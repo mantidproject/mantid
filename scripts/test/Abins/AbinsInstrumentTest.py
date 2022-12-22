@@ -23,7 +23,7 @@ class InstrumentTest(unittest.TestCase):
 
 class GetInstrumentTest(unittest.TestCase):
     def setUp(self):
-        ALL_INSTRUMENTS.append('Unimplemented')
+        ALL_INSTRUMENTS.append("Unimplemented")
 
     def tearDown(self):
         ALL_INSTRUMENTS.pop()
@@ -32,10 +32,10 @@ class GetInstrumentTest(unittest.TestCase):
         from abins.instruments import get_instrument
 
         with self.assertRaises(ValueError):
-            get_instrument('Unheardof')
+            get_instrument("Unheardof")
         with self.assertRaises(NotImplementedError):
-            get_instrument('Unimplemented')
+            get_instrument("Unimplemented")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

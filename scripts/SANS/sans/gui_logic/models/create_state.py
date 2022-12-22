@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.kernel import Logger
 from sans.gui_logic.models.state_gui_model import StateGuiModel
-from sans.gui_logic.presenter.gui_state_director import (GuiStateDirector)
+from sans.gui_logic.presenter.gui_state_director import GuiStateDirector
 
 sans_logger = Logger("SANS")
 
@@ -50,8 +50,7 @@ def _get_thickness_for_row(row):
         converted = float(original_val) if original_val else None
         setattr(row, attr, converted)
 
-    thickness = float(row.sample_thickness) if row.sample_thickness \
-        else round(file_info.get_thickness(), 2)
+    thickness = float(row.sample_thickness) if row.sample_thickness else round(file_info.get_thickness(), 2)
     height = float(row.sample_height) if row.sample_height else round(file_info.get_height(), 2)
     width = float(row.sample_width) if row.sample_width else round(file_info.get_width(), 2)
 
@@ -68,8 +67,10 @@ def _create_row_state(row_entry, file_lookup, gui_state_director):
 
     try:
         if not row_entry.file_information and file_lookup:
-            error_message = "Trying to find the SANS file {0}, but cannot find it. Make sure that " \
-                            "the relevant paths are added and the correct instrument is selected."
+            error_message = (
+                "Trying to find the SANS file {0}, but cannot find it. Make sure that "
+                "the relevant paths are added and the correct instrument is selected."
+            )
             raise RuntimeError(error_message.format(row_entry.sample_scatter))
 
         if not row_entry.is_empty():
@@ -82,6 +83,6 @@ def _create_row_state(row_entry, file_lookup, gui_state_director):
 
 def __is_empty_row(row, table):
     for key, value in table._table_entries[row].__dict__.items():
-        if value and key in ['sample_scatter']:
+        if value and key in ["sample_scatter"]:
             return False
     return True

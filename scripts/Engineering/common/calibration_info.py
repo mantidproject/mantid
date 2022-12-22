@@ -11,21 +11,50 @@ from os import path
 from mantid.simpleapi import Load, LoadDetectorsGroupingFile, CreateGroupingWorkspace, SaveDetectorsGrouping
 from mantid.kernel import logger
 
-GROUP_FILES = {GROUP.BOTH: "ENGINX_NorthAndSouth_grouping.xml", GROUP.NORTH: "ENGINX_North_grouping.xml",
-               GROUP.SOUTH: "ENGINX_South_grouping.xml", GROUP.TEXTURE20: "ENGINX_Texture20_grouping.xml",
-               GROUP.TEXTURE30: "ENGINX_Texture30_grouping.xml"}
+GROUP_FILES = {
+    GROUP.BOTH: "ENGINX_NorthAndSouth_grouping.xml",
+    GROUP.NORTH: "ENGINX_North_grouping.xml",
+    GROUP.SOUTH: "ENGINX_South_grouping.xml",
+    GROUP.TEXTURE20: "ENGINX_Texture20_grouping.xml",
+    GROUP.TEXTURE30: "ENGINX_Texture30_grouping.xml",
+}
 GROUP_BANK_ARGS = {GROUP.BOTH: "NorthBank,SouthBank", GROUP.NORTH: "NorthBank", GROUP.SOUTH: "SouthBank"}
-GROUP_DESCRIPTIONS = {GROUP.BOTH: "North and South Banks", GROUP.NORTH: "North Bank",
-                      GROUP.SOUTH: "South Bank", GROUP.CROPPED: "Custom spectrum numbers",
-                      GROUP.CUSTOM: "Custom .cal file", GROUP.TEXTURE20: "Texture20", GROUP.TEXTURE30: "Texture30"}
-GROUP_WS_NAMES = {GROUP.BOTH: "NorthAndSouthBank_grouping", GROUP.NORTH: "NorthBank_grouping",
-                  GROUP.SOUTH: "SouthBank_grouping", GROUP.CROPPED: "Cropped_spectra_grouping",
-                  GROUP.CUSTOM: "Custom_calfile_grouping", GROUP.TEXTURE20: "Texture20_grouping",
-                  GROUP.TEXTURE30: "Texture30_grouping"}
-GROUP_SUFFIX = {GROUP.BOTH: "all_banks", GROUP.NORTH: "bank_1", GROUP.SOUTH: "bank_2", GROUP.CROPPED: "Cropped",
-                GROUP.CUSTOM: "Custom", GROUP.TEXTURE20: "Texture20", GROUP.TEXTURE30: "Texture30"}  # prm suffix
-GROUP_FOC_WS_SUFFIX = {GROUP.BOTH: "bank", GROUP.NORTH: "bank_1", GROUP.SOUTH: "bank_2", GROUP.CROPPED: "Cropped",
-                       GROUP.CUSTOM: "Custom", GROUP.TEXTURE20: "Texture20", GROUP.TEXTURE30: "Texture30"}
+GROUP_DESCRIPTIONS = {
+    GROUP.BOTH: "North and South Banks",
+    GROUP.NORTH: "North Bank",
+    GROUP.SOUTH: "South Bank",
+    GROUP.CROPPED: "Custom spectrum numbers",
+    GROUP.CUSTOM: "Custom .cal file",
+    GROUP.TEXTURE20: "Texture20",
+    GROUP.TEXTURE30: "Texture30",
+}
+GROUP_WS_NAMES = {
+    GROUP.BOTH: "NorthAndSouthBank_grouping",
+    GROUP.NORTH: "NorthBank_grouping",
+    GROUP.SOUTH: "SouthBank_grouping",
+    GROUP.CROPPED: "Cropped_spectra_grouping",
+    GROUP.CUSTOM: "Custom_calfile_grouping",
+    GROUP.TEXTURE20: "Texture20_grouping",
+    GROUP.TEXTURE30: "Texture30_grouping",
+}
+GROUP_SUFFIX = {
+    GROUP.BOTH: "all_banks",
+    GROUP.NORTH: "bank_1",
+    GROUP.SOUTH: "bank_2",
+    GROUP.CROPPED: "Cropped",
+    GROUP.CUSTOM: "Custom",
+    GROUP.TEXTURE20: "Texture20",
+    GROUP.TEXTURE30: "Texture30",
+}  # prm suffix
+GROUP_FOC_WS_SUFFIX = {
+    GROUP.BOTH: "bank",
+    GROUP.NORTH: "bank_1",
+    GROUP.SOUTH: "bank_2",
+    GROUP.CROPPED: "Cropped",
+    GROUP.CUSTOM: "Custom",
+    GROUP.TEXTURE20: "Texture20",
+    GROUP.TEXTURE30: "Texture30",
+}
 
 
 class CalibrationInfo:
@@ -101,8 +130,8 @@ class CalibrationInfo:
         basepath, fname = path.split(file_path)
         # fname has form INSTRUMENT_ceriaRunNo_BANKS
         # BANKS can be "all_banks, "bank_1", "bank_2", "Cropped", "Custom", "Texture20", "Texture30"
-        fname_words = fname.split('_')
-        suffix = fname_words[-1].split('.')[0]  # take last element and remove extension
+        fname_words = fname.split("_")
+        suffix = fname_words[-1].split(".")[0]  # take last element and remove extension
         if any(grp.value == suffix for grp in GROUP):
             self.group = GROUP(suffix)
             self.prm_filepath = file_path
@@ -125,7 +154,7 @@ class CalibrationInfo:
         Load calibration table ws output from second step of calibration (PDCalibration of ROI focused spectra)
         :param output_prefix: prefix for workspace
         """
-        filepath = path.splitext(self.prm_filepath)[0] + '.nxs'  # change extension to .nxs
+        filepath = path.splitext(self.prm_filepath)[0] + ".nxs"  # change extension to .nxs
         self.calibration_table = output_prefix + "_calibration_" + self.get_group_suffix()
 
         try:
@@ -155,13 +184,13 @@ class CalibrationInfo:
         :param directory: directory in which to save grouping workspace
         """
         if self.group and not self.group.banks:
-            filename = self.generate_output_file_name(ext='.xml')
+            filename = self.generate_output_file_name(ext=".xml")
             SaveDetectorsGrouping(InputWorkspace=self.group_ws, OutputFile=path.join(directory, filename))
         else:
             logger.warning("Only save grouping workspace for custom or cropped groupings.")
         return
 
-    def generate_output_file_name(self, group=None, ext='.prm'):
+    def generate_output_file_name(self, group=None, ext=".prm"):
         """
         Generate an output filename in the form INSTRUMENT_ceriaRunNo_BANKS
         :param ext: Extension to be used on the saved file
@@ -207,33 +236,34 @@ class CalibrationInfo:
         ws_name = GROUP_WS_NAMES[self.group]
         grp_ws = None
         try:
-            grp_ws = LoadDetectorsGroupingFile(InputFile=path.join(CALIB_DIR, GROUP_FILES[self.group]),
-                                               OutputWorkspace=ws_name)
+            grp_ws = LoadDetectorsGroupingFile(InputFile=path.join(CALIB_DIR, GROUP_FILES[self.group]), OutputWorkspace=ws_name)
         except ValueError:
             logger.notice("Grouping file not found in user directories - creating one")
             if self.group.banks and self.group != GROUP.TEXTURE20 and self.group != GROUP.TEXTURE30:
-                grp_ws, _, _ = CreateGroupingWorkspace(InstrumentName=self.instrument, OutputWorkspace=ws_name,
-                                                       GroupNames=GROUP_BANK_ARGS[self.group])
+                grp_ws, _, _ = CreateGroupingWorkspace(
+                    InstrumentName=self.instrument, OutputWorkspace=ws_name, GroupNames=GROUP_BANK_ARGS[self.group]
+                )
         if grp_ws:
             self.group_ws = grp_ws
         else:
-            raise ValueError("Could not find or create grouping requested - make sure the directory of the grouping.xml"
-                             " files is on the path")
+            raise ValueError(
+                "Could not find or create grouping requested - make sure the directory of the grouping.xml" " files is on the path"
+            )
 
     def create_grouping_workspace_from_calfile(self):
         """
         Create grouping workspace for ROI defined in .cal file
         """
-        grp_ws, _, _ = CreateGroupingWorkspace(InstrumentName=self.instrument, OldCalFilename=self.cal_filepath,
-                                               OutputWorkspace=GROUP_WS_NAMES[self.group])
+        grp_ws, _, _ = CreateGroupingWorkspace(
+            InstrumentName=self.instrument, OldCalFilename=self.cal_filepath, OutputWorkspace=GROUP_WS_NAMES[self.group]
+        )
         self.group_ws = grp_ws
 
     def create_grouping_workspace_from_spectra_list(self):
         """
         Create grouping workspace for ROI defined as a list of spectrum numbers
         """
-        grp_ws, _, _ = CreateGroupingWorkspace(InstrumentName=self.instrument,
-                                               OutputWorkspace=GROUP_WS_NAMES[self.group])
+        grp_ws, _, _ = CreateGroupingWorkspace(InstrumentName=self.instrument, OutputWorkspace=GROUP_WS_NAMES[self.group])
         for spec in self.spectra_list:
             det_ids = grp_ws.getDetectorIDs(spec - 1)
             grp_ws.setValue(det_ids[0], 1)
@@ -243,5 +273,11 @@ class CalibrationInfo:
         """
         :return: bool for if CalibrationInfo object can be used for focusing
         """
-        return self.ceria_path is not None and self.instrument is not None and self.calibration_table is not None \
-               and self.group_ws is not None and self.calibration_table in ADS and self.group_ws in ADS
+        return (
+            self.ceria_path is not None
+            and self.instrument is not None
+            and self.calibration_table is not None
+            and self.group_ws is not None
+            and self.calibration_table in ADS
+            and self.group_ws in ADS
+        )

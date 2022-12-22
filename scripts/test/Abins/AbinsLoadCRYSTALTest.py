@@ -11,7 +11,6 @@ from abins.input import CRYSTALLoader
 
 
 class AbinsLoadCRYSTALTest(unittest.TestCase, abins.input.Tester):
-
     def tearDown(self):
         abins.test_helpers.remove_output_files(list_of_names=["_LoadCRYSTAL"])
 
@@ -53,5 +52,5 @@ class AbinsLoadCRYSTALTest(unittest.TestCase, abins.input.Tester):
         self.check(name=self._phonon_dispersion_v2, loader=CRYSTALLoader)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

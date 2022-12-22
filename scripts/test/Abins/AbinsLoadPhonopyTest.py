@@ -15,14 +15,14 @@ from dos.load_euphonic import euphonic_available
 class AbinsLoadPhonopyTest(unittest.TestCase, abins.input.Tester):
     def setUp(self):
         # A small cutoff is used to limit number of data files
-        self.default_cutoff = abins.parameters.sampling['force_constants']['qpt_cutoff']
-        abins.parameters.sampling['force_constants']['qpt_cutoff'] = 4.
+        self.default_cutoff = abins.parameters.sampling["force_constants"]["qpt_cutoff"]
+        abins.parameters.sampling["force_constants"]["qpt_cutoff"] = 4.0
 
     def tearDown(self):
         abins.test_helpers.remove_output_files(list_of_names=["_LoadPhonopy"])
-        abins.parameters.sampling['force_constants']['qpt_cutoff'] = self.default_cutoff
+        abins.parameters.sampling["force_constants"]["qpt_cutoff"] = self.default_cutoff
 
-    @unittest.skipUnless(euphonic_available(), 'Optional dependency (euphonic) not available')
+    @unittest.skipUnless(euphonic_available(), "Optional dependency (euphonic) not available")
     def test_non_existing_file(self):
         with self.assertRaises(IOError):
             bad_phonopy_reader = EuphonicLoader(input_ab_initio_filename="NonExistingFile.yaml")
@@ -32,5 +32,5 @@ class AbinsLoadPhonopyTest(unittest.TestCase, abins.input.Tester):
             _ = EuphonicLoader(input_ab_initio_filename=1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -11,13 +11,12 @@ from unittest import mock
 from sans.common.enums import SANSInstrument
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.test_helper.mock_objects import create_mock_beam_centre_tab
-from sans.test_helper.mock_objects import (create_run_tab_presenter_mock)
+from sans.test_helper.mock_objects import create_run_tab_presenter_mock
 
 
 class BeamCentrePresenterTest(unittest.TestCase):
-
     def setUp(self):
-        self.parent_presenter = create_run_tab_presenter_mock(use_fake_state = False)
+        self.parent_presenter = create_run_tab_presenter_mock(use_fake_state=False)
         self.view = create_mock_beam_centre_tab()
         self.WorkHandler = mock.MagicMock()
         self.BeamCentreModel = mock.MagicMock()
@@ -31,7 +30,8 @@ class BeamCentrePresenterTest(unittest.TestCase):
     def test_that_on_run_clicked_calls_find_beam_centre(self):
         self.presenter.on_run_clicked()
         self.presenter._worker.find_beam_centre.assert_called_once_with(
-            mock.ANY, self.BeamCentreModel.pack_beam_centre_settings.return_value)
+            mock.ANY, self.BeamCentreModel.pack_beam_centre_settings.return_value
+        )
 
     def test_beam_centre_finder_update_handles_str(self):
         # Since the view might give us mixed types check we can handle str
@@ -143,7 +143,7 @@ class BeamCentrePresenterTest(unittest.TestCase):
         attr_list = ["rear_pos_1", "rear_pos_2", "front_pos_1", "front_pos_2"]
 
         for attr in attr_list:
-            setattr(mocked_external_model, attr, random.randint(0, 1000)/100)  # Simulate a random FP value
+            setattr(mocked_external_model, attr, random.randint(0, 1000) / 100)  # Simulate a random FP value
         self.presenter.copy_centre_positions(mocked_external_model)
 
         for attr in attr_list:
@@ -156,10 +156,10 @@ class BeamCentrePresenterTest(unittest.TestCase):
 
         for attr in front_list:
             # On instruments with no front this can be a blank string
-            setattr(mocked_external_model, attr, '')
+            setattr(mocked_external_model, attr, "")
 
         for attr in rear_attr:
-            setattr(mocked_external_model, attr, random.randint(0, 1000)/100)  # Simulate a random FP value
+            setattr(mocked_external_model, attr, random.randint(0, 1000) / 100)  # Simulate a random FP value
         self.presenter.copy_centre_positions(mocked_external_model)
 
         for attr in rear_attr:
@@ -167,8 +167,7 @@ class BeamCentrePresenterTest(unittest.TestCase):
 
         # When front isn't present we should take rear values
         for front_attr, rear_attr in zip(front_list, rear_attr):
-            self.assertEqual(getattr(mocked_external_model, rear_attr),
-                             getattr(self.presenter._beam_centre_model, front_attr))
+            self.assertEqual(getattr(mocked_external_model, rear_attr), getattr(self.presenter._beam_centre_model, front_attr))
 
     def test_on_update_rows_updates_centres(self):
         # As the rear centres can update when the rows change (due to different run number groups)
@@ -205,15 +204,15 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.BeamCentreModel.rear_pos_1 = 1.1
         self.BeamCentreModel.rear_pos_2 = 1.2
         # Zero is a valid value, so should be respected
-        self.BeamCentreModel.front_pos_1 = 0.
-        self.BeamCentreModel.front_pos_2 = 0.
+        self.BeamCentreModel.front_pos_1 = 0.0
+        self.BeamCentreModel.front_pos_2 = 0.0
         self.presenter.update_centre_positions()
 
         self.assertEqual(1.1, self.view.rear_pos_1)
         self.assertEqual(1.2, self.view.rear_pos_2)
-        self.assertEqual(0., self.view.front_pos_1)
-        self.assertEqual(0., self.view.front_pos_2)
+        self.assertEqual(0.0, self.view.front_pos_1)
+        self.assertEqual(0.0, self.view.front_pos_2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

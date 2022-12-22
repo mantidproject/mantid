@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 import mantid.simpleapi as msi
 import mantid.api
 from mantid.kernel import logger
@@ -27,7 +27,7 @@ class ConvertToWavelength(object):
 
     @classmethod
     def get_first_of_coadd_ws(cls, candidate):
-        return re.split(',|:', candidate)[0]
+        return re.split(",|:", candidate)[0]
 
     @classmethod
     def to_single_workspace(cls, candidate):
@@ -39,7 +39,7 @@ class ConvertToWavelength(object):
             input = ws[0]
         else:
             input = ws
-        output = msi.CloneWorkspace(OutputWorkspace="_singleWorkspace",InputWorkspace=input)
+        output = msi.CloneWorkspace(OutputWorkspace="_singleWorkspace", InputWorkspace=input)
         return output
 
     @classmethod
@@ -50,9 +50,9 @@ class ConvertToWavelength(object):
         if isinstance(candidate, mantid.api.Workspace):
             _workspace = candidate
         elif isinstance(candidate, str):
-            if  mantid.api.AnalysisDataService.doesExist(candidate.strip()):
+            if mantid.api.AnalysisDataService.doesExist(candidate.strip()):
                 _workspace = mantid.api.AnalysisDataService.retrieve(candidate.strip())
-            elif  mantid.api.AnalysisDataService.doesExist(ws_prefix + str(candidate.strip())):
+            elif mantid.api.AnalysisDataService.doesExist(ws_prefix + str(candidate.strip())):
                 _workspace = mantid.api.AnalysisDataService.retrieve(ws_prefix + str(candidate.strip()))
             else:
                 ws_name = ws_prefix + str(candidate.strip())
@@ -73,7 +73,7 @@ class ConvertToWavelength(object):
         return self.__source_list
 
     def __to_workspace_list(self, source_list):
-        temp=[]
+        temp = []
         for item in source_list:
             temp.append(ConvertToWavelength.to_workspace(item))
         self.__ws_list = temp
@@ -89,7 +89,7 @@ class ConvertToWavelength(object):
         source_list = None
         if not isinstance(source, list):
             if isinstance(source, str):
-                source_list = re.split(',|:', source)
+                source_list = re.split(",|:", source)
             else:
                 source_list = [source]
         else:
@@ -118,15 +118,23 @@ class ConvertToWavelength(object):
 
         if is_actual_range(rng):
             start, stop = rng[0], rng[1]
-            _in_rng = msi.CropWorkspace(InputWorkspace=_in_rng, StartWorkspaceIndex=start,EndWorkspaceIndex=stop)
+            _in_rng = msi.CropWorkspace(InputWorkspace=_in_rng, StartWorkspaceIndex=start, EndWorkspaceIndex=stop)
         else:
             for subrng in rng:
                 _in_rng = ConvertToWavelength.crop_range(ws, subrng)
 
         return _in_rng
 
-    def convert(self, wavelength_min, wavelength_max, detector_workspace_indexes, monitor_workspace_index,
-                correct_monitor=False, bg_min=None, bg_max=None):
+    def convert(
+        self,
+        wavelength_min,
+        wavelength_max,
+        detector_workspace_indexes,
+        monitor_workspace_index,
+        correct_monitor=False,
+        bg_min=None,
+        bg_max=None,
+    ):
         """
         Run the conversion
 
@@ -155,21 +163,22 @@ class ConvertToWavelength(object):
             raise ValueError("Background min must be < Background max")
 
         sum = ConvertToWavelength.sum_workspaces(self.__ws_list)
-        sum_wavelength= msi.ConvertUnits(InputWorkspace=sum, Target="Wavelength", AlignBins='1')
+        sum_wavelength = msi.ConvertUnits(InputWorkspace=sum, Target="Wavelength", AlignBins="1")
 
         logger.debug("Monitor detector index %s" % str(monitor_workspace_index))
 
         # Crop out the monitor workspace
-        _monitor_ws = msi.CropWorkspace(InputWorkspace=sum_wavelength,
-                                        StartWorkspaceIndex=monitor_workspace_index,EndWorkspaceIndex=monitor_workspace_index)
+        _monitor_ws = msi.CropWorkspace(
+            InputWorkspace=sum_wavelength, StartWorkspaceIndex=monitor_workspace_index, EndWorkspaceIndex=monitor_workspace_index
+        )
         # Crop out the detector workspace then chop out the x-ranges of interest.
-        _detector_ws =  ConvertToWavelength.crop_range(sum_wavelength, detector_workspace_indexes)
+        _detector_ws = ConvertToWavelength.crop_range(sum_wavelength, detector_workspace_indexes)
 
-        _detector_ws =  msi.CropWorkspace(InputWorkspace=_detector_ws, XMin=wavelength_min, XMax=wavelength_max)
+        _detector_ws = msi.CropWorkspace(InputWorkspace=_detector_ws, XMin=wavelength_min, XMax=wavelength_max)
 
         # Apply a flat background
         if correct_monitor and all((bg_min, bg_max)):
-            _monitor_ws = msi.CalculateFlatBackground(InputWorkspace=_monitor_ws,WorkspaceIndexList=0,StartX=bg_min, EndX=bg_max)
+            _monitor_ws = msi.CalculateFlatBackground(InputWorkspace=_monitor_ws, WorkspaceIndexList=0, StartX=bg_min, EndX=bg_max)
 
         msi.DeleteWorkspace(Workspace=sum_wavelength.name())
         return (_monitor_ws, _detector_ws)

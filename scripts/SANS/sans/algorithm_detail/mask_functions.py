@@ -8,19 +8,19 @@ from collections import namedtuple
 from collections.abc import Sequence
 
 from enum import Enum
-from sans.common.enums import (DetectorType, SANSInstrument)
+from sans.common.enums import DetectorType, SANSInstrument
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 
 
-detector_shape_bundle = namedtuple("detector_shape_bundle", 'rectangular_shape, width, height, '
-                                                            'number_of_pixels_override')
-geometry_bundle = namedtuple("geometry_bundle", 'shape, first_low_angle_spec_number')
+detector_shape_bundle = namedtuple("detector_shape_bundle", "rectangular_shape, width, height, " "number_of_pixels_override")
+geometry_bundle = namedtuple("geometry_bundle", "shape, first_low_angle_spec_number")
 
 
 class DetectorOrientation(Enum):
     """
     Defines the detector orientation.
     """
+
     HORIZONTAL = "Horizontal"
     ROTATED = "Rotated"
     VERTICAL = "Vertical"
@@ -40,6 +40,7 @@ def get_geometry_information(ipf_path, detector_type):
     :param detector_type: The type of detector for which we should get the information.
     :return: Geometry information for LAB and HAB as well as the firs
     """
+
     def create_detector_shape_bundle(num_columns, non_rectangle_width, num_rows, non_rectangle_height, num_pixels):
         cols_data = num_columns
         if len(cols_data) > 0:
@@ -62,8 +63,9 @@ def get_geometry_information(ipf_path, detector_type):
         else:
             number_of_pixels_override = None
 
-        return detector_shape_bundle(rectangular_shape=rectangular_shape, width=width, height=height,
-                                     number_of_pixels_override=number_of_pixels_override)
+        return detector_shape_bundle(
+            rectangular_shape=rectangular_shape, width=width, height=height, number_of_pixels_override=number_of_pixels_override
+        )
 
     # Determine the prefix for the detector
     if detector_type is DetectorType.LAB:
@@ -71,12 +73,9 @@ def get_geometry_information(ipf_path, detector_type):
     elif detector_type is DetectorType.HAB:
         prefix = "high-angle-detector-"
     else:
-        raise RuntimeError("MaskingParser: Tyring to get information for unknown "
-                           "detector {0}".format(str(detector_type)))
+        raise RuntimeError("MaskingParser: Tyring to get information for unknown " "detector {0}".format(str(detector_type)))
 
-    search_items_for_detectors = ["num-columns",
-                                  "non-rectangle-width", "num-rows",
-                                  "non-rectangle-height", "num-pixels"]
+    search_items_for_detectors = ["num-columns", "non-rectangle-width", "num-rows", "non-rectangle-height", "num-pixels"]
     search_items = [prefix + item for item in search_items_for_detectors]
     search_items.append("first-low-angle-spec-number")
 
@@ -91,14 +90,15 @@ def get_geometry_information(ipf_path, detector_type):
         if not isinstance(value, Sequence):
             found_items[key] = [value]
 
-    shape = create_detector_shape_bundle(num_columns=found_items[prefix + "num-columns"],
-                                         non_rectangle_width=found_items[prefix + "non-rectangle-width"],
-                                         num_rows=found_items[prefix + "num-rows"],
-                                         non_rectangle_height=found_items[prefix + "non-rectangle-height"],
-                                         num_pixels=found_items[prefix + "num-pixels"])
+    shape = create_detector_shape_bundle(
+        num_columns=found_items[prefix + "num-columns"],
+        non_rectangle_width=found_items[prefix + "non-rectangle-width"],
+        num_rows=found_items[prefix + "num-rows"],
+        non_rectangle_height=found_items[prefix + "non-rectangle-height"],
+        num_pixels=found_items[prefix + "num-pixels"],
+    )
 
-    return geometry_bundle(shape=shape,
-                           first_low_angle_spec_number=found_items["first-low-angle-spec-number"])
+    return geometry_bundle(shape=shape, first_low_angle_spec_number=found_items["first-low-angle-spec-number"])
 
 
 class SpectraBlock(object):
@@ -106,6 +106,7 @@ class SpectraBlock(object):
     The SpectraBlock class maps a SANS-particular detector selection syntax to a detector selection on the actual
     instrument.
     """
+
     def __init__(self, ipf_path, run_number, instrument, detector_type):
         super(SpectraBlock, self).__init__()
         self._ipf_path = ipf_path
@@ -146,8 +147,7 @@ class SpectraBlock(object):
             self._first_spectrum_number = 9
             self._detector_orientation = DetectorOrientation.HORIZONTAL
         else:
-            raise RuntimeError("MaskParser: Cannot handle masking request for "
-                               "instrument {0}".format(str(self._instrument)))
+            raise RuntimeError("MaskParser: Cannot handle masking request for " "instrument {0}".format(str(self._instrument)))
 
     def get_block(self, y_lower, x_lower, y_dim, x_dim):
         """
@@ -178,13 +178,13 @@ class SpectraBlock(object):
         elif self._detector_orientation == DetectorOrientation.VERTICAL:
             start_spectrum = base_spectrum_number + x_lower * detector_dimension + y_lower
             for x in range(detector_dimension - 1, detector_dimension - x_dim - 1, -1):
-                output.extend((start_spectrum + ((detector_dimension - x - 1) * detector_dimension) + y
-                               for y in range(0, y_dim)))
+                output.extend((start_spectrum + ((detector_dimension - x - 1) * detector_dimension) + y for y in range(0, y_dim)))
         elif self._detector_orientation == DetectorOrientation.ROTATED:
             # This is the horizontal one rotated so need to map the x_low and y_low to their rotated versions
             start_spectrum = base_spectrum_number + y_lower * detector_dimension + x_lower
             max_spectrum = detector_dimension * detector_dimension + base_spectrum_number - 1
             for y in range(0, y_dim):
-                output.extend((max_spectrum - (start_spectrum + x + (y * detector_dimension) - base_spectrum_number)
-                               for x in range(0, x_dim)))
+                output.extend(
+                    (max_spectrum - (start_spectrum + x + (y * detector_dimension) - base_spectrum_number) for x in range(0, x_dim))
+                )
         return output

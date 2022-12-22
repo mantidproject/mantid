@@ -14,10 +14,10 @@ from typing import List
 
 from sans.state.JsonSerializable import JsonSerializable
 from sans.state.automatic_setters import automatic_setters
-from sans.state.state_functions import (is_pure_none_or_not_none, validation_message)
+from sans.state.state_functions import is_pure_none_or_not_none, validation_message
 
 from sans.common.file_information import find_full_file_path
-from sans.common.enums import (DetectorType, SANSInstrument)
+from sans.common.enums import DetectorType, SANSInstrument
 from sans.common.general_functions import get_bank_for_spectrum_number
 
 
@@ -37,28 +37,28 @@ def range_check(start, stop, invalid_dict, start_name, stop_name, general_name=N
     :return: A (potentially) updated invalid_dict
     """
     if not is_pure_none_or_not_none([start, stop]):
-        entry = validation_message("A range element has not been set.",
-                                   "Make sure that all entries are set.",
-                                   {start_name: start,
-                                    stop_name: stop})
+        entry = validation_message(
+            "A range element has not been set.", "Make sure that all entries are set.", {start_name: start, stop_name: stop}
+        )
         invalid_dict.update(entry)
 
     if start is not None and stop is not None:
         # Start and stop need to have the same length
         if len(start) != len(stop):
-            entry = validation_message("Start and stop ranges have different lengths.",
-                                       "Make sure that all entries for {0} he same length.".format(general_name),
-                                       {start_name: start,
-                                        stop_name: stop})
+            entry = validation_message(
+                "Start and stop ranges have different lengths.",
+                "Make sure that all entries for {0} he same length.".format(general_name),
+                {start_name: start, stop_name: stop},
+            )
             invalid_dict.update(entry)
         # Start values need to be smaller than the stop values
         for a, b in zip(start, stop):
             if a > b:
-                entry = validation_message("Incorrect start-stop bounds.",
-                                           "Make sure the lower bound is smaller than the upper bound for {0}."
-                                           "".format(general_name),
-                                           {start_name: start,
-                                            stop_name: stop})
+                entry = validation_message(
+                    "Incorrect start-stop bounds.",
+                    "Make sure the lower bound is smaller than the upper bound for {0}." "".format(general_name),
+                    {start_name: start, stop_name: stop},
+                )
                 invalid_dict.update(entry)
     return invalid_dict
 
@@ -68,10 +68,11 @@ def is_spectrum_range_all_on_one_detector(start, stop, invalid_dict, start_name,
         detector_a = get_bank_for_spectrum_number(a, instrument)
         detector_b = get_bank_for_spectrum_number(b, instrument)
         if detector_a is not detector_b:
-            entry = validation_message("The lower and the upper bounds of the specified spectrum range S{0}{1} are on "
-                                       "two different banks. They have to be on the same bank.".format(a, b),
-                                       {start_name: start,
-                                        stop_name: stop})
+            entry = validation_message(
+                "The lower and the upper bounds of the specified spectrum range S{0}{1} are on "
+                "two different banks. They have to be on the same bank.".format(a, b),
+                {start_name: start, stop_name: stop},
+            )
             invalid_dict.update(entry)
             return
     return invalid_dict
@@ -80,6 +81,7 @@ def is_spectrum_range_all_on_one_detector(start, stop, invalid_dict, start_name,
 # ------------------------------------------------
 # StateData
 # ------------------------------------------------
+
 
 class StateMaskDetectors(metaclass=JsonSerializable):
     def __init__(self):
@@ -124,49 +126,79 @@ class StateMaskDetectors(metaclass=JsonSerializable):
         # --------------------
         # Vertical strip mask
         # --------------------
-        range_check(self.range_vertical_strip_start, self.range_vertical_strip_stop,
-                    is_invalid, "range_vertical_strip_start", "range_vertical_strip_stop", "range_vertical_strip")
+        range_check(
+            self.range_vertical_strip_start,
+            self.range_vertical_strip_stop,
+            is_invalid,
+            "range_vertical_strip_start",
+            "range_vertical_strip_stop",
+            "range_vertical_strip",
+        )
 
         # --------------------
         # Horizontal strip mask
         # --------------------
-        range_check(self.range_horizontal_strip_start, self.range_horizontal_strip_stop,
-                    is_invalid, "range_horizontal_strip_start", "range_horizontal_strip_stop", "range_horizontal_strip")
+        range_check(
+            self.range_horizontal_strip_start,
+            self.range_horizontal_strip_stop,
+            is_invalid,
+            "range_horizontal_strip_start",
+            "range_horizontal_strip_stop",
+            "range_horizontal_strip",
+        )
 
         # --------------------
         # Block mask
         # --------------------
-        range_check(self.block_horizontal_start, self.block_horizontal_stop,
-                    is_invalid, "block_horizontal_start", "block_horizontal_stop", "block_horizontal")
-        range_check(self.block_vertical_start, self.block_vertical_stop,
-                    is_invalid, "block_vertical_start", "block_vertical_stop", "block_vertical")
+        range_check(
+            self.block_horizontal_start,
+            self.block_horizontal_stop,
+            is_invalid,
+            "block_horizontal_start",
+            "block_horizontal_stop",
+            "block_horizontal",
+        )
+        range_check(
+            self.block_vertical_start,
+            self.block_vertical_stop,
+            is_invalid,
+            "block_vertical_start",
+            "block_vertical_stop",
+            "block_vertical",
+        )
 
         # --------------------
         # Time/Bin mask
         # --------------------
-        range_check(self.bin_mask_start, self.bin_mask_stop,
-                    is_invalid, "bin_mask_start", "bin_mask_stop", "bin_mask")
+        range_check(self.bin_mask_start, self.bin_mask_stop, is_invalid, "bin_mask_start", "bin_mask_stop", "bin_mask")
 
         if not self.detector_name:
-            entry = validation_message("Missing detector name.",
-                                       "Make sure that the detector names are set.",
-                                       {"detector_name": self.detector_name})
+            entry = validation_message(
+                "Missing detector name.", "Make sure that the detector names are set.", {"detector_name": self.detector_name}
+            )
             is_invalid.update(entry)
         if not self.detector_name_short:
-            entry = validation_message("Missing short detector name.",
-                                       "Make sure that the short detector names are set.",
-                                       {"detector_name_short": self.detector_name_short})
+            entry = validation_message(
+                "Missing short detector name.",
+                "Make sure that the short detector names are set.",
+                {"detector_name_short": self.detector_name_short},
+            )
             is_invalid.update(entry)
 
         # --------------------
         # Spectrum Range
         # --------------------
-        range_check(self.spectrum_range_start, self.spectrum_range_stop,
-                    is_invalid, "spectrum_range_start", "spectrum_range_stop", "spectrum_range")
+        range_check(
+            self.spectrum_range_start,
+            self.spectrum_range_stop,
+            is_invalid,
+            "spectrum_range_start",
+            "spectrum_range_stop",
+            "spectrum_range",
+        )
 
         if is_invalid:
-            raise ValueError("StateMaskDetectors: The provided inputs are illegal. "
-                             "Please see: {0}".format(json.dumps(is_invalid)))
+            raise ValueError("StateMaskDetectors: The provided inputs are illegal. " "Please see: {0}".format(json.dumps(is_invalid)))
 
 
 class StateMask(metaclass=JsonSerializable):
@@ -208,21 +240,26 @@ class StateMask(metaclass=JsonSerializable):
         # Radius Mask
         # --------------------
         # Radius mask rule: the min radius must be less or equal to the max radius
-        if self.radius_max is not None and self.radius_min is not None and \
-                self.radius_max != -1 and self.radius_min != -1:  # noqa
+        if self.radius_max is not None and self.radius_min is not None and self.radius_max != -1 and self.radius_min != -1:  # noqa
             if self.radius_min > 0 and self.radius_max > 0 and (self.radius_min > self.radius_max):
-                entry = validation_message("Incorrect radius bounds.",
-                                           "Makes sure that the lower radius bound is smaller than the"
-                                           " upper radius bound.",
-                                           {"radius_min": self.radius_min,
-                                            "radius_max": self.radius_max})
+                entry = validation_message(
+                    "Incorrect radius bounds.",
+                    "Makes sure that the lower radius bound is smaller than the" " upper radius bound.",
+                    {"radius_min": self.radius_min, "radius_max": self.radius_max},
+                )
                 is_invalid.update(entry)
 
         # --------------------
         # General bin mask
         # --------------------
-        range_check(self.bin_mask_general_start, self.bin_mask_general_stop,
-                    is_invalid, "bin_mask_general_start", "bin_mask_general_stop", "bin_mask_general")
+        range_check(
+            self.bin_mask_general_start,
+            self.bin_mask_general_stop,
+            is_invalid,
+            "bin_mask_general_start",
+            "bin_mask_general_stop",
+            "bin_mask_general",
+        )
 
         # --------------------
         # Mask files
@@ -230,9 +267,9 @@ class StateMask(metaclass=JsonSerializable):
         if self.mask_files:
             for mask_file in self.mask_files:
                 if not find_full_file_path(mask_file):
-                    entry = validation_message("Mask file not found.",
-                                               "Makes sure that the mask file is in your path",
-                                               {"mask_file": self.mask_files})
+                    entry = validation_message(
+                        "Mask file not found.", "Makes sure that the mask file is in your path", {"mask_file": self.mask_files}
+                    )
                     is_invalid.update(entry)
 
         # --------------------
@@ -242,16 +279,14 @@ class StateMask(metaclass=JsonSerializable):
             value.validate()
 
         if is_invalid:
-            raise ValueError("StateMask: The provided inputs are illegal. "
-                             "Please see: {0}".format(json.dumps(is_invalid)))
+            raise ValueError("StateMask: The provided inputs are illegal. " "Please see: {0}".format(json.dumps(is_invalid)))
 
 
 class StateMaskSANS2D(StateMask):
     def __init__(self):
         super(StateMaskSANS2D, self).__init__()
         # Setup the detectors
-        self.detectors = {DetectorType.LAB.value: StateMaskDetectors(),
-                          DetectorType.HAB.value: StateMaskDetectors()}
+        self.detectors = {DetectorType.LAB.value: StateMaskDetectors(), DetectorType.HAB.value: StateMaskDetectors()}
 
     def validate(self):
         super(StateMaskSANS2D, self).validate()
@@ -261,8 +296,7 @@ class StateMaskLOQ(StateMask):
     def __init__(self):
         super(StateMaskLOQ, self).__init__()
         # Setup the detectors
-        self.detectors = {DetectorType.LAB.value: StateMaskDetectors(),
-                          DetectorType.HAB.value: StateMaskDetectors()}
+        self.detectors = {DetectorType.LAB.value: StateMaskDetectors(), DetectorType.HAB.value: StateMaskDetectors()}
 
     def validate(self):
         super(StateMaskLOQ, self).validate()
@@ -292,11 +326,11 @@ class StateMaskNoInst(StateMask):
     def __init__(self):
         super(StateMaskNoInst, self).__init__()
         # Setup the detectors
-        self.detectors = {DetectorType.LAB.value: StateMaskDetectors(),
-                          DetectorType.HAB.value: StateMaskDetectors()}
+        self.detectors = {DetectorType.LAB.value: StateMaskDetectors(), DetectorType.HAB.value: StateMaskDetectors()}
 
     def validate(self):
         pass
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Builder
@@ -340,8 +374,10 @@ class StateMaskBuilder(object):
             detector_bank_start = get_bank_for_spectrum_number(start, instrument)
             detector_bank_stop = get_bank_for_spectrum_number(stop, instrument)
             if detector_bank_start != detector_bank_stop:
-                raise ValueError("The specified spectrum mask range S{0}{1} has spectra on more than one detector. "
-                                 "Make sure that all spectra in the range are on a single detector".format(start, stop))
+                raise ValueError(
+                    "The specified spectrum mask range S{0}{1} has spectra on more than one detector. "
+                    "Make sure that all spectra in the range are on a single detector".format(start, stop)
+                )
             else:
                 detector_mask_state = self.state.detectors[detector_bank_start.value]
                 spec_range_start = detector_mask_state.spectrum_range_start
@@ -378,5 +414,6 @@ def get_mask_builder(data_info):
     elif instrument is SANSInstrument.NO_INSTRUMENT:
         return StateMaskBuilder(data_info, StateMaskNoInst())
     else:
-        raise NotImplementedError("StateMaskBuilder: Could not find any valid mask builder for the "
-                                  "specified StateData object {0}".format(str(instrument)))
+        raise NotImplementedError(
+            "StateMaskBuilder: Could not find any valid mask builder for the " "specified StateData object {0}".format(str(instrument))
+        )

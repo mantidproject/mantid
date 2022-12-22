@@ -36,19 +36,23 @@ class StateInstrumentInfoTest(unittest.TestCase):
 
     @staticmethod
     def _get_ipf_names():
-        return {"lab_short": "low-angle-detector-short-name",
-                "lab_full": "low-angle-detector-name",
-                "hab_short": "high-angle-detector-short-name",
-                "hab_full": "high-angle-detector-name"}
+        return {
+            "lab_short": "low-angle-detector-short-name",
+            "lab_full": "low-angle-detector-name",
+            "hab_short": "high-angle-detector-short-name",
+            "hab_full": "high-angle-detector-name",
+        }
 
     def _prep_mock_det_ipf(self):
         lab_short, lab_full = mock.NonCallableMock(), mock.NonCallableMock()
         hab_short, hab_full = mock.NonCallableMock(), mock.NonCallableMock()
         ipf_names = self._get_ipf_names()
-        mocked_ipf = {ipf_names["lab_short"]: lab_short,
-                      ipf_names["lab_full"]: lab_full,
-                      ipf_names["hab_short"]: hab_short,
-                      ipf_names["hab_full"]: hab_full}
+        mocked_ipf = {
+            ipf_names["lab_short"]: lab_short,
+            ipf_names["lab_full"]: lab_full,
+            ipf_names["hab_short"]: hab_short,
+            ipf_names["hab_full"]: hab_full,
+        }
         return mocked_ipf
 
     @mock.patch("state_instrument_info_test.state_instrument_info.get_named_elements_from_ipf_file")
@@ -75,8 +79,7 @@ class StateInstrumentInfoTest(unittest.TestCase):
         mocked_data_info = mock.NonCallableMock()
 
         inst_info = StateInstrumentInfo()
-        state_instrument_info._set_detector_names(inst_info, mocked_data_info,
-                                                  invalid_detector_types=[DetectorType.HAB])
+        state_instrument_info._set_detector_names(inst_info, mocked_data_info, invalid_detector_types=[DetectorType.HAB])
 
         ipf_names = self._get_ipf_names()
         lab_values = inst_info.detector_names[DetectorType.LAB.value]
@@ -93,8 +96,7 @@ class StateInstrumentInfoTest(unittest.TestCase):
         expected = mock.NonCallableMock()
         get_invalid_monitors.return_value = expected
 
-        state_instrument_info._init_detector_names(data_info=mock.NonCallableMock(),
-                                                   inst_info=mock.NonCallableMock())
+        state_instrument_info._init_detector_names(data_info=mock.NonCallableMock(), inst_info=mock.NonCallableMock())
 
         set_det_names.assert_called_once_with(mock.ANY, mock.ANY, invalid_detector_types=expected)
 
@@ -104,8 +106,7 @@ class StateInstrumentInfoTest(unittest.TestCase):
         expected = mock.NonCallableMock()
         get_invalid_names.return_value = expected
 
-        state_instrument_info._init_monitor_names(data_info=mock.NonCallableMock(),
-                                                  inst_info=mock.NonCallableMock())
+        state_instrument_info._init_monitor_names(data_info=mock.NonCallableMock(), inst_info=mock.NonCallableMock())
 
         set_monitor_names.assert_called_once_with(mock.ANY, mock.ANY, invalid_monitor_names=expected)
 
@@ -132,5 +133,5 @@ class StateInstrumentInfoTest(unittest.TestCase):
         self.assertEqual("idf_path", returned.idf_path)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

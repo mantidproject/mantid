@@ -12,6 +12,7 @@ from sans.common.enums import SANSFacility
 from sans.state.JsonSerializable import JsonSerializable
 from sans.state.StateObjects.StateAdjustment import StateAdjustment
 from sans.state.StateObjects.StateCompatibility import get_compatibility_builder, StateCompatibility
+
 # Note that the compatibility state is not part of the new reduction chain, but allows us to accurately compare
 # results obtained via the old and new reduction chain
 from sans.state.StateObjects.StateConvertToQ import StateConvertToQ
@@ -31,12 +32,12 @@ from sans.state.automatic_setters import automatic_setters
 # State
 # ----------------------------------------------------------------------------------------------------------------------
 
-class AllStates(metaclass=JsonSerializable):
 
+class AllStates(metaclass=JsonSerializable):
     def __init__(self):
 
         super(AllStates, self).__init__()
-        self.data : StateData = StateData()
+        self.data: StateData = StateData()
         self.move: StateMove = StateMove()
         self.instrument_info: StateInstrumentInfo = StateInstrumentInfo()
         self.reduction: StateReductionMode = StateReductionMode()
@@ -103,5 +104,6 @@ def get_all_states_builder(data_info):
     if facility is SANSFacility.ISIS:
         return AllStatesBuilder()
     else:
-        raise NotImplementedError("SANSStateBuilder: Could not find any valid state builder for the "
-                                  "specified SANSStateData object {0}".format(str(data_info)))
+        raise NotImplementedError(
+            "SANSStateBuilder: Could not find any valid state builder for the " "specified SANSStateData object {0}".format(str(data_info))
+        )
