@@ -85,8 +85,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWs))
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("EPPTable", eppTable));
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("IndexType", "Spectrum Number"))
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("ReferenceSpectra", "1-300"))
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("IndexType", "Workspace Index"))
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("ReferenceSpectra", "0-299"))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("EFixed", actualEi))
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -178,7 +178,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWs))
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("IndexType", "Workspace Index"))
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("ReferenceSpectra", "1-299"))
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("ReferenceSpectra", "0-299"))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("ElasticBinIndex", static_cast<double>(eppIndex)))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("EFixed", actualEi))
     TS_ASSERT_THROWS_NOTHING(alg->execute());
