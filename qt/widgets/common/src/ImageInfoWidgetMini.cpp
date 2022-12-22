@@ -39,10 +39,12 @@ void ImageInfoWidgetMini::showInfo(const ImageInfoModel::ImageInfo &info) {
   if (info.empty())
     return;
   auto text = QString{};
-  // TOF
-  text += info.name(0) + "=" + info.value(0) + ", ";
-  // Spectrum
-  text += info.name(1) + "=" + info.value(1);
+
+  if (!info.value(0).isEmpty() && info.value(0) != "-") {
+    text += info.name(0) + "=" + info.value(0) + ", "; // TOF
+    text += info.name(1) + "=" + info.value(1) + ", "; // Spectrum
+    text += info.name(2) + "=" + info.value(2);        // Signal
+  }
 
   setText(text);
 }
