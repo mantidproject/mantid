@@ -22,9 +22,16 @@ class MANTID_KERNEL_DLL TimeROI {
 public:
   TimeROI();
   double durationInSeconds() const;
+  std::size_t numBoundaries() const;
+  bool empty() const;
   void addROI(const std::string &startTime, const std::string &stopTime);
   void addROI(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime);
   void addROI(const std::time_t &startTime, const std::time_t &stopTime);
+  void addMask(const std::string &startTime, const std::string &stopTime);
+  void addMask(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime);
+  void addMask(const std::time_t &startTime, const std::time_t &stopTime);
+  void removeRedundantEntries();
+  void debugPrint() const;
 
 private:
   /**
