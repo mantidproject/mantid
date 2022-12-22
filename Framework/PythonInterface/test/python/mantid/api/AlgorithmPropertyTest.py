@@ -10,7 +10,6 @@ from mantid.kernel import Direction
 
 
 class AlgorithmPropertyTest(unittest.TestCase):
-
     def test_construction_with_name_produces_input_property(self):
         prop = AlgorithmProperty("TestProperty")
 
@@ -20,12 +19,11 @@ class AlgorithmPropertyTest(unittest.TestCase):
         # load plugins to register CreateWorkspace
         FrameworkManagerImpl.Instance()
         prop = AlgorithmProperty("TestProperty")
-        prop.valueAsStr = '{"name": "CreateWorkspace",' \
-                          '"parameters": {"OutputWorkspace": "ws", "DataY": "1", "DataX": "1","NSpec": "1"}}'
+        prop.valueAsStr = '{"name": "CreateWorkspace",' '"parameters": {"OutputWorkspace": "ws", "DataY": "1", "DataX": "1","NSpec": "1"}}'
         alg = prop.value
         self.assertTrue(isinstance(alg, IAlgorithm))
         self.assertEqual("CreateWorkspace", alg.name())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

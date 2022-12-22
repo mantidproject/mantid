@@ -37,17 +37,16 @@ class LegendTest(unittest.TestCase):
 
         ax.legend.assert_called_once()
 
-    @mock.patch('mantid.plots.legend.ConfigService', new_callable=MockConfigService)
+    @mock.patch("mantid.plots.legend.ConfigService", new_callable=MockConfigService)
     def test_calling_create_legend_with_no_props_uses_config_values_in_legend(self, mock_ConfigService):
         ax = mock.Mock(spec=MantidAxes)
         ax.lines = [mock.Mock()]
 
         LegendProperties.create_legend(props=None, ax=ax)
 
-        mock_ConfigService.getString.assert_has_calls([mock.call('plots.legend.Location'),
-                                                       mock.call('plots.legend.FontSize')])
-        ax.legend.assert_called_once_with(handles=mock.ANY, loc='best', prop={"size": 8.0})
+        mock_ConfigService.getString.assert_has_calls([mock.call("plots.legend.Location"), mock.call("plots.legend.FontSize")])
+        ax.legend.assert_called_once_with(handles=mock.ANY, loc="best", prop={"size": 8.0})
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

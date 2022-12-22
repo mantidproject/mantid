@@ -26,4 +26,4 @@ are used for checks such as isinstance()
 ###############################################################################
 from mantid.utils import import_mantid_cext
 
-import_mantid_cext('._curvefitting', 'mantid._plugins', globals())
+import_mantid_cext("._curvefitting", "mantid._plugins", globals())

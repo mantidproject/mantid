@@ -16,7 +16,7 @@ from mantid.plots.modest_image import ModestImage
 
 
 x, y = np.mgrid[0:40000, 0:1000]
-data = np.sin(x / 10.) * np.cos(y / 30.)
+data = np.sin(x / 10.0) * np.cos(y / 30.0)
 
 
 def setup(img_cls):
@@ -28,7 +28,7 @@ def setup(img_cls):
     artist = img_cls(ax, data=data)
 
     ax.add_artist(artist)
-    ax.set_aspect('equal')
+    ax.set_aspect("equal")
     artist.norm.vmin = -1
     artist.norm.vmax = 1
     ax.set_xlim(0, 2000)
@@ -38,8 +38,7 @@ def setup(img_cls):
 
 
 def report(label, t0, t1, niter):
-    print('%15s: %i ms per operation' % (label,
-                                         (t1 - t0) * 1000 / niter))
+    print("%15s: %i ms per operation" % (label, (t1 - t0) * 1000 / niter))
 
 
 def time_draw(img_cls, repeat=5):
@@ -52,11 +51,11 @@ def time_draw(img_cls, repeat=5):
     for i in range(repeat):
         a.changed()  # clear caches, simulate first render
         a.axes.figure.canvas.draw()
-    report('time_draw', t, time(), repeat)
+    report("time_draw", t, time(), repeat)
 
 
 def time_move(img_cls, repeat=10):
-    """ Render time for moving an image without cache clear """
+    """Render time for moving an image without cache clear"""
     lims = [(0, 2000), (500, 2500)]
     a, t = setup(img_cls)
     ax = plt.gca()
@@ -66,11 +65,11 @@ def time_move(img_cls, repeat=10):
         ax.set_xlim(lims[i % 2])
         ax.set_ylim(lims[i % 2])
         a.axes.figure.canvas.draw()
-    report('time_move', t, time(), repeat)
+    report("time_move", t, time(), repeat)
 
 
 def time_move_zoom(img_cls, repeat=10):
-    """ Move image, at high zoom setting """
+    """Move image, at high zoom setting"""
     delta = 100
     lims = [(0, 100), (500, 600)]
     a, t = setup(img_cls)
@@ -81,15 +80,15 @@ def time_move_zoom(img_cls, repeat=10):
         ax.set_xlim(lims[i % 2])
         ax.set_ylim(lims[i % 2])
         a.axes.figure.canvas.draw()
-    report('time_move_zoom', t, time(), repeat)
+    report("time_move_zoom", t, time(), repeat)
 
 
 def main():
-    print('Test image dimensions: %i x %i' % data.shape)
+    print("Test image dimensions: %i x %i" % data.shape)
     for im in [mi.AxesImage, ModestImage]:
-        print('**********************************')
+        print("**********************************")
         print("Performace Tests for %s" % im.__name__)
-        print('**********************************')
+        print("**********************************")
         time_draw(im)
         time_move(im)
         time_move_zoom(im)

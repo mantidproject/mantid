@@ -19,85 +19,74 @@ class D4ILLReductionTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        config.appendDataSearchSubDir('ILL/D4/')
+        config.appendDataSearchSubDir("ILL/D4/")
 
     def setUp(self):
-        self._facility = config['default.facility']
-        self._instrument = config['default.instrument']
+        self._facility = config["default.facility"]
+        self._instrument = config["default.instrument"]
 
-        config['default.facility'] = 'ILL'
-        config['default.instrument'] = 'D4C'
+        config["default.facility"] = "ILL"
+        config["default.instrument"] = "D4C"
 
     def tearDown(self):
         if self._facility:
-            config['default.facility'] = self._facility
+            config["default.facility"] = self._facility
         if self._instrument:
-            config['default.instrument'] = self._instrument
+            config["default.instrument"] = self._instrument
         mtd.clear()
 
     def test_single_run_default(self):
-        output_ws = 'single_run_default'
-        D4ILLReduction(Run='387230', OutputWorkspace=output_ws, ExportAscii=False)
-        self._check_output(mtd[output_ws], 256, 1, 2, ['Scattering Angle', 'q'], ['Label', 'MomentumTransfer'],
-                           'Height', 'Label')
+        output_ws = "single_run_default"
+        D4ILLReduction(Run="387230", OutputWorkspace=output_ws, ExportAscii=False)
+        self._check_output(mtd[output_ws], 256, 1, 2, ["Scattering Angle", "q"], ["Label", "MomentumTransfer"], "Height", "Label")
 
     def test_multi_run_default(self):
-        output_ws = 'multi_run_default'
-        D4ILLReduction(Run='387229:387230', OutputWorkspace=output_ws, ExportAscii=False)
-        self._check_output(mtd[output_ws], 258, 1, 2, ['Scattering Angle', 'q'], ['Label', 'MomentumTransfer'],
-                           'Height', 'Label')
+        output_ws = "multi_run_default"
+        D4ILLReduction(Run="387229:387230", OutputWorkspace=output_ws, ExportAscii=False)
+        self._check_output(mtd[output_ws], 258, 1, 2, ["Scattering Angle", "q"], ["Label", "MomentumTransfer"], "Height", "Label")
 
     def test_save_ascii(self):
-        output_ws = 'multi_run_default'
-        D4ILLReduction(Run='387229:387230', OutputWorkspace=output_ws, ExportAscii=True)
-        self.assertTrue(path.exists(path.join(config['defaultsave.directory'],
-                                              '{}_diffractogram_2theta.dat'.format(output_ws))))
-        self.assertTrue(path.exists(path.join(config['defaultsave.directory'],
-                                              '{}_diffractogram_q.dat'.format(output_ws))))
-        remove(path.join(config['defaultsave.directory'],
-                         '{}_diffractogram_2theta.dat'.format(output_ws)))  # clean up the temporary file
-        remove(path.join(config['defaultsave.directory'],
-                         '{}_diffractogram_q.dat'.format(output_ws)))  # clean up the temporary file
-
+        output_ws = "multi_run_default"
+        D4ILLReduction(Run="387229:387230", OutputWorkspace=output_ws, ExportAscii=True)
+        self.assertTrue(path.exists(path.join(config["defaultsave.directory"], "{}_diffractogram_2theta.dat".format(output_ws))))
+        self.assertTrue(path.exists(path.join(config["defaultsave.directory"], "{}_diffractogram_q.dat".format(output_ws))))
+        remove(path.join(config["defaultsave.directory"], "{}_diffractogram_2theta.dat".format(output_ws)))  # clean up the temporary file
+        remove(path.join(config["defaultsave.directory"], "{}_diffractogram_q.dat".format(output_ws)))  # clean up the temporary file
 
     def test_rotation(self):
-        output_ws = 'single_run_rotation'
-        D4ILLReduction(Run='387230', OutputWorkspace=output_ws, ZeroPositionAngle=10, ExportAscii=True)
+        output_ws = "single_run_rotation"
+        D4ILLReduction(Run="387230", OutputWorkspace=output_ws, ZeroPositionAngle=10, ExportAscii=True)
         min_angular_range = mtd[output_ws][0].readX(0)[0]
         max_angular_range = mtd[output_ws][0].readX(0)[256]
         self.assertAlmostEqual(min_angular_range, 19.70, delta=1e-2)
         self.assertAlmostEqual(max_angular_range, 147.70, delta=1e-2)
 
     def test_normalise_to_monitor(self):
-        output_ws = 'norm_to_monitor'
-        D4ILLReduction(Run='387230', OutputWorkspace=output_ws, NormaliseBy='Monitor', ExportAscii=True)
-        self._check_output(mtd[output_ws], 256, 1, 2, ['Scattering Angle', 'q'], ['Label', 'MomentumTransfer'],
-                           'Height', 'Label')
-        integrated_ws = 'integration_ws'
+        output_ws = "norm_to_monitor"
+        D4ILLReduction(Run="387230", OutputWorkspace=output_ws, NormaliseBy="Monitor", ExportAscii=True)
+        self._check_output(mtd[output_ws], 256, 1, 2, ["Scattering Angle", "q"], ["Label", "MomentumTransfer"], "Height", "Label")
+        integrated_ws = "integration_ws"
         Integration(InputWorkspace=output_ws, OutputWorkspace=integrated_ws)
         self.assertEqual(mtd[integrated_ws][0].readY(0)[0], mtd[integrated_ws][1].readY(0)[0])
         self.assertAlmostEqual(mtd[integrated_ws][0].readY(0)[0], 2769365.5, delta=1e-1)
 
     def test_normalise_to_time(self):
-        output_ws = 'norm_to_time'
-        D4ILLReduction(Run='387230', OutputWorkspace=output_ws, NormaliseBy='Time', NormalisationStandard=80,
-                       ExportAscii=True)
-        self._check_output(mtd[output_ws], 256, 1, 2, ['Scattering Angle', 'q'], ['Label', 'MomentumTransfer'],
-                           'Height', 'Label')
-        integrated_ws = 'integration_ws'
+        output_ws = "norm_to_time"
+        D4ILLReduction(Run="387230", OutputWorkspace=output_ws, NormaliseBy="Time", NormalisationStandard=80, ExportAscii=True)
+        self._check_output(mtd[output_ws], 256, 1, 2, ["Scattering Angle", "q"], ["Label", "MomentumTransfer"], "Height", "Label")
+        integrated_ws = "integration_ws"
         Integration(InputWorkspace=output_ws, OutputWorkspace=integrated_ws)
         self.assertEqual(mtd[integrated_ws][0].readY(0)[0], mtd[integrated_ws][1].readY(0)[0])
         self.assertAlmostEqual(mtd[integrated_ws][0].readY(0)[0], 2762649.6, delta=1e-1)
 
     def test_calibrate_bank_positions(self):
         bank_positions = np.linspace(0, 9, 9)
-        calibration_file = 'calibration.dat'
+        calibration_file = "calibration.dat"
         with open(calibration_file, "w") as f:
             for bank_no, bank_pos in enumerate(bank_positions):
                 f.write("{}\t{}\n".format(bank_no, bank_pos))
-        output_ws = 'calibrate_positions'
-        D4ILLReduction(Run='387230', OutputWorkspace=output_ws, BankPositionOffsetsFile=calibration_file,
-                       ExportAscii=True)
+        output_ws = "calibrate_positions"
+        D4ILLReduction(Run="387230", OutputWorkspace=output_ws, BankPositionOffsetsFile=calibration_file, ExportAscii=True)
         remove(calibration_file)  # clean up the temporary file
         min_angular_range = mtd[output_ws][0].readX(0)[0]
         max_angular_range = mtd[output_ws][0].readX(0)[256]
@@ -123,5 +112,5 @@ class D4ILLReductionTest(unittest.TestCase):
             self.assertTrue(entry.getHistory())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

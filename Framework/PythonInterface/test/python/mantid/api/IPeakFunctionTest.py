@@ -11,7 +11,6 @@ import numpy as np
 
 
 class MyPeak(IPeakFunction):
-
     def init(self):
         self.declareAttribute("Centre", 1)
         self.declareAttribute("Height", 3.4)
@@ -67,14 +66,13 @@ class RectangularFunction(IPeakFunction):
         fwhm = self.getParameterValue("Fwhm")
         fwhm_error = self.getError("Fwhm")
         intensity = height * fwhm
-        return intensity * np.sqrt((height_error / height)**2 + (fwhm_error / fwhm)**2)
+        return intensity * np.sqrt((height_error / height) ** 2 + (fwhm_error / fwhm) ** 2)
 
 
 FunctionFactory.subscribe(RectangularFunction)
 
 
 class IPeakFunctionTest(unittest.TestCase):
-
     def test_instance_can_be_created_standalone(self):
         func = MyPeak()
         self.assertTrue(isinstance(func, IPeakFunction))
@@ -91,12 +89,12 @@ class IPeakFunctionTest(unittest.TestCase):
     def test_functionLocal_can_be_called_directly(self):
         func = MyPeak()
         func.initialize()
-        xvals = np.array([1., 2., 3.])
+        xvals = np.array([1.0, 2.0, 3.0])
         out = func.functionLocal(xvals)
         self.assertEqual(3, out.shape[0])
-        self.assertEqual(5., out[0])
-        self.assertEqual(10., out[1])
-        self.assertEqual(15., out[2])
+        self.assertEqual(5.0, out[0])
+        self.assertEqual(10.0, out[1])
+        self.assertEqual(15.0, out[2])
 
     def test_get_set_intensity(self):
         func = RectangularFunction()
@@ -117,8 +115,8 @@ class IPeakFunctionTest(unittest.TestCase):
         self.assertAlmostEqual(func.intensity(), 12.0, places=10)
 
     def test_get_set_matrix_workspace(self):
-        ws = LoadEmptyInstrument(InstrumentName='ENGIN-X', OutputWorkspace='ws')
-        LoadParameterFile(Workspace=ws, Filename='ENGIN-X_Parameters.xml')
+        ws = LoadEmptyInstrument(InstrumentName="ENGIN-X", OutputWorkspace="ws")
+        LoadParameterFile(Workspace=ws, Filename="ENGIN-X_Parameters.xml")
         axis = ws.getAxis(0)
         unit = axis.getUnit()
         axis.setUnit("TOF")
@@ -144,5 +142,5 @@ class IPeakFunctionTest(unittest.TestCase):
         self.assertAlmostEqual(func.intensityError(), func.intensityErrorLocal(), places=6)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

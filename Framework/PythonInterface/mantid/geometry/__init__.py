@@ -16,9 +16,9 @@ Defines Python objects that wrap the C++ Geometry namespace.
 ###############################################################################
 from mantid.utils import import_mantid_cext
 
-import_mantid_cext('._geometry', 'mantid.geometry', globals())
+import_mantid_cext("._geometry", "mantid.geometry", globals())
 
 ###############################################################################
 # Make aliases accessible in this namespace
 ###############################################################################
-from mantid.geometry._aliases import *   # noqa: E402,F401
+from mantid.geometry._aliases import *  # noqa: E402,F401

@@ -16,17 +16,16 @@ import tempfile
 
 
 class PathTest(unittest.TestCase):
-
     def test_run_exists(self):
         # create fake events file in temporary directory
         data_dir = tempfile.gettempdir()
-        old = config['datasearch.directories']
-        config['datasearch.directories'] = f'{data_dir};{old}'
-        expected = Path(data_dir) / 'SNAP_45874.nxs.h5'
+        old = config["datasearch.directories"]
+        config["datasearch.directories"] = f"{data_dir};{old}"
+        expected = Path(data_dir) / "SNAP_45874.nxs.h5"
         expected.touch()  # create empty file
-        self.assertEqual(path.run_file(45874, instrument='SNAP', oncat=False), str(expected))
-        config['datasearch.directories'] = old  # restore the original list of data search directories
+        self.assertEqual(path.run_file(45874, instrument="SNAP", oncat=False), str(expected))
+        config["datasearch.directories"] = old  # restore the original list of data search directories
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

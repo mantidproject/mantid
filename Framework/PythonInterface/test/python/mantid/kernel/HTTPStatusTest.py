@@ -9,9 +9,8 @@ from mantid.kernel import HTTPStatus
 
 
 class HTTPStatusTest(unittest.TestCase):
-
     def test_types(self):
-        '''Test the "common" return codes'''
+        """Test the "common" return codes"""
         self.assertTrue(hasattr(HTTPStatus, "OK"))
         self.assertTrue(hasattr(HTTPStatus, "CREATED"))
         self.assertTrue(hasattr(HTTPStatus, "MOVED_PERMANENTLY"))
@@ -25,7 +24,7 @@ class HTTPStatusTest(unittest.TestCase):
         self.assertFalse(hasattr(HTTPStatus, "NOT_OK"))
 
     def test_toInt(self):
-        '''Test explicit conversion to int'''
+        """Test explicit conversion to int"""
         self.assertEqual(int(HTTPStatus.OK), 200)
         self.assertNotEqual(int(HTTPStatus.OK), 201)
 
@@ -34,10 +33,11 @@ class HTTPStatusTest(unittest.TestCase):
         self.assertEqual(HTTPStatus(500), HTTPStatus.INTERNAL_SERVER_ERROR)
 
     def test_int_compare(self):
-        '''Test comparing with int'''
+        """Test comparing with int"""
         self.assertEqual(HTTPStatus.OK, 200)
         self.assertEqual(200, HTTPStatus.OK)
         self.assertNotEqual(HTTPStatus.OK, 201)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
