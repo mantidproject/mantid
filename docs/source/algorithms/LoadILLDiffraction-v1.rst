@@ -119,8 +119,6 @@ Output:
 
   The output has 1 bin (detector scan) and 1281 spectra
 
-<<<<<<< HEAD
-=======
 **Example - LoadILLDiffraction - D4**
 
 .. testcode:: LoadILLDiffractionD4Example
@@ -135,21 +133,6 @@ Output:
 
    The output has 1 bin and 577 spectra
 
-**Example - LoadILLDiffraction - IN5**
-
-.. testcode:: LoadILLDiffractionIN5Example
-
-  ws = LoadILLDiffraction(Filename='ILL/IN5/199857.nxs')
-
-  print('The output has {0} bin (omega scan) and {1} spectra'.format(ws.blocksize(), ws.getNumberHistograms()))
-
-Output:
-
-.. testoutput:: LoadILLDiffractionIN5Example
-
-  The output has 17 bin (omega scan) and 98305 spectra
-
->>>>>>> origin/main
 .. categories::
 
 .. sourcelink::
