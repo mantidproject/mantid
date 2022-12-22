@@ -41,7 +41,7 @@ class LinkedUBs(DataProcessorAlgorithm):
     _delete_ws = None
 
     def category(self):
-        return "Diffraction\\Reduction"
+        return "Diffraction\\Reduction;Crystal\\UBMatrix"
 
     def seeAlso(self):
         return ["SetGoniometer", "CalculateUMatrix"]

@@ -21,7 +21,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         return "FindGlobalBMatrix"
 
     def category(self):
-        return "Diffraction\\Reduction"
+        return "Diffraction\\Reduction;Crystal\\UBMatrix"
 
     def seeAlso(self):
         return ["FindUBUsingLatticeParameters", "CalculateUMatrix"]
