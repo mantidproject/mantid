@@ -59,16 +59,16 @@ Loading Data Test
 	- Select the groups "one" and "two", then right click and select ``Add Pair``
 	- Call the pair "short", it will then appear in the pair table
 	- Tick the ``Analyse`` option for the "short" pair
-	- In the plot selection pop-up make sure only the "short" pair is selected
+	- In the plot selector pop-up make sure only the "short" pair is selected
 	- Change the value of ``Group 1`` to be "two", this will change the data and ``Group 2`` should update to be "one"
 	- Click the ``+`` button on the difference table and create a pair called "pairDiff"
 	- Tick the ``Analyse`` option for the "pairDiff" difference
-	- In the plot selection pop-up make sure only the "pairDiff" difference (this is still technically a pair) is selected
+	- In the plot selector pop-up make sure only the "pairDiff" difference (this is still technically a pair) is selected
 	- Changing the options for ``Pair 1`` and ``Pair 2`` will alter the data
 	- Above the difference table, select the ``Groups`` radio button
 	- Right click in the difference table and select ``Add diff``, call it "delta"
 	- Tick the ``Analyse`` option for the "delta" difference
-	- In the plot selection pop-up make sure only the "delta" difference (this is still technically a group) is selected
+	- In the plot selector pop-up make sure only the "delta" difference (this is still technically a group) is selected
 	- Press the ``Save`` button at the top of the tab and save the grouping as "MUSR_test"
 	- Remove groups, pairs and differences by using either by selecting the row and pressing the ``-`` button or by right clicking the row and selecting ``Remove``
 	- The GUI will not let you delete a group/pair that is in use elsewhere
@@ -109,7 +109,7 @@ We can do a better fit by using simultaneous fitting
 - Tick the ``Simultaneous over`` option
 - In the fitting function, set ``Sigma`` and ``Phi`` to global
 - Press fit
-- Inspect the flat background by using the arrorws next to ``Select Data``, all but one should be non-zero
+- Inspect the flat background by using the arrorws next to ``Display Parameters For``, all but one should be non-zero
 - Remove the flat background
 - Change the ``Fitting type`` from "Normal" to "TF Asymmetry"
 - Press Fit
