@@ -177,11 +177,11 @@ void ALFAnalysisModel::openExternalPlot() const {
 MatrixWorkspace_sptr ALFAnalysisModel::plottedWorkspace() const {
   if (m_fitWorkspace) {
     return m_fitWorkspace;
-  } else if (m_extractedWorkspace) {
-    return m_extractedWorkspace;
-  } else {
-    return nullptr;
   }
+  if (m_extractedWorkspace) {
+    return m_extractedWorkspace;
+  }
+  return nullptr;
 }
 
 std::vector<int> ALFAnalysisModel::plottedWorkspaceIndices() const {
