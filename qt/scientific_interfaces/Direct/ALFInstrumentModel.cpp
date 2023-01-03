@@ -211,7 +211,7 @@ MatrixWorkspace_sptr ALFInstrumentModel::loadAndNormalise(std::string const &fil
  */
 void ALFInstrumentModel::generateLoadedWorkspace() {
   if (!m_sample) {
-    throw std::invalid_argument("The ALF sample has not been loaded.");
+    return;
   }
 
   if (m_vanadium) {

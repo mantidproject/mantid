@@ -60,7 +60,6 @@ public:
 
 private:
   Mantid::API::MatrixWorkspace_sptr loadAndNormalise(const std::string &pathToRun);
-  void generateLoadedWorkspace();
 
   void updateInstrumentViewFromModel();
   void updateAnalysisViewFromModel();

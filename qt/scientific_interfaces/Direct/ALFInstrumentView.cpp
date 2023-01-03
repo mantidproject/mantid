@@ -113,10 +113,6 @@ void ALFInstrumentView::sampleLoaded() {
 }
 
 void ALFInstrumentView::vanadiumLoaded() {
-  if (m_vanadium->getText().isEmpty()) {
-    return;
-  }
-
   if (!m_vanadium->isValid()) {
     warningBox(m_vanadium->getFileProblem().toStdString());
     return;

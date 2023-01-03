@@ -42,21 +42,20 @@ void ALFInstrumentPresenter::loadSample() {
   m_model->setSample(loadAndNormalise(*filepath));
   m_view->setSampleRun(std::to_string(m_model->sampleRun()));
 
-  generateLoadedWorkspace();
+  m_model->generateLoadedWorkspace();
 }
 
 void ALFInstrumentPresenter::loadVanadium() {
-  auto const filepath = m_view->getVanadiumFile();
-  if (!filepath) {
-    return;
-  }
-
   m_analysisPresenter->clear();
 
-  m_model->setVanadium(loadAndNormalise(*filepath));
-  m_view->setVanadiumRun(std::to_string(m_model->vanadiumRun()));
+  if (auto const filepath = m_view->getVanadiumFile()) {
+    m_model->setVanadium(loadAndNormalise(*filepath));
+    m_view->setVanadiumRun(std::to_string(m_model->vanadiumRun()));
+  } else {
+    m_model->setVanadium(nullptr);
+  }
 
-  generateLoadedWorkspace();
+  m_model->generateLoadedWorkspace();
 }
 
 Mantid::API::MatrixWorkspace_sptr ALFInstrumentPresenter::loadAndNormalise(const std::string &pathToRun) {
@@ -65,14 +64,6 @@ Mantid::API::MatrixWorkspace_sptr ALFInstrumentPresenter::loadAndNormalise(const
   } catch (std::exception const &ex) {
     m_view->warningBox(ex.what());
     return nullptr;
-  }
-}
-
-void ALFInstrumentPresenter::generateLoadedWorkspace() {
-  try {
-    m_model->generateLoadedWorkspace();
-  } catch (std::exception const &ex) {
-    m_view->warningBox(ex.what());
   }
 }
 
