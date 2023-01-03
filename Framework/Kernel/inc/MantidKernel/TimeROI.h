@@ -41,6 +41,8 @@ public:
   void debugPrint() const;
 
 private:
+  std::vector<Types::Core::DateAndTime> getAllTimes(const TimeROI &other);
+
   /**
    * @brief m_roi private member that holds most of the information
    *

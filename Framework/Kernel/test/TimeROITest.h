@@ -169,32 +169,31 @@ public:
   void test_intersection_no_overlap() { runIntersectionTest(CHRISTMAS, TimeROI{NEW_YEARS_START, NEW_YEARS_STOP}, 0.); }
 
   void runUnionTest(const TimeROI &left, const TimeROI &right, const double exp_duration) {
-    return; // REMOVE
     // left union with right
     TimeROI one(left);
     one.update_union(right);
-    TS_ASSERT_EQUALS(one.durationInSeconds(), exp_duration);
+    TS_ASSERT_EQUALS(one.durationInSeconds() / ONE_DAY_DURATION, exp_duration / ONE_DAY_DURATION);
 
     // right union with left
     TimeROI two(right);
     two.update_union(left);
-    TS_ASSERT_EQUALS(two.durationInSeconds(), exp_duration);
+    TS_ASSERT_EQUALS(two.durationInSeconds() / ONE_DAY_DURATION, exp_duration / ONE_DAY_DURATION);
 
     // the values should be identical
     TS_ASSERT_EQUALS(one, two);
   }
 
-  void xtest_union_same_date() { runUnionTest(CHRISTMAS, CHRISTMAS, CHRISTMAS.durationInSeconds()); }
+  void test_union_same_date() { runUnionTest(CHRISTMAS, CHRISTMAS, CHRISTMAS.durationInSeconds()); }
 
-  void xtest_union_full_overlap() { runUnionTest(DECEMBER, CHRISTMAS, DECEMBER.durationInSeconds()); }
+  void test_union_full_overlap() { runUnionTest(DECEMBER, CHRISTMAS, DECEMBER.durationInSeconds()); }
 
-  void xtest_union_partial_overlap() {
+  void test_union_partial_overlap() {
     TimeROI left{HANUKKAH_START, NEW_YEARS_START};
     TimeROI right{HANUKKAH_STOP, NEW_YEARS_STOP};
-    runUnionTest(left, right, 19. * ONE_DAY_DURATION);
+    runUnionTest(left, right, 13. * ONE_DAY_DURATION);
   }
 
-  void xtest_union_no_overlap() {
+  void test_union_no_overlap() {
     runUnionTest(CHRISTMAS, TimeROI{NEW_YEARS_START, NEW_YEARS_STOP}, 2. * ONE_DAY_DURATION);
   }
 };
