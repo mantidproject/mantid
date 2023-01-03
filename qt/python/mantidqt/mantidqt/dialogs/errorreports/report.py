@@ -100,17 +100,18 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
     def fullShare(self):
         self.action.emit(self.continue_working, 0, self.input_name, self.input_email,
                          self.input_text)
-        self.close()
 
     def nonIDShare(self):
         self.action.emit(self.continue_working, 1, self.input_name, self.input_email,
                          self.input_text)
-        self.close()
 
     def noShare(self):
         self.action.emit(self.continue_working, 2, self.input_name, self.input_email,
                          self.input_text)
-        self.close()
+
+    def close(self, status):
+        if status == 201 or status == -1:
+            self.close()
 
     def get_simple_line_edit_field(self, expected_type, line_edit):
         gui_element = getattr(self, line_edit)
