@@ -5,8 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import DataProcessorAlgorithm, MultipleFileProperty, FileAction, MatrixWorkspaceProperty,\
-    FileProperty
+from mantid.api import DataProcessorAlgorithm, MultipleFileProperty, FileAction, MatrixWorkspaceProperty, FileProperty
 from mantid.kernel import Direction, StringListValidator
 from mantid.simpleapi import *
 
@@ -49,11 +48,11 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
 
     @staticmethod
     def category():
-        return 'ILL\\Indirect'
+        return "ILL\\Indirect"
 
     @staticmethod
     def summary():
-        return 'Reduces Lagrange data.'
+        return "Reduces Lagrange data."
 
     @staticmethod
     def seeAlso():
@@ -61,37 +60,39 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
 
     @staticmethod
     def name():
-        return 'LagrangeILLReduction'
+        return "LagrangeILLReduction"
 
     def setup(self):
-        self.use_incident_energy = self.getProperty('UseIncidentEnergy').value
-        self.convert_to_wavenumber = self.getProperty('ConvertToWaveNumber').value
-        self.normalise_by = self.getPropertyValue('NormaliseBy')
+        self.use_incident_energy = self.getProperty("UseIncidentEnergy").value
+        self.convert_to_wavenumber = self.getProperty("ConvertToWaveNumber").value
+        self.normalise_by = self.getPropertyValue("NormaliseBy")
 
     def PyInit(self):
-        self.declareProperty(MultipleFileProperty('SampleRuns', action=FileAction.Load, extensions=['']),
-                             doc='Sample run(s).')
+        self.declareProperty(MultipleFileProperty("SampleRuns", action=FileAction.Load, extensions=[""]), doc="Sample run(s).")
 
-        self.declareProperty(MultipleFileProperty('ContainerRuns', action=FileAction.OptionalLoad, extensions=['']),
-                             doc='Container run(s) (empty cell)')
+        self.declareProperty(
+            MultipleFileProperty("ContainerRuns", action=FileAction.OptionalLoad, extensions=[""]), doc="Container run(s) (empty cell)"
+        )
 
-        self.declareProperty(FileProperty('CorrectionFile', '', action=FileAction.OptionalLoad, extensions=['.txt']),
-                             doc='Correction reference file.')
+        self.declareProperty(
+            FileProperty("CorrectionFile", "", action=FileAction.OptionalLoad, extensions=[".txt"]), doc="Correction reference file."
+        )
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
-                             doc='The output workspace containing reduced data.')
+        self.declareProperty(
+            MatrixWorkspaceProperty("OutputWorkspace", "", direction=Direction.Output), doc="The output workspace containing reduced data."
+        )
 
-        self.declareProperty(name="NormaliseBy",
-                             defaultValue="Monitor",
-                             validator=StringListValidator(["Monitor", "None"]),
-                             direction=Direction.Input,
-                             doc="What normalisation approach to use on data.")
+        self.declareProperty(
+            name="NormaliseBy",
+            defaultValue="Monitor",
+            validator=StringListValidator(["Monitor", "None"]),
+            direction=Direction.Input,
+            doc="What normalisation approach to use on data.",
+        )
 
-        self.declareProperty(name='UseIncidentEnergy', defaultValue=False,
-                             doc='Show the energies as incident energies, not transfer ones.')
+        self.declareProperty(name="UseIncidentEnergy", defaultValue=False, doc="Show the energies as incident energies, not transfer ones.")
 
-        self.declareProperty(name='ConvertToWaveNumber', defaultValue=False,
-                             doc='Convert axis unit to energy in wave number (cm-1)')
+        self.declareProperty(name="ConvertToWaveNumber", defaultValue=False, doc="Convert axis unit to energy in wave number (cm-1)")
 
         # the list of all the intermediate workspaces to group at the end
         self.intermediate_workspaces = []
@@ -99,31 +100,27 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
     def PyExec(self):
         self.setup()
 
-        correction_file = self.getPropertyValue('CorrectionFile')
-        self.output_ws_name = self.getPropertyValue('OutputWorkspace')
+        correction_file = self.getPropertyValue("CorrectionFile")
+        self.output_ws_name = self.getPropertyValue("OutputWorkspace")
 
         # load correction
         if correction_file:
             self.water_correction = self.get_water_correction(correction_file)
 
-        empty_cell_files = self.getPropertyValue('ContainerRuns').split(',')
+        empty_cell_files = self.getPropertyValue("ContainerRuns").split(",")
 
         # empty cell treatment, if there is any
         if empty_cell_files[0] != str():
             self.process_empty_cell(empty_cell_files)
 
         # sample load and formatting
-        sample_files = self.getPropertyValue('SampleRuns').split(',')
+        sample_files = self.getPropertyValue("SampleRuns").split(",")
         sample_data = self.load_and_concatenate(sample_files)
         sample_data = self.merge_adjacent_points(sample_data)
         energy, detector_counts, errors, time, temperature = self.get_counts_errors_metadata(sample_data)
 
         raw_sample_ws = "__" + self.output_ws_name + "_rawS"
-        CreateWorkspace(outputWorkspace=raw_sample_ws,
-                        DataX=energy,
-                        DataY=detector_counts,
-                        DataE=errors,
-                        UnitX="Energy")
+        CreateWorkspace(outputWorkspace=raw_sample_ws, DataX=energy, DataY=detector_counts, DataE=errors, UnitX="Energy")
 
         self.add_metadata(raw_sample_ws, time, temperature)
 
@@ -138,20 +135,18 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
             self.intermediate_workspaces.append(water_corrected_ws)
 
         # clone the last workspace - either the raw or water corrected data - to the destination name
-        CloneWorkspace(InputWorkspace=self.intermediate_workspaces[-1],
-                       OutputWorkspace=self.output_ws_name)
+        CloneWorkspace(InputWorkspace=self.intermediate_workspaces[-1], OutputWorkspace=self.output_ws_name)
 
         # correct by empty cell if there is any
         if self.empty_cell_ws is not None:
             self.subtract_empty_cell()
 
         if self.convert_to_wavenumber:
-            ConvertUnits(InputWorkspace=self.output_ws_name, OutputWorkspace=self.output_ws_name,
-                         Target='Energy_inWavenumber')
+            ConvertUnits(InputWorkspace=self.output_ws_name, OutputWorkspace=self.output_ws_name, Target="Energy_inWavenumber")
 
         # set the properties and group the hidden workspaces
-        self.setProperty('OutputWorkspace', self.output_ws_name)
-        GroupWorkspaces(OutputWorkspace='__' + self.output_ws_name, InputWorkspaces=self.intermediate_workspaces)
+        self.setProperty("OutputWorkspace", self.output_ws_name)
+        GroupWorkspaces(OutputWorkspace="__" + self.output_ws_name, InputWorkspaces=self.intermediate_workspaces)
 
     def add_metadata(self, ws: str, time: List[float], temperature: List[float]):
         """
@@ -187,8 +182,8 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
             with open(file, "r") as f:
                 for index, line in enumerate(f):
                     if line.startswith("TITLE:"):
-                        contents = line.split(' ')
-                        self._title = ' '.join(contents[1:-1])  # the metadata tag and the line break at the end
+                        contents = line.split(" ")
+                        self._title = " ".join(contents[1:-1])  # the metadata tag and the line break at the end
                     if line == "DATA_:\n":
                         header_index = index
                         next_line = f.__next__().split()
@@ -197,20 +192,25 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
                             energy_col = next_line.index("EI")
                         else:
                             energy_col = self.ENERGY_COL_DEFAULT
-                            self.log().warning("Could not find energy column in file {}. "
-                                               "Defaulting to column {}".format(file, self.ENERGY_COL_DEFAULT))
+                            self.log().warning(
+                                "Could not find energy column in file {}. " "Defaulting to column {}".format(file, self.ENERGY_COL_DEFAULT)
+                            )
                         if "CNTS" in next_line:
                             detector_counts_col = next_line.index("CNTS")
                         else:
                             detector_counts_col = self.DETECTOR_COUNT_COL_DEFAULT
-                            self.log().warning("Could not find detector counts column in file {}. "
-                                               "Defaulting to column {}".format(file, self.DETECTOR_COUNT_COL_DEFAULT))
+                            self.log().warning(
+                                "Could not find detector counts column in file {}. "
+                                "Defaulting to column {}".format(file, self.DETECTOR_COUNT_COL_DEFAULT)
+                            )
                         if "M1" in next_line:
                             monitor_counts_col = next_line.index("M1")
                         else:
                             monitor_counts_col = self.MONITOR_COUNT_COL_DEFAULT
-                            self.log().warning("Could not find monitor counts column in file {}. "
-                                               "Defaulting to column {}".format(file, self.MONITOR_COUNT_COL_DEFAULT))
+                            self.log().warning(
+                                "Could not find monitor counts column in file {}. "
+                                "Defaulting to column {}".format(file, self.MONITOR_COUNT_COL_DEFAULT)
+                            )
                         if "TIME" in next_line:
                             time_col = next_line.index("TIME")
                         else:
@@ -223,8 +223,9 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
                 f.close()
 
             if header_index < 0:
-                self.log().warning("Could not determine header length in file {}. "
-                                   "Defaulting to {}".format(file, self.HEADER_SIZE_DEFAULT))
+                self.log().warning(
+                    "Could not determine header length in file {}. " "Defaulting to {}".format(file, self.HEADER_SIZE_DEFAULT)
+                )
                 header_index = self.HEADER_SIZE_DEFAULT
                 energy_col = self.ENERGY_COL_DEFAULT
                 detector_counts_col = self.DETECTOR_COUNT_COL_DEFAULT
@@ -233,17 +234,18 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
                 temperature_col = self.TEMPERATURE_COL_DEFAULT
 
             # load the relevant data, which position we just determined - angle, monitor count, detector count
-            data = np.loadtxt(file,
-                              dtype=float,
-                              skiprows=header_index + 2,
-                              usecols=(energy_col, monitor_counts_col, detector_counts_col, time_col, temperature_col))
+            data = np.loadtxt(
+                file,
+                dtype=float,
+                skiprows=header_index + 2,
+                usecols=(energy_col, monitor_counts_col, detector_counts_col, time_col, temperature_col),
+            )
             loaded_data = np.vstack((loaded_data, data)) if loaded_data is not None else data
         if np.shape(loaded_data)[0] == 0:
             raise RuntimeError("Provided files contain no data in the LAGRANGE format.")
         return loaded_data
 
-    def get_counts_errors_metadata(self, data: np.ndarray) \
-            -> Tuple[List[float], List[int], List[float], List[float], List[float]]:
+    def get_counts_errors_metadata(self, data: np.ndarray) -> Tuple[List[float], List[int], List[float], List[float], List[float]]:
         """
         Processes loaded data and metadata, computes and returns correct energy, (optionally) normalized detector counts
         and errors.
@@ -271,11 +273,9 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
 
             detector_counts[index] = det_counts
             if self.normalise_by == "Monitor":
-                monitor_errors = np.sqrt(
-                    monitor_counts)  # the monitor errors are *not* assumed to be zero, and will be propagated
+                monitor_errors = np.sqrt(monitor_counts)  # the monitor errors are *not* assumed to be zero, and will be propagated
                 detector_counts[index] /= monitor_counts
-                errors[index] = np.sqrt(
-                    det_counts + ((det_counts ** 2) * monitor_errors ** 2) / monitor_counts ** 2) / monitor_counts
+                errors[index] = np.sqrt(det_counts + ((det_counts**2) * monitor_errors**2) / monitor_counts**2) / monitor_counts
             else:
                 errors[index] = np.sqrt(detector_counts[index])
         return energy, detector_counts, errors, time, temperature
@@ -302,10 +302,7 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
             if not self.use_incident_energy:
                 correction[:, 0] -= self.INCIDENT_ENERGY_OFFSET
             self.water_corr_ws = "__{}_Calibration".format(self.output_ws_name)
-            CreateWorkspace(OutputWorkspace=self.water_corr_ws,
-                            DataX=correction[:, 0],
-                            DataY=correction[:, 1],
-                            UnitX='Energy')
+            CreateWorkspace(OutputWorkspace=self.water_corr_ws, DataX=correction[:, 0], DataY=correction[:, 1], UnitX="Energy")
             self.intermediate_workspaces.append(self.water_corr_ws)
         return correction
 
@@ -329,12 +326,12 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
             # This could be troublesome if there are a lot of points separated by very short distances,
             # but it normally shouldn't happen on Lagrange data
             try:
-                if (data[point_no+1][0] - point[0]) < self.EPSILON:
+                if (data[point_no + 1][0] - point[0]) < self.EPSILON:
                     data_mask.mask[point_no] = True
                     n_masked += 1
             except IndexError:
                 break
-        return data_mask.compressed().reshape(np.shape(data)[0]-n_masked, np.shape(data)[1])
+        return data_mask.compressed().reshape(np.shape(data)[0] - n_masked, np.shape(data)[1])
 
     def correct_data(self, ws_to_correct: str, corrected_ws: str):
         """
@@ -352,15 +349,10 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
 
         sample_type = "EC" if "EC" in corrected_ws else "S"
         interpolated_water_ws = "{}_interp{}".format(self.water_corr_ws, sample_type)
-        CreateWorkspace(OutputWorkspace=interpolated_water_ws,
-                        DataX=energy,
-                        DataY=interpolated_corr,
-                        UnitX='Energy')
+        CreateWorkspace(OutputWorkspace=interpolated_water_ws, DataX=energy, DataY=interpolated_corr, UnitX="Energy")
         self.intermediate_workspaces.append(interpolated_water_ws)
 
-        Multiply(LHSWorkspace=ws_to_correct,
-                 RHSWorkspace=interpolated_water_ws,
-                 OutputWorkspace=corrected_ws)
+        Multiply(LHSWorkspace=ws_to_correct, RHSWorkspace=interpolated_water_ws, OutputWorkspace=corrected_ws)
 
     def process_empty_cell(self, empty_cell_files: List[str]):
         """
@@ -374,11 +366,7 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
 
         self.empty_cell_ws = "__" + self.output_ws_name + "_rawEC"
 
-        CreateWorkspace(OutputWorkspace=self.empty_cell_ws,
-                        DataX=energy,
-                        DataY=detector_counts,
-                        DataE=errors,
-                        UnitX="Energy")
+        CreateWorkspace(OutputWorkspace=self.empty_cell_ws, DataX=energy, DataY=detector_counts, DataE=errors, UnitX="Energy")
 
         self.add_metadata(self.empty_cell_ws, time, temperature)
 
@@ -398,14 +386,12 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         # interpolating, because the empty cell may not have the same binning as the sample
         # let's hope that the spline behaves
         interpolated_empty_cell_ws = "{}_interpS".format(self.empty_cell_ws)
-        SplineInterpolation(WorkspaceToMatch=self.output_ws_name,
-                            WorkspaceToInterpolate=self.empty_cell_ws,
-                            OutputWorkspace=interpolated_empty_cell_ws)
+        SplineInterpolation(
+            WorkspaceToMatch=self.output_ws_name, WorkspaceToInterpolate=self.empty_cell_ws, OutputWorkspace=interpolated_empty_cell_ws
+        )
         self.intermediate_workspaces.append(interpolated_empty_cell_ws)
 
-        Subtract(LHSWorkspace=self.output_ws_name,
-                 RHSWorkspace=interpolated_empty_cell_ws,
-                 OutputWorkspace=self.output_ws_name)
+        Subtract(LHSWorkspace=self.output_ws_name, RHSWorkspace=interpolated_empty_cell_ws, OutputWorkspace=self.output_ws_name)
 
         final_ws_name = "__{}_final".format(self.output_ws_name)
         CloneWorkspace(InputWorkspace=self.output_ws_name, OutputWorkspace=final_ws_name)

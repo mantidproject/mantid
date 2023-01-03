@@ -23,7 +23,6 @@ _default_folder = os.path.join(mantid.kernel.config.getAppDataDirectory(), "reco
 
 
 class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
-
     def category(self):
         return "Utility"
 
@@ -31,23 +30,23 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
         return "OrderWorkspaceHistory"
 
     def summary(self):
-        return "Takes a folder full of workspace histories or a string with timestamps and" \
-               " creates a single unified history from them."
+        return "Takes a folder full of workspace histories or a string with timestamps and" " creates a single unified history from them."
 
     def PyInit(self):
-        self.declareProperty(mantid.api.FileProperty(_recovery_folder, _default_folder,
-                                                     action=mantid.api.FileAction.OptionalDirectory),
-                             "Location of all saved workspace histories")
+        self.declareProperty(
+            mantid.api.FileProperty(_recovery_folder, _default_folder, action=mantid.api.FileAction.OptionalDirectory),
+            "Location of all saved workspace histories",
+        )
 
-        self.declareProperty(mantid.api.FileProperty(_destination_file,
-                                                     os.path.join(_default_folder, "summedHistory.py"),
-                                                     action=mantid.api.FileAction.OptionalSave),
-                             "File destination to write the combined history to.")
+        self.declareProperty(
+            mantid.api.FileProperty(
+                _destination_file, os.path.join(_default_folder, "summedHistory.py"), action=mantid.api.FileAction.OptionalSave
+            ),
+            "File destination to write the combined history to.",
+        )
 
-        self.declareProperty("InputString", "", "The string to be turned into a single cohesive history",
-                             Direction.Input)
-        self.declareProperty("OutputString", "", "The output from the algorithm when InputString is given",
-                             Direction.Output)
+        self.declareProperty("InputString", "", "The string to be turned into a single cohesive history", Direction.Input)
+        self.declareProperty("OutputString", "", "The output from the algorithm when InputString is given", Direction.Output)
 
     def validateInputs(self):
         dic = {}
@@ -83,7 +82,7 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
         input_string = self.getPropertyValue("InputString")
 
         if input_string == "":
-            for fn in glob.iglob(os.path.join(self.getPropertyValue(_recovery_folder), '*.py')):
+            for fn in glob.iglob(os.path.join(self.getPropertyValue(_recovery_folder), "*.py")):
                 with open(fn) as f:
                     all_lines.extend(self._get_all_lines_from_io(f.readline))
         else:
@@ -110,7 +109,7 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
             script += line[0]
 
         if input_string == "":
-            with open(destination, 'w') as outfile:
+            with open(destination, "w") as outfile:
                 # Add in an extra line to import the previously implicit imports from MantidPlot
                 outfile.write("from mantid.simpleapi import *\n\n")
                 outfile.write(script)

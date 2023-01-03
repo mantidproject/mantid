@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
 from mantid.api import *
 from mantid.kernel import *
 import mantid.simpleapi as ms
@@ -21,7 +21,7 @@ class SortByQVectors(PythonAlgorithm):
         return "Transforms\\Merging;Utility\\Sorting"
 
     def seeAlso(self):
-        return [ "SortDetectors" ]
+        return ["SortDetectors"]
 
     def name(self):
         return "SortByQVectors"
@@ -32,14 +32,14 @@ class SortByQVectors(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty("InputWorkspace", "", "Group workspace that automatically includes all members.")
 
-    #pylint: disable=too-many-branches
+    # pylint: disable=too-many-branches
     def PyExec(self):
         # get parameter values
         wsString = self.getPropertyValue("InputWorkspace").strip()
-        #internal values
+        # internal values
         wsOutput = "__OutputWorkspace"
         wsTemp = "__Sort_temp"
-        #get the workspace list
+        # get the workspace list
         wsNames = []
         for wsName in wsString.split(","):
             ws = mtd[wsName.strip()]
@@ -53,7 +53,7 @@ class SortByQVectors(PythonAlgorithm):
         sortStat = []
         for wsName in wsNames:
             if "qvectors" in wsName:
-                #extract the spectrum
+                # extract the spectrum
                 ws = mtd[wsName.strip()]
                 for s in range(0, ws.getNumberHistograms()):
                     y_s = ws.readY(s)
@@ -62,7 +62,7 @@ class SortByQVectors(PythonAlgorithm):
                 sortStat.sort()
         if len(sortStat) == 0:
             raise RuntimeError("Cannot find file with qvectors, aborting")
-        #sort spectra using norm of q
+        # sort spectra using norm of q
         for wsName in wsNames:
             ws = mtd[wsName.strip()]
             yUnit = ws.getAxis(1).getUnit().unitID()
@@ -73,17 +73,17 @@ class SortByQVectors(PythonAlgorithm):
             for norm, spec in sortStat:
                 ms.ExtractSingleSpectrum(InputWorkspace=wsName, OutputWorkspace=wsTemp, WorkspaceIndex=spec)
                 if wsOutput in mtd:
-                    ms.ConjoinWorkspaces(InputWorkspace1=wsOutput,InputWorkspace2=wsTemp,CheckOverlapping=False)
+                    ms.ConjoinWorkspaces(InputWorkspace1=wsOutput, InputWorkspace2=wsTemp, CheckOverlapping=False)
                     if wsTemp in mtd:
                         ms.DeleteWorkspace(Workspace=wsTemp)
                 else:
                     ms.RenameWorkspace(InputWorkspace=wsTemp, OutputWorkspace=wsOutput)
 
-            #put norm as y value and copy units from input
+            # put norm as y value and copy units from input
             loopIndex = 0
             wsOut = mtd[wsOutput]
             for norm, spec in sortStat:
-                wsOut.getSpectrum(loopIndex).setSpectrumNo(int(norm*1000))
+                wsOut.getSpectrum(loopIndex).setSpectrumNo(int(norm * 1000))
                 loopIndex = loopIndex + 1
             if len(yUnit) > 0:
                 wsOut.getAxis(1).setUnit(yUnit)

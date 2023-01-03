@@ -18,37 +18,36 @@ from numpy import vectorize
 
 def voigtFunction(X, Y):
     Y = abs(Y)
-    S = abs(X)+Y
+    S = abs(X) + Y
     T = Y - (X * 1j)
 
     # Determine values based on value of S
     # REGION 1
     if S >= 15:
-        W = T*0.5641896/(0.5+T*T)
+        W = T * 0.5641896 / (0.5 + T * T)
 
     # REGION 2
     else:
         if S >= 5.5:
-            U = T*T
-            W = T*(1.410474+U*0.5641896)/(0.75+U*(3+U))
-    # REGION 3
+            U = T * T
+            W = T * (1.410474 + U * 0.5641896) / (0.75 + U * (3 + U))
+        # REGION 3
         else:
             if Y >= (0.195 * np.abs(X) - 0.176):
-                W = (16.4955 + T * (20.20933 + T * (11.96482 + T * (3.778987 + T * 0.5642236))))
-                W /= (16.4955 + T * (38.82363 + T * (39.27121 + T * (21.69274 + T * (6.699398 + T)))))
-    # REGION 4
+                W = 16.4955 + T * (20.20933 + T * (11.96482 + T * (3.778987 + T * 0.5642236)))
+                W /= 16.4955 + T * (38.82363 + T * (39.27121 + T * (21.69274 + T * (6.699398 + T))))
+            # REGION 4
             else:
                 U = T * T
-                step = (1540.787 - U * (219.0313 - U * (35.76683 - U * (1.320522 - U * 0.56419))))
+                step = 1540.787 - U * (219.0313 - U * (35.76683 - U * (1.320522 - U * 0.56419)))
                 W = T * (36183.31 - U * (3321.9905 - U * step))
-                step = (9022.228 - U * (2186.181 - U * (364.2191 - U * (61.57037 - U * (1.841439 - U)))))
-                W /= (32066.6 - U * (24322.84 - U * step))
-                W = (np.exp(np.real(U))*np.cos(np.imag(U)) + 0j) - W
+                step = 9022.228 - U * (2186.181 - U * (364.2191 - U * (61.57037 - U * (1.841439 - U))))
+                W /= 32066.6 - U * (24322.84 - U * step)
+                W = (np.exp(np.real(U)) * np.cos(np.imag(U)) + 0j) - W
     return np.real(W)
 
 
 class PEARLTransVoigt(IFunction1D):
-
     def init(self):
         # Starting parameters as fitted from run PRL111643
         self.declareParameter("Position", 1096.3)

@@ -24,7 +24,7 @@ class PrimStretchedExpFT(IFunction1D):
         self._parmList = list()
 
     def category(self):
-        return 'QuasiElastic'
+        return "QuasiElastic"
 
     @surrogate
     def init(self):
@@ -37,7 +37,7 @@ class PrimStretchedExpFT(IFunction1D):
         pass
 
     def function1D(self, xvals, **optparms):
-        r""" Fourier transform of the symmetrized stretched exponential integrated
+        r"""Fourier transform of the symmetrized stretched exponential integrated
         within each energy bin.
 
         The Symmetrized Stretched Exponential:
@@ -57,21 +57,21 @@ class PrimStretchedExpFT(IFunction1D):
         :return: P(bin_boundaries[i+1])- P(bin_boundaries[i]), the difference of the primitive
         """
         rf = 16
-        parms, de, energies, fourier = function1Dcommon(
-            self, xvals, rf=rf, **optparms)
+        parms, de, energies, fourier = function1Dcommon(self, xvals, rf=rf, **optparms)
         if parms is None:
             return fourier  # return zeros if parameters not valid
-        denergies = (energies[-1] - energies[0]) / (len(energies)-1)
+        denergies = (energies[-1] - energies[0]) / (len(energies) - 1)
         # Find bin boundaries
-        boundaries = (xvals[1:]+xvals[:-1])/2  # internal bin boundaries
+        boundaries = (xvals[1:] + xvals[:-1]) / 2  # internal bin boundaries
         # external lower boundary
-        boundaries = np.insert(boundaries, 0, 2*xvals[0]-boundaries[0])
+        boundaries = np.insert(boundaries, 0, 2 * xvals[0] - boundaries[0])
         # external upper boundary
-        boundaries = np.append(boundaries, 2*xvals[-1]-boundaries[-1])
-        primitive = np.cumsum(fourier) * (denergies / (rf*de))  # running Riemann sum
-        transform = np.interp(boundaries[1:] - parms['Centre'], energies, primitive) - \
-            np.interp(boundaries[:-1] - parms['Centre'], energies, primitive)
-        return transform * parms['Height']
+        boundaries = np.append(boundaries, 2 * xvals[-1] - boundaries[-1])
+        primitive = np.cumsum(fourier) * (denergies / (rf * de))  # running Riemann sum
+        transform = np.interp(boundaries[1:] - parms["Centre"], energies, primitive) - np.interp(
+            boundaries[:-1] - parms["Centre"], energies, primitive
+        )
+        return transform * parms["Height"]
 
     @surrogate
     def fillJacobian(self, xvals, jacobian, partials):

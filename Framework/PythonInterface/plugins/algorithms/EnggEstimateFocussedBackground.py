@@ -26,12 +26,12 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
         return "Performs iterative smoothing (low-pass filter) to estimate the background of a spectrum"
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
-                             "Workspace with focussed spectra")
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input), "Workspace with focussed spectra")
 
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),
-                             "Workspace to contain the estimated background (one for each spectrum in the "
-                             "InputWorkspace)")
+        self.declareProperty(
+            MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),
+            "Workspace to contain the estimated background (one for each spectrum in the " "InputWorkspace)",
+        )
 
         self.declareProperty(
             name="NIterations",
@@ -39,8 +39,9 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
             direction=Direction.Input,
             validator=IntBoundedValidator(lower=1),
             doc="Number of iterations of the smoothing procedure to perform. Too few iterations and the background will"
-                " be enhanced in the peak regions. Too many iterations and the background will be unrealistically"
-                " low and not catch the rising edge at low TOF/d-spacing (typical values are in range 20-100).")
+            " be enhanced in the peak regions. Too many iterations and the background will be unrealistically"
+            " low and not catch the rising edge at low TOF/d-spacing (typical values are in range 20-100).",
+        )
 
         self.declareProperty(
             name="XWindow",
@@ -48,21 +49,26 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
             direction=Direction.Input,
             validator=FloatBoundedValidator(lower=0.0),
             doc="Extent of the convolution window in the x-axis for all spectra. A reasonable value is about 4-8 times"
-                " the FWHM of a typical peak/feature to be suppressed (default is reasonable for TOF spectra). This is "
-                "converted to an odd number of points using the median bin width of each spectra.")
+            " the FWHM of a typical peak/feature to be suppressed (default is reasonable for TOF spectra). This is "
+            "converted to an odd number of points using the median bin width of each spectra.",
+        )
 
-        self.declareProperty('ApplyFilterSG', True, direction=Direction.Input,
-                             doc='Apply a Savitzky–Golay filter with a linear polynomial over the same XWindow before'
-                                 ' the iterative smoothing procedure (recommended for noisy data)')
+        self.declareProperty(
+            "ApplyFilterSG",
+            True,
+            direction=Direction.Input,
+            doc="Apply a Savitzky–Golay filter with a linear polynomial over the same XWindow before"
+            " the iterative smoothing procedure (recommended for noisy data)",
+        )
 
     def validateInputs(self):
         issues = dict()
         # check there are more than three points in a workspace
         inws = self.getProperty("InputWorkspace").value
         if not isinstance(inws, MatrixWorkspace):
-            issues['InputWorkspace'] = "The InputWorkspace must be a MatrixWorkspace."
+            issues["InputWorkspace"] = "The InputWorkspace must be a MatrixWorkspace."
         elif inws.blocksize() < self.MIN_WINDOW_SIZE:
-            issues['InputWorkspace'] = "At least three points needed in each spectra"
+            issues["InputWorkspace"] = "At least three points needed in each spectra"
         return issues
 
     def PyExec(self):
@@ -71,7 +77,7 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
         inws = self.getProperty("InputWorkspace").value
         niter = self.getProperty("NIterations").value
         xwindow = self.getProperty("XWindow").value
-        doSGfilter = self.getProperty('ApplyFilterSG').value
+        doSGfilter = self.getProperty("ApplyFilterSG").value
 
         # make output workspace
         clone_alg = self.createChildAlgorithm("CloneWorkspace", enableLogging=False)
@@ -94,7 +100,7 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
                 nwindow += 1
 
             if nwindow < self.MIN_WINDOW_SIZE:
-                raise RuntimeError('Convolution window must have at least three points')
+                raise RuntimeError("Convolution window must have at least three points")
             elif not nwindow < nbins:
                 # not effective due to edge effects of the convolution
                 raise RuntimeError("Data has must have at least the number of points as the convolution window")
@@ -106,7 +112,7 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
                 ybg = np.copy(inws.readY(ispec))
             Ibar = np.mean(ybg)
             Imin = np.min(ybg)
-            ybg[ybg > (Ibar + 2 * (Ibar - Imin))] = (Ibar + 2 * (Ibar - Imin))
+            ybg[ybg > (Ibar + 2 * (Ibar - Imin))] = Ibar + 2 * (Ibar - Imin)
 
             # perform iterative smoothing
             ybg = self.doIterativeSmoothing(ybg, nwindow, niter)
@@ -132,9 +138,9 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
         yy = np.copy(y)
         yy = np.convolve(yy, np.ones(nwindow) / nwindow, mode="same")
         # normalise end values effected by convolution
-        ends = np.convolve(np.ones(nwindow), np.ones(nwindow) / nwindow, mode='same')
-        yy[0:nwindow // 2] = yy[0:nwindow // 2] / ends[0:nwindow // 2]
-        yy[-nwindow // 2:] = yy[-nwindow // 2:] / ends[-nwindow // 2:]
+        ends = np.convolve(np.ones(nwindow), np.ones(nwindow) / nwindow, mode="same")
+        yy[0 : nwindow // 2] = yy[0 : nwindow // 2] / ends[0 : nwindow // 2]
+        yy[-nwindow // 2 :] = yy[-nwindow // 2 :] / ends[-nwindow // 2 :]
         if depth < maxdepth:
             # compare pt by pt with original and keep lowest
             idx = yy > y
