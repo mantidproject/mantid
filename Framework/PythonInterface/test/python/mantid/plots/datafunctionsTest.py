@@ -833,6 +833,18 @@ class DataFunctionsTest(unittest.TestCase):
         self.assertTrue(isinstance(bin_indices, np.ndarray))
         ConfigService.Instance().setString("default.facility", " ")
 
+    def test_errorbar_bounds_if_some_errors_nan(self):
+        fig = figure()
+        ax = fig.add_subplot(111)
+        container = ax.errorbar([0, 1], [0, 1], xerr=[np.nan, 0.1], yerr=[np.nan, 0.1])
+        bounds = mantid.plots.datafunctions.get_errorbar_bounds(container)
+
+    def test_errorbar_bounds_if_all_errors_nan(self):
+        fig = figure()
+        ax = fig.add_subplot(111)
+        container = ax.errorbar([0, 1], [0, 1], xerr=[np.nan, np.nan], yerr=[np.nan, np.nan])
+        bounds = mantid.plots.datafunctions.get_errorbar_bounds(container)
+
 
 if __name__ == "__main__":
     unittest.main()
