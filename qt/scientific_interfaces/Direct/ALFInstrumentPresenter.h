@@ -9,6 +9,7 @@
 #include "ALFInstrumentModel.h"
 #include "DetectorTube.h"
 #include "DllConfig.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <optional>
 #include <string>
@@ -58,7 +59,9 @@ public:
   void notifyTubesSelected(std::vector<DetectorTube> const &tubes) override;
 
 private:
-  std::optional<std::string> loadAndTransform(const std::string &run);
+  Mantid::API::MatrixWorkspace_sptr loadAndNormalise(const std::string &pathToRun);
+  void generateLoadedWorkspace();
+
   void updateInstrumentViewFromModel();
   void updateAnalysisViewFromModel();
 

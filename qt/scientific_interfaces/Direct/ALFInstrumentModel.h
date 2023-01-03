@@ -35,10 +35,16 @@ class MANTIDQT_DIRECT_DLL IALFInstrumentModel {
 public:
   virtual ~IALFInstrumentModel() = default;
 
-  virtual std::optional<std::string> loadAndTransform(std::string const &filename) = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr loadAndNormalise(std::string const &filename) = 0;
+  virtual void generateLoadedWorkspace() = 0;
+
+  virtual void setSample(Mantid::API::MatrixWorkspace_sptr const &sample) = 0;
+  virtual void setVanadium(Mantid::API::MatrixWorkspace_sptr const &vanadium) = 0;
 
   virtual std::string loadedWsName() const = 0;
-  virtual std::size_t runNumber() const = 0;
+
+  virtual std::size_t sampleRun() const = 0;
+  virtual std::size_t vanadiumRun() const = 0;
 
   virtual bool setSelectedTubes(std::vector<DetectorTube> tubes) = 0;
   virtual bool addSelectedTube(DetectorTube const &tube) = 0;
@@ -53,10 +59,16 @@ class MANTIDQT_DIRECT_DLL ALFInstrumentModel final : public IALFInstrumentModel 
 public:
   ALFInstrumentModel();
 
-  std::optional<std::string> loadAndTransform(const std::string &filename) override;
+  Mantid::API::MatrixWorkspace_sptr loadAndNormalise(std::string const &filename) override;
+  void generateLoadedWorkspace() override;
+
+  void setSample(Mantid::API::MatrixWorkspace_sptr const &sample) override;
+  void setVanadium(Mantid::API::MatrixWorkspace_sptr const &vanadium) override;
 
   inline std::string loadedWsName() const noexcept override { return "ALFData"; };
-  std::size_t runNumber() const override;
+
+  std::size_t sampleRun() const override;
+  std::size_t vanadiumRun() const override;
 
   bool setSelectedTubes(std::vector<DetectorTube> tubes) override;
   bool addSelectedTube(DetectorTube const &tube) override;
@@ -66,6 +78,8 @@ public:
   generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::IInstrumentActor const &actor) const override;
 
 private:
+  std::size_t runNumber(Mantid::API::MatrixWorkspace_sptr const &workspace) const;
+
   bool tubeExists(DetectorTube const &tube) const;
 
   void collectXAndYData(MantidQt::MantidWidgets::IInstrumentActor const &actor, std::vector<double> &x,
@@ -78,6 +92,8 @@ private:
 
   inline std::size_t numberOfTubes() const noexcept { return m_tubes.size(); }
 
+  Mantid::API::MatrixWorkspace_sptr m_sample;
+  Mantid::API::MatrixWorkspace_sptr m_vanadium;
   std::vector<DetectorTube> m_tubes;
 };
 

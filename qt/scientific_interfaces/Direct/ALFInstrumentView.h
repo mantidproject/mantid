@@ -47,7 +47,10 @@ public:
   virtual void subscribePresenter(IALFInstrumentPresenter *presenter) = 0;
 
   virtual std::optional<std::string> getSampleFile() const = 0;
+  virtual std::optional<std::string> getVanadiumFile() const = 0;
+
   virtual void setSampleRun(std::string const &runNumber) = 0;
+  virtual void setVanadiumRun(std::string const &runNumber) = 0;
 
   virtual MantidWidgets::IInstrumentActor const &getInstrumentActor() const = 0;
 
@@ -74,7 +77,10 @@ public:
   void subscribePresenter(IALFInstrumentPresenter *presenter) override;
 
   std::optional<std::string> getSampleFile() const override;
+  std::optional<std::string> getVanadiumFile() const override;
+
   void setSampleRun(std::string const &runNumber) override;
+  void setVanadiumRun(std::string const &runNumber) override;
 
   MantidWidgets::IInstrumentActor const &getInstrumentActor() const override;
 

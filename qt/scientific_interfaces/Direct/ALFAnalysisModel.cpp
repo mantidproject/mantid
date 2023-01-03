@@ -35,15 +35,6 @@ MatrixWorkspace_sptr cropWorkspace(MatrixWorkspace_sptr const &workspace, double
   return cropper->getProperty("OutputWorkspace");
 }
 
-MatrixWorkspace_sptr convertToPointData(MatrixWorkspace_sptr const &workspace) {
-  auto converter = AlgorithmManager::Instance().create("ConvertToPointData");
-  converter->setAlwaysStoreInADS(false);
-  converter->setProperty("InputWorkspace", workspace);
-  converter->setProperty("OutputWorkspace", "__pointData");
-  converter->execute();
-  return converter->getProperty("OutputWorkspace");
-}
-
 IFunction_sptr createFlatBackground(double const height = 0.0) {
   auto flatBackground = FunctionFactory::Instance().createFunction("FlatBackground");
   flatBackground->setParameter("A0", height);
@@ -147,8 +138,6 @@ void ALFAnalysisModel::calculateEstimate(std::pair<double, double> const &range)
 IFunction_sptr ALFAnalysisModel::calculateEstimate(MatrixWorkspace_sptr &workspace,
                                                    std::pair<double, double> const &range) {
   if (auto alteredWorkspace = cropWorkspace(workspace, range.first, range.second)) {
-    alteredWorkspace = convertToPointData(alteredWorkspace);
-
     auto const xData = alteredWorkspace->readX(0);
     auto const yData = alteredWorkspace->readY(0);
 

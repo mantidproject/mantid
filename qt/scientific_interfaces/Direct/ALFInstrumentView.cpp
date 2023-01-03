@@ -84,8 +84,19 @@ std::optional<std::string> ALFInstrumentView::getSampleFile() const {
   return std::nullopt;
 }
 
+std::optional<std::string> ALFInstrumentView::getVanadiumFile() const {
+  auto name = m_vanadium->getFilenames();
+  if (name.size() > 0)
+    return name[0].toStdString();
+  return std::nullopt;
+}
+
 void ALFInstrumentView::setSampleRun(std::string const &runNumber) {
   m_sample->setText(QString::fromStdString(runNumber));
+}
+
+void ALFInstrumentView::setVanadiumRun(std::string const &runNumber) {
+  m_vanadium->setText(QString::fromStdString(runNumber));
 }
 
 void ALFInstrumentView::sampleLoaded() {
