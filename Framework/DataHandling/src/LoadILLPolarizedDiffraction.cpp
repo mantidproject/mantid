@@ -21,7 +21,6 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
@@ -152,62 +151,40 @@ void LoadILLPolarizedDiffraction::loadData() {
     NXEntry entry = dataRoot.openEntry("entry" + std::to_string(entryNumber));
     m_instName = entry.getString("D7/name");
 
-    std::string start_time = entry.getString("start_time");
-    start_time = LoadHelper::dateTimeInIsoFormat(start_time);
+    std::string startTime = entry.getString("start_time");
+    startTime = LoadHelper::dateTimeInIsoFormat(startTime);
 
     // init the workspace with proper number of histograms and number of channels
     auto workspace = initStaticWorkspace(entry);
 
+    // the start time is needed in the workspace when loading the parameter file
+    workspace->mutableRun().addProperty("start_time", startTime);
+
     // load the instrument
-    loadInstrument(workspace, start_time);
+    LoadHelper::loadEmptyInstrument(workspace, m_instName);
 
     // rotate detectors to their position during measurement
     moveTwoTheta(entry, workspace);
 
     // prepare axes for data
-    std::vector<double> axis = prepareAxes(entry);
+    const std::vector<double> axis = prepareAxes(entry);
 
     // load data from file
-    std::string dataName = "data/Detector_data";
-    NXUInt data = entry.openNXDataSet<unsigned int>(dataName);
+    auto data = LoadHelper::getIntDataset(entry, "data");
     data.load();
 
-    // Assign detector counts
-    PARALLEL_FOR_IF(Kernel::threadSafe(*workspace))
-    for (auto pixel_no = 0; pixel_no < static_cast<int>(D7_NUMBER_PIXELS); ++pixel_no) {
-      auto &spectrum = workspace->mutableY(pixel_no);
-      auto &errors = workspace->mutableE(pixel_no);
-      for (auto channel_no = 0; channel_no < static_cast<int>(m_numberOfChannels); ++channel_no) {
-        unsigned int counts = data(pixel_no, 0, channel_no);
-        spectrum[channel_no] = counts;
-        if (counts == 0) {
-          errors[channel_no] = 1.0;
-        } else {
-          errors[channel_no] = std::sqrt(counts);
-        }
-      }
-      workspace->mutableX(pixel_no) = axis;
-    }
+    LoadHelper::fillStaticWorkspace(workspace, data, axis, 0);
 
     // load and assign monitor data
     for (auto monitor_no = static_cast<int>(D7_NUMBER_PIXELS);
          monitor_no < static_cast<int>(D7_NUMBER_PIXELS + NUMBER_MONITORS); ++monitor_no) {
-      NXUInt monitorData = entry.openNXDataSet<unsigned int>(
-          "monitor" + std::to_string(monitor_no + 1 - static_cast<int>(D7_NUMBER_PIXELS)) + "/data");
+      auto monitorData = LoadHelper::getIntDataset(
+          entry, "monitor" + std::to_string(monitor_no + 1 - static_cast<int>(D7_NUMBER_PIXELS)));
       monitorData.load();
-      auto &spectrum = workspace->mutableY(monitor_no);
-      auto &errors = workspace->mutableE(monitor_no);
-      for (auto channel_no = 0; channel_no < static_cast<int>(m_numberOfChannels); channel_no++) {
-        unsigned int counts = monitorData(0, 0, channel_no);
-        spectrum[channel_no] = counts;
-        if (counts == 0) {
-          errors[channel_no] = 1.0;
-        } else {
-          errors[channel_no] = std::sqrt(counts);
-        }
-      }
-      workspace->mutableX(monitor_no) = axis;
+      LoadHelper::fillStaticWorkspace(workspace, monitorData, axis, monitor_no);
     }
+    // replace errors for bins with zero counts with ones:
+    LoadHelper::replaceZeroErrors(workspace, 1.0);
 
     // convert the spectrum axis to scattering angle
     if (getProperty("ConvertToScatteringAngle")) {
@@ -294,23 +271,6 @@ API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::initStaticWorkspace(const
   std::string flipperState = entry.getString("D7/POL/actual_stateB1B2");
   workspace->setTitle(polDirection.substr(0, 1) + "_" + flipperState);
   return workspace;
-}
-/**
- * Runs LoadInstrument as child to link the instrument to workspace
- * @param workspace : workspace with data from the first entry
- * @param startTime :: the date the run started, in ISO compliant format
- */
-void LoadILLPolarizedDiffraction::loadInstrument(const API::MatrixWorkspace_sptr &workspace,
-                                                 const std::string &startTime) {
-
-  // the start time is needed in the workspace when loading the parameter file
-  workspace->mutableRun().addProperty("start_time", startTime);
-
-  auto loadInst = createChildAlgorithm("LoadInstrument");
-  loadInst->setPropertyValue("Filename", m_instName + "_Definition.xml");
-  loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", workspace);
-  loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
-  loadInst->execute();
 }
 
 /**

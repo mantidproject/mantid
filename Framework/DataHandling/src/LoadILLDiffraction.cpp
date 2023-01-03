@@ -20,7 +20,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -48,15 +47,13 @@ constexpr size_t D20_NUMBER_PIXELS = 1600;
 constexpr size_t D20_NUMBER_DEAD_PIXELS = 32;
 // This defines the number of monitors in the instrument. If there are cases
 // where this is no longer one this decleration should be moved.
-constexpr size_t NUMBER_MONITORS = 1;
+constexpr int NUMBER_MONITORS = 1;
 // This is the angular size of a pixel in degrees (in low resolution mode)
 constexpr double D20_PIXEL_SIZE = 0.1;
 // The conversion factor from radian to degree
 constexpr double RAD_TO_DEG = 180. / M_PI;
 // A factor to compute E from lambda: E (mev) = waveToE/lambda(A)
 constexpr double WAVE_TO_E = 81.8;
-// Number of pixels in the tubes for D2B
-constexpr size_t D2B_NUMBER_PIXELS_IN_TUBES = 128;
 } // namespace
 
 // Register the algorithm into the AlgorithmFactory
@@ -69,9 +66,7 @@ int LoadILLDiffraction::confidence(NexusDescriptor &descriptor) const {
   // the second one is to recognize D1B, Tx field eliminates SALSA
   // the third one is to recognize IN5/PANTHER/SHARP scan mode
   if ((descriptor.pathExists("/entry0/instrument/2theta") && !descriptor.pathExists("/entry0/instrument/Tx")) ||
-      descriptor.pathExists("/entry0/instrument/Canne") ||
-      (descriptor.pathExists("/entry0/data_scan") && descriptor.pathExists("/entry0/experiment_identifier") &&
-       descriptor.pathExists("/entry0/instrument/Detector"))) {
+      descriptor.pathExists("/entry0/instrument/Canne")) {
     return 80;
   } else {
     return 0;
@@ -162,9 +157,6 @@ void LoadILLDiffraction::loadDataScan() {
   NXRoot dataRoot(m_filename);
   NXEntry firstEntry = dataRoot.openFirstEntry();
   m_instName = firstEntry.getString("instrument/name");
-  if (m_instName == "IN5" || m_instName == "PANTHER" || m_instName == "SHARP") {
-    m_isSpectrometer = true;
-  }
   m_startTime = DateAndTime(LoadHelper::dateTimeInIsoFormat(firstEntry.getString("start_time")));
   const std::string dataType = getPropertyValue("DataType");
   const bool hasCalibratedData = containsCalibratedData(m_filename);
@@ -178,12 +170,11 @@ void LoadILLDiffraction::loadDataScan() {
   else
     dataName = "data_scan/detector_data/data";
   g_log.notice() << "Loading data from " + dataName;
-  NXUInt data = firstEntry.openNXDataSet<unsigned int>(dataName);
+  auto data = firstEntry.openNXDataSet<int>(dataName);
   data.load();
 
   // read the scan data
-  NXData scanGroup = firstEntry.openNXData("data_scan/scanned_variables");
-  NXDouble scan = scanGroup.openDoubleData();
+  auto scan = LoadHelper::getDoubleDataset(firstEntry, "data_scan/scanned_variables");
   scan.load();
 
   // read which variables are scanned
@@ -203,7 +194,7 @@ void LoadILLDiffraction::loadDataScan() {
     } else {
       twoThetaValue = getProperty("TwoThetaOffset");
     }
-  } else if (!m_isSpectrometer) {
+  } else {
     std::string twoThetaPath = "instrument/2theta/value";
     NXFloat twoTheta0 = firstEntry.openNXFloat(twoThetaPath);
     twoTheta0.load();
@@ -227,20 +218,16 @@ void LoadILLDiffraction::loadDataScan() {
   resolveScanType();
   computeThetaOffset();
 
-  std::string start_time = firstEntry.getString("start_time");
-  start_time = LoadHelper::dateTimeInIsoFormat(start_time);
-
   if (m_scanType == DetectorScan) {
-    initMovingWorkspace(scan, start_time);
+    initMovingWorkspace(scan);
     fillMovingInstrumentScan(data, scan);
   } else {
-    initStaticWorkspace(start_time);
+    initStaticWorkspace();
     fillStaticInstrumentScan(data, scan, twoThetaValue);
   }
 
   fillDataScanMetaData(scan);
 
-  scanGroup.close();
   firstEntry.close();
   dataRoot.close();
 }
@@ -273,10 +260,8 @@ void LoadILLDiffraction::loadMetaData() {
 /**
  * Initializes the output workspace based on the resolved instrument, scan
  * points, and scan type
- *
- * @param start_time :: the date the run started, in ISO compliant format
  */
-void LoadILLDiffraction::initStaticWorkspace(const std::string &start_time) {
+void LoadILLDiffraction::initStaticWorkspace() {
   size_t nSpectra = m_numberDetectorsActual + NUMBER_MONITORS;
   size_t nBins = 1;
 
@@ -289,21 +274,26 @@ void LoadILLDiffraction::initStaticWorkspace(const std::string &start_time) {
   m_outWorkspace = WorkspaceFactory::Instance().create("Workspace2D", nSpectra, nBins, nBins);
 
   // the start time is needed in the workspace when loading the parameter file
-  m_outWorkspace->mutableRun().addProperty("start_time", start_time);
+  m_outWorkspace->mutableRun().addProperty("start_time", m_startTime.toISO8601String());
 }
 
 /**
  * Use the ScanningWorkspaceBuilder to create a time indexed workspace.
  *
  * @param scan : scan data
- * @param start_time : start time in ISO format string
  */
-void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan, const std::string &start_time) {
+void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan) {
   const size_t nTimeIndexes = m_numberScanPoints;
   const size_t nBins = 1;
   const bool isPointData = true;
 
-  const auto instrumentWorkspace = loadEmptyInstrument(start_time);
+  const auto instrumentWorkspace = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+  auto &run = instrumentWorkspace->mutableRun();
+  // the start time is needed in the workspace when loading the parameter file
+  run.addProperty("start_time", m_startTime.toISO8601String());
+
+  getInstrumentFilePath(m_instName);
+  LoadHelper::loadEmptyInstrument(instrumentWorkspace, m_instName);
   const auto &instrument = instrumentWorkspace->getInstrument();
   auto &params = instrumentWorkspace->instrumentParameters();
 
@@ -460,7 +450,7 @@ void LoadILLDiffraction::calculateRelativeRotations(std::vector<double> &tubeRot
  * @param data : detector data
  * @param scan : scan data
  */
-void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data, const NXDouble &scan) {
+void LoadILLDiffraction::fillMovingInstrumentScan(const NXInt &data, const NXDouble &scan) {
 
   std::vector<double> axis = {0.};
   std::vector<double> monitor = getMonitor(scan);
@@ -475,22 +465,33 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data, const NXDo
     }
   }
 
-  // Then load the detector spectra
-  PARALLEL_FOR_IF(Kernel::threadSafe(*m_outWorkspace))
-  for (int i = NUMBER_MONITORS; i < static_cast<int>(m_numberDetectorsActual + NUMBER_MONITORS); ++i) {
-    for (size_t j = 0; j < m_numberScanPoints; ++j) {
-      const auto tubeNumber = (i - NUMBER_MONITORS) / m_sizeDim2;
-      auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
-      if (m_instName == "D2B" && !m_useCalibratedData && tubeNumber % 2 == 1) {
-        pixelInTubeNumber = D2B_NUMBER_PIXELS_IN_TUBES - 1 - pixelInTubeNumber;
+  // prepare inputs, dimension orders and list of accepted IDs for exclusion of inactive detectors (D20)
+  std::tuple<int, int, int> dimOrder{2, 1, 0}; // scan - tube - pixel
+  std::set<int> acceptedIDs;
+  if (static_cast<int>(m_numberDetectorsActual) != data.dim1() * data.dim2()) {
+    for (auto index = static_cast<int>(NUMBER_MONITORS);
+         index < static_cast<int>(m_numberDetectorsActual + NUMBER_MONITORS); ++index)
+      acceptedIDs.insert(index);
+  }
+  std::vector<int> customDetectorIDs;
+  if (m_instName == "D2B" && !m_useCalibratedData) {
+    // this is the "Raw" case of D2B where data in NXS is filled in a 'snake' way: odd tubes are filled with
+    // data from the start, and the even ones from the end.
+    const auto pixelPerTube = data.dim2();
+    customDetectorIDs.resize(data.dim1() * pixelPerTube);
+    for (auto tubeNo = 0; tubeNo < data.dim1(); tubeNo++) {
+      for (auto pixelNo = 0; pixelNo < pixelPerTube; pixelNo++) {
+        const auto defaultSpectrumNo = tubeNo * pixelPerTube + pixelNo; // based-zero count of detectors
+        int index = defaultSpectrumNo + NUMBER_MONITORS; // direct filling order, shift by number of monitors
+        if (tubeNo % 2 != 0)
+          index += (pixelPerTube - 1) - 2 * pixelNo; // inverted order of pixels in odd numbered tubes
+        customDetectorIDs[defaultSpectrumNo] = index;
       }
-      unsigned int y = data(static_cast<int>(j), static_cast<int>(tubeNumber), static_cast<int>(pixelInTubeNumber));
-      const auto wsIndex = j + i * m_numberScanPoints;
-      m_outWorkspace->mutableY(wsIndex) = y;
-      m_outWorkspace->mutableE(wsIndex) = sqrt(y);
-      m_outWorkspace->mutableX(wsIndex) = axis;
     }
   }
+  // Assign detector counts
+  LoadHelper::fillMovingWorkspace(m_outWorkspace, data, axis, NUMBER_MONITORS, acceptedIDs, customDetectorIDs,
+                                  dimOrder);
 }
 
 /**
@@ -501,48 +502,33 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data, const NXDo
  * @param scan : scan data
  * @param twoTheta0 : starting two theta
  */
-void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data, const NXDouble &scan, const double &twoTheta0) {
+void LoadILLDiffraction::fillStaticInstrumentScan(const NXInt &data, const NXDouble &scan, const double &twoTheta0) {
 
   const std::vector<double> axis = getAxis(scan);
   const std::vector<double> monitor = getMonitor(scan);
 
-  size_t monitorIndex = 0;
-  size_t startIndex = NUMBER_MONITORS;
-  if (m_isSpectrometer) {
-    startIndex = 0;
-    monitorIndex = m_numberDetectorsActual;
-  }
+  int startIndex = static_cast<int>(NUMBER_MONITORS);
 
   // Assign monitor counts
-  m_outWorkspace->mutableX(monitorIndex) = axis;
-  m_outWorkspace->mutableY(monitorIndex) = monitor;
-  std::transform(monitor.begin(), monitor.end(), m_outWorkspace->mutableE(monitorIndex).begin(),
-                 [](double e) { return sqrt(e); });
+  m_outWorkspace->mutableX(0) = axis;
+  m_outWorkspace->mutableY(0) = monitor;
+  std::transform(monitor.begin(), monitor.end(), m_outWorkspace->mutableE(0).begin(), [](double e) { return sqrt(e); });
 
-  // Assign detector counts
-  PARALLEL_FOR_IF(Kernel::threadSafe(*m_outWorkspace))
-  for (int i = static_cast<int>(startIndex); i < static_cast<int>(m_numberDetectorsActual + startIndex); ++i) {
-    auto &spectrum = m_outWorkspace->mutableY(i);
-    auto &errors = m_outWorkspace->mutableE(i);
-    const auto tubeNumber = (i - startIndex) / m_sizeDim2;
-    auto pixelInTubeNumber = (i - startIndex) % m_sizeDim2;
-    if (m_instName == "D2B" && !m_useCalibratedData && tubeNumber % 2 == 1) {
-      pixelInTubeNumber = D2B_NUMBER_PIXELS_IN_TUBES - 1 - pixelInTubeNumber;
-    }
-    for (size_t j = 0; j < m_numberScanPoints; ++j) {
-      unsigned int y = data(static_cast<int>(j), static_cast<int>(tubeNumber), static_cast<int>(pixelInTubeNumber));
-      spectrum[j] = y;
-      errors[j] = sqrt(y);
-    }
-    m_outWorkspace->mutableX(i) = axis;
+  // prepare inputs, dimension orders and list of accepted IDs for exclusion of inactive detectors (D20)
+  std::tuple<int, int, int> dimOrder{2, 1, 0}; // scan - tube - pixel
+  std::set<int> acceptedIDs;
+  if (static_cast<int>(m_numberDetectorsActual) != data.dim1() * data.dim2()) {
+    for (int i = static_cast<int>(startIndex); i < static_cast<int>(startIndex + m_numberDetectorsActual); ++i)
+      acceptedIDs.insert(i);
   }
+  // Assign detector counts
+  LoadHelper::fillStaticWorkspace(m_outWorkspace, data, axis, startIndex, true, std::vector<int>(), acceptedIDs,
+                                  dimOrder);
 
   // Link the instrument
-  loadStaticInstrument();
-  if (!m_isSpectrometer) {
-    // Move to the starting 2theta
-    moveTwoThetaZero(twoTheta0);
-  }
+  LoadHelper::loadEmptyInstrument(m_outWorkspace, m_instName);
+  // Move to the starting 2theta
+  moveTwoThetaZero(twoTheta0);
 }
 
 /**
@@ -754,38 +740,6 @@ void LoadILLDiffraction::resolveInstrument() {
     g_log.debug() << "Instrument name is " << m_instName << " and has " << m_numberDetectorsActual
                   << " actual detectors.\n";
   }
-}
-
-/**
- * Runs LoadInstrument as child to link the non-moving instrument to workspace
- */
-void LoadILLDiffraction::loadStaticInstrument() {
-  auto loadInst = createChildAlgorithm("LoadInstrument");
-  loadInst->setPropertyValue("Filename", getInstrumentFilePath(m_instName));
-  loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_outWorkspace);
-  loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
-  loadInst->execute();
-}
-
-/**
- * Runs LoadInstrument and returns a workspace with the instrument, to be
- *used in the ScanningWorkspaceBuilder.
- * @param start_time : start time in ISO formatted string
- * @return A MatrixWorkspace containing the correct instrument
- */
-MatrixWorkspace_sptr LoadILLDiffraction::loadEmptyInstrument(const std::string &start_time) {
-  auto loadInst = createChildAlgorithm("LoadInstrument");
-  loadInst->setPropertyValue("InstrumentName", m_instName);
-  auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-  auto &run = ws->mutableRun();
-
-  // the start time is needed in the workspace when loading the parameter file
-  run.addProperty("start_time", start_time);
-
-  loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", ws);
-  loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
-  loadInst->execute();
-  return loadInst->getProperty("Workspace");
 }
 
 /**
