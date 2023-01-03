@@ -1,0 +1,1 @@
+- If the error reporter fails to send, it will now not automatically close
