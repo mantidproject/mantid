@@ -42,6 +42,7 @@ public:
 
 private:
   std::vector<Types::Core::DateAndTime> getAllTimes(const TimeROI &other);
+  void replaceValues(const std::vector<Types::Core::DateAndTime> &times, const std::vector<bool> &values);
 
   /**
    * @brief m_roi private member that holds most of the information
