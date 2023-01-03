@@ -96,6 +96,33 @@ std::vector<DateAndTime> TimeROI::getAllTimes(const TimeROI &other) {
   return times_all;
 }
 
+void TimeROI::replaceValues(const std::vector<DateAndTime> &times, const std::vector<bool> &values) {
+  if (times.size() != values.size()) {
+    std::stringstream msg;
+    msg << "Times and Values are different size: " << times.size() << " != " << values.size();
+    throw std::runtime_error(msg.str());
+  }
+
+  // remove all current values
+  this->m_roi.clear();
+
+  // see if everything to add is "IGNORE"
+  bool set_values = false;
+  {
+    for (const auto value : values) {
+      if (value) {
+        set_values = true;
+        break;
+      }
+    }
+  }
+
+  // set the values if there are any use regions
+  if (set_values) {
+    this->m_roi.addValues(times, values);
+  }
+}
+
 void TimeROI::update_union(const TimeROI &other) {
   // exit early if the two TimeROI are identical
   if (*this == other)
@@ -107,22 +134,13 @@ void TimeROI::update_union(const TimeROI &other) {
   std::vector<DateAndTime> times_all = getAllTimes(other);
 
   // calculate what values to add
-  std::vector<bool> additional_values;
-  additional_values.reserve(times_all.size());
-  for (const auto time : times_all) {
-    const bool value_lft = this->valueAtTime(time);
-    if (value_lft) {
-      additional_values.push_back(ROI_USE);
-    } else {
-      const bool value_rgt = other.valueAtTime(time);
-      additional_values.push_back(value_lft || value_rgt);
-    }
-  }
+  std::vector<bool> additional_values(times_all.size());
+  std::transform(times_all.begin(), times_all.end(), additional_values.begin(), [this, other](const DateAndTime &time) {
+    return bool(this->valueAtTime(time) || other.valueAtTime(time));
+  });
 
   // remove old values and replace with new ones
-  this->m_roi.clear();
-  this->m_roi.addValues(times_all, additional_values);
-
+  this->replaceValues(times_all, additional_values);
   this->removeRedundantEntries();
 }
 
@@ -138,36 +156,13 @@ void TimeROI::update_intersection(const TimeROI &other) {
   std::vector<DateAndTime> times_all = getAllTimes(other);
 
   // calculate what values to add
-  std::vector<bool> additional_values;
-  additional_values.reserve(times_all.size());
-  for (const auto time : times_all) {
-    const bool value_lft = this->valueAtTime(time);
-    if (!value_lft) {
-      additional_values.push_back(ROI_IGNORE);
-    } else {
-      const bool value_rgt = other.valueAtTime(time);
-      additional_values.push_back(value_lft && value_rgt);
-    }
-  }
+  std::vector<bool> additional_values(times_all.size());
+  std::transform(times_all.begin(), times_all.end(), additional_values.begin(), [this, other](const DateAndTime &time) {
+    return bool(this->valueAtTime(time) && other.valueAtTime(time));
+  });
 
-  // see if everything to add is "IGNORE"
-  bool ignore_all;
-  {
-    std::size_t use = 0;
-    for (const auto value : additional_values) {
-      if (value)
-        use += 1;
-    }
-    ignore_all = bool(use == 0);
-  }
-  if (ignore_all) {
-    // remove all values
-    this->m_roi.clear();
-  } else {
-    // add values
-    this->m_roi.addValues(times_all, additional_values);
-  }
-
+  // remove old values and replace with new ones
+  this->replaceValues(times_all, additional_values);
   this->removeRedundantEntries();
 }
 
