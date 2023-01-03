@@ -24,7 +24,7 @@
 
 namespace MantidQt::CustomInterfaces {
 
-ALFInstrumentView::ALFInstrumentView(QWidget *parent) : QWidget(parent), m_files(), m_instrumentWidget() {}
+ALFInstrumentView::ALFInstrumentView(QWidget *parent) : QWidget(parent), m_sample(), m_instrumentWidget() {}
 
 void ALFInstrumentView::setUpInstrument(std::string const &fileName) {
   m_instrumentWidget = new ALFInstrumentWidget(QString::fromStdString(fileName));
@@ -45,19 +45,19 @@ void ALFInstrumentView::setUpInstrument(std::string const &fileName) {
   connect(pickTab->getSelectTubeButton(), SIGNAL(clicked()), this, SLOT(selectWholeTube()));
 }
 
-QWidget *ALFInstrumentView::generateLoadWidget() {
-  m_files = new API::FileFinderWidget(this);
-  m_files->setLabelText("ALF");
-  m_files->allowMultipleFiles(false);
-  m_files->setInstrumentOverride("ALF");
-  m_files->isForRunFiles(true);
-  connect(m_files, SIGNAL(fileFindingFinished()), this, SLOT(fileLoaded()));
+QWidget *ALFInstrumentView::generateSampleLoadWidget() {
+  m_sample = new API::FileFinderWidget(this);
+  m_sample->setLabelText("ALF");
+  m_sample->allowMultipleFiles(false);
+  m_sample->setInstrumentOverride("ALF");
+  m_sample->isForRunFiles(true);
+  connect(m_sample, SIGNAL(fileFindingFinished()), this, SLOT(sampleLoaded()));
 
   auto loadWidget = new QWidget();
   auto loadLayout = new QHBoxLayout(loadWidget);
 
   loadLayout->addItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
-  loadLayout->addWidget(m_files);
+  loadLayout->addWidget(m_sample);
   loadLayout->addItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
 
   return loadWidget;
@@ -69,26 +69,26 @@ void ALFInstrumentView::reconnectInstrumentActor() {
 
 void ALFInstrumentView::subscribePresenter(IALFInstrumentPresenter *presenter) { m_presenter = presenter; }
 
-std::optional<std::string> ALFInstrumentView::getFile() {
-  auto name = m_files->getFilenames();
+std::optional<std::string> ALFInstrumentView::getSampleFile() const {
+  auto name = m_sample->getFilenames();
   if (name.size() > 0)
     return name[0].toStdString();
   return std::nullopt;
 }
 
-void ALFInstrumentView::setRunQuietly(std::string const &runNumber) {
-  m_files->setText(QString::fromStdString(runNumber));
+void ALFInstrumentView::setSampleRun(std::string const &runNumber) {
+  m_sample->setText(QString::fromStdString(runNumber));
 }
 
-void ALFInstrumentView::fileLoaded() {
-  if (m_files->getText().isEmpty())
+void ALFInstrumentView::sampleLoaded() {
+  if (m_sample->getText().isEmpty())
     return;
 
-  if (!m_files->isValid()) {
-    warningBox(m_files->getFileProblem().toStdString());
+  if (!m_sample->isValid()) {
+    warningBox(m_sample->getFileProblem().toStdString());
     return;
   }
-  m_presenter->loadRunNumber();
+  m_presenter->loadSample();
 }
 
 void ALFInstrumentView::notifyInstrumentActorReset() { m_presenter->notifyInstrumentActorReset(); }

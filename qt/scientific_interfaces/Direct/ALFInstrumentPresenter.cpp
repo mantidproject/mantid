@@ -20,7 +20,7 @@ ALFInstrumentPresenter::ALFInstrumentPresenter(IALFInstrumentView *view, std::un
   m_view->setUpInstrument(m_model->loadedWsName());
 }
 
-QWidget *ALFInstrumentPresenter::getLoadWidget() { return m_view->generateLoadWidget(); }
+QWidget *ALFInstrumentPresenter::getSampleLoadWidget() { return m_view->generateSampleLoadWidget(); }
 
 ALFInstrumentWidget *ALFInstrumentPresenter::getInstrumentView() { return m_view->getInstrumentView(); }
 
@@ -28,8 +28,8 @@ void ALFInstrumentPresenter::subscribeAnalysisPresenter(IALFAnalysisPresenter *p
   m_analysisPresenter = presenter;
 }
 
-void ALFInstrumentPresenter::loadRunNumber() {
-  auto const filepath = m_view->getFile();
+void ALFInstrumentPresenter::loadSample() {
+  auto const filepath = m_view->getSampleFile();
   if (!filepath) {
     return;
   }
@@ -38,7 +38,7 @@ void ALFInstrumentPresenter::loadRunNumber() {
   if (auto const message = loadAndTransform(*filepath)) {
     m_view->warningBox(*message);
   }
-  m_view->setRunQuietly(std::to_string(m_model->runNumber()));
+  m_view->setSampleRun(std::to_string(m_model->runNumber()));
 }
 
 std::optional<std::string> ALFInstrumentPresenter::loadAndTransform(const std::string &pathToRun) {

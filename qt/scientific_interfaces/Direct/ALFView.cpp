@@ -42,7 +42,7 @@ void ALFView::initLayout() {
   splitter->setCollapsible(1, false);
 
   auto mainWidget = new QSplitter(Qt::Vertical);
-  mainWidget->addWidget(m_instrumentPresenter->getLoadWidget());
+  mainWidget->addWidget(m_instrumentPresenter->getSampleLoadWidget());
   mainWidget->addWidget(splitter);
 
   mainWidget->setCollapsible(0, false);

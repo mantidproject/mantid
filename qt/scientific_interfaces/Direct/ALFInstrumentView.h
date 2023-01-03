@@ -40,13 +40,13 @@ class MANTIDQT_DIRECT_DLL IALFInstrumentView {
 public:
   virtual void setUpInstrument(std::string const &fileName) = 0;
 
-  virtual QWidget *generateLoadWidget() = 0;
+  virtual QWidget *generateSampleLoadWidget() = 0;
   virtual ALFInstrumentWidget *getInstrumentView() = 0;
 
   virtual void subscribePresenter(IALFInstrumentPresenter *presenter) = 0;
 
-  virtual std::optional<std::string> getFile() = 0;
-  virtual void setRunQuietly(std::string const &runNumber) = 0;
+  virtual std::optional<std::string> getSampleFile() const = 0;
+  virtual void setSampleRun(std::string const &runNumber) = 0;
 
   virtual MantidWidgets::IInstrumentActor const &getInstrumentActor() const = 0;
 
@@ -66,13 +66,13 @@ public:
 
   void setUpInstrument(std::string const &fileName) override;
 
-  QWidget *generateLoadWidget() override;
+  QWidget *generateSampleLoadWidget() override;
   ALFInstrumentWidget *getInstrumentView() override { return m_instrumentWidget; };
 
   void subscribePresenter(IALFInstrumentPresenter *presenter) override;
 
-  std::optional<std::string> getFile() override;
-  void setRunQuietly(std::string const &runNumber) override;
+  std::optional<std::string> getSampleFile() const override;
+  void setSampleRun(std::string const &runNumber) override;
 
   MantidWidgets::IInstrumentActor const &getInstrumentActor() const override;
 
@@ -85,14 +85,14 @@ public:
 
 private slots:
   void reconnectInstrumentActor();
-  void fileLoaded();
+  void sampleLoaded();
   void notifyInstrumentActorReset();
   void notifyShapeChanged();
   void selectWholeTube();
   void notifyWholeTubeSelected(size_t pickID);
 
 private:
-  API::FileFinderWidget *m_files;
+  API::FileFinderWidget *m_sample;
   ALFInstrumentWidget *m_instrumentWidget;
   IALFInstrumentPresenter *m_presenter;
 };
