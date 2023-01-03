@@ -31,6 +31,7 @@ class SANSDataType(Enum):
     Defines the different data types which are required for the reduction. Besides the fundamental data of the
     sample and the can, we can also specify a calibration.
     """
+
     CAN_DIRECT = "Can Direct"
     CAN_TRANSMISSION = "Can Transmission"
     CAN_SCATTER = "Can Scatter"
@@ -78,10 +79,14 @@ class ReductionMode(Enum):
         :param support_deprecated: (Optional) support HAB/LAB legacy input. True by default, throws when False.
         :return: Reduction Mode enum, or throws if unsupported
         """
-        mapping = {"HAB": ReductionMode.HAB, "front": ReductionMode.HAB,
-                   "LAB": ReductionMode.LAB, "rear": ReductionMode.LAB,
-                   "All": ReductionMode.ALL,
-                   "Merged": ReductionMode.MERGED}
+        mapping = {
+            "HAB": ReductionMode.HAB,
+            "front": ReductionMode.HAB,
+            "LAB": ReductionMode.LAB,
+            "rear": ReductionMode.LAB,
+            "All": ReductionMode.ALL,
+            "Merged": ReductionMode.MERGED,
+        }
         if not support_deprecated and next((key for key in ["hab", "lab"] if val.casefold() == key.casefold()), None):
             raise ValueError(f"A deprecated key was found: {val}.\nPlease use front/rear as appropriate instead.")
 
@@ -103,6 +108,7 @@ class ReductionData(Enum):
     Defines the workspace type of the reduction data. For all known instances this can be scatter, transmission
     or direct
     """
+
     DIRECT = "Direct"
     SCATTER = "Scatter"
     TRANSMISSION = "Transmission"
@@ -112,6 +118,7 @@ class DataType(Enum):
     """
     Defines the type of reduction data. This can either the sample or only the can.
     """
+
     CAN = "Can"
     SAMPLE = "Sample"
 
@@ -120,6 +127,7 @@ class OutputParts(Enum):
     """
     Defines the partial outputs of a reduction. They are the numerator (Count) and denominator (Norm) of a division.
     """
+
     COUNT = "Count"
     NORM = "Norm"
 
@@ -129,6 +137,7 @@ class FitModeForMerge(Enum):
     """
     Defines which fit operation to use during the merge of two reductions.
     """
+
     BOTH = "Both"
     NO_FIT = "NoFit"
     SCALE_ONLY = "ScaleOnly"
@@ -139,6 +148,7 @@ class DetectorType(Enum):
     """
     Defines the detector type
     """
+
     BOTH = "BOTH"
     HAB = "HAB"
     LAB = "LAB"
@@ -148,6 +158,7 @@ class TransmissionType(Enum):
     """
     Defines the detector type
     """
+
     CALCULATED = "Calculated"
     UNFITTED = "Unfitted"
 
@@ -157,6 +168,7 @@ class RangeStepType(Enum):
     """
     Defines the step type of a range
     """
+
     LIN = "Lin"
     LOG = "Log"
     NOT_SET = "NotSet"
@@ -186,6 +198,7 @@ class FitType(Enum):
     """
     Defines possible fit types for the transmission calculation
     """
+
     LINEAR = "Linear"
     LOGARITHMIC = "Logarithmic"
     POLYNOMIAL = "Polynomial"
@@ -197,6 +210,7 @@ class SampleShape(Enum):
     """
     Defines the sample shape types
     """
+
     CYLINDER = "Cylinder"
     DISC = "Disc"
     FLAT_PLATE = "FlatPlate"
@@ -214,6 +228,7 @@ class OutputMode(Enum):
     """
     Defines the output modes of a batch reduction.
     """
+
     BOTH = "Both"
     PUBLISH_TO_ADS = "PublishToADS"
     SAVE_TO_FILE = "SaveToFile"
@@ -223,6 +238,7 @@ class BatchReductionEntry(Enum):
     """
     Defines the entries of a batch reduction file.
     """
+
     CAN_DIRECT = "CanDirect"
     CAN_DIRECT_PERIOD = "CanDirectPeriod"
 
@@ -254,6 +270,7 @@ class MaskingQuadrant(Enum):
     """
     Defines the entries of a batch reduction file.
     """
+
     BOTTOM = "Bottom"
     LEFT = "Left"
     RIGHT = "Right"
@@ -264,6 +281,7 @@ class FindDirectionEnum(Enum):
     """
     Defines the entries of a batch reduction file.
     """
+
     ALL = "All"
     UP_DOWN = "Up_Down"
     LEFT_RIGHT = "Left_Right"
@@ -273,6 +291,7 @@ class IntegralEnum(Enum):
     """
     Defines the entries of a batch reduction file.
     """
+
     Horizontal = "Horizontal"
     Time = "Time"
     Vertical = "Vertical"
@@ -282,6 +301,7 @@ class RowState(Enum):
     """
     Defines the entries of a batch reduction file.
     """
+
     ERROR = "Error"
     PROCESSED = "Processed"
     UNPROCESSED = "Unprocessed"
@@ -291,6 +311,7 @@ class BinningType(Enum):
     """
     Defines the types of binning when adding runs together
     """
+
     CUSTOM = "Custom"
     FROM_MONITORS = "FromMonitors"
     SAVE_AS_EVENT_DATA = "SaveAsEventData"

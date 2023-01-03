@@ -35,8 +35,7 @@ class CreateSANSAdjustmentWorkspaces(object):
         self._state_adjustment = state.adjustment
         self._state_wavelength = state.wavelength
 
-    def create_sans_adjustment_workspaces(self, transmission_ws, direct_ws, monitor_ws,
-                                          sample_data, wav_range: WavRange):
+    def create_sans_adjustment_workspaces(self, transmission_ws, direct_ws, monitor_ws, sample_data, wav_range: WavRange):
         """
         Creates the adjustment workspace
         :param transmission_ws: The transmission workspace.
@@ -54,52 +53,53 @@ class CreateSANSAdjustmentWorkspaces(object):
         # --------------------------------------
         # Get the monitor normalization workspace
         # --------------------------------------
-        monitor_normalization_workspace = self._get_monitor_normalization_workspace(monitor_ws=monitor_ws,
-                                                                                    wav_range=wav_range)
+        monitor_normalization_workspace = self._get_monitor_normalization_workspace(monitor_ws=monitor_ws, wav_range=wav_range)
 
         # --------------------------------------
         # Get the calculated transmission
         # --------------------------------------
-        calculated_trans_ws, unfitted_transmission_workspace = \
-            self._get_calculated_transmission_workspace(direct_ws=direct_ws, transmission_ws=transmission_ws,
-                                                        wav_range=wav_range)
+        calculated_trans_ws, unfitted_transmission_workspace = self._get_calculated_transmission_workspace(
+            direct_ws=direct_ws, transmission_ws=transmission_ws, wav_range=wav_range
+        )
 
         # --------------------------------------
         # Get the wide angle correction workspace
         # --------------------------------------
-        wavelength_and_pixel_adj_workspace = \
-            self._get_wide_angle_correction_workspace(sample_data=sample_data,
-                                                      calculated_transmission_workspace=calculated_trans_ws)
+        wavelength_and_pixel_adj_workspace = self._get_wide_angle_correction_workspace(
+            sample_data=sample_data, calculated_transmission_workspace=calculated_trans_ws
+        )
 
         # --------------------------------------------
         # Get the full wavelength and pixel adjustment
         # --------------------------------------------
-        wavelength_adjustment_workspace, pixel_length_adjustment_workspace = \
-            self._get_wavelength_and_pixel_adjustment_workspaces(
-                calculated_transmission_workspace=calculated_trans_ws, wav_range=wav_range,
-                monitor_normalization_workspace=monitor_normalization_workspace)
+        wavelength_adjustment_workspace, pixel_length_adjustment_workspace = self._get_wavelength_and_pixel_adjustment_workspaces(
+            calculated_transmission_workspace=calculated_trans_ws,
+            wav_range=wav_range,
+            monitor_normalization_workspace=monitor_normalization_workspace,
+        )
 
-        to_return = {"wavelength_adj": wavelength_adjustment_workspace,
-                     "pixel_adj": pixel_length_adjustment_workspace,
-                     "wavelength_pixel_adj": wavelength_and_pixel_adj_workspace,
-                     "calculated_trans_ws": calculated_trans_ws,
-                     "unfitted_trans_ws": unfitted_transmission_workspace}
+        to_return = {
+            "wavelength_adj": wavelength_adjustment_workspace,
+            "pixel_adj": pixel_length_adjustment_workspace,
+            "wavelength_pixel_adj": wavelength_and_pixel_adj_workspace,
+            "calculated_trans_ws": calculated_trans_ws,
+            "unfitted_trans_ws": unfitted_transmission_workspace,
+        }
 
         return to_return
 
-    def _get_wavelength_and_pixel_adjustment_workspaces(self, monitor_normalization_workspace,
-                                                        calculated_transmission_workspace, wav_range: WavRange):
+    def _get_wavelength_and_pixel_adjustment_workspaces(
+        self, monitor_normalization_workspace, calculated_transmission_workspace, wav_range: WavRange
+    ):
         component = self._component
 
         state_adjust = self._state_adjustment.wavelength_and_pixel_adjustment
 
-        alg = CreateSANSWavelengthPixelAdjustment(component=component,
-                                                  state_adjustment_wavelength_and_pixel=state_adjust)
+        alg = CreateSANSWavelengthPixelAdjustment(component=component, state_adjustment_wavelength_and_pixel=state_adjust)
 
-        wavelength_out, pixel_out = \
-            alg.create_sans_wavelength_and_pixel_adjustment(monitor_norm_ws=monitor_normalization_workspace,
-                                                            transmission_ws=calculated_transmission_workspace,
-                                                            wav_range=wav_range)
+        wavelength_out, pixel_out = alg.create_sans_wavelength_and_pixel_adjustment(
+            monitor_norm_ws=monitor_normalization_workspace, transmission_ws=calculated_transmission_workspace, wav_range=wav_range
+        )
 
         return wavelength_out, pixel_out
 
@@ -109,7 +109,10 @@ class CreateSANSAdjustmentWorkspaces(object):
         ws = normalize_to_monitor(
             normalize_to_monitor=self._state_adjustment.normalize_to_monitor,
             wavelengths=self._state_wavelength,
-            workspace=monitor_ws, scale_factor=scale_factor, wav_range=wav_range)
+            workspace=monitor_ws,
+            scale_factor=scale_factor,
+            wav_range=wav_range,
+        )
 
         return ws
 
@@ -127,8 +130,12 @@ class CreateSANSAdjustmentWorkspaces(object):
             calc_trans_state = self._state_adjustment.calculate_transmission
 
             fitted_data, unfitted_data = calculate_transmission(
-                data_type_str=data_type, state_adjustment_calculate_transmission=calc_trans_state,
-                transmission_ws=transmission_ws, direct_ws=direct_ws, wav_range=wav_range)
+                data_type_str=data_type,
+                state_adjustment_calculate_transmission=calc_trans_state,
+                transmission_ws=transmission_ws,
+                direct_ws=direct_ws,
+                wav_range=wav_range,
+            )
         return fitted_data, unfitted_data
 
     def _get_wide_angle_correction_workspace(self, sample_data, calculated_transmission_workspace):
@@ -137,9 +144,11 @@ class CreateSANSAdjustmentWorkspaces(object):
         workspace = None
         if wide_angle_correction and sample_data and calculated_transmission_workspace:
             wide_angle_name = "SANSWideAngleCorrection"
-            wide_angle_options = {"SampleData": sample_data,
-                                  "TransmissionData": calculated_transmission_workspace,
-                                  "OutputWorkspace": EMPTY_NAME}
+            wide_angle_options = {
+                "SampleData": sample_data,
+                "TransmissionData": calculated_transmission_workspace,
+                "OutputWorkspace": EMPTY_NAME,
+            }
             wide_angle_alg = create_unmanaged_algorithm(wide_angle_name, **wide_angle_options)
             wide_angle_alg.execute()
             workspace = wide_angle_alg.getProperty("OutputWorkspace").value

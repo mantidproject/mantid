@@ -15,10 +15,10 @@ from mantidqt.widgets.sliceviewer.views.dataview import SliceViewerDataView
 class RegionSelectorView(QWidget):
     """The view for the data portion of the sliceviewer"""
 
-    def __init__(self, presenter, parent=None, dims_info=None):
+    def __init__(self, presenter, parent=None, dims_info=None, image_info_widget=None):
         super().__init__(parent)
         self.setWindowFlags(Qt.Window)
-        self._data_view = SliceViewerDataView(presenter, dims_info, None, self, None)
+        self._data_view = SliceViewerDataView(presenter, dims_info, None, self, None, image_info_widget)
 
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -31,7 +31,7 @@ class RegionSelectorView(QWidget):
         self._data_view.image_info_widget.setWorkspace(workspace)
 
     def create_dimensions(self, dims_info):
-        self._data_view.create_dimensions(dims_info=dims_info)
+        self._data_view.create_dimensions(dims_info=dims_info, custom_image_info=True)
 
     def create_axes_orthogonal(self, redraw_on_zoom):
         self._data_view.create_axes_orthogonal(redraw_on_zoom=redraw_on_zoom)

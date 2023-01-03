@@ -112,7 +112,7 @@ void ManageUserDirectories::loadProperties() {
   auto &config = ConfigService::Instance();
   auto populateListWidget = [&config](QListWidget *widget, const std::string &key) {
     const auto directories = QString::fromStdString(config.getString(key)).trimmed();
-    const auto items = directories.split(";", QString::SkipEmptyParts);
+    const auto items = directories.split(";", Qt::SkipEmptyParts);
     widget->clear();
     widget->addItems(items);
   };

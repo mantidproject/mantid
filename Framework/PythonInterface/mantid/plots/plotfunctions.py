@@ -27,20 +27,48 @@ from mantid.plots.utility import MantidAxType
 # -----------------------------------------------------------------------------
 # Constants
 # -----------------------------------------------------------------------------
-PROJECTION = 'mantid'
+PROJECTION = "mantid"
 
-MARKER_MAP = {'square': 's', 'plus (filled)': 'P', 'point': '.', 'tickdown': 3,
-              'triangle_right': '>', 'tickup': 2, 'hline': '_', 'vline': '|',
-              'pentagon': 'p', 'tri_left': '3', 'caretdown': 7,
-              'caretright (centered at base)': 9, 'tickright': 1,
-              'caretright': 5, 'caretleft': 4, 'tickleft': 0, 'tri_up': '2',
-              'circle': 'o', 'pixel': ',', 'caretleft (centered at base)': 8,
-              'diamond': 'D', 'star': '*', 'hexagon1': 'h', 'octagon': '8',
-              'hexagon2': 'H', 'tri_right': '4', 'x (filled)': 'X',
-              'thin_diamond': 'd', 'tri_down': '1', 'triangle_left': '<',
-              'plus': '+', 'triangle_down': 'v', 'triangle_up': '^', 'x': 'x',
-              'caretup': 6, 'caretup (centered at base)': 10,
-              'caretdown (centered at base)': 11, 'None': 'None'}
+MARKER_MAP = {
+    "square": "s",
+    "plus (filled)": "P",
+    "point": ".",
+    "tickdown": 3,
+    "triangle_right": ">",
+    "tickup": 2,
+    "hline": "_",
+    "vline": "|",
+    "pentagon": "p",
+    "tri_left": "3",
+    "caretdown": 7,
+    "caretright (centered at base)": 9,
+    "tickright": 1,
+    "caretright": 5,
+    "caretleft": 4,
+    "tickleft": 0,
+    "tri_up": "2",
+    "circle": "o",
+    "pixel": ",",
+    "caretleft (centered at base)": 8,
+    "diamond": "D",
+    "star": "*",
+    "hexagon1": "h",
+    "octagon": "8",
+    "hexagon2": "H",
+    "tri_right": "4",
+    "x (filled)": "X",
+    "thin_diamond": "d",
+    "tri_down": "1",
+    "triangle_left": "<",
+    "plus": "+",
+    "triangle_down": "v",
+    "triangle_up": "^",
+    "x": "x",
+    "caretup": 6,
+    "caretup (centered at base)": 10,
+    "caretdown (centered at base)": 11,
+    "None": "None",
+}
 
 # -----------------------------------------------------------------------------
 # Decorators
@@ -77,7 +105,7 @@ def figure_title(workspaces, fig_num):
     """
 
     def wsname(w):
-        return w.name() if hasattr(w, 'name') else w
+        return w.name() if hasattr(w, "name") else w
 
     if isinstance(workspaces, str) or not isinstance(workspaces, Sequence):
         # assume a single workspace
@@ -86,7 +114,7 @@ def figure_title(workspaces, fig_num):
         assert len(workspaces) > 0
         first = workspaces[0]
 
-    return wsname(first) + '-' + str(fig_num)
+    return wsname(first) + "-" + str(fig_num)
 
 
 @manage_workspace_names
@@ -103,8 +131,7 @@ def plot_md_histo_ws(workspaces, errors=False, overplot=False, fig=None, ax_prop
     # Get figure and Axes
     num_axes = 1
     fig, axes = get_plot_fig(overplot, ax_properties, window_title, num_axes, fig)
-    axes = [MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend])
-            if not isinstance(ax, MantidAxes) else ax for ax in axes]
+    axes = [MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend]) if not isinstance(ax, MantidAxes) else ax for ax in axes]
 
     # Plot MD
     _do_single_plot_mdhisto_workspace(axes[0], workspaces, errors)
@@ -113,10 +140,22 @@ def plot_md_histo_ws(workspaces, errors=False, overplot=False, fig=None, ax_prop
 
 
 @manage_workspace_names
-def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
-         overplot=False, fig=None, plot_kwargs=None, ax_properties=None,
-         window_title=None, tiled=False, waterfall=False, log_name=None,
-         log_values=None, superplot=False):
+def plot(
+    workspaces,
+    spectrum_nums=None,
+    wksp_indices=None,
+    errors=False,
+    overplot=False,
+    fig=None,
+    plot_kwargs=None,
+    ax_properties=None,
+    window_title=None,
+    tiled=False,
+    waterfall=False,
+    log_name=None,
+    log_values=None,
+    superplot=False,
+):
     """
     Create a figure with a single subplot and for each workspace/index add a
     line plot to the new axes. show() is called before returning the figure instance. A legend
@@ -138,12 +177,12 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     :param log_values: An optional list of log values to plot against.
     :return: The figure containing the plots
     """
-    plot_font = ConfigService.getString('plots.font')
+    plot_font = ConfigService.getString("plots.font")
     if plot_font:
-        if len(mpl.rcParams['font.family']) > 1:
-            mpl.rcParams['font.family'][0] = plot_font
+        if len(mpl.rcParams["font.family"]) > 1:
+            mpl.rcParams["font.family"][0] = plot_font
         else:
-            mpl.rcParams['font.family'].insert(0, plot_font)
+            mpl.rcParams["font.family"].insert(0, plot_font)
 
     if plot_kwargs is None:
         plot_kwargs = {}
@@ -155,9 +194,9 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     workspaces = [ws for ws in workspaces if isinstance(ws, MatrixWorkspace)]
 
     if spectrum_nums is not None:
-        kw, nums = 'specNum', spectrum_nums
+        kw, nums = "specNum", spectrum_nums
     else:
-        kw, nums = 'wkspIndex', wksp_indices
+        kw, nums = "wkspIndex", wksp_indices
 
     _add_default_plot_kwargs_from_settings(plot_kwargs, errors)
 
@@ -167,8 +206,7 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
 
     # Convert to a MantidAxes if it isn't already. Ignore legend since
     # a new one will be drawn later
-    axes = [MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend]) if not isinstance(ax, MantidAxes) else ax
-            for ax in axes]
+    axes = [MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend]) if not isinstance(ax, MantidAxes) else ax for ax in axes]
 
     assert axes, "No axes are associated with this plot"
 
@@ -178,11 +216,11 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
             if index < len(ws_index):
                 _do_single_plot(ax, [ws_index[index][0]], errors, False, [ws_index[index][1]], kw, plot_kwargs)
             else:
-                ax.axis('off')
+                ax.axis("off")
     else:
         show_title = ("on" == ConfigService.getString("plots.ShowTitle").lower()) and not overplot
         ax = overplot if isinstance(overplot, MantidAxes) else axes[0]
-        ax.axis('on')
+        ax.axis("on")
         _do_single_plot(ax, workspaces, errors, show_title, nums, kw, plot_kwargs, log_name, log_values)
 
     show_legend = "on" == ConfigService.getString("plots.ShowLegend").lower()
@@ -205,10 +243,10 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     if not overplot and fig.canvas.manager is not None:
         fig.canvas.manager.set_window_title(figure_title(workspaces, fig.number))
     elif ax.is_waterfall():
-        _overplot_waterfall(ax, len(nums)*len(workspaces))
+        _overplot_waterfall(ax, len(nums) * len(workspaces))
 
     if ax.is_waterfall():
-        #If axes is waterfall, update axes limits following line offset.
+        # If axes is waterfall, update axes limits following line offset.
         ax.relim()
         ax.autoscale()
     elif superplot and not tiled:
@@ -270,6 +308,7 @@ def create_subplots(nplots, fig=None):
     :return: A 2-tuple of (fig, axes)
     """
     import matplotlib.pyplot as plt
+
     square_side_len = int(math.ceil(math.sqrt(nplots)))
     nrows, ncols = square_side_len, square_side_len
     if square_side_len * square_side_len != nplots:
@@ -290,8 +329,7 @@ def create_subplots(nplots, fig=None):
     ax0 = fig.add_subplot(gs[0, 0], projection=PROJECTION)
     axes[0] = ax0
     for i in range(1, nplots):
-        axes[i] = fig.add_subplot(gs[i // ncols, i % ncols],
-                                  projection=PROJECTION)
+        axes[i] = fig.add_subplot(gs[i // ncols, i % ncols], projection=PROJECTION)
     axes = axes.reshape(nrows, ncols)
 
     return fig, axes, nrows, ncols
@@ -309,10 +347,9 @@ def raise_if_not_sequence(value, seq_name, element_type=None):
     """
     accepted_types = (list, tuple, range)
     if type(value) not in accepted_types:
-        raise ValueError("{} should be a list or tuple, "
-                         "instead found '{}'".format(seq_name,
-                                                     value.__class__.__name__))
+        raise ValueError("{} should be a list or tuple, " "instead found '{}'".format(seq_name, value.__class__.__name__))
     if element_type is not None:
+
         def raise_if_not_type(x):
             if not isinstance(x, element_type):
                 raise ValueError(f"{x} has unexpected type: '{x.__class__.__name__}'")
@@ -353,14 +390,14 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
 
     if not ax_properties and not overplot:
         ax_properties = {}
-        if ConfigService.getString("plots.xAxesScale").lower() == 'log':
-            ax_properties['xscale'] = 'log'
+        if ConfigService.getString("plots.xAxesScale").lower() == "log":
+            ax_properties["xscale"] = "log"
         else:
-            ax_properties['xscale'] = 'linear'
-        if ConfigService.getString("plots.yAxesScale").lower() == 'log':
-            ax_properties['yscale'] = 'log'
+            ax_properties["xscale"] = "linear"
+        if ConfigService.getString("plots.yAxesScale").lower() == "log":
+            ax_properties["yscale"] = "log"
         else:
-            ax_properties['yscale'] = 'linear'
+            ax_properties["yscale"] = "linear"
     if ax_properties:
         for axis in fig.axes:
             axis.set(**ax_properties)
@@ -370,7 +407,7 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
     if not overplot:
         for ax in fig.axes:
             ax.tick_params(
-                which='both',
+                which="both",
                 left="on" == ConfigService.getString("plots.showTicksLeft").lower(),
                 bottom="on" == ConfigService.getString("plots.showTicksBottom").lower(),
                 right="on" == ConfigService.getString("plots.showTicksRight").lower(),
@@ -381,16 +418,16 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
                 labeltop="on" == ConfigService.getString("plots.showLabelsTop").lower(),
             )
             ax.xaxis.set_tick_params(
-                which='major',
+                which="major",
                 width=int(ConfigService.getString("plots.ticks.major.width")),
                 length=int(ConfigService.getString("plots.ticks.major.length")),
-                direction=ConfigService.getString("plots.ticks.major.direction").lower()
+                direction=ConfigService.getString("plots.ticks.major.direction").lower(),
             )
             ax.yaxis.set_tick_params(
-                which='major',
+                which="major",
                 width=int(ConfigService.getString("plots.ticks.major.width")),
                 length=int(ConfigService.getString("plots.ticks.major.length")),
-                direction=ConfigService.getString("plots.ticks.major.direction").lower()
+                direction=ConfigService.getString("plots.ticks.major.direction").lower(),
             )
 
         if ConfigService.getString("plots.ShowMinorTicks").lower() == "on":
@@ -398,21 +435,21 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
                 ax.minorticks_on()
 
                 ax.xaxis.set_tick_params(
-                    which='minor',
+                    which="minor",
                     width=int(ConfigService.getString("plots.ticks.minor.width")),
                     length=int(ConfigService.getString("plots.ticks.minor.length")),
-                    direction=ConfigService.getString("plots.ticks.minor.direction").lower()
+                    direction=ConfigService.getString("plots.ticks.minor.direction").lower(),
                 )
                 ax.yaxis.set_tick_params(
-                    which='minor',
+                    which="minor",
                     width=int(ConfigService.getString("plots.ticks.minor.width")),
                     length=int(ConfigService.getString("plots.ticks.minor.length")),
-                    direction=ConfigService.getString("plots.ticks.minor.direction").lower()
+                    direction=ConfigService.getString("plots.ticks.minor.direction").lower(),
                 )
 
         for ax in fig.axes:
             ax.show_minor_gridlines = ConfigService.getString("plots.ShowMinorGridlines").lower() == "on"
-            for spine in ['top', 'bottom', 'left', 'right']:
+            for spine in ["top", "bottom", "left", "right"]:
                 ax.spines[spine].set_linewidth(float(ConfigService.getString("plots.axesLineWidth")))
 
         if ConfigService.getString("plots.enableGrid").lower() == "on":
@@ -439,42 +476,40 @@ def _unpack_grouped_workspaces(mixed_list: List):
 def _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices, tiled=False, overplot=False):
     """Raises a ValueError if any arguments have the incorrect types"""
     if spectrum_nums is not None and wksp_indices is not None:
-        raise ValueError("Both spectrum_nums and wksp_indices supplied. "
-                         "Please supply only 1.")
+        raise ValueError("Both spectrum_nums and wksp_indices supplied. " "Please supply only 1.")
 
     if tiled and overplot:
-        raise ValueError("Both tiled and overplot flags set to true. "
-                         "Please set only one to true.")
+        raise ValueError("Both tiled and overplot flags set to true. " "Please set only one to true.")
 
-    raise_if_not_sequence(workspaces, 'workspaces', MatrixWorkspace)
+    raise_if_not_sequence(workspaces, "workspaces", MatrixWorkspace)
 
     if spectrum_nums is not None:
-        raise_if_not_sequence(spectrum_nums, 'spectrum_nums')
+        raise_if_not_sequence(spectrum_nums, "spectrum_nums")
 
     if wksp_indices is not None:
-        raise_if_not_sequence(wksp_indices, 'wksp_indices')
+        raise_if_not_sequence(wksp_indices, "wksp_indices")
 
 
 def _add_default_plot_kwargs_from_settings(plot_kwargs, errors):
-    if 'linestyle' not in plot_kwargs:
-        plot_kwargs['linestyle'] = ConfigService.getString("plots.line.Style")
-    if 'drawstyle' not in plot_kwargs:
-        plot_kwargs['drawstyle'] = ConfigService.getString("plots.line.DrawStyle")
-    if 'linewidth' not in plot_kwargs:
-        plot_kwargs['linewidth'] = float(ConfigService.getString("plots.line.Width"))
-    if 'marker' not in plot_kwargs:
-        plot_kwargs['marker'] = MARKER_MAP[ConfigService.getString("plots.marker.Style")]
-    if 'markersize' not in plot_kwargs:
-        plot_kwargs['markersize'] = float(ConfigService.getString("plots.marker.Size"))
+    if "linestyle" not in plot_kwargs:
+        plot_kwargs["linestyle"] = ConfigService.getString("plots.line.Style")
+    if "drawstyle" not in plot_kwargs:
+        plot_kwargs["drawstyle"] = ConfigService.getString("plots.line.DrawStyle")
+    if "linewidth" not in plot_kwargs:
+        plot_kwargs["linewidth"] = float(ConfigService.getString("plots.line.Width"))
+    if "marker" not in plot_kwargs:
+        plot_kwargs["marker"] = MARKER_MAP[ConfigService.getString("plots.marker.Style")]
+    if "markersize" not in plot_kwargs:
+        plot_kwargs["markersize"] = float(ConfigService.getString("plots.marker.Size"))
     if errors:
-        if 'capsize' not in plot_kwargs:
-            plot_kwargs['capsize'] = float(ConfigService.getString("plots.errorbar.Capsize"))
-        if 'capthick' not in plot_kwargs:
-            plot_kwargs['capthick'] = float(ConfigService.getString("plots.errorbar.CapThickness"))
-        if 'errorevery' not in plot_kwargs:
-            plot_kwargs['errorevery'] = int(ConfigService.getString("plots.errorbar.errorEvery"))
-        if 'elinewidth' not in plot_kwargs:
-            plot_kwargs['elinewidth'] = float(ConfigService.getString("plots.errorbar.Width"))
+        if "capsize" not in plot_kwargs:
+            plot_kwargs["capsize"] = float(ConfigService.getString("plots.errorbar.Capsize"))
+        if "capthick" not in plot_kwargs:
+            plot_kwargs["capthick"] = float(ConfigService.getString("plots.errorbar.CapThickness"))
+        if "errorevery" not in plot_kwargs:
+            plot_kwargs["errorevery"] = int(ConfigService.getString("plots.errorbar.errorEvery"))
+        if "elinewidth" not in plot_kwargs:
+            plot_kwargs["elinewidth"] = float(ConfigService.getString("plots.errorbar.Width"))
 
 
 def _validate_workspace_names(workspaces):
@@ -486,7 +521,7 @@ def _validate_workspace_names(workspaces):
     :return: A list of workspaces
     """
     try:
-        raise_if_not_sequence(workspaces, 'workspaces', str)
+        raise_if_not_sequence(workspaces, "workspaces", str)
     except ValueError:
         return workspaces
     else:
@@ -505,14 +540,15 @@ def _do_single_plot_mdhisto_workspace(ax, workspaces, errors=False):
     for ws in workspaces:
         # Check inputs from non-integral dimension
         if not isinstance(ws, IMDHistoWorkspace):
-            raise RuntimeError(f'Workspace {str(ws)} must be an IMDHistoWorkspace but not {type(ws)}')
+            raise RuntimeError(f"Workspace {str(ws)} must be an IMDHistoWorkspace but not {type(ws)}")
         num_dim = 0
         for d in range(ws.getNumDims()):
             if ws.getDimension(d).getNBins() > 1:
                 num_dim += 1
         if num_dim != 1:
-            raise RuntimeError(f'Workspace {str(ws)} is an IMDHistoWorkspace with number of non-integral dimension '
-                               f'equal to {num_dim} but not 1.')
+            raise RuntimeError(
+                f"Workspace {str(ws)} is an IMDHistoWorkspace with number of non-integral dimension " f"equal to {num_dim} but not 1."
+            )
 
         # Plot
         plot_fn(ws, label=str(ws))
@@ -534,7 +570,7 @@ def _do_single_plot(ax, workspaces, errors, set_title, nums, kw, plot_kwargs, lo
                 if len(nums) > 1:
                     label = f"spec {num}: {label}"
 
-                plot_kwargs['label'] = label
+                plot_kwargs["label"] = label
 
                 counter += 1
 

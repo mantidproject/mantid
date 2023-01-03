@@ -14,13 +14,16 @@ from .toscainstrument import ToscaInstrument
 from .ideal2d import Ideal2D
 
 
-instruments = {"lagrange": LagrangeInstrument,
-               "tosca": ToscaInstrument,
-               "ideal2d": Ideal2D,
-               "maps": (PyChopInstrument, {'name': 'MAPS'}),
-               "mari": (PyChopInstrument, {'name': 'MARI'}),
-               "merlin": (PyChopInstrument, {'name': 'MERLIN'}),
-               "panther": PantherInstrument}
+instruments = {
+    "lagrange": LagrangeInstrument,
+    "tosca": ToscaInstrument,
+    "ideal2d": Ideal2D,
+    "maps": (PyChopInstrument, {"name": "MAPS"}),
+    "mari": (PyChopInstrument, {"name": "MARI"}),
+    "merlin": (PyChopInstrument, {"name": "MERLIN"}),
+    "panther": PantherInstrument,
+}
+
 
 def get_instrument(name: str, **kwargs) -> Instrument:
     """Instantiate a named Instrument
@@ -47,10 +50,10 @@ def get_instrument(name: str, **kwargs) -> Instrument:
         return instrument_factory(**kwargs)
 
     elif name not in ALL_INSTRUMENTS:
-        raise ValueError(f'Unknown instrument: "{name}". Known instruments: '
-                         + ', '.join(ALL_INSTRUMENTS))
+        raise ValueError(f'Unknown instrument: "{name}". Known instruments: ' + ", ".join(ALL_INSTRUMENTS))
     else:
         raise NotImplementedError(
             f"Instrument {name} is defined in abins.constants, but was not "
             "accessible from abins.instruments.get_instrument(). "
-            "Please report this error to the Mantid team.")
+            "Please report this error to the Mantid team."
+        )

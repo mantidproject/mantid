@@ -4,14 +4,14 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init
+# pylint: disable=no-init
 import systemtesting
 from mantid.simpleapi import *
 import numpy as np
 
 
 class POLDIMergeTest(systemtesting.MantidSystemTest):
-    '''This test checks that the results of PoldiMerge match the expected outcome.'''
+    """This test checks that the results of PoldiMerge match the expected outcome."""
 
     def runTest(self):
         self.testHappyCase()
@@ -40,15 +40,15 @@ class POLDIMergeTest(systemtesting.MantidSystemTest):
         sumWorkspaceGroup = GroupWorkspaces(dataFiles)
         workspaceGroupResult = self.testGroupWorkspace(sumWorkspaceGroup)
 
-    # compare result of workspace group merging to previously checked results
-        self.compareWorkspaces(workspaceGroupResult, mtd['poldi_sum_6903_6904'])
+        # compare result of workspace group merging to previously checked results
+        self.compareWorkspaces(workspaceGroupResult, mtd["poldi_sum_6903_6904"])
 
     def testGroupWorkspace(self, groupWorkspace):
         return PoldiMerge(groupWorkspace)
 
     def loadData(self, filenames):
         for dataFile in filenames:
-            LoadSINQFile(Instrument='POLDI',Filename=dataFile + ".hdf",OutputWorkspace=dataFile)
+            LoadSINQFile(Instrument="POLDI", Filename=dataFile + ".hdf", OutputWorkspace=dataFile)
             LoadInstrument(Workspace=dataFile, InstrumentName="POLDI", RewriteSpectraMap=True)
 
     def runPoldiMerge(self, workspaceNames, outputWorkspaceName):
@@ -58,9 +58,9 @@ class POLDIMergeTest(systemtesting.MantidSystemTest):
         Load(Filename=outputWorkspaceName + "_reference.nxs", OutputWorkspace=outputWorkspaceName + "_reference")
 
     def analyseResults(self, outputWorkspaceName):
-        for i in range(mtd[outputWorkspaceName + '_reference'].getNumberHistograms()):
-        # reference spectrum is still in the "original order", so for one of the workspaces, the index has to be reversed.
-            self.assertTrue(np.array_equal(mtd[outputWorkspaceName].dataY(i), mtd[outputWorkspaceName + '_reference'].dataY(399 - i)))
+        for i in range(mtd[outputWorkspaceName + "_reference"].getNumberHistograms()):
+            # reference spectrum is still in the "original order", so for one of the workspaces, the index has to be reversed.
+            self.assertTrue(np.array_equal(mtd[outputWorkspaceName].dataY(i), mtd[outputWorkspaceName + "_reference"].dataY(399 - i)))
 
     def compareWorkspaces(self, left, right):
         for i in range(left.getNumberHistograms()):

@@ -90,7 +90,7 @@ void DiagResults::updateResults(const QString &testSummary) {
     }
     QStringList NameValPair = results[i].split(":");
     tn = NameValPair[0].toStdString();
-    QStringList columns = NameValPair[1].split(QRegExp("\\s+"), QString::SkipEmptyParts);
+    QStringList columns = NameValPair[1].split(QRegExp("\\s+"), Qt::SkipEmptyParts);
     Q_ASSERT(columns.size() == 2);
     QString status;
     if (columns[0] == "None")

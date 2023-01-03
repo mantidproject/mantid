@@ -15,9 +15,9 @@ class SpectrumInfoTest(unittest.TestCase):
     _ws = None
 
     def setUp(self):
-        """ Set up code. """
+        """Set up code."""
         if self.__class__._ws is None:
-            self.__class__._ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(3, 1, False) # no monitors
+            self.__class__._ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(3, 1, False)  # no monitors
             self.__class__._ws.getSpectrum(0).clearDetectorIDs()
 
     """
@@ -28,80 +28,80 @@ class SpectrumInfoTest(unittest.TestCase):
     """
 
     def test_len(self):
-        """ Check that the number of spectra we initailly created
-            is the same as in memory. """
+        """Check that the number of spectra we initailly created
+        is the same as in memory."""
         info = self._ws.spectrumInfo()
         self.assertEqual(len(info), 3)
 
     def test_size(self):
-        """ Check that the number of spectra we initailly created
-            is the same as in memory. """
+        """Check that the number of spectra we initailly created
+        is the same as in memory."""
         info = self._ws.spectrumInfo()
         self.assertEqual(info.size(), 3)
 
     def test_detectorCount(self):
-        """ Check total detector count """
+        """Check total detector count"""
         info = self._ws.spectrumInfo()
         # One detector cleared. So not counted.
         self.assertEqual(info.detectorCount(), 2)
 
     def test_isMonitor(self):
-        """ Check if a monitor is present. """
+        """Check if a monitor is present."""
         info = self._ws.spectrumInfo()
         self.assertEqual(info.isMonitor(1), False)
 
     def test_isMasked(self):
-        """ Check if the detector is masked. """
+        """Check if the detector is masked."""
         info = self._ws.spectrumInfo()
         self.assertEqual(info.isMasked(1), False)
 
     def test_setMaskedTrue(self):
-        """ Test that the detector's masking can be set to True. """
+        """Test that the detector's masking can be set to True."""
         info = self._ws.spectrumInfo()
         info.setMasked(1, True)
         self.assertEqual(info.isMasked(1), True)
 
     def test_setMaskedFalse(self):
-        """ Test that the detector's masking can be set to False. """
+        """Test that the detector's masking can be set to False."""
         info = self._ws.spectrumInfo()
         info.setMasked(1, False)
         self.assertEqual(info.isMasked(1), False)
 
     def test_twoTheta(self):
-        """ See if the returned value is a double (float in Python). """
+        """See if the returned value is a double (float in Python)."""
         info = self._ws.spectrumInfo()
         self.assertEqual(type(info.twoTheta(1)), float)
 
     def test_geogAngles(self):
-        """ See if the returned value is a double (float in Python). """
+        """See if the returned value is a double (float in Python)."""
         info = self._ws.spectrumInfo()
         lat, lon = info.geographicalAngles(1)
         self.assertEqual(type(lat), float)
         self.assertEqual(type(lon), float)
 
     def test_signedTwoTheta(self):
-        """ See if the returned value is a double (float in Python). """
+        """See if the returned value is a double (float in Python)."""
         info = self._ws.spectrumInfo()
         self.assertEqual(type(info.signedTwoTheta(1)), float)
 
     def test_l1(self):
-        """ Check if a distance is returned (source to sample). """
+        """Check if a distance is returned (source to sample)."""
         info = self._ws.spectrumInfo()
         self.assertEqual(type(info.l1()), float)
 
     def test_l2(self):
-        """ Check if a distance is returned (sample to spectrum). """
+        """Check if a distance is returned (sample to spectrum)."""
         info = self._ws.spectrumInfo()
         self.assertEqual(type(info.l2(1)), float)
 
     def test_hasDetectors(self):
-        """ Check to see which spectrum has detectors. """
+        """Check to see which spectrum has detectors."""
         info = self._ws.spectrumInfo()
         self.assertEqual(info.hasDetectors(0), False)
         self.assertEqual(info.hasDetectors(1), True)
 
     def test_hasUniqueDetector(self):
-        """ Test if the spectra have unique detectors. """
+        """Test if the spectra have unique detectors."""
         info = self._ws.spectrumInfo()
         self.assertEqual(info.hasUniqueDetector(0), False)
         self.assertEqual(info.hasUniqueDetector(1), True)
@@ -112,17 +112,17 @@ class SpectrumInfoTest(unittest.TestCase):
     """
 
     def test_position(self):
-        """ Test that the spectrum's position is returned. """
+        """Test that the spectrum's position is returned."""
         info = self._ws.spectrumInfo()
         self.assertEqual(type(info.position(1)), V3D)
 
     def test_sourcePosition(self):
-        """ Test that the source's position is returned. """
+        """Test that the source's position is returned."""
         info = self._ws.spectrumInfo()
         self.assertEqual(type(info.sourcePosition()), V3D)
 
     def test_samplePosition(self):
-        """ Test that the sample's position is returned. """
+        """Test that the sample's position is returned."""
         info = self._ws.spectrumInfo()
         self.assertEqual(type(info.samplePosition()), V3D)
 
@@ -131,6 +131,7 @@ class SpectrumInfoTest(unittest.TestCase):
     Iteration
     ---------------
     """
+
     def test_basic_iteration(self):
         info = self._ws.spectrumInfo()
         expected_iterations = len(info)
@@ -141,7 +142,7 @@ class SpectrumInfoTest(unittest.TestCase):
         info = self._ws.spectrumInfo()
         # check no monitors in instrument
         it = iter(info)
-        next(it) # skip first as detectors cleared
+        next(it)  # skip first as detectors cleared
         for item in it:
             self.assertFalse(item.isMonitor)
 
@@ -149,7 +150,7 @@ class SpectrumInfoTest(unittest.TestCase):
         info = self._ws.spectrumInfo()
         # nothing should be masked
         it = iter(info)
-        next(it) # skip first as detectors cleared
+        next(it)  # skip first as detectors cleared
         for item in it:
             self.assertFalse(item.isMasked)
 
@@ -157,7 +158,7 @@ class SpectrumInfoTest(unittest.TestCase):
         info = self._ws.spectrumInfo()
         # nothing should be masked
         it = iter(info)
-        next(it) # skip first as detectors cleared
+        next(it)  # skip first as detectors cleared
         for item in it:
             # mask and check
             item.setMasked(True)
@@ -167,13 +168,13 @@ class SpectrumInfoTest(unittest.TestCase):
         info = self._ws.spectrumInfo()
         lastY = None
         it = iter(info)
-        next(it) # skip first as detectors cleared
-        for i,item in enumerate(it):
+        next(it)  # skip first as detectors cleared
+        for i, item in enumerate(it):
             pos = item.position
             # See test helper for position construction
             self.assertAlmostEqual(pos.X(), 0)
             self.assertAlmostEqual(pos.Z(), 5)
-            if(lastY):
+            if lastY:
                 self.assertGreater(pos.Y(), lastY)
             lastY = pos.Y()
 
@@ -330,8 +331,8 @@ class SpectrumInfoTest(unittest.TestCase):
     """
 
     def test_spectrumDefintionSize(self):
-        """ Check the size of the SpectrumDefinition
-        (i.e. number of detectors) """
+        """Check the size of the SpectrumDefinition
+        (i.e. number of detectors)"""
         info = self._ws.spectrumInfo()
         spectrumDefinitionOne = info.getSpectrumDefinition(0)
         spectrumDefinitionTwo = info.getSpectrumDefinition(1)
@@ -339,36 +340,36 @@ class SpectrumInfoTest(unittest.TestCase):
         self.assertEqual(spectrumDefinitionTwo.size(), 1)
 
     def test_spectrumDefintionAdd(self):
-        """ Add a pair of detector index and time index """
+        """Add a pair of detector index and time index"""
         info = self._ws.spectrumInfo()
         spectrumDefinition = info.getSpectrumDefinition(1)
         spectrumDefinition.add(1, 1)
         self.assertEqual(spectrumDefinition.size(), 2)
 
     def test_spectrumDefintionEquals(self):
-        """ Check the equality of the SpectrumDefintions """
+        """Check the equality of the SpectrumDefintions"""
         info = self._ws.spectrumInfo()
         spectrumDefinition = info.getSpectrumDefinition(0)
         # Check equality with equals() and == to make sure same result is given
         self.assertTrue(spectrumDefinition.equals(spectrumDefinition))
-        self.assertEqual(spectrumDefinition,  spectrumDefinition)
+        self.assertEqual(spectrumDefinition, spectrumDefinition)
 
     def test_spectrumDefintionNotEquals(self):
-        """ Check the equality of the SpectrumDefintions """
+        """Check the equality of the SpectrumDefintions"""
         info = self._ws.spectrumInfo()
         spectrumDefinitionOne = info.getSpectrumDefinition(0)
         spectrumDefinitionTwo = info.getSpectrumDefinition(1)
         # Check inequality with not (by negating equals())
         # and != to make sure same result is given
         self.assertTrue(not spectrumDefinitionOne.equals(spectrumDefinitionTwo))
-        self.assertNotEqual(spectrumDefinitionOne,  spectrumDefinitionTwo)
+        self.assertNotEqual(spectrumDefinitionOne, spectrumDefinitionTwo)
 
     def test_spectrumDefintionGet(self):
-        """ See if indexing works """
+        """See if indexing works"""
         info = self._ws.spectrumInfo()
         spectrumDefinition = info.getSpectrumDefinition(1)
         self.assertEqual(spectrumDefinition[0], (1, 0))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

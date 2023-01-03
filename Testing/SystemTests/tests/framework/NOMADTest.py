@@ -15,9 +15,8 @@ from pathlib import Path
 
 
 class MedianDetectorTestTest(systemtesting.MantidSystemTest):
-
     def requiredFiles(self):
-        return ['NOM_144974_SingleBin.nxs', 'NOMAD_mask_gen_config.yml', 'NOM_144974_mask.xml']
+        return ["NOM_144974_SingleBin.nxs", "NOMAD_mask_gen_config.yml", "NOM_144974_mask.xml"]
 
     def runTest(self):
         # TemporaryFile will rather unhelpfully open a handle to our temporary object
@@ -29,21 +28,17 @@ class MedianDetectorTestTest(systemtesting.MantidSystemTest):
     def _test_impl(self, tmp_dir: Path):
         file_xml_mask = (tmp_dir / "NOMADTEST.xml").resolve()
         file_txt_mask = (tmp_dir / "NOMADTEST.txt").resolve()
-        LoadNexusProcessed(Filename='NOM_144974_SingleBin.nxs', OutputWorkspace='NOM_144974')
-        NOMADMedianDetectorTest(InputWorkspace='NOM_144974',
-                                ConfigurationFile='NOMAD_mask_gen_config.yml',
-                                SolidAngleNorm=False,
-                                OutputMaskXML=str(file_xml_mask),
-                                OutputMaskASCII=str(file_txt_mask))
+        LoadNexusProcessed(Filename="NOM_144974_SingleBin.nxs", OutputWorkspace="NOM_144974")
+        NOMADMedianDetectorTest(
+            InputWorkspace="NOM_144974",
+            ConfigurationFile="NOMAD_mask_gen_config.yml",
+            SolidAngleNorm=False,
+            OutputMaskXML=str(file_xml_mask),
+            OutputMaskASCII=str(file_txt_mask),
+        )
 
-        self.loaded_ws = LoadMask(Instrument='NOMAD',
-                                  InputFile=str(file_xml_mask),
-                                  RefWorkspace='NOM_144974',
-                                  StoreInADS=False)
+        self.loaded_ws = LoadMask(Instrument="NOMAD", InputFile=str(file_xml_mask), RefWorkspace="NOM_144974", StoreInADS=False)
 
     def validate(self):
-        ref = LoadMask(Instrument='NOMAD',
-                       InputFile="NOM_144974_mask.xml",
-                       RefWorkspace='NOM_144974',
-                       StoreInADS=False)
+        ref = LoadMask(Instrument="NOMAD", InputFile="NOM_144974_mask.xml", RefWorkspace="NOM_144974", StoreInADS=False)
         return CompareWorkspaces(Workspace1=self.loaded_ws, Workspace2=ref, CheckMasking=True).Result

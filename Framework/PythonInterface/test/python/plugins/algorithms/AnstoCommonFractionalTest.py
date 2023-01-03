@@ -16,7 +16,7 @@ from ansto_common import (
     find_intercept,
     fractional_quad_area,
     fractional_map,
-    extrapolate_grid_edges
+    extrapolate_grid_edges,
 )
 
 
@@ -28,7 +28,6 @@ def rotate(p, deg):
 
 
 class FractionalMapTests(unittest.TestCase):
-
     def setUp(self):
         return
 
@@ -116,28 +115,28 @@ class FractionalMapTests(unittest.TestCase):
     def test_extrapolate_grid_edges(self):
         # for a linear function the extrapolation should be exact
         rows, cols = 11, 11
-        x = np.linspace(0, cols-1, cols)
-        y = np.linspace(0, rows-1, rows)
+        x = np.linspace(0, cols - 1, cols)
+        y = np.linspace(0, rows - 1, rows)
         xx, yy = np.meshgrid(x, y)
         grid = xx + 2 * yy
 
         egrid = extrapolate_grid_edges(grid)
 
-        x_ = np.linspace(-1, cols, cols+2)
-        y_ = np.linspace(-1, rows, rows+2)
+        x_ = np.linspace(-1, cols, cols + 2)
+        y_ = np.linspace(-1, rows, rows + 2)
         xx_, yy_ = np.meshgrid(x_, y_)
         grid_ = xx_ + 2 * yy_
 
         self.assertEqual(egrid.shape, grid_.shape)
         self.assertAlmostEqual(np.min(egrid), np.min(grid_), 7)
         self.assertAlmostEqual(np.max(egrid), np.max(grid_), 7)
-        self.assertAlmostEqual(egrid[0,0], grid_[0,0], 7)
-        self.assertAlmostEqual(egrid[0,-1], grid_[0,-1], 7)
-        self.assertAlmostEqual(egrid[-1,0], grid_[-1,0], 7)
-        self.assertAlmostEqual(egrid[-1,-1], grid_[-1,-1], 7)
-        self.assertAlmostEqual(egrid[1,1], grid_[1,1], 7)
-        self.assertAlmostEqual(egrid[1,2], grid_[1,2], 7)
-        self.assertAlmostEqual(egrid[2,2], grid_[2,2], 7)
+        self.assertAlmostEqual(egrid[0, 0], grid_[0, 0], 7)
+        self.assertAlmostEqual(egrid[0, -1], grid_[0, -1], 7)
+        self.assertAlmostEqual(egrid[-1, 0], grid_[-1, 0], 7)
+        self.assertAlmostEqual(egrid[-1, -1], grid_[-1, -1], 7)
+        self.assertAlmostEqual(egrid[1, 1], grid_[1, 1], 7)
+        self.assertAlmostEqual(egrid[1, 2], grid_[1, 2], 7)
+        self.assertAlmostEqual(egrid[2, 2], grid_[2, 2], 7)
 
     def test_fractional_map(self):
 

@@ -4,8 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=too-many-lines
-#pylint: disable=invalid-name
+# pylint: disable=too-many-lines
+# pylint: disable=invalid-name
 #########################################################
 # This module contains utility functions common to the
 # SANS data reduction scripts
@@ -22,15 +22,15 @@ import numpy as np
 import h5py as h5
 
 sanslog = Logger("SANS")
-ADDED_TAG = '-add'
-ADDED_EVENT_DATA_TAG = '_added_event_data'
-ADD_TAG = '-add'
-ADD_MONITORS_TAG = '-add_monitors'
-REG_DATA_NAME = ADD_TAG  + ADDED_EVENT_DATA_TAG + '[_1-9]*$'
-REG_DATA_MONITORS_NAME = ADD_MONITORS_TAG + ADDED_EVENT_DATA_TAG + '[_1-9]*$'
+ADDED_TAG = "-add"
+ADDED_EVENT_DATA_TAG = "_added_event_data"
+ADD_TAG = "-add"
+ADD_MONITORS_TAG = "-add_monitors"
+REG_DATA_NAME = ADD_TAG + ADDED_EVENT_DATA_TAG + "[_1-9]*$"
+REG_DATA_MONITORS_NAME = ADD_MONITORS_TAG + ADDED_EVENT_DATA_TAG + "[_1-9]*$"
 ZERO_ERROR_DEFAULT = 1e6
-INCIDENT_MONITOR_TAG = '_incident_monitor'
-MANTID_PROCESSED_WORKSPACE_TAG = 'Mantid Processed Workspace'
+INCIDENT_MONITOR_TAG = "_incident_monitor"
+MANTID_PROCESSED_WORKSPACE_TAG = "Mantid Processed Workspace"
 
 
 def deprecated(obj):
@@ -40,17 +40,20 @@ def deprecated(obj):
     """
     if inspect.isfunction(obj) or inspect.ismethod(obj):
         if inspect.isfunction(obj):
-            obj_desc = "\"%s\" function" % obj.__name__
+            obj_desc = '"%s" function' % obj.__name__
         else:
-            obj_desc = "\"%s\" class" % obj.__self__.__class__.__name__
+            obj_desc = '"%s" class' % obj.__self__.__class__.__name__
 
         def print_warning_wrapper(*args, **kwargs):
-            sanslog.warning("The %s has been marked as deprecated and may be "
-                            "removed in a future version of Mantid.  If you "
-                            "believe this to have been marked in error, please "
-                            "contact the member of the Mantid team responsible "
-                            "for ISIS SANS." % obj_desc)
+            sanslog.warning(
+                "The %s has been marked as deprecated and may be "
+                "removed in a future version of Mantid.  If you "
+                "believe this to have been marked in error, please "
+                "contact the member of the Mantid team responsible "
+                "for ISIS SANS." % obj_desc
+            )
             return obj(*args, **kwargs)
+
         return print_warning_wrapper
 
     # Add a @deprecated decorator to each of the member functions in the class
@@ -61,26 +64,26 @@ def deprecated(obj):
                 setattr(obj, name, deprecated(fn))
         return obj
 
-    assert False, "Programming error.  You have incorrectly applied the "\
-                  "@deprecated decorator.  This is only for use with functions "\
-                  "or classes."
+    assert False, (
+        "Programming error.  You have incorrectly applied the " "@deprecated decorator.  This is only for use with functions " "or classes."
+    )
 
 
 def GetInstrumentDetails(instrum):
     """
-        Return the details specific to the instrument's current detector bank
-        @return number of pixels ac, first spectrum in the current detector, its last spectrum
+    Return the details specific to the instrument's current detector bank
+    @return number of pixels ac, first spectrum in the current detector, its last spectrum
     """
     det = instrum.cur_detector()
-    #LOQ HAB is not a square detector and so has no width
-    #for backwards compatibility we have to return a width
-    if instrum.name() == 'LOQ' and instrum.cur_detector().name() == 'HAB':
-        if det.n_columns is None :
+    # LOQ HAB is not a square detector and so has no width
+    # for backwards compatibility we have to return a width
+    if instrum.name() == "LOQ" and instrum.cur_detector().name() == "HAB":
+        if det.n_columns is None:
             return 128, det.get_first_spec_num(), det.last_spec_num
 
     first_spectrum = det.get_first_spec_num()
     last_spectrum = det.last_spec_num
-    if instrum.name() == 'SANS2D':
+    if instrum.name() == "SANS2D":
         first_spectrum += 4
         last_spectrum += 4
 
@@ -88,130 +91,170 @@ def GetInstrumentDetails(instrum):
 
 
 def InfinitePlaneXML(id_name, plane_pt, normal_pt):
-    return '<infinite-plane id="' + str(id_name) + '">' + \
-        '<point-in-plane x="' + str(plane_pt[0]) + '" y="' + str(plane_pt[1]) + '" z="' + str(plane_pt[2]) + '" />' + \
-        '<normal-to-plane x="' + str(normal_pt[0]) + '" y="' + str(normal_pt[1]) + '" z="' + str(normal_pt[2]) + '" />'+ \
-        '</infinite-plane>'
+    return (
+        '<infinite-plane id="'
+        + str(id_name)
+        + '">'
+        + '<point-in-plane x="'
+        + str(plane_pt[0])
+        + '" y="'
+        + str(plane_pt[1])
+        + '" z="'
+        + str(plane_pt[2])
+        + '" />'
+        + '<normal-to-plane x="'
+        + str(normal_pt[0])
+        + '" y="'
+        + str(normal_pt[1])
+        + '" z="'
+        + str(normal_pt[2])
+        + '" />'
+        + "</infinite-plane>"
+    )
 
 
 def InfiniteCylinderXML(id_name, centre, radius, axis):
-    return  '<infinite-cylinder id="' + str(id_name) + '">' + \
-        '<centre x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' + str(centre[2]) + '" />' + \
-        '<axis x="' + str(axis[0]) + '" y="' + str(axis[1]) + '" z="' + str(axis[2]) + '" />' + \
-        '<radius val="' + str(radius) + '" />' + \
-        '</infinite-cylinder>\n'
+    return (
+        '<infinite-cylinder id="'
+        + str(id_name)
+        + '">'
+        + '<centre x="'
+        + str(centre[0])
+        + '" y="'
+        + str(centre[1])
+        + '" z="'
+        + str(centre[2])
+        + '" />'
+        + '<axis x="'
+        + str(axis[0])
+        + '" y="'
+        + str(axis[1])
+        + '" z="'
+        + str(axis[2])
+        + '" />'
+        + '<radius val="'
+        + str(radius)
+        + '" />'
+        + "</infinite-cylinder>\n"
+    )
+
 
 # Mask a cylinder, specifying the algebra to use
 
 
 def MaskWithCylinder(workspace, radius, xcentre, ycentre, algebra):
-    '''Mask a cylinder on the input workspace.'''
-    xmldef = InfiniteCylinderXML('shape', [xcentre, ycentre, 0.0], radius, [0,0,1])
+    """Mask a cylinder on the input workspace."""
+    xmldef = InfiniteCylinderXML("shape", [xcentre, ycentre, 0.0], radius, [0, 0, 1])
     xmldef += '<algebra val="' + algebra + 'shape" />'
     # Apply masking
-    MaskDetectorsInShape(Workspace=workspace,ShapeXML=xmldef)
+    MaskDetectorsInShape(Workspace=workspace, ShapeXML=xmldef)
+
 
 # Mask such that the remainder is that specified by the phi range
 
 
 def LimitPhi(workspace, centre, phimin, phimax, use_mirror=True):
     # convert all angles to be between 0 and 360
-    while phimax > 360 :
+    while phimax > 360:
         phimax -= 360
-    while phimax < 0 :
+    while phimax < 0:
         phimax += 360
-    while phimin > 360 :
+    while phimin > 360:
         phimin -= 360
-    while phimin < 0 :
+    while phimin < 0:
         phimin += 360
-    while phimax<phimin :
+    while phimax < phimin:
         phimax += 360
 
-    #Convert to radians
-    phimin = math.pi*phimin/180.0
-    phimax = math.pi*phimax/180.0
-    xmldef =  InfinitePlaneXML('pla',centre, [math.cos(-phimin + math.pi/2.0),math.sin(-phimin + math.pi/2.0),0]) + \
-        InfinitePlaneXML('pla2',centre, [-math.cos(-phimax + math.pi/2.0),-math.sin(-phimax + math.pi/2.0),0]) + \
-        InfinitePlaneXML('pla3',centre, [math.cos(-phimax + math.pi/2.0),math.sin(-phimax + math.pi/2.0),0]) + \
-        InfinitePlaneXML('pla4',centre, [-math.cos(-phimin + math.pi/2.0),-math.sin(-phimin + math.pi/2.0),0])
+    # Convert to radians
+    phimin = math.pi * phimin / 180.0
+    phimax = math.pi * phimax / 180.0
+    xmldef = (
+        InfinitePlaneXML("pla", centre, [math.cos(-phimin + math.pi / 2.0), math.sin(-phimin + math.pi / 2.0), 0])
+        + InfinitePlaneXML("pla2", centre, [-math.cos(-phimax + math.pi / 2.0), -math.sin(-phimax + math.pi / 2.0), 0])
+        + InfinitePlaneXML("pla3", centre, [math.cos(-phimax + math.pi / 2.0), math.sin(-phimax + math.pi / 2.0), 0])
+        + InfinitePlaneXML("pla4", centre, [-math.cos(-phimin + math.pi / 2.0), -math.sin(-phimin + math.pi / 2.0), 0])
+    )
 
-    if use_mirror :
+    if use_mirror:
         xmldef += '<algebra val="#((pla pla2):(pla3 pla4))" />'
     else:
-        #the formula is different for acute verses obstruse angles
-        if phimax-phimin > math.pi :
+        # the formula is different for acute verses obstruse angles
+        if phimax - phimin > math.pi:
             # to get an obtruse angle, a wedge that's more than half the area, we need to add the semi-inifinite volumes
             xmldef += '<algebra val="#(pla:pla2)" />'
-        else :
+        else:
             # an acute angle, wedge is more less half the area, we need to use the intesection of those semi-inifinite volumes
             xmldef += '<algebra val="#(pla pla2)" />'
 
-    MaskDetectorsInShape(Workspace=workspace,ShapeXML= xmldef)
+    MaskDetectorsInShape(Workspace=workspace, ShapeXML=xmldef)
+
 
 # Work out the spectra IDs for block of detectors
 
 
 def spectrumBlock(base, ylow, xlow, ydim, xdim, det_dimension, orientation):
-    '''Compile a list of spectrum Nos for rectangular block of size xdim by ydim'''
-    output = ''
+    """Compile a list of spectrum Nos for rectangular block of size xdim by ydim"""
+    output = ""
     if orientation == Orientation.Horizontal:
-        start_spec = base + ylow*det_dimension + xlow
+        start_spec = base + ylow * det_dimension + xlow
         for y in range(0, ydim):
             for x in range(0, xdim):
-                output += str(start_spec + x + (y*det_dimension)) + ','
+                output += str(start_spec + x + (y * det_dimension)) + ","
     elif orientation == Orientation.Vertical:
-        start_spec = base + xlow*det_dimension + ylow
-        for x in range(det_dimension - 1, det_dimension - xdim-1,-1):
+        start_spec = base + xlow * det_dimension + ylow
+        for x in range(det_dimension - 1, det_dimension - xdim - 1, -1):
             for y in range(0, ydim):
-                std_i = start_spec + y + ((det_dimension-x-1)*det_dimension)
-                output += str(std_i ) + ','
+                std_i = start_spec + y + ((det_dimension - x - 1) * det_dimension)
+                output += str(std_i) + ","
     elif orientation == Orientation.Rotated:
         # This is the horizontal one rotated so need to map the xlow and vlow to their rotated versions
-        start_spec = base + ylow*det_dimension + xlow
-        max_spec = det_dimension*det_dimension + base - 1
+        start_spec = base + ylow * det_dimension + xlow
+        max_spec = det_dimension * det_dimension + base - 1
         for y in range(0, ydim):
             for x in range(0, xdim):
-                std_i = start_spec + x + (y*det_dimension)
-                output += str(max_spec - (std_i - base)) + ','
+                std_i = start_spec + x + (y * det_dimension)
+                output += str(max_spec - (std_i - base)) + ","
 
     return output.rstrip(",")
+
 
 # Mask by bin range
 
 
 def MaskByBinRange(workspace, timemask):
     # timemask should be a ';' separated list of start/end values
-    ranges = timemask.split(';')
+    ranges = timemask.split(";")
     for r in ranges:
         limits = r.split()
         if len(limits) == 2:
-            MaskBins(InputWorkspace=workspace,OutputWorkspace= workspace, XMin= limits[0] ,XMax=limits[1])
+            MaskBins(InputWorkspace=workspace, OutputWorkspace=workspace, XMin=limits[0], XMax=limits[1])
 
 
-def QuadrantXML(centre,rmin,rmax,quadrant):
-    cin_id = 'cyl-in'
-    xmlstring = InfiniteCylinderXML(cin_id, centre, rmin, [0,0,1])
-    cout_id = 'cyl-out'
-    xmlstring+= InfiniteCylinderXML(cout_id, centre, rmax, [0,0,1])
-    plane1Axis=None
-    plane2Axis=None
-    if quadrant == 'Left':
-        plane1Axis = [-1,1,0]
-        plane2Axis = [-1,-1,0]
-    elif quadrant == 'Right':
-        plane1Axis = [1,-1,0]
-        plane2Axis = [1,1,0]
-    elif quadrant == 'Up':
-        plane1Axis = [1,1,0]
-        plane2Axis = [-1,1,0]
-    elif quadrant == 'Down':
-        plane1Axis = [-1,-1,0]
-        plane2Axis = [1,-1,0]
+def QuadrantXML(centre, rmin, rmax, quadrant):
+    cin_id = "cyl-in"
+    xmlstring = InfiniteCylinderXML(cin_id, centre, rmin, [0, 0, 1])
+    cout_id = "cyl-out"
+    xmlstring += InfiniteCylinderXML(cout_id, centre, rmax, [0, 0, 1])
+    plane1Axis = None
+    plane2Axis = None
+    if quadrant == "Left":
+        plane1Axis = [-1, 1, 0]
+        plane2Axis = [-1, -1, 0]
+    elif quadrant == "Right":
+        plane1Axis = [1, -1, 0]
+        plane2Axis = [1, 1, 0]
+    elif quadrant == "Up":
+        plane1Axis = [1, 1, 0]
+        plane2Axis = [-1, 1, 0]
+    elif quadrant == "Down":
+        plane1Axis = [-1, -1, 0]
+        plane2Axis = [1, -1, 0]
     else:
-        return ''
-    p1id = 'pl-a'
+        return ""
+    p1id = "pl-a"
     xmlstring += InfinitePlaneXML(p1id, centre, plane1Axis)
-    p2id = 'pl-b'
+    p2id = "pl-b"
     xmlstring += InfinitePlaneXML(p2id, centre, plane2Axis)
 
     # The composition of the shape is "(cyl-out (#cyl-in) (pl-a:pl-b))". The breakdown is:
@@ -221,7 +264,7 @@ def QuadrantXML(centre,rmin,rmax,quadrant):
     #    for the slice region we don't want to be masked.
     # 3. Create the intersection between 1 and 2. This will provide a three-quarter wedge of the hollow
     #    cylinder.
-    xmlstring += '<algebra val="(#(' + cout_id + ' (#' + cin_id  + ')) : (' + p1id + ':' + p2id + '))"/>\n'
+    xmlstring += '<algebra val="(#(' + cout_id + " (#" + cin_id + ")) : (" + p1id + ":" + p2id + '))"/>\n'
     return xmlstring
 
 
@@ -234,7 +277,7 @@ def getWorkspaceReference(ws_pointer):
 
 
 def isEventWorkspace(ws_reference):
-    return isinstance(getWorkspaceReference(ws_reference),IEventWorkspace)
+    return isinstance(getWorkspaceReference(ws_reference), IEventWorkspace)
 
 
 def getBinsBoundariesFromWorkspace(ws_reference):
@@ -242,12 +285,12 @@ def getBinsBoundariesFromWorkspace(ws_reference):
     Xvalues = ws_reference.dataX(0)
     binning = str(Xvalues[0])
     binGap = Xvalues[1] - Xvalues[0]
-    binning = binning + ',' + str(binGap)
+    binning = binning + "," + str(binGap)
     for j in range(2, len(Xvalues)):
-        nextBinGap = Xvalues[j] - Xvalues[j-1]
+        nextBinGap = Xvalues[j] - Xvalues[j - 1]
         if nextBinGap != binGap:
             binGap = nextBinGap
-            binning = binning + ',' + str(Xvalues[j-1]) + ',' + str(binGap)
+            binning = binning + "," + str(Xvalues[j - 1]) + "," + str(binGap)
     binning = binning + "," + str(Xvalues[-1])
     return binning
 
@@ -261,15 +304,15 @@ def getFilePathFromWorkspace(ws):
     try:
         for hist in ws_pointer.getHistory():
             try:
-                if 'Load' in hist.name():
-                    file_path = hist.getPropertyValue('Filename')
+                if "Load" in hist.name():
+                    file_path = hist.getPropertyValue("Filename")
             # pylint: disable=bare-except
             except:
                 pass
     except:
         try:
             hist = ws_pointer.getHistory().lastAlgorithm()
-            file_path = hist.getPropertyValue('Filename')
+            file_path = hist.getPropertyValue("Filename")
         except:
             raise RuntimeError("Failed while looking for file in workspace: " + str(ws))
 
@@ -278,7 +321,7 @@ def getFilePathFromWorkspace(ws):
     return file_path
 
 
-def fromEvent2Histogram(ws_event, ws_monitor, binning = ""):
+def fromEvent2Histogram(ws_event, ws_monitor, binning=""):
     """Transform an event mode workspace into a histogram workspace.
     It does conjoin the monitor and the workspace as it is expected from the current
     SANS data inside ISIS.
@@ -293,14 +336,13 @@ def fromEvent2Histogram(ws_event, ws_monitor, binning = ""):
     """
     assert ws_monitor is not None
 
-    name = '__monitor_tmp'
+    name = "__monitor_tmp"
 
     if binning != "":
         aux_hist = Rebin(ws_event, binning, False)
         Rebin(InputWorkspace=ws_monitor, Params=binning, PreserveEvents=False, OutputWorkspace=name)
     else:
-        aux_hist = RebinToWorkspace(WorkspaceToRebin=ws_event, WorkspaceToMatch=ws_monitor,
-                                    PreserveEvents=False)
+        aux_hist = RebinToWorkspace(WorkspaceToRebin=ws_event, WorkspaceToMatch=ws_monitor, PreserveEvents=False)
         ws_monitor.clone(OutputWorkspace=name)
 
     ConjoinWorkspaces(name, aux_hist, CheckOverlapping=True)
@@ -313,43 +355,44 @@ def fromEvent2Histogram(ws_event, ws_monitor, binning = ""):
 
 def getChargeAndTime(ws_event):
     r = ws_event.getRun()
-    charges = r.getLogData('proton_charge')
+    charges = r.getLogData("proton_charge")
     total_charge = sum(charges.value)
-    time_passed = (charges.times[-1] - charges.times[0]) / np.timedelta64(1, 's')
+    time_passed = (charges.times[-1] - charges.times[0]) / np.timedelta64(1, "s")
     return total_charge, time_passed
 
 
 def sliceByTimeWs(ws_event, time_start=None, time_stop=None):
     def formatTime(time_val):
         return "_T%.1f" % time_val
+
     params = dict()
-    outname=str(ws_event)
+    outname = str(ws_event)
     if time_start:
-        outname +=formatTime(time_start)
-        params['StartTime'] = time_start
+        outname += formatTime(time_start)
+        params["StartTime"] = time_start
     if time_stop:
         outname += formatTime(time_stop)
-        params['StopTime'] = time_stop
+        params["StopTime"] = time_stop
 
-    params['OutputWorkspace'] = outname
+    params["OutputWorkspace"] = outname
     sliced_ws = FilterByTime(ws_event, **params)
     return sliced_ws
 
 
 def slice2histogram(ws_event, time_start, time_stop, monitor, binning=""):
     """Return the histogram of the sliced event and a tuple with the following:
-       - total time of the experiment
-       - total charge
-       - time of sliced data
-       - charge of sliced data
-       @param ws_event pointer to the event workspace
-       @param time_start: the minimum value to filter. Pass -1 to get the minimum available
-       @param time_stop: the maximum value to filter. Pass -1 to get the maximum available
-       @param monitor: pointer to the monitor workspace
-       @param binning: optional binning string to use instead of the binning from the monitor
+    - total time of the experiment
+    - total charge
+    - time of sliced data
+    - charge of sliced data
+    @param ws_event pointer to the event workspace
+    @param time_start: the minimum value to filter. Pass -1 to get the minimum available
+    @param time_stop: the maximum value to filter. Pass -1 to get the maximum available
+    @param monitor: pointer to the monitor workspace
+    @param binning: optional binning string to use instead of the binning from the monitor
     """
     if not isEventWorkspace(ws_event):
-        raise RuntimeError("The workspace "+str(ws_event)+ " is not a valid Event workspace")
+        raise RuntimeError("The workspace " + str(ws_event) + " is not a valid Event workspace")
 
     tot_c, tot_t = getChargeAndTime(ws_event)
 
@@ -360,19 +403,19 @@ def slice2histogram(ws_event, time_start, time_stop, monitor, binning=""):
     if time_start == -1:
         time_start = 0.0
     if time_stop == -1:
-        time_stop = tot_t+0.001
+        time_stop = tot_t + 0.001
 
     sliced_ws = sliceByTimeWs(ws_event, time_start, time_stop)
     sliced_ws = RenameWorkspace(sliced_ws, OutputWorkspace=ws_event.name())
 
     part_c, part_t = getChargeAndTime(sliced_ws)
-    scaled_monitor = monitor * (part_c/tot_c)
+    scaled_monitor = monitor * (part_c / tot_c)
 
     hist = fromEvent2Histogram(sliced_ws, scaled_monitor, binning)
     return hist, (tot_t, tot_c, part_t, part_c)
 
 
-def sliceParser(str_to_parser): # noqa: C901
+def sliceParser(str_to_parser):  # noqa: C901
     """
     Create a list of boundaries from a string defing the slices.
     Valid syntax is:
@@ -389,12 +432,12 @@ def sliceParser(str_to_parser): # noqa: C901
     It does not accept negative values.
 
     """
-    num_pat = r'(\d+(?:\.\d+)?(?:[eE][+-]\d+)?)' # float without sign
-    slice_pat = num_pat + r'-' + num_pat
-    lowbound = '>'+num_pat
-    upbound = '<'+num_pat
-    sss_pat = num_pat+r':'+num_pat+r':'+num_pat
-    exception_pattern = 'Invalid input for Slicer: %s'
+    num_pat = r"(\d+(?:\.\d+)?(?:[eE][+-]\d+)?)"  # float without sign
+    slice_pat = num_pat + r"-" + num_pat
+    lowbound = ">" + num_pat
+    upbound = "<" + num_pat
+    sss_pat = num_pat + r":" + num_pat + r":" + num_pat
+    exception_pattern = "Invalid input for Slicer: %s"
     MARK = -1
 
     def _check_match(inpstr, patternstr, qtde_nums):
@@ -402,7 +445,7 @@ def sliceParser(str_to_parser): # noqa: C901
         if match:
             answer = match.groups()
             if len(answer) != qtde_nums:
-                raise SyntaxError(exception_pattern %(inpstr))
+                raise SyntaxError(exception_pattern % (inpstr))
             return [float(answer[i]) for i in range(qtde_nums)]
         else:
             return False
@@ -458,10 +501,10 @@ def sliceParser(str_to_parser): # noqa: C901
     if not str_to_parser:
         return [[MARK, MARK]]
 
-    parts = str_to_parser.split(',')
+    parts = str_to_parser.split(",")
     result = []
     for inps in parts:
-        inps = inps.replace(' ','')
+        inps = inps.replace(" ", "")
         aux_res = _extract_simple_input(inps)
         if aux_res:
             result.append(aux_res)
@@ -470,7 +513,7 @@ def sliceParser(str_to_parser): # noqa: C901
         if aux_res:
             result += aux_res
             continue
-        raise SyntaxError('Invalid input '+ str_to_parser +'. Failed caused by this term:'+inps)
+        raise SyntaxError("Invalid input " + str_to_parser + ". Failed caused by this term:" + inps)
 
     return result
 
@@ -481,7 +524,7 @@ def getFileAndName(incomplete_path):
         # do not catch exception, let it goes.
         this_path = FileFinder.findRuns(incomplete_path)
         # if list, get first value
-        if hasattr(this_path, '__iter__'):
+        if hasattr(this_path, "__iter__"):
             this_path = this_path[0]
 
     # this_path contains the full_path
@@ -552,10 +595,7 @@ def get_masked_det_ids_from_mask_file(mask_file_path, idf_path):
     @returns the list of detector IDs that were masked in the file
     """
     mask_ws_name = "__temp_mask"
-    LoadMask(
-        Instrument=idf_path,
-        InputFile=mask_file_path,
-        OutputWorkspace=mask_ws_name)
+    LoadMask(Instrument=idf_path, InputFile=mask_file_path, OutputWorkspace=mask_ws_name)
     det_ids = list(_yield_masked_det_ids(mtd[mask_ws_name]))
     DeleteWorkspace(Workspace=mask_ws_name)
 
@@ -585,7 +625,7 @@ def mask_detectors_with_masking_ws(ws_name, masking_ws_name):
 
 
 def check_child_ws_for_name_and_type_for_added_eventdata(wsGroup, number_of_entries=None):
-    '''
+    """
     Ensure that the while loading added event data, we are dealing with
     1. The correct naming convention. For event data this is the run number,
        an add tag and possibly underscores and numbers when the same workspace
@@ -595,14 +635,14 @@ def check_child_ws_for_name_and_type_for_added_eventdata(wsGroup, number_of_entr
     2. The correct workspace types.
     @param wsGroup ::  workspace group.
     @param number_of_entries:: how many entries the group workspace may have.
-    '''
+    """
     # Check if there are only two children in the group workspace
     if number_of_entries is not None:
         if len(wsGroup) != number_of_entries:
             return False
     # There has to be an even number of workspaces, for each data workspace
     # there has to be a monitor workspace
-    if len(wsGroup)%2 != 0:
+    if len(wsGroup) % 2 != 0:
         return False
 
     assert isinstance(wsGroup, WorkspaceGroup)
@@ -627,14 +667,14 @@ def check_child_ws_for_name_and_type_for_added_eventdata(wsGroup, number_of_entr
 
 
 def extract_child_ws_for_added_eventdata(ws_group, appendix):
-    '''
+    """
     Extract the the child workspaces from a workspace group which was
     created by adding event data. The workspace group must contains a data
     workspace which is an EventWorkspace and a monitor workspace which is a
     matrix workspace.
     @param ws_group :: workspace group.
     @param appendix :: what to append to the names of the child workspaces
-    '''
+    """
     # Store the name of the group workspace in a string
     ws_group_name = ws_group.name()
 
@@ -644,9 +684,10 @@ def extract_child_ws_for_added_eventdata(ws_group, appendix):
         ws_handles.append(ws_group.getItem(index))
 
     if len(ws_handles) % 2:
-        raise RuntimeError("Expected two child workspaces when loading added event data."
-                           "Please make sure that you have loaded added event data which was generated by the Add tab of the SANS Gui."
-                           )
+        raise RuntimeError(
+            "Expected two child workspaces when loading added event data."
+            "Please make sure that you have loaded added event data which was generated by the Add tab of the SANS Gui."
+        )
 
     # Now ungroup the group
     UnGroupWorkspace(ws_group)
@@ -658,7 +699,7 @@ def extract_child_ws_for_added_eventdata(ws_group, appendix):
         old_workspace_name = ws_handle.name()
         # Get the index of the multiperiod workspace if it is present
         new_workspace_name = get_new_workspace_name(appendix, old_workspace_name, ws_group_name)
-        RenameWorkspace(InputWorkspace = ws_handle, OutputWorkspace=new_workspace_name)
+        RenameWorkspace(InputWorkspace=ws_handle, OutputWorkspace=new_workspace_name)
         if appendix in old_workspace_name:
             monitor_workspaces.append(new_workspace_name)
         else:
@@ -668,13 +709,13 @@ def extract_child_ws_for_added_eventdata(ws_group, appendix):
         raise RuntimeError("The number of data workspaces does not match the number of monitor workspaces.")
 
     if len(data_workspaces) > 1 and len(monitor_workspaces) > 1:
-        GroupWorkspaces(InputWorkspaces = monitor_workspaces, OutputWorkspace = ws_group_name + appendix)
-        GroupWorkspaces(InputWorkspaces = data_workspaces, OutputWorkspace = ws_group_name)
+        GroupWorkspaces(InputWorkspaces=monitor_workspaces, OutputWorkspace=ws_group_name + appendix)
+        GroupWorkspaces(InputWorkspaces=data_workspaces, OutputWorkspace=ws_group_name)
 
 
 def get_new_workspace_name(appendix, old_workspace_name, ws_group_name):
     new_workspace_name = ws_group_name
-    final_number = re.search(r'_(\d+)$', old_workspace_name)
+    final_number = re.search(r"_(\d+)$", old_workspace_name)
     if final_number is not None:
         new_workspace_name += final_number.group(0)
 
@@ -684,7 +725,6 @@ def get_new_workspace_name(appendix, old_workspace_name, ws_group_name):
 
 
 class WorkspaceType(object):
-
     class Event(object):
         pass
 
@@ -703,10 +743,10 @@ class WorkspaceType(object):
 
 def get_number_of_periods_from_file(file_name):
     full_file_path = FileFinder.findRuns(file_name)
-    if hasattr(full_file_path, '__iter__'):
+    if hasattr(full_file_path, "__iter__"):
         full_file_path = full_file_path[0]
     try:
-        with h5.File(full_file_path, 'r') as h5_file:
+        with h5.File(full_file_path, "r") as h5_file:
             first_entry = h5_file["raw_data_1"]
             period_group = first_entry["periods"]
             proton_charge_data_set = period_group["proton_charge"]
@@ -725,9 +765,9 @@ def check_if_is_event_data(file_name):
                                                  |--Attribute: NX_class = NXevent_data
     """
     full_file_path = FileFinder.findRuns(file_name)
-    if hasattr(full_file_path, '__iter__'):
+    if hasattr(full_file_path, "__iter__"):
         file_name = full_file_path[0]
-    with h5.File(file_name, 'r') as h5_file:
+    with h5.File(file_name, "r") as h5_file:
         # Open first entry
         keys = list(h5_file.keys())
         first_entry = h5_file[keys[0]]
@@ -735,7 +775,7 @@ def check_if_is_event_data(file_name):
         is_event_mode = False
         for value in list(first_entry.values()):
             if "NX_class" in value.attrs:
-                if "NXevent_data" == value.attrs["NX_class"].decode() :
+                if "NXevent_data" == value.attrs["NX_class"].decode():
                     is_event_mode = True
                     break
 
@@ -744,11 +784,11 @@ def check_if_is_event_data(file_name):
 
 def is_nexus_file(file_name):
     full_file_path = FileFinder.findRuns(file_name)
-    if hasattr(full_file_path, '__iter__'):
+    if hasattr(full_file_path, "__iter__"):
         file_name = full_file_path[0]
     is_nexus = True
     try:
-        with h5.File(file_name, 'r') as h5_file:
+        with h5.File(file_name, "r") as h5_file:
             keys = list(h5_file.keys())
             nexus_test = "raw_data_1" in keys or "mantid_workspace_1" in keys
             is_nexus = True if nexus_test else False
@@ -783,11 +823,11 @@ def bundle_added_event_data_as_group(out_file_name, out_file_monitors_name, is_m
     # Extract the file name and the extension
     file_name, file_extension = os.path.splitext(out_file_name)
     event_data_temp = file_name + ADDED_EVENT_DATA_TAG
-    Load(Filename = out_file_name, OutputWorkspace = event_data_temp)
+    Load(Filename=out_file_name, OutputWorkspace=event_data_temp)
     event_data_ws = mtd[event_data_temp]
 
-    monitor_temp = file_name + '_monitors' + ADDED_EVENT_DATA_TAG
-    Load(Filename = out_file_monitors_name, OutputWorkspace = monitor_temp)
+    monitor_temp = file_name + "_monitors" + ADDED_EVENT_DATA_TAG
+    Load(Filename=out_file_monitors_name, OutputWorkspace=monitor_temp)
 
     monitor_ws = mtd[monitor_temp]
 
@@ -816,11 +856,11 @@ def bundle_added_event_data_as_group(out_file_name, out_file_monitors_name, is_m
     else:
         workspace_names_to_group.append(monitor_ws.name())
 
-    GroupWorkspaces(InputWorkspaces = workspace_names_to_group, OutputWorkspace = out_group_ws_name)
+    GroupWorkspaces(InputWorkspaces=workspace_names_to_group, OutputWorkspace=out_group_ws_name)
     group_ws = mtd[out_group_ws_name]
 
     # Save the group
-    SaveNexusProcessed(InputWorkspace = group_ws, Filename = out_group_file_name, Append=False)
+    SaveNexusProcessed(InputWorkspace=group_ws, Filename=out_group_file_name, Append=False)
     # Delete the files and the temporary workspaces
     if out_group_ws_name in mtd:
         DeleteWorkspace(out_group_ws_name)
@@ -829,11 +869,11 @@ def bundle_added_event_data_as_group(out_file_name, out_file_monitors_name, is_m
 
 
 def get_full_path_for_added_event_data(file_name):
-    path,base = os.path.split(file_name)
-    if path == '' or base not in os.listdir(path):
-        path = config['defaultsave.directory'] + path
+    path, base = os.path.split(file_name)
+    if path == "" or base not in os.listdir(path):
+        path = config["defaultsave.directory"] + path
         # If the path is still an empty string check in the current working directory
-        if path == '':
+        if path == "":
             path = os.getcwd()
         assert base in os.listdir(path)
     full_path_name = os.path.join(path, base)
@@ -850,7 +890,7 @@ def extract_spectra(ws, det_ids, output_ws_name):
     @param output_ws_name :: the name of the resulting workspace
     @returns :: a workspace containing the extracted spectra
     """
-    ExtractSpectra(InputWorkspace=ws,OutputWorkspace=output_ws_name, DetectorList=det_ids)
+    ExtractSpectra(InputWorkspace=ws, OutputWorkspace=output_ws_name, DetectorList=det_ids)
     return mtd[output_ws_name]
 
 
@@ -874,17 +914,17 @@ def get_masked_det_ids(ws):
 
 
 def create_zero_error_free_workspace(input_workspace_name, output_workspace_name):
-    '''
+    """
     Creates a cloned workspace where all zero-error values have been replaced with a large value
     @param input_workspace_name :: The input workspace name
     @param output_workspace_name :: The output workspace name
     @returns a message and a completion flag
-    '''
+    """
     # Load the input workspace
     message = ""
     complete = False
     if input_workspace_name not in mtd:
-        message = 'Failed to create a zero error free cloned workspace: The input workspace does not seem to exist.'
+        message = "Failed to create a zero error free cloned workspace: The input workspace does not seem to exist."
         return message, complete
 
     # Create a cloned workspace
@@ -893,7 +933,7 @@ def create_zero_error_free_workspace(input_workspace_name, output_workspace_name
     # Remove all zero errors from the cloned workspace
     CloneWorkspace(InputWorkspace=ws_in, OutputWorkspace=output_workspace_name)
     if output_workspace_name not in mtd:
-        message = 'Failed to create a zero error free cloned workspace: A clone could not be created.'
+        message = "Failed to create a zero error free cloned workspace: A clone could not be created."
         return message, complete
 
     ws_out = mtd[output_workspace_name]
@@ -902,62 +942,61 @@ def create_zero_error_free_workspace(input_workspace_name, output_workspace_name
         complete = True
     except ValueError:
         DeleteWorkspace(Workspace=output_workspace_name)
-        message = 'Failed to create a zero error free cloned workspace: Could not remove the zero errors.'
+        message = "Failed to create a zero error free cloned workspace: Could not remove the zero errors."
 
     return message, complete
 
 
 def remove_zero_errors_from_workspace(ws):
-    '''
+    """
     Removes the zero errors from a Matrix workspace
     @param ws :: The input workspace
-    '''
+    """
     # Make sure we are dealing with a MatrixWorkspace
-    if not isinstance(ws, MatrixWorkspace) or isinstance(ws,IEventWorkspace):
-        raise ValueError('Cannot remove zero errors from a workspace which is not of type MatrixWorkspace.')
+    if not isinstance(ws, MatrixWorkspace) or isinstance(ws, IEventWorkspace):
+        raise ValueError("Cannot remove zero errors from a workspace which is not of type MatrixWorkspace.")
     # Iterate over the workspace and replace the zero values with a large default value
     numSpectra = ws.getNumberHistograms()
     errors = ws.dataE
-    for index in range(0,numSpectra):
+    for index in range(0, numSpectra):
         spectrum = errors(index)
         spectrum[spectrum <= 0.0] = ZERO_ERROR_DEFAULT
 
 
 def delete_zero_error_free_workspace(input_workspace_name):
-    '''
+    """
     Deletes the zero-error free workspace
     @param ws :: The input workspace
-    '''
+    """
     complete = False
     message = ""
     if input_workspace_name in mtd:
         DeleteWorkspace(Workspace=input_workspace_name)
         complete = True
     else:
-        message = 'Failed to delete a zero-error free workspace'
+        message = "Failed to delete a zero-error free workspace"
     return message, complete
 
 
 def is_valid_ws_for_removing_zero_errors(input_workspace_name):
-    '''
+    """
     Check if a workspace has been created via Q1D or Qxy.
     @param ws :: The input workspace
-    '''
+    """
     isValid = False
     message = ""
 
     ws = mtd[input_workspace_name]
-    workspaceHistory= ws.getHistory()
+    workspaceHistory = ws.getHistory()
     histories = workspaceHistory.getAlgorithmHistories()
     for history in histories:
         name = history.name()
-        if name == 'Q1D' or name == 'Qxy':
+        if name == "Q1D" or name == "Qxy":
             isValid = True
             break
 
     if not isValid:
-        message = ("Workspace does not seem valid for zero error removal."
-                   "It must have been reduced with Q1D or Qxy.")
+        message = "Workspace does not seem valid for zero error removal." "It must have been reduced with Q1D or Qxy."
 
     return message, isValid
 
@@ -994,11 +1033,13 @@ class AddOperation(object):
                                 Only applicable for Overlay. Default is False.
         """
         current_time_shift = self.time_shifter.get_Nth_time_shift(run_to_add)
-        self.adder.add(LHS_workspace=LHS_workspace,
-                       RHS_workspace=RHS_workspace,
-                       output_workspace=output_workspace,
-                       time_shift=current_time_shift,
-                       estimate_logs=estimate_logs)
+        self.adder.add(
+            LHS_workspace=LHS_workspace,
+            RHS_workspace=RHS_workspace,
+            output_workspace=output_workspace,
+            time_shift=current_time_shift,
+            estimate_logs=estimate_logs,
+        )
 
 
 class CombineWorkspacesFactory(object):
@@ -1061,7 +1102,9 @@ def _estimate_good_log(pc, num):
         sanslog.notice("A corrected pulsetime of {} has been estimated.".format(estimated_time))
 
 
-def _get_average_time_difference(pc, ):
+def _get_average_time_difference(
+    pc,
+):
     """
     Get the average difference between consecutive values,
     in nanoseconds
@@ -1071,8 +1114,8 @@ def _get_average_time_difference(pc, ):
     diffs = []
     for i in range(pc.size() - 1):
         first = pc.nthTime(i)
-        second = pc.nthTime(i+1)
-        diffs.append(second.totalNanoseconds()-first.totalNanoseconds())
+        second = pc.nthTime(i + 1)
+        diffs.append(second.totalNanoseconds() - first.totalNanoseconds())
     return np.mean(diffs)
 
 
@@ -1151,10 +1194,9 @@ class OverlayWorkspaces(object):
 
         # Create a temporary workspace with shifted time values from RHS, if the shift is necessary
         temp = rhs_ws
-        temp_ws_name = 'shifted'
+        temp_ws_name = "shifted"
         if total_time_shift != 0.0:
-            temp = ChangeTimeZero(InputWorkspace=rhs_ws, OutputWorkspace=temp_ws_name,
-                                  RelativeTimeOffset=total_time_shift)
+            temp = ChangeTimeZero(InputWorkspace=rhs_ws, OutputWorkspace=temp_ws_name, RelativeTimeOffset=total_time_shift)
 
         # Add the LHS and shifted workspace
         Plus(LHSWorkspace=LHS_workspace, RHSWorkspace=temp, OutputWorkspace=output_workspace)
@@ -1172,7 +1214,7 @@ class OverlayWorkspaces(object):
         time_1 = self._get_time_from_proton_charge_log(ws1)
         time_2 = self._get_time_from_proton_charge_log(ws2)
 
-        return float((time_1 - time_2) / np.timedelta64(1, 's'))
+        return float((time_1 - time_2) / np.timedelta64(1, "s"))
 
     def _get_time_from_proton_charge_log(self, ws):
         times = ws.getRun().getProperty("proton_charge").times
@@ -1185,6 +1227,7 @@ class OverlayWorkspaces(object):
             return workspace
         elif isinstance(workspace, str) and mtd.doesExist(workspace):
             return mtd[workspace]
+
 
 # pylint: disable=too-few-public-methods
 
@@ -1204,7 +1247,7 @@ class TimeShifter(object):
         Retrieves the specified additional time shift for the nth addition in seconds.
         :param n :: the nth addition
         """
-        if len(self._time_shifts) >= (n+1):
+        if len(self._time_shifts) >= (n + 1):
             return self._cast_to_float(self._time_shifts[n])
         else:
             return 0.0
@@ -1224,16 +1267,15 @@ def transfer_special_sample_logs(from_ws, to_ws):
     Transfers selected sample logs from one workspace to another
     """
     single_valued_names = ["gd_prtn_chrg"]
-    time_series_names = ['good_uah_log', 'good_frames']
-    type_map = {'good_uah_log': float, 'good_frames': int, "gd_prtn_chrg": float}
+    time_series_names = ["good_uah_log", "good_frames"]
+    type_map = {"good_uah_log": float, "good_frames": int, "gd_prtn_chrg": float}
 
     run_from = from_ws.getRun()
     run_to = to_ws.getRun()
 
     # Populate the time series
     for time_series_name in time_series_names:
-        if (run_from.hasProperty(time_series_name)
-                and run_to.hasProperty(time_series_name)):
+        if run_from.hasProperty(time_series_name) and run_to.hasProperty(time_series_name):
 
             times = run_from.getProperty(time_series_name).times
             values = run_from.getProperty(time_series_name).value
@@ -1247,14 +1289,14 @@ def transfer_special_sample_logs(from_ws, to_ws):
     alg_log.initialize()
     alg_log.setChild(True)
     for single_valued_name in single_valued_names:
-        if (run_from.hasProperty(single_valued_name)
-                and run_to.hasProperty(single_valued_name)):
+        if run_from.hasProperty(single_valued_name) and run_to.hasProperty(single_valued_name):
             value = run_from.getProperty(single_valued_name).value
             alg_log.setProperty("Workspace", to_ws)
             alg_log.setProperty("LogName", single_valued_name)
             alg_log.setProperty("LogText", str(type_map[single_valued_name](value)))
             alg_log.setProperty("LogType", "Number")
             alg_log.execute()
+
 
 # pylint: disable=too-many-instance-attributes
 
@@ -1267,7 +1309,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
 
     def __init__(self, total_time_shift_seconds=0):
         super(CummulativeTimeSeriesPropertyAdder, self).__init__()
-        self._time_series = ['good_uah_log', 'good_frames']
+        self._time_series = ["good_uah_log", "good_frames"]
         self._single_valued = ["gd_prtn_chrg"]
 
         self._original_times_lhs = dict()
@@ -1280,9 +1322,9 @@ class CummulativeTimeSeriesPropertyAdder(object):
 
         self._start_time_lhs = None
         self._start_time_rhs = None
-        self._total_time_shift_nano_seconds = int(total_time_shift_seconds*1e9)
+        self._total_time_shift_nano_seconds = int(total_time_shift_seconds * 1e9)
 
-        self._type_map = {'good_uah_log': float, 'good_frames': int, "gd_prtn_chrg": float}
+        self._type_map = {"good_uah_log": float, "good_frames": int, "gd_prtn_chrg": float}
 
     def extract_sample_logs_from_workspace(self, lhs, rhs):
         """
@@ -1294,8 +1336,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
         run_rhs = rhs.getRun()
         # Get the cumulative time s
         for element in self._time_series:
-            if (run_lhs.hasProperty(element)
-                    and run_rhs.hasProperty(element)):
+            if run_lhs.hasProperty(element) and run_rhs.hasProperty(element):
                 # Get values for lhs
                 property_lhs = run_lhs.getProperty(element)
                 self._original_times_lhs[element] = property_lhs.times
@@ -1307,8 +1348,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
                 self._original_values_rhs[element] = property_rhs.value
 
         for element in self._single_valued:
-            if (run_lhs.hasProperty(element)
-                    and run_rhs.hasProperty(element)):
+            if run_lhs.hasProperty(element) and run_rhs.hasProperty(element):
                 # Get the values for lhs
                 property_lhs = run_lhs.getProperty(element)
                 self._original_single_valued_lhs[element] = property_lhs.value
@@ -1318,10 +1358,11 @@ class CummulativeTimeSeriesPropertyAdder(object):
                 self._original_single_valued_rhs[element] = property_rhs.value
 
         log_name_start_time = "start_time"
-        if (run_lhs.hasProperty(log_name_start_time)
-                and run_rhs.hasProperty(log_name_start_time)):
+        if run_lhs.hasProperty(log_name_start_time) and run_rhs.hasProperty(log_name_start_time):
+
             def convert_to_date(val):
                 return DateAndTime(val) if isinstance(val, str) else val
+
             self._start_time_lhs = convert_to_date(run_lhs.getProperty(log_name_start_time).value)
             self._start_time_rhs = convert_to_date(run_rhs.getProperty(log_name_start_time).value)
 
@@ -1331,8 +1372,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
         :param workspace: the workspace which requires correction.
         """
         for element in self._time_series:
-            if (element in self._original_times_rhs
-                    and element in self._original_values_rhs):
+            if element in self._original_times_rhs and element in self._original_values_rhs:
                 run = workspace.getRun()
                 prop = run.getProperty(element)
                 prop.clear()
@@ -1356,8 +1396,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
         for element in self._single_valued:
             if run.hasProperty(element):
                 type_converter = self._type_map[element]
-                new_value = type_converter(self._original_single_valued_lhs[element]
-                                           + self._original_single_valued_rhs[element])
+                new_value = type_converter(self._original_single_valued_lhs[element] + self._original_single_valued_rhs[element])
                 alg_log.setProperty("Workspace", workspace)
                 alg_log.setProperty("LogName", element)
                 alg_log.setProperty("LogText", str(new_value))
@@ -1381,8 +1420,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
         times_rhs = self._shift_time_series(times_rhs)
 
         # Now merge and sort the two entries
-        time_merged, value_merged = self._create_merged_values_and_times(times_lhs, values_raw_lhs,
-                                                                         times_rhs, values_raw_rhs)
+        time_merged, value_merged = self._create_merged_values_and_times(times_lhs, values_raw_lhs, times_rhs, values_raw_rhs)
 
         # Create cummulated values
         time_final = time_merged
@@ -1435,7 +1473,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
             if index == 0:
                 raw_values.append(values[index])
             else:
-                element = values[index] - values[index-1]
+                element = values[index] - values[index - 1]
                 raw_values.append(element)
         return raw_values
 
@@ -1502,7 +1540,7 @@ def load_monitors_for_multiperiod_event_data(workspace, data_file, monitor_appen
     LoadNexusMonitors(Filename=data_file, OutputWorkspace=mon_ws_group_name)
     mon_ws = mtd["temp_ws_group"]
     # Rename all monitor workspces
-    rename_monitors_for_multiperiod_event_data(monitor_workspace = mon_ws, workspace=workspace, appendix=monitor_appendix)
+    rename_monitors_for_multiperiod_event_data(monitor_workspace=mon_ws, workspace=workspace, appendix=monitor_appendix)
 
 
 def rename_monitors_for_multiperiod_event_data(monitor_workspace, workspace, appendix):
@@ -1515,7 +1553,7 @@ def rename_monitors_for_multiperiod_event_data(monitor_workspace, workspace, app
     """
     if len(monitor_workspace) != len(workspace):
         raise RuntimeError("The workspace and monitor workspace lengths do not match.")
-    for index in range(0,len(monitor_workspace)):
+    for index in range(0, len(monitor_workspace)):
         monitor_name = workspace[index].name() + appendix
         RenameWorkspace(InputWorkspace=monitor_workspace[index], OutputWorkspace=monitor_name)
     # Finally rename the group workspace
@@ -1562,7 +1600,7 @@ def is_valid_xml_file_list(input_value):
     if not isinstance(input_value, list) or not input or len(input_value) == 0:
         return False
     for element in input_value:
-        if not isinstance(element, str) or not element.endswith('.xml'):
+        if not isinstance(element, str) or not element.endswith(".xml"):
             return False
     return True
 
@@ -1572,7 +1610,7 @@ def convert_from_string_list(to_convert):
     Convert a Python string list to a comma-separted string
     :param to_convert :: a string list input
     """
-    return ','.join(element.replace(" ", "") for element in to_convert)
+    return ",".join(element.replace(" ", "") for element in to_convert)
 
 
 def convert_to_string_list(to_convert):
@@ -1582,22 +1620,22 @@ def convert_to_string_list(to_convert):
     :param to_convert :: a comma-spearated string
     """
     string_list = to_convert.replace(" ", "").split(",")
-    output_string = "[" + ','.join("'"+element+"'" for element in string_list) + "]"
+    output_string = "[" + ",".join("'" + element + "'" for element in string_list) + "]"
     return output_string
 
 
 def convert_to_list_of_strings(to_convert):
-    '''
+    """
     Converts a string of comma-separted values to a list of strings
     @param to_convert: the string to convert
     @returns a list of strings
-    '''
+    """
     values = to_convert.split(",")
     return [element.strip() for element in values]
 
 
 def can_load_as_event_workspace(filename):
-    '''
+    """
     Check if an file can be loaded into an event workspace
     Currently we check if the file
     1. can be loaded with LoadEventNexus
@@ -1605,7 +1643,7 @@ def can_load_as_event_workspace(filename):
     Note that this assumes a specific directory structure for the nexus file.
     @param filename: the name of the input file name
     @returns true if the file can be loaded as an event workspace else false
-    '''
+    """
     is_event_workspace = False
 
     # Check if it can be loaded with LoadEventNexus
@@ -1618,11 +1656,11 @@ def can_load_as_event_workspace(filename):
         try:
             # We only check the first entry in the root
             # and check for event_eventworkspace in the next level
-            with h5.File(filename, 'r') as h5f:
+            with h5.File(filename, "r") as h5f:
                 try:
-                    rootKeys = list(h5f.keys()) # python3 fix
+                    rootKeys = list(h5f.keys())  # python3 fix
                     entry0 = h5f[rootKeys[0]]
-                    ew = entry0['event_workspace']
+                    ew = entry0["event_workspace"]
                     is_event_workspace = ew is not None
                 except:
                     pass
@@ -1632,12 +1670,12 @@ def can_load_as_event_workspace(filename):
 
 
 def get_start_q_and_end_q_values(rear_data_name, front_data_name, rescale_shift):
-    '''
+    """
     Determines the min and max values for Q which are subsequently used for fitting.
     @param rear_data_name: name of the rear data set
     @param front_data_name: name of the the front data set
     @param rescale_shift: the rescale and shift object
-    '''
+    """
     min_q = None
     max_q = None
     front_data = mtd[front_data_name]
@@ -1664,9 +1702,8 @@ def get_start_q_and_end_q_values(rear_data_name, front_data_name, rescale_shift)
     else:
         raise RuntimeError("The REAR detector does not seem to contain q values")
 
-    if  rear_q_max < front_q_min:
-        raise RuntimeError("The min value of the FRONT detector data set is larger"
-                           "than the max value of the REAR detector data set")
+    if rear_q_max < front_q_min:
+        raise RuntimeError("The min value of the FRONT detector data set is larger" "than the max value of the REAR detector data set")
 
     # Get the min and max range
     min_q = max(rear_q_min, front_q_min)
@@ -1674,45 +1711,45 @@ def get_start_q_and_end_q_values(rear_data_name, front_data_name, rescale_shift)
 
     if rescale_shift.qRangeUserSelected:
         min_q = max(min_q, rescale_shift.qMin)
-        max_q = min(max_q,rescale_shift.qMax)
+        max_q = min(max_q, rescale_shift.qMax)
 
     return min_q, max_q
 
 
 def get_error_corrected_front_and_rear_data_sets(front_data, rear_data, q_min, q_max):
-    '''
+    """
     Transfers the error data from the front data to the rear data
     @param front_data: the front data set
     @param rear_data: the rear data set
     @param q_min: the minimal q value
     @param q_max: the maximal q value
-    '''
+    """
     # First we want to crop the workspaces
-    front_data_cropped = CropWorkspace(InputWorkspace=front_data, XMin = q_min, XMax = q_max)
+    front_data_cropped = CropWorkspace(InputWorkspace=front_data, XMin=q_min, XMax=q_max)
     # For the rear data set
-    rear_data_cropped = CropWorkspace(InputWorkspace=rear_data, XMin = q_min, XMax = q_max)
+    rear_data_cropped = CropWorkspace(InputWorkspace=rear_data, XMin=q_min, XMax=q_max)
 
     # Now transfer the error from front data to the rear data workspace
     # This works only if we have a single QMod spectrum in the workspaces
     front_error = front_data_cropped.dataE(0)
     rear_error = rear_data_cropped.dataE(0)
 
-    rear_error_squared = rear_error*rear_error
-    front_error_squared = front_error*front_error
+    rear_error_squared = rear_error * rear_error
+    front_error_squared = front_error * front_error
 
-    corrected_error_squared =  rear_error_squared + front_error_squared
+    corrected_error_squared = rear_error_squared + front_error_squared
     corrected_error = np.sqrt(corrected_error_squared)
-    rear_error[0:len(rear_error)] = corrected_error[0:len(rear_error)]
+    rear_error[0 : len(rear_error)] = corrected_error[0 : len(rear_error)]
 
     return front_data_cropped, rear_data_cropped
 
 
 def is_1D_workspace(workspace):
-    '''
+    """
     Check if the workspace is 1D, ie if it has only a single spectrum
     @param workspace: the workspace to check
     @returns true if the workspace has a single spectrum else false
-    '''
+    """
     if workspace.getNumberHistograms() == 1:
         return True
     else:
@@ -1720,25 +1757,25 @@ def is_1D_workspace(workspace):
 
 
 def meter_2_millimeter(num):
-    '''
+    """
     Converts from m to mm
     @param float in m
     @returns float in mm
-    '''
-    return num*1000.
+    """
+    return num * 1000.0
 
 
 def millimeter_2_meter(num):
-    '''
+    """
     Converts from mm to m
     @param float in mm
     @returns float in m
-    '''
-    return num/1000.
+    """
+    return num / 1000.0
 
 
 def correct_q_resolution_for_can(original_workspace, can_workspace, subtracted_workspace):
-    '''
+    """
     We need to transfer the DX error values from the original workspaces to the subtracted
     workspace. Richard wants us to ignore potential DX values for the CAN workspace (they
     would be very small any way). The Q Resolution functionality only exists currently
@@ -1746,14 +1783,13 @@ def correct_q_resolution_for_can(original_workspace, can_workspace, subtracted_w
     @param original_workspace: the original workspace
     @param can_workspace: the can workspace
     @param subtracted_workspace: the subtracted workspace
-    '''
+    """
     if original_workspace.getNumberHistograms() == 1 and original_workspace.hasDx(0):
         subtracted_workspace.setDx(0, original_workspace.dataDx(0))
 
 
-def correct_q_resolution_for_merged(count_ws_front, count_ws_rear,
-                                    output_ws, scale):
-    '''
+def correct_q_resolution_for_merged(count_ws_front, count_ws_rear, output_ws, scale):
+    """
     We need to transfer the DX error values from the original workspaces to the merged worksapce.
     We have:
     C(Q) = Sum_all_lambda_for_particular_Q(Counts(lambda))
@@ -1768,15 +1804,16 @@ def correct_q_resolution_for_merged(count_ws_front, count_ws_rear,
     @param count_ws_front: the front counts
     @param count_ws_rear: the rear counts
     @param output_ws: the output workspace
-    '''
+    """
+
     def divide_q_resolution_by_counts(q_res, counts):
         # We are dividing DX by Y.
-        q_res_buffer = np.divide(q_res,counts)
+        q_res_buffer = np.divide(q_res, counts)
         return q_res_buffer
 
     def multiply_q_resolution_by_counts(q_res, counts):
         # We are dividing DX by Y.
-        q_res_buffer = np.multiply(q_res,counts)
+        q_res_buffer = np.multiply(q_res, counts)
         return q_res_buffer
 
     if count_ws_rear.getNumberHistograms() != 1:
@@ -1792,60 +1829,59 @@ def correct_q_resolution_for_merged(count_ws_front, count_ws_rear,
     counts_rear = count_ws_rear.readY(0)
 
     # We need to make sure that the workspaces match in length
-    if ((len(q_resolution_front) != len(q_resolution_rear))
-            or (len(counts_front) != len(counts_rear))):
+    if (len(q_resolution_front) != len(q_resolution_rear)) or (len(counts_front) != len(counts_rear)):
         return
 
     # Get everything for the FRONT detector
     q_res_front_norm_free = multiply_q_resolution_by_counts(q_resolution_front, counts_front)
-    q_res_front_norm_free = q_res_front_norm_free*scale
-    counts_front = counts_front*scale
+    q_res_front_norm_free = q_res_front_norm_free * scale
+    counts_front = counts_front * scale
 
     # Get everything for the REAR detector
     q_res_rear_norm_free = multiply_q_resolution_by_counts(q_resolution_rear, counts_rear)
 
     # Now add and divide
-    new_q_res= np.add(q_res_front_norm_free, q_res_rear_norm_free)
-    new_counts = np.add(counts_front,counts_rear)
-    q_resolution = divide_q_resolution_by_counts(new_q_res,new_counts)
+    new_q_res = np.add(q_res_front_norm_free, q_res_rear_norm_free)
+    new_counts = np.add(counts_front, counts_rear)
+    q_resolution = divide_q_resolution_by_counts(new_q_res, new_counts)
 
     # Set the dx error
     output_ws.setDx(0, q_resolution)
 
 
 class MeasurementTimeFromNexusFileExtractor(object):
-    '''
+    """
     Extracts the measurement from a nexus file
-    '''
+    """
 
     def __init__(self):
         super(MeasurementTimeFromNexusFileExtractor, self).__init__()
 
     def _get_str(self, v):
-        return v.tostring().decode('UTF-8')
+        return v.tostring().decode("UTF-8")
 
     def _get_measurement_time_processed_file(self, h5entry):
-        logs = h5entry['logs']
-        end_time = logs['end_time']
-        value = end_time['value']
+        logs = h5entry["logs"]
+        end_time = logs["end_time"]
+        value = end_time["value"]
         return self._get_str(value[0])
 
     def _get_measurement_time_for_non_processed_file(self, h5entry):
-        end_time = h5entry['end_time']
+        end_time = h5entry["end_time"]
         return self._get_str(end_time[0])
 
     def _check_if_processed_nexus_file(self, h5entry):
-        definition = h5entry['definition']
+        definition = h5entry["definition"]
         mantid_definition = self._get_str(definition[0])
         is_processed = True if MANTID_PROCESSED_WORKSPACE_TAG in mantid_definition else False
         return is_processed
 
     def get_measurement_time(self, filename_full):
-        measurement_time = ''
+        measurement_time = ""
         try:
-            with h5.File(filename_full, 'r') as h5f:
+            with h5.File(filename_full, "r") as h5f:
                 try:
-                    rootKeys =  list(h5f.keys())
+                    rootKeys = list(h5f.keys())
                     entry0 = h5f[rootKeys[0]]
                     is_processed_file = self._check_if_processed_nexus_file(entry0)
                     if is_processed_file:
@@ -1860,18 +1896,30 @@ class MeasurementTimeFromNexusFileExtractor(object):
 
 
 def get_measurement_time_from_file(filename):
-    '''
+    """
     This function extracts the measurement time from either a Nexus or a
     Raw file. In the case of a Nexus file it queries the "end_run" entry,
     in the case of a raw file it uses the RawFileInfo algorithm to get
     the relevant dateTime.
     @param filename: the file to check
     @returns the measurement time
-    '''
+    """
+
     def get_month(month_string):
-        month_conversion ={"JAN":"01", "FEB":"02", "MAR":"03", "APR":"04",
-                           "MAY":"05", "JUN":"06", "JUL":"07", "AUG":"08",
-                           "SEP":"09", "OCT":"10", "NOV":"11", "DEC":"12"}
+        month_conversion = {
+            "JAN": "01",
+            "FEB": "02",
+            "MAR": "03",
+            "APR": "04",
+            "MAY": "05",
+            "JUN": "06",
+            "JUL": "07",
+            "AUG": "08",
+            "SEP": "09",
+            "OCT": "10",
+            "NOV": "11",
+            "DEC": "12",
+        }
         month_upper = month_string.upper()
         if month_upper in month_conversion:
             return month_conversion[month_upper]
@@ -1879,12 +1927,12 @@ def get_measurement_time_from_file(filename):
             raise RuntimeError("Cannot get measurement time. Invalid month in Raw file: " + month_upper)
 
     def get_raw_measurement_time(date, time):
-        '''
+        """
         Takes the date and time from the raw workspace and creates the correct format
         @param date: the date part
         @param time: the time part
-        '''
-        year = date[7:(7+4)]
+        """
+        year = date[7 : (7 + 4)]
         day = date[0:2]
         month_string = date[3:6]
         month = get_month(month_string)
@@ -1904,19 +1952,19 @@ def get_measurement_time_from_file(filename):
     filename_full = get_file_path(filename)
 
     if filename_capital.endswith(".RAW"):
-        RawFileInfo(Filename = filename_full, GetRunParameters = True)
+        RawFileInfo(Filename=filename_full, GetRunParameters=True)
         time_id = "r_endtime"
         date_id = "r_enddate"
-        file_info = mtd['Raw_RPB']
-        keys =  file_info.getColumnNames()
+        file_info = mtd["Raw_RPB"]
+        keys = file_info.getColumnNames()
         time = []
         date = []
-        if time_id  in keys:
+        if time_id in keys:
             time = file_info.column(keys.index(time_id))
-        if date_id  in keys:
+        if date_id in keys:
             date = file_info.column(keys.index(date_id))
         time = time[0]
-        date =date[0]
+        date = date[0]
         measurement_time = get_raw_measurement_time(date, time)
         DeleteWorkspace(file_info)
     else:
@@ -1926,27 +1974,28 @@ def get_measurement_time_from_file(filename):
 
 
 def are_two_files_identical(file_path_1, file_path_2):
-    '''
+    """
     We want to make sure that two files are binary identical.
     @file_path_1: first file path
     @file_path_2: second file path
     @returns True if the files are identical else False
-    '''
+    """
     import filecmp
+
     return filecmp.cmp(file_path_1, file_path_2)
 
 
 def is_valid_user_file_extension(user_file):
-    '''
+    """
     Check if the file name has a valid extension for user files
     @param user_file: the name of the user file
     @returns true if it is valid, else false
-    '''
-    allowed_values = ['.TXT']
+    """
+    allowed_values = [".TXT"]
     # We need to allow for old user file formats. They started with a number.
     # But there doesn't seem to be a general format. As a very basic check
     # we make sure that the ending starts with a number
-    pattern = r'^\.[0-9]+'
+    pattern = r"^\.[0-9]+"
 
     filename, file_extension = os.path.splitext(user_file)
     file_extension = file_extension.upper()
@@ -1957,11 +2006,11 @@ def is_valid_user_file_extension(user_file):
 
 
 def createUnmanagedAlgorithm(name, **kwargs):
-    '''
+    """
     This creates an unmanged child algorithm with the
     provided properties set. The returned algorithm has
     not been executed yet.
-    '''
+    """
     alg = AlgorithmManager.createUnmanaged(name)
     alg.initialize()
     alg.setChild(True)
@@ -1971,10 +2020,10 @@ def createUnmanagedAlgorithm(name, **kwargs):
 
 
 def extract_fit_parameters(rAnds):
-    '''
+    """
     @param rAnds: a rescale and shift object
     @returns a scale factor, a shift factor and a fit mode
-    '''
+    """
     scale_factor = rAnds.scale
     shift_factor = rAnds.shift
 
@@ -2001,9 +2050,11 @@ def check_has_bench_rot(workspace, log_dict=None):
     if log_dict:
         run = workspace.run()
         if not run.hasProperty("Bench_Rot"):
-            raise RuntimeError("LARMOR Instrument: Bench_Rot does not seem to be available on {0}. There might be "
-                               "an issue with your data acquisition. Make sure that the sample_log entry "
-                               "Bench_Rot is available.".format(workspace.name()))
+            raise RuntimeError(
+                "LARMOR Instrument: Bench_Rot does not seem to be available on {0}. There might be "
+                "an issue with your data acquisition. Make sure that the sample_log entry "
+                "Bench_Rot is available.".format(workspace.name())
+            )
 
 
 def quaternion_to_angle_and_axis(quaternion):
@@ -2013,8 +2064,8 @@ def quaternion_to_angle_and_axis(quaternion):
     The conversion from a quaternion to an angle + axis is explained here:
     http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToAngle/
     """
-    angle = 2*math.acos(quaternion[0])
-    s_parameter = math.sqrt(1 - quaternion[0]*quaternion[0])
+    angle = 2 * math.acos(quaternion[0])
+    s_parameter = math.sqrt(1 - quaternion[0] * quaternion[0])
 
     axis = []
     # If the the angle is zero, then it does not make sense to have an axis
@@ -2023,9 +2074,9 @@ def quaternion_to_angle_and_axis(quaternion):
         axis.append(quaternion[2])
         axis.append(quaternion[3])
     else:
-        axis.append(quaternion[1]/s_parameter)
-        axis.append(quaternion[2]/s_parameter)
-        axis.append(quaternion[3]/s_parameter)
+        axis.append(quaternion[1] / s_parameter)
+        axis.append(quaternion[2] / s_parameter)
+        axis.append(quaternion[3] / s_parameter)
     return math.degrees(angle), axis
 
 
@@ -2047,7 +2098,7 @@ def get_user_file_name_options_with_txt_extension(user_file_name):
     @return: either the original user file name or a list of user file names with .txt and .TXT extensions
     """
     capitalized_user_file = user_file_name.upper()
-    if capitalized_user_file.endswith('.TXT'):
+    if capitalized_user_file.endswith(".TXT"):
         user_file_with_extension = [user_file_name]
     else:
         user_file_with_extension = [user_file_name + ".txt", user_file_name + ".TXT"]
@@ -2074,31 +2125,29 @@ def get_correct_combinDet_setting(instrument_name, detector_selection):
     # If we are dealing with LOQ, then the correct combineDet selection is
     if instrument_name == "LOQ":
         if detector_selection == "MAIN" or detector_selection == "MAIN-DETECTOR-BANK":
-            new_combine_detector_selection = 'rear'
+            new_combine_detector_selection = "rear"
         elif detector_selection == "HAB":
-            new_combine_detector_selection = 'front'
+            new_combine_detector_selection = "front"
         elif detector_selection == "MERGED":
-            new_combine_detector_selection = 'merged'
+            new_combine_detector_selection = "merged"
         elif detector_selection == "BOTH":
-            new_combine_detector_selection = 'both'
+            new_combine_detector_selection = "both"
         else:
-            raise RuntimeError("SANSBatchReduce: Unknown detector {0} for conversion "
-                               "to combineDet.".format(detector_selection))
+            raise RuntimeError("SANSBatchReduce: Unknown detector {0} for conversion " "to combineDet.".format(detector_selection))
         return new_combine_detector_selection
 
     # If we are dealing with SANS2D, then the correct combineDet selection is
     if instrument_name == "SANS2D":
         if detector_selection == "REAR" or detector_selection == "REAR-DETECTOR":
-            new_combine_detector_selection = 'rear'
+            new_combine_detector_selection = "rear"
         elif detector_selection == "FRONT" or detector_selection == "FRONT-DETECTOR":
-            new_combine_detector_selection = 'front'
+            new_combine_detector_selection = "front"
         elif detector_selection == "MERGED":
-            new_combine_detector_selection = 'merged'
+            new_combine_detector_selection = "merged"
         elif detector_selection == "BOTH":
-            new_combine_detector_selection = 'both'
+            new_combine_detector_selection = "both"
         else:
-            raise RuntimeError("SANSBatchReduce: Unknown detector {0} for conversion "
-                               "to combineDet.".format(detector_selection))
+            raise RuntimeError("SANSBatchReduce: Unknown detector {0} for conversion " "to combineDet.".format(detector_selection))
         return new_combine_detector_selection
     raise RuntimeError("SANSBatchReduce: Unknown instrument {0}.".format(instrument_name))
 
@@ -2145,13 +2194,13 @@ def rename_workspace_correctly(instrument_name, reduced_type, final_name, worksp
     if isinstance(reduced_workspace, WorkspaceGroup):
         workspaces_to_rename += reduced_workspace.getNames()
 
-    run_number = re.findall(r'\d+', workspace)[0] if re.findall(r'\d+', workspace) else None
+    run_number = re.findall(r"\d+", workspace)[0] if re.findall(r"\d+", workspace) else None
 
     if run_number and workspace.startswith(run_number):
         for workspace_name in workspaces_to_rename:
-            complete_name = workspace_name.replace(run_number, final_name + '_')
+            complete_name = workspace_name.replace(run_number, final_name + "_")
             RenameWorkspace(InputWorkspace=workspace_name, OutputWorkspace=complete_name)
-        return workspace.replace(run_number, final_name + '_')
+        return workspace.replace(run_number, final_name + "_")
     else:
         final_suffix = get_suffix(instrument_name, reduced_type)
         for workspace_name in workspaces_to_rename:
@@ -2167,11 +2216,10 @@ def rename_workspace_correctly(instrument_name, reduced_type, final_name, worksp
 # Parse a log file containing run information and return the detector positions
 @deprecated
 def parseLogFile(logfile):
-    logkeywords = {'Rear_Det_X':0.0, 'Rear_Det_Z':0.0, 'Front_Det_X':0.0, 'Front_Det_Z':0.0,
-                   'Front_Det_Rot':0.0}
+    logkeywords = {"Rear_Det_X": 0.0, "Rear_Det_Z": 0.0, "Front_Det_X": 0.0, "Front_Det_Z": 0.0, "Front_Det_Rot": 0.0}
     if logfile is None:
         return tuple(logkeywords.values())
-    file_log = open(logfile, 'rU')
+    file_log = open(logfile, "rU")
     for line in file_log:
         entry = line.split()[1]
         if entry in list(logkeywords.keys()):
@@ -2190,21 +2238,24 @@ def normalizePhi(phi):
         pass
     return phi
 
+
 # Mask the inside of a cylinder
 
 
 @deprecated
-def MaskInsideCylinder(workspace, radius, xcentre = '0.0', ycentre = '0.0'):
-    '''Mask out the inside of a cylinder or specified radius'''
-    MaskWithCylinder(workspace, radius, xcentre, ycentre, '')
+def MaskInsideCylinder(workspace, radius, xcentre="0.0", ycentre="0.0"):
+    """Mask out the inside of a cylinder or specified radius"""
+    MaskWithCylinder(workspace, radius, xcentre, ycentre, "")
+
 
 # Mask the outside of a cylinder
 
 
 @deprecated
-def MaskOutsideCylinder(workspace, radius, xcentre = '0.0', ycentre = '0.0'):
-    '''Mask out the outside of a cylinder or specified radius'''
-    MaskWithCylinder(workspace, radius, xcentre, ycentre, '#')
+def MaskOutsideCylinder(workspace, radius, xcentre="0.0", ycentre="0.0"):
+    """Mask out the outside of a cylinder or specified radius"""
+    MaskWithCylinder(workspace, radius, xcentre, ycentre, "#")
+
 
 # Convert a mask string to a spectra list
 # 6/8/9 RKH attempt to add a box mask e.g.  h12+v34 (= one pixel at intersection), h10>h12+v101>v123 (=block 3 wide, 23 tall)
@@ -2212,92 +2263,95 @@ def MaskOutsideCylinder(workspace, radius, xcentre = '0.0', ycentre = '0.0'):
 
 @deprecated
 def ConvertToSpecList(maskstring, firstspec, dimension, orientation):
-    '''Compile spectra ID list'''
-    if maskstring == '':
-        return ''
-    masklist = maskstring.split(',')
-    speclist = ''
+    """Compile spectra ID list"""
+    if maskstring == "":
+        return ""
+    masklist = maskstring.split(",")
+    speclist = ""
     for x in masklist:
         x = x.lower()
-        if '+' in x:
-            bigPieces = x.split('+')
-            if '>' in bigPieces[0]:
-                pieces = bigPieces[0].split('>')
-                low = int(pieces[0].lstrip('hv'))
-                upp = int(pieces[1].lstrip('hv'))
+        if "+" in x:
+            bigPieces = x.split("+")
+            if ">" in bigPieces[0]:
+                pieces = bigPieces[0].split(">")
+                low = int(pieces[0].lstrip("hv"))
+                upp = int(pieces[1].lstrip("hv"))
             else:
-                low = int(bigPieces[0].lstrip('hv'))
+                low = int(bigPieces[0].lstrip("hv"))
                 upp = low
-            if '>' in bigPieces[1]:
-                pieces = bigPieces[1].split('>')
-                low2 = int(pieces[0].lstrip('hv'))
-                upp2 = int(pieces[1].lstrip('hv'))
+            if ">" in bigPieces[1]:
+                pieces = bigPieces[1].split(">")
+                low2 = int(pieces[0].lstrip("hv"))
+                upp2 = int(pieces[1].lstrip("hv"))
             else:
-                low2 = int(bigPieces[1].lstrip('hv'))
+                low2 = int(bigPieces[1].lstrip("hv"))
                 upp2 = low2
-            if 'h' in bigPieces[0] and 'v' in bigPieces[1]:
-                ydim=abs(upp-low)+1
-                xdim=abs(upp2-low2)+1
-                speclist += spectrumBlock(firstspec,low, low2,ydim, xdim, dimension,orientation) + ','
-            elif 'v' in bigPieces[0] and 'h' in bigPieces[1]:
-                xdim=abs(upp-low)+1
-                ydim=abs(upp2-low2)+1
-                speclist += spectrumBlock(firstspec,low2, low,nstrips, dimension, dimension,orientation)+ ','
+            if "h" in bigPieces[0] and "v" in bigPieces[1]:
+                ydim = abs(upp - low) + 1
+                xdim = abs(upp2 - low2) + 1
+                speclist += spectrumBlock(firstspec, low, low2, ydim, xdim, dimension, orientation) + ","
+            elif "v" in bigPieces[0] and "h" in bigPieces[1]:
+                xdim = abs(upp - low) + 1
+                ydim = abs(upp2 - low2) + 1
+                speclist += spectrumBlock(firstspec, low2, low, nstrips, dimension, dimension, orientation) + ","
             else:
                 print("error in mask, ignored:  " + x)
-        elif '>' in x:
-            pieces = x.split('>')
-            low = int(pieces[0].lstrip('hvs'))
-            upp = int(pieces[1].lstrip('hvs'))
-            if 'h' in pieces[0]:
+        elif ">" in x:
+            pieces = x.split(">")
+            low = int(pieces[0].lstrip("hvs"))
+            upp = int(pieces[1].lstrip("hvs"))
+            if "h" in pieces[0]:
                 nstrips = abs(upp - low) + 1
-                speclist += spectrumBlock(firstspec,low, 0,nstrips, dimension, dimension,orientation)  + ','
-            elif 'v' in pieces[0]:
+                speclist += spectrumBlock(firstspec, low, 0, nstrips, dimension, dimension, orientation) + ","
+            elif "v" in pieces[0]:
                 nstrips = abs(upp - low) + 1
-                speclist += spectrumBlock(firstspec,0,low, dimension, nstrips, dimension,orientation)  + ','
+                speclist += spectrumBlock(firstspec, 0, low, dimension, nstrips, dimension, orientation) + ","
             else:
                 for i in range(low, upp + 1):
-                    speclist += str(i) + ','
-        elif 'h' in x:
-            speclist += spectrumBlock(firstspec,int(x.lstrip('h')), 0,1, dimension, dimension,orientation) + ','
-        elif 'v' in x:
-            speclist += spectrumBlock(firstspec,0,int(x.lstrip('v')), dimension, 1, dimension,orientation) + ','
+                    speclist += str(i) + ","
+        elif "h" in x:
+            speclist += spectrumBlock(firstspec, int(x.lstrip("h")), 0, 1, dimension, dimension, orientation) + ","
+        elif "v" in x:
+            speclist += spectrumBlock(firstspec, 0, int(x.lstrip("v")), dimension, 1, dimension, orientation) + ","
         else:
-            speclist += x.lstrip('s') + ','
+            speclist += x.lstrip("s") + ","
 
     return speclist
+
 
 # Mask by detector number
 
 
 @deprecated
 def MaskBySpecNumber(workspace, speclist):
-    speclist = speclist.rstrip(',')
-    if speclist == '':
-        return ''
-    MaskDetectors(Workspace=workspace, SpectraList = speclist, ForceInstrumentMasking=True)
+    speclist = speclist.rstrip(",")
+    if speclist == "":
+        return ""
+    MaskDetectors(Workspace=workspace, SpectraList=speclist, ForceInstrumentMasking=True)
 
 
 @deprecated
 def SetupTransmissionWorkspace(inputWS, spec_list, backmon_start, backmon_end, wavbining, interpolate, loqremovebins):
-    tmpWS = inputWS + '_tmp'
-    CropWorkspace(InputWorkspace=inputWS,OutputWorkspace=tmpWS, StartWorkspaceIndex=0, EndWorkspaceIndex=2)
+    tmpWS = inputWS + "_tmp"
+    CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmpWS, StartWorkspaceIndex=0, EndWorkspaceIndex=2)
 
     if loqremovebins:
-        RemoveBins(InputWorkspace=tmpWS,OutputWorkspace=tmpWS,XMin= 19900,XMax= 20500, Interpolation='Linear')
+        RemoveBins(InputWorkspace=tmpWS, OutputWorkspace=tmpWS, XMin=19900, XMax=20500, Interpolation="Linear")
     if backmon_start is not None and backmon_end is not None:
-        CalculateFlatBackground(InputWorkspace=tmpWS, OutputWorkspace=tmpWS,
-                                StartX=backmon_start, EndX=backmon_end, WorkspaceIndexList=spec_list, Mode='Mean')
+        CalculateFlatBackground(
+            InputWorkspace=tmpWS, OutputWorkspace=tmpWS, StartX=backmon_start, EndX=backmon_end, WorkspaceIndexList=spec_list, Mode="Mean"
+        )
 
     # Convert and rebin
-    ConvertUnits(InputWorkspace=tmpWS,OutputWorkspace=tmpWS,Target="Wavelength")
+    ConvertUnits(InputWorkspace=tmpWS, OutputWorkspace=tmpWS, Target="Wavelength")
 
-    if interpolate :
-        InterpolatingRebin(InputWorkspace=tmpWS,OutputWorkspace= tmpWS,Params= wavbining)
-    else :
-        Rebin(InputWorkspace=tmpWS,OutputWorkspace= tmpWS,Params= wavbining)
+    if interpolate:
+        InterpolatingRebin(InputWorkspace=tmpWS, OutputWorkspace=tmpWS, Params=wavbining)
+    else:
+        Rebin(InputWorkspace=tmpWS, OutputWorkspace=tmpWS, Params=wavbining)
 
     return tmpWS
+
 
 # Setup the transmission workspace
 # Correct of for the volume of the sample/can. Dimensions should be in order: width, height, thickness
@@ -2309,41 +2363,41 @@ def ScaleByVolume(inputWS, scalefactor, geomid, width, height, thickness):
     if geomid == 1:
         # Volume = circle area * height
         # Factor of four comes from radius = width/2
-        scalefactor /= (height*math.pi*math.pow(width,2)/4.0)
+        scalefactor /= height * math.pi * math.pow(width, 2) / 4.0
     elif geomid == 2:
-        scalefactor /= (width*height*thickness)
+        scalefactor /= width * height * thickness
     else:
         # Factor of four comes from radius = width/2
-        scalefactor /= (thickness*math.pi*math.pow(width, 2)/4.0)
+        scalefactor /= thickness * math.pi * math.pow(width, 2) / 4.0
     # Multiply by the calculated correction factor
     ws = mtd[inputWS]
     ws *= scalefactor
 
 
 @deprecated
-def StripEndZeroes(workspace, flag_value = 0.0):
+def StripEndZeroes(workspace, flag_value=0.0):
     result_ws = mtd[workspace]
     y_vals = result_ws.readY(0)
     length = len(y_vals)
-        # Find the first non-zero value
+    # Find the first non-zero value
     start = 0
     for i in range(0, length):
-        if  y_vals[i] != flag_value :
+        if y_vals[i] != flag_value:
             start = i
             break
         # Now find the last non-zero value
     stop = 0
     length -= 1
-    for j in range(length, 0,-1):
-        if  y_vals[j] != flag_value :
+    for j in range(length, 0, -1):
+        if y_vals[j] != flag_value:
             stop = j
             break
         # Find the appropriate X values and call CropWorkspace
     x_vals = result_ws.readX(0)
     startX = x_vals[start]
-        # Make sure we're inside the bin that we want to crop
-    endX = 1.001*x_vals[stop + 1]
-    CropWorkspace(InputWorkspace=workspace,OutputWorkspace=workspace,XMin=startX,XMax=endX)
+    # Make sure we're inside the bin that we want to crop
+    endX = 1.001 * x_vals[stop + 1]
+    CropWorkspace(InputWorkspace=workspace, OutputWorkspace=workspace, XMin=startX, XMax=endX)
 
 
 @deprecated
@@ -2353,15 +2407,15 @@ class Orientation(object):
     Vertical = 2
     Rotated = 3
 
+
 # A small class holds the run number with the workspace name, because the run number is not contained in the workspace at the moment
 
 
 @deprecated
 class WorkspaceDetails(object):
-
     def __init__(self, name, run_number):
         self._name = name
-        run_number = str(run_number).split('-add')[0]
+        run_number = str(run_number).split("-add")[0]
         self._run_number = int(run_number)
 
     def getName(self):
@@ -2374,12 +2428,12 @@ class WorkspaceDetails(object):
         self._name = ""
         self._run_number = -1
 
+
 # A small class to collect together run information, used to save passing tuples around
 
 
 @deprecated
 class RunDetails(object):
-
     def __init__(self, raw_ws, final_ws, trans_raw, direct_raw, maskpt_rmin, maskpt_rmax, suffix):
         self._rawworkspace = raw_ws
         self._finalws = final_ws
@@ -2419,10 +2473,11 @@ class RunDetails(object):
     def getSuffix(self):
         return self._suffix
 
+
 ###############################################################################
 ########################## End of Deprecated Code #############################
 ###############################################################################
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

@@ -77,5 +77,5 @@ class ISISPowderFocusCropTest(unittest.TestCase):
             self.assertEqual(compare, val)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

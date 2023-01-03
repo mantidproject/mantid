@@ -32,8 +32,7 @@ class ReflectometryISISSumBanksTest(systemtesting.MantidSystemTest):
 
         # Banks 1 + 2
         roi_str = f"{get_first_detid_in_bank(1)}-{get_first_detid_in_bank(3) - 1}"
-        ReflectometryISISSumBanks(InputWorkspace=raw_ws, ROIDetectorIDs=roi_str,
-                                  OutputWorkspace=self.OUT_WS_NAME)
+        ReflectometryISISSumBanks(InputWorkspace=raw_ws, ROIDetectorIDs=roi_str, OutputWorkspace=self.OUT_WS_NAME)
 
     def validate(self):
         return self.OUT_WS_NAME, self.REF_FILENAME

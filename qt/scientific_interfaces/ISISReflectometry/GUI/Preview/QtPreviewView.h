@@ -9,6 +9,7 @@
 #include "Common/DllConfig.h"
 #include "IPreviewView.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/ImageInfoWidgetMini.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentDisplay.h"
 #include "MantidQtWidgets/InstrumentView/RotationSurface.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
@@ -37,6 +38,7 @@ public:
   void subscribe(PreviewViewSubscriber *notifyee) noexcept override;
 
   QLayout *getDockedWidgetsLayout() noexcept override;
+  MantidWidgets::IImageInfoWidget *getImageInfo() noexcept override;
 
   void enableMainWidget() override;
   void disableMainWidget() override;
@@ -50,6 +52,7 @@ private:
   Ui::PreviewWidget m_ui;
   PreviewViewSubscriber *m_notifyee{nullptr};
   std::unique_ptr<MantidQt::MantidWidgets::InstrumentDisplay> m_instDisplay{nullptr};
+  MantidQt::MantidWidgets::ImageInfoWidgetMini *m_imageInfo{nullptr};
 
   void connectSignals() const;
 

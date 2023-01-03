@@ -32,7 +32,7 @@ algorithm.
 Usage
 -----
 
-**Simple Example**
+**Simple Example with plotting of temperature vs initial energy**
 
 .. code-block:: python
 
@@ -42,6 +42,17 @@ Usage
                                   CorrectionFile='correction-water-cu220-2020.txt',
                                   UseIncidentEnergy=False,
                                   ConvertToWaveNumber=False)
+
+    run = result.getRun()
+    times = run.getLogData('time').value
+    eis = result.readX(0)
+    temperatures = run.getLogData('temperature').value
+
+    plt.plot(eis, temperatures)
+    plt.xlabel("Ei (meV)")
+    plt.ylabel("temperature (K)")
+    plt.show()
+
 
 **Multiple monochromators example**
 

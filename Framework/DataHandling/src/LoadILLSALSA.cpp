@@ -14,7 +14,6 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/Points.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/OptionalBool.h"
 
 #include <iterator>
 #include <sstream>
@@ -118,11 +117,7 @@ void LoadILLSALSA::exec() {
  */
 void LoadILLSALSA::setInstrument(double distance, double angle) {
   // load instrument
-  auto loadInst = createChildAlgorithm("LoadInstrument");
-  loadInst->setPropertyValue("InstrumentName", "SALSA");
-  loadInst->setProperty<API::MatrixWorkspace_sptr>("Workspace", m_outputWorkspace);
-  loadInst->setProperty("RewriteSpectraMap", Kernel::OptionalBool(true));
-  loadInst->execute();
+  LoadHelper::loadEmptyInstrument(m_outputWorkspace, "SALSA");
 
   // translation
   double angleRad = angle * M_PI / 180.0;

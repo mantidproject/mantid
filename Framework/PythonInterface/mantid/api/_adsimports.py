@@ -29,29 +29,30 @@ LEADING_NUMS_REGEX = _re.compile(r"^[0-9]")
 
 def _importAll(mtd):
     """
-        Creates a named variable in the globals dictionary
-        of the current frame (inspect.currentframe).
+    Creates a named variable in the globals dictionary
+    of the current frame (inspect.currentframe).
 
-        For example, if the ADS contains a workspace with the name "deltax" then
+    For example, if the ADS contains a workspace with the name "deltax" then
 
-            mtd.importAll()
+        mtd.importAll()
 
-        will create a python variable for that workspace as if the user had typed
-        mtd['deltax'].
+    will create a python variable for that workspace as if the user had typed
+    mtd['deltax'].
 
-        @param mtd The Analysis Data Service Object
+    @param mtd The Analysis Data Service Object
     """
+
     def clean(name):
         """
-            Returns a name cleaned up so that it is a valid
-            identifier
+        Returns a name cleaned up so that it is a valid
+        identifier
         """
         # If it is exactly a keyword just prefix with an underscore
         if _keyword.iskeyword(name):
             varname = "_" + name
         else:
             # Replace invalid characters with underscore
-            varname = INVALID_CHARS_REGEX.sub('_', name)
+            varname = INVALID_CHARS_REGEX.sub("_", name)
             # If it starts with a number prefix with underscore
             if LEADING_NUMS_REGEX.match(varname) is not None:
                 varname = "_" + varname
@@ -70,7 +71,7 @@ def _importAll(mtd):
         varname = name
         if not is_valid_identifier(varname):
             varname = clean(name)
-            print ('Warning: "%s" is an invalid identifier, "%s" has been imported instead.' % (name, varname))
+            print('Warning: "%s" is an invalid identifier, "%s" has been imported instead.' % (name, varname))
         vars[varname] = mtd[name]
     # Update the caller's dictionary
     locals_.update(vars)

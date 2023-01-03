@@ -22,6 +22,7 @@ class MaskingTable(QtWidgets.QWidget, Ui_MaskingTable):
         """
         Defines the elements which a presenter can listen to for the masking table
         """
+
         @abstractmethod
         def on_row_changed(self):
             pass

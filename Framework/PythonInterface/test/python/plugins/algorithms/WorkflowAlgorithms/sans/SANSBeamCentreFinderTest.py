@@ -23,8 +23,8 @@ class SANSBeamCentreFinderTest(unittest.TestCase):
         points_1 = [1.0, 2.0, 4.0]
         points_2 = [1.0, 3.0, 5.0]
 
-        q1_data = self.gen_mock_data(points_1, [0., 0., 0.])
-        q2_data = self.gen_mock_data(points_2, [0., 0., 0.])
+        q1_data = self.gen_mock_data(points_1, [0.0, 0.0, 0.0])
+        q2_data = self.gen_mock_data(points_2, [0.0, 0.0, 0.0])
 
         expected_points = len(set().union(points_1, points_2))
         mismatched_points = len(set(points_1).symmetric_difference(set(points_2)))

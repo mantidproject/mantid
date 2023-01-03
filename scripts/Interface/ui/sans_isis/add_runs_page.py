@@ -37,8 +37,7 @@ class AddRunsPage(QtWidgets.QWidget, Ui_AddRunsPage):
         self.outputDirectoryLabel.setText("Save Directory: {}".format(out_file_directory))
 
     def no_save_directory(self):
-        QtWidgets.QMessageBox.warning(self, "No Save Directory Set!",
-                                      "You must set the mantid output directory before suming files.")
+        QtWidgets.QMessageBox.warning(self, "No Save Directory Set!", "You must set the mantid output directory before suming files.")
 
     def set_out_file_name(self, out_file_name):
         self.fileNameEdit.setText(out_file_name)
@@ -59,8 +58,7 @@ class AddRunsPage(QtWidgets.QWidget, Ui_AddRunsPage):
         self.summation_settings_view().setEnabled(False)
 
     def display_save_directory_box(self, title, default_path):
-        filename = QtWidgets.QFileDialog.getExistingDirectory(self, title, default_path,
-                                                              QtWidgets.QFileDialog.ShowDirsOnly)
+        filename = QtWidgets.QFileDialog.getExistingDirectory(self, title, default_path, QtWidgets.QFileDialog.ShowDirsOnly)
         return filename
 
     def setupUi(self, other):

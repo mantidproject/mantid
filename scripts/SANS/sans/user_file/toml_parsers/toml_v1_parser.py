@@ -5,8 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from sans.common.enums import SANSInstrument, ReductionMode, DetectorType, RangeStepType, FitModeForMerge, \
-    DataType, FitType, RebinType
+from sans.common.enums import SANSInstrument, ReductionMode, DetectorType, RangeStepType, FitModeForMerge, DataType, FitType, RebinType
 from sans.common.general_functions import get_bank_for_spectrum_number
 from sans.state.IStateParser import IStateParser
 from sans.state.StateObjects.StateAdjustment import StateAdjustment
@@ -195,15 +194,17 @@ class _TomlV1ParserImpl(TomlParserImplBase):
 
         self.adjustment.calibration = self.get_val(["tube", "file"], correction_dict)
 
-        name_attr_pairs = {"_x": "x_translation_correction",
-                           "_y": "y_translation_correction",
-                           "_z": "z_translation_correction",
-                           "_radius": "radius_correction",
-                           "_rot": "rotation_correction",
-                           "_side": "side_correction",
-                           "_x_tilt": "x_tilt_correction",
-                           "_y_tilt": "y_tilt_correction",
-                           "_z_tilt": "z_tilt_correction"}
+        name_attr_pairs = {
+            "_x": "x_translation_correction",
+            "_y": "y_translation_correction",
+            "_z": "z_translation_correction",
+            "_radius": "radius_correction",
+            "_rot": "rotation_correction",
+            "_side": "side_correction",
+            "_x_tilt": "x_tilt_correction",
+            "_y_tilt": "y_tilt_correction",
+            "_z_tilt": "z_tilt_correction",
+        }
 
         position_dict = self.get_val("position", correction_dict)
         lab_move = self.move.detectors[DetectorType.LAB.value]
@@ -219,9 +220,8 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         binning_dict = self.get_val(["binning"])
 
         to_set = DuplicateWavelengthStates(
-            transmission=self.calculate_transmission,
-            wavelength=self.wavelength,
-            pixel=self.wavelength_and_pixel)
+            transmission=self.calculate_transmission, wavelength=self.wavelength, pixel=self.wavelength_and_pixel
+        )
 
         WavelengthTomlParser(toml_dict=self._input).set_wavelength_details(state_objs=to_set)
 
@@ -239,8 +239,7 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         self.convert_to_q.q_xy_step = self.get_val(["2d_reduction", "step"], binning_dict)
         two_d_step_type = self.get_val(["2d_reduction", "type"], binning_dict)
         if two_d_step_type and two_d_step_type != RangeStepType.LIN.value:
-            raise ValueError(
-                f"{two_d_step_type} binning is not supported for 2D reductions. The type must be set to \"Lin\".")
+            raise ValueError(f'{two_d_step_type} binning is not supported for 2D reductions. The type must be set to "Lin".')
 
         # We could previous interpolate. This is now obsolete, see the docs for details
         self.calculate_transmission.rebin_type = RebinType.REBIN
@@ -250,8 +249,7 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         reduction_dict = self.get_val(["reduction"])
 
         events_binning = self.get_val(["events", "binning"], reduction_dict, default="")
-        if (events_binning and len(events_binning.split(',')) != 3) or \
-                self.instrument is SANSInstrument.ZOOM and not events_binning:
+        if (events_binning and len(events_binning.split(",")) != 3) or self.instrument is SANSInstrument.ZOOM and not events_binning:
             raise ValueError(f"Events.binning: Three comma separated values are required, got '{events_binning}'")
         self.compatibility.time_rebin_string = events_binning
 
@@ -313,16 +311,17 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         transmission_dict = self.get_mandatory_val(["transmission", "monitor", selected_trans_monitor])
 
         if self.get_val("use_different_norm_monitor", transmission_dict):
-            selected_norm_monitor = self.get_mandatory_val(
-                ["transmission", "monitor", selected_trans_monitor, "trans_norm_monitor"])
+            selected_norm_monitor = self.get_mandatory_val(["transmission", "monitor", selected_trans_monitor, "trans_norm_monitor"])
         else:
             selected_norm_monitor = self.get_mandatory_val(["instrument", "configuration", "norm_monitor"])
 
         self.calculate_transmission.incident_monitor = self.get_mandatory_val(
-            [self._get_normalisation_spelling(), "monitor", selected_norm_monitor, "spectrum_number"])
+            [self._get_normalisation_spelling(), "monitor", selected_norm_monitor, "spectrum_number"]
+        )
 
         self.calculate_transmission.transmission_monitor = self.get_mandatory_val(
-            ["transmission", "monitor", selected_trans_monitor, "spectrum_number"])
+            ["transmission", "monitor", selected_trans_monitor, "spectrum_number"]
+        )
 
         monitor_dict = transmission_dict
 

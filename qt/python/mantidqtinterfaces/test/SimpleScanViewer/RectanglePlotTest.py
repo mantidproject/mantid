@@ -31,6 +31,7 @@ class RectanglePlotTest(unittest.TestCase):
         config['default.instrument'] = "D16"
 
         plotter = mock.MagicMock()
+        plotter.image_axes._get_aspect_ratio.return_value = 1
         exporter = mock.MagicMock()
         exporter.rectangles_manager = RectanglesManager()
 

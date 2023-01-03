@@ -42,6 +42,21 @@ template <typename T> T *extract(const Object &obj) {
 #endif
 }
 
+/**
+ * Convert a C++ object of type T to a Python object
+ * @param obj A C++ object
+ * @param nameOfType The type of the C++ object as a string. Allows SIP to find the right export.
+ */
+template <typename T> Object wrap(const T &obj, char const *nameOfType) {
+  const auto sipapi = Detail::sipAPI();
+  const auto type = sipapi->api_find_type(nameOfType);
+  if (!type) {
+    return Python::Object();
+  }
+  auto pyObj = sipapi->api_convert_from_type(obj, type, nullptr);
+  return NewRef(pyObj);
+}
+
 } // namespace Python
 } // namespace Common
 } // namespace Widgets

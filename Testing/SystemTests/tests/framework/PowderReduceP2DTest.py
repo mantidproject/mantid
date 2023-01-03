@@ -16,6 +16,10 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
         self.tolerance = 1e-6
         self.setUp()
 
+    def skipTests(self):
+        # Windows produces different outputs. Disable there for further investigation
+        return sys.platform.startswith("win")
+
     def setUp(self):
         self.sample = self._sampleEventData()
         self.vana = self._vanadiumEventData()
@@ -39,25 +43,36 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
         self.outputFile = self._outputFile()
 
     def runTest(self):
-        PowderReduceP2D(SampleData=self.sample, OutputFile=self.outputFile, DoIntensityCorrection = True,
-                                            VanaData = self.vana, DoBackgroundCorrection = True, EmptyData = self.empty,
-                                            DoEdgebinning = False, CalFile = self.calFile,
-                                            TwoThetaMin = self.twoThetaMin, TwoThetaMax = self.twoThetaMax,
-                                            WavelengthCenter = self.wavelengthCenter, LambdaMin = self.lambdaMin,
-                                            LambdaMax = self.lambdaMax, DMin = self.dMin, DMax = self.dMax, DpMin = self.dpMin,
-                                            DpMax = self.dpMax, dSpaceBinning = self.dSpaceBinning,
-                                            dPerpendicularBinning = self.dPerpendicularBinning, FWHM = self.FWHM,
-                                            Tolerance = self.tolerance, SystemTest = True)
+        PowderReduceP2D(
+            SampleData=self.sample,
+            OutputFile=self.outputFile,
+            DoIntensityCorrection=True,
+            VanaData=self.vana,
+            DoBackgroundCorrection=True,
+            EmptyData=self.empty,
+            DoEdgebinning=False,
+            CalFile=self.calFile,
+            TwoThetaMin=self.twoThetaMin,
+            TwoThetaMax=self.twoThetaMax,
+            WavelengthCenter=self.wavelengthCenter,
+            LambdaMin=self.lambdaMin,
+            LambdaMax=self.lambdaMax,
+            DMin=self.dMin,
+            DMax=self.dMax,
+            DpMin=self.dpMin,
+            DpMax=self.dpMax,
+            dSpaceBinning=self.dSpaceBinning,
+            dPerpendicularBinning=self.dPerpendicularBinning,
+            FWHM=self.FWHM,
+            Tolerance=self.tolerance,
+            SystemTest=True,
+        )
 
     def validateMethod(self):
-        return 'ValidateAscii'
+        return "ValidateAscii"
 
     def validate(self):
-        return self.outputFile + '.p2d', self.reference
-
-    def skipTests(self):
-        # disabled
-        return True
+        return self.outputFile + ".p2d", self.reference
 
     def _sampleEventData(self):
         """path to sample event data used for testing the algorithm"""
@@ -73,7 +88,7 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
 
     def _calFile(self):
         """path to calibration File used for testing the algorithm"""
-        return 'PG3_FERNS_d4832_2011_08_24.cal'
+        return "PG3_FERNS_d4832_2011_08_24.cal"
 
     def _twoThetaMin(self):
         """2theta min used for testing the algorithm"""
@@ -128,8 +143,8 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
         return 4
 
     def _loadReference(self):
-        suffix = "" if sys.platform != 'win32' else "_msvc"
-        return f'PowderReduceP2D_reference{suffix}.p2d'
+        suffix = "" if sys.platform != "win32" else "_msvc"
+        return f"PowderReduceP2D_reference{suffix}.p2d"
 
     def _outputFile(self):
-        return 'PowderReduceP2D_Test'
+        return "PowderReduceP2D_Test"

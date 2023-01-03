@@ -11,7 +11,7 @@ from sans.state.AllStates import AllStates
 
 
 def mask_workspace(state: AllStates, component_as_string, workspace):
-    assert (state is not dict)
+    assert state is not dict
     component = DetectorType(component_as_string)
 
     # Get the correct SANS masking strategy from create_masker

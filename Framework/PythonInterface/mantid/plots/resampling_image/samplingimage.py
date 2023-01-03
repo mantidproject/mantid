@@ -15,30 +15,34 @@ MAX_HISTOGRAMS = 5000
 
 
 class SamplingImage(MantidImage):
-    def __init__(self,
-                 ax,
-                 workspace,
-                 transpose=False,
-                 cmap=None,
-                 norm=None,
-                 interpolation=None,
-                 origin=None,
-                 extent=None,
-                 filternorm=1,
-                 filterrad=4.0,
-                 resample=False,
-                 normalize_by_bin_width=None,
-                 **kwargs):
-        super().__init__(ax,
-                         cmap=cmap,
-                         norm=norm,
-                         interpolation=interpolation,
-                         origin=origin,
-                         extent=extent,
-                         filternorm=filternorm,
-                         filterrad=filterrad,
-                         resample=resample,
-                         **kwargs)
+    def __init__(
+        self,
+        ax,
+        workspace,
+        transpose=False,
+        cmap=None,
+        norm=None,
+        interpolation=None,
+        origin=None,
+        extent=None,
+        filternorm=1,
+        filterrad=4.0,
+        resample=False,
+        normalize_by_bin_width=None,
+        **kwargs
+    ):
+        super().__init__(
+            ax,
+            cmap=cmap,
+            norm=norm,
+            interpolation=interpolation,
+            origin=origin,
+            extent=extent,
+            filternorm=filternorm,
+            filterrad=filterrad,
+            resample=resample,
+            **kwargs
+        )
         self.ws = workspace
         try:
             self.spectrum_info = workspace.spectrumInfo()
@@ -49,17 +53,16 @@ class SamplingImage(MantidImage):
         self._resize_cid, self._xlim_cid, self._ylim_cid = None, None, None
         self._resample_required = True
         self._full_extent = extent
-        self.orig_shape = (workspace.getDimension(0).getNBins(),
-                           workspace.getDimension(1).getNBins())
+        self.orig_shape = (workspace.getDimension(0).getNBins(), workspace.getDimension(1).getNBins())
         self._xbins, self._ybins = 100, 100
         self.origin = origin
         self._update_maxpooling_option()
 
     def connect_events(self):
         axes = self.axes
-        self._resize_cid = axes.get_figure().canvas.mpl_connect('resize_event', self._resize)
-        self._xlim_cid = axes.callbacks.connect('xlim_changed', self._xlim_changed)
-        self._ylim_cid = axes.callbacks.connect('ylim_changed', self._ylim_changed)
+        self._resize_cid = axes.get_figure().canvas.mpl_connect("resize_event", self._resize)
+        self._xlim_cid = axes.callbacks.connect("xlim_changed", self._xlim_changed)
+        self._ylim_cid = axes.callbacks.connect("ylim_changed", self._ylim_changed)
 
     def disconnect_events(self):
         axes = self.axes
@@ -92,8 +95,7 @@ class SamplingImage(MantidImage):
             self._resample_required = True
 
     def _calculate_bins_from_extent(self):
-        bbox = self.get_window_extent().transformed(
-            self.axes.get_figure().dpi_scale_trans.inverted())
+        bbox = self.get_window_extent().transformed(self.axes.get_figure().dpi_scale_trans.inverted())
         dpi = self.axes.get_figure().dpi
         xbins = int(np.ceil(bbox.width * dpi))
         ybins = int(np.ceil(bbox.height * dpi))
@@ -106,15 +108,17 @@ class SamplingImage(MantidImage):
             if xbins is None or ybins is None:
                 xbins, ybins = self._calculate_bins_from_extent()
 
-            x, y, data = get_matrix_2d_ragged(self.ws,
-                                              self.normalize_by_bin_width,
-                                              histogram2D=True,
-                                              transpose=self.transpose,
-                                              extent=extent,
-                                              xbins=xbins,
-                                              ybins=ybins,
-                                              spec_info=self.spectrum_info,
-                                              maxpooling=self._maxpooling)
+            x, y, data = get_matrix_2d_ragged(
+                self.ws,
+                self.normalize_by_bin_width,
+                histogram2D=True,
+                transpose=self.transpose,
+                extent=extent,
+                xbins=xbins,
+                ybins=ybins,
+                spec_info=self.spectrum_info,
+                maxpooling=self._maxpooling,
+            )
 
             # Data is an MxN matrix.
             # If origin = upper extent is set as [xmin, xmax, ymax, ymin].
@@ -152,22 +156,12 @@ class SamplingImage(MantidImage):
         If the workspace is large, or ragged, we skip this maxpooling step and set the option as False
         """
         axis = self.ws.getAxis(1)
-        self._maxpooling = (self.ws.getNumberHistograms() <= MAX_HISTOGRAMS and axis.isSpectra()
-                            and not self.ws.isRaggedWorkspace())
+        self._maxpooling = self.ws.getNumberHistograms() <= MAX_HISTOGRAMS and axis.isSpectra() and not self.ws.isRaggedWorkspace()
 
 
-def imshow_sampling(axes,
-                    workspace,
-                    cmap=None,
-                    alpha=None,
-                    vmin=None,
-                    vmax=None,
-                    shape=None,
-                    filternorm=1,
-                    filterrad=4.0,
-                    imlim=None,
-                    url=None,
-                    **kwargs):
+def imshow_sampling(
+    axes, workspace, cmap=None, alpha=None, vmin=None, vmax=None, shape=None, filternorm=1, filterrad=4.0, imlim=None, url=None, **kwargs
+):
     """Copy of imshow but replaced AxesImage with SamplingImage and added
     callbacks and Mantid Workspace stuff.
 
@@ -181,19 +175,21 @@ def imshow_sampling(axes,
     fig.show()
     """
     normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, axes, **kwargs)
-    transpose = kwargs.pop('transpose', False)
-    extent = kwargs.pop('extent', None)
-    interpolation = kwargs.pop('interpolation', None)
-    origin = kwargs.pop('origin', None)
-    norm = kwargs.pop('norm', None)
-    resample = kwargs.pop('resample', False)
-    kwargs.pop('distribution', None)
+    transpose = kwargs.pop("transpose", False)
+    extent = kwargs.pop("extent", None)
+    interpolation = kwargs.pop("interpolation", None)
+    origin = kwargs.pop("origin", None)
+    norm = kwargs.pop("norm", None)
+    resample = kwargs.pop("resample", False)
+    kwargs.pop("distribution", None)
 
     if not extent:
-        x0, x1, y0, y1 = (workspace.getDimension(0).getMinimum(),
-                          workspace.getDimension(0).getMaximum(),
-                          workspace.getDimension(1).getMinimum(),
-                          workspace.getDimension(1).getMaximum())
+        x0, x1, y0, y1 = (
+            workspace.getDimension(0).getMinimum(),
+            workspace.getDimension(0).getMaximum(),
+            workspace.getDimension(1).getMinimum(),
+            workspace.getDimension(1).getMaximum(),
+        )
         if isinstance(workspace, MatrixWorkspace) and not workspace.isCommonBins():
             # for MatrixWorkspace the x extent obtained from dimension 0 corresponds to the first spectrum
             # this is not correct in case of ragged workspaces, where we need to obtain the global xmin and xmax
@@ -231,22 +227,24 @@ def imshow_sampling(axes,
     if norm is not None and not isinstance(norm, matplotlib.colors.Normalize):
         raise ValueError("'norm' must be an instance of 'mcolors.Normalize'")
 
-    aspect = kwargs.pop('aspect', matplotlib.rcParams['image.aspect'])
+    aspect = kwargs.pop("aspect", matplotlib.rcParams["image.aspect"])
     axes.set_aspect(aspect)
 
-    im = SamplingImage(axes,
-                       workspace,
-                       transpose,
-                       cmap,
-                       norm,
-                       interpolation,
-                       origin,
-                       extent,
-                       filternorm=filternorm,
-                       filterrad=filterrad,
-                       resample=resample,
-                       normalize_by_bin_width=normalize_by_bin_width,
-                       **kwargs)
+    im = SamplingImage(
+        axes,
+        workspace,
+        transpose,
+        cmap,
+        norm,
+        interpolation,
+        origin,
+        extent,
+        filternorm=filternorm,
+        filterrad=filterrad,
+        resample=resample,
+        normalize_by_bin_width=normalize_by_bin_width,
+        **kwargs
+    )
     im._resample_image(100, 100)
 
     im.set_alpha(alpha)

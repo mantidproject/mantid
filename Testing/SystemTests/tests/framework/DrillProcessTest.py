@@ -25,19 +25,19 @@ app = QApplication(sys.argv)
 
 
 class DrillProcessSANSTest(systemtesting.MantidSystemTest):
-    '''This test runs the same as SANSILLAutoProcessTest::D11_AutoProcess_Test but through DrILL'''
+    """This test runs the same as SANSILLAutoProcessTest::D11_AutoProcess_Test but through DrILL"""
 
     def __init__(self):
         super().__init__()
-        config['default.facility'] = 'ILL'
-        config['default.instrument'] = 'D11'
-        self.disableChecking = ['Instrument']
-        config.appendDataSearchSubDir('ILL/D11/')
+        config["default.facility"] = "ILL"
+        config["default.instrument"] = "D11"
+        self.disableChecking = ["Instrument"]
+        config.appendDataSearchSubDir("ILL/D11/")
 
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
-        self.disableChecking.append('Instrument')
+        self.disableChecking.append("Instrument")
         return ["out", "D11_AutoProcess_Reference.nxs"]
 
     def editCell(self, row, column, text):
@@ -52,10 +52,8 @@ class DrillProcessSANSTest(systemtesting.MantidSystemTest):
         columnIndex = self.drill.table._columns.index(column)
         y = self.drill.table.rowViewportPosition(row) + 5
         x = self.drill.table.columnViewportPosition(columnIndex) + 5
-        QTest.mouseClick(self.drill.table.viewport(),
-                         Qt.LeftButton, Qt.NoModifier, QPoint(x, y))
-        QTest.mouseDClick(self.drill.table.viewport(),
-                          Qt.LeftButton, Qt.NoModifier, QPoint(x, y))
+        QTest.mouseClick(self.drill.table.viewport(), Qt.LeftButton, Qt.NoModifier, QPoint(x, y))
+        QTest.mouseDClick(self.drill.table.viewport(), Qt.LeftButton, Qt.NoModifier, QPoint(x, y))
         QTest.keyClicks(self.drill.table.viewport().focusWidget(), text)
         QTest.keyClick(self.drill.table.viewport().focusWidget(), Qt.Key_Tab)
 
@@ -76,7 +74,7 @@ class DrillProcessSANSTest(systemtesting.MantidSystemTest):
             label = form.itemAt(i, QFormLayout.LabelRole).widget().text()
             widget = form.itemAt(i, QFormLayout.FieldRole).widget()
             widgets[label] = widget
-        for name,value in settingValues.items():
+        for name, value in settingValues.items():
             if name in widgets:
                 if isinstance(widgets[name], QLineEdit):
                     QTest.mouseClick(widgets[name], Qt.LeftButton)
@@ -101,12 +99,8 @@ class DrillProcessSANSTest(systemtesting.MantidSystemTest):
         mtd.clear()
 
     def runTest(self):
-        sampleRuns = ["2889,2885,2881",
-                      "2887,2883,2879",
-                      "3187,3177,3167"]
-        sampleTransmissionRuns = ["2871",
-                                  "2869",
-                                  "3172"]
+        sampleRuns = ["2889,2885,2881", "2887,2883,2879", "3187,3177,3167"]
+        sampleTransmissionRuns = ["2871", "2869", "3172"]
         beamRuns = "2866,2867+2868,2878"
         transmissionBeamRuns = "2867+2868"
         containerRuns = "2888+2971,2884+2960,2880+2949"
@@ -118,16 +112,20 @@ class DrillProcessSANSTest(systemtesting.MantidSystemTest):
         QTest.mouseClick(self.drill.addrow, Qt.LeftButton)
         QTest.mouseClick(self.drill.addrow, Qt.LeftButton)
 
-        self.editSettings({"SensitivityMaps": "sens-lamp.nxs",
-                           "BeamRadius": "0.05,0.05,0.05",
-                           "CalculateResolution": "MildnerCarpenter",
-                           "TransmissionBeamRadius": "0.2"})
+        self.editSettings(
+            {
+                "SensitivityMaps": "sens-lamp.nxs",
+                "BeamRadius": "0.05,0.05,0.05",
+                "CalculateResolution": "MildnerCarpenter",
+                "TransmissionBeamRadius": "0.2",
+            }
+        )
 
         # remove all exports
         QTest.mouseClick(self.drill.export, Qt.LeftButton)
         ew = self.drill.children()[-1]
         for i in range(ew.algoList.rowCount()):
-            widget = ew.algoList.itemAtPosition(i,0).widget()
+            widget = ew.algoList.itemAtPosition(i, 0).widget()
             if isinstance(widget, QCheckBox) and widget.isChecked():
                 QTest.mouseClick(widget, Qt.LeftButton)
         QTest.mouseClick(ew.okButton, Qt.LeftButton)
@@ -164,9 +162,7 @@ class DrillProcessSANSTest(systemtesting.MantidSystemTest):
 
         QTest.mouseClick(self.drill.buttonProcessAll, Qt.LeftButton)
 
-        while (("iq_s1" not in mtd)
-               or ("iq_s2" not in mtd)
-               or ("iq_s3" not in mtd)):
+        while ("iq_s1" not in mtd) or ("iq_s2" not in mtd) or ("iq_s3" not in mtd):
             time.sleep(1)
 
-        GroupWorkspaces(InputWorkspaces=['iq_s1', 'iq_s2', 'iq_s3'], OutputWorkspace='out')
+        GroupWorkspaces(InputWorkspaces=["iq_s1", "iq_s2", "iq_s3"], OutputWorkspace="out")

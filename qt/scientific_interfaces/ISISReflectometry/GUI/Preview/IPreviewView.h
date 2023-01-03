@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/IImageInfoWidget.h"
 #include "MantidQtWidgets/InstrumentView/RotationSurface.h"
 
 #include <QLayout>
@@ -36,6 +37,7 @@ public:
   virtual ~IPreviewView() = default;
   virtual void subscribe(PreviewViewSubscriber *notifyee) noexcept = 0;
   virtual QLayout *getDockedWidgetsLayout() noexcept = 0;
+  virtual MantidWidgets::IImageInfoWidget *getImageInfo() noexcept = 0;
   virtual void enableMainWidget() = 0;
   virtual void disableMainWidget() = 0;
 
