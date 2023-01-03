@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -10,8 +10,8 @@
 #include "DllOption.h"
 #include "MantidQtWidgets/Common/IImageInfoWidget.h"
 #include "MantidQtWidgets/Common/ImageInfoPresenter.h"
+#include <QLabel>
 #include <QMap>
-#include <QTableWidget>
 
 namespace MantidQt::MantidWidgets {
 
@@ -19,11 +19,11 @@ namespace MantidQt::MantidWidgets {
  * A table widget containing information about the pixel the mouse is over in
  * an image
  */
-class EXPORT_OPT_MANTIDQT_COMMON ImageInfoWidget : public QTableWidget, public IImageInfoWidget {
+class EXPORT_OPT_MANTIDQT_COMMON ImageInfoWidgetMini : public QLabel, public IImageInfoWidget {
   Q_OBJECT
 
 public:
-  ImageInfoWidget(QWidget *parent = nullptr);
+  ImageInfoWidgetMini(QWidget *parent = nullptr);
 
   // Note: QMap has sip binding via PyQt but only for specific types (both types have to be classes or the first type
   // has to be int)

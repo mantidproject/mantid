@@ -11,6 +11,8 @@
 #include "GUI/Preview/QtPreviewDockedWidgets.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Strings.h"
+#include "MantidQtWidgets/Common/ImageInfoWidget.h"
+#include "MantidQtWidgets/Common/ImageInfoWidgetMini.h"
 #include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MantidQtWidgets/RegionSelector/IRegionSelector.h"
 #include "MantidQtWidgets/RegionSelector/RegionSelector.h"
@@ -20,6 +22,7 @@
 
 using Mantid::API::MatrixWorkspace_sptr;
 using MantidQt::MantidWidgets::AxisID;
+using MantidQt::MantidWidgets::ImageInfoWidgetMini;
 using MantidQt::MantidWidgets::PlotPresenter;
 using MantidQt::Widgets::IRegionSelector;
 using MantidQt::Widgets::RegionSelector;
@@ -40,7 +43,8 @@ PreviewPresenter::PreviewPresenter(Dependencies dependencies)
     m_dockedWidgets = std::make_unique<QtPreviewDockedWidgets>(nullptr, m_view->getDockedWidgetsLayout());
   }
   if (!m_regionSelector) {
-    m_regionSelector = std::make_unique<RegionSelector>(nullptr, m_dockedWidgets->getRegionSelectorLayout());
+    m_regionSelector =
+        std::make_unique<RegionSelector>(nullptr, m_dockedWidgets->getRegionSelectorLayout(), m_view->getImageInfo());
   }
   if (!m_plotPresenter) {
     m_plotPresenter = std::make_unique<PlotPresenter>(m_dockedWidgets->getLinePlotView());
