@@ -19,7 +19,7 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
     def skipTests(self):
         # Windows produces different outputs. Disable there for further investigation
         return sys.platform.startswith("win")
-        
+
     def setUp(self):
         self.sample = self._sampleEventData()
         self.vana = self._vanadiumEventData()
