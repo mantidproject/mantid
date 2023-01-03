@@ -60,6 +60,7 @@ QWidget *ALFInstrumentView::generateSampleLoadWidget() {
 
 QWidget *ALFInstrumentView::generateVanadiumLoadWidget() {
   m_vanadium = new API::FileFinderWidget(this);
+  m_vanadium->isOptional(true);
   m_vanadium->setLabelText("Vanadium");
   m_vanadium->setLabelMinWidth(150);
   m_vanadium->allowMultipleFiles(false);
