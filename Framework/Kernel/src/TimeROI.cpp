@@ -78,9 +78,53 @@ bool TimeROI::valueAtTime(const DateAndTime &time) const {
   }
 }
 
-void TimeROI::update_union(const TimeROI &other) {}
+/// get a list of all unique times. order is not guaranteed
+std::vector<DateAndTime> TimeROI::getAllTimes(const TimeROI &other) {
 
-// std::vector<std::pair<DateAndTime, DateAndTime>> toROIs()
+  std::set<DateAndTime> times_set;
+  const auto times_lft = this->m_roi.timesAsVector();
+  for (const auto time : times_lft)
+    times_set.insert(time);
+  const auto times_rgt = other.m_roi.timesAsVector();
+  for (const auto time : times_rgt)
+    times_set.insert(time);
+
+  // copy into the vector
+  std::vector<DateAndTime> times_all;
+  times_all.assign(times_set.begin(), times_set.end());
+
+  return times_all;
+}
+
+void TimeROI::update_union(const TimeROI &other) {
+  // exit early if the two TimeROI are identical
+  if (*this == other)
+    return;
+
+  // get rid of redundant entries before starting
+  this->removeRedundantEntries();
+  // get a list of all unique times
+  std::vector<DateAndTime> times_all = getAllTimes(other);
+
+  // calculate what values to add
+  std::vector<bool> additional_values;
+  additional_values.reserve(times_all.size());
+  for (const auto time : times_all) {
+    const bool value_lft = this->valueAtTime(time);
+    if (value_lft) {
+      additional_values.push_back(ROI_USE);
+    } else {
+      const bool value_rgt = other.valueAtTime(time);
+      additional_values.push_back(value_lft || value_rgt);
+    }
+  }
+
+  // remove old values and replace with new ones
+  this->m_roi.clear();
+  this->m_roi.addValues(times_all, additional_values);
+
+  this->removeRedundantEntries();
+}
 
 void TimeROI::update_intersection(const TimeROI &other) {
   // exit early if the two TimeROI are identical
@@ -91,18 +135,7 @@ void TimeROI::update_intersection(const TimeROI &other) {
   this->removeRedundantEntries();
 
   // get a list of all unique times
-  std::vector<DateAndTime> times_all;
-  { // reduce variable scope
-    std::set<DateAndTime> times_set;
-    const auto times_lft = m_roi.timesAsVector();
-    for (const auto time : times_lft)
-      times_set.insert(time);
-    const auto times_rgt = other.m_roi.timesAsVector();
-    for (const auto time : times_rgt)
-      times_set.insert(time);
-    // copy into the vector
-    times_all.assign(times_set.begin(), times_set.end());
-  }
+  std::vector<DateAndTime> times_all = getAllTimes(other);
 
   // calculate what values to add
   std::vector<bool> additional_values;
