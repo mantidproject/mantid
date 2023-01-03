@@ -21,6 +21,7 @@ namespace {
 class MANTID_KERNEL_DLL TimeROI {
 public:
   TimeROI();
+  TimeROI(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime);
   double durationInSeconds() const;
   std::size_t numBoundaries() const;
   bool empty() const;
@@ -30,7 +31,13 @@ public:
   void addMask(const std::string &startTime, const std::string &stopTime);
   void addMask(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime);
   void addMask(const std::time_t &startTime, const std::time_t &stopTime);
+  bool valueAtTime(const Types::Core::DateAndTime &time) const;
+  /// https://en.wikipedia.org/wiki/Union_(set_theory)
+  void update_union(const TimeROI &other);
+  /// https://en.wikipedia.org/wiki/Intersection
+  void update_intersection(const TimeROI &other);
   void removeRedundantEntries();
+  bool operator==(const TimeROI &other) const;
   void debugPrint() const;
 
 private:
