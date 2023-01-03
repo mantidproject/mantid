@@ -218,9 +218,7 @@ void SaveSPE::writeHists(const API::MatrixWorkspace_const_sptr &WS, FILE *const 
       if (isNumericAxis || !spectrumInfo.isMasked(i)) {
         // there's no masking, write the data
         writeHist(WS, outFile, i);
-      } else { // all the detectors are masked, write the masking value from the
-               // SPE spec
-               // http://www.mantidproject.org/images/3/3d/Spe_file_format.pdf
+      } else { // all the detectors are masked, write the masking value instead
         writeMaskFlags(outFile);
         nMasked++;
       }
