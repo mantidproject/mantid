@@ -15,9 +15,9 @@ class SANSILLParameterScanTest(unittest.TestCase):
     _facility = None
 
     def setUp(self):
-        self._facility = config['default.facility']
+        self._facility = config["default.facility"]
         self._data_search_dirs = config.getDataSearchDirs()
-        config.appendDataSearchSubDir('ILL/D16/')
+        config.appendDataSearchSubDir("ILL/D16/")
         config.setFacility("ILL")
 
     def tearDown(self):
@@ -27,12 +27,14 @@ class SANSILLParameterScanTest(unittest.TestCase):
 
     def test_D16_omega(self):
         output_name = "output2d"
-        SANSILLParameterScan(SampleRun="066321.nxs",
-                             OutputWorkspace=output_name,
-                             OutputJoinedWorkspace="reduced",
-                             Observable="Omega.value",
-                             PixelYmin=3,
-                             PixelYMax=189)
+        SANSILLParameterScan(
+            SampleRun="066321.nxs",
+            OutputWorkspace=output_name,
+            OutputJoinedWorkspace="reduced",
+            Observable="Omega.value",
+            PixelYmin=3,
+            PixelYMax=189,
+        )
 
         ws = mtd[output_name]
         self._check_output(ws, 6, 1152)
@@ -58,5 +60,5 @@ class SANSILLParameterScanTest(unittest.TestCase):
         self.assertTrue(not ws.isDistribution())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

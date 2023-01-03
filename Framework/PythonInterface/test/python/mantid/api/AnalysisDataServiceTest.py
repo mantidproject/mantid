@@ -6,13 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from testhelpers import run_algorithm
-from mantid.api import (AnalysisDataService, AnalysisDataServiceImpl,
-                        FrameworkManagerImpl, MatrixWorkspace)
+from mantid.api import AnalysisDataService, AnalysisDataServiceImpl, FrameworkManagerImpl, MatrixWorkspace
 from mantid import mtd
 
 
 class AnalysisDataServiceTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         FrameworkManagerImpl.Instance()
@@ -29,36 +27,36 @@ class AnalysisDataServiceTest(unittest.TestCase):
 
     def test_retrieval_of_non_existent_data_raises_KeyError(self):
         try:
-            AnalysisDataService['NotHere']
-            self.fail('AnalysisDataService did not throw when object does not exist')
+            AnalysisDataService["NotHere"]
+            self.fail("AnalysisDataService did not throw when object does not exist")
         except KeyError:
             pass
 
     def _run_createws(self, wsname):
         """
-            Run create workspace storing the output in the named workspace
+        Run create workspace storing the output in the named workspace
         """
         data = [1.0, 2.0, 3.0]
-        alg = run_algorithm('CreateWorkspace', DataX=data, DataY=data, NSpec=1, UnitX='Wavelength', child=True)
+        alg = run_algorithm("CreateWorkspace", DataX=data, DataY=data, NSpec=1, UnitX="Wavelength", child=True)
         AnalysisDataService.addOrReplace(wsname, alg.getProperty("OutputWorkspace").value)
 
     def test_contains(self):
         # verify check against None
         self.assertFalse(None in mtd)
         # verify check against things that bool to False
-        self.assertFalse('' in mtd)
+        self.assertFalse("" in mtd)
         self.assertFalse(0 in mtd)
         # verify check for converting checked value to string
         self.assertFalse(1 in mtd)
 
     def test_len_increases_when_item_added(self):
-        wsname = 'ADSTest_test_len_increases_when_item_added'
+        wsname = "ADSTest_test_len_increases_when_item_added"
         current_len = len(AnalysisDataService)
         self._run_createws(wsname)
         self.assertEqual(len(AnalysisDataService), current_len + 1)
 
     def test_len_decreases_when_item_removed(self):
-        wsname = 'ADSTest_test_len_decreases_when_item_removed'
+        wsname = "ADSTest_test_len_decreases_when_item_removed"
         self._run_createws(wsname)
         current_len = len(AnalysisDataService)
         # Remove to clean the test up
@@ -67,7 +65,7 @@ class AnalysisDataServiceTest(unittest.TestCase):
 
     def test_add_raises_error_if_name_exists(self):
         data = [1.0, 2.0, 3.0]
-        alg = run_algorithm('CreateWorkspace', DataX=data, DataY=data, NSpec=1, UnitX='Wavelength', child=True)
+        alg = run_algorithm("CreateWorkspace", DataX=data, DataY=data, NSpec=1, UnitX="Wavelength", child=True)
         name = "testws"
         ws = alg.getProperty("OutputWorkspace").value
         AnalysisDataService.addOrReplace(name, ws)
@@ -75,7 +73,7 @@ class AnalysisDataServiceTest(unittest.TestCase):
 
     def test_addOrReplace_replaces_workspace_with_existing_name(self):
         data = [1.0, 2.0, 3.0]
-        alg = run_algorithm('CreateWorkspace', DataX=data, DataY=data, NSpec=1, UnitX='Wavelength', child=True)
+        alg = run_algorithm("CreateWorkspace", DataX=data, DataY=data, NSpec=1, UnitX="Wavelength", child=True)
         name = "testws"
         ws = alg.getProperty("OutputWorkspace").value
         AnalysisDataService.add(name, ws)
@@ -86,17 +84,17 @@ class AnalysisDataServiceTest(unittest.TestCase):
 
     def do_check_for_matrix_workspace_type(self, workspace):
         self.assertTrue(isinstance(workspace, MatrixWorkspace))
-        self.assertNotEqual(workspace.name(), '')
-        self.assertTrue(hasattr(workspace, 'getNumberHistograms'))
-        self.assertTrue(hasattr(workspace, 'getMemorySize'))
+        self.assertNotEqual(workspace.name(), "")
+        self.assertTrue(hasattr(workspace, "getNumberHistograms"))
+        self.assertTrue(hasattr(workspace, "getMemorySize"))
 
     def test_retrieve_gives_back_derived_type_not_DataItem(self):
-        wsname = 'ADSTest_test_retrieve_gives_back_derived_type_not_DataItem'
+        wsname = "ADSTest_test_retrieve_gives_back_derived_type_not_DataItem"
         self._run_createws(wsname)
         self.do_check_for_matrix_workspace_type(AnalysisDataService.retrieve(wsname))
 
     def test_key_operator_does_same_as_retrieve(self):
-        wsname = 'ADSTest_test_key_operator_does_same_as_retrieve'
+        wsname = "ADSTest_test_key_operator_does_same_as_retrieve"
         self._run_createws(wsname)
         ws_from_op = AnalysisDataService[wsname]
         ws_from_method = AnalysisDataService.retrieve(wsname)
@@ -118,9 +116,8 @@ class AnalysisDataServiceTest(unittest.TestCase):
         ws_names = ["test_retrieve_workspaces_1", "test_retrieve_workspaces_2"]
         for name in ws_names:
             self._run_createws(name)
-        group_name = 'group1'
-        _ = run_algorithm('GroupWorkspaces', InputWorkspaces=ws_names,
-                          OutputWorkspace=group_name)
+        group_name = "group1"
+        _ = run_algorithm("GroupWorkspaces", InputWorkspaces=ws_names, OutputWorkspace=group_name)
 
         workspaces = AnalysisDataService.retrieveWorkspaces([group_name], True)
         self.assertEqual(2, len(workspaces))
@@ -131,7 +128,7 @@ class AnalysisDataServiceTest(unittest.TestCase):
         # If a reference to a DataItem has been extracted from the ADS
         # and it is then removed. The extracted handle should no longer
         # be able to access the DataItem
-        wsname = 'ADSTest_test_removing_item_invalidates_extracted_handles'
+        wsname = "ADSTest_test_removing_item_invalidates_extracted_handles"
         self._run_createws(wsname)
         ws_handle = AnalysisDataService[wsname]
         succeeded = False
@@ -175,6 +172,7 @@ class AnalysisDataServiceTest(unittest.TestCase):
 
     def test_addToGroup_adds_workspace_to_group(self):
         from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces
+
         CreateSampleWorkspace(OutputWorkspace="ws1")
         CreateSampleWorkspace(OutputWorkspace="ws2")
         GroupWorkspaces(InputWorkspaces="ws1,ws2", OutputWorkspace="NewGroup")
@@ -182,13 +180,14 @@ class AnalysisDataServiceTest(unittest.TestCase):
 
         AnalysisDataService.addToGroup("NewGroup", "ws3")
 
-        group = mtd['NewGroup']
+        group = mtd["NewGroup"]
 
         self.assertEqual(group.size(), 3)
         self.assertCountEqual(group.getNames(), ["ws1", "ws2", "ws3"])
 
     def test_removeFromGroup_removes_workspace_from_group(self):
         from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces
+
         CreateSampleWorkspace(OutputWorkspace="ws1")
         CreateSampleWorkspace(OutputWorkspace="ws2")
         CreateSampleWorkspace(OutputWorkspace="ws3")
@@ -196,7 +195,7 @@ class AnalysisDataServiceTest(unittest.TestCase):
 
         AnalysisDataService.removeFromGroup("NewGroup", "ws3")
 
-        group = mtd['NewGroup']
+        group = mtd["NewGroup"]
 
         self.assertEqual(group.size(), 2)
         self.assertCountEqual(group.getNames(), ["ws1", "ws2"])
@@ -220,5 +219,5 @@ class AnalysisDataServiceTest(unittest.TestCase):
             str(workspaces[0])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

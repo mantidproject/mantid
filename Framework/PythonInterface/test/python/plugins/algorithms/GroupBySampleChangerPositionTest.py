@@ -4,24 +4,21 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=too-many-public-methods,invalid-name
+# pylint: disable=too-many-public-methods,invalid-name
 import unittest
 from mantid.simpleapi import ISISIndirectEnergyTransferWrapper, GroupBySampleChangerPosition, AnalysisDataServiceImpl
 
 
 class GroupBySampleChangerPositionTest(unittest.TestCase):
-
     def test_group_with_no_sample_position(self):
         """
         Sanity test to ensure the most basic reduction actually completes.
         """
 
-        wks = ISISIndirectEnergyTransferWrapper(InputFiles='IRS26176.RAW',
-                                                Instrument='IRIS',
-                                                Analyser='graphite',
-                                                Reflection='002',
-                                                SpectraRange=[3, 53])
-        GroupBySampleChangerPosition(InputWorkspace=wks, OutputGroupPrefix='Prefix', OutputGroupSuffix='Suffix')
+        wks = ISISIndirectEnergyTransferWrapper(
+            InputFiles="IRS26176.RAW", Instrument="IRIS", Analyser="graphite", Reflection="002", SpectraRange=[3, 53]
+        )
+        GroupBySampleChangerPosition(InputWorkspace=wks, OutputGroupPrefix="Prefix", OutputGroupSuffix="Suffix")
         ads = AnalysisDataServiceImpl.Instance()
         self.assertFalse(ads.doesExist("Prefix_btm_Suffix"))
         self.assertFalse(ads.doesExist("Prefix_mid_Suffix"))
@@ -34,12 +31,14 @@ class GroupBySampleChangerPositionTest(unittest.TestCase):
         Sanity test to ensure the most basic reduction actually completes.
         """
 
-        wks = ISISIndirectEnergyTransferWrapper(InputFiles='IRS94297.nxs, IRS94298.nxs, IRS94299.nxs',
-                                                Instrument='IRIS',
-                                                Analyser='graphite',
-                                                Reflection='002',
-                                                SpectraRange=[3, 53])
-        GroupBySampleChangerPosition(InputWorkspace=wks, OutputGroupPrefix='Prefix', OutputGroupSuffix='Suffix')
+        wks = ISISIndirectEnergyTransferWrapper(
+            InputFiles="IRS94297.nxs, IRS94298.nxs, IRS94299.nxs",
+            Instrument="IRIS",
+            Analyser="graphite",
+            Reflection="002",
+            SpectraRange=[3, 53],
+        )
+        GroupBySampleChangerPosition(InputWorkspace=wks, OutputGroupPrefix="Prefix", OutputGroupSuffix="Suffix")
         ads = AnalysisDataServiceImpl.Instance()
         self.assertTrue(ads.doesExist("Prefix_btm_Suffix"))
         self.assertTrue(ads.doesExist("Prefix_mid_Suffix"))
@@ -50,5 +49,5 @@ class GroupBySampleChangerPositionTest(unittest.TestCase):
         ads.remove("Prefix_top_Suffix")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

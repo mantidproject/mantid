@@ -20,13 +20,14 @@ import unittest
 # Remove this when everything is switched to qtpy
 try:
     import sip
-    sip.setapi('QString', 2)
-    sip.setapi('QVariant', 2)
-    sip.setapi('QDate', 2)
-    sip.setapi('QDateTime', 2)
-    sip.setapi('QTextStream', 2)
-    sip.setapi('QTime', 2)
-    sip.setapi('QUrl', 2)
+
+    sip.setapi("QString", 2)
+    sip.setapi("QVariant", 2)
+    sip.setapi("QDate", 2)
+    sip.setapi("QDateTime", 2)
+    sip.setapi("QTextStream", 2)
+    sip.setapi("QTime", 2)
+    sip.setapi("QUrl", 2)
 except AttributeError:
     # PyQt < v4.6
     pass
@@ -65,7 +66,9 @@ def main(argv):
         argv=(argv[0],),
         # these make sure that some options that are not applicable
         # remain hidden from the help menu.
-        failfast=False, buffer=False, catchbreak=False
+        failfast=False,
+        buffer=False,
+        catchbreak=False,
     )
 
 
@@ -88,7 +91,7 @@ def result_class(pathname):
     directory_path, _ = os.path.split(pathname)
     directory_name = os.path.relpath(directory_path, os.path.dirname(directory_path))
     class_ = GroupedNameTestResult
-    class_.testcase_prefix = "python." +  directory_name + "."
+    class_.testcase_prefix = "python." + directory_name + "."
     return class_
 
 

@@ -12,15 +12,13 @@ from mantid.api import PythonAlgorithm
 
 
 class ListValidatorTest(unittest.TestCase):
-
     def test_empty_ListValidator_allows_nothing(self):
         """
-            Test that a list validator restricts the values
-            for a property
+        Test that a list validator restricts the values
+        for a property
         """
 
         class EmptyListValidator(PythonAlgorithm):
-
             def PyInit(self):
                 validator = StringListValidator()
                 self.declareProperty("Input", "", validator)
@@ -34,8 +32,8 @@ class ListValidatorTest(unittest.TestCase):
 
     def test_ListValidator_plus_addAllowedValued_allows_that_value(self):
         """
-            Test that a list validator restricts the values
-            for a property
+        Test that a list validator restricts the values
+        for a property
         """
 
         class SingleItemListValidator(PythonAlgorithm):
@@ -57,13 +55,13 @@ class ListValidatorTest(unittest.TestCase):
 
     def test_ListValidator_with_values_in_constructor_restricts_property_values(self):
         """
-            Test that a list validator restricts the values
-            for a property
+        Test that a list validator restricts the values
+        for a property
         """
 
         class MultiValueValidator(PythonAlgorithm):
 
-            _allowed_vals = ["Val1", "Val2","Val3"]
+            _allowed_vals = ["Val1", "Val2", "Val3"]
 
             def PyInit(self):
                 validator = StringListValidator(self._allowed_vals)
@@ -79,5 +77,5 @@ class ListValidatorTest(unittest.TestCase):
             testhelpers.assertRaisesNothing(self, alg.setProperty, "Input", val)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

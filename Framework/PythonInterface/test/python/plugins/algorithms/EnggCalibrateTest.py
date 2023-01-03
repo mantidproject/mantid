@@ -23,18 +23,17 @@ class EnggCalibrateTest(unittest.TestCase):
         Set up dependencies for one or more of the tests below.
         """
         if not self.__class__._data_ws:
-            self.__class__._data_ws = sapi.LoadNexus("ENGINX00228061.nxs", OutputWorkspace='ENGIN-X_test_ws')
+            self.__class__._data_ws = sapi.LoadNexus("ENGINX00228061.nxs", OutputWorkspace="ENGIN-X_test_ws")
 
         if not self.__class__._van_curves_ws:
             # Note the pre-calculated file instead of the too big vanadium run
             # self.__class__._van_ws = LoadNexus("ENGINX00236516.nxs", OutputWorkspace='ENGIN-X_test_vanadium_ws')
-            self.__class__._van_curves_ws = sapi.LoadNexus(Filename=
-                                                           'ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs',
-                                                           OutputWorkspace='ENGIN-X_vanadium_curves_test_ws')
-            self.__class__._van_integ_tbl = sapi.LoadNexus(Filename=
-                                                           'ENGINX_precalculated_vanadium_run000236516_integration.nxs',
-                                                           OutputWorkspace='ENGIN-X_vanadium_integ_test_ws')
-
+            self.__class__._van_curves_ws = sapi.LoadNexus(
+                Filename="ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs", OutputWorkspace="ENGIN-X_vanadium_curves_test_ws"
+            )
+            self.__class__._van_integ_tbl = sapi.LoadNexus(
+                Filename="ENGINX_precalculated_vanadium_run000236516_integration.nxs", OutputWorkspace="ENGIN-X_vanadium_integ_test_ws"
+            )
 
     def test_issues_with_properties(self):
         """
@@ -43,31 +42,22 @@ class EnggCalibrateTest(unittest.TestCase):
         """
 
         # No InputWorkspace property (required)
-        self.assertRaises(RuntimeError,
-                          sapi.EnggCalibrate,
-                          File='foo', Bank='1')
+        self.assertRaises(RuntimeError, sapi.EnggCalibrate, File="foo", Bank="1")
 
         # Wrong (mispelled) InputWorkspace property
-        self.assertRaises(RuntimeError,
-                          sapi.EnggCalibrate,
-                          InputWorkpace='anything_goes', Bank='2')
+        self.assertRaises(RuntimeError, sapi.EnggCalibrate, InputWorkpace="anything_goes", Bank="2")
 
         # mispelled ExpectedPeaks
-        tbl = sapi.CreateEmptyTableWorkspace(OutputWorkspace='test_table')
-        self.assertRaises(RuntimeError,
-                          sapi.EnggCalibrate,
-                          Inputworkspace=self.__class__._data_ws, DetectorPositions=tbl, Bank='2', Peaks='2')
+        tbl = sapi.CreateEmptyTableWorkspace(OutputWorkspace="test_table")
+        self.assertRaises(
+            RuntimeError, sapi.EnggCalibrate, Inputworkspace=self.__class__._data_ws, DetectorPositions=tbl, Bank="2", Peaks="2"
+        )
 
         # mispelled DetectorPositions
-        self.assertRaises(RuntimeError,
-                          sapi.EnggCalibrate,
-                          InputWorkspace=self.__class__._data_ws, Detectors=tbl, Bank='2', Peaks='2')
+        self.assertRaises(RuntimeError, sapi.EnggCalibrate, InputWorkspace=self.__class__._data_ws, Detectors=tbl, Bank="2", Peaks="2")
 
         # There's no output workspace
-        self.assertRaises(RuntimeError,
-                          sapi.EnggCalibrate,
-                          InputWorkspace=self.__class__._data_ws, Bank='1')
-
+        self.assertRaises(RuntimeError, sapi.EnggCalibrate, InputWorkspace=self.__class__._data_ws, Bank="1")
 
     def test_fails_gracefully(self):
         """
@@ -76,19 +66,20 @@ class EnggCalibrateTest(unittest.TestCase):
 
         # This should produce 'given peak center ... is outside of data range' warnings
         # and finally raise after a 'some peaks not found' error
-        self.assertRaises(RuntimeError,
-                          sapi.EnggCalibrate,
-                          InputWorkspace=self.__class__._data_ws, ExpectedPeaks=[0.2, 0.4], Bank='2')
+        self.assertRaises(RuntimeError, sapi.EnggCalibrate, InputWorkspace=self.__class__._data_ws, ExpectedPeaks=[0.2, 0.4], Bank="2")
 
     def test_runs_ok_without_reliable_peaks(self):
         """
         Checks normal operation.
         """
         try:
-            difa, difc, zero, peaks = sapi.EnggCalibrate(InputWorkspace=self.__class__._data_ws,
-                                                         VanIntegrationWorkspace=self.__class__._van_integ_tbl,
-                                                         VanCurvesWorkspace=self.__class__._van_curves_ws,
-                                                         ExpectedPeaks=[1.6, 1.1, 1.8], Bank='2')
+            difa, difc, zero, peaks = sapi.EnggCalibrate(
+                InputWorkspace=self.__class__._data_ws,
+                VanIntegrationWorkspace=self.__class__._van_integ_tbl,
+                VanCurvesWorkspace=self.__class__._van_curves_ws,
+                ExpectedPeaks=[1.6, 1.1, 1.8],
+                Bank="2",
+            )
             self.assertEqual(difa, 0)
             self.assertGreater(difc, 0)
             self.assertLess(abs(zero), 1000)
@@ -102,15 +93,17 @@ class EnggCalibrateTest(unittest.TestCase):
         Normal operation with a csv input file with (poor / impossible) expected peaks
         """
         # This file has: 1.6, 1.1, 1.8 (as the test above)
-        filename = 'EnginX_3_expected_peaks_unittest.csv'
+        filename = "EnginX_3_expected_peaks_unittest.csv"
         try:
-            difa, difc, zero, peaks = sapi.EnggCalibrate(InputWorkspace=self.__class__._data_ws,
-                                                         VanIntegrationWorkspace=self.__class__._van_integ_tbl,
-                                                         VanCurvesWorkspace=self.__class__._van_curves_ws,
-                                                         # nonsense, but FromFile should prevail
-                                                         ExpectedPeaks=[-4, 40, 323],
-                                                         ExpectedPeaksFromFile=filename,
-                                                         Bank='2')
+            difa, difc, zero, peaks = sapi.EnggCalibrate(
+                InputWorkspace=self.__class__._data_ws,
+                VanIntegrationWorkspace=self.__class__._van_integ_tbl,
+                VanCurvesWorkspace=self.__class__._van_curves_ws,
+                # nonsense, but FromFile should prevail
+                ExpectedPeaks=[-4, 40, 323],
+                ExpectedPeaksFromFile=filename,
+                Bank="2",
+            )
             self.assertEqual(difa, 0)
             self.assertGreater(difc, 0)
             self.assertLess(abs(zero), 1000)
@@ -135,8 +128,10 @@ class EnggCalibrateTest(unittest.TestCase):
         difc_err_epsilon = 1e-2
 
         # assertLess would be nice, but only available in unittest >= 2.7
-        self.assertTrue(abs((expected_difc-difc)/expected_difc) < difc_err_epsilon,
-                        "DIFC (%f) is too far from its expected value (%f)" %(difc, expected_difc))
+        self.assertTrue(
+            abs((expected_difc - difc) / expected_difc) < difc_err_epsilon,
+            "DIFC (%f) is too far from its expected value (%f)" % (difc, expected_difc),
+        )
 
         # especially this zero parameter is extremely platform dependent/sensitive
         # Examples:
@@ -147,9 +142,11 @@ class EnggCalibrateTest(unittest.TestCase):
         # do not change too much
         zero_err_epsilon = 0.2
 
-        self.assertTrue(abs((expected_zero-zero)/expected_zero) < zero_err_epsilon,
-                        "TZERO (%f) is too far from its expected value (%f)" %(zero, expected_zero))
+        self.assertTrue(
+            abs((expected_zero - zero) / expected_zero) < zero_err_epsilon,
+            "TZERO (%f) is too far from its expected value (%f)" % (zero, expected_zero),
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

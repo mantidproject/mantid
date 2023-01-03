@@ -9,14 +9,14 @@ from mantid import config, simpleapi
 
 
 class StringToPngTest(unittest.TestCase):
-    plotfile = os.path.join(config.getString('defaultsave.directory'), "StringToPngTest.png")
+    plotfile = os.path.join(config.getString("defaultsave.directory"), "StringToPngTest.png")
 
     def tearDown(self):
         if os.path.exists(self.plotfile):
             os.remove(self.plotfile)
 
     def testPlot(self):
-        to_plot = 'This is a string\nAnd this is a second line'
+        to_plot = "This is a string\nAnd this is a second line"
         simpleapi.StringToPng(String=to_plot, OutputFilename=self.plotfile)
         self.assertGreater(os.path.getsize(self.plotfile), 1e3)
 
