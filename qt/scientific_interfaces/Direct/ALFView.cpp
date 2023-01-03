@@ -42,7 +42,13 @@ void ALFView::initLayout() {
   splitter->setCollapsible(1, false);
 
   auto mainWidget = new QSplitter(Qt::Vertical);
-  mainWidget->addWidget(m_instrumentPresenter->getSampleLoadWidget());
+
+  auto loadWidget = new QWidget();
+  auto loadLayout = new QVBoxLayout(loadWidget);
+  loadLayout->addWidget(m_instrumentPresenter->getSampleLoadWidget());
+  loadLayout->addWidget(m_instrumentPresenter->getVanadiumLoadWidget());
+
+  mainWidget->addWidget(loadWidget);
   mainWidget->addWidget(splitter);
 
   mainWidget->setCollapsible(0, false);

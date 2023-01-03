@@ -22,6 +22,8 @@ ALFInstrumentPresenter::ALFInstrumentPresenter(IALFInstrumentView *view, std::un
 
 QWidget *ALFInstrumentPresenter::getSampleLoadWidget() { return m_view->generateSampleLoadWidget(); }
 
+QWidget *ALFInstrumentPresenter::getVanadiumLoadWidget() { return m_view->generateVanadiumLoadWidget(); }
+
 ALFInstrumentWidget *ALFInstrumentPresenter::getInstrumentView() { return m_view->getInstrumentView(); }
 
 void ALFInstrumentPresenter::subscribeAnalysisPresenter(IALFAnalysisPresenter *presenter) {
@@ -40,6 +42,8 @@ void ALFInstrumentPresenter::loadSample() {
   }
   m_view->setSampleRun(std::to_string(m_model->runNumber()));
 }
+
+void ALFInstrumentPresenter::loadVanadium() {}
 
 std::optional<std::string> ALFInstrumentPresenter::loadAndTransform(const std::string &pathToRun) {
   try {

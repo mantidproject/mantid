@@ -41,6 +41,7 @@ public:
   virtual void setUpInstrument(std::string const &fileName) = 0;
 
   virtual QWidget *generateSampleLoadWidget() = 0;
+  virtual QWidget *generateVanadiumLoadWidget() = 0;
   virtual ALFInstrumentWidget *getInstrumentView() = 0;
 
   virtual void subscribePresenter(IALFInstrumentPresenter *presenter) = 0;
@@ -67,6 +68,7 @@ public:
   void setUpInstrument(std::string const &fileName) override;
 
   QWidget *generateSampleLoadWidget() override;
+  QWidget *generateVanadiumLoadWidget() override;
   ALFInstrumentWidget *getInstrumentView() override { return m_instrumentWidget; };
 
   void subscribePresenter(IALFInstrumentPresenter *presenter) override;
@@ -86,6 +88,7 @@ public:
 private slots:
   void reconnectInstrumentActor();
   void sampleLoaded();
+  void vanadiumLoaded();
   void notifyInstrumentActorReset();
   void notifyShapeChanged();
   void selectWholeTube();
@@ -93,6 +96,7 @@ private slots:
 
 private:
   API::FileFinderWidget *m_sample;
+  API::FileFinderWidget *m_vanadium;
   ALFInstrumentWidget *m_instrumentWidget;
   IALFInstrumentPresenter *m_presenter;
 };

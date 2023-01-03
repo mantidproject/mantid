@@ -47,20 +47,28 @@ void ALFInstrumentView::setUpInstrument(std::string const &fileName) {
 
 QWidget *ALFInstrumentView::generateSampleLoadWidget() {
   m_sample = new API::FileFinderWidget(this);
-  m_sample->setLabelText("ALF");
+  m_sample->setLabelText("Sample");
+  m_sample->setLabelMinWidth(150);
   m_sample->allowMultipleFiles(false);
   m_sample->setInstrumentOverride("ALF");
   m_sample->isForRunFiles(true);
+
   connect(m_sample, SIGNAL(fileFindingFinished()), this, SLOT(sampleLoaded()));
 
-  auto loadWidget = new QWidget();
-  auto loadLayout = new QHBoxLayout(loadWidget);
+  return m_sample;
+}
 
-  loadLayout->addItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
-  loadLayout->addWidget(m_sample);
-  loadLayout->addItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
+QWidget *ALFInstrumentView::generateVanadiumLoadWidget() {
+  m_vanadium = new API::FileFinderWidget(this);
+  m_vanadium->setLabelText("Vanadium");
+  m_vanadium->setLabelMinWidth(150);
+  m_vanadium->allowMultipleFiles(false);
+  m_vanadium->setInstrumentOverride("ALF");
+  m_vanadium->isForRunFiles(true);
 
-  return loadWidget;
+  connect(m_vanadium, SIGNAL(fileFindingFinished()), this, SLOT(vanadiumLoaded()));
+
+  return m_vanadium;
 }
 
 void ALFInstrumentView::reconnectInstrumentActor() {
@@ -81,14 +89,27 @@ void ALFInstrumentView::setSampleRun(std::string const &runNumber) {
 }
 
 void ALFInstrumentView::sampleLoaded() {
-  if (m_sample->getText().isEmpty())
+  if (m_sample->getText().isEmpty()) {
     return;
+  }
 
   if (!m_sample->isValid()) {
     warningBox(m_sample->getFileProblem().toStdString());
     return;
   }
   m_presenter->loadSample();
+}
+
+void ALFInstrumentView::vanadiumLoaded() {
+  if (m_vanadium->getText().isEmpty()) {
+    return;
+  }
+
+  if (!m_vanadium->isValid()) {
+    warningBox(m_vanadium->getFileProblem().toStdString());
+    return;
+  }
+  m_presenter->loadVanadium();
 }
 
 void ALFInstrumentView::notifyInstrumentActorReset() { m_presenter->notifyInstrumentActorReset(); }

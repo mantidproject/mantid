@@ -26,11 +26,13 @@ class MANTIDQT_DIRECT_DLL IALFInstrumentPresenter {
 
 public:
   virtual QWidget *getSampleLoadWidget() = 0;
+  virtual QWidget *getVanadiumLoadWidget() = 0;
   virtual ALFInstrumentWidget *getInstrumentView() = 0;
 
   virtual void subscribeAnalysisPresenter(IALFAnalysisPresenter *presenter) = 0;
 
   virtual void loadSample() = 0;
+  virtual void loadVanadium() = 0;
 
   virtual void notifyInstrumentActorReset() = 0;
   virtual void notifyShapeChanged() = 0;
@@ -43,11 +45,13 @@ public:
   ALFInstrumentPresenter(IALFInstrumentView *view, std::unique_ptr<IALFInstrumentModel> model);
 
   QWidget *getSampleLoadWidget() override;
+  QWidget *getVanadiumLoadWidget() override;
   ALFInstrumentWidget *getInstrumentView() override;
 
   void subscribeAnalysisPresenter(IALFAnalysisPresenter *presenter) override;
 
   void loadSample() override;
+  void loadVanadium() override;
 
   void notifyInstrumentActorReset() override;
   void notifyShapeChanged() override;
