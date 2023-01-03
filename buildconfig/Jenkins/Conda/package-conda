@@ -28,7 +28,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $SCRIPT_DIR/mamba-utils
 
 # Setup expected variables
-REPO_ROOT_DIR=$SCRIPT_DIR/../../
+REPO_ROOT_DIR=$SCRIPT_DIR/../../..
 WORKSPACE=$1
 if [[ -z "$WORKSPACE" ]]; then
     echo "A workspace argument is required"
