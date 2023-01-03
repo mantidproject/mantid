@@ -2,6 +2,11 @@
 # Generate a version number in the nightly format of v.X.Y.DATE.TIME,
 # where X and Y are taken from the latest git tag and the date and
 # time are taken from the last git commit.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Ensure we are inside the repository. It doesn't matter
+# where for these commands.
+cd ${SCRIPT_DIR}
 
 LATEST_TAG=$(git describe --tags --abbrev=0)
 VERSION_START=""
