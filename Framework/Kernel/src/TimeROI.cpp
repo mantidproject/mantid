@@ -218,7 +218,7 @@ void TimeROI::debugPrint() const {
 }
 
 /**
- * duration of the whole TimeROI
+ * Duration of the whole TimeROI
  */
 double TimeROI::durationInSeconds() const {
   const auto ROI_SIZE = this->numBoundaries();
@@ -240,7 +240,7 @@ double TimeROI::durationInSeconds() const {
 }
 
 /**
- * duration of the TimeROI between startTime and stopTime
+ * Duration of the TimeROI between startTime and stopTime
  */
 double TimeROI::durationInSeconds(const Types::Core::DateAndTime &startTime,
                                   const Types::Core::DateAndTime &stopTime) const {
