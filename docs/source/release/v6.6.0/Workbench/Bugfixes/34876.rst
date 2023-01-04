@@ -1,1 +1,1 @@
-- Fixed a bug where the superplot plot area shrinked on some data
+- Fixed a bug where the superplot plot area shrunk on some data
