@@ -329,14 +329,14 @@ def package_conda_options(platform, base_or_workbench) {
 
 def generate_git_tag() {
   git_tag = ""
-    if(GITHUB_RELEASES_TAG.trim() != '') {
+  if(GITHUB_RELEASES_TAG.trim() != '') {
     git_tag = "${GITHUB_RELEASES_TAG}"
   }
   else {
     versionscript_path = "${CISCRIPT_DIR}/generate-version-number"
     if(platform.startsWith('win')) {
       workspace_unix_style = toUnixStylePath("${WORKSPACE}")
-      bat(script: "\"${WIN_BASH}\" -ex -c \"${versionscript_path}\"", returnStdout: true).trim()
+      git_tag = bat(script: "\"${WIN_BASH}\" -ex -c \"${versionscript_path}\"", returnStdout: true).trim()
     } else {
       git_tag = sh(
         script: "${versionscript_path}", returnStdout: true
