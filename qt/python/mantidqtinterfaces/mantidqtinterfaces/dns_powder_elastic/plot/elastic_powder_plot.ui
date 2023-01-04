@@ -51,14 +51,14 @@
        <item>
         <widget class="QToolButton" name="tB_raw">
          <property name="text">
-          <string>RAW</string>
+          <string>Raw</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QToolButton" name="tB_separated">
          <property name="text">
-          <string>SEP</string>
+          <string>Sep</string>
          </property>
         </widget>
        </item>
