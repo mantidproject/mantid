@@ -14,7 +14,7 @@
 namespace Mantid {
 namespace Kernel {
 
-using Types::Core::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 
 namespace {
 /// static Logger definition
@@ -38,7 +38,7 @@ void assert_increasing(const DateAndTime &startTime, const DateAndTime &stopTime
 
 TimeROI::TimeROI() : m_roi{NAME} {}
 
-TimeROI::TimeROI(const DateAndTime &startTime, const DateAndTime &stopTime) : m_roi{NAME} {
+TimeROI::TimeROI(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) : m_roi{NAME} {
   this->addROI(startTime, stopTime);
 }
 
@@ -46,7 +46,7 @@ void TimeROI::addROI(const std::string &startTime, const std::string &stopTime) 
   this->addROI(DateAndTime(startTime), DateAndTime(stopTime));
 }
 
-void TimeROI::addROI(const DateAndTime &startTime, const DateAndTime &stopTime) {
+void TimeROI::addROI(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) {
   assert_increasing(startTime, stopTime);
   m_roi.addValue(startTime, ROI_USE);
   m_roi.addValue(stopTime, ROI_IGNORE);
@@ -60,7 +60,7 @@ void TimeROI::addMask(const std::string &startTime, const std::string &stopTime)
   this->addMask(DateAndTime(startTime), DateAndTime(stopTime));
 }
 
-void TimeROI::addMask(const DateAndTime &startTime, const DateAndTime &stopTime) {
+void TimeROI::addMask(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) {
   assert_increasing(startTime, stopTime);
   m_roi.addValue(startTime, ROI_IGNORE);
   m_roi.addValue(stopTime, ROI_USE);
@@ -115,6 +115,10 @@ void TimeROI::replaceValues(const std::vector<DateAndTime> &times, const std::ve
   }
 }
 
+/**
+ * Updates the TimeROI values with the union with another TimeROI.
+ * See https://en.wikipedia.org/wiki/Union_(set_theory) for more details
+ */
 void TimeROI::update_union(const TimeROI &other) {
   // exit early if the two TimeROI are identical
   if (*this == other)
@@ -136,6 +140,10 @@ void TimeROI::update_union(const TimeROI &other) {
   this->removeRedundantEntries();
 }
 
+/**
+ * Updates the TimeROI values with the intersection with another TimeROI.
+ * See https://en.wikipedia.org/wiki/Intersection for more details
+ */
 void TimeROI::update_intersection(const TimeROI &other) {
   // exit early if the two TimeROI are identical
   if (*this == other)
@@ -209,6 +217,9 @@ void TimeROI::debugPrint() const {
   }
 }
 
+/**
+ * duration of the whole TimeROI
+ */
 double TimeROI::durationInSeconds() const {
   const auto ROI_SIZE = this->numBoundaries();
   if (ROI_SIZE == 0) {
@@ -228,7 +239,11 @@ double TimeROI::durationInSeconds() const {
   }
 }
 
-double TimeROI::durationInSeconds(const DateAndTime &startTime, const DateAndTime &stopTime) const {
+/**
+ * duration of the TimeROI between startTime and stopTime
+ */
+double TimeROI::durationInSeconds(const Types::Core::DateAndTime &startTime,
+                                  const Types::Core::DateAndTime &stopTime) const {
   assert_increasing(startTime, stopTime);
   if (stopTime <= m_roi.firstTime()) { // asking before ROI
     return 0.;
