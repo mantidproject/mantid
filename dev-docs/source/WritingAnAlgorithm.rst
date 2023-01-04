@@ -12,12 +12,10 @@ Introduction
 Mantid's :ref:`plugin <Plugin>` architecture has been engineered so that it is easy for a user
 to write their own algorithm. This page is a primer for the user about to write their first algorithm and assumes no
 great knowledge of C++.
-It covers the basics, with links to more advanced options where appropriate. Note if you are looking to add a
-:ref:`plugin <Plugin>` fit function rather than an algorithm then see
-`Writing a Fit Function <https://www.mantidproject.org/Writing_a_Fit_Function>`__.
+It covers the basics, with links to more advanced options where appropriate.
 There is special description for the case when you are looking to add a custom :ref:`MD conversion plugin <WritingCustomConvertToMDTransformation>`.
 
-Alternatively, you can implement your algorithm in :ref:`Python <emwp_py_fit_funcs>`.
+Alternatively, you can implement your algorithm in :ref:`Python <emwp_intro>`.
 See :ref:`Python Vs C++ Algorithms <PythonVSCppAlgorithms>` for a comparison of Mantid's
 two programming languages.
 
