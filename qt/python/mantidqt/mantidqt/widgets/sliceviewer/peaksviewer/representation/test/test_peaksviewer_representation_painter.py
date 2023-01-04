@@ -14,8 +14,7 @@ from unittest.mock import MagicMock
 from numpy.testing import assert_allclose
 
 # local imports
-from mantidqt.widgets.sliceviewer.peaksviewer.representation.painter \
-    import MplPainter, Painted
+from mantidqt.widgets.sliceviewer.peaksviewer.representation.painter import MplPainter, Painted
 
 
 class MplPainterTest(unittest.TestCase):
@@ -83,12 +82,12 @@ class MplPainterTest(unittest.TestCase):
         self._verify_patch(patch=painter.axes.add_patch.call_args[0][0], nvertices=100, alpha=None)
 
     def test_bbox_returns_ll_and_ur_of_containing_box(self):
-        artist, view, axes, bbox, inv_trans = (MagicMock(), ) * 5
+        artist, view, axes, bbox, inv_trans = (MagicMock(),) * 5
         # 1:1 transformation for simplicity
         inv_trans.transform.side_effect = lambda x: x
         axes.transData.inverted.return_value = inv_trans
         artist.get_extents.return_value = bbox
-        bbox.min, bbox.max = (1., 1.5), (3., 3.5)
+        bbox.min, bbox.max = (1.0, 1.5), (3.0, 3.5)
         view.ax = axes
         painter = MplPainter(view)
 
@@ -109,8 +108,7 @@ class MplPainterTest(unittest.TestCase):
         # 1:1 transformation for simplicity
         inv_trans.transform.side_effect = lambda x: x
         axes.transData.inverted.return_value = inv_trans
-        artists = create_mock_artist(((1., 1.5), (3., 3.5))), create_mock_artist(
-            ((1.1, 1.3), (2.9, 3.6)))
+        artists = create_mock_artist(((1.0, 1.5), (3.0, 3.5))), create_mock_artist(((1.1, 1.3), (2.9, 3.6)))
         view.ax = axes
         painter = MplPainter(view)
         painted = Painted(painter, artists)
@@ -133,5 +131,5 @@ class MplPainterTest(unittest.TestCase):
             self.assertEqual(alpha, patch.get_alpha())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

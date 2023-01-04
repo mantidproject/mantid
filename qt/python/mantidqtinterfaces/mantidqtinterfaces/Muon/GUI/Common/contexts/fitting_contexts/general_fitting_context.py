@@ -11,7 +11,6 @@ SIMULTANEOUS_FITS_KEY = "SimultaneousFits"
 
 
 class GeneralFittingContext(BasicFittingContext):
-
     def __init__(self, allow_double_pulse_fitting: bool = False):
         super(GeneralFittingContext, self).__init__(allow_double_pulse_fitting)
 

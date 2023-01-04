@@ -24,6 +24,7 @@ class MantidNavigationTool:
     """
     Mantid navigation tool
     """
+
     def __init__(self, text, tooltip, icon=None, callback=None, checked=None, initialiser=None):
         """
         Context manager
@@ -51,13 +52,14 @@ class MantidStandardNavigationTools:
     Connected to the callbacks:
     home, back, forward, pan, save_figure, zoom
     """
-    HOME = MantidNavigationTool('Home', 'Reset axes limits', 'mdi.home', 'home', None)
-    BACK = MantidNavigationTool('Back', 'Back to previous view', 'mdi.arrow-left', 'back', None)
-    FORWARD = MantidNavigationTool('Forward', 'Forward to next view', 'mdi.arrow-right', 'forward', None)
-    PAN = MantidNavigationTool('Pan', 'Pan: L-click \nStretch: R-click', 'mdi.arrow-all', 'pan', False)
-    SAVE = MantidNavigationTool('Save', 'Save image file', 'mdi.content-save', 'save_figure', None)
-    ZOOM = MantidNavigationTool('Zoom', 'Zoom to rectangle', 'mdi.magnify', 'zoom', False)
-    CONFIGURE = MantidNavigationTool('Subplots', 'Edit subplots', 'mdi.settings', 'configure_subplots', None)
+
+    HOME = MantidNavigationTool("Home", "Reset axes limits", "mdi.home", "home", None)
+    BACK = MantidNavigationTool("Back", "Back to previous view", "mdi.arrow-left", "back", None)
+    FORWARD = MantidNavigationTool("Forward", "Forward to next view", "mdi.arrow-right", "forward", None)
+    PAN = MantidNavigationTool("Pan", "Pan: L-click \nStretch: R-click", "mdi.arrow-all", "pan", False)
+    SAVE = MantidNavigationTool("Save", "Save image file", "mdi.content-save", "save_figure", None)
+    ZOOM = MantidNavigationTool("Zoom", "Zoom to rectangle", "mdi.magnify", "zoom", False)
+    CONFIGURE = MantidNavigationTool("Subplots", "Edit subplots", "mdi.settings", "configure_subplots", None)
     SEPARATOR = MantidNavigationTool(None, None, None, None, None)
 
 
@@ -68,13 +70,14 @@ cursord = {
     backend_tools.cursors.POINTER: Qt.ArrowCursor,
     backend_tools.cursors.SELECT_REGION: Qt.CrossCursor,
     backend_tools.cursors.WAIT: Qt.WaitCursor,
-    }
+}
 
 
 class MantidNavigationToolbar(NavigationToolbar2, QToolBar):
     """
     Base class for the MantidNavigationToolbar
     """
+
     message = Signal(str)
 
     # Default tool items, may be overriden in sub classes
@@ -89,8 +92,7 @@ class MantidNavigationToolbar(NavigationToolbar2, QToolBar):
     def __init__(self, canvas, parent, coordinates=True):
         """coordinates: should we show the coordinates on the right?"""
         QToolBar.__init__(self, parent)
-        self.setAllowedAreas(
-            Qt.TopToolBarArea | Qt.BottomToolBarArea)
+        self.setAllowedAreas(Qt.TopToolBarArea | Qt.BottomToolBarArea)
         self._actions = {}  # mapping of toolitem method names to QActions.
         self.coordinates = coordinates
 
@@ -114,8 +116,7 @@ class MantidNavigationToolbar(NavigationToolbar2, QToolBar):
         if self.coordinates:
             self.locLabel = QLabel("", self)
             self.locLabel.setAlignment(Qt.AlignRight | Qt.AlignTop)
-            self.locLabel.setSizePolicy(
-                QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Ignored))
+            self.locLabel.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Ignored))
             labelAction = self.addWidget(self.locLabel)
             labelAction.setVisible(True)
         NavigationToolbar2.__init__(self, canvas)
@@ -155,59 +156,52 @@ class MantidNavigationToolbar(NavigationToolbar2, QToolBar):
         sorted_filetypes = sorted(filetypes.items())
         default_filetype = self.canvas.get_default_filetype()
 
-        startpath = os.path.expanduser(
-            matplotlib.rcParams['savefig.directory'])
+        startpath = os.path.expanduser(matplotlib.rcParams["savefig.directory"])
         start = os.path.join(startpath, self.canvas.get_default_filename())
         filters = []
         selectedFilter = None
         for name, exts in sorted_filetypes:
-            exts_list = " ".join(['*.%s' % ext for ext in exts])
-            filter = '%s (%s)' % (name, exts_list)
+            exts_list = " ".join(["*.%s" % ext for ext in exts])
+            filter = "%s (%s)" % (name, exts_list)
             if default_filetype in exts:
                 selectedFilter = filter
             filters.append(filter)
-        filters = ';;'.join(filters)
+        filters = ";;".join(filters)
 
-        filename, filter = QFileDialog.getSaveFileName(
-            self.canvas.parent(), "Choose a filename to save to", start,
-            filters, selectedFilter)
+        filename, filter = QFileDialog.getSaveFileName(self.canvas.parent(), "Choose a filename to save to", start, filters, selectedFilter)
         if filename:
             # Save dir for next time, unless empty str (i.e., use cwd).
             if startpath != "":
-                matplotlib.rcParams['savefig.directory'] = (
-                    os.path.dirname(filename))
+                matplotlib.rcParams["savefig.directory"] = os.path.dirname(filename)
             try:
                 self.canvas.figure.savefig(filename)
             except Exception as e:
-                QMessageBox.critical(
-                    self, "Error saving file", str(e),
-                    QMessageBox.Ok, QMessageBox.NoButton)
+                QMessageBox.critical(self, "Error saving file", str(e), QMessageBox.Ok, QMessageBox.NoButton)
 
     def set_history_buttons(self):
         if LooseVersion(matplotlib.__version__) >= LooseVersion("2.1.1"):
             can_backward = self._nav_stack._pos > 0
             can_forward = self._nav_stack._pos < len(self._nav_stack._elements) - 1
-            if 'back' in self._actions:
-                self._actions['back'].setEnabled(can_backward)
-            if 'forward' in self._actions:
-                self._actions['forward'].setEnabled(can_forward)
+            if "back" in self._actions:
+                self._actions["back"].setEnabled(can_backward)
+            if "forward" in self._actions:
+                self._actions["forward"].setEnabled(can_forward)
 
     def _get_mode(self):
-        if hasattr(self, 'name'):
+        if hasattr(self, "name"):
             return self.mode.name
         else:
             return self.mode
 
     def _update_buttons_checked(self):
         # sync button checkstates to match active mode
-        if 'pan' in self._actions:
-            self._actions['pan'].setChecked(self._get_mode() == 'PAN' or self._get_mode() == 'pan/zoom')
-        if 'zoom' in self._actions:
-            self._actions['zoom'].setChecked(self._get_mode() == 'ZOOM' or self._get_mode() == 'zoom rect')
+        if "pan" in self._actions:
+            self._actions["pan"].setChecked(self._get_mode() == "PAN" or self._get_mode() == "pan/zoom")
+        if "zoom" in self._actions:
+            self._actions["zoom"].setChecked(self._get_mode() == "ZOOM" or self._get_mode() == "zoom rect")
 
     def configure_subplots(self):
-        image = os.path.join(matplotlib.get_data_path(),
-                             'images', 'matplotlib.png')
+        image = os.path.join(matplotlib.get_data_path(), "images", "matplotlib.png")
         dia = SubplotToolQt(self.canvas.figure, self.canvas.parent())
         dia.setWindowIcon(QIcon(image))
         dia.setWindowTitle(MantidStandardNavigationTools.CONFIGURE.tooltip)

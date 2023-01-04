@@ -12,14 +12,24 @@ Common class for DNS views - supports easy setting and getting of values.
 from collections import OrderedDict
 
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import (QCheckBox, QComboBox, QDoubleSpinBox, QGroupBox,
-                            QLineEdit, QMessageBox, QRadioButton, QSlider,
-                            QSpinBox, QToolButton, QWidget)
+from qtpy.QtWidgets import (
+    QCheckBox,
+    QComboBox,
+    QDoubleSpinBox,
+    QGroupBox,
+    QLineEdit,
+    QMessageBox,
+    QRadioButton,
+    QSlider,
+    QSpinBox,
+    QToolButton,
+    QWidget,
+)
 
 
 class DNSView(QWidget):
     HAS_TAB = True
-    NAME = 'DNSView'
+    NAME = "DNSView"
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -28,8 +38,8 @@ class DNSView(QWidget):
         self.parent = parent
         self._map = {}
         self.menus = []
-        self.app = getattr(parent, 'app', None)
-        self.within_mantid = getattr(parent, 'within_mantid', None)
+        self.app = getattr(parent, "app", None)
+        self.within_mantid = getattr(parent, "within_mantid", None)
 
     def process_events(self):
         self.app.processEvents()
@@ -56,9 +66,7 @@ class DNSView(QWidget):
         elif isinstance(target_object, QRadioButton):
             target_object.setChecked(value)
         elif isinstance(target_object, QComboBox):
-            index = target_object.findText(
-                str(value),
-                Qt.MatchFixedString)  # crapy workaround for Qt4 compatibility
+            index = target_object.findText(str(value), Qt.MatchFixedString)  # crapy workaround for Qt4 compatibility
             if index >= 0:
                 target_object.setCurrentIndex(index)
         elif isinstance(target_object, QSlider):
@@ -115,8 +123,7 @@ class DNSView(QWidget):
         short names of the widgets as keys and the values.
         """
         for key, target_object in self._map.items():
-            self.set_single_state(target_object,
-                                  value=state_dict.get(key, None))
+            self.set_single_state(target_object, value=state_dict.get(key, None))
 
     @staticmethod
     def raise_error(message, critical=False, info=False):
@@ -134,7 +141,7 @@ class DNSView(QWidget):
         error_dialog.setWindowTitle("Error")
         error_dialog.exec_()
 
-    def show_status_message(self, message='', time=1, clear=False):
+    def show_status_message(self, message="", time=1, clear=False):
         """
         Change of status message in global DNS GUI.
         """

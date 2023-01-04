@@ -35,7 +35,7 @@ class ParameterAbo:
         """
         Loads the gui status from mantid workbench project save.
         """
-        self.gui_parameter = gui_param # this should replace xml load at some point
+        self.gui_parameter = gui_param  # this should replace xml load at some point
         self._notify_observers()
         for observer in self.observers:
             observer.set_view_from_param()
@@ -99,7 +99,7 @@ class ParameterAbo:
         """
         Loads the gui status from an xml file.
         """
-        gui_param = self.observer_dict['xml_dump'].load_xml()
+        gui_param = self.observer_dict["xml_dump"].load_xml()
         if gui_param is not None:
             self.gui_parameter = gui_param
             self._notify_observers()
@@ -111,14 +111,14 @@ class ParameterAbo:
         Saves xml to previous saved filename or if not there asks for name.
         """
         self.update_from_all_observers()
-        self.observer_dict['xml_dump'].save_xml()
+        self.observer_dict["xml_dump"].save_xml()
 
     def xml_save_as(self):
         """
         Saves to an xml file by choosing a name.
         """
         self.update_from_all_observers()
-        self.observer_dict['xml_dump'].save_as_xml()
+        self.observer_dict["xml_dump"].save_as_xml()
 
     def update_from_observer(self, observer):
         """

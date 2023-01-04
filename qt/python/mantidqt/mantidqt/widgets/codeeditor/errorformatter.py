@@ -31,4 +31,4 @@ class ErrorFormatter(object):
         if stack is not None:
             lines.extend(traceback.format_list(stack))
 
-        return ''.join(lines)
+        return "".join(lines)

@@ -23,6 +23,7 @@ class CursorTracker:
     axes is draw on. Holds a list of subscribers that are notified
     of the events. Subscribers are expected to have a cursor_at method.
     """
+
     def __init__(self, *, image_axes: Axes, autoconnect=True):
         """
         :param image_axes: A reference to the Axes object the image resides in
@@ -35,8 +36,8 @@ class CursorTracker:
 
     def connect(self):
         canvas = self._im_axes.figure.canvas
-        self._mouse_move_cid = canvas.mpl_connect('motion_notify_event', self.on_mouse_move)
-        self._mouse_outside_cid = canvas.mpl_connect('axes_leave_event', self.on_mouse_leave)
+        self._mouse_move_cid = canvas.mpl_connect("motion_notify_event", self.on_mouse_move)
+        self._mouse_outside_cid = canvas.mpl_connect("axes_leave_event", self.on_mouse_leave)
 
     def disconnect(self):
         canvas = self._im_axes.figure.canvas
@@ -72,8 +73,8 @@ class MoveMouseCursor:
     The __call__ method expects a derived type to implement the actual
     computation of the new data coordinates
     """
-    def __init__(self, image: AxesImage, new_pixel: Callable[[float, float], Tuple[float, float]],
-                 to_int: Callable[[float], int]):
+
+    def __init__(self, image: AxesImage, new_pixel: Callable[[float, float], Tuple[float, float]], to_int: Callable[[float], int]):
         """
         :param image: A reference to the image the cursor hovers over
         :param new_pixel: Callable to calculate the new position in data coordinates
@@ -93,7 +94,7 @@ class MoveMouseCursor:
         # compute pixel widths, assuming a regular grid
         self.extent = image.get_extent()
         xmin, xmax, ymin, ymax = self.extent
-        if hasattr(image, 'orig_shape'):
+        if hasattr(image, "orig_shape"):
             nx, ny = image.orig_shape
         else:
             arr = image.get_array()
@@ -143,6 +144,7 @@ class MoveMouseCursorUp(MoveMouseCursor):
     Transform to compute the new position in data coordinates
     by moving up 1 pixel
     """
+
     def __init__(self, image: AxesImage):
         super().__init__(image, new_pixel=lambda x, y: (x, y + self.delta_y), to_int=floor)
 
@@ -151,6 +153,7 @@ class MoveMouseCursorDown(MoveMouseCursor):
     """Transform to compute the new position in data coordinates
     by moving down 1 pixel
     """
+
     def __init__(self, image: AxesImage):
         super().__init__(image, new_pixel=lambda x, y: (x, y - self.delta_y), to_int=ceil)
 
@@ -159,6 +162,7 @@ class MoveMouseCursorLeft(MoveMouseCursor):
     """Transform to compute the new position in data coordinates
     by moving left 1 pixel
     """
+
     def __init__(self, image: AxesImage):
         super().__init__(image, new_pixel=lambda x, y: (x - self.delta_x, y), to_int=floor)
 
@@ -167,5 +171,6 @@ class MoveMouseCursorRight(MoveMouseCursor):
     """Transform to compute the new position in data coordinates
     by moving right 1 pixel
     """
+
     def __init__(self, image: AxesImage):
         super().__init__(image, new_pixel=lambda x, y: (x + self.delta_x, y), to_int=ceil)

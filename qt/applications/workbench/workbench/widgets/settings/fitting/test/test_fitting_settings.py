@@ -39,20 +39,15 @@ class FittingSettingsTest(unittest.TestCase):
     def test_setup_signals(self, _):
         presenter = FittingSettings(None)
 
-        self.assert_connected_once(presenter.view.auto_bkg,
-                                   presenter.view.auto_bkg.currentTextChanged)
+        self.assert_connected_once(presenter.view.auto_bkg, presenter.view.auto_bkg.currentTextChanged)
 
-        self.assert_connected_once(presenter.view.default_peak,
-                                   presenter.view.default_peak.currentTextChanged)
+        self.assert_connected_once(presenter.view.default_peak, presenter.view.default_peak.currentTextChanged)
 
-        self.assert_connected_once(presenter.view.background_args,
-                                   presenter.view.background_args.editingFinished)
+        self.assert_connected_once(presenter.view.background_args, presenter.view.background_args.editingFinished)
 
-        self.assert_connected_once(presenter.view.findpeaks_fwhm,
-                                   presenter.view.findpeaks_fwhm.valueChanged)
+        self.assert_connected_once(presenter.view.findpeaks_fwhm, presenter.view.findpeaks_fwhm.valueChanged)
 
-        self.assert_connected_once(presenter.view.findpeaks_tol,
-                                   presenter.view.findpeaks_tol.valueChanged)
+        self.assert_connected_once(presenter.view.findpeaks_tol, presenter.view.findpeaks_tol.valueChanged)
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_auto_background_changed(self, mock_ConfigService):
@@ -84,8 +79,7 @@ class FittingSettingsTest(unittest.TestCase):
 
         mock_view.background_args.text = Mock(return_value="n=5")
         presenter.action_background_args_changed()
-        mock_ConfigService.setString.assert_called_once_with(FittingProperties.AUTO_BACKGROUND.value,
-                                                             "Polynomial n=5")
+        mock_ConfigService.setString.assert_called_once_with(FittingProperties.AUTO_BACKGROUND.value, "Polynomial n=5")
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_background_args_changed_with_auto_background_none(self, mock_ConfigService):

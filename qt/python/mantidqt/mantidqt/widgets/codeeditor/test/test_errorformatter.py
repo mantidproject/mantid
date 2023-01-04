@@ -19,7 +19,6 @@ from mantidqt.widgets.codeeditor.errorformatter import ErrorFormatter
 
 
 class ErrorFormatterTest(unittest.TestCase):
-
     def test_syntax_error(self):
         try:
             exec("if:")
@@ -60,7 +59,7 @@ foo()
         expected_lines = [
             "NameError:.*'_local'.*",
             r'  File ".*test_errorformatter.py", line \d+, in test_standard_exception',
-            '    exec(.*)',
+            "    exec(.*)",
             r'  File "<string>", line \d+, in <module>',
             r'  File "<string>", line \d+, in foo',
             r'  File "<string>", line \d+, in bar',

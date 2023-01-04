@@ -18,10 +18,9 @@ from mantidqt.utils.asynchronous import AsyncTask, BlockingAsyncTaskWithCallback
 
 
 class AsyncTaskTest(unittest.TestCase):
-
     class Receiver(object):
         success_cb_called, error_cb_called, finished_cb_called = False, False, False
-        task_output = None,
+        task_output = (None,)
         task_exc_type, task_exc, task_exc_stack = None, None, None
 
         def on_success(self, task_result):
@@ -45,8 +44,7 @@ class AsyncTaskTest(unittest.TestCase):
             return 42
 
         recv = AsyncTaskTest.Receiver()
-        t = AsyncTask(foo, success_cb=recv.on_success, error_cb=recv.on_error,
-                      finished_cb=recv.on_finished)
+        t = AsyncTask(foo, success_cb=recv.on_success, error_cb=recv.on_error, finished_cb=recv.on_finished)
         t.start()
         t.join()
         self.assertTrue(recv.finished_cb_called)
@@ -60,9 +58,7 @@ class AsyncTaskTest(unittest.TestCase):
 
         recv = AsyncTaskTest.Receiver()
         shift = 2
-        t = AsyncTask(foo, args = (shift,),
-                      success_cb=recv.on_success, error_cb=recv.on_error,
-                      finished_cb=recv.on_finished)
+        t = AsyncTask(foo, args=(shift,), success_cb=recv.on_success, error_cb=recv.on_error, finished_cb=recv.on_finished)
         t.start()
         t.join()
         self.assertTrue(recv.finished_cb_called)
@@ -72,19 +68,19 @@ class AsyncTaskTest(unittest.TestCase):
 
     def test_successful_args_and_kwargs_operation_calls_success_and_finished_callback(self):
         def foo(scale, shift):
-            return scale*42 + shift
+            return scale * 42 + shift
 
         recv = AsyncTaskTest.Receiver()
         scale, shift = 2, 4
-        t = AsyncTask(foo, args = (scale,), kwargs={'shift': shift},
-                      success_cb=recv.on_success, error_cb=recv.on_error,
-                      finished_cb=recv.on_finished)
+        t = AsyncTask(
+            foo, args=(scale,), kwargs={"shift": shift}, success_cb=recv.on_success, error_cb=recv.on_error, finished_cb=recv.on_finished
+        )
         t.start()
         t.join()
         self.assertTrue(recv.finished_cb_called)
         self.assertTrue(recv.success_cb_called)
         self.assertFalse(recv.error_cb_called)
-        self.assertEqual(scale*42 + shift, recv.task_output)
+        self.assertEqual(scale * 42 + shift, recv.task_output)
 
     def test_unsuccessful_no_arg_operation_calls_error_and_finished_callback(self):
         def foo():
@@ -93,16 +89,13 @@ class AsyncTaskTest(unittest.TestCase):
             raise RuntimeError("Bad operation")
 
         recv = AsyncTaskTest.Receiver()
-        t = AsyncTask(foo, success_cb=recv.on_success,
-                      error_cb=recv.on_error,
-                      finished_cb=recv.on_finished)
+        t = AsyncTask(foo, success_cb=recv.on_success, error_cb=recv.on_error, finished_cb=recv.on_finished)
         t.start()
         t.join()
         self.assertTrue(recv.finished_cb_called)
         self.assertFalse(recv.success_cb_called)
         self.assertTrue(recv.error_cb_called)
-        self.assertTrue(isinstance(recv.task_exc, RuntimeError),
-                        msg="Expected RuntimeError, found " + recv.task_exc.__class__.__name__)
+        self.assertTrue(isinstance(recv.task_exc, RuntimeError), msg="Expected RuntimeError, found " + recv.task_exc.__class__.__name__)
 
         self.assertEqual(2, len(recv.task_exc_stack))
         # line number of self.target in asynchronous.py
@@ -116,9 +109,9 @@ class AsyncTaskTest(unittest.TestCase):
 
         recv = AsyncTaskTest.Receiver()
         scale, shift = 2, 4
-        t = AsyncTask(foo, args = (scale,), kwargs={'shift': shift},
-                      success_cb=recv.on_success, error_cb=recv.on_error,
-                      finished_cb=recv.on_finished)
+        t = AsyncTask(
+            foo, args=(scale,), kwargs={"shift": shift}, success_cb=recv.on_success, error_cb=recv.on_error, finished_cb=recv.on_finished
+        )
         t.start()
         t.join()
         self.assertTrue(recv.finished_cb_called)
@@ -130,12 +123,12 @@ class AsyncTaskTest(unittest.TestCase):
         def foo(scale, shift):
             def bar():
                 raise RuntimeError("Bad operation")
+
             bar()
 
         recv = AsyncTaskTest.Receiver()
         scale, shift = 2, 4
-        t = AsyncTask(foo, args = (scale,), kwargs={'shift': shift},
-                      error_cb=recv.on_error)
+        t = AsyncTask(foo, args=(scale,), kwargs={"shift": shift}, error_cb=recv.on_error)
         t.start()
         t.join()
         self.assertTrue(recv.error_cb_called)
@@ -176,11 +169,11 @@ class BlockingAsyncTaskWithCallbackTest(unittest.TestCase):
 
     def test_successful_args_and_kwargs_operation(self):
         def foo(scale, shift):
-            return scale*42 + shift
+            return scale * 42 + shift
 
         scale, shift = 2, 4
 
-        task = BlockingAsyncTaskWithCallback(foo, args=(scale,), kwargs={'shift': shift})
+        task = BlockingAsyncTaskWithCallback(foo, args=(scale,), kwargs={"shift": shift})
         self.assertEqual(scale * 42 + shift, task.start())
 
     def test_unsuccessful_args_and_kwargs_operation_raises_exception(self):
@@ -188,7 +181,7 @@ class BlockingAsyncTaskWithCallbackTest(unittest.TestCase):
             raise RuntimeError("Bad operation")
 
         scale, shift = 2, 4
-        task = BlockingAsyncTaskWithCallback(foo, args=(scale,), kwargs={'shift': shift})
+        task = BlockingAsyncTaskWithCallback(foo, args=(scale,), kwargs={"shift": shift})
         self.assertRaises(RuntimeError, task.start)
 
 

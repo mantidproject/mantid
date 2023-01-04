@@ -13,7 +13,6 @@ ui_plotting_view, widget = load_ui(__file__, "base_pane_view.ui")
 
 
 class BasePaneView(widget, ui_plotting_view):
-
     @staticmethod
     def warning_popup(message):
         message_box.warning(str(message))
@@ -114,7 +113,7 @@ class BasePaneView(widget, ui_plotting_view):
         """
         self.tiled_plot_checkbox.stateChanged.connect(slot)
 
-    def on_plot_diff_checkbox_changed(self,slot):
+    def on_plot_diff_checkbox_changed(self, slot):
         """
         Connect the plot difference checkbox to the input slot
         """

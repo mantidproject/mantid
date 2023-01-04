@@ -13,7 +13,6 @@ from mantidqtinterfaces.Muon.GUI.Common.load_file_widget.view import BrowseFileW
 
 @start_qapplication
 class LoadFileWidgetViewTest(unittest.TestCase):
-
     def setUp(self):
         self.view = BrowseFileWidgetView()
 
@@ -49,5 +48,5 @@ class LoadFileWidgetViewTest(unittest.TestCase):
         self.assertEqual(self.view.get_file_edit_text(), text)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

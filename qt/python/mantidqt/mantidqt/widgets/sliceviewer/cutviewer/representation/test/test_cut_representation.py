@@ -8,6 +8,7 @@
 import unittest
 from unittest import mock
 from numpy import sqrt
+
 # 3rd party imports
 from mantidqt.widgets.sliceviewer.cutviewer.representation.cut_representation import CutRepresentation
 
@@ -59,9 +60,9 @@ class LinePlotsTest(unittest.TestCase):
 
     def test_draw_line(self):
         self.cut_rep.draw_line()
-        self.cut_rep.ax.plot.assert_any_call(-1, 0, 'ow', label='start')
-        self.cut_rep.ax.plot.assert_any_call(1, 2, 'ow', label='end')
-        self.cut_rep.ax.plot.assert_any_call(0, 1, label='mid', marker='o', color='w', markerfacecolor='w')
+        self.cut_rep.ax.plot.assert_any_call(-1, 0, "ow", label="start")
+        self.cut_rep.ax.plot.assert_any_call(1, 2, "ow", label="end")
+        self.cut_rep.ax.plot.assert_any_call(0, 1, label="mid", marker="o", color="w", markerfacecolor="w")
 
     def test_get_start_end_points(self):
         xmin, xmax, ymin, ymax = self.cut_rep.get_start_end_points()
@@ -79,8 +80,8 @@ class LinePlotsTest(unittest.TestCase):
     def test_get_perp_dir(self):
         vecx, vecy = self.cut_rep.get_perp_dir()
 
-        self.assertAlmostEqual(vecx, 1/sqrt(2))
-        self.assertAlmostEqual(vecy, -1/sqrt(2))
+        self.assertAlmostEqual(vecx, 1 / sqrt(2))
+        self.assertAlmostEqual(vecy, -1 / sqrt(2))
 
     @mock.patch(fpath + ".CutRepresentation.clear_lines", autospec=True)
     @mock.patch(fpath + ".CutRepresentation.draw", autospec=True)
@@ -88,7 +89,7 @@ class LinePlotsTest(unittest.TestCase):
     def test_on_motion_midpoint_selected(self, mock_is_valid, mock_draw, mock_clear):
         mock_is_valid.return_value = True
         self.cut_rep.current_artist = mock.MagicMock()
-        self.cut_rep.current_artist.get_label.return_value = 'mid'
+        self.cut_rep.current_artist.get_label.return_value = "mid"
         self.cut_rep.current_artist.get_xdata.return_value = [0.0]
         mock_event = mock.MagicMock()
         mock_event.xdata = 4
@@ -109,7 +110,7 @@ class LinePlotsTest(unittest.TestCase):
     def test_on_motion_thickness_selected(self, mock_is_valid, mock_draw, mock_clear):
         mock_is_valid.return_value = True
         self.cut_rep.current_artist = mock.MagicMock()
-        self.cut_rep.current_artist.get_label.return_value = 'mid_box_top'
+        self.cut_rep.current_artist.get_label.return_value = "mid_box_top"
         self.cut_rep.current_artist.get_xdata.return_value = [0.0]
         mock_event = mock.MagicMock()
         mock_event.xdata = 0.5
@@ -127,7 +128,7 @@ class LinePlotsTest(unittest.TestCase):
     def test_on_motion_end_point_selected(self, mock_is_valid, mock_draw, mock_clear):
         mock_is_valid.return_value = True
         self.cut_rep.current_artist = mock.MagicMock()
-        self.cut_rep.current_artist.get_label.return_value = 'end'
+        self.cut_rep.current_artist.get_label.return_value = "end"
         self.cut_rep.current_artist.get_xdata.return_value = [0.0]
         mock_event = mock.MagicMock()
         mock_event.xdata = 2.0
@@ -183,7 +184,7 @@ class LinePlotsTest(unittest.TestCase):
         mock_is_valid.return_value = True
         mock_has_artist.return_value = True
         # overwrite end point to have x < start point
-        self.cut_rep.xmax_c= -2
+        self.cut_rep.xmax_c = -2
 
         self.cut_rep.on_release("event")
 
@@ -191,8 +192,8 @@ class LinePlotsTest(unittest.TestCase):
 
     def test_draw_line_non_orth(self):
         self.cut_rep_no.draw_line()
-        self.cut_rep_no.ax.plot.assert_any_call(0, -0.5, 'ow', label='start')
-        self.cut_rep_no.ax.plot.assert_any_call(-1, 0.5, 'ow', label='end')
+        self.cut_rep_no.ax.plot.assert_any_call(0, -0.5, "ow", label="start")
+        self.cut_rep_no.ax.plot.assert_any_call(-1, 0.5, "ow", label="end")
 
     def test_get_start_end_points_non_orth(self):
         xmin, xmax, ymin, ymax = self.cut_rep_no.get_start_end_points()
@@ -204,14 +205,14 @@ class LinePlotsTest(unittest.TestCase):
     def test_get_perp_dir_non_ortho(self):
         vecx, vecy = self.cut_rep_no.get_perp_dir()
 
-        self.assertAlmostEqual(vecx, 1/sqrt(2))
-        self.assertAlmostEqual(vecy, 1/sqrt(2))
+        self.assertAlmostEqual(vecx, 1 / sqrt(2))
+        self.assertAlmostEqual(vecy, 1 / sqrt(2))
 
     def test_get_perp_dir_crystal_non_ortho(self):
         vecx, vecy = self.cut_rep_no.get_perp_dir_crystal()
 
-        self.assertAlmostEqual(vecx, 1/sqrt(2))
-        self.assertAlmostEqual(vecy, -1/sqrt(2))
+        self.assertAlmostEqual(vecx, 1 / sqrt(2))
+        self.assertAlmostEqual(vecy, -1 / sqrt(2))
 
     @mock.patch(fpath + ".CutRepresentation.clear_lines", autospec=True)
     @mock.patch(fpath + ".CutRepresentation.draw", autospec=True)
@@ -219,7 +220,7 @@ class LinePlotsTest(unittest.TestCase):
     def test_on_motion_thickness_selected_non_ortho(self, mock_is_valid, mock_draw, mock_clear):
         mock_is_valid.return_value = True
         self.cut_rep_no.current_artist = mock.MagicMock()
-        self.cut_rep_no.current_artist.get_label.return_value = 'mid_box_top'
+        self.cut_rep_no.current_artist.get_label.return_value = "mid_box_top"
         mock_event = mock.MagicMock()
         # cut is pointing top left to bottom right with gradient -1
         # Drag thickness out in top right direction from midpoint at (-0.5,0) towards point (-0.25, 0.25)
@@ -233,5 +234,5 @@ class LinePlotsTest(unittest.TestCase):
         self.assertAlmostEqual(self.cut_rep_no.thickness_c, sqrt(2))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

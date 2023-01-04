@@ -21,10 +21,10 @@ class DNSScriptGeneratorPresenter(DNSObserver):
         super().__init__(parent=parent, name=name, view=view, model=model)
         # connect statements
         self._data = None
-        self._script_path = ''
+        self._script_path = ""
         self._script = None
         self._script_number = 0
-        self._script_text = ''
+        self._script_text = ""
 
         # connect signals
         self.view.sig_progress_canceled.connect(self._progress_canceled)
@@ -39,13 +39,13 @@ class DNSScriptGeneratorPresenter(DNSObserver):
         self.request_from_abo()  # pylint: disable=E1102
         # is registered in parameter abo
         # to ask for automatic data reduction
-        opt_name = self.name.replace('script_generator', 'options')
+        opt_name = self.name.replace("script_generator", "options")
         options = self.param_dict[opt_name]
-        paths = self.param_dict['paths']
-        file_selector = self.param_dict['file_selector']
+        paths = self.param_dict["paths"]
+        file_selector = self.param_dict["file_selector"]
         script, error = self.model.script_maker(options, paths, file_selector)
         self.raise_error(error, critical=True, do_raise=error)
-        if script != [''] and not error:
+        if script != [""] and not error:
             self._script_text = "\n".join(script)
             self.view.set_script_output(self._script_text)
             self.view.process_events()
@@ -65,18 +65,18 @@ class DNSScriptGeneratorPresenter(DNSObserver):
         pass
 
     def _get_sample_data(self):
-        sample_data = self.param_dict['file_selector']['full_data']
+        sample_data = self.param_dict["file_selector"]["full_data"]
         if not sample_data:
-            self.raise_error('No data selected', critical=True)
+            self.raise_error("No data selected", critical=True)
             return False
         return sample_data
 
     def get_option_dict(self):
         if self.view is not None:
             self.own_dict.update(self.view.get_state())
-        self.own_dict['script_path'] = self._script_path
-        self.own_dict['script_number'] = self._script_number
-        self.own_dict['script_text'] = self._script_text
+        self.own_dict["script_path"] = self._script_path
+        self.own_dict["script_number"] = self._script_number
+        self.own_dict["script_text"] = self._script_text
         return self.own_dict
 
     def update_progress(self, i, end_i=None):
@@ -85,25 +85,19 @@ class DNSScriptGeneratorPresenter(DNSObserver):
     def _progress_canceled(self):
         self.model.cancel_progress()
 
-    def _set_script_filename(self, filename='script.py'):
+    def _set_script_filename(self, filename="script.py"):
         own_dict = self.get_option_dict()
-        if own_dict['automatic_filename']:
+        if own_dict["automatic_filename"]:
             self.view.set_filename(filename)
 
     def _save_script(self, script):
-        sample_data = self.param_dict['file_selector']['full_data']
-        script_dir = self.param_dict['paths']['script_dir']
+        sample_data = self.param_dict["file_selector"]["full_data"]
+        script_dir = self.param_dict["paths"]["script_dir"]
         own_options = self.get_option_dict()
-        filename = self.model.get_filename(own_options['script_filename'],
-                                           sample_data,
-                                           own_options['automatic_filename'])
+        filename = self.model.get_filename(own_options["script_filename"], sample_data, own_options["automatic_filename"])
         if script_dir:
-            filename, script_path = self.model.save_script(
-                script, filename, script_dir)
-            self.view.show_status_message(f'Script Saved to: {script_path}',
-                                          30,
-                                          clear=True)
+            filename, script_path = self.model.save_script(script, filename, script_dir)
+            self.view.show_status_message(f"Script Saved to: {script_path}", 30, clear=True)
             self._set_script_filename(filename)
         else:
-            self.raise_error('No script filepath set, script will not be '
-                             'saved.')
+            self.raise_error("No script filepath set, script will not be " "saved.")

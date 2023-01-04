@@ -17,36 +17,34 @@ from workbench.plotting.plotscriptgenerator.utils import convert_args_to_string
 BASE_SUBPLOTS_COMMAND = "plt.subplots({})"
 
 default_kwargs = {
-    'dpi': rcParams['figure.dpi'],
-    'edgecolor': convert_color_to_hex(rcParams['figure.edgecolor']),
-    'facecolor': convert_color_to_hex(rcParams['figure.facecolor']),
-    'figsize': rcParams['figure.figsize'],
-    'frameon': rcParams['figure.frameon'],
-    'ncols': 1,
-    'nrows': 1,
-    'num': ''
+    "dpi": rcParams["figure.dpi"],
+    "edgecolor": convert_color_to_hex(rcParams["figure.edgecolor"]),
+    "facecolor": convert_color_to_hex(rcParams["figure.facecolor"]),
+    "figsize": rcParams["figure.figsize"],
+    "frameon": rcParams["figure.frameon"],
+    "ncols": 1,
+    "nrows": 1,
+    "num": "",
 }
 
 
 def get_subplots_command_kwargs(fig):
     ax = fig.get_axes()[0]
     kwargs = {
-        'dpi': fig.dpi,
-        'edgecolor': convert_color_to_hex(fig.get_edgecolor()),
-        'facecolor': convert_color_to_hex(fig.get_facecolor()),
-        'figsize': [fig.get_figwidth(), fig.get_figheight()],
-        'frameon': fig.frameon,
-        'num': fig.get_label(),
-        'subplot_kw': {
-            'projection': 'mantid'
-        },
+        "dpi": fig.dpi,
+        "edgecolor": convert_color_to_hex(fig.get_edgecolor()),
+        "facecolor": convert_color_to_hex(fig.get_facecolor()),
+        "figsize": [fig.get_figwidth(), fig.get_figheight()],
+        "frameon": fig.frameon,
+        "num": fig.get_label(),
+        "subplot_kw": {"projection": "mantid"},
     }
-    if LooseVersion('3.1.3') < LooseVersion(matplotlib.__version__):
-        kwargs['ncols'] = ax.get_gridspec().ncols
-        kwargs['nrows'] = ax.get_gridspec().nrows
+    if LooseVersion("3.1.3") < LooseVersion(matplotlib.__version__):
+        kwargs["ncols"] = ax.get_gridspec().ncols
+        kwargs["nrows"] = ax.get_gridspec().nrows
     else:
-        kwargs['ncols'] = ax.numCols
-        kwargs['nrows'] = ax.numRows
+        kwargs["ncols"] = ax.numCols
+        kwargs["nrows"] = ax.numRows
     return kwargs
 
 
@@ -59,7 +57,7 @@ def generate_subplots_command(fig):
 def _remove_kwargs_if_default(kwargs):
     for kwarg, default_value in default_kwargs.items():
         try:
-            if kwarg == 'figsize' and isclose(kwargs[kwarg], default_value, rtol=0.05).all():
+            if kwarg == "figsize" and isclose(kwargs[kwarg], default_value, rtol=0.05).all():
                 kwargs.pop(kwarg)
             elif kwargs[kwarg] == default_value:
                 kwargs.pop(kwarg)

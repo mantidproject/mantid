@@ -98,8 +98,9 @@ class ProjectRecoveryModelTest(unittest.TestCase):
         self.prm.open_selected_in_editor(checkpoint)
 
         self.assertEqual(1, self.prm.project_recovery.open_checkpoint_in_script_editor.call_count)
-        self.assertEqual(self.prm.project_recovery.open_checkpoint_in_script_editor.call_args,
-                         mock.call(os.path.join(self.pid, checkpoint)))
+        self.assertEqual(
+            self.prm.project_recovery.open_checkpoint_in_script_editor.call_args, mock.call(os.path.join(self.pid, checkpoint))
+        )
 
     def test_decide_last_checkpoint(self):
         CreateSampleWorkspace(OutputWorkspace="6")
@@ -129,8 +130,7 @@ class ProjectRecoveryModelTest(unittest.TestCase):
         self.assertEqual([checkpoints[1].replace("T", " "), "6", "No"], self.prm.rows[0])
 
     def test_get_number_of_checkpoints(self):
-        self.assertEqual(int(ConfigService.getString(NO_OF_CHECKPOINTS_KEY)),
-                         self.prm.get_number_of_checkpoints())
+        self.assertEqual(int(ConfigService.getString(NO_OF_CHECKPOINTS_KEY)), self.prm.get_number_of_checkpoints())
 
     def test_update_checkpoint_tried(self):
         checkpoints = os.listdir(self.pid)

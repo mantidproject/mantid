@@ -4,29 +4,33 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
-from qtpy.QtWidgets import (QButtonGroup, QDialog, QFileDialog, QFrame)  # noqa
-from qtpy.QtGui import (QDoubleValidator, QIntValidator)  # noqa
+# pylint: disable=invalid-name
+from qtpy.QtWidgets import QButtonGroup, QDialog, QFileDialog, QFrame  # noqa
+from qtpy.QtGui import QDoubleValidator, QIntValidator  # noqa
 import mantidqtinterfaces.reduction_gui.widgets.util as util
 import os
 from reduction_gui.reduction.sans.eqsans_options_script import ReductionOptions
 from mantidqtinterfaces.reduction_gui.settings.application_settings import GeneralSettings
 from mantidqtinterfaces.reduction_gui.widgets.base_widget import BaseWidget
+
 try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
     from mantid.kernel import Logger
-    Logger("SANSInstrumentWidget").information('Using legacy ui importer')
+
+    Logger("SANSInstrumentWidget").information("Using legacy ui importer")
     from mantidplot import load_ui
 from mantid.api import AnalysisDataService
 from mantid.simpleapi import ExtractMask
+
 unicode = str
 
 
 class SANSInstrumentWidget(BaseWidget):
     """
-        Widget that present instrument details to the user
+    Widget that present instrument details to the user
     """
+
     ## Widget name
     name = "Reduction Options"
 
@@ -37,7 +41,7 @@ class SANSInstrumentWidget(BaseWidget):
     _beam_diameter_supplied = True
 
     # Internal data members for mask editor logic
-    mask_file = ''
+    mask_file = ""
     mask_reload = False
     mask_ws = "__eqsans_mask"
 
@@ -47,7 +51,7 @@ class SANSInstrumentWidget(BaseWidget):
         class SummaryFrame(QFrame):
             def __init__(self, parent=None):
                 QFrame.__init__(self, parent)
-                self.ui = load_ui(__file__, '../../../ui/sans/eqsans_instrument.ui', baseinstance=self)
+                self.ui = load_ui(__file__, "../../../ui/sans/eqsans_instrument.ui", baseinstance=self)
 
         self._summary = SummaryFrame(self)
         self.initialize_content()
@@ -71,9 +75,9 @@ class SANSInstrumentWidget(BaseWidget):
 
     def _data_updated(self, key, value):
         """
-            Respond to application-level key/value pair updates.
-            @param key: key string
-            @param value: value string
+        Respond to application-level key/value pair updates.
+        @param key: key string
+        @param value: value string
         """
         if key == "sample_detector_distance":
             self._sample_detector_distance = value
@@ -183,7 +187,7 @@ class SANSInstrumentWidget(BaseWidget):
             self._summary.geometry_options_groupbox.hide()
 
             # Hide expert options
-            #self._summary.config_mask_chk.hide()
+            # self._summary.config_mask_chk.hide()
             self._summary.tof_cut_chk.hide()
             self._summary.low_tof_edit.hide()
             self._summary.high_tof_edit.hide()
@@ -212,8 +216,9 @@ class SANSInstrumentWidget(BaseWidget):
     def _mask_plot_clicked(self):
         ws_name = os.path.basename(str(self._summary.mask_edit.text()))
         self.mask_ws = "__mask_%s" % ws_name
-        self.show_instrument(self._summary.mask_edit.text, workspace=self.mask_ws, tab=2,
-                             reload=self.mask_reload, mask=self._masked_detectors)
+        self.show_instrument(
+            self._summary.mask_edit.text, workspace=self.mask_ws, tab=2, reload=self.mask_reload, mask=self._masked_detectors
+        )
         self._masked_detectors = []
         self.mask_reload = False
 
@@ -244,10 +249,12 @@ class SANSInstrumentWidget(BaseWidget):
             self._settings.emit_key_value("OUTPUT_DIR", str(self._summary.output_dir_edit.text()))
 
     def _output_dir_browse(self):
-        output_dir = QFileDialog.getExistingDirectory(self, "Output Directory - Choose a directory",
-                                                            os.path.expanduser('~'),
-                                                            QFileDialog.ShowDirsOnly
-                                                            | QFileDialog.DontResolveSymlinks)
+        output_dir = QFileDialog.getExistingDirectory(
+            self,
+            "Output Directory - Choose a directory",
+            os.path.expanduser("~"),
+            QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks,
+        )
         if not output_dir:
             return
         if isinstance(output_dir, tuple):
@@ -335,13 +342,13 @@ class SANSInstrumentWidget(BaseWidget):
 
     def set_state(self, state):
         """
-            Populate the UI elements with the data from the given state.
-            @param state: InstrumentDescription object
+        Populate the UI elements with the data from the given state.
+        @param state: InstrumentDescription object
         """
         self._summary.instr_name_label.setText(state.instrument_name)
-        #npixels = "%d x %d" % (state.nx_pixels, state.ny_pixels)
-        #self._summary.n_pixel_label.setText(str(npixels))
-        #self._summary.pixel_size_label.setText(str(state.pixel_size))
+        # npixels = "%d x %d" % (state.nx_pixels, state.ny_pixels)
+        # self._summary.n_pixel_label.setText(str(npixels))
+        # self._summary.pixel_size_label.setText(str(state.pixel_size))
 
         # Absolute scaling
         self._summary.scale_chk.setChecked(state.calculate_scale)
@@ -359,16 +366,17 @@ class SANSInstrumentWidget(BaseWidget):
         self._scale_clicked(self._summary.scale_chk.isChecked())
 
         # Detector offset input
-        self._prepare_field(state.detector_offset != 0,
-                            state.detector_offset,
-                            self._summary.detector_offset_chk,
-                            self._summary.detector_offset_edit)
+        self._prepare_field(
+            state.detector_offset != 0, state.detector_offset, self._summary.detector_offset_chk, self._summary.detector_offset_edit
+        )
 
         # Sample-detector distance
-        self._prepare_field(state.sample_detector_distance != 0,
-                            state.sample_detector_distance,
-                            self._summary.sample_dist_chk,
-                            self._summary.sample_dist_edit)
+        self._prepare_field(
+            state.sample_detector_distance != 0,
+            state.sample_detector_distance,
+            self._summary.sample_dist_chk,
+            self._summary.sample_dist_edit,
+        )
         util._check_and_get_float_line_edit(self._summary.sample_dist_edit, min=0)
         if self._sample_detector_distance is None:
             self._sample_detector_distance = state.sample_detector_distance
@@ -419,14 +427,14 @@ class SANSInstrumentWidget(BaseWidget):
         # Output directory
         self._summary.select_output_dir_radio.setChecked(not state.use_data_directory)
         self._summary.use_data_dir_radio.setChecked(state.use_data_directory)
-        if len(state.output_directory.strip())>0:
+        if len(state.output_directory.strip()) > 0:
             self._summary.output_dir_edit.setText(str(state.output_directory))
         else:
-            self._summary.output_dir_edit.setText(str(os.path.expanduser('~')))
+            self._summary.output_dir_edit.setText(str(os.path.expanduser("~")))
         self._output_dir_clicked()
 
     def _prepare_field(self, is_enabled, stored_value, chk_widget, edit_widget, suppl_value=None, suppl_edit=None):
-        #to_display = str(stored_value) if is_enabled else ''
+        # to_display = str(stored_value) if is_enabled else ''
         edit_widget.setEnabled(is_enabled)
         chk_widget.setChecked(is_enabled)
         edit_widget.setText(str(stored_value))
@@ -436,7 +444,7 @@ class SANSInstrumentWidget(BaseWidget):
 
     def get_state(self):
         """
-            Returns an object with the state of the interface
+        Returns an object with the state of the interface
         """
         m = ReductionOptions()
 
@@ -506,6 +514,7 @@ class SANSInstrumentWidget(BaseWidget):
         class HelpDialog(QDialog):
             def __init__(self, parent=None):
                 QDialog.__init__(self, parent)
-                self.ui = load_ui(__file__, '../../../ui/sans/eqsans_info.ui', baseinstance=self)
+                self.ui = load_ui(__file__, "../../../ui/sans/eqsans_info.ui", baseinstance=self)
+
         dialog = HelpDialog(self)
         dialog.exec_()

@@ -14,12 +14,11 @@ from mantidqt.utils.qt import load_ui
 
 
 class ProjectSaveDialogView(QDialog):
-
     def __init__(self):
         super(ProjectSaveDialogView, self).__init__()
 
-        self.ui = load_ui(__file__, 'saveprojectdialog.ui', baseinstance=self)
-        self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
+        self.ui = load_ui(__file__, "saveprojectdialog.ui", baseinstance=self)
+        self.setWindowIcon(QIcon(":/images/MantidIcon.ico"))
         self.setWindowTitle("Save Project")
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 

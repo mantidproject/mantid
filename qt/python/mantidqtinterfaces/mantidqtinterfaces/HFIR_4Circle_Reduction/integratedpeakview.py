@@ -4,30 +4,30 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=W0403,R0904,R0903
+# pylint: disable=W0403,R0904,R0903
 import numpy
 from mantidqtinterfaces.HFIR_4Circle_Reduction import mplgraphicsview
 
 
 class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
-    """ Extended graphic view for integrated peaks
-    """
+    """Extended graphic view for integrated peaks"""
+
     class MousePress(object):
         RELEASED = 0
         LEFT = 1
         RIGHT = 2
 
     def __init__(self, parent):
-        """ Init
+        """Init
         :param parent:
         :return:
         """
         mplgraphicsview.MplGraphicsView.__init__(self, parent)
 
         # define interaction with the canvas
-        self._myCanvas.mpl_connect('button_press_event', self.on_mouse_press_event)
-        self._myCanvas.mpl_connect('button_release_event', self.on_mouse_release_event)
-        self._myCanvas.mpl_connect('motion_notify_event', self.on_mouse_motion)
+        self._myCanvas.mpl_connect("button_press_event", self.on_mouse_press_event)
+        self._myCanvas.mpl_connect("button_release_event", self.on_mouse_release_event)
+        self._myCanvas.mpl_connect("motion_notify_event", self.on_mouse_motion)
 
         # class variable
         self._mousePressed = self.MousePress.RELEASED
@@ -35,8 +35,8 @@ class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
         self._bkgdIndicatorID = -1
 
         # current mouse position
-        self._currX = 0.
-        self._currY = 0.
+        self._currX = 0.0
+        self._currY = 0.0
 
         # data managing
         self._rawDataID = None
@@ -49,7 +49,7 @@ class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
         :return:
         """
         min_y, max_y = self.getYLimit()
-        self._bkgdIndicatorID = self.add_horizontal_indicator(y=min_y+0.5*(max_y-min_y), color='red')
+        self._bkgdIndicatorID = self.add_horizontal_indicator(y=min_y + 0.5 * (max_y - min_y), color="red")
 
         return
 
@@ -59,7 +59,7 @@ class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
         :return: 2-tuple as vec_x and vec_y
         """
         if self._rawDataID is None:
-            raise RuntimeError('There is no raw data plot on the canvas')
+            raise RuntimeError("There is no raw data plot on the canvas")
 
         data_set = self.canvas().get_data(self._rawDataID)
         vec_x = data_set[0]
@@ -107,7 +107,7 @@ class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
         :return:
         """
         # plot data
-        self._rawDataID = self.add_plot_1d(vec_x, vec_y,  color='blue')
+        self._rawDataID = self.add_plot_1d(vec_x, vec_y, color="blue")
         self.set_smart_y_limit(vec_y)
 
         return
@@ -126,7 +126,7 @@ class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
             self.set_title(title)
         self.set_smart_y_limit(model_vec_y)
 
-        self.setXYLimit(xmin=vec_x[0] - 1., xmax=vec_x[-1] + 1.)
+        self.setXYLimit(xmin=vec_x[0] - 1.0, xmax=vec_x[-1] + 1.0)
 
         return
 
@@ -136,10 +136,10 @@ class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
         :return:
         """
         if self._modelDataID is None:
-            raise RuntimeError('There is no model plot on canvas')
+            raise RuntimeError("There is no model plot on canvas")
 
         # reset title
-        self.set_title('')
+        self.set_title("")
         self.remove_line(self._modelDataID)
 
         self._modelDataID = None
@@ -159,7 +159,7 @@ class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
         self._modelDataID = None
 
         # reset title
-        self.set_title('')
+        self.set_title("")
 
         return
 
@@ -171,7 +171,7 @@ class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
         :return:
         """
         # check
-        assert isinstance(vec_y, numpy.ndarray) and len(vec_y) > 0, 'Vector Y must be a numpy array and not empty.'
+        assert isinstance(vec_y, numpy.ndarray) and len(vec_y) > 0, "Vector Y must be a numpy array and not empty."
 
         # find y's minimum and maximum
         try:
@@ -236,9 +236,18 @@ class GeneralPurposedPlotView(mplgraphicsview.MplGraphicsView):
         :param annotation_list:
         :return:
         """
-        self._currentDataID = self.add_plot_1d(vec_x=vec_x, vec_y=vec_y, y_err=vec_e, annotation_list=annotation_list,
-                                               color='red', label=title, x_label=label_x, y_label=label_y,
-                                               marker='.', line_style='--')
+        self._currentDataID = self.add_plot_1d(
+            vec_x=vec_x,
+            vec_y=vec_y,
+            y_err=vec_e,
+            annotation_list=annotation_list,
+            color="red",
+            label=title,
+            x_label=label_x,
+            y_label=label_y,
+            marker=".",
+            line_style="--",
+        )
 
         return
 
@@ -263,7 +272,7 @@ class GeneralPurposedPlotView(mplgraphicsview.MplGraphicsView):
         :return:
         """
         if line_id is None and self._currentDataID is None:
-            raise RuntimeError('No line on canvas to save!')
+            raise RuntimeError("No line on canvas to save!")
         if line_id is None:
             line_id = self._currentDataID
 
@@ -272,7 +281,7 @@ class GeneralPurposedPlotView(mplgraphicsview.MplGraphicsView):
         # convert vectors to a matrix to save
         row_size = len(vec_x)
 
-        matrix = numpy.ndarray(shape=(row_size, 3), dtype='float')
+        matrix = numpy.ndarray(shape=(row_size, 3), dtype="float")
         matrix[:, 0] = vec_x
         matrix[:, 1] = vec_y
         matrix[:, 2] = vec_e
@@ -294,7 +303,7 @@ class SinglePtIntegrationView(mplgraphicsview.MplGraphicsView):
         super(SinglePtIntegrationView, self).__init__(parent)
 
         # define interaction with the canvas
-        self._myCanvas.mpl_connect('button_press_event', self.on_mouse_press_event)
+        self._myCanvas.mpl_connect("button_press_event", self.on_mouse_press_event)
 
         # class variables
         self._rawDataID = None
@@ -315,8 +324,7 @@ class SinglePtIntegrationView(mplgraphicsview.MplGraphicsView):
         :param update_plot: flag to update the plot (call draw)
         :return:
         """
-        self._rawDataID = self.add_plot_1d(vec_x, vec_y, x_label='pixel', label=label,
-                                           color='blue', update_plot=update_plot)
+        self._rawDataID = self.add_plot_1d(vec_x, vec_y, x_label="pixel", label=label, color="blue", update_plot=update_plot)
         self.set_smart_y_limit(vec_y)
 
         return
@@ -330,7 +338,7 @@ class SinglePtIntegrationView(mplgraphicsview.MplGraphicsView):
         :param update_plot: flag to update the plot (call draw)
         :return:
         """
-        self._fitDataID = self.add_plot_1d(vec_x, vec_y, label=label, color='red', update_plot=update_plot)
+        self._fitDataID = self.add_plot_1d(vec_x, vec_y, label=label, color="red", update_plot=update_plot)
         self.set_smart_y_limit(vec_y)
 
         return
@@ -358,7 +366,7 @@ class SinglePtIntegrationView(mplgraphicsview.MplGraphicsView):
         return
 
     def plot_2theta_model(self, vec_2theta, vec_fwhm, vec_model):
-        """ plot 2theta model
+        """plot 2theta model
         :param vec_2theta:
         :param vec_fwhm:
         :param vec_model:
@@ -371,12 +379,14 @@ class SinglePtIntegrationView(mplgraphicsview.MplGraphicsView):
 
         # add the line
         if vec_fwhm is not None:
-            self._2thetaFwhmID = self.add_plot_1d(vec_2theta, vec_fwhm, x_label='$2\theta$', y_label='FWHM',
-                                                  color='black', update_plot=True, label='Observed')
+            self._2thetaFwhmID = self.add_plot_1d(
+                vec_2theta, vec_fwhm, x_label="$2\theta$", y_label="FWHM", color="black", update_plot=True, label="Observed"
+            )
 
         if vec_model is not None:
-            self._2thetaModelID = self.add_plot_1d(vec_2theta, vec_model, x_label='$2\theta$', y_label='FWHM',
-                                                   color='blue', update_plot=True, label='Model')
+            self._2thetaModelID = self.add_plot_1d(
+                vec_2theta, vec_model, x_label="$2\theta$", y_label="FWHM", color="blue", update_plot=True, label="Model"
+            )
 
         return
 
@@ -386,7 +396,7 @@ class SinglePtIntegrationView(mplgraphicsview.MplGraphicsView):
         :param parent_window:
         :return:
         """
-        assert parent_window is not None, 'Parent window cannot be None'
+        assert parent_window is not None, "Parent window cannot be None"
 
         self._parent_window = parent_window
 
@@ -400,7 +410,7 @@ class SinglePtIntegrationView(mplgraphicsview.MplGraphicsView):
         :return:
         """
         # check
-        assert isinstance(vec_y, numpy.ndarray) and len(vec_y) > 0, 'Vector Y must be a numpy array and not empty.'
+        assert isinstance(vec_y, numpy.ndarray) and len(vec_y) > 0, "Vector Y must be a numpy array and not empty."
 
         # find y's minimum and maximum
         try:

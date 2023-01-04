@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name,relative-import,W0611,R0921,R0902,R0904,R0921,C0302,R0912
+# pylint: disable=invalid-name,relative-import,W0611,R0921,R0902,R0904,R0921,C0302,R0912
 ################################################################################
 #
 # MainWindow application for reducing HFIR 4-circle
@@ -34,6 +34,7 @@ import mantidqtinterfaces.HFIR_4Circle_Reduction.refineubfftsetup as refineubfft
 import mantidqtinterfaces.HFIR_4Circle_Reduction.PeaksIntegrationReport as PeaksIntegrationReport
 import mantidqtinterfaces.HFIR_4Circle_Reduction.IntegrateSingePtSubWindow as IntegrateSingePtSubWindow
 import mantidqtinterfaces.HFIR_4Circle_Reduction.generalplotview as generalplotview
+
 # import line for the UI python class
 from mantidqtinterfaces.HFIR_4Circle_Reduction.hfctables import UBMatrixPeakTable
 from mantidqtinterfaces.HFIR_4Circle_Reduction.hfctables import UBMatrixTable
@@ -44,44 +45,42 @@ from mantidqtinterfaces.HFIR_4Circle_Reduction.detector2dview import Detector2DV
 from mantidqtinterfaces.HFIR_4Circle_Reduction.hfctables import KShiftTableWidget
 from mantidqtinterfaces.HFIR_4Circle_Reduction.hfctables import MatrixTable
 from mantid.kernel import Logger
-from qtpy.QtWidgets import (QButtonGroup, QFileDialog, QMessageBox, QMainWindow, QInputDialog)  # noqa
-from qtpy.QtCore import (QSettings)  # noqa
+from qtpy.QtWidgets import QButtonGroup, QFileDialog, QMessageBox, QMainWindow, QInputDialog  # noqa
+from qtpy.QtCore import QSettings  # noqa
 from qtpy import PYQT4  # noqa
+
 try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
-    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    Logger("HFIR_4Circle_Reduction").information("Using legacy ui importer")
     from mantidplot import load_ui
-from qtpy.QtWidgets import (QVBoxLayout)
+from qtpy.QtWidgets import QVBoxLayout
+
 SCROLL_AVAILABLE = False
 if PYQT4:
     try:
         from mantidqtpython import MantidQt
+
         SCROLL_AVAILABLE = True
     except ImportError:
         SCROLL_AVAILABLE = False
 unicode = str
 
 # define constants
-IndexFromSpice = 'From Spice (pre-defined)'
-IndexFromUB = 'From Calculation By UB'
+IndexFromSpice = "From Spice (pre-defined)"
+IndexFromUB = "From Calculation By UB"
 MAGNETIC_TOL = 0.2
 
 
 class MainWindow(QMainWindow):
-    """ Class of Main Window (top)
-    """
-    TabPage = {'View Raw Data': 2,
-               'Calculate UB': 3,
-               'UB Matrix': 4,
-               'Peak Integration': 6,
-               'Scans Processing': 5}
+    """Class of Main Window (top)"""
+
+    TabPage = {"View Raw Data": 2, "Calculate UB": 3, "UB Matrix": 4, "Peak Integration": 6, "Scans Processing": 5}
 
     def __init__(self, parent=None, window_flags=None):
-        """ Initialization and set up
-        """
+        """Initialization and set up"""
         # Base class
-        QMainWindow.__init__(self,parent)
+        QMainWindow.__init__(self, parent)
 
         if window_flags:
             self.setWindowFlags(window_flags)
@@ -99,7 +98,7 @@ class MainWindow(QMainWindow):
         self._spiceViewer = None
         self._mySinglePeakIntegrationDialog = None
         self._preProcessWindow = None
-        self._singlePeakIntegrationDialogBuffer = ''
+        self._singlePeakIntegrationDialogBuffer = ""
         self._dataDownloadDialog = None
         self._single_pt_peak_integration_window = None
         self._general_1d_plot_window = None
@@ -270,7 +269,7 @@ class MainWindow(QMainWindow):
         # Control
         self._myControl = r4c.CWSCDReductionControl(self._instrument)
         self._allowDownload = True
-        self._dataAccessMode = 'Download'
+        self._dataAccessMode = "Download"
         self._surveyTableFlag = True
         self._ubPeakTableFlag = True
         self._isROIApplied = False
@@ -279,11 +278,11 @@ class MainWindow(QMainWindow):
         self.do_set_detector_size()
 
         # Sub window
-        self._baseTitle = 'Title is not initialized'
+        self._baseTitle = "Title is not initialized"
 
         # Timing and thread 'global'
         self._startMeringScans = time.process_time()
-        self._errorMessageEnsemble = ''
+        self._errorMessageEnsemble = ""
 
         # QSettings
         self.load_settings()
@@ -343,21 +342,21 @@ class MainWindow(QMainWindow):
 
     @property
     def controller(self):
-        """ Parameter controller
-        """
-        assert self._myControl is not None, 'Controller cannot be None.'
-        assert isinstance(self._myControl, r4c.CWSCDReductionControl), \
-            'My controller must be of type %s, but not %s.' % ('CWSCDReductionControl',
-                                                               self._myControl.__class__.__name__)
+        """Parameter controller"""
+        assert self._myControl is not None, "Controller cannot be None."
+        assert isinstance(self._myControl, r4c.CWSCDReductionControl), "My controller must be of type %s, but not %s." % (
+            "CWSCDReductionControl",
+            self._myControl.__class__.__name__,
+        )
 
         return self._myControl
 
     def _init_widgets(self):
-        """ Initialize the table widgets
+        """Initialize the table widgets
         :return:
         """
         self._baseTitle = str(self.windowTitle())
-        self.setWindowTitle('No Experiment Is Set')
+        self.setWindowTitle("No Experiment Is Set")
 
         # detector geometry (set to 256 x 256)
         self.ui.comboBox_detectorSize.setCurrentIndex(0)
@@ -385,29 +384,29 @@ class MainWindow(QMainWindow):
 
         # combo-box
         self.ui.comboBox_kVectors.clear()
-        self.ui.comboBox_kVectors.addItem('0: (0, 0, 0)')
+        self.ui.comboBox_kVectors.addItem("0: (0, 0, 0)")
 
         self.ui.comboBox_indexFrom.clear()
-        self.ui.comboBox_indexFrom.addItem('By calculation')
-        self.ui.comboBox_indexFrom.addItem('From SPICE')
+        self.ui.comboBox_indexFrom.addItem("By calculation")
+        self.ui.comboBox_indexFrom.addItem("From SPICE")
 
         self.ui.comboBox_hklType.clear()
-        self.ui.comboBox_hklType.addItem('SPICE')
-        self.ui.comboBox_hklType.addItem('Calculated')
+        self.ui.comboBox_hklType.addItem("SPICE")
+        self.ui.comboBox_hklType.addItem("Calculated")
 
         # normalization to peak
         self.ui.comboBox_ptCountType.clear()
-        self.ui.comboBox_ptCountType.addItem('Time')
-        self.ui.comboBox_ptCountType.addItem('Monitor')
-        self.ui.comboBox_ptCountType.addItem('Absolute')
+        self.ui.comboBox_ptCountType.addItem("Time")
+        self.ui.comboBox_ptCountType.addItem("Monitor")
+        self.ui.comboBox_ptCountType.addItem("Absolute")
 
-        self.ui.comboBox_viewRawDataMasks.addItem('')
+        self.ui.comboBox_viewRawDataMasks.addItem("")
 
         # tab
         self.ui.tabWidget.setCurrentIndex(0)
 
         self.ui.radioButton_ubMantidStyle.setChecked(True)
-        self.ui.lineEdit_numSurveyOutput.setText('')
+        self.ui.lineEdit_numSurveyOutput.setText("")
         self.ui.checkBox_sortDescending.setChecked(False)
         self.ui.radioButton_sortByCounts.setChecked(True)
         self.ui.radioButton_ubSelectNoScan.setChecked(True)
@@ -427,10 +426,10 @@ class MainWindow(QMainWindow):
         self.ui.checkBox_fpHighPrecision.setChecked(True)
 
         # background points
-        self.ui.lineEdit_backgroundPts.setText('1, 1')
-        self.ui.lineEdit_scaleFactor.setText('1.')
-        self.ui.lineEdit_numPt4BackgroundLeft.setText('1')
-        self.ui.lineEdit_numPt4BackgroundRight.setText('1')
+        self.ui.lineEdit_backgroundPts.setText("1, 1")
+        self.ui.lineEdit_scaleFactor.setText("1.")
+        self.ui.lineEdit_numPt4BackgroundLeft.setText("1")
+        self.ui.lineEdit_numPt4BackgroundRight.setText("1")
 
         # about pre-processed data
         # FIXME self.ui.checkBox_searchPreprocessedFirst.setChecked(True)
@@ -442,15 +441,14 @@ class MainWindow(QMainWindow):
         return
 
     def _build_peak_info_list(self, zero_hkl, is_spice=True):
-        """ Build a list of PeakInfo to build peak workspace
+        """Build a list of PeakInfo to build peak workspace
         peak HKL can be set to zero or from table
         :return: list of peak information, which is a PeakProcessRecord instance
         """
         # Collecting all peaks that will be used to refine UB matrix
         row_index_list = self.ui.tableWidget_peaksCalUB.get_selected_rows(True)
         if len(row_index_list) < 3:
-            err_msg = 'At least 3 peaks must be selected to refine UB matrix.' \
-                      'Now it is only %d selected.' % len(row_index_list)
+            err_msg = "At least 3 peaks must be selected to refine UB matrix." "Now it is only %d selected." % len(row_index_list)
             self.pop_one_button_dialog(err_msg)
             return None
 
@@ -467,7 +465,7 @@ class MainWindow(QMainWindow):
 
             if zero_hkl:
                 # set HKL to zero
-                peak_info.set_hkl(0., 0., 0.)
+                peak_info.set_hkl(0.0, 0.0, 0.0)
             elif is_spice:
                 # set from table
                 spice_hkl = self.ui.tableWidget_peaksCalUB.get_hkl(i_row, True)
@@ -476,7 +474,7 @@ class MainWindow(QMainWindow):
                 try:
                     calculated_hkl = self.ui.tableWidget_peaksCalUB.get_hkl(i_row, False)
                 except RuntimeError as run_err:
-                    errmsg = '[ERROR] Failed to get calculated HKL from UB calculation table due to {0}'.format(run_err)
+                    errmsg = "[ERROR] Failed to get calculated HKL from UB calculation table due to {0}".format(run_err)
                     self.pop_one_button_dialog(errmsg)
                     return None
                 peak_info.set_hkl_np_array(numpy.array(calculated_hkl))
@@ -500,21 +498,21 @@ class MainWindow(QMainWindow):
         # lattice parameter
         assert isinstance(lattice, list)
         assert len(lattice) == 6
-        self.ui.lineEdit_aUnitCell.setText('%.5f' % lattice[0])
-        self.ui.lineEdit_bUnitCell.setText('%.5f' % lattice[1])
-        self.ui.lineEdit_cUnitCell.setText('%.5f' % lattice[2])
-        self.ui.lineEdit_alphaUnitCell.setText('%.5f' % lattice[3])
-        self.ui.lineEdit_betaUnitCell.setText('%.5f' % lattice[4])
-        self.ui.lineEdit_gammaUnitCell.setText('%.5f' % lattice[5])
+        self.ui.lineEdit_aUnitCell.setText("%.5f" % lattice[0])
+        self.ui.lineEdit_bUnitCell.setText("%.5f" % lattice[1])
+        self.ui.lineEdit_cUnitCell.setText("%.5f" % lattice[2])
+        self.ui.lineEdit_alphaUnitCell.setText("%.5f" % lattice[3])
+        self.ui.lineEdit_betaUnitCell.setText("%.5f" % lattice[4])
+        self.ui.lineEdit_gammaUnitCell.setText("%.5f" % lattice[5])
 
         assert isinstance(lattice_error, list)
         assert len(lattice_error) == 6
-        self.ui.lineEdit_aError.setText('%.5f' % lattice_error[0])
-        self.ui.lineEdit_bError.setText('%.5f' % lattice_error[1])
-        self.ui.lineEdit_cError.setText('%.5f' % lattice_error[2])
-        self.ui.lineEdit_alphaError.setText('%.5f' % lattice_error[3])
-        self.ui.lineEdit_betaError.setText('%.5f' % lattice_error[4])
-        self.ui.lineEdit_gammaError.setText('%.5f' % lattice_error[5])
+        self.ui.lineEdit_aError.setText("%.5f" % lattice_error[0])
+        self.ui.lineEdit_bError.setText("%.5f" % lattice_error[1])
+        self.ui.lineEdit_cError.setText("%.5f" % lattice_error[2])
+        self.ui.lineEdit_alphaError.setText("%.5f" % lattice_error[3])
+        self.ui.lineEdit_betaError.setText("%.5f" % lattice_error[4])
+        self.ui.lineEdit_gammaError.setText("%.5f" % lattice_error[5])
 
         return
 
@@ -535,45 +533,44 @@ class MainWindow(QMainWindow):
         :return:
         """
         # read project file name
-        project_file_name = QFileDialog.getSaveFileName(self, 'Specify Project File', os.getcwd())
+        project_file_name = QFileDialog.getSaveFileName(self, "Specify Project File", os.getcwd())
         if not project_file_name:
             return
         if isinstance(project_file_name, tuple):
             project_file_name = project_file_name[0]
         # NEXT ISSUE - consider to allow incremental project saving technique
         if os.path.exists(project_file_name):
-            yes = gutil.show_message(self, 'Project file %s does exist. This is supposed to be '
-                                           'an incremental save.' % project_file_name)
+            yes = gutil.show_message(self, "Project file %s does exist. This is supposed to be " "an incremental save." % project_file_name)
             if yes:
-                message = 'Save project to {0} in incremental way.'.format(project_file_name)
+                message = "Save project to {0} in incremental way.".format(project_file_name)
             else:
-                message = 'Saving activity is cancelled.'
+                message = "Saving activity is cancelled."
         else:
-            message = 'Saving current project to {0}'.format(project_file_name)
+            message = "Saving current project to {0}".format(project_file_name)
         self._show_message(message)
 
         # gather some useful information
         ui_dict = dict()
-        ui_dict['exp number'] = str(self.ui.lineEdit_exp.text())
-        ui_dict['local spice dir'] = str(self.ui.lineEdit_localSpiceDir.text())
-        ui_dict['work dir'] = str(self.ui.lineEdit_workDir.text())
-        ui_dict['survey start'] = str(self.ui.lineEdit_surveyStartPt.text())
-        ui_dict['survey stop'] = str(self.ui.lineEdit_surveyEndPt.text())
+        ui_dict["exp number"] = str(self.ui.lineEdit_exp.text())
+        ui_dict["local spice dir"] = str(self.ui.lineEdit_localSpiceDir.text())
+        ui_dict["work dir"] = str(self.ui.lineEdit_workDir.text())
+        ui_dict["survey start"] = str(self.ui.lineEdit_surveyStartPt.text())
+        ui_dict["survey stop"] = str(self.ui.lineEdit_surveyEndPt.text())
 
         # detector-sample distance
         det_distance_str = str(self.ui.lineEdit_infoDetSampleDistance.text()).strip()
         if len(det_distance_str) > 0:
-            ui_dict['det_sample_distance'] = det_distance_str
+            ui_dict["det_sample_distance"] = det_distance_str
 
         # wave length
         wave_length_str = str(self.ui.lineEdit_infoWavelength.text()).strip()
         if len(wave_length_str) > 0:
-            ui_dict['wave_length'] = wave_length_str
+            ui_dict["wave_length"] = wave_length_str
 
         # calibrated detector center
         det_center_str = str(self.ui.lineEdit_infoDetCenter.text())
         if len(det_center_str) > 0:
-            ui_dict['det_center'] = det_center_str
+            ui_dict["det_center"] = det_center_str
 
         # register and make it as a queue for last n opened/saved project
         last_1_path = str(self.ui.label_last1Path.text())
@@ -588,8 +585,8 @@ class MainWindow(QMainWindow):
             self.pop_one_button_dialog(err_msg)
 
         # show user the message that the saving process is over
-        information = 'Project has been saved to {0}\n'.format(project_file_name)
-        information += 'Including dictionary keys: {0}'.format(ui_dict)
+        information = "Project has been saved to {0}\n".format(project_file_name)
+        information += "Including dictionary keys: {0}".format(ui_dict)
         self.pop_one_button_dialog(information)
 
         return
@@ -599,7 +596,7 @@ class MainWindow(QMainWindow):
         Load project
         :return:
         """
-        project_file_name = QFileDialog.getOpenFileName(self, 'Choose Project File', os.getcwd())
+        project_file_name = QFileDialog.getOpenFileName(self, "Choose Project File", os.getcwd())
         if not project_file_name:  # return if cancelled
             return
         if isinstance(project_file_name, tuple):
@@ -622,7 +619,7 @@ class MainWindow(QMainWindow):
         """
         project_file_name = str(self.ui.label_last1Path.text())
         if os.path.exists(project_file_name) is False:
-            self.pop_one_button_dialog('Last saved project %s cannot be located.' % project_file_name)
+            self.pop_one_button_dialog("Last saved project %s cannot be located." % project_file_name)
         else:
             self.load_project(project_file_name)
 
@@ -635,8 +632,7 @@ class MainWindow(QMainWindow):
         self.menu_quit()
 
     def do_accept_ub(self):
-        """ Accept the calculated UB matrix and thus put to controller
-        """
+        """Accept the calculated UB matrix and thus put to controller"""
         # get the experiment number
         exp_number = int(str(self.ui.lineEdit_exp.text()))
 
@@ -650,7 +646,7 @@ class MainWindow(QMainWindow):
         self._myControl.set_ub_matrix(exp_number, curr_ub)
 
     def do_add_peaks_for_ub(self):
-        """ In tab-survey, merge selected scans, find peaks in merged data and
+        """In tab-survey, merge selected scans, find peaks in merged data and
          switch to UB matrix calculation tab and add to table
         :return:
         """
@@ -658,17 +654,17 @@ class MainWindow(QMainWindow):
         selected_row_index_list = self.ui.tableWidget_surveyTable.get_selected_rows(True)
         scan_number_list = self.ui.tableWidget_surveyTable.get_scan_numbers(selected_row_index_list)
         if len(scan_number_list) == 0:
-            self.pop_one_button_dialog('No scan is selected.')
+            self.pop_one_button_dialog("No scan is selected.")
             return
 
         # get experiment number
         status, exp_number = gutil.parse_integers_editors(self.ui.lineEdit_exp)
         if not status:
-            self.pop_one_button_dialog('Unable to get experiment number\n  due to %s.' % str(exp_number))
+            self.pop_one_button_dialog("Unable to get experiment number\n  due to %s." % str(exp_number))
             return
 
         # switch to tab-3
-        self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage['Calculate UB'])
+        self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage["Calculate UB"])
 
         # prototype for a new thread
         self.ui.progressBar_add_ub_peaks.setRange(0, len(scan_number_list))
@@ -679,7 +675,7 @@ class MainWindow(QMainWindow):
         self.ui.lineEdit_peaksIndexedBy.setText(IndexFromSpice)
 
     def add_scans_ub_table(self, scan_list):
-        """ add scans to UB matrix construction table
+        """add scans to UB matrix construction table
         :param scan_list:
         :return:
         """
@@ -687,7 +683,7 @@ class MainWindow(QMainWindow):
         # get experiment number
         status, exp_number = gutil.parse_integers_editors(self.ui.lineEdit_exp)
         if not status:
-            self.pop_one_button_dialog('Unable to get experiment number\n  due to %s.' % str(exp_number))
+            self.pop_one_button_dialog("Unable to get experiment number\n  due to %s." % str(exp_number))
             return
 
         # switch to tab-3
@@ -702,30 +698,30 @@ class MainWindow(QMainWindow):
         self.ui.lineEdit_peaksIndexedBy.setText(IndexFromSpice)
 
     def do_switch_roi_mode(self):
-        """ Add region of interest to 2D image
+        """Add region of interest to 2D image
         :return:
         """
         # set the button to next mode
-        if str(self.ui.pushButton_switchROIMode.text()) == 'Enter ROI-Edit Mode':
+        if str(self.ui.pushButton_switchROIMode.text()) == "Enter ROI-Edit Mode":
             # enter adding ROI mode
             self.ui.graphicsView_detector2dPlot.enter_roi_mode(roi_state=True)
             # rename the button
-            self.ui.pushButton_switchROIMode.setText('Quit ROI-Edit Mode')
+            self.ui.pushButton_switchROIMode.setText("Quit ROI-Edit Mode")
         else:
             # quit editing ROI mode
             self.ui.graphicsView_detector2dPlot.enter_roi_mode(roi_state=False)
             # rename the button
-            self.ui.pushButton_switchROIMode.setText('Enter ROI-Edit Mode')
+            self.ui.pushButton_switchROIMode.setText("Enter ROI-Edit Mode")
         # END-IF-ELSE
 
     def do_add_scans_merge(self):
-        """ Add scans to merge
+        """Add scans to merge
         :return:
         """
         # Get list of scans
         scan_list = gutil.parse_integer_list(str(self.ui.lineEdit_listScansSliceView.text()))
         if len(scan_list) == 0:
-            self.pop_one_button_dialog('Scan list is empty.')
+            self.pop_one_button_dialog("Scan list is empty.")
 
         # Set table
         self.ui.tableWidget_mergeScans.append_scans(scans=scan_list, allow_duplicate_scans=False)
@@ -790,12 +786,11 @@ class MainWindow(QMainWindow):
     #     return
 
     def do_add_k_shift_vector(self):
-        """ Add a k-shift vector
+        """Add a k-shift vector
         :return:
         """
         # parse the k-vector
-        status, ret_obj = gutil.parse_float_editors([self.ui.lineEdit_kX, self.ui.lineEdit_kY, self.ui.lineEdit_kZ],
-                                                    allow_blank=False)
+        status, ret_obj = gutil.parse_float_editors([self.ui.lineEdit_kX, self.ui.lineEdit_kY, self.ui.lineEdit_kZ], allow_blank=False)
         if status is False:
             error_message = ret_obj
             self.pop_one_button_dialog(error_message)
@@ -809,11 +804,11 @@ class MainWindow(QMainWindow):
         # add to table and combo-box
         self.ui.tableWidget_kShift.add_k_vector(k_index, k_x, k_y, k_z)
 
-        combo_message = '%d: (%.5f, %.5f, %.5f)' % (k_index, k_x, k_y, k_z)
+        combo_message = "%d: (%.5f, %.5f, %.5f)" % (k_index, k_x, k_y, k_z)
         self.ui.comboBox_kVectors.addItem(combo_message)
 
     def do_apply_k_shift(self):
-        """ Apply k-shift to selected reflections
+        """Apply k-shift to selected reflections
         :return:
         """
         # get the selected scans
@@ -825,7 +820,7 @@ class MainWindow(QMainWindow):
 
         # get the k-vector
         k_shift_message = str(self.ui.comboBox_kVectors.currentText())
-        k_index = int(k_shift_message.split(':')[0])
+        k_index = int(k_shift_message.split(":")[0])
 
         # set to controller
         self._myControl.set_k_shift(scan_list, k_index)
@@ -857,17 +852,16 @@ class MainWindow(QMainWindow):
         self._myControl.set_working_directory(working_dir)
 
         # check
-        error_message = ''
+        error_message = ""
 
         # local data dir
-        if local_data_dir == '':
-            error_message += 'Local data directory is not specified!\n'
+        if local_data_dir == "":
+            error_message += "Local data directory is not specified!\n"
         elif os.path.exists(local_data_dir) is False:
             try:
                 os.mkdir(local_data_dir)
             except OSError as os_error:
-                error_message += 'Unable to create local data directory %s due to %s.\n' % (
-                    local_data_dir, str(os_error))
+                error_message += "Unable to create local data directory %s due to %s.\n" % (local_data_dir, str(os_error))
                 self.ui.lineEdit_localSpiceDir.setStyleSheet("color: red;")
             else:
                 self.ui.lineEdit_localSpiceDir.setStyleSheet("color: green;")
@@ -876,15 +870,14 @@ class MainWindow(QMainWindow):
         # END-IF-ELSE
 
         # working directory
-        if working_dir == '':
-            error_message += 'Working directory is not specified!\n'
+        if working_dir == "":
+            error_message += "Working directory is not specified!\n"
         elif os.path.exists(working_dir) is False:
             try:
                 os.mkdir(working_dir)
                 self.ui.lineEdit_workDir.setStyleSheet("color: green;")
             except OSError as os_error:
-                error_message += 'Unable to create working directory %s due to %s.\n' % (
-                    working_dir, str(os_error))
+                error_message += "Unable to create working directory %s due to %s.\n" % (working_dir, str(os_error))
                 self.ui.lineEdit_workDir.setStyleSheet("color: red;")
         else:
             self.ui.lineEdit_workDir.setStyleSheet("color: green;")
@@ -898,13 +891,14 @@ class MainWindow(QMainWindow):
         elif os.path.exists(pre_process_dir):
             # user specifies a valid directory
             self._myControl.pre_processed_dir = pre_process_dir
-            self.ui.lineEdit_preprocessedDir.setStyleSheet('color: green;')
+            self.ui.lineEdit_preprocessedDir.setStyleSheet("color: green;")
         else:
             # user specifies a non-exist directory. make an error message
-            self.pop_one_button_dialog('Pre-processed directory {0} ({1}) does not exist.'
-                                       ''.format(pre_process_dir, type(pre_process_dir)))
+            self.pop_one_button_dialog(
+                "Pre-processed directory {0} ({1}) does not exist." "".format(pre_process_dir, type(pre_process_dir))
+            )
             self._myControl.pre_processed_dir = self._myControl.get_working_directory()
-            self.ui.lineEdit_preprocessedDir.setStyleSheet('color: red;')
+            self.ui.lineEdit_preprocessedDir.setStyleSheet("color: red;")
             self.ui.lineEdit_preprocessedDir.setText(self._myControl.pre_processed_dir)
         # END-IF
 
@@ -912,18 +906,18 @@ class MainWindow(QMainWindow):
             self.pop_one_button_dialog(error_message)
 
     def do_browse_preprocessed_dir(self):
-        """ browse the pre-processed merged scans' directory
+        """browse the pre-processed merged scans' directory
         :return:
         """
-        print ('Here...2')
+        print("Here...2")
         # determine default directory
         exp_number_str = str(self.ui.lineEdit_exp.text())
-        default_pp_dir = os.path.join('/HFIR/HB3A/exp{0}/Shared/'.format(exp_number_str))
+        default_pp_dir = os.path.join("/HFIR/HB3A/exp{0}/Shared/".format(exp_number_str))
         if not os.path.exists(default_pp_dir):
-            default_pp_dir = os.path.expanduser('~')
+            default_pp_dir = os.path.expanduser("~")
 
         # use FileDialog to get the directory and set to preprocessedDir
-        pp_dir = QFileDialog.getExistingDirectory(self, 'Get Directory', default_pp_dir)
+        pp_dir = QFileDialog.getExistingDirectory(self, "Get Directory", default_pp_dir)
         if not pp_dir:
             return
         if isinstance(pp_dir, tuple):
@@ -931,11 +925,9 @@ class MainWindow(QMainWindow):
         self.ui.lineEdit_preprocessedDir.setText(pp_dir)
 
     def do_browse_local_spice_data(self):
-        """ Browse local source SPICE data directory
-        """
-        print ('Here...1')
-        src_spice_dir = QFileDialog.getExistingDirectory(self, 'Get Directory',
-                                                         self._homeSrcDir)
+        """Browse local source SPICE data directory"""
+        print("Here...1")
+        src_spice_dir = QFileDialog.getExistingDirectory(self, "Get Directory", self._homeSrcDir)
         if isinstance(src_spice_dir, tuple):
             src_spice_dir = src_spice_dir[0]
         # Set local data directory to controller
@@ -952,8 +944,8 @@ class MainWindow(QMainWindow):
         Browse and set up working directory
         :return:
         """
-        print ('Here...2')
-        work_dir = QFileDialog.getExistingDirectory(self, 'Get Working Directory', self._homeDir)
+        print("Here...2")
+        work_dir = QFileDialog.getExistingDirectory(self, "Get Working Directory", self._homeDir)
         if isinstance(work_dir, tuple):
             work_dir = work_dir[0]
         status, error_message = self._myControl.set_working_directory(work_dir)
@@ -963,8 +955,7 @@ class MainWindow(QMainWindow):
             self.ui.lineEdit_workDir.setText(work_dir)
 
     def do_cal_ub_matrix(self):
-        """ Calculate UB matrix by 2 or 3 reflections
-        """
+        """Calculate UB matrix by 2 or 3 reflections"""
         # Get reflections selected to calculate UB matrix
         num_rows = self.ui.tableWidget_peaksCalUB.rowCount()
         peak_info_list = list()
@@ -990,8 +981,7 @@ class MainWindow(QMainWindow):
             return
 
         # Calculate UB matrix
-        status, ub_matrix = self._myControl.calculate_ub_matrix(peak_info_list, a, b, c,
-                                                                alpha, beta, gamma)
+        status, ub_matrix = self._myControl.calculate_ub_matrix(peak_info_list, a, b, c, alpha, beta, gamma)
 
         # Deal with result
         if status is True:
@@ -1002,11 +992,11 @@ class MainWindow(QMainWindow):
             self.pop_one_button_dialog(err_msg)
 
     def do_change_instrument_name(self):
-        """ Handing the event as the instrument name is changed
+        """Handing the event as the instrument name is changed
         :return:
         """
         new_instrument = str(self.ui.comboBox_instrument.currentText())
-        self.pop_one_button_dialog('Change of instrument during data processing is dangerous.')
+        self.pop_one_button_dialog("Change of instrument during data processing is dangerous.")
         status, error_message = self._myControl.set_instrument_name(new_instrument)
         if status is False:
             self.pop_one_button_dialog(error_message)
@@ -1018,7 +1008,7 @@ class MainWindow(QMainWindow):
         """
         num_rows = self.ui.tableWidget_peaksCalUB.rowCount()
         for i_row in range(num_rows):
-            self.ui.tableWidget_peaksCalUB.set_hkl(i_row, [0., 0., 0.], is_spice_hkl=False)
+            self.ui.tableWidget_peaksCalUB.set_hkl(i_row, [0.0, 0.0, 0.0], is_spice_hkl=False)
 
     def do_clear_merge_table(self):
         """
@@ -1035,12 +1025,12 @@ class MainWindow(QMainWindow):
         """
         self.ui.graphicsView_integratedPeakView.clear_all_lines()
 
-        self.ui.lineEdit_rawSinglePeakIntensity.setText('')
-        self.ui.lineEdit_intensity2.setText('')
-        self.ui.lineEdit_gaussianPeakIntensity.setText('')
-        self.ui.lineEdit_errorIntensity1.setText('')
-        self.ui.lineEdit_errorIntensity2.setText('')
-        self.ui.lineEdit_errorIntensity3.setText('')
+        self.ui.lineEdit_rawSinglePeakIntensity.setText("")
+        self.ui.lineEdit_intensity2.setText("")
+        self.ui.lineEdit_gaussianPeakIntensity.setText("")
+        self.ui.lineEdit_errorIntensity1.setText("")
+        self.ui.lineEdit_errorIntensity2.setText("")
+        self.ui.lineEdit_errorIntensity3.setText("")
 
     def do_clear_survey(self):
         """
@@ -1077,15 +1067,14 @@ class MainWindow(QMainWindow):
             scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
             status, ret_obj = self._myControl.get_pt_numbers(exp_number, scan_number)
             if not status:
-                raise RuntimeError('It is not possible to fail to get Pt number list at this stage.'
-                                   'Error is due to %s.' % str(ret_obj))
+                raise RuntimeError("It is not possible to fail to get Pt number list at this stage." "Error is due to %s." % str(ret_obj))
             pt_number_list = ret_obj
 
             # set intensity to zero and error message if fails to get Pt.
             self._myControl.convert_merged_ws_to_hkl(exp_number, scan_number, pt_number_list)
 
     def do_del_roi(self):
-        """ Remove the current ROI
+        """Remove the current ROI
         :return:
         """
         # check whether there is mask on detector view
@@ -1117,8 +1106,7 @@ class MainWindow(QMainWindow):
         self.ui.tableWidget_peaksCalUB.delete_rows(row_num_list)
 
     def find_peak_in_scan(self, scan_number, load_spice_hkl):
-        """ Find peak in a given scan and record it
-        """
+        """Find peak in a given scan and record it"""
         # Get experiment, scan and pt
         status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp])
         if status is True:
@@ -1129,8 +1117,9 @@ class MainWindow(QMainWindow):
 
         # merge peak if necessary
         if self._myControl.has_merged_data(exp_no, scan_number) is False:
-            status, err_msg = self._myControl.merge_pts_in_scan(exp_no, scan_number, [], rewrite=True,
-                                                                preprocessed_dir=self._myControl.pre_processed_dir)
+            status, err_msg = self._myControl.merge_pts_in_scan(
+                exp_no, scan_number, [], rewrite=True, preprocessed_dir=self._myControl.pre_processed_dir
+            )
             if status is False:
                 self.pop_one_button_dialog(err_msg)
 
@@ -1149,7 +1138,7 @@ class MainWindow(QMainWindow):
 
         # Set up correct values to table tableWidget_peaksCalUB
         peak_info = self._myControl.get_peak_info(exp_no, scan_number)
-        assert peak_info is not None, 'Unable to locate PeakProcessRecord (peak info).'
+        assert peak_info is not None, "Unable to locate PeakProcessRecord (peak info)."
 
         if load_spice_hkl:
             h, k, l = peak_info.get_hkl()
@@ -1169,14 +1158,14 @@ class MainWindow(QMainWindow):
         """
         # get selected mask name
         mask_name = str(self.ui.comboBox_viewRawDataMasks.currentText())
-        if mask_name == 'No Mask':
-            self.pop_one_button_dialog('No mask is selected.  Saving is aborted.')
+        if mask_name == "No Mask":
+            self.pop_one_button_dialog("No mask is selected.  Saving is aborted.")
             return
 
         # get the output file name
-        roi_file_name = QFileDialog.getSaveFileName(self, 'Output mask/ROI file name',
-                                                    self._myControl.get_working_directory(),
-                                                    'XML Files (*.xml);;All Files (*.*)')
+        roi_file_name = QFileDialog.getSaveFileName(
+            self, "Output mask/ROI file name", self._myControl.get_working_directory(), "XML Files (*.xml);;All Files (*.*)"
+        )
         if not roi_file_name:
             return
         if isinstance(roi_file_name, tuple):
@@ -1193,23 +1182,23 @@ class MainWindow(QMainWindow):
         """
         scan_list = self.ui.tableWidget_surveyTable.get_scan_numbers(range(self.ui.tableWidget_surveyTable.rowCount()))
         # roi_name = str(self.ui.comboBox_viewRawDataMasks.currentText())
-        file_name_out = ''
+        file_name_out = ""
         for i_scan, scan_number in enumerate(scan_list):
             # get pt numbers
             status, pt_number_list = self._myControl.get_pt_numbers(self._current_exp_number, scan_number)
             # stop this loop if unable to get Pt. numbers
             if not status:
-                print ('[DB...BAT] Unable to get list of Pt. number from scan {0} due to {1}.'
-                       ''.format(scan_number, pt_number_list))
+                print("[DB...BAT] Unable to get list of Pt. number from scan {0} due to {1}." "".format(scan_number, pt_number_list))
                 continue
             # plot
             for pt_number in pt_number_list:
                 # ROI is set to None because only the ROI rectangular shall appear on the output. But with
                 # a ROI name, the detector is then masked.  It is not the purpose to examine whether all the
                 # peaks are in ROI
-                file_name = self.load_plot_raw_data(self._current_exp_number, scan_number, pt_number, roi_name=None,
-                                                    save=True, remove_workspace=True)
-                file_name_out += file_name + '\n'
+                file_name = self.load_plot_raw_data(
+                    self._current_exp_number, scan_number, pt_number, roi_name=None, save=True, remove_workspace=True
+                )
+                file_name_out += file_name + "\n"
             # END-FOR
 
             # debug break
@@ -1218,13 +1207,12 @@ class MainWindow(QMainWindow):
         # END-FOR
 
         # write out the file list
-        list_name = os.path.join(self._myControl.get_working_directory(), 'png_exp{0}_list.txt'
-                                                                          ''.format(self._current_exp_number))
-        ofile = open(list_name, 'w')
+        list_name = os.path.join(self._myControl.get_working_directory(), "png_exp{0}_list.txt" "".format(self._current_exp_number))
+        ofile = open(list_name, "w")
         ofile.write(file_name_out)
         ofile.close()
 
-        message = 'convert -delay 10 -loop 0 @{0} {1}.mpeg'.format(list_name, '[Your Name]')
+        message = "convert -delay 10 -loop 0 @{0} {1}.mpeg".format(list_name, "[Your Name]")
         self.pop_one_button_dialog(message)
 
     def do_export_selected_peaks_to_integrate(self):
@@ -1240,21 +1228,21 @@ class MainWindow(QMainWindow):
             scan_number_list.append(tup[0])
         scan_number_list.sort()
 
-        info_str = '{0}'.format(scan_number_list)
-        self._show_message('Selected scans: {0}'.format(info_str))
+        info_str = "{0}".format(scan_number_list)
+        self._show_message("Selected scans: {0}".format(info_str))
 
     def do_export_to_fp(self):
-        """ Export selected reflections to Fullprof single crystal data file for analysis
+        """Export selected reflections to Fullprof single crystal data file for analysis
         :return:
         """
         # get selected lines
         selected_rows = self.ui.tableWidget_mergeScans.get_selected_rows(True)
         if len(selected_rows) == 0:
-            self.pop_one_button_dialog('There isn\'t any peak selected.')
+            self.pop_one_button_dialog("There isn't any peak selected.")
             return
 
         # get the file name
-        fp_name = QFileDialog.getSaveFileName(self, 'Save to Fullprof File')
+        fp_name = QFileDialog.getSaveFileName(self, "Save to Fullprof File")
         if not fp_name:  # return due to cancel
             return
         if isinstance(fp_name, tuple):
@@ -1274,9 +1262,9 @@ class MainWindow(QMainWindow):
         try:
             export_absorption = self.ui.checkBox_exportAbsorptionToFP.isChecked()
 
-            file_content = self._myControl.export_to_fullprof(exp_number, scan_number_list,
-                                                              user_header, export_absorption, fp_name,
-                                                              self.ui.checkBox_fpHighPrecision.isChecked())
+            file_content = self._myControl.export_to_fullprof(
+                exp_number, scan_number_list, user_header, export_absorption, fp_name, self.ui.checkBox_fpHighPrecision.isChecked()
+            )
             self.ui.plainTextEdit_fpContent.setPlainText(file_content)
         except AssertionError as a_err:
             self.pop_one_button_dialog(str(a_err))
@@ -1284,8 +1272,8 @@ class MainWindow(QMainWindow):
             self.pop_one_button_dialog(str(key_err))
         except RuntimeError as run_error:
             error_msg = str(run_error)
-            if error_msg.count('Peak index error') > 0:
-                error_msg = 'You may forget to index peak\n' + error_msg
+            if error_msg.count("Peak index error") > 0:
+                error_msg = "You may forget to index peak\n" + error_msg
             self.pop_one_button_dialog(error_msg)
 
     def do_filter_sort_survey_table(self):
@@ -1297,21 +1285,21 @@ class MainWindow(QMainWindow):
         """
         # Get column name
         if self.ui.radioButton_sortByScan.isChecked():
-            column_name = 'Scan'
+            column_name = "Scan"
         elif self.ui.radioButton_sortByCounts.isChecked():
-            column_name = 'Max Counts'
+            column_name = "Max Counts"
         elif self.ui.radioButton_sortByTemp.isChecked():
-            column_name = 'Sample Temp'
+            column_name = "Sample Temp"
         elif self.ui.radioButton_sortBy2Theta.isChecked():
-            column_name = '2theta'
+            column_name = "2theta"
         else:
-            self.pop_one_button_dialog('No column is selected to sort.')
+            self.pop_one_button_dialog("No column is selected to sort.")
             return
 
         # Get filters
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_filterScanLower,
-                                                        self.ui.lineEdit_filterScanUpper],
-                                                       allow_blank=True)
+        status, ret_obj = gutil.parse_integers_editors(
+            [self.ui.lineEdit_filterScanLower, self.ui.lineEdit_filterScanUpper], allow_blank=True
+        )
 
         # return with error
         if status is False:
@@ -1326,9 +1314,9 @@ class MainWindow(QMainWindow):
         if end_scan_number is None:
             end_scan_number = sys.maxsize
 
-        status, ret_obj = gutil.parse_float_editors([self.ui.lineEdit_filterCountsLower,
-                                                     self.ui.lineEdit_filterCountsUpper],
-                                                    allow_blank=True)
+        status, ret_obj = gutil.parse_float_editors(
+            [self.ui.lineEdit_filterCountsLower, self.ui.lineEdit_filterCountsUpper], allow_blank=True
+        )
         if status is False:
             # return with error message
             self.pop_one_button_dialog(ret_obj)
@@ -1348,9 +1336,7 @@ class MainWindow(QMainWindow):
             sort_order = 0
         else:
             sort_order = 1
-        self.ui.tableWidget_surveyTable.filter_and_sort(start_scan_number, end_scan_number,
-                                                        min_counts, max_counts,
-                                                        column_name, sort_order)
+        self.ui.tableWidget_surveyTable.filter_and_sort(start_scan_number, end_scan_number, min_counts, max_counts, column_name, sort_order)
 
     def do_integrate_single_scan(self):
         """
@@ -1359,28 +1345,27 @@ class MainWindow(QMainWindow):
         :return:
         """
         # parse experiment and scan number
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
-                                                        self.ui.lineEdit_scanIntegratePeak])
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_scanIntegratePeak])
         if not status:
-            self.pop_one_button_dialog('Unable to integrate peak due to %s.' % ret_obj)
+            self.pop_one_button_dialog("Unable to integrate peak due to %s." % ret_obj)
             return
         else:
             exp_number, scan_number = ret_obj
 
         # parse normalization type
         normalization = str(self.ui.comboBox_ptCountType.currentText())
-        if normalization.count('Time') > 0:
-            norm_type = 'time'
-        elif normalization.count('Monitor') > 0:
-            norm_type = 'monitor'
+        if normalization.count("Time") > 0:
+            norm_type = "time"
+        elif normalization.count("Monitor") > 0:
+            norm_type = "monitor"
         else:
-            norm_type = ''
+            norm_type = ""
 
         # parse scale factor
         try:
             intensity_scale_factor = float(self.ui.lineEdit_scaleFactorScan.text())
         except ValueError:
-            intensity_scale_factor = 1.
+            intensity_scale_factor = 1.0
 
         # calculate peak center (weighted)
         status, ret_obj = self._myControl.find_peak(exp_number, scan_number)
@@ -1393,37 +1378,37 @@ class MainWindow(QMainWindow):
 
         # mask workspace
         mask_name = str(self.ui.comboBox_maskNames2.currentText())
-        if mask_name.lower() == 'no mask':
-            mask_name = ''
+        if mask_name.lower() == "no mask":
+            mask_name = ""
 
         # ui.lineEdit_backgroundPts and set default in init_widgets
         bkgd_pt_tuple = gutil.parse_integer_list(str(self.ui.lineEdit_backgroundPts.text()), 2)
 
         # integrate peak
         try:
-            int_peak_dict = self._myControl.integrate_scan_peak(exp_number=exp_number,
-                                                                scan_number=scan_number,
-                                                                peak_centre=this_peak_centre,
-                                                                mask_name=mask_name,
-                                                                normalization=norm_type,
-                                                                scale_factor=intensity_scale_factor,
-                                                                background_pt_tuple=bkgd_pt_tuple)
+            int_peak_dict = self._myControl.integrate_scan_peak(
+                exp_number=exp_number,
+                scan_number=scan_number,
+                peak_centre=this_peak_centre,
+                mask_name=mask_name,
+                normalization=norm_type,
+                scale_factor=intensity_scale_factor,
+                background_pt_tuple=bkgd_pt_tuple,
+            )
         except RuntimeError as run_error:
-            self.pop_one_button_dialog('Unable to integrate peak for scan {0} due to {1}.'
-                                       ''.format(scan_number, run_error))
+            self.pop_one_button_dialog("Unable to integrate peak for scan {0} due to {1}." "".format(scan_number, run_error))
             return
 
         # plot calculated motor position (or Pt.) - integrated intensity per Pts.
-        motor_pos_vec = int_peak_dict['motor positions']
-        pt_intensity_vec = int_peak_dict['pt intensities']
+        motor_pos_vec = int_peak_dict["motor positions"]
+        pt_intensity_vec = int_peak_dict["pt intensities"]
         motor_std = motor_pos_vec.std()
         if motor_std > 0.005:
             self.ui.graphicsView_integratedPeakView.plot_raw_data(motor_pos_vec, pt_intensity_vec)
         else:
             # motor position fixed
             # KEEP-IN-MIND:  Make this an option from
-            self.ui.graphicsView_integratedPeakView.plot_raw_data(numpy.arange(1, len(pt_intensity_vec)+1),
-                                                                  pt_intensity_vec)
+            self.ui.graphicsView_integratedPeakView.plot_raw_data(numpy.arange(1, len(pt_intensity_vec) + 1), pt_intensity_vec)
 
         if self._mySinglePeakIntegrationDialog is None:
             self._mySinglePeakIntegrationDialog = message_dialog.MessageDialog(self)
@@ -1431,36 +1416,37 @@ class MainWindow(QMainWindow):
 
         # set calculated values
         try:
-            self.ui.lineEdit_rawSinglePeakIntensity.setText('{0:.7f}'.format(int_peak_dict['simple intensity']))
-            self.ui.lineEdit_errorIntensity1.setText('{0:.7f}'.format(int_peak_dict['simple error']))
-            self.ui.lineEdit_avgBackground.setText('{0:.7f}'.format(int_peak_dict['simple background']))
-            self.ui.lineEdit_intensity2.setText('{0:.7f}'.format(int_peak_dict['intensity 2']))
-            if int_peak_dict['error 2'] is None:
-                self.ui.lineEdit_errorIntensity2.setText('inf')
+            self.ui.lineEdit_rawSinglePeakIntensity.setText("{0:.7f}".format(int_peak_dict["simple intensity"]))
+            self.ui.lineEdit_errorIntensity1.setText("{0:.7f}".format(int_peak_dict["simple error"]))
+            self.ui.lineEdit_avgBackground.setText("{0:.7f}".format(int_peak_dict["simple background"]))
+            self.ui.lineEdit_intensity2.setText("{0:.7f}".format(int_peak_dict["intensity 2"]))
+            if int_peak_dict["error 2"] is None:
+                self.ui.lineEdit_errorIntensity2.setText("inf")
             else:
-                self.ui.lineEdit_errorIntensity2.setText('{0:.7f}'.format(int_peak_dict['error 2']))
-            self.ui.lineEdit_ptRange.setText('{0}'.format(int_peak_dict['pt_range']))
-            self.ui.lineEdit_gaussianPeakIntensity.setText('{0:.7f}'.format(int_peak_dict['gauss intensity']))
-            if int_peak_dict['gauss error'] is None:
-                self.ui.lineEdit_errorIntensity3.setText('inf')
+                self.ui.lineEdit_errorIntensity2.setText("{0:.7f}".format(int_peak_dict["error 2"]))
+            self.ui.lineEdit_ptRange.setText("{0}".format(int_peak_dict["pt_range"]))
+            self.ui.lineEdit_gaussianPeakIntensity.setText("{0:.7f}".format(int_peak_dict["gauss intensity"]))
+            if int_peak_dict["gauss error"] is None:
+                self.ui.lineEdit_errorIntensity3.setText("inf")
             else:
-                self.ui.lineEdit_errorIntensity3.setText('{0:.7f}'.format(int_peak_dict['gauss error']))
-            self.ui.tableWidget_covariance.set_matrix(int_peak_dict['covariance matrix'])
+                self.ui.lineEdit_errorIntensity3.setText("{0:.7f}".format(int_peak_dict["gauss error"]))
+            self.ui.tableWidget_covariance.set_matrix(int_peak_dict["covariance matrix"])
 
-            fit_param_dict = int_peak_dict['gauss parameters']
+            fit_param_dict = int_peak_dict["gauss parameters"]
             # {'A': 1208.4097237325959, 'x0': 32.175524426773507, 'B': 23.296505385975976, 's': 0.47196665622701633}
-            self.ui.lineEdit_peakBackground.setText('{0:.4f}'.format(fit_param_dict['B']))
-            self.ui.lineEdit_gaussA.setText('{0:.4f}'.format(fit_param_dict['A']))
-            self.ui.lineEdit_gaussSigma.setText('{0:.4f}'.format(fit_param_dict['s']))
-            self.ui.lineEdit_gaussB.setText('{0:.4f}'.format(fit_param_dict['B']))
+            self.ui.lineEdit_peakBackground.setText("{0:.4f}".format(fit_param_dict["B"]))
+            self.ui.lineEdit_gaussA.setText("{0:.4f}".format(fit_param_dict["A"]))
+            self.ui.lineEdit_gaussSigma.setText("{0:.4f}".format(fit_param_dict["s"]))
+            self.ui.lineEdit_gaussB.setText("{0:.4f}".format(fit_param_dict["B"]))
 
             # plot fitted Gaussian
-            fit_gauss_dict = int_peak_dict['gauss parameters']
+            fit_gauss_dict = int_peak_dict["gauss parameters"]
         except KeyError as key_err:
-            raise RuntimeError('Peak integration result dictionary has keys {0}. Error is caused by {1}.'
-                               ''.format(int_peak_dict.keys(), key_err))
+            raise RuntimeError(
+                "Peak integration result dictionary has keys {0}. Error is caused by {1}." "".format(int_peak_dict.keys(), key_err)
+            )
         except ValueError as value_err:
-            self._show_message('[ERROR] Unable to fit by Gaussian due to {0}.'.format(value_err))
+            self._show_message("[ERROR] Unable to fit by Gaussian due to {0}.".format(value_err))
         else:
             self.plot_model_data(motor_pos_vec, fit_gauss_dict)
 
@@ -1471,23 +1457,22 @@ class MainWindow(QMainWindow):
         :return:
         """
         # check inputs
-        assert isinstance(vec_x, numpy.ndarray), 'vec X {0} must be a numpy.ndarray but not a {1}.' \
-                                                 ''.format(vec_x, type(vec_x))
-        assert isinstance(params, dict), 'Model parameters {0} must be given by a dictionary but not by a {1}.' \
-                                         ''.format(params, type(params))
+        assert isinstance(vec_x, numpy.ndarray), "vec X {0} must be a numpy.ndarray but not a {1}." "".format(vec_x, type(vec_x))
+        assert isinstance(params, dict), "Model parameters {0} must be given by a dictionary but not by a {1}." "".format(
+            params, type(params)
+        )
 
         # get parameters
-        x0 = params['x0']
-        gauss_sigma = params['s']
-        gauss_a = params['A']
-        background = params['B']
-        info_str = 'Gaussian fit'
+        x0 = params["x0"]
+        gauss_sigma = params["s"]
+        gauss_a = params["A"]
+        background = params["B"]
+        info_str = "Gaussian fit"
 
         # plot the data
         # make modelX and modelY for more fine grids
         model_x = peak_integration_utility.get_finer_grid(vec_x, 10)
-        model_y = peak_integration_utility.gaussian_linear_background(model_x, x0, gauss_sigma,
-                                                                      gauss_a, background)
+        model_y = peak_integration_utility.gaussian_linear_background(model_x, x0, gauss_sigma, gauss_a, background)
 
         # plot the model
         self.ui.graphicsView_integratedPeakView.plot_model(model_x, model_y, title=info_str)
@@ -1519,7 +1504,7 @@ class MainWindow(QMainWindow):
         # get rows to merge
         row_number_list = self.ui.tableWidget_mergeScans.get_selected_rows(True)
         if len(row_number_list) == 0:
-            self.pop_one_button_dialog('No scan is selected for scan')
+            self.pop_one_button_dialog("No scan is selected for scan")
             return
 
         # get experiment number
@@ -1527,25 +1512,25 @@ class MainWindow(QMainWindow):
         if status:
             exp_number = ret_obj
         else:
-            self.pop_one_button_dialog('Unable to get valid experiment number due to %s.' % ret_obj)
+            self.pop_one_button_dialog("Unable to get valid experiment number due to %s." % ret_obj)
             return
 
         # mask workspace
         selected_mask = str(self.ui.comboBox_maskNames1.currentText())
-        if selected_mask.lower().startswith('no mask'):
-            selected_mask = ''
+        if selected_mask.lower().startswith("no mask"):
+            selected_mask = ""
             mask_det = False
         else:
             mask_det = True
 
         # normalization
         norm_str = str(self.ui.comboBox_mergePeakNormType.currentText())
-        if norm_str.lower().count('time') > 0:
-            norm_type = 'time'
-        elif norm_str.lower().count('monitor') > 0:
-            norm_type = 'monitor'
+        if norm_str.lower().count("time") > 0:
+            norm_type = "time"
+        elif norm_str.lower().count("monitor") > 0:
+            norm_type = "monitor"
         else:
-            norm_type = ''
+            norm_type = ""
 
         # background Pt.
         # status, num_bg_pt = gutil.parse_integers_editors(self.ui.lineEdit_numPt4Background, allow_blank=False)
@@ -1562,11 +1547,9 @@ class MainWindow(QMainWindow):
 
             # set intensity to zero and error message if fails to get Pt.
             if status is False:
-                error_msg = 'Unable to get Pt. of experiment %d scan %d due to %s.' % (exp_number, scan_number,
-                                                                                       str(pt_number_list))
+                error_msg = "Unable to get Pt. of experiment %d scan %d due to %s." % (exp_number, scan_number, str(pt_number_list))
                 self.controller.set_zero_peak_intensity(exp_number, scan_number)
-                self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, scan_number, 0., False,
-                                                                  integrate_method='')
+                self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, scan_number, 0.0, False, integrate_method="")
                 self.ui.tableWidget_mergeScans.set_status(scan_number, error_msg)
                 continue
 
@@ -1575,19 +1558,19 @@ class MainWindow(QMainWindow):
 
             # add to list
             scan_number_list.append((scan_number, pt_number_list, merged))
-            self.ui.tableWidget_mergeScans.set_status(row_number, 'Waiting')
+            self.ui.tableWidget_mergeScans.set_status(row_number, "Waiting")
         # END-FOR
 
         # set the progress bar
         self.ui.progressBar_mergeScans.setRange(0, len(scan_number_list))
         self.ui.progressBar_mergeScans.setValue(0)
         self.ui.progressBar_mergeScans.setTextVisible(True)
-        self.ui.progressBar_mergeScans.setStatusTip('Hello')
+        self.ui.progressBar_mergeScans.setStatusTip("Hello")
 
         # process background setup
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_numPt4BackgroundLeft,
-                                                        self.ui.lineEdit_numPt4BackgroundRight],
-                                                       allow_blank=False)
+        status, ret_obj = gutil.parse_integers_editors(
+            [self.ui.lineEdit_numPt4BackgroundLeft, self.ui.lineEdit_numPt4BackgroundRight], allow_blank=False
+        )
         if not status:
             error_msg = str(ret_obj)
             self.pop_one_button_dialog(error_msg)
@@ -1599,34 +1582,39 @@ class MainWindow(QMainWindow):
         scale_factor = float(self.ui.lineEdit_scaleFactor.text())
 
         # initialize a thread and start
-        self._myIntegratePeaksThread = \
-            thread_pool.IntegratePeaksThread(self, exp_number, scan_number_list,
-                                             mask_det, selected_mask, norm_type,
-                                             num_pt_bg_left, num_pt_bg_right,
-                                             scale_factor=scale_factor)
+        self._myIntegratePeaksThread = thread_pool.IntegratePeaksThread(
+            self,
+            exp_number,
+            scan_number_list,
+            mask_det,
+            selected_mask,
+            norm_type,
+            num_pt_bg_left,
+            num_pt_bg_right,
+            scale_factor=scale_factor,
+        )
         self._myIntegratePeaksThread.start()
 
     def do_index_ub_peaks(self):
-        """ Index the peaks in the UB matrix peak table
+        """Index the peaks in the UB matrix peak table
         :return:
         """
         # Get UB matrix
         ub_matrix = self.ui.tableWidget_ubMatrix.get_matrix()
-        self._show_message('[Info] Get UB matrix from table: {0}'.format(ub_matrix))
+        self._show_message("[Info] Get UB matrix from table: {0}".format(ub_matrix))
 
         # Index all peaks
         num_peaks = self.ui.tableWidget_peaksCalUB.rowCount()
-        err_msg = ''
+        err_msg = ""
         for i_peak in range(num_peaks):
             scan_no = self.ui.tableWidget_peaksCalUB.get_exp_info(i_peak)[0]
             status, ret_obj = self._myControl.index_peak(ub_matrix, scan_number=scan_no)
             if status is True:
                 hkl_value = ret_obj[0]
                 hkl_error = ret_obj[1]
-                self.ui.tableWidget_peaksCalUB.set_hkl(i_peak, hkl_value, is_spice_hkl=False,
-                                                       error=hkl_error)
+                self.ui.tableWidget_peaksCalUB.set_hkl(i_peak, hkl_value, is_spice_hkl=False, error=hkl_error)
             else:
-                err_msg += ret_obj + '\n'
+                err_msg += ret_obj + "\n"
         # END-FOR
 
         # error message
@@ -1641,7 +1629,7 @@ class MainWindow(QMainWindow):
         # self.ui.pushButton_undoSetToInteger.setEnabled(True)
 
     def do_load_scan_info(self):
-        """ Load SIICE's scan file
+        """Load SIICE's scan file
         :return:
         """
         # Get scan number
@@ -1650,7 +1638,7 @@ class MainWindow(QMainWindow):
             scan_no = ret_obj[0]
         else:
             err_msg = ret_obj
-            self.pop_one_button_dialog('Unable to get scan number in raw data tab due to %s.' % err_msg)
+            self.pop_one_button_dialog("Unable to get scan number in raw data tab due to %s." % err_msg)
             return
 
         status, err_msg = self._myControl.load_spice_scan_file(exp_no=None, scan_no=scan_no)
@@ -1658,16 +1646,15 @@ class MainWindow(QMainWindow):
             self.pop_one_button_dialog(err_msg)
 
     def do_load_survey(self):
-        """ Load csv file containing experiment-scan survey's result.
+        """Load csv file containing experiment-scan survey's result.
         :return:
         """
         # check validity
         num_rows = int(self.ui.lineEdit_numSurveyOutput.text())
 
         # get the csv file
-        file_filter = 'CSV Files (*.csv);;All Files (*)'
-        csv_file_name = QFileDialog.getOpenFileName(self, 'Open Exp-Scan Survey File', self._homeDir,
-                                                    file_filter)
+        file_filter = "CSV Files (*.csv);;All Files (*)"
+        csv_file_name = QFileDialog.getOpenFileName(self, "Open Exp-Scan Survey File", self._homeDir, file_filter)
         if not csv_file_name:  # return if file selection is cancelled
             return
         if isinstance(csv_file_name, tuple):
@@ -1676,7 +1663,7 @@ class MainWindow(QMainWindow):
         # call controller to load
         survey_tuple = self._myControl.load_scan_survey_file(csv_file_name)
         scan_sum_list = survey_tuple[1]
-        assert isinstance(scan_sum_list, list), 'Returned value from load scan survey file must be a dictionary.'
+        assert isinstance(scan_sum_list, list), "Returned value from load scan survey file must be a dictionary."
 
         # set the table
         self.ui.tableWidget_surveyTable.set_survey_result(scan_sum_list)
@@ -1684,18 +1671,15 @@ class MainWindow(QMainWindow):
         self.ui.tableWidget_surveyTable.show_reflections(num_rows)
 
     def do_plot_pt_raw(self):
-        """ Plot the Pt.
-        """
+        """Plot the Pt."""
         # Get measurement pt and the file number
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
-                                                        self.ui.lineEdit_run,
-                                                        self.ui.lineEdit_rawDataPtNo])
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_run, self.ui.lineEdit_rawDataPtNo])
         if status is True:
             exp_no = ret_obj[0]
             scan_no = ret_obj[1]
             pt_no = ret_obj[2]
         else:
-            self.pop_one_button_dialog(f'Unable to plot detector counts as a 2D image due to {ret_obj}')
+            self.pop_one_button_dialog(f"Unable to plot detector counts as a 2D image due to {ret_obj}")
             return
 
         if self.ui.checkBox_autoMask.isChecked():
@@ -1711,12 +1695,9 @@ class MainWindow(QMainWindow):
         self.load_plot_raw_data(exp_no, scan_no, pt_no, roi_name=roi_name)
 
     def do_plot_prev_pt_raw(self):
-        """ Plot the Pt.
-        """
+        """Plot the Pt."""
         # Get measurement pt and the file number
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
-                                                        self.ui.lineEdit_run,
-                                                        self.ui.lineEdit_rawDataPtNo])
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_run, self.ui.lineEdit_rawDataPtNo])
         if status is True:
             pt_no = ret_obj[2]
         else:
@@ -1726,16 +1707,16 @@ class MainWindow(QMainWindow):
         # Previous one
         pt_no -= 1
         if pt_no <= 0:
-            self.pop_one_button_dialog('Pt. = 1 is the first one.')
+            self.pop_one_button_dialog("Pt. = 1 is the first one.")
             return
         else:
-            self.ui.lineEdit_rawDataPtNo.setText('%d' % pt_no)
+            self.ui.lineEdit_rawDataPtNo.setText("%d" % pt_no)
 
         # Plot
         self.do_plot_pt_raw()
 
     def do_plot_prev_scan(self):
-        """ Plot the previous scan while keeping the same Pt.
+        """Plot the previous scan while keeping the same Pt.
         :return:
         """
         # get current exp number, scan number and pt number
@@ -1750,7 +1731,7 @@ class MainWindow(QMainWindow):
         # get next scan
         scan_number -= 1
         if scan_number < 0:
-            self.pop_one_button_dialog('Scan number cannot be negative!')
+            self.pop_one_button_dialog("Scan number cannot be negative!")
             return
 
         # update line edits
@@ -1760,12 +1741,9 @@ class MainWindow(QMainWindow):
         self.do_plot_pt_raw()
 
     def do_plot_next_pt_raw(self):
-        """ Plot the Pt.
-        """
+        """Plot the Pt."""
         # Get measurement pt and the file number
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
-                                                        self.ui.lineEdit_run,
-                                                        self.ui.lineEdit_rawDataPtNo])
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_run, self.ui.lineEdit_rawDataPtNo])
         if status:
             exp_no = ret_obj[0]
             scan_no = ret_obj[1]
@@ -1780,13 +1758,12 @@ class MainWindow(QMainWindow):
         status, last_pt_no = self._myControl.get_pt_numbers(exp_no, scan_no)
         if status is False:
             error_message = last_pt_no
-            self.pop_one_button_dialog('Unable to access Spice table for scan %d. Reason" %s.' % (
-                scan_no, error_message))
+            self.pop_one_button_dialog('Unable to access Spice table for scan %d. Reason" %s.' % (scan_no, error_message))
         if pt_no > last_pt_no:
-            self.pop_one_button_dialog('Pt. = %d is the last one of scan %d.' % (pt_no, scan_no))
+            self.pop_one_button_dialog("Pt. = %d is the last one of scan %d." % (pt_no, scan_no))
             return
         else:
-            self.ui.lineEdit_rawDataPtNo.setText('%d' % pt_no)
+            self.ui.lineEdit_rawDataPtNo.setText("%d" % pt_no)
 
         # Plot
         self.do_plot_pt_raw()
@@ -1794,7 +1771,7 @@ class MainWindow(QMainWindow):
         # self.load_plot_raw_data(exp_no, scan_no, pt_no)
 
     def do_plot_next_scan(self):
-        """ Plot the next scan while keeping the same Pt.
+        """Plot the next scan while keeping the same Pt.
         :return:
         """
         # get current exp number, scan number and pt number
@@ -1835,13 +1812,13 @@ class MainWindow(QMainWindow):
         elif self.ui.radioButton_useLast3.isChecked():
             project_file_name = str(self.ui.label_last3Path.text())
         else:
-            raise RuntimeError('None of the saved project is selected.')
+            raise RuntimeError("None of the saved project is selected.")
 
         # load project
         self.load_project(project_file_name)
 
     def do_mask_pt_2d(self):
-        """ Save current in-edit ROI Mask a Pt and re-plot with current selected ROI or others
+        """Save current in-edit ROI Mask a Pt and re-plot with current selected ROI or others
         :return:
         """
         # # get the experiment and scan value
@@ -1852,7 +1829,7 @@ class MainWindow(QMainWindow):
         # scan_number = par_val_list[1]
 
         # get the user specified name from ...
-        roi_name, ok = QInputDialog.getText(self, 'Input Mask Name', 'Enter mask name:')
+        roi_name, ok = QInputDialog.getText(self, "Input Mask Name", "Enter mask name:")
 
         # return if cancelled
         if not ok:
@@ -1860,11 +1837,11 @@ class MainWindow(QMainWindow):
         roi_name = str(roi_name)
 
         # check whether this ROI name is used or not. If it is, warn user if the given ROI is used already
-        current_roi_names = [str(self.ui.comboBox_maskNames1.itemText(i))
-                             for i in range(self.ui.comboBox_maskNames1.count())]
+        current_roi_names = [str(self.ui.comboBox_maskNames1.itemText(i)) for i in range(self.ui.comboBox_maskNames1.count())]
         if roi_name in current_roi_names:
-            self.pop_one_button_dialog('[Warning] ROI name {} is used before.  The previous ROI '
-                                       'will be overwritten by the new defined.'.format(roi_name))
+            self.pop_one_button_dialog(
+                "[Warning] ROI name {} is used before.  The previous ROI " "will be overwritten by the new defined.".format(roi_name)
+            )
 
         # get current ROI
         ll_corner, ur_corner = self.ui.graphicsView_detector2dPlot.get_roi()
@@ -1878,13 +1855,13 @@ class MainWindow(QMainWindow):
         self.ui.comboBox_maskNames2.addItem(roi_name)
         self.ui.comboBox_maskNamesSurvey.addItem(roi_name)
         self.ui.comboBox_viewRawDataMasks.addItem(roi_name)
-        self.ui.comboBox_viewRawDataMasks.setCurrentIndex(self.ui.comboBox_viewRawDataMasks.count()-1)
+        self.ui.comboBox_viewRawDataMasks.setCurrentIndex(self.ui.comboBox_viewRawDataMasks.count() - 1)
         self._roiComboBoxMutex = False
 
         # get experiment, scan
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_run,
-                                                        self.ui.lineEdit_rawDataPtNo],
-                                                       allow_blank=False)
+        status, ret_obj = gutil.parse_integers_editors(
+            [self.ui.lineEdit_exp, self.ui.lineEdit_run, self.ui.lineEdit_rawDataPtNo], allow_blank=False
+        )
         if status:
             exp, scan, pt = ret_obj
         else:
@@ -1894,9 +1871,9 @@ class MainWindow(QMainWindow):
         # previously saved ROI
         if self._myControl.has_roi_generated(roi_name) is False:
             roi_start, roi_end = self._myControl.get_region_of_interest(roi_name)
-            status, mask_ws_name = self._myControl.generate_mask_workspace(exp, scan,
-                                                                           roi_start=roi_start, roi_end=roi_end,
-                                                                           mask_tag=roi_name)
+            status, mask_ws_name = self._myControl.generate_mask_workspace(
+                exp, scan, roi_start=roi_start, roi_end=roi_end, mask_tag=roi_name
+            )
             if status:
                 self._myControl.set_roi_workspace(roi_name, mask_ws_name)
         # END-IF
@@ -1915,7 +1892,7 @@ class MainWindow(QMainWindow):
         # find the selected scans
         selected_rows = self.ui.tableWidget_mergeScans.get_selected_rows(True)
         if len(selected_rows) < 2:
-            self.pop_one_button_dialog('Merging multiple scans requires more than 1 scan to be selected.')
+            self.pop_one_button_dialog("Merging multiple scans requires more than 1 scan to be selected.")
             return
 
         # find out the merged workspace is in Q or hkl
@@ -1932,14 +1909,15 @@ class MainWindow(QMainWindow):
             if convert_to_hkl:
                 status, ret_obj = self._myControl.get_pt_numbers(exp_number, scan_number)
                 if not status:
-                    raise RuntimeError('It is not possible to fail to get Pt number list at this stage.'
-                                       'Error is due to %s.' % str(ret_obj))
+                    raise RuntimeError(
+                        "It is not possible to fail to get Pt number list at this stage." "Error is due to %s." % str(ret_obj)
+                    )
                 pt_list = ret_obj
                 md_ws_name = hb3a_util.get_merged_hkl_md_name(self._instrument, exp_number, scan_number, pt_list)
             md_ws_list.append(md_ws_name)
             # get peak center in 3-tuple
             peak_center = self._myControl.get_peak_info(exp_number, scan_number).get_peak_centre()
-            assert peak_center is not None, 'Exp/Scan/Pt %s does not exist in PeakInfo dictionary.'
+            assert peak_center is not None, "Exp/Scan/Pt %s does not exist in PeakInfo dictionary."
             peak_center_list.append(peak_center)
         # END-FOR
 
@@ -1953,7 +1931,7 @@ class MainWindow(QMainWindow):
         self.pop_one_button_dialog(message)
 
     def do_merge_scans(self):
-        """ Merge each selected scans in the tab-merge-scans
+        """Merge each selected scans in the tab-merge-scans
         :return:
         """
         # Get UB matrix and set to control
@@ -1961,13 +1939,13 @@ class MainWindow(QMainWindow):
         self._myControl.set_ub_matrix(exp_number=None, ub_matrix=ub_matrix)
 
         # Warning
-        self.pop_one_button_dialog('Merging scans can take long time. Please be patient!')
+        self.pop_one_button_dialog("Merging scans can take long time. Please be patient!")
 
         # Process
         row_number_list = self.ui.tableWidget_mergeScans.get_selected_rows(True)
         exp_number = int(str(self.ui.lineEdit_exp.text()))
 
-        sum_error_msg = ''
+        sum_error_msg = ""
 
         for row_number in row_number_list:
             # get row number
@@ -1979,24 +1957,24 @@ class MainWindow(QMainWindow):
             status, pt_list = self._myControl.get_pt_numbers(exp_number, scan_number)
             if status is False:
                 # skip this row due to error
-                sum_error_msg += '%s\n' % str(pt_list)
+                sum_error_msg += "%s\n" % str(pt_list)
                 continue
 
-            self.ui.tableWidget_mergeScans.set_status(row_number, 'In Processing')
-            status, ret_tup = self._myControl.merge_pts_in_scan(exp_no=exp_number, scan_no=scan_number,
-                                                                pt_num_list=[], rewrite=False,
-                                                                preprocessed_dir=self._myControl.pre_processed_dir)
+            self.ui.tableWidget_mergeScans.set_status(row_number, "In Processing")
+            status, ret_tup = self._myControl.merge_pts_in_scan(
+                exp_no=exp_number, scan_no=scan_number, pt_num_list=[], rewrite=False, preprocessed_dir=self._myControl.pre_processed_dir
+            )
             # find peaks too
             status, ret_obj = self._myControl.find_peak(exp_number, scan_number)
 
             # process output
             if status:
                 assert len(ret_tup) == 2
-                merge_status = 'Merged'
+                merge_status = "Merged"
                 merged_name = ret_tup[0]
             else:
-                merge_status = 'Failed. Reason: %s' % ret_tup
-                merged_name = 'x'
+                merge_status = "Failed. Reason: %s" % ret_tup
+                merged_name = "x"
 
             # update table
             self.ui.tableWidget_mergeScans.set_status(row_number, merge_status)
@@ -2016,7 +1994,7 @@ class MainWindow(QMainWindow):
         # get the selected scans
         scan_run_list = self.ui.tableWidget_surveyTable.get_selected_run_surveyed(required_size=None)
         if len(scan_run_list) == 0:
-            self.pop_one_button_dialog('There is no run that is selected.')
+            self.pop_one_button_dialog("There is no run that is selected.")
 
         # start to add scan/run to table
         # Set table
@@ -2027,7 +2005,7 @@ class MainWindow(QMainWindow):
         self.ui.tableWidget_mergeScans.append_scans(scans=scan_list, allow_duplicate_scans=False)
 
         # switch tab
-        self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage['Scans Processing'])
+        self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage["Scans Processing"])
 
     def do_refine_ub_indexed_peaks(self):
         """
@@ -2087,59 +2065,61 @@ class MainWindow(QMainWindow):
         :param project_file_name:
         :return:
         """
-        assert isinstance(project_file_name, str), 'Project file name %s must be a string but not %s.' \
-                                                   '' % (str(project_file_name), type(project_file_name))
+        assert isinstance(project_file_name, str), "Project file name %s must be a string but not %s." "" % (
+            str(project_file_name),
+            type(project_file_name),
+        )
         assert os.path.exists(project_file_name), 'Project file "%s" cannot be found.' % project_file_name
 
         # load project
         ui_dict, err_msg = self._myControl.load_project(project_file_name)
 
         # get experiment number and IPTS number
-        exp_number = int(ui_dict['exp number'])
+        exp_number = int(ui_dict["exp number"])
         self.ui.lineEdit_exp.setText(str(exp_number))
-        if 'ipts' in ui_dict and ui_dict['ipts'] is not None:
-            self.ui.lineEdit_iptsNumber.setText(str(ui_dict['ipts']))
+        if "ipts" in ui_dict and ui_dict["ipts"] is not None:
+            self.ui.lineEdit_iptsNumber.setText(str(ui_dict["ipts"]))
 
         # set the UI parameters to GUI
         try:
-            self.ui.lineEdit_localSpiceDir.setText(ui_dict['local spice dir'])
-            self.ui.lineEdit_workDir.setText(ui_dict['work dir'])
-            self.ui.lineEdit_surveyStartPt.setText(ui_dict['survey start'])
-            self.ui.lineEdit_surveyEndPt.setText(ui_dict['survey stop'])
+            self.ui.lineEdit_localSpiceDir.setText(ui_dict["local spice dir"])
+            self.ui.lineEdit_workDir.setText(ui_dict["work dir"])
+            self.ui.lineEdit_surveyStartPt.setText(ui_dict["survey start"])
+            self.ui.lineEdit_surveyEndPt.setText(ui_dict["survey stop"])
 
             # now try to call some actions
             self.do_apply_setup()
             self.do_set_experiment()
 
         except KeyError:
-            self._show_message('[Error] Some field cannot be found from project file {0}'.format(project_file_name))
+            self._show_message("[Error] Some field cannot be found from project file {0}".format(project_file_name))
 
         # set experiment configurations
         # set sample distance
-        if 'det_sample_distance' in ui_dict and ui_dict['det_sample_distance'] is not None:
-            det_sample_distance = float(ui_dict['det_sample_distance'])
+        if "det_sample_distance" in ui_dict and ui_dict["det_sample_distance"] is not None:
+            det_sample_distance = float(ui_dict["det_sample_distance"])
             self.ui.lineEdit_infoDetSampleDistance.setText(str(det_sample_distance))
             self._myControl.set_default_detector_sample_distance(det_sample_distance)
 
         # set user-specified wave length
-        if 'wave_length' in ui_dict and ui_dict['wave_length'] is not None:
-            wave_length = float(ui_dict['wave_length'])
+        if "wave_length" in ui_dict and ui_dict["wave_length"] is not None:
+            wave_length = float(ui_dict["wave_length"])
             self.ui.lineEdit_infoWavelength.setText(str(wave_length))
             self._myControl.set_user_wave_length(exp_number, wave_length)
 
-        if 'det_center' in ui_dict and ui_dict['det_center'] is not None:
-            det_center_str = ui_dict['det_center'].strip()
-            terms = det_center_str.split(',')
+        if "det_center" in ui_dict and ui_dict["det_center"] is not None:
+            det_center_str = ui_dict["det_center"].strip()
+            terms = det_center_str.split(",")
             center_row = int(terms[0].strip())
             center_col = int(terms[1].strip())
-            self.ui.lineEdit_infoDetCenter.setText('{0}, {1}'.format(center_row, center_col))
+            self.ui.lineEdit_infoDetCenter.setText("{0}, {1}".format(center_row, center_col))
             self._myControl.set_detector_center(exp_number, center_row, center_col)
 
         # pop out a dialog to notify the completion
         if err_msg is not None:
-            self.pop_one_button_dialog('Encountered these errors from loading:\n{0}'.format(err_msg))
+            self.pop_one_button_dialog("Encountered these errors from loading:\n{0}".format(err_msg))
 
-        message = 'Project from file {0} is loaded.'.format(project_file_name)
+        message = "Project from file {0} is loaded.".format(project_file_name)
         self.pop_one_button_dialog(message)
 
     def process_single_pt_scan_intensity(self, scan_integrate_info_dict):
@@ -2149,9 +2129,9 @@ class MainWindow(QMainWindow):
         :return:
         """
         # check inputs
-        assert isinstance(scan_integrate_info_dict, dict), 'Input scan-pt pairs {0} must be in a dict but not a {1}' \
-                                                           ''.format(scan_integrate_info_dict,
-                                                                     type(scan_integrate_info_dict))
+        assert isinstance(scan_integrate_info_dict, dict), "Input scan-pt pairs {0} must be in a dict but not a {1}" "".format(
+            scan_integrate_info_dict, type(scan_integrate_info_dict)
+        )
 
         # get intensities
         for scan_number in scan_integrate_info_dict:
@@ -2174,7 +2154,7 @@ class MainWindow(QMainWindow):
         """
         # check signal for hand shaking
         if val != 1000:
-            raise RuntimeError('Signal value %s is not an authorized signal value (1000).' % str(val))
+            raise RuntimeError("Signal value %s is not an authorized signal value (1000)." % str(val))
 
         # it is supposed to get the information back from the window
         unit_cell_type = self._refineConfigWindow.get_unit_cell_type()
@@ -2193,7 +2173,7 @@ class MainWindow(QMainWindow):
             self._show_message('UB matrix comes from tab "UB Matrix".')
             ub_matrix = self.ui.tableWidget_ubInUse.get_matrix_str()
         else:
-            self.pop_one_button_dialog('UB source tab %s is not supported.' % str(ub_src_tab))
+            self.pop_one_button_dialog("UB source tab %s is not supported." % str(ub_src_tab))
             return
 
         # refine UB matrix by constraint on lattice parameters
@@ -2219,23 +2199,19 @@ class MainWindow(QMainWindow):
 
         # launch the dialog to get min D and max D
         if (0 < min_d < max_d) is False:
-            self.pop_one_button_dialog('Range of d is not correct! FYI, min D = %.5f, max D = %.5f.'
-                                       '' % (min_d, max_d))
+            self.pop_one_button_dialog("Range of d is not correct! FYI, min D = %.5f, max D = %.5f." "" % (min_d, max_d))
             return
 
         # get PeakInfo list and check
         peak_info_list = self._build_peak_info_list(zero_hkl=True)
         if peak_info_list is None:
             return
-        assert isinstance(peak_info_list, list), \
-            'PeakInfo list must be a list but not %s.' % str(type(peak_info_list))
-        assert len(peak_info_list) >= 3, \
-            'PeakInfo must be larger or equal to 3 (.now given %d) to refine UB matrix' % len(peak_info_list)
+        assert isinstance(peak_info_list, list), "PeakInfo list must be a list but not %s." % str(type(peak_info_list))
+        assert len(peak_info_list) >= 3, "PeakInfo must be larger or equal to 3 (.now given %d) to refine UB matrix" % len(peak_info_list)
 
         # friendly suggestion
         if len(peak_info_list) <= 9:
-            self.pop_one_button_dialog('It is recommended to use at least 9 reflections'
-                                       'to refine UB matrix without prior knowledge.')
+            self.pop_one_button_dialog("It is recommended to use at least 9 reflections" "to refine UB matrix without prior knowledge.")
 
         # refine
         try:
@@ -2251,7 +2227,7 @@ class MainWindow(QMainWindow):
         self.do_clear_all_peaks_index_ub()
 
     def do_refresh_merged_scans_table(self):
-        """ Find the merged
+        """Find the merged
         :return:
         """
         # find out the merged runs
@@ -2269,7 +2245,7 @@ class MainWindow(QMainWindow):
 
             exp_number = scan_info_tup[0]
             pt_number_list = scan_info_tup[2]
-            ws_name = hb3a_util.get_merged_md_name('HB3A', exp_number, scan_number, pt_number_list)
+            ws_name = hb3a_util.get_merged_md_name("HB3A", exp_number, scan_number, pt_number_list)
             self.ui.tableWidget_mergeScans.add_new_merged_data(exp_number, scan_number, ws_name)
 
     def do_reset_ub_peaks_hkl(self):
@@ -2304,9 +2280,8 @@ class MainWindow(QMainWindow):
         :return:
         """
         # Get file name
-        file_filter = 'CSV Files (*.csv);;All Files (*)'
-        out_file_name = QFileDialog.getSaveFileName(self, 'Save scan survey result',
-                                                    self._homeDir, file_filter)
+        file_filter = "CSV Files (*.csv);;All Files (*)"
+        out_file_name = QFileDialog.getSaveFileName(self, "Save scan survey result", self._homeDir, file_filter)
         if isinstance(out_file_name, tuple):
             out_file_name = out_file_name[0]
 
@@ -2314,13 +2289,12 @@ class MainWindow(QMainWindow):
         self._myControl.save_scan_survey(out_file_name)
 
     def do_save_ub(self):
-        """ Save the in-use Matrix to an ASCII file
+        """Save the in-use Matrix to an ASCII file
         :return:
         """
         # get file name
-        file_filter = 'Data Files (*.dat);;All Files (*)'
-        ub_file_name = QFileDialog.getSaveFileName(self, 'ASCII File To Save UB Matrix', self._homeDir,
-                                                   file_filter)
+        file_filter = "Data Files (*.dat);;All Files (*)"
+        ub_file_name = QFileDialog.getSaveFileName(self, "ASCII File To Save UB Matrix", self._homeDir, file_filter)
 
         # early return if user cancels selecting a file name to save
         if not ub_file_name:
@@ -2334,14 +2308,14 @@ class MainWindow(QMainWindow):
         assert len(ub_shape) == 2 and ub_shape[0] == ub_shape[1] == 3
 
         # construct string
-        ub_str = '# UB matrix\n# %s\n' % str(self.ui.label_ubInfoLabel.text())
+        ub_str = "# UB matrix\n# %s\n" % str(self.ui.label_ubInfoLabel.text())
         for i_row in range(3):
             for j_col in range(3):
-                ub_str += '%.15f  ' % in_use_ub[i_row][j_col]
-            ub_str += '\n'
+                ub_str += "%.15f  " % in_use_ub[i_row][j_col]
+            ub_str += "\n"
 
         # write to file
-        ub_file = open(ub_file_name, 'w')
+        ub_file = open(ub_file_name, "w")
         ub_file.write(ub_str)
         ub_file.close()
 
@@ -2359,6 +2333,7 @@ class MainWindow(QMainWindow):
         elif self.ui.radioButton_ubAdvancedSelection.isChecked() and self._ubPeakTableFlag != 2:
             # advanced
             import FindUBUtility
+
             self._selectUBScanDialog = FindUBUtility.SelectUBMatrixScansDialog(self)
             self._selectUBScanDialog.show()
             self._ubPeakTableFlag = 2
@@ -2422,20 +2397,20 @@ class MainWindow(QMainWindow):
         self._surveyTableFlag = not self._surveyTableFlag
 
     def do_select_merged_scans(self):
-        """ Select or deselect all rows in the merged scan table
+        """Select or deselect all rows in the merged scan table
         :return:
         """
         # get current status
-        curr_state = str(self.ui.pushButton_selectAllScans2Merge.text()).startswith('Select')
+        curr_state = str(self.ui.pushButton_selectAllScans2Merge.text()).startswith("Select")
 
         # select/deselect all
         self.ui.tableWidget_mergeScans.select_all_rows(curr_state)
 
         # set the text to the push button
         if curr_state:
-            self.ui.pushButton_selectAllScans2Merge.setText('Deselect All')
+            self.ui.pushButton_selectAllScans2Merge.setText("Deselect All")
         else:
-            self.ui.pushButton_selectAllScans2Merge.setText('Select All')
+            self.ui.pushButton_selectAllScans2Merge.setText("Select All")
 
     def do_set_all_calibration(self):
         """
@@ -2454,17 +2429,17 @@ class MainWindow(QMainWindow):
         """
         det_size_str = str(self.ui.comboBox_detectorSize.currentText())
 
-        if det_size_str.count('256') > 0:
+        if det_size_str.count("256") > 0:
             # 256 by 256 pixels
             det_size_row = 256
             det_size_col = 256
-        elif det_size_str.count('512') > 0:
+        elif det_size_str.count("512") > 0:
             # 512 x 512
             det_size_row = 512
             det_size_col = 512
         else:
             # unsupported case yet
-            raise NotImplementedError('Detector with size {0} is not supported yet.'.format(det_size_str))
+            raise NotImplementedError("Detector with size {0} is not supported yet.".format(det_size_str))
 
         # set to controller
         self._myControl.set_detector_geometry(det_size_row, det_size_col)
@@ -2479,7 +2454,7 @@ class MainWindow(QMainWindow):
         if status:
             # a valid IPTS number
 
-            raise NotImplementedError('The following section commented out now will be implemented when IPTS is ready.')
+            raise NotImplementedError("The following section commented out now will be implemented when IPTS is ready.")
             # ipts_number = ret_obj[0]
             # search archive for available experiment number under this IPTS
             # status, ret_obj = self._myControl.check_ipts(ipts_number=ipts_number)
@@ -2494,11 +2469,10 @@ class MainWindow(QMainWindow):
             #     return
         else:
             # error
-            self.pop_one_button_dialog('User specified IPTS number {0} is not correct.'
-                                       ''.format(str(self.ui.lineEdit_iptsNumber.text())))
+            self.pop_one_button_dialog("User specified IPTS number {0} is not correct." "".format(str(self.ui.lineEdit_iptsNumber.text())))
 
     def do_set_experiment(self):
-        """ Set experiment
+        """Set experiment
         :return:
         """
         # get exp number
@@ -2510,18 +2484,20 @@ class MainWindow(QMainWindow):
             # current experiment to be replaced: warning
             curr_exp_number = self._myControl.get_experiment()
             if curr_exp_number is not None and exp_number != curr_exp_number:
-                self.pop_one_button_dialog('Changing experiment to %d.  Clean previous experiment %d\'s result'
-                                           ' in Mantid manually.' % (exp_number, curr_exp_number))
+                self.pop_one_button_dialog(
+                    "Changing experiment to %d.  Clean previous experiment %d's result"
+                    " in Mantid manually." % (exp_number, curr_exp_number)
+                )
             # set the new experiment number
             self._myControl.set_exp_number(exp_number)
-            self.ui.lineEdit_exp.setStyleSheet('color: black')
-            self.setWindowTitle('Experiment %d' % exp_number)
+            self.ui.lineEdit_exp.setStyleSheet("color: black")
+            self.setWindowTitle("Experiment %d" % exp_number)
 
             # try to set the default
             if self._iptsNumber is not None:
-                default_data_dir = '/HFIR/HB3A/IPTS-{0}/exp{1}/Datafiles'.format(self._iptsNumber, exp_number)
+                default_data_dir = "/HFIR/HB3A/IPTS-{0}/exp{1}/Datafiles".format(self._iptsNumber, exp_number)
             else:
-                default_data_dir = '/HFIR/HB3A/exp{0}/Datafiles'.format(exp_number)
+                default_data_dir = "/HFIR/HB3A/exp{0}/Datafiles".format(exp_number)
             if os.path.exists(default_data_dir):
                 # set the directory in
                 self.ui.lineEdit_localSpiceDir.setText(default_data_dir)
@@ -2531,9 +2507,9 @@ class MainWindow(QMainWindow):
             # TEST new feature
             # Check working directory.  If not set or with different exp number, then set to
             work_dir = str(self.ui.lineEdit_workDir.text()).strip()
-            if work_dir != '':
+            if work_dir != "":
                 # check whether it contains exp number other than current one
-                if work_dir.lower().count('exp') > 0 and work_dir.count('{0}'.format(exp_number)) == 0:
+                if work_dir.lower().count("exp") > 0 and work_dir.count("{0}".format(exp_number)) == 0:
                     use_default = True
                 else:
                     use_default = False
@@ -2541,20 +2517,20 @@ class MainWindow(QMainWindow):
                 use_default = False
             if use_default:
                 # set default to analysis cluster or local
-                work_dir = '/HFIR/HB3A/exp{0}/Shared/'.format(exp_number)
+                work_dir = "/HFIR/HB3A/exp{0}/Shared/".format(exp_number)
                 # check whether user has writing permission
                 if os.access(work_dir, os.W_OK) is False:
-                    work_dir = os.path.join(os.path.expanduser('~'), 'HB3A/Exp{0}'.format(exp_number))
+                    work_dir = os.path.join(os.path.expanduser("~"), "HB3A/Exp{0}".format(exp_number))
                 self.ui.lineEdit_workDir.setText(work_dir)
             # END-IF
 
             # TEST new feature
             # Check pre-processing directory.  If not set or with different exp number, then set to
             pre_process_dir = str(self.ui.lineEdit_preprocessedDir.text()).strip()
-            if pre_process_dir == '':
+            if pre_process_dir == "":
                 # empty
                 use_default = True
-            elif pre_process_dir.lower().count('exp') > 0 and pre_process_dir.count('{0}'.format(exp_number)) > 0:
+            elif pre_process_dir.lower().count("exp") > 0 and pre_process_dir.count("{0}".format(exp_number)) > 0:
                 # doesn't sound right
                 use_default = True
             else:
@@ -2562,19 +2538,18 @@ class MainWindow(QMainWindow):
                 use_default = False
             if use_default:
                 # shared Example: /HFIR/HB3A/exp668/Shared/preprocessed
-                pre_process_dir = '/HFIR/HB3A/exp{0}/Shared/preprocessed'.format(exp_number)
+                pre_process_dir = "/HFIR/HB3A/exp{0}/Shared/preprocessed".format(exp_number)
                 # check whether user has writing permission
                 if os.access(pre_process_dir, os.W_OK) is False:
                     # use local
-                    pre_process_dir = os.path.join(os.path.expanduser('~'),
-                                                   'HB3A/Exp{0}/preprocessed'.format(exp_number))
+                    pre_process_dir = os.path.join(os.path.expanduser("~"), "HB3A/Exp{0}/preprocessed".format(exp_number))
                 self.ui.lineEdit_preprocessedDir.setText(pre_process_dir)
             # END-IF
 
         else:
             err_msg = ret_obj
-            self.pop_one_button_dialog('Unable to set experiment as %s' % err_msg)
-            self.ui.lineEdit_exp.setStyleSheet('color: red')
+            self.pop_one_button_dialog("Unable to set experiment as %s" % err_msg)
+            self.ui.lineEdit_exp.setStyleSheet("color: red")
             return
 
         # register experiment number
@@ -2583,29 +2558,26 @@ class MainWindow(QMainWindow):
         self.ui.tabWidget.setCurrentIndex(0)
 
         # set the instrument geometry constants
-        status, ret_obj = gutil.parse_float_editors([self.ui.lineEdit_defaultSampleDetDistance,
-                                                     self.ui.lineEdit_pixelSizeX,
-                                                     self.ui.lineEdit_pixelSizeY],
-                                                    allow_blank=False)
+        status, ret_obj = gutil.parse_float_editors(
+            [self.ui.lineEdit_defaultSampleDetDistance, self.ui.lineEdit_pixelSizeX, self.ui.lineEdit_pixelSizeY], allow_blank=False
+        )
         if status:
             default_det_sample_distance, pixel_x_size, pixel_y_size = ret_obj
             self._myControl.set_default_detector_sample_distance(default_det_sample_distance)
             self._myControl.set_default_pixel_size(pixel_x_size, pixel_y_size)
         else:
-            self.pop_one_button_dialog('[ERROR] Unable to parse default instrument geometry constants '
-                                       'due to %s.' % str(ret_obj))
+            self.pop_one_button_dialog("[ERROR] Unable to parse default instrument geometry constants " "due to %s." % str(ret_obj))
             return
 
         # set the detector center
         det_center_str = str(self.ui.lineEdit_defaultDetCenter.text())
         try:
-            terms = det_center_str.split(',')
+            terms = det_center_str.split(",")
             center_row = int(terms[0])
             center_col = int(terms[1])
             self._myControl.set_detector_center(exp_number, center_row, center_col, default=True)
         except (IndexError, ValueError) as error:
-            self.pop_one_button_dialog('[ERROR] Unable to parse default detector center %s due to %s.'
-                                       '' % (det_center_str, str(error)))
+            self.pop_one_button_dialog("[ERROR] Unable to parse default detector center %s due to %s." "" % (det_center_str, str(error)))
 
     def do_set_ub_tab_hkl_to_integers(self):
         """
@@ -2615,14 +2587,14 @@ class MainWindow(QMainWindow):
         """
         # get the current index source
         hkl_type_str = str(self.ui.comboBox_hklType.currentText())
-        if hkl_type_str.lower().count('spice') > 0:
+        if hkl_type_str.lower().count("spice") > 0:
             # set spice HKL to integer
             is_spice = True
         else:
             is_spice = False
 
         # store the current value
-        self.ui.tableWidget_peaksCalUB .store_current_indexing()
+        self.ui.tableWidget_peaksCalUB.store_current_indexing()
 
         # set the index to integer
         num_rows = self.ui.tableWidget_peaksCalUB.rowCount()
@@ -2633,8 +2605,7 @@ class MainWindow(QMainWindow):
                 self.ui.tableWidget_peaksCalUB.set_hkl(row_index, peak_indexing, is_spice, round_error)
             except RuntimeError as run_err:
                 scan_number, pt_number = self.ui.tableWidget_peaksCalUB.get_scan_pt(row_index)
-                print('[ERROR] Unable to convert HKL to integer for scan '
-                      '{0} due to {1}.'.format(scan_number, run_err))
+                print("[ERROR] Unable to convert HKL to integer for scan " "{0} due to {1}.".format(scan_number, run_err))
         # END-FOR
 
         # disable the set to integer button and enable the revert/undo button
@@ -2649,14 +2620,14 @@ class MainWindow(QMainWindow):
         exp_number = int(self.ui.lineEdit_exp.text())
 
         integrate_type = self.ui.tableWidget_mergeScans.get_integration_type()
-        if integrate_type == 'simple':
-            integrate_type = 'mixed'
-        elif integrate_type == 'mixed':
-            integrate_type = 'gaussian'
+        if integrate_type == "simple":
+            integrate_type = "mixed"
+        elif integrate_type == "mixed":
+            integrate_type = "gaussian"
         else:
-            integrate_type = 'simple'
+            integrate_type = "simple"
 
-        err_msg = ''
+        err_msg = ""
         for i_row in range(self.ui.tableWidget_mergeScans.rowCount()):
             scan_number = self.ui.tableWidget_mergeScans.get_scan_number(i_row)
             peak_info_obj = self._myControl.get_peak_info(exp_number, scan_number)
@@ -2665,11 +2636,11 @@ class MainWindow(QMainWindow):
                 intensity2, error2 = peak_info_obj.get_intensity(integrate_type, True)
                 self.ui.tableWidget_mergeScans.set_peak_intensity(i_row, intensity1, intensity2, error2, integrate_type)
             except RuntimeError as run_err:
-                err_msg += '{0} due to {1};'.format(self.ui.tableWidget_mergeScans.get_scan_number(i_row), run_err)
+                err_msg += "{0} due to {1};".format(self.ui.tableWidget_mergeScans.get_scan_number(i_row), run_err)
         # END-FOR
 
         if len(err_msg) > 0:
-            self._show_message('Unable to get peak intensity of scan: {0}'.format(err_msg))
+            self._show_message("Unable to get peak intensity of scan: {0}".format(err_msg))
 
     def do_undo_ub_tab_hkl_to_integers(self):
         """
@@ -2678,7 +2649,7 @@ class MainWindow(QMainWindow):
         """
         # get the column
         hkl_type = str(self.ui.comboBox_hklType.currentText())
-        if hkl_type.lower().count('spice') > 0:
+        if hkl_type.lower().count("spice") > 0:
             is_spice = True
         else:
             is_spice = False
@@ -2691,7 +2662,7 @@ class MainWindow(QMainWindow):
         # self.ui.pushButton_undoSetToInteger.setEnabled(False)
 
     def do_index_merged_scans_peaks(self):
-        """ Index all peaks' HKL value in the merged-peak tab by UB matrix that is just calculated
+        """Index all peaks' HKL value in the merged-peak tab by UB matrix that is just calculated
         :return:
         """
         # get the parameters
@@ -2699,7 +2670,7 @@ class MainWindow(QMainWindow):
         hkl_src = str(self.ui.comboBox_indexFrom.currentText())
 
         # loop through all rows
-        message = ''
+        message = ""
         num_rows = self.ui.tableWidget_mergeScans.rowCount()
         for row_index in range(num_rows):
             # get scan number
@@ -2707,20 +2678,19 @@ class MainWindow(QMainWindow):
 
             integral_type = self.ui.tableWidget_mergeScans.get_integration_type(row_index)
             is_single_pt = False
-            if integral_type == 'single-pt':
+            if integral_type == "single-pt":
                 roi_name = self.ui.tableWidget_mergeScans.get_roi_name(row_index)
-                peak_info_i = self._myControl.get_single_pt_info(exp_number, scan_number=scan_i, pt_number=1,
-                                                                 roi_name=roi_name)
+                peak_info_i = self._myControl.get_single_pt_info(exp_number, scan_number=scan_i, pt_number=1, roi_name=roi_name)
                 is_single_pt = True
             else:
                 peak_info_i = self._myControl.get_peak_info(exp_number, scan_number=scan_i)
                 # skip non-merged sans
                 if peak_info_i is None:
-                    message += 'Row {0} Scan {1} is not integrated.\n'.format(row_index, scan_i)
+                    message += "Row {0} Scan {1} is not integrated.\n".format(row_index, scan_i)
                     continue
 
             # get or calculate HKL
-            if is_single_pt or hkl_src == 'From SPICE':
+            if is_single_pt or hkl_src == "From SPICE":
                 # get HKL from SPICE (non-user-hkl)
                 hkl_i = peak_info_i.get_hkl(user_hkl=False)
             else:
@@ -2728,8 +2698,7 @@ class MainWindow(QMainWindow):
                 try:
                     ub_matrix = self._myControl.get_ub_matrix(exp_number)
                 except KeyError as key_err:
-                    self.pop_one_button_dialog('Unable to get UB matrix due to {0}.\nCheck whether UB matrix is set.'
-                                               ''.format(key_err))
+                    self.pop_one_button_dialog("Unable to get UB matrix due to {0}.\nCheck whether UB matrix is set." "".format(key_err))
                     return
                 index_status, ret_tup = self._myControl.index_peak(ub_matrix, scan_i, allow_magnetic=True)
                 if index_status:
@@ -2737,7 +2706,7 @@ class MainWindow(QMainWindow):
                 else:
                     # unable to index peak. use fake hkl and set error message
                     hkl_i = [0, 0, 0]
-                    error_msg = 'Scan %d: %s' % (scan_i, str(ret_tup))
+                    error_msg = "Scan %d: %s" % (scan_i, str(ret_tup))
                     self.ui.tableWidget_mergeScans.set_status(scan_i, error_msg)
                 # END-IF-ELSE(index)
 
@@ -2748,9 +2717,11 @@ class MainWindow(QMainWindow):
 
             # show by rounding HKL?
             if self.ui.checkBox_roundHKL.isChecked():
-                hkl_i = [hb3a_util.round_miller_index(hkl_i[0], 0.2),
-                         hb3a_util.round_miller_index(hkl_i[1], 0.2),
-                         hb3a_util.round_miller_index(hkl_i[2], 0.2)]
+                hkl_i = [
+                    hb3a_util.round_miller_index(hkl_i[0], 0.2),
+                    hb3a_util.round_miller_index(hkl_i[1], 0.2),
+                    hb3a_util.round_miller_index(hkl_i[2], 0.2),
+                ]
 
             self.ui.tableWidget_mergeScans.set_hkl(row_index, hkl_i, hkl_src)
         # END-FOR
@@ -2761,49 +2732,48 @@ class MainWindow(QMainWindow):
         If directory /HFIR/HB3A exists, it means that the user can access HFIR archive server
         :return:
         """
-        home_dir = os.path.expanduser('~')
+        home_dir = os.path.expanduser("~")
 
         # Data cache directory
-        project_cache_dir = os.path.join(home_dir, 'Temp/HB3ATest')
-        if os.path.exists('/HFIR/HB3A/'):
-            self.ui.lineEdit_localSrcDir.setText('/HFIR/HB3A/')
+        project_cache_dir = os.path.join(home_dir, "Temp/HB3ATest")
+        if os.path.exists("/HFIR/HB3A/"):
+            self.ui.lineEdit_localSrcDir.setText("/HFIR/HB3A/")
         else:
             self.ui.lineEdit_localSpiceDir.setText(project_cache_dir)
 
         # working directory
-        work_dir = os.path.join(project_cache_dir, 'Workspace')
+        work_dir = os.path.join(project_cache_dir, "Workspace")
         self.ui.lineEdit_workDir.setText(work_dir)
 
     def set_ub_from_file(self):
-        """ Get UB matrix from an Ascii file
+        """Get UB matrix from an Ascii file
         :return:
         """
-        file_filter = 'Data Files (*.dat);;Text Files (*.txt);;All Files (*)'
-        file_name = QFileDialog.getOpenFileName(self, 'Open UB ASCII File', self._homeDir,
-                                                      file_filter)
-        if not file_name: # quit if cancelled
+        file_filter = "Data Files (*.dat);;Text Files (*.txt);;All Files (*)"
+        file_name = QFileDialog.getOpenFileName(self, "Open UB ASCII File", self._homeDir, file_filter)
+        if not file_name:  # quit if cancelled
             return
         if isinstance(file_name, tuple):
             file_name = file_name[0]
 
         # parse file
-        ub_file = open(file_name, 'r')
+        ub_file = open(file_name, "r")
         raw_lines = ub_file.readlines()
         ub_file.close()
 
         # convert to ub string
-        ub_str = ''
+        ub_str = ""
         for line in raw_lines:
             line = line.strip()
             if len(line) == 0:
                 # empty line
                 continue
-            elif line[0] == '#':
+            elif line[0] == "#":
                 # comment line
                 continue
             else:
                 # regular line
-                ub_str += '%s ' % line
+                ub_str += "%s " % line
 
         # convert to matrix
         ub_matrix = gutil.convert_str_to_matrix(ub_str, (3, 3))
@@ -2823,14 +2793,14 @@ class MainWindow(QMainWindow):
         try:
             user_det_distance = float(user_det_distance_str)
         except ValueError:
-            self.pop_one_button_dialog('User detector-sample distance %s must be a float.' % user_det_distance_str)
+            self.pop_one_button_dialog("User detector-sample distance %s must be a float." % user_det_distance_str)
             return
 
         # check distance value because it cannot be too far
         default_det_distance = float(str(self.ui.lineEdit_defaultSampleDetDistance.text()))
         distance_tol = float(str(self.ui.lineEdit_sampleDetDistTol.text()))
         if abs((user_det_distance - default_det_distance) / default_det_distance) > distance_tol:
-            self.pop_one_button_dialog('User specified sample-detector distance is not reasonable.')
+            self.pop_one_button_dialog("User specified sample-detector distance is not reasonable.")
             return
 
         # set to controller
@@ -2838,7 +2808,7 @@ class MainWindow(QMainWindow):
         self._myControl.set_detector_sample_distance(exp_number, user_det_distance)
 
         # update the GUI for information
-        self.ui.lineEdit_infoDetSampleDistance.setText('%.5f' % user_det_distance)
+        self.ui.lineEdit_infoDetSampleDistance.setText("%.5f" % user_det_distance)
 
     def do_set_user_wave_length(self):
         """
@@ -2849,14 +2819,13 @@ class MainWindow(QMainWindow):
             exp_number = int(str(self.ui.lineEdit_exp.text()))
             user_lambda = float(str(self.ui.lineEdit_userWaveLength.text()))
         except ValueError:
-            self.pop_one_button_dialog('Unable to set user wave length with value %s.'
-                                       '' % str(self.ui.lineEdit_infoWavelength.text()))
+            self.pop_one_button_dialog("Unable to set user wave length with value %s." "" % str(self.ui.lineEdit_infoWavelength.text()))
             return
 
         self._myControl.set_user_wave_length(exp_number, user_lambda)
 
         # set back to GUI
-        self.ui.lineEdit_infoWavelength.setText('%.5f' % user_lambda)
+        self.ui.lineEdit_infoWavelength.setText("%.5f" % user_lambda)
 
     def do_set_user_detector_center(self):
         """
@@ -2864,23 +2833,22 @@ class MainWindow(QMainWindow):
         :return:
         """
         # get information
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
-                                                        self.ui.lineEdit_detCenterPixHorizontal,
-                                                        self.ui.lineEdit_detCenterPixVertical],
-                                                       allow_blank=True)
+        status, ret_obj = gutil.parse_integers_editors(
+            [self.ui.lineEdit_exp, self.ui.lineEdit_detCenterPixHorizontal, self.ui.lineEdit_detCenterPixVertical], allow_blank=True
+        )
 
         if not status:
             self.pop_one_button_dialog(str(ret_obj))
             return
 
-        assert isinstance(ret_obj, list) and len(ret_obj) == 3, 'Error!'
+        assert isinstance(ret_obj, list) and len(ret_obj) == 3, "Error!"
         exp_number, user_center_row, user_center_col = ret_obj
-        assert isinstance(exp_number, int), 'Experiment number must be set up.'
+        assert isinstance(exp_number, int), "Experiment number must be set up."
 
         self._myControl.set_detector_center(exp_number, user_center_row, user_center_col)
 
         # apply to the GUI
-        self.ui.lineEdit_infoDetCenter.setText('%d, %d' % (user_center_row, user_center_col))
+        self.ui.lineEdit_infoDetCenter.setText("%d, %d" % (user_center_row, user_center_col))
 
     def do_show_integration_details(self):
         """
@@ -2927,7 +2895,7 @@ class MainWindow(QMainWindow):
         self._spiceViewer = viewspicedialog.ViewSpiceDialog(self)
 
         # Write each line
-        wbuf = ''
+        wbuf = ""
         for line in spice_line_list:
             wbuf += line
         self._spiceViewer.write_text(wbuf)
@@ -2947,8 +2915,7 @@ class MainWindow(QMainWindow):
         try:
             scan_number = int(str(self.ui.lineEdit_run.text()))
         except ValueError as val_err:
-            error_msg = 'Scan number {0} in raw-data-view-tab is invalid. FYI: {1}.' \
-                        ''.format(self.ui.lineEdit_run.text(), val_err)
+            error_msg = "Scan number {0} in raw-data-view-tab is invalid. FYI: {1}." "".format(self.ui.lineEdit_run.text(), val_err)
             self.pop_one_button_dialog(error_msg)
             return
 
@@ -2961,7 +2928,7 @@ class MainWindow(QMainWindow):
             self._spiceViewer = viewspicedialog.ViewSpiceDialog(self)
 
         # form the buffer
-        spice_buffer = ''
+        spice_buffer = ""
         for line in spice_line_list:
             spice_buffer += line
 
@@ -2972,16 +2939,16 @@ class MainWindow(QMainWindow):
         self._spiceViewer.show()
 
     def do_show_ub_in_box(self):
-        """ Get UB matrix in table tableWidget_ubMergeScan and write to plain text edit plainTextEdit_ubInput
+        """Get UB matrix in table tableWidget_ubMergeScan and write to plain text edit plainTextEdit_ubInput
         :return:
         """
         ub_matrix = self.ui.tableWidget_ubInUse.get_matrix()
 
-        text = ''
+        text = ""
         for i in range(3):
             for j in range(3):
-                text += '%.7f, ' % ub_matrix[i][j]
-            text += '\n'
+                text += "%.7f, " % ub_matrix[i][j]
+            text += "\n"
 
         self.ui.plainTextEdit_ubInput.setPlainText(text)
 
@@ -2993,11 +2960,11 @@ class MainWindow(QMainWindow):
         # get number of rows that are selected
         row_number_list = self.ui.tableWidget_mergeScans.get_selected_rows(True)
 
-        message = ''
+        message = ""
         for row_number in row_number_list:
             scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
             md_qample_ws_name = self.ui.tableWidget_mergeScans.get_merged_ws_name(row_number)
-            message += 'Scan %03d: %s\n' % (scan_number, md_qample_ws_name)
+            message += "Scan %03d: %s\n" % (scan_number, md_qample_ws_name)
         # END-FOR
 
         gutil.show_message(message=message)
@@ -3009,8 +2976,7 @@ class MainWindow(QMainWindow):
         """
         # Get experiment number
         exp_number = int(self.ui.lineEdit_exp.text())
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_surveyStartPt,
-                                                        self.ui.lineEdit_surveyEndPt])
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_surveyStartPt, self.ui.lineEdit_surveyEndPt])
         if status is False:
             err_msg = ret_obj
             self.pop_one_button_dialog(err_msg)
@@ -3030,18 +2996,18 @@ class MainWindow(QMainWindow):
         if status is False:
             self.pop_one_button_dialog(ret_obj)
             return
-        elif err_msg != '':
+        elif err_msg != "":
             self.pop_one_button_dialog(err_msg)
         scan_sum_list = ret_obj
         self.ui.tableWidget_surveyTable.set_survey_result(scan_sum_list)
         self.ui.tableWidget_surveyTable.show_reflections(max_number)
 
     def do_switch_tab_peak_int(self):
-        """ Switch to tab 'Peak Integration' to set up and learn how to do peak integration
+        """Switch to tab 'Peak Integration' to set up and learn how to do peak integration
         :return:
         """
         # switch tab
-        self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage['Peak Integration'])
+        self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage["Peak Integration"])
 
         # set up value
         selected_scans = self.ui.tableWidget_mergeScans.get_selected_scans()
@@ -3050,7 +3016,7 @@ class MainWindow(QMainWindow):
             self.ui.lineEdit_scanIntegratePeak.setText(str(selected_scans[0][0]))
 
     def do_sync_ub(self):
-        """ Purpose: synchronize UB matrix in use with UB matrix calculated.
+        """Purpose: synchronize UB matrix in use with UB matrix calculated.
         Requirements: One of these must be given
         1. a valid UB matrix from tableWidget_ubMatrix
         2. an ascii file that contains 9 float
@@ -3072,7 +3038,7 @@ class MainWindow(QMainWindow):
             ub_matrix = self.get_ub_from_text()
 
         else:
-            raise RuntimeError('None radio button is selected for UB')
+            raise RuntimeError("None radio button is selected for UB")
 
         # set to in-use UB matrix and control
         self.ui.tableWidget_ubInUse.set_from_matrix(ub_matrix)
@@ -3087,11 +3053,11 @@ class MainWindow(QMainWindow):
         """
         # get a list of rows that are selected
         row_index_list = self.ui.tableWidget_peaksCalUB.get_selected_rows(True)
-        assert len(row_index_list) > 0, 'There is no row that is selected to view.'
+        assert len(row_index_list) > 0, "There is no row that is selected to view."
 
         # get the information from the selected row
         status, exp_number = gutil.parse_integers_editors(self.ui.lineEdit_exp)
-        assert status, 'Experiment number is not a valid integer.'
+        assert status, "Experiment number is not a valid integer."
 
         # create window
         if self._my3DWindow is None:
@@ -3107,7 +3073,7 @@ class MainWindow(QMainWindow):
             md_file_name, weight_peak_centers, weight_peak_intensities, avg_peak_centre, avg_peak_intensity = ret_obj
 
             # add the 3D window
-            self._my3DWindow.initialize_group('%s' % scan_number)
+            self._my3DWindow.initialize_group("%s" % scan_number)
             self._my3DWindow.add_plot_by_file(md_file_name)
             self._my3DWindow.add_plot_by_array(weight_peak_centers, weight_peak_intensities)
             self._my3DWindow.add_plot_by_array(avg_peak_centre, avg_peak_intensity)
@@ -3132,15 +3098,17 @@ class MainWindow(QMainWindow):
             return
         scan_number_list = self.ui.tableWidget_peaksCalUB.get_selected_scans()
         if len(scan_number_list) != 1:
-            self.pop_one_button_dialog('To view scan data in 3D, one and only one scan can be selected.'
-                                       'Now there are {0} scans that are selected.'.format(len(scan_number_list)))
+            self.pop_one_button_dialog(
+                "To view scan data in 3D, one and only one scan can be selected."
+                "Now there are {0} scans that are selected.".format(len(scan_number_list))
+            )
             return
         else:
             scan_number = scan_number_list[0]
 
         # Check
         if self._myControl.has_merged_data(exp_number, scan_number) is False:
-            self.pop_one_button_dialog('No merged MD workspace found for %d, %d' % (exp_number, scan_number))
+            self.pop_one_button_dialog("No merged MD workspace found for %d, %d" % (exp_number, scan_number))
             return
 
         # Generate data by writing out temp file
@@ -3169,7 +3137,7 @@ class MainWindow(QMainWindow):
         assert isinstance(exp_number, int) and isinstance(scan_number, int)
 
         # get file name for 3D data
-        base_file_name = 'md_%d.dat' % random.randint(1, 1001)
+        base_file_name = "md_%d.dat" % random.randint(1, 1001)
         md_file_name = self._myControl.export_md_data(exp_number, scan_number, base_file_name)
         peak_info = self._myControl.get_peak_info(exp_number, scan_number)
 
@@ -3181,15 +3149,15 @@ class MainWindow(QMainWindow):
         num_pt_peaks = len(weight_peak_centers)
         assert num_pt_peaks == len(weight_peak_intensities)
 
-        pt_peak_centre_array = numpy.ndarray(shape=(num_pt_peaks, 3), dtype='float')
-        pt_peak_intensity_array = numpy.ndarray(shape=(num_pt_peaks,), dtype='float')
+        pt_peak_centre_array = numpy.ndarray(shape=(num_pt_peaks, 3), dtype="float")
+        pt_peak_intensity_array = numpy.ndarray(shape=(num_pt_peaks,), dtype="float")
         for i_pt in range(num_pt_peaks):
             for j in range(3):
                 pt_peak_centre_array[i_pt][j] = weight_peak_centers[i_pt][j]
             pt_peak_intensity_array[i_pt] = weight_peak_intensities[i_pt]
 
-        avg_peak_centre = numpy.ndarray(shape=(1, 3), dtype='float')
-        avg_peak_intensity = numpy.ndarray(shape=(1,), dtype='float')
+        avg_peak_centre = numpy.ndarray(shape=(1, 3), dtype="float")
+        avg_peak_intensity = numpy.ndarray(shape=(1,), dtype="float")
         avg_peak_centre[0][0] = qx
         avg_peak_centre[0][1] = qy
         avg_peak_centre[0][2] = qz
@@ -3199,7 +3167,7 @@ class MainWindow(QMainWindow):
         return md_file_name, pt_peak_centre_array, pt_peak_intensity_array, avg_peak_centre, avg_peak_intensity
 
     def do_view_merged_scans_3d(self):
-        """ Get selected merged scan and plot them individually in 3D
+        """Get selected merged scan and plot them individually in 3D
         :return:
         """
         # collect the selected rows and thus workspace names
@@ -3218,13 +3186,13 @@ class MainWindow(QMainWindow):
         self._my3DWindow.show()
 
     def do_view_ub(self):
-        """ View UB matrix in tab 'UB matrix'
+        """View UB matrix in tab 'UB matrix'
         :return:
         """
-        self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage['UB Matrix'])
+        self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage["UB Matrix"])
 
     def do_view_survey_peak(self):
-        """ View selected peaks from survey table
+        """View selected peaks from survey table
         Requirements: one and only 1 run is selected
         Guarantees: the scan number and pt number that are selected will be set to
             tab 'View Raw' and the tab is switched.
@@ -3241,7 +3209,7 @@ class MainWindow(QMainWindow):
         self.ui.tableWidget_surveyTable.select_all_rows(False)
 
         # switch tab
-        self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage['View Raw Data'])
+        self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage["View Raw Data"])
         self.ui.lineEdit_run.setText(str(scan_num))
         self.ui.lineEdit_rawDataPtNo.setText(str(pt_num))
 
@@ -3252,17 +3220,17 @@ class MainWindow(QMainWindow):
         """
         # read the current normalization type
         new_norm_type = str(self.ui.comboBox_mergePeakNormType.currentText()).lower()
-        print ('[DB...BAT] Change Norm Type is Triggered.  Type: {0}'.format(new_norm_type))
+        print("[DB...BAT] Change Norm Type is Triggered.  Type: {0}".format(new_norm_type))
 
         # set the scale factor according to new norm type
-        if new_norm_type.count('time') > 0:
-            scale_factor = 1.
-        elif new_norm_type.count('monitor') > 0:
-            scale_factor = 1000.
+        if new_norm_type.count("time") > 0:
+            scale_factor = 1.0
+        elif new_norm_type.count("monitor") > 0:
+            scale_factor = 1000.0
         else:
-            scale_factor = 1.
+            scale_factor = 1.0
 
-        self.ui.lineEdit_scaleFactor.setText('{0}'.format(scale_factor))
+        self.ui.lineEdit_scaleFactor.setText("{0}".format(scale_factor))
 
     def evt_change_normalization(self):
         """
@@ -3275,7 +3243,7 @@ class MainWindow(QMainWindow):
         self.do_integrate_single_scan()
 
     def evt_change_roi(self):
-        """ handing event of ROI selected in combobox is changed
+        """handing event of ROI selected in combobox is changed
         :return:
         """
         if self._roiComboBoxMutex:
@@ -3316,8 +3284,9 @@ class MainWindow(QMainWindow):
         # a new ROI is defined so combo box is set to item 0
         self.ui.comboBox_viewRawDataMasks.setCurrentIndex(0)
 
-        self.ui.lineEdit_message.setText('New selected ROI: ({0}, {1}), ({2}, {3})'
-                                         ''.format(lower_left_x, lower_left_y, upper_right_x, upper_right_y))
+        self.ui.lineEdit_message.setText(
+            "New selected ROI: ({0}, {1}), ({2}, {3})" "".format(lower_left_x, lower_left_y, upper_right_x, upper_right_y)
+        )
 
     def evt_show_survey(self):
         """
@@ -3329,7 +3298,7 @@ class MainWindow(QMainWindow):
             return
 
         max_number_str = str(self.ui.lineEdit_numSurveyOutput.text()).strip()
-        if max_number_str == '':
+        if max_number_str == "":
             # empty: select all
             surveyed_scan_list = self._myControl.get_surveyed_scans()
             max_number = len(surveyed_scan_list)
@@ -3371,7 +3340,7 @@ class MainWindow(QMainWindow):
         return report_dict
 
     def get_ub_from_text(self):
-        """ Purpose: Set UB matrix in use from plain text edit plainTextEdit_ubInput.
+        """Purpose: Set UB matrix in use from plain text edit plainTextEdit_ubInput.
         Requirements:
           1. the string in the plain text edit must be able to be split to 9 floats by ',', ' ', '\t' and '\n'
         Guarantees: the matrix will be set up the UB matrix in use
@@ -3389,7 +3358,7 @@ class MainWindow(QMainWindow):
             return
         elif len(ret_obj) != 9:
             # number of floats is not 9
-            self.pop_one_button_dialog('Requiring 9 floats for UB matrix.  Only %d are given.' % len(ret_obj))
+            self.pop_one_button_dialog("Requiring 9 floats for UB matrix.  Only %d are given." % len(ret_obj))
             return
 
         # in good UB matrix format
@@ -3404,7 +3373,7 @@ class MainWindow(QMainWindow):
 
         else:
             # not defined
-            self.pop_one_button_dialog('Neither Mantid or SPICE-styled UB is checked!')
+            self.pop_one_button_dialog("Neither Mantid or SPICE-styled UB is checked!")
             return
 
         return mantid_ub
@@ -3416,39 +3385,38 @@ class MainWindow(QMainWindow):
         :return:
         """
         if filename is None:
-            filename = 'session_backup.csv'
-            filename = os.path.join(os.path.expanduser('~/.mantid/'), filename)
+            filename = "session_backup.csv"
+            filename = os.path.join(os.path.expanduser("~/.mantid/"), filename)
 
-        in_file = open(filename, 'r')
+        in_file = open(filename, "r")
         reader = csv.reader(in_file)
         my_dict = dict(x for x in reader)
 
         # set the data from saved file
         for key, value in my_dict.items():
-            if key.startswith('lineEdit') is True:
+            if key.startswith("lineEdit") is True:
                 self.ui.__getattribute__(key).setText(value)
-            elif key.startswith('plainText') is True:
+            elif key.startswith("plainText") is True:
                 self.ui.__getattribute__(key).setPlainText(value)
-            elif key.startswith('comboBox') is True:
+            elif key.startswith("comboBox") is True:
                 self.ui.__getattribute__(key).setCurrentIndex(int(value))
             else:
-                self.pop_one_button_dialog('Error! Widget name %s is not supported' % key)
+                self.pop_one_button_dialog("Error! Widget name %s is not supported" % key)
         # END-FOR
 
         # set the experiment
         self._myControl.set_local_data_dir(str(self.ui.lineEdit_localSpiceDir.text()))
         self._myControl.set_working_directory(str(self.ui.lineEdit_workDir.text()))
 
-        self._show_message('Session {0} has been loaded.'.format(filename))
+        self._show_message("Session {0} has been loaded.".format(filename))
 
     def pop_one_button_dialog(self, message):
-        """ Pop up a one-button dialog
+        """Pop up a one-button dialog
         :param message:
         :return:
         """
-        assert isinstance(message, str), 'Input message %s must a string but not %s.' \
-                                         '' % (str(message), type(message))
-        QMessageBox.information(self, '4-circle Data Reduction', message)
+        assert isinstance(message, str), "Input message %s must a string but not %s." "" % (str(message), type(message))
+        QMessageBox.information(self, "4-circle Data Reduction", message)
 
     def report_peak_addition(self, exp_number, error_message):
         """
@@ -3458,50 +3426,50 @@ class MainWindow(QMainWindow):
         :param error_message:
         :return:
         """
-        self.pop_one_button_dialog('Exp: %d\n%s' % (exp_number, error_message))
+        self.pop_one_button_dialog("Exp: %d\n%s" % (exp_number, error_message))
 
     def save_current_session(self, filename=None):
-        """ Save current session/value setup to
+        """Save current session/value setup to
         :return:
         """
         # Set up dictionary
         save_dict = dict()
 
         # Setup
-        save_dict['lineEdit_localSpiceDir'] = str(self.ui.lineEdit_localSpiceDir.text())
-        save_dict['lineEdit_workDir'] = str(self.ui.lineEdit_workDir.text())
+        save_dict["lineEdit_localSpiceDir"] = str(self.ui.lineEdit_localSpiceDir.text())
+        save_dict["lineEdit_workDir"] = str(self.ui.lineEdit_workDir.text())
 
         # Experiment
-        save_dict['lineEdit_exp'] = str(self.ui.lineEdit_exp.text())
+        save_dict["lineEdit_exp"] = str(self.ui.lineEdit_exp.text())
 
         # Lattice
-        save_dict['lineEdit_a'] = str(self.ui.lineEdit_a.text())
-        save_dict['lineEdit_b'] = str(self.ui.lineEdit_b.text())
-        save_dict['lineEdit_c'] = str(self.ui.lineEdit_c.text())
-        save_dict['lineEdit_alpha'] = str(self.ui.lineEdit_alpha.text())
-        save_dict['lineEdit_beta'] = str(self.ui.lineEdit_beta.text())
-        save_dict['lineEdit_gamma'] = str(self.ui.lineEdit_gamma.text())
+        save_dict["lineEdit_a"] = str(self.ui.lineEdit_a.text())
+        save_dict["lineEdit_b"] = str(self.ui.lineEdit_b.text())
+        save_dict["lineEdit_c"] = str(self.ui.lineEdit_c.text())
+        save_dict["lineEdit_alpha"] = str(self.ui.lineEdit_alpha.text())
+        save_dict["lineEdit_beta"] = str(self.ui.lineEdit_beta.text())
+        save_dict["lineEdit_gamma"] = str(self.ui.lineEdit_gamma.text())
 
         # Merge scan
-        save_dict['lineEdit_listScansSliceView'] = str(self.ui.lineEdit_listScansSliceView.text())
+        save_dict["lineEdit_listScansSliceView"] = str(self.ui.lineEdit_listScansSliceView.text())
 
         # Save to csv file
         if filename is None:
             # default
-            save_dir = os.path.expanduser('~/.mantid/')
+            save_dir = os.path.expanduser("~/.mantid/")
             if os.path.exists(save_dir) is False:
                 os.mkdir(save_dir)
-            filename = os.path.join(save_dir, 'session_backup.csv')
+            filename = os.path.join(save_dir, "session_backup.csv")
         # END-IF
 
-        ofile = open(filename, 'w')
+        ofile = open(filename, "w")
         writer = csv.writer(ofile)
         for key, value in save_dict.items():
             writer.writerow([key, value])
         ofile.close()
 
     def menu_download_data(self):
-        """ launch a dialog for user to download data
+        """launch a dialog for user to download data
         :return:
         """
         # create the dialog instance if it is not created
@@ -3516,7 +3484,7 @@ class MainWindow(QMainWindow):
         self._dataDownloadDialog.show()
 
     def menu_integrate_peak_single_pt(self):
-        """ Handle the event to integrate single-pt peak from menu operation
+        """Handle the event to integrate single-pt peak from menu operation
         The operation includes
         1. initialize the single-pt scan integration window if it is not initialized
         2. add the selected scans to the table in single-pt scan integration window
@@ -3535,27 +3503,25 @@ class MainWindow(QMainWindow):
         # get other information
         for scan_number, pt_number in scan_pt_tup_list:
             # check HKL and 2theta
-            h_i = self._myControl.get_sample_log_value(self._current_exp_number, scan_number, pt_number, '_h')
-            k_i = self._myControl.get_sample_log_value(self._current_exp_number, scan_number, pt_number, '_k')
-            l_i = self._myControl.get_sample_log_value(self._current_exp_number, scan_number, pt_number, '_l')
-            hkl_str = '{0}, {1}, {2}'.format(h_i, k_i, l_i)
-            two_theta = self._myControl.get_sample_log_value(self._current_exp_number, scan_number, pt_number, '2theta')
+            h_i = self._myControl.get_sample_log_value(self._current_exp_number, scan_number, pt_number, "_h")
+            k_i = self._myControl.get_sample_log_value(self._current_exp_number, scan_number, pt_number, "_k")
+            l_i = self._myControl.get_sample_log_value(self._current_exp_number, scan_number, pt_number, "_l")
+            hkl_str = "{0}, {1}, {2}".format(h_i, k_i, l_i)
+            two_theta = self._myControl.get_sample_log_value(self._current_exp_number, scan_number, pt_number, "2theta")
             self._single_pt_peak_integration_window.add_scan(scan_number, pt_number, hkl_str, two_theta)
 
     def menu_load_mask(self):
-        """ Load Mask and apply to both workspaces and GUI
+        """Load Mask and apply to both workspaces and GUI
         hb3a_clean_ui_21210
         """
         # get the XML file to load
-        file_filter = 'XML Files (*.xml);;All Files (*)'
-        mask_file_name = QFileDialog.getOpenFileName(self, 'Open Masking File',
-                                                     self._myControl.get_working_directory(),
-                                                     file_filter)
+        file_filter = "XML Files (*.xml);;All Files (*)"
+        mask_file_name = QFileDialog.getOpenFileName(self, "Open Masking File", self._myControl.get_working_directory(), file_filter)
         if isinstance(mask_file_name, tuple):
             mask_file_name = mask_file_name[0]
 
         # generate a mask name and load by calling controller to load mask XML
-        roi_name = os.path.basename(mask_file_name).split('.')[0]
+        roi_name = os.path.basename(mask_file_name).split(".")[0]
         lower_left_corner, upper_right_corner = self._myControl.load_mask_file(mask_file_name, roi_name)
 
         # set UI
@@ -3589,7 +3555,7 @@ class MainWindow(QMainWindow):
 
         # set up the window
         try:
-            output_arrays = self._myControl.get_peak_integration_parameters(xlabel='2theta', ylabel=['sigma', 'scan'])
+            output_arrays = self._myControl.get_peak_integration_parameters(xlabel="2theta", ylabel=["sigma", "scan"])
             # convert matrix to arrays
             xye_matrix = output_arrays.transpose()
             vec_2theta = xye_matrix[0]
@@ -3599,11 +3565,12 @@ class MainWindow(QMainWindow):
             vec_scan_number = xye_matrix[3]
             notes = list()
             for i_scan in range(len(vec_scan_number)):
-                notes.append('{}'.format(int(vec_scan_number[i_scan])))
+                notes.append("{}".format(int(vec_scan_number[i_scan])))
 
             # get the latest (cached) vec_x and vec_y
-            self._general_1d_plot_window.plot_data(vec_2theta, vec_sigma, vec_sigma_error, '2theta', 'Gaussian-Sigma',
-                                                   annotation_list=notes)
+            self._general_1d_plot_window.plot_data(
+                vec_2theta, vec_sigma, vec_sigma_error, "2theta", "Gaussian-Sigma", annotation_list=notes
+            )
         except RuntimeError as run_err:
             self.pop_one_button_dialog(str(run_err))
 
@@ -3613,9 +3580,12 @@ class MainWindow(QMainWindow):
         :return:
         """
         # get file name
-        out_file_name = QFileDialog.getSaveFileName(self, caption='Select a file to save 2theta-Sigma-Scan',
-                                                    directory=self._myControl.get_working_directory(),
-                                                    filter='Data Files (*.dat);;All File (*.*)')
+        out_file_name = QFileDialog.getSaveFileName(
+            self,
+            caption="Select a file to save 2theta-Sigma-Scan",
+            directory=self._myControl.get_working_directory(),
+            filter="Data Files (*.dat);;All File (*.*)",
+        )
         if not out_file_name:  # cancelled
             return
         if isinstance(out_file_name, tuple):
@@ -3623,8 +3593,7 @@ class MainWindow(QMainWindow):
 
         # construct the table
         try:
-            output_arrays = self._myControl.get_peak_integration_parameters(xlabel='2theta', ylabel=['sigma', 'scan'],
-                                                                            with_error=True)
+            output_arrays = self._myControl.get_peak_integration_parameters(xlabel="2theta", ylabel=["sigma", "scan"], with_error=True)
         except RuntimeError as run_err:
             self.pop_one_button_dialog(str(run_err))
             return
@@ -3637,15 +3606,16 @@ class MainWindow(QMainWindow):
             pass
 
         # write to the output file
-        wbuf = '# 2theta\tsigam\terror\tscan number\n'
+        wbuf = "# 2theta\tsigam\terror\tscan number\n"
         for index in range(output_arrays.shape[0]):
             # wbuf += '{:.5f}\t{:5f}\t{:5f}\t{}\n'.format(vec_2theta[index], vec_sigma[index], vec_sigma_error[index],
             #                                             vec_scan_number[index])
-            wbuf += '{:.5f}\t{:5f}\t{:5f}\t{}\n'.format(output_arrays[index][0], output_arrays[index][1],
-                                                        output_arrays[index][2], output_arrays[index][3])
+            wbuf += "{:.5f}\t{:5f}\t{:5f}\t{}\n".format(
+                output_arrays[index][0], output_arrays[index][1], output_arrays[index][2], output_arrays[index][3]
+            )
         # END-FOR
 
-        out_file = open(out_file_name, 'w')
+        out_file = open(out_file_name, "w")
         out_file.write(wbuf)
         out_file.close()
 
@@ -3658,7 +3628,7 @@ class MainWindow(QMainWindow):
         self.close()
 
     def menu_pre_process(self):
-        """ handling action to trigger menu pre-process
+        """handling action to trigger menu pre-process
         :return:
         """
         # initialize the pre processing window if it is not initialized
@@ -3696,10 +3666,13 @@ class MainWindow(QMainWindow):
                 wave_length = None
 
             # set up the other calibration parameters
-            self._preProcessWindow.set_instrument_calibration(exp_number=exp_number, det_size=det_size,
-                                                              det_center=det_center,
-                                                              det_sample_distance=det_sample_dist,
-                                                              wave_length=wave_length)
+            self._preProcessWindow.set_instrument_calibration(
+                exp_number=exp_number,
+                det_size=det_size,
+                det_center=det_center,
+                det_sample_distance=det_sample_dist,
+                wave_length=wave_length,
+            )
         # END-IF
 
     def menu_sort_survey_2theta(self):
@@ -3707,9 +3680,9 @@ class MainWindow(QMainWindow):
         sort survey table by 2theta
         :return:
         """
-        self.ui.tableWidget_surveyTable.filter_and_sort(start_scan=0, end_scan=100000,
-                                                        min_counts=0., max_counts=10000000000.,
-                                                        sort_by_column='2theta', sort_order=0)
+        self.ui.tableWidget_surveyTable.filter_and_sort(
+            start_scan=0, end_scan=100000, min_counts=0.0, max_counts=10000000000.0, sort_by_column="2theta", sort_order=0
+        )
 
     # TESTME - recently implemented
     def menu_sort_by_pt_number(self):
@@ -3717,12 +3690,12 @@ class MainWindow(QMainWindow):
         sort survey table by pt number (with the maximum counts in the scan)
         :return:
         """
-        self.ui.tableWidget_surveyTable.filter_and_sort(start_scan=0, end_scan=100000,
-                                                        min_counts=0., max_counts=10000000000.,
-                                                        sort_by_column='Max Counts Pt', sort_order=0)
+        self.ui.tableWidget_surveyTable.filter_and_sort(
+            start_scan=0, end_scan=100000, min_counts=0.0, max_counts=10000000000.0, sort_by_column="Max Counts Pt", sort_order=0
+        )
 
     def show_scan_pt_list(self):
-        """ Show the range of Pt. in a scan
+        """Show the range of Pt. in a scan
         :return:
         """
         # Get parameters
@@ -3745,11 +3718,10 @@ class MainWindow(QMainWindow):
             # Form message
             pt_list = sorted(ret_obj)
             num_pts = len(pt_list)
-            info = 'Exp %d Scan %d has %d Pt. ranging from %d to %d.\n' % (exp_no, scan_no, num_pts,
-                                                                           pt_list[0], pt_list[-1])
+            info = "Exp %d Scan %d has %d Pt. ranging from %d to %d.\n" % (exp_no, scan_no, num_pts, pt_list[0], pt_list[-1])
             num_miss_pt = pt_list[-1] - pt_list[0] + 1 - num_pts
             if num_miss_pt > 0:
-                info += 'There are %d Pt. skipped.\n' % num_miss_pt
+                info += "There are %d Pt. skipped.\n" % num_miss_pt
 
             self.pop_one_button_dialog(info)
 
@@ -3761,15 +3733,16 @@ class MainWindow(QMainWindow):
         :return:
         """
         # Check requirement
-        assert isinstance(peak_info, r4c.PeakProcessRecord), 'Peak information instance must be a PeakProcessedRecord' \
-                                                             'but not a {0}'.format(type(peak_info))
+        assert isinstance(
+            peak_info, r4c.PeakProcessRecord
+        ), "Peak information instance must be a PeakProcessedRecord" "but not a {0}".format(type(peak_info))
 
         # Get data
         exp_number, scan_number = peak_info.get_experiment_info()
         h, k, l = peak_info.get_hkl(user_hkl=False)
         q_x, q_y, q_z = peak_info.get_peak_centre()
         # wave length
-        m1 = self._myControl.get_sample_log_value(exp_number, scan_number, 1, '_m1')
+        m1 = self._myControl.get_sample_log_value(exp_number, scan_number, 1, "_m1")
         user_wave_length = self._myControl.get_calibrated_wave_length(exp_number)
         if user_wave_length is None:
             # no user specified wave length
@@ -3779,8 +3752,7 @@ class MainWindow(QMainWindow):
             wave_length = user_wave_length
 
         # Set to table
-        status, err_msg = self.ui.tableWidget_peaksCalUB.add_peak(scan_number, (h, k, l), (q_x, q_y, q_z), m1,
-                                                                  wave_length)
+        status, err_msg = self.ui.tableWidget_peaksCalUB.add_peak(scan_number, (h, k, l), (q_x, q_y, q_z), m1, wave_length)
         if status is False:
             self.pop_one_button_dialog(err_msg)
 
@@ -3795,48 +3767,48 @@ class MainWindow(QMainWindow):
         local_spice_dir = str(self.ui.lineEdit_localSpiceDir.text())
         settings.setValue("local_spice_dir", local_spice_dir)
         work_dir = str(self.ui.lineEdit_workDir.text())
-        settings.setValue('work_dir', work_dir)
+        settings.setValue("work_dir", work_dir)
 
         # experiment number
         exp_num = str(self.ui.lineEdit_exp.text())
-        settings.setValue('exp_number', exp_num)
+        settings.setValue("exp_number", exp_num)
 
         # lattice parameters
         lattice_a = str(self.ui.lineEdit_a.text())
-        settings.setValue('a', lattice_a)
+        settings.setValue("a", lattice_a)
         lattice_b = str(self.ui.lineEdit_b.text())
-        settings.setValue('b', lattice_b)
+        settings.setValue("b", lattice_b)
         lattice_c = str(self.ui.lineEdit_c.text())
-        settings.setValue('c', lattice_c)
+        settings.setValue("c", lattice_c)
         lattice_alpha = str(self.ui.lineEdit_alpha.text())
-        settings.setValue('alpha', lattice_alpha)
+        settings.setValue("alpha", lattice_alpha)
         lattice_beta = str(self.ui.lineEdit_beta.text())
-        settings.setValue('beta', lattice_beta)
+        settings.setValue("beta", lattice_beta)
         lattice_gamma = str(self.ui.lineEdit_gamma.text())
-        settings.setValue('gamma', lattice_gamma)
+        settings.setValue("gamma", lattice_gamma)
 
         # calibrated instrument configurations
         user_wave_length = str(self.ui.lineEdit_userWaveLength.text())
-        settings.setValue('wave_length', user_wave_length)
+        settings.setValue("wave_length", user_wave_length)
 
         det_row_center = str(self.ui.lineEdit_detCenterPixHorizontal.text())
-        settings.setValue('row_center', det_row_center)
+        settings.setValue("row_center", det_row_center)
 
         det_col_center = str(self.ui.lineEdit_detCenterPixVertical.text())
-        settings.setValue('col_center', det_col_center)
+        settings.setValue("col_center", det_col_center)
 
         det_sample_distance_str = str(self.ui.lineEdit_userDetSampleDistance.text())
-        settings.setValue('det_sample_distance', det_sample_distance_str)
+        settings.setValue("det_sample_distance", det_sample_distance_str)
 
         # last project
         last_1_project_path = str(self.ui.label_last1Path.text())
-        settings.setValue('last1path', last_1_project_path)
+        settings.setValue("last1path", last_1_project_path)
 
         # survey
         survey_start = str(self.ui.lineEdit_surveyStartPt.text())
         survey_stop = str(self.ui.lineEdit_surveyEndPt.text())
-        settings.setValue('survey_start_scan', survey_start)
-        settings.setValue('survey_stop_scan', survey_stop)
+        settings.setValue("survey_start_scan", survey_start)
+        settings.setValue("survey_stop_scan", survey_stop)
 
     def load_settings(self):
         """
@@ -3847,54 +3819,54 @@ class MainWindow(QMainWindow):
 
         # directories
         try:
-            spice_dir = settings.value('local_spice_dir', '', type=str)
+            spice_dir = settings.value("local_spice_dir", "", type=str)
             self.ui.lineEdit_localSpiceDir.setText(str(spice_dir))
-            work_dir = settings.value('work_dir', type=str)
+            work_dir = settings.value("work_dir", type=str)
             self.ui.lineEdit_workDir.setText(str(work_dir))
 
             # experiment number
-            exp_num = settings.value('exp_number')
+            exp_num = settings.value("exp_number")
             self.ui.lineEdit_exp.setText(str(exp_num))
 
             # lattice parameters
-            lattice_a = settings.value('a', type=str)
+            lattice_a = settings.value("a", type=str)
             self.ui.lineEdit_a.setText(str(lattice_a))
-            lattice_b = settings.value('b', type=str)
+            lattice_b = settings.value("b", type=str)
             self.ui.lineEdit_b.setText(str(lattice_b))
-            lattice_c = settings.value('c', type=str)
+            lattice_c = settings.value("c", type=str)
             self.ui.lineEdit_c.setText(str(lattice_c))
-            lattice_alpha = settings.value('alpha', type=str)
+            lattice_alpha = settings.value("alpha", type=str)
             self.ui.lineEdit_alpha.setText(str(lattice_alpha))
-            lattice_beta = settings.value('beta', type=str)
+            lattice_beta = settings.value("beta", type=str)
             self.ui.lineEdit_beta.setText(str(lattice_beta))
-            lattice_gamma = settings.value('gamma', type=str)
+            lattice_gamma = settings.value("gamma", type=str)
             self.ui.lineEdit_gamma.setText(str(lattice_gamma))
 
             # last project
-            last_1_project_path = settings.value('last1path', type=str)
+            last_1_project_path = settings.value("last1path", type=str)
             self.ui.label_last1Path.setText(last_1_project_path)
 
             # calibrated instrument configurations
-            user_wave_length = settings.value('wave_length', type=str)
+            user_wave_length = settings.value("wave_length", type=str)
             self.ui.lineEdit_userWaveLength.setText(user_wave_length)
 
-            det_row_center = settings.value('row_center', type=str)
+            det_row_center = settings.value("row_center", type=str)
             self.ui.lineEdit_detCenterPixHorizontal.setText(det_row_center)
 
-            det_col_center = settings.value('col_center', type=str)
+            det_col_center = settings.value("col_center", type=str)
             self.ui.lineEdit_detCenterPixVertical.setText(det_col_center)
 
-            det_sample_distance = settings.value('det_sample_distance', type=str)
+            det_sample_distance = settings.value("det_sample_distance", type=str)
             self.ui.lineEdit_userDetSampleDistance.setText(det_sample_distance)
 
             # survey
-            survey_start = settings.value('survey_start_scan', type=str)
+            survey_start = settings.value("survey_start_scan", type=str)
             self.ui.lineEdit_surveyStartPt.setText(survey_start)
-            survey_stop = settings.value('survey_stop_scan', type=str)
+            survey_stop = settings.value("survey_stop_scan", type=str)
             self.ui.lineEdit_surveyEndPt.setText(survey_stop)
 
         except TypeError as err:
-            self.pop_one_button_dialog('Failed to load previous session successfully due to {0}'.format(err))
+            self.pop_one_button_dialog("Failed to load previous session successfully due to {0}".format(err))
             return
 
     def _get_lattice_parameters(self):
@@ -3903,15 +3875,19 @@ class MainWindow(QMainWindow):
         :return: (Boolean, Object).  True, 6-tuple as a, b, c, alpha, beta, gamm
                                      False: error message
         """
-        status, ret_list = gutil.parse_float_editors([self.ui.lineEdit_a,
-                                                      self.ui.lineEdit_b,
-                                                      self.ui.lineEdit_c,
-                                                      self.ui.lineEdit_alpha,
-                                                      self.ui.lineEdit_beta,
-                                                      self.ui.lineEdit_gamma])
+        status, ret_list = gutil.parse_float_editors(
+            [
+                self.ui.lineEdit_a,
+                self.ui.lineEdit_b,
+                self.ui.lineEdit_c,
+                self.ui.lineEdit_alpha,
+                self.ui.lineEdit_beta,
+                self.ui.lineEdit_gamma,
+            ]
+        )
         if status is False:
             err_msg = ret_list
-            err_msg = 'Unable to parse unit cell due to %s' % err_msg
+            err_msg = "Unable to parse unit cell due to %s" % err_msg
             return False, err_msg
 
         a, b, c, alpha, beta, gamma = ret_list
@@ -3927,10 +3903,10 @@ class MainWindow(QMainWindow):
         :return:
         """
         # check inputs
-        assert isinstance(exp_number, int), 'Exp number {0} must be an integer but not of type {1}' \
-                                            ''.format(exp_number, type(exp_number))
-        assert isinstance(scan_number, int), 'Scan number {0} must be an integer but not of type {1}' \
-                                             ''.format(scan_number, type(scan_number))
+        assert isinstance(exp_number, int), "Exp number {0} must be an integer but not of type {1}" "".format(exp_number, type(exp_number))
+        assert isinstance(scan_number, int), "Scan number {0} must be an integer but not of type {1}" "".format(
+            scan_number, type(scan_number)
+        )
 
         # Check and load SPICE table file
         load_spice = False
@@ -3963,12 +3939,9 @@ class MainWindow(QMainWindow):
         :return:
         """
         # check inputs
-        assert isinstance(exp_no, int), 'Exp number {0} must be an integer but not of type {1}' \
-                                        ''.format(exp_no, type(exp_no))
-        assert isinstance(scan_no, int), 'Scan number {0} must be an integer but not of type {1}' \
-                                         ''.format(scan_no, type(scan_no))
-        assert isinstance(pt_no, int), 'Pt number {0} must be an integer but not of type {1}' \
-                                       ''.format(pt_no, type(pt_no))
+        assert isinstance(exp_no, int), "Exp number {0} must be an integer but not of type {1}" "".format(exp_no, type(exp_no))
+        assert isinstance(scan_no, int), "Scan number {0} must be an integer but not of type {1}" "".format(scan_no, type(scan_no))
+        assert isinstance(pt_no, int), "Pt number {0} must be an integer but not of type {1}" "".format(pt_no, type(pt_no))
 
         # check data loaded with mask information
         does_loaded = self._myControl.does_raw_loaded(exp_no, scan_no, pt_no, roi_name)
@@ -3984,19 +3957,16 @@ class MainWindow(QMainWindow):
 
         # Get data and plot
         raw_det_data = self._myControl.get_raw_detector_counts(exp_no, scan_no, pt_no)
-        this_title = 'Exp {} Scan {} Pt {} ROI {}'.format(exp_no, scan_no, pt_no, roi_name)
+        this_title = "Exp {} Scan {} Pt {} ROI {}".format(exp_no, scan_no, pt_no, roi_name)
         self.ui.graphicsView_detector2dPlot.plot_detector_counts(raw_det_data, title=this_title)
         if save:
-            image_file = os.path.join(self.working_directory, 'exp{}_scan{}_pt{}_{}.png'
-                                                              ''.format(exp_no, scan_no, pt_no, roi_name))
+            image_file = os.path.join(self.working_directory, "exp{}_scan{}_pt{}_{}.png" "".format(exp_no, scan_no, pt_no, roi_name))
             self.ui.graphicsView_detector2dPlot.save_figure(image_file)
         else:
             image_file = None
 
         # Information
-        info = '%-10s: %d\n%-10s: %d\n%-10s: %d\n' % ('Exp', exp_no,
-                                                      'Scan', scan_no,
-                                                      'Pt', pt_no)
+        info = "%-10s: %d\n%-10s: %d\n%-10s: %d\n" % ("Exp", exp_no, "Scan", scan_no, "Pt", pt_no)
         self.ui.plainTextEdit_rawDataInformation.setPlainText(info)
 
         if remove_workspace:
@@ -4014,10 +3984,9 @@ class MainWindow(QMainWindow):
         """
         # show message to bar
         if scan_number < 0:
-            message = 'Peak processing finished'
+            message = "Peak processing finished"
         else:
-            message = 'Processing experiment %d scan %d starting from %s.' % (exp_number, scan_number,
-                                                                              str(datetime.datetime.now()))
+            message = "Processing experiment %d scan %d starting from %s." % (exp_number, scan_number, str(datetime.datetime.now()))
         self.ui.statusbar.showMessage(message)
 
         # update progress bar
@@ -4040,7 +4009,7 @@ class MainWindow(QMainWindow):
             if progress == 0:
                 # run start
                 self._startMeringScans = time.clock()
-                self._errorMessageEnsemble = ''
+                self._errorMessageEnsemble = ""
 
             self.ui.progressBar_mergeScans.setValue(progress)
 
@@ -4053,22 +4022,21 @@ class MainWindow(QMainWindow):
             try:
                 row_number = self.ui.tableWidget_mergeScans.get_row_by_scan(scan_number)
             except RuntimeError as run_err:
-                raise RuntimeError('Unable to find scan {0} in Peak-Processing table due to {1}.'
-                                   ''.format(scan_number, run_err))
+                raise RuntimeError("Unable to find scan {0} in Peak-Processing table due to {1}." "".format(scan_number, run_err))
 
             # get peak: simple summation intensity
-            intensity, int_std_dev = peak_info_obj.get_intensity('simple intensity', False)
+            intensity, int_std_dev = peak_info_obj.get_intensity("simple intensity", False)
 
             # check intensity value
             is_error = False
             if intensity < 0:
                 # set to status
-                error_msg = 'Negative intensity (simple): %.3f' % intensity
+                error_msg = "Negative intensity (simple): %.3f" % intensity
                 self.ui.tableWidget_mergeScans.set_status(row_number=row_number, status=error_msg)
                 # reset intensity to 0.
-                intensity = 0.
+                intensity = 0.0
                 is_error = True
-                int_std_dev = 0.
+                int_std_dev = 0.0
 
             # get the corrected value
             corrected_intensity = intensity * peak_info_obj.lorentz_correction_factor
@@ -4077,16 +4045,18 @@ class MainWindow(QMainWindow):
             # status, error_msg = self._myControl.set_peak_intensity(exp_number, scan_number, intensity)
             # if status:
             #     # set the value to table
-            self.ui.tableWidget_mergeScans.set_peak_intensity(row_number=row_number,
-                                                              peak_intensity=intensity,
-                                                              corrected_intensity=corrected_intensity,
-                                                              standard_error=corrected_std_dev,
-                                                              integrate_method='simple')
+            self.ui.tableWidget_mergeScans.set_peak_intensity(
+                row_number=row_number,
+                peak_intensity=intensity,
+                corrected_intensity=corrected_intensity,
+                standard_error=corrected_std_dev,
+                integrate_method="simple",
+            )
 
             if is_error:
-                self.ui.tableWidget_mergeScans.set_status(row_number, 'Integration Error')
+                self.ui.tableWidget_mergeScans.set_status(row_number, "Integration Error")
             else:
-                self.ui.tableWidget_mergeScans.set_status(row_number, 'Integrated')
+                self.ui.tableWidget_mergeScans.set_status(row_number, "Integrated")
 
         elif mode == 2:
             # get signal from the end of all selected scans being integrated
@@ -4095,13 +4065,13 @@ class MainWindow(QMainWindow):
             # self.ui_apply_lorentz_correction_mt()
 
             # set progress bar
-            progress = int(sig_value+0.5)
+            progress = int(sig_value + 0.5)
             self.ui.progressBar_mergeScans.setValue(progress)
 
             # set message to status bar
             merge_run_end = time.clock()
             elapsed = merge_run_end - self._startMeringScans
-            message = 'Peak integration is over. Used %.2f seconds' % elapsed
+            message = "Peak integration is over. Used %.2f seconds" % elapsed
             self.ui.statusbar.showMessage(message)
 
             # pop error message if there is any
@@ -4125,12 +4095,13 @@ class MainWindow(QMainWindow):
         :return:
         """
         # check
-        assert isinstance(exp_number, int), 'Experiment number must be integer.'
-        assert isinstance(scan_number, int), 'Scan number must be integer.'
-        assert isinstance(mode, int), 'Mode %s must be integer but not %s.' \
-                                      '' % (str(mode), type(mode))
-        assert isinstance(message, str) or isinstance(message, unicode),\
-            'Message %s must be a string/unicode but not %s.' % (str(message), type(message))
+        assert isinstance(exp_number, int), "Experiment number must be integer."
+        assert isinstance(scan_number, int), "Scan number must be integer."
+        assert isinstance(mode, int), "Mode %s must be integer but not %s." "" % (str(mode), type(mode))
+        assert isinstance(message, str) or isinstance(message, unicode), "Message %s must be a string/unicode but not %s." % (
+            str(message),
+            type(message),
+        )
 
         # passed value from PyQt signal might be a unicode code
         message = str(message)
@@ -4144,8 +4115,9 @@ class MainWindow(QMainWindow):
         # set intensity, state to table
         if mode == 0:
             # error message
-            self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, peak_intensity=0., corrected_intensity=0.,
-                                                              standard_error=0., integrate_method='simple')
+            self.ui.tableWidget_mergeScans.set_peak_intensity(
+                row_number, peak_intensity=0.0, corrected_intensity=0.0, standard_error=0.0, integrate_method="simple"
+            )
             self.ui.tableWidget_mergeScans.set_status(row_number=row_number, status=message)
 
             # set peak value
@@ -4159,7 +4131,7 @@ class MainWindow(QMainWindow):
             self.ui.tableWidget_mergeScans.set_ws_name(row_number=row_number, merged_md_name=merged_ws_name)
 
         else:
-            raise RuntimeError('Peak-merging mode %d is not supported.' % mode)
+            raise RuntimeError("Peak-merging mode %d is not supported." % mode)
 
     def update_peak_added_info(self, int_msg, int_msg2):
         """

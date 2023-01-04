@@ -21,6 +21,7 @@ def _catch_exceptions(func):
         except Exception:
             sys.stderr.write("Error occurred in handler:\n")
             import traceback
+
             traceback.print_exc()
 
     return wrapper

@@ -9,7 +9,6 @@ import unittest
 
 
 class RunStringUtilsListToStringTest(unittest.TestCase):
-
     def test_run_list_to_string_for_consecutive_runs(self):
         run_list = [1, 2, 3, 4, 5]
         run_string = utils.run_list_to_string(run_list)
@@ -114,37 +113,37 @@ class RunStringUtilsStringToListTest(unittest.TestCase):
         self.assertEqual(utils.run_string_to_list(run_string), run_list)
 
     def test_run_string_to_list_allows_large_number_runs(self):
-        run_string = '1-1001'
+        run_string = "1-1001"
         expected_list = list(range(1, 1002))
         self.assertEqual(utils.run_string_to_list(run_string), expected_list)
 
     def test_run_string_to_list_allows_trailing_comma_in_short_string(self):
-        run_string = '1,2,3,10-15,'
+        run_string = "1,2,3,10-15,"
         expected_list = [1, 2, 3, 10, 11, 12, 13, 14, 15]
         self.assertEqual(utils.run_string_to_list(run_string), expected_list)
 
     def test_run_string_to_list_allows_trailing_dash_in_short_string(self):
-        run_string = '1,2,3,10-15-'
+        run_string = "1,2,3,10-15-"
         expected_list = [1, 2, 3, 10, 11, 12, 13, 14, 15]
         self.assertEqual(utils.run_string_to_list(run_string), expected_list)
 
     def test_run_string_to_list_allows_trailing_comma_in_long_string(self):
-        run_string = '1,2,3,10-10010,'
+        run_string = "1,2,3,10-10010,"
         expected_list = [1, 2, 3] + list(range(10, 10011))
         self.assertEqual(utils.run_string_to_list(run_string), expected_list)
 
     def test_run_string_to_list_allows_trailing_dash_in_long_string(self):
-        run_string = '1,2,3,10-10010-'
+        run_string = "1,2,3,10-10010-"
         expected_list = [1, 2, 3] + list(range(10, 10011))
         self.assertEqual(utils.run_string_to_list(run_string), expected_list)
 
     def test_run_string_allows_incomplete_upper_range(self):
-        run_string = '62260-66'
+        run_string = "62260-66"
         run_list = [62260, 62261, 62262, 62263, 62264, 62265, 62266]
         self.assertEqual(utils.run_string_to_list(run_string), run_list)
 
     def test_run_string_allows_trailing_comma(self):
-        run_string = '5,4,3,2,1,'
+        run_string = "5,4,3,2,1,"
         run_list = utils.run_string_to_list(run_string)
         self.assertEqual(run_list, [1, 2, 3, 4, 5])
 
@@ -154,10 +153,10 @@ class RunStringUtilsStringToListTest(unittest.TestCase):
         self.assertEqual(utils.run_string_to_list(run_string), run_list)
 
     def test_run_string_allows_range_over_decade(self):
-        run_string = '62268-2'
+        run_string = "62268-2"
         run_list = [62268, 62269, 62270, 62271, 62272]
         self.assertEqual(utils.run_string_to_list(run_string), run_list)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

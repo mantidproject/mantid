@@ -19,8 +19,7 @@ class EAGroupingTabPresenter(object):
     def string_to_list(text):
         return run_string_to_list(text)
 
-    def __init__(self, view, model,
-                 grouping_table_widget=None):
+    def __init__(self, view, model, grouping_table_widget=None):
         self._view = view
         self._model = model
 
@@ -61,7 +60,7 @@ class EAGroupingTabPresenter(object):
         text = "\u03BCx: exp2k : file type .dat"
         return text
 
-    def update_description_text(self, description_text=''):
+    def update_description_text(self, description_text=""):
         if not description_text:
             description_text = self.text_for_description()
         self._view.set_description_text(description_text)
@@ -109,9 +108,7 @@ class EAGroupingTabPresenter(object):
 
     def handle_update_all_clicked(self):
         self.update_thread = self.create_update_thread()
-        self.update_thread.threadWrapperSetUp(self.disable_editing,
-                                              self.handle_update_finished,
-                                              self.error_callback)
+        self.update_thread.threadWrapperSetUp(self.disable_editing, self.handle_update_finished, self.error_callback)
         self.update_thread.start()
 
     def create_update_thread(self):

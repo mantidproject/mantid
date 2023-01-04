@@ -44,7 +44,7 @@ class _PeaksWorkspaceTableView(TableWorkspaceDisplayView):
     """
 
     def __init__(self, *args, **kwargs):
-        self._key_handler = kwargs.pop('key_handler')
+        self._key_handler = kwargs.pop("key_handler")
         TableWorkspaceDisplayView.__init__(self, *args, **kwargs)
         self.source_model = self.model()
         self.proxy_model = None
@@ -85,12 +85,10 @@ class PeaksViewerView(QWidget):
     """Displays a table view of the PeaksWorkspace along with controls
     to interact with the peaks.
     """
+
     TITLE_PREFIX = "Workspace: "
 
-    def __init__(self,
-                 painter: MplPainter,
-                 sliceinfo_provider: 'SliceViewer',
-                 parent=None):
+    def __init__(self, painter: MplPainter, sliceinfo_provider: "SliceViewer", parent=None):
         """
         :param painter: An object responsible for draw the peaks representations
         :param sliceinfo_provider: An object responsible for providing access to current slice information
@@ -98,9 +96,9 @@ class PeaksViewerView(QWidget):
         """
         super().__init__(parent)
         self._painter: MplPainter = painter
-        self._sliceinfo_provider: 'SliceViewer' = sliceinfo_provider
+        self._sliceinfo_provider: "SliceViewer" = sliceinfo_provider
         self._group_box: Optional[QGroupBox] = None
-        self._presenter: Optional['PeaksViewerPresenter'] = None  # handle to its presenter
+        self._presenter: Optional["PeaksViewerPresenter"] = None  # handle to its presenter
         self._table_view: Optional[_PeaksWorkspaceTableView] = None
         self._concise_check_box: Optional[QCheckBox] = None
         self._setup_ui()
@@ -228,12 +226,9 @@ class PeaksViewerView(QWidget):
 
 
 class PeaksViewerCollectionView(QWidget):
-    """Display a collection of PeaksViewerView objects in a scrolling view.
-    """
-    def __init__(self,
-                 painter: MplPainter,
-                 sliceinfo_provider: 'SliceViewer',
-                 parent=None):
+    """Display a collection of PeaksViewerView objects in a scrolling view."""
+
+    def __init__(self, painter: MplPainter, sliceinfo_provider: "SliceViewer", parent=None):
         """
         :param painter: An object responsible for draw the peaks representations
         :param sliceinfo_provider: An object responsible for providing access to current slice information

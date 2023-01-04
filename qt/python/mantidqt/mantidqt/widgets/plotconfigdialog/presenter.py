@@ -14,12 +14,10 @@ from mantidqt.widgets.plotconfigdialog.curvestabwidget.presenter import CurvesTa
 from mantidqt.widgets.plotconfigdialog.imagestabwidget.presenter import ImagesTabWidgetPresenter
 from mantidqt.widgets.plotconfigdialog.legendtabwidget.presenter import LegendTabWidgetPresenter
 
-HELP_URL = 'qthelp://org.mantidproject/doc/tutorials/mantid_basic_course/loading_and_displaying_data/' \
-           '06_formatting_plots.html'
+HELP_URL = "qthelp://org.mantidproject/doc/tutorials/mantid_basic_course/loading_and_displaying_data/" "06_formatting_plots.html"
 
 
 class PlotConfigDialogPresenter:
-
     def __init__(self, fig, view=None, parent=None):
         self.fig = fig
         if view:
@@ -33,9 +31,9 @@ class PlotConfigDialogPresenter:
         legend_tab = None
         # Axes tab
         if len(self.fig.get_axes()) > 0:
-            axes_tab = AxesTabWidgetPresenter(self.fig, parent=self.view,
-                                              success_callback=self.success_callback,
-                                              error_callback=self.error_callback)
+            axes_tab = AxesTabWidgetPresenter(
+                self.fig, parent=self.view, success_callback=self.success_callback, error_callback=self.error_callback
+            )
             self.tab_widget_presenters[1] = axes_tab
             self.tab_widget_views[0] = (axes_tab.view, "Axes")
         # Legend tab
@@ -107,9 +105,9 @@ class PlotConfigDialogPresenter:
         # Show the help documentation relevant to the plot type.
         if self.tab_widget_presenters[3] is not None:
             # If the dialog has the images tab then go to the section on image plots.
-            InterfaceManager().showHelpPage(HELP_URL + '#image-plots')
+            InterfaceManager().showHelpPage(HELP_URL + "#image-plots")
         else:
-            InterfaceManager().showHelpPage(HELP_URL + '#figureoptionsgear-png-ptions-menu')
+            InterfaceManager().showHelpPage(HELP_URL + "#figureoptionsgear-png-ptions-menu")
 
     def forget_tab_from_presenter(self, tab_presenter):
         """Given the presenter of a tab, forgets the tab's presenter and view

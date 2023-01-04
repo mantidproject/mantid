@@ -28,7 +28,8 @@ if "workbench.app.mainwindow" in sys.modules:
     IS_IN_MANTIDGUI = True
 else:
     try:
-        import mantidplot # noqa
+        import mantidplot  # noqa
+
         IS_IN_MANTIDGUI = True
     except:
         pass
@@ -38,8 +39,9 @@ if IS_IN_MANTIDGUI:
 
 class EQSANSInterface(InstrumentInterface):
     """
-        Defines the widgets for EQSANS reduction
+    Defines the widgets for EQSANS reduction
     """
+
     data_type = "Data files *.nxs *.dat *.h5 (*.nxs *.dat *.h5)"
 
     def __init__(self, name, settings):
@@ -49,34 +51,40 @@ class EQSANSInterface(InstrumentInterface):
         self.LAST_REDUCTION_NAME = ".mantid_last_reduction.xml"
 
         # Scripter object to interface with Mantid
-        self.scripter = EQSANSReductionScripter(name=name, settings = self._settings)
+        self.scripter = EQSANSReductionScripter(name=name, settings=self._settings)
 
         # Instrument description
-        self.attach(SANSInstrumentWidget(settings = self._settings, data_proxy=DataProxy, data_type = self.data_type))
+        self.attach(SANSInstrumentWidget(settings=self._settings, data_proxy=DataProxy, data_type=self.data_type))
 
         # Detector
-        self.attach(DetectorWidget(settings = self._settings, data_proxy=DataProxy,
-                                   data_type = self.data_type, use_sample_dc=True,
-                                   options_callback = self.scripter.set_options))
+        self.attach(
+            DetectorWidget(
+                settings=self._settings,
+                data_proxy=DataProxy,
+                data_type=self.data_type,
+                use_sample_dc=True,
+                options_callback=self.scripter.set_options,
+            )
+        )
 
         # Sample
-        self.attach(DataSetsWidget(settings = self._settings, data_proxy=None, data_type = self.data_type))
+        self.attach(DataSetsWidget(settings=self._settings, data_proxy=None, data_type=self.data_type))
 
         # Catalog
-        self.attach(SANSCatalogWidget(settings = self._settings, catalog_cls=DataCatalog))
+        self.attach(SANSCatalogWidget(settings=self._settings, catalog_cls=DataCatalog))
 
         # Tabs that only make sense within MantidPlot
         if IS_IN_MANTIDGUI:
             # Stitcher
-            self.attach(StitcherWidget(settings = self._settings))
+            self.attach(StitcherWidget(settings=self._settings))
 
         # Reduction output
-        self.attach(OutputWidget(settings = self._settings))
+        self.attach(OutputWidget(settings=self._settings))
 
         return
 
     def has_advanced_version(self):
         """
-            Returns true if the instrument has simple and advanced views
+        Returns true if the instrument has simple and advanced views
         """
         return False

@@ -8,7 +8,6 @@ from qtpy import QtWidgets
 
 
 class HomeTabView(QtWidgets.QWidget):
-
     def __init__(self, parent=None, widget_list=None):
         super(HomeTabView, self).__init__(parent)
 

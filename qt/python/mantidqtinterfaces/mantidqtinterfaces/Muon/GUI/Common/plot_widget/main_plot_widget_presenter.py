@@ -8,9 +8,7 @@ from mantidqtinterfaces.Muon.GUI.Common.home_tab.home_tab_presenter import HomeT
 
 
 class MainPlotWidgetPresenter(HomeTabSubWidget):
-
-    def __init__(self, view,
-                 plot_modes):
+    def __init__(self, view, plot_modes):
         """
         :param view: A reference to the QWidget object for plotting
         """

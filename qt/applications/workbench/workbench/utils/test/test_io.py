@@ -13,8 +13,7 @@ from workbench.utils.io import input_qinputdialog
 
 
 class IOTest(TestCase):
-
-    @patch('workbench.utils.io.QInputDialog')
+    @patch("workbench.utils.io.QInputDialog")
     def test_input_qinputdialog_setup_is_correct(self, mock_QInputDialogClass):
         mock_QInputDialogClass.TextInput = QInputDialog.TextInput
         mock_QInputDialog = mock_QInputDialogClass()
@@ -24,7 +23,7 @@ class IOTest(TestCase):
         mock_QInputDialog.setInputMode.assert_called_with(QInputDialog.TextInput)
         mock_QInputDialog.setLabelText.assert_called_with("prompt")
 
-    @patch('workbench.utils.io.QInputDialog')
+    @patch("workbench.utils.io.QInputDialog")
     def test_input_qinputdialog_return_value_is_correct_when_dialog_accepted(self, mock_QInputDialogClass):
         mock_QInputDialog = mock_QInputDialogClass()
         mock_QInputDialog.exec_.return_value = True
@@ -34,7 +33,7 @@ class IOTest(TestCase):
 
         self.assertEqual(user_input, "their input")
 
-    @patch('workbench.utils.io.QInputDialog')
+    @patch("workbench.utils.io.QInputDialog")
     def test_input_qinputdialog_raises_RuntimeError_when_input_cancelled(self, mock_QInputDialogClass):
         mock_QInputDialog = mock_QInputDialogClass()
         mock_QInputDialog.exec_.return_value = False

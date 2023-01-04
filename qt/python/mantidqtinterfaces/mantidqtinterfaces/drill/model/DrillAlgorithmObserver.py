@@ -14,8 +14,9 @@ class DrillAlgorithmObserverSignals(QObject):
     """
     Signals that the observer could send.
     """
+
     finished = Signal(int, str)  # return code (0: success - 1: error), error msg
-    progress = Signal(float)     # progress value between 0.0 and 1.0
+    progress = Signal(float)  # progress value between 0.0 and 1.0
 
 
 class DrillAlgorithmObserver(AlgorithmObserver):
@@ -23,6 +24,7 @@ class DrillAlgorithmObserver(AlgorithmObserver):
     Class that defines an observer for the algorithms started through the DrILL
     interface. It basically overrides the handle methods to propagate signals.
     """
+
     def __init__(self):
         super(DrillAlgorithmObserver, self).__init__()
         self.signals = DrillAlgorithmObserverSignals()

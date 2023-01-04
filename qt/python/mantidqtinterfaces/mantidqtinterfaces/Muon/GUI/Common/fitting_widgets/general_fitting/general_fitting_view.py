@@ -49,8 +49,7 @@ class GeneralFittingView(BasicFittingView):
 
     def update_fit_function(self, fit_function: IFunction, global_parameters: list = []) -> None:
         """Updates the parameters of a fit function shown in the view."""
-        self.fit_function_options.update_function_browser_parameters(self.simultaneous_fitting_mode, fit_function,
-                                                                     global_parameters)
+        self.fit_function_options.update_function_browser_parameters(self.simultaneous_fitting_mode, fit_function, global_parameters)
 
     @property
     def simultaneous_fit_by(self) -> str:

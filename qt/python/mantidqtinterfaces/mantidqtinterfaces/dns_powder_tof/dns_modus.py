@@ -11,18 +11,12 @@ Definition of DNS measurement modi and functions for switching.
 
 from collections import OrderedDict
 
-from mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_widget \
-    import DNSFileSelectorWidget
-from mantidqtinterfaces.dns_powder_tof.options.tof_powder_options_widget import \
-    DNSTofPowderOptionsWidget
+from mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_widget import DNSFileSelectorWidget
+from mantidqtinterfaces.dns_powder_tof.options.tof_powder_options_widget import DNSTofPowderOptionsWidget
 from mantidqtinterfaces.dns_powder_tof.paths.path_widget import DNSPathWidget
-from mantidqtinterfaces.dns_powder_tof.plot.tof_powder_plot_widget import \
-    DNSTofPowderPlotWidget
-from mantidqtinterfaces.dns_powder_tof.script_generator.\
-    tof_powder_script_generator_widget import \
-    DNSTofPowderScriptGeneratorWidget
-from mantidqtinterfaces.dns_powder_tof.xml_dump.xml_dump_widget import \
-    DNSXMLDumpWidget
+from mantidqtinterfaces.dns_powder_tof.plot.tof_powder_plot_widget import DNSTofPowderPlotWidget
+from mantidqtinterfaces.dns_powder_tof.script_generator.tof_powder_script_generator_widget import DNSTofPowderScriptGeneratorWidget
+from mantidqtinterfaces.dns_powder_tof.xml_dump.xml_dump_widget import DNSXMLDumpWidget
 
 
 class DNSModus:
@@ -38,19 +32,16 @@ class DNSModus:
         self.widgets = OrderedDict()
 
         self._mode_map = {
-            'powder_tof': [
-                'paths', 'file_selector', 'tof_powder_options',
-                'tof_powder_script_generator', 'xml_dump', 'plot_tof_powder'
-            ]
+            "powder_tof": ["paths", "file_selector", "tof_powder_options", "tof_powder_script_generator", "xml_dump", "plot_tof_powder"]
         }
         # Yapf: disable
         self._widget_map = {
-            'paths': DNSPathWidget,
-            'file_selector': DNSFileSelectorWidget,
-            'tof_powder_options': DNSTofPowderOptionsWidget,
-            'tof_powder_script_generator': DNSTofPowderScriptGeneratorWidget,
-            'xml_dump': DNSXMLDumpWidget,
-            'plot_tof_powder': DNSTofPowderPlotWidget,
+            "paths": DNSPathWidget,
+            "file_selector": DNSFileSelectorWidget,
+            "tof_powder_options": DNSTofPowderOptionsWidget,
+            "tof_powder_script_generator": DNSTofPowderScriptGeneratorWidget,
+            "xml_dump": DNSXMLDumpWidget,
+            "plot_tof_powder": DNSTofPowderPlotWidget,
         }
         # Yapf: enable
 

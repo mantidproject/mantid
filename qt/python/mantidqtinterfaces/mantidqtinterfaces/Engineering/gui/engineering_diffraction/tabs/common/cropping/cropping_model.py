@@ -12,7 +12,6 @@ SPLITTING_REGEX = ",|-"
 
 
 class CroppingModel(object):
-
     def validate_and_clean_spectrum_numbers(self, numbers):
         numbers = numbers.strip()
         try:

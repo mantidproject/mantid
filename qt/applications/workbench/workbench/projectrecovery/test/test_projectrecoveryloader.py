@@ -43,7 +43,7 @@ class ProjectRecoveryLoaderTest(unittest.TestCase):
         if os.path.exists(self.working_directory):
             shutil.rmtree(self.working_directory)
 
-    @mock.patch('workbench.projectrecovery.projectrecoveryloader.ProjectRecoveryPresenter')
+    @mock.patch("workbench.projectrecovery.projectrecoveryloader.ProjectRecoveryPresenter")
     def test_attempt_recovery_and_recovery_passes(self, presenter):
         presenter.return_value.start_recovery_view.return_value = True
         presenter.return_value.start_recovery_failure.return_value = True
@@ -59,7 +59,7 @@ class ProjectRecoveryLoaderTest(unittest.TestCase):
         self.assertEqual(self.pr.start_recovery_thread.call_count, 1)
         self.pr.loader.main_window.algorithm_selector.block_progress_widget_updates.assert_context_triggered()
 
-    @mock.patch('workbench.projectrecovery.projectrecoveryloader.ProjectRecoveryPresenter')
+    @mock.patch("workbench.projectrecovery.projectrecoveryloader.ProjectRecoveryPresenter")
     def test_attempt_recovery_and_recovery_fails_first_time_but_is_successful_on_failure_view(self, presenter):
         presenter.return_value.start_recovery_view.return_value = False
         presenter.return_value.start_recovery_failure.return_value = True
@@ -75,14 +75,13 @@ class ProjectRecoveryLoaderTest(unittest.TestCase):
         self.assertEqual(self.pr.start_recovery_thread.call_count, 1)
         self.pr.loader.main_window.algorithm_selector.block_progress_widget_updates.assert_context_triggered()
 
-    @mock.patch('workbench.projectrecovery.projectrecoveryloader.ProjectLoader')
+    @mock.patch("workbench.projectrecovery.projectrecoveryloader.ProjectLoader")
     def test_load_project_interfaces_call(self, loader):
         loader.return_value.load_project.return_value = True
 
         self.pr_loader._load_project_interfaces("")
 
-        self.assertEqual(loader.return_value.load_project.call_args, mock.call(file_name=self.pr.recovery_file_ext,
-                                                                               load_workspaces=False))
+        self.assertEqual(loader.return_value.load_project.call_args, mock.call(file_name=self.pr.recovery_file_ext, load_workspaces=False))
 
     def test_compile_recovery_script(self):
         # make sure to clear out the script if it exists
@@ -103,18 +102,17 @@ class ProjectRecoveryLoaderTest(unittest.TestCase):
         self.assertTrue(os.path.exists(self.pr.recovery_order_workspace_history_file))
 
         # Confirm contents is correct
-        with open(self.pr.recovery_order_workspace_history_file, 'r') as f:
+        with open(self.pr.recovery_order_workspace_history_file, "r") as f:
             actual_file_contents = f.read()
 
         file_contents = ""
         # Strip out the time
         for ii in actual_file_contents:
-            if ii == '#':
+            if ii == "#":
                 break
             file_contents += ii
 
-        self.assertEqual(file_contents,
-                         "from mantid.simpleapi import *\n\nCreateSampleWorkspace(OutputWorkspace='ws') ")
+        self.assertEqual(file_contents, "from mantid.simpleapi import *\n\nCreateSampleWorkspace(OutputWorkspace='ws') ")
 
     def test_load_checkpoint(self):
         # Create the checkpoint
@@ -145,7 +143,7 @@ class ProjectRecoveryLoaderTest(unittest.TestCase):
 
         # Ensure a script file exists
         script = os.path.join(self.working_directory, "script")
-        open(script, 'a').close()
+        open(script, "a").close()
 
         self.pr_loader._open_script_in_editor(script)
 

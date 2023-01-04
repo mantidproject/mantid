@@ -18,7 +18,6 @@ from mantidqt.utils.qt.testing import start_qapplication
 
 @start_qapplication
 class CustomTextElidingDelegateTest(unittest.TestCase):
-
     def test_custom_eliding_delegate_does_nothing_for_invalid_indices(self):
         delegate = CustomTextElidingDelegate(padding=5)
         painter = mock.MagicMock(spec=QPainter)

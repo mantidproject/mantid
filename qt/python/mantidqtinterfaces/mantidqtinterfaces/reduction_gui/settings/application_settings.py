@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-'''
+"""
 Notes:
 
 From the command line:
@@ -14,28 +14,29 @@ It uses:
 .config/Mantid/Mantid Reduction.conf
 From mantidplot:
 .config/Mantid/MantidPlot.conf
-'''
+"""
 
-from qtpy.QtCore import (QObject, QSettings, Signal)  # noqa
+from qtpy.QtCore import QObject, QSettings, Signal  # noqa
 
 unicode = str
 
 
 class GeneralSettings(QObject):
     """
-        Settings class that will be passed from the main application
-        to the control widgets.
+    Settings class that will be passed from the main application
+    to the control widgets.
     """
+
     # Properties to be saved in the QSettings file
-    _data_path = '.'
+    _data_path = "."
     _debug = False
     _advanced = True
-    _last_data_ws = ''
-    _last_file = ''
-    _instrument_name = ''
-    _facility_name = ''
+    _last_data_ws = ""
+    _last_file = ""
+    _instrument_name = ""
+    _facility_name = ""
     _data_output_dir = None
-    _catalog_data_path = '.'
+    _catalog_data_path = "."
 
     # User information for remote submission
     cluster_user = None
@@ -44,13 +45,13 @@ class GeneralSettings(QObject):
 
     # Mantid Python API version
     api2 = True
-    data_updated = Signal('PyQt_PyObject','PyQt_PyObject')
+    data_updated = Signal("PyQt_PyObject", "PyQt_PyObject")
     progress = Signal(int)
 
     def __init__(self, settings=None):
         """
-            Initialization.
-            @param settings: QSettings object passed by the main application
+        Initialization.
+        @param settings: QSettings object passed by the main application
         """
         super(GeneralSettings, self).__init__()
         if settings is not None:
@@ -60,13 +61,13 @@ class GeneralSettings(QObject):
 
     def emit_key_value(self, key, value):
         """
-            Emit a signal to alert listeners of key/value update
+        Emit a signal to alert listeners of key/value update
         """
         self.data_updated.emit(key, value)
 
     @property
     def data_path(self):
-        self._data_path = self._settings.value("general_data_path", '.', type=unicode)
+        self._data_path = self._settings.value("general_data_path", ".", type=unicode)
         return self._data_path
 
     @data_path.setter
@@ -99,7 +100,7 @@ class GeneralSettings(QObject):
 
     @property
     def instrument_name(self):
-        """ Get instrument name
+        """Get instrument name
         :return: instrument name or False
         """
         self._instrument_name = self._settings.value("instrument_name", "", type=unicode)

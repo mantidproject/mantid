@@ -12,11 +12,8 @@ from mantidqtinterfaces.drill.model.DrillModel import DrillModel
 
 
 class DrillModelTest(unittest.TestCase):
-
     def setUp(self):
-        patch = mock.patch(
-                'mantidqtinterfaces.drill.model.DrillModel.DrillAlgorithmPool'
-                )
+        patch = mock.patch("mantidqtinterfaces.drill.model.DrillModel.DrillAlgorithmPool")
         self.mTasksPool = patch.start()
         self.addCleanup(patch.stop)
         self.mTasksPool = self.mTasksPool.return_value
@@ -76,8 +73,7 @@ class DrillModelTest(unittest.TestCase):
     def test_getAvailableAcquisitionModes(self, mSettings):
         mSettings.ACQUISITION_MODES = {"i1": ["a1", "a2"]}
         self.model.instrument = "i1"
-        self.assertEqual(self.model.getAvailableAcquisitionModes(),
-                         ["a1", "a2"])
+        self.assertEqual(self.model.getAvailableAcquisitionModes(), ["a1", "a2"])
         self.model.instrument = None
         self.assertEqual(self.model.getAvailableAcquisitionModes(), [])
 
@@ -127,12 +123,15 @@ class DrillModelTest(unittest.TestCase):
         self.model.algorithm = "test_alg"
         self.model.controller = "test_controller"
         self.model._initProcessingParameters()
-        mSapi.AlgorithmManager.createUnmanaged \
-            .assert_called_once_with("test_alg")
-        calls = [mock.call("p1"), mock.call().setController("test_controller"),
-                 mock.call().initFromProperty(p1),
-                 mock.call("p2"), mock.call().setController("test_controller"),
-                 mock.call().initFromProperty(p2)]
+        mSapi.AlgorithmManager.createUnmanaged.assert_called_once_with("test_alg")
+        calls = [
+            mock.call("p1"),
+            mock.call().setController("test_controller"),
+            mock.call().initFromProperty(p1),
+            mock.call("p2"),
+            mock.call().setController("test_controller"),
+            mock.call().initFromProperty(p2),
+        ]
         mParam.assert_has_calls(calls)
 
     def test_getParameters(self):
@@ -252,21 +251,16 @@ class DrillModelTest(unittest.TestCase):
         g1.getName.return_value = "g1"
         s0 = mock.Mock()
         s0.getGroup.return_value = g0
-        s0.getParameterValues.return_value = {"p1": "v0", "p2": "v0",
-                                              "p3": "v0",
-                                              "OutputWorkspace": "out"}
+        s0.getParameterValues.return_value = {"p1": "v0", "p2": "v0", "p3": "v0", "OutputWorkspace": "out"}
         s1 = mock.Mock()
         s1.getGroup.return_value = g0
-        s1.getParameterValues.return_value = {"p1": "v1", "p2": "v1",
-                                              "p3": "v1"}
+        s1.getParameterValues.return_value = {"p1": "v1", "p2": "v1", "p3": "v1"}
         s2 = mock.Mock()
         s2.getGroup.return_value = g1
-        s2.getParameterValues.return_value = {"p1": "v2", "p2": "v2",
-                                              "p3": "v2"}
+        s2.getParameterValues.return_value = {"p1": "v2", "p2": "v2", "p3": "v2"}
         s3 = mock.Mock()
         s3.getGroup.return_value = None
-        s3.getParameterValues.return_value = {"p1": "v3", "p2": "v3",
-                                              "p3": "v3"}
+        s3.getParameterValues.return_value = {"p1": "v3", "p2": "v3", "p3": "v3"}
         g0.getSamples.return_value = [s0, s1]
         g0.getMaster.return_value = s0
         g1.getSamples.return_value = [s2]
@@ -274,9 +268,10 @@ class DrillModelTest(unittest.TestCase):
         self.model._samples = [s0, s1, s2, s3]
         self.assertFalse(self.model.processGroupByGroup([3]))
         self.assertTrue(self.model.processGroupByGroup([0, 1, 2, 3]))
-        calls = [mock.call("g0", "algo", p1='v0,v1', p2='v0,v1', p3="v0",
-                           OutputWorkspace="out"),
-                 mock.call("g1", "algo", p1='v2', p2='v2', p3="v2")]
+        calls = [
+            mock.call("g0", "algo", p1="v0,v1", p2="v0,v1", p3="v0", OutputWorkspace="out"),
+            mock.call("g1", "algo", p1="v2", p2="v2", p3="v2"),
+        ]
         mTask.assert_has_calls(calls, any_order=True)
         self.model.tasksPool.addProcesses.assert_called_once()
 
@@ -342,8 +337,7 @@ class DrillModelTest(unittest.TestCase):
     def test_setVisualSettings(self):
         visualSettings = {"s1": "v1", "s2": "v2"}
         self.model.setVisualSettings(visualSettings)
-        self.assertDictEqual(self.model.visualSettings,
-                             {"s1": "v1", "s2": "v2"})
+        self.assertDictEqual(self.model.visualSettings, {"s1": "v1", "s2": "v2"})
 
     def test_getVisualSettings(self):
         self.model.visualSettings = {"test": "test"}

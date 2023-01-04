@@ -23,12 +23,11 @@ app = QApplication(sys.argv)
 
 
 class RectanglePlotTest(unittest.TestCase):
-
     def setUp(self) -> None:
-        self.facility = config['default.facility']
-        self.instrument = config['default.instrument']
-        config['default.facility'] = "ILL"
-        config['default.instrument'] = "D16"
+        self.facility = config["default.facility"]
+        self.instrument = config["default.instrument"]
+        config["default.facility"] = "ILL"
+        config["default.instrument"] = "D16"
 
         plotter = mock.MagicMock()
         plotter.image_axes._get_aspect_ratio.return_value = 1
@@ -38,14 +37,13 @@ class RectanglePlotTest(unittest.TestCase):
         self.rectangle_plot = MultipleRectangleSelectionLinePlot(plotter, exporter)
 
     def tearDown(self) -> None:
-        config['default.facility'] = self.facility
-        config['default.instrument'] = self.instrument
+        config["default.facility"] = self.facility
+        config["default.instrument"] = self.instrument
         mtd.clear()
 
     @staticmethod
     def create_data_array(width: int = 500, height: int = 500, peaks: list = (), sigma: float = 10):
-        arr = np.fromfunction(lambda x, y: sum([np.exp(-((x - px)**2 + (y - py)**2) / sigma) for px, py in peaks]),
-                              (width, height))
+        arr = np.fromfunction(lambda x, y: sum([np.exp(-((x - px) ** 2 + (y - py) ** 2) / sigma) for px, py in peaks]), (width, height))
 
         return arr
 
@@ -58,16 +56,14 @@ class RectanglePlotTest(unittest.TestCase):
         click_event.ydata = 1
         release_event.ydata = 1
 
-        self.assertEqual(self.rectangle_plot._determine_behaviour(click_event, release_event),
-                         UserInteraction.RECTANGLE_SELECTED)
+        self.assertEqual(self.rectangle_plot._determine_behaviour(click_event, release_event), UserInteraction.RECTANGLE_SELECTED)
 
         click_event.xdata = 0
         click_event.ydata = 0
         release_event.xdata = 1
         release_event.ydata = 1
 
-        self.assertEqual(self.rectangle_plot._determine_behaviour(click_event, release_event),
-                         UserInteraction.RECTANGLE_CREATED)
+        self.assertEqual(self.rectangle_plot._determine_behaviour(click_event, release_event), UserInteraction.RECTANGLE_CREATED)
 
         rect = Rectangle((0, 0), 1, 1)
         self.rectangle_plot._manager.add_rectangle(rect)
@@ -77,24 +73,21 @@ class RectanglePlotTest(unittest.TestCase):
         release_event.xdata = 2
         release_event.ydata = 2
 
-        self.assertEqual(self.rectangle_plot._determine_behaviour(click_event, release_event),
-                         UserInteraction.RECTANGLE_RESHAPED)
+        self.assertEqual(self.rectangle_plot._determine_behaviour(click_event, release_event), UserInteraction.RECTANGLE_RESHAPED)
 
         click_event.xdata = 0.5
         click_event.ydata = 0.5
         release_event.xdata = 1.5
         release_event.ydata = 1.5
 
-        self.assertEqual(self.rectangle_plot._determine_behaviour(click_event, release_event),
-                         UserInteraction.RECTANGLE_MOVED)
+        self.assertEqual(self.rectangle_plot._determine_behaviour(click_event, release_event), UserInteraction.RECTANGLE_MOVED)
 
         click_event.xdata = 10
         click_event.ydata = 10
         release_event.xdata = 15
         release_event.ydata = 15
 
-        self.assertEqual(self.rectangle_plot._determine_behaviour(click_event, release_event),
-                         UserInteraction.RECTANGLE_CREATED)
+        self.assertEqual(self.rectangle_plot._determine_behaviour(click_event, release_event), UserInteraction.RECTANGLE_CREATED)
 
     def test_select_rectangle(self):
         self.rectangle_plot._selector = mock.Mock()
@@ -120,8 +113,7 @@ class RectanglePlotTest(unittest.TestCase):
         point_2 = (10, 10)
 
         corner, width, height = self.rectangle_plot._snap_to_edges(point_1, point_2)
-        self.assertEqual(self.rectangle_plot._selector.extents,
-                         (corner[0], corner[0] + width, corner[1], corner[1] + height))
+        self.assertEqual(self.rectangle_plot._selector.extents, (corner[0], corner[0] + width, corner[1], corner[1] + height))
         self.assertEqual(corner, (0, 0))
         self.assertEqual(width, 9.5)
         self.assertEqual(height, 9.5)
@@ -130,8 +122,7 @@ class RectanglePlotTest(unittest.TestCase):
         point_2 = (10.2, 10.2)
 
         corner, width, height = self.rectangle_plot._snap_to_edges(point_1, point_2)
-        self.assertEqual(self.rectangle_plot._selector.extents,
-                         (corner[0], corner[0] + width, corner[1], corner[1] + height))
+        self.assertEqual(self.rectangle_plot._selector.extents, (corner[0], corner[0] + width, corner[1], corner[1] + height))
         self.assertEqual(corner, (5.5, 5.5))
         self.assertEqual(width, 5)
         self.assertEqual(height, 5)
@@ -140,8 +131,7 @@ class RectanglePlotTest(unittest.TestCase):
         point_2 = (10.2, 10.2)
 
         corner, width, height = self.rectangle_plot._snap_to_edges(point_1, point_2)
-        self.assertEqual(self.rectangle_plot._selector.extents,
-                         (corner[0], corner[0] + width, corner[1], corner[1] + height))
+        self.assertEqual(self.rectangle_plot._selector.extents, (corner[0], corner[0] + width, corner[1], corner[1] + height))
         self.assertEqual(corner, (0, 0))
         self.assertEqual(width, 10.5)
         self.assertEqual(height, 10.5)
@@ -150,8 +140,7 @@ class RectanglePlotTest(unittest.TestCase):
         point_2 = (10.2, 10.2)
 
         corner, width, height = self.rectangle_plot._snap_to_edges(point_1, point_2)
-        self.assertEqual(self.rectangle_plot._selector.extents,
-                         (corner[0], corner[0] + width, corner[1], corner[1] + height))
+        self.assertEqual(self.rectangle_plot._selector.extents, (corner[0], corner[0] + width, corner[1], corner[1] + height))
         self.assertEqual(corner, (9.5, 9.5))
         self.assertEqual(width, 1)
         self.assertEqual(height, 1)
@@ -160,8 +149,7 @@ class RectanglePlotTest(unittest.TestCase):
         point_2 = (10.7, 10.7)
 
         corner, width, height = self.rectangle_plot._snap_to_edges(point_1, point_2)
-        self.assertEqual(self.rectangle_plot._selector.extents,
-                         (corner[0], corner[0] + width, corner[1], corner[1] + height))
+        self.assertEqual(self.rectangle_plot._selector.extents, (corner[0], corner[0] + width, corner[1], corner[1] + height))
         self.assertEqual(corner, (10.5, 10.5))
         self.assertEqual(width, 1)
         self.assertEqual(height, 1)
@@ -170,8 +158,7 @@ class RectanglePlotTest(unittest.TestCase):
         point_2 = (0.2, 0.2)
 
         corner, width, height = self.rectangle_plot._snap_to_edges(point_1, point_2)
-        self.assertEqual(self.rectangle_plot._selector.extents,
-                         (corner[0], corner[0] + width, corner[1], corner[1] + height))
+        self.assertEqual(self.rectangle_plot._selector.extents, (corner[0], corner[0] + width, corner[1], corner[1] + height))
         self.assertEqual(corner, (0, 0))
         self.assertEqual(width, 0.5)
         self.assertEqual(height, 0.5)
@@ -182,8 +169,7 @@ class RectanglePlotTest(unittest.TestCase):
         point_2 = (0.2, 0.2)
 
         corner, width, height = self.rectangle_plot._snap_to_edges(point_1, point_2)
-        self.assertEqual(self.rectangle_plot._selector.extents,
-                         (corner[0], corner[0] + width, corner[1], corner[1] + height))
+        self.assertEqual(self.rectangle_plot._selector.extents, (corner[0], corner[0] + width, corner[1], corner[1] + height))
         self.assertEqual(corner, (-0.5, -0.5))
         self.assertEqual(width, 1)
         self.assertEqual(height, 1)
@@ -348,7 +334,7 @@ class RectanglePlotTest(unittest.TestCase):
 
         self.rectangle_plot._place_interpolate_linear()
 
-        calls = [mock.call((10 + 15*i, 10 + 15*i), 10, 10) for i in range(1, 5)]
+        calls = [mock.call((10 + 15 * i, 10 + 15 * i), 10, 10) for i in range(1, 5)]
         self.assertEqual(self.rectangle_plot._draw_rectangle.call_count, 5)
         self.rectangle_plot._draw_rectangle.assert_has_calls(calls)
 
@@ -399,10 +385,7 @@ class RectanglePlotTest(unittest.TestCase):
 
     def test_find_peaks(self):
         extent = (0, 500, 0, 500)
-        arr = self.create_data_array(width=500,
-                                     height=500,
-                                     peaks=((70, 70), (200, 200), (210, 210)),
-                                     sigma=15)
+        arr = self.create_data_array(width=500, height=500, peaks=((70, 70), (200, 200), (210, 210)), sigma=15)
 
         self.rectangle_plot.plotter.image.get_extent = mock.Mock()
         self.rectangle_plot.plotter.image.get_extent.return_value = extent
@@ -411,22 +394,22 @@ class RectanglePlotTest(unittest.TestCase):
         self.rectangle_plot.plotter.image.get_array.return_value = arr
 
         # only the center of the peak
-        rect = Rectangle((70, 70), 1, 1, facecolor='none', edgecolor='black')
+        rect = Rectangle((70, 70), 1, 1, facecolor="none", edgecolor="black")
         peak = self.rectangle_plot._find_peak(rect)
-        self.assertAlmostEqual(peak[0], 70., 5)
-        self.assertAlmostEqual(peak[1], 70., 5)
+        self.assertAlmostEqual(peak[0], 70.0, 5)
+        self.assertAlmostEqual(peak[1], 70.0, 5)
 
         # a couple of pixels
         rect = Rectangle((69, 69), 3, 3)
         peak = self.rectangle_plot._find_peak(rect)
-        self.assertAlmostEqual(peak[0], 70., 5)
-        self.assertAlmostEqual(peak[1], 70., 5)
+        self.assertAlmostEqual(peak[0], 70.0, 5)
+        self.assertAlmostEqual(peak[1], 70.0, 5)
 
         # a wider rectangle
         rect = Rectangle((50, 50), 40, 40)
         peak = self.rectangle_plot._find_peak(rect)
-        self.assertAlmostEqual(peak[0], 70., 5)
-        self.assertAlmostEqual(peak[1], 70., 5)
+        self.assertAlmostEqual(peak[0], 70.0, 5)
+        self.assertAlmostEqual(peak[1], 70.0, 5)
 
         # off centered rectangle - this time the peak is not just in the middle of the rectangle
         rect = Rectangle((205, 205), 290, 290)
@@ -440,28 +423,28 @@ class RectanglePlotTest(unittest.TestCase):
         peak = self.rectangle_plot._find_peak(rect)
 
         # less precise result because it is just a center of mass
-        self.assertAlmostEqual(peak[0], 70., 2)
-        self.assertAlmostEqual(peak[1], 70., 2)
+        self.assertAlmostEqual(peak[0], 70.0, 2)
+        self.assertAlmostEqual(peak[1], 70.0, 2)
 
         # far enough from the peak that there is no interference from them, so it is an empty rectangle
         rect = Rectangle((450, 450), 10, 10)
         peak = self.rectangle_plot._find_peak(rect)
 
-        self.assertAlmostEqual(peak[0], 455., 5)
-        self.assertAlmostEqual(peak[1], 455., 5)
+        self.assertAlmostEqual(peak[0], 455.0, 5)
+        self.assertAlmostEqual(peak[1], 455.0, 5)
 
         # two peaks at once, finds the middle
         rect = Rectangle((150, 150), 100, 100)
         peak = self.rectangle_plot._find_peak(rect)
-        self.assertAlmostEqual(peak[0], 205., 5)
-        self.assertAlmostEqual(peak[1], 205., 5)
+        self.assertAlmostEqual(peak[0], 205.0, 5)
+        self.assertAlmostEqual(peak[1], 205.0, 5)
 
         # rectangle completely off screen
         rect = Rectangle((-200, -200), 10, 10)
         peak = self.rectangle_plot._find_peak(rect)
 
-        self.assertAlmostEqual(peak[0], 0., 5)
-        self.assertAlmostEqual(peak[1], 0., 5)
+        self.assertAlmostEqual(peak[0], 0.0, 5)
+        self.assertAlmostEqual(peak[1], 0.0, 5)
 
     def test_show_peak(self):
         rect = Rectangle((0, 0), 1, 1)

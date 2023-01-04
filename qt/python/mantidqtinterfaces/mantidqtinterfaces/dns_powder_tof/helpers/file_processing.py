@@ -23,7 +23,7 @@ def filter_filenames(all_datafiles, start, end):
     """
     filtered = []
     for filename in all_datafiles:
-        number = int(filename.replace('.d_dat', '').split('_')[-1])
+        number = int(filename.replace(".d_dat", "").split("_")[-1])
         if end >= number >= start:
             filtered.append(filename)
     return filtered
@@ -44,12 +44,12 @@ def return_filelist(data_dir):
 
 def return_standard_zip(data_dir):
     if not os.path.isdir(data_dir):
-        return ''
+        return ""
     zip_files = sorted(glob.glob(data_dir + "/standard*.zip"))
     if zip_files:
         latest_standard_file = max(zip_files, key=os.path.getmtime)
         return latest_standard_file
-    return ''
+    return ""
 
 
 def unzip_latest_standard(data_dir, standard_dir):
@@ -75,27 +75,27 @@ def create_dir(current_dir):
 
 def save_txt(txt, filename, current_dir=None):
     if current_dir is not None and current_dir:
-        current_path = ''.join((current_dir, '/', filename))
+        current_path = "".join((current_dir, "/", filename))
     else:
         current_path = filename
-    with open(current_path, 'w', encoding="utf8") as my_file:
+    with open(current_path, "w", encoding="utf8") as my_file:
         my_file.write(txt)
     return [filename, current_path]
 
 
 def load_txt(filename, current_dir=None):
     if current_dir is not None and current_dir:
-        current_path = ''.join((current_dir, '/', filename))
+        current_path = "".join((current_dir, "/", filename))
     else:
         current_path = filename
-    with open(current_path, 'r', encoding="utf8") as my_file:
+    with open(current_path, "r", encoding="utf8") as my_file:
         txt = my_file.readlines()
     return txt
 
 
 def open_editor(filename, current_dir=None):
     if current_dir is not None and current_dir:
-        current_path = ''.join((current_dir, '/', filename))
+        current_path = "".join((current_dir, "/", filename))
     else:
         current_path = filename
     if os.path.exists(current_path):

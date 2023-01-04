@@ -37,8 +37,7 @@ class EAGroupingTabPresenterTest(unittest.TestCase):
         self.grouping_table_view.warning_popup = mock.MagicMock()
 
         self.view = EAGroupingTabView(self.grouping_table_view)
-        self.presenter = EAGroupingTabPresenter(self.view, self.model,
-                                                self.grouping_table_widget)
+        self.presenter = EAGroupingTabPresenter(self.view, self.model, self.grouping_table_widget)
 
         self.presenter.create_update_thread = mock.MagicMock(return_value=mock.MagicMock())
         self.view.display_warning_box = mock.MagicMock()
@@ -46,9 +45,9 @@ class EAGroupingTabPresenterTest(unittest.TestCase):
 
     def create_group_workspace_and_load(self):
         grpws = WorkspaceGroup()
-        ws_detector1 = '9999; Detector 1'
+        ws_detector1 = "9999; Detector 1"
         grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector1))
-        ws_detector2 = '9999; Detector 2'
+        ws_detector2 = "9999; Detector 2"
         grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector2))
         run = 9999
         self.context.data_context._loaded_data.add_data(run=[run], workspace=grpws)
@@ -108,5 +107,5 @@ class EAGroupingTabPresenterTest(unittest.TestCase):
         self.presenter.on_clear_requested.assert_called_once()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

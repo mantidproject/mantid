@@ -22,7 +22,4 @@ class EAGroupingTabWidget(object):
         self.grouping_table_widget = EAGroupingTablePresenter(self.grouping_table_view, self.group_tab_model)
 
         self.group_tab_view = EAGroupingTabView(self.grouping_table_view)
-        self.group_tab_presenter = EAGroupingTabPresenter(self.group_tab_view,
-                                                          self.group_tab_model,
-
-                                                          self.grouping_table_widget)
+        self.group_tab_presenter = EAGroupingTabPresenter(self.group_tab_view, self.group_tab_model, self.grouping_table_widget)

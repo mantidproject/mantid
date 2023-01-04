@@ -19,7 +19,6 @@ from .view import SimpleScanViewerView
 
 
 class SimpleScanViewerPresenter:
-
     def __init__(self):
         self._ws: MatrixWorkspace = None  # the workspace containing the data shown
         self._bg_ws: MatrixWorkspace = None  # the workspace containing the background, if there is one.
@@ -82,18 +81,16 @@ class SimpleScanViewerPresenter:
         for each ROIs.
         """
         sample_roi_integrations, corrected_roi_integrations = self.model.roi_integration(self._ws, rectangles, self._bg_ws)
-        peak_dict = {'I': sample_roi_integrations}
+        peak_dict = {"I": sample_roi_integrations}
 
         if self._bg_ws is not None:
             peak_dict["I (bg corrected)"] = corrected_roi_integrations
 
             if np.any(self._bg_ws.getAxis(0).extractValues() != self._ws.getAxis(0).extractValues()):
-                logger.warning("Background and sample data have different two theta ranges."
-                               "Please check that these data match.")
+                logger.warning("Background and sample data have different two theta ranges." "Please check that these data match.")
 
             if len(self._bg_ws.getAxis(1)) > 1:
-                logger.warning("Background has more than one slice. "
-                               "Only the first one is considered for background subtraction.")
+                logger.warning("Background has more than one slice. " "Only the first one is considered for background subtraction.")
 
         return peak_dict
 
@@ -208,6 +205,7 @@ class ScanAlgorithmObserverSignals(QObject):
     """
     Signals for the observer
     """
+
     finished = Signal(bool, str)  # return False for success, True for error, and in this case an error message
     started = Signal(Algorithm)
 

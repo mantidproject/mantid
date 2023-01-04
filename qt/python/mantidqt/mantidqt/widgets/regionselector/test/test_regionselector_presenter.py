@@ -14,9 +14,7 @@ from mantidqt.widgets.sliceviewer.models.workspaceinfo import WS_TYPE
 
 class RegionSelectorTest(unittest.TestCase):
     def setUp(self) -> None:
-        self._ws_info_patcher = patch.multiple("mantidqt.widgets.regionselector.presenter",
-                                               Dimensions=DEFAULT,
-                                               WorkspaceInfo=DEFAULT)
+        self._ws_info_patcher = patch.multiple("mantidqt.widgets.regionselector.presenter", Dimensions=DEFAULT, WorkspaceInfo=DEFAULT)
         self.patched_deps = self._ws_info_patcher.start()
         self.patched_deps["WorkspaceInfo"].get_ws_type.return_value = WS_TYPE.MATRIX
         self.mock_view = MagicMock()
@@ -116,8 +114,7 @@ class RegionSelectorTest(unittest.TestCase):
 
         region = region_selector.get_region("signal")
         self.assertEqual(4, len(region))
-        self.assertEqual([selector_one.extents[2], selector_one.extents[3], selector_two.extents[2],
-                          selector_two.extents[3]], region)
+        self.assertEqual([selector_one.extents[2], selector_one.extents[3], selector_two.extents[2], selector_two.extents[3]], region)
 
     def test_get_region_with_different_region_types(self):
         region_selector, selector_one, selector_two = self._mock_selectors("signal", "background")
@@ -316,5 +313,5 @@ class RegionSelectorTest(unittest.TestCase):
         return region_selector, selector_one, selector_two
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

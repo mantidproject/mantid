@@ -23,7 +23,6 @@ class FittingProperties(Enum):
 
 
 class FittingSettings(object):
-
     def __init__(self, parent, view=None):
         self.view = view if view else FittingSettingsView(parent, self)
         self.parent = parent

@@ -142,8 +142,7 @@ class ProjectRecoveryModel(QObject):
         Decide which was the last checkpoint to be saved from the choices
         :return: The last checkpoint that was saved from the given options
         """
-        checkpoints = self.project_recovery.listdir_fullpath(
-            self.project_recovery.get_pid_folder_to_load_a_checkpoint_from())
+        checkpoints = self.project_recovery.listdir_fullpath(self.project_recovery.get_pid_folder_to_load_a_checkpoint_from())
         # Sort the checkpoints
         checkpoints.sort()
         return checkpoints[-1]
@@ -159,8 +158,7 @@ class ProjectRecoveryModel(QObject):
         pid_folder = self.project_recovery.get_pid_folder_to_load_a_checkpoint_from()
         if pid_folder is None:
             return
-        paths = self.project_recovery.listdir_fullpath(os.path.join(self.project_recovery.recovery_directory_hostname,
-                                                       pid_folder))
+        paths = self.project_recovery.listdir_fullpath(os.path.join(self.project_recovery.recovery_directory_hostname, pid_folder))
 
         paths.sort()
         for path in paths:
@@ -215,8 +213,7 @@ class ProjectRecoveryModel(QObject):
             if row[0] == checkpoint_name:
                 row[2] = "Yes"
                 return
-        raise RuntimeError("Project Recovery: Passed checkpoint name for update of GUI was incorrect: "
-                           + checkpoint_name)
+        raise RuntimeError("Project Recovery: Passed checkpoint name for update of GUI was incorrect: " + checkpoint_name)
 
     def _start_recovery_of_checkpoint(self, checkpoint):
         """

@@ -20,9 +20,9 @@ class InstrumentWidgetModel(object):
     def __init__(self, context=None):
         self._data = context.data_context
         self._context = context
-        self._context.gui_context['RebinType'] = 'None'
-        self._context.gui_context['DoublePulseTime'] = 0.33
-        self._context.gui_context['DoublePulseEnabled'] = False
+        self._context.gui_context["RebinType"] = "None"
+        self._context.gui_context["DoublePulseTime"] = 0.33
+        self._context.gui_context["DoublePulseEnabled"] = False
 
     def clear_data(self):
         """When e.g. instrument changed"""
@@ -96,44 +96,44 @@ class InstrumentWidgetModel(object):
         self._context.gui_context.update_and_send_signal(RebinVariable=str(rebin_params))
 
     def get_variable_binning(self):
-        if 'RebinVariable' in self._context.gui_context:
-            return self._context.gui_context['RebinVariable']
+        if "RebinVariable" in self._context.gui_context:
+            return self._context.gui_context["RebinVariable"]
         else:
-            return ''
+            return ""
 
     def update_binning_type(self, rebin_type):
         self._context.gui_context.update_and_send_signal(RebinType=rebin_type)
 
     def validate_variable_rebin_string(self, variable_rebin_string):
-        variable_rebin_list = variable_rebin_string.split(',')
+        variable_rebin_list = variable_rebin_string.split(",")
         try:
             variable_rebin_list = [Decimal(x) for x in variable_rebin_list]
         except (ValueError, InvalidOperation):
-            return (False, 'Rebin entries must be numbers')
+            return (False, "Rebin entries must be numbers")
 
         if len(variable_rebin_list) == 0:
-            return (False, 'Rebin list must be non-empty')
+            return (False, "Rebin list must be non-empty")
 
         if len(variable_rebin_list) == 1:
-            return (True, '')
+            return (True, "")
 
         if len(variable_rebin_list) == 2:
             if variable_rebin_list[1] > variable_rebin_list[0]:
-                return (True, '')
+                return (True, "")
             else:
-                return (False, 'End of range must be greater than start of range')
+                return (False, "End of range must be greater than start of range")
 
         while len(variable_rebin_list) >= 3:
             # We don't do any additional checking of logarithmic binning so just return true in this instance
             if variable_rebin_list[1] <= 0:
-                return (True, '')
+                return (True, "")
 
-            if (variable_rebin_list[2] - variable_rebin_list[0])%variable_rebin_list[1] != 0:
-                return (False, 'Step and bin boundaries must line up')
+            if (variable_rebin_list[2] - variable_rebin_list[0]) % variable_rebin_list[1] != 0:
+                return (False, "Step and bin boundaries must line up")
 
             variable_rebin_list = variable_rebin_list[2:]
 
         if len(variable_rebin_list) == 1:
-            return (True, '')
+            return (True, "")
         else:
-            return (False, 'Variable rebin string must have 2 or an odd number of entires')
+            return (False, "Variable rebin string must have 2 or an odd number of entires")

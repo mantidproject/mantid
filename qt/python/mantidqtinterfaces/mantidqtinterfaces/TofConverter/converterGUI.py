@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 from qtpy.QtWidgets import QMainWindow, QMessageBox
 from qtpy.QtGui import QDoubleValidator
 from qtpy import QtCore
@@ -16,15 +16,15 @@ from mantidqtinterfaces.TofConverter import convertUnits
 try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
-    Logger("TofConverter").information('Using legacy ui importer')
+    Logger("TofConverter").information("Using legacy ui importer")
     from mantidplot import load_ui
 
 
 class MainWindow(QMainWindow):
-    needsThetaInputList = ['Momentum transfer (Q Angstroms^-1)', 'd-spacing (Angstroms)']
-    needsThetaOutputList = ['Momentum transfer (Q Angstroms^-1)', 'd-spacing (Angstroms)']
-    needsFlightPathInputList = ['Time of flight (microseconds)']
-    needsFlightPathOutputList = ['Time of flight (microseconds)']
+    needsThetaInputList = ["Momentum transfer (Q Angstroms^-1)", "d-spacing (Angstroms)"]
+    needsThetaOutputList = ["Momentum transfer (Q Angstroms^-1)", "d-spacing (Angstroms)"]
+    needsFlightPathInputList = ["Time of flight (microseconds)"]
+    needsFlightPathOutputList = ["Time of flight (microseconds)"]
 
     def thetaEnable(self, enabled):
         self.ui.scatteringAngleInput.setEnabled(enabled)
@@ -37,22 +37,22 @@ class MainWindow(QMainWindow):
             self.ui.totalFlightPathInput.clear()
 
     def setInstrumentInputs(self):
-        #disable both
+        # disable both
         self.thetaEnable(False)
         self.flightPathEnable(False)
 
-        #get the values of the two unit strings
+        # get the values of the two unit strings
         inOption = self.ui.inputUnits.currentText()
         outOption = self.ui.outputUnits.currentText()
 
-        #for theta: enable if input or output unit requires it
+        # for theta: enable if input or output unit requires it
         if inOption in self.needsThetaInputList:
             self.thetaEnable(True)
 
         if outOption in self.needsThetaOutputList:
             self.thetaEnable(True)
 
-        #for flightpath: enable if input or output unit requires it
+        # for flightpath: enable if input or output unit requires it
         if inOption in self.needsFlightPathInputList:
             self.flightPathEnable(True)
 
@@ -63,7 +63,7 @@ class MainWindow(QMainWindow):
         QMainWindow.__init__(self, parent)
         if window_flags:
             self.setWindowFlags(window_flags)
-        self.ui = load_ui(__file__, 'converter.ui', baseinstance=self)
+        self.ui = load_ui(__file__, "converter.ui", baseinstance=self)
         self.ui.InputVal.setValidator(QDoubleValidator(self.ui.InputVal))
         self.ui.totalFlightPathInput.setValidator(QDoubleValidator(self.ui.totalFlightPathInput))
         self.ui.scatteringAngleInput.setValidator(QDoubleValidator(self.ui.scatteringAngleInput))
@@ -78,21 +78,21 @@ class MainWindow(QMainWindow):
         self.Theta = -1.0
         self.output = 0.0
 
-        #help
+        # help
         self.assistant_process = QtCore.QProcess(self)
         # pylint: disable=protected-access
-        self.mantidplot_name = 'TOF Converter'
+        self.mantidplot_name = "TOF Converter"
 
         try:
             import mantid
-            #register startup
-            mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface,
-                                                     "TofConverter", False)
+
+            # register startup
+            mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface, "TofConverter", False)
         except ImportError:
             pass
 
     def helpClicked(self):
-        show_interface_help(self.mantidplot_name, self.assistant_process, area='utility')
+        show_interface_help(self.mantidplot_name, self.assistant_process, area="utility")
 
     def closeEvent(self, event):
         self.assistant_process.close()
@@ -100,7 +100,7 @@ class MainWindow(QMainWindow):
         event.accept()
 
     def convert(self):
-        #Always reset these values before conversion.
+        # Always reset these values before conversion.
         self.Theta = None
         self.flightpath = None
         try:
@@ -119,9 +119,7 @@ class MainWindow(QMainWindow):
             else:
                 self.Theta = -1.0
 
-            self.output = convertUnits.doConversion(self.ui.InputVal.text(), inOption,
-                                                    outOption, self.Theta,
-                                                    self.flightpath)
+            self.output = convertUnits.doConversion(self.ui.InputVal.text(), inOption, outOption, self.Theta, self.flightpath)
 
             self.ui.convertedVal.clear()
             self.ui.convertedVal.insert(str(self.output))

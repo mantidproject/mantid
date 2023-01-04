@@ -21,9 +21,9 @@ from typing import List
 
 # map coordinate system to correct Peak getter
 FRAME_TO_PEAK_CENTER_ATTR = {
-    SpecialCoordinateSystem.QLab: 'getQLabFrame',
-    SpecialCoordinateSystem.QSample: 'getQSampleFrame',
-    SpecialCoordinateSystem.HKL: 'getHKL',
+    SpecialCoordinateSystem.QLab: "getQLabFrame",
+    SpecialCoordinateSystem.QSample: "getQSampleFrame",
+    SpecialCoordinateSystem.HKL: "getHKL",
 }
 
 
@@ -32,16 +32,13 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
     Extends PeaksWorkspace functionality to include color selection
     """
 
-    def __init__(self,
-                 peaks_ws: IPeaksWorkspace,
-                 fg_color: str,
-                 bg_color: str):
+    def __init__(self, peaks_ws: IPeaksWorkspace, fg_color: str, bg_color: str):
         """
         :param peaks_ws: A pointer to the PeaksWorkspace
         :param fg_color: Color of the glyphs marking the signal region
         :param bg_color: Color of the glyphs marking the background region
         """
-        if not hasattr(peaks_ws, 'getNumberPeaks'):
+        if not hasattr(peaks_ws, "getNumberPeaks"):
             raise ValueError("Expected a PeaksWorkspace type but found a {}".format(type(peaks_ws)))
 
         super().__init__(peaks_ws)
@@ -86,8 +83,7 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
             frame_to_slice_fn = self._frame_to_slice_fn(frame)
             for peak in self.ws:
                 peak_origin = getattr(peak, frame_to_slice_fn)()
-                peak_repr = draw_peak_representation(peak_origin, peak.getPeakShape(), slice_info,
-                                                     painter, self.fg_color, self.bg_color)
+                peak_repr = draw_peak_representation(peak_origin, peak.getPeakShape(), slice_info, painter, self.fg_color, self.bg_color)
                 representations.append(peak_repr)
         self._representations = representations
 
@@ -177,7 +173,6 @@ def _get_peaksworkspace(name: str):
     :return: A workspace handle for a PeaksWorkspace
     """
     workspace = AnalysisDataService.Instance()[name]
-    if not hasattr(workspace, 'getNumberPeaks'):
-        raise ValueError("Requested workspace {} is not a PeaksWorkspace. Type={}".format(
-            name, type(workspace)))
+    if not hasattr(workspace, "getNumberPeaks"):
+        raise ValueError("Requested workspace {} is not a PeaksWorkspace. Type={}".format(name, type(workspace)))
     return workspace

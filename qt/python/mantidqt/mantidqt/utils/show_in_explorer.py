@@ -18,10 +18,10 @@ class ShowInExplorer(object):
         try:
             if sys.platform == "win32":
                 os.startfile(path)
-            elif sys.platform == 'darwin':
-                subprocess.check_call(['open', '--', path])
-            elif sys.platform == 'linux2':
-                call_params = ['xdg-open', path]
+            elif sys.platform == "darwin":
+                subprocess.check_call(["open", "--", path])
+            elif sys.platform == "linux2":
+                call_params = ["xdg-open", path]
                 subprocess.check_call(call_params)
         except Exception as ex:
             # it is hard to narrow down the type of exception, as too many things can go wrong:

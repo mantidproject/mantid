@@ -15,7 +15,7 @@ from os.path import splitext
 Ui_data, _ = load_ui(__file__, "data_widget.ui")
 
 
-class FileFilterProxyModel (QtCore.QSortFilterProxyModel):
+class FileFilterProxyModel(QtCore.QSortFilterProxyModel):
     text_filter = None
 
     def __init__(self, parent=None):
@@ -30,7 +30,7 @@ class FileFilterProxyModel (QtCore.QSortFilterProxyModel):
         if self.text_filter is None:
             return True
         else:
-            return model.isDir(index0) or fnmatch(fname,self.text_filter)
+            return model.isDir(index0) or fnmatch(fname, self.text_filter)
 
     def sort(self, column, order):
         self.sourceModel().sort(column, order)
@@ -45,8 +45,7 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         super(FittingDataView, self).__init__(parent)
         self.setupUi(self)
         # file finder
-        self.finder_data.readSettings(
-            output_settings.INTERFACES_SETTINGS_GROUP + '/' + output_settings.ENGINEERING_PREFIX)
+        self.finder_data.readSettings(output_settings.INTERFACES_SETTINGS_GROUP + "/" + output_settings.ENGINEERING_PREFIX)
         self.finder_data.setUseNativeWidget(False)
         self.proxy_model = FileFilterProxyModel()
         self.finder_data.setProxyModel(self.proxy_model)
@@ -59,8 +58,7 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         self.update_file_filter(self.combo_region.currentText(), self.combo_xunit.currentText())
 
     def saveSettings(self):
-        self.finder_data.saveSettings(
-            output_settings.INTERFACES_SETTINGS_GROUP + '/' + output_settings.ENGINEERING_PREFIX)
+        self.finder_data.saveSettings(output_settings.INTERFACES_SETTINGS_GROUP + "/" + output_settings.ENGINEERING_PREFIX)
 
     # =================
     # Slot Connectors
@@ -153,7 +151,7 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
 
         bgsub_check_box = QtWidgets.QTableWidgetItem()
         bgsub_check_box.setFlags(bgsub_check_box.flags() & ~QtCore.Qt.ItemIsEditable)
-        bgsub_check_box.setToolTip('Estimate the background using iterative low-pass (smoothing) filter algorithm')
+        bgsub_check_box.setToolTip("Estimate the background using iterative low-pass (smoothing) filter algorithm")
         if bgsub:
             bgsub_check_box.setCheckState(QtCore.Qt.Checked)
         else:
@@ -163,19 +161,18 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         niter_item = QtWidgets.QTableWidgetItem()
         niter_item.setData(QtCore.Qt.EditRole, int(niter))
         niter_item.setFlags(niter_item.flags() | QtCore.Qt.ItemIsEditable)
-        niter_item.setToolTip('The number of iterations in the background estimation')
+        niter_item.setToolTip("The number of iterations in the background estimation")
         self.table_selection.setItem(row_no, 4, niter_item)
 
         xwindow_item = QtWidgets.QTableWidgetItem()
         xwindow_item.setData(QtCore.Qt.EditRole, float(xwindow))
         xwindow_item.setFlags(xwindow_item.flags() | QtCore.Qt.ItemIsEditable)
-        xwindow_item.setToolTip('The width of the convolution window used for finding the background (in x-axis units)')
+        xwindow_item.setToolTip("The width of the convolution window used for finding the background (in x-axis units)")
         self.table_selection.setItem(row_no, 5, xwindow_item)
 
         SG_check_box = QtWidgets.QTableWidgetItem()
         SG_check_box.setFlags(SG_check_box.flags() & ~QtCore.Qt.ItemIsEditable)
-        SG_check_box.setToolTip(
-            'Apply linear Savitzky–Golay filter before first iteration of background subtraction (recommended)')
+        SG_check_box.setToolTip("Apply linear Savitzky–Golay filter before first iteration of background subtraction (recommended)")
         if SG:
             SG_check_box.setCheckState(QtCore.Qt.Checked)
         else:

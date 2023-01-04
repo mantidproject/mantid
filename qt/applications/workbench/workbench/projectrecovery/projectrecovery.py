@@ -19,7 +19,7 @@ from mantid.kernel import ConfigService, logger
 from workbench.projectrecovery.projectrecoveryloader import ProjectRecoveryLoader
 from workbench.projectrecovery.projectrecoverysaver import ProjectRecoverySaver
 
-if os.name == 'nt':  # Windows packaged and development
+if os.name == "nt":  # Windows packaged and development
     EXECUTABLE_NAMES = ["launch_workbench.pyw", "workbench-script.pyw"]
 else:  # Confirmed on Ubuntu 18.04 Dev and MacOS
     EXECUTABLE_NAMES = ["workbench", "workbench-script"]
@@ -47,15 +47,15 @@ class ProjectRecovery(object):
         :param globalfiguremanager: Based on the globalfiguremanager object expects an object with a dictionary on
         cls/self.figs for the object passed here which contains all of the plots open/needed to be saved
         """
-        self._recovery_directory = os.path.join(ConfigService.getAppDataDirectory(),
-                                                self.recovery_workbench_recovery_name)
+        self._recovery_directory = os.path.join(ConfigService.getAppDataDirectory(), self.recovery_workbench_recovery_name)
         self._recovery_directory_hostname = os.path.join(self.recovery_directory, socket.gethostname())
         self._recovery_directory_pid = os.path.join(self.recovery_directory_hostname, str(os.getpid()))
 
-        self._recovery_order_workspace_history_file = os.path.join(ConfigService.getAppDataDirectory(),
-                                                                   self.recovery_ordered_recovery_file_name)
+        self._recovery_order_workspace_history_file = os.path.join(
+            ConfigService.getAppDataDirectory(), self.recovery_ordered_recovery_file_name
+        )
 
-        self.recovery_enabled = ("true" == ConfigService[RECOVERY_ENABLED_KEY].lower())
+        self.recovery_enabled = "true" == ConfigService[RECOVERY_ENABLED_KEY].lower()
         self.maximum_num_checkpoints = int(ConfigService[NO_OF_CHECKPOINTS_KEY])
         self.time_between_saves = int(ConfigService[SAVING_TIME_KEY])  # seconds
 
@@ -263,6 +263,7 @@ class ProjectRecovery(object):
             if _is_mantid_workbench_process(child.cmdline()):
                 return True
         return False
+
     ######################################################
     #  Loading
     ######################################################

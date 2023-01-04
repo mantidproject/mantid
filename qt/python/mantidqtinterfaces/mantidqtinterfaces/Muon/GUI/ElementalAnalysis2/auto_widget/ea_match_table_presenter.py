@@ -7,7 +7,6 @@
 
 
 class EAMatchTablePresenter(object):
-
     def __init__(self, view):
         self.view = view
         self.table_entries = []
@@ -25,7 +24,7 @@ class EAMatchTablePresenter(object):
 
     def find_entry_index(self, new_entry):
         """
-            Finds index of entry using first 2 columns returns -1 if not found
+        Finds index of entry using first 2 columns returns -1 if not found
         """
         for i, entry in enumerate(self.table_entries):
             if entry[:2] == new_entry[:2]:

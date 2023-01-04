@@ -7,31 +7,46 @@
 #  This file is part of the mantid workbench.
 #
 #
-from mantid.kernel import (BoolTimeSeriesProperty, BoolFilteredTimeSeriesProperty,
-                           FloatTimeSeriesProperty, FloatFilteredTimeSeriesProperty,
-                           Int32TimeSeriesProperty, Int32FilteredTimeSeriesProperty,
-                           Int64TimeSeriesProperty, Int64FilteredTimeSeriesProperty,
-                           StringTimeSeriesProperty, StringFilteredTimeSeriesProperty,
-                           logger)
+from mantid.kernel import (
+    BoolTimeSeriesProperty,
+    BoolFilteredTimeSeriesProperty,
+    FloatTimeSeriesProperty,
+    FloatFilteredTimeSeriesProperty,
+    Int32TimeSeriesProperty,
+    Int32FilteredTimeSeriesProperty,
+    Int64TimeSeriesProperty,
+    Int64FilteredTimeSeriesProperty,
+    StringTimeSeriesProperty,
+    StringFilteredTimeSeriesProperty,
+    logger,
+)
 from mantid.api import MultipleExperimentInfos
 from mantid.kernel import PropertyManager
 from qtpy.QtGui import QStandardItemModel, QStandardItem, QColor
 from qtpy.QtCore import Qt
 import numpy as np
 
-TimeSeriesProperties = (BoolTimeSeriesProperty,
-                        FloatTimeSeriesProperty, Int32TimeSeriesProperty,
-                        Int64TimeSeriesProperty, StringTimeSeriesProperty)
-FilteredTimeSeriesProperties = (BoolFilteredTimeSeriesProperty,
-                                FloatFilteredTimeSeriesProperty, Int32FilteredTimeSeriesProperty,
-                                Int64FilteredTimeSeriesProperty, StringFilteredTimeSeriesProperty)
+TimeSeriesProperties = (
+    BoolTimeSeriesProperty,
+    FloatTimeSeriesProperty,
+    Int32TimeSeriesProperty,
+    Int64TimeSeriesProperty,
+    StringTimeSeriesProperty,
+)
+FilteredTimeSeriesProperties = (
+    BoolFilteredTimeSeriesProperty,
+    FloatFilteredTimeSeriesProperty,
+    Int32FilteredTimeSeriesProperty,
+    Int64FilteredTimeSeriesProperty,
+    StringFilteredTimeSeriesProperty,
+)
 
 DEEP_RED = QColor.fromHsv(0, 180, 255)
 
 
 def get_type(log):
     """Convert type to something readable"""
-    dtype_map = {'i': 'int', 'f': 'float', 's': 'string', 'b': 'bool'}
+    dtype_map = {"i": "int", "f": "float", "s": "string", "b": "bool"}
     if isinstance(log, TimeSeriesProperties):
         return "{} series".format(dtype_map[log.dtype()[0].lower()])
     else:
@@ -39,16 +54,15 @@ def get_type(log):
 
 
 def get_value(log):
-    """Returns the either the value or the number of entries
-    """
+    """Returns the either the value or the number of entries"""
     MAX_LOG_SIZE = 20  # the maximum log length to try to show in the value column
 
     if isinstance(log, TimeSeriesProperties):
         if log.size() == 1:
             # for logs which are filtered or not
-            return '{} (1 entry)'.format(log.filtered_value[0])
+            return "{} (1 entry)".format(log.filtered_value[0])
         else:
-            entry_descr = '({} entries)'.format(log.size())
+            entry_descr = "({} entries)".format(log.size())
 
             # show the value if they are all the same
             if log.size() < MAX_LOG_SIZE:
@@ -67,7 +81,7 @@ def get_value(log):
         return s
 
 
-class SampleLogsModel():
+class SampleLogsModel:
     """This class stores the workspace object and return log values when
     requested
     """
@@ -139,7 +153,7 @@ class SampleLogsModel():
         for log_name in log_list:
             if PropertyManager.isAnInvalidValuesFilterLog(log_name):
                 log = self.get_log(log_name)
-                #determine if the entire log is invalid
+                # determine if the entire log is invalid
                 invalid_value_count = 0
                 for log_value in log.value:
                     if not log_value:
@@ -172,15 +186,13 @@ class SampleLogsModel():
         """Checks if logs is plottable. Only Float, Int32 and Int64
         TimeSeriesProperties are plottable at this point.
         """
-        return isinstance(self.get_log(LogName), (FloatTimeSeriesProperty,
-                                                  Int32TimeSeriesProperty,
-                                                  Int64TimeSeriesProperty))
+        return isinstance(self.get_log(LogName), (FloatTimeSeriesProperty, Int32TimeSeriesProperty, Int64TimeSeriesProperty))
 
-    def get_statistics(self, LogName, filtered = True):
+    def get_statistics(self, LogName, filtered=True):
         """Return the statistics of a particular log"""
         log = self.get_log(LogName)
         if isinstance(log, TimeSeriesProperties):
-            if ((not filtered) and isinstance(log,FilteredTimeSeriesProperties)):
+            if (not filtered) and isinstance(log, FilteredTimeSeriesProperties):
                 log = log.unfiltered()
             return log.getStatistics()
 
@@ -188,7 +200,7 @@ class SampleLogsModel():
         """Checks if workspace is a MD Workspace"""
         return isinstance(self._ws, MultipleExperimentInfos)
 
-    def getItemModel(self, searched_key=''):
+    def getItemModel(self, searched_key=""):
         """Return a QModel made from the current workspace. This should be set
         onto a QTableView. The searched_key allows for filtering log entries.
         """
@@ -196,16 +208,18 @@ class SampleLogsModel():
         def create_table_item(column, itemname, invalid_value_count, log_size, callable, *args):
             item = QStandardItem()
             item.setEditable(False)
-            #format if there is invalid data entries
+            # format if there is invalid data entries
             if invalid_value_count == -1:
                 item.setData(DEEP_RED, Qt.BackgroundRole)
                 item.setToolTip("All of the values in the log are marked invalid, none of them are filtered.")
             elif invalid_value_count > 0:
-                saturation = 10 + (170 * (invalid_value_count/(log_size+invalid_value_count)))
+                saturation = 10 + (170 * (invalid_value_count / (log_size + invalid_value_count)))
                 item.setData(QColor.fromHsv(0, saturation, 255), Qt.BackgroundRole)
                 aux_verb = "is" if invalid_value_count == 1 else "are"
-                item.setToolTip(f"{invalid_value_count}/{log_size+invalid_value_count} of the values in the log"
-                                f" {aux_verb} marked invalid, and {aux_verb} filtered.")
+                item.setToolTip(
+                    f"{invalid_value_count}/{log_size+invalid_value_count} of the values in the log"
+                    f" {aux_verb} marked invalid, and {aux_verb} filtered."
+                )
             try:
                 item.setText(callable(*args))
             except Exception as exc:
@@ -227,7 +241,7 @@ class SampleLogsModel():
             if key in logs_to_highlight.keys():
                 invalid_value_count = logs_to_highlight[key]
             log = self.run.getLogData(key)
-            size = log.size() if hasattr(log, 'size') else 0
+            size = log.size() if hasattr(log, "size") else 0
             name = create_table_item("Name", key, invalid_value_count, size, lambda: log.name)
             log_type = create_table_item("Type", key, invalid_value_count, size, get_type, log)
             value = create_table_item("Value", key, invalid_value_count, size, lambda log: get_value(log), log)

@@ -10,15 +10,16 @@ from qtpy.QtWidgets import QTableWidgetItem
 from mantidqtinterfaces.Muon.GUI.Common import message_box
 from mantidqt.utils.observer_pattern import GenericObserver
 
-GROUP_TABLE_COLUMNS = {0: 'workspace_name', 1: 'run', 2: 'detector', 3: 'to_analyse', 4: 'rebin', 5: 'rebin_options'}
-INVERSE_GROUP_TABLE_COLUMNS = {'workspace_name': 0, 'run': 1, 'detector': 2, 'to_analyse': 3, 'rebin': 4,
-                               'rebin_options': 5}
-TABLE_COLUMN_FLAGS = {'workspace_name': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
-                      'run': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
-                      'detector': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
-                      'to_analyse': QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled,
-                      'rebin': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
-                      'rebin_options': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled}
+GROUP_TABLE_COLUMNS = {0: "workspace_name", 1: "run", 2: "detector", 3: "to_analyse", 4: "rebin", 5: "rebin_options"}
+INVERSE_GROUP_TABLE_COLUMNS = {"workspace_name": 0, "run": 1, "detector": 2, "to_analyse": 3, "rebin": 4, "rebin_options": 5}
+TABLE_COLUMN_FLAGS = {
+    "workspace_name": QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
+    "run": QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
+    "detector": QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
+    "to_analyse": QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled,
+    "rebin": QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
+    "rebin_options": QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
+}
 
 
 class EAGroupingTableView(QtWidgets.QWidget):
@@ -81,8 +82,7 @@ class EAGroupingTableView(QtWidgets.QWidget):
 
     def set_up_table(self):
         self.grouping_table.setColumnCount(6)
-        self.grouping_table.setHorizontalHeaderLabels(["Workspace Name", "Run", "Detector", "Analyse (plot/fit)",
-                                                       "Rebin", "Rebin Options"])
+        self.grouping_table.setHorizontalHeaderLabels(["Workspace Name", "Run", "Detector", "Analyse (plot/fit)", "Rebin", "Rebin Options"])
         header = self.grouping_table.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
@@ -96,18 +96,16 @@ class EAGroupingTableView(QtWidgets.QWidget):
         vertical_headers.setVisible(True)
         self.grouping_table.setColumnHidden(0, True)
 
-        self.grouping_table.horizontalHeaderItem(1).setToolTip("The run :"
-                                                               "\n    - The run can only use digits, characters and _")
-        self.grouping_table.horizontalHeaderItem(2).setToolTip("The detector :"
-                                                               "\n    - The detector can only use digits, characters "
-                                                               "and _")
+        self.grouping_table.horizontalHeaderItem(1).setToolTip("The run :" "\n    - The run can only use digits, characters and _")
+        self.grouping_table.horizontalHeaderItem(2).setToolTip(
+            "The detector :" "\n    - The detector can only use digits, characters " "and _"
+        )
         self.grouping_table.horizontalHeaderItem(3).setToolTip("Whether to include this group in the analysis.")
 
-        self.grouping_table.horizontalHeaderItem(4).setToolTip("A list of Rebins :"
-                                                               "\n  - Select None, Fixed or Variable from the list.")
-        self.grouping_table.horizontalHeaderItem(5).setToolTip("Rebin Options :"
-                                                               "\n  For fixed rebin enter number of steps"
-                                                               "\n  For variable rebin enter Bin Boundaries")
+        self.grouping_table.horizontalHeaderItem(4).setToolTip("A list of Rebins :" "\n  - Select None, Fixed or Variable from the list.")
+        self.grouping_table.horizontalHeaderItem(5).setToolTip(
+            "Rebin Options :" "\n  For fixed rebin enter number of steps" "\n  For variable rebin enter Bin Boundaries"
+        )
 
     def num_rows(self):
         return self.grouping_table.rowCount()
@@ -137,20 +135,19 @@ class EAGroupingTableView(QtWidgets.QWidget):
         for i, entry in enumerate(row_entries):
             table_item = QtWidgets.QTableWidgetItem(entry)
             table_item.setFlags(TABLE_COLUMN_FLAGS[GROUP_TABLE_COLUMNS[i]])
-            if GROUP_TABLE_COLUMNS[i] == 'to_analyse':
+            if GROUP_TABLE_COLUMNS[i] == "to_analyse":
                 if entry:
                     table_item.setCheckState(QtCore.Qt.Checked)
                 else:
                     table_item.setCheckState(QtCore.Qt.Unchecked)
-            if GROUP_TABLE_COLUMNS[i] == 'rebin':
+            if GROUP_TABLE_COLUMNS[i] == "rebin":
                 self.add_rebin_cell(row_position, i, table_item)
 
             self.grouping_table.setItem(row_position, i, table_item)
 
     def add_rebin_cell(self, row_position, column, table_item):
         rebin_selector_widget = self._rebin_selection_cell_widget()
-        rebin_selector_widget.currentIndexChanged.connect(
-            lambda i, row_position=row_position: self.on_rebin_combo_changed(i, row_position))
+        rebin_selector_widget.currentIndexChanged.connect(lambda i, row_position=row_position: self.on_rebin_combo_changed(i, row_position))
         index = int(table_item.text())
         rebin_selector_widget.setCurrentIndex(index)
         self.grouping_table.setCellWidget(row_position, column, rebin_selector_widget)
@@ -173,7 +170,7 @@ class EAGroupingTableView(QtWidgets.QWidget):
             self.grouping_table.removeRow(last_row)
 
     def enter_group_name(self):
-        new_group_name, ok = QtWidgets.QInputDialog.getText(self, 'Detector', 'Enter name of new detector:')
+        new_group_name, ok = QtWidgets.QInputDialog.getText(self, "Detector", "Enter name of new detector:")
         if ok:
             return new_group_name
 
@@ -204,9 +201,9 @@ class EAGroupingTableView(QtWidgets.QWidget):
     def _context_menu_remove_group_action(self, slot):
         if len(self._get_selected_row_indices()) > 1:
             # use plural if >1 item selected
-            remove_group_action = QtWidgets.QAction('Remove Groups', self)
+            remove_group_action = QtWidgets.QAction("Remove Groups", self)
         else:
-            remove_group_action = QtWidgets.QAction('Remove Group', self)
+            remove_group_action = QtWidgets.QAction("Remove Group", self)
         if self.num_rows() == 0:
             remove_group_action.setEnabled(False)
         remove_group_action.triggered.connect(slot)
@@ -241,12 +238,12 @@ class EAGroupingTableView(QtWidgets.QWidget):
 
     def set_to_analyse_state(self, row, state):
         checked_state = QtCore.Qt.Checked if state is True else QtCore.Qt.Unchecked
-        item = self.get_table_item(row, INVERSE_GROUP_TABLE_COLUMNS['to_analyse'])
+        item = self.get_table_item(row, INVERSE_GROUP_TABLE_COLUMNS["to_analyse"])
         item.setCheckState(checked_state)
 
     def set_to_analyse_state_quietly(self, row, state):
         checked_state = QtCore.Qt.Checked if state is True else QtCore.Qt.Unchecked
-        item = self.get_table_item(row, INVERSE_GROUP_TABLE_COLUMNS['to_analyse'])
+        item = self.get_table_item(row, INVERSE_GROUP_TABLE_COLUMNS["to_analyse"])
         self.grouping_table.blockSignals(True)
         item.setCheckState(checked_state)
         self.grouping_table.blockSignals(False)
@@ -272,9 +269,9 @@ class EAGroupingTableView(QtWidgets.QWidget):
         self.grouping_table.setItem(row, 4, QTableWidgetItem(str(index)))
 
     def rebin_fixed_chosen(self, row):
-        steps, ok = QtWidgets.QInputDialog.getText(self, 'Steps',
-                                                   'Rebinning creates a new workspace.\n'
-                                                   'Enter the new bin width in KeV for a new workspace:')
+        steps, ok = QtWidgets.QInputDialog.getText(
+            self, "Steps", "Rebinning creates a new workspace.\n" "Enter the new bin width in KeV for a new workspace:"
+        )
         if not ok:
             self.grouping_table.cellWidget(row, 4).setCurrentIndex(0)
             return
@@ -290,23 +287,26 @@ class EAGroupingTableView(QtWidgets.QWidget):
             return
         steps_text = "Steps: " + str(steps) + " KeV"
         table_item = QTableWidgetItem(steps_text)
-        table_item.setFlags(TABLE_COLUMN_FLAGS['rebin_options'])
+        table_item.setFlags(TABLE_COLUMN_FLAGS["rebin_options"])
         self.grouping_table.setItem(row, 5, table_item)
 
     def rebin_variable_chosen(self, row):
-        steps, ok = QtWidgets.QInputDialog.getText(self, 'Bin Boundaries',
-                                                   'Rebinning creates a new workspace.\n'
-                                                   'A comma separated list of first bin boundary, width, last bin '
-                                                   'boundary.\n'
-                                                   'Optionally this can be followed by a comma and more widths and last'
-                                                   ' boundary pairs.\n'
-                                                   'Optionally this can also be a single number, which is the bin '
-                                                   'width.\n'
-                                                   'Negative width values indicate logarithmic binning.\n\n'
-                                                   'For example:\n'
-                                                   '2,-0.035,10: from 2 rebin in Logarithmic bins of 0.035 up to 10;\n'
-                                                   '0,100,10000,200,20000: from 0 rebin in steps of 100 to 10,000 then '
-                                                   'steps of 200 to 20,000')
+        steps, ok = QtWidgets.QInputDialog.getText(
+            self,
+            "Bin Boundaries",
+            "Rebinning creates a new workspace.\n"
+            "A comma separated list of first bin boundary, width, last bin "
+            "boundary.\n"
+            "Optionally this can be followed by a comma and more widths and last"
+            " boundary pairs.\n"
+            "Optionally this can also be a single number, which is the bin "
+            "width.\n"
+            "Negative width values indicate logarithmic binning.\n\n"
+            "For example:\n"
+            "2,-0.035,10: from 2 rebin in Logarithmic bins of 0.035 up to 10;\n"
+            "0,100,10000,200,20000: from 0 rebin in steps of 100 to 10,000 then "
+            "steps of 200 to 20,000",
+        )
         if not ok:
             self.grouping_table.cellWidget(row, 4).setCurrentIndex(0)
             return
@@ -316,12 +316,12 @@ class EAGroupingTableView(QtWidgets.QWidget):
             return
         bin_text = "Bin Boundaries: " + str(steps)
         table_item = QTableWidgetItem(bin_text)
-        table_item.setFlags(TABLE_COLUMN_FLAGS['rebin_options'])
+        table_item.setFlags(TABLE_COLUMN_FLAGS["rebin_options"])
         self.grouping_table.setItem(row, 5, table_item)
 
     def rebin_none_chosen(self, row):
         table_item = QTableWidgetItem("")
-        table_item.setFlags(TABLE_COLUMN_FLAGS['rebin_options'])
+        table_item.setFlags(TABLE_COLUMN_FLAGS["rebin_options"])
         self.grouping_table.setItem(row, 5, table_item)
 
     # ------------------------------------------------------------------------------------------------------------------

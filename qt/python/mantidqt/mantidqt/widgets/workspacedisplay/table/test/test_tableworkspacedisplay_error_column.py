@@ -10,7 +10,6 @@ from mantidqt.widgets.workspacedisplay.table.error_column import ErrorColumn
 
 
 class ErrorColumnTest(unittest.TestCase):
-
     def test_correct_init(self):
         ErrorColumn(0, 1)
 

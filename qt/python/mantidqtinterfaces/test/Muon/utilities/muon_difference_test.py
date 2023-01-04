@@ -10,7 +10,6 @@ from mantidqtinterfaces.Muon.GUI.Common.muon_diff import MuonDiff
 
 
 class MuonDifferenceTest(unittest.TestCase):
-
     def test_that_cannot_initialize_MuonDiff_without_name(self):
         with self.assertRaises(TypeError):
             MuonDiff(positive="positive", negative="negative")
@@ -40,5 +39,5 @@ class MuonDifferenceTest(unittest.TestCase):
         self.assertEqual("pair", diff.group_or_pair)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

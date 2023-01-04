@@ -15,13 +15,7 @@ class DNSReductionGUIPresenter:
     The presenter is owned by main_view.
     """
 
-    def __init__(self,
-                 name=None,
-                 view=None,
-                 parameter_abo=None,
-                 modus=None,
-                 parent=None,
-                 command_line_reader=None):
+    def __init__(self, name=None, view=None, parameter_abo=None, modus=None, parent=None, command_line_reader=None):
         # pylint: disable=unused-argument, too-many-arguments
         self.name = name
         self.view = view
@@ -29,7 +23,7 @@ class DNSReductionGUIPresenter:
         self.command_line_reader = command_line_reader
         self._parameter_abo = parameter_abo
         self.model = self._parameter_abo
-        self._switch_mode('powder_tof')
+        self._switch_mode("powder_tof")
         # connect signals
         self._attach_signal_slots()
 

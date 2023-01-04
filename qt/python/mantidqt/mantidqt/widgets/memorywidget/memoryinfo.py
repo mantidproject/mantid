@@ -61,5 +61,4 @@ def get_mantid_memory_info() -> MantidMemoryInfo:
     mantid_mem_used_percent = min(int(round(mantid_mem_used * 100 / mem_total)), 100)
     mantid_mem_used_GB = mantid_mem_used * CONVERSION_FACTOR_BYTES_TO_GB
     mem_total_GB = mem_total * CONVERSION_FACTOR_BYTES_TO_GB
-    return MantidMemoryInfo(used_percent=mantid_mem_used_percent, used_GB=mantid_mem_used_GB,
-                            system_total_GB=mem_total_GB)
+    return MantidMemoryInfo(used_percent=mantid_mem_used_percent, used_GB=mantid_mem_used_GB, system_total_GB=mem_total_GB)

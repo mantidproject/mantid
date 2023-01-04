@@ -46,10 +46,7 @@ class TestWorkspaceInfo(unittest.TestCase):
 
     def test_get_display_indices_raises_error_with_incorrect_number_of_dimensions(self):
         self.assertRaises(ValueError, WorkspaceInfo.display_indices, slicepoint=(0, 0, 0), transpose=False)
-        self.assertRaises(ValueError,
-                          WorkspaceInfo.display_indices,
-                          slicepoint=(None, 0, 0),
-                          transpose=False)
+        self.assertRaises(ValueError, WorkspaceInfo.display_indices, slicepoint=(None, 0, 0), transpose=False)
 
     def test_can_support_dynamic_rebinning_for_MDE_workspace(self):
         with mock.patch.object(WorkspaceInfo, "get_ws_type") as mock_get_ws_type:
@@ -113,8 +110,8 @@ class TestWorkspaceInfo(unittest.TestCase):
 
                 self.assertFalse(WorkspaceInfo.can_support_dynamic_rebinning(mock_ws))
                 self.assertEqual(mock_get_ws_type.call_count, 2)
-                mock_get_ws_type.assert_has_calls(2*[mock.call(mock_ws)])
+                mock_get_ws_type.assert_has_calls(2 * [mock.call(mock_ws)])
 
 
-if __name__ == '__name':
+if __name__ == "__name":
     unittest.main()

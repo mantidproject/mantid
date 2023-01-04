@@ -9,7 +9,6 @@ from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import remov
 
 
 class PlotFitPanePresenter(BasePanePresenter):
-
     def __init__(self, view, model, context, fitting_context, figure_presenter):
         """
         Initializes the PlotFitPanePresenter. The fitting_context is a FittingContext that corresponds to this specific
@@ -44,8 +43,8 @@ class PlotFitPanePresenter(BasePanePresenter):
             self._current_fit_info = fit_information_list
             for fit_information in fit_information_list:
                 fit = fit_information.fit
-                fit_workspaces, fit_indices = self._model.get_fit_workspace_and_indices(fit,with_diff)
-                workspace_list += self.match_raw_selection(fit_information.input_workspaces,raw) + fit_workspaces
+                fit_workspaces, fit_indices = self._model.get_fit_workspace_and_indices(fit, with_diff)
+                workspace_list += self.match_raw_selection(fit_information.input_workspaces, raw) + fit_workspaces
                 indices += [0] * len(fit_information.input_workspaces) + fit_indices
                 # dont shade the data but do shade the fit lines
                 self._figure_presenter.add_shaded_region(fit_workspaces, fit_indices)

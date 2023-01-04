@@ -20,7 +20,7 @@ from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_
 class HomeTabRunInfoPresenterTest(unittest.TestCase):
     def setUp(self):
         setup_context_for_tests(self)
-        self.data_context.instrument = 'MUSR'
+        self.data_context.instrument = "MUSR"
 
         self.view = mock.Mock(spec=HomeRunInfoWidgetView)
         self.view.clear = mock.Mock()
@@ -31,13 +31,13 @@ class HomeTabRunInfoPresenterTest(unittest.TestCase):
         self.presenter = HomeRunInfoWidgetPresenter(self.view, self.model)
 
     def test_runinfo_correct(self):
-        file_path = FileFinder.findRuns('MUSR00022725.nxs')[0]
+        file_path = FileFinder.findRuns("MUSR00022725.nxs")[0]
         ws, run, filename, _ = load_utils.load_workspace_from_filename(file_path)
         self.data_context._loaded_data.remove_data(run=run)
-        self.data_context._loaded_data.add_data(run=[run], workspace=ws, filename=filename, instrument='MUSR')
+        self.data_context._loaded_data.add_data(run=[run], workspace=ws, filename=filename, instrument="MUSR")
         self.data_context.current_runs = [[22725]]
         self.context.update_current_data()
-        test_pair = MuonPair('test_pair', 'top', 'bottom', alpha=0.75)
+        test_pair = MuonPair("test_pair", "top", "bottom", alpha=0.75)
         self.group_context.add_pair(pair=test_pair)
 
         self.presenter.update_view_from_model()
@@ -59,5 +59,5 @@ class HomeTabRunInfoPresenterTest(unittest.TestCase):
         self.assertEqual(self.view.add_text_line.call_count, 14)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

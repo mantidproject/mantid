@@ -9,11 +9,8 @@ import numpy
 
 from qtpy.QtCore import QObject, Signal
 
-from mantid.kernel import StringPropertyWithValue, BoolPropertyWithValue, \
-                          FloatArrayProperty, IntArrayProperty, \
-                          StringArrayProperty
-from mantid.api import FileProperty, MultipleFileProperty, \
-                       WorkspaceGroupProperty, MatrixWorkspaceProperty
+from mantid.kernel import StringPropertyWithValue, BoolPropertyWithValue, FloatArrayProperty, IntArrayProperty, StringArrayProperty
+from mantid.api import FileProperty, MultipleFileProperty, WorkspaceGroupProperty, MatrixWorkspaceProperty
 
 
 class DrillParameter(QObject):
@@ -103,27 +100,26 @@ class DrillParameter(QObject):
         self._documentation = mantidProperty.documentation
         self._allowedValues = mantidProperty.allowedValues
         value = mantidProperty.value
-        if (isinstance(mantidProperty, FileProperty)):
+        if isinstance(mantidProperty, FileProperty):
             self._type = self.FILE_TYPE
-        elif (isinstance(mantidProperty, MultipleFileProperty)):
+        elif isinstance(mantidProperty, MultipleFileProperty):
             self._type = self.FILES_TYPE
             if not value:
                 value = ""
-        elif (isinstance(mantidProperty, (WorkspaceGroupProperty,
-                                          MatrixWorkspaceProperty))):
+        elif isinstance(mantidProperty, (WorkspaceGroupProperty, MatrixWorkspaceProperty)):
             self._type = self.WORKSPACE_TYPE
-        elif (isinstance(mantidProperty, StringPropertyWithValue)):
+        elif isinstance(mantidProperty, StringPropertyWithValue):
             if mantidProperty.allowedValues:
                 self._type = self.COMBOBOX_TYPE
             else:
                 self._type = self.STRING_TYPE
-        elif (isinstance(mantidProperty, BoolPropertyWithValue)):
+        elif isinstance(mantidProperty, BoolPropertyWithValue):
             self._type = self.BOOL_TYPE
-        elif (isinstance(mantidProperty, FloatArrayProperty)):
+        elif isinstance(mantidProperty, FloatArrayProperty):
             self._type = self.FLOAT_ARRAY_TYPE
-        elif (isinstance(mantidProperty, IntArrayProperty)):
+        elif isinstance(mantidProperty, IntArrayProperty):
             self._type = self.INT_ARRAY_TYPE
-        elif (isinstance(mantidProperty, StringArrayProperty)):
+        elif isinstance(mantidProperty, StringArrayProperty):
             self._type = self.STRING_TYPE
         else:
             self._type = self.STRING_TYPE

@@ -24,6 +24,7 @@ class WorkspaceLoader(object):
             return
 
         from mantid.simpleapi import Load  # noqa
+
         for workspace in workspaces_to_load:
             try:
                 Load(path.join(directory, (workspace + ".nxs")), OutputWorkspace=workspace)

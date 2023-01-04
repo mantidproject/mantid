@@ -73,5 +73,4 @@ class WorkspaceInfo:
         """
         :return: bool for if workspace is matrix workspace with non common bins
         """
-        return WorkspaceInfo.get_ws_type(workspace) == WS_TYPE.MATRIX \
-            and not workspace.isCommonBins()
+        return WorkspaceInfo.get_ws_type(workspace) == WS_TYPE.MATRIX and not workspace.isCommonBins()

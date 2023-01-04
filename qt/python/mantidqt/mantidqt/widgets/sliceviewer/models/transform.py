@@ -17,6 +17,7 @@ class NonOrthogonalTransform:
     The transformation leaves the origin unaffected which means it can be used to transform
     both points and vectors
     """
+
     def __init__(self, angle: float):
         """
         :param angle: Angle in radians of skewed. Angle increases anti-clockwise from X
@@ -48,9 +49,9 @@ class NonOrthogonalTransform:
         return x - y / np.tan(angle), y / np.sin(angle)
 
 
-class OrthogonalTransform():
+class OrthogonalTransform:
     def __init__(self):
-        self._angle = np.pi/2  # 90 degrees
+        self._angle = np.pi / 2  # 90 degrees
 
     def tr(self, x, y):
         return x, y

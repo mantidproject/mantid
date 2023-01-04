@@ -48,7 +48,7 @@ class SuperplotPresenter:
         self._model.sig_workspace_renamed.connect(self.on_workspace_renamed)
         self._model.sig_workspace_replaced.connect(self.on_workspace_replaced)
 
-        #initial state
+        # initial state
         self._sync_with_current_plot()
 
         self._update_list()
@@ -155,41 +155,33 @@ class SuperplotPresenter:
         axes = figure.gca()
         artists = axes.get_tracked_artists()
         if not artists:
-            self._view.set_available_modes([self.SPECTRUM_MODE_TEXT,
-                                            self.BIN_MODE_TEXT])
+            self._view.set_available_modes([self.SPECTRUM_MODE_TEXT, self.BIN_MODE_TEXT])
         else:
             try:
                 args = axes.creation_args
             except:
                 args = [{}]
             if "axis" in args[0]:
-                if (args[0]["axis"] == MantidAxType.BIN
-                   or args[0]["axis"] == MantidAxType.BIN.value):
+                if args[0]["axis"] == MantidAxType.BIN or args[0]["axis"] == MantidAxType.BIN.value:
                     for arg in args:
-                        if ("axis" not in arg
-                            or (arg["axis"] != MantidAxType.BIN
-                                and arg["axis"] != MantidAxType.BIN.value)):
+                        if "axis" not in arg or (arg["axis"] != MantidAxType.BIN and arg["axis"] != MantidAxType.BIN.value):
                             return
                     self._model.set_bin_mode()
                     self._view.set_available_modes([self.BIN_MODE_TEXT])
                 else:
                     for arg in args:
-                        if ("axis" in arg
-                            and (arg["axis"] == MantidAxType.BIN
-                                 or arg["axis"] == MantidAxType.BIN.value)):
+                        if "axis" in arg and (arg["axis"] == MantidAxType.BIN or arg["axis"] == MantidAxType.BIN.value):
                             return
                     self._model.set_spectrum_mode()
                     self._view.set_available_modes([self.SPECTRUM_MODE_TEXT])
             else:
                 for arg in args:
-                    if ("axis" in arg
-                        and (arg["axis"] != MantidAxType.SPECTRUM
-                             and arg["axis"] != MantidAxType.SPECTRUM.value)):
+                    if "axis" in arg and (arg["axis"] != MantidAxType.SPECTRUM and arg["axis"] != MantidAxType.SPECTRUM.value):
                         return
                 self._model.set_spectrum_mode()
                 self._view.set_available_modes([self.SPECTRUM_MODE_TEXT])
             if "function" in args[0]:
-                self._error_bars = (args[0]["function"] == "errorbar")
+                self._error_bars = args[0]["function"] == "errorbar"
 
         for artist in artists:
             ws, spec_index = axes.get_artists_workspace_and_workspace_index(artist)
@@ -210,15 +202,15 @@ class SuperplotPresenter:
             dict(str: str): plot keyword arguments
         """
         kwargs = dict()
-        kwargs['linestyle'] = ConfigService.getString("plots.line.Style")
-        kwargs['drawstyle'] = ConfigService.getString("plots.line.DrawStyle")
-        kwargs['linewidth'] = float(ConfigService.getString("plots.line.Width"))
-        kwargs['marker'] = MARKER_MAP[ConfigService.getString("plots.marker.Style")]
+        kwargs["linestyle"] = ConfigService.getString("plots.line.Style")
+        kwargs["drawstyle"] = ConfigService.getString("plots.line.DrawStyle")
+        kwargs["linewidth"] = float(ConfigService.getString("plots.line.Width"))
+        kwargs["marker"] = MARKER_MAP[ConfigService.getString("plots.marker.Style")]
         if self._error_bars:
-            kwargs['capsize'] = float(ConfigService.getString("plots.errorbar.Capsize"))
-            kwargs['capthick'] = float(ConfigService.getString("plots.errorbar.CapThickness"))
-            kwargs['errorevery'] = int(ConfigService.getString("plots.errorbar.errorEvery"))
-            kwargs['elinewidth'] = float(ConfigService.getString("plots.errorbar.Width"))
+            kwargs["capsize"] = float(ConfigService.getString("plots.errorbar.Capsize"))
+            kwargs["capthick"] = float(ConfigService.getString("plots.errorbar.CapThickness"))
+            kwargs["errorevery"] = int(ConfigService.getString("plots.errorbar.errorEvery"))
+            kwargs["elinewidth"] = float(ConfigService.getString("plots.errorbar.Width"))
         return kwargs
 
     def on_visibility_changed(self, visible):
@@ -292,8 +284,7 @@ class SuperplotPresenter:
         self._update_list()
         if not self._model.is_bin_mode() and not self._model.is_spectrum_mode():
             mode = self._view.get_mode()
-            self._view.set_available_modes([self.SPECTRUM_MODE_TEXT,
-                                            self.BIN_MODE_TEXT])
+            self._view.set_available_modes([self.SPECTRUM_MODE_TEXT, self.BIN_MODE_TEXT])
             self._view.set_mode(mode)
         self._view.set_selection(selection)
         if all(name in selected_workspaces for name in selection.keys()):
@@ -374,7 +365,7 @@ class SuperplotPresenter:
                     spectra.append(data[1])
             self._view.set_spectra_list(name, spectra)
 
-    def _update_plot(self, replot:bool=False):
+    def _update_plot(self, replot: bool = False):
         """
         Update the plot. This function overplots the memorized data with the
         currently selected workspace and spectrum index. It keeps a memory of
@@ -434,7 +425,7 @@ class SuperplotPresenter:
                 continue
             ws_name = ws.name()
             if (ws_name, sp) not in plotted_data:
-                axes.remove_artists_if(lambda a: a==artist)
+                axes.remove_artists_if(lambda a: a == artist)
             else:
                 label = artist.get_label()
                 try:
@@ -445,9 +436,8 @@ class SuperplotPresenter:
                     self._model.set_workspace_color(ws_name, None)
                 self._view.modify_spectrum_label(ws_name, sp, label, color)
                 if replot:
-                    axes.remove_artists_if(lambda a: a==artist)
-                    kwargs = self._fill_plot_kwargs(ws_name, sp, normalised,
-                                                    mode, color)
+                    axes.remove_artists_if(lambda a: a == artist)
+                    kwargs = self._fill_plot_kwargs(ws_name, sp, normalised, mode, color)
                     ws = mtd[ws_name]
                     if self._error_bars:
                         axes.errorbar(ws, **kwargs)
@@ -469,16 +459,14 @@ class SuperplotPresenter:
 
         # add selection to plot
         for ws_name, spectra in selection.items():
-            if (current_spectrum_index not in spectra
-               and not self._view.is_spectrum_selection_disabled()):
+            if current_spectrum_index not in spectra and not self._view.is_spectrum_selection_disabled():
                 spectra.append(current_spectrum_index)
             for sp in spectra:
                 if sp == -1:
                     continue
                 if (ws_name, sp) not in plotted_data:
                     color = self._model.get_workspace_color(ws_name)
-                    kwargs = self._fill_plot_kwargs(ws_name, sp, normalised,
-                                                    mode, color)
+                    kwargs = self._fill_plot_kwargs(ws_name, sp, normalised, mode, color)
                     if ws_name not in mtd:
                         continue
                     ws = mtd[ws_name]
@@ -490,8 +478,7 @@ class SuperplotPresenter:
                         color = lines[0].get_color()
                     self._model.set_workspace_color(ws_name, color)
 
-    def _fill_plot_kwargs(self, ws_name: str, spectrum: int, normalise: bool,
-                          mode: str, color: str) -> dict:
+    def _fill_plot_kwargs(self, ws_name: str, spectrum: int, normalise: bool, mode: str, color: str) -> dict:
         """
         Fill the keywork arguments dictionnary needed by the mantid plot
         function.
@@ -561,8 +548,7 @@ class SuperplotPresenter:
         mode = self._view.get_mode()
         self._model.remove_data(ws_name, index)
         if not self._model.is_bin_mode() and not self._model.is_spectrum_mode():
-            self._view.set_available_modes([self.SPECTRUM_MODE_TEXT,
-                                            self.BIN_MODE_TEXT])
+            self._view.set_available_modes([self.SPECTRUM_MODE_TEXT, self.BIN_MODE_TEXT])
             self._view.set_mode(mode)
         if ws_name in selection:
             if index in selection[ws_name]:
@@ -612,8 +598,7 @@ class SuperplotPresenter:
                     self._model.remove_data(ws_name, spectrum)
             selection[ws_name] = [-1]
         if not self._model.is_bin_mode() and not self._model.is_spectrum_mode():
-            self._view.set_available_modes([self.SPECTRUM_MODE_TEXT,
-                                            self.BIN_MODE_TEXT])
+            self._view.set_available_modes([self.SPECTRUM_MODE_TEXT, self.BIN_MODE_TEXT])
             self._view.set_mode(mode)
         self._update_list()
         self._update_hold_button()

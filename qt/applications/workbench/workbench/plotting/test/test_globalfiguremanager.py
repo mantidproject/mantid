@@ -128,25 +128,24 @@ class TestGlobalFigureManager(unittest.TestCase):
         self.assertTrue(GlobalFigureManager.has_fignum(num))
 
     def test_destroy_doesnt_have_fig(self):
-        with patch.object(GlobalFigureManager, 'has_fignum', return_value=False) as mock_has_fignum:
+        with patch.object(GlobalFigureManager, "has_fignum", return_value=False) as mock_has_fignum:
             num = 123123
             GlobalFigureManager.destroy(num)
             mock_has_fignum.assert_called_once_with(num)
 
-    @patch('gc.collect')
+    @patch("gc.collect")
     def test_destroy(self, mock_gc_collect):
         num = 0
         mock_manager = MockFigureManager(num)
         GlobalFigureManager.set_active(mock_manager)
         self.assertEqual(1, len(GlobalFigureManager._activeQue))
         self.assertEqual(1, len(GlobalFigureManager.figs))
-        with patch.object(GlobalFigureManager, 'notify_observers') as mock_notify_observers:
+        with patch.object(GlobalFigureManager, "notify_observers") as mock_notify_observers:
             GlobalFigureManager.destroy(num)
             self.assertEqual(0, len(GlobalFigureManager._activeQue))
             self.assertEqual(0, len(GlobalFigureManager.figs))
             mock_gc_collect.assert_called_once_with(1)
-            mock_notify_observers.assert_has_calls(
-                [call(FigureAction.Closed, num), call(FigureAction.OrderChanged, -1)])
+            mock_notify_observers.assert_has_calls([call(FigureAction.Closed, num), call(FigureAction.OrderChanged, -1)])
 
     def test_destroy_fig(self):
         num = 0
@@ -294,13 +293,13 @@ class TestGlobalFigureManager(unittest.TestCase):
 
     def test_figure_title_changed(self):
         mock_figure_number = 312312
-        with patch.object(GlobalFigureManager, 'notify_observers', return_value=False) as mock_notify_observers:
+        with patch.object(GlobalFigureManager, "notify_observers", return_value=False) as mock_notify_observers:
             GlobalFigureManager.figure_title_changed(mock_figure_number)
             mock_notify_observers.assert_called_once_with(FigureAction.Renamed, mock_figure_number)
 
     def test_figure_visibility_changed(self):
         mock_figure_number = 99994
-        with patch.object(GlobalFigureManager, 'notify_observers', return_value=False) as mock_notify_observers:
+        with patch.object(GlobalFigureManager, "notify_observers", return_value=False) as mock_notify_observers:
             GlobalFigureManager.figure_visibility_changed(mock_figure_number)
             mock_notify_observers.assert_called_once_with(FigureAction.VisibilityChanged, mock_figure_number)
 
@@ -308,5 +307,5 @@ class TestGlobalFigureManager(unittest.TestCase):
         self.assertEqual(0, mock.call_count)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

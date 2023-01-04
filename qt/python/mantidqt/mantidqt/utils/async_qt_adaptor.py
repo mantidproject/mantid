@@ -31,6 +31,7 @@ class IQtAsync:
 
     For the benefits of using this over QThreads see AsyncTaskQtAdaptor.
     """
+
     def __init__(self):
         self._worker = None
         self._run_synchronously = False
@@ -75,6 +76,7 @@ def qt_async_task(method: Callable):
             def async_method(some_param_1, some_param_2, ...etc):
                 some_expensive_call(some_param_1, some_param_2) # Will run async
     """
+
     @wraps(method)
     def _inner(self, *args, **kwargs):
         # So that we can store the worker so it doesn't end up garbage collected with no refs
@@ -82,19 +84,23 @@ def qt_async_task(method: Callable):
         assert isinstance(self, IQtAsync), "This class must inherit from IQtAsync"
 
         if self._worker:
-            Logger("Qt Async Task").warning(
-                "Starting a new task, the task in progress has been cancelled")
+            Logger("Qt Async Task").warning("Starting a new task, the task in progress has been cancelled")
             self._worker.abort()
 
-        self._worker = AsyncTaskQtAdaptor(target=method, args=(self, *args), kwargs=kwargs,
-                                          success_cb=self.success_cb_slot,
-                                          error_cb=self.error_cb_slot,
-                                          finished_cb=self._internal_finished_handler,
-                                          run_synchronously=self._run_synchronously)
+        self._worker = AsyncTaskQtAdaptor(
+            target=method,
+            args=(self, *args),
+            kwargs=kwargs,
+            success_cb=self.success_cb_slot,
+            error_cb=self.error_cb_slot,
+            finished_cb=self._internal_finished_handler,
+            run_synchronously=self._run_synchronously,
+        )
         if self._run_synchronously:
             self._worker.run()
         else:
             self._worker.start()
+
     return _inner
 
 
@@ -102,6 +108,7 @@ class _QtSignals(QObject):
     """
     Wrapper class for the signals used to translate from Python threading -> Qt Signals/Slots
     """
+
     success_signal = Signal(AsyncTaskSuccess)
     error_signal = Signal(AsyncTaskFailure)
     finished_signal = Signal()
@@ -143,11 +150,16 @@ class AsyncTaskQtAdaptor(AsyncTask):
     on the main thread and is out of scope for this.
     """
 
-    def __init__(self, target: Callable, args: Any = (), kwargs: Any = None,
-                 success_cb: SuccessCbType = None,
-                 error_cb: ErrorCbType = None,
-                 finished_cb: FinishedCbType = None,
-                 run_synchronously: bool = False):
+    def __init__(
+        self,
+        target: Callable,
+        args: Any = (),
+        kwargs: Any = None,
+        success_cb: SuccessCbType = None,
+        error_cb: ErrorCbType = None,
+        finished_cb: FinishedCbType = None,
+        run_synchronously: bool = False,
+    ):
         self._signals = _QtSignals()
         self._run_synchronously = run_synchronously
         success_cb = self._wrap_signal(self._signals.success_signal, success_cb)
@@ -155,8 +167,7 @@ class AsyncTaskQtAdaptor(AsyncTask):
         finished_cb = self._wrap_signal(self._signals.finished_signal, finished_cb)
 
         super(AsyncTaskQtAdaptor, self).__init__(
-            target=target, args=args, kwargs=kwargs,
-            success_cb=success_cb, error_cb=error_cb, finished_cb=finished_cb
+            target=target, args=args, kwargs=kwargs, success_cb=success_cb, error_cb=error_cb, finished_cb=finished_cb
         )
 
     def _wrap_signal(self, signal: Signal, slot: Optional[Callable]) -> Optional[Callable]:

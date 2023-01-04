@@ -12,12 +12,13 @@ from mantid.api import FrameworkManager, FunctionFactory
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model import GeneralFittingModel
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_presenter import GeneralFittingPresenter
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_view import GeneralFittingView
-from mantidqtinterfaces.Muon.GUI.Common.test_helpers.fitting_mock_setup import (add_mock_methods_to_basic_fitting_model,
-                                                                                add_mock_methods_to_general_fitting_view)
+from mantidqtinterfaces.Muon.GUI.Common.test_helpers.fitting_mock_setup import (
+    add_mock_methods_to_basic_fitting_model,
+    add_mock_methods_to_general_fitting_view,
+)
 
 
 class GeneralFittingPresenterTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         FrameworkManager.Instance()
@@ -100,8 +101,7 @@ class GeneralFittingPresenterTest(unittest.TestCase):
         self.presenter.update_and_reset_all_data.assert_called_with()
 
     def test_that_handle_selected_group_pair_changed_will_set_the_list_of_fit_by_specifiers(self):
-        self.model.get_simultaneous_fit_by_specifiers_to_display_from_context = mock.Mock(
-            return_value=[self.simultaneous_fit_by_specifier])
+        self.model.get_simultaneous_fit_by_specifiers_to_display_from_context = mock.Mock(return_value=[self.simultaneous_fit_by_specifier])
 
         self.presenter.handle_selected_group_pair_changed()
 
@@ -116,8 +116,7 @@ class GeneralFittingPresenterTest(unittest.TestCase):
 
         self.presenter.handle_fitting_finished(self.fit_function, self.fit_status, self.chi_squared)
 
-        self.presenter.update_fit_statuses_and_chi_squared_in_model.assert_called_once_with(self.fit_status,
-                                                                                            self.chi_squared)
+        self.presenter.update_fit_statuses_and_chi_squared_in_model.assert_called_once_with(self.fit_status, self.chi_squared)
         self.presenter.update_fit_function_in_model.assert_called_once_with(self.fit_function)
         self.presenter.update_fit_statuses_and_chi_squared_in_view_from_model.assert_called_once_with()
         self.presenter.update_fit_function_in_view_from_model.assert_called_once_with()
@@ -236,8 +235,7 @@ class GeneralFittingPresenterTest(unittest.TestCase):
         self.mock_model_current_single_fit_function.assert_called_once_with(self.fit_function)
 
     def test_that_update_simultaneous_fit_by_specifiers_in_view_will_change_the_fit_specifiers_in_the_view(self):
-        self.model.get_simultaneous_fit_by_specifiers_to_display_from_context = mock.Mock(
-            return_value=[self.simultaneous_fit_by_specifier])
+        self.model.get_simultaneous_fit_by_specifiers_to_display_from_context = mock.Mock(return_value=[self.simultaneous_fit_by_specifier])
         self.view.setup_fit_by_specifier = mock.Mock()
 
         self.presenter.update_simultaneous_fit_by_specifiers_in_view()
@@ -296,13 +294,11 @@ class GeneralFittingPresenterTest(unittest.TestCase):
         # Mock the properties of the view
         self.mock_view_current_dataset_index = mock.PropertyMock(return_value=self.current_dataset_index)
         type(self.view).current_dataset_index = self.mock_view_current_dataset_index
-        self.mock_view_current_dataset_name = mock.PropertyMock(return_value=
-                                                                self.dataset_names[self.current_dataset_index])
+        self.mock_view_current_dataset_name = mock.PropertyMock(return_value=self.dataset_names[self.current_dataset_index])
         type(self.view).current_dataset_name = self.mock_view_current_dataset_name
         self.mock_view_simultaneous_fit_by = mock.PropertyMock(return_value=self.simultaneous_fit_by)
         type(self.view).simultaneous_fit_by = self.mock_view_simultaneous_fit_by
-        self.mock_view_simultaneous_fit_by_specifier = mock.PropertyMock(return_value=
-                                                                         self.simultaneous_fit_by_specifier)
+        self.mock_view_simultaneous_fit_by_specifier = mock.PropertyMock(return_value=self.simultaneous_fit_by_specifier)
         type(self.view).simultaneous_fit_by_specifier = self.mock_view_simultaneous_fit_by_specifier
         self.mock_view_global_parameters = mock.PropertyMock(return_value=self.global_parameters)
         type(self.view).global_parameters = self.mock_view_global_parameters
@@ -327,9 +323,16 @@ class GeneralFittingPresenterTest(unittest.TestCase):
 
     def _setup_mock_model(self):
         self.model = mock.Mock(spec=GeneralFittingModel)
-        self.model = add_mock_methods_to_basic_fitting_model(self.model, self.dataset_names, self.current_dataset_index,
-                                                             self.fit_function, self.start_x, self.end_x,
-                                                             self.fit_status, self.chi_squared)
+        self.model = add_mock_methods_to_basic_fitting_model(
+            self.model,
+            self.dataset_names,
+            self.current_dataset_index,
+            self.fit_function,
+            self.start_x,
+            self.end_x,
+            self.fit_status,
+            self.chi_squared,
+        )
         # Mock the context
         self.model.context = mock.Mock()
 
@@ -338,8 +341,7 @@ class GeneralFittingPresenterTest(unittest.TestCase):
         type(self.model).current_dataset_index = self.mock_model_current_dataset_index
         self.mock_model_dataset_names = mock.PropertyMock(return_value=self.dataset_names)
         type(self.model).dataset_names = self.mock_model_dataset_names
-        self.mock_model_current_dataset_name = mock.PropertyMock(return_value=
-                                                                 self.dataset_names[self.current_dataset_index])
+        self.mock_model_current_dataset_name = mock.PropertyMock(return_value=self.dataset_names[self.current_dataset_index])
         type(self.model).current_dataset_name = self.mock_model_current_dataset_name
         self.mock_model_number_of_datasets = mock.PropertyMock(return_value=len(self.dataset_names))
         type(self.model).number_of_datasets = self.mock_model_number_of_datasets
@@ -361,8 +363,7 @@ class GeneralFittingPresenterTest(unittest.TestCase):
         type(self.model).fit_to_raw = self.mock_model_fit_to_raw
         self.mock_model_simultaneous_fit_by = mock.PropertyMock(return_value=self.simultaneous_fit_by)
         type(self.model).simultaneous_fit_by = self.mock_model_simultaneous_fit_by
-        self.mock_model_simultaneous_fit_by_specifier = mock.PropertyMock(return_value=
-                                                                          self.simultaneous_fit_by_specifier)
+        self.mock_model_simultaneous_fit_by_specifier = mock.PropertyMock(return_value=self.simultaneous_fit_by_specifier)
         type(self.model).simultaneous_fit_by_specifier = self.mock_model_simultaneous_fit_by_specifier
         self.mock_model_global_parameters = mock.PropertyMock(return_value=self.global_parameters)
         type(self.model).global_parameters = self.mock_model_global_parameters
@@ -406,5 +407,5 @@ class GeneralFittingPresenterTest(unittest.TestCase):
         self.presenter.simultaneous_fit_by_specifier_changed.notify_subscribers = mock.Mock()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

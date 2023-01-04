@@ -12,7 +12,6 @@ from mantidqt.widgets.memorywidget.memoryinfo import get_memory_info, get_mantid
 
 
 class MemoryInfoTest(unittest.TestCase):
-
     def test_memoryinfo(self):
         system_bar = get_memory_info()
         self.assertTrue(isinstance(system_bar.used_percent, int))

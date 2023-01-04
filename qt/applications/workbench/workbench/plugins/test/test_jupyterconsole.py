@@ -20,7 +20,6 @@ from workbench.plugins.jupyterconsole import InProcessJupyterConsole, JupyterCon
 
 @start_qapplication
 class JupyterConsoleTest(unittest.TestCase):
-
     def test_construction_creates_inprocess_console_widget(self):
         main_window = QMainWindow()
         widget = JupyterConsole(main_window)
@@ -32,5 +31,5 @@ class JupyterConsoleTest(unittest.TestCase):
         del console
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
