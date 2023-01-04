@@ -22,7 +22,10 @@ class MANTID_KERNEL_DLL TimeROI {
 public:
   TimeROI();
   TimeROI(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime);
+  /// duration of the whole TimeROI
   double durationInSeconds() const;
+  /// duration of the TimeROI between startTime and stopTime
+  double durationInSeconds(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) const;
   std::size_t numBoundaries() const;
   bool empty() const;
   void addROI(const std::string &startTime, const std::string &stopTime);

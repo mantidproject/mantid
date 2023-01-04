@@ -228,6 +228,22 @@ double TimeROI::durationInSeconds() const {
   }
 }
 
+double TimeROI::durationInSeconds(const DateAndTime &startTime, const DateAndTime &stopTime) const {
+  assert_increasing(startTime, stopTime);
+  if (stopTime <= m_roi.firstTime()) { // asking before ROI
+    return 0.;
+  } else if (startTime >= m_roi.lastTime()) { // asking after ROI
+    return 0.;
+  } else if ((startTime <= m_roi.firstTime()) && (stopTime >= m_roi.lastTime())) { // full range of ROI
+    return this->durationInSeconds();
+  } else { // do the calculation
+    // the time requested is an intersection of start/stop time and this object
+    TimeROI temp{startTime, stopTime};
+    temp.update_intersection(*this);
+    return temp.durationInSeconds();
+  }
+}
+
 std::size_t TimeROI::numBoundaries() const { return static_cast<std::size_t>(m_roi.size()); }
 
 bool TimeROI::empty() const { return bool(this->numBoundaries() == 0); }
