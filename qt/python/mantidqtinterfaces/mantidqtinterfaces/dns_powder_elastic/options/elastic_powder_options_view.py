@@ -6,13 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-DNS Options Widget = View - Tab of DNS Reduction GUI.
+DNS  powder elastic options tab view of DNS reduction GUI.
 """
 
 from qtpy.QtCore import Signal
 
 from mantidqt.utils.qt import load_ui
-
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_view import DNSView
 
 
@@ -28,49 +27,105 @@ class DNSElasticPowderOptionsView(DNSView):
                                 'elastic_powder_options.ui',
                                 baseinstance=self)
         self._map = {
-            # 'multiple_scattering': self._content.dSB_multiple_scattering,
-            'norm_time': self._content.rB_norm_time,
-            'separation_coh_inc': self._content.rB_separation_coh_inc,
-            # 'sum_vana_det_pos': self._content.cB_sum_vana_det_pos,
-            'sum_vana_sf_nsf': self._content.cB_sum_vana_sf_nsf,
-            'ignore_vana_fields': self._content.cB_ignore_vana_fields,
-            'separation': self._content.gB_separation,
-            'det_efficiency': self._content.cB_det_efficiency,
-            'flipping_ratio': self._content.cB_flipping_ratio,
-            'separation_xyz': self._content.rB_separation_xyz,
-            'subtract_background_from_sample':
-                self._content.cB_subtract_background_from_sample,
-            'corrections': self._content.gB_corrections,
-            'background_factor': self._content.dSB_background_factor,
-            'norm_monitor': self._content.rB_norm_monitor,
             'wavelength': self._content.dSB_wavelength,
             'get_wavelength': self._content.cB_get_wavelength,
-            'ttheta_min': self._content.dSB_two_theta_min,
-            'ttheta_max': self._content.dSB_two_theta_max,
+
+            'norm_time': self._content.rB_norm_time,
+            'norm_monitor': self._content.rB_norm_monitor,
+
+            'separation': self._content.gB_separation,
+            'separation_xyz': self._content.rB_separation_xyz,
+            'separation_coh_inc': self._content.rB_separation_coh_inc,
+
+            'corrections': self._content.gB_corrections,
+            'det_efficiency': self._content.cB_det_efficiency,
+            'sum_vana_sf_nsf': self._content.cB_sum_vana_sf_nsf,
+            'ignore_vana_fields': self._content.cB_ignore_vana_fields,
+            'flipping_ratio': self._content.cB_flipping_ratio,
+            'subtract_background_from_sample':
+                self._content.cB_subtract_background_from_sample,
+            'background_factor': self._content.dSB_background_factor,
+
+            'automatic_binning': self._content.cB_automatic_binning,
+            'two_theta_min': self._content.dSB_two_theta_min,
+            'two_theta_max': self._content.dSB_two_theta_max,
+            'two_theta_bin_size': self._content.dSB_two_theta_bin_size
         }
 
         # connect signals
-        self._map['get_wavelength'].stateChanged.connect(
-            self._get_wavelength)
-        self._map['det_efficiency'].stateChanged.connect(
-            self._disable_sub_det_efficiency)
-        self._map['subtract_background_from_sample'].stateChanged.connect(
-            self._disable_sub_sample_back)
+        self._attach_signal_slots()
 
     # signals
     sig_get_wavelength = Signal()
-
-    def _disable_sub_det_efficiency(self, state):
-        self._map['ignore_vana_fields'].setEnabled(state)
-        self._map['sum_vana_sf_nsf'].setEnabled(state)
-        # self._map['sum_vana_det_pos'].setEnabled(state)
-
-    def _disable_sub_sample_back(self, state):
-        self._map['background_factor'].setEnabled(state)
+    sig_auto_binning_clicked = Signal(int)
 
     def deactivate_get_wavelength(self):
-        self._map['get_wavelength'].setCheckState(0)
+        self._map['get_wavelength'].setCheckState(False)
+
+    def _disable_det_efficiency(self, state):
+        if state == 0:
+            self._map['ignore_vana_fields'].setChecked(False)
+            self._map['ignore_vana_fields'].setEnabled(False)
+            self._map['sum_vana_sf_nsf'].setChecked(False)
+            self._map['sum_vana_sf_nsf'].setEnabled(False)
+        else:
+            self._map['ignore_vana_fields'].setEnabled(True)
+            self._map['sum_vana_sf_nsf'].setEnabled(True)
+
+    def _disable_sum_vanadium(self, state):
+        if state == 0:
+            self._map['ignore_vana_fields'].setEnabled(True)
+        else:
+            self._map['ignore_vana_fields'].setEnabled(False)
+            self._map['ignore_vana_fields'].setChecked(False)
+
+    def _disable_ignore_vana(self, state):
+        if state == 0:
+            self._map['sum_vana_sf_nsf'].setEnabled(True)
+        else:
+            self._map['sum_vana_sf_nsf'].setEnabled(False)
+            self._map['sum_vana_sf_nsf'].setChecked(False)
+
+    def _disable_corrections(self, state):
+        if state == 0:
+            self._disable_det_efficiency(False)
+            self._map['det_efficiency'].setChecked(False)
+            self._map['flipping_ratio'].setChecked(False)
+            self._disable_subtract_sample_background(False)
+            self._map['subtract_background_from_sample'].setChecked(False)
+
+    def _disable_subtract_sample_background(self, state):
+        self._map['background_factor'].setEnabled(state)
+
+    def _automatic_binning_clicked(self, state):
+        if state == 0:
+            self._map['two_theta_min'].setEnabled(True)
+            self._map['two_theta_max'].setEnabled(True)
+            self._map['two_theta_bin_size'].setEnabled(True)
+        else:
+            self._map['two_theta_min'].setEnabled(False)
+            self._map['two_theta_max'].setEnabled(False)
+            self._map['two_theta_bin_size'].setEnabled(False)
+        self.sig_auto_binning_clicked.emit(state)
 
     def _get_wavelength(self, state):
         if state:
             self.sig_get_wavelength.emit()
+
+    def _attach_signal_slots(self):
+        self._map['wavelength'].valueChanged.connect(
+            self.deactivate_get_wavelength)
+        self._map['get_wavelength'].stateChanged.connect(
+            self._get_wavelength)
+        self._map['det_efficiency'].stateChanged.connect(
+            self._disable_det_efficiency)
+        self._map['subtract_background_from_sample'].stateChanged.connect(
+            self._disable_subtract_sample_background)
+        self._map['corrections'].clicked.connect(
+            self._disable_corrections)
+        self._map['sum_vana_sf_nsf'].stateChanged.connect(
+            self._disable_sum_vanadium)
+        self._map['ignore_vana_fields'].stateChanged.connect(
+            self._disable_ignore_vana)
+        self._map['automatic_binning'].stateChanged.connect(
+            self._automatic_binning_clicked)
