@@ -99,9 +99,9 @@ class AsyncTaskTest(unittest.TestCase):
 
         self.assertEqual(2, len(recv.task_exc_stack))
         # line number of self.target in asynchronous.py
-        self.assertEqual(65, recv.task_exc_stack[0][1])
+        self.assertEqual(63, recv.task_exc_stack[0][1])
         # line number of raise statement above
-        self.assertEqual(93, recv.task_exc_stack[1][1])
+        self.assertEqual(89, recv.task_exc_stack[1][1])
 
     def test_unsuccessful_args_and_kwargs_operation_calls_error_and_finished_callback(self):
         def foo(scale, shift):
@@ -134,8 +134,10 @@ class AsyncTaskTest(unittest.TestCase):
         self.assertTrue(recv.error_cb_called)
         self.assertTrue(isinstance(recv.task_exc, RuntimeError))
         self.assertEqual(3, len(recv.task_exc_stack))
-        self.assertEqual(133, recv.task_exc_stack[1][1])
-        self.assertEqual(132, recv.task_exc_stack[2][1])
+        # line number of exception
+        self.assertEqual(127, recv.task_exc_stack[1][1])
+        # line number of exception
+        self.assertEqual(125, recv.task_exc_stack[2][1])
 
     # ---------------------------------------------------------------
     # Failure cases

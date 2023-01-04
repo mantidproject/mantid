@@ -209,7 +209,7 @@ class AsyncTaskFailure(AsyncTaskResult):
         msg = self.exc_value.args
         if msg and isinstance(msg, tuple):
             msg = msg[0]
-        return "{} on line {} of '{}': {}".format(error_name, lineno, filename, msg)
+        return f"{error_name} on line {lineno} of '{filename}': {msg}"
 
     @property
     def success(self):
