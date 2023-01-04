@@ -53,6 +53,29 @@ public:
     TS_ASSERT_EQUALS(value.numBoundaries(), 0);
   }
 
+  void test_durations() {
+    TimeROI value{HANUKKAH_START, HANUKKAH_STOP};
+
+    // verify the full duration
+    TS_ASSERT_EQUALS(value.durationInSeconds(), HANUKKAH_DURATION);
+    TS_ASSERT_EQUALS(value.durationInSeconds(HANUKKAH_START, HANUKKAH_STOP), HANUKKAH_DURATION);
+
+    // window parameter order matters
+    TS_ASSERT_THROWS(value.durationInSeconds(HANUKKAH_STOP, HANUKKAH_START), const std::runtime_error &);
+
+    // window entirely outside of TimeROI gives zero
+    TS_ASSERT_EQUALS(value.durationInSeconds(DECEMBER_START, HANUKKAH_START), 0.);
+    TS_ASSERT_EQUALS(value.durationInSeconds(HANUKKAH_STOP, NEW_YEARS_STOP), 0.);
+
+    // from the beginning
+    TS_ASSERT_EQUALS(value.durationInSeconds(DECEMBER_START, CHRISTMAS_START) / ONE_DAY_DURATION, 6.);
+    TS_ASSERT_EQUALS(value.durationInSeconds(HANUKKAH_START, CHRISTMAS_START) / ONE_DAY_DURATION, 6.);
+
+    // past the end
+    TS_ASSERT_EQUALS(value.durationInSeconds(CHRISTMAS_START, HANUKKAH_STOP) / ONE_DAY_DURATION, 1.);
+    TS_ASSERT_EQUALS(value.durationInSeconds(CHRISTMAS_START, NEW_YEARS_STOP) / ONE_DAY_DURATION, 1.);
+  }
+
   void test_sortedROI() {
     TimeROI value;
     // add Hanukkah
