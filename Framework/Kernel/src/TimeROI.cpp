@@ -107,15 +107,7 @@ void TimeROI::replaceValues(const std::vector<DateAndTime> &times, const std::ve
   this->m_roi.clear();
 
   // see if everything to add is "IGNORE"
-  bool set_values = false;
-  {
-    for (const auto value : values) {
-      if (value) {
-        set_values = true;
-        break;
-      }
-    }
-  }
+  bool set_values = std::any_of(values.cbegin(), values.cend(), [](bool value) { return value; });
 
   // set the values if there are any use regions
   if (set_values) {
@@ -226,7 +218,7 @@ double TimeROI::durationInSeconds() const {
   } else {
     const std::vector<bool> &values = m_roi.valuesAsVector();
     const std::vector<double> &times = m_roi.timesAsVectorSeconds();
-    double total = 0.;
+    double total{0.};
     for (std::size_t i = 0; i < ROI_SIZE - 1; ++i) {
       if (values[i])
         total += (times[i + 1] - times[i]);
