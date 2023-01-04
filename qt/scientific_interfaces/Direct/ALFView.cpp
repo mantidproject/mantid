@@ -22,7 +22,7 @@ namespace MantidQt::CustomInterfaces {
 DECLARE_SUBWINDOW(ALFView)
 
 ALFView::ALFView(QWidget *parent) : UserSubWindow(parent), m_instrumentPresenter(), m_analysisPresenter() {
-  this->setWindowTitle("ALF View");
+  this->setWindowTitle("ALFView");
 
   m_instrumentPresenter =
       std::make_unique<ALFInstrumentPresenter>(new ALFInstrumentView(this), std::make_unique<ALFInstrumentModel>());
@@ -68,6 +68,6 @@ QWidget *ALFView::createHelpWidget() {
   return helpWidget;
 }
 
-void ALFView::openHelp() { MantidQt::API::HelpWindow::showCustomInterface(QString("direct/ALF View")); }
+void ALFView::openHelp() { MantidQt::API::HelpWindow::showCustomInterface(QString("direct/ALFView")); }
 
 } // namespace MantidQt::CustomInterfaces
