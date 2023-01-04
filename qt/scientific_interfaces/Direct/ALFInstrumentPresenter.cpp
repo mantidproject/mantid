@@ -13,6 +13,17 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
+#include <map>
+
+namespace {
+
+// A map of the message to display for a returned exception.
+static std::map<std::string, std::string> const EXCEPTION_MAP{
+    {"X arrays must match when dividing 2D workspaces.",
+     "Vanadium normalisation failed:\nX arrays must match when dividing two workspaces."}};
+
+} // namespace
+
 namespace MantidQt::CustomInterfaces {
 
 ALFInstrumentPresenter::ALFInstrumentPresenter(IALFInstrumentView *view, std::unique_ptr<IALFInstrumentModel> model)
@@ -46,7 +57,7 @@ void ALFInstrumentPresenter::loadSample() {
   m_model->setSample(loadAndNormalise(*filepath));
   m_view->setSampleRun(std::to_string(m_model->sampleRun()));
 
-  m_model->generateLoadedWorkspace();
+  generateLoadedWorkspace();
 }
 
 void ALFInstrumentPresenter::loadVanadium() {
@@ -59,7 +70,7 @@ void ALFInstrumentPresenter::loadVanadium() {
     m_model->setVanadium(nullptr);
   }
 
-  m_model->generateLoadedWorkspace();
+  generateLoadedWorkspace();
 }
 
 Mantid::API::MatrixWorkspace_sptr ALFInstrumentPresenter::loadAndNormalise(const std::string &pathToRun) {
@@ -68,6 +79,15 @@ Mantid::API::MatrixWorkspace_sptr ALFInstrumentPresenter::loadAndNormalise(const
   } catch (std::exception const &ex) {
     m_view->warningBox(ex.what());
     return nullptr;
+  }
+}
+
+void ALFInstrumentPresenter::generateLoadedWorkspace() {
+  try {
+    m_model->generateLoadedWorkspace();
+  } catch (std::exception const &ex) {
+    auto const iter = EXCEPTION_MAP.find(ex.what());
+    m_view->warningBox(iter != EXCEPTION_MAP.cend() ? iter->second : ex.what());
   }
 }
 

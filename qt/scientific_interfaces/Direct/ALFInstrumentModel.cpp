@@ -171,8 +171,8 @@ MatrixWorkspace_sptr replaceSpecialValues(MatrixWorkspace_sptr const &inputWorks
   alg->setAlwaysStoreInADS(false);
   alg->setProperty("InputWorkspace", inputWorkspace);
   alg->setProperty("InfinityValue", 0.0);
-  alg->setProperty("BigNumberThreshold", 1.0001);
   alg->setProperty("NaNValue", 0.0);
+  alg->setProperty("CheckErrorAxis", true);
   alg->setProperty("OutputWorkspace", NOT_IN_ADS);
   alg->execute();
   MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
