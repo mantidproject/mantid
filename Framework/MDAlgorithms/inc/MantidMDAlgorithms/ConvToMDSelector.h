@@ -14,12 +14,11 @@ namespace MDAlgorithms {
   (possibly, in a future) other workspace parameters.
   * may be replaced by usual mantid factory in a future;
   *
-  *
-  * See http://www.mantidproject.org/Writing_custom_ConvertTo_MD_transformation
-  for detailed description of this
+  * The detailed description of the algorithm is provided at
+  * dev-docs/source/WritingCustomConvertToMDTransformation.rst.
+  * for detailed description of this
   * class place in the algorithms hierarchy.
   *
-  * @date 25-05-2012
 */
 
 class MANTID_MDALGORITHMS_DLL ConvToMDSelector {

@@ -19,12 +19,10 @@ namespace MDAlgorithms {
    *  Main part of two algorithms which use ConvertToMD factory to transform
    points from instrument space to physical MD space
    *
-   * The description of the algorithm is available at:
-   <http://www.mantidproject.org/ConvertToMD>
-   * The detailed description of the algorithm is provided at:
-   <http://www.mantidproject.org/Writing_custom_ConvertTo_MD_transformation>
-
-   * @date 11-10-2011
+   * See the ConvertToMD algorithm documentation for further details from the
+   * user side.
+   * The detailed description of the algorithm is provided at
+   * dev-docs/source/WritingCustomConvertToMDTransformation.rst.
 */
 
 /// Convert to MD Events class itself:
