@@ -78,8 +78,7 @@ public:
   void test_loadedWsName_returns_the_expected_instrument() { TS_ASSERT_EQUALS("ALFData", m_model->loadedWsName()); }
 
   void test_loadAndNormalise_throws_an_error_if_the_data_is_not_ALF_data() {
-    TS_ASSERT_THROWS(m_model->loadAndNormalise(m_nonALFData), std::invalid_argument const &,
-                     "The loaded data is not from the ALF instrument");
+    TS_ASSERT_THROWS(m_model->loadAndNormalise(m_nonALFData), std::invalid_argument const &);
   }
 
   void test_loadAndNormalise_returns_a_non_null_workspace_if_the_data_is_valid() {
@@ -91,7 +90,7 @@ public:
     TS_ASSERT_EQUALS("dSpacing", workspace->getAxis(0)->unit()->unitID());
   }
 
-  void test_runNumber_returns_zero_when_no_data_is_loaded() {
+  void test_sampleRun_and_vanadiumRun_returns_zero_when_no_data_is_loaded() {
     TS_ASSERT_EQUALS(0u, m_model->sampleRun());
     TS_ASSERT_EQUALS(0u, m_model->vanadiumRun());
   }
@@ -179,6 +178,36 @@ public:
     // The two thetas are the same because we use the same workspace index in the expectations
     TS_ASSERT_DELTA(39.879471, twoThetas[0], 0.00001);
     TS_ASSERT_DELTA(39.879471, twoThetas[1], 0.00001);
+  }
+
+  void test_generateLoadedWorkspace_does_not_throw_when_no_sample_is_set() {
+    TS_ASSERT_THROWS_NOTHING(m_model->generateLoadedWorkspace());
+  }
+
+  void test_generateLoadedWorkspace_outputs_the_sample_workspace_when_no_vanadium_is_set() {
+    auto const sample = m_model->loadAndNormalise(m_ALFData);
+    m_model->setSample(sample);
+
+    m_model->generateLoadedWorkspace();
+
+    TS_ASSERT(ADS.doesExist("ALFData"));
+
+    auto const workspace = ADS.retrieveWS<MatrixWorkspace>("ALFData");
+    TS_ASSERT_EQUALS(sample->y(0), workspace->y(0));
+  }
+
+  void test_generateLoadedWorkspace_outputs_a_normalised_workspace_when_the_vanadium_is_set() {
+    auto const dataWs = m_model->loadAndNormalise(m_ALFData);
+    m_model->setSample(dataWs);
+    m_model->setVanadium(dataWs);
+
+    m_model->generateLoadedWorkspace();
+
+    TS_ASSERT(ADS.doesExist("ALFData"));
+
+    auto const workspace = ADS.retrieveWS<MatrixWorkspace>("ALFData");
+    TS_ASSERT_EQUALS(1.0, workspace->y(0)[0]);
+    TS_ASSERT_EQUALS(1.0, workspace->y(0)[1]);
   }
 
   void

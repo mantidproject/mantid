@@ -83,14 +83,29 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
   }
 
-  void test_getSampleLoadWidget_gets_the_load_widget_from_the_view() {
+  void test_getSampleLoadWidget_gets_the_sample_load_widget_from_the_view() {
     EXPECT_CALL(*m_view, generateSampleLoadWidget()).Times(1);
     m_presenter->getSampleLoadWidget();
+  }
+
+  void test_getVanadiumLoadWidget_gets_the_vanadium_load_widget_from_the_view() {
+    EXPECT_CALL(*m_view, generateVanadiumLoadWidget()).Times(1);
+    m_presenter->getVanadiumLoadWidget();
   }
 
   void test_getInstrumentView_gets_the_instrument_view_widget_from_the_view() {
     EXPECT_CALL(*m_view, getInstrumentView()).Times(1);
     m_presenter->getInstrumentView();
+  }
+
+  void test_loadSettings_will_load_the_settings_in_the_view() {
+    EXPECT_CALL(*m_view, loadSettings()).Times(1);
+    m_presenter->loadSettings();
+  }
+
+  void test_saveSettings_will_save_the_settings_in_the_view() {
+    EXPECT_CALL(*m_view, saveSettings()).Times(1);
+    m_presenter->saveSettings();
   }
 
   void test_loadSample_will_not_attempt_a_load_when_an_empty_filepath_is_provided() {

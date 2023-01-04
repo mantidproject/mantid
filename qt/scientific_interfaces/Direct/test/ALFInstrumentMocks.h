@@ -47,6 +47,9 @@ public:
 
   MOCK_METHOD1(subscribePresenter, void(IALFInstrumentPresenter *presenter));
 
+  MOCK_METHOD0(loadSettings, void());
+  MOCK_METHOD0(saveSettings, void());
+
   MOCK_CONST_METHOD0(getSampleFile, std::optional<std::string>());
   MOCK_CONST_METHOD0(getVanadiumFile, std::optional<std::string>());
 
