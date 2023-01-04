@@ -262,6 +262,7 @@ void PreviewPresenter::runSumBanks() { m_model->sumBanksAsync(*m_jobManager); }
 
 void PreviewPresenter::runReduction() {
   m_view->disableMainWidget();
+  m_view->setUpdateAngleButtonEnabled(false);
   // Ensure the angle is up to date
   m_model->setTheta(m_view->getAngle());
   // Ensure the selected regions are up to date. Required when Loading new data because an empty run details is created.

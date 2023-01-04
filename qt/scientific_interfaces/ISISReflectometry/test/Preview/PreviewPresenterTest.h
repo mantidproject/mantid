@@ -648,6 +648,7 @@ private:
   void expectRunReduction(MockPreviewView &mockView, MockPreviewModel &mockModel, MockJobManager &mockJobManager,
                           MockRegionSelector &mockRegionSelector) {
     EXPECT_CALL(mockView, disableMainWidget()).Times(1);
+    EXPECT_CALL(mockView, setUpdateAngleButtonEnabled(false)).Times(1);
     // Check theta is set
     auto theta = 0.3;
     EXPECT_CALL(mockView, getAngle()).Times(1).WillOnce(Return(theta));
