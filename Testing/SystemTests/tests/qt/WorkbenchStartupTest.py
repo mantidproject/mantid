@@ -26,7 +26,7 @@ def get_mantid_executables_for_platform(platform):
 
 
 def get_mantid_executable_path(platform):
-    directory = ConfigService.getPropertiesDir().replace('\\', '/')
+    directory = ConfigService.getPropertiesDir().replace("\\", "/")
     for executable in get_mantid_executables_for_platform(platform):
         workbench_exe = os.path.join(directory, executable)
         if os.path.exists(workbench_exe):
@@ -36,11 +36,9 @@ def get_mantid_executable_path(platform):
 
 def start_and_wait_for_completion(args_list):
     pids_before_open = set(psutil.pids())
-    process = subprocess.Popen(args_list,
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE)
+    process = subprocess.Popen(args_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     exitcode = process.wait(timeout=SUBPROCESS_TIMEOUT_SECS)
-    if sys.platform == 'win32':
+    if sys.platform == "win32":
         # The setuptools generated .exe starts a new process using 'pythonw workbench-script.pyw'
         # but this outer process does not wait for the child to finish so completes leaving workbench
         # to continue. We attempt to find the python child process by looking at the created pids
@@ -49,7 +47,7 @@ def start_and_wait_for_completion(args_list):
         new_pids_created = pids_after_open - pids_before_open
         for pid in new_pids_created:
             proc = psutil.Process(pid)
-            if 'python' in proc.exe():
+            if "python" in proc.exe():
                 print(f"Found Python subprocess {proc.exe()}. Pid={pid}. Waiting for completion...")
                 proc.wait(timeout=SUBPROCESS_TIMEOUT_SECS)
 
@@ -78,8 +76,8 @@ class WorkbenchStartupTest(systemtesting.MantidSystemTest):
     def __init__(self):
         super(WorkbenchStartupTest, self).__init__()
 
-        self._test_file = NamedTemporaryFile(suffix=".txt", delete=False).name.replace('\\', '/')
-        self._test_script = NamedTemporaryFile(suffix=".py", delete=False).name.replace('\\', '/')
+        self._test_file = NamedTemporaryFile(suffix=".txt", delete=False).name.replace("\\", "/")
+        self._test_script = NamedTemporaryFile(suffix=".py", delete=False).name.replace("\\", "/")
         self._executable = get_mantid_executable_path(sys.platform)
         write_test_script(self._test_script, self._test_file)
 
