@@ -118,7 +118,7 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
             doc="Comma separated list of component names to output the reduced data for; for example tube_1",
         )
 
-        self.declareProperty(name="AlignTubes", defaultValue=True, doc="Align the tubes vertically and horizontally according to IPF.")
+        self.declareProperty(name="AlignTubes", defaultValue=False, doc="Align the tubes vertically and horizontally according to IPF.")
 
     def _generate_mask(self, n_pix, instrument):
         """

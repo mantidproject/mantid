@@ -99,7 +99,7 @@ void LoadILLDiffraction::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The output workspace.");
   declareProperty("TwoThetaOffset", 0.0, "2 theta offset for D1B data, in degrees.");
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("AlignTubes", true, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("AlignTubes", false, Direction::Input),
                   "Apply vertical and horizontal alignment of tubes as defined in IPF");
   declareProperty("ConvertAxisAndTranspose", false,
                   "Whether to convert the spectrum axis to 2theta and "
