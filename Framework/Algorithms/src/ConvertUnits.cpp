@@ -65,7 +65,7 @@ void ConvertUnits::init() {
                   "ensure that all spectra in the output workspace\n"
                   "have identical bin boundaries. This option is not "
                   "recommended (see "
-                  "http://www.mantidproject.org/ConvertUnits).");
+                  "http://docs.mantidproject.org/algorithms/ConvertUnits).");
 
   declareProperty("ConvertFromPointData", true,
                   "When checked, if the Input Workspace contains Points\n"
