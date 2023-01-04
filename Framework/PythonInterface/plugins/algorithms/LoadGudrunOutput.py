@@ -4,8 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import (FileProperty, WorkspaceProperty, PythonAlgorithm,
-                        AlgorithmFactory, FileAction, PropertyMode)
+from mantid.api import FileProperty, WorkspaceProperty, PythonAlgorithm, AlgorithmFactory, FileAction, PropertyMode
 from mantid.kernel import Direction
 from mantid.simpleapi import LoadAscii, CreateWorkspace
 
@@ -13,38 +12,35 @@ import itertools
 
 
 class LoadGudrunOutput(PythonAlgorithm):
-
     def name(self):
-        return 'LoadGudrunOutput'
+        return "LoadGudrunOutput"
 
     def category(self):
-        return 'DataHandling'
+        return "DataHandling"
 
     def summary(self):
-        return 'Loads the common outputs created from Gudrun'
+        return "Loads the common outputs created from Gudrun"
 
     def PyInit(self):
-        self.declareProperty(FileProperty(name='InputFile', defaultValue='', action=FileAction.Load,
-                                          extensions=[".dcs01",
-                                                      ".mdsc01",
-                                                      ".mint01",
-                                                      ".mdor01",
-                                                      ".mgor01"]),
-                             doc="Gudrun output file to be loaded.")
-        self.declareProperty(WorkspaceProperty(name='OutputWorkspace', defaultValue='',
-                                               direction=Direction.Output,
-                                               optional=PropertyMode.Optional),
-                             doc="If No OutputWorkspace is provided, then the workpsace name "
-                                 "will be obtained from the meta data in the input file.")
+        self.declareProperty(
+            FileProperty(
+                name="InputFile", defaultValue="", action=FileAction.Load, extensions=[".dcs01", ".mdsc01", ".mint01", ".mdor01", ".mgor01"]
+            ),
+            doc="Gudrun output file to be loaded.",
+        )
+        self.declareProperty(
+            WorkspaceProperty(name="OutputWorkspace", defaultValue="", direction=Direction.Output, optional=PropertyMode.Optional),
+            doc="If No OutputWorkspace is provided, then the workpsace name " "will be obtained from the meta data in the input file.",
+        )
 
     def PyExec(self):
-        input_file = self.getProperty('InputFile').value
-        output_ws = self.getPropertyValue('OutputWorkspace')
+        input_file = self.getProperty("InputFile").value
+        output_ws = self.getPropertyValue("OutputWorkspace")
         if not output_ws:
             output_ws = self.get_title(input_file)
         number_of_columns, data_line_start = self.find_number_of_columns(input_file)
         self.load_gudrun_file(input_file, output_ws, number_of_columns, data_line_start)
-        self.setProperty('OutputWorkspace', output_ws)
+        self.setProperty("OutputWorkspace", output_ws)
 
     def get_title(self, input_file):
         """
@@ -52,10 +48,10 @@ class LoadGudrunOutput(PythonAlgorithm):
         :param input_file: file to get meta data from
         :return: (title)
         """
-        with open(input_file, 'r') as gudrun_file:
+        with open(input_file, "r") as gudrun_file:
             first_line = gudrun_file.readline()
             first_line = first_line[2:]
-            return first_line.replace('.', '-')
+            return first_line.replace(".", "-")
 
     def find_number_of_columns(self, input_file):
         """
@@ -63,9 +59,9 @@ class LoadGudrunOutput(PythonAlgorithm):
         :param input_file: The file to check
         :return: (The number of columns of data, the first line of data)
         """
-        with open(input_file, 'r') as gudrun_file:
+        with open(input_file, "r") as gudrun_file:
             data_line_start = 0
-            while gudrun_file.readline().startswith('#'):
+            while gudrun_file.readline().startswith("#"):
                 # skip over lines that are commented
                 data_line_start += 1
             row = self.format_data_row(gudrun_file.readline().split(" "))
@@ -83,10 +79,12 @@ class LoadGudrunOutput(PythonAlgorithm):
 
         if number_of_columns % 2 == 0:
             print(number_of_columns)
-            raise ValueError('Incorrect data format: The input file {} must have an odd number '
-                             'of columns in the format X , Y , E, Y1, E1, Y2, E2, ...'.format(input_file))
+            raise ValueError(
+                "Incorrect data format: The input file {} must have an odd number "
+                "of columns in the format X , Y , E, Y1, E1, Y2, E2, ...".format(input_file)
+            )
         elif number_of_columns == 3:
-            LoadAscii(Filename=input_file, OutputWorkspace=output_workspace, CommentIndicator='#')
+            LoadAscii(Filename=input_file, OutputWorkspace=output_workspace, CommentIndicator="#")
         else:
             self.load_multi_column_file(input_file, output_workspace, first_data_line)
 
@@ -98,15 +96,11 @@ class LoadGudrunOutput(PythonAlgorithm):
         :param first_data_line: The first line to expect data on
         :return: The outputWorkspace pointer
         """
-        with open(input_file, 'r') as gudrun_file:
+        with open(input_file, "r") as gudrun_file:
             data_rows = [self.format_data_row(line.split(" ")) for line in gudrun_file.readlines()[first_data_line:]]
         x_data, y_data, e_data = self.create_2d_data_arrays(data_rows)
         n_spec = int((len(data_rows[0]) - 1) / 2)
-        CreateWorkspace(OutputWorkspace=output_workspace,
-                        DataX=x_data,
-                        DataY=y_data,
-                        DataE=e_data,
-                        NSpec=n_spec)
+        CreateWorkspace(OutputWorkspace=output_workspace, DataX=x_data, DataY=y_data, DataE=e_data, NSpec=n_spec)
 
     def format_data_row(self, data_row):
         """
@@ -114,7 +108,7 @@ class LoadGudrunOutput(PythonAlgorithm):
         :param data_row: The data to format
         :return: a formatted data row
         """
-        formatted_row = [data.rstrip() for data in data_row if data != '']
+        formatted_row = [data.rstrip() for data in data_row if data != ""]
         return formatted_row
 
     def create_2d_data_arrays(self, all_data):
@@ -135,11 +129,11 @@ class LoadGudrunOutput(PythonAlgorithm):
             for row_index in range(1, len(data_row)):
                 if row_index % 2 == 1:
                     # y_data
-                    data_array_index = int((row_index/2.0)-0.5)
+                    data_array_index = int((row_index / 2.0) - 0.5)
                     y_data[data_array_index].append(float(data_row[row_index]))
                 else:
                     # e_data
-                    data_array_index = int((row_index/2.0)-1.0)
+                    data_array_index = int((row_index / 2.0) - 1.0)
                     e_data[data_array_index].append(float(data_row[row_index]))
         # collapse 2d lists
         y_data = list(itertools.chain.from_iterable(y_data))

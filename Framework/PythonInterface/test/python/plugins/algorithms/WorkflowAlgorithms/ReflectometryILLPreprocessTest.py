@@ -9,7 +9,7 @@ from mantid.kernel import config
 from mantid.api import mtd
 from mantid.simpleapi import ReflectometryILLPreprocess
 import numpy.testing
-from testhelpers import (assertRaisesNothing, assert_almost_equal, create_algorithm, illhelpers)
+from testhelpers import assertRaisesNothing, assert_almost_equal, create_algorithm, illhelpers
 import unittest
 import ReflectometryILL_common as common
 import math
@@ -17,116 +17,105 @@ import math
 
 class ReflectometryILLPreprocessTest(unittest.TestCase):
     def setUp(self):
-        self._facility = config['default.facility']
-        self._instrument = config['default.instrument']
+        self._facility = config["default.facility"]
+        self._instrument = config["default.instrument"]
 
-        config['default.facility'] = 'ILL'
-        config['default.instrument'] = 'D17'
+        config["default.facility"] = "ILL"
+        config["default.instrument"] = "D17"
 
     def tearDown(self):
         if self._facility:
-            config['default.facility'] = self._facility
+            config["default.facility"] = self._facility
         if self._instrument:
-            config['default.instrument'] = self._instrument
+            config["default.instrument"] = self._instrument
         mtd.clear()
 
     def tearDown(self):
         mtd.clear()
 
     def testDirectBeamD17(self):
-        args = {
-            'Run': 'ILL/D17/317369.nxs',
-            'Measurement': 'DirectBeam',
-            'OutputWorkspace': 'outWS',
-            'rethrow': True,
-            'child': True
-        }
-        alg = create_algorithm('ReflectometryILLPreprocess', **args)
+        args = {"Run": "ILL/D17/317369.nxs", "Measurement": "DirectBeam", "OutputWorkspace": "outWS", "rethrow": True, "child": True}
+        alg = create_algorithm("ReflectometryILLPreprocess", **args)
         assertRaisesNothing(self, alg.execute)
-        outWS = alg.getProperty('OutputWorkspace').value
-        self.assertEqual(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
+        outWS = alg.getProperty("OutputWorkspace").value
+        self.assertEqual(outWS.getAxis(0).getUnit().caption(), "Wavelength")
         fgCentre = outWS.run().getProperty(common.SampleLogs.LINE_POSITION).value
         self.assertAlmostEqual(fgCentre, 202.177, delta=0.001)
         peakLeft = math.floor(fgCentre)
         peakRight = peakLeft + 1
-        two_theta_fg = (outWS.spectrumInfo().twoTheta(peakLeft) + outWS.spectrumInfo().twoTheta(peakRight))/2.
-        self.assertAlmostEqual(numpy.rad2deg(two_theta_fg), 0., delta=0.1)
+        two_theta_fg = (outWS.spectrumInfo().twoTheta(peakLeft) + outWS.spectrumInfo().twoTheta(peakRight)) / 2.0
+        self.assertAlmostEqual(numpy.rad2deg(two_theta_fg), 0.0, delta=0.1)
 
     def testReflectedBeamUserAngleD17(self):
         args = {
-            'Run': 'ILL/D17/317370.nxs',
-            'Measurement': 'ReflectedBeam',
-            'AngleOption': 'UserAngle',
-            'BraggAngle': 1.5,
-            'OutputWorkspace': 'outWS',
-            'rethrow': True,
-            'child': True
+            "Run": "ILL/D17/317370.nxs",
+            "Measurement": "ReflectedBeam",
+            "AngleOption": "UserAngle",
+            "BraggAngle": 1.5,
+            "OutputWorkspace": "outWS",
+            "rethrow": True,
+            "child": True,
         }
-        alg = create_algorithm('ReflectometryILLPreprocess', **args)
+        alg = create_algorithm("ReflectometryILLPreprocess", **args)
         assertRaisesNothing(self, alg.execute)
-        outWS = alg.getProperty('OutputWorkspace').value
-        self.assertEqual(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
+        outWS = alg.getProperty("OutputWorkspace").value
+        self.assertEqual(outWS.getAxis(0).getUnit().caption(), "Wavelength")
         fgCentre = outWS.run().getProperty(common.SampleLogs.LINE_POSITION).value
         self.assertAlmostEqual(fgCentre, 201.674, delta=0.001)
         peakLeft = math.floor(fgCentre)
         peakRight = peakLeft + 1
-        two_theta_fg = (outWS.spectrumInfo().twoTheta(peakLeft) + outWS.spectrumInfo().twoTheta(peakRight))/2.
+        two_theta_fg = (outWS.spectrumInfo().twoTheta(peakLeft) + outWS.spectrumInfo().twoTheta(peakRight)) / 2.0
         self.assertAlmostEqual(numpy.rad2deg(two_theta_fg), 3.0, delta=0.01)
 
     def testReflectedBeamSanAngleD17(self):
         args = {
-            'Run': 'ILL/D17/317370.nxs',
-            'Measurement': 'ReflectedBeam',
-            'AngleOption': 'SampleAngle',
-            'OutputWorkspace': 'outWS',
-            'rethrow': True,
-            'child': True
+            "Run": "ILL/D17/317370.nxs",
+            "Measurement": "ReflectedBeam",
+            "AngleOption": "SampleAngle",
+            "OutputWorkspace": "outWS",
+            "rethrow": True,
+            "child": True,
         }
-        alg = create_algorithm('ReflectometryILLPreprocess', **args)
+        alg = create_algorithm("ReflectometryILLPreprocess", **args)
         assertRaisesNothing(self, alg.execute)
-        outWS = alg.getProperty('OutputWorkspace').value
-        self.assertEqual(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
+        outWS = alg.getProperty("OutputWorkspace").value
+        self.assertEqual(outWS.getAxis(0).getUnit().caption(), "Wavelength")
         fgCentre = outWS.run().getProperty(common.SampleLogs.LINE_POSITION).value
         self.assertAlmostEqual(fgCentre, 201.674, delta=0.001)
         peakLeft = math.floor(fgCentre)
         peakRight = peakLeft + 1
-        two_theta_fg = (outWS.spectrumInfo().twoTheta(peakLeft) + outWS.spectrumInfo().twoTheta(peakRight))/2.
+        two_theta_fg = (outWS.spectrumInfo().twoTheta(peakLeft) + outWS.spectrumInfo().twoTheta(peakRight)) / 2.0
         self.assertAlmostEqual(numpy.rad2deg(two_theta_fg), 1.6, delta=0.01)
 
     def testReflectedBeamDanAngleD17(self):
         args = {
-            'Run': 'ILL/D17/317370.nxs',
-            'Measurement': 'ReflectedBeam',
-            'AngleOption': 'DetectorAngle',
-            'DirectBeamForegroundCentre': 202.177,
-            'DirectBeamDetectorAngle': 0.1,
-            'OutputWorkspace': 'outWS',
-            'rethrow': True,
-            'child': True
+            "Run": "ILL/D17/317370.nxs",
+            "Measurement": "ReflectedBeam",
+            "AngleOption": "DetectorAngle",
+            "DirectBeamForegroundCentre": 202.177,
+            "DirectBeamDetectorAngle": 0.1,
+            "OutputWorkspace": "outWS",
+            "rethrow": True,
+            "child": True,
         }
-        alg = create_algorithm('ReflectometryILLPreprocess', **args)
+        alg = create_algorithm("ReflectometryILLPreprocess", **args)
         assertRaisesNothing(self, alg.execute)
-        outWS = alg.getProperty('OutputWorkspace').value
-        self.assertEqual(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
+        outWS = alg.getProperty("OutputWorkspace").value
+        self.assertEqual(outWS.getAxis(0).getUnit().caption(), "Wavelength")
         fgCentre = outWS.run().getProperty(common.SampleLogs.LINE_POSITION).value
         self.assertAlmostEqual(fgCentre, 201.674, delta=0.001)
         peakLeft = math.floor(fgCentre)
         peakRight = peakLeft + 1
-        two_theta_fg = (outWS.spectrumInfo().twoTheta(peakLeft) + outWS.spectrumInfo().twoTheta(peakRight))/2.
+        two_theta_fg = (outWS.spectrumInfo().twoTheta(peakLeft) + outWS.spectrumInfo().twoTheta(peakRight)) / 2.0
         self.assertAlmostEqual(numpy.rad2deg(two_theta_fg), 3.097, delta=0.01)
 
     def testTwoInputFiles(self):
-        outWSName = 'outWS'
-        args = {
-            'Run': 'ILL/D17/317369, ILL/D17/317370.nxs',
-            'OutputWorkspace': outWSName,
-            'rethrow': True,
-            'child': True
-        }
-        alg = create_algorithm('ReflectometryILLPreprocess', **args)
+        outWSName = "outWS"
+        args = {"Run": "ILL/D17/317369, ILL/D17/317370.nxs", "OutputWorkspace": outWSName, "rethrow": True, "child": True}
+        alg = create_algorithm("ReflectometryILLPreprocess", **args)
         assertRaisesNothing(self, alg.execute)
-        outWS = alg.getProperty('OutputWorkspace').value
-        self.assertEqual(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
+        outWS = alg.getProperty("OutputWorkspace").value
+        self.assertEqual(outWS.getAxis(0).getUnit().caption(), "Wavelength")
         self.assertEqual(mtd.getObjectNames(), [])
 
 

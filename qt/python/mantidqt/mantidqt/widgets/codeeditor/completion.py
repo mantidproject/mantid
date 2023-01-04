@@ -49,7 +49,7 @@ ArgSpec = namedtuple("ArgSpec", "args varargs keywords defaults")
 def _ignore_matplotlib_deprecation_warnings():
     """Context-manager to disable deprecation warnings from matplotlib while
     generating the call tips"""
-    from matplotlib.cbook import MatplotlibDeprecationWarning
+    from matplotlib import MatplotlibDeprecationWarning
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", MatplotlibDeprecationWarning)
         yield

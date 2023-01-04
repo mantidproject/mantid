@@ -30,8 +30,7 @@ class QuadMeshWrapperTest(unittest.TestCase):
         self.mock_mesh.axes.get_ylim.return_value = (-1, 0)
         quad_mesh_wrapper = QuadMeshWrapper(self.mock_mesh)
 
-        assert_array_equal(quad_mesh_wrapper.get_array_clipped_to_bounds(),
-                           self.mock_mesh.get_array()[:2, :5].flatten())
+        assert_array_equal(quad_mesh_wrapper.get_array_clipped_to_bounds(), self.mock_mesh.get_array()[:2, :5].flatten())
 
     def test_quad_mesh_clipped_array_for_no_data_within_axes_limits(self):
         # set axes limits outside the extent of the data
@@ -42,5 +41,5 @@ class QuadMeshWrapperTest(unittest.TestCase):
         self.assertTrue(quad_mesh_wrapper.get_array_clipped_to_bounds().size == 0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

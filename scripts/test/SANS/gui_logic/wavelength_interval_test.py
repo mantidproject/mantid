@@ -29,5 +29,5 @@ class WavelengthIntervalTest(unittest.TestCase):
         self.assertEqual([expected], interval.selected_ranges)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

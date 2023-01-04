@@ -15,8 +15,7 @@ if(CXXTEST_FOUND)
   add_framework_test_helpers(MDAlgorithmsTest)
   add_dependencies(MDAlgorithmsTest DataHandling Algorithms CurveFitting)
   add_dependencies(FrameworkTests MDAlgorithmsTest)
-  # Test data
-  add_dependencies(MDAlgorithmsTest StandardTestData)
+  # Test data add_dependencies(MDAlgorithmsTest StandardTestData)
 
   # Add to the 'FrameworkTests' group in VS
   set_property(TARGET MDAlgorithmsTest PROPERTY FOLDER "UnitTests")

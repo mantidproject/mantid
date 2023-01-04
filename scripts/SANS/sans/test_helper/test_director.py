@@ -20,15 +20,24 @@ from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import get_wavele
 from sans.state.StateObjects.StateAdjustment import get_adjustment_builder
 from sans.state.StateObjects.StateConvertToQ import get_convert_to_q_builder
 
-from sans.common.enums import (SANSFacility, ReductionMode, ReductionDimensionality,
-                               FitModeForMerge, RebinType, RangeStepType, SaveType, FitType, SampleShape,
-                               SANSInstrument)
+from sans.common.enums import (
+    SANSFacility,
+    ReductionMode,
+    ReductionDimensionality,
+    FitModeForMerge,
+    RebinType,
+    RangeStepType,
+    SaveType,
+    FitType,
+    SampleShape,
+    SANSInstrument,
+)
 from sans.state.StateObjects.state_instrument_info import StateInstrumentInfo
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
 class TestDirector(object):
-    """ The purpose of this builder is to create a valid state object for tests"""
+    """The purpose of this builder is to create a valid state object for tests"""
 
     def __init__(self):
         super(TestDirector, self).__init__()
@@ -44,9 +53,19 @@ class TestDirector(object):
         self.convert_to_q_state = None
         self.inst_info_state = None
 
-    def set_states(self, data_state=None, move_state=None, reduction_state=None, slice_state=None,
-                   mask_state=None, wavelength_state=None, save_state=None, scale_state=None, adjustment_state=None,
-                   convert_to_q_state=None):
+    def set_states(
+        self,
+        data_state=None,
+        move_state=None,
+        reduction_state=None,
+        slice_state=None,
+        mask_state=None,
+        wavelength_state=None,
+        save_state=None,
+        scale_state=None,
+        adjustment_state=None,
+        convert_to_q_state=None,
+    ):
         self.data_state = data_state
         self.data_state = data_state
         self.move_state = move_state
@@ -137,8 +156,8 @@ class TestDirector(object):
         if self.adjustment_state is None:
             # NormalizeToMonitor
             normalize_to_monitor_builder = get_normalize_to_monitor_builder(self.data_state)
-            normalize_to_monitor_builder.set_background_TOF_general_start(1000.)
-            normalize_to_monitor_builder.set_background_TOF_general_stop(2000.)
+            normalize_to_monitor_builder.set_background_TOF_general_start(1000.0)
+            normalize_to_monitor_builder.set_background_TOF_general_stop(2000.0)
             normalize_to_monitor_builder.set_incident_monitor(1)
             normalize_to_monitor_builder.set_rebin_type(RebinType.REBIN)
             normalize_to_monitor = normalize_to_monitor_builder.build()
@@ -153,8 +172,8 @@ class TestDirector(object):
             calculate_transmission_obj.wavelength_interval.wavelength_step = 2.0
             calculate_transmission_obj.wavelength_step_type = RangeStepType.LIN
             calculate_transmission_obj.rebin_type = RebinType.REBIN
-            calculate_transmission_obj.background_TOF_general_start = 1000.
-            calculate_transmission_obj.background_TOF_general_stop = 2000.
+            calculate_transmission_obj.background_TOF_general_start = 1000.0
+            calculate_transmission_obj.background_TOF_general_stop = 2000.0
 
             calculate_transmission_obj.set_sample_fit_type(FitType.LINEAR)
             calculate_transmission_obj.set_sample_polynomial_order(0)
@@ -187,7 +206,7 @@ class TestDirector(object):
             convert_to_q_builder.set_reduction_dimensionality(ReductionDimensionality.ONE_DIM)
             convert_to_q_builder.set_use_gravity(False)
             convert_to_q_builder.set_radius_cutoff(0.002)
-            convert_to_q_builder.set_wavelength_cutoff(12.)
+            convert_to_q_builder.set_wavelength_cutoff(12.0)
             convert_to_q_builder.set_q_min(0.1)
             convert_to_q_builder.set_q_max(0.8)
             convert_to_q_builder.set_q_1d_rebin_string("0.1,0.01,0.8")

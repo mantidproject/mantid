@@ -40,10 +40,7 @@ class FittingDataPresenter(object):
         self.all_plots_removed_notifier = GenericObservable()
         self.fit_all_started_notifier = GenericObservable()
         # Observers
-        self.fit_observer = GenericObserverWithArgPassing(self.fit_completed)
-        #
         self.fit_enabled_observer = GenericObserverWithArgPassing(self.set_fit_enabled)
-        self.fit_all_done_observer = GenericObserverWithArgPassing(self.fit_completed)
         self.focus_run_observer = GenericObserverWithArgPassing(
             self.view.set_default_files)
 
@@ -51,15 +48,16 @@ class FittingDataPresenter(object):
         self.view.set_fit_buttons_enabled(fit_enabled)
 
     def fit_completed(self, fit_props):
-        self.model.update_fit(fit_props)
+        if fit_props:
+            self.model.update_fit(fit_props)
 
     def _start_seq_fit(self):
         ws_name_list = self.model.get_active_ws_sorted_by_primary_log()
-        self.fit_all_started_notifier.notify_subscribers(ws_name_list, do_sequential=True)
+        self.fit_all_started_notifier.notify_subscribers((ws_name_list, True))
 
     def _start_serial_fit(self):
         ws_name_list = self.model.get_active_ws_name_list()
-        self.fit_all_started_notifier.notify_subscribers(ws_name_list, do_sequential=False)
+        self.fit_all_started_notifier.notify_subscribers((ws_name_list, False))
 
     def _update_file_filter(self, region, xunit):
         self.view.update_file_filter(region, xunit)

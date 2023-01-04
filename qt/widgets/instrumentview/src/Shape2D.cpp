@@ -1265,7 +1265,8 @@ void Shape2DFree::resetBoundingRect() {
   if (breaks.back() != n) {
     breaks.push_back(n);
   }
-  qSort(breaks);
+  using std::sort;
+  sort(std::begin(breaks), std::end(breaks));
 
   m_outline.moveTo(m_polygon[0]);
   int j1 = 0;

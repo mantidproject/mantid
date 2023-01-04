@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from sans.common.enums import (RangeStepType, ReductionDimensionality, SANSFacility, SANSInstrument)
-from sans.state.StateObjects.StateConvertToQ import (StateConvertToQ, get_convert_to_q_builder)
+from sans.common.enums import RangeStepType, ReductionDimensionality, SANSFacility, SANSInstrument
+from sans.state.StateObjects.StateConvertToQ import StateConvertToQ, get_convert_to_q_builder
 from sans.state.StateObjects.StateData import get_data_builder
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
@@ -19,15 +19,31 @@ class StateConvertToQTest(unittest.TestCase):
     @staticmethod
     def _get_convert_to_q_state(convert_to_q_entries):
         state = StateConvertToQ()
-        default_entries = {"reduction_dimensionality": ReductionDimensionality.ONE_DIM, "use_gravity": True,
-                           "gravity_extra_length": 12., "radius_cutoff": 1.5, "wavelength_cutoff": 2.7,
-                           "q_min": 0.5, "q_max": 1., "q_1d_rebin_string": "0.5,0.2,1.",
-                           "q_step2": 1., "q_step_type2": RangeStepType.LIN, "q_mid": 1.,
-                           "q_xy_max": 1.4, "q_xy_step": 24.5,
-                           "use_q_resolution": True, "q_resolution_collimation_length": 12.,
-                           "q_resolution_delta_r": 12., "moderator_file": "test.txt", "q_resolution_a1": 1.,
-                           "q_resolution_a2": 2., "q_resolution_h1": 1., "q_resolution_h2": 2., "q_resolution_w1": 1.,
-                           "q_resolution_w2": 2.}
+        default_entries = {
+            "reduction_dimensionality": ReductionDimensionality.ONE_DIM,
+            "use_gravity": True,
+            "gravity_extra_length": 12.0,
+            "radius_cutoff": 1.5,
+            "wavelength_cutoff": 2.7,
+            "q_min": 0.5,
+            "q_max": 1.0,
+            "q_1d_rebin_string": "0.5,0.2,1.",
+            "q_step2": 1.0,
+            "q_step_type2": RangeStepType.LIN,
+            "q_mid": 1.0,
+            "q_xy_max": 1.4,
+            "q_xy_step": 24.5,
+            "use_q_resolution": True,
+            "q_resolution_collimation_length": 12.0,
+            "q_resolution_delta_r": 12.0,
+            "moderator_file": "test.txt",
+            "q_resolution_a1": 1.0,
+            "q_resolution_a2": 2.0,
+            "q_resolution_h1": 1.0,
+            "q_resolution_h2": 2.0,
+            "q_resolution_w1": 1.0,
+            "q_resolution_w2": 2.0,
+        }
 
         for key, value in list(default_entries.items()):
             if key in convert_to_q_entries:
@@ -47,16 +63,16 @@ class StateConvertToQTest(unittest.TestCase):
         self.assertIsNone(state.validate())
 
     def test_that_raises_with_inconsistent_1D_q_values(self):
-        self.check_bad_and_good_value({"q_min": None, "q_max": 2.}, {"q_min": 1., "q_max": 2.})
+        self.check_bad_and_good_value({"q_min": None, "q_max": 2.0}, {"q_min": 1.0, "q_max": 2.0})
 
     def test_that_raises_when_the_lower_bound_is_larger_than_the_upper_bound_for_q_1D(self):
-        self.check_bad_and_good_value({"q_min": 2., "q_max": 1.}, {"q_min": 1., "q_max": 2.})
+        self.check_bad_and_good_value({"q_min": 2.0, "q_max": 1.0}, {"q_min": 1.0, "q_max": 2.0})
 
     def test_that_raises_when_no_q_bounds_are_set_for_explicit_1D_reduction(self):
-        self.check_bad_and_good_value({"q_min": None, "q_max": None,
-                                       "reduction_dimensionality": ReductionDimensionality.ONE_DIM},
-                                      {"q_min": 1., "q_max": 2.,
-                                       "reduction_dimensionality": ReductionDimensionality.ONE_DIM})
+        self.check_bad_and_good_value(
+            {"q_min": None, "q_max": None, "reduction_dimensionality": ReductionDimensionality.ONE_DIM},
+            {"q_min": 1.0, "q_max": 2.0, "reduction_dimensionality": ReductionDimensionality.ONE_DIM},
+        )
 
     def test_that_raises_when_q_rebin_string_is_invalid(self):
         self.check_bad_and_good_value({"q_1d_rebin_string": ""}, {"q_1d_rebin_string": "1.0,2.0"})
@@ -65,30 +81,44 @@ class StateConvertToQTest(unittest.TestCase):
         self.check_bad_and_good_value({"q_1d_rebin_string": "1.,1.,2.,1.,1.5"}, {"q_1d_rebin_string": "1.,2.,3."})
 
     def test_that_raises_when_no_q_bounds_are_set_for_explicit_2D_reduction(self):
-        self.check_bad_and_good_value({"q_xy_max": None, "q_xy_step": None,
-                                       "reduction_dimensionality": ReductionDimensionality.TWO_DIM},
-                                      {"q_xy_max": 1., "q_xy_step": 2.,
-                                       "reduction_dimensionality": ReductionDimensionality.TWO_DIM})
+        self.check_bad_and_good_value(
+            {"q_xy_max": None, "q_xy_step": None, "reduction_dimensionality": ReductionDimensionality.TWO_DIM},
+            {"q_xy_max": 1.0, "q_xy_step": 2.0, "reduction_dimensionality": ReductionDimensionality.TWO_DIM},
+        )
 
     def test_that_raises_when_inconsistent_circular_values_for_q_resolution_are_specified(self):
-        self.check_bad_and_good_value({"use_q_resolution": True, "q_resolution_a1": None,
-                                       "q_resolution_a2": 12.},
-                                      {"use_q_resolution": True, "q_resolution_a1": 11.,
-                                       "q_resolution_a2": 12.})
+        self.check_bad_and_good_value(
+            {"use_q_resolution": True, "q_resolution_a1": None, "q_resolution_a2": 12.0},
+            {"use_q_resolution": True, "q_resolution_a1": 11.0, "q_resolution_a2": 12.0},
+        )
 
     def test_that_raises_when_inconsistent_rectangular_values_for_q_resolution_are_specified(self):
-        self.check_bad_and_good_value({"use_q_resolution": True, "q_resolution_h1": None,
-                                       "q_resolution_h2": 12., "q_resolution_w1": 1., "q_resolution_w2": 2.},
-                                      {"use_q_resolution": True, "q_resolution_h1": 1.,
-                                       "q_resolution_h2": 12., "q_resolution_w1": 1., "q_resolution_w2": 2.})
+        self.check_bad_and_good_value(
+            {"use_q_resolution": True, "q_resolution_h1": None, "q_resolution_h2": 12.0, "q_resolution_w1": 1.0, "q_resolution_w2": 2.0},
+            {"use_q_resolution": True, "q_resolution_h1": 1.0, "q_resolution_h2": 12.0, "q_resolution_w1": 1.0, "q_resolution_w2": 2.0},
+        )
 
     def test_that_raises_when_no_geometry_for_q_resolution_was_specified(self):
-        self.check_bad_and_good_value({"use_q_resolution": True, "q_resolution_h1": None, "q_resolution_a1": None,
-                                       "q_resolution_a2": None, "q_resolution_h2": None, "q_resolution_w1": None,
-                                       "q_resolution_w2": None},
-                                      {"use_q_resolution": True, "q_resolution_h1": 1., "q_resolution_a1": 1.,
-                                       "q_resolution_a2": 2., "q_resolution_h2": 12., "q_resolution_w1": 1.,
-                                       "q_resolution_w2": 2.})
+        self.check_bad_and_good_value(
+            {
+                "use_q_resolution": True,
+                "q_resolution_h1": None,
+                "q_resolution_a1": None,
+                "q_resolution_a2": None,
+                "q_resolution_h2": None,
+                "q_resolution_w1": None,
+                "q_resolution_w2": None,
+            },
+            {
+                "use_q_resolution": True,
+                "q_resolution_h1": 1.0,
+                "q_resolution_a1": 1.0,
+                "q_resolution_a2": 2.0,
+                "q_resolution_h2": 12.0,
+                "q_resolution_w1": 1.0,
+                "q_resolution_w2": 2.0,
+            },
+        )
 
     def test_that_raises_when_moderator_file_has_not_been_set(self):
         self.check_bad_and_good_value({"moderator_file": None}, {"moderator_file": "test"})
@@ -118,11 +148,11 @@ class StateConvertToQBuilderTest(unittest.TestCase):
         state = builder.build()
 
         # Assert
-        self.assertEqual(state.q_min,  12.0)
-        self.assertEqual(state.q_max,  17.0)
-        self.assertEqual(state.q_1d_rebin_string,  "12.0,-1.2,17.0")
+        self.assertEqual(state.q_min, 12.0)
+        self.assertEqual(state.q_max, 17.0)
+        self.assertEqual(state.q_1d_rebin_string, "12.0,-1.2,17.0")
         self.assertEqual(state.reduction_dimensionality, ReductionDimensionality.ONE_DIM)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

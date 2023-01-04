@@ -35,7 +35,7 @@ from mantid.simpleapi import (
     Integration,
     GroupWorkspaces,
     RenameWorkspace,
-    GroupDetectors
+    GroupDetectors,
 )
 from mantid.kernel import (
     StringListValidator,
@@ -202,8 +202,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             if bkg is None or bkg.strip() == "":
                 _ws_bkg_resampled = None
             else:
-                _ws_bkg_resampled = self._resample_background(bkg, data[0], "mask_shared",
-                                                              xMin, xMax, _ws_cal_resampled)
+                _ws_bkg_resampled = self._resample_background(bkg, data[0], "mask_shared", xMin, xMax, _ws_cal_resampled)
 
         # BEGIN_FOR: prcess_spectra
         for n, (_wsn, _mskn) in enumerate(zip(data, masks)):
@@ -243,8 +242,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 if bkg is None or bkg.strip() == "":
                     _ws_bkg_resampled = None
                 else:
-                    _ws_bkg_resampled = self._resample_background(bkg, _wsn, _mskn, xMin,
-                                                                  xMax, _ws_cal_resampled)
+                    _ws_bkg_resampled = self._resample_background(bkg, _wsn, _mskn, xMin, xMax, _ws_cal_resampled)
 
             if _ws_bkg_resampled is not None:
                 Minus(
@@ -334,7 +332,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
     def _to_spectrum_axis(self, workspace_in, workspace_out, mask, instrument_donor=None):
         target = self.getProperty("Target").value
         wavelength = self.getProperty("Wavelength").value
-        e_fixed = UnitConversion.run('Wavelength', 'Energy', wavelength, 0, 0, 0, Elastic, 0)
+        e_fixed = UnitConversion.run("Wavelength", "Energy", wavelength, 0, 0, 0, Elastic, 0)
         filtered_eve = self.getProperty("FilteredInput").value
 
         if instrument_donor or not filtered_eve:
@@ -378,14 +376,12 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         axis_values = mtd[workspace_out].getAxis(1).extractValues()
         equal_values = axis_values == np.roll(axis_values, -1)
         if np.any(equal_values):
-            operator = np.full_like(equal_values, ",", dtype='<U1')
-            operator[equal_values] = '+'
-            grouping_pattern = "".join(str(n)+op for n, op in enumerate(operator))
+            operator = np.full_like(equal_values, ",", dtype="<U1")
+            operator[equal_values] = "+"
+            grouping_pattern = "".join(str(n) + op for n, op in enumerate(operator))
             GroupDetectors(
-                InputWorkspace=workspace_out,
-                OutputWorkspace=workspace_out,
-                GroupingPattern=grouping_pattern,
-                EnableLogging=False)
+                InputWorkspace=workspace_out, OutputWorkspace=workspace_out, GroupingPattern=grouping_pattern, EnableLogging=False
+            )
             ConvertSpectrumAxis(
                 InputWorkspace=workspace_out,
                 OutputWorkspace=workspace_out,

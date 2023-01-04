@@ -10,19 +10,26 @@
 @date December 06, 2017
 """
 import numpy as np
+
 try:
     from scipy.special import spherical_jn
 
-    def j1(z): return spherical_jn(1, z)
+    def j1(z):
+        return spherical_jn(1, z)
 
-    def j1d(z): return spherical_jn(1, z, derivative=True)
+    def j1d(z):
+        return spherical_jn(1, z, derivative=True)
+
 except ImportError:
     # spherical_jn removed from scipy >= 1.0.0
     from scipy.special import sph_jn
 
-    def j1(z): return sph_jn(1, z)[0][1]
+    def j1(z):
+        return sph_jn(1, z)[0][1]
 
-    def j1d(z): return sph_jn(1, z)[1][1]
+    def j1d(z):
+        return sph_jn(1, z)[1][1]
+
 
 from mantid.api import IFunction1D, FunctionFactory
 
@@ -35,20 +42,18 @@ class EISFDiffSphereAlkyl(IFunction1D):
     vecbessel = np.vectorize(lambda z: j1(z) / z)
 
     def category(self):
-        return 'QuasiElastic'
+        return "QuasiElastic"
 
     def init(self):
         # Active fitting parameters
-        self.declareParameter('A', 1.0, 'Amplitude')
-        self.declareParameter(
-            'Rmin', 1.0, 'Minimum radius, inverse units of Q.')
-        self.declareParameter(
-            'Rmax', 2.0, 'Maximum radius, inverse units of Q.')
-        self.declareAttribute('M', 2)
+        self.declareParameter("A", 1.0, "Amplitude")
+        self.declareParameter("Rmin", 1.0, "Minimum radius, inverse units of Q.")
+        self.declareParameter("Rmax", 2.0, "Maximum radius, inverse units of Q.")
+        self.declareAttribute("M", 2)
         # Vectorize the calculation of the bessel functions
 
     def setAttributeValue(self, name, value):
-        r""" Invoked the framework when an attribute is passed to Fit and
+        r"""Invoked the framework when an attribute is passed to Fit and
         its value set.
 
         It's main use is to store the attribute value on the object once
@@ -61,7 +66,7 @@ class EISFDiffSphereAlkyl(IFunction1D):
         value : python object
             Value associated to the attribute (int, float, str,...)
         """
-        if name == 'M':
+        if name == "M":
             self._M = value
 
     def function1D(self, xvals):
@@ -80,11 +85,11 @@ class EISFDiffSphereAlkyl(IFunction1D):
         numpy.ndarray
             Function values
         """
-        r = self.getParameterValue('Rmin')
-        R = self.getParameterValue('Rmax')
+        r = self.getParameterValue("Rmin")
+        R = self.getParameterValue("Rmax")
         zs = np.outer(np.linspace(r, R, self._M), np.asarray(xvals))
         eisf = np.mean(np.square(3 * self.vecbessel(zs)), axis=0)
-        return self.getParameterValue('A') * eisf
+        return self.getParameterValue("A") * eisf
 
 
 # Required to have Mantid recognise the new function

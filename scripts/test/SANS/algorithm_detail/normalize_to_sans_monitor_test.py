@@ -29,17 +29,22 @@ def get_expected_for_spectrum_1_case(monitor_workspace, selected_detector):
     mass = 1.674927211e-27
     times = monitor_workspace.dataX(0)
     lambda_after_unit_conversion = [(time * 1e-6) * h / distance_source_detector / mass * 1e10 for time in times]
-    expected_lambda = [2., 4., 6., 8.]
-    expected_signal = [abs(lambda_after_unit_conversion[1] - expected_lambda[1])
-                       / abs(lambda_after_unit_conversion[1] - lambda_after_unit_conversion[2]) * 90,
-
-                       abs(lambda_after_unit_conversion[2] - expected_lambda[1])
-                       / abs(lambda_after_unit_conversion[1] - lambda_after_unit_conversion[2]) * 90
-                       + abs(lambda_after_unit_conversion[2] - expected_lambda[2])
-                       / abs(lambda_after_unit_conversion[2] - lambda_after_unit_conversion[3]) * 90,
-
-                       abs(lambda_after_unit_conversion[3] - expected_lambda[2])
-                       / abs(lambda_after_unit_conversion[2] - lambda_after_unit_conversion[3]) * 90 + 90]
+    expected_lambda = [2.0, 4.0, 6.0, 8.0]
+    expected_signal = [
+        abs(lambda_after_unit_conversion[1] - expected_lambda[1])
+        / abs(lambda_after_unit_conversion[1] - lambda_after_unit_conversion[2])
+        * 90,
+        abs(lambda_after_unit_conversion[2] - expected_lambda[1])
+        / abs(lambda_after_unit_conversion[1] - lambda_after_unit_conversion[2])
+        * 90
+        + abs(lambda_after_unit_conversion[2] - expected_lambda[2])
+        / abs(lambda_after_unit_conversion[2] - lambda_after_unit_conversion[3])
+        * 90,
+        abs(lambda_after_unit_conversion[3] - expected_lambda[2])
+        / abs(lambda_after_unit_conversion[2] - lambda_after_unit_conversion[3])
+        * 90
+        + 90,
+    ]
     return expected_lambda, expected_signal
 
 
@@ -57,18 +62,24 @@ class SANSNormalizeToMonitorTest(unittest.TestCase):
         return ws
 
     @staticmethod
-    def _get_state(background_TOF_general_start=None, background_TOF_general_stop=None,
-                   background_TOF_monitor_start=None, background_TOF_monitor_stop=None, incident_monitor=None,
-                   prompt_peak_correction_min=None, prompt_peak_correction_max=None):
+    def _get_state(
+        background_TOF_general_start=None,
+        background_TOF_general_stop=None,
+        background_TOF_monitor_start=None,
+        background_TOF_monitor_stop=None,
+        incident_monitor=None,
+        prompt_peak_correction_min=None,
+        prompt_peak_correction_max=None,
+    ):
         test_director = TestDirector()
         state = test_director.construct()
 
         data_state = state.data
         normalize_to_monitor_builder = get_normalize_to_monitor_builder(data_state)
-        wav_range = (2., 8.)  # Override from test director
+        wav_range = (2.0, 8.0)  # Override from test director
         state.wavelength.wavelength_interval.wavelength_full_range = wav_range
         state.wavelength.wavelength_interval.selected_ranges = [wav_range]
-        state.wavelength.wavelength_interval.wavelength_step = 2.
+        state.wavelength.wavelength_interval.wavelength_step = 2.0
         if background_TOF_general_start:
             normalize_to_monitor_builder.set_background_TOF_general_start(background_TOF_general_start)
         if background_TOF_general_stop:
@@ -110,9 +121,13 @@ class SANSNormalizeToMonitorTest(unittest.TestCase):
     @staticmethod
     def _run_test(workspace, state, scale=1.0):
         wav_range = state.wavelength.wavelength_interval.wavelength_full_range
-        output_ws = normalize_to_monitor(workspace=workspace, scale_factor=scale, wav_range=wav_range,
-                                         normalize_to_monitor=state.adjustment.normalize_to_monitor,
-                                         wavelengths=state.wavelength)
+        output_ws = normalize_to_monitor(
+            workspace=workspace,
+            scale_factor=scale,
+            wav_range=wav_range,
+            normalize_to_monitor=state.adjustment.normalize_to_monitor,
+            wavelengths=state.wavelength,
+        )
         return output_ws
 
     def _do_assert(self, workspace, expected_monitor_spectrum, expected_lambda, expected_signal):
@@ -129,45 +144,51 @@ class SANSNormalizeToMonitorTest(unittest.TestCase):
 
         # Check the values
         tolerance = 1e-8
-        for e1, e2, in zip(workspace.dataX(0), expected_lambda):
+        for (
+            e1,
+            e2,
+        ) in zip(workspace.dataX(0), expected_lambda):
             self.assertTrue(abs(e1 - e2) < tolerance)
-        for e1, e2, in zip(workspace.dataY(0), expected_signal):
+        for (
+            e1,
+            e2,
+        ) in zip(workspace.dataY(0), expected_signal):
             self.assertLess(abs(e1 - e2), tolerance)
 
     def test_that_gets_normalization_for_general_background_and_no_prompt_peak(self):
         # Arrange
         incident_spectrum = 1
-        state = self._get_state(background_TOF_general_start=5000.,
-                                background_TOF_general_stop=10000.,
-                                incident_monitor=incident_spectrum)
+        state = self._get_state(
+            background_TOF_general_start=5000.0, background_TOF_general_stop=10000.0, incident_monitor=incident_spectrum
+        )
         # Get a test monitor workspace with 4 bins where the first bin is the back ground
-        data = {0: [10., 100., 100., 100.]}
+        data = {0: [10.0, 100.0, 100.0, 100.0]}
         monitor_workspace = SANSNormalizeToMonitorTest._get_monitor_workspace(data=data)
         # Act
         workspace = SANSNormalizeToMonitorTest._run_test(monitor_workspace, state)
 
         # Assert
-        expected_lambda, expected_signal = get_expected_for_spectrum_1_case(monitor_workspace,
-                                                                            selected_detector=incident_spectrum - 1)
+        expected_lambda, expected_signal = get_expected_for_spectrum_1_case(monitor_workspace, selected_detector=incident_spectrum - 1)
         self._do_assert(workspace, incident_spectrum, expected_lambda, expected_signal)
 
     def test_that_gets_normalization_for_specific_monitor_background_and_no_prompt_peak(self):
         # Arrange
         incident_spectrum = 1
-        background_TOF_monitor_start = {str(incident_spectrum): 5000.}
-        background_TOF_monitor_stop = {str(incident_spectrum): 10000.}
-        state = self._get_state(background_TOF_monitor_start=background_TOF_monitor_start,
-                                background_TOF_monitor_stop=background_TOF_monitor_stop,
-                                incident_monitor=incident_spectrum)
+        background_TOF_monitor_start = {str(incident_spectrum): 5000.0}
+        background_TOF_monitor_stop = {str(incident_spectrum): 10000.0}
+        state = self._get_state(
+            background_TOF_monitor_start=background_TOF_monitor_start,
+            background_TOF_monitor_stop=background_TOF_monitor_stop,
+            incident_monitor=incident_spectrum,
+        )
         # Get a test monitor workspace with 4 bins where the first bin is the back ground
-        data = {0: [10., 100., 100., 100.]}
+        data = {0: [10.0, 100.0, 100.0, 100.0]}
         monitor_workspace = SANSNormalizeToMonitorTest._get_monitor_workspace(data=data)
         # Act
         workspace = SANSNormalizeToMonitorTest._run_test(monitor_workspace, state)
 
         # Assert
-        expected_lambda, expected_signal = get_expected_for_spectrum_1_case(monitor_workspace,
-                                                                            selected_detector=incident_spectrum - 1)
+        expected_lambda, expected_signal = get_expected_for_spectrum_1_case(monitor_workspace, selected_detector=incident_spectrum - 1)
         self._do_assert(workspace, incident_spectrum, expected_lambda, expected_signal)
 
     def test_that_gets_normalization_for_general_background_and_prompt_peak(self):
@@ -176,23 +197,24 @@ class SANSNormalizeToMonitorTest(unittest.TestCase):
         # There seems to be an issue with RemoveBins which does not like us specifying xmin or xmax on bin boundaries
         # This is a quick workaround.
         fix_for_remove_bins = 1e-6
-        state = self._get_state(background_TOF_general_start=5000.,
-                                background_TOF_general_stop=10000.,
-                                prompt_peak_correction_min=15000. + fix_for_remove_bins,
-                                prompt_peak_correction_max=20000.,
-                                incident_monitor=incident_spectrum)
+        state = self._get_state(
+            background_TOF_general_start=5000.0,
+            background_TOF_general_stop=10000.0,
+            prompt_peak_correction_min=15000.0 + fix_for_remove_bins,
+            prompt_peak_correction_max=20000.0,
+            incident_monitor=incident_spectrum,
+        )
         # Get a test monitor workspace with 4 bins where the first bin is the back ground and the third bin has
         # a prompt peak which will be removed
-        data = {0: [10., 100., 1000000., 100.]}
+        data = {0: [10.0, 100.0, 1000000.0, 100.0]}
         monitor_workspace = SANSNormalizeToMonitorTest._get_monitor_workspace(data=data)
         # Act
         workspace = SANSNormalizeToMonitorTest._run_test(monitor_workspace, state)
 
         # Assert
-        expected_lambda, expected_signal = get_expected_for_spectrum_1_case(monitor_workspace,
-                                                                            selected_detector=incident_spectrum - 1)
+        expected_lambda, expected_signal = get_expected_for_spectrum_1_case(monitor_workspace, selected_detector=incident_spectrum - 1)
         self._do_assert(workspace, incident_spectrum, expected_lambda, expected_signal)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

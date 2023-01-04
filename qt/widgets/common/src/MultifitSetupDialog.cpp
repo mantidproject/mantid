@@ -35,7 +35,7 @@ MultifitSetupDialog::MultifitSetupDialog(FitPropertyBrowser *fitBrowser)
     int j = static_cast<int>(i);
     ui.paramTable->insertRow(ui.paramTable->rowCount());
     model->setData(model->index(j, 0), QString::fromStdString(f->parameterName(i)));
-    ui.paramTable->item(j, 0)->setFlags(nullptr);
+    ui.paramTable->item(j, 0)->setFlags(Qt::ItemFlags());
     model->setData(model->index(j, 1), "");
     ui.paramTable->item(j, 1)->setCheckState(Qt::Unchecked);
   }

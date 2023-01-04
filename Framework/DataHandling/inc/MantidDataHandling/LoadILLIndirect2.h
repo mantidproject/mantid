@@ -41,13 +41,12 @@ private:
   void setInstrumentName(const NeXus::NXEntry &firstEntry, const std::string &instrumentNamePath);
   std::string getDataPath(const NeXus::NXEntry &entry);
   void loadNexusEntriesIntoProperties(const std::string &nexusfilename);
-  void loadDataIntoTheWorkSpace(NeXus::NXEntry &entry);
+  void loadDataIntoWorkspace(NeXus::NXEntry &entry);
   void loadDiffractionData(NeXus::NXEntry &entry);
-  void runLoadInstrument();
   void moveComponent(const std::string &, double);
   void moveSingleDetectors(const NeXus::NXEntry &entry);
   void rotateTubes();
-  std::string getInstrumentFilePath();
+  std::string getInstrumentFileName();
 
   API::MatrixWorkspace_sptr m_localWorkspace;
 

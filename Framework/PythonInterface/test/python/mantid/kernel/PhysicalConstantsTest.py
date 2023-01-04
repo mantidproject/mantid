@@ -29,5 +29,5 @@ class PhysicalConstantsTest(unittest.TestCase):
         self.assertNotEqual(0, pc.MuonGyromagneticRatio)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

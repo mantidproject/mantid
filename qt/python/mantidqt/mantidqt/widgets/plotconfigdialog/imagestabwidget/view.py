@@ -8,7 +8,7 @@
 
 import numpy as np
 from matplotlib.colors import LogNorm, Normalize
-from matplotlib import cm
+from matplotlib import colormaps
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QPixmap, QIcon, QImage
 from qtpy.QtWidgets import QWidget
@@ -26,7 +26,7 @@ SCALES = {'Linear': Normalize, 'Logarithmic': LogNorm}
 
 
 def create_colormap_img(cmap_name, width=50, height=20):
-    colormap = cm.get_cmap(cmap_name)
+    colormap = colormaps[cmap_name]
     gradient_array = np.tile(np.linspace(0, 1, width), height)
     img_array = (colormap(gradient_array)*255).astype(np.uint8)
     return QImage(img_array, width, height, QImage.Format_RGBA8888_Premultiplied)

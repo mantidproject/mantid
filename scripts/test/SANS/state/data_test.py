@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from sans.common.enums import (SANSFacility, SANSInstrument)
-from sans.state.StateObjects.StateData import (StateData, get_data_builder)
+from sans.common.enums import SANSFacility, SANSInstrument
+from sans.state.StateObjects.StateData import StateData, get_data_builder
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
@@ -18,9 +18,14 @@ class StateDataTest(unittest.TestCase):
     @staticmethod
     def _get_data_state(**data_entries):
         state = StateData()
-        data_settings = {"sample_scatter": "test", "sample_transmission": "test",
-                         "sample_direct": "test", "can_scatter": "test",
-                         "can_transmission": "test", "can_direct": "test"}
+        data_settings = {
+            "sample_scatter": "test",
+            "sample_transmission": "test",
+            "sample_direct": "test",
+            "can_scatter": "test",
+            "can_transmission": "test",
+            "can_direct": "test",
+        }
 
         for key, value in list(data_settings.items()):
             if key in data_entries:
@@ -29,8 +34,7 @@ class StateDataTest(unittest.TestCase):
                 setattr(state, key, value)
         return state
 
-    def assert_raises_for_bad_value_and_raises_nothing_for_good_value(self, data_entries_bad,
-                                                                      data_entries_good):
+    def assert_raises_for_bad_value_and_raises_nothing_for_good_value(self, data_entries_bad, data_entries_good):
         # Bad values
         state = StateDataTest._get_data_state(**data_entries_bad)
         with self.assertRaises(ValueError):
@@ -41,32 +45,24 @@ class StateDataTest(unittest.TestCase):
         self.assertIsNone(state.validate())
 
     def test_that_raises_when_sample_scatter_is_missing(self):
-        self.assert_raises_for_bad_value_and_raises_nothing_for_good_value({"sample_scatter": None},
-                                                                           {"sample_scatter": "test"})
+        self.assert_raises_for_bad_value_and_raises_nothing_for_good_value({"sample_scatter": None}, {"sample_scatter": "test"})
 
     def test_that_raises_when_transmission_and_direct_are_inconsistently_specified_for_sample(self):
-        self.assert_raises_for_bad_value_and_raises_nothing_for_good_value({"sample_transmission": None,
-                                                                            "sample_direct": "test",
-                                                                            "can_transmission": None,
-                                                                            "can_direct": None},
-                                                                           {"sample_transmission": "test",
-                                                                            "sample_direct": "test",
-                                                                            "can_transmission": None,
-                                                                            "can_direct": None})
+        self.assert_raises_for_bad_value_and_raises_nothing_for_good_value(
+            {"sample_transmission": None, "sample_direct": "test", "can_transmission": None, "can_direct": None},
+            {"sample_transmission": "test", "sample_direct": "test", "can_transmission": None, "can_direct": None},
+        )
 
     def test_that_raises_when_transmission_and_direct_are_inconsistently_specified_for_can(self):
-        self.assert_raises_for_bad_value_and_raises_nothing_for_good_value({"can_transmission": "test",
-                                                                            "can_direct": None},
-                                                                           {"can_transmission": "test",
-                                                                            "can_direct": "test"})
+        self.assert_raises_for_bad_value_and_raises_nothing_for_good_value(
+            {"can_transmission": "test", "can_direct": None}, {"can_transmission": "test", "can_direct": "test"}
+        )
 
     def test_that_raises_when_transmission_but_not_scatter_was_specified_for_can(self):
-        self.assert_raises_for_bad_value_and_raises_nothing_for_good_value({"can_scatter": None,
-                                                                            "can_transmission": "test",
-                                                                            "can_direct": "test"},
-                                                                           {"can_scatter": "test",
-                                                                            "can_transmission": "test",
-                                                                            "can_direct": "test"})
+        self.assert_raises_for_bad_value_and_raises_nothing_for_good_value(
+            {"can_scatter": None, "can_transmission": "test", "can_direct": "test"},
+            {"can_scatter": "test", "can_transmission": "test", "can_direct": "test"},
+        )
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -85,12 +81,12 @@ class StateDataBuilderTest(unittest.TestCase):
         data_state = data_builder.build()
 
         # # Assert
-        self.assertEqual(data_state.sample_scatter,  "LOQ74044")
-        self.assertEqual(data_state.sample_scatter_period,  3)
-        self.assertEqual(data_state.sample_direct_period,  0)
-        self.assertEqual(data_state.instrument,  SANSInstrument.LOQ)
-        self.assertEqual(data_state.sample_scatter_run_number,  74044)
+        self.assertEqual(data_state.sample_scatter, "LOQ74044")
+        self.assertEqual(data_state.sample_scatter_period, 3)
+        self.assertEqual(data_state.sample_direct_period, 0)
+        self.assertEqual(data_state.instrument, SANSInstrument.LOQ)
+        self.assertEqual(data_state.sample_scatter_run_number, 74044)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

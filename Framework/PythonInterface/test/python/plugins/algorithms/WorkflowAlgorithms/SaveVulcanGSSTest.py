@@ -17,31 +17,32 @@ import os
 
 
 class SaveVulcanGSSTest(unittest.TestCase):
-
     def test_save_gss_simple(self):
-        """ Test to Save a single spectrum GSAS file to a basic binning parameters
-        """
+        """Test to Save a single spectrum GSAS file to a basic binning parameters"""
         # Create a testing data file and workspace
         data_ws_name = "Test_1Spec_Workspace"
         self._create_data_workspace(data_ws_name, num_spec=1)
         # data_ws = AnalysisDataService.retrieve(data_ws_name)
         # print ('VecX: {0}'.format(data_ws.readX(0)))
 
-        bin_ws_name = 'SimpleBinRefTable'
+        bin_ws_name = "SimpleBinRefTable"
         bin_table = self._create_simple_binning_table(bin_ws_name)
 
         # Execute
         import tempfile
+
         tempDir = tempfile.gettempdir()
-        filename=os.path.join(tempDir, "tempout.gda")
+        filename = os.path.join(tempDir, "tempout.gda")
         try:
-            alg_test = run_algorithm("SaveVulcanGSS",
-                                    InputWorkspace=data_ws_name,
-                                    BinningTable=bin_ws_name,
-                                    OutputWorkspace=data_ws_name + "_rebinned",
-                                    GSSFilename=filename,
-                                    IPTS=12345,
-                                    GSSParmFileName='test.prm')
+            alg_test = run_algorithm(
+                "SaveVulcanGSS",
+                InputWorkspace=data_ws_name,
+                BinningTable=bin_ws_name,
+                OutputWorkspace=data_ws_name + "_rebinned",
+                GSSFilename=filename,
+                IPTS=12345,
+                GSSParmFileName="test.prm",
+            )
 
             self.assertTrue(alg_test.isExecuted())
         # check & verify
@@ -51,7 +52,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
         return
 
     def test_save_gss_vdrive(self):
-        """ Test to save a multiple spectra GSS file with various binning workspace
+        """Test to save a multiple spectra GSS file with various binning workspace
         Data:   tof0 = 4900.
                 delta = 0.001
                 num_pts = 200
@@ -62,28 +63,29 @@ class SaveVulcanGSSTest(unittest.TestCase):
         self._create_data_workspace(data_ws_name, num_spec=3)
 
         # create binning workspaces
-        low_res_bin_name = 'LowerBankBinning'
+        low_res_bin_name = "LowerBankBinning"
         self._create_binning_workspace(low_res_bin_name, tof0=4900, delta=0.002, num_pts=100)
 
-        high_res_bin_name = 'HigherBankBinning'
+        high_res_bin_name = "HigherBankBinning"
         self._create_binning_workspace(high_res_bin_name, tof0=4500, delta=0.0005, num_pts=400)
 
-        bin_table = self._create_vulcan_binning_table('vulcan_sim_table', low_res_bin_name, high_res_bin_name)
+        bin_table = self._create_vulcan_binning_table("vulcan_sim_table", low_res_bin_name, high_res_bin_name)
         # Execute
         try:
-            alg_test = run_algorithm("SaveVulcanGSS",
-                                    InputWorkspace=data_ws_name,
-                                    BinningTable=bin_table,
-                                    OutputWorkspace=data_ws_name + "_rebinned",
-                                    GSSFilename="tempout.gda",
-                                    IPTS=12345,
-                                    GSSParmFileName='test.prm')
+            alg_test = run_algorithm(
+                "SaveVulcanGSS",
+                InputWorkspace=data_ws_name,
+                BinningTable=bin_table,
+                OutputWorkspace=data_ws_name + "_rebinned",
+                GSSFilename="tempout.gda",
+                IPTS=12345,
+                GSSParmFileName="test.prm",
+            )
 
             self.assertTrue(alg_test.isExecuted())
         # check & verify
         except Exception as ex:
             self.assertRaises(RuntimeError)
-
 
     @staticmethod
     def _create_binning_workspace(bin_ws_name, tof0, delta, num_pts):
@@ -100,8 +102,8 @@ class SaveVulcanGSSTest(unittest.TestCase):
         tof = tof0
         delta = abs(delta)
         for n in range(num_pts):
-            x_n = math.log(tof)/math.log(10.)
-            tof *= (1 + delta)
+            x_n = math.log(tof) / math.log(10.0)
+            tof *= 1 + delta
             list_x.append(x_n)
         # END-FOR
 
@@ -109,8 +111,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
         vec_y = numpy.array(list_x)
 
         # create workspace
-        api.CreateWorkspace(DataX=vec_tof, DataY=vec_y, DataE=vec_y, NSpec=1, UnitX='TOF',
-                            OutputWorkspace=bin_ws_name)
+        api.CreateWorkspace(DataX=vec_tof, DataY=vec_y, DataE=vec_y, NSpec=1, UnitX="TOF", OutputWorkspace=bin_ws_name)
 
         return
 
@@ -130,17 +131,17 @@ class SaveVulcanGSSTest(unittest.TestCase):
         api.CreateEmptyTableWorkspace(OutputWorkspace=binning_table_name)
 
         bin_table_ws = AnalysisDataService.retrieve(binning_table_name)
-        bin_table_ws.addColumn('str', 'WorkspaceIndexes')
-        bin_table_ws.addColumn('str', 'BinningParameters')
+        bin_table_ws.addColumn("str", "WorkspaceIndexes")
+        bin_table_ws.addColumn("str", "BinningParameters")
 
         # add a row for simple case
-        bin_table_ws.addRow(['0', '10000, -0.002, 13000'])
+        bin_table_ws.addRow(["0", "10000, -0.002, 13000"])
 
         return bin_table_ws
 
     @staticmethod
     def _create_vulcan_binning_table(binning_table_name, binning_workspace_low_res, binning_workspace_high_res):
-        """ create a binning table for binning data into various resolution
+        """create a binning table for binning data into various resolution
         :param binning_table_name:
         :param binning_workspace_low_res:
         :param binning_workspace_high_res:
@@ -150,12 +151,12 @@ class SaveVulcanGSSTest(unittest.TestCase):
         api.CreateEmptyTableWorkspace(OutputWorkspace=binning_table_name)
 
         bin_table_ws = AnalysisDataService.retrieve(binning_table_name)
-        bin_table_ws.addColumn('str', 'WorkspaceIndexes')
-        bin_table_ws.addColumn('str', 'BinningParameters')
+        bin_table_ws.addColumn("str", "WorkspaceIndexes")
+        bin_table_ws.addColumn("str", "BinningParameters")
 
         # add a row for simple case
-        bin_table_ws.addRow(['0, 1', '{0}: {1}'.format(binning_workspace_low_res, 0)])
-        bin_table_ws.addRow(['2', '{0}: {1}'.format(binning_workspace_high_res, 0)])
+        bin_table_ws.addRow(["0, 1", "{0}: {1}".format(binning_workspace_low_res, 0)])
+        bin_table_ws.addRow(["2", "{0}: {1}".format(binning_workspace_high_res, 0)])
 
         return bin_table_ws
 
@@ -168,7 +169,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
         :return:
         """
         # get base data sets for the workspace as Histograms
-        tof0 = 10000.
+        tof0 = 10000.0
         delta = 0.001
         num_pts = 200
 
@@ -180,9 +181,9 @@ class SaveVulcanGSSTest(unittest.TestCase):
         for n in range(num_pts):
             list_x.append(tof)
             list_y.append(math.sin(tof0))
-            list_e.append(1.)
+            list_e.append(1.0)
 
-            tof *= 1+delta
+            tof *= 1 + delta
         # END-FOR
         list_x.append(tof)
 
@@ -212,5 +213,5 @@ class SaveVulcanGSSTest(unittest.TestCase):
         return data_ws
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

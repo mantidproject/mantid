@@ -8,6 +8,7 @@
 import unittest
 import numpy as np
 import matplotlib
+
 matplotlib.use("agg")
 import matplotlib.pyplot as plt
 
@@ -20,7 +21,7 @@ def default_data():
 
 
 def check_axes_props(ax1, ax2):
-    props = ['aspect']
+    props = ["aspect"]
     check_props(ax1, ax2, props)
 
 
@@ -36,20 +37,18 @@ def teardown_function(func):
 class ImshowTest(unittest.TestCase):
     def check_props(self, obj1, obj2, props):
         for p in props:
-            v1 = obj1.__getattribute__('get_%s' % p)()
-            v2 = obj2.__getattribute__('get_%s' % p)()
+            v1 = obj1.__getattribute__("get_%s" % p)()
+            v2 = obj2.__getattribute__("get_%s" % p)()
             self.assertEqual(v1, v2)
 
     def check_axes_props(self, ax1, ax2):
-        props = ['aspect']
+        props = ["aspect"]
         self.check_props(ax1, ax2, props)
 
     def check_artist_props(self, art1, art2):
         """Assert that properties of two artists are equal"""
 
-        props = ['alpha', 'clim', 'clip_on', 'clip_path',
-                 'interpolation', 'rasterized',
-                 'resample', 'snap', 'url', 'visible', 'zorder']
+        props = ["alpha", "clim", "clip_on", "clip_path", "interpolation", "rasterized", "resample", "snap", "url", "visible", "zorder"]
         self.check_props(art1, art2, props)
 
     def test_imshow_creates_modest_image(self):
@@ -77,5 +76,6 @@ class ImshowTest(unittest.TestCase):
         self.check_artist_props(artist1, artist2)
         self.check_axes_props(ax1, ax2)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

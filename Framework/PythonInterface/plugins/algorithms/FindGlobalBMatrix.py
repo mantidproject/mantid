@@ -4,9 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, Progress, ADSValidator, IPeaksWorkspace)
-from mantid.simpleapi import (AnalysisDataService, logger)
-from mantid.kernel import (Direction, FloatBoundedValidator, StringArrayProperty)
+from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, Progress, ADSValidator, IPeaksWorkspace
+from mantid.simpleapi import AnalysisDataService, logger
+from mantid.kernel import Direction, FloatBoundedValidator, StringArrayProperty
 import numpy as np
 from scipy.optimize import leastsq
 from FindGoniometerFromUB import getSignMaxAbsValInCol
@@ -16,7 +16,6 @@ _MIN_NUM_INDEXED_PEAKS = 3  # minimum indexed peaks required for CalculateUMatri
 
 
 class FindGlobalBMatrix(DataProcessorAlgorithm):
-
     def name(self):
         return "FindGlobalBMatrix"
 
@@ -32,40 +31,34 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
     def PyInit(self):
         # Input
         self.declareProperty(
-            StringArrayProperty(name="PeakWorkspaces",
-                                direction=Direction.Input, validator=ADSValidator()),
-            doc='List of peak workspaces to use (must be more than'
-                ' two peaks workspaces and each must contain at least 6 peaks.')
+            StringArrayProperty(name="PeakWorkspaces", direction=Direction.Input, validator=ADSValidator()),
+            doc="List of peak workspaces to use (must be more than" " two peaks workspaces and each must contain at least 6 peaks.",
+        )
         positiveFloatValidator = FloatBoundedValidator(lower=0.0)
         angleValidator = FloatBoundedValidator(lower=0.0, upper=180.0)
-        self.declareProperty(name="a", defaultValue=-1.0,
-                             direction=Direction.Input,
-                             validator=positiveFloatValidator,
-                             doc="Lattice parameter a")
-        self.declareProperty(name="b", defaultValue=-1.0,
-                             direction=Direction.Input,
-                             validator=positiveFloatValidator,
-                             doc="Lattice parameter b")
-        self.declareProperty(name="c", defaultValue=-1.0,
-                             direction=Direction.Input,
-                             validator=positiveFloatValidator,
-                             doc="Lattice parameter c")
-        self.declareProperty(name="alpha", defaultValue=-1.0,
-                             direction=Direction.Input,
-                             validator=angleValidator,
-                             doc="Lattice angle alpha")
-        self.declareProperty(name="beta", defaultValue=-1.0,
-                             direction=Direction.Input,
-                             validator=angleValidator,
-                             doc="Lattice angle beta")
-        self.declareProperty(name="gamma", defaultValue=-1.0,
-                             direction=Direction.Input,
-                             validator=angleValidator,
-                             doc="Lattice angle gamma")
-        self.declareProperty(name="Tolerance", defaultValue=0.15,
-                             direction=Direction.Input,
-                             validator=positiveFloatValidator,
-                             doc="Tolerance to index peaks in in H,K and L")
+        self.declareProperty(
+            name="a", defaultValue=-1.0, direction=Direction.Input, validator=positiveFloatValidator, doc="Lattice parameter a"
+        )
+        self.declareProperty(
+            name="b", defaultValue=-1.0, direction=Direction.Input, validator=positiveFloatValidator, doc="Lattice parameter b"
+        )
+        self.declareProperty(
+            name="c", defaultValue=-1.0, direction=Direction.Input, validator=positiveFloatValidator, doc="Lattice parameter c"
+        )
+        self.declareProperty(
+            name="alpha", defaultValue=-1.0, direction=Direction.Input, validator=angleValidator, doc="Lattice angle alpha"
+        )
+        self.declareProperty(name="beta", defaultValue=-1.0, direction=Direction.Input, validator=angleValidator, doc="Lattice angle beta")
+        self.declareProperty(
+            name="gamma", defaultValue=-1.0, direction=Direction.Input, validator=angleValidator, doc="Lattice angle gamma"
+        )
+        self.declareProperty(
+            name="Tolerance",
+            defaultValue=0.15,
+            direction=Direction.Input,
+            validator=positiveFloatValidator,
+            doc="Tolerance to index peaks in in H,K and L",
+        )
 
     def validateInputs(self):
         issues = dict()
@@ -76,8 +69,10 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
             if isinstance(ws, IPeaksWorkspace) and ws.getNumberPeaks() >= _MIN_NUM_PEAKS:
                 n_valid_ws += 1
         if n_valid_ws < 2 or n_valid_ws < len(ws_list):
-            issues["PeakWorkspaces"] = f"Accept only peaks workspace with more than {_MIN_NUM_PEAKS} peaks - " \
-                                       "there must be at least two peak tables provided in total."
+            issues["PeakWorkspaces"] = (
+                f"Accept only peaks workspace with more than {_MIN_NUM_PEAKS} peaks - "
+                "there must be at least two peak tables provided in total."
+            )
         return issues
 
     def PyExec(self):
@@ -85,13 +80,13 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         prog_reporter = Progress(self, start=0.0, end=1.0, nreports=3)
         # Get input
         ws_list = self.getProperty("PeakWorkspaces").value
-        a = self.getProperty('a').value
-        b = self.getProperty('b').value
-        c = self.getProperty('c').value
-        alpha = self.getProperty('alpha').value
-        beta = self.getProperty('beta').value
-        gamma = self.getProperty('gamma').value
-        self.tol = self.getProperty('Tolerance').value
+        a = self.getProperty("a").value
+        b = self.getProperty("b").value
+        c = self.getProperty("c").value
+        alpha = self.getProperty("alpha").value
+        beta = self.getProperty("beta").value
+        gamma = self.getProperty("gamma").value
+        self.tol = self.getProperty("Tolerance").value
 
         # Find initial UB and use to index peaks in all runs
         prog_reporter.report(1, "Find initial UB for peak indexing")
@@ -116,13 +111,15 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         if success:
             # calculate errors
             dof = sum([self.child_IndexPeaks(ws, RoundHKLs=True) for ws in ws_list]) - len(alatt0)
-            err = np.sqrt(abs(np.diag(cov)) * (info['fvec'] ** 2).sum() / dof)
+            err = np.sqrt(abs(np.diag(cov)) * (info["fvec"] ** 2).sum() / dof)
             for wsname in ws_list:
                 ws = AnalysisDataService.retrieve(wsname)
                 ws.sample().getOrientedLattice().setError(*err)
-            logger.notice(f"Lattice parameters successfully refined for workspaces: {ws_list}\n"
-                          f"Lattice Parameters: {np.array2string(alatt, precision=6)}\n"
-                          f"Parameter Errors  : {np.array2string(err, precision=6)}")
+            logger.notice(
+                f"Lattice parameters successfully refined for workspaces: {ws_list}\n"
+                f"Lattice Parameters: {np.array2string(alatt, precision=6)}\n"
+                f"Parameter Errors  : {np.array2string(err, precision=6)}"
+            )
         else:
             logger.warning(f"Error in optimization of lattice parameters: {msg}")
         # complete progress
@@ -131,8 +128,11 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
     def find_initial_indexing(self, a, b, c, alpha, beta, gamma, ws_list):
         # check if a UB exists on any run and if so whether it indexes a sufficient number of peaks
         foundUB = False
-        ws_with_UB = [(iws, self.child_IndexPeaks(ws)) for iws, ws in enumerate(ws_list) if
-                      AnalysisDataService.retrieve(ws).sample().hasOrientedLattice()]  # [(iws, n_peaks_indexed),...]
+        ws_with_UB = [
+            (iws, self.child_IndexPeaks(ws))
+            for iws, ws in enumerate(ws_list)
+            if AnalysisDataService.retrieve(ws).sample().hasOrientedLattice()
+        ]  # [(iws, n_peaks_indexed),...]
         if ws_with_UB:
             iref, nindexed = max(ws_with_UB, key=lambda x: x[1])  # get UB which indexes most peaks
             foundUB = nindexed >= _MIN_NUM_INDEXED_PEAKS
@@ -140,8 +140,9 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
             # loop over all ws and try to find a UB
             for iws, ws in enumerate(ws_list):
                 try:
-                    self.child_FindUBUsingLatticeParameters(PeaksWorkspace=ws, a=a, b=b, c=c,
-                                                            alpha=alpha, beta=beta, gamma=gamma, FixParameters=False)
+                    self.child_FindUBUsingLatticeParameters(
+                        PeaksWorkspace=ws, a=a, b=b, c=c, alpha=alpha, beta=beta, gamma=gamma, FixParameters=False
+                    )
                     nindexed = self.child_IndexPeaks(PeaksWorkspace=ws, RoundHKLs=True)
                     foundUB = nindexed >= _MIN_NUM_INDEXED_PEAKS
                 except ValueError:
@@ -167,8 +168,9 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                 nindexed = self.child_IndexPeaks(PeaksWorkspace=ws_list[iws], RoundHKLs=True)
                 if nindexed < _MIN_NUM_INDEXED_PEAKS:
                     # if gonio matrix is inaccurate we have to find the UB from scratch and transform to correct HKL
-                    self.child_FindUBUsingLatticeParameters(PeaksWorkspace=ws_list[iws], a=a, b=b, c=c,
-                                                            alpha=alpha, beta=beta, gamma=gamma, FixParameters=False)
+                    self.child_FindUBUsingLatticeParameters(
+                        PeaksWorkspace=ws_list[iws], a=a, b=b, c=c, alpha=alpha, beta=beta, gamma=gamma, FixParameters=False
+                    )
                     self.make_UB_consistent(ws_list[iref], ws_list[iws])
                     nindexed = self.child_IndexPeaks(PeaksWorkspace=ws_list[iws], RoundHKLs=True)
                     foundUB = nindexed >= _MIN_NUM_INDEXED_PEAKS
@@ -209,7 +211,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                 for ii in range(ws.getNumberPeaks()):
                     pk = ws.getPeak(ii)
                     if pk.getHKL().norm2() > 1e-6:
-                        residsq[ipk] = (np.sum((UB @ pk.getIntHKL() - pk.getQSampleFrame()) ** 2))
+                        residsq[ipk] = np.sum((UB @ pk.getIntHKL() - pk.getQSampleFrame()) ** 2)
                         ipk += 1
         return np.sqrt(residsq / (ipk + 1))
 
@@ -252,8 +254,16 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         alg.setProperty("FindError", FindError)
         alg.execute()
 
-    def child_CopySample(self, InputWorkspace, OutputWorkspace, CopyName=False, CopyMaterial=False,
-                         CopyEnvironment=False, CopyShape=False, CopyOrientationOnly=True):
+    def child_CopySample(
+        self,
+        InputWorkspace,
+        OutputWorkspace,
+        CopyName=False,
+        CopyMaterial=False,
+        CopyEnvironment=False,
+        CopyShape=False,
+        CopyOrientationOnly=True,
+    ):
         alg = self.createChildAlgorithm("CopySample", enableLogging=False)
         alg.setProperty("InputWorkspace", InputWorkspace)
         alg.setProperty("OutputWorkspace", OutputWorkspace)

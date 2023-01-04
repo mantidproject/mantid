@@ -9,7 +9,6 @@ from mantid.kernel import VisibleWhenProperty, PropertyCriterion, LogicOperator
 
 
 class VisibleWhenPropertyTest(unittest.TestCase):
-
     def test_construction_with_name_criterion_only_succeeds(self):
         p = VisibleWhenProperty("OtherProperty", PropertyCriterion.IsDefault)
         self.assertIsNotNone(p)
@@ -38,5 +37,6 @@ class VisibleWhenPropertyTest(unittest.TestCase):
             if "Python argument types in" not in str(e):
                 raise RuntimeError("Unexpected exception type raised")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

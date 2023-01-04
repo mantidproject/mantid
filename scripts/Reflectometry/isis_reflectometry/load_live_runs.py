@@ -4,13 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 from mantid.simpleapi import *
 
 
-def get_live_data(instrument_name, frequency = 60, accumulation = "Add", output_name = "live"):
-    StartLiveData(Instrument=str(instrument_name), UpdateEvery = frequency,
-                  Outputworkspace=str(output_name), AccumulationMethod = accumulation)
+def get_live_data(instrument_name, frequency=60, accumulation="Add", output_name="live"):
+    StartLiveData(Instrument=str(instrument_name), UpdateEvery=frequency, Outputworkspace=str(output_name), AccumulationMethod=accumulation)
     ws = mtd[output_name]
     return ws
 

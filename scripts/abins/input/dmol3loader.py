@@ -23,17 +23,20 @@ from mantid.kernel import Atom
 #  El x   disp_1x  disp_2x ...
 # ...
 #
-_disp_row_regex = re.compile(r' [A-Z]?[a-z]?'  # Optional element symbol
-                             + r'\s+[x-z]\s+'  # Cartesian direction
-                             + r'(\s+-?\d+.\d+)'  # At least one column
-                             + r'(\s+-?\d+.\d+)?' * 8  # up to max nine
-                             + r'\s*$')  # Followed by end-of-line
+_disp_row_regex = re.compile(
+    r" [A-Z]?[a-z]?"  # Optional element symbol
+    + r"\s+[x-z]\s+"  # Cartesian direction
+    + r"(\s+-?\d+.\d+)"  # At least one column
+    + r"(\s+-?\d+.\d+)?" * 8  # up to max nine
+    + r"\s*$"
+)  # Followed by end-of-line
 
 
 class DMOL3Loader(AbInitioLoader):
     """
     Class for loading DMOL3 ab initio vibrational data.
     """
+
     def __init__(self, input_ab_initio_filename):
         """
         :param input_ab_initio_filename: name of file with vibrational data (foo.outmol)
@@ -50,7 +53,10 @@ class DMOL3Loader(AbInitioLoader):
         """
         data = {}  # container to store read data
 
-        with io.open(self._clerk.get_input_filename(), "rb", ) as dmol3_file:
+        with io.open(
+            self._clerk.get_input_filename(),
+            "rb",
+        ) as dmol3_file:
 
             # Move read file pointer to the last calculation recorded in the .outmol file. First calculation could be
             # geometry optimization. The last calculation in the file is expected to be calculation of vibrational data.
@@ -62,17 +68,17 @@ class DMOL3Loader(AbInitioLoader):
                 TextParser.find_last(file_obj=dmol3_file, msg="$coordinates")
 
             # read lattice vectors
-            data['unit_cell'] = self._read_lattice_vectors(dmol3_file)
+            data["unit_cell"] = self._read_lattice_vectors(dmol3_file)
 
             # read info about atoms and construct atom data
             masses = self._read_masses_from_file(obj_file=dmol3_file)
             atoms = self._read_atomic_coordinates(file_obj=dmol3_file)
             self.check_isotopes_substitution(atoms=atoms, masses=masses)
             self._num_atoms = len(atoms)
-            data['atoms'] = atoms
+            data["atoms"] = atoms
 
             # Update masses based on behaviour of check_isotopes_substitution
-            masses = [atom['mass'] for _, atom in atoms.items()]
+            masses = [atom["mass"] for _, atom in atoms.items()]
 
             # read frequencies, corresponding atomic displacements and construct k-points data
             TextParser.find_first(file_obj=dmol3_file, msg="Frequencies (cm-1) and normal modes ")
@@ -126,11 +132,9 @@ class DMOL3Loader(AbInitioLoader):
             atom = Atom(symbol=symbol)
 
             # Convert coordinate units from Bohr to Angstrom
-            coord = np.asarray(coord,
-                               dtype=FLOAT_TYPE) * BOHR_TO_ANGSTROM
+            coord = np.asarray(coord, dtype=FLOAT_TYPE) * BOHR_TO_ANGSTROM
 
-            atoms[f"atom_{atom_index}"] = {"symbol": symbol, "mass": atom.mass,
-                                           "sort": atom_index, "coord": coord}
+            atoms[f"atom_{atom_index}"] = {"symbol": symbol, "mass": atom.mass, "sort": atom_index, "coord": coord}
             atom_index += 1
 
         return atoms
@@ -140,7 +144,7 @@ class DMOL3Loader(AbInitioLoader):
         # Scroll to next non-empty line
         last_line = file_obj.tell()
         for line in file_obj:
-            if line.decode('utf8').strip():
+            if line.decode("utf8").strip():
                 file_obj.seek(last_line)
                 return
             else:
@@ -157,8 +161,7 @@ class DMOL3Loader(AbInitioLoader):
         """
         frequency_blocks, displacement_blocks = [], []
 
-        while not (TextParser.block_end(file_obj=file_obj, msg=["STANDARD"])
-                   or TextParser.file_end(file_obj=file_obj)):
+        while not (TextParser.block_end(file_obj=file_obj, msg=["STANDARD"]) or TextParser.file_end(file_obj=file_obj)):
             frequencies, displacements = cls._read_mode_block(file_obj)
 
             frequency_blocks.append(frequencies)
@@ -189,20 +192,17 @@ class DMOL3Loader(AbInitioLoader):
 
         # Frequency row: "  1: freq1  2: freq2 ..."
         TextParser.move_to(file_obj=file_obj, msg=":")
-        frequencies = np.asarray(file_obj.readline().split()[1::2],
-                                 dtype=FLOAT_TYPE)
+        frequencies = np.asarray(file_obj.readline().split()[1::2], dtype=FLOAT_TYPE)
 
         # Displacements first row: " El x   disp_1x  disp_2x ..."
         TextParser.move_to(file_obj=file_obj, msg=" x ")
 
         displacement_rows = []
         line = file_obj.readline()
-        match = _disp_row_regex.match(line.decode('utf8'))
+        match = _disp_row_regex.match(line.decode("utf8"))
         while match:
-            displacement_rows.append(
-                np.asarray(match.groups(), dtype=FLOAT_TYPE))
-            match = _disp_row_regex.match(file_obj.readline()
-                                          .decode('utf8'))
+            displacement_rows.append(np.asarray(match.groups(), dtype=FLOAT_TYPE))
+            match = _disp_row_regex.match(file_obj.readline().decode("utf8"))
 
         if not displacement_rows:
             raise ValueError("Displacement data not found in this block")
@@ -211,9 +211,7 @@ class DMOL3Loader(AbInitioLoader):
         return frequencies, displacements
 
     @classmethod
-    def _assemble_mode_data(cls, frequencies: np.ndarray,
-                            raw_displacements: np.ndarray,
-                            masses: np.ndarray) -> dict:
+    def _assemble_mode_data(cls, frequencies: np.ndarray, raw_displacements: np.ndarray, masses: np.ndarray) -> dict:
         """Process DMOL3 mode data to relevant keys and values for AbinsData
 
         k-point information is set to single Gamma-point as this is all DMOL3
@@ -223,14 +221,15 @@ class DMOL3Loader(AbInitioLoader):
         scaling/reporting convention a sqrt(mass) factor is _not_ applied as
         with codes that output displacements in length units (e.g. CRYSTAL17).
         """
-        data = {'frequencies': frequencies[None, :],  # Add first (kpt) index
-                'k_vectors': np.array([[0., 0., 0.]], dtype=FLOAT_TYPE),
-                'weights': np.array([1.], dtype=FLOAT_TYPE)
-                }
+        data = {
+            "frequencies": frequencies[None, :],  # Add first (kpt) index
+            "k_vectors": np.array([[0.0, 0.0, 0.0]], dtype=FLOAT_TYPE),
+            "weights": np.array([1.0], dtype=FLOAT_TYPE),
+        }
 
         displacements = cls._reshape_displacements(raw_displacements)
         displacements = cls._normalise_displacements(displacements)
-        data['atomic_displacements'] = displacements.astype(COMPLEX_TYPE)
+        data["atomic_displacements"] = displacements.astype(COMPLEX_TYPE)
 
         return data
 
@@ -247,8 +246,9 @@ class DMOL3Loader(AbInitioLoader):
 
     @staticmethod
     def _normalise_displacements(displacements) -> np.ndarray:
-        """"Normalise displacements of each mode over all atoms"""
+        """ "Normalise displacements of each mode over all atoms"""
         from numpy.linalg import norm
+
         mode_weights = norm(norm(displacements, axis=1), axis=2)
         return displacements / mode_weights[:, None, :, None]
 
@@ -262,8 +262,7 @@ class DMOL3Loader(AbInitioLoader):
         one k-point, so the outer index is trivial.
         """
         n_modes = raw_displacements.shape[1]
-        displacements = raw_displacements.reshape((1, -1, 3, n_modes)
-                                                  ).swapaxes(2, 3)
+        displacements = raw_displacements.reshape((1, -1, 3, n_modes)).swapaxes(2, 3)
         return displacements
 
     @staticmethod
@@ -271,8 +270,7 @@ class DMOL3Loader(AbInitioLoader):
         masses = []
 
         with TextParser.save_excursion(obj_file):
-            TextParser.find_first(file_obj=obj_file,
-                                  msg="Zero point vibrational energy:      ")
+            TextParser.find_first(file_obj=obj_file, msg="Zero point vibrational energy:      ")
 
             end_msg = "Molecular Mass:"
             key = "Atom"

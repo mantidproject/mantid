@@ -1102,7 +1102,8 @@ void IntervalList::addInterval(Interval interval) {
   }
   // if deleteList has any elements, delete intervals at those indices
   if (deleteList.size() > 0) {
-    qSort(deleteList);
+    using std::sort;
+    sort(std::begin(deleteList), std::end(deleteList));
 
     for (int i = deleteList.size() - 1; i >= 0; i--) {
       m_list.removeAt(deleteList[i]);

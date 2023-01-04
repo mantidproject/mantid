@@ -10,18 +10,17 @@ Defines a set of custom axis scales
 """
 from mantid.plots.utility import mpl_version_info
 from matplotlib.scale import ScaleBase
-from matplotlib.ticker import (AutoLocator, NullFormatter,
-                               NullLocator, ScalarFormatter)
+from matplotlib.ticker import AutoLocator, NullFormatter, NullLocator, ScalarFormatter
 from matplotlib.transforms import Transform
 import numpy as np
 
 
 class PowerScale(ScaleBase):
-    """Scales the data using a power-law scaling: x^gamma
-    """
+    """Scales the data using a power-law scaling: x^gamma"""
+
     # Name required by register_scale. Use this is set_*scale
     # commands
-    name = 'power'
+    name = "power"
 
     def __init__(self, _axis, **kwargs):
         """
@@ -63,10 +62,9 @@ class PowerScale(ScaleBase):
         if not self._gamma.is_integer() or self._gamma % 2 == 0:
             if not np.isfinite(minpos):
                 minpos = 1e-300  # This value should rarely if ever
-                                 # end up with a visible effect.
+                # end up with a visible effect.
 
-            return (minpos if vmin <= 0 else vmin,
-                    minpos if vmax <= 0 else vmax)
+            return (minpos if vmin <= 0 else vmin, minpos if vmax <= 0 else vmax)
         else:
             return vmin, vmax
 
@@ -89,8 +87,7 @@ class PowerScale(ScaleBase):
             self._gamma = gamma
 
         def transform_non_affine(self, a):
-            """Apply the transform to the given data array
-            """
+            """Apply the transform to the given data array"""
             with np.errstate(divide="ignore", invalid="ignore"):
                 out = np.power(a, self._gamma)
             if not self._gamma.is_integer():
@@ -118,7 +115,7 @@ class PowerScale(ScaleBase):
         def transform_non_affine(self, a):
             if not self._gamma.is_integer() or self._gamma % 2 == 0:
                 with np.errstate(divide="ignore", invalid="ignore"):
-                    out = np.power(a, 1. / self._gamma)
+                    out = np.power(a, 1.0 / self._gamma)
                 # clip negative values to 0
                 out[a <= 0] = 0
             else:
@@ -126,14 +123,14 @@ class PowerScale(ScaleBase):
                 # returns nan. In the case of where we have a fractional power with
                 # an odd denominator then we can write the power as
                 #     (-a)^(1/b) = (-1)^1(a^(1/b)) = -1*a^(1/b)
-                negative_indices = (a < 0.)
+                negative_indices = a < 0.0
                 if np.any(negative_indices):
                     out = np.copy(a)
                     np.negative(a, where=negative_indices, out=out)
-                    np.power(out, 1. / self._gamma, out=out)
+                    np.power(out, 1.0 / self._gamma, out=out)
                     np.negative(out, where=negative_indices, out=out)
                 else:
-                    out = np.power(a, 1. / self._gamma)
+                    out = np.power(a, 1.0 / self._gamma)
 
             return out
 
@@ -143,8 +140,8 @@ class PowerScale(ScaleBase):
 
 class SquareScale(PowerScale):
     # Convenience type for square scaling
-    name = 'square'
+    name = "square"
 
     def __init__(self, axis, **kwargs):
-        kwargs['gamma'] = 2
+        kwargs["gamma"] = 2
         super(SquareScale, self).__init__(axis, **kwargs)

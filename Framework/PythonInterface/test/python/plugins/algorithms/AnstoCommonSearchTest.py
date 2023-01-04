@@ -23,12 +23,11 @@ from ansto_common import (
     SingleRun,
     find_cycle_folders,
     split_run_index,
-    ScratchFolder
+    ScratchFolder,
 )
 
 
 class AnstoCommonSearchTests(unittest.TestCase):
-
     def setUp(self):
         return
 
@@ -118,11 +117,10 @@ class AnstoCommonSearchTests(unittest.TestCase):
             # load a file using the scratch folder method
             erun = hdf_files_from_runs("44464", [], "PLN", ".hdf")[0]
             source, ds_index = split_run_index(erun)
-            nxsfile = scratch.build_temp_fpath(source, 0, '')
+            nxsfile = scratch.build_temp_fpath(source, 0, "")
 
             loadopts = {"BinaryEventPath": "./PLN0044464.bin"}
-            loaded = scratch.load_run_from_scratch(source, 0, LoadPLN, loadopts,
-                        'test', params=[], event_dirs = [], filter = None)
+            loaded = scratch.load_run_from_scratch(source, 0, LoadPLN, loadopts, "test", params=[], event_dirs=[], filter=None)
             self.assertTrue(loaded, "Unable to load file {}".format(source))
 
             # confirm the file is in the scratch folder
@@ -130,13 +128,12 @@ class AnstoCommonSearchTests(unittest.TestCase):
             self.assertTrue(ok, "Missing scratch file {}".format(nxsfile))
 
             # rename the tmp file
-            newfile = nxsfile.replace('44464.', '55555.')
+            newfile = nxsfile.replace("44464.", "55555.")
             os.rename(nxsfile, newfile)
 
             # load renamed file which is only available in the scratch folder
-            newsrc = source.replace('44464.', '55555.')
-            loaded = scratch.load_run_from_scratch(newsrc, 0, LoadPLN, loadopts,
-                    'test', params=[], event_dirs = [], filter = None)
+            newsrc = source.replace("44464.", "55555.")
+            loaded = scratch.load_run_from_scratch(newsrc, 0, LoadPLN, loadopts, "test", params=[], event_dirs=[], filter=None)
             self.assertTrue(loaded, "Unable to load file {}".format(newsrc))
 
 

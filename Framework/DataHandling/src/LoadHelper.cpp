@@ -9,10 +9,12 @@
  * */
 
 #include "MantidDataHandling/LoadHelper.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <nexus/napi.h>
@@ -354,62 +356,6 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &ru
 } // recurseAndAddNexusFieldsToWsRun
 
 /**
- * Show attributes attached to the current Nexus entry
- *
- * @param nxfileID The Nexus entry
- *
- */
-void LoadHelper::dumpNexusAttributes(NXhandle nxfileID) {
-  // Attributes
-  NXname pName;
-  int iLength, iType;
-#ifndef NEXUS43
-  int rank;
-  int dims[4];
-#endif
-  std::vector<char> buff(128);
-
-#ifdef NEXUS43
-  while (NXgetnextattr(nxfileID, pName, &iLength, &iType) != NX_EOD) {
-#else
-  while (NXgetnextattra(nxfileID, pName, &rank, dims, &iType) != NX_EOD) {
-    if (rank > 1) { // mantid only supports single value attributes
-      throw std::runtime_error("Encountered attribute with multi-dimensional array value");
-    }
-    iLength = dims[0]; // to clarify things
-    if (iType != NX_CHAR && iLength != 1) {
-      throw std::runtime_error("Encountered attribute with array value");
-    }
-#endif
-
-    switch (iType) {
-    case NX_CHAR: {
-      if (iLength > static_cast<int>(buff.size())) {
-        buff.resize(iLength);
-      }
-      int nz = iLength + 1;
-      NXgetattr(nxfileID, pName, buff.data(), &nz, &iType);
-      break;
-    }
-    case NX_INT16: {
-      short int value;
-      NXgetattr(nxfileID, pName, &value, &iLength, &iType);
-      break;
-    }
-    case NX_INT32: {
-      int value;
-      NXgetattr(nxfileID, pName, &value, &iLength, &iType);
-      break;
-    }
-    case NX_UINT16: {
-      short unsigned int value;
-      NXgetattr(nxfileID, pName, &value, &iLength, &iType);
-      break;
-    }
-    } // switch
-  }   // while
-}
-/**
  * Parses the date as formatted at the ILL:
  * 29-Jun-12 11:27:26
  * and converts it to the ISO format used in Mantid:
@@ -493,6 +439,197 @@ V3D LoadHelper::getComponentPosition(const API::MatrixWorkspace_sptr &ws, const 
   }
   V3D pos = component->getPos();
   return pos;
+}
+
+/**
+ * Loads empty instrument of chosen name into a provided workspace
+ * @param ws A MatrixWorkspace
+ * @param instrumentName Name of the instrument to be loaded
+ * @param instrumentPath Path to the instrument definition file, optional
+ */
+void LoadHelper::loadEmptyInstrument(const API::MatrixWorkspace_sptr &ws, const std::string &instrumentName,
+                                     const std::string &instrumentPath) {
+  auto loadInst = AlgorithmManager::Instance().create("LoadInstrument");
+  loadInst->initialize();
+  loadInst->setChild(true);
+  loadInst->setPropertyValue("InstrumentName", instrumentName);
+  if (!instrumentPath.empty())
+    loadInst->setPropertyValue("Filename", instrumentPath);
+  loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", ws);
+  loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
+  loadInst->execute();
+}
+
+/**
+ * Fills workspace with histogram data from provided data structure
+ * @param ws A MatrixWorkspace to be filled with data
+ * @param data Data object to extract counts from
+ * @param xAxis X axis values to be assigned to each spectrum
+ * @param initialSpectrum Initial spectrum number, optional and defaults to 0
+ * @param pointData Switch to decide whether the data is going to be a histogram or point data, defaults to false
+ * (histogram)
+ * @param detectorIDs Vector of detector IDs to override the default spectrum number, defaults to empty (IDs equal to
+ * index)
+ * @param acceptedDetectorIDs Set of accepted detector IDs, defaults to empty (all accepted)
+ * @param axisOrder Tuple containing information at which position in data one can find tubes, pixels, and channels
+ * (scans), defaults to 0,1,2 meaning default order of tube-pixel-channel
+ */
+void LoadHelper::fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, const Mantid::NeXus::NXInt &data,
+                                     const std::vector<double> &xAxis, int initialSpectrum, bool pointData,
+                                     const std::vector<int> &detectorIDs, const std::set<int> &acceptedDetectorIDs,
+                                     const std::tuple<short, short, short> &axisOrder) {
+
+  const bool customDetectorIDs = detectorIDs.size() != 0;
+  const bool excludeDetectorIDs = acceptedDetectorIDs.size() != 0;
+
+  std::array dims = {data.dim0(), data.dim1(), data.dim2()};
+  const auto nTubes = dims[std::get<0>(axisOrder)];
+  const auto nPixels = dims[std::get<1>(axisOrder)];
+  const auto nChannels = dims[std::get<2>(axisOrder)];
+
+  int loadOrder[3] = {0, 1, 2};
+  loadingOrder(axisOrder, loadOrder);
+
+  HistogramData::Points histoPoints;
+  HistogramData::BinEdges binEdges;
+  if (pointData)
+    histoPoints = HistogramData::Points(xAxis);
+  else
+    binEdges = HistogramData::BinEdges(xAxis);
+  int nSkipped = 0;
+
+#pragma omp parallel for if (!excludeDetectorIDs && Kernel::threadSafe(*ws))
+  for (int tube_no = 0; tube_no < nTubes; ++tube_no) {
+    for (int pixel_no = 0; pixel_no < nPixels; ++pixel_no) {
+      auto currentSpectrum = initialSpectrum + tube_no * nPixels + pixel_no;
+      if (excludeDetectorIDs != 0 && std::find(acceptedDetectorIDs.cbegin(), acceptedDetectorIDs.cend(),
+                                               currentSpectrum) == acceptedDetectorIDs.end()) {
+        nSkipped++;
+        continue;
+      }
+      currentSpectrum -= nSkipped;
+
+      std::vector<int> spectrum(nChannels);
+      for (auto channel_no = 0; channel_no < nChannels; ++channel_no) {
+        const int dataIndices[3] = {tube_no, pixel_no, channel_no};
+        spectrum[channel_no] = data(dataIndices[loadOrder[0]], dataIndices[loadOrder[1]], dataIndices[loadOrder[2]]);
+      }
+      const HistogramData::Counts counts(spectrum.begin(), spectrum.end());
+      const HistogramData::CountVariances countVariances(spectrum.begin(), spectrum.end());
+      if (pointData) {
+        ws->setCounts(currentSpectrum, counts);
+        ws->setCountVariances(currentSpectrum, countVariances);
+        ws->setPoints(currentSpectrum, histoPoints);
+      } else {
+        ws->setHistogram(currentSpectrum, binEdges, counts);
+      }
+      const auto detectorID = customDetectorIDs ? detectorIDs[currentSpectrum] : currentSpectrum;
+      ws->getSpectrum(currentSpectrum).setSpectrumNo(detectorID);
+    }
+  }
+}
+
+/**
+ * Handles non-standard loading order of the provided data, based on the provided data dimension order.
+ * @param dataOrder tuple containing where tubes, pixels, and channels (scans) can be found in data
+ * @param dataIndices pointer to the array containing data indices to be set
+ */
+void LoadHelper::loadingOrder(const std::tuple<short, short, short> &dataOrder, int *dataIndices) {
+  if (std::get<0>(dataOrder) != 0)
+    dataIndices[0] = std::get<1>(dataOrder) == 0 ? 1 : 2;
+  if (std::get<1>(dataOrder) != 1)
+    dataIndices[1] = std::get<0>(dataOrder) == 1 ? 0 : 2;
+  if (std::get<2>(dataOrder) != 2)
+    dataIndices[2] = std::get<1>(dataOrder) == 2 ? 1 : 0;
+}
+
+/**
+ * Fills workspace with histogram data from provided data structure
+ * @param ws A MatrixWorkspace to be filled with data
+ * @param data Data object to extract counts from
+ * @param xAxis X axis values to be assigned to each spectrum
+ * @param initialSpectrum Initial spectrum number, optional and defaults to 0
+ * @param acceptedDetectorIDs Set of accepted detector IDs, defaults to empty (all accepted)
+ * @param customDetectorIDs Vector of custom detector IDs to replace the default detectorID calculation, defaults to
+ * empty (default calculation)
+ * @param axisOrder Tuple containing description of axis order of 3D Nexus data, defaults to 0,1,2 meaning
+ * tube-pixel-channel order
+ */
+void LoadHelper::fillMovingWorkspace(const API::MatrixWorkspace_sptr &ws, const Mantid::NeXus::NXInt &data,
+                                     const std::vector<double> &xAxis, int initialSpectrum,
+                                     const std::set<int> &acceptedDetectorIDs,
+                                     const std::vector<int> &customDetectorIDs,
+                                     const std::tuple<short, short, short> &axisOrder) {
+
+  const auto useCustomSpectraMap = customDetectorIDs.size() != 0;
+  const auto useAcceptedDetectorIDs = acceptedDetectorIDs.size() != 0;
+
+  std::array dims = {data.dim0(), data.dim1(), data.dim2()};
+  const auto nTubes = dims[std::get<0>(axisOrder)];
+  const auto nPixels = dims[std::get<1>(axisOrder)];
+  const auto nScans = dims[std::get<2>(axisOrder)];
+
+  int nSkipped = 0;
+#pragma omp parallel for if (Kernel::threadSafe(*ws))
+  for (int tube_no = 0; tube_no < nTubes; ++tube_no) {
+    for (int pixel_no = 0; pixel_no < nPixels; ++pixel_no) {
+      auto currentDetector = initialSpectrum + tube_no * nPixels + pixel_no;
+      if (useAcceptedDetectorIDs && std::find(acceptedDetectorIDs.cbegin(), acceptedDetectorIDs.cend(),
+                                              currentDetector) == acceptedDetectorIDs.end()) {
+        nSkipped++;
+        continue;
+      }
+      currentDetector -= nSkipped;
+      int currentSpectrum;
+      if (useCustomSpectraMap)
+        currentSpectrum = customDetectorIDs[currentDetector - initialSpectrum];
+      else
+        currentSpectrum = currentDetector;
+      currentSpectrum *= nScans;
+      for (auto channel_no = 0; channel_no < nScans; ++channel_no) {
+        auto spectrumValue = data(channel_no, tube_no, pixel_no);
+        ws->mutableY(currentSpectrum) = spectrumValue;
+        ws->mutableE(currentSpectrum) = sqrt(spectrumValue);
+        ws->mutableX(currentSpectrum) = xAxis;
+        currentSpectrum++;
+      }
+    }
+  }
+}
+
+/**
+ * Replaces errors of bins with zero counts with provided value
+ * @param ws MatrixWorkspace to have its zero errors replaced
+ * @param zeroCountsError Value to replace default error of square root of counts
+ */
+void LoadHelper::replaceZeroErrors(const API::MatrixWorkspace_sptr &ws, double zeroCountsError) {
+  for (size_t spectrum_no = 0; spectrum_no < ws->getNumberHistograms(); ++spectrum_no) {
+    auto &errorAxis = ws->mutableE(spectrum_no);
+    std::transform(errorAxis.begin(), errorAxis.end(), errorAxis.begin(),
+                   [zeroCountsError](const auto &error) { return error == 0 ? zeroCountsError : error; });
+  }
+}
+
+/**
+ * Fetches NXInt data from the requested group name in the entry provided.
+ * @param entry NXEntry where desired data can be found
+ * @param groupName Full name of the data group
+ * @return NXInt data object
+ */
+NeXus::NXInt LoadHelper::getIntDataset(const NeXus::NXEntry &entry, const std::string &groupName) {
+  auto dataGroup = entry.openNXData(groupName);
+  return dataGroup.openIntData();
+}
+
+/**
+ * Fetches NXDouble data from the requested group name in the entry provided.
+ * @param entry NXEntry where desired data can be found
+ * @param groupName Full name of the data group
+ * @return NXDouble data object
+ */
+NeXus::NXDouble LoadHelper::getDoubleDataset(const NeXus::NXEntry &entry, const std::string &groupName) {
+  auto dataGroup = entry.openNXData(groupName);
+  return dataGroup.openDoubleData();
 }
 
 } // namespace DataHandling

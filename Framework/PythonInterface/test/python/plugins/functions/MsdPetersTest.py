@@ -19,13 +19,14 @@ class MsdPetersTest(unittest.TestCase):
 
     def test_function_output(self):
         input = np.array([[0, 1], [2, 3]])
-        expected = np.array([[1., 0.99173554], [0.96774194, 0.93023256]])
+        expected = np.array([[1.0, 0.99173554], [0.96774194, 0.93023256]])
         tolerance = 0.000001
         status, output = check_output("MsdPeters", input, expected, tolerance, Height=1.0, Msd=0.05, Beta=1.0)
 
         if not status:
-            self.fail("Computed output " + str(output) + " from input " + str(input) +
-                      " is not equal to the expected output: " + str(expected))
+            self.fail(
+                "Computed output " + str(output) + " from input " + str(input) + " is not equal to the expected output: " + str(expected)
+            )
 
     def test_use_in_fit(self):
         workspace = create_test_workspace(create_model("MsdPeters", Height=1.0, Msd=0.05, Beta=1.0), 1000)
@@ -33,5 +34,5 @@ class MsdPetersTest(unittest.TestCase):
         Fit(Function=function_string, InputWorkspace=workspace, StartX=1.2, EndX=1200)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

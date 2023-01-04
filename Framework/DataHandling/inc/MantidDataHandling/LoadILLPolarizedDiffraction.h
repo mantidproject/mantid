@@ -43,7 +43,6 @@ private:
   void loadData();
   void loadMetaData();
   API::WorkspaceGroup_sptr sortPolarisations();
-  void loadInstrument(const API::MatrixWorkspace_sptr &, const std::string &);
   std::vector<double> loadTwoThetaDetectors(const API::MatrixWorkspace_sptr &, const NeXus::NXEntry &, const int);
   std::vector<double> loadBankParameters(const API::MatrixWorkspace_sptr &, const int);
   void moveTwoTheta(const NeXus::NXEntry &, const API::MatrixWorkspace_sptr &);

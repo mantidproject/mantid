@@ -5,12 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import ExperimentInfo
-from sans.common.general_functions import (create_unmanaged_algorithm, sanitise_instrument_name)
+from sans.common.general_functions import create_unmanaged_algorithm, sanitise_instrument_name
 from sans.common.constants import EMPTY_NAME
 
 
-def apply_flat_background_correction_to_detectors(workspace, flat_background_correction_start,
-                                                  flat_background_correction_stop):
+def apply_flat_background_correction_to_detectors(workspace, flat_background_correction_start, flat_background_correction_stop):
     """
     Applies the flat background correction to all detectors which are not monitors
 
@@ -21,11 +20,13 @@ def apply_flat_background_correction_to_detectors(workspace, flat_background_cor
     """
     if flat_background_correction_start is not None and flat_background_correction_stop is not None:
         flat_name = "CalculateFlatBackground"
-        flat_options = {"InputWorkspace": workspace,
-                        "Mode": "Mean",
-                        "StartX": flat_background_correction_start,
-                        "EndX": flat_background_correction_stop,
-                        "SkipMonitors": True}
+        flat_options = {
+            "InputWorkspace": workspace,
+            "Mode": "Mean",
+            "StartX": flat_background_correction_start,
+            "EndX": flat_background_correction_stop,
+            "SkipMonitors": True,
+        }
         flat_alg = create_unmanaged_algorithm(flat_name, **flat_options)
         flat_alg.setPropertyValue("OutputWorkspace", EMPTY_NAME)
         flat_alg.setProperty("OutputWorkspace", workspace)
@@ -34,9 +35,14 @@ def apply_flat_background_correction_to_detectors(workspace, flat_background_cor
     return workspace
 
 
-def apply_flat_background_correction_to_monitors(workspace, monitor_indices, background_TOF_monitor_start,
-                                                 background_TOF_monitor_stop, background_TOF_general_start,
-                                                 background_TOF_general_stop):
+def apply_flat_background_correction_to_monitors(
+    workspace,
+    monitor_indices,
+    background_TOF_monitor_start,
+    background_TOF_monitor_stop,
+    background_TOF_general_start,
+    background_TOF_general_stop,
+):
     """
     Applies the flat background correction to some monitors
 
@@ -58,20 +64,26 @@ def apply_flat_background_correction_to_monitors(workspace, monitor_indices, bac
         spectrum = workspace.getSpectrum(workspace_index)
         spectrum_number = spectrum.getSpectrumNo()
         monitor_key = str(spectrum_number)
-        if monitor_key not in background_TOF_monitor_start and monitor_key not in background_TOF_monitor_stop \
-                and background_TOF_general_start is None and background_TOF_general_stop is None:
+        if (
+            monitor_key not in background_TOF_monitor_start
+            and monitor_key not in background_TOF_monitor_stop
+            and background_TOF_general_start is None
+            and background_TOF_general_stop is None
+        ):
             continue
-        tof_start = background_TOF_monitor_start[monitor_key] if monitor_key in background_TOF_monitor_start else \
-            background_TOF_general_start
-        tof_stop = background_TOF_monitor_stop[monitor_key] if monitor_key in background_TOF_monitor_stop else \
-            background_TOF_general_stop
+        tof_start = (
+            background_TOF_monitor_start[monitor_key] if monitor_key in background_TOF_monitor_start else background_TOF_general_start
+        )
+        tof_stop = background_TOF_monitor_stop[monitor_key] if monitor_key in background_TOF_monitor_stop else background_TOF_general_stop
 
         flat_name = "CalculateFlatBackground"
-        flat_options = {"InputWorkspace": workspace,
-                        "Mode": "Mean",
-                        "StartX": tof_start,
-                        "EndX": tof_stop,
-                        "WorkspaceIndexList": workspace_index}
+        flat_options = {
+            "InputWorkspace": workspace,
+            "Mode": "Mean",
+            "StartX": tof_start,
+            "EndX": tof_stop,
+            "WorkspaceIndexList": workspace_index,
+        }
         flat_alg = create_unmanaged_algorithm(flat_name, **flat_options)
         flat_alg.setPropertyValue("OutputWorkspace", EMPTY_NAME)
         flat_alg.setProperty("OutputWorkspace", workspace)
@@ -149,9 +161,7 @@ def get_masked_det_ids_from_mask_file(mask_file_path, idf_path):
     :return the list of detector IDs that were masked in the file
     """
     mask_name = "LoadMask"
-    mask_options = {"Instrument": idf_path,
-                    "InputFile": mask_file_path,
-                    "OutputWorkspace": EMPTY_NAME}
+    mask_options = {"Instrument": idf_path, "InputFile": mask_file_path, "OutputWorkspace": EMPTY_NAME}
     mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
     mask_alg.execute()
     workspace = mask_alg.getProperty("OutputWorkspace").value
@@ -199,11 +209,29 @@ def infinite_cylinder_xml(id_name, centre, radius, axis):
     :param axis: a collection with three entries defining the axis
     :return: the infinite cylinder masking xml
     """
-    return '<infinite-cylinder id="' + str(id_name) + '">' + \
-           '<centre x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' + str(centre[2]) + '" />' + \
-           '<axis x="' + str(axis[0]) + '" y="' + str(axis[1]) + '" z="' + str(axis[2]) + '" />' + \
-           '<radius val="' + str(radius) + '" />' + \
-           '</infinite-cylinder>\n'
+    return (
+        '<infinite-cylinder id="'
+        + str(id_name)
+        + '">'
+        + '<centre x="'
+        + str(centre[0])
+        + '" y="'
+        + str(centre[1])
+        + '" z="'
+        + str(centre[2])
+        + '" />'
+        + '<axis x="'
+        + str(axis[0])
+        + '" y="'
+        + str(axis[1])
+        + '" z="'
+        + str(axis[2])
+        + '" />'
+        + '<radius val="'
+        + str(radius)
+        + '" />'
+        + "</infinite-cylinder>\n"
+    )
 
 
 def mask_with_cylinder(workspace, radius, x_centre, y_centre, algebra):
@@ -216,12 +244,11 @@ def mask_with_cylinder(workspace, radius, x_centre, y_centre, algebra):
     :param y_centre: the y position of the masking radius
     :param algebra: a masking algebra
     """
-    xml_def = infinite_cylinder_xml('shape', [x_centre, y_centre, 0.0], radius, [0, 0, 1])
+    xml_def = infinite_cylinder_xml("shape", [x_centre, y_centre, 0.0], radius, [0, 0, 1])
     xml_def += '<algebra val="' + algebra + 'shape" />'
 
     mask_name = "MaskDetectorsInShape"
-    mask_options = {"Workspace": workspace,
-                    "ShapeXML": xml_def}
+    mask_options = {"Workspace": workspace, "ShapeXML": xml_def}
     mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
     mask_alg.execute()
     return mask_alg.getProperty("Workspace").value
@@ -253,8 +280,7 @@ def get_region_of_interest(workspace, radius=None, roi_files=None, mask_files=No
         # The centre position of the Cylinder does not require a shift, as all
         # components have been shifted already, when the workspaces were loaded
         clone_name = "CloneWorkspace"
-        clone_options = {"InputWorkspace": workspace,
-                         "OutputWorkspace": EMPTY_NAME}
+        clone_options = {"InputWorkspace": workspace, "OutputWorkspace": EMPTY_NAME}
         clone_alg = create_unmanaged_algorithm(clone_name, **clone_options)
         clone_alg.execute()
         cloned_workspace = clone_alg.getProperty("OutputWorkspace").value

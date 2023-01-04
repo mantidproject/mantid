@@ -6,8 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import IFunction, AlgorithmManager, mtd
 from mantid.kernel import logger
-from mantid.simpleapi import (CalculateChiSquared, CreateEmptyTableWorkspace, EvaluateFunction, FunctionFactory,
-                              FunctionWrapper, plotSpectrum)
+from mantid.simpleapi import (
+    CalculateChiSquared,
+    CreateEmptyTableWorkspace,
+    EvaluateFunction,
+    FunctionFactory,
+    FunctionWrapper,
+    plotSpectrum,
+)
 from .function import PeaksFunction, PhysicalProperties, ResolutionModel, Background, Function
 from .energies import energies
 from .normalisation import split2range, ionname2Nre
@@ -21,82 +27,157 @@ from typing import Callable, Dict, List, Tuple
 import warnings
 
 # RegEx pattern matching a composite function parameter name, eg f2.Sigma.
-FN_PATTERN = re.compile('f(\\d+)\\.(.+)')
+FN_PATTERN = re.compile("f(\\d+)\\.(.+)")
 
 # RegEx pattern matching a composite function parameter name, eg f2.Sigma. Multi-spectrum case.
-FN_MS_PATTERN = re.compile('f(\\d+)\\.f(\\d+)\\.(.+)')
+FN_MS_PATTERN = re.compile("f(\\d+)\\.f(\\d+)\\.(.+)")
 
-CONSTRAINTS_PATTERN = re.compile(r'constraints=\((.*?)\)')
-FWHM_PATTERN = re.compile(r'FWHM[X|Y]\d+=\(\),')
-PHYSICAL_PROPERTIES_PATTERN = re.compile(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)')
-TEMPERATURES_PATTERN = re.compile(r'(name=.*?,)(.*?)(Temperatures=\(.*?\),)')
-TIES_PATTERN = re.compile(r',ties=\((.*?)\)')
+CONSTRAINTS_PATTERN = re.compile(r"constraints=\((.*?)\)")
+FWHM_PATTERN = re.compile(r"FWHM[X|Y]\d+=\(\),")
+PHYSICAL_PROPERTIES_PATTERN = re.compile(r"(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)")
+TEMPERATURES_PATTERN = re.compile(r"(name=.*?,)(.*?)(Temperatures=\(.*?\),)")
+TIES_PATTERN = re.compile(r",ties=\((.*?)\)")
 
 
 def makeWorkspace(xArray, yArray):
     """Create a workspace that doesn't appear in the ADS"""
-    alg = AlgorithmManager.createUnmanaged('CreateWorkspace')
+    alg = AlgorithmManager.createUnmanaged("CreateWorkspace")
     alg.initialize()
     alg.setChild(True)
-    alg.setProperty('DataX', xArray)
-    alg.setProperty('DataY', yArray)
-    alg.setProperty('OutputWorkspace', 'dummy')
+    alg.setProperty("DataX", xArray)
+    alg.setProperty("DataY", yArray)
+    alg.setProperty("OutputWorkspace", "dummy")
     alg.execute()
-    return alg.getProperty('OutputWorkspace').value
+    return alg.getProperty("OutputWorkspace").value
 
 
 def islistlike(arg):
     return (not hasattr(arg, "strip")) and (hasattr(arg, "__getitem__") or hasattr(arg, "__iter__")) and hasattr(arg, "__len__")
 
 
-def cfpstrmaker(x, pref='B'):
-    return [pref+str(k)+str(x) for k in [2, 4, 6] if x <= k]
+def cfpstrmaker(x, pref="B"):
+    return [pref + str(k) + str(x) for k in [2, 4, 6] if x <= k]
 
 
 def getSymmAllowedParam(sym_str):
-    if 'T' in sym_str or 'O' in sym_str:
-        return ['B40', 'B60']
-    if any([sym_str == val for val in ['C1', 'Ci']]):
-        return sum([cfpstrmaker(i) for i in range(7)]
-                   + [cfpstrmaker(i, 'IB') for i in range(1, 7)],[])
+    if "T" in sym_str or "O" in sym_str:
+        return ["B40", "B60"]
+    if any([sym_str == val for val in ["C1", "Ci"]]):
+        return sum([cfpstrmaker(i) for i in range(7)] + [cfpstrmaker(i, "IB") for i in range(1, 7)], [])
     retval = cfpstrmaker(0)
-    if '6' in sym_str or '3' in sym_str:
+    if "6" in sym_str or "3" in sym_str:
         retval += cfpstrmaker(6)
-        if any([sym_str == val for val in ['C6', 'C3h', 'C6h']]):
-            retval += cfpstrmaker(6, 'IB')
-    if ('3' in sym_str and '3h' not in sym_str) or 'S6' in sym_str:
+        if any([sym_str == val for val in ["C6", "C3h", "C6h"]]):
+            retval += cfpstrmaker(6, "IB")
+    if ("3" in sym_str and "3h" not in sym_str) or "S6" in sym_str:
         retval += cfpstrmaker(3)
-        if any([sym_str == val for val in ['C3', 'S6']]):
-            retval += cfpstrmaker(3, 'IB') + cfpstrmaker(6, 'IB')
-    if '4' in sym_str or '2' in sym_str:
+        if any([sym_str == val for val in ["C3", "S6"]]):
+            retval += cfpstrmaker(3, "IB") + cfpstrmaker(6, "IB")
+    if "4" in sym_str or "2" in sym_str:
         retval += cfpstrmaker(4)
-        if any([sym_str == val for val in ['C4', 'S4', 'C4h']]):
-            retval += cfpstrmaker(4, 'IB')
-    if ('2' in sym_str and '2d' not in sym_str) or 'Cs' in sym_str:
+        if any([sym_str == val for val in ["C4", "S4", "C4h"]]):
+            retval += cfpstrmaker(4, "IB")
+    if ("2" in sym_str and "2d" not in sym_str) or "Cs" in sym_str:
         retval += cfpstrmaker(2)
-        if any([sym_str == val for val in ['C2', 'Cs', 'C2h']]):
-            retval += cfpstrmaker(2, 'IB') + cfpstrmaker(4, 'IB')
+        if any([sym_str == val for val in ["C2", "Cs", "C2h"]]):
+            retval += cfpstrmaker(2, "IB") + cfpstrmaker(4, "IB")
     return retval
 
 
-#pylint: disable=too-many-instance-attributes,too-many-public-methods
+# pylint: disable=too-many-instance-attributes,too-many-public-methods
 class CrystalField(object):
     """Calculates the crystal fields for one ion"""
 
-    allowed_symmetries = ['C1', 'Ci', 'C2', 'Cs', 'C2h', 'C2v', 'D2', 'D2h', 'C4', 'S4', 'C4h',
-                          'D4', 'C4v', 'D2d', 'D4h', 'C3', 'S6', 'D3', 'C3v', 'D3d', 'C6', 'C3h',
-                          'C6h', 'D6', 'C6v', 'D3h', 'D6h', 'T', 'Td', 'Th', 'O', 'Oh']
+    allowed_symmetries = [
+        "C1",
+        "Ci",
+        "C2",
+        "Cs",
+        "C2h",
+        "C2v",
+        "D2",
+        "D2h",
+        "C4",
+        "S4",
+        "C4h",
+        "D4",
+        "C4v",
+        "D2d",
+        "D4h",
+        "C3",
+        "S6",
+        "D3",
+        "C3v",
+        "D3d",
+        "C6",
+        "C3h",
+        "C6h",
+        "D6",
+        "C6v",
+        "D3h",
+        "D6h",
+        "T",
+        "Td",
+        "Th",
+        "O",
+        "Oh",
+    ]
 
-    lande_g = [6.0 / 7., 4.0 / 5., 8.0 / 11., 3.0 / 5., 2.0 / 7., 0.0, 2.0,
-               3.0 / 2., 4.0 / 3., 5.0 / 4.,  6.0 / 5., 7.0 / 6., 8.0 / 7.]
+    lande_g = [
+        6.0 / 7.0,
+        4.0 / 5.0,
+        8.0 / 11.0,
+        3.0 / 5.0,
+        2.0 / 7.0,
+        0.0,
+        2.0,
+        3.0 / 2.0,
+        4.0 / 3.0,
+        5.0 / 4.0,
+        6.0 / 5.0,
+        7.0 / 6.0,
+        8.0 / 7.0,
+    ]
 
-    default_peakShape = 'Gaussian'
-    default_background = 'FlatBackground'
+    default_peakShape = "Gaussian"
+    default_background = "FlatBackground"
     default_spectrum_size = 200
 
-    field_parameter_names = ['BmolX','BmolY','BmolZ','BextX','BextY','BextZ',
-                             'B20','B21','B22','B40','B41','B42','B43','B44','B60','B61','B62','B63','B64','B65','B66',
-                             'IB21','IB22','IB41','IB42','IB43','IB44','IB61','IB62','IB63','IB64','IB65','IB66']
+    field_parameter_names = [
+        "BmolX",
+        "BmolY",
+        "BmolZ",
+        "BextX",
+        "BextY",
+        "BextZ",
+        "B20",
+        "B21",
+        "B22",
+        "B40",
+        "B41",
+        "B42",
+        "B43",
+        "B44",
+        "B60",
+        "B61",
+        "B62",
+        "B63",
+        "B64",
+        "B65",
+        "B66",
+        "IB21",
+        "IB22",
+        "IB41",
+        "IB42",
+        "IB43",
+        "IB44",
+        "IB61",
+        "IB62",
+        "IB63",
+        "IB64",
+        "IB65",
+        "IB66",
+    ]
 
     def __init__(self, Ion, Symmetry, **kwargs):
         """
@@ -166,9 +247,9 @@ class CrystalField(object):
 
         self._background = None
 
-        if 'Temperature' in kwargs:
-            temperature = kwargs['Temperature']
-            del kwargs['Temperature']
+        if "Temperature" in kwargs:
+            temperature = kwargs["Temperature"]
+            del kwargs["Temperature"]
         else:
             temperature = -1
 
@@ -182,42 +263,42 @@ class CrystalField(object):
 
         free_parameters = {key: kwargs[key] for key in kwargs if key in CrystalField.field_parameter_names}
 
-        if 'ResolutionModel' in kwargs and 'FWHM' in kwargs:
-            msg = 'Both ''ResolutionModel'' and ''FWHM'' specified but can only accept one width option.'
-            msg += ' Preferring to use ResolutionModel, and ignoring FWHM.'
-            kwargs.pop('FWHM')
+        if "ResolutionModel" in kwargs and "FWHM" in kwargs:
+            msg = "Both " "ResolutionModel" " and " "FWHM" " specified but can only accept one width option."
+            msg += " Preferring to use ResolutionModel, and ignoring FWHM."
+            kwargs.pop("FWHM")
             warnings.warn(msg, SyntaxWarning)
 
         for key in kwargs:
-            if key == 'ToleranceEnergy':
+            if key == "ToleranceEnergy":
                 self.ToleranceEnergy = kwargs[key]
-            elif key == 'ToleranceIntensity':
+            elif key == "ToleranceIntensity":
                 self.ToleranceIntensity = kwargs[key]
-            elif key == 'IntensityScaling':
+            elif key == "IntensityScaling":
                 self.IntensityScaling = kwargs[key]
-            elif key == 'FWHM':
+            elif key == "FWHM":
                 self.FWHM = kwargs[key]
-            elif key == 'ResolutionModel':
+            elif key == "ResolutionModel":
                 self.ResolutionModel = kwargs[key]
-            elif key == 'NPeaks':
+            elif key == "NPeaks":
                 self.NPeaks = kwargs[key]
-            elif key == 'FWHMVariation':
+            elif key == "FWHMVariation":
                 self.FWHMVariation = kwargs[key]
-            elif key == 'FixAllPeaks':
+            elif key == "FixAllPeaks":
                 self.FixAllPeaks = kwargs[key]
-            elif key == 'PhysicalProperty':
+            elif key == "PhysicalProperty":
                 self.PhysicalProperty = kwargs[key]
             elif key not in free_parameters:
-                raise RuntimeError('Unknown attribute/parameters %s' % key)
+                raise RuntimeError("Unknown attribute/parameters %s" % key)
 
         # Cubic is a special case where B44=5*B40, B64=-21*B60
-        is_cubic = self.Symmetry.startswith('T') or self.Symmetry.startswith('O')
+        is_cubic = self.Symmetry.startswith("T") or self.Symmetry.startswith("O")
         symm_allowed_par = getSymmAllowedParam(self.Symmetry)
 
         for param in CrystalField.field_parameter_names:
             if param in free_parameters:
                 self.function.setParameter(param, free_parameters[param])
-            if is_cubic and (param == 'B44' or param == 'B64'):
+            if is_cubic and (param == "B44" or param == "B64"):
                 continue
             if param not in symm_allowed_par:
                 self.function.fixParameter(param)
@@ -247,15 +328,15 @@ class CrystalField(object):
 
     def _makeFunction(self, ion, symmetry, temperature):
         if temperature is not None and islistlike(temperature) and len(temperature) > 1:
-            self.function = FunctionFactory.createFunction('CrystalFieldMultiSpectrum')
+            self.function = FunctionFactory.createFunction("CrystalFieldMultiSpectrum")
             self._isMultiSpectrum = True
-            tempStr = 'Temperatures'
+            tempStr = "Temperatures"
         else:
-            self.function = FunctionFactory.createFunction('CrystalFieldSpectrum')
+            self.function = FunctionFactory.createFunction("CrystalFieldSpectrum")
             self._isMultiSpectrum = False
-            tempStr = 'Temperature'
-        self.function.setAttributeValue('Ion', ion)
-        self.function.setAttributeValue('Symmetry', symmetry)
+            tempStr = "Temperature"
+        self.function.setAttributeValue("Ion", ion)
+        self.function.setAttributeValue("Symmetry", symmetry)
         if temperature:
             temperature = [float(val) for val in temperature] if islistlike(temperature) else float(temperature)
             self.function.setAttributeValue(tempStr, temperature)
@@ -283,9 +364,9 @@ class CrystalField(object):
                 else:
                     len_physical_properties = 1
             for i in range(self.NumberOfSpectra - len_physical_properties):
-                self._peaks.append(PeaksFunction(self.crystalFieldFunction, 'f%s.' % i, 1))
+                self._peaks.append(PeaksFunction(self.crystalFieldFunction, "f%s." % i, 1))
         else:
-            self._peaks = PeaksFunction(self.crystalFieldFunction, '', 0)
+            self._peaks = PeaksFunction(self.crystalFieldFunction, "", 0)
 
     @property
     def crystalFieldFunction(self):
@@ -299,9 +380,9 @@ class CrystalField(object):
         @param i: Index of a spectrum.
         """
         temperature = self._getTemperature(i)
-        out = 'name=CrystalFieldPeaks,Ion=%s,Symmetry=%s,Temperature=%s' % (self.Ion, self.Symmetry, temperature)
-        out += ',ToleranceEnergy=%s,ToleranceIntensity=%s' % (self.ToleranceEnergy, self.ToleranceIntensity)
-        out += ',%s' % ','.join(['%s=%s' % item for item in self._getFieldParameters().items()])
+        out = "name=CrystalFieldPeaks,Ion=%s,Symmetry=%s,Temperature=%s" % (self.Ion, self.Symmetry, temperature)
+        out += ",ToleranceEnergy=%s,ToleranceIntensity=%s" % (self.ToleranceEnergy, self.ToleranceIntensity)
+        out += ",%s" % ",".join(["%s=%s" % item for item in self._getFieldParameters().items()])
         return out
 
     def makeSpectrumFunction(self, i=0):
@@ -318,37 +399,37 @@ class CrystalField(object):
         """Form a definition string for one of the crystal field physical properties functions
         @param i: Index of the dataset (default=0), or a PhysicalProperties object.
         """
-        if hasattr(i, 'toString'):
+        if hasattr(i, "toString"):
             out = i.toString()
             ppobj = i
         else:
             if self._physprop is None:
-                raise RuntimeError('Physical properties environment not defined.')
+                raise RuntimeError("Physical properties environment not defined.")
             ppobj = self._physprop[i] if islistlike(self._physprop) else self._physprop
-            if hasattr(ppobj, 'toString'):
+            if hasattr(ppobj, "toString"):
                 out = ppobj.toString()
             else:
-                return ''
-        out += ',Ion=%s,Symmetry=%s' % (self.Ion, self.Symmetry)
+                return ""
+        out += ",Ion=%s,Symmetry=%s" % (self.Ion, self.Symmetry)
         fieldParams = self._getFieldParameters()
         if len(fieldParams) > 0:
-            out += ',%s' % ','.join(['%s=%s' % item for item in fieldParams.items()])
+            out += ",%s" % ",".join(["%s=%s" % item for item in fieldParams.items()])
         ties = self._getFieldTies()
         if ppobj.TypeID == PhysicalProperties.SUSCEPTIBILITY:
-            ties += ',' if ties else ''
-            ties += 'Lambda=0' if ppobj.Lambda == 0. else ''
-            ties += ',Chi0=0' if ppobj.Chi0 == 0. else ''
+            ties += "," if ties else ""
+            ties += "Lambda=0" if ppobj.Lambda == 0.0 else ""
+            ties += ",Chi0=0" if ppobj.Chi0 == 0.0 else ""
         if len(ties) > 0:
-            out += ',ties=(%s)' % ties
+            out += ",ties=(%s)" % ties
         constraints = self._getFieldConstraints()
         if len(constraints) > 0:
-            out += ',constraints=(%s)' % constraints
+            out += ",constraints=(%s)" % constraints
         return out
 
     def makeMultiSpectrumFunction(self):
-        fun = re.sub(FWHM_PATTERN, '', str(self.function))
-        fun = re.sub(TEMPERATURES_PATTERN, r'\1\3\2', fun)
-        fun = re.sub(PHYSICAL_PROPERTIES_PATTERN, r'\1\3\2', fun)
+        fun = re.sub(FWHM_PATTERN, "", str(self.function))
+        fun = re.sub(TEMPERATURES_PATTERN, r"\1\3\2", fun)
+        fun = re.sub(PHYSICAL_PROPERTIES_PATTERN, r"\1\3\2", fun)
         return fun
 
     @property
@@ -359,7 +440,7 @@ class CrystalField(object):
         ...
         ion = cf.Ion
         """
-        return self.crystalFieldFunction.getAttributeValue('Ion')
+        return self.crystalFieldFunction.getAttributeValue("Ion")
 
     @Ion.setter
     def Ion(self, value):
@@ -370,7 +451,7 @@ class CrystalField(object):
         cf.Ion = 'Pr'
         """
         self._nre = ionname2Nre(value)
-        self.crystalFieldFunction.setAttributeValue('Ion', value)
+        self.crystalFieldFunction.setAttributeValue("Ion", value)
         self._dirty_eigensystem = True
         self._dirty_peaks = True
 
@@ -382,7 +463,7 @@ class CrystalField(object):
         ...
         symm = cf.Symmetry
         """
-        return self.crystalFieldFunction.getAttributeValue('Symmetry')
+        return self.crystalFieldFunction.getAttributeValue("Symmetry")
 
     @Symmetry.setter
     def Symmetry(self, value):
@@ -393,10 +474,12 @@ class CrystalField(object):
         cf.Symmetry = 'Td'
         """
         if value not in self.allowed_symmetries:
-            msg = 'Value %s is not allowed for attribute Symmetry.\nList of allowed values: %s' % \
-                  (value, ', '.join(self.allowed_symmetries))
+            msg = "Value %s is not allowed for attribute Symmetry.\nList of allowed values: %s" % (
+                value,
+                ", ".join(self.allowed_symmetries),
+            )
             raise RuntimeError(msg)
-        self.crystalFieldFunction.setAttributeValue('Symmetry', value)
+        self.crystalFieldFunction.setAttributeValue("Symmetry", value)
         self._dirty_eigensystem = True
         self._dirty_peaks = True
 
@@ -405,32 +488,32 @@ class CrystalField(object):
     @property
     def ToleranceEnergy(self):
         """Get energy tolerance"""
-        return self.crystalFieldFunction.getAttributeValue('ToleranceEnergy')
+        return self.crystalFieldFunction.getAttributeValue("ToleranceEnergy")
 
     @ToleranceEnergy.setter
     def ToleranceEnergy(self, value):
         """Set energy tolerance"""
-        self.crystalFieldFunction.setAttributeValue('ToleranceEnergy', float(value))
+        self.crystalFieldFunction.setAttributeValue("ToleranceEnergy", float(value))
         self._dirty_peaks = True
 
     @property
     def ToleranceIntensity(self):
         """Get intensity tolerance"""
-        return self.crystalFieldFunction.getAttributeValue('ToleranceIntensity')
+        return self.crystalFieldFunction.getAttributeValue("ToleranceIntensity")
 
     @ToleranceIntensity.setter
     def ToleranceIntensity(self, value):
         """Set intensity tolerance"""
-        self.crystalFieldFunction.setAttributeValue('ToleranceIntensity', float(value))
+        self.crystalFieldFunction.setAttributeValue("ToleranceIntensity", float(value))
         self._dirty_peaks = True
 
     @property
     def IntensityScaling(self):
         if not self._isMultiSpectrum:
-            return self.crystalFieldFunction.getParameterValue('IntensityScaling')
+            return self.crystalFieldFunction.getParameterValue("IntensityScaling")
         iscaling = []
         for i in range(self.NumberOfSpectra):
-            paramName = 'IntensityScaling%s' % i
+            paramName = "IntensityScaling%s" % i
             iscaling.append(self.crystalFieldFunction.getParameterValue(paramName))
         return iscaling
 
@@ -441,21 +524,21 @@ class CrystalField(object):
                 if len(value) == 1:
                     value = value[0]
                 else:
-                    raise ValueError('IntensityScaling is expected to be a single floating point value')
-            self.crystalFieldFunction.setParameter('IntensityScaling', value)
+                    raise ValueError("IntensityScaling is expected to be a single floating point value")
+            self.crystalFieldFunction.setParameter("IntensityScaling", value)
         else:
             n = self.NumberOfSpectra
             if not islistlike(value) or len(value) != n:
-                raise ValueError('IntensityScaling is expected to be a list of %s values' % n)
+                raise ValueError("IntensityScaling is expected to be a list of %s values" % n)
             for i in range(n):
-                paramName = 'IntensityScaling%s' % i
+                paramName = "IntensityScaling%s" % i
                 self.crystalFieldFunction.setParameter(paramName, value[i])
 
         self._dirty_peaks = True
 
     @property
     def Temperature(self):
-        attrName = 'Temperatures' if self._isMultiSpectrum else 'Temperature'
+        attrName = "Temperatures" if self._isMultiSpectrum else "Temperature"
         return self.crystalFieldFunction.getAttributeValue(attrName)
 
     @Temperature.setter
@@ -467,17 +550,17 @@ class CrystalField(object):
                 # Try to keep current set of field parameters.
                 self._remakeFunction(float(value))
                 return
-            self.crystalFieldFunction.setAttributeValue('Temperatures', value)
+            self.crystalFieldFunction.setAttributeValue("Temperatures", value)
         else:
             if islistlike(value):
                 self._remakeFunction(value)
                 return
-            self.crystalFieldFunction.setAttributeValue('Temperature', float(value))
+            self.crystalFieldFunction.setAttributeValue("Temperature", float(value))
         self._dirty_peaks = True
 
     @property
     def FWHM(self):
-        attrName = 'FWHMs' if self._isMultiSpectrum else 'FWHM'
+        attrName = "FWHMs" if self._isMultiSpectrum else "FWHM"
         fwhm = self.crystalFieldFunction.getAttributeValue(attrName)
         if self._isMultiSpectrum:
             nDatasets = len(self.Temperature)
@@ -498,34 +581,35 @@ class CrystalField(object):
                     # Cast all types to match the first elem so we don't have mixed lists of int/doubles
                     value = [float(v) for v in value]
                 else:
-                    raise RuntimeError('Vector of FWHMs must either have same size as '
-                                       'Temperatures (%i) or have size 1.' % (len(self.Temperature)))
-            self.crystalFieldFunction.setAttributeValue('FWHMs', value)
+                    raise RuntimeError(
+                        "Vector of FWHMs must either have same size as " "Temperatures (%i) or have size 1." % (len(self.Temperature))
+                    )
+            self.crystalFieldFunction.setAttributeValue("FWHMs", value)
         else:
             if islistlike(value):
-                raise ValueError('FWHM is expected to be a single floating point value')
-            self.crystalFieldFunction.setAttributeValue('FWHM', float(value))
+                raise ValueError("FWHM is expected to be a single floating point value")
+            self.crystalFieldFunction.setAttributeValue("FWHM", float(value))
         # If both FWHM and ResolutionModel is set, may cause runtime errors
         self._resolutionModel = None
         if self._isMultiSpectrum:
             for i in range(self.NumberOfSpectra):
-                if self.crystalFieldFunction.getAttributeValue('FWHMX%s' % i):
-                    self.crystalFieldFunction.setAttributeValue('FWHMX%s' % i, [])
-                if self.crystalFieldFunction.getAttributeValue('FWHMY%s' % i):
-                    self.crystalFieldFunction.setAttributeValue('FWHMY%s' % i, [])
+                if self.crystalFieldFunction.getAttributeValue("FWHMX%s" % i):
+                    self.crystalFieldFunction.setAttributeValue("FWHMX%s" % i, [])
+                if self.crystalFieldFunction.getAttributeValue("FWHMY%s" % i):
+                    self.crystalFieldFunction.setAttributeValue("FWHMY%s" % i, [])
         else:
-            if self.crystalFieldFunction.getAttributeValue('FWHMX'):
-                self.crystalFieldFunction.setAttributeValue('FWHMX', [])
-            if self.crystalFieldFunction.getAttributeValue('FWHMY'):
-                self.crystalFieldFunction.setAttributeValue('FWHMY', [])
+            if self.crystalFieldFunction.getAttributeValue("FWHMX"):
+                self.crystalFieldFunction.setAttributeValue("FWHMX", [])
+            if self.crystalFieldFunction.getAttributeValue("FWHMY"):
+                self.crystalFieldFunction.setAttributeValue("FWHMY", [])
 
     @property
     def FWHMVariation(self):
-        return self.crystalFieldFunction.getAttributeValue('FWHMVariation')
+        return self.crystalFieldFunction.getAttributeValue("FWHMVariation")
 
     @FWHMVariation.setter
     def FWHMVariation(self, value):
-        self.crystalFieldFunction.setAttributeValue('FWHMVariation', float(value))
+        self.crystalFieldFunction.setAttributeValue("FWHMVariation", float(value))
 
     def __getitem__(self, item):
         return self.crystalFieldFunction.getParameterValue(item)
@@ -539,7 +623,7 @@ class CrystalField(object):
 
     @ResolutionModel.setter
     def ResolutionModel(self, value):
-        if hasattr(value, 'model'):
+        if hasattr(value, "model"):
             self._resolutionModel = value
         else:
             self._resolutionModel = ResolutionModel(value)
@@ -547,37 +631,38 @@ class CrystalField(object):
             NumberOfPhysProp = len(self._physprop) if islistlike(self._physprop) else (0 if self._physprop is None else 1)
             NSpec = self.NumberOfSpectra - NumberOfPhysProp
             if not self._resolutionModel.multi or self._resolutionModel.NumberOfSpectra != NSpec:
-                raise RuntimeError('Resolution model is expected to have %s functions, found %s' %
-                                   (NSpec, self._resolutionModel.NumberOfSpectra))
+                raise RuntimeError(
+                    "Resolution model is expected to have %s functions, found %s" % (NSpec, self._resolutionModel.NumberOfSpectra)
+                )
             for i in range(self._resolutionModel.NumberOfSpectra):
                 model = self._resolutionModel.model[i]
-                self.crystalFieldFunction.setAttributeValue('FWHMX%s' % i, model[0])
-                self.crystalFieldFunction.setAttributeValue('FWHMY%s' % i, model[1])
+                self.crystalFieldFunction.setAttributeValue("FWHMX%s" % i, model[0])
+                self.crystalFieldFunction.setAttributeValue("FWHMY%s" % i, model[1])
         else:
             model = self._resolutionModel.model
-            self.crystalFieldFunction.setAttributeValue('FWHMX', model[0])
-            self.crystalFieldFunction.setAttributeValue('FWHMY', model[1])
+            self.crystalFieldFunction.setAttributeValue("FWHMX", model[0])
+            self.crystalFieldFunction.setAttributeValue("FWHMY", model[1])
         # If FWHM is set, it overrides resolution model, so unset it
-        if self._isMultiSpectrum and any(self.crystalFieldFunction.getAttributeValue('FWHMs')):
-            self.crystalFieldFunction.setAttributeValue('FWHMs', [0.] * self.NumberOfSpectra)
-        elif not self._isMultiSpectrum and self.crystalFieldFunction.getAttributeValue('FWHM'):
-            self.crystalFieldFunction.setAttributeValue('FWHM', 0.)
+        if self._isMultiSpectrum and any(self.crystalFieldFunction.getAttributeValue("FWHMs")):
+            self.crystalFieldFunction.setAttributeValue("FWHMs", [0.0] * self.NumberOfSpectra)
+        elif not self._isMultiSpectrum and self.crystalFieldFunction.getAttributeValue("FWHM"):
+            self.crystalFieldFunction.setAttributeValue("FWHM", 0.0)
 
     @property
     def FixAllPeaks(self):
-        return self.crystalFieldFunction.getAttributeValue('FixAllPeaks')
+        return self.crystalFieldFunction.getAttributeValue("FixAllPeaks")
 
     @FixAllPeaks.setter
     def FixAllPeaks(self, value):
-        self.crystalFieldFunction.setAttributeValue('FixAllPeaks', value)
+        self.crystalFieldFunction.setAttributeValue("FixAllPeaks", value)
 
     @property
     def PeakShape(self):
-        return self.crystalFieldFunction.getAttributeValue('PeakShape')
+        return self.crystalFieldFunction.getAttributeValue("PeakShape")
 
     @PeakShape.setter
     def PeakShape(self, value):
-        self.crystalFieldFunction.setAttributeValue('PeakShape', value)
+        self.crystalFieldFunction.setAttributeValue("PeakShape", value)
 
     @property
     def NumberOfSpectra(self):
@@ -585,11 +670,11 @@ class CrystalField(object):
 
     @property
     def NPeaks(self):
-        return self.crystalFieldFunction.getAttributeValue('NPeaks')
+        return self.crystalFieldFunction.getAttributeValue("NPeaks")
 
     @NPeaks.setter
     def NPeaks(self, value):
-        self.crystalFieldFunction.setAttributeValue('NPeaks', value)
+        self.crystalFieldFunction.setAttributeValue("NPeaks", value)
 
     @property
     def peaks(self):
@@ -608,11 +693,11 @@ class CrystalField(object):
                 in a multi-spectrum case
         """
         if self._background is not None:
-            raise ValueError('Background has been set already')
-        if not hasattr(value, 'toString'):
-            raise TypeError('Expected a Background object, found %s' % str(value))
+            raise ValueError("Background has been set already")
+        if not hasattr(value, "toString"):
+            raise TypeError("Expected a Background object, found %s" % str(value))
         if not self._isMultiSpectrum:
-            fun_str = value.toString() + ';' + str(self.function)
+            fun_str = value.toString() + ";" + str(self.function)
             self.function = FunctionFactory.createInitialized(fun_str)
             self._background = self._makeBackgroundObject(value)
             self._setPeaks()
@@ -620,25 +705,25 @@ class CrystalField(object):
             self.function.setAttributeValue("Background", value.toString())
             self._background = []
             for ispec in range(self.NumberOfSpectra):
-                prefix = 'f%s.' % ispec
+                prefix = "f%s." % ispec
                 self._background.append(self._makeBackgroundObject(value, prefix))
 
-    def _makeBackgroundObject(self, value, prefix=''):
+    def _makeBackgroundObject(self, value, prefix=""):
         if len(value.functions) > 1:
-            prefix += 'f0.'
+            prefix += "f0."
 
         n_functions = 0
         peak, background = None, None
         if value.peak is not None:
-            peak = Function(self.function, prefix=prefix + f'f{n_functions}.')
+            peak = Function(self.function, prefix=prefix + f"f{n_functions}.")
             n_functions += 1
         if value.background is not None:
-            background = Function(self.function, prefix=prefix + f'f{n_functions}.')
+            background = Function(self.function, prefix=prefix + f"f{n_functions}.")
             n_functions += 1
 
         other_functions = []
         for function_index in range(n_functions, len(value.functions)):
-            other_functions.append(Function(self.function, prefix=prefix + f'f{function_index}.'))
+            other_functions.append(Function(self.function, prefix=prefix + f"f{function_index}."))
 
         return Background(peak=peak, background=background, functions=other_functions)
 
@@ -649,12 +734,12 @@ class CrystalField(object):
     @PhysicalProperty.setter
     def PhysicalProperty(self, value):
         vlist = value if islistlike(value) else [value]
-        if all([hasattr(pp, 'TypeID') for pp in vlist]):
+        if all([hasattr(pp, "TypeID") for pp in vlist]):
             nOldPP = len(self._physprop) if islistlike(self._physprop) else (0 if self._physprop is None else 1)
             self._physprop = value
         else:
-            errmsg = 'PhysicalProperty input must be a PhysicalProperties'
-            errmsg += ' instance or a list of such instances'
+            errmsg = "PhysicalProperty input must be a PhysicalProperties"
+            errmsg += " instance or a list of such instances"
             raise ValueError(errmsg)
         # If a spectrum (temperature) is already defined, or multiple physical properties
         # given, redefine the CrystalFieldMultiSpectrum function.
@@ -667,17 +752,17 @@ class CrystalField(object):
             # Removes 'negative' temperature, which is a flag for no INS dataset
             tt = [val for val in tt if val > 0]
             pptt = [0 if val.Temperature is None else val.Temperature for val in vlist]
-            self._remakeFunction(list(tt)+pptt)
+            self._remakeFunction(list(tt) + pptt)
             self.FWHM = ww
             self._setPeaks()
             ppids = [pp.TypeID for pp in vlist]
-            self.function.setAttributeValue('PhysicalProperties', [0]*len(tt)+ppids)
-            for attribs in [pp.getAttributes(i+len(tt)) for i, pp in enumerate(vlist)]:
+            self.function.setAttributeValue("PhysicalProperties", [0] * len(tt) + ppids)
+            for attribs in [pp.getAttributes(i + len(tt)) for i, pp in enumerate(vlist)]:
                 for item in attribs.items():
-                    if 'Lambda' in item[0] or 'Chi0' in item[0]:
+                    if "Lambda" in item[0] or "Chi0" in item[0]:
                         self.function.setParameter(item[0], item[1])
-                        if item[1] == 0.:
-                            self.function.tie(item[0], '0.')
+                        if item[1] == 0.0:
+                            self.function.tie(item[0], "0.")
                         else:
                             self.function.removeTie(item[0])
                     else:
@@ -685,8 +770,7 @@ class CrystalField(object):
 
     @property
     def isPhysicalPropertyOnly(self):
-        return (not islistlike(self.Temperature) and self.Temperature < 0
-                and self.PhysicalProperty is not None)
+        return not islistlike(self.Temperature) and self.Temperature < 0 and self.PhysicalProperty is not None
 
     def ties(self, **kwargs):
         """Set ties on the field parameters.
@@ -705,7 +789,7 @@ class CrystalField(object):
         @param args: A list of constraints. For example:
                 constraints('B00 > 0', '0.1 < B43 < 0.9')
         """
-        self.crystalFieldFunction.addConstraints(','.join(args))
+        self.crystalFieldFunction.addConstraints(",".join(args))
 
     def getEigenvalues(self):
         self._calcEigensystem()
@@ -752,13 +836,13 @@ class CrystalField(object):
         if not isinstance(i, int):
             if wksp is not None:
                 if not isinstance(wksp, int):
-                    raise RuntimeError('Spectrum index is expected to be int. Got %s' % i.__class__.__name__)
+                    raise RuntimeError("Spectrum index is expected to be int. Got %s" % i.__class__.__name__)
                 ws_index = wksp
             wksp = i
             i = 0
 
         if (self.Temperature[i] if islistlike(self.Temperature) else self.Temperature) < 0:
-            raise RuntimeError('You must first define a temperature for the spectrum')
+            raise RuntimeError("You must first define a temperature for the spectrum")
 
         # Workspace is given, always calculate
         if wksp is None:
@@ -791,7 +875,7 @@ class CrystalField(object):
                           Temperatures are in Kelvin.
         @param ws_index:  The index of a spectrum in workspace to use (default=0).
         """
-        return self._getPhysProp(PhysicalProperties('Cv'), workspace, ws_index)
+        return self._getPhysProp(PhysicalProperties("Cv"), workspace, ws_index)
 
     def getSusceptibility(self, *args, **kwargs):
         """
@@ -824,19 +908,19 @@ class CrystalField(object):
                         susceptibility (Inverse=True).
         """
         # Sets defaults / parses keyword arguments
-        workspace = kwargs['Temperature'] if 'Temperature' in kwargs.keys() else None
-        ws_index = kwargs['ws_index'] if 'ws_index' in kwargs.keys() else 0
+        workspace = kwargs["Temperature"] if "Temperature" in kwargs.keys() else None
+        ws_index = kwargs["ws_index"] if "ws_index" in kwargs.keys() else 0
 
         # Parses argument list
         args = list(args)
         if len(args) > 0:
             workspace = args.pop(0)
-        if 'mantid' in str(type(workspace)) and len(args) > 0:
+        if "mantid" in str(type(workspace)) and len(args) > 0:
             ws_index = args.pop(0)
 
         # _calcSpectrum updates parameters and susceptibility has a 'Lambda' parameter which other
         # CF functions don't have. This causes problems if you want to calculate another quantity after
-        x, y = self._getPhysProp(PhysicalProperties('chi', *args, **kwargs), workspace, ws_index)
+        x, y = self._getPhysProp(PhysicalProperties("chi", *args, **kwargs), workspace, ws_index)
         return x, y
 
     def getMagneticMoment(self, *args, **kwargs):
@@ -880,101 +964,102 @@ class CrystalField(object):
         """
         # Sets defaults / parses keyword arguments
         workspace = None
-        ws_index = kwargs['ws_index'] if 'ws_index' in kwargs.keys() else 0
-        hmag = kwargs['Hmag'] if 'Hmag' in kwargs.keys() else 1.
-        temperature = kwargs['Temperature'] if 'Temperature' in kwargs.keys() else 1.
+        ws_index = kwargs["ws_index"] if "ws_index" in kwargs.keys() else 0
+        hmag = kwargs["Hmag"] if "Hmag" in kwargs.keys() else 1.0
+        temperature = kwargs["Temperature"] if "Temperature" in kwargs.keys() else 1.0
 
         # Checks whether to calculate M(H) or M(T)
-        hmag_isscalar = (not islistlike(hmag) or len(hmag) == 1)
-        hmag_isvector = (islistlike(hmag) and len(hmag) > 1)
-        t_isscalar = (not islistlike(temperature) or len(temperature) == 1)
-        t_isvector = (islistlike(temperature) and len(temperature) > 1)
-        if hmag_isscalar and (t_isvector or 'mantid' in str(type(temperature))):
+        hmag_isscalar = not islistlike(hmag) or len(hmag) == 1
+        hmag_isvector = islistlike(hmag) and len(hmag) > 1
+        t_isscalar = not islistlike(temperature) or len(temperature) == 1
+        t_isvector = islistlike(temperature) and len(temperature) > 1
+        if hmag_isscalar and (t_isvector or "mantid" in str(type(temperature))):
             typeid = 4
             workspace = temperature
-            kwargs['Hmag'] = hmag[0] if islistlike(hmag) else hmag
+            kwargs["Hmag"] = hmag[0] if islistlike(hmag) else hmag
         else:
             typeid = 3
-            if t_isscalar and (hmag_isvector or 'mantid' in str(type(hmag))):
+            if t_isscalar and (hmag_isvector or "mantid" in str(type(hmag))):
                 workspace = hmag
-            kwargs['Temperature'] = temperature[0] if islistlike(temperature) else temperature
+            kwargs["Temperature"] = temperature[0] if islistlike(temperature) else temperature
 
         # Parses argument list
         args = list(args)
         if len(args) > 0:
             if typeid == 4:
-                kwargs['Hmag'] = args.pop(0)
+                kwargs["Hmag"] = args.pop(0)
             else:
                 workspace = args.pop(0)
-        if 'mantid' in str(type(workspace)) and len(args) > 0:
+        if "mantid" in str(type(workspace)) and len(args) > 0:
             ws_index = args.pop(0)
 
-        pptype = 'M(T)' if (typeid == 4) else 'M(H)'
+        pptype = "M(T)" if (typeid == 4) else "M(H)"
         self._typeid = self._str2id(typeid) if isinstance(typeid, str) else int(typeid)
 
         return self._getPhysProp(PhysicalProperties(pptype, *args, **kwargs), workspace, ws_index)
 
     def _calc_gJuB(self):
         gj = 2.0 if (self._nre < 1) else self.lande_g[self._nre - 1]
-        gJuB = gj * physical_constants['Bohr magneton in eV/T'][0] * 1000.
+        gJuB = gj * physical_constants["Bohr magneton in eV/T"][0] * 1000.0
         return gJuB
 
-    def getDipoleMatrixComponent(self, nComponent, gJuB = None):
-        self._calcEigensystem() #will not recalculate if already called (unless _dirty_eigensystem)
+    def getDipoleMatrixComponent(self, nComponent, gJuB=None):
+        self._calcEigensystem()  # will not recalculate if already called (unless _dirty_eigensystem)
         if gJuB is None:
             gJuB = self._calc_gJuB()
 
-        if nComponent == 'X' or nComponent == 'x':
+        if nComponent == "X" or nComponent == "x":
             _, _, h_n = energies(self._nre, BextX=1.0)
-        elif nComponent == 'Y' or nComponent == 'y':
+        elif nComponent == "Y" or nComponent == "y":
             _, _, h_n = energies(self._nre, BextY=1.0)
-        elif nComponent == 'Z' or nComponent == 'z':
+        elif nComponent == "Z" or nComponent == "z":
             _, _, h_n = energies(self._nre, BextZ=1.0)
         else:
-            raise Exception('Invalid Argument, nComponent must be: X, Y or Z (case insensitive)')
+            raise Exception("Invalid Argument, nComponent must be: X, Y or Z (case insensitive)")
 
         i_n = np.dot(np.conj(np.transpose(self._eigenvectors)), np.dot(h_n, self._eigenvectors))
-        return np.multiply(i_n, np.conj(i_n))/(gJuB ** 2)
+        return np.multiply(i_n, np.conj(i_n)) / (gJuB**2)
 
     def getDipoleMatrix(self):
         """Returns the dipole transition matrix as a numpy array"""
         gJuB = self._calc_gJuB()
-        trans = self.getDipoleMatrixComponent('X', gJuB) + self.getDipoleMatrixComponent('Y', gJuB) \
-                + self.getDipoleMatrixComponent('Z', gJuB)
+        trans = (
+            self.getDipoleMatrixComponent("X", gJuB) + self.getDipoleMatrixComponent("Y", gJuB) + self.getDipoleMatrixComponent("Z", gJuB)
+        )
         return trans
 
     def plot(self, i=0, workspace=None, ws_index=0, name=None):
         """Plot a spectrum. Parameters are the same as in getSpectrum(...)"""
-        createWS = AlgorithmManager.createUnmanaged('CreateWorkspace')
+        createWS = AlgorithmManager.createUnmanaged("CreateWorkspace")
         createWS.initialize()
 
         xArray, yArray = self.getSpectrum(i, workspace, ws_index)
-        ws_name = name if name is not None else 'CrystalField_%s' % self.Ion
+        ws_name = name if name is not None else "CrystalField_%s" % self.Ion
 
         if isinstance(i, int):
             if workspace is None:
                 if i > 0:
-                    ws_name += '_%s' % i
-                createWS.setProperty('DataX', xArray)
-                createWS.setProperty('DataY', yArray)
-                createWS.setProperty('OutputWorkspace', ws_name)
+                    ws_name += "_%s" % i
+                createWS.setProperty("DataX", xArray)
+                createWS.setProperty("DataY", yArray)
+                createWS.setProperty("OutputWorkspace", ws_name)
                 createWS.execute()
                 plot_window = self._plot_window[i] if i in self._plot_window else None
                 self._plot_window[i] = plotSpectrum(ws_name, 0, window=plot_window, clearWindow=True)
             else:
-                ws_name += '_%s' % workspace
+                ws_name += "_%s" % workspace
                 if i > 0:
-                    ws_name += '_%s' % i
-                createWS.setProperty('DataX', xArray)
-                createWS.setProperty('DataY', yArray)
-                createWS.setProperty('OutputWorkspace', ws_name)
+                    ws_name += "_%s" % i
+                createWS.setProperty("DataX", xArray)
+                createWS.setProperty("DataY", yArray)
+                createWS.setProperty("OutputWorkspace", ws_name)
                 createWS.execute()
                 plotSpectrum(ws_name, 0)
         else:
-            ws_name += '_%s' % i
-            createWS.setProperty('DataX', xArray)
-            createWS.setProperty('DataY', yArray)
-            createWS.setProperty('OutputWorkspace', ws_name)
+            ws_name += "_%s" % i
+            createWS.setProperty("DataX", xArray)
+            createWS.setProperty("DataY", yArray)
+            createWS.setProperty("OutputWorkspace", ws_name)
             createWS.execute()
             plotSpectrum(ws_name, 0)
 
@@ -1013,14 +1098,14 @@ class CrystalField(object):
         if isinstance(other, CrystalFieldMultiSite):
             return (other).__radd__(self)
         elif isinstance(other, CrystalFieldSite):
-            return (1.0*self).__add__(other)
+            return (1.0 * self).__add__(other)
         if isinstance(other, CrystalField):
-            return (1.0*self).__add__(1.0*other)
+            return (1.0 * self).__add__(1.0 * other)
 
     def __mul__(self, factor):
         ffactor = float(factor)
         if ffactor == 0.0:
-            msg = 'Intensity scaling factor for %s(%s) is set to zero ' % (self.Ion, self.Symmetry)
+            msg = "Intensity scaling factor for %s(%s) is set to zero " % (self.Ion, self.Symmetry)
             warnings.warn(msg, SyntaxWarning)
         return CrystalFieldSite(self, ffactor)
 
@@ -1031,7 +1116,7 @@ class CrystalField(object):
         """Get temperature value for i-th spectrum."""
         if not self._isMultiSpectrum:
             if i != 0:
-                raise RuntimeError('Cannot evaluate spectrum %s. Only 1 temperature is given.' % i)
+                raise RuntimeError("Cannot evaluate spectrum %s. Only 1 temperature is given." % i)
             return float(self.Temperature)
         else:
             temperatures = self.Temperature
@@ -1039,7 +1124,7 @@ class CrystalField(object):
             if -nTemp <= i < nTemp:
                 return float(temperatures[i])
             else:
-                raise RuntimeError('Cannot evaluate spectrum %s. Only %s temperatures are given.' % (i, nTemp))
+                raise RuntimeError("Cannot evaluate spectrum %s. Only %s temperatures are given." % (i, nTemp))
 
     def _getFWHM(self, i):
         """Get default FWHM value for i-th spectrum."""
@@ -1052,12 +1137,12 @@ class CrystalField(object):
             if -nFWHM <= i < nFWHM:
                 return float(fwhm[i])
             else:
-                raise RuntimeError('Cannot get FWHM for spectrum %s. Only %s FWHM are given.' % (i, nFWHM))
+                raise RuntimeError("Cannot get FWHM for spectrum %s. Only %s FWHM are given." % (i, nFWHM))
 
     def _getIntensityScaling(self, i):
         """Get default intensity scaling value for i-th spectrum."""
         if self._intensityScaling is None:
-            raise RuntimeError('Default intensityScaling must be set.')
+            raise RuntimeError("Default intensityScaling must be set.")
         if islistlike(self._intensityScaling):
             return self._intensityScaling[i] if len(self._intensityScaling) > 1 else self._intensityScaling[0]
         else:
@@ -1083,11 +1168,11 @@ class CrystalField(object):
 
     def _getFieldTies(self):
         ties = re.search(TIES_PATTERN, str(self.crystalFieldFunction))
-        return re.sub(FN_PATTERN, '', ties.group(1)).rstrip(',') if ties else ''
+        return re.sub(FN_PATTERN, "", ties.group(1)).rstrip(",") if ties else ""
 
     def _getFieldConstraints(self):
         constraints = re.search(CONSTRAINTS_PATTERN, str(self.crystalFieldFunction))
-        return constraints.group(1) if constraints else ''
+        return constraints.group(1) if constraints else ""
 
     def _getPhysProp(self, ppobj, workspace, ws_index):
         """
@@ -1099,10 +1184,9 @@ class CrystalField(object):
         try:
             typeid = ppobj.TypeID
         except AttributeError:
-            raise RuntimeError('Invalid PhysicalProperties object specified')
+            raise RuntimeError("Invalid PhysicalProperties object specified")
 
-        defaultX = [np.linspace(1, 300, 300), np.linspace(1, 300, 300), np.linspace(0, 30, 300),
-                    np.linspace(0, 30, 300)]
+        defaultX = [np.linspace(1, 300, 300), np.linspace(1, 300, 300), np.linspace(0, 30, 300), np.linspace(0, 30, 300)]
         funstr = self.makePhysicalPropertiesFunction(ppobj)
         if workspace is None:
             xArray = defaultX[typeid - 1]
@@ -1121,21 +1205,20 @@ class CrystalField(object):
         Protected method. Shouldn't be called directly by user code.
         """
         if self._dirty_eigensystem:
-            self._eigenvalues, self._eigenvectors, self._hamiltonian = \
-                energies(self._nre, **self._getFieldParameters())
+            self._eigenvalues, self._eigenvectors, self._hamiltonian = energies(self._nre, **self._getFieldParameters())
             self._dirty_eigensystem = False
 
     def _calcPeaksList(self, i):
         """Calculate a peak list for spectrum i"""
         if self._dirty_peaks:
-            alg = AlgorithmManager.createUnmanaged('EvaluateFunction')
+            alg = AlgorithmManager.createUnmanaged("EvaluateFunction")
             alg.initialize()
             alg.setChild(True)
-            alg.setProperty('Function', self.makePeaksFunction(i))
-            del alg['InputWorkspace']
-            alg.setProperty('OutputWorkspace', 'dummy')
+            alg.setProperty("Function", self.makePeaksFunction(i))
+            del alg["InputWorkspace"]
+            alg.setProperty("OutputWorkspace", "dummy")
             alg.execute()
-            self._peakList = alg.getProperty('OutputWorkspace').value
+            self._peakList = alg.getProperty("OutputWorkspace").value
 
     def _calcSpectrum(self, i, workspace, ws_index, funstr=None):
         """Calculate i-th spectrum.
@@ -1144,15 +1227,15 @@ class CrystalField(object):
         @param workspace: A workspace used to evaluate the spectrum function.
         @param ws_index:  An index of a spectrum in workspace to use.
         """
-        alg = AlgorithmManager.createUnmanaged('EvaluateFunction')
+        alg = AlgorithmManager.createUnmanaged("EvaluateFunction")
         alg.initialize()
         alg.setChild(True)
-        alg.setProperty('Function', i if isinstance(i, str) else self.makeSpectrumFunction(i))
+        alg.setProperty("Function", i if isinstance(i, str) else self.makeSpectrumFunction(i))
         alg.setProperty("InputWorkspace", workspace)
-        alg.setProperty('WorkspaceIndex', ws_index)
-        alg.setProperty('OutputWorkspace', 'dummy')
+        alg.setProperty("WorkspaceIndex", ws_index)
+        alg.setProperty("OutputWorkspace", "dummy")
         alg.execute()
-        out = alg.getProperty('OutputWorkspace').value
+        out = alg.getProperty("OutputWorkspace").value
         # Create copies of the x and y because `out` goes out of scope when this method returns
         # and x and y get deallocated
         return np.array(out.readX(0)), np.array(out.readY(1))
@@ -1166,86 +1249,101 @@ class CrystalFieldSite(object):
     A helper class for the multi-site algebra. It is a result of the '*' operation between a CrystalField
     and a number. Multiplication sets the abundance for the site and which the returned object holds.
     """
+
     def __init__(self, crystalField, abundance):
         self.crystalField = crystalField
         self.abundance = abundance
 
     def __add__(self, other):
         if isinstance(other, CrystalField):
-            return self.__add__(1.0*other)
+            return self.__add__(1.0 * other)
         elif isinstance(other, CrystalFieldSite):
             abundances = [self.abundance, other.abundance]
             other = other.crystalField
         elif isinstance(other, CrystalFieldMultiSite):
             return other.__radd__(self)
         else:
-            raise TypeError('Unsupported operand type(s) for +: CrystalFieldSite and %s' % other.__class__.__name__)
+            raise TypeError("Unsupported operand type(s) for +: CrystalFieldSite and %s" % other.__class__.__name__)
         ions = [self.crystalField.Ion, other.Ion]
         symmetries = [self.crystalField.Symmetry, other.Symmetry]
         temperatures = [self.crystalField._getTemperature(x) for x in range(self.crystalField.NumberOfSpectra)]
         params = {}
         for bparam in CrystalField.field_parameter_names:
-            params['ion0.' + bparam] = self.crystalField[bparam]
-            params['ion1.' + bparam] = other[bparam]
-        params['ion0.IntensityScaling'] = abundances[0]
-        params['ion1.IntensityScaling'] = abundances[1]
+            params["ion0." + bparam] = self.crystalField[bparam]
+            params["ion1." + bparam] = other[bparam]
+        params["ion0.IntensityScaling"] = abundances[0]
+        params["ion1.IntensityScaling"] = abundances[1]
         # Check IntensityScaling settings in original objects
         # If only one has IntensityScaling settings use these for CrystalFieldMultiSite object
         # Warn if both objects have IntensityScaling settings and these are not equal
         if self.crystalField.NumberOfSpectra > 1:
             differentIntensities = False
             for x in range(self.crystalField.NumberOfSpectra):
-                if not (np.isclose(self.crystalField.IntensityScaling[x], other.IntensityScaling[x])
-                        or np.isclose(other.IntensityScaling[x], 1.0)):
+                if not (
+                    np.isclose(self.crystalField.IntensityScaling[x], other.IntensityScaling[x])
+                    or np.isclose(other.IntensityScaling[x], 1.0)
+                ):
                     if np.isclose(self.crystalField.IntensityScaling[x], 1.0):
-                        params['sp'+str(x)+'.IntensityScaling'] = other.IntensityScaling[x]
+                        params["sp" + str(x) + ".IntensityScaling"] = other.IntensityScaling[x]
                     else:
                         differentIntensities = True
                 else:
-                    params['sp'+str(x)+'.IntensityScaling'] = self.crystalField.IntensityScaling[x]
+                    params["sp" + str(x) + ".IntensityScaling"] = self.crystalField.IntensityScaling[x]
             if differentIntensities:
-                warnings.warn('Mismatch between IntensityScaling values of CrystalField objects', RuntimeWarning)
+                warnings.warn("Mismatch between IntensityScaling values of CrystalField objects", RuntimeWarning)
         # Preserve ties and fixes
         ties = {}
         fixes = []
         ties, fixes = self.getTiesAndFixes(other)
         if self.crystalField.ResolutionModel is None:
             FWHM = [self.crystalField._getFWHM(x) for x in range(self.crystalField.NumberOfSpectra)]
-            return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures, FWHM=FWHM,
-                                         abundances=abundances, parameters=params, ties=ties,
-                                         fixedParameters = fixes)
+            return CrystalFieldMultiSite(
+                Ions=ions,
+                Symmetries=symmetries,
+                Temperatures=temperatures,
+                FWHM=FWHM,
+                abundances=abundances,
+                parameters=params,
+                ties=ties,
+                fixedParameters=fixes,
+            )
         else:
-            return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures,
-                                         ResolutionModel=self.crystalField.ResolutionModel,
-                                         abundances=abundances, parameters=params, ties=ties,
-                                         fixedParameters = fixes)
+            return CrystalFieldMultiSite(
+                Ions=ions,
+                Symmetries=symmetries,
+                Temperatures=temperatures,
+                ResolutionModel=self.crystalField.ResolutionModel,
+                abundances=abundances,
+                parameters=params,
+                ties=ties,
+                fixedParameters=fixes,
+            )
 
     def getTiesAndFixes(self, other):
         ties = {}
         fixes = []
-        for prefix, obj in {'ion0.':self.crystalField, 'ion1.':other}.items():
+        for prefix, obj in {"ion0.": self.crystalField, "ion1.": other}.items():
             tiestr = obj.function.getTies()
             if tiestr:
-                for tiepair in [tie.split('=') for tie in tiestr.split(',')]:
+                for tiepair in [tie.split("=") for tie in tiestr.split(",")]:
                     ties[prefix + tiepair[0]] = tiepair[1]
             for par_id in [id for id in range(obj.function.nParams()) if obj.function.isFixed(id)]:
                 parName = obj.function.getParamName(par_id)
                 if obj.background is not None:
-                    parName = parName.split('.')[-1]
+                    parName = parName.split(".")[-1]
                 if parName not in self.crystalField.field_parameter_names:
                     continue
                 fixes.append(prefix + parName)
         return ties, fixes
 
 
-#pylint: disable=too-few-public-methods
+# pylint: disable=too-few-public-methods
 class CrystalFieldFit(object):
     """
     Object that controls fitting.
     """
 
-    def __init__(self, Model=None, Temperature=None, FWHM=None, InputWorkspace=None,
-                 ResolutionModel=None, **kwargs):
+    def __init__(self, Model=None, Temperature=None, FWHM=None, InputWorkspace=None, ResolutionModel=None, **kwargs):
         self.model = Model
         if Temperature is not None:
             self.model.Temperature = Temperature
@@ -1254,7 +1352,7 @@ class CrystalFieldFit(object):
         if ResolutionModel is not None:
             self.model.ResolutionModel = ResolutionModel
         self._input_workspace = InputWorkspace
-        self._output_workspace_base_name = 'fit'
+        self._output_workspace_base_name = "fit"
         self._fit_properties = kwargs
         self._function = None
         self._estimated_parameters = None
@@ -1324,8 +1422,9 @@ class CrystalFieldFit(object):
         jacobian = kwargs.pop("jacobian", False)
 
         # Get the algorithm args to use for the specific algorithm we are using
-        algorithm_args = [m, n] + self._get_algorithm_args(algorithm_name, all_parameters, b_parameters, p0, residual,
-                                                           parameter_bounds, jacobian)
+        algorithm_args = [m, n] + self._get_algorithm_args(
+            algorithm_name, all_parameters, b_parameters, p0, residual, parameter_bounds, jacobian
+        )
 
         # Attempt to do a fit using one of the GOFit algorithms. A TypeError can occur when provided an invalid kwarg
         try:
@@ -1336,9 +1435,16 @@ class CrystalFieldFit(object):
             print(f"GOFit exited with status code {status}.")
             self._process_gofit_output(all_parameters, params, "_" + algorithm_name)
 
-    def _get_algorithm_args(self, algorithm_name: str, all_parameters: List[str], b_parameters: List[str],
-                            p0: List[float], residual: Callable, parameter_bounds: Dict[str, Tuple[float, float]],
-                            jacobian: bool) -> List:
+    def _get_algorithm_args(
+        self,
+        algorithm_name: str,
+        all_parameters: List[str],
+        b_parameters: List[str],
+        p0: List[float],
+        residual: Callable,
+        parameter_bounds: Dict[str, Tuple[float, float]],
+        jacobian: bool,
+    ) -> List:
         """Gets the algorithm arguments to be used for a specific GOFit algorithm."""
         algorithm_args = []
         if algorithm_name == "regularisation":
@@ -1362,7 +1468,7 @@ class CrystalFieldFit(object):
         for i in range(self.model.function.nParams()):
             name = self.model.function.parameterName(i)
             value = self.model.function.getParameterValue(i)
-            if (name.startswith('B') or name.startswith('IB')) and value != 0.0:
+            if (name.startswith("B") or name.startswith("IB")) and value != 0.0:
                 b_params.append(name)
                 initial_values.append(value)
             elif "FWHM" in name or name == "IntensityScaling":
@@ -1371,8 +1477,9 @@ class CrystalFieldFit(object):
         return b_params, shape_params, initial_values
 
     @staticmethod
-    def _parse_lower_and_upper_bounds(parameters_names: List[str],
-                                      parameter_bounds: Dict[str, Tuple[float, float]]) -> Tuple[List[float], List[float]]:
+    def _parse_lower_and_upper_bounds(
+        parameters_names: List[str], parameter_bounds: Dict[str, Tuple[float, float]]
+    ) -> Tuple[List[float], List[float]]:
         """Parses the lower and upper bounds into two separate lists."""
         xl, xu = [], []
         for name in parameters_names:
@@ -1387,9 +1494,7 @@ class CrystalFieldFit(object):
             self.model.function.setParameter(name, value)
 
         output_name = self._fit_properties["Output"] if "Output" in self._fit_properties else self._output_workspace_base_name
-        EvaluateFunction(Function=str(self.model.function),
-                         InputWorkspace=self._input_workspace,
-                         OutputWorkspace=output_name + suffix)
+        EvaluateFunction(Function=str(self.model.function), InputWorkspace=self._input_workspace, OutputWorkspace=output_name + suffix)
         self._create_parameter_table(output_name, suffix)
 
     def _create_parameter_table(self, output_name: str, suffix: str) -> None:
@@ -1435,7 +1540,7 @@ class CrystalFieldFit(object):
 
     def two_step_fit_sc(self, OverwriteMaxIterations: list = None, OverwriteMinimizers: list = None, Iterations: int = 20) -> None:
         if isinstance(self.model, CrystalFieldMultiSite):
-            logger.notice('The two_step_fit_sc algorithm is only available for single-site calculations at the moment')
+            logger.notice("The two_step_fit_sc algorithm is only available for single-site calculations at the moment")
             return
         logger.warning("Please note that this is a first experimental version of the two_step_fit_sc algorithm.")
         fix_all_peaks = self.model.FixAllPeaks
@@ -1445,9 +1550,9 @@ class CrystalFieldFit(object):
         self.check_fit_properties()
         self._iterations = Iterations
         if self._overwrite_maxiterations is not None:
-            Options = {'disp': False, 'maxiter': self._overwrite_maxiterations[0] }
+            Options = {"disp": False, "maxiter": self._overwrite_maxiterations[0]}
         else:
-            Options = {'disp': False }
+            Options = {"disp": False}
         self.check_consistency()
         self.find_free_cef_parameters()
         self._two_step_fit_sc(Options)
@@ -1460,7 +1565,7 @@ class CrystalFieldFit(object):
             if self._overwrite_minimizer is not None:
                 self.fit_sp(self._overwrite_minimizer[0], opt)
             else:
-                self.fit_sp('L-BFGS-B', opt)
+                self.fit_sp("L-BFGS-B", opt)
             self._function = self.model.function
             # Fit peaks only
             for parameter in self._free_cef_parameters:
@@ -1475,18 +1580,18 @@ class CrystalFieldFit(object):
 
     def check_fit_properties(self) -> None:
         if self._overwrite_maxiterations is not None and len(self._overwrite_maxiterations) != 2:
-            raise RuntimeError('You must provide two values for overwriting MaxIterations')
+            raise RuntimeError("You must provide two values for overwriting MaxIterations")
 
         if self._overwrite_minimizer is not None and len(self._overwrite_minimizer) != 2:
-            raise RuntimeError('You must provide two values for overwriting Minimizers')
+            raise RuntimeError("You must provide two values for overwriting Minimizers")
 
     def overwrite_fit_properties(self, index: int) -> None:
         if index > 1:
             return
         if self._overwrite_maxiterations is not None:
-            self._fit_properties['MaxIterations'] = self._overwrite_maxiterations[index]
+            self._fit_properties["MaxIterations"] = self._overwrite_maxiterations[index]
         if self._overwrite_minimizer is not None:
-            self._fit_properties['Minimizer'] = self._overwrite_minimizer[index]
+            self._fit_properties["Minimizer"] = self._overwrite_minimizer[index]
 
     def find_free_cef_parameters(self) -> None:
         """store free CEF parameters"""
@@ -1509,20 +1614,17 @@ class CrystalFieldFit(object):
                 pars = Parameters[ni] if islistlike(Parameters[ni]) else Parameters
                 ion = self.model.Ions[ni]
                 ranges = split2range(Ion=ion, EnergySplitting=EnergySplitting, Parameters=pars)
-                constraints += [('%s<ion%d.%s<%s' % (-bound, ni, parName, bound))
-                                for parName, bound in ranges.items()]
+                constraints += [("%s<ion%d.%s<%s" % (-bound, ni, parName, bound)) for parName, bound in ranges.items()]
         else:
-            ranges = split2range(Ion=self.model.Ion, EnergySplitting=EnergySplitting,
-                                 Parameters=Parameters)
-            constraints = [('%s<%s<%s' % (-bound, parName, bound))
-                           for parName, bound in ranges.items()]
+            ranges = split2range(Ion=self.model.Ion, EnergySplitting=EnergySplitting, Parameters=Parameters)
+            constraints = [("%s<%s<%s" % (-bound, parName, bound)) for parName, bound in ranges.items()]
         self.model.constraints(*constraints)
-        if 'Type' not in kwargs or kwargs['Type'] == 'Monte Carlo':
-            if 'OutputWorkspace' in kwargs and kwargs['OutputWorkspace'].strip() != '':
-                output_workspace = kwargs['OutputWorkspace']
+        if "Type" not in kwargs or kwargs["Type"] == "Monte Carlo":
+            if "OutputWorkspace" in kwargs and kwargs["OutputWorkspace"].strip() != "":
+                output_workspace = kwargs["OutputWorkspace"]
             else:
-                output_workspace = 'estimated_parameters'
-                kwargs['OutputWorkspace'] = output_workspace
+                output_workspace = "estimated_parameters"
+                kwargs["OutputWorkspace"] = output_workspace
         else:
             output_workspace = None
         self.monte_carlo(**kwargs)
@@ -1541,13 +1643,13 @@ class CrystalFieldFit(object):
     def select_estimated_parameters(self, index):
         ne = self.get_number_estimates()
         if ne == 0:
-            raise RuntimeError('There are no estimated parameters.')
+            raise RuntimeError("There are no estimated parameters.")
         if index > ne:
-            raise RuntimeError('There are only %s sets of estimated parameters, requested set #%s' % (ne, index))
+            raise RuntimeError("There are only %s sets of estimated parameters, requested set #%s" % (ne, index))
         for row in range(self._estimated_parameters.rowCount()):
             name = self._estimated_parameters.cell(row, 0)
             value = self._estimated_parameters.cell(row, index)
-            model_pname = name if isinstance(self.model, CrystalFieldMultiSite) else name.split('.')[-1]
+            model_pname = name if isinstance(self.model, CrystalFieldMultiSite) else name.split(".")[-1]
             self.model[model_pname] = value
             if self._function is not None:
                 self._function.setParameter(name, value)
@@ -1559,18 +1661,18 @@ class CrystalFieldFit(object):
             **kwargs: Properties of the algorithm.
         """
         fun = self.model.makeSpectrumFunction()
-        if 'CrystalFieldMultiSpectrum' in fun:
+        if "CrystalFieldMultiSpectrum" in fun:
             # Hack to ensure that 'PhysicalProperties' attribute is first
             # otherwise it won't set up other attributes properly
-            fun = re.sub(PHYSICAL_PROPERTIES_PATTERN, r'\1\3\2', fun)
-        alg = AlgorithmManager.createUnmanaged('EstimateFitParameters')
+            fun = re.sub(PHYSICAL_PROPERTIES_PATTERN, r"\1\3\2", fun)
+        alg = AlgorithmManager.createUnmanaged("EstimateFitParameters")
         alg.initialize()
-        alg.setProperty('Function', fun)
-        alg.setProperty('InputWorkspace', self._input_workspace)
+        alg.setProperty("Function", fun)
+        alg.setProperty("InputWorkspace", self._input_workspace)
         for param in kwargs:
             alg.setProperty(param, kwargs[param])
         alg.execute()
-        function = alg.getProperty('Function').value
+        function = alg.getProperty("Function").value
         self.model.update(function)
         self._function = function
 
@@ -1581,18 +1683,18 @@ class CrystalFieldFit(object):
             **kwargs: Properties of the algorithm.
         """
         fun = self.model.makeMultiSpectrumFunction()
-        alg = AlgorithmManager.createUnmanaged('EstimateFitParameters')
+        alg = AlgorithmManager.createUnmanaged("EstimateFitParameters")
         alg.initialize()
-        alg.setProperty('Function', fun)
-        alg.setProperty('InputWorkspace', self._input_workspace[0])
+        alg.setProperty("Function", fun)
+        alg.setProperty("InputWorkspace", self._input_workspace[0])
         i = 1
         for workspace in self._input_workspace[1:]:
-            alg.setProperty('InputWorkspace_%s' % i, workspace)
+            alg.setProperty("InputWorkspace_%s" % i, workspace)
             i += 1
         for param in kwargs:
             alg.setProperty(param, kwargs[param])
         alg.execute()
-        function = alg.getProperty('Function').value
+        function = alg.getProperty("Function").value
         self.model.update(function)
         self._function = function
 
@@ -1610,18 +1712,18 @@ class CrystalFieldFit(object):
                     fun = self.model.makeSpectrumFunction()
             else:
                 fun = str(self._function)
-        if 'CrystalFieldMultiSpectrum' in fun:
-            fun = re.sub(PHYSICAL_PROPERTIES_PATTERN, r'\1\3\2', fun)
-        alg = AlgorithmManager.createUnmanaged('Fit')
+        if "CrystalFieldMultiSpectrum" in fun:
+            fun = re.sub(PHYSICAL_PROPERTIES_PATTERN, r"\1\3\2", fun)
+        alg = AlgorithmManager.createUnmanaged("Fit")
         alg.initialize()
-        alg.setProperty('Function', fun)
-        alg.setProperty('InputWorkspace', self._input_workspace)
-        alg.setProperty('Output', self._output_workspace_base_name)
+        alg.setProperty("Function", fun)
+        alg.setProperty("InputWorkspace", self._input_workspace)
+        alg.setProperty("Output", self._output_workspace_base_name)
         self._set_fit_properties(alg)
         alg.execute()
-        function = alg.getProperty('Function').value
+        function = alg.getProperty("Function").value
         self.model.update(function)
-        self.model.chi2 = alg.getProperty('OutputChi2overDoF').value
+        self.model.chi2 = alg.getProperty("OutputChi2overDoF").value
 
     def _fit_multi(self):
         """
@@ -1631,20 +1733,20 @@ class CrystalFieldFit(object):
             fun = str(self.model.function)
         else:
             fun = self.model.makeMultiSpectrumFunction()
-        alg = AlgorithmManager.createUnmanaged('Fit')
+        alg = AlgorithmManager.createUnmanaged("Fit")
         alg.initialize()
-        alg.setProperty('Function', fun)
-        alg.setProperty('InputWorkspace', self._input_workspace[0])
+        alg.setProperty("Function", fun)
+        alg.setProperty("InputWorkspace", self._input_workspace[0])
         i = 1
         for workspace in self._input_workspace[1:]:
-            alg.setProperty('InputWorkspace_%s' % i, workspace)
+            alg.setProperty("InputWorkspace_%s" % i, workspace)
             i += 1
-        alg.setProperty('Output', self._output_workspace_base_name)
+        alg.setProperty("Output", self._output_workspace_base_name)
         self._set_fit_properties(alg)
         alg.execute()
-        function = alg.getProperty('Function').value
+        function = alg.getProperty("Function").value
         self.model.update(function)
-        self.model.chi2 = alg.getProperty('OutputChi2overDoF').value
+        self.model.chi2 = alg.getProperty("OutputChi2overDoF").value
 
     def fit_sp(self, Solver: str, Options: dict = None) -> None:
         """
@@ -1661,11 +1763,11 @@ class CrystalFieldFit(object):
             if parName in CrystalField.field_parameter_names or "IntensityScaling" in parName:
                 cef_fixed.append(par_id)
         x0 = []
-        fun.setAttributeValue('FixAllPeaks', True)
+        fun.setAttributeValue("FixAllPeaks", True)
         for par_id in self._free_cef_parameters:
             x0.append(fun.getParameterValue(par_id))
             fun.fixParameter(par_id)
-        opt = {'disp': False}
+        opt = {"disp": False}
         if Options is not None:
             opt = Options
         for (x, pos) in zip(x0, self._free_cef_parameters):
@@ -1684,19 +1786,19 @@ class CrystalFieldFit(object):
         fun.setParameter(cef_pos, x0[0])
         if isinstance(self._input_workspace, list):
             ws_kwargs = {}
-            ws_kwargs['InputWorkspace'] = self._input_workspace[0]
+            ws_kwargs["InputWorkspace"] = self._input_workspace[0]
             i = 1
             for workspace in self._input_workspace[1:]:
-                ws_kwargs[f'InputWorkspace_{i}'] = workspace
+                ws_kwargs[f"InputWorkspace_{i}"] = workspace
                 i += 1
             # clean up multispectrum function to prevent problems during evaluation
             # e.g. remove FWHMX0/FWHMY0 and FWHMX1/FWHMY1
-            fun_str = re.sub(FWHM_PATTERN, '', str(fun))
+            fun_str = re.sub(FWHM_PATTERN, "", str(fun))
             # move Temperature and PhysicalProperties settings to front
-            fun_str = re.sub(TEMPERATURES_PATTERN, r'\1\3\2', fun_str)
-            fun_str = re.sub(PHYSICAL_PROPERTIES_PATTERN, r'\1\3\2', fun_str)
+            fun_str = re.sub(TEMPERATURES_PATTERN, r"\1\3\2", fun_str)
+            fun_str = re.sub(PHYSICAL_PROPERTIES_PATTERN, r"\1\3\2", fun_str)
             # remove peaks above MaxPeakCount
-            fun_str = re.sub(r'f[0-9]+\.f(['+str(fun.getAttributeValue("MaxPeakCount"))+r'-9]|[1-9][0-9])\.\w+=.*?,','', fun_str)
+            fun_str = re.sub(r"f[0-9]+\.f([" + str(fun.getAttributeValue("MaxPeakCount")) + r"-9]|[1-9][0-9])\.\w+=.*?,", "", fun_str)
             return CalculateChiSquared(fun_str, **ws_kwargs)[1]
         else:
             return CalculateChiSquared(str(fun), self._input_workspace)[1]
@@ -1706,9 +1808,9 @@ class CrystalFieldFit(object):
             alg.setProperty(*prop)
 
     def check_consistency(self):
-        """ Checks that list input variables are consistent """
+        """Checks that list input variables are consistent"""
         num_ws = self.model.NumberOfSpectra
-        errmsg = 'Number of input workspaces not consistent with model'
+        errmsg = "Number of input workspaces not consistent with model"
         if islistlike(self._input_workspace):
             if num_ws != len(self._input_workspace):
                 raise ValueError(errmsg)
@@ -1720,4 +1822,4 @@ class CrystalFieldFit(object):
         if not isinstance(self.model, CrystalFieldMultiSite) and not self.model.isPhysicalPropertyOnly:
             tt = self.model.Temperature
             if any([val < 0 for val in (tt if islistlike(tt) else [tt])]):
-                raise RuntimeError('You must first define a temperature for the spectrum')
+                raise RuntimeError("You must first define a temperature for the spectrum")

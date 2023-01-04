@@ -16,10 +16,10 @@ WavRangePairs = List[WavRange]
 
 @dataclass()
 class WavelengthInterval(metaclass=JsonSerializable):
-    wavelength_step: float = 0.
+    wavelength_step: float = 0.0
     user_wavelength_input: str = ""
     _selected_ranges: WavRangePairs = field(default_factory=list)
-    _wavelength_full_range: WavRange = (0., 0.)
+    _wavelength_full_range: WavRange = (0.0, 0.0)
 
     @property
     def wavelength_full_range(self) -> WavRange:

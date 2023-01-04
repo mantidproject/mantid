@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 import sys
 from reduction_gui.reduction.scripter import BaseScriptElement
 
@@ -12,6 +12,7 @@ from reduction_gui.reduction.scripter import BaseScriptElement
 IS_IN_MANTIDPLOT = False
 try:
     import mantidplot
+
     IS_IN_MANTIDPLOT = True
     from mantid.api import AnalysisDataService
 except:
@@ -19,28 +20,28 @@ except:
 
 
 class Output(BaseScriptElement):
-    log_text = ''
+    log_text = ""
     data = None
 
     def update(self):
         """
-            Update data members according to reduction results
+        Update data members according to reduction results
         """
         if IS_IN_MANTIDPLOT:
             from reduction_workflow.command_interface import ReductionSingleton
+
             self.log_text = ReductionSingleton().log_text
             try:
-                if hasattr(ReductionSingleton(), "output_workspaces") \
-                        and len(ReductionSingleton().output_workspaces)>0:
+                if hasattr(ReductionSingleton(), "output_workspaces") and len(ReductionSingleton().output_workspaces) > 0:
                     for item in ReductionSingleton().output_workspaces:
                         mantidplot.plotSpectrum(item, 0, True)
                 else:
                     iq_plots = []
                     for item in ReductionSingleton()._data_files.keys():
                         for ws in AnalysisDataService.Instance().getObjectNames():
-                            if ws.startswith(item) and ws.endswith('_Iq'):
+                            if ws.startswith(item) and ws.endswith("_Iq"):
                                 iq_plots.append(ws)
-                    if len(iq_plots)>0:
+                    if len(iq_plots) > 0:
                         mantidplot.plotSpectrum(iq_plots, 0, True)
             except:
                 raise RuntimeError("Could not plot resulting output\n  %s" % sys.exc_info()[1])

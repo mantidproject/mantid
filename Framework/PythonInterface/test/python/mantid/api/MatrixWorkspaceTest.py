@@ -8,8 +8,16 @@ import unittest
 import sys
 import math
 from testhelpers import create_algorithm, run_algorithm, can_be_instantiated, WorkspaceCreationHelper
-from mantid.api import (MatrixWorkspace, MatrixWorkspaceProperty, WorkspaceProperty, Workspace,
-                        ExperimentInfo, AnalysisDataService, WorkspaceFactory, NumericAxis)
+from mantid.api import (
+    MatrixWorkspace,
+    MatrixWorkspaceProperty,
+    WorkspaceProperty,
+    Workspace,
+    ExperimentInfo,
+    AnalysisDataService,
+    WorkspaceFactory,
+    NumericAxis,
+)
 from mantid.geometry import Detector
 from mantid.kernel import Direction, V3D
 from mantid.simpleapi import CreateSampleWorkspace, Rebin
@@ -22,8 +30,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
 
     def setUp(self):
         if self._test_ws is None:
-            self.__class__._test_ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(
-                2, 102, False)  # no monitors
+            self.__class__._test_ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(2, 102, False)  # no monitors
 
     def test_that_one_cannot_be_instantiated_directly(self):
         self.assertFalse(can_be_instantiated(MatrixWorkspace))
@@ -301,13 +308,11 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertEqual(self._test_ws.readY(0)[0], ynow)
 
     def test_operators_with_workspaces_in_ADS(self):
-        run_algorithm('CreateWorkspace', OutputWorkspace='a', DataX=[
-            1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
+        run_algorithm("CreateWorkspace", OutputWorkspace="a", DataX=[1.0, 2.0, 3.0], DataY=[2.0, 3.0], DataE=[2.0, 3.0], UnitX="TOF")
         ads = AnalysisDataService
-        A = ads['a']
-        run_algorithm('CreateWorkspace', OutputWorkspace='b', DataX=[
-            1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
-        B = ads['b']
+        A = ads["a"]
+        run_algorithm("CreateWorkspace", OutputWorkspace="b", DataX=[1.0, 2.0, 3.0], DataY=[2.0, 3.0], DataE=[2.0, 3.0], UnitX="TOF")
+        B = ads["b"]
 
         # Equality
         self.assertTrue(A.equals(B, 1e-8))
@@ -333,47 +338,44 @@ class MatrixWorkspaceTest(unittest.TestCase):
         C = A * B
         C = A / B
 
-        ads.remove('C')
-        self.assertTrue('C' not in ads)
-        run_algorithm('CreateWorkspace', OutputWorkspace='ca', DataX=[
-            1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
-        C = ads['ca']
+        ads.remove("C")
+        self.assertTrue("C" not in ads)
+        run_algorithm("CreateWorkspace", OutputWorkspace="ca", DataX=[1.0, 2.0, 3.0], DataY=[2.0, 3.0], DataE=[2.0, 3.0], UnitX="TOF")
+        C = ads["ca"]
 
         C *= B
-        self.assertTrue('C' not in ads)
+        self.assertTrue("C" not in ads)
         C -= B
-        self.assertTrue('C' not in ads)
+        self.assertTrue("C" not in ads)
         C += B
-        self.assertTrue('C' not in ads)
+        self.assertTrue("C" not in ads)
         C /= B
-        self.assertTrue('C' not in ads)
+        self.assertTrue("C" not in ads)
         # Check correct in place ops have been used
-        self.assertTrue('ca' in ads)
-        ads.remove('ca')
+        self.assertTrue("ca" in ads)
+        ads.remove("ca")
 
         # Commutative: double + workspace
         C = B * A
         C = B + A
 
-        ads.remove('A')
-        ads.remove('B')
-        ads.remove('C')
+        ads.remove("A")
+        ads.remove("B")
+        ads.remove("C")
 
     def test_complex_binary_ops_do_not_leave_temporary_workspaces_behind(self):
-        run_algorithm('CreateWorkspace', OutputWorkspace='ca', DataX=[
-            1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
+        run_algorithm("CreateWorkspace", OutputWorkspace="ca", DataX=[1.0, 2.0, 3.0], DataY=[2.0, 3.0], DataE=[2.0, 3.0], UnitX="TOF")
         ads = AnalysisDataService
-        w1 = (ads['ca'] * 0.0) + 1.0
+        w1 = (ads["ca"] * 0.0) + 1.0
 
-        self.assertTrue('w1' in ads)
-        self.assertTrue('ca' in ads)
-        self.assertTrue('__python_op_tmp0' not in ads)
+        self.assertTrue("w1" in ads)
+        self.assertTrue("ca" in ads)
+        self.assertTrue("__python_op_tmp0" not in ads)
 
     def test_history_access(self):
-        run_algorithm('CreateWorkspace', OutputWorkspace='raw', DataX=[
-            1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
-        run_algorithm('Rebin', InputWorkspace='raw', Params=[1., 0.5, 3.], OutputWorkspace='raw')
-        raw = AnalysisDataService['raw']
+        run_algorithm("CreateWorkspace", OutputWorkspace="raw", DataX=[1.0, 2.0, 3.0], DataY=[2.0, 3.0], DataE=[2.0, 3.0], UnitX="TOF")
+        run_algorithm("Rebin", InputWorkspace="raw", Params=[1.0, 0.5, 3.0], OutputWorkspace="raw")
+        raw = AnalysisDataService["raw"]
         history = raw.getHistory()
         last = history.lastAlgorithm()
         self.assertEqual(last.name(), "Rebin")
@@ -381,27 +383,24 @@ class MatrixWorkspaceTest(unittest.TestCase):
         first = history[0]
         self.assertEqual(first.name(), "CreateWorkspace")
         self.assertEqual(first.getPropertyValue("OutputWorkspace"), "raw")
-        AnalysisDataService.remove('raw')
+        AnalysisDataService.remove("raw")
 
     def test_setTitleAndComment(self):
-        run_algorithm('CreateWorkspace', OutputWorkspace='ws1', DataX=[
-            1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
-        ws1 = AnalysisDataService['ws1']
-        title = 'test_title'
+        run_algorithm("CreateWorkspace", OutputWorkspace="ws1", DataX=[1.0, 2.0, 3.0], DataY=[2.0, 3.0], DataE=[2.0, 3.0], UnitX="TOF")
+        ws1 = AnalysisDataService["ws1"]
+        title = "test_title"
         ws1.setTitle(title)
         self.assertEqual(title, ws1.getTitle())
-        comment = 'Some comment on this workspace.'
+        comment = "Some comment on this workspace."
         ws1.setComment(comment)
         self.assertEqual(comment, ws1.getComment())
         AnalysisDataService.remove(ws1.name())
 
     def test_setGetMonitorWS(self):
-        run_algorithm('CreateWorkspace', OutputWorkspace='ws1', DataX=[
-            1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
-        run_algorithm('CreateWorkspace', OutputWorkspace='ws_mon', DataX=[
-            1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
+        run_algorithm("CreateWorkspace", OutputWorkspace="ws1", DataX=[1.0, 2.0, 3.0], DataY=[2.0, 3.0], DataE=[2.0, 3.0], UnitX="TOF")
+        run_algorithm("CreateWorkspace", OutputWorkspace="ws_mon", DataX=[1.0, 2.0, 3.0], DataY=[2.0, 3.0], DataE=[2.0, 3.0], UnitX="TOF")
 
-        ws1 = AnalysisDataService.retrieve('ws1')
+        ws1 = AnalysisDataService.retrieve("ws1")
         try:
             monWs = ws1.getMonitorWorkspace()
             GotIt = True
@@ -409,7 +408,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
             GotIt = False
         self.assertFalse(GotIt)
 
-        monWs = AnalysisDataService.retrieve('ws_mon')
+        monWs = AnalysisDataService.retrieve("ws_mon")
         ws1.setMonitorWorkspace(monWs)
         monWs.setTitle("My Fake Monitor workspace")
 
@@ -446,10 +445,10 @@ class MatrixWorkspaceTest(unittest.TestCase):
 
     def test_isCommonLogBins(self):
         self.assertFalse(self._test_ws.isCommonLogBins())
-        ws = CreateSampleWorkspace('Event')
-        ws = Rebin(ws, '1,-1,10000')
+        ws = CreateSampleWorkspace("Event")
+        ws = Rebin(ws, "1,-1,10000")
         self.assertTrue(ws.isCommonLogBins())
-        ws = Rebin(ws, '1,-0.1,10000')
+        ws = Rebin(ws, "1,-0.1,10000")
         self.assertTrue(ws.isCommonLogBins())
 
     def test_hasMaskedBins(self):
@@ -530,28 +529,28 @@ class MatrixWorkspaceTest(unittest.TestCase):
 
     def test_findY(self):
         # Check that zero is not present
-        idx = self._test_ws.findY(0.)
+        idx = self._test_ws.findY(0.0)
         self.assertEqual(idx[0], -1)
         self.assertEqual(idx[1], -1)
         # Check that 5. is the first element
-        idx = self._test_ws.findY(5.)
+        idx = self._test_ws.findY(5.0)
         self.assertEqual(idx[0], 0)
         self.assertEqual(idx[1], 0)
         # Check that no other elements are 5
-        idx = self._test_ws.findY(5., (0, 1))
+        idx = self._test_ws.findY(5.0, (0, 1))
         self.assertEqual(idx[0], -1)
         self.assertEqual(idx[1], -1)
         # Check that 2. is the next element
-        idx = self._test_ws.findY(2.)
+        idx = self._test_ws.findY(2.0)
         self.assertEqual(idx[0], 0)
         self.assertEqual(idx[1], 1)
         # Check that 2. is the next element
-        idx = self._test_ws.findY(2., (0, 2))
+        idx = self._test_ws.findY(2.0, (0, 2))
         self.assertEqual(idx[0], 0)
         self.assertEqual(idx[1], 2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
     # Testing particular test from Mantid
     # tester=MatrixWorkspaceTest('test_setGetMonitorWS')

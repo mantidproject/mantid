@@ -27,7 +27,7 @@ class SampleData(BaseSampleData):
 
     def reset(self):
         """
-            Reset state
+        Reset state
         """
         super(SampleData, self).reset()
         self.calculation_method.reset()
@@ -36,8 +36,8 @@ class SampleData(BaseSampleData):
 
     def to_script(self, data_file=None):
         """
-            Generate reduction script
-            @param execute: if true, the script will be executed
+        Generate reduction script
+        @param execute: if true, the script will be executed
         """
         script = super(SampleData, self).to_script(data_file)
         if self.calculate_transmission:
@@ -46,36 +46,39 @@ class SampleData(BaseSampleData):
 
     def to_xml(self):
         """
-            Create XML from the current data.
+        Create XML from the current data.
         """
         xml_str = super(SampleData, self).to_xml()
-        return BaseScriptElement.addElementToSection(xml_str, "Transmission", "combine_transmission_frames",
-                                                     str(self.combine_transmission_frames))
+        return BaseScriptElement.addElementToSection(
+            xml_str, "Transmission", "combine_transmission_frames", str(self.combine_transmission_frames)
+        )
 
     def from_xml(self, xml_str):
         """
-            Read in data from XML
-            @param xml_str: text to read the data from
+        Read in data from XML
+        @param xml_str: text to read the data from
         """
         self.reset()
         super(SampleData, self).from_xml(xml_str)
 
         dom = xml.dom.minidom.parseString(xml_str)
         element_list = dom.getElementsByTagName("Transmission")
-        if len(element_list)>0:
+        if len(element_list) > 0:
             instrument_dom = element_list[0]
-            self.combine_transmission_frames = BaseScriptElement.getBoolElement(instrument_dom, "combine_transmission_frames",
-                                                                                default = SampleData.combine_transmission_frames)
+            self.combine_transmission_frames = BaseScriptElement.getBoolElement(
+                instrument_dom, "combine_transmission_frames", default=SampleData.combine_transmission_frames
+            )
 
     def from_setup_info(self, xml_str):
         """
-            Read in data from XML using the string representation of the setup algorithm used
-            to prepare the reduction properties.
-            @param xml_str: text to read the data from
+        Read in data from XML using the string representation of the setup algorithm used
+        to prepare the reduction properties.
+        @param xml_str: text to read the data from
         """
         self.reset()
         super(SampleData, self).from_setup_info(xml_str)
 
         (alg, _) = BaseScriptElement.getAlgorithmFromXML(xml_str)
-        self.combine_transmission_frames = BaseScriptElement.getPropertyValue(alg, "FitFramesTogether",
-                                                                              default=SampleData.combine_transmission_frames)
+        self.combine_transmission_frames = BaseScriptElement.getPropertyValue(
+            alg, "FitFramesTogether", default=SampleData.combine_transmission_frames
+        )

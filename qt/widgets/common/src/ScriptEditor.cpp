@@ -311,7 +311,7 @@ void ScriptEditor::setFileName(const QString &filename) {
  */
 void ScriptEditor::wheelEvent(QWheelEvent *e) {
   if (e->modifiers() == Qt::ControlModifier) {
-    if (e->delta() > 0) {
+    if (e->angleDelta().y() > 0) {
       zoomIn();
       emit textZoomedIn(); // allows tracking
     } else {

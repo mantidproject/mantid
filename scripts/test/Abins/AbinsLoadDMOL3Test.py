@@ -13,6 +13,7 @@ import abins.test_helpers
 
 class AbinsLoadDMOL3Test(unittest.TestCase, abins.input.Tester):
     """Check entire input files against expected outputs"""
+
     def tearDown(self):
         abins.test_helpers.remove_output_files(list_of_names=["_LoadDMOL3"])
 
@@ -30,5 +31,5 @@ class AbinsLoadDMOL3Test(unittest.TestCase, abins.input.Tester):
         self.check(name=self._molecule_opt_dmol3, loader=DMOL3Loader)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
