@@ -32,6 +32,9 @@ public:
 
   virtual void subscribeAnalysisPresenter(IALFAnalysisPresenter *presenter) = 0;
 
+  virtual void loadSettings() = 0;
+  virtual void saveSettings() = 0;
+
   virtual void loadSample() = 0;
   virtual void loadVanadium() = 0;
 
@@ -50,6 +53,9 @@ public:
   ALFInstrumentWidget *getInstrumentView() override;
 
   void subscribeAnalysisPresenter(IALFAnalysisPresenter *presenter) override;
+
+  void loadSettings() override;
+  void saveSettings() override;
 
   void loadSample() override;
   void loadVanadium() override;

@@ -24,7 +24,9 @@
 
 namespace MantidQt::CustomInterfaces {
 
-ALFInstrumentView::ALFInstrumentView(QWidget *parent) : QWidget(parent), m_sample(), m_instrumentWidget() {}
+ALFInstrumentView::ALFInstrumentView(QWidget *parent)
+    : QWidget(parent), m_settingsGroup("CustomInterfaces/ALFView"), m_sample(), m_vanadium(), m_instrumentWidget(),
+      m_presenter() {}
 
 void ALFInstrumentView::setUpInstrument(std::string const &fileName) {
   m_instrumentWidget = new ALFInstrumentWidget(QString::fromStdString(fileName));
@@ -70,6 +72,26 @@ QWidget *ALFInstrumentView::generateVanadiumLoadWidget() {
   connect(m_vanadium, SIGNAL(fileFindingFinished()), this, SLOT(vanadiumLoaded()));
 
   return m_vanadium;
+}
+
+void ALFInstrumentView::loadSettings() {
+  QSettings settings;
+
+  // Load the last used vanadium run
+  settings.beginGroup(m_settingsGroup);
+  auto const vanadiumRun = settings.value("vanadium-run", "");
+  settings.endGroup();
+
+  if (!vanadiumRun.toString().isEmpty()) {
+    m_vanadium->setUserInput(vanadiumRun);
+  }
+}
+
+void ALFInstrumentView::saveSettings() {
+  QSettings settings;
+  settings.beginGroup(m_settingsGroup);
+  settings.setValue("vanadium-run", m_vanadium->getText());
+  settings.endGroup();
 }
 
 void ALFInstrumentView::reconnectInstrumentActor() {

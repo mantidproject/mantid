@@ -31,6 +31,10 @@ void ALFInstrumentPresenter::subscribeAnalysisPresenter(IALFAnalysisPresenter *p
   m_analysisPresenter = presenter;
 }
 
+void ALFInstrumentPresenter::loadSettings() { m_view->loadSettings(); }
+
+void ALFInstrumentPresenter::saveSettings() { m_view->saveSettings(); }
+
 void ALFInstrumentPresenter::loadSample() {
   auto const filepath = m_view->getSampleFile();
   if (!filepath) {

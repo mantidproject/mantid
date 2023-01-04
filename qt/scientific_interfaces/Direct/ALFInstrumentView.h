@@ -46,6 +46,9 @@ public:
 
   virtual void subscribePresenter(IALFInstrumentPresenter *presenter) = 0;
 
+  virtual void loadSettings() = 0;
+  virtual void saveSettings() = 0;
+
   virtual std::optional<std::string> getSampleFile() const = 0;
   virtual std::optional<std::string> getVanadiumFile() const = 0;
 
@@ -76,6 +79,9 @@ public:
 
   void subscribePresenter(IALFInstrumentPresenter *presenter) override;
 
+  void loadSettings() override;
+  void saveSettings() override;
+
   std::optional<std::string> getSampleFile() const override;
   std::optional<std::string> getVanadiumFile() const override;
 
@@ -101,6 +107,8 @@ private slots:
   void notifyWholeTubeSelected(size_t pickID);
 
 private:
+  QString m_settingsGroup;
+
   API::FileFinderWidget *m_sample;
   API::FileFinderWidget *m_vanadium;
   ALFInstrumentWidget *m_instrumentWidget;

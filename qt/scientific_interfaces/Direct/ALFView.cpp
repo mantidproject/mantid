@@ -33,6 +33,8 @@ ALFView::ALFView(QWidget *parent) : UserSubWindow(parent), m_instrumentPresenter
   m_instrumentPresenter->subscribeAnalysisPresenter(m_analysisPresenter.get());
 }
 
+ALFView::~ALFView() { m_instrumentPresenter->saveSettings(); }
+
 void ALFView::initLayout() {
   auto *splitter = new QSplitter(Qt::Horizontal);
   splitter->addWidget(m_instrumentPresenter->getInstrumentView());
@@ -60,6 +62,8 @@ void ALFView::initLayout() {
   verticalLayout->addWidget(createHelpWidget());
 
   this->setCentralWidget(centralWidget);
+
+  m_instrumentPresenter->loadSettings();
 }
 
 QWidget *ALFView::createHelpWidget() {
