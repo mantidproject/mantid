@@ -13,152 +13,180 @@ import EnggUtils
 
 
 class EnggCalibrateFull(PythonAlgorithm):
-    INDICES_PROP_NAME = 'SpectrumNumbers'
+    INDICES_PROP_NAME = "SpectrumNumbers"
 
     def category(self):
         return "Diffraction\\Engineering"
 
     def seeAlso(self):
-        return [ "EnggCalibrate" ]
+        return ["EnggCalibrate"]
 
     def name(self):
         return "EnggCalibrateFull"
 
     def summary(self):
-        return ("This algorithm is deprecated as of May 2021, consider using PDCalibration instead."
-                "Calibrates every detector/pixel position by performing single peak fitting.")
+        return (
+            "This algorithm is deprecated as of May 2021, consider using PDCalibration instead."
+            "Calibrates every detector/pixel position by performing single peak fitting."
+        )
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty("Workspace", "", Direction.InOut),
-                             "Workspace with the calibration run to use. The calibration will be applied on it.")
+        self.declareProperty(
+            MatrixWorkspaceProperty("Workspace", "", Direction.InOut),
+            "Workspace with the calibration run to use. The calibration will be applied on it.",
+        )
 
-        self.declareProperty(MatrixWorkspaceProperty("VanadiumWorkspace", "", Direction.Input,
-                                                     PropertyMode.Optional),
-                             "Workspace with the Vanadium (correction and calibration) run.")
+        self.declareProperty(
+            MatrixWorkspaceProperty("VanadiumWorkspace", "", Direction.Input, PropertyMode.Optional),
+            "Workspace with the Vanadium (correction and calibration) run.",
+        )
 
-        self.declareProperty(ITableWorkspaceProperty('VanIntegrationWorkspace', '',
-                                                     Direction.Input, PropertyMode.Optional),
-                             doc='Results of integrating the spectra of a Vanadium run, with one column '
-                             '(integration result) and one row per spectrum. This can be used in '
-                             'combination with OutVanadiumCurveFits from a previous execution and '
-                             'VanadiumWorkspace to provide pre-calculated values for Vanadium correction.')
+        self.declareProperty(
+            ITableWorkspaceProperty("VanIntegrationWorkspace", "", Direction.Input, PropertyMode.Optional),
+            doc="Results of integrating the spectra of a Vanadium run, with one column "
+            "(integration result) and one row per spectrum. This can be used in "
+            "combination with OutVanadiumCurveFits from a previous execution and "
+            "VanadiumWorkspace to provide pre-calculated values for Vanadium correction.",
+        )
 
-        self.declareProperty(MatrixWorkspaceProperty('VanCurvesWorkspace', '', Direction.Input,
-                                                     PropertyMode.Optional),
-                             doc='A workspace2D with the fitting workspaces corresponding to '
-                             'the instrument banks. This workspace has three spectra per bank, as produced '
-                             'by the algorithm Fit. This is meant to be used as an alternative input '
-                             'VanadiumWorkspace for testing and performance reasons. If not given, no '
-                             'workspace is generated.')
+        self.declareProperty(
+            MatrixWorkspaceProperty("VanCurvesWorkspace", "", Direction.Input, PropertyMode.Optional),
+            doc="A workspace2D with the fitting workspaces corresponding to "
+            "the instrument banks. This workspace has three spectra per bank, as produced "
+            "by the algorithm Fit. This is meant to be used as an alternative input "
+            "VanadiumWorkspace for testing and performance reasons. If not given, no "
+            "workspace is generated.",
+        )
 
-        vana_grp = 'Vanadium (open beam) properties'
-        self.setPropertyGroup('VanadiumWorkspace', vana_grp)
-        self.setPropertyGroup('VanIntegrationWorkspace', vana_grp)
-        self.setPropertyGroup('VanCurvesWorkspace', vana_grp)
+        vana_grp = "Vanadium (open beam) properties"
+        self.setPropertyGroup("VanadiumWorkspace", vana_grp)
+        self.setPropertyGroup("VanIntegrationWorkspace", vana_grp)
+        self.setPropertyGroup("VanCurvesWorkspace", vana_grp)
 
-        self.declareProperty(ITableWorkspaceProperty("OutDetPosTable", "", Direction.Output),
-                             doc="A table with the detector IDs and calibrated detector positions and "
-                             "additional calibration information. The table includes: the old positions "
-                             "in V3D format (3D vector with x, y, z values), the new positions in V3D, the "
-                             "new positions in spherical coordinates, the change in L2, and the DIFA, "
-                             "DIFC and TZERO calibration parameters.")
+        self.declareProperty(
+            ITableWorkspaceProperty("OutDetPosTable", "", Direction.Output),
+            doc="A table with the detector IDs and calibrated detector positions and "
+            "additional calibration information. The table includes: the old positions "
+            "in V3D format (3D vector with x, y, z values), the new positions in V3D, the "
+            "new positions in spherical coordinates, the change in L2, and the DIFA, "
+            "DIFC and TZERO calibration parameters.",
+        )
 
-        self.declareProperty(ITableWorkspaceProperty("FittedPeaks", "", Direction.Output),
-                             doc="Information on fitted peaks. The table has one row per calibrated "
-                             "detector contains. In each row, the parameters of all the peaks fitted "
-                             "are specified together with the the expected peak value (in d-spacing). "
-                             "The expected values are given in the field labelled 'dSpacing'. When "
-                             "fitting back-to-back exponential functions, the 'X0' column has the fitted "
-                             "peak center.")
+        self.declareProperty(
+            ITableWorkspaceProperty("FittedPeaks", "", Direction.Output),
+            doc="Information on fitted peaks. The table has one row per calibrated "
+            "detector contains. In each row, the parameters of all the peaks fitted "
+            "are specified together with the the expected peak value (in d-spacing). "
+            "The expected values are given in the field labelled 'dSpacing'. When "
+            "fitting back-to-back exponential functions, the 'X0' column has the fitted "
+            "peak center.",
+        )
 
-        self.declareProperty("Bank", '', StringListValidator(EnggUtils.ENGINX_BANKS),
-                             direction=Direction.Input,
-                             doc="Which bank to calibrate: It can be specified as 1 or 2, or "
-                             "equivalently, North or South. See also " + self.INDICES_PROP_NAME + " "
-                             "for a more flexible alternative to select specific detectors")
+        self.declareProperty(
+            "Bank",
+            "",
+            StringListValidator(EnggUtils.ENGINX_BANKS),
+            direction=Direction.Input,
+            doc="Which bank to calibrate: It can be specified as 1 or 2, or "
+            "equivalently, North or South. See also " + self.INDICES_PROP_NAME + " "
+            "for a more flexible alternative to select specific detectors",
+        )
 
-        self.declareProperty(self.INDICES_PROP_NAME, '', direction=Direction.Input,
-                             doc='Sets the spectrum numbers for the detectors '
-                             'that should be considered in the calibration (all others will be '
-                             'ignored). This option cannot be used together with Bank, as they overlap. '
-                             'You can give multiple ranges, for example: "0-99", or "0-9, 50-59, 100-109".')
+        self.declareProperty(
+            self.INDICES_PROP_NAME,
+            "",
+            direction=Direction.Input,
+            doc="Sets the spectrum numbers for the detectors "
+            "that should be considered in the calibration (all others will be "
+            "ignored). This option cannot be used together with Bank, as they overlap. "
+            'You can give multiple ranges, for example: "0-99", or "0-9, 50-59, 100-109".',
+        )
 
-        banks_grp = 'Banks / spectra'
-        self.setPropertyGroup('Bank', banks_grp)
+        banks_grp = "Banks / spectra"
+        self.setPropertyGroup("Bank", banks_grp)
         self.setPropertyGroup(self.INDICES_PROP_NAME, banks_grp)
 
-        self.declareProperty(FileProperty("OutDetPosFilename", "", FileAction.OptionalSave, [".csv"]),
-                             doc="Name of the file to save the pre-/post-calibrated detector positions - this "
-                             "saves the same information that is provided in the output table workspace "
-                             "(OutDetPosTable).")
+        self.declareProperty(
+            FileProperty("OutDetPosFilename", "", FileAction.OptionalSave, [".csv"]),
+            doc="Name of the file to save the pre-/post-calibrated detector positions - this "
+            "saves the same information that is provided in the output table workspace "
+            "(OutDetPosTable).",
+        )
 
         # The default value of '-0.0005' is borrowed from OG routines
-        self.declareProperty('RebinBinWidth', defaultValue='-0.0005', direction=Direction.Input,
-                             doc="Before calculating the calibrated positions (fitting peaks) this algorithms "
-                             "re-bins the input sample data using a single bin width parameter. This option is"
-                             "to change the default bin width which is set to the value traditionally used for "
-                             "the Engin-X instrument")
+        self.declareProperty(
+            "RebinBinWidth",
+            defaultValue="-0.0005",
+            direction=Direction.Input,
+            doc="Before calculating the calibrated positions (fitting peaks) this algorithms "
+            "re-bins the input sample data using a single bin width parameter. This option is"
+            "to change the default bin width which is set to the value traditionally used for "
+            "the Engin-X instrument",
+        )
 
-        opt_outs_grp = 'Optional outputs'
-        self.setPropertyGroup('OutDetPosFilename', opt_outs_grp)
+        opt_outs_grp = "Optional outputs"
+        self.setPropertyGroup("OutDetPosFilename", opt_outs_grp)
 
-        self.declareProperty(FloatArrayProperty("ExpectedPeaks",
-                                                values=EnggUtils.default_ceria_expected_peaks(),
-                                                direction=Direction.Input),
-                             doc="A list of dSpacing values where peaks are expected.")
+        self.declareProperty(
+            FloatArrayProperty("ExpectedPeaks", values=EnggUtils.default_ceria_expected_peaks(), direction=Direction.Input),
+            doc="A list of dSpacing values where peaks are expected.",
+        )
 
-        self.declareProperty(FileProperty(name="ExpectedPeaksFromFile",defaultValue="",
-                                          action=FileAction.OptionalLoad,extensions = [".csv"]),
-                             doc="Load from file a list of dSpacing values to be translated into TOF to "
-                             "find expected peaks. This takes precedence over 'ExpectedPeaks' if both "
-                             "options are given.")
+        self.declareProperty(
+            FileProperty(name="ExpectedPeaksFromFile", defaultValue="", action=FileAction.OptionalLoad, extensions=[".csv"]),
+            doc="Load from file a list of dSpacing values to be translated into TOF to "
+            "find expected peaks. This takes precedence over 'ExpectedPeaks' if both "
+            "options are given.",
+        )
 
-        peaks_grp = 'Peaks to fit'
-        self.setPropertyGroup('ExpectedPeaks', peaks_grp)
-        self.setPropertyGroup('ExpectedPeaksFromFile', peaks_grp)
+        peaks_grp = "Peaks to fit"
+        self.setPropertyGroup("ExpectedPeaks", peaks_grp)
+        self.setPropertyGroup("ExpectedPeaksFromFile", peaks_grp)
 
     def PyExec(self):
         logger.warning("EnggCalibrateFull is deprecated as of May 2021. Please use PDCalibration instead.")
         # Get peaks in dSpacing from file, and check we have what we need, before doing anything
-        expected_peaks_d = EnggUtils.read_in_expected_peaks(self.getPropertyValue("ExpectedPeaksFromFile"),
-                                                            self.getProperty('ExpectedPeaks').value)
+        expected_peaks_d = EnggUtils.read_in_expected_peaks(
+            self.getPropertyValue("ExpectedPeaksFromFile"), self.getProperty("ExpectedPeaks").value
+        )
 
         if len(expected_peaks_d) < 1:
             raise ValueError("Cannot run this algorithm without any input expected peaks")
 
-        in_wks = self.getProperty('Workspace').value
-        wks_indices = EnggUtils.get_ws_indices_from_input_properties(in_wks, self.getProperty('Bank').value,
-                                                                     self.getProperty(self.INDICES_PROP_NAME).value)
+        in_wks = self.getProperty("Workspace").value
+        wks_indices = EnggUtils.get_ws_indices_from_input_properties(
+            in_wks, self.getProperty("Bank").value, self.getProperty(self.INDICES_PROP_NAME).value
+        )
 
         van_wks = self.getProperty("VanadiumWorkspace").value
-        van_integ_wks = self.getProperty('VanIntegrationWorkspace').value
-        van_curves_wks = self.getProperty('VanCurvesWorkspace').value
+        van_integ_wks = self.getProperty("VanIntegrationWorkspace").value
+        van_curves_wks = self.getProperty("VanCurvesWorkspace").value
         # These corrections rely on ToF<->Dspacing conversions, so ideally they'd be done after the
         # calibration step, which creates a cycle / chicken-and-egg issue.
         EnggUtils.apply_vanadium_corrections(self, in_wks, wks_indices, van_wks, van_integ_wks, van_curves_wks)
 
-        rebinned_ws = self._prepare_ws_for_fitting(in_wks, self.getProperty('RebinBinWidth').value)
+        rebinned_ws = self._prepare_ws_for_fitting(in_wks, self.getProperty("RebinBinWidth").value)
         pos_tbl, peaks_tbl = self._calculate_calib_positions_tbl(rebinned_ws, wks_indices, expected_peaks_d)
 
         # Produce 2 results: 'output table' and 'apply calibration' + (optional) calibration file
         self.setProperty("OutDetPosTable", pos_tbl)
         self.setProperty("FittedPeaks", peaks_tbl)
         self._apply_calibration_table(in_wks, pos_tbl)
-        self._output_det_pos_file(self.getPropertyValue('OutDetPosFilename'), pos_tbl)
+        self._output_det_pos_file(self.getPropertyValue("OutDetPosFilename"), pos_tbl)
 
     def _prepare_ws_for_fitting(self, ws, bin_width):
         """
         Rebins the workspace and converts it to distribution
         """
-        rebin_alg = self.createChildAlgorithm('Rebin')
-        rebin_alg.setProperty('InputWorkspace', ws)
-        rebin_alg.setProperty('Params', bin_width)
+        rebin_alg = self.createChildAlgorithm("Rebin")
+        rebin_alg.setProperty("InputWorkspace", ws)
+        rebin_alg.setProperty("Params", bin_width)
         rebin_alg.execute()
-        result = rebin_alg.getProperty('OutputWorkspace').value
+        result = rebin_alg.getProperty("OutputWorkspace").value
 
         if not result.isDistribution():
-            convert_alg = self.createChildAlgorithm('ConvertToDistribution')
-            convert_alg.setProperty('Workspace', result)
+            convert_alg = self.createChildAlgorithm("ConvertToDistribution")
+            convert_alg.setProperty("Workspace", result)
             convert_alg.execute()
 
         return result
@@ -189,10 +217,12 @@ class EnggCalibrateFull(PythonAlgorithm):
                 fitted_peaks_table = self._fit_peaks(ws, i, expected_peaks_d)
                 difa, difc, tzero = self._fit_difc_linear(fitted_peaks_table)
             except RuntimeError as re:
-                raise RuntimeError("Severe issue found when trying to fit peaks for the detector with ID %d. "
-                                   "This calibration algorithm cannot continue. Please check the expected "
-                                   "peaks provided. Details from "
-                                   "FindPeaks: %s" % (i, str(re)))
+                raise RuntimeError(
+                    "Severe issue found when trying to fit peaks for the detector with ID %d. "
+                    "This calibration algorithm cannot continue. Please check the expected "
+                    "peaks provided. Details from "
+                    "FindPeaks: %s" % (i, str(re))
+                )
 
             det = ws.getDetector(i)
             new_pos, new_L2 = self._get_calibrated_det_pos(difc, det, ws)
@@ -203,8 +233,7 @@ class EnggCalibrateFull(PythonAlgorithm):
             det_phi = det.getPhi()
             old_pos = det.getPos()
 
-            pos_tbl.addRow([det.getID(), old_pos, new_pos, new_L2, det_2Theta, det_phi,
-                            new_L2-old_L2, difa, difc, tzero])
+            pos_tbl.addRow([det.getID(), old_pos, new_pos, new_L2, det_2Theta, det_phi, new_L2 - old_L2, difa, difc, tzero])
 
             # fitted parameter details as a string for every peak for one detector
             peaks_details = self._build_peaks_details_string(fitted_peaks_table)
@@ -223,13 +252,13 @@ class EnggCalibrateFull(PythonAlgorithm):
         @returns the peaks parameters in a table as produced by the algorithm
         EnggFitPeaks
         """
-        alg = self.createChildAlgorithm('EnggFitPeaks')
-        alg.setProperty('InputWorkspace', ws)
-        alg.setProperty('WorkspaceIndex', ws_index) # There should be only one index anyway
-        alg.setProperty('ExpectedPeaks', expected_peaks_d)
+        alg = self.createChildAlgorithm("EnggFitPeaks")
+        alg.setProperty("InputWorkspace", ws)
+        alg.setProperty("WorkspaceIndex", ws_index)  # There should be only one index anyway
+        alg.setProperty("ExpectedPeaks", expected_peaks_d)
         alg.execute()
 
-        fitted_peaks_table = alg.getProperty('FittedPeaks').value
+        fitted_peaks_table = alg.getProperty("FittedPeaks").value
 
         return fitted_peaks_table
 
@@ -242,13 +271,13 @@ class EnggCalibrateFull(PythonAlgorithm):
 
         @returns the DIFA, DIFC, TZERO calibration parameters of GSAS
         """
-        alg = self.createChildAlgorithm('EnggFitTOFFromPeaks')
-        alg.setProperty('FittedPeaks', fitted_peaks_table)
+        alg = self.createChildAlgorithm("EnggFitTOFFromPeaks")
+        alg.setProperty("FittedPeaks", fitted_peaks_table)
         alg.execute()
 
-        difa = alg.getProperty('DIFA').value
-        difc = alg.getProperty('DIFC').value
-        tzero = alg.getProperty('TZERO').value
+        difa = alg.getProperty("DIFA").value
+        difc = alg.getProperty("DIFC").value
+        tzero = alg.getProperty("TZERO").value
 
         return difa, difc, tzero
 
@@ -258,22 +287,22 @@ class EnggCalibrateFull(PythonAlgorithm):
 
         @return table with the expected output columns
         """
-        alg = self.createChildAlgorithm('CreateEmptyTableWorkspace')
+        alg = self.createChildAlgorithm("CreateEmptyTableWorkspace")
         alg.execute()
-        table = alg.getProperty('OutputWorkspace').value
+        table = alg.getProperty("OutputWorkspace").value
 
         # Note: the colums 'Detector ID' and 'Detector Position' must have those
         # exact names (expected by child alg. ApplyCalibration in EnggFocus)
-        table.addColumn('int', 'Detector ID')
-        table.addColumn('V3D', 'Old Detector Position')
-        table.addColumn('V3D', 'Detector Position')
-        table.addColumn('float', 'L2')
-        table.addColumn('float', '2 \\theta')
-        table.addColumn('float', '\\phi')
-        table.addColumn('float', '\\delta L2 (calibrated - old)')
-        table.addColumn('float', 'DIFA')
-        table.addColumn('float', 'DIFC')
-        table.addColumn('float', 'TZERO')
+        table.addColumn("int", "Detector ID")
+        table.addColumn("V3D", "Old Detector Position")
+        table.addColumn("V3D", "Detector Position")
+        table.addColumn("float", "L2")
+        table.addColumn("float", "2 \\theta")
+        table.addColumn("float", "\\phi")
+        table.addColumn("float", "\\delta L2 (calibrated - old)")
+        table.addColumn("float", "DIFA")
+        table.addColumn("float", "DIFC")
+        table.addColumn("float", "TZERO")
 
         return table
 
@@ -284,12 +313,12 @@ class EnggCalibrateFull(PythonAlgorithm):
         Returns::
            Empty table that needs to be populated with peaks information (one row per detector)
         """
-        alg = self.createChildAlgorithm('CreateEmptyTableWorkspace')
+        alg = self.createChildAlgorithm("CreateEmptyTableWorkspace")
         alg.execute()
-        table = alg.getProperty('OutputWorkspace').value
+        table = alg.getProperty("OutputWorkspace").value
 
-        table.addColumn('int', 'Detector ID')
-        table.addColumn('str', 'Parameters')
+        table.addColumn("int", "Detector ID")
+        table.addColumn("str", "Parameters")
 
         return table
 
@@ -312,9 +341,10 @@ class EnggCalibrateFull(PythonAlgorithm):
 
         """
         import json
+
         all_dict = {}
         for row_idx, row_txt in enumerate(fitted_params_tbl):
-            all_dict[row_idx+1] = row_txt
+            all_dict[row_idx + 1] = row_txt
 
         return json.dumps(all_dict)
 
@@ -363,9 +393,9 @@ class EnggCalibrateFull(PythonAlgorithm):
         'Detector ID' and 'Detector Position'
         """
         self.log().notice("Applying calibration on the input workspace")
-        alg = self.createChildAlgorithm('ApplyCalibration')
-        alg.setProperty('Workspace', ws)
-        alg.setProperty('CalibrationTable', detPos)
+        alg = self.createChildAlgorithm("ApplyCalibration")
+        alg.setProperty("Workspace", ws)
+        alg.setProperty("CalibrationTable", detPos)
         alg.execute()
 
     def _V3D_from_spherical(self, R, polar, azimuth):

@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
@@ -16,7 +16,7 @@ class ConjoinFiles(PythonAlgorithm):
         return "DataHandling\\Text"
 
     def seeAlso(self):
-        return [ "ConjoinWorkspaces" ]
+        return ["ConjoinWorkspaces"]
 
     def name(self):
         return "ConjoinFiles"
@@ -24,7 +24,7 @@ class ConjoinFiles(PythonAlgorithm):
     def summary(self):
         return "Conjoin two file-based workspaces."
 
-    #pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments
     def __load(self, directory, instr, run, loader, exts, wksp):
         filename = None
         for ext in exts:
@@ -43,7 +43,7 @@ class ConjoinFiles(PythonAlgorithm):
 
     def PyInit(self):
         greaterThanZero = IntArrayBoundedValidator(lower=0)
-        self.declareProperty(IntArrayProperty("RunNumbers",values=[0],validator=greaterThanZero), doc="Run numbers")
+        self.declareProperty(IntArrayProperty("RunNumbers", values=[0], validator=greaterThanZero), doc="Run numbers")
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output))
         self.declareProperty(FileProperty("Directory", "", FileAction.OptionalDirectory))
 
@@ -55,7 +55,7 @@ class ConjoinFiles(PythonAlgorithm):
         directory = self.getPropertyValue("Directory").strip()
 
         # change here if you want something other than gsas files
-        exts = ['.txt', '.gsa']
+        exts = [".txt", ".gsa"]
         loader = LoadGSS
 
         # load things and conjoin them

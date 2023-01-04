@@ -11,17 +11,15 @@ import numpy as np
 
 
 class AFMLF(IFunction1D):
-
     def category(self):
         return "Muon\\MuonSpecific"
 
     def init(self):
-        self.declareParameter("A0", 0.2, 'Amplitude')
-        self.declareParameter("Freq", 2, 'ZF Frequency (MHz)')
-        self.declareParameter(
-            "Angle", 50, 'Angle of internal field w.r.t. to applied field (degrees)')
-        self.declareParameter("Field", 10, 'Applied Field (G)')
-        self.declareParameter("Phi", 0.0, 'Phase (rad)')
+        self.declareParameter("A0", 0.2, "Amplitude")
+        self.declareParameter("Freq", 2, "ZF Frequency (MHz)")
+        self.declareParameter("Angle", 50, "Angle of internal field w.r.t. to applied field (degrees)")
+        self.declareParameter("Field", 10, "Applied Field (G)")
+        self.declareParameter("Phi", 0.0, "Phase (rad)")
 
     def function1D(self, x):
         A0 = self.getParameterValue("A0")
@@ -32,15 +30,11 @@ class AFMLF(IFunction1D):
         FreqInt = Freq
         FreqExt = 0.01355 * B
         theta = np.pi / 180 * theta
-        omega1 = 2 * np.pi * \
-            np.sqrt(FreqInt ** 2 + FreqExt ** 2 + 2 * FreqInt * FreqExt * np.cos(theta))
-        omega2 = 2 * np.pi * \
-            np.sqrt(FreqInt ** 2 + FreqExt ** 2 - 2 * FreqInt * FreqExt * np.cos(theta))
-        a1 = (FreqInt * np.sin(theta)) ** 2 / ((FreqExt + FreqInt
-                                                * np.cos(theta)) ** 2 + (FreqInt * np.sin(theta)) ** 2)
+        omega1 = 2 * np.pi * np.sqrt(FreqInt**2 + FreqExt**2 + 2 * FreqInt * FreqExt * np.cos(theta))
+        omega2 = 2 * np.pi * np.sqrt(FreqInt**2 + FreqExt**2 - 2 * FreqInt * FreqExt * np.cos(theta))
+        a1 = (FreqInt * np.sin(theta)) ** 2 / ((FreqExt + FreqInt * np.cos(theta)) ** 2 + (FreqInt * np.sin(theta)) ** 2)
 
-        a2 = (FreqInt * np.sin(theta)) ** 2 / ((FreqExt - FreqInt
-                                                * np.cos(theta)) ** 2 + (FreqInt * np.sin(theta)) ** 2)
+        a2 = (FreqInt * np.sin(theta)) ** 2 / ((FreqExt - FreqInt * np.cos(theta)) ** 2 + (FreqInt * np.sin(theta)) ** 2)
         return A0 * ((1 - a1) + a1 * np.cos(omega1 * x + phi) + (1 - a2) + a2 * np.cos(omega2 * x + phi)) / 2
 
 

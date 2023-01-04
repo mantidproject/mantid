@@ -5,10 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
-'''
+"""
 @author Spencer Howells, ISIS
 @date December 05, 2013
-'''
+"""
 import math
 import numpy as np
 
@@ -19,15 +19,16 @@ from mantid.api import IFunction1D, FunctionFactory
 # The elastic intensity is propotional to 1/(1+msd*Q^2/6*beta)^beta
 # where the mean square displacement msd = <r^2> and beta is the paramter of the Gamma function Gamma(beta)
 
+
 class MsdPeters(IFunction1D):
     def category(self):
         return "QuasiElastic"
 
     def init(self):
         # Active fitting parameters
-        self.declareParameter("Height", 1.0, 'Height')
-        self.declareParameter("Msd", 0.05, 'Mean square displacement')
-        self.declareParameter("Beta", 1.0, 'beta')
+        self.declareParameter("Height", 1.0, "Height")
+        self.declareParameter("Msd", 0.05, "Mean square displacement")
+        self.declareParameter("Beta", 1.0, "beta")
 
     def function1D(self, xvals):
         height = self.getParameterValue("Height")
