@@ -103,6 +103,7 @@ public:
     EXPECT_CALL(*mockView, disableMainWidget()).Times(1);
     EXPECT_CALL(*mockModel, loadWorkspaceFromAds(workspaceName)).Times(1).WillOnce(Throw(error));
     EXPECT_CALL(*mockModel, loadAndPreprocessWorkspaceAsync(_, _)).Times(0);
+    EXPECT_CALL(*mockView, enableMainWidget()).Times(1);
 
     auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel)));
     TS_ASSERT_THROWS_NOTHING(presenter.notifyLoadWorkspaceRequested());
@@ -474,6 +475,7 @@ public:
 
     expectRegionSelectorCleared(rawMockDockableWidgets, rawMockRegionSelector);
     expectReductionPlotCleared(rawMockPlotPresenter);
+    EXPECT_CALL(*mockView, enableMainWidget());
 
     presenter.notifySumBanksAlgorithmError();
   }

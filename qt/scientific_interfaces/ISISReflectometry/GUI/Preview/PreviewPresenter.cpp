@@ -98,6 +98,7 @@ void PreviewPresenter::notifyLoadWorkspaceRequested() {
     }
   } catch (std::runtime_error const &ex) {
     g_log.error(ex.what());
+    m_view->enableMainWidget();
   }
 }
 
@@ -152,6 +153,7 @@ void PreviewPresenter::notifyLoadWorkspaceAlgorithmError() { m_view->enableMainW
 void PreviewPresenter::notifySumBanksAlgorithmError() {
   clearRegionSelector();
   clearReductionPlot();
+  m_view->enableMainWidget();
 }
 
 void PreviewPresenter::notifyReductionAlgorithmError() {
