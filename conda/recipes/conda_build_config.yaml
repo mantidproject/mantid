@@ -25,10 +25,10 @@ numpy:
   - 1.19
 
 matplotlib:
-  - 3.5.*
+  - 3.6.*
 
 openssl:
-  - 1.1.1l.*
+  - 1.1.*
 
 setuptools:
   - 48.0.*
@@ -40,13 +40,16 @@ sphinx_bootstrap_theme:
   - 0.8.1
 
 qt:
-  - 5.12.*
+  - 5.15.*
+
+qscintilla2:
+  - 2.13.*
 
 tbb:
   - 2020.2.*
 
 hdf5:
-  - 1.10.*
+  - 1.12.*
 
 occt:
   - 7.5.*
