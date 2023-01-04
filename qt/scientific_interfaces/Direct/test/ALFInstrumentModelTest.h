@@ -77,32 +77,33 @@ public:
 
   void test_loadedWsName_returns_the_expected_instrument() { TS_ASSERT_EQUALS("ALFData", m_model->loadedWsName()); }
 
-  void test_loadAndTransform_returns_an_error_if_the_data_is_not_ALF_data() {
-    auto const message = m_model->loadAndTransform(m_nonALFData);
-
-    TS_ASSERT(message);
-    TS_ASSERT_EQUALS("The loaded data is not from the ALF instrument", *message);
+  void test_loadAndNormalise_throws_an_error_if_the_data_is_not_ALF_data() {
+    TS_ASSERT_THROWS(m_model->loadAndNormalise(m_nonALFData), std::invalid_argument const &,
+                     "The loaded data is not from the ALF instrument");
   }
 
-  void test_loadAndTransform_returns_a_nullopt_if_the_data_is_valid() {
-    auto const message = m_model->loadAndTransform(m_ALFData);
-    TS_ASSERT(!message);
+  void test_loadAndNormalise_returns_a_non_null_workspace_if_the_data_is_valid() {
+    TS_ASSERT(m_model->loadAndNormalise(m_ALFData));
   }
 
-  void test_loadAndTransform_transforms_the_data_to_dSpacing_if_not_already() {
-    auto const message = m_model->loadAndTransform(m_ALFData);
-
-    TS_ASSERT(ADS.doesExist(m_model->loadedWsName()));
-
-    auto workspace = ADS.retrieveWS<MatrixWorkspace>(m_model->loadedWsName());
+  void test_loadAndNormalise_transforms_the_data_to_dSpacing_if_not_already() {
+    auto const workspace = m_model->loadAndNormalise(m_ALFData);
     TS_ASSERT_EQUALS("dSpacing", workspace->getAxis(0)->unit()->unitID());
   }
 
-  void test_runNumber_returns_zero_when_no_data_is_loaded() { TS_ASSERT_EQUALS(0u, m_model->runNumber()); }
+  void test_runNumber_returns_zero_when_no_data_is_loaded() {
+    TS_ASSERT_EQUALS(0u, m_model->sampleRun());
+    TS_ASSERT_EQUALS(0u, m_model->vanadiumRun());
+  }
 
-  void test_runNumber_returns_the_run_number_of_the_loaded_data() {
-    m_model->loadAndTransform(m_ALFData);
-    TS_ASSERT_EQUALS(82301u, m_model->runNumber());
+  void test_sampleRun_returns_the_run_number_of_the_loaded_data() {
+    m_model->setSample(m_model->loadAndNormalise(m_ALFData));
+    TS_ASSERT_EQUALS(82301u, m_model->sampleRun());
+  }
+
+  void test_vanadiumRun_returns_the_run_number_of_the_loaded_data() {
+    m_model->setVanadium(m_model->loadAndNormalise(m_ALFData));
+    TS_ASSERT_EQUALS(82301u, m_model->vanadiumRun());
   }
 
   void test_setSelectedTubes_will_set_an_empty_vector_of_tubes_when_provided_an_empty_vector() {
@@ -197,10 +198,11 @@ public:
   }
 
   void test_generateOutOfPlaneAngleWorkspace_will_create_a_workspace_with_the_expected_data_for_an_edge_case_dataset() {
-    m_model->loadAndTransform(m_ALFEdgeCaseData);
+    auto const sample = m_model->loadAndNormalise(m_ALFEdgeCaseData);
+    m_model->setSample(sample);
+    m_model->generateLoadedWorkspace();
 
-    auto const ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_model->loadedWsName());
-    m_singleTubeDetectorIDs = findWholeTubes(ws->componentInfo(), {2500u, 2501u, 2502u});
+    m_singleTubeDetectorIDs = findWholeTubes(sample->componentInfo(), {2500u, 2501u, 2502u});
     TS_ASSERT(m_model->setSelectedTubes(m_singleTubeDetectorIDs));
 
     expectInstrumentActorCalls(12288u);
@@ -218,19 +220,21 @@ public:
 
 private:
   void setSingleTubeSelected() {
-    m_model->loadAndTransform(m_ALFData);
+    auto const sample = m_model->loadAndNormalise(m_ALFData);
+    m_model->setSample(sample);
+    m_model->generateLoadedWorkspace();
 
-    auto const workspace = ADS.retrieveWS<MatrixWorkspace>(m_model->loadedWsName());
-    m_singleTubeDetectorIDs = findWholeTubes(workspace->componentInfo(), {2500u, 2501u, 2502u});
+    m_singleTubeDetectorIDs = findWholeTubes(sample->componentInfo(), {2500u, 2501u, 2502u});
 
     TS_ASSERT(m_model->setSelectedTubes(m_singleTubeDetectorIDs));
   }
 
   void setMultipleTubesSelected() {
-    m_model->loadAndTransform(m_ALFData);
+    auto const sample = m_model->loadAndNormalise(m_ALFData);
+    m_model->setSample(sample);
+    m_model->generateLoadedWorkspace();
 
-    auto const workspace = ADS.retrieveWS<MatrixWorkspace>(m_model->loadedWsName());
-    m_multiTubeDetectorIDs = findWholeTubes(workspace->componentInfo(), {2500u, 2501u, 2502u, 3500u, 3501u, 3502u});
+    m_multiTubeDetectorIDs = findWholeTubes(sample->componentInfo(), {2500u, 2501u, 2502u, 3500u, 3501u, 3502u});
 
     TS_ASSERT(m_model->setSelectedTubes(m_multiTubeDetectorIDs));
   }

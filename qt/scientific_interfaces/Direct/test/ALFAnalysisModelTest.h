@@ -32,7 +32,7 @@ public:
   static void destroySuite(ALFAnalysisModelTest *suite) { delete suite; }
 
   void setUp() override {
-    m_workspace = WorkspaceCreationHelper::create2DWorkspace(1, 100);
+    m_workspace = WorkspaceCreationHelper::create2DWorkspacePoints(1, 100);
     m_exportWorkspaceName = "ALFView_exported";
     m_range = std::make_pair<double, double>(0.0, 100.0);
     m_twoThetas = std::vector<double>{29.5, 30.4, 31.0};
@@ -74,16 +74,19 @@ public:
   }
 
   void test_that_calculateEstimate_returns_an_estimate_if_the_extracted_workspace_is_set() {
+    // Set a maximum y value at x = 5.0
+    m_workspace->mutableY(0)[5] = 3.0;
+
     m_model->setExtractedWorkspace(m_workspace, m_twoThetas);
 
     m_model->calculateEstimate(m_range);
 
-    TS_ASSERT_EQUALS(0.5, m_model->peakCentre());
+    TS_ASSERT_DELTA(5.0, m_model->peakCentre(), 0.00001);
     TS_ASSERT_EQUALS("", m_model->fitStatus());
   }
 
   void test_that_calculateEstimate_returns_zero_peak_centre_if_the_crop_range_is_invalid() {
-    m_workspace = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100, 300.0);
+    m_workspace = WorkspaceCreationHelper::create2DWorkspacePoints(1, 100, 300.0);
     m_model->setExtractedWorkspace(m_workspace, m_twoThetas);
 
     m_model->calculateEstimate(m_range);

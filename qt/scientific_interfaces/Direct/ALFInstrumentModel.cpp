@@ -196,7 +196,7 @@ MatrixWorkspace_sptr ALFInstrumentModel::loadAndNormalise(std::string const &fil
   auto loadedWorkspace = load(filename);
 
   if (!isALFData(loadedWorkspace)) {
-    throw std::invalid_argument("The provided data is not ALF data.");
+    throw std::invalid_argument("The loaded data is not from the ALF instrument");
   }
 
   if (!isAxisDSpacing(loadedWorkspace)) {
