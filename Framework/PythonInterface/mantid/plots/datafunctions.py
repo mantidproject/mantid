@@ -34,16 +34,19 @@ from mantid.plots.utility import convert_color_to_hex, MantidAxType
 
 
 def validate_args(*args, **kwargs):
-    return len(args) > 0 and (isinstance(args[0], EventWorkspace)
-                              or isinstance(args[0], Workspace2D)
-                              or isinstance(args[0], MDHistoWorkspace)
-                              or isinstance(args[0], MultipleExperimentInfos)
-                              and "LogName" in kwargs)
+    return len(args) > 0 and (
+        isinstance(args[0], EventWorkspace)
+        or isinstance(args[0], Workspace2D)
+        or isinstance(args[0], MDHistoWorkspace)
+        or isinstance(args[0], MultipleExperimentInfos)
+        and "LogName" in kwargs
+    )
 
 
 # ====================================================
 # Data extraction and manipulation
 # ====================================================
+
 
 def get_distribution(workspace, **kwargs):
     """
@@ -53,7 +56,7 @@ def get_distribution(workspace, **kwargs):
     Applies to Matrix workspaces only
     :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
     """
-    distribution = kwargs.pop('distribution', False)
+    distribution = kwargs.pop("distribution", False)
     distribution = True if workspace.isDistribution() else bool(distribution)
     return distribution, kwargs
 
@@ -68,13 +71,12 @@ def get_normalize_by_bin_width(workspace, axes, **kwargs):
     :param workspace: :class:`mantid.api.MatrixWorkspace` workspace being plotted
     :param axes: The axes being plotted on
     """
-    normalize_by_bin_width = kwargs.pop('normalize_by_bin_width', None)
+    normalize_by_bin_width = kwargs.pop("normalize_by_bin_width", None)
     if normalize_by_bin_width is not None:
         return normalize_by_bin_width, kwargs
-    distribution = kwargs.get('distribution', None)
-    axis = kwargs.get('axis', None)
-    if axis == MantidAxType.BIN or distribution or \
-            (hasattr(workspace, 'isDistribution') and workspace.isDistribution()):
+    distribution = kwargs.get("distribution", None)
+    axis = kwargs.get("axis", None)
+    if axis == MantidAxType.BIN or distribution or (hasattr(workspace, "isDistribution") and workspace.isDistribution()):
         return False, kwargs
     elif distribution is False:
         return True, kwargs
@@ -85,11 +87,10 @@ def get_normalize_by_bin_width(workspace, axes, **kwargs):
             current_artists = None
 
         if current_artists:
-            current_normalization = any(
-                [artist[0].is_normalized for artist in current_artists])
+            current_normalization = any([artist[0].is_normalized for artist in current_artists])
             normalization = current_normalization
         else:
-            normalization = mantid.kernel.config['graph1d.autodistribution'].lower() == 'on'
+            normalization = mantid.kernel.config["graph1d.autodistribution"].lower() == "on"
     return normalization, kwargs
 
 
@@ -114,7 +115,7 @@ def get_normalization(md_workspace, **kwargs):
 
     :param md_workspace: :class:`mantid.api.IMDHistoWorkspace` to extract the data from
     """
-    normalization = kwargs.pop('normalization', md_workspace.displayNormalizationHisto())
+    normalization = kwargs.pop("normalization", md_workspace.displayNormalizationHisto())
     return normalization, kwargs
 
 
@@ -126,13 +127,12 @@ def get_indices(md_workspace, **kwargs):
 
     :param md_workspace: :class:`mantid.api.IMDHistoWorkspace` to extract the data from
     """
-    if 'slicepoint' in kwargs and 'indices' in kwargs:
+    if "slicepoint" in kwargs and "indices" in kwargs:
         raise ValueError("Must specify either 'slicepoint' or 'indices', not both")
 
-    if 'slicepoint' in kwargs:
-        slicepoint = kwargs.pop('slicepoint')
-        assert md_workspace.getNumDims() == len(
-            slicepoint), "slicepoint provided do not match the dimensions of the workspace"
+    if "slicepoint" in kwargs:
+        slicepoint = kwargs.pop("slicepoint")
+        assert md_workspace.getNumDims() == len(slicepoint), "slicepoint provided do not match the dimensions of the workspace"
         indices = []
         for n, p in enumerate(slicepoint):
             if p is None:
@@ -140,23 +140,26 @@ def get_indices(md_workspace, **kwargs):
             else:
                 indices.append(pointToIndex(md_workspace.getDimension(n), p))
         indices = tuple(indices)
-    elif 'indices' in kwargs:
-        indices = kwargs.pop('indices')
-        assert md_workspace.getNumDims() == len(
-            indices), "indices provided do not match the dimensions of the workspace"
+    elif "indices" in kwargs:
+        indices = kwargs.pop("indices")
+        assert md_workspace.getNumDims() == len(indices), "indices provided do not match the dimensions of the workspace"
     else:
         indices = None
 
-    if indices and 'label' not in kwargs:
+    if indices and "label" not in kwargs:
         ws_name = md_workspace.name()
-        labels = '; '.join('{0}={1:.4}'.format(md_workspace.getDimension(n).name,
-                                               (md_workspace.getDimension(n).getX(indices[n])
-                                                + md_workspace.getDimension(n).getX(indices[n] + 1)) / 2)
-                           for n in range(md_workspace.getNumDims()) if indices[n] != slice(None))
+        labels = "; ".join(
+            "{0}={1:.4}".format(
+                md_workspace.getDimension(n).name,
+                (md_workspace.getDimension(n).getX(indices[n]) + md_workspace.getDimension(n).getX(indices[n] + 1)) / 2,
+            )
+            for n in range(md_workspace.getNumDims())
+            if indices[n] != slice(None)
+        )
         if ws_name:
-            kwargs['label'] = '{0}: {1}'.format(ws_name, labels)
+            kwargs["label"] = "{0}: {1}".format(ws_name, labels)
         else:
-            kwargs['label'] = labels
+            kwargs["label"] = labels
 
     return indices, kwargs
 
@@ -175,10 +178,10 @@ def points_from_boundaries(input_array):
 
     :param input_array: a :class:`numpy.ndarray` of bin boundaries
     """
-    assert isinstance(input_array, np.ndarray), 'Not a numpy array'
+    assert isinstance(input_array, np.ndarray), "Not a numpy array"
     if len(input_array) < 2:
-        raise ValueError('could not get centers from less than two boundaries')
-    return .5 * (input_array[0:-1] + input_array[1:])
+        raise ValueError("could not get centers from less than two boundaries")
+    return 0.5 * (input_array[0:-1] + input_array[1:])
 
 
 def _dim2array(d):
@@ -207,21 +210,21 @@ def get_wksp_index_dist_and_label(workspace, axis=MantidAxType.SPECTRUM, **kwarg
     workspace_index, spectrum_number, kwargs = _get_wksp_index_and_spec_num(workspace, axis, **kwargs)
 
     # create a label if it isn't already specified
-    if 'label' not in kwargs:
+    if "label" not in kwargs:
         ws_name = workspace.name()
         if axis == MantidAxType.SPECTRUM:
             if workspace.getAxis(1).isText() or workspace.getAxis(1).isNumeric():
-                kwargs['label'] = '{0}: {1}'.format(ws_name, workspace.getAxis(1).label(workspace_index))
+                kwargs["label"] = "{0}: {1}".format(ws_name, workspace.getAxis(1).label(workspace_index))
             else:
                 if ws_name:
-                    kwargs['label'] = '{0}: spec {1}'.format(ws_name, spectrum_number)
+                    kwargs["label"] = "{0}: spec {1}".format(ws_name, spectrum_number)
                 else:
-                    kwargs['label'] = 'spec {0}'.format(spectrum_number)
+                    kwargs["label"] = "spec {0}".format(spectrum_number)
         elif axis == MantidAxType.BIN:
             if ws_name:
-                kwargs['label'] = '{0}: bin {1}'.format(ws_name, workspace_index)
+                kwargs["label"] = "{0}: bin {1}".format(ws_name, workspace_index)
             else:
-                kwargs['label'] = 'bin {0}'.format(workspace_index)
+                kwargs["label"] = "bin {0}".format(workspace_index)
 
     (distribution, kwargs) = get_distribution(workspace, **kwargs)
 
@@ -239,28 +242,26 @@ def _get_wksp_index_and_spec_num(workspace, axis, **kwargs):
                    or workspace index
     :return The workspace index and the spectrum number
     """
-    spectrum_number = kwargs.pop('specNum', None)
-    workspace_index = kwargs.pop('wkspIndex', None)
+    spectrum_number = kwargs.pop("specNum", None)
+    workspace_index = kwargs.pop("wkspIndex", None)
 
     # error check input parameters
     if (spectrum_number is not None) and (workspace_index is not None):
-        raise RuntimeError('Must specify only specNum or wkspIndex')
+        raise RuntimeError("Must specify only specNum or wkspIndex")
     if (spectrum_number is None) and (workspace_index is None):
-        raise RuntimeError('Must specify either specNum or wkspIndex')
+        raise RuntimeError("Must specify either specNum or wkspIndex")
 
     # convert the spectrum number to a workspace index and vice versa
     if spectrum_number is not None:
         try:
             workspace_index = workspace.getIndexFromSpectrumNumber(int(spectrum_number))
         except RuntimeError:
-            raise RuntimeError(
-                'Spectrum Number {0} not found in workspace {1}'.format(spectrum_number, workspace.name()))
+            raise RuntimeError("Spectrum Number {0} not found in workspace {1}".format(spectrum_number, workspace.name()))
     elif axis == MantidAxType.SPECTRUM:  # Only get a spectrum number if we're traversing the spectra
         try:
             spectrum_number = workspace.getSpectrum(workspace_index).getSpectrumNo()
         except RuntimeError:
-            raise RuntimeError(
-                'Workspace index {0} not found in workspace {1}'.format(workspace_index, workspace.name()))
+            raise RuntimeError("Workspace index {0} not found in workspace {1}".format(workspace_index, workspace.name()))
 
     return workspace_index, spectrum_number, kwargs
 
@@ -272,7 +273,7 @@ def get_md_data1d(workspace, normalization, indices=None):
     and error, to be used in 1D plots (plot, scatter, errorbar)
     """
     coordinate, data, err = get_md_data(workspace, normalization, indices, withError=True)
-    assert len(coordinate) == 1, 'The workspace is not 1D'
+    assert len(coordinate) == 1, "The workspace is not 1D"
     coordinate = points_from_boundaries(coordinate[0])
     return coordinate, data, err
 
@@ -305,7 +306,7 @@ def get_md_data(workspace, normalization, indices=None, withError=False):
     if withError:
         err2 = workspace.getErrorSquaredArray()[indices].copy()
         if normalization == mantid.api.MDNormalization.NumEventsNormalization:
-            err2 /= (nev * nev)
+            err2 /= nev * nev
         err = np.sqrt(err2)
     data = data.squeeze().T
     data = np.ma.masked_invalid(data)
@@ -374,8 +375,7 @@ def get_bin_indices(workspace):
     except:
         return range(total_range)
 
-    monitors_indices = [index for index in range(total_range)
-                        if spectrum_info.hasDetectors(index) and spectrum_info.isMonitor(index)]
+    monitors_indices = [index for index in range(total_range) if spectrum_info.hasDetectors(index) and spectrum_info.isMonitor(index)]
     monitor_count = len(monitors_indices)
 
     # If possible, ie the detectors' indices are continuous, we return a range.
@@ -436,7 +436,7 @@ def get_md_data2d_bin_bounds(workspace, normalization, indices=None, transpose=F
     Note: return coordinates are 1d vectors. Use numpy.meshgrid to generate 2d versions
     """
     coordinate, data, _ = get_md_data(workspace, normalization, indices, withError=False)
-    assert len(coordinate) == 2, 'The workspace is not 2D'
+    assert len(coordinate) == 2, "The workspace is not 2D"
     if transpose:
         return coordinate[1], coordinate[0], data.T
     else:
@@ -464,14 +464,18 @@ def boundaries_from_points(input_array):
 
     :param input_array: a :class:`numpy.ndarray` of bin centers
     """
-    assert isinstance(input_array, np.ndarray), 'Not a numpy array'
+    assert isinstance(input_array, np.ndarray), "Not a numpy array"
     if len(input_array) == 0:
-        raise ValueError('could not extend array with no elements')
+        raise ValueError("could not extend array with no elements")
     if len(input_array) == 1:
         return np.array([input_array[0] - 0.5, input_array[0] + 0.5])
-    return np.concatenate(([(3 * input_array[0] - input_array[1]) * 0.5],
-                           (input_array[1:] + input_array[:-1]) * 0.5,
-                           [(3 * input_array[-1] - input_array[-2]) * 0.5]))
+    return np.concatenate(
+        (
+            [(3 * input_array[0] - input_array[1]) * 0.5],
+            (input_array[1:] + input_array[:-1]) * 0.5,
+            [(3 * input_array[-1] - input_array[-2]) * 0.5],
+        )
+    )
 
 
 def common_x(arr):
@@ -481,8 +485,17 @@ def common_x(arr):
     return np.all(arr == arr[0, :], axis=(1, 0))
 
 
-def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, transpose=False,
-                         extent=None, xbins=100, ybins=100, spec_info=None, maxpooling=False):
+def get_matrix_2d_ragged(
+    workspace,
+    normalize_by_bin_width,
+    histogram2D=False,
+    transpose=False,
+    extent=None,
+    xbins=100,
+    ybins=100,
+    spec_info=None,
+    maxpooling=False,
+):
     if spec_info is None:
         try:
             spec_info = workspace.spectrumInfo()
@@ -529,8 +542,7 @@ def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, t
         x_centers = mantid.plots.datafunctions.points_from_boundaries(x_edges)
         y = np.linspace(y_low, y_high, int(ybins))
 
-    counts = interpolate_y_data(workspace, x_centers, y, normalize_by_bin_width, spectrum_info=spec_info,
-                                maxpooling=maxpooling)
+    counts = interpolate_y_data(workspace, x_centers, y, normalize_by_bin_width, spectrum_info=spec_info, maxpooling=maxpooling)
 
     if histogram2D and extent is not None:
         x = x_edges
@@ -568,8 +580,7 @@ def _workspace_indices_maxpooling(y_bins, workspace):
     workspace_indices = []
     for y_range in pairwise(y_bins):
         try:
-            workspace_range = [workspace.getAxis(1).indexOfValue(y_range[0]),
-                               workspace.getAxis(1).indexOfValue(y_range[1])]
+            workspace_range = [workspace.getAxis(1).indexOfValue(y_range[0]), workspace.getAxis(1).indexOfValue(y_range[1])]
             # if the range doesn't span more than one spectra just grab the first element
             # else we need to pick the spectra which has the highest intensity
             if np.diff(workspace_range)[0] > 1:
@@ -585,6 +596,7 @@ def _workspace_indices_maxpooling(y_bins, workspace):
 
 def _integrate_workspace(workspace):
     from mantid.api import AlgorithmManager
+
     integration = AlgorithmManager.createUnmanaged("Integration")
     integration.initialize()
     integration.setAlwaysStoreInADS(False)
@@ -597,8 +609,7 @@ def _integrate_workspace(workspace):
 
 
 def interpolate_y_data(workspace, x, y, normalize_by_bin_width, spectrum_info=None, maxpooling=False):
-    workspace_indices = _workspace_indices_maxpooling(y, workspace) \
-        if maxpooling else _workspace_indices(y, workspace)
+    workspace_indices = _workspace_indices_maxpooling(y, workspace) if maxpooling else _workspace_indices(y, workspace)
     counts = np.full([len(workspace_indices), x.size], np.nan, dtype=np.float64)
     previous_index = -1
     index = -1
@@ -612,13 +623,11 @@ def interpolate_y_data(workspace, x, y, normalize_by_bin_width, spectrum_info=No
             counts[index, :] = counts[index - 1]
             continue
         previous_index = workspace_index
-        if not (spectrum_info and spectrum_info.hasDetectors(workspace_index) and spectrum_info.isMonitor(
-                workspace_index)):
-            centers, ztmp, _, _ = get_spectrum(workspace, workspace_index,
-                                               normalize_by_bin_width=normalize_by_bin_width,
-                                               withDy=False, withDx=False)
-            interpolation_function = interp1d(centers, ztmp, kind='nearest', bounds_error=False,
-                                              fill_value="extrapolate")
+        if not (spectrum_info and spectrum_info.hasDetectors(workspace_index) and spectrum_info.isMonitor(workspace_index)):
+            centers, ztmp, _, _ = get_spectrum(
+                workspace, workspace_index, normalize_by_bin_width=normalize_by_bin_width, withDy=False, withDx=False
+            )
+            interpolation_function = interp1d(centers, ztmp, kind="nearest", bounds_error=False, fill_value="extrapolate")
             # only set values in the range of workspace
             x_range = np.where((x >= workspace.readX(workspace_index)[0]) & (x <= workspace.readX(workspace_index)[-1]))
             # set values outside x data to nan
@@ -628,7 +637,7 @@ def interpolate_y_data(workspace, x, y, normalize_by_bin_width, spectrum_info=No
 
 
 def get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=False):
-    '''
+    """
     Get all data from a Matrix workspace that has the same number of bins
     in every spectrum. It is used for 2D plots
 
@@ -641,11 +650,11 @@ def get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=Fal
         -bin edges (such as for pcolor) for True.
 
     Returns x,y,z 2D arrays
-    '''
+    """
     try:
         workspace.blocksize()
     except RuntimeError:
-        raise ValueError('The spectra are not the same length. Try using pcolor, pcolorfast, or pcolormesh instead')
+        raise ValueError("The spectra are not the same length. Try using pcolor, pcolorfast, or pcolormesh instead")
     x = workspace.extractX()
     if workspace.getAxis(1).isText():
         nhist = workspace.getNumberHistograms()
@@ -670,7 +679,7 @@ def get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=Fal
                 y = boundaries_from_points(y)
             x = np.vstack((x, x[-1]))
         else:
-            x = .5 * (x[:, 0:-1] + x[:, 1:])
+            x = 0.5 * (x[:, 0:-1] + x[:, 1:])
             if len(y) == z.shape[0] + 1:
                 y = points_from_boundaries(y)
     else:
@@ -694,7 +703,7 @@ def get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=Fal
 
 
 def get_uneven_data(workspace, distribution):
-    '''
+    """
     Function to get data for uneven workspace2Ds, such as
     that pcolor, pcolorfast, and pcolormesh will plot axis aligned rectangles
 
@@ -705,7 +714,7 @@ def get_uneven_data(workspace, distribution):
     Returns three lists. Each element in the x list is an array of boundaries
     for a spectra. Each element in the y list is a 2 element array with the extents
     of a particular spectra. The z list contains arrays of intensities at bin centers
-    '''
+    """
     z = []
     x = []
     y = []
@@ -737,7 +746,7 @@ def get_uneven_data(workspace, distribution):
 
 
 def get_data_uneven_flag(workspace, **kwargs):
-    '''
+    """
     Helper function that allows :meth:`matplotlib.axes.Axes.pcolor`,
     :meth:`matplotlib.axes.Axes.pcolorfast`, and :meth:`matplotlib.axes.Axes.pcolormesh`
     to plot rectangles parallel to the axes even if the data is not
@@ -747,8 +756,8 @@ def get_data_uneven_flag(workspace, **kwargs):
 
     if axisaligned keyword is available and True or if the workspace does
     not have a constant number of bins, it will return true, otherwise false
-    '''
-    aligned = kwargs.pop('axisaligned', False)
+    """
+    aligned = kwargs.pop("axisaligned", False)
     try:
         workspace.blocksize()
     except RuntimeError:
@@ -758,7 +767,7 @@ def get_data_uneven_flag(workspace, **kwargs):
 
 def check_resample_to_regular_grid(ws, **kwargs):
     if isinstance(ws, MatrixWorkspace):
-        aligned = kwargs.pop('axisaligned', False)
+        aligned = kwargs.pop("axisaligned", False)
         if aligned or not ws.isCommonBins():
             return True, kwargs
 
@@ -773,15 +782,16 @@ def check_resample_to_regular_grid(ws, **kwargs):
 # extract logs
 # ====================================================
 
+
 def get_sample_log(workspace, **kwargs):
-    LogName = kwargs.pop('LogName')
-    ExperimentInfo = kwargs.pop('ExperimentInfo', 0)
+    LogName = kwargs.pop("LogName")
+    ExperimentInfo = kwargs.pop("ExperimentInfo", 0)
     if isinstance(workspace, MultipleExperimentInfos):
         run = workspace.getExperimentInfo(ExperimentInfo).run()
     else:
         run = workspace.run()
     if not run.hasProperty(LogName):
-        raise ValueError('The workspace does not contain the {} sample log'.format(LogName))
+        raise ValueError("The workspace does not contain the {} sample log".format(LogName))
     tsp = run[LogName]
 
     try:
@@ -789,33 +799,33 @@ def get_sample_log(workspace, **kwargs):
     except UnicodeDecodeError as exc:
         mantid.kernel.logger.warning("Error retrieving units for log {}: {}".format(LogName, str(exc)))
         units = "unknown"
-    if not isinstance(tsp, (mantid.kernel.FloatTimeSeriesProperty,
-                            mantid.kernel.Int32TimeSeriesProperty,
-                            mantid.kernel.Int64TimeSeriesProperty)):
-        raise RuntimeError('This function can only plot Float or Int TimeSeriesProperties objects')
-    Filtered = kwargs.pop('Filtered', True)
+    if not isinstance(
+        tsp, (mantid.kernel.FloatTimeSeriesProperty, mantid.kernel.Int32TimeSeriesProperty, mantid.kernel.Int64TimeSeriesProperty)
+    ):
+        raise RuntimeError("This function can only plot Float or Int TimeSeriesProperties objects")
+    Filtered = kwargs.pop("Filtered", True)
     if not Filtered:
         # these methods access the unfiltered data
-        times = tsp.times.astype('datetime64[us]')
+        times = tsp.times.astype("datetime64[us]")
         y = tsp.value
     else:
-        times = tsp.filtered_times.astype('datetime64[us]')
+        times = tsp.filtered_times.astype("datetime64[us]")
         y = tsp.filtered_value
-    FullTime = kwargs.pop('FullTime', False)
-    StartFromLog = kwargs.pop('StartFromLog', False)
+    FullTime = kwargs.pop("FullTime", False)
+    StartFromLog = kwargs.pop("StartFromLog", False)
     if FullTime:
         x = times.astype(datetime.datetime)
     else:
         # Compute relative time, preserving t=0 at run start. Logs can record before
         # run start and will have negative time offset
         try:
-            t0 = run.startTime().to_datetime64().astype('datetime64[us]')
+            t0 = run.startTime().to_datetime64().astype("datetime64[us]")
         except RuntimeError:
             mantid.kernel.logger.warning("Workspace has no start time. Assume t0 as first log time.")
             t0 = times[0]
         if not StartFromLog:
             try:
-                t0 = run['proton_charge'].times.astype('datetime64[us]')[0]
+                t0 = run["proton_charge"].times.astype("datetime64[us]")[0]
             except:
                 pass  # TODO: Maybe raise a warning?
         x = (times - t0).astype(float) * 1e-6
@@ -842,8 +852,8 @@ def get_axes_labels(workspace, indices=None, normalize_by_bin_width=True, use_la
     :param use_latex: bool: return y-unit label in Latex form
     """
     if isinstance(workspace, MultipleExperimentInfos):
-        axes_labels = ['Intensity']
-        title = ''
+        axes_labels = ["Intensity"]
+        title = ""
         if indices is None:
             dims = workspace.getNonIntegratedDimensions()
         else:
@@ -853,25 +863,23 @@ def get_axes_labels(workspace, indices=None, normalize_by_bin_width=True, use_la
                 if indices[n] == slice(None):
                     dims.append(d)
                 else:
-                    title += '{0}={1:.4}; '.format(d.name,
-                                                   (d.getX(indices[n]) + d.getX(indices[n] + 1)) / 2)
+                    title += "{0}={1:.4}; ".format(d.name, (d.getX(indices[n]) + d.getX(indices[n] + 1)) / 2)
         for d in dims:
-            axis_title = d.name.replace('DeltaE', r'$\Delta E$')
-            axis_unit = d.getUnits().replace('Angstrom^-1', r'$\AA^{-1}$')
-            axis_unit = axis_unit.replace('DeltaE', 'meV')
-            axis_unit = axis_unit.replace('Angstrom', r'$\AA$')
-            axis_unit = axis_unit.replace('MomentumTransfer', r'$\AA^{-1}$')
-            axes_labels.append('{0} ({1})'.format(axis_title, axis_unit))
+            axis_title = d.name.replace("DeltaE", r"$\Delta E$")
+            axis_unit = d.getUnits().replace("Angstrom^-1", r"$\AA^{-1}$")
+            axis_unit = axis_unit.replace("DeltaE", "meV")
+            axis_unit = axis_unit.replace("Angstrom", r"$\AA$")
+            axis_unit = axis_unit.replace("MomentumTransfer", r"$\AA^{-1}$")
+            axes_labels.append("{0} ({1})".format(axis_title, axis_unit))
         axes_labels.append(title.strip())
     else:
         # For matrix workspaces, return a tuple of ``(YUnit, <other units>)``
-        axes_labels = [workspace.YUnitLabel(useLatex=use_latex,
-                                            plotAsDistribution=normalize_by_bin_width)]
+        axes_labels = [workspace.YUnitLabel(useLatex=use_latex, plotAsDistribution=normalize_by_bin_width)]
         for index in range(workspace.axes()):
             axis = workspace.getAxis(index)
             unit = axis.getUnit()
             if len(str(unit.symbol())) > 0:
-                unit = '{} (${}$)'.format(unit.caption(), unit.symbol().latex())
+                unit = "{} (${}$)".format(unit.caption(), unit.symbol().latex())
             else:
                 unit = unit.caption()
             axes_labels.append(unit)
@@ -1067,7 +1075,7 @@ def apply_waterfall_offset_to_errorbars(ax, line, amount_to_move_x, amount_to_mo
                         point[row][1] += amount_to_move_y[i]
                     for column in range(2):
                         point[column][0] += amount_to_move_x[i]
-                    i+=1
+                    i += 1
                 bar_line_col.set_segments(segments)
             bar_line_col.set_zorder((len(ax.get_lines()) - index) + 1)
             break
@@ -1078,17 +1086,29 @@ def convert_single_line_to_waterfall(ax, index, x=None, y=None, need_to_update_f
     x_data = line.get_xdata()
     y_data = line.get_ydata()
     if ax.get_xscale() == "log":
-        amount_to_move_x = x_data * ((1 + ax.waterfall_x_offset / 100) ** index - 1) if x is None else \
-            x_data * (((1 + x / 100)/(1 + ax.waterfall_x_offset / 100)) ** index - 1)
+        amount_to_move_x = (
+            x_data * ((1 + ax.waterfall_x_offset / 100) ** index - 1)
+            if x is None
+            else x_data * (((1 + x / 100) / (1 + ax.waterfall_x_offset / 100)) ** index - 1)
+        )
     else:
-        amount_to_move_x = np.zeros(x_data.size) + index * ax.width * (ax.waterfall_x_offset / 500) if x is None else \
-            np.zeros(x_data.size) + index * ax.width * ((x - ax.waterfall_x_offset) / 500)
+        amount_to_move_x = (
+            np.zeros(x_data.size) + index * ax.width * (ax.waterfall_x_offset / 500)
+            if x is None
+            else np.zeros(x_data.size) + index * ax.width * ((x - ax.waterfall_x_offset) / 500)
+        )
     if ax.get_yscale() == "log":
-        amount_to_move_y = y_data * ((1 + ax.waterfall_y_offset / 100) ** index - 1) if y is None else \
-            y_data * (((1 + y / 100)/(1 + ax.waterfall_y_offset / 100)) ** index - 1)
+        amount_to_move_y = (
+            y_data * ((1 + ax.waterfall_y_offset / 100) ** index - 1)
+            if y is None
+            else y_data * (((1 + y / 100) / (1 + ax.waterfall_y_offset / 100)) ** index - 1)
+        )
     else:
-        amount_to_move_y = np.zeros(y_data.size) + index * ax.height * (ax.waterfall_y_offset / 500) if y is None else \
-            np.zeros(y_data.size) + index * ax.height * ((y - ax.waterfall_y_offset) / 500)
+        amount_to_move_y = (
+            np.zeros(y_data.size) + index * ax.height * (ax.waterfall_y_offset / 500)
+            if y is None
+            else np.zeros(y_data.size) + index * ax.height * ((y - ax.waterfall_y_offset) / 500)
+        )
 
     if line.get_label() == "_nolegend_":
         apply_waterfall_offset_to_errorbars(ax, line, amount_to_move_x, amount_to_move_y, index)
@@ -1208,7 +1228,7 @@ def line_colour_fill(ax):
 
 
 def update_colorbar_scale(figure, image, scale, vmin, vmax):
-    """"
+    """ "
     Updates the colorbar to the scale and limits given.
 
     :param figure: A matplotlib figure instance
@@ -1219,8 +1239,7 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
     """
     if vmin <= 0 and scale == LogNorm:
         vmin = 0.0001  # Avoid 0 log scale error
-        mantid.kernel.logger.warning(
-            "Scale is set to logarithmic so non-positive min value has been changed to 0.0001.")
+        mantid.kernel.logger.warning("Scale is set to logarithmic so non-positive min value has been changed to 0.0001.")
 
     if vmax <= 0 and scale == LogNorm:
         vmax = 1  # Avoid 0 log scale error
@@ -1236,8 +1255,9 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
             locator = LogLocator(subs=np.arange(1, 10))
             if locator.tick_values(vmin=vmin, vmax=vmax).size == 0:
                 locator = LogLocator()
-                mantid.kernel.logger.warning("Minor ticks on colorbar scale cannot be shown "
-                                             "as the range between min value and max value is too large")
+                mantid.kernel.logger.warning(
+                    "Minor ticks on colorbar scale cannot be shown " "as the range between min value and max value is too large"
+                )
         figure.subplots_adjust(wspace=0.5, hspace=0.5)
         colorbar = figure.colorbar(image, ax=figure.axes, ticks=locator, pad=0.06)
         colorbar.set_label(label)
@@ -1249,7 +1269,7 @@ def add_colorbar_label(colorbar, axes):
     :param colorbar: the colorbar to label.
     :param axes: the axes that the colorbar belongs to.
     """
-    colorbar_labels = [ax.colorbar_label for ax in axes if hasattr(ax, 'colorbar_label')]
+    colorbar_labels = [ax.colorbar_label for ax in axes if hasattr(ax, "colorbar_label")]
     if colorbar_labels and colorbar_labels.count(colorbar_labels[0]) == len(colorbar_labels):
         colorbar.set_label(colorbar_labels[0])
 
@@ -1260,8 +1280,7 @@ def get_images_from_figure(figure):
 
     all_images = []
     for ax in axes:
-        all_images += ax.images + [col for col in ax.collections if isinstance(col, QuadMesh)
-                                   or isinstance(col, Poly3DCollection)]
+        all_images += ax.images + [col for col in ax.collections if isinstance(col, QuadMesh) or isinstance(col, Poly3DCollection)]
 
     # remove any colorbar images
     colorbars = [img.colorbar.solids for img in all_images if img.colorbar]

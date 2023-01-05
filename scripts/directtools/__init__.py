@@ -39,9 +39,18 @@ def _choosemarker(markers, index):
 
 def _clearmath(s):
     """Return string s with special math characters removed."""
-    s = s.replace(r'\AA', 'A')
-    for c in ['%', '_', '$', '&',  '\\', '^', '{', '}',]:
-        s = s.replace(c, '')
+    s = s.replace(r"\AA", "A")
+    for c in [
+        "%",
+        "_",
+        "$",
+        "&",
+        "\\",
+        "^",
+        "{",
+        "}",
+    ]:
+        s = s.replace(c, "")
     return s
 
 
@@ -55,14 +64,14 @@ def _chooseylabel(workspace, axes):
     yUnitLabel = workspace.YUnitLabel()
     if yUnitLabel == "Dynamic susceptibility":
         axes.set_ylabel(r"$\chi''(Q,E)$")
-    elif yUnitLabel == 'g^{neutron}(E) (arb. units)':
-        axes.set_ylabel(r'$g(E)$')
-    elif yUnitLabel == 'g(E) (states/cm^-1)':
-        axes.set_ylabel('$g(E)$ (states/cm$^{-1}$)')
-    elif yUnitLabel == 'g(E) (states/meV)':
-        axes.set_ylabel('$g(E)$ (states/meV)')
+    elif yUnitLabel == "g^{neutron}(E) (arb. units)":
+        axes.set_ylabel(r"$g(E)$")
+    elif yUnitLabel == "g(E) (states/cm^-1)":
+        axes.set_ylabel("$g(E)$ (states/cm$^{-1}$)")
+    elif yUnitLabel == "g(E) (states/meV)":
+        axes.set_ylabel("$g(E)$ (states/meV)")
     else:
-        axes.set_ylabel('$S(Q,E)$')
+        axes.set_ylabel("$S(Q,E)$")
 
 
 def _cutcentreandwidth(line):
@@ -70,8 +79,8 @@ def _cutcentreandwidth(line):
     axis = line.getAxis(1)
     aMin = axis.getMin()
     aMax = axis.getMax()
-    centre = (aMin + aMax) / 2.
-    width = (aMax - aMin) / 2.
+    centre = (aMin + aMax) / 2.0
+    width = (aMax - aMin) / 2.0
     return centre, width
 
 
@@ -95,16 +104,16 @@ def _dostitle(workspaces, axes):
         logs = workspaces[0].run()
         instrument = _instrumentname(logs)
         if instrument is not None:
-            title = instrument + ' ' + title
+            title = instrument + " " + title
     axes.set_title(title)
 
 
 def _energylimits(workspaces):
     """Find suitable xmin and xmax for energy transfer plots."""
     workspaces = _normwslist(workspaces)
-    eMax = 0.
+    eMax = 0.0
     for ws in workspaces:
-        axisIndex = 0 if ws.getAxis(0).getUnit().caption() == 'Energy transfer' else 1
+        axisIndex = 0 if ws.getAxis(0).getUnit().caption() == "Energy transfer" else 1
         Xs = ws.getAxis(axisIndex).extractValues()
         eMax = max(eMax, Xs[-1])
     eMin = -eMax
@@ -113,7 +122,7 @@ def _energylimits(workspaces):
     T = _applyiftimeseries(_sampletemperature(logs), numpy.mean)
     if ei is not None:
         if T is not None:
-            eMin = min(-T / 6., -0.2 * ei)
+            eMin = min(-T / 6.0, -0.2 * ei)
         else:
             eMin = -0.2 * ei
     return eMin, eMax
@@ -121,11 +130,11 @@ def _energylimits(workspaces):
 
 def _finalizeprofileE(axes):
     """Set axes for const E axes."""
-    if axes.get_xscale() == 'linear':
-        axes.set_xlim(xmin=0.)
-    axes.set_xlabel(r'$Q$ ($\mathrm{\AA}^{-1}$)')
-    if axes.get_yscale() == 'linear':
-        axes.set_ylim(0.)
+    if axes.get_xscale() == "linear":
+        axes.set_xlim(xmin=0.0)
+    axes.set_xlabel(r"$Q$ ($\mathrm{\AA}^{-1}$)")
+    if axes.get_yscale() == "linear":
+        axes.set_ylim(0.0)
 
 
 def _finalizeprofileQ(workspaces, axes):
@@ -133,13 +142,13 @@ def _finalizeprofileQ(workspaces, axes):
     workspaces = _normwslist(workspaces)
     eMin, eMax = _energylimits(workspaces)
     axes.set_xlim(xmax=eMax)
-    if axes.get_xscale() == 'linear':
+    if axes.get_xscale() == "linear":
         axes.set_xlim(xmin=eMin)
-    axes.set_xlabel('Energy (meV)')
+    axes.set_xlabel("Energy (meV)")
     unusedMin, cMax = _globalnanminmax(workspaces)
-    if axes.get_yscale() == 'linear':
-        axes.set_ylim(ymin=0.)
-    axes.set_ylim(ymax=cMax / 100.)
+    if axes.get_yscale() == "linear":
+        axes.set_ylim(ymin=0.0)
+    axes.set_ylim(ymax=cMax / 100.0)
 
 
 def _globalnanminmax(workspaces):
@@ -156,22 +165,22 @@ def _globalnanminmax(workspaces):
 
 def _horizontallineatzero(axes):
     """Add a horizontal line at Y = 0."""
-    spine = axes.spines['bottom']
+    spine = axes.spines["bottom"]
     axes.axhline(linestyle=spine.get_linestyle(), color=spine.get_edgecolor(), linewidth=spine.get_linewidth())
 
 
 def _incidentenergy(logs):
     """Return the incident energy value from the logs or None."""
-    if logs.hasProperty('Ei'):
-        return logs.getProperty('Ei').value
+    if logs.hasProperty("Ei"):
+        return logs.getProperty("Ei").value
     else:
         return None
 
 
 def _instrumentname(logs):
     """Return the instrument name from the logs or None."""
-    if logs.hasProperty('instrument.name'):
-        return logs.getProperty('instrument.name').value
+    if logs.hasProperty("instrument.name"):
+        return logs.getProperty("instrument.name").value
     else:
         return None
 
@@ -189,13 +198,13 @@ def _singlecutinfo(cuts, widths):
 def _label(ws, cut, width, singleWS, singleCut, singleWidth, quantity, units):
     """Return a line label for a line profile."""
     ws = _normws(ws)
-    wsLabel = ''
+    wsLabel = ""
     if not singleWS:
         wsLabel = _workspacelabel(ws)
-    cutLabel = ''
+    cutLabel = ""
     if not singleCut or not singleWidth:
-        cutLabel = quantity + r' = {:0.2f} $\pm$ {:1.2f}'.format(cut, width) + ' ' + units
-    return wsLabel + ' ' + cutLabel
+        cutLabel = quantity + r" = {:0.2f} $\pm$ {:1.2f}".format(cut, width) + " " + units
+    return wsLabel + " " + cutLabel
 
 
 def _normws(workspace):
@@ -219,24 +228,23 @@ def _plotsinglehistogram(workspaces, labels, style, xscale, yscale):
     workspaces = _normwslist(workspaces)
     if not isinstance(labels, collections.abc.Iterable) or isinstance(labels, str):
         if labels is None:
-            labels = len(workspaces) * ['']
+            labels = len(workspaces) * [""]
         else:
             labels = [labels]
     if len(workspaces) != len(labels):
-        raise ValueError('workspaces and labels list lengths do not match.')
-    lineStyle = 'solid' if 'l' in style else 'None'
+        raise ValueError("workspaces and labels list lengths do not match.")
+    lineStyle = "solid" if "l" in style else "None"
     figure, axes = subplots()
     markers = matplotlib.markers.MarkerStyle.filled_markers
-    markerStyle = 'None'
+    markerStyle = "None"
     markerIndex = 0
     for ws, label in zip(workspaces, labels):
-        if 'm' in style:
+        if "m" in style:
             markerStyle, markerIndex = _choosemarker(markers, markerIndex)
-        axes.errorbar(ws, wkspIndex=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True,
-                      capsize=4, linewidth=1)
+        axes.errorbar(ws, wkspIndex=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True, capsize=4, linewidth=1)
     axes.set_xscale(xscale)
     axes.set_yscale(yscale)
-    if axes.get_yscale() == 'linear':
+    if axes.get_yscale() == "linear":
         _horizontallineatzero(axes)
     _chooseylabel(workspaces[0], axes)
     return figure, axes
@@ -244,12 +252,12 @@ def _plotsinglehistogram(workspaces, labels, style, xscale, yscale):
 
 def _plottingtime():
     """Return a string presenting the plotting time."""
-    return time.strftime('%d.%m.%Y %H:%M:%S')
+    return time.strftime("%d.%m.%Y %H:%M:%S")
 
 
 def _mantidsubplotsetup():
     """Return the Mantid projection setup."""
-    return {'projection': 'mantid'}
+    return {"projection": "mantid"}
 
 
 def _profiletitle(workspaces, cuts, isSingleCutInfo, scan, units, axes):
@@ -263,10 +271,10 @@ def _profiletitle(workspaces, cuts, isSingleCutInfo, scan, units, axes):
         logs = workspaces[0].run()
         instrument = _instrumentname(logs)
         if instrument is not None:
-            title = instrument + ' ' + title
+            title = instrument + " " + title
     if isSingleCutInfo:
         centre, width = _cutcentreandwidth(cuts[0])
-        title = title + '\n' + scan + r' = {:0.2f} $\pm$ {:0.2f}'.format(centre, width) + ' ' + units
+        title = title + "\n" + scan + r" = {:0.2f} $\pm$ {:0.2f}".format(centre, width) + " " + units
     axes.set_title(title)
 
 
@@ -280,14 +288,14 @@ def _removesingularity(ws, epsilon):
             xs = _bincentres(xs)
         binIndex = numpy.argmin(numpy.abs(xs))
         if xs[binIndex] >= -epsilon and xs[binIndex] < epsilon:
-            ys[binIndex] = 0.
-            es[binIndex] = 0.
+            ys[binIndex] = 0.0
+            es[binIndex] = 0.0
 
 
 def _runnumber(logs):
     """Return run number from the logs or None."""
-    if logs.hasProperty('run_number'):
-        return logs.getProperty('run_number').value
+    if logs.hasProperty("run_number"):
+        return logs.getProperty("run_number").value
     else:
         return None
 
@@ -295,8 +303,8 @@ def _runnumber(logs):
 def _sampletemperature(logs):
     """Return the instrument specific sample temperature from the logs or None."""
     instrument = _instrumentname(logs)
-    sample_log_name = 'sample.temperature'
-    if instrument in ['IN4', 'IN5', 'IN6', 'PANTHER', 'SHARP'] and logs.hasProperty(sample_log_name):
+    sample_log_name = "sample.temperature"
+    if instrument in ["IN4", "IN5", "IN6", "PANTHER", "SHARP"] and logs.hasProperty(sample_log_name):
         return logs.getProperty(sample_log_name).value
     else:
         return None
@@ -304,7 +312,7 @@ def _sampletemperature(logs):
 
 def _sanitize(s):
     """Return a string with special characters escaped."""
-    s = s.replace('$', '\\$')
+    s = s.replace("$", "\\$")
     return s
 
 
@@ -314,20 +322,20 @@ def _singledatatitle(workspace):
     wsName = _sanitize(str(workspace))
     title = wsName
     logs = workspace.run()
-    instrument= _instrumentname(logs)
+    instrument = _instrumentname(logs)
     if instrument is not None:
-        title = title + ' ' + instrument
+        title = title + " " + instrument
     run = _runnumber(logs)
     if run is not None:
-        title = title + ' #{:06d}'.format(run)
-    title = title + '\n' + _plottingtime() + '\n'
+        title = title + " #{:06d}".format(run)
+    title = title + "\n" + _plottingtime() + "\n"
     ei = _incidentenergy(logs)
     if ei is not None:
-        title = title + r' $E_i$ = {:0.2f} meV'.format(ei)
+        title = title + r" $E_i$ = {:0.2f} meV".format(ei)
     T = _sampletemperature(logs)
     if T is not None:
         T = _applyiftimeseries(T, numpy.mean)
-        title = title + r' $T$ = {:0.1f} K'.format(T)
+        title = title + r" $T$ = {:0.1f} K".format(T)
     return title
 
 
@@ -340,8 +348,8 @@ def _SofQWtitle(workspace, axes):
 
 def _wavelength(logs):
     """Return the wavelength from the logs or None."""
-    if logs.hasProperty('wavelength'):
-        return logs.getProperty('wavelength').value
+    if logs.hasProperty("wavelength"):
+        return logs.getProperty("wavelength").value
     else:
         return None
 
@@ -349,18 +357,18 @@ def _wavelength(logs):
 def _workspacelabel(workspace):
     """Return workspace information useful for plot labels."""
     workspace = _normws(workspace)
-    label = ''
+    label = ""
     logs = workspace.run()
     run = _runnumber(logs)
     if run is not None:
-        label = label + r'#{:06d}'.format(run)
+        label = label + r"#{:06d}".format(run)
     ei = _incidentenergy(logs)
     if ei is not None:
-        label =  label + r' $E_i$ = {:0.2f} meV'.format(ei)
+        label = label + r" $E_i$ = {:0.2f} meV".format(ei)
     T = _sampletemperature(logs)
     if T is not None:
         T = _applyiftimeseries(T, numpy.mean)
-        label = label + r' $T$ = {:0.1f} K'.format(T)
+        label = label + r" $T$ = {:0.1f} K".format(T)
     return label
 
 
@@ -395,9 +403,7 @@ def defaultrcparams():
 
     :returns: a :class:`dict` of default :mod:`matplotlib` rc parameters needed by :mod:`directtools`
     """
-    params = {
-        'legend.numpoints': 1
-    }
+    params = {"legend.numpoints": 1}
     return params
 
 
@@ -421,21 +427,22 @@ def dynamicsusceptibility(workspace, temperature, outputName=None, zeroEnergyEps
     """
     workspace = _normws(workspace)
     if not _validate._isSofQW(workspace):
-        raise RuntimeError('Failed to calculate dynamic susceptibility. '
-                           + "The workspace '{}' does not look like a S(Q,E).".format(str(workspace)))
+        raise RuntimeError(
+            "Failed to calculate dynamic susceptibility. " + "The workspace '{}' does not look like a S(Q,E).".format(str(workspace))
+        )
     horAxis = workspace.getAxis(0)
     horUnit = horAxis.getUnit().unitID()
-    doTranspose = horUnit != 'DeltaE'
+    doTranspose = horUnit != "DeltaE"
     if outputName is None:
-        outputName = 'CHIofQW_{}'.format(str(workspace))
+        outputName = "CHIofQW_{}".format(str(workspace))
     if doTranspose:
-        workspace = Transpose(workspace, OutputWorkspace='__transposed_SofQW_', EnableLogging=False)
+        workspace = Transpose(workspace, OutputWorkspace="__transposed_SofQW_", EnableLogging=False)
     c = 1e-3 * constants.e / constants.k / temperature
-    outWS = OneMinusExponentialCor(workspace, OutputWorkspace=outputName, C=c, Operation='Multiply', EnableLogging=False)
+    outWS = OneMinusExponentialCor(workspace, OutputWorkspace=outputName, C=c, Operation="Multiply", EnableLogging=False)
     _removesingularity(outWS, zeroEnergyEpsilon)
     if doTranspose:
         outWS = Transpose(outWS, OutputWorkspace=outputName, EnableLogging=False)
-        DeleteWorkspace('__transposed_SofQW_', EnableLogging=False)
+        DeleteWorkspace("__transposed_SofQW_", EnableLogging=False)
     outWS.setYUnitLabel("Dynamic susceptibility")
     return outWS
 
@@ -471,7 +478,7 @@ def nanminmax(workspace, horMin=-numpy.inf, horMax=numpy.inf, vertMin=-numpy.inf
     return cMin, cMax
 
 
-def plotconstE(workspaces, E, dE, style='l', keepCutWorkspaces=True, xscale='linear', yscale='linear'):
+def plotconstE(workspaces, E, dE, style="l", keepCutWorkspaces=True, xscale="linear", yscale="linear"):
     """Plot line profiles at constant energy transfer from :math:`S(Q,E)` workspace.
 
     Creates cut workspaces using :ref:`algm-LineProfile`, then plots the cuts. A list of workspaces,
@@ -498,26 +505,25 @@ def plotconstE(workspaces, E, dE, style='l', keepCutWorkspaces=True, xscale='lin
     """
     _validate._styleordie(style)
     workspaces = _normwslist(workspaces)
-    eID = 'DeltaE'
+    eID = "DeltaE"
     if workspaces[0].getAxis(1).getUnit().unitID() == eID:
         axisIndex = 1
-        direction = 'Horizontal'
+        direction = "Horizontal"
     else:
         axisIndex = 0
-        direction = 'Vertical'
+        direction = "Vertical"
     for ws in workspaces:
         if ws.getAxis(axisIndex).getUnit().unitID() != eID:
             raise RuntimeError("Cannot cut in const E. The workspace '{}' is not in units of energy transfer.".format(str(ws)))
-    figure, axes, cutWSList = plotcuts(direction, workspaces, E, dE, r'$E$', 'meV', style, keepCutWorkspaces,
-                                       xscale, yscale)
-    _profiletitle(workspaces, cutWSList, _singlecutinfo(E, dE), r'$E$', 'meV', axes)
+    figure, axes, cutWSList = plotcuts(direction, workspaces, E, dE, r"$E$", "meV", style, keepCutWorkspaces, xscale, yscale)
+    _profiletitle(workspaces, cutWSList, _singlecutinfo(E, dE), r"$E$", "meV", axes)
     if len(cutWSList) > 1:
         axes.legend()
     _finalizeprofileE(axes)
     return figure, axes, cutWSList
 
 
-def plotconstQ(workspaces, Q, dQ, style='l', keepCutWorkspaces=True, xscale='linear', yscale='linear'):
+def plotconstQ(workspaces, Q, dQ, style="l", keepCutWorkspaces=True, xscale="linear", yscale="linear"):
     """Plot line profiles at constant momentum transfer from :math:`S(Q,E)` workspace.
 
     Creates cut workspaces using :ref:`algm-LineProfile`, then plots the cuts. A list of workspaces,
@@ -544,26 +550,27 @@ def plotconstQ(workspaces, Q, dQ, style='l', keepCutWorkspaces=True, xscale='lin
     """
     _validate._styleordie(style)
     workspaces = _normwslist(workspaces)
-    qID = 'MomentumTransfer'
+    qID = "MomentumTransfer"
     if workspaces[0].getAxis(0).getUnit().unitID() == qID:
         axisIndex = 0
-        direction = 'Vertical'
+        direction = "Vertical"
     else:
         axisIndex = 1
-        direction = 'Horizontal'
+        direction = "Horizontal"
     for ws in workspaces:
         if ws.getAxis(axisIndex).getUnit().unitID() != qID:
             raise RuntimeError("Cannot cut in const Q. The workspace '{}' is not in units of momentum transfer.".format(str(ws)))
-    figure, axes, cutWSList = plotcuts(direction, workspaces, Q, dQ, r'$Q$', r'$\mathrm{\AA}^{-1}$', style,
-                                       keepCutWorkspaces, xscale, yscale)
-    _profiletitle(workspaces, cutWSList, _singlecutinfo(Q, dQ), r'$Q$', r'$\mathrm{\AA}^{-1}$', axes)
+    figure, axes, cutWSList = plotcuts(
+        direction, workspaces, Q, dQ, r"$Q$", r"$\mathrm{\AA}^{-1}$", style, keepCutWorkspaces, xscale, yscale
+    )
+    _profiletitle(workspaces, cutWSList, _singlecutinfo(Q, dQ), r"$Q$", r"$\mathrm{\AA}^{-1}$", axes)
     if len(cutWSList) > 1:
         axes.legend()
     _finalizeprofileQ(workspaces, axes)
     return figure, axes, cutWSList
 
 
-def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', keepCutWorkspaces=True, xscale='linear', yscale='linear'):
+def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style="l", keepCutWorkspaces=True, xscale="linear", yscale="linear"):
     """Cut and plot multiple line profiles.
 
     Creates cut workspaces using :ref:`algm-LineProfile`, then plots the cuts. A list of workspaces,
@@ -600,11 +607,11 @@ def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', kee
         cuts = [cuts]
     if not isinstance(widths, collections.abc.Iterable):
         widths = [widths]
-    lineStyle = 'solid' if 'l' in style else 'None'
+    lineStyle = "solid" if "l" in style else "None"
     figure, axes = subplots()
     markers = matplotlib.markers.MarkerStyle.filled_markers
     markerIndex = 0
-    markerStyle = 'None'
+    markerStyle = "None"
     wsCount = 0
     cutWSList = list()
     for ws in workspaces:
@@ -612,32 +619,38 @@ def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', kee
         for cut in cuts:
             for width in widths:
                 wsStr = str(ws)
-                if wsStr == '':
+                if wsStr == "":
                     wsStr = str(wsCount)
                 quantityStr = _clearmath(quantity)
-                wsName = 'cut_{}_{}={}+-{}'.format(wsStr, quantityStr, cut, width,)
+                wsName = "cut_{}_{}={}+-{}".format(
+                    wsStr,
+                    quantityStr,
+                    cut,
+                    width,
+                )
                 if keepCutWorkspaces:
                     cutWSList.append(wsName)
-                line = LineProfile(ws, cut, width, Direction=direction,
-                                   OutputWorkspace=wsName, StoreInADS=keepCutWorkspaces, EnableLogging=False)
-                if ws.isDistribution() and direction == 'Vertical':
+                line = LineProfile(
+                    ws, cut, width, Direction=direction, OutputWorkspace=wsName, StoreInADS=keepCutWorkspaces, EnableLogging=False
+                )
+                if ws.isDistribution() and direction == "Vertical":
                     _denormalizeline(line)
-                if 'm' in style:
+                if "m" in style:
                     markerStyle, markerIndex = _choosemarker(markers, markerIndex)
                 realCutCentre, realCutWidth = _cutcentreandwidth(line)
-                label = _label(ws, realCutCentre, realCutWidth, len(workspaces) == 1, len(cuts) == 1, len(widths) == 1,
-                               quantity, unit)
-                axes.errorbar(line, wkspIndex=0, linestyle=lineStyle, marker=markerStyle, label=label,
-                              distribution=True, capsize=4, linewidth=1)
+                label = _label(ws, realCutCentre, realCutWidth, len(workspaces) == 1, len(cuts) == 1, len(widths) == 1, quantity, unit)
+                axes.errorbar(
+                    line, wkspIndex=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True, capsize=4, linewidth=1
+                )
     axes.set_xscale(xscale)
     axes.set_yscale(yscale)
-    if axes.get_yscale() == 'linear':
+    if axes.get_yscale() == "linear":
         _horizontallineatzero(axes)
     _chooseylabel(workspaces[0], axes)
     return figure, axes, cutWSList
 
 
-def plotDOS(workspaces, labels=None, style='l', xscale='linear', yscale='linear'):
+def plotDOS(workspaces, labels=None, style="l", xscale="linear", yscale="linear"):
     """Plot density of state workspaces.
 
     Plots the given DOS workspaces.
@@ -669,7 +682,7 @@ def plotDOS(workspaces, labels=None, style='l', xscale='linear', yscale='linear'
     return figure, axes
 
 
-def plotprofiles(workspaces, labels=None, style='l', xscale='linear', yscale='linear'):
+def plotprofiles(workspaces, labels=None, style="l", xscale="linear", yscale="linear"):
     """Plot line profile workspaces.
 
     Plots the given single histogram cut workspaces.
@@ -692,14 +705,14 @@ def plotprofiles(workspaces, labels=None, style='l', xscale='linear', yscale='li
         _validate._singlehistogramordie(ws)
     figure, axes = _plotsinglehistogram(workspaces, labels, style, xscale, yscale)
     xUnit = workspaces[0].getAxis(0).getUnit().unitID()
-    if xUnit == 'DeltaE':
+    if xUnit == "DeltaE":
         _finalizeprofileQ(workspaces, axes)
-    elif xUnit == 'MomentumTransfer':
+    elif xUnit == "MomentumTransfer":
         _finalizeprofileE(axes)
     return figure, axes
 
 
-def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax=None, colormap='jet', colorscale='linear'):
+def plotSofQW(workspace, QMin=0.0, QMax=None, EMin=None, EMax=None, VMin=0.0, VMax=None, colormap="jet", colorscale="linear"):
     """Plot a 2D :math:`S(Q,E)` workspace.
 
     :param workspace: a workspace to plot
@@ -725,16 +738,16 @@ def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax
     workspace = _normws(workspace)
     if not _validate._isSofQW(workspace):
         logger.warning("The workspace '{}' does not look like proper S(Q,W) data. Trying to plot nonetheless.".format(str(workspace)))
-    qHorizontal = workspace.getAxis(0).getUnit().caption() == 'q'
-    isSusceptibility = workspace.YUnitLabel() == 'Dynamic susceptibility'
+    qHorizontal = workspace.getAxis(0).getUnit().caption() == "q"
+    isSusceptibility = workspace.YUnitLabel() == "Dynamic susceptibility"
     figure, axes = subplots()
     if QMin is None:
-        QMin = 0.
+        QMin = 0.0
     if QMax is None:
         dummy, QMax = validQ(workspace)
     if EMin is None:
         if isSusceptibility:
-            EMin = 0.
+            EMin = 0.0
         else:
             EMin, unusedEMax = _energylimits(workspace)
     if EMax is None:
@@ -744,41 +757,41 @@ def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax
     if VMax is None:
         vertMax = EMax if EMax is not None else numpy.inf
         dummy, VMax = nanminmax(workspace, horMin=QMin, horMax=QMax, vertMin=EMin, vertMax=vertMax)
-        VMax /= 100.
+        VMax /= 100.0
     if VMin is None:
-        VMin = 0.
+        VMin = 0.0
     colorNormalization = None
-    if colorscale == 'linear':
+    if colorscale == "linear":
         colorNormalization = matplotlib.colors.Normalize(vmin=VMin, vmax=VMax)
-    elif colorscale == 'log':
-        if VMin <= 0.:
-            if VMax > 0.:
-                VMin = VMax / 1000.
+    elif colorscale == "log":
+        if VMin <= 0.0:
+            if VMax > 0.0:
+                VMin = VMax / 1000.0
             else:
-                raise RuntimeError('Cannot plot nonpositive range in log scale.')
+                raise RuntimeError("Cannot plot nonpositive range in log scale.")
         colorNormalization = matplotlib.colors.LogNorm(vmin=VMin, vmax=VMax)
     else:
-        raise RuntimeError('Unknown colorscale: ' + colorscale)
+        raise RuntimeError("Unknown colorscale: " + colorscale)
     contours = axes.pcolor(workspace, distribution=True, cmap=colormap, norm=colorNormalization)
     colorbar = figure.colorbar(contours)
     if isSusceptibility:
         colorbar.set_label(r"$\chi''(Q,E)$ (arb. units)")
     else:
-        colorbar.set_label(r'$S(Q,E)$ (arb. units)')
+        colorbar.set_label(r"$S(Q,E)$ (arb. units)")
     if qHorizontal:
-        xLimits = {'left': QMin, 'right': QMax}
-        yLimits = {'bottom': EMin}
+        xLimits = {"left": QMin, "right": QMax}
+        yLimits = {"bottom": EMin}
         if EMax is not None:
-            yLimits['top'] = EMax
-        xLabel = r'$Q$ ($\mathrm{\AA}^{-1}$)'
-        yLabel = 'Energy (meV)'
+            yLimits["top"] = EMax
+        xLabel = r"$Q$ ($\mathrm{\AA}^{-1}$)"
+        yLabel = "Energy (meV)"
     else:
-        xLimits = {'left': EMin}
+        xLimits = {"left": EMin}
         if EMax is not None:
-            xLimits['right'] = EMax
-        yLimits = {'bottom': QMin, 'top': QMax}
-        xLabel = 'Energy (meV)'
-        yLabel = r'$Q$ ($\mathrm{\AA}^{-1}$)'
+            xLimits["right"] = EMax
+        yLimits = {"bottom": QMin, "top": QMax}
+        xLabel = "Energy (meV)"
+        yLabel = r"$Q$ ($\mathrm{\AA}^{-1}$)"
     axes.set_xlim(**xLimits)
     axes.set_ylim(**yLimits)
     axes.set_xlabel(xLabel)
@@ -798,7 +811,7 @@ def subplots(**kwargs):
     """
     figure, axes = pyplot.subplots(subplot_kw=_mantidsubplotsetup(), **kwargs)
     figure.set_tight_layout(True)
-    axes.tick_params(direction='in', top=True, right=True)
+    axes.tick_params(direction="in", top=True, right=True)
     return figure, axes
 
 
@@ -814,7 +827,7 @@ def validQ(workspace, E=0.0):
     :returns: a tuple of (:math:`Q_{min}`, :math:`Q_{max}`)
     """
     workspace = _normws(workspace)
-    if workspace.getAxis(0).getUnit().caption() == 'q':
+    if workspace.getAxis(0).getUnit().caption() == "q":
         vertPoints = workspace.getAxis(1).extractValues()
         if len(vertPoints) > workspace.getNumberHistograms():
             vertPoints = _bincentres(vertPoints)
@@ -864,35 +877,35 @@ def wsreport(workspace):
     print(str(workspace))
     instrument = _instrumentname(logs)
     if instrument is not None:
-        print('Instrument: ' + instrument)
-    if logs.hasProperty('run_number'):
-        print('Run Number: {:06d}'.format(logs.getProperty('run_number').value))
-    if logs.hasProperty('start_time'):
-        print('Start Time: {}'.format(logs.getProperty('start_time').value.replace('T', ' ')))
+        print("Instrument: " + instrument)
+    if logs.hasProperty("run_number"):
+        print("Run Number: {:06d}".format(logs.getProperty("run_number").value))
+    if logs.hasProperty("start_time"):
+        print("Start Time: {}".format(logs.getProperty("start_time").value.replace("T", " ")))
     ei = _incidentenergy(logs)
     wavelength = _wavelength(logs)
     if ei is not None and wavelength is not None:
-        print('Ei = {:0.2f} meV    lambda = {:0.2f} A'.format(ei, wavelength))
+        print("Ei = {:0.2f} meV    lambda = {:0.2f} A".format(ei, wavelength))
     T = _sampletemperature(logs)
     if T is not None:
         if isinstance(T, collections.abc.Iterable):
             meanT = _applyiftimeseries(T, numpy.mean)
             stdT = _applyiftimeseries(T, numpy.std)
-            print('T = {:0.2f} +- {:4.2f} K'.format(meanT, stdT))
+            print("T = {:0.2f} +- {:4.2f} K".format(meanT, stdT))
             minT = _applyiftimeseries(T, numpy.amin)
             maxT = _applyiftimeseries(T, numpy.amax)
-            print('T in [{:0.2f},{:0.2f}]'.format(minT, maxT))
+            print("T in [{:0.2f},{:0.2f}]".format(minT, maxT))
         else:
-            print('T = {:0.2f} K'.format(T))
+            print("T = {:0.2f} K".format(T))
     # Instrument specific additional information
-    if instrument == 'IN4':
-        rpm = logs.getProperty('FC.rotation_speed').value
-        hertz = rpm / 60.
-        print('Fermi = {:0.0f} rpm = {:0.1f} Hz'.format(rpm, hertz))
-    elif instrument == 'IN6':
-        rpm = logs.getProperty('Fermi.rotation_speed').value
-        hertz = rpm / 60.
-        print('Fermi = {:0.0f} rpm = {:0.1f} Hz'.format(rpm, hertz))
+    if instrument == "IN4":
+        rpm = logs.getProperty("FC.rotation_speed").value
+        hertz = rpm / 60.0
+        print("Fermi = {:0.0f} rpm = {:0.1f} Hz".format(rpm, hertz))
+    elif instrument == "IN6":
+        rpm = logs.getProperty("Fermi.rotation_speed").value
+        hertz = rpm / 60.0
+        print("Fermi = {:0.0f} rpm = {:0.1f} Hz".format(rpm, hertz))
 
 
 class SampleLogs:
@@ -910,6 +923,7 @@ class SampleLogs:
         # This is equivalent of calling workspace.run().getProperty('b.c').value
         logs.b.c
     """
+
     def __init__(self, workspace):
         """Initialize a `SampleLogs` object.
         Transform sample log entries from workspace into attributes of this object.
@@ -917,13 +931,15 @@ class SampleLogs:
         :param workspace: the workspace from which to extract the sample logs
         :type workspace: :class:`mantid.api.MatrixWorkspace`
         """
+
         class Log:
             pass
+
         workspace = _normws(workspace)
         properties = workspace.run().getProperties()
         for p in properties:
             name = p.name
-            components = name.split('.')
+            components = name.split(".")
             obj = self
             while len(components) > 1:
                 c = components.pop(0)

@@ -24,32 +24,32 @@ class ReduceMARI(ReductionWrapper):
     @MainProperties
     def def_main_properties(self):
 
-        """ Define main properties used in reduction """
+        """Define main properties used in reduction"""
         prop = {}
-        prop['sample_run'] = 11001
-        prop['wb_run'] = 11060
-        prop['incident_energy'] = 12
-        prop['energy_bins'] = [-11, 0.05, 11]
+        prop["sample_run"] = 11001
+        prop["wb_run"] = 11060
+        prop["incident_energy"] = 12
+        prop["energy_bins"] = [-11, 0.05, 11]
 
         # Absolute units reduction properties.
-        prop['monovan_run'] = 11015
-        prop['sample_mass'] = 10
-        prop['sample_rmm'] = 435.96
+        prop["monovan_run"] = 11015
+        prop["sample_mass"] = 10
+        prop["sample_rmm"] = 435.96
         return prop
 
     # -------------------------------------------------------------------------------------------------#
     @AdvancedProperties
     def def_advanced_properties(self):
-        """  separation between simple and advanced properties depends
-           on scientist, experiment and user.
-           main properties override advanced properties.
-      """
+        """separation between simple and advanced properties depends
+        on scientist, experiment and user.
+        main properties override advanced properties.
+        """
         prop = {}
-        prop['map_file'] = "mari_res.map"
-        prop['monovan_mapfile'] = "mari_res.map"
-        prop['hard_mask_file'] = "mar11015.msk"
-        prop['det_cal_file'] = 11060
-        prop['save_format'] = ''
+        prop["map_file"] = "mari_res.map"
+        prop["monovan_mapfile"] = "mari_res.map"
+        prop["hard_mask_file"] = "mar11015.msk"
+        prop["det_cal_file"] = 11060
+        prop["save_format"] = ""
         # Uncomment two following properties to correct for absorption
         # on sample or sample container during the experiment.
         # 1) Define the sample material and sample shape:
@@ -95,9 +95,9 @@ class ReduceMARI(ReductionWrapper):
     # -------------------------------------------------------------------------------------------------#
     @iliad
     def reduce(self, input_file=None, output_directory=None):
-        """ Method executes reduction over single file
-          Modify only if custom pre or post-processing is needed, namely:
-      """
+        """Method executes reduction over single file
+        Modify only if custom pre or post-processing is needed, namely:
+        """
 
         """
         Define custom preprocessing procedure, to be applied to the whole
@@ -136,43 +136,43 @@ class ReduceMARI(ReductionWrapper):
         #
 
     def do_preprocessing(self, reducer, ws):
-        """ Custom function, applied to each run or every workspace, the run is divided to
-            in multirep mode
-            Applied after diagnostics but before any further reduction is invoked.
-            Inputs:
-            self    -- initialized instance of the instrument reduction class
-            reducer -- initialized instance of the reducer
-                       (DirectEnergyConversion class initialized for specific reduction)
-            ws         the workspace, describing the run or partial run in multirep mode
-                       to preprocess
+        """Custom function, applied to each run or every workspace, the run is divided to
+        in multirep mode
+        Applied after diagnostics but before any further reduction is invoked.
+        Inputs:
+        self    -- initialized instance of the instrument reduction class
+        reducer -- initialized instance of the reducer
+                   (DirectEnergyConversion class initialized for specific reduction)
+        ws         the workspace, describing the run or partial run in multirep mode
+                   to preprocess
 
-            By default, does nothing.
-            Add code to do custom preprocessing.
-            Must return pointer to the preprocessed workspace
+        By default, does nothing.
+        Add code to do custom preprocessing.
+        Must return pointer to the preprocessed workspace
         """
         return ws
 
     #
 
     def do_postprocessing(self, reducer, ws):
-        """ Custom function, applied to each reduced run or every reduced workspace,
-            the run is divided into, in multirep mode.
-            Applied after reduction is completed but before saving the result.
+        """Custom function, applied to each reduced run or every reduced workspace,
+        the run is divided into, in multirep mode.
+        Applied after reduction is completed but before saving the result.
 
-            Inputs:
-            self    -- initialized instance of the instrument reduction class
-            reducer -- initialized instance of the reducer
-                       (DirectEnergyConversion class initialized for specific reduction)
-            ws         the workspace, describing the run or partial run in multirep mode
-                       after reduction to postprocess
+        Inputs:
+        self    -- initialized instance of the instrument reduction class
+        reducer -- initialized instance of the reducer
+                   (DirectEnergyConversion class initialized for specific reduction)
+        ws         the workspace, describing the run or partial run in multirep mode
+                   after reduction to postprocess
 
 
-            By default, does nothing.
-            Add code to do custom postprocessing.
-            Must return pointer to the postprocessed workspace.
+        By default, does nothing.
+        Add code to do custom postprocessing.
+        Must return pointer to the postprocessed workspace.
 
-            The postprocessed workspace should be consistent with selected save method.
-            (E.g. if you decide to convert workspace units to wavelength, you can not save result as nxspe)
+        The postprocessed workspace should be consistent with selected save method.
+        (E.g. if you decide to convert workspace units to wavelength, you can not save result as nxspe)
         """
         return ws
 
@@ -180,14 +180,14 @@ class ReduceMARI(ReductionWrapper):
     def set_custom_output_filename(self):
         """define custom name of output files if standard one is not satisfactory
 
-          In addition to that, example of accessing complex reduction properties
-          Simple reduction properties can be accessed as e.g.: value= prop_man.sum_runs
+        In addition to that, example of accessing complex reduction properties
+        Simple reduction properties can be accessed as e.g.: value= prop_man.sum_runs
         """
 
         def custom_name(prop_man):
             """Sample function which builds filename from
-              incident energy and run number and adds some auxiliary information
-              to it.
+            incident energy and run number and adds some auxiliary information
+            to it.
             """
             # Note -- properties have the same names as the list of advanced
             # and   main properties
@@ -209,28 +209,28 @@ class ReduceMARI(ReductionWrapper):
 
     #
     def eval_absorption_corrections(self, test_ws=None):
-        """ The method to evaluate the speed and efficiency of the absorption corrections procedure,
-            before applying your corrections to the whole workspace and all sample runs.
+        """The method to evaluate the speed and efficiency of the absorption corrections procedure,
+        before applying your corrections to the whole workspace and all sample runs.
 
-            The absorption correction procedure invoked with excessive accuracy can run for too
-            long providing no real improvements in accuracy. This is why it is recommended to
-            run this procedure evaluating absorption on selected detectors and
-            deploy the corrections to the whole runs only after achieving satisfactory accuracy
-            and execution time.
+        The absorption correction procedure invoked with excessive accuracy can run for too
+        long providing no real improvements in accuracy. This is why it is recommended to
+        run this procedure evaluating absorption on selected detectors and
+        deploy the corrections to the whole runs only after achieving satisfactory accuracy
+        and execution time.
 
-            The procedure evaluate and prints the expected time to run the absorption corrections
-            on the whole run.
+        The procedure evaluate and prints the expected time to run the absorption corrections
+        on the whole run.
 
-            Input:
-            If provided, the pointer or the name of the workspace available in analysis data service.
-            If it is not, the workspace is taken from PropertyManager.sample_run property
+        Input:
+        If provided, the pointer or the name of the workspace available in analysis data service.
+        If it is not, the workspace is taken from PropertyManager.sample_run property
 
-            Usage:
-            Reduce single run and uncomment this method in the __main__ area to evaluate
-            adsorption corrections.
+        Usage:
+        Reduce single run and uncomment this method in the __main__ area to evaluate
+        adsorption corrections.
 
-            Change adsorption corrections parameters below to achieve best speed and
-            acceptable accuracy
+        Change adsorption corrections parameters below to achieve best speed and
+        acceptable accuracy
         """
 
         # Gain access to the property manager:
@@ -241,12 +241,12 @@ class ReduceMARI(ReductionWrapper):
         # 3) HollowCylinder([Chem_formula],[Height,InnerRadius,OuterRadius])
         # 4) Sphere([[Chem_formula],Radius)
         # The units are in cm
-        propman.correct_absorption_on = Cylinder('Fe', [10, 2])  # Will be taken from def_advanced_properties
+        propman.correct_absorption_on = Cylinder("Fe", [10, 2])  # Will be taken from def_advanced_properties
         #                                prop['correct_absorption_on'] =  if not defined here
         #
         # Use Monte-Carlo integration.  Take sparse energy points and a few integration attempts
         # to increase initial speed. Increase these numbers to achieve better accuracy.
-        propman.abs_corr_info = {'EventsPerPoint': 3000}  # ,'NumberOfWavelengthPoints':30}
+        propman.abs_corr_info = {"EventsPerPoint": 3000}  # ,'NumberOfWavelengthPoints':30}
         # See MonteCarloAbsorption for all possible properties description and possibility to define
         # a sparse instrument for speed.
         #
@@ -273,28 +273,28 @@ class ReduceMARI(ReductionWrapper):
     # ------------------------------------------------------------------------------------------------
 
     def __init__(self, web_var=None):
-        """ sets properties defaults for the instrument with Name"""
-        ReductionWrapper.__init__(self, 'MAR', web_var)
+        """sets properties defaults for the instrument with Name"""
+        ReductionWrapper.__init__(self, "MAR", web_var)
         Mt = MethodType(self.do_preprocessing, self.reducer)
-        DirectEnergyConversion.__setattr__(self.reducer, 'do_preprocessing', Mt)
+        DirectEnergyConversion.__setattr__(self.reducer, "do_preprocessing", Mt)
         Mt = MethodType(self.do_postprocessing, self.reducer)
-        DirectEnergyConversion.__setattr__(self.reducer, 'do_postprocessing', Mt)
+        DirectEnergyConversion.__setattr__(self.reducer, "do_postprocessing", Mt)
 
 
 # -------------------------------------------------------------------------------------------------#
 def main(input_file=None, output_directory=None):
-    """ This method is used to run code from web service
-        and should not be touched unless you change the name of the
-        particular ReductionWrapper class (e.g. ReduceMARI here)
+    """This method is used to run code from web service
+    and should not be touched unless you change the name of the
+    particular ReductionWrapper class (e.g. ReduceMARI here)
 
-        exception to change the output folder to save data to
+    exception to change the output folder to save data to
     """
     # note web variables initialization
     rd = ReduceMARI(web_var)
     rd.reduce(input_file, output_directory)
 
     # Define folder for web service to copy results to
-    output_folder = ''
+    output_folder = ""
     return output_folder
 
 

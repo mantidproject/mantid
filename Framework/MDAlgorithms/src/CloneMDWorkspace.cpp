@@ -43,6 +43,7 @@ void CloneMDWorkspace::init() {
 }
 
 //----------------------------------------------------------------------------------------------
+
 /** Perform the cloning
  *
  * @param ws ::  MDEventWorkspace to clone
@@ -58,7 +59,7 @@ template <typename MDE, size_t nd> void CloneMDWorkspace::doClone(const typename
       g_log.notice() << "InputWorkspace's file-backend being updated. \n";
       auto alg = createChildAlgorithm("SaveMD", 0.0, 0.4, false);
       alg->setProperty("InputWorkspace", ws);
-      alg->setPropertyValue("UpdateFileBackEnd", "1");
+      alg->setProperty("UpdateFileBackEnd", true);
       alg->executeAsChildAlg();
     }
 
@@ -73,9 +74,11 @@ template <typename MDE, size_t nd> void CloneMDWorkspace::doClone(const typename
       outFilename = path.toString();
     }
 
-    // Perform the copying
+    // Perform the copying. HDF5 takes a file lock out when opening the file. On Windows this
+    // prevents the a read handle being opened to perform the clone so we need to close the
+    // file,  do the copy, then reopen it on the original box controller
     g_log.notice() << "Cloned workspace file being copied to: " << outFilename << '\n';
-    Poco::File(originalFile).copyTo(outFilename);
+    bc->getFileIO()->copyFileTo(outFilename);
     g_log.information() << "File copied successfully.\n";
 
     // Now load it back

@@ -10,7 +10,6 @@ from mantid.kernel import Direction
 
 
 class FilePropertyTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         FrameworkManagerImpl.Instance()
@@ -21,22 +20,22 @@ class FilePropertyTest(unittest.TestCase):
         self.assertEqual(Direction.Input, prop.direction)
 
     def test_constructor_with_name_and_default_and_action_and_exts_list(self):
-        prop = FileProperty("LoadProperty", "", FileAction.Load, ['.nxs', '.raw'])
+        prop = FileProperty("LoadProperty", "", FileAction.Load, [".nxs", ".raw"])
         self.assertNotEqual("", prop.isValid)
         self.assertEqual(Direction.Input, prop.direction)
         allowed = prop.allowedValues
-        self.assertTrue('.nxs' in allowed)
-        self.assertTrue('.raw' in allowed)
+        self.assertTrue(".nxs" in allowed)
+        self.assertTrue(".raw" in allowed)
 
     def test_constructor_with_name_and_default_and_action_and_single_ext(self):
-        prop = FileProperty("LoadProperty", "", FileAction.Load, '.nxs')
+        prop = FileProperty("LoadProperty", "", FileAction.Load, ".nxs")
         self.assertNotEqual("", prop.isValid)
         self.assertEqual(Direction.Input, prop.direction)
         allowed = prop.allowedValues
-        self.assertTrue('.nxs' in allowed)
+        self.assertTrue(".nxs" in allowed)
 
     def test_constructor_with_name_and_default_and_action_and_single_ext_and_direction(self):
-        prop = FileProperty("LoadProperty", "", FileAction.Load, ['.nxs'], Direction.InOut)
+        prop = FileProperty("LoadProperty", "", FileAction.Load, [".nxs"], Direction.InOut)
         self.assertNotEqual("", prop.isValid)
         self.assertEqual(Direction.InOut, prop.direction)
 
@@ -45,7 +44,8 @@ class FilePropertyTest(unittest.TestCase):
         alg.initialize()
         prop = alg.getProperty("Filename")
         self.assertEqual(type(prop), FileProperty)
-        self.assertTrue('value' in dir(prop)) # Do we have a value method
+        self.assertTrue("value" in dir(prop))  # Do we have a value method
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

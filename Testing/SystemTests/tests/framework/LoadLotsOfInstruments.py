@@ -11,20 +11,19 @@ import os
 import glob
 import systemtesting
 
-EXPECTED_EXT = '.expected'
+EXPECTED_EXT = ".expected"
 
 
 class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
-
     @staticmethod
     def _test_clones():
         r"""Test latest definition files for certain sets of instrument names are actually the same
         Example: we test that CG2_Definition.xml and GPSANS_Definition.xml have the same contents except for
         strings 'CG2' and 'GPSANS'.
         """
-        instrument_directory = config['instrumentDefinition.directory']
-        for file_type in ('_Definition.xml', '_Parameters.xml'):
-            for clone_set in (('CG2', 'GPSANS'), ('CG3', 'BIOSANS')):
+        instrument_directory = config["instrumentDefinition.directory"]
+        for file_type in ("_Definition.xml", "_Parameters.xml"):
+            for clone_set in (("CG2", "GPSANS"), ("CG3", "BIOSANS")):
                 original = clone_set[0]  # first item to which we compare the rest of the clones
                 original_file = open(os.path.join(instrument_directory, original + file_type)).read()
                 for clone in clone_set[1:]:
@@ -33,7 +32,7 @@ class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
 
     def __getDataFileList__(self):
         # get a list of directories to look in
-        direc = config['instrumentDefinition.directory']
+        direc = config["instrumentDefinition.directory"]
         print("Looking for instrument definition files in: %s" % direc)
         cwd = os.getcwd()
         os.chdir(direc)
@@ -94,8 +93,7 @@ class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
             print("SUMMARY OF FAILED FILES")
             for filename in failed:
                 print(filename)
-            raise RuntimeError("Failed to load %d of %d files"
-                               % (len(failed), len(files)))
+            raise RuntimeError("Failed to load %d of %d files" % (len(failed), len(files)))
         else:
             print("Successfully loaded %d files" % len(files))
         print(files)

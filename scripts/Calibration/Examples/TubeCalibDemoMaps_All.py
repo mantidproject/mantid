@@ -93,7 +93,7 @@ def minimalInput(filename):
     CalibInstWS = loadingStep(filename)
     # == Set parameters for calibration ==
     # Set what we want to calibrate (e.g whole instrument or one door )
-    CalibratedComponent = 'MAPS'  # Calibrate all
+    CalibratedComponent = "MAPS"  # Calibrate all
     # define the known positions and function factor (edge, peak, peak, peak, edge)
     knownPos, funcFactor = [-0.50, -0.16, -0.00, 0.16, 0.50], [2, 1, 1, 1, 2]
 
@@ -112,10 +112,11 @@ def provideTheExpectedValue(filename):
     This is done through the **fitPar** parameter.
     """
     from tube_calib_fit_params import TubeCalibFitParams
+
     CalibInstWS = loadingStep(filename)
     # == Set parameters for calibration ==
     # Set what we want to calibrate (e.g whole instrument or one door )
-    CalibratedComponent = 'MAPS'  # Calibrate all
+    CalibratedComponent = "MAPS"  # Calibrate all
     # define the known positions and function factor (edge, peak, peak, peak, edge)
     knownPos, funcFactor = [-0.50, -0.16, -0.00, 0.16, 0.50], [2, 1, 1, 1, 2]
 
@@ -125,8 +126,7 @@ def provideTheExpectedValue(filename):
     fitPar.setAutomatic(True)
 
     # == Get the calibration and put results into calibration table ==
-    calibrationTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
-                                      fitPar=fitPar)
+    calibrationTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor, fitPar=fitPar)
     # == Apply the Calibation ==
     mantid.ApplyCalibration(Workspace=CalibInstWS, CalibrationTable=calibrationTable)
 
@@ -154,10 +154,11 @@ def changeMarginAndExpectedValue(filename):
 
     """
     from tube_calib_fit_params import TubeCalibFitParams
+
     CalibInstWS = loadingStep(filename)
     # == Set parameters for calibration ==
     # Set what we want to calibrate (e.g whole instrument or one door )
-    CalibratedComponent = 'MAPS'  # Calibrate all
+    CalibratedComponent = "MAPS"  # Calibrate all
     # define the known positions and function factor (edge, peak, peak, peak, edge)
     knownPos, funcFactor = [-0.50, -0.16, -0.00, 0.16, 0.50], [2, 1, 1, 1, 2]
 
@@ -167,12 +168,13 @@ def changeMarginAndExpectedValue(filename):
     fitPar.setAutomatic(True)
 
     # == Get the calibration and put results into calibration table ==
-    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
-                                                 fitPar=fitPar, plotTube=[1, 10, 100], outputPeak=True, margin=10)
+    calibrationTable, peakTable = tube.calibrate(
+        CalibInstWS, CalibratedComponent, knownPos, funcFactor, fitPar=fitPar, plotTube=[1, 10, 100], outputPeak=True, margin=10
+    )
     # == Apply the Calibation ==
     mantid.ApplyCalibration(Workspace=CalibInstWS, CalibrationTable=calibrationTable)
 
-    tube.savePeak(peakTable, 'TubeDemoMaps01.txt')
+    tube.savePeak(peakTable, "TubeDemoMaps01.txt")
 
 
 def improvingCalibrationSingleTube(filename):
@@ -203,10 +205,11 @@ def improvingCalibrationSingleTube(filename):
     This example shows how to use **overridePeaks** option
     """
     from tube_calib_fit_params import TubeCalibFitParams
+
     CalibInstWS = loadingStep(filename)
     # == Set parameters for calibration ==
     # Set what we want to calibrate (e.g whole instrument or one door )
-    CalibratedComponent = 'MAPS'  # Calibrate all
+    CalibratedComponent = "MAPS"  # Calibrate all
     # define the known positions and function factor (edge, peak, peak, peak, edge)
     knownPos, funcFactor = [-0.50, -0.16, -0.00, 0.16, 0.50], [2, 1, 1, 1, 2]
 
@@ -216,9 +219,16 @@ def improvingCalibrationSingleTube(filename):
     fitPar.setAutomatic(True)
 
     # == Get the calibration and put results into calibration table ==
-    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
-                                                 fitPar=fitPar, outputPeak=True, plotTube=[18, 19, 20],
-                                                 rangeList=[18, 19, 20])
+    calibrationTable, peakTable = tube.calibrate(
+        CalibInstWS,
+        CalibratedComponent,
+        knownPos,
+        funcFactor,
+        fitPar=fitPar,
+        outputPeak=True,
+        plotTube=[18, 19, 20],
+        rangeList=[18, 19, 20],
+    )
 
     mantid.ApplyCalibration(Workspace=CalibInstWS, CalibrationTable=calibrationTable)
 
@@ -233,9 +243,16 @@ def improvingCalibrationSingleTube(filename):
 
     # == Get the calibration and put results into calibration table ==
     # we will not plot anymore, because it will not plot the overridden peaks
-    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
-                                                 fitPar=fitPar, outputPeak=True, rangeList=[18, 19, 20],
-                                                 overridePeaks=overridePeaks)
+    calibrationTable, peakTable = tube.calibrate(
+        CalibInstWS,
+        CalibratedComponent,
+        knownPos,
+        funcFactor,
+        fitPar=fitPar,
+        outputPeak=True,
+        rangeList=[18, 19, 20],
+        overridePeaks=overridePeaks,
+    )
 
     mantid.ApplyCalibration(Workspace=CalibInstWS, CalibrationTable=calibrationTable)
     # check using the InstrumentView and you will see that it is better than before
@@ -261,7 +278,7 @@ def improvingCalibrationOfListOfTubes(filename):
     CalibInstWS = loadingStep(filename)
     # == Set parameters for calibration ==
     # Set what we want to calibrate (e.g whole instrument or one door )
-    CalibratedComponent = 'MAPS'  # Calibrate all
+    CalibratedComponent = "MAPS"  # Calibrate all
     # define the known positions and function factor (edge, peak, peak, peak, edge)
     knownPos, funcFactor = [-0.50, -0.16, -0.00, 0.16, 0.50], [2, 1, 1, 1, 2]
 
@@ -272,25 +289,27 @@ def improvingCalibrationOfListOfTubes(filename):
 
     # == Get the calibration and put results into calibration table ==
     # calibrationTable, peakTable= tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
-    #	fitPar=fitPar, outputPeak=True, plotTube=not_good, rangeList=not_good)
+    # 	fitPar=fitPar, outputPeak=True, plotTube=not_good, rangeList=not_good)
 
     # CalibInstWS = loadingStep(filename)
 
     # it is defined as the mean values around the neighbours
-    define_peaks = {19: [10, 80.9771, 123.221, 164.993, 245.717],  # the first one was bad
-                    37: [6.36, 80.9347, 122.941, 165.104, 248.32],  # the first one was bad
-                    71: [8.62752, 85.074, 124.919, 164.116, 246.82],  # the last one was bad - check if we can inprove
-                    75: [14.4285, 90.087, 128.987, 167.047, 242.62],  # the last one was bad - check if we can inprove
-                    181: [11.726, 94.0496, 137.816, 180, 255],  # the third peak was lost
-                    186: [11.9382, 71.5203, 107, 147.727, 239.041],  # lost the second peak
-                    234: [4.84, 82.7824, 123.125, 163.945, 241.877],  # the first one was bad
-                    235: [4.84, 80.0077, 121.002, 161.098, 238.502],  # the first one was bad
-                    245: [9.88089, 93.0593, 136.911, 179.5, 255],  # the third peak was bad
-                    273: [18.3711, 105.5, 145.5, 181.6, 243.252],  # lost first and third peaks
-                    345: [4.6084, 87.0351, 128.125, 169.923, 245.3]  # the last one was bad
-                    }
-    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
-                                                 fitPar=fitPar, outputPeak=True, overridePeaks=define_peaks)
+    define_peaks = {
+        19: [10, 80.9771, 123.221, 164.993, 245.717],  # the first one was bad
+        37: [6.36, 80.9347, 122.941, 165.104, 248.32],  # the first one was bad
+        71: [8.62752, 85.074, 124.919, 164.116, 246.82],  # the last one was bad - check if we can inprove
+        75: [14.4285, 90.087, 128.987, 167.047, 242.62],  # the last one was bad - check if we can inprove
+        181: [11.726, 94.0496, 137.816, 180, 255],  # the third peak was lost
+        186: [11.9382, 71.5203, 107, 147.727, 239.041],  # lost the second peak
+        234: [4.84, 82.7824, 123.125, 163.945, 241.877],  # the first one was bad
+        235: [4.84, 80.0077, 121.002, 161.098, 238.502],  # the first one was bad
+        245: [9.88089, 93.0593, 136.911, 179.5, 255],  # the third peak was bad
+        273: [18.3711, 105.5, 145.5, 181.6, 243.252],  # lost first and third peaks
+        345: [4.6084, 87.0351, 128.125, 169.923, 245.3],  # the last one was bad
+    }
+    calibrationTable, peakTable = tube.calibrate(
+        CalibInstWS, CalibratedComponent, knownPos, funcFactor, fitPar=fitPar, outputPeak=True, overridePeaks=define_peaks
+    )
 
     mantid.ApplyCalibration(Workspace=CalibInstWS, CalibrationTable=calibrationTable)
 
@@ -312,13 +331,14 @@ def calibrateB2Window(filename):
 
     """
     from tube_calib_fit_params import TubeCalibFitParams
+
     # b2 with 2 peaks range
     b2_range = list(range(196, 212)) + list(range(222, 233))
 
     CalibInstWS = loadingStep(filename)
     # == Set parameters for calibration ==
     # Set what we want to calibrate (e.g whole instrument or one door )
-    CalibratedComponent = 'MAPS'  # Calibrate all
+    CalibratedComponent = "MAPS"  # Calibrate all
     # define the known positions and function factor (edge, peak, peak, peak, edge)
     knownPos, funcFactor = [-0.50, -0.16, 0.16, 0.50], [2, 1, 1, 2]
 
@@ -328,9 +348,16 @@ def calibrateB2Window(filename):
     fitPar.setAutomatic(True)
 
     # == Get the calibration and put results into calibration table ==
-    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
-                                                 fitPar=fitPar, outputPeak=True, plotTube=[b2_range[0], b2_range[-1]],
-                                                 rangeList=b2_range)
+    calibrationTable, peakTable = tube.calibrate(
+        CalibInstWS,
+        CalibratedComponent,
+        knownPos,
+        funcFactor,
+        fitPar=fitPar,
+        outputPeak=True,
+        plotTube=[b2_range[0], b2_range[-1]],
+        rangeList=b2_range,
+    )
 
     mantid.ApplyCalibration(Workspace=CalibInstWS, CalibrationTable=calibrationTable)
 
@@ -358,10 +385,11 @@ def findThoseTubesThatNeedSpecialCareForCalibration(filename):
     to all the 'outliers' tubes.
     """
     from tube_calib_fit_params import TubeCalibFitParams
+
     CalibInstWS = loadingStep(filename)
     # == Set parameters for calibration ==
     # Set what we want to calibrate (e.g whole instrument or one door )
-    CalibratedComponent = 'MAPS'  # Calibrate all
+    CalibratedComponent = "MAPS"  # Calibrate all
     # define the known positions and function factor (edge, peak, peak, peak, edge)
     knownPos, funcFactor = [-0.50, -0.16, -0.00, 0.16, 0.50], [2, 1, 1, 1, 2]
 
@@ -371,21 +399,20 @@ def findThoseTubesThatNeedSpecialCareForCalibration(filename):
     fitPar.setAutomatic(True)
 
     # == Get the calibration and put results into calibration table ==
-    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
-                                                 fitPar=fitPar, outputPeak=True)
+    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor, fitPar=fitPar, outputPeak=True)
 
     # == now, lets investigate the peaks
 
     # parsing the peakTable to produce a numpy array with dimension (number_of_tubes x number_of_peaks)
-    print('parsing the peak table')
+    print("parsing the peak table")
     n = len(peakTable)
-    peaksId = n * ['']
+    peaksId = n * [""]
     data = numpy.zeros((n, 5))
     line = 0
     for row in peakTable:
-        data_row = [row['Peak%d' % (i)] for i in [1, 2, 3, 4, 5]]
+        data_row = [row["Peak%d" % (i)] for i in [1, 2, 3, 4, 5]]
         data[line, :] = data_row
-        peaksId[line] = row['TubeId']
+        peaksId[line] = row["TubeId"]
         line += 1
     # data now has all the peaks positions for each tube
     # the mean value is the expected value for the peak position for each tube
@@ -393,9 +420,9 @@ def findThoseTubesThatNeedSpecialCareForCalibration(filename):
     # calculate how far from the expected position each peak position is
     distance_from_expected = numpy.abs(data - expected_peak_pos)
 
-    print('Creating the Peaks Workspace that shows the distance from the expected value for all peaks for each tube')
+    print("Creating the Peaks Workspace that shows the distance from the expected value for all peaks for each tube")
     # Let's see these peaks:
-    mantid.CreateWorkspace(list(range(n)), distance_from_expected, NSpec=5, OutputWorkspace='Peaks')
+    mantid.CreateWorkspace(list(range(n)), distance_from_expected, NSpec=5, OutputWorkspace="Peaks")
 
     # plot all the 5 peaks for Peaks Workspace. You will see that most of the tubes differ
     # at most 12 pixels from the expected values.
@@ -408,13 +435,14 @@ def findThoseTubesThatNeedSpecialCareForCalibration(filename):
     # select only those tubes inside the problematic_tubes
     problematic_tubes = list(set(check))
 
-    print('Tubes whose distance is far from the expected value: ', problematic_tubes)
+    print("Tubes whose distance is far from the expected value: ", problematic_tubes)
 
-    print('Calibrating again only these tubes')
+    print("Calibrating again only these tubes")
     # let's confir that our suspect works
     CalibInstWS = loadingStep(filename)
-    tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
-                   fitPar=fitPar, rangeList=problematic_tubes, plotTube=problematic_tubes)
+    tube.calibrate(
+        CalibInstWS, CalibratedComponent, knownPos, funcFactor, fitPar=fitPar, rangeList=problematic_tubes, plotTube=problematic_tubes
+    )
     # plot the FittedTube against TubePlot for each detector and you will see that there were problems on those tubes.
 
 
@@ -432,11 +460,12 @@ def completeCalibration(filename):
 
     # first step, load the workspace
     from tube_calib_fit_params import TubeCalibFitParams
+
     CalibInstWS = loadingStep(filename)
 
     # == Set parameters for calibration ==
     # Set what we want to calibrate (e.g whole instrument or one door )
-    CalibratedComponent = 'MAPS'  # Calibrate all
+    CalibratedComponent = "MAPS"  # Calibrate all
 
     # define the known positions and function factor (edge, peak, peak, peak, edge)
     knownPos, funcFactor = [-0.50, -0.16, -0.00, 0.16, 0.50], [2, 1, 1, 1, 2]
@@ -449,27 +478,29 @@ def completeCalibration(filename):
     # execute the improvingCalibrationOfListOfTubes excluding the range of b2 window
     # correct the definition of the peaks for the following indexes
     # define_peaks = {19:[10, 80.9771, 123.221, 164.993, 245.717], # the first one was bad
-    #	37: [6.36, 80.9347, 122.941, 165.104, 248.32], # the first one was bad
-    #	71: [8.62752, 85.074, 124.919, 164.116, 246.82 ], # the last one was bad - check if we can inprove
-    #	75: [14.4285, 90.087, 128.987, 167.047, 242.62], # the last one was bad - check if we can inprove
-    #	181: [11.726, 94.0496, 137.816,  180, 255], # the third peak was lost
-    #	186:[11.9382, 71.5203, 107, 147.727, 239.041], #lost the second peak
-    #	234: [4.84, 82.7824, 123.125, 163.945, 241.877], # the first one was bad
-    #	235: [4.84, 80.0077, 121.002, 161.098, 238.502], # the first one was bad
-    #	245: [9.88089, 93.0593, 136.911, 179.5, 255], # the third peak was bad
-    #	273: [18.3711, 105.5, 145.5, 181.6, 243.252],# lost first and third peaks
-    #	345: [4.6084, 87.0351, 128.125, 169.923, 245.3]} # the last one was bad
-    define_peaks = {19: [10, 80.9771, 123.221, 164.993, 245.717],
-                    37: [6.36, 80.9347, 122.941, 165.104, 248.32],
-                    71: [8.62752, 85.074, 124.919, 164.116, 246.82],
-                    75: [14.4285, 90.087, 128.987, 167.047, 242.62],
-                    181: [11.726, 94.0496, 137.816, 180, 255],
-                    186: [11.9382, 71.5203, 107, 147.727, 239.041],
-                    234: [4.84, 82.7824, 123.125, 163.945, 241.877],
-                    235: [4.84, 80.0077, 121.002, 161.098, 238.502],
-                    245: [9.88089, 93.0593, 136.911, 179.5, 255],
-                    273: [18.3711, 105.5, 145.5, 181.6, 243.252],
-                    345: [4.6084, 87.0351, 128.125, 169.923, 245.3]}
+    # 	37: [6.36, 80.9347, 122.941, 165.104, 248.32], # the first one was bad
+    # 	71: [8.62752, 85.074, 124.919, 164.116, 246.82 ], # the last one was bad - check if we can inprove
+    # 	75: [14.4285, 90.087, 128.987, 167.047, 242.62], # the last one was bad - check if we can inprove
+    # 	181: [11.726, 94.0496, 137.816,  180, 255], # the third peak was lost
+    # 	186:[11.9382, 71.5203, 107, 147.727, 239.041], #lost the second peak
+    # 	234: [4.84, 82.7824, 123.125, 163.945, 241.877], # the first one was bad
+    # 	235: [4.84, 80.0077, 121.002, 161.098, 238.502], # the first one was bad
+    # 	245: [9.88089, 93.0593, 136.911, 179.5, 255], # the third peak was bad
+    # 	273: [18.3711, 105.5, 145.5, 181.6, 243.252],# lost first and third peaks
+    # 	345: [4.6084, 87.0351, 128.125, 169.923, 245.3]} # the last one was bad
+    define_peaks = {
+        19: [10, 80.9771, 123.221, 164.993, 245.717],
+        37: [6.36, 80.9347, 122.941, 165.104, 248.32],
+        71: [8.62752, 85.074, 124.919, 164.116, 246.82],
+        75: [14.4285, 90.087, 128.987, 167.047, 242.62],
+        181: [11.726, 94.0496, 137.816, 180, 255],
+        186: [11.9382, 71.5203, 107, 147.727, 239.041],
+        234: [4.84, 82.7824, 123.125, 163.945, 241.877],
+        235: [4.84, 80.0077, 121.002, 161.098, 238.502],
+        245: [9.88089, 93.0593, 136.911, 179.5, 255],
+        273: [18.3711, 105.5, 145.5, 181.6, 243.252],
+        345: [4.6084, 87.0351, 128.125, 169.923, 245.3],
+    }
 
     b2_window = list(range(196, 212)) + list(range(222, 233))
 
@@ -481,9 +512,16 @@ def completeCalibration(filename):
     # the group that have 3 stripts are all the tubes except the b2 window and e window.
     range_3_strips = numpy.setdiff1d(aux, e1_window)
 
-    calibrationTable, peak3Table = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
-                                                  fitPar=fitPar, outputPeak=True, overridePeaks=define_peaks,
-                                                  rangeList=range_3_strips)
+    calibrationTable, peak3Table = tube.calibrate(
+        CalibInstWS,
+        CalibratedComponent,
+        knownPos,
+        funcFactor,
+        fitPar=fitPar,
+        outputPeak=True,
+        overridePeaks=define_peaks,
+        rangeList=range_3_strips,
+    )
 
     # now calibrate the b2_window REMOVE SECOND PEAK
     # define the known positions and function factor (edge, peak, peak, edge)
@@ -495,13 +533,16 @@ def completeCalibration(filename):
     fitPar.setAutomatic(True)
 
     # apply the calibration for the b2_window 2 strips values
-    calibrationTable, peak2Table = tube.calibrate(CalibInstWS, CalibratedComponent,
-                                                  knownPos,  # these parameters now have only 4 points
-                                                  funcFactor,
-                                                  fitPar=fitPar,
-                                                  outputPeak=True,
-                                                  calibTable=calibrationTable,  # it will append to the calibTable
-                                                  rangeList=b2_window)
+    calibrationTable, peak2Table = tube.calibrate(
+        CalibInstWS,
+        CalibratedComponent,
+        knownPos,  # these parameters now have only 4 points
+        funcFactor,
+        fitPar=fitPar,
+        outputPeak=True,
+        calibTable=calibrationTable,  # it will append to the calibTable
+        rangeList=b2_window,
+    )
 
     mantid.ApplyCalibration(Workspace=CalibInstWS, CalibrationTable=calibrationTable)
 
@@ -513,9 +554,9 @@ def completeCalibration(filename):
 ####
 ## Uncomment one of the following lines to execute one of the examples
 #####
-filename = 'MAP14919.raw'  # found at \\isis\inst$\NDXMAPS\Instrument\data\cycle_09_5
+filename = "MAP14919.raw"  # found at \\isis\inst$\NDXMAPS\Instrument\data\cycle_09_5
 if __name__ == "__main__":
-    filename = 'MAP14919.raw'
+    filename = "MAP14919.raw"
     # minimalInput(filename)
     # provideTheExpectedValue(filename)
     # changeMarginAndExpectedValue(filename)

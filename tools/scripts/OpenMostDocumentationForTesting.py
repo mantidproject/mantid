@@ -25,12 +25,12 @@ import argparse
 
 def crawl_url_for_html_addons(url):
     parent_url = url
-    parent_url = re.sub('index.html$', '', parent_url)
+    parent_url = re.sub("index.html$", "", parent_url)
     html_page = urllib2.urlopen(url)
     soup = BeautifulSoup(html_page)
     urls = []
-    for link in soup.findAll('a', attrs={'href': re.compile(".html")}):
-        html_ref = link.get('href')
+    for link in soup.findAll("a", attrs={"href": re.compile(".html")}):
+        html_ref = link.get("href")
         urls.append(parent_url + html_ref)
     return urls
 
@@ -47,8 +47,7 @@ def open_urls(list_of_urls, delay=1):
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument(
-        '-d', '--open-tab-delay', type=int, help="Delay between each new page tab in seconds.", default=1)
+parser.add_argument("-d", "--open-tab-delay", type=int, help="Delay between each new page tab in seconds.", default=1)
 args = parser.parse_args()
 
 all_urls = []
@@ -70,12 +69,9 @@ technique_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightl
 all_urls.extend(technique_urls)
 
 print("Crawling python api...")
-mantid_kernel_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightly/api/python/mantid/kernel/"
-                                               "index.html")
-mantid_geometry_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightly/api/python/mantid/geometry/"
-                                                 "index.html")
-mantid_api_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightly/api/python/mantid/api/"
-                                            "index.html")
+mantid_kernel_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightly/api/python/mantid/kernel/" "index.html")
+mantid_geometry_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightly/api/python/mantid/geometry/" "index.html")
+mantid_api_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightly/api/python/mantid/api/" "index.html")
 # Only one
 mantid_plots_urls = ["http://docs.mantidproject.org/nightly/api/python/mantid/plots/index.html"]
 

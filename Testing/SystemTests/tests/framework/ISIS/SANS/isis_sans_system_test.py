@@ -17,22 +17,23 @@ def ISISSansSystemTest(*args: SANSInstrument):
         tearDown = getattr(cls, "tearDown")
 
         _instruments = [i for i in args]
-        _config_before: str = config['datasearch.directories']
+        _config_before: str = config["datasearch.directories"]
 
         def patched_setUp(*args):
             # This relies on the assumption that system tests are first in the search dirs
             # which is also assumed in several other system tests
             for i in _instruments:
-                _inst_dir = pathlib.Path(_config_before.split(';')[0]) / 'ISIS_SANS' / i.value
-                config['datasearch.directories'] += ";" + str(_inst_dir.resolve())
+                _inst_dir = pathlib.Path(_config_before.split(";")[0]) / "ISIS_SANS" / i.value
+                config["datasearch.directories"] += ";" + str(_inst_dir.resolve())
             setUp(*args)  # Call original
 
         def patched_tearDown(*args):
-            config['datasearch.directories'] = _config_before
+            config["datasearch.directories"] = _config_before
             tearDown(*args)  # Call original
 
         # And now we patch
         setattr(cls, "setUp", patched_setUp)
         setattr(cls, "tearDown", patched_tearDown)
         return cls
+
     return class_decorator

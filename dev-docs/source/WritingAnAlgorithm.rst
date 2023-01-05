@@ -108,8 +108,8 @@ rely on the values of any of the properties.
 
 Calls to the ``declareProperty`` method are used to add a property to this algorithm. See the properties page
 for more information on the types of properties supported and the example algorithms in ``UserAlgorithms``
-(especially `PropertyAlgorithm <http://svn.mantidproject.org/mantid/trunk/Code/Mantid/UserAlgorithms/PropertyAlgorithm.cpp>`__
-and `WorkspaceAlgorithm <http://svn.mantidproject.org/mantid/trunk/Code/Mantid/UserAlgorithms/WorkspaceAlgorithm.cpp>`__)
+(especially `PropertyAlgorithm <https://github.com/mantidproject/mantid/blob/main/Framework/Examples/PropertyAlgorithm.cpp>`__
+and `WorkspaceAlgorithm <https://github.com/mantidproject/mantid/blob/main/Framework/Examples/WorkspaceAlgorithm.cpp>`__)
 for further guidance on how to use them.
 
 For the simple types (integer, double or string), the basic syntax is::

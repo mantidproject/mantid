@@ -8,9 +8,14 @@ import systemtesting
 from mantid.simpleapi import Abins, Abins2D, mtd, DeleteWorkspace
 
 import abins
-from abins.constants import (ALL_INSTRUMENTS, ALL_SUPPORTED_AB_INITIO_PROGRAMS,
-                             QUANTUM_ORDER_ONE, QUANTUM_ORDER_TWO,
-                             QUANTUM_ORDER_THREE, QUANTUM_ORDER_FOUR)
+from abins.constants import (
+    ALL_INSTRUMENTS,
+    ALL_SUPPORTED_AB_INITIO_PROGRAMS,
+    QUANTUM_ORDER_ONE,
+    QUANTUM_ORDER_TWO,
+    QUANTUM_ORDER_THREE,
+    QUANTUM_ORDER_FOUR,
+)
 
 
 class HelperTestingClass(object):
@@ -60,22 +65,19 @@ class HelperTestingClass(object):
 
     def set_order(self, order=None):
 
-        orders = [QUANTUM_ORDER_ONE, QUANTUM_ORDER_TWO,
-                  QUANTUM_ORDER_THREE, QUANTUM_ORDER_FOUR]
+        orders = [QUANTUM_ORDER_ONE, QUANTUM_ORDER_TWO, QUANTUM_ORDER_THREE, QUANTUM_ORDER_FOUR]
 
         if order in orders:
             self._quantum_order_event = order
         else:
-            raise RuntimeError(
-                "Unsupported number of quantum order event %s" % order)
+            raise RuntimeError("Unsupported number of quantum order event %s" % order)
 
     def set_name(self, name):
         if isinstance(name, str):
             self._system_name = name
             self._output_name = name
         else:
-            raise RuntimeError(
-                "Invalid name. Name should be a string but it is %s " % type(name))
+            raise RuntimeError("Invalid name. Name should be a string but it is %s " % type(name))
 
     def set_cross_section(self, cross_section=None):
         self._cross_section_factor = cross_section
@@ -84,12 +86,20 @@ class HelperTestingClass(object):
         """
         User performs calculation from scratch (not loaded from hdf file). All data is calculated.
         """
-        Abins(AbInitioProgram=self._ab_initio_program,
-              VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
-              TemperatureInKelvin=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
-              BinWidthInWavenumber=self._bin_width, Atoms=self._atoms, SumContributions=self._sum_contributions,
-              QuantumOrderEventsNumber=str(self._quantum_order_event), Scale=self._scale,
-              ScaleByCrossSection=self._cross_section_factor, OutputWorkspace=self._output_name)
+        Abins(
+            AbInitioProgram=self._ab_initio_program,
+            VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
+            TemperatureInKelvin=self._temperature,
+            SampleForm=self._sample_form,
+            Instrument=self._instrument_name,
+            BinWidthInWavenumber=self._bin_width,
+            Atoms=self._atoms,
+            SumContributions=self._sum_contributions,
+            QuantumOrderEventsNumber=str(self._quantum_order_event),
+            Scale=self._scale,
+            ScaleByCrossSection=self._cross_section_factor,
+            OutputWorkspace=self._output_name,
+        )
 
     def case_restart_diff_t(self):
         """
@@ -103,29 +113,52 @@ class HelperTestingClass(object):
         wrk_name = self._system_name
 
         # T = 10 K
-        Abins(AbInitioProgram=self._ab_initio_program,
-              VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
-              TemperatureInKelvin=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
-              BinWidthInWavenumber=self._bin_width, Atoms=self._atoms, SumContributions=self._sum_contributions,
-              Scale=self._scale, QuantumOrderEventsNumber=str(self._quantum_order_event),
-              ScaleByCrossSection=self._cross_section_factor, OutputWorkspace=wrk_name + "init")
+        Abins(
+            AbInitioProgram=self._ab_initio_program,
+            VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
+            TemperatureInKelvin=self._temperature,
+            SampleForm=self._sample_form,
+            Instrument=self._instrument_name,
+            BinWidthInWavenumber=self._bin_width,
+            Atoms=self._atoms,
+            SumContributions=self._sum_contributions,
+            Scale=self._scale,
+            QuantumOrderEventsNumber=str(self._quantum_order_event),
+            ScaleByCrossSection=self._cross_section_factor,
+            OutputWorkspace=wrk_name + "init",
+        )
 
         # T = 20 K
-        Abins(AbInitioProgram=self._ab_initio_program,
-              VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
-              TemperatureInKelvin=temperature_for_test, SampleForm=self._sample_form, Instrument=self._instrument_name,
-              BinWidthInWavenumber=self._bin_width,
-              Atoms=self._atoms, SumContributions=self._sum_contributions, Scale=self._scale,
-              QuantumOrderEventsNumber=str(self._quantum_order_event), ScaleByCrossSection=self._cross_section_factor,
-              OutputWorkspace=wrk_name + "_mod")
+        Abins(
+            AbInitioProgram=self._ab_initio_program,
+            VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
+            TemperatureInKelvin=temperature_for_test,
+            SampleForm=self._sample_form,
+            Instrument=self._instrument_name,
+            BinWidthInWavenumber=self._bin_width,
+            Atoms=self._atoms,
+            SumContributions=self._sum_contributions,
+            Scale=self._scale,
+            QuantumOrderEventsNumber=str(self._quantum_order_event),
+            ScaleByCrossSection=self._cross_section_factor,
+            OutputWorkspace=wrk_name + "_mod",
+        )
 
         # T = 10 K
-        Abins(AbInitioProgram=self._ab_initio_program,
-              VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
-              TemperatureInKelvin=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
-              BinWidthInWavenumber=self._bin_width, Atoms=self._atoms, SumContributions=self._sum_contributions,
-              Scale=self._scale, QuantumOrderEventsNumber=str(self._quantum_order_event),
-              ScaleByCrossSection=self._cross_section_factor, OutputWorkspace=self._output_name)
+        Abins(
+            AbInitioProgram=self._ab_initio_program,
+            VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
+            TemperatureInKelvin=self._temperature,
+            SampleForm=self._sample_form,
+            Instrument=self._instrument_name,
+            BinWidthInWavenumber=self._bin_width,
+            Atoms=self._atoms,
+            SumContributions=self._sum_contributions,
+            Scale=self._scale,
+            QuantumOrderEventsNumber=str(self._quantum_order_event),
+            ScaleByCrossSection=self._cross_section_factor,
+            OutputWorkspace=self._output_name,
+        )
 
     def case_restart_diff_order(self, order=None):
         """
@@ -136,12 +169,20 @@ class HelperTestingClass(object):
         """
         self.case_from_scratch()
         DeleteWorkspace(self._output_name)
-        Abins(AbInitioProgram=self._ab_initio_program,
-              VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
-              TemperatureInKelvin=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
-              BinWidthInWavenumber=self._bin_width, Atoms=self._atoms, SumContributions=self._sum_contributions,
-              Scale=self._scale, QuantumOrderEventsNumber=str(order), ScaleByCrossSection=self._cross_section_factor,
-              OutputWorkspace=self._output_name)
+        Abins(
+            AbInitioProgram=self._ab_initio_program,
+            VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
+            TemperatureInKelvin=self._temperature,
+            SampleForm=self._sample_form,
+            Instrument=self._instrument_name,
+            BinWidthInWavenumber=self._bin_width,
+            Atoms=self._atoms,
+            SumContributions=self._sum_contributions,
+            Scale=self._scale,
+            QuantumOrderEventsNumber=str(order),
+            ScaleByCrossSection=self._cross_section_factor,
+            OutputWorkspace=self._output_name,
+        )
 
     def __del__(self):
         """
@@ -168,6 +209,7 @@ class AbinsCRYSTALTestScratch(systemtesting.MantidSystemTest, HelperTestingClass
     In this benchmark it is tested if calculation from scratch with input data from CRYSTAL and for 1-4 quantum
     order events is correct.
     """
+
     tolerance = None
     ref_result = None
 
@@ -198,6 +240,7 @@ class AbinsCRYSTALTestBiggerSystem(systemtesting.MantidSystemTest, HelperTesting
     In this benchmark it is tested if calculation from scratch with input data from CRYSTAL and for only 1 quantum
     order event is correct.
     """
+
     tolerance = None
     ref_result = None
 
@@ -225,6 +268,7 @@ class AbinsCRYSTALTestT(systemtesting.MantidSystemTest, HelperTestingClass):
     In this benchmark scenario of restart is considered in which data for other temperature already exists in an hdf
     file. In this benchmark input data from CRYSTAL DFT program is used.
     """
+
     tolerance = None
     ref_result = None
 
@@ -255,6 +299,7 @@ class AbinsCRYSTALTestLargerOrder(systemtesting.MantidSystemTest, HelperTestingC
     In this benchmark it is tested if calculation from restart with input data from CRYSTAL is correct. Requested order
     of quantum event is larger than the one which is saved to an hdf file so S has to be calculated.
     """
+
     tolerance = None
     ref_result = None
 
@@ -285,6 +330,7 @@ class AbinsCRYSTALTestSmallerOrder(systemtesting.MantidSystemTest, HelperTesting
     In this benchmark it is tested if calculation from restart with input data from CRYSTAL is correct. Requested
     order of quantum event is smaller than the one which is saved to an hdf file so S is loaded from an hdf file.
     """
+
     tolerance = None
     ref_result = None
 
@@ -308,6 +354,7 @@ class AbinsCRYSTALTestScale(systemtesting.MantidSystemTest, HelperTestingClass):
     """
     In this benchmark it is tested if scaling is correct.
     """
+
     _wrk_1 = None
     _ref_result = None
     tolerance = None
@@ -336,6 +383,7 @@ class AbinsCASTEPNoH(systemtesting.MantidSystemTest, HelperTestingClass):
     """
     In this benchmark it is tested if calculation for systems without H is correct.
     """
+
     tolerance = None
     ref_result = None
 
@@ -361,6 +409,7 @@ class AbinsCASTEP1DDispersion(systemtesting.MantidSystemTest, HelperTestingClass
     """
     In this benchmark it is tested if calculation of S from phonon dispersion is correct (1D case).
     """
+
     tolerance = None
     ref_result = None
 
@@ -386,6 +435,7 @@ class AbinsDMOL3TestScratch(systemtesting.MantidSystemTest, HelperTestingClass):
     In this benchmark it is tested if calculation from scratch with input data from DMOL3 and for 1-4 quantum
     order events is correct.
     """
+
     tolerance = None
     ref_result = None
 
@@ -414,6 +464,7 @@ class AbinsGAUSSIANestScratch(systemtesting.MantidSystemTest, HelperTestingClass
     In this benchmark it is tested if calculation from scratch with input data from GAUSSIAN and for 1-4 quantum
     order events is correct.
     """
+
     tolerance = None
     ref_result = None
 
@@ -443,6 +494,7 @@ class AbinsBinWidth(systemtesting.MantidSystemTest, HelperTestingClass):
     Calculation performed for crystalline benzene for 1st and 2nd quantum event for output from CASTEP and bin width
     3 cm^-1. This system test should be fast so no need for excludeInPullRequests flag.
     """
+
     tolerance = None
     ref_result = None
 
@@ -468,6 +520,7 @@ class AbinsCASTEPIsotopes(systemtesting.MantidSystemTest, HelperTestingClass):
     produces correct results. Input data is generated by CASTEP. This system test should be fast so no need for
     excludeInPullRequests flag.
     """
+
     tolerance = None
     ref_result = None
 
@@ -486,15 +539,17 @@ class AbinsCASTEPIsotopes(systemtesting.MantidSystemTest, HelperTestingClass):
         self.tolerance = 1e-2
         return self._output_name, self.ref_result
 
-#------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 # Tests for 2D S
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 
 class AbinsCRYSTAL2D(systemtesting.MantidSystemTest, HelperTestingClass):
     """
     Check Abins2D runs successfully for a typical use case
     """
+
     tolerance = None
     ref_result = None
 
@@ -508,20 +563,21 @@ class AbinsCRYSTAL2D(systemtesting.MantidSystemTest, HelperTestingClass):
         self.set_name(name)
         self.set_order(QUANTUM_ORDER_TWO)
         self.set_instrument_name("MARI")
-        params_2d = {'Chopper': 'A',
-                     'ChopperFrequency': str(300),
-                     'IncidentEnergy': str(200),
-                     'EnergyUnits': 'meV'}
+        params_2d = {"Chopper": "A", "ChopperFrequency": str(300), "IncidentEnergy": str(200), "EnergyUnits": "meV"}
 
-        Abins2D(AbInitioProgram="CRYSTAL",
-                VibrationalOrPhononFile="TolueneScratchAbins" + self._extension[self._ab_initio_program],
-                TemperatureInKelvin=self._temperature,
-                Instrument=self._instrument_name,
-                Atoms=self._atoms, SumContributions=self._sum_contributions,
-
-                QuantumOrderEventsNumber=str(self._quantum_order_event), autoconvolution=True,
-                ScaleByCrossSection=self._cross_section_factor, OutputWorkspace=self._output_name,
-                **params_2d)
+        Abins2D(
+            AbInitioProgram="CRYSTAL",
+            VibrationalOrPhononFile="TolueneScratchAbins" + self._extension[self._ab_initio_program],
+            TemperatureInKelvin=self._temperature,
+            Instrument=self._instrument_name,
+            Atoms=self._atoms,
+            SumContributions=self._sum_contributions,
+            QuantumOrderEventsNumber=str(self._quantum_order_event),
+            autoconvolution=True,
+            ScaleByCrossSection=self._cross_section_factor,
+            OutputWorkspace=self._output_name,
+            **params_2d
+        )
 
     def validate(self):
         self.tolerance = 1e-4

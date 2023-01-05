@@ -25,11 +25,14 @@ from ui.sans_isis.sans_gui_observable import SansGuiObservable
 from mantid.api import FileFinder
 from mantid.kernel import Logger, ConfigService, ConfigPropertyObserver
 from sans.command_interface.batch_csv_parser import BatchCsvParser
-from sans.common.enums import (ReductionMode, RangeStepType, RowState, SampleShape,
-                               SaveType, SANSInstrument)
-from sans.gui_logic.gui_common import (add_dir_to_datasearch, get_reduction_mode_from_gui_selection,
-                                       get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
-                                       SANSGuiPropertiesHandler)
+from sans.common.enums import ReductionMode, RangeStepType, RowState, SampleShape, SaveType, SANSInstrument
+from sans.gui_logic.gui_common import (
+    add_dir_to_datasearch,
+    get_reduction_mode_from_gui_selection,
+    get_reduction_mode_strings_for_gui,
+    get_string_for_gui_from_instrument,
+    SANSGuiPropertiesHandler,
+)
 from sans.gui_logic.models.RowEntries import RowEntries
 from sans.gui_logic.models.async_workers.sans_run_tab_async import SansRunTabAsync
 from sans.gui_logic.models.create_state import create_states
@@ -49,8 +52,7 @@ from sans.gui_logic.presenter.settings_diagnostic_presenter import SettingsDiagn
 from sans.state.AllStates import AllStates
 from mantid.plots.plotfunctions import get_plot_fig
 
-row_state_to_colour_mapping = {RowState.UNPROCESSED: '#FFFFFF', RowState.PROCESSED: '#d0f4d0',
-                               RowState.ERROR: '#accbff'}
+row_state_to_colour_mapping = {RowState.UNPROCESSED: "#FFFFFF", RowState.PROCESSED: "#d0f4d0", RowState.ERROR: "#accbff"}
 
 
 def log_times(func):
@@ -95,6 +97,7 @@ def disable_model_updates_decorator(f):
     def wrapper(presenter, *args, **kwargs):
         with disable_model_updates(presenter):
             return f(presenter, *args, **kwargs)
+
     return wrapper
 
 
@@ -192,7 +195,7 @@ class RunTabPresenter(PresenterCommon):
         # Logger
         self.sans_logger = Logger("SANS")
         # Name of graph to output to
-        self.output_graph = 'SANS-Latest'
+        self.output_graph = "SANS-Latest"
         # For matplotlib continuous plotting
         self.output_fig = None
         self.progress = 0
@@ -204,9 +207,7 @@ class RunTabPresenter(PresenterCommon):
         self._table_model.subscribe_to_model_changes(self)
 
         self._processing = False
-        self.batch_process_runner = SansRunTabAsync(self.notify_progress,
-                                                    self.on_processing_finished,
-                                                    self.on_processing_error)
+        self.batch_process_runner = SansRunTabAsync(self.notify_progress, self.on_processing_finished, self.on_processing_error)
 
         # File information for the first input
         self._file_information = None
@@ -219,8 +220,7 @@ class RunTabPresenter(PresenterCommon):
             self.set_view(view)
 
         # Check save dir for display
-        self._save_directory_observer = \
-            SaveDirectoryObserver(self._handle_output_directory_changed)
+        self._save_directory_observer = SaveDirectoryObserver(self._handle_output_directory_changed)
         self._register_observers()
 
     def _setup_sub_presenters(self):
@@ -243,14 +243,13 @@ class RunTabPresenter(PresenterCommon):
         # Workspace Diagnostic page presenter
         self._workspace_diagnostic_presenter = DiagnosticsPagePresenter(self, self._facility)
         # Adjustment Tab presenter
-        self._settings_adjustment_presenter = SettingsAdjustmentPresenter(
-            model=SettingsAdjustmentModel(), view=self._view)
+        self._settings_adjustment_presenter = SettingsAdjustmentPresenter(model=SettingsAdjustmentModel(), view=self._view)
         self._common_sub_presenters.append(self._settings_adjustment_presenter)
 
     def _register_observers(self):
         self._observers = RunTabObservers(
-            reduction_dim = GenericObserver(callback=self.on_reduction_dimensionality_changed),
-            save_options = GenericObserver(callback=self.on_save_options_change)
+            reduction_dim=GenericObserver(callback=self.on_reduction_dimensionality_changed),
+            save_options=GenericObserver(callback=self.on_save_options_change),
         )
 
         view_observable: SansGuiObservable = self._view.get_observable()
@@ -266,22 +265,15 @@ class RunTabPresenter(PresenterCommon):
         self._view.set_reduction_modes(reduction_mode_list)
 
         # Set the step type options for wavelength
-        range_step_types = [RangeStepType.LIN.value,
-                            RangeStepType.LOG.value,
-                            RangeStepType.RANGE_LOG.value,
-                            RangeStepType.RANGE_LIN.value]
+        range_step_types = [RangeStepType.LIN.value, RangeStepType.LOG.value, RangeStepType.RANGE_LOG.value, RangeStepType.RANGE_LIN.value]
         self._view.wavelength_step_type = range_step_types
 
         # Set the geometry options. This needs to include the option to read the sample shape from file.
-        sample_shape = ["Read from file",
-                        SampleShape.CYLINDER,
-                        SampleShape.FLAT_PLATE,
-                        SampleShape.DISC]
+        sample_shape = ["Read from file", SampleShape.CYLINDER, SampleShape.FLAT_PLATE, SampleShape.DISC]
         self._view.sample_shape = sample_shape
 
         # Set the q range
-        self._view.q_1d_step_type = [RangeStepType.LIN.value,
-                                     RangeStepType.LOG.value]
+        self._view.q_1d_step_type = [RangeStepType.LIN.value, RangeStepType.LOG.value]
 
     def _handle_output_directory_changed(self, new_directory):
         """
@@ -332,8 +324,7 @@ class RunTabPresenter(PresenterCommon):
         self._beam_centre_presenter.set_view(self._view.beam_centre)
 
         # Set the appropriate view for the diagnostic page
-        self._workspace_diagnostic_presenter.set_view(self._view.diagnostic_page,
-                                                      self._view.instrument)
+        self._workspace_diagnostic_presenter.set_view(self._view.diagnostic_page, self._view.instrument)
 
         self._view.setup_layout()
 
@@ -343,20 +334,18 @@ class RunTabPresenter(PresenterCommon):
         self._view.set_out_default_save_can()
 
         self._view.set_hinting_line_edit_for_column(
-            self._table_model.column_name_converter.index('sample_shape'),
-            self._table_model.get_sample_shape_hint_strategy())
+            self._table_model.column_name_converter.index("sample_shape"), self._table_model.get_sample_shape_hint_strategy()
+        )
 
         self._view.set_hinting_line_edit_for_column(
-            self._table_model.column_name_converter.index('options_column_model'),
-            self._table_model.get_options_hint_strategy())
+            self._table_model.column_name_converter.index("options_column_model"), self._table_model.get_options_hint_strategy()
+        )
 
         self._view.gui_properties_handler = SANSGuiPropertiesHandler(
-                                                {"user_file": (self._view.set_out_default_user_file,
-                                                               str)},
-                                                line_edits={"user_file":
-                                                            self._view.user_file_line_edit})
-        if self._view.get_user_file_path() == '':
-            self._view.gui_properties_handler.set_setting("user_file", '')
+            {"user_file": (self._view.set_out_default_user_file, str)}, line_edits={"user_file": self._view.user_file_line_edit}
+        )
+        if self._view.get_user_file_path() == "":
+            self._view.gui_properties_handler.set_setting("user_file", "")
 
     @property
     def instrument(self):
@@ -388,8 +377,7 @@ class RunTabPresenter(PresenterCommon):
         self._view.reset_all_fields_to_default()
         try:
             # Always set the instrument to NoInstrument unless otherwise specified as our fallback
-            user_file_items = FileLoading.load_user_file(file_path=user_file_path,
-                                                         file_information=self._file_information)
+            user_file_items = FileLoading.load_user_file(file_path=user_file_path, file_information=self._file_information)
         except (UserFileLoadException, TomlValidationError) as e:
             # It is in this exception block that loading fails if the file is invalid (e.g. a csv)
             self._on_user_file_load_failure(e, error_msg + " when reading file.", use_error_name=True)
@@ -399,8 +387,7 @@ class RunTabPresenter(PresenterCommon):
             # 4. Populate the model and update sub-presenters
             self._model = StateGuiModel(user_file_items)
             self._model.user_file = user_file_path
-            self._settings_adjustment_presenter.set_model(
-                SettingsAdjustmentModel(all_states=user_file_items))
+            self._settings_adjustment_presenter.set_model(SettingsAdjustmentModel(all_states=user_file_items))
             # 5. Update the views.
             self.update_view_from_model()
 
@@ -421,8 +408,7 @@ class RunTabPresenter(PresenterCommon):
             # If we don't catch all exceptions, SANS can fail to open if last loaded
             # user file contains an error that would not otherwise be caught
             traceback.print_exc()
-            self._on_user_file_load_failure(other_error, "Unknown error in loading user file.",
-                                            use_error_name=True)
+            self._on_user_file_load_failure(other_error, "Unknown error in loading user file.", use_error_name=True)
 
     def _on_user_file_load_failure(self, e, message, use_error_name=False):
         self._setup_instrument_specific_settings(SANSInstrument.NO_INSTRUMENT)
@@ -448,7 +434,8 @@ class RunTabPresenter(PresenterCommon):
             if not os.path.exists(batch_file_path):
                 raise RuntimeError(
                     "The batch file path {} does not exist. Make sure a valid batch file path"
-                    " has been specified.".format(batch_file_path))
+                    " has been specified.".format(batch_file_path)
+                )
 
             # 2. Read the batch file
             parsed_rows = self._csv_parser.parse_batch_file(batch_file_path)
@@ -462,7 +449,7 @@ class RunTabPresenter(PresenterCommon):
 
         except (RuntimeError, ValueError, SyntaxError, IOError, KeyError) as e:
             self.sans_logger.error("Loading of the batch file failed. {}".format(str(e)))
-            self.display_warning_box('Warning', 'Loading of the batch file failed', str(e))
+            self.display_warning_box("Warning", "Loading of the batch file failed", str(e))
 
         self.on_update_rows()
 
@@ -509,7 +496,7 @@ class RunTabPresenter(PresenterCommon):
         # when they hit a button, not as they type
         self._table_model.replace_table_entry(index, row_entries)
         self._view.change_row_color(row_state_to_colour_mapping[RowState.UNPROCESSED], index)
-        self._view.set_row_tooltip('', index)
+        self._view.set_row_tooltip("", index)
         self._beam_centre_presenter.on_update_rows()
         self._masking_table_presenter.on_update_rows()
         self.update_view_from_table_model()
@@ -527,8 +514,7 @@ class RunTabPresenter(PresenterCommon):
         Plot a graph if continuous output specified.
         """
         if self._view.plot_results:
-            ax_properties = {'yscale': 'log',
-                             'xscale': 'log'}
+            ax_properties = {"yscale": "log", "xscale": "log"}
             fig, _ = get_plot_fig(ax_properties=ax_properties, window_title=self.output_graph)
             fig.show()
             self.output_fig = fig
@@ -540,8 +526,8 @@ class RunTabPresenter(PresenterCommon):
         :param number_steps: The value at which the progress bar is full
         """
         self.progress = current
-        setattr(self._view, 'progress_bar_value', current)
-        setattr(self._view, 'progress_bar_maximum', number_steps)
+        setattr(self._view, "progress_bar_value", current)
+        setattr(self._view, "progress_bar_maximum", number_steps)
 
     def _process_rows(self, rows):
         """
@@ -571,8 +557,14 @@ class RunTabPresenter(PresenterCommon):
         save_can = self._view.save_can
 
         self.batch_process_runner.process_states_on_thread(
-            row_index_pair, self.get_states, self._view.use_optimizations,
-            self._view.output_mode, self._view.plot_results, self.output_fig, save_can)
+            row_index_pair,
+            self.get_states,
+            self._view.use_optimizations,
+            self._view.output_mode,
+            self._view.plot_results,
+            self.output_fig,
+            save_can,
+        )
 
     def on_reduction_dimensionality_changed(self):
         self._run_tab_model.update_reduction_mode(self._view.reduction_dimensionality)
@@ -587,11 +579,9 @@ class RunTabPresenter(PresenterCommon):
         we want to raise an error here. (If we don't, an error will be raised on attempting
         to save after performing the reductions)
         """
-        if (self._view.output_mode_file_radio_button.isChecked()
-                or self._view.output_mode_both_radio_button.isChecked()):
+        if self._view.output_mode_file_radio_button.isChecked() or self._view.output_mode_both_radio_button.isChecked():
             if self._view.save_types == [SaveType.NO_TYPE]:
-                raise ValueError("You have selected an output mode which saves to file, "
-                                 "but no file types have been selected.")
+                raise ValueError("You have selected an output mode which saves to file, " "but no file types have been selected.")
 
     def on_output_mode_changed(self):
         """
@@ -665,17 +655,17 @@ class RunTabPresenter(PresenterCommon):
 
     @staticmethod
     def _get_filename_to_save(filename):
-        if filename in (None, ''):
+        if filename in (None, ""):
             return None
 
         if isinstance(filename, tuple):
             # Filenames returned as tuple of (filename, file ending) in qt5
             filename = filename[0]
-            if filename in (None, ''):
+            if filename in (None, ""):
                 return None
 
-        if filename[-4:] != '.csv':
-            filename += '.csv'
+        if filename[-4:] != ".csv":
+            filename += ".csv"
         return filename
 
     def on_export_table_clicked(self):
@@ -718,7 +708,7 @@ class RunTabPresenter(PresenterCommon):
             logger_msg += " {}:".format(type(error).__name__)
         logger_msg += " {}"
         self.sans_logger.error(logger_msg.format(str(error)))
-        self.display_warning_box('Warning', context_msg, str(error))
+        self.display_warning_box("Warning", context_msg, str(error))
 
     def display_warning_box(self, title, text, detailed_text):
         self._view.display_message_box(title, text, detailed_text)
@@ -729,13 +719,13 @@ class RunTabPresenter(PresenterCommon):
 
     def notify_progress(self, row_index, out_shift_factors, out_scale_factors):
         self.progress += 1
-        setattr(self._view, 'progress_bar_value', self.progress)
+        setattr(self._view, "progress_bar_value", self.progress)
 
         row_entry = self._table_model.get_row(row_index)
 
         if out_scale_factors and out_shift_factors:
-            row_entry.options.set_developer_option('MergeScale', round(out_scale_factors[0], 3))
-            row_entry.options.set_developer_option('MergeShift', round(out_shift_factors[0], 3))
+            row_entry.options.set_developer_option("MergeScale", round(out_scale_factors[0], 3))
+            row_entry.options.set_developer_option("MergeShift", round(out_shift_factors[0], 3))
 
         row_entry.state = RowState.PROCESSED
         row_entry.tool_tip = None
@@ -743,7 +733,7 @@ class RunTabPresenter(PresenterCommon):
 
     def increment_progress(self):
         self.progress += 1
-        setattr(self._view, 'progress_bar_value', self.progress)
+        setattr(self._view, "progress_bar_value", self.progress)
 
     # ----------------------------------------------------------------------------------------------
     # Row manipulation
@@ -767,7 +757,7 @@ class RunTabPresenter(PresenterCommon):
         selected_rows = self._view.get_selected_rows()
 
         empty_row = RowEntries()
-        if len(selected_rows) >= 1 :
+        if len(selected_rows) >= 1:
             self._table_model.insert_row_at(row_index=selected_rows[0] + 1, row_entry=empty_row)
         else:
             self._table_model.append_table_entry(empty_row)
@@ -911,10 +901,9 @@ class RunTabPresenter(PresenterCommon):
         # 3. Go through each row and construct a state object
         states, errors = None, None
         if table_model and state_model_with_view_update:
-            states, errors = create_states(state_model_with_view_update,
-                                           facility=self._facility,
-                                           row_entries=row_entries,
-                                           file_lookup=file_lookup)
+            states, errors = create_states(
+                state_model_with_view_update, facility=self._facility, row_entries=row_entries, file_lookup=file_lookup
+            )
 
         if errors and not suppress_warnings:
             self.sans_logger.warning("Errors in getting states...")
@@ -926,7 +915,7 @@ class RunTabPresenter(PresenterCommon):
     def get_row(self, row_index):
         return self._table_model.get_row(index=row_index)
 
-    def get_state_for_row(self, row_index, file_lookup=True, suppress_warnings=False)->Optional[AllStates]:
+    def get_state_for_row(self, row_index, file_lookup=True, suppress_warnings=False) -> Optional[AllStates]:
         """
         Creates the state for a particular row.
         :param row_index: the row index
@@ -937,12 +926,10 @@ class RunTabPresenter(PresenterCommon):
         :return: a state if the index is valid and there is a state else None
         """
         row_entry = self._table_model.get_row(row_index)
-        states, errors = self.get_states(row_entries=[row_entry], file_lookup=file_lookup,
-                                         suppress_warnings=suppress_warnings)
+        states, errors = self.get_states(row_entries=[row_entry], file_lookup=file_lookup, suppress_warnings=suppress_warnings)
         if not states:
             if not suppress_warnings:
-                self.sans_logger.warning(
-                    "There does not seem to be data for a row {}.".format(row_index))
+                self.sans_logger.warning("There does not seem to be data for a row {}.".format(row_index))
             return None
 
         return states[row_entry].all_states
@@ -1021,8 +1008,12 @@ class RunTabPresenter(PresenterCommon):
         self._set_on_view("q_resolution_sample_w", self.DEFAULT_DECIMAL_PLACES_MM)
 
         # If we have h1, h2, w1, and w2 selected then we want to select the rectangular aperture.
-        is_rectangular = self._model.q_resolution_source_h and self._model.q_resolution_sample_h and \
-                         self._model.q_resolution_source_w and self._model.q_resolution_sample_w  # noqa
+        is_rectangular = (
+            self._model.q_resolution_source_h
+            and self._model.q_resolution_sample_h
+            and self._model.q_resolution_source_w
+            and self._model.q_resolution_sample_w
+        )  # noqa
         self._view.set_q_resolution_shape_to_rectangular(is_rectangular)
 
     def _set_on_view_q_rebin_string(self):
@@ -1150,7 +1141,7 @@ class RunTabPresenter(PresenterCommon):
             q_1d_step = self._view.q_1d_step
             if q_1d_min and q_1d_max and q_1d_step and q_1d_step_type:
                 q_1d_rebin_string = str(q_1d_min) + ","
-                q_1d_step_type_factor = -1. if q_1d_step_type is RangeStepType.LOG else 1.
+                q_1d_step_type_factor = -1.0 if q_1d_step_type is RangeStepType.LOG else 1.0
                 q_1d_rebin_string += str(q_1d_step_type_factor * q_1d_step) + ","
                 q_1d_rebin_string += str(q_1d_max)
                 state_model.q_1d_rebin_string = q_1d_rebin_string

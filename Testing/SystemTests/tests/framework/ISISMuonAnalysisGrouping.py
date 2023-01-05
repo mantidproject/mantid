@@ -4,12 +4,13 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,attribute-defined-outside-init,too-many-instance-attributes,too-few-public-methods
+# pylint: disable=no-init,attribute-defined-outside-init,too-many-instance-attributes,too-few-public-methods
 import systemtesting
 from mantid.simpleapi import *
 
 from abc import ABCMeta, abstractmethod
-#----------------------------------------------------------------------
+
+# ----------------------------------------------------------------------
 
 
 class ISISMuonAnalysisGrouping(systemtesting.MantidSystemTest, metaclass=ABCMeta):
@@ -32,8 +33,7 @@ class ISISMuonAnalysisGrouping(systemtesting.MantidSystemTest, metaclass=ABCMeta
     @abstractmethod
     def get_reference_file(self):
         """Returns the name of the reference file to compare against"""
-        raise NotImplementedError("Implmenent get_reference_file to return "
-                                  "the name of the file to compare against.")
+        raise NotImplementedError("Implmenent get_reference_file to return " "the name of the file to compare against.")
 
     def get_result_workspace(self):
         """Returns the result workspace to be checked"""
@@ -44,19 +44,19 @@ class ISISMuonAnalysisGrouping(systemtesting.MantidSystemTest, metaclass=ABCMeta
 
         self._validate_properties()
 
-        outputWS = (self.instr_name + str(self.sample_run) )
+        outputWS = self.instr_name + str(self.sample_run)
 
-      # Load
-        LoadMuonNexus(Filename=self.file_name, OutputWorkspace='MuonAnalysis' )
+        # Load
+        LoadMuonNexus(Filename=self.file_name, OutputWorkspace="MuonAnalysis")
 
-      # Group, Crop, Clone
+        # Group, Crop, Clone
         if self.period_data:
-            GroupDetectors(InputWorkspace='MuonAnalysis_1', OutputWorkspace=outputWS, MapFile=self.map_name)
+            GroupDetectors(InputWorkspace="MuonAnalysis_1", OutputWorkspace=outputWS, MapFile=self.map_name)
         else:
-            GroupDetectors(InputWorkspace='MuonAnalysis', OutputWorkspace=outputWS, MapFile=self.map_name)
+            GroupDetectors(InputWorkspace="MuonAnalysis", OutputWorkspace=outputWS, MapFile=self.map_name)
         CropWorkspace(InputWorkspace=outputWS, OutputWorkspace=outputWS, XMin=self.x_min, XMax=self.x_max)
-        CloneWorkspace(InputWorkspace=outputWS, OutputWorkspace=(outputWS + '_Raw') )
-        GroupWorkspaces(InputWorkspaces=outputWS + ',' + outputWS + '_Raw', OutputWorkspace='MuonGroup')
+        CloneWorkspace(InputWorkspace=outputWS, OutputWorkspace=(outputWS + "_Raw"))
+        GroupWorkspaces(InputWorkspaces=outputWS + "," + outputWS + "_Raw", OutputWorkspace="MuonGroup")
 
         if self.logs:
             Logarithm(InputWorkspace=outputWS, OutputWorkspace=outputWS)
@@ -66,16 +66,16 @@ class ISISMuonAnalysisGrouping(systemtesting.MantidSystemTest, metaclass=ABCMeta
     def validate(self):
         """Returns the name of the workspace & file to compare"""
         self.tolerance = 1e-7
-        self.disableChecking.append('SpectraMap')
-        self.disableChecking.append('Instrument')
+        self.disableChecking.append("SpectraMap")
+        self.disableChecking.append("Instrument")
         result = self.get_result_workspace()
         reference = self.get_reference_file()
         return result, reference
 
     def _validate_properties(self):
         """Check the object properties are
-      in an expected state to continue
-      """
+        in an expected state to continue
+        """
         if not isinstance(self.file_name, str):
             raise RuntimeError("file_name property should be a string")
         if not isinstance(self.map_name, str):
@@ -90,15 +90,15 @@ class ISISMuonAnalysisGrouping(systemtesting.MantidSystemTest, metaclass=ABCMeta
             raise RuntimeError("log property should be a bool")
 
 
-#------------------------- ARGUS group fwd test -------------------------------------------------
+# ------------------------- ARGUS group fwd test -------------------------------------------------
+
 
 class ARGUSAnalysisFromFile(ISISMuonAnalysisGrouping):
-
     def __init__(self):
         ISISMuonAnalysisGrouping.__init__(self)
-        self.file_name = 'argus0044309.nxs'
-        self.map_name = 'ARGUSFwdGrouping.xml'
-        self.instr_name = 'ARGUS'
+        self.file_name = "argus0044309.nxs"
+        self.map_name = "ARGUSFwdGrouping.xml"
+        self.instr_name = "ARGUS"
         self.sample_run = 44309
         self.period_data = False
         self.asym = False
@@ -110,15 +110,15 @@ class ARGUSAnalysisFromFile(ISISMuonAnalysisGrouping):
         return "ARGUSAnalysisLogFwd.nxs"
 
 
-#------------------------- EMU group fwd test -------------------------------------------------
+# ------------------------- EMU group fwd test -------------------------------------------------
+
 
 class EMUAnalysisFromFile(ISISMuonAnalysisGrouping):
-
     def __init__(self):
         ISISMuonAnalysisGrouping.__init__(self)
-        self.file_name = 'emu00031895.nxs'
-        self.map_name = 'EMUFwdGrouping.xml'
-        self.instr_name = 'EMU'
+        self.file_name = "emu00031895.nxs"
+        self.map_name = "EMUFwdGrouping.xml"
+        self.instr_name = "EMU"
         self.sample_run = 31895
         self.period_data = True
         self.asym = True
@@ -130,15 +130,15 @@ class EMUAnalysisFromFile(ISISMuonAnalysisGrouping):
         return "EMUAnalysisAsymFwd.nxs"
 
 
-#------------------------- HiFi group 0 test -------------------------------------------------
+# ------------------------- HiFi group 0 test -------------------------------------------------
+
 
 class HiFiAnalysisFromFile(ISISMuonAnalysisGrouping):
-
     def __init__(self):
         ISISMuonAnalysisGrouping.__init__(self)
-        self.file_name = 'hifi00038401.nxs'
-        self.map_name = 'HiFi0Grouping.xml'
-        self.instr_name = 'Hifi'
+        self.file_name = "hifi00038401.nxs"
+        self.map_name = "HiFi0Grouping.xml"
+        self.instr_name = "Hifi"
         self.sample_run = 38401
         self.period_data = False
         self.asym = True
@@ -150,15 +150,15 @@ class HiFiAnalysisFromFile(ISISMuonAnalysisGrouping):
         return "HiFiAnalysisAsym0.nxs"
 
 
-#------------------------- MuSR Group 1 test -------------------------------------------------
+# ------------------------- MuSR Group 1 test -------------------------------------------------
+
 
 class MuSRAnalysisFromFile(ISISMuonAnalysisGrouping):
-
     def __init__(self):
         ISISMuonAnalysisGrouping.__init__(self)
-        self.file_name = 'MUSR00015192.nxs'
-        self.map_name = 'MuSR1Grouping.xml'
-        self.instr_name = 'MuSR'
+        self.file_name = "MUSR00015192.nxs"
+        self.map_name = "MuSR1Grouping.xml"
+        self.instr_name = "MuSR"
         self.sample_run = 15192
         self.period_data = True
         self.asym = False

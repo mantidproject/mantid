@@ -50,7 +50,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
     required_arguments, optional_arguments = 0, 0
     option_spec = {"filename": str, "sanity_checks": int, "cpp": str, "h": str, "py": str}
 
-    #IMPORTANT: keys must match the option spec above
+    # IMPORTANT: keys must match the option spec above
     # - apart from filename and sanity_checks
     file_types = {"h": "C++ header", "cpp": "C++ source", "py": "Python"}
     file_lookup = {}
@@ -92,8 +92,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
                 fname = os.path.join(self.source_root, file_paths[extension])
                 file_paths[extension] = fname
                 if not os.path.exists(file_paths[extension]):
-                    error_string += "Cannot find {} file at {}\n".format(
-                        extension, file_paths[extension])
+                    error_string += "Cannot find {} file at {}\n".format(extension, file_paths[extension])
 
         # throw accumulated errors now if you have any
         if error_string != "":
@@ -119,11 +118,25 @@ class SourceLinkDirective(AlgorithmBaseDirective):
                 suggested_path = "os_agnostic_path_to_file_from_source_root"
                 if len(path_list) > 1:
                     suggested_path = path_list[0].replace(self.source_root, "")
-                raise SourceLinkError("Found multiple possibilities for " + file_name + "."
-                                      + extension + "\n" + "Possible matches" + str(path_list)
-                                      + "\n" + "Specify one using the " + extension + " option\n"
-                                      + "e.g. \n" + ".. sourcelink:\n" + "      :" + extension
-                                      + ": " + suggested_path)
+                raise SourceLinkError(
+                    "Found multiple possibilities for "
+                    + file_name
+                    + "."
+                    + extension
+                    + "\n"
+                    + "Possible matches"
+                    + str(path_list)
+                    + "\n"
+                    + "Specify one using the "
+                    + extension
+                    + " option\n"
+                    + "e.g. \n"
+                    + ".. sourcelink:\n"
+                    + "      :"
+                    + extension
+                    + ": "
+                    + suggested_path
+                )
 
             return self.file_lookup[file_name][extension]
         except KeyError:
@@ -137,10 +150,10 @@ class SourceLinkDirective(AlgorithmBaseDirective):
         """
         if self.__source_root is None:
             env = self.state.document.settings.env
-            direc = env.srcdir  #= C:\Mantid\Code\Mantid\docs\source
+            direc = env.srcdir  # = C:\Mantid\Code\Mantid\docs\source
             direc = os.path.join(direc, "..", "..")  # assume root is two levels up
             direc = os.path.abspath(direc)
-            self.__source_root = direc  #pylint: disable=protected-access
+            self.__source_root = direc  # pylint: disable=protected-access
 
         return self.__source_root
 
@@ -158,17 +171,16 @@ class SourceLinkDirective(AlgorithmBaseDirective):
                 continue  # don't check or add to the cache
             for fname in file_list:
                 (base_name, file_extensions) = os.path.splitext(fname)
-                #strip the dot from the extension
+                # strip the dot from the extension
                 file_extensions = file_extensions[1:]
-                #build the data object that is e.g.
-                #file_lookup["Rebin2"]["cpp"] = ['C:\Mantid\Code\Mantid\Framework\Algorithms\src\Rebin2.cpp','possible other location']
+                # build the data object that is e.g.
+                # file_lookup["Rebin2"]["cpp"] = ['C:\Mantid\Code\Mantid\Framework\Algorithms\src\Rebin2.cpp','possible other location']
                 if file_extensions in self.file_types.keys():
                     if base_name not in self.file_lookup.keys():
                         self.file_lookup[base_name] = {}
                     if file_extensions not in self.file_lookup[base_name].keys():
                         self.file_lookup[base_name][file_extensions] = []
-                    self.file_lookup[base_name][file_extensions].append(
-                        os.path.join(dir_name, fname))
+                    self.file_lookup[base_name][file_extensions].append(os.path.join(dir_name, fname))
 
     def output_to_page(self, file_paths, file_name, sanity_checks):
         """
@@ -188,21 +200,44 @@ class SourceLinkDirective(AlgorithmBaseDirective):
             suggested_path = "os_agnostic_path_to_file_from_Code/Mantid"
             if not valid_ext_list:
                 raise SourceLinkError(
-                    "No file possibilities for " + file_name + " have been found\n"
+                    "No file possibilities for "
+                    + file_name
+                    + " have been found\n"
                     + "Please specify a better one using the :filename: option or use the "
-                    + str(list(self.file_types.keys())) + " options\n" + "e.g. \n"
-                    + ".. sourcelink:\n" + "      :" + list(self.file_types.keys())[0] + ": "
-                    + suggested_path + "\n " + "or \n" + ".. sourcelink:\n" + "      :filename: "
-                    + file_name)
+                    + str(list(self.file_types.keys()))
+                    + " options\n"
+                    + "e.g. \n"
+                    + ".. sourcelink:\n"
+                    + "      :"
+                    + list(self.file_types.keys())[0]
+                    + ": "
+                    + suggested_path
+                    + "\n "
+                    + "or \n"
+                    + ".. sourcelink:\n"
+                    + "      :filename: "
+                    + file_name
+                )
 
             # if the have a cpp we should also have a h
             if ("cpp" in valid_ext_list) ^ ("h" in valid_ext_list):
-                raise SourceLinkError("Only one of .h and .cpp found for " + file_name + "\n"
-                                      + "valid files found for " + str(valid_ext_list) + "\n"
-                                      + "Please specify the missing one using an "
-                                      + str(list(self.file_types.keys())) + " option\n" + "e.g. \n"
-                                      + ".. sourcelink:\n" + "      :"
-                                      + list(self.file_types.keys())[0] + ": " + suggested_path)
+                raise SourceLinkError(
+                    "Only one of .h and .cpp found for "
+                    + file_name
+                    + "\n"
+                    + "valid files found for "
+                    + str(valid_ext_list)
+                    + "\n"
+                    + "Please specify the missing one using an "
+                    + str(list(self.file_types.keys()))
+                    + " option\n"
+                    + "e.g. \n"
+                    + ".. sourcelink:\n"
+                    + "      :"
+                    + list(self.file_types.keys())[0]
+                    + ": "
+                    + suggested_path
+                )
 
     def output_path_to_page(self, filepath, extension):
         """
@@ -210,8 +245,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
         """
         _, f_name = os.path.split(filepath)
 
-        self.add_rst("{}: `{} <{}>`_\n\n".format(
-            self.file_types[extension], f_name, self.convert_path_to_github_url(filepath)))
+        self.add_rst("{}: `{} <{}>`_\n\n".format(self.file_types[extension], f_name, self.convert_path_to_github_url(filepath)))
 
     def convert_path_to_github_url(self, file_path):
         """
@@ -239,4 +273,4 @@ def setup(app):
     Args:
       app: The main Sphinx application object
     """
-    app.add_directive('sourcelink', SourceLinkDirective)
+    app.add_directive("sourcelink", SourceLinkDirective)

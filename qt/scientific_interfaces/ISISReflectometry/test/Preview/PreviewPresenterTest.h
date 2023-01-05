@@ -15,6 +15,7 @@
 #include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MockInstViewModel.h"
 #include "MockPlotPresenter.h"
+#include "MockPreviewDockedWidgets.h"
 #include "MockPreviewModel.h"
 #include "MockPreviewView.h"
 #include "PreviewPresenter.h"
@@ -53,6 +54,7 @@ class PreviewPresenterTest : public CxxTest::TestSuite {
   using MockJobManagerT = std::unique_ptr<MockJobManager>;
   using MockModelT = std::unique_ptr<MockPreviewModel>;
   using MockViewT = std::unique_ptr<MockPreviewView>;
+  using MockPreviewDockedWidgetsT = std::unique_ptr<MockPreviewDockedWidgets>;
   using MockRegionSelectorT = std::unique_ptr<MockRegionSelector>;
   using MockPlotPresenterT = std::unique_ptr<MockPlotPresenter>;
 
@@ -75,16 +77,17 @@ public:
     auto mockModel = makeModel();
     auto mockView = makeView();
     auto mockInstViewModel = makeInstViewModel();
+    auto mockDockedWidgets = makePreviewDockedWidgets();
     auto mockJobManager = makeJobManager();
     auto const workspaceName = std::string("test workspace");
 
     EXPECT_CALL(*mockView, getWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
     EXPECT_CALL(*mockModel, loadWorkspaceFromAds(workspaceName)).Times(1).WillOnce(Return(true));
     EXPECT_CALL(*mockModel, loadAndPreprocessWorkspaceAsync(_, _)).Times(0);
-    expectLoadWorkspaceCompletedUpdatesInstrumentView(*mockView, *mockModel, *mockInstViewModel);
+    expectLoadWorkspaceCompletedUpdatesInstrumentView(*mockDockedWidgets, *mockModel, *mockInstViewModel);
 
-    auto presenter = PreviewPresenter(
-        packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), std::move(mockInstViewModel)));
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager),
+                                               std::move(mockInstViewModel), std::move(mockDockedWidgets)));
     presenter.notifyLoadWorkspaceRequested();
   }
 
@@ -97,7 +100,6 @@ public:
     EXPECT_CALL(*mockView, getWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
     EXPECT_CALL(*mockModel, loadWorkspaceFromAds(workspaceName)).Times(1).WillOnce(Throw(error));
     EXPECT_CALL(*mockModel, loadAndPreprocessWorkspaceAsync(_, _)).Times(0);
-    EXPECT_CALL(*mockView, plotInstView(_, _, _)).Times(0);
 
     auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel)));
     TS_ASSERT_THROWS_NOTHING(presenter.notifyLoadWorkspaceRequested());
@@ -112,7 +114,6 @@ public:
     EXPECT_CALL(*mockView, getWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
     EXPECT_CALL(*mockModel, loadWorkspaceFromAds(workspaceName)).Times(1).WillOnce(Throw(error));
     EXPECT_CALL(*mockModel, loadAndPreprocessWorkspaceAsync(_, _)).Times(0);
-    EXPECT_CALL(*mockView, plotInstView(_, _, _)).Times(0);
 
     auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel)));
     TS_ASSERT_THROWS(presenter.notifyLoadWorkspaceRequested(), std::invalid_argument const &);
@@ -122,18 +123,22 @@ public:
     auto mockModel = makeModel();
     auto mockView = makeView();
     auto mockJobManager = makeJobManager();
+    auto mockDockedWidgets = makePreviewDockedWidgets();
     auto mockRegionSelector = makeRegionSelector();
 
-    expectRegionSelectorToolbarEnabled(*mockView, false);
-    expectLoadWorkspaceCompletedForLinearDetector(*mockView, *mockModel, *mockJobManager, *mockRegionSelector);
+    expectRegionSelectorToolbarEnabled(*mockDockedWidgets, false);
+    expectLoadWorkspaceCompletedForLinearDetector(*mockView, *mockModel, *mockJobManager, *mockDockedWidgets,
+                                                  *mockRegionSelector);
+
+    auto rawMockDockedWidgets = mockDockedWidgets.get();
 
     auto deps = packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), makeInstViewModel(),
-                         std::move(mockRegionSelector));
+                         std::move(mockDockedWidgets), std::move(mockRegionSelector));
     auto presenter = PreviewPresenter(std::move(deps));
 
-    expectRegionSelectorToolbarEnabled(*mockView, true);
+    expectRegionSelectorToolbarEnabled(*rawMockDockedWidgets, true);
 
-    EXPECT_CALL(*mockView, setInstViewToolbarEnabled(Eq(false))).Times(1);
+    EXPECT_CALL(*rawMockDockedWidgets, setInstViewToolbarEnabled(Eq(false))).Times(1);
     presenter.notifyLoadWorkspaceCompleted();
   }
 
@@ -141,11 +146,13 @@ public:
     auto mockModel = makeModel();
     auto mockView = makeView();
     auto mockJobManager = makeJobManager();
+    auto mockDockedWidgets = makePreviewDockedWidgets();
     auto mockInstViewModel = makeInstViewModel();
 
-    expectLoadWorkspaceCompletedUpdatesInstrumentView(*mockView, *mockModel, *mockInstViewModel);
+    expectLoadWorkspaceCompletedUpdatesInstrumentView(*mockDockedWidgets, *mockModel, *mockInstViewModel);
 
-    auto deps = packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), std::move(mockInstViewModel));
+    auto deps = packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), std::move(mockInstViewModel),
+                         std::move(mockDockedWidgets));
     auto presenter = PreviewPresenter(std::move(deps));
     presenter.notifyLoadWorkspaceCompleted();
   }
@@ -162,23 +169,26 @@ public:
   }
 
   void test_notify_inst_view_select_rect_requested() {
-    auto mockView = makeView();
-    expectInstViewSetToSelectRectMode(*mockView);
-    auto presenter = PreviewPresenter(packDeps(mockView.get()));
+    auto mockDockedWidgets = makePreviewDockedWidgets();
+    expectInstViewSetToSelectRectMode(*mockDockedWidgets);
+    auto presenter = PreviewPresenter(
+        packDeps(makeView().get(), makeModel(), makeJobManager(), makeInstViewModel(), std::move(mockDockedWidgets)));
     presenter.notifyInstViewSelectRectRequested();
   }
 
   void test_notify_inst_view_pan_requested() {
-    auto mockView = makeView();
-    expectInstViewSetToEditMode(*mockView);
-    auto presenter = PreviewPresenter(packDeps(mockView.get()));
+    auto mockDockedWidgets = makePreviewDockedWidgets();
+    expectInstViewSetToEditMode(*mockDockedWidgets);
+    auto presenter = PreviewPresenter(
+        packDeps(makeView().get(), makeModel(), makeJobManager(), makeInstViewModel(), std::move(mockDockedWidgets)));
     presenter.notifyInstViewEditRequested();
   }
 
   void test_notify_inst_view_zoom_requested() {
-    auto mockView = makeView();
-    expectInstViewSetToZoomMode(*mockView);
-    auto presenter = PreviewPresenter(packDeps(mockView.get()));
+    auto mockDockedWidgets = makePreviewDockedWidgets();
+    expectInstViewSetToZoomMode(*mockDockedWidgets);
+    auto presenter = PreviewPresenter(
+        packDeps(makeView().get(), makeModel(), makeJobManager(), makeInstViewModel(), std::move(mockDockedWidgets)));
     presenter.notifyInstViewZoomRequested();
   }
 
@@ -187,11 +197,12 @@ public:
     auto mockModel = makeModel();
     auto mockInstViewModel = makeInstViewModel();
     auto mockJobManager = makeJobManager();
-    expectInstViewSetToEditMode(*mockView);
-    expectSumBanksCalledOnSelectedDetectors(*mockView, *mockModel, *mockInstViewModel, *mockJobManager);
+    auto mockDockedWidgets = makePreviewDockedWidgets();
+    expectInstViewSetToEditMode(*mockDockedWidgets);
+    expectSumBanksCalledOnSelectedDetectors(*mockModel, *mockInstViewModel, *mockDockedWidgets, *mockJobManager);
     // TODO check that the model is called to sum banks
-    auto presenter = PreviewPresenter(
-        packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), std::move(mockInstViewModel)));
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager),
+                                               std::move(mockInstViewModel), std::move(mockDockedWidgets)));
     presenter.notifyInstViewShapeChanged();
   }
 
@@ -220,18 +231,22 @@ public:
     auto mockModel = makeModel();
     auto mockJobManager = makeJobManager();
     auto mockRegionSelector = makeRegionSelector();
+    auto mockDockedWidgets = makePreviewDockedWidgets();
 
     auto ws = createRectangularDetectorWorkspace();
     EXPECT_CALL(*mockModel, getSummedWs).Times(1).WillOnce(Return(ws));
     EXPECT_CALL(*mockRegionSelector, updateWorkspace(Eq(ws))).Times(1);
-    expectRegionSelectorToolbarEnabled(*mockView, false);
+    expectRegionSelectorToolbarEnabled(*mockDockedWidgets, false);
 
     expectRunReduction(*mockView, *mockModel, *mockJobManager, *mockRegionSelector);
 
-    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager),
-                                               makeInstViewModel(), std::move(mockRegionSelector)));
+    auto rawMockDockedWidgets = mockDockedWidgets.get();
 
-    expectRegionSelectorToolbarEnabled(*mockView, true);
+    auto presenter =
+        PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), makeInstViewModel(),
+                                  std::move(mockDockedWidgets), std::move(mockRegionSelector)));
+
+    expectRegionSelectorToolbarEnabled(*rawMockDockedWidgets, true);
 
     presenter.notifySumBanksCompleted();
   }
@@ -240,41 +255,45 @@ public:
     auto mockView = makeView();
     auto mockModel = makeModel();
     auto mockJobManager = makeJobManager();
+    auto mockDockedWidgets = makePreviewDockedWidgets();
     auto mockRegionSelector = makeRegionSelector();
 
     expectRunReduction(*mockView, *mockModel, *mockJobManager, *mockRegionSelector);
 
-    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager),
-                                               makeInstViewModel(), std::move(mockRegionSelector)));
+    auto presenter =
+        PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), makeInstViewModel(),
+                                  std::move(mockDockedWidgets), std::move(mockRegionSelector)));
 
     presenter.notifyUpdateAngle();
   }
 
   void test_rectangular_roi_requested() {
     auto mockView = makeView();
+    auto mockDockedWidgets = makePreviewDockedWidgets();
     auto mockRegionSelector_uptr = makeRegionSelector();
     auto mockRegionSelector = mockRegionSelector_uptr.get();
     const std::string regionType = roiTypeToString(ROIType::Signal);
     const std::string color = roiTypeToColor(ROIType::Signal);
 
-    EXPECT_CALL(*mockView, getRegionType()).Times(1).WillOnce(Return(regionType));
-    expectRectangularROIMode(*mockView);
+    EXPECT_CALL(*mockDockedWidgets, getRegionType()).Times(1).WillOnce(Return(regionType));
+    expectRectangularROIMode(*mockDockedWidgets);
     EXPECT_CALL(*mockRegionSelector, addRectangularRegion(regionType, color)).Times(1);
     auto presenter = PreviewPresenter(packDeps(mockView.get(), makeModel(), makeJobManager(), makeInstViewModel(),
-                                               std::move(mockRegionSelector_uptr)));
+                                               std::move(mockDockedWidgets), std::move(mockRegionSelector_uptr)));
 
     presenter.notifyRectangularROIModeRequested();
   }
 
   void test_edit_roi_mode_requested() {
     auto mockView = makeView();
+    auto mockDockedWidgets = makePreviewDockedWidgets();
     auto mockRegionSelector_uptr = makeRegionSelector();
     auto mockRegionSelector = mockRegionSelector_uptr.get();
 
-    expectEditROIMode(*mockView);
+    expectEditROIMode(*mockDockedWidgets);
     EXPECT_CALL(*mockRegionSelector, cancelDrawingRegion()).Times(1);
     auto presenter = PreviewPresenter(packDeps(mockView.get(), makeModel(), makeJobManager(), makeInstViewModel(),
-                                               std::move(mockRegionSelector_uptr)));
+                                               std::move(mockDockedWidgets), std::move(mockRegionSelector_uptr)));
 
     presenter.notifyEditROIModeRequested();
   }
@@ -283,13 +302,15 @@ public:
     auto mockView = makeView();
     auto mockModel = makeModel();
     auto mockJobManager = makeJobManager();
+    auto mockDockedWidgets = makePreviewDockedWidgets();
     auto mockRegionSelector = makeRegionSelector();
 
-    expectEditROIMode(*mockView);
+    expectEditROIMode(*mockDockedWidgets);
     expectRunReduction(*mockView, *mockModel, *mockJobManager, *mockRegionSelector);
 
-    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager),
-                                               makeInstViewModel(), std::move(mockRegionSelector)));
+    auto presenter =
+        PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), makeInstViewModel(),
+                                  std::move(mockDockedWidgets), std::move(mockRegionSelector)));
     presenter.notifyRegionChanged();
   }
 
@@ -304,8 +325,9 @@ public:
     EXPECT_CALL(*mockLinePlot, setSpectrum(ws, 0)).Times(1);
     EXPECT_CALL(*mockLinePlot, plot()).Times(1);
 
-    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), makeJobManager(),
-                                               makeInstViewModel(), makeRegionSelector(), std::move(mockLinePlot)));
+    auto presenter =
+        PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), makeJobManager(), makeInstViewModel(),
+                                  makePreviewDockedWidgets(), makeRegionSelector(), std::move(mockLinePlot)));
 
     presenter.notifyReductionCompleted();
   }
@@ -422,6 +444,7 @@ public:
   void test_region_selector_and_reduction_plot_is_cleared_on_a_sum_banks_algorithm_error() {
     auto mockView = makeView();
     auto mockModel = makeModel();
+    auto mockDockableWidgets = makePreviewDockedWidgets();
     auto mockRegionSelector = makeRegionSelector();
     auto mockPlotPresenter = std::make_unique<MockPlotPresenter>();
 
@@ -429,12 +452,13 @@ public:
     // expectations later
     auto rawMockRegionSelector = mockRegionSelector.get();
     auto rawMockPlotPresenter = mockPlotPresenter.get();
+    auto rawMockDockableWidgets = mockDockableWidgets.get();
 
-    auto presenter =
-        PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), makeJobManager(), makeInstViewModel(),
-                                  std::move(mockRegionSelector), std::move(mockPlotPresenter)));
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), makeJobManager(),
+                                               makeInstViewModel(), std::move(mockDockableWidgets),
+                                               std::move(mockRegionSelector), std::move(mockPlotPresenter)));
 
-    expectRegionSelectorCleared(*mockView, rawMockRegionSelector);
+    expectRegionSelectorCleared(rawMockDockableWidgets, rawMockRegionSelector);
     expectReductionPlotCleared(rawMockPlotPresenter);
 
     presenter.notifySumBanksAlgorithmError();
@@ -451,7 +475,7 @@ public:
 
     auto presenter =
         PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), makeJobManager(), makeInstViewModel(),
-                                  makeRegionSelector(), std::move(mockPlotPresenter)));
+                                  makePreviewDockedWidgets(), makeRegionSelector(), std::move(mockPlotPresenter)));
 
     expectReductionPlotCleared(rawMockPlotPresenter);
 
@@ -462,7 +486,6 @@ private:
   MockViewT makeView() {
     auto mockView = std::make_unique<MockPreviewView>();
     EXPECT_CALL(*mockView, subscribe(NotNull())).Times(1);
-    EXPECT_CALL(*mockView, setInstViewToolbarEnabled(Eq(false))).Times(1);
     return mockView;
   }
 
@@ -476,19 +499,28 @@ private:
 
   MockInstViewModelT makeInstViewModel() { return std::make_unique<MockInstViewModel>(); }
 
+  MockPreviewDockedWidgetsT makePreviewDockedWidgets() {
+    auto mockDockedWidgets = std::make_unique<MockPreviewDockedWidgets>();
+    EXPECT_CALL(*mockDockedWidgets, setInstViewToolbarEnabled(Eq(false))).Times(1);
+    EXPECT_CALL(*mockDockedWidgets, subscribe(NotNull())).Times(1);
+    return mockDockedWidgets;
+  }
+
   MockRegionSelectorT makeRegionSelector() { return std::make_unique<MockRegionSelector>(); }
 
-  PreviewPresenter::Dependencies packDeps(MockPreviewView *view,
-                                          MockModelT model = std::make_unique<MockPreviewModel>(),
-                                          MockJobManagerT jobManager = std::make_unique<NiceMock<MockJobManager>>(),
-                                          MockInstViewModelT instView = std::make_unique<MockInstViewModel>(),
-                                          MockRegionSelectorT regionSelector = std::make_unique<MockRegionSelector>(),
-                                          MockPlotPresenterT linePlot = std::make_unique<MockPlotPresenter>()) {
+  PreviewPresenter::Dependencies
+  packDeps(MockPreviewView *view, MockModelT model = std::make_unique<MockPreviewModel>(),
+           MockJobManagerT jobManager = std::make_unique<NiceMock<MockJobManager>>(),
+           MockInstViewModelT instView = std::make_unique<MockInstViewModel>(),
+           MockPreviewDockedWidgetsT dockedWidgets = std::make_unique<MockPreviewDockedWidgets>(),
+           MockRegionSelectorT regionSelector = std::make_unique<MockRegionSelector>(),
+           MockPlotPresenterT linePlot = std::make_unique<MockPlotPresenter>()) {
     expectPresenterConstructed(*regionSelector, *linePlot);
     return PreviewPresenter::Dependencies{view,
                                           std::move(model),
                                           std::move(jobManager),
                                           std::move(instView),
+                                          std::move(dockedWidgets),
                                           std::move(regionSelector),
                                           std::move(linePlot)};
   }
@@ -502,23 +534,25 @@ private:
 
   void expectLoadWorkspaceCompletedForLinearDetector(MockPreviewView &mockView, MockPreviewModel &mockModel,
                                                      MockJobManager &mockJobManager,
+                                                     MockPreviewDockedWidgets &mockDockedWidgets,
                                                      MockRegionSelector &mockRegionSelector) {
     auto ws = createLinearDetectorWorkspace();
 
     EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(ws));
 
-    EXPECT_CALL(mockView, resetInstView()).Times(1);
+    EXPECT_CALL(mockDockedWidgets, resetInstView()).Times(1);
     EXPECT_CALL(mockModel, setSummedWs(ws)).Times(1);
 
     expectRunReduction(mockView, mockModel, mockJobManager, mockRegionSelector);
   }
 
-  void expectLoadWorkspaceCompletedUpdatesInstrumentView(MockPreviewView &mockView, MockPreviewModel &mockModel,
+  void expectLoadWorkspaceCompletedUpdatesInstrumentView(MockPreviewDockedWidgets &mockDockedWidgets,
+                                                         MockPreviewModel &mockModel,
                                                          MockInstViewModel &mockInstViewModel) {
     expectInstViewModelUpdatedWithLoadedWorkspace(mockModel, mockInstViewModel);
-    expectPlotInstView(mockView, mockInstViewModel);
-    expectInstViewToolbarEnabled(mockView);
-    expectInstViewSetToZoomMode(mockView);
+    expectPlotInstView(mockInstViewModel, mockDockedWidgets);
+    expectInstViewToolbarEnabled(mockDockedWidgets);
+    expectInstViewSetToZoomMode(mockDockedWidgets);
   }
 
   void expectLoadWorkspaceCompletedUpdatesAngle(MockPreviewView &mockView, MockPreviewModel &mockModel) {
@@ -537,63 +571,64 @@ private:
     EXPECT_CALL(mockInstViewModel, updateWorkspace(Eq(ws))).Times(1);
   }
 
-  void expectSumBanksCalledOnSelectedDetectors(MockPreviewView &mockView, MockPreviewModel &mockModel,
-                                               MockInstViewModel &mockInstViewModel, MockJobManager &mockJobManager) {
+  void expectSumBanksCalledOnSelectedDetectors(MockPreviewModel &mockModel, MockInstViewModel &mockInstViewModel,
+                                               MockPreviewDockedWidgets &mockDockedWidgets,
+                                               MockJobManager &mockJobManager) {
     auto detIndices = std::vector<size_t>{44, 45, 46};
     auto detIDs = std::vector<Mantid::detid_t>{2, 3, 4};
     auto detIDsStr = ProcessingInstructions{"2-4"};
-    EXPECT_CALL(mockView, getSelectedDetectors()).Times(1).WillOnce(Return(detIndices));
+    EXPECT_CALL(mockDockedWidgets, getSelectedDetectors()).Times(1).WillOnce(Return(detIndices));
     EXPECT_CALL(mockInstViewModel, detIndicesToDetIDs(Eq(detIndices))).Times(1).WillOnce(Return(detIDs));
     EXPECT_CALL(mockModel, setSelectedBanks(Eq(detIDsStr))).Times(1);
     EXPECT_CALL(mockModel, sumBanksAsync(Ref(mockJobManager))).Times(1);
   }
 
-  void expectPlotInstView(MockPreviewView &mockView, MockInstViewModel &mockInstViewModel) {
+  void expectPlotInstView(MockInstViewModel &mockInstViewModel, MockPreviewDockedWidgets &mockDockedWidgets) {
     auto samplePos = V3D(1, 2, 3);
     auto axes = V3D(4, 5, 6);
     EXPECT_CALL(mockInstViewModel, getInstrumentViewActor()).Times(1).WillOnce(Return(nullptr));
     EXPECT_CALL(mockInstViewModel, getSamplePos()).Times(1).WillOnce(Return(samplePos));
     EXPECT_CALL(mockInstViewModel, getAxis()).Times(1).WillOnce(Return(axes));
-    EXPECT_CALL(mockView, plotInstView(Eq(nullptr), Eq(samplePos), Eq(axes))).Times(1);
+    EXPECT_CALL(mockDockedWidgets, plotInstView(Eq(nullptr), Eq(samplePos), Eq(axes))).Times(1);
   }
 
-  void expectInstViewToolbarEnabled(MockPreviewView &mockView) {
-    EXPECT_CALL(mockView, setInstViewToolbarEnabled(Eq(true))).Times(1);
+  void expectInstViewToolbarEnabled(MockPreviewDockedWidgets &mockDockedWidgets) {
+    EXPECT_CALL(mockDockedWidgets, setInstViewToolbarEnabled(Eq(true))).Times(1);
   }
 
-  void expectRegionSelectorToolbarEnabled(MockPreviewView &mockView, bool enable) {
-    EXPECT_CALL(mockView, setRegionSelectorEnabled(Eq(enable))).Times(1);
+  void expectRegionSelectorToolbarEnabled(MockPreviewDockedWidgets &mockDockedWidgets, bool enable) {
+    EXPECT_CALL(mockDockedWidgets, setRegionSelectorEnabled(Eq(enable))).Times(1);
   }
 
-  void expectInstViewSetToZoomMode(MockPreviewView &mockView) {
-    EXPECT_CALL(mockView, setInstViewSelectRectState(Eq(false))).Times(1);
-    EXPECT_CALL(mockView, setInstViewEditState(Eq(false))).Times(1);
-    EXPECT_CALL(mockView, setInstViewZoomState(Eq(true))).Times(1);
-    EXPECT_CALL(mockView, setInstViewZoomMode()).Times(1);
+  void expectInstViewSetToZoomMode(MockPreviewDockedWidgets &mockDockedWidgets) {
+    EXPECT_CALL(mockDockedWidgets, setInstViewSelectRectState(Eq(false))).Times(1);
+    EXPECT_CALL(mockDockedWidgets, setInstViewEditState(Eq(false))).Times(1);
+    EXPECT_CALL(mockDockedWidgets, setInstViewZoomState(Eq(true))).Times(1);
+    EXPECT_CALL(mockDockedWidgets, setInstViewZoomMode()).Times(1);
   }
 
-  void expectInstViewSetToEditMode(MockPreviewView &mockView) {
-    EXPECT_CALL(mockView, setInstViewZoomState(Eq(false))).Times(1);
-    EXPECT_CALL(mockView, setInstViewSelectRectState(Eq(false))).Times(1);
-    EXPECT_CALL(mockView, setInstViewEditState(Eq(true))).Times(1);
-    EXPECT_CALL(mockView, setInstViewEditMode()).Times(1);
+  void expectInstViewSetToEditMode(MockPreviewDockedWidgets &mockDockedWidgets) {
+    EXPECT_CALL(mockDockedWidgets, setInstViewZoomState(Eq(false))).Times(1);
+    EXPECT_CALL(mockDockedWidgets, setInstViewSelectRectState(Eq(false))).Times(1);
+    EXPECT_CALL(mockDockedWidgets, setInstViewEditState(Eq(true))).Times(1);
+    EXPECT_CALL(mockDockedWidgets, setInstViewEditMode()).Times(1);
   }
 
-  void expectInstViewSetToSelectRectMode(MockPreviewView &mockView) {
-    EXPECT_CALL(mockView, setInstViewEditState(Eq(false))).Times(1);
-    EXPECT_CALL(mockView, setInstViewZoomState(Eq(false))).Times(1);
-    EXPECT_CALL(mockView, setInstViewSelectRectState(Eq(true))).Times(1);
-    EXPECT_CALL(mockView, setInstViewSelectRectMode()).Times(1);
+  void expectInstViewSetToSelectRectMode(MockPreviewDockedWidgets &mockDockedWidgets) {
+    EXPECT_CALL(mockDockedWidgets, setInstViewEditState(Eq(false))).Times(1);
+    EXPECT_CALL(mockDockedWidgets, setInstViewZoomState(Eq(false))).Times(1);
+    EXPECT_CALL(mockDockedWidgets, setInstViewSelectRectState(Eq(true))).Times(1);
+    EXPECT_CALL(mockDockedWidgets, setInstViewSelectRectMode()).Times(1);
   }
 
-  void expectRectangularROIMode(MockPreviewView &mockView) {
-    EXPECT_CALL(mockView, setEditROIState(Eq(false))).Times(1);
-    EXPECT_CALL(mockView, setRectangularROIState(Eq(true))).Times(1);
+  void expectRectangularROIMode(MockPreviewDockedWidgets &mockDockedWidgets) {
+    EXPECT_CALL(mockDockedWidgets, setEditROIState(Eq(false))).Times(1);
+    EXPECT_CALL(mockDockedWidgets, setRectangularROIState(Eq(true))).Times(1);
   }
 
-  void expectEditROIMode(MockPreviewView &mockView) {
-    EXPECT_CALL(mockView, setEditROIState(Eq(true))).Times(1);
-    EXPECT_CALL(mockView, setRectangularROIState(Eq(false))).Times(1);
+  void expectEditROIMode(MockPreviewDockedWidgets &mockDockedWidgets) {
+    EXPECT_CALL(mockDockedWidgets, setEditROIState(Eq(true))).Times(1);
+    EXPECT_CALL(mockDockedWidgets, setRectangularROIState(Eq(false))).Times(1);
   }
 
   void expectRunReduction(MockPreviewView &mockView, MockPreviewModel &mockModel, MockJobManager &mockJobManager,
@@ -635,9 +670,10 @@ private:
     EXPECT_CALL(mainPresenter, isAutoreducing()).Times(AtLeast(1)).WillRepeatedly(Return(false));
   }
 
-  void expectRegionSelectorCleared(MockPreviewView &mockView, MockRegionSelector *mockRegionSelector) {
+  void expectRegionSelectorCleared(MockPreviewDockedWidgets *mockDockedWidgets,
+                                   MockRegionSelector *mockRegionSelector) {
     EXPECT_CALL(*mockRegionSelector, clearWorkspace()).Times(1);
-    EXPECT_CALL(mockView, setRegionSelectorEnabled(false)).Times(1);
+    EXPECT_CALL(*mockDockedWidgets, setRegionSelectorEnabled(false)).Times(1);
   }
 
   void expectReductionPlotCleared(MockPlotPresenter *mockPlotPresenter) {

@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+
 ###############################################################################
 # This has to be tested through a workspace as it cannot be created in
 # Python
@@ -21,7 +22,7 @@ class ExperimentInfoTest(unittest.TestCase):
 
     def setUp(self):
         if self.__class__._expt_ws is None:
-            alg = run_algorithm('CreateWorkspace', DataX=[1,2,3,4,5], DataY=[1,2,3,4,5],NSpec=1, child=True)
+            alg = run_algorithm("CreateWorkspace", DataX=[1, 2, 3, 4, 5], DataY=[1, 2, 3, 4, 5], NSpec=1, child=True)
             ws = alg.getProperty("OutputWorkspace").value
             ws.run().addProperty("run_number", 48127, True)
             self.__class__._expt_ws = ws
@@ -66,7 +67,8 @@ class ExperimentInfoTest(unittest.TestCase):
         held_run = self._expt_ws.run()
 
         self.assertNotEqual(id(held_run), id(run))
-        self.assertTrue(held_run.hasProperty('run_property'))
+        self.assertTrue(held_run.hasProperty("run_property"))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

@@ -15,12 +15,12 @@ import mantid.simpleapi as mantid
 
 # == Set parameters for calibration ==
 
-filename = 'MAP14919.raw'  # Name of calibration run
+filename = "MAP14919.raw"  # Name of calibration run
 rangeLower = 2000  # Integrate counts in each spectra from rangeLower to rangeUpper
 rangeUpper = 10000  #
 
 # Set what we want to calibrate (e.g whole instrument or one door )
-CalibratedComponent = 'D2_window'  # Calibrate D2 window
+CalibratedComponent = "D2_window"  # Calibrate D2 window
 
 # Get calibration raw file and integrate it
 rawCalibInstWS = mantid.Load(filename)  # 'raw' in 'rawCalibInstWS' means unintegrated.

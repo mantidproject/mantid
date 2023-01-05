@@ -6,9 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from sans.common.enums import (SANSFacility, SANSInstrument)
+from sans.common.enums import SANSFacility, SANSInstrument
 from sans.state.StateObjects.StateData import get_data_builder
-from sans.state.StateObjects.StateSliceEvent import (StateSliceEvent, get_slice_event_builder)
+from sans.state.StateObjects.StateSliceEvent import StateSliceEvent, get_slice_event_builder
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
@@ -65,14 +65,14 @@ class StateSliceEventBuilderTest(unittest.TestCase):
 
         # Assert
         state = builder.build()
-        self.assertEqual(len(state.start_time),  2)
-        self.assertEqual(state.start_time[0],  start_time[0])
-        self.assertEqual(state.start_time[1],  start_time[1])
+        self.assertEqual(len(state.start_time), 2)
+        self.assertEqual(state.start_time[0], start_time[0])
+        self.assertEqual(state.start_time[1], start_time[1])
 
-        self.assertEqual(len(state.end_time),  2)
-        self.assertEqual(state.end_time[0],  end_time[0])
-        self.assertEqual(state.end_time[1],  end_time[1])
+        self.assertEqual(len(state.end_time), 2)
+        self.assertEqual(state.end_time[0], end_time[0])
+        self.assertEqual(state.end_time[1], end_time[1])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

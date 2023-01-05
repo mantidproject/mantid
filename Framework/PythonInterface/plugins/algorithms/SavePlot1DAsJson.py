@@ -4,63 +4,54 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,unused-variable,invalid-name,bare-except
+# pylint: disable=no-init,unused-variable,invalid-name,bare-except
 from mantid.api import *
 from mantid.kernel import *
 
 
 # See ticket #10234
 
+
 class SavePlot1DAsJson(PythonAlgorithm):
-    """ Save 1D plottable data in json format from workspace.
-    """
+    """Save 1D plottable data in json format from workspace."""
 
     def category(self):
-        """
-        """
+        """ """
         return "DataHandling\\Plots"
 
     def seeAlso(self):
-        return [ "SavePlot1D","StringToPng" ]
+        return ["SavePlot1D", "StringToPng"]
 
     def name(self):
-        """
-        """
+        """ """
         return "SavePlot1DAsJson"
 
     def summary(self):
-        """ Return summary
-        """
+        """Return summary"""
         return "Plottable data file in Json format"
 
     def require(self):
         try:
-            import json # noqa
+            import json  # noqa
         except:
             raise ImportError("Missing json package")
 
     def PyInit(self):
-        """ Declare properties
-        """
+        """Declare properties"""
         # this is the requirement of using this plugin
         # is there a place to register that?
         self.require()
 
-        self.declareProperty(
-            MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
-            "Workspace that contains plottable data")
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input), "Workspace that contains plottable data")
 
-        self.declareProperty(
-            FileProperty("JsonFilename", "", FileAction.Save, ['.json']),
-            "Name of the output Json file")
+        self.declareProperty(FileProperty("JsonFilename", "", FileAction.Save, [".json"]), "Name of the output Json file")
 
         self.declareProperty("PlotName", "", "Name of the output plot")
 
         return
 
     def PyExec(self):
-        """ Main Execution Body
-        """
+        """Main Execution Body"""
         # Properties
         inputwsname = self.getPropertyValue("InputWorkspace")
         outfilename = self.getPropertyValue("JsonFilename")
@@ -69,11 +60,9 @@ class SavePlot1DAsJson(PythonAlgorithm):
         # Check properties
         inputws = AnalysisDataService.retrieve(inputwsname)
         if inputws is None:
-            raise ValueError(
-                "Inputworkspace does not exist.")
+            raise ValueError("Inputworkspace does not exist.")
         if inputws.axes() > 2:
-            raise ValueError(
-                "InputWorkspace must be one-dimensional.")
+            raise ValueError("InputWorkspace must be one-dimensional.")
 
         # Generate Json file
         self._save(inputws, outfilename, plotname)
@@ -82,7 +71,8 @@ class SavePlot1DAsJson(PythonAlgorithm):
     def _save(self, inputws, outpath, plotname):
         plot = self._serialize(inputws, plotname)
         import json
-        json.dump(plot, open(outpath, 'w'))
+
+        json.dump(plot, open(outpath, "w"))
         return
 
     def _serialize(self, workspace, plotname):
@@ -91,9 +81,9 @@ class SavePlot1DAsJson(PythonAlgorithm):
         ishist = workspace.isHistogramData()
         plottype = "histogram" if ishist else "point"
         serialized = dict(
-            type = plottype,
-            data = dict(),
-            )
+            type=plottype,
+            data=dict(),
+        )
         # loop over spectra
         for i in range(workspace.getNumberHistograms()):
             spectrum_no = workspace.getSpectrum(i).getSpectrumNo()
@@ -107,8 +97,8 @@ class SavePlot1DAsJson(PythonAlgorithm):
                 list(workspace.readY(i)),
                 list(workspace.readE(i)),
                 list(workspace.readDx(i)),
-                ]
-            serialized['data'][spectrum_no] = arr
+            ]
+            serialized["data"][spectrum_no] = arr
             continue
         # axes
 
@@ -117,15 +107,16 @@ class SavePlot1DAsJson(PythonAlgorithm):
             try:
                 return s.latex()
             except:
-                return '%s' % s
+                return "%s" % s
+
         axes = dict(
             xlabel=workspace.getAxis(0).getUnit().caption(),
             ylabel=workspace.getAxis(1).getUnit().caption(),
-            xunit = unit(workspace.getAxis(0)),
+            xunit=unit(workspace.getAxis(0)),
             # yunit = unit(workspace.getAxis(1)),
-            yunit = workspace.YUnitLabel(),
-            )
-        serialized['axes'] = axes
+            yunit=workspace.YUnitLabel(),
+        )
+        serialized["axes"] = axes
         return {pname: serialized}
 
 

@@ -6,15 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import mantid
 from mantid.api import mtd
-from mantid.simpleapi import CreateWorkspace, CreateSampleWorkspace, SaveYDA, ConvertSpectrumAxis, \
-    LoadInstrument, AddSampleLog
+from mantid.simpleapi import CreateWorkspace, CreateSampleWorkspace, SaveYDA, ConvertSpectrumAxis, LoadInstrument, AddSampleLog
 import numpy as np
 import os
 import unittest
 
 
 class SaveYDATest(unittest.TestCase):
-
     def setUp(self):
 
         self.prop_num = 3
@@ -37,8 +35,7 @@ class SaveYDATest(unittest.TestCase):
             mantid.api.AnalysisDataService.remove(ws_name)
 
     def test_meta_data(self):
-        """ Test to save Meta data from workspace with all sample logs needed by SaveYDA
-        """
+        """Test to save Meta data from workspace with all sample logs needed by SaveYDA"""
         meta = []
         # read form file
         for i in range(3):
@@ -49,8 +46,7 @@ class SaveYDATest(unittest.TestCase):
         self.assertEqual(meta[2], "  type: generic tabular data\n")
 
     def test_history_all_samples(self):
-        """ Test to save history from workspace with all sample logs
-        """
+        """Test to save history from workspace with all sample logs"""
         history = []
         for i in range(0, 8):
             s = self._n_file.readline()
@@ -64,8 +60,7 @@ class SaveYDATest(unittest.TestCase):
         self.assertEqual(history[4], "  - data reduced with mantid\n")
 
     def test_history_no_samples(self):
-        """ Test save history from workspace without needed sample logs
-        """
+        """Test save history from workspace without needed sample logs"""
         history = []
         for i in range(0, 5):
             s = self._no_sample_file.readline()
@@ -76,8 +71,7 @@ class SaveYDATest(unittest.TestCase):
         self.assertEqual(history[1], "  - data reduced with mantid\n")
 
     def test_coord(self):
-        """ Test save coordinates from workspace with all sample logs
-        """
+        """Test save coordinates from workspace with all sample logs"""
         coord = []
         # Y axis is SpectrumAxis
         for i in range(0, 12):
@@ -87,7 +81,7 @@ class SaveYDATest(unittest.TestCase):
 
         self.assertEqual(coord[0], "Coord:\n")
         self.assertEqual(coord[1], "  x: {name: w, unit: meV}\n")
-        self.assertEqual(coord[2], "  y: {name: \'S(q,w)\', unit: meV-1}\n")
+        self.assertEqual(coord[2], "  y: {name: 'S(q,w)', unit: meV-1}\n")
         self.assertEqual(coord[3], "  z: [{name: 2th, unit: deg}]\n")
 
         ws = self._create_workspace(yAxSpec=False)
@@ -101,12 +95,11 @@ class SaveYDATest(unittest.TestCase):
 
         self.assertEqual(coord[0], "Coord:\n")
         self.assertEqual(coord[1], "  x: {name: w, unit: meV}\n")
-        self.assertEqual(coord[2], "  y: {name: \'S(q,w)\', unit: meV-1}\n")
+        self.assertEqual(coord[2], "  y: {name: 'S(q,w)', unit: meV-1}\n")
         self.assertEqual(coord[3], "  z: [{name: q, unit: A-1}]\n")
 
     def test_rpar(self):
-        """ Test save RPar from workspace with and without sample logs
-        """
+        """Test save RPar from workspace with and without sample logs"""
         r_par = []
         # workspace with all ample logs
         for i in range(21):
@@ -134,8 +127,7 @@ class SaveYDATest(unittest.TestCase):
         self.assertEqual(r_par[0], "RPar: []\n")
 
     def test_slices(self):
-        """ Test save slices from workspace with no sample logs
-        """
+        """Test save slices from workspace with no sample logs"""
         slices = []
         for i in range(15):
             s = self._no_sample_file.readline()
@@ -146,43 +138,46 @@ class SaveYDATest(unittest.TestCase):
         self.assertEqual(slices[1], "  - j: 0\n")
         self.assertTrue(slices[2].startswith("    z: [{val: 14.1499"))
         self.assertTrue(slices[2].endswith("}]\n"))
-        self.assertEqual(slices[3], "    x: [" + str((self.data_x[0] + self.data_x[1]) / 2) + ", "
-                         + str((self.data_x[1] + self.data_x[2]) / 2) + ", " + str((self.data_x[2] + self.data_x[3]) / 2)
-                         + "]" + "\n")
+        self.assertEqual(
+            slices[3],
+            "    x: ["
+            + str((self.data_x[0] + self.data_x[1]) / 2)
+            + ", "
+            + str((self.data_x[1] + self.data_x[2]) / 2)
+            + ", "
+            + str((self.data_x[2] + self.data_x[3]) / 2)
+            + "]"
+            + "\n",
+        )
         self.assertEqual(slices[4], "    y: " + str(self.data_y) + "\n")
 
     def test_event_ws(self):
-        """ Test algorithm is not running with EventWorkspace
-        """
+        """Test algorithm is not running with EventWorkspace"""
         ws = self._create_workspace(False)
         self.assertRaises(RuntimeError, SaveYDA, InputWorkspace=ws, Filename="File")
 
     def test_x_not_detaE(self):
-        """ Test algorithm is not running if X axis is not DeltaE
-        """
+        """Test algorithm is not running if X axis is not DeltaE"""
         ws = self._create_workspace(xAx=False)
         self.assertRaises(ValueError, SaveYDA, InputWorkspace=ws, Filename="File")
 
     def test_no_Instrument(self):
-        """ Test algorithm is not running is workspace has no instrument
-        """
+        """Test algorithm is not running is workspace has no instrument"""
         ws = self._create_workspace(instrument=False)
         self.assertRaises(ValueError, SaveYDA, InputWorkspace=ws, Filename="File")
 
     def test_y_not_mt_or_spec(self):
-        """ Test algorithm is not running if Y axis is not SpectrumAxis or MomentumTransfer
-        """
+        """Test algorithm is not running if Y axis is not SpectrumAxis or MomentumTransfer"""
         ws = self._create_workspace(yAxMt=False, yAxSpec=False)
         self.assertRaises(RuntimeError, SaveYDA, InputWorkspace=ws, Filename="File")
 
     def _init_ws_normal(self):
-        """ init normal workspace, normal workspace is workspace with all sample logs and save file from workspace
-        """
+        """init normal workspace, normal workspace is workspace with all sample logs and save file from workspace"""
         self._n_ws = self._create_workspace()
         self._n_file = self._file(self._n_ws, "normalFile")
 
     def _add_all_sample_logs(self, ws):
-        """ add all sample logs to a workspace
+        """add all sample logs to a workspace
         :param ws: workspace where sample logs should be added
         """
         AddSampleLog(ws, "proposal_number", str(self.prop_num))
@@ -192,7 +187,7 @@ class SaveYDATest(unittest.TestCase):
         AddSampleLog(ws, "Ei", str(self.Ei), LogUnit="meV")
 
     def _file(self, ws, filename):
-        """ create file form workspace and open to read from the file
+        """create file form workspace and open to read from the file
         :param ws: workspace file will be saved from
         :param filename: name of the file to save
         :return f: open file
@@ -201,9 +196,8 @@ class SaveYDATest(unittest.TestCase):
         f = open(filename, "r")
         return f
 
-    def _create_workspace(self, ws_2D=True, sample=True, xAx=True, yAxSpec=True,
-                          yAxMt=True, instrument=True):
-        """ create Workspace
+    def _create_workspace(self, ws_2D=True, sample=True, xAx=True, yAxSpec=True, yAxMt=True, instrument=True):
+        """create Workspace
         :param ws_2D: should workspace be 2D?
         :param sample: should workspace have sample logs?
         :param xAx: should x axis be DeltaE?
@@ -230,14 +224,14 @@ class SaveYDATest(unittest.TestCase):
             ws = CreateWorkspace(DataX=self.data_x, DataY=self.data_y, DataE=np.sqrt(self.data_y), NSpec=1, UnitX="DeltaE")
             LoadInstrument(ws, True, InstrumentName="TOFTOF")
             self._add_all_sample_logs(ws)
-            ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace="ws2", Target ="ElasticQ", EMode="Direct")
+            ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace="ws2", Target="ElasticQ", EMode="Direct")
             ws2 = mtd["ws2"]
             return ws2
         if not sample:
             ws = CreateWorkspace(DataX=self.data_x, DataY=self.data_y, DataE=np.sqrt(self.data_y), NSpec=1, UnitX="DeltaE")
             LoadInstrument(ws, False, InstrumentName="TOFTOF")
             for i in range(ws.getNumberHistograms()):
-                ws.getSpectrum(i).setDetectorID(i+1)
+                ws.getSpectrum(i).setDetectorID(i + 1)
             return ws
         else:
             ws = CreateWorkspace(DataX=self.data_x, DataY=self.data_y, DataE=np.sqrt(self.data_y), NSpec=1, UnitX="DeltaE")
@@ -245,5 +239,6 @@ class SaveYDATest(unittest.TestCase):
             self._add_all_sample_logs(ws)
             return ws
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

@@ -29,7 +29,7 @@ ADVANCED_CONFIG = {
     "gss_filename": "{fileext}{inst}{runno}{suffix}.gsas",
     "dat_files_directory": "dat_files",
     "tof_xye_filename": "{fileext}{instshort}{runno}{suffix}-b_{{bankno}}-TOF.dat",
-    "dspacing_xye_filename": "{fileext}{instshort}{runno}{suffix}-b_{{bankno}}-d.dat"
+    "dspacing_xye_filename": "{fileext}{instshort}{runno}{suffix}-b_{{bankno}}-d.dat",
 }
 
 
@@ -45,9 +45,9 @@ def apply_bragg_peaks_masking(workspaces_to_mask, mask_list):
     for ws_index, (bank_mask_list, workspace) in enumerate(zip(mask_list, output_workspaces)):
         output_name = "masked_vanadium-" + str(ws_index + 1)
         for mask_params in bank_mask_list:
-            output_workspaces[ws_index] = mantid.MaskBins(InputWorkspace=output_workspaces[ws_index],
-                                                          OutputWorkspace=output_name,
-                                                          XMin=mask_params[0], XMax=mask_params[1])
+            output_workspaces[ws_index] = mantid.MaskBins(
+                InputWorkspace=output_workspaces[ws_index], OutputWorkspace=output_name, XMin=mask_params[0], XMax=mask_params[1]
+            )
     return output_workspaces
 
 
@@ -65,10 +65,9 @@ def cal_map_dictionary_key_helper(dictionary, key, append_to_error_message=None)
     :return: The found key if it exists
     """
     err_message = "The field '" + str(key) + "' is required within the calibration file but was not found."
-    err_message += '\n' + str(append_to_error_message) if append_to_error_message else ''
+    err_message += "\n" + str(append_to_error_message) if append_to_error_message else ""
 
-    return dictionary_key_helper(dictionary=dictionary, key=key, throws=True,
-                                 case_insensitive=True, exception_msg=err_message)
+    return dictionary_key_helper(dictionary=dictionary, key=key, throws=True, case_insensitive=True, exception_msg=err_message)
 
 
 def crop_banks_using_crop_list(bank_list, crop_values_list):
@@ -98,9 +97,11 @@ def crop_banks_using_crop_list(bank_list, crop_values_list):
 
         # Finally check the number of elements are equal
         if num_banks != num_crop_vals:
-            raise RuntimeError("The number of TOF cropping values does not match the number of banks for this "
-                               "instrument.\n "
-                               "{} cropping windows were supplied for {} banks".format(num_crop_vals, num_banks))
+            raise RuntimeError(
+                "The number of TOF cropping values does not match the number of banks for this "
+                "instrument.\n "
+                "{} cropping windows were supplied for {} banks".format(num_crop_vals, num_banks)
+            )
 
         for spectra, cropping_values in zip(bank_list, crop_values_list):
             output_list.append(crop_in_tof(ws_to_crop=spectra, x_min=cropping_values[0], x_max=cropping_values[-1]))
@@ -175,8 +176,9 @@ def extract_ws_spectra(ws_to_split):
     for i in range(0, num_spectra):
         output_name = ws_to_split.name() + "-" + str(i + 1)
         # Have to use crop workspace as extract single spectrum struggles with the variable bin widths
-        spectra_bank_list.append(mantid.CropWorkspace(InputWorkspace=ws_to_split, OutputWorkspace=output_name,
-                                                      StartWorkspaceIndex=i, EndWorkspaceIndex=i))
+        spectra_bank_list.append(
+            mantid.CropWorkspace(InputWorkspace=ws_to_split, OutputWorkspace=output_name, StartWorkspaceIndex=i, EndWorkspaceIndex=i)
+        )
     return spectra_bank_list
 
 
@@ -198,7 +200,7 @@ def generate_run_numbers(run_number_string):
 
     # If its a string we must parse it
     run_number_string = run_number_string.strip()
-    run_boundaries = run_number_string.replace('_', '-')  # Accept either _ or - delimiters
+    run_boundaries = run_number_string.replace("_", "-")  # Accept either _ or - delimiters
     run_list = _run_number_generator(processed_string=run_boundaries)
     return run_list
 
@@ -210,17 +212,17 @@ def _generate_vanadium_name(vanadium_string, is_spline, *args):
     :param args: Any other strings to append to the filename
     :return: A filename for the vanadium
     """
-    out_name = 'Van'
+    out_name = "Van"
     if is_spline:
-        out_name += 'Splined'
+        out_name += "Splined"
 
-    out_name += '_' + str(vanadium_string)
+    out_name += "_" + str(vanadium_string)
     for passed_arg in args:
         if isinstance(passed_arg, list):
             for arg in passed_arg:
-                out_name += '_' + str(arg)
+                out_name += "_" + str(arg)
         else:
-            out_name += '_' + (str(passed_arg))
+            out_name += "_" + (str(passed_arg))
 
     out_name += ".nxs"
     return out_name
@@ -261,17 +263,17 @@ def generate_summed_empty_name(empty_runs_string, *args):
     :param empty_runs_string: The empty runs that are summed in this file
     :return: The generated file name
     """
-    out_name = 'summed_empty'
-    out_name += '_' + str(empty_runs_string)
+    out_name = "summed_empty"
+    out_name += "_" + str(empty_runs_string)
 
     # Only arg that may be added is long_mode. tt_mode and cal file are not needed.
     for passed_arg in args:
         if isinstance(passed_arg, list):
-            if 'long' in passed_arg:
-                out_name += '_long'
+            if "long" in passed_arg:
+                out_name += "_long"
         else:
-            if passed_arg == 'long':
-                out_name += '_long'
+            if passed_arg == "long":
+                out_name += "_long"
 
     out_name += ".nxs"
     return out_name
@@ -301,8 +303,7 @@ def extract_single_spectrum(ws_to_process, spectrum_number_to_extract):
     :param spectrum_number_to_extract: The spectrum of the workspace to extract
     :return: The extracted monitor as a workspace
     """
-    load_monitor_ws = mantid.ExtractSingleSpectrum(InputWorkspace=ws_to_process,
-                                                   WorkspaceIndex=spectrum_number_to_extract)
+    load_monitor_ws = mantid.ExtractSingleSpectrum(InputWorkspace=ws_to_process, WorkspaceIndex=spectrum_number_to_extract)
     return load_monitor_ws
 
 
@@ -359,8 +360,7 @@ def load_current_normalised_ws_list(run_number_string, instrument, input_batchin
 
     instrument.mask_prompt_pulses_if_necessary(raw_ws_list)
 
-    normalised_ws_list = _normalise_workspaces(ws_list=raw_ws_list, run_details=run_information,
-                                               instrument=instrument)
+    normalised_ws_list = _normalise_workspaces(ws_list=raw_ws_list, run_details=run_information, instrument=instrument)
 
     return normalised_ws_list
 
@@ -383,7 +383,7 @@ def rebin_workspace(workspace, new_bin_width, start_x=None, end_x=None):
     if end_x is None:
         end_x = workspace.readX(0)[-1]
 
-    rebin_string = str(start_x) + ',' + str(new_bin_width) + ',' + str(end_x)
+    rebin_string = str(start_x) + "," + str(new_bin_width) + "," + str(end_x)
     workspace = mantid.Rebin(InputWorkspace=workspace, OutputWorkspace=workspace, Params=rebin_string)
     return workspace
 
@@ -421,8 +421,7 @@ def rebin_workspace_list(workspace_list, bin_width_list, start_x_list=None, end_
 
     output_list = []
     for ws, bin_width, start_x, end_x in zip(workspace_list, bin_width_list, start_x_list, end_x_list):
-        output_list.append(rebin_workspace(workspace=ws, new_bin_width=bin_width,
-                                           start_x=start_x, end_x=end_x))
+        output_list.append(rebin_workspace(workspace=ws, new_bin_width=bin_width, start_x=start_x, end_x=end_x))
 
     return output_list
 
@@ -452,8 +451,8 @@ def run_normalise_by_current(ws):
         ws = mantid.NormaliseByCurrent(InputWorkspace=ws, OutputWorkspace=ws)
     else:
         warnings.warn(
-            "Run {} had no current. NormaliseByCurrent will not be run on it, and empty will not be subtracted".
-            format(ws.getRunNumber()))
+            "Run {} had no current. NormaliseByCurrent will not be run on it, and empty will not be subtracted".format(ws.getRunNumber())
+        )
     return ws
 
 
@@ -499,45 +498,46 @@ def spline_workspaces(focused_vanadium_spectra, num_splines):
     return splined_ws_list
 
 
-def generate_summed_runs(empty_sample_ws_string, instrument, scale_factor=None):
+def generate_summed_runs(empty_ws_string, instrument, scale_factor=None):
     """
-    Loads the list of empty runs specified by the empty_sample_ws_string and sums
+    Loads the list of empty runs specified by the empty_ws_string and sums
     them (and optionally scales). Returns the summed workspace.
-    :param empty_sample_ws_string: The empty run numbers to sum
+    :param empty_ws_string: The empty run numbers to sum
     :param instrument: The instrument object these runs belong to
     :param scale_factor: The percentage to scale the loaded runs by
     :return: The summed and normalised empty runs
     """
 
-    empty_sample = load_current_normalised_ws_list(run_number_string=empty_sample_ws_string, instrument=instrument,
-                                                   input_batching=INPUT_BATCHING.Summed)
-    empty_sample = empty_sample[0]
+    empty_ws_list = load_current_normalised_ws_list(
+        run_number_string=empty_ws_string, instrument=instrument, input_batching=INPUT_BATCHING.Summed
+    )
+    empty_ws = empty_ws_list[0]
     if scale_factor:
-        empty_sample = mantid.Scale(InputWorkspace=empty_sample, OutputWorkspace=empty_sample, Factor=scale_factor,
-                                    Operation="Multiply")
-    return empty_sample
+        empty_ws = mantid.Scale(InputWorkspace=empty_ws, OutputWorkspace=empty_ws, Factor=scale_factor, Operation="Multiply")
+    return empty_ws
 
 
-def subtract_summed_runs(ws_to_correct, empty_sample):
+def subtract_summed_runs(ws_to_correct, empty_ws):
     """
-    Subtracts the list of empty runs specified by the empty_sample_ws_string
-    from the workspace specified. Returns the subtracted workspace.
+    Subtracts empty_ws from ws_to_correct. Returns the subtracted workspace.
     :param ws_to_correct: The workspace to correct
-    :param empty_sample: The empty workspace to subtract
+    :param empty_ws: The empty workspace to subtract
     :return: The workspace with the empty runs subtracted
     """
     # Skip this step if the workspace has no current, as subtracting empty
     # would give us negative counts
     if workspace_has_current(ws_to_correct):
         try:
-            mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_sample, OutputWorkspace=ws_to_correct)
+            mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_ws, OutputWorkspace=ws_to_correct)
         except ValueError:
-            raise ValueError("The empty run(s) specified for this file do not have matching binning. Do the TOF windows of"
-                             " the empty and sample match?")
+            raise ValueError(
+                "The empty run(s) specified for this file do not have matching binning. Do the TOF windows of"
+                " the empty and sample match?"
+            )
     else:
         ws_to_correct = copy.deepcopy(ws_to_correct)
 
-    remove_intermediate_workspace(empty_sample)
+    remove_intermediate_workspace(empty_ws)
 
     return ws_to_correct
 
@@ -563,7 +563,7 @@ def read_masking_file(masking_file_path):
     encoding = {"encoding": "latin-1"}
     with open(masking_file_path, **encoding) as mask_file:
         for line in mask_file:
-            if 'bank' in line:
+            if "bank" in line:
                 # Push back onto new bank
                 if bank_masking_list:
                     all_banks_masking_list.append(bank_masking_list)
@@ -586,7 +586,8 @@ def load_raw_files(run_number_string, instrument, file_ext=None):
     """
     run_number_list = generate_run_numbers(run_number_string=run_number_string)
     file_ext = "" if file_ext is None else file_ext
-    load_raw_ws = _load_list_of_files(run_number_list, instrument, file_ext=file_ext)
+    file_name_list = [instrument._generate_input_file_name(run_number=run_number, file_ext=file_ext) for run_number in run_number_list]
+    load_raw_ws = _load_list_of_files(file_name_list)
     return load_raw_ws
 
 
@@ -608,8 +609,7 @@ def _crop_single_ws_in_tof(ws_to_rebin, x_max, x_min):
         x_axis = ws_to_rebin.dataX(0)
         x_min = x_axis[0] * (1 + x_min)
         x_max = x_axis[-1] * x_max
-    cropped_ws = mantid.CropWorkspace(InputWorkspace=ws_to_rebin, OutputWorkspace=ws_to_rebin,
-                                      XMin=x_min, XMax=x_max)
+    cropped_ws = mantid.CropWorkspace(InputWorkspace=ws_to_rebin, OutputWorkspace=ws_to_rebin, XMin=x_min, XMax=x_max)
     if previous_units != "TOF":
         cropped_ws = mantid.ConvertUnits(InputWorkspace=cropped_ws, Target=previous_units, OutputWorkspace=cropped_ws)
     return cropped_ws
@@ -641,28 +641,35 @@ def _check_load_range(list_of_runs_to_load):
     """
     maximum_range_len = 1000  # If more than this number of runs is entered probably wrong
     if len(list_of_runs_to_load) > maximum_range_len:
-        raise ValueError("More than " + str(maximum_range_len) + " runs were selected."
-                         " Found " + str(len(list_of_runs_to_load)) + " Aborting.")
+        raise ValueError(
+            "More than " + str(maximum_range_len) + " runs were selected." " Found " + str(len(list_of_runs_to_load)) + " Aborting."
+        )
 
 
-def _load_list_of_files(run_numbers_list, instrument, file_ext=None):
+def _load_list_of_files(file_name_list, keep_original=True):
     """
     Loads files based on the list passed to it. If the list is
     greater than the maximum range it will raise an exception
     see _check_load_range for more details
-    :param run_numbers_list: The list of runs to load
-    :param instrument: The instrument to generate the prefix for
+    :param file_name_list: The list of file names to load
+    :param keep_original: Whether to retain the original loaded file in unaltered state
     :return: The loaded workspaces as a list
     """
     read_ws_list = []
-    _check_load_range(list_of_runs_to_load=run_numbers_list)
+    _check_load_range(list_of_runs_to_load=file_name_list)
 
-    for run_number in run_numbers_list:
-        file_name = instrument._generate_input_file_name(run_number=run_number, file_ext=file_ext)
+    for file_name in file_name_list:
+        # include file extension in ws name to allow users to distinguish different partial files (eg .s1 or .s2)
         if not AnalysisDataService.doesExist(file_name):
-            read_ws = mantid.Load(Filename=file_name, OutputWorkspace=file_name)
+            loaded_ws = mantid.Load(Filename=file_name, OutputWorkspace=file_name)
         else:
-            read_ws = AnalysisDataService.retrieve(file_name)
+            loaded_ws = AnalysisDataService.retrieve(file_name)
+        if keep_original:
+            # preserve original ws in case reduction applies any corrections in situ and user wants to rerun
+            new_name = file_name + "_red"
+            read_ws = mantid.CloneWorkspace(InputWorkspace=loaded_ws, OutputWorkspace=new_name)
+        else:
+            read_ws = loaded_ws
         read_ws_list.append(read_ws)
 
     return read_ws_list
@@ -676,7 +683,7 @@ def _sum_ws_range(ws_list):
     :return: A single summed workspace
     """
     # Sum all workspaces
-    out_ws_name = "summed_" + ws_list[0].name() + '_' + ws_list[-1].name()
+    out_ws_name = "summed_" + ws_list[0].name() + "_" + ws_list[-1].name()
     summed_ws = mantid.MergeRuns(InputWorkspaces=ws_list, OutputWorkspace=out_ws_name)
     return summed_ws
 
@@ -688,7 +695,7 @@ def _run_number_generator(processed_string):
     :return: A list of run numbers based on the input string
     """
     try:
-        number_generator = kernel.IntArrayProperty('array_generator', processed_string)
+        number_generator = kernel.IntArrayProperty("array_generator", processed_string)
         return number_generator.value.tolist()
     except RuntimeError:
         raise ValueError("Could not generate run numbers from this input: " + processed_string)

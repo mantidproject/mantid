@@ -87,6 +87,8 @@ public:
   virtual void disableCostFunction() = 0;
   virtual void enablePolarizationCorrections() = 0;
   virtual void disablePolarizationCorrections() = 0;
+  virtual void enablePolarizationEfficiencies() = 0;
+  virtual void disablePolarizationEfficiencies() = 0;
   virtual void enableFloodCorrectionInputs() = 0;
   virtual void disableFloodCorrectionInputs() = 0;
 
@@ -105,6 +107,8 @@ public:
 
   virtual bool getPolarizationCorrectionOption() const = 0;
   virtual void setPolarizationCorrectionOption(bool enable) = 0;
+  virtual std::string getPolarizationEfficienciesWorkspace() const = 0;
+  virtual void setPolarizationEfficienciesWorkspace(std::string const &workspace) = 0;
 
   virtual std::string getFloodCorrectionType() const = 0;
   virtual void setFloodCorrectionType(std::string const &correction) = 0;

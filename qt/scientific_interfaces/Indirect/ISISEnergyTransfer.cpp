@@ -665,7 +665,7 @@ void ISISEnergyTransfer::setInstrumentDefault(QMap<QString, QString> const &inst
     auto const rebinDefault = getInstrumentDetail(instDetails, "rebin-default");
     m_uiForm.leRebinString->setText(rebinDefault);
     m_uiForm.ckDoNotRebin->setChecked(false);
-    auto const rbp = rebinDefault.split(",", QString::SkipEmptyParts);
+    auto const rbp = rebinDefault.split(",", Qt::SkipEmptyParts);
     if (rbp.size() == 3) {
       m_uiForm.spRebinLow->setValue(rbp[0].toDouble());
       m_uiForm.spRebinWidth->setValue(rbp[1].toDouble());

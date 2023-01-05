@@ -25,15 +25,17 @@ class PowderData:
         this value is used for sanity-checking
 
     """
-    def __init__(self, *,
-                 a_tensors: Dict[int, np.ndarray],
-                 b_tensors: Dict[int, np.ndarray],
-                 frequencies: Dict[int, np.ndarray],
-                 num_atoms: Optional[int] = None):
 
-        self._data = {"a_tensors": a_tensors,
-                      "b_tensors": b_tensors,
-                      "frequencies": frequencies}  # type: PowderDict
+    def __init__(
+        self,
+        *,
+        a_tensors: Dict[int, np.ndarray],
+        b_tensors: Dict[int, np.ndarray],
+        frequencies: Dict[int, np.ndarray],
+        num_atoms: Optional[int] = None,
+    ):
+
+        self._data = {"a_tensors": a_tensors, "b_tensors": b_tensors, "frequencies": frequencies}  # type: PowderDict
 
         self._num_atoms = num_atoms
 
@@ -53,8 +55,7 @@ class PowderData:
         return self._a_traces[k_index]
 
     def _calculate_a_traces(self, k_index):
-        self._a_traces[k_index] = np.trace(a=self.get_a_tensors()[k_index],
-                                           axis1=1, axis2=2)
+        self._a_traces[k_index] = np.trace(a=self.get_a_tensors()[k_index], axis1=1, axis2=2)
 
     def get_b_traces(self, k_index):
         return np.trace(a=self.get_b_tensors()[k_index], axis1=2, axis2=3)
@@ -64,18 +65,15 @@ class PowderData:
 
     def extract(self) -> PowderDict:
         """Get tensor data as dict"""
-        return {key: {str(k): array for k, array in data.items()}
-                for key, data in self._data.items()}
+        return {key: {str(k): array for k, array in data.items()} for key, data in self._data.items()}
 
     @classmethod
-    def from_extracted(cls, dct: PowderDict,
-                       num_atoms: Optional[int] = None):
+    def from_extracted(cls, dct: PowderDict, num_atoms: Optional[int] = None):
         """Reconstruct a PowderData object from the extracted dictionary representation"""
-        a_tensors = {int(k_index): data for k_index, data in dct['a_tensors'].items()}
-        b_tensors = {int(k_index): data for k_index, data in dct['b_tensors'].items()}
-        frequencies = {int(k_index): data for k_index, data in dct['frequencies'].items()}
-        return cls(a_tensors=a_tensors, b_tensors=b_tensors,
-                   frequencies=frequencies, num_atoms=num_atoms)
+        a_tensors = {int(k_index): data for k_index, data in dct["a_tensors"].items()}
+        b_tensors = {int(k_index): data for k_index, data in dct["b_tensors"].items()}
+        frequencies = {int(k_index): data for k_index, data in dct["frequencies"].items()}
+        return cls(a_tensors=a_tensors, b_tensors=b_tensors, frequencies=frequencies, num_atoms=num_atoms)
 
     def _check_data(self) -> None:
         for key in "a_tensors", "b_tensors", "frequencies":

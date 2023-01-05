@@ -389,8 +389,8 @@ void pqHelpWindow::updateNavButtons() {
 
 //-----------------------------------------------------------------------------
 void pqHelpWindow::search() {
-  QList<QHelpSearchQuery> query = this->m_helpEngine->searchEngine()->queryWidget()->query();
-  this->m_helpEngine->searchEngine()->search(query);
+  auto search = this->m_helpEngine->searchEngine()->queryWidget()->searchInput();
+  this->m_helpEngine->searchEngine()->search(search);
 }
 
 //-----------------------------------------------------------------------------

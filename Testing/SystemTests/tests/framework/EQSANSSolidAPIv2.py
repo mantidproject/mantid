@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,attribute-defined-outside-init
+# pylint: disable=no-init,attribute-defined-outside-init
 import systemtesting
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.sns_command_interface import *
@@ -24,8 +24,8 @@ def do_cleanup():
 
 class EQSANSSolid(systemtesting.MantidSystemTest):
     """
-        Analysis Tests for EQSANS
-        Testing that the I(Q) output of is correct
+    Analysis Tests for EQSANS
+    Testing that the I(Q) output of is correct
     """
 
     def cleanup(self):
@@ -34,10 +34,10 @@ class EQSANSSolid(systemtesting.MantidSystemTest):
 
     def runTest(self):
         """
-            Check that EQSANSTofStructure returns the correct workspace
+        Check that EQSANSTofStructure returns the correct workspace
         """
         configI = ConfigService.Instance()
-        configI["facilityName"]='SNS'
+        configI["facilityName"] = "SNS"
         EQSANS(False)
         AppendDataFile("EQSANS_1466_event.nxs")
         SolidAngle()
@@ -46,11 +46,10 @@ class EQSANSSolid(systemtesting.MantidSystemTest):
         UseConfigMask(False)
         TotalChargeNormalization(normalize_to_beam=False)
         SetBeamCenter(96.29, 126.15)
-        SetTransmission(1.0,0.0, False)
+        SetTransmission(1.0, 0.0, False)
         Reduce1D()
-         # Scale up to match correct scaling.
-        Scale(InputWorkspace="EQSANS_1466_event_Iq", Factor=2777.81,
-              Operation='Multiply', OutputWorkspace="EQSANS_1466_event_Iq")
+        # Scale up to match correct scaling.
+        Scale(InputWorkspace="EQSANS_1466_event_Iq", Factor=2777.81, Operation="Multiply", OutputWorkspace="EQSANS_1466_event_Iq")
 
     def validate(self):
         self.tolerance = 0.2
@@ -58,18 +57,18 @@ class EQSANSSolid(systemtesting.MantidSystemTest):
         mtd["EQSANS_1466_event_Iq"].dataE(0)[0] = 13.8013
         mtd["EQSANS_1466_event_Iq"].dataY(0)[2] = 11.3167
 
-        self.disableChecking.append('Instrument')
-        self.disableChecking.append('Sample')
-        self.disableChecking.append('SpectraMap')
-        self.disableChecking.append('Axes')
+        self.disableChecking.append("Instrument")
+        self.disableChecking.append("Sample")
+        self.disableChecking.append("SpectraMap")
+        self.disableChecking.append("Axes")
 
-        return "EQSANS_1466_event_Iq", 'EQSANSSolid.nxs'
+        return "EQSANS_1466_event_Iq", "EQSANSSolid.nxs"
 
 
 class EQSANSSolidEvent(EQSANSSolid):
     """
-        Analysis Tests for EQSANS
-        Testing that the I(Q) output of is correct
+    Analysis Tests for EQSANS
+    Testing that the I(Q) output of is correct
     """
 
     def cleanup(self):
@@ -78,10 +77,10 @@ class EQSANSSolidEvent(EQSANSSolid):
 
     def runTest(self):
         """
-            Check that EQSANSTofStructure returns the correct workspace
+        Check that EQSANSTofStructure returns the correct workspace
         """
         configI = ConfigService.Instance()
-        configI["facilityName"]='SNS'
+        configI["facilityName"] = "SNS"
         EQSANS(True)
         AppendDataFile("EQSANS_1466_event.nxs")
         SolidAngle()
@@ -90,8 +89,7 @@ class EQSANSSolidEvent(EQSANSSolid):
         UseConfigMask(False)
         TotalChargeNormalization(normalize_to_beam=False)
         SetBeamCenter(96.29, 126.15)
-        SetTransmission(1.0,0.0, False)
+        SetTransmission(1.0, 0.0, False)
         Reduce1D()
         # Scale up to match correct scaling.
-        Scale(InputWorkspace="EQSANS_1466_event_Iq", Factor=2777.81,
-              Operation='Multiply', OutputWorkspace="EQSANS_1466_event_Iq")
+        Scale(InputWorkspace="EQSANS_1466_event_Iq", Factor=2777.81, Operation="Multiply", OutputWorkspace="EQSANS_1466_event_Iq")

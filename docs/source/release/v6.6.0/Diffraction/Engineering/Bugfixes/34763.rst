@@ -1,0 +1,1 @@
+- SaveVulcanGSS algorithm marked as deprecated as of 2022-11-30

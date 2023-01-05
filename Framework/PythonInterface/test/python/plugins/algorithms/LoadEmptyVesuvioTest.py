@@ -10,7 +10,6 @@ from mantid.api import *
 
 
 class LoadEmptyVesuvioTest(unittest.TestCase):
-
     def test_load_empty_no_par_file(self):
         """
         Tests loading the instrument with no PAR file.
@@ -32,7 +31,7 @@ class LoadEmptyVesuvioTest(unittest.TestCase):
         """
         Tests loading the instrument with no PAR file.
         """
-        evs_ws = LoadEmptyVesuvio(InstrumentParFile='IP0005.dat')
+        evs_ws = LoadEmptyVesuvio(InstrumentParFile="IP0005.dat")
 
         self.assertEqual(evs_ws.getNumberHistograms(), 198)
         self.assertEqual(evs_ws.blocksize(), 1)
@@ -46,5 +45,5 @@ class LoadEmptyVesuvioTest(unittest.TestCase):
         self.assertAlmostEqual(bs_det_1_l1, 0.6707999706268, places=7)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

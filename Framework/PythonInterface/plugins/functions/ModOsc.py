@@ -12,15 +12,14 @@ import scipy.special as sp
 
 
 class ModOsc(IFunction1D):
-
     def category(self):
         return "Muon\\MuonSpecific"
 
     def init(self):
         self.declareParameter("A0", 0.2)
-        self.declareParameter("Freq", 1.0, 'Oscillation Frequency (MHz)')
-        self.declareParameter("ModFreq", 0.1, 'Modulation Frequency (MHz)')
-        self.declareParameter("Phi", 0.0, 'Phase')
+        self.declareParameter("Freq", 1.0, "Oscillation Frequency (MHz)")
+        self.declareParameter("ModFreq", 0.1, "Modulation Frequency (MHz)")
+        self.declareParameter("Phi", 0.0, "Phase")
 
     def function1D(self, x):
         A0 = self.getParameterValue("A0")

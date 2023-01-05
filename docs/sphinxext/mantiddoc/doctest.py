@@ -149,9 +149,11 @@ TEST_FAILURE_TYPE = "UsageFailure"
 PACKAGE_NAME = "docs"
 
 # No Test found error message
-NO_TEST_ERROR = "\n*************************************************\n" \
-                "* No test code has been found in given file(s). * \n" \
-                "*************************************************"
+NO_TEST_ERROR = (
+    "\n*************************************************\n"
+    "* No test code has been found in given file(s). * \n"
+    "*************************************************"
+)
 
 # -------------------------------------------------------------------------------
 # Define parts of lines that denote a document
@@ -166,12 +168,11 @@ NUMBER_PASSED_RE = re.compile(r"^(\d+) items passed all tests:$")
 TEST_PASSED_END_RE = re.compile(r"Test passed.")
 TEST_FAILED_END_RE = re.compile(r"\*\*\*Test Failed\*\*\* (\d+) failures.")
 FAILURE_LOC_RE = re.compile(r"^File \"(.+)\",\s+line\s+(\d+),\s+in\s+(\S+)(\s\((setup|cleanup) code\))?$")
-MIX_FAIL_RE = re.compile(r'^\s+(\d+)\s+of\s+(\d+)\s+in\s+(\w+)$')
+MIX_FAIL_RE = re.compile(r"^\s+(\d+)\s+of\s+(\d+)\s+in\s+(\w+)$")
 
 
 # -------------------------------------------------------------------------------
 class TestSuiteReport(object):
-
     def __init__(self, name, cases, package=None):
         if len(cases) == 0:
             raise ValueError("No test cases provided")
@@ -198,7 +199,6 @@ class TestSuiteReport(object):
 
 # -------------------------------------------------------------------------------
 class TestCaseReport(object):
-
     def __init__(self, classname, name, failure_descr):
         self.classname = classname
         self.name = name
@@ -243,7 +243,7 @@ class DocTestOutputParser(object):
                           as a filename
         """
         if isfile:
-            with open(doctest_output, 'r') as results:
+            with open(doctest_output, "r") as results:
                 self.testsuite = self.__parse(results)
         else:
             self.testsuite = self.__parse(doctest_output.splitlines())
@@ -307,8 +307,7 @@ class DocTestOutputParser(object):
             if in_doc and line != "":
                 document_txt.append(line)
         # endfor
-        return TestSuiteReport(name="doctests", cases=cases,
-                               package=PACKAGE_NAME)
+        return TestSuiteReport(name="doctests", cases=cases, package=PACKAGE_NAME)
 
     def __parse_document(self, results):
         """
@@ -322,9 +321,7 @@ class DocTestOutputParser(object):
         """
         fullname = self.__extract_fullname(results[0])
         if not results[1].startswith("-"):
-            raise ValueError("Invalid second line of output: '%s'. "
-                             "Expected a title underline."
-                             % text[1])
+            raise ValueError("Invalid second line of output: '%s'. " "Expected a title underline." % text[1])
         results = results[2:]  # trim off top two lines of header information
         maintests, cleanup = self.__split_on_cleanup(results)
         overall_success = not maintests[0] == FAILURE_MARKER
@@ -344,8 +341,7 @@ class DocTestOutputParser(object):
           line (str): Line to test for title
         """
         if not line.startswith(DOCTEST_DOCUMENT_BEGIN):
-            raise ValueError("First line of output text should be a line "
-                             "beginning '%s'" % DOCTEST_DOCUMENT_BEGIN)
+            raise ValueError("First line of output text should be a line " "beginning '%s'" % DOCTEST_DOCUMENT_BEGIN)
         return line.replace(DOCTEST_DOCUMENT_BEGIN, "").strip()
 
     def __split_on_cleanup(self, results):
@@ -364,14 +360,13 @@ class DocTestOutputParser(object):
         # 'Test passed' as this is the final line of the main test results
         summaryline_idx = None
         for idx, line in enumerate(results):
-            if TEST_PASSED_END_RE.match(line) or \
-                    TEST_FAILED_END_RE.match(line):
+            if TEST_PASSED_END_RE.match(line) or TEST_FAILED_END_RE.match(line):
                 summaryline_idx = idx
                 break
 
         if summaryline_idx:
             # +1 includes the summary line itself
-            return (results[:summaryline_idx + 1], results[summaryline_idx + 1:])
+            return (results[: summaryline_idx + 1], results[summaryline_idx + 1 :])
         else:
             return results
 
@@ -388,16 +383,14 @@ class DocTestOutputParser(object):
         """
         match = NUMBER_PASSED_RE.match(results[0])
         if not match:
-            raise ValueError("All passed line incorrect: '%s'"
-                             % results[0])
+            raise ValueError("All passed line incorrect: '%s'" % results[0])
         classname = self.__create_classname(fullname)
         nitems = int(match.group(1))
         cases = []
-        for line in results[1:1 + nitems]:
+        for line in results[1 : 1 + nitems]:
             match = ALLPASS_TEST_NAMES_RE.match(line)
             if not match:
-                raise ValueError("Unexpected information line in "
-                                 "all pass case: %s" % line)
+                raise ValueError("Unexpected information line in " "all pass case: %s" % line)
             ntests, name = int(match.group(1)), match.group(2)
             for idx in range(ntests):
                 cases.append(TestCaseReport(classname, name, failure_descr=None))
@@ -438,8 +431,7 @@ class DocTestOutputParser(object):
         failcases = []
         for i in range(0, nmarkers - 1):
             start, end = fail_markers[i] + 1, fail_markers[i + 1]
-            failcases.append(self.__create_failure_report(classname,
-                                                          results[start:end]))
+            failcases.append(self.__create_failure_report(classname, results[start:end]))
 
         if len(success_markers) == 0:
             return failcases
@@ -453,7 +445,7 @@ class DocTestOutputParser(object):
 
         # The final puzzle piece is that some tests that have failed
         # may have the same names as those that have passed.
-        for line in results[end + 1:]:
+        for line in results[end + 1 :]:
             match = MIX_FAIL_RE.match(line)
             if not match:
                 continue
@@ -461,8 +453,7 @@ class DocTestOutputParser(object):
             npasses = ntotal - nfails
             name = match.group(3)
             for i in range(npasses):
-                passcases.append(TestCaseReport(classname, name,
-                                                failure_descr=None))
+                passcases.append(TestCaseReport(classname, name, failure_descr=None))
 
         return self.__merge_passfail(passcases, failcases)
 
@@ -490,10 +481,12 @@ class DocTestOutputParser(object):
         """
         match = FAILURE_LOC_RE.match(failure_desc[0])
         if not match:
-            raise ValueError("Unexpected failure description format.\n"
-                             "Expected the first line to contain details "
-                             "of the location of the error.\n"
-                             "Found '%s'" % failure_desc[0])
+            raise ValueError(
+                "Unexpected failure description format.\n"
+                "Expected the first line to contain details "
+                "of the location of the error.\n"
+                "Found '%s'" % failure_desc[0]
+            )
         name = match.group(3)
         return TestCaseReport(classname, name, "\n".join(failure_desc))
 
@@ -524,6 +517,7 @@ class DocTestOutputParser(object):
 
 # -------------------------------------------------------------------------------
 
+
 def doctest_to_xunit(app, exception):
     """
     If the runner was 'doctest'then parse the "output.txt"
@@ -539,6 +533,7 @@ def doctest_to_xunit(app, exception):
 
     if exception:
         import traceback
+
         traceback.print_exc()
     if app.builder.name != "doctest":
         logger.debug("Skipping xunit parsing for builder '%s'" % app.builder.name)
@@ -557,8 +552,9 @@ def doctest_to_xunit(app, exception):
 
 # -------------------------------------------------------------------------------
 
+
 def setup(app):
     """
     Connect the 'build-finished' event to the handler function.
     """
-    app.connect('build-finished', doctest_to_xunit)
+    app.connect("build-finished", doctest_to_xunit)

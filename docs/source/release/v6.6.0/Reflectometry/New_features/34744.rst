@@ -1,0 +1,1 @@
+- :ref:`ReflectometryISISLoadAndProcess <algm-ReflectometryISISLoadAndProcess>` can now take a polarization efficiencies workspace to make polarization corrections. This workspace can be set via the ``Polarization Efficiencies`` combo box on the ``Experiment Settings`` tab.

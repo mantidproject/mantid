@@ -22,16 +22,16 @@ class D11_GenerateLogbook_Test(systemtesting.MantidSystemTest):
         self.setUp()
 
     def setUp(self):
-        config['default.facility'] = 'ILL'
-        config['default.instrument'] = 'D11'
-        config['logging.loggers.root.level'] = 'Warning'
+        config["default.facility"] = "ILL"
+        config["default.instrument"] = "D11"
+        config["logging.loggers.root.level"] = "Warning"
 
-        data_dirs = config['datasearch.directories'].split(';')
-        test_data_dir = [p for p in data_dirs if 'SystemTest' in p][0]
-        d11_dir = os.path.join('ILL', 'D11')
-        if 'ILL' in test_data_dir:
-            d11_dir = 'D11'
-        self._data_directory = os.path.abspath(os.path.join(test_data_dir,  d11_dir))
+        data_dirs = config["datasearch.directories"].split(";")
+        test_data_dir = [p for p in data_dirs if "SystemTest" in p][0]
+        d11_dir = os.path.join("ILL", "D11")
+        if "ILL" in test_data_dir:
+            d11_dir = "D11"
+        self._data_directory = os.path.abspath(os.path.join(test_data_dir, d11_dir))
 
     def cleanup(self):
         mtd.clear()
@@ -39,12 +39,13 @@ class D11_GenerateLogbook_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
-        self.disableChecking = ['Instrument']
-        return ['d11_logbook', 'D11_Logbook_Reference.nxs']
+        self.disableChecking = ["Instrument"]
+        return ["d11_logbook", "D11_Logbook_Reference.nxs"]
 
     def runTest(self):
-        GenerateLogbook(Directory=self._data_directory, OutputWorkspace='d11_logbook',
-                        Facility='ILL', Instrument='D11', NumorRange='017038,017039')
+        GenerateLogbook(
+            Directory=self._data_directory, OutputWorkspace="d11_logbook", Facility="ILL", Instrument="D11", NumorRange="017038,017039"
+        )
 
 
 class D11B_GenerateLogbook_Test(systemtesting.MantidSystemTest):
@@ -59,16 +60,16 @@ class D11B_GenerateLogbook_Test(systemtesting.MantidSystemTest):
         self.setUp()
 
     def setUp(self):
-        config['default.facility'] = 'ILL'
-        config['default.instrument'] = 'D11B'
-        config['logging.loggers.root.level'] = 'Warning'
+        config["default.facility"] = "ILL"
+        config["default.instrument"] = "D11B"
+        config["logging.loggers.root.level"] = "Warning"
 
-        data_dirs = config['datasearch.directories'].split(';')
-        test_data_dir = [p for p in data_dirs if 'SystemTest' in p][0]
-        d11b_dir = os.path.join('ILL', 'D11B')
-        if 'ILL' in test_data_dir:
-            d11b_dir = 'D11B'
-        self._data_directory = os.path.abspath(os.path.join(test_data_dir,  d11b_dir))
+        data_dirs = config["datasearch.directories"].split(";")
+        test_data_dir = [p for p in data_dirs if "SystemTest" in p][0]
+        d11b_dir = os.path.join("ILL", "D11B")
+        if "ILL" in test_data_dir:
+            d11b_dir = "D11B"
+        self._data_directory = os.path.abspath(os.path.join(test_data_dir, d11b_dir))
 
     def cleanup(self):
         mtd.clear()
@@ -76,13 +77,18 @@ class D11B_GenerateLogbook_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
-        self.disableChecking = ['Instrument']
-        return ['d11b_logbook', 'D11b_Logbook_Reference.nxs']
+        self.disableChecking = ["Instrument"]
+        return ["d11b_logbook", "D11b_Logbook_Reference.nxs"]
 
     def runTest(self):
-        GenerateLogbook(Directory=self._data_directory, OutputWorkspace='d11b_logbook',
-                        Facility='ILL', Instrument='D11B', NumorRange='000361,000362',
-                        OptionalHeaders='all')
+        GenerateLogbook(
+            Directory=self._data_directory,
+            OutputWorkspace="d11b_logbook",
+            Facility="ILL",
+            Instrument="D11B",
+            NumorRange="000361,000362",
+            OptionalHeaders="all",
+        )
 
 
 class D22_GenerateLogbook_Test(systemtesting.MantidSystemTest):
@@ -97,16 +103,16 @@ class D22_GenerateLogbook_Test(systemtesting.MantidSystemTest):
         self.setUp()
 
     def setUp(self):
-        config['default.facility'] = 'ILL'
-        config['default.instrument'] = 'D22'
-        config['logging.loggers.root.level'] = 'Warning'
+        config["default.facility"] = "ILL"
+        config["default.instrument"] = "D22"
+        config["logging.loggers.root.level"] = "Warning"
 
-        data_dirs = config['datasearch.directories'].split(';')
-        test_data_dir = [p for p in data_dirs if 'SystemTest' in p][0]
-        d22_dir = os.path.join('ILL', 'D22')
-        if 'ILL' in test_data_dir:
-            d22_dir = 'D22'
-        self._data_directory = os.path.abspath(os.path.join(test_data_dir,  d22_dir))
+        data_dirs = config["datasearch.directories"].split(";")
+        test_data_dir = [p for p in data_dirs if "SystemTest" in p][0]
+        d22_dir = os.path.join("ILL", "D22")
+        if "ILL" in test_data_dir:
+            d22_dir = "D22"
+        self._data_directory = os.path.abspath(os.path.join(test_data_dir, d22_dir))
 
     def cleanup(self):
         mtd.clear()
@@ -114,13 +120,18 @@ class D22_GenerateLogbook_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
-        self.disableChecking = ['Instrument']
-        return ['d22_logbook', 'D22_Logbook_Reference.nxs']
+        self.disableChecking = ["Instrument"]
+        return ["d22_logbook", "D22_Logbook_Reference.nxs"]
 
     def runTest(self):
-        GenerateLogbook(Directory=self._data_directory, OutputWorkspace='d22_logbook',
-                        Facility='ILL', Instrument='D22', NumorRange='354717,354718',
-                        OptionalHeaders='all')
+        GenerateLogbook(
+            Directory=self._data_directory,
+            OutputWorkspace="d22_logbook",
+            Facility="ILL",
+            Instrument="D22",
+            NumorRange="354717,354718",
+            OptionalHeaders="all",
+        )
 
 
 class D22B_GenerateLogbook_Test(systemtesting.MantidSystemTest):
@@ -135,16 +146,16 @@ class D22B_GenerateLogbook_Test(systemtesting.MantidSystemTest):
         self.setUp()
 
     def setUp(self):
-        config['default.facility'] = 'ILL'
-        config['default.instrument'] = 'D22B'
-        config['logging.loggers.root.level'] = 'Warning'
+        config["default.facility"] = "ILL"
+        config["default.instrument"] = "D22B"
+        config["logging.loggers.root.level"] = "Warning"
 
-        data_dirs = config['datasearch.directories'].split(';')
-        test_data_dir = [p for p in data_dirs if 'SystemTest' in p][0]
-        d22b_dir = os.path.join('ILL', 'D22B')
-        if 'ILL' in test_data_dir:
-            d22b_dir = 'D22B'
-        self._data_directory = os.path.abspath(os.path.join(test_data_dir,  d22b_dir))
+        data_dirs = config["datasearch.directories"].split(";")
+        test_data_dir = [p for p in data_dirs if "SystemTest" in p][0]
+        d22b_dir = os.path.join("ILL", "D22B")
+        if "ILL" in test_data_dir:
+            d22b_dir = "D22B"
+        self._data_directory = os.path.abspath(os.path.join(test_data_dir, d22b_dir))
 
     def cleanup(self):
         mtd.clear()
@@ -152,13 +163,18 @@ class D22B_GenerateLogbook_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
-        self.disableChecking = ['Instrument']
-        return ['d22b_logbook', 'D22b_Logbook_Reference.nxs']
+        self.disableChecking = ["Instrument"]
+        return ["d22b_logbook", "D22b_Logbook_Reference.nxs"]
 
     def runTest(self):
-        GenerateLogbook(Directory=self._data_directory, OutputWorkspace='d22b_logbook',
-                        Facility='ILL', Instrument='D22B', NumorRange='398672,398673',
-                        OptionalHeaders='all')
+        GenerateLogbook(
+            Directory=self._data_directory,
+            OutputWorkspace="d22b_logbook",
+            Facility="ILL",
+            Instrument="D22B",
+            NumorRange="398672,398673",
+            OptionalHeaders="all",
+        )
 
 
 class IN4_GenerateLogbook_Test(systemtesting.MantidSystemTest):
@@ -173,16 +189,16 @@ class IN4_GenerateLogbook_Test(systemtesting.MantidSystemTest):
         self.setUp()
 
     def setUp(self):
-        config['default.facility'] = 'ILL'
-        config['default.instrument'] = 'IN4'
-        config['logging.loggers.root.level'] = 'Warning'
+        config["default.facility"] = "ILL"
+        config["default.instrument"] = "IN4"
+        config["logging.loggers.root.level"] = "Warning"
 
-        data_dirs = config['datasearch.directories'].split(';')
-        test_data_dir = [p for p in data_dirs if 'SystemTest' in p][0]
-        in4_dir = os.path.join('ILL', 'IN4')
-        if 'ILL' in test_data_dir:
-            in4_dir = 'IN4'
-        self._data_directory = os.path.abspath(os.path.join(test_data_dir,  in4_dir))
+        data_dirs = config["datasearch.directories"].split(";")
+        test_data_dir = [p for p in data_dirs if "SystemTest" in p][0]
+        in4_dir = os.path.join("ILL", "IN4")
+        if "ILL" in test_data_dir:
+            in4_dir = "IN4"
+        self._data_directory = os.path.abspath(os.path.join(test_data_dir, in4_dir))
 
     def cleanup(self):
         mtd.clear()
@@ -190,13 +206,18 @@ class IN4_GenerateLogbook_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
-        self.disableChecking = ['Instrument']
-        return ['in4_logbook', 'IN4_Logbook_Reference.nxs']
+        self.disableChecking = ["Instrument"]
+        return ["in4_logbook", "IN4_Logbook_Reference.nxs"]
 
     def runTest(self):
-        GenerateLogbook(Directory=self._data_directory, OutputWorkspace='in4_logbook',
-                        Facility='ILL', Instrument='IN4', NumorRange='092375,092376',
-                        OptionalHeaders='all')
+        GenerateLogbook(
+            Directory=self._data_directory,
+            OutputWorkspace="in4_logbook",
+            Facility="ILL",
+            Instrument="IN4",
+            NumorRange="092375,092376",
+            OptionalHeaders="all",
+        )
 
 
 class IN5_GenerateLogbook_Test(systemtesting.MantidSystemTest):
@@ -211,16 +232,16 @@ class IN5_GenerateLogbook_Test(systemtesting.MantidSystemTest):
         self.setUp()
 
     def setUp(self):
-        config['default.facility'] = 'ILL'
-        config['default.instrument'] = 'IN5'
-        config['logging.loggers.root.level'] = 'Warning'
+        config["default.facility"] = "ILL"
+        config["default.instrument"] = "IN5"
+        config["logging.loggers.root.level"] = "Warning"
 
-        data_dirs = config['datasearch.directories'].split(';')
-        test_data_dir = [p for p in data_dirs if 'SystemTest' in p][0]
-        in5_dir = os.path.join('ILL', 'IN5')
-        if 'ILL' in test_data_dir:
-            in5_dir = 'IN5'
-        self._data_directory = os.path.abspath(os.path.join(test_data_dir,  in5_dir))
+        data_dirs = config["datasearch.directories"].split(";")
+        test_data_dir = [p for p in data_dirs if "SystemTest" in p][0]
+        in5_dir = os.path.join("ILL", "IN5")
+        if "ILL" in test_data_dir:
+            in5_dir = "IN5"
+        self._data_directory = os.path.abspath(os.path.join(test_data_dir, in5_dir))
 
     def cleanup(self):
         mtd.clear()
@@ -228,13 +249,18 @@ class IN5_GenerateLogbook_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
-        self.disableChecking = ['Instrument']
-        return ['in5_logbook', 'IN5_Logbook_Reference.nxs']
+        self.disableChecking = ["Instrument"]
+        return ["in5_logbook", "IN5_Logbook_Reference.nxs"]
 
     def runTest(self):
-        GenerateLogbook(Directory=self._data_directory, OutputWorkspace='in5_logbook',
-                        Facility='ILL', Instrument='IN5', NumorRange='199728,199729',
-                        OptionalHeaders='all')
+        GenerateLogbook(
+            Directory=self._data_directory,
+            OutputWorkspace="in5_logbook",
+            Facility="ILL",
+            Instrument="IN5",
+            NumorRange="199728,199729",
+            OptionalHeaders="all",
+        )
 
 
 class IN6_GenerateLogbook_Test(systemtesting.MantidSystemTest):
@@ -249,16 +275,16 @@ class IN6_GenerateLogbook_Test(systemtesting.MantidSystemTest):
         self.setUp()
 
     def setUp(self):
-        config['default.facility'] = 'ILL'
-        config['default.instrument'] = 'IN6'
-        config['logging.loggers.root.level'] = 'Warning'
+        config["default.facility"] = "ILL"
+        config["default.instrument"] = "IN6"
+        config["logging.loggers.root.level"] = "Warning"
 
-        data_dirs = config['datasearch.directories'].split(';')
-        test_data_dir = [p for p in data_dirs if 'SystemTest' in p][0]
-        in6_dir = os.path.join('ILL', 'IN6')
-        if 'ILL' in test_data_dir:
-            in6_dir = 'IN6'
-        self._data_directory = os.path.abspath(os.path.join(test_data_dir,  in6_dir))
+        data_dirs = config["datasearch.directories"].split(";")
+        test_data_dir = [p for p in data_dirs if "SystemTest" in p][0]
+        in6_dir = os.path.join("ILL", "IN6")
+        if "ILL" in test_data_dir:
+            in6_dir = "IN6"
+        self._data_directory = os.path.abspath(os.path.join(test_data_dir, in6_dir))
 
     def cleanup(self):
         mtd.clear()
@@ -266,13 +292,18 @@ class IN6_GenerateLogbook_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
-        self.disableChecking = ['Instrument']
-        return ['in6_logbook', 'IN6_Logbook_Reference.nxs']
+        self.disableChecking = ["Instrument"]
+        return ["in6_logbook", "IN6_Logbook_Reference.nxs"]
 
     def runTest(self):
-        GenerateLogbook(Directory=self._data_directory, OutputWorkspace='in6_logbook',
-                        Facility='ILL', Instrument='IN6', NumorRange='224436,224437',
-                        OptionalHeaders='all')
+        GenerateLogbook(
+            Directory=self._data_directory,
+            OutputWorkspace="in6_logbook",
+            Facility="ILL",
+            Instrument="IN6",
+            NumorRange="224436,224437",
+            OptionalHeaders="all",
+        )
 
 
 class D33_GenerateLogbook_Test(systemtesting.MantidSystemTest):
@@ -287,16 +318,16 @@ class D33_GenerateLogbook_Test(systemtesting.MantidSystemTest):
         self.setUp()
 
     def setUp(self):
-        config['default.facility'] = 'ILL'
-        config['default.instrument'] = 'D33'
-        config['logging.loggers.root.level'] = 'Warning'
+        config["default.facility"] = "ILL"
+        config["default.instrument"] = "D33"
+        config["logging.loggers.root.level"] = "Warning"
 
-        data_dirs = config['datasearch.directories'].split(';')
-        test_data_dir = [p for p in data_dirs if 'SystemTest' in p][0]
-        d33_dir = os.path.join('ILL', 'D33')
-        if 'ILL' in test_data_dir:
-            d33_dir = 'D33'
-        self._data_directory = os.path.abspath(os.path.join(test_data_dir,  d33_dir))
+        data_dirs = config["datasearch.directories"].split(";")
+        test_data_dir = [p for p in data_dirs if "SystemTest" in p][0]
+        d33_dir = os.path.join("ILL", "D33")
+        if "ILL" in test_data_dir:
+            d33_dir = "D33"
+        self._data_directory = os.path.abspath(os.path.join(test_data_dir, d33_dir))
 
     def cleanup(self):
         mtd.clear()
@@ -304,13 +335,18 @@ class D33_GenerateLogbook_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
-        self.disableChecking = ['Instrument']
-        return ['d33_logbook', 'D33_Logbook_Reference.nxs']
+        self.disableChecking = ["Instrument"]
+        return ["d33_logbook", "D33_Logbook_Reference.nxs"]
 
     def runTest(self):
-        GenerateLogbook(Directory=self._data_directory, OutputWorkspace='d33_logbook',
-                        Facility='ILL', Instrument='D33', NumorRange='162689,162690',
-                        OptionalHeaders='all')
+        GenerateLogbook(
+            Directory=self._data_directory,
+            OutputWorkspace="d33_logbook",
+            Facility="ILL",
+            Instrument="D33",
+            NumorRange="162689,162690",
+            OptionalHeaders="all",
+        )
 
 
 class D16_GenerateLogbook_Test(systemtesting.MantidSystemTest):
@@ -325,16 +361,16 @@ class D16_GenerateLogbook_Test(systemtesting.MantidSystemTest):
         self.setUp()
 
     def setUp(self):
-        config['default.facility'] = 'ILL'
-        config['default.instrument'] = 'D16'
-        config['logging.loggers.root.level'] = 'Warning'
+        config["default.facility"] = "ILL"
+        config["default.instrument"] = "D16"
+        config["logging.loggers.root.level"] = "Warning"
 
-        data_dirs = config['datasearch.directories'].split(';')
-        test_data_dir = [p for p in data_dirs if 'SystemTest' in p][0]
-        d16_dir = os.path.join('ILL', 'D16')
-        if 'ILL' in test_data_dir:
-            d16_dir = 'D16'
-        self._data_directory = os.path.abspath(os.path.join(test_data_dir,  d16_dir))
+        data_dirs = config["datasearch.directories"].split(";")
+        test_data_dir = [p for p in data_dirs if "SystemTest" in p][0]
+        d16_dir = os.path.join("ILL", "D16")
+        if "ILL" in test_data_dir:
+            d16_dir = "D16"
+        self._data_directory = os.path.abspath(os.path.join(test_data_dir, d16_dir))
 
     def cleanup(self):
         mtd.clear()
@@ -342,10 +378,15 @@ class D16_GenerateLogbook_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
-        self.disableChecking = ['Instrument']
-        return ['d16_logbook', 'D16_Logbook_Reference.nxs']
+        self.disableChecking = ["Instrument"]
+        return ["d16_logbook", "D16_Logbook_Reference.nxs"]
 
     def runTest(self):
-        GenerateLogbook(Directory=self._data_directory, OutputWorkspace='d16_logbook',
-                        Facility='ILL', Instrument='D16', NumorRange='000245,000246',
-                        OptionalHeaders='all')
+        GenerateLogbook(
+            Directory=self._data_directory,
+            OutputWorkspace="d16_logbook",
+            Facility="ILL",
+            Instrument="D16",
+            NumorRange="000245,000246",
+            OptionalHeaders="all",
+        )

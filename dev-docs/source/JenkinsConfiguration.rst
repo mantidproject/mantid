@@ -101,11 +101,14 @@ The agent will connect automatically when the Docker container starts running.
 Mac OS
 ------
 
-Enable `SSH ("Remote Login") and VNC ("Remote Management") <https://apple.stackexchange.com/a/73919>`__.
-If you have connection issues from a non-OS X client then try adjusting your color depth settings (True Color 32bpp works on Remmina).
+Enable `SSH ("Remote Login") and VNC ("Remote Management")
+<https://apple.stackexchange.com/a/73919>`__.
+If you have connection issues from a non-OS X client then try adjusting your color
+depth settings (True Color 32bpp works on Remmina).
 
 In order to run the Qt tests, which require a connection to the windowing system,
-the user that is running the Jenkins agent must have logged in.
+the user that is running the Jenkins agent must be left logged in and the
+automatic screen lock must be disabled.
 This is most easily done by VNC - connect, log in, then disconnect.
 If you see errors such as::
 
@@ -114,21 +117,25 @@ If you see errors such as::
 
 then no one is logged in to the system.
 
-Finally, disable saved application states that cause a dialog to be raised after a program crash resulting in a test hanging waiting for a user to click ok on a dialog::
+Disable saved application states that cause a dialog to be raised after a
+program crash resulting in a test hanging waiting for a user to click ok on a dialog::
 
     defaults write org.python.python NSQuitAlwaysKeepsWindows -bool false
     defaults write org.mantidproject.MantidPlot NSQuitAlwaysKeepsWindows -bool false
+
+Finally, install Java 11 JRE from https://adoptium.net/temurin/releases/ by selecting
+``macOS``, ``x64``, ``JRE`` and ``11`` for the respective options.
+Download the ``.pkg`` and install following the instructions.
+
+Restart the machine and ensure you leave the jenkins-agent user logged in as
+per the instructions above.
 
 Agent Connection
 ^^^^^^^^^^^^^^^^
 
 The Jenkins JNLP connections are maintained by a crontab entry.
 The script is in the `mantid repository <https://github.com/mantidproject/mantid/blob/main/buildconfig/Jenkins/jenkins-slave.sh>`__.
-
-The comments at the top describe a typical crontab entry for the script.
-This needs to be manually set for each agent. Ensure the script is marked executable after downloading it.
-Also ensure the entry in the crontab has the correct ``PATH`` setting (by default cron uses a reduced ``PATH`` entry).
-On macOS ``latex`` and ``sysctl`` should be available.
+The comments at the top describe a how to customize the script for a new agent.
 
 Misc Groovy Scripts
 ###################

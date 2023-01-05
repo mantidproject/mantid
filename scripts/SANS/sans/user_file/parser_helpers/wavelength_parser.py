@@ -22,13 +22,13 @@ class DuplicateWavelengthStates:
     These classes contain duplicated attributes, so this POD
     class ties them together for subsequent setters
     """
+
     transmission: StateCalculateTransmission
     wavelength: StateWavelength
     pixel: StateWavelengthAndPixelAdjustment
 
     def iterate_fields(self):
-        return [self.transmission,
-                self.wavelength, self.pixel]
+        return [self.transmission, self.wavelength, self.pixel]
 
 
 def parse_range_wavelength(wavelength_range: str) -> Tuple[WavRange, WavRangePairs]:
@@ -39,7 +39,7 @@ def parse_range_wavelength(wavelength_range: str) -> Tuple[WavRange, WavRangePai
     return: full wavelength as tuple - (min, max), wavelength pairs - e.g. [(1., 2.), (2., 4.)]
     """
     wavelength_pairs = get_ranges_from_event_slice_setting(wavelength_range)
-    full_wavelength = (min(wavelength_pairs, key=lambda v: v[0])[0],  max(wavelength_pairs, key=lambda v: v[1])[1])
+    full_wavelength = (min(wavelength_pairs, key=lambda v: v[0])[0], max(wavelength_pairs, key=lambda v: v[1])[1])
     wavelength_pairs.append(full_wavelength)
     return full_wavelength, wavelength_pairs
 

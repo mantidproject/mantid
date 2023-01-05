@@ -94,7 +94,7 @@ bool SequentialFitDialog::addWorkspaces(const QStringList &wsNames) {
     model->setData(model->index(row, 1, QModelIndex()), "");
     QTableWidgetItem *item = ui.tWorkspaces->item(row, 1);
     if (item) {
-      item->setBackgroundColor(QColor(Qt::lightGray));
+      item->setBackground(QColor(Qt::lightGray));
       item->setFlags(Qt::NoItemFlags);
     }
 
@@ -157,7 +157,7 @@ void SequentialFitDialog::addFile() {
       model->setData(model->index(row, 3, QModelIndex()), ""); // ws index
       QTableWidgetItem *item = ui.tWorkspaces->item(row, 3);
       if (item) {
-        item->setBackgroundColor(QColor(Qt::lightGray));
+        item->setBackground(QColor(Qt::lightGray));
         item->setFlags(Qt::NoItemFlags);
       }
       ++row;

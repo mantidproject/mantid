@@ -89,7 +89,6 @@ class FigureInteraction(object):
         self._cids.append(canvas.mpl_connect('motion_notify_event', self.motion_event))
         self._cids.append(canvas.mpl_connect('resize_event', self.mpl_redraw_annotations))
         self._cids.append(canvas.mpl_connect('figure_leave_event', self.on_leave))
-        self._cids.append(canvas.mpl_connect('axis_leave_event', self.on_leave))
         self._cids.append(canvas.mpl_connect('scroll_event', self.on_scroll))
 
         self.canvas = canvas

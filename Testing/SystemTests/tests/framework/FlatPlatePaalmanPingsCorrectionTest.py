@@ -11,7 +11,7 @@ from mantid.simpleapi import *
 class FlatPlatePaalmanPingsCorrectionTest(systemtesting.MantidSystemTest):
     def create_input_workspace(self, ws):
         # ws = ws with first two channels set to 2.602 AA and last two channels to 31.974AA
-        LoadNexus(Filename='IN16B_felo_002K.nxs', OutputWorkspace=ws)
+        LoadNexus(Filename="IN16B_felo_002K.nxs", OutputWorkspace=ws)
         ConvertUnits(InputWorkspace=ws, Target="Wavelength", EMode="Indirect", EFixed=2.08, OutputWorkspace=ws)
         ws = mtd[ws]
         val = ws.extractX()
@@ -20,8 +20,7 @@ class FlatPlatePaalmanPingsCorrectionTest(systemtesting.MantidSystemTest):
         for i in range(18):
             ws.setX(i, val[i, :])
 
-    def do_FlatPlatePaalmanPingsTest(self, ws, ws_can, mode, name, sample_thickness = 0.2, can_front_thickness=0.05,
-                                     can_back_thickness = 0.05):
+    def do_FlatPlatePaalmanPingsTest(self, ws, ws_can, mode, name, sample_thickness=0.2, can_front_thickness=0.05, can_back_thickness=0.05):
         """
         The output workspaces in the system tests were verified by Miguel Gonzalez gonzalezm@ill.fr.
 
@@ -35,29 +34,38 @@ class FlatPlatePaalmanPingsCorrectionTest(systemtesting.MantidSystemTest):
         :param mode: Direct, Indirect, Elastic or Efixed
         :return: Nothing
         """
-        FPPP_Result = FlatPlatePaalmanPingsCorrection(SampleWorkspace=ws, Emode=mode, Efixed=2.08,
-                                                      SampleChemicalFormula='V',
-                                                      SampleDensity=0.0704565, SampleDensityType='Number Density',
-                                                      SampleThickness=sample_thickness, SampleAngle=-45,
-                                                      CanWorkspace=ws_can, CanChemicalFormula='Ti',
-                                                      CanDensity=0.0567, CanDensityType='Number Density',
-                                                      CanFrontThickness=can_front_thickness, CanBackThickness=can_back_thickness)
+        FPPP_Result = FlatPlatePaalmanPingsCorrection(
+            SampleWorkspace=ws,
+            Emode=mode,
+            Efixed=2.08,
+            SampleChemicalFormula="V",
+            SampleDensity=0.0704565,
+            SampleDensityType="Number Density",
+            SampleThickness=sample_thickness,
+            SampleAngle=-45,
+            CanWorkspace=ws_can,
+            CanChemicalFormula="Ti",
+            CanDensity=0.0567,
+            CanDensityType="Number Density",
+            CanFrontThickness=can_front_thickness,
+            CanBackThickness=can_back_thickness,
+        )
 
-        LoadNexusProcessed(Filename="FlatPlatePaalmanPings_" + name + ".nxs", OutputWorkspace='ref')
-        result = CompareWorkspaces(Workspace1=FPPP_Result, Workspace2='ref', Tolerance=1e-6, CheckInstrument=False)
+        LoadNexusProcessed(Filename="FlatPlatePaalmanPings_" + name + ".nxs", OutputWorkspace="ref")
+        result = CompareWorkspaces(Workspace1=FPPP_Result, Workspace2="ref", Tolerance=1e-6, CheckInstrument=False)
         if not result[0]:
-            self.assertTrue(result[0], "Mismatch in " + name + ": " + result[1].row(0)['Message'])
+            self.assertTrue(result[0], "Mismatch in " + name + ": " + result[1].row(0)["Message"])
 
     def runTest(self):
-        self.create_input_workspace('ws')
-        self.create_input_workspace('ws_can')
+        self.create_input_workspace("ws")
+        self.create_input_workspace("ws_can")
 
-        self.do_FlatPlatePaalmanPingsTest('ws', 'ws_can', 'Direct', 'Direct')
-        self.do_FlatPlatePaalmanPingsTest('ws', 'ws_can', 'Indirect', 'Indirect')
-        self.do_FlatPlatePaalmanPingsTest('ws', 'ws_can', 'Elastic', 'Elastic')
-        self.do_FlatPlatePaalmanPingsTest('ws', 'ws_can', 'Efixed', 'Efixed')
+        self.do_FlatPlatePaalmanPingsTest("ws", "ws_can", "Direct", "Direct")
+        self.do_FlatPlatePaalmanPingsTest("ws", "ws_can", "Indirect", "Indirect")
+        self.do_FlatPlatePaalmanPingsTest("ws", "ws_can", "Elastic", "Elastic")
+        self.do_FlatPlatePaalmanPingsTest("ws", "ws_can", "Efixed", "Efixed")
 
-        self.do_FlatPlatePaalmanPingsTest('ws', 'ws_can', 'Indirect', 'NoSample', 0.0, 0.05, 0.05)
-        self.do_FlatPlatePaalmanPingsTest('ws', 'ws_can', 'Indirect', 'NoCanFront', 0.2, 0.0, 0.05)
-        self.do_FlatPlatePaalmanPingsTest('ws', 'ws_can', 'Indirect', 'NoCanBack', 0.2, 0.05, 0.0)
-        self.do_FlatPlatePaalmanPingsTest('ws', 'ws_can', 'Indirect', 'NoCan', 0.2, 0.0, 0.0)
+        self.do_FlatPlatePaalmanPingsTest("ws", "ws_can", "Indirect", "NoSample", 0.0, 0.05, 0.05)
+        self.do_FlatPlatePaalmanPingsTest("ws", "ws_can", "Indirect", "NoCanFront", 0.2, 0.0, 0.05)
+        self.do_FlatPlatePaalmanPingsTest("ws", "ws_can", "Indirect", "NoCanBack", 0.2, 0.05, 0.0)
+        self.do_FlatPlatePaalmanPingsTest("ws", "ws_can", "Indirect", "NoCan", 0.2, 0.0, 0.0)

@@ -14,7 +14,7 @@ from mantid.simpleapi import (
     GroupWorkspaces,
     LoadInstrument,
     CreateWorkspace,
-    mtd
+    mtd,
 )
 from mantid.api import (
     MatrixWorkspace,
@@ -75,12 +75,12 @@ class WANDPowderReductionTest(unittest.TestCase):
         def get_data_counts(n, twoTheta):
             tt1 = 30
             tt2 = 45
-            return (get_bkg_counts(n) + 10 * np.exp(-((twoTheta - tt1)**2) / 1) + 20 * np.exp(-((twoTheta - tt2)**2) / 0.2))
+            return get_bkg_counts(n) + 10 * np.exp(-((twoTheta - tt1) ** 2) / 1) + 20 * np.exp(-((twoTheta - tt2) ** 2) / 0.2)
 
         for i in range(cal.getNumberHistograms()):
             cal.setY(i, [get_cal_counts(i) * 2.0])
             bkg.setY(i, [get_bkg_counts(i) / 2.0])
-            twoTheta = (data.getInstrument().getDetector(i + 10000).getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)) * 180 / np.pi)
+            twoTheta = data.getInstrument().getDetector(i + 10000).getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)) * 180 / np.pi
             data.setY(i, [get_data_counts(i, twoTheta)])
 
         return data, cal, bkg
@@ -183,13 +183,15 @@ class WANDPowderReductionTest(unittest.TestCase):
         # data, cal and background, normalised by time
         # NOTE:
         # still needs to check physics
-        pd_out3_multi = WANDPowderReduction(InputWorkspace=[data, data],
-                                            CalibrationWorkspace=cal,
-                                            BackgroundWorkspace=bkg,
-                                            Target="Theta",
-                                            NumberBins=1000,
-                                            NormaliseBy="Time",
-                                            Sum=True)
+        pd_out3_multi = WANDPowderReduction(
+            InputWorkspace=[data, data],
+            CalibrationWorkspace=cal,
+            BackgroundWorkspace=bkg,
+            Target="Theta",
+            NumberBins=1000,
+            NormaliseBy="Time",
+            Sum=True,
+        )
 
         x = pd_out3_multi.extractX()
         y = pd_out3_multi.extractY()
@@ -219,13 +221,15 @@ class WANDPowderReductionTest(unittest.TestCase):
         self.assertAlmostEqual(y.max(), 19.03642005)
         self.assertAlmostEqual(x[0, y.argmax()], 2.1543333)
 
-        pd_out4_multi = WANDPowderReduction(InputWorkspace=[data, data],
-                                            CalibrationWorkspace=cal,
-                                            BackgroundWorkspace=bkg,
-                                            Target="ElasticDSpacing",
-                                            Wavelength=1.6513045600369298,
-                                            NumberBins=1000,
-                                            Sum=True)
+        pd_out4_multi = WANDPowderReduction(
+            InputWorkspace=[data, data],
+            CalibrationWorkspace=cal,
+            BackgroundWorkspace=bkg,
+            Target="ElasticDSpacing",
+            Wavelength=1.6513045600369298,
+            NumberBins=1000,
+            Sum=True,
+        )
 
         x = pd_out4_multi.extractX()
         y = pd_out4_multi.extractY()
@@ -258,14 +262,16 @@ class WANDPowderReductionTest(unittest.TestCase):
 
         # NOTE:
         # Need to check the physics
-        pd_out4_multi = WANDPowderReduction(InputWorkspace=[data, data],
-                                            CalibrationWorkspace=cal,
-                                            BackgroundWorkspace=bkg,
-                                            Target="ElasticQ",
-                                            Wavelength=1.6513045600369298,
-                                            NumberBins=2000,
-                                            MaskAngle=60,
-                                            Sum=True)
+        pd_out4_multi = WANDPowderReduction(
+            InputWorkspace=[data, data],
+            CalibrationWorkspace=cal,
+            BackgroundWorkspace=bkg,
+            Target="ElasticQ",
+            Wavelength=1.6513045600369298,
+            NumberBins=2000,
+            MaskAngle=60,
+            Sum=True,
+        )
 
         x = pd_out4_multi.extractX()
         y = pd_out4_multi.extractY()
@@ -296,14 +302,16 @@ class WANDPowderReductionTest(unittest.TestCase):
         self.assertAlmostEqual(y.max(), 20.72968357)
         self.assertAlmostEqual(x[0, y.argmax()], 45.008708196)
 
-        pd_out4_multi = WANDPowderReduction(InputWorkspace=[data, data],
-                                            CalibrationWorkspace=cal,
-                                            BackgroundWorkspace=bkg,
-                                            BackgroundScale=0.5,
-                                            Target="Theta",
-                                            NumberBins=1000,
-                                            NormaliseBy="Time",
-                                            Sum=True)
+        pd_out4_multi = WANDPowderReduction(
+            InputWorkspace=[data, data],
+            CalibrationWorkspace=cal,
+            BackgroundWorkspace=bkg,
+            BackgroundScale=0.5,
+            Target="Theta",
+            NumberBins=1000,
+            NormaliseBy="Time",
+            Sum=True,
+        )
 
         x = pd_out4_multi.extractX()
         y = pd_out4_multi.extractY()
@@ -468,26 +476,23 @@ class WANDPowderReductionTest(unittest.TestCase):
         # HB2C_558131
         data = np.ones((256, 1920))
         CreateWorkspace(
-            DataX=[0, 1],
-            DataY=data,
-            DataE=np.sqrt(data),
-            UnitX='Empty',
-            YUnitLabel='Counts',
-            NSpec=1966080 // 4,
-            OutputWorkspace='tmp_ws')
-        AddSampleLog('tmp_ws', LogName='HB2C:Mot:s2.RBV', LogText='29.9774', LogType='Number Series', NumberType='Double')
-        AddSampleLog('tmp_ws', LogName='HB2C:Mot:detz.RBV', LogText='0', LogType='Number Series', NumberType='Double')
-        tmp_ws = mtd['tmp_ws']
+            DataX=[0, 1], DataY=data, DataE=np.sqrt(data), UnitX="Empty", YUnitLabel="Counts", NSpec=1966080 // 4, OutputWorkspace="tmp_ws"
+        )
+        AddSampleLog("tmp_ws", LogName="HB2C:Mot:s2.RBV", LogText="29.9774", LogType="Number Series", NumberType="Double")
+        AddSampleLog("tmp_ws", LogName="HB2C:Mot:detz.RBV", LogText="0", LogType="Number Series", NumberType="Double")
+        tmp_ws = mtd["tmp_ws"]
 
         for n in range(tmp_ws.getNumberHistograms()):
             s = tmp_ws.getSpectrum(n)
             for i in range(2):
                 for j in range(2):
                     s.addDetectorID(int(n * 2 % 512 + n // (512 / 2) * 512 * 2 + j + i * 512))
-        LoadInstrument('tmp_ws', InstrumentName='WAND', RewriteSpectraMap=False)
+        LoadInstrument("tmp_ws", InstrumentName="WAND", RewriteSpectraMap=False)
 
-        out = WANDPowderReduction('tmp_ws', Target='Theta', XMin=29, XMax=31, NumberBins=10, NormaliseBy='None')
-        np.testing.assert_allclose(out.readY(0), [0, 0, 0, 0, 269.068237, 486.311606, 618.125152, 720.37274, 811.141863, 821.032586], rtol=5e-4)
+        out = WANDPowderReduction("tmp_ws", Target="Theta", XMin=29, XMax=31, NumberBins=10, NormaliseBy="None")
+        np.testing.assert_allclose(
+            out.readY(0), [0, 0, 0, 0, 269.068237, 486.311606, 618.125152, 720.37274, 811.141863, 821.032586], rtol=5e-4
+        )
 
         tmp_ws.delete()
         out.delete()

@@ -35,132 +35,133 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         return "BilbySANSDataProcessor"
 
     def summary(self):
-        return "BILBY SANS data reduction. Converts a workspace in wavelength into a 1D or 2D workspace of" \
-               " momentum transfer, assuming elastic scattering."
+        return (
+            "BILBY SANS data reduction. Converts a workspace in wavelength into a 1D or 2D workspace of"
+            " momentum transfer, assuming elastic scattering."
+        )
 
     def PyInit(self):
         # input
-        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '',
-                                                     direction=Direction.Input,
-                                                     optional=PropertyMode.Mandatory),
-                             doc='Particle counts as a function of wavelength')
+        self.declareProperty(
+            MatrixWorkspaceProperty("InputWorkspace", "", direction=Direction.Input, optional=PropertyMode.Mandatory),
+            doc="Particle counts as a function of wavelength",
+        )
 
-        self.declareProperty(MatrixWorkspaceProperty('InputMaskingWorkspace', '',
-                                                     direction=Direction.Input,
-                                                     optional=PropertyMode.Optional),
-                             doc='Mask for the scattering data')
+        self.declareProperty(
+            MatrixWorkspaceProperty("InputMaskingWorkspace", "", direction=Direction.Input, optional=PropertyMode.Optional),
+            doc="Mask for the scattering data",
+        )
 
         # blocked beam, beam shape and detector corrections
-        self.declareProperty(MatrixWorkspaceProperty('BlockedBeamWorkspace', '',
-                                                     direction=Direction.Input,
-                                                     optional=PropertyMode.Optional),
-                             doc='Blocked beam scattering')
+        self.declareProperty(
+            MatrixWorkspaceProperty("BlockedBeamWorkspace", "", direction=Direction.Input, optional=PropertyMode.Optional),
+            doc="Blocked beam scattering",
+        )
 
-        self.declareProperty(MatrixWorkspaceProperty('EmptyBeamSpectrumShapeWorkspace', '',
-                                                     direction=Direction.Input,
-                                                     optional=PropertyMode.Mandatory,
-                                                     validator=WorkspaceUnitValidator("Wavelength")),
-                             doc='Empty beam transmission, where only a given wavelength slice is considered')
+        self.declareProperty(
+            MatrixWorkspaceProperty(
+                "EmptyBeamSpectrumShapeWorkspace",
+                "",
+                direction=Direction.Input,
+                optional=PropertyMode.Mandatory,
+                validator=WorkspaceUnitValidator("Wavelength"),
+            ),
+            doc="Empty beam transmission, where only a given wavelength slice is considered",
+        )
 
-        self.declareProperty(MatrixWorkspaceProperty('SensitivityCorrectionMatrix', '',
-                                                     direction=Direction.Input,
-                                                     optional=PropertyMode.Optional),
-                             doc='Detector sensitivity calibration data set')
+        self.declareProperty(
+            MatrixWorkspaceProperty("SensitivityCorrectionMatrix", "", direction=Direction.Input, optional=PropertyMode.Optional),
+            doc="Detector sensitivity calibration data set",
+        )
 
-        self.declareProperty(MatrixWorkspaceProperty('TransmissionWorkspace', '',
-                                                     direction=Direction.Input,
-                                                     optional=PropertyMode.Mandatory),
-                             doc='Sample transmission workspace')
+        self.declareProperty(
+            MatrixWorkspaceProperty("TransmissionWorkspace", "", direction=Direction.Input, optional=PropertyMode.Mandatory),
+            doc="Sample transmission workspace",
+        )
 
-        self.declareProperty(MatrixWorkspaceProperty('TransmissionEmptyBeamWorkspace', '',
-                                                     direction=Direction.Input,
-                                                     optional=PropertyMode.Mandatory),
-                             doc='Empty beam transmission workspace')
+        self.declareProperty(
+            MatrixWorkspaceProperty("TransmissionEmptyBeamWorkspace", "", direction=Direction.Input, optional=PropertyMode.Mandatory),
+            doc="Empty beam transmission workspace",
+        )
 
-        self.declareProperty(MatrixWorkspaceProperty('TransmissionMaskingWorkspace', '',
-                                                     direction=Direction.Input,
-                                                     optional=PropertyMode.Mandatory),
-                             doc='Mask for the transmission data')
+        self.declareProperty(
+            MatrixWorkspaceProperty("TransmissionMaskingWorkspace", "", direction=Direction.Input, optional=PropertyMode.Mandatory),
+            doc="Mask for the transmission data",
+        )
 
-        self.declareProperty(name='FitMethod',
-                             defaultValue='log', doc='Function to use to fit transmission; can be Linear,'
-                                                     ' Log, Polynomial (first letter shall be capital)')
+        self.declareProperty(
+            name="FitMethod",
+            defaultValue="log",
+            doc="Function to use to fit transmission; can be Linear," " Log, Polynomial (first letter shall be capital)",
+        )
 
-        self.declareProperty(name='PolynomialOrder',
-                             defaultValue='3',
-                             doc='Used only for Polynomial function, but needed as an input parameter anyway')
+        self.declareProperty(
+            name="PolynomialOrder", defaultValue="3", doc="Used only for Polynomial function, but needed as an input parameter anyway"
+        )
 
-        self.declareProperty(name='ScalingFactor',
-                             defaultValue=1.0,
-                             validator=FloatBoundedValidator(lower=0.0),
-                             doc='Attenuating factor')
+        self.declareProperty(name="ScalingFactor", defaultValue=1.0, validator=FloatBoundedValidator(lower=0.0), doc="Attenuating factor")
 
-        self.declareProperty(name='SampleThickness',
-                             defaultValue=1.0,
-                             validator=FloatBoundedValidator(lower=0.0),
-                             doc='Thickness of sample')
+        self.declareProperty(
+            name="SampleThickness", defaultValue=1.0, validator=FloatBoundedValidator(lower=0.0), doc="Thickness of sample"
+        )
 
-        self.declareProperty(FloatArrayProperty('BinningWavelength',
-                                                direction=Direction.Input,
-                                                validator=FloatArrayMandatoryValidator()),
-                             doc='Wavelength boundaries for reduction: a comma separated list of first bin boundary,'
-                                 ' width, last bin boundary')
+        self.declareProperty(
+            FloatArrayProperty("BinningWavelength", direction=Direction.Input, validator=FloatArrayMandatoryValidator()),
+            doc="Wavelength boundaries for reduction: a comma separated list of first bin boundary," " width, last bin boundary",
+        )
 
-        self.declareProperty(FloatArrayProperty('BinningWavelengthTransm',
-                                                direction=Direction.Input,
-                                                validator=FloatArrayMandatoryValidator()),
-                             doc='Wavelengths boundaries for transmission binning: a comma separated list of first bin'
-                                 ' boundary, width, last bin')
+        self.declareProperty(
+            FloatArrayProperty("BinningWavelengthTransm", direction=Direction.Input, validator=FloatArrayMandatoryValidator()),
+            doc="Wavelengths boundaries for transmission binning: a comma separated list of first bin" " boundary, width, last bin",
+        )
 
-        self.declareProperty(FloatArrayProperty('BinningQ',
-                                                direction=Direction.Input,
-                                                validator=FloatArrayMandatoryValidator()),
-                             doc='Output Q-boundaries: a comma separated list of first bin boundary,'
-                                 ' width, last bin boundary')
+        self.declareProperty(
+            FloatArrayProperty("BinningQ", direction=Direction.Input, validator=FloatArrayMandatoryValidator()),
+            doc="Output Q-boundaries: a comma separated list of first bin boundary," " width, last bin boundary",
+        )
 
-        self.declareProperty(name='Timemode',
-                             defaultValue=True,
-                             doc='If data collected in ToF or monochromatic mode')
+        self.declareProperty(name="Timemode", defaultValue=True, doc="If data collected in ToF or monochromatic mode")
 
-        self.declareProperty(name='AccountForGravity',
-                             defaultValue=True,
-                             doc='Whether to correct for the effects of gravity')
+        self.declareProperty(name="AccountForGravity", defaultValue=True, doc="Whether to correct for the effects of gravity")
 
-        self.declareProperty(name='SolidAngleWeighting',
-                             defaultValue=True,
-                             doc='If True, pixels will be weighted by their solid angle')
+        self.declareProperty(name="SolidAngleWeighting", defaultValue=True, doc="If True, pixels will be weighted by their solid angle")
 
-        self.declareProperty(name='RadiusCut',
-                             defaultValue=1.0,
-                             validator=FloatBoundedValidator(lower=0.0),
-                             doc='To increase resolution some wavelengths are excluded within this distance from the'
-                                 ' beam center (mm). Note that RadiusCut and WaveCut both need to be larger than 0 to'
-                                 ' affect the effective cutoff. See the algorithm description for a detailed'
-                                 ' explanation of the cutoff.')
+        self.declareProperty(
+            name="RadiusCut",
+            defaultValue=1.0,
+            validator=FloatBoundedValidator(lower=0.0),
+            doc="To increase resolution some wavelengths are excluded within this distance from the"
+            " beam center (mm). Note that RadiusCut and WaveCut both need to be larger than 0 to"
+            " affect the effective cutoff. See the algorithm description for a detailed"
+            " explanation of the cutoff.",
+        )
 
-        self.declareProperty(name='WaveCut',
-                             defaultValue=1.0,
-                             validator=FloatBoundedValidator(lower=0.0),
-                             doc='To increase resolution by starting to remove some wavelengths below this threshold'
-                                 ' (angstrom). Note that WaveCut and RadiusCut both need to be larger than 0 to affect'
-                                 ' on the effective cutoff. See the algorithm description for a detailed explanation'
-                                 ' of the cutoff.')
+        self.declareProperty(
+            name="WaveCut",
+            defaultValue=1.0,
+            validator=FloatBoundedValidator(lower=0.0),
+            doc="To increase resolution by starting to remove some wavelengths below this threshold"
+            " (angstrom). Note that WaveCut and RadiusCut both need to be larger than 0 to affect"
+            " on the effective cutoff. See the algorithm description for a detailed explanation"
+            " of the cutoff.",
+        )
 
-        self.declareProperty(name='WideAngleCorrection',
-                             defaultValue=True,
-                             doc='If true, the wide angle correction for transmissions will be applied')
+        self.declareProperty(
+            name="WideAngleCorrection", defaultValue=True, doc="If true, the wide angle correction for transmissions will be applied"
+        )
 
-        self.declareProperty(name='Reduce2D',
-                             defaultValue=False,
-                             doc='If true, 2D data reduction will be performed')
+        self.declareProperty(name="Reduce2D", defaultValue=False, doc="If true, 2D data reduction will be performed")
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
-                             doc='Name of the workspace that contains the result of the calculation. '
-                                 'Created automatically.')
+        self.declareProperty(
+            MatrixWorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
+            doc="Name of the workspace that contains the result of the calculation. " "Created automatically.",
+        )
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceTransmissionFit', '', direction=Direction.Output),
-                             # This works only when transmission is True. Problems starts when it is not...
-                             doc='Counts vs wavelength, fit for the sample transmission')
+        self.declareProperty(
+            MatrixWorkspaceProperty("OutputWorkspaceTransmissionFit", "", direction=Direction.Output),
+            # This works only when transmission is True. Problems starts when it is not...
+            doc="Counts vs wavelength, fit for the sample transmission",
+        )
 
     def validateInputs(self):
         inputs = dict()
@@ -246,8 +247,7 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         return inputs
 
     def PyExec(self):
-        self.sanslog.warning(
-            "SANSDataProcessing is in the beta phase of development. Properties may change without notice.")
+        self.sanslog.warning("SANSDataProcessing is in the beta phase of development. Properties may change without notice.")
         self.sanslog.warning("Log on the changes is recorded in the body of SANSDataProcessor.py file")
 
         # -- Get Arguments --
@@ -275,8 +275,7 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         fitmethod = self.getProperty("FitMethod").value
         polynomialorder = self.getProperty("PolynomialOrder").value
 
-        time_mode = self.getProperty(
-            "TimeMode").value
+        time_mode = self.getProperty("TimeMode").value
         # True if External time frame (i.e. choppers), False if Internal time frames (Neutron Velocity Selector)
         account_for_gravity = self.getProperty("AccountForGravity").value
         solid_angle_weighting = self.getProperty("SolidAngleWeighting").value
@@ -311,8 +310,7 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         self.sanslog.information("FitMethod " + fitmethod)
         self.sanslog.information("PolynomialOrder " + polynomialorder)
 
-        ws_tran = self._calculate_transmission(ws_tranSam, ws_tranEmp, ws_tranroi, fitmethod, polynomialorder,
-                                               binning_wavelength_transm)
+        ws_tran = self._calculate_transmission(ws_tranSam, ws_tranEmp, ws_tranroi, fitmethod, polynomialorder, binning_wavelength_transm)
 
         ws_tranemp_scale = self._get_frame_count(ws_tranEmp)
         ws_transam_scale = self._get_frame_count(ws_tranSam)
@@ -342,8 +340,7 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         # sensitivity
         pixeladj = ws_sen
 
-        ws_tran = self._emp_shape_adjustment(ws_tran,
-                                             ws_emp)  # swap arrays; ws_emp will always be shorter or equal to ws_tran
+        ws_tran = self._emp_shape_adjustment(ws_tran, ws_emp)  # swap arrays; ws_emp will always be shorter or equal to ws_tran
         wavelengthadj = self._multiply(ws_emp, ws_tran)
 
         # calculate the wide angle correction for sample transmission
@@ -367,12 +364,11 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         if reduce_2d:
             q_max = binning_q[2]
             q_delta = binning_q[1]
-            qxy = self._qxy(ws_sam, q_max, q_delta, pixeladj, wavelengthadj, account_for_gravity, solid_angle_weighting,
-                            extralength)
+            qxy = self._qxy(ws_sam, q_max, q_delta, pixeladj, wavelengthadj, account_for_gravity, solid_angle_weighting, extralength)
             qxy = self._multiply(qxy, f)
             self.setProperty("OutputWorkspace", qxy)
         else:
-            if (ws_sam.run().getProperty("source_aperture").value):
+            if ws_sam.run().getProperty("source_aperture").value:
                 sourceapertureradius = float(ws_sam.run().getProperty("source_aperture").value) / 2.0
                 if sourceapertureradius > SOURCE_APERTURE_RADIUS_MAX:
                     sourceapertureradius = SOURCE_APERTURE_RADIUS
@@ -381,7 +377,7 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
                 sourceapertureradius = SOURCE_APERTURE_RADIUS  # radius in mm
                 print("sourceapertureradius value cannot be retrieved; generic value of 20mm taken")
 
-            if (ws_sam.run().getProperty("sample_aperture").value):
+            if ws_sam.run().getProperty("sample_aperture").value:
                 sampleapertureradius = float(ws_sam.run().getProperty("source_aperture").value) / 2.0
                 if sampleapertureradius > SAMPLE_APERTURE_RADIUS_MAX:
                     sampleapertureradius = SAMPLE_APERTURE_RADIUS
@@ -411,12 +407,24 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
 
             # Call TOFSANSResolutionByPixel
             ws_sam = self._multiply(ws_sam, f)
-            qresolution = self._tofsansresolutionbypixel(ws_sam, sampleapertureradius, sourceapertureradius,
-                                                         sigmamoderator, real_l1, account_for_gravity, extralength)
+            qresolution = self._tofsansresolutionbypixel(
+                ws_sam, sampleapertureradius, sourceapertureradius, sigmamoderator, real_l1, account_for_gravity, extralength
+            )
 
             # Call Q1D, now with resolution
-            q1d = self._q1d(ws_sam, binning_q, pixeladj, wavelengthadj, wavepixeladj, account_for_gravity,
-                            solid_angle_weighting, radiuscut, wavecut, extralength, qresolution)
+            q1d = self._q1d(
+                ws_sam,
+                binning_q,
+                pixeladj,
+                wavelengthadj,
+                wavepixeladj,
+                account_for_gravity,
+                solid_angle_weighting,
+                radiuscut,
+                wavecut,
+                extralength,
+                qresolution,
+            )
 
             self.setProperty("OutputWorkspace", q1d)  # set output, file 1D pattern
 
@@ -527,8 +535,7 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         ws_tran_bins = ws_tran.readX(0)
         if np.array_equal(ws_emp_bins, ws_tran_bins):  # check that bins match
             return ws_emp  # if they match keep them as they are
-        self.sanslog.warning(
-            "EmptyBeamSpectrumShapeWorkspace did not have expected wavelength binning and has to be rebinned")
+        self.sanslog.warning("EmptyBeamSpectrumShapeWorkspace did not have expected wavelength binning and has to be rebinned")
         alg = self.createChildAlgorithm("RebinToWorkspace")
         alg.setProperty("WorkspaceToRebin", ws_emp)
         alg.setProperty("WorkspaceToMatch", ws_tran)
@@ -536,8 +543,17 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
 
-    def _tofsansresolutionbypixel(self, ws_sam, sampleapertureradius, sourceapertureradius, sigmamoderator,
-                                  collimationlength, accountforgravity, extralength, deltar=5.0):
+    def _tofsansresolutionbypixel(
+        self,
+        ws_sam,
+        sampleapertureradius,
+        sourceapertureradius,
+        sigmamoderator,
+        collimationlength,
+        accountforgravity,
+        extralength,
+        deltar=5.0,
+    ):
         alg = self.createChildAlgorithm("TOFSANSResolutionByPixel")
         alg.setProperty("InputWorkspace", ws_sam)
         alg.setProperty("DeltaR", deltar)
@@ -551,8 +567,20 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
 
-    def _q1d(self, ws_sam, binning_q, pixeladj, wavelengthadj, wavepixeladj, accountforgravity, solidangleweighting,
-             radiuscut, wavecut, extralength, qresolution):
+    def _q1d(
+        self,
+        ws_sam,
+        binning_q,
+        pixeladj,
+        wavelengthadj,
+        wavepixeladj,
+        accountforgravity,
+        solidangleweighting,
+        radiuscut,
+        wavecut,
+        extralength,
+        qresolution,
+    ):
         alg = self.createChildAlgorithm("Q1D")
         alg.setProperty("DetBankWorkspace", ws_sam)
         alg.setProperty("OutputBinning", binning_q)
@@ -574,8 +602,7 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
 
-    def _qxy(self, ws_sam, q_max, q_delta, pixeladj, wavelengthadj, accountforgravity, solidangleweighting,
-             extralength):
+    def _qxy(self, ws_sam, q_max, q_delta, pixeladj, wavelengthadj, accountforgravity, solidangleweighting, extralength):
         alg = self.createChildAlgorithm("Qxy")
         alg.setProperty("InputWorkspace", ws_sam)
         alg.setProperty("MaxQxy", q_max)
@@ -595,10 +622,10 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
     def _create_empty_ws(self, data_x, data_y, number_of_spectra, unitx):
         # empty output workspace in case 2D reduction is not happening
         alg = self.createChildAlgorithm("CreateWorkspace")
-        alg.setProperty('DataX', data_x)
-        alg.setProperty('DataY', data_y)
-        alg.setProperty('NSpec', number_of_spectra)
-        alg.setProperty('UnitX', unitx)
+        alg.setProperty("DataX", data_x)
+        alg.setProperty("DataY", data_y)
+        alg.setProperty("NSpec", number_of_spectra)
+        alg.setProperty("UnitX", unitx)
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
 

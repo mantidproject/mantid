@@ -15,7 +15,7 @@ import re
 from typing import Sequence
 import sys
 
-THROW_SPEC_RE = re.compile(r'throw\(.*?\)')
+THROW_SPEC_RE = re.compile(r"throw\(.*?\)")
 
 
 def main(argv: Sequence[str]) -> int:
@@ -42,10 +42,9 @@ def parse_arguments(argv: Sequence[str]) -> argparse.Namespace:
     :return: A argparse.Namespace containing the arguments
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('sourcefiles',
-                        type=str,
-                        nargs='+',
-                        help='The sourcefiles assumed to have been produced by the sip or sip-build programs')
+    parser.add_argument(
+        "sourcefiles", type=str, nargs="+", help="The sourcefiles assumed to have been produced by the sip or sip-build programs"
+    )
 
     return parser.parse_args()
 
@@ -60,16 +59,16 @@ def sanitize_generated_module(generated_module_filepath: str):
 
     :param generated_module_filepath:
     """
-    with open(generated_module_filepath, 'r') as sip_module_orig:
+    with open(generated_module_filepath, "r") as sip_module_orig:
         module_code_orig = sip_module_orig.readlines()
 
     sanitized_code = []
     for line_orig in module_code_orig:
-        sanitized_code.append(THROW_SPEC_RE.sub('noexcept(false)', line_orig))
+        sanitized_code.append(THROW_SPEC_RE.sub("noexcept(false)", line_orig))
 
-    with open(generated_module_filepath, 'w') as sanitized_module:
-        sanitized_module.write(''.join(sanitized_code))
+    with open(generated_module_filepath, "w") as sanitized_module:
+        sanitized_module.write("".join(sanitized_code))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main(sys.argv))

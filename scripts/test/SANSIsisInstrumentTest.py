@@ -48,9 +48,7 @@ class TestParameterMapModifications(unittest.TestCase):
         if any(len(element) != length for element in [types, values, names]):
             return
         for i in range(0, length):
-            SetInstrumentParameter(ws, ParameterName=names[i],
-                                   ParameterType=types[i],
-                                   Value=values[i])
+            SetInstrumentParameter(ws, ParameterName=names[i], ParameterType=types[i], Value=values[i])
 
     def test_that_calibration_workspace_has_absent_entries_copied_over(self):
         # Arrange

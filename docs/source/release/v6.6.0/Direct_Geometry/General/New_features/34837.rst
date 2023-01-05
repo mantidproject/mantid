@@ -1,0 +1,2 @@
+- :ref:`LagrangeILLReduction <algm-LagrangeILLReduction>` now allows the user to select normalisation approach, loads time and temperature metadata from the ASCII files, and
+  properly handles interpolation and energy range of the water correction depending on the user's choice of `UseIncidentEnergy` property value.

@@ -49,12 +49,12 @@ class Selector(RectangleSelector):
 
 
 class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
-    def __init__(self, ws=None, parent=None, view=None):
+    def __init__(self, ws=None, parent=None, view=None, image_info_widget=None):
         if ws and WorkspaceInfo.get_ws_type(ws) != WS_TYPE.MATRIX:
             raise NotImplementedError("Only Matrix Workspaces are currently supported by the region selector.")
 
         self.notifyee = None
-        self.view = view if view else RegionSelectorView(self, parent)
+        self.view = view if view else RegionSelectorView(self, parent, image_info_widget=image_info_widget)
         super().__init__(ws, self.view._data_view)
         self._selectors: list[Selector] = []
         self._drawing_region = False

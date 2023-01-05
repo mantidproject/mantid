@@ -6,15 +6,15 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from vesuvio.backgrounds import (create_from_str, PolynomialBackground)
+from vesuvio.backgrounds import create_from_str, PolynomialBackground
 
 
 # --------------------------------------------------------------------------------
 # Polynomial
 # --------------------------------------------------------------------------------
 
-class PolynomialBackgroundTest(unittest.TestCase):
 
+class PolynomialBackgroundTest(unittest.TestCase):
     def test_create_object_from_str(self):
         background_str = "function=Polynomial,order=2"
 
@@ -36,5 +36,5 @@ class PolynomialBackgroundTest(unittest.TestCase):
         self.assertEqual(expected, background.create_fit_function_str(param_values, param_prefix="f1."))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

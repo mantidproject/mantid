@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name,no-init
+# pylint: disable=invalid-name,no-init
 import systemtesting
 from mantid.simpleapi import *
 from SANSUtility import can_load_as_event_workspace
@@ -12,10 +12,10 @@ import os
 
 
 def create_file_name(base_name):
-    temp_save_dir = config['defaultsave.directory']
-    if temp_save_dir == '':
+    temp_save_dir = config["defaultsave.directory"]
+    if temp_save_dir == "":
         temp_save_dir = os.getcwd()
-    filename = os.path.join(temp_save_dir, base_name + '.nxs')
+    filename = os.path.join(temp_save_dir, base_name + ".nxs")
     return filename
 
 
@@ -31,10 +31,10 @@ def clean_up_workspaces():
 
 
 class SANSProcessedEventWorkspaceInFile(systemtesting.MantidSystemTest):
-    '''
+    """
     Check if a processed nexus file is correctly detected to contain
     an event workspace.
-    '''
+    """
 
     def __init__(self):
         systemtesting.MantidSystemTest.__init__(self)
@@ -45,7 +45,7 @@ class SANSProcessedEventWorkspaceInFile(systemtesting.MantidSystemTest):
         base_name = "processed_event"
         filename = create_file_name(base_name)
         ws = CreateSampleWorkspace("Event")
-        SaveNexusProcessed(InputWorkspace=ws, Filename = filename)
+        SaveNexusProcessed(InputWorkspace=ws, Filename=filename)
         # Act
         can_load = can_load_as_event_workspace(filename)
         # Assert
@@ -62,10 +62,10 @@ class SANSProcessedEventWorkspaceInFile(systemtesting.MantidSystemTest):
 
 
 class SANSProcessedHistoWorkspaceInFile(systemtesting.MantidSystemTest):
-    '''
+    """
     Check if a processed nexus file is correctly detected to contain
     a histo workspace.
-    '''
+    """
 
     def __init__(self):
         systemtesting.MantidSystemTest.__init__(self)
@@ -76,7 +76,7 @@ class SANSProcessedHistoWorkspaceInFile(systemtesting.MantidSystemTest):
         base_name = "processed_histo"
         filename = create_file_name(base_name)
         ws = CreateSampleWorkspace()
-        SaveNexusProcessed(InputWorkspace=ws, Filename = filename)
+        SaveNexusProcessed(InputWorkspace=ws, Filename=filename)
         # Act
         can_load = can_load_as_event_workspace(filename)
         # Assert

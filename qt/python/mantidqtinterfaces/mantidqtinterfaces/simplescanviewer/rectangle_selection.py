@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-import warnings
-
 from matplotlib.widgets import RectangleSelector
 
 
@@ -25,55 +23,46 @@ class RectangleSelection(RectangleSelector):
         So for now, we use this version even if there is no rational reason I can see for it to be needed.
         """
 
-        # matplotlib is bound to deprecate the eventpress attribute with the release of version 3.7, making it private
-        # In the meantime, it gives off warnings every time it is accessed.
-        # But since this feature does not work correctly at the moment, and we need this fix as a workaround, we just
-        # silence the warnings and hope that this bug will be understood and solved by the time this deprecation
-        # actually comes into effect.
-        # This is not nearly a perennial fix, but it should hold for a year or so.
+        if not self._interactive:
+            self.to_draw.set_visible(False)
 
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=DeprecationWarning)
-            if not self.interactive:
-                self.to_draw.set_visible(False)
+        # update the eventpress and eventrelease with the resulting extents
+        x1, x2, y1, y2 = self.extents
+        self._eventpress.xdata = x1
+        self._eventpress.ydata = y1
+        xy1 = self.ax.transData.transform([x1, y1])
+        self._eventpress.x, self._eventpress.y = xy1
 
-            # update the eventpress and eventrelease with the resulting extents
-            x1, x2, y1, y2 = self.extents
-            self.eventpress.xdata = x1
-            self.eventpress.ydata = y1
-            xy1 = self.ax.transData.transform([x1, y1])
-            self.eventpress.x, self.eventpress.y = xy1
+        self._eventrelease.xdata = x2
+        self._eventrelease.ydata = y2
+        xy2 = self.ax.transData.transform([x2, y2])
+        self._eventrelease.x, self._eventrelease.y = xy2
 
-            self.eventrelease.xdata = x2
-            self.eventrelease.ydata = y2
-            xy2 = self.ax.transData.transform([x2, y2])
-            self.eventrelease.x, self.eventrelease.y = xy2
+        # calculate dimensions of box or line
+        if self.spancoords == 'data':
+            spanx = abs(self._eventpress.xdata - self._eventrelease.xdata)
+            spany = abs(self._eventpress.ydata - self._eventrelease.ydata)
+        elif self.spancoords == 'pixels':
+            spanx = abs(self._eventpress.x - self._eventrelease.x)
+            spany = abs(self._eventpress.y - self._eventrelease.y)
+        else:
+            raise ValueError('spancoords must be "data" or "pixels"')
 
-            # calculate dimensions of box or line
-            if self.spancoords == 'data':
-                spanx = abs(self.eventpress.xdata - self.eventrelease.xdata)
-                spany = abs(self.eventpress.ydata - self.eventrelease.ydata)
-            elif self.spancoords == 'pixels':
-                spanx = abs(self.eventpress.x - self.eventrelease.x)
-                spany = abs(self.eventpress.y - self.eventrelease.y)
-            else:
-                raise ValueError('spancoords must be "data" or "pixels"')
-
-            # check if drawn distance (if it exists) is not too small in
-            # either x or y-direction
-            if (self.drawtype != 'none'
-                    and (self.minspanx is not None and spanx < self.minspanx
-                         or self.minspany is not None and spany < self.minspany)):
-                for artist in self.artists:
-                    artist.set_visible(False)
-                self.update()
-                return
-
-            # call desired function
-            self.onselect(self.eventpress, self.eventrelease)
+        # check if drawn distance (if it exists) is not too small in
+        # either x or y-direction
+        if (self._drawtype != 'none'
+                and (self.minspanx is not None and spanx < self.minspanx
+                     or self.minspany is not None and spany < self.minspany)):
+            for artist in self.artists:
+                artist.set_visible(False)
             self.update()
+            return
 
-            return False
+        # call desired function
+        self.onselect(self._eventpress, self._eventrelease)
+        self.update()
+
+        return False
 
     def onmove(self, event):
         """

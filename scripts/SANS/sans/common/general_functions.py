@@ -8,21 +8,28 @@
 
 # pylint: disable=invalid-name
 import copy
-from math import (acos, sqrt, degrees)
+from math import acos, sqrt, degrees
 import re
 from copy import deepcopy
 import json
 from typing import Tuple, Optional, List
 
 import numpy as np
-from mantid.api import (AlgorithmManager, AnalysisDataService, isSameWorkspaceObject)
-from sans.common.constant_containers import (SANSInstrument_enum_list, SANSInstrument_string_list,
-                                             SANSInstrument_string_as_key_NoInstrument)
-from sans.common.constants import (SANS_FILE_TAG, ALL_PERIODS, SANS2D, EMPTY_NAME,
-                                   REDUCED_CAN_TAG)
-from sans.common.log_tagger import (get_tag, has_tag, set_tag, has_hash, get_hash_value, set_hash)
-from sans.common.enums import (DetectorType, RangeStepType, ReductionDimensionality, OutputParts, ReductionMode,
-                               SANSFacility, DataType, TransmissionType, SANSInstrument)
+from mantid.api import AlgorithmManager, AnalysisDataService, isSameWorkspaceObject
+from sans.common.constant_containers import SANSInstrument_enum_list, SANSInstrument_string_list, SANSInstrument_string_as_key_NoInstrument
+from sans.common.constants import SANS_FILE_TAG, ALL_PERIODS, SANS2D, EMPTY_NAME, REDUCED_CAN_TAG
+from sans.common.log_tagger import get_tag, has_tag, set_tag, has_hash, get_hash_value, set_hash
+from sans.common.enums import (
+    DetectorType,
+    RangeStepType,
+    ReductionDimensionality,
+    OutputParts,
+    ReductionMode,
+    SANSFacility,
+    DataType,
+    TransmissionType,
+    SANSInstrument,
+)
 
 # -------------------------------------------
 # Constants
@@ -98,7 +105,7 @@ def get_single_valued_logs_from_workspace(workspace, log_names, log_types, conve
         log_results.update({log_name: log_value})
     if convert_from_millimeter_to_meter:
         for key in log_results:
-            log_results[key] /= 1000.
+            log_results[key] /= 1000.0
     return log_results
 
 
@@ -175,15 +182,15 @@ def get_input_workspace_as_copy_if_not_same_as_output_workspace(alg):
 
     def _clone_input(_ws):
         clone_name = "CloneWorkspace"
-        clone_options = {"InputWorkspace": _ws,
-                         "OutputWorkspace": EMPTY_NAME}
+        clone_options = {"InputWorkspace": _ws, "OutputWorkspace": EMPTY_NAME}
         clone_alg = create_unmanaged_algorithm(clone_name, **clone_options)
         clone_alg.execute()
         return clone_alg.getProperty("OutputWorkspace").value
 
     if "InputWorkspace" not in alg or "OutputWorkspace" not in alg:
-        raise RuntimeError("The algorithm {} does not seem to have an InputWorkspace and"
-                           " an OutputWorkspace property.".format(alg.name()))
+        raise RuntimeError(
+            "The algorithm {} does not seem to have an InputWorkspace and" " an OutputWorkspace property.".format(alg.name())
+        )
 
     ws_in = alg.getProperty("InputWorkspace").value
     if ws_in is None:
@@ -234,9 +241,9 @@ def get_charge_and_time(workspace):
     :return: the charge, the time
     """
     run = workspace.getRun()
-    charges = run.getLogData('proton_charge')
+    charges = run.getLogData("proton_charge")
     total_charge = sum(charges.value)
-    time_passed = int((charges.times[-1] - charges.times[0]) / np.timedelta64(1, 'us'))  # microseconds
+    time_passed = int((charges.times[-1] - charges.times[0]) / np.timedelta64(1, "us"))  # microseconds
     time_passed = float(time_passed) / 1e6
     return total_charge, time_passed
 
@@ -283,14 +290,18 @@ def convert_bank_name_to_detector_type_isis(detector_name):
     """
     detector_name = detector_name.upper()
     detector_name = detector_name.strip()
-    if detector_name == "REAR-DETECTOR" or detector_name == "MAIN-DETECTOR-BANK" or detector_name == "DETECTORBENCH" \
-            or detector_name == "REAR" or detector_name == "MAIN":
+    if (
+        detector_name == "REAR-DETECTOR"
+        or detector_name == "MAIN-DETECTOR-BANK"
+        or detector_name == "DETECTORBENCH"
+        or detector_name == "REAR"
+        or detector_name == "MAIN"
+    ):
         detector_type = DetectorType.LAB
     elif detector_name == "FRONT-DETECTOR" or detector_name == "HAB" or detector_name == "FRONT":
         detector_type = DetectorType.HAB
     else:
-        raise RuntimeError("There is not detector type conversion for a detector with the "
-                           "name {0}".format(detector_name))
+        raise RuntimeError("There is not detector type conversion for a detector with the " "name {0}".format(detector_name))
     return detector_type
 
 
@@ -337,18 +348,18 @@ def is_part_of_reduced_output_workspace_group(state):
 
 def parse_diagnostic_settings(string_to_parse):
     """
-  This class parses a given string into  vector of vectors of numbers.
-  For example : 60,61+62,63-66,67:70,71-75:2  This gives a vector containing 8
-  vectors
-  as Vec[8] and Vec[0] is a vector containing 1 element 60
-  Vec[1] is a vector containing elements 61,62 Vec[2] is a vector containing
-  elements 63,64,65,66,
-  Vec[3] is a vector containing element 67,Vec[4] is a vector containing element
-  68,
-  Vec[5] is a vector containing element 69,Vec[6] is a vector containing element
-  70 ,
-  vec[7] is a vector containing element 71,73,75
-  """
+    This class parses a given string into  vector of vectors of numbers.
+    For example : 60,61+62,63-66,67:70,71-75:2  This gives a vector containing 8
+    vectors
+    as Vec[8] and Vec[0] is a vector containing 1 element 60
+    Vec[1] is a vector containing elements 61,62 Vec[2] is a vector containing
+    elements 63,64,65,66,
+    Vec[3] is a vector containing element 67,Vec[4] is a vector containing element
+    68,
+    Vec[5] is a vector containing element 69,Vec[6] is a vector containing element
+    70 ,
+    vec[7] is a vector containing element 71,73,75
+    """
 
     def _does_match(compiled_regex, line):
         return compiled_regex.match(line) is not None
@@ -358,8 +369,10 @@ def parse_diagnostic_settings(string_to_parse):
         start = int(start)
         stop = int(stop)
         if start > stop:
-            raise ValueError("Parsing event slices. It appears that the start value {0} is larger than the stop "
-                             "value {1}. Make sure that this is not the case.").format(start, stop)
+            raise ValueError(
+                "Parsing event slices. It appears that the start value {0} is larger than the stop "
+                "value {1}. Make sure that this is not the case."
+            ).format(start, stop)
         return [start, stop]
 
     def _extract_simple_range_with_step_pattern(line):
@@ -369,8 +382,10 @@ def parse_diagnostic_settings(string_to_parse):
         stop = int(stop)
         step = int(step)
         if start > stop:
-            raise ValueError("Parsing event slices. It appears that the start value {0} is larger than the stop "
-                             "value {1}. Make sure that this is not the case.").format(start, stop)
+            raise ValueError(
+                "Parsing event slices. It appears that the start value {0} is larger than the stop "
+                "value {1}. Make sure that this is not the case."
+            ).format(start, stop)
         return range(start, stop + 1, step)
 
     def _extract_multiple_entry(line):
@@ -378,8 +393,10 @@ def parse_diagnostic_settings(string_to_parse):
         start = int(split_line[0])
         stop = int(split_line[1])
         if start > stop:
-            raise ValueError("Parsing event slices. It appears that the start value {0} is larger than the stop "
-                             "value {1}. Make sure that this is not the case.").format(start, stop)
+            raise ValueError(
+                "Parsing event slices. It appears that the start value {0} is larger than the stop "
+                "value {1}. Make sure that this is not the case."
+            ).format(start, stop)
         result = []
         for entry in range(start, stop + 1):
             result.append([entry, entry])
@@ -392,20 +409,19 @@ def parse_diagnostic_settings(string_to_parse):
     if not string_to_parse:
         return None
 
-    number = r'(\d+(?:\.\d+)?(?:[eE][+-]\d+)?)'  # float without sign
+    number = r"(\d+(?:\.\d+)?(?:[eE][+-]\d+)?)"  # float without sign
     single_number_pattern = re.compile("\\s*" + number + "\\s*")
-    simple_range_pattern = re.compile("\\s*" + number + "\\s*" r'-' + "\\s*" + number + "\\s*")
+    simple_range_pattern = re.compile("\\s*" + number + "\\s*" r"-" + "\\s*" + number + "\\s*")
 
-    multiple_entry_pattern = re.compile("\\s*" + number + "\\s*" + r':' + "\\s*" + number + "\\s*")
+    multiple_entry_pattern = re.compile("\\s*" + number + "\\s*" + r":" + "\\s*" + number + "\\s*")
 
-    simple_range_with_step_pattern = re.compile(
-        "\\s*" + number + "\\s*" r'-' + "\\s*" + number + "\\s*" + r':' + "\\s*")
+    simple_range_with_step_pattern = re.compile("\\s*" + number + "\\s*" r"-" + "\\s*" + number + "\\s*" + r":" + "\\s*")
 
-    slice_settings = string_to_parse.split(',')
+    slice_settings = string_to_parse.split(",")
 
     all_ranges = []
     for slice_setting in slice_settings:
-        slice_setting = slice_setting.replace(' ', '')
+        slice_setting = slice_setting.replace(" ", "")
         if _does_match(multiple_entry_pattern, slice_setting):
             all_ranges += _extract_multiple_entry(slice_setting)
         else:
@@ -421,8 +437,9 @@ def parse_diagnostic_settings(string_to_parse):
             elif _does_match(single_number_pattern, slice_setting):
                 integral += _extract_number(slice_setting)
             else:
-                raise ValueError("The provided event slice configuration {0} cannot be parsed because "
-                                 "of {1}".format(slice_settings, slice_setting))
+                raise ValueError(
+                    "The provided event slice configuration {0} cannot be parsed because " "of {1}".format(slice_settings, slice_setting)
+                )
             all_ranges.append(integral)
     return all_ranges
 
@@ -431,10 +448,9 @@ def parse_diagnostic_settings(string_to_parse):
 #  Functions for bins, ranges and slices
 # ----------------------------------------------------------------------------------------------------------------------
 class EventSliceParser(object):
-    number = r'(\d+(?:\.\d+)?(?:[eE][+-]\d+)?)'  # float without sign
-    simple_slice_pattern = re.compile("\\s*" + number + "\\s*" r'-' + "\\s*" + number + "\\s*")
-    slice_range_pattern = re.compile("\\s*" + number + "\\s*" + r':' + "\\s*" + number + "\\s*"
-                                     + r':' + "\\s*" + number)
+    number = r"(\d+(?:\.\d+)?(?:[eE][+-]\d+)?)"  # float without sign
+    simple_slice_pattern = re.compile("\\s*" + number + "\\s*" r"-" + "\\s*" + number + "\\s*")
+    slice_range_pattern = re.compile("\\s*" + number + "\\s*" + r":" + "\\s*" + number + "\\s*" + r":" + "\\s*" + number)
     full_range_pattern = re.compile("\\s*" + "(<|>)" + "\\s*" + number + "\\s*")
 
     range_marker = re.compile("[><]")
@@ -472,10 +488,10 @@ class EventSliceParser(object):
         if self._is_comma_separated_range():
             return self._parse_comma_separated_range()
 
-        slice_settings = self.user_input.split(',')
+        slice_settings = self.user_input.split(",")
         all_ranges = []
         for slice_setting in slice_settings:
-            slice_setting = slice_setting.replace(' ', '')
+            slice_setting = slice_setting.replace(" ", "")
             # We can have three scenarios
             # 1. Simple Slice:     X-Y
             # 2. Slice range :     X:Y:Z
@@ -487,8 +503,9 @@ class EventSliceParser(object):
             elif self._does_match(self.full_range_pattern, slice_setting):
                 all_ranges.append(self._extract_full_range(slice_setting, self.range_marker))
             else:
-                raise ValueError("The provided event slice configuration {0} cannot be parsed because "
-                                 "of {1}".format(slice_settings, slice_setting))
+                raise ValueError(
+                    "The provided event slice configuration {0} cannot be parsed because " "of {1}".format(slice_settings, slice_setting)
+                )
         return all_ranges
 
     @staticmethod
@@ -496,11 +513,11 @@ class EventSliceParser(object):
         return compiled_regex.match(section_to_parse) is not None
 
     def _is_comma_separated_range(self):
-        stripped_line = self.user_input.replace(' ', '')
-        if ',' not in stripped_line:
+        stripped_line = self.user_input.replace(" ", "")
+        if "," not in stripped_line:
             return False
 
-        split_line = stripped_line.split(',')
+        split_line = stripped_line.split(",")
         for val in split_line:
             try:
                 float(val)
@@ -517,8 +534,10 @@ class EventSliceParser(object):
         start = float(start)
         stop = float(stop)
         if start > stop:
-            raise ValueError("Parsing event slices. It appears that the start value {0} is larger than the stop "
-                             "value {1}. Make sure that this is not the case.")
+            raise ValueError(
+                "Parsing event slices. It appears that the start value {0} is larger than the stop "
+                "value {1}. Make sure that this is not the case."
+            )
         return start, stop
 
     @staticmethod
@@ -528,8 +547,10 @@ class EventSliceParser(object):
         step = float(split_line[1])
         stop = float(split_line[2])
         if start > stop:
-            raise ValueError("Parsing event slices. It appears that the start value {0} is larger than the stop "
-                             "value {1}. Make sure that this is not the case.")
+            raise ValueError(
+                "Parsing event slices. It appears that the start value {0} is larger than the stop "
+                "value {1}. Make sure that this is not the case."
+            )
 
         elements = list(EventSliceParser.float_range(start, stop, step))
         # We are missing the last element
@@ -545,12 +566,12 @@ class EventSliceParser(object):
         line = re.sub(range_marker_pattern, "", line)
         value = float(line)
         if is_lower_bound:
-            return value, -1.
+            return value, -1.0
         else:
-            return -1., value
+            return -1.0, value
 
     def _parse_comma_separated_range(self):
-        assert (isinstance(self.user_input, list))
+        assert isinstance(self.user_input, list)
         output_list = []
         for i, j in zip(self.user_input, self.user_input[1:]):
             output_list.append((float(i), float(j)))
@@ -630,7 +651,7 @@ def get_ranges_for_rebin_array(rebin_array):
     min_value = rebin_array[0]
     step_value = rebin_array[1]
     max_value = rebin_array[2]
-    step_type = RangeStepType.LIN if step_value >= 0. else RangeStepType.LOG
+    step_type = RangeStepType.LIN if step_value >= 0.0 else RangeStepType.LOG
     step_value = abs(step_value)
     return get_ranges_for_rebin_setting(min_value, max_value, step_value, step_type)
 
@@ -640,7 +661,7 @@ def get_ranges_for_rebin_array(rebin_array):
 # ----------------------------------------------------------------------------------------------------------------------
 def get_wav_range_from_ws(workspace) -> Tuple[float, float]:
     range_str = workspace.getRun().getProperty("Wavelength Range").valueAsStr
-    return range_str.split('-')
+    return range_str.split("-")
 
 
 def wav_ranges_to_str(wav_ranges: List[Tuple[float, float]], *, remove_full_range: bool = False) -> str:
@@ -655,8 +676,7 @@ def wav_range_to_str(wav_range: Tuple[float, float]) -> str:
     return f"{wav_range[0]}-{wav_range[1]}"
 
 
-def get_standard_output_workspace_name(state, reduction_data_type, wav_range,
-                                       include_slice_limits=True, custom_run_name=None):
+def get_standard_output_workspace_name(state, reduction_data_type, wav_range, include_slice_limits=True, custom_run_name=None):
     """
     Creates the name of the output workspace from a state object.
 
@@ -681,8 +701,8 @@ def get_standard_output_workspace_name(state, reduction_data_type, wav_range,
 
     # If the user has specified a custom run name we should prepend that instead
     short_run_number_as_string = custom_run_name if custom_run_name else str(short_run_number)
-    if short_run_number_as_string[-1] != '_':
-        short_run_number_as_string = short_run_number_as_string + '_'
+    if short_run_number_as_string[-1] != "_":
+        short_run_number_as_string = short_run_number_as_string + "_"
 
     # 2. Multiperiod
     if state.data.sample_scatter_period != ALL_PERIODS:
@@ -702,8 +722,9 @@ def get_standard_output_workspace_name(state, reduction_data_type, wav_range,
         det_name = detectors[DetectorType.LAB.value].detector_name_short
         detector_name_short = det_name if det_name is not None else "lab"
     else:
-        raise RuntimeError("SANSStateFunctions: Unknown reduction data type {0} cannot be used to "
-                           "create an output name".format(reduction_data_type))
+        raise RuntimeError(
+            "SANSStateFunctions: Unknown reduction data type {0} cannot be used to " "create an output name".format(reduction_data_type)
+        )
 
     # 4. Dimensionality
     reduction = state.reduction
@@ -719,7 +740,7 @@ def get_standard_output_workspace_name(state, reduction_data_type, wav_range,
     mask = state.mask
     if reduction.reduction_dimensionality is ReductionDimensionality.ONE_DIM:
         if mask.phi_min and mask.phi_max and (abs(mask.phi_max - mask.phi_min) != 180.0):
-            phi_limits_as_string = 'Phi' + str(mask.phi_min) + '_' + str(mask.phi_max)
+            phi_limits_as_string = "Phi" + str(mask.phi_min) + "_" + str(mask.phi_max)
         else:
             phi_limits_as_string = ""
     else:
@@ -730,25 +751,36 @@ def get_standard_output_workspace_name(state, reduction_data_type, wav_range,
     start_time = slice_state.start_time
     end_time = slice_state.end_time
     if start_time and end_time and include_slice_limits:
-        start_time_as_string = '_t%.2f' % start_time[0]
-        end_time_as_string = '_T%.2f' % end_time[0]
+        start_time_as_string = "_t%.2f" % start_time[0]
+        end_time_as_string = "_T%.2f" % end_time[0]
     else:
         start_time_as_string = ""
         end_time_as_string = ""
 
     # Piece it all together
-    output_workspace_name = (short_run_number_as_string + period_as_string + detector_name_short
-                             + dimensionality_as_string + wavelength_range_string + phi_limits_as_string
-                             + start_time_as_string + end_time_as_string)
+    output_workspace_name = (
+        short_run_number_as_string
+        + period_as_string
+        + detector_name_short
+        + dimensionality_as_string
+        + wavelength_range_string
+        + phi_limits_as_string
+        + start_time_as_string
+        + end_time_as_string
+    )
 
-    output_workspace_base_name = (short_run_number_as_string + detector_name_short + dimensionality_as_string
-                                  + phi_limits_as_string)
+    output_workspace_base_name = short_run_number_as_string + detector_name_short + dimensionality_as_string + phi_limits_as_string
 
     return output_workspace_name, output_workspace_base_name
 
 
-def get_transmission_output_name(state, wav_range, data_type=DataType.SAMPLE,
-                                 multi_reduction_type=None, fitted=True,):
+def get_transmission_output_name(
+    state,
+    wav_range,
+    data_type=DataType.SAMPLE,
+    multi_reduction_type=None,
+    fitted=True,
+):
     user_specified_output_name = state.save.user_specified_output_name
 
     data = state.data
@@ -760,14 +792,14 @@ def get_transmission_output_name(state, wav_range, data_type=DataType.SAMPLE,
     fit_wav_range_string = "_" + str(fit.wavelength_low) + "_" + str(fit.wavelength_high)
 
     trans_suffix = "_trans_Sample" if data_type == DataType.SAMPLE else "_trans_Can"
-    trans_suffix = trans_suffix + '_unfitted' if not fitted else trans_suffix
+    trans_suffix = trans_suffix + "_unfitted" if not fitted else trans_suffix
 
     if user_specified_output_name:
         output_name = user_specified_output_name + trans_suffix
-        output_base_name = user_specified_output_name + '_trans'
+        output_base_name = user_specified_output_name + "_trans"
     else:
         output_name = short_run_number_as_string + trans_suffix + fit_wav_range_string
-        output_base_name = short_run_number_as_string + '_trans' + fit_wav_range_string
+        output_base_name = short_run_number_as_string + "_trans" + fit_wav_range_string
 
     if multi_reduction_type and fitted:
         if multi_reduction_type["wavelength_range"]:
@@ -777,18 +809,20 @@ def get_transmission_output_name(state, wav_range, data_type=DataType.SAMPLE,
     return output_name, output_base_name
 
 
-def get_output_name(state, reduction_mode, is_group, wav_range, suffix="",
-                    multi_reduction_type=None, event_slice_optimisation=False):
+def get_output_name(state, reduction_mode, is_group, wav_range, suffix="", multi_reduction_type=None, event_slice_optimisation=False):
     # Get the external settings from the save state
     save_info = state.save
     user_specified_output_name = save_info.user_specified_output_name
     user_specified_output_name_suffix = save_info.user_specified_output_name_suffix
 
     # Get the standard workspace name
-    workspace_name, workspace_base_name = \
-        get_standard_output_workspace_name(state, reduction_mode, wav_range=wav_range,
-                                           include_slice_limits=(not event_slice_optimisation),
-                                           custom_run_name=user_specified_output_name)
+    workspace_name, workspace_base_name = get_standard_output_workspace_name(
+        state,
+        reduction_mode,
+        wav_range=wav_range,
+        include_slice_limits=(not event_slice_optimisation),
+        custom_run_name=user_specified_output_name,
+    )
 
     # If user specified output name is not none then we use it for the base name
     output_name = workspace_name
@@ -805,8 +839,8 @@ def get_output_name(state, reduction_mode, is_group, wav_range, suffix="",
             start_time = slice_state.start_time
             end_time = slice_state.end_time
             if start_time and end_time:
-                start_time_as_string = '_t%.2f' % start_time[0]
-                end_time_as_string = '_T%.2f' % end_time[0]
+                start_time_as_string = "_t%.2f" % start_time[0]
+                end_time_as_string = "_T%.2f" % end_time[0]
             else:
                 start_time_as_string = ""
                 end_time_as_string = ""
@@ -836,8 +870,7 @@ def get_base_name_from_multi_period_name(workspace_name):
     if re.search(multi_period_workspace_form, workspace_name) is not None:
         return re.sub(multi_period_workspace_form, "", workspace_name)
     else:
-        raise RuntimeError("The workspace name {0} seems to not be part of a "
-                           "multi-period workspace.".format(workspace_name))
+        raise RuntimeError("The workspace name {0} seems to not be part of a " "multi-period workspace.".format(workspace_name))
 
 
 def sanitise_instrument_name(instrument_name):
@@ -881,7 +914,7 @@ def get_instrument(instrument_name):
 # ----------------------------------------------------------------------------------------------------------------------
 # Hashing + ADS
 # ----------------------------------------------------------------------------------------------------------------------
-def get_state_hash_for_can_reduction(state, reduction_mode, wav_range: Optional[str]=None, partial_type=None):
+def get_state_hash_for_can_reduction(state, reduction_mode, wav_range: Optional[str] = None, partial_type=None):
     """
     Creates a hash for a (modified) state object.
 
@@ -926,8 +959,7 @@ def get_state_hash_for_can_reduction(state, reduction_mode, wav_range: Optional[
     elif reduction_mode is ReductionMode.HAB:
         state_string += "HAB"
     else:
-        raise RuntimeError("Only LAB and HAB reduction modes are allowed at this point."
-                           " {} was provided".format(reduction_mode))
+        raise RuntimeError("Only LAB and HAB reduction modes are allowed at this point." " {} was provided".format(reduction_mode))
 
     # If we are dealing with a partial output workspace, then mark it as such
     if partial_type is OutputParts.COUNT:
@@ -971,21 +1003,20 @@ def get_reduced_can_workspace_from_ads(state, output_parts, reduction_mode, wav_
 
 def get_transmission_workspaces_from_ads(state, reduction_mode, wav_range):
     """
-        Get the reduced can transmission workspace from the ADS if it exists else nothing
+    Get the reduced can transmission workspace from the ADS if it exists else nothing
 
-        :param state: a SANSState object.
-        :param reduction_mode: the reduction mode which at this point is either HAB or LAB
-        :return: a reduced transmission can object or None.
-        """
+    :param state: a SANSState object.
+    :param reduction_mode: the reduction mode which at this point is either HAB or LAB
+    :return: a reduced transmission can object or None.
+    """
     hashed_state = get_state_hash_for_can_reduction(state, reduction_mode, wav_range, TransmissionType.CALCULATED)
     calculated_transmission = get_workspace_from_ads_based_on_hash(hashed_state)
-    hashed_state = get_state_hash_for_can_reduction(state, reduction_mode, wav_range=None,
-                                                    partial_type=TransmissionType.UNFITTED)
+    hashed_state = get_state_hash_for_can_reduction(state, reduction_mode, wav_range=None, partial_type=TransmissionType.UNFITTED)
     unfitted_transmission = get_workspace_from_ads_based_on_hash(hashed_state)
     return calculated_transmission, unfitted_transmission
 
 
-def write_hash_into_reduced_can_workspace(state, workspace, reduction_mode, wav_range:str, partial_type=None):
+def write_hash_into_reduced_can_workspace(state, workspace, reduction_mode, wav_range: str, partial_type=None):
     """
     Writes the state hash into a reduced can workspace.
 

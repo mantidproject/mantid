@@ -1,4 +1,6 @@
-set(PREVIEW_SRC_FILES InstViewModel.cpp PreviewJobManager.cpp PreviewPresenter.cpp QtPreviewView.cpp PreviewModel.cpp)
+set(PREVIEW_SRC_FILES InstViewModel.cpp PreviewJobManager.cpp PreviewPresenter.cpp QtPreviewView.cpp
+                      QtPreviewDockedWidgets.cpp PreviewModel.cpp
+)
 
 # Include files aren't required, but this makes them appear in Visual Studio IMPORTANT: Include files are required in
 # the MOC_FILES set. Scroll down to find it.
@@ -12,13 +14,14 @@ set(PREVIEW_INC_FILES
     PreviewPresenterFactory.h
     PreviewPresenter.h
     IPreviewView.h
+    IPreviewDockedWidgets.h
     ROIType.h
     QtPreviewView.h
 )
 
-set(PREVIEW_MOC_FILES QtPreviewView.h)
+set(PREVIEW_MOC_FILES QtPreviewView.h QtPreviewDockedWidgets.h)
 
-set(PREVIEW_UI_FILES PreviewWidget.ui)
+set(PREVIEW_UI_FILES PreviewWidget.ui PreviewDockedWidgets.ui)
 
 prepend(PREVIEW_SRC_FILES GUI/Preview ${PREVIEW_SRC_FILES})
 prepend(PREVIEW_INC_FILES GUI/Preview ${PREVIEW_INC_FILES})

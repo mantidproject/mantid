@@ -11,50 +11,65 @@ from mantid.api import *
 
 class GetLiveInstrumentValue(DataProcessorAlgorithm):
     def category(self):
-        return 'Utility'
+        return "Utility"
 
     def summary(self):
-        return 'Get a live data value from and instrument via EPICS'
+        return "Get a live data value from and instrument via EPICS"
 
     def seeAlso(self):
-        return [ "ReflectometryReductionOneLiveData" ]
+        return ["ReflectometryReductionOneLiveData"]
 
     def PyInit(self):
-        instruments = sorted([item.name()
-                              for item in config.getFacility().instruments()])
-        instrument = config.getInstrument() if config.getInstrument() in instruments else ''
-        self.declareProperty(name='Instrument', defaultValue=instrument, direction=Direction.Input,
-                             validator=StringListValidator(instruments),
-                             doc='Instrument to find live value for.')
+        instruments = sorted([item.name() for item in config.getFacility().instruments()])
+        instrument = config.getInstrument() if config.getInstrument() in instruments else ""
+        self.declareProperty(
+            name="Instrument",
+            defaultValue=instrument,
+            direction=Direction.Input,
+            validator=StringListValidator(instruments),
+            doc="Instrument to find live value for.",
+        )
 
-        self.declareProperty(name='PropertyType', defaultValue='Run', direction=Direction.Input,
-                             validator=StringListValidator(['Run', 'Block']),
-                             doc='The type of property to find')
+        self.declareProperty(
+            name="PropertyType",
+            defaultValue="Run",
+            direction=Direction.Input,
+            validator=StringListValidator(["Run", "Block"]),
+            doc="The type of property to find",
+        )
 
-        self.declareProperty(name='PropertyName', defaultValue='TITLE', direction=Direction.Input,
-                             validator=StringMandatoryValidator(),
-                             doc='Name of value to find.')
+        self.declareProperty(
+            name="PropertyName",
+            defaultValue="TITLE",
+            direction=Direction.Input,
+            validator=StringMandatoryValidator(),
+            doc="Name of value to find.",
+        )
 
-        self.declareProperty(name='Value', defaultValue='', direction=Direction.Output,
-                             doc='The live value from the instrument, or an empty string if not found')
+        self.declareProperty(
+            name="Value",
+            defaultValue="",
+            direction=Direction.Output,
+            doc="The live value from the instrument, or an empty string if not found",
+        )
 
     def PyExec(self):
-        self._instrument = self.getProperty('Instrument').value
-        self._propertyType = self.getProperty('PropertyType').value
-        self._propertyName = self.getProperty('PropertyName').value
+        self._instrument = self.getProperty("Instrument").value
+        self._propertyType = self.getProperty("PropertyType").value
+        self._propertyName = self.getProperty("PropertyName").value
         value = self._get_live_value()
         self._set_output_value(value)
 
     def _prefix(self):
         """Prefix to use at the start of the EPICS string"""
-        return 'IN:'
+        return "IN:"
 
     def _name_prefix(self):
         """Prefix to use in the EPICS string before the property name"""
-        if self._propertyType == 'Run':
-            return ':DAE:'
+        if self._propertyType == "Run":
+            return ":DAE:"
         else:
-            return ':CS:SB:'
+            return ":CS:SB:"
 
     @staticmethod
     def _caget(pvname, as_string=False):
@@ -62,8 +77,9 @@ class GetLiveInstrumentValue(DataProcessorAlgorithm):
         try:
             from CaChannel import CaChannel, CaChannelException, ca
         except ImportError:
-            raise RuntimeError("CaChannel must be installed to use this algorithm. "
-                               "For details, see https://www.mantidproject.org/CaChannel_In_Mantid")
+            raise RuntimeError(
+                "CaChannel must be installed to use this algorithm. " "For details, see https://www.mantidproject.org/CaChannel_In_Mantid"
+            )
         if as_string:
             dbr_type = ca.DBR_STRING
         else:
@@ -74,7 +90,7 @@ class GetLiveInstrumentValue(DataProcessorAlgorithm):
             chan.searchw()
             return chan.getw(dbr_type)
         except CaChannelException as e:
-            raise RuntimeError("Error reading EPICS PV \"{}\": {}".format(pvname, str(e)))
+            raise RuntimeError('Error reading EPICS PV "{}": {}'.format(pvname, str(e)))
 
     def _get_live_value(self):
         epicsName = self._prefix() + self._instrument + self._name_prefix() + self._propertyName
@@ -82,10 +98,10 @@ class GetLiveInstrumentValue(DataProcessorAlgorithm):
 
     def _set_output_value(self, value):
         if value is not None:
-            self.log().notice(self._propertyName + ' = ' + value)
-            self.setProperty('Value', str(value))
+            self.log().notice(self._propertyName + " = " + value)
+            self.setProperty("Value", str(value))
         else:
-            self.log().notice(self._propertyName + ' not found')
+            self.log().notice(self._propertyName + " not found")
 
 
 AlgorithmFactory.subscribe(GetLiveInstrumentValue)

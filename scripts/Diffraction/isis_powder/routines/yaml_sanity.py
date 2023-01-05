@@ -27,8 +27,7 @@ def _does_single_unbound_key_exist(keys):
             if not seen_unbounded_key:
                 seen_unbounded_key = key_string
             else:
-                raise ValueError("Seen multiple unbounded keys in mapping file: " + key_string + " and "
-                                 + seen_unbounded_key)
+                raise ValueError("Seen multiple unbounded keys in mapping file: " + key_string + " and " + seen_unbounded_key)
     return True if seen_unbounded_key else False
 
 
@@ -36,7 +35,7 @@ def _is_unbound_key_sane(keys):
     unbounded_lower_value = 0
     largest_seen_bound_value = 0
     for key in keys:
-        split_key = str(key).split('-')
+        split_key = str(key).split("-")
         if _is_run_range_key_unbounded(key):
             unbounded_lower_value = int(split_key[-2])  # Get the second to last element which is the lower bounds
         else:
@@ -47,11 +46,15 @@ def _is_unbound_key_sane(keys):
 
     if unbounded_lower_value < largest_seen_bound_value:
         # We have a bounded value in an unbounded range
-        raise ValueError("Found a run range in calibration mapping overlaps an unbounded run range."
-                         + "\nThe value " + str(largest_seen_bound_value) + " was found and is greater than "
-                         + str(unbounded_lower_value))
+        raise ValueError(
+            "Found a run range in calibration mapping overlaps an unbounded run range."
+            + "\nThe value "
+            + str(largest_seen_bound_value)
+            + " was found and is greater than "
+            + str(unbounded_lower_value)
+        )
 
 
 def _is_run_range_key_unbounded(key):
-    split_key = str(key).split('-')
-    return split_key[-1] == ''
+    split_key = str(key).split("-")
+    return split_key[-1] == ""

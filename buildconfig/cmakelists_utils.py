@@ -2,7 +2,7 @@ import os
 
 
 def find_basedir(project, subproject):
-    """ Returns the base directory. If the subproject is known to be in MantidQt, it uses that.
+    """Returns the base directory. If the subproject is known to be in MantidQt, it uses that.
     The default is current dir + Framework
 
     Parameters
@@ -18,14 +18,14 @@ def find_basedir(project, subproject):
     header_folder = "Mantid" + subproject
     if project == "MantidQt":
         header_folder = "MantidQt" + subproject
-    scriptdir = os.path.split(__file__)[0] #Folder of Code/Build
-    codedir = os.path.split(scriptdir)[0] #Folder of Code/
+    scriptdir = os.path.split(__file__)[0]  # Folder of Code/Build
+    codedir = os.path.split(scriptdir)[0]  # Folder of Code/
     basedir = os.path.join(codedir, project, subproject)
     return basedir, header_folder
 
 
 def redo_cmake_section(lines, cmake_tag, add_this_line, remove_this_line=""):
-    """ Read the LINES of a file. Find first "set(cmake_tag",
+    """Read the LINES of a file. Find first "set(cmake_tag",
     read all the lines to get all the files,
     add your new line,
     sort them,
@@ -53,20 +53,20 @@ def redo_cmake_section(lines, cmake_tag, add_this_line, remove_this_line=""):
             # These are the lines before
             lines_before.append(line)
         elif not section_processed and section_num == 1:
-            #this is a line with the name of a file
+            # this is a line with the name of a file
             line = line.strip()
             # Take off the tag
             if line.startswith(search1):
-                line = line[len(search1):].strip()
+                line = line[len(search1) :].strip()
             if line.startswith(search2_second_line):
-                line = line[len(search2_second_line):].strip()
+                line = line[len(search2_second_line) :].strip()
                 # remove set( from lines_before
                 lines_before.pop()
             # Did we reach the last one?
             if line.endswith(")"):
                 section_num = 2
                 section_processed = True
-                line = line[0:len(line) - 1].strip()
+                line = line[0 : len(line) - 1].strip()
 
             if len(line) > 0:
                 files.append(line)
@@ -97,14 +97,14 @@ def redo_cmake_section(lines, cmake_tag, add_this_line, remove_this_line=""):
     lines.append("set(" + cmake_tag)
     for file in files:
         lines.append("    " + file)
-    lines[-1] += ")" # close the parentheses
+    lines[-1] += ")"  # close the parentheses
     lines += lines_after
 
     return lines
 
 
 def fix_cmake_format(subproject):
-    """ Just fix the CMAKE format"""
+    """Just fix the CMAKE format"""
     cmake_path = os.path.join(os.path.curdir, "Framework/" + subproject + "/CMakeLists.txt")
     source = open(cmake_path).read()
     lines = source.split("\n")
@@ -112,23 +112,34 @@ def fix_cmake_format(subproject):
     lines = redo_cmake_section(lines, "INC_FILES", "")
     lines = redo_cmake_section(lines, "TEST_FILES", "")
 
-    f = open(cmake_path, 'w')
+    f = open(cmake_path, "w")
     text = "\n".join(lines)
     f.write(text)
     f.close()
 
 
 def fix_all_cmakes():
-    """ Fix all cmake files """
-    projects = ["Algorithms", "DataObjects", "MDAlgorithms", "API",
-                "Geometry", "CurveFitting", "ICat", "MDEvents",
-                "DataHandling", "Kernel", "Nexus", "Crystal"]
+    """Fix all cmake files"""
+    projects = [
+        "Algorithms",
+        "DataObjects",
+        "MDAlgorithms",
+        "API",
+        "Geometry",
+        "CurveFitting",
+        "ICat",
+        "MDEvents",
+        "DataHandling",
+        "Kernel",
+        "Nexus",
+        "Crystal",
+    ]
     for proj in projects:
         fix_cmake_format(proj)
 
 
 def add_to_cmake(subproject, classname, args, subfolder):
-    """ Add the class to the cmake list of the given class
+    """Add the class to the cmake list of the given class
     Parameters:
         subproject : API, Kernel
         classname : name of the class
@@ -147,27 +158,27 @@ def add_to_cmake(subproject, classname, args, subfolder):
     if args.test:
         lines = redo_cmake_section(lines, "TEST_FILES", classname + "Test.h")
 
-    f = open(cmake_path, 'w')
+    f = open(cmake_path, "w")
     text = "\n".join(lines)
     f.write(text)
     f.close()
 
 
 def remove_from_cmake(subproject, classname, args, subfolder):
-    """ Removes the class from the cmake list of the given project """
+    """Removes the class from the cmake list of the given project"""
     basedir, header_folder = find_basedir(args.project, subproject)
     cmake_path = os.path.join(basedir, "CMakeLists.txt")
 
     source = open(cmake_path).read()
     lines = source.split("\n")
     if args.header:
-        lines = redo_cmake_section(lines, "INC_FILES", "",  "inc/" + header_folder + "/"+ subfolder + classname + ".h")
+        lines = redo_cmake_section(lines, "INC_FILES", "", "inc/" + header_folder + "/" + subfolder + classname + ".h")
     if args.cpp:
-        lines = redo_cmake_section(lines, "SRC_FILES", "",  "src/" + subfolder + classname + ".cpp")
+        lines = redo_cmake_section(lines, "SRC_FILES", "", "src/" + subfolder + classname + ".cpp")
     if args.test:
         lines = redo_cmake_section(lines, "TEST_FILES", "", classname + "Test.h")
 
-    f = open(cmake_path, 'w')
+    f = open(cmake_path, "w")
     text = "\n".join(lines)
     f.write(text)
     f.close()

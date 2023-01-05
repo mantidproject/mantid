@@ -5,9 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.kernel import Logger
-from sans.common.enums import (FindDirectionEnum, DetectorType, SANSInstrument)
-from sans.gui_logic.gui_common import (meter_2_millimeter, millimeter_2_meter, apply_selective_view_scaling,
-                                       undo_selective_view_scaling)
+from sans.common.enums import FindDirectionEnum, DetectorType, SANSInstrument
+from sans.gui_logic.gui_common import meter_2_millimeter, millimeter_2_meter, apply_selective_view_scaling, undo_selective_view_scaling
 from sans.gui_logic.models.async_workers.beam_centre_async import BeamCentreFields
 
 
@@ -21,11 +20,11 @@ class BeamCentreModel(object):
         self._r_max = 0
         self._left_right = True
         self._up_down = True
-        self._tolerance = 1.251E-07 # metres
-        self._rear_pos_1 = ''
-        self._rear_pos_2 = ''
-        self._front_pos_2 = ''
-        self._front_pos_1 = ''
+        self._tolerance = 1.251e-07  # metres
+        self._rear_pos_1 = ""
+        self._rear_pos_2 = ""
+        self._front_pos_2 = ""
+        self._front_pos_1 = ""
         self.COM = False
         self.verbose = False
         self.q_min = 0.01
@@ -43,14 +42,14 @@ class BeamCentreModel(object):
 
     def reset_inst_defaults(self, instrument):
         if instrument is SANSInstrument.LOQ:
-            self._r_min = 0.096 # metres
-            self._r_max = 0.216 # metres
+            self._r_min = 0.096  # metres
+            self._r_max = 0.216  # metres
 
             # TODO front on LOQ prefers 96-750
         else:
             # All other instruments hard-code this as follows
-            self._r_min = 0.06 # metres
-            self._r_max = 0.280 # metres
+            self._r_min = 0.06  # metres
+            self._r_max = 0.280  # metres
 
         self.instrument = instrument
 
@@ -59,8 +58,8 @@ class BeamCentreModel(object):
             self._rear_pos_1 = results["pos1"]
             self._rear_pos_2 = results["pos2"]
         elif self.component is DetectorType.HAB:
-            self._front_pos_1 = results['pos1']
-            self._front_pos_2 = results['pos2']
+            self._front_pos_1 = results["pos1"]
+            self._front_pos_2 = results["pos2"]
         else:
             raise RuntimeError("Unexpected detector type, got %r" % results)
 
@@ -79,13 +78,20 @@ class BeamCentreModel(object):
         # We pack into a separate object so that:
         # 1. we don't share memory across threads (so free thread-safety)
         # 2. We only move the attrs that are relevant across threads
-        return BeamCentreFields(component=self.component, centre_of_mass=self.COM,
-                                find_direction=self.get_finder_direction(),
-                                lab_pos_1=self._rear_pos_1, lab_pos_2=self._rear_pos_2,
-                                hab_pos_1=self._front_pos_1, hab_pos_2=self._front_pos_2,
-                                max_iterations=self.max_iterations,
-                                r_min=self.r_min, r_max=self.r_max,
-                                tolerance=self.tolerance, verbose=self.verbose)
+        return BeamCentreFields(
+            component=self.component,
+            centre_of_mass=self.COM,
+            find_direction=self.get_finder_direction(),
+            lab_pos_1=self._rear_pos_1,
+            lab_pos_2=self._rear_pos_2,
+            hab_pos_1=self._front_pos_1,
+            hab_pos_2=self._front_pos_2,
+            max_iterations=self.max_iterations,
+            r_min=self.r_min,
+            r_max=self.r_max,
+            tolerance=self.tolerance,
+            verbose=self.verbose,
+        )
 
     @property
     def max_iterations(self):
@@ -170,7 +176,7 @@ class BeamCentreModel(object):
     @property
     @apply_selective_view_scaling
     def rear_pos_1(self):
-        return self._rear_pos_1 if self._rear_pos_1 is not None else ''
+        return self._rear_pos_1 if self._rear_pos_1 is not None else ""
 
     @rear_pos_1.setter
     @undo_selective_view_scaling
@@ -180,7 +186,7 @@ class BeamCentreModel(object):
     @property
     @apply_selective_view_scaling
     def rear_pos_2(self):
-        return self._rear_pos_2 if self._rear_pos_2 is not None else ''
+        return self._rear_pos_2 if self._rear_pos_2 is not None else ""
 
     @rear_pos_2.setter
     @undo_selective_view_scaling
@@ -190,7 +196,7 @@ class BeamCentreModel(object):
     @property
     @apply_selective_view_scaling
     def front_pos_1(self):
-        return self._front_pos_1 if self._front_pos_1 is not None else ''
+        return self._front_pos_1 if self._front_pos_1 is not None else ""
 
     @front_pos_1.setter
     @undo_selective_view_scaling
@@ -200,7 +206,7 @@ class BeamCentreModel(object):
     @property
     @apply_selective_view_scaling
     def front_pos_2(self):
-        return self._front_pos_2 if self._front_pos_2 is not None else ''
+        return self._front_pos_2 if self._front_pos_2 is not None else ""
 
     @front_pos_2.setter
     @undo_selective_view_scaling

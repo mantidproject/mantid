@@ -10,11 +10,12 @@ from mantid.dataobjects import EventWorkspace
 from sans.common.general_functions import create_unmanaged_algorithm
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import SaveType
+
 # from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 
 ZERO_ERROR_DEFAULT = 1e6
 
-file_format_with_append = namedtuple('file_format_with_append', 'file_format, append_file_format_name')
+file_format_with_append = namedtuple("file_format_with_append", "file_format, append_file_format_name")
 
 
 def save_to_file(workspace, file_format, file_name, transmission_workspaces, additional_run_numbers):
@@ -71,8 +72,7 @@ def get_save_strategy(file_format_bundle, file_name, save_options, transmission_
         file_name = get_file_name(file_format_bundle, file_name, "", ".csv")
         save_name = "SaveCSV"
     else:
-        raise RuntimeError("SaveWorkspace: The requested data {0} format is "
-                           "currently not supported.".format(file_format))
+        raise RuntimeError("SaveWorkspace: The requested data {0} format is " "currently not supported.".format(file_format))
     save_options.update({"Filename": file_name})
     return create_unmanaged_algorithm(save_name, **save_options)
 
@@ -92,8 +92,7 @@ def get_zero_error_free_workspace(workspace):
     :return: The zero-error free workspace
     """
     clone_name = "CloneWorkspace"
-    clone_options = {"InputWorkspace": workspace,
-                     "OutputWorkspace": EMPTY_NAME}
+    clone_options = {"InputWorkspace": workspace, "OutputWorkspace": EMPTY_NAME}
     clone_alg = create_unmanaged_algorithm(clone_name, **clone_options)
     clone_alg.execute()
     cloned_workspace = clone_alg.getProperty("OutputWorkspace").value
@@ -110,7 +109,7 @@ def remove_zero_errors_from_workspace(workspace):
     """
     # Make sure we are dealing with a MatrixWorkspace
     if not isinstance(workspace, MatrixWorkspace) or isinstance(workspace, EventWorkspace):
-        raise ValueError('Cannot remove zero errors from a workspace which is not a MatrixWorkspace.')
+        raise ValueError("Cannot remove zero errors from a workspace which is not a MatrixWorkspace.")
 
     # Uncomment the next line and tests fail for checking error values should not be zero, and
     # comparing loaded workspace to calculated workspace. If we want to remove RuntimeWarning for nan

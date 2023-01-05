@@ -19,8 +19,7 @@ class Redfield(IFunction1D):
     def init(self):
         self.declareParameter("A0", 1)
         self.declareParameter("Hloc", 0.1, "Local magnetic field (G)")
-        self.declareParameter(
-            "Tau", 0.1, "Correlation time of muon spins (microsec)")
+        self.declareParameter("Tau", 0.1, "Correlation time of muon spins (microsec)")
 
     def function1D(self, x):
         A0 = self.getParameterValue("A0")

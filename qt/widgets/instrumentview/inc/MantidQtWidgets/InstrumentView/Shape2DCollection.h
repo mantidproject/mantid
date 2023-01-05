@@ -16,6 +16,7 @@
 
 class QPainter;
 class QMouseEvent;
+class QRectF;
 class QWheelEvent;
 class QKeyEvent;
 
@@ -87,6 +88,8 @@ public:
                            // warning)
   // is a point in real space masked by any of the shapes
   bool isMasked(double x, double y) const;
+  // Is a QRectF intersecting one of the shapes
+  bool isIntersecting(const QRectF &rect) const override;
   // collect all screen pixels that are masked by the shapes
   QList<QPoint> getMaskedPixels() const;
 
@@ -160,6 +163,8 @@ protected:
   QList<Shape2D *> m_selectedShapes; ///< A list of selected shapes (can be moved or deleted)
   QList<Shape2D *> m_copiedShapes;   ///< A list of shapes to be pasted if requiered
   bool m_overridingCursor;
+  bool m_cursorOverShape;
+  bool m_cursorOverControlPoint;
   friend class InstrumentWidgetEncoder;
   friend class InstrumentWidgetDecoder;
 };

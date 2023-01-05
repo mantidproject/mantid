@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,too-few-public-methods
+# pylint: disable=no-init,too-few-public-methods
 
 # test batch mode with sans2d and selecting a period in batch mode
 import systemtesting
@@ -57,8 +57,8 @@ class LARMORMultiPeriodEventModeLoading(systemtesting.MantidSystemTest):
         LARMOR()
         Set1D()
         Detector("DetectorBench")
-        MaskFile('USER_Larmor_163F_HePATest_r13038.txt')
-        AssignSample('13038')
+        MaskFile("USER_Larmor_163F_HePATest_r13038.txt")
+        AssignSample("13038")
         base_name = "13038_sans_nxs_"
         number_of_workspaces = 4
         self._check_if_all_multi_period_workspaces_have_the_same_position(base_name, number_of_workspaces)

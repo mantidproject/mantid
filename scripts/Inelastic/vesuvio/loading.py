@@ -35,7 +35,7 @@ class VesuvioLoadHelper(object):
         return self.load_and_crop_runs(runs, spectra)
 
     def load_and_crop_runs(self, runs, spectra):
-        sum_spectra = (self.fit_mode == 'bank')
+        sum_spectra = self.fit_mode == "bank"
         loaded = self.load_runs(runs, spectra, sum_spectra)
         cropped = self._crop_workspace(loaded)
         return self._rebin_workspace(cropped) if self._rebin_params is not None else cropped
@@ -49,27 +49,28 @@ class VesuvioLoadHelper(object):
             return diff_mode
 
     def load_runs(self, runs, spectra, sum_spectra=False):
-        return LoadVesuvio(Filename=runs,
-                           Mode=self._diff_mode,
-                           InstrumentParFile=self._param_file,
-                           SpectrumList=spectra,
-                           SumSpectra=sum_spectra,
-                           LoadLogFiles=self._load_log_files,
-                           OutputWorkspace="loaded",
-                           StoreInADS=False)
+        return LoadVesuvio(
+            Filename=runs,
+            Mode=self._diff_mode,
+            InstrumentParFile=self._param_file,
+            SpectrumList=spectra,
+            SumSpectra=sum_spectra,
+            LoadLogFiles=self._load_log_files,
+            OutputWorkspace="loaded",
+            StoreInADS=False,
+        )
 
     def _crop_workspace(self, workspace):
-        return CropWorkspace(InputWorkspace=workspace,
-                             XMin=self._instrument.tof_range[0],
-                             XMax=self._instrument.tof_range[1],
-                             OutputWorkspace="cropped",
-                             StoreInADS=False)
+        return CropWorkspace(
+            InputWorkspace=workspace,
+            XMin=self._instrument.tof_range[0],
+            XMax=self._instrument.tof_range[1],
+            OutputWorkspace="cropped",
+            StoreInADS=False,
+        )
 
     def _rebin_workspace(self, workspace):
-        return Rebin(InputWorkspace=workspace,
-                     Params=self._rebin_params,
-                     OutputWorkspace="rebinned",
-                     StoreInADS=False)
+        return Rebin(InputWorkspace=workspace, Params=self._rebin_params, OutputWorkspace="rebinned", StoreInADS=False)
 
 
 class VesuvioTOFFitInput(object):
@@ -91,16 +92,14 @@ class VesuvioTOFFitInput(object):
         # Load sample and container runs
         self.spectra = _parse_spectra(loader.fit_mode, spectra, sample_runs)
 
-        self.sample_runs, self.sample_data = self._try_load_data(sample_runs, self.spectra,
-                                                                 loader, "Unable to load Sample Runs:")
-        mtd.addOrReplace(self._tof_workspace_suffix(self.sample_runs, self.spectra),
-                         self.sample_data)
+        self.sample_runs, self.sample_data = self._try_load_data(sample_runs, self.spectra, loader, "Unable to load Sample Runs:")
+        mtd.addOrReplace(self._tof_workspace_suffix(self.sample_runs, self.spectra), self.sample_data)
 
         if container_runs is not None:
-            self.container_runs, self.container_data = self._try_load_data(container_runs, self.spectra,
-                                                                           loader, "Unable to load Container Runs:")
-            mtd.addOrReplace(self._tof_workspace_suffix(self.container_runs, self.spectra),
-                             self.container_data)
+            self.container_runs, self.container_data = self._try_load_data(
+                container_runs, self.spectra, loader, "Unable to load Container Runs:"
+            )
+            mtd.addOrReplace(self._tof_workspace_suffix(self.container_runs, self.spectra), self.container_data)
         else:
             self.container_runs, self.container_data = None, None
 
@@ -162,7 +161,7 @@ def _parse_spectra(fit_mode, spectra, sample_runs):
 
 
 def _spectra_from_string(fit_mode, spectra):
-    if fit_mode == 'bank':
+    if fit_mode == "bank":
         return _parse_spectra_bank(spectra)
     else:
         if spectra == "forward":
@@ -185,8 +184,7 @@ def _parse_spectra_bank(spectra_bank):
     elif spectra_bank == "backward":
         bank_ranges = VESUVIO()._instrument.backward_banks
     else:
-        raise ValueError("Fitting by bank requires selecting either 'forward' or 'backward' "
-                         "for the spectra to load")
+        raise ValueError("Fitting by bank requires selecting either 'forward' or 'backward' " "for the spectra to load")
     bank_ranges = ["{0}-{1}".format(x, y) for x, y in bank_ranges]
     return ";".join(bank_ranges)
 
@@ -199,15 +197,17 @@ def is_back_scattering_spectra(spectra):
     :return:        True if the specified spectra denotes back scattering
                     spectra.
     """
-    if spectra == 'forward':
+    if spectra == "forward":
         return False
-    elif spectra == 'backward':
+    elif spectra == "backward":
         return True
     else:
         try:
             first_spectrum = int(spectra.split("-")[0])
             return any([lower <= first_spectrum <= upper for lower, upper in VESUVIO().backward_banks])
         except:
-            raise RuntimeError("Invalid value given for spectrum range: Range must "
-                               "either be 'forward', 'backward' or specified with "
-                               "the syntax 'a-b'.")
+            raise RuntimeError(
+                "Invalid value given for spectrum range: Range must "
+                "either be 'forward', 'backward' or specified with "
+                "the syntax 'a-b'."
+            )

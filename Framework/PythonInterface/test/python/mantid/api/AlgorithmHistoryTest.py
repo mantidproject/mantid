@@ -6,18 +6,17 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.simpleapi import CreateWorkspace, set_properties
-from mantid.api import (MatrixWorkspaceProperty, AlgorithmFactory, AlgorithmManager,
-                        DataProcessorAlgorithm, PythonAlgorithm)
+from mantid.api import MatrixWorkspaceProperty, AlgorithmFactory, AlgorithmManager, DataProcessorAlgorithm, PythonAlgorithm
 from mantid.kernel import Direction
 
 
 class ChildAlg(PythonAlgorithm):
-
     def PyInit(self):
         pass
 
     def PyExec(self):
         pass
+
 
 AlgorithmFactory.subscribe(ChildAlg)
 
@@ -28,25 +27,24 @@ class ParentAlg(DataProcessorAlgorithm):
     """
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('Workspace', '', Direction.InOut),
-                             doc="Name to give the input workspace.")
+        self.declareProperty(MatrixWorkspaceProperty("Workspace", "", Direction.InOut), doc="Name to give the input workspace.")
 
     def PyExec(self):
 
-        alg = self.createChildAlgorithm('ChildAlg')
+        alg = self.createChildAlgorithm("ChildAlg")
         alg.initialize()
         args = {}
         kwargs = {}
         set_properties(alg, *args, **kwargs)
         alg.execute()
 
+
 AlgorithmFactory.subscribe(ParentAlg)
 
 
 class AlgorithmHistoryTest(unittest.TestCase):
-
     def test_nested_history(self):
-        ws_name = '__tmp_test_algorithm_history'
+        ws_name = "__tmp_test_algorithm_history"
         ws = CreateWorkspace([0, 1, 2], [0, 1, 2], OutputWorkspace=ws_name)
         alg = self._run_algorithm("ParentAlg", Workspace=ws_name)
 
@@ -69,9 +67,9 @@ class AlgorithmHistoryTest(unittest.TestCase):
         self.assertEqual(child_alg.childHistorySize(), 0)
 
     def test_disable_history(self):
-        ws_name = '__tmp_test_algorithm_history'
+        ws_name = "__tmp_test_algorithm_history"
         ws = CreateWorkspace([0, 1, 2], [0, 1, 2], OutputWorkspace=ws_name)
-        alg = self._run_algorithm('ParentAlg', child_algorithm=True, record_history=False, Workspace=ws_name)
+        alg = self._run_algorithm("ParentAlg", child_algorithm=True, record_history=False, Workspace=ws_name)
 
         history = ws.getHistory()
         alg_hists = history.getAlgorithmHistories()
@@ -79,12 +77,12 @@ class AlgorithmHistoryTest(unittest.TestCase):
         self.assertEqual(history.size(), 1)
         self.assertEqual(len(alg_hists), 1)
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Test Helper Functions
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     def _run_algorithm(self, algorithm_name, child_algorithm=False, record_history=True, **kwargs):
-        """ Create and run an algorithm not in the simpleapi"""
+        """Create and run an algorithm not in the simpleapi"""
         alg = AlgorithmManager.create(algorithm_name)
         alg.initialize()
         alg.setChild(child_algorithm)
@@ -94,5 +92,6 @@ class AlgorithmHistoryTest(unittest.TestCase):
         alg.execute()
         return alg
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

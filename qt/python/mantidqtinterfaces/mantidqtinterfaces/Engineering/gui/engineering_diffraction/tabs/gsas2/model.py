@@ -11,11 +11,12 @@ import shutil
 import time
 import datetime
 import json
-
 import matplotlib.pyplot as plt
 import numpy as np
+
 from mantid.geometry import CrystalStructure, ReflectionGenerator, ReflectionConditionFilter
 from mantid.simpleapi import CreateWorkspace, LoadGSS, DeleteWorkspace, CreateEmptyTableWorkspace, logger
+from mantid.api import AnalysisDataService as ADS
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2 import parse_inputs
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
@@ -53,6 +54,7 @@ class GSAS2Model(object):
         self.chosen_cell_lengths = None
         self.out_call_gsas2 = None
         self.err_call_gsas2 = None
+        self.phase_names_list = None
 
     def clear_input_components(self):
         self.user_save_directory = None
@@ -84,6 +86,7 @@ class GSAS2Model(object):
         self.chosen_cell_lengths = None
         self.out_call_gsas2 = None
         self.err_call_gsas2 = None
+        self.phase_names_list = None
 
     def run_model(self, load_parameters, refinement_parameters, project_name, rb_num, user_limits):
 
@@ -216,7 +219,7 @@ class GSAS2Model(object):
         )
         gsas2_python_path = os.path.join(self.path_to_gsas2, "bin", "python")
         if platform.system() == "Windows":
-            gsas2_python_path = os.path.join(self.path_to_gsas2, "python")
+            gsas2_python_path = os.path.join(self.path_to_gsas2, "python.exe")
         call = [gsas2_python_path,
                 os.path.abspath(os.path.join(os.path.dirname(__file__), "call_G2sc.py")),
                 parse_inputs.Gsas2Inputs_to_json(gsas2_inputs)]
@@ -226,7 +229,16 @@ class GSAS2Model(object):
         try:
             env = os.environ.copy()
             env['PYTHONHOME'] = self.path_to_gsas2
-            shell_process = subprocess.Popen(command_string_list,
+            # The PyCharm debugger attempts to debug into any python subprocesses spawned by Workbench
+            # On Windows (see pydev_monkey.py) this results in the command line arguments being manipulated and
+            # the GSASII json parameter string gets corrupted
+            # Avoid this by passing the GSASII python exe in via the executable parameter instead of argv[0] and also
+            # set argv[0] to something not containing the string 'python'
+            # Note - the PyCharm behaviour can also be disabled by unchecking this property in File, Settings:
+            # "Attach to subprocess automatically while debugging"
+            empty_argv0 = '_'
+            shell_process = subprocess.Popen([empty_argv0] + command_string_list[1:],
+                                             executable=command_string_list[0],
                                              shell=False,
                                              stdin=None,
                                              stdout=subprocess.PIPE,
@@ -481,7 +493,8 @@ class GSAS2Model(object):
         self.data_x_max = []
         number_of_regions = 0
         for input_file in self.data_files:
-            loop_focused_workspace = LoadGSS(Filename=input_file, OutputWorkspace="GSASII_input_data")
+            loop_focused_workspace = LoadGSS(Filename=input_file, OutputWorkspace="GSASII_input_data",
+                                             EnableLogging=False)
             for workspace_index in range(loop_focused_workspace.getNumberHistograms()):
                 self.data_x_min.append(loop_focused_workspace.readX(workspace_index)[0])
                 self.data_x_max.append(loop_focused_workspace.readX(workspace_index)[-1])
@@ -630,20 +643,20 @@ class GSAS2Model(object):
     def load_basic_outputs(self, gsas_result_filepath):
         logger.notice(f"GSAS-II .lst result file found. Opening {self.project_name}.lst")
         self.read_gsas_lst_and_print_wR(gsas_result_filepath, self.data_files)
-
         save_message = self.move_output_files_to_user_save_location()
         logger.notice(save_message)
 
-        self.create_lattice_parameter_table()
-
-    def load_result(self, index_histograms):
-        workspace = self.load_gsas_histogram(index_histograms)
-        phase_names_list = self.find_phase_names_in_lst(
+        self.phase_names_list = self.find_phase_names_in_lst(
             os.path.join(self.user_save_directory, self.project_name + ".lst"))
+        self.create_lattice_parameter_table()
+        self.create_instrument_parameter_table()
+        self.create_reflections_table()
 
+    def load_result_for_plot(self, index_histograms):
+        workspace = self.load_gsas_histogram(index_histograms)
         reflections = None
         if self.refinement_method == "Pawley":
-            reflections = self.load_gsas_reflections(index_histograms, phase_names_list)
+            reflections = self.load_gsas_reflections_per_histogram_for_plot(index_histograms)
         return workspace, reflections
 
     def chop_to_limits(self, input_array, x, min_x, max_x):
@@ -667,28 +680,97 @@ class GSAS2Model(object):
         y_data = np.concatenate((y_obs, y_calc, y_diff, y_bkg))
 
         gsas_histogram = CreateWorkspace(OutputWorkspace=f"gsas_histogram_{histogram_index}",
-                                         DataX=np.tile(my_data[0], 4), DataY=y_data, NSpec=4)
+                                         DataX=np.tile(my_data[0], 4), DataY=y_data, NSpec=4,
+                                         EnableLogging=False)
         return gsas_histogram
 
-    def load_gsas_reflections(self, histogram_index, phase_names):
+    def load_gsas_reflections_per_histogram_for_plot(self, histogram_index):
         loaded_reflections = []
-        for phase_name in phase_names:
+        for phase_name in self.phase_names_list:
             result_reflections_txt = os.path.join(self.user_save_directory,
                                                   self.project_name + f"_reflections_{histogram_index}_{phase_name}.txt")
-            loaded_reflections.append(np.loadtxt(result_reflections_txt))
+            loaded_reflections.append(np.genfromtxt(result_reflections_txt)[2:])
+            # first 2 lines iin file are histogram and phase name
         return loaded_reflections
+
+    def load_gsas_reflections_all_histograms_for_table(self):
+        result_reflections_rows = []
+        output_reflections_files = self.get_txt_files_that_include("_reflections_")
+        for file in output_reflections_files:
+            loop_file_text = np.genfromtxt(file, dtype="str")
+            loop_histogram_name = loop_file_text[0]
+            loop_phase_name = loop_file_text[1]
+            loop_reflections_text = ",    ".join(str(num) for num in loop_file_text[2:])
+            result_reflections_rows.append([loop_histogram_name, loop_phase_name, loop_reflections_text])
+        return result_reflections_rows
+
+    def create_reflections_table(self, test=False):
+        table_rows = self.load_gsas_reflections_all_histograms_for_table()
+        if not table_rows or self.refinement_method == "Rietveld":
+            # cannot generate a valid reflections workspace. If one with the same project_name exists, remove it.
+            # This is to cover the case where a user runs a Pawley then Rietveld Refinement for the same project_name.
+            if ADS.doesExist(f"{self.project_name}_GSASII_reflections"):
+                DeleteWorkspace(f"{self.project_name}_GSASII_reflections", EnableLogging=False)
+            return None
+        table = CreateEmptyTableWorkspace(OutputWorkspace=f"{self.project_name}_GSASII_reflections",
+                                          EnableLogging=False)
+        table.addReadOnlyColumn("str", "Histogram name")
+        table.addReadOnlyColumn("str", "Phase name")
+        table.addReadOnlyColumn("str", "Reflections")
+        for row in table_rows:
+            table.addRow(row)
+        if test:
+            return table
+
+    def get_txt_files_that_include(self, sub_string):
+        output_files = []
+        for (_, _, filenames) in os.walk(self.user_save_directory):
+            for loop_filename in filenames:
+                if sub_string in loop_filename and loop_filename[-4:] == ".txt":
+                    output_files.append(os.path.join(self.user_save_directory, loop_filename))
+        output_files.sort()
+        return output_files
+
+    def create_instrument_parameter_table(self, test=False):
+        INST_TABLE_PARAMS = ["Histogram name", "Sigma-1", "Gamma (Y)"]
+        table = CreateEmptyTableWorkspace(OutputWorkspace=f"{self.project_name}_GSASII_instrument_parameters",
+                                          EnableLogging=False)
+        table.addReadOnlyColumn("str", "Histogram name")
+        table.addReadOnlyColumn("double", "Sigma-1{}".format(" (Refined)" if self.refine_sigma_one else ""))
+        table.addReadOnlyColumn("double", "Gamma (Y){}".format(" (Refined)" if self.refine_gamma else ""))
+        table.addReadOnlyColumn("double", "Fit X Min")
+        table.addReadOnlyColumn("double", "Fit X Max")
+
+        output_inst_param_files = self.get_txt_files_that_include("_inst_parameters_")
+
+        for inst_parameters_txt in output_inst_param_files:
+            with open(inst_parameters_txt, 'rt', encoding='utf-8') as file:
+                full_file_string = file.read().replace('\n', '')
+            inst_parameter_dict = json.loads(full_file_string)
+            loop_inst_parameters = [inst_parameter_dict["Histogram name"]]
+            for param in INST_TABLE_PARAMS[1:]:
+                loop_inst_parameters.append(float(inst_parameter_dict[param][1]))
+
+            bank_number_and_extension = str(list(inst_parameters_txt.split("_"))[-1])
+            bank_number_from_gsas2_histogram_name = int(bank_number_and_extension.replace(".txt", ""))
+            loop_inst_parameters.append(float(self.x_min[bank_number_from_gsas2_histogram_name-1]))
+            loop_inst_parameters.append(float(self.x_max[bank_number_from_gsas2_histogram_name-1]))
+            table.addRow(loop_inst_parameters)
+        if test:
+            return table
 
     def create_lattice_parameter_table(self, test=False):
         LATTICE_TABLE_PARAMS = ["length_a", "length_b", "length_c",
                                 "angle_alpha", "angle_beta", "angle_gamma", "volume"]
-        phase_names_list = self.find_phase_names_in_lst(
-            os.path.join(self.user_save_directory, self.project_name + ".lst"))
 
-        table = CreateEmptyTableWorkspace(OutputWorkspace=f"{self.project_name}_GSASII_lattice_parameters")
-        table.addColumn("str", "Phase")
+        table = CreateEmptyTableWorkspace(OutputWorkspace=f"{self.project_name}_GSASII_lattice_parameters",
+                                          EnableLogging=False)
+        table.addReadOnlyColumn("str", "Phase name")
+
         for param in LATTICE_TABLE_PARAMS:
-            table.addColumn("double", param.split("_")[-1])
-        for phase_name in phase_names_list:
+            table.addReadOnlyColumn("double", param.split("_")[-1])
+        table.addReadOnlyColumn("double", "Microstrain{}".format(" (Refined)" if self.refine_microstrain else ""))
+        for phase_name in self.phase_names_list:
             parameters_txt = os.path.join(self.user_save_directory,
                                           self.project_name + f"_cell_parameters_{phase_name}.txt")
             with open(parameters_txt, 'rt', encoding='utf-8') as file:
@@ -697,6 +779,7 @@ class GSAS2Model(object):
             loop_parameters = [phase_name]
             for param in LATTICE_TABLE_PARAMS:
                 loop_parameters.append(float(parameter_dict[param]))
+            loop_parameters.append(float(parameter_dict["Microstrain"]))
             table.addRow(loop_parameters)
         if test:
             return table
@@ -706,7 +789,7 @@ class GSAS2Model(object):
     # =========
 
     def plot_result(self, index_histograms, axis):
-        gsas_histogram_workspace, reflections = self.load_result(index_histograms)
+        gsas_histogram_workspace, reflections = self.load_result_for_plot(index_histograms)
         plot_window_title = self.plot_gsas_histogram(axis, gsas_histogram_workspace, reflections,
                                                      index_histograms, self.data_files)
         return plot_window_title

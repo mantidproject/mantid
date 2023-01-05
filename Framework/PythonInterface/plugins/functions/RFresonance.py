@@ -11,15 +11,14 @@ import numpy as np
 
 
 class RFresonance(IFunction1D):
-
     def category(self):
         return "Muon\\MuonSpecific"
 
     def init(self):
         self.declareParameter("A0", 0.2)
-        self.declareParameter("Boffset", 10, 'Relaxation rate (G)')
-        self.declareParameter("B1", 10, 'Fluctuation (G)')
-        self.declareParameter("B1GauWidth", 0.2, 'Width of resonance (MHz)')
+        self.declareParameter("Boffset", 10, "Relaxation rate (G)")
+        self.declareParameter("B1", 10, "Fluctuation (G)")
+        self.declareParameter("B1GauWidth", 0.2, "Width of resonance (MHz)")
 
     def function1D(self, x):
         A0 = self.getParameterValue("A0")
@@ -27,9 +26,9 @@ class RFresonance(IFunction1D):
         B = self.getParameterValue("B1")
         width = self.getParameterValue("B1GauWidth")
         gmu = 0.0135538817 * 2 * np.pi
-        Beff = np.sqrt(Bcentre ** 2 + B ** 2)
+        Beff = np.sqrt(Bcentre**2 + B**2)
         RelAmp = (B / Beff) ** 2
-        return A0 * (1 + (np.cos(Beff * gmu * x) * np.exp(- (width * x) ** 2) - 1) * RelAmp)
+        return A0 * (1 + (np.cos(Beff * gmu * x) * np.exp(-((width * x) ** 2)) - 1) * RelAmp)
 
 
 FunctionFactory.subscribe(RFresonance)

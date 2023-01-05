@@ -35,7 +35,7 @@ InputController3DMove::InputController3DMove(QObject *parent)
  * Send out movement initialization signals.
  */
 void InputController3DMove::mousePressEvent(QMouseEvent *event) {
-  if (event->buttons() & Qt::MidButton) {
+  if (event->buttons() & Qt::MiddleButton) {
     emit initZoom(event->x(), event->y());
     m_isButtonPressed = true;
   } else if ((event->buttons() & Qt::LeftButton) && !m_isRotationFrozen) {
@@ -56,7 +56,7 @@ void InputController3DMove::mouseMoveEvent(QMouseEvent *event) {
     emit rotate(event->x(), event->y());
   } else if ((event->buttons() & Qt::RightButton) || ((event->buttons() & Qt::LeftButton) && m_isRotationFrozen)) {
     emit translate(event->x(), event->y());
-  } else if (event->buttons() & Qt::MidButton) {
+  } else if (event->buttons() & Qt::MiddleButton) {
     emit zoom(event->x(), event->y());
   }
   InputController::mouseMoveEvent(event);
@@ -75,7 +75,10 @@ void InputController3DMove::mouseReleaseEvent(QMouseEvent * /*unused*/) {
  * Process the mouse wheel event.
  * Send the wheel zoom signal.
  */
-void InputController3DMove::wheelEvent(QWheelEvent *event) { emit wheelZoom(event->x(), event->y(), event->delta()); }
+void InputController3DMove::wheelEvent(QWheelEvent *event) {
+  emit wheelZoom(static_cast<int>(event->position().x()), static_cast<int>(event->position().y()),
+                 event->angleDelta().y());
+}
 
 void InputController3DMove::freezeRotation(bool freeze) { m_isRotationFrozen = freeze; }
 
@@ -317,7 +320,7 @@ void InputControllerDraw::mouseReleaseEvent(QMouseEvent *event) {
 }
 
 void InputControllerDraw::wheelEvent(QWheelEvent *event) {
-  int d = m_size + (event->delta() > 0 ? 4 : -4);
+  int d = m_size + (event->angleDelta().y() > 0 ? 4 : -4);
   if (d > 2 && d < m_max_size) {
     m_size = d;
     resize();

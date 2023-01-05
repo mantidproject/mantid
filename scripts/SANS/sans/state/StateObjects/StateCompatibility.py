@@ -55,5 +55,7 @@ def get_compatibility_builder(data_info):
     if facility is SANSFacility.ISIS:
         return StateCompatibilityBuilder()
     else:
-        raise NotImplementedError("StateCompatibilityBuilder: Could not find any valid compatibility builder for the "
-                                  "specified StateData object {0}".format(str(data_info)))
+        raise NotImplementedError(
+            "StateCompatibilityBuilder: Could not find any valid compatibility builder for the "
+            "specified StateData object {0}".format(str(data_info))
+        )

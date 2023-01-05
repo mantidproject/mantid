@@ -14,12 +14,13 @@ from sans.state.JsonSerializable import JsonSerializable
 from sans.common.enums import SANSFacility, SANSInstrument
 import sans.common.constants
 from sans.state.automatic_setters import automatic_setters
-from sans.state.state_functions import (is_pure_none_or_not_none, validation_message)
+from sans.state.state_functions import is_pure_none_or_not_none, validation_message
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # State
 # ----------------------------------------------------------------------------------------------------------------------
+
 
 class StateData(metaclass=JsonSerializable):
     ALL_PERIODS = sans.common.constants.ALL_PERIODS
@@ -28,7 +29,7 @@ class StateData(metaclass=JsonSerializable):
         super(StateData, self).__init__()
 
         self.sample_scatter = None  # : Str()
-        self.sample_scatter_period =  StateData.ALL_PERIODS  # : Int (Positive)
+        self.sample_scatter_period = StateData.ALL_PERIODS  # : Int (Positive)
         self.sample_transmission = None  # : Str()
         self.sample_transmission_period = StateData.ALL_PERIODS  # : Int (Positive)
         self.sample_direct = None  # : Str()
@@ -56,42 +57,42 @@ class StateData(metaclass=JsonSerializable):
 
         # A sample scatter must be specified
         if not self.sample_scatter:
-            entry = validation_message("Sample scatter was not specified.",
-                                       "Make sure that the sample scatter file is specified.",
-                                       {"sample_scatter": self.sample_scatter})
+            entry = validation_message(
+                "Sample scatter was not specified.",
+                "Make sure that the sample scatter file is specified.",
+                {"sample_scatter": self.sample_scatter},
+            )
             is_invalid.update(entry)
 
         # If the sample transmission/direct was specified, then a sample direct/transmission is required
         if not is_pure_none_or_not_none([self.sample_transmission, self.sample_direct]):
-            entry = validation_message("If the sample transmission is specified then, the direct run needs to be "
-                                       "specified too.",
-                                       "Make sure that the transmission and direct runs are both specified (or none).",
-                                       {"sample_transmission": self.sample_transmission,
-                                        "sample_direct": self.sample_direct})
+            entry = validation_message(
+                "If the sample transmission is specified then, the direct run needs to be " "specified too.",
+                "Make sure that the transmission and direct runs are both specified (or none).",
+                {"sample_transmission": self.sample_transmission, "sample_direct": self.sample_direct},
+            )
             is_invalid.update(entry)
 
         # If the can transmission/direct was specified, then this requires the can scatter
         if (self.can_direct or self.can_transmission) and (not self.can_scatter):
-            entry = validation_message("If the can transmission is specified then the can scatter run needs to be "
-                                       "specified too.",
-                                       "Make sure that the can scatter file is set.",
-                                       {"can_scatter": self.can_scatter,
-                                        "can_transmission": self.can_transmission,
-                                        "can_direct": self.can_direct})
+            entry = validation_message(
+                "If the can transmission is specified then the can scatter run needs to be " "specified too.",
+                "Make sure that the can scatter file is set.",
+                {"can_scatter": self.can_scatter, "can_transmission": self.can_transmission, "can_direct": self.can_direct},
+            )
             is_invalid.update(entry)
 
         # If a can transmission/direct was specified, then the other can entries need to be specified as well.
         if self.can_scatter and not is_pure_none_or_not_none([self.can_transmission, self.can_direct]):
-            entry = validation_message("Inconsistent can transmission setting.",
-                                       "Make sure that the can transmission and can direct runs are set (or none of"
-                                       " them).",
-                                       {"can_transmission": self.can_transmission,
-                                        "can_direct": self.can_direct})
+            entry = validation_message(
+                "Inconsistent can transmission setting.",
+                "Make sure that the can transmission and can direct runs are set (or none of" " them).",
+                {"can_transmission": self.can_transmission, "can_direct": self.can_direct},
+            )
             is_invalid.update(entry)
 
         if is_invalid:
-            raise ValueError("StateData: The provided inputs are illegal. "
-                             "Please see: {0}".format(json.dumps(is_invalid)))
+            raise ValueError("StateData: The provided inputs are illegal. " "Please see: {0}".format(json.dumps(is_invalid)))
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -133,5 +134,4 @@ def get_data_builder(facility, file_information=None):
     if facility is SANSFacility.ISIS:
         return StateDataBuilder(file_information)
     else:
-        raise NotImplementedError("StateDataBuilder: The selected facility {0} does not seem"
-                                  " to exist".format(str(facility)))
+        raise NotImplementedError("StateDataBuilder: The selected facility {0} does not seem" " to exist".format(str(facility)))

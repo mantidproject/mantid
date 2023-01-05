@@ -30,15 +30,19 @@ class BeamCentreAsyncTest(unittest.TestCase):
         self.worker.find_beam_centre(state, settings=fields)
 
         mocked_instance = mocked_alg.return_value
-        mocked_instance.assert_called_once_with(state, r_min=fields.r_min,
-                                                r_max=fields.r_max,
-                                                max_iter=fields.max_iterations,
-                                                x_start=fields.lab_pos_1,
-                                                y_start=fields.lab_pos_2,
-                                                tolerance=fields.tolerance,
-                                                find_direction=fields.find_direction,
-                                                verbose=fields.verbose, component=fields.component,
-                                                reduction_method=True)
+        mocked_instance.assert_called_once_with(
+            state,
+            r_min=fields.r_min,
+            r_max=fields.r_max,
+            max_iter=fields.max_iterations,
+            x_start=fields.lab_pos_1,
+            y_start=fields.lab_pos_2,
+            tolerance=fields.tolerance,
+            find_direction=fields.find_direction,
+            verbose=fields.verbose,
+            component=fields.component,
+            reduction_method=True,
+        )
 
     def test_that_find_beam_centre_calls_centre_finder_twice_when_COM_is_TRUE(self, mocked_alg):
         state = mock.NonCallableMock()
@@ -52,27 +56,33 @@ class BeamCentreAsyncTest(unittest.TestCase):
 
         mocked_pos_1 = mocked_instance.return_value["pos1"]
         mocked_pos_2 = mocked_instance.return_value["pos2"]
-        expected_calls = [call(state,
-                               r_min=fields.r_min,
-                               r_max=fields.r_max,
-                               max_iter=fields.max_iterations,
-                               x_start=fields.hab_pos_1,
-                               y_start=fields.hab_pos_2,
-                               tolerance=fields.tolerance,
-                               find_direction=fields.find_direction,
-                               component=fields.component,
-                               reduction_method=False),
-                          call(state,
-                               r_min=fields.r_min,
-                               r_max=fields.r_max,
-                               max_iter=fields.max_iterations,
-                               x_start=mocked_pos_1,
-                               y_start=mocked_pos_2,
-                               tolerance=fields.tolerance,
-                               find_direction=fields.find_direction,
-                               verbose=fields.verbose, component=fields.component,
-                               reduction_method=True)
-                          ]
+        expected_calls = [
+            call(
+                state,
+                r_min=fields.r_min,
+                r_max=fields.r_max,
+                max_iter=fields.max_iterations,
+                x_start=fields.hab_pos_1,
+                y_start=fields.hab_pos_2,
+                tolerance=fields.tolerance,
+                find_direction=fields.find_direction,
+                component=fields.component,
+                reduction_method=False,
+            ),
+            call(
+                state,
+                r_min=fields.r_min,
+                r_max=fields.r_max,
+                max_iter=fields.max_iterations,
+                x_start=mocked_pos_1,
+                y_start=mocked_pos_2,
+                tolerance=fields.tolerance,
+                find_direction=fields.find_direction,
+                verbose=fields.verbose,
+                component=fields.component,
+                reduction_method=True,
+            ),
+        ]
 
         mocked_instance.assert_has_calls(expected_calls, any_order=True)
 

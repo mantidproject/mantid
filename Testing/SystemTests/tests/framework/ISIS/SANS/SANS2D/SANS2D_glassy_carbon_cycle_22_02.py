@@ -8,9 +8,16 @@
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 
-from sans.command_interface.ISISCommandInterface import (SANS2D, Set1D,
-                                                         MaskFile, UseCompatibilityMode,
-                                                         AssignSample, TransmissionSample, WavRangeReduction, Set2D)
+from sans.command_interface.ISISCommandInterface import (
+    SANS2D,
+    Set1D,
+    MaskFile,
+    UseCompatibilityMode,
+    AssignSample,
+    TransmissionSample,
+    WavRangeReduction,
+    Set2D,
+)
 from sans.common.enums import SANSInstrument
 
 
@@ -29,9 +36,9 @@ class SANS2D_glassy_carbon_22_02_1D_M3(systemtesting.MantidSystemTest):
         self.returned = WavRangeReduction()
 
     def validate(self):
-        self.disableChecking.append('Axes')
-        self.disableChecking.append('Instrument')
-        self.disableChecking.append('SpectraMap')
+        self.disableChecking.append("Axes")
+        self.disableChecking.append("Instrument")
+        self.disableChecking.append("SpectraMap")
 
         return self.returned, "SANS2D_glassy_carbon_cycle_22_02_1D_M3_ref.nxs"
 
@@ -51,8 +58,8 @@ class SANS2D_glassy_carbon_22_02_2D_M3(systemtesting.MantidSystemTest):
         self.returned = WavRangeReduction()
 
     def validate(self):
-        self.disableChecking.append('Axes')
-        self.disableChecking.append('Instrument')
-        self.disableChecking.append('SpectraMap')
+        self.disableChecking.append("Axes")
+        self.disableChecking.append("Instrument")
+        self.disableChecking.append("SpectraMap")
 
         return self.returned, "SANS2D_glassy_carbon_cycle_22_02_2D_M3_ref.nxs"

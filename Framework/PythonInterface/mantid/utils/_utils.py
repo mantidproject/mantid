@@ -7,11 +7,11 @@
 from contextlib import contextmanager
 from importlib import import_module
 
-__all__ = ['is_required_version', 'import_mantid_cext']
+__all__ = ["is_required_version", "import_mantid_cext"]
 
 
 def is_required_version(required_version, version):
-    for version_part, required_version_part in zip(version.split('.'), required_version.split('.')):
+    for version_part, required_version_part in zip(version.split("."), required_version.split(".")):
         if int(version_part) < int(required_version_part):
             return False
     return True
@@ -30,7 +30,7 @@ def import_mantid_cext(modulename, package="", caller_globals=None):
     :raises: If the module cannot be imported
     """
     with _shared_cextension():
-        if modulename.startswith('.'):
+        if modulename.startswith("."):
             try:
                 # import from PACKAGE.MODULE, this is used for mantid packages, where the .pyd files
                 # are placed at e.g. `from mantid.kernel import _kernel`
@@ -38,11 +38,10 @@ def import_mantid_cext(modulename, package="", caller_globals=None):
             except ImportError as e1:
                 # import relative to current working directory, this simulates doing `import _kernel`
                 try:
-                    lib = import_module(modulename.lstrip('.'))
+                    lib = import_module(modulename.lstrip("."))
                 except ImportError as e2:
                     msg = 'import of "{}" failed with "{}"'
-                    msg = 'First ' + msg.format(modulename, e1) \
-                          + '. Second ' + msg.format(modulename.lstrip('.'), e2)
+                    msg = "First " + msg.format(modulename, e1) + ". Second " + msg.format(modulename.lstrip("."), e2)
                     raise ImportError(msg)
         else:
             lib = import_module(modulename)
@@ -68,11 +67,13 @@ def _shared_cextension():
     See https://docs.python.org/3/library/sys.html#sys.setdlopenflags
     """
     import sys
-    if not sys.platform.startswith('linux'):
+
+    if not sys.platform.startswith("linux"):
         yield
         return
 
     import os as dl
+
     flags_orig = sys.getdlopenflags()
     sys.setdlopenflags(dl.RTLD_NOW | dl.RTLD_GLOBAL)
     yield

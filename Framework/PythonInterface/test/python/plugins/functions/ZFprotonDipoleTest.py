@@ -7,11 +7,10 @@
 import unittest
 import numpy as np
 
-from MsdTestHelper import (is_registered, check_output, do_a_fit)
+from MsdTestHelper import is_registered, check_output, do_a_fit
 
 
 class ZFprotonDipoleTest(unittest.TestCase):
-
     def test_function_has_been_registered(self):
         status, msg = is_registered("ZFprotonDipole")
         if not status:
@@ -24,14 +23,14 @@ class ZFprotonDipoleTest(unittest.TestCase):
         status, output = check_output("ZFprotonDipole", input, expected, tolerance, A0=0.2, Radius=2, LambdaTrans=0.2)
 
         if not status:
-            msg = 'Computed output {} from input {} unequal to expected: {}'
+            msg = "Computed output {} from input {} unequal to expected: {}"
             self.fail(msg.format(*[str(i) for i in (output, input, expected)]))
 
     def test_do_fit(self):
         guess = dict(A0=0.25, Radius=2.5, LambdaTrans=0.25)
         target = dict(A0=0.2, Radius=2, LambdaTrans=0.2)
-        do_a_fit(np.arange(0.1, 16, 0.2), 'ZFprotonDipole', guess, target, atol=0.01)
+        do_a_fit(np.arange(0.1, 16, 0.2), "ZFprotonDipole", guess, target, atol=0.01)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

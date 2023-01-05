@@ -23,17 +23,16 @@ class ConvertHFIRSCDtoMDETest(systemtesting.MantidSystemTest):
         return 4000
 
     def runTest(self):
-        LoadMD('HB2C_WANDSCD_data.nxs', OutputWorkspace='ConvertHFIRSCDtoMDETest_data')
-        SetGoniometer('ConvertHFIRSCDtoMDETest_data', Axis0='s1,0,1,0,1', Average=False)
+        LoadMD("HB2C_WANDSCD_data.nxs", OutputWorkspace="ConvertHFIRSCDtoMDETest_data")
+        SetGoniometer("ConvertHFIRSCDtoMDETest_data", Axis0="s1,0,1,0,1", Average=False)
 
-        ConvertHFIRSCDtoMDETest_Q = ConvertHFIRSCDtoMDE(InputWorkspace='ConvertHFIRSCDtoMDETest_data', Wavelength=1.488)
+        ConvertHFIRSCDtoMDETest_Q = ConvertHFIRSCDtoMDE(InputWorkspace="ConvertHFIRSCDtoMDETest_data", Wavelength=1.488)
 
         self.assertEqual(ConvertHFIRSCDtoMDETest_Q.getNEvents(), 18022177)
 
-        ConvertHFIRSCDtoMDETest_peaks = FindPeaksMD(InputWorkspace=ConvertHFIRSCDtoMDETest_Q,
-                                                    PeakDistanceThreshold=2.2,
-                                                    CalculateGoniometerForCW=True,
-                                                    Wavelength=1.488)
+        ConvertHFIRSCDtoMDETest_peaks = FindPeaksMD(
+            InputWorkspace=ConvertHFIRSCDtoMDETest_Q, PeakDistanceThreshold=2.2, CalculateGoniometerForCW=True, Wavelength=1.488
+        )
 
         self.assertEqual(ConvertHFIRSCDtoMDETest_peaks.getNumberPeaks(), 14)
 
@@ -51,23 +50,27 @@ class ConvertHFIRSCDtoMDETest(systemtesting.MantidSystemTest):
         self.assertEqual(ConvertHFIRSCDtoMDETest_peaks2.getNumberPeaks(), 14)
 
         for p in range(14):
-            np.testing.assert_allclose(ConvertHFIRSCDtoMDETest_peaks2.getPeak(p).getQSampleFrame(),
-                                       ConvertHFIRSCDtoMDETest_peaks.getPeak(p).getQSampleFrame(),
-                                       atol=0.005,
-                                       err_msg=f"mismatch for peak {p}")
+            np.testing.assert_allclose(
+                ConvertHFIRSCDtoMDETest_peaks2.getPeak(p).getQSampleFrame(),
+                ConvertHFIRSCDtoMDETest_peaks.getPeak(p).getQSampleFrame(),
+                atol=0.005,
+                err_msg=f"mismatch for peak {p}",
+            )
 
         # now try using LeanElasticPeak
-        ConvertHFIRSCDtoMDETest_peaks3 = FindPeaksMD(InputWorkspace=ConvertHFIRSCDtoMDETest_Q,
-                                                     PeakDistanceThreshold=2.2,
-                                                     OutputType='LeanElasticPeak')
+        ConvertHFIRSCDtoMDETest_peaks3 = FindPeaksMD(
+            InputWorkspace=ConvertHFIRSCDtoMDETest_Q, PeakDistanceThreshold=2.2, OutputType="LeanElasticPeak"
+        )
 
         self.assertEqual(ConvertHFIRSCDtoMDETest_peaks3.getNumberPeaks(), 14)
 
         for p in range(14):
-            np.testing.assert_allclose(ConvertHFIRSCDtoMDETest_peaks3.getPeak(p).getQSampleFrame(),
-                                       ConvertHFIRSCDtoMDETest_peaks.getPeak(p).getQSampleFrame(),
-                                       atol=0.005,
-                                       err_msg=f"mismatch for peak {p}")
+            np.testing.assert_allclose(
+                ConvertHFIRSCDtoMDETest_peaks3.getPeak(p).getQSampleFrame(),
+                ConvertHFIRSCDtoMDETest_peaks.getPeak(p).getQSampleFrame(),
+                atol=0.005,
+                err_msg=f"mismatch for peak {p}",
+            )
 
         HFIRCalculateGoniometer(ConvertHFIRSCDtoMDETest_peaks3)
         peak0 = ConvertHFIRSCDtoMDETest_peaks3.getPeak(0)
@@ -84,25 +87,25 @@ class ConvertHFIRSCDtoMDE_HB3A_Test(systemtesting.MantidSystemTest):
         return 1000
 
     def runTest(self):
-        LoadMD('HB3A_data.nxs', OutputWorkspace='ConvertHFIRSCDtoMDE_HB3ATest_data')
+        LoadMD("HB3A_data.nxs", OutputWorkspace="ConvertHFIRSCDtoMDE_HB3ATest_data")
 
-        SetGoniometer('ConvertHFIRSCDtoMDE_HB3ATest_data',
-                      Axis0='omega,0,1,0,-1',
-                      Axis1='chi,0,0,1,-1',
-                      Axis2='phi,0,1,0,-1',
-                      Average=False)
+        SetGoniometer(
+            "ConvertHFIRSCDtoMDE_HB3ATest_data", Axis0="omega,0,1,0,-1", Axis1="chi,0,0,1,-1", Axis2="phi,0,1,0,-1", Average=False
+        )
 
-        ConvertHFIRSCDtoMDETest_Q = ConvertHFIRSCDtoMDE(InputWorkspace='ConvertHFIRSCDtoMDE_HB3ATest_data', Wavelength=1.008)
+        ConvertHFIRSCDtoMDETest_Q = ConvertHFIRSCDtoMDE(InputWorkspace="ConvertHFIRSCDtoMDE_HB3ATest_data", Wavelength=1.008)
 
         self.assertEqual(ConvertHFIRSCDtoMDETest_Q.getNEvents(), 9038)
 
-        ConvertHFIRSCDtoMDETest_peaks = FindPeaksMD(InputWorkspace='ConvertHFIRSCDtoMDETest_Q',
-                                                    PeakDistanceThreshold=0.25,
-                                                    DensityThresholdFactor=20000,
-                                                    CalculateGoniometerForCW=True,
-                                                    Wavelength=1.008,
-                                                    FlipX=True,
-                                                    InnerGoniometer=False)
+        ConvertHFIRSCDtoMDETest_peaks = FindPeaksMD(
+            InputWorkspace="ConvertHFIRSCDtoMDETest_Q",
+            PeakDistanceThreshold=0.25,
+            DensityThresholdFactor=20000,
+            CalculateGoniometerForCW=True,
+            Wavelength=1.008,
+            FlipX=True,
+            InnerGoniometer=False,
+        )
 
         IndexPeaks(ConvertHFIRSCDtoMDETest_peaks)
 
@@ -114,16 +117,16 @@ class ConvertHFIRSCDtoMDE_HB3A_Test(systemtesting.MantidSystemTest):
         np.testing.assert_array_equal(peak.getHKL(), [0, 0, 6])
 
         # new method using multiple goniometers, q_sample should be the same as above method
-        ConvertHFIRSCDtoMDETest_peaks2 = FindPeaksMD(InputWorkspace='ConvertHFIRSCDtoMDETest_Q',
-                                                     PeakDistanceThreshold=0.25,
-                                                     DensityThresholdFactor=20000)
+        ConvertHFIRSCDtoMDETest_peaks2 = FindPeaksMD(
+            InputWorkspace="ConvertHFIRSCDtoMDETest_Q", PeakDistanceThreshold=0.25, DensityThresholdFactor=20000
+        )
 
         self.assertEqual(ConvertHFIRSCDtoMDETest_peaks2.getNumberPeaks(), 1)
         np.testing.assert_allclose(ConvertHFIRSCDtoMDETest_peaks2.getPeak(0).getQSampleFrame(), [-0.417683, 1.792265, 2.238072], rtol=1e-3)
 
     def validate(self):
-        results = 'ConvertHFIRSCDtoMDETest_Q'
-        reference = 'ConvertHFIRSCDtoMDE_HB3A_Test.nxs'
+        results = "ConvertHFIRSCDtoMDETest_Q"
+        reference = "ConvertHFIRSCDtoMDE_HB3A_Test.nxs"
 
         Load(Filename=reference, OutputWorkspace=reference)
 
@@ -137,7 +140,7 @@ class ConvertHFIRSCDtoMDE_HB3A_Test(systemtesting.MantidSystemTest):
         if checker.getPropertyValue("Equals") != "1":
             print(" Workspaces do not match, result: ", checker.getPropertyValue("Result"))
             print(self.__class__.__name__)
-            SaveMD(InputWorkspace=results, Filename=self.__class__.__name__ + '-mismatch.nxs')
+            SaveMD(InputWorkspace=results, Filename=self.__class__.__name__ + "-mismatch.nxs")
             return False
 
         return True

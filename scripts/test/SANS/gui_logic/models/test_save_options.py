@@ -28,5 +28,5 @@ class SaveOptionsTest(unittest.TestCase):
         self.assertEqual([SaveType.CAN_SAS], opts.to_all_states())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

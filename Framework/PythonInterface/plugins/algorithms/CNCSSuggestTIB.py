@@ -4,22 +4,21 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
 
 # package imports
 from mantid.api import PythonAlgorithm, AlgorithmFactory
-from mantid.kernel import FloatBoundedValidator,Direction
+from mantid.kernel import FloatBoundedValidator, Direction
 from mantid.utils.deprecator import deprecated_alias
 
 # third party imports
 import numpy as np
 
-#pylint: disable=too-few-public-methods
+# pylint: disable=too-few-public-methods
 
 
 class Interval(object):
-    """Simple class that provides check for overlapping intervals
-    """
+    """Simple class that provides check for overlapping intervals"""
 
     def __init__(self, minv, maxv):
         self.min = minv
@@ -35,10 +34,9 @@ class Interval(object):
         return False
 
 
-@deprecated_alias('2021-09-16')
+@deprecated_alias("2021-09-16")
 class CNCSSuggestTIB(PythonAlgorithm):
-    """ Check if certain sample logs exists on a workspace
-    """
+    """Check if certain sample logs exists on a workspace"""
 
     @staticmethod
     def e2v(energy):
@@ -46,48 +44,43 @@ class CNCSSuggestTIB(PythonAlgorithm):
 
     def alias(self):
         r"""Alternative name to this algorithm"""
-        return 'SuggestTibCNCS'
+        return "SuggestTibCNCS"
 
     def category(self):
-        """ Return category
-        """
+        """Return category"""
         return "Inelastic\\Utility"
 
     def seeAlso(self):
         return ["HYSPECSuggestTIB"]
 
     def name(self):
-        """ Return name
-        """
+        """Return name"""
         return "CNCSSuggestTIB"
 
     def summary(self):
-        """ Return summary
-        """
+        """Return summary"""
         return "Suggest possible time independent background range for CNCS."
 
     def PyInit(self):
-        """ Declare properties
-        """
+        """Declare properties"""
         val = FloatBoundedValidator()
         val.setBounds(0.5, 50)  # reasonable incident energy range for CNCS
-        self.declareProperty("IncidentEnergy", 0., val, "Incident energy (0.5 to 50 meV)")
-        self.declareProperty("TibMin", 0., Direction.Output)
-        self.declareProperty("TibMax", 0., Direction.Output)
+        self.declareProperty("IncidentEnergy", 0.0, val, "Incident energy (0.5 to 50 meV)")
+        self.declareProperty("TibMin", 0.0, Direction.Output)
+        self.declareProperty("TibMax", 0.0, Direction.Output)
         return
 
     # pylint: disable=too-many-branches
     def PyExec(self):
-        """ Main execution body
-        """
+        """Main execution body"""
         # get parameter
         energy = self.getProperty("IncidentEnergy").value
-        frame = 1e6 / 60.
+        frame = 1e6 / 60.0
         # calculate tel, tmin, tmax, tinf, tpulse
         tel = 1e6 * (3.5 + 36.262) / self.e2v(energy)
         tmin = tel - frame * 0.5
         if tmin < 0:
-            tmin = 0.
+            tmin = 0.0
         tmax = tmin + frame
         tinf = 1e6 * (36.262) / self.e2v(energy)
         if tinf < tmin:
@@ -95,7 +88,7 @@ class CNCSSuggestTIB(PythonAlgorithm):
         tpulse = frame * np.floor(tmax / frame)
 
         # check for TIB
-        dtib = 3500.  # default length of TIB range
+        dtib = 3500.0  # default length of TIB range
         dtibreduced = 2500  # reduced range
 
         dtinfminus = 500
@@ -109,7 +102,7 @@ class CNCSSuggestTIB(PythonAlgorithm):
         # interval is in the previous frame, jut move it up
 
         intervalList = []
-        intervalList.append(Interval(tinf - dtinfminus, tinf)) # interval close to t_inf, on the lower side
+        intervalList.append(Interval(tinf - dtinfminus, tinf))  # interval close to t_inf, on the lower side
         # interval denoting frame edge. This will make sure that one cannot get an interval overlapping t_min
         intervalList.append(Interval(tmin, tmin))
         # interval close to t_inf, on the upper side, but moved one frame down

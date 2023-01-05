@@ -4,21 +4,48 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import (AlgorithmFactory, FileAction, FileProperty,
-                        IMDHistoWorkspace, IMDHistoWorkspaceProperty, PythonAlgorithm,
-                        Progress, PropertyMode, MultipleFileProperty, WorkspaceProperty)
-from mantid.kernel import (Direction, EnabledWhenProperty,
-                           PropertyCriterion, FloatArrayProperty, FloatArrayLengthValidator,
-                           FloatPropertyWithValue, V3D, StringListValidator)
-from mantid.simpleapi import (ConvertHFIRSCDtoMDE, ConvertWANDSCDtoQ, CloneMDWorkspace,
-                              DeleteWorkspace, DeleteWorkspaces, DivideMD, LoadMD, MergeMD,
-                              ReplicateMD, SetGoniometer, mtd, GroupWorkspaces, RenameWorkspace)
+from mantid.api import (
+    AlgorithmFactory,
+    FileAction,
+    FileProperty,
+    IMDHistoWorkspace,
+    IMDHistoWorkspaceProperty,
+    PythonAlgorithm,
+    Progress,
+    PropertyMode,
+    MultipleFileProperty,
+    WorkspaceProperty,
+)
+from mantid.kernel import (
+    Direction,
+    EnabledWhenProperty,
+    PropertyCriterion,
+    FloatArrayProperty,
+    FloatArrayLengthValidator,
+    FloatPropertyWithValue,
+    V3D,
+    StringListValidator,
+)
+from mantid.simpleapi import (
+    ConvertHFIRSCDtoMDE,
+    ConvertWANDSCDtoQ,
+    CloneMDWorkspace,
+    DeleteWorkspace,
+    DeleteWorkspaces,
+    DivideMD,
+    LoadMD,
+    MergeMD,
+    ReplicateMD,
+    SetGoniometer,
+    mtd,
+    GroupWorkspaces,
+    RenameWorkspace,
+)
 import os
 import numpy as np
 
 
 class HB3AAdjustSampleNorm(PythonAlgorithm):
-
     def category(self):
         return "Crystal\\Corrections"
 
@@ -29,85 +56,117 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         return "HB3AAdjustSampleNorm"
 
     def summary(self):
-        return 'Adjusts the detector position based on a detector height and distance offset and normalizes with ' \
-               'detector efficiency from a vanadium file or workspace, and converts the input to Q-space.'
+        return (
+            "Adjusts the detector position based on a detector height and distance offset and normalizes with "
+            "detector efficiency from a vanadium file or workspace, and converts the input to Q-space."
+        )
 
     def PyInit(self):
         # Input params
-        self.declareProperty(MultipleFileProperty(name="Filename",
-                                                  extensions=[".nxs.h5", ".nxs"],
-                                                  action=FileAction.OptionalLoad),
-                             doc="Input autoreduced detector scan data files to convert to Q-space.")
         self.declareProperty(
-            FileProperty(name="VanadiumFile", defaultValue="", extensions=[".nxs"], direction=Direction.Input,
-                         action=FileAction.OptionalLoad),
-            doc="File with Vanadium normalization scan data")
+            MultipleFileProperty(name="Filename", extensions=[".nxs.h5", ".nxs"], action=FileAction.OptionalLoad),
+            doc="Input autoreduced detector scan data files to convert to Q-space.",
+        )
+        self.declareProperty(
+            FileProperty(
+                name="VanadiumFile", defaultValue="", extensions=[".nxs"], direction=Direction.Input, action=FileAction.OptionalLoad
+            ),
+            doc="File with Vanadium normalization scan data",
+        )
 
-        self.declareProperty('NormaliseBy', 'Time', StringListValidator(['None', 'Time', 'Monitor']),
-                             "Normalise to monitor, time or None.")
+        self.declareProperty("NormaliseBy", "Time", StringListValidator(["None", "Time", "Monitor"]), "Normalise to monitor, time or None.")
 
         # Alternative WS inputs
-        self.declareProperty("InputWorkspaces", defaultValue="", direction=Direction.Input,
-                             doc="Workspace or comma-separated workspace list containing input MDHisto scan data.")
-        self.declareProperty(IMDHistoWorkspaceProperty("VanadiumWorkspace", defaultValue="", direction=Direction.Input,
-                                                       optional=PropertyMode.Optional),
-                             doc="MDHisto workspace containing vanadium normalization data")
+        self.declareProperty(
+            "InputWorkspaces",
+            defaultValue="",
+            direction=Direction.Input,
+            doc="Workspace or comma-separated workspace list containing input MDHisto scan data.",
+        )
+        self.declareProperty(
+            IMDHistoWorkspaceProperty("VanadiumWorkspace", defaultValue="", direction=Direction.Input, optional=PropertyMode.Optional),
+            doc="MDHisto workspace containing vanadium normalization data",
+        )
 
         # Detector adjustment options
-        self.declareProperty("DetectorHeightOffset", defaultValue=0.0, direction=Direction.Input,
-                             doc="Optional distance (in meters) to move detector height (relative to current position)")
-        self.declareProperty("DetectorDistanceOffset", defaultValue=0.0, direction=Direction.Input,
-                             doc="Optional distance (in meters) to move detector distance (relative to current position)")
+        self.declareProperty(
+            "DetectorHeightOffset",
+            defaultValue=0.0,
+            direction=Direction.Input,
+            doc="Optional distance (in meters) to move detector height (relative to current position)",
+        )
+        self.declareProperty(
+            "DetectorDistanceOffset",
+            defaultValue=0.0,
+            direction=Direction.Input,
+            doc="Optional distance (in meters) to move detector distance (relative to current position)",
+        )
 
-        self.declareProperty(FloatPropertyWithValue("Wavelength", # EMPTY_DBL so it shows as blank in GUI
-                                                    FloatPropertyWithValue.EMPTY_DBL),
-                             doc="Optional wavelength value to use as backup if one was not found in the sample log")
+        self.declareProperty(
+            FloatPropertyWithValue("Wavelength", FloatPropertyWithValue.EMPTY_DBL),  # EMPTY_DBL so it shows as blank in GUI
+            doc="Optional wavelength value to use as backup if one was not found in the sample log",
+        )
 
         # Which conversion algorithm to use
-        self.declareProperty("OutputType", "Q-sample events", StringListValidator(['Q-sample events', 'Q-sample histogram', 'Detector']),
-                             direction=Direction.Input,
-                             doc="Whether to use ConvertHFIRSCDtoQ for an MDEvent, or ConvertWANDSCDtoQ for an MDHisto")
+        self.declareProperty(
+            "OutputType",
+            "Q-sample events",
+            StringListValidator(["Q-sample events", "Q-sample histogram", "Detector"]),
+            direction=Direction.Input,
+            doc="Whether to use ConvertHFIRSCDtoQ for an MDEvent, or ConvertWANDSCDtoQ for an MDHisto",
+        )
 
-        self.declareProperty("ScaleByMotorStep", False,
-                             "If True then the intensity of the output in Q space will be scaled by the motor step size. "
-                             "This will allow directly comparing the intensity of data measure with diffrent motor step sizes.")
+        self.declareProperty(
+            "ScaleByMotorStep",
+            False,
+            "If True then the intensity of the output in Q space will be scaled by the motor step size. "
+            "This will allow directly comparing the intensity of data measure with diffrent motor step sizes.",
+        )
 
         # MDEvent WS Specific options for ConvertHFIRSCDtoQ
-        self.declareProperty(FloatArrayProperty("MinValues", [-10, -10, -10], FloatArrayLengthValidator(3),
-                                                direction=Direction.Input),
-                             doc="3 comma separated values, one for each q_sample dimension")
-        self.declareProperty(FloatArrayProperty("MaxValues", [10, 10, 10], FloatArrayLengthValidator(3),
-                                                direction=Direction.Input),
-                             doc="3 comma separated values, one for each q_sample dimension; must be larger than"
-                                 "those specified in MinValues")
-        self.declareProperty("MergeInputs", defaultValue=False, direction=Direction.Input,
-                             doc="If all inputs should be merged into one MDEvent output workspace")
+        self.declareProperty(
+            FloatArrayProperty("MinValues", [-10, -10, -10], FloatArrayLengthValidator(3), direction=Direction.Input),
+            doc="3 comma separated values, one for each q_sample dimension",
+        )
+        self.declareProperty(
+            FloatArrayProperty("MaxValues", [10, 10, 10], FloatArrayLengthValidator(3), direction=Direction.Input),
+            doc="3 comma separated values, one for each q_sample dimension; must be larger than" "those specified in MinValues",
+        )
+        self.declareProperty(
+            "MergeInputs",
+            defaultValue=False,
+            direction=Direction.Input,
+            doc="If all inputs should be merged into one MDEvent output workspace",
+        )
 
         # MDHisto WS Specific options for ConvertWANDSCDtoQ
-        self.declareProperty(FloatArrayProperty("BinningDim0", [-8.02, 8.02, 401], FloatArrayLengthValidator(3),
-                                                direction=Direction.Input),
-                             "Binning parameters for the 0th dimension. Enter it as a"
-                             "comma-separated list of values with the"
-                             "format: 'minimum,maximum,number_of_bins'.")
-        self.declareProperty(FloatArrayProperty("BinningDim1", [-2.52, 2.52, 126], FloatArrayLengthValidator(3),
-                                                direction=Direction.Input),
-                             "Binning parameters for the 1st dimension. Enter it as a"
-                             "comma-separated list of values with the"
-                             "format: 'minimum,maximum,number_of_bins'.")
-        self.declareProperty(FloatArrayProperty("BinningDim2", [-8.02, 8.02, 401], FloatArrayLengthValidator(3),
-                                                direction=Direction.Input),
-                             "Binning parameters for the 2nd dimension. Enter it as a"
-                             "comma-separated list of values with the"
-                             "format: 'minimum,maximum,number_of_bins'.")
+        self.declareProperty(
+            FloatArrayProperty("BinningDim0", [-8.02, 8.02, 401], FloatArrayLengthValidator(3), direction=Direction.Input),
+            "Binning parameters for the 0th dimension. Enter it as a"
+            "comma-separated list of values with the"
+            "format: 'minimum,maximum,number_of_bins'.",
+        )
+        self.declareProperty(
+            FloatArrayProperty("BinningDim1", [-2.52, 2.52, 126], FloatArrayLengthValidator(3), direction=Direction.Input),
+            "Binning parameters for the 1st dimension. Enter it as a"
+            "comma-separated list of values with the"
+            "format: 'minimum,maximum,number_of_bins'.",
+        )
+        self.declareProperty(
+            FloatArrayProperty("BinningDim2", [-8.02, 8.02, 401], FloatArrayLengthValidator(3), direction=Direction.Input),
+            "Binning parameters for the 2nd dimension. Enter it as a"
+            "comma-separated list of values with the"
+            "format: 'minimum,maximum,number_of_bins'.",
+        )
 
-        self.setPropertySettings("Filename", EnabledWhenProperty('InputWorkspaces', PropertyCriterion.IsDefault))
-        self.setPropertySettings("VanadiumFile", EnabledWhenProperty('VanadiumWorkspace', PropertyCriterion.IsDefault))
-        self.setPropertySettings("InputWorkspaces", EnabledWhenProperty('Filename', PropertyCriterion.IsDefault))
-        self.setPropertySettings("VanadiumWorkspace", EnabledWhenProperty('VanadiumFile', PropertyCriterion.IsDefault))
+        self.setPropertySettings("Filename", EnabledWhenProperty("InputWorkspaces", PropertyCriterion.IsDefault))
+        self.setPropertySettings("VanadiumFile", EnabledWhenProperty("VanadiumWorkspace", PropertyCriterion.IsDefault))
+        self.setPropertySettings("InputWorkspaces", EnabledWhenProperty("Filename", PropertyCriterion.IsDefault))
+        self.setPropertySettings("VanadiumWorkspace", EnabledWhenProperty("VanadiumFile", PropertyCriterion.IsDefault))
 
-        self.setPropertySettings("ScaleByMotorStep", EnabledWhenProperty('OutputType', PropertyCriterion.IsNotEqualTo, "Detector"))
+        self.setPropertySettings("ScaleByMotorStep", EnabledWhenProperty("OutputType", PropertyCriterion.IsNotEqualTo, "Detector"))
 
-        event_settings = EnabledWhenProperty('OutputType', PropertyCriterion.IsEqualTo, 'Q-sample events')
+        event_settings = EnabledWhenProperty("OutputType", PropertyCriterion.IsEqualTo, "Q-sample events")
         self.setPropertyGroup("MinValues", "MDEvent Settings")
         self.setPropertyGroup("MaxValues", "MDEvent Settings")
         self.setPropertyGroup("MergeInputs", "MDEvent Settings")
@@ -115,7 +174,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         self.setPropertySettings("MaxValues", event_settings)
         self.setPropertySettings("MergeInputs", event_settings)
 
-        histo_settings = EnabledWhenProperty('OutputType', PropertyCriterion.IsEqualTo, 'Q-sample histogram')
+        histo_settings = EnabledWhenProperty("OutputType", PropertyCriterion.IsEqualTo, "Q-sample histogram")
         self.setPropertyGroup("BinningDim0", "MDHisto Settings")
         self.setPropertyGroup("BinningDim1", "MDHisto Settings")
         self.setPropertyGroup("BinningDim2", "MDHisto Settings")
@@ -125,7 +184,8 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
 
         self.declareProperty(
             WorkspaceProperty("OutputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Output),
-            doc="Output MDWorkspace in Q-space, name is prefix if multiple input files were provided.")
+            doc="Output MDWorkspace in Q-space, name is prefix if multiple input files were provided.",
+        )
 
     def validateInputs(self):
         issues = dict()
@@ -139,30 +199,30 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         # Make sure files and workspaces aren't both set
         if len(filelist) >= 1:
             if not input_ws.isDefault:
-                issues['InputWorkspaces'] = "Cannot specify both a filename and input workspace"
+                issues["InputWorkspaces"] = "Cannot specify both a filename and input workspace"
         else:
             if input_ws.isDefault:
-                issues['Filename'] = "Either a file or input workspace must be specified"
+                issues["Filename"] = "Either a file or input workspace must be specified"
 
         if len(vanfile) > 0 and not van_ws.isDefault:
-            issues['VanadiumWorkspace'] = "Cannot specify both a vanadium file and workspace"
+            issues["VanadiumWorkspace"] = "Cannot specify both a vanadium file and workspace"
 
         # Verify given workspaces exist
         if not input_ws.isDefault:
             input_ws_list = list(map(str.strip, input_ws.value.split(",")))
             for ws in input_ws_list:
                 if not mtd.doesExist(ws):
-                    issues['InputWorkspaces'] = "Could not find input workspace '{}'".format(ws)
+                    issues["InputWorkspaces"] = "Could not find input workspace '{}'".format(ws)
                 else:
                     # If it does exist, make sure the workspace is an MDHisto with 3 dimensions
                     if not isinstance(mtd[ws], IMDHistoWorkspace):
-                        issues['InputWorkspaces'] = "Workspace '{}' must be a MDHistoWorkspace".format(ws)
+                        issues["InputWorkspaces"] = "Workspace '{}' must be a MDHistoWorkspace".format(ws)
                     elif mtd[ws].getNumDims() != 3:
-                        issues['InputWorkspaces'] = "Workspace '{}' expected to have 3 dimensions".format(ws)
+                        issues["InputWorkspaces"] = "Workspace '{}' expected to have 3 dimensions".format(ws)
 
         if not wavelength.isDefault:
             if wavelength.value <= 0.0:
-                issues['Wavelength'] = "Wavelength should be greater than zero"
+                issues["Wavelength"] = "Wavelength should be greater than zero"
 
         return issues
 
@@ -207,11 +267,11 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             prog.report()
             self.log().information("Processing '{}'".format(in_file))
 
-            SetGoniometer(Workspace=scan, Axis0='omega,0,1,0,-1', Axis1='chi,0,0,1,-1', Axis2='phi,0,1,0,-1', Average=False)
+            SetGoniometer(Workspace=scan, Axis0="omega,0,1,0,-1", Axis1="chi,0,0,1,-1", Axis2="phi,0,1,0,-1", Average=False)
             # If processing multiple files, append the base name to the given output name
             if has_multiple:
                 if load_files:
-                    out_ws_name = out_ws + "_" + os.path.basename(in_file).strip(',.nxs')
+                    out_ws_name = out_ws + "_" + os.path.basename(in_file).strip(",.nxs")
                 else:
                     out_ws_name = out_ws + "_" + in_file
                 wslist.append(out_ws_name)
@@ -223,9 +283,9 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             wavelength = self.__get_wavelength(exp_info)
 
             # set the run number to be the same as scan number, this will be used for peaks
-            if not exp_info.run().hasProperty('run_number') and exp_info.run().hasProperty('scan'):
+            if not exp_info.run().hasProperty("run_number") and exp_info.run().hasProperty("scan"):
                 try:
-                    exp_info.mutableRun().addProperty('run_number', int(exp_info.run().getProperty('scan').value), True)
+                    exp_info.mutableRun().addProperty("run_number", int(exp_info.run().getProperty("scan").value), True)
                 except ValueError:
                     # scan must be a int
                     pass
@@ -236,18 +296,26 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                 minvals = self.getProperty("MinValues").value
                 maxvals = self.getProperty("MaxValues").value
                 merge = self.getProperty("MergeInputs").value
-                ConvertHFIRSCDtoMDE(InputWorkspace=norm_data, Wavelength=wavelength, MinValues=minvals,
-                                    MaxValues=maxvals, OutputWorkspace=out_ws_name)
+                ConvertHFIRSCDtoMDE(
+                    InputWorkspace=norm_data, Wavelength=wavelength, MinValues=minvals, MaxValues=maxvals, OutputWorkspace=out_ws_name
+                )
                 DeleteWorkspace(norm_data)
-            elif output == 'Q-sample histogram':
+            elif output == "Q-sample histogram":
                 bin0 = self.getProperty("BinningDim0").value
                 bin1 = self.getProperty("BinningDim1").value
                 bin2 = self.getProperty("BinningDim2").value
                 # Convert to Q space and normalize with from the vanadium
-                ConvertWANDSCDtoQ(InputWorkspace=scan, NormalisationWorkspace=vanws, Frame='Q_sample',
-                                  Wavelength=wavelength, NormaliseBy=self.getProperty("NormaliseBy").value,
-                                  BinningDim0=bin0, BinningDim1=bin1, BinningDim2=bin2,
-                                  OutputWorkspace=out_ws_name)
+                ConvertWANDSCDtoQ(
+                    InputWorkspace=scan,
+                    NormalisationWorkspace=vanws,
+                    Frame="Q_sample",
+                    Wavelength=wavelength,
+                    NormaliseBy=self.getProperty("NormaliseBy").value,
+                    BinningDim0=bin0,
+                    BinningDim1=bin1,
+                    BinningDim2=bin2,
+                    OutputWorkspace=out_ws_name,
+                )
                 if load_files:
                     DeleteWorkspace(scan)
             else:
@@ -279,15 +347,15 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
 
         if self.getProperty("ScaleByMotorStep").value and self.getProperty("OutputType").value != "Detector":
             run = data.getExperimentInfo(0).run()
-            scan_log = 'omega' if np.isclose(run.getTimeAveragedStd('phi'), 0.0) else 'phi'
+            scan_log = "omega" if np.isclose(run.getTimeAveragedStd("phi"), 0.0) else "phi"
             scan_axis = run[scan_log].value
-            scan_step = (scan_axis[-1]-scan_axis[0])/(scan_axis.size-1)
+            scan_step = (scan_axis[-1] - scan_axis[0]) / (scan_axis.size - 1)
             norm_data *= scan_step
 
         normaliseBy = self.getProperty("NormaliseBy").value
 
-        monitors = np.asarray(data.getExperimentInfo(0).run().getProperty('monitor').value)
-        times = np.asarray(data.getExperimentInfo(0).run().getProperty('time').value)
+        monitors = np.asarray(data.getExperimentInfo(0).run().getProperty("monitor").value)
+        times = np.asarray(data.getExperimentInfo(0).run().getProperty("time").value)
 
         if load_files and vanadium:
             DeleteWorkspace(data)
@@ -301,12 +369,12 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
 
         if vanadium:
             if normaliseBy == "Monitor":
-                scale /= vanadium.getExperimentInfo(0).run().getProperty('monitor').value[0]
+                scale /= vanadium.getExperimentInfo(0).run().getProperty("monitor").value[0]
             elif normaliseBy == "Time":
-                scale /= vanadium.getExperimentInfo(0).run().getProperty('time').value[0]
+                scale /= vanadium.getExperimentInfo(0).run().getProperty("time").value[0]
 
-        norm_data.setSignalArray(norm_data.getSignalArray()/scale)
-        norm_data.setErrorSquaredArray(norm_data.getErrorSquaredArray()/scale**2)
+        norm_data.setSignalArray(norm_data.getSignalArray() / scale)
+        norm_data.setErrorSquaredArray(norm_data.getErrorSquaredArray() / scale**2)
 
         return norm_data
 

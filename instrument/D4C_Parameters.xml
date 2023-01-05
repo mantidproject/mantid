@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="D4C" valid-from="1900-01-01T00:00:00">
+
+  <component-link name="D4C">
+    <parameter name="number_banks" type="int" visible="false">
+      <value val="9" />
+    </parameter>
+    <parameter name="number_pixels_per_bank" type="int" visible="false">
+      <value val="64" />
+    </parameter>
+
+    <parameter name="sample_logs_sum" type="string">
+      <value val="duration" />
+    </parameter>
+
+    <parameter name="logbook_default_parameters" type="string" visible="false">
+      <value val="proposal_number:/entry0/user/proposal:s,
+		  start_time:/entry0/start_time:s,
+		  total_duration:/entry0/duration:d,
+		  2theta:/entry0/instrument/2theta/value:f,
+		  pressure:/entry0/sample/Pcloche:f,
+		  reg_temp:/entry0/sample/regulation_temperature:f,
+		  set_temp:/entry0/sample/setpoint_temperature:f,
+		  experiment_identifier:/entry0/experiment_identifier:s"/>
+    </parameter>
+  </component-link>
+</parameter-file>

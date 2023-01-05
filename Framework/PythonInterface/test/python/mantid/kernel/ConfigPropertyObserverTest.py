@@ -39,5 +39,5 @@ class ConfigObserverTest(unittest.TestCase):
         onPropertyValueChangedMock.assert_called_once_with(new_save_directory_value, mock.ANY)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

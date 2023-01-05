@@ -11,47 +11,26 @@ Style
 - Unless otherwise specified, follow `PEP 8
   <https://www.python.org/dev/peps/pep-0008>`_; this means using
   `snake_case <https://en.wikipedia.org/wiki/Snake_case>`_
-- Use `YAPF <https://github.com/google/yapf>`_ to format Python code
+- Use `black <https://black.readthedocs.io/en/stable/>`_ to format Python code with the configuration in the ``pyproject.toml`` in the root of the repository
 - Always use four spaces for indentation
 - For docstrings please follow `Docstring Conventions PEP 257
   <https://www.python.org/dev/peps/pep-0257>`_ and document code to
   aid `sphinx
   <https://pythonhosted.org/an_example_pypi_project/sphinx.html#full-code-example>`_
 
-Formatting with YAPF
---------------------
+Formatting with black
+---------------------
 
-To ensure that formatting matches across all developers please use YAPF version 0.28.0.
-This may be installed using ``pip install --user yapf==0.28.0``. Note that on Windows this
-is already included with the bundled Python distribution.
+To ensure that formatting matches across all developers please use the latest version of black.
+This is installed by the mantid-developer conda environment files and will eventually be enforced by a pre-commit hook.
+black automatically finds the configuration in the ``pyproject.toml`` file when executed inside the Mantid source directory.
+To format a given file you may use ``python -m black path/to/file.py``.
 
-YAPF will automatically find the configuration file when executed inside the Mantid source directory.
-To format a given file you may use ``yapf -i path/to/file.py``.
-
-To automatically format any Python files you have changed prior to commiting you may use the command: ``git diff --name-only --cached | grep '\.py' | xargs yapf -i``.
+To automatically format any Python files you have changed prior to commiting you may use the command: ``git diff --name-only --cached | grep '\.py' | xargs python -m black``.
 This will in place format any files with the ``.py`` extension that you have staged.
+Adding configuration of black into pre-commit is planned.
 
-PyCharm Configuration
-#####################
-
-YAPF can be configured as an "External Tool" inside PyCharm and run on a per-file basis.
-Go to `File -> Settings -> Tools -> External Tools` and click `+`.
-In the dialog that opens enter the following details:
-
-- `Name`: YAPF
-- `Description`: Run Yapf formatter on current file
-- `Program`: <path to yapf>
-- `Arguments`: ``-i $FilePath$``
-- `Working directory`: ``$Project$FileDir$``
-
-``<path to yapf>`` is the full path to the YAPF executable on your system:
-
-- Linux/Mac: ``/usr/bin/yapf`` if installed with a package manager or ``$HOME/.local/bin/yapf`` if installed with `pip`
-- Windows: ``<mantid-repo>\external\src\ThirdParty\lib\python2.7\Scripts\yapf``
-
-A YAPF item should now appear in the `Tools -> External Tools` menu.
-This can be bound to a shortcut key under `File -> Settings -> Keymap -> External Tools`.
-
+The `editor integration <https://black.readthedocs.io/en/stable/integrations/editors.html>`_ from black's docuementation provide details.
 
 None checks
 -----------

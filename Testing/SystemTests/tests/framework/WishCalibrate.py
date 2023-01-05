@@ -102,12 +102,11 @@ class WishCalibration(systemtesting.MantidSystemTest):
         idealTube.setArray(peak_positions)
 
         # First calibrate all of the detectors
-        calibrationTable, peaks = tube.calibrate(ws, spec, peak_positions, funcForm, margin=15,
-                                                 outputPeak=True, fitPar=fitPar)
+        calibrationTable, peaks = tube.calibrate(ws, spec, peak_positions, funcForm, margin=15, outputPeak=True, fitPar=fitPar)
         self.calibration_table = calibrationTable
 
         def findBadPeakFits(peaksTable, threshold=10):
-            """ Find peaks whose fit values fall outside of a given tolerance
+            """Find peaks whose fit values fall outside of a given tolerance
             of the mean peak centers across all tubes.
 
             Tubes are defined as have a bad fit if the absolute difference
@@ -122,7 +121,7 @@ class WishCalibration(systemtesting.MantidSystemTest):
             """
             n = len(peaksTable)
             num_peaks = peaksTable.columnCount() - 1
-            column_names = ['Peak%d' % i for i in range(1, num_peaks + 1)]
+            column_names = ["Peak%d" % i for i in range(1, num_peaks + 1)]
             data = np.zeros((n, num_peaks))
             for i, row in enumerate(peaksTable):
                 data_row = [row[name] for name in column_names]
@@ -140,7 +139,7 @@ class WishCalibration(systemtesting.MantidSystemTest):
             return expected_peak_pos, problematic_tubes
 
         def correctMisalignedTubes(ws, calibrationTable, peaksTable, spec, idealTube, fitPar, threshold=10):
-            """ Correct misaligned tubes due to poor fitting results
+            """Correct misaligned tubes due to poor fitting results
             during the first round of calibration.
 
             Misaligned tubes are first identified according to a tolerance
@@ -163,10 +162,10 @@ class WishCalibration(systemtesting.MantidSystemTest):
             @param threshold: tolerance defining is a peak is outside of the acceptable range
             @return table of corrected detector positions
             """
-            table_name = calibrationTable.name() + 'Corrected'
+            table_name = calibrationTable.name() + "Corrected"
             corrections_table = mantid.CreateEmptyTableWorkspace(OutputWorkspace=table_name)
-            corrections_table.addColumn('int', "Detector ID")
-            corrections_table.addColumn('V3D', "Detector Position")
+            corrections_table.addColumn("int", "Detector ID")
+            corrections_table.addColumn("V3D", "Detector Position")
 
             mean_peaks, bad_tubes = findBadPeakFits(peaksTable, threshold)
 
@@ -174,14 +173,15 @@ class WishCalibration(systemtesting.MantidSystemTest):
                 print("Refitting tube %s" % spec.getTubeName(index))
                 tube_dets, _ = spec.getTube(index)
                 getPoints(ws, idealTube.getFunctionalForms(), fitPar, tube_dets)
-                tube_ws = mantid.mtd['TubePlot']
-                fit_ws = mantid.FindPeaks(InputWorkspace=tube_ws, WorkspaceIndex=0,
-                                          PeakPositions=fitPar.getPeaks(), PeaksList='RefittedPeaks')
-                centers = [row['centre'] for row in fit_ws]
+                tube_ws = mantid.mtd["TubePlot"]
+                fit_ws = mantid.FindPeaks(
+                    InputWorkspace=tube_ws, WorkspaceIndex=0, PeakPositions=fitPar.getPeaks(), PeaksList="RefittedPeaks"
+                )
+                centers = [row["centre"] for row in fit_ws]
                 detIDList, detPosList = getCalibratedPixelPositions(ws, centers, idealTube.getArray(), tube_dets)
 
                 for id, pos in zip(detIDList, detPosList):
-                    corrections_table.addRow({'Detector ID': id, 'Detector Position': kernel.V3D(*pos)})
+                    corrections_table.addRow({"Detector ID": id, "Detector Position": kernel.V3D(*pos)})
 
             return corrections_table
 

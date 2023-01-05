@@ -139,6 +139,10 @@ void LoadNXSPE::exec() {
     file.openData("psi");
     file.getData(temporary);
     psi = temporary.at(0);
+    if (std::isnan(psi)) {
+      psi = 0.;
+      g_log.warning("Entry for PSI is empty, will use default of 0.0 instead.");
+    }
     file.closeData();
   }
 

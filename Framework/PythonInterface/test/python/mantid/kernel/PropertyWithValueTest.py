@@ -45,12 +45,7 @@ class PropertyWithValueTest(unittest.TestCase):
 
     def test_getproperty_value_returns_derived_type(self):
         data = [1.0, 2.0, 3.0]
-        alg = run_algorithm('CreateWorkspace',
-                            DataX=data,
-                            DataY=data,
-                            NSpec=1,
-                            UnitX='Wavelength',
-                            child=True)
+        alg = run_algorithm("CreateWorkspace", DataX=data, DataY=data, NSpec=1, UnitX="Wavelength", child=True)
         wksp = alg.getProperty("OutputWorkspace").value
         self.assertTrue(isinstance(wksp, MatrixWorkspace))
 
@@ -66,7 +61,7 @@ class PropertyWithValueTest(unittest.TestCase):
         unit_bytes = b"\xc2\xb5eV"
         quantity.units = unit_bytes
 
-        self.assertEqual(unit_bytes.decode('utf-8'), quantity.units)
+        self.assertEqual(unit_bytes.decode("utf-8"), quantity.units)
 
     def test_units_string_gives_expected_unicode_object_from_windows_1252_encoding(self):
         # covers some log units in old files at ISIS
@@ -74,18 +69,18 @@ class PropertyWithValueTest(unittest.TestCase):
         unit_bytes = b"\xb5eV"
         quantity.units = unit_bytes
 
-        self.assertEqual(unit_bytes.decode('windows-1252'), quantity.units)
+        self.assertEqual(unit_bytes.decode("windows-1252"), quantity.units)
 
     def test_units_raises_error_if_string_cannot_be_decoded(self):
         quantity = FloatPropertyWithValue("Energy", 13.5)
-        unit_bytes = b'\x81'  # invalid in both utf-8 and windows 1252
+        unit_bytes = b"\x81"  # invalid in both utf-8 and windows 1252
         quantity.units = unit_bytes
 
         self.assertRaises(RuntimeError, lambda: quantity.units)
 
     def test_unitsAsBytes_Returns_Same_Bytes_Sequence(self):
         quantity = FloatPropertyWithValue("Energy", 13.5)
-        units_bytes = b'\x81'
+        units_bytes = b"\x81"
         quantity.units = units_bytes
 
         self.assertEqual(units_bytes, quantity.unitsAsBytes)
@@ -106,14 +101,14 @@ class PropertyWithValueTest(unittest.TestCase):
 
     def test_set_property_succeeds_with_python_int_lists(self):
         value = [2, 3, 4, 5, 6]
-        self._mask_dets.setProperty("WorkspaceIndexList", value)  #size_t
+        self._mask_dets.setProperty("WorkspaceIndexList", value)  # size_t
         idx_list = self._mask_dets.getProperty("WorkspaceIndexList").value
         self.assertEqual(len(idx_list), 5)
         for i in range(5):
             self.assertEqual(idx_list[i], i + 2)
         value.append(7)
 
-        self._mask_dets.setProperty("DetectorList", value)  #integer
+        self._mask_dets.setProperty("DetectorList", value)  # integer
         det_list = self._mask_dets.getProperty("DetectorList").value
         self.assertEqual(len(det_list), 6)
         for i in range(6):
@@ -129,16 +124,15 @@ class PropertyWithValueTest(unittest.TestCase):
         rebin = AlgorithmManager.createUnmanaged("Rebin")
         rebin.initialize()
         input = [0.5, 1.0, 5.5]
-        rebin.setProperty('Params', input)
-        params = rebin.getProperty('Params').value
+        rebin.setProperty("Params", input)
+        params = rebin.getProperty("Params").value
         self.assertEqual(len(params), 3)
         for i in range(3):
             self.assertEqual(params[i], input[i])
 
     def test_set_property_raises_type_error_when_a_list_contains_multiple_types(self):
         values = [2, 3, 4.0, 5, 6]
-        self.assertRaises(TypeError, self._mask_dets.setProperty, "WorkspaceIndexList",
-                          values)  #size_t
+        self.assertRaises(TypeError, self._mask_dets.setProperty, "WorkspaceIndexList", values)  # size_t
 
     def test_set_property_of_vector_double_succeeds_with_numpy_array_of_float_type(self):
         self._do_vector_double_numpy_test()
@@ -178,14 +172,14 @@ class PropertyWithValueTest(unittest.TestCase):
         self.assertEqual(det_list_prop.dtype(), "i")
 
     def _do_vector_double_numpy_test(self, int_type=False):
-        create_ws = AlgorithmManager.createUnmanaged('CreateWorkspace')
+        create_ws = AlgorithmManager.createUnmanaged("CreateWorkspace")
         create_ws.initialize()
         if int_type:
             datax = np.arange(10)
         else:
             datax = np.arange(10.0)
-        create_ws.setProperty('DataX', datax)
-        x_values = create_ws.getProperty('DataX').value
+        create_ws.setProperty("DataX", datax)
+        x_values = create_ws.getProperty("DataX").value
         self.assertEqual(len(x_values), 10)
         for i in range(10):
             self.assertEqual(x_values[i], i)
@@ -202,11 +196,11 @@ class PropertyWithValueTest(unittest.TestCase):
     def test_set_property_of_vector_int_succeeds_with_numpy_array_of_int_type(self):
         # Minor hole with int64 as that technically can't be converted to an int32 without precision loss
         # but I don't think it will be heavily used so we'll see
-        self._do_vector_int_numpy_test('DetectorList', np.int32)
+        self._do_vector_int_numpy_test("DetectorList", np.int32)
 
     def test_set_property_of_vector_int_succeeds_with_numpy_array_of_int_type(self):
-        self._do_vector_int_numpy_test('WorkspaceIndexList')
+        self._do_vector_int_numpy_test("WorkspaceIndexList")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

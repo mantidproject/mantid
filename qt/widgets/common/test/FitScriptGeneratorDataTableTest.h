@@ -147,7 +147,7 @@ private:
 
     // Click the table cell, thereby selecting a row
     QWidget *pViewport = m_dataTable->viewport();
-    QTest::mouseClick(pViewport, Qt::LeftButton, NULL, QPoint(xPos, yPos));
+    QTest::mouseClick(pViewport, Qt::LeftButton, Qt::KeyboardModifiers(), QPoint(xPos, yPos));
     QApplication::sendPostedEvents();
   }
 

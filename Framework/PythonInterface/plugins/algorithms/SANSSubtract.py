@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
 from mantid.api import *
 from mantid.kernel import Direction, FloatBoundedValidator
 import mantid.simpleapi
@@ -13,21 +13,21 @@ import os
 
 class SANSSubtract(PythonAlgorithm):
     """
-        I(Q) subtraction
+    I(Q) subtraction
     """
 
     def category(self):
         """
-            Return category
+        Return category
         """
         return "SANS"
 
     def seeAlso(self):
-        return [ "SANSStitch","SANSFitShiftScale" ]
+        return ["SANSStitch", "SANSFitShiftScale"]
 
     def name(self):
         """
-            Return name
+        Return name
         """
         return "SANSSubtract"
 
@@ -36,28 +36,26 @@ class SANSSubtract(PythonAlgorithm):
 
     def PyInit(self):
         """
-            Declare properties
+        Declare properties
         """
-        self.declareProperty('DataDistribution', '', direction = Direction.Input,
-                             doc='Name of the input workspace or file path')
-        self.declareProperty('Background', '', direction = Direction.Input,
-                             doc='Name of the background workspace or file path')
-        self.declareProperty("ScaleFactor", 1., FloatBoundedValidator(),
-                             doc="Scaling factor [Default: 1]")
-        self.declareProperty("Constant", 0., FloatBoundedValidator(),
-                             doc="Additive constant [Default:0]")
-        self.declareProperty(FileProperty("OutputDirectory","", FileAction.OptionalDirectory),
-                             doc="Directory to write the output files in [optional]")
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),
-                             doc="Workspace containing data from detectors")
+        self.declareProperty("DataDistribution", "", direction=Direction.Input, doc="Name of the input workspace or file path")
+        self.declareProperty("Background", "", direction=Direction.Input, doc="Name of the background workspace or file path")
+        self.declareProperty("ScaleFactor", 1.0, FloatBoundedValidator(), doc="Scaling factor [Default: 1]")
+        self.declareProperty("Constant", 0.0, FloatBoundedValidator(), doc="Additive constant [Default:0]")
+        self.declareProperty(
+            FileProperty("OutputDirectory", "", FileAction.OptionalDirectory), doc="Directory to write the output files in [optional]"
+        )
+        self.declareProperty(
+            MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output), doc="Workspace containing data from detectors"
+        )
         return
 
     def _find_or_load(self, data_str):
         """
-            Determine whether the input data string is the name
-            of an existing workspace or is a file to be loaded.
-            Return the workspace and its name.
-            @param data_str: input string for the data
+        Determine whether the input data string is the name
+        of an existing workspace or is a file to be loaded.
+        Return the workspace and its name.
+        @param data_str: input string for the data
         """
 
         if AnalysisDataService.doesExist(data_str):
@@ -65,7 +63,7 @@ class SANSSubtract(PythonAlgorithm):
             data_ws_name = data_str
         else:
             data_ws_name = os.path.basename(data_str)
-            load_alg = mantid.api.AlgorithmManager.createUnmanaged('Load')
+            load_alg = mantid.api.AlgorithmManager.createUnmanaged("Load")
             load_alg.setChild(True)
             load_alg.initialize()
             load_alg.setProperty("Filename", data_str)
@@ -87,7 +85,7 @@ class SANSSubtract(PythonAlgorithm):
 
         # Make sure we have the correct units, especially important
         # if the data was loaded from an ASCII file
-        data.getAxis(0).setUnit('MomentumTransfer')
+        data.getAxis(0).setUnit("MomentumTransfer")
 
         # Set the "distribution" flag on the matrix workspace
         data.setDistribution(False)
@@ -96,7 +94,7 @@ class SANSSubtract(PythonAlgorithm):
 
     def PyExec(self):
         """
-            Main execution body
+        Main execution body
         """
         data_str = self.getProperty("DataDistribution").value
         background_str = self.getProperty("Background").value
@@ -121,30 +119,30 @@ class SANSSubtract(PythonAlgorithm):
         rebinned_bck = op.getProperty("OutputWorkspace").value
 
         # Output = data - scale * background + constant
-        op = mantid.api.AlgorithmManager.createUnmanaged('Scale')
+        op = mantid.api.AlgorithmManager.createUnmanaged("Scale")
         op.initialize()
         op.setChild(True)
         op.setProperty("InputWorkspace", rebinned_bck)
-        op.setProperty("OutputWorkspace", '__scaled_bck')
+        op.setProperty("OutputWorkspace", "__scaled_bck")
         op.setProperty("Factor", scale)
         op.setProperty("Operation", "Multiply")
         op.execute()
         scaled_bck = op.getProperty("OutputWorkspace").value
 
-        op = mantid.api.AlgorithmManager.createUnmanaged('Minus')
+        op = mantid.api.AlgorithmManager.createUnmanaged("Minus")
         op.initialize()
         op.setChild(True)
         op.setProperty("LHSWorkspace", data)
         op.setProperty("RHSWorkspace", scaled_bck)
-        op.setProperty("OutputWorkspace", '__bck_substracted')
+        op.setProperty("OutputWorkspace", "__bck_substracted")
         op.execute()
         bck_subtr = op.getProperty("OutputWorkspace").value
 
-        op = mantid.api.AlgorithmManager.createUnmanaged('Scale')
+        op = mantid.api.AlgorithmManager.createUnmanaged("Scale")
         op.initialize()
         op.setChild(True)
         op.setProperty("InputWorkspace", bck_subtr)
-        op.setProperty("OutputWorkspace", '__corrected_output')
+        op.setProperty("OutputWorkspace", "__corrected_output")
         op.setProperty("Factor", constant)
         op.setProperty("Operation", "Add")
         op.execute()
@@ -158,20 +156,20 @@ class SANSSubtract(PythonAlgorithm):
         self.setProperty("OutputWorkspace", output)
 
         # Save the output to disk as needed
-        if len(output_dir)>0:
+        if len(output_dir) > 0:
             root_name, _ = os.path.splitext(data_ws_name)
-            op = mantid.api.AlgorithmManager.createUnmanaged('SaveCanSAS1D')
+            op = mantid.api.AlgorithmManager.createUnmanaged("SaveCanSAS1D")
             op.initialize()
             op.setChild(True)
             op.setProperty("InputWorkspace", output)
-            op.setProperty("Filename", os.path.join(output_dir, root_name+'_corr.xml'))
+            op.setProperty("Filename", os.path.join(output_dir, root_name + "_corr.xml"))
             op.setProperty("RadiationSource", "Spallation Neutron Source")
             op.execute()
 
             op = mantid.api.AlgorithmManager.createUnmanaged("SaveAscii")
             op.initialize()
             op.setChild(True)
-            op.setProperty("Filename", os.path.join(output_dir, root_name+'_corr.txt'))
+            op.setProperty("Filename", os.path.join(output_dir, root_name + "_corr.txt"))
             op.setProperty("InputWorkspace", output)
             op.setProperty("Separator", "Tab")
             op.setProperty("CommentIndicator", "# ")

@@ -18,8 +18,9 @@ from mantidqt.dialogs.spectraselectordialog import SpectraSelection
 from mantidqt.plotting.functions import plot_contour, plot_surface
 
 
-def plot(plot_type: SpectraSelection, plot_index: int, axis_name: str, log_name: str, custom_log_values: List[float],
-         workspaces: List[Workspace]) -> None:
+def plot(
+    plot_type: SpectraSelection, plot_index: int, axis_name: str, log_name: str, custom_log_values: List[float], workspaces: List[Workspace]
+) -> None:
     if len(workspaces) > 0:
         matrix_ws = _create_workspace_for_group_plot(plot_type, workspaces, plot_index, log_name, custom_log_values)
 
@@ -46,8 +47,9 @@ def plot(plot_type: SpectraSelection, plot_index: int, axis_name: str, log_name:
                 fig.canvas.manager.set_window_title("Contour" + title)
 
 
-def _create_workspace_for_group_plot(plot_type: SpectraSelection, workspaces: List[Workspace], plot_index: int,
-                                     log_name: str, custom_log_values: List[float]) -> MatrixWorkspace:
+def _create_workspace_for_group_plot(
+    plot_type: SpectraSelection, workspaces: List[Workspace], plot_index: int, log_name: str, custom_log_values: List[float]
+) -> MatrixWorkspace:
     _validate_workspace_choices(workspaces, plot_index)
 
     number_of_workspaces = len(workspaces)
@@ -60,8 +62,7 @@ def _create_workspace_for_group_plot(plot_type: SpectraSelection, workspaces: Li
     else:
         x_size = first_blocksize
 
-    matrix_ws = WorkspaceFactory.Instance().create(
-        parent=first_ws, NVectors=number_of_workspaces, XLength=x_size, YLength=first_blocksize)
+    matrix_ws = WorkspaceFactory.Instance().create(parent=first_ws, NVectors=number_of_workspaces, XLength=x_size, YLength=first_blocksize)
 
     matrix_ws.setYUnitLabel(first_ws.YUnitLabel())
 

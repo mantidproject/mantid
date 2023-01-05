@@ -9,9 +9,17 @@
 #
 import numpy
 
-from mantid.plots.datafunctions import (get_axes_labels, get_normalization, get_distribution,
-                                        get_md_data2d_bin_centers, get_matrix_2d_data, get_md_data1d,
-                                        get_wksp_index_dist_and_label, get_spectrum, get_indices)
+from mantid.plots.datafunctions import (
+    get_axes_labels,
+    get_normalization,
+    get_distribution,
+    get_md_data2d_bin_centers,
+    get_matrix_2d_data,
+    get_md_data1d,
+    get_wksp_index_dist_and_label,
+    get_spectrum,
+    get_indices,
+)
 import mantid.dataobjects
 
 
@@ -39,7 +47,7 @@ def _extract_3d_data(workspace, **kwargs):
 
 
 def plot(axes, workspace, *args, **kwargs):
-    '''
+    """
     3D plots - line plots
 
     :param axes: class:`matplotlib.axes.Axes3D` object that will do the plotting
@@ -55,7 +63,7 @@ def plot(axes, workspace, *args, **kwargs):
                        You need to use ``None`` to select which dimension to plot. *e.g.* to select the second
                        axis to plot from a 3D volume use ``slicepoint=(1.0, None, 2.0)`` where the 1.0/2.0 are
                        the dimension selected for the other 2 axes.
-    '''
+    """
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
         (normalization, kwargs) = get_normalization(workspace, **kwargs)
         indices, kwargs = get_indices(workspace, **kwargs)
@@ -70,7 +78,7 @@ def plot(axes, workspace, *args, **kwargs):
 
 
 def scatter(axes, workspace, *args, **kwargs):
-    '''
+    """
     Scatter plots
 
     :param axes: class:`matplotlib.axes.Axes3D` object that will do the plotting
@@ -96,14 +104,14 @@ def scatter(axes, workspace, *args, **kwargs):
                        You need to use ``None`` to select which dimension to plot. *e.g.* to select the last
                        two axes to plot from a 3D volume use ``slicepoint=(1.0, None, None)`` where the 1.0 is
                        the value of the dimension selected for the first axis.
-    '''
+    """
     x, y, z, indices = _extract_3d_data(workspace, **kwargs)
     _set_labels_3d(axes, workspace, indices)
     return axes.scatter(x, y, z, *args, **kwargs)
 
 
 def plot_wireframe(axes, workspace, *args, **kwargs):
-    '''
+    """
     Wire-frame plot
 
     :param axes: class:`matplotlib.axes.Axes3D` object that will do the plotting
@@ -122,14 +130,14 @@ def plot_wireframe(axes, workspace, *args, **kwargs):
                        You need to use ``None`` to select which dimension to plot. *e.g.* to select the last
                        two axes to plot from a 3D volume use ``slicepoint=(1.0, None, None)`` where the 1.0 is
                        the value of the dimension selected for the first axis.
-    '''
+    """
     x, y, z, indices = _extract_3d_data(workspace, **kwargs)
     _set_labels_3d(axes, workspace, indices)
     return axes.plot_wireframe(x, y, z, *args, **kwargs)
 
 
 def plot_surface(axes, workspace, *args, **kwargs):
-    '''
+    """
     Surface plots
 
     :param axes: class:`matplotlib.axes.Axes3D` object that will do the plotting
@@ -155,16 +163,16 @@ def plot_surface(axes, workspace, *args, **kwargs):
                        You need to use ``None`` to select which dimension to plot. *e.g.* to select the last
                        two axes to plot from a 3D volume use ``slicepoint=(1.0, None, None)`` where the 1.0 is
                        the value of the dimension selected for the first axis.
-    '''
+    """
     x, y, z, indices = _extract_3d_data(workspace, **kwargs)
     _set_labels_3d(axes, workspace, indices)
-    rcount = kwargs.pop('rcount', 100)
-    ccount = kwargs.pop('ccount', 100)
+    rcount = kwargs.pop("rcount", 100)
+    ccount = kwargs.pop("ccount", 100)
     return axes.plot_surface(x, y, z, rcount=rcount, ccount=ccount, *args, **kwargs)
 
 
 def contour(axes, workspace, *args, **kwargs):
-    '''
+    """
     Contour plots
 
     :param axes: class:`matplotlib.axes.Axes3D` object that will do the plotting
@@ -184,14 +192,14 @@ def contour(axes, workspace, *args, **kwargs):
                        You need to use ``None`` to select which dimension to plot. *e.g.* to select the last
                        two axes to plot from a 3D volume use ``slicepoint=(1.0, None, None)`` where the 1.0 is
                        the value of the dimension selected for the first axis.
-    '''
+    """
     x, y, z, indices = _extract_3d_data(workspace, **kwargs)
     _set_labels_3d(axes, workspace, indices)
     return axes.contour(x, y, z, *args, **kwargs)
 
 
 def contourf(axes, workspace, *args, **kwargs):
-    '''
+    """
     Filled Contour plots
 
     :param axes: class:`matplotlib.axes.Axes3D` object that will do the plotting
@@ -209,7 +217,7 @@ def contourf(axes, workspace, *args, **kwargs):
                        You need to use ``None`` to select which dimension to plot. *e.g.* to select the last
                        two axes to plot from a 3D volume use ``slicepoint=(1.0, None, None)`` where the 1.0 is
                        the value of the dimension selected for the first axis.
-    '''
+    """
     x, y, z, indices = _extract_3d_data(workspace, **kwargs)
     _set_labels_3d(axes, workspace, indices)
     return axes.contourf(x, y, z, *args, **kwargs)

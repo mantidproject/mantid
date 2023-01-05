@@ -18,6 +18,7 @@ class RundexSettings(object):
     D2B =    "D2B"
     D20 =    "D20"
     D1B =    "D1B"
+    IN1 =    "IN1"
     IN4 =     "IN4"
     IN5 =     "IN5"
     IN6 =     "IN6"
@@ -29,6 +30,7 @@ class RundexSettings(object):
     REFL =   "Reflectometry"
     POWDER = "Powder diffraction"
     DIRECT = "Direct geometry"
+    SPECTRO= "Neutron Spectroscopy"
 
     # acquisition modes
     SANS_ACQ =     "SANS v1"
@@ -39,6 +41,7 @@ class RundexSettings(object):
     POWDER_DSCAN = "Detector scan"
     POWDER_PSCAN = "Sample scan"
     DIRECT_TOF = "TOF"
+    SPECTRO_PSCAN = "Sample scan"
 
     # correspondance between instrument and technique
     TECHNIQUE = {
@@ -51,6 +54,7 @@ class RundexSettings(object):
             D2B:    POWDER,
             D20:    POWDER,
             D1B:    POWDER,
+            IN1:    SPECTRO,
             IN4:     DIRECT,
             IN5:     DIRECT,
             IN6:     DIRECT,
@@ -69,6 +73,7 @@ class RundexSettings(object):
             D2B:    [POWDER_DSCAN],
             D20:    [POWDER_DSCAN, POWDER_PSCAN],
             D1B:    [POWDER_PSCAN],
+            IN1:    [SPECTRO_PSCAN],
             IN4:     [DIRECT_TOF],
             IN5:     [DIRECT_TOF],
             IN6:     [DIRECT_TOF],
@@ -204,7 +209,13 @@ class RundexSettings(object):
                 "SampleMaterial",
                 "SampleGeometry",
                 "CustomOptions"
-                ]
+                ],
+            SPECTRO_PSCAN: [
+                "SampleRuns",
+                "OutputWorkspace",
+                "ContainerRuns",
+                "CorrectionFile"
+            ]
             }
 
     VISUAL_SETTINGS = {
@@ -233,7 +244,8 @@ class RundexSettings(object):
             REFL_NPOL:    "ReflectometryILLAutoProcess",
             POWDER_DSCAN: "PowderILLDetectorScan",
             POWDER_PSCAN: "PowderILLParameterScan",
-            DIRECT_TOF:   "DirectILLAutoProcess"
+            DIRECT_TOF:   "DirectILLAutoProcess",
+            SPECTRO_PSCAN:"LagrangeILLReduction"
             }
 
     # export algos for each acquisition mode. Each algo has a boolean to set

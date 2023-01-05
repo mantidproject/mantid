@@ -34,6 +34,10 @@ public:
     if (!p)
       return;
     TS_ASSERT_EQUALS(p->value(), other->value());
+    if (!(other->units().empty())) {
+      // for some reason empty units read in as a single space
+      TS_ASSERT_EQUALS(p->units(), other->units());
+    }
   }
 
   void test_saving_then_loading() {
@@ -42,6 +46,7 @@ public:
     PropertyWithValue<int> pi("int_val", 123);
     PropertyWithValue<uint32_t> pu("uint_val", 123);
     PropertyWithValue<double> pd("double_val", 456.78);
+    pd.setUnits("meter");
     PropertyWithValue<float> pf("float_val", float(987.56));
     PropertyWithValue<std::string> ps("string_val", "supercallifragalistic");
     PropertyWithValue<std::vector<double>> pvd("vector_double_val", std::vector<double>(2, 1.4));

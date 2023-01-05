@@ -10,19 +10,39 @@ import string
 from typing import List, Optional, Union
 
 from mantid.api import (
-    AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, WorkspaceProperty, mtd, Progress, TextAxis,
-    Workspace, WorkspaceGroup, WorkspaceUnitValidator)
+    AlgorithmFactory,
+    AnalysisDataService,
+    DataProcessorAlgorithm,
+    WorkspaceProperty,
+    mtd,
+    Progress,
+    TextAxis,
+    Workspace,
+    WorkspaceGroup,
+    WorkspaceUnitValidator,
+)
 from mantid.dataobjects import TableWorkspace, Workspace2D
 from mantid.kernel import StringListValidator
 from mantid.simpleapi import (
-    CalculateDIFC, CloneWorkspace, CopyInstrumentParameters, ConvertUnits, CreateEmptyTableWorkspace,
-    CreateGroupingWorkspace, CreateWorkspace, DeleteWorkspace, GroupDetectors, GroupWorkspaces, Multiply,
-    MoveInstrumentComponent, PDCalibration, Rebin)
+    CalculateDIFC,
+    CloneWorkspace,
+    CopyInstrumentParameters,
+    ConvertUnits,
+    CreateEmptyTableWorkspace,
+    CreateGroupingWorkspace,
+    CreateWorkspace,
+    DeleteWorkspace,
+    GroupDetectors,
+    GroupWorkspaces,
+    Multiply,
+    MoveInstrumentComponent,
+    PDCalibration,
+    Rebin,
+)
 from mantid.kernel import Direction, EnabledWhenProperty, logger, PropertyCriterion, StringArrayProperty
 
 
-def unique_workspace_name(n: int = 5, prefix: Optional[str] = '',
-                          suffix: Optional[str] = ''):
+def unique_workspace_name(n: int = 5, prefix: Optional[str] = "", suffix: Optional[str] = ""):
     r"""
     Create a random sequence of `n` lowercase characters that is guaranteed
     not to collide with the name of any existing Mantid workspace registered
@@ -33,12 +53,12 @@ def unique_workspace_name(n: int = 5, prefix: Optional[str] = '',
     @param suffix : string to suffix the randon sequence
     """
 
-    n_seq = ''.join(random.choice(string.ascii_lowercase) for _ in range(n))
-    ws_name = '{}{}{}'.format(str(prefix), n_seq, str(suffix))
+    n_seq = "".join(random.choice(string.ascii_lowercase) for _ in range(n))
+    ws_name = "{}{}{}".format(str(prefix), n_seq, str(suffix))
     while ws_name in AnalysisDataService.getObjectNames():
         characters = [random.choice(string.ascii_lowercase) for _ in range(n)]
-        n_seq = ''.join(characters)
-        ws_name = '{}{}{}'.format(str(prefix), n_seq, str(suffix))
+        n_seq = "".join(characters)
+        ws_name = "{}{}{}".format(str(prefix), n_seq, str(suffix))
     return ws_name
 
 
@@ -50,15 +70,16 @@ def temp_workspace_generator(temp_workspaces):
 
     @return function that serves the workspace names
     """
+
     def inner_function():
         name = unique_workspace_name()
         temp_workspaces.append(name)
         return name
+
     return inner_function
 
 
-def insert_bank_numbers(input_workspace: Union[str, Workspace2D],
-                        grouping_workspace: Union[str, WorkspaceGroup]):
+def insert_bank_numbers(input_workspace: Union[str, Workspace2D], grouping_workspace: Union[str, WorkspaceGroup]):
     r"""
     Label each spectra according to each bank number
 
@@ -69,15 +90,15 @@ def insert_bank_numbers(input_workspace: Union[str, Workspace2D],
     group_ids = sorted(list(set(grouping_handle.extractY().flatten())))
     assert input_handle.getNumberHistograms() == len(group_ids)
     axis = TextAxis.create(len(group_ids))
-    [axis.setLabel(index, f'bank{group_id}') for index, group_id in enumerate(group_ids)]
+    [axis.setLabel(index, f"bank{group_id}") for index, group_id in enumerate(group_ids)]
     input_handle.replaceAxis(1, axis)
 
 
 class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
 
-    peak_shapes = ['Gaussian']
+    peak_shapes = ["Gaussian"]
     bank_count = 92
-    _banks = [f'bank{i}/sixteenpack' for i in range(1, bank_count)]
+    _banks = [f"bank{i}/sixteenpack" for i in range(1, bank_count)]
 
     #: The calibration attempts to adjust the location and orientation of various instrument components, namely
     #: the source and detector banks. The items describing a full adjustment are as follows:
@@ -85,17 +106,25 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
     #: - Xposition, YPosition, ZPosition: location of the instrument component in the lab frame (units in meters)
     #: - XdirectionCosine, YdirectionCosine, ZdirectionCosine, RotationAngle: direction cosines and rotation angle
     #: (in degress) defining a rotation in the lab frame that orients the instrument component
-    adjustment_items = ['ComponentName', 'Xposition', 'Yposition', 'Zposition',
-                        'XdirectionCosine', 'YdirectionCosine', 'ZdirectionCosine', 'RotationAngle']
+    adjustment_items = [
+        "ComponentName",
+        "Xposition",
+        "Yposition",
+        "Zposition",
+        "XdirectionCosine",
+        "YdirectionCosine",
+        "ZdirectionCosine",
+        "RotationAngle",
+    ]
 
     def name(self):
         return "CorelliPowderCalibrationCreate"
 
     def category(self):
-        return 'Diffraction\\Reduction'
+        return "Diffraction\\Reduction"
 
     def seeAlso(self):
-        return ['PDCalibration', 'AlignDetectors', 'AlignComponents']
+        return ["PDCalibration", "AlignDetectors", "AlignComponents"]
 
     def summary(self):
         return "Adjust bank positions and orientations to optimize peak determination in d-spacing"
@@ -103,148 +132,165 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
     def validateInputs(self):
         issues = dict()
 
-        if self.getProperty('FixSource').value == self.getProperty('AdjustSource').value:
-            issues['FixSource'] = 'Either "FixSource" or "AdjustSource" must be set to True, but not both.'
+        if self.getProperty("FixSource").value == self.getProperty("AdjustSource").value:
+            issues["FixSource"] = 'Either "FixSource" or "AdjustSource" must be set to True, but not both.'
 
         return issues
 
     def PyInit(self):
         self.declareProperty(
-            WorkspaceProperty('InputWorkspace', '',
-                              direction=Direction.Input,
-                              validator=WorkspaceUnitValidator('TOF')),
-            doc='Powder event data, ideally from a highly symmetric space group',
+            WorkspaceProperty("InputWorkspace", "", direction=Direction.Input, validator=WorkspaceUnitValidator("TOF")),
+            doc="Powder event data, ideally from a highly symmetric space group",
         )
-        self.declareProperty(name='OutputWorkspacesPrefix', defaultValue='pdcal_', direction=Direction.Input,
-                             doc="Prefix to be added to output workspaces")
+        self.declareProperty(
+            name="OutputWorkspacesPrefix", defaultValue="pdcal_", direction=Direction.Input, doc="Prefix to be added to output workspaces"
+        )
 
         # PDCalibration properties exposed, grouped
-        property_names = ['TofBinning', 'PeakFunction', 'PeakPositions']
-        self.copyProperties('PDCalibration', property_names)
-        [self.setPropertyGroup(name, 'PDCalibration') for name in property_names]
+        property_names = ["TofBinning", "PeakFunction", "PeakPositions"]
+        self.copyProperties("PDCalibration", property_names)
+        [self.setPropertyGroup(name, "PDCalibration") for name in property_names]
 
         # "Source Position" properties
-        self.declareProperty(name='FixSource', defaultValue=True,
-                             doc="Fix source's distance from the sample")
-        self.declareProperty(name='SourceToSampleDistance', defaultValue=20.004,
-                             doc='Set this value for a fixed distance from source to sample, in meters')
-        self.setPropertySettings('SourceToSampleDistance',
-                                 EnabledWhenProperty("FixSource", PropertyCriterion.IsDefault))
-        self.declareProperty(name='AdjustSource', defaultValue=False,
-                             doc='Adjust Z-coordinate of the source')
-        self.declareProperty(name='SourceMaxTranslation', defaultValue=0.1,
-                             doc='Maximum adjustment of source position along the beam (Z) axis (m)')
-        self.setPropertySettings("SourceMaxTranslation",
-                                 EnabledWhenProperty("AdjustSource", PropertyCriterion.IsNotDefault))
-        property_names = ['FixSource', 'SourceToSampleDistance', 'AdjustSource', 'SourceMaxTranslation']
-        [self.setPropertyGroup(name, 'Source Calibration') for name in property_names]
+        self.declareProperty(name="FixSource", defaultValue=True, doc="Fix source's distance from the sample")
+        self.declareProperty(
+            name="SourceToSampleDistance", defaultValue=20.004, doc="Set this value for a fixed distance from source to sample, in meters"
+        )
+        self.setPropertySettings("SourceToSampleDistance", EnabledWhenProperty("FixSource", PropertyCriterion.IsDefault))
+        self.declareProperty(name="AdjustSource", defaultValue=False, doc="Adjust Z-coordinate of the source")
+        self.declareProperty(
+            name="SourceMaxTranslation", defaultValue=0.1, doc="Maximum adjustment of source position along the beam (Z) axis (m)"
+        )
+        self.setPropertySettings("SourceMaxTranslation", EnabledWhenProperty("AdjustSource", PropertyCriterion.IsNotDefault))
+        property_names = ["FixSource", "SourceToSampleDistance", "AdjustSource", "SourceMaxTranslation"]
+        [self.setPropertyGroup(name, "Source Calibration") for name in property_names]
 
         # AlignComponents properties
-        self.declareProperty(name='FixY', defaultValue=True, doc="Vertical bank position is left unchanged")
-        self.declareProperty(StringArrayProperty('ComponentList', values=self._banks, direction=Direction.Input),
-                             doc='Comma separated list on banks to refine')
-        self.declareProperty(name='ComponentMaxTranslation', defaultValue=0.02,
-                             doc='Maximum translation of each component along either of the X, Y, Z axes (m)')
-        self.declareProperty(name='FixYaw', defaultValue=True, doc="Prevent rotations around the axis normal to the bank")
-        self.declareProperty(name='ComponentMaxRotation', defaultValue=3.0,
-                             doc='Maximum rotation of each component along either of the X, Y, Z axes (deg)')
-        property_names = ['FixY', 'ComponentList', 'ComponentMaxTranslation', 'FixYaw', 'ComponentMaxRotation']
-        [self.setPropertyGroup(name, 'Banks Calibration') for name in property_names]
+        self.declareProperty(name="FixY", defaultValue=True, doc="Vertical bank position is left unchanged")
+        self.declareProperty(
+            StringArrayProperty("ComponentList", values=self._banks, direction=Direction.Input),
+            doc="Comma separated list on banks to refine",
+        )
+        self.declareProperty(
+            name="ComponentMaxTranslation",
+            defaultValue=0.02,
+            doc="Maximum translation of each component along either of the X, Y, Z axes (m)",
+        )
+        self.declareProperty(name="FixYaw", defaultValue=True, doc="Prevent rotations around the axis normal to the bank")
+        self.declareProperty(
+            name="ComponentMaxRotation", defaultValue=3.0, doc="Maximum rotation of each component along either of the X, Y, Z axes (deg)"
+        )
+        property_names = ["FixY", "ComponentList", "ComponentMaxTranslation", "FixYaw", "ComponentMaxRotation"]
+        [self.setPropertyGroup(name, "Banks Calibration") for name in property_names]
 
         #
         # Minimization Properties
-        self.declareProperty(name='Minimizer', defaultValue='L-BFGS-B', direction=Direction.Input,
-                             validator=StringListValidator(['L-BFGS-B', 'differential_evolution']),
-                             doc='Minimizer to use, differential_evolution is more accurate and slower.')
-        self.declareProperty(name='MaxIterations', defaultValue=20, direction=Direction.Input,
-                             doc='Maximum number of iterations for minimizer differential_evolution')
+        self.declareProperty(
+            name="Minimizer",
+            defaultValue="L-BFGS-B",
+            direction=Direction.Input,
+            validator=StringListValidator(["L-BFGS-B", "differential_evolution"]),
+            doc="Minimizer to use, differential_evolution is more accurate and slower.",
+        )
+        self.declareProperty(
+            name="MaxIterations",
+            defaultValue=20,
+            direction=Direction.Input,
+            doc="Maximum number of iterations for minimizer differential_evolution",
+        )
 
-        properties = ['Minimizer', 'MaxIterations']
+        properties = ["Minimizer", "MaxIterations"]
         [self.setPropertyGroup(name, "Minimization") for name in properties]
 
     def PyExec(self):
         temporary_workspaces = []
         self.temp_ws = temp_workspace_generator(temporary_workspaces)  # name generator for temporary workpaces
 
-        prefix_output = self.getProperty('OutputWorkspacesPrefix').value
+        prefix_output = self.getProperty("OutputWorkspacesPrefix").value
         progress_percent_start, progress_percent_end, reports_count = 0.0, 0.01, 5
         progress = Progress(self, progress_percent_start, progress_percent_end, reports_count)
-        input_workspace = self.getPropertyValue('InputWorkspace')  # name of the input workspace
+        input_workspace = self.getPropertyValue("InputWorkspace")  # name of the input workspace
         adjustment_diagnostics = list()  # list workspace names that analyze the orientation of the banks
 
         # Create a grouping workspace whereby we group detectors by banks
         grouping_workspace = self.temp_ws()  # a temporary name
-        CreateGroupingWorkspace(InputWorkspace=input_workspace,
-                                OutputWorkspace=grouping_workspace,
-                                GroupDetectorsBy='bank')
+        CreateGroupingWorkspace(InputWorkspace=input_workspace, OutputWorkspace=grouping_workspace, GroupDetectorsBy="bank")
 
         # Remove delayed emission time from the moderator
-        kwargs = dict(InputWorkspace=input_workspace, Emode='Elastic', OutputWorkspace=input_workspace)
-        self.run_algorithm('ModeratorTzero', 0, 0.02, soft_crash=True, **kwargs)
-        progress.report('ModeratorTzero has been applied')
+        kwargs = dict(InputWorkspace=input_workspace, Emode="Elastic", OutputWorkspace=input_workspace)
+        self.run_algorithm("ModeratorTzero", 0, 0.02, soft_crash=True, **kwargs)
+        progress.report("ModeratorTzero has been applied")
 
         # Find dSpacing to TOF conversion DIFC parameter
-        difc_table = f'{prefix_output}PDCalibration_difc'
-        diagnostics_workspaces = prefix_output + 'PDCalibration_diagnostics'  # group workspace
-        kwargs = dict(InputWorkspace=input_workspace,
-                      TofBinning=self.getProperty('TofBinning').value,
-                      PeakFunction=self.getProperty('PeakFunction').value,
-                      PeakPositions=self.getProperty('PeakPositions').value,
-                      CalibrationParameters='DIFC',
-                      OutputCalibrationTable=difc_table,
-                      DiagnosticWorkspaces=diagnostics_workspaces)
+        difc_table = f"{prefix_output}PDCalibration_difc"
+        diagnostics_workspaces = prefix_output + "PDCalibration_diagnostics"  # group workspace
+        kwargs = dict(
+            InputWorkspace=input_workspace,
+            TofBinning=self.getProperty("TofBinning").value,
+            PeakFunction=self.getProperty("PeakFunction").value,
+            PeakPositions=self.getProperty("PeakPositions").value,
+            CalibrationParameters="DIFC",
+            OutputCalibrationTable=difc_table,
+            DiagnosticWorkspaces=diagnostics_workspaces,
+        )
         PDCalibration(**kwargs)
-        progress.report('PDCalibration has been applied')
+        progress.report("PDCalibration has been applied")
 
         # Create one spectra in d-spacing for each bank using the original instrument geometry
-        self.fitted_in_dspacing(fitted_in_tof=prefix_output + 'PDCalibration_diagnostics_fitted',
-                                workspace_with_instrument=input_workspace,
-                                output_workspace=prefix_output + 'PDCalibration_peaks_original',
-                                grouping_workspace=grouping_workspace)
-        adjustment_diagnostics.append(prefix_output + 'PDCalibration_peaks_original')
+        self.fitted_in_dspacing(
+            fitted_in_tof=prefix_output + "PDCalibration_diagnostics_fitted",
+            workspace_with_instrument=input_workspace,
+            output_workspace=prefix_output + "PDCalibration_peaks_original",
+            grouping_workspace=grouping_workspace,
+        )
+        adjustment_diagnostics.append(prefix_output + "PDCalibration_peaks_original")
 
         # Find the peak centers in TOF units, for the peaks found at each pixel
-        peak_centers_in_tof = prefix_output + 'PDCalibration_diagnostics_tof'
-        self.centers_in_tof(prefix_output + 'PDCalibration_diagnostics_dspacing',
-                            difc_table, peak_centers_in_tof)
+        peak_centers_in_tof = prefix_output + "PDCalibration_diagnostics_tof"
+        self.centers_in_tof(prefix_output + "PDCalibration_diagnostics_dspacing", difc_table, peak_centers_in_tof)
         mtd[diagnostics_workspaces].add(peak_centers_in_tof)
 
         # Find the Histogram of peak deviations (in d-spacing units)
         # for each bank, using the original instrument geometry
-        self.histogram_peak_deviations(prefix_output + 'PDCalibration_diagnostics_tof',
-                                       input_workspace,
-                                       prefix_output + 'peak_deviations_original',
-                                       grouping_workspace)
-        adjustment_diagnostics.append(prefix_output + 'peak_deviations_original')
+        self.histogram_peak_deviations(
+            prefix_output + "PDCalibration_diagnostics_tof", input_workspace, prefix_output + "peak_deviations_original", grouping_workspace
+        )
+        adjustment_diagnostics.append(prefix_output + "peak_deviations_original")
 
         # repeat with percent peak deviations for each bank, using the adjusted instrument geometry
-        self.histogram_peak_deviations(prefix_output + 'PDCalibration_diagnostics_tof',
-                                       input_workspace,
-                                       prefix_output + 'percent_peak_deviations_original',
-                                       grouping_workspace,
-                                       deviation_params=[-10, 0.01, 10],
-                                       percent_deviations=True)
-        adjustment_diagnostics.append(prefix_output + 'percent_peak_deviations_original')
+        self.histogram_peak_deviations(
+            prefix_output + "PDCalibration_diagnostics_tof",
+            input_workspace,
+            prefix_output + "percent_peak_deviations_original",
+            grouping_workspace,
+            deviation_params=[-10, 0.01, 10],
+            percent_deviations=True,
+        )
+        adjustment_diagnostics.append(prefix_output + "percent_peak_deviations_original")
 
         # store the DIFC and DIFC_mask workspace created by PDCalibration in the diagnostics workspace
         mtd[diagnostics_workspaces].add(difc_table)
-        mtd[diagnostics_workspaces].add(difc_table + '_mask')
+        mtd[diagnostics_workspaces].add(difc_table + "_mask")
 
-        adjustments_table_name = f'{prefix_output}adjustments'
+        adjustments_table_name = f"{prefix_output}adjustments"
         # Adjust the position of the source along the beam (Z) axis
         # The instrument in `input_workspace` is adjusted in-place
-        if self.getProperty('AdjustSource').value is True:
-            dz = self.getProperty('SourceMaxTranslation').value
-            kwargs = dict(InputWorkspace=input_workspace,
-                          OutputWorkspace=input_workspace,
-                          PeakCentersTofTable=peak_centers_in_tof,
-                          PeakPositions=self.getProperty('PeakPositions').value,
-                          MaskWorkspace=f'{difc_table}_mask',
-                          FitSourcePosition=True,
-                          FitSamplePosition=False,
-                          Zposition=True, MinZPosition=-dz, MaxZPosition=dz,
-                          Minimizer='L-BFGS-B')
-            self.run_algorithm('AlignComponents', 0.1, 0.2, **kwargs)
+        if self.getProperty("AdjustSource").value is True:
+            dz = self.getProperty("SourceMaxTranslation").value
+            kwargs = dict(
+                InputWorkspace=input_workspace,
+                OutputWorkspace=input_workspace,
+                PeakCentersTofTable=peak_centers_in_tof,
+                PeakPositions=self.getProperty("PeakPositions").value,
+                MaskWorkspace=f"{difc_table}_mask",
+                FitSourcePosition=True,
+                FitSamplePosition=False,
+                Zposition=True,
+                MinZPosition=-dz,
+                MaxZPosition=dz,
+                Minimizer="L-BFGS-B",
+            )
+            self.run_algorithm("AlignComponents", 0.1, 0.2, **kwargs)
         else:
             # Impose the fixed position of the source and save into the adjustments table
             self._fixed_source_set_and_table(adjustments_table_name)
@@ -252,77 +298,99 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         # The instrument in `input_workspace` is adjusted in-place
 
         # Translation options to AlignComponents
-        dt = self.getProperty('ComponentMaxTranslation').value  # maximum translation along either axis
-        move_y = False if self.getProperty('FixY').value is True else True
-        kwargs_transl = dict(Xposition=True, MinXPosition=-dt, MaxXPosition=dt,
-                             Yposition=move_y, MinYPosition=-dt, MaxYPosition=dt,
-                             Zposition=True, MinZPosition=-dt, MaxZPosition=dt)
+        dt = self.getProperty("ComponentMaxTranslation").value  # maximum translation along either axis
+        move_y = False if self.getProperty("FixY").value is True else True
+        kwargs_transl = dict(
+            Xposition=True,
+            MinXPosition=-dt,
+            MaxXPosition=dt,
+            Yposition=move_y,
+            MinYPosition=-dt,
+            MaxYPosition=dt,
+            Zposition=True,
+            MinZPosition=-dt,
+            MaxZPosition=dt,
+        )
 
         # Rotation options for AlignComponents
-        dr = self.getProperty('ComponentMaxRotation').value  # maximum rotation along either axis
-        rot_z = False if self.getProperty('FixYaw').value is True else True
-        kwargs_rotat = dict(AlphaRotation=True, MinAlphaRotation=-dr, MaxAlphaRotation=dr,
-                            BetaRotation=True, MinBetaRotation=-dr, MaxBetaRotation=dr,
-                            GammaRotation=rot_z, MinGammaRotation=-dr, MaxGammaRotation=dr,
-                            EulerConvention='YXZ')
+        dr = self.getProperty("ComponentMaxRotation").value  # maximum rotation along either axis
+        rot_z = False if self.getProperty("FixYaw").value is True else True
+        kwargs_rotat = dict(
+            AlphaRotation=True,
+            MinAlphaRotation=-dr,
+            MaxAlphaRotation=dr,
+            BetaRotation=True,
+            MinBetaRotation=-dr,
+            MaxBetaRotation=dr,
+            GammaRotation=rot_z,
+            MinGammaRotation=-dr,
+            MaxGammaRotation=dr,
+            EulerConvention="YXZ",
+        )
 
         # Remaining options for AlignComponents
-        displacements_table_name = f'{prefix_output}displacements'
-        kwargs = dict(InputWorkspace=input_workspace,
-                      OutputWorkspace=input_workspace,
-                      PeakCentersTofTable=peak_centers_in_tof,
-                      PeakPositions=self.getProperty('PeakPositions').value,
-                      MaskWorkspace=f'{difc_table}_mask',
-                      AdjustmentsTable=adjustments_table_name + '_banks',
-                      DisplacementsTable=displacements_table_name,
-                      FitSourcePosition=False,
-                      FitSamplePosition=False,
-                      ComponentList=self.getProperty('ComponentList').value,
-                      Minimizer=self.getProperty('Minimizer').value,
-                      MaxIterations=self.getProperty('MaxIterations').value)
+        displacements_table_name = f"{prefix_output}displacements"
+        kwargs = dict(
+            InputWorkspace=input_workspace,
+            OutputWorkspace=input_workspace,
+            PeakCentersTofTable=peak_centers_in_tof,
+            PeakPositions=self.getProperty("PeakPositions").value,
+            MaskWorkspace=f"{difc_table}_mask",
+            AdjustmentsTable=adjustments_table_name + "_banks",
+            DisplacementsTable=displacements_table_name,
+            FitSourcePosition=False,
+            FitSamplePosition=False,
+            ComponentList=self.getProperty("ComponentList").value,
+            Minimizer=self.getProperty("Minimizer").value,
+            MaxIterations=self.getProperty("MaxIterations").value,
+        )
 
-        self.run_algorithm('AlignComponents', 0.2, 0.97, **kwargs, **kwargs_transl, **kwargs_rotat)
-        progress.report('AlignComponents has been applied')
+        self.run_algorithm("AlignComponents", 0.2, 0.97, **kwargs, **kwargs_transl, **kwargs_rotat)
+        progress.report("AlignComponents has been applied")
 
         # AlignComponents produces two unwanted workspaces
-        temporary_workspaces.append('calWS')
+        temporary_workspaces.append("calWS")
 
         # Append the banks table to the source table, then delete the banks table.
-        self._append_second_to_first(adjustments_table_name, adjustments_table_name + '_banks')
+        self._append_second_to_first(adjustments_table_name, adjustments_table_name + "_banks")
         # Create one spectra in d-spacing for each bank using the adjusted instrument geometry.
         # The spectra can be compare to those of prefix_output + 'PDCalibration_peaks_original'
-        self.fitted_in_dspacing(fitted_in_tof=prefix_output + 'PDCalibration_diagnostics_fitted',
-                                workspace_with_instrument=input_workspace,
-                                output_workspace=prefix_output + 'PDCalibration_peaks_adjusted',
-                                grouping_workspace=grouping_workspace)
-        adjustment_diagnostics.append(prefix_output + 'PDCalibration_peaks_adjusted')
+        self.fitted_in_dspacing(
+            fitted_in_tof=prefix_output + "PDCalibration_diagnostics_fitted",
+            workspace_with_instrument=input_workspace,
+            output_workspace=prefix_output + "PDCalibration_peaks_adjusted",
+            grouping_workspace=grouping_workspace,
+        )
+        adjustment_diagnostics.append(prefix_output + "PDCalibration_peaks_adjusted")
 
         # Find the Histogram of peak deviations (in d-spacing units)
         # for each bank, using the adjusted instrument geometry
-        self.histogram_peak_deviations(prefix_output + 'PDCalibration_diagnostics_tof',
-                                       input_workspace,
-                                       prefix_output + 'peak_deviations_adjusted',
-                                       grouping_workspace)
-        adjustment_diagnostics.append(prefix_output + 'peak_deviations_adjusted')
+        self.histogram_peak_deviations(
+            prefix_output + "PDCalibration_diagnostics_tof", input_workspace, prefix_output + "peak_deviations_adjusted", grouping_workspace
+        )
+        adjustment_diagnostics.append(prefix_output + "peak_deviations_adjusted")
 
         # repeat with percent peak deviations for each bank, using the adjusted instrument geometry
-        self.histogram_peak_deviations(prefix_output + 'PDCalibration_diagnostics_tof',
-                                       input_workspace,
-                                       prefix_output + 'percent_peak_deviations_adjusted',
-                                       grouping_workspace,
-                                       deviation_params=[-10, 0.01, 10],
-                                       percent_deviations=True)
-        adjustment_diagnostics.append(prefix_output + 'percent_peak_deviations_adjusted')
+        self.histogram_peak_deviations(
+            prefix_output + "PDCalibration_diagnostics_tof",
+            input_workspace,
+            prefix_output + "percent_peak_deviations_adjusted",
+            grouping_workspace,
+            deviation_params=[-10, 0.01, 10],
+            percent_deviations=True,
+        )
+        adjustment_diagnostics.append(prefix_output + "percent_peak_deviations_adjusted")
 
         # summarize the changes observed in the histogram of percent peak deviations
-        self.peak_deviations_summarize(prefix_output + 'percent_peak_deviations_original',
-                                       prefix_output + 'percent_peak_deviations_adjusted',
-                                       prefix_output + 'percent_peak_deviations_summary')
-        adjustment_diagnostics.append(prefix_output + 'percent_peak_deviations_summary')
+        self.peak_deviations_summarize(
+            prefix_output + "percent_peak_deviations_original",
+            prefix_output + "percent_peak_deviations_adjusted",
+            prefix_output + "percent_peak_deviations_summary",
+        )
+        adjustment_diagnostics.append(prefix_output + "percent_peak_deviations_summary")
 
         # Create a WorkspaceGroup with the orientation diagnostics
-        GroupWorkspaces(InputWorkspaces=adjustment_diagnostics,
-                        OutputWorkspace=prefix_output + 'bank_adjustment_diagnostics')
+        GroupWorkspaces(InputWorkspaces=adjustment_diagnostics, OutputWorkspace=prefix_output + "bank_adjustment_diagnostics")
 
         # clean up at the end (only happens if algorithm completes sucessfully)
         [DeleteWorkspace(name) for name in temporary_workspaces if AnalysisDataService.doesExist(name)]
@@ -331,22 +399,18 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         r"""
         @param soft_crash : log an error but do not raise an exception
         """
-        algorithm_align = self.createChildAlgorithm(name=name,
-                                                    startProgress=start_progress, endProgress=end_progress,
-                                                    enableLogging=True)
+        algorithm_align = self.createChildAlgorithm(name=name, startProgress=start_progress, endProgress=end_progress, enableLogging=True)
         [algorithm_align.setProperty(name, value) for name, value in kwargs.items()]
         try:
             algorithm_align.execute()
         except Exception as err:
             if soft_crash is True:
-                logger.error('Execution continues')
+                logger.error("Execution continues")
             else:
                 raise err.__class__(err)
-        logger.notice(f'{name} has executed')
+        logger.notice(f"{name} has executed")
 
-    def _append_second_to_first(self, first: Union[str, TableWorkspace],
-                                second: Union[str, TableWorkspace],
-                                delete_second: bool = True):
+    def _append_second_to_first(self, first: Union[str, TableWorkspace], second: Union[str, TableWorkspace], delete_second: bool = True):
         r"""
         Append the rows of the second table into to the first table
 
@@ -362,36 +426,43 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
     def _fixed_source_set_and_table(self, table_name):
         r"""Create a table with appropriate column names for saving the location of the source"""
         # collect info on the source
-        input_workspace = self.getPropertyValue('InputWorkspace')  # name of the input workspace
-        source = mtd[self.getPropertyValue('InputWorkspace')].getInstrument().getSource()
+        input_workspace = self.getPropertyValue("InputWorkspace")  # name of the input workspace
+        source = mtd[self.getPropertyValue("InputWorkspace")].getInstrument().getSource()
         source_name, source_full_name = source.getName(), source.getFullName()
 
         # Update the position of the source
-        z_position = -abs(self.getProperty('SourceToSampleDistance').value)
+        z_position = -abs(self.getProperty("SourceToSampleDistance").value)
         MoveInstrumentComponent(input_workspace, source_full_name, X=0.0, Y=0.0, Z=z_position, RelativePosition=False)
 
         # Initialize the table of adjustments for the source
         table = CreateEmptyTableWorkspace(OutputWorkspace=table_name)
-        item_types = ['str',
-                      'double', 'double', 'double',
-                      'double', 'double', 'double', 'double']
-        item_names = ['ComponentName', 'Xposition', 'Yposition', 'Zposition',
-                      'XdirectionCosine', 'YdirectionCosine', 'ZdirectionCosine', 'RotationAngle']
+        item_types = ["str", "double", "double", "double", "double", "double", "double", "double"]
+        item_names = [
+            "ComponentName",
+            "Xposition",
+            "Yposition",
+            "Zposition",
+            "XdirectionCosine",
+            "YdirectionCosine",
+            "ZdirectionCosine",
+            "RotationAngle",
+        ]
         for column_name, column_type in zip(item_names, item_types):
             table.addColumn(name=column_name, type=column_type)
 
         # Add the appropriate row in the table for the source
-        table.addRow([source_name,
-                      0.0, 0.0, z_position,  # new position for the source
-                      0.0, 0.0, 0.0,  # no rotation axis
-                      0.0])  # no rotation angle
+        table.addRow(
+            [source_name, 0.0, 0.0, z_position, 0.0, 0.0, 0.0, 0.0]  # new position for the source  # no rotation axis
+        )  # no rotation angle
         return table
 
     @staticmethod
-    def fitted_in_tof(fitted_in_dspacing: Union[str, Workspace2D],
-                      difc: Union[str, TableWorkspace],
-                      output_workspace: str,
-                      group_workspace: Union[str, WorkspaceGroup] = None):
+    def fitted_in_tof(
+        fitted_in_dspacing: Union[str, Workspace2D],
+        difc: Union[str, TableWorkspace],
+        output_workspace: str,
+        group_workspace: Union[str, WorkspaceGroup] = None,
+    ):
         r"""
         Create a workspace of fitted spectra in TOF
 
@@ -405,7 +476,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         dspacing_workspace, difc_workspace = mtd[str(fitted_in_dspacing)], mtd[str(difc)]
 
         # Validate number of histograms in fitted_in_dspacing is same as in difc
-        error_message = f'{dspacing_workspace} and {difc_workspace} have different number of spectra'
+        error_message = f"{dspacing_workspace} and {difc_workspace} have different number of spectra"
         assert dspacing_workspace.getNumberHistograms() == difc_workspace.getNumberHistograms(), error_message
 
         # Divide fitted_in_dspacing by difc, and assign output_workspace to it
@@ -417,11 +488,14 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
 
         return output
 
-    def fitted_in_dspacing(self, fitted_in_tof: Union[str, Workspace2D],
-                           workspace_with_instrument: Union[str, Workspace],
-                           output_workspace: str,
-                           dspacing_bin_width: float = 0.001,
-                           grouping_workspace: Optional[str] = None) -> None:
+    def fitted_in_dspacing(
+        self,
+        fitted_in_tof: Union[str, Workspace2D],
+        workspace_with_instrument: Union[str, Workspace],
+        output_workspace: str,
+        dspacing_bin_width: float = 0.001,
+        grouping_workspace: Optional[str] = None,
+    ) -> None:
         r"""
         Create one spectra of fitted peaks in d-spacing for each pixel or group of detectors
 
@@ -438,26 +512,21 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         """
         CloneWorkspace(InputWorkspace=fitted_in_tof, OutputWorkspace=output_workspace)
         CopyInstrumentParameters(InputWorkspace=workspace_with_instrument, OutputWorkspace=output_workspace)
-        ConvertUnits(InputWorkspace=output_workspace,
-                     OutputWorkspace=output_workspace,
-                     Target='dSpacing',
-                     Emode='Elastic')
+        ConvertUnits(InputWorkspace=output_workspace, OutputWorkspace=output_workspace, Target="dSpacing", Emode="Elastic")
         # Rebin spectra to common bin boundaries. This is required if grouping is desired
-        peak_centers_reference = self.getProperty('PeakPositions').value
+        peak_centers_reference = self.getProperty("PeakPositions").value
         dspacing_extra = 1.0  # 1 Angstrom
         dspacing_min = max(0, min(peak_centers_reference) - dspacing_extra)
         dspacing_max = max(peak_centers_reference) + dspacing_extra
-        Rebin(InputWorkspace=output_workspace, OutputWorkspace=output_workspace,
-              Params=[dspacing_min, dspacing_bin_width, dspacing_max])  # bin width is 0.001 Angstroms
+        Rebin(
+            InputWorkspace=output_workspace, OutputWorkspace=output_workspace, Params=[dspacing_min, dspacing_bin_width, dspacing_max]
+        )  # bin width is 0.001 Angstroms
         # Optional groping into banks
         if grouping_workspace is not None:
-            GroupDetectors(InputWorkspace=output_workspace, OutputWorkspace=output_workspace,
-                           CopyGroupingFromWorkspace=grouping_workspace)
-            insert_bank_numbers(output_workspace, grouping_workspace) # label each spectrum with the bank number
+            GroupDetectors(InputWorkspace=output_workspace, OutputWorkspace=output_workspace, CopyGroupingFromWorkspace=grouping_workspace)
+            insert_bank_numbers(output_workspace, grouping_workspace)  # label each spectrum with the bank number
 
-    def centers_in_tof(self, centers_in_dspacing: Union[str, TableWorkspace],
-                       difc: Union[str, TableWorkspace],
-                       output_workspace: str):
+    def centers_in_tof(self, centers_in_dspacing: Union[str, TableWorkspace], difc: Union[str, TableWorkspace], output_workspace: str):
         r"""
         Convert the peak centers in dSpacing units (Angstroms) to TOF units (microseconds)
 
@@ -476,23 +545,25 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
             table.addColumn(name=column_name, type=column_type)
 
         # Populate the table
-        difc_values = np.array(difc_table.column('difc'))
+        difc_values = np.array(difc_table.column("difc"))
         dspacing_dict = dspacing_table.toDict()  # the table in a data structure we can modify
         column_names = dspacing_table.getColumnNames()
-        column_peaks = [name for name in column_names if '@' in name]
+        column_peaks = [name for name in column_names if "@" in name]
         for column in column_peaks:
             dspacing_dict[column] = (difc_values * np.array(dspacing_dict[column])).tolist()  # peaks now in TOF
         for row_index in range(dspacing_table.rowCount()):
             row_new = [dspacing_dict[column][row_index] for column in column_names]
             table.addRow(row_new)
 
-    def histogram_peak_deviations(self,
-                                  peak_centers_in_tof: Union[str, TableWorkspace],
-                                  workspace_with_instrument: Union[str, Workspace],
-                                  output_workspace: str,
-                                  grouping_workspace: Union[str, WorkspaceGroup],
-                                  deviation_params: List[float] = [-0.1, 0.0001, 0.1],
-                                  percent_deviations: bool = False):
+    def histogram_peak_deviations(
+        self,
+        peak_centers_in_tof: Union[str, TableWorkspace],
+        workspace_with_instrument: Union[str, Workspace],
+        output_workspace: str,
+        grouping_workspace: Union[str, WorkspaceGroup],
+        deviation_params: List[float] = [-0.1, 0.0001, 0.1],
+        percent_deviations: bool = False,
+    ):
         r"""
         Find deviations of the fitted peak centers with respect to the reference values,
         in d-spacing units. Histogram these deviations for all peaks found on each bank
@@ -519,15 +590,15 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
 
         # Calculate the peak deviations with respect to the reference peak centers, in d-spacing or percent units
         column_names = tof_table.getColumnNames()
-        column_peaks = [name for name in column_names if '@' in name]  # column containing the peak centers
+        column_peaks = [name for name in column_names if "@" in name]  # column containing the peak centers
         for column in column_peaks:
-            dspacing_reference = float(column.replace('@', ''))  # the column name has the reference peak center
+            dspacing_reference = float(column.replace("@", ""))  # the column name has the reference peak center
             # peak deviations, in d-spacing units, that we use to overwrite tof_dic
             tof_dict[column] = np.array(tof_dict[column]) / difc_values - dspacing_reference
             # switch to percent deviations if so required
             if percent_deviations is True:
                 tof_dict[column] *= 100 / dspacing_reference
-            tof_dict[column] = tof_dict[column].tolist() # cast to list
+            tof_dict[column] = tof_dict[column].tolist()  # cast to list
 
         # Extract the group ID's, which typically corresponds to bank numbers
         # grouping_workspace_y contain the group ID (bank number) of each pixel
@@ -557,17 +628,22 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
 
         # Create a workspace with the histograms
         spectra = spectra = np.array(list(histograms.values())).flatten()  # single list needed
-        unit_x = 'dSpacing' if percent_deviations is False else 'Empty'
-        title_prefix = 'Peak ' if percent_deviations is False else 'Percent peak '
-        CreateWorkspace(DataX=bins, DataY=spectra, NSpec=len(group_ids), UnitX=unit_x,
-                        WorkspaceTitle=title_prefix + 'Peak deviations per pixel group',
-                        OutputWorkspace=output_workspace)
-        insert_bank_numbers(output_workspace, grouping_workspace) # label each spectrum with the bank number
+        unit_x = "dSpacing" if percent_deviations is False else "Empty"
+        title_prefix = "Peak " if percent_deviations is False else "Percent peak "
+        CreateWorkspace(
+            DataX=bins,
+            DataY=spectra,
+            NSpec=len(group_ids),
+            UnitX=unit_x,
+            WorkspaceTitle=title_prefix + "Peak deviations per pixel group",
+            OutputWorkspace=output_workspace,
+        )
+        insert_bank_numbers(output_workspace, grouping_workspace)  # label each spectrum with the bank number
 
     @staticmethod
-    def peak_deviations_summarize(original_workspace: Union[str, Workspace2D],
-                                  adjusted_workspace: Union[str, Workspace2D],
-                                  output_workspace: str) -> None:
+    def peak_deviations_summarize(
+        original_workspace: Union[str, Workspace2D], adjusted_workspace: Union[str, Workspace2D], output_workspace: str
+    ) -> None:
         r"""
         Basic statistics from the histograms of peak deviations
 
@@ -579,13 +655,13 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         @param adjusted_workspace : histograms of peak deviations after calibration is applied
         @param output_workspace : name of the output TableWorkspace containing statistics for each bank
         """
-        statuses = ['original', 'adjusted']  # statuses before and after calibration is applied to input_workspace
-        quantities = ['mean(abs)', 'mean', 'fwhm']  # quantities we will record for each histogram
+        statuses = ["original", "adjusted"]  # statuses before and after calibration is applied to input_workspace
+        quantities = ["mean(abs)", "mean", "fwhm"]  # quantities we will record for each histogram
         handles = {s: mtd[str(w)] for s, w in zip(statuses, [original_workspace, adjusted_workspace])}
 
         # Validation
-        bank_count = handles['original'].getNumberHistograms()
-        assert bank_count == handles['adjusted'].getNumberHistograms()
+        bank_count = handles["original"].getNumberHistograms()
+        assert bank_count == handles["adjusted"].getNumberHistograms()
 
         # dictionary to hold the summary data
         summary = {status: {quantity: None for quantity in quantities} for status in statuses}
@@ -603,11 +679,11 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
 
         # save to table only those banks with counts
         table = CreateEmptyTableWorkspace(OutputWorkspace=output_workspace)
-        table.addColumn(name='bank', type='int')
-        table.addColumn(name='peak count', type='int')
+        table.addColumn(name="bank", type="int")
+        table.addColumn(name="peak count", type="int")
         for quantity in quantities:
             for status in statuses:
-                table.addColumn(name=quantity + ' ' + status, type='float')
+                table.addColumn(name=quantity + " " + status, type="float")
         for workspace_index in range(bank_count):
             peak_count = int(sum(counts[workspace_index]))
             if peak_count < 1:

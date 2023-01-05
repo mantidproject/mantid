@@ -4,43 +4,40 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
 from mantid.api import PythonAlgorithm, AlgorithmFactory
-from mantid.kernel import Direction,IntArrayProperty, FloatArrayProperty
-import  mantid
+from mantid.kernel import Direction, IntArrayProperty, FloatArrayProperty
+import mantid
 import math
 import numpy
 
 
 class SortDetectors(PythonAlgorithm):
-    """ Sort detectors by distance
-    """
+    """Sort detectors by distance"""
 
     def category(self):
-        """ Return category
-        """
+        """Return category"""
         return "Utility\\Sorting"
 
     def seeAlso(self):
-        return [ "SortByQVectors","SortXAxis" ]
+        return ["SortByQVectors", "SortXAxis"]
 
     def name(self):
-        """ Return name
-        """
+        """Return name"""
         return "SortDetectors"
 
     def summary(self):
-        """ Return summary
-        """
+        """Return summary"""
         return "Algorithm to sort detectors by distance."
 
     def PyInit(self):
-        """ Declare properties
-        """
-        self.declareProperty(mantid.api.WorkspaceProperty(  "Workspace", "",
-                                                            direction=mantid.kernel.Direction.Input,
-                                                            validator=mantid.api.InstrumentValidator()),
-                             "Input workspace")
+        """Declare properties"""
+        self.declareProperty(
+            mantid.api.WorkspaceProperty(
+                "Workspace", "", direction=mantid.kernel.Direction.Input, validator=mantid.api.InstrumentValidator()
+            ),
+            "Input workspace",
+        )
 
         self.declareProperty(IntArrayProperty("UpstreamSpectra", Direction.Output))
         self.declareProperty(FloatArrayProperty("UpstreamDetectorDistances", Direction.Output))
@@ -48,37 +45,36 @@ class SortDetectors(PythonAlgorithm):
         self.declareProperty(FloatArrayProperty("DownstreamDetectorDistances", Direction.Output))
 
     def PyExec(self):
-        """ Main execution body
-        """
+        """Main execution body"""
         workspace = self.getProperty("Workspace").value
         samplePos = workspace.getInstrument().getSample().getPos()
         moderatorPos = workspace.getInstrument().getSource().getPos()
         incident = samplePos - moderatorPos
 
-        upstream=[]
-        upinds=[]
-        updist=[]
-        downstream=[]
-        downinds=[]
-        downdist=[]
+        upstream = []
+        upinds = []
+        updist = []
+        downstream = []
+        downinds = []
+        downdist = []
         for i in range(workspace.getNumberHistograms()):
-            detPos=workspace.getDetector(i).getPos()
-            scattered=detPos-samplePos
-            if abs(scattered.angle(incident))>0.999*math.pi:
-                upstream.append((i,scattered.norm()))
+            detPos = workspace.getDetector(i).getPos()
+            scattered = detPos - samplePos
+            if abs(scattered.angle(incident)) > 0.999 * math.pi:
+                upstream.append((i, scattered.norm()))
             else:
-                downstream.append((i,scattered.norm()))
+                downstream.append((i, scattered.norm()))
 
-        if len(upstream)>0:
+        if len(upstream) > 0:
             upstream.sort(key=lambda x: x[1])
             zipped_upstream = list(zip(*upstream))
-            upinds=zipped_upstream[0]
-            updist=zipped_upstream[1]
-        if len(downstream)>0:
+            upinds = zipped_upstream[0]
+            updist = zipped_upstream[1]
+        if len(downstream) > 0:
             downstream.sort(key=lambda x: x[1])
             zipped_downstream = list(zip(*downstream))
-            downinds=zipped_downstream[0]
-            downdist=zipped_downstream[1]
+            downinds = zipped_downstream[0]
+            downdist = zipped_downstream[1]
 
         self.setProperty("UpstreamSpectra", numpy.array(upinds))
         self.setProperty("UpstreamDetectorDistances", numpy.array(updist))

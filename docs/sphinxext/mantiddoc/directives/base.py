@@ -11,8 +11,8 @@ import re
 from mantid.api import AlgorithmFactory, AlgorithmManager, FunctionFactory
 from mantiddoc import get_logger
 
-ALG_DOCNAME_RE = re.compile(r'^([A-Z][a-zA-Z0-9]+)-v([0-9][0-9]*)$')
-FIT_DOCNAME_RE = re.compile(r'^([A-Z][a-zA-Z0-9]+)$')
+ALG_DOCNAME_RE = re.compile(r"^([A-Z][a-zA-Z0-9]+)-v([0-9][0-9]*)$")
+FIT_DOCNAME_RE = re.compile(r"^([A-Z][a-zA-Z0-9]+)$")
 
 
 # ----------------------------------------------------------------------------------------
@@ -29,8 +29,8 @@ def algorithm_name_and_version(docname):
       tuple: A tuple containing two elements (name, version). In the case of a fit function the version is None.
     """
     # simple check to see if it is an algorithm or fit function
-    is_alg = ("algorithms" in docname)
-    is_fit = ("fitfunctions" in docname)
+    is_alg = "algorithms" in docname
+    is_fit = "fitfunctions" in docname
 
     # docname includes path, using forward slashes, from root of documentation directory
     docname = docname.split("/")[-1]
@@ -39,9 +39,7 @@ def algorithm_name_and_version(docname):
     if is_alg:
         match = ALG_DOCNAME_RE.match(docname)
         if not match or len(match.groups()) != 2:
-            raise RuntimeError(
-                "Document filename '%s.rst' does not match the expected format: AlgorithmName-vX.rst"
-                % docname)
+            raise RuntimeError("Document filename '%s.rst' does not match the expected format: AlgorithmName-vX.rst" % docname)
 
         grps = match.groups()
         return (str(grps[0]), int(grps[1]))
@@ -50,9 +48,7 @@ def algorithm_name_and_version(docname):
     if is_fit:
         match = FIT_DOCNAME_RE.match(docname)
         if not match or len(match.groups()) != 1:
-            raise RuntimeError(
-                "Document filename '%s.rst' does not match the expected format: FitFunctionName.rst"
-                % docname)
+            raise RuntimeError("Document filename '%s.rst' does not match the expected format: FitFunctionName.rst" % docname)
 
         return (str(match.groups()[0]), None)
 
@@ -65,6 +61,7 @@ class BaseDirective(Directive):
     """
     Contains shared functionality for Mantid custom directives.
     """
+
     has_content = False
     final_argument_whitespace = True
 
@@ -125,7 +122,7 @@ class BaseDirective(Directive):
             level = 1
         if level not in level_dict:
             env = self.state.document.settings.env
-            env.app.warn('base.make_header - Did not understand level ' + str(level))
+            env.app.warn("base.make_header - Did not understand level " + str(level))
             level = 2
 
         line = "\n" + level_dict[level] * (len(name)) + "\n"

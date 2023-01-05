@@ -38,33 +38,33 @@ class RunSelectorPresenterTest(unittest.TestCase):
         return mock.create_autospec(SummableRunFinder)
 
     def _make_presenter(self, run_selection, run_finder, view):
-        return RunSelectorPresenter('some_title', run_selection, run_finder, view, None)
+        return RunSelectorPresenter("some_title", run_selection, run_finder, view, None)
 
     def test_searches_for_runs_when_add_run_pressed(self):
-        run_query = '1'
-        no_runs = ('', [])
+        run_query = "1"
+        no_runs = ("", [])
         self.view.run_list.return_value = run_query
         self.run_finder.find_all_from_query.return_value = no_runs
         self.view.addRuns.emit()
         self.run_finder.find_all_from_query.assert_called_with(run_query)
 
     def _make_fake_run_model(self, run_name):
-        return SummableRunFile('/home/{}'.format(run_name), run_name, is_event_mode=True)
+        return SummableRunFile("/home/{}".format(run_name), run_name, is_event_mode=True)
 
     def test_adds_search_results_to_model_when_add_run_pressed(self):
-        run_name = '1'
+        run_name = "1"
         run_query = run_name
         found_run = self._make_fake_run_model(run_name)
 
         self.view.run_list.return_value = run_query
-        self.run_finder.find_all_from_query.return_value = ('', [found_run])
+        self.run_finder.find_all_from_query.return_value = ("", [found_run])
 
         self.view.addRuns.emit()
         self.run_selection.add_run.assert_called_with(found_run)
 
     def test_handles_error_when_invalid_query(self):
-        run_query = '1-0'
-        error_message = 'Invalid Query'
+        run_query = "1-0"
+        error_message = "Invalid Query"
         self.view.run_list.return_value = run_query
         self.run_finder.find_all_from_query.return_value = (error_message, [])
 
@@ -72,20 +72,20 @@ class RunSelectorPresenterTest(unittest.TestCase):
         self.view.invalid_run_query.assert_called_with(error_message)
 
     def test_handles_error_when_run_not_found(self):
-        run_query = '1-10'
+        run_query = "1-10"
         self.view.run_list.return_value = run_query
-        self.run_finder.find_all_from_query.return_value = ('', [])
+        self.run_finder.find_all_from_query.return_value = ("", [])
 
         self.view.addRuns.emit()
         self.view.run_not_found.assert_called()
 
     def test_adds_multiple_search_results_to_model_when_add_run_pressed(self):
-        run_names = ['1', '009', '12']
+        run_names = ["1", "009", "12"]
         run_query = ",".join(run_names)
         found_runs = [self._make_fake_run_model(run_name) for run_name in run_names]
 
         self.view.run_list.return_value = run_query
-        self.run_finder.find_all_from_query.return_value = ('', found_runs)
+        self.run_finder.find_all_from_query.return_value = ("", found_runs)
 
         self.view.addRuns.emit()
         expected = [mock.call.add_run(run) for run in found_runs]
@@ -124,5 +124,5 @@ class RunSelectorPresenterTest(unittest.TestCase):
         self.view.show_file_picker.assert_called()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -32,6 +32,9 @@ public:
   bool isOpened() const override { return m_File.get() != nullptr; }
   /// get the full file name of the file used for IO operations
   const std::string &getFileName() const override { return m_fileName; }
+  /** Copy the file contents to a new location. */
+  void copyFileTo(const std::string &destFilename) override;
+
   /**Return the size of the NeXus data block used in NeXus data array*/
   size_t getDataChunk() const override { return m_dataChunk; }
 

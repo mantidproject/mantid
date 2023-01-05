@@ -11,15 +11,13 @@ from mantid.api import mtd, WorkspaceGroup, MatrixWorkspace, AnalysisDataService
 
 
 class WorkspaceGroupTest(unittest.TestCase):
-
     def create_matrix_workspace_in_ADS(self, name):
-        run_algorithm('CreateWorkspace', OutputWorkspace=name,
-                      DataX=[1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
+        run_algorithm("CreateWorkspace", OutputWorkspace=name, DataX=[1.0, 2.0, 3.0], DataY=[2.0, 3.0], DataE=[2.0, 3.0], UnitX="TOF")
 
     def create_group_via_GroupWorkspace_algorithm(self):
         self.create_matrix_workspace_in_ADS("First")
         self.create_matrix_workspace_in_ADS("Second")
-        run_algorithm('GroupWorkspaces', InputWorkspaces='First,Second', OutputWorkspace='grouped')
+        run_algorithm("GroupWorkspaces", InputWorkspaces="First,Second", OutputWorkspace="grouped")
         return mtd["grouped"]
 
     def tearDown(self):
@@ -139,10 +137,11 @@ class WorkspaceGroupTest(unittest.TestCase):
 
     def test_SimpleAlgorithm_Accepts_Group_Handle(self):
         from mantid.simpleapi import Scale
+
         self.create_matrix_workspace_in_ADS("First")
         self.create_matrix_workspace_in_ADS("Second")
-        run_algorithm('GroupWorkspaces', InputWorkspaces='First,Second', OutputWorkspace='grouped')
-        group = mtd['grouped']
+        run_algorithm("GroupWorkspaces", InputWorkspaces="First,Second", OutputWorkspace="grouped")
+        group = mtd["grouped"]
 
         try:
             w = Scale(group, 1.5)
@@ -152,26 +151,28 @@ class WorkspaceGroupTest(unittest.TestCase):
         mtd.remove(str(group))
 
     def test_complex_binary_operations_with_group_do_not_leave_temporary_workspaces_in_ADS(self):
-        run_algorithm('CreateWorkspace', OutputWorkspace='grouped_1', DataX=[1., 2., 3.], DataY=[2., 3.],
-                      DataE=[2., 3.], UnitX='TOF')
-        run_algorithm('CreateWorkspace', OutputWorkspace='grouped_2', DataX=[1., 2., 3.], DataY=[2., 3.],
-                      DataE=[2., 3.], UnitX='TOF')
-        run_algorithm('GroupWorkspaces', InputWorkspaces='grouped_1,grouped_2', OutputWorkspace='grouped')
+        run_algorithm(
+            "CreateWorkspace", OutputWorkspace="grouped_1", DataX=[1.0, 2.0, 3.0], DataY=[2.0, 3.0], DataE=[2.0, 3.0], UnitX="TOF"
+        )
+        run_algorithm(
+            "CreateWorkspace", OutputWorkspace="grouped_2", DataX=[1.0, 2.0, 3.0], DataY=[2.0, 3.0], DataE=[2.0, 3.0], UnitX="TOF"
+        )
+        run_algorithm("GroupWorkspaces", InputWorkspaces="grouped_1,grouped_2", OutputWorkspace="grouped")
 
-        w1 = (mtd['grouped'] * 0.0) + 1.0
+        w1 = (mtd["grouped"] * 0.0) + 1.0
 
-        self.assertTrue('w1' in mtd)
-        self.assertTrue('grouped' in mtd)
-        self.assertTrue('grouped_1' in mtd)
-        self.assertTrue('grouped_2' in mtd)
-        self.assertTrue('__python_op_tmp0' not in mtd)
-        self.assertTrue('__python_op_tmp0_1' not in mtd)
-        self.assertTrue('__python_op_tmp0_2' not in mtd)
+        self.assertTrue("w1" in mtd)
+        self.assertTrue("grouped" in mtd)
+        self.assertTrue("grouped_1" in mtd)
+        self.assertTrue("grouped_2" in mtd)
+        self.assertTrue("__python_op_tmp0" not in mtd)
+        self.assertTrue("__python_op_tmp0_1" not in mtd)
+        self.assertTrue("__python_op_tmp0_2" not in mtd)
 
-        mtd.remove('w1')
-        mtd.remove('grouped')
-        mtd.remove('grouped_1')
-        mtd.remove('grouped_2')
+        mtd.remove("w1")
+        mtd.remove("grouped")
+        mtd.remove("grouped_1")
+        mtd.remove("grouped_2")
 
     def test_negative_indices_return_correct_ws_from_group(self):
         group = self.create_group_via_GroupWorkspace_algorithm()
@@ -195,5 +196,5 @@ class WorkspaceGroupTest(unittest.TestCase):
         self.assertEqual(group.isGroup(), True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

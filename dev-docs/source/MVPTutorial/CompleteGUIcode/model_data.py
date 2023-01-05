@@ -8,7 +8,6 @@ import numpy as np
 
 
 class DataGenerator(object):
-
     def __init__(self):
         self.x_data = np.linspace(0.0, 10.0, 100)
         self.y_data = []

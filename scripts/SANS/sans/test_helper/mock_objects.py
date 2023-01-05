@@ -4,11 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from functools import (partial)
+from functools import partial
 
 from unittest import mock
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
-from sans.common.enums import (RangeStepType, OutputMode, SANSFacility, SANSInstrument)
+from sans.common.enums import RangeStepType, OutputMode, SANSFacility, SANSInstrument
 from sans.state.JsonSerializable import JsonSerializable
 from sans.test_helper.test_director import TestDirector
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
@@ -42,7 +42,7 @@ def create_mock_diagnostics_tab():
     return view
 
 
-def get_cell_mock(row, column, convert_to=None, user_file_path = ""):
+def get_cell_mock(row, column, convert_to=None, user_file_path=""):
     _ = convert_to  # noqa
     if row == 0:
         # For the first row we return the
@@ -132,10 +132,10 @@ def create_mock_view(user_file_path, batch_file_path=None, row_user_file_path=""
     _event_slices = mock.PropertyMock(return_value="")
     type(view).event_slices = _event_slices
 
-    _merge_scale = mock.PropertyMock(return_value=1.)
+    _merge_scale = mock.PropertyMock(return_value=1.0)
     type(view).merge_scale = _merge_scale
 
-    _merge_shift = mock.PropertyMock(return_value=0.)
+    _merge_shift = mock.PropertyMock(return_value=0.0)
     type(view).merge_shift = _merge_shift
 
     _merge_q_range_start = mock.PropertyMock(return_value=None)
@@ -201,7 +201,7 @@ def create_mock_view(user_file_path, batch_file_path=None, row_user_file_path=""
     _phi_limit_max = mock.PropertyMock(return_value=None)
     type(view).phi_limit_max = _phi_limit_max
 
-    _q_1d_step = mock.PropertyMock(return_value=.001)
+    _q_1d_step = mock.PropertyMock(return_value=0.001)
     type(view).q_1d_step = _q_1d_step
 
     _q_1d_step_type = mock.PropertyMock(return_value=RangeStepType.LIN)
@@ -210,7 +210,7 @@ def create_mock_view(user_file_path, batch_file_path=None, row_user_file_path=""
     _output_mode = mock.PropertyMock(return_value=OutputMode.PUBLISH_TO_ADS)
     type(view).output_mode = _output_mode
 
-    _wavelength_range = mock.PropertyMock(return_value='')
+    _wavelength_range = mock.PropertyMock(return_value="")
     type(view).wavelength_range = _wavelength_range
 
     _instrument = mock.PropertyMock(return_value=SANSInstrument.SANS2D)

@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantiddoc.directives.base import BaseDirective  #pylint: disable=unused-import
+from mantiddoc.directives.base import BaseDirective  # pylint: disable=unused-import
 from sphinx.locale import _  # noqa: F401
 import os
 from string import Template
@@ -12,7 +12,9 @@ import subprocess
 
 STYLE = dict()
 
-STYLE["global_style"] = """
+STYLE[
+    "global_style"
+] = """
 fontname = Helvetica
 labelloc = t
 ordering = out
@@ -20,12 +22,11 @@ node[fontname="Helvetica", style = filled]
 edge[fontname="Helvetica"]
 """
 
-STYLE['param_style'] = 'node[fillcolor = khaki, shape = oval]'
-STYLE['decision_style'] = 'node[fillcolor = limegreen, shape = diamond]'
-STYLE[
-    'algorithm_style'] = 'node[style = "rounded,filled", fillcolor = lightskyblue, shape = rectangle]'
-STYLE['process_style'] = 'node[fillcolor = lightseagreen, shape = rectangle]'
-STYLE['value_style'] = 'node[fontname = "Times-Roman", fillcolor = grey, shape = parallelogram]'
+STYLE["param_style"] = "node[fillcolor = khaki, shape = oval]"
+STYLE["decision_style"] = "node[fillcolor = limegreen, shape = diamond]"
+STYLE["algorithm_style"] = 'node[style = "rounded,filled", fillcolor = lightskyblue, shape = rectangle]'
+STYLE["process_style"] = "node[fillcolor = lightseagreen, shape = rectangle]"
+STYLE["value_style"] = 'node[fontname = "Times-Roman", fillcolor = grey, shape = parallelogram]'
 
 
 class DiagramDirective(BaseDirective):
@@ -66,15 +67,13 @@ class DiagramDirective(BaseDirective):
         env = self.state.document.settings.env
         diagrams_dir = self.diagrams_dir
         if diagrams_dir is None:
-            self.add_rst(".. figure:: /images/ImageNotFound.png\n\n"
-                         "    diagram generation was disabled")
+            self.add_rst(".. figure:: /images/ImageNotFound.png\n\n" "    diagram generation was disabled")
             return []
 
         try:
             dot_executable = os.environ["DOT_EXECUTABLE"]
         except KeyError:
-            self.add_rst(".. figure:: /images/ImageNotFound.png\n\n"
-                         "    graphviz not found - diagram could not be rendered.")
+            self.add_rst(".. figure:: /images/ImageNotFound.png\n\n" "    graphviz not found - diagram could not be rendered.")
             return []
 
         # Make sure we have an output directory
@@ -82,18 +81,16 @@ class DiagramDirective(BaseDirective):
             os.makedirs(diagrams_dir)
         diagram_name = self.arguments[0]
         if diagram_name[-4:] != ".dot":
-            raise RuntimeError(
-                "Diagrams need to be referred to by their filename, including '.dot' extension.")
+            raise RuntimeError("Diagrams need to be referred to by their filename, including '.dot' extension.")
 
         in_path = os.path.join(env.srcdir, "diagrams", diagram_name)
         out_path = os.path.join(diagrams_dir, diagram_name[:-4] + ".svg")
 
-        #Generate the diagram
+        # Generate the diagram
         try:
-            in_src = open(in_path, 'r').read()
+            in_src = open(in_path, "r").read()
         except Exception:
-            raise RuntimeError("Cannot find dot-file: '" + diagram_name + "' in '"
-                               + os.path.join(env.srcdir, "diagrams"))
+            raise RuntimeError("Cannot find dot-file: '" + diagram_name + "' in '" + os.path.join(env.srcdir, "diagrams"))
 
         out_src = Template(in_src).substitute(STYLE)
         out_src = out_src.encode()
@@ -109,7 +106,7 @@ class DiagramDirective(BaseDirective):
         return []
 
 
-#------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------
 
 
 def setup(app):
@@ -119,4 +116,4 @@ def setup(app):
     Args:
       app: The main Sphinx application object
     """
-    app.add_directive('diagram', DiagramDirective)
+    app.add_directive("diagram", DiagramDirective)

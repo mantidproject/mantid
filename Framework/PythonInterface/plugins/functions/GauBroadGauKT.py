@@ -11,14 +11,13 @@ import numpy as np
 
 
 class GauBroadGauKT(IFunction1D):
-
     def category(self):
         return "Muon\\MuonSpecific"
 
     def init(self):
         self.declareParameter("A0", 0.2)
-        self.declareParameter("R", 0.1, 'Broadening ratio')
-        self.declareParameter("Delta0", 0.1, 'Central Field width')
+        self.declareParameter("R", 0.1, "Broadening ratio")
+        self.declareParameter("Delta0", 0.1, "Central Field width")
         self.addConstraints("Delta0 >= 0")
 
     def function1D(self, x):
@@ -26,10 +25,10 @@ class GauBroadGauKT(IFunction1D):
         R = self.getParameterValue("R")
         Delta = self.getParameterValue("Delta0")
         omega = R * Delta
-        DeltaEff = np.sqrt(Delta ** 2 + omega ** 2)
-        denom = 1 + R ** 2 + R ** 2 * DeltaEff ** 2 * x ** 2
+        DeltaEff = np.sqrt(Delta**2 + omega**2)
+        denom = 1 + R**2 + R**2 * DeltaEff**2 * x**2
         term1 = (DeltaEff * x) ** 2 / denom
-        return A0 * (1./3. + 2./3. * ((1 + R ** 2) / denom) ** 1.5 * (1 - term1) * np.exp(- term1 / 2))
+        return A0 * (1.0 / 3.0 + 2.0 / 3.0 * ((1 + R**2) / denom) ** 1.5 * (1 - term1) * np.exp(-term1 / 2))
 
 
 FunctionFactory.subscribe(GauBroadGauKT)

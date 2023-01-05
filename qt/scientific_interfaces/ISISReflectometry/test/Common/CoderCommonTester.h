@@ -307,6 +307,7 @@ public:
     declareProperty("Params", "");
     declareProperty("ScaleRHSWorkspace", "");
     declareProperty("PolarizationAnalysis", "");
+    declareProperty("PolarizationEfficiencies", "");
     declareProperty("ReductionType", "");
     declareProperty("SummationType", "");
     declareProperty("IncludePartialBins", "");

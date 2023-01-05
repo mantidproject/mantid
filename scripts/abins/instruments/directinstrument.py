@@ -3,8 +3,7 @@ from typing import Tuple
 
 import numpy as np
 
-from abins.constants import (FLOAT_TYPE, MILLI_EV_TO_WAVENUMBER,
-                             WAVENUMBER_TO_INVERSE_A)
+from abins.constants import FLOAT_TYPE, MILLI_EV_TO_WAVENUMBER, WAVENUMBER_TO_INVERSE_A
 from .instrument import Instrument
 from .broadening import broaden_spectrum, prebin_required_schemes
 
@@ -16,28 +15,26 @@ class DirectInstrument(Instrument):
     determined by a variable incident energy and the corresponding q limits
     are determined by an angular range.
     """
-    def __init__(self,
-                 name: str = 'Direct',
-                 setting: str = '') -> None:
+
+    def __init__(self, name: str = "Direct", setting: str = "") -> None:
         self._name = name
         self._e_init = None
 
         super().__init__(setting=setting)
 
-    def set_incident_energy(self, e_init: float, units: str = 'cm-1'):
+    def set_incident_energy(self, e_init: float, units: str = "cm-1"):
         """
         Setter for incident energy.
 
         :param e_init: new incident energy
         :param units: units of input e_init: 'cm-1' or 'meV'.
         """
-        if units == 'cm-1':
+        if units == "cm-1":
             self._e_init = e_init
-        elif units == 'meV':
+        elif units == "meV":
             self._e_init = e_init * MILLI_EV_TO_WAVENUMBER
         else:
-            raise ValueError("Unknown unit: incident energy should be given "
-                             "in 'cm-1' or 'meV'.")
+            raise ValueError("Unknown unit: incident energy should be given " "in 'cm-1' or 'meV'.")
 
     def get_incident_energy(self) -> float:
         return self._e_init
@@ -46,7 +43,7 @@ class DirectInstrument(Instrument):
         return self.get_incident_energy()
 
     def get_min_wavenumber(self):
-        return 0.
+        return 0.0
 
     def get_angle_range(self):
         raise NotImplementedError()
@@ -69,7 +66,7 @@ class DirectInstrument(Instrument):
         # absolute values in the right order, spanning the whole range.
         if (min_angle < 0) and (max_angle <= 0):
             min_angle, max_angle = -max_angle, -min_angle
-        elif (min_angle < 0):
+        elif min_angle < 0:
             # e.g. if -10 < 2θ < 20, we don't want to set limits 10 < |2θ| < 20
             # as this would omit contributions from the range -10 < θ < 10
             min_angle = 0
@@ -127,7 +124,7 @@ class DirectInstrument(Instrument):
         cos_angle = math.cos(math.radians(angle))
         return k2_i + k2_f - 2 * cos_angle * np.sqrt(k2_i * k2_f)
 
-    def convolve_with_resolution_function(self, frequencies=None, bins=None, s_dft=None, scheme='auto'):
+    def convolve_with_resolution_function(self, frequencies=None, bins=None, s_dft=None, scheme="auto"):
         """
         Convolve discrete frequency spectrum with energy-dependent resolution function for a 2D instrument.
 
@@ -141,18 +138,16 @@ class DirectInstrument(Instrument):
             mesh frequencies and corresponding broadened intensity.
         """
 
-        if scheme == 'auto':
-            scheme = 'interpolate'
+        if scheme == "auto":
+            scheme = "interpolate"
 
         if scheme in prebin_required_schemes:
             s_dft, _ = np.histogram(frequencies, bins=bins, weights=s_dft, density=False)
             frequencies = (bins[1:] + bins[:-1]) / 2
 
-        sigma = np.full(frequencies.size, self.calculate_sigma(frequencies),
-                        dtype=FLOAT_TYPE)
+        sigma = np.full(frequencies.size, self.calculate_sigma(frequencies), dtype=FLOAT_TYPE)
 
-        bin_centres, broadened_spectrum = broaden_spectrum(frequencies, bins, s_dft, sigma,
-                                                           scheme=scheme)
+        bin_centres, broadened_spectrum = broaden_spectrum(frequencies, bins, s_dft, sigma, scheme=scheme)
         return bin_centres, broadened_spectrum
 
     def calculate_sigma(self, frequencies):

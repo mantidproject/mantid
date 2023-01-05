@@ -41,15 +41,15 @@ WorkspaceInput = Union[str, EventWorkspace, Workspace2D]
 
 def create_tube_calibration_ws_by_ws_index_list(integrated_workspace, output_workspace, workspace_index_list):
     """
-       Creates workspace with integrated data for one tube against distance along tube
-       The tube is specified by a list of workspace indices of its spectra
+    Creates workspace with integrated data for one tube against distance along tube
+    The tube is specified by a list of workspace indices of its spectra
 
-       @param integrated_workspace: Workspace of integrated data
-       @param workspace_index_list:  list of workspace indices for the tube
-       @param x_unit: unit of distance ( Pixel)
-       @param show_plot: True = show plot of workspace created, False = just make the workspace.
+    @param integrated_workspace: Workspace of integrated data
+    @param workspace_index_list:  list of workspace indices for the tube
+    @param x_unit: unit of distance ( Pixel)
+    @param show_plot: True = show plot of workspace created, False = just make the workspace.
 
-       Return Value: Workspace created
+    Return Value: Workspace created
 
     """
 
@@ -86,10 +86,9 @@ def get_ypos(work_handle, pixel_float):
     center_low_pixel = int(math.floor(pixel_float))
     center_high_pixel = int(math.ceil(pixel_float))
     idlow, low = get_detector_pos(work_handle, center_low_pixel)  # Get the detector position of the nearest lower pixel
-    idhigh, high = get_detector_pos(work_handle,
-                                    center_high_pixel)  # Get the detector position of the nearest higher pixel
+    idhigh, high = get_detector_pos(work_handle, center_high_pixel)  # Get the detector position of the nearest higher pixel
     center_y = (center_high_pixel - pixel_float) * low.getY() + (pixel_float - center_low_pixel) * high.getY()
-    center_y /= (center_high_pixel - center_low_pixel)
+    center_y /= center_high_pixel - center_low_pixel
     return center_y
 
 
@@ -114,7 +113,7 @@ def fit_edges(fit_par, index, ws, output_ws):
     # get values around the expected center
     all_values = ws.dataY(0)
     right_limit = len(all_values)
-    values = all_values[max(int(centre - margin), 0):min(int(centre + margin), len(all_values))]
+    values = all_values[max(int(centre - margin), 0) : min(int(centre + margin), len(all_values))]
 
     # identify if the edge is a sloping edge or descent edge
     descent_mode = values[0] > values[-1]
@@ -126,8 +125,7 @@ def fit_edges(fit_par, index, ws, output_ws):
         start = max(centre - inner_edge, 0)
         end = min(centre + outer_edge, right_limit)
         edgeMode = 1
-    Fit(InputWorkspace=ws, Function=fit_end_erfc_params(centre, end_grad * edgeMode), StartX=str(start), EndX=str(end),
-        Output=output_ws)
+    Fit(InputWorkspace=ws, Function=fit_end_erfc_params(centre, end_grad * edgeMode), StartX=str(start), EndX=str(end), Output=output_ws)
     return 1  # peakIndex (center) -> parameter B of EndERFC
 
 
@@ -169,11 +167,9 @@ def fit_gaussian(fit_par, index, ws, output_ws):
         start = max(centre - margin, 0)
         end = min(centre + margin, right_limit)
 
-        fit_msg = 'name=LinearBackground,A0=%f;name=Gaussian,Height=%f,PeakCentre=%f,Sigma=%f' % (
-                  background, height, centre, width)
+        fit_msg = "name=LinearBackground,A0=%f;name=Gaussian,Height=%f,PeakCentre=%f,Sigma=%f" % (background, height, centre, width)
 
-        Fit(InputWorkspace=ws, Function=fit_msg,
-            StartX=str(start), EndX=str(end), Output=output_ws)
+        Fit(InputWorkspace=ws, Function=fit_msg, StartX=str(start), EndX=str(end), Output=output_ws)
 
         peak_index = 3
 
@@ -187,12 +183,16 @@ def fit_gaussian(fit_par, index, ws, output_ws):
         # fit the input data as a linear background + gaussian fit
         # it was seen that the best result for static general fitParamters,
         # is to divide the values in two fitting steps
-        Fit(InputWorkspace=ws, Function='name=LinearBackground,A0=%f' % background,
-            StartX=str(start), EndX=str(end), Output='Z1')
-        Fit(InputWorkspace='Z1_Workspace',
-            Function='name=Gaussian,Height=%f,PeakCentre=%f,Sigma=%f' % (height, centre, width),
-            WorkspaceIndex=2, StartX=str(start), EndX=str(end), Output=output_ws)
-        CloneWorkspace(output_ws + '_Workspace', OutputWorkspace='gauss_' + str(index))
+        Fit(InputWorkspace=ws, Function="name=LinearBackground,A0=%f" % background, StartX=str(start), EndX=str(end), Output="Z1")
+        Fit(
+            InputWorkspace="Z1_Workspace",
+            Function="name=Gaussian,Height=%f,PeakCentre=%f,Sigma=%f" % (height, centre, width),
+            WorkspaceIndex=2,
+            StartX=str(start),
+            EndX=str(end),
+            Output=output_ws,
+        )
+        CloneWorkspace(output_ws + "_Workspace", OutputWorkspace="gauss_" + str(index))
         peak_index = 1
 
     return peak_index
@@ -223,8 +223,8 @@ def getPoints(integrated_ws, func_forms, fit_params, which_tube, show_plot=False
     counts_y = numpy.array([integrated_ws.dataY(i)[0] for i in which_tube])
     if len(counts_y) == 0:
         return
-    get_points_ws = CreateWorkspace(range(len(counts_y)), counts_y, OutputWorkspace='TubePlot')
-    calib_points_ws = 'CalibPoint'
+    get_points_ws = CreateWorkspace(range(len(counts_y)), counts_y, OutputWorkspace="TubePlot")
+    calib_points_ws = "CalibPoint"
     results = []
     fitt_y_values = []
     fitt_x_values = []
@@ -236,30 +236,28 @@ def getPoints(integrated_ws, func_forms, fit_params, which_tube, show_plot=False
             peak_index = fit_edges(fit_params, i, get_points_ws, calib_points_ws)
         else:
             peak_index = fit_gaussian(fit_params, i, get_points_ws, calib_points_ws)
-        peak_centre = tuple(ADS.retrieve(calib_points_ws + '_Parameters').row(peak_index).items())[1][1]
+        peak_centre = tuple(ADS.retrieve(calib_points_ws + "_Parameters").row(peak_index).items())[1][1]
         results.append(peak_centre)
 
         if show_plot:
-            ws = ADS.retrieve(calib_points_ws + '_Workspace')
+            ws = ADS.retrieve(calib_points_ws + "_Workspace")
             fitt_y_values.append(copy.copy(ws.dataY(1)))
             fitt_x_values.append(copy.copy(ws.dataX(1)))
 
     if show_plot:
-        CreateWorkspace(OutputWorkspace='FittedData',
-                        DataX=numpy.hstack(fitt_x_values),
-                        DataY=numpy.hstack(fitt_y_values))
+        CreateWorkspace(OutputWorkspace="FittedData", DataX=numpy.hstack(fitt_x_values), DataY=numpy.hstack(fitt_y_values))
     return results
 
 
 def get_ideal_tube_from_n_slits(integrated_workspace, slits):
     """
-       Given N slits for calibration on an ideal tube
-       convert to Y values to form a ideal tube for correctTubeToIdealTube()
+    Given N slits for calibration on an ideal tube
+    convert to Y values to form a ideal tube for correctTubeToIdealTube()
 
-       @param integrated_workspace: Workspace of integrated data
-       @param slits: positions of slits for ideal tube (in pixels)
+    @param integrated_workspace: Workspace of integrated data
+    @param slits: positions of slits for ideal tube (in pixels)
 
-       Return Value: Ideal tube in Y-coords for use by correctTubeToIdealTube()
+    Return Value: Ideal tube in Y-coords for use by correctTubeToIdealTube()
 
     """
     ideal = []
@@ -271,15 +269,15 @@ def get_ideal_tube_from_n_slits(integrated_workspace, slits):
 
 def correct_tube(AP, BP, CP, nDets):
     """
-       Corrects position errors in a tube in the same manner as is done for MERLIN
-       according to an algorithm used by Rob Bewley in his MATLAB code.
+    Corrects position errors in a tube in the same manner as is done for MERLIN
+    according to an algorithm used by Rob Bewley in his MATLAB code.
 
-       @param AP: Fit position of left (in pixels)
-       @param BP: Fit position of right (in pixels)
-       @param CP: Fit position of centre (in pixels)
-       @param nDets: Number of pixel detectors in tube
+    @param AP: Fit position of left (in pixels)
+    @param BP: Fit position of right (in pixels)
+    @param CP: Fit position of centre (in pixels)
+    @param nDets: Number of pixel detectors in tube
 
-       Return Value: Array of corrected Xs  (in pixels)
+    Return Value: Array of corrected Xs  (in pixels)
     """
 
     AO = AP / (nDets - AP)
@@ -302,12 +300,14 @@ def correct_tube(AP, BP, CP, nDets):
     return x_bin_new
 
 
-def correct_tube_to_ideal_tube(tube_points: List,
-                               ideal_tube_points: List,
-                               n_detectors: int,
-                               test_mode: bool = False,
-                               polin_fit: int = 2,
-                               parameters_table: Optional[str] = None) -> numpy.ndarray:
+def correct_tube_to_ideal_tube(
+    tube_points: List,
+    ideal_tube_points: List,
+    n_detectors: int,
+    test_mode: bool = False,
+    polin_fit: int = 2,
+    parameters_table: Optional[str] = None,
+) -> numpy.ndarray:
     r"""
     Corrects position errors in a tube given an array of points and their ideal positions.
 
@@ -327,8 +327,7 @@ def correct_tube_to_ideal_tube(tube_points: List,
 
     # Check the arguments
     if len(tube_points) != len(ideal_tube_points):
-        print("Number of points in tube {0} must equal number of points in ideal tube {1}".
-              format(len(tube_points), len(ideal_tube_points)))
+        print("Number of points in tube {0} must equal number of points in ideal tube {1}".format(len(tube_points), len(ideal_tube_points)))
         return x_result
 
     # Filter out rogue slit points
@@ -342,9 +341,8 @@ def correct_tube_to_ideal_tube(tube_points: List,
         else:
             missed_tube_points.append(i + 1)
 
-    # State number of rogue slit points, if any
-        print("Only {0} out of {1} slit points used. Missed {2}".format(len(used_tube_points), len(tube_points),
-                                                                        missed_tube_points))
+        # State number of rogue slit points, if any
+        print("Only {0} out of {1} slit points used. Missed {2}".format(len(used_tube_points), len(tube_points), missed_tube_points))
 
     # Check number of usable points
     if len(used_tube_points) < 3:
@@ -354,17 +352,22 @@ def correct_tube_to_ideal_tube(tube_points: List,
     # Fit quadratic to ideal tube points
     CreateWorkspace(dataX=used_tube_points, dataY=used_ideal_tube_points, OutputWorkspace="PolyFittingWorkspace")
     try:
-        Fit(InputWorkspace="PolyFittingWorkspace", Function='name=Polynomial,n=%d' % polin_fit, StartX=str(0.0),
-            EndX=str(n_detectors), Output="QF")
+        Fit(
+            InputWorkspace="PolyFittingWorkspace",
+            Function="name=Polynomial,n=%d" % polin_fit,
+            StartX=str(0.0),
+            EndX=str(n_detectors),
+            Output="QF",
+        )
     except:
         print("Fit failed")
         return []
 
-    param_q_f = ADS.retrieve('QF_Parameters')
+    param_q_f = ADS.retrieve("QF_Parameters")
 
     # get the coefficients, get the Value from every row, and exclude the last one because it is the error
     # rowErr is the last one, it could be used to check accuracy of fit
-    c = [r['Value'] for r in param_q_f][:-1]
+    c = [r["Value"] for r in param_q_f][:-1]
 
     # Modify the output array by the fitted quadratic
     x_result = numpy.polynomial.polynomial.polyval(list(range(n_detectors)), c)
@@ -383,13 +386,15 @@ def correct_tube_to_ideal_tube(tube_points: List,
     return x_result
 
 
-def getCalibratedPixelPositions(input_workspace: WorkspaceInput,
-                                tube_positions: ArrayInt,
-                                ideal_tube_positions: ArrayInt,
-                                which_tube: ArrayInt,
-                                peak_test_mode: bool = False,
-                                polin_fit: int = 2,
-                                parameters_table: Optional[str] = None) -> Tuple[List[int], List[int]]:
+def getCalibratedPixelPositions(
+    input_workspace: WorkspaceInput,
+    tube_positions: ArrayInt,
+    ideal_tube_positions: ArrayInt,
+    which_tube: ArrayInt,
+    peak_test_mode: bool = False,
+    polin_fit: int = 2,
+    parameters_table: Optional[str] = None,
+) -> Tuple[List[int], List[int]]:
     r"""
     Get the calibrated detector positions for one tube.
 
@@ -417,8 +422,9 @@ def getCalibratedPixelPositions(input_workspace: WorkspaceInput,
         return det_IDs, det_positions
 
     # Correct positions of detectors in tube by quadratic fit. If so requested, store the table of fit parameters
-    pixels = correct_tube_to_ideal_tube(tube_positions, ideal_tube_positions, n_dets, test_mode=peak_test_mode,
-                                        polin_fit=polin_fit, parameters_table=parameters_table)
+    pixels = correct_tube_to_ideal_tube(
+        tube_positions, ideal_tube_positions, n_dets, test_mode=peak_test_mode, polin_fit=polin_fit, parameters_table=parameters_table
+    )
     if len(pixels) != n_dets:
         print("Tube correction failed.")
         return det_IDs, det_positions
@@ -474,20 +480,20 @@ def read_peak_file(file_name):
     # MERLIN/door1/tube_1_1 [34.199347724575574, 525.5864438725401, 1001.7456248836971]
     # Will be splited as:
     # ['MERLIN/door1/tube_1_1', '', '34.199347724575574', '', '525.5864438725401', '', '1001.7456248836971', '', '', '']
-    pattern = re.compile(r'[\[\],\s\r]')
-    save_directory = config['defaultsave.directory']
+    pattern = re.compile(r"[\[\],\s\r]")
+    save_directory = config["defaultsave.directory"]
     pfile = os.path.join(save_directory, file_name)
-    for line in open(pfile, 'r'):
+    for line in open(pfile, "r"):
         # check if the entry is a comment line
-        if line.startswith('#'):
+        if line.startswith("#"):
             continue
         # split all values
         line_vals = re.split(pattern, line)
         id_ = line_vals[0]
-        if id_ == '':
+        if id_ == "":
             continue
         try:
-            f_values = [float(v) for v in line_vals[1:] if v != '']
+            f_values = [float(v) for v in line_vals[1:] if v != ""]
         except ValueError:
             continue
 
@@ -497,19 +503,22 @@ def read_peak_file(file_name):
 
 ### THESE FUNCTIONS NEXT SHOULD BE THE ONLY FUNCTIONS THE USER CALLS FROM THIS FILE
 
-def getCalibration(input_workspace: Union[str, Workspace2D],
-                   tubeSet: TubeSpec,
-                   calibTable: TableWorkspace,
-                   fitPar: TubeCalibFitParams,
-                   iTube:IdealTube,
-                   peaksTable: TableWorkspace,
-                   overridePeaks: Dict[int, List[Any]] = dict(),
-                   excludeShortTubes: float = 0.0,
-                   plotTube: List[int] = [],
-                   range_list: Optional[List[int]] = None,
-                   polinFit: int = 2,
-                   peaksTestMode: bool = False,
-                   parameters_table_group: Optional[str] = None) -> None:
+
+def getCalibration(
+    input_workspace: Union[str, Workspace2D],
+    tubeSet: TubeSpec,
+    calibTable: TableWorkspace,
+    fitPar: TubeCalibFitParams,
+    iTube: IdealTube,
+    peaksTable: TableWorkspace,
+    overridePeaks: Dict[int, List[Any]] = dict(),
+    excludeShortTubes: float = 0.0,
+    plotTube: List[int] = [],
+    range_list: Optional[List[int]] = None,
+    polinFit: int = 2,
+    peaksTestMode: bool = False,
+    parameters_table_group: Optional[str] = None,
+) -> None:
     """
     Get the results the calibration and put them in the calibration table provided.
 
@@ -556,8 +565,7 @@ def getCalibration(input_workspace: Union[str, Workspace2D],
 
         print("Calibrating tube", i + 1, "of", n_tubes, tubeSet.getTubeName(i))
         if len(wht) < 1:
-            print("Unable to get any workspace indices (spectra) for this tube. Tube", tubeSet.getTubeName(i),
-                  "not calibrated.")
+            print("Unable to get any workspace indices (spectra) for this tube. Tube", tubeSet.getTubeName(i), "not calibrated.")
             # skip this tube
             continue
 
@@ -578,8 +586,8 @@ def getCalibration(input_workspace: Union[str, Workspace2D],
             plot_this_tube = i in plotTube
             actual_tube = getPoints(ws, iTube.getFunctionalForms(), fitPar, wht, show_plot=plot_this_tube)
             if plot_this_tube:
-                RenameWorkspace('FittedData', OutputWorkspace='FittedTube%d' % (i))
-                RenameWorkspace('TubePlot', OutputWorkspace='TubePlot%d' % (i))
+                RenameWorkspace("FittedData", OutputWorkspace="FittedTube%d" % (i))
+                RenameWorkspace("TubePlot", OutputWorkspace="TubePlot%d" % (i))
 
         # Set the peak positions at the peakTable
         peaksTable.addRow([tubeSet.getTubeName(i)] + list(actual_tube))
@@ -590,31 +598,40 @@ def getCalibration(input_workspace: Union[str, Workspace2D],
         if parameters_table_group is None:
             parameters_table = None
         else:
-            parameters_table = f'{parameters_table_group}_{i}'
+            parameters_table = f"{parameters_table_group}_{i}"
             parameters_tables.append(parameters_table)
-        det_id_list, det_position_list = getCalibratedPixelPositions(ws, actual_tube, iTube.getArray(), wht,
-                                                                     peaksTestMode, polinFit,
-                                                                     parameters_table=parameters_table)
+        det_id_list, det_position_list = getCalibratedPixelPositions(
+            ws, actual_tube, iTube.getArray(), wht, peaksTestMode, polinFit, parameters_table=parameters_table
+        )
         # save the detector positions to calibTable
         if len(det_id_list) == len(wht):  # We have corrected positions
             for j in range(len(wht)):
-                next_row = {'Detector ID': det_id_list[j], 'Detector Position': det_position_list[j]}
+                next_row = {"Detector ID": det_id_list[j], "Detector Position": det_position_list[j]}
                 calibTable.addRow(next_row)
 
     if len(all_skipped) > 0:
-        print("%i histogram(s) were excluded from the calibration since they did not have an assigned detector." % len(
-            all_skipped))
+        print("%i histogram(s) were excluded from the calibration since they did not have an assigned detector." % len(all_skipped))
 
     # Create the WorkspaceGroup containing the fit parameters tables
     if len(parameters_tables) > 0:
         GroupWorkspaces(InputWorkspaces=parameters_tables, OutputWorkspace=parameters_table_group)
 
     # Delete temporary workspaces used in the calibration
-    for ws_name in ('TubePlot', 'CalibPoint_NormalisedCovarianceMatrix',
-                    'CalibPoint_NormalisedCovarianceMatrix', 'CalibPoint_NormalisedCovarianceMatrix',
-                    'CalibPoint_Parameters', 'CalibPoint_Workspace', 'PolyFittingWorkspace',
-                    'QF_NormalisedCovarianceMatrix', 'QF_Parameters', 'QF_Workspace',
-                    'Z1_Workspace', 'Z1_Parameters', 'Z1_NormalisedCovarianceMatrix'):
+    for ws_name in (
+        "TubePlot",
+        "CalibPoint_NormalisedCovarianceMatrix",
+        "CalibPoint_NormalisedCovarianceMatrix",
+        "CalibPoint_NormalisedCovarianceMatrix",
+        "CalibPoint_Parameters",
+        "CalibPoint_Workspace",
+        "PolyFittingWorkspace",
+        "QF_NormalisedCovarianceMatrix",
+        "QF_Parameters",
+        "QF_Workspace",
+        "Z1_Workspace",
+        "Z1_Parameters",
+        "Z1_NormalisedCovarianceMatrix",
+    ):
         try:
             DeleteWorkspace(ws_name)
         except:
@@ -623,12 +640,12 @@ def getCalibration(input_workspace: Union[str, Workspace2D],
 
 def getCalibrationFromPeakFile(ws, calibTable, iTube, PeakFile):
     """
-       Get the results the calibration and put them in the calibration table provided.
+    Get the results the calibration and put them in the calibration table provided.
 
-       @param ws: Integrated Workspace with tubes to be calibrated
-       @param calibTable: Calibration table into which the calibration results are placed
-       @param  iTube: The ideal tube
-       @param PeakFile: File of peaks for calibration
+    @param ws: Integrated Workspace with tubes to be calibrated
+    @param calibTable: Calibration table into which the calibration results are placed
+    @param  iTube: The ideal tube
+    @param PeakFile: File of peaks for calibration
 
     """
 
@@ -658,31 +675,31 @@ def getCalibrationFromPeakFile(ws, calibTable, iTube, PeakFile):
 
         if len(det_id_list) == len(wht):  # We have corrected positions
             for j in range(len(wht)):
-                next_row = {'Detector ID': det_id_list[j], 'Detector Position': det_pos_list[j]}
+                next_row = {"Detector ID": det_id_list[j], "Detector Position": det_pos_list[j]}
                 calibTable.addRow(next_row)
 
     if n_tubes == 0:
         return
 
     # Delete temporary workspaces for getting new detector positions
-    DeleteWorkspace('PolyFittingWorkspace')
-    DeleteWorkspace('QF_NormalisedCovarianceMatrix')
-    DeleteWorkspace('QF_Parameters')
-    DeleteWorkspace('QF_Workspace')
+    DeleteWorkspace("PolyFittingWorkspace")
+    DeleteWorkspace("QF_NormalisedCovarianceMatrix")
+    DeleteWorkspace("QF_Parameters")
+    DeleteWorkspace("QF_Workspace")
 
 
 ## implement this function
 def constructIdealTubeFromRealTube(ws, tube, fitPar, funcForm):
     """
-   Construct an ideal tube from an actual tube (assumed ideal)
+    Construct an ideal tube from an actual tube (assumed ideal)
 
-   :param ws: integrated workspace
-   :param tube: specification of one tube (if several tubes, only first tube is used)
-   :param fitPar: initial fit parameters for peak of the tube
-   :param funcForm: listing the type of known positions 1=Gaussian; 2=edge
-   :rtype: IdealTube
+    :param ws: integrated workspace
+    :param tube: specification of one tube (if several tubes, only first tube is used)
+    :param fitPar: initial fit parameters for peak of the tube
+    :param funcForm: listing the type of known positions 1=Gaussian; 2=edge
+    :rtype: IdealTube
 
-   """
+    """
     # Get workspace indices
     ideal_tube = IdealTube()
 

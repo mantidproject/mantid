@@ -16,8 +16,8 @@ class SaveOtherPresenter(object):
     def __init__(self, parent_presenter=None):
         self._parent_presenter = parent_presenter
         self._view = None
-        self.current_directory = ConfigService['defaultsave.directory']
-        self.filename = ''
+        self.current_directory = ConfigService["defaultsave.directory"]
+        self.filename = ""
         self.workspace_list = AnalysisDataService.getObjectNames()
 
     def set_view(self, view=None):
@@ -48,10 +48,12 @@ class SaveOtherPresenter(object):
             try:
                 save_workspace_to_file(name_to_save, file_formats, filename, additional_run_numbers)
             except RuntimeError:
-                logger.warning(f"Cannot save {name_to_save} using SANSSave. "
-                               "This workspace needs to be the result of a SANS reduction, "
-                               "i.e. it can only be 1D or 2D if the second axis "
-                               "is numeric.")
+                logger.warning(
+                    f"Cannot save {name_to_save} using SANSSave. "
+                    "This workspace needs to be the result of a SANS reduction, "
+                    "i.e. it can only be 1D or 2D if the second axis "
+                    "is numeric."
+                )
             self._view.increment_progress()
 
     def on_item_selection_changed(self):
@@ -59,9 +61,9 @@ class SaveOtherPresenter(object):
         self._view.progress_bar_value = 0
 
         if len(self.selected_workspaces) > 1:
-            self._view.rename_filebox('Suffix')
+            self._view.rename_filebox("Suffix")
         else:
-            self._view.rename_filebox('Filename')
+            self._view.rename_filebox("Filename")
 
     def on_directory_changed(self, directory):
         self.current_directory = directory
@@ -76,7 +78,7 @@ class SaveOtherPresenter(object):
         if filename and len(selected_workspaces) == 1:
             return [os.path.join(self.current_directory, filename)]
         elif filename:
-            return [os.path.join(self.current_directory, x + '_' + filename) for x in selected_workspaces]
+            return [os.path.join(self.current_directory, x + "_" + filename) for x in selected_workspaces]
         else:
             return [os.path.join(self.current_directory, x) for x in selected_workspaces]
 
@@ -84,7 +86,7 @@ class SaveOtherPresenter(object):
         simple_list = self._view.get_selected_workspaces()
         for workspace_name in simple_list:
             workspace = AnalysisDataService.retrieve(workspace_name)
-            if issubclass(type(workspace),WorkspaceGroup):
+            if issubclass(type(workspace), WorkspaceGroup):
                 simple_list.remove(workspace_name)
                 simple_list += list(workspace.getNames())
         return list(set(simple_list))

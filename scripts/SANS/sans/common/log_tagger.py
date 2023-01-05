@@ -9,7 +9,7 @@
 # pylint: disable=invalid-name
 
 from hashlib import sha224
-from mantid.api import (MatrixWorkspace, WorkspaceGroup)
+from mantid.api import MatrixWorkspace, WorkspaceGroup
 
 
 def get_hash_value(value):
@@ -21,8 +21,7 @@ def get_hash_value(value):
     """
     hash_value = sha224(str(value).encode("utf8")).hexdigest()
     if not hash_value or hash_value is None:
-        raise RuntimeError("SANSLogTagger: Something went wrong when trying to get the hash"
-                           " for {0}.".format(str(value)))
+        raise RuntimeError("SANSLogTagger: Something went wrong when trying to get the hash" " for {0}.".format(str(value)))
     return hash_value
 
 
@@ -32,9 +31,11 @@ def check_if_valid_tag_and_workspace(tag, workspace):
     :param tag: the tag
     :param workspace: the workspace
     """
-    if not(isinstance(tag, str) and isinstance(workspace, MatrixWorkspace)):
-        raise RuntimeError("SANSLogTagger: Either tag {0} or workspace are invalid. The tag has to be a string"
-                           " and the workspace {1} has to be a MatrixWorkspace".format(str(tag), str(workspace)))
+    if not (isinstance(tag, str) and isinstance(workspace, MatrixWorkspace)):
+        raise RuntimeError(
+            "SANSLogTagger: Either tag {0} or workspace are invalid. The tag has to be a string"
+            " and the workspace {1} has to be a MatrixWorkspace".format(str(tag), str(workspace))
+        )
 
 
 def set_tag(tag, value, workspace):

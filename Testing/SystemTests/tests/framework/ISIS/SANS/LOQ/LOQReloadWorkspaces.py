@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name,no-init
+# pylint: disable=invalid-name,no-init
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from ISISCommandInterface import *
@@ -47,42 +47,42 @@ class SANSLOQReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
     """
 
     def setUp(self):
-        self.load_run = '54431.raw'
+        self.load_run = "54431.raw"
         config["default.instrument"] = "LOQ"
         LOQ()
         MaskFile("MASK.094AA")
-        self.control_name = '54431main_1D_2.2_10.0'
-        self.inst_comp = 'main-detector-bank'
+        self.control_name = "54431main_1D_2.2_10.0"
+        self.inst_comp = "main-detector-bank"
 
     def tearDown(self):
         mtd.clear()
 
     def test_accept_loaded_workspace_only_if_reload_false(self):
         my_workspace = Load(self.load_run)
-        #set the value for my_workspace to ensure it is the one used
+        # set the value for my_workspace to ensure it is the one used
         aux = my_workspace.dataY(0)
-        aux[10]=5
-        my_workspace.setY(0,aux)
+        aux[10] = 5
+        my_workspace.setY(0, aux)
         # ask to use the loaded workspace
-        AssignSample(my_workspace,reload=False)
+        AssignSample(my_workspace, reload=False)
 
         ws_name = ReductionSingleton().get_sample().get_wksp_name()
 
         self.assertTrue(ws_name, my_workspace.name())
 
-        self.assertTrue(my_workspace.dataY(0)[10],5)
+        self.assertTrue(my_workspace.dataY(0)[10], 5)
         # ensure that it is able to execute the reduction
         Reduce()
         self.assertTrue(self.control_name in mtd)
 
     def test_accept_loaded_workspace_but_reload_the_data_file_if_reload_true(self):
         my_workspace = Load(self.load_run)
-        #set the value for my_workspace to ensure it is the one used
+        # set the value for my_workspace to ensure it is the one used
         aux = my_workspace.dataY(0)
-        aux[10]=5
-        my_workspace.setY(0,aux)
+        aux[10] = 5
+        my_workspace.setY(0, aux)
         # ask to use the loaded workspace
-        AssignSample(my_workspace,reload=True)
+        AssignSample(my_workspace, reload=True)
 
         ws_name = ReductionSingleton().get_sample().get_wksp_name()
         # it is different, because, it will compose the name using its rule,
@@ -93,7 +93,7 @@ class SANSLOQReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
 
     def test_should_not_accept_loaded_workspace_if_moved(self):
         my_workspace = Load(self.load_run)
-        MoveInstrumentComponent(my_workspace,self.inst_comp,X=2,Y=1,Z=0)
+        MoveInstrumentComponent(my_workspace, self.inst_comp, X=2, Y=1, Z=0)
         ## attempt to use a workspace that has been moved
         self.assertRaises(RuntimeError, AssignSample, my_workspace, False)
 
@@ -116,7 +116,7 @@ class SANSLOQReductionShouldAcceptLoadedWorkspaceSystemTest(systemtesting.Mantid
         self._success = False
         # Custom code to create and run this single test suite
         suite = unittest.TestSuite()
-        suite.addTest( unittest.makeSuite(self.cl, "test"))
+        suite.addTest(unittest.makeSuite(self.cl, "test"))
         runner = unittest.TextTestRunner()
         # Run using either runner
         res = runner.run(suite)
@@ -132,37 +132,37 @@ class SANSLOQTransFitWorkspace2DWithLoadedWorkspace(systemtesting.MantidSystemTe
     def runTest(self):
         config["default.instrument"] = "LOQ"
         LOQ()
-        MaskFile('MASK.094AA')
+        MaskFile("MASK.094AA")
         Gravity(False)
         Set2D()
         Detector("main-detector-bank")
-        Sample = LoadRaw('54431.raw')
-        AssignSample(Sample,False)
-        Can = LoadRaw('54432.raw')
-        AssignCan(Can,False)
-        LimitsWav(3,4, 0.2, 'LIN')
-        TransFit('LOG',3.0,8.0)
-        Sample_Trans = LoadRaw('54435.raw')
-        Sample_Direct = LoadRaw('54433.raw')
+        Sample = LoadRaw("54431.raw")
+        AssignSample(Sample, False)
+        Can = LoadRaw("54432.raw")
+        AssignCan(Can, False)
+        LimitsWav(3, 4, 0.2, "LIN")
+        TransFit("LOG", 3.0, 8.0)
+        Sample_Trans = LoadRaw("54435.raw")
+        Sample_Direct = LoadRaw("54433.raw")
         TransmissionSample(Sample_Trans, Sample_Direct, False)
-        Can_Trans = LoadRaw('54434.raw')
-        Can_Direct = LoadRaw('54433.raw')
+        Can_Trans = LoadRaw("54434.raw")
+        Can_Direct = LoadRaw("54433.raw")
         TransmissionCan(Can_Trans, Can_Direct, False)
 
-        #run the reduction
-        WavRangeReduction(3, 4, False, '_suff')
+        # run the reduction
+        WavRangeReduction(3, 4, False, "_suff")
 
     def validate(self):
-        self.disableChecking.append('SpectraMap')
-        #when comparing LOQ files you seem to need the following
-        self.disableChecking.append('Axes')
-        self.disableChecking.append('Instrument')
-        return '54431main_2D_3.0_4.0_suff','LOQTransFitWorkspace2D.nxs'
+        self.disableChecking.append("SpectraMap")
+        # when comparing LOQ files you seem to need the following
+        self.disableChecking.append("Axes")
+        self.disableChecking.append("Instrument")
+        return "54431main_2D_3.0_4.0_suff", "LOQTransFitWorkspace2D.nxs"
 
 
 @ISISSansSystemTest(SANSInstrument.LOQ)
 class SANSLOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1(systemtesting.MantidSystemTest):
-    """ It will repeat the test done at SANSLOQCentreNoGrav but using
+    """It will repeat the test done at SANSLOQCentreNoGrav but using
     loaded workspaces
     """
 
@@ -176,27 +176,27 @@ class SANSLOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1(systemtesting.
 
         Set1D()
         Detector("rear-detector")
-        MaskFile('MASK.094AA')
+        MaskFile("MASK.094AA")
         Gravity(False)
-        Sample = LoadRaw('54431.raw')
-        Trans_Sample = LoadRaw('54435.raw')
-        Trans_Direct = LoadRaw('54433.raw')
-        Can = LoadRaw('54432.raw')
-        CanTrans_Sample = LoadRaw('54434.raw')
-        CanTrans_Direct = LoadRaw('54433.raw')
+        Sample = LoadRaw("54431.raw")
+        Trans_Sample = LoadRaw("54435.raw")
+        Trans_Direct = LoadRaw("54433.raw")
+        Can = LoadRaw("54432.raw")
+        CanTrans_Sample = LoadRaw("54434.raw")
+        CanTrans_Direct = LoadRaw("54433.raw")
 
         AssignSample(Sample, False)
         TransmissionSample(Trans_Sample, Trans_Direct, False)
         AssignCan(Can, False)
         TransmissionCan(CanTrans_Sample, CanTrans_Direct, False)
 
-        FindBeamCentre(60,200, 9)
+        FindBeamCentre(60, 200, 9)
 
         WavRangeReduction(3, 9, DefaultTrans)
 
     def validate(self):
-        self.disableChecking.append('Instrument')
-        return '54431main_1D_3.0_9.0','LOQCentreNoGravSearchCentreFixed.nxs'
+        self.disableChecking.append("Instrument")
+        return "54431main_1D_3.0_9.0", "LOQCentreNoGravSearchCentreFixed.nxs"
 
 
 @ISISSansSystemTest(SANSInstrument.LOQ)
@@ -212,14 +212,14 @@ class SANSLOQReductionOnLoadedWorkspaceMustProduceTheSameResult_2(systemtesting.
 
         Set1D()
         Detector("rear-detector")
-        MaskFile('MASK.094AA')
+        MaskFile("MASK.094AA")
         Gravity(False)
-        Sample = LoadRaw('54431.raw')
-        Trans_Sample = LoadRaw('54435.raw')
-        Trans_Direct = LoadRaw('54433.raw')
-        Can = LoadRaw('54432.raw')
-        CanTrans_Sample = LoadRaw('54434.raw')
-        CanTrans_Direct = LoadRaw('54433.raw')
+        Sample = LoadRaw("54431.raw")
+        Trans_Sample = LoadRaw("54435.raw")
+        Trans_Direct = LoadRaw("54433.raw")
+        Can = LoadRaw("54432.raw")
+        CanTrans_Sample = LoadRaw("54434.raw")
+        CanTrans_Direct = LoadRaw("54433.raw")
 
         SetCentre(324.765, 327.670)
 
@@ -234,27 +234,26 @@ class SANSLOQReductionOnLoadedWorkspaceMustProduceTheSameResult_2(systemtesting.
         # Need to disable checking of the Spectra-Detector map becauseit isn't
         # fully saved out to the nexus file (it's limited to the spectra that
         # are actually present in the saved workspace).
-        self.disableChecking.append('SpectraMap')
-        self.disableChecking.append('Axes')
-        self.disableChecking.append('Instrument')
+        self.disableChecking.append("SpectraMap")
+        self.disableChecking.append("Axes")
+        self.disableChecking.append("Instrument")
 
-        return '54431main_1D_3.0_9.0','LOQCentreNoGrav_V2.nxs'
+        return "54431main_1D_3.0_9.0", "LOQCentreNoGrav_V2.nxs"
 
 
 @ISISSansSystemTest(SANSInstrument.LOQ)
 class SANSLOQCan2DReloadWorkspace(systemtesting.MantidSystemTest):
-
     def runTest(self):
         config["default.instrument"] = "LOQ"
         LOQ()
         Set2D()
         Detector("main-detector-bank")
-        MaskFile('MASK.094AA')
+        MaskFile("MASK.094AA")
         # apply some small artificial shift
-        SetDetectorOffsets('REAR', -1.0, 1.0, 0.0, 0.0, 0.0, 0.0)
+        SetDetectorOffsets("REAR", -1.0, 1.0, 0.0, 0.0, 0.0, 0.0)
         Gravity(True)
-        sample = Load('99630')
-        can = Load('99631')
+        sample = Load("99630")
+        can = Load("99631")
         AssignSample(sample, False)
         AssignCan(can, False)
 
@@ -264,9 +263,9 @@ class SANSLOQCan2DReloadWorkspace(systemtesting.MantidSystemTest):
         # Need to disable checking of the Spectra-Detector map because it isn't
         # fully saved out to the nexus file (it's limited to the spectra that
         # are actually present in the saved workspace).
-        self.disableChecking.append('SpectraMap')
-        self.disableChecking.append('Instrument')
-        #when comparing LOQ files you seem to need the following
-        self.disableChecking.append('Axes')
+        self.disableChecking.append("SpectraMap")
+        self.disableChecking.append("Instrument")
+        # when comparing LOQ files you seem to need the following
+        self.disableChecking.append("Axes")
         # the change in number is because the run number reported from 99630 is 53615
-        return '53615main_2D_2.2_10.0','SANSLOQCan2D.nxs'
+        return "53615main_2D_2.2_10.0", "SANSLOQCan2D.nxs"

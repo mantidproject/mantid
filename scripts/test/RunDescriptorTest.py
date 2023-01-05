@@ -18,7 +18,6 @@ from mantid.simpleapi import *
 # -----------------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------------
 class RunDescriptorTest(unittest.TestCase):
-
     def __init__(self, methodName):
         self.prop_man = PropertyManager("MAR")
         return super(RunDescriptorTest, self).__init__(methodName)
@@ -31,16 +30,16 @@ class RunDescriptorTest(unittest.TestCase):
         api.AnalysisDataService.clear()
 
     @staticmethod
-    def getInstrument(InstrumentName='MAR'):
-        """ test method used to obtain default instrument for testing """
+    def getInstrument(InstrumentName="MAR"):
+        """test method used to obtain default instrument for testing"""
         idf_file = api.ExperimentInfo.getInstrumentFilename(InstrumentName)
-        tmp_ws_name = '__empty_' + InstrumentName
+        tmp_ws_name = "__empty_" + InstrumentName
         if not mtd.doesExist(tmp_ws_name):
             LoadEmptyInstrument(Filename=idf_file, OutputWorkspace=tmp_ws_name)
         return mtd[tmp_ws_name].getInstrument()
 
     def test_descr_basic(self):
-        propman = PropertyManager('MAR')
+        propman = PropertyManager("MAR")
 
         self.assertEqual(propman.sample_run, None)
         self.assertEqual(PropertyManager.sample_run.get_workspace(), None)
@@ -48,8 +47,8 @@ class RunDescriptorTest(unittest.TestCase):
         propman.sample_run = 10
         self.assertEqual(propman.sample_run, 10)
 
-        run_ws = CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=1, BankPixelWidth=4, NumEvents=100)
-        propman.sample_run = 'run_ws'
+        run_ws = CreateSampleWorkspace(Function="Multiple Peaks", NumBanks=1, BankPixelWidth=4, NumEvents=100)
+        propman.sample_run = "run_ws"
         self.assertEqual(PropertyManager.sample_run.run_number(), 0)
 
         stor_ws = PropertyManager.sample_run.get_workspace()
@@ -57,10 +56,10 @@ class RunDescriptorTest(unittest.TestCase):
 
         self.assertTrue(rez[0])
 
-        propman.sample_run = 'MAR11001.RAW'
-        self.assertFalse('run_ws' in mtd)
+        propman.sample_run = "MAR11001.RAW"
+        self.assertFalse("run_ws" in mtd)
         self.assertEqual(PropertyManager.sample_run.run_number(), 11001)
-        self.assertEqual(PropertyManager.sample_run._fext, '.RAW')
+        self.assertEqual(PropertyManager.sample_run._fext, ".RAW")
 
     def test_descr_dependend(self):
         propman = self.prop_man
@@ -91,32 +90,32 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertGreater(len(file), 0)
 
         ext = PropertyManager.sample_run.get_fext()
-        self.assertEqual(ext.casefold(), '.raw'.casefold())
+        self.assertEqual(ext.casefold(), ".raw".casefold())
 
-        PropertyManager.sample_run.set_file_ext('nxs')
+        PropertyManager.sample_run.set_file_ext("nxs")
         ext = PropertyManager.sample_run.get_fext()
-        self.assertEqual(ext.casefold(), '.nxs'.casefold())
+        self.assertEqual(ext.casefold(), ".nxs".casefold())
 
-        test_dir = config.getString('defaultsave.directory')
+        test_dir = config.getString("defaultsave.directory")
 
-        testFile1 = os.path.normpath(test_dir + 'MAR101111.nxs')
-        testFile2 = os.path.normpath(test_dir + 'MAR101111.raw')
+        testFile1 = os.path.normpath(test_dir + "MAR101111.nxs")
+        testFile2 = os.path.normpath(test_dir + "MAR101111.raw")
 
         # create two test files to check search for appropriate extension
-        f = open(testFile1, 'w')
-        f.write('aaaaaa')
+        f = open(testFile1, "w")
+        f.write("aaaaaa")
         f.close()
 
-        f = open(testFile2, 'w')
-        f.write('bbbb')
+        f = open(testFile2, "w")
+        f.write("bbbb")
         f.close()
 
         propman.sample_run = 101111
-        PropertyManager.sample_run.set_file_ext('nxs')
+        PropertyManager.sample_run.set_file_ext("nxs")
 
         ok, file = PropertyManager.sample_run.find_file(propman)
         self.assertEqual(testFile1, os.path.normpath(file))
-        PropertyManager.sample_run.set_file_ext('.raw')
+        PropertyManager.sample_run.set_file_ext(".raw")
         ok, file = PropertyManager.sample_run.find_file(propman)
         self.assertEqual(testFile2, os.path.normpath(file))
 
@@ -126,24 +125,23 @@ class RunDescriptorTest(unittest.TestCase):
     def test_alsk_one_find_another_ext_file(self):
         propman = self.prop_man
         propman.sample_run = 11001
-        PropertyManager.sample_run.set_file_ext('nxs')
+        PropertyManager.sample_run.set_file_ext("nxs")
 
         ok, file = PropertyManager.sample_run.find_file(propman)
         self.assertTrue(ok)
         self.assertGreater(len(file), 12)
 
         ext = PropertyManager.sample_run.get_fext()
-        self.assertEqual(ext.casefold(), '.raw'.casefold())
+        self.assertEqual(ext.casefold(), ".raw".casefold())
 
     def test_alsk_one_find_another_ext_blocked(self):
         propman = self.prop_man
         propman.sample_run = 11001
-        PropertyManager.sample_run.set_file_ext('raw')
+        PropertyManager.sample_run.set_file_ext("raw")
 
-        ok, file = PropertyManager.sample_run.find_file(propman,force_extension='.nxs')
+        ok, file = PropertyManager.sample_run.find_file(propman, force_extension=".nxs")
         self.assertFalse(ok)
-        self.assertEqual(file.strip(),
-                         '*** Rejecting file matching hint: MAR11001.nxs as found file has wrong extension: .raw')
+        self.assertEqual(file.strip(), "*** Rejecting file matching hint: MAR11001.nxs as found file has wrong extension: .raw")
 
     #
     def test_load_workspace(self):
@@ -151,10 +149,10 @@ class RunDescriptorTest(unittest.TestCase):
 
         # MARI run with number 11001 and extension raw must among unit test files
         propman.sample_run = 11001
-        PropertyManager.sample_run.set_file_ext('nxs')
+        PropertyManager.sample_run.set_file_ext("nxs")
 
         ws = PropertyManager.sample_run.get_workspace()
-        self.assertEqual(PropertyManager.sample_run.get_fext(), '.raw')
+        self.assertEqual(PropertyManager.sample_run.get_fext(), ".raw")
 
         self.assertTrue(isinstance(ws, api.Workspace))
 
@@ -164,10 +162,10 @@ class RunDescriptorTest(unittest.TestCase):
 
     def test_copy_spectra2monitors(self):
         propman = self.prop_man
-        run_ws = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Event', NumBanks=1, BankPixelWidth=5,
-                                       NumEvents=100)
-        run_ws_monitors = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Histogram', NumBanks=2,
-                                                BankPixelWidth=1, NumEvents=100)
+        run_ws = CreateSampleWorkspace(Function="Multiple Peaks", WorkspaceType="Event", NumBanks=1, BankPixelWidth=5, NumEvents=100)
+        run_ws_monitors = CreateSampleWorkspace(
+            Function="Multiple Peaks", WorkspaceType="Histogram", NumBanks=2, BankPixelWidth=1, NumEvents=100
+        )
         run_ws.setMonitorWorkspace(run_ws_monitors)
 
         self.assertEqual(run_ws_monitors.getNumberHistograms(), 2)
@@ -182,11 +180,11 @@ class RunDescriptorTest(unittest.TestCase):
 
     def test_copy_spectra2monitors_heterogen(self):
         propman = self.prop_man
-        run_ws = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Event', NumBanks=1, BankPixelWidth=5,
-                                       NumEvents=100)
-        run_ws_monitors = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Histogram', NumBanks=2,
-                                                BankPixelWidth=1, NumEvents=100)
-        run_ws_monitors = Rebin(run_ws_monitors, Params='1,-0.01,20000')
+        run_ws = CreateSampleWorkspace(Function="Multiple Peaks", WorkspaceType="Event", NumBanks=1, BankPixelWidth=5, NumEvents=100)
+        run_ws_monitors = CreateSampleWorkspace(
+            Function="Multiple Peaks", WorkspaceType="Histogram", NumBanks=2, BankPixelWidth=1, NumEvents=100
+        )
+        run_ws_monitors = Rebin(run_ws_monitors, Params="1,-0.01,20000")
         run_ws.setMonitorWorkspace(run_ws_monitors)
 
         x = run_ws_monitors.readX(0)
@@ -210,27 +208,27 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertAlmostEqual(max_step1, min_step1, 5)
 
     def test_ws_name(self):
-        run_ws = CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=1, BankPixelWidth=4, NumEvents=100)
+        run_ws = CreateSampleWorkspace(Function="Multiple Peaks", NumBanks=1, BankPixelWidth=4, NumEvents=100)
         propman = self.prop_man
         propman.sample_run = run_ws
 
         ws = PropertyManager.sample_run.get_workspace()
-        self.assertEqual(ws.name(), 'SR_run_ws')
+        self.assertEqual(ws.name(), "SR_run_ws")
 
         propman.sample_run = ws
         ws = PropertyManager.sample_run.get_workspace()
-        self.assertEqual(ws.name(), 'SR_run_ws')
-        self.assertTrue('SR_run_ws' in mtd)
+        self.assertEqual(ws.name(), "SR_run_ws")
+        self.assertTrue("SR_run_ws" in mtd)
 
         propman.sample_run = 11001
-        self.assertFalse('SR_run_ws' in mtd)
+        self.assertFalse("SR_run_ws" in mtd)
 
         propman.load_monitors_with_workspace = False
         ws = PropertyManager.sample_run.get_workspace()
         ws_name = ws.name()
-        self.assertEqual('SR_MAR011001', ws_name)
+        self.assertEqual("SR_MAR011001", ws_name)
         self.assertTrue(ws_name in mtd)
-        self.assertTrue(ws_name + '_monitors' in mtd)
+        self.assertTrue(ws_name + "_monitors" in mtd)
 
         propman.sample_run = ws
         self.assertTrue(ws_name in mtd)
@@ -238,11 +236,11 @@ class RunDescriptorTest(unittest.TestCase):
         ws1 = PropertyManager.sample_run.get_workspace()
         self.assertEqual(ws1.name(), ws_name)
         #
-        PropertyManager.sample_run.set_action_suffix('_modified')
+        PropertyManager.sample_run.set_action_suffix("_modified")
         PropertyManager.sample_run.synchronize_ws(ws1)
 
         ws1 = PropertyManager.sample_run.get_workspace()
-        self.assertGreater(str.find(ws1.name(), '_modified'), 0)
+        self.assertGreater(str.find(ws1.name(), "_modified"), 0)
 
         propman.sample_run = ws1
         self.assertEqual(ws1.name(), PropertyManager.sample_run._ws_name)
@@ -254,28 +252,38 @@ class RunDescriptorTest(unittest.TestCase):
         DeleteWorkspace(ws_name)
 
         propman.sample_run = None
-        self.assertFalse(ws_name + '_monitors' in mtd)
+        self.assertFalse(ws_name + "_monitors" in mtd)
 
     def test_assign_fname(self):
         propman = self.prop_man
-        propman.sample_run = 'MAR11001.RAW'
+        propman.sample_run = "MAR11001.RAW"
 
         self.assertEqual(PropertyManager.sample_run.run_number(), 11001)
-        self.assertEqual(PropertyManager.sample_run._fext, '.RAW')
+        self.assertEqual(PropertyManager.sample_run._fext, ".RAW")
 
     def test_chop_ws_part(self):
         propman = self.prop_man
-        ws = CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1, NumEvents=100, XUnit='TOF',
-                                   XMin=2000, XMax=20000, BinWidth=1)
+        ws = CreateSampleWorkspace(
+            Function="Multiple Peaks", NumBanks=4, BankPixelWidth=1, NumEvents=100, XUnit="TOF", XMin=2000, XMax=20000, BinWidth=1
+        )
 
-        CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1, NumEvents=100,
-                              XUnit='TOF', XMin=2000, XMax=20000, BinWidth=1, OutputWorkspace="ws_monitors")
+        CreateSampleWorkspace(
+            Function="Multiple Peaks",
+            NumBanks=4,
+            BankPixelWidth=1,
+            NumEvents=100,
+            XUnit="TOF",
+            XMin=2000,
+            XMax=20000,
+            BinWidth=1,
+            OutputWorkspace="ws_monitors",
+        )
 
         propman.sample_run = ws
 
         ws1 = PropertyManager.sample_run.chop_ws_part(None, (2000, 1, 5000), False, 1, 2)
 
-        rez = CompareWorkspaces('SR_ws', ws1)
+        rez = CompareWorkspaces("SR_ws", ws1)
         self.assertTrue(rez[0])
 
         wsc = PropertyManager.sample_run.get_workspace()
@@ -283,22 +291,22 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertAlmostEqual(x[0], 2000)
         self.assertAlmostEqual(x[-1], 5000)
 
-        self.assertEqual(wsc.name(), 'SR_#1/2#ws')
-        self.assertTrue('SR_#1/2#ws_monitors' in mtd)
+        self.assertEqual(wsc.name(), "SR_#1/2#ws")
+        self.assertTrue("SR_#1/2#ws_monitors" in mtd)
 
         ws1 = PropertyManager.sample_run.chop_ws_part(ws1, (10000, 100, 20000), True, 2, 2)
         x = ws1.readX(0)
         self.assertAlmostEqual(x[0], 10000)
         self.assertAlmostEqual(x[-1], 20000)
 
-        self.assertEqual(ws1.name(), 'SR_#2/2#ws')
-        self.assertTrue('SR_#2/2#ws_monitors' in mtd)
+        self.assertEqual(ws1.name(), "SR_#2/2#ws")
+        self.assertTrue("SR_#2/2#ws_monitors" in mtd)
 
     def test_get_run_list(self):
-        """ verify the logic behind setting a run file as
-            a sample run when run list is defined
+        """verify the logic behind setting a run file as
+        a sample run when run list is defined
         """
-        propman = PropertyManager('MAR')
+        propman = PropertyManager("MAR")
         propman.sample_run = [10204]
 
         self.assertEqual(propman.sample_run, 10204)
@@ -359,11 +367,11 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertTrue(propman.sum_runs)
 
         # check asigning file with path
-        propman.sample_run = 'c:/data/MAR10382.nxs'
+        propman.sample_run = "c:/data/MAR10382.nxs"
         self.assertEqual(propman.sample_run, 10382)
         self.assertEqual(PropertyManager.sample_run._run_list._last_ind2sum, 1)
-        self.assertEqual(PropertyManager.sample_run._run_list._file_path[1], 'c:/data')
-        self.assertEqual(PropertyManager.sample_run._run_list._fext[1], '.nxs')
+        self.assertEqual(PropertyManager.sample_run._run_list._file_path[1], "c:/data")
+        self.assertEqual(PropertyManager.sample_run._run_list._fext[1], ".nxs")
 
         # check extend when summing
         propman.sample_run = 10999
@@ -404,23 +412,23 @@ class RunDescriptorTest(unittest.TestCase):
         test_val1 = ws.dataY(3)[0]
         test_val2 = ws.dataY(6)[100]
         test_val3 = ws.dataY(50)[200]
-        self.assertEqual(ws.name(), 'SR_MAR011001')
+        self.assertEqual(ws.name(), "SR_MAR011001")
         self.assertEqual(ws.getNEvents(), 2455286)
 
         # propman.sample_run = [11001,11001]
         propman.sum_runs = True
-        self.assertFalse('SR_MAR011001' in mtd)
+        self.assertFalse("SR_MAR011001" in mtd)
         ws = PropertyManager.sample_run.get_workspace()
-        self.assertEqual(ws.name(), 'SR_MAR011001SumOf2')
+        self.assertEqual(ws.name(), "SR_MAR011001SumOf2")
 
         self.assertEqual(2 * test_val1, ws.dataY(3)[0])
         self.assertEqual(2 * test_val2, ws.dataY(6)[100])
         self.assertEqual(2 * test_val3, ws.dataY(50)[200])
 
         propman.sample_run = "MAR11001.raw,11001.nxs,MAR11001.raw"
-        self.assertFalse('SR_MAR011001SumOf2' in mtd)
+        self.assertFalse("SR_MAR011001SumOf2" in mtd)
         ws = PropertyManager.sample_run.get_workspace()
-        self.assertEqual(ws.name(), 'SR_MAR011001SumOf3')
+        self.assertEqual(ws.name(), "SR_MAR011001SumOf3")
 
         self.assertEqual(3 * test_val1, ws.dataY(3)[0])
         self.assertEqual(3 * test_val2, ws.dataY(6)[100])
@@ -442,17 +450,17 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertEqual(len(runs), 4)
         self.assertEqual(runs[3], 11111)
         self.assertTrue(propman.sum_runs)
-        self.assertTrue('SR_MAR011001SumOf3' in mtd)
+        self.assertTrue("SR_MAR011001SumOf3" in mtd)
 
         propman.cashe_sum_ws = True  # Not used at this stage but will be used at loading
-        PropertyManager.sample_run._run_list.set_cashed_sum_ws(mtd['SR_MAR011001SumOf3'], 'SumWS_cashe')
-        self.assertTrue('SumWS_cashe' in mtd)
-        self.assertFalse('SR_MAR011001SumOf3' in mtd)
+        PropertyManager.sample_run._run_list.set_cashed_sum_ws(mtd["SR_MAR011001SumOf3"], "SumWS_cashe")
+        self.assertTrue("SumWS_cashe" in mtd)
+        self.assertFalse("SR_MAR011001SumOf3" in mtd)
 
         sum_list, sum_ws, n_summed = PropertyManager.sample_run.get_runs_to_sum()
         self.assertEqual(len(sum_list), 1)
         self.assertEqual(n_summed, 3)
-        self.assertEqual(sum_ws.name(), 'SumWS_cashe')
+        self.assertEqual(sum_ws.name(), "SumWS_cashe")
         self.assertEqual(sum_list[0], 11111)
 
         # file 1 does not exist, so can not be found. Otherwise it should load it
@@ -460,9 +468,9 @@ class RunDescriptorTest(unittest.TestCase):
 
         # Clear all
         propman.sum_runs = False
-        self.assertFalse('SR_MAR011001SumOf3' in mtd)
+        self.assertFalse("SR_MAR011001SumOf3" in mtd)
         # disabling sum_runs clears sum cash
-        self.assertFalse('SumWS_cashe' in mtd)
+        self.assertFalse("SumWS_cashe" in mtd)
         runs = PropertyManager.sample_run.get_run_list()
         self.assertEqual(len(runs), 4)
         self.assertEqual(propman.sample_run, 11001)
@@ -483,7 +491,7 @@ class RunDescriptorTest(unittest.TestCase):
         files = PropertyManager.sample_run.get_run_file_list()
         self.assertEqual(len(files), 2)
 
-        nf, found = PropertyManager.sample_run._run_list.find_run_files('MAR')
+        nf, found = PropertyManager.sample_run._run_list.find_run_files("MAR")
         self.assertEqual(len(nf), 1)
         self.assertEqual(len(found), 1)
         self.assertEqual(nf[0], 11111)
@@ -493,9 +501,17 @@ class RunDescriptorTest(unittest.TestCase):
 
     def test_add_masks(self):
         propman = self.prop_man
-        ws = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Event',
-                                   NumBanks=4, BankPixelWidth=1, NumEvents=100, XUnit='TOF',
-                                   XMin=2000, XMax=20000, BinWidth=1)
+        ws = CreateSampleWorkspace(
+            Function="Multiple Peaks",
+            WorkspaceType="Event",
+            NumBanks=4,
+            BankPixelWidth=1,
+            NumEvents=100,
+            XUnit="TOF",
+            XMin=2000,
+            XMax=20000,
+            BinWidth=1,
+        )
 
         PropertyManager.sample_run.add_masked_ws(ws)
 
@@ -542,52 +558,77 @@ class RunDescriptorTest(unittest.TestCase):
         real_fext = PropertyManager.sample_run.get_fext()
         self.assertEqual(def_fext, real_fext)
 
-        propman.data_file_ext = '.bla_bla'
+        propman.data_file_ext = ".bla_bla"
         real_fext = PropertyManager.sample_run.get_fext()
-        self.assertEqual('.bla_bla', real_fext)
+        self.assertEqual(".bla_bla", real_fext)
 
-        propman.sample_run = 'MAR11001.nxs'
+        propman.sample_run = "MAR11001.nxs"
         real_fext = PropertyManager.sample_run.get_fext()
-        self.assertEqual('.nxs', real_fext)
+        self.assertEqual(".nxs", real_fext)
 
-        propman.data_file_ext = '.raw'
+        propman.data_file_ext = ".raw"
         real_fext = PropertyManager.sample_run.get_fext()
-        self.assertEqual('.nxs', real_fext)
+        self.assertEqual(".nxs", real_fext)
 
     def test_change_normalization(self):
         propman = self.prop_man
-        a_wksp = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Event',
-                                       NumBanks=4, BankPixelWidth=1, NumEvents=100, XUnit='TOF',
-                                       XMin=2000, XMax=20000, BinWidth=1)
-        source_wksp = a_wksp / 5.
+        a_wksp = CreateSampleWorkspace(
+            Function="Multiple Peaks",
+            WorkspaceType="Event",
+            NumBanks=4,
+            BankPixelWidth=1,
+            NumEvents=100,
+            XUnit="TOF",
+            XMin=2000,
+            XMax=20000,
+            BinWidth=1,
+        )
+        source_wksp = a_wksp / 5.0
         propman.sample_run = source_wksp
         self.assertRaises(RuntimeError, PropertyManager.sample_run.export_normalization, a_wksp)
 
-        AddSampleLog(source_wksp, LogName='NormalizationFactor', LogText='5.', LogType='Number')
+        AddSampleLog(source_wksp, LogName="NormalizationFactor", LogText="5.", LogType="Number")
         PropertyManager.sample_run.export_normalization(a_wksp)
 
-        rez = CompareWorkspaces(Workspace1=source_wksp, Workspace2=a_wksp, Tolerance=1.e-8)
+        rez = CompareWorkspaces(Workspace1=source_wksp, Workspace2=a_wksp, Tolerance=1.0e-8)
         self.assertTrue(rez[0])
 
         # divide by 20 to get final normalization factor equal 100 (ws/(5*20))
         a_wksp /= 20
-        AddSampleLog(a_wksp, LogName='NormalizationFactor', LogText='100', LogType='Number')
+        AddSampleLog(a_wksp, LogName="NormalizationFactor", LogText="100", LogType="Number")
         # export normalization by 5
         PropertyManager.sample_run.export_normalization(a_wksp)
-        rez = CompareWorkspaces(Workspace1=source_wksp, Workspace2=a_wksp, Tolerance=1.e-6)
+        rez = CompareWorkspaces(Workspace1=source_wksp, Workspace2=a_wksp, Tolerance=1.0e-6)
         self.assertTrue(rez[0])
-        self.assertAlmostEqual(a_wksp.getRun().getLogData('NormalizationFactor').value, 5.)
+        self.assertAlmostEqual(a_wksp.getRun().getLogData("NormalizationFactor").value, 5.0)
 
         propman.sample_run = None
         DeleteWorkspace(a_wksp)
 
     def test_monitors_renamed(self):
-        wksp = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Event',
-                                     NumBanks=1, BankPixelWidth=1, NumEvents=1, XUnit='TOF',
-                                     XMin=2000, XMax=20000, BinWidth=1)
-        CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Histogram',
-                              NumBanks=3, BankPixelWidth=1, NumEvents=1, XUnit='TOF',
-                              XMin=2000, XMax=20000, BinWidth=1, OutputWorkspace="wksp_monitors")
+        wksp = CreateSampleWorkspace(
+            Function="Multiple Peaks",
+            WorkspaceType="Event",
+            NumBanks=1,
+            BankPixelWidth=1,
+            NumEvents=1,
+            XUnit="TOF",
+            XMin=2000,
+            XMax=20000,
+            BinWidth=1,
+        )
+        CreateSampleWorkspace(
+            Function="Multiple Peaks",
+            WorkspaceType="Histogram",
+            NumBanks=3,
+            BankPixelWidth=1,
+            NumEvents=1,
+            XUnit="TOF",
+            XMin=2000,
+            XMax=20000,
+            BinWidth=1,
+            OutputWorkspace="wksp_monitors",
+        )
         propman = self.prop_man
 
         propman.sample_run = wksp
@@ -598,13 +639,13 @@ class RunDescriptorTest(unittest.TestCase):
             self.fail()
 
         mon_ws = PropertyManager.sample_run.get_monitors_ws()
-        self.assertEqual(mon_ws.name(), 'SR_wksp_monitors')
+        self.assertEqual(mon_ws.name(), "SR_wksp_monitors")
 
-        wsr = RenameWorkspace(wksp, OutputWorkspace='Renamed1', RenameMonitors=True)
+        wsr = RenameWorkspace(wksp, OutputWorkspace="Renamed1", RenameMonitors=True)
         PropertyManager.sample_run.synchronize_ws(wsr)
 
         mon_ws = PropertyManager.sample_run.get_monitors_ws()
-        self.assertEqual(mon_ws.name(), 'SR_wksp_monitors')
+        self.assertEqual(mon_ws.name(), "SR_wksp_monitors")
 
         wsr.clearMonitorWorkspace()
         try:
@@ -622,78 +663,113 @@ class RunDescriptorTest(unittest.TestCase):
             self.fail()
 
     def test_remove_background_matching_workspaces(self):
-        wksp = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Event',
-                                     NumBanks=3, BankPixelWidth=1, NumEvents=100, XUnit='TOF',
-                                     XMin=2000, XMax=20000, BinWidth=1)
-        CloneWorkspace(wksp,OutputWorkspace='bg_ws')
-        AddSampleLog(Workspace=wksp,LogName='gd_prtn_chrg', LogText='10', LogType='Number')
-        AddSampleLog(Workspace='bg_ws',LogName='gd_prtn_chrg', LogText='100', LogType='Number')
-        CloneWorkspace('bg_ws',OutputWorkspace='ref_ws')
+        wksp = CreateSampleWorkspace(
+            Function="Multiple Peaks",
+            WorkspaceType="Event",
+            NumBanks=3,
+            BankPixelWidth=1,
+            NumEvents=100,
+            XUnit="TOF",
+            XMin=2000,
+            XMax=20000,
+            BinWidth=1,
+        )
+        CloneWorkspace(wksp, OutputWorkspace="bg_ws")
+        AddSampleLog(Workspace=wksp, LogName="gd_prtn_chrg", LogText="10", LogType="Number")
+        AddSampleLog(Workspace="bg_ws", LogName="gd_prtn_chrg", LogText="100", LogType="Number")
+        CloneWorkspace("bg_ws", OutputWorkspace="ref_ws")
 
-        self.assertFalse(wksp.run().hasProperty('empty_bg_removed'))
+        self.assertFalse(wksp.run().hasProperty("empty_bg_removed"))
 
         propman = self.prop_man
 
         propman.sample_run = wksp
-        propman.empty_bg_run = 'bg_ws'
+        propman.empty_bg_run = "bg_ws"
 
         bgws = PropertyManager.empty_bg_run.get_workspace()
         PropertyManager.sample_run.remove_empty_background(bgws)
         ws = PropertyManager.sample_run.get_workspace()
 
-        self.assertTrue(ws.run().hasProperty('empty_bg_removed'))
-        resWs = 0.9*wksp
-        difr = CompareWorkspaces(resWs,ws)
+        self.assertTrue(ws.run().hasProperty("empty_bg_removed"))
+        resWs = 0.9 * wksp
+        difr = CompareWorkspaces(resWs, ws)
         self.assertTrue(difr.Result)
 
         # the subtaction occurs only once
         PropertyManager.sample_run.remove_empty_background(bgws)
         # operation above does nothing
         ws = PropertyManager.sample_run.get_workspace()
-        difr = CompareWorkspaces(resWs,ws)
+        difr = CompareWorkspaces(resWs, ws)
         self.assertTrue(difr.Result)
         # ensure that bg Workspace remains unchanged
         bg_ws_restored = PropertyManager.empty_bg_run.get_workspace()
-        difr = CompareWorkspaces(bg_ws_restored,'ref_ws')
+        difr = CompareWorkspaces(bg_ws_restored, "ref_ws")
         self.assertTrue(difr.Result)
 
     def test_add_emptpy_sectra_first(self):
-        CreateSampleWorkspace(OutputWorkspace='wksp',Function='Multiple Peaks', WorkspaceType='Histogram',
-                                     NumBanks=3, NumMonitors=3, BankPixelWidth=1, XUnit='TOF',
-                                     XMin=200, XMax=20000, BinWidth=200)
-        ExtractMonitors(InputWorkspace='wksp', DetectorWorkspace='wksp', MonitorWorkspace='Monitors')
+        CreateSampleWorkspace(
+            OutputWorkspace="wksp",
+            Function="Multiple Peaks",
+            WorkspaceType="Histogram",
+            NumBanks=3,
+            NumMonitors=3,
+            BankPixelWidth=1,
+            XUnit="TOF",
+            XMin=200,
+            XMax=20000,
+            BinWidth=200,
+        )
+        ExtractMonitors(InputWorkspace="wksp", DetectorWorkspace="wksp", MonitorWorkspace="Monitors")
 
-        wksp = mtd['wksp']
-        mod_ws = RunDescriptor._add_empty_spectra(wksp,3,True)
-        self.assertEqual(mod_ws.getNumberHistograms(),6)
-        self.assertEqual('wksp',mod_ws.name())
+        wksp = mtd["wksp"]
+        mod_ws = RunDescriptor._add_empty_spectra(wksp, 3, True)
+        self.assertEqual(mod_ws.getNumberHistograms(), 6)
+        self.assertEqual("wksp", mod_ws.name())
 
     def test_add_emptpy_sectra_last(self):
-        CreateSampleWorkspace(OutputWorkspace='wksp',Function='Multiple Peaks', WorkspaceType='Histogram',
-                                     NumBanks=3, NumMonitors=3, BankPixelWidth=1, XUnit='TOF',
-                                     XMin=200, XMax=20000, BinWidth=200)
-        ExtractMonitors(InputWorkspace='wksp', DetectorWorkspace='wksp', MonitorWorkspace='Monitors')
+        CreateSampleWorkspace(
+            OutputWorkspace="wksp",
+            Function="Multiple Peaks",
+            WorkspaceType="Histogram",
+            NumBanks=3,
+            NumMonitors=3,
+            BankPixelWidth=1,
+            XUnit="TOF",
+            XMin=200,
+            XMax=20000,
+            BinWidth=200,
+        )
+        ExtractMonitors(InputWorkspace="wksp", DetectorWorkspace="wksp", MonitorWorkspace="Monitors")
 
-        wksp = mtd['Monitors']
-        mod_ws = RunDescriptor._add_empty_spectra(wksp,3,False)
-        self.assertEqual(mod_ws.getNumberHistograms(),6)
-        self.assertEqual('Monitors',mod_ws.name())
+        wksp = mtd["Monitors"]
+        mod_ws = RunDescriptor._add_empty_spectra(wksp, 3, False)
+        self.assertEqual(mod_ws.getNumberHistograms(), 6)
+        self.assertEqual("Monitors", mod_ws.name())
 
     def test_remove_background_matrix_minus_event(self):
         # Verify situation if sampe workspace is in histogram mode with monitors loaded with workspace
         # and background is event workspace with monitors loaded separately
-        wksp = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Histogram',
-                                     NumBanks=3, NumMonitors=3, BankPixelWidth=1, NumEvents=100, XUnit='TOF',
-                                     XMin=2000, XMax=20000, BinWidth=1)
-        ExtractMonitors(InputWorkspace='wksp', DetectorWorkspace='bg_ws', MonitorWorkspace='refMonitors')
+        wksp = CreateSampleWorkspace(
+            Function="Multiple Peaks",
+            WorkspaceType="Histogram",
+            NumBanks=3,
+            NumMonitors=3,
+            BankPixelWidth=1,
+            NumEvents=100,
+            XUnit="TOF",
+            XMin=2000,
+            XMax=20000,
+            BinWidth=1,
+        )
+        ExtractMonitors(InputWorkspace="wksp", DetectorWorkspace="bg_ws", MonitorWorkspace="refMonitors")
 
-        CloneWorkspace('bg_ws',OutputWorkspace='ref_ws')
-        bg_ws = ConvertToEventWorkspace('bg_ws')
+        CloneWorkspace("bg_ws", OutputWorkspace="ref_ws")
+        bg_ws = ConvertToEventWorkspace("bg_ws")
 
-        AddSampleLog(Workspace=wksp,LogName='gd_prtn_chrg', LogText='10', LogType='Number')
-        AddSampleLog(Workspace=bg_ws,LogName='gd_prtn_chrg', LogText='100', LogType='Number')
+        AddSampleLog(Workspace=wksp, LogName="gd_prtn_chrg", LogText="10", LogType="Number")
+        AddSampleLog(Workspace=bg_ws, LogName="gd_prtn_chrg", LogText="100", LogType="Number")
 
-        self.assertFalse(wksp.run().hasProperty('empty_bg_removed'))
+        self.assertFalse(wksp.run().hasProperty("empty_bg_removed"))
 
         propman = self.prop_man
 
@@ -703,36 +779,45 @@ class RunDescriptorTest(unittest.TestCase):
         bgws = PropertyManager.empty_bg_run.get_workspace()
         PropertyManager.sample_run.remove_empty_background(bgws)
         resWs = PropertyManager.sample_run.get_workspace()
-        self.assertTrue(resWs.run().hasProperty('empty_bg_removed'))
+        self.assertTrue(resWs.run().hasProperty("empty_bg_removed"))
 
-        ExtractMonitors(InputWorkspace=resWs, DetectorWorkspace='resWs', MonitorWorkspace='resMonitors')
-        difr_mon = CompareWorkspaces('refMonitors','resMonitors')
+        ExtractMonitors(InputWorkspace=resWs, DetectorWorkspace="resWs", MonitorWorkspace="resMonitors")
+        difr_mon = CompareWorkspaces("refMonitors", "resMonitors")
         self.assertTrue(difr_mon.Result)
 
-        ref_ws = mtd['ref_ws']
+        ref_ws = mtd["ref_ws"]
 
         # Errors if two matrix workspaces extacted from each other are not extracted
-        ref_ws = ref_ws - 0.1*ref_ws
+        ref_ws = ref_ws - 0.1 * ref_ws
 
-        resWs = mtd['resWs']
+        resWs = mtd["resWs"]
 
-        difr_sample = CompareWorkspaces(ref_ws,resWs,Tolerance=1.e-7)
+        difr_sample = CompareWorkspaces(ref_ws, resWs, Tolerance=1.0e-7)
         self.assertTrue(difr_sample.Result)
 
     def test_remove_background_matrix_minus_matrix(self):
         # Verify situation if sample workspace is in event mode and
         # and background loaded as a histogram with monitors included
-        bg_ws = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Histogram',
-                                      NumBanks=3, NumMonitors=3, BankPixelWidth=1, NumEvents=100, XUnit='TOF',
-                                      XMin=2000, XMax=20000, BinWidth=1)
-        ExtractMonitors(InputWorkspace='bg_ws', DetectorWorkspace='sample_run', MonitorWorkspace='refMonitors')
-        ref_ws = CloneWorkspace('sample_run')
+        bg_ws = CreateSampleWorkspace(
+            Function="Multiple Peaks",
+            WorkspaceType="Histogram",
+            NumBanks=3,
+            NumMonitors=3,
+            BankPixelWidth=1,
+            NumEvents=100,
+            XUnit="TOF",
+            XMin=2000,
+            XMax=20000,
+            BinWidth=1,
+        )
+        ExtractMonitors(InputWorkspace="bg_ws", DetectorWorkspace="sample_run", MonitorWorkspace="refMonitors")
+        ref_ws = CloneWorkspace("sample_run")
 
-        AddSampleLog(Workspace='sample_run',LogName='gd_prtn_chrg', LogText='10', LogType='Number')
-        AddSampleLog(Workspace=bg_ws,LogName='gd_prtn_chrg', LogText='100', LogType='Number')
+        AddSampleLog(Workspace="sample_run", LogName="gd_prtn_chrg", LogText="10", LogType="Number")
+        AddSampleLog(Workspace=bg_ws, LogName="gd_prtn_chrg", LogText="100", LogType="Number")
 
-        wksp = mtd['sample_run']
-        self.assertFalse(wksp.run().hasProperty('empty_bg_removed'))
+        wksp = mtd["sample_run"]
+        self.assertFalse(wksp.run().hasProperty("empty_bg_removed"))
 
         propman = self.prop_man
 
@@ -742,19 +827,19 @@ class RunDescriptorTest(unittest.TestCase):
         bgws = PropertyManager.empty_bg_run.get_workspace()
         PropertyManager.sample_run.remove_empty_background(bgws)
         resWs = PropertyManager.sample_run.get_workspace()
-        self.assertTrue(resWs.run().hasProperty('empty_bg_removed'))
+        self.assertTrue(resWs.run().hasProperty("empty_bg_removed"))
 
         # Errors if two matrix workspaces extacted from each other are not extracted
-        ref_ws = ref_ws - 0.1*ref_ws
-        difr = CompareWorkspaces(ref_ws,resWs)
+        ref_ws = ref_ws - 0.1 * ref_ws
+        difr = CompareWorkspaces(ref_ws, resWs)
         self.assertTrue(difr.Result)
         # bg Workspace remains unchanged
         bg_ws_restored = PropertyManager.empty_bg_run.get_workspace()
-        difr = CompareWorkspaces(bg_ws_restored,bg_ws)
+        difr = CompareWorkspaces(bg_ws_restored, bg_ws)
         self.assertTrue(difr.Result)
 
 
 if __name__ == "__main__" or __name__ == "mantidqt.widgets.codeeditor.execution":
-    #tester=RunDescriptorTest('test_remove_background_matching_workspaces')
-    #tester.run()
+    # tester=RunDescriptorTest('test_remove_background_matching_workspaces')
+    # tester.run()
     unittest.main()

@@ -9,20 +9,19 @@ from mantid import AnalysisDataServiceImpl, config, simpleapi
 
 
 class DakotaChiSquaredTest(unittest.TestCase):
-
     def makeFiles(self):
-        simpleapi.CreateWorkspace(OutputWorkspace='data', DataX='1,2,3,4,5', DataY='1,0,1,4,4', DataE='1,0,1,2,2')
-        simpleapi.CreateWorkspace(OutputWorkspace='sim', DataX='1,2,3,4,5', DataY='1,1,1,1,1', DataE='0,0,0,0,0')
-        simpleapi.CreateWorkspace(OutputWorkspace='simwrong', DataX='1,2,3,4', DataY='1,1,1,1', DataE='0,0,0,0')
+        simpleapi.CreateWorkspace(OutputWorkspace="data", DataX="1,2,3,4,5", DataY="1,0,1,4,4", DataE="1,0,1,2,2")
+        simpleapi.CreateWorkspace(OutputWorkspace="sim", DataX="1,2,3,4,5", DataY="1,1,1,1,1", DataE="0,0,0,0,0")
+        simpleapi.CreateWorkspace(OutputWorkspace="simwrong", DataX="1,2,3,4", DataY="1,1,1,1", DataE="0,0,0,0")
 
-        self.datafile = os.path.join(config.getString('defaultsave.directory'), 'DakotaChiSquared_data.nxs')
-        self.simfile = os.path.join(config.getString('defaultsave.directory'), 'DakotaChiSquared_sim.nxs')
-        self.simwrongfile = os.path.join(config.getString('defaultsave.directory'), 'DakotaChiSquared_simwrong.nxs')
-        self.chifile = os.path.join(config.getString('defaultsave.directory'), 'DakotaChiSquared_chi.txt')
+        self.datafile = os.path.join(config.getString("defaultsave.directory"), "DakotaChiSquared_data.nxs")
+        self.simfile = os.path.join(config.getString("defaultsave.directory"), "DakotaChiSquared_sim.nxs")
+        self.simwrongfile = os.path.join(config.getString("defaultsave.directory"), "DakotaChiSquared_simwrong.nxs")
+        self.chifile = os.path.join(config.getString("defaultsave.directory"), "DakotaChiSquared_chi.txt")
 
-        simpleapi.SaveNexus('data', self.datafile)
-        simpleapi.SaveNexus('sim', self.simfile)
-        simpleapi.SaveNexus('simwrong', self.simwrongfile)
+        simpleapi.SaveNexus("data", self.datafile)
+        simpleapi.SaveNexus("sim", self.simfile)
+        simpleapi.SaveNexus("simwrong", self.simwrongfile)
 
         ads = AnalysisDataServiceImpl.Instance()
         ads.remove("data")
@@ -42,17 +41,17 @@ class DakotaChiSquaredTest(unittest.TestCase):
     def test_wrongType(self):
         self.makeFiles()
         try:
-            simpleapi.DakotaChiSquared(self.datafile, 'CNCS_7860_event.nxs', self.chifile)
+            simpleapi.DakotaChiSquared(self.datafile, "CNCS_7860_event.nxs", self.chifile)
         except RuntimeError as e:
-            self.assertNotEqual(str(e).find('Wrong workspace type for calculated file'), -1)
+            self.assertNotEqual(str(e).find("Wrong workspace type for calculated file"), -1)
         except:
             assert False, "Raised the wrong exception type"
         else:
             assert False, "Didn't raise any exception"
         try:
-            simpleapi.DakotaChiSquared('CNCS_7860_event.nxs', self.simfile, self.chifile)
+            simpleapi.DakotaChiSquared("CNCS_7860_event.nxs", self.simfile, self.chifile)
         except RuntimeError as e:
-            self.assertNotEqual(str(e).find('Wrong workspace type for data file'), -1)
+            self.assertNotEqual(str(e).find("Wrong workspace type for data file"), -1)
         except:
             assert False, "Raised the wrong exception type"
         else:
@@ -64,7 +63,7 @@ class DakotaChiSquaredTest(unittest.TestCase):
         try:
             simpleapi.DakotaChiSquared(self.datafile, self.simwrongfile, self.chifile)
         except RuntimeError as e:
-            self.assertNotEqual(str(e).find('The file sizes are different'), -1)
+            self.assertNotEqual(str(e).find("The file sizes are different"), -1)
         except:
             assert False, "Raised the wrong exception type"
         else:
@@ -75,9 +74,9 @@ class DakotaChiSquaredTest(unittest.TestCase):
         self.makeFiles()
         try:
             simpleapi.DakotaChiSquared(self.datafile, self.simfile, self.chifile)
-            f = open(self.chifile, 'r')
+            f = open(self.chifile, "r")
             chistr = f.read()
-            self.assertEqual(chistr, '4.5 obj_fn\n')
+            self.assertEqual(chistr, "4.5 obj_fn\n")
             f.close()
         except:
             assert False, "Raised an exception"

@@ -11,14 +11,13 @@ import numpy as np
 
 
 class ZFprotonDipole(IFunction1D):
-
     def category(self):
         return "Muon\\MuonSpecific"
 
     def init(self):
         self.declareParameter("A0", 0.5)
-        self.declareParameter("Radius", 2, 'Radius (Angstrom)')
-        self.declareParameter("LambdaTrans", 0.2, 'Lambda-Trans (MHz)')
+        self.declareParameter("Radius", 2, "Radius (Angstrom)")
+        self.declareParameter("LambdaTrans", 0.2, "Lambda-Trans (MHz)")
         self.addConstraints("Radius > 0")
         self.addConstraints("LambdaTrans > 0")
 
@@ -30,13 +29,15 @@ class ZFprotonDipole(IFunction1D):
         proton_moment = 2.792847351
         nuclear_moment = 5.05088370
         if radius > 0:
-            B = 2 * proton_moment * nuclear_moment / (radius ** 3)
+            B = 2 * proton_moment * nuclear_moment / (radius**3)
         else:
             B = 0
         Omega = gmu * B
-        return A0 * (1. / 6) * (
-            1 + np.exp(- LambdaTrans * x) *( np.cos(Omega * x) + 2 * np.cos(1.5 * Omega * x) + 2 * np.cos(
-                0.5 * Omega * x)))
+        return (
+            A0
+            * (1.0 / 6)
+            * (1 + np.exp(-LambdaTrans * x) * (np.cos(Omega * x) + 2 * np.cos(1.5 * Omega * x) + 2 * np.cos(0.5 * Omega * x)))
+        )
 
 
 FunctionFactory.subscribe(ZFprotonDipole)

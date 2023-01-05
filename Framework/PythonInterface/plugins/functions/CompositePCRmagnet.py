@@ -11,15 +11,14 @@ import numpy as np
 
 
 class CompositePCRmagnet(IFunction1D):
-
     def category(self):
         return "Muon\\MuonSpecific"
 
     def init(self):
-        self.declareParameter("A0", 0.2, 'Amplitude')
-        self.declareParameter("KTdelta", 0.1, 'KT Relaxation rate')
-        self.declareParameter("B0", 10, 'Local Magnetic Field (G)')
-        self.declareParameter("Gauss", 0.2, 'Gaussian relaxation rate')
+        self.declareParameter("A0", 0.2, "Amplitude")
+        self.declareParameter("KTdelta", 0.1, "KT Relaxation rate")
+        self.declareParameter("B0", 10, "Local Magnetic Field (G)")
+        self.declareParameter("Gauss", 0.2, "Gaussian relaxation rate")
 
     def function1D(self, x):
         A0 = self.getParameterValue("A0")
@@ -28,12 +27,9 @@ class CompositePCRmagnet(IFunction1D):
         Gaus = self.getParameterValue("Gauss")
         gmu = 0.01355342 * 2 * np.pi
         if B0 > 0:
-            output = 1./3 + 2./3 * \
-                np.cos(gmu * B0 * x) * np.exp(- (Gaus * x)
-                                              ** 2 + 2./5 * (KTdelta * x) ** 2)
+            output = 1.0 / 3 + 2.0 / 3 * np.cos(gmu * B0 * x) * np.exp(-((Gaus * x) ** 2) + 2.0 / 5 * (KTdelta * x) ** 2)
         else:
-            output = 1./3 + 2./3 * (1 - (KTdelta * x) ** 2) * \
-                np.exp(-(KTdelta * x) ** 2 / 2)
+            output = 1.0 / 3 + 2.0 / 3 * (1 - (KTdelta * x) ** 2) * np.exp(-((KTdelta * x) ** 2) / 2)
         return A0 * output
 
 

@@ -13,20 +13,24 @@ class AbinsPowderDataTest(unittest.TestCase):
     def setUp(self):
         # hypothetical data for two atoms
         self.good_items = {
-            "a_tensors": {0: np.asarray([[[0.01, 0.02, 0.03],
-                                          [0.01, 0.02, 0.03],
-                                          [0.01, 0.02, 0.03]],
-                                         [[0.01, 0.02, 0.03],
-                                          [0.01, 0.02, 0.03],
-                                          [0.01, 0.02, 0.03]]])},
-
-            "b_tensors": {0: np.asarray([[[0.01, 0.02, 0.03],
-                                          [0.01, 0.02, 0.03],
-                                          [0.01, 0.02, 0.03]],
-                                         [[0.01, 0.02, 0.03],
-                                          [0.01, 0.02, 0.03],
-                                          [0.01, 0.02, 0.03]]])},
-            "frequencies": {0: np.asarray([2.34, 5.67, 8.90])}}
+            "a_tensors": {
+                0: np.asarray(
+                    [
+                        [[0.01, 0.02, 0.03], [0.01, 0.02, 0.03], [0.01, 0.02, 0.03]],
+                        [[0.01, 0.02, 0.03], [0.01, 0.02, 0.03], [0.01, 0.02, 0.03]],
+                    ]
+                )
+            },
+            "b_tensors": {
+                0: np.asarray(
+                    [
+                        [[0.01, 0.02, 0.03], [0.01, 0.02, 0.03], [0.01, 0.02, 0.03]],
+                        [[0.01, 0.02, 0.03], [0.01, 0.02, 0.03], [0.01, 0.02, 0.03]],
+                    ]
+                )
+            },
+            "frequencies": {0: np.asarray([2.34, 5.67, 8.90])},
+        }
 
     def test_bad_num_atoms(self):
         # wrong number of atoms
@@ -36,7 +40,7 @@ class AbinsPowderDataTest(unittest.TestCase):
     def test_bad_items(self):
         # wrong items: array instead of dict
         bad_items = self.good_items.copy()
-        bad_items['a_tensors'] = bad_items['a_tensors'][0]
+        bad_items["a_tensors"] = bad_items["a_tensors"][0]
         with self.assertRaises(TypeError):
             PowderData(**bad_items, num_atoms=2)
 
@@ -48,9 +52,11 @@ class AbinsPowderDataTest(unittest.TestCase):
             PowderData(**bad_items, num_atoms=2)
 
         # wrong size of items: data only for one atom ; should be for two atoms
-        bad_items = {"a_tensors": {0: np.asarray([[[0.01, 0.02, 0.03], [0.01, 0.02, 0.03], [0.01, 0.02, 0.03]]])},
-                     "b_tensors": {0: np.asarray([[[0.01, 0.02, 0.03], [0.01, 0.02, 0.03], [0.01, 0.02, 0.03]]])},
-                     "frequencies": {0: np.asarray([[[1.23, 4.56, 7.89]]])}}
+        bad_items = {
+            "a_tensors": {0: np.asarray([[[0.01, 0.02, 0.03], [0.01, 0.02, 0.03], [0.01, 0.02, 0.03]]])},
+            "b_tensors": {0: np.asarray([[[0.01, 0.02, 0.03], [0.01, 0.02, 0.03], [0.01, 0.02, 0.03]]])},
+            "frequencies": {0: np.asarray([[[1.23, 4.56, 7.89]]])},
+        }
         with self.assertRaises(ValueError):
             PowderData(**bad_items, num_atoms=2)
 
@@ -60,8 +66,7 @@ class AbinsPowderDataTest(unittest.TestCase):
         extracted_data = good_powderdata.extract()
         for key in self.good_items:
             for k_index in self.good_items[key]:
-                self.assertTrue(np.allclose(self.good_items[key][k_index],
-                                            extracted_data[key][str(k_index)]))
+                self.assertTrue(np.allclose(self.good_items[key][k_index], extracted_data[key][str(k_index)]))
 
         # Should also work if num_atoms is not given
         PowderData(**self.good_items)
@@ -69,21 +74,17 @@ class AbinsPowderDataTest(unittest.TestCase):
     def test_roundtrip(self):
         initial_powderdata = PowderData(**self.good_items, num_atoms=2)
         roundtrip_data = PowderData.from_extracted(initial_powderdata.extract())
-        for attr in 'get_a_tensors', 'get_b_tensors', 'get_frequencies':
-            for k_index in self.good_items['a_tensors']:
-                self.assertTrue(np.allclose(getattr(initial_powderdata, attr)()[k_index],
-                                            getattr(roundtrip_data, attr)()[k_index]))
+        for attr in "get_a_tensors", "get_b_tensors", "get_frequencies":
+            for k_index in self.good_items["a_tensors"]:
+                self.assertTrue(np.allclose(getattr(initial_powderdata, attr)()[k_index], getattr(roundtrip_data, attr)()[k_index]))
 
     def test_getters(self):
         good_powderdata = PowderData(**self.good_items, num_atoms=2)
         for k_point in self.good_items["a_tensors"]:
-            self.assertTrue(np.allclose(self.good_items["a_tensors"][k_point],
-                                        good_powderdata.get_a_tensors()[k_point]))
-            self.assertTrue(np.allclose(self.good_items["b_tensors"][k_point],
-                                        good_powderdata.get_b_tensors()[k_point]))
-            self.assertTrue(np.allclose(self.good_items["frequencies"][k_point],
-                                        good_powderdata.get_frequencies()[k_point]))
+            self.assertTrue(np.allclose(self.good_items["a_tensors"][k_point], good_powderdata.get_a_tensors()[k_point]))
+            self.assertTrue(np.allclose(self.good_items["b_tensors"][k_point], good_powderdata.get_b_tensors()[k_point]))
+            self.assertTrue(np.allclose(self.good_items["frequencies"][k_point], good_powderdata.get_frequencies()[k_point]))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -13,7 +13,7 @@ are not available in the model associated with the data table.
 from sans.common.enums import SANSInstrument, DataType, DetectorType, RebinType
 from sans.gui_logic.models.model_common import ModelCommon
 from sans.state.StateObjects.StateCalculateTransmission import StateTransmissionFit
-from sans.gui_logic.gui_common import (meter_2_millimeter, millimeter_2_meter)
+from sans.gui_logic.gui_common import meter_2_millimeter, millimeter_2_meter
 
 
 class SettingsAdjustmentModel(ModelCommon):
@@ -45,14 +45,12 @@ class SettingsAdjustmentModel(ModelCommon):
 
     @property
     def pixel_adjustment_det_1(self):
-        val = self._all_states.adjustment.wavelength_and_pixel_adjustment\
-                .adjustment_files[DetectorType.LAB.value].pixel_adjustment_file
+        val = self._all_states.adjustment.wavelength_and_pixel_adjustment.adjustment_files[DetectorType.LAB.value].pixel_adjustment_file
         return self._get_val_or_default(val)
 
     @pixel_adjustment_det_1.setter
     def pixel_adjustment_det_1(self, value):
-        self._all_states.adjustment.wavelength_and_pixel_adjustment\
-            .adjustment_files[DetectorType.LAB.value].pixel_adjustment_file = value
+        self._all_states.adjustment.wavelength_and_pixel_adjustment.adjustment_files[DetectorType.LAB.value].pixel_adjustment_file = value
 
     @property
     def pixel_adjustment_det_2(self):
@@ -70,14 +68,16 @@ class SettingsAdjustmentModel(ModelCommon):
 
     @property
     def wavelength_adjustment_det_1(self):
-        val = self._all_states.adjustment.wavelength_and_pixel_adjustment\
-                .adjustment_files[DetectorType.LAB.value].wavelength_adjustment_file
+        val = self._all_states.adjustment.wavelength_and_pixel_adjustment.adjustment_files[
+            DetectorType.LAB.value
+        ].wavelength_adjustment_file
         return self._get_val_or_default(val)
 
     @wavelength_adjustment_det_1.setter
     def wavelength_adjustment_det_1(self, value):
-        self._all_states.adjustment.wavelength_and_pixel_adjustment \
-            .adjustment_files[DetectorType.LAB.value].wavelength_adjustment_file = value
+        self._all_states.adjustment.wavelength_and_pixel_adjustment.adjustment_files[
+            DetectorType.LAB.value
+        ].wavelength_adjustment_file = value
 
     @property
     def wavelength_adjustment_det_2(self):
@@ -92,6 +92,7 @@ class SettingsAdjustmentModel(ModelCommon):
         adj_files = self._all_states.adjustment.wavelength_and_pixel_adjustment.adjustment_files
         if DetectorType.HAB.value in adj_files:
             adj_files[DetectorType.HAB.value].wavelength_adjustment_file = value
+
     # ------------------------------------------------------------------------------------------------------------------
     # Transmission Fitting
     # ------------------------------------------------------------------------------------------------------------------

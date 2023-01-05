@@ -13,9 +13,9 @@ from mantid.api import *
 from mantid.simpleapi import *
 from testhelpers import run_algorithm
 
-'''
+"""
 Helper type to represent an entry in a cal file
-'''
+"""
 
 
 class CalFileLine:
@@ -48,9 +48,10 @@ class CalFileLine:
     def getGroup(self):
         return self._group
 
-'''
+
+"""
 A helper resource managing wrapper over a new calfile object. Creates cal file and allows writing to it.
-'''
+"""
 
 
 class DisposableCalFileObject:
@@ -59,14 +60,14 @@ class DisposableCalFileObject:
     _dirpath = None
 
     def __init__(self, name):
-         self._dirpath = tempfile.mkdtemp()
-         self._fullpath = os.path.join(self._dirpath, name)
-         file = open(self._fullpath, 'w')
-         file.close()
+        self._dirpath = tempfile.mkdtemp()
+        self._fullpath = os.path.join(self._dirpath, name)
+        file = open(self._fullpath, "w")
+        file.close()
 
     def writeline(self, entry):
-        file = open(self._fullpath, 'a')
-        file.write("%i\t%i\t%f\t%i\t%i\n" %(entry.getNumber(), entry.getUDET(), entry.getOffset(), entry.getSelect(), entry.getGroup()) )
+        file = open(self._fullpath, "a")
+        file.write("%i\t%i\t%f\t%i\t%i\n" % (entry.getNumber(), entry.getUDET(), entry.getOffset(), entry.getSelect(), entry.getGroup()))
         file.close()
 
     def __del__(self):
@@ -76,9 +77,11 @@ class DisposableCalFileObject:
 
     def getPath(self):
         return self._fullpath
-'''
+
+
+"""
 A helper resource managing wrapper over an existing cal file for reading. Disposes of it after reading.
-'''
+"""
 
 
 class ReadableCalFileObject:
@@ -101,7 +104,7 @@ class ReadableCalFileObject:
 
     def readline(self):
         result = None
-        file = open(self._fullpath, 'r')
+        file = open(self._fullpath, "r")
         line = file.readline().split()
         number = int(line[0])
         udet = int(line[1])
@@ -115,8 +118,6 @@ class ReadableCalFileObject:
 
 
 class MergeCalFilesTest(unittest.TestCase):
-
-
     def do_execute(self, masterEntry, updateEntry, mergeOffsets, mergeSelect, mergeGroups):
 
         # Create the master cal file
@@ -132,11 +133,18 @@ class MergeCalFilesTest(unittest.TestCase):
         outputfilestring = os.path.join(dirpath, "product.cal")
 
         # Run the algorithm
-        run_algorithm("MergeCalFiles", UpdateFile=updatefile.getPath(), MasterFile=masterfile.getPath(),
-                      OutputFile=outputfilestring, MergeOffsets=mergeOffsets, MergeSelections=mergeSelect, MergeGroups=mergeGroups)
+        run_algorithm(
+            "MergeCalFiles",
+            UpdateFile=updatefile.getPath(),
+            MasterFile=masterfile.getPath(),
+            OutputFile=outputfilestring,
+            MergeOffsets=mergeOffsets,
+            MergeSelections=mergeSelect,
+            MergeGroups=mergeGroups,
+        )
 
         # Read the results file and return the first line as a CalFileEntry
-        outputfile = ReadableCalFileObject(dirpath,"product.cal")
+        outputfile = ReadableCalFileObject(dirpath, "product.cal")
         firstLineOutput = outputfile.readline()
 
         return firstLineOutput
@@ -146,7 +154,9 @@ class MergeCalFilesTest(unittest.TestCase):
         masterEntry = CalFileLine(1, 1, 1.0, 1, 1)
         updateEntry = CalFileLine(1, 1, 2.0, 2, 2)
 
-        firstLineOutput = self.do_execute(masterEntry=masterEntry, updateEntry=updateEntry, mergeOffsets=False, mergeSelect=False, mergeGroups=False)
+        firstLineOutput = self.do_execute(
+            masterEntry=masterEntry, updateEntry=updateEntry, mergeOffsets=False, mergeSelect=False, mergeGroups=False
+        )
 
         self.assertEqual(masterEntry.getOffset(), firstLineOutput.getOffset())
         self.assertEqual(masterEntry.getSelect(), firstLineOutput.getSelect())
@@ -157,7 +167,9 @@ class MergeCalFilesTest(unittest.TestCase):
         masterEntry = CalFileLine(1, 1, 1.0, 1, 1)
         updateEntry = CalFileLine(1, 1, 2.0, 2, 2)
 
-        firstLineOutput = self.do_execute(masterEntry=masterEntry, updateEntry=updateEntry, mergeOffsets=True, mergeSelect=False, mergeGroups=False)
+        firstLineOutput = self.do_execute(
+            masterEntry=masterEntry, updateEntry=updateEntry, mergeOffsets=True, mergeSelect=False, mergeGroups=False
+        )
 
         self.assertEqual(updateEntry.getOffset(), firstLineOutput.getOffset())
         self.assertEqual(masterEntry.getSelect(), firstLineOutput.getSelect())
@@ -169,7 +181,9 @@ class MergeCalFilesTest(unittest.TestCase):
         updateEntry = CalFileLine(1, 1, 2.0, 2, 2)
 
         # Run the algorithm and return the first line of the output merged cal file.
-        firstLineOutput = self.do_execute(masterEntry=masterEntry, updateEntry=updateEntry, mergeOffsets=False, mergeSelect=True, mergeGroups=False)
+        firstLineOutput = self.do_execute(
+            masterEntry=masterEntry, updateEntry=updateEntry, mergeOffsets=False, mergeSelect=True, mergeGroups=False
+        )
 
         self.assertEqual(masterEntry.getOffset(), firstLineOutput.getOffset())
         self.assertEqual(updateEntry.getSelect(), firstLineOutput.getSelect())
@@ -181,7 +195,9 @@ class MergeCalFilesTest(unittest.TestCase):
         updateEntry = CalFileLine(1, 1, 2.0, 2, 2)
 
         # Run the algorithm and return the first line of the output merged cal file.
-        firstLineOutput = self.do_execute(masterEntry=masterEntry, updateEntry=updateEntry, mergeOffsets=False, mergeSelect=False, mergeGroups=True)
+        firstLineOutput = self.do_execute(
+            masterEntry=masterEntry, updateEntry=updateEntry, mergeOffsets=False, mergeSelect=False, mergeGroups=True
+        )
 
         self.assertEqual(masterEntry.getOffset(), firstLineOutput.getOffset())
         self.assertEqual(masterEntry.getSelect(), firstLineOutput.getSelect())
@@ -193,12 +209,14 @@ class MergeCalFilesTest(unittest.TestCase):
         updateEntry = CalFileLine(1, 1, 2.0, 2, 2)
 
         # Run the algorithm and return the first line of the output merged cal file.
-        firstLineOutput = self.do_execute(masterEntry=masterEntry, updateEntry=updateEntry, mergeOffsets=True, mergeSelect=True, mergeGroups=True)
+        firstLineOutput = self.do_execute(
+            masterEntry=masterEntry, updateEntry=updateEntry, mergeOffsets=True, mergeSelect=True, mergeGroups=True
+        )
 
         self.assertEqual(updateEntry.getOffset(), firstLineOutput.getOffset())
         self.assertEqual(updateEntry.getSelect(), firstLineOutput.getSelect())
         self.assertEqual(updateEntry.getGroup(), firstLineOutput.getGroup())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

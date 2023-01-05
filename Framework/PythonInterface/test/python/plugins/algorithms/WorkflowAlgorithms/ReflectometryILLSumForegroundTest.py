@@ -11,17 +11,10 @@ import unittest
 
 
 class ReflectometryILLSumForegroundTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
-        ReflectometryILLPreprocess(Run = 'ILL/D17/317369.nxs',
-                                   Measurement='DirectBeam',
-                                   ForegroundHalfWidth=5,
-                                   OutputWorkspace='db')
-        ReflectometryILLPreprocess(Run='ILL/D17/317370.nxs',
-                                   Measurement='ReflectedBeam',
-                                   ForegroundHalfWidth=5,
-                                   OutputWorkspace='rb')
+        ReflectometryILLPreprocess(Run="ILL/D17/317369.nxs", Measurement="DirectBeam", ForegroundHalfWidth=5, OutputWorkspace="db")
+        ReflectometryILLPreprocess(Run="ILL/D17/317370.nxs", Measurement="ReflectedBeam", ForegroundHalfWidth=5, OutputWorkspace="rb")
 
     @classmethod
     def tearDownClass(cls):
@@ -29,32 +22,32 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
 
     def testSumInLambdaD17(self):
         # first the direct beam
-        ReflectometryILLSumForeground(InputWorkspace='db',
-                                      OutputWorkspace='db_frg')
+        ReflectometryILLSumForeground(InputWorkspace="db", OutputWorkspace="db_frg")
 
         # then the reflected beam
-        ReflectometryILLSumForeground(InputWorkspace='rb',
-                                      OutputWorkspace='rb_frg',
-                                      SummationType='SumInLambda',
-                                      DirectLineWorkspace='db',
-                                      DirectForegroundWorkspace='db_frg')
-        self.checkOutput(mtd['rb_frg'], 991)
-
+        ReflectometryILLSumForeground(
+            InputWorkspace="rb",
+            OutputWorkspace="rb_frg",
+            SummationType="SumInLambda",
+            DirectLineWorkspace="db",
+            DirectForegroundWorkspace="db_frg",
+        )
+        self.checkOutput(mtd["rb_frg"], 991)
 
     def testSumInQD17(self):
         # first the direct beam
-        ReflectometryILLSumForeground(InputWorkspace='db',
-                                      OutputWorkspace='db_frg')
+        ReflectometryILLSumForeground(InputWorkspace="db", OutputWorkspace="db_frg")
 
         # then the reflected beam
-        ReflectometryILLSumForeground(InputWorkspace='rb',
-                                      OutputWorkspace='rb_inq_frg',
-                                      SummationType='SumInQ',
-                                      DirectLineWorkspace='db',
-                                      DirectForegroundWorkspace='db_frg')
+        ReflectometryILLSumForeground(
+            InputWorkspace="rb",
+            OutputWorkspace="rb_inq_frg",
+            SummationType="SumInQ",
+            DirectLineWorkspace="db",
+            DirectForegroundWorkspace="db_frg",
+        )
 
-        self.checkOutput(mtd['rb_inq_frg'], 1046)
-
+        self.checkOutput(mtd["rb_inq_frg"], 1046)
 
     def checkOutput(self, ws, blocksize):
         self.assertTrue(ws)
@@ -62,7 +55,7 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         self.assertTrue(ws.isHistogramData())
         self.assertEqual(ws.blocksize(), blocksize)
         self.assertEqual(ws.getNumberHistograms(), 1)
-        self.assertEqual(ws.getAxis(0).getUnit().unitID(), 'Wavelength')
+        self.assertEqual(ws.getAxis(0).getUnit().unitID(), "Wavelength")
 
 
 if __name__ == "__main__":

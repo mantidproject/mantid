@@ -11,6 +11,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include <algorithm>
@@ -43,6 +44,7 @@ MatrixWorkspace_sptr convertToPointData(MatrixWorkspace_sptr const &workspace) {
 IFunction_sptr createFlatBackground(double const height = 0.0) {
   auto flatBackground = FunctionFactory::Instance().createFunction("FlatBackground");
   flatBackground->setParameter("A0", height);
+  flatBackground->addConstraints("A0 > 0");
   return flatBackground;
 }
 
@@ -51,6 +53,7 @@ IFunction_sptr createGaussian(double const height = 0.0, double const peakCentre
   gaussian->setParameter("Height", height);
   gaussian->setParameter("PeakCentre", peakCentre);
   gaussian->setParameter("Sigma", sigma);
+  gaussian->addConstraints("Height > 0");
   return gaussian;
 }
 
@@ -149,12 +152,27 @@ IFunction_sptr ALFAnalysisModel::calculateEstimate(MatrixWorkspace_sptr &workspa
   return createCompositeFunction(createFlatBackground(), createGaussian());
 }
 
+void ALFAnalysisModel::setPeakParameters(Mantid::API::IPeakFunction_const_sptr const &peak) {
+  auto const centre = peak->getParameter("PeakCentre");
+  auto const height = peak->getParameter("Height");
+  auto const sigma = peak->getParameter("Sigma");
+
+  setPeakCentre(centre);
+  m_function->setParameter("f1.Height", height);
+  m_function->setParameter("f1.Sigma", sigma);
+}
+
 void ALFAnalysisModel::setPeakCentre(double const centre) {
   m_function->setParameter("f1.PeakCentre", centre);
   m_fitStatus = "";
 }
 
 double ALFAnalysisModel::peakCentre() const { return m_function->getParameter("f1.PeakCentre"); }
+
+Mantid::API::IPeakFunction_const_sptr ALFAnalysisModel::getPeakCopy() const {
+  auto const gaussian = m_function->getFunction(1)->clone();
+  return std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(gaussian);
+}
 
 std::string ALFAnalysisModel::fitStatus() const { return m_fitStatus; }
 
@@ -165,6 +183,17 @@ std::optional<double> ALFAnalysisModel::averageTwoTheta() const {
     return std::nullopt;
   }
   return std::reduce(m_twoThetas.cbegin(), m_twoThetas.cend()) / static_cast<double>(numberOfTubes());
+}
+
+std::optional<double> ALFAnalysisModel::rotationAngle() const {
+  if (m_fitStatus.empty()) {
+    return std::nullopt;
+  }
+  auto const twoTheta = averageTwoTheta();
+  if (!twoTheta) {
+    return std::nullopt;
+  }
+  return peakCentre() / (2 * sin(*twoTheta));
 }
 
 } // namespace MantidQt::CustomInterfaces

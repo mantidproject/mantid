@@ -7,13 +7,13 @@
 # pylint: disable=invalid-name
 
 """ Handles calibration of SANS workspaces."""
-from os.path import (basename, splitext, isfile)
-from mantid.api import (AnalysisDataService)
+from os.path import basename, splitext, isfile
+from mantid.api import AnalysisDataService
 
 from sans.common.file_information import find_full_file_path
-from sans.common.constants import (EMPTY_NAME, CALIBRATION_WORKSPACE_TAG)
-from sans.common.log_tagger import (has_tag, get_tag, set_tag)
-from sans.common.general_functions import (create_child_algorithm, sanitise_instrument_name)
+from sans.common.constants import EMPTY_NAME, CALIBRATION_WORKSPACE_TAG
+from sans.common.log_tagger import has_tag, get_tag, set_tag
+from sans.common.general_functions import create_child_algorithm, sanitise_instrument_name
 from sans.common.enums import SANSDataType
 
 
@@ -48,13 +48,10 @@ def apply_calibration(calibration_file_name, workspaces, monitor_workspaces, use
     # Check for the sample scatter and the can scatter workspaces monitors
     workspace_monitors_to_calibrate = {}
     if SANSDataType.SAMPLE_SCATTER in monitor_workspaces:
-        workspace_monitors_to_calibrate.update({SANSDataType.SAMPLE_SCATTER:
-                                                monitor_workspaces[SANSDataType.SAMPLE_SCATTER]})
+        workspace_monitors_to_calibrate.update({SANSDataType.SAMPLE_SCATTER: monitor_workspaces[SANSDataType.SAMPLE_SCATTER]})
     if SANSDataType.CAN_SCATTER in monitor_workspaces:
-        workspace_monitors_to_calibrate.update({SANSDataType.CAN_SCATTER:
-                                                monitor_workspaces[SANSDataType.CAN_SCATTER]})
-    do_apply_calibration(full_file_path, workspace_monitors_to_calibrate,
-                         use_loaded, publish_to_ads, parent_alg)
+        workspace_monitors_to_calibrate.update({SANSDataType.CAN_SCATTER: monitor_workspaces[SANSDataType.CAN_SCATTER]})
+    do_apply_calibration(full_file_path, workspace_monitors_to_calibrate, use_loaded, publish_to_ads, parent_alg)
 
 
 def do_apply_calibration(full_file_path, workspaces_to_calibrate, use_loaded, publish_to_ads, parent_alg):
@@ -124,8 +121,7 @@ def get_calibration_workspace(full_file_path, use_loaded, parent_alg):
         if not isfile(full_file_path):
             raise RuntimeError("SANSCalibration: The file for {0} does not seem to exist".format(full_file_path))
         loader_name = "LoadNexusProcessed"
-        loader_options = {"Filename": full_file_path,
-                          "OutputWorkspace": "dummy"}
+        loader_options = {"Filename": full_file_path, "OutputWorkspace": "dummy"}
         loader = create_child_algorithm(parent_alg, loader_name, **loader_options)
         loader.execute()
         calibration_workspace = loader.getProperty("OutputWorkspace").value
@@ -195,8 +191,7 @@ def get_cloned_calibration_workspace(calibration_workspace, parent_alg):
     :return: a cloned calibration workspace
     """
     clone_name = "CloneWorkspace"
-    clone_options = {"InputWorkspace": calibration_workspace,
-                     "OutputWorkspace": EMPTY_NAME}
+    clone_options = {"InputWorkspace": calibration_workspace, "OutputWorkspace": EMPTY_NAME}
     alg = create_child_algorithm(parent_alg, clone_name, **clone_options)
     alg.execute()
     return alg.getProperty("OutputWorkspace").value
@@ -233,15 +228,12 @@ def apply_missing_parameters(calibration_workspace, workspace, missing_parameter
     component_name = instrument.getName()
     component_name = sanitise_instrument_name(component_name)
     set_instrument_name = "SetInstrumentParameter"
-    set_instrument_parameter_options = {"Workspace": calibration_workspace,
-                                        "ComponentName": component_name}
+    set_instrument_parameter_options = {"Workspace": calibration_workspace, "ComponentName": component_name}
     alg = create_child_algorithm(parent_alg, set_instrument_name, **set_instrument_parameter_options)
 
     # For now only string, int and double are handled
     type_options = {"string": "String", "int": "Number", "double": "Number"}
-    value_options = {"string": instrument.getStringParameter,
-                     "int": instrument.getIntParameter,
-                     "double": instrument.getNumberParameter}
+    value_options = {"string": instrument.getStringParameter, "int": instrument.getIntParameter, "double": instrument.getNumberParameter}
     try:
         for missing_parameter in missing_parameters:
             parameter_type = instrument.getParameterType(missing_parameter)
@@ -252,8 +244,9 @@ def apply_missing_parameters(calibration_workspace, workspace, missing_parameter
             alg.setProperty("ParameterType", type_to_save)
             alg.setProperty("Value", str(value[0]))
     except KeyError:
-        raise RuntimeError("SANSCalibration: An Instrument Parameter File value of unknown type"
-                           "was going to be copied. Cannot handle this currently.")
+        raise RuntimeError(
+            "SANSCalibration: An Instrument Parameter File value of unknown type" "was going to be copied. Cannot handle this currently."
+        )
 
 
 def calibrate(calibration_workspace, workspace_to_calibrate, parent_alg):
@@ -265,8 +258,7 @@ def calibrate(calibration_workspace, workspace_to_calibrate, parent_alg):
     :param parent_alg: a handle to the parent algorithm
     """
     copy_instrument_name = "CopyInstrumentParameters"
-    copy_instrument_options = {"InputWorkspace": calibration_workspace,
-                               "OutputWorkspace": workspace_to_calibrate}
+    copy_instrument_options = {"InputWorkspace": calibration_workspace, "OutputWorkspace": workspace_to_calibrate}
     alg = create_child_algorithm(parent_alg, copy_instrument_name, **copy_instrument_options)
     alg.execute()
 

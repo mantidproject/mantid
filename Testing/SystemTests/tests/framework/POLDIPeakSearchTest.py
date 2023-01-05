@@ -4,14 +4,14 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init
+# pylint: disable=no-init
 import systemtesting
 from mantid.simpleapi import *
 import numpy as np
 
 
 class POLDIPeakSearchTest(systemtesting.MantidSystemTest):
-    '''This test checks that the results of PoldiAutoCorrelation match the expected outcome.'''
+    """This test checks that the results of PoldiAutoCorrelation match the expected outcome."""
 
     def runTest(self):
         dataFiles = ["poldi2013n006903", "poldi2013n006904"]
@@ -42,13 +42,13 @@ class POLDIPeakSearchTest(systemtesting.MantidSystemTest):
             positions = calculatedPeaks.column(3)
             referencePositions = referencePeaks.column(0)
 
-      # In this test we only compare positions, because the height
-      # and error estimates are derived differently than in the
-      # original software, so the results are not exactly the same.
-      #
-      # Most important in this case are peak positions. Since the order
-      # depends on height, it may be different, so the comparison can not
-      # be done 1:1.
+            # In this test we only compare positions, because the height
+            # and error estimates are derived differently than in the
+            # original software, so the results are not exactly the same.
+            #
+            # Most important in this case are peak positions. Since the order
+            # depends on height, it may be different, so the comparison can not
+            # be done 1:1.
             for position in positions[:10]:
                 deltas = [np.abs(float(position) - x) for x in referencePositions]
 

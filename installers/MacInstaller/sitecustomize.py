@@ -9,6 +9,6 @@ import site
 
 
 # Add extra site-packages containing our Python modules
-_macos = Path(__file__).joinpath('../../../../../../../../MacOS')
+_macos = Path(__file__).joinpath("../../../../../../../../MacOS")
 site.addsitedir(_macos.resolve())
 del _macos

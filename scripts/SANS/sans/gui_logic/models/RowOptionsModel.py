@@ -19,9 +19,9 @@ class RowOptionsModel(object):
         self._developer_options[key] = value
 
     def get_displayed_text(self):
-        output = self._user_options + ',' if self._user_options else ''
+        output = self._user_options + "," if self._user_options else ""
         for k, v in self._developer_options.items():
-            output += k + '=' + str(v) + ', '
+            output += k + "=" + str(v) + ", "
 
         if output.endswith(", "):
             output = output[:-2]
@@ -38,17 +38,23 @@ class RowOptionsModel(object):
             return {}
 
         parsed_options = self._parse_string(user_text)
-        permissible_properties = \
-            {"WavelengthMin": float, "WavelengthMax": float, "EventSlices": str, "MergeScale": float,
-             "MergeShift": float, "PhiMin": float, "PhiMax": float, "UseMirror": bool}
+        permissible_properties = {
+            "WavelengthMin": float,
+            "WavelengthMax": float,
+            "EventSlices": str,
+            "MergeScale": float,
+            "MergeShift": float,
+            "PhiMin": float,
+            "PhiMax": float,
+            "UseMirror": bool,
+        }
 
         options = {}
         for key, value in parsed_options.items():
             if key == "UseMirror":
                 val = any(v == value for v in ["true", "1", "yes", "True", "t", "y"])
                 if not val and not any(v == value for v in ["false", "0", "no", "f", "n", "False"]):
-                    raise ValueError(
-                        "Could not evaluate {} as a boolean value. It should be True or False.".format(value))
+                    raise ValueError("Could not evaluate {} as a boolean value. It should be True or False.".format(value))
                 options.update({key: value})
                 continue
 
@@ -67,8 +73,8 @@ class RowOptionsModel(object):
         # Remove all white space
         parsed = {}
         options_column_string_no_whitespace = "".join(options_column_string.split())
-        options_column_string_no_whitespace = options_column_string_no_whitespace.replace('"', '')
-        options_column_string_no_whitespace = options_column_string_no_whitespace.replace("'", '')
+        options_column_string_no_whitespace = options_column_string_no_whitespace.replace('"', "")
+        options_column_string_no_whitespace = options_column_string_no_whitespace.replace("'", "")
 
         if not options_column_string_no_whitespace:
             return parsed
@@ -78,11 +84,11 @@ class RowOptionsModel(object):
         # ([^,=]+) Anything except equals detects keys in the options string
         # =* then an equals sign
         # ((?:[^,=]+(?:,|$))*) Any number of repetitions of a string without = followed by a comma or end of input.
-        option_pattern = re.compile(r'''([^,=]+)=*((?:[^,=]+(?:,|$))*)''')
+        option_pattern = re.compile(r"""([^,=]+)=*((?:[^,=]+(?:,|$))*)""")
 
         # The findall option finds all instances of the pattern specified above in the options string.
         for key, value in option_pattern.findall(options_column_string_no_whitespace):
-            if value.endswith(','):
+            if value.endswith(","):
                 value = value[:-1]
             parsed.update({key: value})
 

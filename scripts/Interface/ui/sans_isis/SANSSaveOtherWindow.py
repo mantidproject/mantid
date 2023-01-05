@@ -23,7 +23,7 @@ class SANSSaveOtherDialog(QtWidgets.QDialog, Ui_SaveOtherDialog):
         self.subscribers = []
         self.setup_view()
 
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Save Other Tab"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Save Other Tab"], False)
 
     def setup_view(self):
         self.setupUi(self)
@@ -88,8 +88,9 @@ class SANSSaveOtherDialog(QtWidgets.QDialog, Ui_SaveOtherDialog):
         return save_types
 
     def launch_file_browser(self, current_directory):
-        filename = QtWidgets.QFileDialog.getExistingDirectory(self, 'Select Directory', current_directory,
-                                                              QtWidgets.QFileDialog.ShowDirsOnly)
+        filename = QtWidgets.QFileDialog.getExistingDirectory(
+            self, "Select Directory", current_directory, QtWidgets.QFileDialog.ShowDirsOnly
+        )
         return filename
 
     def rename_filebox(self, name):
@@ -98,7 +99,8 @@ class SANSSaveOtherDialog(QtWidgets.QDialog, Ui_SaveOtherDialog):
     def _on_help_button_clicked(self):
         try:
             import mantidqt
-            mantidqt.interfacemanager.InterfaceManager().showCustomInterfaceHelp('sans_save_other','isis_sans')
+
+            mantidqt.interfacemanager.InterfaceManager().showCustomInterfaceHelp("sans_save_other", "isis_sans")
         except:
             pass
 

@@ -13,9 +13,7 @@ from pathlib import Path
 from typing import Optional, Union
 
 
-def run_file(run_number: Union[str, int],
-             instrument: Optional[str] = None,
-             oncat: Optional[bool] = True) -> Optional[None]:
+def run_file(run_number: Union[str, int], instrument: Optional[str] = None, oncat: Optional[bool] = True) -> Optional[None]:
     r"""
     @brief Test whether the file for a run number exists.
     @details Search first the datasearch directories and if file is not found, use the locations
@@ -29,13 +27,13 @@ def run_file(run_number: Union[str, int],
         try:
             int(run_number)
         except ValueError:
-            raise ValueError(f'{run_number} does not represent a number')
-        assert int(run_number) > 0, f'{run_number} does not represent an positive integer number'
+            raise ValueError(f"{run_number} does not represent a number")
+        assert int(run_number) > 0, f"{run_number} does not represent an positive integer number"
     if instrument is None:
-        instrument = config['default.instrument']
-    root_name = f'{instrument}_{run_number}'
+        instrument = config["default.instrument"]
+    root_name = f"{instrument}_{run_number}"
     # check in 'datasearch.directories'
-    for extension in ('.h5', '.nxs', '.nxs.h5'):
+    for extension in (".h5", ".nxs", ".nxs.h5"):
         file_path = FileFinder.getFullPath(root_name + extension)
         if Path(file_path).is_file():
             return file_path

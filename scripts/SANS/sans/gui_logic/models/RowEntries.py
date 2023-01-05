@@ -47,18 +47,45 @@ class _UserEntries(object):
         # member, causing dataclass to skip our fields. Instead we can manually do this
         # for the moment
         if isinstance(other, _UserEntries):
-            return (self.can_direct, self.can_scatter, self.can_transmission,
-                    self.sample_direct, self.sample_scatter, self.sample_transmission,
-                    self.output_name, self.user_file,
-                    self.sample_height, self._sample_shape, self.sample_thickness, self.sample_width,
-                    self.can_direct_period, self.can_scatter_period, self.can_transmission_period,
-                    self.sample_direct, self.sample_scatter_period, self.sample_transmission_period) == \
-                   (other.can_direct, other.can_scatter, other.can_transmission,
-                    other.sample_direct, other.sample_scatter, other.sample_transmission,
-                    other.output_name, other.user_file,
-                    other.sample_height, other._sample_shape, other.sample_thickness, other.sample_width,
-                    other.can_direct_period, other.can_scatter_period, other.can_transmission_period,
-                    other.sample_direct, other.sample_scatter_period, other.sample_transmission_period)
+            return (
+                self.can_direct,
+                self.can_scatter,
+                self.can_transmission,
+                self.sample_direct,
+                self.sample_scatter,
+                self.sample_transmission,
+                self.output_name,
+                self.user_file,
+                self.sample_height,
+                self._sample_shape,
+                self.sample_thickness,
+                self.sample_width,
+                self.can_direct_period,
+                self.can_scatter_period,
+                self.can_transmission_period,
+                self.sample_direct,
+                self.sample_scatter_period,
+                self.sample_transmission_period,
+            ) == (
+                other.can_direct,
+                other.can_scatter,
+                other.can_transmission,
+                other.sample_direct,
+                other.sample_scatter,
+                other.sample_transmission,
+                other.output_name,
+                other.user_file,
+                other.sample_height,
+                other._sample_shape,
+                other.sample_thickness,
+                other.sample_width,
+                other.can_direct_period,
+                other.can_scatter_period,
+                other.can_transmission_period,
+                other.sample_direct,
+                other.sample_scatter_period,
+                other.sample_transmission_period,
+            )
 
     def __hash__(self):
         # We want to store "duplicate" hashable types
@@ -84,8 +111,7 @@ class RowEntries(_UserEntries):
 
     def __eq__(self, other):
         if isinstance(other, RowEntries):
-            return (self.tool_tip, self.state) == (other.tool_tip, other.state) \
-                   and super().__eq__(other)
+            return (self.tool_tip, self.state) == (other.tool_tip, other.state) and super().__eq__(other)
 
     def __hash__(self):
         return id(self)
@@ -102,8 +128,7 @@ class RowEntries(_UserEntries):
 
     @options.setter
     def options(self, value):
-        assert isinstance(value, RowOptionsModel), \
-            "Expected a RowOptionsModel, got %r" % value
+        assert isinstance(value, RowOptionsModel), "Expected a RowOptionsModel, got %r" % value
         self._options = value
 
     @property
@@ -127,8 +152,16 @@ class RowEntries(_UserEntries):
             self._sample_shape = None
 
     def is_multi_period(self):
-        return any((self.sample_scatter_period, self.sample_transmission_period, self.sample_direct_period,
-                    self.can_scatter_period, self.can_transmission_period, self.can_direct_period))
+        return any(
+            (
+                self.sample_scatter_period,
+                self.sample_transmission_period,
+                self.sample_direct_period,
+                self.can_scatter_period,
+                self.can_transmission_period,
+                self.can_direct_period,
+            )
+        )
 
     def is_empty(self):
         return not any(getattr(self, attr) for attr in self._data_vars.keys())

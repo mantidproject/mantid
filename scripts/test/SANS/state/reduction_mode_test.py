@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from sans.common.enums import (ReductionMode, ReductionDimensionality, FitModeForMerge)
+from sans.common.enums import ReductionMode, ReductionDimensionality, FitModeForMerge
 from sans.state.StateObjects.StateReductionMode import StateReductionMode
 
 
@@ -34,10 +34,10 @@ class StateReductionModeTest(unittest.TestCase):
         self.assertEqual(merge_strategy[1], ReductionMode.HAB)
 
         all_reductions = state.get_all_reduction_modes()
-        self.assertEqual(len(all_reductions),  2)
+        self.assertEqual(len(all_reductions), 2)
         self.assertEqual(all_reductions[0], ReductionMode.LAB)
         self.assertEqual(all_reductions[1], ReductionMode.HAB)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

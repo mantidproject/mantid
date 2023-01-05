@@ -12,20 +12,16 @@ class PropertyManagerTest(unittest.TestCase):
     def test_static_methods(self):
         test_log_name = "testLog"
         self.assertFalse(PropertyManager.isAnInvalidValuesFilterLog(test_log_name))
-        self.assertEqual(PropertyManager.getInvalidValuesFilterLogName(test_log_name),
-          test_log_name + "_invalid_values")
+        self.assertEqual(PropertyManager.getInvalidValuesFilterLogName(test_log_name), test_log_name + "_invalid_values")
 
-        self.assertTrue(PropertyManager.isAnInvalidValuesFilterLog(
-            PropertyManager.getInvalidValuesFilterLogName(test_log_name)))
+        self.assertTrue(PropertyManager.isAnInvalidValuesFilterLog(PropertyManager.getInvalidValuesFilterLogName(test_log_name)))
 
         # not a valid invalid values log
-        self.assertEqual(
-            PropertyManager.getLogNameFromInvalidValuesFilter(test_log_name), "")
+        self.assertEqual(PropertyManager.getLogNameFromInvalidValuesFilter(test_log_name), "")
         # A valid invalid values log
         self.assertEqual(
-            PropertyManager.getLogNameFromInvalidValuesFilter(
-                PropertyManager.getInvalidValuesFilterLogName(test_log_name)),
-            test_log_name)
+            PropertyManager.getLogNameFromInvalidValuesFilter(PropertyManager.getInvalidValuesFilterLogName(test_log_name)), test_log_name
+        )
 
     def test_propertymanager_population(self):
         manager = PropertyManager()
@@ -35,7 +31,7 @@ class PropertyManagerTest(unittest.TestCase):
         self.assertEqual(len(manager), 0)
 
         # add some values
-        manager["f"] = 1.
+        manager["f"] = 1.0
         manager["i"] = 2
         manager["s"] = "3"
 
@@ -54,12 +50,12 @@ class PropertyManagerTest(unittest.TestCase):
         self.assertEqual(manager.getPropertyValue("s"), "3")
 
         # check actual values
-        self.assertEqual(manager.getProperty("f").value, 1.)
+        self.assertEqual(manager.getProperty("f").value, 1.0)
         self.assertEqual(manager.getProperty("i").value, 2)
         self.assertEqual(manager.getProperty("s").value, "3")
 
         # ...and accessing them through dict interface
-        self.assertEqual(manager["f"].value, 1.)
+        self.assertEqual(manager["f"].value, 1.0)
         self.assertEqual(manager["i"].value, 2)
         self.assertEqual(manager["s"].value, "3")
 
@@ -88,20 +84,17 @@ class PropertyManagerTest(unittest.TestCase):
         self.assertTrue(len(manager), 2)
 
     def test_propertymanager_can_be_created_from_dict(self):
-        values = {
-            "int": 5,
-            "float": 20.0,
-            "str": 'a string'
-        }
+        values = {"int": 5, "float": 20.0, "str": "a string"}
         pmgr = PropertyManager(values)
         self.assertEqual(len(pmgr), 3)
         self.assertEqual(5, pmgr["int"].value)
         self.assertEqual(20.0, pmgr["float"].value)
-        self.assertEqual('a string', pmgr["str"].value)
+        self.assertEqual("a string", pmgr["str"].value)
 
     def test_propertymanager_cannot_be_created_from_arbitrary_sequence(self):
         with self.assertRaises(Exception):
-            PropertyManager((1,2,3,4,5))
+            PropertyManager((1, 2, 3, 4, 5))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -30,14 +30,126 @@ FUNDAMENTALS_DIM = 1
 PYTHON_INDEX_SHIFT = 1
 
 # symbols of all elements
-ALL_SYMBOLS = ["Ac", "Ag", "Al", "Am", "Ar", "As", "At", "Au", "B", "Ba", "Be", "Bh", "Bi", "Bk", "Br", "C", "Ca",
-               "Cd", "Ce", "Cf", "Cl", "Cm", "Cn", "Co", "Cr", "Cs", "Cu", "Db", "Ds", "Dy", "Er", "Es", "Eu", "F",
-               "Fe", "Fl", "Fm", "Fr", "Ga", "Gd", "Ge", "H", "He", "Hf", "Hg", "Ho", "Hs", "I", "In", "Ir", "K",
-               "Kr", "La", "Li", "Lr", "Lu", "Lv", "Md", "Mg", "Mn", "Mo", "Mt", "N", "Na", "Nb", "Nd", "Ne", "Ni",
-               "No", "Np", "O", "Os", "P", "Pa", "Pb", "Pd", "Pm", "Po", "Pr", "Pt", "Pu", "Ra", "Rb", "Re", "Rf",
-               "Rg", "Rh", "Rn", "Ru", "S", "Sb", "Sc", "Se", "Sg", "Si", "Sm", "Sn", "Sr", "Ta", "Tb", "Tc", "Te",
-               "Th", "Ti", "Tl", "Tm", "U", "Uuo", "Uup", "Uus", "Uut", "V", "W", "Xe", "Y", "Yb", "Zn", "Zr",
-               ]
+ALL_SYMBOLS = [
+    "Ac",
+    "Ag",
+    "Al",
+    "Am",
+    "Ar",
+    "As",
+    "At",
+    "Au",
+    "B",
+    "Ba",
+    "Be",
+    "Bh",
+    "Bi",
+    "Bk",
+    "Br",
+    "C",
+    "Ca",
+    "Cd",
+    "Ce",
+    "Cf",
+    "Cl",
+    "Cm",
+    "Cn",
+    "Co",
+    "Cr",
+    "Cs",
+    "Cu",
+    "Db",
+    "Ds",
+    "Dy",
+    "Er",
+    "Es",
+    "Eu",
+    "F",
+    "Fe",
+    "Fl",
+    "Fm",
+    "Fr",
+    "Ga",
+    "Gd",
+    "Ge",
+    "H",
+    "He",
+    "Hf",
+    "Hg",
+    "Ho",
+    "Hs",
+    "I",
+    "In",
+    "Ir",
+    "K",
+    "Kr",
+    "La",
+    "Li",
+    "Lr",
+    "Lu",
+    "Lv",
+    "Md",
+    "Mg",
+    "Mn",
+    "Mo",
+    "Mt",
+    "N",
+    "Na",
+    "Nb",
+    "Nd",
+    "Ne",
+    "Ni",
+    "No",
+    "Np",
+    "O",
+    "Os",
+    "P",
+    "Pa",
+    "Pb",
+    "Pd",
+    "Pm",
+    "Po",
+    "Pr",
+    "Pt",
+    "Pu",
+    "Ra",
+    "Rb",
+    "Re",
+    "Rf",
+    "Rg",
+    "Rh",
+    "Rn",
+    "Ru",
+    "S",
+    "Sb",
+    "Sc",
+    "Se",
+    "Sg",
+    "Si",
+    "Sm",
+    "Sn",
+    "Sr",
+    "Ta",
+    "Tb",
+    "Tc",
+    "Te",
+    "Th",
+    "Ti",
+    "Tl",
+    "Tm",
+    "U",
+    "Uuo",
+    "Uup",
+    "Uus",
+    "Uut",
+    "V",
+    "W",
+    "Xe",
+    "Y",
+    "Yb",
+    "Zn",
+    "Zr",
+]
 
 SMALL_K = 1.0e-1  # norm of k vector below this value is considered zero
 
@@ -46,8 +158,7 @@ K_2_HARTREE = constants.value("kelvin-hartree relationship")  # K * K_2_HARTREE 
 # here we have to multiply by 100 because frequency is expressed in cm^-1
 CM1_2_HARTREE = constants.value("inverse meter-hartree relationship") * 100.0  # cm-1 * CM1_2_HARTREE =  Hartree
 
-ATOMIC_LENGTH_2_ANGSTROM = constants.value(
-    "atomic unit of length") / constants.angstrom  # 1 a.u. = 0.52917721067 Angstrom
+ATOMIC_LENGTH_2_ANGSTROM = constants.value("atomic unit of length") / constants.angstrom  # 1 a.u. = 0.52917721067 Angstrom
 
 M_2_HARTREE = constants.value("atomic mass unit-hartree relationship")  # amu * m2_hartree =  Hartree
 
@@ -96,7 +207,7 @@ with warnings.catch_warnings(record=True) as warning_list:
 
 H_BAR_DECOMPOSITION = math.frexp(H_BAR)
 
-M2_TO_ANGSTROM2 = 1.0 / constants.angstrom ** 2  # m^2 = 10^20 A^2
+M2_TO_ANGSTROM2 = 1.0 / constants.angstrom**2  # m^2 = 10^20 A^2
 M2_TO_ANGSTROM2_DECOMPOSITION = math.frexp(M2_TO_ANGSTROM2)
 
 KG2AMU = constants.value("kilogram-atomic mass unit relationship")  # kg = 6.022140857e+26 amu
@@ -123,10 +234,8 @@ MILLI_EV_TO_WAVENUMBER = 8.06554465
 # omega = 2 pi nu
 #
 
-CONSTANT = H_BAR_DECOMPOSITION[0] * M2_TO_ANGSTROM2_DECOMPOSITION[0] * \
-    KG2AMU_DECOMPOSITION[0] * HZ2INV_CM_DECOMPOSITION[0] / math.pi
-CONSTANT *= 2 ** (H_BAR_DECOMPOSITION[1] + M2_TO_ANGSTROM2_DECOMPOSITION[1] + KG2AMU_DECOMPOSITION[1]
-                  + HZ2INV_CM_DECOMPOSITION[1] - 2)
+CONSTANT = H_BAR_DECOMPOSITION[0] * M2_TO_ANGSTROM2_DECOMPOSITION[0] * KG2AMU_DECOMPOSITION[0] * HZ2INV_CM_DECOMPOSITION[0] / math.pi
+CONSTANT *= 2 ** (H_BAR_DECOMPOSITION[1] + M2_TO_ANGSTROM2_DECOMPOSITION[1] + KG2AMU_DECOMPOSITION[1] + HZ2INV_CM_DECOMPOSITION[1] - 2)
 
 CONSTANT_DECOMPOSITION = math.frexp(CONSTANT)
 M_N_DECOMPOSITION = math.frexp(constants.m_n)

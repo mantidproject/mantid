@@ -9,7 +9,7 @@ from mantid import FileFinder
 from sans.common.enums import SANSInstrument
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 
-from sans.command_interface.ISISCommandInterface import (LOQ, UseCompatibilityMode, BatchReduce)
+from sans.command_interface.ISISCommandInterface import LOQ, UseCompatibilityMode, BatchReduce
 from mantid.simpleapi import GroupWorkspaces
 
 
@@ -20,7 +20,7 @@ class SANSLOQLegacyUserFile_M3(systemtesting.MantidSystemTest):
         LOQ()
 
         csv_file = FileFinder.getFullPath("toml_legacy_file_m3.csv")
-        BatchReduce(csv_file, 'raw')
+        BatchReduce(csv_file, "raw")
 
     def validate(self):
         self.tolerance = 1e-4
@@ -41,7 +41,7 @@ class SANSLOQTomlUserFile_M3(systemtesting.MantidSystemTest):
         LOQ()
 
         csv_file = FileFinder.getFullPath("toml_v1_file_m3.csv")
-        BatchReduce(csv_file, 'raw')
+        BatchReduce(csv_file, "raw")
 
     def validate(self):
         self.tolerance = 1e-4
@@ -63,7 +63,7 @@ class SANSLOQLegacyUserFile_M4(systemtesting.MantidSystemTest):
         LOQ()
 
         csv_file = FileFinder.getFullPath("toml_legacy_file_m4.csv")
-        BatchReduce(csv_file, 'raw')
+        BatchReduce(csv_file, "raw")
 
     def validate(self):
         self.tolerance = 1e-4
@@ -77,7 +77,7 @@ class SANSLOQTomlUserFile_M4(systemtesting.MantidSystemTest):
         LOQ()
 
         csv_file = FileFinder.getFullPath("toml_v1_file_m4.csv")
-        BatchReduce(csv_file, 'raw')
+        BatchReduce(csv_file, "raw")
 
     def validate(self):
         self.tolerance = 1e-4

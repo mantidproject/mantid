@@ -389,7 +389,10 @@ class ApplyAllPropertiesTest(unittest.TestCase):
                          isinstance(self.new_legend.legendPatch.get_boxstyle(), BoxStyle.Round))
 
     def test_apply_properties_on_figure_with_legend_sets_number_of_columns(self):
-        self.assertEqual(new_legend_props['columns'], self.new_legend._ncol)
+        if LooseVersion(matplotlib.__version__) >= LooseVersion('3.6.0'):
+            self.assertEqual(new_legend_props['columns'], self.new_legend._ncols)
+        else:
+            self.assertEqual(new_legend_props['columns'], self.new_legend._ncol)
 
     def test_apply_properties_on_figure_with_legend_sets_column_spacing(self):
         self.assertEqual(new_legend_props['column_spacing'], self.new_legend.columnspacing)

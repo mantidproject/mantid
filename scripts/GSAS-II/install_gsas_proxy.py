@@ -14,17 +14,19 @@ import subprocess
 import urllib2
 
 
-FAILED_DOWNLOAD_MESSAGE = "Could not download the GSAS installation package. " \
-                          "This can occur for many reasons, one of which is " \
-                          "that your computer is not connected to the internet.\n" \
-                          "A common reason is that your version of SSL is out of date " \
-                          "(often seen on OSX). From a Python shell, run " \
-                          "'import ssl; print(ssl.OPENSSL_VERSION)'\n" \
-                          "If you see a version number less than 1.0, you need to either " \
-                          "upgrade SSL (contact the Mantid team or seek help online) " \
-                          "or do a manual installation from the GSAS-II website.\n" \
-                          "If neither of these solutions yield anything useful, please " \
-                          "get in contact with the Mantid team."
+FAILED_DOWNLOAD_MESSAGE = (
+    "Could not download the GSAS installation package. "
+    "This can occur for many reasons, one of which is "
+    "that your computer is not connected to the internet.\n"
+    "A common reason is that your version of SSL is out of date "
+    "(often seen on OSX). From a Python shell, run "
+    "'import ssl; print(ssl.OPENSSL_VERSION)'\n"
+    "If you see a version number less than 1.0, you need to either "
+    "upgrade SSL (contact the Mantid team or seek help online) "
+    "or do a manual installation from the GSAS-II website.\n"
+    "If neither of these solutions yield anything useful, please "
+    "get in contact with the Mantid team."
+)
 GSAS_SVN_URL = "https://subversion.xray.aps.anl.gov/pyGSAS/install/GSASIIproxy.zip"
 GSAS_BOOTSTRAP_URL = "https://subversion.xray.aps.anl.gov/pyGSAS/install/bootstrap.py"
 GSAS_PROXY_FILE_NAME = "GSASIIProxy.zip"
@@ -82,32 +84,42 @@ def install_gsasii(install_directory, revision_number, force_overwrite):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Script to install GSAS-II")
 
-    parser.add_argument("-d", "--install-dir",
-                        default=os.path.abspath(os.sep),
-                        type=str,
-                        dest="install_dir",
-                        help="Directory to install GSAS-II in "
-                             "(leave blank to use current drive (Windows) or / (Linux)")
+    parser.add_argument(
+        "-d",
+        "--install-dir",
+        default=os.path.abspath(os.sep),
+        type=str,
+        dest="install_dir",
+        help="Directory to install GSAS-II in " "(leave blank to use current drive (Windows) or / (Linux)",
+    )
 
-    parser.add_argument("-v", "--version",
-                        default=0,
-                        type=int,
-                        dest="version",
-                        help="SVN revision number to install (leave blank to use the latest revision")
+    parser.add_argument(
+        "-v",
+        "--version",
+        default=0,
+        type=int,
+        dest="version",
+        help="SVN revision number to install (leave blank to use the latest revision",
+    )
 
-    parser.add_argument("-b", "--build-server",
-                        action="store_true",
-                        default=False,
-                        dest="build_server_mode",
-                        help="Build server mode. Install GSAS-II in Python user site package directory "
-                             "and don't wait for prompt before exiting")
+    parser.add_argument(
+        "-b",
+        "--build-server",
+        action="store_true",
+        default=False,
+        dest="build_server_mode",
+        help="Build server mode. Install GSAS-II in Python user site package directory " "and don't wait for prompt before exiting",
+    )
 
-    parser.add_argument("-f", "--force-overwrite",
-                        action="store_true",
-                        default=False,
-                        dest="force_overwrite",
-                        help="Force overwrite mode. If a GSAS-II installation is found at the requested "
-                             "directory, remove it and perform a fresh install")
+    parser.add_argument(
+        "-f",
+        "--force-overwrite",
+        action="store_true",
+        default=False,
+        dest="force_overwrite",
+        help="Force overwrite mode. If a GSAS-II installation is found at the requested "
+        "directory, remove it and perform a fresh install",
+    )
 
     args = parser.parse_args()
 

@@ -49,21 +49,26 @@ def run_cylinder_absorb_corrections(ws_to_correct, multiple_scattering, sample_d
     """
 
     if not isinstance(sample_details_obj, sample_details.SampleDetails):
-        raise RuntimeError("A SampleDetails object was not set or a different object type was found when sample"
-                           " absorption corrections were requested. If you want sample absorption corrections please "
-                           "create a SampleDetails object and set the relevant properties it. "
-                           "Then set the new sample by calling set_sample_details().")
+        raise RuntimeError(
+            "A SampleDetails object was not set or a different object type was found when sample"
+            " absorption corrections were requested. If you want sample absorption corrections please "
+            "create a SampleDetails object and set the relevant properties it. "
+            "Then set the new sample by calling set_sample_details()."
+        )
 
     # Get the underlying material object
     if not sample_details_obj.is_material_set():
-        raise RuntimeError("The material for this sample has not been set yet. Please call"
-                           " set_material on the SampleDetails object to set the material")
+        raise RuntimeError(
+            "The material for this sample has not been set yet. Please call" " set_material on the SampleDetails object to set the material"
+        )
     if multiple_scattering and not is_vanadium:
-        raise NotImplementedError("Multiple scattering absorption corrections are not yet implemented for "
-                                  "anisotropic samples")
+        raise NotImplementedError("Multiple scattering absorption corrections are not yet implemented for " "anisotropic samples")
     ws_to_correct = _calculate__cylinder_absorb_corrections(
-        ws_to_correct=ws_to_correct, multiple_scattering=multiple_scattering,
-        sample_details_obj=sample_details_obj, is_vanadium=is_vanadium)
+        ws_to_correct=ws_to_correct,
+        multiple_scattering=multiple_scattering,
+        sample_details_obj=sample_details_obj,
+        is_vanadium=is_vanadium,
+    )
     return ws_to_correct
 
 
@@ -80,11 +85,10 @@ def _calculate__cylinder_absorb_corrections(ws_to_correct, multiple_scattering, 
     :param is_vanadium: Whether the sample is a vanadium
     :return: The workspace with corrections applied
     """
-    _setup_sample_for_cylinder_absorb_corrections(ws_to_correct=ws_to_correct,
-                                                  sample_details_obj=sample_details_obj)
-    ws_to_correct = _do_cylinder_absorb_corrections(ws_to_correct=ws_to_correct,
-                                                    multiple_scattering=multiple_scattering,
-                                                    is_vanadium=is_vanadium)
+    _setup_sample_for_cylinder_absorb_corrections(ws_to_correct=ws_to_correct, sample_details_obj=sample_details_obj)
+    ws_to_correct = _do_cylinder_absorb_corrections(
+        ws_to_correct=ws_to_correct, multiple_scattering=multiple_scattering, is_vanadium=is_vanadium
+    )
     return ws_to_correct
 
 
@@ -100,22 +104,21 @@ def _do_cylinder_absorb_corrections(ws_to_correct, multiple_scattering, is_vanad
 
     # Mayers Sample correction must be completed in TOF, convert if needed. Then back to original units afterwards
     if previous_units != ws_units.tof:
-        ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, Target=ws_units.tof)
+        ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, Target=ws_units.tof, OutputWorkspace=ws_to_correct)
 
     if is_vanadium:
-        ws_to_correct = mantid.MayersSampleCorrection(InputWorkspace=ws_to_correct,
-                                                      MultipleScattering=multiple_scattering)
+        ws_to_correct = mantid.MayersSampleCorrection(
+            InputWorkspace=ws_to_correct, MultipleScattering=multiple_scattering, OutputWorkspace=ws_to_correct
+        )
     else:
         # Ensure we never do multiple scattering if the sample is not isotropic (e.g. not a Vanadium)
-        ws_to_correct = mantid.MayersSampleCorrection(InputWorkspace=ws_to_correct,
-                                                      MultipleScattering=False)
+        ws_to_correct = mantid.MayersSampleCorrection(InputWorkspace=ws_to_correct, MultipleScattering=False, OutputWorkspace=ws_to_correct)
     if previous_units != ws_units.tof:
-        ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, Target=previous_units)
+        ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, Target=previous_units, OutputWorkspace=ws_to_correct)
     return ws_to_correct
 
 
-def apply_paalmanpings_absorb_and_subtract_empty(workspace, summed_empty, sample_details,
-                                                 paalman_pings_events_per_point=None):
+def apply_paalmanpings_absorb_and_subtract_empty(workspace, summed_empty, sample_details, paalman_pings_events_per_point=None):
     if paalman_pings_events_per_point:
         events_per_point = int(paalman_pings_events_per_point)
     else:
@@ -124,20 +127,19 @@ def apply_paalmanpings_absorb_and_subtract_empty(workspace, summed_empty, sample
     container_geometry = sample_details.generate_container_geometry()
     container_material = sample_details.generate_container_material()
     if container_geometry and container_material:
-        mantid.SetSample(workspace, Geometry=sample_details.generate_sample_geometry(),
-                         Material=sample_details.generate_sample_material(),
-                         ContainerGeometry=container_geometry,
-                         ContainerMaterial=container_material)
-        corrections = mantid.PaalmanPingsMonteCarloAbsorption(InputWorkspace=workspace, Shape='Preset',
-                                                              EventsPerPoint=events_per_point)
-        workspace = mantid.ApplyPaalmanPingsCorrection(SampleWorkspace=workspace,
-                                                       CorrectionsWorkspace=corrections,
-                                                       CanWorkspace=summed_empty)
+        mantid.SetSample(
+            workspace,
+            Geometry=sample_details.generate_sample_geometry(),
+            Material=sample_details.generate_sample_material(),
+            ContainerGeometry=container_geometry,
+            ContainerMaterial=container_material,
+        )
+        corrections = mantid.PaalmanPingsMonteCarloAbsorption(InputWorkspace=workspace, Shape="Preset", EventsPerPoint=events_per_point)
+        workspace = mantid.ApplyPaalmanPingsCorrection(
+            SampleWorkspace=workspace, CorrectionsWorkspace=corrections, CanWorkspace=summed_empty
+        )
     else:
-        mantid.SetSample(workspace, Geometry=sample_details.generate_sample_geometry(),
-                         Material=sample_details.generate_sample_material())
-        corrections = mantid.PaalmanPingsMonteCarloAbsorption(InputWorkspace=workspace, Shape='Preset',
-                                                              EventsPerPoint=events_per_point)
-        workspace = mantid.ApplyPaalmanPingsCorrection(SampleWorkspace=workspace,
-                                                       CorrectionsWorkspace=corrections)
+        mantid.SetSample(workspace, Geometry=sample_details.generate_sample_geometry(), Material=sample_details.generate_sample_material())
+        corrections = mantid.PaalmanPingsMonteCarloAbsorption(InputWorkspace=workspace, Shape="Preset", EventsPerPoint=events_per_point)
+        workspace = mantid.ApplyPaalmanPingsCorrection(SampleWorkspace=workspace, CorrectionsWorkspace=corrections)
     return workspace

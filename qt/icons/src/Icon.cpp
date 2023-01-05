@@ -106,7 +106,7 @@ QString IconicFont::findCharacterFromCharMap(const QString &prefix, const QStrin
 void IconicFont::addValuesToOptions(QList<QHash<QString, QVariant>> &options, const QStringList &iconNames,
                                     unsigned int vectorIndex) {
   const auto iconName = iconNames[vectorIndex];
-  auto splitValues = iconName.split('.', QString::SkipEmptyParts);
+  auto splitValues = iconName.split('.', Qt::SkipEmptyParts);
   const auto prefix = splitValues.at(0);
   const auto character = splitValues.at(1);
 

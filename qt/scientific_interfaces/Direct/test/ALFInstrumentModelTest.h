@@ -81,6 +81,7 @@ public:
   void setUp() override {
     m_nonALFData = "IRIS00072464.raw";
     m_ALFData = "ALF82301.raw";
+    m_ALFEdgeCaseData = "ALF83743.raw";
 
     m_singleTubeDetectorIDs = std::vector<std::size_t>{2500u, 2501u, 2502u};
     m_multiTubeDetectorIDs = std::vector<std::size_t>{2500u, 2501u, 2502u, 3500u, 3501u, 3502u};
@@ -186,6 +187,25 @@ public:
     TS_ASSERT_DELTA(workspace->readY(0)[2], 0.0, 0.000001);
   }
 
+  void test_generateOutOfPlaneAngleWorkspace_will_create_a_workspace_with_the_expected_data_for_an_edge_case_dataset() {
+    m_model->loadAndTransform(m_ALFEdgeCaseData);
+
+    auto const ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_model->loadedWsName());
+    m_model->setSelectedDetectors(ws->componentInfo(), m_singleTubeDetectorIDs);
+
+    expectInstrumentActorCalls(12288u);
+
+    auto [workspace, _] = m_model->generateOutOfPlaneAngleWorkspace(*m_instrumentActor);
+
+    TS_ASSERT_EQUALS("Label", workspace->getAxis(0)->unit()->unitID());
+    TS_ASSERT_EQUALS("Out of plane angle", std::string(workspace->getAxis(0)->unit()->label()));
+
+    TS_ASSERT_DELTA(workspace->readX(0)[1], -20.318228, 0.000001);
+    TS_ASSERT_DELTA(workspace->readX(0)[2], -20.242194, 0.000001);
+    TS_ASSERT_DELTA(workspace->readY(0)[1], 0.001780, 0.000001);
+    TS_ASSERT_DELTA(workspace->readY(0)[2], 0.001780, 0.000001);
+  }
+
 private:
   void setSingleTubeSelected() {
     m_model->loadAndTransform(m_ALFData);
@@ -201,20 +221,21 @@ private:
     m_model->setSelectedDetectors(workspace->componentInfo(), m_multiTubeDetectorIDs);
   }
 
-  void expectInstrumentActorCalls() {
+  void expectInstrumentActorCalls(std::size_t const workspaceIndex = 0u) {
     auto const loadedWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_model->loadedWsName());
 
     EXPECT_CALL(*m_instrumentActor, getWorkspace()).WillRepeatedly(Return(loadedWorkspace));
     EXPECT_CALL(*m_instrumentActor, componentInfo()).WillRepeatedly(ReturnRef(loadedWorkspace->componentInfo()));
     EXPECT_CALL(*m_instrumentActor, detectorInfo()).WillOnce(ReturnRef(loadedWorkspace->detectorInfo()));
     EXPECT_CALL(*m_instrumentActor, getInstrument()).WillOnce(Return(loadedWorkspace->getInstrument()));
-    EXPECT_CALL(*m_instrumentActor, getWorkspaceIndex(_)).WillRepeatedly(Return(0u));
-    EXPECT_CALL(*m_instrumentActor, getBinMinMaxIndex(0u, _, _))
+    EXPECT_CALL(*m_instrumentActor, getWorkspaceIndex(_)).WillRepeatedly(Return(workspaceIndex));
+    EXPECT_CALL(*m_instrumentActor, getBinMinMaxIndex(workspaceIndex, _, _))
         .WillRepeatedly(DoAll(SetArgReferee<1>(0u), SetArgReferee<2>(50u)));
   }
 
   std::string m_nonALFData;
   std::string m_ALFData;
+  std::string m_ALFEdgeCaseData;
 
   std::vector<std::size_t> m_singleTubeDetectorIDs;
   std::vector<std::size_t> m_multiTubeDetectorIDs;

@@ -10,7 +10,6 @@ from mantid import mtd, FileFinder
 
 
 class WorkspaceHistoryTest(unittest.TestCase):
-
     def test_history(self):
         ws_name = "GEM38370_Focussed_Legacy"
         file_name = FileFinder.getFullPath(ws_name + ".nxs")
@@ -37,7 +36,7 @@ class WorkspaceHistoryTest(unittest.TestCase):
         alg = history.lastAlgorithm()
         self.assertEqual(alg.name(), "Load")
 
-        alg = history.getAlgorithm(history.size()-1)
+        alg = history.getAlgorithm(history.size() - 1)
         self.assertEqual(alg.name(), "Load")
 
     def test_get_history_chained_calls(self):
@@ -49,5 +48,5 @@ class WorkspaceHistoryTest(unittest.TestCase):
         self.assertEqual(file_name, load_filename[0])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

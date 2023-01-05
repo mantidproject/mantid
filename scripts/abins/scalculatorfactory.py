@@ -17,11 +17,18 @@ class SCalculatorFactory(object):
 
          * SPowderSemiEmpiricalCalculator
     """
+
     @staticmethod
-    def init(*, filename: str, temperature: float, sample_form: str,
-             abins_data: abins.AbinsData, instrument: Instrument,
-             quantum_order_num: int,
-             autoconvolution: bool = False):
+    def init(
+        *,
+        filename: str,
+        temperature: float,
+        sample_form: str,
+        abins_data: abins.AbinsData,
+        instrument: Instrument,
+        quantum_order_num: int,
+        autoconvolution: bool = False
+    ):
         """
         :param filename: name of input DFT file (CASTEP: foo.phonon)
         :param temperature: temperature in K for which calculation of S should be done
@@ -34,10 +41,14 @@ class SCalculatorFactory(object):
         if sample_form in ALL_SAMPLE_FORMS:
             if sample_form == "Powder":
 
-                return abins.SPowderSemiEmpiricalCalculator(filename=filename, temperature=temperature,
-                                                            abins_data=abins_data, instrument=instrument,
-                                                            quantum_order_num=quantum_order_num,
-                                                            autoconvolution=autoconvolution)
+                return abins.SPowderSemiEmpiricalCalculator(
+                    filename=filename,
+                    temperature=temperature,
+                    abins_data=abins_data,
+                    instrument=instrument,
+                    quantum_order_num=quantum_order_num,
+                    autoconvolution=autoconvolution,
+                )
                 # TODO: implement numerical powder averaging
 
             # elif sample == "SingleCrystal":  #TODO implement single crystal scenario
@@ -68,7 +79,7 @@ class SCalculatorFactory(object):
 
         try:
             np.set_printoptions(threshold=np.nan)
-            with open(out_file, 'w') as f:
+            with open(out_file, "w") as f:
                 f.write(str(data.extract()))
         # We probably don't want full-sized array printing if something goes wrong,
         # so use `finally` to ensure np verbosity is reset

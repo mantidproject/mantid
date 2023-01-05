@@ -13,7 +13,7 @@ from mantid import config
 
 from isis_powder.osiris import Osiris
 
-DIRS = config['datasearch.directories'].split(';')
+DIRS = config["datasearch.directories"].split(";")
 
 # Setup various path details
 
@@ -45,7 +45,7 @@ focused_path = os.path.join(calibration_dir, focussed_rel_path)
 class DiffractionFocusingTest(systemtesting.MantidSystemTest):
 
     calibration_results = None
-    existing_config = config['datasearch.directories']
+    existing_config = config["datasearch.directories"]
 
     def requiredFiles(self):
         return _gen_required_files()
@@ -63,7 +63,7 @@ class DiffractionFocusingTest(systemtesting.MantidSystemTest):
             _try_delete(output_dir)
         finally:
             mantid.mtd.clear()
-            config['datasearch.directories'] = self.existing_config
+            config["datasearch.directories"] = self.existing_config
 
 
 def run_diffraction_focusing():
@@ -72,32 +72,40 @@ def run_diffraction_focusing():
     osiris_inst_obj = setup_inst_object()
 
     # Run diffraction focusing
-    osiris_inst_obj.run_diffraction_focusing(run_number=sample_runs,
-                                             merge_drange=False,
-                                             subtract_empty_can=True,
-                                             vanadium_normalisation=False)
+    osiris_inst_obj.run_diffraction_focusing(
+        run_number=sample_runs, merge_drange=False, subtract_empty_can=True, vanadium_normalisation=False
+    )
     foccussed_ws = mantid.Load(Filename=focused_path)
 
     return foccussed_ws
 
 
 def setup_mantid_paths():
-    config['datasearch.directories'] += ";" + input_dir
+    config["datasearch.directories"] += ";" + input_dir
 
 
 def setup_inst_object(with_container=False):
     user_name = "Test"
 
-    inst_obj = Osiris(user_name=user_name, calibration_mapping_file=calibration_map_path,
-                      calibration_directory=calibration_dir, output_directory=output_dir)
+    inst_obj = Osiris(
+        user_name=user_name,
+        calibration_mapping_file=calibration_map_path,
+        calibration_directory=calibration_dir,
+        output_directory=output_dir,
+    )
 
     return inst_obj
 
 
 def _gen_required_files():
-    required_run_files = ["OSIRIS82717.nxs", "OSIRIS82718.nxs",  # empty can
-                          "OSIRIS119963.nxs", "OSIRIS119964.nxs",  # van
-                          "OSIRIS119977.nxs", "OSIRIS119978.nxs"]  # sample
+    required_run_files = [
+        "OSIRIS82717.nxs",
+        "OSIRIS82718.nxs",  # empty can
+        "OSIRIS119963.nxs",
+        "OSIRIS119964.nxs",  # van
+        "OSIRIS119977.nxs",
+        "OSIRIS119978.nxs",
+    ]  # sample
     input_files = [os.path.join(input_dir, file) for file in required_run_files]
     input_files.append(calibration_map_path)
     return input_files

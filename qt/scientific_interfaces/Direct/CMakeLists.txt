@@ -5,10 +5,11 @@ set(SRC_FILES
     ALFInstrumentModel.cpp
     ALFInstrumentPresenter.cpp
     ALFInstrumentView.cpp
+    ALFInstrumentWidget.cpp
     ALFView.cpp
 )
 
-set(MOC_FILES ALFAnalysisView.h ALFInstrumentView.h ALFView.h)
+set(MOC_FILES ALFAnalysisView.h ALFInstrumentView.h ALFInstrumentWidget.h ALFView.h)
 
 set(INC_FILES ALFAnalysisModel.h ALFAnalysisPresenter.h ALFInstrumentModel.h ALFInstrumentPresenter.h DllConfig.h)
 

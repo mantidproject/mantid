@@ -49,6 +49,7 @@ set(SRC_FILES
     src/ImageInfoModelMD.cpp
     src/ImageInfoPresenter.cpp
     src/ImageInfoWidget.cpp
+    src/ImageInfoWidgetMini.cpp
     src/InputController.cpp
     src/InstrumentSelector.cpp
     src/InterfaceManager.cpp
@@ -180,8 +181,8 @@ set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/HintingLineEdit.h
     inc/MantidQtWidgets/Common/IFitScriptGeneratorView.h
     inc/MantidQtWidgets/Common/IFunctionView.h
-    inc/MantidQtWidgets/Common/IImageInfoWidget.h
     inc/MantidQtWidgets/Common/ImageInfoWidget.h
+    inc/MantidQtWidgets/Common/ImageInfoWidgetMini.h
     inc/MantidQtWidgets/Common/InputController.h
     inc/MantidQtWidgets/Common/InstrumentSelector.h
     inc/MantidQtWidgets/Common/LineEditWithClear.h
@@ -281,6 +282,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/IFunctionBrowser.h
     inc/MantidQtWidgets/Common/IFunctionView.h
     inc/MantidQtWidgets/Common/ImageInfoModel.h
+    inc/MantidQtWidgets/Common/IImageInfoWidget.h
     inc/MantidQtWidgets/Common/ImageInfoModelMatrixWS.h
     inc/MantidQtWidgets/Common/ImageInfoModelMD.h
     inc/MantidQtWidgets/Common/ImageInfoPresenter.h
@@ -403,7 +405,6 @@ set(MOC_FILES
     inc/MantidQtWidgets/Common/CatalogSearch.h
     inc/MantidQtWidgets/Common/CatalogSelector.h
     inc/MantidQtWidgets/Common/IFitScriptGeneratorView.h
-    inc/MantidQtWidgets/Common/IImageInfoWidget.h
     inc/MantidQtWidgets/Common/ImageInfoWidget.h
     inc/MantidQtWidgets/Common/InstrumentSelector.h
     inc/MantidQtWidgets/Common/InputController.h

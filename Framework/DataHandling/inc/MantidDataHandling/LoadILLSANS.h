@@ -75,7 +75,6 @@ private:
   void moveDetectorDistance(double distance, const std::string &componentName);
   void moveDetectorHorizontal(double, const std::string &);
   void moveDetectorVertical(double, const std::string &);
-  Kernel::V3D getComponentPosition(const std::string &componentName);
   void loadMetaData(const NeXus::NXEntry &, const std::string &);
   std::string getInstrumentFilePath(const std::string &) const;
   void rotateInstrument(double, const std::string &);

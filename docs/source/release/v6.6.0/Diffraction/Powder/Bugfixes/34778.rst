@@ -1,0 +1,1 @@
+- Fix problem when calling focus twice in a reduction using the ISIS Powder diffraction scripts. The second run of focus was using a partially processed input file from the first focus resulting in some of the reduction steps (normalisation, absorption correction) were being run twice

@@ -8,8 +8,11 @@ import os
 from qtpy.QtCore import QSettings
 from qtpy.QtWidgets import QFileDialog
 
-from sans.common.constant_containers import (SANSInstrument_enum_as_key, SANSInstrument_string_as_key_NoInstrument,
-                                             SANSInstrument_string_list)
+from sans.common.constant_containers import (
+    SANSInstrument_enum_as_key,
+    SANSInstrument_string_as_key_NoInstrument,
+    SANSInstrument_string_list,
+)
 from sans.common.enums import ReductionMode, DetectorType, SANSInstrument
 
 
@@ -18,23 +21,23 @@ from sans.common.enums import ReductionMode, DetectorType, SANSInstrument
 # ----------------------------------------------------------------------------------------------------------------------
 def generate_table_index(multi_period):
     table_index = {}
-    table_index.update({'SAMPLE_SCATTER_INDEX': 0})
-    table_index.update({'SAMPLE_SCATTER_PERIOD_INDEX': 1 if multi_period else None})
-    table_index.update({'SAMPLE_TRANSMISSION_INDEX': 2 if multi_period else 1})
-    table_index.update({'SAMPLE_TRANSMISSION_PERIOD_INDEX': 3 if multi_period else None})
-    table_index.update({'SAMPLE_DIRECT_INDEX': 4 if multi_period else 2})
-    table_index.update({'SAMPLE_DIRECT_PERIOD_INDEX': 5 if multi_period else None})
-    table_index.update({'CAN_SCATTER_INDEX': 6 if multi_period else 3})
-    table_index.update({'CAN_SCATTER_PERIOD_INDEX': 7 if multi_period else None})
-    table_index.update({'CAN_TRANSMISSION_INDEX': 8 if multi_period else 4})
-    table_index.update({'CAN_TRANSMISSION_PERIOD_INDEX': 9 if multi_period else None})
-    table_index.update({'CAN_DIRECT_INDEX': 10 if multi_period else 5})
-    table_index.update({'CAN_DIRECT_PERIOD_INDEX': 11 if multi_period else None})
-    table_index.update({'OUTPUT_NAME_INDEX': 12 if multi_period else 6})
-    table_index.update({'USER_FILE_INDEX': 13 if multi_period else 7})
-    table_index.update({'SAMPLE_THICKNESS_INDEX': 14 if multi_period else 8})
-    table_index.update({'OPTIONS_INDEX': 15 if multi_period else 9})
-    table_index.update({'HIDDEN_OPTIONS_INDEX': 16 if multi_period else 10})
+    table_index.update({"SAMPLE_SCATTER_INDEX": 0})
+    table_index.update({"SAMPLE_SCATTER_PERIOD_INDEX": 1 if multi_period else None})
+    table_index.update({"SAMPLE_TRANSMISSION_INDEX": 2 if multi_period else 1})
+    table_index.update({"SAMPLE_TRANSMISSION_PERIOD_INDEX": 3 if multi_period else None})
+    table_index.update({"SAMPLE_DIRECT_INDEX": 4 if multi_period else 2})
+    table_index.update({"SAMPLE_DIRECT_PERIOD_INDEX": 5 if multi_period else None})
+    table_index.update({"CAN_SCATTER_INDEX": 6 if multi_period else 3})
+    table_index.update({"CAN_SCATTER_PERIOD_INDEX": 7 if multi_period else None})
+    table_index.update({"CAN_TRANSMISSION_INDEX": 8 if multi_period else 4})
+    table_index.update({"CAN_TRANSMISSION_PERIOD_INDEX": 9 if multi_period else None})
+    table_index.update({"CAN_DIRECT_INDEX": 10 if multi_period else 5})
+    table_index.update({"CAN_DIRECT_PERIOD_INDEX": 11 if multi_period else None})
+    table_index.update({"OUTPUT_NAME_INDEX": 12 if multi_period else 6})
+    table_index.update({"USER_FILE_INDEX": 13 if multi_period else 7})
+    table_index.update({"SAMPLE_THICKNESS_INDEX": 14 if multi_period else 8})
+    table_index.update({"OPTIONS_INDEX": 15 if multi_period else 9})
+    table_index.update({"HIDDEN_OPTIONS_INDEX": 16 if multi_period else 10})
     return table_index
 
 
@@ -44,16 +47,15 @@ OPTIONS_EQUAL = "="
 # ----------------------------------------------------------------------------------------------------------------------
 #  Other Globals
 # ----------------------------------------------------------------------------------------------------------------------
-LAB_STRINGS = {SANSInstrument.SANS2D: "rear",
-               SANSInstrument.LOQ: "main-detector",
-               SANSInstrument.LARMOR: "DetectorBench",
-               SANSInstrument.ZOOM: "rear-detector",
-               SANSInstrument.NO_INSTRUMENT: ReductionMode.LAB.value
-               }
+LAB_STRINGS = {
+    SANSInstrument.SANS2D: "rear",
+    SANSInstrument.LOQ: "main-detector",
+    SANSInstrument.LARMOR: "DetectorBench",
+    SANSInstrument.ZOOM: "rear-detector",
+    SANSInstrument.NO_INSTRUMENT: ReductionMode.LAB.value,
+}
 
-HAB_STRINGS = {SANSInstrument.SANS2D: "front",
-               SANSInstrument.LOQ: "Hab",
-               SANSInstrument.NO_INSTRUMENT: ReductionMode.HAB.value}
+HAB_STRINGS = {SANSInstrument.SANS2D: "front", SANSInstrument.LOQ: "Hab", SANSInstrument.NO_INSTRUMENT: ReductionMode.HAB.value}
 
 ALL = ReductionMode.ALL.value
 DEFAULT_HAB = ReductionMode.HAB.value
@@ -70,12 +72,14 @@ def apply_selective_view_scaling(getter):
     """
     Scales
     """
+
     def wrapper(self):
         val = getter(self)
         try:
             return meter_2_millimeter(val) if self.instrument not in SCALING_EXCLUDED else val
         except TypeError:
             return val
+
     return wrapper
 
 
@@ -87,25 +91,26 @@ def undo_selective_view_scaling(setter):
             pass
         finally:
             setter(self, val)  # Always take user val including blank string
+
     return wrapper
 
 
 def meter_2_millimeter(num):
-    '''
+    """
     Converts from m to mm
     @param float in m
     @returns float in mm
-    '''
-    return num * 1000.
+    """
+    return num * 1000.0
 
 
 def millimeter_2_meter(num):
-    '''
+    """
     Converts from mm to m
     @param float in mm
     @returns float in m
-    '''
-    return num/1000.
+    """
+    return num / 1000.0
 
 
 def get_detector_strings_for_gui(instrument=None):
@@ -116,8 +121,7 @@ def get_detector_strings_for_gui(instrument=None):
         return [LAB_STRINGS[instrument]]
 
     else:
-        return [LAB_STRINGS[SANSInstrument.NO_INSTRUMENT],
-                HAB_STRINGS[SANSInstrument.NO_INSTRUMENT]]
+        return [LAB_STRINGS[SANSInstrument.NO_INSTRUMENT], HAB_STRINGS[SANSInstrument.NO_INSTRUMENT]]
 
 
 def get_detector_strings_for_diagnostic_page(instrument=None):
@@ -128,8 +132,7 @@ def get_detector_strings_for_diagnostic_page(instrument=None):
         return [LAB_STRINGS[instrument]]
 
     else:
-        return [LAB_STRINGS[SANSInstrument.NO_INSTRUMENT],
-                HAB_STRINGS[SANSInstrument.NO_INSTRUMENT]]
+        return [LAB_STRINGS[SANSInstrument.NO_INSTRUMENT], HAB_STRINGS[SANSInstrument.NO_INSTRUMENT]]
 
 
 def get_reduction_mode_strings_for_gui(instrument=None):
@@ -143,9 +146,7 @@ def get_reduction_mode_strings_for_gui(instrument=None):
         return [LAB_STRINGS[instrument]]
 
     else:
-        return [LAB_STRINGS[SANSInstrument.NO_INSTRUMENT],
-                HAB_STRINGS[SANSInstrument.NO_INSTRUMENT],
-                MERGED, ALL]
+        return [LAB_STRINGS[SANSInstrument.NO_INSTRUMENT], HAB_STRINGS[SANSInstrument.NO_INSTRUMENT], MERGED, ALL]
 
 
 def get_instrument_strings_for_gui():
@@ -153,19 +154,18 @@ def get_instrument_strings_for_gui():
 
 
 def get_reduction_selection(instrument):
-    selection = {ReductionMode.MERGED: MERGED,
-                 ReductionMode.ALL: ALL}
+    selection = {ReductionMode.MERGED: MERGED, ReductionMode.ALL: ALL}
 
-    if any (instrument is x for x in [SANSInstrument.SANS2D, SANSInstrument.LOQ]):
-        selection.update({ReductionMode.LAB: LAB_STRINGS[instrument],
-                          ReductionMode.HAB: HAB_STRINGS[instrument]})
+    if any(instrument is x for x in [SANSInstrument.SANS2D, SANSInstrument.LOQ]):
+        selection.update({ReductionMode.LAB: LAB_STRINGS[instrument], ReductionMode.HAB: HAB_STRINGS[instrument]})
 
     elif any(instrument is x for x in [SANSInstrument.LARMOR, SANSInstrument.ZOOM]):
         selection = {ReductionMode.LAB: LAB_STRINGS[instrument]}
 
     else:
-        selection.update({ReductionMode.LAB: LAB_STRINGS[SANSInstrument.NO_INSTRUMENT],
-                          ReductionMode.HAB: HAB_STRINGS[SANSInstrument.NO_INSTRUMENT]})
+        selection.update(
+            {ReductionMode.LAB: LAB_STRINGS[SANSInstrument.NO_INSTRUMENT], ReductionMode.HAB: HAB_STRINGS[SANSInstrument.NO_INSTRUMENT]}
+        )
     return selection
 
 
@@ -260,7 +260,7 @@ def set_setting(q_settings_group_key, q_settings_key, value):
 
 
 def open_file_dialog(line_edit, filter_text, directory):
-    file_name = QFileDialog.getOpenFileName(None, 'Open', directory, filter_text)
+    file_name = QFileDialog.getOpenFileName(None, "Open", directory, filter_text)
     if not file_name:
         return
     if isinstance(file_name, tuple):

@@ -258,7 +258,7 @@ void EditLocalParameterDialog::copy() {
 /// Paste a list of values from the clipboard.
 void EditLocalParameterDialog::paste() {
   auto text = QApplication::clipboard()->text();
-  auto vec = text.split(QRegExp("\\s|,"), QString::SkipEmptyParts);
+  auto vec = text.split(QRegExp("\\s|,"), Qt::SkipEmptyParts);
   auto n = qMin(vec.size(), m_uiForm.tableWidget->rowCount());
   // prepare for pasting data
   auto deleg = static_cast<LocalParameterItemDelegate *>(m_uiForm.tableWidget->itemDelegateForColumn(valueColumn));

@@ -24,7 +24,7 @@ class OverlayEventWorkspaces(object):
 
 class CustomBinning(object):
     def __init__(self):
-        self._bin_settings = ''
+        self._bin_settings = ""
 
     @property
     def bin_settings(self):
@@ -47,7 +47,7 @@ class CustomBinning(object):
 class SaveAsEventData(OverlayEventWorkspaces):
     def __init__(self):
         super(SaveAsEventData, self).__init__(False)
-        self._additional_time_shifts = ''
+        self._additional_time_shifts = ""
 
     @property
     def additional_time_shifts(self):
@@ -80,14 +80,16 @@ class BinningFromMonitors(object):
 
 class SummationSettingsModel(object):
     def __init__(self, initial_type):
-        self._save_directory = ConfigService.getString('defaultsave.directory')
-        self._type_factory_dict = {BinningType.SAVE_AS_EVENT_DATA: SaveAsEventData(),
-                                   BinningType.CUSTOM: CustomBinning(),
-                                   BinningType.FROM_MONITORS: BinningFromMonitors()}
+        self._save_directory = ConfigService.getString("defaultsave.directory")
+        self._type_factory_dict = {
+            BinningType.SAVE_AS_EVENT_DATA: SaveAsEventData(),
+            BinningType.CUSTOM: CustomBinning(),
+            BinningType.FROM_MONITORS: BinningFromMonitors(),
+        }
         self._settings, self._type = self._settings_from_type(initial_type)
 
     def instrument(self):
-        return ConfigService.getString('default.instrument')
+        return ConfigService.getString("default.instrument")
 
     @property
     def save_directory(self):

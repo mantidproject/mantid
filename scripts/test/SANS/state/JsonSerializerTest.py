@@ -72,12 +72,12 @@ class SimpleState(metaclass=JsonSerializable):
         self.string_parameter = "String_in_SimpleState"
         self.bool_parameter = False
         # We explicitly leave out the float_parameter
-        self.positive_float_parameter = 1.
+        self.positive_float_parameter = 1.0
         self.positive_integer_parameter = 6
         self.dict_parameter = {"1": 123, "2": "test"}
-        self.float_with_none_parameter = 325.
+        self.float_with_none_parameter = 325.0
         # We expliclty leave out the positive_float_with_none_parameter
-        self.float_list_parameter = [123., 234.]
+        self.float_list_parameter = [123.0, 234.0]
         self.string_list_parameter = ["test1", "test2"]
         self.positive_integer_list_parameter = [1, 2, 3]
         self.sub_state_very_simple = VerySimpleState()
@@ -89,8 +89,8 @@ class SimpleState(metaclass=JsonSerializable):
 class ComplexState(metaclass=JsonSerializable):
     def __init__(self):
         super(ComplexState, self).__init__()
-        self.float_parameter = 23.
-        self.positive_float_with_none_parameter = 234.
+        self.float_parameter = 23.0
+        self.positive_float_with_none_parameter = 234.0
         self.sub_state_1 = SimpleState()
         self.dict_parameter = {"A": SimpleState(), "B": SimpleState()}
 
@@ -101,7 +101,7 @@ class ComplexState(metaclass=JsonSerializable):
 class JsonSerializerTest(unittest.TestCase):
     class FakeAlgorithm(Algorithm):
         def PyInit(self):
-            self.declareProperty("Args", '')
+            self.declareProperty("Args", "")
 
         def PyExec(self):
             pass
@@ -157,16 +157,16 @@ class JsonSerializerTest(unittest.TestCase):
         property_manager = fake.getProperty("Args").value
 
         # Assert
-        self.assertEqual(type(serialized),  str)
+        self.assertEqual(type(serialized), str)
         state_2 = Serializer.from_json(property_manager)
 
         # The direct sub state
         self.assertEqual(state.sub_state_1.float_list_parameter, state_2.sub_state_1.float_list_parameter)
 
         # The regular parameters
-        self.assertEqual(state_2.float_parameter,  23.)
-        self.assertEqual(state_2.positive_float_with_none_parameter,  234.)
+        self.assertEqual(state_2.float_parameter, 23.0)
+        self.assertEqual(state_2.positive_float_with_none_parameter, 234.0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -44,7 +44,8 @@ We use ``DebugWithRelRuntime`` for Conda specific builds to allow debugging due 
     - ``{SOURCE}/Framework/PythonInterface``
     - ``{SOURCE}/qt/applications/workbench``
     - ``{SOURCE}/qt/widgets``
-    - ``{SOURCE}/qt/Python``
+    - ``{SOURCE}/qt/python/mantidqt``
+    - ``{SOURCE}/qt/python/mantidqtinterfaces``
 
 - In the file tree select your build directory and mark as Excluded by clicking the ``Excluded`` button whilst it's selected.
 - On Windows, select the ``{BUILD}/bin/DebugWithRelRuntime`` file and mark as Source by clicking the ``Sources`` button whilst it's selected.

@@ -19,7 +19,7 @@ namespace MantidQt::MantidWidgets {
  * @param parent A QWidget to act as the parent widget
  */
 ImageInfoWidget::ImageInfoWidget(QWidget *parent)
-    : IImageInfoWidget(parent), m_presenter(std::make_unique<ImageInfoPresenter>(this)) {
+    : QTableWidget(0, 0, parent), m_presenter(std::make_unique<ImageInfoPresenter>(this)) {
   setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
   setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
   horizontalHeader()->hide();
@@ -64,4 +64,7 @@ void ImageInfoWidget::showInfo(const ImageInfoModel::ImageInfo &info) {
  * @param ws A pointer to a Workspace object
  */
 void ImageInfoWidget::setWorkspace(const Mantid::API::Workspace_sptr &ws) { m_presenter->setWorkspace(ws); }
+
+void ImageInfoWidget::setRowCount(const int count) { QTableWidget::setRowCount(count); }
+
 } // namespace MantidQt::MantidWidgets

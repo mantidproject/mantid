@@ -13,6 +13,7 @@ from IndirectImport import is_supported_f2py_platform
 
 
 if is_supported_f2py_platform():
+
     class BayesQuasiTest(unittest.TestCase):
 
         _res_ws = None
@@ -22,15 +23,11 @@ if is_supported_f2py_platform():
         _num_hists = None
 
         def setUp(self):
-            self._res_ws = Load(Filename='irs26173_graphite002_res.nxs',
-                                OutputWorkspace='__BayesQuasiTest_Resolution')
-            self._sample_ws = Load(Filename='irs26176_graphite002_red.nxs',
-                                OutputWorkspace='__BayesQuasiTest_Sample')
-            self._resnorm_ws = Load(Filename='irs26173_graphite002_ResNorm.nxs',
-                                OutputWorkspace='irs26173_graphite002_ResNorm')
+            self._res_ws = Load(Filename="irs26173_graphite002_res.nxs", OutputWorkspace="__BayesQuasiTest_Resolution")
+            self._sample_ws = Load(Filename="irs26176_graphite002_red.nxs", OutputWorkspace="__BayesQuasiTest_Sample")
+            self._resnorm_ws = Load(Filename="irs26173_graphite002_ResNorm.nxs", OutputWorkspace="irs26173_graphite002_ResNorm")
             self._num_bins = self._sample_ws.blocksize()
             self._num_hists = self._sample_ws.getNumberHistograms()
-
 
         def tearDown(self):
             """
@@ -40,69 +37,72 @@ if is_supported_f2py_platform():
             DeleteWorkspace(self._res_ws)
             DeleteWorkspace(self._resnorm_ws)
 
-
-#----------------------------------Algorithm tests----------------------------------------
+        # ----------------------------------Algorithm tests----------------------------------------
 
         def test_QLr_Run(self):
             """
             Test Lorentzian fit for BayesQuasi
             """
-            fit_group, result, prob = BayesQuasi(Program='QL',
-                                              SampleWorkspace=self._sample_ws,
-                                              ResolutionWorkspace=self._res_ws,
-                                              MinRange=-0.547607,
-                                              MaxRange=0.543216,
-                                              SampleBins=1,
-                                              ResolutionBins=1,
-                                              Elastic=False,
-                                              Background='Sloping',
-                                              FixedWidth=False,
-                                              UseResNorm=False,
-                                              WidthFile='',
-                                              Loop=True)
+            fit_group, result, prob = BayesQuasi(
+                Program="QL",
+                SampleWorkspace=self._sample_ws,
+                ResolutionWorkspace=self._res_ws,
+                MinRange=-0.547607,
+                MaxRange=0.543216,
+                SampleBins=1,
+                ResolutionBins=1,
+                Elastic=False,
+                Background="Sloping",
+                FixedWidth=False,
+                UseResNorm=False,
+                WidthFile="",
+                Loop=True,
+            )
             self._validate_QLr_shape(result, prob, fit_group)
             self._validate_Qlr_value(result, prob, fit_group)
-
 
         def test_QSe_Run(self):
             """
             Test Stretched Exponential fit for BayesQuasi
             """
-            fit_group, result = BayesQuasi(Program='QSe',
-                                      SampleWorkspace=self._sample_ws,
-                                      ResolutionWorkspace=self._res_ws,
-                                      MinRange=-0.547607,
-                                      MaxRange=0.543216,
-                                      SampleBins=1,
-                                      ResolutionBins=1,
-                                      Elastic=False,
-                                      Background='Sloping',
-                                      FixedWidth=False,
-                                      UseResNorm=False,
-                                      WidthFile='',
-                                      Loop=True)
+            fit_group, result = BayesQuasi(
+                Program="QSe",
+                SampleWorkspace=self._sample_ws,
+                ResolutionWorkspace=self._res_ws,
+                MinRange=-0.547607,
+                MaxRange=0.543216,
+                SampleBins=1,
+                ResolutionBins=1,
+                Elastic=False,
+                Background="Sloping",
+                FixedWidth=False,
+                UseResNorm=False,
+                WidthFile="",
+                Loop=True,
+            )
             self._validate_QSe_shape(result, fit_group)
             self._validate_QSe_value(result, fit_group)
-
 
         def test_run_with_resNorm_file(self):
             """
             Test a simple lorentzian fit with a ResNorm file
             """
-            fit_group, result, prob = BayesQuasi(Program='QL',
-                                           SampleWorkspace=self._sample_ws,
-                                           ResolutionWorkspace=self._res_ws,
-                                           ResNormWorkspace=self._resnorm_ws,
-                                           MinRange=-0.547607,
-                                           MaxRange=0.543216,
-                                           SampleBins=1,
-                                           ResolutionBins=1,
-                                           Elastic=False,
-                                           Background='Sloping',
-                                           FixedWidth=False,
-                                           UseResNorm=True,
-                                           WidthFile='',
-                                           Loop=True)
+            fit_group, result, prob = BayesQuasi(
+                Program="QL",
+                SampleWorkspace=self._sample_ws,
+                ResolutionWorkspace=self._res_ws,
+                ResNormWorkspace=self._resnorm_ws,
+                MinRange=-0.547607,
+                MaxRange=0.543216,
+                SampleBins=1,
+                ResolutionBins=1,
+                Elastic=False,
+                Background="Sloping",
+                FixedWidth=False,
+                UseResNorm=True,
+                WidthFile="",
+                Loop=True,
+            )
             self._validate_QLr_shape(result, prob, fit_group)
             self._validate_QLr_value_with_resnorm(result, prob, fit_group)
 
@@ -111,17 +111,15 @@ if is_supported_f2py_platform():
             Test that the algorithm handles data with appended zeros correctly
             """
             sample = self._create_sample_with_trailing_zero()
-            fit_group, result, prob = BayesQuasi(SampleWorkspace=sample,
-                                                 ResolutionWorkspace=self._res_ws,
-                                                 MinRange=-0.54,
-                                                 MaxRange=0.50,
-                                                 FixedWidth=False)
+            fit_group, result, prob = BayesQuasi(
+                SampleWorkspace=sample, ResolutionWorkspace=self._res_ws, MinRange=-0.54, MaxRange=0.50, FixedWidth=False
+            )
 
             self.assertTrue(isinstance(fit_group, WorkspaceGroup))
             self.assertTrue(isinstance(result, MatrixWorkspace))
             self.assertTrue(isinstance(prob, MatrixWorkspace))
 
-#--------------------------------Validate results------------------------------------------------
+        # --------------------------------Validate results------------------------------------------------
 
         def _validate_QLr_shape(self, result, probability, group):
             """
@@ -136,25 +134,24 @@ if is_supported_f2py_platform():
             self.assertTrue(isinstance(result, MatrixWorkspace))
             self.assertEqual(result.getNumberHistograms(), 21)
             self.assertEqual(result.blocksize(), self._num_hists)
-            self.assertEqual(result.getAxis(0).getUnit().unitID(), 'MomentumTransfer')
+            self.assertEqual(result.getAxis(0).getUnit().unitID(), "MomentumTransfer")
 
             # Test size/shape of probability
             self.assertTrue(isinstance(probability, MatrixWorkspace))
             self.assertEqual(probability.getNumberHistograms(), 4)
             self.assertEqual(probability.blocksize(), self._num_hists)
-            self.assertEqual(result.getAxis(0).getUnit().unitID(), 'MomentumTransfer')
+            self.assertEqual(result.getAxis(0).getUnit().unitID(), "MomentumTransfer")
 
             # Test size/shape of group fitting workspaces
             self.assertTrue(isinstance(group, WorkspaceGroup))
             self.assertEqual(group.getNumberOfEntries(), self._sample_ws.getNumberHistograms())
 
             # Test sub workspaces
-            for i in range (group.getNumberOfEntries()):
+            for i in range(group.getNumberOfEntries()):
                 sub_ws = group.getItem(i)
                 self.assertTrue(isinstance(sub_ws, MatrixWorkspace))
                 self.assertEqual(sub_ws.getNumberHistograms(), 7)
-                self.assertEqual(sub_ws.getAxis(0).getUnit().unitID(), 'DeltaE')
-
+                self.assertEqual(sub_ws.getAxis(0).getUnit().unitID(), "DeltaE")
 
         def _validate_Qlr_value(self, result, probability, group):
             """
@@ -187,7 +184,6 @@ if is_supported_f2py_platform():
             self.assertEqual(round(sub_ws.dataY(2)[0], 5), -0.00638)
             self.assertEqual(round(sub_ws.dataY(3)[0], 5), 0.01614)
             self.assertEqual(round(sub_ws.dataY(4)[0], 5), -0.00926)
-
 
         def _validate_QLr_value_with_resnorm(self, result, probability, group):
             """
@@ -234,19 +230,18 @@ if is_supported_f2py_platform():
             self.assertTrue(isinstance(result, MatrixWorkspace))
             self.assertEqual(result.getNumberHistograms(), 3)
             self.assertEqual(result.blocksize(), self._num_hists)
-            self.assertEqual(result.getAxis(0).getUnit().unitID(), 'MomentumTransfer')
+            self.assertEqual(result.getAxis(0).getUnit().unitID(), "MomentumTransfer")
 
             # Test size/shape of group fitting workspaces
             self.assertTrue(isinstance(group, WorkspaceGroup))
             self.assertEqual(group.getNumberOfEntries(), self._sample_ws.getNumberHistograms())
 
             # Test sub workspaces
-            for i in range (group.getNumberOfEntries()):
+            for i in range(group.getNumberOfEntries()):
                 sub_ws = group.getItem(i)
                 self.assertTrue(isinstance(sub_ws, MatrixWorkspace))
                 self.assertEqual(sub_ws.getNumberHistograms(), 3)
-                self.assertEqual(sub_ws.getAxis(0).getUnit().unitID(), 'DeltaE')
-
+                self.assertEqual(sub_ws.getAxis(0).getUnit().unitID(), "DeltaE")
 
         def _validate_QSe_value(self, result, group):
             """
@@ -270,7 +265,7 @@ if is_supported_f2py_platform():
             self.assertEqual(round(sub_ws.dataY(1)[0], 5), 0.01632)
             self.assertEqual(round(sub_ws.dataY(2)[0], 5), -0.00908)
 
-#--------------------------------Helper functions--------------------------------------
+        # --------------------------------Helper functions--------------------------------------
 
         def _create_sample_with_trailing_zero(self):
             """
@@ -285,10 +280,9 @@ if is_supported_f2py_platform():
             e_data2 = np.append(self._sample_ws.readE(1), 0)
             e_data = np.concatenate((e_data1, e_data2), axis=0)
             sample = CreateWorkspace(x_data, y_data, e_data, NSpec=2, ParentWorkspace=self._sample_ws)
-            sample.getSpectrum(0).setDetectorID(1);
-            sample.getSpectrum(1).setDetectorID(2);
+            sample.getSpectrum(0).setDetectorID(1)
+            sample.getSpectrum(1).setDetectorID(2)
             return sample
 
-
-    if __name__=="__main__":
+    if __name__ == "__main__":
         unittest.main()

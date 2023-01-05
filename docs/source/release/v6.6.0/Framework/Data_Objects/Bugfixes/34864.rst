@@ -1,0 +1,1 @@
+- Fixed a minor bug in LoadNXSPE that caused an invalid value for PSI when the corresponding entry in the NXSPE file is empty

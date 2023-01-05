@@ -19,6 +19,9 @@
 # Possible parameters:
 #   --package-suffix: An optional suffix to pass to the standalone package step.
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source $SCRIPT_DIR/mamba-utils
+
 # Setup expected variables
 WORKSPACE=$1
 if [[ -z "$WORKSPACE" ]]; then

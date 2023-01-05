@@ -4,65 +4,70 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
+
 _OUTPUTLEVEL = "NOOUTPUT"
 
 
 class CreateLeBailFitInput(PythonAlgorithm):
-    """ Create the input TableWorkspaces for LeBail Fitting
-    """
+    """Create the input TableWorkspaces for LeBail Fitting"""
 
     def category(self):
-        """
-        """
+        """ """
         return "Diffraction\\Fitting;Utility\\Workspaces"
 
     def seeAlso(self):
-        return [ "LeBailFit" ]
+        return ["LeBailFit"]
 
     def name(self):
-        """
-        """
+        """ """
         return "CreateLeBailFitInput"
 
     def summary(self):
         return "Create various input Workspaces required by algorithm LeBailFit."
 
     def PyInit(self):
-        """ Declare properties
-        """
-        self.declareProperty(FileProperty("ReflectionsFile","", FileAction.OptionalLoad, ['.hkl']),
-                             "Name of [http://www.ill.eu/sites/fullprof/ Fullprof] .hkl file that contains the peaks.")
+        """Declare properties"""
+        self.declareProperty(
+            FileProperty("ReflectionsFile", "", FileAction.OptionalLoad, [".hkl"]),
+            "Name of [http://www.ill.eu/sites/fullprof/ Fullprof] .hkl file that contains the peaks.",
+        )
 
-        self.declareProperty(FileProperty("FullprofParameterFile", "", FileAction.Load, ['.irf']),
-                             "Fullprof's .irf file containing the peak parameters.")
+        self.declareProperty(
+            FileProperty("FullprofParameterFile", "", FileAction.Load, [".irf"]), "Fullprof's .irf file containing the peak parameters."
+        )
 
-        self.declareProperty("GenerateBraggReflections", False,
-                             "Generate Bragg reflections other than reading a Fullprof .irf file. ")
+        self.declareProperty("GenerateBraggReflections", False, "Generate Bragg reflections other than reading a Fullprof .irf file. ")
 
         arrvalidator = IntArrayBoundedValidator(lower=0)
-        self.declareProperty(IntArrayProperty("MaxHKL", values=[12, 12, 12], validator=arrvalidator,
-                                              direction=Direction.Input), "Maximum reflection (HKL) to generate")
+        self.declareProperty(
+            IntArrayProperty("MaxHKL", values=[12, 12, 12], validator=arrvalidator, direction=Direction.Input),
+            "Maximum reflection (HKL) to generate",
+        )
 
         self.declareProperty("Bank", 1, "Bank ID for output if there are more than one bank in .irf file.")
 
-        self.declareProperty("LatticeConstant", -0.0, validator=FloatBoundedValidator(lower=1.0E-9),
-                             doc="Lattice constant for cubic crystal.")
+        self.declareProperty(
+            "LatticeConstant", -0.0, validator=FloatBoundedValidator(lower=1.0e-9), doc="Lattice constant for cubic crystal."
+        )
 
-        self.declareProperty(ITableWorkspaceProperty("InstrumentParameterWorkspace", "", Direction.Output),
-                             "Name of Table Workspace Containing Peak Parameters From .irf File.")
+        self.declareProperty(
+            ITableWorkspaceProperty("InstrumentParameterWorkspace", "", Direction.Output),
+            "Name of Table Workspace Containing Peak Parameters From .irf File.",
+        )
 
-        self.declareProperty(ITableWorkspaceProperty("BraggPeakParameterWorkspace", "", Direction.Output),
-                             "Name of Table Workspace Containing Peaks' Miller Indices From .prf File.")
+        self.declareProperty(
+            ITableWorkspaceProperty("BraggPeakParameterWorkspace", "", Direction.Output),
+            "Name of Table Workspace Containing Peaks' Miller Indices From .prf File.",
+        )
 
         return
 
     def PyExec(self):
-        """ Main Execution Body
-        """
+        """Main Execution Body"""
         # 1. Peak profile parameter workspace
         irffilename = self.getPropertyValue("FullprofParameterFile")
         paramWS = self.createPeakParameterWorkspace(irffilename)
@@ -87,18 +92,14 @@ class CreateLeBailFitInput(PythonAlgorithm):
         return
 
     def importFullProfHKLFile(self, hklfilename, hklwsname):
-        """ Import Fullprof's .hkl file
-        """
+        """Import Fullprof's .hkl file"""
         import random
 
         rand = random.randint(1, 100000)
         dummywsname = "Foo%d" % (rand)
         hklwsname = self.getPropertyValue("BraggPeakParameterWorkspace")
 
-        api.LoadFullprofFile(
-            Filename=hklfilename,
-            PeakParameterWorkspace = hklwsname,
-            OutputWorkspace = dummywsname)
+        api.LoadFullprofFile(Filename=hklfilename, PeakParameterWorkspace=hklwsname, OutputWorkspace=dummywsname)
 
         hklws = AnalysisDataService.retrieve(hklwsname)
         if hklws is None:
@@ -109,7 +110,7 @@ class CreateLeBailFitInput(PythonAlgorithm):
         return hklws
 
     def createPeakParameterWorkspace(self, irffilename):
-        """ Create TableWorkspace by importing Fullprof .irf file
+        """Create TableWorkspace by importing Fullprof .irf file
 
         Note:
         1. Sig-0, Sig-1 and Sig-2 in .irf file are actually the square of sig0, sig1 and sig2
@@ -128,16 +129,16 @@ class CreateLeBailFitInput(PythonAlgorithm):
         # 2. Create an empty workspace
         tablews = WorkspaceFactory.createTable()
 
-        tablews.addColumn("str",    "Name")
+        tablews.addColumn("str", "Name")
         tablews.addColumn("double", "Value")
-        tablews.addColumn("str",    "FitOrTie")
+        tablews.addColumn("str", "FitOrTie")
         tablews.addColumn("double", "Min")
         tablews.addColumn("double", "Max")
         tablews.addColumn("double", "StepSize")
 
         numrows = irfws.rowCount()
         for ir in range(numrows):
-            tablews.addRow(["Parameter", 0.0, "tie", -1.0E200, 1.0E200, 1.0])
+            tablews.addRow(["Parameter", 0.0, "tie", -1.0e200, 1.0e200, 1.0])
 
         # 3. Copy between 2 workspace
         for ir in range(numrows):
@@ -146,7 +147,7 @@ class CreateLeBailFitInput(PythonAlgorithm):
 
         # 4. Extra Lattice parameter
         latticepar = float(self.getPropertyValue("LatticeConstant"))
-        tablews.addRow(["LatticeConstant", latticepar,  "tie", -1.0E200, 1.0E200, 1.0])
+        tablews.addRow(["LatticeConstant", latticepar, "tie", -1.0e200, 1.0e200, 1.0])
 
         # 5. Clean
         api.DeleteWorkspace(Workspace=irfwsname)
@@ -154,12 +155,11 @@ class CreateLeBailFitInput(PythonAlgorithm):
         return tablews
 
     def generateBraggReflections(self, hklmax):
-        """ Generate Bragg reflections from (0, 0, 0) to (HKL)_max
-        """
+        """Generate Bragg reflections from (0, 0, 0) to (HKL)_max"""
         import math
 
         # Generate reflections
-        max_hkl_sq = hklmax[0]**2 + hklmax[1]**2 + hklmax[2]**2
+        max_hkl_sq = hklmax[0] ** 2 + hklmax[1] ** 2 + hklmax[2] ** 2
         max_m = int(math.sqrt(max_hkl_sq)) + 1
 
         # Note: the maximum HKL is defined by (HKL)^2.  Therefore, the iteration should reach some larger integer
@@ -169,7 +169,7 @@ class CreateLeBailFitInput(PythonAlgorithm):
         for h in range(0, max_m):
             for k in range(h, max_m):
                 for l in range(k, max_m):
-                    dsq = h*h + k*k + l*l
+                    dsq = h * h + k * k + l * l
                     if dsq <= max_hkl_sq:
                         if (dsq in hkldict) is False:
                             hkldict[dsq] = []

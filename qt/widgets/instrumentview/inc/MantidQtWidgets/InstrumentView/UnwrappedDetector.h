@@ -13,6 +13,8 @@
 #include <limits>
 #include <memory>
 
+class QRectF;
+
 namespace Mantid {
 namespace Geometry {
 class IDetector;
@@ -38,6 +40,7 @@ public:
   UnwrappedDetector(const UnwrappedDetector &other);
   UnwrappedDetector &operator=(const UnwrappedDetector &other);
   bool empty() const;
+  QRectF toQRectF() const;
   GLColor color;                                        ///< red, green, blue colour components (0 - 255)
   double u;                                             ///< horizontal "unwrapped" coordinate
   double v;                                             ///< vertical "unwrapped" coordinate

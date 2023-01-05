@@ -43,18 +43,18 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
     CentC = [10, 13, 14, 17, 20, 23, 25, 27, 28, 29, 30, 36, 37, 38, 39, 40, 41]
 
     def CalcConventionalUB(self, a, b, c, alpha, _beta, _gamma, celltype):
-        Res = matrix([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
+        Res = matrix([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])
 
-        if celltype == 'O':
+        if celltype == "O":
 
-            Res[0, 0] = 1. / a
-            Res[1, 1] = 1. / b
-            Res[2, 2] = 1. / c
+            Res[0, 0] = 1.0 / a
+            Res[1, 1] = 1.0 / b
+            Res[2, 2] = 1.0 / c
 
-        elif celltype == 'H':
+        elif celltype == "H":
             Res[0, 0] = a * 1.0
-            Res[1, 0] = -a / 2.
-            Res[1, 1] = a * .866
+            Res[1, 0] = -a / 2.0
+            Res[1, 1] = a * 0.866
             Res[2, 2] = c * 1.0
             Res = Res.I
         else:
@@ -63,7 +63,7 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
                 return None
             Res[0, 0] = a * 1.0
             Res[1, 1] = b * 1.0
-            Alpha = (alpha * math.pi / 180)
+            Alpha = alpha * math.pi / 180
             Res[2, 0] = c * math.cos(Alpha)
             Res[2, 2] = c * math.sin(Alpha)
             # Now Nigglify the matrix( get 3 smallest sides)
@@ -76,7 +76,7 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
 
             else:
 
-                n = (int)(-a * Res[2, 0] / (c * c) - .5)
+                n = (int)(-a * Res[2, 0] / (c * c) - 0.5)
                 YY = n * Res[2, 0] + a
 
                 # print ["A",YY,n]
@@ -214,11 +214,11 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
 
     def CalcNiggliUB(self, a, b, c, alpha, beta, gamma, celltype, Center):
 
-        if Center == 'P':
+        if Center == "P":
             X = self.CalcConventionalUB(a, b, c, alpha, beta, gamma, celltype)
             return X
 
-        Res = matrix([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
+        Res = matrix([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])
         ConvUB = self.CalcConventionalUB(a, b, c, alpha, beta, gamma, celltype)
         if ConvUB is None:
             return None
@@ -226,47 +226,47 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
         ResP = numpy.matrix.copy(ConvUB)
         ResP = ResP.I
 
-        if celltype == 'H' and Center == 'I':
-            Center = 'R'
+        if celltype == "H" and Center == "I":
+            Center = "R"
 
-        if Center == 'I':
+        if Center == "I":
             Res = Peak2ConvCell_Test._calc_result_center_I(Res, ResP)
 
-        elif Center == 'F':
+        elif Center == "F":
 
-            if celltype == 'H' or celltype == 'M':
+            if celltype == "H" or celltype == "M":
                 return None
 
             Res = Peak2ConvCell_Test._calc_result_center_F(Res, ResP)
 
-        elif Center == 'A' or Center == 'B' or Center == 'C':
+        elif Center == "A" or Center == "B" or Center == "C":
 
-            if celltype == 'H':
+            if celltype == "H":
                 return None
-            if celltype == 'M' and Center == 'B':
+            if celltype == "M" and Center == "B":
                 return None
 
             r = 2
-            if Center == 'A':
+            if Center == "A":
 
                 r = 0
-                if b == c and celltype == 'O':  # result would be orthorhombic primitive
+                if b == c and celltype == "O":  # result would be orthorhombic primitive
                     return None
 
-            elif Center == 'B':
+            elif Center == "B":
 
                 r = 1
-                if a == c and celltype == 'O':
+                if a == c and celltype == "O":
                     return None
 
-            elif a == b and celltype == 'O':
+            elif a == b and celltype == "O":
                 return None
 
             Res = Peak2ConvCell_Test._calc_result_center_ABC(Res, ResP, r)
 
-        elif Center == 'R':
+        elif Center == "R":
 
-            if celltype != 'H' or alpha > 120:  # alpha =120 planar, >120 no go or c under a-b plane.
+            if celltype != "H" or alpha > 120:  # alpha =120 planar, >120 no go or c under a-b plane.
 
                 self.conventionalUB = None
                 return None
@@ -274,17 +274,17 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
                 # Did not work with 0 error. FindUBUsingFFT failed
                 # Alpha = alpha*math.pi/180
 
-            Res[0, 0] = .5 * a
+            Res[0, 0] = 0.5 * a
             Res[0, 1] = math.sqrt(3) * a / 2
-            Res[0, 2] = .5 * b
+            Res[0, 2] = 0.5 * b
             Res[1, 0] = -a
             Res[1, 1] = 0
-            Res[1, 2] = .5 * b
-            Res[2, 0] = .5 * a
+            Res[1, 2] = 0.5 * b
+            Res[2, 0] = 0.5 * a
             Res[2, 1] = -math.sqrt(3) * a / 2
-            Res[2, 2] = .5 * b
+            Res[2, 2] = 0.5 * b
 
-            Rhomb2Hex = matrix([[1., -1., 0.], [-1., 0., 1.], [-1., -1., -1.]])
+            Rhomb2Hex = matrix([[1.0, -1.0, 0.0], [-1.0, 0.0, 1.0], [-1.0, -1.0, -1.0]])
 
             self.conventionalUB = Rhomb2Hex * Res
             Res = Res.I
@@ -304,10 +304,10 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
     def Next(self, hkl1):
         # print "Next"
         hkl = matrix([[hkl1[0, 0]], [hkl1[1, 0]], [hkl1[2, 0]]])
-        S = (math.fabs(hkl[0, 0]) + math.fabs(hkl[1, 0]) + math.fabs(hkl[2, 0]))
+        S = math.fabs(hkl[0, 0]) + math.fabs(hkl[1, 0]) + math.fabs(hkl[2, 0])
         # print ["S=",S]
         # The sum of abs hkl's = S until not possible. Increasing lexicographically
-        if (hkl[2, 0] < 0):
+        if hkl[2, 0] < 0:
             # print "Nexta"
             hkl[2, 0] = -hkl[2, 0]
             # print hkl
@@ -340,7 +340,7 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
             return List
         has90 = False
         for i in range(3, 6):
-            if math.fabs(List[i] - 90) < .05:
+            if math.fabs(List[i] - 90) < 0.05:
                 nneg += 1
                 has90 = True
             elif List[i] < 90:
@@ -357,19 +357,19 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
             elif List[i] < 90 and over90:
                 List[i] = 180 - List[i]
 
-        bdotc = math.cos(List[3] / 180. * math.pi) * List[1] * List[2]
-        adotc = math.cos(List[4] / 180. * math.pi) * List[0] * List[2]
-        adotb = math.cos(List[5] / 180. * math.pi) * List[1] * List[0]
+        bdotc = math.cos(List[3] / 180.0 * math.pi) * List[1] * List[2]
+        adotc = math.cos(List[4] / 180.0 * math.pi) * List[0] * List[2]
+        adotb = math.cos(List[5] / 180.0 * math.pi) * List[1] * List[0]
         if List[0] > List[1] or (List[0] == List[1] and math.fabs(bdotc) > math.fabs(adotc)):
             List = self.XchangeSides(List, 0, 1)
-        bdotc = math.cos(List[3] / 180. * math.pi) * List[1] * List[2]
-        adotc = math.cos(List[4] / 180. * math.pi) * List[0] * List[2]
-        adotb = math.cos(List[5] / 180. * math.pi) * List[1] * List[0]
+        bdotc = math.cos(List[3] / 180.0 * math.pi) * List[1] * List[2]
+        adotc = math.cos(List[4] / 180.0 * math.pi) * List[0] * List[2]
+        adotb = math.cos(List[5] / 180.0 * math.pi) * List[1] * List[0]
         if List[1] > List[2] or (List[1] == List[2] and math.fabs(adotc) > math.fabs(adotb)):
             List = self.XchangeSides(List, 1, 2)
-        bdotc = math.cos(List[3] / 180. * math.pi) * List[1] * List[2]
-        adotc = math.cos(List[4] / 180. * math.pi) * List[0] * List[2]
-        adotb = math.cos(List[5] / 180. * math.pi) * List[1] * List[0]
+        bdotc = math.cos(List[3] / 180.0 * math.pi) * List[1] * List[2]
+        adotc = math.cos(List[4] / 180.0 * math.pi) * List[0] * List[2]
+        adotb = math.cos(List[5] / 180.0 * math.pi) * List[1] * List[0]
 
         if List[0] > List[1] or (List[0] == List[1] and math.fabs(bdotc) > math.fabs(adotc)):
             List = self.XchangeSides(List, 0, 1)
@@ -379,7 +379,7 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
     def FixUpPlusMinus(self, UB):  # TODO make increasing lengthed sides too
         M = matrix([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
         G = UB.T * UB
-        #G.I
+        # G.I
 
         if G[0, 1] > 0:
             if G[0, 2] > 0:
@@ -411,11 +411,12 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
         while done == 1:
             done = 0
             X = UB.T * UB
-            #X.I
+            # X.I
 
             print("B1", X)
-            if X[0, 0] > X[1, 1] or (math.fabs(X[0, 0] - X[1, 1]) < tolerance / 10 and math.fabs(X[1, 2]) > math.fabs(
-                    X[0, 2]) + tolerance / 10):
+            if X[0, 0] > X[1, 1] or (
+                math.fabs(X[0, 0] - X[1, 1]) < tolerance / 10 and math.fabs(X[1, 2]) > math.fabs(X[0, 2]) + tolerance / 10
+            ):
                 done = 1
                 for i in range(0, 3):
                     sav = UB[i, 0]
@@ -425,8 +426,7 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
                 continue
 
             print("B2")
-            if X[1, 1] > X[2, 2] or (math.fabs(X[1, 1] - X[2, 2]) < tolerance and math.fabs(X[1, 0]) < math.fabs(
-                    X[2, 0]) - tolerance / 10):
+            if X[1, 1] > X[2, 2] or (math.fabs(X[1, 1] - X[2, 2]) < tolerance and math.fabs(X[1, 0]) < math.fabs(X[2, 0]) - tolerance / 10):
                 done = 1
                 for i in range(0, 3):
                     sav = UB[i, 1]
@@ -510,7 +510,7 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
         done = False
         while not done:
 
-            Qs = (UB * hkl)
+            Qs = UB * hkl
             Qs *= 2 * math.pi
 
             for qs in range(3):
@@ -521,7 +521,7 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
                 QQ = mantid.kernel.V3D(Qs[0, 0], Qs[1, 0], Qs[2, 0])
                 norm = QQ.norm()
 
-                if .3 < norm < 30:
+                if 0.3 < norm < 30:
                     peak = Peaks.createPeak(QQ, 1.0)
 
                     peak.setQLabFrame(mantid.kernel.V3D(Qs[0, 0], Qs[1, 0], Qs[2, 0]), 1.0)
@@ -543,27 +543,27 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
 
     def newSetting(self, side1, side2, Xtal, Center, ang, i1, i2a):
         C = Center
-        if Center == 'A' or Center == 'B' or Center == 'C':
-            C = 'C'
-        if Xtal == 'O':
+        if Center == "A" or Center == "B" or Center == "C":
+            C = "C"
+        if Xtal == "O":
             if ang > 20 or i1 > 0 or i2a > 1:
                 return False
-            elif (side1 == 0 and side2 != 0) and (C == 'F' or C == 'C'):  # No Tetragonal "F" or C Center
+            elif (side1 == 0 and side2 != 0) and (C == "F" or C == "C"):  # No Tetragonal "F" or C Center
                 return False
-            elif (C == 'F' or C == 'C') and (side1 == side2 and side1 != 0):
+            elif (C == "F" or C == "C") and (side1 == side2 and side1 != 0):
                 return False
             else:
                 return True
 
-        if Xtal == 'H':
-            if ang > 20 or i2a > 1 or not (C == 'P' or C == 'I'):
+        if Xtal == "H":
+            if ang > 20 or i2a > 1 or not (C == "P" or C == "I"):
                 return False
             elif side2 > side1:
                 return False
             else:
                 return True
 
-        if Xtal != 'M':
+        if Xtal != "M":
             return False
         return True
 
@@ -581,7 +581,7 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
 
     def getMatrixAxis(self, v, Xtal):
         ident = matrix([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
-        if Xtal != 'H' or v >= 2:
+        if Xtal != "H" or v >= 2:
             return ident
         ident[v, v] = 0
         ident[2, 2] = 0
@@ -593,10 +593,14 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
     def getLat(self, UB):
         G = UB.T * UB
         G1 = G.I
-        Res = [math.sqrt(G1[0, 0]), math.sqrt(G1[1, 1]), math.sqrt(G1[2, 2]),
-               math.acos(G1[1, 2] / Res[1] / Res[2]) * 180.0 / math.pi,
-               math.acos(G1[0, 2] / Res[0] / Res[2]) * 180.0 / math.pi,
-               math.acos(G1[0, 1] / Res[0] / Res[1]) * 180.0 / math.pi]
+        Res = [
+            math.sqrt(G1[0, 0]),
+            math.sqrt(G1[1, 1]),
+            math.sqrt(G1[2, 2]),
+            math.acos(G1[1, 2] / Res[1] / Res[2]) * 180.0 / math.pi,
+            math.acos(G1[0, 2] / Res[0] / Res[2]) * 180.0 / math.pi,
+            math.acos(G1[0, 1] / Res[0] / Res[1]) * 180.0 / math.pi,
+        ]
         return Res
 
     def AppendForms(self, condition, Center, CenterTarg, FormNums, List2Append):
@@ -610,7 +614,7 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
         return L
 
     def Xlate(self, Xtal, Center, sides, LatNiggle):  # sides are sides of conventional cell
-        if Xtal == 'O':
+        if Xtal == "O":
             C = Center
             if sides[0] == sides[1]:
                 if sides[1] == sides[2]:
@@ -629,52 +633,52 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
                 X = "Orthorhombic"
                 Z1 = list(self.Orth)
 
-            if C == 'A' or C == 'B':
-                C = 'C'
+            if C == "A" or C == "B":
+                C = "C"
 
-        elif Xtal == 'H':
-            if Center == 'I':
-                C = 'R'
-                X = 'Rhombohedral'
+        elif Xtal == "H":
+            if Center == "I":
+                C = "R"
+                X = "Rhombohedral"
                 Z1 = list(self.Hex)
             else:
-                C = 'P'
+                C = "P"
                 X = "Hexagonal"
                 Z1 = list(self.Hex)
         else:  # Monoclinic
             X = "Monoclinic"
             Z1 = list(self.Mon)
             C = Center
-            LL = [math.cos(LatNiggle[5] / 180 * math.pi) * LatNiggle[0] * LatNiggle[1],
-                  math.cos(LatNiggle[4] / 180 * math.pi) * LatNiggle[0] * LatNiggle[2],
-                  math.cos(LatNiggle[3] / 180 * math.pi) * LatNiggle[2] * LatNiggle[1]]
+            LL = [
+                math.cos(LatNiggle[5] / 180 * math.pi) * LatNiggle[0] * LatNiggle[1],
+                math.cos(LatNiggle[4] / 180 * math.pi) * LatNiggle[0] * LatNiggle[2],
+                math.cos(LatNiggle[3] / 180 * math.pi) * LatNiggle[2] * LatNiggle[1],
+            ]
 
-            if C == 'A' or C == 'B':
-                C = 'C'
+            if C == "A" or C == "B":
+                C = "C"
 
-            if C == 'C' or C == 'I':  # 'I':
+            if C == "C" or C == "I":  # 'I':
 
-                Z1 = self.AppendForms(LatNiggle[2] * LatNiggle[2] < 4 * math.fabs(LL[2]) + .001, 'C', C, [10, 14, 39],
-                                      Z1)
-                Z1 = self.AppendForms(LatNiggle[0] * LatNiggle[0] < 4 * math.fabs(LL[1]) + .001, 'C', C, [20, 25, 41],
-                                      Z1)
+                Z1 = self.AppendForms(LatNiggle[2] * LatNiggle[2] < 4 * math.fabs(LL[2]) + 0.001, "C", C, [10, 14, 39], Z1)
+                Z1 = self.AppendForms(LatNiggle[0] * LatNiggle[0] < 4 * math.fabs(LL[1]) + 0.001, "C", C, [20, 25, 41], Z1)
 
-                Z1 = self.AppendForms(LatNiggle[1] * LatNiggle[1] < 4 * math.fabs(LL[2] + .001), 'C', C, [37], Z1)
+                Z1 = self.AppendForms(LatNiggle[1] * LatNiggle[1] < 4 * math.fabs(LL[2] + 0.001), "C", C, [37], Z1)
 
                 Z1 = self.AppendForms(
-                    3 * LatNiggle[0] * LatNiggle[0] < LatNiggle[2] * LatNiggle[2] + 2 * math.fabs(LL[1]) + .001, 'I', C,
-                    [17], Z1)
+                    3 * LatNiggle[0] * LatNiggle[0] < LatNiggle[2] * LatNiggle[2] + 2 * math.fabs(LL[1]) + 0.001, "I", C, [17], Z1
+                )
                 Z1 = self.AppendForms(
-                    3 * LatNiggle[1] * LatNiggle[1] < LatNiggle[2] * LatNiggle[2] + 2 * math.fabs(LL[2] + .001), 'I', C,
-                    [27], Z1)
+                    3 * LatNiggle[1] * LatNiggle[1] < LatNiggle[2] * LatNiggle[2] + 2 * math.fabs(LL[2] + 0.001), "I", C, [27], Z1
+                )
 
-        if C == 'P':
+        if C == "P":
             Z2 = self.CentP
-        elif C == 'F':
+        elif C == "F":
             Z2 = self.CentF
-        elif C == 'I' or C == 'R':
+        elif C == "I" or C == "R":
             Z2 = self.CentI
-        elif C == 'C':
+        elif C == "C":
             Z2 = self.CentC
         Z1 = sorted(Z1)
         return [X, C, Z1, Z2]
@@ -700,22 +704,31 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
 
                 _i = 0
                 for _i in range(0, 3):
-                    match = math.fabs(List1[3] - List2[3]) < angtolerance and math.fabs(
-                        List1[4] - List2[4]) < angtolerance and math.fabs(List1[5] - List2[5]) < angtolerance
+                    match = (
+                        math.fabs(List1[3] - List2[3]) < angtolerance
+                        and math.fabs(List1[4] - List2[4]) < angtolerance
+                        and math.fabs(List1[5] - List2[5]) < angtolerance
+                    )
 
                     if match:
                         break
                     List1 = self.XchangeSides(List1, 1, 0)
 
-                    match = math.fabs(List1[3] - List2[3]) < angtolerance and math.fabs(
-                        List1[4] - List2[4]) < angtolerance and math.fabs(List1[5] - List2[5]) < angtolerance
+                    match = (
+                        math.fabs(List1[3] - List2[3]) < angtolerance
+                        and math.fabs(List1[4] - List2[4]) < angtolerance
+                        and math.fabs(List1[5] - List2[5]) < angtolerance
+                    )
                     if match:
                         break
 
                     List1 = self.XchangeSides(List1, 1, 2)
 
-                match = math.fabs(List1[3] - List2[3]) < angtolerance and math.fabs(
-                    List1[4] - List2[4]) < angtolerance and math.fabs(List1[5] - List2[5]) < angtolerance
+                match = (
+                    math.fabs(List1[3] - List2[3]) < angtolerance
+                    and math.fabs(List1[4] - List2[4]) < angtolerance
+                    and math.fabs(List1[5] - List2[5]) < angtolerance
+                )
                 self.assertTrue(match, "Angles do not match in any order")
             else:
                 self.assertDelta(List1[5], List2[5], angtolerance, "Error in " + Var[5])
@@ -775,44 +788,53 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
             else:
                 Res = SelectCellWithForm(Peaks, FormXtal[i1], True)
 
-                if Res[0] > .85 * nOrigIndexed:
-                    CopySample(Peaks, "Temp", CopyMaterial="0", CopyEnvironment="0", CopyName="0", CopyShape="0",
-                               CopyLattice="1")
+                if Res[0] > 0.85 * nOrigIndexed:
+                    CopySample(Peaks, "Temp", CopyMaterial="0", CopyEnvironment="0", CopyName="0", CopyShape="0", CopyLattice="1")
                     OrLat = mtd["Temp"].sample().getOrientedLattice()
                     Lat1 = [OrLat.a(), OrLat.b(), OrLat.c(), OrLat.alpha(), OrLat.beta(), OrLat.gamma()]
                     Lat1 = self.FixLatParams(Lat1)
                     print(["Formnum,Lat1,Lat0", FormXtal[i1], Lat1, Lat0])
-                    if math.fabs(Lat0[0] - Lat1[0]) < tolerance and math.fabs(Lat0[1] - Lat1[1]) < tolerance \
-                            and math.fabs(Lat0[2] - Lat1[2]) < tolerance:
+                    if (
+                        math.fabs(Lat0[0] - Lat1[0]) < tolerance
+                        and math.fabs(Lat0[1] - Lat1[1]) < tolerance
+                        and math.fabs(Lat0[2] - Lat1[2]) < tolerance
+                    ):
 
                         for dummy_i in range(3):
-                            if math.fabs(Lat0[3] - Lat1[3]) < angTolerance and\
-                                            math.fabs(Lat0[4] - Lat1[4]) < angTolerance and\
-                                            math.fabs(Lat0[5] - Lat1[5]) < angTolerance:
+                            if (
+                                math.fabs(Lat0[3] - Lat1[3]) < angTolerance
+                                and math.fabs(Lat0[4] - Lat1[4]) < angTolerance
+                                and math.fabs(Lat0[5] - Lat1[5]) < angTolerance
+                            ):
                                 break
                             if Lat1[0] > Lat1[1] - tolerance:
                                 Lat1 = self.XchangeSides(Lat1, 0, 1)
 
-                            if math.fabs(Lat0[3] - Lat1[3]) < angTolerance and\
-                                math.fabs(Lat0[4] - Lat1[4]) < angTolerance and\
-                                    math.fabs(Lat0[5] - Lat1[5]) < angTolerance:
+                            if (
+                                math.fabs(Lat0[3] - Lat1[3]) < angTolerance
+                                and math.fabs(Lat0[4] - Lat1[4]) < angTolerance
+                                and math.fabs(Lat0[5] - Lat1[5]) < angTolerance
+                            ):
                                 break
                             if Lat1[1] > Lat1[2] - tolerance:
                                 Lat1 = self.XchangeSides(Lat1, 1, 2)
 
-                            if math.fabs(Lat0[3] - Lat1[3]) < angTolerance and\
-                                    math.fabs(Lat0[4] - Lat1[4]) < angTolerance and\
-                                    math.fabs(Lat0[5] - Lat1[5]) < angTolerance:
+                            if (
+                                math.fabs(Lat0[3] - Lat1[3]) < angTolerance
+                                and math.fabs(Lat0[4] - Lat1[4]) < angTolerance
+                                and math.fabs(Lat0[5] - Lat1[5]) < angTolerance
+                            ):
                                 break
 
-                        if math.fabs(Lat0[3] - Lat1[3]) < angTolerance and\
-                                math.fabs(Lat0[4] - Lat1[4]) < angTolerance and\
-                                math.fabs(Lat0[5] - Lat1[5]) < angTolerance:
+                        if (
+                            math.fabs(Lat0[3] - Lat1[3]) < angTolerance
+                            and math.fabs(Lat0[4] - Lat1[4]) < angTolerance
+                            and math.fabs(Lat0[5] - Lat1[5]) < angTolerance
+                        ):
                             return Lat1
                     i1 = i1 + 1
                     i2 = i2 + 1
-                    CopySample(wsName, Peaks, CopyMaterial="0", CopyEnvironment="0", CopyName="0", CopyShape="0",
-                               CopyLattice="1")
+                    CopySample(wsName, Peaks, CopyMaterial="0", CopyEnvironment="0", CopyName="0", CopyShape="0", CopyLattice="1")
         return []
 
     def runTest(self):
@@ -825,8 +847,8 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
         startA = 2
         side1Ratios = [1.0, 1.2, 3.0, 8.0]
         alphas = [20, 50, 80, 110, 140]
-        xtal = ['O', 'M', 'H']  # ['O','M','H']
-        centerings = ['P', 'I', 'F', 'A', 'B', 'C']
+        xtal = ["O", "M", "H"]  # ['O','M','H']
+        centerings = ["P", "I", "F", "A", "B", "C"]
         # ['P','I','F','A', 'B',  'C']
         error = [0.0]  # [ 0, .05,  0.1, 0, 0.15]
         Npeaks = 150
@@ -844,11 +866,9 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
                                             Sides = self.MonoClinicRearrange(Sides, Xtal, Center, i1, i2a)
                                             print([Sides, Error, Xtal, Center, ang, i1, i2a])
 
-                                            UBconv = self.CalcConventionalUB(Sides[0], Sides[1], Sides[2], ang, ang,
-                                                                             ang, Xtal)
+                                            UBconv = self.CalcConventionalUB(Sides[0], Sides[1], Sides[2], ang, ang, ang, Xtal)
 
-                                            UBnig = self.CalcNiggliUB(Sides[0], Sides[1], Sides[2], ang, ang, ang, Xtal,
-                                                                      Center)
+                                            UBnig = self.CalcNiggliUB(Sides[0], Sides[1], Sides[2], ang, ang, ang, Xtal, Center)
 
                                             UBconv = self.conventionalUB
                                             V = self.getMatrixAxis(i1, Xtal)
@@ -870,57 +890,97 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
 
                                             # -------Failed tests because of FindUBUsingFFT -------------------
 
-                                            if side1 == 1 and side2 == 2 and Error == 0.0 and Xtal == 'M' and \
-                                                    Center == 'C' and i1 == 0 and i2a == 1 and ang == 140:
+                                            if (
+                                                side1 == 1
+                                                and side2 == 2
+                                                and Error == 0.0
+                                                and Xtal == "M"
+                                                and Center == "C"
+                                                and i1 == 0
+                                                and i2a == 1
+                                                and ang == 140
+                                            ):
                                                 continue
 
-                                            if side1 == 2 and side2 == 2 and Error == 0.0 and Xtal == 'M' and\
-                                                    Center == 'P' and i1 == 1 and i2a == 1 and ang == 110:
+                                            if (
+                                                side1 == 2
+                                                and side2 == 2
+                                                and Error == 0.0
+                                                and Xtal == "M"
+                                                and Center == "P"
+                                                and i1 == 1
+                                                and i2a == 1
+                                                and ang == 110
+                                            ):
                                                 continue  # one side doubled
 
-                                            if side1 == 3 and side2 == 3 and Error == 0.0 and Xtal == 'M' and\
-                                                    Center == 'I' and i1 == 1 and i2a == 2:
+                                            if (
+                                                side1 == 3
+                                                and side2 == 3
+                                                and Error == 0.0
+                                                and Xtal == "M"
+                                                and Center == "I"
+                                                and i1 == 1
+                                                and i2a == 2
+                                            ):
                                                 continue
 
-                                            if side1 == 3 and side2 == 3 and Error == 0.0 and Xtal == 'M' and\
-                                                    Center == 'I' and i1 == 2 and i2a == 1:
+                                            if (
+                                                side1 == 3
+                                                and side2 == 3
+                                                and Error == 0.0
+                                                and Xtal == "M"
+                                                and Center == "I"
+                                                and i1 == 2
+                                                and i2a == 1
+                                            ):
                                                 continue
 
-                                            if side1 == 3 and side2 == 3 and Error == 0.0 and Xtal == 'H' and\
-                                                    Center == 'I' and i1 == 2 and i2a == 1 and ang == 20:
+                                            if (
+                                                side1 == 3
+                                                and side2 == 3
+                                                and Error == 0.0
+                                                and Xtal == "H"
+                                                and Center == "I"
+                                                and i1 == 2
+                                                and i2a == 1
+                                                and ang == 20
+                                            ):
                                                 continue
                                                 # ------------------------------ end Failed FindUB test------------
-                                            FindUBUsingFFT(Peaks, Lat0[0] * .5, Lat0[2] * 2.0, .15)
-                                            InPks = IndexPeaks(Peaks, .10)
+                                            FindUBUsingFFT(Peaks, Lat0[0] * 0.5, Lat0[2] * 2.0, 0.15)
+                                            InPks = IndexPeaks(Peaks, 0.10)
 
-                                            CopySample(Peaks, "Sws", CopyMaterial="0",
-                                                       CopyEnvironment="0", CopyName="0", CopyShape="0",
-                                                       CopyLattice="1")
+                                            CopySample(
+                                                Peaks,
+                                                "Sws",
+                                                CopyMaterial="0",
+                                                CopyEnvironment="0",
+                                                CopyName="0",
+                                                CopyShape="0",
+                                                CopyLattice="1",
+                                            )
                                             OrLat = mtd["Sws"].sample().getOrientedLattice()
 
-                                            Lat1 = [OrLat.a(), OrLat.b(), OrLat.c(), OrLat.alpha(), OrLat.beta(),
-                                                    OrLat.gamma()]
+                                            Lat1 = [OrLat.a(), OrLat.b(), OrLat.c(), OrLat.alpha(), OrLat.beta(), OrLat.gamma()]
 
                                             Lat1 = self.FixLatParams(Lat1)
 
-                                            MatchXtalTol = .03 * (1 + 4 * Error) * (side1Ratios[side2])
+                                            MatchXtalTol = 0.03 * (1 + 4 * Error) * (side1Ratios[side2])
                                             print(Lat0)
                                             print(Lat1)
                                             self.MatchXtlparams(Lat1, Lat0, MatchXtalTol, "Niggli values do not match")
 
                                             # Now see if the conventional cell is in list
-                                            XtalCenter1 = self.Xlate(Xtal, Center, Sides,
-                                                                     Lat0)  # get proper strings for SelectCellOfType
+                                            XtalCenter1 = self.Xlate(Xtal, Center, Sides, Lat0)  # get proper strings for SelectCellOfType
 
                                             Lat0 = self.getLat(UBconv)
                                             Lat0 = self.FixLatParams(Lat0)
-                                            Lat1 = self.GetConvCell(Peaks, XtalCenter1, "Sws", InPks[0], MatchXtalTol,
-                                                                    Lat0)
+                                            Lat1 = self.GetConvCell(Peaks, XtalCenter1, "Sws", InPks[0], MatchXtalTol, Lat0)
 
                                             Lat1 = self.FixLatParams(Lat1)
 
-                                            self.MatchXtlparams(Lat1, Lat0, MatchXtalTol,
-                                                                "Conventional lattice parameter do not match")
+                                            self.MatchXtlparams(Lat1, Lat0, MatchXtalTol, "Conventional lattice parameter do not match")
                                             self.assertTrue(len(Lat1) > 4, "Conventional values do not match")
                                             # "XYXYZS"
 

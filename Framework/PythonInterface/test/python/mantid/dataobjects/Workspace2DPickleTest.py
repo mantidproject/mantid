@@ -17,7 +17,7 @@ from mantid.simpleapi import Load, CreateSampleWorkspace
 
 class Workspace2DPickleTest(unittest.TestCase):
     def setUp(self):
-        group = Load(Filename='POLREF00004699.nxs', OutputWorkspace='ws_orig')
+        group = Load(Filename="POLREF00004699.nxs", OutputWorkspace="ws_orig")
         self.ws_orig = group[0]
         pickled = pickle.dumps(self.ws_orig, pickle.HIGHEST_PROTOCOL)
         self.ws_copy = pickle.loads(pickled)
@@ -50,5 +50,5 @@ class Workspace2DPickleTest(unittest.TestCase):
             pickle.dumps(ws, pickle.HIGHEST_PROTOCOL)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -12,17 +12,16 @@ import SANSBatchMode as bm
 
 class TestSettingUserFileInBatchMode(unittest.TestCase):
     def _create_minimal_user_files(self, amount):
-        temp_save_dir = config['defaultsave.directory']
-        if temp_save_dir == '':
+        temp_save_dir = config["defaultsave.directory"]
+        if temp_save_dir == "":
             temp_save_dir = os.getcwd()
-        base_name = 'batch_test_file_'
+        base_name = "batch_test_file_"
         file_names = []
-        minimal_user_file = ("LOQ\n"
-                             "L/QXY 0 0.2 0.0125/lin\n")
+        minimal_user_file = "LOQ\n" "L/QXY 0 0.2 0.0125/lin\n"
         for element in range(0, amount):
-            file_name = os.path.join(temp_save_dir, base_name + str(element) + '.txt')
+            file_name = os.path.join(temp_save_dir, base_name + str(element) + ".txt")
             file_names.append(file_name)
-            with open(file_name, 'w') as ff:
+            with open(file_name, "w") as ff:
                 ff.write(minimal_user_file)
         return file_names
 
@@ -53,21 +52,25 @@ class TestSettingUserFileInBatchMode(unittest.TestCase):
         new_user_file = ""  # Create an invalid new user file
         current_user_file = user_files[1]
         original_user_file = user_files[2]
-        original_settings, original_prop_man_settings = self._prepare_reducer(current_user_file=current_user_file,
-                                                                              original_user_file=original_user_file)
+        original_settings, original_prop_man_settings = self._prepare_reducer(
+            current_user_file=current_user_file, original_user_file=original_user_file
+        )
         # Act
         reducer_address = str(ReductionSingleton().reference())
-        bm.setUserFileInBatchMode(new_user_file=new_user_file,
-                                  current_user_file=current_user_file,
-                                  original_user_file=original_user_file,
-                                  original_settings=original_settings,
-                                  original_prop_man_settings=original_prop_man_settings)
+        bm.setUserFileInBatchMode(
+            new_user_file=new_user_file,
+            current_user_file=current_user_file,
+            original_user_file=original_user_file,
+            original_settings=original_settings,
+            original_prop_man_settings=original_prop_man_settings,
+        )
         # Assert
-        self.assertTrue(str(ReductionSingleton().reference()) != reducer_address,
-                        ("The physical reducer should change."))
-        self.assertEqual(ReductionSingleton().user_settings.filename, original_user_file,
-                         ("The reducer should use the original user file,"
-                          "since we don't provide a valid new user file."))
+        self.assertTrue(str(ReductionSingleton().reference()) != reducer_address, ("The physical reducer should change."))
+        self.assertEqual(
+            ReductionSingleton().user_settings.filename,
+            original_user_file,
+            ("The reducer should use the original user file," "since we don't provide a valid new user file."),
+        )
         # Clean up
         self._delete_minimal_user_files(user_files)
 
@@ -77,20 +80,21 @@ class TestSettingUserFileInBatchMode(unittest.TestCase):
         new_user_file = user_files[0]
         current_user_file = user_files[1]
         original_user_file = user_files[2]
-        original_settings, original_prop_man_settings = self._prepare_reducer(current_user_file=current_user_file,
-                                                                              original_user_file=original_user_file)
+        original_settings, original_prop_man_settings = self._prepare_reducer(
+            current_user_file=current_user_file, original_user_file=original_user_file
+        )
         # Act
         reducer_address = str(ReductionSingleton().reference())
-        bm.setUserFileInBatchMode(new_user_file=new_user_file,
-                                  current_user_file=current_user_file,
-                                  original_user_file=original_user_file,
-                                  original_settings=original_settings,
-                                  original_prop_man_settings=original_prop_man_settings)
+        bm.setUserFileInBatchMode(
+            new_user_file=new_user_file,
+            current_user_file=current_user_file,
+            original_user_file=original_user_file,
+            original_settings=original_settings,
+            original_prop_man_settings=original_prop_man_settings,
+        )
         # Assert
-        self.assertTrue(str(ReductionSingleton().reference()) != reducer_address,
-                        "The physical reducer should not change.")
-        self.assertEqual(ReductionSingleton().user_settings.filename, new_user_file,
-                         "The reducer should use the new user file.")
+        self.assertTrue(str(ReductionSingleton().reference()) != reducer_address, "The physical reducer should not change.")
+        self.assertEqual(ReductionSingleton().user_settings.filename, new_user_file, "The reducer should use the new user file.")
         # Clean up
         self._delete_minimal_user_files(user_files)
 
@@ -100,19 +104,21 @@ class TestSettingUserFileInBatchMode(unittest.TestCase):
         new_user_file = user_files[0]
         current_user_file = user_files[1]
         original_user_file = user_files[2]
-        original_settings, original_prop_man_settings = self._prepare_reducer(current_user_file=current_user_file,
-                                                                              original_user_file=original_user_file)
+        original_settings, original_prop_man_settings = self._prepare_reducer(
+            current_user_file=current_user_file, original_user_file=original_user_file
+        )
         ReductionSingleton().to_Q.output_type = "2D"
         # Act
 
-        bm.setUserFileInBatchMode(new_user_file=new_user_file,
-                                  current_user_file=current_user_file,
-                                  original_user_file=original_user_file,
-                                  original_settings=original_settings,
-                                  original_prop_man_settings=original_prop_man_settings)
+        bm.setUserFileInBatchMode(
+            new_user_file=new_user_file,
+            current_user_file=current_user_file,
+            original_user_file=original_user_file,
+            original_settings=original_settings,
+            original_prop_man_settings=original_prop_man_settings,
+        )
         # Assert
-        self.assertTrue(ReductionSingleton().to_Q.output_type == "2D",
-                        "The reducer should retain the same dimensionality.")
+        self.assertTrue(ReductionSingleton().to_Q.output_type == "2D", "The reducer should retain the same dimensionality.")
         # Clean up
         self._delete_minimal_user_files(user_files)
 
@@ -122,20 +128,21 @@ class TestSettingUserFileInBatchMode(unittest.TestCase):
         new_user_file = user_files[1]
         current_user_file = user_files[1]
         original_user_file = user_files[2]
-        original_settings, original_prop_man_settings = self._prepare_reducer(current_user_file=current_user_file,
-                                                                              original_user_file=original_user_file)
+        original_settings, original_prop_man_settings = self._prepare_reducer(
+            current_user_file=current_user_file, original_user_file=original_user_file
+        )
         # Act
         reducer_address = str(ReductionSingleton().reference())
-        bm.setUserFileInBatchMode(new_user_file=new_user_file,
-                                  current_user_file=current_user_file,
-                                  original_user_file=original_user_file,
-                                  original_settings=original_settings,
-                                  original_prop_man_settings=original_prop_man_settings)
+        bm.setUserFileInBatchMode(
+            new_user_file=new_user_file,
+            current_user_file=current_user_file,
+            original_user_file=original_user_file,
+            original_settings=original_settings,
+            original_prop_man_settings=original_prop_man_settings,
+        )
         # Assert
-        self.assertTrue(str(ReductionSingleton().reference()) == reducer_address,
-                        "The physical reducer should change.")
-        self.assertEqual(ReductionSingleton().user_settings.filename, current_user_file,
-                         "The reducer should use the current user file.")
+        self.assertTrue(str(ReductionSingleton().reference()) == reducer_address, "The physical reducer should change.")
+        self.assertEqual(ReductionSingleton().user_settings.filename, current_user_file, "The reducer should use the current user file.")
         # Clean up
         self._delete_minimal_user_files(user_files)
 
@@ -145,20 +152,21 @@ class TestSettingUserFileInBatchMode(unittest.TestCase):
         new_user_file = user_files[1]
         current_user_file = user_files[1]
         original_user_file = user_files[1]
-        original_settings, original_prop_man_settings = self._prepare_reducer(current_user_file=current_user_file,
-                                                                              original_user_file=original_user_file)
+        original_settings, original_prop_man_settings = self._prepare_reducer(
+            current_user_file=current_user_file, original_user_file=original_user_file
+        )
         # Act
         reducer_address = str(ReductionSingleton().reference())
-        bm.setUserFileInBatchMode(new_user_file=new_user_file,
-                                  current_user_file=current_user_file,
-                                  original_user_file=original_user_file,
-                                  original_settings=original_settings,
-                                  original_prop_man_settings=original_prop_man_settings)
+        bm.setUserFileInBatchMode(
+            new_user_file=new_user_file,
+            current_user_file=current_user_file,
+            original_user_file=original_user_file,
+            original_settings=original_settings,
+            original_prop_man_settings=original_prop_man_settings,
+        )
         # Assert
-        self.assertTrue(str(ReductionSingleton().reference()) == reducer_address,
-                        "The physical reducer should not change.")
-        self.assertEqual(ReductionSingleton().user_settings.filename, current_user_file,
-                         "The reducer should use the current user file.")
+        self.assertTrue(str(ReductionSingleton().reference()) == reducer_address, "The physical reducer should not change.")
+        self.assertEqual(ReductionSingleton().user_settings.filename, current_user_file, "The reducer should use the current user file.")
         # Clean up
         self._delete_minimal_user_files(user_files)
 
@@ -174,9 +182,9 @@ class TestGeometrySettings(unittest.TestCase):
         self.assertTrue("SampleThickness" in geometry_settings)
 
         self.assertEqual(geometry_settings["Geometry"], "Disc")
-        self.assertEqual(geometry_settings["SampleHeight"], 1.)
-        self.assertEqual(geometry_settings["SampleWidth"], 1.)
-        self.assertEqual(geometry_settings["SampleThickness"], 1.)
+        self.assertEqual(geometry_settings["SampleHeight"], 1.0)
+        self.assertEqual(geometry_settings["SampleWidth"], 1.0)
+        self.assertEqual(geometry_settings["SampleThickness"], 1.0)
 
 
 if __name__ == "__main__":

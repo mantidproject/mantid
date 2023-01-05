@@ -9,6 +9,7 @@ from testhelpers import create_algorithm
 from mantid.simpleapi import CreateWorkspace, EnggEstimateFocussedBackground, DeleteWorkspace
 import numpy as np
 
+
 def mgauss(x, p):
     """
     make gaussian peaks
@@ -23,8 +24,8 @@ def mgauss(x, p):
         y += ht[ii] * np.exp(-0.5 * ((np.array(x) - cen[ii]) / sig[ii]) ** 2)
     return y
 
-class EnggEstimateFocussedBackground_Test(unittest.TestCase):
 
+class EnggEstimateFocussedBackground_Test(unittest.TestCase):
     def setUp(self):
         # create some fairly realistic fake data with peaks and background
         x = np.linspace(0, 160, 401)
@@ -38,16 +39,17 @@ class EnggEstimateFocussedBackground_Test(unittest.TestCase):
 
         y = mgauss(x, pin)
         np.random.seed(0)
-        self.ws = CreateWorkspace(OutputWorkspace='ws', DataX=x, DataY=y + np.random.normal(y, 0.2 * np.sqrt(y)))
+        self.ws = CreateWorkspace(OutputWorkspace="ws", DataX=x, DataY=y + np.random.normal(y, 0.2 * np.sqrt(y)))
         self.mask = mask
 
     def tearDown(self):
-        if self.ws is not None: DeleteWorkspace(self.ws)
+        if self.ws is not None:
+            DeleteWorkspace(self.ws)
 
     def test_subtraction(self):
 
         # get bg and subtract
-        ws_bg = EnggEstimateFocussedBackground(InputWorkspace='ws', NIterations=20, XWindow=3)
+        ws_bg = EnggEstimateFocussedBackground(InputWorkspace="ws", NIterations=20, XWindow=3)
         ws_diff = self.ws - ws_bg
 
         # test residuals to ensure background is well approximated
@@ -57,10 +59,11 @@ class EnggEstimateFocussedBackground_Test(unittest.TestCase):
     def test_window_validation(self):
         # test too small a window
         with self.assertRaises(RuntimeError):
-            EnggEstimateFocussedBackground(InputWorkspace='ws', OutputWorkspace='ws_bg', NIterations=20, XWindow=0.1)
+            EnggEstimateFocussedBackground(InputWorkspace="ws", OutputWorkspace="ws_bg", NIterations=20, XWindow=0.1)
         # test too large a window
         with self.assertRaises(RuntimeError):
-            EnggEstimateFocussedBackground(InputWorkspace='ws', OutputWorkspace='ws_bg', NIterations=20, XWindow=200)
+            EnggEstimateFocussedBackground(InputWorkspace="ws", OutputWorkspace="ws_bg", NIterations=20, XWindow=200)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

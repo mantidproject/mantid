@@ -14,7 +14,7 @@ from mantid.kernel import IntArrayProperty, UnitConversion, DeltaEModeType, logg
 import mantid.simpleapi as mantid  # required to call EnggUtils funcs from algorithms to avoid simpleapi error
 from Engineering.common import path_handling
 
-ENGINX_BANKS = ['', 'North', 'South', 'Both: North, South', '1', '2']  # used in EnggCalibrate, EnggVanadiumCorrections
+ENGINX_BANKS = ["", "North", "South", "Both: North, South", "1", "2"]  # used in EnggCalibrate, EnggVanadiumCorrections
 ENGINX_MASK_BIN_MINS = [0, 19930, 39960, 59850, 79930]  # used in EnggFocus
 ENGINX_MASK_BIN_MAXS = [5300, 20400, 40450, 62000, 82670]  # used in EnggFocus
 # calibration tab variables
@@ -25,7 +25,7 @@ FOCUSED_OUTPUT_WORKSPACE_NAME = "engggui_focusing_output_ws_"
 CALIB_PARAMS_WORKSPACE_NAME = "engggui_calibration_banks_parameters"
 CURVES_PREFIX = "engggui_curves_"
 VAN_CURVE_REBINNED_NAME = "van_ws_foc_rb"
-XUNIT_SUFFIXES = {'d-Spacing': 'dSpacing', 'Time-of-flight': 'TOF'}  # to put in saved focused data filename
+XUNIT_SUFFIXES = {"d-Spacing": "dSpacing", "Time-of-flight": "TOF"}  # to put in saved focused data filename
 
 
 class GROUP(Enum):
@@ -64,9 +64,9 @@ def plot_tof_vs_d_from_calibration(diag_ws, ws_foc, dspacing, calibration):
     fiterror = ADS.retrieve(diag_ws.name() + "_fiterror").toDict()
     d_table = ADS.retrieve(diag_ws.name() + "_dspacing").toDict()
     dspacing = array(sorted(dspacing))  # PDCal sorts the dspacing list passed
-    x0 = array(fitparam['X0'])
-    x0_er = array(fiterror['X0'])
-    ws_index = array(fitparam['wsindex'])
+    x0 = array(fitparam["X0"])
+    x0_er = array(fiterror["X0"])
+    ws_index = array(fitparam["wsindex"])
     nspec = len(set(ws_index))
     si = ws_foc.spectrumInfo()
 
@@ -75,32 +75,31 @@ def plot_tof_vs_d_from_calibration(diag_ws, ws_foc, dspacing, calibration):
     for ispec in range(nspec):
         # extract data from tables
         detid = ws_foc.getSpectrum(ispec).getDetectorIDs()[0]
-        irow = d_table['detid'].index(detid)
-        valid = [isfinite(d_table[key][irow]) for key in d_table if '@' in key]  # nan if fit unsuccessful
+        irow = d_table["detid"].index(detid)
+        valid = [isfinite(d_table[key][irow]) for key in d_table if "@" in key]  # nan if fit unsuccessful
         ipks = ws_index == ispec  # peak centres for this spectrum
         x, y, e = dspacing[valid], x0[ipks][valid], x0_er[ipks][valid]
         # get poly fit
         diff_consts = si.diffractometerConstants(ispec)  # output is a UnitParametersMap
-        yfit = array([UnitConversion.run("dSpacing", "TOF", xpt, 0, DeltaEModeType.Elastic, diff_consts)
-                      for xpt in x])
+        yfit = array([UnitConversion.run("dSpacing", "TOF", xpt, 0, DeltaEModeType.Elastic, diff_consts) for xpt in x])
         # plot polynomial fit to TOF vs dSpacing
         if ispec + 1 > len(figs) * ncols_per_fig:
             # create new figure
             ncols = ncols_per_fig if not nspec - ispec < ncols_per_fig else nspec % ncols_per_fig
-            fig, ax = subplots(2, ncols, sharex=True, sharey='row', subplot_kw={'projection': 'mantid'})
+            fig, ax = subplots(2, ncols, sharex=True, sharey="row", subplot_kw={"projection": "mantid"})
             ax = reshape(ax, (-1, 1)) if ax.ndim == 1 else ax  # to ensure is 2D matrix even if ncols==1
-            ax[0, 0].set_ylabel('Fitted TOF (\u03BCs)')
-            ax[1, 0].set_ylabel('Residuals (\u03BCs)')
+            ax[0, 0].set_ylabel("Fitted TOF (\u03BCs)")
+            ax[1, 0].set_ylabel("Residuals (\u03BCs)")
             figs.append(fig)
             icol = 0
         # plot TOF vs d
         ax[0, icol].set_title(calibration.get_subplot_title(ispec))
-        ax[0, icol].errorbar(x, y, yerr=e, marker='o', markersize=3, capsize=2, ls='', color='b', label='Peak centres')
-        ax[0, icol].plot(x, yfit, '-r', label='quadratic fit')
+        ax[0, icol].errorbar(x, y, yerr=e, marker="o", markersize=3, capsize=2, ls="", color="b", label="Peak centres")
+        ax[0, icol].plot(x, yfit, "-r", label="quadratic fit")
         # plot residuals
-        ax[1, icol].errorbar(x, y - yfit, yerr=e, marker='o', markersize=3, capsize=2, ls='', color='b', label='resids')
-        ax[1, icol].axhline(color='r', ls='-')
-        ax[1, icol].set_xlabel('d-spacing (Ang)')
+        ax[1, icol].errorbar(x, y - yfit, yerr=e, marker="o", markersize=3, capsize=2, ls="", color="b", label="resids")
+        ax[1, icol].axhline(color="r", ls="-")
+        ax[1, icol].set_xlabel("d-spacing (Ang)")
         icol += 1
     # Format figs and show
     for fig in figs:
@@ -109,7 +108,7 @@ def plot_tof_vs_d_from_calibration(diag_ws, ws_foc, dspacing, calibration):
 
 
 def create_spectrum_list_from_string(str_list):
-    array = IntArrayProperty('var', str_list).value
+    array = IntArrayProperty("var", str_list).value
     int_list = [int(i) for i in array]  # cast int32 to int
     return int_list
 
@@ -122,9 +121,22 @@ def default_ceria_expected_peaks(final=False):
     @Returns :: a list of peaks in d-spacing as a float list
     """
     _CERIA_EXPECTED_PEAKS = [1.104598643, 1.352851554, 1.631600313, 1.913220892, 2.705702376]
-    _CERIA_EXPECTED_PEAKS_FINAL = [0.781069, 0.855618487, 0.901900955, 0.914694494, 0.956610446, 1.04142562,
-                                   1.104598643, 1.210027059, 1.241461538, 1.352851554, 1.562138267, 1.631600313,
-                                   1.913220892, 2.705702376]
+    _CERIA_EXPECTED_PEAKS_FINAL = [
+        0.781069,
+        0.855618487,
+        0.901900955,
+        0.914694494,
+        0.956610446,
+        1.04142562,
+        1.104598643,
+        1.210027059,
+        1.241461538,
+        1.352851554,
+        1.562138267,
+        1.631600313,
+        1.913220892,
+        2.705702376,
+    ]
 
     return _CERIA_EXPECTED_PEAKS_FINAL if final else _CERIA_EXPECTED_PEAKS
 
@@ -136,9 +148,36 @@ def default_ceria_expected_peak_windows(final=False):
     @Returns :: a list of peak windows in d-spacing as a float list
     """
     _CERIA_EXPECTED_WINDOW = [1.06515, 1.15210, 1.30425, 1.41292, 1.59224, 1.68462, 1.84763, 1.98891, 2.64097, 2.77186]
-    _CERIA_EXPECTED_WINDOW_FINAL = [0.77, 0.805, 0.83702, 0.88041, 0.88041, 0.90893, 0.90893, 0.93474, 0.93474, 0.98908,
-                                    1.01625, 1.06515, 1.06515, 1.15210, 1.16297, 1.22817, 1.22817, 1.29338, 1.30425,
-                                    1.41292, 1.53242, 1.59224, 1.59224, 1.68462, 1.84763, 1.98891, 2.64097, 2.77186]
+    _CERIA_EXPECTED_WINDOW_FINAL = [
+        0.77,
+        0.805,
+        0.83702,
+        0.88041,
+        0.88041,
+        0.90893,
+        0.90893,
+        0.93474,
+        0.93474,
+        0.98908,
+        1.01625,
+        1.06515,
+        1.06515,
+        1.15210,
+        1.16297,
+        1.22817,
+        1.22817,
+        1.29338,
+        1.30425,
+        1.41292,
+        1.53242,
+        1.59224,
+        1.59224,
+        1.68462,
+        1.84763,
+        1.98891,
+        2.64097,
+        2.77186,
+    ]
 
     return _CERIA_EXPECTED_WINDOW_FINAL if final else _CERIA_EXPECTED_WINDOW
 
@@ -197,8 +236,8 @@ def write_prm_file(ws_foc, prm_savepath, spec_nums=None):
     # read header
     with open(path.join(CALIB_DIR, "template_ENGINX_prm_header.prm")) as fheader:
         lines = fheader.readlines()
-    lines[1] = lines[1].replace('2', f'{nspec}')  # replace with nspectra in header
-    lines[13] = lines[13].replace('241391', f'{ws_foc.run().get("run_number").value}')  # replace run num
+    lines[1] = lines[1].replace("2", f"{nspec}")  # replace with nspectra in header
+    lines[13] = lines[13].replace("241391", f'{ws_foc.run().get("run_number").value}')  # replace run num
     # add blocks
     si = ws_foc.spectrumInfo()
     inst = ws_foc.getInstrument()
@@ -209,21 +248,21 @@ def write_prm_file(ws_foc, prm_savepath, spec_nums=None):
         phi, tth = degrees(si.geographicalAngles(ispec))
         dc = si.diffractometerConstants(ispec)
         difa, difc, tzero = [dc[param] for param in [UnitParams.difa, UnitParams.difc, UnitParams.tzero]]
-        block = [f'INS  {iblock + 1}I ITYP\t0\t1.0000\t80.0000\t0{endl}']
-        block.extend(f'INS  {iblock + 1}BNKPAR\t{l2:.3f}\t{abs(tth):.3f}\t{phi:.3f}\t0.000\t0.000\t0\t0{endl}')
-        block.extend(f'INS  {iblock + 1} ICONS\t{difc:.2f}\t{difa:.2f}\t{tzero:.2f}{endl}')
+        block = [f"INS  {iblock + 1}I ITYP\t0\t1.0000\t80.0000\t0{endl}"]
+        block.extend(f"INS  {iblock + 1}BNKPAR\t{l2:.3f}\t{abs(tth):.3f}\t{phi:.3f}\t0.000\t0.000\t0\t0{endl}")
+        block.extend(f"INS  {iblock + 1} ICONS\t{difc:.2f}\t{difa:.2f}\t{tzero:.2f}{endl}")
         # TOF peak profile parameters
         alpha0, beta0, beta1, sig0_sq, sig1_sq, sig2_sq = getParametersFromDetector(inst, ws_foc.getDetector(ispec))
-        block.extend(f'INS  {iblock + 1}PRCF1 \t3\t21\t0.00050{endl}')
-        block.extend(f'INS  {iblock + 1}PRCF11\t{alpha0:.6E}\t{beta0:.6E}\t{beta1:.6E}\t{sig0_sq:.6E}{endl}')
-        block.extend(f'INS  {iblock + 1}PRCF12\t{sig1_sq:.6E}\t{sig2_sq:.6E}\t{0.0:.6E}\t{0.0:.6E}{endl}')
+        block.extend(f"INS  {iblock + 1}PRCF1 \t3\t21\t0.00050{endl}")
+        block.extend(f"INS  {iblock + 1}PRCF11\t{alpha0:.6E}\t{beta0:.6E}\t{beta1:.6E}\t{sig0_sq:.6E}{endl}")
+        block.extend(f"INS  {iblock + 1}PRCF12\t{sig1_sq:.6E}\t{sig2_sq:.6E}\t{0.0:.6E}\t{0.0:.6E}{endl}")
         for iblank in [3, 4, 5]:
-            block.extend(f'INS  {iblock + 1}PRCF1{iblank}\t{0.0:.6E}\t{0.0:.6E}\t{0.0:.6E}\t{0.0:.6E}{endl}')
-        block.extend(f'INS  {iblock + 1}PRCF16\t{0.0:.6E}{endl}')
+            block.extend(f"INS  {iblock + 1}PRCF1{iblank}\t{0.0:.6E}\t{0.0:.6E}\t{0.0:.6E}\t{0.0:.6E}{endl}")
+        block.extend(f"INS  {iblock + 1}PRCF16\t{0.0:.6E}{endl}")
         # append to lines
         lines.extend(block)
     # write lines to prm file
-    with open(prm_savepath, 'w') as fout:
+    with open(prm_savepath, "w") as fout:
         fout.writelines(lines)
 
 
@@ -267,7 +306,7 @@ def make_diff_consts_table(ws_foc):
     :param ws_foc: focused ceria workspace
     """
     table = mantid.CreateDetectorTable(InputWorkspace=ws_foc, DetectorTableWorkspace=DIFF_CONSTS_TABLE_NAME)
-    col_names = ['Spectrum No', "Detector ID(s)", "Monitor", "DIFC - Uncalibrated"]
+    col_names = ["Spectrum No", "Detector ID(s)", "Monitor", "DIFC - Uncalibrated"]
     for col in col_names:
         table.removeColumn(col)
 
@@ -285,27 +324,30 @@ def run_calibration(ceria_ws, calibration, full_instrument_cal_ws):
     # initial process of ceria ws
     mantid.NormaliseByCurrent(InputWorkspace=ceria_ws, OutputWorkspace=ceria_ws)
     mantid.ApplyDiffCal(InstrumentWorkspace=ceria_ws, CalibrationWorkspace=full_instrument_cal_ws)
-    mantid.ConvertUnits(InputWorkspace=ceria_ws, OutputWorkspace=ceria_ws, Target='dSpacing')
+    mantid.ConvertUnits(InputWorkspace=ceria_ws, OutputWorkspace=ceria_ws, Target="dSpacing")
 
     # get grouping workspace and focus
     grp_ws = calibration.get_group_ws()  # (creates if doesn't exist)
     focused_ceria = mantid.DiffractionFocussing(InputWorkspace=ceria_ws, GroupingWorkspace=grp_ws)
     mantid.ApplyDiffCal(InstrumentWorkspace=focused_ceria, ClearCalibration=True)  # DIFC of detector in middle of bank
-    focused_ceria = mantid.ConvertUnits(InputWorkspace=focused_ceria, Target='TOF')
+    focused_ceria = mantid.ConvertUnits(InputWorkspace=focused_ceria, Target="TOF")
 
     # Run mantid.PDCalibration to fit peaks in TOF
     foc_name = focused_ceria.name()  # PDCal invalidates ptr during rebin so keep track of ws name
     cal_table_name = "engggui_calibration_" + calibration.get_group_suffix()
     diag_ws_name = "diag_" + calibration.get_group_suffix()
-    cal_table, diag_ws, mask = mantid.PDCalibration(InputWorkspace=foc_name, OutputCalibrationTable=cal_table_name,
-                                                    DiagnosticWorkspaces=diag_ws_name,
-                                                    PeakPositions=default_ceria_expected_peaks(final=True),
-                                                    TofBinning=[12000, -0.0003, 52000],
-                                                    PeakWindow=default_ceria_expected_peak_windows(final=True),
-                                                    MinimumPeakHeight=0.5,
-                                                    PeakFunction='BackToBackExponential',
-                                                    CalibrationParameters='DIFC+TZERO+DIFA',
-                                                    UseChiSq=True)
+    cal_table, diag_ws, mask = mantid.PDCalibration(
+        InputWorkspace=foc_name,
+        OutputCalibrationTable=cal_table_name,
+        DiagnosticWorkspaces=diag_ws_name,
+        PeakPositions=default_ceria_expected_peaks(final=True),
+        TofBinning=[12000, -0.0003, 52000],
+        PeakWindow=default_ceria_expected_peak_windows(final=True),
+        MinimumPeakHeight=0.5,
+        PeakFunction="BackToBackExponential",
+        CalibrationParameters="DIFC+TZERO+DIFA",
+        UseChiSq=True,
+    )
     mantid.ApplyDiffCal(InstrumentWorkspace=foc_name, CalibrationWorkspace=cal_table)
 
     # warn user which spectra were unsuccessfully calibrated
@@ -313,8 +355,7 @@ def run_calibration(ceria_ws, calibration, full_instrument_cal_ws):
     masked_detIDs = mask.getMaskedDetectors()
     for ispec in range(focused_ceria.getNumberHistograms()):
         if focused_ceria.getSpectrum(ispec).getDetectorIDs()[0] in masked_detIDs:
-            logger.warning(
-                f'mantid.PDCalibration failed for spectrum index {ispec} - proceeding with uncalibrated DIFC.')
+            logger.warning(f"mantid.PDCalibration failed for spectrum index {ispec} - proceeding with uncalibrated DIFC.")
 
     # store cal_table in calibration
     calibration.set_calibration_table(cal_table_name)
@@ -343,7 +384,7 @@ def create_output_files(calibration_dir, calibration, ws_foc):
     calibration.set_prm_filepath(prm_filepath)
     # save pdcal output as nexus
     filepath, ext = path.splitext(prm_filepath)
-    nxs_filepath = filepath + '.nxs'
+    nxs_filepath = filepath + ".nxs"
     mantid.SaveNexus(InputWorkspace=calibration.get_calibration_table(), Filename=nxs_filepath)
 
     # if both banks calibrated save individual banks separately as well
@@ -351,14 +392,13 @@ def create_output_files(calibration_dir, calibration, ws_foc):
         # output a separate prm for North and South when both banks included
         for ibank, bank in enumerate(calibration.group.banks):
             # get prm filename for individual banks by passing group enum as argument to generate_output_file_name
-            prm_filepath_bank = path.join(calibration_dir,
-                                          calibration.generate_output_file_name(GROUP(str(ibank + 1))))
+            prm_filepath_bank = path.join(calibration_dir, calibration.generate_output_file_name(GROUP(str(ibank + 1))))
             write_prm_file(ws_foc, prm_filepath_bank, spec_nums=[ibank])
             # copy pdcal output nxs for both banks
             filepath, ext = path.splitext(prm_filepath_bank)
-            nxs_filepath_bank = filepath + '.nxs'
+            nxs_filepath_bank = filepath + ".nxs"
             copy2(nxs_filepath, nxs_filepath_bank)
-    logger.notice(f"\n\nCalibration files saved to: \"{calibration_dir}\"\n\n")
+    logger.notice(f'\n\nCalibration files saved to: "{calibration_dir}"\n\n')
 
     return prm_filepath  # if both banks, do not pass individual banks (prm_filepath_bank) to GSAS II tab
 
@@ -370,7 +410,7 @@ def getParametersFromDetector(instrument, detector):
     :param detector:
     :return: list of parameters
     """
-    inst_tree = detector.getFullName().split(detector.getNameSeparator())[0].split('/')
+    inst_tree = detector.getFullName().split(detector.getNameSeparator())[0].split("/")
     param_names = ["alpha_0", "beta_0", "beta_1", "sigma_0_sq", "sigma_1_sq", "sigma_2_sq"]
     params = None
     for comp_name in inst_tree:
@@ -444,7 +484,7 @@ def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, sav
             ws_foc = _apply_vanadium_norm(ws_foc, ws_van_foc)
             _save_output_files(focus_dirs, ws_foc, calibration, van_run, rb_num)
             # convert units to TOF and save again
-            ws_foc = mantid.ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target='TOF')
+            ws_foc = mantid.ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target="TOF")
             nxs_paths, gss_path = _save_output_files(focus_dirs, ws_foc, calibration, van_run, rb_num)
             focused_files_list.extend(nxs_paths)  # list of .nsx paths for that sample using last dir in focus_dirs
             print(type(gss_path), len(gss_path))
@@ -472,8 +512,7 @@ def process_vanadium(vanadium_path, calibration, full_calib):
         else:
             ws_van = _load_run_and_convert_to_dSpacing(vanadium_path, calibration.get_instrument(), full_calib)
             if not ws_van:
-                raise RuntimeError(f"vanadium run {van_run} has no proton_charge - "
-                                   f"please supply a valid vanadium run to focus.")
+                raise RuntimeError(f"vanadium run {van_run} has no proton_charge - " f"please supply a valid vanadium run to focus.")
         ws_van_foc = _focus_run_and_apply_roi_calibration(ws_van, calibration, ws_foc_name=van_foc_name)
         ws_van_foc = _smooth_vanadium(ws_van_foc)
     return ws_van_foc, van_run
@@ -486,10 +525,10 @@ def _plot_focused_workspaces(ws_names):
 
     for ws_name in ws_names:
         ws_foc = ADS.retrieve(ws_name)
-        ws_label = '_'.join([ws_foc.getInstrument().getName(), ws_foc.run().get('run_number').value])
-        fig, ax = subplots(subplot_kw={'projection': 'mantid'})
+        ws_label = "_".join([ws_foc.getInstrument().getName(), ws_foc.run().get("run_number").value])
+        fig, ax = subplots(subplot_kw={"projection": "mantid"})
         for ispec in range(ws_foc.getNumberHistograms()):
-            ax.plot(ws_foc, label=f'{ws_label} focused: spec {ispec + 1}', marker='.', wkspIndex=ispec)
+            ax.plot(ws_foc, label=f"{ws_label} focused: spec {ispec + 1}", marker=".", wkspIndex=ispec)
         ax.legend()
         fig.show()
 
@@ -504,36 +543,37 @@ def _load_run_and_convert_to_dSpacing(filepath, instrument, full_calib):
         mantid.DeleteWorkspace(ws)
         return None
     mantid.ApplyDiffCal(InstrumentWorkspace=ws, CalibrationWorkspace=full_calib)
-    ws = mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws.name(), Target='dSpacing')
+    ws = mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws.name(), Target="dSpacing")
     return ws
 
 
 def _focus_run_and_apply_roi_calibration(ws, calibration, ws_foc_name=None):
     if not ws_foc_name:
         ws_foc_name = ws.name() + "_" + FOCUSED_OUTPUT_WORKSPACE_NAME + calibration.get_foc_ws_suffix()
-    ws_foc = mantid.DiffractionFocussing(InputWorkspace=ws, OutputWorkspace=ws_foc_name,
-                                         GroupingWorkspace=calibration.get_group_ws())
+    ws_foc = mantid.DiffractionFocussing(InputWorkspace=ws, OutputWorkspace=ws_foc_name, GroupingWorkspace=calibration.get_group_ws())
     mantid.ApplyDiffCal(InstrumentWorkspace=ws_foc, ClearCalibration=True)
-    ws_foc = mantid.ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target='TOF')
+    ws_foc = mantid.ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target="TOF")
     mantid.ApplyDiffCal(InstrumentWorkspace=ws_foc, CalibrationWorkspace=calibration.get_calibration_table())
-    ws_foc = mantid.ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target='dSpacing')
+    ws_foc = mantid.ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target="dSpacing")
     return ws_foc
 
 
 def _smooth_vanadium(van_ws_foc):
-    return mantid.EnggEstimateFocussedBackground(InputWorkspace=van_ws_foc, OutputWorkspace=van_ws_foc,
-                                                 NIterations=1, XWindow=0.08)
+    return mantid.EnggEstimateFocussedBackground(InputWorkspace=van_ws_foc, OutputWorkspace=van_ws_foc, NIterations=1, XWindow=0.08)
 
 
 def _apply_vanadium_norm(sample_ws_foc, van_ws_foc):
     # divide by curves - automatically corrects for solid angle, det efficiency and lambda dep. flux
     sample_ws_foc = mantid.CropWorkspace(InputWorkspace=sample_ws_foc, OutputWorkspace=sample_ws_foc.name(), XMin=0.45)
-    van_ws_foc_rb = mantid.RebinToWorkspace(WorkspaceToRebin=van_ws_foc, WorkspaceToMatch=sample_ws_foc,
-                                            OutputWorkspace=VAN_CURVE_REBINNED_NAME)  # copy so as not to lose data
-    sample_ws_foc = mantid.Divide(LHSWorkspace=sample_ws_foc, RHSWorkspace=van_ws_foc_rb,
-                                  OutputWorkspace=sample_ws_foc.name(), AllowDifferentNumberSpectra=False)
-    sample_ws_foc = mantid.ReplaceSpecialValues(InputWorkspace=sample_ws_foc, OutputWorkspace=sample_ws_foc.name(),
-                                                NaNValue=0, NaNError=0.0, InfinityValue=0, InfinityError=0.0)
+    van_ws_foc_rb = mantid.RebinToWorkspace(
+        WorkspaceToRebin=van_ws_foc, WorkspaceToMatch=sample_ws_foc, OutputWorkspace=VAN_CURVE_REBINNED_NAME
+    )  # copy so as not to lose data
+    sample_ws_foc = mantid.Divide(
+        LHSWorkspace=sample_ws_foc, RHSWorkspace=van_ws_foc_rb, OutputWorkspace=sample_ws_foc.name(), AllowDifferentNumberSpectra=False
+    )
+    sample_ws_foc = mantid.ReplaceSpecialValues(
+        InputWorkspace=sample_ws_foc, OutputWorkspace=sample_ws_foc.name(), NaNValue=0, NaNError=0.0, InfinityValue=0, InfinityError=0.0
+    )
     return sample_ws_foc
 
 
@@ -542,32 +582,31 @@ def _save_output_files(focus_dirs, sample_ws_foc, calibration, van_run, rb_num=N
     foc_suffix = calibration.get_foc_ws_suffix()
     xunit = sample_ws_foc.getDimension(0).name
     xunit_suffix = XUNIT_SUFFIXES[xunit]
-    sample_run_no = sample_ws_foc.run().get('run_number').value
+    sample_run_no = sample_ws_foc.run().get("run_number").value
     # save all spectra to single ASCII files
-    ascii_fname = _generate_output_file_name(calibration.get_instrument(), sample_run_no, van_run,
-                                             calibration.get_group_suffix(), xunit_suffix, ext='')
+    ascii_fname = _generate_output_file_name(
+        calibration.get_instrument(), sample_run_no, van_run, calibration.get_group_suffix(), xunit_suffix, ext=""
+    )
 
     for focus_dir in focus_dirs:
         if not path.exists(focus_dir):
             makedirs(focus_dir)
 
-        gss_path = path.join(focus_dir, ascii_fname + '.gss')
+        gss_path = path.join(focus_dir, ascii_fname + ".gss")
         gss_paths = [gss_path]
-        mantid.SaveGSS(InputWorkspace=sample_ws_foc, Filename=gss_path,
-                       SplitFiles=False, UseSpectrumNumberAsBankID=True, Append=False)
-        mantid.SaveFocusedXYE(InputWorkspace=sample_ws_foc, Filename=path.join(focus_dir, ascii_fname + ".abc"),
-                              SplitFiles=False, Format="TOPAS")
+        mantid.SaveGSS(InputWorkspace=sample_ws_foc, Filename=gss_path, SplitFiles=False, UseSpectrumNumberAsBankID=True, Append=False)
+        mantid.SaveFocusedXYE(
+            InputWorkspace=sample_ws_foc, Filename=path.join(focus_dir, ascii_fname + ".abc"), SplitFiles=False, Format="TOPAS"
+        )
         # Save nxs per spectrum
         nxs_paths = []
         mantid.AddSampleLog(Workspace=sample_ws_foc, LogName="Vanadium Run", LogText=van_run)
         for ispec in range(sample_ws_foc.getNumberHistograms()):
             # add a bankid and vanadium to log that is read by fitting model
-            bankid = foc_suffix if sample_ws_foc.getNumberHistograms() == 1 else f'{foc_suffix}_{ispec + 1}'
-            mantid.AddSampleLog(Workspace=sample_ws_foc, LogName="bankid",
-                                LogText=bankid.replace('_', ' '))  # overwrites
+            bankid = foc_suffix if sample_ws_foc.getNumberHistograms() == 1 else f"{foc_suffix}_{ispec + 1}"
+            mantid.AddSampleLog(Workspace=sample_ws_foc, LogName="bankid", LogText=bankid.replace("_", " "))  # overwrites
             # save spectrum as nexus
-            filename = _generate_output_file_name(calibration.get_instrument(), sample_run_no, van_run, bankid,
-                                                  xunit_suffix, ext=".nxs")
+            filename = _generate_output_file_name(calibration.get_instrument(), sample_run_no, van_run, bankid, xunit_suffix, ext=".nxs")
             nxs_path = path.join(focus_dir, filename)
             mantid.SaveNexus(InputWorkspace=sample_ws_foc, Filename=nxs_path, WorkspaceIndexList=[ispec])
             nxs_paths.append(nxs_path)
@@ -603,7 +642,7 @@ def read_in_expected_peaks(filename, expected_peaks):
         try:
             with open(filename) as f:
                 for line in f:
-                    read_in_array.append([float(x) for x in line.split(',')])
+                    read_in_array.append([float(x) for x in line.split(",")])
             for a in read_in_array:
                 for b in a:
                     ex_peak_array.append(b)
@@ -613,9 +652,12 @@ def read_in_expected_peaks(filename, expected_peaks):
         if not ex_peak_array:
             # "File could not be read. Defaults in alternative option used."
             if not expected_peaks:
-                raise ValueError("Could not read any peaks from the file given in 'ExpectedPeaksFromFile: '"
-                                 + filename + "', and no expected peaks were given in the property "
-                                              "'ExpectedPeaks' either. Cannot continue without a list of expected peaks.")
+                raise ValueError(
+                    "Could not read any peaks from the file given in 'ExpectedPeaksFromFile: '"
+                    + filename
+                    + "', and no expected peaks were given in the property "
+                    "'ExpectedPeaks' either. Cannot continue without a list of expected peaks."
+                )
             expected_peaks_d = sorted(expected_peaks)
 
         else:
@@ -623,9 +665,11 @@ def read_in_expected_peaks(filename, expected_peaks):
 
     else:
         if 0 == len(expected_peaks):
-            raise ValueError("No expected peaks were given in the property 'ExpectedPeaks', "
-                             "could not get default expected peaks, and 'ExpectedPeaksFromFile' "
-                             "was not given either. Cannot continout without a list of expected peaks.")
+            raise ValueError(
+                "No expected peaks were given in the property 'ExpectedPeaks', "
+                "could not get default expected peaks, and 'ExpectedPeaksFromFile' "
+                "was not given either. Cannot continout without a list of expected peaks."
+            )
         expected_peaks_d = sorted(expected_peaks)
 
     return expected_peaks_d
@@ -646,26 +690,30 @@ def get_ws_indices_from_input_properties(workspace, bank, detector_indices):
     """
 
     if bank and detector_indices:
-        raise ValueError("It is not possible to use at the same time the input properties 'Bank' and "
-                         "'DetectorIndices', as they overlap. Please use either of them. Got Bank: '%s', "
-                         "and DetectorIndices: '%s'" % (bank, detector_indices))
+        raise ValueError(
+            "It is not possible to use at the same time the input properties 'Bank' and "
+            "'DetectorIndices', as they overlap. Please use either of them. Got Bank: '%s', "
+            "and DetectorIndices: '%s'" % (bank, detector_indices)
+        )
     elif bank:
-        bank_aliases = {'North': '1', 'South': '2', 'Both: North, South': '-1'}
+        bank_aliases = {"North": "1", "South": "2", "Both: North, South": "-1"}
         bank = bank_aliases.get(bank, bank)
         indices = get_ws_indices_for_bank(workspace, bank)
         if not indices:
-            raise RuntimeError("Unable to find a meaningful list of workspace indices for the "
-                               "bank passed: %s. Please check the inputs." % bank)
+            raise RuntimeError(
+                "Unable to find a meaningful list of workspace indices for the " "bank passed: %s. Please check the inputs." % bank
+            )
         return indices
     elif detector_indices:
         indices = parse_spectrum_indices(workspace, detector_indices)
         if not indices:
-            raise RuntimeError("Unable to find a meaningful list of workspace indices for the "
-                               "range(s) of detectors passed: %s. Please check the inputs." % detector_indices)
+            raise RuntimeError(
+                "Unable to find a meaningful list of workspace indices for the "
+                "range(s) of detectors passed: %s. Please check the inputs." % detector_indices
+            )
         return indices
     else:
-        raise ValueError("You have not given any value for the properties 'Bank' and 'DetectorIndices' "
-                         "One of them is required")
+        raise ValueError("You have not given any value for the properties 'Bank' and 'DetectorIndices' " "One of them is required")
 
 
 def parse_spectrum_indices(workspace, spectrum_numbers):
@@ -687,9 +735,14 @@ def parse_spectrum_indices(workspace, spectrum_numbers):
     indices = sorted(set(indices))
     max_index = workspace.getNumberHistograms()
     if indices[-1] >= max_index:
-        raise ValueError("A workspace index equal or bigger than the number of histograms available in the "
-                         "workspace '" + workspace.name() + "' (" + str(workspace.getNumberHistograms())
-                         + ") has been given. Please check the list of indices.")
+        raise ValueError(
+            "A workspace index equal or bigger than the number of histograms available in the "
+            "workspace '"
+            + workspace.name()
+            + "' ("
+            + str(workspace.getNumberHistograms())
+            + ") has been given. Please check the list of indices."
+        )
     # and finally translate from 'spectrum numbers' to 'workspace indices'
     return [workspace.getIndexFromSpectrumNumber(sn) for sn in indices]
 
@@ -731,23 +784,22 @@ def get_detector_ids_for_bank(bank):
     @returns list of detector IDs corresponding to the specified Engg bank number
     """
     import os
-    grouping_file_path = os.path.join(mantid.config.getInstrumentDirectory(),
-                                      'Grouping', 'ENGINX_Grouping.xml')
 
-    alg = AlgorithmManager.create('LoadDetectorsGroupingFile')
+    grouping_file_path = os.path.join(mantid.config.getInstrumentDirectory(), "Grouping", "ENGINX_Grouping.xml")
+
+    alg = AlgorithmManager.create("LoadDetectorsGroupingFile")
     alg.initialize()
     alg.setLogging(False)
-    alg.setProperty('InputFile', grouping_file_path)
-    group_name = '__EnginXGrouping'
-    alg.setProperty('OutputWorkspace', group_name)
+    alg.setProperty("InputFile", grouping_file_path)
+    group_name = "__EnginXGrouping"
+    alg.setProperty("OutputWorkspace", group_name)
     alg.execute()
 
     # LoadDetectorsGroupingFile produces a 'Grouping' workspace.
     # PropertyWithValue<GroupingWorkspace> not working (GitHub issue 13437)
     # => cannot run as child and get outputworkspace property properly
     if not ADS.doesExist(group_name):
-        raise RuntimeError('LoadDetectorsGroupingFile did not run correctly. Could not '
-                           'find its output workspace: ' + group_name)
+        raise RuntimeError("LoadDetectorsGroupingFile did not run correctly. Could not " "find its output workspace: " + group_name)
     grouping = ADS.retrieve(group_name)
 
     detector_ids = set()
@@ -768,7 +820,7 @@ def get_detector_ids_for_bank(bank):
     mantid.DeleteWorkspace(grouping)
 
     if len(detector_ids) == 0:
-        raise ValueError('Could not find any detector for this bank: ' + bank + '. This looks like an unknown bank')
+        raise ValueError("Could not find any detector for this bank: " + bank + ". This looks like an unknown bank")
 
     return detector_ids
 
@@ -785,14 +837,13 @@ def generate_output_param_table(name, difa, difc, tzero):
     @param tzero :: TZERO calibration parameter
     """
     tbl = mantid.CreateEmptyTableWorkspace(OutputWorkspace=name)
-    tbl.addColumn('double', 'DIFA')
-    tbl.addColumn('double', 'DIFZ')
-    tbl.addColumn('double', 'TZERO')
+    tbl.addColumn("double", "DIFA")
+    tbl.addColumn("double", "DIFZ")
+    tbl.addColumn("double", "TZERO")
     tbl.addRow([float(difa), float(difc), float(tzero)])
 
 
-def apply_vanadium_corrections(parent, ws, indices, vanadium_ws, van_integration_ws, van_curves_ws,
-                               progress_range=None):
+def apply_vanadium_corrections(parent, ws, indices, vanadium_ws, van_integration_ws, van_curves_ws, progress_range=None):
     """
     DEPRECATED: not used in UI, only in deprecated functions (EnggCalibrateFull, EnggVanadiumCorrections and EnggFocus)
 
@@ -808,13 +859,14 @@ def apply_vanadium_corrections(parent, ws, indices, vanadium_ws, van_integration
     @param progress_range :: pair for (startProgress, endProgress) with respect to the parent algorithm
     """
     if vanadium_ws and vanadium_ws.getNumberHistograms() < len(indices):
-        raise ValueError("Inconsistency in inputs: the Vanadium workspace has less spectra (%d) than "
-                         "the number of workspace indices to process (%d)" %
-                         (vanadium_ws.getNumberHistograms(), len(indices)))
+        raise ValueError(
+            "Inconsistency in inputs: the Vanadium workspace has less spectra (%d) than "
+            "the number of workspace indices to process (%d)" % (vanadium_ws.getNumberHistograms(), len(indices))
+        )
     elif van_integration_ws and van_curves_ws:
         # filter only indices from vanIntegWS (crop the table)
         tbl = mantid.CreateEmptyTableWorkspace(OutputWorkspace="__vanadium_integration_ws")
-        tbl.addColumn('double', 'Spectra Integration')
+        tbl.addColumn("double", "Spectra Integration")
         for i in indices:
             tbl.addRow([van_integration_ws.cell(i, 0)])
         van_integration_ws = tbl
@@ -825,15 +877,15 @@ def apply_vanadium_corrections(parent, ws, indices, vanadium_ws, van_integration
         progress_params["startProgress"] = progress_range[0]
         progress_params["endProgress"] = progress_range[1]
 
-    alg = parent.createChildAlgorithm('EnggVanadiumCorrections', **progress_params)
+    alg = parent.createChildAlgorithm("EnggVanadiumCorrections", **progress_params)
     if ws:
-        alg.setProperty('Workspace', ws)
+        alg.setProperty("Workspace", ws)
     if vanadium_ws:
-        alg.setProperty('VanadiumWorkspace', vanadium_ws)
+        alg.setProperty("VanadiumWorkspace", vanadium_ws)
     if van_integration_ws:
-        alg.setProperty('IntegrationWorkspace', van_integration_ws)
+        alg.setProperty("IntegrationWorkspace", van_integration_ws)
     if van_curves_ws:
-        alg.setProperty('CurvesWorkspace', van_curves_ws)
+        alg.setProperty("CurvesWorkspace", van_curves_ws)
 
     alg.execute()
 
@@ -850,19 +902,21 @@ def convert_to_d_spacing(parent, ws):
     @returns workspace converted to d-spacing units
     """
     # A check to catch possible errors in an understandable way
-    expected_dimension = 'Time-of-flight'
+    expected_dimension = "Time-of-flight"
     dimension = ws.getXDimension().name
     if expected_dimension != dimension:
-        raise ValueError("This function expects a workspace with %s X dimension, but "
-                         "the X dimension of the input workspace is: '%s'. This is an internal logic "
-                         "error. " % (expected_dimension, dimension))
+        raise ValueError(
+            "This function expects a workspace with %s X dimension, but "
+            "the X dimension of the input workspace is: '%s'. This is an internal logic "
+            "error. " % (expected_dimension, dimension)
+        )
 
-    alg = parent.createChildAlgorithm('ConvertUnits')
-    alg.setProperty('InputWorkspace', ws)
-    alg.setProperty('Target', 'dSpacing')
-    alg.setProperty('AlignBins', True)
+    alg = parent.createChildAlgorithm("ConvertUnits")
+    alg.setProperty("InputWorkspace", ws)
+    alg.setProperty("Target", "dSpacing")
+    alg.setProperty("AlignBins", True)
     alg.execute()
-    return alg.getProperty('OutputWorkspace').value
+    return alg.getProperty("OutputWorkspace").value
 
 
 def convert_to_TOF(parent, ws):
@@ -876,11 +930,11 @@ def convert_to_TOF(parent, ws):
 
     @returns workspace with data converted to ToF units
     """
-    alg = parent.createChildAlgorithm('ConvertUnits')
-    alg.setProperty('InputWorkspace', ws)
-    alg.setProperty('Target', 'TOF')
+    alg = parent.createChildAlgorithm("ConvertUnits")
+    alg.setProperty("InputWorkspace", ws)
+    alg.setProperty("Target", "TOF")
     alg.execute()
-    return alg.getProperty('OutputWorkspace').value
+    return alg.getProperty("OutputWorkspace").value
 
 
 def crop_data(parent, ws, indices):
@@ -899,12 +953,12 @@ def crop_data(parent, ws, indices):
     @returns cropped workspace, with only the spectra corresponding to the indices requested
     """
     # Leave only spectra between min and max
-    alg = parent.createChildAlgorithm('ExtractSpectra')
-    alg.setProperty('InputWorkspace', ws)
-    alg.setProperty('WorkspaceIndexList', indices)
+    alg = parent.createChildAlgorithm("ExtractSpectra")
+    alg.setProperty("InputWorkspace", ws)
+    alg.setProperty("WorkspaceIndexList", indices)
     alg.execute()
 
-    return alg.getProperty('OutputWorkspace').value
+    return alg.getProperty("OutputWorkspace").value
 
 
 def sum_spectra(parent, ws):
@@ -918,9 +972,9 @@ def sum_spectra(parent, ws):
 
     @return single-spectrum workspace resulting from the sum
     """
-    alg = parent.createChildAlgorithm('SumSpectra')
-    alg.setProperty('InputWorkspace', ws)
-    alg.setProperty('RemoveSpecialValues', True)
+    alg = parent.createChildAlgorithm("SumSpectra")
+    alg.setProperty("InputWorkspace", ws)
+    alg.setProperty("RemoveSpecialValues", True)
     alg.execute()
 
-    return alg.getProperty('OutputWorkspace').value
+    return alg.getProperty("OutputWorkspace").value

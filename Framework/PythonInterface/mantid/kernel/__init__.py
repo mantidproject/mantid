@@ -33,6 +33,6 @@ _mantidsite.set_NEXUSLIB_var()
 from mantid.utils import import_mantid_cext  # noqa: E402
 
 # insert all the classes from _kernel in the mantid.kernel namespace
-import_mantid_cext('._kernel', 'mantid.kernel', globals())
+import_mantid_cext("._kernel", "mantid.kernel", globals())
 
 from mantid.kernel._aliases import *  # noqa: E402,F401

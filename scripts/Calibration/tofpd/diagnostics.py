@@ -20,14 +20,35 @@ from mantid.simpleapi import CalculateDIFC, LoadDiffCal, mtd
 
 
 # Diamond peak positions in d-space which may differ from actual sample
-DIAMOND = np.asarray((2.06,1.2615,1.0758,0.892,0.8186,0.7283,0.6867,0.6307,0.5642,0.5441,0.515,0.4996,0.4768,
-                      0.4645,0.4205,0.3916,0.3499,0.3257,0.3117))
+DIAMOND = np.asarray(
+    (
+        2.06,
+        1.2615,
+        1.0758,
+        0.892,
+        0.8186,
+        0.7283,
+        0.6867,
+        0.6307,
+        0.5642,
+        0.5441,
+        0.515,
+        0.4996,
+        0.4768,
+        0.4645,
+        0.4205,
+        0.3916,
+        0.3499,
+        0.3257,
+        0.3117,
+    )
+)
 
 
 def _get_xrange(wksp, xmarkers, tolerance, xmin, xmax):
     # start with the range determined by the markers and tolerance
-    x_mins = [xmarkers.min() * (1. - 3 * tolerance)]
-    x_maxs = [xmarkers.max() * (1. + 3 * tolerance)]
+    x_mins = [xmarkers.min() * (1.0 - 3 * tolerance)]
+    x_maxs = [xmarkers.max() * (1.0 + 3 * tolerance)]
     # add range based on user supplied parameters
     if not np.isnan(xmin):
         x_mins.append(xmin)
@@ -60,9 +81,11 @@ def _get_difc_ws(wksp, instr_ws=None):
         if ws_str.endswith(tuple([".h5", ".hd5", ".hdf", ".cal"])):
             try:
                 LoadDiffCal(Filename=ws_str, WorkspaceName="__cal_{}".format(ws_str))
-                difc_ws = CalculateDIFC(InputWorkspace="__cal_{}_group".format(ws_str),
-                                        CalibrationWorkspace="__cal_{}_cal".format(ws_str),
-                                        OutputWorkspace="__difc_{}".format(ws_str))
+                difc_ws = CalculateDIFC(
+                    InputWorkspace="__cal_{}_group".format(ws_str),
+                    CalibrationWorkspace="__cal_{}_cal".format(ws_str),
+                    OutputWorkspace="__difc_{}".format(ws_str),
+                )
             except:
                 raise RuntimeError("Could not load calibration file {}".format(ws_str))
         else:
@@ -79,8 +102,9 @@ def _get_difc_ws(wksp, instr_ws=None):
             # Only need the first two columns for the CalculateDIFC algorithm to work
             if len(col_names) >= 2 and col_names[0] == "detid" and col_names[1] == "difc":
                 # Calculate DIFC on this workspace
-                difc_ws = CalculateDIFC(InputWorkspace=mtd[str(instr_ws)], CalibrationWorkspace=mtd[ws_str],
-                                        OutputWorkspace="__difc_{}".format(ws_str))
+                difc_ws = CalculateDIFC(
+                    InputWorkspace=mtd[str(instr_ws)], CalibrationWorkspace=mtd[ws_str], OutputWorkspace="__difc_{}".format(ws_str)
+                )
         else:
             raise TypeError("Wrong workspace type. Expects SpecialWorkspace2D, TableWorkspace, or a filename")
     return difc_ws
@@ -146,10 +170,11 @@ def get_peakwindows(peakpositions: np.ndarray):
     return peakwindows
 
 
-def plot2d(workspace, tolerance: float=0.001, peakpositions: np.ndarray=DIAMOND,
-           xmin: float=np.nan, xmax: float=np.nan, horiz_markers=[]):
-    TOLERANCE_COLOR = 'w'  # color to mark the area within tolerance
-    MARKER_COLOR = 'b'  # color for peak markers and horizontal (between bank) markers
+def plot2d(
+    workspace, tolerance: float = 0.001, peakpositions: np.ndarray = DIAMOND, xmin: float = np.nan, xmax: float = np.nan, horiz_markers=[]
+):
+    TOLERANCE_COLOR = "w"  # color to mark the area within tolerance
+    MARKER_COLOR = "b"  # color for peak markers and horizontal (between bank) markers
 
     # convert workspace to pointer to workspace
     wksp = mtd[str(workspace)]
@@ -162,7 +187,7 @@ def plot2d(workspace, tolerance: float=0.001, peakpositions: np.ndarray=DIAMOND,
     # show the image - this uses the same function used by "colorfill" plot
     # and slice viewer. The data is subsampled according to how may screen
     # pixels are available
-    im = imshow_sampling(ax, wksp, aspect='auto', origin='lower')
+    im = imshow_sampling(ax, wksp, aspect="auto", origin="lower")
     # add the colorbar
     fig.colorbar(im, ax=ax)
     # set the x-range to show
@@ -171,8 +196,8 @@ def plot2d(workspace, tolerance: float=0.001, peakpositions: np.ndarray=DIAMOND,
     # annotate expected peak positions and tolerances
     for peak in peakpositions:
         if peak > xmin and peak < xmax:
-            shade = ((1-tolerance) * peak, (1+tolerance) * peak)
-            ax.axvspan(shade[0], shade[1], color=TOLERANCE_COLOR, alpha=.2)
+            shade = ((1 - tolerance) * peak, (1 + tolerance) * peak)
+            ax.axvspan(shade[0], shade[1], color=TOLERANCE_COLOR, alpha=0.2)
             ax.axvline(x=peak, color=MARKER_COLOR, alpha=0.4)
 
     # annotate areas of the detector
@@ -191,7 +216,7 @@ def plot2d(workspace, tolerance: float=0.001, peakpositions: np.ndarray=DIAMOND,
     return fig, fig.axes
 
 
-def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None, vrange=(0,1)):
+def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None, vrange=(0, 1)):
     """
     Plots the percent change in DIFC between calib_new and calib_old
     :param calib_new: New calibration, can be filename, SpecialWorkspace2D, or calibration table (TableWorkspace)
@@ -271,18 +296,18 @@ def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None, vrange=(0,1
     p = PatchCollection(patches)
     p.set_array(colors)
     p.set_clim(vrange[0], vrange[1])
-    p.set_edgecolor('face')
+    p.set_edgecolor("face")
 
     fig, ax = plt.subplots()
     ax.add_collection(p)
     mp = PatchCollection(masked_patches)
-    mp.set_facecolor('gray')
-    mp.set_edgecolor('face')
+    mp.set_facecolor("gray")
+    mp.set_edgecolor("face")
     ax.add_collection(mp)
     cb = fig.colorbar(p, ax=ax)
-    cb.set_label('delta DIFC (%)')
-    ax.set_xlabel(r'in-plane polar (deg)')
-    ax.set_ylabel(r'azimuthal (deg)')
+    cb.set_label("delta DIFC (%)")
+    ax.set_xlabel(r"in-plane polar (deg)")
+    ax.set_ylabel(r"azimuthal (deg)")
 
     # Find bounds based on detector pos
     xmin = np.min(theta_array)
@@ -314,20 +339,18 @@ def __calculate_dspacing(obs: dict):
 
 
 def __create_outputws(donor: Union[str, Workspace2D], numSpec, numPeaks):
-    '''The resulting workspace needs to be added to the ADS'''
+    """The resulting workspace needs to be added to the ADS"""
     # convert the d-space table to a Workspace2d
     if donor:
         donor = mtd[str(donor)]
     else:
-        donor = 'Workspace2D'
-    output = WorkspaceFactory.create(donor, NVectors=numSpec,
-                                     XLength=numPeaks, YLength=numPeaks)
-    output.getAxis(0).setUnit('dSpacing')
+        donor = "Workspace2D"
+    output = WorkspaceFactory.create(donor, NVectors=numSpec, XLength=numPeaks, YLength=numPeaks)
+    output.getAxis(0).setUnit("dSpacing")
     return output
 
 
-def collect_peaks(wksp: Union[str, TableWorkspace], outputname: str, donor: Union[str, Workspace2D] = None,
-                  infotype: str = 'strain'):
+def collect_peaks(wksp: Union[str, TableWorkspace], outputname: str, donor: Union[str, Workspace2D] = None, infotype: str = "strain"):
     """
     Calculate different types of information for each peak position in wksp and create a new Workspace2D
     where each column is a peak position and each row is the info for each workspace index in donor
@@ -337,14 +360,13 @@ def collect_peaks(wksp: Union[str, TableWorkspace], outputname: str, donor: Unio
     :param infotype: 'strain', 'difference', or 'dpsacing' to specify which kind of data to output
     :return: Created Workspace2D with fractional difference, relative difference, or dspacing values
     """
-    if infotype not in ['strain', 'difference', 'dspacing']:
+    if infotype not in ["strain", "difference", "dspacing"]:
         raise ValueError('Do not know how to calculate "{}"'.format(infotype))
 
     wksp = mtd[str(wksp)]
 
     numSpec = int(wksp.rowCount())
-    peak_names = [item for item in wksp.getColumnNames()
-                  if item not in ['detid', 'chisq', 'normchisq']]
+    peak_names = [item for item in wksp.getColumnNames() if item not in ["detid", "chisq", "normchisq"]]
     peaks = np.asarray([float(item[1:]) for item in peak_names])
     numPeaks = len(peaks)
 
@@ -352,22 +374,28 @@ def collect_peaks(wksp: Union[str, TableWorkspace], outputname: str, donor: Unio
     output = __create_outputws(donor, numSpec, numPeaks)
     for i in range(numSpec):  # TODO get the detID correct
         output.setX(i, peaks)
-        if infotype == 'strain':
+        if infotype == "strain":
             output.setY(i, __calculate_strain(wksp.row(i), peaks))
-        elif infotype == 'difference':
+        elif infotype == "difference":
             output.setY(i, __calculate_difference(wksp.row(i), peaks))
-        elif infotype == 'dspacing':
+        elif infotype == "dspacing":
             output.setY(i, __calculate_dspacing(wksp.row(i)))
         else:
-            raise ValueError(f'Do not know how to calculate {infotype}')
+            raise ValueError(f"Do not know how to calculate {infotype}")
 
     # add the workspace to the AnalysisDataService
     mtd.addOrReplace(outputname, output)
     return mtd[outputname]
 
 
-def collect_fit_result(wksp: Union[str, TableWorkspace], outputname: str, peaks, donor: Union[str, Workspace2D] = None,
-                       infotype: str = 'centre', chisq_max: float = 1.e4):
+def collect_fit_result(
+    wksp: Union[str, TableWorkspace],
+    outputname: str,
+    peaks,
+    donor: Union[str, Workspace2D] = None,
+    infotype: str = "centre",
+    chisq_max: float = 1.0e4,
+):
     """
     Extracts different information about fit results from a TableWorkspace and places into a Workspace2D
     This assumes that the input is sorted by wsindex then peakindex
@@ -379,18 +407,18 @@ def collect_fit_result(wksp: Union[str, TableWorkspace], outputname: str, peaks,
     :param chisq_max: Max chisq value that should be included in output, data gets set to nan if above this
     :return: Created Workspace2D with infotype extracted from wksp
     """
-    KNOWN_COLUMNS = ['centre', 'width', 'height', 'intensity']
+    KNOWN_COLUMNS = ["centre", "width", "height", "intensity"]
     if infotype not in KNOWN_COLUMNS:
         raise ValueError(f'Do not know how to extract "{infotype}"')
 
     wksp = mtd[str(wksp)]
-    for name in KNOWN_COLUMNS + ['wsindex', 'peakindex', 'chi2']:
+    for name in KNOWN_COLUMNS + ["wsindex", "peakindex", "chi2"]:
         if name not in wksp.getColumnNames():
             raise RuntimeError('did not find column "{}" in workspace "{}"'.format(name, str(wksp)))
 
-    wsindex = np.asarray(wksp.column('wsindex'))
+    wsindex = np.asarray(wksp.column("wsindex"))
     wsindex_unique = np.unique(wsindex)
-    chi2 = np.asarray(wksp.column('chi2'))
+    chi2 = np.asarray(wksp.column("chi2"))
     observable = np.asarray(wksp.column(infotype))
     # set values to nan where the chisq is too high
     observable[chi2 > chisq_max] = np.nan
@@ -406,7 +434,7 @@ def collect_fit_result(wksp: Union[str, TableWorkspace], outputname: str, peaks,
         start = int(np.searchsorted(wsindex, wsindex_unique[i]))
         i = int(i)  # to be compliant with mantid API
         output.setX(i, peaks)
-        output.setY(i, observable[start:start+numPeaks])
+        output.setY(i, observable[start : start + numPeaks])
     mtd.addOrReplace(outputname, output)
     return mtd[outputname]
 
@@ -427,10 +455,8 @@ def extract_peak_info(wksp: Union[str, Workspace2D], outputname: str, peak_posit
     peak_index = wksp.readX(0).searchsorted(peak_position)
 
     # create a workspace to put the result into
-    single = WorkspaceFactory.create('Workspace2D', NVectors=1,
-                                     XLength=wksp.getNumberHistograms(),
-                                     YLength=wksp.getNumberHistograms())
-    single.setTitle('d-spacing={}\\A'.format(wksp.readX(0)[peak_index]))
+    single = WorkspaceFactory.create("Workspace2D", NVectors=1, XLength=wksp.getNumberHistograms(), YLength=wksp.getNumberHistograms())
+    single.setTitle("d-spacing={}\\A".format(wksp.readX(0)[peak_index]))
 
     # get a handle to map the detector positions
     detids = wksp.detectorInfo().detectorIDs()
@@ -453,9 +479,11 @@ def extract_peak_info(wksp: Union[str, Workspace2D], outputname: str, peak_posit
     mtd.addOrReplace(outputname, single)
     return mtd[outputname]
 
+
 # flake8: noqa: C901
-def plot_peakd(wksp: Union[str, Workspace2D], peak_positions: Union[float, list], plot_regions=True, show_bad_cnt=True,
-               drange=(0, 0), threshold=0.01):
+def plot_peakd(
+    wksp: Union[str, Workspace2D], peak_positions: Union[float, list], plot_regions=True, show_bad_cnt=True, drange=(0, 0), threshold=0.01
+):
     """
     Plots peak d spacing value for each peak position in peaks
     :param wksp: Workspace returned from collect_peaks
@@ -504,7 +532,7 @@ def plot_peakd(wksp: Union[str, Workspace2D], peak_positions: Union[float, list]
     # Plot data for each peak position
     for peak in peaks:
         print("Processing peak position {}".format(peak))
-        single = extract_peak_info(wksp, 'single', peak)
+        single = extract_peak_info(wksp, "single", peak)
 
         # get x and y arrays from single peak ws
         x = single.dataX(0)
@@ -530,25 +558,24 @@ def plot_peakd(wksp: Union[str, Workspace2D], peak_positions: Union[float, list]
         cut_id = (dstart, dend)
 
         # skip if y was entirely nans or detector slice yields empty region
-        if len(y_val) == 0 or len(y_val[cut_id[0]:cut_id[1]]) == 0:
+        if len(y_val) == 0 or len(y_val[cut_id[0] : cut_id[1]]) == 0:
             print("No valid y-data was found for peak {}, so it will be skipped".format(peak))
             continue
 
-        lens.append(len(y_val[cut_id[0]:cut_id[1]]))
-        means.append(np.mean(y_val[cut_id[0]:cut_id[1]]))
-        stddevs.append(np.std(y_val[cut_id[0]:cut_id[1]]))
+        lens.append(len(y_val[cut_id[0] : cut_id[1]]))
+        means.append(np.mean(y_val[cut_id[0] : cut_id[1]]))
+        stddevs.append(np.std(y_val[cut_id[0] : cut_id[1]]))
 
         # Draw vertical lines between detector regions
         if not regions:
-            regions = __get_regions(x[cut_id[0]:cut_id[1]])
+            regions = __get_regions(x[cut_id[0] : cut_id[1]])
             if plot_regions:
                 for region in regions:
                     ax.axvline(x=region[0], lw=0.5, color="black")
                     ax.axvline(x=region[1], lw=0.5, color="black", ls="--")
         plotted_peaks.append(peak)
 
-        ax.plot(x[cut_id[0]:cut_id[1]], y[cut_id[0]:cut_id[1]], marker="x", linestyle="None",
-                label="{:0.6f}".format(peak))
+        ax.plot(x[cut_id[0] : cut_id[1]], y[cut_id[0] : cut_id[1]], marker="x", linestyle="None", label="{:0.6f}".format(peak))
         ax.legend(bbox_to_anchor=(1, 1), loc="upper left")
 
     # If every peak had nans, raise error
@@ -558,13 +585,13 @@ def plot_peakd(wksp: Union[str, Workspace2D], peak_positions: Union[float, list]
     # Calculate total mean and stddev of all peaks
     total_mean = np.sum(np.asarray(means) * np.asarray(lens)) / np.sum(lens)
     sq_sum = np.sum(lens * (np.power(stddevs, 2) + np.power(means, 2)))
-    total_stddev = np.sqrt((sq_sum / np.sum(lens)) - total_mean ** 2)
+    total_stddev = np.sqrt((sq_sum / np.sum(lens)) - total_mean**2)
 
     # Get bad counts in regions over all peaks using the total mean
     if show_bad_cnt and regions:
         region_cnts = [0] * len(regions)
         for peak in plotted_peaks:
-            single = extract_peak_info(wksp, 'single', peak)
+            single = extract_peak_info(wksp, "single", peak)
             y = single.dataY(0)
             for i in range(len(regions)):
                 det_start = single.yIndexOfX(regions[i][0])
@@ -575,12 +602,12 @@ def plot_peakd(wksp: Union[str, Workspace2D], peak_positions: Union[float, list]
         if plot_regions:
             for i in range(len(regions)):
                 mid_region = regions[i][0] + 0.5 * (regions[i][1] - regions[i][0])
-                ax.annotate("{}".format(region_cnts[i]), xy=(mid_region, 0.05), xycoords=('data', 'axes fraction'),
-                            clip_on=True, ha="center")
+                ax.annotate(
+                    "{}".format(region_cnts[i]), xy=(mid_region, 0.05), xycoords=("data", "axes fraction"), clip_on=True, ha="center"
+                )
         else:
             overall_cnt = int(np.sum(region_cnts))
-            ax.annotate("{}".format(overall_cnt), xy=(0.5, 0.05), xycoords=('axes fraction', 'axes fraction'),
-                        clip_on=True, ha="center")
+            ax.annotate("{}".format(overall_cnt), xy=(0.5, 0.05), xycoords=("axes fraction", "axes fraction"), clip_on=True, ha="center")
     # Draw solid line at mean
     ax.axhline(total_mean, color="black", lw=2.5)  # default lw=1.5
 
@@ -597,6 +624,7 @@ def plot_peakd(wksp: Union[str, Workspace2D], peak_positions: Union[float, list]
     plt.show()
 
     return fig, ax
+
 
 def plot_corr(tof_ws):
     """
@@ -642,6 +670,7 @@ def plot_corr(tof_ws):
 
     ax.plot(detID, r_vals, marker="x", linestyle="None")
 
+
 def plot_peak_info(wksp: Union[str, TableWorkspace], peak_positions: Union[float, list], donor=None):
     """
     Generates a plot using the PeakParameter Workspace returned from FitPeaks to show peak information
@@ -664,15 +693,14 @@ def plot_peak_info(wksp: Union[str, TableWorkspace], peak_positions: Union[float
         raise ValueError("Expected one or more peak positions")
 
     # Generate workspaces for each kind of peak info
-    center = collect_fit_result(wksp, 'center', peaks, donor=donor, infotype='centre')
-    width = collect_fit_result(wksp, 'width', peaks, donor=donor, infotype='width')
-    height = collect_fit_result(wksp, 'height', peaks, donor=donor, infotype='height')
-    intensity = collect_fit_result(wksp, 'intensity', peaks, donor=donor,
-        infotype='intensity')
+    center = collect_fit_result(wksp, "center", peaks, donor=donor, infotype="centre")
+    width = collect_fit_result(wksp, "width", peaks, donor=donor, infotype="width")
+    height = collect_fit_result(wksp, "height", peaks, donor=donor, infotype="height")
+    intensity = collect_fit_result(wksp, "intensity", peaks, donor=donor, infotype="intensity")
 
     nbanks = center.getNumberHistograms()
     workspaces = [center, width, height, intensity]
-    labels = ['center', 'width', 'height', 'intensity']
+    labels = ["center", "width", "height", "intensity"]
 
     fig, ax = plt.subplots(len(workspaces), 1, sharex="all")
     for i in range(len(workspaces)):

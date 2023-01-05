@@ -66,7 +66,7 @@ WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb, bool viewOnly, 
 
   // Dialog box used for user to specify folder to save multiple workspaces into
   m_saveFolderDialog = new QFileDialog;
-  m_saveFolderDialog->setFileMode(QFileDialog::DirectoryOnly);
+  m_saveFolderDialog->setFileMode(QFileDialog::Directory);
   m_saveFolderDialog->setOption(QFileDialog::ShowDirsOnly);
 
   // To be able to use them in queued signals they need to be registered
@@ -714,7 +714,7 @@ void WorkspaceTreeWidget::populateChildData(QTreeWidgetItem *item) {
     } catch (std::runtime_error &e) {
       details = QString("Error: %1").arg(e.what());
     }
-    QStringList rows = details.split(QLatin1Char('\n'), QString::SkipEmptyParts);
+    QStringList rows = details.split(QLatin1Char('\n'), Qt::SkipEmptyParts);
     rows.append(QString("Memory used: ") + workspace->getMemorySizeAsStr().c_str());
 
     auto iend = rows.constEnd();

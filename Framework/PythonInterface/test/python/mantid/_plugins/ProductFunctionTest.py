@@ -14,7 +14,6 @@ from mantid._plugins import ProductFunction
 
 
 class ProductFunctionTest(unittest.TestCase):
-
     def test_type(self):
         p = FunctionFactory.createFunction("ProductFunction")
         self.assertTrue(isinstance(p, ProductFunction))
@@ -32,5 +31,5 @@ class ProductFunctionTest(unittest.TestCase):
         self.assertEqual(len(p), 2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

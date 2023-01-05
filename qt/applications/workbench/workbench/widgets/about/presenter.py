@@ -148,19 +148,19 @@ class AboutPresenter(object):
         InterfaceManager().showHelpPage(release_notes_url())
 
     def action_open_download_website(self):
-        InterfaceManager().showWebPage('http://download.mantidproject.org')
+        InterfaceManager().showWebPage('https://www.mantidproject.org/installation/index#sample-data')
 
     def action_open_mantid_introduction(self):
-        InterfaceManager().showWebPage('http://www.mantidproject.org/Mantid_Basic_Course')
+        InterfaceManager().showWebPage('https://docs.mantidproject.org/nightly/tutorials/mantid_basic_course')
 
     def action_open_python_introduction(self):
-        InterfaceManager().showWebPage('http://www.mantidproject.org/Introduction_To_Python')
+        InterfaceManager().showWebPage('https://docs.mantidproject.org/nightly/tutorials/introduction_to_python')
 
     def action_open_python_in_mantid(self):
-        InterfaceManager().showWebPage('http://www.mantidproject.org/Python_In_Mantid')
+        InterfaceManager().showWebPage('https://docs.mantidproject.org/nightly/tutorials/python_in_mantid')
 
     def action_open_extending_mantid(self):
-        InterfaceManager().showWebPage('http://www.mantidproject.org/Extending_Mantid_With_Python')
+        InterfaceManager().showWebPage('https://docs.mantidproject.org/nightly/tutorials/extending_mantid_with_python')
 
     def action_open_external_link(self, url):
         InterfaceManager().showWebPage(url)

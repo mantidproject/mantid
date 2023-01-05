@@ -12,7 +12,6 @@ from isis_powder.routines import yaml_parser
 
 
 class ISISPowderYamlParserTest(unittest.TestCase):
-
     def setUp(self):
         self.temp_file_paths = []
 
@@ -150,8 +149,7 @@ class ISISPowderYamlParserTest(unittest.TestCase):
         file_path = file_handle.name
         file_handle.close()
 
-        with self.assertRaisesRegex(ValueError, "Found a run range in calibration mapping overlaps an unbounded run "
-                                    "range"):
+        with self.assertRaisesRegex(ValueError, "Found a run range in calibration mapping overlaps an unbounded run " "range"):
             yaml_parser.get_run_dictionary(run_number_string="32", file_path=file_path)
 
 

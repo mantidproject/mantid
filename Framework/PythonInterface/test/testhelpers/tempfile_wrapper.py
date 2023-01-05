@@ -32,10 +32,11 @@ class TemporaryFileHelper(object):
       del emptyFileHelper
       del filledFileHelper
     """
+
     tempFile = None
 
     def __init__(self, fileContent="", extension=""):
-        self.tempFile = NamedTemporaryFile('r+', delete=False, suffix=extension)
+        self.tempFile = NamedTemporaryFile("r+", delete=False, suffix=extension)
 
         if fileContent:
             self._setFileContent(fileContent)
@@ -47,6 +48,6 @@ class TemporaryFileHelper(object):
         return self.tempFile.name
 
     def _setFileContent(self, content):
-        fileHandle = open(self.getName(), 'r+')
+        fileHandle = open(self.getName(), "r+")
         fileHandle.write(content)
         fileHandle.close()

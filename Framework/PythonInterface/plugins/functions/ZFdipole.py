@@ -11,14 +11,13 @@ import numpy as np
 
 
 class ZFdipole(IFunction1D):
-
     def category(self):
         return "Muon\\MuonSpecific"
 
     def init(self):
         self.declareParameter("A0", 0.2)
         self.declareParameter("BDip", 10)
-        self.declareParameter("LambdaTrans", 0.2, 'Lambda-Trans (MHz)')
+        self.declareParameter("LambdaTrans", 0.2, "Lambda-Trans (MHz)")
         self.addConstraints("BDip > 0")
         self.addConstraints("LambdaTrans > 0")
 
@@ -28,8 +27,11 @@ class ZFdipole(IFunction1D):
         LambdaTrans = self.getParameterValue("LambdaTrans")
         gmu = 2 * np.pi * 0.01355342
         Omega = gmu * BDip
-        return A0 * (1. / 6) * (1 + np.exp(- LambdaTrans * x) * (
-            np.cos(Omega * x) + 2 * np.cos(1.5 * Omega * x) + 2 * np.cos(0.5 * Omega * x)))
+        return (
+            A0
+            * (1.0 / 6)
+            * (1 + np.exp(-LambdaTrans * x) * (np.cos(Omega * x) + 2 * np.cos(1.5 * Omega * x) + 2 * np.cos(0.5 * Omega * x)))
+        )
 
 
 FunctionFactory.subscribe(ZFdipole)

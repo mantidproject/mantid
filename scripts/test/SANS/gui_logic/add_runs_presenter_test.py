@@ -47,8 +47,8 @@ class AddRunsPagePresenterTestCase(unittest.TestCase):
         return mock_parent_view
 
     def setUpFakeChildViews(self):
-        self.fake_run_selector_view = 'Fake Run Selector View'
-        self.fake_summation_settings_view = 'Fake Summation Settings View'
+        self.fake_run_selector_view = "Fake Run Selector View"
+        self.fake_summation_settings_view = "Fake Summation Settings View"
 
     def _make_mock_run_summation(self):
         return mock.create_autospec(SumRunsModel, spec_set=True)
@@ -66,8 +66,8 @@ class InitializationTest(AddRunsPagePresenterTestCase):
     def setUp(self):
         self.setUpFakeChildViews()
 
-    @mock.patch('sans.gui_logic.presenter.add_runs_presenter.RunSelectionModel', autospec=True)
-    @mock.patch('sans.gui_logic.presenter.add_runs_presenter.RunSelectorPresenter', autospec=True)
+    @mock.patch("sans.gui_logic.presenter.add_runs_presenter.RunSelectionModel", autospec=True)
+    @mock.patch("sans.gui_logic.presenter.add_runs_presenter.RunSelectorPresenter", autospec=True)
     def test_creates_run_selector_with_child_view(self, patched_presenter, patched_model):
         view = self._make_mock_view()
         parent_view = self._make_mock_parent_view()
@@ -77,8 +77,8 @@ class InitializationTest(AddRunsPagePresenterTestCase):
         patched_model.assert_called_once_with(mock.ANY)
         patched_presenter.assert_called_once_with(mock.ANY, patched_model.return_value, mock.ANY, mock.ANY, view)
 
-    @mock.patch('sans.gui_logic.presenter.add_runs_presenter.SummationSettingsModel', autospec=True)
-    @mock.patch('sans.gui_logic.presenter.add_runs_presenter.SummationSettingsPresenter', autospec=True)
+    @mock.patch("sans.gui_logic.presenter.add_runs_presenter.SummationSettingsModel", autospec=True)
+    @mock.patch("sans.gui_logic.presenter.add_runs_presenter.SummationSettingsPresenter", autospec=True)
     def test_creates_run_selector_summation_model_with_child_view(self, patched_presenter, patched_model):
         view = self._make_mock_view()
         parent_view = self._make_mock_parent_view()
@@ -92,13 +92,13 @@ class InitializationTest(AddRunsPagePresenterTestCase):
 class SummationSettingsViewEnablednessTest(AddRunsPagePresenterTestCase):
     def _make_fake_event_run(self):
         run = mock.create_autospec(SummableRunFile, spec_set=True)
-        run.display_name.return_value = '14'
+        run.display_name.return_value = "14"
         run.is_event_data.return_value = True
         return run
 
     def _make_fake_histogram_run(self):
         run = mock.create_autospec(SummableRunFile, spec_set=True)
-        run.display_name.return_value = '10'
+        run.display_name.return_value = "10"
         run.is_event_data.return_value = False
         return run
 
@@ -159,7 +159,7 @@ class SummationConfigurationTest(AddRunsPagePresenterTestCase):
 
         run_selector_mock.run_selection.return_value = mocked_run_selector
         self.view.sum.emit()
-        run_summation.assert_called_with(mock.ANY, mock.ANY, 'LOQ00003-add')
+        run_summation.assert_called_with(mock.ANY, mock.ANY, "LOQ00003-add")
 
     @mock.patch("sans.gui_logic.presenter.add_runs_presenter.RunSelectionModel", autospec=True)
     def test_shows_error_when_empty_default_directory(self, _):
@@ -203,7 +203,7 @@ class BaseFileNameTest(AddRunsPagePresenterTestCase):
         run_summation.__iter__.return_value = [run_selection]
         returned = presenter._sum_base_file_name(run_summation)
 
-        self.assertEqual('LOQ00003-add', returned)
+        self.assertEqual("LOQ00003-add", returned)
 
     def test_regenerates_correct_base_name_after_highest_removed(self):
         run_summation = mock.MagicMock()
@@ -216,16 +216,16 @@ class BaseFileNameTest(AddRunsPagePresenterTestCase):
 
         run_summation.__iter__.return_value = run_selection
         returned = presenter._sum_base_file_name(run_summation)
-        self.assertEqual('LOQ00006-add', returned)
+        self.assertEqual("LOQ00006-add", returned)
 
         # Drop run 6
         del run_selection[-1]
         returned = presenter._sum_base_file_name(run_summation)
 
-        self.assertEqual('LOQ00005-add', returned)
+        self.assertEqual("LOQ00005-add", returned)
 
     def test_correct_base_name_after_set_by_user(self):
-        user_out_file_name = 'Output'
+        user_out_file_name = "Output"
         run_summation = mock.MagicMock()
         presenter = self._make_presenter(run_summation)
 
@@ -247,7 +247,7 @@ class BaseFileNameTest(AddRunsPagePresenterTestCase):
         # Runs 4 / 5 / 6
         run_selection = create_mocked_runs(start=4, len=3)
 
-        user_out_file_name = 'Output'
+        user_out_file_name = "Output"
         self.view.out_file_name.return_value = user_out_file_name
         self.view.outFileChanged.emit()
 
@@ -271,7 +271,7 @@ class BaseFileNameTest(AddRunsPagePresenterTestCase):
         run_summation.__iter__.return_value = run_selection
         presenter._refresh_view(run_selection=run_summation)
 
-        self.view.set_out_file_name.assert_called_with('LOQ00006-add')
+        self.view.set_out_file_name.assert_called_with("LOQ00006-add")
 
 
 class SumButtonTest(AddRunsPagePresenterTestCase):
@@ -353,8 +353,7 @@ class AddRunsDefaultSettingsTest(unittest.TestCase):
     def setUp(self):
         mock_parent_view = mock.Mock()
         mock_parent_view.instrument = SANSInstrument.LOQ
-        self.presenter = AddRunsPagePresenter(parent_view=mock_parent_view, sum_runs_model=mock.Mock(),
-                                              view=mock.Mock())
+        self.presenter = AddRunsPagePresenter(parent_view=mock_parent_view, sum_runs_model=mock.Mock(), view=mock.Mock())
 
     def test_that_presenter_calls_properties_handler_to_update_directory_on_directory_changed(self):
         new_dir_name = os.path.join("some", "dir", "path")
@@ -363,8 +362,7 @@ class AddRunsDefaultSettingsTest(unittest.TestCase):
         self.presenter.set_output_directory = mock.Mock()
 
         self.presenter._handle_output_directory_changed()
-        self.presenter.gui_properties_handler.set_setting.assert_called_once_with("add_runs_output_directory",
-                                                                                  new_dir_name + os.sep)
+        self.presenter.gui_properties_handler.set_setting.assert_called_once_with("add_runs_output_directory", new_dir_name + os.sep)
         self.presenter.set_output_directory.assert_called_once_with(new_dir_name + os.sep)
 
     def test_that_if_output_directory_is_empty_default_save_directory_is_used_instead(self):
@@ -376,10 +374,13 @@ class AddRunsDefaultSettingsTest(unittest.TestCase):
         output_dir = self.presenter.set_output_directory("")
         ConfigService["defaultsave.directory"] = ""
 
-        self.assertEqual(output_dir, default_dir,
-                         "Because directory input was an empty string, we expected the output directory "
-                         "to use the default save directory {} instead. "
-                         "Directory actually used was {}".format(default_dir, output_dir))
+        self.assertEqual(
+            output_dir,
+            default_dir,
+            "Because directory input was an empty string, we expected the output directory "
+            "to use the default save directory {} instead. "
+            "Directory actually used was {}".format(default_dir, output_dir),
+        )
         self.assertEqual(self.presenter.save_directory, default_dir)
 
     def test_that_if_output_directory_is_not_empty_it_is_used(self):
@@ -390,5 +391,5 @@ class AddRunsDefaultSettingsTest(unittest.TestCase):
         self.assertEqual(self.presenter.save_directory, dir)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

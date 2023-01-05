@@ -22,20 +22,24 @@ public:
 public:
   void testConstructionYieldsExpectedSubplot() {
     FigureCanvasQt canvas{111};
-    auto geometry = canvas.gca().pyobj().attr("get_geometry")();
+    auto subplotspec = canvas.gca().pyobj().attr("get_subplotspec")();
+    auto geometry = subplotspec.attr("get_geometry")();
     TS_ASSERT_EQUALS(1, geometry[0]);
     TS_ASSERT_EQUALS(1, geometry[1]);
-    TS_ASSERT_EQUALS(1, geometry[2]);
+    TS_ASSERT_EQUALS(0, geometry[2]);
+    TS_ASSERT_EQUALS(0, geometry[3]);
   }
 
   void testConstructionCapturesGivenAxesObject() {
     Figure fig;
     fig.addSubPlot(221);
     FigureCanvasQt canvas{std::move(fig)};
-    auto geometry = canvas.gca().pyobj().attr("get_geometry")();
+    auto subplotspec = canvas.gca().pyobj().attr("get_subplotspec")();
+    auto geometry = subplotspec.attr("get_geometry")();
     TS_ASSERT_EQUALS(2, geometry[0]);
     TS_ASSERT_EQUALS(2, geometry[1]);
-    TS_ASSERT_EQUALS(1, geometry[2]);
+    TS_ASSERT_EQUALS(0, geometry[2]);
+    TS_ASSERT_EQUALS(0, geometry[3]);
   }
 
   void testToDataCoordinatesReturnsExpectedPoint() {

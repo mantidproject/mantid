@@ -58,5 +58,5 @@ class SettingsAdjustmentPresenterTest(unittest.TestCase):
         self.assertEqual(param, mock_model.instrument)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

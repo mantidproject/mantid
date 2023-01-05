@@ -11,142 +11,145 @@ import os
 import re
 import systemtesting
 
-BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
-                '80_tubes_Top_and_Bottom_May_2016.xml',
-                '80tubeCalibration_18-04-2016_r9330-9335.nxs',
-                '80tube_DIRECT_3146_M1_30April15_r3146.dat',
-                '992 Descriptions.txt',
-                'BASIS_AutoReduction_Mask.xml',
-                'BioSANS_dark_current.xml',
-                'BioSANS_empty_cell.xml',
-                'BioSANS_empty_trans.xml',
-                'BioSANS_exp61_scan0004_0001.xml',
-                'BioSANS_flood_data.xml',
-                'BioSANS_sample_trans.xml',
-                'C6H5Cl-Gaussian.log',
-                'CNCS_TS_2008_08_18.dat',
-                'DISF_NaF.cdl',
-                'det_corrected7.dat',
-                'det_LET_cycle12-3.dat',
-                'DIRECT_M1_21Nov15_6x8mm_0.9_20.0_r6279_extrapolated.dat',
-                'eqsans_configuration.1463',
-                'FLAT_CELL.061',
-                'HYSA_mask.xml',
-                'IN10_P3OT_350K.inx',
-                'IN13_16347.asc',
-                'IN16_65722.asc',
-                'IP0005.dat',
-                'batch_input.csv',
-                'mar11015.msk',
-                'LET_hard.msk',  # It seems loade does not understand it?
-                'MASK.094AA',
-                'MASKSANS2D_094i_RKH.txt',
-                'MASKSANS2D.091A',
-                'MASKSANS2Doptions.091A',
-                'MASK_squareBeamstop_20-June-2015.xml',
-                'MaskSANS2DReductionGUI.txt',
-                'MaskSANS2DReductionGUI_MaskFiles.txt',
-                'MaskSANS2DReductionGUI_LimitEventsTime.txt',
-                'MASK_SANS2D_FRONT_Edges_16Mar2015.xml',
-                'MASK_SANS2D_REAR_Bottom_3_tubes_16May2014.xml',
-                'MASK_SANS2D_REAR_Edges_16Mar2015.xml',
-                'MASK_SANS2D_REAR_module2_tube12.xml',
-                'MASK_SANS2D_beam_stop_4m_x_100mm_2July2015_medium_beamstop.xml',
-                'MASK_SANS2D_BOTH_Extras_24Mar2015.xml',
-                'MASK_Tube6.xml',
-                'MASK_squareBeamstop_6x8Beam_11-October-2016.xml',
-                'MAP17269.raw',  # Don't need to check multiple MAPS files
-                'MAP17589.raw',
-                'MER06399.raw',  # Don't need to check multiple MERLIN files
-                'PG3_11485-1.dat',  # Generic load doesn't do very well with ASCII files
-                'PG3_char_2020_05_06-HighRes-PAC_1.4_MW.txt',
-                'PG3_char_2020_01_04_PAC_limit_1.4MW.txt',
-                'PG3_2538_event.nxs',  # Don't need to check all of the PG3 files
-                'PG3_9829_event.nxs',
-                'REF_M_9684_event.nxs',
-                'REF_M_9709_event.nxs',
-                'REF_M_24945_event.nxs',
-                'REF_M_24949_event.nxs',
-                'SANS2D_periodTests.csv',
-                'SANS2D_992_91A.csv',
-                'SANS2D_mask_batch.csv',
-                'sans2d_reduction_gui_batch.csv',
-                'squaricn.phonon',
-                'test_isotopes.phonon',
-                'squaricn.castep',
-                'target_circles_mask.xml',
-                'tube10_mask.xml',
-                'linked_circles_mask.xml',
-                'testCansas1DMultiEntry.xml',
-                'Wish_Diffuse_Scattering_ISAW_UB.mat',
-                'WSH_test.dat',
-                'WISH00035991.raw',
-                'WISH00038237.raw',
-                'SANS2D_multiPeriodTests.csv',
-                'SANS2D_periodTests.csv',
-                'SANS2DTube_ZerroErrorFreeTest.txt',
-                'SANS2DTUBES_ZeroErrorFree_batch.csv',
-                'DIRECTM1_15785_12m_31Oct12_v12.dat',
-                'MaskSANS2DReductionGUI.txt',
-                'sans2d_reduction_gui_batch.csv',
-                'MANTID_FLAT_CELL.115',
-                'MaskLOQData.txt',
-                'DIRECTHAB.983',
-                'loq_batch_mode_reduction.csv',
-                'det_corrected7.nxs',  # this file can be loaded by LoadDetectorInfo; not sure if generic loader should ever deal with it
-                'poldi2013n006903.hdf',
-                'poldi2013n006904.hdf',
-                'poldi2014n019874.hdf',
-                'poldi2014n019881.hdf',
-                'poldi2015n000977.hdf',
-                'USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt',
-                'USER_LARMOR_151B_LarmorTeam_80tubes_BenchRot1p4_M4_r3699.txt',
-                'USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt',
-                'USER_Larmor_163F_HePATest_r13038.txt',
-                'Vesuvio_IP_file_test.par',
-                'IP0004_10.par',
-                'Crystalb3lypScratchAbins.out',
-                'V15_0000016544_S000_P01.raw',
-                'TolueneTAbins.out',
-                'TolueneSmallerOrderAbins.out',
-                'TolueneLargerOrderAbins.out',
-                'phonopy-Al.yaml',
-                'TolueneScale.out',
-                'TolueneScratchAbins.out',
-                'SingleCrystalDiffuseReduction_UB.mat',
-                'Na2SiF6_DMOL3.outmol',
-                'template_ENGINX_241391_236516_North_bank.prm',
-                'test_data_Iqxy.dat',
-                'BioSANS_test_data_Iqxy.dat',
-                'BioSANS_exp61_scan0004_0001_Iqxy.dat',
-                'test_data_Iq.xml',
-                'BioSANS_exp61_scan0004_0001_Iq.xml',
-                'BioSANS_test_data_Iq.xml',
-                'BioSANS_exp61_scan0004_0001_Iq.txt',
-                'test_data_Iq.txt',
-                'BioSANS_test_data_Iq.txt'
-                ]
+BANNED_FILES = [
+    "80_tubes_Top_and_Bottom_April_2015.xml",
+    "80_tubes_Top_and_Bottom_May_2016.xml",
+    "80tubeCalibration_18-04-2016_r9330-9335.nxs",
+    "80tube_DIRECT_3146_M1_30April15_r3146.dat",
+    "992 Descriptions.txt",
+    "BASIS_AutoReduction_Mask.xml",
+    "BioSANS_dark_current.xml",
+    "BioSANS_empty_cell.xml",
+    "BioSANS_empty_trans.xml",
+    "BioSANS_exp61_scan0004_0001.xml",
+    "BioSANS_flood_data.xml",
+    "BioSANS_sample_trans.xml",
+    "C6H5Cl-Gaussian.log",
+    "CNCS_TS_2008_08_18.dat",
+    "DISF_NaF.cdl",
+    "det_corrected7.dat",
+    "det_LET_cycle12-3.dat",
+    "DIRECT_M1_21Nov15_6x8mm_0.9_20.0_r6279_extrapolated.dat",
+    "eqsans_configuration.1463",
+    "FLAT_CELL.061",
+    "HYSA_mask.xml",
+    "IN10_P3OT_350K.inx",
+    "IN13_16347.asc",
+    "IN16_65722.asc",
+    "IP0005.dat",
+    "batch_input.csv",
+    "mar11015.msk",
+    "LET_hard.msk",  # It seems loade does not understand it?
+    "MASK.094AA",
+    "MASKSANS2D_094i_RKH.txt",
+    "MASKSANS2D.091A",
+    "MASKSANS2Doptions.091A",
+    "MASK_squareBeamstop_20-June-2015.xml",
+    "MaskSANS2DReductionGUI.txt",
+    "MaskSANS2DReductionGUI_MaskFiles.txt",
+    "MaskSANS2DReductionGUI_LimitEventsTime.txt",
+    "MASK_SANS2D_FRONT_Edges_16Mar2015.xml",
+    "MASK_SANS2D_REAR_Bottom_3_tubes_16May2014.xml",
+    "MASK_SANS2D_REAR_Edges_16Mar2015.xml",
+    "MASK_SANS2D_REAR_module2_tube12.xml",
+    "MASK_SANS2D_beam_stop_4m_x_100mm_2July2015_medium_beamstop.xml",
+    "MASK_SANS2D_BOTH_Extras_24Mar2015.xml",
+    "MASK_Tube6.xml",
+    "MASK_squareBeamstop_6x8Beam_11-October-2016.xml",
+    "MAP17269.raw",  # Don't need to check multiple MAPS files
+    "MAP17589.raw",
+    "MER06399.raw",  # Don't need to check multiple MERLIN files
+    "PG3_11485-1.dat",  # Generic load doesn't do very well with ASCII files
+    "PG3_char_2020_05_06-HighRes-PAC_1.4_MW.txt",
+    "PG3_char_2020_01_04_PAC_limit_1.4MW.txt",
+    "PG3_2538_event.nxs",  # Don't need to check all of the PG3 files
+    "PG3_9829_event.nxs",
+    "REF_M_9684_event.nxs",
+    "REF_M_9709_event.nxs",
+    "REF_M_24945_event.nxs",
+    "REF_M_24949_event.nxs",
+    "SANS2D_periodTests.csv",
+    "SANS2D_992_91A.csv",
+    "SANS2D_mask_batch.csv",
+    "sans2d_reduction_gui_batch.csv",
+    "squaricn.phonon",
+    "test_isotopes.phonon",
+    "squaricn.castep",
+    "target_circles_mask.xml",
+    "tube10_mask.xml",
+    "linked_circles_mask.xml",
+    "testCansas1DMultiEntry.xml",
+    "Wish_Diffuse_Scattering_ISAW_UB.mat",
+    "WSH_test.dat",
+    "WISH00035991.raw",
+    "WISH00038237.raw",
+    "SANS2D_multiPeriodTests.csv",
+    "SANS2D_periodTests.csv",
+    "SANS2DTube_ZerroErrorFreeTest.txt",
+    "SANS2DTUBES_ZeroErrorFree_batch.csv",
+    "DIRECTM1_15785_12m_31Oct12_v12.dat",
+    "MaskSANS2DReductionGUI.txt",
+    "sans2d_reduction_gui_batch.csv",
+    "MANTID_FLAT_CELL.115",
+    "MaskLOQData.txt",
+    "DIRECTHAB.983",
+    "loq_batch_mode_reduction.csv",
+    "det_corrected7.nxs",  # this file can be loaded by LoadDetectorInfo; not sure if generic loader should ever deal with it
+    "poldi2013n006903.hdf",
+    "poldi2013n006904.hdf",
+    "poldi2014n019874.hdf",
+    "poldi2014n019881.hdf",
+    "poldi2015n000977.hdf",
+    "USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt",
+    "USER_LARMOR_151B_LarmorTeam_80tubes_BenchRot1p4_M4_r3699.txt",
+    "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt",
+    "USER_Larmor_163F_HePATest_r13038.txt",
+    "Vesuvio_IP_file_test.par",
+    "IP0004_10.par",
+    "Crystalb3lypScratchAbins.out",
+    "V15_0000016544_S000_P01.raw",
+    "TolueneTAbins.out",
+    "TolueneSmallerOrderAbins.out",
+    "TolueneLargerOrderAbins.out",
+    "phonopy-Al.yaml",
+    "TolueneScale.out",
+    "TolueneScratchAbins.out",
+    "SingleCrystalDiffuseReduction_UB.mat",
+    "Na2SiF6_DMOL3.outmol",
+    "template_ENGINX_241391_236516_North_bank.prm",
+    "test_data_Iqxy.dat",
+    "BioSANS_test_data_Iqxy.dat",
+    "BioSANS_exp61_scan0004_0001_Iqxy.dat",
+    "test_data_Iq.xml",
+    "BioSANS_exp61_scan0004_0001_Iq.xml",
+    "BioSANS_test_data_Iq.xml",
+    "BioSANS_exp61_scan0004_0001_Iq.txt",
+    "test_data_Iq.txt",
+    "BioSANS_test_data_Iq.txt",
+]
 
-EXPECTED_EXT = '.expected'
+EXPECTED_EXT = ".expected"
 
-BANNED_REGEXP = [r'SANS2D\d+.log$',
-                 r'SANS2D00000808_.+.txt$',
-                 r'.*_reduction.log$',
-                 r'.+_characterization_\d+_\d+_\d+.*\.txt',
-                 r'.*\.cal',
-                 r'.*\.detcal',
-                 r'.*Grouping\.xml',
-                 r'.*\.map',
-                 r'.*\.irf',
-                 r'.*\.hkl',
-                 r'EVS.*\.raw',
-                 r'.*_pulseid\.dat',
-                 r'.*\.phonon',
-                 r'.*\.cif',
-                 r'.*\.toml',
-                 r'.*\.h5',
-                 r'.*\.p2d',
-                 r'.*\.cfg']
+BANNED_REGEXP = [
+    r"SANS2D\d+.log$",
+    r"SANS2D00000808_.+.txt$",
+    r".*_reduction.log$",
+    r".+_characterization_\d+_\d+_\d+.*\.txt",
+    r".*\.cal",
+    r".*\.detcal",
+    r".*Grouping\.xml",
+    r".*\.map",
+    r".*\.irf",
+    r".*\.hkl",
+    r"EVS.*\.raw",
+    r".*_pulseid\.dat",
+    r".*\.phonon",
+    r".*\.cif",
+    r".*\.toml",
+    r".*\.h5",
+    r".*\.p2d",
+    r".*\.cfg",
+]
 
 BANNED_DIRS = ["DocTest", "UnitTest", "reference"]
 
@@ -188,9 +191,9 @@ def useFile(direc, filename):
 class LoadLotsOfFiles(systemtesting.MantidSystemTest):
     def __getDataFileList__(self):
         # get a list of directories to look in
-        dirs = config['datasearch.directories'].split(';')
+        dirs = config["datasearch.directories"].split(";")
         dirs = [item for item in dirs if useDir(item)]
-        print("Looking for data files in:", ', '.join(dirs))
+        print("Looking for data files in:", ", ".join(dirs))
 
         # Files
         datafiles = []
@@ -240,6 +243,7 @@ class LoadLotsOfFiles(systemtesting.MantidSystemTest):
         print("----------------------------------------")
         print("Loading '%s'" % filename)
         from mantid.api import Workspace
+
         # Output can be a tuple if the Load algorithm has extra output properties
         # but the output workspace should always be the first argument
         outputs = Load(filename)
@@ -253,7 +257,7 @@ class LoadLotsOfFiles(systemtesting.MantidSystemTest):
             return False
 
         if wksp is None:
-            print('Load returned None')
+            print("Load returned None")
             return False
 
         # generic checks
@@ -321,8 +325,7 @@ class LoadLotsOfFiles(systemtesting.MantidSystemTest):
             print("SUMMARY OF FAILED FILES")
             for filename in failed:
                 print(filename)
-            raise RuntimeError("Failed to load %d of %d files"
-                               % (len(failed), len(files)))
+            raise RuntimeError("Failed to load %d of %d files" % (len(failed), len(files)))
         else:
             print("Successfully loaded %d files" % len(files))
 

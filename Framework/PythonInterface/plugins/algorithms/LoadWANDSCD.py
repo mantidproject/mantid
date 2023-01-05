@@ -44,61 +44,63 @@ import re
 
 class LoadWANDSCD(PythonAlgorithm):
     def category(self):
-        return 'DataHandling\\Nexus'
+        return "DataHandling\\Nexus"
 
     def seeAlso(self):
         return ["ConvertWANDSCDtoQ"]
 
     def name(self):
-        return 'LoadWANDSCD'
+        return "LoadWANDSCD"
 
     def summary(self):
-        return 'Load WAND single crystal data into a detector space vs rotation MDHisto'
+        return "Load WAND single crystal data into a detector space vs rotation MDHisto"
 
     def PyInit(self):
         # Input workspace/data info (filename or IPTS+RunNumber)
         # Priority: Filename > IPTS + RunNumber
         self.declareProperty(MultipleFileProperty(name="Filename", action=FileAction.OptionalLoad, extensions=[".nxs.h5"]), "Files to load")
-        self.declareProperty('IPTS', Property.EMPTY_INT, "IPTS number to load from")
-        self.declareProperty(IntArrayProperty("RunNumbers", []), 'Run numbers to load')
+        self.declareProperty("IPTS", Property.EMPTY_INT, "IPTS number to load from")
+        self.declareProperty(IntArrayProperty("RunNumbers", []), "Run numbers to load")
 
         # Normalization info (optional, skip normalization if not specified)
         # Priority: IPTS + RunNumber > Filename >  NormalizationFile
         # NOTE:
         #   The current convention for loading Vanadium data is by IPTS+RunNumber, so this is the default\
         # -- default
-        self.declareProperty('VanadiumIPTS', Property.EMPTY_INT, "IPTS number to load Vanadium normalization")
-        self.declareProperty('VanadiumRunNumber', Property.EMPTY_INT, "Run number to load Vanadium normalization")
+        self.declareProperty("VanadiumIPTS", Property.EMPTY_INT, "IPTS number to load Vanadium normalization")
+        self.declareProperty("VanadiumRunNumber", Property.EMPTY_INT, "Run number to load Vanadium normalization")
         # -- alternative
-        self.declareProperty(FileProperty(name="VanadiumFile",
-                                          defaultValue="",
-                                          extensions=[".nxs"],
-                                          direction=Direction.Input,
-                                          action=FileAction.OptionalLoad),
-                             doc="File with Vanadium normalization scan data")
+        self.declareProperty(
+            FileProperty(
+                name="VanadiumFile", defaultValue="", extensions=[".nxs"], direction=Direction.Input, action=FileAction.OptionalLoad
+            ),
+            doc="File with Vanadium normalization scan data",
+        )
         # alternative
-        self.declareProperty(IMDHistoWorkspaceProperty("VanadiumWorkspace",
-                                                       defaultValue="",
-                                                       direction=Direction.Input,
-                                                       optional=PropertyMode.Optional),
-                             doc="MDHisto workspace containing vanadium normalization data")
+        self.declareProperty(
+            IMDHistoWorkspaceProperty("VanadiumWorkspace", defaultValue="", direction=Direction.Input, optional=PropertyMode.Optional),
+            doc="MDHisto workspace containing vanadium normalization data",
+        )
         # normalization method
-        self.declareProperty("NormalizedBy", 'None', StringListValidator(['None', 'Counts', 'Monitor', 'Time']),
-                             "Normalize to Counts, Monitor, Time.")
+        self.declareProperty(
+            "NormalizedBy", "None", StringListValidator(["None", "Counts", "Monitor", "Time"]), "Normalize to Counts, Monitor, Time."
+        )
         # group normalization properties
-        self.setPropertyGroup('VanadiumIPTS', 'Normalization')
-        self.setPropertyGroup('VanadiumRunNumber', 'Normalization')
-        self.setPropertyGroup('VanadiumFile', 'Normalization')
-        self.setPropertyGroup('VanadiumWorkspace', 'Normalization')
-        self.setPropertyGroup('NormalizedBy', 'Normalization')
+        self.setPropertyGroup("VanadiumIPTS", "Normalization")
+        self.setPropertyGroup("VanadiumRunNumber", "Normalization")
+        self.setPropertyGroup("VanadiumFile", "Normalization")
+        self.setPropertyGroup("VanadiumWorkspace", "Normalization")
+        self.setPropertyGroup("NormalizedBy", "Normalization")
 
         # Grouping info
-        self.declareProperty("Grouping", 'None', StringListValidator(['None', '2x2', '4x4']),
-                             "Group pixels (shared by input and normalization)")
+        self.declareProperty(
+            "Grouping", "None", StringListValidator(["None", "2x2", "4x4"]), "Group pixels (shared by input and normalization)"
+        )
 
         # Output workspace/data info
-        self.declareProperty(WorkspaceProperty("OutputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Output),
-                             "Output Workspace")
+        self.declareProperty(
+            WorkspaceProperty("OutputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Output), "Output Workspace"
+        )
 
     def validateInputs(self):
         issues = dict()
@@ -106,7 +108,7 @@ class LoadWANDSCD(PythonAlgorithm):
         # case 1: missing input
         if not self.getProperty("Filename").value:
             if (self.getProperty("IPTS").value == Property.EMPTY_INT) or len(self.getProperty("RunNumbers").value) == 0:
-                issues["Filename"] = 'Must specify either Filename or IPTS AND RunNumbers'
+                issues["Filename"] = "Must specify either Filename or IPTS AND RunNumbers"
 
         # case 2: vanadium IPTS and run number must be specified at the same time
         va_noIPTS = self.getProperty("VanadiumIPTS").isDefault
@@ -114,7 +116,7 @@ class LoadWANDSCD(PythonAlgorithm):
         va_noRunNumber = self.getProperty("VanadiumRunNumber").isDefault
         va_useRunNumber = not self.getProperty("VanadiumRunNumber").isDefault
         if (va_useIPTS and va_noRunNumber) or (va_noIPTS and va_useRunNumber):
-            issues["VanadiumIPTS"] = 'VanadiumIPTS and VanadiumRunNumber must be specified together'
+            issues["VanadiumIPTS"] = "VanadiumIPTS and VanadiumRunNumber must be specified together"
 
         return issues
 
@@ -127,12 +129,14 @@ class LoadWANDSCD(PythonAlgorithm):
 
         # check if normalization need to be performed
         # NOTE: the normalization will be skipped if no information regarding Vanadium is provided
-        skipNormalization = self.getProperty("VanadiumIPTS").isDefault and \
-                            self.getProperty("VanadiumRunNumber").isDefault and \
-                            self.getProperty("VanadiumFile").isDefault and \
-                            self.getProperty("VanadiumWorkspace").isDefault
+        skipNormalization = (
+            self.getProperty("VanadiumIPTS").isDefault
+            and self.getProperty("VanadiumRunNumber").isDefault
+            and self.getProperty("VanadiumFile").isDefault
+            and self.getProperty("VanadiumWorkspace").isDefault
+        )
         if skipNormalization:
-            self.log().warning('No Vanadium data provided, skip normalization')
+            self.log().warning("No Vanadium data provided, skip normalization")
         else:
             # attempt to get the vanadium via file
             van_filename = self.get_va_filename()
@@ -179,7 +183,7 @@ class LoadWANDSCD(PythonAlgorithm):
             ipts_va = self.getProperty("VanadiumIPTS").value
             run_va = self.getProperty("VanadiumRunNumber").value
             va_filename = f"/HFIR/HB2C/IPTS-{ipts_va}/nexus/HB2C_{run_va}.nxs.h5"
-        elif (not self.getProperty("VanadiumFile").isDefault):
+        elif not self.getProperty("VanadiumFile").isDefault:
             # try the file name next
             va_filename = self.getProperty("VanadiumFile").value
         else:
@@ -193,10 +197,10 @@ class LoadWANDSCD(PythonAlgorithm):
         """
         # grouping config
         grouping = self.getProperty("Grouping").value
-        if grouping == 'None':
+        if grouping == "None":
             grouping = 1
         else:
-            grouping = 2 if grouping == '2x2' else 4
+            grouping = 2 if grouping == "2x2" else 4
         number_of_runs = len(runs)
 
         x_dim = 480 * 8 // grouping
@@ -212,53 +216,71 @@ class LoadWANDSCD(PythonAlgorithm):
         progress = Progress(self, 0.0, 1.0, number_of_runs + 3)
 
         for n, run in enumerate(runs):
-            progress.report('Loading: ' + run)
-            with h5py.File(run, 'r') as f:
+            progress.report("Loading: " + run)
+            with h5py.File(run, "r") as f:
                 bc = np.zeros((512 * 480 * 8), dtype=np.int64)
                 for b in range(8):
-                    bc += np.bincount(f['/entry/bank' + str(b + 1) + '_events/event_id'][()], minlength=512 * 480 * 8)
+                    bc += np.bincount(f["/entry/bank" + str(b + 1) + "_events/event_id"][()], minlength=512 * 480 * 8)
                 bc = bc.reshape((480 * 8, 512))
                 if grouping == 2:
                     bc = bc[::2, ::2] + bc[1::2, ::2] + bc[::2, 1::2] + bc[1::2, 1::2]
                 elif grouping == 4:
-                    bc = bc[::4, ::4] + bc[1::4, ::4] + bc[2::4, ::4] + bc[3::4, ::4] + bc[::4, 1::4] + bc[1::4, 1::4] + bc[2::4, 1::4] + \
-                         bc[3::4, 1::4] + bc[::4, 2::4] + bc[1::4, 2::4] + bc[2::4, 2::4] + bc[3::4, 2::4] + bc[::4, 3::4] + \
-                         bc[1::4, 3::4] + bc[2::4, 3::4] + bc[3::4, 3::4]
+                    bc = (
+                        bc[::4, ::4]
+                        + bc[1::4, ::4]
+                        + bc[2::4, ::4]
+                        + bc[3::4, ::4]
+                        + bc[::4, 1::4]
+                        + bc[1::4, 1::4]
+                        + bc[2::4, 1::4]
+                        + bc[3::4, 1::4]
+                        + bc[::4, 2::4]
+                        + bc[1::4, 2::4]
+                        + bc[2::4, 2::4]
+                        + bc[3::4, 2::4]
+                        + bc[::4, 3::4]
+                        + bc[1::4, 3::4]
+                        + bc[2::4, 3::4]
+                        + bc[3::4, 3::4]
+                    )
                 data_array[n] = bc
-                s1_array.append(f['/entry/DASlogs/HB2C:Mot:s1.RBV/average_value'][0])
-                duration_array.append(float(f['/entry/duration'][0]))
-                run_number_array.append(float(f['/entry/run_number'][0]))
-                monitor_count_array.append(float(f['/entry/monitor1/total_counts'][0]))
+                s1_array.append(f["/entry/DASlogs/HB2C:Mot:s1.RBV/average_value"][0])
+                duration_array.append(float(f["/entry/duration"][0]))
+                run_number_array.append(float(f["/entry/run_number"][0]))
+                monitor_count_array.append(float(f["/entry/monitor1/total_counts"][0]))
 
-        progress.report('Creating MDHistoWorkspace')
+        progress.report("Creating MDHistoWorkspace")
         createWS_alg = self.createChildAlgorithm("CreateMDHistoWorkspace", enableLogging=False)
         createWS_alg.setProperty("SignalInput", data_array)
         createWS_alg.setProperty("ErrorInput", np.sqrt(data_array))
         createWS_alg.setProperty("Dimensionality", 3)
-        createWS_alg.setProperty("Extents", '0.5,{},0.5,{},0.5,{}'.format(y_dim + 0.5, x_dim + 0.5, number_of_runs + 0.5))
-        createWS_alg.setProperty("NumberOfBins", '{},{},{}'.format(y_dim, x_dim, number_of_runs))
-        createWS_alg.setProperty("Names", 'y,x,scanIndex')
-        createWS_alg.setProperty("Units", 'bin,bin,number')
+        createWS_alg.setProperty("Extents", "0.5,{},0.5,{},0.5,{}".format(y_dim + 0.5, x_dim + 0.5, number_of_runs + 0.5))
+        createWS_alg.setProperty("NumberOfBins", "{},{},{}".format(y_dim, x_dim, number_of_runs))
+        createWS_alg.setProperty("Names", "y,x,scanIndex")
+        createWS_alg.setProperty("Units", "bin,bin,number")
         createWS_alg.execute()
         outWS = createWS_alg.getProperty("OutputWorkspace").value
 
-        progress.report('Getting IDF')
+        progress.report("Getting IDF")
         # Get the instrument and some logs from the first file; assume the rest are the same
         _tmp_ws = LoadEventNexus(runs[0], MetaDataOnly=True, EnableLogging=False)
         # The following logs should be the same for all runs
-        RemoveLogs(_tmp_ws,
-                   KeepLogs='HB2C:Mot:detz,HB2C:Mot:detz.RBV,HB2C:Mot:s2,HB2C:Mot:s2.RBV,'
-                   'HB2C:Mot:sgl,HB2C:Mot:sgl.RBV,HB2C:Mot:sgu,HB2C:Mot:sgu.RBV,'
-                   'run_title,start_time,experiment_identifier,HB2C:CS:CrystalAlign:UBMatrix',
-                   EnableLogging=False)
+        RemoveLogs(
+            _tmp_ws,
+            KeepLogs="HB2C:Mot:detz,HB2C:Mot:detz.RBV,HB2C:Mot:s2,HB2C:Mot:s2.RBV,"
+            "HB2C:Mot:sgl,HB2C:Mot:sgl.RBV,HB2C:Mot:sgu,HB2C:Mot:sgu.RBV,"
+            "run_title,start_time,experiment_identifier,HB2C:CS:CrystalAlign:UBMatrix",
+            EnableLogging=False,
+        )
 
         time_ns_array = _tmp_ws.run().startTime().totalNanoseconds() + np.append(0, np.cumsum(duration_array) * 1e9)[:-1]
 
         try:
-            ub = np.array(re.findall(r'-?\d+\.*\d*',
-                                     _tmp_ws.run().getProperty('HB2C:CS:CrystalAlign:UBMatrix').value[0]), dtype=float).reshape(3, 3)
-            sgl = np.deg2rad(_tmp_ws.run().getProperty('HB2C:Mot:sgl.RBV').value[0])  # 'HB2C:Mot:sgl.RBV,1,0,0,-1'
-            sgu = np.deg2rad(_tmp_ws.run().getProperty('HB2C:Mot:sgu.RBV').value[0])  # 'HB2C:Mot:sgu.RBV,0,0,1,-1'
+            ub = np.array(
+                re.findall(r"-?\d+\.*\d*", _tmp_ws.run().getProperty("HB2C:CS:CrystalAlign:UBMatrix").value[0]), dtype=float
+            ).reshape(3, 3)
+            sgl = np.deg2rad(_tmp_ws.run().getProperty("HB2C:Mot:sgl.RBV").value[0])  # 'HB2C:Mot:sgl.RBV,1,0,0,-1'
+            sgu = np.deg2rad(_tmp_ws.run().getProperty("HB2C:Mot:sgu.RBV").value[0])  # 'HB2C:Mot:sgu.RBV,0,0,1,-1'
             sgl_a = np.array([[1, 0, 0], [0, np.cos(sgl), np.sin(sgl)], [0, -np.sin(sgl), np.cos(sgl)]])
             sgu_a = np.array([[np.cos(sgu), np.sin(sgu), 0], [-np.sin(sgu), np.cos(sgu), 0], [0, 0, 1]])
             UB = sgl_a.dot(sgu_a).dot(ub)  # Apply the Goniometer tilts to the UB matrix
@@ -280,34 +302,34 @@ class LoadWANDSCD(PythonAlgorithm):
             _tmp_ws = GroupDetectors(InputWorkspace=_tmp_ws, CopyGroupingFromWorkspace=_tmp_group, EnableLogging=False)
             DeleteWorkspace(_tmp_group, EnableLogging=False)
 
-        progress.report('Adding logs')
+        progress.report("Adding logs")
 
         # Hack: ConvertToMD is needed so that a deep copy of the ExperimentInfo can happen
         # outWS.addExperimentInfo(_tmp_ws) # This doesn't work but should, when you delete `ws` `outWS` also loses it's ExperimentInfo
-        _tmp_ws = Rebin(_tmp_ws, '0,1,2', EnableLogging=False)
-        _tmp_ws = ConvertToMD(_tmp_ws, dEAnalysisMode='Elastic', EnableLogging=False, PreprocDetectorsWS='__PreprocessedDetectorsWS')
+        _tmp_ws = Rebin(_tmp_ws, "0,1,2", EnableLogging=False)
+        _tmp_ws = ConvertToMD(_tmp_ws, dEAnalysisMode="Elastic", EnableLogging=False, PreprocDetectorsWS="__PreprocessedDetectorsWS")
 
-        preprocWS = mtd['__PreprocessedDetectorsWS']
+        preprocWS = mtd["__PreprocessedDetectorsWS"]
         twotheta = preprocWS.column(2)
         azimuthal = preprocWS.column(3)
 
         outWS.copyExperimentInfos(_tmp_ws)
         DeleteWorkspace(_tmp_ws, EnableLogging=False)
-        DeleteWorkspace('__PreprocessedDetectorsWS', EnableLogging=False)
+        DeleteWorkspace("__PreprocessedDetectorsWS", EnableLogging=False)
         # end Hack
 
-        add_time_series_property('s1', outWS.getExperimentInfo(0).run(), time_ns_array, s1_array)
-        outWS.getExperimentInfo(0).run().getProperty('s1').units = 'deg'
-        add_time_series_property('duration', outWS.getExperimentInfo(0).run(), time_ns_array, duration_array)
-        outWS.getExperimentInfo(0).run().getProperty('duration').units = 'second'
-        outWS.getExperimentInfo(0).run().addProperty('run_number', run_number_array, True)
-        add_time_series_property('monitor_count', outWS.getExperimentInfo(0).run(), time_ns_array, monitor_count_array)
-        outWS.getExperimentInfo(0).run().addProperty('twotheta', twotheta, True)
-        outWS.getExperimentInfo(0).run().addProperty('azimuthal', azimuthal, True)
+        add_time_series_property("s1", outWS.getExperimentInfo(0).run(), time_ns_array, s1_array)
+        outWS.getExperimentInfo(0).run().getProperty("s1").units = "deg"
+        add_time_series_property("duration", outWS.getExperimentInfo(0).run(), time_ns_array, duration_array)
+        outWS.getExperimentInfo(0).run().getProperty("duration").units = "second"
+        outWS.getExperimentInfo(0).run().addProperty("run_number", run_number_array, True)
+        add_time_series_property("monitor_count", outWS.getExperimentInfo(0).run(), time_ns_array, monitor_count_array)
+        outWS.getExperimentInfo(0).run().addProperty("twotheta", twotheta, True)
+        outWS.getExperimentInfo(0).run().addProperty("azimuthal", azimuthal, True)
 
         setGoniometer_alg = self.createChildAlgorithm("SetGoniometer", enableLogging=False)
         setGoniometer_alg.setProperty("Workspace", outWS)
-        setGoniometer_alg.setProperty("Axis0", 's1,0,1,0,1')
+        setGoniometer_alg.setProperty("Axis0", "s1,0,1,0,1")
         setGoniometer_alg.setProperty("Average", False)
         setGoniometer_alg.execute()
 
@@ -328,21 +350,21 @@ class LoadWANDSCD(PythonAlgorithm):
         # reduce memory footprint
         DeleteWorkspace(norm_replicated)
         # find the scale
-        if normalize_by == 'counts':
+        if normalize_by == "counts":
             scale = norm.getSignalArray().mean()
-            self.getLogger().information('scale counts = {}'.format(int(scale)))
-        elif normalize_by == 'monitor':
-            scale = np.array(data.getExperimentInfo(0).run().getProperty('monitor_count').value)
-            scale /= norm.getExperimentInfo(0).run().getProperty('monitor_count').value[0]
-            self.getLogger().information('scale monitor = {}'.format(scale))
-        elif normalize_by == 'time':
-            scale = np.array(data.getExperimentInfo(0).run().getProperty('duration').value)
-            scale /= norm.getExperimentInfo(0).run().getProperty('duration').value[0]
-            self.getLogger().information('van time = {}'.format(scale))
-        elif normalize_by == 'none':
+            self.getLogger().information("scale counts = {}".format(int(scale)))
+        elif normalize_by == "monitor":
+            scale = np.array(data.getExperimentInfo(0).run().getProperty("monitor_count").value)
+            scale /= norm.getExperimentInfo(0).run().getProperty("monitor_count").value[0]
+            self.getLogger().information("scale monitor = {}".format(scale))
+        elif normalize_by == "time":
+            scale = np.array(data.getExperimentInfo(0).run().getProperty("duration").value)
+            scale /= norm.getExperimentInfo(0).run().getProperty("duration").value[0]
+            self.getLogger().information("van time = {}".format(scale))
+        elif normalize_by == "none":
             scale = 1
         else:
-            raise RuntimeError(f'Unknown normalization method: {normalize_by}!')
+            raise RuntimeError(f"Unknown normalization method: {normalize_by}!")
         # exec
         data.setSignalArray(data.getSignalArray() / scale)
         data.setErrorSquaredArray(data.getErrorSquaredArray() / scale**2)

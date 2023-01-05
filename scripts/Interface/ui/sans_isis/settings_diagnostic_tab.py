@@ -16,7 +16,7 @@ import os
 from qtpy import QtWidgets
 
 from mantidqt.utils.qt import load_ui
-from sans.gui_logic.gui_common import (GENERIC_SETTINGS, JSON_SUFFIX, load_file)
+from sans.gui_logic.gui_common import GENERIC_SETTINGS, JSON_SUFFIX, load_file
 
 unicode = str
 
@@ -28,6 +28,7 @@ class SettingsDiagnosticTab(QtWidgets.QWidget, Ui_SettingsDiagnosticTab):
         """
         Defines the elements which a presenter can listen to for the diagnostic tab
         """
+
         @abstractmethod
         def on_row_changed(self):
             pass
@@ -91,8 +92,7 @@ class SettingsDiagnosticTab(QtWidgets.QWidget, Ui_SettingsDiagnosticTab):
         self._call_settings_diagnostic_listeners(lambda listener: listener.on_save_state_to_file())
 
     def on_browse_save_location(self):
-        load_file(self.save_state_line_edit, "*.json", self.__generic_settings, self.__save_location_path_key,
-                  self.get_save_location)
+        load_file(self.save_state_line_edit, "*.json", self.__generic_settings, self.__save_location_path_key, self.get_save_location)
 
         # Correct the file extension. The output file has to be a json type file. If the user has added a different
         # file extension then change it to .json

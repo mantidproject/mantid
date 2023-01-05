@@ -235,8 +235,10 @@ class DGSPlannerGUI(QtWidgets.QWidget):
                 if reply == QtWidgets.QMessageBox.No:
                     return
 
-            if self.wg is not None:
+            try:
                 mantid.simpleapi.DeleteWorkspace(self.wg)
+            except:
+                pass
 
             instrumentName = self.masterDict['instrument']
             if instrumentName == 'WAND\u00B2':

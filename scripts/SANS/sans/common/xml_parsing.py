@@ -59,8 +59,10 @@ def get_monitor_names_from_idf_file(idf_file, invalid_monitor_names=None):
                                   dummy monitors which exist in the IDF but not in the workspace.
     :return: a NumberAsString vs Monitor Name map
     """
+
     def get_tag(tag_in):
         return "{http://www.mantidproject.org/IDF/1.0}" + tag_in
+
     output = {}
     tag = "idlist"
     idname = "idname"

@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=too-few-public-methods
+# pylint: disable=too-few-public-methods
 """
 Holds an instrument class for VESUVIO
 """
@@ -12,11 +12,11 @@ Holds an instrument class for VESUVIO
 
 class VESUVIO(object):
     """
-        Contains all the Vesuvio specific data
+    Contains all the Vesuvio specific data
     """
 
     def __init__(self):
-        self.name = 'Vesuvio'
+        self.name = "Vesuvio"
         # Need to load these from the parameter file
 
         # Crop range (VMS defaults)
@@ -27,5 +27,4 @@ class VESUVIO(object):
         self.backward_banks = ((3, 46), (47, 90), (91, 134))
 
         self.forward_spectra = (135, 198)
-        self.forward_banks = ((135, 142), (143, 150), (151, 158), (159, 166),
-                              (167, 174), (175, 182), (183, 190), (191, 198))
+        self.forward_banks = ((135, 142), (143, 150), (151, 158), (159, 166), (167, 174), (175, 182), (183, 190), (191, 198))

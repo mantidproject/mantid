@@ -13,7 +13,7 @@ from mantid import config
 
 from isis_powder import Pearl
 
-DIRS = config['datasearch.directories'].split(';')
+DIRS = config["datasearch.directories"].split(";")
 
 # Setup various path details
 
@@ -48,7 +48,7 @@ summed_empty_path = os.path.join(calibration_dir, summed_empty_rel_path)
 
 class _CreateVanadiumTest(systemtesting.MantidSystemTest):
 
-    existing_config = config['datasearch.directories']
+    existing_config = config["datasearch.directories"]
     focus_mode = None
 
     def requiredFiles(self):
@@ -68,8 +68,12 @@ class _CreateVanadiumTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 0.05  # Required for difference in spline data between operating systems
-        return "PEARL98472_tt70-Results-D-Grp", "ISIS_Powder_PRL98472_tt70_{}.nxs".format(self.focus_mode), \
-               "Van_spline_data_tt70", "ISIS_Powder-PEARL00098472_splined.nxs"
+        return (
+            "PEARL98472_tt70-Results-D-Grp",
+            "ISIS_Powder_PRL98472_tt70_{}.nxs".format(self.focus_mode),
+            "Van_spline_data_tt70",
+            "ISIS_Powder-PEARL00098472_splined.nxs",
+        )
 
     def cleanup(self):
         try:
@@ -78,7 +82,7 @@ class _CreateVanadiumTest(systemtesting.MantidSystemTest):
             _try_delete(summed_empty_path)
         finally:
             mantid.mtd.clear()
-            config['datasearch.directories'] = self.existing_config
+            config["datasearch.directories"] = self.existing_config
 
 
 class CreateVanadiumAllTest(_CreateVanadiumTest):
@@ -112,7 +116,7 @@ class CreateVanadiumModsTest(_CreateVanadiumTest):
 class FocusTest(systemtesting.MantidSystemTest):
 
     focus_results = None
-    existing_config = config['datasearch.directories']
+    existing_config = config["datasearch.directories"]
 
     def requiredFiles(self):
         return _gen_required_files()
@@ -129,18 +133,16 @@ class FocusTest(systemtesting.MantidSystemTest):
     def validate(self):
         # check output files as expected
         def generate_error_message(expected_file, output_dir):
-            return "Unable to find {} in {}\nContents={}".format(expected_file, output_dir,
-                                                                 os.listdir(output_dir))
+            return "Unable to find {} in {}\nContents={}".format(expected_file, output_dir, os.listdir(output_dir))
 
         def assert_output_file_exists(directory, filename):
-            self.assertTrue(os.path.isfile(os.path.join(directory, filename)),
-                            msg=generate_error_message(filename, directory))
+            self.assertTrue(os.path.isfile(os.path.join(directory, filename)), msg=generate_error_message(filename, directory))
 
         user_output = os.path.join(output_dir, cycle, user_name)
-        assert_output_file_exists(user_output, 'PRL98507_tt70.nxs')
-        assert_output_file_exists(user_output, 'PRL98507_tt70.gsas')
-        assert_output_file_exists(user_output, 'PRL98507_tt70_tof-0.xye')
-        assert_output_file_exists(user_output, 'PRL98507_tt70_d-0.xye')
+        assert_output_file_exists(user_output, "PRL98507_tt70.nxs")
+        assert_output_file_exists(user_output, "PRL98507_tt70.gsas")
+        assert_output_file_exists(user_output, "PRL98507_tt70_tof-0.xye")
+        assert_output_file_exists(user_output, "PRL98507_tt70_d-0.xye")
 
         self.tolerance = 1e-8  # Required for difference in spline data between operating systems
         return "PEARL98507_tt70-Results-D-Grp", "ISIS_Powder-PEARL00098507_tt70Atten.nxs"
@@ -150,14 +152,14 @@ class FocusTest(systemtesting.MantidSystemTest):
             _try_delete(spline_path)
             _try_delete(output_dir)
         finally:
-            config['datasearch.directories'] = self.existing_config
+            config["datasearch.directories"] = self.existing_config
             mantid.mtd.clear()
 
 
 class FocusLongThenShortTest(systemtesting.MantidSystemTest):
 
     focus_results = None
-    existing_config = config['datasearch.directories']
+    existing_config = config["datasearch.directories"]
 
     def requiredFiles(self):
         return _gen_required_files()
@@ -166,8 +168,14 @@ class FocusLongThenShortTest(systemtesting.MantidSystemTest):
         # Gen vanadium calibration first
         setup_mantid_paths()
         inst_object = setup_inst_object(tt_mode="tt88", focus_mode="Trans")
-        inst_object.focus(run_number=98507, vanadium_normalisation=False, do_absorb_corrections=False,
-                          long_mode=True, perform_attenuation=False, tt_mode="tt70")
+        inst_object.focus(
+            run_number=98507,
+            vanadium_normalisation=False,
+            do_absorb_corrections=False,
+            long_mode=True,
+            perform_attenuation=False,
+            tt_mode="tt70",
+        )
         self.focus_results = run_focus(inst_object, tt_mode="tt70", subtract_empty=True, spline_path=spline_path)
 
         # Make sure that inst settings reverted to the default after focus
@@ -177,33 +185,35 @@ class FocusLongThenShortTest(systemtesting.MantidSystemTest):
     def validate(self):
         # check output files as expected
         def generate_error_message(expected_file, output_dir):
-            return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir,
-                                                                  os.listdir(output_dir))
+            return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir, os.listdir(output_dir))
 
         def assert_output_file_exists(directory, filename):
-            self.assertTrue(os.path.isfile(os.path.join(directory, filename)),
-                            msg=generate_error_message(filename, directory))
+            self.assertTrue(os.path.isfile(os.path.join(directory, filename)), msg=generate_error_message(filename, directory))
 
         user_output = os.path.join(output_dir, cycle, user_name)
-        assert_output_file_exists(user_output, 'PRL98507_tt70.nxs')
-        assert_output_file_exists(user_output, 'PRL98507_tt70_long.nxs')
-        assert_output_file_exists(user_output, 'PRL98507_tt70.gsas')
-        assert_output_file_exists(user_output, 'PRL98507_tt70_long.gsas')
-        assert_output_file_exists(user_output, 'PRL98507_tt70_tof-0.xye')
-        assert_output_file_exists(user_output, 'PRL98507_tt70_d-0.xye')
-        assert_output_file_exists(user_output, 'PRL98507_tt70_long_tof-0.xye')
-        assert_output_file_exists(user_output, 'PRL98507_tt70_long_d-0.xye')
+        assert_output_file_exists(user_output, "PRL98507_tt70.nxs")
+        assert_output_file_exists(user_output, "PRL98507_tt70_long.nxs")
+        assert_output_file_exists(user_output, "PRL98507_tt70.gsas")
+        assert_output_file_exists(user_output, "PRL98507_tt70_long.gsas")
+        assert_output_file_exists(user_output, "PRL98507_tt70_tof-0.xye")
+        assert_output_file_exists(user_output, "PRL98507_tt70_d-0.xye")
+        assert_output_file_exists(user_output, "PRL98507_tt70_long_tof-0.xye")
+        assert_output_file_exists(user_output, "PRL98507_tt70_long_d-0.xye")
 
         self.tolerance = 1e-8  # Required for difference in spline data between operating systems
-        return ("PEARL98507_tt70-Results-D-Grp", "ISIS_Powder-PEARL00098507_tt70Atten.nxs",
-                "PEARL98507_tt70_long-Results-D-Grp", "ISIS_Powder-PEARL00098507_tt70Long.nxs")
+        return (
+            "PEARL98507_tt70-Results-D-Grp",
+            "ISIS_Powder-PEARL00098507_tt70Atten.nxs",
+            "PEARL98507_tt70_long-Results-D-Grp",
+            "ISIS_Powder-PEARL00098507_tt70Long.nxs",
+        )
 
     def cleanup(self):
         try:
             _try_delete(spline_path)
             _try_delete(output_dir)
         finally:
-            config['datasearch.directories'] = self.existing_config
+            config["datasearch.directories"] = self.existing_config
             mantid.mtd.clear()
 
 
@@ -226,14 +236,14 @@ class FocusWithAbsorbCorrectionsTest(systemtesting.MantidSystemTest):
         try:
             _try_delete(output_dir)
         finally:
-            config['datasearch.directories'] = self.existing_config
+            config["datasearch.directories"] = self.existing_config
             mantid.mtd.clear()
 
 
 class FocusWithoutEmptySubtractionTest(systemtesting.MantidSystemTest):
 
     focus_results = None
-    existing_config = config['datasearch.directories']
+    existing_config = config["datasearch.directories"]
 
     def requiredFiles(self):
         return _gen_required_files()
@@ -251,7 +261,7 @@ class FocusWithoutEmptySubtractionTest(systemtesting.MantidSystemTest):
             _try_delete(spline_path)
             _try_delete(output_dir)
         finally:
-            config['datasearch.directories'] = self.existing_config
+            config["datasearch.directories"] = self.existing_config
             mantid.mtd.clear()
 
 
@@ -283,7 +293,7 @@ class CreateCalTest(systemtesting.MantidSystemTest):
         try:
             _try_delete(self.run_details.offset_file_path)
         finally:
-            config['datasearch.directories'] = self.existing_config
+            config["datasearch.directories"] = self.existing_config
             mantid.mtd.clear()
 
 
@@ -296,15 +306,25 @@ class CreateVanadiumAndFocusCustomMode(systemtesting.MantidSystemTest):
         inst_object = setup_inst_object(tt_mode="tt70", focus_mode="Trans")
         # for tt_mode=custom you can specify a different grouping file on each run. So need
         # to make sure the V file is tracked per grouping file and focus actions use the correct one
-        run_vanadium_calibration(inst_object, tt_mode="custom", focus_mode="Trans",
-                                 custom_grouping_filename=os.path.join(calibration_dir, "DAC_group.cal"))
-        run_vanadium_calibration(inst_object, tt_mode="custom", focus_mode="Trans",
-                                 custom_grouping_filename=os.path.join(calibration_dir, "pearl_group_12_1_TT70.cal"))
-        focus_results_grp = run_focus(inst_object, tt_mode="custom", subtract_empty=False,
-                                      custom_grouping_filename=os.path.join(calibration_dir,"DAC_group.cal"))
+        run_vanadium_calibration(
+            inst_object, tt_mode="custom", focus_mode="Trans", custom_grouping_filename=os.path.join(calibration_dir, "DAC_group.cal")
+        )
+        run_vanadium_calibration(
+            inst_object,
+            tt_mode="custom",
+            focus_mode="Trans",
+            custom_grouping_filename=os.path.join(calibration_dir, "pearl_group_12_1_TT70.cal"),
+        )
+        focus_results_grp = run_focus(
+            inst_object, tt_mode="custom", subtract_empty=False, custom_grouping_filename=os.path.join(calibration_dir, "DAC_group.cal")
+        )
         self.assertEqual(focus_results_grp.size(), 1)
-        focus_results_grp = run_focus(inst_object, tt_mode="custom", subtract_empty=False,
-                                      custom_grouping_filename=os.path.join(calibration_dir,"pearl_group_12_1_TT70.cal"))
+        focus_results_grp = run_focus(
+            inst_object,
+            tt_mode="custom",
+            subtract_empty=False,
+            custom_grouping_filename=os.path.join(calibration_dir, "pearl_group_12_1_TT70.cal"),
+        )
         self.assertEqual(focus_results_grp.size(), 10)
 
     def cleanup(self):
@@ -318,14 +338,12 @@ class CreateVanadiumAndFocusCustomMode(systemtesting.MantidSystemTest):
             _try_delete(output_dir)
             _try_delete(summed_empty_path)
         finally:
-            config['datasearch.directories'] = self.existing_config
+            config["datasearch.directories"] = self.existing_config
             mantid.mtd.clear()
 
 
 def _gen_required_files():
-    required_run_numbers = ["98472", "98485",  # create_van
-                            "98507", "98472_splined",  # Focus (Si)
-                            "98494"]  # create_cal (Ce)
+    required_run_numbers = ["98472", "98485", "98507", "98472_splined", "98494"]  # create_van  # Focus (Si)  # create_cal (Ce)
 
     # Generate file names of form "INSTxxxxx.nxs" - PEARL requires 000 padding
     input_files = [os.path.join(input_dir, (inst_name + "000" + number + ".nxs")) for number in required_run_numbers]
@@ -356,26 +374,40 @@ def run_focus(inst_object, tt_mode, subtract_empty, spline_path=None, custom_gro
         original_splined_path = os.path.join(input_dir, splined_file_name)
         shutil.copy(original_splined_path, spline_path)
 
-    return inst_object.focus(run_number=run_number, vanadium_normalisation=True, do_absorb_corrections=False,
-                             perform_attenuation=True, attenuation_file='ZTA',
-                             attenuation_files=[{"name": "ZTA", "path": attenuation_path}], tt_mode=tt_mode,
-                             subtract_empty_instrument=subtract_empty, custom_grouping_filename=custom_grouping_filename)
+    return inst_object.focus(
+        run_number=run_number,
+        vanadium_normalisation=True,
+        do_absorb_corrections=False,
+        perform_attenuation=True,
+        attenuation_file="ZTA",
+        attenuation_files=[{"name": "ZTA", "path": attenuation_path}],
+        tt_mode=tt_mode,
+        subtract_empty_instrument=subtract_empty,
+        custom_grouping_filename=custom_grouping_filename,
+    )
 
 
 def run_focus_with_absorb_corrections():
     run_number = 98507
     inst_object = setup_inst_object(tt_mode="tt70", focus_mode="Trans")
-    return inst_object.focus(run_number=run_number, vanadium_normalisation=False, perform_attenuation=False,
-                             do_absorb_corrections=True, long_mode=False)
+    return inst_object.focus(
+        run_number=run_number, vanadium_normalisation=False, perform_attenuation=False, do_absorb_corrections=True, long_mode=False
+    )
 
 
 def setup_mantid_paths():
-    config['datasearch.directories'] += ";" + input_dir
+    config["datasearch.directories"] += ";" + input_dir
 
 
 def setup_inst_object(**kwargs):
-    inst_obj = Pearl(user_name=user_name, calibration_mapping_file=calibration_map_path, long_mode=False,
-                     calibration_directory=calibration_dir, output_directory=output_dir, **kwargs)
+    inst_obj = Pearl(
+        user_name=user_name,
+        calibration_mapping_file=calibration_map_path,
+        long_mode=False,
+        calibration_directory=calibration_dir,
+        output_directory=output_dir,
+        **kwargs
+    )
     return inst_obj
 
 
@@ -387,4 +419,4 @@ def _try_delete(path):
         else:
             os.remove(path)
     except OSError:
-        print ("Could not delete output file at: ", path)
+        print("Could not delete output file at: ", path)

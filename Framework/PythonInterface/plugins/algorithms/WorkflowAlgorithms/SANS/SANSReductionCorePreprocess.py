@@ -19,11 +19,10 @@ from sans.common.enums import DetectorType
 
 class SANSReductionCorePreprocess(SANSReductionCoreBase):
     def category(self):
-        return 'SANS\\Reduction'
+        return "SANS\\Reduction"
 
     def summary(self):
-        return 'Runs the initial core reduction elements. These are the steps which ' \
-               'can be carried out before event slicing.'
+        return "Runs the initial core reduction elements. These are the steps which " "can be carried out before event slicing."
 
     def PyInit(self):
         # ----------
@@ -35,13 +34,15 @@ class SANSReductionCorePreprocess(SANSReductionCoreBase):
         # ----------
         # OUTPUT
         # ----------
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", '', direction=Direction.Output),
-                             doc='The output workspace.')
-        self.declareProperty(MatrixWorkspaceProperty("DummyMaskWorkspace", '', direction=Direction.Output),
-                             doc='The histogram workspace which contains bin masks for non-compatibility mode.')
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", direction=Direction.Output), doc="The output workspace.")
+        self.declareProperty(
+            MatrixWorkspaceProperty("DummyMaskWorkspace", "", direction=Direction.Output),
+            doc="The histogram workspace which contains bin masks for non-compatibility mode.",
+        )
 
-        self.declareProperty(MatrixWorkspaceProperty("OutputMonitorWorkspace", '', direction=Direction.Output),
-                             doc='The output monitor workspace.')
+        self.declareProperty(
+            MatrixWorkspaceProperty("OutputMonitorWorkspace", "", direction=Direction.Output), doc="The output monitor workspace."
+        )
 
     def PyExec(self):
         # Get the input
@@ -70,8 +71,9 @@ class SANSReductionCorePreprocess(SANSReductionCoreBase):
         # Once the new reduction chain is established, we should remove the compatibility feature.
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         monitor_workspace = self._get_monitor_workspace()
-        workspace, dummy_mask_workspace, \
-            use_dummy_workspace = self._check_compatibility_mode(workspace, monitor_workspace, state.compatibility)
+        workspace, dummy_mask_workspace, use_dummy_workspace = self._check_compatibility_mode(
+            workspace, monitor_workspace, state.compatibility
+        )
 
         # ------------------------------------------------------------
         # 3. Move the workspace into the correct position
@@ -95,10 +97,8 @@ class SANSReductionCorePreprocess(SANSReductionCoreBase):
         workspace = self._convert_to_wavelength(wavelength_state=state.wavelength, workspace=workspace)
         # Convert and rebin the dummy workspace to get correct bin flags
         if use_dummy_workspace:
-            dummy_mask_workspace = mask_bins(state.mask, dummy_mask_workspace,
-                                             DetectorType(component_as_string))
-            dummy_mask_workspace = self._convert_to_wavelength(wavelength_state=state.wavelength,
-                                                               workspace=dummy_mask_workspace)
+            dummy_mask_workspace = mask_bins(state.mask, dummy_mask_workspace, DetectorType(component_as_string))
+            dummy_mask_workspace = self._convert_to_wavelength(wavelength_state=state.wavelength, workspace=dummy_mask_workspace)
 
         # --------------------------------------------------------------------------------------------------------------
         # 6. Multiply by volume and absolute scale

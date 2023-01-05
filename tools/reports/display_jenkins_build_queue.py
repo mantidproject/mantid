@@ -10,20 +10,20 @@ import pprint
 
 import requests
 
-JENKINS_ROOT_URL = 'http://builds.mantidproject.org'
-QUEUE_ENDPOINT_JSON = path.join(JENKINS_ROOT_URL, 'queue/api/json')
+JENKINS_ROOT_URL = "http://builds.mantidproject.org"
+QUEUE_ENDPOINT_JSON = path.join(JENKINS_ROOT_URL, "queue/api/json")
 
 req = requests.get(QUEUE_ENDPOINT_JSON)
 payload = req.json()
 
 # extract items by job name
-queue = payload['items']
+queue = payload["items"]
 task_queues = {}
 for item in queue:
-    params = item['params'].split('\n')
+    params = item["params"].split("\n")
     try:
         pr = params[5]
-        job_name = item['task']['name']
+        job_name = item["task"]["name"]
         if job_name not in task_queues:
             task_queues[job_name] = list()
         task_queues[job_name].append(pr)

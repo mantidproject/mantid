@@ -11,13 +11,13 @@ from mantid.api import WorkspaceGroup, MatrixWorkspace, TextAxis
 
 
 class SANSILLMultiProcessTest(unittest.TestCase):
-    '''
+    """
     The testee algorithm performs an entire experiment reduction.
     It takes too long to be unit tested in all the possible scenarios.
     Therefore, the functionality is covered by system tests instead.
     This unit test suite covers only the failure cases, i.e. the input validation,
     and the most basic reduction with default parameters.
-    '''
+    """
 
     @classmethod
     def setUpClass(cls):
@@ -44,7 +44,7 @@ class SANSILLMultiProcessTest(unittest.TestCase):
         realspace = ws.getItem(0)
         self.assertTrue(isinstance(realspace, MatrixWorkspace))
         self.assertEqual(realspace.getAxis(0).getUnit().unitID(), "Empty")
-        self.assertEqual(realspace.getNumberHistograms(), 128*128+2)
+        self.assertEqual(realspace.getNumberHistograms(), 128 * 128 + 2)
         self.assertEqual(realspace.blocksize(), 1)
         self.assertFalse(realspace.isHistogramData())
         self.assertTrue(realspace.getInstrument())
@@ -62,60 +62,74 @@ class SANSILLMultiProcessTest(unittest.TestCase):
         self.assertTrue(iq.getHistory())
 
     def test_fail_d2_before_d1_samples(self):
-        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out",
-                          SampleRunsD2="010569")
+        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out", SampleRunsD2="010569")
 
     def test_fail_d2_skipped_samples(self):
-        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out",
-                          SampleRunsD1="010569", SampleRunsD3="010455")
+        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out", SampleRunsD1="010569", SampleRunsD3="010455")
 
     def test_fail_different_number_of_samples(self):
-        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out",
-                          SampleRunsD1="010569", SampleRunsD2="010455,010460")
+        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out", SampleRunsD1="010569", SampleRunsD2="010455,010460")
 
     def test_fail_transmission_wo_empty_beam(self):
-        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out",
-                          SampleRunsD1="010569", SampleTrRunsW1="010585")
+        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out", SampleRunsD1="010569", SampleTrRunsW1="010585")
 
     def test_fail_different_number_of_tr_runs(self):
-        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out",
-                          SampleRunsD1="010569,010460", SampleTrRunsW1="010585",
-                          TrEmptyBeamRuns="010414")
+        self.assertRaises(
+            RuntimeError,
+            SANSILLMultiProcess,
+            OutputWorkspace="out",
+            SampleRunsD1="010569,010460",
+            SampleTrRunsW1="010585",
+            TrEmptyBeamRuns="010414",
+        )
 
     def test_fail_w2_before_w1_tr_runs(self):
-        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out",
-                          SampleRunsD1="010569", SampleTrRunsW2="010585",
-                          TrEmptyBeamRuns="010414")
+        self.assertRaises(
+            RuntimeError,
+            SANSILLMultiProcess,
+            OutputWorkspace="out",
+            SampleRunsD1="010569",
+            SampleTrRunsW2="010585",
+            TrEmptyBeamRuns="010414",
+        )
 
     def test_fail_output_name_not_alphanumeric(self):
-        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="7out",
-                          SampleRunsD1="010569")
+        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="7out", SampleRunsD1="010569")
 
     def test_fail_wedges_and_panels(self):
-        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out",
-                          SampleRunsD1="010569", OutputPanels=True, NumberOfWedges=2)
+        self.assertRaises(
+            RuntimeError, SANSILLMultiProcess, OutputWorkspace="out", SampleRunsD1="010569", OutputPanels=True, NumberOfWedges=2
+        )
 
     def test_fail_wrong_q_range(self):
-        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out",
-                          SampleRunsD1="010569", OutputBinning="0.05,0.3:")
+        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out", SampleRunsD1="010569", OutputBinning="0.05,0.3:")
 
     def test_fail_wrong_tr_beam_radius_dimension(self):
-        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out",
-                          SampleRunsD1="010569", SampleTrRunsW1="010585",
-                          TrEmptyBeamRuns="010414", TrBeamRadius=[0.1,0.11])
+        self.assertRaises(
+            RuntimeError,
+            SANSILLMultiProcess,
+            OutputWorkspace="out",
+            SampleRunsD1="010569",
+            SampleTrRunsW1="010585",
+            TrEmptyBeamRuns="010414",
+            TrBeamRadius=[0.1, 0.11],
+        )
 
     def test_fail_wrong_sample_names_dimension(self):
-        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out",
-                          SampleRunsD1="010569", SampleNamesFrom="User",
-                          SampleNames="apple, pear")
+        self.assertRaises(
+            RuntimeError,
+            SANSILLMultiProcess,
+            OutputWorkspace="out",
+            SampleRunsD1="010569",
+            SampleNamesFrom="User",
+            SampleNames="apple, pear",
+        )
 
     def test_fail_wrong_sample_thickness_dimension(self):
-        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out",
-                          SampleRunsD1="010569", SampleThickness=[0.1,0.11])
+        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out", SampleRunsD1="010569", SampleThickness=[0.1, 0.11])
 
     def test_fail_wrong_beam_radius_dimension(self):
-        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out",
-                          SampleRunsD1="010569", BeamRadius=[0.1,0.11])
+        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out", SampleRunsD1="010569", BeamRadius=[0.1, 0.11])
 
 
 if __name__ == "__main__":

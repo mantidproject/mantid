@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name,no-init
+# pylint: disable=invalid-name,no-init
 import os
 from systemtesting import MantidSystemTest
 from mantid.simpleapi import *
@@ -14,7 +14,8 @@ from mantid import config
 
 def MAX_DBL():
     import sys
-    return sys.float_info[0]/2
+
+    return sys.float_info[0] / 2
 
 
 def getNamedParameter(ws, name):
@@ -23,7 +24,7 @@ def getNamedParameter(ws, name):
 
 class DirectInelasticDiagnostic2(MantidSystemTest):
 
-    saved_diag_file=''
+    saved_diag_file = ""
 
     def requiredMemoryMB(self):
         """Requires 4Gb"""
@@ -34,21 +35,21 @@ class DirectInelasticDiagnostic2(MantidSystemTest):
         red_man_name = "__dgs_reduction_properties"
         pmds[red_man_name] = red_man
 
-        if 'detvan' in mtd:
-            detvan = mtd['detvan']
+        if "detvan" in mtd:
+            detvan = mtd["detvan"]
         else:
-            detvan = Load('MAP17186.raw')
-        if 'sample' in mtd:
-            sample = mtd['sample']
+            detvan = Load("MAP17186.raw")
+        if "sample" in mtd:
+            sample = mtd["sample"]
         else:
-            sample = Load('MAP17269.raw')
+            sample = Load("MAP17269.raw")
 
         # Libisis values to check against
         # All PropertyManager properties need to be set
         red_man["LowCounts"] = 1e-10
         red_man["HighCounts"] = 1e10
         red_man["LowOutlier"] = 0.01
-        red_man["HighOutlier"] = 100.
+        red_man["HighOutlier"] = 100.0
         red_man["ErrorBarCriterion"] = 0.0
         red_man["MedianTestLow"] = 0.1
         red_man["MedianTestHigh"] = 2.0
@@ -61,39 +62,35 @@ class DirectInelasticDiagnostic2(MantidSystemTest):
         red_man["DetVanIntRangeUnits"] = "Energy"
         #  properties affecting diagnostics:
 
-        #reducer.wb_integr_range = [20,300]
-        red_man["DetVanIntRangeLow"] = 20.
-        red_man["DetVanIntRangeHigh"] = 300.
+        # reducer.wb_integr_range = [20,300]
+        red_man["DetVanIntRangeLow"] = 20.0
+        red_man["DetVanIntRangeHigh"] = 300.0
         red_man["BackgroundCheck"] = True
-        red_man["BackgroundTofStart"]=12000.
-        red_man["BackgroundTofEnd"]=18000.
-        #reducer.bkgd_range=[12000,18000]
+        red_man["BackgroundTofStart"] = 12000.0
+        red_man["BackgroundTofEnd"] = 18000.0
+        # reducer.bkgd_range=[12000,18000]
 
-        diag_mask = DgsDiagnose(DetVanWorkspace=detvan, SampleWorkspace=sample,
-                                ReductionProperties=red_man_name)
+        diag_mask = DgsDiagnose(DetVanWorkspace=detvan, SampleWorkspace=sample, ReductionProperties=red_man_name)
 
         MaskDetectors(sample, MaskedWorkspace=diag_mask)
         # Save the masked spectra numbers to a simple ASCII file for comparison
-        self.saved_diag_file = os.path.join(config['defaultsave.directory'],
-                                            'CurrentDirectInelasticDiag2.txt')
-        with open(self.saved_diag_file, 'w') as handle:
+        self.saved_diag_file = os.path.join(config["defaultsave.directory"], "CurrentDirectInelasticDiag2.txt")
+        with open(self.saved_diag_file, "w") as handle:
             spectrumInfo = sample.spectrumInfo()
             for index in range(sample.getNumberHistograms()):
                 if spectrumInfo.isMasked(index):
                     spec_no = sample.getSpectrum(index).getSpectrumNo()
-                    handle.write(str(spec_no) + '\n')
+                    handle.write(str(spec_no) + "\n")
 
     def cleanup(self):
         if os.path.exists(self.saved_diag_file):
             if self.succeeded():
                 os.remove(self.saved_diag_file)
             else:
-                os.rename(self.saved_diag_file,
-                          os.path.join(config['defaultsave.directory'],
-                                       'DirectInelasticDiag2-Mismatch.txt'))
+                os.rename(self.saved_diag_file, os.path.join(config["defaultsave.directory"], "DirectInelasticDiag2-Mismatch.txt"))
 
     def validateMethod(self):
-        return 'validateASCII'
+        return "validateASCII"
 
     def validate(self):
-        return (self.saved_diag_file, 'DirectInelasticDiagnostic.txt')
+        return (self.saved_diag_file, "DirectInelasticDiagnostic.txt")

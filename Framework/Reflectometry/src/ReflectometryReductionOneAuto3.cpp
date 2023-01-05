@@ -7,6 +7,7 @@
 #include "MantidReflectometry/ReflectometryReductionOneAuto3.h"
 #include "MantidAPI/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -36,6 +37,9 @@ namespace CorrectionMethod {
 static const std::string WILDES{"Wildes"};
 static const std::string FREDRIKZE{"Fredrikze"};
 
+static const std::vector<std::string> WILDES_AXES = {"P1", "P2", "F1", "F2"};
+static const std::vector<std::string> FREDRIKZE_AXES = {"Pp", "Ap", "Rho", "Alpha"};
+
 // Map correction methods to which correction-option property name they use
 static const std::map<std::string, std::string> OPTION_NAME{{CorrectionMethod::WILDES, Prop::FLIPPERS},
                                                             {CorrectionMethod::FREDRIKZE, Prop::POLARIZATION_ANALYSIS}};
@@ -45,6 +49,13 @@ void validate(const std::string &method) {
     throw std::invalid_argument("Unsupported polarization correction method: " + method);
 }
 } // namespace CorrectionMethod
+
+namespace CorrectionOption {
+static const std::string PNR{"PNR"};
+static const std::string PA{"PA"};
+static const std::string FLIPPERS_NO_ANALYSER{"0, 1"};
+static const std::string FLIPPERS_FULL{"00, 01, 10, 11"};
+} // namespace CorrectionOption
 
 std::vector<std::string> getGroupMemberNames(const std::string &groupName) {
   auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
@@ -311,6 +322,11 @@ void ReflectometryReductionOneAuto3::init() {
                       std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
 
   initTransmissionOutputProperties();
+
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("PolarizationEfficiencies", "", Direction::Input,
+                                                                       PropertyMode::Optional),
+                  "A workspace to be used for polarization analysis that contains the efficiency factors as "
+                  "histograms: P1, P2, F1 and F2 in the Wildes method and Pp, Ap, Rho and Alpha for Fredrikze.");
 }
 
 /** Execute the algorithm.
@@ -948,22 +964,81 @@ auto ReflectometryReductionOneAuto3::getOutputNamesForGroupMember(const std::vec
   return outputNames;
 }
 
+/** Find the polarization correction method to use for the given efficiencies workspace.
+ * Checks the workspace axes labels to determine the appropriate correction method.
+ * We don't check all the workspace labels here, we just look for the first label that matches
+ * one of the efficiency factors for a supported correction method.
+ */
+std::string
+ReflectometryReductionOneAuto3::findPolarizationCorrectionMethod(const API::MatrixWorkspace_sptr &efficiencies) {
+  try {
+    auto const &axis = dynamic_cast<TextAxis &>(*efficiencies->getAxis(1));
+
+    for (size_t i = 0; i < axis.length(); ++i) {
+      if (std::find(CorrectionMethod::WILDES_AXES.begin(), CorrectionMethod::WILDES_AXES.end(), axis.label(i)) !=
+          CorrectionMethod::WILDES_AXES.end()) {
+        return CorrectionMethod::WILDES;
+      }
+      if (std::find(CorrectionMethod::FREDRIKZE_AXES.begin(), CorrectionMethod::FREDRIKZE_AXES.end(), axis.label(i)) !=
+          CorrectionMethod::FREDRIKZE_AXES.end()) {
+        return CorrectionMethod::FREDRIKZE;
+      }
+    }
+  } catch (std::bad_cast &) {
+    throw std::runtime_error("Efficiencies workspace is not in a supported format");
+  }
+  throw std::runtime_error(
+      "Axes labels for efficiencies workspace do not match any supported polarization correction method");
+}
+
+/** Find the polarization correction option to use for the given correction method, based on the number of workspaces
+ * in the input workspace group.
+ * For the Fredrikze algorithm the correction option represents the polarization analysis mode.
+ * For Wildes the correction option is the flipper configuration. There are more than two possible flipper
+ * configurations, but this is mainly intended for use by POLREF initially so we only need to support two for now.
+ */
+std::string ReflectometryReductionOneAuto3::findPolarizationCorrectionOption(const std::string &correctionMethod) {
+  auto groupIvsLam =
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(getPropertyValue("OutputWorkspaceWavelength"));
+  auto numWorkspacesInGrp = groupIvsLam->size();
+  if (numWorkspacesInGrp == 2) {
+    return (correctionMethod == CorrectionMethod::FREDRIKZE) ? CorrectionOption::PNR
+                                                             : CorrectionOption::FLIPPERS_NO_ANALYSER;
+  }
+  if (numWorkspacesInGrp == 4) {
+    return (correctionMethod == CorrectionMethod::FREDRIKZE) ? CorrectionOption::PA : CorrectionOption::FLIPPERS_FULL;
+  }
+  throw std::runtime_error("Only input workspace groups with two or four periods are supported");
+}
+
 /** Construct a polarization efficiencies workspace based on values of input
  * properties.
  */
 std::tuple<API::MatrixWorkspace_sptr, std::string, std::string>
 ReflectometryReductionOneAuto3::getPolarizationEfficiencies() {
-  auto groupIvsLam =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(getPropertyValue("OutputWorkspaceWavelength"));
+  MatrixWorkspace_sptr efficiencies;
+  std::string correctionMethod;
+  std::string correctionOption;
 
-  Workspace_sptr workspace = groupIvsLam->getItem(0);
+  if (!isDefault("PolarizationEfficiencies")) {
+    // Get the efficiencies from the provided workspace
+    efficiencies = getProperty("PolarizationEfficiencies");
+    correctionMethod = findPolarizationCorrectionMethod(efficiencies);
+    correctionOption = findPolarizationCorrectionOption(correctionMethod);
+  } else {
+    // Get the efficiencies from the parameter file
+    auto groupIvsLam =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(getPropertyValue("OutputWorkspaceWavelength"));
 
-  auto effAlg = createChildAlgorithm("ExtractPolarizationEfficiencies");
-  effAlg->setProperty("InputWorkspace", workspace);
-  effAlg->execute();
-  MatrixWorkspace_sptr efficiencies = effAlg->getProperty("OutputWorkspace");
-  std::string correctionMethod = effAlg->getPropertyValue("CorrectionMethod");
-  std::string correctionOption = effAlg->getPropertyValue("CorrectionOption");
+    Workspace_sptr workspace = groupIvsLam->getItem(0);
+
+    auto effAlg = createChildAlgorithm("ExtractPolarizationEfficiencies");
+    effAlg->setProperty("InputWorkspace", workspace);
+    effAlg->execute();
+    efficiencies = effAlg->getProperty("OutputWorkspace");
+    correctionMethod = effAlg->getPropertyValue("CorrectionMethod");
+    correctionOption = effAlg->getPropertyValue("CorrectionOption");
+  }
 
   return std::make_tuple(efficiencies, correctionMethod, correctionOption);
 }

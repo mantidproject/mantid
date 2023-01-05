@@ -39,8 +39,7 @@ class SettingsTransmissionModelTest(unittest.TestCase):
 
     def test_monitor_5_disabled_for_no_inst(self):
         user_file = {DetectorId.INSTRUMENT: [SANSInstrument.NO_INSTRUMENT]}
-        model_under_test = self.create_model(user_file, self.create_mock_inst_file_information(
-                                                        SANSInstrument.NO_INSTRUMENT))
+        model_under_test = self.create_model(user_file, self.create_mock_inst_file_information(SANSInstrument.NO_INSTRUMENT))
 
         self.assertFalse(model_under_test.does_instrument_support_monitor_5())
 
@@ -57,7 +56,7 @@ class SettingsTransmissionModelTest(unittest.TestCase):
         state_gui_model = self.create_model({}, self.create_mock_inst_file_information(SANSInstrument.SANS2D))
         state_gui_model.normalization_interpolate = True
         # This is normally found in the IPF which we have mocked out, so it will be blank
-        self.assertEqual(state_gui_model.normalization_incident_monitor, '')
+        self.assertEqual(state_gui_model.normalization_incident_monitor, "")
         self.assertTrue(state_gui_model.normalization_interpolate)
 
     def test_that_transmission_monitor_defaults_are_empty_and_false_for_interpolating_rebin(self):
@@ -91,7 +90,7 @@ class SettingsTransmissionModelTest(unittest.TestCase):
         state_gui_model = self.create_model({})
         state_gui_model.transmission_roi_files = "roi.xml"
         state_gui_model.transmission_mask_files = "mask.xml"
-        state_gui_model.transmission_radius = 8.
+        state_gui_model.transmission_radius = 8.0
         self.assertEqual(state_gui_model.transmission_roi_files, "roi.xml")
         self.assertEqual(state_gui_model.transmission_mask_files, "mask.xml")
         self.assertEqual(state_gui_model.transmission_radius, 8)
@@ -175,5 +174,5 @@ class SettingsTransmissionModelTest(unittest.TestCase):
         self.assertEqual(state_gui_model.transmission_can_wavelength_max, 10.3)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

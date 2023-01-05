@@ -13,7 +13,7 @@ from sans.gui_logic.models.beam_centre_model import BeamCentreModel
 
 class BeamCentreModelTest(unittest.TestCase):
     def setUp(self):
-        self.result = {'pos1': 300, 'pos2': -300}
+        self.result = {"pos1": 300, "pos2": -300}
         self.centre_finder_instance = mock.MagicMock(return_value=self.result)
         self.SANSCentreFinder = mock.MagicMock(return_value=self.centre_finder_instance)
         self.beam_centre_model = BeamCentreModel()
@@ -25,10 +25,10 @@ class BeamCentreModelTest(unittest.TestCase):
         self.assertEqual(self.beam_centre_model.left_right, True)
         self.assertEqual(self.beam_centre_model.up_down, True)
         self.assertEqual(self.beam_centre_model.tolerance, 0.0001251)
-        self.assertEqual(self.beam_centre_model.rear_pos_1, '')
-        self.assertEqual(self.beam_centre_model.rear_pos_2, '')
-        self.assertEqual(self.beam_centre_model.front_pos_2, '')
-        self.assertEqual(self.beam_centre_model.front_pos_1, '')
+        self.assertEqual(self.beam_centre_model.rear_pos_1, "")
+        self.assertEqual(self.beam_centre_model.rear_pos_2, "")
+        self.assertEqual(self.beam_centre_model.front_pos_2, "")
+        self.assertEqual(self.beam_centre_model.front_pos_1, "")
         self.assertEqual(self.beam_centre_model.COM, False)
         self.assertEqual(self.beam_centre_model.verbose, False)
         self.assertEqual(self.beam_centre_model.q_min, 0.01)
@@ -121,8 +121,8 @@ class BeamCentreModelTest(unittest.TestCase):
         self.beam_centre_model.instrument = SANSInstrument.NO_INSTRUMENT
 
         # When in doubt it should just forward the value as is
-        self.beam_centre_model.rear_pos_1 = 'a'
-        self.assertEqual(self.beam_centre_model.rear_pos_1, 'a')
+        self.beam_centre_model.rear_pos_1 = "a"
+        self.assertEqual(self.beam_centre_model.rear_pos_1, "a")
 
     def test_scaling_ignores_zero_vals(self):
         self.beam_centre_model.lab_pos_1 = 0.0
@@ -136,5 +136,5 @@ class BeamCentreModelTest(unittest.TestCase):
         self.assertEqual(0.0, self.beam_centre_model.hab_pos_2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

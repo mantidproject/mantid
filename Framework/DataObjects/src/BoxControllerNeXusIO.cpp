@@ -15,6 +15,8 @@
 #include "MantidKernel/Exception.h"
 
 #include <H5Cpp.h>
+#include <Poco/File.h>
+
 #include <algorithm>
 #include <string>
 
@@ -163,6 +165,32 @@ bool BoxControllerNeXusIO::openFile(const std::string &fileName, const std::stri
 
   return true;
 }
+
+/**
+ * Copy the underlying file to the given destination. If the file is opened and locked
+ * then it is closed, the copy made and the file is reopened again with the same mode
+ * @param destFilename A filepath to copy the file to.
+ */
+void BoxControllerNeXusIO::copyFileTo(const std::string &destFilename) {
+  // Some OSs (observed on Windows) take an exclusive lock on the file
+  // To copy the file must be closed, copied and reopened. To avoid
+  // paying for this where not necessary first try without closing first
+  try {
+    Poco::File(this->getFileName()).copyTo(destFilename);
+    return;
+  } catch (const Poco::Exception &) {
+    try {
+      this->closeFile();
+      Poco::File(this->getFileName()).copyTo(destFilename);
+    } catch (...) {
+      // if an exception happened during the copy attempt to reopen the original
+      this->openFile(this->getFileName(), m_ReadOnly ? "r" : "w");
+      throw;
+    }
+    this->openFile(this->getFileName(), m_ReadOnly ? "r" : "w");
+  }
+}
+
 /**Create group responsible for keeping events and add necessary attributes to
  * it*/
 void BoxControllerNeXusIO::CreateEventGroup() {

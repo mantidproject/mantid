@@ -15,16 +15,17 @@ class ToscaInstrument(IndirectInstrument):
 
     A quadratic model is used for energy resolution
     """
-    parameters = abins.parameters.instruments['TOSCA']
 
-    def __init__(self, setting: str = ''):
-        super().__init__(name='TOSCA', setting=setting)
+    parameters = abins.parameters.instruments["TOSCA"]
+
+    def __init__(self, setting: str = ""):
+        super().__init__(name="TOSCA", setting=setting)
 
     @classmethod
     def get_sigma(cls, frequencies):
         """Frequency-dependent broadening width from empirical fit"""
-        a = cls.parameters['a']
-        b = cls.parameters['b']
-        c = cls.parameters['c']
-        sigma = a * frequencies ** 2 + b * frequencies + c
+        a = cls.parameters["a"]
+        b = cls.parameters["b"]
+        c = cls.parameters["c"]
+        sigma = a * frequencies**2 + b * frequencies + c
         return sigma

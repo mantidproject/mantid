@@ -12,16 +12,13 @@ from mantid.api import PythonAlgorithm
 
 
 class StringContainsValidatorTest(unittest.TestCase):
-
-
     def test_StringContainsValidator_with_empty_required_string(self):
         """
-            Test that a list validator restricts the values
-            for a property
+        Test that a list validator restricts the values
+        for a property
         """
 
         class StringContainsValidatorWithEmptyItem(PythonAlgorithm):
-
             def PyInit(self):
                 validator = StringContainsValidator()
                 validator.setRequiredStrings([""])
@@ -36,12 +33,11 @@ class StringContainsValidatorTest(unittest.TestCase):
 
     def test_StringContainsValidator_with_single_required_string(self):
         """
-            Test that a string-contains validator that requires
-            a single string to be contained in the input string
+        Test that a string-contains validator that requires
+        a single string to be contained in the input string
         """
 
         class StringContainsValidatorWithSingleItem(PythonAlgorithm):
-
             def PyInit(self):
                 validator = StringContainsValidator()
                 validator.setRequiredStrings(["meOw"])
@@ -60,15 +56,14 @@ class StringContainsValidatorTest(unittest.TestCase):
 
     def test_StringContainsValidator_with_multiple_required_strings(self):
         """
-            Test that a string-contains validator that requires
-            multiple strings to all be contained in the input string
+        Test that a string-contains validator that requires
+        multiple strings to all be contained in the input string
         """
 
         class StringContainsValidatorWithMultipleItem(PythonAlgorithm):
-
             def PyInit(self):
                 validator = StringContainsValidator()
-                validator.setRequiredStrings(["Home","meOw"])
+                validator.setRequiredStrings(["Home", "meOw"])
                 self.declareProperty("Input", "", validator)
 
             def PyExec(self):
@@ -83,14 +78,13 @@ class StringContainsValidatorTest(unittest.TestCase):
 
     def test_StringContainsValidator_with_multiple_required_strings_constructor(self):
         """
-            Test that a string-contains validator made from constructor that
-            supplies multiple strings required to all be contained in the input string
+        Test that a string-contains validator made from constructor that
+        supplies multiple strings required to all be contained in the input string
         """
 
         class StringContainsValidatorWithMultipleItem(PythonAlgorithm):
-
             def PyInit(self):
-                validator = StringContainsValidator(["Home","meOw"])
+                validator = StringContainsValidator(["Home", "meOw"])
                 self.declareProperty("Input", "", validator)
 
             def PyExec(self):
@@ -104,5 +98,5 @@ class StringContainsValidatorTest(unittest.TestCase):
         testhelpers.assertRaisesNothing(self, alg.setProperty, "Input", "HomeOwner")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -4,14 +4,13 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init
+# pylint: disable=no-init
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
 
 
 class ExampleRedStep(PythonAlgorithm):
-
     def name(self):
         return "ExampleRedStep"
 
@@ -29,11 +28,11 @@ class ExampleRedStep(PythonAlgorithm):
         alg.setPropertyValue("OutputWorkspace", output_ws)
         alg.execute()
 
-#AlgorithmFactory.subscribe(ExampleRedStep)
+
+# AlgorithmFactory.subscribe(ExampleRedStep)
 
 
 class ExampleLoader(PythonAlgorithm):
-
     def name(self):
         return "ExampleLoader"
 

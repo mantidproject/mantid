@@ -58,12 +58,16 @@ if(SIP_BUILD_EXECUTABLE)
 
   # module generator
   find_program(SIP_MODULE_EXECUTABLE NAMES sip-module)
-
   # pyproject.toml template
-  find_file(SIP_PYPROJECT_TOML_TEMPLATE NAME pyproject.toml.in PATHS ${CMAKE_MODULE_PATH}/sip-build)
-
+  set(SIP_PYPROJECT_TOML_TEMPLATE
+      ${CMAKE_MODULE_PATH}/sip-templates/pyproject.toml.in
+      CACHE FILEPATH ""
+  )
   # project.py template
-  find_file(SIP_PROJECT_PY_TEMPLATE NAME project.py.in PATHS ${CMAKE_MODULE_PATH}/sip-build)
+  set(SIP_PROJECT_PY_TEMPLATE
+      ${CMAKE_MODULE_PATH}/sip-templates/project.py.in
+      CACHE FILEPATH ""
+  )
 
   # Set expected variables for find_package
   find_package_handle_standard_args(

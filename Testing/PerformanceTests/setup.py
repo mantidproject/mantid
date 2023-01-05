@@ -16,4 +16,5 @@ import time
 
 
 import sqlresults
+
 sqlresults.setup_database()

@@ -22,8 +22,7 @@ class RunTest(unittest.TestCase):
             run = Run()
             run.addProperty("gd_prtn_chrg", 10.05, True)
             run.addProperty("nspectra", self._nspec, True)
-            run.setStartAndEndTime(DateAndTime("2008-12-18T17:58:38"),
-                                   DateAndTime("2008-12-18T17:59:40"))
+            run.setStartAndEndTime(DateAndTime("2008-12-18T17:58:38"), DateAndTime("2008-12-18T17:59:40"))
             self.__class__._run = run
 
     def test_get_goniometer(self):
@@ -41,56 +40,55 @@ class RunTest(unittest.TestCase):
         self.assertAlmostEqual(charge, 10.05)
 
     def test_run_hasProperty(self):
-        self.assertTrue(self._run.hasProperty('start_time'))
-        self.assertTrue('start_time' in self._run)
-        self.assertFalse('not a log' in self._run)
+        self.assertTrue(self._run.hasProperty("start_time"))
+        self.assertTrue("start_time" in self._run)
+        self.assertFalse("not a log" in self._run)
 
     def test_run_getProperty(self):
-        run_start = self._run.getProperty('start_time')
+        run_start = self._run.getProperty("start_time")
         self.assertEqual(type(run_start.value), str)
         self.assertEqual(run_start.value, "2008-12-18T17:58:38")
 
         def do_spectra_check(nspectra):
             self.assertEqual(type(nspectra.value), int)
             self.assertEqual(nspectra.value, self._nspec)
-            self.assertRaises(RuntimeError,
-                              self._run.getProperty, 'not_a_log')
+            self.assertRaises(RuntimeError, self._run.getProperty, "not_a_log")
 
-        do_spectra_check(self._run.getProperty('nspectra'))
-        do_spectra_check(self._run['nspectra'])
-        do_spectra_check(self._run.get('nspectra'))
+        do_spectra_check(self._run.getProperty("nspectra"))
+        do_spectra_check(self._run["nspectra"])
+        do_spectra_check(self._run.get("nspectra"))
 
         # get returns the default if key does not exist, or None if no default
-        self.assertEqual(self._run.get('not_a_log'), None)
-        self.assertEqual(self._run.get('not_a_log', 5.), 5.)
+        self.assertEqual(self._run.get("not_a_log"), None)
+        self.assertEqual(self._run.get("not_a_log", 5.0), 5.0)
 
     def test_run_getPropertyAsSingleValue_with_number(self):
-        charge = self._run.getPropertyAsSingleValue('gd_prtn_chrg')
+        charge = self._run.getPropertyAsSingleValue("gd_prtn_chrg")
         self.assertAlmostEqual(10.05, charge)
 
     def test_add_property_with_known_type_succeeds(self):
         run = self._run
         nprops = len(run.getProperties())
-        run.addProperty('int_t', 1, False)
+        run.addProperty("int_t", 1, False)
         self.assertEqual(len(run.getProperties()), nprops + 1)
-        run.addProperty('float_t', 2.4, False)
+        run.addProperty("float_t", 2.4, False)
         self.assertEqual(len(run.getProperties()), nprops + 2)
-        run.addProperty('str_t', 'from_python', False)
+        run.addProperty("str_t", "from_python", False)
         self.assertEqual(len(run.getProperties()), nprops + 3)
-        run['int_t'] = 6.5
+        run["int_t"] = 6.5
         self.assertEqual(len(run.getProperties()), nprops + 3)
-        self.assertEqual(run.getProperty('int_t').value, 6.5)
+        self.assertEqual(run.getProperty("int_t").value, 6.5)
 
     def test_add_propgates_units_correctly(self):
         run = self._run
-        run.addProperty('float_t', 2.4, 'metres', True)
-        prop = run.getProperty('float_t')
-        self.assertEqual(prop.units, 'metres')
+        run.addProperty("float_t", 2.4, "metres", True)
+        prop = run.getProperty("float_t")
+        self.assertEqual(prop.units, "metres")
 
     def test_add_property_with_unknown_type_raises_error(self):
         run = self._run
         # This used to test for dict, but we allow for dict now.
-        self.assertRaises(ValueError, run.addProperty, 'set_t', set(), False)
+        self.assertRaises(ValueError, run.addProperty, "set_t", set(), False)
 
     def test_keys_returns_a_list_of_the_property_names(self):
         run = self._run
@@ -98,46 +96,39 @@ class RunTest(unittest.TestCase):
         self.assertEqual(type(names), list)
 
         # Test a few
-        self.assertTrue('nspectra' in names)
-        self.assertTrue('start_time' in names)
-        self.assertFalse('not a log' in names)
+        self.assertTrue("nspectra" in names)
+        self.assertTrue("start_time" in names)
+        self.assertFalse("not a log" in names)
 
     def test_startime(self):
-        """ Test exported function startTime()
-        """
+        """Test exported function startTime()"""
         run = self._run
 
         runstart = run.startTime()
         runstartstr = str(runstart)
-        self.assertEqual(
-            runstartstr, "2008-12-18T17:58:38 "
-        )  # The space at the end is to get around an IPython bug (#8351)
+        self.assertEqual(runstartstr, "2008-12-18T17:58:38 ")  # The space at the end is to get around an IPython bug (#8351)
         self.assertTrue(isinstance(runstart, DateAndTime))
 
     def test_endtime(self):
-        """ Test exported function endTime()
-        """
+        """Test exported function endTime()"""
         run = self._run
 
         runend = run.endTime()
         runendstr = str(runend)
-        self.assertEqual(
-            runendstr, "2008-12-18T17:59:40 "
-        )  # The space at the end is to get around an IPython bug (#8351)
+        self.assertEqual(runendstr, "2008-12-18T17:59:40 ")  # The space at the end is to get around an IPython bug (#8351)
         self.assertTrue(isinstance(runend, DateAndTime))
 
     def test_timestd(self):
-        """
-        """
+        """ """
         run = Run()
         start_time = DateAndTime("2008-12-18T17:58:38")
         nanosec = 1000000000
         # === Float type ===
         temp1 = FloatTimeSeriesProperty("TEMP1")
-        vals = np.arange(10) * 2.
+        vals = np.arange(10) * 2.0
         for i in range(10):
-            temp1.addValue(start_time + i*nanosec, vals[i])
-        run.addProperty(temp1.name, temp1,True)
+            temp1.addValue(start_time + i * nanosec, vals[i])
+        run.addProperty(temp1.name, temp1, True)
         # ignore the last value
         expected = vals[:-1].std()
         self.assertEqual(run.getTimeAveragedStd("TEMP1"), expected)
@@ -165,5 +156,5 @@ class RunTest(unittest.TestCase):
         self.assertNotEqual(self._run, other)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

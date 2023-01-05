@@ -13,23 +13,19 @@ class CrystalStructureTest(unittest.TestCase):
     def test_creation(self):
         # Some valid constructions
         self.assertTrue(self.createCrystalStructureOrRaise("5.43 5.43 5.43", "F d -3 m", "Al 1/3 0.454 1/12 1.0 0.01"))
-        self.assertTrue(self.createCrystalStructureOrRaise("5.43 5.43 5.43", "C m m m", "Al 1/3 0.454 1/12 1.0 0.01;\n"
-                                                                                        "Si 2/3 0.121 1/8"))
+        self.assertTrue(self.createCrystalStructureOrRaise("5.43 5.43 5.43", "C m m m", "Al 1/3 0.454 1/12 1.0 0.01;\n" "Si 2/3 0.121 1/8"))
         self.assertTrue(
-            self.createCrystalStructureOrRaise("5.43 5.43 5.43 90 90 120", "R -3 c", "Al 1/3 0.454 1/12 1.0 0.01;\n"
-                                                                                     "Si 2/3 0.121 1/8"))
+            self.createCrystalStructureOrRaise("5.43 5.43 5.43 90 90 120", "R -3 c", "Al 1/3 0.454 1/12 1.0 0.01;\n" "Si 2/3 0.121 1/8")
+        )
 
         # Invalid unit cell specification
-        self.assertFalse(
-            self.createCrystalStructureOrRaise("5.43 5.43 5.43 90.0", "C m m m", "Al 1/3 0.454 1/12 1.0 0.01"))
+        self.assertFalse(self.createCrystalStructureOrRaise("5.43 5.43 5.43 90.0", "C m m m", "Al 1/3 0.454 1/12 1.0 0.01"))
 
         # Invalid space group
-        self.assertFalse(
-            self.createCrystalStructureOrRaise("5.43 5.43 5.43", "INVALID", "Al 1/3 0.454 1/12 1.0 0.01"))
+        self.assertFalse(self.createCrystalStructureOrRaise("5.43 5.43 5.43", "INVALID", "Al 1/3 0.454 1/12 1.0 0.01"))
 
         # Invalid atom specification
-        self.assertFalse(
-            self.createCrystalStructureOrRaise("5.43 5.43 5.43", "C m c e", "Al 1/3 0"))
+        self.assertFalse(self.createCrystalStructureOrRaise("5.43 5.43 5.43", "C m c e", "Al 1/3 0"))
 
     def createCrystalStructureOrRaise(self, unitCell, spaceGroup, atomStrings):
         try:
@@ -58,21 +54,21 @@ class CrystalStructureTest(unittest.TestCase):
         structure = CrystalStructure("5.43 5.42 5.41", "F d -3 m", initialString)
         scatterers = structure.getScatterers()
 
-        self.assertEqual(';'.join(scatterers), initialString)
+        self.assertEqual(";".join(scatterers), initialString)
 
     def test_to_string(self):
         initialString = "Al 1/3 0.454 1/12 1 0.01;Si 0.1 0.2 0.3 0.99 0.1"
         structure = CrystalStructure("5.43 5.42 5.41", "F d -3 m", initialString)
 
-        expected_str = "Crystal structure with:\nUnit cell: a = 5.43 b = 5.42 "\
-                       "c = 5.41 alpha = 90 beta = 90 gamma = 90\n"\
-                       "Centering: All-face centred\nSpace Group: F d -3 m\n"\
-                       "Scatterers: Al 1/3 0.454 1/12 1 0.01, "\
-                       "Si 0.1 0.2 0.3 0.99 0.1"
+        expected_str = (
+            "Crystal structure with:\nUnit cell: a = 5.43 b = 5.42 "
+            "c = 5.41 alpha = 90 beta = 90 gamma = 90\n"
+            "Centering: All-face centred\nSpace Group: F d -3 m\n"
+            "Scatterers: Al 1/3 0.454 1/12 1 0.01, "
+            "Si 0.1 0.2 0.3 0.99 0.1"
+        )
 
-        expected_repr = "CrystalStructure(\"5.43 5.42 5.41 90 90 90\", "\
-                        "\"F d -3 m\", \"Al 1/3 0.454 1/12 1 0.01; "\
-                        "Si 0.1 0.2 0.3 0.99 0.1\")"
+        expected_repr = 'CrystalStructure("5.43 5.42 5.41 90 90 90", ' '"F d -3 m", "Al 1/3 0.454 1/12 1 0.01; ' 'Si 0.1 0.2 0.3 0.99 0.1")'
 
         self.assertEqual(expected_str, str(structure))
         self.assertEqual(expected_repr, structure.__repr__())
@@ -81,5 +77,5 @@ class CrystalStructureTest(unittest.TestCase):
         self.assertEqual(structure.getUnitCell().a(), newStructure.getUnitCell().a())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

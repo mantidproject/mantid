@@ -12,16 +12,18 @@ from Engineering.common.calibration_info import CalibrationInfo
 
 
 class EnginX:
-    def __init__(self,
-                 vanadium_run: str,
-                 focus_runs: Sequence[str],
-                 save_dir: str,
-                 full_inst_calib_path: str,
-                 prm_path: Optional[str] = None,
-                 ceria_run: Optional[str] = None,
-                 group: Optional[GROUP] = None,
-                 calfile_path: Optional[str] = None,
-                 spectrum_num: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        vanadium_run: str,
+        focus_runs: Sequence[str],
+        save_dir: str,
+        full_inst_calib_path: str,
+        prm_path: Optional[str] = None,
+        ceria_run: Optional[str] = None,
+        group: Optional[GROUP] = None,
+        calfile_path: Optional[str] = None,
+        spectrum_num: Optional[str] = None,
+    ) -> None:
 
         # init attributes
         self.calibration = CalibrationInfo()
@@ -50,13 +52,21 @@ class EnginX:
         if self.calibration.get_prm_filepath():
             self.calibration.load_relevant_calibration_files()  # loading existing calibration files
         else:
-            create_new_calibration(self.calibration, rb_num=None, plot_output=plot_output, save_dir=self.save_dir,
-                                   full_calib=self.full_calib_ws)
+            create_new_calibration(
+                self.calibration, rb_num=None, plot_output=plot_output, save_dir=self.save_dir, full_calib=self.full_calib_ws
+            )
 
     def focus(self, plot_output: bool) -> None:
         if self.calibration.is_valid() and self.van_run:
-            focus_run(self.focus_runs, self.van_run, plot_output, rb_num=None, calibration=self.calibration,
-                      save_dir=self.save_dir, full_calib=self.full_calib_ws)
+            focus_run(
+                self.focus_runs,
+                self.van_run,
+                plot_output,
+                rb_num=None,
+                calibration=self.calibration,
+                save_dir=self.save_dir,
+                full_calib=self.full_calib_ws,
+            )
 
     def main(self, plot_cal: bool = False, plot_foc: bool = False):
         self.calibrate(plot_cal)

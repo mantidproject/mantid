@@ -12,7 +12,6 @@ from mantid.dataobjects import SpecialWorkspace2D
 
 
 class SpecialWorkspace2DTest(unittest.TestCase):
-
     def setUp(self):
         ws = Load("ENGINX228061.nxs")  # SWS2D must have an instrument component, using an ENGINX ws to generate
         self.special_ws2d = SpecialWorkspace2D(ws)
@@ -29,5 +28,5 @@ class SpecialWorkspace2DTest(unittest.TestCase):
         self.assertEqual(0, self.special_ws2d.getValue(100001))  # default sws2d values are all 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

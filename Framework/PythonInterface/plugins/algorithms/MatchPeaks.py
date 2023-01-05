@@ -23,19 +23,18 @@ def mask_ws(ws_to_mask, xstart, xend):
     x_values = ws_to_mask.readX(0)
 
     if xstart > 0:
-        logger.debug('Mask bins smaller than {0}'.format(xstart))
+        logger.debug("Mask bins smaller than {0}".format(xstart))
         MaskBins(InputWorkspace=ws_to_mask, OutputWorkspace=ws_to_mask, XMin=x_values[0], XMax=x_values[int(xstart)])
     else:
-        logger.debug('No masking due to x bin <= 0!: {0}'.format(xstart))
+        logger.debug("No masking due to x bin <= 0!: {0}".format(xstart))
     if xend < len(x_values) - 1:
-        logger.debug('Mask bins larger than {0}'.format(xend))
+        logger.debug("Mask bins larger than {0}".format(xend))
         MaskBins(InputWorkspace=ws_to_mask, OutputWorkspace=ws_to_mask, XMin=x_values[int(xend) + 1], XMax=x_values[-1])
     else:
-        logger.debug('No masking due to x bin >= len(x_values) - 1!: {0}'.format(xend))
+        logger.debug("No masking due to x bin >= len(x_values) - 1!: {0}".format(xend))
 
     if xstart > 0 and xend < len(x_values) - 1:
-        logger.information('Bins out of range {0} {1} [Unit of X-axis] are masked'.format
-                           (x_values[int(xstart)],x_values[int(xend) + 1]))
+        logger.information("Bins out of range {0} {1} [Unit of X-axis] are masked".format(x_values[int(xstart)], x_values[int(xend) + 1]))
 
 
 class MatchPeaks(PythonAlgorithm):
@@ -57,99 +56,83 @@ class MatchPeaks(PythonAlgorithm):
         return "Transforms"
 
     def summary(self):
-        return 'Circular shifts (numpy.roll) the data of the input workspace to align peaks without modifying the x-axis.'
+        return "Circular shifts (numpy.roll) the data of the input workspace to align peaks without modifying the x-axis."
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace',
-                                                     defaultValue='',
-                                                     direction=Direction.Input),
-                             doc='Input workspace')
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", defaultValue="", direction=Direction.Input), doc="Input workspace")
 
-        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace2',
-                                                     defaultValue='',
-                                                     direction=Direction.Input,
-                                                     optional=PropertyMode.Optional),
-                             doc='Input workspace to align peaks with')
+        self.declareProperty(
+            MatrixWorkspaceProperty("InputWorkspace2", defaultValue="", direction=Direction.Input, optional=PropertyMode.Optional),
+            doc="Input workspace to align peaks with",
+        )
 
-        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace3',
-                                                     defaultValue='',
-                                                     direction=Direction.Input,
-                                                     optional=PropertyMode.Optional),
-                             doc='Input workspace to align peaks with')
+        self.declareProperty(
+            MatrixWorkspaceProperty("InputWorkspace3", defaultValue="", direction=Direction.Input, optional=PropertyMode.Optional),
+            doc="Input workspace to align peaks with",
+        )
 
-        self.declareProperty('MaskBins',
-                             defaultValue=False,
-                             doc='Whether to mask shifted bins')
+        self.declareProperty("MaskBins", defaultValue=False, doc="Whether to mask shifted bins")
 
-        self.declareProperty('MatchInput2ToCenter',
-                             defaultValue=False,
-                             doc='Match peaks such that InputWorkspace2 would be centered')
+        self.declareProperty("MatchInput2ToCenter", defaultValue=False, doc="Match peaks such that InputWorkspace2 would be centered")
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace',
-                                                     defaultValue='',
-                                                     direction=Direction.Output),
-                             doc='Shifted output workspace')
+        self.declareProperty(
+            MatrixWorkspaceProperty("OutputWorkspace", defaultValue="", direction=Direction.Output), doc="Shifted output workspace"
+        )
 
-        self.declareProperty(ITableWorkspaceProperty('BinRangeTable',
-                                                     defaultValue='',
-                                                     direction=Direction.Output,
-                                                     optional=PropertyMode.Optional),
-                             doc='Table workspace that contains two values defining a range. '
-                                 'Bins outside this range are overflown out of range due to circular shift'
-                                 'and can be masked.')
+        self.declareProperty(
+            ITableWorkspaceProperty("BinRangeTable", defaultValue="", direction=Direction.Output, optional=PropertyMode.Optional),
+            doc="Table workspace that contains two values defining a range. "
+            "Bins outside this range are overflown out of range due to circular shift"
+            "and can be masked.",
+        )
 
     def setUp(self):
-        self._input_ws = self.getPropertyValue('InputWorkspace')
-        self._input_2_ws = self.getPropertyValue('InputWorkspace2')
-        self._input_3_ws = self.getPropertyValue('InputWorkspace3')
-        self._output_ws = self.getPropertyValue('OutputWorkspace')
-        self._output_bin_range = self.getPropertyValue('BinRangeTable')
+        self._input_ws = self.getPropertyValue("InputWorkspace")
+        self._input_2_ws = self.getPropertyValue("InputWorkspace2")
+        self._input_3_ws = self.getPropertyValue("InputWorkspace3")
+        self._output_ws = self.getPropertyValue("OutputWorkspace")
+        self._output_bin_range = self.getPropertyValue("BinRangeTable")
 
-        self._masking = self.getProperty('MaskBins').value
-        self._match_option = self.getProperty('MatchInput2ToCenter').value
+        self._masking = self.getProperty("MaskBins").value
+        self._match_option = self.getProperty("MatchInput2ToCenter").value
 
         if self._input_ws:
-            ReplaceSpecialValues(InputWorkspace = self._input_ws, OutputWorkspace = self._input_ws,
-                                 NaNValue = 0, InfinityValue = 0)
+            ReplaceSpecialValues(InputWorkspace=self._input_ws, OutputWorkspace=self._input_ws, NaNValue=0, InfinityValue=0)
 
         if self._input_2_ws:
-            ReplaceSpecialValues(InputWorkspace = self._input_2_ws, OutputWorkspace = self._input_2_ws,
-                                 NaNValue = 0, InfinityValue = 0)
+            ReplaceSpecialValues(InputWorkspace=self._input_2_ws, OutputWorkspace=self._input_2_ws, NaNValue=0, InfinityValue=0)
 
         if self._input_3_ws:
-            ReplaceSpecialValues(InputWorkspace = self._input_3_ws, OutputWorkspace = self._input_3_ws,
-                                 NaNValue = 0, InfinityValue = 0)
+            ReplaceSpecialValues(InputWorkspace=self._input_3_ws, OutputWorkspace=self._input_3_ws, NaNValue=0, InfinityValue=0)
 
     def validateInputs(self):
         issues = dict()
-        input1 = self.getPropertyValue('InputWorkspace')
-        input2 = self.getPropertyValue('InputWorkspace2')
-        input3 = self.getPropertyValue('InputWorkspace3')
+        input1 = self.getPropertyValue("InputWorkspace")
+        input2 = self.getPropertyValue("InputWorkspace2")
+        input3 = self.getPropertyValue("InputWorkspace3")
 
         if input3:
             if not input2:
-                issues['InputWorkspace2'] = 'When InputWorkspace3 is given, InputWorkspace2 is also required.'
+                issues["InputWorkspace2"] = "When InputWorkspace3 is given, InputWorkspace2 is also required."
             else:
                 if mtd[input3].isDistribution() and not mtd[input2].isDistribution():
-                    issues['InputWorkspace3'] = 'InputWorkspace2 and InputWorkspace3 must be either point data or ' \
-                                                'histogram data'
+                    issues["InputWorkspace3"] = "InputWorkspace2 and InputWorkspace3 must be either point data or " "histogram data"
                 elif mtd[input3].blocksize() != mtd[input2].blocksize():
-                    issues['InputWorkspace3'] = 'Incompatible number of bins'
+                    issues["InputWorkspace3"] = "Incompatible number of bins"
                 elif mtd[input3].getNumberHistograms() != mtd[input2].getNumberHistograms():
-                    issues['InputWorkspace3'] = 'Incompatible number of spectra'
+                    issues["InputWorkspace3"] = "Incompatible number of spectra"
                 elif np.any(mtd[input3].extractX() - mtd[input2].extractX()):
-                    issues['InputWorkspace3'] = 'Incompatible x-values'
+                    issues["InputWorkspace3"] = "Incompatible x-values"
 
         if input2:
             if mtd[input1].isDistribution() and not mtd[input2].isDistribution():
-                issues['InputWorkspace2'] = 'InputWorkspace2 and InputWorkspace3 must be either point data or ' \
-                                            'histogram data'
+                issues["InputWorkspace2"] = "InputWorkspace2 and InputWorkspace3 must be either point data or " "histogram data"
             elif mtd[input1].blocksize() != mtd[input2].blocksize():
-                issues['InputWorkspace2'] = 'Incompatible number of bins'
+                issues["InputWorkspace2"] = "Incompatible number of bins"
             elif mtd[input1].getNumberHistograms() != mtd[input2].getNumberHistograms():
-                issues['InputWorkspace2'] = 'Incompatible number of spectra'
+                issues["InputWorkspace2"] = "Incompatible number of spectra"
             elif np.any(mtd[input1].extractX() - mtd[input2].extractX()):
-                issues['InputWorkspace2'] = 'Incompatible x-values'
+                issues["InputWorkspace2"] = "Incompatible x-values"
 
         return issues
 
@@ -163,17 +146,17 @@ class MatchPeaks(PythonAlgorithm):
 
         # Find peak positions in input workspace
         peak_bins1 = self._get_peak_position(output_ws)
-        self.log().information('Peak bins {0}: {1}'.format(self._input_ws, peak_bins1))
+        self.log().information("Peak bins {0}: {1}".format(self._input_ws, peak_bins1))
 
         # Find peak positions in second input workspace
         if self._input_2_ws:
             peak_bins2 = self._get_peak_position(mtd[self._input_2_ws])
-            self.log().information('Peak bins {0}: {1}'.format(self._input_2_ws, peak_bins2))
+            self.log().information("Peak bins {0}: {1}".format(self._input_2_ws, peak_bins2))
 
         # Find peak positions in third input workspace
         if self._input_3_ws:
             peak_bins3 = self._get_peak_position(mtd[self._input_3_ws])
-            self.log().information('Peak bins {0}: {1}'.format(self._input_3_ws, peak_bins3))
+            self.log().information("Peak bins {0}: {1}".format(self._input_3_ws, peak_bins3))
 
         # All bins must be positive and larger than zero
         if not self._input_2_ws:
@@ -197,7 +180,7 @@ class MatchPeaks(PythonAlgorithm):
             output_ws.setY(i, np.roll(output_ws.readY(i), int(-to_shift[i])))
             output_ws.setE(i, np.roll(output_ws.readE(i), int(-to_shift[i])))
 
-        self.log().debug('Shift array: {0}'.format(-to_shift))
+        self.log().debug("Shift array: {0}".format(-to_shift))
 
         # Final treatment of bins (masking, produce output)
         min_bin = 0
@@ -217,13 +200,13 @@ class MatchPeaks(PythonAlgorithm):
         if self._output_bin_range:
             # Create table with its columns containing bin range
             bin_range = CreateEmptyTableWorkspace(OutputWorkspace=self._output_bin_range)
-            bin_range.addColumn(type="double", name='MinBin')
-            bin_range.addColumn(type="double", name='MaxBin')
-            bin_range.addRow({'MinBin': min_bin, 'MaxBin': max_bin})
-            self.setProperty('BinRangeTable', bin_range)
+            bin_range.addColumn(type="double", name="MinBin")
+            bin_range.addColumn(type="double", name="MaxBin")
+            bin_range.addRow({"MinBin": min_bin, "MaxBin": max_bin})
+            self.setProperty("BinRangeTable", bin_range)
 
         # Set output properties
-        self.setProperty('OutputWorkspace', output_ws)
+        self.setProperty("OutputWorkspace", output_ws)
 
         return
 
@@ -235,14 +218,14 @@ class MatchPeaks(PythonAlgorithm):
         @return          :: bin numbers of the peak positions
         """
 
-        fit_table_name = input_ws.name() + '_epp'
+        fit_table_name = input_ws.name() + "_epp"
 
         if isinstance(input_ws, MatrixWorkspace):
             fit_table = FindEPP(InputWorkspace=input_ws, OutputWorkspace=fit_table_name)
         elif isinstance(input_ws, ITableWorkspace):
             fit_table = input_ws
         else:
-            logger.error('Workspace not defined')
+            logger.error("Workspace not defined")
 
         # Mid bin number
         mid_bin = int(input_ws.blocksize() / 2)
@@ -261,30 +244,28 @@ class MatchPeaks(PythonAlgorithm):
 
             if peak_plus_error > x_values[0] and peak_plus_error < x_values[-1]:
                 peak_plus_error_bin = input_ws.yIndexOfX(peak_plus_error)
-                if abs(peak_plus_error_bin - mid_bin) < tolerance and fit["FitStatus"] == 'success':
+                if abs(peak_plus_error_bin - mid_bin) < tolerance and fit["FitStatus"] == "success":
                     # fit succeeded, and fitted peak is within acceptance range, take it
                     peak_bin[i] = input_ws.yIndexOfX(fit["PeakCentre"])
-                    logger.debug('Fit successfull, peak inside tolerance')
+                    logger.debug("Fit successfull, peak inside tolerance")
                 elif abs(max_pos - mid_bin) < tolerance:
                     # fit not reliable, take the maximum if within acceptance
                     peak_bin[i] = max_pos
-                    logger.debug('Fit outside the trusted range, take the maximum position')
+                    logger.debug("Fit outside the trusted range, take the maximum position")
                 else:
                     # do not shift
-                    logger.debug('Both the fit and the max are outside the trusted range. '
-                                 'Do not shift the spectrum.')
+                    logger.debug("Both the fit and the max are outside the trusted range. " "Do not shift the spectrum.")
 
             elif abs(max_pos - mid_bin) < tolerance:
                 # fit not reliable, take the maximum if within acceptance
                 peak_bin[i] = max_pos
-                logger.debug('Fit outside the x-range, take the maximum position')
+                logger.debug("Fit outside the x-range, take the maximum position")
 
             else:
                 # do not shift
-                logger.debug('Both the fit and the max are outside the trusted range. '
-                             'Do not shift the spectrum.')
+                logger.debug("Both the fit and the max are outside the trusted range. " "Do not shift the spectrum.")
 
-            logger.debug('Spectrum {0} will be shifted to bin {1}'.format(i,peak_bin[i]))
+            logger.debug("Spectrum {0} will be shifted to bin {1}".format(i, peak_bin[i]))
 
         DeleteWorkspace(fit_table)
 

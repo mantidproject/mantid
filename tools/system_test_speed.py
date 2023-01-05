@@ -12,7 +12,7 @@ a CSV file of the speed & memory for each system test.
 """
 import sys
 
-with open(sys.argv[1], 'r') as f:
+with open(sys.argv[1], "r") as f:
     lines = f.readlines()
 
 lines = filter(lambda x: "RESULT|" in x or ": Executing" in x, lines)
@@ -25,7 +25,7 @@ for i, (x, y) in enumerate(zip(lines, lines[1::])):
         idxs.append(i)
 lines = [i for j, i in enumerate(lines) if j not in idxs]
 
-with open(sys.argv[2], 'w') as f:
+with open(sys.argv[2], "w") as f:
     f.write("name, time, memory\n")
     for name, time, memory in zip(lines[::3], lines[1::3], lines[2::3]):
         name = name.split("Executing")[-1].strip()

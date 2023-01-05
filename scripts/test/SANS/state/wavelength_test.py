@@ -6,9 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from sans.common.enums import (SANSFacility, SANSInstrument, RangeStepType)
+from sans.common.enums import SANSFacility, SANSInstrument, RangeStepType
 from sans.state.StateObjects.StateData import get_data_builder
-from sans.state.StateObjects.StateWavelength import (StateWavelength, get_wavelength_builder)
+from sans.state.StateObjects.StateWavelength import StateWavelength, get_wavelength_builder
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
@@ -16,7 +16,6 @@ from sans.test_helper.file_information_mock import SANSFileInformationMock
 # State
 # ----------------------------------------------------------------------------------------------------------------------
 class StateWavelengthTest(unittest.TestCase):
-
     def test_that_is_sans_state_data_object(self):
         state = StateWavelength()
         self.assertTrue(isinstance(state, StateWavelength))
@@ -24,52 +23,53 @@ class StateWavelengthTest(unittest.TestCase):
     def test_convert_step_type_from_RANGE_LIN_to_LIN(self):
         state = StateWavelength()
         state.wavelength_step_type = RangeStepType.RANGE_LIN
-        self.assertEqual(state.wavelength_step_type_lin_log,  RangeStepType.LIN)
+        self.assertEqual(state.wavelength_step_type_lin_log, RangeStepType.LIN)
 
     def test_convert_step_type_from_RANGE_LOG_to_LOG(self):
         state = StateWavelength()
         state.wavelength_step_type = RangeStepType.RANGE_LOG
-        self.assertEqual(state.wavelength_step_type_lin_log,  RangeStepType.LOG)
+        self.assertEqual(state.wavelength_step_type_lin_log, RangeStepType.LOG)
 
     def test_convert_step_type_does_not_change_LIN(self):
         state = StateWavelength()
         state.wavelength_step_type = RangeStepType.LIN
-        self.assertEqual(state.wavelength_step_type_lin_log,  RangeStepType.LIN)
+        self.assertEqual(state.wavelength_step_type_lin_log, RangeStepType.LIN)
 
     def test_convert_step_type_does_not_change_LOG(self):
         state = StateWavelength()
         state.wavelength_step_type = RangeStepType.LOG
-        self.assertEqual(state.wavelength_step_type_lin_log,  RangeStepType.LOG)
+        self.assertEqual(state.wavelength_step_type_lin_log, RangeStepType.LOG)
 
     def test_convert_step_type_does_not_change_NOT_SET(self):
         state = StateWavelength()
         state.wavelength_step_type = RangeStepType.NOT_SET
-        self.assertEqual(state.wavelength_step_type_lin_log,  RangeStepType.NOT_SET)
+        self.assertEqual(state.wavelength_step_type_lin_log, RangeStepType.NOT_SET)
 
     def test_convert_step_type_from_LIN_to_RANGE_LIN(self):
         state = StateWavelength()
         state.wavelength_step_type = RangeStepType.LIN
-        self.assertEqual(state.wavelength_step_type_range,  RangeStepType.RANGE_LIN)
+        self.assertEqual(state.wavelength_step_type_range, RangeStepType.RANGE_LIN)
 
     def test_convert_step_type_from_LOG_to_RANGE_LOG(self):
         state = StateWavelength()
         state.wavelength_step_type = RangeStepType.LOG
-        self.assertEqual(state.wavelength_step_type_range,  RangeStepType.RANGE_LOG)
+        self.assertEqual(state.wavelength_step_type_range, RangeStepType.RANGE_LOG)
 
     def test_convert_step_type_does_not_change_RANGE_LIN(self):
         state = StateWavelength()
         state.wavelength_step_type = RangeStepType.RANGE_LIN
-        self.assertEqual(state.wavelength_step_type_range,  RangeStepType.RANGE_LIN)
+        self.assertEqual(state.wavelength_step_type_range, RangeStepType.RANGE_LIN)
 
     def test_convert_step_type_does_not_change_RANGE_LOG(self):
         state = StateWavelength()
         state.wavelength_step_type = RangeStepType.RANGE_LOG
-        self.assertEqual(state.wavelength_step_type_range,  RangeStepType.RANGE_LOG)
+        self.assertEqual(state.wavelength_step_type_range, RangeStepType.RANGE_LOG)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Builder
 # ----------------------------------------------------------------------------------------------------------------------
+
 
 class StateSliceEventBuilderTest(unittest.TestCase):
     def test_that_slice_event_state_can_be_built(self):
@@ -91,9 +91,9 @@ class StateSliceEventBuilderTest(unittest.TestCase):
         # Assert
         state = builder.build()
 
-        self.assertEqual(state.wavelength_interval.wavelength_full_range,  (10.0, 20.0))
+        self.assertEqual(state.wavelength_interval.wavelength_full_range, (10.0, 20.0))
         self.assertEqual(state.wavelength_step_type, RangeStepType.LIN)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

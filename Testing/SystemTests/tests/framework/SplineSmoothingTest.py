@@ -71,7 +71,7 @@ class LoadTests(unittest.TestCase):
         SplineSmoothing(InputWorkspace=wsstheta, OutputWorkspace="SthetaOutSpline")
 
     def test_enginx_curve_spline_smoothed(self):
-        ws_smooth = mtd['enginxOutSpline']
+        ws_smooth = mtd["enginxOutSpline"]
 
         # SplineSmooth all three spectrum
         self.assertEqual(3, ws_smooth.getNumberHistograms())
@@ -83,7 +83,7 @@ class LoadTests(unittest.TestCase):
         self.assertAlmostEqual(57.1213842, ws_smooth.readY(2)[0], places=DIFF_PLACES)
 
     def test_stheta_curve_spline_smoothed(self):
-        ws_smooth = mtd['SthetaOutSpline']
+        ws_smooth = mtd["SthetaOutSpline"]
 
         # SplineSmooth all three spectrum
         self.assertEqual(1, ws_smooth.getNumberHistograms())
@@ -93,11 +93,11 @@ class LoadTests(unittest.TestCase):
         self.assertAlmostEqual(56.9972, ws_smooth.readX(0)[231], places=DIFF_PLACES)
 
     def test_enginx_curve_further_checks(self):
-        ws_smooth_enginx = mtd['enginxOutSpline']
-        ws_enginx = mtd['wsenginx']
+        ws_smooth_enginx = mtd["enginxOutSpline"]
+        ws_enginx = mtd["wsenginx"]
 
-        ws_smooth_stetha = mtd['SthetaOutSpline']
-        ws_stetha = mtd['wsStheta']
+        ws_smooth_stetha = mtd["SthetaOutSpline"]
+        ws_stetha = mtd["wsStheta"]
 
         for i in range(0, 462):
             self.assertTrue(ws_enginx.readX(0)[i], ws_smooth_enginx.readX(0)[i])

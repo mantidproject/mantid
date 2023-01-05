@@ -11,12 +11,11 @@ import numpy as np
 
 
 class PCRmagRedfield(IFunction1D):
-
     def category(self):
         return "Muon\\MuonSpecific"
 
     def init(self):
-        self.declareParameter("A0", 0.2, 'Amplitude')
+        self.declareParameter("A0", 0.2, "Amplitude")
         self.declareParameter("Delta", 0.2)
         self.declareParameter("Nu", 0.2)
 
@@ -25,12 +24,12 @@ class PCRmagRedfield(IFunction1D):
         Delta = self.getParameterValue("Delta")
         Nu = self.getParameterValue("Nu")
         W = 2 * np.pi * Delta
-        Q = (Nu ** 2 + Delta ** 2) * Nu
+        Q = (Nu**2 + Delta**2) * Nu
         if Q > 0:
-            Lambda = Delta ** 4 / Q
+            Lambda = Delta**4 / Q
         else:
             Lambda = 0
-        return A0 * (1./3 + 2./3 * np.exp(- Lambda * x) * np.cos(W * x))
+        return A0 * (1.0 / 3 + 2.0 / 3 * np.exp(-Lambda * x) * np.cos(W * x))
 
 
 FunctionFactory.subscribe(PCRmagRedfield)

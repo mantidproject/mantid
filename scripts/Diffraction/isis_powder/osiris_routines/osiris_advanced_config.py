@@ -9,12 +9,13 @@
 # into future versions of Mantid.
 
 
-general_params = {"file_names": {
-         "grouping_filename": "osiris_grouping.cal",
-         "nxs_filename": "{instshort}{runno}{suffix}{unit}.nxs",
-         "gss_filename": "{instshort}{runno}{suffix}{unit}.gsas",
-         "dat_files_directory": "",
-         "xye_filename": "{instshort}{runno}{suffix}{unit}.xye",
+general_params = {
+    "file_names": {
+        "grouping_filename": "osiris_grouping.cal",
+        "nxs_filename": "{instshort}{runno}{suffix}{unit}.nxs",
+        "gss_filename": "{instshort}{runno}{suffix}{unit}.gsas",
+        "dat_files_directory": "",
+        "xye_filename": "{instshort}{runno}{suffix}{unit}.xye",
     }
 }
 

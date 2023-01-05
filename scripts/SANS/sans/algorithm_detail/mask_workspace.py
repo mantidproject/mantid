@@ -4,15 +4,15 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from abc import (ABCMeta, abstractmethod)
+from abc import ABCMeta, abstractmethod
 
 from mantid.kernel import Logger
 
 from sans.algorithm_detail.mask_functions import SpectraBlock
-from sans.algorithm_detail.xml_shapes import (add_cylinder, add_outside_cylinder, create_phi_mask, create_line_mask)
+from sans.algorithm_detail.xml_shapes import add_cylinder, add_outside_cylinder, create_phi_mask, create_line_mask
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import SANSInstrument
-from sans.common.file_information import (find_full_file_path, get_instrument_paths_for_sans_file)
+from sans.common.file_information import find_full_file_path, get_instrument_paths_for_sans_file
 from sans.common.general_functions import create_unmanaged_algorithm
 
 
@@ -81,11 +81,11 @@ def mask_cylinder(mask_info, workspace):
     xml = []
     # Set up the inner radius of the cylinder
     if radius_min is not None and radius_min > 0.0:
-        add_cylinder(xml, radius_min, 0, 0, 'beam_stop')
+        add_cylinder(xml, radius_min, 0, 0, "beam_stop")
 
     # Set up the outer radius of the cylinder
     if radius_max is not None and radius_max > 0.0:
-        add_outside_cylinder(xml, radius_max, 0, 0, 'beam_area')
+        add_outside_cylinder(xml, radius_max, 0, 0, "beam_area")
 
     # Mask the cylinder shape if there is anything to mask, else don't do anything
     if xml:
@@ -122,8 +122,7 @@ def mask_with_mask_files(mask_info, inst_info, workspace):
 
         # Mask loader
         load_name = "LoadMask"
-        load_options = {"Instrument": idf_path,
-                        "OutputWorkspace": EMPTY_NAME}
+        load_options = {"Instrument": idf_path, "OutputWorkspace": EMPTY_NAME}
         load_alg = create_unmanaged_algorithm(load_name, **load_options)
         mask_alg = create_unmanaged_algorithm("MaskDetectors")
 
@@ -241,8 +240,9 @@ def mask_spectra(mask_info, workspace, spectra_block, detector_type):
     block_vertical_stop = detector.block_vertical_stop
 
     if block_horizontal_start and block_horizontal_stop and block_vertical_start and block_vertical_stop:
-        for h_start, h_stop, v_start, v_stop in zip(block_horizontal_start, block_horizontal_stop,
-                                                    block_vertical_start, block_vertical_stop):
+        for h_start, h_stop, v_start, v_stop in zip(
+            block_horizontal_start, block_horizontal_stop, block_vertical_start, block_vertical_stop
+        ):
             x_dim = abs(v_stop - v_start) + 1
             y_dim = abs(h_stop - h_start) + 1
             total_spectra.extend(spectra_block.get_block(h_start, v_start, y_dim, x_dim))
@@ -267,16 +267,16 @@ def mask_spectra(mask_info, workspace, spectra_block, detector_type):
 
     if len(filtered_mask_spectra) != len(total_spectra):
         log = Logger("SANS - Mask Workspace")
-        log.warning("Skipped masking some spectrum numbers that do not exist in the workspace. Re-run"
-                    " with logging set to information for more details")
+        log.warning(
+            "Skipped masking some spectrum numbers that do not exist in the workspace. Re-run"
+            " with logging set to information for more details"
+        )
         log.information("The following spectrum numbers do not exist in the ws (cropped to component):")
         for i in list(set(total_spectra) - set(filtered_mask_spectra)):
             log.information(str(i))
 
     mask_name = "MaskSpectra"
-    mask_options = {"InputWorkspace": workspace,
-                    "InputWorkspaceIndexType": "SpectrumNumber",
-                    "OutputWorkspace": "__dummy"}
+    mask_options = {"InputWorkspace": workspace, "InputWorkspaceIndexType": "SpectrumNumber", "OutputWorkspace": "__dummy"}
     mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
     mask_alg.setProperty("InputWorkspaceIndexSet", list(set(filtered_mask_spectra)))
     mask_alg.setProperty("OutputWorkspace", workspace)
@@ -307,12 +307,11 @@ def mask_angle(mask_info, workspace):
                 phi_max = 90.0
 
         # Create the phi mask and apply it if anything was created
-        phi_mask = create_phi_mask('unique phi', [0, 0, 0], phi_min, phi_max, phi_mirror)
+        phi_mask = create_phi_mask("unique phi", [0, 0, 0], phi_min, phi_max, phi_mirror)
 
         if phi_mask:
             mask_name = "MaskDetectorsInShape"
-            mask_options = {"Workspace": workspace,
-                            "ShapeXML": phi_mask}
+            mask_options = {"Workspace": workspace, "ShapeXML": phi_mask}
             mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
             mask_alg.execute()
             workspace = mask_alg.getProperty("Workspace").value
@@ -348,11 +347,10 @@ def mask_beam_stop(mask_info, workspace):
     z_position = detector_pos.getZ()
 
     start_point = [beam_stop_arm_pos1, beam_stop_arm_pos2, z_position]
-    line_mask = create_line_mask(start_point, 100., beam_stop_arm_width, beam_stop_arm_angle)
+    line_mask = create_line_mask(start_point, 100.0, beam_stop_arm_width, beam_stop_arm_angle)
 
     mask_name = "MaskDetectorsInShape"
-    mask_options = {"Workspace": workspace,
-                    "ShapeXML": line_mask}
+    mask_options = {"Workspace": workspace, "ShapeXML": line_mask}
     mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
     mask_alg.execute()
     workspace = mask_alg.getProperty("Workspace").value
@@ -362,6 +360,7 @@ def mask_beam_stop(mask_info, workspace):
 # ------------------------------------------------------------------
 # Masker classes
 # ------------------------------------------------------------------
+
 
 class Masker(metaclass=ABCMeta):
     def __init__(self):
@@ -427,8 +426,12 @@ def create_masker(state, detector_type):
 
     # TODO remove this shim
 
-    if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or\
-                    instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.ZOOM:  # noqa
+    if (
+        instrument is SANSInstrument.LARMOR
+        or instrument is SANSInstrument.LOQ
+        or instrument is SANSInstrument.SANS2D
+        or instrument is SANSInstrument.ZOOM
+    ):  # noqa
         run_number = data_info.sample_scatter_run_number
         file_name = data_info.sample_scatter
         _, ipf_path = get_instrument_paths_for_sans_file(file_name)

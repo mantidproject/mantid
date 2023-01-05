@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init
+# pylint: disable=no-init
 from mantid.kernel import *
 from mantid.api import *
 import mantid.simpleapi
@@ -12,7 +12,6 @@ import math
 
 
 class PearlMCAbsorption(PythonAlgorithm):
-
     def category(self):
         return "CorrectionFunctions\\AbsorptionCorrections"
 
@@ -20,14 +19,13 @@ class PearlMCAbsorption(PythonAlgorithm):
         return "Loads pre-calculated or measured absorption correction files for Pearl."
 
     def seeAlso(self):
-        return [ "MonteCarloAbsorption", "MayersSampleCorrection",
-                 "CarpenterSampleCorrection", "VesuvioCalculateMS" ]
+        return ["MonteCarloAbsorption", "MayersSampleCorrection", "CarpenterSampleCorrection", "VesuvioCalculateMS"]
 
     def PyInit(self):
         # Input file
-        self.declareProperty(FileProperty("Filename","", FileAction.Load, ['.out','.dat']), doc="The name of the input file.")
+        self.declareProperty(FileProperty("Filename", "", FileAction.Load, [".out", ".dat"]), doc="The name of the input file.")
         # Output workspace
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace","", direction=Direction.Output), doc="The name of the input file.")
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", direction=Direction.Output), doc="The name of the input file.")
 
     def PyExec(self):
         filename = self.getProperty("Filename").value
@@ -35,9 +33,9 @@ class PearlMCAbsorption(PythonAlgorithm):
         # If we have a thickness value then this is a file containing measured mu(t) values
         # and the units are wavelength. If not then they are calculated and the units are dspacing
         if thickness is not None:
-            x_unit = 'Wavelength'
+            x_unit = "Wavelength"
         else:
-            x_unit = 'dSpacing'
+            x_unit = "dSpacing"
 
         wkspace_name = self.getPropertyValue("OutputWorkspace")
         # Load the file
@@ -58,32 +56,32 @@ class PearlMCAbsorption(PythonAlgorithm):
         calculated is assumed.
         """
         # Parse some header information to test whether this is a measured or calculated file
-        input_file = open(filename, 'r')
+        input_file = open(filename, "r")
         tvalue = None
         for line in input_file:
-            sep = 't='
+            sep = "t="
             if sep not in line:
-                sep = 't ='
+                sep = "t ="
                 if sep not in line:
                     sep = None
             if sep is not None:
                 tvalue = line.split(sep)[1]
-                tvalue = tvalue.split('mm')[0]
+                tvalue = tvalue.split("mm")[0]
                 break
         return tvalue
 
     def _calculateAbsorption(self, input_ws, thickness):
         """
-            Calculate the I/I_0 for the given set of mu_values, i.e.
-            (I/I_0) = exp(-mu*t)
+        Calculate the I/I_0 for the given set of mu_values, i.e.
+        (I/I_0) = exp(-mu*t)
         """
-        #c = math.exp(-1.0*mu*thickness)
+        # c = math.exp(-1.0*mu*thickness)
         num_hist = input_ws.getNumberHistograms()
         num_vals = input_ws.blocksize()
         for i in range(num_hist):
             mu_values = input_ws.readY(i)
             for j in range(num_vals):
-                input_ws.dataY(i)[j] = math.exp(-1.0*mu_values[j]*thickness)
+                input_ws.dataY(i)[j] = math.exp(-1.0 * mu_values[j] * thickness)
 
         return input_ws
 

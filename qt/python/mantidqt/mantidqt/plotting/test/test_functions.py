@@ -12,7 +12,7 @@ from unittest import TestCase, main, mock
 
 # third party imports
 import matplotlib
-from matplotlib import cm
+from matplotlib import colormaps
 
 matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
@@ -206,7 +206,7 @@ class FunctionsTest(TestCase):
     @mock.patch('mantidqt.plotting.functions.ConfigService', new_callable=MockConfigService)
     def test_pcolor_mesh_from_names_gets_colormap_from_ConfigService(self, mock_ConfigService):
         ws = CreateSampleWorkspace()
-        spring_colormap = cm.get_cmap('spring')
+        spring_colormap = colormaps['spring']
 
         fig = pcolormesh_from_names([ws])
 

@@ -7,7 +7,7 @@
 # Disable unused import warnings. The import is for user convenience
 # Bring instruments into package namespace
 from .gem import Gem  # noqa: F401
-from .hrpd import HRPD # noqa: F401
+from .hrpd import HRPD  # noqa: F401
 from .pearl import Pearl  # noqa: F401
 from .polaris import Polaris  # noqa: F401
 

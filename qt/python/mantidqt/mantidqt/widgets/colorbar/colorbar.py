@@ -17,7 +17,7 @@ from matplotlib.colorbar import Colorbar
 from matplotlib.figure import Figure
 from matplotlib.colors import ListedColormap, Normalize, SymLogNorm, PowerNorm, LogNorm
 from matplotlib.image import AxesImage
-from matplotlib import cm
+from matplotlib import colormaps
 import numpy as np
 from qtpy.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QComboBox, QCheckBox, QLabel
 from qtpy.QtCore import Signal, Qt
@@ -35,10 +35,10 @@ def register_customized_colormaps():
         cmap_name = os.path.basename(cmap_file).split(".")[0]
         cmap_data = np.loadtxt(cmap_file)/255.0
         cmap = ListedColormap(cmap_data, name=cmap_name)
-        cm.register_cmap(name=cmap_name, cmap=cmap)
+        colormaps.register(name=cmap_name, cmap=cmap)
         cmap_data_r = np.flipud(cmap_data)
         cmap_r = ListedColormap(cmap_data_r, name=f"{cmap_name}_r")
-        cm.register_cmap(name=f"{cmap_name}_r", cmap=cmap_r)
+        colormaps.register(name=f"{cmap_name}_r", cmap=cmap_r)
 
 
 class ColorbarWidget(QWidget):
@@ -47,7 +47,7 @@ class ColorbarWidget(QWidget):
     # register additional color maps from file
     register_customized_colormaps()
     # create the list
-    cmap_list = sorted([cmap for cmap in cm.cmap_d.keys() if not cmap.endswith('_r')])
+    cmap_list = sorted([cmap for cmap in colormaps.keys() if not cmap.endswith('_r')])
 
     def __init__(self, parent=None, default_norm_scale=None):
         """
@@ -193,7 +193,7 @@ class ColorbarWidget(QWidget):
         self.cmin_value = low
         self.cmax_value = high
         self.update_clim_text()
-        self.cmap.setCurrentIndex(sorted(cm.cmap_d.keys()).index(mappable_cmap.name))
+        self.cmap.setCurrentIndex(sorted(colormaps.keys()).index(mappable_cmap.name))
         self.redraw()
 
     def norm_changed(self):
@@ -285,7 +285,7 @@ class ColorbarWidget(QWidget):
         Redraws the colobar and emits signal to cause the parent to redraw
         """
         self.colorbar.update_ticks()
-        self.colorbar.draw_all()
+        self.canvas.figure.draw_without_rendering()
         self.canvas.draw_idle()
         self.colorbarChanged.emit()
 

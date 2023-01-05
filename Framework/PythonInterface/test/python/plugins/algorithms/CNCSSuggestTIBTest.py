@@ -11,20 +11,20 @@ import numpy
 
 class CNCSSuggestTIBTest(unittest.TestCase):
     def test_simple(self):
-        result = simpleapi.CNCSSuggestTIB(3.)
+        result = simpleapi.CNCSSuggestTIB(3.0)
         self.assertAlmostEqual(result[0] * 0.1, 4491.5, 0)
         self.assertAlmostEqual(result[1] * 0.1, 4731.5, 0)
-        result = simpleapi.CNCSSuggestTIB(1.)
+        result = simpleapi.CNCSSuggestTIB(1.0)
         self.assertAlmostEqual(result[0] * 0.1, 9562.1, 0)
         self.assertAlmostEqual(result[1] * 0.1, 9902.1, 0)
-        result = simpleapi.CNCSSuggestTIB(6.)
+        result = simpleapi.CNCSSuggestTIB(6.0)
         self.assertAlmostEqual(result[0] * 0.1, 2983.3, 0)
         self.assertAlmostEqual(result[1] * 0.1, 3323.3, 0)
 
     def test_someresult(self):
-        for en in numpy.arange(1., 30., 0.1):
+        for en in numpy.arange(1.0, 30.0, 0.1):
             result = simpleapi.CNCSSuggestTIB(en)
-            self.assertTrue(result[1] - result[0] > 1000.)
+            self.assertTrue(result[1] - result[0] > 1000.0)
 
 
 if __name__ == "__main__":

@@ -9,7 +9,7 @@ import unittest
 
 from mantid.simpleapi import CreateSampleWorkspace
 from sans.algorithm_detail.scale_sans_workspace import scale_workspace, _divide_by_sample_volume, _multiply_by_abs_scale
-from sans.common.enums import (SANSFacility, SampleShape, SANSInstrument)
+from sans.common.enums import SANSFacility, SampleShape, SANSInstrument
 from sans.state.StateObjects.StateData import get_data_builder
 from sans.state.StateObjects.StateScale import get_scale_builder
 from sans.test_helper.file_information_mock import SANSFileInformationMock
@@ -19,8 +19,7 @@ from sans.test_helper.test_director import TestDirector
 class SANSScaleTest(unittest.TestCase):
     @staticmethod
     def _get_workspace():
-        workspace = CreateSampleWorkspace(WorkspaceType="Histogram", NumBanks=1,
-                                          BankPixelWidth=1)
+        workspace = CreateSampleWorkspace(WorkspaceType="Histogram", NumBanks=1, BankPixelWidth=1)
         return workspace
 
     @staticmethod
@@ -57,14 +56,12 @@ class SANSScaleTest(unittest.TestCase):
         width = 1.0
         height = 2.0
         scale = 7.2
-        state = self._get_sample_state(width=width, height=height, thickness=3.0, scale=scale,
-                                       shape=SampleShape.CYLINDER)
+        state = self._get_sample_state(width=width, height=height, thickness=3.0, scale=scale, shape=SampleShape.CYLINDER)
 
-        output_workspace = scale_workspace(workspace=workspace,
-                                           instrument=SANSInstrument.LOQ, state_scale=state.scale)
+        output_workspace = scale_workspace(workspace=workspace, instrument=SANSInstrument.LOQ, state_scale=state.scale)
 
         # We have a LOQ data set, hence we need to divide by pi
-        expected_value = 0.3 / (height * math.pi * math.pow(width, 2) / 4.0) * (scale / math.pi) * 100.
+        expected_value = 0.3 / (height * math.pi * math.pow(width, 2) / 4.0) * (scale / math.pi) * 100.0
         data_y = output_workspace.dataY(0)
         tolerance = 1e-7
         self.assertTrue(abs(data_y[0] - expected_value) < tolerance)
@@ -72,8 +69,9 @@ class SANSScaleTest(unittest.TestCase):
     def test_that_divide_uses_settings_from_workspace(self):
         # Arrange
         facility = SANSFacility.ISIS
-        file_information = SANSFileInformationMock(instrument=SANSInstrument.SANS2D, run_number=22024, height=8.0,
-                                                   width=8.0, thickness=1.0, shape=SampleShape.DISC)
+        file_information = SANSFileInformationMock(
+            instrument=SANSInstrument.SANS2D, run_number=22024, height=8.0, width=8.0, thickness=1.0, shape=SampleShape.DISC
+        )
         data_builder = get_data_builder(facility, file_information)
         data_builder.set_sample_scatter("SANS2D00022024")
         data_state = data_builder.build()
@@ -86,14 +84,13 @@ class SANSScaleTest(unittest.TestCase):
         state = test_director.construct()
 
         # Apply the settings from the SANS2D00022024 workspace
-        width = 8.
-        height = 8.
-        thickness = 1.
+        width = 8.0
+        height = 8.0
+        thickness = 1.0
         shape = 3
 
         workspace = self._get_workspace()
-        self._set_sample_geometry(workspace=workspace, width=width,
-                                  height=height, thickness=thickness, shape=shape)
+        self._set_sample_geometry(workspace=workspace, width=width, height=height, thickness=thickness, shape=shape)
 
         output_workspace = _divide_by_sample_volume(workspace=workspace, scale_info=state.scale)
         # Assert
@@ -111,9 +108,9 @@ class SANSScaleTest(unittest.TestCase):
         data_state = data_builder.build()
 
         scale_builder = get_scale_builder(data_state, file_information)
-        width = 10.
-        height = 5.
-        thickness = 2.
+        width = 10.0
+        height = 5.0
+        thickness = 2.0
         scale_builder.set_shape(SampleShape.DISC)
         scale_builder.set_thickness(thickness)
         scale_builder.set_width(width)
@@ -150,14 +147,13 @@ class SANSScaleTest(unittest.TestCase):
 
         workspace = self._get_workspace()
 
-        output_workspace = _multiply_by_abs_scale(instrument=SANSInstrument.LOQ, workspace=workspace,
-                                                  state_scale=state_loq.scale)
+        output_workspace = _multiply_by_abs_scale(instrument=SANSInstrument.LOQ, workspace=workspace, state_scale=state_loq.scale)
 
         # Assert
-        expected_value = 0.3 * 2.4 / math.pi * 100.
+        expected_value = 0.3 * 2.4 / math.pi * 100.0
         data_y = output_workspace.dataY(0)
         self.assertEqual(data_y[0], expected_value)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

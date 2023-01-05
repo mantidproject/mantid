@@ -23,8 +23,8 @@ from mantid.kernel.funcinspect import customise_func, lhs_info, LazyMethodSignat
 # ------------------------------------------------------------------------------
 def attach_binary_operators_to_workspace():
     """
-        Attaches the common binary operators
-        to the Workspace class
+    Attaches the common binary operators
+    to the Workspace class
     """
 
     def add_operator_func(attr, algorithm, inplace, reverse):
@@ -33,8 +33,7 @@ def attach_binary_operators_to_workspace():
             # Get the result variable to know what to call the output
             result_info = lhs_info()
             # Pass off to helper
-            return _do_binary_operation(algorithm, self, other, result_info,
-                                        inplace, reverse)
+            return _do_binary_operation(algorithm, self, other, result_info, inplace, reverse)
 
         op_wrapper.__name__ = attr
         setattr(Workspace, attr, op_wrapper)
@@ -48,7 +47,7 @@ def attach_binary_operators_to_workspace():
         "GreaterThan": "__gt__",
         "Or": "__or__",
         "And": "__and__",
-        "Xor": "__xor__"
+        "Xor": "__xor__",
     }
 
     divops = ["__truediv__", "__rtruediv__", "__itruediv__"]
@@ -59,25 +58,25 @@ def attach_binary_operators_to_workspace():
         if type(attributes) == str:
             attributes = [attributes]
         for attr in attributes:
-            add_operator_func(attr, alg, attr.startswith('__i'), attr.startswith('__r'))
+            add_operator_func(attr, alg, attr.startswith("__i"), attr.startswith("__r"))
 
 
 # Prefix for temporary objects within workspace operations
-_workspace_op_prefix = '__python_op_tmp'
+_workspace_op_prefix = "__python_op_tmp"
 # A list of temporary workspaces created by algebraic operations
 _workspace_op_tmps = []
 
 
 def _do_binary_operation(op, self, rhs, lhs_vars, inplace, reverse):
     """
-        Perform the given binary operation
+    Perform the given binary operation
 
-        :param op: A string containing the Mantid algorithm name
-        :param self: The object that was the self argument when object.__op__(other) was called
-        :param rhs: The object that was the other argument when object.__op__(other) was called
-        :param lhs_vars: A tuple containing details of the lhs of the assignment, i.e a = b + c, lhs_vars = (1, 'a')
-        :param inplace: True if the operation should be performed inplace
-        :param reverse: True if the reverse operator was called, i.e. 3 + a calls __radd__
+    :param op: A string containing the Mantid algorithm name
+    :param self: The object that was the self argument when object.__op__(other) was called
+    :param rhs: The object that was the other argument when object.__op__(other) was called
+    :param lhs_vars: A tuple containing details of the lhs of the assignment, i.e a = b + c, lhs_vars = (1, 'a')
+    :param inplace: True if the operation should be performed inplace
+    :param reverse: True if the reverse operator was called, i.e. 3 + a calls __radd__
 
     """
     global _workspace_op_tmps
@@ -122,8 +121,8 @@ def _do_binary_operation(op, self, rhs, lhs_vars, inplace, reverse):
 # ------------------------------------------------------------------------------
 def attach_unary_operators_to_workspace():
     """
-        Attaches the common unary operators
-        to the Workspace class
+    Attaches the common unary operators
+    to the Workspace class
     """
 
     def add_operator_func(attr, algorithm):
@@ -138,9 +137,7 @@ def attach_unary_operators_to_workspace():
         setattr(Workspace, attr, op_wrapper)
 
     # Binary operations that workspaces are aware of
-    operations = {
-        'NotMD': '__invert__'
-    }
+    operations = {"NotMD": "__invert__"}
     # Loop through and add each one in turn
     for alg, attributes in operations.items():
         if type(attributes) == str:
@@ -220,15 +217,15 @@ def attach_tableworkspaceiterator():
 # ------------------------------------------------------------------------------
 def attach_func_as_method(name, func_obj, self_param_name, algm_name, workspace_types=None):
     """
-        Adds a method to the given type that calls an algorithm
-        using the calling object as the input workspace
+    Adds a method to the given type that calls an algorithm
+    using the calling object as the input workspace
 
-        :param name: The name of the new method as it should appear on the type
-        :param func_obj: A free function object that defines the implementation of the call
-        :param self_param_name: The name of the parameter in the free function that the method's self maps to
-        :param algm_name: The name of the algorithm being attached.
-        :param workspace_types: A list of string names of a workspace types. If None, then it is attached
-                              to the general Workspace type. Default=None
+    :param name: The name of the new method as it should appear on the type
+    :param func_obj: A free function object that defines the implementation of the call
+    :param self_param_name: The name of the parameter in the free function that the method's self maps to
+    :param algm_name: The name of the algorithm being attached.
+    :param workspace_types: A list of string names of a workspace types. If None, then it is attached
+                          to the general Workspace type. Default=None
     """
 
     def _method_impl(self, *args, **kwargs):
@@ -241,11 +238,11 @@ def attach_func_as_method(name, func_obj, self_param_name, algm_name, workspace_
         return func_obj(*args, **kwargs)
 
     # ------------------------------------------------------------------
-    customise_func(_method_impl, func_obj.__name__,
-                   LazyMethodSignature(alg_name=algm_name), func_obj.__doc__)
+    customise_func(_method_impl, func_obj.__name__, LazyMethodSignature(alg_name=algm_name), func_obj.__doc__)
 
     if workspace_types or len(workspace_types) > 0:
         from mantid import api
+
         for typename in workspace_types:
             cls = getattr(api, typename)
             setattr(cls, name, _method_impl)

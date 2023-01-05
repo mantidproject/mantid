@@ -16,14 +16,13 @@ from typing import Optional, Sequence, Mapping
 
 import github
 
-DEFAULT_REPO = 'mantidproject/mantid'
-ISSUE_CLOSE_RE = re.compile(
-    r'\b(?:close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\b\s+#(\d+)',
-    flags=re.IGNORECASE)
+DEFAULT_REPO = "mantidproject/mantid"
+ISSUE_CLOSE_RE = re.compile(r"\b(?:close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\b\s+#(\d+)", flags=re.IGNORECASE)
 
 
 class _HashableGithubIssue:
     """Thin extension to store an issue as a dict key"""
+
     def __init__(self, issue: github.Issue.Issue):
         self._issue = issue
 
@@ -37,6 +36,7 @@ IssueToPRs = Mapping[_HashableGithubIssue, Sequence[github.PullRequest.PullReque
 
 class IssuesToCloseInfo:
     """Simple type to aggreagate summary information"""
+
     _issues: IssueToPRs = None
 
     def __init__(self):
@@ -49,20 +49,20 @@ class IssuesToCloseInfo:
     def close_all(self):
         """Edits the state of the issues to closed"""
         for issue, prs in self._issues.items():
-            issue._issue.edit(state='closed')
-            pr_refs = '#' + ',#'.join(map(lambda x: str(x.number), prs))
-            issue._issue.create_comment(f'Fixed by {pr_refs}')
+            issue._issue.edit(state="closed")
+            pr_refs = "#" + ",#".join(map(lambda x: str(x.number), prs))
+            issue._issue.create_comment(f"Fixed by {pr_refs}")
 
     def prettyprint(self, writer):
-        lines = [f'{len(self._issues)} open issues are referenced to be closed']
-        row_format = '{:^15}|{:^15}'
-        lines.append(row_format.format('Issue', 'Pulls'))
-        lines.append('-' * 30)
+        lines = [f"{len(self._issues)} open issues are referenced to be closed"]
+        row_format = "{:^15}|{:^15}"
+        lines.append(row_format.format("Issue", "Pulls"))
+        lines.append("-" * 30)
         for issue, prs in self._issues.items():
-            formatted_prs = ','.join(map(lambda x: str(x.number), prs))
+            formatted_prs = ",".join(map(lambda x: str(x.number), prs))
             lines.append(row_format.format(issue._issue.number, formatted_prs))
 
-        writer('\n'.join(lines))
+        writer("\n".join(lines))
 
 
 def enable_console_logging():
@@ -83,8 +83,7 @@ def main() -> int:
     if args.milestone is not None:
         milestone = find_matching_milestone(repository, args.milestone)
         if milestone is None:
-            logging.error(
-                f'Unable to find milestone with title "{args.milestone}" in repository "{args.repo}"')
+            logging.error(f'Unable to find milestone with title "{args.milestone}" in repository "{args.repo}"')
             return 1
 
     close_issues_with_merged_pull_request(repository, milestone, args.dry_run)
@@ -98,31 +97,26 @@ def parse_arguments() -> argparse.Namespace:
     :return: The arguments as a argparse object
     """
     parser = argparse.ArgumentParser(description="Close issues fixed by merged pull requests")
-    parser.add_argument("--repo",
-                        dest="repo",
-                        default=DEFAULT_REPO,
-                        help="The full org/repo name of a GitHubrepository")
+    parser.add_argument("--repo", dest="repo", default=DEFAULT_REPO, help="The full org/repo name of a GitHubrepository")
     parser.add_argument("--token", required=True, help="GitHub authorization token")
-    parser.add_argument(
-        "--milestone", help="An optional milestone on the project. Checks all open issues for this milestone.")
-    parser.add_argument(
-        "--dry-run", help="If true, just print what would happen but don't do anything", action='store_true')
+    parser.add_argument("--milestone", help="An optional milestone on the project. Checks all open issues for this milestone.")
+    parser.add_argument("--dry-run", help="If true, just print what would happen but don't do anything", action="store_true")
     return parser.parse_args()
 
 
-def find_matching_milestone(repository: github.Repository.Repository,
-                            milestone_title: str) -> Optional[github.Milestone.Milestone]:
+def find_matching_milestone(repository: github.Repository.Repository, milestone_title: str) -> Optional[github.Milestone.Milestone]:
     """Given a milestone title, find the matching milestone
     in the Github repo"""
-    for milestone in repository.get_milestones(state='open'):
+    for milestone in repository.get_milestones(state="open"):
         if milestone.title == milestone_title:
             return milestone
 
     return None
 
 
-def close_issues_with_merged_pull_request(repository: github.Repository.Repository,
-                                          milestone: Optional[github.Milestone.Milestone] = None, dry_run: bool = False):
+def close_issues_with_merged_pull_request(
+    repository: github.Repository.Repository, milestone: Optional[github.Milestone.Milestone] = None, dry_run: bool = False
+):
     """
     For each open issue, optionally constrained to a milestone,:
       - check if a pull request is connected to it
@@ -132,26 +126,25 @@ def close_issues_with_merged_pull_request(repository: github.Repository.Reposito
     :param dry_run: If True no action is take but the steps are printed
     """
     if milestone:
-        open_issues = repository.get_issues(milestone=milestone, state='open')
+        open_issues = repository.get_issues(milestone=milestone, state="open")
         logging.info(f'Milestone "{milestone.title}" has {open_issues.totalCount} open issues')
     else:
-        open_issues = repository.get_issues(state='open')
-        logging.info(f'Repository has {open_issues.totalCount} open issues')
-    logging.info('Checking for merged linked pull requests')
+        open_issues = repository.get_issues(state="open")
+        logging.info(f"Repository has {open_issues.totalCount} open issues")
+    logging.info("Checking for merged linked pull requests")
     # Github does not provide an easy link between pull requests & issues
     # We use the timeline on the issue to look for a referenced event and extract the pull_request from the raw_data
 
     issues_to_close = find_issues_fixed_by_pull_requests(open_issues)
     issues_to_close.prettyprint(logging.info)
     if dry_run:
-        logging.info('Dry run requested. No close action taken')
+        logging.info("Dry run requested. No close action taken")
     else:
-        logging.info('Closing these issues')
+        logging.info("Closing these issues")
         issues_to_close.close_all()
 
 
-def find_issues_fixed_by_pull_requests(
-        issues: Sequence[github.Issue.Issue]) -> Sequence[github.Issue.Issue]:
+def find_issues_fixed_by_pull_requests(issues: Sequence[github.Issue.Issue]) -> Sequence[github.Issue.Issue]:
     """
     Filter the list of issues and return any fixed/closed by a pull request
     :param issues: A sequence of Issue objects
@@ -178,13 +171,13 @@ def get_linked_pull_requests(issue: github.Issue.Issue) -> Sequence[github.PullR
     # so we use the events timeline to search for a cross-referenced event
     # that contains a link to the pull request
     def get_pr_number(event):
-        if event.event != 'cross-referenced':
+        if event.event != "cross-referenced":
             return
-        raw_data = event.raw_data['source']['issue']
-        pull_request = raw_data.get('pull_request', None)
+        raw_data = event.raw_data["source"]["issue"]
+        pull_request = raw_data.get("pull_request", None)
         if pull_request is None:
             return
-        return int(posixpath.basename(pull_request['url']))
+        return int(posixpath.basename(pull_request["url"]))
 
     pr_numbers = filter(lambda x: x is not None, map(get_pr_number, issue.get_timeline()))
     repository = issue.repository
@@ -207,5 +200,5 @@ def is_fixed_by(issue: github.Issue.Issue, pull_request: github.PullRequest.Pull
     return str(issue.number) in pr_closed_issues
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

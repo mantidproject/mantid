@@ -17,12 +17,12 @@ from sans.state.AllStates import AllStates
 class GuiCommonTest(unittest.TestCase):
     def setUp(self):
         self.state_gui_model = StateGuiModel(AllStates())
-        self._good_row_one = RowEntries(sample_scatter='LOQ74044')
-        self._good_row_two = RowEntries(sample_scatter='LOQ74044')
+        self._good_row_one = RowEntries(sample_scatter="LOQ74044")
+        self._good_row_two = RowEntries(sample_scatter="LOQ74044")
 
         self.gui_state_director_instance = mock.MagicMock()
         self.gui_state_director_instance.create_state.return_value = self.state_gui_model
-        self.patcher = mock.patch('sans.gui_logic.models.create_state.GuiStateDirector')
+        self.patcher = mock.patch("sans.gui_logic.models.create_state.GuiStateDirector")
         self.addCleanup(self.patcher.stop)
         self.gui_state_director = self.patcher.start()
         self.gui_state_director.return_value = self.gui_state_director_instance
@@ -38,9 +38,9 @@ class GuiCommonTest(unittest.TestCase):
         states, errors = create_states(self.state_gui_model, SANSFacility.ISIS, row_entries=rows)
         self.assertEqual(2, len(states))
 
-    @mock.patch('sans.gui_logic.models.create_state._get_thickness_for_row')
+    @mock.patch("sans.gui_logic.models.create_state._get_thickness_for_row")
     def test_create_state_from_user_file_if_specified(self, thickness_mock):
-        expected_user_file = 'MaskLOQData.txt'
+        expected_user_file = "MaskLOQData.txt"
 
         # Mock out row entry so it does not lookup file information
         mock_row_entry = mock.Mock(spec=RowEntries)
@@ -52,9 +52,10 @@ class GuiCommonTest(unittest.TestCase):
 
         self.assertEqual(len(states), 1)
         self.gui_state_director_instance.create_state.assert_called_once_with(
-            mock_row_entry, file_lookup=mock.ANY, row_user_file=expected_user_file)
+            mock_row_entry, file_lookup=mock.ANY, row_user_file=expected_user_file
+        )
         thickness_mock.assert_called()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

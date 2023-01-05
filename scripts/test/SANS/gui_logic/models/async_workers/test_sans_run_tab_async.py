@@ -9,7 +9,7 @@ import unittest
 from unittest.mock import call
 
 from unittest import mock
-from sans.common.enums import (OutputMode, RowState)
+from sans.common.enums import OutputMode, RowState
 from sans.gui_logic.models.async_workers.sans_run_tab_async import SansRunTabAsync
 
 
@@ -41,35 +41,40 @@ class SansRunTabAsyncTest(unittest.TestCase):
         expected_shift_scale_factors = (1.1, 2.2)
         self.async_worker.batch_processor.return_value = expected_shift_scale_factors
 
-        self.async_worker.process_states_on_thread(row_index_pairs=self._mock_rows,
-                                                   get_states_func=get_states_mock,
-                                                   use_optimizations=False, output_mode=OutputMode.BOTH,
-                                                   plot_results=False, output_graph='')
+        self.async_worker.process_states_on_thread(
+            row_index_pairs=self._mock_rows,
+            get_states_func=get_states_mock,
+            use_optimizations=False,
+            output_mode=OutputMode.BOTH,
+            plot_results=False,
+            output_graph="",
+        )
 
         for row, _ in self._mock_rows:
             self.assertEqual(RowState.PROCESSED, row.state)
             self.assertIsNone(row.tool_tip)
 
         self.assertEqual(self.async_worker.batch_processor.call_count, 3)
-        expected_emit_calls = [call(i, [], [])
-                               for i in range(len(self._mock_rows))]
+        expected_emit_calls = [call(i, [], []) for i in range(len(self._mock_rows))]
 
-        self.async_worker._notify_progress_signal.signal.emit.assert_has_calls(
-            expected_emit_calls, any_order=True
-        )
+        self.async_worker._notify_progress_signal.signal.emit.assert_has_calls(expected_emit_calls, any_order=True)
 
     def test_that_process_states_emits_row_failed_information(self):
-        self.async_worker.batch_processor.side_effect = Exception('failure')
+        self.async_worker.batch_processor.side_effect = Exception("failure")
 
         get_states_mock = mock.MagicMock()
         states = {0: mock.MagicMock()}
         errors = {}
         get_states_mock.return_value = states, errors
 
-        self.async_worker.process_states_on_thread(row_index_pairs=self._mock_rows,
-                                                   get_states_func=get_states_mock,
-                                                   use_optimizations=False, output_mode=OutputMode.BOTH,
-                                                   plot_results=False, output_graph='')
+        self.async_worker.process_states_on_thread(
+            row_index_pairs=self._mock_rows,
+            get_states_func=get_states_mock,
+            use_optimizations=False,
+            output_mode=OutputMode.BOTH,
+            plot_results=False,
+            output_graph="",
+        )
 
         for row, _ in self._mock_rows:
             self.assertEqual(RowState.ERROR, row.state)
@@ -81,10 +86,14 @@ class SansRunTabAsyncTest(unittest.TestCase):
         errors = {row[0]: "error message" for row in self._mock_rows}
         get_states_mock.return_value = states, errors
 
-        self.async_worker.process_states_on_thread(row_index_pairs=self._mock_rows,
-                                                   get_states_func=get_states_mock,
-                                                   use_optimizations=False, output_mode=OutputMode.BOTH,
-                                                   plot_results=False, output_graph='')
+        self.async_worker.process_states_on_thread(
+            row_index_pairs=self._mock_rows,
+            get_states_func=get_states_mock,
+            use_optimizations=False,
+            output_mode=OutputMode.BOTH,
+            plot_results=False,
+            output_graph="",
+        )
 
         for row, _ in self._mock_rows:
             self.assertEqual(RowState.ERROR, row.state)
@@ -92,35 +101,38 @@ class SansRunTabAsyncTest(unittest.TestCase):
 
     def test_that_process_states_emits_row_failed_information_when_get_states_throws(self):
         get_states_mock = mock.MagicMock()
-        get_states_mock.side_effect = Exception('failure')
+        get_states_mock.side_effect = Exception("failure")
 
-        self.async_worker.process_states_on_thread(row_index_pairs=self._mock_rows,
-                                                   get_states_func=get_states_mock,
-                                                   use_optimizations=False, output_mode=OutputMode.BOTH,
-                                                   plot_results=False, output_graph='')
+        self.async_worker.process_states_on_thread(
+            row_index_pairs=self._mock_rows,
+            get_states_func=get_states_mock,
+            use_optimizations=False,
+            output_mode=OutputMode.BOTH,
+            plot_results=False,
+            output_graph="",
+        )
 
         for row, _ in self._mock_rows:
             self.assertEqual(RowState.ERROR, row.state)
             self.assertEqual("failure", row.tool_tip)
 
-    @mock.patch('sans.gui_logic.models.async_workers.sans_run_tab_async.load_workspaces_from_states')
+    @mock.patch("sans.gui_logic.models.async_workers.sans_run_tab_async.load_workspaces_from_states")
     def test_that_load_workspaces_sets_row_to_processed(self, mocked_loader):
         states = {0: mock.MagicMock()}
         errors = {}
         get_states_mock = mock.MagicMock()
         get_states_mock.return_value = states, errors
 
-        self.async_worker.load_workspaces_on_thread(row_index_pairs=self._mock_rows,
-                                                    get_states_func=get_states_mock)
+        self.async_worker.load_workspaces_on_thread(row_index_pairs=self._mock_rows, get_states_func=get_states_mock)
 
         self.assertEqual(len(self._mock_rows), mocked_loader.call_count)
         for row, _ in self._mock_rows:
             self.assertEqual(RowState.PROCESSED, row.state)
             self.assertIsNone(row.tool_tip)
 
-    @mock.patch('sans.gui_logic.models.async_workers.sans_run_tab_async.load_workspaces_from_states')
+    @mock.patch("sans.gui_logic.models.async_workers.sans_run_tab_async.load_workspaces_from_states")
     def test_that_load_workspaces_sets_rows_to_error(self, mocked_loader):
-        mocked_loader.side_effect = Exception('failure')
+        mocked_loader.side_effect = Exception("failure")
 
         states = {0: mock.MagicMock()}
         errors = {}
@@ -144,5 +156,5 @@ class SansRunTabAsyncTest(unittest.TestCase):
         self.notify_error.assert_called_once_with(str(expected))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

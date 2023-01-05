@@ -143,7 +143,7 @@ template <typename MDE, size_t nd> void SaveMD::doSaveEvents(typename MDEventWor
       prepareUpdate<MDE, nd>(BoxFlatStruct, bc.get(), ws, filename);
       BoxFlatStruct.saveBoxStructure(filename);
     }
-    Poco::File(bc->getFilename()).copyTo(filename);
+    bc->getFileIO()->copyFileTo(filename);
   } else // not file backed;
   {
     // the boxes file positions are unknown and we need to calculate it.

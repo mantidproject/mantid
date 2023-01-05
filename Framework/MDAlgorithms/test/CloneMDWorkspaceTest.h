@@ -77,12 +77,13 @@ public:
     {
       if (!Filename.empty()) {
         file1 = alg.getPropertyValue("Filename");
-        TS_ASSERT(Poco::File(file1).exists());
         file2 = ws1->getBoxController()->getFileIO()->getFileName();
       } else {
         file1 = ws1->getBoxController()->getFileIO()->getFileName();
         file2 = ws2->getBoxController()->getFileIO()->getFileName();
       }
+      TS_ASSERT(Poco::File(file1).exists());
+      TS_ASSERT(Poco::File(file2).exists());
     }
 
     // Clean up files

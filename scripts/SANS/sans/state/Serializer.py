@@ -23,12 +23,12 @@ class Serializer(object):
 
     @staticmethod
     def load_file(file_path):
-        with open(file_path, 'r') as f:
+        with open(file_path, "r") as f:
             return json.load(f, object_hook=SerializerImpl.obj_hook)
 
     @staticmethod
     def save_file(obj, file_path):
-        with open(file_path, 'w') as f:
+        with open(file_path, "w") as f:
             json.dump(obj, f, cls=SerializerImpl, sort_keys=True, indent=4)
 
 
@@ -44,8 +44,7 @@ class SerializerImpl(json.JSONEncoder):
             return {tag: o.value}
 
         if isinstance(o, tuple) and hasattr(o, "_fields"):
-            raise ValueError("A NamedTuple was passed to the JSON encoder, this is not supported as"
-                             " it will be deserialized to a list")
+            raise ValueError("A NamedTuple was passed to the JSON encoder, this is not supported as" " it will be deserialized to a list")
 
         return json.JSONEncoder.default(self, o)
 

@@ -5,6 +5,10 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
+New Features
+------------
+.. amalgamate:: Framework/New_features
+
 Algorithms
 ----------
 

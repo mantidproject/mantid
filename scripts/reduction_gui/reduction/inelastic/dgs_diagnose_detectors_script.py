@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 """
     Classes for each reduction step. Those are kept separately
     from the the interface class so that the DgsReduction class could
@@ -17,25 +17,25 @@ from reduction_gui.reduction.scripter import BaseScriptElement
 
 class DiagnoseDetectorsScript(BaseScriptElement):
 
-    high_counts = 1.0e+10
+    high_counts = 1.0e10
     low_counts = 1.0e-10
     median_test_out_high = 100
     median_test_out_low = 0.01
     median_test_high = 3
     median_test_low = 0.1
     errorbar_criterion = 0.0
-    det_van2 = ''
+    det_van2 = ""
     detvan_ratio_var = 1.1
     background_check = False
     sambkg_median_test_high = 5
     sambkg_median_test_low = 0.1
     sambkg_errorbar_criterion = 3.3
-    tof_start = ''
-    tof_end = ''
+    tof_start = ""
+    tof_end = ""
     reject_zero_bkg = False
     psd_bleed = False
-    max_framerate = ''
-    ignored_pixels = ''
+    max_framerate = ""
+    ignored_pixels = ""
 
     def __init__(self, inst_name):
         super(DiagnoseDetectorsScript, self).__init__()
@@ -44,6 +44,7 @@ class DiagnoseDetectorsScript(BaseScriptElement):
 
     def set_default_pars(self, inst_name):
         from . import dgs_utils
+
         ip = dgs_utils.InstrumentParameters(inst_name)
         DiagnoseDetectorsScript.high_counts = ip.get_parameter("diag_huge")
         DiagnoseDetectorsScript.low_counts = ip.get_parameter("diag_tiny")
@@ -81,8 +82,8 @@ class DiagnoseDetectorsScript(BaseScriptElement):
         if self.errorbar_criterion != DiagnoseDetectorsScript.errorbar_criterion:
             script += "ErrorBarCriterion=%s,\n" % str(self.errorbar_criterion)
         if self.det_van2 != DiagnoseDetectorsScript.det_van2:
-            script += "DetectorVanadium2InputFile=\"%s\",\n" % self.det_van2
-            if self.detvan_ratio_var!= DiagnoseDetectorsScript.detvan_ratio_var:
+            script += 'DetectorVanadium2InputFile="%s",\n' % self.det_van2
+            if self.detvan_ratio_var != DiagnoseDetectorsScript.detvan_ratio_var:
                 script += "DetVanRatioVariation=%s,\n" % str(self.detvan_ratio_var)
         if self.background_check:
             script += "BackgroundCheck=%s,\n" % self.background_check
@@ -108,9 +109,9 @@ class DiagnoseDetectorsScript(BaseScriptElement):
 
     def to_xml(self):
         """
-            Create XML from the current data.
+        Create XML from the current data.
         """
-        xml =  "<DiagnoseDetectors>\n"
+        xml = "<DiagnoseDetectors>\n"
         xml += "  <high_counts>%s</high_counts>\n" % str(self.high_counts)
         xml += "  <low_counts>%s</low_counts>\n" % str(self.low_counts)
         xml += "  <median_test_outlier_low>%s</median_test_outlier_low>\n" % str(self.median_test_out_low)
@@ -135,74 +136,64 @@ class DiagnoseDetectorsScript(BaseScriptElement):
 
     def from_xml(self, xml_str):
         """
-            Read in data from XML
-            @param xml_str: text to read the data from
+        Read in data from XML
+        @param xml_str: text to read the data from
         """
         dom = xml.dom.minidom.parseString(xml_str)
         element_list = dom.getElementsByTagName("DiagnoseDetectors")
-        if len(element_list)>0:
+        if len(element_list) > 0:
             instrument_dom = element_list[0]
-            self.high_counts = BaseScriptElement.getFloatElement(instrument_dom,
-                                                                 "high_counts",
-                                                                 default=DiagnoseDetectorsScript.high_counts)
-            self.low_counts = BaseScriptElement.getFloatElement(instrument_dom,
-                                                                "low_counts",
-                                                                default=DiagnoseDetectorsScript.low_counts)
-            self.median_test_out_low = BaseScriptElement.getFloatElement(instrument_dom,
-                                                                         "median_test_out_low",
-                                                                         default=DiagnoseDetectorsScript.median_test_out_low)
-            self.median_test_out_high = BaseScriptElement.getFloatElement(instrument_dom,
-                                                                          "median_test_out_high",
-                                                                          default=DiagnoseDetectorsScript.median_test_out_high)
-            self.median_test_low = BaseScriptElement.getFloatElement(instrument_dom,
-                                                                     "median_test_low",
-                                                                     default=DiagnoseDetectorsScript.median_test_low)
-            self.median_test_high = BaseScriptElement.getFloatElement(instrument_dom,
-                                                                      "median_test_high",
-                                                                      default=DiagnoseDetectorsScript.median_test_high)
-            self.errorbar_criterion = BaseScriptElement.getFloatElement(instrument_dom,
-                                                                        "errorbar_criterion",
-                                                                        default=DiagnoseDetectorsScript.errorbar_criterion)
-            self.det_van2 = BaseScriptElement.getStringElement(instrument_dom,
-                                                               "det_van2",
-                                                               default=DiagnoseDetectorsScript.det_van2)
-            self.detvan_ratio_var = BaseScriptElement.getFloatElement(instrument_dom,
-                                                                      "detvan_ratio_var",
-                                                                      default=DiagnoseDetectorsScript.detvan_ratio_var)
-            self.background_check = BaseScriptElement.getBoolElement(instrument_dom,
-                                                                     "background_check",
-                                                                     default=DiagnoseDetectorsScript.background_check)
-            self.sambkg_median_test_low = BaseScriptElement.getFloatElement(instrument_dom,
-                                                                            "sambkg_median_test_low",
-                                                                            default=DiagnoseDetectorsScript.sambkg_median_test_low)
-            self.sambkg_median_test_high = BaseScriptElement.getFloatElement(instrument_dom,
-                                                                             "sambkg_median_test_high",
-                                                                             default=DiagnoseDetectorsScript.sambkg_median_test_high)
-            self.sambkg_errorbar_criterion = BaseScriptElement.getFloatElement(instrument_dom,
-                                                                               "sambkg_errorbar_criterion",
-                                                                               default=DiagnoseDetectorsScript.sambkg_errorbar_criterion)
-            self.tof_start = BaseScriptElement.getIntElement(instrument_dom,
-                                                             "background_tof_start",
-                                                             default=DiagnoseDetectorsScript.tof_start)
-            self.tof_end = BaseScriptElement.getIntElement(instrument_dom,
-                                                           "background_tof_end",
-                                                           default=DiagnoseDetectorsScript.tof_end)
-            self.reject_zero_bkg = BaseScriptElement.getBoolElement(instrument_dom,
-                                                                    "reject_zero_bkg",
-                                                                    default=DiagnoseDetectorsScript.reject_zero_bkg)
-            self.psd_bleed = BaseScriptElement.getBoolElement(instrument_dom,
-                                                              "psd_bleed",
-                                                              default=DiagnoseDetectorsScript.psd_bleed)
-            self.max_framerate = BaseScriptElement.getStringElement(instrument_dom,
-                                                                    "max_framerate",
-                                                                    default=DiagnoseDetectorsScript.max_framerate)
-            self.ignored_pixels = BaseScriptElement.getStringElement(instrument_dom,
-                                                                     "ignored_pixels",
-                                                                     default=DiagnoseDetectorsScript.ignored_pixels)
+            self.high_counts = BaseScriptElement.getFloatElement(instrument_dom, "high_counts", default=DiagnoseDetectorsScript.high_counts)
+            self.low_counts = BaseScriptElement.getFloatElement(instrument_dom, "low_counts", default=DiagnoseDetectorsScript.low_counts)
+            self.median_test_out_low = BaseScriptElement.getFloatElement(
+                instrument_dom, "median_test_out_low", default=DiagnoseDetectorsScript.median_test_out_low
+            )
+            self.median_test_out_high = BaseScriptElement.getFloatElement(
+                instrument_dom, "median_test_out_high", default=DiagnoseDetectorsScript.median_test_out_high
+            )
+            self.median_test_low = BaseScriptElement.getFloatElement(
+                instrument_dom, "median_test_low", default=DiagnoseDetectorsScript.median_test_low
+            )
+            self.median_test_high = BaseScriptElement.getFloatElement(
+                instrument_dom, "median_test_high", default=DiagnoseDetectorsScript.median_test_high
+            )
+            self.errorbar_criterion = BaseScriptElement.getFloatElement(
+                instrument_dom, "errorbar_criterion", default=DiagnoseDetectorsScript.errorbar_criterion
+            )
+            self.det_van2 = BaseScriptElement.getStringElement(instrument_dom, "det_van2", default=DiagnoseDetectorsScript.det_van2)
+            self.detvan_ratio_var = BaseScriptElement.getFloatElement(
+                instrument_dom, "detvan_ratio_var", default=DiagnoseDetectorsScript.detvan_ratio_var
+            )
+            self.background_check = BaseScriptElement.getBoolElement(
+                instrument_dom, "background_check", default=DiagnoseDetectorsScript.background_check
+            )
+            self.sambkg_median_test_low = BaseScriptElement.getFloatElement(
+                instrument_dom, "sambkg_median_test_low", default=DiagnoseDetectorsScript.sambkg_median_test_low
+            )
+            self.sambkg_median_test_high = BaseScriptElement.getFloatElement(
+                instrument_dom, "sambkg_median_test_high", default=DiagnoseDetectorsScript.sambkg_median_test_high
+            )
+            self.sambkg_errorbar_criterion = BaseScriptElement.getFloatElement(
+                instrument_dom, "sambkg_errorbar_criterion", default=DiagnoseDetectorsScript.sambkg_errorbar_criterion
+            )
+            self.tof_start = BaseScriptElement.getIntElement(
+                instrument_dom, "background_tof_start", default=DiagnoseDetectorsScript.tof_start
+            )
+            self.tof_end = BaseScriptElement.getIntElement(instrument_dom, "background_tof_end", default=DiagnoseDetectorsScript.tof_end)
+            self.reject_zero_bkg = BaseScriptElement.getBoolElement(
+                instrument_dom, "reject_zero_bkg", default=DiagnoseDetectorsScript.reject_zero_bkg
+            )
+            self.psd_bleed = BaseScriptElement.getBoolElement(instrument_dom, "psd_bleed", default=DiagnoseDetectorsScript.psd_bleed)
+            self.max_framerate = BaseScriptElement.getStringElement(
+                instrument_dom, "max_framerate", default=DiagnoseDetectorsScript.max_framerate
+            )
+            self.ignored_pixels = BaseScriptElement.getStringElement(
+                instrument_dom, "ignored_pixels", default=DiagnoseDetectorsScript.ignored_pixels
+            )
 
     def reset(self):
         """
-            Reset state
+        Reset state
         """
         self.high_counts = DiagnoseDetectorsScript.high_counts
         self.low_counts = DiagnoseDetectorsScript.low_counts

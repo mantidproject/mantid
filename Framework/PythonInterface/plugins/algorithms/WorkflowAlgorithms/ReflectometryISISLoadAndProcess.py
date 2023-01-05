@@ -5,40 +5,45 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import (AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm,
-                        WorkspaceGroup)
+from mantid.api import AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, WorkspaceGroup
 
 from mantid.simpleapi import MergeRuns
 
-from mantid.kernel import (CompositeValidator, Direction, EnabledWhenProperty,
-                           IntBoundedValidator, Property, PropertyCriterion,
-                           StringArrayLengthValidator, StringArrayMandatoryValidator,
-                           StringArrayProperty)
+from mantid.kernel import (
+    CompositeValidator,
+    Direction,
+    EnabledWhenProperty,
+    IntBoundedValidator,
+    Property,
+    PropertyCriterion,
+    StringArrayLengthValidator,
+    StringArrayMandatoryValidator,
+    StringArrayProperty,
+)
 
 
 class Prop:
-    RUNS = 'InputRunList'
-    ROI_DETECTOR_IDS = 'ROIDetectorIDs'
-    FIRST_TRANS_RUNS = 'FirstTransmissionRunList'
-    SECOND_TRANS_RUNS = 'SecondTransmissionRunList'
-    SLICE = 'SliceWorkspace'
-    NUMBER_OF_SLICES = 'NumberOfSlices'
-    QMIN = 'MomentumTransferMin'
-    QSTEP = 'MomentumTransferStep'
-    QMAX = 'MomentumTransferMax'
-    GROUP_TOF = 'GroupTOFWorkspaces'
-    RELOAD = 'ReloadInvalidWorkspaces'
-    DEBUG = 'Debug'
-    OUTPUT_WS = 'OutputWorkspace'
-    OUTPUT_WS_BINNED = 'OutputWorkspaceBinned'
-    OUTPUT_WS_LAM = 'OutputWorkspaceWavelength'
-    OUTPUT_WS_FIRST_TRANS = 'OutputWorkspaceFirstTransmission'
-    OUTPUT_WS_SECOND_TRANS = 'OutputWorkspaceSecondTransmission'
-    OUTPUT_WS_TRANS = 'OutputWorkspaceTransmission'
+    RUNS = "InputRunList"
+    ROI_DETECTOR_IDS = "ROIDetectorIDs"
+    FIRST_TRANS_RUNS = "FirstTransmissionRunList"
+    SECOND_TRANS_RUNS = "SecondTransmissionRunList"
+    SLICE = "SliceWorkspace"
+    NUMBER_OF_SLICES = "NumberOfSlices"
+    QMIN = "MomentumTransferMin"
+    QSTEP = "MomentumTransferStep"
+    QMAX = "MomentumTransferMax"
+    GROUP_TOF = "GroupTOFWorkspaces"
+    RELOAD = "ReloadInvalidWorkspaces"
+    DEBUG = "Debug"
+    OUTPUT_WS = "OutputWorkspace"
+    OUTPUT_WS_BINNED = "OutputWorkspaceBinned"
+    OUTPUT_WS_LAM = "OutputWorkspaceWavelength"
+    OUTPUT_WS_FIRST_TRANS = "OutputWorkspaceFirstTransmission"
+    OUTPUT_WS_SECOND_TRANS = "OutputWorkspaceSecondTransmission"
+    OUTPUT_WS_TRANS = "OutputWorkspaceTransmission"
 
 
 class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
-
     def __init__(self):
         """Initialize an instance of the algorithm."""
         DataProcessorAlgorithm.__init__(self)
@@ -47,11 +52,11 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
     def category(self):
         """Return the categories of the algorithm."""
-        return 'Reflectometry\\ISIS;Workflow\\Reflectometry'
+        return "Reflectometry\\ISIS;Workflow\\Reflectometry"
 
     def name(self):
         """Return the name of the algorithm."""
-        return 'ReflectometryISISLoadAndProcess'
+        return "ReflectometryISISLoadAndProcess"
 
     def summary(self):
         """Return a summary of the algorithm."""
@@ -59,7 +64,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
     def seeAlso(self):
         """Return a list of related algorithm names."""
-        return ['ReflectometrySliceEventWorkspace', 'ReflectometryReductionOneAuto']
+        return ["ReflectometrySliceEventWorkspace", "ReflectometryReductionOneAuto"]
 
     def version(self):
         """Return the version of the algorithm."""
@@ -67,7 +72,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
     def PyInit(self):
         """Initialize the input and output properties of the algorithm."""
-        self._reduction_properties = [] # cached list of properties copied from child alg
+        self._reduction_properties = []  # cached list of properties copied from child alg
         self._declareRunProperties()
         self._declarePreprocessProperties()
         self._declareSumBanksProperties()
@@ -75,6 +80,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         self._declareReductionProperties()
         self._declareTransmissionProperties()
         self._declareOutputProperties()
+        self._declarePolarizationEfficiencyProperties()
 
     def PyExec(self):
         """Execute the algorithm."""
@@ -127,6 +133,10 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             issues[Prop.SLICE] = "Cannot perform slicing when summing multiple input runs"
         return issues
 
+    def _copy_properties_from_reduction_algorithm(self, properties):
+        self.copyProperties("ReflectometryReductionOneAuto", properties)
+        self._reduction_properties += properties
+
     def _declareRunProperties(self):
         mandatoryInputRuns = CompositeValidator()
         mandatoryInputRuns.add(StringArrayMandatoryValidator())
@@ -134,97 +144,127 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         lenValidator.setLengthMin(1)
         mandatoryInputRuns.add(lenValidator)
         # Add property for the input runs
-        self.declareProperty(StringArrayProperty(Prop.RUNS,
-                                                 values=[],
-                                                 validator=mandatoryInputRuns),
-                             doc='A list of run numbers or workspace names for the input runs. '
-                                 'Multiple runs will be summed before reduction.')
+        self.declareProperty(
+            StringArrayProperty(Prop.RUNS, values=[], validator=mandatoryInputRuns),
+            doc="A list of run numbers or workspace names for the input runs. " "Multiple runs will be summed before reduction.",
+        )
         # Add properties from child algorithm
         properties = [
-            'ThetaIn', 'ThetaLogName',
+            "ThetaIn",
+            "ThetaLogName",
         ]
-        self.copyProperties('ReflectometryReductionOneAuto', properties)
-        self._reduction_properties += properties
+        self._copy_properties_from_reduction_algorithm(properties)
         # Add properties for settings to apply to input runs
-        self.declareProperty(Prop.RELOAD, True,
-                             doc='If true, reload input workspaces if they are of the incorrect type')
-        self.declareProperty(Prop.GROUP_TOF, True, doc='If true, group the TOF workspaces')
+        self.declareProperty(Prop.RELOAD, True, doc="If true, reload input workspaces if they are of the incorrect type")
+        self.declareProperty(Prop.GROUP_TOF, True, doc="If true, group the TOF workspaces")
 
     def _declarePreprocessProperties(self):
         """Copy properties from the child preprocess algorithm"""
-        properties = ['CalibrationFile']
-        self.copyProperties('ReflectometryISISPreprocess', properties)
+        properties = ["CalibrationFile"]
+        self.copyProperties("ReflectometryISISPreprocess", properties)
 
     def _declareSumBanksProperties(self):
         """Copy properties from the child sum banks algorithm"""
-        properties = ['ROIDetectorIDs']
-        self.copyProperties('ReflectometryISISSumBanks', properties)
+        properties = ["ROIDetectorIDs"]
+        self.copyProperties("ReflectometryISISSumBanks", properties)
 
     def _declareSlicingProperties(self):
         """Copy properties from the child slicing algorithm and add our own custom ones"""
-        self.declareProperty(Prop.SLICE, False, doc='If true, slice the input workspace')
-        self.setPropertyGroup(Prop.SLICE, 'Slicing')
+        self.declareProperty(Prop.SLICE, False, doc="If true, slice the input workspace")
+        self.setPropertyGroup(Prop.SLICE, "Slicing")
         # Convenience variables for conditional properties
         whenSliceEnabled = EnabledWhenProperty(Prop.SLICE, PropertyCriterion.IsEqualTo, "1")
 
-        self._slice_properties = ['TimeInterval', 'LogName', 'LogValueInterval', 'UseNewFilterAlgorithm']
-        self.copyProperties('ReflectometrySliceEventWorkspace', self._slice_properties)
+        self._slice_properties = ["TimeInterval", "LogName", "LogValueInterval", "UseNewFilterAlgorithm"]
+        self.copyProperties("ReflectometrySliceEventWorkspace", self._slice_properties)
         for property in self._slice_properties:
             self.setPropertySettings(property, whenSliceEnabled)
-            self.setPropertyGroup(property, 'Slicing')
+            self.setPropertyGroup(property, "Slicing")
 
-        self.declareProperty(name=Prop.NUMBER_OF_SLICES,
-                             defaultValue=Property.EMPTY_INT,
-                             validator=IntBoundedValidator(lower=1),
-                             direction=Direction.Input,
-                             doc='The number of uniform-length slices to slice the input workspace into')
+        self.declareProperty(
+            name=Prop.NUMBER_OF_SLICES,
+            defaultValue=Property.EMPTY_INT,
+            validator=IntBoundedValidator(lower=1),
+            direction=Direction.Input,
+            doc="The number of uniform-length slices to slice the input workspace into",
+        )
         self.setPropertySettings(Prop.NUMBER_OF_SLICES, whenSliceEnabled)
-        self.setPropertyGroup(Prop.NUMBER_OF_SLICES, 'Slicing')
+        self.setPropertyGroup(Prop.NUMBER_OF_SLICES, "Slicing")
 
     def _declareReductionProperties(self):
         properties = [
-            'SummationType', 'ReductionType', 'IncludePartialBins',
-            'AnalysisMode', 'ProcessingInstructions', 'CorrectDetectors',
-            'DetectorCorrectionType', 'WavelengthMin', 'WavelengthMax', 'I0MonitorIndex',
-            'MonitorBackgroundWavelengthMin', 'MonitorBackgroundWavelengthMax',
-            'MonitorIntegrationWavelengthMin', 'MonitorIntegrationWavelengthMax',
-            'SubtractBackground', 'BackgroundProcessingInstructions', 'BackgroundCalculationMethod',
-            'DegreeOfPolynomial', 'CostFunction',
-            'NormalizeByIntegratedMonitors', 'PolarizationAnalysis',
-            'FloodCorrection', 'FloodWorkspace',
-            'CorrectionAlgorithm', 'Polynomial', 'C0', 'C1'
+            "SummationType",
+            "ReductionType",
+            "IncludePartialBins",
+            "AnalysisMode",
+            "ProcessingInstructions",
+            "CorrectDetectors",
+            "DetectorCorrectionType",
+            "WavelengthMin",
+            "WavelengthMax",
+            "I0MonitorIndex",
+            "MonitorBackgroundWavelengthMin",
+            "MonitorBackgroundWavelengthMax",
+            "MonitorIntegrationWavelengthMin",
+            "MonitorIntegrationWavelengthMax",
+            "SubtractBackground",
+            "BackgroundProcessingInstructions",
+            "BackgroundCalculationMethod",
+            "DegreeOfPolynomial",
+            "CostFunction",
+            "NormalizeByIntegratedMonitors",
+            "PolarizationAnalysis",
+            "FloodCorrection",
+            "FloodWorkspace",
+            "CorrectionAlgorithm",
+            "Polynomial",
+            "C0",
+            "C1",
         ]
-        self.copyProperties('ReflectometryReductionOneAuto', properties)
-        self._reduction_properties += properties
+        self._copy_properties_from_reduction_algorithm(properties)
 
     def _declareTransmissionProperties(self):
         # Add input transmission run properties
-        self.declareProperty(StringArrayProperty(Prop.FIRST_TRANS_RUNS,
-                                                 values=[]),
-                             doc='A list of run numbers or workspace names for the first transmission run. '
-                                 'Multiple runs will be summed before reduction.')
-        self.setPropertyGroup(Prop.FIRST_TRANS_RUNS, 'Transmission')
-        self.declareProperty(StringArrayProperty(Prop.SECOND_TRANS_RUNS,
-                                                 values=[]),
-                             doc='A list of run numbers or workspace names for the second transmission run. '
-                                 'Multiple runs will be summed before reduction.')
-        self.setPropertyGroup(Prop.SECOND_TRANS_RUNS, 'Transmission')
+        self.declareProperty(
+            StringArrayProperty(Prop.FIRST_TRANS_RUNS, values=[]),
+            doc="A list of run numbers or workspace names for the first transmission run. "
+            "Multiple runs will be summed before reduction.",
+        )
+        self.setPropertyGroup(Prop.FIRST_TRANS_RUNS, "Transmission")
+        self.declareProperty(
+            StringArrayProperty(Prop.SECOND_TRANS_RUNS, values=[]),
+            doc="A list of run numbers or workspace names for the second transmission run. "
+            "Multiple runs will be summed before reduction.",
+        )
+        self.setPropertyGroup(Prop.SECOND_TRANS_RUNS, "Transmission")
         # Add properties copied from child algorithm
-        properties = [
-            'Params', 'StartOverlap', 'EndOverlap',
-            'ScaleRHSWorkspace', 'TransmissionProcessingInstructions'
-        ]
-        self.copyProperties('ReflectometryReductionOneAuto', properties)
-        self._reduction_properties += properties
+        properties = ["Params", "StartOverlap", "EndOverlap", "ScaleRHSWorkspace", "TransmissionProcessingInstructions"]
+        self._copy_properties_from_reduction_algorithm(properties)
 
     def _declareOutputProperties(self):
-        properties = [Prop.DEBUG,
-                      'MomentumTransferMin', 'MomentumTransferStep', 'MomentumTransferMax',
-                      'ScaleFactor',
-                      Prop.OUTPUT_WS_BINNED, Prop.OUTPUT_WS, Prop.OUTPUT_WS_LAM,
-                      Prop.OUTPUT_WS_TRANS, Prop.OUTPUT_WS_FIRST_TRANS, Prop.OUTPUT_WS_SECOND_TRANS]
-        self.copyProperties('ReflectometryReductionOneAuto', properties)
-        self._reduction_properties += properties
+        properties = [
+            Prop.DEBUG,
+            "MomentumTransferMin",
+            "MomentumTransferStep",
+            "MomentumTransferMax",
+            "ScaleFactor",
+            Prop.OUTPUT_WS_BINNED,
+            Prop.OUTPUT_WS,
+            Prop.OUTPUT_WS_LAM,
+            Prop.OUTPUT_WS_TRANS,
+            Prop.OUTPUT_WS_FIRST_TRANS,
+            Prop.OUTPUT_WS_SECOND_TRANS,
+        ]
+        self._copy_properties_from_reduction_algorithm(properties)
+
+    def _declarePolarizationEfficiencyProperties(self):
+        self.declareProperty(
+            "PolarizationEfficiencies",
+            "",
+            "A workspace or file name containing the polarization efficiency factors for either "
+            "the Wildes or Fredrikze correction methods.",
+            Direction.Input,
+        )
 
     def _getInputWorkspaces(self, runs, isTrans):
         """Convert the given run numbers into real workspace names. Uses workspaces from
@@ -235,9 +275,30 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             if not ws:
                 ws = self._loadRun(run, isTrans)
             if not ws:
-                raise RuntimeError('Error loading run ' + run)
+                raise RuntimeError("Error loading run " + run)
             workspaces.append(ws)
         return workspaces
+
+    def _loadPolarizationCorrectionWorkspace(self):
+        efficiencies_ws = self.getPropertyValue("PolarizationEfficiencies")
+        if not efficiencies_ws:
+            return None
+
+        if AnalysisDataService.doesExist(efficiencies_ws):
+            self.log().information(f'Loading polarization efficiency information from workspace "{efficiencies_ws}"')
+            return AnalysisDataService.retrieve(efficiencies_ws)
+
+        alg = self.createChildAlgorithm("LoadNexus")
+        try:
+            alg.setRethrows(True)
+            alg.setProperty("Filename", efficiencies_ws)
+            alg.execute()
+        except:
+            raise RuntimeError(f'Could not load polarization efficiency information from file "{efficiencies_ws}"')
+
+        ws = alg.getProperty("OutputWorkspace").value
+        self.log().information(f'Loaded polarization efficiency information from file "{efficiencies_ws}"')
+        return ws
 
     def _sumBanks(self, workspace_names, roiDetectorIDs):
         output_workspace_names = workspace_names.copy()
@@ -245,10 +306,8 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             workspace = AnalysisDataService.retrieve(workspace_name)
             if self._has_single_2D_rectangular_detector(workspace):
                 output_workspace_names[i] = _summedSegmentWorkspace(workspace_name)
-                args = {"InputWorkspace": workspace,
-                        "ROIDetectorIDs": roiDetectorIDs,
-                        "OutputWorkspace": output_workspace_names[i]}
-                alg = self.createChildAlgorithm('ReflectometryISISSumBanks', **args)
+                args = {"InputWorkspace": workspace, "ROIDetectorIDs": roiDetectorIDs, "OutputWorkspace": output_workspace_names[i]}
+                alg = self.createChildAlgorithm("ReflectometryISISSumBanks", **args)
                 alg.setAlwaysStoreInADS(True)
                 alg.execute()
         return output_workspace_names
@@ -266,8 +325,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             return False
 
         if num_rect_detectors != 1:
-            raise NotImplementedError(f"Not implemented for more than one rectangular detector, "
-                                      f"{num_rect_detectors} were found.")
+            raise NotImplementedError(f"Not implemented for more than one rectangular detector, " f"{num_rect_detectors} were found.")
 
         # We don't sum banks for a linear detector
         if rect_detectors[0].xpixels() == 1 or rect_detectors[0].ypixels() == 1:
@@ -284,6 +342,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     @staticmethod
     def _spectra_refer_to_rectangular_detector(workspace, rectangular_detector) -> bool:
         """Returns true if the detectors in a rectangular bank are found in a workspace."""
+
         def _safe_get_id(ws_index):
             try:
                 return workspace.getDetector(ws_index).getID()
@@ -291,8 +350,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                 return None
 
         workspace_det_ids = [_safe_get_id(i) for i in range(workspace.getNumberHistograms())]
-        return all(det_id in workspace_det_ids for det_id in [rectangular_detector.minDetectorID(),
-                                                              rectangular_detector.maxDetectorID()])
+        return all(det_id in workspace_det_ids for det_id in [rectangular_detector.minDetectorID(), rectangular_detector.maxDetectorID()])
 
     def _prefixedName(self, name, isTrans):
         """Add a prefix for TOF workspaces onto the given name"""
@@ -308,7 +366,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         an error otherwise
         """
         if not _hasWorkspaceID(workspace_name, workspace_id):
-            message = 'Workspace ' + workspace_name + ' exists but is not a ' + workspace_id
+            message = "Workspace " + workspace_name + " exists but is not a " + workspace_id
             if self._reload:
                 self.log().information(message)
                 _removeWorkspace(workspace_name)
@@ -319,7 +377,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         # For event workspaces, the monitors workspace must also exist, otherwise it's not valid
         if workspace_id == "EventWorkspace":
             if not AnalysisDataService.doesExist(_monitorWorkspace(workspace_name)):
-                message = 'Monitors workspace ' + workspace_name + '_monitors does not exist'
+                message = "Monitors workspace " + workspace_name + "_monitors does not exist"
                 if self._reload:
                     self.log().information(message)
                     _removeWorkspace(workspace_name)
@@ -331,9 +389,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     def _workspaceExistsAndIsValid(self, workspace_name, isTrans):
         """Return true, if the given workspace exists in the ADS and is valid"""
         if not AnalysisDataService.doesExist(workspace_name):
-            self.log().information('Workspace ' + workspace_name + ' does not exist')
+            self.log().information("Workspace " + workspace_name + " does not exist")
             return False
-        self.log().information('Workspace ' + workspace_name + ' exists')
+        self.log().information("Workspace " + workspace_name + " exists")
         if not isTrans and self._slicingEnabled():
             return self._isValidWorkspace(workspace_name, "EventWorkspace")
         else:
@@ -362,12 +420,11 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         for ws_name in workspaces:
             ws = AnalysisDataService.retrieve(ws_name)
             if isinstance(ws, WorkspaceGroup):
-                ungrouped_workspaces = ungrouped_workspaces.union(
-                    self._collapse_workspace_groups(ws.getNames()))
+                ungrouped_workspaces = ungrouped_workspaces.union(self._collapse_workspace_groups(ws.getNames()))
                 if delete_ws_group_flag is True:
                     AnalysisDataService.remove(ws_name)
             else:
-                if (ws.getAxis(0).getUnit().unitID()) == 'TOF':
+                if (ws.getAxis(0).getUnit().unitID()) == "TOF":
                     ungrouped_workspaces.add(ws_name)
                 else:
                     # Do not remove the workspace group from the ADS if a non-TOF workspace exists
@@ -390,7 +447,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         if AnalysisDataService.doesExist(output_ws_name):
             ws_group = AnalysisDataService.retrieve(output_ws_name)
             if not isinstance(ws_group, WorkspaceGroup):
-                raise RuntimeError('Cannot group TOF workspaces, a workspace called TOF already exists')
+                raise RuntimeError("Cannot group TOF workspaces, a workspace called TOF already exists")
             else:
                 for ws in workspaces:
                     if ws not in ws_group:
@@ -410,16 +467,16 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         """Load a run as an event workspace if slicing is requested, or a histogram
         workspace otherwise. Transmission runs are always loaded as histogram workspaces."""
         event_mode = not isTrans and self._slicingEnabled()
-        args = {'InputRunList': [run], 'EventMode': event_mode}
-        calibration_filepath = self.getPropertyValue('CalibrationFile')
+        args = {"InputRunList": [run], "EventMode": event_mode}
+        calibration_filepath = self.getPropertyValue("CalibrationFile")
         if calibration_filepath:
-            args['CalibrationFile'] = calibration_filepath
-        alg = self.createChildAlgorithm('ReflectometryISISPreprocess', **args)
+            args["CalibrationFile"] = calibration_filepath
+        alg = self.createChildAlgorithm("ReflectometryISISPreprocess", **args)
         alg.setRethrows(True)
         alg.execute()
 
-        ws = alg.getProperty('OutputWorkspace').value
-        monitor_ws = alg.getProperty('MonitorWorkspace').value
+        ws = alg.getProperty("OutputWorkspace").value
+        monitor_ws = alg.getProperty("MonitorWorkspace").value
         workspace_name = self._prefixedName(_getRunNumberAsString(ws), isTrans)
         AnalysisDataService.addOrReplace(workspace_name, ws)
         if monitor_ws:
@@ -427,9 +484,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
         if event_mode:
             _throwIfNotValidReflectometryEventWorkspace(workspace_name)
-            self.log().information('Loaded event workspace ' + workspace_name)
+            self.log().information("Loaded event workspace " + workspace_name)
         else:
-            self.log().information('Loaded workspace ' + workspace_name)
+            self.log().information("Loaded workspace " + workspace_name)
         return workspace_name
 
     def _sumWorkspaces(self, workspaces, isTrans):
@@ -442,7 +499,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         workspaces_without_prefixes = [self._removePrefix(ws, isTrans) for ws in workspaces]
         concatenated_names = "+".join(workspaces_without_prefixes)
         summed_name = self._prefixedName(concatenated_names, isTrans)
-        self.log().information('Summing workspaces' + " ".join(workspaces) + ' into ' + summed_name)
+        self.log().information("Summing workspaces" + " ".join(workspaces) + " into " + summed_name)
         summed_ws = MergeRuns(InputWorkspaces=", ".join(workspaces), OutputWorkspace=summed_name)
         # The reduction algorithm sets the output workspace names from the run number,
         # which by default is just the first run. Set it to the concatenated name,
@@ -450,9 +507,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         if isinstance(summed_ws, WorkspaceGroup):
             for workspaceName in summed_ws.getNames():
                 grouped_ws = AnalysisDataService.retrieve(workspaceName)
-                grouped_ws.run().addProperty('run_number', concatenated_names, True)
+                grouped_ws.run().addProperty("run_number", concatenated_names, True)
         else:
-            summed_ws.run().addProperty('run_number', concatenated_names, True)
+            summed_ws.run().addProperty("run_number", concatenated_names, True)
         return summed_name
 
     def _slicingEnabled(self):
@@ -469,8 +526,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         total_duration = (run.endTime() - run.startTime()).total_seconds()
         slice_duration = total_duration / number_of_slices
         alg.setProperty("TimeInterval", slice_duration)
-        self.log().information('Slicing ' + workspace_name + ' into ' + str(number_of_slices)
-                               + ' even slices of duration ' + str(slice_duration))
+        self.log().information(
+            "Slicing " + workspace_name + " into " + str(number_of_slices) + " even slices of duration " + str(slice_duration)
+        )
 
     def _setSliceStartStopTimes(self, alg, workspace_name):
         """Set the start/stop time for the slicing algorithm based on the
@@ -484,7 +542,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
     def _runSliceAlgorithm(self, input_workspace, output_workspace):
         """Run the child algorithm to perform the slicing"""
-        self.log().information('Running ReflectometrySliceEventWorkspace')
+        self.log().information("Running ReflectometrySliceEventWorkspace")
         alg = self.createChildAlgorithm("ReflectometrySliceEventWorkspace")
         for property in self._slice_properties:
             alg.setProperty(property, self.getPropertyValue(property))
@@ -503,16 +561,16 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             return workspace
         # Perform the slicing
         sliced_workspace_name = self._getSlicedWorkspaceGroupName(workspace)
-        self.log().information('Slicing workspace ' + workspace + ' into ' + sliced_workspace_name)
+        self.log().information("Slicing workspace " + workspace + " into " + sliced_workspace_name)
         workspace = self._runSliceAlgorithm(workspace, sliced_workspace_name)
         return sliced_workspace_name
 
     def _getSlicedWorkspaceGroupName(self, workspace):
-        return workspace + '_sliced'
+        return workspace + "_sliced"
 
     def _reduce(self, input_workspace, first_trans_workspace, second_trans_workspace):
         """Run the child algorithm to do the reduction. Return the child algorithm."""
-        self.log().information('Running ReflectometryReductionOneAuto on ' + input_workspace)
+        self.log().information("Running ReflectometryReductionOneAuto on " + input_workspace)
         alg = self.createChildAlgorithm("ReflectometryReductionOneAuto")
         # Set properties that we copied directly from the child
         for property in self._reduction_properties:
@@ -521,6 +579,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         alg.setProperty("InputWorkspace", input_workspace)
         alg.setProperty("FirstTransmissionRun", first_trans_workspace)
         alg.setProperty("SecondTransmissionRun", second_trans_workspace)
+        efficiencies_ws = self._loadPolarizationCorrectionWorkspace()
+        if efficiencies_ws:
+            alg.setProperty("PolarizationEfficiencies", efficiencies_ws)
         alg.execute()
         return alg
 
@@ -576,19 +637,19 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 def _throwIfNotValidReflectometryEventWorkspace(workspace_name):
     workspace = AnalysisDataService.retrieve(workspace_name)
     if isinstance(workspace, WorkspaceGroup):
-        raise RuntimeError('Slicing workspace groups is not supported')
-    if not workspace.run().hasProperty('proton_charge'):
-        raise RuntimeError('Cannot slice workspace: run must contain proton_charge')
+        raise RuntimeError("Slicing workspace groups is not supported")
+    if not workspace.run().hasProperty("proton_charge"):
+        raise RuntimeError("Cannot slice workspace: run must contain proton_charge")
 
 
 def _monitorWorkspace(workspace):
     """Return the associated monitor workspace name for the given workspace"""
-    return workspace + '_monitors'
+    return workspace + "_monitors"
 
 
 def _summedSegmentWorkspace(workspace):
     """Return the associated summed segment workspace name for the given workspace"""
-    return workspace + '_summed_segment'
+    return workspace + "_summed_segment"
 
 
 def _getRunNumberAsString(workspace):
@@ -600,7 +661,7 @@ def _getRunNumberAsString(workspace):
         # Get first child in the group
         return str(workspace[0].getRunNumber())
     except:
-        raise RuntimeError('Could not find run number for workspace ' + workspace.getName())
+        raise RuntimeError("Could not find run number for workspace " + workspace.getName())
 
 
 def _hasWorkspaceID(workspace_name, workspace_id):

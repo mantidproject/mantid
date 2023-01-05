@@ -18,7 +18,7 @@ tracking = """<script>
 </script>
 """
 
-with open(sys.argv[1], 'r') as inFile:
+with open(sys.argv[1], "r") as inFile:
     content = inFile.readlines()
     inFile.close()
 
@@ -26,6 +26,6 @@ for i in range(len(content)):
     if r"</head>" in content[i]:
         content[i] = tracking + content[i]
 
-with open(sys.argv[1][:-3], 'w') as outFile:
-    outFile.write(''.join(content))
+with open(sys.argv[1][:-3], "w") as outFile:
+    outFile.write("".join(content))
     outFile.close()

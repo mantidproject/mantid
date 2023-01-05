@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,attribute-defined-outside-init
+# pylint: disable=no-init,attribute-defined-outside-init
 import systemtesting
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.hfir_command_interface import *
@@ -13,14 +13,15 @@ from reduction_workflow.command_interface import AppendDataFile, Reduce
 
 class HFIRReductionAPIv2(systemtesting.MantidSystemTest):
     """
-        Simple reduction example
+    Simple reduction example
     """
+
     def setUp(self):
         self._work_dir = self.temporary_directory()
 
     def runTest(self):
         configI = ConfigService.Instance()
-        configI["facilityName"]='HFIR'
+        configI["facilityName"] = "HFIR"
         GPSANS()
         DataPath(self._work_dir)
         SetSampleDetectorDistance(6000)
@@ -32,23 +33,24 @@ class HFIRReductionAPIv2(systemtesting.MantidSystemTest):
         Reduce()
 
     def validate(self):
-        self.disableChecking.append('Instrument')
-        self.disableChecking.append('Sample')
-        self.disableChecking.append('SpectraMap')
-        self.disableChecking.append('Axes')
+        self.disableChecking.append("Instrument")
+        self.disableChecking.append("Sample")
+        self.disableChecking.append("SpectraMap")
+        self.disableChecking.append("Axes")
         return "BioSANS_test_data_Iq", "HFIRReduction.nxs"
 
 
 class HFIRAbsoluteScalingReference(systemtesting.MantidSystemTest):
     """
-        Test absolute scaling using a reference data set
+    Test absolute scaling using a reference data set
     """
+
     def setUp(self):
         self._work_dir = self.temporary_directory()
 
     def runTest(self):
         configI = ConfigService.Instance()
-        configI["facilityName"]='HFIR'
+        configI["facilityName"] = "HFIR"
         GPSANS()
         DataPath(self._work_dir)
         SetSampleDetectorDistance(6000)
@@ -56,29 +58,30 @@ class HFIRAbsoluteScalingReference(systemtesting.MantidSystemTest):
         MonitorNormalization()
         AzimuthalAverage(binning="0.01,0.001,0.2")
         SetBeamCenter(16.39, 95.53)
-        SetDirectBeamAbsoluteScale('BioSANS_empty_trans.xml')
+        SetDirectBeamAbsoluteScale("BioSANS_empty_trans.xml")
         AppendDataFile(["BioSANS_test_data.xml"])
         Reduce()
 
     def validate(self):
         self.tolerance = 0.2
-        self.disableChecking.append('Instrument')
-        self.disableChecking.append('Sample')
-        self.disableChecking.append('SpectraMap')
-        self.disableChecking.append('Axes')
+        self.disableChecking.append("Instrument")
+        self.disableChecking.append("Sample")
+        self.disableChecking.append("SpectraMap")
+        self.disableChecking.append("Axes")
         return "BioSANS_test_data_Iq", "HFIRAbsoluteScalingReference.nxs"
 
 
 class HFIRAbsoluteScalingValue(systemtesting.MantidSystemTest):
     """
-        Test absolute scaling using a reference data set
+    Test absolute scaling using a reference data set
     """
+
     def setUp(self):
         self._work_dir = self.temporary_directory()
 
     def runTest(self):
         configI = ConfigService.Instance()
-        configI["facilityName"]='HFIR'
+        configI["facilityName"] = "HFIR"
         GPSANS()
         DataPath(self._work_dir)
         SetSampleDetectorDistance(6000)
@@ -92,8 +95,8 @@ class HFIRAbsoluteScalingValue(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 0.2
-        self.disableChecking.append('Instrument')
-        self.disableChecking.append('Sample')
-        self.disableChecking.append('SpectraMap')
-        self.disableChecking.append('Axes')
+        self.disableChecking.append("Instrument")
+        self.disableChecking.append("Sample")
+        self.disableChecking.append("SpectraMap")
+        self.disableChecking.append("Axes")
         return "BioSANS_test_data_Iq", "HFIRAbsoluteScalingReference.nxs"

@@ -19,8 +19,7 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         expected_center = [3.3, 4.4, 5.5]
 
         # Check easiest case
-        sample_details_obj = sample_details.SampleDetails(height=expected_height, radius=expected_radius,
-                                                          center=expected_center)
+        sample_details_obj = sample_details.SampleDetails(height=expected_height, radius=expected_radius, center=expected_center)
         self.assertEqual(sample_details_obj.height(), expected_height)
         self.assertEqual(sample_details_obj.radius(), expected_radius)
         self.assertEqual(sample_details_obj.center(), expected_center)
@@ -31,8 +30,9 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         # Does it handle ints correctly
         height_radius_int = 1
         center_int = [2, 3, 4]
-        sample_details_obj_int = sample_details.SampleDetails(height=height_radius_int, radius=height_radius_int,
-                                                              center=center_int, shape="cylinder")
+        sample_details_obj_int = sample_details.SampleDetails(
+            height=height_radius_int, radius=height_radius_int, center=center_int, shape="cylinder"
+        )
         self.assertTrue(isinstance(sample_details_obj.height(), float))
         self.assertTrue(isinstance(sample_details_obj.radius(), float))
         self.assertEqual(sample_details_obj_int.height(), float(height_radius_int))
@@ -42,8 +42,9 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         # Does it handle strings correctly
         height_radius_string = "5"
         center_string = ["2.0", "3.0", "5.0"]
-        sample_details_obj_str = sample_details.SampleDetails(height=height_radius_string, radius=height_radius_string,
-                                                              center=center_string, shape="cylinder")
+        sample_details_obj_str = sample_details.SampleDetails(
+            height=height_radius_string, radius=height_radius_string, center=center_string, shape="cylinder"
+        )
         self.assertTrue(isinstance(sample_details_obj.height(), float))
         self.assertTrue(isinstance(sample_details_obj.radius(), float))
         self.assertEqual(sample_details_obj_str.height(), float(height_radius_string))
@@ -53,23 +54,20 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
     def test_constructor_non_number_input(self):
         good_input = 1.0
         good_center_input = [1.0, 2.0, 3.0]
-        empty_input_value = ''
-        char_input_value = 'a'
+        empty_input_value = ""
+        char_input_value = "a"
 
         # Check it handles empty input
         with self.assertRaisesRegex(ValueError, "Could not convert the height to a number"):
-            sample_details.SampleDetails(height=empty_input_value, radius=good_input,
-                                         center=good_center_input, shape="cylinder")
+            sample_details.SampleDetails(height=empty_input_value, radius=good_input, center=good_center_input, shape="cylinder")
 
         # Does it handle bad input and tell us what we put in
         with self.assertRaisesRegex(ValueError, ".*to a number. The input was: '" + char_input_value + "'"):
-            sample_details.SampleDetails(height=char_input_value, radius=good_input,
-                                         center=good_center_input, shape="cylinder")
+            sample_details.SampleDetails(height=char_input_value, radius=good_input, center=good_center_input, shape="cylinder")
 
         # Does it indicate which field was incorrect
         with self.assertRaisesRegex(ValueError, "radius"):
-            sample_details.SampleDetails(height=good_input, radius=char_input_value,
-                                         center=good_center_input, shape="cylinder")
+            sample_details.SampleDetails(height=good_input, radius=char_input_value, center=good_center_input, shape="cylinder")
 
         # Can it handle bad center values
         with self.assertRaisesRegex(ValueError, "center"):
@@ -97,41 +95,37 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
 
         # Check it handles zero
         with self.assertRaisesRegex(ValueError, "The value set for height was: 0"):
-            sample_details.SampleDetails(height=zero_value, radius=good_input,
-                                         center=good_center_input, shape="cylinder")
+            sample_details.SampleDetails(height=zero_value, radius=good_input, center=good_center_input, shape="cylinder")
 
         # Very small negative
         with self.assertRaisesRegex(ValueError, "which is impossible for a physical object"):
-            sample_details.SampleDetails(height=good_input, radius=negative_value,
-                                         center=good_center_input, shape="cylinder")
+            sample_details.SampleDetails(height=good_input, radius=negative_value, center=good_center_input, shape="cylinder")
 
         # Integer negative
         with self.assertRaisesRegex(ValueError, "The value set for height was: -1"):
-            sample_details.SampleDetails(height=negative_int, radius=good_input,
-                                         center=good_center_input, shape="cylinder")
+            sample_details.SampleDetails(height=negative_int, radius=good_input, center=good_center_input, shape="cylinder")
 
         # String negative
         with self.assertRaisesRegex(ValueError, "The value set for radius was: -1"):
-            sample_details.SampleDetails(height=good_input, radius=negative_string,
-                                         center=good_center_input, shape="cylinder")
+            sample_details.SampleDetails(height=good_input, radius=negative_string, center=good_center_input, shape="cylinder")
 
     def test_set_material(self):
         sample_details_obj = sample_details.SampleDetails(height=1.0, radius=1.0, center=[2, 3, 4], shape="cylinder")
 
         # Check that we can only set a material once. We will test the underlying class elsewhere
-        sample_details_obj.set_material(chemical_formula='V')
+        sample_details_obj.set_material(chemical_formula="V")
         self.assertIsNotNone(sample_details_obj.material_object)
 
         # Check that the material is now immutable
         with self.assertRaisesRegex(RuntimeError, "The material has already been set to the above details"):
-            sample_details_obj.set_material(chemical_formula='V')
+            sample_details_obj.set_material(chemical_formula="V")
 
         # Check resetting it works
         sample_details_obj.reset_sample_material()
         self.assertIsNone(sample_details_obj.material_object)
 
         # And ensure setting it for a second time works
-        sample_details_obj.set_material(chemical_formula='V')
+        sample_details_obj.set_material(chemical_formula="V")
         self.assertIsNotNone(sample_details_obj.material_object)
 
     def test_set_material_properties(self):
@@ -144,14 +138,14 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
             sample_details_obj.set_material_properties(absorption_cross_section=1.0, scattering_cross_section=2.0)
 
         # Check that with a material object we are allowed to set material properties
-        sample_details_obj.set_material(chemical_formula='V')
+        sample_details_obj.set_material(chemical_formula="V")
         # We will test the immutability of the underlying object elsewhere
         sample_details_obj.set_material_properties(scattering_cross_section=2.0, absorption_cross_section=3.0)
 
     def test_material_constructor(self):
-        chemical_formula_one_char_element = 'V'
-        chemical_formula_two_char_element = 'Si'
-        chemical_formula_complex = 'V Si'  # Yes, this isn't a sensible input but for our tests it will do
+        chemical_formula_one_char_element = "V"
+        chemical_formula_two_char_element = "Si"
+        chemical_formula_complex = "V Si"  # Yes, this isn't a sensible input but for our tests it will do
         number_density_effective_sample = 1.234
         number_density_sample = 2.345
         packing_fraction = number_density_effective_sample / number_density_sample
@@ -173,18 +167,20 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         self.assertIsNone(material_obj_two_char.number_density)
 
         # Check it stores number density if passed (both flavours)
-        material_obj_number_density = sample_details._Material(chemical_formula=chemical_formula_two_char_element,
-                                                               number_density_effective=number_density_effective_sample)
+        material_obj_number_density = sample_details._Material(
+            chemical_formula=chemical_formula_two_char_element, number_density_effective=number_density_effective_sample
+        )
         self.assertEqual(material_obj_number_density.number_density_effective, number_density_effective_sample)
 
-        material_obj_number_density = sample_details._Material(chemical_formula=chemical_formula_two_char_element,
-                                                               number_density=number_density_sample)
+        material_obj_number_density = sample_details._Material(
+            chemical_formula=chemical_formula_two_char_element, number_density=number_density_sample
+        )
         self.assertEqual(material_obj_number_density.number_density, number_density_sample)
 
         # Check it stores packing fraction if passed
-        material_obj_packing_fraction = sample_details._Material(chemical_formula=chemical_formula_two_char_element,
-                                                                 number_density=number_density_sample,
-                                                                 packing_fraction=packing_fraction)
+        material_obj_packing_fraction = sample_details._Material(
+            chemical_formula=chemical_formula_two_char_element, number_density=number_density_sample, packing_fraction=packing_fraction
+        )
         self.assertEqual(material_obj_packing_fraction.packing_fraction, packing_fraction)
 
         # Check that it raises an error if we have a non-elemental formula without number density
@@ -192,26 +188,27 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
             sample_details._Material(chemical_formula=chemical_formula_complex)
 
         # Check it constructs if it is given the number density too
-        material_obj_num_complex_formula = sample_details._Material(chemical_formula=chemical_formula_complex,
-                                                                    number_density=number_density_sample)
+        material_obj_num_complex_formula = sample_details._Material(
+            chemical_formula=chemical_formula_complex, number_density=number_density_sample
+        )
         self.assertEqual(material_obj_num_complex_formula.chemical_formula, chemical_formula_complex)
         self.assertEqual(material_obj_num_complex_formula.number_density, number_density_sample)
 
-        material_obj_num_complex_formula = sample_details._Material(chemical_formula=chemical_formula_complex,
-                                                                    number_density_effective=number_density_effective_sample)
+        material_obj_num_complex_formula = sample_details._Material(
+            chemical_formula=chemical_formula_complex, number_density_effective=number_density_effective_sample
+        )
         self.assertEqual(material_obj_num_complex_formula.chemical_formula, chemical_formula_complex)
         self.assertEqual(material_obj_num_complex_formula.number_density_effective, number_density_effective_sample)
 
     def test_material_set_properties(self):
-        bad_absorb = '-1'
+        bad_absorb = "-1"
         bad_scattering = 0
 
-        good_absorb = '1'
+        good_absorb = "1"
         good_scattering = 2.0
 
-        material_obj = sample_details._Material(chemical_formula='V')
-        with self.assertRaisesRegex(ValueError, "absorption_cross_section was: -1 which is impossible for a physical "
-                                    "object"):
+        material_obj = sample_details._Material(chemical_formula="V")
+        with self.assertRaisesRegex(ValueError, "absorption_cross_section was: -1 which is impossible for a physical " "object"):
             material_obj.set_material_properties(abs_cross_sect=bad_absorb, scattering_cross_sect=good_scattering)
 
         # Check the immutability flag has not been set on a failure
@@ -241,8 +238,8 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         expected_radius = 2
         expected_center = [3, 4, 5]
 
-        chemical_formula = 'Si'
-        chemical_formula_two = 'V'
+        chemical_formula = "Si"
+        chemical_formula_two = "V"
         expected_number_density = 1.2345
 
         old_std_out = sys.stdout
@@ -252,8 +249,9 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
             std_out_buffer = get_std_out_buffer_obj()
             sys.stdout = std_out_buffer
 
-            sample_details_obj = sample_details.SampleDetails(height=expected_height, radius=expected_radius,
-                                                              center=expected_center, shape="cylinder")
+            sample_details_obj = sample_details.SampleDetails(
+                height=expected_height, radius=expected_radius, center=expected_center, shape="cylinder"
+            )
             # Test with most defaults set
             sample_details_obj.print_sample_details()
             captured_std_out_default = std_out_buffer.getvalue()
@@ -274,8 +272,7 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
             # Test with material and number density
             sys.stdout = std_out_buffer = get_std_out_buffer_obj()
             sample_details_obj.reset_sample_material()
-            sample_details_obj.set_material(chemical_formula=chemical_formula_two,
-                                            number_density=expected_number_density)
+            sample_details_obj.set_material(chemical_formula=chemical_formula_two, number_density=expected_number_density)
             sample_details_obj.print_sample_details()
             captured_std_out_material_set = std_out_buffer.getvalue()
             self.assertRegex(captured_std_out_material_set, "Chemical formula: " + chemical_formula_two)
@@ -291,14 +288,13 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
 
             # Test with material set
             sys.stdout = std_out_buffer = get_std_out_buffer_obj()
-            sample_details_obj.set_material_properties(absorption_cross_section=expected_abs_x_section,
-                                                       scattering_cross_section=expected_scattering_x_section)
+            sample_details_obj.set_material_properties(
+                absorption_cross_section=expected_abs_x_section, scattering_cross_section=expected_scattering_x_section
+            )
             sample_details_obj.print_sample_details()
             captured_std_out_material_props = std_out_buffer.getvalue()
-            self.assertRegex(captured_std_out_material_props, "Absorption cross section: "
-                             + str(expected_abs_x_section))
-            self.assertRegex(captured_std_out_material_props, "Scattering cross section: "
-                             + str(expected_scattering_x_section))
+            self.assertRegex(captured_std_out_material_props, "Absorption cross section: " + str(expected_abs_x_section))
+            self.assertRegex(captured_std_out_material_props, "Scattering cross section: " + str(expected_scattering_x_section))
         finally:
             # Ensure std IO is restored. Do NOT remove this line as all std out will pipe into our buffer otherwise
             sys.stdout = old_std_out
@@ -311,9 +307,14 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         expected_angle = 3.0
 
         # Check easiest case
-        sample_details_obj = sample_details.SampleDetails(thickness=expected_thickness, shape="slab",
-                                                          height=expected_height, width=expected_width,
-                                                          center=expected_center, angle=expected_angle)
+        sample_details_obj = sample_details.SampleDetails(
+            thickness=expected_thickness,
+            shape="slab",
+            height=expected_height,
+            width=expected_width,
+            center=expected_center,
+            angle=expected_angle,
+        )
         self.assertEqual(sample_details_obj.thickness(), expected_thickness)
         self.assertEqual(sample_details_obj.width(), expected_width)
         self.assertEqual(sample_details_obj.height(), expected_height)
@@ -326,9 +327,9 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         height_int = 3
         center_int = [1, 2, 3]
         angle_int = 4
-        sample_details_obj_int = sample_details.SampleDetails(thickness=thickness_int, shape="slab",
-                                                              height=height_int, width=width_int, center=center_int,
-                                                              angle=angle_int)
+        sample_details_obj_int = sample_details.SampleDetails(
+            thickness=thickness_int, shape="slab", height=height_int, width=width_int, center=center_int, angle=angle_int
+        )
         self.assertTrue(isinstance(sample_details_obj_int.thickness(), float))
         self.assertTrue(isinstance(sample_details_obj_int.width(), float))
         self.assertTrue(isinstance(sample_details_obj_int.height(), float))
@@ -347,9 +348,9 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         height_string = "2"
         center_string = ["1", "2", "3"]
         angle_string = "3"
-        sample_details_obj_str = sample_details.SampleDetails(thickness=thickness_string, shape="slab",
-                                                              height=height_string, width=width_string,
-                                                              center=center_string, angle=angle_string)
+        sample_details_obj_str = sample_details.SampleDetails(
+            thickness=thickness_string, shape="slab", height=height_string, width=width_string, center=center_string, angle=angle_string
+        )
         self.assertTrue(isinstance(sample_details_obj_str.thickness(), float))
         self.assertTrue(isinstance(sample_details_obj_str.width(), float))
         self.assertTrue(isinstance(sample_details_obj_str.height(), float))
@@ -364,31 +365,22 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
 
     def test_generate_sample_geometry(self):
         # Create mock SampleDetails
-        sample_details_obj = sample_details.SampleDetails(height=4.0, radius=3.0,
-                                                          center=[0.5, 1.0, -3.2], shape='cylinder')
+        sample_details_obj = sample_details.SampleDetails(height=4.0, radius=3.0, center=[0.5, 1.0, -3.2], shape="cylinder")
         # Run test
         result = sample_details_obj.generate_sample_geometry()
         # Validate result
-        expected = {'Shape': 'Cylinder',
-                    'Height': 4.0,
-                    'Radius': 3.0,
-                    'Center': [0.5, 1.0, -3.2]}
+        expected = {"Shape": "Cylinder", "Height": 4.0, "Radius": 3.0, "Center": [0.5, 1.0, -3.2]}
         self.assertEqual(result, expected)
 
     def test_generate_sample_material(self):
         # Create mock SampleDetails
-        sample_details_obj = sample_details.SampleDetails(height=1.0, radius=1.0,
-                                                          center=[0.0, 0.0, 0.0])
-        sample_details_obj.set_material(chemical_formula='Si', number_density=1.5)
-        sample_details_obj.set_material_properties(absorption_cross_section=123,
-                                                   scattering_cross_section=456)
+        sample_details_obj = sample_details.SampleDetails(height=1.0, radius=1.0, center=[0.0, 0.0, 0.0])
+        sample_details_obj.set_material(chemical_formula="Si", number_density=1.5)
+        sample_details_obj.set_material_properties(absorption_cross_section=123, scattering_cross_section=456)
         # Run test
         result = sample_details_obj.generate_sample_material()
         # Validate
-        expected = {'ChemicalFormula': 'Si',
-                    'NumberDensity': 1.5,
-                    'AttenuationXSection': 123.0,
-                    'ScatteringXSection': 456.0}
+        expected = {"ChemicalFormula": "Si", "NumberDensity": 1.5, "AttenuationXSection": 123.0, "ScatteringXSection": 456.0}
         self.assertEqual(result, expected)
 
     def test_generate_geometry_cylinder(self):
@@ -398,38 +390,38 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         radius_float = 1.0
         height_float = 2.0
         center_float = [1.0, 2.0, 3.0]
-        sample_details_float = sample_details.SampleDetails(radius=radius_float, shape="cylinder",
-                                                            height=height_float, center=center_float)
-        sample_details_float.set_material(chemical_formula='Si')
+        sample_details_float = sample_details.SampleDetails(radius=radius_float, shape="cylinder", height=height_float, center=center_float)
+        sample_details_float.set_material(chemical_formula="Si")
 
         # int
         radius_int = 1
         height_int = 3
         center_int = [1, 2, 3]
-        sample_details_int = sample_details.SampleDetails(radius=radius_int, shape="cylinder",
-                                                          height=height_int, center=center_int)
-        sample_details_int.set_material(chemical_formula='Si')
+        sample_details_int = sample_details.SampleDetails(radius=radius_int, shape="cylinder", height=height_int, center=center_int)
+        sample_details_int.set_material(chemical_formula="Si")
 
         # string
         radius_string = "1"
         height_string = "2"
         center_string = ["1", "2", "3"]
-        sample_details_string = sample_details.SampleDetails(radius=radius_string, shape="cylinder",
-                                                             height=height_string, center=center_string)
-        sample_details_string.set_material(chemical_formula='Si')
+        sample_details_string = sample_details.SampleDetails(
+            radius=radius_string, shape="cylinder", height=height_string, center=center_string
+        )
+        sample_details_string.set_material(chemical_formula="Si")
 
         radius_mix = 1.23
         height_mix = 2
         center_mix = ["1", 2, 3.45]
-        sample_details_mix = sample_details.SampleDetails(radius=radius_mix, shape="cylinder",
-                                                          height=height_mix, center=center_mix)
-        sample_details_mix.set_material(chemical_formula='Si')
+        sample_details_mix = sample_details.SampleDetails(radius=radius_mix, shape="cylinder", height=height_mix, center=center_mix)
+        sample_details_mix.set_material(chemical_formula="Si")
 
-        sample_details_objects = [sample_details_float, sample_details_int,
-                                  sample_details_string, sample_details_mix]
+        sample_details_objects = [sample_details_float, sample_details_int, sample_details_string, sample_details_mix]
         for sample_details_object in sample_details_objects:
-            SetSample(workspace, Geometry=sample_details_object.generate_sample_geometry(),
-                      Material=sample_details_object.generate_sample_material())
+            SetSample(
+                workspace,
+                Geometry=sample_details_object.generate_sample_geometry(),
+                Material=sample_details_object.generate_sample_material(),
+            )
 
     def test_generate_geometry_cylinder_with_container(self):
         workspace = CreateSampleWorkspace()
@@ -437,42 +429,42 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         radius_float = 1.0
         height_float = 2.0
         center_float = [1.0, 2.0, 3.0]
-        sample_details_float = sample_details.SampleDetails(radius=radius_float, shape="cylinder",
-                                                            height=height_float, center=center_float)
-        sample_details_float.set_material(chemical_formula='Si')
-        sample_details_float.set_container(radius=2.0, chemical_formula='V')
+        sample_details_float = sample_details.SampleDetails(radius=radius_float, shape="cylinder", height=height_float, center=center_float)
+        sample_details_float.set_material(chemical_formula="Si")
+        sample_details_float.set_container(radius=2.0, chemical_formula="V")
         # int
         radius_int = 1
         height_int = 3
         center_int = [1, 2, 3]
-        sample_details_int = sample_details.SampleDetails(radius=radius_int, shape="cylinder",
-                                                          height=height_int, center=center_int)
-        sample_details_int.set_material(chemical_formula='Si')
-        sample_details_int.set_container(radius=2, chemical_formula='V')
+        sample_details_int = sample_details.SampleDetails(radius=radius_int, shape="cylinder", height=height_int, center=center_int)
+        sample_details_int.set_material(chemical_formula="Si")
+        sample_details_int.set_container(radius=2, chemical_formula="V")
         # string
         radius_string = "1"
         height_string = "2"
         center_string = ["1", "2", "3"]
-        sample_details_string = sample_details.SampleDetails(radius=radius_string, shape="cylinder",
-                                                             height=height_string, center=center_string)
-        sample_details_string.set_material(chemical_formula='Si')
-        sample_details_string.set_container(radius="2", chemical_formula='V')
+        sample_details_string = sample_details.SampleDetails(
+            radius=radius_string, shape="cylinder", height=height_string, center=center_string
+        )
+        sample_details_string.set_material(chemical_formula="Si")
+        sample_details_string.set_container(radius="2", chemical_formula="V")
         # mix
         radius_mix = 1.23
         height_mix = 2
         center_mix = ["1", 2, 3.45]
-        sample_details_mix = sample_details.SampleDetails(radius=radius_mix, shape="cylinder",
-                                                          height=height_mix, center=center_mix)
-        sample_details_mix.set_material(chemical_formula='Si')
-        sample_details_mix.set_container(radius="2", chemical_formula='V')
+        sample_details_mix = sample_details.SampleDetails(radius=radius_mix, shape="cylinder", height=height_mix, center=center_mix)
+        sample_details_mix.set_material(chemical_formula="Si")
+        sample_details_mix.set_container(radius="2", chemical_formula="V")
 
-        sample_details_objects = [sample_details_float, sample_details_int,
-                                  sample_details_string, sample_details_mix]
+        sample_details_objects = [sample_details_float, sample_details_int, sample_details_string, sample_details_mix]
         for sample_details_object in sample_details_objects:
-            SetSample(workspace, Geometry=sample_details_object.generate_sample_geometry(),
-                      Material=sample_details_object.generate_sample_material(),
-                      ContainerGeometry=sample_details_object.generate_container_geometry(),
-                      ContainerMaterial=sample_details_object.generate_container_material())
+            SetSample(
+                workspace,
+                Geometry=sample_details_object.generate_sample_geometry(),
+                Material=sample_details_object.generate_sample_material(),
+                ContainerGeometry=sample_details_object.generate_container_geometry(),
+                ContainerMaterial=sample_details_object.generate_container_material(),
+            )
 
     def test_generate_geometry_slab(self):
         workspace = CreateSampleWorkspace()
@@ -483,10 +475,10 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         height_float = 2.0
         center_float = [1.0, 2.0, 3.0]
         angle_float = 3.0
-        sample_details_float = sample_details.SampleDetails(thickness=thickness_float, shape="slab",
-                                                            height=height_float, width=width_float,
-                                                            center=center_float, angle=angle_float)
-        sample_details_float.set_material(chemical_formula='Si')
+        sample_details_float = sample_details.SampleDetails(
+            thickness=thickness_float, shape="slab", height=height_float, width=width_float, center=center_float, angle=angle_float
+        )
+        sample_details_float.set_material(chemical_formula="Si")
 
         # int
         thickness_int = 1
@@ -494,10 +486,10 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         height_int = 3
         center_int = [1, 2, 3]
         angle_int = 4
-        sample_details_int = sample_details.SampleDetails(thickness=thickness_int, shape="slab",
-                                                          height=height_int, width=width_int, center=center_int,
-                                                          angle=angle_int)
-        sample_details_int.set_material(chemical_formula='Si')
+        sample_details_int = sample_details.SampleDetails(
+            thickness=thickness_int, shape="slab", height=height_int, width=width_int, center=center_int, angle=angle_int
+        )
+        sample_details_int.set_material(chemical_formula="Si")
 
         # string
         thickness_string = "5"
@@ -505,10 +497,10 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         height_string = "2"
         center_string = ["1", "2", "3"]
         angle_string = "3"
-        sample_details_string = sample_details.SampleDetails(thickness=thickness_string, shape="slab",
-                                                             height=height_string, width=width_string,
-                                                             center=center_string, angle=angle_string)
-        sample_details_string.set_material(chemical_formula='Si')
+        sample_details_string = sample_details.SampleDetails(
+            thickness=thickness_string, shape="slab", height=height_string, width=width_string, center=center_string, angle=angle_string
+        )
+        sample_details_string.set_material(chemical_formula="Si")
 
         # mix
         thickness_mix = "5"
@@ -516,16 +508,18 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         height_mix = "2"
         center_mix = ["1", 2, 3.45]
         angle_mix = 3
-        sample_details_mix = sample_details.SampleDetails(thickness=thickness_mix, shape="slab",
-                                                          height=height_mix, width=width_mix,
-                                                          center=center_mix, angle=angle_mix)
-        sample_details_mix.set_material(chemical_formula='Si')
+        sample_details_mix = sample_details.SampleDetails(
+            thickness=thickness_mix, shape="slab", height=height_mix, width=width_mix, center=center_mix, angle=angle_mix
+        )
+        sample_details_mix.set_material(chemical_formula="Si")
 
-        sample_details_objects = [sample_details_float, sample_details_int,
-                                  sample_details_string, sample_details_mix]
+        sample_details_objects = [sample_details_float, sample_details_int, sample_details_string, sample_details_mix]
         for sample_details_object in sample_details_objects:
-            SetSample(workspace, Geometry=sample_details_object.generate_sample_geometry(),
-                      Material=sample_details_object.generate_sample_material())
+            SetSample(
+                workspace,
+                Geometry=sample_details_object.generate_sample_geometry(),
+                Material=sample_details_object.generate_sample_material(),
+            )
 
     def test_generate_geometry_slab_with_container(self):
         workspace = CreateSampleWorkspace()
@@ -535,52 +529,54 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         height_float = 2.0
         center_float = [1.0, 2.0, 3.0]
         angle_float = 3.0
-        sample_details_float = sample_details.SampleDetails(thickness=thickness_float, shape="slab",
-                                                            height=height_float, width=width_float,
-                                                            center=center_float, angle=angle_float)
-        sample_details_float.set_material(chemical_formula='Si')
-        sample_details_float.set_container(front_thick=2.0, back_thick=2.2, chemical_formula='V')
+        sample_details_float = sample_details.SampleDetails(
+            thickness=thickness_float, shape="slab", height=height_float, width=width_float, center=center_float, angle=angle_float
+        )
+        sample_details_float.set_material(chemical_formula="Si")
+        sample_details_float.set_container(front_thick=2.0, back_thick=2.2, chemical_formula="V")
 
         thickness_int = 1
         width_int = 2
         height_int = 3
         center_int = [1, 2, 3]
         angle_int = 4
-        sample_details_int = sample_details.SampleDetails(thickness=thickness_int, shape="slab",
-                                                          height=height_int, width=width_int, center=center_int,
-                                                          angle=angle_int)
-        sample_details_int.set_material(chemical_formula='Si')
-        sample_details_int.set_container(front_thick=2, back_thick=1, chemical_formula='V')
+        sample_details_int = sample_details.SampleDetails(
+            thickness=thickness_int, shape="slab", height=height_int, width=width_int, center=center_int, angle=angle_int
+        )
+        sample_details_int.set_material(chemical_formula="Si")
+        sample_details_int.set_container(front_thick=2, back_thick=1, chemical_formula="V")
 
         thickness_string = "5"
         width_string = "1"
         height_string = "2"
         center_string = ["1", "2", "3"]
         angle_string = "3"
-        sample_details_string = sample_details.SampleDetails(thickness=thickness_string, shape="slab",
-                                                             height=height_string, width=width_string,
-                                                             center=center_string, angle=angle_string)
-        sample_details_string.set_material(chemical_formula='Si')
-        sample_details_string.set_container(front_thick="2", back_thick="2.2", chemical_formula='V')
+        sample_details_string = sample_details.SampleDetails(
+            thickness=thickness_string, shape="slab", height=height_string, width=width_string, center=center_string, angle=angle_string
+        )
+        sample_details_string.set_material(chemical_formula="Si")
+        sample_details_string.set_container(front_thick="2", back_thick="2.2", chemical_formula="V")
 
         thickness_mix = "5"
         width_mix = 3.5
         height_mix = "2"
         center_mix = ["1", 2, 3.45]
         angle_mix = 3
-        sample_details_mix = sample_details.SampleDetails(thickness=thickness_mix, shape="slab",
-                                                          height=height_mix, width=width_mix,
-                                                          center=center_mix, angle=angle_mix)
-        sample_details_mix.set_material(chemical_formula='Si')
-        sample_details_mix.set_container(front_thick="2.0", back_thick=2, chemical_formula='V')
+        sample_details_mix = sample_details.SampleDetails(
+            thickness=thickness_mix, shape="slab", height=height_mix, width=width_mix, center=center_mix, angle=angle_mix
+        )
+        sample_details_mix.set_material(chemical_formula="Si")
+        sample_details_mix.set_container(front_thick="2.0", back_thick=2, chemical_formula="V")
 
-        sample_details_objects = [sample_details_float, sample_details_int,
-                                  sample_details_string, sample_details_mix]
+        sample_details_objects = [sample_details_float, sample_details_int, sample_details_string, sample_details_mix]
         for sample_details_object in sample_details_objects:
-            SetSample(workspace, Geometry=sample_details_object.generate_sample_geometry(),
-                      Material=sample_details_object.generate_sample_material(),
-                      ContainerGeometry=sample_details_object.generate_container_geometry(),
-                      ContainerMaterial=sample_details_object.generate_container_material())
+            SetSample(
+                workspace,
+                Geometry=sample_details_object.generate_sample_geometry(),
+                Material=sample_details_object.generate_sample_material(),
+                ContainerGeometry=sample_details_object.generate_container_geometry(),
+                ContainerMaterial=sample_details_object.generate_container_material(),
+            )
 
 
 def get_std_out_buffer_obj():

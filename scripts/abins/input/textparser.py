@@ -16,6 +16,7 @@ class TextParser:
     """
     File parsing tools: wraps a few methods for buffer navigation
     """
+
     @staticmethod
     @contextmanager
     def save_excursion(file_obj):
@@ -28,10 +29,7 @@ class TextParser:
             file_obj.seek(pos)
 
     @classmethod
-    def find_first(cls, *,
-                   file_obj: BufferedReader,
-                   msg: str = None,
-                   regex: str = None) -> str:
+    def find_first(cls, *, file_obj: BufferedReader, msg: str = None, regex: str = None) -> str:
         """
         Match a string/regex and moves file current position to the next line.
 
@@ -58,7 +56,7 @@ class TextParser:
             while not cls.file_end(file_obj):
                 line = file_obj.readline()
                 if test.match(line):
-                    return(line)
+                    return line
             raise EOFError(f'"{regex.decode()}" not found')
         else:
             raise ValueError("No msg or regex provided: nothing to match")

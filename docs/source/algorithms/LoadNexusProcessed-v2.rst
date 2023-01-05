@@ -11,7 +11,7 @@ Description
 -----------
 
 The algorithm LoadNexusProcessed will read a Nexus data file created
-by :ref:`algm-SaveNexusProcessed` or `algm-SaveNexusESS` and place the data into the named workspace. The file name can be an absolute or relative path and
+by :ref:`algm-SaveNexusProcessed` or :ref:`algm-SaveNexusESS` and place the data into the named workspace. The file name can be an absolute or relative path and
 should have the extension .nxs, .nx5 or .xml.
 
 .. warning::
@@ -33,7 +33,7 @@ is read, earlier ones can be accessed by setting the EntryNumber.
 If the saved data has a reference to an XML file defining instrument
 geometry this will be read.
 
-This is version 2 of the algorithm. For old behaviour :ref:`algm-SaveNexusProcessed-v1`, which does not handle :ref:`algm-SaveNexusESS` outputs. This is the only difference between the two versions.
+This is version 2 of the algorithm. Information about the previous behaviour can be found in :ref:`algm-SaveNexusProcessed-v1`, which does not handle :ref:`algm-SaveNexusESS` outputs. This is the only difference between the two versions.
 
 Time series data
 ################

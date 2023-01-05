@@ -5,8 +5,15 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,too-many-instance-attributes
-from mantid.api import (AlgorithmFactory, AnalysisDataService, MatrixWorkspace, MatrixWorkspaceProperty,
-                        PythonAlgorithm, PropertyMode, WorkspaceGroup)
+from mantid.api import (
+    AlgorithmFactory,
+    AnalysisDataService,
+    MatrixWorkspace,
+    MatrixWorkspaceProperty,
+    PythonAlgorithm,
+    PropertyMode,
+    WorkspaceGroup,
+)
 from mantid.kernel import Direction
 
 
@@ -52,7 +59,7 @@ def get_bin_index_of_value(workspace, value):
         if is_equal(x_axis.getValue(i), value, 0.000001):
             return i
 
-    raise ValueError('The corresponding bin in the input workspace could not be found.')
+    raise ValueError("The corresponding bin in the input workspace could not be found.")
 
 
 def get_x_insertion_index(input_workspace, single_fit_workspace):
@@ -70,8 +77,7 @@ def get_indices_of_equivalent_labels(input_workspace, destination_workspace):
 def fit_parameter_missing(single_fit_workspace, destination_workspace, exclude_parameters):
     single_parameters = single_fit_workspace.getAxis(1).extractValues()
     destination_parameters = destination_workspace.getAxis(1).extractValues()
-    return any([parameter not in destination_parameters and parameter not in exclude_parameters
-                for parameter in single_parameters])
+    return any([parameter not in destination_parameters and parameter not in exclude_parameters for parameter in single_parameters])
 
 
 class IndirectReplaceFitResult(PythonAlgorithm):
@@ -85,90 +91,83 @@ class IndirectReplaceFitResult(PythonAlgorithm):
     _insertion_y_indices = None
 
     _result_group = None
-    _allowed_extension = '_Result'
+    _allowed_extension = "_Result"
 
     def category(self):
         return "Workflow\\DataHandling;Inelastic\\Indirect"
 
     def summary(self):
-        return 'Replaces a fit result within the Input Workspace with the corresponding fit result found in the ' \
-               'Single Fit Workspace.'
+        return "Replaces a fit result within the Input Workspace with the corresponding fit result found in the " "Single Fit Workspace."
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '',
-                                                     optional=PropertyMode.Mandatory,
-                                                     direction=Direction.Input),
-                             doc='The result workspace containing the poor fit value which needs replacing. It\'s name '
-                                 'must end with _Result.')
+        self.declareProperty(
+            MatrixWorkspaceProperty("InputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Input),
+            doc="The result workspace containing the poor fit value which needs replacing. It's name " "must end with _Result.",
+        )
 
-        self.declareProperty(MatrixWorkspaceProperty('SingleFitWorkspace', '',
-                                                     optional=PropertyMode.Mandatory,
-                                                     direction=Direction.Input),
-                             doc='The result workspace containing the result data from a single fit. It\'s name must '
-                                 'end with _Result.')
+        self.declareProperty(
+            MatrixWorkspaceProperty("SingleFitWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Input),
+            doc="The result workspace containing the result data from a single fit. It's name must " "end with _Result.",
+        )
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
-                                                     direction=Direction.Output,
-                                                     optional=PropertyMode.Optional),
-                             doc='The name of the output workspace.')
+        self.declareProperty(
+            MatrixWorkspaceProperty("OutputWorkspace", "", direction=Direction.Output, optional=PropertyMode.Optional),
+            doc="The name of the output workspace.",
+        )
 
     def validateInputs(self):
         issues = dict()
 
-        input_name = self.getPropertyValue('InputWorkspace')
-        single_fit_name = self.getPropertyValue('SingleFitWorkspace')
-        output_name = self.getPropertyValue('OutputWorkspace')
+        input_name = self.getPropertyValue("InputWorkspace")
+        single_fit_name = self.getPropertyValue("SingleFitWorkspace")
+        output_name = self.getPropertyValue("OutputWorkspace")
 
-        input_workspace = self.getProperty('InputWorkspace').value
-        single_fit_workspace = self.getProperty('SingleFitWorkspace').value
+        input_workspace = self.getProperty("InputWorkspace").value
+        single_fit_workspace = self.getProperty("SingleFitWorkspace").value
 
         if not string_ends_with(input_name, self._allowed_extension):
-            issues['InputWorkspace'] = 'The input workspace must have a name ending in ' \
-                                       '{0}'.format(self._allowed_extension)
+            issues["InputWorkspace"] = "The input workspace must have a name ending in " "{0}".format(self._allowed_extension)
 
         if not string_ends_with(single_fit_name, self._allowed_extension):
-            issues['SingleFitWorkspace'] = 'This workspace must have a name ending in ' \
-                                           '{0}'.format(self._allowed_extension)
+            issues["SingleFitWorkspace"] = "This workspace must have a name ending in " "{0}".format(self._allowed_extension)
 
         if not output_name:
-            issues['OutputWorkspace'] = 'No OutputWorkspace name was provided.'
+            issues["OutputWorkspace"] = "No OutputWorkspace name was provided."
 
         if not isinstance(input_workspace, MatrixWorkspace):
-            issues['InputWorkspace'] = 'The input workspace must be a matrix workspace.'
+            issues["InputWorkspace"] = "The input workspace must be a matrix workspace."
         else:
             input_x_axis = input_workspace.getAxis(0)
             input_y_axis = input_workspace.getAxis(1)
             if not input_x_axis.isNumeric():
-                issues['InputWorkspace'] = 'The input workspace must have a numeric x axis.'
+                issues["InputWorkspace"] = "The input workspace must have a numeric x axis."
             if len(input_workspace.readY(0)) < 2:
-                issues['InputWorkspace'] = 'The input workspace must contain result data from a fit involving 2 or ' \
-                                           'more spectra.'
+                issues["InputWorkspace"] = "The input workspace must contain result data from a fit involving 2 or " "more spectra."
             if not input_y_axis.isText():
-                issues['InputWorkspace'] = 'The input workspace must have a text y axis.'
+                issues["InputWorkspace"] = "The input workspace must have a text y axis."
 
         if not isinstance(single_fit_workspace, MatrixWorkspace):
-            issues['SingleFitWorkspace'] = 'The single fit workspace must be a matrix workspace.'
+            issues["SingleFitWorkspace"] = "The single fit workspace must be a matrix workspace."
         else:
             single_fit_x_axis = single_fit_workspace.getAxis(0)
             single_fit_y_axis = single_fit_workspace.getAxis(1)
             if not single_fit_x_axis.isNumeric():
-                issues['SingleFitWorkspace'] = 'The single fit workspace must have a numeric x axis.'
+                issues["SingleFitWorkspace"] = "The single fit workspace must have a numeric x axis."
             if len(single_fit_workspace.readY(0)) > 1:
-                issues['SingleFitWorkspace'] = 'The single fit workspace must contain data from a single fit.'
+                issues["SingleFitWorkspace"] = "The single fit workspace must contain data from a single fit."
             if not single_fit_y_axis.isText():
-                issues['SingleFitWorkspace'] = 'The single fit workspace must have a text y axis.'
+                issues["SingleFitWorkspace"] = "The single fit workspace must have a text y axis."
 
         if isinstance(input_workspace, MatrixWorkspace) and isinstance(single_fit_workspace, MatrixWorkspace):
-            if fit_parameter_missing(single_fit_workspace, input_workspace, ['Chi_squared']):
-                issues['InputWorkspace'] = 'The fit parameters in the input workspace and single fit workspace do ' \
-                                           'not match.'
+            if fit_parameter_missing(single_fit_workspace, input_workspace, ["Chi_squared"]):
+                issues["InputWorkspace"] = "The fit parameters in the input workspace and single fit workspace do " "not match."
 
         return issues
 
     def _setup(self):
-        self._input_workspace = self.getPropertyValue('InputWorkspace')
-        self._single_fit_workspace = self.getPropertyValue('SingleFitWorkspace')
-        self._output_workspace = self.getPropertyValue('OutputWorkspace')
+        self._input_workspace = self.getPropertyValue("InputWorkspace")
+        self._single_fit_workspace = self.getPropertyValue("SingleFitWorkspace")
+        self._output_workspace = self.getPropertyValue("OutputWorkspace")
 
         input_workspace = get_ads_workspace(self._input_workspace)
         single_fit_workspace = get_ads_workspace(self._single_fit_workspace)
@@ -178,13 +177,13 @@ class IndirectReplaceFitResult(PythonAlgorithm):
         self._row_indices = get_indices_of_equivalent_labels(input_workspace, single_fit_workspace)
         self._insertion_y_indices = get_indices_of_equivalent_labels(single_fit_workspace, input_workspace)
 
-        self._result_group = find_result_group_containing(self._input_workspace, self._allowed_extension + 's')
+        self._result_group = find_result_group_containing(self._input_workspace, self._allowed_extension + "s")
 
     def PyExec(self):
         self._setup()
         self._copy_data()
 
-        self.setProperty('OutputWorkspace', self._output_workspace)
+        self.setProperty("OutputWorkspace", self._output_workspace)
 
         self._add_workspace_to_group()
 
@@ -194,14 +193,20 @@ class IndirectReplaceFitResult(PythonAlgorithm):
             self._copy_value(from_index, to_index, self._output_workspace)
 
     def _copy_value(self, row_index, insertion_index, destination_workspace):
-        copy_algorithm = self.createChildAlgorithm(name='CopyDataRange', startProgress=0.1,
-                                                   endProgress=1.0, enableLogging=True)
+        copy_algorithm = self.createChildAlgorithm(name="CopyDataRange", startProgress=0.1, endProgress=1.0, enableLogging=True)
         copy_algorithm.setAlwaysStoreInADS(True)
 
-        args = {"InputWorkspace": self._single_fit_workspace, "DestWorkspace": destination_workspace,
-                "StartWorkspaceIndex": row_index, "EndWorkspaceIndex": row_index, "XMin": self._bin_value,
-                "XMax": self._bin_value, "InsertionYIndex": insertion_index, "InsertionXIndex": self._insertion_x_index,
-                "OutputWorkspace": self._output_workspace}
+        args = {
+            "InputWorkspace": self._single_fit_workspace,
+            "DestWorkspace": destination_workspace,
+            "StartWorkspaceIndex": row_index,
+            "EndWorkspaceIndex": row_index,
+            "XMin": self._bin_value,
+            "XMax": self._bin_value,
+            "InsertionYIndex": insertion_index,
+            "InsertionXIndex": self._insertion_x_index,
+            "OutputWorkspace": self._output_workspace,
+        }
 
         for key, value in args.items():
             copy_algorithm.setProperty(key, value)

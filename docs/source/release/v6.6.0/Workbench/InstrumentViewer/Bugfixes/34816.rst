@@ -1,0 +1,1 @@
+Fixed a bug where Y histogram data was not being summed correctly when plotting ALF data on the Pick tab in units of Out of Plane angle.

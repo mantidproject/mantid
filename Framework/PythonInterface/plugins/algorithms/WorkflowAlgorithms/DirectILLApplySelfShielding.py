@@ -7,29 +7,29 @@
 
 import DirectILL_common as common
 import ILL_utilities as utils
-from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator, MatrixWorkspaceProperty,
-                        Progress, PropertyMode,  WorkspaceProperty, WorkspaceUnitValidator)
-from mantid.kernel import (CompositeValidator, Direction, FloatBoundedValidator, StringListValidator)
-from mantid.simpleapi import (CloneWorkspace, Divide, Minus, RebinToWorkspace, Scale)
+from mantid.api import (
+    AlgorithmFactory,
+    DataProcessorAlgorithm,
+    InstrumentValidator,
+    MatrixWorkspaceProperty,
+    Progress,
+    PropertyMode,
+    WorkspaceProperty,
+    WorkspaceUnitValidator,
+)
+from mantid.kernel import CompositeValidator, Direction, FloatBoundedValidator, StringListValidator
+from mantid.simpleapi import CloneWorkspace, Divide, Minus, RebinToWorkspace, Scale
 
 
 def _subtractEC(ws, ecWS, ecScaling, wsNames, wsCleanup, algorithmLogging):
     """Subtract empty container."""
     # out = in - ecScaling * EC
-    scaledECWSName = wsNames.withSuffix('scaled_EC')
-    scaledECWS = Scale(InputWorkspace=ecWS,
-                       Factor=ecScaling,
-                       OutputWorkspace=scaledECWSName,
-                       EnableLogging=algorithmLogging)
-    rebinnedECWSName = wsNames.withSuffix('rebinned_EC')
-    rebinnedECWS = RebinToWorkspace(WorkspaceToRebin=scaledECWS,
-                                    WorkspaceToMatch=ws,
-                                    OutputWorkspace=rebinnedECWSName)
-    ecSubtractedWSName = wsNames.withSuffix('EC_subtracted')
-    ecSubtractedWS = Minus(LHSWorkspace=ws,
-                           RHSWorkspace=rebinnedECWS,
-                           OutputWorkspace=ecSubtractedWSName,
-                           EnableLogging=algorithmLogging)
+    scaledECWSName = wsNames.withSuffix("scaled_EC")
+    scaledECWS = Scale(InputWorkspace=ecWS, Factor=ecScaling, OutputWorkspace=scaledECWSName, EnableLogging=algorithmLogging)
+    rebinnedECWSName = wsNames.withSuffix("rebinned_EC")
+    rebinnedECWS = RebinToWorkspace(WorkspaceToRebin=scaledECWS, WorkspaceToMatch=ws, OutputWorkspace=rebinnedECWSName)
+    ecSubtractedWSName = wsNames.withSuffix("EC_subtracted")
+    ecSubtractedWS = Minus(LHSWorkspace=ws, RHSWorkspace=rebinnedECWS, OutputWorkspace=ecSubtractedWSName, EnableLogging=algorithmLogging)
     wsCleanup.cleanup(scaledECWS)
     return ecSubtractedWS
 
@@ -46,15 +46,15 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
         return common.CATEGORIES
 
     def seeAlso(self):
-        return [ 'DirectILLReduction', 'DirectILLApplySelfShielding' ]
+        return ["DirectILLReduction", "DirectILLApplySelfShielding"]
 
     def name(self):
         """Return the algorithm's name."""
-        return 'DirectILLApplySelfShielding'
+        return "DirectILLApplySelfShielding"
 
     def summary(self):
         """Return a summary of the algorithm."""
-        return 'Applies empty container subtraction and self-shielding corrections.'
+        return "Applies empty container subtraction and self-shielding corrections."
 
     def version(self):
         """Return the algorithm's version."""
@@ -69,78 +69,80 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
         self._names = utils.NameSource(wsNamePrefix, cleanupMode)
         self._cleanup = utils.Cleanup(cleanupMode, self._subalgLogging)
 
-        progress.report('Loading inputs')
+        progress.report("Loading inputs")
         mainWS = self._inputWS()
 
         # First subtract the background, then apply the absorption correction to sample
-        progress.report('Subtracting EC')
+        progress.report("Subtracting EC")
         mainWS, subtracted = self._subtractEC(mainWS)
 
-        progress.report('Applying self shielding corrections')
+        progress.report("Applying self shielding corrections")
         mainWS, applied = self._applyCorrections(mainWS)
 
         if not applied and not subtracted:
             mainWS = self._cloneOnly(mainWS)
 
         self._finalize(mainWS)
-        progress.report('Done')
+        progress.report("Done")
 
     def PyInit(self):
         """Initialize the algorithm's input and output properties."""
         inputWorkspaceValidator = CompositeValidator()
         inputWorkspaceValidator.add(InstrumentValidator())
-        inputWorkspaceValidator.add(WorkspaceUnitValidator('TOF'))
+        inputWorkspaceValidator.add(WorkspaceUnitValidator("TOF"))
         mustBePositive = FloatBoundedValidator(lower=0)
 
         # Properties.
-        self.declareProperty(MatrixWorkspaceProperty(
-            name=common.PROP_INPUT_WS,
-            defaultValue='',
-            validator=inputWorkspaceValidator,
-            direction=Direction.Input),
-            doc='A workspace to which to apply the corrections.')
-        self.declareProperty(WorkspaceProperty(name=common.PROP_OUTPUT_WS,
-                                               defaultValue='',
-                                               direction=Direction.Output),
-                             doc='The corrected workspace.')
-        self.declareProperty(name=common.PROP_CLEANUP_MODE,
-                             defaultValue=utils.Cleanup.ON,
-                             validator=StringListValidator([
-                                 utils.Cleanup.ON,
-                                 utils.Cleanup.OFF]),
-                             direction=Direction.Input,
-                             doc='What to do with intermediate workspaces.')
-        self.declareProperty(name=common.PROP_SUBALG_LOGGING,
-                             defaultValue=common.SUBALG_LOGGING_OFF,
-                             validator=StringListValidator([
-                                 common.SUBALG_LOGGING_OFF,
-                                 common.SUBALG_LOGGING_ON]),
-                             direction=Direction.Input,
-                             doc='Enable or disable subalgorithms to print in the logs.')
-        self.declareProperty(MatrixWorkspaceProperty(
-            name=common.PROP_EC_WS,
-            defaultValue='',
-            validator=inputWorkspaceValidator,
+        self.declareProperty(
+            MatrixWorkspaceProperty(
+                name=common.PROP_INPUT_WS, defaultValue="", validator=inputWorkspaceValidator, direction=Direction.Input
+            ),
+            doc="A workspace to which to apply the corrections.",
+        )
+        self.declareProperty(
+            WorkspaceProperty(name=common.PROP_OUTPUT_WS, defaultValue="", direction=Direction.Output), doc="The corrected workspace."
+        )
+        self.declareProperty(
+            name=common.PROP_CLEANUP_MODE,
+            defaultValue=utils.Cleanup.ON,
+            validator=StringListValidator([utils.Cleanup.ON, utils.Cleanup.OFF]),
             direction=Direction.Input,
-            optional=PropertyMode.Optional),
-            doc='An empty container workspace for subtraction from the input workspace.')
-        self.declareProperty(name=common.PROP_EC_SCALING,
-                             defaultValue=1.0,
-                             validator=mustBePositive,
-                             direction=Direction.Input,
-                             doc='A multiplier (transmission, if no self shielding is applied) for the empty container.')
-        self.declareProperty(MatrixWorkspaceProperty(
-            name=common.PROP_SELF_SHIELDING_CORRECTION_WS,
-            defaultValue='',
+            doc="What to do with intermediate workspaces.",
+        )
+        self.declareProperty(
+            name=common.PROP_SUBALG_LOGGING,
+            defaultValue=common.SUBALG_LOGGING_OFF,
+            validator=StringListValidator([common.SUBALG_LOGGING_OFF, common.SUBALG_LOGGING_ON]),
             direction=Direction.Input,
-            optional=PropertyMode.Optional),
-            doc='A workspace containing the self shielding correction factors.')
+            doc="Enable or disable subalgorithms to print in the logs.",
+        )
+        self.declareProperty(
+            MatrixWorkspaceProperty(
+                name=common.PROP_EC_WS,
+                defaultValue="",
+                validator=inputWorkspaceValidator,
+                direction=Direction.Input,
+                optional=PropertyMode.Optional,
+            ),
+            doc="An empty container workspace for subtraction from the input workspace.",
+        )
+        self.declareProperty(
+            name=common.PROP_EC_SCALING,
+            defaultValue=1.0,
+            validator=mustBePositive,
+            direction=Direction.Input,
+            doc="A multiplier (transmission, if no self shielding is applied) for the empty container.",
+        )
+        self.declareProperty(
+            MatrixWorkspaceProperty(
+                name=common.PROP_SELF_SHIELDING_CORRECTION_WS, defaultValue="", direction=Direction.Input, optional=PropertyMode.Optional
+            ),
+            doc="A workspace containing the self shielding correction factors.",
+        )
 
     def _cloneOnly(self, mainWS):
-        cloneWSName = self._names.withSuffix('cloned_only')
-        cloneWS = CloneWorkspace(InputWorkspace=mainWS,
-                                 OutputWorkspace=cloneWSName,
-                                 EnableLogging=self._subalgLogging)
+        cloneWSName = self._names.withSuffix("cloned_only")
+        cloneWS = CloneWorkspace(InputWorkspace=mainWS, OutputWorkspace=cloneWSName, EnableLogging=self._subalgLogging)
         return cloneWS
 
     def _applyCorrections(self, mainWS):
@@ -148,15 +150,12 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
         if self.getProperty(common.PROP_SELF_SHIELDING_CORRECTION_WS).isDefault:
             return mainWS, False
         correctionWS = self.getProperty(common.PROP_SELF_SHIELDING_CORRECTION_WS).value
-        matchedCorrectionWS = '{}_matched'.format(correctionWS)
-        RebinToWorkspace(WorkspaceToRebin=correctionWS,
-                         WorkspaceToMatch=mainWS,
-                         OutputWorkspace=matchedCorrectionWS)
-        correctedWSName = self._names.withSuffix('self_shielding_corrected')
-        correctedWS = Divide(LHSWorkspace=mainWS,
-                             RHSWorkspace=matchedCorrectionWS,
-                             OutputWorkspace=correctedWSName,
-                             EnableLogging=self._subalgLogging)
+        matchedCorrectionWS = "{}_matched".format(correctionWS)
+        RebinToWorkspace(WorkspaceToRebin=correctionWS, WorkspaceToMatch=mainWS, OutputWorkspace=matchedCorrectionWS)
+        correctedWSName = self._names.withSuffix("self_shielding_corrected")
+        correctedWS = Divide(
+            LHSWorkspace=mainWS, RHSWorkspace=matchedCorrectionWS, OutputWorkspace=correctedWSName, EnableLogging=self._subalgLogging
+        )
         self._cleanup.cleanup(matchedCorrectionWS)
         self._cleanup.cleanup(mainWS)
         return correctedWS, True

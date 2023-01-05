@@ -395,8 +395,8 @@ private:
 
     // Double click the table cell and change its value
     QWidget *pViewport = m_view->tableWidget()->viewport();
-    QTest::mouseClick(pViewport, Qt::LeftButton, NULL, QPoint(xPos, yPos));
-    QTest::mouseDClick(pViewport, Qt::LeftButton, NULL, QPoint(xPos, yPos));
+    QTest::mouseClick(pViewport, Qt::LeftButton, Qt::KeyboardModifiers(), QPoint(xPos, yPos));
+    QTest::mouseDClick(pViewport, Qt::LeftButton, Qt::KeyboardModifiers(), QPoint(xPos, yPos));
     QTest::keyClick(pViewport->focusWidget(), Qt::Key_5);
     QTest::keyClick(pViewport->focusWidget(), Qt::Key_Enter);
     QApplication::sendPostedEvents();
@@ -409,7 +409,7 @@ private:
 
     // Click the table cell, thereby selecting the row
     QWidget *pViewport = m_view->tableWidget()->viewport();
-    QTest::mouseClick(pViewport, Qt::LeftButton, NULL, QPoint(xPos, yPos));
+    QTest::mouseClick(pViewport, Qt::LeftButton, Qt::KeyboardModifiers(), QPoint(xPos, yPos));
     QApplication::sendPostedEvents();
   }
 

@@ -89,7 +89,7 @@ class EngineeringDiffractionDecoder(EngineeringDiffractionUIAttributes):
             if fit_properties is not None:
                 fit_browser = presenter.fitting_presenter.plot_widget.view.fit_browser
                 fit_browser.show()  # show the fit browser, default is off
-                presenter.fitting_presenter.plot_widget.view.fit_toggle()  # show the fit browser, default is off
+                presenter.fitting_presenter.plot_widget.fit_toggle()  # show the fit browser, default is off
                 fit_props = fit_properties["properties"]
                 fit_function = fit_props["Function"]
                 output_name = fit_props["Output"]

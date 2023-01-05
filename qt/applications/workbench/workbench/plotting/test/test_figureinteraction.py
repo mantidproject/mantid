@@ -23,6 +23,7 @@ from testhelpers import assert_almost_equal
 
 # local package imports
 from mantid.plots import MantidAxes
+from unittest import mock
 from unittest.mock import MagicMock, PropertyMock, call, patch
 from mantid.simpleapi import CreateWorkspace
 from mantidqt.plotting.figuretype import FigureType
@@ -84,7 +85,6 @@ class FigureInteractionTest(unittest.TestCase):
             call('motion_notify_event', interactor.motion_event),
             call('resize_event', interactor.mpl_redraw_annotations),
             call('figure_leave_event', interactor.on_leave),
-            call('axis_leave_event', interactor.on_leave),
             call('scroll_event', interactor.on_scroll)
         ]
         fig_manager.canvas.mpl_connect.assert_has_calls(expected_call)
@@ -671,6 +671,52 @@ class FigureInteractionTest(unittest.TestCase):
         interactor.on_mouse_button_release(mouse_event)
         interactor._add_all_marker_annotations.assert_called_once()
 
+    def test_double_left_click_calls_show_axis_editor(self):
+        fig_manager = self._create_mock_fig_manager_to_accept_left_click()
+        fig_manager.fit_browser.tool = None
+        interactor = FigureInteraction(fig_manager)
+        mouse_event = self._create_mock_double_left_click()
+
+        interactor._show_axis_editor = MagicMock()
+        interactor.on_mouse_button_press(mouse_event)
+        interactor._show_axis_editor.assert_called_once()
+
+    @mock.patch("workbench.plotting.figureinteraction.XAxisEditor")
+    def test_click_x_axes_launches_x_axes_editor(self, mock_x_editor):
+        self.interactor.canvas.figure = MagicMock()
+        axes = self._create_axes_for_axes_editor_test(mouse_over='xaxis')
+        self.interactor.canvas.figure.get_axes.return_value = axes
+        self.interactor._show_axis_editor(event=MagicMock())
+
+        mock_x_editor.assert_called_once()
+
+    @mock.patch("workbench.plotting.figureinteraction.YAxisEditor")
+    def test_click_y_axes_launches_y_axes_editor(self, mock_y_editor):
+        self.interactor.canvas.figure = MagicMock()
+        axes = self._create_axes_for_axes_editor_test(mouse_over='yaxis')
+        self.interactor.canvas.figure.get_axes.return_value = axes
+        self.interactor._show_axis_editor(event=MagicMock())
+
+        mock_y_editor.assert_called_once()
+
+    @mock.patch("workbench.plotting.figureinteraction.XAxisEditor")
+    def test_click_x_axes_tick_lable_launches_x_axes_editor(self, mock_x_editor):
+        self.interactor.canvas.figure = MagicMock()
+        axes = self._create_axes_for_axes_editor_test(mouse_over='xaxis_tick')
+        self.interactor.canvas.figure.get_axes.return_value = axes
+        self.interactor._show_axis_editor(event=MagicMock())
+
+        mock_x_editor.assert_called_once()
+
+    @mock.patch("workbench.plotting.figureinteraction.YAxisEditor")
+    def test_click_y_axes_tick_lable_launches_y_axes_editor(self, mock_y_editor):
+        self.interactor.canvas.figure = MagicMock()
+        axes = self._create_axes_for_axes_editor_test(mouse_over='yaxis_tick')
+        self.interactor.canvas.figure.get_axes.return_value = axes
+        self.interactor._show_axis_editor(event=MagicMock())
+
+        mock_y_editor.assert_called_once()
+
 # Private methods
     def _create_mock_fig_manager_to_accept_right_click(self):
         fig_manager = MagicMock()
@@ -686,6 +732,13 @@ class FigureInteractionTest(unittest.TestCase):
         fig_manager.canvas = canvas
         return fig_manager
 
+    def _create_mock_fig_manager_to_accept_left_click(self):
+        fig_manager = MagicMock()
+        canvas = MagicMock()
+        type(canvas).buttond = PropertyMock(return_value={Qt.LeftButton: 1})
+        fig_manager.canvas = canvas
+        return fig_manager
+
     def _create_mock_right_click(self):
         mouse_event = MagicMock(inaxes=MagicMock(spec=MantidAxes, collections = [], creation_args = [{}]))
         type(mouse_event).button = PropertyMock(return_value=3)
@@ -695,6 +748,28 @@ class FigureInteractionTest(unittest.TestCase):
         mouse_event = MagicMock(inaxes=MagicMock(spec=MantidAxes, collections = [], creation_args = [{}]))
         type(mouse_event).button = PropertyMock(return_value=4)
         return mouse_event
+
+    def _create_mock_double_left_click(self):
+        mouse_event = MagicMock(inaxes=MagicMock(spec=MantidAxes, collections = [], creation_args = [{}]))
+        type(mouse_event).button = PropertyMock(return_value=1)
+        type(mouse_event).dblclick = PropertyMock(return_value=True)
+        return mouse_event
+
+    def _create_axes_for_axes_editor_test(self, mouse_over: str):
+        ax = MagicMock()
+        ax.xaxis.contains.return_value = (mouse_over == 'xaxis', {})
+        ax.yaxis.contains.return_value = (mouse_over == 'yaxis', {})
+        ax.title.contains.return_value = (False, {})
+        ax.xaxis.label.contains.return_value = (False, {})
+        ax.yaxis.label.contains.return_value = (False, {})
+
+        xtick = MagicMock()
+        ytick = MagicMock()
+        xtick.contains.return_value = (mouse_over == 'xaxis_tick', {})
+        ytick.contains.return_value = (mouse_over == 'yaxis_tick', {})
+        ax.get_xticklabels.return_value = [xtick]
+        ax.get_yticklabels.return_value = [ytick]
+        return [ax]
 
     def _test_toggle_normalization(self, errorbars_on, plot_kwargs):
         fig = plot([self.ws], spectrum_nums=[1], errors=errorbars_on,

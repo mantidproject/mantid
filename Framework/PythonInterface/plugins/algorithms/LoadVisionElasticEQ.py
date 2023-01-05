@@ -4,9 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,invalid-name
-#from mantid.api import AlgorithmFactory
-#from mantid.simpleapi import PythonAlgorithm, WorkspaceProperty
+# pylint: disable=no-init,invalid-name
+# from mantid.api import AlgorithmFactory
+# from mantid.simpleapi import PythonAlgorithm, WorkspaceProperty
 # from mantid.kernel import Direction
 from mantid.api import *
 from mantid.kernel import *
@@ -22,7 +22,7 @@ class LoadVisionElasticEQ(PythonAlgorithm):
         return "DataHandling\\Nexus"
 
     def seeAlso(self):
-        return [ "LoadVisionElasticBS","LoadVisionInelastic" ]
+        return ["LoadVisionElasticBS", "LoadVisionInelastic"]
 
     def name(self):
         return "LoadVisionElasticEQ"
@@ -49,7 +49,7 @@ class LoadVisionElasticEQ(PythonAlgorithm):
         banks_list_integers = banks_integers.split(",")
         banks_list_integers = list(set(banks_list_integers))
         banks_list_integers.sort(key=int)
-        banks_list = ['bank{0}'.format(i) for i in banks_list_integers]
+        banks_list = ["bank{0}".format(i) for i in banks_list_integers]
         banks = ",".join(banks_list)
 
         wksp_name = "__tmp"
@@ -62,18 +62,18 @@ class LoadVisionElasticEQ(PythonAlgorithm):
         try:
             # First try to load as events
             ws = mantid.simpleapi.LoadEventNexus(Filename=filename, BankName=banks, OutputWorkspace=wksp_name)
-        #pylint: disable=bare-except
+        # pylint: disable=bare-except
         except:
             workspaces = []
             first_bank = True
             # Now lets try histograms.
             for bank in banks_list:
-                mantid.simpleapi.LoadFlexiNexus(Filename=filename,
-                                                Dictionary=os.path.join(dictionary_path, 'vision-'+bank+'.dic'),
-                                                OutputWorkspace=bank)
-                mantid.simpleapi.LoadInstrument(Workspace=bank,
-                                                Filename=ExperimentInfo.getInstrumentFilename('VISION'),
-                                                RewriteSpectraMap=False)
+                mantid.simpleapi.LoadFlexiNexus(
+                    Filename=filename, Dictionary=os.path.join(dictionary_path, "vision-" + bank + ".dic"), OutputWorkspace=bank
+                )
+                mantid.simpleapi.LoadInstrument(
+                    Workspace=bank, Filename=ExperimentInfo.getInstrumentFilename("VISION"), RewriteSpectraMap=False
+                )
                 workspaces.append(bank)
                 if first_bank:
                     mantid.simpleapi.RenameWorkspace(InputWorkspace=bank, OutputWorkspace=wksp_cache)

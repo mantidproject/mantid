@@ -15,13 +15,15 @@ from abins.input import AbInitioLoader
 class Tester(object):
     """Base class for testing Abins input loaders"""
 
-    _loaders_extensions = {"CASTEPLoader": "phonon",
-                           "CRYSTALLoader": "out",
-                           "DMOL3Loader": "outmol",
-                           "EuphonicLoader": "castep_bin",
-                           "GAUSSIANLoader": "log",
-                           "VASPLoader": "xml",
-                           "VASPOUTCARLoader": "OUTCAR"}
+    _loaders_extensions = {
+        "CASTEPLoader": "phonon",
+        "CRYSTALLoader": "out",
+        "DMOL3Loader": "outmol",
+        "EuphonicLoader": "castep_bin",
+        "GAUSSIANLoader": "log",
+        "VASPLoader": "xml",
+        "VASPOUTCARLoader": "OUTCAR",
+    }
 
     @staticmethod
     def _prepare_data(seedname):
@@ -40,9 +42,11 @@ class Tester(object):
         array = {}
         for k in range(num_k):
 
-            temp = np.loadtxt(abins.test_helpers.find_file(
-                    "{seedname}_atomic_displacements_data_{k}.txt".format(seedname=seedname, k=k))
-                ).view(complex).reshape(-1)
+            temp = (
+                np.loadtxt(abins.test_helpers.find_file("{seedname}_atomic_displacements_data_{k}.txt".format(seedname=seedname, k=k)))
+                .view(complex)
+                .reshape(-1)
+            )
             total_size = temp.size
             num_freq = int(total_size / (atoms * 3))
             array[str(k)] = temp.reshape(atoms, num_freq, 3)
@@ -57,6 +61,7 @@ class Tester(object):
     @staticmethod
     def _cull_imaginary_modes(frequencies, displacements):
         from abins.constants import ACOUSTIC_PHONON_THRESHOLD
+
         finite_mode_indices = frequencies > ACOUSTIC_PHONON_THRESHOLD
         return (frequencies[finite_mode_indices], displacements[:, finite_mode_indices])
 
@@ -67,9 +72,9 @@ class Tester(object):
 
         for k in correct_k_points["frequencies"]:
             correct_frequencies, correct_displacements = self._cull_imaginary_modes(
-                correct_k_points["frequencies"][k], correct_k_points["atomic_displacements"][k])
-            calc_frequencies, calc_displacements = self._cull_imaginary_modes(
-                items["frequencies"][k], items["atomic_displacements"][k])
+                correct_k_points["frequencies"][k], correct_k_points["atomic_displacements"][k]
+            )
+            calc_frequencies, calc_displacements = self._cull_imaginary_modes(items["frequencies"][k], items["atomic_displacements"][k])
             assert_allclose(correct_frequencies, calc_frequencies)
             assert_allclose(correct_displacements, calc_displacements)
             assert_allclose(correct_k_points["k_vectors"][k], items["k_vectors"][k])
@@ -79,8 +84,9 @@ class Tester(object):
         atoms = data["datasets"]["atoms_data"]
         for item in range(len(correct_atoms)):
             self.assertEqual(correct_atoms["atom_%s" % item]["sort"], atoms["atom_%s" % item]["sort"])
-            self.assertAlmostEqual(correct_atoms["atom_%s" % item]["mass"], atoms["atom_%s" % item]["mass"],
-                                   delta=0.00001)  # delta in amu units
+            self.assertAlmostEqual(
+                correct_atoms["atom_%s" % item]["mass"], atoms["atom_%s" % item]["mass"], delta=0.00001
+            )  # delta in amu units
             self.assertEqual(correct_atoms["atom_%s" % item]["symbol"], atoms["atom_%s" % item]["symbol"])
             assert_allclose(correct_atoms["atom_%s" % item]["coord"], atoms["atom_%s" % item]["coord"])
 
@@ -88,11 +94,9 @@ class Tester(object):
         self.assertEqual(correct_data["attributes"]["hash"], data["attributes"]["hash"])
         self.assertEqual(correct_data["attributes"]["ab_initio_program"], data["attributes"]["ab_initio_program"])
         try:
-            self.assertEqual(abins.test_helpers.find_file(filename + "." + extension),
-                             data["attributes"]["filename"])
+            self.assertEqual(abins.test_helpers.find_file(filename + "." + extension), data["attributes"]["filename"])
         except AssertionError:
-            self.assertEqual(abins.test_helpers.find_file(filename + "." + extension.upper()),
-                             data["attributes"]["filename"])
+            self.assertEqual(abins.test_helpers.find_file(filename + "." + extension.upper()), data["attributes"]["filename"])
 
         # check datasets
         assert_allclose(correct_data["datasets"]["unit_cell"], data["datasets"]["unit_cell"])
@@ -117,9 +121,9 @@ class Tester(object):
 
         for k in correct_items["frequencies"]:
             correct_frequencies, correct_displacements = self._cull_imaginary_modes(
-                correct_items["frequencies"][k], correct_items["atomic_displacements"][k])
-            calc_frequencies, calc_displacements = self._cull_imaginary_modes(
-                items["frequencies"][k], items["atomic_displacements"][k])
+                correct_items["frequencies"][k], correct_items["atomic_displacements"][k]
+            )
+            calc_frequencies, calc_displacements = self._cull_imaginary_modes(items["frequencies"][k], items["atomic_displacements"][k])
 
             assert_allclose(correct_frequencies, calc_frequencies)
             assert_allclose(correct_displacements, calc_displacements)
@@ -132,16 +136,11 @@ class Tester(object):
 
         for item in range(len(correct_atoms)):
             self.assertEqual(correct_atoms["atom_%s" % item]["sort"], atoms["atom_%s" % item]["sort"])
-            self.assertAlmostEqual(correct_atoms["atom_%s" % item]["mass"], atoms["atom_%s" % item]["mass"],
-                                   delta=0.00001)
+            self.assertAlmostEqual(correct_atoms["atom_%s" % item]["mass"], atoms["atom_%s" % item]["mass"], delta=0.00001)
             self.assertEqual(correct_atoms["atom_%s" % item]["symbol"], atoms["atom_%s" % item]["symbol"])
-            assert_allclose(np.array(correct_atoms["atom_%s" % item]["coord"]),
-                            atoms["atom_%s" % item]["coord"])
+            assert_allclose(np.array(correct_atoms["atom_%s" % item]["coord"]), atoms["atom_%s" % item]["coord"])
 
-    def check(self, *,
-              name: str,
-              loader: AbInitioLoader,
-              extension: str = None):
+    def check(self, *, name: str, loader: AbInitioLoader, extension: str = None):
         """Run loader and compare output with reference files
 
         Args:
@@ -161,10 +160,7 @@ class Tester(object):
         self._check_reader_data(correct_data=correct_data, data=data, filename=name, extension=extension)
 
         # check loaded data
-        self._check_loader_data(correct_data=correct_data,
-                                input_ab_initio_filename=name,
-                                extension=extension,
-                                loader=loader)
+        self._check_loader_data(correct_data=correct_data, input_ab_initio_filename=name, extension=extension, loader=loader)
 
     def _read_ab_initio(self, loader=None, filename=None, extension=None):
         """
@@ -195,9 +191,7 @@ class Tester(object):
         :returns: read data
         """
         abins_type_data = ab_initio_reader.read_vibrational_or_phonon_data()
-        data = {"datasets": abins_type_data.extract(),
-                "attributes": ab_initio_reader._clerk._attributes.copy()
-                }
+        data = {"datasets": abins_type_data.extract(), "attributes": ab_initio_reader._clerk._attributes.copy()}
         data["datasets"].update({"unit_cell": ab_initio_reader._clerk._data["unit_cell"]})
         return data
 
@@ -222,10 +216,10 @@ class Tester(object):
 
         displacements = data["datasets"]["k_points_data"].pop("atomic_displacements")
         for i, eigenvector in displacements.items():
-            with open('{seedname}_atomic_displacements_data_{i}.txt'.format(seedname=seedname, i=i), 'wt') as f:
-                eigenvector.flatten().view(float).tofile(f, sep=' ')
+            with open("{seedname}_atomic_displacements_data_{i}.txt".format(seedname=seedname, i=i), "wt") as f:
+                eigenvector.flatten().view(float).tofile(f, sep=" ")
 
-        with open('{seedname}_data.txt'.format(seedname=seedname), 'wt') as f:
+        with open("{seedname}_data.txt".format(seedname=seedname), "wt") as f:
             json.dump(cls._arrays_to_lists(data), f, indent=4, sort_keys=True)
 
     @classmethod

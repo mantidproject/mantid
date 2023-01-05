@@ -69,5 +69,5 @@ class LoadCASTEPTest(unittest.TestCase, abins.input.Tester):
         self.check(name=self._li7_d2, loader=CASTEPLoader)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -98,6 +98,7 @@ signals:
   void mouseDown(const QPoint &point);
   void mouseUp(const QPoint &point);
   void mouseMove(const QPoint &point);
+  void mouseHovering(const QPoint &point);
 
   void redraw();
   void resetSelectorBounds();

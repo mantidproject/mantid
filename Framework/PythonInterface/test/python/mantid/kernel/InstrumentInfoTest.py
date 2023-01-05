@@ -40,5 +40,5 @@ class InstrumentInfoTest(unittest.TestCase):
         self.assertEqual(len(inst.liveListenerInfoList()), 1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

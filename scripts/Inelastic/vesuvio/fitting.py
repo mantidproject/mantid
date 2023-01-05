@@ -19,14 +19,17 @@ import vesuvio.profiles as profiles
 # Functions
 # --------------------------------------------------------------------------------
 
+
 def parse_fit_options(mass_values, profile_strs, background_str="", constraints_str=""):
     """Parse the function string into a more usable format"""
 
     # Individual functions are separated by semi-colon separators
     mass_functions = profile_strs.rstrip(";").split(";")
     if len(mass_functions) != len(mass_values):
-        raise ValueError("Expected the number of 'function=' definitions to equal the number of masses. "
-                         "Found {0} masses but {1} function definition".format(len(mass_values), len(mass_functions)))
+        raise ValueError(
+            "Expected the number of 'function=' definitions to equal the number of masses. "
+            "Found {0} masses but {1} function definition".format(len(mass_values), len(mass_functions))
+        )
     mass_profiles = []
     for mass_value, prop_str in zip(mass_values, mass_functions):
         mass_profiles.append(profiles.create_from_str(prop_str, mass_value))
@@ -66,7 +69,9 @@ class FittingOptions(object):
                 self.intensity_constraints = intensity_constraints
             else:
                 # trailing comma is important or the list gets undone
-                self.intensity_constraints = [intensity_constraints, ]
+                self.intensity_constraints = [
+                    intensity_constraints,
+                ]
         else:
             self.intensity_constraints = None
         self.background = background
@@ -75,8 +80,7 @@ class FittingOptions(object):
         self.output_prefix = None
 
     def has_been_set(self, name):
-        """Returns true if the given option has been set by the user
-        """
+        """Returns true if the given option has been set by the user"""
         return getattr(self, name) is not None
 
     # ----------------------------------------------------------------------------
@@ -92,7 +96,7 @@ class FittingOptions(object):
         standard CompositeFunction is used when running the fit for a second time
         to compute the errors with everything free
         """
-        all_free = (default_vals is not None)
+        all_free = default_vals is not None
 
         if all_free or (self.intensity_constraints is None):
             function_str = "composite=CompositeFunction,NumDeriv=1;"
@@ -111,8 +115,7 @@ class FittingOptions(object):
         # Add on a background polynomial if requested
         if self.background is not None:
             bkgd_index = len(self.mass_profiles)
-            function_str += self.background.create_fit_function_str(default_vals,
-                                                                    param_prefix="f{0}.".format(bkgd_index))
+            function_str += self.background.create_fit_function_str(default_vals, param_prefix="f{0}.".format(bkgd_index))
 
         return function_str.rstrip(";")
 
@@ -126,7 +129,7 @@ class FittingOptions(object):
         nrows = len(constraints_tuple)
         ncols = len(constraints_tuple[0])
 
-        matrix_str = "\"Matrix(%d|%d)%s\""
+        matrix_str = '"Matrix(%d|%d)%s"'
         values = ""
         for row in constraints_tuple:
             for val in row:
@@ -136,8 +139,7 @@ class FittingOptions(object):
         return matrix_str
 
     def create_constraints_str(self):
-        """Returns the string of constraints for this Fit
-        """
+        """Returns the string of constraints for this Fit"""
         constraints = []
         for func_index, mass_info in enumerate(self.mass_profiles):
             # Constraints
@@ -149,8 +151,7 @@ class FittingOptions(object):
         return ",".join(constraints).rstrip(",")
 
     def create_ties_str(self):
-        """Returns the string of ties for this Fit
-        """
+        """Returns the string of ties for this Fit"""
         ties = []
         for func_index, mass_info in enumerate(self.mass_profiles):
             # Constraints
@@ -181,30 +182,29 @@ class FittingOptions(object):
         # create a local function to fit a single spectrum
         func_str = self.create_function_str(param_values)
         # insert an attribute telling the function which spectrum it should be applied to
-        i = func_str.index(';')
+        i = func_str.index(";")
         # $domains=i means "function index == workspace index"
-        fun_str = func_str[:i] + ',$domains=i' + func_str[i:]
+        fun_str = func_str[:i] + ",$domains=i" + func_str[i:]
 
         # append the constrints and ties within the local function
-        fun_str += ';constraints=(' + self.create_constraints_str() + ')'
+        fun_str += ";constraints=(" + self.create_constraints_str() + ")"
         ties = self.create_ties_str()
         if len(ties) > 0:
-            fun_str += ';ties=(' + ties + ')'
+            fun_str += ";ties=(" + ties + ")"
 
         # initialize a string for composing the global ties
-        global_ties = 'f0.f0.Width'
+        global_ties = "f0.f0.Width"
         # build the multi-dataset function by joining local functions of the same type
-        global_fun_str = 'composite=MultiDomainFunction'
+        global_fun_str = "composite=MultiDomainFunction"
         for i in range(nspectra):
-            global_fun_str += ';(' + fun_str + ')'
+            global_fun_str += ";(" + fun_str + ")"
             if i > 0:
-                global_ties = 'f' + str(i) + '.f0.Width=' + global_ties
+                global_ties = "f" + str(i) + ".f0.Width=" + global_ties
         # add the global ties
-        global_fun_str += ';ties=(' + global_ties + ')'
+        global_fun_str += ";ties=(" + global_ties + ")"
 
         return global_fun_str
 
     def __str__(self):
-        """Returns a string representation of the object
-        """
+        """Returns a string representation of the object"""
         self.generate_function_str()

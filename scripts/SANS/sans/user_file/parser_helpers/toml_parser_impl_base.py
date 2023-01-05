@@ -54,8 +54,7 @@ class TomlParserImplBase:
         if dict_to_parse is None:
             dict_to_parse = self._input
 
-        assert isinstance(dict_to_parse, dict), \
-            "Expected a dict for get keys, got %r instead" % repr(dict_to_parse)
+        assert isinstance(dict_to_parse, dict), "Expected a dict for get keys, got %r instead" % repr(dict_to_parse)
 
         val = dict_to_parse[keys[0]]
         if isinstance(val, dict) and len(keys) > 1:

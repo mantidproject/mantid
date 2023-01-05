@@ -7,11 +7,12 @@
 import unittest
 from mantid.kernel import MaterialBuilder, NumberDensityUnit
 
-NAME = 'Bizarre oxide'
-FORMULA = 'Al2 O3'
-NUMBER_DENSITY = 0.23 # atoms / Angstrom^3
+NAME = "Bizarre oxide"
+FORMULA = "Al2 O3"
+NUMBER_DENSITY = 0.23  # atoms / Angstrom^3
 MASS_DENSITY = 3.987  # g/cm^3
 PACKING_OBS = 0.51192  # packing fraction from the above two values
+
 
 class MaterialBuilderTest(unittest.TestCase):
     def test_build_material(self):
@@ -20,15 +21,15 @@ class MaterialBuilderTest(unittest.TestCase):
         self.assertEqual(material.name(), NAME)
         self.assertEqual(material.numberDensity, NUMBER_DENSITY)
         self.assertEqual(material.numberDensityEffective, NUMBER_DENSITY)
-        self.assertEqual(material.packingFraction, 1.)
+        self.assertEqual(material.packingFraction, 1.0)
 
         formula = material.chemicalFormula()
         self.assertEqual(len(formula), 2)
         atoms = formula[0]
         multiplicities = formula[1]
         self.assertEqual(len(atoms), 2)
-        self.assertEqual(atoms[0].symbol, 'Al')
-        self.assertEqual(atoms[1].symbol, 'O')
+        self.assertEqual(atoms[0].symbol, "Al")
+        self.assertEqual(atoms[1].symbol, "O")
         self.assertEqual(len(multiplicities), 2)
         self.assertEqual(multiplicities[0], 2)
         self.assertEqual(multiplicities[1], 3)
@@ -40,9 +41,9 @@ class MaterialBuilderTest(unittest.TestCase):
         # setting nothing should be an error
         try:
             material = builder.build()
-            raise AssertionError('Should throw an exception')
+            raise AssertionError("Should throw an exception")
         except RuntimeError as e:
-            assert 'number density' in str(e)
+            assert "number density" in str(e)
 
         builder = MaterialBuilder().setName(NAME).setFormula(FORMULA).setNumberDensity(NUMBER_DENSITY)
 
@@ -80,18 +81,19 @@ class MaterialBuilderTest(unittest.TestCase):
         # setting all 3 should be an error
         try:
             material = builder.setPackingFraction(0.5).setNumberDensity(NUMBER_DENSITY).setMassDensity(MASS_DENSITY).build()
-            raise AssertionError('Should throw an exception')
+            raise AssertionError("Should throw an exception")
         except RuntimeError as e:
-            assert 'number density' in str(e)
+            assert "number density" in str(e)
 
     def test_number_density_units(self):
         builder = MaterialBuilder()
         builder.setName(NAME).setFormula(FORMULA).setNumberDensity(NUMBER_DENSITY)
         builder.setNumberDensityUnit(NumberDensityUnit.FormulaUnits)
         material = builder.build()
-        self.assertEqual(material.numberDensity, NUMBER_DENSITY * (2. + 3.))
-        self.assertEqual(material.numberDensityEffective, NUMBER_DENSITY * (2. + 3.))
-        self.assertEqual(material.packingFraction, 1.)
+        self.assertEqual(material.numberDensity, NUMBER_DENSITY * (2.0 + 3.0))
+        self.assertEqual(material.numberDensityEffective, NUMBER_DENSITY * (2.0 + 3.0))
+        self.assertEqual(material.packingFraction, 1.0)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

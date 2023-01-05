@@ -37,20 +37,20 @@ class ISISCommandInterfaceTest(unittest.TestCase):
             MaskFile(file_not_there)
 
     def test_mask_file_works_for_full_path(self):
-        tmp_file = tempfile.NamedTemporaryFile(mode='r')
+        tmp_file = tempfile.NamedTemporaryFile(mode="r")
         path = tmp_file.name
         self.assertTrue(os.path.isfile(path))
 
         self.assertIsNone(MaskFile(path))
 
     def test_mask_file_for_existing_file(self):
-        tmp_file = tempfile.NamedTemporaryFile(mode='r')
+        tmp_file = tempfile.NamedTemporaryFile(mode="r")
 
         file_name = os.path.basename(tmp_file.name)
-        with mock.patch('sans.command_interface.ISISCommandInterface.find_full_file_path') as mocked_finder:
+        with mock.patch("sans.command_interface.ISISCommandInterface.find_full_file_path") as mocked_finder:
             mocked_finder.return_value = tmp_file.name
             self.assertIsNone(MaskFile(file_name))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

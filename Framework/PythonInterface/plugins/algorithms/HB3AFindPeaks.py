@@ -4,45 +4,72 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import (AlgorithmFactory, WorkspaceProperty,
-                        PythonAlgorithm, PropertyMode, ADSValidator, WorkspaceGroup,
-                        MultipleExperimentInfos)
-from mantid.kernel import (Direction, EnabledWhenProperty,
-                           FloatPropertyWithValue, PropertyCriterion, StringListValidator,
-                           StringArrayProperty)
-from mantid.simpleapi import (DeleteWorkspace, FindPeaksMD,
-                              FindUBUsingFFT,
-                              FindUBUsingLatticeParameters,
-                              IndexPeaks, ShowPossibleCells,
-                              SelectCellOfType,
-                              OptimizeLatticeForCellType,
-                              AnalysisDataService,
-                              CreatePeaksWorkspace,
-                              CombinePeaksWorkspaces, CopySample,
-                              GroupWorkspaces)
+from mantid.api import (
+    AlgorithmFactory,
+    WorkspaceProperty,
+    PythonAlgorithm,
+    PropertyMode,
+    ADSValidator,
+    WorkspaceGroup,
+    MultipleExperimentInfos,
+)
+from mantid.kernel import (
+    Direction,
+    EnabledWhenProperty,
+    FloatPropertyWithValue,
+    PropertyCriterion,
+    StringListValidator,
+    StringArrayProperty,
+)
+from mantid.simpleapi import (
+    DeleteWorkspace,
+    FindPeaksMD,
+    FindUBUsingFFT,
+    FindUBUsingLatticeParameters,
+    IndexPeaks,
+    ShowPossibleCells,
+    SelectCellOfType,
+    OptimizeLatticeForCellType,
+    AnalysisDataService,
+    CreatePeaksWorkspace,
+    CombinePeaksWorkspaces,
+    CopySample,
+    GroupWorkspaces,
+)
 from mantid.dataobjects import MDHistoWorkspace
 import numpy as np
 
 
 class HB3AFindPeaks(PythonAlgorithm):
-
     def category(self):
         return "Crystal\\Peaks;Crystal\\UBMatrix"
 
     def seeAlso(self):
-        return ["FindPeaksMD", "OptimizeLatticeForCellType", "FindUBUsingFFT", "SelectCellOfType", "IndexPeaks",
-                "HB3AAdjustSampleNorm", "HB3APredictPeaks", "HB3AIntegratePeaks"]
+        return [
+            "FindPeaksMD",
+            "OptimizeLatticeForCellType",
+            "FindUBUsingFFT",
+            "SelectCellOfType",
+            "IndexPeaks",
+            "HB3AAdjustSampleNorm",
+            "HB3APredictPeaks",
+            "HB3AIntegratePeaks",
+        ]
 
     def name(self):
         return "HB3AFindPeaks"
 
     def summary(self):
-        return 'Given a MD workspace in Q-space, calculates the UB matrix and finds peaks; the UB matrix can be ' \
-               'optionally refined using lattice parameters.'
+        return (
+            "Given a MD workspace in Q-space, calculates the UB matrix and finds peaks; the UB matrix can be "
+            "optionally refined using lattice parameters."
+        )
 
     def PyInit(self):
-        self.declareProperty(StringArrayProperty('InputWorkspace', direction=Direction.Input, validator=ADSValidator()),
-                             doc="Input MD workspace (in Q-space) to use for peak finding")
+        self.declareProperty(
+            StringArrayProperty("InputWorkspace", direction=Direction.Input, validator=ADSValidator()),
+            doc="Input MD workspace (in Q-space) to use for peak finding",
+        )
         cell_type = StringListValidator()
         cell_type.addAllowedValue("Cubic")
         cell_type.addAllowedValue("Hexagonal")
@@ -64,19 +91,24 @@ class HB3AFindPeaks(PythonAlgorithm):
         # Some of the options to pass through to FindPeaksMD (options like CalculateGoniometerForCW, FlipX, etc are
         # assumed to be True)
         self.declareProperty("MaxPeaks", 1000, doc="Maximum number of peaks to find.")
-        self.declareProperty("PeakDistanceThreshold", 0.25, doc="Threshold distance for rejecting peaks that are found "
-                                                                "to be too close from each other")
+        self.declareProperty(
+            "PeakDistanceThreshold", 0.25, doc="Threshold distance for rejecting peaks that are found " "to be too close from each other"
+        )
         # Having this number too low will likely cause FindUBUsingFFT to fail since not enough peaks will be found
-        self.declareProperty("DensityThresholdFactor", 2000.0,
-                             doc="Scaling factor which the overall signal density will be multiplied by to determine "
-                                 "a threshold for determining peaks.")
+        self.declareProperty(
+            "DensityThresholdFactor",
+            2000.0,
+            doc="Scaling factor which the overall signal density will be multiplied by to determine " "a threshold for determining peaks.",
+        )
 
-        self.declareProperty("Wavelength", FloatPropertyWithValue.EMPTY_DBL,
-                             doc="Wavelength value to use only if one was not found in the sample log")
+        self.declareProperty(
+            "Wavelength", FloatPropertyWithValue.EMPTY_DBL, doc="Wavelength value to use only if one was not found in the sample log"
+        )
 
         # Lattice parameter validators from same as FindUBUsingLatticeParameters
-        self.declareProperty("UseLattice", False, direction=Direction.Input,
-                             doc="Whether to refine UB matrix based on given lattice parameters")
+        self.declareProperty(
+            "UseLattice", False, direction=Direction.Input, doc="Whether to refine UB matrix based on given lattice parameters"
+        )
 
         self.declareProperty("LatticeA", FloatPropertyWithValue.EMPTY_DBL, doc="The a value of the lattice")
         self.declareProperty("LatticeB", FloatPropertyWithValue.EMPTY_DBL, doc="The b value of the lattice")
@@ -85,8 +117,10 @@ class HB3AFindPeaks(PythonAlgorithm):
         self.declareProperty("LatticeBeta", FloatPropertyWithValue.EMPTY_DBL, doc="The beta value of the lattice")
         self.declareProperty("LatticeGamma", FloatPropertyWithValue.EMPTY_DBL, doc="The gamma value of the lattice")
 
-        self.declareProperty(WorkspaceProperty("OutputWorkspace", defaultValue="", direction=Direction.Output,
-                                               optional=PropertyMode.Mandatory), doc="Output peaks workspace")
+        self.declareProperty(
+            WorkspaceProperty("OutputWorkspace", defaultValue="", direction=Direction.Output, optional=PropertyMode.Mandatory),
+            doc="Output peaks workspace",
+        )
 
         lattice_params = ["LatticeA", "LatticeB", "LatticeC", "LatticeAlpha", "LatticeBeta", "LatticeGamma"]
         for param in lattice_params:
@@ -114,19 +148,22 @@ class HB3AFindPeaks(PythonAlgorithm):
 
         input_workspaces = self._expand_groups()
         for input_ws in input_workspaces:
-            if not (isinstance(AnalysisDataService[input_ws], MultipleExperimentInfos)
-                    or isinstance(AnalysisDataService[input_ws], MDHistoWorkspace)):
+            if not (
+                isinstance(AnalysisDataService[input_ws], MultipleExperimentInfos)
+                or isinstance(AnalysisDataService[input_ws], MDHistoWorkspace)
+            ):
                 issues["InputWorkspace"] = "Workspace need to be a MDWorkspace"
             elif AnalysisDataService[input_ws].getSpecialCoordinateSystem().name != "QSample":
-                issues["InputWorkspace"] = "Input workspace expected to be in QSample, " \
-                    "workspace is in '{}'".format(AnalysisDataService[input_ws].getSpecialCoordinateSystem().name)
+                issues["InputWorkspace"] = "Input workspace expected to be in QSample, " "workspace is in '{}'".format(
+                    AnalysisDataService[input_ws].getSpecialCoordinateSystem().name
+                )
             elif AnalysisDataService[input_ws].getNumDims() != 3:
                 issues["InputWorkspace"] = "Workspace has the wrong number of dimensions"
 
         wavelength = self.getProperty("Wavelength")
         if not wavelength.isDefault:
             if wavelength.value <= 0.0:
-                issues['Wavelength'] = "Wavelength should be greater than zero"
+                issues["Wavelength"] = "Wavelength should be greater than zero"
 
         return issues
 
@@ -162,7 +199,7 @@ class HB3AFindPeaks(PythonAlgorithm):
         output_workspaces = []
         for input_ws in input_workspaces:
             if multi_ws:
-                peaks_ws_name = input_ws + '_' + output_workspace_name
+                peaks_ws_name = input_ws + "_" + output_workspace_name
                 output_workspaces.append(peaks_ws_name)
             else:
                 peaks_ws_name = output_workspace_name
@@ -182,21 +219,21 @@ class HB3AFindPeaks(PythonAlgorithm):
                         use_inner = False
                 self.log().information("Using inner goniometer: {}".format(use_inner))
 
-            FindPeaksMD(InputWorkspace=input_ws,
-                        PeakDistanceThreshold=dist_thresh,
-                        DensityThresholdFactor=density_thresh,
-                        CalculateGoniometerForCW=True,
-                        Wavelength=wavelength,
-                        FlipX=True,
-                        InnerGoniometer=use_inner,
-                        MaxPeaks=npeaks,
-                        OutputWorkspace=peaks_ws_name)
+            FindPeaksMD(
+                InputWorkspace=input_ws,
+                PeakDistanceThreshold=dist_thresh,
+                DensityThresholdFactor=density_thresh,
+                CalculateGoniometerForCW=True,
+                Wavelength=wavelength,
+                FlipX=True,
+                InnerGoniometer=use_inner,
+                MaxPeaks=npeaks,
+                OutputWorkspace=peaks_ws_name,
+            )
 
         if multi_ws:
-            peaks_ws_name = '__tmp_peaks_ws'
-            CreatePeaksWorkspace(InstrumentWorkspace=input_workspaces[0],
-                                 NumberOfPeaks=0,
-                                 OutputWorkspace=peaks_ws_name)
+            peaks_ws_name = "__tmp_peaks_ws"
+            CreatePeaksWorkspace(InstrumentWorkspace=input_workspaces[0], NumberOfPeaks=0, OutputWorkspace=peaks_ws_name)
             for peak_ws in output_workspaces:
                 CombinePeaksWorkspaces(peaks_ws_name, peak_ws, OutputWorkspace=peaks_ws_name)
 
@@ -211,13 +248,15 @@ class HB3AFindPeaks(PythonAlgorithm):
 
         if multi_ws:
             for out_ws in output_workspaces:
-                CopySample(InputWorkspace=peaks_ws_name,
-                           OutputWorkspace=out_ws,
-                           CopyName=False,
-                           CopyMaterial=False,
-                           CopyEnvironment=False,
-                           CopyShape=False,
-                           CopyLattice=True)
+                CopySample(
+                    InputWorkspace=peaks_ws_name,
+                    OutputWorkspace=out_ws,
+                    CopyName=False,
+                    CopyMaterial=False,
+                    CopyEnvironment=False,
+                    CopyShape=False,
+                    CopyLattice=True,
+                )
                 IndexPeaks(PeaksWorkspace=out_ws)
 
             GroupWorkspaces(output_workspaces, OutputWorkspace=output_workspace_name)

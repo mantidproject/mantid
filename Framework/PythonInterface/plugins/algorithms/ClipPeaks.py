@@ -19,36 +19,29 @@ class ClipPeaks(PythonAlgorithm):
     """
 
     def PyInit(self):
-        self.declareProperty(
-            WorkspaceProperty("InputWorkspace", "", Direction.Input),
-            "The workspace containing the normalization data.")
+        self.declareProperty(WorkspaceProperty("InputWorkspace", "", Direction.Input), "The workspace containing the normalization data.")
 
         self.declareProperty(
-            "LLSCorrection", True,
-            "Whether to apply a log-log-sqrt transformation to make data more sensitive to weaker peaks."
+            "LLSCorrection", True, "Whether to apply a log-log-sqrt transformation to make data more sensitive to weaker peaks."
         )
 
-        self.declareProperty(
-            "IncreasingWindow", False,
-            "Use an increasing moving window when clipping."
-        )
+        self.declareProperty("IncreasingWindow", False, "Use an increasing moving window when clipping.")
 
         self.declareProperty(
             name="SmoothingRange",
             defaultValue=10,
             validator=IntBoundedValidator(lower=0),
-            doc="The size of the window used for smoothing data. No smoothing if set to 0."
+            doc="The size of the window used for smoothing data. No smoothing if set to 0.",
         )
 
         self.declareProperty(
             name="WindowSize",
             defaultValue=10,
             validator=IntBoundedValidator(lower=0),
-            doc="The size of the peak clipping window to be used."
+            doc="The size of the peak clipping window to be used.",
         )
 
-        self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output),
-                             "The workspace containing the normalization data.")
+        self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output), "The workspace containing the normalization data.")
 
     def category(self):
         return "Diffraction\\Corrections"
@@ -123,7 +116,7 @@ class ClipPeaks(PythonAlgorithm):
         start_data = np.copy(data)
 
         window = clip_window_size
-        self.log().information('Smoothing window: {0}'.format(str(smooth_factor)))
+        self.log().information("Smoothing window: {0}".format(str(smooth_factor)))
 
         if smooth_factor > 0:
             data = self.smooth(data, smooth_factor)
@@ -142,15 +135,15 @@ class ClipPeaks(PythonAlgorithm):
                     # Skip if current index is outside of the window range
                     continue
                 else:
-                    win_array = data[i - w:i + w + 1]
+                    win_array = data[i - w : i + w + 1]
                     win_array_reversed = win_array[::-1]
                     average = (win_array + win_array_reversed) / 2
-                    data[i] = np.min(average[:int(len(average) / 2)])
+                    data[i] = np.min(average[: int(len(average) / 2)])
 
         if use_lls:
             data = self.inv_log_log_sqrt_transformation(data)
 
-        self.log().information('Minimum of starting data - peak clipped data: {0}'.format(str(min(start_data - data))))
+        self.log().information("Minimum of starting data - peak clipped data: {0}".format(str(min(start_data - data))))
 
         index = np.where((start_data - data) == min(start_data - data))[0][0]
 
@@ -191,11 +184,8 @@ class ClipPeaks(PythonAlgorithm):
             peak_clip_ws.setX(histogram, x[histogram])
             peak_clip_ws.setY(
                 histogram,
-                self.peak_clip(y[histogram],
-                               clip_window_size=window,
-                               decrease=decreasing,
-                               use_lls=lls_set,
-                               smooth_factor=smooth_range))
+                self.peak_clip(y[histogram], clip_window_size=window, decrease=decreasing, use_lls=lls_set, smooth_factor=smooth_range),
+            )
             peak_clip_ws.setE(histogram, e[histogram])
 
         self.setProperty("OutputWorkspace", peak_clip_ws)

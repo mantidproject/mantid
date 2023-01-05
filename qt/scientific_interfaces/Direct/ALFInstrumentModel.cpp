@@ -89,12 +89,12 @@ double calculateError(Mantid::HistogramData::HistogramE const &eValues, std::siz
   std::transform(eValues.cbegin() + binIndexMin, eValues.cbegin() + binIndexMax, eValues.cbegin() + binIndexMin,
                  squaredValues.begin(), std::multiplies<double>());
   // Sum them and then take the sqrt
-  return sqrt(std::accumulate(squaredValues.begin(), squaredValues.end(), 0));
+  return sqrt(std::accumulate(squaredValues.begin(), squaredValues.end(), 0.0));
 }
 
 double calculateYCounts(Mantid::HistogramData::HistogramY const &yValues, std::size_t const binIndexMin,
                         std::size_t const binIndexMax) {
-  return std::accumulate(yValues.cbegin() + binIndexMin, yValues.cbegin() + binIndexMax, 0);
+  return std::accumulate(yValues.cbegin() + binIndexMin, yValues.cbegin() + binIndexMax, 0.0);
 }
 
 double calculateOutOfPlaneAngle(Mantid::Kernel::V3D const &pos, Mantid::Kernel::V3D const &origin,

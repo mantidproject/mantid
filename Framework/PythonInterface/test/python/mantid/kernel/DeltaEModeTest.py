@@ -9,7 +9,6 @@ from mantid.kernel import DeltaEMode, DeltaEModeType
 
 
 class DeltaEModeTest(unittest.TestCase):
-
     def test_availableTypes_contains_three_modes(self):
 
         modes = DeltaEMode.availableTypes()
@@ -25,5 +24,6 @@ class DeltaEModeTest(unittest.TestCase):
         self.assertTrue(hasattr(DeltaEModeType, "Direct"))
         self.assertTrue(hasattr(DeltaEModeType, "Indirect"))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

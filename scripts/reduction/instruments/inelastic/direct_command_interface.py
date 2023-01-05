@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 """
     Command set for Direct Geometry reduction
 """
@@ -60,7 +60,7 @@ def FixEi(ei):
 
 def CalculateEi(guess=None):
     alg = AlgorithmManager.create("InelasticCalcEi")
-    alg.setProperty("EiGuess",guess)
+    alg.setProperty("EiGuess", guess)
     ReductionSingleton().set_ei_calculator(alg)
 
 

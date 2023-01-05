@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
 import mantid.simpleapi
 import mantid.kernel
 import mantid.api
@@ -13,42 +13,47 @@ import numpy
 
 
 class MaskAngle(mantid.api.PythonAlgorithm):
-    """ Mask detectors between specified angles based on angle type required
-    """
+    """Mask detectors between specified angles based on angle type required"""
 
     def category(self):
-        """ Mantid required
-        """
+        """Mantid required"""
         return "Transforms\\Masking"
 
     def seeAlso(self):
-        return [ "MaskDetectors" ]
+        return ["MaskDetectors"]
 
     def name(self):
-        """ Mantid require
-        """
+        """Mantid require"""
         return "MaskAngle"
 
     def summary(self):
-        """ Mantid require
-        """
+        """Mantid require"""
         return "Algorithm to mask detectors with scattering angles in a given interval (in degrees)."
 
     def PyInit(self):
-        self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "",direction=mantid.kernel.Direction.Input),
-                             "Input workspace")
+        self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "", direction=mantid.kernel.Direction.Input), "Input workspace")
 
-        angleValidator=mantid.kernel.FloatBoundedValidator()
-        angleValidator.setBounds(-180.,180.)
-        self.declareProperty(name="MinAngle", defaultValue=0.0, validator=angleValidator,
-                             direction=mantid.kernel.Direction.Input, doc="Angles above MinAngle are going to be masked")
-        self.declareProperty(name="MaxAngle", defaultValue=180.0, validator=angleValidator,
-                             direction=mantid.kernel.Direction.Input, doc="Angles below MaxAngle are going to be masked")
-        self.declareProperty('Angle', 'TwoTheta',
-                             mantid.kernel.StringListValidator(['TwoTheta', 'Phi', 'InPlane']),
-                             'Which angle to use')
-        self.declareProperty(mantid.kernel.IntArrayProperty(name="MaskedDetectors", direction=mantid.kernel.Direction.Output),
-                             doc="List of detector masked, with scattering angles between MinAngle and MaxAngle")
+        angleValidator = mantid.kernel.FloatBoundedValidator()
+        angleValidator.setBounds(-180.0, 180.0)
+        self.declareProperty(
+            name="MinAngle",
+            defaultValue=0.0,
+            validator=angleValidator,
+            direction=mantid.kernel.Direction.Input,
+            doc="Angles above MinAngle are going to be masked",
+        )
+        self.declareProperty(
+            name="MaxAngle",
+            defaultValue=180.0,
+            validator=angleValidator,
+            direction=mantid.kernel.Direction.Input,
+            doc="Angles below MaxAngle are going to be masked",
+        )
+        self.declareProperty("Angle", "TwoTheta", mantid.kernel.StringListValidator(["TwoTheta", "Phi", "InPlane"]), "Which angle to use")
+        self.declareProperty(
+            mantid.kernel.IntArrayProperty(name="MaskedDetectors", direction=mantid.kernel.Direction.Output),
+            doc="List of detector masked, with scattering angles between MinAngle and MaxAngle",
+        )
 
     def validateInputs(self):
         issues = dict()
@@ -66,46 +71,46 @@ class MaskAngle(mantid.api.PythonAlgorithm):
         if not hasInstrument and "Workspace" not in issues:
             issues["Workspace"] = "Workspace must have an associated instrument."
 
-        angleMin = self.getProperty('MinAngle').value
-        angleMax = self.getProperty('MaxAngle').value
+        angleMin = self.getProperty("MinAngle").value
+        angleMax = self.getProperty("MaxAngle").value
         if angleMin >= angleMax:
-            msg = 'MinAngle ({}) must be less than MaxAngle ({})'.format(angleMin, angleMax)
-            issues['MinAngle'] = msg
-            issues['MaxAngle'] = msg
+            msg = "MinAngle ({}) must be less than MaxAngle ({})".format(angleMin, angleMax)
+            issues["MinAngle"] = msg
+            issues["MaxAngle"] = msg
 
-        if self.getProperty('Angle').value != 'InPlane':
-            if angleMin < 0.:
-                issues['MinAngle'] = 'Must be positive'
-            if angleMax < 0.:
-                issues['MaxAngle'] = 'Must be positive'
+        if self.getProperty("Angle").value != "InPlane":
+            if angleMin < 0.0:
+                issues["MinAngle"] = "Must be positive"
+            if angleMax < 0.0:
+                issues["MaxAngle"] = "Must be positive"
 
         return issues
 
     def _get_phi(self, spectra_pos):
-        '''
+        """
         The implementation here assumes that z is the beam direction.
         That assumption is not universally true, it depends on the geometry configuration.
         This returns the phi spherical coordinate value
-        '''
+        """
         return numpy.fabs(numpy.arctan2(spectra_pos.Y(), spectra_pos.X()))
 
     def _get_in_plane(self, spectra_pos):
-        '''
+        """
         The implementation here assumes that z is the beam direction and x is in plane.
         That assumption is not universally true, it depends on the geometry configuration.
         This returns the angle from the z-axis constrained in-plane
-        '''
+        """
         return numpy.arctan2(spectra_pos.X(), spectra_pos.Z())
 
     def PyExec(self):
         ws = self.getProperty("Workspace").value
         ttmin = numpy.radians(self.getProperty("MinAngle").value)
         ttmax = numpy.radians(self.getProperty("MaxAngle").value)
-        if ttmin > ttmax :
+        if ttmin > ttmax:
             raise ValueError("MinAngle > MaxAngle, please check angle range for masking")
 
-        angle_phi = self.getProperty('Angle').value == 'Phi'
-        angle_in_plane = self.getProperty('Angle').value == 'InPlane'
+        angle_phi = self.getProperty("Angle").value == "Phi"
+        angle_in_plane = self.getProperty("Angle").value == "InPlane"
         spectrum_info = ws.spectrumInfo()
         detector_info = ws.detectorInfo()
         det_ids = detector_info.detectorIDs()
@@ -118,16 +123,16 @@ class MaskAngle(mantid.api.PythonAlgorithm):
                 elif angle_in_plane:
                     val = self._get_in_plane(spectrum.position)
                 else:  # Two theta
-                    val =spectrum.twoTheta
+                    val = spectrum.twoTheta
 
-                if val>= ttmin and val<= ttmax:
+                if val >= ttmin and val <= ttmax:
                     detectors = spectrum.spectrumDefinition
                     for j in range(len(detectors)):
                         masked_ids.append(det_ids[detectors[j][0]])
         if not masked_ids:
             self.log().information("no detectors within this range")
         else:
-            mantid.simpleapi.MaskDetectors(Workspace=ws,DetectorList=numpy.array(masked_ids))
+            mantid.simpleapi.MaskDetectors(Workspace=ws, DetectorList=numpy.array(masked_ids))
         self.setProperty("MaskedDetectors", numpy.array(masked_ids))
 
 

@@ -15,26 +15,28 @@ from unittest import mock
 
 import matplotlib
 
-matplotlib.use('AGG')  # noqa
+matplotlib.use("AGG")  # noqa
 import matplotlib.pyplot as plt
 
 # local imports
 # register mantid projection
 from mantid.api import AnalysisDataService, WorkspaceFactory, WorkspaceGroup
-from mantid.simpleapi import CreateMDHistoWorkspace, CloneWorkspace, GroupWorkspaces, \
-                             CreateSampleWorkspace
+from mantid.simpleapi import CreateMDHistoWorkspace, CloneWorkspace, GroupWorkspaces, CreateSampleWorkspace
 from mantid.kernel import config
 from mantid.plots import MantidAxes
-from mantid.plots.plotfunctions import (figure_title, manage_workspace_names,
-                                        plot, plot_md_histo_ws)
+from mantid.plots.plotfunctions import figure_title, manage_workspace_names, plot, plot_md_histo_ws
 from mantid.plots.utility import MantidAxType
 
 
-PLOT_OPTIONS = {"plots.ShowMinorTicks": "off", "plots.ShowMinorGridlines": "off",
-                "plots.ShowLegend": "off", "plots.line.Width": 5,
-                "plots.marker.Style": "None",
-                "plots.marker.Size": 5,
-                "plots.ShowTitle": "off"}
+PLOT_OPTIONS = {
+    "plots.ShowMinorTicks": "off",
+    "plots.ShowMinorGridlines": "off",
+    "plots.ShowLegend": "off",
+    "plots.line.Width": 5,
+    "plots.marker.Style": "None",
+    "plots.marker.Size": 5,
+    "plots.ShowTitle": "off",
+}
 
 
 class MockConfigService(object):
@@ -64,21 +66,22 @@ class FunctionsTest(unittest.TestCase):
 
     def setUp(self):
         if self._test_ws is None:
-            self.__class__._test_ws = WorkspaceFactory.Instance().create(
-                "Workspace2D", NVectors=2, YLength=5, XLength=5)
+            self.__class__._test_ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=2, YLength=5, XLength=5)
         if self._test_md_ws is None:
-            self._test_md_ws = CreateMDHistoWorkspace(SignalInput='1,2,3,4,2,1',
-                                                      ErrorInput='1,1,1,1,1,1',
-                                                      Dimensionality=3,
-                                                      Extents='-1,1,-1,1,0.5,6.5',
-                                                      NumberOfBins='1,1,6',
-                                                      Names='x,y,|Q|',
-                                                      Units='mm,km,AA^-1',
-                                                      OutputWorkspace='test_plot_md_from_names_ws')
+            self._test_md_ws = CreateMDHistoWorkspace(
+                SignalInput="1,2,3,4,2,1",
+                ErrorInput="1,1,1,1,1,1",
+                Dimensionality=3,
+                Extents="-1,1,-1,1,0.5,6.5",
+                NumberOfBins="1,1,6",
+                Names="x,y,|Q|",
+                Units="mm,km,AA^-1",
+                OutputWorkspace="test_plot_md_from_names_ws",
+            )
 
     def tearDown(self):
         AnalysisDataService.Instance().clear()
-        plt.close('all')
+        plt.close("all")
 
     def test_figure_title_with_single_string(self):
         self.assertEqual("test-1", figure_title("test", 1))
@@ -90,14 +93,13 @@ class FunctionsTest(unittest.TestCase):
         self.assertEqual("fake-5", figure_title(FakeWorkspace("fake"), 5))
 
     def test_figure_title_with_workspace_list(self):
-        self.assertEqual("fake-10", figure_title((FakeWorkspace("fake"),
-                                                  FakeWorkspace("nextfake")), 10))
+        self.assertEqual("fake-10", figure_title((FakeWorkspace("fake"), FakeWorkspace("nextfake")), 10))
 
     def test_figure_title_with_empty_list_raises_assertion(self):
         with self.assertRaises(AssertionError):
             figure_title([], 5)
 
-    @mock.patch('mantid.plots.plotfunctions.ConfigService', new_callable=MockConfigService)
+    @mock.patch("mantid.plots.plotfunctions.ConfigService", new_callable=MockConfigService)
     def test_plot_gets_legend_visibility_from_ConfigService(self, mock_ConfigService):
         fig = plt.figure()
         plt.plot([0, 1], [0, 1])
@@ -105,7 +107,7 @@ class FunctionsTest(unittest.TestCase):
         plot([ws], wksp_indices=[1], fig=fig, overplot=True)
         ax = plt.gca()
 
-        mock_ConfigService.getString.assert_any_call('plots.ShowLegend')
+        mock_ConfigService.getString.assert_any_call("plots.ShowLegend")
         self.assertEqual(ax.get_legend().get_visible(), False)
 
     def test_that_plot_can_accept_workspace_names(self):
@@ -195,25 +197,25 @@ class FunctionsTest(unittest.TestCase):
         self.assertIsInstance(mantid_ax, MantidAxes)
 
     def test_that_plot_spectrum_has_same_y_label_with_and_without_errorbars(self):
-        auto_dist = config['graph1d.autodistribution']
+        auto_dist = config["graph1d.autodistribution"]
         try:
-            config['graph1d.autodistribution'] = 'Off'
+            config["graph1d.autodistribution"] = "Off"
             self._compare_errorbar_labels_and_title()
         finally:
-            config['graph1d.autodistribution'] = auto_dist
+            config["graph1d.autodistribution"] = auto_dist
 
     def test_that_plot_spectrum_has_same_y_label_with_and_without_errorbars_normalize_by_bin_width(self):
-        auto_dist = config['graph1d.autodistribution']
+        auto_dist = config["graph1d.autodistribution"]
         try:
-            config['graph1d.autodistribution'] = 'On'
+            config["graph1d.autodistribution"] = "On"
             self._compare_errorbar_labels_and_title()
         finally:
-            config['graph1d.autodistribution'] = auto_dist
+            config["graph1d.autodistribution"] = auto_dist
 
     def test_setting_waterfall_to_true_makes_waterfall_plot(self):
         fig = plt.figure()
         ws = self._test_ws
-        plot([ws], wksp_indices=[0,1], fig=fig, waterfall=True)
+        plot([ws], wksp_indices=[0, 1], fig=fig, waterfall=True)
         ax = plt.gca()
 
         self.assertTrue(ax.is_waterfall())
@@ -236,7 +238,7 @@ class FunctionsTest(unittest.TestCase):
     def test_overplotting_onto_waterfall_plot_maintains_waterfall(self):
         fig = plt.figure()
         ws = self._test_ws
-        plot([ws], wksp_indices=[0,1], fig=fig, waterfall=True)
+        plot([ws], wksp_indices=[0, 1], fig=fig, waterfall=True)
         # Overplot one of the same lines.
         plot([ws], wksp_indices=[0], fig=fig, overplot=True)
         ax = plt.gca()
@@ -253,38 +255,34 @@ class FunctionsTest(unittest.TestCase):
         ax.set_waterfall_fill(True)
         plot([ws], wksp_indices=[0], fig=fig, overplot=True)
 
-        fills = [collection for collection in ax.collections
-                 if isinstance(collection, matplotlib.collections.PolyCollection)]
+        fills = [collection for collection in ax.collections if isinstance(collection, matplotlib.collections.PolyCollection)]
 
         self.assertEqual(len(fills), 3)
 
     def test_plot_1d_md(self):
-        """Test to plot 1D IMDHistoWorkspace
-        """
+        """Test to plot 1D IMDHistoWorkspace"""
         fig = plt.figure()
         plt.plot([0, 1], [0, 1])
         ws = self._test_md_ws
         plot_md_histo_ws([ws], fig=fig, overplot=True)
         ax = plt.gca()
-        self.assertEqual(len(ax.lines), 2, msg=f'With overplot on an existing fig, there shall be 2 lines,'
-                                               f'but not {len(ax.lines)} lines.')
+        self.assertEqual(
+            len(ax.lines), 2, msg=f"With overplot on an existing fig, there shall be 2 lines," f"but not {len(ax.lines)} lines."
+        )
 
     def test_superplot_bin_plot(self):
         fig = plt.gcf()
         fig.canvas.manager = mock.Mock()
         ws = CreateSampleWorkspace()
-        plot([ws], wksp_indices=[], superplot=True, fig=fig,
-             plot_kwargs={"axis": MantidAxType.BIN})
+        plot([ws], wksp_indices=[], superplot=True, fig=fig, plot_kwargs={"axis": MantidAxType.BIN})
         fig.canvas.manager.superplot.set_workspaces.assert_called_once()
         fig.canvas.manager.superplot.set_bin_mode.assert_called_once_with(True)
         fig.canvas.manager.reset_mock()
-        plot([ws], wksp_indices=[], superplot=True, fig=fig,
-             plot_kwargs={"axis": MantidAxType.SPECTRUM})
+        plot([ws], wksp_indices=[], superplot=True, fig=fig, plot_kwargs={"axis": MantidAxType.SPECTRUM})
         fig.canvas.manager.superplot.set_workspaces.assert_called_once()
         fig.canvas.manager.superplot.set_bin_mode.assert_called_once_with(False)
         fig.canvas.manager.reset_mock()
-        plot([ws], wksp_indices=[], superplot=True, fig=fig,
-             plot_kwargs={})
+        plot([ws], wksp_indices=[], superplot=True, fig=fig, plot_kwargs={})
         fig.canvas.manager.superplot.set_workspaces.assert_called_once()
         fig.canvas.manager.superplot.set_bin_mode.assert_called_once_with(False)
 
@@ -310,5 +308,6 @@ class FunctionsTest(unittest.TestCase):
             # Compare title
             self.assertEqual(ax.get_title(), err_ax.get_title())
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

@@ -22,6 +22,7 @@ from mantidqt.widgets.sliceviewer.models.transform import NonOrthogonalTransform
 DBLMAX = sys.float_info.max
 
 ImageInfoWidget = import_qt('.._common', 'mantidqt.widgets', 'ImageInfoWidget')
+ImageInfoWidgetMini = import_qt('.._common', 'mantidqt.widgets', 'ImageInfoWidgetMini')
 
 
 class ImageInfoTracker(CursorTracker):

@@ -6,9 +6,20 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.kernel import Logger, Property, PropertyManager
-from mantid.simpleapi import (AbsorptionCorrection, DeleteWorkspace, Divide, Load, Multiply,
-                              MultipleScatteringCorrection, PaalmanPingsAbsorptionCorrection, PreprocessDetectorsToMD,
-                              RenameWorkspace, SaveNexusProcessed, UnGroupWorkspace, mtd)
+from mantid.simpleapi import (
+    AbsorptionCorrection,
+    DeleteWorkspace,
+    Divide,
+    Load,
+    Multiply,
+    MultipleScatteringCorrection,
+    PaalmanPingsAbsorptionCorrection,
+    PreprocessDetectorsToMD,
+    RenameWorkspace,
+    SaveNexusProcessed,
+    UnGroupWorkspace,
+    mtd,
+)
 import mantid.simpleapi
 import numpy as np
 import os
@@ -29,7 +40,7 @@ def _getBasename(filename):
         filename = filename[0]
     name = os.path.split(filename)[-1]
     for extension in _EXTENSIONS_NXS:
-        name = name.replace(extension, '')
+        name = name.replace(extension, "")
     return name
 
 
@@ -74,23 +85,23 @@ def __get_cache_name(
     if meta_wksp_name in mtd:
         ws = mtd[meta_wksp_name]
     else:
-        raise ValueError(
-            f"Cannot find workspace {meta_wksp_name} to extract meta data for hashing, aborting")
+        raise ValueError(f"Cannot find workspace {meta_wksp_name} to extract meta data for hashing, aborting")
 
     # requires cache_dir
     cache_filenames = []
     if cache_dirs:
         # generate the property string for hashing
         property_string = [
-            f"{key}={val}" for key, val in {
-                'wavelength_min': ws.readX(0).min(),
-                'wavelength_max': ws.readX(0).max(),
+            f"{key}={val}"
+            for key, val in {
+                "wavelength_min": ws.readX(0).min(),
+                "wavelength_max": ws.readX(0).max(),
                 "num_wl_bins": len(ws.readX(0)) - 1,
-                "sample_formula": ws.run()['SampleFormula'].lastValue().strip(),
-                "mass_density": ws.run()['SampleDensity'].lastValue(),
-                "height_unit": ws.run()['BL11A:CS:ITEMS:HeightInContainerUnits'].lastValue(),
-                "height": ws.run()['BL11A:CS:ITEMS:HeightInContainer'].lastValue(),
-                "sample_container": ws.run()['SampleContainer'].lastValue().replace(" ", ""),
+                "sample_formula": ws.run()["SampleFormula"].lastValue().strip(),
+                "mass_density": ws.run()["SampleDensity"].lastValue(),
+                "height_unit": ws.run()["BL11A:CS:ITEMS:HeightInContainerUnits"].lastValue(),
+                "height": ws.run()["BL11A:CS:ITEMS:HeightInContainer"].lastValue(),
+                "sample_container": ws.run()["SampleContainer"].lastValue().replace(" ", ""),
                 "abs_method": abs_method,
                 "ms_method": ms_method,
             }.items()
@@ -101,13 +112,12 @@ def __get_cache_name(
         for cache_dir in cache_dirs:
 
             ascii_name, ascii_hash = mantid.simpleapi.CreateCacheFilename(
-              Prefix=prefix_name,
-              OtherProperties=property_string,
-              CacheDir=cache_dir)
+                Prefix=prefix_name, OtherProperties=property_string, CacheDir=cache_dir
+            )
 
-            cache_filenames.append( ascii_name )
+            cache_filenames.append(ascii_name)
 
-    return cache_filenames,  ascii_hash
+    return cache_filenames, ascii_hash
 
 
 def __load_cached_data(cache_files, sha1, abs_method="", prefix_name=""):
@@ -146,7 +156,7 @@ def __load_cached_data(cache_files, sha1, abs_method="", prefix_name=""):
 
     # step_2: load from disk if either is not found in memory
     if (not found_abs_wksp_sample) or (not found_abs_wksp_container):
-        for candidate in cache_files :
+        for candidate in cache_files:
             if os.path.exists(candidate):
                 wsntmp = "tmpwsg"
                 Load(Filename=candidate, OutputWorkspace=wsntmp)
@@ -165,7 +175,7 @@ def __load_cached_data(cache_files, sha1, abs_method="", prefix_name=""):
     if mtd.doesExist(abs_wksp_container):
         found_abs_wksp_container = mtd[abs_wksp_container].run()["absSHA1"].value == sha1
 
-    return found_abs_wksp_sample, found_abs_wksp_container, abs_wksp_sample, abs_wksp_container, cache_files[ 0 ]
+    return found_abs_wksp_sample, found_abs_wksp_container, abs_wksp_sample, abs_wksp_container, cache_files[0]
 
 
 # NOTE:
@@ -192,6 +202,7 @@ def abs_cache(func):
     Speedup by
         4.7660x
     """
+
     @wraps(func)
     def inner(*args, **kwargs):
         """
@@ -218,7 +229,7 @@ def abs_cache(func):
             cache_dirs=cache_dirs,
             prefix_name=cache_prefix,
             ms_method=ms_method,
-            )
+        )
 
         # step_2: try load the cached data from disk
         found_sample, found_container, abs_wksp_sample, abs_wksp_container, cache_filename = __load_cached_data(
@@ -237,7 +248,7 @@ def abs_cache(func):
                 return abs_wksp_sample, abs_wksp_container
             else:
                 # no cache found, need calculation
-                log = Logger('calc_absorption_corr_using_wksp')
+                log = Logger("calc_absorption_corr_using_wksp")
                 if cache_filename:
                     log.information(f"Storing cached data in {cache_filename}")
 
@@ -251,9 +262,7 @@ def abs_cache(func):
                 # save to disk
                 SaveNexusProcessed(InputWorkspace=abs_wksp_sample, Filename=cache_filename)
                 if abs_wksp_container != "":
-                    SaveNexusProcessed(InputWorkspace=abs_wksp_container,
-                                       Filename=cache_filename,
-                                       Append=True)
+                    SaveNexusProcessed(InputWorkspace=abs_wksp_container, Filename=cache_filename, Append=True)
 
                 return abs_wksp_sample, abs_wksp_container
 
@@ -331,16 +340,12 @@ def calculate_absorption_correction(
 
     environment = {}
     if container_shape:
-        environment['Name'] = 'InAir'
-        environment['Container'] = container_shape
+        environment["Name"] = "InAir"
+        environment["Container"] = container_shape
 
-    donorWS = create_absorption_input(filename,
-                                      props,
-                                      num_wl_bins,
-                                      material=material,
-                                      geometry=sample_geometry,
-                                      environment=environment,
-                                      metaws=metaws)
+    donorWS = create_absorption_input(
+        filename, props, num_wl_bins, material=material, geometry=sample_geometry, environment=environment, metaws=metaws
+    )
 
     # NOTE: Ideally we want to separate cache related task from calculation,
     #       but the fact that we are trying to determine the name based on
@@ -367,13 +372,14 @@ def calculate_absorption_correction(
     else:
         absName = f"{_getBasename(filename)}_abs_correction"
 
-    return calc_absorption_corr_using_wksp(donorWS,
-                                           abs_method,
-                                           element_size,
-                                           prefix_name=absName,
-                                           cache_dirs=cache_dirs,
-                                           ms_method=ms_method,
-                                           )
+    return calc_absorption_corr_using_wksp(
+        donorWS,
+        abs_method,
+        element_size,
+        prefix_name=absName,
+        cache_dirs=cache_dirs,
+        ms_method=ms_method,
+    )
 
 
 @abs_cache
@@ -386,7 +392,7 @@ def calc_absorption_corr_using_wksp(
     ms_method="",
 ):
     # warn about caching
-    log = Logger('CalcAbsorptionCorrUsingWksp')
+    log = Logger("CalcAbsorptionCorrUsingWksp")
     if cache_dirs:
         log.warning("Empty cache dir found.")
     # 1. calculate first order absorption correction
@@ -410,7 +416,7 @@ def calc_absorption_corr_using_wksp(
                 LHSWorkspace=abs_s,  # str
                 RHSWorkspace=ms_sampleOnly,  # workspace
                 OutputWorkspace=abs_s,  # str
-                )
+            )
             # nothing need to be done for container
             # cleanup
             mtd.remove("ms_tmp_sampleOnly")
@@ -463,41 +469,26 @@ def calc_1st_absorption_corr_using_wksp(
         donor_wksp = mtd[donor_wksp]
 
     absName = donor_wksp.name()
-    if prefix_name != '':
+    if prefix_name != "":
         absName = prefix_name
 
     if abs_method == "SampleOnly":
-        AbsorptionCorrection(donor_wksp,
-                             OutputWorkspace=absName + '_ass',
-                             ScatterFrom='Sample',
-                             ElementSize=element_size)
-        return absName + '_ass', ""
+        AbsorptionCorrection(donor_wksp, OutputWorkspace=absName + "_ass", ScatterFrom="Sample", ElementSize=element_size)
+        return absName + "_ass", ""
     elif abs_method == "SampleAndContainer":
-        AbsorptionCorrection(donor_wksp,
-                             OutputWorkspace=absName + '_ass',
-                             ScatterFrom='Sample',
-                             ElementSize=element_size)
-        AbsorptionCorrection(donor_wksp,
-                             OutputWorkspace=absName + '_acc',
-                             ScatterFrom='Container',
-                             ElementSize=element_size)
-        return absName + '_ass', absName + '_acc'
+        AbsorptionCorrection(donor_wksp, OutputWorkspace=absName + "_ass", ScatterFrom="Sample", ElementSize=element_size)
+        AbsorptionCorrection(donor_wksp, OutputWorkspace=absName + "_acc", ScatterFrom="Container", ElementSize=element_size)
+        return absName + "_ass", absName + "_acc"
     elif abs_method == "FullPaalmanPings":
-        PaalmanPingsAbsorptionCorrection(donor_wksp,
-                                         OutputWorkspace=absName,
-                                         ElementSize=element_size)
-        Multiply(LHSWorkspace=absName + '_acc',
-                 RHSWorkspace=absName + '_assc',
-                 OutputWorkspace=absName + '_ac')
-        Divide(LHSWorkspace=absName + '_ac',
-               RHSWorkspace=absName + '_acsc',
-               OutputWorkspace=absName + '_ac')
-        return absName + '_assc', absName + '_ac'
+        PaalmanPingsAbsorptionCorrection(donor_wksp, OutputWorkspace=absName, ElementSize=element_size)
+        Multiply(LHSWorkspace=absName + "_acc", RHSWorkspace=absName + "_assc", OutputWorkspace=absName + "_ac")
+        Divide(LHSWorkspace=absName + "_ac", RHSWorkspace=absName + "_acsc", OutputWorkspace=absName + "_ac")
+        return absName + "_assc", absName + "_ac"
     else:
         raise ValueError("Unrecognized absorption correction method '{}'".format(abs_method))
 
 
-def create_absorption_input(   # noqa: C901
+def create_absorption_input(  # noqa: C901
     filename,
     props=None,
     num_wl_bins=1000,
@@ -524,87 +515,82 @@ def create_absorption_input(   # noqa: C901
     :param metaws: Optional workspace name with metadata to use for donor workspace instead of reading from filename
     :return: Name of the donor workspace created
     """
+
     def confirmProps(props):
-        '''This function will throw an exception if the PropertyManager
+        """This function will throw an exception if the PropertyManager
         is not defined correctly. It should only be called if the value
-        is needed.'''
+        is needed."""
         if props is None:
             raise ValueError("props is required to create donor workspace, props is None")
 
         if not isinstance(props, PropertyManager):
             raise ValueError("props must be a PropertyManager object")
 
-    log = Logger('CreateAbsorptionInput')
+    log = Logger("CreateAbsorptionInput")
 
     # Load from file if no workspace with metadata has been given, otherwise avoid a duplicate load with the metaws
     absName = metaws
     if metaws is None:
-        absName = '__{}_abs'.format(_getBasename(filename))
-        allowed_log = ",".join([
-            'SampleFormula', 'SampleDensity', "BL11A:CS:ITEMS:HeightInContainerUnits",
-            "SampleContainer", "SampleMass"
-        ])
+        absName = "__{}_abs".format(_getBasename(filename))
+        allowed_log = ",".join(["SampleFormula", "SampleDensity", "BL11A:CS:ITEMS:HeightInContainerUnits", "SampleContainer", "SampleMass"])
         Load(Filename=filename, OutputWorkspace=absName, MetaDataOnly=True, AllowList=allowed_log)
 
     # attempt to get the wavelength from the function parameters
-    if opt_wl_min > 0.:
+    if opt_wl_min > 0.0:
         wl_min = opt_wl_min
     else:
         # or get it from the PropertyManager
         confirmProps(props)
-        wl_min = props['wavelength_min'].value
+        wl_min = props["wavelength_min"].value
     if opt_wl_max != Property.EMPTY_DBL:
         wl_max = opt_wl_max
     else:
         # or get it from the PropertyManager
         confirmProps(props)
-        wl_max = props['wavelength_max'].value  # unset value is 0.
+        wl_max = props["wavelength_max"].value  # unset value is 0.
 
     # if it isn't found by this point, guess it from the time-of-flight range
-    if wl_min == 0. or wl_max == 0.:
+    if wl_min == 0.0 or wl_max == 0.0:
         confirmProps(props)
-        tof_min = props['tof_min'].value
-        tof_max = props['tof_max'].value
-        if tof_min >= 0. and tof_max > tof_min:
-            log.information('TOF range is {} to {} microseconds'.format(tof_min, tof_max))
+        tof_min = props["tof_min"].value
+        tof_max = props["tof_max"].value
+        if tof_min >= 0.0 and tof_max > tof_min:
+            log.information("TOF range is {} to {} microseconds".format(tof_min, tof_max))
 
             # determine L1
             instr = mtd[absName].getInstrument()
             L1 = instr.getSource().getDistance(instr.getSample())
             # determine L2 range
-            PreprocessDetectorsToMD(InputWorkspace=absName,
-                                    OutputWorkspace=absName + '_dets',
-                                    GetMaskState=False)
-            L2 = mtd[absName + '_dets'].column('L2')
+            PreprocessDetectorsToMD(InputWorkspace=absName, OutputWorkspace=absName + "_dets", GetMaskState=False)
+            L2 = mtd[absName + "_dets"].column("L2")
             Lmin = np.min(L2) + L1
             Lmax = np.max(L2) + L1
-            DeleteWorkspace(Workspace=absName + '_dets')
+            DeleteWorkspace(Workspace=absName + "_dets")
 
-            log.information('Distance range is {} to {} meters'.format(Lmin, Lmax))
+            log.information("Distance range is {} to {} meters".format(Lmin, Lmax))
 
             # wavelength is h*TOF / m_n * L  values copied from Kernel/PhysicalConstants.h
-            usec_to_sec = 1.e-6
-            meter_to_angstrom = 1.e10
+            usec_to_sec = 1.0e-6
+            meter_to_angstrom = 1.0e10
             h_m_n = meter_to_angstrom * usec_to_sec * 6.62606896e-34 / 1.674927211e-27
-            if wl_min == 0.:
+            if wl_min == 0.0:
                 wl_min = h_m_n * tof_min / Lmax
-            if wl_max == 0.:
+            if wl_max == 0.0:
                 wl_max = h_m_n * tof_max / Lmin
 
     # there isn't a good way to guess it so error out
     if wl_max <= wl_min:
         DeleteWorkspace(Workspace=absName)  # no longer needed
-        raise RuntimeError('Invalid wavelength range min={}A max={}A'.format(wl_min, wl_max))
-    log.information('Using wavelength range min={}A max={}A'.format(wl_min, wl_max))
+        raise RuntimeError("Invalid wavelength range min={}A max={}A".format(wl_min, wl_max))
+    log.information("Using wavelength range min={}A max={}A".format(wl_min, wl_max))
 
-    absorptionWS = WorkspaceFactory.create(mtd[absName],
-                                           NVectors=mtd[absName].getNumberHistograms(),
-                                           XLength=num_wl_bins + 1,
-                                           YLength=num_wl_bins)
-    xaxis = np.arange(0., float(num_wl_bins + 1)) * (wl_max - wl_min) / (num_wl_bins) + wl_min
+    absorptionWS = WorkspaceFactory.create(
+        mtd[absName], NVectors=mtd[absName].getNumberHistograms(), XLength=num_wl_bins + 1, YLength=num_wl_bins
+    )
+    xaxis = np.arange(0.0, float(num_wl_bins + 1)) * (wl_max - wl_min) / (num_wl_bins) + wl_min
     for i in range(absorptionWS.getNumberHistograms()):
         absorptionWS.setX(i, xaxis)
-    absorptionWS.getAxis(0).setUnit('Wavelength')
+    absorptionWS.getAxis(0).setUnit("Wavelength")
 
     # this effectively deletes the metadata only workspace
     AnalysisDataService.addOrReplace(absName, absorptionWS)
@@ -619,10 +605,8 @@ def create_absorption_input(   # noqa: C901
 
     # Make sure one is set before calling SetSample
     if material or geometry or environment:
-        mantid.simpleapi.SetSampleFromLogs(InputWorkspace=absName,
-                                           Material=material,
-                                           Geometry=geometry,
-                                           Environment=environment,
-                                           FindEnvironment=find_environment)
+        mantid.simpleapi.SetSampleFromLogs(
+            InputWorkspace=absName, Material=material, Geometry=geometry, Environment=environment, FindEnvironment=find_environment
+        )
 
     return absName

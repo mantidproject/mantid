@@ -6,19 +6,20 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import json
 
-from sans.algorithm_detail.calculate_transmission_helper import (get_detector_id_for_spectrum_number,
-                                                                 get_workspace_indices_for_monitors,
-                                                                 apply_flat_background_correction_to_monitors,
-                                                                 apply_flat_background_correction_to_detectors,
-                                                                 get_region_of_interest)
+from sans.algorithm_detail.calculate_transmission_helper import (
+    get_detector_id_for_spectrum_number,
+    get_workspace_indices_for_monitors,
+    apply_flat_background_correction_to_monitors,
+    apply_flat_background_correction_to_detectors,
+    get_region_of_interest,
+)
 from sans.common.constants import EMPTY_NAME
-from sans.common.enums import (RangeStepType, FitType, DataType)
+from sans.common.enums import RangeStepType, FitType, DataType
 from sans.common.general_functions import create_unmanaged_algorithm
 from sans.state.StateObjects.wavelength_interval import WavRange
 
 
-def calculate_transmission(transmission_ws, direct_ws, state_adjustment_calculate_transmission, data_type_str,
-                           wav_range):
+def calculate_transmission(transmission_ws, direct_ws, state_adjustment_calculate_transmission, data_type_str, wav_range):
     """
     Calculates the transmission for a SANS reduction.
     :param transmission_ws: The transmission workspace in time-of-light units.
@@ -38,10 +39,10 @@ def calculate_transmission(transmission_ws, direct_ws, state_adjustment_calculat
         raise ValueError("The incident monitor is missing, add MON/SPECTRUM=x or [normalization] selected_monitor = Mx")
 
     # 1. Get relevant spectra
-    detector_id_incident_monitor = get_detector_id_for_spectrum_number(transmission_ws,
-                                                                       incident_monitor_spectrum_number)
-    detector_ids_roi, detector_id_transmission_monitor = \
-        _get_detector_ids_for_transmission_calculation(transmission_ws, calculate_transmission_state)
+    detector_id_incident_monitor = get_detector_id_for_spectrum_number(transmission_ws, incident_monitor_spectrum_number)
+    detector_ids_roi, detector_id_transmission_monitor = _get_detector_ids_for_transmission_calculation(
+        transmission_ws, calculate_transmission_state
+    )
 
     all_detector_ids = [detector_id_incident_monitor]
 
@@ -58,24 +59,38 @@ def calculate_transmission(transmission_ws, direct_ws, state_adjustment_calculat
     # 2. Clean transmission data
 
     data_type = DataType(data_type_str)
-    transmission_ws = _get_corrected_wavelength_workspace(transmission_ws, wav_range, all_detector_ids,
-                                                          calculate_transmission_state, data_type=data_type)
-    direct_ws = _get_corrected_wavelength_workspace(direct_ws, wav_range, all_detector_ids,
-                                                    calculate_transmission_state, data_type=data_type)
+    transmission_ws = _get_corrected_wavelength_workspace(
+        transmission_ws, wav_range, all_detector_ids, calculate_transmission_state, data_type=data_type
+    )
+    direct_ws = _get_corrected_wavelength_workspace(
+        direct_ws, wav_range, all_detector_ids, calculate_transmission_state, data_type=data_type
+    )
 
     # 3. Fit
-    output_workspace, unfitted_transmission_workspace = \
-        _perform_fit(transmission_ws, direct_ws, detector_ids_roi,
-                     detector_id_transmission_monitor,
-                     detector_id_incident_monitor, calculate_transmission_state, data_type, wav_range)
+    output_workspace, unfitted_transmission_workspace = _perform_fit(
+        transmission_ws,
+        direct_ws,
+        detector_ids_roi,
+        detector_id_transmission_monitor,
+        detector_id_incident_monitor,
+        calculate_transmission_state,
+        data_type,
+        wav_range,
+    )
 
     return output_workspace, unfitted_transmission_workspace
 
 
-def _perform_fit(transmission_workspace, direct_workspace,
-                 transmission_roi_detector_ids, transmission_monitor_detector_id,
-                 incident_monitor_detector_id,
-                 calculate_transmission_state, data_type, wav_range: WavRange):
+def _perform_fit(
+    transmission_workspace,
+    direct_workspace,
+    transmission_roi_detector_ids,
+    transmission_monitor_detector_id,
+    incident_monitor_detector_id,
+    calculate_transmission_state,
+    data_type,
+    wav_range: WavRange,
+):
     """
     This performs the actual transmission calculation.
 
@@ -95,12 +110,14 @@ def _perform_fit(transmission_workspace, direct_workspace,
     rebin_params = f"{wav_range[0]}, {wavelength_step}, {wav_range[1]}"
 
     trans_name = "CalculateTransmission"
-    trans_options = {"SampleRunWorkspace": transmission_workspace,
-                     "DirectRunWorkspace": direct_workspace,
-                     "OutputWorkspace": EMPTY_NAME,
-                     "IncidentBeamMonitor": incident_monitor_detector_id,
-                     "RebinParams": rebin_params,
-                     "OutputUnfittedData": True}
+    trans_options = {
+        "SampleRunWorkspace": transmission_workspace,
+        "DirectRunWorkspace": direct_workspace,
+        "OutputWorkspace": EMPTY_NAME,
+        "IncidentBeamMonitor": incident_monitor_detector_id,
+        "RebinParams": rebin_params,
+        "OutputUnfittedData": True,
+    }
 
     # If we have a region of interest we use it else we use the transmission monitor
 
@@ -162,16 +179,14 @@ def _get_detector_ids_for_transmission_calculation(transmission_workspace, calcu
     transmission_radius = calculate_transmission_state.transmission_radius_on_detector
     transmission_roi = calculate_transmission_state.transmission_roi_files
     transmission_mask = calculate_transmission_state.transmission_mask_files
-    detector_ids_roi = get_region_of_interest(transmission_workspace, transmission_radius, transmission_roi,
-                                              transmission_mask)
+    detector_ids_roi = get_region_of_interest(transmission_workspace, transmission_radius, transmission_roi, transmission_mask)
 
     # Get the potential transmission monitor detector id
     transmission_monitor_spectrum_number = calculate_transmission_state.transmission_monitor
     detector_id_transmission_monitor = None
 
     if transmission_monitor_spectrum_number is not None:
-        detector_id_transmission_monitor = get_detector_id_for_spectrum_number(transmission_workspace,
-                                                                               transmission_monitor_spectrum_number)
+        detector_id_transmission_monitor = get_detector_id_for_spectrum_number(transmission_workspace, transmission_monitor_spectrum_number)
 
     return detector_ids_roi, detector_id_transmission_monitor
 
@@ -194,17 +209,14 @@ def _get_corrected_wavelength_workspace(workspace, wav_range, detector_ids, calc
     # that we have to exclude unused spectra as the interpolation runs into
     # problems if we don't.
     extract_name = "ExtractSpectra"
-    extract_options = {"InputWorkspace": workspace,
-                       "OutputWorkspace": EMPTY_NAME,
-                       "DetectorList": detector_ids}
+    extract_options = {"InputWorkspace": workspace, "OutputWorkspace": EMPTY_NAME, "DetectorList": detector_ids}
     extract_alg = create_unmanaged_algorithm(extract_name, **extract_options)
     extract_alg.execute()
     workspace = extract_alg.getProperty("OutputWorkspace").value
 
     # Make sure that we still have spectra in the workspace
     if workspace.getNumberHistograms() == 0:
-        raise RuntimeError("SANSCalculateTransmissionCorrection: The transmission workspace does "
-                           "not seem to have any spectra.")
+        raise RuntimeError("SANSCalculateTransmissionCorrection: The transmission workspace does " "not seem to have any spectra.")
 
     # ----------------------------------
     # Perform the prompt peak correction
@@ -212,8 +224,9 @@ def _get_corrected_wavelength_workspace(workspace, wav_range, detector_ids, calc
     prompt_peak_correction_min = calculate_transmission_state.prompt_peak_correction_min
     prompt_peak_correction_max = calculate_transmission_state.prompt_peak_correction_max
     prompt_peak_correction_enabled = calculate_transmission_state.prompt_peak_correction_enabled
-    workspace = _perform_prompt_peak_correction(workspace, prompt_peak_correction_min,
-                                                prompt_peak_correction_max, prompt_peak_correction_enabled)
+    workspace = _perform_prompt_peak_correction(
+        workspace, prompt_peak_correction_min, prompt_peak_correction_max, prompt_peak_correction_enabled
+    )
 
     # ---------------------------------------
     # Perform the flat background correction
@@ -228,18 +241,19 @@ def _get_corrected_wavelength_workspace(workspace, wav_range, detector_ids, calc
     background_tof_monitor_stop = calculate_transmission_state.background_TOF_monitor_stop
     background_tof_general_start = calculate_transmission_state.background_TOF_general_start
     background_tof_general_stop = calculate_transmission_state.background_TOF_general_stop
-    workspace = apply_flat_background_correction_to_monitors(workspace,
-                                                             workspace_indices_of_monitors,
-                                                             background_tof_monitor_start,
-                                                             background_tof_monitor_stop,
-                                                             background_tof_general_start,
-                                                             background_tof_general_stop)
+    workspace = apply_flat_background_correction_to_monitors(
+        workspace,
+        workspace_indices_of_monitors,
+        background_tof_monitor_start,
+        background_tof_monitor_stop,
+        background_tof_general_start,
+        background_tof_general_stop,
+    )
 
     # Detector flat background correction
     flat_background_correction_start = calculate_transmission_state.background_TOF_roi_start
     flat_background_correction_stop = calculate_transmission_state.background_TOF_roi_stop
-    workspace = apply_flat_background_correction_to_detectors(workspace, flat_background_correction_start,
-                                                              flat_background_correction_stop)
+    workspace = apply_flat_background_correction_to_detectors(workspace, flat_background_correction_start, flat_background_correction_stop)
 
     # ---------------------------------------
     # Convert to wavelength and rebin
@@ -260,11 +274,13 @@ def _get_corrected_wavelength_workspace(workspace, wav_range, detector_ids, calc
     wavelength_step_type = calculate_transmission_state.wavelength_step_type_lin_log
 
     convert_name = "SANSConvertToWavelengthAndRebin"
-    convert_options = {"InputWorkspace": workspace,
-                       "WavelengthPairs": json.dumps([(wavelength_low, wavelength_high)]),
-                       "WavelengthStep": wavelength_step,
-                       "WavelengthStepType": wavelength_step_type.value,
-                       "RebinMode": rebin_type.value}
+    convert_options = {
+        "InputWorkspace": workspace,
+        "WavelengthPairs": json.dumps([(wavelength_low, wavelength_high)]),
+        "WavelengthStep": wavelength_step,
+        "WavelengthStepType": wavelength_step_type.value,
+        "RebinMode": rebin_type.value,
+    }
     convert_alg = create_unmanaged_algorithm(convert_name, **convert_options)
     convert_alg.setPropertyValue("OutputWorkspace", EMPTY_NAME)
     convert_alg.setProperty("OutputWorkspace", workspace)
@@ -273,8 +289,7 @@ def _get_corrected_wavelength_workspace(workspace, wav_range, detector_ids, calc
     return group_ws.getItem(0)
 
 
-def _perform_prompt_peak_correction(workspace, prompt_peak_correction_min, prompt_peak_correction_max,
-                                    prompt_peak_correction_enabled):
+def _perform_prompt_peak_correction(workspace, prompt_peak_correction_min, prompt_peak_correction_max, prompt_peak_correction_enabled):
     """
     Prompt peak correction is performed if it is explicitly set by the user.
 
@@ -286,13 +301,14 @@ def _perform_prompt_peak_correction(workspace, prompt_peak_correction_min, promp
     """
     # We perform only a prompt peak correction if the start and stop values of the bins we want to remove,
     # were explicitly set. Some instruments require it, others don't.
-    if prompt_peak_correction_enabled and prompt_peak_correction_min is not None and \
-            prompt_peak_correction_max is not None:  # noqa
+    if prompt_peak_correction_enabled and prompt_peak_correction_min is not None and prompt_peak_correction_max is not None:  # noqa
         remove_name = "RemoveBins"
-        remove_options = {"InputWorkspace": workspace,
-                          "XMin": prompt_peak_correction_min,
-                          "XMax": prompt_peak_correction_max,
-                          "Interpolation": "Linear"}
+        remove_options = {
+            "InputWorkspace": workspace,
+            "XMin": prompt_peak_correction_min,
+            "XMax": prompt_peak_correction_max,
+            "Interpolation": "Linear",
+        }
         remove_alg = create_unmanaged_algorithm(remove_name, **remove_options)
         remove_alg.setPropertyValue("OutputWorkspace", EMPTY_NAME)
         remove_alg.setProperty("OutputWorkspace", workspace)

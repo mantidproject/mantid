@@ -8,6 +8,7 @@ from isis_powder.routines.param_map_entry import ParamMapEntry
 from isis_powder.gem_routines.gem_enums import GEM_CHOPPER_MODES
 from isis_powder.routines.common import PARAM_MAPPING as COMMON_PARAM_MAPPING
 from isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS, EMPTY_CAN_SUBTRACTION_METHOD
+
 #                 Maps friendly user name (ext_name) -> script name (int_name)
 attr_mapping = [
     ParamMapEntry(ext_name="calibration_to_adjust", int_name="cal_adjust", optional=True),
@@ -26,8 +27,12 @@ attr_mapping = [
     ParamMapEntry(ext_name="get_det_offsets_x_min", int_name="get_det_offsets_x_min"),
     ParamMapEntry(ext_name="get_det_offsets_x_max", int_name="get_det_offsets_x_max"),
     ParamMapEntry(ext_name="do_absorb_corrections", int_name="do_absorb_corrections"),
-    ParamMapEntry(ext_name="empty_can_subtraction_method", int_name="empty_can_subtraction_method",
-                  enum_class=EMPTY_CAN_SUBTRACTION_METHOD, optional=True),
+    ParamMapEntry(
+        ext_name="empty_can_subtraction_method",
+        int_name="empty_can_subtraction_method",
+        enum_class=EMPTY_CAN_SUBTRACTION_METHOD,
+        optional=True,
+    ),
     ParamMapEntry(ext_name="file_ext", int_name="file_extension", optional=True),
     ParamMapEntry(ext_name="first_cycle_run_no", int_name="run_in_range"),
     ParamMapEntry(ext_name="focused_cropping_values", int_name="focused_cropping_values"),
@@ -46,18 +51,13 @@ attr_mapping = [
     ParamMapEntry(ext_name="save_maud_calib", int_name="save_maud_calib"),
     ParamMapEntry(ext_name="save_maud", int_name="save_maud"),
     ParamMapEntry(ext_name="spline_coefficient", int_name="spline_coeff"),
-    ParamMapEntry(ext_name="subtract_empty_instrument",
-                  int_name="subtract_empty_inst",
-                  optional=True),
+    ParamMapEntry(ext_name="subtract_empty_instrument", int_name="subtract_empty_inst", optional=True),
     ParamMapEntry(ext_name="suffix", int_name="suffix", optional=True),
     ParamMapEntry(ext_name="texture_mode", int_name="texture_mode", optional=True),
     ParamMapEntry(ext_name="output_directory", int_name="output_dir"),
-    ParamMapEntry(ext_name="unit_to_keep",
-                  int_name="unit_to_keep",
-                  enum_class=WORKSPACE_UNITS,
-                  optional=True),
+    ParamMapEntry(ext_name="unit_to_keep", int_name="unit_to_keep", enum_class=WORKSPACE_UNITS, optional=True),
     ParamMapEntry(ext_name="user_name", int_name="user_name"),
     ParamMapEntry(ext_name="vanadium_cropping_values", int_name="vanadium_cropping_values"),
-    ParamMapEntry(ext_name="vanadium_normalisation", int_name="do_van_norm")
+    ParamMapEntry(ext_name="vanadium_normalisation", int_name="do_van_norm"),
 ]
 attr_mapping.extend(COMMON_PARAM_MAPPING)

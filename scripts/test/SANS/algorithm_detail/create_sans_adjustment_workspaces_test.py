@@ -8,7 +8,7 @@ import unittest
 
 from mantid.simpleapi import CreateSampleWorkspace, CloneWorkspace, Load, Rebin
 from sans.algorithm_detail.CreateSANSAdjustmentWorkspaces import CreateSANSAdjustmentWorkspaces
-from sans.common.enums import (DetectorType, DataType)
+from sans.common.enums import DetectorType, DataType
 from sans.test_helper.test_director import TestDirector
 
 
@@ -17,9 +17,9 @@ class CreateSANSAdjustmentWorkspacesTest(unittest.TestCase):
     test_tof_min = 1000
     test_tof_max = 10000
     test_tof_width = 1000
-    test_wav_min = 1.
-    test_wav_max = 11.
-    test_wav_width = 2.
+    test_wav_min = 1.0
+    test_wav_max = 11.0
+    test_wav_width = 2.0
 
     @classmethod
     def setUpClass(cls):
@@ -42,9 +42,15 @@ class CreateSANSAdjustmentWorkspacesTest(unittest.TestCase):
 
     def _get_sample_monitor_data(self, value):
         name = "test_monitor_workspace"
-        monitor_workspace = CreateSampleWorkspace(OutputWorkspace=name, NumBanks=0, NumMonitors=8,
-                                                  XMin=self.test_tof_min, XMax=self.test_tof_max,
-                                                  BinWidth=self.test_tof_width, StoreInADS=False)
+        monitor_workspace = CreateSampleWorkspace(
+            OutputWorkspace=name,
+            NumBanks=0,
+            NumMonitors=8,
+            XMin=self.test_tof_min,
+            XMax=self.test_tof_max,
+            BinWidth=self.test_tof_width,
+            StoreInADS=False,
+        )
 
         for hist in range(monitor_workspace.getNumberHistograms()):
             data_y = monitor_workspace.dataY(hist)
@@ -56,11 +62,16 @@ class CreateSANSAdjustmentWorkspacesTest(unittest.TestCase):
 
     def _get_sample_data(self):
         name = "test_workspace"
-        workspace = CreateSampleWorkspace(OutputWorkspace=name, NumBanks=1, NumMonitors=1,
-                                          XMin=self.test_wav_min,
-                                          XMax=self.test_wav_max,
-                                          BinWidth=self.test_wav_width,
-                                          XUnit="Wavelength", StoreInADS=False)
+        workspace = CreateSampleWorkspace(
+            OutputWorkspace=name,
+            NumBanks=1,
+            NumMonitors=1,
+            XMin=self.test_wav_min,
+            XMax=self.test_wav_max,
+            BinWidth=self.test_wav_width,
+            XUnit="Wavelength",
+            StoreInADS=False,
+        )
 
         return workspace
 
@@ -82,13 +93,14 @@ class CreateSANSAdjustmentWorkspacesTest(unittest.TestCase):
         component = DetectorType.LAB.value if is_lab else DetectorType.HAB.value
         wav_range = state.adjustment.wavelength_and_pixel_adjustment.wavelength_interval.wavelength_full_range
 
-        alg = CreateSANSAdjustmentWorkspaces(state=state,
-                                             component=component, data_type=data_type)
-        returned = alg.create_sans_adjustment_workspaces(direct_ws=direct_data,
-                                                         monitor_ws=sample_monitor_data,
-                                                         transmission_ws=transmission_data,
-                                                         sample_data=sample_data,
-                                                         wav_range=wav_range)
+        alg = CreateSANSAdjustmentWorkspaces(state=state, component=component, data_type=data_type)
+        returned = alg.create_sans_adjustment_workspaces(
+            direct_ws=direct_data,
+            monitor_ws=sample_monitor_data,
+            transmission_ws=transmission_data,
+            sample_data=sample_data,
+            wav_range=wav_range,
+        )
 
         wavelength_adjustment = returned["wavelength_adj"]
         pixel_adjustment = returned["pixel_adj"]
@@ -96,8 +108,7 @@ class CreateSANSAdjustmentWorkspacesTest(unittest.TestCase):
         calculated_transmission = returned["calculated_trans_ws"]
         unfitted_transmission = returned["unfitted_trans_ws"]
 
-        return wavelength_adjustment, pixel_adjustment, wavelength_and_pixel_adjustment, \
-            calculated_transmission, unfitted_transmission
+        return wavelength_adjustment, pixel_adjustment, wavelength_and_pixel_adjustment, calculated_transmission, unfitted_transmission
 
     def test_that_adjustment_workspaces_are_produced_wavelength_and_wavelength_plus_pixel(self):
         # Arrange
@@ -105,18 +116,21 @@ class CreateSANSAdjustmentWorkspacesTest(unittest.TestCase):
         state.adjustment.wide_angle_correction = True
 
         sample_data = self._get_sample_data()
-        sample_monitor_data = self._get_sample_monitor_data(3.)
+        sample_monitor_data = self._get_sample_monitor_data(3.0)
 
         transmission_ws = CloneWorkspace(self.sans_data, StoreInADS=False)
-        self._prepare_trans_data(ws=transmission_ws, value=1.)
+        self._prepare_trans_data(ws=transmission_ws, value=1.0)
 
         direct_ws = CloneWorkspace(self.sans_data, StoreInADS=False)
-        direct_ws = self._prepare_trans_data(ws=direct_ws, value=2.)
+        direct_ws = self._prepare_trans_data(ws=direct_ws, value=2.0)
 
-        wavelength_adjustment, pixel_adjustment, wavelength_and_pixel_adjustment, \
-            calculated_transmission, unfitted_transmission = \
-            CreateSANSAdjustmentWorkspacesTest._run_test(state, sample_data, sample_monitor_data,
-                                                         transmission_ws, direct_ws)
+        (
+            wavelength_adjustment,
+            pixel_adjustment,
+            wavelength_and_pixel_adjustment,
+            calculated_transmission,
+            unfitted_transmission,
+        ) = CreateSANSAdjustmentWorkspacesTest._run_test(state, sample_data, sample_monitor_data, transmission_ws, direct_ws)
 
         # We expect a wavelength adjustment workspace
         self.assertTrue(wavelength_adjustment)
@@ -134,18 +148,21 @@ class CreateSANSAdjustmentWorkspacesTest(unittest.TestCase):
 
         sample_data = self._get_sample_data()
 
-        sample_monitor_data = self._get_sample_monitor_data(3.)
+        sample_monitor_data = self._get_sample_monitor_data(3.0)
 
         transmission_ws = CloneWorkspace(self.sans_data, StoreInADS=False)
-        transmission_ws = self._prepare_trans_data(ws=transmission_ws, value=1.)
+        transmission_ws = self._prepare_trans_data(ws=transmission_ws, value=1.0)
 
         direct_ws = CloneWorkspace(self.sans_data, StoreInADS=False)
-        direct_ws = self._prepare_trans_data(ws=direct_ws, value=2.)
+        direct_ws = self._prepare_trans_data(ws=direct_ws, value=2.0)
 
-        wavelength_adjustment, pixel_adjustment, wavelength_and_pixel_adjustment, \
-            calculated_transmission, unfitted_transmisison = \
-            CreateSANSAdjustmentWorkspacesTest._run_test(state, sample_data, sample_monitor_data,
-                                                         transmission_ws, direct_ws)
+        (
+            wavelength_adjustment,
+            pixel_adjustment,
+            wavelength_and_pixel_adjustment,
+            calculated_transmission,
+            unfitted_transmisison,
+        ) = CreateSANSAdjustmentWorkspacesTest._run_test(state, sample_data, sample_monitor_data, transmission_ws, direct_ws)
 
         # We expect a wavelength adjustment workspace
         self.assertTrue(wavelength_adjustment)
@@ -159,5 +176,5 @@ class CreateSANSAdjustmentWorkspacesTest(unittest.TestCase):
         self.assertTrue(unfitted_transmisison)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

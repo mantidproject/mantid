@@ -37,6 +37,8 @@ public:
   virtual bool isOpened() const = 0;
   /**@return the full name of the used data file*/
   virtual const std::string &getFileName() const = 0;
+  /** Copy the file contents to a new location. */
+  virtual void copyFileTo(const std::string &destFilename) = 0;
 
   /**Save a float data block in the specified file position */
   virtual void saveBlock(const std::vector<float> & /* DataBlock */, const uint64_t /*blockPosition*/) const = 0;

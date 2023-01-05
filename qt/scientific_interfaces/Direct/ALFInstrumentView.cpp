@@ -7,12 +7,12 @@
 #include "ALFInstrumentView.h"
 
 #include "ALFInstrumentPresenter.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "ALFInstrumentWidget.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
+#include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
 
 #include <string>
 
@@ -26,18 +26,18 @@ namespace MantidQt::CustomInterfaces {
 ALFInstrumentView::ALFInstrumentView(QWidget *parent) : QWidget(parent), m_files(), m_instrumentWidget() {}
 
 void ALFInstrumentView::setUpInstrument(std::string const &fileName) {
-  m_instrumentWidget =
-      new MantidWidgets::InstrumentWidget(QString::fromStdString(fileName), nullptr, true, true, 0.0, 0.0, true,
-                                          MantidWidgets::InstrumentWidget::Dependencies(), false);
-  m_instrumentWidget->removeTab("Instrument");
-  m_instrumentWidget->removeTab("Draw");
-  m_instrumentWidget->hideHelp();
+  m_instrumentWidget = new ALFInstrumentWidget(QString::fromStdString(fileName));
 
-  connect(m_instrumentWidget->getInstrumentDisplay()->getSurface().get(), SIGNAL(shapeChangeFinished()), this,
-          SLOT(notifyShapeChanged()));
+  connect(m_instrumentWidget, SIGNAL(instrumentActorReset()), this, SLOT(reconnectInstrumentActor()));
+  reconnectInstrumentActor();
+
+  auto surface = m_instrumentWidget->getInstrumentDisplay()->getSurface().get();
+  connect(surface, SIGNAL(shapeCreated()), this, SLOT(notifyShapeChanged()));
+  connect(surface, SIGNAL(shapeChangeFinished()), this, SLOT(notifyShapeChanged()));
+  connect(surface, SIGNAL(shapesRemoved()), this, SLOT(notifyShapeChanged()));
+  connect(surface, SIGNAL(shapesCleared()), this, SLOT(notifyShapeChanged()));
 
   auto pickTab = m_instrumentWidget->getPickTab();
-  pickTab->expandPlotPanel();
   connect(pickTab->getSelectTubeButton(), SIGNAL(clicked()), this, SLOT(selectWholeTube()));
 }
 
@@ -57,6 +57,10 @@ QWidget *ALFInstrumentView::generateLoadWidget() {
   loadLayout->addItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
 
   return loadWidget;
+}
+
+void ALFInstrumentView::reconnectInstrumentActor() {
+  connect(&m_instrumentWidget->getInstrumentActor(), SIGNAL(refreshView()), this, SLOT(notifyShapeChanged()));
 }
 
 void ALFInstrumentView::subscribePresenter(IALFInstrumentPresenter *presenter) { m_presenter = presenter; }
@@ -95,10 +99,12 @@ Mantid::Geometry::ComponentInfo const &ALFInstrumentView::componentInfo() const 
 }
 
 std::vector<std::size_t> ALFInstrumentView::getSelectedDetectors() const {
+  auto const surface = std::dynamic_pointer_cast<MantidQt::MantidWidgets::UnwrappedSurface>(
+      m_instrumentWidget->getInstrumentDisplay()->getSurface());
+
   std::vector<size_t> detectorIndices;
-  // The name is confusing here but "masked" detectors refers to those selected by a "mask shape"
-  // (although weather it's treated as a mask or not is up to the caller)
-  m_instrumentWidget->getInstrumentDisplay()->getSurface()->getMaskedDetectors(detectorIndices);
+  // Find the detectors which are being intersected by the "masked" shapes.
+  surface->getIntersectingDetectors(detectorIndices);
   return detectorIndices;
 }
 

@@ -28,11 +28,11 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
     Typically the user calls get_formatted_data() which checks the cache before calling
     read_formatted_data() if necessary and caching the results.
     """
+
     def __init__(self, input_ab_initio_filename=None):
         self._sample_form = None
         self._ab_initio_program = None
-        self._clerk = abins.IO(input_filename=input_ab_initio_filename,
-                               group_name=abins.parameters.hdf_groups['ab_initio_data'])
+        self._clerk = abins.IO(input_filename=input_ab_initio_filename, group_name=abins.parameters.hdf_groups["ab_initio_data"])
 
     @abstractmethod
     def read_vibrational_or_phonon_data(self) -> abins.AbinsData:
@@ -128,16 +128,17 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
         Loads data from hdf file. After data is loaded it is put into AbinsData object.
         :returns: object of type AbinsData
         """
-        data = self._clerk.load(list_of_datasets=["frequencies", "weights", "k_vectors",
-                                                  "atomic_displacements", "unit_cell", "atoms"])
+        data = self._clerk.load(list_of_datasets=["frequencies", "weights", "k_vectors", "atomic_displacements", "unit_cell", "atoms"])
         datasets = data["datasets"]
 
-        loaded_data = {"frequencies": datasets["frequencies"],
-                       "weights": datasets["weights"],
-                       "k_vectors": datasets["k_vectors"],
-                       "atomic_displacements": datasets["atomic_displacements"],
-                       "unit_cell": datasets["unit_cell"],
-                       "atoms": datasets["atoms"]}
+        loaded_data = {
+            "frequencies": datasets["frequencies"],
+            "weights": datasets["weights"],
+            "k_vectors": datasets["k_vectors"],
+            "atomic_displacements": datasets["atomic_displacements"],
+            "unit_cell": datasets["unit_cell"],
+            "atoms": datasets["atoms"],
+        }
 
         return self._rearrange_data(data=loaded_data)
 
@@ -149,16 +150,17 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
         :param data: dictionary with the data to rearrange
         """
 
-        k_points = abins.KpointsData(# 1D [k] (one entry corresponds to weight of one k-point)
-                                     weights=data["weights"],
-                                     # 2D [k][3] (one entry corresponds to one coordinate of particular k-point)
-                                     k_vectors=data["k_vectors"],
-                                     # 2D  array [k][freq] (one entry corresponds to one frequency for the k-point k)
-                                     frequencies=data["frequencies"],
-                                     # 4D array [k][atom_n][freq][3] (one entry corresponds to
-                                     # one coordinate for atom atom_n, frequency  freq and k-point k )
-                                     atomic_displacements=data["atomic_displacements"],
-                                     unit_cell=data["unit_cell"])
+        k_points = abins.KpointsData(  # 1D [k] (one entry corresponds to weight of one k-point)
+            weights=data["weights"],
+            # 2D [k][3] (one entry corresponds to one coordinate of particular k-point)
+            k_vectors=data["k_vectors"],
+            # 2D  array [k][freq] (one entry corresponds to one frequency for the k-point k)
+            frequencies=data["frequencies"],
+            # 4D array [k][atom_n][freq][3] (one entry corresponds to
+            # one coordinate for atom atom_n, frequency  freq and k-point k )
+            atomic_displacements=data["atomic_displacements"],
+            unit_cell=data["unit_cell"],
+        )
 
         atoms = abins.AtomsData(data["atoms"])
         return abins.AbinsData(k_points_data=k_points, atoms_data=atoms)
@@ -196,10 +198,7 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
         return ab_initio_data
 
     @staticmethod
-    def check_isotopes_substitution(atoms: dict,
-                                    masses: Sequence[float],
-                                    approximate: bool = False
-                                    ) -> None:
+    def check_isotopes_substitution(atoms: dict, masses: Sequence[float], approximate: bool = False) -> None:
         """
         Update atomic masses to Mantid values if isotopic substitution detected
 
@@ -216,8 +215,7 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
         num_atoms = len(atoms)
         eps = MASS_EPS
         if approximate:
-            isotopes_found = [abs(round(atoms["atom_%s" % i]["mass"]) - round(masses[i])) > eps
-                              for i in range(num_atoms)]
+            isotopes_found = [abs(round(atoms["atom_%s" % i]["mass"]) - round(masses[i])) > eps for i in range(num_atoms)]
         else:
             isotopes_found = [abs(atoms["atom_%s" % i]["mass"] - masses[i]) > eps for i in range(num_atoms)]
 

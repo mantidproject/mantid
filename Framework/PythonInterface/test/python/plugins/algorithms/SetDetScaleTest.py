@@ -11,21 +11,20 @@ from mantid.api import *
 
 
 class SetDetScaleTest(unittest.TestCase):
-
     def testScaleDetectors(self):
-        w = LoadNexusProcessed('TOPAZ_3007.peaks.nxs')
+        w = LoadNexusProcessed("TOPAZ_3007.peaks.nxs")
         x = w.getInstrument().getNumberParameter("detScale17")[0]
         y = w.getInstrument().getNumberParameter("detScale49")[0]
         self.assertEqual(x, 1.18898)
         self.assertEqual(y, 0.79420)
-        SetDetScale(Workspace=w, DetScaleList='17:1.0,49:2.0')
+        SetDetScale(Workspace=w, DetScaleList="17:1.0,49:2.0")
         x = w.getInstrument().getNumberParameter("detScale17")[0]
         y = w.getInstrument().getNumberParameter("detScale49")[0]
         self.assertEqual(x, 1.0)
         self.assertEqual(y, 2.0)
 
         # create file for test
-        filename = 'testDetScale.txt'
+        filename = "testDetScale.txt"
         hklfile = open(filename, "w")
         hklfile.write("  17  0.5\n")
         hklfile.write("  49  1.5\n")
@@ -38,12 +37,13 @@ class SetDetScaleTest(unittest.TestCase):
         self.assertEqual(y, 1.5)
 
         # test both input
-        SetDetScale(Workspace=w, DetScaleList='17:1.0,49:2.0', DetScaleFile=filename)
+        SetDetScale(Workspace=w, DetScaleList="17:1.0,49:2.0", DetScaleFile=filename)
         x = w.getInstrument().getNumberParameter("detScale17")[0]
         y = w.getInstrument().getNumberParameter("detScale49")[0]
         self.assertEqual(x, 1.0)
         self.assertEqual(y, 2.0)
         os.remove(filename)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

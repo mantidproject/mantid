@@ -36,11 +36,7 @@ class SummationSettingsWidget(QtWidgets.QWidget, Ui_SummationSettingsWidget):
         self._setupBinningTypes()
 
     def _setupBinningTypes(self):
-        binningTypes = [
-            'Use custom binning',
-            'Use binning from monitors',
-            'Save as event data'
-        ]
+        binningTypes = ["Use custom binning", "Use binning from monitors", "Save as event data"]
         for binningType in binningTypes:
             self.binningType.addItem(binningType)
 
@@ -87,11 +83,9 @@ class SummationSettingsWidget(QtWidgets.QWidget, Ui_SummationSettingsWidget):
         if settings.has_overlay_event_workspaces():
             self.overlayEventWorkspacesCheckbox.setVisible(True)
             should_be_checked = settings.is_overlay_event_workspaces_enabled()
-            set_checked_without_signal(
-                self.overlayEventWorkspacesCheckbox, should_be_checked)
+            set_checked_without_signal(self.overlayEventWorkspacesCheckbox, should_be_checked)
         else:
-            set_checked_without_signal(
-                self.overlayEventWorkspacesCheckbox, False)
+            set_checked_without_signal(self.overlayEventWorkspacesCheckbox, False)
             self.overlayEventWorkspacesCheckbox.setVisible(False)
 
     def _draw_binning_type(self, settings):
@@ -101,13 +95,13 @@ class SummationSettingsWidget(QtWidgets.QWidget, Ui_SummationSettingsWidget):
 
     def _draw_bin_settings(self, settings):
         if settings.has_bin_settings():
-            self._activate_line_edit('Custom Bin Boundaries:', settings.bin_settings)
+            self._activate_line_edit("Custom Bin Boundaries:", settings.bin_settings)
         elif not settings.has_additional_time_shifts():
             self._deactivate_line_edit()
 
     def _draw_additional_time_shifts(self, settings):
         if settings.has_additional_time_shifts():
-            self._activate_line_edit('Additional Time Shifts:', settings.additional_time_shifts)
+            self._activate_line_edit("Additional Time Shifts:", settings.additional_time_shifts)
         elif not settings.has_bin_settings():
             self._deactivate_line_edit()
 
@@ -118,6 +112,6 @@ class SummationSettingsWidget(QtWidgets.QWidget, Ui_SummationSettingsWidget):
         self.lineEditLabel.setVisible(True)
 
     def _deactivate_line_edit(self):
-        self.binningOptionsLineEdit.setText('')
+        self.binningOptionsLineEdit.setText("")
         self.binningOptionsLineEdit.setVisible(False)
         self.lineEditLabel.setVisible(False)

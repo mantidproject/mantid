@@ -11,33 +11,32 @@ from mantid.simpleapi import config, mtd, DirectILLAutoProcess
 
 
 class DirectILLAutoProcessTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
-        cls._facility = config['default.facility']
-        cls._instrument = config['default.instrument']
+        cls._facility = config["default.facility"]
+        cls._instrument = config["default.instrument"]
 
-        config.appendDataSearchSubDir('ILL/PANTHER/')
-        config['default.facility'] = 'ILL'
-        config['default.instrument'] = 'PANTHER'
+        config.appendDataSearchSubDir("ILL/PANTHER/")
+        config["default.facility"] = "ILL"
+        config["default.instrument"] = "PANTHER"
 
     def tearDown(self):
         if self._facility:
-            config['default.facility'] = self._facility
+            config["default.facility"] = self._facility
         if self._instrument:
-            config['default.instrument'] = self._instrument
+            config["default.instrument"] = self._instrument
         mtd.clear()
 
     def test_empty(self):
-        empty_runs = '9777'
-        empty_name = 'MTCell19meV'
+        empty_runs = "9777"
+        empty_name = "MTCell19meV"
         ei = 19
         elc = 104
         DirectILLAutoProcess(
             Runs=empty_runs,
             OutputWorkspace=empty_name,
-            ProcessAs='Empty',
-            ReductionType='Powder',
+            ProcessAs="Empty",
+            ReductionType="Powder",
             IncidentEnergy=ei,
             IncidentEnergyCalibration="Energy Calibration ON",
             ElasticChannelIndex=elc,
@@ -47,36 +46,36 @@ class DirectILLAutoProcessTest(unittest.TestCase):
         self._check_output(mtd[empty_name][0], 512, 73728, False, "Time-of-flight", "TOF", "Spectrum", "Label")
 
     def test_vanadium(self):
-        vanadium_runs = '9406'
-        vanadium_name = 'V19meV'
+        vanadium_runs = "9406"
+        vanadium_name = "V19meV"
         ei = 19
         DirectILLAutoProcess(
             Runs=vanadium_runs,
             OutputWorkspace=vanadium_name,
-            ProcessAs='Vanadium',
-            ReductionType='Powder',
+            ProcessAs="Vanadium",
+            ReductionType="Powder",
             IncidentEnergy=ei,
             IncidentEnergyCalibration="Energy Calibration ON",
             SaveOutput=False,
-            ClearCache=True
+            ClearCache=True,
         )
         self.assertTrue(isinstance(mtd[vanadium_name], WorkspaceGroup))
-        self._check_output(mtd[vanadium_name][0], 664, 226, True, "q", "MomentumTransfer", "Energy transfer",
-                           "DeltaE")  # S(Q, w)
-        self._check_output(mtd[vanadium_name][1], 226, 669, True, "Energy transfer", "DeltaE", "Scattering angle",
-                           "Degrees")  # S(2theta, w)
+        self._check_output(mtd[vanadium_name][0], 664, 226, True, "q", "MomentumTransfer", "Energy transfer", "DeltaE")  # S(Q, w)
+        self._check_output(
+            mtd[vanadium_name][1], 226, 669, True, "Energy transfer", "DeltaE", "Scattering angle", "Degrees"
+        )  # S(2theta, w)
 
     def test_sample_single_crystal(self):
-        sample_runs = '13806'
-        sample_name = 'panther_sx'
+        sample_runs = "13806"
+        sample_name = "panther_sx"
         ei = 19.03
         elp = 104
-        eBins = [-2., 0.19, 16]
+        eBins = [-2.0, 0.19, 16]
         DirectILLAutoProcess(
             Runs=sample_runs,
             OutputWorkspace=sample_name,
-            ProcessAs='Sample',
-            ReductionType='SingleCrystal',
+            ProcessAs="Sample",
+            ReductionType="SingleCrystal",
             IncidentEnergyCalibration="Energy Calibration ON",
             IncidentEnergy=ei,
             ElasticChannelIndex=elp,
@@ -85,32 +84,30 @@ class DirectILLAutoProcessTest(unittest.TestCase):
             MaskThresholdMin=0,
             MaskThresholdMax=20,
             ClearCache=True,
-            SaveOutput=False
+            SaveOutput=False,
         )
         self._check_output(mtd[sample_name][0], 95, 36863, False, "Energy transfer", "DeltaE", "Spectrum", "Label")
 
     def test_sample_powder(self):
-        sample_runs = '9738'
-        sample_name = 'panther_powder'
+        sample_runs = "9738"
+        sample_name = "panther_powder"
         ei = 19
         elp = 104
         DirectILLAutoProcess(
             Runs=sample_runs,
             OutputWorkspace=sample_name,
-            ProcessAs='Sample',
-            ReductionType='Powder',
+            ProcessAs="Sample",
+            ReductionType="Powder",
             IncidentEnergyCalibration="Energy Calibration ON",
             IncidentEnergy=ei,
             ElasticChannelIndex=elp,
             MaskThresholdMin=0,
             MaskThresholdMax=20,
             ClearCache=True,
-            SaveOutput=False
+            SaveOutput=False,
         )
-        self._check_output(mtd[sample_name][0], 665, 226, True, "q", "MomentumTransfer", "Energy transfer",
-                           "DeltaE")  # S(Q, w)
-        self._check_output(mtd[sample_name][1], 226, 669, True, "Energy transfer", "DeltaE", "Scattering angle",
-                           "Degrees")  # S(2theta, w)
+        self._check_output(mtd[sample_name][0], 665, 226, True, "q", "MomentumTransfer", "Energy transfer", "DeltaE")  # S(Q, w)
+        self._check_output(mtd[sample_name][1], 226, 669, True, "Energy transfer", "DeltaE", "Scattering angle", "Degrees")  # S(2theta, w)
 
     def _check_output(self, ws, blocksize, spectra, isDistribution, x_unit, x_unit_id, y_unit, y_unit_id):
         self.assertTrue(ws)
@@ -126,5 +123,5 @@ class DirectILLAutoProcessTest(unittest.TestCase):
         self.assertTrue(ws.getHistory())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

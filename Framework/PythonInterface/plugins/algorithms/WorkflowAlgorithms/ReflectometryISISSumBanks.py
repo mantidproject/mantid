@@ -5,22 +5,22 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, MatrixWorkspace, PropertyMode)
+from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, MatrixWorkspace, PropertyMode
 from mantid.kernel import Direction
 
 
 class ReflectometryISISSumBanks(DataProcessorAlgorithm):
-    _WORKSPACE = 'InputWorkspace'
-    _ROI = 'ROIDetectorIDs'
-    _OUTPUT_WS = 'OutputWorkspace'
+    _WORKSPACE = "InputWorkspace"
+    _ROI = "ROIDetectorIDs"
+    _OUTPUT_WS = "OutputWorkspace"
 
     def category(self):
         """Return the categories of the algorithm."""
-        return 'Reflectometry\\ISIS;Workflow\\Reflectometry'
+        return "Reflectometry\\ISIS;Workflow\\Reflectometry"
 
     def name(self):
         """Return the name of the algorithm."""
-        return 'ReflectometryISISSumBanks'
+        return "ReflectometryISISSumBanks"
 
     def summary(self):
         """Return a summary of the algorithm."""
@@ -28,18 +28,19 @@ class ReflectometryISISSumBanks(DataProcessorAlgorithm):
 
     def seeAlso(self):
         """Return a list of related algorithm names."""
-        return ['ReflectometryISISLoadAndProcess']
+        return ["ReflectometryISISLoadAndProcess"]
 
     def PyInit(self):
         self.declareProperty(
-            MatrixWorkspaceProperty(self._WORKSPACE, '', direction=Direction.Input, optional=PropertyMode.Mandatory),
-            doc='An input 2D detector workspace')
-        self.declareProperty(self._ROI, defaultValue="",
-                             doc="List of detector IDs to include")
+            MatrixWorkspaceProperty(self._WORKSPACE, "", direction=Direction.Input, optional=PropertyMode.Mandatory),
+            doc="An input 2D detector workspace",
+        )
+        self.declareProperty(self._ROI, defaultValue="", doc="List of detector IDs to include")
         self.declareProperty(
-            MatrixWorkspaceProperty(self._OUTPUT_WS, '', direction=Direction.Output),
-            doc='The preprocessed output workspace. If multiple input runs are specified '
-                'they will be summed into a single output workspace.')
+            MatrixWorkspaceProperty(self._OUTPUT_WS, "", direction=Direction.Output),
+            doc="The preprocessed output workspace. If multiple input runs are specified "
+            "they will be summed into a single output workspace.",
+        )
 
     def PyExec(self):
         input_workspace = self.getProperty(self._WORKSPACE).value
@@ -61,40 +62,38 @@ class ReflectometryISISSumBanks(DataProcessorAlgorithm):
         try:
             self._get_rectangular_detector_component(workspace)
         except Exception as err:
-            issues['InputWorkspace'] = str(err)
+            issues["InputWorkspace"] = str(err)
         return issues
 
     def mask_detectors(self, workspace: MatrixWorkspace, roi_detector_ids: str) -> MatrixWorkspace:
         # We need to apply the mask to the original workspace so we can extract a MaskWorkspace to use in
         # BinaryOperateMasks which inverts it. First, we take a clone to not destructively alter the original WS
         cloned_ws = self._run_child_with_out_props("CloneWorkspace", InputWorkspace=workspace)
-        self.createChildAlgorithm('MaskDetectors', Workspace=cloned_ws, DetectorList=roi_detector_ids).execute()
-        mask_ws = self._run_child_with_out_props('ExtractMask', InputWorkspace=cloned_ws)
+        self.createChildAlgorithm("MaskDetectors", Workspace=cloned_ws, DetectorList=roi_detector_ids).execute()
+        mask_ws = self._run_child_with_out_props("ExtractMask", InputWorkspace=cloned_ws)
 
-        self.createChildAlgorithm('BinaryOperateMasks', InputWorkspace1=mask_ws,
-                                  OperationType='NOT', OutputWorkspace=mask_ws).execute()
+        self.createChildAlgorithm("BinaryOperateMasks", InputWorkspace1=mask_ws, OperationType="NOT", OutputWorkspace=mask_ws).execute()
 
         # and then re-apply this to the original workspace, again taking a clone
         cloned_ws = self._run_child_with_out_props("CloneWorkspace", InputWorkspace=workspace)
-        self.createChildAlgorithm('MaskDetectors', Workspace=cloned_ws, MaskedWorkspace=mask_ws).execute()
+        self.createChildAlgorithm("MaskDetectors", Workspace=cloned_ws, MaskedWorkspace=mask_ws).execute()
         return cloned_ws
 
     def sum_banks(self, workspace: MatrixWorkspace):
         component = self._get_rectangular_detector_component(workspace)
         num_banks = component.xpixels()
-        return self._run_child_with_out_props('SmoothNeighbours', InputWorkspace=workspace,
-                                              SumPixelsX=num_banks, SumPixelsY=1)
+        return self._run_child_with_out_props("SmoothNeighbours", InputWorkspace=workspace, SumPixelsX=num_banks, SumPixelsY=1)
 
     def _get_rectangular_detector_component(self, workspace: MatrixWorkspace):
         instrument = workspace.getInstrument()
         if not instrument:
-            raise RuntimeError('The input workspace must have an instrument')
+            raise RuntimeError("The input workspace must have an instrument")
 
         rect_detectors = instrument.findRectDetectors()
         if len(rect_detectors) == 0:
-            raise RuntimeError('The input workspace must contain a rectangular detector')
+            raise RuntimeError("The input workspace must contain a rectangular detector")
         if len(rect_detectors) > 1:
-            raise RuntimeError('The input workspace must only contain one rectangular detector: multiple were found')
+            raise RuntimeError("The input workspace must only contain one rectangular detector: multiple were found")
         return rect_detectors[0]
 
     def _run_child_with_out_props(self, *args, **kwargs) -> MatrixWorkspace:
@@ -103,8 +102,9 @@ class ReflectometryISISSumBanks(DataProcessorAlgorithm):
         return alg.getProperty("OutputWorkspace").value
 
     def _prepend_monitors(self, input_workspace, summed_workspace):
-        crop_alg = self.createChildAlgorithm("ExtractMonitors", InputWorkspace=input_workspace,
-                                             MonitorWorkspace="__preview_summed_ws_monitors")
+        crop_alg = self.createChildAlgorithm(
+            "ExtractMonitors", InputWorkspace=input_workspace, MonitorWorkspace="__preview_summed_ws_monitors"
+        )
         crop_alg.execute()
         monitor_workspace = crop_alg.getProperty("MonitorWorkspace").value
 

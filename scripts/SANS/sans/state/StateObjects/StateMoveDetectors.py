@@ -11,7 +11,7 @@
 import copy
 from typing import Dict
 
-from sans.common.enums import (CanonicalCoordinates, SANSInstrument, DetectorType)
+from sans.common.enums import CanonicalCoordinates, SANSInstrument, DetectorType
 from sans.state.JsonSerializable import JsonSerializable
 from sans.state.automatic_setters import automatic_setters
 
@@ -19,6 +19,7 @@ from sans.state.automatic_setters import automatic_setters
 # ----------------------------------------------------------------------------------------------------------------------
 # State
 # ----------------------------------------------------------------------------------------------------------------------
+
 
 class StateMoveDetectors(metaclass=JsonSerializable):
     def __init__(self):
@@ -62,11 +63,10 @@ class StateMoveLOQ(StateMove):
     def __init__(self):
         super(StateMoveLOQ, self).__init__()
         # Set the center_position in meter
-        self.center_position = 317.5 / 1000.  # : Float
+        self.center_position = 317.5 / 1000.0  # : Float
 
         # Setup the detectors
-        self.detectors = {DetectorType.LAB.value: StateMoveDetectors(),
-                          DetectorType.HAB.value: StateMoveDetectors()}
+        self.detectors = {DetectorType.LAB.value: StateMoveDetectors(), DetectorType.HAB.value: StateMoveDetectors()}
 
     def validate(self):
         # No validation of the descriptors on this level, let potential exceptions from detectors "bubble" up
@@ -77,7 +77,7 @@ class StateMoveSANS2D(StateMove):
     def __init__(self):
         super(StateMoveSANS2D, self).__init__()
         # Set the descriptors which corresponds to information which we gain through the IPF
-        self.hab_detector_radius = 306.0 / 1000.  # : Float
+        self.hab_detector_radius = 306.0 / 1000.0  # : Float
         self.hab_detector_default_sd_m = 4.0  # : Float
         self.hab_detector_default_x_m = 1.1  # : Float
         self.lab_detector_default_sd_m = 4.0  # : Float
@@ -90,8 +90,7 @@ class StateMoveSANS2D(StateMove):
         self.lab_detector_z = 0.0  # : Float
 
         # Setup the detectors
-        self.detectors = {DetectorType.LAB.value: StateMoveDetectors(),
-                          DetectorType.HAB.value: StateMoveDetectors()}
+        self.detectors = {DetectorType.LAB.value: StateMoveDetectors(), DetectorType.HAB.value: StateMoveDetectors()}
 
     def validate(self):
         super(StateMoveSANS2D, self).validate()
@@ -130,8 +129,7 @@ class StateMoveNoInst(StateMove):
         self.lab_detector_default_sd_m = 0.0  # : Float
 
         # Setup the detectors
-        self.detectors = {DetectorType.LAB.value: StateMoveDetectors(),
-                          DetectorType.HAB.value: StateMoveDetectors()}
+        self.detectors = {DetectorType.LAB.value: StateMoveDetectors(), DetectorType.HAB.value: StateMoveDetectors()}
 
     def validate(self):
         pass
@@ -152,10 +150,10 @@ class StateMoveLOQBuilder(object):
         return copy.copy(self.state)
 
     def convert_pos1(self, value):
-        return value / 1000.
+        return value / 1000.0
 
     def convert_pos2(self, value):
-        return value / 1000.
+        return value / 1000.0
 
 
 class StateMoveSANS2DBuilder(object):
@@ -168,10 +166,10 @@ class StateMoveSANS2DBuilder(object):
         return copy.copy(self.state)
 
     def convert_pos1(self, value):
-        return value / 1000.
+        return value / 1000.0
 
     def convert_pos2(self, value):
-        return value / 1000.
+        return value / 1000.0
 
 
 class StateMoveZOOMBuilder(object):
@@ -184,10 +182,10 @@ class StateMoveZOOMBuilder(object):
         return copy.copy(self.state)
 
     def convert_pos1(self, value):
-        return value / 1000.
+        return value / 1000.0
 
     def convert_pos2(self, value):
-        return value / 1000.
+        return value / 1000.0
 
 
 class StateMoveLARMORBuilder(object):
@@ -196,7 +194,7 @@ class StateMoveLARMORBuilder(object):
         super(StateMoveLARMORBuilder, self).__init__()
         self.state = StateMoveLARMOR()
 
-        self.conversion_value = 1000.
+        self.conversion_value = 1000.0
         self._set_conversion_value(data_info)
 
     def _set_conversion_value(self, data_info):
@@ -207,7 +205,7 @@ class StateMoveLARMORBuilder(object):
         # When a run number is entered this re-runs anyway overwriting our assumptions
         # User files after 2217 use Si. units for x but not y
         if run_number is None or run_number > 2217:
-            self.conversion_value = 1.
+            self.conversion_value = 1.0
 
     def build(self):
         return copy.copy(self.state)
@@ -216,7 +214,7 @@ class StateMoveLARMORBuilder(object):
         return value / self.conversion_value
 
     def convert_pos2(self, value):
-        return value / 1000.
+        return value / 1000.0
 
 
 class StateMoveNoInstBuilder(object):
@@ -228,10 +226,10 @@ class StateMoveNoInstBuilder(object):
         return self.state
 
     def convert_pos1(self, value):
-        return value / 1000.
+        return value / 1000.0
 
     def convert_pos2(self, value):
-        return value / 1000.
+        return value / 1000.0
 
 
 def get_move_builder(data_info):
@@ -250,5 +248,6 @@ def get_move_builder(data_info):
     elif instrument is SANSInstrument.NO_INSTRUMENT:
         return StateMoveNoInstBuilder()
     else:
-        raise NotImplementedError("StateMoveBuilder: Could not find any valid move builder for the "
-                                  "specified StateData object {0}".format(str(data_info)))
+        raise NotImplementedError(
+            "StateMoveBuilder: Could not find any valid move builder for the " "specified StateData object {0}".format(str(data_info))
+        )

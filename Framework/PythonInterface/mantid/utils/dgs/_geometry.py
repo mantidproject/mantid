@@ -12,10 +12,11 @@ from mantid.geometry import OrientedLattice
 import mantid.kernel as mk
 from enum import Enum
 import warnings
+
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 
-__all__ = ['qangle', 'ErrorCodes']
+__all__ = ["qangle", "ErrorCodes"]
 
 
 def namedtuplefy(func):
@@ -39,9 +40,10 @@ def namedtuplefy(func):
         res = func(*args, **kwargs)
         if wrapper.nt is None:
             if isinstance(res, Mapping) is False:
-                raise ValueError('Cannot namedtuplefy a non-dict')
-            wrapper.nt = namedtuple(func.__name__ + '_nt', res.keys())
+                raise ValueError("Cannot namedtuplefy a non-dict")
+            wrapper.nt = namedtuple(func.__name__ + "_nt", res.keys())
         return wrapper.nt(**res)
+
     wrapper.nt = None
     return wrapper
 
@@ -57,6 +59,7 @@ class ErrorCodes(Enum):
         - 5 scattering in the beam stop
         - 6 goniometer out of range
     """
+
     CORRECT = 0
     WRONG_INPUT = 1
     QE_CONSERVATION = 2
@@ -66,18 +69,20 @@ class ErrorCodes(Enum):
     GONIOMETR = 6
 
 
-def _qangle_validate_inputs(hkl: np.array,  # noqa: C901
-                            Ei: float or np.array,
-                            DeltaE: float or np.array,
-                            sign: float or np.array,
-                            lattice: OrientedLattice,
-                            detector_constraints: bool,
-                            horizontal_extent: np.array,
-                            vertical_extent: np.array,
-                            horizontal_extent_low: np.array,
-                            vertical_extent_low: np.array,
-                            goniometer_constraints: bool,
-                            goniometer_range):
+def _qangle_validate_inputs(  # noqa: C901
+    hkl: np.array,
+    Ei: float or np.array,
+    DeltaE: float or np.array,
+    sign: float or np.array,
+    lattice: OrientedLattice,
+    detector_constraints: bool,
+    horizontal_extent: np.array,
+    vertical_extent: np.array,
+    horizontal_extent_low: np.array,
+    vertical_extent_low: np.array,
+    goniometer_constraints: bool,
+    goniometer_range,
+):
     """
     Validate inputs for qangle function, according to the rules for
     that function
@@ -87,83 +92,89 @@ def _qangle_validate_inputs(hkl: np.array,  # noqa: C901
         if len(hkl[0]) != 3:
             raise ValueError()
     except (TypeError, ValueError):
-        raise ValueError('hkl is not an array of triplets')
+        raise ValueError("hkl is not an array of triplets")
 
     try:
         # check if float
         Ei = float(Ei)
         Ei = np.full(len_hkl, Ei)
     except ValueError:
-        raise ValueError('Ei is not a float or numpy array')
+        raise ValueError("Ei is not a float or numpy array")
     except TypeError:
         if len(Ei) != len_hkl:
-            raise ValueError('Ei has different length than hkl')
+            raise ValueError("Ei has different length than hkl")
     try:
         # check if float
         DeltaE = float(DeltaE)
         DeltaE = np.full(len_hkl, DeltaE)
     except ValueError:
-        raise ValueError('DeltaE is not a float or numpy array')
+        raise ValueError("DeltaE is not a float or numpy array")
     except TypeError:
         if len(DeltaE) != len_hkl:
-            raise ValueError('DeltaE has different length than hkl')
+            raise ValueError("DeltaE has different length than hkl")
 
     try:
         # check if int
         sign = int(sign)
-        sign = np.full(len_hkl,sign)
+        sign = np.full(len_hkl, sign)
     except ValueError:
-        raise ValueError('sign is not an int or numpy array')
+        raise ValueError("sign is not an int or numpy array")
     except TypeError:
         if len(sign) != len_hkl:
-            raise ValueError('sign has different length than hkl')
+            raise ValueError("sign has different length than hkl")
 
     try:
-        UB = lattice.getUB() * 2. * np.pi
+        UB = lattice.getUB() * 2.0 * np.pi
     except:
         raise ValueError("Can't get the UB matrix from the lattice object")
 
     # inputs for geometry and goniometer constraints
     if detector_constraints:
-        if horizontal_extent[0]<-180 or horizontal_extent[1]<horizontal_extent[0] or horizontal_extent[1]>180:
-            raise ValueError(f"Horizontal constraints must obey -180 <= horizontal_extent[0]"
-                             f" ({horizontal_extent[0]}) <= horizontal_extent[1] ({horizontal_extent[1]})<=180")
-        if vertical_extent[0]<-180 or vertical_extent[1]<vertical_extent[0] or vertical_extent[1]>180:
-            raise ValueError(f"Vertical constraints must obey -180 <= vertical_extent[0] ({vertical_extent[0]}) "
-                             f"<= vertical_extent[1] ({vertical_extent[1]}) <=180")
-        if horizontal_extent_low[0]<-180 or horizontal_extent_low[1]<horizontal_extent_low[0] \
-                or horizontal_extent_low[1]>180:
-            raise ValueError(f"Horizontal constraints must obey -180 <= horizontal_extent_low[0]"
-                             f" ({horizontal_extent_low[0]}) <= horizontal_extent_low[1] ({horizontal_extent_low[1]}) "
-                             f"<=180")
-        if vertical_extent_low[0]<-180 or vertical_extent_low[1]<vertical_extent_low[0] or vertical_extent_low[1]>180:
-            raise ValueError(f"Vertical constraints must obey -180 <= vertical_extent_low[0] ({vertical_extent_low[0]}) "
-                             f"<= vertical_extent_low[1] ({vertical_extent_low[1]}) <=180")
+        if horizontal_extent[0] < -180 or horizontal_extent[1] < horizontal_extent[0] or horizontal_extent[1] > 180:
+            raise ValueError(
+                f"Horizontal constraints must obey -180 <= horizontal_extent[0]"
+                f" ({horizontal_extent[0]}) <= horizontal_extent[1] ({horizontal_extent[1]})<=180"
+            )
+        if vertical_extent[0] < -180 or vertical_extent[1] < vertical_extent[0] or vertical_extent[1] > 180:
+            raise ValueError(
+                f"Vertical constraints must obey -180 <= vertical_extent[0] ({vertical_extent[0]}) "
+                f"<= vertical_extent[1] ({vertical_extent[1]}) <=180"
+            )
+        if horizontal_extent_low[0] < -180 or horizontal_extent_low[1] < horizontal_extent_low[0] or horizontal_extent_low[1] > 180:
+            raise ValueError(
+                f"Horizontal constraints must obey -180 <= horizontal_extent_low[0]"
+                f" ({horizontal_extent_low[0]}) <= horizontal_extent_low[1] ({horizontal_extent_low[1]}) "
+                f"<=180"
+            )
+        if vertical_extent_low[0] < -180 or vertical_extent_low[1] < vertical_extent_low[0] or vertical_extent_low[1] > 180:
+            raise ValueError(
+                f"Vertical constraints must obey -180 <= vertical_extent_low[0] ({vertical_extent_low[0]}) "
+                f"<= vertical_extent_low[1] ({vertical_extent_low[1]}) <=180"
+            )
 
     if goniometer_constraints:
-        if goniometer_range[1]<goniometer_range[0] or \
-           goniometer_range[0]<-180. or goniometer_range[1]>180.:
-            raise ValueError("goniometer_range must be an increasing array, "
-                             "with both limits between -180 and 180 degrees")
+        if goniometer_range[1] < goniometer_range[0] or goniometer_range[0] < -180.0 or goniometer_range[1] > 180.0:
+            raise ValueError("goniometer_range must be an increasing array, " "with both limits between -180 and 180 degrees")
 
     return (Ei, DeltaE, sign, UB)
 
 
 @namedtuplefy
-def qangle(*,  # force keyword arguments
-           Ei: float or np.array,
-           hkl: np.array,  #numpy array of triplets
-           DeltaE: float or np.array,
-           sign: int or np.array,
-           lattice: OrientedLattice,
-           detector_constraints: bool = False,
-           horizontal_extent: np.array = np.array([-180.,180.]),
-           vertical_extent: np.array = np.array([-90.,90.]),
-           horizontal_extent_low: np.array = np.array([0.,0.]),
-           vertical_extent_low: np.array = np.array([0.,0.]),
-           goniometer_constraints: bool = False,
-           goniometer_range: np.array = np.array([-180.,180.]),
-           ) -> namedtuple:
+def qangle(
+    *,  # force keyword arguments
+    Ei: float or np.array,
+    hkl: np.array,  # numpy array of triplets
+    DeltaE: float or np.array,
+    sign: int or np.array,
+    lattice: OrientedLattice,
+    detector_constraints: bool = False,
+    horizontal_extent: np.array = np.array([-180.0, 180.0]),
+    vertical_extent: np.array = np.array([-90.0, 90.0]),
+    horizontal_extent_low: np.array = np.array([0.0, 0.0]),
+    vertical_extent_low: np.array = np.array([0.0, 0.0]),
+    goniometer_constraints: bool = False,
+    goniometer_range: np.array = np.array([-180.0, 180.0]),
+) -> namedtuple:
     """
     The function calculates the momentum transfer in the lab frame,
     scattered momentum, and vertical goniometer angle,
@@ -209,9 +220,20 @@ def qangle(*,  # force keyword arguments
     # https://github.com/mantidproject/documents/blob/master/Design/UBMatriximplementationnotes.pdf
 
     # check input parameters
-    Ei, DeltaE, sign, UB = _qangle_validate_inputs(hkl, Ei, DeltaE, sign, lattice, detector_constraints,
-                                                   horizontal_extent, vertical_extent, horizontal_extent_low,
-                                                   vertical_extent_low, goniometer_constraints, goniometer_range)
+    Ei, DeltaE, sign, UB = _qangle_validate_inputs(
+        hkl,
+        Ei,
+        DeltaE,
+        sign,
+        lattice,
+        detector_constraints,
+        horizontal_extent,
+        vertical_extent,
+        horizontal_extent_low,
+        vertical_extent_low,
+        goniometer_constraints,
+        goniometer_range,
+    )
 
     error_code = np.full((len(hkl)), ErrorCodes.CORRECT)
 
@@ -220,8 +242,8 @@ def qangle(*,  # force keyword arguments
 
     # Q_sample =2Pi(hkl) (the multiplication with 2pi was done in validation) (eq 5-7)
     Q_sample_x, Q_sample_y, Q_sample_z = np.matmul(UB, hkl.T)
-    k_i = np.sqrt(Ei/E2k)
-    k_f = np.sqrt((Ei-DeltaE)/E2k)
+    k_i = np.sqrt(Ei / E2k)
+    k_f = np.sqrt((Ei - DeltaE) / E2k)
 
     # if any of the above elements in the array is NaN or inf, you get error_code 1 (or 2 if only kf is wrong)
     error_code[np.logical_not(np.isfinite(k_f))] = ErrorCodes.QE_CONSERVATION
@@ -232,12 +254,12 @@ def qangle(*,  # force keyword arguments
     delta = -np.arcsin(Q_sample_y / k_f)
 
     # calculate chi (eq 125)
-    chi = np.arccos((k_i**2 + k_f**2 - Q_sample_x**2 - Q_sample_y**2 - Q_sample_z**2)/(2 * k_i * k_f *np.cos(delta)))
+    chi = np.arccos((k_i**2 + k_f**2 - Q_sample_x**2 - Q_sample_y**2 - Q_sample_z**2) / (2 * k_i * k_f * np.cos(delta)))
     bad_chi = np.logical_not(np.isfinite(chi))
     error_code[np.logical_and(bad_chi, error_code == ErrorCodes.CORRECT)] = ErrorCodes.QE_CONSERVATION
 
     # check left/right
-    bad_sign = np.abs(sign)!=1
+    bad_sign = np.abs(sign) != 1
     chi *= sign
     chi[bad_sign] = np.nan
     delta[bad_sign] = np.nan
@@ -250,12 +272,12 @@ def qangle(*,  # force keyword arguments
 
     # calculate angles Q_lab
     in_plane_Q_angle = np.arctan2(Q_lab_x, Q_lab_z)
-    out_plane_Q_angle = np.arcsin(Q_lab_y/np.sqrt(Q_lab_x**2 + Q_lab_y**2 + Q_lab_z**2))
+    out_plane_Q_angle = np.arcsin(Q_lab_y / np.sqrt(Q_lab_x**2 + Q_lab_y**2 + Q_lab_z**2))
 
     # calculate omega (eq 126)
     omega = np.arctan2(Q_lab_x, Q_lab_z) - np.arctan2(Q_sample_x, Q_sample_z)
-    omega[omega>np.pi] -= 2*np.pi
-    omega[omega<-np.pi] += 2*np.pi
+    omega[omega > np.pi] -= 2 * np.pi
+    omega[omega < -np.pi] += 2 * np.pi
 
     # transform all angles to degrees
     chi = np.degrees(chi)
@@ -265,18 +287,31 @@ def qangle(*,  # force keyword arguments
     out_plane_Q_angle = np.degrees(out_plane_Q_angle)
 
     if detector_constraints:
-        error_code[((chi < horizontal_extent[0]) | (chi > horizontal_extent[1])
-                   | (delta < vertical_extent[0]) | (delta > vertical_extent[1]))
-                   & (error_code == ErrorCodes.CORRECT)] = ErrorCodes.OUTSIDE_DETECTOR
-        error_code[(chi > horizontal_extent_low[0]) & (chi < horizontal_extent_low[1])
-                   & (delta > vertical_extent_low[0]) & (delta < vertical_extent_low[1])
-                   & (error_code == ErrorCodes.CORRECT)] = ErrorCodes.INSIDE_BEAMSTOP
+        error_code[
+            ((chi < horizontal_extent[0]) | (chi > horizontal_extent[1]) | (delta < vertical_extent[0]) | (delta > vertical_extent[1]))
+            & (error_code == ErrorCodes.CORRECT)
+        ] = ErrorCodes.OUTSIDE_DETECTOR
+        error_code[
+            (chi > horizontal_extent_low[0])
+            & (chi < horizontal_extent_low[1])
+            & (delta > vertical_extent_low[0])
+            & (delta < vertical_extent_low[1])
+            & (error_code == ErrorCodes.CORRECT)
+        ] = ErrorCodes.INSIDE_BEAMSTOP
 
     if goniometer_constraints:
-        error_code[((omega < goniometer_range[0]) | (omega > goniometer_range[1]))
-                   & (error_code == ErrorCodes.CORRECT)] = ErrorCodes.GONIOMETR
+        error_code[
+            ((omega < goniometer_range[0]) | (omega > goniometer_range[1])) & (error_code == ErrorCodes.CORRECT)
+        ] = ErrorCodes.GONIOMETR
 
-    return dict(Q_lab_x=Q_lab_x, Q_lab_y=Q_lab_y, Q_lab_z=Q_lab_z,
-                in_plane_Q_angle = in_plane_Q_angle, out_plane_Q_angle = out_plane_Q_angle,
-                in_plane_kf_angle = chi, out_plane_kf_angle = delta,
-                omega=omega, error_code=error_code)
+    return dict(
+        Q_lab_x=Q_lab_x,
+        Q_lab_y=Q_lab_y,
+        Q_lab_z=Q_lab_z,
+        in_plane_Q_angle=in_plane_Q_angle,
+        out_plane_Q_angle=out_plane_Q_angle,
+        in_plane_kf_angle=chi,
+        out_plane_kf_angle=delta,
+        omega=omega,
+        error_code=error_code,
+    )

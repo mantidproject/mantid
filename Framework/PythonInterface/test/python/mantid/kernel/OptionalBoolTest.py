@@ -9,8 +9,6 @@ from mantid.kernel import Direction, OptionalBool, OptionalBoolValue, OptionalBo
 
 
 class OptionalBoolTest(unittest.TestCase):
-
-
     def test_default_construction(self):
         obj = OptionalBool()
         self.assertEqual(OptionalBoolValue.Unset, obj.getValue())
@@ -28,5 +26,5 @@ class OptionalBoolTest(unittest.TestCase):
         self.assertEqual(OptionalBoolValue.True_, obj.getValue())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

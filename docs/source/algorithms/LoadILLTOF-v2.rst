@@ -9,16 +9,16 @@
 Description
 -----------
 
-Loads an ILL TOF NeXus file into a :ref:`Workspace2D <Workspace2D>` with
-the given name.
+Loads an ILL TOF NeXus file into a :ref:`Workspace2D <Workspace2D>` with the given name.
 
 To date this algorithm only supports: IN4, IN5, IN6, PANTHER, and SHARP.
 
-By default, this algorithm loads the data indexed by channels. To convert to time-of-flight, use the ConvertToTOF option.
+By default, this algorithm loads the data indexed by channels. To convert to time-of-flight, use the `ConvertToTOF` option.
 
 This algorithm also supports diffraction mode. In this case, the unit of the output workspace will be wavelength instead of time-of-flight or channel.
-The support for the omega scan measurement mode for IN5, PANTHER, and SHARP is **not** handled by this loader, but instead the data
-is loaded with :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>`.
+
+The support for the omega scan measurement mode for IN5, PANTHER, and SHARP is also handled by this loader, with the assumption that only one monitor exists. The X-axis
+unit is `Label` with values provided by the scanned parameter. In this case, the setting to convert to the time-of-flight with `ConvertToTOF` has no effect.
 
 .. note::
     The initial time-of-flight axis is set up using the 'time_of_flight' field in the NeXus file. Therefore the conversion from 'TOF' to 'DeltaE' may not give the correct zero-energy transfer.
@@ -64,6 +64,20 @@ Output:
 .. testoutput:: ExLoad
 
     This workspace has 2 dimensions and 98305 histograms.
+
+**Example - Loading IN5 data scan**
+
+.. testcode:: LoadILLTOF2IN5ScanExample
+
+  ws = LoadILLTOF2(Filename='ILL/IN5/199857.nxs')
+
+  print('The output has {0} bin (omega scan) and {1} spectra'.format(ws.blocksize(), ws.getNumberHistograms()))
+
+Output:
+
+.. testoutput:: LoadILLTOF2IN5ScanExample
+
+  The output has 17 bin (omega scan) and 98305 spectra
 
 .. categories::
 

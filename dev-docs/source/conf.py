@@ -13,9 +13,8 @@ from distutils.version import LooseVersion
 if LooseVersion(sphinx_version) > LooseVersion("1.6"):
 
     def setup(app):
-        """Called automatically by Sphinx when starting the build process
-        """
-        if hasattr(app, 'add_css_file'):  # >=v1.8
+        """Called automatically by Sphinx when starting the build process"""
+        if hasattr(app, "add_css_file"):  # >=v1.8
             app.add_css_file("custom.css")
         else:
             app.add_stylesheet("custom.css")  # v1.6-1.8
@@ -27,27 +26,27 @@ if LooseVersion(sphinx_version) > LooseVersion("1.6"):
 extensions = [
     # we use pngmath over mathjax so that the the offline help isn't reliant on
     # anything external and we don't need to include the large mathjax package
-    'sphinx.ext.autodoc',
-    'sphinx.ext.intersphinx'
+    "sphinx.ext.autodoc",
+    "sphinx.ext.intersphinx",
 ]
 
 if LooseVersion(sphinx_version) > LooseVersion("1.8"):
-    extensions.append('sphinx.ext.imgmath')
+    extensions.append("sphinx.ext.imgmath")
 else:
-    extensions.append('sphinx.ext.pngmath')
+    extensions.append("sphinx.ext.pngmath")
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # The suffix of source filenames.
-source_suffix = '.rst'
+source_suffix = ".rst"
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = "index"
 
 # General information about the project.
-project = u'MantidProject'
-copyright = u'2007-2020, Mantid'
+project = "MantidProject"
+copyright = "2007-2020, Mantid"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -59,12 +58,12 @@ version = "master"
 release = version
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = "sphinx"
 
 # -- Options for pngmath --------------------------------------------------
 
 # Load the preview package into latex
-pngmath_latex_preamble = r'\usepackage[active]{preview}'
+pngmath_latex_preamble = r"\usepackage[active]{preview}"
 
 # Ensures that the vertical alignment of equations is correct.
 # See http://sphinx-doc.org/ext/math.html#confval-pngmath_use_preview
@@ -74,7 +73,7 @@ pngmath_use_preview = True
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'bootstrap'
+html_theme = "bootstrap"
 
 # Add any paths that contain custom themes here, relative to this directory.
 html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
@@ -85,17 +84,17 @@ html_title = ""
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = os.path.relpath(os.path.join('..', '..', 'images', 'Mantid_Logo_Transparent.png'))
+html_logo = os.path.relpath(os.path.join("..", "..", "images", "Mantid_Logo_Transparent.png"))
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
 # directly to the root of the documentation.
-#html_extra_path = []
+# html_extra_path = []
 
 # If true, Smart Quotes will be used to convert quotes and dashes to
 # typographically correct entities.
@@ -115,11 +114,11 @@ html_show_copyright = False
 # custom.css rather than here.
 html_theme_options = {
     # Navigation bar title.
-    'navbar_title': " ",  # deliberate single space so it's not visible
+    "navbar_title": " ",  # deliberate single space so it's not visible
     # Tab name for entire site.
-    'navbar_site_name': "Mantid",
+    "navbar_site_name": "Mantid",
     # Add links to the nav bar. Third param of tuple is true to create absolute url.
-    'navbar_links': [
+    "navbar_links": [
         ("Home", "index"),
         ("Download", "http://download.mantidproject.org", True),
         ("Wiki", "http://www.mantidproject.org", True),
@@ -127,17 +126,17 @@ html_theme_options = {
         ("Contact Us", "http://www.mantidproject.org/Contact", True),
     ],
     # Do not show the "Show source" button.
-    'source_link_position': "no",
+    "source_link_position": "no",
     # Remove the local TOC from the nav bar
-    'navbar_pagenav': False,
+    "navbar_pagenav": False,
     # Hide the next/previous in the nav bar.
-    'navbar_sidebarrel': True,
+    "navbar_sidebarrel": True,
     # Use the latest version.
-    'bootstrap_version': "3",
+    "bootstrap_version": "3",
     # Ensure the nav bar always stays on top of page.
-    'navbar_fixed_top': "false",
+    "navbar_fixed_top": "false",
     # Don't limit the width
-    'body_max_width': "none"
+    "body_max_width": "none",
 }
 
 # -- Options for Epub output ---------------------------------------------------
@@ -146,36 +145,36 @@ html_theme_options = {
 # The default value is True.
 epub_tocdup = True
 
-#This setting control the scope of the epub table of contents
-epub_tocscope = 'includehidden'
+# This setting control the scope of the epub table of contents
+epub_tocscope = "includehidden"
 
-#The author of the document. This is put in the Dublin Core metadata. The default value is 'unknown'.
+# The author of the document. This is put in the Dublin Core metadata. The default value is 'unknown'.
 epub_author = "The Mantid Project"
 
-#The publisher of the document. This is put in the Dublin Core metadata. You may use any sensible string, e.g. the project homepage.
+# The publisher of the document. This is put in the Dublin Core metadata. You may use any sensible string, e.g. the project homepage.
 epub_publisher = "The Mantid Project"
 
-#An identifier for the document. This is put in the Dublin Core metadata.
-#For published documents this is the ISBN number, but you can also use an alternative scheme, e.g. the project homepage.
-#The default value is 'unknown'.
+# An identifier for the document. This is put in the Dublin Core metadata.
+# For published documents this is the ISBN number, but you can also use an alternative scheme, e.g. the project homepage.
+# The default value is 'unknown'.
 epub_identifier = "www.mantidproject.org"
 
-#The publication scheme for the epub_identifier. This is put in the Dublin Core metadata.
-#For published books the scheme is 'ISBN'. If you use the project homepage, 'URL' seems reasonable.
-#The default value is 'unknown'.
-epub_scheme = 'URL'
+# The publication scheme for the epub_identifier. This is put in the Dublin Core metadata.
+# For published books the scheme is 'ISBN'. If you use the project homepage, 'URL' seems reasonable.
+# The default value is 'unknown'.
+epub_scheme = "URL"
 
-#A unique identifier for the document. This is put in the Dublin Core metadata. You may use a random string.
-#The default value is 'unknown'.
+# A unique identifier for the document. This is put in the Dublin Core metadata. You may use a random string.
+# The default value is 'unknown'.
 epub_uid = "Mantid Reference: " + version
 
 # -- Link to other projects ----------------------------------------------------
 
 intersphinx_mapping = {
-    'h5py': ('https://h5py.readthedocs.io/en/stable/', None),
-    'matplotlib': ('http://matplotlib.org', None),
-    'numpy': ('https://numpy.org/doc/stable/', None),
-    'python': ('https://docs.python.org/3/', None),
-    'SciPy': ('http://docs.scipy.org/doc/scipy/reference', None),
-    'mantid': ('http://docs.mantidproject.org/', None)
+    "h5py": ("https://h5py.readthedocs.io/en/stable/", None),
+    "matplotlib": ("http://matplotlib.org", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "python": ("https://docs.python.org/3/", None),
+    "SciPy": ("http://docs.scipy.org/doc/scipy/reference", None),
+    "mantid": ("http://docs.mantidproject.org/", None),
 }

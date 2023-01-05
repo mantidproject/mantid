@@ -19,13 +19,14 @@ class MsdGaussTest(unittest.TestCase):
 
     def test_function_output(self):
         input = np.array([[0, 1], [2, 3]])
-        expected = np.array([[1., 0.99170129], [0.9672161, 0.92774349]])
+        expected = np.array([[1.0, 0.99170129], [0.9672161, 0.92774349]])
         tolerance = 0.000001
         status, output = check_output("MsdGauss", input, expected, tolerance, Height=1.0, Msd=0.05)
 
         if not status:
-            self.fail("Computed output " + str(output) + " from input " + str(input) +
-                      " is not equal to the expected output: " + str(expected))
+            self.fail(
+                "Computed output " + str(output) + " from input " + str(input) + " is not equal to the expected output: " + str(expected)
+            )
 
     def test_use_in_fit(self):
         workspace = create_test_workspace(create_model("MsdGauss", Height=1.0, Msd=0.05), 1000)
@@ -33,5 +34,5 @@ class MsdGaussTest(unittest.TestCase):
         Fit(Function=function_string, InputWorkspace=workspace, StartX=1.2, EndX=1200)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

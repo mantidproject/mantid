@@ -12,42 +12,39 @@ import unittest
 class DirectILLSelfShieldingTest(unittest.TestCase):
     _TEST_WS = None
 
-    def __init__(self, methodName='runTest'):
+    def __init__(self, methodName="runTest"):
         unittest.TestCase.__init__(self, methodName)
-        self._TEST_WS_NAME = '_testWS_'
+        self._TEST_WS_NAME = "_testWS_"
 
     def setUp(self):
         if DirectILLSelfShieldingTest._TEST_WS is None:
             bkgLevel = 0.0
-            DirectILLSelfShieldingTest._TEST_WS = illhelpers.create_poor_mans_in5_workspace(bkgLevel,
-                                                                                            illhelpers.default_test_detectors)
-        tempMonitorWSName = 'monitors'
+            DirectILLSelfShieldingTest._TEST_WS = illhelpers.create_poor_mans_in5_workspace(bkgLevel, illhelpers.default_test_detectors)
+        tempMonitorWSName = "monitors"
         kwargs = {
-            'InputWorkspace': DirectILLSelfShieldingTest._TEST_WS,
-            'DetectorWorkspace': self._TEST_WS_NAME,
-            'MonitorWorkspace': tempMonitorWSName
+            "InputWorkspace": DirectILLSelfShieldingTest._TEST_WS,
+            "DetectorWorkspace": self._TEST_WS_NAME,
+            "MonitorWorkspace": tempMonitorWSName,
         }
-        run_algorithm('ExtractMonitors', **kwargs)
-        kwargs = {
-            'Workspace': tempMonitorWSName
-        }
-        run_algorithm('DeleteWorkspace', **kwargs)
+        run_algorithm("ExtractMonitors", **kwargs)
+        kwargs = {"Workspace": tempMonitorWSName}
+        run_algorithm("DeleteWorkspace", **kwargs)
 
     def tearDown(self):
         mtd.clear()
 
     def testExecSparseInstrument(self):
         self._setDefaultSample(self._TEST_WS_NAME)
-        outWSName = 'correctionWS'
+        outWSName = "correctionWS"
         kwargs = {
-            'InputWorkspace': self._TEST_WS_NAME,
-            'OutputWorkspace': outWSName,
-            'SimulationInstrument': 'Sparse Instrument',
-            'SparseInstrumentRows': 3,
-            'SparseInstrumentColumns': 2,
-            'rethrow': True
+            "InputWorkspace": self._TEST_WS_NAME,
+            "OutputWorkspace": outWSName,
+            "SimulationInstrument": "Sparse Instrument",
+            "SparseInstrumentRows": 3,
+            "SparseInstrumentColumns": 2,
+            "rethrow": True,
         }
-        run_algorithm('DirectILLSelfShielding', **kwargs)
+        run_algorithm("DirectILLSelfShielding", **kwargs)
         self.assertTrue(mtd.doesExist(outWSName))
         inWS = mtd[self._TEST_WS_NAME]
         outWS = mtd[outWSName]
@@ -58,13 +55,9 @@ class DirectILLSelfShieldingTest(unittest.TestCase):
 
     def testOutputHasCommonBinningWithInput(self):
         self._setDefaultSample(self._TEST_WS_NAME)
-        outWSName = 'correctionWS'
-        kwargs = {
-            'InputWorkspace': self._TEST_WS_NAME,
-            'OutputWorkspace': outWSName,
-            'rethrow': True
-        }
-        run_algorithm('DirectILLSelfShielding', **kwargs)
+        outWSName = "correctionWS"
+        kwargs = {"InputWorkspace": self._TEST_WS_NAME, "OutputWorkspace": outWSName, "rethrow": True}
+        run_algorithm("DirectILLSelfShielding", **kwargs)
         self.assertTrue(mtd.doesExist(outWSName))
         inWS = mtd[self._TEST_WS_NAME]
         outWS = mtd[outWSName]
@@ -74,23 +67,11 @@ class DirectILLSelfShieldingTest(unittest.TestCase):
         assert_almost_equal(xs, originalXs[:, :])
 
     def _setDefaultSample(self, wsName):
-        geometry = {
-            'Shape': 'Cylinder',
-            'Height': 8.0,
-            'Radius': 2.0,
-            'Center': [0.0, 0.0, 0.0]
-        }
-        material = {
-            'ChemicalFormula': 'V',
-            'SampleNumberDensity': 0.1
-        }
-        kwargs = {
-            'InputWorkspace': wsName,
-            'Geometry': geometry,
-            'Material': material
-        }
-        run_algorithm('SetSample', **kwargs)
+        geometry = {"Shape": "Cylinder", "Height": 8.0, "Radius": 2.0, "Center": [0.0, 0.0, 0.0]}
+        material = {"ChemicalFormula": "V", "SampleNumberDensity": 0.1}
+        kwargs = {"InputWorkspace": wsName, "Geometry": geometry, "Material": material}
+        run_algorithm("SetSample", **kwargs)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -14,22 +14,22 @@ from reduction_gui.reduction.scripter import BaseScriptElement
 
 class DataSets(BaseScriptElement):
 
-    DataPeakSelectionType = 'narrow'
+    DataPeakSelectionType = "narrow"
     DataPeakPixels = [120, 130]
-    DataPeakDiscreteSelection = 'N/A'
+    DataPeakDiscreteSelection = "N/A"
     DataBackgroundFlag = False
-    DataBackgroundRoi = [115, 137,123, 137]
-    DataTofRange = [9600., 21600.]
+    DataBackgroundRoi = [115, 137, 123, 137]
+    DataTofRange = [9600.0, 21600.0]
     TofRangeFlag = True
 
     data_x_range_flag = True
-    data_x_range = [115,210]
+    data_x_range = [115, 210]
 
-    tthd_value = 'N/A'
-    ths_value = 'N/A'
+    tthd_value = "N/A"
+    ths_value = "N/A"
 
     norm_x_range_flag = True
-    norm_x_range = [115,210]
+    norm_x_range = [115, 210]
 
     NormFlag = True
     NormPeakPixels = [120, 130]
@@ -37,8 +37,8 @@ class DataSets(BaseScriptElement):
     NormBackgroundRoi = [115, 137]
 
     # Data files
-    #data_files = [66421]
-    #norm_file = 66196
+    # data_files = [66421]
+    # norm_file = 66196
     data_files = [0]
     norm_file = 0
 
@@ -51,19 +51,19 @@ class DataSets(BaseScriptElement):
     angle_offset = 0.0
     angle_offset_error = 0.0
 
-    #scaling factor file
-    scaling_factor_file = ''
+    # scaling factor file
+    scaling_factor_file = ""
     scaling_factor_file_flag = True
     slits_width_flag = True
 
-    #geometry correction
+    # geometry correction
     geometry_correction_switch = False
 
-    #incident medium list and selected value
-    incident_medium_list = ['H2O']
+    # incident medium list and selected value
+    incident_medium_list = ["H2O"]
     incident_medium_index_selected = 0
 
-    #4th column of ASCII file (precision)
+    # 4th column of ASCII file (precision)
     fourth_column_flag = True
     fourth_column_dq0 = 0.0009
     fourth_column_dq_over_q = 0.045
@@ -80,25 +80,25 @@ class DataSets(BaseScriptElement):
         super(DataSets, self).__init__()
         self.reset()
 
-#pylint: disable = unused-argument, arguments-differ
+    # pylint: disable = unused-argument, arguments-differ
     def to_script(self, for_automated_reduction=False):
         """
-            Generate reduction script
-            @param execute: if true, the script will be executed
+        Generate reduction script
+        @param execute: if true, the script will be executed
         """
         raise RuntimeError("refl_data_script.DataSets.to_script is deprecated")
 
     def update(self):
         """
-            Update transmission from reduction output
+        Update transmission from reduction output
         """
         pass
 
     def to_xml(self):
         """
-            Create XML from the current data.
+        Create XML from the current data.
         """
-        _xml  = "<RefLData>\n"
+        _xml = "<RefLData>\n"
         _xml += "<peak_selection_type>%s</peak_selection_type>\n" % self.DataPeakSelectionType
         _xml += "<from_peak_pixels>%s</from_peak_pixels>\n" % str(self.DataPeakPixels[0])
         _xml += "<to_peak_pixels>%s</to_peak_pixels>\n" % str(self.DataPeakPixels[1])
@@ -111,7 +111,7 @@ class DataSets(BaseScriptElement):
         _xml += "<tof_range_flag>%s</tof_range_flag>\n" % str(self.TofRangeFlag)
         _xml += "<from_tof_range>%s</from_tof_range>\n" % str(self.DataTofRange[0])
         _xml += "<to_tof_range>%s</to_tof_range>\n" % str(self.DataTofRange[1])
-        _xml += "<data_sets>%s</data_sets>\n" % ','.join([str(i) for i in self.data_files])
+        _xml += "<data_sets>%s</data_sets>\n" % ",".join([str(i) for i in self.data_files])
         _xml += "<x_min_pixel>%s</x_min_pixel>\n" % str(self.data_x_range[0])
         _xml += "<x_max_pixel>%s</x_max_pixel>\n" % str(self.data_x_range[1])
         _xml += "<x_range_flag>%s</x_range_flag>\n" % str(self.data_x_range_flag)
@@ -150,11 +150,11 @@ class DataSets(BaseScriptElement):
         # geometry correction
         _xml += "<geometry_correction_switch>%s</geometry_correction_switch>\n" % str(self.geometry_correction_switch)
 
-        #incident medium
+        # incident medium
         _xml += "<incident_medium_list>%s</incident_medium_list>\n" % str(self.incident_medium_list[0])
         _xml += "<incident_medium_index_selected>%s</incident_medium_index_selected>\n" % str(self.incident_medium_index_selected)
 
-        #fourth column precision
+        # fourth column precision
         _xml += "<fourth_column_flag>%s</fourth_column_flag>\n" % str(self.fourth_column_flag)
         _xml += "<fourth_column_dq0>%s</fourth_column_dq0>\n" % str(self.fourth_column_dq0)
         _xml += "<fourth_column_dq_over_q>%s</fourth_column_dq_over_q>\n" % str(self.fourth_column_dq_over_q)
@@ -172,84 +172,92 @@ class DataSets(BaseScriptElement):
         self.reset()
         dom = xml.dom.minidom.parseString(xml_str)
         self.from_xml_element(dom)
-        #element_list = dom.getElementsByTagName("RefLData")
-        #if len(element_list)>0:
+        # element_list = dom.getElementsByTagName("RefLData")
+        # if len(element_list)>0:
         #    instrument_dom = element_list[0]
 
     def from_xml_element(self, instrument_dom):
         """
-            Read in data from XML
-            @param xml_str: text to read the data from
+        Read in data from XML
+        @param xml_str: text to read the data from
         """
-        #Peak selection
+        # Peak selection
         self.DataPeakSelectionType = BaseScriptElement.getStringElement(instrument_dom, "peak_selection_type")
 
-        #Peak from/to pixels
-        self.DataPeakPixels = [BaseScriptElement.getIntElement(instrument_dom, "from_peak_pixels"),
-                               BaseScriptElement.getIntElement(instrument_dom, "to_peak_pixels")]
+        # Peak from/to pixels
+        self.DataPeakPixels = [
+            BaseScriptElement.getIntElement(instrument_dom, "from_peak_pixels"),
+            BaseScriptElement.getIntElement(instrument_dom, "to_peak_pixels"),
+        ]
 
-        #data metadata
+        # data metadata
         _tthd_value = BaseScriptElement.getStringElement(instrument_dom, "tthd_value")
-        if _tthd_value == '':
-            _tthd_value = 'N/A'
+        if _tthd_value == "":
+            _tthd_value = "N/A"
         self.tthd_value = _tthd_value
 
         _ths_value = BaseScriptElement.getStringElement(instrument_dom, "ths_value")
-        if _ths_value == '':
-            _ths_value = 'N/A'
+        if _ths_value == "":
+            _ths_value = "N/A"
         self.ths_value = _ths_value
 
-        #low resolution range
-        self.data_x_range_flag = BaseScriptElement.getBoolElement(instrument_dom, "x_range_flag",
-                                                                  default=DataSets.data_x_range_flag)
+        # low resolution range
+        self.data_x_range_flag = BaseScriptElement.getBoolElement(instrument_dom, "x_range_flag", default=DataSets.data_x_range_flag)
 
-        self.data_x_range = [BaseScriptElement.getIntElement(instrument_dom, "x_min_pixel"),
-                             BaseScriptElement.getIntElement(instrument_dom, "x_max_pixel")]
+        self.data_x_range = [
+            BaseScriptElement.getIntElement(instrument_dom, "x_min_pixel"),
+            BaseScriptElement.getIntElement(instrument_dom, "x_max_pixel"),
+        ]
 
-        self.norm_x_range_flag = BaseScriptElement.getBoolElement(instrument_dom, "norm_x_range_flag",
-                                                                  default=DataSets.norm_x_range_flag)
+        self.norm_x_range_flag = BaseScriptElement.getBoolElement(instrument_dom, "norm_x_range_flag", default=DataSets.norm_x_range_flag)
 
-        self.norm_x_range = [BaseScriptElement.getIntElement(instrument_dom, "norm_x_min"),
-                             BaseScriptElement.getIntElement(instrument_dom, "norm_x_max")]
+        self.norm_x_range = [
+            BaseScriptElement.getIntElement(instrument_dom, "norm_x_min"),
+            BaseScriptElement.getIntElement(instrument_dom, "norm_x_max"),
+        ]
 
-        #discrete selection string
+        # discrete selection string
         self.DataPeakDiscreteSelection = BaseScriptElement.getStringElement(instrument_dom, "peak_discrete_selection")
 
-        #background flag
-        self.DataBackgroundFlag = BaseScriptElement.getBoolElement(instrument_dom,
-                                                                   "background_flag",
-                                                                   default=DataSets.DataBackgroundFlag)
+        # background flag
+        self.DataBackgroundFlag = BaseScriptElement.getBoolElement(instrument_dom, "background_flag", default=DataSets.DataBackgroundFlag)
 
-        #background from/to pixels
-        self.DataBackgroundRoi = [BaseScriptElement.getIntElement(instrument_dom, "back_roi1_from"),
-                                  BaseScriptElement.getIntElement(instrument_dom, "back_roi1_to"),
-                                  BaseScriptElement.getIntElement(instrument_dom, "back_roi2_from"),
-                                  BaseScriptElement.getIntElement(instrument_dom, "back_roi2_to")]
+        # background from/to pixels
+        self.DataBackgroundRoi = [
+            BaseScriptElement.getIntElement(instrument_dom, "back_roi1_from"),
+            BaseScriptElement.getIntElement(instrument_dom, "back_roi1_to"),
+            BaseScriptElement.getIntElement(instrument_dom, "back_roi2_from"),
+            BaseScriptElement.getIntElement(instrument_dom, "back_roi2_to"),
+        ]
 
-        #from TOF and to TOF
-        self.TofRangeFlag = BaseScriptElement.getBoolElement(instrument_dom, "tof_range_flag",
-                                                             default=DataSets.TofRangeFlag)
-        self.DataTofRange = [BaseScriptElement.getFloatElement(instrument_dom, "from_tof_range"),
-                             BaseScriptElement.getFloatElement(instrument_dom, "to_tof_range")]
+        # from TOF and to TOF
+        self.TofRangeFlag = BaseScriptElement.getBoolElement(instrument_dom, "tof_range_flag", default=DataSets.TofRangeFlag)
+        self.DataTofRange = [
+            BaseScriptElement.getFloatElement(instrument_dom, "from_tof_range"),
+            BaseScriptElement.getFloatElement(instrument_dom, "to_tof_range"),
+        ]
 
         self.data_files = BaseScriptElement.getIntList(instrument_dom, "data_sets")
 
-        #with or without norm
-        self.NormFlag = BaseScriptElement.getBoolElement(instrument_dom, "norm_flag",
-                                                         default=DataSets.NormFlag)
+        # with or without norm
+        self.NormFlag = BaseScriptElement.getBoolElement(instrument_dom, "norm_flag", default=DataSets.NormFlag)
 
-        #Peak from/to pixels
-        self.NormPeakPixels = [BaseScriptElement.getIntElement(instrument_dom, "norm_from_peak_pixels"),
-                               BaseScriptElement.getIntElement(instrument_dom, "norm_to_peak_pixels")]
+        # Peak from/to pixels
+        self.NormPeakPixels = [
+            BaseScriptElement.getIntElement(instrument_dom, "norm_from_peak_pixels"),
+            BaseScriptElement.getIntElement(instrument_dom, "norm_to_peak_pixels"),
+        ]
 
-        #background flag
-        self.NormBackgroundFlag = BaseScriptElement.getBoolElement(instrument_dom,
-                                                                   "norm_background_flag",
-                                                                   default=DataSets.NormBackgroundFlag)
+        # background flag
+        self.NormBackgroundFlag = BaseScriptElement.getBoolElement(
+            instrument_dom, "norm_background_flag", default=DataSets.NormBackgroundFlag
+        )
 
-        #background from/to pixels
-        self.NormBackgroundRoi = [BaseScriptElement.getIntElement(instrument_dom, "norm_from_back_pixels"),
-                                  BaseScriptElement.getIntElement(instrument_dom, "norm_to_back_pixels")]
+        # background from/to pixels
+        self.NormBackgroundRoi = [
+            BaseScriptElement.getIntElement(instrument_dom, "norm_from_back_pixels"),
+            BaseScriptElement.getIntElement(instrument_dom, "norm_to_back_pixels"),
+        ]
 
         self.norm_file = BaseScriptElement.getIntElement(instrument_dom, "norm_dataset")
 
@@ -264,10 +272,11 @@ class DataSets(BaseScriptElement):
 
         # Angle offset
         self.angle_offset = BaseScriptElement.getFloatElement(instrument_dom, "angle_offset", default=DataSets.angle_offset)
-        self.angle_offset_error = BaseScriptElement.getFloatElement(instrument_dom, "angle_offset_error",
-                                                                    default=DataSets.angle_offset_error)
+        self.angle_offset_error = BaseScriptElement.getFloatElement(
+            instrument_dom, "angle_offset_error", default=DataSets.angle_offset_error
+        )
 
-        #scaling factor file and options
+        # scaling factor file and options
         self.scaling_factor_file = BaseScriptElement.getStringElement(instrument_dom, "scaling_factor_file")
         self.slits_width_flag = BaseScriptElement.getBoolElement(instrument_dom, "slits_width_flag")
         self.scaling_factor_file_flag = BaseScriptElement.getBoolElement(instrument_dom, "scaling_factor_flag")
@@ -275,15 +284,15 @@ class DataSets(BaseScriptElement):
         # geometry correction switch
         self.geometry_correction_switch = BaseScriptElement.getBoolElement(instrument_dom, "geometry_correction_switch")
 
-        #incident medium selected
+        # incident medium selected
         if BaseScriptElement.getStringList(instrument_dom, "incident_medium_list") != []:
             self.incident_medium_list = BaseScriptElement.getStringList(instrument_dom, "incident_medium_list")
             self.incident_medium_index_selected = BaseScriptElement.getIntElement(instrument_dom, "incident_medium_index_selected")
         else:
-            self.incident_medium_list = ['H2O']
+            self.incident_medium_list = ["H2O"]
             self.incident_medium_index_selected = 0
 
-        #fourth column (precision)
+        # fourth column (precision)
         self.fourth_column_flag = BaseScriptElement.getBoolElement(instrument_dom, "fourth_column_flag")
         self.fourth_column_dq0 = BaseScriptElement.getFloatElement(instrument_dom, "fourth_column_dq0")
         self.fourth_column_dq_over_q = BaseScriptElement.getFloatElement(instrument_dom, "fourth_column_dq_over_q")
@@ -294,7 +303,7 @@ class DataSets(BaseScriptElement):
 
     def reset(self):
         """
-            Reset state
+        Reset state
         """
         self.DataPeakSelectionType = DataSets.DataPeakSelectionType
         self.DataBackgroundFlag = DataSets.DataBackgroundFlag
@@ -331,19 +340,19 @@ class DataSets(BaseScriptElement):
         self.angle_offset = DataSets.angle_offset
         self.angle_offset_error = DataSets.angle_offset_error
 
-        #scaling factor file and options
+        # scaling factor file and options
         self.scaling_factor_file = DataSets.scaling_factor_file
         self.slits_width_flag = DataSets.slits_width_flag
         self.scaling_factor_file_flag = DataSets.scaling_factor_file_flag
 
-        #geometry correction
+        # geometry correction
         self.geometry_correction_switch = DataSets.geometry_correction_switch
 
-        #incident medium selected
+        # incident medium selected
         self.incident_medium_list = DataSets.incident_medium_list
         self.incident_medium_index_selected = DataSets.incident_medium_index_selected
 
-        #4th column (precision)
+        # 4th column (precision)
         self.fourth_column_flag = DataSets.fourth_column_flag
         self.fourth_column_dq0 = DataSets.fourth_column_dq0
         self.fourth_column_dq_over_q = DataSets.fourth_column_dq_over_q

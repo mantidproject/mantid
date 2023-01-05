@@ -94,7 +94,6 @@ mkdir $COPY_DIR/bin
 mv $CONDA_ENV_PATH/DLLs $COPY_DIR/bin/
 mv $CONDA_ENV_PATH/Lib $COPY_DIR/bin/
 mv $CONDA_ENV_PATH/Scripts $COPY_DIR/bin/
-mv $CONDA_ENV_PATH/tcl $COPY_DIR/bin/
 mv $CONDA_ENV_PATH/python*.* $COPY_DIR/bin/
 mv $CONDA_ENV_PATH/msvc*.* $COPY_DIR/bin/
 mv $CONDA_ENV_PATH/ucrt*.* $COPY_DIR/bin/

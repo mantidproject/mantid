@@ -27,7 +27,8 @@ class RebinRaggedTest(unittest.TestCase):
             OutputWorkspace="NOM_91796_banks",
             XMin=[0.67, 1.20, 2.42, 3.70, 4.12, 0.39],
             Delta=0.02,  # original data bin size
-            XMax=[10.20, 20.8, np_nan, math_nan, np_nan, 9.35])
+            XMax=[10.20, 20.8, np_nan, math_nan, np_nan, 9.35],
+        )
 
         self.assertTrue(alg_test.isExecuted())
 
@@ -45,28 +46,28 @@ class RebinRaggedTest(unittest.TestCase):
             InputWorkspace="NOM_91796_banks",
             OutputWorkspace="NOM_91796_banks",
             Delta=0.04,  # double original data bin size
-            XMax=[10.20, 20.8, np_inf, math_nan, np_nan, 9.35])
+            XMax=[10.20, 20.8, np_inf, math_nan, np_nan, 9.35],
+        )
 
         self.assertTrue(alg_test.isExecuted())
 
         # Verify ....
         outputws = AnalysisDataService.retrieve("NOM_91796_banks")
-        for i, Xlen in enumerate([256, 521, 1001, 1001, 1001,
-                                  235]):  # larger than in test_nomad_inplace
+        for i, Xlen in enumerate([256, 521, 1001, 1001, 1001, 235]):  # larger than in test_nomad_inplace
             self.assertEqual(len(outputws.readX(i)), Xlen)
 
         AnalysisDataService.remove("NOM_91796_banks")
 
     def test_hist_workspace(self):
         # numpy 1.7 (on rhel7) doesn't have np.full
-        xmins = np.full((200, ), 2600.0)
+        xmins = np.full((200,), 2600.0)
         xmins[11] = 3000.0
-        xmaxs = np.full((200, ), 6200.0)
+        xmaxs = np.full((200,), 6200.0)
         xmaxs[12] = 5000.0
         deltas = np.full(200, 400.0)
         deltas[13] = 600.0
 
-        ws = api.CreateSampleWorkspace(OutputWorkspace='RebinRagged_hist', WorkspaceType='Histogram')
+        ws = api.CreateSampleWorkspace(OutputWorkspace="RebinRagged_hist", WorkspaceType="Histogram")
 
         rebinned = api.RebinRagged(ws, XMin=xmins, XMax=xmaxs, Delta=deltas)
 
@@ -92,14 +93,14 @@ class RebinRaggedTest(unittest.TestCase):
 
     def test_event_workspace(self):
         # numpy 1.7 (on rhel7) doesn't have np.full
-        xmins = np.full((200, ), 2600.0)
+        xmins = np.full((200,), 2600.0)
         xmins[11] = 3000.0
-        xmaxs = np.full((200, ), 6200.0)
+        xmaxs = np.full((200,), 6200.0)
         xmaxs[12] = 5000.0
         deltas = np.full(200, 400.0)
         deltas[13] = 600.0
 
-        ws = api.CreateSampleWorkspace(OutputWorkspace='RebinRagged_events', WorkspaceType='Event')
+        ws = api.CreateSampleWorkspace(OutputWorkspace="RebinRagged_events", WorkspaceType="Event")
         orig_y = ws.readY(0)
 
         rebinned = api.RebinRagged(ws, XMin=xmins, XMax=xmaxs, Delta=deltas)

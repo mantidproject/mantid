@@ -38,12 +38,12 @@ public:
       Poco::File(FullPathFile).remove();
   }
 
+  void test_constructor_does_not_throw() { TS_ASSERT_THROWS_NOTHING(createTestBoxController()); }
+
   void test_constructor_setters() {
     using Mantid::DataObjects::BoxControllerNeXusIO;
     using EDV = Mantid::DataObjects::BoxControllerNeXusIO::EventDataVersion;
-
-    BoxControllerNeXusIO *pSaver(nullptr);
-    TS_ASSERT_THROWS_NOTHING(pSaver = createTestBoxController());
+    auto pSaver = createTestBoxController();
 
     size_t CoordSize;
     std::string typeName;
@@ -74,16 +74,13 @@ public:
     pSaver->setDataType(CoordSize, "MDEvent");
     TS_ASSERT_THROWS_NOTHING(pSaver->setEventDataVersion(EDV::EDVOriginal));
     TS_ASSERT_EQUALS(EDV::EDVOriginal, pSaver->getEventDataVersion());
-
-    delete pSaver;
   }
 
   void test_eventDataVersion() {
     // initialization
     using Mantid::DataObjects::BoxControllerNeXusIO;
     using EDV = Mantid::DataObjects::BoxControllerNeXusIO::EventDataVersion;
-    BoxControllerNeXusIO *pSaver(nullptr);
-    TS_ASSERT_THROWS_NOTHING(pSaver = createTestBoxController());
+    auto pSaver = createTestBoxController();
 
     // valid values
     std::map<EDV, size_t> traitsCountToEDV = {{EDV::EDVLean, 2}, {EDV::EDVOriginal, 4}, {EDV::EDVGoniometer, 5}};
@@ -94,7 +91,6 @@ public:
     std::vector<size_t> invalids{3, 6, 7, 8, 9, 42};
     for (auto const &invalid : invalids)
       TS_ASSERT_THROWS(pSaver->setEventDataVersion(invalid), const std::invalid_argument &)
-    delete pSaver;
   }
 
   void test_CreateOrOpenFile() {
@@ -103,8 +99,7 @@ public:
     using Mantid::DataObjects::BoxControllerNeXusIO;
     using Mantid::Kernel::Exception::FileError;
 
-    BoxControllerNeXusIO *pSaver(nullptr);
-    TS_ASSERT_THROWS_NOTHING(pSaver = createTestBoxController());
+    auto pSaver = createTestBoxController();
     pSaver->setDataType(sizeof(coord_t), "MDLeanEvent");
     std::string FullPathFile;
 
@@ -133,7 +128,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(pSaver->closeFile());
     TS_ASSERT(!pSaver->isOpened());
 
-    delete pSaver;
     if (Poco::File(FullPathFile).exists())
       Poco::File(FullPathFile).remove();
   }
@@ -141,8 +135,7 @@ public:
   void test_free_space_index_is_written_out_and_read_in() {
     using Mantid::DataObjects::BoxControllerNeXusIO;
 
-    BoxControllerNeXusIO *pSaver(nullptr);
-    TS_ASSERT_THROWS_NOTHING(pSaver = createTestBoxController());
+    auto pSaver = createTestBoxController();
     std::string FullPathFile;
 
     TS_ASSERT_THROWS_NOTHING(pSaver->openFile(this->xxfFileName, "w"));
@@ -167,9 +160,23 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(pSaver->closeFile());
 
-    delete pSaver;
     if (Poco::File(FullPathFile).exists())
       Poco::File(FullPathFile).remove();
+  }
+
+  void test_copyToFile_successfully_copies_open_file_handle() {
+    using Mantid::DataObjects::BoxControllerNeXusIO;
+
+    auto pSaver = createTestBoxController();
+    pSaver->openFile(xxfFileName, "w");
+    const std::string destFilename(xxfFileName + "_copied");
+
+    TS_ASSERT_THROWS_NOTHING(pSaver->copyFileTo(destFilename));
+
+    TSM_ASSERT("File not copied successfully.", Poco::File(destFilename).exists());
+
+    if (Poco::File(destFilename).exists())
+      Poco::File(destFilename).remove();
   }
 
   //---------------------------------------------------------------------------------------------------------
@@ -208,8 +215,7 @@ public:
   template <typename FROM, typename TO> void WriteReadRead() {
     using Mantid::DataObjects::BoxControllerNeXusIO;
 
-    BoxControllerNeXusIO *pSaver(nullptr);
-    TS_ASSERT_THROWS_NOTHING(pSaver = createTestBoxController());
+    auto pSaver = createTestBoxController();
     pSaver->setDataType(sizeof(FROM), "MDEvent");
     std::string FullPathFile;
 
@@ -228,7 +234,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(pSaver->saveBlock(toWrite, 100));
 
-    IF<FROM, TO>::compareReadTheSame(pSaver, toWrite, nEvents, nColumns);
+    IF<FROM, TO>::compareReadTheSame(pSaver.get(), toWrite, nEvents, nColumns);
 
     // open and read what was written,
     pSaver->setDataType(sizeof(TO), "MDEvent");
@@ -239,7 +245,7 @@ public:
       TS_ASSERT_DELTA(toWrite[(nEvents - 1) * nColumns + i], toRead2[i], 1.e-6);
     }
 
-    delete pSaver;
+    pSaver->closeFile();
     if (Poco::File(FullPathFile).exists())
       Poco::File(FullPathFile).remove();
   }
@@ -255,8 +261,7 @@ public:
     using EDV = BoxControllerNeXusIO::EventDataVersion;
 
     // MDEvents, where the dimensionality of the event coordinates is 4
-    BoxControllerNeXusIO *pSaver(nullptr);
-    TS_ASSERT_THROWS_NOTHING(pSaver = createTestBoxController());
+    auto pSaver = createTestBoxController();
 
     // MDEvent cannot accept EDVLean
     TS_ASSERT_THROWS(pSaver->setEventDataVersion(EDV::EDVLean), const std::invalid_argument &);
@@ -267,8 +272,6 @@ public:
     TS_ASSERT_EQUALS(pSaver->dataEventCount(), dataSizePerEvent - 1);
     pSaver->setEventDataVersion(EDV::EDVGoniometer);
     TS_ASSERT_EQUALS(pSaver->dataEventCount(), dataSizePerEvent);
-
-    delete (pSaver);
   }
 
   void test_adjustEventDataBlock() {
@@ -277,8 +280,7 @@ public:
     using EDV = BoxControllerNeXusIO::EventDataVersion;
 
     // MDEvents, where the dimensionality of the event coordinates is 4
-    BoxControllerNeXusIO *pSaver(nullptr);
-    TS_ASSERT_THROWS_NOTHING(pSaver = createTestBoxController());
+    auto pSaver = createTestBoxController();
 
     // We're dealing with an old Nexus file
     pSaver->setEventDataVersion(EDV::EDVOriginal);
@@ -309,7 +311,7 @@ public:
 
 private:
   /// Create a Nexus reader/writer for boxController sc
-  Mantid::DataObjects::BoxControllerNeXusIO *createTestBoxController() {
-    return new Mantid::DataObjects::BoxControllerNeXusIO(sc.get());
+  std::unique_ptr<Mantid::DataObjects::BoxControllerNeXusIO> createTestBoxController() {
+    return std::make_unique<Mantid::DataObjects::BoxControllerNeXusIO>(sc.get());
   }
 };

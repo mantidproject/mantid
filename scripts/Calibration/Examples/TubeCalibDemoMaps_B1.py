@@ -16,7 +16,7 @@ import mantid.simpleapi as mantid
 
 # == Set parameters for calibration ==
 
-filename = 'MAP14919.raw'  # Calibration run ( found in \\isis\inst$\NDXMAPS\Instrument\data\cycle_09_5 )
+filename = "MAP14919.raw"  # Calibration run ( found in \\isis\inst$\NDXMAPS\Instrument\data\cycle_09_5 )
 rangeLower = 2000  # Integrate counts in each spectra from rangeLower to rangeUpper
 rangeUpper = 10000  #
 
@@ -27,7 +27,7 @@ ExpectedPositions = [4.0, 85.0, 128.0, 161.0, 252.0]
 # Expected positions of the edges and Gaussian peaks in pixels (initial values of fit parameters)
 
 # Set what we want to calibrate (e.g whole instrument or one door )
-CalibratedComponent = 'B1_window'  # Calibrate B1 window
+CalibratedComponent = "B1_window"  # Calibrate B1 window
 
 # Get calibration raw file and integrate it
 rawCalibInstWS = mantid.Load(filename)  # 'raw' in 'rawCalibInstWS' means unintegrated.
@@ -51,8 +51,7 @@ print("Created objects needed for calibration.")
 
 # == Get the calibration and put results into calibration table ==
 # also put peaks into PeakFile
-calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcForm,
-                                             fitPar=fitPar, outputPeak=True)
+calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcForm, fitPar=fitPar, outputPeak=True)
 print("Got calibration (new positions of detectors) ")
 
 # == Apply the Calibation ==
@@ -60,8 +59,8 @@ mantid.ApplyCalibration(Workspace=CalibInstWS, CalibrationTable=calibrationTable
 print("Applied calibration")
 
 # == Save workspace ==
-mantid.SaveNexusProcessed(CalibInstWS, 'TubeCalibDemoMapsResult.nxs', "Result of Running TCDemoMaps_B1.py")
+mantid.SaveNexusProcessed(CalibInstWS, "TubeCalibDemoMapsResult.nxs", "Result of Running TCDemoMaps_B1.py")
 print("saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMapsResult.nxs")
 
 # == Save Peak File ==
-tube.savePeak(peakTable, 'TubeDemoMaps01.txt')
+tube.savePeak(peakTable, "TubeDemoMaps01.txt")

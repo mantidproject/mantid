@@ -21,7 +21,7 @@ class HB3AFindPeaksTest(unittest.TestCase):
         # Loads in the testing files to workspaces to reduce testing overhead for multiple tests
         if self._data_ws is None:
             name = "HB3A_exp0724"
-            HB3AAdjustSampleNorm(Filename=",".join(f for f in self._files), OutputWorkspace=name, NormaliseBy='None')
+            HB3AAdjustSampleNorm(Filename=",".join(f for f in self._files), OutputWorkspace=name, NormaliseBy="None")
             self._data_ws = name
 
     def test_find_ub_peaks(self):
@@ -32,17 +32,17 @@ class HB3AFindPeaksTest(unittest.TestCase):
         # Remove the UB matrix from the input data
         ClearUB(mtd[self._data_ws])
 
-        peaks_md = FindPeaksMD(InputWorkspace=mtd[self._data_ws],
-                               PeakDistanceThreshold=0.25,
-                               DensityThresholdFactor=2000,
-                               CalculateGoniometerForCW=True,
-                               Wavelength=1.008,
-                               FlipX=True,
-                               InnerGoniometer=True)
+        peaks_md = FindPeaksMD(
+            InputWorkspace=mtd[self._data_ws],
+            PeakDistanceThreshold=0.25,
+            DensityThresholdFactor=2000,
+            CalculateGoniometerForCW=True,
+            Wavelength=1.008,
+            FlipX=True,
+            InnerGoniometer=True,
+        )
 
-        peaks = HB3AFindPeaks(InputWorkspace=mtd[self._data_ws],
-                              CellType="Orthorhombic",
-                              Centering="F")
+        peaks = HB3AFindPeaks(InputWorkspace=mtd[self._data_ws], CellType="Orthorhombic", Centering="F")
 
         # Verify that the algorithm found a UB matrix
         for i in range(peaks.size()):
@@ -57,16 +57,18 @@ class HB3AFindPeaksTest(unittest.TestCase):
         # Remove the UB matrix from the input data
         ClearUB(mtd[self._data_ws])
 
-        peaks = HB3AFindPeaks(InputWorkspace=mtd[self._data_ws],
-                              CellType="Orthorhombic",
-                              Centering="F",
-                              UseLattice=True,
-                              LatticeA=5.2384,
-                              LatticeB=5.2384,
-                              LatticeC=19.6519,
-                              LatticeAlpha=90.0,
-                              LatticeBeta=90.0,
-                              LatticeGamma=90.0)
+        peaks = HB3AFindPeaks(
+            InputWorkspace=mtd[self._data_ws],
+            CellType="Orthorhombic",
+            Centering="F",
+            UseLattice=True,
+            LatticeA=5.2384,
+            LatticeB=5.2384,
+            LatticeC=19.6519,
+            LatticeAlpha=90.0,
+            LatticeBeta=90.0,
+            LatticeGamma=90.0,
+        )
 
         # Verify that the algorithm found a UB matrix from lattice params
         for ws in peaks:
@@ -75,5 +77,5 @@ class HB3AFindPeaksTest(unittest.TestCase):
             self.assertTrue(ws.getNumberPeaks() > 0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

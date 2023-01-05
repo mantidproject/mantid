@@ -22,7 +22,8 @@ class IO(object):
     """
     Class for Abins I/O HDF file operations.
     """
-    def __init__(self, input_filename=None, group_name=None, setting='', autoconvolution=False):
+
+    def __init__(self, input_filename=None, group_name=None, setting="", autoconvolution=False):
 
         self._setting = setting
         self._autoconvolution = autoconvolution
@@ -51,8 +52,8 @@ class IO(object):
         else:
             raise ValueError("Invalid name of the group. String was expected.")
 
-        if filename.split('.')[-1] in AB_INITIO_FILE_EXTENSIONS:
-            core_name = filename[0:filename.rfind(".")]  # e.g. NaCl.phonon -> NaCl (core_name) -> NaCl.hdf5
+        if filename.split(".")[-1] in AB_INITIO_FILE_EXTENSIONS:
+            core_name = filename[0 : filename.rfind(".")]  # e.g. NaCl.phonon -> NaCl (core_name) -> NaCl.hdf5
         else:
             core_name = filename  # e.g. OUTCAR -> OUTCAR (core_name) -> OUTCAR.hdf5
 
@@ -103,18 +104,17 @@ class IO(object):
         from abins.parameters import non_performance_parameters as current_advanced_parameters
 
         previous_advanced_parameters = self.load(list_of_attributes=["advanced_parameters"])
-        previous_advanced_parameters = json.loads(
-            previous_advanced_parameters["attributes"]["advanced_parameters"])
+        previous_advanced_parameters = json.loads(previous_advanced_parameters["attributes"]["advanced_parameters"])
 
-        diff = {key: (value, previous_advanced_parameters.get(key, None))
-                for key, value in current_advanced_parameters.items()
-                if previous_advanced_parameters.get(key, None) != value}
-        diff.update({key: (None, value)
-                     for key, value in previous_advanced_parameters.items()
-                     if key not in current_advanced_parameters})
+        diff = {
+            key: (value, previous_advanced_parameters.get(key, None))
+            for key, value in current_advanced_parameters.items()
+            if previous_advanced_parameters.get(key, None) != value
+        }
+        diff.update({key: (None, value) for key, value in previous_advanced_parameters.items() if key not in current_advanced_parameters})
 
         if diff:
-            sections = ('instruments', 'sampling', 'hdf_groups')
+            sections = ("instruments", "sampling", "hdf_groups")
 
             for section in sections:
                 if section in diff:
@@ -122,7 +122,7 @@ class IO(object):
                     new_group, old_group = diff[section]
                     for key in new_group:
                         if key not in old_group:
-                            old_group[key] = '<key not present>'
+                            old_group[key] = "<key not present>"
 
                         if new_group[key] != old_group[key]:
                             logger.information(key)
@@ -162,7 +162,7 @@ class IO(object):
         Erases content of hdf file.
         """
 
-        with h5py.File(self._hdf_filename, 'w') as hdf_file:
+        with h5py.File(self._hdf_filename, "w") as hdf_file:
             hdf_file.close()
 
     def add_attribute(self, name=None, value=None):
@@ -181,8 +181,7 @@ class IO(object):
         self.add_attribute("setting", self._setting)
         self.add_attribute("autoconvolution", self._autoconvolution)
         self.add_attribute("filename", self._input_filename)
-        self.add_attribute("advanced_parameters",
-                           json.dumps(abins.parameters.non_performance_parameters))
+        self.add_attribute("advanced_parameters", json.dumps(abins.parameters.non_performance_parameters))
 
     def add_data(self, name=None, value=None):
         """
@@ -203,10 +202,10 @@ class IO(object):
             if isinstance(self._attributes[name], (np.int64, int, np.float64, float, str, bytes, bool)):
                 group.attrs[name] = self._attributes[name]
             else:
-                raise ValueError("Invalid value of attribute. String, "
-                                 "int, bool or bytes was expected! "
-                                 + name
-                                 + "= (invalid type : %s) " % type(self._attributes[name]))
+                raise ValueError(
+                    "Invalid value of attribute. String, "
+                    "int, bool or bytes was expected! " + name + "= (invalid type : %s) " % type(self._attributes[name])
+                )
 
     def _recursively_save_structured_data_to_group(self, hdf_file=None, path=None, dic=None):
         """
@@ -227,9 +226,9 @@ class IO(object):
                     del hdf_file[folder]
                 hdf_file.create_dataset(name=folder, data=item, compression="gzip", compression_opts=9)
             elif isinstance(item, dict):
-                self._recursively_save_structured_data_to_group(hdf_file=hdf_file, path=folder + '/', dic=item)
+                self._recursively_save_structured_data_to_group(hdf_file=hdf_file, path=folder + "/", dic=item)
             else:
-                raise ValueError('Cannot save %s type' % type(item))
+                raise ValueError("Cannot save %s type" % type(item))
 
     def _save_data(self, hdf_file=None, group=None):
         """
@@ -250,23 +249,21 @@ class IO(object):
             elif isinstance(self._data[item], list):
                 num_el = len(self._data[item])
                 for el in range(num_el):
-                    self._recursively_save_structured_data_to_group(hdf_file=hdf_file,
-                                                                    path=group.name + "/" + item + "/%s/" % el,
-                                                                    dic=self._data[item][el])
+                    self._recursively_save_structured_data_to_group(
+                        hdf_file=hdf_file, path=group.name + "/" + item + "/%s/" % el, dic=self._data[item][el]
+                    )
             # case data has a form of dictionary
             elif isinstance(self._data[item], dict):
-                self._recursively_save_structured_data_to_group(hdf_file=hdf_file,
-                                                                path=group.name + "/" + item + "/",
-                                                                dic=self._data[item])
+                self._recursively_save_structured_data_to_group(hdf_file=hdf_file, path=group.name + "/" + item + "/", dic=self._data[item])
             else:
-                raise ValueError('Invalid structured dataset. Cannot save %s type' % type(item))
+                raise ValueError("Invalid structured dataset. Cannot save %s type" % type(item))
 
     def save(self):
         """
         Saves datasets and attributes to an hdf file.
         """
 
-        with h5py.File(self._hdf_filename, 'a') as hdf_file:
+        with h5py.File(self._hdf_filename, "a") as hdf_file:
             if self._group_name not in hdf_file:
                 hdf_file.create_group(self._group_name)
             group = hdf_file[self._group_name]
@@ -281,8 +278,7 @@ class IO(object):
             path = os.getcwd()
             temp_file = self._hdf_filename[self._hdf_filename.find(".")] + "temphgfrt.hdf5"
 
-            subprocess.check_call(["h5repack" + " -i " + os.path.join(path, self._hdf_filename)
-                                   + " -o " + os.path.join(path, temp_file)])
+            subprocess.check_call(["h5repack" + " -i " + os.path.join(path, self._hdf_filename) + " -o " + os.path.join(path, temp_file)])
 
             shutil.move(os.path.join(path, temp_file), os.path.join(path, self._hdf_filename))
         except OSError:
@@ -302,8 +298,7 @@ class IO(object):
         if list_str is None:
             return False
 
-        if not (isinstance(list_str, list)
-                and all([isinstance(list_str[item], str) for item in range(len(list_str))])):
+        if not (isinstance(list_str, list) and all([isinstance(list_str[item], str) for item in range(len(list_str))])):
             raise ValueError("Invalid list of items to load!")
 
         return True
@@ -370,7 +365,7 @@ class IO(object):
         :returns: laundered item
         """
         if isinstance(item, str):
-            return item.encode('utf-8')
+            return item.encode("utf-8")
         else:
             return item
 
@@ -399,8 +394,8 @@ class IO(object):
             num_keys = len(hdf_group.keys())
             for item in range(num_keys):
                 structured_dataset_list.append(
-                    self._recursively_load_dict_contents_from_group(hdf_file=hdf_file,
-                                                                    path=hdf_group.name + "/%s" % item))
+                    self._recursively_load_dict_contents_from_group(hdf_file=hdf_file, path=hdf_group.name + "/%s" % item)
+                )
             return structured_dataset_list
         else:
             return self._recursively_load_dict_contents_from_group(hdf_file=hdf_file, path=hdf_group.name + "/")
@@ -420,7 +415,7 @@ class IO(object):
             if isinstance(item, h5py._hl.dataset.Dataset):
                 ans[key] = item[()]
             elif isinstance(item, h5py._hl.group.Group):
-                ans[key] = cls._recursively_load_dict_contents_from_group(hdf_file, path + key + '/')
+                ans[key] = cls._recursively_load_dict_contents_from_group(hdf_file, path + key + "/")
         return ans
 
     def load(self, list_of_attributes=None, list_of_datasets=None):
@@ -435,7 +430,7 @@ class IO(object):
         """
 
         results = {}
-        with h5py.File(self._hdf_filename, 'r') as hdf_file:
+        with h5py.File(self._hdf_filename, "r") as hdf_file:
 
             if self._group_name not in hdf_file:
                 raise ValueError("No group %s in hdf file." % self._group_name)
@@ -446,9 +441,7 @@ class IO(object):
                 results["attributes"] = self._load_attributes(list_of_attributes=list_of_attributes, group=group)
 
             if self._list_of_str(list_str=list_of_datasets):
-                results["datasets"] = self._load_datasets(hdf_file=hdf_file,
-                                                          list_of_datasets=list_of_datasets,
-                                                          group=group)
+                results["datasets"] = self._load_datasets(hdf_file=hdf_file, list_of_datasets=list_of_datasets, group=group)
 
         return results
 
@@ -466,8 +459,7 @@ class IO(object):
         hash_calculator = hashlib.sha512()
 
         # chop content of a file into chunks to minimize memory consumption for hash creation
-        with io.open(file=filename, mode="rb",
-                     buffering=BUF, newline=None) as file_handle:
+        with io.open(file=filename, mode="rb", buffering=BUF, newline=None) as file_handle:
             while True:
                 data = file_handle.read(BUF)
                 if not data:

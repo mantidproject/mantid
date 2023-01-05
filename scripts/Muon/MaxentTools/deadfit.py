@@ -13,8 +13,23 @@ from Muon.MaxentTools.zft import ZFT
 
 
 def DEADFIT(
-            datum, sigma, datt, DETECT_a, DETECT_b, DETECT_d, DETECT_e, RUNDATA_res, RUNDATA_frames, RUNDATA_fnorm, RUNDATA_hists,
-            MAXPAGE_n, MAXPAGE_f, PULSESHAPE_convol, SAVETIME_I2, mylog):
+    datum,
+    sigma,
+    datt,
+    DETECT_a,
+    DETECT_b,
+    DETECT_d,
+    DETECT_e,
+    RUNDATA_res,
+    RUNDATA_frames,
+    RUNDATA_fnorm,
+    RUNDATA_hists,
+    MAXPAGE_n,
+    MAXPAGE_f,
+    PULSESHAPE_convol,
+    SAVETIME_I2,
+    mylog,
+):
     (npts, ngroups) = datt.shape
 
     zr, zi = ZFT(MAXPAGE_f, PULSESHAPE_convol, DETECT_e, SAVETIME_I2)
@@ -29,12 +44,11 @@ def DEADFIT(
     Ex = np.sum(diff * datt**2 * isig, axis=0)
     tau = (Bx * Cx - Ax * Ex) / (Ax * Dx - Cx * Cx)
     scale = (Bx / Ax) + tau * (Cx / Ax)
-    SENSE_taud = tau * RUNDATA_res * \
-        RUNDATA_hists * RUNDATA_frames * RUNDATA_fnorm
+    SENSE_taud = tau * RUNDATA_res * RUNDATA_hists * RUNDATA_frames * RUNDATA_fnorm
     DETECT_c = scale - DETECT_d
     DETECT_d = scale
     corr = datt**2 * tau[np.newaxis, :]
-    datum = np.where(sigma <= 1.E3, datt + corr - np.outer(DETECT_e, DETECT_d), datum)
+    datum = np.where(sigma <= 1.0e3, datt + corr - np.outer(DETECT_e, DETECT_d), datum)
 
     mylog.debug("amplitudes of exponentials:" + str(DETECT_d))
     mylog.debug("changes this cycle:" + str(DETECT_c))

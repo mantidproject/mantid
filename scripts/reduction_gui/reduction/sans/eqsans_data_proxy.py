@@ -5,11 +5,13 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import sys
+
 # Check whether Mantid is available
 try:
-    from mantid.api import AnalysisDataService # noqa
-    from mantid.kernel import Logger # noqa
+    from mantid.api import AnalysisDataService  # noqa
+    from mantid.kernel import Logger  # noqa
     import mantid.simpleapi as api
+
     HAS_MANTID = True
 except:
     HAS_MANTID = False
@@ -17,8 +19,9 @@ except:
 
 class DataProxy(object):
     """
-        Class used to load a data file temporarily to extract header information
+    Class used to load a data file temporarily to extract header information
     """
+
     data_ws = None
 
     ## Error log

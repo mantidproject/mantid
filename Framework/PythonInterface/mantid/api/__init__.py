@@ -17,7 +17,7 @@ Defines Python objects that wrap the C++ API namespace.
 from mantid.utils import import_mantid_cext
 
 # insert all the classes from _api in the mantid.api namespace
-import_mantid_cext('._api', 'mantid.api', globals())
+import_mantid_cext("._api", "mantid.api", globals())
 
 ###############################################################################
 # Attach additional operators to workspaces

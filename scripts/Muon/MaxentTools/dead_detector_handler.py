@@ -13,8 +13,8 @@ def removeDeadDetectors(ws):
     for j in range(0, ws.getNumberHistograms()):
         if np.count_nonzero(ws.readY(j)) == 0:
             deadDetectors.append(j + 1)
-    if len(deadDetectors)==0:
-        return ws,deadDetectors
+    if len(deadDetectors) == 0:
+        return ws, deadDetectors
     maskAlg = mantid.AlgorithmManager.create("MaskDetectors")
     maskAlg.initialize()
     maskAlg.setChild(True)

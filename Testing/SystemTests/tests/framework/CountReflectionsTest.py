@@ -10,11 +10,11 @@ from SortHKLTest import HKLStatisticsTestMixin
 
 
 class CountReflectionsTest(HKLStatisticsTestMixin, systemtesting.MantidSystemTest):
-    '''
+    """
     This systemtest follows the same principle as the one for SortHKL. It loads data,
     computes statistics and checks them against reference data obtained from another
     software package (SORTAV, see SortHKLTest.py for a reference).
-    '''
+    """
 
     def runTest(self):
         self._init_test_data()
@@ -34,12 +34,11 @@ class CountReflectionsTest(HKLStatisticsTestMixin, systemtesting.MantidSystemTes
         point_group = self._get_point_group(space_group).getHMSymbol()
         centering = space_group[0]
 
-        return CountReflections(InputWorkspace=reflections, PointGroup=point_group,
-                                LatticeCentering=centering, MinDSpacing=0.5, MaxDSpacing=10.0)
+        return CountReflections(
+            InputWorkspace=reflections, PointGroup=point_group, LatticeCentering=centering, MinDSpacing=0.5, MaxDSpacing=10.0
+        )
 
     def _compare_statistics(self, statistics, reference_statistics):
-        self.assertEqual(round(statistics['Redundancy'], 1), round(reference_statistics['<N>'], 1))
-        self.assertEqual(statistics['UniqueReflections'], int(reference_statistics['Nunique']))
-        self.assertDelta(round(statistics['Completeness'] * 100.0, 1),
-                         round(reference_statistics['Completeness'], 1),
-                         0.5)
+        self.assertEqual(round(statistics["Redundancy"], 1), round(reference_statistics["<N>"], 1))
+        self.assertEqual(statistics["UniqueReflections"], int(reference_statistics["Nunique"]))
+        self.assertDelta(round(statistics["Completeness"] * 100.0, 1), round(reference_statistics["Completeness"], 1), 0.5)

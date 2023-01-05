@@ -28,8 +28,8 @@ RunNumber = 12024
 
 def CalibrateMerlin(RunNumber):
     # == Set parameters for calibration ==
-    previousDefaultInstrument = mantid.config['default.instrument']
-    mantid.config['default.instrument'] = "MERLIN"
+    previousDefaultInstrument = mantid.config["default.instrument"]
+    mantid.config["default.instrument"] = "MERLIN"
     filename = str(RunNumber)  # Name of calibration run.
     rangeLower = 3000  # Integrate counts in each spectra from rangeLower to rangeUpper
     rangeUpper = 20000  #
@@ -43,11 +43,10 @@ def CalibrateMerlin(RunNumber):
     # Set initial parameters for peak finding
     ExpectedHeight = 1000.0  # Expected Height of Gaussian Peaks (initial value of fit parameter)
     ExpectedWidth = 32.0  # Expected width of centre peak in Pixels (initial value of fit parameter)
-    ExpectedPositions = [35.0, 512.0,
-                         989.0]  # Expected positions of the edges and peak in pixels (initial values of fit parameters)
+    ExpectedPositions = [35.0, 512.0, 989.0]  # Expected positions of the edges and peak in pixels (initial values of fit parameters)
 
     # Set what we want to calibrate (e.g whole instrument or one door )
-    CalibratedComponent = 'MERLIN'  # Calibrate door 2
+    CalibratedComponent = "MERLIN"  # Calibrate door 2
 
     # Get calibration raw file and integrate it
     print(filename)
@@ -78,8 +77,9 @@ def CalibrateMerlin(RunNumber):
 
     # == Get the calibration and put results into calibration table ==
     # also put peaks into PeakFile
-    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcForm,
-                                                 outputPeak=True, fitPar=fitPar, plotTube=list(range(0, 280, 20)))
+    calibrationTable, peakTable = tube.calibrate(
+        CalibInstWS, CalibratedComponent, knownPos, funcForm, outputPeak=True, fitPar=fitPar, plotTube=list(range(0, 280, 20))
+    )
     print("Got calibration (new positions of detectors) and put slit peaks into file TubeDemoMerlin01.txt")
 
     # == Apply the Calibation ==
@@ -91,7 +91,7 @@ def CalibrateMerlin(RunNumber):
     # print("saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMerlinResult.nxs")
 
     # == Reset default instrument ==
-    mantid.config['default.instrument'] = previousDefaultInstrument
+    mantid.config["default.instrument"] = previousDefaultInstrument
 
     # ==== End of CalibrateMerlin() ====
 

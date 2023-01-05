@@ -27,11 +27,11 @@ class FileFinderWidget;
 
 namespace MantidWidgets {
 class IInstrumentActor;
-class InstrumentWidget;
-} // namespace MantidWidgets
+}
 
 namespace CustomInterfaces {
 
+class ALFInstrumentWidget;
 class IALFInstrumentPresenter;
 
 class MANTIDQT_DIRECT_DLL IALFInstrumentView {
@@ -40,7 +40,7 @@ public:
   virtual void setUpInstrument(std::string const &fileName) = 0;
 
   virtual QWidget *generateLoadWidget() = 0;
-  virtual MantidWidgets::InstrumentWidget *getInstrumentView() = 0;
+  virtual ALFInstrumentWidget *getInstrumentView() = 0;
 
   virtual void subscribePresenter(IALFInstrumentPresenter *presenter) = 0;
 
@@ -64,7 +64,7 @@ public:
   void setUpInstrument(std::string const &fileName) override;
 
   QWidget *generateLoadWidget() override;
-  MantidWidgets::InstrumentWidget *getInstrumentView() override { return m_instrumentWidget; };
+  ALFInstrumentWidget *getInstrumentView() override { return m_instrumentWidget; };
 
   void subscribePresenter(IALFInstrumentPresenter *presenter) override;
 
@@ -79,14 +79,14 @@ public:
   void warningBox(std::string const &message) override;
 
 private slots:
+  void reconnectInstrumentActor();
   void fileLoaded();
   void notifyShapeChanged();
   void selectWholeTube();
 
 private:
   API::FileFinderWidget *m_files;
-  MantidWidgets::InstrumentWidget *m_instrumentWidget;
-
+  ALFInstrumentWidget *m_instrumentWidget;
   IALFInstrumentPresenter *m_presenter;
 };
 } // namespace CustomInterfaces

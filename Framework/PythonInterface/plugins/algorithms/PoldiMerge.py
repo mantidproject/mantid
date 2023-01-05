@@ -14,9 +14,7 @@ import numpy as np
 
 class PoldiMerge(PythonAlgorithm):
     comparedPropertyNames = ["TablePositionX", "TablePositionY", "TablePositionZ"]
-    comparedInstrumentParameters = [("detector", "two_theta"),
-                                    ("chopper", "t0"),
-                                    ("chopper", "t0_const")]
+    comparedInstrumentParameters = [("detector", "two_theta"), ("chopper", "t0"), ("chopper", "t0_const")]
     outputWorkspaceName = None
     checkInstruments = True
 
@@ -30,18 +28,18 @@ class PoldiMerge(PythonAlgorithm):
         return "PoldiMerge takes a list of workspace names and adds the counts, resulting in a new workspace."
 
     def PyInit(self):
-        self.declareProperty(StringArrayProperty(name="WorkspaceNames",
-                                                 direction=Direction.Input),
-                             doc="List of Workspace names to merge.")
+        self.declareProperty(StringArrayProperty(name="WorkspaceNames", direction=Direction.Input), doc="List of Workspace names to merge.")
 
-        self.declareProperty(WorkspaceProperty(name="OutputWorkspace",
-                                               defaultValue="MergedPoldiWorkspaces",
-                                               direction=Direction.Output),
-                             doc="Workspace where all counts from the list workspaces have been added")
+        self.declareProperty(
+            WorkspaceProperty(name="OutputWorkspace", defaultValue="MergedPoldiWorkspaces", direction=Direction.Output),
+            doc="Workspace where all counts from the list workspaces have been added",
+        )
 
-        self.declareProperty("CheckInstruments", True, "If checked, only workspaces with equal"
-                                                       "instrument parameters are merged."
-                                                       "Do not disable without a very good reason.")
+        self.declareProperty(
+            "CheckInstruments",
+            True,
+            "If checked, only workspaces with equal" "instrument parameters are merged." "Do not disable without a very good reason.",
+        )
 
     def PyExec(self):
         self.checkInstruments = self.getProperty("CheckInstruments").value
@@ -78,15 +76,14 @@ class PoldiMerge(PythonAlgorithm):
 
         # If this option is enabled, don't do any checks
         if not self.checkInstruments:
-            self.log().warning('Instrument check has been disabled.')
+            self.log().warning("Instrument check has been disabled.")
             return True
 
         leftRun = leftWorkspace.getRun()
         rightRun = rightWorkspace.getRun()
 
         if not self.chopperSpeedsMatch(leftRun, rightRun):
-            raise RuntimeError(
-                "Chopper speeds do not match (" + '&'.join((leftWorkspace.name(), rightWorkspace.name())) + ")")
+            raise RuntimeError("Chopper speeds do not match (" + "&".join((leftWorkspace.name(), rightWorkspace.name())) + ")")
 
         return self.propertiesMatch(leftRun, rightRun) and self.instrumentsMatch(leftWorkspace, rightWorkspace)
 
@@ -138,7 +135,7 @@ class PoldiMerge(PythonAlgorithm):
                 if abs(self.getPropertyValue(leftProperty) - self.getPropertyValue(rightProperty)) > 5e-3:
                     raise RuntimeError("Property '%s' does not match" % (propertyName))
             else:
-                self.log().warning('Property ' + propertyName + ' is not present in data - skipping comparison.')
+                self.log().warning("Property " + propertyName + " is not present in data - skipping comparison.")
 
         return True
 

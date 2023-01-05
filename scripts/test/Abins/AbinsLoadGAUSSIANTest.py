@@ -11,7 +11,6 @@ import abins.test_helpers
 
 
 class AbinsLoadGAUSSIANTest(unittest.TestCase, abins.input.Tester):
-
     def tearDown(self):
         abins.test_helpers.remove_output_files(list_of_names=["_LoadGAUSSIAN"])
 
@@ -42,5 +41,5 @@ class AbinsLoadGAUSSIANTest(unittest.TestCase, abins.input.Tester):
         self.check(name=self._gaussian_system3, loader=abins.input.GAUSSIANLoader)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

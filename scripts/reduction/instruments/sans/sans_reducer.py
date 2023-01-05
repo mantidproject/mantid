@@ -18,15 +18,16 @@ import warnings
 import inspect
 
 ## Version number
-__version__ = '0.0'
+__version__ = "0.0"
 
 
 class SANSReducer(Reducer):
     """
-        SANS-specific implementation of the Reducer
+    SANS-specific implementation of the Reducer
     """
+
     ## Normalization options
-    #TODO: those also correspond to the timer and monitor spectra -> store this in instr conf instead
+    # TODO: those also correspond to the timer and monitor spectra -> store this in instr conf instead
     NORMALIZATION_NONE = None
     NORMALIZATION_TIME = 1
     NORMALIZATION_MONITOR = 0
@@ -106,9 +107,9 @@ class SANSReducer(Reducer):
 
     def set_instrument(self, configuration):
         """
-            Sets the instrument and put in the default beam center (usually the
-            center of the detector)
-            @param configuration: instrument object
+        Sets the instrument and put in the default beam center (usually the
+        center of the detector)
+        @param configuration: instrument object
         """
         super(SANSReducer, self).set_instrument(configuration)
         center = self.instrument.get_default_beam_center()
@@ -117,8 +118,8 @@ class SANSReducer(Reducer):
     @validate_step
     def set_normalizer(self, normalizer):
         """
-            Set normalization
-            @param normalizer: normalization step object
+        Set normalization
+        @param normalizer: normalization step object
         """
         self._normalizer = normalizer
 
@@ -132,15 +133,15 @@ class SANSReducer(Reducer):
     @validate_step
     def set_geometry_correcter(self, correcter):
         """
-            Set the ReductionStep object that takes care of the geometry correction
-            @param subtracter: ReductionStep object
+        Set the ReductionStep object that takes care of the geometry correction
+        @param subtracter: ReductionStep object
         """
         self.geometry_correcter = correcter
 
     def set_transmission(self, trans):
         """
-             Set the reduction step that will apply the transmission correction
-             @param trans: ReductionStep object
+        Set the reduction step that will apply the transmission correction
+        @param trans: ReductionStep object
         """
         if issubclass(trans.__class__, sans_reduction_steps.BaseTransmission) or trans is None:
             self._transmission_calculator = trans
@@ -153,8 +154,8 @@ class SANSReducer(Reducer):
     @validate_step
     def set_mask(self, mask):
         """
-            Set the reduction step that will apply the mask
-            @param mask: ReductionStep object
+        Set the reduction step that will apply the mask
+        @param mask: ReductionStep object
         """
         self._mask = mask
 
@@ -163,14 +164,14 @@ class SANSReducer(Reducer):
 
     def get_beam_center(self):
         """
-            Return the beam center position
+        Return the beam center position
         """
         return self._beam_finder.get_beam_center()
 
     def set_beam_finder(self, finder):
         """
-            Set the ReductionStep object that finds the beam center
-            @param finder: BaseBeamFinder object
+        Set the ReductionStep object that finds the beam center
+        @param finder: BaseBeamFinder object
         """
         if issubclass(finder.__class__, sans_reduction_steps.BaseBeamFinder) or finder is None:
             self._beam_finder = finder
@@ -179,14 +180,13 @@ class SANSReducer(Reducer):
 
     @validate_step
     def set_absolute_scale(self, scaler):
-        """
-        """
+        """ """
         self._absolute_scale = scaler
 
     def set_data_loader(self, loader):
         """
-            Set the loader for all data files
-            @param loader: ReductionStep object
+        Set the loader for all data files
+        @param loader: ReductionStep object
         """
         if issubclass(loader.__class__, ReductionStep):
             self._data_loader = loader
@@ -199,11 +199,11 @@ class SANSReducer(Reducer):
     @validate_step
     def set_sensitivity_correcter(self, correcter):
         """
-            Set the ReductionStep object that applies the sensitivity correction.
-            The ReductionStep object stores the sensitivity, so that the object
-            can be re-used on multiple data sets and the sensitivity will not be
-            recalculated.
-            @param correcter: ReductionStep object
+        Set the ReductionStep object that applies the sensitivity correction.
+        The ReductionStep object stores the sensitivity, so that the object
+        can be re-used on multiple data sets and the sensitivity will not be
+        recalculated.
+        @param correcter: ReductionStep object
         """
         self._sensitivity_correcter = correcter
 
@@ -220,18 +220,18 @@ class SANSReducer(Reducer):
     @validate_step
     def set_dark_current_subtracter(self, subtracter):
         """
-            Set the ReductionStep object that subtracts the dark current from the data.
-            The loaded dark current is stored by the ReductionStep object so that the
-            subtraction can be applied to multiple data sets without reloading it.
-            @param subtracter: ReductionStep object
+        Set the ReductionStep object that subtracts the dark current from the data.
+        The loaded dark current is stored by the ReductionStep object so that the
+        subtraction can be applied to multiple data sets without reloading it.
+        @param subtracter: ReductionStep object
         """
         self._dark_current_subtracter = subtracter
 
     @validate_step
     def set_solid_angle_correcter(self, correcter):
         """
-            Set the ReductionStep object that performs the solid angle correction.
-            @param subtracter: ReductionStep object
+        Set the ReductionStep object that performs the solid angle correction.
+        @param subtracter: ReductionStep object
         """
         if issubclass(correcter.__class__, ReductionStep) or correcter is None:
             self._solid_angle_correcter = correcter
@@ -241,34 +241,35 @@ class SANSReducer(Reducer):
     @validate_step
     def set_azimuthal_averager(self, averager):
         """
-            Set the ReductionStep object that performs azimuthal averaging
-            and transforms the 2D reduced data set into I(Q).
-            @param averager: ReductionStep object
+        Set the ReductionStep object that performs azimuthal averaging
+        and transforms the 2D reduced data set into I(Q).
+        @param averager: ReductionStep object
         """
         self._azimuthal_averager = averager
 
     def get_azimuthal_averager(self):
         """
-            Return the azimuthal average reduction step
+        Return the azimuthal average reduction step
         """
         return self._azimuthal_averager
 
     @validate_step
     def set_save_Iq(self, save_iq):
         """
-            Set the ReductionStep object that saves the I(q) output
-            @param averager: ReductionStep object
+        Set the ReductionStep object that saves the I(q) output
+        @param averager: ReductionStep object
         """
         self._save_iq = save_iq
 
     def set_bck_transmission(self, trans):
         """
-             Set the reduction step that will apply the transmission correction
-             @param trans: ReductionStep object
+        Set the reduction step that will apply the transmission correction
+        @param trans: ReductionStep object
         """
         lineno = inspect.currentframe().f_code.co_firstlineno
-        warnings.warn_explicit("SANSReducer.set_bck_transmission id deprecated: use get_background().set_transmission()",
-                               DeprecationWarning, __file__, lineno)
+        warnings.warn_explicit(
+            "SANSReducer.set_bck_transmission id deprecated: use get_background().set_transmission()", DeprecationWarning, __file__, lineno
+        )
 
         if issubclass(trans.__class__, sans_reduction_steps.BaseTransmission) or trans is None:
             self._background_subtracter.set_transmission(trans)
@@ -278,16 +279,16 @@ class SANSReducer(Reducer):
     @validate_step
     def set_IQxQy(self, calculator):
         """
-            Set the algorithm to compute I(Qx,Qy)
-            @param calculator: ReductionStep object
+        Set the algorithm to compute I(Qx,Qy)
+        @param calculator: ReductionStep object
         """
         self._two_dim_calculator = calculator
 
     def pre_process(self):
         """
-            Reduction steps that are meant to be executed only once per set
-            of data files. After this is executed, all files will go through
-            the list of reduction steps.
+        Reduction steps that are meant to be executed only once per set
+        of data files. After this is executed, all files will go through
+        the list of reduction steps.
         """
         if self.instrument is None:
             raise RuntimeError("SANSReducer: trying to run a reduction with no instrument specified")
@@ -305,10 +306,10 @@ class SANSReducer(Reducer):
 
     def _2D_steps(self):
         """
-            Creates a list of reduction steps to be applied to
-            each data set, including the background file.
-            Only the steps applied to a data set
-            before azimuthal averaging are included.
+        Creates a list of reduction steps to be applied to
+        each data set, including the background file.
+        Only the steps applied to a data set
+        before azimuthal averaging are included.
         """
         reduction_steps = []
 
@@ -339,11 +340,11 @@ class SANSReducer(Reducer):
 
     def _to_steps(self):
         """
-            Creates a list of reduction steps for each data set
-            following a predefined reduction approach. For each
-            predefined step, we check that a ReductionStep object
-            exists to take of it. If one does, we append it to the
-            list of steps to be executed.
+        Creates a list of reduction steps for each data set
+        following a predefined reduction approach. For each
+        predefined step, we check that a ReductionStep object
+        exists to take of it. If one does, we append it to the
+        list of steps to be executed.
         """
         # Get the basic 2D steps
         self._reduction_steps = self._2D_steps()

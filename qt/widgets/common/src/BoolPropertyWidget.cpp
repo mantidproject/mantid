@@ -27,7 +27,7 @@ BoolPropertyWidget::BoolPropertyWidget(Mantid::Kernel::PropertyWithValue<bool> *
   m_widgets.push_back(m_checkBox);
 
   // Add the checkbox at column 1
-  m_gridLayout->addWidget(m_checkBox, m_row, 1, nullptr);
+  m_gridLayout->addWidget(m_checkBox, m_row, 1);
 }
 
 //----------------------------------------------------------------------------------------------

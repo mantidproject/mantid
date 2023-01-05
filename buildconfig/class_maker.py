@@ -21,7 +21,7 @@ def get_year():
 def write_header(subproject, classname, filename, args):
     """Write a class header file"""
     print("Writing header file to", filename)
-    f = open(filename, 'w')
+    f = open(filename, "w")
 
     subproject_upper = subproject.upper()
 
@@ -67,8 +67,15 @@ public:{algorithm_header}}};
 
 }} // namespace {subproject}
 }} // namespace Mantid
-""".format(subproject=subproject, alg_include=alg_include, classname=classname, year=get_year(),
-           subproject_upper=subproject_upper, alg_class_declare=alg_class_declare, algorithm_header=algorithm_header)
+""".format(
+        subproject=subproject,
+        alg_include=alg_include,
+        classname=classname,
+        year=get_year(),
+        subproject_upper=subproject_upper,
+        alg_class_declare=alg_class_declare,
+        algorithm_header=algorithm_header,
+    )
 
     f.write(s)
     f.close()
@@ -77,14 +84,16 @@ public:{algorithm_header}}};
 def write_source(subproject, classname, filename, args):
     """Write a class source file"""
     print("Writing source file to", filename)
-    f = open(filename, 'w')
+    f = open(filename, "w")
 
     algorithm_top = """using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM({})
-""".format(classname)
+""".format(
+        classname
+    )
     algorithm_source = """
 //----------------------------------------------------------------------------------------------
 
@@ -124,7 +133,9 @@ void {algname}::init() {{
 void {algname}::exec() {{
   // TODO Auto-generated execute stub
 }}
-""".format(algname=classname)
+""".format(
+        algname=classname
+    )
 
     if not args.alg:
         algorithm_top = ""
@@ -146,8 +157,13 @@ namespace {subproject} {{
 }} // namespace {subproject}
 }} // namespace Mantid
 """.format(
-        year=get_year(), subproject=subproject, subfolder=args.subfolder, classname=classname,
-        algorithm_top=algorithm_top, algorithm_source=algorithm_source)
+        year=get_year(),
+        subproject=subproject,
+        subfolder=args.subfolder,
+        classname=classname,
+        algorithm_top=algorithm_top,
+        algorithm_source=algorithm_source,
+    )
     f.write(s)
     f.close()
 
@@ -155,7 +171,7 @@ namespace {subproject} {{
 def write_test(subproject, classname, filename, args):
     """Write a class test file"""
     print("Writing test file to", filename)
-    f = open(filename, 'w')
+    f = open(filename, "w")
 
     algorithm_test = """
   void test_Init()
@@ -187,7 +203,9 @@ def write_test(subproject, classname, filename, args):
     TS_ASSERT(outputWS);
     TS_FAIL("TODO: Check the results and remove this line");
   }}
-  """.format(algname=classname)
+  """.format(
+        algname=classname
+    )
 
     if not args.alg:
         algorithm_test = ""
@@ -221,8 +239,9 @@ public:
 
 
 }};
-""".format(year=get_year(), subproject=subproject, subfolder=args.subfolder, classname=classname,
-           algorithm_test=algorithm_test)
+""".format(
+        year=get_year(), subproject=subproject, subfolder=args.subfolder, classname=classname, algorithm_test=algorithm_test
+    )
     f.write(s)
     f.close()
 
@@ -230,7 +249,7 @@ public:
 def write_rst(subproject, classname, filename, args):
     """Write an algorithm rst documentation file"""
     print("Writing rst file to", filename)
-    f = open(filename, 'w')
+    f = open(filename, "w")
 
     s = """
 .. algorithm::
@@ -278,7 +297,9 @@ Output:
 
 .. sourcelink::
 
-""".format(algname=classname)
+""".format(
+        algname=classname
+    )
 
     f.write(s)
     f.close()
@@ -292,7 +313,7 @@ def generate(subproject, classname, overwrite, args):
     headerfile = os.path.join(basedir, "inc", header_folder, args.subfolder + classname + ".h")
     sourcefile = os.path.join(basedir, "src", args.subfolder + classname + ".cpp")
     testfile = os.path.join(basedir, "test", classname + "Test.h")
-    #up two from the subproject basedir and then docs\source\algorithms
+    # up two from the subproject basedir and then docs\source\algorithms
     mantiddir = os.path.dirname(os.path.dirname(basedir))
     rstfile = os.path.join(mantiddir, "docs", "source", "algorithms", classname + "-v1.rst")
 
@@ -333,40 +354,39 @@ def generate(subproject, classname, overwrite, args):
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description='Utility to create Mantid class files: header, source and test. '
-                                                 'version ' + VERSION)
-    parser.add_argument('subproject', metavar='SUBPROJECT', type=str,
-                        help='The subproject under Framework/; e.g. Kernel')
-    parser.add_argument('classname', metavar='CLASSNAME', type=str,
-                        help='Name of the class to create')
-    parser.add_argument('--force', dest='force', action='store_const',
-                        const=True, default=False,
-                        help='Force overwriting existing files. Use with caution!')
-    parser.add_argument('--no-header', dest='header', action='store_const',
-                        const=False, default=True,
-                        help="Don't create the header file")
-    parser.add_argument('--no-test', dest='test', action='store_const',
-                        const=False, default=True,
-                        help="Don't create the test file")
-    parser.add_argument('--no-cpp', dest='cpp', action='store_const',
-                        const=False, default=True,
-                        help="Don't create the cpp file")
-    parser.add_argument('--no-rst', dest='rst', action='store_const',
-                        const=False, default=True,
-                        help="Don't create the rst file")
-    parser.add_argument('--no-cmake', dest='cmake', action='store_const',
-                        const=False, default=True,
-                        help="Don't modify cmake files")
-    parser.add_argument('--alg', dest='alg', action='store_const',
-                        const=True, default=False,
-                        help='Create an Algorithm stub. This adds some methods common to algorithms.')
-    parser.add_argument('--subfolder', dest='subfolder',
-                        default="",
-                        help='Put the source under a subfolder below the main part of the project, e.g. '
-                             'Geometry/Instrument.')
-    parser.add_argument('--project', dest='project',
-                        default="Framework",
-                        help='The project in which this goes. Default: Framework. Can be MantidQt')
+    parser = argparse.ArgumentParser(description="Utility to create Mantid class files: header, source and test. " "version " + VERSION)
+    parser.add_argument("subproject", metavar="SUBPROJECT", type=str, help="The subproject under Framework/; e.g. Kernel")
+    parser.add_argument("classname", metavar="CLASSNAME", type=str, help="Name of the class to create")
+    parser.add_argument(
+        "--force",
+        dest="force",
+        action="store_const",
+        const=True,
+        default=False,
+        help="Force overwriting existing files. Use with caution!",
+    )
+    parser.add_argument("--no-header", dest="header", action="store_const", const=False, default=True, help="Don't create the header file")
+    parser.add_argument("--no-test", dest="test", action="store_const", const=False, default=True, help="Don't create the test file")
+    parser.add_argument("--no-cpp", dest="cpp", action="store_const", const=False, default=True, help="Don't create the cpp file")
+    parser.add_argument("--no-rst", dest="rst", action="store_const", const=False, default=True, help="Don't create the rst file")
+    parser.add_argument("--no-cmake", dest="cmake", action="store_const", const=False, default=True, help="Don't modify cmake files")
+    parser.add_argument(
+        "--alg",
+        dest="alg",
+        action="store_const",
+        const=True,
+        default=False,
+        help="Create an Algorithm stub. This adds some methods common to algorithms.",
+    )
+    parser.add_argument(
+        "--subfolder",
+        dest="subfolder",
+        default="",
+        help="Put the source under a subfolder below the main part of the project, e.g. " "Geometry/Instrument.",
+    )
+    parser.add_argument(
+        "--project", dest="project", default="Framework", help="The project in which this goes. Default: Framework. Can be MantidQt"
+    )
 
     args = parser.parse_args()
     subproject = args.subproject

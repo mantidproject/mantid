@@ -14,6 +14,7 @@ class CSGObjectTest(unittest.TestCase):
 
     def setUp(self):
         import testhelpers
+
         if not self.__class__._testws:
             alg = testhelpers.run_algorithm("LoadEmptyInstrument", Filename="ALF_Definition.xml", child=True)
             self.__class__._testws = alg.getProperty("OutputWorkspace").value
@@ -33,5 +34,6 @@ class CSGObjectTest(unittest.TestCase):
         box = shape.getBoundingBox()
         self.assertTrue(isinstance(box, BoundingBox))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

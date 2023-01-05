@@ -22,18 +22,20 @@ regex_old_style = re.compile(
     + r"(.*mantid\>.*?($|(?=\*\/))){0,1}"  # optional change history line
     + r"(.*http://doxygen.mantidproject.org.*?($|(?=\*\/))){0,1}",
     # optional code doc line
-
-    re.IGNORECASE | re.DOTALL | re.MULTILINE)
+    re.IGNORECASE | re.DOTALL | re.MULTILINE,
+)
 # new style statement, year in group 1
-regex_new_style = re.compile(r"^\W*Mantid.{0,100}?(\d{4}).{100,300}?SPDX - License - Identifier.*?$[\s]*",
-                             re.IGNORECASE | re.DOTALL | re.MULTILINE)
+regex_new_style = re.compile(
+    r"^\W*Mantid.{0,100}?(\d{4}).{100,300}?SPDX - License - Identifier.*?$[\s]*", re.IGNORECASE | re.DOTALL | re.MULTILINE
+)
 # Other copyright statement
-regex_other_style = re.compile(r"^.*?Copyright\s.{0,200}?(\d{4}).{0,400}?$",
-                               re.IGNORECASE | re.MULTILINE)
+regex_other_style = re.compile(r"^.*?Copyright\s.{0,200}?(\d{4}).{0,400}?$", re.IGNORECASE | re.MULTILINE)
 
 # lines to skip when determining where to put the copyright statement (they must be from the start of the file)
-regex_lines_to_skip = [re.compile(r"^#!.*?$[\s]*", re.MULTILINE),  # shebang line
-                       re.compile(r"^# -\*- coding: .+?$", re.MULTILINE)]  # encoding definition
+regex_lines_to_skip = [
+    re.compile(r"^#!.*?$[\s]*", re.MULTILINE),  # shebang line
+    re.compile(r"^# -\*- coding: .+?$", re.MULTILINE),
+]  # encoding definition
 
 # Finds empty C++ multiline comments
 regex_empty_comments = re.compile(r"(\/\*)[\/\s\*]{0,1000}?(\*\/)", re.MULTILINE)
@@ -47,13 +49,32 @@ excluded_files = [".cmake.in", ".desktop.in", ".rb.in", ".py.in", "systemtest.in
 # python file exxtensions
 python_file_extensions = [".py"]
 # extensions to ignore, don't even report these
-exts_to_ignore = [".txt", ".pyc", ".sh", ".template", ".png", ".odg", ".md",
-                  ".doxyfile", ".properties", ".pbs", ".rst", ".md5", ".xml",
-                  ".dot", ".ui", ".jpg", ".png", ".svg"]
+exts_to_ignore = [
+    ".txt",
+    ".pyc",
+    ".sh",
+    ".template",
+    ".png",
+    ".odg",
+    ".md",
+    ".doxyfile",
+    ".properties",
+    ".pbs",
+    ".rst",
+    ".md5",
+    ".xml",
+    ".dot",
+    ".ui",
+    ".jpg",
+    ".png",
+    ".svg",
+]
 # manually edit these files
-manually_editable_files = ["Testing/SystemTests/scripts/systemtest.in",
-                           "Testing/SystemTests/scripts/systemtest.bat.in",
-                           "installers/MacInstaller/Info.plist.in"]
+manually_editable_files = [
+    "Testing/SystemTests/scripts/systemtest.in",
+    "Testing/SystemTests/scripts/systemtest.bat.in",
+    "installers/MacInstaller/Info.plist.in",
+]
 
 # global reporting dictionaries
 report_new_statements_updated = {}
@@ -63,13 +84,14 @@ report_new_statement_current = {}
 report_unrecognized_statement = {}
 report_unmatched_files = {}
 
-reporting_dictionaries = {"new_statements_updated.txt": report_new_statements_updated,
-                          "old_statements_updated.txt": report_old_statements_updated,
-                          "new_statements_added.txt": report_new_statement_added,
-                          "new_statements_current.txt": report_new_statement_current,
-                          "unrecognized_statement.txt": report_unrecognized_statement,
-                          "unmatched_files.txt": report_unmatched_files
-                          }
+reporting_dictionaries = {
+    "new_statements_updated.txt": report_new_statements_updated,
+    "old_statements_updated.txt": report_old_statements_updated,
+    "new_statements_added.txt": report_new_statement_added,
+    "new_statements_current.txt": report_new_statement_current,
+    "unrecognized_statement.txt": report_unrecognized_statement,
+    "unmatched_files.txt": report_unmatched_files,
+}
 
 
 ######################################################################################################################
@@ -85,7 +107,9 @@ def get_copyright(year, comment_prefix="//"):
 {0} Copyright &copy; {1} ISIS Rutherford Appleton Laboratory UKRI,
 {0}   NScD Oak Ridge National Laboratory, European Spallation Source,
 {0}   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-{0} SPDX - License - Identifier: GPL - 3.0 +""".format(comment_prefix,year)
+{0} SPDX - License - Identifier: GPL - 3.0 +""".format(
+        comment_prefix, year
+    )
 
 
 def process_file_tree(path):
@@ -95,7 +119,7 @@ def process_file_tree(path):
     :return: None
     """
     for dir_name, subdir_list, file_list in os.walk(path):
-        print('Found directory: %s' % dir_name)
+        print("Found directory: %s" % dir_name)
         skipdir = False
         for ignore_directory in directories_to_ignore:
             if ignore_directory in dir_name:
@@ -105,7 +129,7 @@ def process_file_tree(path):
             # skip this directory
             continue
         for filename in file_list:
-            print('\t%s' % filename)
+            print("\t%s" % filename)
             basename, file_extension = os.path.splitext(filename)
             if file_extension.lower() in accepted_file_extensions:
                 process_file(os.path.join(dir_name, filename))
@@ -134,23 +158,23 @@ def process_file(filename):
             print("\t\tFile excluded by token", excluded_file)
             return
 
-    comment_prefix = r'//'
+    comment_prefix = r"//"
     basename, file_extension = os.path.splitext(filename)
     if file_extension.lower() in python_file_extensions:
-        comment_prefix = r'#'
+        comment_prefix = r"#"
 
     # load file text
     file_text = ""
-    with open (filename, "r", encoding="utf-8") as myfile:
-        file_text=myfile.read()
+    with open(filename, "r", encoding="utf-8") as myfile:
+        file_text = myfile.read()
 
     # find old style statement - remove and replace
     match_old = regex_old_style.search(file_text)
     year = None
     if match_old:
         file_text = remove_text_section(file_text, match_old.start(), match_old.end())
-        if comment_prefix == r'//':
-            file_text = regex_empty_comments.sub('', file_text)
+        if comment_prefix == r"//":
+            file_text = regex_empty_comments.sub("", file_text)
         year = match_old.group(1)
         print("\t\tOld statement", year)
         report_old_statements_updated[filename] = year
@@ -164,8 +188,8 @@ def process_file(filename):
                 report_new_statement_current[filename] = year
                 return
             file_text = remove_text_section(file_text, match_new.start(), match_new.end())
-            if comment_prefix == r'//':
-                file_text = regex_empty_comments.sub('', file_text)
+            if comment_prefix == r"//":
+                file_text = regex_empty_comments.sub("", file_text)
             print("\t\tNew statement", year)
             report_new_statements_updated[filename] = year
         else:
@@ -186,8 +210,8 @@ def process_file(filename):
     file_text = add_copyright_statement(copyright_statement, file_text)
 
     if not dry_run:
-        #save file text
-        with open (filename, "w", encoding="utf-8") as myfile:
+        # save file text
+        with open(filename, "w", encoding="utf-8") as myfile:
             myfile.write(file_text)
 
 
@@ -229,19 +253,16 @@ def remove_text_section(text, start, end):
 # Main function
 
 # Set up command line arguments
-parser = argparse.ArgumentParser(description='Updates copyright statements in Python and C++.')
-parser.add_argument("-i", "--input", type=str,
-                    help="The root path for files")
-parser.add_argument("-d", "--dryrun", help="Process and report on changes without altering files",
-                    action="store_true")
-parser.add_argument("-n", "--noreport", help="Suppress the writing of reporting files",
-                    action="store_true")
+parser = argparse.ArgumentParser(description="Updates copyright statements in Python and C++.")
+parser.add_argument("-i", "--input", type=str, help="The root path for files")
+parser.add_argument("-d", "--dryrun", help="Process and report on changes without altering files", action="store_true")
+parser.add_argument("-n", "--noreport", help="Suppress the writing of reporting files", action="store_true")
 args = parser.parse_args()
 
 # Handle the arguments
 root_path = args.input
 if root_path is None:
-    root_path = '.'
+    root_path = "."
 dry_run = args.dryrun
 
 # Process the files
@@ -249,11 +270,11 @@ process_file_tree(root_path)
 
 # Reporting
 if not args.noreport:
-    #write out reporting files
+    # write out reporting files
     for reporting_filename, reporting_dict in reporting_dictionaries.items():
         with open(reporting_filename, "w") as reporting_file:
             for key, value in reporting_dict.items():
-                reporting_file.write("{0}\t{1}{2}".format(key,value,os.linesep))
+                reporting_file.write("{0}\t{1}{2}".format(key, value, os.linesep))
 
 # Final comments
 print()

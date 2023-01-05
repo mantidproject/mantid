@@ -9,13 +9,15 @@ import unittest
 
 from mantid.api import AnalysisDataService
 from mantid.kernel import config, ConfigService
-from mantid.simpleapi import (CreateSampleWorkspace, MaskDetectors, DeleteWorkspace, LoadNexusProcessed, Load, Rebin)
-from sans.algorithm_detail.calculate_transmission_helper import (get_masked_det_ids,
-                                                                 get_idf_path_from_workspace,
-                                                                 get_workspace_indices_for_monitors,
-                                                                 apply_flat_background_correction_to_monitors,
-                                                                 apply_flat_background_correction_to_detectors,
-                                                                 get_region_of_interest)
+from mantid.simpleapi import CreateSampleWorkspace, MaskDetectors, DeleteWorkspace, LoadNexusProcessed, Load, Rebin
+from sans.algorithm_detail.calculate_transmission_helper import (
+    get_masked_det_ids,
+    get_idf_path_from_workspace,
+    get_workspace_indices_for_monitors,
+    apply_flat_background_correction_to_monitors,
+    apply_flat_background_correction_to_detectors,
+    get_region_of_interest,
+)
 
 
 class CalculateTransmissionHelperTest(unittest.TestCase):
@@ -28,7 +30,7 @@ class CalculateTransmissionHelperTest(unittest.TestCase):
 
     def _assert_collection_elements_are_equal(self, collection1, collection2):
         tolerance = 1e-7
-        self.assertEqual(len(collection1),  len(collection2))
+        self.assertEqual(len(collection1), len(collection2))
         for index in range(len(collection1)):
             self.assertTrue(abs(collection1[index] - collection2[index]) < tolerance)
 
@@ -43,15 +45,15 @@ class CalculateTransmissionHelperTest(unittest.TestCase):
         # For each spectrum we set the first two entries to 2 and the other two entries to 4.
         for index in range(workspace.getNumberHistograms()):
             data_y = workspace.dataY(index)
-            data_y[0] = 2.
-            data_y[1] = 2.
-            data_y[2] = 4.
-            data_y[3] = 4.
+            data_y[0] = 2.0
+            data_y[1] = 2.0
+            data_y[2] = 4.0
+            data_y[3] = 4.0
         return workspace
 
     @staticmethod
     def _get_path(file_name):
-        save_directory = config['defaultsave.directory']
+        save_directory = config["defaultsave.directory"]
         if not os.path.isdir(save_directory):
             save_directory = os.getcwd()
         return os.path.join(save_directory, file_name)
@@ -73,22 +75,26 @@ class CalculateTransmissionHelperTest(unittest.TestCase):
         cls.region_of_interest_workspace = region_of_interest_workspace
 
         # A region of interest xml file
-        roi_content = ("<?xml version=\"1.0\"?>\n"
-                       "\t<detector-masking>\n"
-                       "\t\t<group>\n"
-                       "\t\t\t<detids>6990-6996</detids>\n"
-                       "\t\t</group>\n"
-                       "\t</detector-masking>\n")
+        roi_content = (
+            '<?xml version="1.0"?>\n'
+            "\t<detector-masking>\n"
+            "\t\t<group>\n"
+            "\t\t\t<detids>6990-6996</detids>\n"
+            "\t\t</group>\n"
+            "\t</detector-masking>\n"
+        )
         cls.roi_file_path = cls._get_path(cls.roi_file)
         cls._save_file(cls.roi_file_path, roi_content)
 
         # A mask file
-        mask_content = ("<?xml version=\"1.0\"?>\n"
-                        "\t<detector-masking>\n"
-                        "\t\t<group>\n"
-                        "\t\t\t<detids>6991</detids>\n"
-                        "\t\t</group>\n"
-                        "\t</detector-masking>\n")
+        mask_content = (
+            '<?xml version="1.0"?>\n'
+            "\t<detector-masking>\n"
+            "\t\t<group>\n"
+            "\t\t\t<detids>6991</detids>\n"
+            "\t\t</group>\n"
+            "\t</detector-masking>\n"
+        )
         cls.mask_file_path = cls._get_path(cls.mask_file)
         cls._save_file(cls.mask_file_path, mask_content)
         ConfigService.Instance().setString("default.facility", " ")
@@ -126,16 +132,16 @@ class CalculateTransmissionHelperTest(unittest.TestCase):
         idf_path = get_idf_path_from_workspace(self.immutable_test_workspace)
         # Assert
         self.assertTrue(os.path.exists(idf_path))
-        self.assertEqual(os.path.basename(idf_path),  "LOQ_Definition_20020226-.xml")
+        self.assertEqual(os.path.basename(idf_path), "LOQ_Definition_20020226-.xml")
 
     def test_that_extracts_workspace_indices_of_monitor_when_monitors_are_present(self):
         # Act
         workspace_indices_generator = get_workspace_indices_for_monitors(self.immutable_test_workspace)
         # Assert
         workspace_indices = list(workspace_indices_generator)
-        self.assertEqual(len(workspace_indices),  2)
-        self.assertEqual(workspace_indices[0],  0)
-        self.assertEqual(workspace_indices[1],  1)
+        self.assertEqual(len(workspace_indices), 2)
+        self.assertEqual(workspace_indices[0], 0)
+        self.assertEqual(workspace_indices[1], 1)
 
     def test_that_returns_empty_generator_if_no_monitors_are_present(self):
         # Arrange
@@ -144,7 +150,7 @@ class CalculateTransmissionHelperTest(unittest.TestCase):
         workspace_indices_generator = get_workspace_indices_for_monitors(test_workspace_for_monitors)
         # Assert
         workspace_indices = list(workspace_indices_generator)
-        self.assertEqual(workspace_indices,  [])
+        self.assertEqual(workspace_indices, [])
         # Clean up
         DeleteWorkspace(test_workspace_for_monitors)
 
@@ -161,11 +167,14 @@ class CalculateTransmissionHelperTest(unittest.TestCase):
         tof_general_start = 24
         tof_general_stop = 38
         # Act
-        output_workspace = apply_flat_background_correction_to_monitors(workspace,
-                                                                        monitor_workspace_indices,
-                                                                        monitor_spectrum_tof_start,
-                                                                        monitor_spectrum_tof_stop, tof_general_start,
-                                                                        tof_general_stop)
+        output_workspace = apply_flat_background_correction_to_monitors(
+            workspace,
+            monitor_workspace_indices,
+            monitor_spectrum_tof_start,
+            monitor_spectrum_tof_stop,
+            tof_general_start,
+            tof_general_stop,
+        )
         # Assert
         # The first monitor  should have [0, 0, 2, 2], it has 2.1 in the last value, not clear why
         # The second monitor  should have [0, 0, 0, 0], it has 0.1 in the last value, not clear why. Note that
@@ -192,11 +201,11 @@ class CalculateTransmissionHelperTest(unittest.TestCase):
 
         # Assert
         # The monitors should not have changed
-        self._assert_collection_elements_are_equal(output_workspace.dataY(0), [2., 2., 4., 4.])
-        self._assert_collection_elements_are_equal(output_workspace.dataY(1), [2., 2., 4., 4.])
+        self._assert_collection_elements_are_equal(output_workspace.dataY(0), [2.0, 2.0, 4.0, 4.0])
+        self._assert_collection_elements_are_equal(output_workspace.dataY(1), [2.0, 2.0, 4.0, 4.0])
         # The detectors should be subtracted by 2. The last value seems to be slightly off
         for index in range(2, output_workspace.getNumberHistograms()):
-            self._assert_collection_elements_are_equal(output_workspace.dataY(index), [0., 0., 2., 2.1])
+            self._assert_collection_elements_are_equal(output_workspace.dataY(index), [0.0, 0.0, 2.0, 2.1])
 
         # Clean up
         DeleteWorkspace(workspace)
@@ -219,14 +228,14 @@ class CalculateTransmissionHelperTest(unittest.TestCase):
 
     def test_that_gets_region_of_interest_for_roi_mask_and_radius(self):
         # Act
-        detector_ids = get_region_of_interest(self.region_of_interest_workspace, roi_files=[self.roi_file_path],
-                                              mask_files=[self.mask_file_path], radius=0.01)
+        detector_ids = get_region_of_interest(
+            self.region_of_interest_workspace, roi_files=[self.roi_file_path], mask_files=[self.mask_file_path], radius=0.01
+        )
         # Assert
         # From Radius: [7872, 7873, 7874, 8000, 8001, 8002, 8003, 8128, 8129, 8130]
         # From Roi File: [6990, 6991, 6992, 6993, 6994, 6995, 6996]
         # Mask file removes: [6991]
-        expected_detector_ids = [6990, 6992, 6993, 6994, 6995, 6996, 7872, 7873, 7874, 8000,
-                                 8001, 8002, 8003, 8128, 8129, 8130]
+        expected_detector_ids = [6990, 6992, 6993, 6994, 6995, 6996, 7872, 7873, 7874, 8000, 8001, 8002, 8003, 8128, 8129, 8130]
         self._assert_collection_elements_are_equal(detector_ids, expected_detector_ids)
 
     def test_that_returns_empty_list_if_nothing_is_specified(self):

@@ -20,7 +20,7 @@ Logger = Union[logging.Logger, mantid.kernel.Logger]
 class Instrument:
     _name = None
 
-    def __init__(self, setting: str = ''):
+    def __init__(self, setting: str = ""):
         setting = self._check_setting(setting)
         self._setting = setting
         self._setting_parameters = None
@@ -70,21 +70,20 @@ class Instrument:
         settings are not mutable.)
         """
         if self._setting_parameters is None:
-            all_settings_data = self.get_parameters().get('settings')
+            all_settings_data = self.get_parameters().get("settings")
 
             if all_settings_data:
-                self._setting_parameters =  all_settings_data.get(
-                    self._check_setting(self.get_setting()))
+                self._setting_parameters = all_settings_data.get(self._check_setting(self.get_setting()))
             else:
                 self._setting_parameters = {}
 
         return self._setting_parameters
 
     def get_min_wavenumber(self):
-        return self.get_parameter('min_wavenumber', default=abins.parameters.sampling['min_wavenumber'])
+        return self.get_parameter("min_wavenumber", default=abins.parameters.sampling["min_wavenumber"])
 
     def get_max_wavenumber(self):
-        return self.get_parameter('max_wavenumber', default=abins.parameters.sampling['max_wavenumber'])
+        return self.get_parameter("max_wavenumber", default=abins.parameters.sampling["max_wavenumber"])
 
     def get_energy_bin_width(self):
         """Check abins.parameters and select appropriate energy bin in cm-1
@@ -104,13 +103,11 @@ class Instrument:
         max_wavenumber.
 
         """
-        bin_width = abins.parameters.sampling['bin_width']
+        bin_width = abins.parameters.sampling["bin_width"]
         if not bin_width:
-            bin_width = self.get_parameter('energy_bin_width', default=None)
+            bin_width = self.get_parameter("energy_bin_width", default=None)
         if not bin_width:
-            n_energy_bins = self.get_parameter(
-                'n_energy_bins',
-                default=abins.parameters.sampling['default_n_energy_bins'])
+            n_energy_bins = self.get_parameter("n_energy_bins", default=abins.parameters.sampling["default_n_energy_bins"])
             bin_width = self.get_max_wavenumber() / n_energy_bins
         return bin_width
 
@@ -134,7 +131,7 @@ class Instrument:
         """
         raise NotImplementedError()
 
-    def convolve_with_resolution_function(self, frequencies=None, bins=None, s_dft=None, scheme='auto'):
+    def convolve_with_resolution_function(self, frequencies=None, bins=None, s_dft=None, scheme="auto"):
         """
         Convolves discrete spectrum with the resolution function for the particular instrument.
 
@@ -165,8 +162,7 @@ class Instrument:
         if isinstance(angle, float):
             self._angle = angle
         else:
-            raise ValueError("Invalid value of a detector angle (%s, type(%s) = %s; should be float)."
-                             % (angle, angle, type(angle)))
+            raise ValueError("Invalid value of a detector angle (%s, type(%s) = %s; should be float)." % (angle, angle, type(angle)))
 
     def __str__(self):
         return self._name
@@ -211,26 +207,28 @@ class Instrument:
         else:
             parameters = abins.parameters.instruments.get(self.get_name())
 
-            if 'settings' not in parameters:
-                if setting != '':
-                    logger.warning(f'Instrument "{self.get_name()}" does not use settings. '
-                                   f'Ignoring selected setting "{setting}".')
-                return ''
+            if "settings" not in parameters:
+                if setting != "":
+                    logger.warning(f'Instrument "{self.get_name()}" does not use settings. ' f'Ignoring selected setting "{setting}".')
+                return ""
 
-            if setting == '':
-                if 'settings_default' in parameters:
-                    default = parameters['settings_default']
+            if setting == "":
+                if "settings_default" in parameters:
+                    default = parameters["settings_default"]
                     logger.notice(f'Using default setting "{default}" for instrument "{self.get_name()}"')
                     return default
-                raise ValueError(f'{self.get_name()} instrument does not have a default setting, '
-                                 + 'and no setting was specified. Accepted settings: '
-                                 + ', '.join(parameters['settings'].keys()))
+                raise ValueError(
+                    f"{self.get_name()} instrument does not have a default setting, "
+                    + "and no setting was specified. Accepted settings: "
+                    + ", ".join(parameters["settings"].keys())
+                )
 
-            downcased_settings = {s.lower(): s for s in parameters['settings']}
+            downcased_settings = {s.lower(): s for s in parameters["settings"]}
             if setting.lower() in downcased_settings:
                 return downcased_settings[setting.lower()]
 
             else:
-                raise ValueError(f'Setting "{setting}" is unknown for instrument {self.get_name()}. '
-                                 'Supported settings: '
-                                 + ', '.join(sorted(parameters['settings'].keys())))
+                raise ValueError(
+                    f'Setting "{setting}" is unknown for instrument {self.get_name()}. '
+                    "Supported settings: " + ", ".join(sorted(parameters["settings"].keys()))
+                )

@@ -343,6 +343,7 @@ private:
     TS_ASSERT_EQUALS(result.getPropertyValue("DegreeOfPolynomial"), "3");
     TS_ASSERT_EQUALS(result.getPropertyValue("CostFunction"), "Unweighted least squares");
     TS_ASSERT_EQUALS(result.getPropertyValue("PolarizationAnalysis"), "1");
+    TS_ASSERT_EQUALS(result.getPropertyValue("PolarizationEfficiencies"), "test_eff_workspace");
     TS_ASSERT_EQUALS(result.getPropertyValue("FloodCorrection"), "Workspace");
     TS_ASSERT_EQUALS(result.getPropertyValue("FloodWorkspace"), "test_workspace");
     assertProperty(result, "StartOverlap", 7.5);

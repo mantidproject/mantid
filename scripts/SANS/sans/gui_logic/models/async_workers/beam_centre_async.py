@@ -38,7 +38,7 @@ class BeamCentreFields:
 
 
 class BeamCentreAsync(IQtAsync):
-    def __init__(self, parent_presenter: 'BeamCentrePresenter'):
+    def __init__(self, parent_presenter: "BeamCentrePresenter"):
         super().__init__()
         self._parent_presenter = parent_presenter
         self._logger = Logger("CentreFinder")
@@ -70,24 +70,45 @@ class BeamCentreAsync(IQtAsync):
         pos_2 = settings.lab_pos_2 if settings.component is DetectorType.LAB else settings.hab_pos_2
 
         if settings.centre_of_mass:
-            centre = centre_finder(state, r_min=settings.r_min, r_max=settings.r_max,
-                                   max_iter=settings.max_iterations,
-                                   x_start=pos_1, y_start=pos_2,
-                                   tolerance=settings.tolerance,
-                                   find_direction=settings.find_direction,
-                                   reduction_method=False, component=settings.component)
+            centre = centre_finder(
+                state,
+                r_min=settings.r_min,
+                r_max=settings.r_max,
+                max_iter=settings.max_iterations,
+                x_start=pos_1,
+                y_start=pos_2,
+                tolerance=settings.tolerance,
+                find_direction=settings.find_direction,
+                reduction_method=False,
+                component=settings.component,
+            )
 
-            centre = centre_finder(state, r_min=settings.r_min, r_max=settings.r_max,
-                                   max_iter=settings.max_iterations,
-                                   x_start=centre['pos1'], y_start=centre['pos2'],
-                                   tolerance=settings.tolerance,
-                                   find_direction=settings.find_direction, reduction_method=True,
-                                   verbose=settings.verbose, component=settings.component)
+            centre = centre_finder(
+                state,
+                r_min=settings.r_min,
+                r_max=settings.r_max,
+                max_iter=settings.max_iterations,
+                x_start=centre["pos1"],
+                y_start=centre["pos2"],
+                tolerance=settings.tolerance,
+                find_direction=settings.find_direction,
+                reduction_method=True,
+                verbose=settings.verbose,
+                component=settings.component,
+            )
         else:
-            centre = centre_finder(state, r_min=settings.r_min, r_max=settings.r_max,
-                                   max_iter=settings.max_iterations, x_start=pos_1,
-                                   y_start=pos_2, tolerance=settings.tolerance,
-                                   find_direction=settings.find_direction, reduction_method=True,
-                                   verbose=settings.verbose, component=settings.component)
+            centre = centre_finder(
+                state,
+                r_min=settings.r_min,
+                r_max=settings.r_max,
+                max_iter=settings.max_iterations,
+                x_start=pos_1,
+                y_start=pos_2,
+                tolerance=settings.tolerance,
+                find_direction=settings.find_direction,
+                reduction_method=True,
+                verbose=settings.verbose,
+                component=settings.component,
+            )
 
         return centre

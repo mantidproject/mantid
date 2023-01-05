@@ -9,9 +9,8 @@
 import copy
 
 import matplotlib.axes
-import matplotlib.cm as cm
 import matplotlib.colors
-from matplotlib import axis, ticker  # noqa
+from matplotlib import axis, ticker, colormaps  # noqa
 from matplotlib.ticker import NullFormatter,\
     ScalarFormatter, LogFormatterSciNotation
 
@@ -402,11 +401,11 @@ class PlotsLoader(object):
         # colorbar = image.colorbar
         image.set_clim(*sorted([dic["min"], dic["max"]]))
         image.set_label(dic["label"])
-        image.set_cmap(cm.get_cmap(dic["cmap"]))
+        image.set_cmap(colormaps[dic["cmap"]])
         image.set_interpolation(dic["interpolation"])
         # Try and make the cmap line up but sometimes it wont
         try:
-            image.axes.set_cmap(cm.get_cmap(dic["cmap"]))
+            image.axes.set_cmap(colormaps[dic["cmap"]])
         except AttributeError as e:
             logger.debug(
                 "PlotsLoader - The Image accessed did not have an axes with the ability to set the cmap: "

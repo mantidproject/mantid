@@ -100,6 +100,9 @@ void updatePolarizationCorrectionProperties(AlgorithmRuntimeProps &properties,
     return;
 
   AlgorithmProperties::update("PolarizationAnalysis", true, properties);
+  if (corrections.correctionType() == PolarizationCorrectionType::Workspace) {
+    AlgorithmProperties::update("PolarizationEfficiencies", corrections.workspace(), properties);
+  }
 }
 
 void updateFloodCorrectionProperties(AlgorithmRuntimeProps &properties, FloodCorrections const &corrections) {

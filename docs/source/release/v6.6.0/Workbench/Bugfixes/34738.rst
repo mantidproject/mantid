@@ -1,0 +1,1 @@
+- Fixed links to tutorials on the About widget.

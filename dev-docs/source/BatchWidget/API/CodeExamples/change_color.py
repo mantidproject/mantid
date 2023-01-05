@@ -9,11 +9,9 @@ from mantidqtpython import MantidQt
 
 # Inside the parent view
 def setup(self):
-    self.table = MantidQt.MantidWidgets.Batch.JobTreeView(
-        ["Column 1", "Column 2"], cell(""), self)
+    self.table = MantidQt.MantidWidgets.Batch.JobTreeView(["Column 1", "Column 2"], cell(""), self)
 
-    self.table_signals = \
-        MantidQt.MantidWidgets.Batch.JobTreeViewSignalAdapter(self.table, self)
+    self.table_signals = MantidQt.MantidWidgets.Batch.JobTreeViewSignalAdapter(self.table, self)
 
     self.table.appendChildRowOf(row([]), [cell("Value for Column A"), cell("Value for Column B")])
     self.change_colour_to_red(location=row([0]), column_index=1)

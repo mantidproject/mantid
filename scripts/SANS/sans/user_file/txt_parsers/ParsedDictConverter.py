@@ -7,8 +7,7 @@
 import abc
 
 from sans.common.enums import DetectorType, RangeStepType, RebinType, FitType, DataType, FitModeForMerge
-from sans.common.general_functions import get_ranges_from_event_slice_setting, get_ranges_for_rebin_setting, \
-    get_ranges_for_rebin_array
+from sans.common.general_functions import get_ranges_from_event_slice_setting, get_ranges_for_rebin_setting, get_ranges_for_rebin_array
 from sans.state.AllStates import AllStates
 from sans.state.IStateParser import IStateParser
 from sans.state.StateObjects.StateAdjustment import StateAdjustment
@@ -25,9 +24,24 @@ from sans.state.StateObjects.StateSliceEvent import StateSliceEvent
 from sans.state.StateObjects.StateWavelength import StateWavelength
 from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import StateWavelengthAndPixelAdjustment
 from sans.user_file.parser_helpers.wavelength_parser import parse_range_wavelength
-from sans.user_file.settings_tags import TubeCalibrationFileId, MaskId, LimitsId, complex_range, GravityId, \
-    QResolutionId, OtherId, MonId, TransId, FitId, BackId, SampleId, SetId, DetectorId, simple_range, \
-    rebin_string_values
+from sans.user_file.settings_tags import (
+    TubeCalibrationFileId,
+    MaskId,
+    LimitsId,
+    complex_range,
+    GravityId,
+    QResolutionId,
+    OtherId,
+    MonId,
+    TransId,
+    FitId,
+    BackId,
+    SampleId,
+    SetId,
+    DetectorId,
+    simple_range,
+    rebin_string_values,
+)
 
 
 class ParsedDictConverter(IStateParser):
@@ -78,11 +92,13 @@ class ParsedDictConverter(IStateParser):
         return state
 
     def get_state_calculate_transmission(self):
-        state = self._all_states.adjustment.calculate_transmission if self._all_states else\
-            get_calculate_transmission(instrument=self._instrument)
+        state = (
+            self._all_states.adjustment.calculate_transmission
+            if self._all_states
+            else get_calculate_transmission(instrument=self._instrument)
+        )
 
-        self._set_single_entry(state, "transmission_radius_on_detector", TransId.RADIUS,
-                               apply_to_value=_convert_mm_to_m)
+        self._set_single_entry(state, "transmission_radius_on_detector", TransId.RADIUS, apply_to_value=_convert_mm_to_m)
 
         # List of transmission roi files
         if TransId.ROI in self._input_dict:
@@ -144,8 +160,7 @@ class ParsedDictConverter(IStateParser):
             sample = state.fit[DataType.SAMPLE.value]
 
             # 1 Fit type settings
-            clear_settings = [item for item in fit_general if item.data_type is None
-                              and item.fit_type is FitType.NO_FIT]
+            clear_settings = [item for item in fit_general if item.data_type is None and item.fit_type is FitType.NO_FIT]
 
             if clear_settings:
                 clear_settings = clear_settings[-1]
@@ -154,8 +169,7 @@ class ParsedDictConverter(IStateParser):
                 can.fit_type = clear_settings.fit_type
 
             # 2. General settings
-            general_settings = [item for item in fit_general if item.data_type is None
-                                and item.fit_type is not FitType.NO_FIT]
+            general_settings = [item for item in fit_general if item.data_type is None and item.fit_type is not FitType.NO_FIT]
             if general_settings:
                 general_settings = general_settings[-1]
 
@@ -286,9 +300,10 @@ class ParsedDictConverter(IStateParser):
             pos1 = mask_line.x
             pos2 = mask_line.y
             if angle is None or width is None:
-                raise RuntimeError("UserFileStateDirector: You specified a line mask without an angle or a width."
-                                   "The parameters were: width {0}; angle {1}; x {2}; y {3}".format(width, angle,
-                                                                                                    pos1, pos2))
+                raise RuntimeError(
+                    "UserFileStateDirector: You specified a line mask without an angle or a width."
+                    "The parameters were: width {0}; angle {1}; x {2}; y {3}".format(width, angle, pos1, pos2)
+                )
             pos1 = 0.0 if pos1 is None else pos1
             pos2 = 0.0 if pos2 is None else pos2
 
@@ -306,9 +321,11 @@ class ParsedDictConverter(IStateParser):
             stop_time = []
             for times in mask_time_general:
                 if times.start > times.start:
-                    raise RuntimeError("UserFileStateDirector: You specified a general time mask with a start time {0}"
-                                       " which is larger than the stop time {1} of the mask. This is not"
-                                       " valid.".format(times.start, times.stop))
+                    raise RuntimeError(
+                        "UserFileStateDirector: You specified a general time mask with a start time {0}"
+                        " which is larger than the stop time {1} of the mask. This is not"
+                        " valid.".format(times.start, times.stop)
+                    )
                 start_time.append(times.start)
                 stop_time.append(times.stop)
             state_builder.set_bin_mask_general_start(start_time)
@@ -325,9 +342,11 @@ class ParsedDictConverter(IStateParser):
             stop_times_lab = []
             for times in mask_times:
                 if times.start > times.start:
-                    raise RuntimeError("UserFileStateDirector: You specified a general time mask with a start time {0}"
-                                       " which is larger than the stop time {1} of the mask. This is not"
-                                       " valid.".format(times.start, times.stop))
+                    raise RuntimeError(
+                        "UserFileStateDirector: You specified a general time mask with a start time {0}"
+                        " which is larger than the stop time {1} of the mask. This is not"
+                        " valid.".format(times.start, times.stop)
+                    )
                 if times.detector_type is DetectorType.HAB:
                     start_times_hab.append(times.start)
                     stop_times_hab.append(times.stop)
@@ -335,8 +354,7 @@ class ParsedDictConverter(IStateParser):
                     start_times_lab.append(times.start)
                     stop_times_lab.append(times.stop)
                 else:
-                    RuntimeError("UserFileStateDirector: The specified detector {0} is not "
-                                 "known".format(times.detector_type))
+                    RuntimeError("UserFileStateDirector: The specified detector {0} is not " "known".format(times.detector_type))
             if start_times_hab:
                 state_builder.set_HAB_bin_mask_start(start_times_hab)
             if stop_times_hab:
@@ -381,9 +399,11 @@ class ParsedDictConverter(IStateParser):
             stop_range = []
             for spectrum_range in spectrum_ranges:
                 if spectrum_range.start > spectrum_range.start:
-                    raise RuntimeError("UserFileStateDirector: You specified a spectrum range with a start value {0}"
-                                       " which is larger than the stop value {1}. This is not"
-                                       " valid.".format(spectrum_range.start, spectrum_range.stop))
+                    raise RuntimeError(
+                        "UserFileStateDirector: You specified a spectrum range with a start value {0}"
+                        " which is larger than the stop value {1}. This is not"
+                        " valid.".format(spectrum_range.start, spectrum_range.stop)
+                    )
                 start_range.append(spectrum_range.start)
                 stop_range.append(spectrum_range.stop)
             # Note that we are using an unusual setter here. Check mask.py for why we are doing this.
@@ -402,10 +422,11 @@ class ParsedDictConverter(IStateParser):
                 elif single_vertical_strip_mask.detector_type is DetectorType.LAB:
                     entry_lab.append(single_vertical_strip_mask.entry)
                 else:
-                    raise RuntimeError("UserFileStateDirector: The vertical single strip mask {0} has an unknown "
-                                       "detector {1} associated"
-                                       " with it.".format(single_vertical_strip_mask.entry,
-                                                          single_vertical_strip_mask.detector_type))
+                    raise RuntimeError(
+                        "UserFileStateDirector: The vertical single strip mask {0} has an unknown "
+                        "detector {1} associated"
+                        " with it.".format(single_vertical_strip_mask.entry, single_vertical_strip_mask.detector_type)
+                    )
             if entry_hab:
                 state_builder.set_HAB_single_vertical_strip_mask(entry_hab)
             if entry_lab:
@@ -428,10 +449,11 @@ class ParsedDictConverter(IStateParser):
                     start_lab.append(range_vertical_strip_mask.start)
                     stop_lab.append(range_vertical_strip_mask.stop)
                 else:
-                    raise RuntimeError("UserFileStateDirector: The vertical range strip mask {0} has an unknown "
-                                       "detector {1} associated "
-                                       "with it.".format(range_vertical_strip_mask.entry,
-                                                         range_vertical_strip_mask.detector_type))
+                    raise RuntimeError(
+                        "UserFileStateDirector: The vertical range strip mask {0} has an unknown "
+                        "detector {1} associated "
+                        "with it.".format(range_vertical_strip_mask.entry, range_vertical_strip_mask.detector_type)
+                    )
             if start_hab:
                 state_builder.set_HAB_range_vertical_strip_start(start_hab)
             if stop_hab:
@@ -454,10 +476,11 @@ class ParsedDictConverter(IStateParser):
                 elif single_horizontal_strip_mask.detector_type is DetectorType.LAB:
                     entry_lab.append(single_horizontal_strip_mask.entry)
                 else:
-                    raise RuntimeError("UserFileStateDirector: The horizontal single strip mask {0} has an unknown "
-                                       "detector {1} associated"
-                                       " with it.".format(single_horizontal_strip_mask.entry,
-                                                          single_horizontal_strip_mask.detector_type))
+                    raise RuntimeError(
+                        "UserFileStateDirector: The horizontal single strip mask {0} has an unknown "
+                        "detector {1} associated"
+                        " with it.".format(single_horizontal_strip_mask.entry, single_horizontal_strip_mask.detector_type)
+                    )
             if entry_hab:
                 state_builder.set_HAB_single_horizontal_strip_mask(entry_hab)
             if entry_lab:
@@ -480,10 +503,11 @@ class ParsedDictConverter(IStateParser):
                     start_lab.append(range_horizontal_strip_mask.start)
                     stop_lab.append(range_horizontal_strip_mask.stop)
                 else:
-                    raise RuntimeError("UserFileStateDirector: The vertical range strip mask {0} has an unknown "
-                                       "detector {1} associated "
-                                       "with it.".format(range_horizontal_strip_mask.entry,
-                                                         range_horizontal_strip_mask.detector_type))
+                    raise RuntimeError(
+                        "UserFileStateDirector: The vertical range strip mask {0} has an unknown "
+                        "detector {1} associated "
+                        "with it.".format(range_horizontal_strip_mask.entry, range_horizontal_strip_mask.detector_type)
+                    )
             if start_hab:
                 state_builder.set_HAB_range_horizontal_strip_start(start_hab)
             if stop_hab:
@@ -509,10 +533,11 @@ class ParsedDictConverter(IStateParser):
 
             for block in blocks:
                 if block.horizontal1 > block.horizontal2 or block.vertical1 > block.vertical2:
-                    raise RuntimeError("UserFileStateDirector: The block mask seems to have inconsistent entries. "
-                                       "The values are horizontal_start {0}; horizontal_stop {1}; vertical_start {2};"
-                                       " vertical_stop {3}".format(block.horizontal1, block.horizontal2,
-                                                                   block.vertical1, block.vertical2))
+                    raise RuntimeError(
+                        "UserFileStateDirector: The block mask seems to have inconsistent entries. "
+                        "The values are horizontal_start {0}; horizontal_stop {1}; vertical_start {2};"
+                        " vertical_stop {3}".format(block.horizontal1, block.horizontal2, block.vertical1, block.vertical2)
+                    )
                 if block.detector_type is DetectorType.HAB:
                     horizontal_start_hab.append(block.horizontal1)
                     horizontal_stop_hab.append(block.horizontal2)
@@ -524,9 +549,11 @@ class ParsedDictConverter(IStateParser):
                     vertical_start_lab.append(block.vertical1)
                     vertical_stop_lab.append(block.vertical2)
                 else:
-                    raise RuntimeError("UserFileStateDirector: The block mask has an unknown "
-                                       "detector {0} associated "
-                                       "with it.".format(block.detector_type))
+                    raise RuntimeError(
+                        "UserFileStateDirector: The block mask has an unknown "
+                        "detector {0} associated "
+                        "with it.".format(block.detector_type)
+                    )
             if horizontal_start_hab:
                 state_builder.set_HAB_block_horizontal_start(horizontal_start_hab)
             if horizontal_stop_hab:
@@ -553,9 +580,11 @@ class ParsedDictConverter(IStateParser):
                     horizontal_lab.append(block_cross.horizontal)
                     vertical_lab.append(block_cross.vertical)
                 else:
-                    raise RuntimeError("UserFileStateDirector: The block cross mask has an unknown "
-                                       "detector {0} associated "
-                                       "with it.".format(block_cross.detector_type))
+                    raise RuntimeError(
+                        "UserFileStateDirector: The block cross mask has an unknown "
+                        "detector {0} associated "
+                        "with it.".format(block_cross.detector_type)
+                    )
             if horizontal_hab:
                 state_builder.set_HAB_block_cross_horizontal(horizontal_hab)
             if vertical_hab:
@@ -591,8 +620,10 @@ class ParsedDictConverter(IStateParser):
             # Should the user have chosen several values, then the last element is selected
             radius = radii[-1]
             if radius.start > radius.stop > 0:
-                raise RuntimeError("UserFileStateDirector: The inner radius {0} appears to be larger that the outer"
-                                   " radius {1} of the mask.".format(radius.start, radius.stop))
+                raise RuntimeError(
+                    "UserFileStateDirector: The inner radius {0} appears to be larger that the outer"
+                    " radius {1} of the mask.".format(radius.start, radius.stop)
+                )
             min_value = None if radius.start is None else _convert_mm_to_m(radius.start)
             max_value = None if radius.stop is None else _convert_mm_to_m(radius.stop)
             state_builder.set_radius_min(min_value)
@@ -614,8 +645,10 @@ class ParsedDictConverter(IStateParser):
                 elif correction_x.detector_type is DetectorType.LAB:
                     state_builder.set_LAB_x_translation_correction(_convert_mm_to_m(correction_x.entry))
                 else:
-                    raise RuntimeError("UserFileStateDirector: An unknown detector {0} was used for the"
-                                       " x correction.".format(correction_x.detector_type))
+                    raise RuntimeError(
+                        "UserFileStateDirector: An unknown detector {0} was used for the"
+                        " x correction.".format(correction_x.detector_type)
+                    )
 
         if DetectorId.CORRECTION_Y in self._input_dict:
             corrections_in_y = self._input_dict[DetectorId.CORRECTION_Y]
@@ -625,8 +658,10 @@ class ParsedDictConverter(IStateParser):
                 elif correction_y.detector_type is DetectorType.LAB:
                     state_builder.set_LAB_y_translation_correction(_convert_mm_to_m(correction_y.entry))
                 else:
-                    raise RuntimeError("UserFileStateDirector: An unknown detector {0} was used for the"
-                                       " y correction.".format(correction_y.detector_type))
+                    raise RuntimeError(
+                        "UserFileStateDirector: An unknown detector {0} was used for the"
+                        " y correction.".format(correction_y.detector_type)
+                    )
 
         if DetectorId.CORRECTION_Z in self._input_dict:
             corrections_in_z = self._input_dict[DetectorId.CORRECTION_Z]
@@ -636,8 +671,10 @@ class ParsedDictConverter(IStateParser):
                 elif correction_z.detector_type is DetectorType.LAB:
                     state_builder.set_LAB_z_translation_correction(_convert_mm_to_m(correction_z.entry))
                 else:
-                    raise RuntimeError("UserFileStateDirector: An unknown detector {0} was used for the"
-                                       " z correction.".format(correction_z.detector_type))
+                    raise RuntimeError(
+                        "UserFileStateDirector: An unknown detector {0} was used for the"
+                        " z correction.".format(correction_z.detector_type)
+                    )
 
         # ---------------------------
         # Correction for Rotation
@@ -650,8 +687,10 @@ class ParsedDictConverter(IStateParser):
             elif rotation_correction.detector_type is DetectorType.LAB:
                 state_builder.set_LAB_rotation_correction(rotation_correction.entry)
             else:
-                raise RuntimeError("UserFileStateDirector: An unknown detector {0} was used for the"
-                                   " rotation correction.".format(rotation_correction.detector_type))
+                raise RuntimeError(
+                    "UserFileStateDirector: An unknown detector {0} was used for the"
+                    " rotation correction.".format(rotation_correction.detector_type)
+                )
 
         # ---------------------------
         # Correction for Radius
@@ -664,8 +703,10 @@ class ParsedDictConverter(IStateParser):
                 elif radius_correction.detector_type is DetectorType.LAB:
                     state_builder.set_LAB_radius_correction(_convert_mm_to_m(radius_correction.entry))
                 else:
-                    raise RuntimeError("UserFileStateDirector: An unknown detector {0} was used for the"
-                                       " radius correction.".format(radius_correction.detector_type))
+                    raise RuntimeError(
+                        "UserFileStateDirector: An unknown detector {0} was used for the"
+                        " radius correction.".format(radius_correction.detector_type)
+                    )
 
         # ---------------------------
         # Correction for Translation
@@ -678,8 +719,10 @@ class ParsedDictConverter(IStateParser):
                 elif side_correction.detector_type is DetectorType.LAB:
                     state_builder.set_LAB_side_correction(_convert_mm_to_m(side_correction.entry))
                 else:
-                    raise RuntimeError("UserFileStateDirector: An unknown detector {0} was used for the"
-                                       " side correction.".format(side_correction.detector_type))
+                    raise RuntimeError(
+                        "UserFileStateDirector: An unknown detector {0} was used for the"
+                        " side correction.".format(side_correction.detector_type)
+                    )
 
         # ---------------------------
         # Tilt
@@ -692,8 +735,10 @@ class ParsedDictConverter(IStateParser):
             elif tilt_correction.detector_type is DetectorType.LAB:
                 state_builder.set_LAB_side_correction(tilt_correction.entry)
             else:
-                raise RuntimeError("UserFileStateDirector: An unknown detector {0} was used for the"
-                                   " titlt correction.".format(tilt_correction.detector_type))
+                raise RuntimeError(
+                    "UserFileStateDirector: An unknown detector {0} was used for the"
+                    " titlt correction.".format(tilt_correction.detector_type)
+                )
 
         if DetectorId.CORRECTION_Y_TILT in self._input_dict:
             tilt_correction = self._input_dict[DetectorId.CORRECTION_Y_TILT]
@@ -703,8 +748,10 @@ class ParsedDictConverter(IStateParser):
             elif tilt_correction.detector_type is DetectorType.LAB:
                 state_builder.set_LAB_side_correction(tilt_correction.entry)
             else:
-                raise RuntimeError("UserFileStateDirector: An unknown detector {0} was used for the"
-                                   " tilt correction.".format(tilt_correction.detector_type))
+                raise RuntimeError(
+                    "UserFileStateDirector: An unknown detector {0} was used for the"
+                    " tilt correction.".format(tilt_correction.detector_type)
+                )
 
         # ---------------------------
         # Sample offset
@@ -736,8 +783,7 @@ class ParsedDictConverter(IStateParser):
         # ---------------------------
         if SetId.CENTRE in self._input_dict:
             beam_centres = self._input_dict[SetId.CENTRE]
-            beam_centres_for_lab = [beam_centre for beam_centre in beam_centres if beam_centre.detector_type
-                                    is DetectorType.LAB]
+            beam_centres_for_lab = [beam_centre for beam_centre in beam_centres if beam_centre.detector_type is DetectorType.LAB]
             for beam_centre in beam_centres_for_lab:
                 pos1 = beam_centre.pos1
                 pos2 = beam_centre.pos2
@@ -751,8 +797,7 @@ class ParsedDictConverter(IStateParser):
 
         if SetId.CENTRE_HAB in self._input_dict:
             beam_centres = self._input_dict[SetId.CENTRE_HAB]
-            beam_centres_for_hab = [beam_centre for beam_centre in beam_centres if beam_centre.detector_type
-                                    is DetectorType.HAB]
+            beam_centres_for_hab = [beam_centre for beam_centre in beam_centres if beam_centre.detector_type is DetectorType.HAB]
             for beam_centre in beam_centres_for_hab:
                 state_builder.set_HAB_sample_centre_pos1(state_builder.convert_pos1(beam_centre.pos1))
                 state_builder.set_HAB_sample_centre_pos2(state_builder.convert_pos2(beam_centre.pos2))
@@ -971,8 +1016,7 @@ class ParsedDictConverter(IStateParser):
             # 2. As an already parsed rebin array, ie min, step, max
             # 3. As a string. Note that this includes custom commands.
             if isinstance(event_slices, simple_range):
-                start, stop = get_ranges_for_rebin_setting(event_slices.start, event_slices.stop,
-                                                           event_slices.step, event_slices.step_type)
+                start, stop = get_ranges_for_rebin_setting(event_slices.start, event_slices.stop, event_slices.step, event_slices.step_type)
             elif isinstance(event_slices, rebin_string_values):
                 start, stop = get_ranges_for_rebin_array(event_slices.value)
             else:
@@ -991,8 +1035,7 @@ class ParsedDictConverter(IStateParser):
         return state
 
     def get_state_wavelength_and_pixel_adjustment(self):  # -> StateWavelengthAndPixelAdjustment:
-        state = self._all_states.adjustment.wavelength_and_pixel_adjustment if self._all_states \
-            else StateWavelengthAndPixelAdjustment()
+        state = self._all_states.adjustment.wavelength_and_pixel_adjustment if self._all_states else StateWavelengthAndPixelAdjustment()
         # Get the flat/flood files. There can be entries for LAB and HAB.
         if MonId.FLAT in self._input_dict:
             mon_flat = self._input_dict[MonId.FLAT]
@@ -1045,7 +1088,7 @@ class ParsedDictConverter(IStateParser):
 
 
 def _convert_mm_to_m(value):
-    return value / 1000. if value else 0.0
+    return value / 1000.0 if value else 0.0
 
 
 def _get_last_element(val):

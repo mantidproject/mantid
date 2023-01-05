@@ -3,7 +3,7 @@
     Instrument Definition File see http://www.mantidproject.org/IDF
     -->
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" name="D4C" valid-from="1900-01-31 23:59:59"
-valid-to="2100-01-31 23:59:59" last-modified="2017-02-27 17:13:17">
+valid-to="2100-01-31 23:59:59" last-modified="2022-06-21 08:45:22">
   <!-- Author: vardanyan@ill.fr -->
   <defaults>
     <length unit="meter" />
@@ -56,31 +56,31 @@ valid-to="2100-01-31 23:59:59" last-modified="2017-02-27 17:13:17">
   <!-- Detector Panels -->
   <type name="detector">
     <component type="panel">
-      <location name="panel_1" r="1.146" t="5.5" p="0.0">
+      <location name="panel_1" r="1.146" t="3.875" p="0.0">
         <facing r="0.0" t="0.0" p="0.0" />
       </location>
-      <location name="panel_2" r="1.146" t="20.5" p="0.0">
+      <location name="panel_2" r="1.146" t="18.875" p="0.0">
         <facing r="0.0" t="0.0" p="0.0" />
       </location>
-      <location name="panel_3" r="1.146" t="35.5" p="0.0">
+      <location name="panel_3" r="1.146" t="33.875" p="0.0">
         <facing r="0.0" t="0.0" p="0.0" />
       </location>
-      <location name="panel_4" r="1.146" t="50.5" p="0.0">
+      <location name="panel_4" r="1.146" t="48.875" p="0.0">
         <facing r="0.0" t="0.0" p="0.0" />
       </location>
-      <location name="panel_5" r="1.146" t="65.5" p="0.0">
+      <location name="panel_5" r="1.146" t="63.875" p="0.0">
         <facing r="0.0" t="0.0" p="0.0" />
       </location>
-      <location name="panel_6" r="1.146" t="80.5" p="0.0">
+      <location name="panel_6" r="1.146" t="78.875" p="0.0">
         <facing r="0.0" t="0.0" p="0.0" />
       </location>
-      <location name="panel_7" r="1.146" t="95.5" p="0.0">
+      <location name="panel_7" r="1.146" t="93.875" p="0.0">
         <facing r="0.0" t="0.0" p="0.0" />
       </location>
-      <location name="panel_8" r="1.146" t="110.5" p="0.0">
+      <location name="panel_8" r="1.146" t="108.875" p="0.0">
         <facing r="0.0" t="0.0" p="0.0" />
       </location>
-      <location name="panel_9" r="1.146" t="125.5" p="0.0">
+      <location name="panel_9" r="1.146" t="123.875" p="0.0">
         <facing r="0.0" t="0.0" p="0.0" />
       </location>
     </component>

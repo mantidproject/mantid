@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 """
     Classes for each reduction step. Those are kept separately
     from the the interface class so that the DgsReduction class could
@@ -18,10 +18,10 @@ from reduction_gui.reduction.scripter import BaseScriptElement
 class AbsoluteUnitsScript(BaseScriptElement):
 
     do_absolute_units = False
-    absunits_vanadium = ''
-    grouping_file = ''
-    absunits_detector_vanadium = ''
-    incident_energy = ''
+    absunits_vanadium = ""
+    grouping_file = ""
+    absunits_detector_vanadium = ""
+    incident_energy = ""
     emin = -1.0
     emax = 1.0
     vanadium_mass = 32.58
@@ -41,6 +41,7 @@ class AbsoluteUnitsScript(BaseScriptElement):
 
     def set_default_pars(self, inst_name):
         from . import dgs_utils
+
         ip = dgs_utils.InstrumentParameters(inst_name)
         AbsoluteUnitsScript.emin = ip.get_parameter("monovan-integr-min")
         AbsoluteUnitsScript.emax = ip.get_parameter("monovan-integr-max")
@@ -55,11 +56,11 @@ class AbsoluteUnitsScript(BaseScriptElement):
         script = ""
         if self.do_absolute_units:
             script += "DoAbsoluteUnits=%s,\n" % self.do_absolute_units
-            script += "AbsUnitsSampleInputFile=\"%s\",\n" % self.absunits_vanadium
+            script += 'AbsUnitsSampleInputFile="%s",\n' % self.absunits_vanadium
             if self.grouping_file != AbsoluteUnitsScript.grouping_file:
-                script += "AbsUnitsGroupingFile=\"%s\",\n" % self.grouping_file
+                script += 'AbsUnitsGroupingFile="%s",\n' % self.grouping_file
             if self.absunits_detector_vanadium != AbsoluteUnitsScript.absunits_detector_vanadium:
-                script += "AbsUnitsDetectorVanadiumInputFile=\"%s\",\n" % self.absunits_detector_vanadium
+                script += 'AbsUnitsDetectorVanadiumInputFile="%s",\n' % self.absunits_detector_vanadium
             if self.incident_energy != AbsoluteUnitsScript.incident_energy:
                 script += "AbsUnitsIncidentEnergy=%s,\n" % str(self.incident_energy)
             if self.emin != AbsoluteUnitsScript.emin:
@@ -86,9 +87,9 @@ class AbsoluteUnitsScript(BaseScriptElement):
 
     def to_xml(self):
         """
-            Create XML from the current data.
+        Create XML from the current data.
         """
-        xml =  "<AbsoluteUnits>\n"
+        xml = "<AbsoluteUnits>\n"
         xml += "  <do_absolute_units>%s</do_absolute_units>\n" % self.do_absolute_units
         xml += "  <absunits_vanadium>%s</absunits_vanadium>\n" % self.absunits_vanadium
         xml += "  <grouping_file>%s</grouping_file>\n" % self.grouping_file
@@ -109,62 +110,54 @@ class AbsoluteUnitsScript(BaseScriptElement):
 
     def from_xml(self, xml_str):
         """
-            Read in data from XML
-            @param xml_str: text to read the data from
+        Read in data from XML
+        @param xml_str: text to read the data from
         """
         dom = xml.dom.minidom.parseString(xml_str)
         element_list = dom.getElementsByTagName("AbsoluteUnits")
-        if len(element_list)>0:
+        if len(element_list) > 0:
             instrument_dom = element_list[0]
-            self.find_bad_detectors = BaseScriptElement.getBoolElement(instrument_dom,
-                                                                       "do_absolute_units",
-                                                                       default=AbsoluteUnitsScript.do_absolute_units)
-            self.absunits_vanadium = BaseScriptElement.getStringElement(instrument_dom,
-                                                                        "absunits_vanadium",
-                                                                        default=AbsoluteUnitsScript.absunits_vanadium)
-            self.grouping_file = BaseScriptElement.getStringElement(instrument_dom,
-                                                                    "grouping_file",
-                                                                    default=AbsoluteUnitsScript.grouping_file)
-            self.absunits_detector_vanadium = BaseScriptElement.getStringElement(instrument_dom,
-                                                                                 "absunits_detector_vanadium",
-                                                                                 default=AbsoluteUnitsScript.absunits_detector_vanadium)
-            self.incident_energy = BaseScriptElement.getStringElement(instrument_dom,
-                                                                      "incident_energy",
-                                                                      default=AbsoluteUnitsScript.incident_energy)
-            self.emin = BaseScriptElement.getFloatElement(instrument_dom,
-                                                          "minimum_energy",
-                                                          default=AbsoluteUnitsScript.emin)
-            self.emax = BaseScriptElement.getFloatElement(instrument_dom,
-                                                          "maximum_energy",
-                                                          default=AbsoluteUnitsScript.emax)
-            self.vanadium_mass = BaseScriptElement.getFloatElement(instrument_dom,
-                                                                   "vanadium_mass",
-                                                                   default=AbsoluteUnitsScript.vanadium_mass)
-            self.sample_mass = BaseScriptElement.getFloatElement(instrument_dom,
-                                                                 "sample_mass",
-                                                                 default=AbsoluteUnitsScript.sample_mass)
-            self.sample_rmm = BaseScriptElement.getFloatElement(instrument_dom,
-                                                                "sample_rmm",
-                                                                default=AbsoluteUnitsScript.sample_rmm)
-            self.absunits_median_test_out_low = BaseScriptElement.getFloatElement(instrument_dom,
-                                                                                  "median_test_out_low",
-                                                                                  default=AbsoluteUnitsScript.absunits_median_test_out_low)
-            self.absunits_median_test_out_high = BaseScriptElement.getFloatElement(instrument_dom,
-                                                                                   "median_test_out_high",
-                                                                                   default=AbsoluteUnitsScript.absunits_median_test_out_high)# noqa
-            self.absunits_median_test_low = BaseScriptElement.getFloatElement(instrument_dom,
-                                                                              "median_test_low",
-                                                                              default=AbsoluteUnitsScript.absunits_median_test_low)
-            self.absunits_median_test_high = BaseScriptElement.getFloatElement(instrument_dom,
-                                                                               "median_test_high",
-                                                                               default=AbsoluteUnitsScript.absunits_median_test_high)
-            self.absunits_errorbar_criterion = BaseScriptElement.getFloatElement(instrument_dom,
-                                                                                 "errorbar_criterion",
-                                                                                 default=AbsoluteUnitsScript.absunits_errorbar_criterion)
+            self.find_bad_detectors = BaseScriptElement.getBoolElement(
+                instrument_dom, "do_absolute_units", default=AbsoluteUnitsScript.do_absolute_units
+            )
+            self.absunits_vanadium = BaseScriptElement.getStringElement(
+                instrument_dom, "absunits_vanadium", default=AbsoluteUnitsScript.absunits_vanadium
+            )
+            self.grouping_file = BaseScriptElement.getStringElement(
+                instrument_dom, "grouping_file", default=AbsoluteUnitsScript.grouping_file
+            )
+            self.absunits_detector_vanadium = BaseScriptElement.getStringElement(
+                instrument_dom, "absunits_detector_vanadium", default=AbsoluteUnitsScript.absunits_detector_vanadium
+            )
+            self.incident_energy = BaseScriptElement.getStringElement(
+                instrument_dom, "incident_energy", default=AbsoluteUnitsScript.incident_energy
+            )
+            self.emin = BaseScriptElement.getFloatElement(instrument_dom, "minimum_energy", default=AbsoluteUnitsScript.emin)
+            self.emax = BaseScriptElement.getFloatElement(instrument_dom, "maximum_energy", default=AbsoluteUnitsScript.emax)
+            self.vanadium_mass = BaseScriptElement.getFloatElement(
+                instrument_dom, "vanadium_mass", default=AbsoluteUnitsScript.vanadium_mass
+            )
+            self.sample_mass = BaseScriptElement.getFloatElement(instrument_dom, "sample_mass", default=AbsoluteUnitsScript.sample_mass)
+            self.sample_rmm = BaseScriptElement.getFloatElement(instrument_dom, "sample_rmm", default=AbsoluteUnitsScript.sample_rmm)
+            self.absunits_median_test_out_low = BaseScriptElement.getFloatElement(
+                instrument_dom, "median_test_out_low", default=AbsoluteUnitsScript.absunits_median_test_out_low
+            )
+            self.absunits_median_test_out_high = BaseScriptElement.getFloatElement(
+                instrument_dom, "median_test_out_high", default=AbsoluteUnitsScript.absunits_median_test_out_high
+            )  # noqa
+            self.absunits_median_test_low = BaseScriptElement.getFloatElement(
+                instrument_dom, "median_test_low", default=AbsoluteUnitsScript.absunits_median_test_low
+            )
+            self.absunits_median_test_high = BaseScriptElement.getFloatElement(
+                instrument_dom, "median_test_high", default=AbsoluteUnitsScript.absunits_median_test_high
+            )
+            self.absunits_errorbar_criterion = BaseScriptElement.getFloatElement(
+                instrument_dom, "errorbar_criterion", default=AbsoluteUnitsScript.absunits_errorbar_criterion
+            )
 
     def reset(self):
         """
-            Reset state
+        Reset state
         """
         self.do_absolute_units = AbsoluteUnitsScript.do_absolute_units
         self.absunits_vanadium = AbsoluteUnitsScript.absunits_vanadium

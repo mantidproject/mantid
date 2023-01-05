@@ -1,7 +1,15 @@
 import unittest
 from testhelpers import create_algorithm
-from mantid.simpleapi import (FindGlobalBMatrix, AnalysisDataService, SetGoniometer, SetUB, CreatePeaksWorkspace,
-                              LoadEmptyInstrument, CloneWorkspace, TransformHKL)
+from mantid.simpleapi import (
+    FindGlobalBMatrix,
+    AnalysisDataService,
+    SetGoniometer,
+    SetUB,
+    CreatePeaksWorkspace,
+    LoadEmptyInstrument,
+    CloneWorkspace,
+    TransformHKL,
+)
 import numpy as np
 from FindGoniometerFromUB import getR
 
@@ -23,10 +31,9 @@ def getUMatrix(ws):
 
 
 class FindGlobalBMatrixTest(unittest.TestCase):
-
     def setUp(self):
         # load empty instrument so can create a peak table
-        self.ws = LoadEmptyInstrument(InstrumentName='SXD', OutputWorkspace='empty_SXD')
+        self.ws = LoadEmptyInstrument(InstrumentName="SXD", OutputWorkspace="empty_SXD")
         axis = self.ws.getAxis(0)
         axis.setUnit("TOF")
 
@@ -44,8 +51,7 @@ class FindGlobalBMatrixTest(unittest.TestCase):
         # Add some peaks
         add_peaksHKL([peaks1, peaks2], range(0, 3), range(0, 3), 4)
 
-        FindGlobalBMatrix(PeakWorkspaces=[peaks1, peaks2], a=4.1, b=4.2, c=10, alpha=88, beta=88, gamma=89,
-                          Tolerance=0.15)
+        FindGlobalBMatrix(PeakWorkspaces=[peaks1, peaks2], a=4.1, b=4.2, c=10, alpha=88, beta=88, gamma=89, Tolerance=0.15)
 
         # check lattice  - should have average a=4.0
         self.assert_lattice([peaks1, peaks2], 4.0, 4.0, 10.0, 90.0, 90.0, 90.0, delta_latt=5e-2, delta_angle=2.5e-1)
@@ -57,22 +63,21 @@ class FindGlobalBMatrixTest(unittest.TestCase):
         peaks2 = CloneWorkspace(InputWorkspace=peaks1, OutputWorkspace="SXD_peaks4")
         # set different gonio on each run
         rot = 5
-        SetGoniometer(Workspace=peaks1, Axis0=f'{-rot},0,1,0,1')
-        SetGoniometer(Workspace=peaks2, Axis0=f'{rot},0,1,0,1')
+        SetGoniometer(Workspace=peaks1, Axis0=f"{-rot},0,1,0,1")
+        SetGoniometer(Workspace=peaks2, Axis0=f"{rot},0,1,0,1")
         # Add peaks at QLab corresponding to slightly different gonio rotations
         UB = np.diag([0.25, 0.25, 0.1])  # alatt = [4,4,10]
         for h in range(0, 3):
             for k in range(0, 3):
                 hkl = np.array([h, k, 4])
-                qlab = 2 * np.pi * np.matmul(np.matmul(getR(-(rot+1), [0, 1, 0]), UB), hkl)
+                qlab = 2 * np.pi * np.matmul(np.matmul(getR(-(rot + 1), [0, 1, 0]), UB), hkl)
                 pk = peaks1.createPeak(qlab)
                 peaks1.addPeak(pk)
-                qlab = 2 * np.pi * np.matmul(np.matmul(getR(rot+1, [0, 1, 0]), UB), hkl)
+                qlab = 2 * np.pi * np.matmul(np.matmul(getR(rot + 1, [0, 1, 0]), UB), hkl)
                 pk = peaks2.createPeak(qlab)
                 peaks2.addPeak(pk)
 
-        FindGlobalBMatrix(PeakWorkspaces=[peaks1, peaks2], a=4.15, b=3.95, c=10, alpha=88, beta=88, gamma=89,
-                          Tolerance=0.15)
+        FindGlobalBMatrix(PeakWorkspaces=[peaks1, peaks2], a=4.15, b=3.95, c=10, alpha=88, beta=88, gamma=89, Tolerance=0.15)
 
         # check lattice - shouldn't be effected by error in goniometer
         self.assert_lattice([peaks1, peaks2], 4.0, 4.0, 10.0, 90.0, 90.0, 90.0, delta_latt=2e-2, delta_angle=2.5e-1)
@@ -86,8 +91,9 @@ class FindGlobalBMatrixTest(unittest.TestCase):
         # Add some peaks
         add_peaksHKL([peaks1], range(0, 3), range(0, 3), 4)
 
-        alg = create_algorithm('FindGlobalBMatrix', PeakWorkspaces=[peaks1],
-                               a=4.1, b=4.2, c=10, alpha=88, beta=88, gamma=89, Tolerance=0.15)
+        alg = create_algorithm(
+            "FindGlobalBMatrix", PeakWorkspaces=[peaks1], a=4.1, b=4.2, c=10, alpha=88, beta=88, gamma=89, Tolerance=0.15
+        )
 
         with self.assertRaises(RuntimeError):
             alg.execute()
@@ -100,8 +106,9 @@ class FindGlobalBMatrixTest(unittest.TestCase):
         add_peaksHKL([peaks1], range(0, 5), [0], 4)
         peaks2 = CloneWorkspace(InputWorkspace=peaks1, OutputWorkspace="SXD_peaks6")
 
-        alg = create_algorithm('FindGlobalBMatrix', PeakWorkspaces=[peaks1, peaks2],
-                               a=4.1, b=4.2, c=10, alpha=88, beta=88, gamma=89, Tolerance=0.15)
+        alg = create_algorithm(
+            "FindGlobalBMatrix", PeakWorkspaces=[peaks1, peaks2], a=4.1, b=4.2, c=10, alpha=88, beta=88, gamma=89, Tolerance=0.15
+        )
 
         with self.assertRaises(RuntimeError):
             alg.execute()
@@ -119,8 +126,7 @@ class FindGlobalBMatrixTest(unittest.TestCase):
         transform = np.array([[0, 1, 0], [1, 0, 0], [0, 0, -1]])
         TransformHKL(PeaksWorkspace=peaks2, HKLTransform=transform, FindError=False)
 
-        FindGlobalBMatrix(PeakWorkspaces=[peaks1, peaks2], a=4.15, b=3.95, c=10, alpha=88, beta=88, gamma=89,
-                          Tolerance=0.15)
+        FindGlobalBMatrix(PeakWorkspaces=[peaks1, peaks2], a=4.15, b=3.95, c=10, alpha=88, beta=88, gamma=89, Tolerance=0.15)
 
         # check lattice - shouldn't be effected by error in goniometer
         self.assert_lattice([peaks1, peaks2], 5.0, 4.0, 10.0, 90.0, 90.0, 90.0, delta_latt=5e-2, delta_angle=2.5e-1)
@@ -145,5 +151,5 @@ class FindGlobalBMatrixTest(unittest.TestCase):
                     self.assertAlmostEqual(mat[ii, jj], ref_mat[ii, jj], delta=delta)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

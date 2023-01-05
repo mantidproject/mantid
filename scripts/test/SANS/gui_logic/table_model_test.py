@@ -38,8 +38,8 @@ class TableModelTest(unittest.TestCase):
 
         options_dict = table_index_model.options.get_options_dict()
         self.assertEqual(len(options_dict), 2)
-        self.assertEqual(options_dict["WavelengthMin"], 1.)
-        self.assertEqual(options_dict["WavelengthMax"], 3.)
+        self.assertEqual(options_dict["WavelengthMin"], 1.0)
+        self.assertEqual(options_dict["WavelengthMax"], 3.0)
 
     def test_that_raises_for_missing_equal(self):
         row = RowEntries()
@@ -48,10 +48,10 @@ class TableModelTest(unittest.TestCase):
             row.options.get_options_dict()
 
     def test_that_parse_string_returns_correctly(self):
-        string_to_parse = 'EventSlices=1-6,5-9,4:5:89 , WavelengthMax=78 , WavelengthMin=9'
+        string_to_parse = "EventSlices=1-6,5-9,4:5:89 , WavelengthMax=78 , WavelengthMin=9"
         entry = RowEntries()
         entry.options.set_user_options(string_to_parse)
-        expected_dict = {'EventSlices': '1-6,5-9,4:5:89', 'WavelengthMax': 78.0, 'WavelengthMin': 9.0}
+        expected_dict = {"EventSlices": "1-6,5-9,4:5:89", "WavelengthMax": 78.0, "WavelengthMin": 9.0}
 
         parsed_dict = entry.options.get_options_dict()
 
@@ -233,21 +233,21 @@ class TableModelTest(unittest.TestCase):
 
     def test_that_OptionsColumnModel_get_hint_strategy(self):
         hint_strategy = TableModel.get_options_hint_strategy()
-        expected_hint_strategy = BasicHintStrategy({
-            "WavelengthMin": 'The min value of the wavelength when converting from TOF.',
-            "WavelengthMax": 'The max value of the wavelength when converting from TOF.',
-            "PhiMin": 'The min angle of the detector to accept.'
-                      ' Anti-clockwise from horizontal.',
-            "PhiMax": 'The max angle of the detector to accept.'
-                      ' Anti-clockwise from horizontal.',
-            "UseMirror": 'True or False. Whether or not to accept phi angle'
-                         ' in opposing quadrant',
-            "MergeScale": 'The scale applied to the HAB when merging',
-            "MergeShift": 'The shift applied to the HAB when merging',
-            "EventSlices": 'The event slices to reduce.'
-                           ' The format is the same as for the event slices'
-                           ' box in settings, however if a comma separated list is given '
-                           'it must be enclosed in quotes'})
+        expected_hint_strategy = BasicHintStrategy(
+            {
+                "WavelengthMin": "The min value of the wavelength when converting from TOF.",
+                "WavelengthMax": "The max value of the wavelength when converting from TOF.",
+                "PhiMin": "The min angle of the detector to accept." " Anti-clockwise from horizontal.",
+                "PhiMax": "The max angle of the detector to accept." " Anti-clockwise from horizontal.",
+                "UseMirror": "True or False. Whether or not to accept phi angle" " in opposing quadrant",
+                "MergeScale": "The scale applied to the HAB when merging",
+                "MergeShift": "The shift applied to the HAB when merging",
+                "EventSlices": "The event slices to reduce."
+                " The format is the same as for the event slices"
+                " box in settings, however if a comma separated list is given "
+                "it must be enclosed in quotes",
+            }
+        )
 
         self.assertEqual(expected_hint_strategy, hint_strategy)
 
@@ -258,7 +258,7 @@ class TableModelTest(unittest.TestCase):
         table_model.replace_table_entry(0, table_index_model)
 
         row = 0
-        tool_tip = 'There was an error'
+        tool_tip = "There was an error"
 
         table_model.set_row_to_error(row, tool_tip)
         row_entry = table_model.get_row(0)
@@ -364,5 +364,5 @@ class TableModelTest(unittest.TestCase):
         table_model.user_file = value
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

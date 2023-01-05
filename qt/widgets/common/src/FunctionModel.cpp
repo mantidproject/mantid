@@ -309,7 +309,8 @@ void FunctionModel::removeDatasets(QList<int> &indices) {
   checkDatasets();
 
   // Sort in reverse order
-  qSort(indices.begin(), indices.end(), [](int a, int b) { return a > b; });
+  using std::sort;
+  sort(indices.begin(), indices.end(), [](int a, int b) { return a > b; });
   for (auto i = indices.constBegin(); i != indices.constEnd(); ++i)
     m_datasets.erase(m_datasets.begin() + *i);
 

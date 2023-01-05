@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init
+# pylint: disable=no-init
 from mantid.kernel import *
 from mantid.api import *
 
@@ -14,41 +14,41 @@ WKSP_PROP = "OutputWorkspace"
 INST_PAR_PROP = "InstrumentParFile"
 
 # Instrument parameter headers. Key in the dictionary is the number of columns in the file
-IP_HEADERS = {5:"spectrum,theta,t0,-,R", 6:"spectrum,-,theta,t0,-,R"}
+IP_HEADERS = {5: "spectrum,theta,t0,-,R", 6: "spectrum,-,theta,t0,-,R"}
 
 # Child Algorithm logging
 _LOGGING_ = False
 
-#----------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
 
 
 class LoadEmptyVesuvio(PythonAlgorithm):
-
     def summary(self):
         return "Loads an empty workspace containing the Vesuvio instrument at ISIS."
-#----------------------------------------------------------------------------------------
+
+    # ----------------------------------------------------------------------------------------
 
     def category(self):
-        """ Defines the category the algorithm will be put in the algorithm browser
-        """
-        return 'DataHandling\\Raw'
-#----------------------------------------------------------------------------------------
+        """Defines the category the algorithm will be put in the algorithm browser"""
+        return "DataHandling\\Raw"
+
+    # ----------------------------------------------------------------------------------------
 
     def seeAlso(self):
-        return [ "LoadVesuvio" ]
+        return ["LoadVesuvio"]
 
-#----------------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------------
     def PyInit(self):
-        self.declareProperty(FileProperty(INST_PAR_PROP, "", action=FileAction.OptionalLoad,
-                                          extensions=["dat"]),
-                             doc="An optional IP file. If provided the values are used to correct "
-                                 "the default instrument values and attach the t0 values to each "
-                                 "detector")
+        self.declareProperty(
+            FileProperty(INST_PAR_PROP, "", action=FileAction.OptionalLoad, extensions=["dat"]),
+            doc="An optional IP file. If provided the values are used to correct "
+            "the default instrument values and attach the t0 values to each "
+            "detector",
+        )
 
-        self.declareProperty(WorkspaceProperty(WKSP_PROP, "", Direction.Output),
-                             doc="The name of the output workspace.")
+        self.declareProperty(WorkspaceProperty(WKSP_PROP, "", Direction.Output), doc="The name of the output workspace.")
 
-#----------------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------------
 
     def PyExec(self):
         vesuvio_ws = self._load_empty_evs()
@@ -60,7 +60,7 @@ class LoadEmptyVesuvio(PythonAlgorithm):
 
         self.setProperty(WKSP_PROP, vesuvio_ws)
 
-#----------------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------------
 
     def _load_empty_evs(self):
         """
@@ -80,7 +80,7 @@ class LoadEmptyVesuvio(PythonAlgorithm):
 
         return load_empty.getProperty("OutputWorkspace").value
 
-#----------------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------------
 
     def _load_ip_file(self, workspace, ip_file):
         """
@@ -102,7 +102,7 @@ class LoadEmptyVesuvio(PythonAlgorithm):
 
         return update_inst.getProperty("Workspace").value
 
-#----------------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------------
 
     def _get_header_format(self, ip_filename):
         """
@@ -114,14 +114,14 @@ class LoadEmptyVesuvio(PythonAlgorithm):
         """
         ipfile = open(ip_filename, "r")
         first_line = ipfile.readline()
-        columns = first_line.split() # splits on whitespace characters
+        columns = first_line.split()  # splits on whitespace characters
         try:
             return IP_HEADERS[len(columns)]
         except KeyError:
-            raise ValueError("Unknown format for IP file. Currently support 5/6 column "
-                             "variants. ncols=%d" % (len(columns)))
+            raise ValueError("Unknown format for IP file. Currently support 5/6 column " "variants. ncols=%d" % (len(columns)))
 
-#----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
 
 
 AlgorithmFactory.subscribe(LoadEmptyVesuvio)

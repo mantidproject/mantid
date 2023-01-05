@@ -7,9 +7,17 @@
 """
     Defines a set of aliases to make accessing certain objects easier
 """
-from mantid.api import (AlgorithmFactoryImpl, AlgorithmManagerImpl, AnalysisDataServiceImpl, CatalogManagerImpl,
-                        FileFinderImpl, FileLoaderRegistryImpl, FrameworkManagerImpl, FunctionFactoryImpl,
-                        WorkspaceFactoryImpl)
+from mantid.api import (
+    AlgorithmFactoryImpl,
+    AlgorithmManagerImpl,
+    AnalysisDataServiceImpl,
+    CatalogManagerImpl,
+    FileFinderImpl,
+    FileLoaderRegistryImpl,
+    FrameworkManagerImpl,
+    FunctionFactoryImpl,
+    WorkspaceFactoryImpl,
+)
 from mantid.kernel._aliases import lazy_instance_access
 
 # Historically the singleton aliases mapped to the instances rather than

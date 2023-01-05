@@ -4,11 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init
+# pylint: disable=no-init
 from LoadAndCheckBase import *
 
 #
-#Test File loading and basic data integrity checks of INTER data in Mantid.
+# Test File loading and basic data integrity checks of INTER data in Mantid.
 #
 
 

@@ -4,14 +4,17 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=bare-except,invalid-name
+# pylint: disable=bare-except,invalid-name
 import sys
+
 # Check whether Mantid is available
 try:
     from mantid.api import AnalysisDataService
     from mantid.kernel import Logger
+
     logger = Logger("hfir_data_proxy")
     import mantid.simpleapi as api
+
     HAS_MANTID = True
 except ImportError:
     HAS_MANTID = False
@@ -19,13 +22,14 @@ except ImportError:
 
 class DataProxy(object):
     """
-        Class used to load a data file temporarily to extract header information:
-        HFIR SANS Data files have the following properties (parsed from the data file!)
-        "sample-detector-distance-offset"
-        "sample-detector-distance"
-        "sample-si-window-distance"
-        "sample_detector_distance"
+    Class used to load a data file temporarily to extract header information:
+    HFIR SANS Data files have the following properties (parsed from the data file!)
+    "sample-detector-distance-offset"
+    "sample-detector-distance"
+    "sample-si-window-distance"
+    "sample_detector_distance"
     """
+
     wavelength = None
     wavelength_spread = None
     sample_detector_distance = None
@@ -34,7 +38,7 @@ class DataProxy(object):
     # If it was moved before that's where the distance is:
     sample_detector_distance_moved = None
     data = None
-    data_ws = ''
+    data_ws = ""
     sample_thickness = None
     beam_diameter = None
 
@@ -52,8 +56,8 @@ class DataProxy(object):
                 api.HFIRLoad(Filename=str(data_file), OutputWorkspace=self.data_ws)
                 ws = AnalysisDataService.retrieve(self.data_ws)
                 x = ws.dataX(0)
-                self.wavelength = (x[0]+x[1])/2.0
-                self.wavelength_spread = x[1]-x[0]
+                self.wavelength = (x[0] + x[1]) / 2.0
+                self.wavelength_spread = x[1] - x[0]
                 self.sample_detector_distance = ws.getRun().getProperty("sample-detector-distance").value
                 self.sample_detector_distance_offset = ws.getRun().getProperty("sample-detector-distance-offset").value
                 self.sample_si_window_distance = ws.getRun().getProperty("sample-si-window-distance").value

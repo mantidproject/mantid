@@ -21,7 +21,6 @@ from Calibration.tube_calib import correct_tube_to_ideal_tube, getCalibratedPixe
 
 
 class TestTubeCalib(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):  # called only before running all tests in the test case
         cls.workspaces_temporary = list()  # workspaces to be deleted at tear-down
@@ -43,31 +42,32 @@ class TestTubeCalib(unittest.TestCase):
 
             :param n: pixel coordinate
             """
-            return -0.502 + 0.00435287724834028 * n -3.306169908908442e-06 * n * n
+            return -0.502 + 0.00435287724834028 * n - 3.306169908908442e-06 * n * n
+
         # assume 11 slits(wires) casting 11 peaks(shadows) onto the tube at the following pixel numbers
         tube_points = np.linspace(5, 245, 11, endpoint=True)  # 5, 29, 53,...,221, 245
         # assume the Y-coordinates of the peaks(shadows) given by our quadratic example function
         ideal_tube_coordinates = [y_quad(n) for n in tube_points]
-        cls.y_quad_data = {'detector_count': 256,
-                           'peak_count': 11,
-                           'y_quad': y_quad,
-                           'coefficients': {'A0': -0.502, 'A1': 0.00435287724834028, 'A2': -3.306169908908442e-06},
-                           'tube_points': tube_points,
-                           'ideal_tube_coordinates': ideal_tube_coordinates}
+        cls.y_quad_data = {
+            "detector_count": 256,
+            "peak_count": 11,
+            "y_quad": y_quad,
+            "coefficients": {"A0": -0.502, "A1": 0.00435287724834028, "A2": -3.306169908908442e-06},
+            "tube_points": tube_points,
+            "ideal_tube_coordinates": ideal_tube_coordinates,
+        }
 
         # Load a CORELLI file containing data for bank number 20 (16 tubes)
-        config.appendDataSearchSubDir('CORELLI/calibration')
+        config.appendDataSearchSubDir("CORELLI/calibration")
         for directory in config.getDataSearchDirs():
-            if 'UnitTest' in directory:
-                data_dir = path.join(directory, 'CORELLI', 'calibration')
+            if "UnitTest" in directory:
+                data_dir = path.join(directory, "CORELLI", "calibration")
                 break
-        workspace = 'CORELLI_123455_bank20'
-        LoadNexusProcessed(Filename=path.join(data_dir, workspace + '.nxs'), OutputWorkspace=workspace)
+        workspace = "CORELLI_123455_bank20"
+        LoadNexusProcessed(Filename=path.join(data_dir, workspace + ".nxs"), OutputWorkspace=workspace)
         assert AnalysisDataService.doesExist(workspace)
         cls.workspaces_temporary.append(workspace)  # delete workspace at tear-down
-        cls.corelli = {'tube_length': 0.900466,  # in meters
-                       'pixels_per_tube': 256,
-                       'workspace': workspace}
+        cls.corelli = {"tube_length": 0.900466, "pixels_per_tube": 256, "workspace": workspace}  # in meters
 
     @classmethod
     def tearDownClass(cls) -> None:  # called only after all tests in the test case have run
@@ -80,54 +80,51 @@ class TestTubeCalib(unittest.TestCase):
         data = self.y_quad_data
 
         # fit the Y-coordinates to the pixel positions with a default quadratic function
-        fitted_coordinates = correct_tube_to_ideal_tube(data['tube_points'],
-                                                        data['ideal_tube_coordinates'],
-                                                        data['detector_count'],
-                                                        parameters_table='parameters')
+        fitted_coordinates = correct_tube_to_ideal_tube(
+            data["tube_points"], data["ideal_tube_coordinates"], data["detector_count"], parameters_table="parameters"
+        )
 
         # Verify the fitted coordinates are the ideal_tube_coordinates
-        assert_allclose([fitted_coordinates[int(n)] for n in data['tube_points']],
-                        data['ideal_tube_coordinates'], atol=0.0001)
+        assert_allclose([fitted_coordinates[int(n)] for n in data["tube_points"]], data["ideal_tube_coordinates"], atol=0.0001)
         # Compare fitting coefficients
-        assert AnalysisDataService.doesExist('parameters')
+        assert AnalysisDataService.doesExist("parameters")
         # here retrieve the fitting coefficients from the 'parameters' table and compare to the expected values
-        expected = data['coefficients']
-        for row in mtd['parameters']:
-            if row['Name'] in expected:
-                self.assertAlmostEqual(row['Value'], expected[row['Name']], places=6)
+        expected = data["coefficients"]
+        for row in mtd["parameters"]:
+            if row["Name"] in expected:
+                self.assertAlmostEqual(row["Value"], expected[row["Name"]], places=6)
         # a bit of clean-up
-        DeleteWorkspaces(['PolyFittingWorkspace', 'QF_NormalisedCovarianceMatrix',
-                          'QF_Parameters', 'QF_Workspace', 'parameters'])
+        DeleteWorkspaces(["PolyFittingWorkspace", "QF_NormalisedCovarianceMatrix", "QF_Parameters", "QF_Workspace", "parameters"])
 
     def test_getCalibratedPixelPositions(self):
         data = self.y_quad_data
         # calibrate the first tube of bank 20 in the corelli input workspace
-        detector_ids, detector_positions = \
-            getCalibratedPixelPositions(self.corelli['workspace'],
-                                        data['tube_points'],
-                                        data['ideal_tube_coordinates'],
-                                        range(0, self.corelli['pixels_per_tube']),  # first 256 workspace indexes
-                                        parameters_table='parameters')
+        detector_ids, detector_positions = getCalibratedPixelPositions(
+            self.corelli["workspace"],
+            data["tube_points"],
+            data["ideal_tube_coordinates"],
+            range(0, self.corelli["pixels_per_tube"]),  # first 256 workspace indexes
+            parameters_table="parameters",
+        )
 
         # 77824 is the detector ID for the first pixel in bank 20
-        self.assertEqual(detector_ids, list(range(77824, 77824 + self.corelli['pixels_per_tube'])))
+        self.assertEqual(detector_ids, list(range(77824, 77824 + self.corelli["pixels_per_tube"])))
 
         # Assert the detector positions were adjusted to the input quadratic function
-        y_quad = data['y_quad']
-        expected_y = (-1.30686 - y_quad(0)) + np.array([y_quad(n) for n in range(0, self.corelli['pixels_per_tube'])])
+        y_quad = data["y_quad"]
+        expected_y = (-1.30686 - y_quad(0)) + np.array([y_quad(n) for n in range(0, self.corelli["pixels_per_tube"])])
         assert_allclose([xyz[1] for xyz in detector_positions], expected_y, atol=0.0001)
 
         # here retrieve the fitting coefficients from the 'parameters' table and compare to the expected values
-        assert AnalysisDataService.doesExist('parameters')
-        expected = data['coefficients']
-        for row in mtd['parameters']:
-            if row['Name'] in expected:
-                self.assertAlmostEqual(row['Value'], expected[row['Name']], places=6)
+        assert AnalysisDataService.doesExist("parameters")
+        expected = data["coefficients"]
+        for row in mtd["parameters"]:
+            if row["Name"] in expected:
+                self.assertAlmostEqual(row["Value"], expected[row["Name"]], places=6)
 
         # a bit of clean-up
-        DeleteWorkspaces(['parameters', 'PolyFittingWorkspace', 'QF_NormalisedCovarianceMatrix',
-                          'QF_Parameters', 'QF_Workspace'])
+        DeleteWorkspaces(["parameters", "PolyFittingWorkspace", "QF_NormalisedCovarianceMatrix", "QF_Parameters", "QF_Workspace"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

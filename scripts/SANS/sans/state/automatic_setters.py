@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from functools import (partial, wraps)
+from functools import partial, wraps
 import inspect
 
 # -------------------------------------------------------------------------------------------------------------
@@ -38,7 +38,7 @@ def forwarding_setter(value, builder_instance, attribute_name_list):
     setattr(instance, attribute_name_list[-1], value)
 
 
-def update_the_method(builder_instance,  new_methods, setter_name, attribute_name, attribute_name_list):
+def update_the_method(builder_instance, new_methods, setter_name, attribute_name, attribute_name_list):
     setter_name_copy = list(setter_name)
     setter_name_copy.append(attribute_name)
     try:
@@ -50,21 +50,19 @@ def update_the_method(builder_instance,  new_methods, setter_name, attribute_nam
     attribute_name_list_copy = list(attribute_name_list)
     attribute_name_list_copy.append(attribute_name)
 
-    new_method = partial(forwarding_setter, builder_instance=builder_instance,
-                         attribute_name_list=attribute_name_list_copy)
+    new_method = partial(forwarding_setter, builder_instance=builder_instance, attribute_name_list=attribute_name_list_copy)
     new_methods.update({method_name: new_method})
 
 
 def get_all_typed_parameter_descriptors(instance):
     descriptor_types = {}
     for descriptor_name, descriptor_object in inspect.getmembers(instance):
-        if not descriptor_name.startswith('__'):
+        if not descriptor_name.startswith("__"):
             descriptor_types.update({descriptor_name: descriptor_object})
     return descriptor_types
 
 
-def create_automatic_setters_for_state(attribute_value, builder_instance, attribute_name_list,
-                                       setter_name, exclusions, new_methods):
+def create_automatic_setters_for_state(attribute_value, builder_instance, attribute_name_list, setter_name, exclusions, new_methods):
     # Find all typed parameter descriptors which are on the instance, i.e. on attribute_value.
     all_descriptors = get_all_typed_parameter_descriptors(attribute_value)
 
@@ -91,8 +89,9 @@ def create_automatic_setters_for_state(attribute_value, builder_instance, attrib
                     attribute_name_list_copy = list(attribute_name_list)
                     attribute_name_list_copy.append(name)
                     attribute_name_list_copy.append(dict_key)
-                    create_automatic_setters_for_state(dict_value, builder_instance, attribute_name_list_copy,
-                                                       setter_name_copy, exclusions, new_methods)
+                    create_automatic_setters_for_state(
+                        dict_value, builder_instance, attribute_name_list_copy, setter_name_copy, exclusions, new_methods
+                    )
         else:
             update_the_method(builder_instance, new_methods, setter_name, name, attribute_name_list)
 
@@ -104,8 +103,7 @@ def create_automatic_setters(builder_instance, state_class, exclusions):
         if isinstance(attribute_value, state_class):
             attribute_name_list = [attribute_name]
             setter_name = ["set"]
-            create_automatic_setters_for_state(attribute_value, builder_instance, attribute_name_list,
-                                               setter_name, exclusions, new_methods)
+            create_automatic_setters_for_state(attribute_value, builder_instance, attribute_name_list, setter_name, exclusions, new_methods)
 
     # Apply the methods
     for method_name, method in list(new_methods.items()):
@@ -121,7 +119,9 @@ def automatic_setters(state_class, exclusions=None):
         def func_wrapper(self, *args, **kwargs):
             func(self, *args, **kwargs)
             create_automatic_setters(self, state_class, exclusions)
+
         return func_wrapper
+
     return automatic_setters_decorator
 
 
@@ -149,7 +149,6 @@ def set_up_setter_forwarding_from_director_to_builder(director, builder_name):
     for method in dir(builder_instance):
         if method.startswith(set_tag):
             method_name_director = set_tag + builder_name + "_" + method[4:]
-            new_method = partial(forwarding_setter_for_director, builder=builder_instance,
-                                 method_name=method)
+            new_method = partial(forwarding_setter_for_director, builder=builder_instance, method_name=method)
             new_methods.update({method_name_director: new_method})
     director.__dict__.update(new_methods)

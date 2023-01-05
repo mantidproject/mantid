@@ -16,15 +16,15 @@ import numpy as np
 
 
 def StartTime(prog):
-    logger.notice('----------')
-    message = 'Program ' + prog + ' started @ ' + str(datetime.datetime.now())
+    logger.notice("----------")
+    message = "Program " + prog + " started @ " + str(datetime.datetime.now())
     logger.notice(message)
 
 
 def EndTime(prog):
-    message = 'Program ' + prog + ' ended @ ' + str(datetime.datetime.now())
+    message = "Program " + prog + " ended @ " + str(datetime.datetime.now())
     logger.notice(message)
-    logger.notice('----------')
+    logger.notice("----------")
 
 
 def get_run_number(ws_name):
@@ -40,17 +40,17 @@ def get_run_number(ws_name):
 
     workspace = s_api.mtd[ws_name]
     run_number = str(workspace.getRunNumber())
-    if run_number == '0':
+    if run_number == "0":
         # Attempt to parse run number off of name
-        match = re.match(r'([a-zA-Z]+)([0-9]+)', ws_name)
+        match = re.match(r"([a-zA-Z]+)([0-9]+)", ws_name)
         if match:
             run_number = match.group(2)
         else:
             # attempt reading from the logs (ILL)
             run = workspace.getRun()
-            if run.hasProperty('run_number'):
-                log = run.getLogData('run_number').value
-                run_number = log.split(',')[0]
+            if run.hasProperty("run_number"):
+                log = run.getLogData("run_number").value
+                run_number = log.split(",")[0]
             else:
                 raise RuntimeError("Could not find run number associated with workspace.")
 
@@ -68,7 +68,7 @@ def getInstrRun(ws_name):
     run_number = get_run_number(ws_name)
 
     instrument = s_api.mtd[ws_name].getInstrument().getName()
-    if instrument != '':
+    if instrument != "":
         for facility in config.getFacilities():
             try:
                 instrument = facility.instrument(instrument).filePrefix(int(run_number))
@@ -86,33 +86,33 @@ def getWSprefix(wsname):
     all of our other naming conventions are built. The workspace is used to get the
     instrument parameters.
     """
-    if wsname == '':
-        return ''
+    if wsname == "":
+        return ""
 
     workspace = s_api.mtd[wsname]
-    facility = config['default.facility']
+    facility = config["default.facility"]
 
     ws_run = workspace.getRun()
-    if 'facility' in ws_run:
-        facility = ws_run.getLogData('facility').value
+    if "facility" in ws_run:
+        facility = ws_run.getLogData("facility").value
 
     (instrument, run_number) = getInstrRun(wsname)
-    if facility == 'ILL':
-        run_name = instrument + '_' + run_number
+    if facility == "ILL":
+        run_name = instrument + "_" + run_number
     else:
         run_name = instrument + run_number
 
     try:
-        analyser = workspace.getInstrument().getStringParameter('analyser')[0]
-        reflection = workspace.getInstrument().getStringParameter('reflection')[0]
+        analyser = workspace.getInstrument().getStringParameter("analyser")[0]
+        reflection = workspace.getInstrument().getStringParameter("reflection")[0]
     except IndexError:
-        analyser = ''
-        reflection = ''
+        analyser = ""
+        reflection = ""
 
-    prefix = run_name + '_' + analyser + reflection
+    prefix = run_name + "_" + analyser + reflection
 
     if len(analyser + reflection) > 0:
-        prefix += '_'
+        prefix += "_"
 
     return prefix
 
@@ -123,17 +123,17 @@ def getEfixed(workspace):
     else:
         inst = workspace.getInstrument()
 
-    if inst.hasParameter('Efixed'):
-        return inst.getNumberParameter('EFixed')[0]
+    if inst.hasParameter("Efixed"):
+        return inst.getNumberParameter("EFixed")[0]
 
-    if inst.hasParameter('analyser'):
-        analyser_name = inst.getStringParameter('analyser')[0]
+    if inst.hasParameter("analyser"):
+        analyser_name = inst.getStringParameter("analyser")[0]
         analyser_comp = inst.getComponentByName(analyser_name)
 
-        if analyser_comp is not None and analyser_comp.hasParameter('Efixed'):
-            return analyser_comp.getNumberParameter('EFixed')[0]
+        if analyser_comp is not None and analyser_comp.hasParameter("Efixed"):
+            return analyser_comp.getNumberParameter("EFixed")[0]
 
-    raise ValueError('No Efixed parameter found')
+    raise ValueError("No Efixed parameter found")
 
 
 def checkUnitIs(ws, unit_id, axis_index=0):
@@ -150,7 +150,7 @@ def getDefaultWorkingDirectory():
     """
     Get the default save directory and check it's valid.
     """
-    workdir = config['defaultsave.directory']
+    workdir = config["defaultsave.directory"]
 
     if not os.path.isdir(workdir):
         raise IOError("Default save directory is not a valid path!")
@@ -175,12 +175,12 @@ def createQaxis(inputWS):
             result.append(q)
     else:
         axis = workspace.getAxis(1)
-        msg = 'Creating Axis based on Detector Q value: '
+        msg = "Creating Axis based on Detector Q value: "
         if not axis.isNumeric():
-            msg += 'Input workspace must have either spectra or numeric axis.'
+            msg += "Input workspace must have either spectra or numeric axis."
             raise ValueError(msg)
-        if axis.getUnit().unitID() != 'MomentumTransfer':
-            msg += 'Input must have axis values of Q'
+        if axis.getUnit().unitID() != "MomentumTransfer":
+            msg += "Input must have axis values of Q"
             raise ValueError(msg)
         for i in range(0, num_hist):
             result.append(float(axis.label(i)))
@@ -220,7 +220,7 @@ def GetThetaQ(ws):
         q = k0 * np.sin(0.5 * np.radians(theta))
 
     # If axis is in Q need to calculate back to angles and just return axis values
-    elif axis.isNumeric() and axis.getUnit().unitID() == 'MomentumTransfer':
+    elif axis.isNumeric() and axis.getUnit().unitID() == "MomentumTransfer":
         q_bin_edge = axis.extractValues()
         q = list()
         for i in range(1, len(q_bin_edge)):
@@ -231,7 +231,7 @@ def GetThetaQ(ws):
 
     # Out of options here
     else:
-        raise RuntimeError('Cannot get theta and Q for workspace %s' % ws)
+        raise RuntimeError("Cannot get theta and Q for workspace %s" % ws)
 
     return theta, q
 
@@ -283,23 +283,23 @@ def check_analysers_are_equal(in1WS, in2WS):
     """
     ws1 = s_api.mtd[in1WS]
     try:
-        analyser_1 = ws1.getInstrument().getStringParameter('analyser')[0]
-        reflection_1 = ws1.getInstrument().getStringParameter('reflection')[0]
+        analyser_1 = ws1.getInstrument().getStringParameter("analyser")[0]
+        reflection_1 = ws1.getInstrument().getStringParameter("reflection")[0]
     except IndexError:
-        raise RuntimeError('Could not find analyser or reflection for workspace %s' % in1WS)
+        raise RuntimeError("Could not find analyser or reflection for workspace %s" % in1WS)
     ws2 = s_api.mtd[in2WS]
     try:
-        analyser_2 = ws2.getInstrument().getStringParameter('analyser')[0]
-        reflection_2 = ws2.getInstrument().getStringParameter('reflection')[0]
+        analyser_2 = ws2.getInstrument().getStringParameter("analyser")[0]
+        reflection_2 = ws2.getInstrument().getStringParameter("reflection")[0]
     except:
-        raise RuntimeError('Could not find analyser or reflection for workspace %s' % in2WS)
+        raise RuntimeError("Could not find analyser or reflection for workspace %s" % in2WS)
 
     if analyser_1 != analyser_2:
-        raise ValueError('Workspace %s and %s have different analysers' % (ws1, ws2))
+        raise ValueError("Workspace %s and %s have different analysers" % (ws1, ws2))
     elif reflection_1 != reflection_2:
-        raise ValueError('Workspace %s and %s have different reflections' % (ws1, ws2))
+        raise ValueError("Workspace %s and %s have different reflections" % (ws1, ws2))
     else:
-        logger.information('Analyser is %s, reflection %s' % (analyser_1, reflection_1))
+        logger.information("Analyser is %s, reflection %s" % (analyser_1, reflection_1))
 
 
 def get_sample_log(workspace, log_name):
@@ -316,11 +316,11 @@ def try_get_sample_log(workspace, log_name):
 
 def check_e_fixed_are_equal(workspace1, workspace2):
     if getEfixed(workspace1) != getEfixed(workspace2):
-        raise ValueError('Workspaces {str(workspace1)} and {str(workspace2)} have a different EFixed.')
+        raise ValueError("Workspaces {str(workspace1)} and {str(workspace2)} have a different EFixed.")
 
 
 def is_technique_direct(workspace):
-    return try_get_sample_log(workspace, 'deltaE-mode') == 'Direct'
+    return try_get_sample_log(workspace, "deltaE-mode") == "Direct"
 
 
 def CheckAnalysersOrEFixed(workspace1, workspace2):
@@ -329,7 +329,7 @@ def CheckAnalysersOrEFixed(workspace1, workspace2):
     reflections are identical
     """
     if is_technique_direct(workspace1) or is_technique_direct(workspace2):
-        logger.warning('Could not find an analyser for the input workspaces because the energy mode is Direct')
+        logger.warning("Could not find an analyser for the input workspaces because the energy mode is Direct")
         check_e_fixed_are_equal(workspace1, workspace2)
     else:
         check_analysers_are_equal(workspace1, workspace2)
@@ -356,11 +356,11 @@ def CheckHistZero(inWS):
     """
     num_hist = s_api.mtd[inWS].getNumberHistograms()  # no. of hist/groups in WS
     if num_hist == 0:
-        raise ValueError('Workspace ' + inWS + ' has NO histograms')
+        raise ValueError("Workspace " + inWS + " has NO histograms")
     x_in = s_api.mtd[inWS].readX(0)
     ntc = len(x_in) - 1  # no. points from length of x array
     if ntc == 0:
-        raise ValueError('Workspace ' + inWS + ' has NO points')
+        raise ValueError("Workspace " + inWS + " has NO points")
     return num_hist, ntc
 
 
@@ -388,43 +388,43 @@ def CheckHistSame(in1WS, name1, in2WS, name2):
     x_2 = s_api.mtd[in2WS].readX(0)
     x_len_2 = len(x_2)
     if num_hist_1 != num_hist_2:  # Check that no. groups are the same
-        error_1 = '%s (%s) histograms (%d)' % (name1, in1WS, num_hist_1)
-        error_2 = '%s (%s) histograms (%d)' % (name2, in2WS, num_hist_2)
-        error = error_1 + ' not = ' + error_2
+        error_1 = "%s (%s) histograms (%d)" % (name1, in1WS, num_hist_1)
+        error_2 = "%s (%s) histograms (%d)" % (name2, in2WS, num_hist_2)
+        error = error_1 + " not = " + error_2
         raise ValueError(error)
     elif x_len_1 != x_len_2:
-        error_1 = '%s (%s) array length (%d)' % (name1, in1WS, x_len_1)
-        error_2 = '%s (%s) array length (%d)' % (name2, in2WS, x_len_2)
-        error = error_1 + ' not = ' + error_2
+        error_1 = "%s (%s) array length (%d)" % (name1, in1WS, x_len_1)
+        error_2 = "%s (%s) array length (%d)" % (name2, in2WS, x_len_2)
+        error = error_1 + " not = " + error_2
         raise ValueError(error)
 
 
 def CheckXrange(x_range, range_type):
     if not ((len(x_range) == 2) or (len(x_range) == 4)):
-        raise ValueError(range_type + ' - Range must contain either 2 or 4 numbers')
+        raise ValueError(range_type + " - Range must contain either 2 or 4 numbers")
 
     for lower, upper in zip(x_range[::2], x_range[1::2]):
         if math.fabs(lower) < 1e-5:
-            raise ValueError('%s - input minimum (%f) is zero' % (range_type, lower))
+            raise ValueError("%s - input minimum (%f) is zero" % (range_type, lower))
         if math.fabs(upper) < 1e-5:
-            raise ValueError('%s - input maximum (%f) is zero' % (range_type, upper))
+            raise ValueError("%s - input maximum (%f) is zero" % (range_type, upper))
         if upper < lower:
-            raise ValueError('%s - input maximum (%f) < minimum (%f)' % (range_type, upper, lower))
+            raise ValueError("%s - input maximum (%f) < minimum (%f)" % (range_type, upper, lower))
 
 
 def CheckElimits(erange, Xin):
     len_x = len(Xin) - 1
 
     if math.fabs(erange[0]) < 1e-5:
-        raise ValueError('Elimits - input emin (%f) is Zero' % (erange[0]))
+        raise ValueError("Elimits - input emin (%f) is Zero" % (erange[0]))
     if erange[0] < Xin[0]:
-        raise ValueError('Elimits - input emin (%f) < data emin (%f)' % (erange[0], Xin[0]))
+        raise ValueError("Elimits - input emin (%f) < data emin (%f)" % (erange[0], Xin[0]))
     if math.fabs(erange[1]) < 1e-5:
-        raise ValueError('Elimits - input emax (%f) is Zero' % (erange[1]))
+        raise ValueError("Elimits - input emax (%f) is Zero" % (erange[1]))
     if erange[1] > Xin[len_x]:
-        raise ValueError('Elimits - input emax (%f) > data emax (%f)' % (erange[1], Xin[len_x]))
+        raise ValueError("Elimits - input emax (%f) > data emax (%f)" % (erange[1], Xin[len_x]))
     if erange[1] < erange[0]:
-        raise ValueError('Elimits - input emax (%f) < emin (%f)' % (erange[1], erange[0]))
+        raise ValueError("Elimits - input emax (%f) < emin (%f)" % (erange[1], erange[0]))
 
 
 def getInstrumentParameter(ws, param_name):
@@ -438,17 +438,21 @@ def getInstrumentParameter(ws, param_name):
 
     # Create a map of type parameters to functions. This is so we avoid writing lots of
     # if statements because there's no way to dynamically get the type.
-    func_map = {'double': inst.getNumberParameter, 'string': inst.getStringParameter,
-                'int': inst.getIntParameter, 'bool': inst.getBoolParameter}
+    func_map = {
+        "double": inst.getNumberParameter,
+        "string": inst.getStringParameter,
+        "int": inst.getIntParameter,
+        "bool": inst.getBoolParameter,
+    }
 
     if inst.hasParameter(param_name):
         param_type = inst.getParameterType(param_name)
-        if param_type != '':
+        if param_type != "":
             param = func_map[param_type](param_name)[0]
         else:
-            raise ValueError('Unable to retrieve %s from Instrument Parameter file.' % param_name)
+            raise ValueError("Unable to retrieve %s from Instrument Parameter file." % param_name)
     else:
-        raise ValueError('Unable to retrieve %s from Instrument Parameter file.' % param_name)
+        raise ValueError("Unable to retrieve %s from Instrument Parameter file." % param_name)
 
     return param
 
@@ -467,18 +471,17 @@ def convertToElasticQ(input_ws, output_ws=None):
     axis = s_api.mtd[input_ws].getAxis(1)
     if axis.isSpectra():
         e_fixed = getEfixed(input_ws)
-        s_api.ConvertSpectrumAxis(input_ws, Target='ElasticQ', EMode='Indirect', EFixed=e_fixed,
-                                  OutputWorkspace=output_ws)
+        s_api.ConvertSpectrumAxis(input_ws, Target="ElasticQ", EMode="Indirect", EFixed=e_fixed, OutputWorkspace=output_ws)
 
     elif axis.isNumeric():
         # Check that units are Momentum Transfer
-        if axis.getUnit().unitID() != 'MomentumTransfer':
-            raise RuntimeError('Input must have axis values of Q')
+        if axis.getUnit().unitID() != "MomentumTransfer":
+            raise RuntimeError("Input must have axis values of Q")
 
         s_api.CloneWorkspace(input_ws, OutputWorkspace=output_ws)
 
     else:
-        raise RuntimeError('Input workspace must have either spectra or numeric axis.')
+        raise RuntimeError("Input workspace must have either spectra or numeric axis.")
 
 
 def transposeFitParametersTable(params_table, output_table=None):
@@ -492,7 +495,7 @@ def transposeFitParametersTable(params_table, output_table=None):
     """
     params_table = s_api.mtd[params_table]
 
-    table_ws = '__tmp_table_ws'
+    table_ws = "__tmp_table_ws"
     table_ws = s_api.CreateEmptyTableWorkspace(OutputWorkspace=table_ws)
 
     param_names = params_table.column(0)[:-1]  # -1 to remove cost function
@@ -500,26 +503,26 @@ def transposeFitParametersTable(params_table, output_table=None):
     param_errors = params_table.column(2)[:-1]
 
     # Find the number of parameters per function
-    func_index = param_names[0].split('.')[0]
+    func_index = param_names[0].split(".")[0]
     num_params = 0
     for i, name in enumerate(param_names):
-        if name.split('.')[0] != func_index:
+        if name.split(".")[0] != func_index:
             num_params = i
             break
 
     # Create columns with parameter names for headers
-    column_names = ['.'.join(name.split('.')[1:]) for name in param_names[:num_params]]
-    column_error_names = [name + '_Err' for name in column_names]
+    column_names = [".".join(name.split(".")[1:]) for name in param_names[:num_params]]
+    column_error_names = [name + "_Err" for name in column_names]
     column_names = list(zip(column_names, column_error_names))
-    table_ws.addColumn('double', 'axis-1')
+    table_ws.addColumn("double", "axis-1")
     for name, error_name in column_names:
-        table_ws.addColumn('double', name)
-        table_ws.addColumn('double', error_name)
+        table_ws.addColumn("double", name)
+        table_ws.addColumn("double", error_name)
 
     # Output parameter values to table row
     for i in range(0, params_table.rowCount() - 1, num_params):
-        row_values = param_values[i:i + num_params]
-        row_errors = param_errors[i:i + num_params]
+        row_values = param_values[i : i + num_params]
+        row_errors = param_errors[i : i + num_params]
         row = [value for pair in zip(row_values, row_errors) for value in pair]
         row = [i / num_params] + row
         table_ws.addRow(row)
@@ -574,8 +577,8 @@ def formatRuns(runs, instrument_name):
     """
     run_list = []
     for run in runs:
-        if '-' in run:
-            a, b = run.split('-')
+        if "-" in run:
+            a, b = run.split("-")
             run_list.extend(range(int(a), int(b) + 1))
         else:
             try:

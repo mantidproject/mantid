@@ -12,9 +12,14 @@ from sans.common.enums import ReductionMode
 class TestSANSEnums(unittest.TestCase):
     def test_converter_accepts_legacy_and_new(self):
         # Mixed case intentional
-        for val, expected in [("hAb", ReductionMode.HAB), ("fRont", ReductionMode.HAB),
-                              ("laB", ReductionMode.LAB), ("reaR", ReductionMode.LAB),
-                              ("MerGed", ReductionMode.MERGED), ("AlL", ReductionMode.ALL)]:
+        for val, expected in [
+            ("hAb", ReductionMode.HAB),
+            ("fRont", ReductionMode.HAB),
+            ("laB", ReductionMode.LAB),
+            ("reaR", ReductionMode.LAB),
+            ("MerGed", ReductionMode.MERGED),
+            ("AlL", ReductionMode.ALL),
+        ]:
             self.assertEqual(expected, ReductionMode.convert(val))
 
     def test_converter_throws_unknown(self):
@@ -27,5 +32,5 @@ class TestSANSEnums(unittest.TestCase):
                 ReductionMode.convert(val, support_deprecated=False)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -7,11 +7,10 @@
 import unittest
 
 from mantid.api import AlgorithmManager, FrameworkManager
-from sans.common.log_tagger import (has_tag, set_tag, get_tag, has_hash, set_hash, get_hash_value)
+from sans.common.log_tagger import has_tag, set_tag, get_tag, has_hash, set_hash, get_hash_value
 
 
 class SANSLogTaggerTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         FrameworkManager.Instance()
@@ -53,5 +52,5 @@ class SANSLogTaggerTest(unittest.TestCase):
         self.assertFalse(has_hash(tag1, hashed_value_2, ws1))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

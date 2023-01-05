@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init
+# pylint: disable=no-init
 """
     Extract or compute the Q values from reduced QENS data
 """
@@ -17,14 +17,14 @@ import numpy as np
 
 class GlobalFitTest(MantidSystemTest):
     """Global fit of QENS data to the jump-diffusion model by Teixeira
-       Fitting model. In this case:
-        Convolution( A*Resolution, x*Delta + (1-x)*TeixeiraWaterSQE ) + LinearBackground
-        with 0<x<1 is the fraction of the elastic intensity
-       Parameters DiffCoeff and Tau (residence time) of fit function TeixeiraWaterSQE are
-       the same for all spectra. All other fitting  parameters are different for each spectrum
+    Fitting model. In this case:
+     Convolution( A*Resolution, x*Delta + (1-x)*TeixeiraWaterSQE ) + LinearBackground
+     with 0<x<1 is the fraction of the elastic intensity
+    Parameters DiffCoeff and Tau (residence time) of fit function TeixeiraWaterSQE are
+    the same for all spectra. All other fitting  parameters are different for each spectrum
     """
 
-    #def requiredFiles(self):
+    # def requiredFiles(self):
     #    return ["irs26173_graphite002_res.nxs", "irs26176_graphite002_red.nxs"]
 
     def runTest(self):
@@ -39,7 +39,7 @@ class GlobalFitTest(MantidSystemTest):
          name=TeixeiraWaterSQE,Height=1.0,Tau=1.0,DiffCoeff=1.0,Centre=0;
          ties=(f1.Centre=f0.Centre)));
         name=LinearBackground,A0=0,A1=0"""
-        single_model = re.sub(r'[\s+]', '', single_model)
+        single_model = re.sub(r"[\s+]", "", single_model)
 
         # Include all spectra for the fit
         selected_wi = range(data.getNumberHistograms())
@@ -50,32 +50,38 @@ class GlobalFitTest(MantidSystemTest):
         maxE = 0.4
 
         # Create the string representation of the global model (for selected spectra):
-        global_model="composite=MultiDomainFunction,NumDeriv=true;"
+        global_model = "composite=MultiDomainFunction,NumDeriv=true;"
         for _ in selected_wi:
             global_model += "(composite=CompositeFunction,NumDeriv=true,$domains=i;{0});\n".format(single_model)
 
         # Tie DiffCoeff and Tau since they are global parameters
-        ties = ['='.join(["f{0}.f0.f1.f1.DiffCoeff".format(di) for di in reversed(range(nWi))]),
-                '='.join(["f{0}.f0.f1.f1.Tau".format(wi) for wi in reversed(range(nWi))])]
-        global_model += "ties=(" + ','.join(ties) + ')'  # tie Radius
+        ties = [
+            "=".join(["f{0}.f0.f1.f1.DiffCoeff".format(di) for di in reversed(range(nWi))]),
+            "=".join(["f{0}.f0.f1.f1.Tau".format(wi) for wi in reversed(range(nWi))]),
+        ]
+        global_model += "ties=(" + ",".join(ties) + ")"  # tie Radius
 
         # Now relate each domain(i.e. spectrum) to each single-spectrum model
         domain_model = dict()
         domain_index = 0
         for wi in selected_wi:
             if domain_index == 0:
-                domain_model.update({"InputWorkspace": data.name(), "WorkspaceIndex": str(wi),
-                                     "StartX": str(minE), "EndX": str(maxE)})
+                domain_model.update({"InputWorkspace": data.name(), "WorkspaceIndex": str(wi), "StartX": str(minE), "EndX": str(maxE)})
             else:
                 di = str(domain_index)
-                domain_model.update({"InputWorkspace_" + di: data.name(), "WorkspaceIndex_" + di: str(wi),
-                                     "StartX_" + di: str(minE), "EndX_" + di: str(maxE)})
+                domain_model.update(
+                    {
+                        "InputWorkspace_" + di: data.name(),
+                        "WorkspaceIndex_" + di: str(wi),
+                        "StartX_" + di: str(minE),
+                        "EndX_" + di: str(maxE),
+                    }
+                )
             domain_index += 1
 
         # Invoke the Fit algorithm using global_model and domain_model:
         output_workspace = "glofit_" + data.name()
-        fit_output = sm.Fit(Function=global_model, Output=output_workspace,
-                            CreateOutput=True, MaxIterations=500, **domain_model)
+        fit_output = sm.Fit(Function=global_model, Output=output_workspace, CreateOutput=True, MaxIterations=500, **domain_model)
         chi2 = fit_output.OutputChi2overDoF
         params = fit_output.OutputParameters
         curves = fit_output.OutputWorkspace
@@ -84,7 +90,7 @@ class GlobalFitTest(MantidSystemTest):
         self._success = True
         try:
             self.assertLess(chi2, 1)  # goodness of fit
-            self.assertLess(abs(params.row(6)["Value"]-1.58)/1.58, 0.1) # optimal DiffCoeff
+            self.assertLess(abs(params.row(6)["Value"] - 1.58) / 1.58, 0.1)  # optimal DiffCoeff
             self.assertTrue(abs(params.row(7)["Value"] - 1.16) / 1.16 < 0.1)  # optimal Tau
             # check curves are correctly generated by calculating their Chi^2
             residuals = np.empty(0)
@@ -93,15 +99,20 @@ class GlobalFitTest(MantidSystemTest):
                 dataY = curveset.dataY(0)
                 dataE = curveset.dataE(0)
                 modelY = curveset.dataY(1)
-                residuals = np.append(residuals, ((dataY-modelY)/dataE)**2)  # don't trust residuals of curveset
-            otherChi2 = residuals.sum()/len(residuals)
-            self.assertLess(abs(otherChi2-chi2)/chi2, 0.1)
+                residuals = np.append(residuals, ((dataY - modelY) / dataE) ** 2)  # don't trust residuals of curveset
+            otherChi2 = residuals.sum() / len(residuals)
+            self.assertLess(abs(otherChi2 - chi2) / chi2, 0.1)
         except:
             self._success = False
 
     def cleanup(self):
-        for workspace in ["data", "resolution", "glofit_data_Parameters",
-                          "glofit_data_Workspaces", "glofit_data_NormalisedCovarianceMatrix"]:
+        for workspace in [
+            "data",
+            "resolution",
+            "glofit_data_Parameters",
+            "glofit_data_Workspaces",
+            "glofit_data_NormalisedCovarianceMatrix",
+        ]:
             if mantid.AnalysisDataService.doesExist(workspace):
                 sm.DeleteWorkspace(workspace)
 

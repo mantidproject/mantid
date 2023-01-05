@@ -15,56 +15,55 @@ from testhelpers import WorkspaceCreationHelper
 
 
 class ReflectometryISISSumBanksTest(unittest.TestCase):
-
     def test_validate_inputs(self):
         test_ws = WorkspaceCreationHelper.create2DWorkspaceWithRectangularInstrument(1, 5, 5)
 
         alg = ReflectometryISISSumBanks()
         alg.initialize()
-        alg.setProperty('InputWorkspace', test_ws)
+        alg.setProperty("InputWorkspace", test_ws)
 
         issues = alg.validateInputs()
         self.assertEqual(len(issues), 0)
 
     def test_validate_inputs_fails_if_no_instrument(self):
-        test_ws = CreateWorkspace(StoreInADS=False, DataX=[1, 2, 3], DataY=[10,20,30])
+        test_ws = CreateWorkspace(StoreInADS=False, DataX=[1, 2, 3], DataY=[10, 20, 30])
 
         alg = ReflectometryISISSumBanks()
         alg.initialize()
-        alg.setProperty('InputWorkspace', test_ws)
+        alg.setProperty("InputWorkspace", test_ws)
 
         issues = alg.validateInputs()
         self.assertEqual(len(issues), 1)
-        self.assertEqual(issues['InputWorkspace'], 'The input workspace must have an instrument')
+        self.assertEqual(issues["InputWorkspace"], "The input workspace must have an instrument")
 
     def test_validate_inputs_fails_if_multiple_rectangular_detectors(self):
         test_ws = WorkspaceCreationHelper.create2DWorkspaceWithRectangularInstrument(2, 5, 5)
 
         alg = ReflectometryISISSumBanks()
         alg.initialize()
-        alg.setProperty('InputWorkspace', test_ws)
+        alg.setProperty("InputWorkspace", test_ws)
 
         issues = alg.validateInputs()
         self.assertEqual(len(issues), 1)
-        self.assertEqual(issues['InputWorkspace'], 'The input workspace must only contain one rectangular detector: multiple were found')
+        self.assertEqual(issues["InputWorkspace"], "The input workspace must only contain one rectangular detector: multiple were found")
 
     def test_validate_inputs_fails_if_not_a_rectangular_detector(self):
         test_ws = WorkspaceCreationHelper.createEventWorkspaceWithNonUniformInstrument(1, True)
 
         alg = ReflectometryISISSumBanks()
         alg.initialize()
-        alg.setProperty('InputWorkspace', test_ws)
+        alg.setProperty("InputWorkspace", test_ws)
 
         issues = alg.validateInputs()
         self.assertEqual(len(issues), 1)
-        self.assertEqual(issues['InputWorkspace'], 'The input workspace must contain a rectangular detector')
+        self.assertEqual(issues["InputWorkspace"], "The input workspace must contain a rectangular detector")
 
     def test_validate_inputs_succeeds_if_single_rectangular_detectors(self):
         test_ws = WorkspaceCreationHelper.create2DWorkspaceWithRectangularInstrument(1, 5, 5)
 
         alg = ReflectometryISISSumBanks()
         alg.initialize()
-        alg.setProperty('InputWorkspace', test_ws)
+        alg.setProperty("InputWorkspace", test_ws)
 
         issues = alg.validateInputs()
         self.assertEqual(len(issues), 0)
@@ -97,7 +96,7 @@ class ReflectometryISISSumBanksTest(unittest.TestCase):
 
         # We have 3x3 pixels, so 9 detectors. Include the first 6, i.e. first 2 banks.
         num_banks_included = 2
-        roi_detector_ids = '9-14'
+        roi_detector_ids = "9-14"
         masked_ws = ReflectometryISISSumBanks().mask_detectors(test_ws, roi_detector_ids)
         summed_ws = ReflectometryISISSumBanks().sum_banks(masked_ws)
 
@@ -120,5 +119,5 @@ class ReflectometryISISSumBanksTest(unittest.TestCase):
             self.assertEqual(expected_monitor, prepended_ws.getDetector(idx).isMonitor())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,1 @@
+- HDF5 has been upgraded to v1.12 along with h5py to version 3.

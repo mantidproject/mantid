@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init
+# pylint: disable=no-init
 from mantid.api import *
 from mantid.kernel import *
 import math
@@ -12,14 +12,14 @@ import math
 
 class ReactorSANSResolution(PythonAlgorithm):
     """
-        Calculate and populate the Q resolution
+    Calculate and populate the Q resolution
     """
 
     def category(self):
         return "SANS"
 
     def seeAlso(self):
-        return [ "EQSANSResolution" ]
+        return ["EQSANSResolution"]
 
     def name(self):
         return "ReactorSANSResolution"
@@ -29,15 +29,14 @@ class ReactorSANSResolution(PythonAlgorithm):
 
     def PyInit(self):
         # Input workspace
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "",
-                                                     direction=Direction.Input),
-                             "Name the workspace to calculate the resolution for")
+        self.declareProperty(
+            MatrixWorkspaceProperty("InputWorkspace", "", direction=Direction.Input), "Name the workspace to calculate the resolution for"
+        )
 
         # Dummy property for temporary backward compatibility
         # The output workspace property is not used and the resolution is
         # added to the input workspace
-        self.declareProperty("OutputWorkspace", "",
-                             doc="Obsolete: not used - The resolution is added to input workspace")
+        self.declareProperty("OutputWorkspace", "", doc="Obsolete: not used - The resolution is added to input workspace")
 
     def PyExec(self):
         input_ws = self.getProperty("InputWorkspace").value
@@ -56,11 +55,11 @@ class ReactorSANSResolution(PythonAlgorithm):
 
         source_apert_radius = None
         if input_ws.getRun().hasProperty("source-aperture-diameter"):
-            source_apert_radius = input_ws.getRun().getProperty("source-aperture-diameter").value/2.0
+            source_apert_radius = input_ws.getRun().getProperty("source-aperture-diameter").value / 2.0
 
         sample_apert_radius = None
         if input_ws.getRun().hasProperty("sample-aperture-diameter"):
-            sample_apert_radius = input_ws.getRun().getProperty("sample-aperture-diameter").value/2.0
+            sample_apert_radius = input_ws.getRun().getProperty("sample-aperture-diameter").value / 2.0
 
         source_sample_distance = None
         if input_ws.getRun().hasProperty("source-sample-distance"):
@@ -72,21 +71,34 @@ class ReactorSANSResolution(PythonAlgorithm):
 
         pixel_size_x = input_ws.getInstrument().getNumberParameter("x-pixel-size")[0]
 
-        if wvl is not None and d_wvl is not None \
-                and source_apert_radius is not None and sample_apert_radius is not None \
-                and source_sample_distance is not None and sample_detector_distance is not None:
-            k = 2.0*math.pi/wvl
-            res_factor = math.pow(k*source_apert_radius/source_sample_distance, 2)/4.0
-            res_factor += (math.pow(k*sample_apert_radius*(source_sample_distance+sample_detector_distance)
-                                    / (source_sample_distance*sample_detector_distance), 2)/4.0)
-            res_factor += math.pow(k*pixel_size_x/sample_detector_distance, 2)/12.0
+        if (
+            wvl is not None
+            and d_wvl is not None
+            and source_apert_radius is not None
+            and sample_apert_radius is not None
+            and source_sample_distance is not None
+            and sample_detector_distance is not None
+        ):
+            k = 2.0 * math.pi / wvl
+            res_factor = math.pow(k * source_apert_radius / source_sample_distance, 2) / 4.0
+            res_factor += (
+                math.pow(
+                    k
+                    * sample_apert_radius
+                    * (source_sample_distance + sample_detector_distance)
+                    / (source_sample_distance * sample_detector_distance),
+                    2,
+                )
+                / 4.0
+            )
+            res_factor += math.pow(k * pixel_size_x / sample_detector_distance, 2) / 12.0
 
             for i in range(len(input_ws.readDx(0))):
                 if len(input_ws.readDx(0)) == len(input_ws.readX(0)):
                     center = input_ws.readX(0)[i]
                 else:
-                    center = 0.5*(input_ws.readX(0)[i] + input_ws.readX(0)[i+1])
-                input_ws.dataDx(0)[i] = math.sqrt(res_factor+math.pow((center*d_wvl), 2)/6.0)
+                    center = 0.5 * (input_ws.readX(0)[i] + input_ws.readX(0)[i + 1])
+                input_ws.dataDx(0)[i] = math.sqrt(res_factor + math.pow((center * d_wvl), 2) / 6.0)
         else:
             raise RuntimeError("ReactorSANSResolution could not find all the run parameters needed to compute the resolution.")
 

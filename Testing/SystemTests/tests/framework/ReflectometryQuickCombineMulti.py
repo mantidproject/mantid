@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init
+# pylint: disable=no-init
 import systemtesting
 from mantid.simpleapi import *
 from isis_reflectometry import quick
@@ -21,7 +21,7 @@ class ReflectometryQuickCombineMulti(systemtesting.MantidSystemTest):
     __stitchedWorkspaceName = "stitched_13460_13462"
 
     def doQuickOnRun(self, runNumber, transmissionNumbers, instrument, incidentAngle):
-        defaultInstKey = 'default.instrument'
+        defaultInstKey = "default.instrument"
         defaultInstrument = config[defaultInstKey]
         try:
             config[defaultInstKey] = instrument
@@ -34,10 +34,10 @@ class ReflectometryQuickCombineMulti(systemtesting.MantidSystemTest):
             quick.quick(str(runNumber), trans=transmissionRuns, theta=incidentAngle)
         finally:
             config[defaultInstKey] = defaultInstrument
-        return mtd[str(runNumber) + '_IvsQ']
+        return mtd[str(runNumber) + "_IvsQ"]
 
     def createBinningParam(self, low, step, high):
-        return "%f,%f,%f" %(low, step, high)
+        return "%f,%f,%f" % (low, step, high)
 
     def runTest(self):
         step = 0.040
@@ -47,17 +47,25 @@ class ReflectometryQuickCombineMulti(systemtesting.MantidSystemTest):
         run2QHigh = 0.300
 
         # Create IvsQ workspaces
-        IvsQ1 = self.doQuickOnRun(runNumber=13460, transmissionNumbers=[13463,13464], instrument='INTER', incidentAngle=0.7)
+        IvsQ1 = self.doQuickOnRun(runNumber=13460, transmissionNumbers=[13463, 13464], instrument="INTER", incidentAngle=0.7)
         IvsQ1Binned = Rebin(InputWorkspace=IvsQ1, Params=self.createBinningParam(run1QLow, -step, run1QHigh))
 
         # Create IvsQ workspaces
-        IvsQ2 = self.doQuickOnRun(runNumber=13462, transmissionNumbers=[13463,13464], instrument='INTER', incidentAngle=2.3)
+        IvsQ2 = self.doQuickOnRun(runNumber=13462, transmissionNumbers=[13463, 13464], instrument="INTER", incidentAngle=2.3)
         IvsQ2Binned = Rebin(InputWorkspace=IvsQ2, Params=self.createBinningParam(run2QLow, -step, run2QHigh))
 
         # Perform the stitching
-        combineMulti.combineDataMulti([IvsQ1Binned.name(), IvsQ2Binned.name()], self.__stitchedWorkspaceName,
-                                      [run1QLow, run2QLow], [run1QHigh, run2QHigh], run1QLow, run2QHigh, -step, 1)
+        combineMulti.combineDataMulti(
+            [IvsQ1Binned.name(), IvsQ2Binned.name()],
+            self.__stitchedWorkspaceName,
+            [run1QLow, run2QLow],
+            [run1QHigh, run2QHigh],
+            run1QLow,
+            run2QHigh,
+            -step,
+            1,
+        )
 
     def validate(self):
-        self.disableChecking.append('Instrument')
-        return self.__stitchedWorkspaceName,'QuickStitchedReferenceResult.nxs'
+        self.disableChecking.append("Instrument")
+        return self.__stitchedWorkspaceName, "QuickStitchedReferenceResult.nxs"

@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init
+# pylint: disable=no-init
 import systemtesting
 from mantid.simpleapi import LoadEventNexus
 
@@ -20,13 +20,16 @@ class ISISLoadingEventData(systemtesting.MantidSystemTest):
     """
 
     def runTest(self):
-        ev_ws = LoadEventNexus('LET00006278.nxs')
+        ev_ws = LoadEventNexus("LET00006278.nxs")
         # isis_vms_compat/SPB[2]
-        self.assertEqual(ev_ws.sample().getGeometryFlag(), 1,
-                         "Geometry flag mismatch. vms_compat block not read correctly")
+        self.assertEqual(ev_ws.sample().getGeometryFlag(), 1, "Geometry flag mismatch. vms_compat block not read correctly")
         # Isis correct the tof using loadTimeOfFlight method.
-        self.assertDelta(ev_ws.getSpectrum(10).getTofs()[1], 1041.81, 0.01,
-                         "The ISIS event correction is incorrect (check LoadEventNexus::loadTimeOfFlight)")
+        self.assertDelta(
+            ev_ws.getSpectrum(10).getTofs()[1],
+            1041.81,
+            0.01,
+            "The ISIS event correction is incorrect (check LoadEventNexus::loadTimeOfFlight)",
+        )
 
     def validate(self):
         return True

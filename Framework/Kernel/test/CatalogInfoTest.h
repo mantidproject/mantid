@@ -26,7 +26,7 @@ public:
     const std::string facilitiesXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                                       "<facilities>"
                                       "<facility name=\"ISIS\">"
-                                      "<catalog name=\"ICat3Catalog\">"
+                                      "<catalog name=\"ICat4Catalog\">"
                                       "<soapendpoint "
                                       "url=\"https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT\"></"
                                       "soapendpoint>"
@@ -43,7 +43,7 @@ public:
     std::unique_ptr<CatalogInfo> catalogInfo = nullptr;
     TS_ASSERT_THROWS_NOTHING(catalogInfo = getCatalogFromXML(facilitiesXml));
 
-    TS_ASSERT_EQUALS(catalogInfo->catalogName(), "ICat3Catalog");
+    TS_ASSERT_EQUALS(catalogInfo->catalogName(), "ICat4Catalog");
     TS_ASSERT_EQUALS(catalogInfo->soapEndPoint(), "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT");
     // The regex needs escaped in order to work correctly. The output should be
     // same as Facilities.xml (\\\\isis\\inst\$\\Instruments\$)
@@ -59,7 +59,7 @@ public:
     const std::string facilitiesXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                                       "<facilities>"
                                       "<facility name=\"ISIS\">"
-                                      "<catalog name=\"ICat3Catalog\">"
+                                      "<catalog name=\"ICat4Catalog\">"
                                       "<soapendpoint "
                                       "url=\"https://facilities01.esc.rl.ac.uk:443/"
                                       "ICATService/ICAT\"></soapendpoint>"
@@ -130,7 +130,7 @@ public:
     const std::string facilitiesXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                                       "<facilities>"
                                       "<facility name=\"ISIS\">"
-                                      "<catalog name=\"ICat3Catalog\">"
+                                      "<catalog name=\"ICat4Catalog\">"
                                       "<soapendpoint "
                                       "url=\"https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT\"></"
                                       "soapendpoint>"

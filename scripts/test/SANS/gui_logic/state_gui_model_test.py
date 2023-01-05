@@ -7,8 +7,16 @@
 import itertools
 import unittest
 
-from sans.common.enums import (ReductionDimensionality, ReductionMode, RangeStepType, SampleShape, SaveType,
-                               SANSInstrument, FitModeForMerge, DetectorType)
+from sans.common.enums import (
+    ReductionDimensionality,
+    ReductionMode,
+    RangeStepType,
+    SampleShape,
+    SaveType,
+    SANSInstrument,
+    FitModeForMerge,
+    DetectorType,
+)
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.state.AllStates import AllStates
 from sans.state.StateObjects.StateMoveDetectors import StateMoveDetectors
@@ -124,8 +132,7 @@ class StateGuiModelTest(unittest.TestCase):
         state_gui_model = StateGuiModel(state)
         self.assertEqual(state_gui_model.reduction_dimensionality, ReductionDimensionality.ONE_DIM)
         state_gui_model.reduction_dimensionality = ReductionDimensionality.TWO_DIM
-        self.assertEqual(state_gui_model.all_states.reduction.reduction_dimensionality,
-                         ReductionDimensionality.TWO_DIM)
+        self.assertEqual(state_gui_model.all_states.reduction.reduction_dimensionality, ReductionDimensionality.TWO_DIM)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Event binning for compatibility mode
@@ -218,33 +225,33 @@ class StateGuiModelTest(unittest.TestCase):
 
     def test_that_can_set_and_reset_merged_settings(self):
         state = AllStates()
-        state.reduction.merge_scale = 12.
-        state.reduction.merge_shift = 234.
+        state.reduction.merge_scale = 12.0
+        state.reduction.merge_shift = 234.0
         state.reduction.merge_fit_mode = FitModeForMerge.SHIFT_ONLY
-        state.reduction.merge_range_min = 1.
-        state.reduction.merge_range_max = 7.
+        state.reduction.merge_range_min = 1.0
+        state.reduction.merge_range_max = 7.0
 
         state_gui_model = StateGuiModel(state)
-        self.assertEqual(state_gui_model.merge_scale, 12.)
-        self.assertEqual(state_gui_model.merge_shift, 234.)
+        self.assertEqual(state_gui_model.merge_scale, 12.0)
+        self.assertEqual(state_gui_model.merge_shift, 234.0)
         self.assertFalse(state_gui_model.merge_scale_fit)
         self.assertTrue(state_gui_model.merge_shift_fit)
-        self.assertEqual(state_gui_model.merge_q_range_start, 1.)
-        self.assertEqual(state_gui_model.merge_q_range_stop, 7.)
+        self.assertEqual(state_gui_model.merge_q_range_start, 1.0)
+        self.assertEqual(state_gui_model.merge_q_range_stop, 7.0)
 
         state_gui_model.merge_scale = 12.3
-        state_gui_model.merge_shift = 3.
+        state_gui_model.merge_shift = 3.0
         state_gui_model.merge_scale_fit = True
         state_gui_model.merge_shift_fit = False
-        state_gui_model.merge_q_range_start = 2.
-        state_gui_model.merge_q_range_stop = 8.
+        state_gui_model.merge_q_range_start = 2.0
+        state_gui_model.merge_q_range_stop = 8.0
 
         self.assertEqual(state_gui_model.merge_scale, 12.3)
-        self.assertEqual(state_gui_model.merge_shift, 3.)
+        self.assertEqual(state_gui_model.merge_shift, 3.0)
         self.assertTrue(state_gui_model.merge_scale_fit)
         self.assertFalse(state_gui_model.merge_shift_fit)
-        self.assertEqual(state_gui_model.merge_q_range_start, 2.)
-        self.assertEqual(state_gui_model.merge_q_range_stop, 8.)
+        self.assertEqual(state_gui_model.merge_q_range_start, 2.0)
+        self.assertEqual(state_gui_model.merge_q_range_stop, 8.0)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Wavelength
@@ -270,13 +277,12 @@ class StateGuiModelTest(unittest.TestCase):
         user_input = "1-3,3-5"
         state_gui_model.wavelength_range = user_input
         self.assertEqual(state_gui_model.wavelength_range, user_input)
-        self.assertEqual([(1., 5.), (1., 3.), (3., 5.)],
-                         state_gui_model.all_states.wavelength.wavelength_interval.selected_ranges)
+        self.assertEqual([(1.0, 5.0), (1.0, 3.0), (3.0, 5.0)], state_gui_model.all_states.wavelength.wavelength_interval.selected_ranges)
 
     def test_wavelength_range_builds_user_string(self):
         # We need to build this string when the user hasn't interacted with the GUI
         state_gui_model = StateGuiModel(AllStates())
-        ranges = [(1., 7.), (1., 3.), (3., 5.), (5., 7.)]
+        ranges = [(1.0, 7.0), (1.0, 3.0), (3.0, 5.0), (5.0, 7.0)]
         state_gui_model.all_states.wavelength.wavelength_interval.selected_ranges = ranges
         self.assertEqual(state_gui_model.wavelength_range, "1.0-3.0, 3.0-5.0, 5.0-7.0")
 
@@ -294,8 +300,9 @@ class StateGuiModelTest(unittest.TestCase):
             state_gui_model.wavelength_range = sample_wav_range
             state_gui_model.wavelength_min = sample_full_range[0]
             state_gui_model.wavelength_max = sample_full_range[1]
-            self.assertNotEqual(user_facing_full_range, state_gui_model.wavelength_range,
-                                "State GUI model not preserving user range input. Aborting test")
+            self.assertNotEqual(
+                user_facing_full_range, state_gui_model.wavelength_range, "State GUI model not preserving user range input. Aborting test"
+            )
 
             state_gui_model.wavelength_step_type = non_range
             # This should now reset our sample range back to only the full range
@@ -315,23 +322,25 @@ class StateGuiModelTest(unittest.TestCase):
                 state_gui_model.wavelength_step_type = original_val
                 state_gui_model.wavelength_range = user_input
                 state_gui_model.wavelength_step_type = new_val
-                self.assertEqual(user_input, state_gui_model.wavelength_range,
-                                 f"Setting enum from {original_val} to {new_val}"
-                                 " did not preserve the users selected range")
-                self.assertEqual(2., state_gui_model.wavelength_min)
-                self.assertEqual(8., state_gui_model.wavelength_max)
+                self.assertEqual(
+                    user_input,
+                    state_gui_model.wavelength_range,
+                    f"Setting enum from {original_val} to {new_val}" " did not preserve the users selected range",
+                )
+                self.assertEqual(2.0, state_gui_model.wavelength_min)
+                self.assertEqual(8.0, state_gui_model.wavelength_max)
 
         run_test(range_types, range_wav_range)
         run_test(non_range_types, user_facing_full_range)
 
     def test_that_can_set_wavelength(self):
         state_gui_model = StateGuiModel(AllStates())
-        state_gui_model.wavelength_min = 1.
-        state_gui_model.wavelength_max = 2.
-        state_gui_model.wavelength_step = .5
+        state_gui_model.wavelength_min = 1.0
+        state_gui_model.wavelength_max = 2.0
+        state_gui_model.wavelength_step = 0.5
         state_gui_model.wavelength_step_type = RangeStepType.LIN
         state_gui_model.wavelength_step_type = RangeStepType.LOG
-        self._assert_all_wavelengths_match(state_gui_model, 1., 2., .5, RangeStepType.LOG)
+        self._assert_all_wavelengths_match(state_gui_model, 1.0, 2.0, 0.5, RangeStepType.LOG)
 
     def _assert_all_wavelengths_match(self, model, low, high, step, step_type):
         # Transmission
@@ -361,8 +370,8 @@ class StateGuiModelTest(unittest.TestCase):
 
     def test_that_can_set_absolute_scale(self):
         state_gui_model = StateGuiModel(AllStates())
-        state_gui_model.absolute_scale = .5
-        self.assertEqual(state_gui_model.absolute_scale, .5)
+        state_gui_model.absolute_scale = 0.5
+        self.assertEqual(state_gui_model.absolute_scale, 0.5)
 
     def test_that_default_extents_are_empty(self):
         state_gui_model = StateGuiModel(AllStates())
@@ -409,16 +418,16 @@ class StateGuiModelTest(unittest.TestCase):
     def test_that_can_set_the_q_limits(self):
         state_gui_model = StateGuiModel(AllStates())
         state_gui_model.q_1d_rebin_string = "test"
-        state_gui_model.q_xy_max = 1.
-        state_gui_model.q_xy_step = 122.
-        state_gui_model.r_cut = 45.
-        state_gui_model.w_cut = 890.
+        state_gui_model.q_xy_max = 1.0
+        state_gui_model.q_xy_step = 122.0
+        state_gui_model.r_cut = 45.0
+        state_gui_model.w_cut = 890.0
 
         self.assertEqual(state_gui_model.q_1d_rebin_string, "test")
-        self.assertEqual(state_gui_model.q_xy_max, 1.)
-        self.assertEqual(state_gui_model.q_xy_step, 122.)
-        self.assertEqual(state_gui_model.r_cut, 45.)
-        self.assertEqual(state_gui_model.w_cut, 890.)
+        self.assertEqual(state_gui_model.q_xy_max, 1.0)
+        self.assertEqual(state_gui_model.q_xy_step, 122.0)
+        self.assertEqual(state_gui_model.r_cut, 45.0)
+        self.assertEqual(state_gui_model.w_cut, 890.0)
 
     def test_that_q_1d_rebin_string_as_bytes_is_converted_to_string(self):
         state_gui_model = StateGuiModel(AllStates())
@@ -439,9 +448,9 @@ class StateGuiModelTest(unittest.TestCase):
     def test_that_can_set_gravity(self):
         state_gui_model = StateGuiModel(AllStates())
         state_gui_model.gravity_on_off = False
-        state_gui_model.gravity_extra_length = 1.
+        state_gui_model.gravity_extra_length = 1.0
         self.assertFalse(state_gui_model.gravity_on_off)
-        self.assertEqual(state_gui_model.gravity_extra_length, 1.)
+        self.assertEqual(state_gui_model.gravity_extra_length, 1.0)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Q resolution
@@ -500,11 +509,11 @@ class StateGuiModelTest(unittest.TestCase):
 
     def test_that_phi_mask_can_be_set(self):
         state_gui_model = StateGuiModel(AllStates())
-        state_gui_model.phi_limit_min = 12.
-        state_gui_model.phi_limit_max = 13.
+        state_gui_model.phi_limit_min = 12.0
+        state_gui_model.phi_limit_max = 13.0
         state_gui_model.phi_limit_use_mirror = True
-        self.assertEqual(state_gui_model.phi_limit_min, 12.)
-        self.assertEqual(state_gui_model.phi_limit_max, 13.)
+        self.assertEqual(state_gui_model.phi_limit_min, 12.0)
+        self.assertEqual(state_gui_model.phi_limit_max, 13.0)
         self.assertTrue(state_gui_model.phi_limit_use_mirror)
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -517,10 +526,10 @@ class StateGuiModelTest(unittest.TestCase):
 
     def test_that_radius_mask_can_be_set(self):
         state_gui_model = StateGuiModel(AllStates())
-        state_gui_model.radius_limit_min = 12.
-        state_gui_model.radius_limit_max = 13.
-        self.assertEqual(state_gui_model.radius_limit_min, 12.)
-        self.assertEqual(state_gui_model.radius_limit_max, 13.)
+        state_gui_model.radius_limit_min = 12.0
+        state_gui_model.radius_limit_max = 13.0
+        self.assertEqual(state_gui_model.radius_limit_min, 12.0)
+        self.assertEqual(state_gui_model.radius_limit_max, 13.0)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Mask files
@@ -539,44 +548,43 @@ class StateGuiModelTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------------------------------------
     def test_that_user_file_items_interpreted_correctly(self):
         state = AllStates()
-        state.move.sample_offset = 1.78 / 1000.
+        state.move.sample_offset = 1.78 / 1000.0
         state.scale.width = 1.2
         state.scale.height = 1.6
         state.scale.thickness = 1.8
         state.scale.shape = SampleShape.FLAT_PLATE
-        state.convert_to_q.radius_cutoff = 45. / 1000.
-        state.convert_to_q.q_resolution_a1 = 1.5 / 1000.
-        state.convert_to_q.q_resolution_a2 = 2.5 / 1000.
-        state.convert_to_q.q_resolution_h1 = 1.5 / 1000.
-        state.convert_to_q.q_resolution_h2 = 2.5 / 1000.
-        state.convert_to_q.q_resolution_delta_r = 0.1 / 1000.
-        state.mask.radius_min = 12. / 1000.
-        state.mask.radius_max = 13. / 1000.
-        state.move.detectors = {DetectorType.LAB.value: StateMoveDetectors(),
-                                DetectorType.HAB.value: StateMoveDetectors()}
-        state.move.detectors[DetectorType.LAB.value].sample_centre_pos1 = 21.5 / 1000.
-        state.move.detectors[DetectorType.LAB.value].sample_centre_pos2 = 17.8 / 1000.
-        state.move.detectors[DetectorType.HAB.value].sample_centre_pos1 = 25.1 / 1000.
-        state.move.detectors[DetectorType.HAB.value].sample_centre_pos2 = 16.9 / 1000.
+        state.convert_to_q.radius_cutoff = 45.0 / 1000.0
+        state.convert_to_q.q_resolution_a1 = 1.5 / 1000.0
+        state.convert_to_q.q_resolution_a2 = 2.5 / 1000.0
+        state.convert_to_q.q_resolution_h1 = 1.5 / 1000.0
+        state.convert_to_q.q_resolution_h2 = 2.5 / 1000.0
+        state.convert_to_q.q_resolution_delta_r = 0.1 / 1000.0
+        state.mask.radius_min = 12.0 / 1000.0
+        state.mask.radius_max = 13.0 / 1000.0
+        state.move.detectors = {DetectorType.LAB.value: StateMoveDetectors(), DetectorType.HAB.value: StateMoveDetectors()}
+        state.move.detectors[DetectorType.LAB.value].sample_centre_pos1 = 21.5 / 1000.0
+        state.move.detectors[DetectorType.LAB.value].sample_centre_pos2 = 17.8 / 1000.0
+        state.move.detectors[DetectorType.HAB.value].sample_centre_pos1 = 25.1 / 1000.0
+        state.move.detectors[DetectorType.HAB.value].sample_centre_pos2 = 16.9 / 1000.0
         state_gui_model = StateGuiModel(state)
         self.assertEqual(state_gui_model.sample_width, 1.2)
         self.assertEqual(state_gui_model.sample_height, 1.6)
         self.assertEqual(state_gui_model.sample_thickness, 1.8)
         self.assertEqual(state_gui_model.z_offset, 1.78)
         self.assertEqual(state_gui_model.sample_shape, SampleShape.FLAT_PLATE)
-        self.assertEqual(state_gui_model.r_cut, 45.)
+        self.assertEqual(state_gui_model.r_cut, 45.0)
         self.assertEqual(state_gui_model.q_resolution_source_a, 1.5)
         self.assertEqual(state_gui_model.q_resolution_sample_a, 2.5)
         self.assertEqual(state_gui_model.q_resolution_source_h, 1.5)
         self.assertEqual(state_gui_model.q_resolution_sample_h, 2.5)
         self.assertEqual(state_gui_model.q_resolution_delta_r, 0.1)
-        self.assertEqual(state_gui_model.radius_limit_min, 12.)
-        self.assertEqual(state_gui_model.radius_limit_max, 13.)
+        self.assertEqual(state_gui_model.radius_limit_min, 12.0)
+        self.assertEqual(state_gui_model.radius_limit_max, 13.0)
         self.assertEqual(state_gui_model.rear_pos_1, 21.5)
         self.assertEqual(state_gui_model.rear_pos_2, 17.8)
         self.assertEqual(state_gui_model.front_pos_1, 25.1)
         self.assertEqual(state_gui_model.front_pos_2, 16.9)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

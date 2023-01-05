@@ -5,21 +5,21 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
-from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspace, MatrixWorkspaceProperty, WorkspaceProperty,
-                        WorkspaceFactory)
-from mantid.kernel import (Direction, StringListValidator, logger)
+from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspace, MatrixWorkspaceProperty, WorkspaceProperty, WorkspaceFactory
+from mantid.kernel import Direction, StringListValidator, logger
 
 from pystog.converter import Converter
 
-Gr = 'G(r)'
-GKr = 'GK(r)'
-gr = 'g(r)'
+Gr = "G(r)"
+GKr = "GK(r)"
+gr = "g(r)"
 
 
 class PDConvertRealSpace(PythonAlgorithm):
     """
     Convert between different real space functions
     """
+
     def category(self):
         """
         Return category
@@ -42,36 +42,33 @@ class PDConvertRealSpace(PythonAlgorithm):
         """
         Declare properties
         """
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "",
-                                                     direction=Direction.Input),
-                             doc="Input workspace. The units are assumed to be distance")
+        self.declareProperty(
+            MatrixWorkspaceProperty("InputWorkspace", "", direction=Direction.Input),
+            doc="Input workspace. The units are assumed to be distance",
+        )
         functions = [Gr, GKr, gr]
-        self.declareProperty("From", Gr, StringListValidator(functions),
-                             "Function type in the input workspace")
-        self.declareProperty("To", Gr, StringListValidator(functions),
-                             "Function type in the output workspace")
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
-                                               direction=Direction.Output),
-                             doc='Output workspace')
+        self.declareProperty("From", Gr, StringListValidator(functions), "Function type in the input workspace")
+        self.declareProperty("To", Gr, StringListValidator(functions), "Function type in the output workspace")
+        self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output), doc="Output workspace")
 
     def validateInputs(self):
         result = dict()
-        input_ws = self.getProperty('InputWorkspace').value
+        input_ws = self.getProperty("InputWorkspace").value
         if not isinstance(input_ws, MatrixWorkspace):
-            result['InputWorkspace'] = "The InputWorkspace must be a MatrixWorkspace."
+            result["InputWorkspace"] = "The InputWorkspace must be a MatrixWorkspace."
         elif input_ws.sample().getMaterial():
-            if input_ws.sample().getMaterial().cohScatterLengthSqrd() == 0.:
-                from_quantity = self.getProperty('From').value
-                to_quantity = self.getProperty('To').value
+            if input_ws.sample().getMaterial().cohScatterLengthSqrd() == 0.0:
+                from_quantity = self.getProperty("From").value
+                to_quantity = self.getProperty("To").value
                 if from_quantity == GKr and to_quantity in [Gr, gr]:
-                    result['To'] = 'Require non-zero coherent scattering length'
+                    result["To"] = "Require non-zero coherent scattering length"
         else:
-            result['InputWorkspace'] = 'Please run SetSample or SetSampleMaterial'
+            result["InputWorkspace"] = "Please run SetSample or SetSampleMaterial"
         return result
 
     def PyExec(self):
         input_ws = self.getProperty("InputWorkspace").value
-        output_ws_name = self.getProperty('OutputWorkspace').valueAsStr
+        output_ws_name = self.getProperty("OutputWorkspace").valueAsStr
         from_quantity = self.getProperty("From").value
         to_quantity = self.getProperty("To").value
 
@@ -80,19 +77,19 @@ class PDConvertRealSpace(PythonAlgorithm):
         else:
             output_ws = WorkspaceFactory.create(input_ws)
 
-        self.setProperty('OutputWorkspace', output_ws)
+        self.setProperty("OutputWorkspace", output_ws)
         if from_quantity == to_quantity:
-            logger.warning('The input and output functions are the same. Nothing to be done')
+            logger.warning("The input and output functions are the same. Nothing to be done")
             return
 
         c = Converter()
-        transformation = {Gr: {GKr: c.G_to_GK, gr: c.G_to_g},
-                          GKr: {Gr: c.GK_to_G, gr: c.GK_to_g},
-                          gr: {Gr: c.g_to_G, GKr: c.g_to_GK}}
+        transformation = {Gr: {GKr: c.G_to_GK, gr: c.G_to_g}, GKr: {Gr: c.GK_to_G, gr: c.GK_to_g}, gr: {Gr: c.g_to_G, GKr: c.g_to_GK}}
 
-        sample_kwargs = {"<b_coh>^2": input_ws.sample().getMaterial().cohScatterLengthSqrd(),
-                         "<b_tot^2>": input_ws.sample().getMaterial().totalScatterLengthSqrd(),
-                         "rho": input_ws.sample().getMaterial().numberDensity}
+        sample_kwargs = {
+            "<b_coh>^2": input_ws.sample().getMaterial().cohScatterLengthSqrd(),
+            "<b_tot^2>": input_ws.sample().getMaterial().totalScatterLengthSqrd(),
+            "rho": input_ws.sample().getMaterial().numberDensity,
+        }
 
         for sp_num in range(input_ws.getNumberHistograms()):
             x = input_ws.readX(sp_num)

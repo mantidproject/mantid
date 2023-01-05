@@ -30,20 +30,14 @@ def split_into_tof_d_spacing_groups(run_details, processed_spectra, include_q_sq
         tof_out_name = run_number + ext + "-ResultTOF_" + str(name_index)
         q_squared_out_name = run_number + ext + "-ResultQ_" + str(name_index)
 
-        d_spacing_output.append(
-            mantid.ConvertUnits(InputWorkspace=ws,
-                                OutputWorkspace=d_spacing_out_name,
-                                Target="dSpacing"))
-        tof_output.append(
-            mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=tof_out_name, Target="TOF"))
+        d_spacing_output.append(mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=d_spacing_out_name, Target="dSpacing"))
+        tof_output.append(mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=tof_out_name, Target="TOF"))
         if include_q_squared:
-            q_squared_output.append(
-                mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=q_squared_out_name, Target="QSquared"))
+            q_squared_output.append(mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=q_squared_out_name, Target="QSquared"))
 
     # Group the outputs
     d_spacing_group_name = run_number + ext + "-ResultD"
-    d_spacing_group = mantid.GroupWorkspaces(InputWorkspaces=d_spacing_output,
-                                             OutputWorkspace=d_spacing_group_name)
+    d_spacing_group = mantid.GroupWorkspaces(InputWorkspaces=d_spacing_output, OutputWorkspace=d_spacing_group_name)
     tof_group_name = run_number + ext + "-ResultTOF"
     tof_group = mantid.GroupWorkspaces(InputWorkspaces=tof_output, OutputWorkspace=tof_group_name)
     if include_q_squared:
@@ -62,24 +56,18 @@ def save_focused_data(d_spacing_group, tof_group, output_paths, q_squared=None):
     :param output_paths: A dictionary containing the full paths to save to
     :return: None
     """
+
     def ensure_dir_exists(filename):
         dirname = os.path.dirname(filename)
         if not os.path.exists(dirname):
             os.makedirs(dirname)
         return filename
 
-    mantid.SaveGSS(InputWorkspace=tof_group,
-                   Filename=ensure_dir_exists(output_paths["gss_filename"]),
-                   SplitFiles=False,
-                   Append=False)
-    mantid.SaveNexusProcessed(InputWorkspace=tof_group,
-                              Filename=ensure_dir_exists(output_paths["nxs_filename"]),
-                              Append=False)
+    mantid.SaveGSS(InputWorkspace=tof_group, Filename=ensure_dir_exists(output_paths["gss_filename"]), SplitFiles=False, Append=False)
+    mantid.SaveNexusProcessed(InputWorkspace=tof_group, Filename=ensure_dir_exists(output_paths["nxs_filename"]), Append=False)
 
-    _save_xye(ws_group=d_spacing_group,
-              filename_template=ensure_dir_exists(output_paths["dspacing_xye_filename"]))
-    _save_xye(ws_group=tof_group,
-              filename_template=ensure_dir_exists(output_paths["tof_xye_filename"]))
+    _save_xye(ws_group=d_spacing_group, filename_template=ensure_dir_exists(output_paths["dspacing_xye_filename"]))
+    _save_xye(ws_group=tof_group, filename_template=ensure_dir_exists(output_paths["tof_xye_filename"]))
 
 
 def _save_xye(ws_group, filename_template):
@@ -93,7 +81,6 @@ def _save_xye(ws_group, filename_template):
     """
     for bank_index, ws in enumerate(ws_group):
         bank_index += 1  # Ensure we start a 1 when saving out
-        mantid.SaveFocusedXYE(InputWorkspace=ws,
-                              Filename=filename_template.format(bankno=bank_index),
-                              SplitFiles=False,
-                              IncludeHeader=False)
+        mantid.SaveFocusedXYE(
+            InputWorkspace=ws, Filename=filename_template.format(bankno=bank_index), SplitFiles=False, IncludeHeader=False
+        )

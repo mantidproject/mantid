@@ -7,7 +7,7 @@
 
 from typing import TYPE_CHECKING
 
-from mantid.api import (AnalysisDataService)
+from mantid.api import AnalysisDataService
 from mantidqt.utils.async_qt_adaptor import IQtAsync, qt_async_task
 from mantidqt.utils.asynchronous import AsyncTaskSuccess, AsyncTaskFailure
 from sans.algorithm_detail.mask_sans_workspace import mask_workspace
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
 
 class MaskingTableAsync(IQtAsync):
-    def __init__(self, parent_presenter: 'MaskingTablePresenter'):
+    def __init__(self, parent_presenter: "MaskingTablePresenter"):
         super().__init__()
         self._parent_presenter = parent_presenter
 
@@ -84,22 +84,24 @@ class MaskingTableAsync(IQtAsync):
         return load_algorithm.getProperty("SampleScatterWorkspace").value
 
     def _perform_move(self, state, workspace):
-        move_component(state=state, component_name='', workspace=workspace, move_type=MoveTypes.RESET_POSITION)
+        move_component(state=state, component_name="", workspace=workspace, move_type=MoveTypes.RESET_POSITION)
         move_component(component_name=None, state=state, workspace=workspace, move_type=MoveTypes.INITIAL_MOVE)
 
     def _create_load_algorithm(self, serialized_state):
         load_name = "SANSLoad"
-        load_options = {"SANSState": serialized_state,
-                        "PublishToCache": True,
-                        "UseCached": True,
-                        "SampleScatterWorkspace": EMPTY_NAME,
-                        "SampleScatterMonitorWorkspace": EMPTY_NAME,
-                        "SampleTransmissionWorkspace": EMPTY_NAME,
-                        "SampleDirectWorkspace": EMPTY_NAME,
-                        "CanScatterWorkspace": EMPTY_NAME,
-                        "CanScatterMonitorWorkspace": EMPTY_NAME,
-                        "CanTransmissionWorkspace": EMPTY_NAME,
-                        "CanDirectWorkspace": EMPTY_NAME}
+        load_options = {
+            "SANSState": serialized_state,
+            "PublishToCache": True,
+            "UseCached": True,
+            "SampleScatterWorkspace": EMPTY_NAME,
+            "SampleScatterMonitorWorkspace": EMPTY_NAME,
+            "SampleTransmissionWorkspace": EMPTY_NAME,
+            "SampleDirectWorkspace": EMPTY_NAME,
+            "CanScatterWorkspace": EMPTY_NAME,
+            "CanScatterMonitorWorkspace": EMPTY_NAME,
+            "CanTransmissionWorkspace": EMPTY_NAME,
+            "CanDirectWorkspace": EMPTY_NAME,
+        }
         return create_unmanaged_algorithm(load_name, **load_options)
 
     @staticmethod

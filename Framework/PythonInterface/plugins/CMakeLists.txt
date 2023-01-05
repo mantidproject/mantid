@@ -208,6 +208,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/CalculateMonteCarloAbsorption.py
     algorithms/WorkflowAlgorithms/ConvertMultipleRunsToSingleCrystalMD.py
     algorithms/WorkflowAlgorithms/CorelliPowderCalibrationCreate.py
+    algorithms/WorkflowAlgorithms/D4ILLReduction.py
     algorithms/WorkflowAlgorithms/D7AbsoluteCrossSections.py
     algorithms/WorkflowAlgorithms/D7YIGPositionCalibration.py
     algorithms/WorkflowAlgorithms/DetectorFloodWeighting.py
@@ -252,6 +253,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/IndirectTwoPeakFit.py
     algorithms/WorkflowAlgorithms/IqtFitMultiple.py
     algorithms/WorkflowAlgorithms/LoadWAND.py
+    algorithms/WorkflowAlgorithms/LagrangeILLReduction.py
     algorithms/WorkflowAlgorithms/MDNormSCDPreprocessIncoherent.py
     algorithms/WorkflowAlgorithms/MSDFit.py
     algorithms/WorkflowAlgorithms/MatchAndMergeWorkspaces.py

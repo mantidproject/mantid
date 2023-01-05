@@ -4,13 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init
+# pylint: disable=no-init
 import systemtesting
 from mantid.simpleapi import *
 
 
 class MuonLoadersSignatureTest(systemtesting.MantidSystemTest):
-
     def runTest(self):
         # Check signatures for LoadMuonNexus, LoadMuonNexusV2 and LoadPSIMuonBinData are the same
         load_muon_nexus = AlgorithmManager.create("LoadMuonNexus")

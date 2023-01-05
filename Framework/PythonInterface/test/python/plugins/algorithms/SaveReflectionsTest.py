@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+from unittest.mock import patch
 import tempfile
 import os
 import shutil
@@ -12,8 +13,16 @@ import numpy as np
 
 from mantid.api import FileFinder
 from mantid.kernel import V3D
-from mantid.simpleapi import (CloneWorkspace, CreatePeaksWorkspace, DeleteWorkspace,
-                              LoadEmptyInstrument, SetUB, SaveReflections, DeleteTableRows)
+from mantid.simpleapi import (
+    CloneWorkspace,
+    CreatePeaksWorkspace,
+    DeleteWorkspace,
+    AnalysisDataService,
+    LoadEmptyInstrument,
+    SetUB,
+    SaveReflections,
+    DeleteTableRows,
+)
 
 
 class SaveReflectionsTest(unittest.TestCase):
@@ -23,6 +32,7 @@ class SaveReflectionsTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        AnalysisDataService.clear()
         shutil.rmtree(cls._test_dir)
 
     def setUp(self):
@@ -75,7 +85,7 @@ class SaveReflectionsTest(unittest.TestCase):
         modulated = CloneWorkspace(fractional_peaks)
         lattice = modulated.sample().getOrientedLattice()
         lattice.setModVec1(V3D(0.5, 0.0, 0.5))
-        lattice.setModVec2(V3D(0.333, 0.333, 0.))
+        lattice.setModVec2(V3D(0.333, 0.333, 0.0))
         for row, peak in enumerate(modulated):
             row_indices = m1m2[row]
             mnp = V3D(row_indices[0], row_indices[1], 0)
@@ -114,7 +124,7 @@ class SaveReflectionsTest(unittest.TestCase):
     def test_save_fullprof_format_constant_wavelength(self):
         # Arrange
         # leave only one peak (therefore a single wavelength in table)
-        DeleteTableRows(TableWorkspace=self._workspace, Rows=f'1-{self._workspace.getNumberPeaks() - 1:.0f}')
+        DeleteTableRows(TableWorkspace=self._workspace, Rows=f"1-{self._workspace.getNumberPeaks() - 1:.0f}")
         file_name = os.path.join(self._test_dir, "test_fullprof_cw.hkl")
         output_format = "Fullprof"
 
@@ -123,10 +133,10 @@ class SaveReflectionsTest(unittest.TestCase):
 
         # Assert
         wavelength = 0
-        with open(file_name, 'r') as file:
+        with open(file_name, "r") as file:
             file.readline()  # skip
             file.readline()  # skip
-            wavelength = float(file.readline().lstrip().split(' ')[0])
+            wavelength = float(file.readline().lstrip().split(" ")[0])
         self.assertAlmostEqual(wavelength, self._workspace.getPeak(0).getWavelength(), delta=1e-4)
 
     def test_save_fullprof_format_modulated(self):
@@ -176,25 +186,17 @@ class SaveReflectionsTest(unittest.TestCase):
     def test_save_jana_format_modulated_separate_files(self):
         # Arrange
         workspace = self._create_modulated_peak_table()
-        reference_results = [
-            self._get_reference_result("jana_format_modulated-m{}.hkl".format(i))
-            for i in range(1, 3)
-        ]
+        reference_results = [self._get_reference_result("jana_format_modulated-m{}.hkl".format(i)) for i in range(1, 3)]
         file_name = os.path.join(self._test_dir, "test_jana_modulated.hkl")
         output_format = "Jana"
         split_files = True
 
         # Act
-        SaveReflections(InputWorkspace=workspace,
-                        Filename=file_name,
-                        Format=output_format,
-                        SplitFiles=split_files)
+        SaveReflections(InputWorkspace=workspace, Filename=file_name, Format=output_format, SplitFiles=split_files)
 
         # Assert
-        self._assert_file_content_equal(reference_results[0],
-                                        os.path.join(self._test_dir, "test_jana_modulated-m1.hkl"))
-        self._assert_file_content_equal(reference_results[1],
-                                        os.path.join(self._test_dir, "test_jana_modulated-m2.hkl"))
+        self._assert_file_content_equal(reference_results[0], os.path.join(self._test_dir, "test_jana_modulated-m1.hkl"))
+        self._assert_file_content_equal(reference_results[1], os.path.join(self._test_dir, "test_jana_modulated-m2.hkl"))
 
     def test_save_jana_with_no_lattice_information(self):
         peaks = CloneWorkspace(self._workspace)
@@ -202,8 +204,7 @@ class SaveReflectionsTest(unittest.TestCase):
         file_name = os.path.join(self._test_dir, "test_jana_no_lattice.hkl")
 
         # Act
-        SaveReflections(InputWorkspace=peaks, Filename=file_name,
-                        Format="Jana", SplitFiles=False)
+        SaveReflections(InputWorkspace=peaks, Filename=file_name, Format="Jana", SplitFiles=False)
 
     def test_save_GSAS_format(self):
         # Arrange
@@ -230,11 +231,7 @@ class SaveReflectionsTest(unittest.TestCase):
         output_format = "GSAS"
 
         # Act
-        self.assertRaises(RuntimeError,
-                          SaveReflections,
-                          InputWorkspace=workspace,
-                          Filename=file_name,
-                          Format=output_format)
+        self.assertRaises(RuntimeError, SaveReflections, InputWorkspace=workspace, Filename=file_name, Format=output_format)
 
     def test_save_SHELX_format(self):
         # Arrange
@@ -261,11 +258,7 @@ class SaveReflectionsTest(unittest.TestCase):
         output_format = "SHELX"
 
         # Act
-        self.assertRaises(RuntimeError,
-                          SaveReflections,
-                          InputWorkspace=workspace,
-                          Filename=file_name,
-                          Format=output_format)
+        self.assertRaises(RuntimeError, SaveReflections, InputWorkspace=workspace, Filename=file_name, Format=output_format)
 
     def test_save_invalid_format(self):
         # Arrange
@@ -273,35 +266,37 @@ class SaveReflectionsTest(unittest.TestCase):
         output_format = "InvalidFormatName"
 
         # Act
-        self.assertRaises(ValueError,
-                          SaveReflections,
-                          InputWorkspace=self._workspace,
-                          Filename=file_name,
-                          Format=output_format)
+        self.assertRaises(ValueError, SaveReflections, InputWorkspace=self._workspace, Filename=file_name, Format=output_format)
+
+    @patch("mantid.kernel.logger.warning")
+    def test_save_empty_peak_table(self, mock_log):
+        empty_peaks = CreatePeaksWorkspace(self._workspace, NumberOfPeaks=0)
+        SaveReflections(InputWorkspace=empty_peaks, Filename="test.int", Format="Jana")
+        mock_log.assert_called_once_with("Peaks workspace empty_peaks is empty - an empty file will be produced.")
 
     # Private api
     def _assert_file_content_equal(self, reference_result, file_name):
-        with open(reference_result, 'r') as ref_file:
+        with open(reference_result, "r") as ref_file:
             reference = ref_file.read()
-        with open(file_name, 'r') as actual_file:
+        with open(file_name, "r") as actual_file:
             actual = actual_file.read()
             self.maxDiff = 10000
         self.assertMultiLineEqual(reference, actual)
 
     def _test_helper_scale_large_intensities(self, output_format, file_name):
         # Arrange
-        DeleteTableRows(TableWorkspace=self._workspace, Rows=f'1-{self._workspace.getNumberPeaks()-1}')  # only first pk
-        self._workspace.getPeak(0).setIntensity(2.5E8)
+        DeleteTableRows(TableWorkspace=self._workspace, Rows=f"1-{self._workspace.getNumberPeaks()-1}")  # only first pk
+        self._workspace.getPeak(0).setIntensity(2.5e8)
 
         # Act
         SaveReflections(InputWorkspace=self._workspace, Filename=file_name, Format=output_format)
 
         # Read lines from file to be asserted in individual tests
-        with open(file_name, 'r') as actual_file:
+        with open(file_name, "r") as actual_file:
             lines = actual_file.readlines()
 
         return lines
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -4,9 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-'''
+"""
 Data object for a TestResult
-'''
+"""
 
 import sys
 import os
@@ -21,17 +21,15 @@ import sqlresults
 import numpy as np
 
 
-
-
 #########################################################################
 #########################################################################
 def envAsString():
-    """ Return the environment as a string """
-    if os.name == 'nt':
+    """Return the environment as a string"""
+    if os.name == "nt":
         system = platform.system().lower()[:3]
         arch = platform.architecture()[0][:2]
         env = system + arch
-    elif os.name == 'mac':
+    elif os.name == "mac":
         env = platform.mac_ver()[0]
     else:
         env = " ".join(platform.dist())
@@ -42,28 +40,30 @@ def envAsString():
 # A class to store the results of a test
 #########################################################################
 class TestResult(object):
-    '''
+    """
     Stores the results of each test so that they can be reported later.
-    '''
+    """
 
-    def __init__(self,
-                 date = datetime.datetime.now(),
-                 name="",
-                 type="system",
-                 host=platform.uname()[1],
-                 environment=envAsString(),
-                 runner="",
-                 commitid='',
-                 revision=0,
-                 runtime=0.0,
-                 speed_up=0.0,
-                 cpu_fraction=0.0,
-                 iterations=1,
-                 success=False,
-                 status="",
-                 log_contents="",
-                 variables=""):
-        """ Fill the TestResult object with the contents """
+    def __init__(
+        self,
+        date=datetime.datetime.now(),
+        name="",
+        type="system",
+        host=platform.uname()[1],
+        environment=envAsString(),
+        runner="",
+        commitid="",
+        revision=0,
+        runtime=0.0,
+        speed_up=0.0,
+        cpu_fraction=0.0,
+        iterations=1,
+        success=False,
+        status="",
+        log_contents="",
+        variables="",
+    ):
+        """Fill the TestResult object with the contents"""
         self.data = {}
         self.data["date"] = date
         self.data["name"] = name
@@ -80,7 +80,6 @@ class TestResult(object):
         self.data["log_contents"] = log_contents
         self.data["variables"] = variables
 
-
     def get_logarchive_filename(self):
         "Return a bare filename that will hold the archived log contents"
         s = str(self.data["date"])
@@ -95,11 +94,8 @@ class TestResult(object):
         self.data.__setitem__(key, value)
 
     def getData(self):
-        ''' Get the map storing the results   '''
+        """Get the map storing the results"""
         return self.data
 
     def __str__(self):
         return str(self.data)
-
-
-

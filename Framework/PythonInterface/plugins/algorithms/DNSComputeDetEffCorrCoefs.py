@@ -17,9 +17,16 @@ class DNSComputeDetEffCorrCoefs(PythonAlgorithm):
     This algorithm is written for the DNS @ MLZ,
     but can be used for other instruments if needed.
     """
-    properties_to_compare = ['wavelength', 'slit_i_left_blade_position',
-                             'slit_i_right_blade_position', 'slit_i_lower_blade_position',
-                             'slit_i_upper_blade_position', 'polarisation', 'polarisation_comment']
+
+    properties_to_compare = [
+        "wavelength",
+        "slit_i_left_blade_position",
+        "slit_i_right_blade_position",
+        "slit_i_lower_blade_position",
+        "slit_i_upper_blade_position",
+        "polarisation",
+        "polarisation_comment",
+    ]
 
     def __init__(self):
         """
@@ -32,10 +39,10 @@ class DNSComputeDetEffCorrCoefs(PythonAlgorithm):
         """
         Returns category
         """
-        return 'Workflow\\MLZ\\DNS;CorrectionFunctions\\SpecialCorrections'
+        return "Workflow\\MLZ\\DNS;CorrectionFunctions\\SpecialCorrections"
 
     def seeAlso(self):
-        return [ "DNSFlippingRatioCorr" ]
+        return ["DNSFlippingRatioCorr"]
 
     def name(self):
         """
@@ -48,16 +55,26 @@ class DNSComputeDetEffCorrCoefs(PythonAlgorithm):
 
     def PyInit(self):
         validator = StringArrayLengthValidator()
-        validator.setLengthMin(2)       # even for workspacegroups at least 2 (SF, NSF) must be given
+        validator.setLengthMin(2)  # even for workspacegroups at least 2 (SF, NSF) must be given
 
-        self.declareProperty(StringArrayProperty(name="VanadiumWorkspaces", direction=Direction.Input, validator=validator),
-                             doc="Comma separated list of Vanadium workspaces or groups of workspaces.")
-        self.declareProperty(StringArrayProperty(name="BackgroundWorkspaces", direction=Direction.Input, validator=validator),
-                             doc="Comma separated list of Background workspaces or groups of workspaces.")
-        self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
-                             doc="Name of the workspace or group of workspaces that will contain computed coefficients.")
-        self.declareProperty("TwoThetaTolerance", 0.05, FloatBoundedValidator(lower=0, upper=0.1),
-                             doc="Tolerance for 2theta comparison (degrees). Number between 0 and 0.1.")
+        self.declareProperty(
+            StringArrayProperty(name="VanadiumWorkspaces", direction=Direction.Input, validator=validator),
+            doc="Comma separated list of Vanadium workspaces or groups of workspaces.",
+        )
+        self.declareProperty(
+            StringArrayProperty(name="BackgroundWorkspaces", direction=Direction.Input, validator=validator),
+            doc="Comma separated list of Background workspaces or groups of workspaces.",
+        )
+        self.declareProperty(
+            WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
+            doc="Name of the workspace or group of workspaces that will contain computed coefficients.",
+        )
+        self.declareProperty(
+            "TwoThetaTolerance",
+            0.05,
+            FloatBoundedValidator(lower=0, upper=0.1),
+            doc="Tolerance for 2theta comparison (degrees). Number between 0 and 0.1.",
+        )
 
         return
 
@@ -77,7 +94,7 @@ class DNSComputeDetEffCorrCoefs(PythonAlgorithm):
         workspace_names.extend(self._expand_groups(bg_workspaces))
 
         # workspaces must have the same normalization
-        result = api.CompareSampleLogs(workspace_names, 'normalized', 0.01)
+        result = api.CompareSampleLogs(workspace_names, "normalized", 0.01)
         if len(result) > 0:
             issues["WorkspaceNames"] = "Workspaces must have the same normalization."
 
@@ -85,7 +102,7 @@ class DNSComputeDetEffCorrCoefs(PythonAlgorithm):
 
     def _expand_groups(self, input_list):
         """
-            returns names of the grouped workspaces
+        returns names of the grouped workspaces
         """
         workspaces = []
         for wsname in input_list:
@@ -105,7 +122,7 @@ class DNSComputeDetEffCorrCoefs(PythonAlgorithm):
             return
         for wsname in wslist:
             if api.AnalysisDataService.doesExist(wsname):
-                delete = self.createChildAlgorithm('DeleteWorkspace')
+                delete = self.createChildAlgorithm("DeleteWorkspace")
                 delete.setProperty("Workspace", wsname)
                 delete.execute()
         return
@@ -117,7 +134,7 @@ class DNSComputeDetEffCorrCoefs(PythonAlgorithm):
         deterota = []
         for wsname in wslist:
             run = api.AnalysisDataService.retrieve(wsname).getRun()
-            angle = run.getProperty('deterota').value
+            angle = run.getProperty("deterota").value
             if angle not in deterota:
                 deterota.append(angle)
         return deterota
@@ -131,12 +148,12 @@ class DNSComputeDetEffCorrCoefs(PythonAlgorithm):
         nsfdata = dict.fromkeys(deterota)
         for wsname in wslist:
             run = api.AnalysisDataService.retrieve(wsname).getRun()
-            wsangle = run.getProperty('deterota').value
-            flipper = run.getProperty('flipper').value
+            wsangle = run.getProperty("deterota").value
+            flipper = run.getProperty("flipper").value
             for key in deterota:
                 if np.fabs(wsangle - key) < tol:
                     angle = key
-            if flipper == 'ON':
+            if flipper == "ON":
                 sfdata[angle] = wsname
             else:
                 nsfdata[angle] = wsname
@@ -185,7 +202,7 @@ class DNSComputeDetEffCorrCoefs(PythonAlgorithm):
     def _sum_signal(self, datasf, datansf, deterota):
         result = dict.fromkeys(deterota)
         for angle in deterota:
-            wsname = 'sum' + str(angle)
+            wsname = "sum" + str(angle)
             api.Plus(datasf[angle], datansf[angle], OutputWorkspace=wsname)
             self.toremove.append(wsname)
             result[angle] = wsname
@@ -205,7 +222,7 @@ class DNSComputeDetEffCorrCoefs(PythonAlgorithm):
             raise RuntimeError("Number of Vanadium and background workspaces doe not match!")
 
         # compare optional sample logs, throw warnings
-        result = api.CompareSampleLogs(vana_workspaces+bg_workspaces, self.properties_to_compare, 5e-3)
+        result = api.CompareSampleLogs(vana_workspaces + bg_workspaces, self.properties_to_compare, 5e-3)
         if result:
             self.log().warning("Following properties do not match: " + result)
 
@@ -220,13 +237,13 @@ class DNSComputeDetEffCorrCoefs(PythonAlgorithm):
         total = self._sum_signal(sfv, nsfv, deterota)
 
         # compute vmean
-        _mean_ws_ = api.Mean(",".join(list(total.values())))     # Mean takes string
+        _mean_ws_ = api.Mean(",".join(list(total.values())))  # Mean takes string
         self.toremove.append(_mean_ws_.name())
-        num =  self._get_notmasked_detectors_number(_mean_ws_)
+        num = self._get_notmasked_detectors_number(_mean_ws_)
         if num == 0:
             self.cleanup(self.toremove)
             raise RuntimeError("All detectors are masked! Cannot compute coefficients.")
-        _vana_mean_ = api.SumSpectra(_mean_ws_)/num
+        _vana_mean_ = api.SumSpectra(_mean_ws_) / num
         self.toremove.append(_vana_mean_.name())
 
         # compute coefficients k_i = (VSF_i + VNSF_i)/Vmean
@@ -238,7 +255,7 @@ class DNSComputeDetEffCorrCoefs(PythonAlgorithm):
             # for many detector positions group of workspaces will be created
             results = []
             for angle in deterota:
-                wsname = outws_name + '_2theta' + str(angle)
+                wsname = outws_name + "_2theta" + str(angle)
                 api.Divide(total[angle], _vana_mean_, OutputWorkspace=wsname)
                 results.append(wsname)
 

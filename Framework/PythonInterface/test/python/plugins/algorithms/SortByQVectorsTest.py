@@ -11,7 +11,7 @@ from mantid import AnalysisDataServiceImpl, simpleapi
 class SortByQVectorsTest(unittest.TestCase):
     def test_output(self):
         ws = simpleapi.LoadSassena("outputSassena_1.4.1.h5", TimeUnit=1.0)
-        simpleapi.SortByQVectors('ws')
+        simpleapi.SortByQVectors("ws")
         self.assertAlmostEqual(ws[0].getNumberHistograms(), 5)
         self.assertAlmostEqual(ws[0].dataY(0)[0], 0.0)
         self.assertAlmostEqual(ws[0].dataY(1)[0], 0.00600600591861)

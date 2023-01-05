@@ -16,8 +16,8 @@ class Presenter(object):
         # Note that, in the view, the drop-down could be replaced with a set of
         # tick boxes and this line would remain unchanged - an advantage of
         # decoupling the presenter and view
-        self.view.set_options('operations', ['+', '-'])
-        self.view.set_options('display', ['print', 'update', 'print and update'])
+        self.view.set_options("operations", ["+", "-"])
+        self.view.set_options("display", ["print", "update", "print and update"])
         self.printToScreen = True
         self.view.hide_display()
 
@@ -28,10 +28,10 @@ class Presenter(object):
     # The final two methods handle the signals
     def display_update(self):
         display = self.view.get_display()
-        if display == 'update':
+        if display == "update":
             self.printToScreen = False
             self.view.show_display()
-        elif display == 'print':
+        elif display == "print":
             self.printToScreen = True
             self.view.hide_display()
         else:

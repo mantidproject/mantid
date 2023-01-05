@@ -32,5 +32,5 @@ class ConfigObserverTest(unittest.TestCase):
         onValueChangedMock.assert_any_call("datasearch.directories", mock.ANY, mock.ANY)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

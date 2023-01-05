@@ -33,8 +33,10 @@ class TestRunTabModel(unittest.TestCase):
             self.assertEqual(mode, self.model.get_reduction_mode())
 
     def test_reduction_mode_updates_save_opts(self):
-        for mode, expected in [(ReductionDimensionality.TWO_DIM, SaveOptions(nxs_can_sas=True)),
-                               (ReductionDimensionality.ONE_DIM, SaveOptions(can_sas_1d=True))]:
+        for mode, expected in [
+            (ReductionDimensionality.TWO_DIM, SaveOptions(nxs_can_sas=True)),
+            (ReductionDimensionality.ONE_DIM, SaveOptions(can_sas_1d=True)),
+        ]:
             self.model.update_reduction_mode(mode)
             self.assertEqual(expected, self.model.get_save_types())
 
@@ -47,5 +49,5 @@ class TestRunTabModel(unittest.TestCase):
             self.assertEqual(expected, self.model.get_save_types())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

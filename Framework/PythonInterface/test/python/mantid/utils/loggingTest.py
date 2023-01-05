@@ -28,23 +28,23 @@ class loggingTest(unittest.TestCase):
     def test_capture_logs(self):
 
         with capture_logs() as logs:
-            logger.error('Error message')
-            self.assertTrue('Error message' in logs.getvalue())
+            logger.error("Error message")
+            self.assertTrue("Error message" in logs.getvalue())
 
         with temporary_config():
             config = ConfigService.Instance()
-            config['logging.loggers.root.level'] = 'information'
-            with capture_logs(level='error') as logs:
-                self.assertTrue(config['logging.loggers.root.level'] == 'error')
-                logger.error('Error-message')
-                logger.debug('Debug-message')
-                self.assertTrue('Error-message' in logs.getvalue())
-                self.assertFalse('Debug-message' in logs.getvalue())
+            config["logging.loggers.root.level"] = "information"
+            with capture_logs(level="error") as logs:
+                self.assertTrue(config["logging.loggers.root.level"] == "error")
+                logger.error("Error-message")
+                logger.debug("Debug-message")
+                self.assertTrue("Error-message" in logs.getvalue())
+                self.assertFalse("Debug-message" in logs.getvalue())
 
-            self.assertTrue(config['logging.loggers.root.level'] == 'information')
+            self.assertTrue(config["logging.loggers.root.level"] == "information")
 
     def test_log_to_python(self):
-        py_logger = logging.getLogger('Mantid')
+        py_logger = logging.getLogger("Mantid")
         py_logger.setLevel(logging.INFO)
         handler = CaptureHandler()
         for hdlr in py_logger.handlers:
@@ -53,18 +53,16 @@ class loggingTest(unittest.TestCase):
 
         with temporary_config():
             log_to_python()
-            logger.information('[[info]]')
-            logger.warning('[[warning]]')
-            logger.error('[[error]]')
-            logger.fatal('[[fatal]]')
+            logger.information("[[info]]")
+            logger.warning("[[warning]]")
+            logger.error("[[error]]")
+            logger.fatal("[[fatal]]")
 
-        self.assertListEqual([record.msg for record in handler.records],
-                             ['[[info]]', '[[warning]]', '[[error]]', '[[fatal]]'])
-        self.assertListEqual([record.levelname for record in handler.records],
-                             ['INFO', 'WARNING', 'ERROR', 'CRITICAL'])
+        self.assertListEqual([record.msg for record in handler.records], ["[[info]]", "[[warning]]", "[[error]]", "[[fatal]]"])
+        self.assertListEqual([record.levelname for record in handler.records], ["INFO", "WARNING", "ERROR", "CRITICAL"])
 
         py_logger.removeHandler(handler)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

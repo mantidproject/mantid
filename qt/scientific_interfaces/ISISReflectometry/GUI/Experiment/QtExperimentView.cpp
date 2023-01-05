@@ -98,6 +98,7 @@ void QtExperimentView::initLayout(const Mantid::API::IAlgorithm_sptr &algorithmF
   connect(m_deleteShortcut.get(), SIGNAL(activated()), this, SLOT(onRemoveLookupRowRequested()));
   initOptionsTable(algorithmForTooltips);
   initFloodControls();
+  initPolCorrEfficienciesControls();
 
   auto blacklist = std::vector<std::string>({"InputWorkspaces", "OutputWorkspace", "ScaleRHSWorkspace"});
   MantidWidgets::AlgorithmHintStrategy strategy("Stitch1DMany", blacklist);
@@ -209,6 +210,11 @@ void QtExperimentView::initOptionsTable(const Mantid::API::IAlgorithm_sptr &algo
   table->setMinimumHeight(totalRowHeight + header->height() + padding);
 }
 
+void QtExperimentView::initPolCorrEfficienciesControls() {
+  m_ui.polCorrEfficienciesWsSelector->setOptional(true);
+  m_ui.polCorrEfficienciesWsSelector->setWorkspaceTypes({"Workspace2D"});
+}
+
 void QtExperimentView::initFloodControls() {
   m_ui.floodWorkspaceWsSelector->setOptional(true);
   m_ui.floodWorkspaceWsSelector->setWorkspaceTypes({"Workspace2D"});
@@ -270,6 +276,7 @@ void QtExperimentView::setEnabledStateForAllWidgets(bool enabled) {
   m_ui.transStitchParamsEdit->setEnabled(enabled);
   m_ui.transScaleRHSCheckBox->setEnabled(enabled);
   m_ui.polCorrCheckBox->setEnabled(enabled);
+  m_ui.polCorrEfficienciesWsSelector->setEnabled(enabled);
   stitchOptionsLineEdit().setEnabled(enabled);
   m_ui.reductionTypeComboBox->setEnabled(enabled);
   m_ui.summationTypeComboBox->setEnabled(enabled);
@@ -300,6 +307,7 @@ void QtExperimentView::registerExperimentSettingsWidgets(const Mantid::API::IAlg
   registerSettingWidget(*m_ui.transStitchParamsEdit, "Params", alg);
   registerSettingWidget(*m_ui.transScaleRHSCheckBox, "ScaleRHSWorkspace", alg);
   registerSettingWidget(*m_ui.polCorrCheckBox, "PolarizationAnalysis", alg);
+  registerSettingWidget(*m_ui.polCorrEfficienciesWsSelector, "PolarizationEfficiencies", alg);
   registerSettingWidget(*m_ui.reductionTypeComboBox, "ReductionType", alg);
   registerSettingWidget(*m_ui.summationTypeComboBox, "SummationType", alg);
   registerSettingWidget(*m_ui.includePartialBinsCheckBox, "IncludePartialBins", alg);
@@ -326,6 +334,7 @@ void QtExperimentView::connectExperimentSettingsWidgets() {
   connectSettingsChange(*m_ui.transStitchParamsEdit);
   connectSettingsChange(*m_ui.transScaleRHSCheckBox);
   connectSettingsChange(*m_ui.polCorrCheckBox);
+  connectSettingsChange(*m_ui.polCorrEfficienciesWsSelector);
   connectSettingsChange(stitchOptionsLineEdit());
   connectSettingsChange(*m_ui.reductionTypeComboBox);
   connectSettingsChange(*m_ui.includePartialBinsCheckBox);
@@ -347,6 +356,7 @@ void QtExperimentView::disconnectExperimentSettingsWidgets() {
   disconnectSettingsChange(*m_ui.transStitchParamsEdit);
   disconnectSettingsChange(*m_ui.transScaleRHSCheckBox);
   disconnectSettingsChange(*m_ui.polCorrCheckBox);
+  disconnectSettingsChange(*m_ui.polCorrEfficienciesWsSelector);
   disconnectSettingsChange(stitchOptionsLineEdit());
   disconnectSettingsChange(*m_ui.reductionTypeComboBox);
   disconnectSettingsChange(*m_ui.includePartialBinsCheckBox);
@@ -521,12 +531,22 @@ void QtExperimentView::disableCostFunction() { m_ui.costFunctionComboBox->setEna
 
 void QtExperimentView::enablePolarizationCorrections() {
   m_ui.polCorrCheckBox->setEnabled(true);
-  m_ui.polCorrLabel->setEnabled(true);
+  m_ui.polCorrCheckLabel->setEnabled(true);
 }
 
 void QtExperimentView::disablePolarizationCorrections() {
   m_ui.polCorrCheckBox->setEnabled(false);
-  m_ui.polCorrLabel->setEnabled(false);
+  m_ui.polCorrCheckLabel->setEnabled(false);
+}
+
+void QtExperimentView::enablePolarizationEfficiencies() {
+  m_ui.polCorrEfficienciesWsSelector->setEnabled(true);
+  m_ui.polCorrEfficienciesLabel->setEnabled(true);
+}
+
+void QtExperimentView::disablePolarizationEfficiencies() {
+  m_ui.polCorrEfficienciesWsSelector->setEnabled(false);
+  m_ui.polCorrEfficienciesLabel->setEnabled(false);
 }
 
 void QtExperimentView::disableFloodCorrectionInputs() {
@@ -726,6 +746,14 @@ void QtExperimentView::showTransmissionStitchParamsInvalid() { showAsInvalid(*m_
 void QtExperimentView::setPolarizationCorrectionOption(bool enable) { setChecked(*m_ui.polCorrCheckBox, enable); }
 
 bool QtExperimentView::getPolarizationCorrectionOption() const { return m_ui.polCorrCheckBox->isChecked(); }
+
+std::string QtExperimentView::getPolarizationEfficienciesWorkspace() const {
+  return getText(*m_ui.polCorrEfficienciesWsSelector);
+}
+
+void QtExperimentView::setPolarizationEfficienciesWorkspace(std::string const &workspace) {
+  setSelected(*m_ui.polCorrEfficienciesWsSelector, workspace);
+}
 
 std::string QtExperimentView::getStitchOptions() const { return getText(stitchOptionsLineEdit()); }
 

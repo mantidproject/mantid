@@ -11,7 +11,7 @@ from sans.state.AllStates import AllStates
 
 
 class ModelCommon(metaclass=ABCMeta):
-    def __init__(self, all_states : AllStates):
+    def __init__(self, all_states: AllStates):
         if all_states is None:
             self._all_states = AllStates()
             self._instrument = SANSInstrument.NO_INSTRUMENT
@@ -31,7 +31,7 @@ class ModelCommon(metaclass=ABCMeta):
     @staticmethod
     def _get_val_or_default(val, default_val=""):
         # These are Falsey in Python but are acceptable
-        good_vals = [0., 0, False, [0]]
+        good_vals = [0.0, 0, False, [0]]
 
         if not val and val not in good_vals:
             return default_val

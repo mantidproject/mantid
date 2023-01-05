@@ -15,32 +15,23 @@ import unittest
 
 class DirectILLReductionTest(unittest.TestCase):
     _BKG_LEVEL = 0.0
-    _EPP_WS_NAME = 'eppWS_'
-    _TEST_WS_NAME = 'testWS_'
-    _VANADIUM_WS_NAME = 'vanadiumWS_'
+    _EPP_WS_NAME = "eppWS_"
+    _TEST_WS_NAME = "testWS_"
+    _VANADIUM_WS_NAME = "vanadiumWS_"
 
-    def __init__(self, methodName='runTest'):
+    def __init__(self, methodName="runTest"):
         unittest.TestCase.__init__(self, methodName)
         self._testIN5WS = None
 
     def setUp(self):
         if not self._testIN5WS:
-            self._testIN5WS = illhelpers.create_poor_mans_in5_workspace(self._BKG_LEVEL,
-                                                                        illhelpers.default_test_detectors)
-        inWSName = 'inputWS'
+            self._testIN5WS = illhelpers.create_poor_mans_in5_workspace(self._BKG_LEVEL, illhelpers.default_test_detectors)
+        inWSName = "inputWS"
         mtd.addOrReplace(inWSName, self._testIN5WS)
-        kwargs = {
-            'InputWorkspace': self._testIN5WS,
-            'OutputWorkspace': self._TEST_WS_NAME,
-            'OutputEPPWorkspace': self._EPP_WS_NAME
-        }
-        run_algorithm('DirectILLCollectData', **kwargs)
-        kwargs = {
-            'InputWorkspace': self._TEST_WS_NAME,
-            'OutputWorkspace': self._VANADIUM_WS_NAME,
-            'EPPWorkspace': self._EPP_WS_NAME
-        }
-        run_algorithm('DirectILLIntegrateVanadium', **kwargs)
+        kwargs = {"InputWorkspace": self._testIN5WS, "OutputWorkspace": self._TEST_WS_NAME, "OutputEPPWorkspace": self._EPP_WS_NAME}
+        run_algorithm("DirectILLCollectData", **kwargs)
+        kwargs = {"InputWorkspace": self._TEST_WS_NAME, "OutputWorkspace": self._VANADIUM_WS_NAME, "EPPWorkspace": self._EPP_WS_NAME}
+        run_algorithm("DirectILLIntegrateVanadium", **kwargs)
         vanadiumWS = mtd[self._VANADIUM_WS_NAME]
         for i in range(vanadiumWS.getNumberHistograms()):
             vanadiumYs = vanadiumWS.dataY(i)
@@ -52,81 +43,60 @@ class DirectILLReductionTest(unittest.TestCase):
 
     def testSuccessfulRun(self):
         _add_natural_angle_step_parameter(self._TEST_WS_NAME)
-        outWSName = 'outWS'
+        outWSName = "outWS"
         algProperties = {
-            'InputWorkspace': self._TEST_WS_NAME,
-            'OutputWorkspace': outWSName,
-            'SubalgorithmLogging': 'Logging ON',
-            'rethrow': True
+            "InputWorkspace": self._TEST_WS_NAME,
+            "OutputWorkspace": outWSName,
+            "SubalgorithmLogging": "Logging ON",
+            "rethrow": True,
         }
-        run_algorithm('DirectILLReduction', **algProperties)
+        run_algorithm("DirectILLReduction", **algProperties)
         self.assertTrue(mtd.doesExist(outWSName))
 
     def testAbsoluteUnits(self):
         _add_natural_angle_step_parameter(self._TEST_WS_NAME)
-        geometry = {
-            'Shape': 'HollowCylinder',
-            'Height': 4.0,
-            'InnerRadius': 1.9,
-            'OuterRadius': 2.0,
-            'Center': [0.0, 0.0, 0.0]}
-        material = {
-            'ChemicalFormula': 'Cd S',
-            'SampleNumberDensity': 0.01}
+        geometry = {"Shape": "HollowCylinder", "Height": 4.0, "InnerRadius": 1.9, "OuterRadius": 2.0, "Center": [0.0, 0.0, 0.0]}
+        material = {"ChemicalFormula": "Cd S", "SampleNumberDensity": 0.01}
         SetSample(self._TEST_WS_NAME, geometry, material)
-        vgeometry = {
-            'Shape': 'HollowCylinder',
-            'Height': 4.0,
-            'InnerRadius': 1.9,
-            'OuterRadius': 2.0,
-            'Center': [0.0, 0.0, 0.0]}
-        vmaterial = {
-            'ChemicalFormula': 'V',
-            'SampleNumberDensity': 0.1}
+        vgeometry = {"Shape": "HollowCylinder", "Height": 4.0, "InnerRadius": 1.9, "OuterRadius": 2.0, "Center": [0.0, 0.0, 0.0]}
+        vmaterial = {"ChemicalFormula": "V", "SampleNumberDensity": 0.1}
         SetSample(self._VANADIUM_WS_NAME, vgeometry, vmaterial)
-        outWSName = 'outWS'
+        outWSName = "outWS"
         algProperties = {
-            'InputWorkspace': self._TEST_WS_NAME,
-            'OutputWorkspace': outWSName,
-            'SubalgorithmLogging': 'Logging ON',
-            'AbsoluteUnitsNormalisation': 'Absolute Units ON',
-            'IntegratedVanadiumWorkspace': self._VANADIUM_WS_NAME,
-            'rethrow': True
+            "InputWorkspace": self._TEST_WS_NAME,
+            "OutputWorkspace": outWSName,
+            "SubalgorithmLogging": "Logging ON",
+            "AbsoluteUnitsNormalisation": "Absolute Units ON",
+            "IntegratedVanadiumWorkspace": self._VANADIUM_WS_NAME,
+            "rethrow": True,
         }
-        run_algorithm('DirectILLReduction', **algProperties)
+        run_algorithm("DirectILLReduction", **algProperties)
         self.assertTrue(mtd.doesExist(outWSName))
 
     def testAbsoluteUnitsNoSampleMaterial(self):
         _add_natural_angle_step_parameter(self._TEST_WS_NAME)
         algProperties = {
-            'InputWorkspace': self._TEST_WS_NAME,
-            'OutputWorkspace': 'outWS',
-            'SubalgorithmLogging': 'Logging ON',
-            'AbsoluteUnitsNormalisation': 'Absolute Units ON',
-            'IntegratedVanadiumWorkspace': self._VANADIUM_WS_NAME
+            "InputWorkspace": self._TEST_WS_NAME,
+            "OutputWorkspace": "outWS",
+            "SubalgorithmLogging": "Logging ON",
+            "AbsoluteUnitsNormalisation": "Absolute Units ON",
+            "IntegratedVanadiumWorkspace": self._VANADIUM_WS_NAME,
         }
-        self.assertRaises(RuntimeError,DirectILLReduction,**algProperties)
+        self.assertRaises(RuntimeError, DirectILLReduction, **algProperties)
 
     def testAbsoluteUnitsNoVanadiumMaterial(self):
         _add_natural_angle_step_parameter(self._TEST_WS_NAME)
-        geometry = {
-            'Shape': 'HollowCylinder',
-            'Height': 4.0,
-            'InnerRadius': 1.9,
-            'OuterRadius': 2.0,
-            'Center': [0.0, 0.0, 0.0]}
-        material = {
-            'ChemicalFormula': 'Cd S',
-            'SampleNumberDensity': 0.01}
+        geometry = {"Shape": "HollowCylinder", "Height": 4.0, "InnerRadius": 1.9, "OuterRadius": 2.0, "Center": [0.0, 0.0, 0.0]}
+        material = {"ChemicalFormula": "Cd S", "SampleNumberDensity": 0.01}
         SetSample(self._TEST_WS_NAME, geometry, material)
         algProperties = {
-            'InputWorkspace': self._TEST_WS_NAME,
-            'OutputWorkspace': 'outWS',
-            'SubalgorithmLogging': 'Logging ON',
-            'AbsoluteUnitsNormalisation': 'Absolute Units ON',
-            'IntegratedVanadiumWorkspace': self._VANADIUM_WS_NAME
+            "InputWorkspace": self._TEST_WS_NAME,
+            "OutputWorkspace": "outWS",
+            "SubalgorithmLogging": "Logging ON",
+            "AbsoluteUnitsNormalisation": "Absolute Units ON",
+            "IntegratedVanadiumWorkspace": self._VANADIUM_WS_NAME,
         }
-        self.assertRaises(RuntimeError,DirectILLReduction,**algProperties)
+        self.assertRaises(RuntimeError, DirectILLReduction, **algProperties)
 
     def testDetectorGrouping(self):
         ws = illhelpers.create_poor_mans_in5_workspace(0.0, _groupingTestDetectors)
@@ -135,17 +105,17 @@ class DirectILLReductionTest(unittest.TestCase):
         for i in range(originalNDetectors):
             detectorIds.append(ws.getDetector(i).getID())
         _add_natural_angle_step_parameter(ws)
-        mtd.addOrReplace('inWS', ws)
-        outWSName = 'outWS'
+        mtd.addOrReplace("inWS", ws)
+        outWSName = "outWS"
         algProperties = {
-            'InputWorkspace': ws,
-            'OutputWorkspace': outWSName,
-            'Cleanup': 'Cleanup OFF',
-            'Transposing': 'Transposing OFF',
-            'rethrow': True
+            "InputWorkspace": ws,
+            "OutputWorkspace": outWSName,
+            "Cleanup": "Cleanup OFF",
+            "Transposing": "Transposing OFF",
+            "rethrow": True,
         }
-        run_algorithm('DirectILLReduction', **algProperties)
-        groupedWSName = outWSName + '_grouped_detectors_'
+        run_algorithm("DirectILLReduction", **algProperties)
+        groupedWSName = outWSName + "_grouped_detectors_"
         self.assertTrue(groupedWSName in mtd)
         groupedWS = mtd[groupedWSName]
         self.assertEqual(groupedWS.getNumberHistograms(), 2)
@@ -157,25 +127,25 @@ class DirectILLReductionTest(unittest.TestCase):
         ws = illhelpers.create_poor_mans_in5_workspace(0.0, _groupingTestDetectors)
         nhisto = ws.getNumberHistograms()
         spectrumInfo = ws.spectrumInfo()
-        minAngle = 180.
-        maxAngle = 0.
+        minAngle = 180.0
+        maxAngle = 0.0
         for i in range(nhisto):
             angle = numpy.rad2deg(spectrumInfo.twoTheta(i))
             minAngle = min(minAngle, angle)
             maxAngle = max(maxAngle, angle)
-        mtd.addOrReplace('inWS', ws)
-        outWSName = 'unused'
-        outSThetaWName = 'SofThetaW'
+        mtd.addOrReplace("inWS", ws)
+        outWSName = "unused"
+        outSThetaWName = "SofThetaW"
         angleStep = 0.2
         algProperties = {
-            'InputWorkspace': ws,
-            'OutputWorkspace': outWSName,
-            'GroupingAngleStep': angleStep,
-            'OutputSofThetaEnergyWorkspace': outSThetaWName,
-            'Transposing': 'Transposing OFF',
-            'rethrow': True
+            "InputWorkspace": ws,
+            "OutputWorkspace": outWSName,
+            "GroupingAngleStep": angleStep,
+            "OutputSofThetaEnergyWorkspace": outSThetaWName,
+            "Transposing": "Transposing OFF",
+            "rethrow": True,
         }
-        run_algorithm('DirectILLReduction', **algProperties)
+        run_algorithm("DirectILLReduction", **algProperties)
         self.assertTrue(outSThetaWName in mtd)
         SThetaWWS = mtd[outSThetaWName]
         spectrumInfo = SThetaWWS.spectrumInfo()
@@ -186,112 +156,107 @@ class DirectILLReductionTest(unittest.TestCase):
 
     def testOutputIsDistribution(self):
         _add_natural_angle_step_parameter(self._TEST_WS_NAME)
-        outWSName = 'outWS'
+        outWSName = "outWS"
         algProperties = {
-            'InputWorkspace': self._TEST_WS_NAME,
-            'OutputWorkspace': outWSName,
-            'OutputSofThetaEnergyWorkspace': 'SofThetaE',
-            'rethrow': True
+            "InputWorkspace": self._TEST_WS_NAME,
+            "OutputWorkspace": outWSName,
+            "OutputSofThetaEnergyWorkspace": "SofThetaE",
+            "rethrow": True,
         }
-        run_algorithm('DirectILLReduction', **algProperties)
+        run_algorithm("DirectILLReduction", **algProperties)
         self.assertTrue(mtd.doesExist(outWSName))
         ws = mtd[outWSName]
         self.assertTrue(ws.isDistribution())
-        self.assertTrue(mtd.doesExist('SofThetaE'))
-        ws = mtd['SofThetaE']
+        self.assertTrue(mtd.doesExist("SofThetaE"))
+        ws = mtd["SofThetaE"]
         self.assertTrue(ws.isDistribution())
 
     def testERebinning(self):
         _add_natural_angle_step_parameter(self._TEST_WS_NAME)
-        outWSName = 'outWS'
-        E0 = -2.
+        outWSName = "outWS"
+        E0 = -2.0
         dE = 0.13
         E1 = E0 + 40 * dE
         algProperties = {
-            'InputWorkspace': self._TEST_WS_NAME,
-            'OutputWorkspace': outWSName,
-            'EnergyRebinningParams': [E0, dE, E1],
-            'Transposing': 'Transposing OFF',
-            'rethrow': True
+            "InputWorkspace": self._TEST_WS_NAME,
+            "OutputWorkspace": outWSName,
+            "EnergyRebinningParams": [E0, dE, E1],
+            "Transposing": "Transposing OFF",
+            "rethrow": True,
         }
-        run_algorithm('DirectILLReduction', **algProperties)
+        run_algorithm("DirectILLReduction", **algProperties)
         self.assertTrue(mtd.doesExist(outWSName))
         ws = mtd[outWSName]
-        self.assertEqual(ws.getAxis(0).getUnit().unitID(), 'DeltaE')
+        self.assertEqual(ws.getAxis(0).getUnit().unitID(), "DeltaE")
         xs = ws.readX(0)
         assert_almost_equal(xs, numpy.arange(E0, E1 + 0.01, dE))
 
     def testHybridERebinningSingleUserRange(self):
-        outWSName = 'outWS'
-        E0 = -2.
+        outWSName = "outWS"
+        E0 = -2.0
         dE = 0.13
         E1 = E0 + 40 * dE
         algProperties = {
-            'InputWorkspace': self._TEST_WS_NAME,
-            'OutputWorkspace': outWSName,
-            'EnergyRebinning': '{},{},{}'.format(E0, dE, E1),
-            'Transposing': 'Transposing OFF',
-            'rethrow': True
+            "InputWorkspace": self._TEST_WS_NAME,
+            "OutputWorkspace": outWSName,
+            "EnergyRebinning": "{},{},{}".format(E0, dE, E1),
+            "Transposing": "Transposing OFF",
+            "rethrow": True,
         }
-        run_algorithm('DirectILLReduction', **algProperties)
+        run_algorithm("DirectILLReduction", **algProperties)
         self.assertTrue(mtd.doesExist(outWSName))
         ws = mtd[outWSName]
-        self.assertEqual(ws.getAxis(0).getUnit().unitID(), 'DeltaE')
+        self.assertEqual(ws.getAxis(0).getUnit().unitID(), "DeltaE")
         xs = ws.readX(0)
         assert_almost_equal(xs, numpy.arange(E0, E1 + 0.01, dE))
 
     def testHybridERebinningUserConstrainedAutoRange(self):
-        outWSName = 'outWS'
+        outWSName = "outWS"
         E0 = -0.23
         E1 = 0.32
         algProperties = {
-            'InputWorkspace': self._TEST_WS_NAME,
-            'OutputWorkspace': outWSName,
-            'EnergyRebinning': '{},a,{}'.format(E0, E1),
-            'Transposing': 'Transposing OFF',
-            'rethrow': True
+            "InputWorkspace": self._TEST_WS_NAME,
+            "OutputWorkspace": outWSName,
+            "EnergyRebinning": "{},a,{}".format(E0, E1),
+            "Transposing": "Transposing OFF",
+            "rethrow": True,
         }
-        run_algorithm('DirectILLReduction', **algProperties)
+        run_algorithm("DirectILLReduction", **algProperties)
         self.assertTrue(mtd.doesExist(outWSName))
         ws = mtd[outWSName]
-        self.assertEqual(ws.getAxis(0).getUnit().unitID(), 'DeltaE')
+        self.assertEqual(ws.getAxis(0).getUnit().unitID(), "DeltaE")
         xs = ws.readX(0)
         self.assertEqual(xs[0], E0)
         self.assertEqual(xs[-1], E1)
 
     def testQRebinning(self):
         _add_natural_angle_step_parameter(self._TEST_WS_NAME)
-        outWSName = 'outWS'
+        outWSName = "outWS"
         Q0 = 2.3
         dQ = 0.1
         Q1 = 2.7
         algProperties = {
-            'InputWorkspace': self._TEST_WS_NAME,
-            'OutputWorkspace': outWSName,
-            'QBinningParams': [Q0, dQ, Q1],
-            'rethrow': True
+            "InputWorkspace": self._TEST_WS_NAME,
+            "OutputWorkspace": outWSName,
+            "QBinningParams": [Q0, dQ, Q1],
+            "rethrow": True,
         }
-        run_algorithm('DirectILLReduction', **algProperties)
+        run_algorithm("DirectILLReduction", **algProperties)
         self.assertTrue(mtd.doesExist(outWSName))
         ws = mtd[outWSName]
-        self.assertEqual(ws.getAxis(0).getUnit().unitID(), 'MomentumTransfer')
+        self.assertEqual(ws.getAxis(0).getUnit().unitID(), "MomentumTransfer")
         xs = ws.readX(0)
         assert_almost_equal(xs, numpy.arange(Q0, Q1, dQ))
 
     def testQRebinningBinWidthOnly(self):
         _add_natural_angle_step_parameter(self._TEST_WS_NAME)
-        outWSName = 'outWS'
+        outWSName = "outWS"
         dQ = 0.1
-        algProperties = {
-            'InputWorkspace': self._TEST_WS_NAME,
-            'OutputWorkspace': outWSName,
-            'QBinningParams': [dQ],
-            'rethrow': True
-        }
-        run_algorithm('DirectILLReduction', **algProperties)
+        algProperties = {"InputWorkspace": self._TEST_WS_NAME, "OutputWorkspace": outWSName, "QBinningParams": [dQ], "rethrow": True}
+        run_algorithm("DirectILLReduction", **algProperties)
         self.assertTrue(mtd.doesExist(outWSName))
         ws = mtd[outWSName]
-        self.assertEqual(ws.getAxis(0).getUnit().unitID(), 'MomentumTransfer')
+        self.assertEqual(ws.getAxis(0).getUnit().unitID(), "MomentumTransfer")
         xs = ws.readX(0)
         self.assertGreater(len(xs), 3)
         dx = xs[1:] - xs[:-1]
@@ -313,25 +278,15 @@ class DirectILLReductionTest(unittest.TestCase):
 
 
 def _add_natural_angle_step_parameter(ws, step=1.0):
-    kwargs = {
-        'Workspace': ws,
-        'ParameterName': 'natural-angle-step',
-        'ParameterType': 'Number',
-        'Value': str(step)
-    }
-    run_algorithm('SetInstrumentParameter', **kwargs)
+    kwargs = {"Workspace": ws, "ParameterName": "natural-angle-step", "ParameterType": "Number", "Value": str(step)}
+    run_algorithm("SetInstrumentParameter", **kwargs)
 
 
 def _groupingTestDetectors(ws):
     """Mask detectors for detector grouping tests."""
     indexBegin = 63105  # Detector at L2 and at 2theta = 40.6.
-    kwargs = {
-        'Workspace': ws,
-        'StartWorkspaceIndex': 0,
-        'EndWorkspaceIndex': indexBegin - 1,
-        'child': True
-    }
-    run_algorithm('MaskDetectors', **kwargs)
+    kwargs = {"Workspace": ws, "StartWorkspaceIndex": 0, "EndWorkspaceIndex": indexBegin - 1, "child": True}
+    run_algorithm("MaskDetectors", **kwargs)
     spectrumInfo = ws.spectrumInfo()
     reference2Theta1 = spectrumInfo.twoTheta(indexBegin)
     reference2Theta2 = spectrumInfo.twoTheta(indexBegin + 256)
@@ -341,19 +296,12 @@ def _groupingTestDetectors(ws):
         twoTheta = spectrumInfo.twoTheta(i)
         if abs(reference2Theta1 - twoTheta) >= tolerance and abs(reference2Theta2 - twoTheta) >= tolerance:
             mask.append(i)
-    kwargs = {
-        'Workspace': ws,
-        'WorkspaceIndexList': mask,
-        'child': True
-    }
-    run_algorithm('MaskDetectors', **kwargs)
-    kwargs = {
-        'Workspace': ws,
-        'StartWorkspaceIndex': indexBegin + 10000,
-        'child': True
-    }
-    run_algorithm('MaskDetectors', **kwargs)
+    kwargs = {"Workspace": ws, "WorkspaceIndexList": mask, "child": True}
+    run_algorithm("MaskDetectors", **kwargs)
+    kwargs = {"Workspace": ws, "StartWorkspaceIndex": indexBegin + 10000, "child": True}
+    run_algorithm("MaskDetectors", **kwargs)
     return ws
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

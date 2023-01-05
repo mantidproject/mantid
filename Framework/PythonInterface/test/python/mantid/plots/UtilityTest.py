@@ -22,38 +22,40 @@ from unittest.mock import create_autospec
 
 
 class UtilityTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
-        cls.workspace = CreateSampleWorkspace(Function='User Defined',
-                                              UserDefinedFunction='name=ExpDecay,Lifetime = 20,Height = 200;'
-                                                                  'name=Gaussian,PeakCentre=50, Height=10, Sigma=3',
-                                              XMax=100, BinWidth=2, OutputWorkspace="__temp")
+        cls.workspace = CreateSampleWorkspace(
+            Function="User Defined",
+            UserDefinedFunction="name=ExpDecay,Lifetime = 20,Height = 200;" "name=Gaussian,PeakCentre=50, Height=10, Sigma=3",
+            XMax=100,
+            BinWidth=2,
+            OutputWorkspace="__temp",
+        )
 
     @classmethod
     def tearDownClass(cls):
         AnalysisDataService.clear()
 
     def setUp(self):
-        self.fig, self.axes = plt.subplots(ncols=2, nrows=1, subplot_kw={'projection': 'mantid'})
+        self.fig, self.axes = plt.subplots(ncols=2, nrows=1, subplot_kw={"projection": "mantid"})
 
         self.axes[0].plot(self.workspace, specNum=1)
         self.axes[1].errorbar(self.workspace, specNum=1, capsize=2.0)
 
         # Add an inset axes, which is a good edge case to test
-        inset = self.fig.add_axes([0.77, 0.70, 0.18, 0.18], projection='mantid')
-        inset.plot(self.workspace, specNum=5, color='blue', label='Log Peak', marker='.')
+        inset = self.fig.add_axes([0.77, 0.70, 0.18, 0.18], projection="mantid")
+        inset.plot(self.workspace, specNum=5, color="blue", label="Log Peak", marker=".")
 
     def tearDown(self):
-        plt.close('all')
+        plt.close("all")
         self.fig, self.axes = None, None
 
     def test_legend_set_draggable(self):
         legend = create_autospec(Legend)
-        args = (None, False, 'loc')
+        args = (None, False, "loc")
         legend_set_draggable(legend, *args)
 
-        if hasattr(Legend, 'set_draggable'):
+        if hasattr(Legend, "set_draggable"):
             legend.set_draggable.assert_called_with(*args)
         else:
             legend.draggable.assert_called_with(*args)
@@ -69,5 +71,5 @@ class UtilityTest(unittest.TestCase):
             self.assertEqual(col_num(axis), col_number)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

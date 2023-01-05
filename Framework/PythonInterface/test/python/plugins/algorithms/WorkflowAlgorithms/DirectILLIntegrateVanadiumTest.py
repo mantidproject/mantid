@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid import mtd
-from mantid.simpleapi import (CloneWorkspace, FindEPP)
+from mantid.simpleapi import CloneWorkspace, FindEPP
 import numpy
 from testhelpers import illhelpers, run_algorithm
 import unittest
@@ -14,9 +14,9 @@ import unittest
 
 class DirectILLIntegrateVanadiumTest(unittest.TestCase):
     _BKG_LEVEL = 0.0
-    _TEST_WS_NAME = 'testWS_'
+    _TEST_WS_NAME = "testWS_"
 
-    def __init__(self, methodName='runTest'):
+    def __init__(self, methodName="runTest"):
         unittest.TestCase.__init__(self, methodName)
         self._testIN5WS = illhelpers.create_poor_mans_in5_workspace(self._BKG_LEVEL, illhelpers.default_test_detectors)
 
@@ -29,17 +29,17 @@ class DirectILLIntegrateVanadiumTest(unittest.TestCase):
             ws.dataY(i).fill(float(i + 1))
             ws.dataE(i).fill(numpy.sqrt(float(i + 1)))
         numBins = ws.blocksize()
-        eppWSName = 'eppWS'
+        eppWSName = "eppWS"
         self._EPPTable(ws, eppWSName)
-        outWSName = 'outWS'
+        outWSName = "outWS"
         algProperties = {
-            'InputWorkspace': self._TEST_WS_NAME,
-            'OutputWorkspace': outWSName,
-            'EPPWorkspace': eppWSName,
-            'DebyeWallerCorrection': 'Correction ON',
-            'rethrow': True
+            "InputWorkspace": self._TEST_WS_NAME,
+            "OutputWorkspace": outWSName,
+            "EPPWorkspace": eppWSName,
+            "DebyeWallerCorrection": "Correction ON",
+            "rethrow": True,
         }
-        run_algorithm('DirectILLIntegrateVanadium', **algProperties)
+        run_algorithm("DirectILLIntegrateVanadium", **algProperties)
         self.assertTrue(mtd.doesExist(outWSName))
         outWS = mtd[outWSName]
         self.assertEqual(outWS.getNumberHistograms(), ws.getNumberHistograms())
@@ -54,17 +54,17 @@ class DirectILLIntegrateVanadiumTest(unittest.TestCase):
             ws.dataY(i).fill(float(i + 1))
             ws.dataE(i).fill(numpy.sqrt(float(i + 1)))
         numBins = ws.blocksize()
-        eppWSName = 'eppWS'
+        eppWSName = "eppWS"
         self._EPPTable(ws, eppWSName)
-        outWSName = 'outWS'
+        outWSName = "outWS"
         algProperties = {
-            'InputWorkspace': self._TEST_WS_NAME,
-            'OutputWorkspace': outWSName,
-            'EPPWorkspace': eppWSName,
-            'DebyeWallerCorrection': 'Correction OFF',
-            'rethrow': True
+            "InputWorkspace": self._TEST_WS_NAME,
+            "OutputWorkspace": outWSName,
+            "EPPWorkspace": eppWSName,
+            "DebyeWallerCorrection": "Correction OFF",
+            "rethrow": True,
         }
-        run_algorithm('DirectILLIntegrateVanadium', **algProperties)
+        run_algorithm("DirectILLIntegrateVanadium", **algProperties)
         self.assertTrue(mtd.doesExist(outWSName))
         outWS = mtd[outWSName]
         self.assertEqual(outWS.getNumberHistograms(), ws.getNumberHistograms())
@@ -77,17 +77,12 @@ class DirectILLIntegrateVanadiumTest(unittest.TestCase):
         ws = self._cloneTestWorkspace()
         zeroIndices = [5, 23]
         for i in zeroIndices:
-            ws.dataY(i).fill(0.)
-        eppWSName = 'eppWS'
+            ws.dataY(i).fill(0.0)
+        eppWSName = "eppWS"
         self._EPPTable(ws, eppWSName)
-        outWSName = 'outWS'
-        algProperties = {
-            'InputWorkspace': self._TEST_WS_NAME,
-            'OutputWorkspace': outWSName,
-            'EPPWorkspace': eppWSName,
-            'rethrow': True
-        }
-        run_algorithm('DirectILLIntegrateVanadium', **algProperties)
+        outWSName = "outWS"
+        algProperties = {"InputWorkspace": self._TEST_WS_NAME, "OutputWorkspace": outWSName, "EPPWorkspace": eppWSName, "rethrow": True}
+        run_algorithm("DirectILLIntegrateVanadium", **algProperties)
         self.assertTrue(mtd.doesExist(outWSName))
         outWS = mtd[outWSName]
         self.assertEqual(outWS.getNumberHistograms(), ws.getNumberHistograms())
@@ -95,29 +90,26 @@ class DirectILLIntegrateVanadiumTest(unittest.TestCase):
         spectrumInfo = outWS.spectrumInfo()
         for i in range(outWS.getNumberHistograms()):
             if i in zeroIndices:
-                self.assertEqual(outWS.readY(i)[0], 0.)
+                self.assertEqual(outWS.readY(i)[0], 0.0)
                 self.assertTrue(spectrumInfo.isMasked(i))
             else:
-                self.assertGreater(outWS.readY(i)[0], 0.)
+                self.assertGreater(outWS.readY(i)[0], 0.0)
                 self.assertFalse(spectrumInfo.isMasked(i))
 
     def _cloneTestWorkspace(self, wsName=None):
         if not wsName:
             # Cannot use as default parameter as 'self' is not know in argument list.
             wsName = self._TEST_WS_NAME
-        tempName = 'temp_testWS_'
+        tempName = "temp_testWS_"
         mtd.addOrReplace(tempName, self._testIN5WS)
-        ws = CloneWorkspace(InputWorkspace=tempName,
-                            OutputWorkspace=wsName)
+        ws = CloneWorkspace(InputWorkspace=tempName, OutputWorkspace=wsName)
         mtd.remove(tempName)
         return ws
 
     def _EPPTable(self, ws, eppWSName):
-        eppWS = FindEPP(InputWorkspace=ws,
-                        OutputWorkspace=eppWSName,
-                        EnableLogging=False)
+        eppWS = FindEPP(InputWorkspace=ws, OutputWorkspace=eppWSName, EnableLogging=False)
         return eppWS
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

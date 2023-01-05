@@ -17,47 +17,47 @@ except ModuleNotFoundError:
 class ReduceMAPS(ReductionWrapper):
     @MainProperties
     def def_main_properties(self):
-        """ Define main properties used in reduction """
+        """Define main properties used in reduction"""
         prop = {}
-        prop['sample_run'] = 17269
-        prop['wb_run'] = 17186
-        prop['incident_energy'] = 150
-        prop['energy_bins'] = [-15, 3, 135]
+        prop["sample_run"] = 17269
+        prop["wb_run"] = 17186
+        prop["incident_energy"] = 150
+        prop["energy_bins"] = [-15, 3, 135]
 
         # Absolute units reduction properties.
-        prop['monovan_run'] = 17589
+        prop["monovan_run"] = 17589
         # -- this number allows to get approximately the same system test intensities for MAPS as the old test
-        prop['sample_mass'] = 10 / (94.4 / 13)
-        prop['sample_rmm'] = 435.96  #
+        prop["sample_mass"] = 10 / (94.4 / 13)
+        prop["sample_rmm"] = 435.96  #
         return prop
 
     @AdvancedProperties
     def def_advanced_properties(self):
-        """  separation between simple and advanced properties depends
-           on scientist, experiment and user.
-           main properties override advanced properties.
+        """separation between simple and advanced properties depends
+        on scientist, experiment and user.
+        main properties override advanced properties.
         """
         prop = {}
-        prop['map_file'] = 'default'
+        prop["map_file"] = "default"
         # prop['monovan_mapfile'] = 'default' #'4to1_mid_lowang.map' # default
-        prop['hard_mask_file'] = None
+        prop["hard_mask_file"] = None
         # prop['det_cal_file'] = ?  default?
-        prop['save_format'] = ''
+        prop["save_format"] = ""
 
-        prop['diag_remove_zero'] = False
+        prop["diag_remove_zero"] = False
 
         # this are the parameters which were used in old MAPS_Parameters.xml test.
-        prop['wb-integr-max'] = 300
+        prop["wb-integr-max"] = 300
         # prop['wb_integr_range']=[20,300]
-        prop['bkgd-range-min'] = 12000
-        prop['bkgd-range-max'] = 18000
+        prop["bkgd-range-min"] = 12000
+        prop["bkgd-range-max"] = 18000
         # prop['bkgd_range']=[12000,18000]
 
-        prop['diag_samp_hi'] = 1.5
-        prop['diag_samp_sig'] = 3.3
-        prop['diag_van_hi'] = 2.0
+        prop["diag_samp_hi"] = 1.5
+        prop["diag_samp_sig"] = 3.3
+        prop["diag_van_hi"] = 2.0
 
-        prop['abs_units_van_range'] = [-40, 40]
+        prop["abs_units_van_range"] = [-40, 40]
 
         return prop
 
@@ -65,74 +65,74 @@ class ReduceMAPS(ReductionWrapper):
 
     @iliad
     def reduce(self, input_file=None, output_directory=None):
-        """ Method executes reduction over single file
-         Overload only if custom reduction is needed
+        """Method executes reduction over single file
+        Overload only if custom reduction is needed
         """
         outWS = ReductionWrapper.reduce(self, input_file, output_directory)
         # SaveNexus(ws,Filename = 'MARNewReduction.nxs')
         return outWS
 
     def __init__(self, web_var=None):
-        """ sets properties defaults for the instrument with Name"""
-        ReductionWrapper.__init__(self, 'MAP', web_var)
+        """sets properties defaults for the instrument with Name"""
+        ReductionWrapper.__init__(self, "MAP", web_var)
         Mt = MethodType(self.do_preprocessing, self.reducer)
-        DirectEnergyConversion.__setattr__(self.reducer, 'do_preprocessing', Mt)
+        DirectEnergyConversion.__setattr__(self.reducer, "do_preprocessing", Mt)
         Mt = MethodType(self.do_postprocessing, self.reducer)
-        DirectEnergyConversion.__setattr__(self.reducer, 'do_postprocessing', Mt)
+        DirectEnergyConversion.__setattr__(self.reducer, "do_postprocessing", Mt)
 
     #
 
     def do_preprocessing(self, reducer, ws):
-        """ Custom function, applied to each run or every workspace, the run is divided to
-            in multirep mode
-            Applied after diagnostics but before any further reduction is invoked.
-            Inputs:
-            self    -- initialized instance of the instrument reduction class
-            reducer -- initialized instance of the reducer
-                       (DirectEnergyConversion class initialized for specific reduction)
-            ws         the workspace, describing the run or partial run in multirep mode
-                       to preprocess
+        """Custom function, applied to each run or every workspace, the run is divided to
+        in multirep mode
+        Applied after diagnostics but before any further reduction is invoked.
+        Inputs:
+        self    -- initialized instance of the instrument reduction class
+        reducer -- initialized instance of the reducer
+                   (DirectEnergyConversion class initialized for specific reduction)
+        ws         the workspace, describing the run or partial run in multirep mode
+                   to preprocess
 
-            By default, does nothing.
-            Add code to do custom preprocessing.
-            Must return pointer to the preprocessed workspace
+        By default, does nothing.
+        Add code to do custom preprocessing.
+        Must return pointer to the preprocessed workspace
         """
         return ws
 
     #
 
     def do_postprocessing(self, reducer, ws):
-        """ Custom function, applied to each reduced run or every reduced workspace,
-            the run is divided into, in multirep mode.
-            Applied after reduction is completed but before saving the result.
+        """Custom function, applied to each reduced run or every reduced workspace,
+        the run is divided into, in multirep mode.
+        Applied after reduction is completed but before saving the result.
 
-            Inputs:
-            self    -- initialized instance of the instrument reduction class
-            reducer -- initialized instance of the reducer
-                       (DirectEnergyConversion class initialized for specific reduction)
-            ws         the workspace, describing the run or partial run in multirep mode
-                       after reduction to postprocess
+        Inputs:
+        self    -- initialized instance of the instrument reduction class
+        reducer -- initialized instance of the reducer
+                   (DirectEnergyConversion class initialized for specific reduction)
+        ws         the workspace, describing the run or partial run in multirep mode
+                   after reduction to postprocess
 
 
-            By default, does nothing.
-            Add code to do custom postprocessing.
-            Must return pointer to the postprocessed workspace.
+        By default, does nothing.
+        Add code to do custom postprocessing.
+        Must return pointer to the postprocessed workspace.
 
-            The postprocessed workspace should be consistent with selected save method.
-            (E.g. if you decide to convert workspace units to wavelength, you can not save result as nxspe)
+        The postprocessed workspace should be consistent with selected save method.
+        (E.g. if you decide to convert workspace units to wavelength, you can not save result as nxspe)
         """
         return ws
 
     def set_custom_output_filename(self):
-        """ define custom name of output files if standard one is not satisfactory
-          In addition to that, example of accessing reduction properties
-          Changing them if necessary
+        """define custom name of output files if standard one is not satisfactory
+        In addition to that, example of accessing reduction properties
+        Changing them if necessary
         """
 
         def custom_name(prop_man):
-            """ sample function which builds filename from
-              incident energy and run number and adds some auxiliary information
-              to it.
+            """sample function which builds filename from
+            incident energy and run number and adds some auxiliary information
+            to it.
             """
             # Note -- properties have the same names as the list of advanced and
             # main properties
@@ -153,28 +153,28 @@ class ReduceMAPS(ReductionWrapper):
     #
 
     def eval_absorption_corrections(self, test_ws=None):
-        """ The method to evaluate the speed and efficiency of the absorption corrections procedure,
-            before applying your corrections to the whole workspace and all sample runs.
+        """The method to evaluate the speed and efficiency of the absorption corrections procedure,
+        before applying your corrections to the whole workspace and all sample runs.
 
-            The absorption correction procedure invoked with excessive accuracy can run for too
-            long providing no real improvements in accuracy. This is why it is recommended to
-            run this procedure evaluating absorption on selected detectors and
-            deploy the corrections to the whole runs only after achieving satisfactory accuracy
-            and execution time.
+        The absorption correction procedure invoked with excessive accuracy can run for too
+        long providing no real improvements in accuracy. This is why it is recommended to
+        run this procedure evaluating absorption on selected detectors and
+        deploy the corrections to the whole runs only after achieving satisfactory accuracy
+        and execution time.
 
-            The procedure evaluate and prints the expected time to run the absorption corrections
-            on the whole run.
+        The procedure evaluate and prints the expected time to run the absorption corrections
+        on the whole run.
 
-            Input:
-            If provided, the pointer or the name of the workspace available in analysis data service.
-            If it is not, the workspace is taken from PropertyManager.sample_run property
+        Input:
+        If provided, the pointer or the name of the workspace available in analysis data service.
+        If it is not, the workspace is taken from PropertyManager.sample_run property
 
-            Usage:
-            Reduce single run and uncomment this method in the __main__ area to evaluate
-            absorption corrections.
+        Usage:
+        Reduce single run and uncomment this method in the __main__ area to evaluate
+        absorption corrections.
 
-            Change absorption corrections parameters below to achieve best speed and
-            acceptable accuracy
+        Change absorption corrections parameters below to achieve best speed and
+        acceptable accuracy
         """
 
         # Gain access to the property manager:
@@ -185,12 +185,12 @@ class ReduceMAPS(ReductionWrapper):
         # 3) HollowCylinder([Chem_formula],[Height,InnerRadius,OuterRadius])
         # 4) Sphere([[Chem_formula],Radius)
         # The units are in cm
-        propman.correct_absorption_on = Cylinder('Fe', [10, 2])  # Will be taken from def_advanced_properties
+        propman.correct_absorption_on = Cylinder("Fe", [10, 2])  # Will be taken from def_advanced_properties
         #                                prop['correct_absorption_on'] =  if not defined here
         #
         # Use Monte-Carlo integration.  Take sparse energy points and a few integration attempts
         # to increase initial speed. Increase these numbers to achieve better accuracy.
-        propman.abs_corr_info = {'EventsPerPoint': 3000}  # ,'NumberOfWavelengthPoints':30}
+        propman.abs_corr_info = {"EventsPerPoint": 3000}  # ,'NumberOfWavelengthPoints':30}
         # See MonteCarloAbsorption for all possible properties description and possibility to define
         # a sparse instrument for speed.
         #
@@ -214,14 +214,14 @@ if __name__ == "__main__":
 
     os.environ["PATH"] = r"c:\Mantid\Code\builds\br_master\bin\Release;" + os.environ["PATH"]
 
-    data_root = r'd:\Data\MantidDevArea\Datastore\DataCopies'
-    data_dir = os.path.join(data_root, r'Testing\Data\SystemTest')
-    ref_data_dir = os.path.join(data_root, r'Testing\SystemTests\tests\framework\reference')
-    result_dir = r'd:/Data/Mantid_Testing/14_12_15'
+    data_root = r"d:\Data\MantidDevArea\Datastore\DataCopies"
+    data_dir = os.path.join(data_root, r"Testing\Data\SystemTest")
+    ref_data_dir = os.path.join(data_root, r"Testing\SystemTests\tests\framework\reference")
+    result_dir = r"d:/Data/Mantid_Testing/14_12_15"
 
-    config.setDataSearchDirs('{0};{1};{2}'.format(data_dir, ref_data_dir, result_dir))
+    config.setDataSearchDirs("{0};{1};{2}".format(data_dir, ref_data_dir, result_dir))
     # config.appendDataSearchDir('d:/Data/Mantid_GIT/Test/AutoTestData')
-    config['defaultsave.directory'] = result_dir  # folder to save resulting spe/nxspe files.  Defaults are in
+    config["defaultsave.directory"] = result_dir  # folder to save resulting spe/nxspe files.  Defaults are in
 
     # execute stuff from Mantid
     rd = ReduceMAPS()

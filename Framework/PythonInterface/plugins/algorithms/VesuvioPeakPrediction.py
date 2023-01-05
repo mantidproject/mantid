@@ -14,7 +14,7 @@ import math
 import numpy as np
 
 MIN_TEMPERATURE = 1e-6
-K_IN_MEV = scipy.constants.value('electron volt-kelvin relationship') / 1e3
+K_IN_MEV = scipy.constants.value("electron volt-kelvin relationship") / 1e3
 EINSTEIN_CONSTANT = 2.0717
 DEBYE_CONSTANT = 4.18036
 
@@ -30,60 +30,56 @@ class VesuvioPeakPrediction(VesuvioBase):
         return "Predicts parameters for Vesuvio peak widths using Debye or Einstein methods"
 
     def category(self):
-        return 'Inelastic\\Indirect\\Vesuvio'
+        return "Inelastic\\Indirect\\Vesuvio"
 
     def PyInit(self):
 
-        self.declareProperty(name='Model', defaultValue='Einstein',
-                             validator=StringListValidator(['Debye', 'Einstein']),
-                             doc='Model used to make predictions')
+        self.declareProperty(
+            name="Model",
+            defaultValue="Einstein",
+            validator=StringListValidator(["Debye", "Einstein"]),
+            doc="Model used to make predictions",
+        )
 
-        arrvalid = FloatArrayBoundedValidator(lower=0.)
+        arrvalid = FloatArrayBoundedValidator(lower=0.0)
 
-        self.declareProperty(FloatArrayProperty(name='Temperature', validator=arrvalid),
-                             doc='Temperature (K)')
+        self.declareProperty(FloatArrayProperty(name="Temperature", validator=arrvalid), doc="Temperature (K)")
 
         floatvalid = FloatBoundedValidator(0.0)
         floatvalid.setLowerExclusive(True)
 
-        self.declareProperty(name='AtomicMass', defaultValue=1.0,
-                             validator=floatvalid,
-                             doc='Atomic Mass (AMU)')
+        self.declareProperty(name="AtomicMass", defaultValue=1.0, validator=floatvalid, doc="Atomic Mass (AMU)")
 
-        self.declareProperty(name='Frequency', defaultValue=1.0,
-                             validator=floatvalid,
-                             doc='Fundamental frequency of oscillator (mEV)')
+        self.declareProperty(name="Frequency", defaultValue=1.0, validator=floatvalid, doc="Fundamental frequency of oscillator (mEV)")
 
-        self.declareProperty(name='DebyeTemperature', defaultValue=1.0,
-                             validator=floatvalid,
-                             doc='Debye Temperature (K)')
+        self.declareProperty(name="DebyeTemperature", defaultValue=1.0, validator=floatvalid, doc="Debye Temperature (K)")
 
-        self.declareProperty(ITableWorkspaceProperty("OutputTable", "vesuvio_params",
-                                                     direction=Direction.Output),
-                             doc="The name of the output table")
+        self.declareProperty(
+            ITableWorkspaceProperty("OutputTable", "vesuvio_params", direction=Direction.Output), doc="The name of the output table"
+        )
 
     def setup(self):
 
-        self._model = self.getPropertyValue('Model')
-        self._temperature = self.getProperty('Temperature').value
-        self._atomic_mass = self.getProperty('AtomicMass').value
-        self._frequency = self.getProperty('Frequency').value
-        self._debye_temp = self.getProperty('DebyeTemperature').value
+        self._model = self.getPropertyValue("Model")
+        self._temperature = self.getProperty("Temperature").value
+        self._atomic_mass = self.getProperty("AtomicMass").value
+        self._frequency = self.getProperty("Frequency").value
+        self._debye_temp = self.getProperty("DebyeTemperature").value
 
     def PyExec(self):
 
         self.setup()
 
         vesuvio_params = WorkspaceFactory.Instance().createTable()
-        vesuvio_params.setTitle('Vesuvio Peak Parameters')
-        vesuvio_params.addColumn('float', 'Temperature(K)')
-        vesuvio_params.addColumn('float', 'Atomic Mass(AMU)')
+        vesuvio_params.setTitle("Vesuvio Peak Parameters")
+        vesuvio_params.addColumn("float", "Temperature(K)")
+        vesuvio_params.addColumn("float", "Atomic Mass(AMU)")
 
-        if self._model == 'Einstein':
-            vesuvio_params.addColumn('float', 'Frequency(mEV)')
-            vesuvio_params.addColumn('float', 'Kinetic Energy(mEV)')
-            vesuvio_params.addColumn('float', 'Effective Temp(K)')
-            vesuvio_params.addColumn('float', 'RMS Momentum(A)')
+        if self._model == "Einstein":
+            vesuvio_params.addColumn("float", "Frequency(mEV)")
+            vesuvio_params.addColumn("float", "Kinetic Energy(mEV)")
+            vesuvio_params.addColumn("float", "Effective Temp(K)")
+            vesuvio_params.addColumn("float", "RMS Momentum(A)")
 
             for temp in self._temperature:
                 if temp == 0:
@@ -100,11 +96,11 @@ class VesuvioPeakPrediction(VesuvioBase):
 
                 vesuvio_params.addRow([temp, self._atomic_mass, self._frequency, kinetic_energy, t_star, sig])
 
-        if self._model == 'Debye':
-            vesuvio_params.addColumn('float', 'Debye Temp(K)')
-            vesuvio_params.addColumn('float', 'Kinetic Energy(mEV)')
-            vesuvio_params.addColumn('float', 'RMS Momentum(A-1)')
-            vesuvio_params.addColumn('float', 'RMS Displacement(A)')
+        if self._model == "Debye":
+            vesuvio_params.addColumn("float", "Debye Temp(K)")
+            vesuvio_params.addColumn("float", "Kinetic Energy(mEV)")
+            vesuvio_params.addColumn("float", "RMS Momentum(A-1)")
+            vesuvio_params.addColumn("float", "RMS Displacement(A)")
 
             for temp in self._temperature:
 
@@ -134,7 +130,7 @@ class VesuvioPeakPrediction(VesuvioBase):
         dx = debye_energy / (n - 1)
         for i in range(1, n + 1):
             x = dx * (i - 1) + dx / 1e6
-            y[i] = x * (3.0 * x ** 2 / debye_energy ** 3) / (math.tanh(x / (2 * temp)))
+            y[i] = x * (3.0 * x**2 / debye_energy**3) / (math.tanh(x / (2 * temp)))
 
         w_bar = self.r_integral(y, dx, n)
 
@@ -159,7 +155,7 @@ class VesuvioPeakPrediction(VesuvioBase):
         dx = debye_energy / (n - 1)
         for i in range(1, n + 1):
             x = dx * (i - 1) + dx / 1e6
-            y[i] = (3.0 * x ** 2 / debye_energy ** 3) / (x * math.tanh(x / (2 * temp)))
+            y[i] = (3.0 * x**2 / debye_energy**3) / (x * math.tanh(x / (2 * temp)))
 
         disp = math.sqrt(self.r_integral(y, dx, n) * DEBYE_CONSTANT / (2 * atomic_mass))
         return disp
@@ -168,8 +164,8 @@ class VesuvioPeakPrediction(VesuvioBase):
         """
         Function to perform integration using Simpson's Rule
         """
-        s_even = np.sum(y[2:n - 1:2])
-        s_odd = np.sum(y[3:n - 2:2])
+        s_even = np.sum(y[2 : n - 1 : 2])
+        s_odd = np.sum(y[3 : n - 2 : 2])
         rint = dx * (y[1] + y[n] + 4 * s_even + 2 * s_odd) / 3.0
 
         return rint

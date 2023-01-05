@@ -14,7 +14,8 @@ def json_serializable(cls):  # Decorator for enums
 
 
 class JsonSerializable(type):
-    """ The fundamental base of the SANS State"""
+    """The fundamental base of the SANS State"""
+
     _derived_types = {}
 
     __ENUM_TAG = "E#"
@@ -28,8 +29,10 @@ class JsonSerializable(type):
     def tag_type(incoming_type):
         def check_in_dict(tag):
             if tag not in JsonSerializable._derived_types:
-                raise RuntimeError("Trying to serialize enum {0} which is not registered with JsonSerializer"
-                                   "\nUse the add_json_support decorator on the enum".format(tag))
+                raise RuntimeError(
+                    "Trying to serialize enum {0} which is not registered with JsonSerializer"
+                    "\nUse the add_json_support decorator on the enum".format(tag)
+                )
             return tag
 
         metaclass = type(incoming_type)

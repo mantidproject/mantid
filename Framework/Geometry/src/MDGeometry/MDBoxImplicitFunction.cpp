@@ -9,6 +9,8 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
 
+#include <algorithm>
+
 using Mantid::Kernel::VMD;
 
 namespace Mantid::Geometry {

@@ -4,63 +4,62 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name,no-init
+# pylint: disable=invalid-name,no-init
 import mantid.simpleapi
 import mantid.api
 import mantid.kernel
 
 
 class CorrectLogTimes(mantid.api.PythonAlgorithm):
-    """ Class to shift log times to match proton charge
-    """
+    """Class to shift log times to match proton charge"""
 
     ws = None
 
     def category(self):
-        """ Mantid required
-        """
+        """Mantid required"""
         return "DataHandling\\Logs"
 
     def seeAlso(self):
-        return [ "ChangeLogTime","CreateLogTimeCorrection","ChangePulsetime","ShiftLogTime" ]
+        return ["ChangeLogTime", "CreateLogTimeCorrection", "ChangePulsetime", "ShiftLogTime"]
 
     def name(self):
-        """ Mantid required
-        """
+        """Mantid required"""
         return "CorrectLogTimes"
 
     def summary(self):
-        return "This algorithm attempts to make the time series property logs start at the same time "+\
-               "as the first time in the proton charge log."
+        return (
+            "This algorithm attempts to make the time series property logs start at the same time "
+            + "as the first time in the proton charge log."
+        )
 
     def PyInit(self):
-        self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "",direction=mantid.kernel.Direction.InOut), "Input workspace")
-        self.declareProperty("LogNames","",doc="Experimental log values to be shifted. If empty, will attempt to shift all logs")
+        self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "", direction=mantid.kernel.Direction.InOut), "Input workspace")
+        self.declareProperty("LogNames", "", doc="Experimental log values to be shifted. If empty, will attempt to shift all logs")
 
     def PyExec(self):
         self.ws = self.getProperty("Workspace").value
         logNames = self.getProperty("LogNames").value
 
-        logList=[]
+        logList = []
 
-        #check for parameters and build the result string
-        for value in logNames.split(','):
-            value=value.strip()
-            if len(value)>0:
+        # check for parameters and build the result string
+        for value in logNames.split(","):
+            value = value.strip()
+            if len(value) > 0:
                 if not self.ws.run().hasProperty(value):
-                    err = 'Property '+value+' not found'
+                    err = "Property " + value + " not found"
                     raise ValueError(err)
                 else:
                     logList.append(value)
 
-        if len(logList)==0:
-            logList=list(self.ws.getRun().keys())
+        if len(logList) == 0:
+            logList = list(self.ws.getRun().keys())
 
         for x in logList:
-            if x not in ['duration','proton_charge','start_time','run_title','run_start','run_number','gd_prtn_chrg','end_time']:
+            if x not in ["duration", "proton_charge", "start_time", "run_title", "run_start", "run_number", "gd_prtn_chrg", "end_time"]:
                 try:
                     self.ShiftTime(x)
-                #pylint: disable= bare-except
+                # pylint: disable= bare-except
                 except:
                     pass
 
@@ -68,11 +67,11 @@ class CorrectLogTimes(mantid.api.PythonAlgorithm):
         """
         shift the time in a given log to match the time in the proton charge log"
         """
-        PC = self.ws.getRun()['proton_charge'].firstTime()
+        PC = self.ws.getRun()["proton_charge"].firstTime()
         P = self.ws.getRun()[logName].firstTime()
-        Tdiff = PC-P
-        Tdiff_num = Tdiff.total_milliseconds()*1E-3
-        mantid.simpleapi.ChangeLogTime(InputWorkspace=self.ws, OutputWorkspace = self.ws, LogName = logName, TimeOffset = Tdiff_num)
+        Tdiff = PC - P
+        Tdiff_num = Tdiff.total_milliseconds() * 1e-3
+        mantid.simpleapi.ChangeLogTime(InputWorkspace=self.ws, OutputWorkspace=self.ws, LogName=logName, TimeOffset=Tdiff_num)
 
 
 mantid.api.AlgorithmFactory.subscribe(CorrectLogTimes)

@@ -22,17 +22,17 @@ class VesuvioBase(Algorithm):
         alg = self.createChildAlgorithm(name)
         # For Fit algorithm, Function & InputWorkspace have to
         # be set first and in that order.
-        if name == 'Fit':
-            for key in ('Function', 'InputWorkspace'):
+        if name == "Fit":
+            for key in ("Function", "InputWorkspace"):
                 alg.setProperty(key, kwargs[key])
                 del kwargs[key]
 
         ret_props = None
-        if 'return_values' in kwargs:
-            ret_props = kwargs['return_values']
+        if "return_values" in kwargs:
+            ret_props = kwargs["return_values"]
             if type(ret_props) is str:
                 ret_props = [ret_props]
-            del kwargs['return_values']
+            del kwargs["return_values"]
 
         for name, value in kwargs.items():
             alg.setProperty(name, value)
@@ -51,6 +51,7 @@ class VesuvioBase(Algorithm):
         else:
             return tuple(outputs)
 
+
 # -----------------------------------------------------------------------------------------
 # Helper to translate from an table workspace to a dictionary. Should be on the workspace
 # really ...
@@ -67,16 +68,17 @@ class TableWorkspaceDictionaryFacade(object):
 
     def __getitem__(self, item):
         for row in self._table_ws:
-            if row['Name'] == item:
-                return row['Value']
-        #endfor
+            if row["Name"] == item:
+                return row["Value"]
+        # endfor
         raise KeyError(str(item))
 
     def __contains__(self, item):
         for row in self._table_ws:
-            if row['Name'] == item:
+            if row["Name"] == item:
                 return True
 
         return False
+
 
 # -----------------------------------------------------------------------------------------

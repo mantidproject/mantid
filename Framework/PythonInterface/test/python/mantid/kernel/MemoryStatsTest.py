@@ -10,7 +10,6 @@ import sys
 
 
 class MemoryStatsTest(unittest.TestCase):
-
     def test_values_are_all_greater_than_zero(self):
         # Best we can do is test that something is returned
         mem = MemoryStats()
@@ -21,10 +20,11 @@ class MemoryStatsTest(unittest.TestCase):
         self.assertTrue(mem.residentMem() > 0.0, "Value should be larger than 0.0")
         self.assertTrue(mem.virtualMem() > 0.0, "Value should be larger than 0.0")
         self.assertTrue(mem.getFreeRatio() > 0.0, "Value should be larger than 0.0")
-        if sys.platform == 'win32':
+        if sys.platform == "win32":
             self.assertTrue(mem.reservedMem() > 0.0, "Value should be larger than 0.0")
         else:
-            self.assertEqual(mem.reservedMem(),  0.0, "Value should 0.0")
+            self.assertEqual(mem.reservedMem(), 0.0, "Value should 0.0")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
