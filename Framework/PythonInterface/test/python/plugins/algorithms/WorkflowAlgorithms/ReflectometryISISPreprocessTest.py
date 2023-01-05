@@ -88,10 +88,18 @@ class ReflectometryISISPreprocessTest(unittest.TestCase):
         self.assertIsInstance(output_ws, MatrixWorkspace)
         self._check_calibration(output_ws, is_calibrated=False)
 
-    def _run_test_with_monitors(self, args):
+    def test_workspace_group_with_calibration_throws(self):
+        args = {"InputRunList": "POLREF14966", "CalibrationFile": self._CALIBRATION_TEST_DATA, "OutputWorkspace": "ws"}
+        self._assert_run_algorithm_raises_exception(args, "Workspace Group")
+
+    def _setup_algorithm(self, args):
         alg = create_algorithm("ReflectometryISISPreprocess", **args)
         alg.setChild(True)
         alg.setRethrows(True)
+        return alg
+
+    def _run_test_with_monitors(self, args):
+        alg = self._setup_algorithm(args)
         alg.execute()
         output_ws = alg.getProperty("OutputWorkspace").value
         monitor_ws = alg.getProperty("MonitorWorkspace").value
@@ -100,6 +108,11 @@ class ReflectometryISISPreprocessTest(unittest.TestCase):
     def _run_test(self, args):
         output_ws, _ = self._run_test_with_monitors(args)
         return output_ws
+
+    def _assert_run_algorithm_raises_exception(self, args, error_msg_regex):
+        """Run the algorithm with the given args and check it raises the expected exception"""
+        alg = self._setup_algorithm(args)
+        self.assertRaisesRegex(RuntimeError, error_msg_regex, alg.execute)
 
     def _check_calibration(self, ws, is_calibrated):
         self.assertEqual(is_calibrated, AnalysisDataService.doesExist(f"Calib_Table_{str(ws.getRunNumber())}"))

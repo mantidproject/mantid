@@ -103,6 +103,9 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
         return ws, monitor_ws
 
     def _applyCalibration(self, ws: MatrixWorkspace, calibration_filepath: str) -> MatrixWorkspace:
+        if isinstance(ws, WorkspaceGroup):
+            raise RuntimeError("Calibrating a Workspace Group as part of pre-processing is not currently supported")
+
         alg = self.createChildAlgorithm("ReflectometryISISCalibration")
         alg.setProperty("InputWorkspace", ws)
         alg.setProperty("CalibrationFile", calibration_filepath)
