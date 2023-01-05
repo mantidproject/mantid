@@ -14,7 +14,6 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidQtWidgets/MplCpp/Plot.h"
 
 #include <algorithm>
 #include <numeric>
@@ -164,13 +163,6 @@ void ALFAnalysisModel::exportWorkspaceCopyToADS() const {
   // The ADS should not be used anywhere else apart from here. Note that a copy is exported.
   if (auto const workspace = plottedWorkspace()) {
     AnalysisDataService::Instance().addOrReplace(WS_EXPORT_NAME, workspace->clone());
-  }
-}
-
-void ALFAnalysisModel::openExternalPlot() const {
-  // Externally plot the extracted workspace or fitted workspace depending on which one is available.
-  if (auto const workspace = plottedWorkspace()) {
-    MantidQt::Widgets::MplCpp::plot({workspace}, boost::none, plottedWorkspaceIndices());
   }
 }
 

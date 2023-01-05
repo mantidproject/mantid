@@ -9,6 +9,7 @@
 
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidQtIcons/Icon.h"
+#include "MantidQtWidgets/MplCpp/Plot.h"
 #include "MantidQtWidgets/Plotting/PeakPicker.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
 
@@ -233,6 +234,12 @@ void ALFAnalysisView::notifyExternalPlotClicked() { m_presenter->notifyExternalP
 void ALFAnalysisView::notifyResetClicked() { m_presenter->notifyResetClicked(); }
 
 void ALFAnalysisView::replot() { m_plot->replot(); }
+
+void ALFAnalysisView::openExternalPlot(Mantid::API::MatrixWorkspace_sptr const &workspace,
+                                       std::vector<int> const &workspaceIndices) const {
+  // Externally plot the plotted workspace.
+  MantidQt::Widgets::MplCpp::plot({workspace}, boost::none, workspaceIndices);
+}
 
 std::pair<double, double> ALFAnalysisView::getRange() const {
   return std::make_pair(m_start->text().toDouble(), m_end->text().toDouble());

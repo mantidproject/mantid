@@ -42,6 +42,9 @@ public:
 
   virtual void replot() = 0;
 
+  virtual void openExternalPlot(Mantid::API::MatrixWorkspace_sptr const &workspace,
+                                std::vector<int> const &workspaceIndices) const = 0;
+
   virtual std::pair<double, double> getRange() const = 0;
 
   virtual void addSpectrum(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
@@ -73,6 +76,9 @@ public:
   void subscribePresenter(IALFAnalysisPresenter *presenter) override;
 
   void replot() override;
+
+  void openExternalPlot(Mantid::API::MatrixWorkspace_sptr const &workspace,
+                        std::vector<int> const &workspaceIndices) const override;
 
   std::pair<double, double> getRange() const override;
 

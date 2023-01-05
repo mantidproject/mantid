@@ -168,8 +168,26 @@ public:
     TS_ASSERT_DELTA(-0.0557, *m_model->rotationAngle(), 0.0001);
   }
 
-  void test_openExternalPlot_does_not_error_if_data_is_not_extracted() {
-    TS_ASSERT_THROWS_NOTHING(m_model->openExternalPlot());
+  void test_plottedWorkspace_returns_nullptr_data_is_not_extracted() {
+    TS_ASSERT_EQUALS(nullptr, m_model->plottedWorkspace());
+  }
+
+  void test_plottedWorkspace_returns_a_non_null_value_if_data_is_extracted() {
+    m_model->setExtractedWorkspace(m_workspace, m_twoThetas);
+    TS_ASSERT(m_model->plottedWorkspace());
+  }
+
+  void test_plottedWorkspaceIndices_returns_zero_if_there_is_no_fitted_workspace() {
+    auto const expectedIndices = std::vector<int>{0};
+    TS_ASSERT_EQUALS(expectedIndices, m_model->plottedWorkspaceIndices());
+  }
+
+  void test_plottedWorkspaceIndices_returns_zero_and_one_if_there_is_a_fitted_workspace() {
+    m_model->setExtractedWorkspace(m_workspace, m_twoThetas);
+    m_model->doFit(m_range);
+
+    auto const expectedIndices = std::vector<int>{0, 1};
+    TS_ASSERT_EQUALS(expectedIndices, m_model->plottedWorkspaceIndices());
   }
 
   void test_exportWorkspaceCopyToADS_does_not_create_an_exported_workspace_if_data_is_not_extracted() {

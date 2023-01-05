@@ -54,6 +54,9 @@ public:
 
   MOCK_METHOD0(replot, void());
 
+  MOCK_CONST_METHOD2(openExternalPlot,
+                     void(Mantid::API::MatrixWorkspace_sptr const &workspace, std::vector<int> const &worspaceIndices));
+
   MOCK_CONST_METHOD0(getRange, std::pair<double, double>());
 
   MOCK_METHOD1(addSpectrum, void(Mantid::API::MatrixWorkspace_sptr const &workspace));
@@ -87,7 +90,9 @@ public:
   MOCK_METHOD1(calculateEstimate, void(std::pair<double, double> const &range));
 
   MOCK_CONST_METHOD0(exportWorkspaceCopyToADS, void());
-  MOCK_CONST_METHOD0(openExternalPlot, void());
+
+  MOCK_CONST_METHOD0(plottedWorkspace, Mantid::API::MatrixWorkspace_sptr());
+  MOCK_CONST_METHOD0(plottedWorkspaceIndices, std::vector<int>());
 
   MOCK_METHOD1(setPeakParameters, void(Mantid::API::IPeakFunction_const_sptr const &peak));
   MOCK_METHOD1(setPeakCentre, void(double const centre));

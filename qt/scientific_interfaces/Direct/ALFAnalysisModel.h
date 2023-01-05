@@ -35,7 +35,9 @@ public:
   virtual void calculateEstimate(std::pair<double, double> const &range) = 0;
 
   virtual void exportWorkspaceCopyToADS() const = 0;
-  virtual void openExternalPlot() const = 0;
+
+  virtual Mantid::API::MatrixWorkspace_sptr plottedWorkspace() const = 0;
+  virtual std::vector<int> plottedWorkspaceIndices() const = 0;
 
   virtual void setPeakParameters(Mantid::API::IPeakFunction_const_sptr const &peak) = 0;
   virtual void setPeakCentre(double const centre) = 0;
@@ -68,7 +70,9 @@ public:
   void calculateEstimate(std::pair<double, double> const &range) override;
 
   void exportWorkspaceCopyToADS() const override;
-  void openExternalPlot() const override;
+
+  Mantid::API::MatrixWorkspace_sptr plottedWorkspace() const override;
+  std::vector<int> plottedWorkspaceIndices() const override;
 
   void setPeakParameters(Mantid::API::IPeakFunction_const_sptr const &peak) override;
   void setPeakCentre(double const centre) override;
@@ -85,8 +89,6 @@ public:
   std::optional<double> rotationAngle() const override;
 
 private:
-  Mantid::API::MatrixWorkspace_sptr plottedWorkspace() const;
-  std::vector<int> plottedWorkspaceIndices() const;
   Mantid::API::IFunction_sptr calculateEstimate(Mantid::API::MatrixWorkspace_sptr &workspace,
                                                 std::pair<double, double> const &range);
 
