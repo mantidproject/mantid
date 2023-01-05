@@ -5,9 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.kernel import (
-    CompositeValidator,
     Direction,
-    FloatArrayLengthValidator,
     FloatArrayOrderedPairsValidator,
     FloatArrayProperty,
     StringListValidator,
@@ -19,7 +17,7 @@ from mantid.simpleapi import *
 
 class PowderILLDetectorScan(DataProcessorAlgorithm):
     _progress = None
-    _height_range = ""
+    _height_ranges = [""]
     _mirror = None
     _crop_negative = None
     _out_ws_name = None
@@ -84,10 +82,10 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
             FloatArrayProperty(
                 name="HeightRange",
                 values=[],
-                validator=CompositeValidator([FloatArrayOrderedPairsValidator(), FloatArrayLengthValidator(0, 2)]),
+                validator=FloatArrayOrderedPairsValidator(),
             ),
-            doc="A pair of values, comma separated, to give the minimum and maximum height range (in m). If not specified "
-            "the full height range is used.",
+            doc="A list (even length) of comma separated values, to give the minimum and maximum heights of the different ranges "
+            "(in m). If not specified only the full height range will be used.",
         )
 
         self.declareProperty(
@@ -160,7 +158,7 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
         output1D = SumOverlappingTubes(
             InputWorkspaces=input_group,
             OutputType="1D",
-            HeightAxis=self._height_range,
+            HeightAxis=self._height_ranges[0],
             MirrorScatteringAngles=self._mirror,
             CropNegativeScatteringAngles=self._crop_negative,
             OutputWorkspace=self._out_ws_name + "_1D",
@@ -172,7 +170,7 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
         output2DTubes = SumOverlappingTubes(
             InputWorkspaces=input_group,
             OutputType="2DTubes",
-            HeightAxis=self._height_range,
+            HeightAxis=self._height_ranges[0],
             MirrorScatteringAngles=self._mirror,
             CropNegativeScatteringAngles=self._crop_negative,
             OutputWorkspace=output2DtubesName,
@@ -189,7 +187,7 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
         output2D = SumOverlappingTubes(
             InputWorkspaces=input_group,
             OutputType="2D",
-            HeightAxis=self._height_range,
+            HeightAxis=self._height_ranges[0],
             MirrorScatteringAngles=self._mirror,
             CropNegativeScatteringAngles=self._crop_negative,
             OutputWorkspace=output2DName,
@@ -253,9 +251,9 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
             if run.hasProperty("PixelHeight") and run.hasProperty("MaxHeight"):
                 pixelHeight = run.getLogData("PixelHeight").value
                 maxHeight = run.getLogData("MaxHeight").value
-                self._height_range = str(-maxHeight) + "," + str(pixelHeight) + "," + str(maxHeight)
-        elif len(height_range_prop) == 2:
-            self._height_range = str(height_range_prop[0]) + ", " + str(height_range_prop[1])
+                self._height_ranges = [str(-maxHeight) + "," + str(pixelHeight) + "," + str(maxHeight)]
+        elif len(height_range_prop) % 2 == 0:
+            self._height_ranges.append(str(height_range_prop[0]) + ", " + str(height_range_prop[1]))
         output_workspaces = []
         self._out_ws_name = self.getPropertyValue("OutputWorkspace")
         self._mirror = False
