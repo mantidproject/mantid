@@ -39,9 +39,9 @@ ALFInstrumentWidget::ALFInstrumentWidget(QString workspaceName)
 MantidWidgets::InstrumentWidget::TabCustomizations ALFInstrumentWidget::getTabCustomizations() const {
   MantidWidgets::InstrumentWidget::TabCustomizations customizations;
   customizations.pickTools = std::vector<MantidWidgets::IWPickToolType>{
-      MantidWidgets::IWPickToolType::Zoom,       MantidWidgets::IWPickToolType::PixelSelect,
-      MantidWidgets::IWPickToolType::TubeSelect, MantidWidgets::IWPickToolType::PeakSelect,
-      MantidWidgets::IWPickToolType::EditShape,  MantidWidgets::IWPickToolType::DrawRectangle};
+      MantidWidgets::IWPickToolType::Zoom, MantidWidgets::IWPickToolType::PixelSelect,
+      MantidWidgets::IWPickToolType::TubeSelect, MantidWidgets::IWPickToolType::EditShape,
+      MantidWidgets::IWPickToolType::DrawRectangle};
   return customizations;
 }
 
