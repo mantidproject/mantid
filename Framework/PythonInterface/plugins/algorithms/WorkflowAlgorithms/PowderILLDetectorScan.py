@@ -253,7 +253,9 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
                 maxHeight = run.getLogData("MaxHeight").value
                 self._height_ranges = [str(-maxHeight) + "," + str(pixelHeight) + "," + str(maxHeight)]
         elif len(height_range_prop) % 2 == 0:
-            self._height_ranges.append(str(height_range_prop[0]) + ", " + str(height_range_prop[1]))
+            self._height_ranges = []
+            for i in range(len(height_range_prop) - 1):
+                self._height_ranges.append(str(height_range_prop[i]) + ", " + str(height_range_prop[i + 1]))
         output_workspaces = []
         self._out_ws_name = self.getPropertyValue("OutputWorkspace")
         self._mirror = False
