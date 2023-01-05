@@ -66,22 +66,15 @@ void LoadILLSALSA::exec() {
 
   FileType fileType = NONE;
   // guess type of file
-  try {
-    H5::Group detectorDataset = h5file.openGroup("entry0/data");
-    detectorDataset.close();
+  if (!h5file.nameExists("entry0"))
+    throw std::runtime_error(
+        "The Nexus file your are trying to open is incorrectly formatted, 'entry0' group does not exist");
+  H5::Group entryGroup = h5file.openGroup("entry0");
+  if (entryGroup.nameExists("data"))
     fileType = V1;
-  } catch (H5::Exception &) {
-    fileType = NONE;
-  }
-  if (fileType == NONE) {
-    try {
-      H5::Group detectorDataset = h5file.openGroup("entry0/data_scan");
-      detectorDataset.close();
-      fileType = V2;
-    } catch (H5::Exception &) {
-      fileType = NONE;
-    }
-  }
+  else if (entryGroup.nameExists("data_scan"))
+    fileType = V2;
+  entryGroup.close();
 
   switch (fileType) {
   case NONE:
