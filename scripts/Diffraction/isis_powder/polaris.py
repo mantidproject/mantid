@@ -47,8 +47,6 @@ class Polaris(AbstractInst):
         self._inst_settings.update_attributes(kwargs=kwargs)
 
         per_detector = False
-        if "per_detector" in kwargs.keys():
-            per_detector = bool(kwargs["per_detector"])
         if self._inst_settings.per_detector:
             per_detector = bool(self._inst_settings.per_detector)
 

@@ -92,7 +92,6 @@ def _focus_one_ws(
         if instrument._inst_settings.per_detector:
             input_workspace = apply_per_detector_placzek(input_workspace, instrument, perform_vanadium_norm,
                                                          vanadium_path, placzek_run_number, sample_details, run_details)
-            mantid.ConvertFromDistribution(input_workspace)
 
     # Align
     mantid.ApplyDiffCal(InstrumentWorkspace=input_workspace, CalibrationFile=run_details.offset_file_path)
@@ -178,6 +177,8 @@ def apply_per_detector_placzek(input_workspace, instrument, perform_vanadium_nor
     # Currently, only supported for POLARIS instrument
     input_workspace = _apply_placzek_corrections(input_workspace, instrument, perform_vanadium_norm, vanadium_path,
                                                  placzek_run_number, sample_details, run_details)
+    # must convert to point data before focussing
+    mantid.ConvertFromDistribution(input_workspace)
 
     return input_workspace
 
