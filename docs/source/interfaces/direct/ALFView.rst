@@ -23,7 +23,7 @@ two theta, :code:`2θ`, obtained from the ALFView interface.
 
 .. math:: R = V / (2\sin(\theta))
 
-The Out of Plane Angle is defined as ...
+The Out of Plane Angle is the vertical position of the detectors as viewed from the sample.
 
 The interface can be accessed from the main menu of MantidWorkbench, in *Interfaces → Direct → ALFView*.
 
