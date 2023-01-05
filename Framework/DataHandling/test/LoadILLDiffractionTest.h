@@ -347,6 +347,7 @@ public:
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "535401.nxs"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__outWS"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("AlignTubes", true));
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
