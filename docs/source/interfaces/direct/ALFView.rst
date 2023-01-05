@@ -3,7 +3,7 @@
 ALFView
 =======
 
-.. image::  ../../images/ALF_view.png
+.. image::  ../../images/ALFView_Interface.png
    :align: right
    :height: 400px
 
