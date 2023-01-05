@@ -222,15 +222,16 @@ public:
     jobManager.notifyAlgorithmError(configuredAlgRef, "");
   }
 
-  void test_notify_algorithm_complete_catches_runtime_errors() {
+  void test_notify_algorithm_complete_notifies_about_runtime_errors() {
     auto mockJobRunner = makeJobRunner();
     auto mockSubscriber = MockJobManagerSubscriber();
     auto row = makePreviewRow();
-    auto configuredAlg = makeConfiguredAlg(row, makeStubAlg(), updateFuncThatThrowsExpectedError);
+    auto configuredAlg = makeConfiguredPreprocessAlg(row, updateFuncThatThrowsExpectedError);
 
+    EXPECT_CALL(mockSubscriber, notifyLoadWorkspaceAlgorithmError).Times(1);
     EXPECT_CALL(mockSubscriber, notifyLoadWorkspaceCompleted).Times(0);
 
-    auto jobManager = makeJobManager(std::move(mockJobRunner));
+    auto jobManager = makeJobManager(std::move(mockJobRunner), mockSubscriber);
     auto configuredAlgRef = std::static_pointer_cast<IConfiguredAlgorithm>(configuredAlg);
 
     jobManager.notifyAlgorithmComplete(configuredAlgRef);
@@ -301,8 +302,9 @@ private:
     return configuredAlg;
   }
 
-  std::shared_ptr<ConfiguredAlgorithm> makeConfiguredPreprocessAlg(Item &item) {
-    return makeConfiguredAlg(item, std::make_shared<StubAlgPreprocess>());
+  std::shared_ptr<ConfiguredAlgorithm> makeConfiguredPreprocessAlg(
+      Item &item, BatchJobAlgorithm::UpdateFunction updateFunc = AlgCompleteCallback::updateRowOnAlgorithmComplete) {
+    return makeConfiguredAlg(item, std::make_shared<StubAlgPreprocess>(), updateFunc);
   }
 
   std::shared_ptr<ConfiguredAlgorithm> makeConfiguredSumBanksAlg(Item &item) {

@@ -65,7 +65,7 @@ void PreviewJobManager::notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr &
   try {
     jobAlgorithm->updateItem();
   } catch (std::runtime_error const &ex) {
-    g_log.error(ex.what());
+    notifyAlgorithmError(algorithm, ex.what());
     return;
   }
 
