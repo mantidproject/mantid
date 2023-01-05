@@ -121,7 +121,10 @@ class ISISPowderFocusUnitTest(TestCase):
                                focus.focus, run_number_string=98532, instrument=pdf_inst_obj,
                                perform_vanadium_norm=True, absorb=True, sample_details=pdf_inst_obj._sample_details)
 
-    def test_focus_per_detector_individual_input_batching(self):
+    @patch("isis_powder.routines.focus._apply_vanadium_corrections_per_detector",
+           wraps=focus._apply_vanadium_corrections_per_detector)
+    @patch("isis_powder.routines.focus._apply_placzek_corrections", wraps=focus._apply_placzek_corrections)
+    def test_focus_per_detector_individual_input_batching(self, mock_placzek, mock_vanadium):
         pdf_inst_obj = self.setup_inst_object("PDF")
         pdf_inst_obj._inst_settings.per_detector = True
         _ = pdf_inst_obj.create_vanadium(first_cycle_run_no=98532, do_absorb_corrections=True,
@@ -136,6 +139,8 @@ class ISISPowderFocusUnitTest(TestCase):
         expected_per_bank = Load("/home/danielmurphy/Desktop/focus/focused_per_detector.nxs")
         match_bool, _ = CompareWorkspaces(expected_per_bank, output)
         self.assertTrue(match_bool)
+        mock_placzek.assert_called_once()
+        mock_vanadium.assert_called_once()
 
     @patch("isis_powder.routines.focus._apply_vanadium_corrections_per_detector",
            wraps=focus._apply_vanadium_corrections_per_detector)
