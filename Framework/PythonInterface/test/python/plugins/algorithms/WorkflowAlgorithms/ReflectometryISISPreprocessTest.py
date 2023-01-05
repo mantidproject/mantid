@@ -77,18 +77,13 @@ class ReflectometryISISPreprocessTest(unittest.TestCase):
         self.assertEqual(output_ws.getNumberOfEntries(), 2)
 
     def test_calibration_file_is_applied_when_provided(self):
-        args = {'InputRunList': 'INTER45455',
-                'Debug': True,
-                'CalibrationFile': self._CALIBRATION_TEST_DATA,
-                "OutputWorkspace": "ws"}
+        args = {"InputRunList": "INTER45455", "Debug": True, "CalibrationFile": self._CALIBRATION_TEST_DATA, "OutputWorkspace": "ws"}
         output_ws = self._run_test(args)
         self.assertIsInstance(output_ws, MatrixWorkspace)
         self._check_calibration(output_ws, is_calibrated=True)
 
     def test_calibration_is_skipped_if_file_not_provided(self):
-        args = {'InputRunList': 'INTER45455',
-                'Debug': True,
-                "OutputWorkspace": "ws"}
+        args = {"InputRunList": "INTER45455", "Debug": True, "OutputWorkspace": "ws"}
         output_ws = self._run_test(args)
         self.assertIsInstance(output_ws, MatrixWorkspace)
         self._check_calibration(output_ws, is_calibrated=False)

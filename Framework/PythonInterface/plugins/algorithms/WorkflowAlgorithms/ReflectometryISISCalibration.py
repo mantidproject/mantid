@@ -20,10 +20,10 @@ import math
 
 
 class ReflectometryISISCalibration(DataProcessorAlgorithm):
-    _WORKSPACE = 'InputWorkspace'
-    _CALIBRATION_FILE = 'CalibrationFile'
-    _OUTPUT_WORKSPACE = 'OutputWorkspace'
-    _DEBUG = 'Debug'
+    _WORKSPACE = "InputWorkspace"
+    _CALIBRATION_FILE = "CalibrationFile"
+    _OUTPUT_WORKSPACE = "OutputWorkspace"
+    _DEBUG = "Debug"
 
     def category(self):
         """Return the categories of the algorithm."""
@@ -39,23 +39,21 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
 
     def seeAlso(self):
         """Return a list of related algorithm names."""
-        return ['ReflectometryISISLoadAndProcess']
+        return ["ReflectometryISISLoadAndProcess"]
 
     def PyInit(self):
         self.declareProperty(
             WorkspaceProperty(self._WORKSPACE, "", direction=Direction.Input, optional=PropertyMode.Mandatory),
             doc="An input workspace or workspace group",
         )
-        self.declareProperty(FileProperty(self._CALIBRATION_FILE, "",
-                                          action=FileAction.OptionalLoad,
-                                          direction=Direction.Input,
-                                          extensions=["dat"]),
+        self.declareProperty(
+            FileProperty(self._CALIBRATION_FILE, "", action=FileAction.OptionalLoad, direction=Direction.Input, extensions=["dat"]),
             doc="Calibration data file containing Y locations for detector pixels in mm.",
         )
         self.declareProperty(
-            WorkspaceProperty(self._OUTPUT_WORKSPACE, '', direction=Direction.Output),
-            doc='The calibrated output workspace.')
-        self.copyProperties('ReflectometryReductionOneAuto', [self._DEBUG])
+            WorkspaceProperty(self._OUTPUT_WORKSPACE, "", direction=Direction.Output), doc="The calibrated output workspace."
+        )
+        self.copyProperties("ReflectometryReductionOneAuto", [self._DEBUG])
 
     def PyExec(self):
         ws = self.getProperty(self._WORKSPACE).value
@@ -69,7 +67,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         output_ws = CloneWorkspace(InputWorkspace=ws)
         ApplyCalibration(Workspace=output_ws, CalibrationTable=calib_table)
         self.setProperty(self._OUTPUT_WORKSPACE, output_ws)
-        AnalysisDataService.remove('output_ws')
+        AnalysisDataService.remove("output_ws")
         if self.getProperty(self._DEBUG).isDefault:
             # Only output the calibration table if we're in debug mode
             AnalysisDataService.remove(calib_table.name())
@@ -134,7 +132,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
     def _get_pixel_positions_from_file(self, filepath):
         # Create dictionary of pixel spectrum number and position from scan
         scanned_pixel_positions = {}
-        with open(filepath, 'r') as file:
+        with open(filepath, "r") as file:
             pixels = csv.reader(file)
             for pixel in pixels:
                 pixel_info = pixel[0].split()
