@@ -89,13 +89,12 @@ def create_van_per_detector(instrument, run_details, absorb, test=False):
     instrument.create_solid_angle_corrections(input_van_ws, run_details)
 
     if not (run_details.empty_inst_runs is None):
-        summed_empty = common.generate_summed_runs(empty_sample_ws_string=run_details.empty_inst_runs,
-                                                   instrument=instrument)
+        summed_empty = common.generate_summed_runs(empty_ws_string=run_details.empty_inst_runs, instrument=instrument)
         if test:
             summed_empty = crop_to_small_ws_for_test(summed_empty)
         if not test:
             mantid.SaveNexus(Filename=run_details.summed_empty_inst_file_path, InputWorkspace=summed_empty)
-        corrected_van_ws = common.subtract_summed_runs(ws_to_correct=input_van_ws, empty_sample=summed_empty)
+        corrected_van_ws = common.subtract_summed_runs(ws_to_correct=input_van_ws, empty_ws=summed_empty)
 
     corrected_van_ws = instrument._crop_raw_to_expected_tof_range(ws_to_crop=corrected_van_ws)
 
