@@ -212,7 +212,7 @@ public:
     EXPECT_CALL(*m_model, plottedWorkspace()).Times(1).WillOnce(Return(workspace));
 
     EXPECT_CALL(*m_model, plottedWorkspaceIndices()).Times(1).WillOnce(Return(workspaceIndices));
-    EXPECT_CALL(*m_view, openExternalPlot(_, workspaceIndices)).Times(1);
+    EXPECT_CALL(*m_view, openExternalPlot(Eq(workspace), workspaceIndices)).Times(1);
 
     m_presenter->notifyExternalPlotClicked();
   }
