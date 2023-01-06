@@ -28,8 +28,6 @@ HIFI Transverse Field Simultaneous Fitting
 - Change *Instrument* to **HIFI**, found in the *Home* tab
 - In the loading bar enter ``134028-39``
 - Some new data will appear in the plot
-- To see all of the data press the ``select plot data`` button and select ``134028`` in the pop-up
-- Keep the pop-up open
 - Go to the **Corrections** tab
 	- Set the plot to ``Counts`` (combobox above the plot), you will now see an exponential decay
 	- Change the dead time correction to ``None`` and notice that the counts at small times decreases

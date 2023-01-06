@@ -49,6 +49,12 @@ Ionic Diffusion Test
 	- **f1.Asym:** ``0.155``
 	- **f1.Delta:** ``0.389``
 	- **f1.Nu:** ``0.474``
+- In the plotting window click the ``External Plot`` button
+- You should get a plot that looks like the following:
+
+
+.. figure:: ../../images/MuonAnalysisTests/MATestingIDF.png
+	:alt: MATestingIDF.png
 - Go to the **Fitting** tab
 	- Remove the ``DynamicKuboToyabe`` function
 	- Uncheck the **Simultaneous fit over** checkbox
@@ -56,12 +62,6 @@ Ionic Diffusion Test
 	- Tick the ``Exclude Range`` option in the table
 	- Enter values of 0 to 6
 	- Press fit, notice that the fit line moves to lower y values
-- In the plotting window click the ``External Plot`` button
-- You should get a plot that looks like the following:
-
-
-.. figure:: ../../images/MuonAnalysisTests/MATestingIDF.png
-	:alt: MATestingIDF.png
 
 --------------------------------
 
@@ -75,8 +75,6 @@ Superconducting Copper Test
 - Open **Muon Analysis** (*Interfaces* > *Muon* > *Muon Analysis*)
 - Change *Instrument* to **EMU**, found in the *Home* tab
 - Load run ``20889-20900``
-- Using the **>** button, step through a couple files (Plot should
-  update each time)
 - Go to the **Fitting** tab
 	- Right click the empty table area; Select **Add Function**
 	- Add **ExpDecayMuon** (*Muon* > *MuonGeneric* >

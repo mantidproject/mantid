@@ -26,10 +26,8 @@ FFT Test
     - Set the workspace to "MUSR00062260; Group; bkwd; Asym; FD"
     - Click the calculate FFT button and a plot will appear
     - The plot window will show a broad peak
-- In the **Fitting** tab it will contain 3 workspace ending in `Re` (real), `Im` (imaginary) and `mod` (modulus)
+- In the **Fitting** tab it will contain 3 workspace ending in `Re_unit_MHz` (real), `Im_unit_MHz` (imaginary) and `mod_unit_MHz` (modulus)
 - Go to the **Transform** tab
-    - Untick the Imaginary Data and the row beneath should disappear
-    - Click the Calculate FFT button
     - The "Apodization Function" determines the amount of smoothing of the data
     - Set the "Apodization Function" to ``None`` and press calculate
     - The plot will show a large peak at 0 and then lots of noise
@@ -54,13 +52,18 @@ Muon data from all of the detectors can be combined into a pair of lines if ther
 This is done by applying a phase shift to each of the detectors, such that they all have a phase of zero.
 The data can then be summed.
 
+- Open Frequency Domain Analysis (Interfaces > Muon > Frequency Domain Analysis)
+- Change Instrument to MUSR, found in the Home tab
+- In the loading bar enter 62260
 - Go to the **Phase** tab
 - Click "calculate phase table"
-- Click "calculate phasequad"
-- When asked for a name enter ``pq``
+- Enter ``ptable`` as the name of the table
+- Select the Phase Table from the menu below, the name of the table will contain ``ptable``
+- Click the plus button, located in the left down of the tab, to enter a new Phasequad
+- Enter ``pq`` as the name of the Phasequad
 - Go to the transform tab
 - Tick the **imaginary Workspace** option
-- You select the real and imaginary parts of ``pq`` to be the **Workspace** and **Imaginary Workspace** respectively
+- Select the real and imaginary parts of ``pq`` to be the **Workspace** and **Imaginary Workspace** respectively
 - Click calculate
 
 ------------------------------------
@@ -72,6 +75,10 @@ Maxent Test
 
 Maxent calculates the frequency spectra and then converts using an FFT to compare with the time domain data.
 
+- Open Frequency Domain Analysis (Interfaces > Muon > Frequency Domain Analysis)
+- Change Instrument to MUSR, found in the Home tab
+- In the loading bar enter 62260
+- Go to the **Transform** tab
 - Change the drop-down menu at the top of the interface to "MaxEnt"
 - The interface should look different
 - Click the Calculate MaxEnt button
@@ -83,8 +90,9 @@ Maxent calculates the frequency spectra and then converts using an FFT to compar
 - Click calculate MaxEnt
 - In the plotting window change the plot to ``Maxent Dual Plot``
 - You will now see 5 plots (1 frequency and 4 time domain)
-- In the ADS expand the ``MUSR62260 MaxEnt FD`` group
+- In the ADS expand the ``MUSR62260`` group
 - It will contain several workspaces
-- The phase convergence will show a plot that tends to a single y value as x gets larger (just check a spectrum or two)
-- Deadtimes and phase table will be table of spectrum number then some numbers
-- The reconstructed spectra will look like the original data
+- The workspace that ends with ``phase_convergence`` will show a plot that tends to a single y value as x gets larger (just check a spectrum or two)
+- The table that ends with ``dead_times`` will have two columns: spectrum number and dead time
+- The table taht ends with ``phase_table`` will have three columns: spectrum number, asymmetry, and phase
+- The workspace that ends with ``reconstructed_spectra`` will look like the original data

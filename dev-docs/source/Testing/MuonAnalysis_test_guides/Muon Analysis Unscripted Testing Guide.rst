@@ -12,7 +12,7 @@ This document is intended for developers to use for unscripted testing of muon G
 
 The tests follow real use cases provided by scientists and are intended to exercise all the interface's functionality.
 As changes are made to the interface and features added, anything for which it is not possible to write an automated
-test should have a manual test added to this list.
+test should have a manual test added to this list. You may need to use the muon feature flags to turn on some additional features (like model analysis, raw plots and fit wizard features). Check the :ref:`Muon_Feature_Flags-ref` documentation for more information.
 
 .. note:: The tests here are grouped into sections. The test groups can be done in any order.
 
