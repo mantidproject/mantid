@@ -166,7 +166,7 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
                 OutputWorkspace=self._out_ws_name + "_1D",
             )
         )
-        return output1D[0]
+        return output1D
 
     def _reduce_2DTubes(self, input_group):
         output2DtubesName = self._out_ws_name + "_2DTubes"
@@ -186,7 +186,7 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
             mask_list = "0-{0},{1}-{2}".format(self._final_mask, nSpec - self._final_mask, nSpec - 1)
             MaskDetectors(Workspace=output2DtubesName, WorkspaceIndexList=mask_list)
 
-        return output2DTubes[0]
+        return output2DTubes
 
     def _reduce_2D(self, input_group):
         output2DName = self._out_ws_name + "_2D"
@@ -206,7 +206,7 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
             mask_list = "0-{0},{1}-{2}".format(self._final_mask, nSpec - self._final_mask, nSpec - 1)
             MaskDetectors(Workspace=output2DName, WorkspaceIndexList=mask_list)
 
-        return output2D[0]
+        return output2D
 
     def PyExec(self):
         align_tubes = self.getProperty("AlignTubes").value
@@ -281,17 +281,17 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
         self._progress.report("Doing Output2DTubes Option")
         if self.getProperty("Output2DTubes").value:
             output2DTubes = self._reduce_2DTubes(input_group)
-            output_workspaces.append(output2DTubes)
+            output_workspaces += output2DTubes
 
         self._progress.report("Doing Output2D Option")
         if self.getProperty("Output2D").value:
             output2D = self._reduce_2D(input_group)
-            output_workspaces.append(output2D)
+            output_workspaces += output2D
 
         self._progress.report("Doing Output1D Option")
         if self.getProperty("Output1D").value:
             output1D = self._reduce_1D(input_group)
-            output_workspaces.append(output1D)
+            output_workspaces += output1D
 
         self._progress.report("Finishing up...")
         DeleteWorkspace("input_group")
