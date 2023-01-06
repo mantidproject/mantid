@@ -46,10 +46,22 @@ void TimeROI::addROI(const std::string &startTime, const std::string &stopTime) 
   this->addROI(DateAndTime(startTime), DateAndTime(stopTime));
 }
 
+/**
+ * Add new region as a union.
+ */
 void TimeROI::addROI(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) {
   assert_increasing(startTime, stopTime);
-  m_roi.addValue(startTime, ROI_USE);
-  m_roi.addValue(stopTime, ROI_IGNORE);
+  if ((this->empty()) || (startTime > m_roi.lastTime()) || (stopTime < m_roi.firstTime())) {
+    // add in the new region
+    m_roi.addValue(startTime, ROI_USE);
+    m_roi.addValue(stopTime, ROI_IGNORE);
+  } else if (this->isCompletelyInROI(startTime, stopTime)) {
+    g_log.debug("TimeROI::addROI is already accounted for and being ignored");
+  } else {
+    g_log.debug("TimeROI::addROI using union method");
+    // add as an union with this
+    this->update_union(TimeROI(startTime, stopTime));
+  }
 }
 
 void TimeROI::addROI(const std::time_t &startTime, const std::time_t &stopTime) {
@@ -60,14 +72,62 @@ void TimeROI::addMask(const std::string &startTime, const std::string &stopTime)
   this->addMask(DateAndTime(startTime), DateAndTime(stopTime));
 }
 
+/**
+ * Remove a region that is already in use.
+ *
+ * This subtracts the intersection which means adding a mask to an empty area does nothing. This may leave redundant
+ * values in the ROI
+ */
 void TimeROI::addMask(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) {
   assert_increasing(startTime, stopTime);
-  m_roi.addValue(startTime, ROI_IGNORE);
-  m_roi.addValue(stopTime, ROI_USE);
+
+  if (this->empty()) {
+    g_log.debug("TimeROI::addMask to an empty object is ignored");
+  } else if ((startTime > m_roi.lastTime()) || (stopTime < m_roi.firstTime())) {
+    g_log.debug("TimeROI::addMask to ignored region");
+  } else if ((startTime <= m_roi.firstTime()) && (stopTime >= m_roi.lastTime())) {
+    // the mask includes everything so remove all current values
+    this->m_roi.clear();
+  } else if (isCompletelyInROI(startTime, stopTime)) {
+    g_log.debug("TimeROI::addMask cutting notch in existing ROI");
+    // cutting a notch in an existing ROI
+    m_roi.addValue(startTime, ROI_IGNORE);
+    m_roi.addValue(stopTime, ROI_USE);
+  } else {
+    g_log.debug("TimeROI::addMask using intersection method");
+    // create an ROI that is full possible range minus the mask then intersect it
+    TimeROI temp(std::min(m_roi.firstTime(), startTime), std::max(m_roi.lastTime(), stopTime));
+    temp.m_roi.addValue(startTime, ROI_IGNORE);
+    temp.m_roi.addValue(stopTime, ROI_USE);
+
+    this->update_intersection(temp);
+  }
 }
 
 void TimeROI::addMask(const std::time_t &startTime, const std::time_t &stopTime) {
   this->addMask(DateAndTime(startTime), DateAndTime(stopTime));
+}
+
+/**
+ * This method returns true if the entire region between startTime and stopTime is inside an existing ROI.
+ * If part of the supplied region is not covered this returns false.
+ */
+bool TimeROI::isCompletelyInROI(const Types::Core::DateAndTime &startTime,
+                                const Types::Core::DateAndTime &stopTime) const {
+  // check if the region is in the overall window at all
+  if ((startTime > m_roi.lastTime()) || (stopTime < m_roi.firstTime()))
+    return false;
+
+  // since the ROI should be alternating "use" and "ignore", see if the start and stop are within a single region
+  const auto &times = m_roi.timesAsVector();
+  const auto iterStart = std::lower_bound(times.cbegin(), times.cend(), startTime);
+  const auto iterStop = std::lower_bound(iterStart, times.cend(), stopTime);
+  // too far apart
+  if (std::distance(iterStart, iterStop) > 0)
+    return false;
+
+  // the value at the start time should be "use"
+  return this->valueAtTime(startTime);
 }
 
 bool TimeROI::valueAtTime(const DateAndTime &time) const {
@@ -118,6 +178,8 @@ void TimeROI::replaceValues(const std::vector<DateAndTime> &times, const std::ve
 /**
  * Updates the TimeROI values with the union with another TimeROI.
  * See https://en.wikipedia.org/wiki/Union_(set_theory) for more details
+ *
+ * This will remove redundant entries as a side-effect.
  */
 void TimeROI::update_union(const TimeROI &other) {
   // exit early if the two TimeROI are identical
@@ -143,6 +205,8 @@ void TimeROI::update_union(const TimeROI &other) {
 /**
  * Updates the TimeROI values with the intersection with another TimeROI.
  * See https://en.wikipedia.org/wiki/Intersection for more details
+ *
+ * This will remove redundant entries as a side-effect.
  */
 void TimeROI::update_intersection(const TimeROI &other) {
   // exit early if the two TimeROI are identical
