@@ -14,6 +14,7 @@ import io
 import sys
 import re
 from functools import wraps
+import warnings
 
 import matplotlib
 from matplotlib.axes import Axes
@@ -189,6 +190,10 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         self.window.setWindowTitle("Figure %d" % num)
         canvas.figure.set_label("Figure %d" % num)
+
+        # Set tight layout so axes labels remain visible
+        canvas.figure.set_layout_engine(layout="tight")
+        warnings.filterwarnings("ignore", message="Tight layout not applied.")
 
         FigureManagerBase.__init__(self, canvas, num)
         # Give the keyboard focus to the figure instead of the
