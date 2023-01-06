@@ -130,6 +130,12 @@ bool TimeROI::isCompletelyInROI(const Types::Core::DateAndTime &startTime,
   return this->valueAtTime(startTime);
 }
 
+/**
+ * This returns whether the time should be "used" (rather than ignored).
+ * Anything outside of the region of interest is ignored.
+ *
+ * The value is, essentially, whatever it was at the last recorded time before or equal to the one requested.
+ */
 bool TimeROI::valueAtTime(const DateAndTime &time) const {
   if (this->empty() || time < m_roi.firstTime()) {
     return ROI_IGNORE;
@@ -230,6 +236,27 @@ void TimeROI::update_intersection(const TimeROI &other) {
   this->removeRedundantEntries();
 }
 
+// if the values are alternating after duplicates are removed, then everything can be considered unique
+bool valuesAreAlternating(const std::vector<bool> &values) {
+  const auto NUM_VALUES = values.size();
+  // should be an even number of values
+  if (NUM_VALUES % 2 != 0)
+    return false;
+
+  // the values must start with use and end with ignore
+  if ((values.front() == ROI_IGNORE) || (values.back() == ROI_USE))
+    return false;
+
+  // even entries should be use and odd should be ignore
+  for (size_t i = 0; i < NUM_VALUES; ++i) {
+    if ((i % 2 == 0) && (values[i] == ROI_IGNORE))
+      return false;
+    else if (values[i] == ROI_USE) // odd entries
+      return false;
+  }
+  return true;
+}
+
 void TimeROI::removeRedundantEntries() {
   if (this->numBoundaries() < 2) {
     return; // nothing to do with zero or one elements
@@ -240,6 +267,10 @@ void TimeROI::removeRedundantEntries() {
 
   // get a copy of the current roi
   const auto values_old = m_roi.valuesAsVector();
+  if (valuesAreAlternating(values_old)) {
+    // there is nothing more to do
+    return;
+  }
   const auto times_old = m_roi.timesAsVector();
   const auto ORIG_SIZE = values_old.size();
 
