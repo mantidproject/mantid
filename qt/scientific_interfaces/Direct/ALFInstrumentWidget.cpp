@@ -40,8 +40,8 @@ MantidWidgets::InstrumentWidget::TabCustomizations ALFInstrumentWidget::getTabCu
   MantidWidgets::InstrumentWidget::TabCustomizations customizations;
   customizations.pickTools = std::vector<MantidWidgets::IWPickToolType>{
       MantidWidgets::IWPickToolType::Zoom, MantidWidgets::IWPickToolType::PixelSelect,
-      MantidWidgets::IWPickToolType::TubeSelect, MantidWidgets::IWPickToolType::EditShape,
-      MantidWidgets::IWPickToolType::DrawRectangle};
+      MantidWidgets::IWPickToolType::TubeSelect, MantidWidgets::IWPickToolType::DrawRectangle,
+      MantidWidgets::IWPickToolType::EditShape};
   return customizations;
 }
 
