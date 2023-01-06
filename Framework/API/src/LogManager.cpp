@@ -8,6 +8,7 @@
 #include "MantidKernel/Cache.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyNexus.h"
+#include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <nexus/NeXusFile.hpp>
@@ -94,12 +95,13 @@ const char *LogManager::PROTON_CHARGE_LOG_NAME = "gd_prtn_chrg";
 //----------------------------------------------------------------------
 
 LogManager::LogManager()
-    : m_manager(std::make_unique<Kernel::PropertyManager>()),
+    : m_manager(std::make_unique<Kernel::PropertyManager>()), m_timeroi(std::make_unique<Kernel::TimeROI>()),
       m_singleValueCache(
           std::make_unique<Kernel::Cache<std::pair<std::string, Kernel::Math::StatisticType>, double>>()) {}
 
 LogManager::LogManager(const LogManager &other)
     : m_manager(std::make_unique<Kernel::PropertyManager>(*other.m_manager)),
+      m_timeroi(std::make_unique<Kernel::TimeROI>(*other.m_timeroi)),
       m_singleValueCache(std::make_unique<Kernel::Cache<std::pair<std::string, Kernel::Math::StatisticType>, double>>(
           *other.m_singleValueCache)) {}
 
@@ -455,6 +457,10 @@ void LogManager::saveNexus(::NeXus::File *file, const std::string &group, bool k
       g_log.warning(exc.what());
     }
   }
+  // save the timeROI to the nexus file
+  if (!(m_timeroi->empty()))
+    m_timeroi->saveNexus(file);
+
   if (!keepOpen)
     file->closeGroup();
 }
@@ -470,7 +476,9 @@ void LogManager::saveNexus(::NeXus::File *file, const std::string &group, bool k
  */
 void LogManager::loadNexus(::NeXus::File * /*file*/, const std::string & /*group*/,
                            const Mantid::Kernel::NexusHDF5Descriptor & /*fileInfo*/, const std::string & /*prefix*/,
-                           bool /*keepOpen*/) {}
+                           bool /*keepOpen*/) {
+  throw std::runtime_error("LogManager::loadNexus should not be used");
+}
 
 //--------------------------------------------------------------------------------------------
 /** Load the object from an open NeXus file.
@@ -524,10 +532,18 @@ void LogManager::loadNexus(::NeXus::File *file, const Mantid::Kernel::NexusHDF5D
 
     auto prop = PropertyNexus::loadProperty(file, nameClass, fileInfo, prefix);
     if (prop) {
-      if (m_manager->existsProperty(prop->name())) {
-        m_manager->removeProperty(prop->name());
+      // get TimeROI
+      if (prop->name() == Kernel::TimeROI::NAME) {
+        auto boolProp = dynamic_cast<TimeSeriesProperty<bool> *>(prop.get());
+        if (boolProp) {
+          m_timeroi->replaceROI(boolProp);
+        } else {
+          throw std::runtime_error("Kernel_TimeROI is not a TimeSeriesPropertyBool");
+        }
+      } else {
+        // everything else gets added to the list of properties
+        m_manager->declareOrReplaceProperty(std::move(prop));
       }
-      m_manager->declareProperty(std::move(prop));
     }
   }
 }
@@ -546,10 +562,18 @@ void LogManager::loadNexus(::NeXus::File *file, const std::map<std::string, std:
     if (name_class.second == "NXlog") {
       auto prop = PropertyNexus::loadProperty(file, name_class.first);
       if (prop) {
-        if (m_manager->existsProperty(prop->name())) {
-          m_manager->removeProperty(prop->name());
+        // get TimeROI
+        if (prop->name() == Kernel::TimeROI::NAME) {
+          auto boolProp = dynamic_cast<TimeSeriesProperty<bool> *>(prop.get());
+          if (boolProp) {
+            m_timeroi->replaceROI(boolProp);
+          } else {
+            throw std::runtime_error("Kernel_TimeROI is not a TimeSeriesPropertyBool");
+          }
+        } else {
+          // everything else gets added to the list of properties
+          m_manager->declareOrReplaceProperty(std::move(prop));
         }
-        m_manager->declareProperty(std::move(prop));
       }
     }
   }

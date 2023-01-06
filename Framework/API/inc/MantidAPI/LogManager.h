@@ -30,6 +30,7 @@ template <typename TYPE> class TimeSeriesProperty;
 class SplittingInterval;
 using TimeSplitterType = std::vector<SplittingInterval>;
 class PropertyManager;
+class TimeROI;
 } // namespace Kernel
 
 namespace API {
@@ -196,6 +197,7 @@ protected:
   void loadNexus(::NeXus::File *file, const std::map<std::string, std::string> &entries);
   /// A pointer to a property manager
   std::unique_ptr<Kernel::PropertyManager> m_manager;
+  std::unique_ptr<Kernel::TimeROI> m_timeroi;
   /// Name of the log entry containing the proton charge when retrieved using
   /// getProtonCharge
   static const char *PROTON_CHARGE_LOG_NAME;

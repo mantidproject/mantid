@@ -19,8 +19,6 @@ using Mantid::Types::Core::DateAndTime;
 namespace {
 /// static Logger definition
 Logger g_log("TimeROI");
-/// the underlying property needs a name
-const std::string NAME{"Kernel_TimeROI"};
 
 const bool ROI_USE{true};
 const bool ROI_IGNORE{false};
@@ -63,6 +61,8 @@ bool valuesAreAlternating(const std::vector<bool> &values) {
   return true;
 }
 } // namespace
+
+const std::string TimeROI::NAME = "Kernel_TimeROI";
 
 TimeROI::TimeROI() : m_roi{NAME} {}
 
@@ -207,6 +207,13 @@ void TimeROI::replaceValues(const std::vector<DateAndTime> &times, const std::ve
   if (set_values) {
     this->m_roi.addValues(times, values);
   }
+}
+
+void TimeROI::replaceROI(const TimeSeriesProperty<bool> *roi) {
+  // this is used by LogManager::loadNexus
+  const auto times = roi->timesAsVector();
+  const auto values = roi->valuesAsVector();
+  this->replaceValues(times, values);
 }
 
 /**
@@ -371,6 +378,9 @@ double TimeROI::durationInSeconds(const Types::Core::DateAndTime &startTime,
 std::size_t TimeROI::numBoundaries() const { return static_cast<std::size_t>(m_roi.size()); }
 
 bool TimeROI::empty() const { return bool(this->numBoundaries() == 0); }
+
+// serialization / deserialization items
+void TimeROI::saveNexus(::NeXus::File *file) const { const_cast<TimeSeriesProperty<bool> &>(m_roi).saveProperty(file); }
 
 } // namespace Kernel
 } // namespace Mantid
