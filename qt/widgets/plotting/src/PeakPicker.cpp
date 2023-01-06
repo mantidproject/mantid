@@ -13,12 +13,10 @@ using namespace MantidQt::Widgets::MplCpp;
 
 namespace MantidQt::MantidWidgets {
 
-PeakPicker::PeakPicker(PreviewPlot *plot, const QColor &colour)
+PeakPicker::PeakPicker(PreviewPlot *plot)
     : QObject(), m_plot(plot), m_peak(nullptr),
       m_peakMarker(std::make_unique<PeakMarker>(m_plot->canvas(), 1, std::get<0>(m_plot->getAxisRange()),
                                                 std::get<1>(m_plot->getAxisRange(AxisID::YLeft)), 0.0, 0.0)) {
-  UNUSED_ARG(colour);
-
   m_plot->canvas()->draw();
 
   connect(m_plot, SIGNAL(mouseDown(QPoint)), this, SLOT(handleMouseDown(QPoint)));
