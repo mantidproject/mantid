@@ -13,7 +13,6 @@ from mantidqtinterfaces.Muon.GUI.Common.corrections_tab_widget.dead_time_correct
 
 @start_qapplication
 class DeadTimeCorrectionsViewTest(unittest.TestCase):
-
     def setUp(self):
         self.view = DeadTimeCorrectionsView()
         self.view.show()
@@ -54,8 +53,7 @@ class DeadTimeCorrectionsViewTest(unittest.TestCase):
     def test_that_populate_dead_time_workspace_selector_will_populate_the_workspace_selector(self):
         self.view.populate_dead_time_workspace_selector(["Table1", "Table2"])
 
-        items = [self.view.dead_time_workspace_selector.itemText(i)
-                 for i in range(self.view.dead_time_workspace_selector.count())]
+        items = [self.view.dead_time_workspace_selector.itemText(i) for i in range(self.view.dead_time_workspace_selector.count())]
         expected_items = ["None", "Table1", "Table2"]
         self.assertEqual(items, expected_items)
 
@@ -97,5 +95,5 @@ class DeadTimeCorrectionsViewTest(unittest.TestCase):
         self.assertEqual(self.view.dead_time_info_label.text(), "1.001 to 3.003 (av. 2.002)")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

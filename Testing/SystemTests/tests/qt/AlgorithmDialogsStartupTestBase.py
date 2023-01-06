@@ -12,6 +12,7 @@ from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt.testing import get_application
 
 from qtpy.QtCore import Qt
+
 # Import sip after Qt. Modern versions of PyQt ship an internal sip module
 # located at PyQt5X.sip. Importing PyQt first sets a shim sip module to point
 # to the correct place
@@ -53,8 +54,9 @@ class AlgorithmDialogsStartupTestBase(MantidSystemTest, metaclass=ABCMeta):
     def _attempt_to_open_algorithm_dialog(self, workspace_type: str, algorithm_name: str) -> None:
         """Attempt to open the most recent version of the algorithm provided."""
         try:
-            dialog = self._interface_manager.createDialogFromName(algorithm_name, -1, None, False,
-                                                                  self._get_algorithm_preset_values(algorithm_name))
+            dialog = self._interface_manager.createDialogFromName(
+                algorithm_name, -1, None, False, self._get_algorithm_preset_values(algorithm_name)
+            )
             dialog.setAttribute(Qt.WA_DeleteOnClose, True)
             dialog.show()
             dialog.close()
@@ -63,8 +65,10 @@ class AlgorithmDialogsStartupTestBase(MantidSystemTest, metaclass=ABCMeta):
             sip.delete(dialog)
             self.assertTrue(sip.isdeleted(dialog))
         except Exception as ex:
-            self.fail(f"Exception thrown when attempting to open the '{algorithm_name}' algorithm dialog with a "
-                      f"'{workspace_type}' in the ADS: {ex}.")
+            self.fail(
+                f"Exception thrown when attempting to open the '{algorithm_name}' algorithm dialog with a "
+                f"'{workspace_type}' in the ADS: {ex}."
+            )
 
     @staticmethod
     def _get_algorithm_preset_values(algorithm_name: str) -> dict:

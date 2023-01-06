@@ -51,12 +51,12 @@ class StateMachine(object):
         Change the state.
         :param state_name: A name of a new state.
         """
-        if state_name == 'add_peak':
+        if state_name == "add_peak":
             self.state = AddPeakState(self)
-        elif state_name == 'move_markers':
+        elif state_name == "move_markers":
             self.state = MoveMarkersState(self)
         else:
-            raise RuntimeError('Unknown state {}'.format(state_name))
+            raise RuntimeError("Unknown state {}".format(state_name))
 
 
 class MoveMarkersState(object):

@@ -43,15 +43,22 @@ _ADDITIONAL_MAINWINDOWS_PARENT = None
 # The strings APPNAME, ORG_DOMAIN, ORGANIZATION are duplicated
 # in mantidqt/dialogs/errorreports/main.py
 
-ORGANIZATION = 'mantidproject'
-ORG_DOMAIN = 'mantidproject.org'
-APPNAME = 'mantidworkbench'
+ORGANIZATION = "mantidproject"
+ORG_DOMAIN = "mantidproject.org"
+APPNAME = "mantidworkbench"
 
 DEFAULT_SCRIPT_CONTENT = ""
-DEFAULT_SCRIPT_CONTENT += "# import mantid algorithms, numpy and matplotlib" + os.linesep + \
-                          "from mantid.simpleapi import *" + os.linesep + \
-                          "import matplotlib.pyplot as plt" + os.linesep + \
-                          "import numpy as np" + os.linesep + os.linesep
+DEFAULT_SCRIPT_CONTENT += (
+    "# import mantid algorithms, numpy and matplotlib"
+    + os.linesep
+    + "from mantid.simpleapi import *"
+    + os.linesep
+    + "import matplotlib.pyplot as plt"
+    + os.linesep
+    + "import numpy as np"
+    + os.linesep
+    + os.linesep
+)
 
 # Flags defining a standard Window
 WINDOW_STANDARD_FLAGS = Qt.WindowFlags(Qt.Window)
@@ -59,34 +66,30 @@ WINDOW_STANDARD_FLAGS = Qt.WindowFlags(Qt.Window)
 # Flags defining our meaning of keeping figure windows on top.
 # On Windows the standard Qt.Window flags + setting a parent keeps the widget on top
 # Other OSs use the Qt.Tool type with a close button
-if sys.platform == 'win32':
+if sys.platform == "win32":
     WINDOW_ONTOP_FLAGS = WINDOW_STANDARD_FLAGS
-elif sys.platform == 'darwin':
-    WINDOW_ONTOP_FLAGS = (Qt.Tool | Qt.CustomizeWindowHint | Qt.WindowCloseButtonHint
-                          | Qt.WindowMinimizeButtonHint)
+elif sys.platform == "darwin":
+    WINDOW_ONTOP_FLAGS = Qt.Tool | Qt.CustomizeWindowHint | Qt.WindowCloseButtonHint | Qt.WindowMinimizeButtonHint
 else:
-    WINDOW_ONTOP_FLAGS = (Qt.Tool | Qt.CustomizeWindowHint | Qt.WindowCloseButtonHint
-                          | Qt.WindowMinimizeButtonHint)
+    WINDOW_ONTOP_FLAGS = Qt.Tool | Qt.CustomizeWindowHint | Qt.WindowCloseButtonHint | Qt.WindowMinimizeButtonHint
 
 # Iterable containing defaults for each configurable section of the code
 # General application settings are in the main section
 DEFAULTS = {
-    'MainWindow': {
-        'size': (1260, 740),
-        'position': (10, 10),
+    "MainWindow": {
+        "size": (1260, 740),
+        "position": (10, 10),
     },
-    'AdditionalWindows': {
-        'behaviour': "On top"
+    "AdditionalWindows": {"behaviour": "On top"},
+    "project": {
+        "prompt_save_on_close": True,
+        "prompt_save_editor_modified": True,
+        "prompt_on_deleting_workspace": False,
+        "save_altered_workspaces_only": False,
     },
-    'project': {
-        'prompt_save_on_close': True,
-        'prompt_save_editor_modified': True,
-        'prompt_on_deleting_workspace': False,
-        'save_altered_workspaces_only': False
+    "Editors": {
+        "completion_enabled": True,
     },
-    'Editors': {
-        'completion_enabled': True,
-    }
 }
 
 # State encodes widget layout (among other things).

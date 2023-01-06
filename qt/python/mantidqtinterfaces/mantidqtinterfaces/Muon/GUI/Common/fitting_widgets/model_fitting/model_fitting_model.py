@@ -9,8 +9,10 @@ from mantid.simpleapi import CreateWorkspace
 from mantid.kernel import UnitFactory
 
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import add_ws_to_ads, check_if_workspace_exist, retrieve_ws
-from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import (create_model_fitting_parameter_combination_name,
-                                                                            create_model_fitting_parameters_group_name)
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import (
+    create_model_fitting_parameter_combination_name,
+    create_model_fitting_parameters_group_name,
+)
 from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.model_fitting_context import ModelFittingContext
 from mantidqtinterfaces.Muon.GUI.Common.contexts.muon_context import MuonContext
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel
@@ -132,16 +134,15 @@ class ModelFittingModel(BasicFittingModel):
             current_results_table = retrieve_ws(results_table_name)
 
             for i, column_name in enumerate(current_results_table.getColumnNames()):
-                self._save_values_from_table_column(column_name, current_results_table.column(i),
-                                                    current_results_table.getPlotType(i))
+                self._save_values_from_table_column(column_name, current_results_table.column(i), current_results_table.getPlotType(i))
 
             self._populate_empty_parameter_errors(current_results_table.rowCount())
 
     def _save_values_from_table_column(self, column_name: str, values: list, type: int) -> None:
         """Saves the values from a results table column in the correct location based on the column name."""
         if "Error" not in column_name:
-            if column_name in ['run_start_seconds', 'run_end_seconds']:
-                values = [value-values[0] for value in values]
+            if column_name in ["run_start_seconds", "run_end_seconds"]:
+                values = [value - values[0] for value in values]
                 self.fitting_context.x_parameters[column_name] = [values, type]
                 self.fitting_context.y_parameters[column_name] = [values, type]
             else:
@@ -174,11 +175,11 @@ class ModelFittingModel(BasicFittingModel):
             add_ws_to_ads(group_name, workspace_group)
         return workspace_group
 
-    def _create_matrix_workspaces_for_parameter_combination(self, workspace_group: WorkspaceGroup,
-                                                            x_parameter_name: str, y_parameter_name: str) -> None:
+    def _create_matrix_workspaces_for_parameter_combination(
+        self, workspace_group: WorkspaceGroup, x_parameter_name: str, y_parameter_name: str
+    ) -> None:
         """Creates the matrix workspace for a specific x and y parameter, and adds it to the workspace group."""
-        if x_parameter_name != y_parameter_name and x_parameter_name in self.x_parameters() \
-                and y_parameter_name in self.y_parameters():
+        if x_parameter_name != y_parameter_name and x_parameter_name in self.x_parameters() and y_parameter_name in self.y_parameters():
             x_values = self._convert_str_column_values_to_int(self.fitting_context.x_parameters[x_parameter_name])
             x_errors = self.fitting_context.x_parameter_errors[x_parameter_name]
             y_values = self._convert_str_column_values_to_int(self.fitting_context.y_parameters[y_parameter_name])
@@ -189,12 +190,12 @@ class ModelFittingModel(BasicFittingModel):
 
             output_name = self.parameter_combination_workspace_name(x_parameter_name, y_parameter_name)
             if not self._parameter_combination_workspace_exists(output_name, x_values, y_values, y_errors):
-                self._create_workspace(x_values, x_errors, x_parameter_name, y_values, y_errors,
-                                       y_parameter_name, output_name)
+                self._create_workspace(x_values, x_errors, x_parameter_name, y_values, y_errors, y_parameter_name, output_name)
                 workspace_group.add(output_name)
 
-    def _create_workspace(self, x_values: list, x_errors: list, x_parameter: str, y_values: list, y_errors: list,
-                          y_parameter: str, output_name: str) -> None:
+    def _create_workspace(
+        self, x_values: list, x_errors: list, x_parameter: str, y_values: list, y_errors: list, y_parameter: str, output_name: str
+    ) -> None:
         """Creates a matrix workspace using the provided data. Uses UnitX if the parameter exists in the UnitFactory."""
         CreateWorkspace(DataX=x_values, Dx=x_errors, DataY=y_values, DataE=y_errors, OutputWorkspace=output_name)
         self._set_x_label(output_name, x_parameter)
@@ -204,9 +205,11 @@ class ModelFittingModel(BasicFittingModel):
         """Returns true if a parameter combination workspace exists and contains the same data."""
         if check_if_workspace_exist(workspace_name):
             workspace = retrieve_ws(workspace_name)
-            return self._lists_are_equal(workspace.dataX(0), x_values) \
-                and self._lists_are_equal(workspace.dataY(0), y_values) \
+            return (
+                self._lists_are_equal(workspace.dataX(0), x_values)
+                and self._lists_are_equal(workspace.dataY(0), y_values)
                 and self._lists_are_equal(workspace.dataE(0), y_errors)
+            )
         return False
 
     @staticmethod
@@ -242,8 +245,10 @@ class ModelFittingModel(BasicFittingModel):
         """Resets the current result table index stored by the context."""
         if self.fitting_context.number_of_result_tables() == 0:
             self.fitting_context.current_result_table_index = None
-        elif self.fitting_context.current_result_table_index is None or \
-                self.fitting_context.current_result_table_index >= self.fitting_context.number_of_result_tables():
+        elif (
+            self.fitting_context.current_result_table_index is None
+            or self.fitting_context.current_result_table_index >= self.fitting_context.number_of_result_tables()
+        ):
             self.fitting_context.current_result_table_index = 0
 
     @staticmethod
@@ -267,7 +272,7 @@ class ModelFittingModel(BasicFittingModel):
 
     def _get_parameter_unit(self, parameter_name: str, axis: int) -> str:
         """Returns the units of a parameter by searching the Dictionary, UnitFactory and Sample logs."""
-        parameter_name = parameter_name.split('.')[-1]
+        parameter_name = parameter_name.split(".")[-1]
         unit = self._get_unit_from_unit_dictionary(parameter_name, axis)
         if unit == "":
             unit = self._get_unit_from_sample_logs(parameter_name)
@@ -302,10 +307,8 @@ class ModelFittingModel(BasicFittingModel):
 
     def get_override_x_and_y_tick_labels(self, x_parameter_name: str, y_parameter_name: str) -> tuple:
         """Returns the override x and y tick labels to use when plotting."""
-        override_x_tick_labels = self._get_override_tick_labels_if_str(x_parameter_name,
-                                                                       self.fitting_context.x_parameters)
-        override_y_tick_labels = self._get_override_tick_labels_if_str(y_parameter_name,
-                                                                       self.fitting_context.y_parameters)
+        override_x_tick_labels = self._get_override_tick_labels_if_str(x_parameter_name, self.fitting_context.x_parameters)
+        override_y_tick_labels = self._get_override_tick_labels_if_str(y_parameter_name, self.fitting_context.y_parameters)
         return override_x_tick_labels, override_y_tick_labels
 
     @staticmethod

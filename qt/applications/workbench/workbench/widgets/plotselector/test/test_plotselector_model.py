@@ -16,7 +16,6 @@ from workbench.widgets.plotselector.presenter import PlotSelectorPresenter
 
 
 class PlotSelectorModelTest(unittest.TestCase):
-
     def side_effect_manager(self, plot_number):
         if plot_number == 42:
             return self.figure_manager
@@ -140,5 +139,5 @@ class PlotSelectorModelTest(unittest.TestCase):
         self.figure_manager.canvas.figure.savefig.assert_called_once_with("/home/Documents/Figure1.pdf")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

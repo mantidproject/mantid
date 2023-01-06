@@ -12,10 +12,8 @@ from mantidqtinterfaces.drill.presenter.DrillPresenter import DrillPresenter
 
 
 class DrillPresenterTest(unittest.TestCase):
-
     def setUp(self):
-        patch = mock.patch(
-                'mantidqtinterfaces.drill.presenter.DrillPresenter.DrillModel')
+        patch = mock.patch("mantidqtinterfaces.drill.presenter.DrillPresenter.DrillModel")
         self.mModel = patch.start()
         self.mModel.return_value.getColumnHeaderData.return_value = [], []
         self.mModel.return_value.getCycleAndExperiment.return_value = "", ""
@@ -57,18 +55,15 @@ class DrillPresenterTest(unittest.TestCase):
         self.mTable.setCellContents.reset_mock()
         self.mTable.getCellContents.return_value = "test01,test,test_10"
         self.presenter.onAutomaticFilling()
-        self.mTable.setCellContents.assert_called_with(0, 1,
-                                                       "test02,test,test_11")
+        self.mTable.setCellContents.assert_called_with(0, 1, "test02,test,test_11")
         self.mTable.setCellContents.reset_mock()
         # multiple columns
         self.view.increment.value.return_value = 7
-        self.mTable.getSelectedCells.return_value = [(0, 0), (1, 0),
-                                                     (0, 1), (1, 1)]
+        self.mTable.getSelectedCells.return_value = [(0, 0), (1, 0), (0, 1), (1, 1)]
         self.mTable.getRowsFromSelectedCells.return_value = [0, 1]
         self.mTable.getCellContents.return_value = "10+15,100:200,1:10:2"
         self.presenter.onAutomaticFilling()
-        calls = [mock.call(1, 0, "17+22,207:307,17:26:2"),
-                 mock.call(1, 1, "17+22,207:307,17:26:2")]
+        calls = [mock.call(1, 0, "17+22,207:307,17:26:2"), mock.call(1, 1, "17+22,207:307,17:26:2")]
         self.mTable.setCellContents.assert_has_calls(calls)
 
     def test_onGroupSelectedRows(self):
@@ -202,11 +197,9 @@ class DrillPresenterTest(unittest.TestCase):
         self.view.setWindowModified.assert_called()
 
     @mock.patch("mantidqtinterfaces.drill.presenter.DrillPresenter.RundexSettings")
-    @mock.patch("mantidqtinterfaces.drill.presenter.DrillPresenter"
-                ".DrillSettingsPresenter")
+    @mock.patch("mantidqtinterfaces.drill.presenter.DrillPresenter" ".DrillSettingsPresenter")
     def test_settingsWindow(self, mSettingsPresenter, mRundexSettings):
-        mRundexSettings.SETTINGS = {"a1": ["param1", "param2"],
-                                    "a2": ["param3"]}
+        mRundexSettings.SETTINGS = {"a1": ["param1", "param2"], "a2": ["param3"]}
         self.model.getAcquisitionMode.return_value = "a1"
         p1 = mock.Mock()
         p1.getName.return_value = "param1"
@@ -232,8 +225,7 @@ class DrillPresenterTest(unittest.TestCase):
     def test_onShowContextMenu(self, mContextMenuPresenter):
         menu = mock.Mock()
         self.presenter.onShowContextMenu(menu)
-        mContextMenuPresenter.assert_called_once_with(self.view, self.model,
-                                                      menu)
+        mContextMenuPresenter.assert_called_once_with(self.view, self.model, menu)
 
     def test_onClose(self):
         self.view.isWindowModified.return_value = True
@@ -271,15 +263,13 @@ class DrillPresenterTest(unittest.TestCase):
 
     def test_syncViewHeader(self):
         self.view.reset_mock()
-        self.model.getAvailableAcquisitionModes.return_value = ["a1", "a2",
-                                                                "a3"]
+        self.model.getAvailableAcquisitionModes.return_value = ["a1", "a2", "a3"]
         self.model.getInstrument.return_value = "i1"
         self.model.getAcquisitionMode.return_value = "a1"
         self.model.getCycleAndExperiment.return_value = "c1", "exp1"
         self.presenter._syncViewHeader()
         self.view.setInstrument.assert_called_once_with("i1")
-        self.view.set_available_modes.assert_called_once_with(["a1", "a2",
-                                                               "a3"])
+        self.view.set_available_modes.assert_called_once_with(["a1", "a2", "a3"])
         self.view.set_acquisition_mode.assert_called_once_with("a1")
         self.view.setCycleAndExperiment.assert_called_once_with("c1", "exp1")
 
@@ -302,8 +292,7 @@ class DrillPresenterTest(unittest.TestCase):
         self.view.reset_mock()
         r = self.presenter._resetTable()
         self.assertTrue(r)
-        self.view.set_table.assert_called_once_with(["c1", "c2"],
-                                                    ["doc1", "doc2"])
+        self.view.set_table.assert_called_once_with(["c1", "c2"], ["doc1", "doc2"])
 
 
 if __name__ == "__main__":

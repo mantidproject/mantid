@@ -16,7 +16,7 @@ from mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.PeakSelector.pe
 class PeakDataFileTest(unittest.TestCase):
     def setUp(self):
         self.file_name = PeriodicTableModel().get_default_peak_data_file()
-        with open(self.file_name, 'r') as _file:
+        with open(self.file_name, "r") as _file:
             self.data = json.load(_file)
         self.el_names = [data[0] for data in _elements]
 
@@ -30,25 +30,25 @@ class PeakDataFileTest(unittest.TestCase):
                 raise Exception("Element '{}' does not contain valid data".format(element))
 
     def test_some_elements_have_gamma_peaks(self):
-        if not any(['Gammas' in data.keys() for _, data in self.data.items()]):
-            raise Exception('No element has gamma peaks')
+        if not any(["Gammas" in data.keys() for _, data in self.data.items()]):
+            raise Exception("No element has gamma peaks")
 
     def test_some_elements_have_electron_peaks(self):
-        if not any(['Electrons' in data.keys() for _, data in self.data.items()]):
-            raise Exception('No element has electron peaks')
+        if not any(["Electrons" in data.keys() for _, data in self.data.items()]):
+            raise Exception("No element has electron peaks")
 
     def test_atomic_number_matches_the_one_in_periodic_table(self):
         for element in _elements:
             from_file = self.data.get(element[0], None)
             if from_file is not None:
-                self.assertEqual(element[1], from_file['Z'])
+                self.assertEqual(element[1], from_file["Z"])
 
     def test_atomic_mass_matches_the_one_in_periodic_table(self):
         for element in _elements:
             from_file = self.data.get(element[0], None)
-            if from_file is not None and from_file['A'] is not None:
-                self.assertAlmostEqual(element[5], from_file['A'])
+            if from_file is not None and from_file["A"] is not None:
+                self.assertAlmostEqual(element[5], from_file["A"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

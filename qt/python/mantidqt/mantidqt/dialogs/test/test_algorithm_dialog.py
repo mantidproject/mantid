@@ -20,9 +20,8 @@ from mantidqt.utils.qt.testing import start_qapplication
 
 
 class AlgorithmDialogMockAlgorithm(PythonAlgorithm):
-
     def category(self):
-        return 'Examples'
+        return "Examples"
 
     def PyInit(self):
         self.declareProperty("InValue", 0)
@@ -36,21 +35,20 @@ class AlgorithmDialogMockAlgorithm(PythonAlgorithm):
 
 @start_qapplication
 class TestAlgorithmDialog(unittest.TestCase):
-
     def setUp(self):
         AlgorithmFactory.subscribe(AlgorithmDialogMockAlgorithm)
 
     def tearDown(self):
-        AlgorithmFactory.unsubscribe('AlgorithmDialogMockAlgorithm', 1)
+        AlgorithmFactory.unsubscribe("AlgorithmDialogMockAlgorithm", 1)
 
     def test_it_exists(self):
         self.assertTrue(issubclass(AlgorithmDialog, QWidget))
-        self.assertTrue('setAlgorithm' in dir(AlgorithmDialog))
-        self.assertTrue('addAlgorithmObserver' in dir(AlgorithmDialog))
+        self.assertTrue("setAlgorithm" in dir(AlgorithmDialog))
+        self.assertTrue("addAlgorithmObserver" in dir(AlgorithmDialog))
 
     def test_generic_dialog(self):
         dialog = GenericDialog()
-        alg = AlgorithmManager.create('AlgorithmDialogMockAlgorithm')
+        alg = AlgorithmManager.create("AlgorithmDialogMockAlgorithm")
         dialog.setAlgorithm(alg)
         dialog.initializeLayout()
         input_widgets = dialog.findChildren(QLineEdit)
@@ -64,5 +62,5 @@ class TestAlgorithmDialog(unittest.TestCase):
         self.assertEqual(len(input_widgets), 3)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

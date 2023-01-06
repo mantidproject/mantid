@@ -18,6 +18,7 @@ class SuperplotModel(QObject):
     """
     Constant for bin mode.
     """
+
     BIN_MODE = "bin"
 
     """
@@ -78,12 +79,9 @@ class SuperplotModel(QObject):
         self._plotted_data = list()
         self._ws_colors = dict()
         self._ads_observer = SuperplotAdsObserver()
-        self._ads_observer.signals.sig_ws_deleted.connect(
-                self.on_workspace_deleted)
-        self._ads_observer.signals.sig_ws_renamed.connect(
-                self.on_workspace_renamed)
-        self._ads_observer.signals.sig_ws_replaced.connect(
-                self.on_workspace_replaced)
+        self._ads_observer.signals.sig_ws_deleted.connect(self.on_workspace_deleted)
+        self._ads_observer.signals.sig_ws_renamed.connect(self.on_workspace_renamed)
+        self._ads_observer.signals.sig_ws_replaced.connect(self.on_workspace_replaced)
 
     def __del__(self):
         del self._ads_observer
@@ -104,8 +102,7 @@ class SuperplotModel(QObject):
             names = [name]
         for name in names:
             if not isinstance(mtd[name], MatrixWorkspace):
-                logger.warning("Type of workspace \"{}\" is not supported by "
-                               "Superplot".format(name))
+                logger.warning('Type of workspace "{}" is not supported by ' "Superplot".format(name))
                 continue
             if name not in self._workspaces:
                 self._workspaces.append(name)
@@ -119,8 +116,7 @@ class SuperplotModel(QObject):
         """
         if name in self._workspaces:
             self._workspaces.remove(name)
-            self._plotted_data = [(n, i) for (n, i) in self._plotted_data
-                                  if n != name]
+            self._plotted_data = [(n, i) for (n, i) in self._plotted_data if n != name]
         if not self._plotted_data:
             self._plot_mode = None
 
@@ -253,8 +249,7 @@ class SuperplotModel(QObject):
         if ws_name not in self._workspaces:
             return
         self._workspaces.remove(ws_name)
-        self._plotted_data = [(ws, sp) for (ws, sp) in self._plotted_data
-                              if ws != ws_name]
+        self._plotted_data = [(ws, sp) for (ws, sp) in self._plotted_data if ws != ws_name]
         if not self._plotted_data:
             self._plot_mode = None
         self.sig_workspace_deleted.emit(ws_name)

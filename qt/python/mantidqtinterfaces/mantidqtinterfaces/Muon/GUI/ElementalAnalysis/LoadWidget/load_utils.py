@@ -20,12 +20,12 @@ num_files_per_detector = 3
 class LModel(object):
     def __init__(self):
         self.run = 0
-        self.num_loaded_detectors =OrderedDict()
+        self.num_loaded_detectors = OrderedDict()
         self.loaded_runs = OrderedDict()
         self.last_loaded_runs = []
 
     def _load(self, inputs):
-        """ inputs is a dict mapping filepaths to output names """
+        """inputs is a dict mapping filepaths to output names"""
         for path, output in inputs.items():
             workspace = mantid.LoadAscii(path, OutputWorkspace=output)
             workspace.getAxis(0).setUnit("Label").setLabel("Energy", "keV")
@@ -35,10 +35,7 @@ class LModel(object):
         to_load = search_user_dirs(self.run)
         if not to_load:
             return None
-        workspaces = {
-            filename: get_filename(filename, self.run)
-            for filename in to_load if get_filename(filename, self.run) is not None
-        }
+        workspaces = {filename: get_filename(filename, self.run) for filename in to_load if get_filename(filename, self.run) is not None}
         unique_workspaces = {}
         for path, workspace in workspaces.items():
             if workspace not in unique_workspaces.values():
@@ -71,7 +68,7 @@ class LModel(object):
 
 
 def pad_run(run):
-    """ Pads run number: i.e. 123 -> 00123; 2695 -> 02695 """
+    """Pads run number: i.e. 123 -> 00123; 2695 -> 02695"""
     return str(run).zfill(5)
 
 
@@ -86,8 +83,8 @@ def search_user_dirs(run):
 
 # merge each detector workspace into one
 def merge_workspaces(run, workspaces):
-    """ where workspaces is a tuple of form:
-            (filepath, ws name)
+    """where workspaces is a tuple of form:
+    (filepath, ws name)
     """
     d_string = "{}; Detector {}"
     # detectors is a dictionary of {detector_name : [names_of_workspaces]}
@@ -135,8 +132,9 @@ def create_merged_workspace(workspace_list):
 
         # create single ws for the merged data, use original ws as a template
         template_ws = next(ws for ws in workspace_list if ws is not None)
-        merged_ws = mantid.WorkspaceFactory.create(mantid.mtd[template_ws], NVectors=num_files_per_detector,
-                                                   XLength=max_num_bins, YLength=max_num_bins)
+        merged_ws = mantid.WorkspaceFactory.create(
+            mantid.mtd[template_ws], NVectors=num_files_per_detector, XLength=max_num_bins, YLength=max_num_bins
+        )
 
         # create a merged workspace based on every entry from workspace list
         for i in range(0, num_files_per_detector):

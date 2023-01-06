@@ -42,7 +42,7 @@ class DNSObserver:
         # presenter. The values will represent the respective
         # values corresponding to these parameters.
         self.own_dict = OrderedDict()
-        self.modus = ''
+        self.modus = ""
         self.request_from_abo = None
 
     def update(self, param_dict):
@@ -60,7 +60,7 @@ class DNSObserver:
         """
         Sets the view from the own parameter dictionary.
         """
-        self.view.set_state(self.own_dict) # own dict not from abo
+        self.view.set_state(self.own_dict)  # own dict not from abo
 
     def get_option_dict(self):
         """

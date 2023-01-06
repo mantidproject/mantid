@@ -16,12 +16,13 @@ from qtpy.QtWidgets import QVBoxLayout, QWidget
 
 # local imports
 from mantidqt.utils.qt import import_qt
+
 # import widget class from C++ wrappers
 from mantidqt.widgets.observers.observing_view import ObservingView
 
 # _instrumentview.sip --> _instrumentview
 
-InstrumentWidget = import_qt('._instrumentview', 'mantidqt.widgets.instrumentview', 'InstrumentWidget')
+InstrumentWidget = import_qt("._instrumentview", "mantidqt.widgets.instrumentview", "InstrumentWidget")
 
 
 class InstrumentView(QWidget, ObservingView):
@@ -31,6 +32,7 @@ class InstrumentView(QWidget, ObservingView):
     to the presenter and keeps it alive for the duration that
     the window is open
     """
+
     _presenter = None
     _widget = None
 
@@ -58,11 +60,8 @@ class InstrumentView(QWidget, ObservingView):
         self.close_signal.connect(self._run_close)
 
     def get_tab(self, tab_index):
-        tab_name = [InstrumentWidget.RENDER,
-                    InstrumentWidget.PICK,
-                    InstrumentWidget.MASK,
-                    InstrumentWidget.TREE][tab_index]
-        print(f'Tab: {tab_name}')
+        tab_name = [InstrumentWidget.RENDER, InstrumentWidget.PICK, InstrumentWidget.MASK, InstrumentWidget.TREE][tab_index]
+        print(f"Tab: {tab_name}")
 
         return self.widget.getTab(tab_name)
 

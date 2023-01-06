@@ -18,6 +18,7 @@ class SuperplotAdsObserverSignals(QObject):
     Args:
         str: name of the deleted workspace
     """
+
     sig_ws_deleted = Signal(str)
 
     """
@@ -40,7 +41,6 @@ class SuperplotAdsObserverSignals(QObject):
 
 
 class SuperplotAdsObserver(AnalysisDataServiceObserver):
-
     def __init__(self):
         super().__init__()
         self.signals = SuperplotAdsObserverSignals()

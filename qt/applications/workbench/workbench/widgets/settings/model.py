@@ -13,27 +13,26 @@ from workbench.widgets.settings.general.presenter import GeneralProperties
 
 
 class SettingsModel:
-
     @staticmethod
     def save_settings_to_file(filepath, settings):
-        with open(filepath, 'w') as file:
+        with open(filepath, "w") as file:
             for setting in settings:
                 if CONF.has(setting):
                     if setting != GeneralProperties.USER_LAYOUT.value:
                         value = CONF.get(setting, type=str)
                 else:
                     value = ConfigService.getString(setting)
-                file.write(setting + '=' + str(value) + '\n')
+                file.write(setting + "=" + str(value) + "\n")
 
     @staticmethod
     def load_settings_from_file(filepath, settings):
-        with open(filepath, 'r') as file:
+        with open(filepath, "r") as file:
             line = file.readline()
             while line:
-                setting = line.rstrip('\n').split('=', 1)
+                setting = line.rstrip("\n").split("=", 1)
                 prop = setting[0].strip()
                 if prop in settings:
-                    if CONF.has(prop) or prop.find('/') != -1:
+                    if CONF.has(prop) or prop.find("/") != -1:
                         if prop == GeneralProperties.USER_LAYOUT.value:
                             pass
                         elif prop == GeneralProperties.FONT.value and not setting[1]:

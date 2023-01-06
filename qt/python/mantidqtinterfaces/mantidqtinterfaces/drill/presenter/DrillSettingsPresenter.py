@@ -13,6 +13,7 @@ class DrillSettingsPresenter:
     """
     Settings dialog.
     """
+
     _dialog = None
 
     """

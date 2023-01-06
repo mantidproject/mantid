@@ -26,8 +26,7 @@ class VanadiumCorrectionsTest(unittest.TestCase):
     def test_fetch_correction_workspaces_when_not_cached(self, wspexist, van_correction):
         van_correction.return_value = ("integ", "processed")
         wspexist.return_value = False
-        vanadium_corrections.fetch_correction_workspaces("something/somewhere/ENGINX123.nxs",
-                                                         "ENGINX")
+        vanadium_corrections.fetch_correction_workspaces("something/somewhere/ENGINX123.nxs", "ENGINX")
         self.assertEqual(1, van_correction.call_count)
 
     @patch(dir_path + ".vanadium_corrections.create_vanadium_corrections")
@@ -36,8 +35,7 @@ class VanadiumCorrectionsTest(unittest.TestCase):
     def test_fetch_correction_workspaces_when_cached(self, ads, wspexist, van_correction):
         van_correction.return_value = ("integ", "processed")
         wspexist.return_value = True
-        vanadium_corrections.fetch_correction_workspaces("something/somewhere/ENGINX123.nxs",
-                                                         "ENGINX")
+        vanadium_corrections.fetch_correction_workspaces("something/somewhere/ENGINX123.nxs", "ENGINX")
         self.assertEqual(0, van_correction.call_count)
         self.assertEqual(2, ads.retrieve.call_count)
 
@@ -54,5 +52,5 @@ class VanadiumCorrectionsTest(unittest.TestCase):
         self.assertEqual(2, load.call_count)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

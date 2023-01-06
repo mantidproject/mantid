@@ -13,23 +13,23 @@ from mantid.kernel import config, logger
 
 
 if not PYQT5:
-    logger.error('Drill interface is supported only in workbench.')
+    logger.error("Drill interface is supported only in workbench.")
 else:
-    if config['default.facility'] != 'ILL':
-        logger.error('Drill is enabled only if the facility is set to ILL.')
+    if config["default.facility"] != "ILL":
+        logger.error("Drill is enabled only if the facility is set to ILL.")
     else:
         from mantidqt.gui_helper import get_qapplication
         from mantidqtinterfaces.drill.view.DrillView import DrillView
 
         app, within_mantid = get_qapplication()
-        if 'drillInterface' not in globals():
+        if "drillInterface" not in globals():
             drillInterface = DrillView()
         else:
             drillInterface = globals()["drillInterface"]
             try:
                 visible = drillInterface.isVisible()
             except:
-                #underlying Qt object has been deleted
+                # underlying Qt object has been deleted
                 visible = False
             if not visible:
                 drillInterface = DrillView()

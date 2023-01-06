@@ -9,6 +9,7 @@
 import unittest
 
 import matplotlib
+
 matplotlib.use("AGG")  # noqa
 import matplotlib.pyplot as plt
 from numpy import array_equal
@@ -46,25 +47,27 @@ class FigureErrorsManagerTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.ws2d_histo = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30, 10, 20, 30],
-                                         DataY=[2, 3, 4, 5, 3, 5],
-                                         DataE=[1, 2, 3, 4, 1, 1],
-                                         NSpec=3,
-                                         Distribution=True,
-                                         UnitX='Wavelength',
-                                         VerticalAxisUnit='DeltaE',
-                                         VerticalAxisValues=[4, 6, 8],
-                                         OutputWorkspace='ws2d_histo')
+        cls.ws2d_histo = CreateWorkspace(
+            DataX=[10, 20, 30, 10, 20, 30, 10, 20, 30],
+            DataY=[2, 3, 4, 5, 3, 5],
+            DataE=[1, 2, 3, 4, 1, 1],
+            NSpec=3,
+            Distribution=True,
+            UnitX="Wavelength",
+            VerticalAxisUnit="DeltaE",
+            VerticalAxisValues=[4, 6, 8],
+            OutputWorkspace="ws2d_histo",
+        )
         # initialises the QApplication
         super(cls, FigureErrorsManagerTest).setUpClass()
 
     def setUp(self):
-        self.fig, self.ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        self.fig, self.ax = plt.subplots(subplot_kw={"projection": "mantid"})
 
         self.errors_manager = FigureErrorsManager(self.fig.canvas)
 
     def tearDown(self):
-        plt.close('all')
+        plt.close("all")
         del self.fig
         del self.ax
         del self.errors_manager
@@ -110,10 +113,10 @@ class FigureErrorsManagerTest(unittest.TestCase):
 
     def test_curve_has_all_errorbars_on_replot_after_error_every_increase(self):
         curve = self.ax.errorbar([0, 1, 2, 4], [0, 1, 2, 4], yerr=[0.1, 0.2, 0.3, 0.4])
-        new_curve = FigureErrorsManager._replot_mpl_curve(self.ax, curve, {'errorevery': 2})
+        new_curve = FigureErrorsManager._replot_mpl_curve(self.ax, curve, {"errorevery": 2})
         self.assertEqual(2, len(new_curve[2][0].get_segments()))
-        new_curve = FigureErrorsManager._replot_mpl_curve(self.ax, new_curve, {'errorevery': 1})
-        self.assertTrue(hasattr(new_curve, 'errorbar_data'))
+        new_curve = FigureErrorsManager._replot_mpl_curve(self.ax, new_curve, {"errorevery": 1})
+        self.assertTrue(hasattr(new_curve, "errorbar_data"))
         self.assertEqual(4, len(new_curve[2][0].get_segments()))
 
     def test_show_all_errors_on_waterfall_plot_retains_waterfall(self):
@@ -142,5 +145,5 @@ class FigureErrorsManagerTest(unittest.TestCase):
         self.assertEqual(0, len(self.ax.creation_args))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

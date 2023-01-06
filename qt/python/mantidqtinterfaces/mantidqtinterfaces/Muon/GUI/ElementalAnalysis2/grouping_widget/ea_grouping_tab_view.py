@@ -10,7 +10,6 @@ from mantidqtinterfaces.Muon.GUI.Common.utilities.muon_file_utils import show_fi
 
 
 class EAGroupingTabView(QtWidgets.QWidget):
-
     def __init__(self, grouping_table, parent=None):
         super(EAGroupingTabView, self).__init__(parent)
         # declare all the interface items in the __init__ method
@@ -83,8 +82,7 @@ class EAGroupingTabView(QtWidgets.QWidget):
     def get_description_text(self):
         return self.description_edit.text()
 
-    def show_file_browser_and_return_selection(
-            self, file_filter, search_directories):
+    def show_file_browser_and_return_selection(self, file_filter, search_directories):
         return show_file_browser_and_return_selection(self, file_filter, search_directories)[0]
 
     def display_warning_box(self, message):

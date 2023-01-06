@@ -13,7 +13,6 @@ from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.general_fitting.general_
 
 @start_qapplication
 class GeneralFittingOptionsViewTest(unittest.TestCase):
-
     def setUp(self):
         self.view = GeneralFittingOptionsView()
         self.view.show()
@@ -67,5 +66,5 @@ class GeneralFittingOptionsViewTest(unittest.TestCase):
         self.assertTrue(data, fit_specifiers)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -16,6 +16,7 @@ from qtpy.QtWidgets import QVBoxLayout
 from workbench.plugins.base import PluginWidget
 from workbench.plotting.globalfiguremanager import GlobalFigureManager
 from workbench.widgets.plotselector.presenter import PlotSelectorPresenter
+
 # from mantidqt.utils.qt import toQSettings when readSettings/writeSettings are implemented
 
 
@@ -33,7 +34,7 @@ class PlotSelector(PluginWidget):
         layout.addWidget(self.plot_selector_widget)
         self.setLayout(layout)
 
-# ----------------- Plugin API --------------------
+    # ----------------- Plugin API --------------------
 
     def register_plugin(self):
         self.main.add_dockwidget(self)

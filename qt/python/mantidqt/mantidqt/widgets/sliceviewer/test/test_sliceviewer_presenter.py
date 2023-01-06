@@ -17,13 +17,17 @@ from mantidqt.utils.qt.testing import start_qapplication
 
 import matplotlib
 
-matplotlib.use('Agg')
+matplotlib.use("Agg")
 # Mock out simpleapi to import expensive import of something we don't use anyway
-sys.modules['mantid.simpleapi'] = mock.MagicMock()
+sys.modules["mantid.simpleapi"] = mock.MagicMock()
 
 from mantidqt.widgets.sliceviewer.models.model import SliceViewerModel, WS_TYPE  # noqa: E402
-from mantidqt.widgets.sliceviewer.presenters.presenter import (PeaksViewerCollectionPresenter,
-                                                               SliceViewer, SliceViewXAxisEditor, SliceViewYAxisEditor)  # noqa: E402
+from mantidqt.widgets.sliceviewer.presenters.presenter import (
+    PeaksViewerCollectionPresenter,
+    SliceViewer,
+    SliceViewXAxisEditor,
+    SliceViewYAxisEditor,
+)  # noqa: E402
 from mantidqt.widgets.sliceviewer.models.transform import NonOrthogonalTransform  # noqa: E402
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText  # noqa: E402
 from mantidqt.widgets.sliceviewer.views.view import SliceViewerView  # noqa: E402
@@ -71,7 +75,6 @@ def create_mdhistoworkspace_mock():
 
 @start_qapplication
 class SliceViewerTest(unittest.TestCase):
-
     def createMockDataView(self):
         data_view = mock.Mock(spec=SliceViewerDataView)
         data_view.plot_MDH = mock.Mock()
@@ -127,12 +130,12 @@ class SliceViewerTest(unittest.TestCase):
             "supports_normalise": True,
             "supports_nonorthogonal_axes": False,
             "supports_dynamic_rebinning": False,
-            "supports_peaks_overlays": True
+            "supports_peaks_overlays": True,
         }
 
-        self._ws_info_patcher = mock.patch.multiple("mantidqt.widgets.sliceviewer.presenters.presenter",
-                                                    Dimensions=mock.DEFAULT,
-                                                    WorkspaceInfo=mock.DEFAULT)
+        self._ws_info_patcher = mock.patch.multiple(
+            "mantidqt.widgets.sliceviewer.presenters.presenter", Dimensions=mock.DEFAULT, WorkspaceInfo=mock.DEFAULT
+        )
         self.patched_deps = self._ws_info_patcher.start()
         self.patched_deps["Dimensions"].return_value.get_dim_limits.return_value = ((-1, 1), (-2, 2))
         self.patched_deps["WorkspaceInfo"].get_ws_type.return_value = WS_TYPE.MDH
@@ -261,8 +264,7 @@ class SliceViewerTest(unittest.TestCase):
 
         presenter.nonorthogonal_axes(True)
 
-        data_view_mock.deactivate_and_disable_tool.assert_called_once_with(
-            ToolItemText.REGIONSELECTION)
+        data_view_mock.deactivate_and_disable_tool.assert_called_once_with(ToolItemText.REGIONSELECTION)
         data_view_mock.create_axes_nonorthogonal.assert_called_once()
         data_view_mock.create_axes_orthogonal.assert_not_called()
         data_view_mock.disable_tool_button.assert_has_calls([mock.call(ToolItemText.LINEPLOTS)])
@@ -273,11 +275,9 @@ class SliceViewerTest(unittest.TestCase):
     def test_non_orthogonal_axes_toggled_off(self, mock_sliceinfo_cls):
         self.patched_deps["WorkspaceInfo"].get_ws_type.return_value = WS_TYPE.MDE
         self.model.can_support_non_axis_cuts.return_value = True
-        presenter, data_view_mock = _create_presenter(self.model,
-                                                      self.view,
-                                                      mock_sliceinfo_cls,
-                                                      enable_nonortho_axes=True,
-                                                      supports_nonortho=True)
+        presenter, data_view_mock = _create_presenter(
+            self.model, self.view, mock_sliceinfo_cls, enable_nonortho_axes=True, supports_nonortho=True
+        )
 
         data_view_mock.plot_MDH.reset_mock()  # clear initial plot call
         data_view_mock.create_axes_orthogonal.reset_mock()
@@ -291,26 +291,21 @@ class SliceViewerTest(unittest.TestCase):
         data_view_mock.create_axes_orthogonal.assert_called_once()
         data_view_mock.create_axes_nonorthogonal.assert_not_called()
         data_view_mock.plot_MDH.assert_called_once()
-        data_view_mock.enable_tool_button.assert_has_calls(
-            (mock.call(ToolItemText.LINEPLOTS),
-             mock.call(ToolItemText.REGIONSELECTION)))
+        data_view_mock.enable_tool_button.assert_has_calls((mock.call(ToolItemText.LINEPLOTS), mock.call(ToolItemText.REGIONSELECTION)))
 
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceInfo")
     def test_non_orthogonal_axes_toggled_off_not_enable_non_axis_cuts_if_not_supported(self, mock_sliceinfo_cls):
         self.patched_deps["WorkspaceInfo"].get_ws_type.return_value = WS_TYPE.MDE
         self.model.can_support_non_axis_cuts.return_value = False
-        presenter, data_view_mock = _create_presenter(self.model,
-                                                      self.view,
-                                                      mock_sliceinfo_cls,
-                                                      enable_nonortho_axes=True,
-                                                      supports_nonortho=True)
+        presenter, data_view_mock = _create_presenter(
+            self.model, self.view, mock_sliceinfo_cls, enable_nonortho_axes=True, supports_nonortho=True
+        )
 
         data_view_mock.enable_tool_button.reset_mock()
 
         presenter.nonorthogonal_axes(False)
 
-        self.assertTrue(mock.call(ToolItemText.NONAXISALIGNEDCUTS) not in
-                        data_view_mock.enable_tool_button.call_args_list)
+        self.assertTrue(mock.call(ToolItemText.NONAXISALIGNEDCUTS) not in data_view_mock.enable_tool_button.call_args_list)
 
     def test_cut_view_button_disabled_if_model_cannot_support_it(self):
         self.patched_deps["WorkspaceInfo"].get_ws_type.return_value = WS_TYPE.MATRIX
@@ -329,9 +324,9 @@ class SliceViewerTest(unittest.TestCase):
 
         mock_cv_pres.assert_called_once_with(presenter, self.view.data_view.canvas)
         # test correct buttons disabled
-        self.view.data_view.deactivate_and_disable_tool.assert_has_calls([mock.call(tool) for tool in
-                                                                          (ToolItemText.REGIONSELECTION,
-                                                                           ToolItemText.LINEPLOTS)])
+        self.view.data_view.deactivate_and_disable_tool.assert_has_calls(
+            [mock.call(tool) for tool in (ToolItemText.REGIONSELECTION, ToolItemText.LINEPLOTS)]
+        )
         self.view.data_view.deactivate_tool.assert_called_once_with(ToolItemText.ZOOM)
         self.view.data_view.track_cursor.setChecked.assert_called_once_with(False)
 
@@ -345,18 +340,16 @@ class SliceViewerTest(unittest.TestCase):
 
         presenter._cutviewer_presenter.hide_view.assert_called_once()
         # test correct buttons disabled
-        self.view.data_view.enable_tool_button.assert_has_calls([mock.call(tool) for tool in
-                                                                 (ToolItemText.REGIONSELECTION, ToolItemText.LINEPLOTS,
-                                                                  ToolItemText.NONORTHOGONAL_AXES)])
+        self.view.data_view.enable_tool_button.assert_has_calls(
+            [mock.call(tool) for tool in (ToolItemText.REGIONSELECTION, ToolItemText.LINEPLOTS, ToolItemText.NONORTHOGONAL_AXES)]
+        )
 
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceViewer.new_plot_MDH")
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceInfo")
     def test_dimensions_changed_when_transpose_2D_MD_workspace(self, mock_sliceinfo_cls, mock_new_plot):
-        presenter, data_view_mock = _create_presenter(self.model,
-                                                      self.view,
-                                                      mock_sliceinfo_cls,
-                                                      enable_nonortho_axes=False,
-                                                      supports_nonortho=False)
+        presenter, data_view_mock = _create_presenter(
+            self.model, self.view, mock_sliceinfo_cls, enable_nonortho_axes=False, supports_nonortho=False
+        )
         # stop regression of issue #33241
         self.model.get_number_dimensions.return_value = 2
         mock_sliceinfo_cls.slicepoint = [None, None]  # no slicepoint as 2D ws
@@ -367,13 +360,10 @@ class SliceViewerTest(unittest.TestCase):
         mock_new_plot.assert_called_with(dimensions_transposing=True)
 
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceInfo")
-    def test_changing_dimensions_in_nonortho_mode_switches_to_ortho_when_dim_not_Q(
-            self, mock_sliceinfo_cls):
-        presenter, data_view_mock = _create_presenter(self.model,
-                                                      self.view,
-                                                      mock_sliceinfo_cls,
-                                                      enable_nonortho_axes=True,
-                                                      supports_nonortho=False)
+    def test_changing_dimensions_in_nonortho_mode_switches_to_ortho_when_dim_not_Q(self, mock_sliceinfo_cls):
+        presenter, data_view_mock = _create_presenter(
+            self.model, self.view, mock_sliceinfo_cls, enable_nonortho_axes=True, supports_nonortho=False
+        )
         self.model.get_number_dimensions.return_value = 2
 
         presenter.dimensions_changed()
@@ -383,13 +373,10 @@ class SliceViewerTest(unittest.TestCase):
         data_view_mock.create_axes_nonorthogonal.assert_not_called()
 
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceInfo")
-    def test_changing_dimensions_in_nonortho_mode_keeps_nonortho_when_dim_is_Q(
-            self, mock_sliceinfo_cls):
-        presenter, data_view_mock = _create_presenter(self.model,
-                                                      self.view,
-                                                      mock_sliceinfo_cls,
-                                                      enable_nonortho_axes=True,
-                                                      supports_nonortho=True)
+    def test_changing_dimensions_in_nonortho_mode_keeps_nonortho_when_dim_is_Q(self, mock_sliceinfo_cls):
+        presenter, data_view_mock = _create_presenter(
+            self.model, self.view, mock_sliceinfo_cls, enable_nonortho_axes=True, supports_nonortho=True
+        )
 
         self.patched_deps["WorkspaceInfo"].is_ragged_matrix_workspace.return_value = False
         self.model.get_number_dimensions.return_value = 2
@@ -401,13 +388,10 @@ class SliceViewerTest(unittest.TestCase):
         data_view_mock.create_axes_orthogonal.assert_not_called()
 
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceInfo")
-    def test_changing_dimensions_in_ortho_mode_disables_nonortho_btn_if_not_supported(
-            self, mock_sliceinfo_cls):
-        presenter, data_view_mock = _create_presenter(self.model,
-                                                      self.view,
-                                                      mock_sliceinfo_cls,
-                                                      enable_nonortho_axes=False,
-                                                      supports_nonortho=False)
+    def test_changing_dimensions_in_ortho_mode_disables_nonortho_btn_if_not_supported(self, mock_sliceinfo_cls):
+        presenter, data_view_mock = _create_presenter(
+            self.model, self.view, mock_sliceinfo_cls, enable_nonortho_axes=False, supports_nonortho=False
+        )
         self.model.get_number_dimensions.return_value = 2
 
         presenter.dimensions_changed()
@@ -415,13 +399,10 @@ class SliceViewerTest(unittest.TestCase):
         data_view_mock.disable_tool_button.assert_called_once_with(ToolItemText.NONORTHOGONAL_AXES)
 
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceInfo")
-    def test_changing_dimensions_in_ortho_mode_enables_nonortho_btn_if_supported(
-            self, mock_sliceinfo_cls):
-        presenter, data_view_mock = _create_presenter(self.model,
-                                                      self.view,
-                                                      mock_sliceinfo_cls,
-                                                      enable_nonortho_axes=False,
-                                                      supports_nonortho=True)
+    def test_changing_dimensions_in_ortho_mode_enables_nonortho_btn_if_supported(self, mock_sliceinfo_cls):
+        presenter, data_view_mock = _create_presenter(
+            self.model, self.view, mock_sliceinfo_cls, enable_nonortho_axes=False, supports_nonortho=True
+        )
         self.model.get_number_dimensions.return_value = 2
 
         presenter.dimensions_changed()
@@ -429,12 +410,10 @@ class SliceViewerTest(unittest.TestCase):
         data_view_mock.enable_tool_button.assert_called_once_with(ToolItemText.NONORTHOGONAL_AXES)
 
     @mock.patch("mantidqt.widgets.sliceviewer.peaksviewer.presenter.TableWorkspaceDataPresenterStandard")
-    @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.PeaksViewerCollectionPresenter",
-                spec=PeaksViewerCollectionPresenter)
+    @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.PeaksViewerCollectionPresenter", spec=PeaksViewerCollectionPresenter)
     def test_overlay_peaks_workspaces_attaches_view_and_draws_peaks(self, mock_peaks_presenter, _):
         for nonortho_axes in (False, True):
-            presenter, _ = _create_presenter(self.model, self.view, mock.MagicMock(), nonortho_axes,
-                                             nonortho_axes)
+            presenter, _ = _create_presenter(self.model, self.view, mock.MagicMock(), nonortho_axes, nonortho_axes)
 
             presenter.view.query_peaks_to_overlay.side_effect = ["peaks_workspace"]
             presenter.overlay_peaks_workspaces()
@@ -451,27 +430,19 @@ class SliceViewerTest(unittest.TestCase):
 
     def test_replace_workspace_returns_when_the_workspace_is_not_the_model_workspace(self):
         self.model.workspace_equals.return_value = False
-        presenter, _ = _create_presenter(self.model,
-                                         self.view,
-                                         mock.MagicMock(),
-                                         enable_nonortho_axes=False,
-                                         supports_nonortho=False)
+        presenter, _ = _create_presenter(self.model, self.view, mock.MagicMock(), enable_nonortho_axes=False, supports_nonortho=False)
         presenter.update_view = mock.Mock()
         presenter._decide_plot_update_methods = mock.Mock()
         other_workspace = mock.Mock()
 
-        presenter.replace_workspace('other_workspace', other_workspace)
+        presenter.replace_workspace("other_workspace", other_workspace)
 
         presenter._decide_plot_update_methods.assert_not_called()
         presenter.update_view.assert_not_called()
 
     def test_replace_workspace_closes_view_when_model_properties_change(self):
         self.model.workspace_equals.return_value = True
-        presenter, _ = _create_presenter(self.model,
-                                         self.view,
-                                         mock.MagicMock(),
-                                         enable_nonortho_axes=False,
-                                         supports_nonortho=False)
+        presenter, _ = _create_presenter(self.model, self.view, mock.MagicMock(), enable_nonortho_axes=False, supports_nonortho=False)
         presenter.refresh_view = mock.Mock()
         presenter._decide_plot_update_methods = mock.Mock()
 
@@ -483,22 +454,18 @@ class SliceViewerTest(unittest.TestCase):
             "supports_normalise": False,
             "supports_nonorthogonal_axes": False,
             "supports_dynamic_rebinning": False,
-            "supports_peaks_overlays": True
+            "supports_peaks_overlays": True,
         }
 
         with patch.object(SliceViewerModel, "get_properties", return_value=new_model_properties):
-            presenter.replace_workspace('workspace', workspace)
+            presenter.replace_workspace("workspace", workspace)
 
             self.view.emit_close.assert_called_once()
             presenter._decide_plot_update_methods.assert_not_called()
             presenter.refresh_view.assert_not_called()
 
     def test_replace_workspace_updates_view(self):
-        presenter, _ = _create_presenter(self.model,
-                                         self.view,
-                                         mock.MagicMock(),
-                                         enable_nonortho_axes=False,
-                                         supports_nonortho=False)
+        presenter, _ = _create_presenter(self.model, self.view, mock.MagicMock(), enable_nonortho_axes=False, supports_nonortho=False)
         workspace = create_mdhistoworkspace_mock()
         new_model_properties = self.model.get_properties()
 
@@ -507,17 +474,13 @@ class SliceViewerTest(unittest.TestCase):
             presenter.view.data_view.plot_MDH.assert_called_once()
             presenter.view.data_view.plot_MDH.reset_mock()
 
-            presenter.replace_workspace('workspace', workspace)
+            presenter.replace_workspace("workspace", workspace)
 
             presenter.view.emit_close.assert_not_called()
             presenter.view.delayed_refresh.assert_called_once()  # leave it to QTimer to call refresh_view()
 
     def test_refresh_view(self):
-        presenter, _ = _create_presenter(self.model,
-                                         self.view,
-                                         mock.MagicMock(),
-                                         enable_nonortho_axes=False,
-                                         supports_nonortho=False)
+        presenter, _ = _create_presenter(self.model, self.view, mock.MagicMock(), enable_nonortho_axes=False, supports_nonortho=False)
         presenter.new_plot = mock.Mock()
 
         presenter.refresh_view()
@@ -529,11 +492,7 @@ class SliceViewerTest(unittest.TestCase):
         presenter.new_plot.assert_called_once()
 
     def test_refresh_queued_flag_reset_upon_refresh_view(self):
-        presenter, _ = _create_presenter(self.model,
-                                         self.view,
-                                         mock.MagicMock(),
-                                         enable_nonortho_axes=False,
-                                         supports_nonortho=False)
+        presenter, _ = _create_presenter(self.model, self.view, mock.MagicMock(), enable_nonortho_axes=False, supports_nonortho=False)
         presenter.new_plot = mock.Mock()
         presenter.view.refresh_queued = True
 
@@ -541,11 +500,7 @@ class SliceViewerTest(unittest.TestCase):
         self.assertFalse(presenter.view.refresh_queued)
 
     def test_clear_observer_peaks_presenter_not_none(self):
-        presenter, _ = _create_presenter(self.model,
-                                         self.view,
-                                         mock.MagicMock(),
-                                         enable_nonortho_axes=False,
-                                         supports_nonortho=False)
+        presenter, _ = _create_presenter(self.model, self.view, mock.MagicMock(), enable_nonortho_axes=False, supports_nonortho=False)
         presenter._peaks_presenter = mock.MagicMock()
 
         presenter.clear_observer()
@@ -553,11 +508,7 @@ class SliceViewerTest(unittest.TestCase):
         presenter._peaks_presenter.clear_observer.assert_called_once()
 
     def test_clear_observer_peaks_presenter_is_none(self):
-        presenter, _ = _create_presenter(self.model,
-                                         self.view,
-                                         mock.MagicMock(),
-                                         enable_nonortho_axes=False,
-                                         supports_nonortho=False)
+        presenter, _ = _create_presenter(self.model, self.view, mock.MagicMock(), enable_nonortho_axes=False, supports_nonortho=False)
         presenter._peaks_presenter = None
 
         # Will raise exception if misbehaving.
@@ -628,17 +579,12 @@ class SliceViewerTest(unittest.TestCase):
         mock_view.emit_close.assert_called_once()
 
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceInfo")
-    @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.PeaksViewerCollectionPresenter",
-                spec=PeaksViewerCollectionPresenter)
+    @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.PeaksViewerCollectionPresenter", spec=PeaksViewerCollectionPresenter)
     def test_peak_add_delete_event(self, mock_peaks_presenter, mock_sliceinfo_cls):
         mock_sliceinfo_cls().inverse_transform = mock.Mock(side_effect=lambda pos: pos[::-1])
         mock_sliceinfo_cls().z_value = 3
 
-        presenter, _ = _create_presenter(self.model,
-                                         self.view,
-                                         mock_sliceinfo_cls,
-                                         enable_nonortho_axes=False,
-                                         supports_nonortho=True)
+        presenter, _ = _create_presenter(self.model, self.view, mock_sliceinfo_cls, enable_nonortho_axes=False, supports_nonortho=True)
         presenter._peaks_presenter = mock_peaks_presenter
 
         event = mock.Mock()
@@ -674,7 +620,7 @@ class SliceViewerTest(unittest.TestCase):
     def test_x_axes_editor_is_opened_on_x_axes_double_click(self, mock_xaxis_editor):
         presenter = SliceViewer(None, model=self.model, view=self.view)
         event = self._double_left_click_event()
-        self._setup_data_view_for_axes_double_click('x', tick_label=False)
+        self._setup_data_view_for_axes_double_click("x", tick_label=False)
 
         presenter.canvas_clicked(event)
 
@@ -684,7 +630,7 @@ class SliceViewerTest(unittest.TestCase):
     def test_y_axes_editor_is_opened_on_y_axes_double_click(self, mock_yaxis_editor):
         presenter = SliceViewer(None, model=self.model, view=self.view)
         event = self._double_left_click_event()
-        self._setup_data_view_for_axes_double_click('y', tick_label=False)
+        self._setup_data_view_for_axes_double_click("y", tick_label=False)
 
         presenter.canvas_clicked(event)
 
@@ -694,7 +640,7 @@ class SliceViewerTest(unittest.TestCase):
     def test_x_axes_editor_is_opened_on_x_axes_tick_label_double_click(self, mock_xaxis_editor):
         presenter = SliceViewer(None, model=self.model, view=self.view)
         event = self._double_left_click_event()
-        self._setup_data_view_for_axes_double_click('x', tick_label=True)
+        self._setup_data_view_for_axes_double_click("x", tick_label=True)
 
         presenter.canvas_clicked(event)
 
@@ -704,7 +650,7 @@ class SliceViewerTest(unittest.TestCase):
     def test_y_axes_editor_is_opened_on_y_axes_tick_label_double_click(self, mock_yaxis_editor):
         presenter = SliceViewer(None, model=self.model, view=self.view)
         event = self._double_left_click_event()
-        self._setup_data_view_for_axes_double_click('y', tick_label=True)
+        self._setup_data_view_for_axes_double_click("y", tick_label=True)
 
         presenter.canvas_clicked(event)
 
@@ -713,8 +659,8 @@ class SliceViewerTest(unittest.TestCase):
     def _setup_data_view_for_axes_double_click(self, orientation: str, tick_label: bool):
         self.view.data_view.nonorthogonal_mode = False
         self.view.data_view.ax = mock.MagicMock()
-        is_x = orientation == 'x'
-        is_y = orientation == 'y'
+        is_x = orientation == "x"
+        is_y = orientation == "y"
         if tick_label:
             tick_label = mock.MagicMock()
             tick_label.contains.return_value = (True, {})
@@ -744,8 +690,7 @@ class SliceViewerTest(unittest.TestCase):
 
         mock_axes = mock.MagicMock()
         mock_axes.get_xlim = mock.MagicMock(return_value=[0, 1])
-        xaxes_edit = SliceViewXAxisEditor(canvas=mock.MagicMock(), axes=mock_axes,
-                                          dimensions_changed=presenter.dimensions_changed)
+        xaxes_edit = SliceViewXAxisEditor(canvas=mock.MagicMock(), axes=mock_axes, dimensions_changed=presenter.dimensions_changed)
 
         xaxes_edit.on_ok()
 
@@ -757,13 +702,12 @@ class SliceViewerTest(unittest.TestCase):
 
         mock_axes = mock.MagicMock()
         mock_axes.get_ylim = mock.MagicMock(return_value=[0, 1])
-        yaxes_edit = SliceViewYAxisEditor(canvas=mock.MagicMock(), axes=mock_axes,
-                                          dimensions_changed=presenter.dimensions_changed)
+        yaxes_edit = SliceViewYAxisEditor(canvas=mock.MagicMock(), axes=mock_axes, dimensions_changed=presenter.dimensions_changed)
 
         yaxes_edit.on_ok()
 
         presenter.dimensions_changed.assert_called_once()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

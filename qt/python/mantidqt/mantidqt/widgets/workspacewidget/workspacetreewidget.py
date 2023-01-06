@@ -9,4 +9,4 @@
 #
 from mantidqt.utils.qt import import_qt
 
-WorkspaceTreeWidget = import_qt('..._common', 'mantidqt.widgets.workspacewidget', 'WorkspaceTreeWidgetSimple')
+WorkspaceTreeWidget = import_qt("..._common", "mantidqt.widgets.workspacewidget", "WorkspaceTreeWidgetSimple")

@@ -13,7 +13,7 @@ from typing import List
 class PlottingContext(object):
     def __init__(self):
         self._subplots = {}
-        self._default_xlim = [-0.1 ,0.1]
+        self._default_xlim = [-0.1, 0.1]
         self._default_ylim = [-10, 10]
         self._xlim_all = self._default_xlim
         self._ylim_all = self._default_ylim
@@ -47,12 +47,12 @@ class PlottingContext(object):
 
     @property
     def min_y_range(self):
-        return self._min_y_range/2.
+        return self._min_y_range / 2.0
 
     @property
     def y_axis_margin(self):
         # stored as a percentage, but return decimal
-        return self._y_axis_margin/100.
+        return self._y_axis_margin / 100.0
 
     @property
     def default_xlims(self):
@@ -87,7 +87,7 @@ class PlottingContext(object):
         self._ylim_all = values
 
     @property
-    def get_ylim_all(self)-> List[float]:
+    def get_ylim_all(self) -> List[float]:
         return self._ylim_all
 
     def set_autoscale_all(self, state: bool):

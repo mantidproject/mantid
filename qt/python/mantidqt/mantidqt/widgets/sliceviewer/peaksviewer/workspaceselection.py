@@ -14,7 +14,7 @@ from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QDialog, QDialogButtonBox, QTableWidget, QTableWidgetItem, QVBoxLayout
 
 
-class PeaksWorkspaceSelectorModel():
+class PeaksWorkspaceSelectorModel:
     """Data model for selecting PeaksWorkspaces from an object capable of providing
     a access to the available list of workspaces.
     """
@@ -47,7 +47,7 @@ class PeaksWorkspaceSelectorModel():
         return name_status
 
 
-class PeaksWorkspaceSelectorPresenter():
+class PeaksWorkspaceSelectorPresenter:
     """Present the list of available PeaksWorkspaces to the user and allow them
     to select them.
     """
@@ -130,8 +130,7 @@ class PeaksWorkspaceSelectorView(QDialog):
 
     # private
     def _setup_ui(self):
-        """Setup the widgets on the screen
-        """
+        """Setup the widgets on the screen"""
         # table
         nrows, ncols = 0, 2
         self._table = QTableWidget(nrows, ncols, self)

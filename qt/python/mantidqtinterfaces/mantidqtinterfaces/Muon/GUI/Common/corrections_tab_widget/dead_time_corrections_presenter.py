@@ -14,7 +14,7 @@ class DeadTimeCorrectionsPresenter:
     The DeadTimeCorrectionsPresenter has a DeadTimeCorrectionsView and DeadTimeCorrectionsModel.
     """
 
-    def __init__(self, view: DeadTimeCorrectionsView,  model: DeadTimeCorrectionsModel, corrections_presenter):
+    def __init__(self, view: DeadTimeCorrectionsView, model: DeadTimeCorrectionsModel, corrections_presenter):
         """Initialize the DeadTimeCorrectionsPresenter. Sets up the slots and event observers."""
         self.view = view
         self.model = model
@@ -113,8 +113,9 @@ class DeadTimeCorrectionsPresenter:
     def update_dead_time_info_text_in_view(self) -> None:
         """Update the dead time info label in the view."""
         if self.model.is_dead_time_source_from_data_file() or self.model.is_dead_time_source_from_workspace():
-            self.view.set_dead_time_average_and_range(self._corrections_presenter.current_run_string(),
-                                                      self.model.dead_times_range(), self.model.dead_times_average())
+            self.view.set_dead_time_average_and_range(
+                self._corrections_presenter.current_run_string(), self.model.dead_times_range(), self.model.dead_times_average()
+            )
         else:
             self.view.set_dead_time_info_text("No dead time correction")
 
@@ -143,8 +144,9 @@ class DeadTimeCorrectionsPresenter:
         try:
             name = load_dead_time_from_filename(filename)
         except Exception:
-            self._corrections_presenter.warning_popup("The file provided has an unexpected format. The file should be "
-                                                      "of the same instrument and cycle as the raw data.")
+            self._corrections_presenter.warning_popup(
+                "The file provided has an unexpected format. The file should be " "of the same instrument and cycle as the raw data."
+            )
             return None
 
         if name == "":

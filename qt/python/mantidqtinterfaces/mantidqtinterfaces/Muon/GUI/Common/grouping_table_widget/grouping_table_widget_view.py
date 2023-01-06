@@ -9,13 +9,15 @@ from qtpy.QtCore import Signal
 import sys
 from mantidqtinterfaces.Muon.GUI.Common import message_box
 
-group_table_columns = {0: 'group_name', 2: 'to_analyse', 3: 'detector_ids', 4: 'number_of_detectors', 1: 'periods'}
-inverse_group_table_columns = {'group_name': 0, 'to_analyse': 2,  'detector_ids': 3,  'number_of_detectors': 4, 'periods': 1}
-table_column_flags = {'group_name': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
-                      'to_analyse': QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled,
-                      'detector_ids': QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable,
-                      'number_of_detectors': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
-                      'periods': QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable}
+group_table_columns = {0: "group_name", 2: "to_analyse", 3: "detector_ids", 4: "number_of_detectors", 1: "periods"}
+inverse_group_table_columns = {"group_name": 0, "to_analyse": 2, "detector_ids": 3, "number_of_detectors": 4, "periods": 1}
+table_column_flags = {
+    "group_name": QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
+    "to_analyse": QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled,
+    "detector_ids": QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable,
+    "number_of_detectors": QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
+    "periods": QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable,
+}
 
 
 class GroupingTableView(QtWidgets.QWidget):
@@ -53,14 +55,14 @@ class GroupingTableView(QtWidgets.QWidget):
         self.remove_group_button = QtWidgets.QToolButton()
 
         self.group_range_label = QtWidgets.QLabel()
-        self.group_range_label.setText('Group Asymmetry Range from:')
+        self.group_range_label.setText("Group Asymmetry Range from:")
         self.group_range_min = QtWidgets.QLineEdit("0.0")
         self.group_range_min.setEnabled(False)
         positive_float_validator = QtGui.QDoubleValidator(0.0, sys.float_info.max, 5)
         self.group_range_min.setValidator(positive_float_validator)
 
         self.group_range_use_first_good_data = QtWidgets.QCheckBox()
-        self.group_range_use_first_good_data.setText(u"\u03BCs (From data file)")
+        self.group_range_use_first_good_data.setText("\u03BCs (From data file)")
 
         self.group_range_use_first_good_data.setChecked(True)
         self.group_range_max = QtWidgets.QLineEdit("1.0")
@@ -68,10 +70,10 @@ class GroupingTableView(QtWidgets.QWidget):
         self.group_range_max.setValidator(positive_float_validator)
 
         self.group_range_use_last_data = QtWidgets.QCheckBox()
-        self.group_range_use_last_data.setText(u"\u03BCs (From data file)")
+        self.group_range_use_last_data.setText("\u03BCs (From data file)")
         self.group_range_use_last_data.setChecked(True)
         self.group_range_to_label = QtWidgets.QLabel()
-        self.group_range_to_label.setText('to:')
+        self.group_range_to_label.setText("to:")
 
         self.group_range_layout = QtWidgets.QGridLayout()
         self.group_range_layout_min = QtWidgets.QHBoxLayout()
@@ -130,17 +132,21 @@ class GroupingTableView(QtWidgets.QWidget):
         vertical_headers.setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
         vertical_headers.setVisible(True)
 
-        self.grouping_table.horizontalHeaderItem(0).setToolTip("The name of the group :"
-                                                               "\n    - The name must be unique across all groups/pairs"
-                                                               "\n    - The name can only use digits, characters and _")
+        self.grouping_table.horizontalHeaderItem(0).setToolTip(
+            "The name of the group :"
+            "\n    - The name must be unique across all groups/pairs"
+            "\n    - The name can only use digits, characters and _"
+        )
         self.grouping_table.horizontalHeaderItem(1).setToolTip("Sum of periods to use when calculating this group.")
         self.grouping_table.horizontalHeaderItem(2).setToolTip("Whether to include this group in the analysis.")
 
-        self.grouping_table.horizontalHeaderItem(3).setToolTip("The sorted list of detectors :"
-                                                               "\n  - The list can only contain integers."
-                                                               "\n  - , is used to separate detectors or ranges."
-                                                               "\n  - \"-\" denotes a range, i,e \"1-5\" is the same as"
-                                                               " \"1,2,3,4,5\" ")
+        self.grouping_table.horizontalHeaderItem(3).setToolTip(
+            "The sorted list of detectors :"
+            "\n  - The list can only contain integers."
+            "\n  - , is used to separate detectors or ranges."
+            '\n  - "-" denotes a range, i,e "1-5" is the same as'
+            ' "1,2,3,4,5" '
+        )
         self.grouping_table.horizontalHeaderItem(4).setToolTip("The number of detectors in the group.")
 
     def num_rows(self):
@@ -156,7 +162,7 @@ class GroupingTableView(QtWidgets.QWidget):
     # ------------------------------------------------------------------------------------------------------------------
     # Adding / removing table entries
     # ------------------------------------------------------------------------------------------------------------------
-    def add_entry_to_table(self, row_entries, color = (255, 255, 255), tooltip=''):
+    def add_entry_to_table(self, row_entries, color=(255, 255, 255), tooltip=""):
         assert len(row_entries) == self.grouping_table.columnCount()
         row_position = self.grouping_table.rowCount()
         self.grouping_table.insertRow(row_position)
@@ -169,7 +175,7 @@ class GroupingTableView(QtWidgets.QWidget):
             self.grouping_table.setItem(row_position, i, table_item)
             table_item.setFlags(table_column_flags[group_table_columns[i]])
 
-            if group_table_columns[i] == 'to_analyse':
+            if group_table_columns[i] == "to_analyse":
                 if entry:
                     table_item.setCheckState(QtCore.Qt.Checked)
                 else:
@@ -180,7 +186,7 @@ class GroupingTableView(QtWidgets.QWidget):
 
     def get_selected_group_names_and_indexes(self):
         indexes = self._get_selected_row_indices()
-        return [[str(self.grouping_table.item(i, 0).text()),i] for i in indexes]
+        return [[str(self.grouping_table.item(i, 0).text()), i] for i in indexes]
 
     def remove_group_by_index(self, index):
         self.grouping_table.removeRow(index)
@@ -191,7 +197,7 @@ class GroupingTableView(QtWidgets.QWidget):
             self.grouping_table.removeRow(last_row)
 
     def enter_group_name(self):
-        new_group_name, ok = QtWidgets.QInputDialog.getText(self, 'Group Name', 'Enter name of new group:')
+        new_group_name, ok = QtWidgets.QInputDialog.getText(self, "Group Name", "Enter name of new group:")
         if ok:
             return new_group_name
 
@@ -200,7 +206,7 @@ class GroupingTableView(QtWidgets.QWidget):
     # ------------------------------------------------------------------------------------------------------------------
 
     def _context_menu_add_group_action(self, slot):
-        add_group_action = QtWidgets.QAction('Add Group', self)
+        add_group_action = QtWidgets.QAction("Add Group", self)
         if len(self._get_selected_row_indices()) > 0:
             add_group_action.setEnabled(False)
         add_group_action.triggered.connect(slot)
@@ -209,16 +215,16 @@ class GroupingTableView(QtWidgets.QWidget):
     def _context_menu_remove_group_action(self, slot):
         if len(self._get_selected_row_indices()) > 1:
             # use plural if >1 item selected
-            remove_group_action = QtWidgets.QAction('Remove Groups', self)
+            remove_group_action = QtWidgets.QAction("Remove Groups", self)
         else:
-            remove_group_action = QtWidgets.QAction('Remove Group', self)
+            remove_group_action = QtWidgets.QAction("Remove Group", self)
         if self.num_rows() == 0:
             remove_group_action.setEnabled(False)
         remove_group_action.triggered.connect(slot)
         return remove_group_action
 
     def _context_menu_add_pair_action(self, slot):
-        add_pair_action = QtWidgets.QAction('Add Pair', self)
+        add_pair_action = QtWidgets.QAction("Add Pair", self)
         if len(self._get_selected_row_indices()) != 2:
             add_pair_action.setEnabled(False)
         add_pair_action.triggered.connect(slot)
@@ -294,12 +300,12 @@ class GroupingTableView(QtWidgets.QWidget):
 
     def set_to_analyse_state(self, row, state):
         checked_state = QtCore.Qt.Checked if state is True else QtCore.Qt.Unchecked
-        item = self.get_table_item(row, inverse_group_table_columns['to_analyse'])
+        item = self.get_table_item(row, inverse_group_table_columns["to_analyse"])
         item.setCheckState(checked_state)
 
     def set_to_analyse_state_quietly(self, row, state):
         checked_state = QtCore.Qt.Checked if state is True else QtCore.Qt.Unchecked
-        item = self.get_table_item(row, inverse_group_table_columns['to_analyse'])
+        item = self.get_table_item(row, inverse_group_table_columns["to_analyse"])
         self.grouping_table.blockSignals(True)
         item.setCheckState(checked_state)
         self.grouping_table.blockSignals(False)
@@ -325,11 +331,11 @@ class GroupingTableView(QtWidgets.QWidget):
     # ------------------------------------------------------------------------------------------------------------------
 
     def disable_updates(self):
-        """Usage : """
+        """Usage :"""
         self._updating = True
 
     def enable_updates(self):
-        """Usage : """
+        """Usage :"""
         self._updating = False
 
     def disable_editing(self):

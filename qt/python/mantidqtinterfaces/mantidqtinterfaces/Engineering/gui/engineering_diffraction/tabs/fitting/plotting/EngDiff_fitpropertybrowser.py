@@ -17,7 +17,7 @@ from mantid.simpleapi import logger
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 
-BaseBrowser = import_qt('.._common', 'mantidqt.widgets', 'FitPropertyBrowser')
+BaseBrowser = import_qt(".._common", "mantidqt.widgets", "FitPropertyBrowser")
 
 
 class EngDiffFitPropertyBrowser(FitPropertyBrowser):
@@ -29,8 +29,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
     def __init__(self, canvas, toolbar_manager, parent=None):
         super(EngDiffFitPropertyBrowser, self).__init__(canvas, toolbar_manager, parent)
         # overwrite default peak with that in settings (gets init when UI opened)
-        default_peak = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
-                                   "default_peak")
+        default_peak = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "default_peak")
         self.setDefaultPeakType(default_peak)
         self.fit_notifier = GenericObservable()
         self.fit_enabled_notifier = GenericObservable()
@@ -52,9 +51,9 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         dict_str = self.getFitAlgorithmParameters()
         if dict_str:
             # evaluate string to make a dict (replace case of bool values)
-            fitprop = eval(dict_str.replace('true', 'True').replace('false', 'False'))
-            fitprop['peak_centre_params'] = self._get_center_param_names()
-            fitprop['status'] = self.getFitAlgorithmOutputStatus()
+            fitprop = eval(dict_str.replace("true", "True").replace("false", "False"))
+            fitprop["peak_centre_params"] = self._get_center_param_names()
+            fitprop["status"] = self.getFitAlgorithmOutputStatus()
             return fitprop
         else:
             # if no fit has been performed
@@ -68,17 +67,21 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         :return: dict in style of self.getFitAlgorithmParameters()
         """
         try:
-            fitprop = {'properties': {'InputWorkspace': self.workspaceName(),
-                                      'Output': self.outputName(),
-                                      'StartX': self.startX(),
-                                      'EndX': self.endX(),
-                                      'Function': self.getFunctionString(),
-                                      'ConvolveMembers': True,
-                                      'OutputCompositeMembers': True}}
+            fitprop = {
+                "properties": {
+                    "InputWorkspace": self.workspaceName(),
+                    "Output": self.outputName(),
+                    "StartX": self.startX(),
+                    "EndX": self.endX(),
+                    "Function": self.getFunctionString(),
+                    "ConvolveMembers": True,
+                    "OutputCompositeMembers": True,
+                }
+            }
             exclude = self.getExcludeRange()
             if exclude:
-                fitprop['properties']['Exclude'] = [int(s) for s in exclude.split(',')]
-            fitprop['peak_centre_params'] = self._get_center_param_names()
+                fitprop["properties"]["Exclude"] = [int(s) for s in exclude.split(",")]
+            fitprop["peak_centre_params"] = self._get_center_param_names()
             return fitprop
         except BaseException:  # The cpp passes up an 'unknown' error if getFunctionString() fails, i.e. if no fit
             return None
@@ -108,7 +111,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         self.fit_enabled_notifier.notify_subscribers(self.isFitEnabled() and self.isVisible())
 
     def ws_is_valid(self, ws_name, warn):
-        is_valid = ADS.retrieve(ws_name).getAxis(0).getUnit().caption() == 'Time-of-flight'
+        is_valid = ADS.retrieve(ws_name).getAxis(0).getUnit().caption() == "Time-of-flight"
         if not is_valid and warn:
             logger.warning(f"Workspace {ws_name} will not be available for fitting because it doesn't have units of TOF")
         return is_valid
@@ -138,8 +141,8 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         for peak_pre in peak_prefixes:
             handler = self.getPeakHandler(peak_pre)
             func_name_prefixed = handler.functionName()
-            func_name = func_name_prefixed.split('-')[1]  # separate the prefix from the function name
-            peak_center_params.append(func_name + '_' + self.getCentreParameterNameOf(peak_pre))
+            func_name = func_name_prefixed.split("-")[1]  # separate the prefix from the function name
+            peak_center_params.append(func_name + "_" + self.getCentreParameterNameOf(peak_pre))
         return peak_center_params
 
     @Slot(str)

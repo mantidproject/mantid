@@ -4,19 +4,19 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy.QtWidgets import (QDialog)  # noqa
+from qtpy.QtWidgets import QDialog  # noqa
 from mantid.kernel import Logger
+
 try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
-    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    Logger("HFIR_4Circle_Reduction").information("Using legacy ui importer")
     from mantidplot import load_ui
 
 
 class RefineUBFFTSetupDialog(QDialog):
-    """A dialog window to get the setup for refining UB matrix by FFT.
+    """A dialog window to get the setup for refining UB matrix by FFT."""
 
-    """
     def __init__(self, parent):
         """Initialization
 
@@ -29,9 +29,9 @@ class RefineUBFFTSetupDialog(QDialog):
         self.ui = load_ui(__file__, ui_path, baseinstance=self)
 
         # init widget value
-        self.ui.lineEdit_minD.setText('1.0')
-        self.ui.lineEdit_maxD.setText('40.0')
-        self.ui.lineEdit_tolerance.setText('0.15')
+        self.ui.lineEdit_minD.setText("1.0")
+        self.ui.lineEdit_maxD.setText("40.0")
+        self.ui.lineEdit_tolerance.setText("0.15")
 
         # connected to event handler
         self.ui.buttonBox.accepted.connect(self.do_ok)
@@ -56,15 +56,16 @@ class RefineUBFFTSetupDialog(QDialog):
 
         except ValueError:
             # unable to parse the value right
-            self.ui.label_message.setText('Unable to set up MinD, MaxD or Tolerance due to value error.\n'
-                                          'Either enter correct value or press "Cancel".')
+            self.ui.label_message.setText(
+                "Unable to set up MinD, MaxD or Tolerance due to value error.\n" 'Either enter correct value or press "Cancel".'
+            )
 
         else:
             # good to go?
             if min_d >= max_d:
-                self.ui.label_message.setText('MinD cannot be equal or larger than MaxD.')
-            elif tolerance <= 0. or tolerance >= 1.:
-                self.ui.label_message.setText('Tolerance cannot be negative or larger than 1.')
+                self.ui.label_message.setText("MinD cannot be equal or larger than MaxD.")
+            elif tolerance <= 0.0 or tolerance >= 1.0:
+                self.ui.label_message.setText("Tolerance cannot be negative or larger than 1.")
             else:
                 # finally good value
                 self._minD = min_d

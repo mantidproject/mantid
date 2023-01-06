@@ -11,7 +11,6 @@ import mantidqtinterfaces.Muon.GUI.Common.utilities.load_utils as load_utils
 
 
 class BrowseFileWidgetModel(object):
-
     def __init__(self, loaded_data_store=MuonLoadData(), context=None):
         # Temporary list of filenames used for load thread
         self._filenames = []
@@ -49,7 +48,7 @@ class BrowseFileWidgetModel(object):
                 failed_files += [(filename, error)]
                 continue
             if not psi_data:
-                instrument_from_workspace = ws['OutputWorkspace'][0].workspace.getInstrument().getName()
+                instrument_from_workspace = ws["OutputWorkspace"][0].workspace.getInstrument().getName()
             else:
                 # Load another instrument first
                 instrument_from_workspace = "PSI"
@@ -80,13 +79,13 @@ class BrowseFileWidgetModel(object):
         dirs = list(set(dirs))
         if dirs:
             for directory in dirs:
-                ConfigService.Instance().appendDataSearchDir(directory.encode('ascii', 'ignore'))
+                ConfigService.Instance().appendDataSearchDir(directory.encode("ascii", "ignore"))
 
     def get_data(self, *args, **kwargs):
         return self._loaded_data_store.get_data(**kwargs)
 
     def get_instrument_from_latest_run(self):
-        instrument = self._loaded_data_store.get_latest_data()['workspace']['OutputWorkspace'][0].workspace.getInstrument().getName()
+        instrument = self._loaded_data_store.get_latest_data()["workspace"]["OutputWorkspace"][0].workspace.getInstrument().getName()
         if instrument:
             return instrument
         else:

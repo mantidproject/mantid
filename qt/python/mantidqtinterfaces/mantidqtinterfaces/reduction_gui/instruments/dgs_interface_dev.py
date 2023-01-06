@@ -14,8 +14,9 @@ from reduction_gui.reduction.inelastic.dgs_reduction_script import DgsReductionS
 
 class DgsInterface(InstrumentInterface):
     """
-        Defines the widgets for direct geometry spectrometer reduction
+    Defines the widgets for direct geometry spectrometer reduction
     """
+
     # Allowed extensions for loading data files
     data_type = "Data files * (*)"
 
@@ -28,19 +29,15 @@ class DgsInterface(InstrumentInterface):
         self.scripter = DgsReductionScripter(name=name, facility=settings.facility_name)
 
         # Sample run setup
-        self.attach(SampleSetupWidget(settings = self._settings,
-                                      data_type = self.data_type))
+        self.attach(SampleSetupWidget(settings=self._settings, data_type=self.data_type))
 
         # Data corrections
-        self.attach(DataCorrectionsWidget(settings = self._settings,
-                                          data_type = self.data_type))
+        self.attach(DataCorrectionsWidget(settings=self._settings, data_type=self.data_type))
 
         # Diagnose detectors
-        self.attach(DiagnoseDetectorsWidget(settings = self._settings,
-                                            data_type = self.data_type))
+        self.attach(DiagnoseDetectorsWidget(settings=self._settings, data_type=self.data_type))
 
         # Absolute units normalisation
-        self.attach(AbsoluteUnitsWidget(settings = self._settings,
-                                        data_type = self.data_type))
+        self.attach(AbsoluteUnitsWidget(settings=self._settings, data_type=self.data_type))
 
         return

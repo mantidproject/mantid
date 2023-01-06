@@ -111,12 +111,14 @@ class QtAsyncTaskDecoratorTest(unittest.TestCase):
         task.some_task()
 
         mocked_adaptor.assert_called_with(
-            target=mock.ANY, args=mock.ANY, kwargs=mock.ANY,
+            target=mock.ANY,
+            args=mock.ANY,
+            kwargs=mock.ANY,
             error_cb=task.error_cb_slot,
             success_cb=task.success_cb_slot,
             # This is special as we have cleanup code afterwards
             finished_cb=task._internal_finished_handler,
-            run_synchronously=task._run_synchronously
+            run_synchronously=task._run_synchronously,
         )
 
 
@@ -125,12 +127,15 @@ class AsyncTaskQtAdaptorTest(unittest.TestCase):
     def test_signal_connected_to_user_cb(self, mocked_signals):
         signals_instance = mocked_signals.return_value
         cb_class = IQtAsync()
-        AsyncTaskQtAdaptor(target=lambda: None, error_cb=cb_class.error_cb_slot,
-                           finished_cb=cb_class.finished_cb_slot, success_cb=cb_class.success_cb_slot)
+        AsyncTaskQtAdaptor(
+            target=lambda: None, error_cb=cb_class.error_cb_slot, finished_cb=cb_class.finished_cb_slot, success_cb=cb_class.success_cb_slot
+        )
 
-        for signal, slot in [(signals_instance.error_signal, cb_class.error_cb_slot),
-                             (signals_instance.success_signal, cb_class.success_cb_slot),
-                             (signals_instance.finished_signal, cb_class.finished_cb_slot)]:
+        for signal, slot in [
+            (signals_instance.error_signal, cb_class.error_cb_slot),
+            (signals_instance.success_signal, cb_class.success_cb_slot),
+            (signals_instance.finished_signal, cb_class.finished_cb_slot),
+        ]:
             signal.connect.assert_called_once_with(slot, mock.ANY)
 
     def test_signal_can_handle_none_types(self, mocked_signals):
@@ -147,18 +152,19 @@ class AsyncTaskQtAdaptorTest(unittest.TestCase):
         def null_task():
             pass
 
-        fixture = AsyncTaskQtAdaptor(target=null_task, success_cb=null_task,
-                                     error_cb=null_task, finished_cb=null_task)
+        fixture = AsyncTaskQtAdaptor(target=null_task, success_cb=null_task, error_cb=null_task, finished_cb=null_task)
 
         signals_instance = mocked_signals.return_value
 
-        for callback, signal in [(fixture.error_cb, signals_instance.error_signal),
-                                 (fixture.success_cb, signals_instance.success_signal),
-                                 (fixture.finished_cb, signals_instance.finished_signal)]:
+        for callback, signal in [
+            (fixture.error_cb, signals_instance.error_signal),
+            (fixture.success_cb, signals_instance.success_signal),
+            (fixture.finished_cb, signals_instance.finished_signal),
+        ]:
             signal.emit.assert_not_called()
             callback()
             signal.emit.assert_called_once()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

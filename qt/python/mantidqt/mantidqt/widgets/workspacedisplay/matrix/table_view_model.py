@@ -14,15 +14,15 @@ from enum import Enum
 
 
 class MatrixWorkspaceTableViewModelType(Enum):
-    x = 'x'
-    y = 'y'
-    e = 'e'
-    dx = 'dx'
+    x = "x"
+    y = "y"
+    e = "e"
+    dx = "dx"
 
 
 class MatrixWorkspaceTableViewModel(QAbstractTableModel):
-    HORIZONTAL_HEADER_DISPLAY_STRING = u"{0}\n{1:0.4f}{2}"
-    HORIZONTAL_HEADER_TOOLTIP_STRING = u"index {0}\n{1} {2:0.6f}{3} (bin centre)"
+    HORIZONTAL_HEADER_DISPLAY_STRING = "{0}\n{1:0.4f}{2}"
+    HORIZONTAL_HEADER_TOOLTIP_STRING = "index {0}\n{1} {2:0.6f}{3} (bin centre)"
 
     HORIZONTAL_HEADER_DISPLAY_STRING_FOR_X_VALUES = "{0}"
     HORIZONTAL_HEADER_TOOLTIP_STRING_FOR_X_VALUES = "index {0}"
@@ -30,8 +30,8 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
     VERTICAL_HEADER_DISPLAY_STRING = "{0} {1}"
     VERTICAL_HEADER_TOOLTIP_STRING = "index {0}\nspectra no {1}"
 
-    VERTICAL_HEADER_DISPLAY_STRING_FOR_NUMERIC_AXIS = u"{0} {1:0.2f}{2}"
-    VERTICAL_HEADER_TOOLTIP_STRING_FOR_NUMERIC_AXIS = u"index {0}\nbin center {1:0.2f}{2}"
+    VERTICAL_HEADER_DISPLAY_STRING_FOR_NUMERIC_AXIS = "{0} {1:0.2f}{2}"
+    VERTICAL_HEADER_TOOLTIP_STRING_FOR_NUMERIC_AXIS = "index {0}\nbin center {1:0.2f}{2}"
 
     HORIZONTAL_BINS_VARY_DISPLAY_STRING = "{0}\nbins vary"
     HORIZONTAL_BINS_VARY_TOOLTIP_STRING = "index {0}\nbin centre value varies\nRebin to set common bins"
@@ -52,9 +52,12 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
         :param model_type: MatrixWorkspaceTableViewModelType
         :type model_type: MatrixWorkspaceTableViewModelType
         """
-        assert model_type in [MatrixWorkspaceTableViewModelType.x, MatrixWorkspaceTableViewModelType.y,
-                              MatrixWorkspaceTableViewModelType.e, MatrixWorkspaceTableViewModelType.dx], \
-            "The Model type must be either X, Y, E or DX."
+        assert model_type in [
+            MatrixWorkspaceTableViewModelType.x,
+            MatrixWorkspaceTableViewModelType.y,
+            MatrixWorkspaceTableViewModelType.e,
+            MatrixWorkspaceTableViewModelType.dx,
+        ], "The Model type must be either X, Y, E or DX."
 
         super(MatrixWorkspaceTableViewModel, self).__init__()
 
@@ -101,8 +104,7 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
             axis = self.ws.getAxis(axis_index)
             if role == Qt.DisplayRole:
                 if not axis.isNumeric():
-                    return self.VERTICAL_HEADER_DISPLAY_STRING.format(
-                        section, axis.label(section))
+                    return self.VERTICAL_HEADER_DISPLAY_STRING.format(section, axis.label(section))
                 else:
                     display_value, unit = _numeric_axis_value_unit(axis)
                     return self.VERTICAL_HEADER_DISPLAY_STRING_FOR_NUMERIC_AXIS.format(section, display_value, unit)
@@ -152,8 +154,7 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
             return self.HORIZONTAL_HEADER_DISPLAY_STRING.format(section, bin_centre_value, unit.symbol().utf8())
         else:
             # format for the tooltip
-            return self.HORIZONTAL_HEADER_TOOLTIP_STRING.format(section, unit.caption(), bin_centre_value,
-                                                                unit.symbol().utf8())
+            return self.HORIZONTAL_HEADER_TOOLTIP_STRING.format(section, unit.caption(), bin_centre_value, unit.symbol().utf8())
 
     def headerData(self, section, orientation, role=None):
         if not (role == Qt.DisplayRole or role == Qt.ToolTipRole):

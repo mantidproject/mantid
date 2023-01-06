@@ -17,7 +17,6 @@ import numpy as np
 
 @start_qapplication
 class PlottingCanvasViewTest(unittest.TestCase):
-
     def setUp(self):
         self.context = PlottingContext()
         self.settings = self.context.settings
@@ -32,7 +31,7 @@ class PlottingCanvasViewTest(unittest.TestCase):
         self.assertTrue(self.view.close())
 
     def make_plot_side_effect(self, _unused):
-        self._count +=1
+        self._count += 1
         return self._count
 
     def test_start_up(self):
@@ -40,7 +39,7 @@ class PlottingCanvasViewTest(unittest.TestCase):
 
     def test_create_new_plot_canvas(self):
         num_axes = 5
-        self.view.get_plot_fig = mock.Mock(return_value = (mock.Mock(), mock.Mock()))
+        self.view.get_plot_fig = mock.Mock(return_value=(mock.Mock(), mock.Mock()))
         self.settings.set_condensed(False)
         self.view.fig.subplots_adjust = mock.Mock()
 
@@ -50,7 +49,7 @@ class PlottingCanvasViewTest(unittest.TestCase):
 
     def test_create_new_plot_canvas_condense(self):
         num_axes = 5
-        self.view.get_plot_fig = mock.Mock(return_value = (mock.Mock(), mock.Mock()))
+        self.view.get_plot_fig = mock.Mock(return_value=(mock.Mock(), mock.Mock()))
         self.settings.set_condensed(True)
         self.view.fig.subplots_adjust = mock.Mock()
 
@@ -60,7 +59,7 @@ class PlottingCanvasViewTest(unittest.TestCase):
         self.assertEqual(self.view.fig.subplots_adjust.call_count, 1)
 
     def test_add_workspace_to_plot(self):
-        self.view._make_plot = mock.Mock(side_effect = self.make_plot_side_effect)
+        self.view._make_plot = mock.Mock(side_effect=self.make_plot_side_effect)
         self.view._number_of_axes = 4
         self.settings.set_condensed(False)
         self.view.hide_axis = mock.Mock()
@@ -71,7 +70,7 @@ class PlottingCanvasViewTest(unittest.TestCase):
         self.assertEqual(self.view.hide_axis.call_count, 0)
 
     def test_add_workspace_to_plot_condensed(self):
-        self.view._make_plot = mock.Mock(side_effect = self.make_plot_side_effect)
+        self.view._make_plot = mock.Mock(side_effect=self.make_plot_side_effect)
         self.view._number_of_axes = 4
         self.settings.set_condensed(True)
         self.view.hide_axis = mock.Mock()
@@ -84,8 +83,8 @@ class PlottingCanvasViewTest(unittest.TestCase):
             self.view.hide_axis.assert_any_call(j, 2, 2)
 
     def test_add_workspace_to_plot_condensed_with_empty(self):
-        self.view._make_plot = mock.Mock(side_effect = self.make_plot_side_effect)
-        self.view._number_of_axes = 7 # 2 empty
+        self.view._make_plot = mock.Mock(side_effect=self.make_plot_side_effect)
+        self.view._number_of_axes = 7  # 2 empty
         self.settings.set_condensed(True)
         self.view.hide_axis = mock.Mock()
 
@@ -101,13 +100,13 @@ class PlottingCanvasViewTest(unittest.TestCase):
 
     def setup_axis_mock(self):
         ax = mock.Mock()
-        ax.get_xticks = mock.Mock(return_value=np.array([0,1,2,3,4]))
+        ax.get_xticks = mock.Mock(return_value=np.array([0, 1, 2, 3, 4]))
         ax.set_xtixklabels = mock.Mock()
         ax.xaxis = mock.Mock()
         ax.xaxis.label = mock.Mock()
         ax.xaxis.label.set_visible = mock.Mock()
 
-        ax.get_yticks = mock.Mock(return_value=np.array([0,1,2,3,4]))
+        ax.get_yticks = mock.Mock(return_value=np.array([0, 1, 2, 3, 4]))
         ax.set_ytixklabels = mock.Mock()
         ax.yaxis = mock.Mock()
         ax.yaxis.label = mock.Mock()
@@ -122,7 +121,7 @@ class PlottingCanvasViewTest(unittest.TestCase):
         ax = self.setup_axis_mock()
         n_row = 2
         n_col = 2
-        axes = [ax for j in range(n_row*n_col)]
+        axes = [ax for j in range(n_row * n_col)]
 
         self.view.fig.axes = axes
         # bottom left
@@ -139,7 +138,7 @@ class PlottingCanvasViewTest(unittest.TestCase):
         ax = self.setup_axis_mock()
         n_row = 2
         n_col = 2
-        axes = [ax for j in range(n_row*n_col)]
+        axes = [ax for j in range(n_row * n_col)]
 
         self.view.fig.axes = axes
         # top left
@@ -156,7 +155,7 @@ class PlottingCanvasViewTest(unittest.TestCase):
         ax = self.setup_axis_mock()
         n_row = 2
         n_col = 2
-        axes = [ax for j in range(n_row*n_col)]
+        axes = [ax for j in range(n_row * n_col)]
 
         self.view.fig.axes = axes
         # bottom right
@@ -173,7 +172,7 @@ class PlottingCanvasViewTest(unittest.TestCase):
         ax = self.setup_axis_mock()
         n_row = 2
         n_col = 2
-        axes = [ax for j in range(n_row*n_col)]
+        axes = [ax for j in range(n_row * n_col)]
 
         self.view.fig.axes = axes
         # top right
@@ -190,7 +189,7 @@ class PlottingCanvasViewTest(unittest.TestCase):
         ax = self.setup_axis_mock()
         n_row = 3
         n_col = 3
-        axes = [ax for j in range(n_row*n_col)]
+        axes = [ax for j in range(n_row * n_col)]
 
         self.view.fig.axes = axes
         # last row, middle tile
@@ -207,7 +206,7 @@ class PlottingCanvasViewTest(unittest.TestCase):
         ax = self.setup_axis_mock()
         n_row = 3
         n_col = 3
-        axes = [ax for j in range(n_row*n_col)]
+        axes = [ax for j in range(n_row * n_col)]
 
         self.view.fig.axes = axes
         # middle row and middle col
@@ -224,7 +223,7 @@ class PlottingCanvasViewTest(unittest.TestCase):
         ax = self.setup_axis_mock()
         n_row = 3
         n_col = 3
-        axes = [ax for j in range(n_row*n_col)]
+        axes = [ax for j in range(n_row * n_col)]
 
         self.view.fig.axes = axes
         # middle row and right subplot
@@ -241,8 +240,8 @@ class PlottingCanvasViewTest(unittest.TestCase):
         ax = self.setup_axis_mock()
         n_row = 3
         n_col = 3
-        self.view._number_of_axes = n_row*n_col
-        axes = [ax for j in range(n_row*n_col)]
+        self.view._number_of_axes = n_row * n_col
+        axes = [ax for j in range(n_row * n_col)]
         self.view.fig.axes = axes
 
         self.view.set_title(0, "test")
@@ -253,8 +252,8 @@ class PlottingCanvasViewTest(unittest.TestCase):
         ax = self.setup_axis_mock()
         n_row = 3
         n_col = 3
-        self.view._number_of_axes = n_row*n_col
-        axes = [ax for j in range(n_row*n_col)]
+        self.view._number_of_axes = n_row * n_col
+        axes = [ax for j in range(n_row * n_col)]
         self.view.fig.axes = axes
 
         self.view.set_title(100, "test")
@@ -264,8 +263,8 @@ class PlottingCanvasViewTest(unittest.TestCase):
         ax = self.setup_axis_mock()
         n_row = 3
         n_col = 3
-        self.view._number_of_axes = n_row*n_col
-        axes = [ax for j in range(n_row*n_col)]
+        self.view._number_of_axes = n_row * n_col
+        axes = [ax for j in range(n_row * n_col)]
         self.view.fig.axes = axes
         self.settings.set_condensed(True)
         self.view.set_title(1, "test")
@@ -330,10 +329,10 @@ class PlottingCanvasViewTest(unittest.TestCase):
         shade_region.remove.assert_called_once_with()
 
     def test_add_shaded_region(self):
-        self.view.fig.axes = [1,2]
-        x_data = [0,1,2,3]
-        y1_data = [1,2,3,4]
-        y2_data = [ 4,3,2,1]
+        self.view.fig.axes = [1, 2]
+        x_data = [0, 1, 2, 3]
+        y1_data = [1, 2, 3, 4]
+        y2_data = [4, 3, 2, 1]
         axis = 1
         name = "unit test"
 
@@ -348,10 +347,10 @@ class PlottingCanvasViewTest(unittest.TestCase):
         self.assertEqual(self.view._shaded_regions[name].y2_values, y2_data)
 
     def test_update_shaded_region(self):
-        self.view.fig.axes = [1,2]
-        x_data = [0,1,2,3]
-        y1_data = [1,2,3,4]
-        y2_data = [ 4,3,2,1]
+        self.view.fig.axes = [1, 2]
+        x_data = [0, 1, 2, 3]
+        y1_data = [1, 2, 3, 4]
+        y2_data = [4, 3, 2, 1]
         axis = 1
         name = "unit test"
 
@@ -359,9 +358,9 @@ class PlottingCanvasViewTest(unittest.TestCase):
 
         self.view.add_shaded_region(name, axis, x_data, y1_data, y2_data)
 
-        new_x = [5,4,3,2,1]
-        new_y1 = [4,2,0,-2,-4]
-        new_y2 = [1,2,3,4,5]
+        new_x = [5, 4, 3, 2, 1]
+        new_y1 = [4, 2, 0, -2, -4]
+        new_y2 = [1, 2, 3, 4, 5]
 
         self.view.add_shaded_region(name, axis, new_x, new_y1, new_y2)
         self.assertEqual(list(self.view._shaded_regions.keys()), [name])
@@ -371,5 +370,5 @@ class PlottingCanvasViewTest(unittest.TestCase):
         self.assertEqual(self.view._shaded_regions[name].y2_values, new_y2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

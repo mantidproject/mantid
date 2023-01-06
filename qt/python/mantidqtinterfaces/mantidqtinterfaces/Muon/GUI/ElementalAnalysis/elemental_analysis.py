@@ -49,8 +49,7 @@ def is_string(value):
 def gen_name(element, name):
     msg = None
     if not is_string(element):
-        msg = "'{}' expected element to be 'str', found '{}' instead".format(
-            str(element), type(element))
+        msg = "'{}' expected element to be 'str', found '{}' instead".format(str(element), type(element))
     if not is_string(name):
         msg = "'{}' expected name to be 'str', found '{}' instead".format(str(name), type(name))
 
@@ -63,9 +62,9 @@ def gen_name(element, name):
 
 
 class ElementalAnalysisGui(QtWidgets.QMainWindow):
-    BLUE = 'C0'
-    ORANGE = 'C1'
-    GREEN = 'C2'
+    BLUE = "C0"
+    ORANGE = "C1"
+    GREEN = "C2"
 
     def __init__(self, parent=None, window_flags=None):
         super(ElementalAnalysisGui, self).__init__(parent)
@@ -126,7 +125,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
         # plotting
         self.plot_window = None
-        self.num_colors = len(mpl.rcParams['axes.prop_cycle'])
+        self.num_colors = len(mpl.rcParams["axes.prop_cycle"])
         self.used_colors = {}
 
         # layout
@@ -159,9 +158,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         if element in self.used_colors:
             return self.used_colors[element]
 
-        occurrences = [
-            list(self.used_colors.values()).count('C{}'.format(i)) for i in range(self.num_colors)
-        ]
+        occurrences = [list(self.used_colors.values()).count("C{}".format(i)) for i in range(self.num_colors)]
 
         color_index = occurrences.index(min(occurrences))
 
@@ -320,7 +317,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
     def add_detector_to_plot(self, detector, name):
         self.plotting.add_subplot(detector)
         ws = mantid.mtd[name]
-        ws.setYUnit('Counts')
+        ws.setYUnit("Counts")
         # find correct detector number from the workspace group run
         if self.lines.total.isChecked():
             self.plotting.plot(detector, ws.name(), spec_num=spectrum_index["Total"], color=self.BLUE)
@@ -410,9 +407,10 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
     def _reset_data_file_warning_and_action(self):
         message_box.warning(
-            'The file does not contain correctly formatted data, resetting to default data file.'
+            "The file does not contain correctly formatted data, resetting to default data file."
             'See "https://docs.mantidproject.org/nightly/interfaces/muon/'
-            'Muon%20Elemental%20Analysis.html" for more information.')
+            'Muon%20Elemental%20Analysis.html" for more information.'
+        )
         self.ptable.set_peak_datafile(None)
         self._generate_element_widgets()
 
@@ -463,14 +461,14 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             return
 
         # Plot the correct line type on all open subplots
-        if _type == 'Total':
+        if _type == "Total":
             color = self.BLUE
-        elif _type == 'Prompt':
+        elif _type == "Prompt":
             color = self.ORANGE
         else:
             color = self.GREEN
         for subplot in self.plotting.get_subplots():
-            name = '{}; Detector {}'.format(run, subplot[-1])
+            name = "{}; Detector {}".format(run, subplot[-1])
             ws = mantid.mtd[name]
             self.plotting.plot(subplot, ws.name(), spec_num=spectrum_index[_type], color=color)
 
@@ -481,7 +479,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
         # Remove the correct line type on all open subplots
         for subplot in self.plotting.get_subplots():
-            name = '{}; Detector {}'.format(run, subplot[-1])
+            name = "{}; Detector {}".format(run, subplot[-1])
             ws = mantid.mtd[name]
             self.plotting.remove_line(subplot, ws.name(), spec=spectrum_index[_type])
 
@@ -490,11 +488,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
     def uncheck_detectors_if_no_line_plotted(self):
         last_run = self.load_widget.last_loaded_run()
-        if not any([
-            self.lines.total.isChecked(),
-            self.lines.prompt.isChecked(),
-            self.lines.delayed.isChecked()
-        ]):
+        if not any([self.lines.total.isChecked(), self.lines.prompt.isChecked(), self.lines.delayed.isChecked()]):
             for i, detector in enumerate(self.detectors.detectors):
                 if i < self.load_widget.get_run_num_loaded_detectors(last_run):
                     detector.setEnabled(False)
@@ -505,15 +499,15 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             return
 
         for line in removed_lines:
-            if 'Total' in line:
+            if "Total" in line:
                 self.lines.total.blockSignals(True)
                 self.lines.total.setChecked(False)
                 self.lines.total.blockSignals(False)
-            if 'Prompt' in line:
+            if "Prompt" in line:
                 self.lines.prompt.blockSignals(True)
                 self.lines.prompt.setChecked(False)
                 self.lines.prompt.blockSignals(False)
-            if 'Delayed' in line:
+            if "Delayed" in line:
                 self.lines.delayed.blockSignals(True)
                 self.lines.delayed.setChecked(False)
                 self.lines.delayed.blockSignals(False)
@@ -523,22 +517,22 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
     def line_total_changed(self, line_total):
         self.lines.total.setChecked(line_total.isChecked())
         if line_total.isChecked():
-            self.add_line_by_type(self.load_widget.last_loaded_run(), 'Total')
+            self.add_line_by_type(self.load_widget.last_loaded_run(), "Total")
         else:
-            self.remove_line_type(self.load_widget.last_loaded_run(), 'Total')
+            self.remove_line_type(self.load_widget.last_loaded_run(), "Total")
 
     # Line prompt
     def line_prompt_changed(self, line_prompt):
         self.lines.prompt.setChecked(line_prompt.isChecked())
         if line_prompt.isChecked():
-            self.add_line_by_type(self.load_widget.last_loaded_run(), 'Prompt')
+            self.add_line_by_type(self.load_widget.last_loaded_run(), "Prompt")
         else:
-            self.remove_line_type(self.load_widget.last_loaded_run(), 'Prompt')
+            self.remove_line_type(self.load_widget.last_loaded_run(), "Prompt")
 
     # Line delayed
     def line_delayed_changed(self, line_delayed):
         self.lines.delayed.setChecked(line_delayed.isChecked())
         if line_delayed.isChecked():
-            self.add_line_by_type(self.load_widget.last_loaded_run(), 'Delayed')
+            self.add_line_by_type(self.load_widget.last_loaded_run(), "Delayed")
         else:
-            self.remove_line_type(self.load_widget.last_loaded_run(), 'Delayed')
+            self.remove_line_type(self.load_widget.last_loaded_run(), "Delayed")

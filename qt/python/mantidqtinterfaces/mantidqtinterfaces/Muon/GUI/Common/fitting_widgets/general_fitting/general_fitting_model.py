@@ -8,11 +8,14 @@ from mantid.api import AnalysisDataService, IFunction, MultiDomainFunction
 from mantid.simpleapi import RenameWorkspace, CopyLogs
 
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
-from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import (create_covariance_matrix_name,
-                                                                            create_fitted_workspace_name,
-                                                                            create_multi_domain_fitted_workspace_name,
-                                                                            create_parameter_table_name, get_group_or_pair_from_name,
-                                                                            get_run_numbers_as_string_from_workspace_name)
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import (
+    create_covariance_matrix_name,
+    create_fitted_workspace_name,
+    create_multi_domain_fitted_workspace_name,
+    create_parameter_table_name,
+    get_group_or_pair_from_name,
+    get_run_numbers_as_string_from_workspace_name,
+)
 from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.general_fitting_context import GeneralFittingContext
 from mantidqtinterfaces.Muon.GUI.Common.contexts.muon_context import MuonContext
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel
@@ -114,8 +117,7 @@ class GeneralFittingModel(BasicFittingModel):
         """Attempt to update the function name automatically."""
         if self.fitting_context.function_name_auto_update:
             if self.fitting_context.simultaneous_fitting_mode:
-                self.fitting_context.function_name = self._get_function_name(
-                    self.fitting_context.simultaneous_fit_function)
+                self.fitting_context.function_name = self._get_function_name(self.fitting_context.simultaneous_fit_function)
             else:
                 super().automatically_update_function_name()
 
@@ -158,8 +160,9 @@ class GeneralFittingModel(BasicFittingModel):
     def save_current_fit_function_to_undo_data(self) -> None:
         """Saves the current simultaneous fit function, and the single fit functions defined in the base class."""
         if self.fitting_context.simultaneous_fitting_mode:
-            self.fitting_context.simultaneous_fit_functions_for_undo.append(self._clone_function(
-                self.fitting_context.simultaneous_fit_function))
+            self.fitting_context.simultaneous_fit_functions_for_undo.append(
+                self._clone_function(self.fitting_context.simultaneous_fit_function)
+            )
             self.fitting_context.simultaneous_fit_statuses_for_undo.append(self.current_fit_status)
             self.fitting_context.simultaneous_chi_squared_for_undo.append(self.current_chi_squared)
             self.fitting_context.global_parameters_for_undo.append(self.fitting_context.global_parameters)
@@ -223,8 +226,9 @@ class GeneralFittingModel(BasicFittingModel):
 
     def _create_global_tie_string(self, index: int, global_parameter: str) -> str:
         """Create a string to represent the tying of a global parameter."""
-        ties = ["f" + str(i) + "." + global_parameter
-                for i in range(self.fitting_context.simultaneous_fit_function.nFunctions()) if i != index]
+        ties = [
+            "f" + str(i) + "." + global_parameter for i in range(self.fitting_context.simultaneous_fit_function.nFunctions()) if i != index
+        ]
         ties.append("f" + str(index) + "." + global_parameter)
         return "=".join(ties)
 
@@ -303,33 +307,38 @@ class GeneralFittingModel(BasicFittingModel):
         """Extract runs from the output workspace of the data context."""
         instrument = self.context.data_context.instrument
         workspace_list = self.context.data_context.current_data["OutputWorkspace"]
-        return [get_run_numbers_as_string_from_workspace_name(workspace.workspace_name, instrument)
-                for workspace in workspace_list]
+        return [get_run_numbers_as_string_from_workspace_name(workspace.workspace_name, instrument) for workspace in workspace_list]
 
     def perform_fit(self) -> tuple:
         """Performs a single or simultaneous fit and returns the resulting function, status and chi squared."""
         if self.fitting_context.simultaneous_fitting_mode:
-            parameters = self._get_parameters_for_simultaneous_fit(self.fitting_context.dataset_names,
-                                                                   self.fitting_context.simultaneous_fit_function)
+            parameters = self._get_parameters_for_simultaneous_fit(
+                self.fitting_context.dataset_names, self.fitting_context.simultaneous_fit_function
+            )
             return self._do_simultaneous_fit(parameters, self.fitting_context.global_parameters)
         else:
             return super().perform_fit()
 
     def _do_simultaneous_fit(self, parameters: dict, global_parameters: list) -> tuple:
         """Performs a simultaneous fit and returns the resulting function, status and chi squared."""
-        output_group_workspace, parameter_table, function, fit_status, chi_squared, covariance_matrix = \
-            self._do_simultaneous_fit_and_return_workspace_parameters_and_fit_function(parameters)
+        (
+            output_group_workspace,
+            parameter_table,
+            function,
+            fit_status,
+            chi_squared,
+            covariance_matrix,
+        ) = self._do_simultaneous_fit_and_return_workspace_parameters_and_fit_function(parameters)
 
-        self._add_simultaneous_fit_results_to_ADS_and_context(parameters["InputWorkspace"], parameter_table,
-                                                              output_group_workspace, covariance_matrix,
-                                                              global_parameters)
+        self._add_simultaneous_fit_results_to_ADS_and_context(
+            parameters["InputWorkspace"], parameter_table, output_group_workspace, covariance_matrix, global_parameters
+        )
         return function, fit_status, chi_squared
 
     def _do_simultaneous_fit_and_return_workspace_parameters_and_fit_function(self, parameters: dict) -> tuple:
         """Performs a simultaneous fit and returns the resulting function, status and chi squared."""
         alg = self._create_fit_algorithm()
-        output_workspace, parameter_table, function, fit_status, chi_squared, covariance_matrix = run_simultaneous_Fit(
-            parameters, alg)
+        output_workspace, parameter_table, function, fit_status, chi_squared, covariance_matrix = run_simultaneous_Fit(parameters, alg)
 
         self._copy_logs(parameters["InputWorkspace"], output_workspace)
         return output_workspace, parameter_table, function, fit_status, chi_squared, covariance_matrix
@@ -357,14 +366,15 @@ class GeneralFittingModel(BasicFittingModel):
             params["Exclude"] = list(zip(self.fitting_context.exclude_start_xs, self.fitting_context.exclude_end_xs))
         return params
 
-    def _add_simultaneous_fit_results_to_ADS_and_context(self, input_workspace_names: list, parameter_table,
-                                                         output_group_workspace, covariance_matrix,
-                                                         global_parameters: list) -> None:
+    def _add_simultaneous_fit_results_to_ADS_and_context(
+        self, input_workspace_names: list, parameter_table, output_group_workspace, covariance_matrix, global_parameters: list
+    ) -> None:
         """Adds the results of a simultaneous fit to the ADS and fitting context."""
         function_name = self.fitting_context.function_name
 
-        output_workspace_wraps, directory = self._create_output_workspace_wraps(input_workspace_names, function_name,
-                                                                                output_group_workspace)
+        output_workspace_wraps, directory = self._create_output_workspace_wraps(
+            input_workspace_names, function_name, output_group_workspace
+        )
 
         parameter_table_name, _ = create_parameter_table_name(input_workspace_names[0] + "+ ...", function_name)
         covariance_matrix_name, _ = create_covariance_matrix_name(input_workspace_names[0] + "+ ...", function_name)
@@ -377,16 +387,27 @@ class GeneralFittingModel(BasicFittingModel):
         # the directory returns with a slash, so lets remove it
         self._add_workspaces_to_group([parameter_table_name, covariance_matrix_name], directory[:-1])
 
-        self._add_fit_to_context(input_workspace_names, output_workspace_wraps, parameter_workspace_wrap,
-                                 covariance_workspace_wrap, global_parameters)
+        self._add_fit_to_context(
+            input_workspace_names, output_workspace_wraps, parameter_workspace_wrap, covariance_workspace_wrap, global_parameters
+        )
 
-    def _add_fit_to_context(self, input_workspace_names: list, output_workspaces: list,
-                            parameter_workspace: StaticWorkspaceWrapper, covariance_workspace: StaticWorkspaceWrapper,
-                            global_parameters: list = None) -> None:
+    def _add_fit_to_context(
+        self,
+        input_workspace_names: list,
+        output_workspaces: list,
+        parameter_workspace: StaticWorkspaceWrapper,
+        covariance_workspace: StaticWorkspaceWrapper,
+        global_parameters: list = None,
+    ) -> None:
         """Adds the results of a single or simultaneous fit to the context."""
-        self.fitting_context.add_fit_from_values(input_workspace_names, self.fitting_context.function_name,
-                                                 output_workspaces, parameter_workspace, covariance_workspace,
-                                                 global_parameters)
+        self.fitting_context.add_fit_from_values(
+            input_workspace_names,
+            self.fitting_context.function_name,
+            output_workspaces,
+            parameter_workspace,
+            covariance_workspace,
+            global_parameters,
+        )
 
     def _get_names_in_group_workspace(self, group_name: str) -> list:
         """Returns the names of the workspaces existing within a group workspace."""
@@ -398,33 +419,33 @@ class GeneralFittingModel(BasicFittingModel):
     def _create_output_workspace_wraps(self, input_workspace_names: list, function_name: str, output_group_workspace) -> tuple:
         """Returns a list of StaticWorkspaceWrapper objects containing the fitted output workspaces"""
         if self.fitting_context.number_of_datasets > 1:
-            output_group_name, directory = create_multi_domain_fitted_workspace_name(input_workspace_names[0],
-                                                                                     function_name)
-            output_workspace_wraps = self._create_output_workspace_wraps_for_a_multi_domain_fit(input_workspace_names,
-                                                                                                output_group_workspace,
-                                                                                                output_group_name)
+            output_group_name, directory = create_multi_domain_fitted_workspace_name(input_workspace_names[0], function_name)
+            output_workspace_wraps = self._create_output_workspace_wraps_for_a_multi_domain_fit(
+                input_workspace_names, output_group_workspace, output_group_name
+            )
         else:
             output_workspace_name, directory = create_fitted_workspace_name(input_workspace_names[0], function_name)
             self._add_workspace_to_ADS(output_group_workspace, output_workspace_name, directory)
             output_workspace_wraps = [StaticWorkspaceWrapper(output_workspace_name, retrieve_ws(output_workspace_name))]
         return output_workspace_wraps, directory
 
-    def _create_output_workspace_wraps_for_a_multi_domain_fit(self, input_workspace_names: list, output_group_workspace,
-                                                              output_group_name: str) -> list:
+    def _create_output_workspace_wraps_for_a_multi_domain_fit(
+        self, input_workspace_names: list, output_group_workspace, output_group_name: str
+    ) -> list:
         """Returns a list of StaticWorkspaceWrapper objects containing the fitted output workspaces for many domains."""
         self._add_workspace_to_ADS(output_group_workspace, output_group_name, "")
-        output_workspace_names = self._rename_members_of_fitted_workspace_group(input_workspace_names,
-                                                                                output_group_name)
+        output_workspace_names = self._rename_members_of_fitted_workspace_group(input_workspace_names, output_group_name)
 
-        return [StaticWorkspaceWrapper(workspace_name, retrieve_ws(workspace_name))
-                for workspace_name in output_workspace_names]
+        return [StaticWorkspaceWrapper(workspace_name, retrieve_ws(workspace_name)) for workspace_name in output_workspace_names]
 
     def _rename_members_of_fitted_workspace_group(self, input_workspace_names: list, group_workspace: str) -> list:
         """Renames the output workspaces within a group workspace. The Fit algorithm returns an output group when
         doing a fit over multiple domains (i.e. for a simultaneous fit)."""
         self.context.ads_observer.observeRename(False)
-        output_names = [self._rename_workspace(input_name, workspace_name) for input_name, workspace_name in
-                        zip(input_workspace_names, self._get_names_in_group_workspace(group_workspace))]
+        output_names = [
+            self._rename_workspace(input_name, workspace_name)
+            for input_name, workspace_name in zip(input_workspace_names, self._get_names_in_group_workspace(group_workspace))
+        ]
         self.context.ads_observer.observeRename(True)
 
         return output_names
@@ -432,7 +453,7 @@ class GeneralFittingModel(BasicFittingModel):
     def _rename_workspace(self, input_name: str, workspace_name: str) -> str:
         """Renames a resulting workspace from a simultaneous fit."""
         new_name, _ = create_fitted_workspace_name(input_name, self.fitting_context.function_name)
-        new_name += '; Simultaneous'
+        new_name += "; Simultaneous"
         RenameWorkspace(InputWorkspace=workspace_name, OutputWorkspace=new_name)
         return new_name
 
@@ -460,20 +481,22 @@ class GeneralFittingModel(BasicFittingModel):
         """Returns the runs and group/pairs for the selected data in simultaneous fit by runs mode."""
         runs = self._get_selected_runs()
         groups_and_pairs = [get_group_or_pair_from_name(name) for name in self.fitting_context.dataset_names]
-        workspace_names = ["/".join(self.get_fit_workspace_names_from_groups_and_runs([run], groups_and_pairs))
-                           for run in runs]
-        return self._get_datasets_containing_string(display_type, workspace_names, runs,
-                                                    [";".join(groups_and_pairs)] * len(runs))
+        workspace_names = ["/".join(self.get_fit_workspace_names_from_groups_and_runs([run], groups_and_pairs)) for run in runs]
+        return self._get_datasets_containing_string(display_type, workspace_names, runs, [";".join(groups_and_pairs)] * len(runs))
 
     def _get_runs_groups_and_pairs_for_simultaneous_fit_by_groups_and_pairs(self, display_type: str):
         """Returns the runs and group/pairs for the selected data in simultaneous fit by group/pairs mode."""
-        runs = [get_run_numbers_as_string_from_workspace_name(name, self.context.data_context.instrument)
-                for name in self.fitting_context.dataset_names]
+        runs = [
+            get_run_numbers_as_string_from_workspace_name(name, self.context.data_context.instrument)
+            for name in self.fitting_context.dataset_names
+        ]
         groups_and_pairs = self._get_selected_groups_and_pairs()
-        workspace_names = ["/".join(self.get_fit_workspace_names_from_groups_and_runs(runs, [group_and_pair]))
-                           for group_and_pair in groups_and_pairs]
-        return self._get_datasets_containing_string(display_type, workspace_names,
-                                                    [";".join(runs)] * len(groups_and_pairs), groups_and_pairs)
+        workspace_names = [
+            "/".join(self.get_fit_workspace_names_from_groups_and_runs(runs, [group_and_pair])) for group_and_pair in groups_and_pairs
+        ]
+        return self._get_datasets_containing_string(
+            display_type, workspace_names, [";".join(runs)] * len(groups_and_pairs), groups_and_pairs
+        )
 
     def get_all_fit_functions(self) -> list:
         """Returns all the fit functions for the current fitting mode."""
@@ -512,11 +535,15 @@ class GeneralFittingModel(BasicFittingModel):
             workspaces = self._flatten_workspace_names(workspaces)
         return self._perform_sequential_fit_using_func(fitting_func, workspaces, parameter_values, use_initial_values)
 
-    def _do_sequential_simultaneous_fits(self, row_index: int, workspace_names: list, parameter_values: list,
-                                         functions: list, use_initial_values: bool = False):
+    def _do_sequential_simultaneous_fits(
+        self, row_index: int, workspace_names: list, parameter_values: list, functions: list, use_initial_values: bool = False
+    ):
         """Performs a number of simultaneous fits, sequentially."""
-        simultaneous_function = functions[row_index - 1].clone() if not use_initial_values and row_index >= 1 else \
-            self._get_simultaneous_function_with_parameters(parameter_values)
+        simultaneous_function = (
+            functions[row_index - 1].clone()
+            if not use_initial_values and row_index >= 1
+            else self._get_simultaneous_function_with_parameters(parameter_values)
+        )
 
         params = self._get_parameters_for_simultaneous_fit(workspace_names, simultaneous_function)
 
@@ -561,8 +588,9 @@ class GeneralFittingModel(BasicFittingModel):
         else:
             super()._update_fit_statuses_and_chi_squared_after_sequential_fit(workspaces, fit_statuses, chi_squared_list)
 
-    def _update_fit_statuses_and_chi_squared_for_simultaneous_mode(self, workspaces: list, fit_statuses: list,
-                                                                   chi_squared_list: list) -> None:
+    def _update_fit_statuses_and_chi_squared_for_simultaneous_mode(
+        self, workspaces: list, fit_statuses: list, chi_squared_list: list
+    ) -> None:
         """Updates the fit statuses and chi squared after a sequential fit when in simultaneous fit mode."""
         for fit_index, workspace_names in enumerate(workspaces):
             if self._are_same_workspaces_as_the_datasets(workspace_names):

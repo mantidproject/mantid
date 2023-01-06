@@ -10,13 +10,13 @@ from unittest import mock
 from mantid.api import FrameworkManager, FunctionFactory
 
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_fitting_model import TFAsymmetryFittingModel
-from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_fitting_presenter import \
-    TFAsymmetryFittingPresenter
+from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_fitting_presenter import (
+    TFAsymmetryFittingPresenter,
+)
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_fitting_view import TFAsymmetryFittingView
 
 
 class TFAsymmetryFittingPresenterTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         FrameworkManager.Instance()
@@ -259,8 +259,7 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
 
         self.presenter.update_fit_function_in_model(self.fit_function)
 
-        self.model.update_tf_asymmetry_single_fit_function.assert_called_once_with(self.model.current_dataset_index,
-                                                                                   self.fit_function)
+        self.model.update_tf_asymmetry_single_fit_function.assert_called_once_with(self.model.current_dataset_index, self.fit_function)
 
     def test_that_handle_sequential_fit_finished_will_update_the_fit_functions_and_statuses_in_the_view_and_model(self):
         self.presenter.update_fit_function_in_view_from_model = mock.Mock()
@@ -277,13 +276,11 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         # Mock the properties of the view
         self.mock_view_current_dataset_index = mock.PropertyMock(return_value=self.current_dataset_index)
         type(self.view).current_dataset_index = self.mock_view_current_dataset_index
-        self.mock_view_current_dataset_name = mock.PropertyMock(return_value=
-                                                                self.dataset_names[self.current_dataset_index])
+        self.mock_view_current_dataset_name = mock.PropertyMock(return_value=self.dataset_names[self.current_dataset_index])
         type(self.view).current_dataset_name = self.mock_view_current_dataset_name
         self.mock_view_simultaneous_fit_by = mock.PropertyMock(return_value=self.simultaneous_fit_by)
         type(self.view).simultaneous_fit_by = self.mock_view_simultaneous_fit_by
-        self.mock_view_simultaneous_fit_by_specifier = mock.PropertyMock(return_value=
-                                                                         self.simultaneous_fit_by_specifier)
+        self.mock_view_simultaneous_fit_by_specifier = mock.PropertyMock(return_value=self.simultaneous_fit_by_specifier)
         type(self.view).simultaneous_fit_by_specifier = self.mock_view_simultaneous_fit_by_specifier
         self.mock_view_global_parameters = mock.PropertyMock(return_value=self.global_parameters)
         type(self.view).global_parameters = self.mock_view_global_parameters
@@ -351,8 +348,7 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         type(self.model).current_dataset_index = self.mock_model_current_dataset_index
         self.mock_model_dataset_names = mock.PropertyMock(return_value=self.dataset_names)
         type(self.model).dataset_names = self.mock_model_dataset_names
-        self.mock_model_current_dataset_name = mock.PropertyMock(return_value=
-                                                                 self.dataset_names[self.current_dataset_index])
+        self.mock_model_current_dataset_name = mock.PropertyMock(return_value=self.dataset_names[self.current_dataset_index])
         type(self.model).current_dataset_name = self.mock_model_current_dataset_name
         self.mock_model_number_of_datasets = mock.PropertyMock(return_value=len(self.dataset_names))
         type(self.model).number_of_datasets = self.mock_model_number_of_datasets
@@ -374,8 +370,7 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         type(self.model).fit_to_raw = self.mock_model_fit_to_raw
         self.mock_model_simultaneous_fit_by = mock.PropertyMock(return_value=self.simultaneous_fit_by)
         type(self.model).simultaneous_fit_by = self.mock_model_simultaneous_fit_by
-        self.mock_model_simultaneous_fit_by_specifier = mock.PropertyMock(return_value=
-                                                                          self.simultaneous_fit_by_specifier)
+        self.mock_model_simultaneous_fit_by_specifier = mock.PropertyMock(return_value=self.simultaneous_fit_by_specifier)
         type(self.model).simultaneous_fit_by_specifier = self.mock_model_simultaneous_fit_by_specifier
         self.mock_model_global_parameters = mock.PropertyMock(return_value=self.global_parameters)
         type(self.model).global_parameters = self.mock_model_global_parameters
@@ -447,5 +442,5 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         self.presenter.fitting_mode_changed_notifier.notify_subscribers = mock.Mock()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

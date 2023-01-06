@@ -24,7 +24,6 @@ class HomeTabSubWidget:
 
 
 class HomeTabPresenter(object):
-
     def __init__(self, view, model, subwidgets):
         self._view = view
         self._model = model
@@ -62,7 +61,6 @@ class HomeTabPresenter(object):
     # ------------------------------------------------------------------------------------------------------------------
 
     class InstrumentObserver(Observer):
-
         def __init__(self, outer):
             Observer.__init__(self)
             self.outer = outer
@@ -71,7 +69,6 @@ class HomeTabPresenter(object):
             self.outer.update_all_widgets()
 
     class LoadObserver(Observer):
-
         def __init__(self, outer):
             Observer.__init__(self)
             self.outer = outer
@@ -80,7 +77,6 @@ class HomeTabPresenter(object):
             self.outer.update_all_widgets()
 
     class GroupingObserver(Observer):
-
         def __init__(self, outer):
             Observer.__init__(self)
             self.outer = outer

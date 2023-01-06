@@ -17,34 +17,50 @@ from workbench.plotting.plotscriptgenerator.utils import convert_args_to_string,
 BASE_CREATE_LINE_COMMAND = "plot({})"
 BASE_ERRORBAR_COMMAND = "errorbar({})"
 PLOT_KWARGS = [
-    'alpha', 'color', 'drawstyle', 'fillstyle', 'label', 'linestyle', 'linewidth', 'marker',
-    'markeredgecolor', 'markeredgewidth', 'markerfacecolor', 'markerfacecoloralt', 'markersize',
-    'markevery', 'solid_capstyle', 'solid_joinstyle', 'visible', 'zorder']
+    "alpha",
+    "color",
+    "drawstyle",
+    "fillstyle",
+    "label",
+    "linestyle",
+    "linewidth",
+    "marker",
+    "markeredgecolor",
+    "markeredgewidth",
+    "markerfacecolor",
+    "markerfacecoloralt",
+    "markersize",
+    "markevery",
+    "solid_capstyle",
+    "solid_joinstyle",
+    "visible",
+    "zorder",
+]
 
 mpl_default_kwargs = {
-    'alpha': None,
-    'barsabove': False,
-    'capsize': rcParams['errorbar.capsize'],
-    'capthick': rcParams['lines.markeredgewidth'],
-    'color': rcParams['lines.color'],
-    'distribution': config['graph1d.autodistribution'] != 'On',
-    'drawstyle': 'default',
-    'ecolor': rcParams['lines.color'],
-    'elinewidth': rcParams['lines.linewidth'],
-    'errorevery': 1,
-    'fillstyle': rcParams['markers.fillstyle'],
-    'label': '',
-    'linestyle': rcParams['lines.linestyle'],
-    'linewidth': rcParams['lines.linewidth'],
-    'marker': rcParams['lines.marker'],
-    'markeredgewidth': rcParams['lines.markeredgewidth'],
-    'markerfacecoloralt': 'none',
-    'markersize': rcParams['lines.markersize'],
-    'markevery': None,
-    'solid_capstyle': rcParams['lines.solid_capstyle'],
-    'solid_joinstyle': rcParams['lines.solid_joinstyle'],
-    'visible': True,
-    'zorder': 2
+    "alpha": None,
+    "barsabove": False,
+    "capsize": rcParams["errorbar.capsize"],
+    "capthick": rcParams["lines.markeredgewidth"],
+    "color": rcParams["lines.color"],
+    "distribution": config["graph1d.autodistribution"] != "On",
+    "drawstyle": "default",
+    "ecolor": rcParams["lines.color"],
+    "elinewidth": rcParams["lines.linewidth"],
+    "errorevery": 1,
+    "fillstyle": rcParams["markers.fillstyle"],
+    "label": "",
+    "linestyle": rcParams["lines.linestyle"],
+    "linewidth": rcParams["lines.linewidth"],
+    "marker": rcParams["lines.marker"],
+    "markeredgewidth": rcParams["lines.markeredgewidth"],
+    "markerfacecoloralt": "none",
+    "markersize": rcParams["lines.markersize"],
+    "markevery": None,
+    "solid_capstyle": rcParams["lines.solid_capstyle"],
+    "solid_joinstyle": rcParams["lines.solid_joinstyle"],
+    "visible": True,
+    "zorder": 2,
 }
 
 
@@ -72,7 +88,7 @@ def get_plot_command_kwargs(artist):
         # errorbars are hidden
         if errorbars_hidden(artist):
             kwargs = _get_plot_command_kwargs_from_line2d(artist[0])
-            kwargs['label'] = artist.get_label()
+            kwargs["label"] = artist.get_label()
         else:
             kwargs = _get_plot_command_kwargs_from_errorbar_container(artist)
     else:
@@ -89,9 +105,9 @@ def _remove_kwargs_if_default(kwargs):
                 kwargs.pop(kwarg)
         except KeyError:
             pass
-    for color in ['markeredgecolor', 'markerfacecolor', 'ecolor']:
+    for color in ["markeredgecolor", "markerfacecolor", "ecolor"]:
         try:
-            if kwargs[color] == kwargs['color']:
+            if kwargs[color] == kwargs["color"]:
                 kwargs.pop(color)
         except KeyError:
             pass
@@ -105,9 +121,9 @@ def _get_plot_command_kwargs_from_line2d(line):
 
 def _get_errorbar_specific_plot_kwargs(err_container):
     props = CurveProperties._get_errorbars_props_from_curve(err_container, {})
-    props.pop('hide_errors')
+    props.pop("hide_errors")
     try:
-        props['barsabove'] = err_container[2][0].zorder >= err_container[0].zorder
+        props["barsabove"] = err_container[2][0].zorder >= err_container[0].zorder
     except TypeError:  # Error when indexing err_container[0] when it has no line
         pass
     return props
@@ -116,14 +132,14 @@ def _get_errorbar_specific_plot_kwargs(err_container):
 def _get_plot_command_kwargs_from_errorbar_container(err_cont):
     props = _get_errorbar_specific_plot_kwargs(err_cont)
     if not err_cont[0]:
-        props['fmt'] = None
+        props["fmt"] = None
     else:
         props.update({key: err_cont[0].properties()[key] for key in PLOT_KWARGS})
         # The capthick kwarg overwrites markeredgewidth so there's no point
         # having both
-        props.pop('markeredgewidth')
-    props['label'] = err_cont.get_label()
-    props['zorder'] = err_cont[2][0].zorder
+        props.pop("markeredgewidth")
+    props["label"] = err_cont.get_label()
+    props["zorder"] = err_cont[2][0].zorder
     return props
 
 
@@ -133,16 +149,18 @@ def _get_mantid_specific_plot_kwargs(artist):
         return dict()
     sample_log_plot_details = ax.get_artists_sample_log_plot_details(artist)
     if sample_log_plot_details is None:
-        plot_kwargs = {"wkspIndex": ax.get_artists_workspace_and_workspace_index(artist)[1],
-                       "distribution": not ax.get_artist_normalization_state(artist)}
-        ax_type = ax.creation_args[0].get('axis', None)
+        plot_kwargs = {
+            "wkspIndex": ax.get_artists_workspace_and_workspace_index(artist)[1],
+            "distribution": not ax.get_artist_normalization_state(artist),
+        }
+        ax_type = ax.creation_args[0].get("axis", None)
         if ax_type:
             plot_kwargs["axis"] = ax_type
         return plot_kwargs
     else:
-        sample_log_details_map =  {'LogName': sample_log_plot_details[0]}
+        sample_log_details_map = {"LogName": sample_log_plot_details[0]}
         if sample_log_plot_details[1] is not None:
-            sample_log_details_map['Filtered'] = sample_log_plot_details[1]
+            sample_log_details_map["Filtered"] = sample_log_plot_details[1]
         if sample_log_plot_details[2] is not None:
-            sample_log_details_map['ExperimentInfo'] = sample_log_plot_details[2]
+            sample_log_details_map["ExperimentInfo"] = sample_log_plot_details[2]
         return sample_log_details_map

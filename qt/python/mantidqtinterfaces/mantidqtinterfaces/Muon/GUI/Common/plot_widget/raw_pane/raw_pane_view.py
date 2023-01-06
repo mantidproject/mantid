@@ -13,8 +13,8 @@ from mantidqtinterfaces.Muon.GUI.Common.data_selectors.cyclic_data_selector_view
 # might need to have a baseqidget instance and add to layout
 # then have access methods into the base widget
 
-class RawPaneView(BasePaneView):
 
+class RawPaneView(BasePaneView):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self._selectors_layout = QtWidgets.QHBoxLayout()
@@ -36,7 +36,7 @@ class RawPaneView(BasePaneView):
     def set_slot_for_detectors_changed(self, slot):
         self._detectors_selector.set_slot_for_dataset_changed(slot)
 
-    def update_detectors(self, detectors: list)->None:
+    def update_detectors(self, detectors: list) -> None:
         self._detectors_selector.update_dataset_name_combo_box(detectors)
 
     @property
@@ -48,7 +48,7 @@ class RawPaneView(BasePaneView):
     def set_slot_for_runs_changed(self, slot):
         self._runs_selector.set_slot_for_dataset_changed(slot)
 
-    def update_runs(self, detectors: list)->None:
+    def update_runs(self, detectors: list) -> None:
         self._runs_selector.update_dataset_name_combo_box(detectors)
 
     @property

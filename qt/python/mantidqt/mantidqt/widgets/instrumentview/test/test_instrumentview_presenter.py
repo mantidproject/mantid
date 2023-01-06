@@ -16,6 +16,7 @@ class InstrumentViewPresenterTest(unittest.TestCase):
     def setUp(self) -> None:
         # Keep import private so we're not tempted to use it in other tests
         from mantidqt.widgets.instrumentview.view import InstrumentView
+
         self.mock_view = mock.create_autospec(InstrumentView)
         self.ws = mock.NonCallableMock()
         self.presenter = InstrumentViewPresenter(ws=self.ws, view=self.mock_view)
@@ -28,8 +29,7 @@ class InstrumentViewPresenterTest(unittest.TestCase):
         ws = mock.NonCallableMock()
         presenter = InstrumentViewPresenter(ws)
 
-        mock_view.assert_called_once_with(parent=mock.ANY, presenter=presenter,
-                                          name=str(ws), window_flags=mock.ANY)
+        mock_view.assert_called_once_with(parent=mock.ANY, presenter=presenter, name=str(ws), window_flags=mock.ANY)
 
     @mock.patch("mantidqt.widgets.instrumentview.presenter.AnalysisDataService")
     @mock.patch("mantidqt.widgets.instrumentview.presenter.InstrumentView")
@@ -41,8 +41,7 @@ class InstrumentViewPresenterTest(unittest.TestCase):
         mock_ads.retrieve.return_value = mock.NonCallableMock()
         ws_name = "my_workspace"
         presenter = InstrumentViewPresenter(ws_name)
-        mock_view.assert_called_once_with(parent=mock.ANY, presenter=presenter,
-                                          name=ws_name, window_flags=mock.ANY)
+        mock_view.assert_called_once_with(parent=mock.ANY, presenter=presenter, name=ws_name, window_flags=mock.ANY)
 
     @mock.patch("mantidqt.widgets.instrumentview.presenter.AnalysisDataService")
     @mock.patch("mantidqt.widgets.instrumentview.presenter.InstrumentView")
@@ -63,7 +62,7 @@ class InstrumentViewPresenterTest(unittest.TestCase):
         ws = mock.NonCallableMock()
         mock_ads.retrieve.return_value = ws
         # Get our mock InstrumentView to throw an exception.
-        mock_view.side_effect = KeyError('instrument view threw an exception')
+        mock_view.side_effect = KeyError("instrument view threw an exception")
         with self.assertRaises(KeyError):
             InstrumentViewPresenter(ws)
         # Make sure workspace is unlocked if exception is thrown.
@@ -144,8 +143,7 @@ class InstrumentViewPresenterTest(unittest.TestCase):
         expected = mock.NonCallableMock()
         mock_manager.last_view = expected
         self.presenter.close("")
-        self.assertEqual(expected, mock_manager.last_view,
-                         "InstrumentViewManager.last_view was cleared when it should not have been")
+        self.assertEqual(expected, mock_manager.last_view, "InstrumentViewManager.last_view was cleared when it should not have been")
 
     @mock.patch("mantidqt.widgets.instrumentview.presenter.ObservingPresenter.close")
     @mock.patch("mantidqt.widgets.instrumentview.presenter.InstrumentViewManager")
@@ -164,5 +162,5 @@ class InstrumentViewPresenterTest(unittest.TestCase):
         mocked_manager.assert_not_called()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

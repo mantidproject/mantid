@@ -30,7 +30,7 @@ def cleanup_qapp_ref():
     del _QAPP
 
 
-def get_application(name=''):
+def get_application(name=""):
     """
     Initialise and return the global application object
     :param name: Optional application name

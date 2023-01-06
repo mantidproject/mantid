@@ -63,13 +63,13 @@ class DNSTreeItem:
 
     def get_sample_type(self):
         sample = self.get_sample()
-        if 'vanadium' in sample or 'vana' in sample:
-            return 'vanadium'
-        if 'nicr' in sample or 'NiCr' in sample:
-            return 'nicr'
-        if 'empty' in sample or 'leer' in sample:
-            return 'empty'
-        return 'sample'
+        if "vanadium" in sample or "vana" in sample:
+            return "vanadium"
+        if "nicr" in sample or "NiCr" in sample:
+            return "nicr"
+        if "empty" in sample or "leer" in sample:
+            return "empty"
+        return "sample"
 
     def is_type(self, sample_type):
         return sample_type == self.get_sample_type()

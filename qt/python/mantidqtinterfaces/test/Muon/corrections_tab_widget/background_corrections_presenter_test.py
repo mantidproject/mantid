@@ -13,7 +13,6 @@ from mantidqtinterfaces.Muon.GUI.Common.corrections_tab_widget.background_correc
 
 
 class BackgroundCorrectionsPresenterTest(unittest.TestCase):
-
     def setUp(self):
         self.workspace_name = "HIFI84447; Group; fwd; Counts; MA"
         self.runs = ["84447", "84447", "84447", "84447"]
@@ -138,13 +137,11 @@ class BackgroundCorrectionsPresenterTest(unittest.TestCase):
 
     def test_that_handle_start_x_changed_will_validate_the_start_x_before_updating_the_xs_in_the_model(self):
         self.presenter.handle_start_x_changed()
-        self.presenter._handle_start_or_end_x_changed.assert_called_once_with(
-            self.presenter._get_new_x_range_when_start_x_changed)
+        self.presenter._handle_start_or_end_x_changed.assert_called_once_with(self.presenter._get_new_x_range_when_start_x_changed)
 
     def test_that_handle_end_x_changed_will_validate_the_end_x_before_updating_the_xs_in_the_model(self):
         self.presenter.handle_end_x_changed()
-        self.presenter._handle_start_or_end_x_changed.assert_called_once_with(
-            self.presenter._get_new_x_range_when_end_x_changed)
+        self.presenter._handle_start_or_end_x_changed.assert_called_once_with(self.presenter._get_new_x_range_when_end_x_changed)
 
     def test_that_handle_background_changed_will_update_the_background_in_the_view_and_model(self):
         runs, groups = ["62260", "62260"], ["fwd", "bwd"]
@@ -157,7 +154,8 @@ class BackgroundCorrectionsPresenterTest(unittest.TestCase):
         self.view.selected_background.assert_called_once_with()
 
         self.presenter._update_background_in_view_and_model.assert_has_calls(
-            [mock.call("62260", "fwd", self.background), mock.call("62260", "bwd", self.background)])
+            [mock.call("62260", "fwd", self.background), mock.call("62260", "bwd", self.background)]
+        )
 
         self.presenter._perform_background_corrections_for.assert_called_with(runs, groups)
 
@@ -225,5 +223,5 @@ class BackgroundCorrectionsPresenterTest(unittest.TestCase):
         self.presenter._run_background_corrections_for_all = mock.Mock()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

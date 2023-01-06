@@ -47,8 +47,7 @@ def construct_empty_pair(group_names, pair_names, pair_index=0):
     else:
         group1 = None
         group2 = None
-    return MuonPair(pair_name=new_pair_name,
-                    forward_group_name=group1, backward_group_name=group2, alpha=1.0)
+    return MuonPair(pair_name=new_pair_name, forward_group_name=group1, backward_group_name=group2, alpha=1.0)
 
 
 class MuonDataContext(object):
@@ -71,10 +70,9 @@ class MuonDataContext(object):
         self._loaded_data = load_data
 
         self._current_runs = []
-        self._main_field_direction = ''
+        self._main_field_direction = ""
 
-        self._instrument = ConfigService.getInstrument().name() if ConfigService.getInstrument().name()\
-            in allowed_instruments else 'EMU'
+        self._instrument = ConfigService.getInstrument().name() if ConfigService.getInstrument().name() in allowed_instruments else "EMU"
 
         self.instrumentNotifier = MuonDataContext.InstrumentNotifier(self)
         self.message_notifier = MuonDataContext.MessageNotifier(self)
@@ -97,9 +95,9 @@ class MuonDataContext(object):
     @instrument.setter
     def instrument(self, value):
         if value != self.instrument:
-            ConfigService['default.instrument'] = value
+            ConfigService["default.instrument"] = value
             self._instrument = value
-            self._main_field_direction = ''
+            self._main_field_direction = ""
             self.instrumentNotifier.notify_subscribers(self._instrument)
 
     @property
@@ -117,24 +115,28 @@ class MuonDataContext(object):
         current_filenames = []
         for run in self.current_runs:
             if self._loaded_data.get_data(run=run, instrument=self.instrument):
-                current_filenames.append(self._loaded_data.get_data(run=run, instrument=self.instrument)['filename'])
+                current_filenames.append(self._loaded_data.get_data(run=run, instrument=self.instrument)["filename"])
         return current_filenames
 
     @property
     def current_workspaces(self):
         current_workspaces = []
         for run in self.current_runs:
-            current_workspaces.append(self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace'])
+            current_workspaces.append(self._loaded_data.get_data(run=run, instrument=self.instrument)["workspace"])
         return current_workspaces
 
     def update_current_data(self):
         # Update the current data; resetting the groups and pairs to their default values
 
-        if self.current_data['MainFieldDirection'] and self.current_data['MainFieldDirection'] != self._main_field_direction\
-                and self._main_field_direction:
-            self.message_notifier.notify_subscribers('MainFieldDirection has changed between'
-                                                     ' data sets, click default to reset grouping if required')
-        self._main_field_direction = self.current_data['MainFieldDirection']
+        if (
+            self.current_data["MainFieldDirection"]
+            and self.current_data["MainFieldDirection"] != self._main_field_direction
+            and self._main_field_direction
+        ):
+            self.message_notifier.notify_subscribers(
+                "MainFieldDirection has changed between" " data sets, click default to reset grouping if required"
+            )
+        self._main_field_direction = self.current_data["MainFieldDirection"]
 
     @property
     def _current_data(self):
@@ -142,7 +144,7 @@ class MuonDataContext(object):
         if self.current_runs:
             loaded_data = self._loaded_data.get_data(run=self.current_runs[0], instrument=self.instrument)
 
-        return loaded_data if loaded_data else {"workspace": load_utils.empty_loaded_data(), 'run': []}
+        return loaded_data if loaded_data else {"workspace": load_utils.empty_loaded_data(), "run": []}
 
     @property
     def current_data(self):
@@ -165,11 +167,13 @@ class MuonDataContext(object):
 
     def loaded_workspace_as_group(self, run):
         if self.is_multi_period():
-            workspace_list = [wrapper._workspace_name for wrapper in self._loaded_data.get_data(
-                run=run, instrument=self.instrument)['workspace']['OutputWorkspace']]
-            return GroupWorkspaces(InputWorkspaces=workspace_list, OutputWorkspace='__temp_group')
+            workspace_list = [
+                wrapper._workspace_name
+                for wrapper in self._loaded_data.get_data(run=run, instrument=self.instrument)["workspace"]["OutputWorkspace"]
+            ]
+            return GroupWorkspaces(InputWorkspaces=workspace_list, OutputWorkspace="__temp_group")
         else:
-            return self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']['OutputWorkspace'][0].workspace
+            return self._loaded_data.get_data(run=run, instrument=self.instrument)["workspace"]["OutputWorkspace"][0].workspace
 
     @property
     def num_detectors(self):
@@ -188,7 +192,7 @@ class MuonDataContext(object):
     def num_points(self):
         workspace_lengths = []
         for run in self.current_runs:
-            workspace = self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']['OutputWorkspace'][0].workspace
+            workspace = self._loaded_data.get_data(run=run, instrument=self.instrument)["workspace"]["OutputWorkspace"][0].workspace
             workspace_lengths.append(len(workspace.readX(0)))
 
         if workspace_lengths:
@@ -197,7 +201,7 @@ class MuonDataContext(object):
             return 1
 
     def num_periods(self, run):
-        return len(self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']['OutputWorkspace'])
+        return len(self._loaded_data.get_data(run=run, instrument=self.instrument)["workspace"]["OutputWorkspace"])
 
     @property
     def main_field_direction(self):
@@ -229,10 +233,10 @@ class MuonDataContext(object):
     def clear(self):
         self._loaded_data.clear()
         self._current_runs = []
-        self._main_field_direction = ''
+        self._main_field_direction = ""
 
     def _base_run_name(self, run=None):
-        """ e.g. EMU0001234 """
+        """e.g. EMU0001234"""
         if not run:
             run = self.run
         if isinstance(run, int):
@@ -254,24 +258,23 @@ class MuonDataContext(object):
             return True
 
         first_field = self._loaded_data.get_main_field_direction(run=run_list[0], instrument=self.instrument)
-        return all(first_field == self._loaded_data.get_main_field_direction(run=run, instrument=self.instrument)
-                   for run in run_list)
+        return all(first_field == self._loaded_data.get_main_field_direction(run=run, instrument=self.instrument) for run in run_list)
 
     def create_multiple_field_directions_error_message(self, run_list):
         transverse = []
         longitudinal = []
         for run in run_list:
             field_direction = self._loaded_data.get_main_field_direction(run=run, instrument=self.instrument)
-            if field_direction.lower() == 'transverse':
+            if field_direction.lower() == "transverse":
                 transverse += run
-            elif field_direction.lower() == 'longitudinal':
+            elif field_direction.lower() == "longitudinal":
                 longitudinal += run
             else:
-                return 'Unrecognised field direction {} for run {}'.format(field_direction, run)
+                return "Unrecognised field direction {} for run {}".format(field_direction, run)
 
-        message = 'MainFieldDirection changes within current run set:\n'
-        message += 'transverse field runs {}\n'.format(run_list_to_string(transverse))
-        message += 'longitudinal field runs {}\n'.format(run_list_to_string(longitudinal))
+        message = "MainFieldDirection changes within current run set:\n"
+        message += "transverse field runs {}\n".format(run_list_to_string(transverse))
+        message += "longitudinal field runs {}\n".format(run_list_to_string(longitudinal))
         return message
 
     def remove_workspace_by_name(self, workspace_name):

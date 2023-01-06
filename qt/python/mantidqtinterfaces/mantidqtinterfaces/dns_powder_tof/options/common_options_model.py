@@ -14,10 +14,9 @@ from mantidqtinterfaces.dns_powder_tof.data_structures.dns_obs_model import DNSO
 
 
 class DNSCommonOptionsModel(DNSObsModel):
-
     @staticmethod
     def get_det_rot_min_max(full_data):
-        det_rot = [x['det_rot'] for x in full_data]
+        det_rot = [x["det_rot"] for x in full_data]
         det_rot_max = -min(det_rot)
         det_rot_min = -max(det_rot)
         return [det_rot_min, det_rot_max]
@@ -31,10 +30,9 @@ class DNSCommonOptionsModel(DNSObsModel):
         selector_speeds = _get_selector_speeds(full_data)
         selector_wavelength = _selector_wavelength(selector_speeds[0])
         errors = {
-            'wavelength_varies': _wavelength_varies(wavelengths),
-            'selector_wavelength_missmatch': _selector_wavelength_missmatch(
-                selector_wavelength, wavelengths[0]),
-            'selector_speed_varies': _selector_speed_varies(selector_speeds)
+            "wavelength_varies": _wavelength_varies(wavelengths),
+            "selector_wavelength_missmatch": _selector_wavelength_missmatch(selector_wavelength, wavelengths[0]),
+            "selector_speed_varies": _selector_speed_varies(selector_speeds),
         }
 
         return [wavelengths[0], errors]
@@ -47,7 +45,7 @@ def _selector_wavelength(selector_speed):
 
 
 def _get_selector_speeds(full_data):
-    return [x['selector_speed'] for x in full_data]
+    return [x["selector_speed"] for x in full_data]
 
 
 def _selector_speed_varies(selector_speeds):
@@ -55,7 +53,7 @@ def _selector_speed_varies(selector_speeds):
 
 
 def _get_wavelengths(full_data):
-    return [x['wavelength'] / 10.0 for x in full_data]
+    return [x["wavelength"] / 10.0 for x in full_data]
 
 
 def _wavelength_varies(wavelengths):

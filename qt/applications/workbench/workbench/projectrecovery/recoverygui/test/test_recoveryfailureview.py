@@ -49,15 +49,13 @@ class RecoveryFailureViewTest(unittest.TestCase):
         self.prw.presenter.recover_last()
 
     def test_onClickSelectedCheckpoint(self):
-        self.prw.ui.tableWidget.selectedItems.return_value = \
-            [QTableWidgetItem("1"), QTableWidgetItem("2"), QTableWidgetItem("No")]
+        self.prw.ui.tableWidget.selectedItems.return_value = [QTableWidgetItem("1"), QTableWidgetItem("2"), QTableWidgetItem("No")]
         self.prw.onClickSelectedCheckpoint()
 
         self.prw.presenter.recover_selected_checkpoint.assert_called_with("1")
 
     def test_onClickOpenSelectedInScriptWindow(self):
-        self.prw.ui.tableWidget.selectedItems.return_value = \
-            [QTableWidgetItem("1"), QTableWidgetItem("2"), QTableWidgetItem("No")]
+        self.prw.ui.tableWidget.selectedItems.return_value = [QTableWidgetItem("1"), QTableWidgetItem("2"), QTableWidgetItem("No")]
         self.prw.onClickOpenSelectedInScriptWindow()
 
         self.prw.presenter.open_selected_checkpoint_in_editor.assert_called_with("1")
@@ -70,6 +68,5 @@ class RecoveryFailureViewTest(unittest.TestCase):
     def test_connection_is_attempted(self):
         self.prw.connect_progress_bar()
 
-        self.assertEqual(1,
-                         self.prw.presenter.project_recovery.loader.multi_file_interpreter.current_editor.call_count)
+        self.assertEqual(1, self.prw.presenter.project_recovery.loader.multi_file_interpreter.current_editor.call_count)
         self.prw.editor.connect_to_progress_reports.assert_called_once_with(self.prw.update_progress_bar)

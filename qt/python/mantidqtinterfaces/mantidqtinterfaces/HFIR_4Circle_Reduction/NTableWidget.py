@@ -4,10 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=C0103,R0904
+# pylint: disable=C0103,R0904
 # N(DAV)TableWidget
 import csv
-from qtpy.QtWidgets import (QCheckBox, QTableWidget, QTableWidgetItem)  # noqa
+from qtpy.QtWidgets import QCheckBox, QTableWidget, QTableWidgetItem  # noqa
 from qtpy import QtCore  # noqa
 import qtpy  # noqa
 
@@ -21,9 +21,9 @@ class NTableWidget(QTableWidget):
     NdavTableWidget inherits from QTableWidget by extending the features
     for easy application.
     """
+
     # List of supported cell types (all in lower cases)
-    Supported_Cell_Types = ['checkbox', 'string', 'str', 'integer', 'int',
-                            'float', 'double']
+    Supported_Cell_Types = ["checkbox", "string", "str", "integer", "int", "float", "double"]
 
     def __init__(self, parent):
         """
@@ -39,7 +39,7 @@ class NTableWidget(QTableWidget):
         self._myColumnTypeList = None
         self._editableList = list()
 
-        self._statusColName = 'Status'
+        self._statusColName = "Status"
         self._colIndexSelect = None
 
         return
@@ -52,24 +52,26 @@ class NTableWidget(QTableWidget):
         :return:  2-tuple as (boolean, message)
         """
         # Check input
-        assert isinstance(row_value_list, list), 'Row values {0} must be given by a list but ' \
-                                                 'not a {1}'.format(row_value_list, type(row_value_list))
+        assert isinstance(row_value_list, list), "Row values {0} must be given by a list but " "not a {1}".format(
+            row_value_list, type(row_value_list)
+        )
         if type_list is not None:
-            assert isinstance(type_list, list), 'Value types {0} must be given by a list but ' \
-                                                'not a {1}'.format(type_list, type(type_list))
+            assert isinstance(type_list, list), "Value types {0} must be given by a list but " "not a {1}".format(
+                type_list, type(type_list)
+            )
             if len(row_value_list) != len(type_list):
-                raise RuntimeError('If value types are given, then they must have the same '
-                                   'numbers ({0}) and values ({1})'.format(len(row_value_list),
-                                                                           len(type_list)))
+                raise RuntimeError(
+                    "If value types are given, then they must have the same "
+                    "numbers ({0}) and values ({1})".format(len(row_value_list), len(type_list))
+                )
         else:
             type_list = self._myColumnTypeList
 
         if len(row_value_list) != self.columnCount():
-            ret_msg = 'Input number of values (%d) is different from ' \
-                      'column number (%d).' % (len(row_value_list), self.columnCount())
+            ret_msg = "Input number of values (%d) is different from " "column number (%d)." % (len(row_value_list), self.columnCount())
             return False, ret_msg
         else:
-            ret_msg = ''
+            ret_msg = ""
 
         # Insert new row
         row_number = self.rowCount()
@@ -79,13 +81,13 @@ class NTableWidget(QTableWidget):
         for i_col in range(min(len(row_value_list), self.columnCount())):
             item = QTableWidgetItem()
             if row_value_list[i_col] is None:
-                item_value = ''
+                item_value = ""
             else:
                 item_value = str(row_value_list[i_col])
             item.setText(_fromUtf8(item_value))
             item.setFlags(item.flags() & ~QtCore.Qt.ItemIsEditable)
             # Set editable flag! item.setFlags(item.flags() | ~QtCore.Qt.ItemIsEditable)
-            if type_list[i_col] == 'checkbox':
+            if type_list[i_col] == "checkbox":
                 self.set_check_box(row_number, i_col, False)
             else:
                 self.setItem(row_number, i_col, item)
@@ -94,7 +96,7 @@ class NTableWidget(QTableWidget):
         return True, ret_msg
 
     def delete_rows(self, row_number_list):
-        """ Delete rows
+        """Delete rows
         :param row_number_list:
         :return:
         """
@@ -108,7 +110,7 @@ class NTableWidget(QTableWidget):
         return
 
     def export_table_csv(self, csv_file_name):
-        """ Export table to a CSV fie
+        """Export table to a CSV fie
         :param csv_file_name:
         :return:
         """
@@ -128,16 +130,16 @@ class NTableWidget(QTableWidget):
                 item_value = self.get_cell_value(i_row, j_col)
                 if isinstance(item_value, str):
                     # remove tab because tab will be used as delimiter
-                    item_value = item_value.replace('\t', '')
+                    item_value = item_value.replace("\t", "")
                 elif item_value is None:
-                    item_value = ''
+                    item_value = ""
                 line_items.append(item_value)
             # END-FOR
             content_line_list.append(line_items)
         # END-FOR (row)
 
-        with open(csv_file_name, 'w') as csv_file:
-            csv_writer = csv.writer(csv_file, delimiter='\t', quoting=csv.QUOTE_MINIMAL)
+        with open(csv_file_name, "w") as csv_file:
+            csv_writer = csv.writer(csv_file, delimiter="\t", quoting=csv.QUOTE_MINIMAL)
             # write header
             csv_writer.writerow(col_names)
             # write content
@@ -158,56 +160,60 @@ class NTableWidget(QTableWidget):
         :return:
         """
         # check
-        assert isinstance(row_index, int), 'Row index {0} must be an integer'.format(row_index)
-        assert isinstance(col_index, int), 'Column index {0} must be an integer'.format(col_index)
+        assert isinstance(row_index, int), "Row index {0} must be an integer".format(row_index)
+        assert isinstance(col_index, int), "Column index {0} must be an integer".format(col_index)
         if not 0 <= row_index < self.rowCount():
-            raise RuntimeError('Row index {0} is out of range [0, {1})'
-                               ''.format(row_index, self.rowCount()))
+            raise RuntimeError("Row index {0} is out of range [0, {1})" "".format(row_index, self.rowCount()))
         if not 0 <= col_index < self.columnCount():
-            raise RuntimeError('Column index {0} is out of range [0, {1})'
-                               ''.format(col_index, self.columnCount()))
+            raise RuntimeError("Column index {0} is out of range [0, {1})" "".format(col_index, self.columnCount()))
 
         # get cell type
         cell_data_type = self._myColumnTypeList[col_index]
 
-        if cell_data_type == 'checkbox':
+        if cell_data_type == "checkbox":
             # Check box
             cell_i_j = self.cellWidget(row_index, col_index)
             # PyQt5 compatible issue!
-            assert isinstance(cell_i_j, QCheckBox), 'Cell {0} {1} must be of type QCheckBox but not a {2}' \
-                                                    ''.format(row_index, col_index, type(cell_i_j))
+            assert isinstance(cell_i_j, QCheckBox), "Cell {0} {1} must be of type QCheckBox but not a {2}" "".format(
+                row_index, col_index, type(cell_i_j)
+            )
 
             return_value = cell_i_j.isChecked()
         else:
             # Regular cell for int, float or string
             item_i_j = self.item(row_index, col_index)
-            assert isinstance(item_i_j, QTableWidgetItem), 'Cell {0} {1} must be of type QTableWidgetItem but not a ' \
-                                                           '{2}'.format(row_index, col_index, type(item_i_j))
+            assert isinstance(item_i_j, QTableWidgetItem), "Cell {0} {1} must be of type QTableWidgetItem but not a " "{2}".format(
+                row_index, col_index, type(item_i_j)
+            )
 
             # get the string of the cell
             return_value = str(item_i_j.text()).strip()
 
             # cast to supported
-            if return_value == 'None' or len(return_value) == 0:
+            if return_value == "None" or len(return_value) == 0:
                 # None case
                 return_value = None
-            elif cell_data_type.startswith('str'):
+            elif cell_data_type.startswith("str"):
                 # case as str of string
                 pass
-            elif cell_data_type.startswith('int'):
+            elif cell_data_type.startswith("int"):
                 # integer
                 try:
                     return_value = int(return_value)
                 except ValueError as val_err:
-                    raise RuntimeError('Unable to convert cell ({0}, {1}) with value "{2}" to integer due to {3}.'
-                                       ''.format(row_index, col_index, return_value, val_err))
-            elif cell_data_type == 'float' or cell_data_type == 'double':
+                    raise RuntimeError(
+                        'Unable to convert cell ({0}, {1}) with value "{2}" to integer due to {3}.'
+                        "".format(row_index, col_index, return_value, val_err)
+                    )
+            elif cell_data_type == "float" or cell_data_type == "double":
                 # float or double
                 try:
                     return_value = float(return_value)
                 except ValueError as val_err:
-                    raise RuntimeError('Unable to convert cell ({0}, {1}) with value "{2}" to float due to {3}.'
-                                       ''.format(row_index, col_index, return_value, val_err))
+                    raise RuntimeError(
+                        'Unable to convert cell ({0}, {1}) with value "{2}" to float due to {3}.'
+                        "".format(row_index, col_index, return_value, val_err)
+                    )
             # END-IF-ELSE
         # END-IF-ELSE
 
@@ -230,13 +236,13 @@ class NTableWidget(QTableWidget):
         :return: list of objects
         """
         if row_index < 0 or row_index >= self.rowCount():
-            raise IndexError('Index of row (%d) is out of range.' % row_index)
+            raise IndexError("Index of row (%d) is out of range." % row_index)
 
         ret_list = list()
         for i_col in range(len(self._myColumnTypeList)):
             c_type = self._myColumnTypeList[i_col]
 
-            if c_type == 'checkbox':
+            if c_type == "checkbox":
                 # Check box
                 cell_i_j = self.cellWidget(row_index, i_col)
                 assert isinstance(cell_i_j, QCheckBox)
@@ -248,9 +254,9 @@ class NTableWidget(QTableWidget):
                 assert isinstance(item_i_j, QTableWidgetItem)
                 value = str(item_i_j.text()).strip()
                 if len(value) > 0:
-                    if c_type == 'int':
+                    if c_type == "int":
                         value = int(value)
-                    elif c_type == 'float':
+                    elif c_type == "float":
                         value = float(value)
                 else:
                     value = None
@@ -262,7 +268,7 @@ class NTableWidget(QTableWidget):
         return ret_list
 
     def get_selected_rows(self, status=True):
-        """ Get the rows whose status is same as given status
+        """Get the rows whose status is same as given status
         Requirements: given status must be a boolean
         Guarantees: a list of row indexes are constructed for those rows that meet the requirement.
         :param status:
@@ -284,7 +290,7 @@ class NTableWidget(QTableWidget):
         return row_index_list
 
     def init_setup(self, column_tup_list):
-        """ Initial setup
+        """Initial setup
         :param column_tup_list: list of 2-tuple as string (column name) and string (data type)
         :return:
         """
@@ -329,23 +335,23 @@ class NTableWidget(QTableWidget):
         :return:
         """
         num_rows = self.rowCount()
-        for i_row in range(1, num_rows+1):
+        for i_row in range(1, num_rows + 1):
             self.removeRow(num_rows - i_row)
 
         return
 
     def remove_rows(self, row_number_list):
-        """ Remove row number
+        """Remove row number
         :param row_number_list:
         :return: string as error message
         """
         assert isinstance(row_number_list, list)
         row_number_list.sort(reverse=True)
 
-        error_message = ''
+        error_message = ""
         for row_number in row_number_list:
             if row_number >= self.rowCount():
-                error_message += 'Row %d is out of range.\n' % row_number
+                error_message += "Row %d is out of range.\n" % row_number
             else:
                 self.removeRow(row_number)
         # END-FOR
@@ -359,7 +365,7 @@ class NTableWidget(QTableWidget):
         """
         # check
         if self._colIndexSelect is None:
-            raise RuntimeError('Column for selection is not defined yet. Unable to revert selection')
+            raise RuntimeError("Column for selection is not defined yet. Unable to revert selection")
 
         num_rows = self.rowCount()
         for i_row in range(num_rows):
@@ -411,16 +417,17 @@ class NTableWidget(QTableWidget):
 
         # Loop over all rows. If any row's status is not same as target status, then set it
         num_rows = self.rowCount()
-        assert isinstance(row_index, int) and 0 <= row_index < num_rows, 'Row number %s of type %s is not right.' \
-                                                                         '' % (str(row_index), type(row_index))
+        assert isinstance(row_index, int) and 0 <= row_index < num_rows, "Row number %s of type %s is not right." "" % (
+            str(row_index),
+            type(row_index),
+        )
 
         if self.get_cell_value(row_index, status_col_index) != status:
             self.update_cell_value(row_index, status_col_index, status)
 
         return
 
-    def select_rows_by_column_value(self, column_index, target_value, value_tolerance,
-                                    keep_current_selection):
+    def select_rows_by_column_value(self, column_index, target_value, value_tolerance, keep_current_selection):
         """
         select row
         :param column_index:
@@ -430,11 +437,13 @@ class NTableWidget(QTableWidget):
         :return:
         """
         # check inputs
-        assert isinstance(column_index, int) and 0 <= column_index < self.columnCount(),\
-            'Column index {0} must be an integer (now {1}) and in range (0, {2}]' \
-            ''.format(column_index, type(column_index), self.columnCount())
+        assert (
+            isinstance(column_index, int) and 0 <= column_index < self.columnCount()
+        ), "Column index {0} must be an integer (now {1}) and in range (0, {2}]" "".format(
+            column_index, type(column_index), self.columnCount()
+        )
         if self._colIndexSelect is None:
-            raise RuntimeError('Column for selection is never set up.')
+            raise RuntimeError("Column for selection is never set up.")
 
         # loop over lines
         num_rows = self.rowCount()
@@ -455,7 +464,7 @@ class NTableWidget(QTableWidget):
         return
 
     def set_check_box(self, row, col, state):
-        """ function to add a new select checkbox to a cell in a table row
+        """function to add a new select checkbox to a cell in a table row
         won't add a new checkbox if one already exists
         """
         # Check input
@@ -468,7 +477,7 @@ class NTableWidget(QTableWidget):
         else:
             # case to add checkbox
             checkbox = QCheckBox()
-            checkbox.setText('')
+            checkbox.setText("")
             checkbox.setChecked(state)
 
             # Adding a widget which will be inserted into the table cell
@@ -488,11 +497,9 @@ class NTableWidget(QTableWidget):
         :return:
         """
         # check
-        assert isinstance(name, str), 'Given status column name must be an integer,' \
-                                      'but not %s.' % str(type(name))
+        assert isinstance(name, str), "Given status column name must be an integer," "but not %s." % str(type(name))
         if name not in self._myColumnNameList:
-            raise RuntimeError('Input selection/status name {0} is not in column names list {1}.'
-                               ''.format(name, self._myColumnNameList))
+            raise RuntimeError("Input selection/status name {0} is not in column names list {1}." "".format(name, self._myColumnNameList))
 
         # set value
         self._statusColName = name
@@ -502,7 +509,7 @@ class NTableWidget(QTableWidget):
 
         return
 
-    def set_value_cell(self, row, col, value=''):
+    def set_value_cell(self, row, col, value=""):
         """
         Set value to a cell with integer, float or string
         :param row:
@@ -512,7 +519,7 @@ class NTableWidget(QTableWidget):
         """
         # Check
         if row < 0 or row >= self.rowCount() or col < 0 or col >= self.columnCount():
-            raise IndexError('Input row number or column number is out of range.')
+            raise IndexError("Input row number or column number is out of range.")
 
         # Init cell
         cell_item = QTableWidgetItem()
@@ -533,13 +540,12 @@ class NTableWidget(QTableWidget):
         :return:
         """
         # check
-        assert isinstance(column_index, int), \
-            'column_index must be an integer but not %s.' % str(type(column_index))
+        assert isinstance(column_index, int), "column_index must be an integer but not %s." % str(type(column_index))
         if column_index < 0:
             column_index += len(self._myColumnNameList)
-        assert 0 <= column_index < len(self._myColumnNameList), 'Column index %d is out of range.' % column_index
+        assert 0 <= column_index < len(self._myColumnNameList), "Column index %d is out of range." % column_index
 
-        assert isinstance(sort_order, int), 'sort_order must be integer but not %s.' % str(type(sort_order))
+        assert isinstance(sort_order, int), "sort_order must be integer but not %s." % str(type(sort_order))
         assert sort_order == 0 or sort_order == 1
 
         # get rows
@@ -577,8 +583,11 @@ class NTableWidget(QTableWidget):
         :return: None
         """
         # Check
-        assert isinstance(row, int) and 0 <= row < self.rowCount(),\
-            'Row %s (%s) must be an integer between 0 and %d.' % (str(row), type(row), self.rowCount())
+        assert isinstance(row, int) and 0 <= row < self.rowCount(), "Row %s (%s) must be an integer between 0 and %d." % (
+            str(row),
+            type(row),
+            self.rowCount(),
+        )
         assert isinstance(col, int) and 0 <= col < self.columnCount()
 
         cell_item = self.item(row, col)
@@ -588,7 +597,7 @@ class NTableWidget(QTableWidget):
             # TableWidgetItem
             assert isinstance(cell_item, QTableWidgetItem)
             if isinstance(value, float):
-                cell_item.setText(_fromUtf8('%.7f' % value))
+                cell_item.setText(_fromUtf8("%.7f" % value))
             else:
                 cell_item.setText(_fromUtf8(str(value)))
         elif cell_item is None and cell_widget is not None:
@@ -596,8 +605,8 @@ class NTableWidget(QTableWidget):
             if isinstance(cell_widget, QCheckBox) is True:
                 cell_widget.setChecked(value)
             else:
-                raise TypeError('Cell of type %s is not supported.' % str(type(cell_item)))
+                raise TypeError("Cell of type %s is not supported." % str(type(cell_item)))
         else:
-            raise TypeError('Table cell (%d, %d) is in an unsupported situation!' % (row, col))
+            raise TypeError("Table cell (%d, %d) is in an unsupported situation!" % (row, col))
 
         return

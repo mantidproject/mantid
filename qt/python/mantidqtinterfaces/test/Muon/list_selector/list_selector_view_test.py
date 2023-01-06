@@ -18,7 +18,7 @@ class TestListSelectorView(unittest.TestCase):
         self.view = ListSelectorView()
 
     def test_add_items_adds_correct_number_of_items_to_table_view(self):
-        item_list = [('property_one', True, True), ('property_two', False, False)]
+        item_list = [("property_one", True, True), ("property_two", False, False)]
 
         self.view.addItems(item_list)
 
@@ -31,7 +31,7 @@ class TestListSelectorView(unittest.TestCase):
         self.assertEqual(self.view.item_table_widget.item(1, 0).checkState(), QtCore.Qt.Unchecked)
 
     def test_that_clear_removes_all_items(self):
-        item_list = [('property_one', True, True), ('property_two', False, False)]
+        item_list = [("property_one", True, True), ("property_two", False, False)]
 
         self.view.addItems(item_list)
         self.view.clearItems()
@@ -39,5 +39,5 @@ class TestListSelectorView(unittest.TestCase):
         self.assertEqual(self.view.item_table_widget.rowCount(), 0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

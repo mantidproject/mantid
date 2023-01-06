@@ -31,20 +31,24 @@ ABORTED_STATUS_MSG = "Status: Aborted"
 # Editor
 CURRENTLINE_BKGD_COLOR = QColor(247, 236, 248)
 TAB_WIDTH = 4
-TAB_CHAR = '\t'
+TAB_CHAR = "\t"
 SPACE_CHAR = " "
 
 
 class EditorIO(object):
-
     def __init__(self, editor, confirm_on_exit=True):
         self.editor = editor
         self.confirm_on_exit = confirm_on_exit
 
     def ask_for_filename(self):
-        filename = open_a_file_dialog(parent=self.editor, default_suffix=".py", file_filter="Python Files (*.py)",
-                                      accept_mode=QFileDialog.AcceptSave, file_mode=QFileDialog.AnyFile,
-                                      directory=config["defaultsave.directory"])
+        filename = open_a_file_dialog(
+            parent=self.editor,
+            default_suffix=".py",
+            file_filter="Python Files (*.py)",
+            accept_mode=QFileDialog.AcceptSave,
+            file_mode=QFileDialog.AnyFile,
+            directory=config["defaultsave.directory"],
+        )
         if filename is not None and os.path.isdir(filename):
             # Set value to None as, we do not want to be saving a directory, it is possible to receive a directory
             filename = None
@@ -66,10 +70,13 @@ class EditorIO(object):
         the operation should be cancelled
         """
         if prompt_for_confirm:
-            button = QMessageBox.question(self.editor, "",
-                                          "Save changes to document before closing?",
-                                          buttons=(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel),
-                                          defaultButton=QMessageBox.Cancel)
+            button = QMessageBox.question(
+                self.editor,
+                "",
+                "Save changes to document before closing?",
+                buttons=(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel),
+                defaultButton=QMessageBox.Cancel,
+            )
             if button == QMessageBox.Yes:
                 return self.write()
             elif button == QMessageBox.No:
@@ -95,12 +102,11 @@ class EditorIO(object):
             self.editor.setFileName(filename)
 
         try:
-            with io.open(filename, 'w', encoding='utf8', newline='') as f:
+            with io.open(filename, "w", encoding="utf8", newline="") as f:
                 f.write(self.editor.text())
             self.editor.setModified(False)
         except IOError as exc:
-            QMessageBox.warning(self.editor, "",
-                                "Error while saving '{}': {}".format(filename, str(exc)))
+            QMessageBox.warning(self.editor, "", "Error while saving '{}': {}".format(filename, str(exc)))
             return False
         else:
             return True
@@ -113,8 +119,7 @@ class PythonFileInterpreter(QWidget):
     sig_exec_error = Signal(object)
     sig_exec_success = Signal(object)
 
-    def __init__(self, font=None, content=None, filename=None,
-                 parent=None, completion_enabled=True):
+    def __init__(self, font=None, content=None, filename=None, parent=None, completion_enabled=True):
         """
         :param font: A reference to the font to be used by the editor. If not supplied use the system default
         :param content: An optional string of content to pass to the editor
@@ -237,7 +242,7 @@ class PythonFileInterpreter(QWidget):
         self.replace_text(TAB_CHAR, SPACE_CHAR * TAB_WIDTH)
 
     def replace_text(self, match_text, replace_text):
-        if self.editor.selectedText() == '':
+        if self.editor.selectedText() == "":
             self.editor.selectAll()
         new_text = self.editor.selectedText().replace(match_text, replace_text)
         self.editor.replaceSelectedText(new_text)
@@ -291,6 +296,7 @@ class PythonFileInterpreter(QWidget):
 
 class PythonFileInterpreterPresenter(QObject):
     """Presenter part of MVP to control actions on the editor"""
+
     MAX_STACKTRACE_LENGTH = 2
 
     def __init__(self, view, model):
@@ -338,9 +344,9 @@ class PythonFileInterpreterPresenter(QObject):
         self.is_executing = True
         self.view.set_editor_readonly(True)
         self.view.set_status_message(RUNNING_STATUS_MSG)
-        return self.model.execute_async(code_str=code_str,
-                                        line_offset=self._code_start_offset,
-                                        filename=self.view.filename, blocking=blocking)
+        return self.model.execute_async(
+            code_str=code_str, line_offset=self._code_start_offset, filename=self.view.filename, blocking=blocking
+        )
 
     def _get_code_for_execution(self, ignore_selection):
         editor = self.view.editor
@@ -359,8 +365,8 @@ class PythonFileInterpreterPresenter(QObject):
 
     def _on_exec_error(self, task_error):
         exc_type, exc_value, exc_stack = task_error.exc_type, task_error.exc_value, task_error.stack
-        exc_stack = traceback.extract_tb(exc_stack)[self.MAX_STACKTRACE_LENGTH:]
-        if hasattr(exc_value, 'lineno'):
+        exc_stack = traceback.extract_tb(exc_stack)[self.MAX_STACKTRACE_LENGTH :]
+        if hasattr(exc_value, "lineno"):
             lineno = exc_value.lineno + self._code_start_offset
         elif exc_stack is not None:
             try:
@@ -378,12 +384,11 @@ class PythonFileInterpreterPresenter(QObject):
         self._finish(success=False, task_result=task_error)
 
     def _finish(self, success, task_result):
-        status = 'successfully' if success else 'with errors'
-        status_message = self._create_status_msg(status, task_result.timestamp,
-                                                 task_result.elapsed_time)
+        status = "successfully" if success else "with errors"
+        status_message = self._create_status_msg(status, task_result.timestamp, task_result.elapsed_time)
         self.view.set_status_message(status_message)
         self.view.set_editor_readonly(False)
         self.is_executing = False
 
     def _create_status_msg(self, status, timestamp, elapsed_time):
-        return IDLE_STATUS_MSG + ' ' + LAST_JOB_MSG_TEMPLATE.format(status, timestamp, elapsed_time)
+        return IDLE_STATUS_MSG + " " + LAST_JOB_MSG_TEMPLATE.format(status, timestamp, elapsed_time)

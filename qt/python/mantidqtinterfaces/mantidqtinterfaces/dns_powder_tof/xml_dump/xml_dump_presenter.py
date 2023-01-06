@@ -9,12 +9,10 @@
 DNS xml data dump presenter.
 """
 
-from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import \
-    DNSObserver
+from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import DNSObserver
 
 
 class DNSXMLDumpPresenter(DNSObserver):
-
     def __init__(self, name=None, parent=None, view=None, model=None):
         super().__init__(parent=parent, name=name, view=view, model=model)
         self.last_filename = None
@@ -37,7 +35,7 @@ class DNSXMLDumpPresenter(DNSObserver):
             options = self.param_dict
             self.model.dict_to_xml_file(options, xml_file_path, xml_header)
             self.last_filename = xml_file_path
-            self.view.show_status_message(f'Saved as {xml_file_path}', 30)
+            self.view.show_status_message(f"Saved as {xml_file_path}", 30)
         return xml_file_path
 
     def save_xml(self):
@@ -48,8 +46,7 @@ class DNSXMLDumpPresenter(DNSObserver):
             xml_header = self.view.get_file_header()
             options = self.param_dict
             self.model.dict_to_xml_file(options, self.last_filename, xml_header)
-            self.view.show_status_message(
-                f'Saved as {self.last_filename}', 30)
+            self.view.show_status_message(f"Saved as {self.last_filename}", 30)
         else:
             self.save_as_xml()
 
@@ -59,13 +56,13 @@ class DNSXMLDumpPresenter(DNSObserver):
     def _get_xml_file_path_for_loading(self):
         xml_filepath = self.view.open_load_filename()
         xml_filepath = xml_filepath[0]
-        if xml_filepath and not xml_filepath.lower().endswith('.xml'):
-            xml_filepath = ''.join([xml_filepath, '.xml'])
+        if xml_filepath and not xml_filepath.lower().endswith(".xml"):
+            xml_filepath = "".join([xml_filepath, ".xml"])
         return xml_filepath
 
     def _get_xml_file_path_for_saving(self):
         xml_filepath = self.view.open_save_filename()
         xml_filepath = xml_filepath[0]
-        if xml_filepath and not xml_filepath.lower().endswith('.xml'):
-            xml_filepath = ''.join([xml_filepath, '.xml'])
+        if xml_filepath and not xml_filepath.lower().endswith(".xml"):
+            xml_filepath = "".join([xml_filepath, ".xml"])
         return xml_filepath

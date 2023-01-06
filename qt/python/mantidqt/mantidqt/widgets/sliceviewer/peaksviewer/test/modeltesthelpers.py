@@ -39,13 +39,13 @@ def create_peaks_viewer_model(centers, fg_color, name=None):
         return peaks[index]
 
     def column(name: str):
-        if name in ('QLab', 'QSample'):
+        if name in ("QLab", "QSample"):
             return centers
 
     def remove_peak(peak_number: int):
         return peak_number
 
-    model = PeaksViewerModel(create_autospec(PeaksWorkspace), fg_color, 'unused')
+    model = PeaksViewerModel(create_autospec(PeaksWorkspace), fg_color, "unused")
     if name is not None:
         model.ws.name.return_value = name
     model.ws.__iter__.return_value = peaks
@@ -63,14 +63,12 @@ def create_mock_peak(center):
     peak.getQSampleFrame.return_value = V3D(*center)
     peak.getHKL.return_value = V3D(*center)
     shape = MagicMock()
-    shape.shapeName.return_value = 'none'
+    shape.shapeName.return_value = "none"
     peak.getPeakShape.return_value = shape
     return peak
 
 
-def create_slice_info(transform_side_effect,
-                      slice_value,
-                      slice_width):
+def create_slice_info(transform_side_effect, slice_value, slice_width):
     slice_info = MagicMock()
     slice_info.transform.side_effect = transform_side_effect
     slice_info.z_value = slice_value

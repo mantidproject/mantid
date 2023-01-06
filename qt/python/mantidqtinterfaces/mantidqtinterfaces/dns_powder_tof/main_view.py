@@ -31,9 +31,7 @@ class DNSReductionGUIView(QMainWindow):
         self.app = app
         self.within_mantid = within_mantid
         # load main ui file for gui
-        self.ui = load_ui(__file__,
-                          'dns_gui_main_reduced_menu.ui',
-                          baseinstance=self)
+        self.ui = load_ui(__file__, "dns_gui_main_reduced_menu.ui", baseinstance=self)
         self.subview_menus = []
         self.last_index = 0
         # connect menu signals
@@ -45,10 +43,10 @@ class DNSReductionGUIView(QMainWindow):
         self.ui.actionDNS_website.triggered.connect(self._open_dns_webpage)
         # connect mode switching signals
         self.modus_mapping = {
-            self.ui.actionPowder_TOF: 'powder_tof',
+            self.ui.actionPowder_TOF: "powder_tof",
         }
         self.modus_titles = {
-            'powder_tof': 'DNS Reduction - Powder TOF',
+            "powder_tof": "DNS Reduction - Powder TOF",
         }
         for key in self.modus_mapping:
             key.triggered.connect(self._modus_change)
@@ -98,8 +96,7 @@ class DNSReductionGUIView(QMainWindow):
         return None
 
     def _help_button_clicked(self):
-        show_interface_help("direct/dns_powder_tof/DNS Powder TOF",
-                            QProcess(self))
+        show_interface_help("direct/dns_powder_tof/DNS Powder TOF", QProcess(self))
 
     def add_submenu(self, subview):
         for menu in subview.menues:
@@ -120,7 +117,7 @@ class DNSReductionGUIView(QMainWindow):
 
     @staticmethod
     def _open_dns_webpage():
-        webbrowser.open('https://mlz-garching.de/dns', new=1, autoraise=True)
+        webbrowser.open("https://mlz-garching.de/dns", new=1, autoraise=True)
 
     def _open_triggered(self):
         self.sig_open_triggered.emit()
@@ -131,7 +128,7 @@ class DNSReductionGUIView(QMainWindow):
     def _save_triggered(self):
         self.sig_save_triggered.emit()
 
-    def show_status_message(self, message='', time=10, clear=False):
+    def show_status_message(self, message="", time=10, clear=False):
         old_message = self.ui.statusbar.currentMessage()
         if old_message and not clear:
             message = " AND ".join((message, old_message))
@@ -139,7 +136,7 @@ class DNSReductionGUIView(QMainWindow):
 
     def switch_to_plot_tab(self):
         for i, subview in enumerate(self.subviews):
-            if 'Plot' in subview.NAME:
+            if "Plot" in subview.NAME:
                 self.ui.tabWidget.setCurrentIndex(i)
                 self._tab_changed(i)
                 break

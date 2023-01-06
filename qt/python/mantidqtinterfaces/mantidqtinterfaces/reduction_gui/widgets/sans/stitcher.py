@@ -5,9 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, protected-access, super-on-old-class
-from qtpy.QtWidgets import (QButtonGroup, QFileDialog, QMessageBox, QFrame)  # noqa
-from qtpy.QtCore import (QFile, QObject, QEvent, Qt, QFileInfo)  # noqa
-from qtpy.QtGui import (QDoubleValidator)  # noqa
+from qtpy.QtWidgets import QButtonGroup, QFileDialog, QMessageBox, QFrame  # noqa
+from qtpy.QtCore import QFile, QObject, QEvent, Qt, QFileInfo  # noqa
+from qtpy.QtGui import QDoubleValidator  # noqa
 import os
 from mantidqtinterfaces.reduction_gui.settings.application_settings import GeneralSettings
 from mantidqtinterfaces.reduction_gui.widgets.base_widget import BaseWidget
@@ -17,7 +17,8 @@ from mantid.plots._compatability import plotSpectrum
 from mantid.api import AnalysisDataService
 from LargeScaleStructures.data_stitching import DataSet, Stitcher, RangeSelector
 from reduction_gui.reduction.scripter import BaseScriptElement
-Ui_Frame, _ = load_ui(__file__, '../../../ui/stitcher.ui')
+
+Ui_Frame, _ = load_ui(__file__, "../../../ui/stitcher.ui")
 
 
 class StitcherState(BaseScriptElement):
@@ -27,8 +28,9 @@ class StitcherState(BaseScriptElement):
 
 class StitcherWidget(BaseWidget):
     """
-        Widget that present a data catalog to the user
+    Widget that present a data catalog to the user
     """
+
     ## Widget name
     name = "Data Stitching"
 
@@ -70,7 +72,7 @@ class StitcherWidget(BaseWidget):
 
     def initialize_content(self):
         """
-            Initialize the content of the frame
+        Initialize the content of the frame
         """
         # Validators
         self._content.low_scale_edit.setValidator(QDoubleValidator(self._content.low_scale_edit))
@@ -164,37 +166,41 @@ class StitcherWidget(BaseWidget):
         ws_list = AnalysisDataService.getObjectNames()
         for _ws in ws_list:
             ws_object = AnalysisDataService.retrieve(_ws)
-            if not _ws.startswith("__") and combo.findText(_ws) < 0 \
-                    and hasattr(ws_object, "getNumberHistograms") \
-                    and ws_object.getNumberHistograms() == 1:
+            if (
+                not _ws.startswith("__")
+                and combo.findText(_ws) < 0
+                and hasattr(ws_object, "getNumberHistograms")
+                and ws_object.getNumberHistograms() == 1
+            ):
                 combo.addItem(_ws)
 
     def _update_low_scale(self):
         """
-            Callback for scale update from user
+        Callback for scale update from user
         """
         self._low_q_data.set_scale(float(self._content.low_scale_edit.text()))
         self.plot_result()
 
     def _update_medium_scale(self):
         """
-            Callback for scale update from user
+        Callback for scale update from user
         """
         self._medium_q_data.set_scale(float(self._content.medium_scale_edit.text()))
         self.plot_result()
 
     def _update_high_scale(self):
         """
-            Callback for scale update from user
+        Callback for scale update from user
         """
         self._high_q_data.set_scale(float(self._content.high_scale_edit.text()))
         self.plot_result()
 
     def _low_range(self):
         """
-            User requested to select range common to data sets 1 and 2
+        User requested to select range common to data sets 1 and 2
         """
         if self._low_q_data is not None:
+
             def call_back(minmax):
                 self._content.low_min_edit.setText("%-6.3g" % minmax[0])
                 self._content.low_max_edit.setText("%-6.3g" % minmax[1])
@@ -208,9 +214,10 @@ class StitcherWidget(BaseWidget):
 
     def _medium_range(self):
         """
-            User requested to select range common to data sets 2 and 3
+        User requested to select range common to data sets 2 and 3
         """
         if self._medium_q_data is not None:
+
             def call_back(minmax):
                 self._content.medium_min_edit.setText("%-6.3g" % minmax[0])
                 self._content.medium_max_edit.setText("%-6.3g" % minmax[1])
@@ -224,34 +231,33 @@ class StitcherWidget(BaseWidget):
 
     def _low_q_selected(self):
         """
-            Callback for radio button clicked [selected as reference data set]
+        Callback for radio button clicked [selected as reference data set]
         """
         self._content.low_scale_edit.setText("1.0")
         self._referenceID = 0
 
     def _medium_q_selected(self):
         """
-            Callback for radio button clicked [selected as reference data set]
+        Callback for radio button clicked [selected as reference data set]
         """
         self._content.medium_scale_edit.setText("1.0")
         self._referenceID = 1
 
     def _high_q_selected(self):
         """
-            Callback for radio button clicked [selected as reference data set]
+        Callback for radio button clicked [selected as reference data set]
         """
         self._content.high_scale_edit.setText("1.0")
         self._referenceID = 2
 
-    def update_data(self, dataset_control, min_control, max_control,
-                    scale_control):
+    def update_data(self, dataset_control, min_control, max_control, scale_control):
         """
-            Update a data set
+        Update a data set
 
-            @param dataset_control: combo box with the file path or workspace name
-            @param min_control: text widget containing the minimum Q of the overlap region
-            @param max_control: text widget containing the maximum Q of the overlap region
-            @param scale_control: text widget containing the scale (can be input or output)
+        @param dataset_control: combo box with the file path or workspace name
+        @param min_control: text widget containing the minimum Q of the overlap region
+        @param max_control: text widget containing the maximum Q of the overlap region
+        @param scale_control: text widget containing the scale (can be input or output)
         """
         data_object = None
 
@@ -265,11 +271,11 @@ class StitcherWidget(BaseWidget):
             except (AttributeError, ImportError, NameError, TypeError, ValueError, Warning):
                 data_object = None
                 util.set_valid(dataset_control.lineEdit(), False)
-                QMessageBox.warning(self, "Error loading file",
-                                          "Could not load %s.\nMake sure you pick the XML output from the reduction." % file_in)
+                QMessageBox.warning(
+                    self, "Error loading file", "Could not load %s.\nMake sure you pick the XML output from the reduction." % file_in
+                )
                 return
-            if min_control is not None and max_control is not None \
-                    and (len(min_control.text()) == 0 or len(max_control.text()) == 0):
+            if min_control is not None and max_control is not None and (len(min_control.text()) == 0 or len(max_control.text()) == 0):
                 minx, maxx = data_object.get_range()
                 min_control.setText("%-6.3g" % minx)
                 max_control.setText("%-6.3g" % maxx)
@@ -291,32 +297,27 @@ class StitcherWidget(BaseWidget):
 
     def _update_low_q(self, _ws=None):
         """
-            Update Low-Q data set
+        Update Low-Q data set
         """
-        self._low_q_data = self.update_data(self._content.low_q_combo,
-                                            self._content.low_min_edit,
-                                            self._content.low_max_edit,
-                                            self._content.low_scale_edit)
+        self._low_q_data = self.update_data(
+            self._content.low_q_combo, self._content.low_min_edit, self._content.low_max_edit, self._content.low_scale_edit
+        )
         self._low_q_modified = False
 
     def _update_medium_q(self, _ws=None):
         """
-            Update Medium-Q data set
+        Update Medium-Q data set
         """
-        self._medium_q_data = self.update_data(self._content.medium_q_combo,
-                                               self._content.medium_min_edit,
-                                               self._content.medium_max_edit,
-                                               self._content.medium_scale_edit)
+        self._medium_q_data = self.update_data(
+            self._content.medium_q_combo, self._content.medium_min_edit, self._content.medium_max_edit, self._content.medium_scale_edit
+        )
         self._medium_q_modified = False
 
     def _update_high_q(self, _ws=None):
         """
-            Update High-Q data set
+        Update High-Q data set
         """
-        self._high_q_data = self.update_data(self._content.high_q_combo,
-                                             None,
-                                             None,
-                                             self._content.high_scale_edit)
+        self._high_q_data = self.update_data(self._content.high_q_combo, None, None, self._content.high_scale_edit)
         self._high_q_modified = False
 
         file_in = str(self._content.high_q_combo.lineEdit().text())
@@ -329,8 +330,9 @@ class StitcherWidget(BaseWidget):
             except (AttributeError, ImportError, NameError, TypeError, ValueError, Warning):
                 self._high_q_data = None
                 util.set_valid(self._content.high_q_combo.lineEdit(), False)
-                QMessageBox.warning(self, "Error loading file",
-                                          "Could not load %s.\nMake sure you pick the XML output from the reduction." % file_in)
+                QMessageBox.warning(
+                    self, "Error loading file", "Could not load %s.\nMake sure you pick the XML output from the reduction." % file_in
+                )
                 return
             self._content.high_scale_edit.setText("1.0")
             util.set_valid(self._content.high_q_combo.lineEdit(), True)
@@ -340,14 +342,13 @@ class StitcherWidget(BaseWidget):
 
     def data_browse_dialog(self):
         """
-            Pop up a file dialog box.
+        Pop up a file dialog box.
         """
         title = "Data file - Choose a reduced I(Q) file"
         if not os.path.isdir(str(self._output_dir)):
             self._output_dir = os.path.expanduser("~")
-        FileName = QFileDialog.getOpenFileName(self, title, self._output_dir,
-                                               "Reduced txt files (*.txt);; All files (*)")
-        if isinstance(FileName,tuple):
+        FileName = QFileDialog.getOpenFileName(self, title, self._output_dir, "Reduced txt files (*.txt);; All files (*)")
+        if isinstance(FileName, tuple):
             FileName = FileName[0]
         fname = QFileInfo(FileName).filePath()
         if fname:
@@ -359,7 +360,7 @@ class StitcherWidget(BaseWidget):
 
     def _low_q_browse(self):
         """
-            Browse for Low-Q I(Q) data set
+        Browse for Low-Q I(Q) data set
         """
         fname = self.data_browse_dialog()
         if fname:
@@ -369,7 +370,7 @@ class StitcherWidget(BaseWidget):
 
     def _medium_q_browse(self):
         """
-            Browse for Medium-Q I(Q) data set
+        Browse for Medium-Q I(Q) data set
         """
         fname = self.data_browse_dialog()
         if fname:
@@ -379,7 +380,7 @@ class StitcherWidget(BaseWidget):
 
     def _high_q_browse(self):
         """
-            Browse for High-Q I(Q) data set
+        Browse for High-Q I(Q) data set
         """
         fname = self.data_browse_dialog()
         if fname:
@@ -389,8 +390,8 @@ class StitcherWidget(BaseWidget):
 
     def is_running(self, is_running):
         """
-            Enable/disable controls depending on whether a reduction is running or not
-            @param is_running: True if a reduction is running
+        Enable/disable controls depending on whether a reduction is running or not
+        @param is_running: True if a reduction is running
         """
         super(StitcherWidget, self).is_running(is_running)
         self._content.save_result_button.setEnabled(not is_running)
@@ -398,16 +399,16 @@ class StitcherWidget(BaseWidget):
 
     def _data_updated(self, key, value):
         """
-            Respond to application-level key/value pair updates.
-            @param key: key string
-            @param value: value string
+        Respond to application-level key/value pair updates.
+        @param key: key string
+        @param value: value string
         """
         if key == "OUTPUT_DIR":
             self._output_dir = value
 
     def _apply(self):
         """
-            Perform auto-scaling
+        Perform auto-scaling
         """
         # Update data sets, in case the user typed in a file name without using the browse button
         if self._low_q_modified:
@@ -462,7 +463,7 @@ class StitcherWidget(BaseWidget):
 
     def plot_result(self):
         """
-            Plot the scaled data sets
+        Plot the scaled data sets
         """
         low_xmin = util._check_and_get_float_line_edit(self._content.low_min_edit)
         low_xmax = util._check_and_get_float_line_edit(self._content.low_max_edit)
@@ -493,23 +494,21 @@ class StitcherWidget(BaseWidget):
 
     def _save_result(self):
         """
-            Save the scaled output in one combined I(Q) file
+        Save the scaled output in one combined I(Q) file
         """
         if self._stitcher is not None:
             if not os.path.isdir(self._output_dir):
                 self._output_dir = os.path.expanduser("~")
-            fname = QFileDialog.getSaveFileName(self, "Save combined I(Q)",
-                                                      self._output_dir,
-                                                      "Data Files (*.xml)")
+            fname = QFileDialog.getSaveFileName(self, "Save combined I(Q)", self._output_dir, "Data Files (*.xml)")
             if not fname:
                 return
             if isinstance(fname, tuple):
                 fname = fname[0]
             fname = str(QFileInfo(fname).filePath())
             if len(fname) > 0:
-                if fname.endswith('.xml'):
+                if fname.endswith(".xml"):
                     self._stitcher.save_combined(fname, as_canSAS=True)
-                elif fname.endswith('.txt'):
+                elif fname.endswith(".txt"):
                     self._stitcher.save_combined(fname, as_canSAS=False)
                 else:
                     fname_tmp = fname + ".xml"
@@ -519,7 +518,7 @@ class StitcherWidget(BaseWidget):
 
     def set_state(self, state):
         """
-            Update the catalog according to the new data path
+        Update the catalog according to the new data path
         """
         # Refresh combo boxes
         self.populate_combobox(self._content.low_q_combo)
@@ -528,6 +527,6 @@ class StitcherWidget(BaseWidget):
 
     def get_state(self):
         """
-            Return dummy state
+        Return dummy state
         """
         return StitcherState()

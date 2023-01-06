@@ -10,8 +10,8 @@ from qtpy.QtCore import Signal
 from mantidqtinterfaces.Muon.GUI.Common import message_box
 from mantidqtinterfaces.Muon.GUI.Common.utilities import table_utils
 
-diff_columns = {0: 'diff_name', 1: 'to_analyse', 2: 'group_1', 3: 'group_2'}
-inverse_diff_columns = {'diff_name': 0, 'to_analyse': 1, 'group_1': 2, 'group_2': 3}
+diff_columns = {0: "diff_name", 1: "to_analyse", 2: "group_1", 3: "group_2"}
+inverse_diff_columns = {"diff_name": 0, "to_analyse": 1, "group_1": 2, "group_2": 3}
 
 
 class DifferenceTableView(QtWidgets.QWidget):
@@ -116,7 +116,7 @@ class DifferenceTableView(QtWidgets.QWidget):
         if not self._updating:
             self.dataChanged.emit()
 
-    def add_entry_to_table(self, row_entries, color=(255, 255, 255), tooltip=''):
+    def add_entry_to_table(self, row_entries, color=(255, 255, 255), tooltip=""):
         assert len(row_entries) == self.diff_table.columnCount()
         q_color = QtGui.QColor(*color, alpha=127)
         q_brush = QtGui.QBrush(q_color)
@@ -127,27 +127,27 @@ class DifferenceTableView(QtWidgets.QWidget):
             item = QtWidgets.QTableWidgetItem(entry)
             item.setBackground(q_brush)
             item.setToolTip(tooltip)
-            if diff_columns[i] == 'diff_name':
+            if diff_columns[i] == "diff_name":
                 diff_name_widget = table_utils.ValidatedTableItem(self._validate_diff_name_entry)
                 diff_name_widget.setText(entry)
                 self.diff_table.setItem(row_position, i, diff_name_widget)
                 item.setFlags(QtCore.Qt.ItemIsEnabled)
                 item.setFlags(QtCore.Qt.ItemIsSelectable)
-            if diff_columns[i] == 'group_1':
+            if diff_columns[i] == "group_1":
                 group1_selector_widget = self._group_selection_cell_widget()
                 # ensure changing the selection sends an update signal
                 group1_selector_widget.currentIndexChanged.connect(lambda: self.on_cell_changed(row_position, 2))
                 index = self.get_index_of_text(group1_selector_widget, entry)
                 group1_selector_widget.setCurrentIndex(index)
                 self.diff_table.setCellWidget(row_position, i, group1_selector_widget)
-            if diff_columns[i] == 'group_2':
+            if diff_columns[i] == "group_2":
                 group2_selector_widget = self._group_selection_cell_widget()
                 # ensure changing the selection sends an update signal
                 group2_selector_widget.currentIndexChanged.connect(lambda: self.on_cell_changed(row_position, 3))
                 index = self.get_index_of_text(group2_selector_widget, entry)
                 group2_selector_widget.setCurrentIndex(index)
                 self.diff_table.setCellWidget(row_position, i, group2_selector_widget)
-            if diff_columns[i] == 'to_analyse':
+            if diff_columns[i] == "to_analyse":
                 if entry:
                     item.setCheckState(QtCore.Qt.Checked)
                 else:
@@ -181,7 +181,7 @@ class DifferenceTableView(QtWidgets.QWidget):
     def get_table_item_text(self, row, col):
         if diff_columns[col] == "group_1" or diff_columns[col] == "group_2":
             return str(self.diff_table.cellWidget(row, col).currentText())
-        else: # columns without widgets
+        else:  # columns without widgets
             return str(self.diff_table.item(row, col).text())
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -229,7 +229,7 @@ class DifferenceTableView(QtWidgets.QWidget):
         self.menu.popup(QtGui.QCursor.pos())
 
     def _context_menu_add_diff_action(self, slot):
-        add_diff_action = QtWidgets.QAction('Add diff', self)
+        add_diff_action = QtWidgets.QAction("Add diff", self)
         add_diff_action.setCheckable(False)
         if len(self._get_selected_row_indices()) > 0:
             add_diff_action.setEnabled(False)
@@ -239,9 +239,9 @@ class DifferenceTableView(QtWidgets.QWidget):
     def _context_menu_remove_diff_action(self, slot):
         if len(self._get_selected_row_indices()) > 1:
             # use plural if >1 item selected
-            remove_diff_action = QtWidgets.QAction('Remove diffs', self)
+            remove_diff_action = QtWidgets.QAction("Remove diffs", self)
         else:
-            remove_diff_action = QtWidgets.QAction('Remove diff', self)
+            remove_diff_action = QtWidgets.QAction("Remove diff", self)
         if self.num_rows() == 0:
             remove_diff_action.setEnabled(False)
         remove_diff_action.triggered.connect(slot)
@@ -269,7 +269,7 @@ class DifferenceTableView(QtWidgets.QWidget):
             self.diff_table.removeRow(last_row)
 
     def enter_diff_name(self):
-        new_diff_name, ok = QtWidgets.QInputDialog.getText(self, 'diff Name', 'Enter name of new diff:')
+        new_diff_name, ok = QtWidgets.QInputDialog.getText(self, "diff Name", "Enter name of new diff:")
         if ok:
             return new_diff_name
 
@@ -303,7 +303,7 @@ class DifferenceTableView(QtWidgets.QWidget):
         for row in range(self.num_rows()):
             for col in range(self.num_cols()):
                 column_name = diff_columns[col]
-                if column_name == 'group_1' or column_name == 'group_2':
+                if column_name == "group_1" or column_name == "group_2":
                     item = self.diff_table.cellWidget(row, col)
                     item.setEnabled(False)
                 else:
@@ -314,13 +314,13 @@ class DifferenceTableView(QtWidgets.QWidget):
         for row in range(self.num_rows()):
             for col in range(self.num_cols()):
                 column_name = diff_columns[col]
-                if column_name == 'group_1' or column_name == 'group_2':
+                if column_name == "group_1" or column_name == "group_2":
                     item = self.diff_table.cellWidget(row, col)
                     item.setEnabled(True)
-                elif column_name == 'diff_name':
+                elif column_name == "diff_name":
                     item = self.diff_table.item(row, col)
                     item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
-                elif column_name == 'to_analyse':
+                elif column_name == "to_analyse":
                     item = self.diff_table.item(row, col)
                     item.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
                 else:
@@ -336,7 +336,7 @@ class DifferenceTableView(QtWidgets.QWidget):
 
     def set_to_analyse_state(self, row, state):
         checked_state = QtCore.Qt.Checked if state is True else QtCore.Qt.Unchecked
-        item = self.get_table_item(row, inverse_diff_columns['to_analyse'])
+        item = self.get_table_item(row, inverse_diff_columns["to_analyse"])
         item.setCheckState(checked_state)
 
     def set_to_analyse_state_quietly(self, row, state):
@@ -355,9 +355,11 @@ class DifferenceTableView(QtWidgets.QWidget):
         header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
 
-        self.diff_table.horizontalHeaderItem(0).setToolTip("The name of the diff :"
-                                                           "\n    - The name must be unique across all groups/diffs"
-                                                           "\n    - The name can only use digits, characters and _")
+        self.diff_table.horizontalHeaderItem(0).setToolTip(
+            "The name of the diff :"
+            "\n    - The name must be unique across all groups/diffs"
+            "\n    - The name can only use digits, characters and _"
+        )
         self.diff_table.horizontalHeaderItem(2).setToolTip("Pair 1 of the diff, selected from the pair table")
         self.diff_table.horizontalHeaderItem(3).setToolTip("Pair 2 of the diff, selected from the pair table")
         self.diff_table.horizontalHeaderItem(1).setToolTip("Whether to include this diff in the analysis")
@@ -371,9 +373,11 @@ class DifferenceTableView(QtWidgets.QWidget):
         header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
 
-        self.diff_table.horizontalHeaderItem(0).setToolTip("The name of the diff :"
-                                                           "\n    - The name must be unique across all groups/diffs"
-                                                           "\n    - The name can only use digits, characters and _")
+        self.diff_table.horizontalHeaderItem(0).setToolTip(
+            "The name of the diff :"
+            "\n    - The name must be unique across all groups/diffs"
+            "\n    - The name can only use digits, characters and _"
+        )
         self.diff_table.horizontalHeaderItem(2).setToolTip("Group 1 of the diff, selected from the group table")
         self.diff_table.horizontalHeaderItem(3).setToolTip("Group 2 of the diff, selected from the group table")
         self.diff_table.horizontalHeaderItem(1).setToolTip("Whether to include this diff in the analysis")

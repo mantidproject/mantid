@@ -25,7 +25,6 @@ from mantidqt.utils.qt.testing import start_qapplication
 
 @start_qapplication
 class InProcessJupyterConsoleTest(unittest.TestCase):
-
     def test_construction_raises_no_errors(self):
         widget = InProcessJupyterConsole()
         self.assertTrue(hasattr(widget, "kernel_manager"))
@@ -37,12 +36,12 @@ class InProcessJupyterConsoleTest(unittest.TestCase):
 
     def test_construction_with_startup_code_adds_to_banner_and_executes(self):
         widget = InProcessJupyterConsole(startup_code="x = 1")
-        self.assertEqual(1, widget.kernel_manager.kernel.shell.user_ns['x'])
+        self.assertEqual(1, widget.kernel_manager.kernel.shell.user_ns["x"])
         self._pre_delete_console_cleanup(widget)
         widget.kernel_manager.shutdown_kernel()
         del widget
 
-    @patch('mantidqt.widgets.jupyterconsole.input_qinputdialog')
+    @patch("mantidqt.widgets.jupyterconsole.input_qinputdialog")
     def test_construction_overrides_python_input_with_qinputdialog(self, mock_input):
         widget = InProcessJupyterConsole()
         kernel = widget.kernel_manager.kernel
@@ -74,5 +73,5 @@ class InProcessJupyterConsoleTest(unittest.TestCase):
             pass
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

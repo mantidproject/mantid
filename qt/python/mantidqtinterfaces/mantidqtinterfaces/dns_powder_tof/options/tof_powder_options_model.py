@@ -8,10 +8,8 @@
 DNS powder TOF options tab model of DNS Reduction GUI
 """
 
-from mantidqtinterfaces.dns_powder_tof.helpers.converters import (
-    lambda_to_energy, two_theta_to_q)
-from mantidqtinterfaces.dns_powder_tof.options.common_options_model import \
-    DNSCommonOptionsModel
+from mantidqtinterfaces.dns_powder_tof.helpers.converters import lambda_to_energy, two_theta_to_q
+from mantidqtinterfaces.dns_powder_tof.options.common_options_model import DNSCommonOptionsModel
 
 
 class DNSTofPowderOptionsModel(DNSCommonOptionsModel):
@@ -24,31 +22,26 @@ class DNSTofPowderOptionsModel(DNSCommonOptionsModel):
         det_rot_min, det_rot_max = self.get_det_rot_min_max(full_data)
         d_e = lambda_to_energy(wavelength)
         binning = {
-            'dE_min': -d_e + 0.5,
-            'dE_max': d_e - 0.5,
-            'dE_step': 2 * d_e / max(tof_channels) * 10,
+            "dE_min": -d_e + 0.5,
+            "dE_max": d_e - 0.5,
+            "dE_step": 2 * d_e / max(tof_channels) * 10,
             # in principle *10 should not be done, prevents empty bins
-            'q_max': two_theta_to_q(det_rot_max + 115, wavelength, -d_e),
-            'q_min': two_theta_to_q(det_rot_min, wavelength, 0),
-            'q_step': 0.025,  # anyhow, linear steps not good
+            "q_max": two_theta_to_q(det_rot_max + 115, wavelength, -d_e),
+            "q_min": two_theta_to_q(det_rot_min, wavelength, 0),
+            "q_step": 0.025,  # anyhow, linear steps not good
         }
-        errors = {
-            'channel_widths': channel_widths,
-            'chan_error': chan_error,
-            'tof_channels': tof_channels,
-            'tof_error': tof_error
-        }
+        errors = {"channel_widths": channel_widths, "chan_error": chan_error, "tof_channels": tof_channels, "tof_error": tof_error}
         return [binning, errors]
 
 
 def get_tof_channels(full_data):
-    tof_channels = [x['tof_channels'] for x in full_data]
+    tof_channels = [x["tof_channels"] for x in full_data]
     error = number_of_tof_channels_varies(tof_channels)
     return [tof_channels, error]
 
 
 def get_channel_widths(full_data):
-    channel_widths = [x['channel_width'] for x in full_data]
+    channel_widths = [x["channel_width"] for x in full_data]
     error = channel_width_varies(channel_widths)
     return [channel_widths, error]
 

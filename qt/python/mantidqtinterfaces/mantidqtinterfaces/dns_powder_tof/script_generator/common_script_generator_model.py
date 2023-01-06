@@ -11,7 +11,7 @@ Common model for DNS script generators.
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_error import DNSError
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_obs_model import DNSObsModel
-from mantidqtinterfaces.dns_powder_tof.helpers.file_processing import (create_dir, save_txt)
+from mantidqtinterfaces.dns_powder_tof.helpers.file_processing import create_dir, save_txt
 
 
 class DNSScriptGeneratorModel(DNSObsModel):
@@ -31,7 +31,7 @@ class DNSScriptGeneratorModel(DNSObsModel):
 
     def run_script(self, script):
         if not script:
-            return ''
+            return ""
         self._progress_is_canceled = False
         for i, line in enumerate(script):
             try:
@@ -40,8 +40,8 @@ class DNSScriptGeneratorModel(DNSObsModel):
                 return str(error_message)
             self._update_progress(i)
             if self._progress_is_canceled:
-                return 'Warning script execution stopped, no valid data.'
-        return ''
+                return "Warning script execution stopped, no valid data."
+        return ""
 
     def cancel_progress(self):
         self._progress_is_canceled = True
@@ -51,25 +51,24 @@ class DNSScriptGeneratorModel(DNSObsModel):
         Generation of a Mantid script to reduce DNS data.
         """
         self._script = [""]
-        error = ''
+        error = ""
         return self._script, error
 
     # helper functions:
     @staticmethod
     def get_auto_script_name(full_data):
-        sample_name = full_data[0]['sample_name'].strip('_.')
-        file_numbers = [x['file_number'] for x in full_data]
-        return f"script_{sample_name}_from_{min(file_numbers)}" \
-               f"_to_{max(file_numbers)}.py"
+        sample_name = full_data[0]["sample_name"].strip("_.")
+        file_numbers = [x["file_number"] for x in full_data]
+        return f"script_{sample_name}_from_{min(file_numbers)}" f"_to_{max(file_numbers)}.py"
 
     def get_filename(self, filename, full_data, auto=False):
         if auto:
             return self.get_auto_script_name(full_data)
         if filename:
-            if not filename.endswith('.py'):
-                filename = ''.join((filename, '.py'))
+            if not filename.endswith(".py"):
+                filename = "".join((filename, ".py"))
         else:
-            filename = 'script.py'
+            filename = "script.py"
         return filename
 
     @staticmethod

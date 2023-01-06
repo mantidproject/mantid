@@ -20,7 +20,7 @@ class PyChopInstrumentTests(unittest.TestCase):
 
     # Tests the Fermi chopper instruments
     def test_pychop_fermi(self):
-        instnames = ['maps', 'mari', 'merlin']
+        instnames = ["maps", "mari", "merlin"]
         res = []
         flux = []
         for inc, instname in enumerate(instnames):
@@ -28,7 +28,7 @@ class PyChopInstrumentTests(unittest.TestCase):
             # Code should give an error if the chopper settings and Ei have
             # not been set.
             self.assertRaises(ValueError, chopobj.getResolution)
-            chopobj.setChopper('s', 200)
+            chopobj.setChopper("s", 200)
             chopobj.setEi(18)
             rr, ff = chopobj.getResFlux(np.linspace(0, 17, 10))
             res.append(rr)
@@ -44,17 +44,17 @@ class PyChopInstrumentTests(unittest.TestCase):
         self.assertLess(res[1][0], res[2][0])
         # Now tests the standalone function
         for inc, instname in enumerate(instnames):
-            rr, ff = Instrument.calculate(instname, 's', 200, 18, 0)
+            rr, ff = Instrument.calculate(instname, "s", 200, 18, 0)
             self.assertAlmostEqual(rr[0], res[inc][0], places=7)
             self.assertAlmostEqual(ff, flux[inc], places=7)
 
     # Tests the different variants of LET
     def test_pychop_let(self):
-        variants = ['High flux', 'Intermediate', 'High resolution']
+        variants = ["High flux", "Intermediate", "High resolution"]
         res = []
         flux = []
         for inc, variant in enumerate(variants):
-            chopobj = Instrument('LET', variant)
+            chopobj = Instrument("LET", variant)
             # Checks that it instantiates the correct variant
             self.assertTrue(variant in chopobj.getChopper())
             # Code should give an error if the chopper settings and Ei have
@@ -73,15 +73,15 @@ class PyChopInstrumentTests(unittest.TestCase):
         self.assertLessEqual(res[1][0], res[0][0])
         # Now tests the standalone function
         for inc, variant in enumerate(variants):
-            rr, ff = Instrument.calculate('LET', variant, 200, 18, 0)
+            rr, ff = Instrument.calculate("LET", variant, 200, 18, 0)
             self.assertAlmostEqual(rr[0], res[inc][0], places=7)
             self.assertAlmostEqual(ff, flux[inc], places=7)
 
     def test_pychop_invalid_ei(self):
-        chopobj = Instrument('MARI', 'G', 400.)
+        chopobj = Instrument("MARI", "G", 400.0)
         chopobj.setEi(120)
         with warnings.catch_warnings(record=True) as w:
-            res = chopobj.getResolution(130.)
+            res = chopobj.getResolution(130.0)
             assert len(w) == 1
             assert issubclass(w[0].category, UserWarning)
             assert "Cannot calculate for energy transfer greater than Ei" in str(w[0].message)
@@ -98,7 +98,7 @@ class MockedModule(mock.MagicMock):
         return self.mock_class(*args, **kwargs)
 
 
-class MockImports():
+class MockImports:
     """
     Class to mock imports. Meant to be used with patch on `builtins.__import__`
     Fake modules can be access using the dot notation on this object, e.g.
@@ -117,7 +117,7 @@ class MockImports():
         self.replace = replace
         self.real_import = builtins.__import__
         self.loaded_modules = {}  # Stores mocks of loaded fake modules
-        self.loaded_from = {}     # Stores mocks of "from" syntax
+        self.loaded_from = {}  # Stores mocks of "from" syntax
         if replace:
             for replacement_mock in replace:
                 if replacement_mock not in self.include:
@@ -125,8 +125,8 @@ class MockImports():
 
     def _check_dot_names(self, name, ref_list):
         for ref_name in ref_list:
-            level = ref_name.count('.') + 1
-            requested = '.'.join(name.split('.')[:level])
+            level = ref_name.count(".") + 1
+            requested = ".".join(name.split(".")[:level])
             if ref_name == requested:
                 return name
         return None
@@ -139,7 +139,7 @@ class MockImports():
 
     def get_mock(self, name, fromlist):
         replacement = self._check_dot_names(name, self.replace)
-        root_name = name.split('.')[0]
+        root_name = name.split(".")[0]
         save = False
         if replacement is not None:
             rv = self.replace[replacement]
@@ -163,14 +163,14 @@ class MockImports():
         return rv
 
     def save_module(self, name, fromlist, mock_object):
-        root_name = name.split('.')[0]
+        root_name = name.split(".")[0]
         self.loaded_modules[root_name] = mock_object
         if fromlist:
             for mods in fromlist:
                 self.loaded_from[mods] = mock_object
 
     def import_func(self, name, globals=None, locals=None, fromlist=(), level=0):
-        prf = f'name:{name}, from:{fromlist}, level:{level}'
+        prf = f"name:{name}, from:{fromlist}, level:{level}"
         if self.include:
             if self.is_module_included(name):
                 return self.get_mock(name, fromlist)
@@ -191,117 +191,123 @@ class PyChopGuiTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        class fake_QMainWindow():
+        class fake_QMainWindow:
             def __init__(self, *args, **kwargs):
                 self.menuBar = mock.MagicMock()
                 self.setCentralWidget = mock.MagicMock()
                 self.setWindowTitle = mock.MagicMock()
 
-            def setWindowFlags(self, *args, **kwargs):            # noqa: E306
+            def setWindowFlags(self, *args, **kwargs):  # noqa: E306
                 pass
 
-            def show(self):                                       # noqa: E306
+            def show(self):  # noqa: E306
                 pass
 
-        class fake_QCombo(mock.MagicMock):                        # noqa: E306
+        class fake_QCombo(mock.MagicMock):  # noqa: E306
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
                 self.clear()
 
-            def clear(self):                                      # noqa: E306
+            def clear(self):  # noqa: E306
                 self.items = []
                 self.currentIndex = 0
 
-            def addItem(self, item):                              # noqa: E306
+            def addItem(self, item):  # noqa: E306
                 self.items.append(item)
 
-            def currentText(self):                                # noqa: E306
+            def currentText(self):  # noqa: E306
                 return self.items[self.currentIndex]
 
-            def count(self):                                      # noqa: E306
+            def count(self):  # noqa: E306
                 return len(self.items)
 
-            def itemText(self, idx):                              # noqa: E306
+            def itemText(self, idx):  # noqa: E306
                 return self.items[idx]
 
-            def setCurrentIndex(self, idx):                       # noqa: E306
+            def setCurrentIndex(self, idx):  # noqa: E306
                 self.currentIndex = idx
 
-            def __getattr__(self, attribute):                     # noqa: E306
+            def __getattr__(self, attribute):  # noqa: E306
                 if attribute not in self.__dict__:
                     self.__dict__[attribute] = mock.MagicMock()
                 return self.__dict__[attribute]
 
-        class fake_Line(mock.MagicMock):                          # noqa: E306
+        class fake_Line(mock.MagicMock):  # noqa: E306
             def __init__(self, parent, *args, **kwargs):
                 super().__init__(*args, **kwargs)
                 self.parent = parent
 
-            def set_label(self, label):                           # noqa: E306
+            def set_label(self, label):  # noqa: E306
                 self.parent.legends[self] = label
 
-        class fake_Axes(mock.MagicMock):                          # noqa: E306
+        class fake_Axes(mock.MagicMock):  # noqa: E306
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
                 self.legends = {}
 
-            def plot(self, *args, **kwargs):                      # noqa: E306
+            def plot(self, *args, **kwargs):  # noqa: E306
                 self.lines.append(fake_Line(self))
-                return self.lines[-1],
+                return (self.lines[-1],)
 
-            def get_legend_handles_labels(self):                  # noqa: E306
+            def get_legend_handles_labels(self):  # noqa: E306
                 labels = [self.legends[line] for line in self.lines]
                 return self.lines, labels
 
-        class fake_Figure(mock.MagicMock):                        # noqa: E306
+        class fake_Figure(mock.MagicMock):  # noqa: E306
             def add_subplot(self, *args, **kwargs):
                 return fake_Axes()
 
-        class fake_Slider(mock.MagicMock):                        # noqa: E306
+        class fake_Slider(mock.MagicMock):  # noqa: E306
             def __init__(self, parent, label, valmin, valmax, **kwargs):
                 super().__init__(parent, label, valmin, valmax, **kwargs)
                 self.parent, self.label, self.valmin, self.valmax = parent, label, valmin, valmax
-                self.val = kwargs.pop('valinit', 0.5)
+                self.val = kwargs.pop("valinit", 0.5)
                 self.valtext = mock.MagicMock()
                 self.on_changed = mock.MagicMock()
-        cls.mock_modules = MockImports(include=['qtpy', 'matplotlib', 'mantidqt', 'mantid.plots'],
-                                       replace={'QMainWindow':fake_QMainWindow,
-                                                'QComboBox':MockedModule(mock_class=fake_QCombo),
-                                                'Figure':MockedModule(mock_class=fake_Figure),
-                                                'Slider':MockedModule(mock_class=fake_Slider)})
+
+        cls.mock_modules = MockImports(
+            include=["qtpy", "matplotlib", "mantidqt", "mantid.plots"],
+            replace={
+                "QMainWindow": fake_QMainWindow,
+                "QComboBox": MockedModule(mock_class=fake_QCombo),
+                "Figure": MockedModule(mock_class=fake_Figure),
+                "Slider": MockedModule(mock_class=fake_Slider),
+            },
+        )
         # Mess around with import mechanism _inside_ PyChopGui so GUI libs not really imported
-        with patch('builtins.__import__', cls.mock_modules.import_func):
+        with patch("builtins.__import__", cls.mock_modules.import_func):
             from mantidqtinterfaces.PyChop import PyChopGui
+
             cls.window = PyChopGui.PyChopGui()
             cls.window.eiPlots.isChecked = mock.MagicMock(return_value=False)
-            cls.mock_modules.matplotlib.__version__ = '2.1.0'
+            cls.mock_modules.matplotlib.__version__ = "2.1.0"
 
     def test_hyspec(self):
         # Tests that Hyspec routines are only called when the instrument is Hyspec
-        with patch.object(self.window, 'setS2') as setS2:
-            self.window.setInstrument('MAPS')
+        with patch.object(self.window, "setS2") as setS2:
+            self.window.setInstrument("MAPS")
             self.window.calc_callback()
             setS2.assert_not_called()
-            self.window.setInstrument('HYSPEC')
+            self.window.setInstrument("HYSPEC")
             self.window.calc_callback()
             setS2.assert_called()
         # Test that the value of S2 is set correctly
-        with patch.object(self.window.widgets['S2Edit']['Edit'], 'text') as S2txt:
-            S2txt.return_value = '55'
+        with patch.object(self.window.widgets["S2Edit"]["Edit"], "text") as S2txt:
+            S2txt.return_value = "55"
             self.window.setS2()
             assert self.window.hyspecS2 == 55
             # Valid values are from -150 to +150
-            S2txt.return_value = '155'
+            S2txt.return_value = "155"
             with self.assertRaises(ValueError):
                 self.window.setS2()
 
     def test_plot_flux_ei(self):
         # Tests that Hyspec routines are only called when the instrument is Hyspec
-        with patch.object(self.window, 'plot_flux_ei') as plot_flux_ei:
-            self.window.widgets['EiEdit']['Edit'].text = mock.MagicMock(return_value='')
+        with patch.object(self.window, "plot_flux_ei") as plot_flux_ei:
+            self.window.widgets["EiEdit"]["Edit"].text = mock.MagicMock(return_value="")
             self.window.calc_callback()
             plot_flux_ei.assert_not_called()
-            self.window.widgets['EiEdit']['Edit'].text = mock.MagicMock(return_value=120)
+            self.window.widgets["EiEdit"]["Edit"].text = mock.MagicMock(return_value=120)
             self.window.calc_callback()
             plot_flux_ei.assert_called()
 
@@ -309,49 +315,49 @@ class PyChopGuiTests(unittest.TestCase):
         # Test that if we have N independent phases, we get N text boxes to input them
         # There are no instruments which currently has more than 1 independent phases
         # So we just use a modified version of LET
-        let_choppers = self.window.instruments['LET'].chopper_system
+        let_choppers = self.window.instruments["LET"].chopper_system
         let_choppers.isPhaseIndependent = [1, 2]
         let_choppers.defaultPhase = [5, 2200]
-        let_choppers.phaseNames = ['Chopper 2 delay', 'Chopper 3 delay']
-        self.window.setInstrument('LET')
+        let_choppers.phaseNames = ["Chopper 2 delay", "Chopper 3 delay"]
+        self.window.setInstrument("LET")
         # 2 calls per chopper to insert a label and an edit box each
         assert self.window.leftPanel.insertWidget.call_count == 4
         # All `QLabel`s are the same mock object
         calls = self.mock_modules.QLabel().setText.call_args_list
-        assert calls[-2] == mock.call('Chopper 2 delay')
-        assert calls[-1] == mock.call('Chopper 3 delay')
+        assert calls[-2] == mock.call("Chopper 2 delay")
+        assert calls[-1] == mock.call("Chopper 3 delay")
 
     def test_update_on_Ei_press_enter(self):
         # Test that when we press "enter" in the Ei box, that plots are generated
         # if the "eiPlots" option is selected
-        with patch.object(self.window, 'calc_callback') as calc:
+        with patch.object(self.window, "calc_callback") as calc:
             self.window.eiPlots.isChecked = mock.MagicMock(return_value=True)
-            self.window.setInstrument('ARCS')
-            self.window.widgets['EiEdit']['Edit'].setText('50')
+            self.window.setInstrument("ARCS")
+            self.window.widgets["EiEdit"]["Edit"].setText("50")
             self.window.setEi()
             calc.assert_called_once()
 
     def test_merlin_specials(self):
         # Tests Merlin special routines are called for Merlin
-        self.window.setInstrument('MERLIN')
+        self.window.setInstrument("MERLIN")
         # Checks that the pulse removal phase is hiden from users unless the
         # "instrument_scientist" mode is enabled
         self.window.instSciAct.isChecked = mock.MagicMock(return_value=False)
-        self.window.widgets['Chopper0Phase']['Edit'].hide.assert_called()
+        self.window.widgets["Chopper0Phase"]["Edit"].hide.assert_called()
         # Merlin can run with either the "G" chopper in RRM-mode
         # or the "S" chopper without RRM
-        self.window.widgets['MultiRepCheck'].setEnabled.reset_mock()
-        self.window.setChopper('G')
-        self.window.widgets['MultiRepCheck'].setEnabled.assert_called_with(True)
-        with patch.object(self.window, '_hide_phases') as hide_phases:
-            self.window.setChopper('S')
-            self.window.widgets['MultiRepCheck'].setEnabled.assert_called_with(False)
+        self.window.widgets["MultiRepCheck"].setEnabled.reset_mock()
+        self.window.setChopper("G")
+        self.window.widgets["MultiRepCheck"].setEnabled.assert_called_with(True)
+        with patch.object(self.window, "_hide_phases") as hide_phases:
+            self.window.setChopper("S")
+            self.window.widgets["MultiRepCheck"].setEnabled.assert_called_with(False)
             hide_phases.assert_called()
         # Now check that with inst sci mode on, user can change the pulse removal phase
-        self.window.widgets['Chopper0Phase']['Edit'].show.reset_mock()
+        self.window.widgets["Chopper0Phase"]["Edit"].show.reset_mock()
         self.window.instSciAct.isChecked = mock.MagicMock(return_value=True)
-        self.window.setChopper('G')
-        self.window.widgets['Chopper0Phase']['Edit'].show.assert_called()
+        self.window.setChopper("G")
+        self.window.widgets["Chopper0Phase"]["Edit"].show.assert_called()
 
 
 if __name__ == "__main__":

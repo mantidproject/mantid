@@ -13,14 +13,7 @@ FIT_FUNCTION_GUESS_LABEL = "Fit function guess"
 
 
 class WorkspacePlotInformation(object):
-
-    def __init__(self,
-                 workspace_name: str,
-                 index: int,
-                 axis: int,
-                 normalised: bool,
-                 errors: bool,
-                 label: str):
+    def __init__(self, workspace_name: str, index: int, axis: int, normalised: bool, errors: bool, label: str):
         self.workspace_name = workspace_name
         self.index = index
         self.axis = axis
@@ -30,16 +23,13 @@ class WorkspacePlotInformation(object):
 
     # equal only checks for workspace, axis, and spec num, as the user could have changed the other states
     def __eq__(self, other):
-        if self.workspace_name == other.workspace_name and \
-                self.index == other.index and \
-                self.axis == other.axis:
+        if self.workspace_name == other.workspace_name and self.index == other.index and self.axis == other.axis:
             return True
         else:
             return False
 
 
 class PlottingCanvasModel(object):
-
     def __init__(self, plot_model):
         self._user_axis_limits = None
         self._axes_workspace_map = {}
@@ -57,8 +47,9 @@ class PlottingCanvasModel(object):
     def is_tiled(self, state: bool):
         self._is_tiled = state
 
-    def create_workspace_plot_information(self, input_workspace_names: List[str], input_indices: List[int],
-                                          errors: bool) -> List[WorkspacePlotInformation]:
+    def create_workspace_plot_information(
+        self, input_workspace_names: List[str], input_indices: List[int], errors: bool
+    ) -> List[WorkspacePlotInformation]:
         """
         Creates a list of workspace plot information (workspace name, index, axis..) from a input list
         of indices and workspace names
@@ -89,8 +80,7 @@ class PlottingCanvasModel(object):
         for axis_number, key in enumerate(tiled_keys):
             self._axes_workspace_map[key] = axis_number
 
-    def create_plot_information(self, workspace_name: str, index: int, axis: int,
-                                errors: bool) -> WorkspacePlotInformation:
+    def create_plot_information(self, workspace_name: str, index: int, axis: int, errors: bool) -> WorkspacePlotInformation:
         """
         Creates a workspace plot information instance (workspace name, index, axis..) from an input
         workspace name, index, axis and errors flag.
@@ -101,9 +91,9 @@ class PlottingCanvasModel(object):
         :return: A WorkspacePlotInformation instance desciribng the data to be plotted
         """
         label = self._plot_model._create_workspace_label(workspace_name, index)
-        return WorkspacePlotInformation(workspace_name=workspace_name, index=index, axis=axis,
-                                        normalised=self._normalised,
-                                        errors=errors, label=label)
+        return WorkspacePlotInformation(
+            workspace_name=workspace_name, index=index, axis=axis, normalised=self._normalised, errors=errors, label=label
+        )
 
     def create_plot_information_for_guess_ws(self, guess_ws_name: str) -> WorkspacePlotInformation:
         """
@@ -113,16 +103,16 @@ class PlottingCanvasModel(object):
         """
         axis = self._plot_model._get_workspace_plot_axis(guess_ws_name, self._axes_workspace_map)
 
-        return WorkspacePlotInformation(workspace_name=guess_ws_name, index=1, axis=axis,
-                                        normalised=self._normalised,
-                                        errors=False, label=FIT_FUNCTION_GUESS_LABEL)
+        return WorkspacePlotInformation(
+            workspace_name=guess_ws_name, index=1, axis=axis, normalised=self._normalised, errors=False, label=FIT_FUNCTION_GUESS_LABEL
+        )
 
     def _get_workspace_plot_axis(self, workspace_name):
         return self._plot_model._get_workspace_plot_axis(workspace_name, self._axes_workspace_map)
 
     def create_axes_titles(self):
         if not self._is_tiled:
-            return ''
+            return ""
         else:
             return list(self._axes_workspace_map.keys())
 

@@ -10,7 +10,7 @@ from qtpy.QtCore import Qt
 from mantidqt.icons import get_icon
 from mantidqt.utils.qt import create_action, load_ui
 
-DialogBase, DialogForm = load_ui(__file__, 'dialog.ui')
+DialogBase, DialogForm = load_ui(__file__, "dialog.ui")
 
 
 class FindReplaceOptions(object):
@@ -32,19 +32,15 @@ class EmbeddedFindReplaceDialogView(DialogBase, DialogForm):
 
         self.presenter = presenter
 
-        self.hide_find_replace = create_action(self, '',
-                                               on_triggered=self.presenter.hide,
-                                               shortcut=Qt.Key_Escape)
+        self.hide_find_replace = create_action(self, "", on_triggered=self.presenter.hide, shortcut=Qt.Key_Escape)
         self.addAction(self.hide_find_replace)
 
-        self.enter_to_search = create_action(self, '',
-                                             on_triggered=self.presenter.action_next,
-                                             shortcut=[Qt.Key_Return, Qt.Key_Enter])
+        self.enter_to_search = create_action(self, "", on_triggered=self.presenter.action_next, shortcut=[Qt.Key_Return, Qt.Key_Enter])
         self.addAction(self.enter_to_search)
 
-        self.shift_enter_to_search_backwards = create_action(self, '',
-                                                             on_triggered=self.presenter.action_previous,
-                                                             shortcut=["Shift+Enter", "Shift+Return"])
+        self.shift_enter_to_search_backwards = create_action(
+            self, "", on_triggered=self.presenter.action_previous, shortcut=["Shift+Enter", "Shift+Return"]
+        )
         self.addAction(self.shift_enter_to_search_backwards)
 
         self.find.lineEdit().setPlaceholderText("Find")
@@ -79,7 +75,9 @@ class EmbeddedFindReplaceDialogView(DialogBase, DialogForm):
         super(EmbeddedFindReplaceDialogView, self).closeEvent(event)
 
     def get_options(self):
-        return FindReplaceOptions(match_case=self.match_case.isChecked(),
-                                  words=self.words.isChecked(),
-                                  regex=self.regex.isChecked(),
-                                  wrap_around=self.wrap_around.isChecked())
+        return FindReplaceOptions(
+            match_case=self.match_case.isChecked(),
+            words=self.words.isChecked(),
+            regex=self.regex.isChecked(),
+            wrap_around=self.wrap_around.isChecked(),
+        )

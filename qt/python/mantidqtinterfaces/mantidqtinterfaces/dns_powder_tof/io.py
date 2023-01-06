@@ -12,7 +12,7 @@ Project save for DNS reduction GUI.
 from mantidqtinterfaces.dns_powder_tof.main_widget import DNSReductionGuiWidget
 
 
-class InterfaceAttributes():
+class InterfaceAttributes:
     # WARNING: If you delete a tag from here instead of adding a new one,
     # it will make old project files obsolete so
     # just add an extra tag to the list e.g. ["InstrumentWidget", "IWidget"]
@@ -37,7 +37,7 @@ class DNSReductionGuiWidgetDecoder(InterfaceAttributes):
     def decode(self, obj_dict, project_path=None):
         # pylint: disable=unused-argument, no-self-use
         # Recreate the GUI in a base state
-        widget = DNSReductionGuiWidget(name='DNS-Reduction')
+        widget = DNSReductionGuiWidget(name="DNS-Reduction")
         # Restore the state from the dictionary
         widget.parameter_abo.project_save_load(obj_dict)
         # Return the view of the GUI or whatever object can have .show()

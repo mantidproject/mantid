@@ -7,12 +7,10 @@
 
 import unittest
 
-from mantidqtinterfaces.dns_powder_tof.helpers.converters import (
-    lambda_to_energy, two_theta_to_q)
+from mantidqtinterfaces.dns_powder_tof.helpers.converters import lambda_to_energy, two_theta_to_q
 
 
 class DNSconvertersTest(unittest.TestCase):
-
     def setUp(self):
         pass
 
@@ -31,5 +29,5 @@ class DNSconvertersTest(unittest.TestCase):
             two_theta_to_q(120, 0, 0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

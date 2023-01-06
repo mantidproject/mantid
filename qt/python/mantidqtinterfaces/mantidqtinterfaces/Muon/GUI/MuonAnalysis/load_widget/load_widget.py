@@ -22,11 +22,8 @@ class LoadWidget(object):
         # set up the views
         self.load_file_view = BrowseFileWidgetView(parent)
         self.load_run_view = LoadRunWidgetView(parent)
-        self.load_widget_view = LoadWidgetView(parent=parent,
-                                               load_file_view=self.load_file_view,
-                                               load_run_view=self.load_run_view)
-        self.load_widget = LoadWidgetPresenter(self.load_widget_view,
-                                               LoadWidgetModel(loaded_data, context))
+        self.load_widget_view = LoadWidgetView(parent=parent, load_file_view=self.load_file_view, load_run_view=self.load_run_view)
+        self.load_widget = LoadWidgetPresenter(self.load_widget_view, LoadWidgetModel(loaded_data, context))
 
         self.file_widget = BrowseFileWidgetPresenter(self.load_file_view, BrowseFileWidgetModel(loaded_data, context))
         self.run_widget = LoadRunWidgetPresenter(self.load_run_view, LoadRunWidgetModel(loaded_data, context))

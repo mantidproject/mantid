@@ -18,7 +18,7 @@ class _ElementButtonTest(unittest.TestCase):
         self.item = ColoredPeriodicTableItem("Ti", 22, 4, 4, "titanium", 47.9000, "transition metal")
         self.element = _ElementButton(self.item)
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table._ElementButton._setBrush')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table._ElementButton._setBrush")
     def test_that_set_current_updates_value_and_calls_setBrush(self, mock_setBrush):
         self.element.setCurrent(None)
 
@@ -33,42 +33,42 @@ class _ElementButtonTest(unittest.TestCase):
         self.assertEqual(self.element.selected, self.element.isSelected())
         self.assertEqual(False, self.element.isSelected())
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table._ElementButton._setBrush')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table._ElementButton._setBrush")
     def test_that_set_selected_updates_value_and_calls_setBrush(self, mock_setBrush):
         self.element.setSelected(None)
 
         self.assertEqual(self.element.selected, None)
         self.assertEqual(mock_setBrush.call_count, 1)
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtGui.QBrush')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtGui.QBrush")
     def test_that_brush_is_called_if_element_selected(self, mock_brush):
         self.element.selected = True
-        self.element.selected_color = 'mycolor'
+        self.element.selected_color = "mycolor"
         self.element.palette = mock.Mock()
         self.element.setPalette = mock.Mock()
         self.element.update = mock.Mock()
         self.element._setBrush()
 
         self.assertEqual(mock_brush.call_count, 1)
-        mock_brush.assert_called_with('mycolor')
+        mock_brush.assert_called_with("mycolor")
         self.assertEqual(self.element.setPalette.call_count, 1)
         self.assertEqual(self.element.update.call_count, 1)
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtGui.QBrush')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtGui.QBrush")
     def test_that_brush_is_called_if_element_not_selected_and_bgcolor_not_none(self, mock_brush):
         self.element.selected = False
-        self.element.bgcolor = 'mybgcolor'
+        self.element.bgcolor = "mybgcolor"
         self.element.palette = mock.Mock()
         self.element.setPalette = mock.Mock()
         self.element.update = mock.Mock()
         self.element._setBrush()
 
         self.assertEqual(mock_brush.call_count, 1)
-        mock_brush.assert_called_with('mybgcolor')
+        mock_brush.assert_called_with("mybgcolor")
         self.assertEqual(self.element.setPalette.call_count, 1)
         self.assertEqual(self.element.update.call_count, 1)
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtGui.QBrush')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtGui.QBrush")
     def test_that_brush_is_called_if_element_not_selected_and_bgcolor_none(self, mock_brush):
         self.element.selected = False
         self.element.bgcolor = None
@@ -82,24 +82,24 @@ class _ElementButtonTest(unittest.TestCase):
         self.assertEqual(self.element.setPalette.call_count, 1)
         self.assertEqual(self.element.update.call_count, 1)
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtWidgets.QPushButton.paintEvent')
-    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtGui.QPainter.fillRect')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtWidgets.QPushButton.paintEvent")
+    @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtGui.QPainter.fillRect")
     def test_that_paint_event_does_not_call_fillRect_if_brush_is_none(self, mock_fillRect, mock_paintEvent):
         self.element.brush = None
         self.element.paintEvent(mock.Mock())
 
         self.assertEqual(mock_fillRect.call_count, 0)
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtWidgets.QPushButton.paintEvent')
-    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtGui.QPainter.fillRect')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtWidgets.QPushButton.paintEvent")
+    @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtGui.QPainter.fillRect")
     def test_that_paint_event_calls_fillRect_if_brush_is_not_none(self, mock_fillRect, mock_paintEvent):
         self.element.brush = mock.Mock()
         self.element.paintEvent(mock.Mock())
 
         self.assertEqual(mock_fillRect.call_count, 1)
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtWidgets.QPushButton.paintEvent')
-    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtGui.QPen.setWidth')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtWidgets.QPushButton.paintEvent")
+    @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtGui.QPen.setWidth")
     def test_that_setWidth_called_with_correct_parameters(self, mock_setWidth, mock_paintEvent):
         self.element.isCurrent = mock.Mock()
         self.element.isCurrent.return_value = True
@@ -141,5 +141,5 @@ class _ElementButtonTest(unittest.TestCase):
         self.assertEqual(self.element.sigElementRightClicked.emit.call_count, 1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -10,13 +10,12 @@
 #
 from mantid.api import MatrixWorkspace
 from mantid.dataobjects import EventWorkspace, Workspace2D
-from mantidqt.widgets.workspacedisplay.matrix.table_view_model import MatrixWorkspaceTableViewModel, \
-    MatrixWorkspaceTableViewModelType
+from mantidqt.widgets.workspacedisplay.matrix.table_view_model import MatrixWorkspaceTableViewModel, MatrixWorkspaceTableViewModelType
 
 
 class MatrixWorkspaceDisplayModel(object):
-    SPECTRUM_PLOT_LEGEND_STRING = '{}-{}'
-    BIN_PLOT_LEGEND_STRING = '{}-bin-{}'
+    SPECTRUM_PLOT_LEGEND_STRING = "{}-{}"
+    BIN_PLOT_LEGEND_STRING = "{}-bin-{}"
 
     ALLOWED_WORKSPACE_TYPES = [MatrixWorkspace, Workspace2D, EventWorkspace]
 
@@ -47,10 +46,12 @@ class MatrixWorkspaceDisplayModel(object):
         self._workspace_name = workspace_name
 
     def get_item_model(self):
-        return (MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.x),
-                MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.y),
-                MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.e),
-                MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.dx))
+        return (
+            MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.x),
+            MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.y),
+            MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.e),
+            MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.dx),
+        )
 
     def workspace_equals(self, workspace_name):
         return workspace_name == self._workspace_name

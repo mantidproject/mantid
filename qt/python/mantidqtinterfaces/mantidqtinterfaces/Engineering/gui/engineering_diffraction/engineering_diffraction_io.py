@@ -12,8 +12,14 @@ import sys
 
 IO_VERSION = 1
 
-SETTINGS_KEYS_TYPES = {"save_location": str, "full_calibration": str, "recalc_vanadium": bool, "logs": str,
-                       "primary_log": str, "sort_ascending": bool}
+SETTINGS_KEYS_TYPES = {
+    "save_location": str,
+    "full_calibration": str,
+    "recalc_vanadium": bool,
+    "logs": str,
+    "primary_log": str,
+    "sort_ascending": bool,
+}
 
 
 class EngineeringDiffractionUIAttributes(object):
@@ -63,7 +69,7 @@ class EngineeringDiffractionDecoder(EngineeringDiffractionUIAttributes):
             logger.error("Engineering Diffraction Interface encoder used different version, restoration may fail")
 
         ws_names = obj_dic.get("data_workspaces", None)  # workspaces are in ADS, need restoring into interface
-        if 'workbench' in sys.modules:
+        if "workbench" in sys.modules:
             from workbench.config import get_window_config
 
             parent, flags = get_window_config()
@@ -99,7 +105,7 @@ class EngineeringDiffractionDecoder(EngineeringDiffractionUIAttributes):
                 fit_browser.setEndX(fit_props["EndX"])
                 fit_browser.loadFunction(fit_function)
                 fit_browser.setOutputName(output_name)
-                ws_name = output_name + '_Workspace'
+                ws_name = output_name + "_Workspace"
                 fit_browser.do_plot(ADS.retrieve(ws_name), is_plot_diff)
         return gui
 

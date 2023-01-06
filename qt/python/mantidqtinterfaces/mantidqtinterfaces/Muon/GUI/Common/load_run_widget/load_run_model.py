@@ -36,11 +36,12 @@ class LoadRunWidgetModel(object):
                 failed_files += [(filename, error)]
                 continue
             self._loaded_data_store.remove_data(run=[run])
-            self._loaded_data_store.add_data(run=[run], workspace=ws, filename=filename,
-                                             instrument=self._data_context.instrument)
+            self._loaded_data_store.add_data(run=[run], workspace=ws, filename=filename, instrument=self._data_context.instrument)
         if failed_files:
-            message = "The requested run could not be found. This could be due to: \n - The run does not yet exist." \
-                      "\n - The file was not found locally (please check the user directories)."
+            message = (
+                "The requested run could not be found. This could be due to: \n - The run does not yet exist."
+                "\n - The file was not found locally (please check the user directories)."
+            )
             raise ValueError(message)
 
     def cancel(self):
@@ -82,7 +83,7 @@ class LoadRunWidgetModel(object):
         self._data_context.current_runs = value
 
     def get_latest_loaded_run(self):
-        return self._loaded_data_store.get_latest_data()['run']
+        return self._loaded_data_store.get_latest_data()["run"]
 
     def get_data(self, run):
         return self._loaded_data_store.get_data(run=run, instrument=self._data_context.instrument)

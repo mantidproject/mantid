@@ -10,8 +10,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from matplotlib.image import AxesImage
-from mantidqt.widgets.sliceviewer.views.cursor import (MoveMouseCursorUp, MoveMouseCursorDown,
-                                                       MoveMouseCursorLeft, MoveMouseCursorRight)
+from mantidqt.widgets.sliceviewer.views.cursor import MoveMouseCursorUp, MoveMouseCursorDown, MoveMouseCursorLeft, MoveMouseCursorRight
 from qtpy.QtCore import QPoint
 
 
@@ -27,13 +26,12 @@ class MoveMouseCursorTest(unittest.TestCase):
         mock_canvas.figure = mock_figure
 
         mock_axes = MagicMock(figure=mock_figure)
-        xmin, xmax, ymin, ymax = -5., 5., -10., 10.
+        xmin, xmax, ymin, ymax = -5.0, 5.0, -10.0, 10.0
         shape = (10, 20)
         mock_array = MagicMock(shape=(10, 20))
-        self.mock_image = MagicMock(spec=AxesImage,
-                                    axes=mock_axes,
-                                    get_extent=lambda: (xmin, xmax, ymin, ymax),
-                                    get_array=lambda: mock_array)
+        self.mock_image = MagicMock(
+            spec=AxesImage, axes=mock_axes, get_extent=lambda: (xmin, xmax, ymin, ymax), get_array=lambda: mock_array
+        )
         self.deltax = (xmax - xmin) / shape[1]
         self.deltay = (ymax - ymin) / shape[0]
         # define identity transforms to make tests simpler
@@ -45,33 +43,28 @@ class MoveMouseCursorTest(unittest.TestCase):
     def test_move_up_keeps_X_constant(self, mock_cursor_cls):
         cur_pos_data = (-1, 1)
         expected_set_pos = QPoint(-1, 97)
-        self._do_move_cursor_test(MoveMouseCursorUp, mock_cursor_cls, cur_pos_data,
-                                  expected_set_pos)
+        self._do_move_cursor_test(MoveMouseCursorUp, mock_cursor_cls, cur_pos_data, expected_set_pos)
 
     def test_move_down_keeps_X_constant(self, mock_cursor_cls):
         cur_pos_data = (-1, 1)
         expected_set_pos = QPoint(-1, 101)
-        self._do_move_cursor_test(MoveMouseCursorDown, mock_cursor_cls, cur_pos_data,
-                                  expected_set_pos)
+        self._do_move_cursor_test(MoveMouseCursorDown, mock_cursor_cls, cur_pos_data, expected_set_pos)
 
     def test_move_left_keeps_Y_constant(self, mock_cursor_cls):
         cur_pos_data = (-1, 1)
         expected_set_pos = QPoint(-2, 1)
-        self._do_move_cursor_test(MoveMouseCursorLeft, mock_cursor_cls, cur_pos_data,
-                                  expected_set_pos)
+        self._do_move_cursor_test(MoveMouseCursorLeft, mock_cursor_cls, cur_pos_data, expected_set_pos)
 
     def test_move_right_keeps_Y_constant(self, mock_cursor_cls):
         cur_pos_data = (-1, 1)
         expected_set_pos = QPoint(0, 1)
-        self._do_move_cursor_test(MoveMouseCursorRight, mock_cursor_cls, cur_pos_data,
-                                  expected_set_pos)
+        self._do_move_cursor_test(MoveMouseCursorRight, mock_cursor_cls, cur_pos_data, expected_set_pos)
 
     def test_move_respects_dpi(self, mock_cursor_cls):
         self.mock_image.axes.figure.canvas._dpi_ratio = 10.0
         cur_pos_data = (-1, 1)
         expected_set_pos = QPoint(-1, 9)
-        self._do_move_cursor_test(MoveMouseCursorUp, mock_cursor_cls, cur_pos_data,
-                                  expected_set_pos)
+        self._do_move_cursor_test(MoveMouseCursorUp, mock_cursor_cls, cur_pos_data, expected_set_pos)
 
     # private api
     def _do_move_cursor_test(self, test_cls, mock_cursor_cls, cur_pos_data, expected_set_pos):
@@ -83,5 +76,5 @@ class MoveMouseCursorTest(unittest.TestCase):
         mock_cursor_cls.setPos.assert_called_once_with(expected_set_pos)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

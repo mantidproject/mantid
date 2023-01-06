@@ -18,13 +18,13 @@ from mantidqt.utils.qt.testing import start_qapplication, ModalTester
 
 @start_qapplication
 class TestModalTester(unittest.TestCase):
-
     def test_pass_widget_closed(self):
         def testing_function(widget):
-            widget.setTextValue('Hello World!')
+            widget.setTextValue("Hello World!")
             text = widget.textValue()
-            self.assertEqual(text, 'Hello World!')
+            self.assertEqual(text, "Hello World!")
             widget.accept()
+
         tester = ModalTester(QInputDialog, testing_function)
         tester.start()
         self.assertFalse(tester.widget.isVisible())
@@ -32,11 +32,12 @@ class TestModalTester(unittest.TestCase):
 
     def test_fail_widget_closed(self):
         def testing_function(widget):
-            widget.setTextValue('Hello World!')
+            widget.setTextValue("Hello World!")
             text = widget.textValue()
-            self.assertEqual(text, 'STUFF')
+            self.assertEqual(text, "STUFF")
             widget.accept()
-        with patch('traceback.print_exc') as print_exc:
+
+        with patch("traceback.print_exc") as print_exc:
             tester = ModalTester(QInputDialog, testing_function)
             tester.start()
             print_exc.assert_called_once_with()
@@ -45,9 +46,10 @@ class TestModalTester(unittest.TestCase):
 
     def test_pass_widget_open(self):
         def testing_function(widget):
-            widget.setTextValue('Hello World!')
+            widget.setTextValue("Hello World!")
             text = widget.textValue()
-            self.assertEqual(text, 'Hello World!')
+            self.assertEqual(text, "Hello World!")
+
         tester = ModalTester(QInputDialog, testing_function)
         tester.start()
         self.assertFalse(tester.widget.isVisible())
@@ -55,10 +57,11 @@ class TestModalTester(unittest.TestCase):
 
     def test_fail_widget_open(self):
         def testing_function(widget):
-            widget.setTextValue('Hello World!')
+            widget.setTextValue("Hello World!")
             text = widget.textValue()
-            self.assertEqual(text, '')
-        with patch('traceback.print_exc') as print_exc:
+            self.assertEqual(text, "")
+
+        with patch("traceback.print_exc") as print_exc:
             tester = ModalTester(QInputDialog, testing_function)
             tester.start()
             print_exc.assert_called_once_with()
@@ -67,8 +70,9 @@ class TestModalTester(unittest.TestCase):
 
     def test_exception(self):
         def testing_function(widget):
-            raise RuntimeError('')
-        with patch('traceback.print_exc') as print_exc:
+            raise RuntimeError("")
+
+        with patch("traceback.print_exc") as print_exc:
             tester = ModalTester(QInputDialog, testing_function)
             tester.start()
             print_exc.assert_called_once_with()
@@ -77,11 +81,12 @@ class TestModalTester(unittest.TestCase):
 
     def test_exception_in_creator(self):
         def create():
-            raise RuntimeError('')
+            raise RuntimeError("")
 
         def testing_function(widget):
             pass
-        with patch('traceback.print_exc') as print_exc:
+
+        with patch("traceback.print_exc") as print_exc:
             tester = ModalTester(create, testing_function)
             tester.start()
             print_exc.assert_called_once_with()
@@ -89,5 +94,5 @@ class TestModalTester(unittest.TestCase):
         self.assertFalse(tester.passed)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

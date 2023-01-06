@@ -16,20 +16,16 @@ class FittingPresenter(object):
         self.plot_widget = FittingPlotPresenter(self.view, view=self.view.get_plot_widget())
 
         # Plot added/removed observer/notifiers
-        self.data_widget.presenter.plot_removed_notifier.add_subscriber(
-            self.plot_widget.workspace_removed_observer)
-        self.data_widget.presenter.plot_added_notifier.add_subscriber(
-            self.plot_widget.workspace_added_observer)
-        self.data_widget.presenter.all_plots_removed_notifier.add_subscriber(
-            self.plot_widget.all_workspaces_removed_observer)
+        self.data_widget.presenter.plot_removed_notifier.add_subscriber(self.plot_widget.workspace_removed_observer)
+        self.data_widget.presenter.plot_added_notifier.add_subscriber(self.plot_widget.workspace_added_observer)
+        self.data_widget.presenter.all_plots_removed_notifier.add_subscriber(self.plot_widget.all_workspaces_removed_observer)
 
         # Fit started observer/notifiers
         self.fit_all_started_observer = GenericObserverWithArgPassing(self.fit_all_started)
         self.data_widget.presenter.fit_all_started_notifier.add_subscriber(self.fit_all_started_observer)
 
         self.fit_started_observer = GenericObserver(self.fit_started)
-        self.plot_widget.view.fit_browser.fit_started_notifier.add_subscriber(
-            self.fit_started_observer)
+        self.plot_widget.view.fit_browser.fit_started_notifier.add_subscriber(self.fit_started_observer)
 
         # Fit ended observer/notifiers
         self.fit_all_done_observer = GenericObserverWithArgPassing(self.fit_all_done)
@@ -39,8 +35,7 @@ class FittingPresenter(object):
         self.plot_widget.view.fit_browser.fit_notifier.add_subscriber(self.fit_complete_observer)
 
         # Fit enabled notifier
-        self.plot_widget.view.fit_browser.fit_enabled_notifier.add_subscriber(
-            self.data_widget.presenter.fit_enabled_observer)
+        self.plot_widget.view.fit_browser.fit_enabled_notifier.add_subscriber(self.data_widget.presenter.fit_enabled_observer)
 
         self.connect_view_signals()
 

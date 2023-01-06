@@ -14,6 +14,7 @@ class DrillParameterPresenter:
     """
     Reference to the QTableWidgetItem.
     """
+
     _item = None
 
     """

@@ -18,7 +18,7 @@ from .fitpropertybrowserplotinteraction import FitPropertyBrowserPlotInteraction
 from .interactive_tool import FitInteractiveTool
 import numpy as np
 
-BaseBrowser = import_qt('.._common', 'mantidqt.widgets', 'FitPropertyBrowser')
+BaseBrowser = import_qt(".._common", "mantidqt.widgets", "FitPropertyBrowser")
 
 
 class FitPropertyBrowserBase(BaseBrowser):
@@ -71,7 +71,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             self.hide()
 
     def _update_workspace_info(self):
-        " Update the allowed spectra/tableworkspace in the fit browser"
+        "Update the allowed spectra/tableworkspace in the fit browser"
         allowed_spectra_old = self.allowed_spectra
         allowed_spectra = self._get_allowed_spectra()
         table = self._get_table_workspace()
@@ -117,7 +117,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                     # we don't want to include the fit workspace in our selection
                     if ws_name in output_wsnames:
                         continue
-                    #loop through arists and get relevant spec numbers if spec_num represents a spectrum as opposed to a bin axes.
+                    # loop through arists and get relevant spec numbers if spec_num represents a spectrum as opposed to a bin axes.
                     spectrum_list = [artist.spec_num for artist in artists if artist.is_spec]
 
                     if spectrum_list:
@@ -157,7 +157,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             workspace = AnalysisDataService.retrieve(self.workspaceName())
             if isinstance(workspace, ITableWorkspace):
                 return
-            if hasattr(workspace, 'isDistribution') and workspace.isDistribution():
+            if hasattr(workspace, "isDistribution") and workspace.isDistribution():
                 ws_is_distribution = True
         ws_artist = self._get_selected_workspace_artist()
         should_normalise_before_fit = ws_artist.is_normalized and not ws_is_distribution
@@ -171,8 +171,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         :param fun: peak function prefix
         :param fwhm: estimated fwhm of peak added
         """
-        if not self.getWidthParameterNameOf(fun) or not \
-                self.isParameterExplicitlySetOf(fun, self.getWidthParameterNameOf(fun)):
+        if not self.getWidthParameterNameOf(fun) or not self.isParameterExplicitlySetOf(fun, self.getWidthParameterNameOf(fun)):
             self.setPeakFwhmOf(fun, fwhm)
 
     def closeEvent(self, event):
@@ -200,12 +199,11 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             logger.warning("Cannot open fitting tool: No valid workspaces to fit to.")
             return
 
-        self.canvas_draw_signal = self.canvas.mpl_connect('draw_event', self._update_workspace_info_slot)
+        self.canvas_draw_signal = self.canvas.mpl_connect("draw_event", self._update_workspace_info_slot)
         super(FitPropertyBrowser, self).show()
-        self.tool = FitInteractiveTool(self.canvas,
-                                       self.toolbar_manager,
-                                       current_peak_type=self.defaultPeakType(),
-                                       default_background=self.defaultBackgroundType())
+        self.tool = FitInteractiveTool(
+            self.canvas, self.toolbar_manager, current_peak_type=self.defaultPeakType(), default_background=self.defaultBackgroundType()
+        )
         self.tool.fit_range_changed.connect(self.set_fit_range)
         self.tool.peak_added.connect(self.peak_added_slot)
         self.tool.peak_moved.connect(self.peak_moved_slot)
@@ -223,13 +221,14 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
     def set_output_window_names(self):
         import matplotlib.pyplot as plt  # unfortunately need to import again
+
         """
         Change the output name if more than one plot of the same workspace
         """
         window_title = self.canvas.manager.get_window_title()
-        workspace_name = window_title.rsplit('-', 1)[0]
+        workspace_name = window_title.rsplit("-", 1)[0]
         for open_figures in plt.get_figlabels():
-            if open_figures != window_title and open_figures.rsplit('-', 1)[0] == workspace_name:
+            if open_figures != window_title and open_figures.rsplit("-", 1)[0] == workspace_name:
                 self.setOutputName(window_title)
         return None
 
@@ -339,25 +338,25 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
     def evaluate_function(self, ws_name, fun, out_ws_name):
         workspace = AnalysisDataService.retrieve(ws_name)
-        alg = AlgorithmManager.createUnmanaged('EvaluateFunction')
+        alg = AlgorithmManager.createUnmanaged("EvaluateFunction")
         alg.setChild(True)
         alg.initialize()
-        alg.setProperty('Function', fun)
-        alg.setProperty('InputWorkspace', ws_name)
+        alg.setProperty("Function", fun)
+        alg.setProperty("InputWorkspace", ws_name)
         if isinstance(workspace, ITableWorkspace):
-            alg.setProperty('XColumn', self.getXColumnName())
-            alg.setProperty('YColumn', self.getYColumnName())
+            alg.setProperty("XColumn", self.getXColumnName())
+            alg.setProperty("YColumn", self.getYColumnName())
             if self.getErrColumnName():
-                alg.setProperty('ErrColumn', self.getErrColumnName())
+                alg.setProperty("ErrColumn", self.getErrColumnName())
         else:
-            alg.setProperty('WorkspaceIndex', self.workspaceIndex())
-        alg.setProperty('StartX', self.startX())
-        alg.setProperty('EndX', self.endX())
-        alg.setProperty('IgnoreInvalidData', self.ignoreInvalidData())
-        alg.setProperty('OutputWorkspace', out_ws_name)
+            alg.setProperty("WorkspaceIndex", self.workspaceIndex())
+        alg.setProperty("StartX", self.startX())
+        alg.setProperty("EndX", self.endX())
+        alg.setProperty("IgnoreInvalidData", self.ignoreInvalidData())
+        alg.setProperty("OutputWorkspace", out_ws_name)
         alg.execute()
 
-        return alg.getProperty('OutputWorkspace').value
+        return alg.getProperty("OutputWorkspace").value
 
     def add_to_menu(self, menu):
         """
@@ -366,11 +365,13 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         :return: The menu passed to us
         """
         if self.tool is not None:
-            self.tool.add_to_menu(menu,
-                                  peak_names=self.registeredPeaks(),
-                                  current_peak_type=self.defaultPeakType(),
-                                  background_names=self.registeredBackgrounds(),
-                                  other_names=self.registeredOthers())
+            self.tool.add_to_menu(
+                menu,
+                peak_names=self.registeredPeaks(),
+                current_peak_type=self.defaultPeakType(),
+                background_names=self.registeredBackgrounds(),
+                other_names=self.registeredOthers(),
+            )
         return menu
 
     def do_plot(self, ws, plot_diff=False, **plot_kwargs):
@@ -428,7 +429,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         except RuntimeError:
             return
 
-        plot_kwargs = {'label': out_ws_name}
+        plot_kwargs = {"label": out_ws_name}
         self.do_plot(out_ws, plot_diff=False, **plot_kwargs)
         self.sequential_fit_line = out_ws_name
 
@@ -482,8 +483,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         """
         for peak_id, prefix in self.peak_ids.items():
             if prefix == fun:
-                self.tool.update_peak(peak_id, self.getPeakCentreOf(prefix),
-                                      self.getPeakHeightOf(prefix), self.getPeakFwhmOf(prefix))
+                self.tool.update_peak(peak_id, self.getPeakCentreOf(prefix), self.getPeakHeightOf(prefix), self.getPeakFwhmOf(prefix))
         self.plot_interaction_manager.update_guess()
 
     @Slot(str)
@@ -503,8 +503,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         peaks_to_add = []
         peaks = {v: k for k, v in self.peak_ids.items()}
         for prefix in self.getPeakPrefixes():
-            c, h, w = self.getPeakCentreOf(prefix), self.getPeakHeightOf(
-                prefix), self.getPeakFwhmOf(prefix)
+            c, h, w = self.getPeakCentreOf(prefix), self.getPeakHeightOf(prefix), self.getPeakFwhmOf(prefix)
             if w > (self.endX() - self.startX()):
                 logger.warning("Peak FWHM > X range. Width markers will not be shown")
             if prefix in peaks:
@@ -522,13 +521,11 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                 if prefix is None:
                     need_update_markers = True
                     break
-                if self.getPeakCentreOf(prefix) != c or self.getPeakHeightOf(prefix) != h or \
-                        self.getPeakFwhmOf(prefix) != w:
+                if self.getPeakCentreOf(prefix) != c or self.getPeakHeightOf(prefix) != h or self.getPeakFwhmOf(prefix) != w:
                     need_update_markers = True
                     break
         if need_update_markers:
-            peak_ids, peak_updates = self.tool.update_peak_markers(self.peak_ids.keys(),
-                                                                   peaks_to_add)
+            peak_ids, peak_updates = self.tool.update_peak_markers(self.peak_ids.keys(), peaks_to_add)
             self.peak_ids.update(peak_ids)
             for prefix, c, h, w in peak_updates:
                 self.setPeakCentreOf(prefix, c)
@@ -540,6 +537,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
     def display_workspace(self, name):
         from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
         from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
+
         if AnalysisDataService.doesExist(name):
             ws = AnalysisDataService.retrieve(name)
             if isinstance(ws, MatrixWorkspace):

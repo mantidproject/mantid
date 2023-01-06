@@ -21,7 +21,7 @@ class AddFitting(AddFeature):
 
     def _get_features(self, feature_dict):
         features = []
-        if FITWIZARD in feature_dict.keys() and feature_dict[FITWIZARD]==ADD:
+        if FITWIZARD in feature_dict.keys() and feature_dict[FITWIZARD] == ADD:
             features.append(ADD)
         return features
 

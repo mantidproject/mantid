@@ -4,16 +4,18 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.fit_pane.plot_fit_pane_model import PlotFitPaneModel
-from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import (FFT_STR, MAXENT_STR,
-                                                                            get_fft_component_from_workspace_name,
-                                                                            get_group_or_pair_from_name,
-                                                                            get_run_numbers_as_string_from_workspace_name)
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import (
+    FFT_STR,
+    MAXENT_STR,
+    get_fft_component_from_workspace_name,
+    get_group_or_pair_from_name,
+    get_run_numbers_as_string_from_workspace_name,
+)
 
 
 class PlotFreqFitPaneModel(PlotFitPaneModel):
-
     def __init__(self, context):
-        super().__init__(context,"Frequency Data")
+        super().__init__(context, "Frequency Data")
         x_range = self.context._frequency_context.range()
         self.context.plot_panes_context[self.name].set_defaults(x_range, [0.0, 1.0])
 
@@ -30,14 +32,14 @@ class PlotFreqFitPaneModel(PlotFitPaneModel):
         else:
             return f"{group}{fit_label}{freq_label}"
 
-    def _get_workspace_plot_axis(self, workspace_name: str, axes_workspace_map, index = 0):
+    def _get_workspace_plot_axis(self, workspace_name: str, axes_workspace_map, index=0):
         return 0
 
     @staticmethod
     def _get_freq_label(workspace_name):
-        label = ''
+        label = ""
         if FFT_STR in workspace_name:
             label = f";{get_fft_component_from_workspace_name(workspace_name)}"
         elif MAXENT_STR in workspace_name:
-            label = f';{MAXENT_STR}'
+            label = f";{MAXENT_STR}"
         return label

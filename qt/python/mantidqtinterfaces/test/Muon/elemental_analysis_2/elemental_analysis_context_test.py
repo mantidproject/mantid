@@ -18,8 +18,9 @@ from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws,
 
 class ElementalAnalysisContextTest(unittest.TestCase):
     def setUp(self):
-        self.context = ElementalAnalysisContext(data_context=DataContext(), ea_group_context=EAGroupContext(),
-                                                muon_gui_context=MuonGuiContext)
+        self.context = ElementalAnalysisContext(
+            data_context=DataContext(), ea_group_context=EAGroupContext(), muon_gui_context=MuonGuiContext
+        )
 
     def assert_workspace_equal(self, workspace1, workspace2):
         self.assertEqual(workspace1.getNumberHistograms(), workspace2.getNumberHistograms())
@@ -40,13 +41,13 @@ class ElementalAnalysisContextTest(unittest.TestCase):
     def test_name(self):
         self.assertEqual(self.context.name, "Elemental Analysis 2")
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.context.context.retrieve_ws')
-    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.context.context.remove_ws_if_present')
-    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.context.ea_group_context.EAGroupContext.__getitem__')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.context.context.retrieve_ws")
+    @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.context.context.remove_ws_if_present")
+    @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.context.ea_group_context.EAGroupContext.__getitem__")
     def test_rebin(self, mock_get_item, mock_remove_ws, mock_retrieve_ws):
         mock_get_item.return_value = EAGroup("9999; Detector 1", "detector 1", "9999")
-        name = '9999; Detector 1'
-        rebinned_name = '9999; Detector 1' + REBINNED_VARIABLE_WS_SUFFIX
+        name = "9999; Detector 1"
+        rebinned_name = "9999; Detector 1" + REBINNED_VARIABLE_WS_SUFFIX
         mock_params = "0, 2, 9"
 
         x_data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -157,8 +158,7 @@ class ElementalAnalysisContextTest(unittest.TestCase):
         self.context.update_current_data()
 
         # assert statement
-        self.context.group_context.reset_group_to_default.assert_called_once_with(
-            self.context.data_context._loaded_data)
+        self.context.group_context.reset_group_to_default.assert_called_once_with(self.context.data_context._loaded_data)
 
     def test_update_current_data_with_populated_group_context(self):
         self.context.group_context.add_new_group = mock.Mock()
@@ -170,9 +170,10 @@ class ElementalAnalysisContextTest(unittest.TestCase):
         self.context.update_current_data()
 
         # assert statement
-        self.context.group_context.add_new_group.assert_called_once_with(self.context.group_context.groups,
-                                                                         self.context.data_context._loaded_data)
+        self.context.group_context.add_new_group.assert_called_once_with(
+            self.context.group_context.groups, self.context.data_context._loaded_data
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

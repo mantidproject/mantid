@@ -10,7 +10,7 @@
 
 import matplotlib
 
-matplotlib.use('Qt5Agg')
+matplotlib.use("Qt5Agg")
 
 from qtpy.QtWidgets import QApplication  # noqa: F402
 

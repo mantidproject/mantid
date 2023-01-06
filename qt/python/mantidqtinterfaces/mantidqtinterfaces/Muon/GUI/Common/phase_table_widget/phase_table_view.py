@@ -225,13 +225,14 @@ class PhaseTableView(QtWidgets.QWidget):
         warning(message)
 
     def enter_phasequad_name(self):
-        new_pair_name, ok = QtWidgets.QInputDialog.getText(self, 'Phasequad Name', 'Enter name of new phasequad:')
+        new_pair_name, ok = QtWidgets.QInputDialog.getText(self, "Phasequad Name", "Enter name of new phasequad:")
         if ok:
             return new_pair_name
 
     def enter_phase_table_name(self):
-        name, ok = QtWidgets.QInputDialog.getText(self, 'Phase Table Name', 'Enter the name of the new Phase table \n'
-                                                                            '(leave blank to use the default name):')
+        name, ok = QtWidgets.QInputDialog.getText(
+            self, "Phase Table Name", "Enter the name of the new Phase table \n" "(leave blank to use the default name):"
+        )
         if ok:
             return name
 
@@ -290,20 +291,20 @@ class PhaseTableView(QtWidgets.QWidget):
 
         table_utils.setRowName(self.phase_table_options_table, 3, "First Good Data")
         self.first_good_data_item, self.first_good_data_validator = table_utils.addDoubleToTable(
-            self.phase_table_options_table, 0.1, 3, minimum=0.0)
+            self.phase_table_options_table, 0.1, 3, minimum=0.0
+        )
 
         table_utils.setRowName(self.phase_table_options_table, 4, "Last Good Data")
         self.last_good_data_item, self.last_good_data_validator = table_utils.addDoubleToTable(
-            self.phase_table_options_table, 15.0, 4, minimum=0.0)
+            self.phase_table_options_table, 15.0, 4, minimum=0.0
+        )
 
         table_utils.setRowName(self.phase_table_options_table, 5, "Output fit information")
-        self.output_fit_info_box = table_utils.addCheckBoxToTable(
-            self.phase_table_options_table, False, 5)
+        self.output_fit_info_box = table_utils.addCheckBoxToTable(self.phase_table_options_table, False, 5)
 
     def setup_phasequad_table(self):
         self.phasequad_table.setColumnCount(3)
-        self.phasequad_table.setHorizontalHeaderLabels(["Phasequad Name", "Analyse Re (plot/fit)",
-                                                        "Analyse Im (plot/fit)"])
+        self.phasequad_table.setHorizontalHeaderLabels(["Phasequad Name", "Analyse Re (plot/fit)", "Analyse Im (plot/fit)"])
         header = self.phasequad_table.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
         header.setSectionResizeMode(REAL_PART, QtWidgets.QHeaderView.ResizeToContents)
