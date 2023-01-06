@@ -156,55 +156,58 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
 
     def _reduce_1D(self, input_group):
         output1D = []
-        output1D.append(
-            SumOverlappingTubes(
-                InputWorkspaces=input_group,
-                OutputType="1D",
-                HeightAxis=self._height_ranges[0],
-                MirrorScatteringAngles=self._mirror,
-                CropNegativeScatteringAngles=self._crop_negative,
-                OutputWorkspace=self._out_ws_name + "_1D",
+        for height_range in self._height_ranges:
+            output1D.append(
+                SumOverlappingTubes(
+                    InputWorkspaces=input_group,
+                    OutputType="1D",
+                    HeightAxis=height_range,
+                    MirrorScatteringAngles=self._mirror,
+                    CropNegativeScatteringAngles=self._crop_negative,
+                    OutputWorkspace=self._out_ws_name + "_1D_" + height_range,
+                )
             )
-        )
         return output1D
 
     def _reduce_2DTubes(self, input_group):
-        output2DtubesName = self._out_ws_name + "_2DTubes"
         output2DTubes = []
-        output2DTubes.append(
-            SumOverlappingTubes(
-                InputWorkspaces=input_group,
-                OutputType="2DTubes",
-                HeightAxis=self._height_ranges[0],
-                MirrorScatteringAngles=self._mirror,
-                CropNegativeScatteringAngles=self._crop_negative,
-                OutputWorkspace=output2DtubesName,
+        for height_range in self._height_ranges:
+            output2DtubesName = self._out_ws_name + "_2DTubes_" + height_range
+            output2DTubes.append(
+                SumOverlappingTubes(
+                    InputWorkspaces=input_group,
+                    OutputType="2DTubes",
+                    HeightAxis=height_range,
+                    MirrorScatteringAngles=self._mirror,
+                    CropNegativeScatteringAngles=self._crop_negative,
+                    OutputWorkspace=output2DtubesName,
+                )
             )
-        )
-        if self._final_mask != 0:
-            nSpec = mtd[output2DtubesName].getNumberHistograms()
-            mask_list = "0-{0},{1}-{2}".format(self._final_mask, nSpec - self._final_mask, nSpec - 1)
-            MaskDetectors(Workspace=output2DtubesName, WorkspaceIndexList=mask_list)
+            if self._final_mask != 0:
+                nSpec = mtd[output2DtubesName].getNumberHistograms()
+                mask_list = "0-{0},{1}-{2}".format(self._final_mask, nSpec - self._final_mask, nSpec - 1)
+                MaskDetectors(Workspace=output2DtubesName, WorkspaceIndexList=mask_list)
 
         return output2DTubes
 
     def _reduce_2D(self, input_group):
-        output2DName = self._out_ws_name + "_2D"
         output2D = []
-        output2D.append(
-            SumOverlappingTubes(
-                InputWorkspaces=input_group,
-                OutputType="2D",
-                HeightAxis=self._height_ranges[0],
-                MirrorScatteringAngles=self._mirror,
-                CropNegativeScatteringAngles=self._crop_negative,
-                OutputWorkspace=output2DName,
+        for height_range in self._height_ranges:
+            output2DName = self._out_ws_name + "_2D_" + height_range
+            output2D.append(
+                SumOverlappingTubes(
+                    InputWorkspaces=input_group,
+                    OutputType="2D",
+                    HeightAxis=height_range,
+                    MirrorScatteringAngles=self._mirror,
+                    CropNegativeScatteringAngles=self._crop_negative,
+                    OutputWorkspace=output2DName,
+                )
             )
-        )
-        if self._final_mask != 0:
-            nSpec = mtd[output2DName].getNumberHistograms()
-            mask_list = "0-{0},{1}-{2}".format(self._final_mask, nSpec - self._final_mask, nSpec - 1)
-            MaskDetectors(Workspace=output2DName, WorkspaceIndexList=mask_list)
+            if self._final_mask != 0:
+                nSpec = mtd[output2DName].getNumberHistograms()
+                mask_list = "0-{0},{1}-{2}".format(self._final_mask, nSpec - self._final_mask, nSpec - 1)
+                MaskDetectors(Workspace=output2DName, WorkspaceIndexList=mask_list)
 
         return output2D
 
@@ -263,8 +266,10 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
                 self._height_ranges = [str(-maxHeight) + "," + str(pixelHeight) + "," + str(maxHeight)]
         elif len(height_range_prop) % 2 == 0:
             self._height_ranges = []
-            for i in range(len(height_range_prop) - 1):
+            i = 0
+            while i < len(height_range_prop) - 1:
                 self._height_ranges.append(str(height_range_prop[i]) + ", " + str(height_range_prop[i + 1]))
+                i += 2
         output_workspaces = []
         self._out_ws_name = self.getPropertyValue("OutputWorkspace")
         self._mirror = False
