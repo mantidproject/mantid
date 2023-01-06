@@ -18,7 +18,7 @@ from mantid.simpleapi import Load, CompareWorkspaces, ExtractSpectra
 from mantid.api import AnalysisDataService as ADS
 
 
-DIRS = config['datasearch.directories'].split(';')
+DIRS = config["datasearch.directories"].split(";")
 
 # Setup various path details
 
@@ -52,29 +52,41 @@ total_scattering_input_file = os.path.join(input_dir, "ISIS_Powder-POLARIS98533_
 
 
 def crop_to_small_ws_for_test(input_workspace):
-    return ExtractSpectra(InputWorkspace=input_workspace, OutputWorkspace=input_workspace, XMin=2000, XMax=2020,
-                          DetectorList='672, 101001-101002,201001-201002,301001-301002,'
-                                       '401001-401002,501001-501002,601001-601002')
+    return ExtractSpectra(
+        InputWorkspace=input_workspace,
+        OutputWorkspace=input_workspace,
+        XMin=2000,
+        XMax=2020,
+        DetectorList="672, 101001-101002,201001-201002,301001-301002," "401001-401002,501001-501002,601001-601002",
+    )
 
 
 class ISISPowderFocusUnitTest(TestCase):
-
     def tearDown(self) -> None:
         ADS.clear()
 
     def setup_inst_object(self, mode, with_container=False):
         user_name = "Test"
         if mode:
-            inst_obj = Polaris(user_name=user_name, calibration_mapping_file=calibration_map_path,
-                               calibration_directory=calibration_dir, output_directory=output_dir, mode=mode)
+            inst_obj = Polaris(
+                user_name=user_name,
+                calibration_mapping_file=calibration_map_path,
+                calibration_directory=calibration_dir,
+                output_directory=output_dir,
+                mode=mode,
+            )
         else:
-            inst_obj = Polaris(user_name=user_name, calibration_mapping_file=calibration_map_path,
-                               calibration_directory=calibration_dir, output_directory=output_dir)
+            inst_obj = Polaris(
+                user_name=user_name,
+                calibration_mapping_file=calibration_map_path,
+                calibration_directory=calibration_dir,
+                output_directory=output_dir,
+            )
 
-        sample_details = SampleDetails(height=4.0, radius=0.2985, center=[0, 0, 0], shape='cylinder')
-        sample_details.set_material(chemical_formula='Si')
+        sample_details = SampleDetails(height=4.0, radius=0.2985, center=[0, 0, 0], shape="cylinder")
+        sample_details.set_material(chemical_formula="Si")
         if with_container:
-            sample_details.set_container(radius=0.3175, chemical_formula='V')
+            sample_details.set_container(radius=0.3175, chemical_formula="V")
         inst_obj.set_sample_details(sample=sample_details)
         inst_obj._inst_settings.spline_coeff = 5
 
@@ -83,32 +95,43 @@ class ISISPowderFocusUnitTest(TestCase):
     def test_focus_per_bank_no_input_batching(self):
         pdf_inst_obj = self.setup_inst_object("PDF")
         pdf_inst_obj._inst_settings.input_mode = "PDF"
-        self.assertRaisesRegex(ValueError, "Input batching not passed through. Please contact development team.",
-                               focus.focus, run_number_string=98532, instrument=pdf_inst_obj,
-                               perform_vanadium_norm=True, absorb=True, sample_details=pdf_inst_obj._sample_details)
+        self.assertRaisesRegex(
+            ValueError,
+            "Input batching not passed through. Please contact development team.",
+            focus.focus,
+            run_number_string=98532,
+            instrument=pdf_inst_obj,
+            perform_vanadium_norm=True,
+            absorb=True,
+            sample_details=pdf_inst_obj._sample_details,
+        )
 
     def test_focus_per_bank_individual_input_batching(self):
         pdf_inst_obj = self.setup_inst_object("PDF")
-        _ = pdf_inst_obj.create_vanadium(first_cycle_run_no=98532, do_absorb_corrections=True,
-                                         multiple_scattering=False)
-        ADS.clear()  # clear ADS to work around bug issue #34749
-        pdf_inst_obj = self.setup_inst_object("PDF")
+        _ = pdf_inst_obj.create_vanadium(first_cycle_run_no=98532, do_absorb_corrections=True, multiple_scattering=False)
         pdf_inst_obj._inst_settings.input_mode = INPUT_BATCHING.Individual
-        output = focus.focus(run_number_string=98532, instrument=pdf_inst_obj, perform_vanadium_norm=True, absorb=True,
-                             sample_details=pdf_inst_obj._sample_details)
+        output = focus.focus(
+            run_number_string=98532,
+            instrument=pdf_inst_obj,
+            perform_vanadium_norm=True,
+            absorb=True,
+            sample_details=pdf_inst_obj._sample_details,
+        )
         expected_per_bank = Load("/home/danielmurphy/Desktop/focus/focused_per_bank.nxs")
         match_bool, _ = CompareWorkspaces(expected_per_bank, output)
         self.assertTrue(match_bool)
 
     def test_focus_per_bank_summed_input_batching(self):
         pdf_inst_obj = self.setup_inst_object("PDF")
-        _ = pdf_inst_obj.create_vanadium(first_cycle_run_no=98532, do_absorb_corrections=True,
-                                         multiple_scattering=False)
-        ADS.clear()  # clear ADS to work around bug issue #34749
-        pdf_inst_obj = self.setup_inst_object("PDF")
+        _ = pdf_inst_obj.create_vanadium(first_cycle_run_no=98532, do_absorb_corrections=True, multiple_scattering=False)
         pdf_inst_obj._inst_settings.input_mode = INPUT_BATCHING.Summed
-        output = focus.focus(run_number_string=98532, instrument=pdf_inst_obj, perform_vanadium_norm=True, absorb=True,
-                             sample_details=pdf_inst_obj._sample_details)
+        output = focus.focus(
+            run_number_string=98532,
+            instrument=pdf_inst_obj,
+            perform_vanadium_norm=True,
+            absorb=True,
+            sample_details=pdf_inst_obj._sample_details,
+        )
         expected_per_bank = Load("/home/danielmurphy/Desktop/focus/focused_per_bank.nxs")
         match_bool, _ = CompareWorkspaces(expected_per_bank, output)
         self.assertTrue(match_bool)
@@ -117,46 +140,55 @@ class ISISPowderFocusUnitTest(TestCase):
         pdf_inst_obj = self.setup_inst_object("PDF")
         pdf_inst_obj._inst_settings.input_mode = "PDF"
         pdf_inst_obj._inst_settings.per_detector = True
-        self.assertRaisesRegex(ValueError, "Input batching not passed through. Please contact development team.",
-                               focus.focus, run_number_string=98532, instrument=pdf_inst_obj,
-                               perform_vanadium_norm=True, absorb=True, sample_details=pdf_inst_obj._sample_details)
+        self.assertRaisesRegex(
+            ValueError,
+            "Input batching not passed through. Please contact development team.",
+            focus.focus,
+            run_number_string=98532,
+            instrument=pdf_inst_obj,
+            perform_vanadium_norm=True,
+            absorb=True,
+            sample_details=pdf_inst_obj._sample_details,
+        )
 
-    @patch("isis_powder.routines.focus._apply_vanadium_corrections_per_detector",
-           wraps=focus._apply_vanadium_corrections_per_detector)
+    @patch("isis_powder.routines.focus._apply_vanadium_corrections_per_detector", wraps=focus._apply_vanadium_corrections_per_detector)
     @patch("isis_powder.routines.focus._apply_placzek_corrections", wraps=focus._apply_placzek_corrections)
     def test_focus_per_detector_individual_input_batching(self, mock_placzek, mock_vanadium):
         pdf_inst_obj = self.setup_inst_object("PDF")
         pdf_inst_obj._inst_settings.per_detector = True
-        _ = pdf_inst_obj.create_vanadium(first_cycle_run_no=98532, do_absorb_corrections=True,
-                                         multiple_scattering=False)
-        ADS.clear()  # clear ADS to work around bug issue #34749
-        pdf_inst_obj = self.setup_inst_object("PDF")
+        _ = pdf_inst_obj.create_vanadium(first_cycle_run_no=98532, do_absorb_corrections=True, multiple_scattering=False)
         pdf_inst_obj._inst_settings.input_mode = INPUT_BATCHING.Individual
         pdf_inst_obj._inst_settings.per_detector = True
         pdf_inst_obj._inst_settings.placzek_run_number = 98533
-        output = focus.focus(run_number_string=98532, instrument=pdf_inst_obj, perform_vanadium_norm=True, absorb=True,
-                             sample_details=pdf_inst_obj._sample_details)
+        output = focus.focus(
+            run_number_string=98532,
+            instrument=pdf_inst_obj,
+            perform_vanadium_norm=True,
+            absorb=True,
+            sample_details=pdf_inst_obj._sample_details,
+        )
         expected_per_bank = Load("/home/danielmurphy/Desktop/focus/focused_per_detector.nxs")
         match_bool, _ = CompareWorkspaces(expected_per_bank, output)
         self.assertTrue(match_bool)
         mock_placzek.assert_called_once()
         mock_vanadium.assert_called_once()
 
-    @patch("isis_powder.routines.focus._apply_vanadium_corrections_per_detector",
-           wraps=focus._apply_vanadium_corrections_per_detector)
+    @patch("isis_powder.routines.focus._apply_vanadium_corrections_per_detector", wraps=focus._apply_vanadium_corrections_per_detector)
     @patch("isis_powder.routines.focus._apply_placzek_corrections", wraps=focus._apply_placzek_corrections)
     def test_focus_per_detector_summed_input_batching(self, mock_placzek, mock_vanadium):
         pdf_inst_obj = self.setup_inst_object("PDF")
         pdf_inst_obj._inst_settings.per_detector = True
-        _ = pdf_inst_obj.create_vanadium(first_cycle_run_no=98532, do_absorb_corrections=True,
-                                         multiple_scattering=False)
-        ADS.clear()  # clear ADS to work around bug issue #34749
-        pdf_inst_obj = self.setup_inst_object("PDF")
+        _ = pdf_inst_obj.create_vanadium(first_cycle_run_no=98532, do_absorb_corrections=True, multiple_scattering=False)
         pdf_inst_obj._inst_settings.input_mode = INPUT_BATCHING.Summed
         pdf_inst_obj._inst_settings.per_detector = True
         pdf_inst_obj._inst_settings.placzek_run_number = 98533
-        output = focus.focus(run_number_string=98532, instrument=pdf_inst_obj, perform_vanadium_norm=True, absorb=True,
-                             sample_details=pdf_inst_obj._sample_details)
+        output = focus.focus(
+            run_number_string=98532,
+            instrument=pdf_inst_obj,
+            perform_vanadium_norm=True,
+            absorb=True,
+            sample_details=pdf_inst_obj._sample_details,
+        )
         expected_per_bank = Load("/home/danielmurphy/Desktop/focus/focused_per_detector.nxs")
         match_bool, _ = CompareWorkspaces(expected_per_bank, output)
         self.assertTrue(match_bool)
@@ -164,5 +196,5 @@ class ISISPowderFocusUnitTest(TestCase):
         mock_vanadium.assert_called_once()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
