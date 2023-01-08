@@ -43,7 +43,6 @@ requirements:
     - python {{ python }}
     - poco
     - tbb-devel {{ tbb }}
-    - zlib
     - pip
     - openssl {{ openssl }}
     - versioningit
