@@ -26,10 +26,10 @@ requirements:
     - {{ cdt('libx11-devel') }}  # [linux]
     - {{ cdt('xorg-x11-proto-devel') }}  # [linux]
   host:
-    - python
+    - python {{ python }}
     - setuptools {{ setuptools }}
     - sphinx {{ sphinx }}
-    - sphinx_bootstrap_theme
+    - sphinx_bootstrap_theme {{ sphinx_bootstrap_theme }}
     - mantidqt {{ version }}
     - versioningit
 

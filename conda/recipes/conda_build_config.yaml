@@ -31,7 +31,7 @@ openssl:
   - 1.1.*
 
 setuptools:
-  - 48.0.*
+  - 48.0
 
 sphinx:
   - 5.1.1
@@ -39,11 +39,11 @@ sphinx:
 sphinx_bootstrap_theme:
   - 0.8.1
 
-qt:
-  - 5.15.*
+pyqt:
+  - 5.15
 
 qscintilla2:
-  - 2.13.*
+  - 2.13
 
 tbb:
   - 2021
@@ -52,7 +52,7 @@ hdf5:
   - 1.12.*
 
 occt:
-  - 7.5.*
+  - 7.5
 
 gsl:
   - 2.7

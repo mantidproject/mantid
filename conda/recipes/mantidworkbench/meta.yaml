@@ -29,7 +29,7 @@ requirements:
   host:
     - setuptools {{ setuptools }}
     - mantidqt {{ version }}
-    - python
+    - python {{ python }}
     - versioningit
   run:
     - ipykernel {{ ipykernel }}

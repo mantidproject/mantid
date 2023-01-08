@@ -31,10 +31,10 @@ requirements:
     - eigen
     - jemalloc  # [unix]
     - mantid {{ version }}
-    - python
-    - pyqt
-    - qt {{ qt }}
-    - qscintilla2
+    - python {{ python }}
+    - pyqt {{ pyqt }}
+    - qscintilla2 {{ qscintilla2 }}
+    - qt-webengine
     - setuptools {{ setuptools }}
     - tbb-devel {{ tbb }}
     - versioningit
