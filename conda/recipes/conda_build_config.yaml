@@ -46,7 +46,7 @@ qscintilla2:
   - 2.13.*
 
 tbb:
-  - 2020.2.*
+  - 2021
 
 hdf5:
   - 1.12.*
@@ -67,3 +67,6 @@ pin_run_as_build:
 # Otherwise it will find the wrong sdk, currently working on 10.10 as that is what Anaconda/conda-build does.
 CONDA_BUILD_SYSROOT:
   - /opt/MacOSX10.10.sdk     # [osx]
+
+MACOSX_DEPLOYMENT_TARGET:      # [osx]
+  - 10.10                      # [osx and x86_64]
