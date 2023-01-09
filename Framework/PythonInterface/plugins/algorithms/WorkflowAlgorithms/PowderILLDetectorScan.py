@@ -9,7 +9,6 @@ from mantid.kernel import (
     FloatArrayOrderedPairsValidator,
     FloatArrayProperty,
     StringListValidator,
-    IntBoundedValidator,
 )
 from mantid.api import DataProcessorAlgorithm, MultipleFileProperty, Progress, WorkspaceGroupProperty, FileProperty, FileAction
 from mantid.simpleapi import *
@@ -21,7 +20,6 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
     _mirror = None
     _crop_negative = None
     _out_ws_name = None
-    _final_mask = None
 
     def category(self):
         return "ILL\\Diffraction;Diffraction\\Reduction"
@@ -90,13 +88,6 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
 
         self.declareProperty(
             WorkspaceGroupProperty("OutputWorkspace", "", direction=Direction.Output), doc="Output workspace containing the reduced data."
-        )
-
-        self.declareProperty(
-            name="FinalMask",
-            defaultValue=30,
-            validator=IntBoundedValidator(lower=0, upper=70),
-            doc="Number of spectra to mask from the bottom and the top of the result of 2D options.",
         )
 
         self.declareProperty(
@@ -181,10 +172,6 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
                     OutputWorkspace=output2DtubesName,
                 )
             )
-            if self._final_mask != 0:
-                nSpec = mtd[output2DtubesName].getNumberHistograms()
-                mask_list = "0-{0},{1}-{2}".format(self._final_mask, nSpec - self._final_mask, nSpec - 1)
-                MaskDetectors(Workspace=output2DtubesName, WorkspaceIndexList=mask_list)
 
         return output2DTubes
 
@@ -204,10 +191,6 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
                     OutputWorkspace=output2DName,
                 )
             )
-            if self._final_mask != 0:
-                nSpec = mtd[output2DName].getNumberHistograms()
-                mask_list = "0-{0},{1}-{2}".format(self._final_mask, nSpec - self._final_mask, nSpec - 1)
-                MaskDetectors(Workspace=output2DName, WorkspaceIndexList=mask_list)
 
         return output2D
 
@@ -262,7 +245,6 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
         self._crop_negative = self.getProperty("CropNegativeScatteringAngles").value
         if instrument.hasParameter("mirror_scattering_angles"):
             self._mirror = instrument.getBoolParameter("mirror_scattering_angles")[0]
-        self._final_mask = self.getProperty("FinalMask").value
 
         components = self.getPropertyValue("ComponentsToReduce")
         if components:
