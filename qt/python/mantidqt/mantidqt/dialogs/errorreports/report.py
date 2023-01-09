@@ -104,7 +104,7 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
     def noShare(self):
         self.action.emit(self.continue_working, 2, self.input_name, self.input_email, self.input_text)
 
-    def close(self, status):
+    def close_reporter(self, status):
         if status == 201 or status == -1:
             self.close()
 
