@@ -265,14 +265,7 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
                 MaskDetectors(Workspace=ws, ComponentList=components_to_mask)
 
         height_range_prop = self.getProperty("HeightRange").value
-        if len(height_range_prop) == 0:
-            run = mtd["input_group"].getItem(0).getRun()
-            if run.hasProperty("PixelHeight") and run.hasProperty("MaxHeight"):
-                pixelHeight = run.getLogData("PixelHeight").value
-                maxHeight = run.getLogData("MaxHeight").value
-                self._height_ranges = [str(-maxHeight) + "," + str(pixelHeight) + "," + str(maxHeight)]
-        elif len(height_range_prop) % 2 == 0:
-            self._height_ranges = []
+        if len(height_range_prop) % 2 == 0:
             i = 0
             while i < len(height_range_prop) - 1:
                 self._height_ranges.append(str(height_range_prop[i]) + ", " + str(height_range_prop[i + 1]))
