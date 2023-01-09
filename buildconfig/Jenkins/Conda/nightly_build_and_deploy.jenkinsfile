@@ -336,7 +336,9 @@ def generate_git_tag() {
     versionscript_path = "${CISCRIPT_DIR}/generate-version-number"
     if(platform.startsWith('win')) {
       workspace_unix_style = toUnixStylePath("${WORKSPACE}")
-      git_tag = bat(script: "\"${WIN_BASH}\" -ex -c \"${versionscript_path}\"", returnStdout: true).trim()
+      // @ suppresses the inclusion of the command itself in the output
+      // https://www.jenkins.io/doc/pipeline/steps/workflow-durable-task-step/#bat-windows-batch-script
+      git_tag = bat(script: "@\"${WIN_BASH}\" -ex -c \"${versionscript_path}\"", returnStdout: true).trim()
     } else {
       git_tag = sh(
         script: "${versionscript_path}", returnStdout: true
