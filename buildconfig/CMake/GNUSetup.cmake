@@ -68,6 +68,10 @@ if(CMAKE_COMPILER_IS_GNUCXX)
   endif()
 elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
   add_compile_options(-Wno-sign-conversion)
+  # Conda uses its own newer compilers so these checks are not needed
+  if(CONDA_ENV OR CONDA_BUILD)
+    add_definitions(-D_LIBCPP_DISABLE_AVAILABILITY)
+  endif()
 endif()
 
 # Add some options for debug build to help the Zoom profiler

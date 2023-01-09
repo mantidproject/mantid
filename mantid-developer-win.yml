@@ -43,8 +43,7 @@ dependencies:
   - setuptools=47.0.0 # Pinned purposefully due to incompatibility with later versions
   - sphinx >= 4.5.*
   - sphinx_bootstrap_theme=>0.8.1
-  - tbb-devel=2020.2.*
-  - tbb=2020.2.*
+  - tbb-devel=2021.*
   - toml>=0.10.2
   - zlib>=1.2.11
   # Needed only for development
