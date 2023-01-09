@@ -300,7 +300,7 @@ font: {self.rescale_w(12)}px;
         usagelayout.addSpacerItem(QSpacerItem(self.rescale_w(40), self.rescale_h(20), hPolicy=QSizePolicy.Expanding))
         self.lbl_privacy_policy.setText(
             r"<html><head/><body><p>"
-            r'<a href="https://www.mantidproject.org/MantidProject:Privacy_policy'
+            r'<a href="https://www.mantidproject.org/privacy#details-of-data-retention'
             r'#Usage_Data_recorded_in_Mantid">'
             r'<span style=" text-decoration: underline; color:#0000ff;">'
             r"Privacy Policy</span></a></p></body></html>"
