@@ -193,7 +193,13 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         # Set tight layout so axes labels remain visible
         canvas.figure.set_layout_engine(layout="tight")
-        warnings.filterwarnings("ignore", message="Tight layout not applied.")
+        # Matplotlib issues a warnings if the window is made too small in the vertical or horizontal direction
+        # Filtering it to only warn once per plot per axis so that it doesn't give a warning everytime the plot window
+        # is resized, filling up the console with warnings
+        warnings.filterwarnings("once", message="Tight layout not applied. The left and right margins cannot be made "
+                                                "large enough to accommodate all axes decorations.")
+        warnings.filterwarnings("once", message="Tight layout not applied. The bottom and top margins cannot be made "
+                                                "large enough to accommodate all axes decorations.")
 
         FigureManagerBase.__init__(self, canvas, num)
         # Give the keyboard focus to the figure instead of the
