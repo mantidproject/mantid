@@ -12,6 +12,7 @@ try:
     import plotSpectrum
 except ImportError:
     logger.warning("plotSpectrum not available")
+    plotSpectrum = None
 
 import os
 import numpy as np
@@ -890,10 +891,11 @@ def plot_reduction(workspace_name, plot_type):
 
     if plot_type == "Spectra" or plot_type == "Both":
         num_spectra = mtd[workspace_name].getNumberHistograms()
-        try:
+        if plotSpectrum is None:
+            logger.error("plotSpectrum is not available. Please check your Mantid installation.")
+            raise RuntimeError("plotSpectrum is not available. Please check your Mantid installation.")
+        else:
             plotSpectrum(workspace_name, range(0, num_spectra))
-        except RuntimeError:
-            logger.notice("Spectrum plotting canceled by user")
 
     can_plot_contour = mtd[workspace_name].getNumberHistograms() > 1
     if (plot_type == "Contour" or plot_type == "Both") and can_plot_contour:
