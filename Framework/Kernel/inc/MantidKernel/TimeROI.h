@@ -42,7 +42,7 @@ public:
 private:
   std::vector<Types::Core::DateAndTime> getAllTimes(const TimeROI &other);
   void replaceValues(const std::vector<Types::Core::DateAndTime> &times, const std::vector<bool> &values);
-
+  bool isCompletelyInROI(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) const;
   /**
    * @brief m_roi private member that holds most of the information
    *
