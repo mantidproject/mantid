@@ -46,6 +46,7 @@ public:
 
   virtual void setSelectedBanks(boost::optional<ProcessingInstructions> selectedBanks) = 0;
   virtual void setSelectedRegion(ROIType regionType, Selection const &selection) = 0;
+  virtual std::optional<Selection> const getSelectedRegion(ROIType regionType) = 0;
 
   virtual void exportSummedWsToAds() const = 0;
   virtual void exportReducedWsToAds() const = 0;

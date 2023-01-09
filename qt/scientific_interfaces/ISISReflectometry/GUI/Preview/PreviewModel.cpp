@@ -132,7 +132,35 @@ void PreviewModel::setSelectedRegion(ROIType regionType, Selection const &select
     }
     processingInstructions += std::to_string(start) + "-" + std::to_string(end);
   }
+  setSelectedRegionMembers(regionType, selection);
   m_runDetails->setProcessingInstructions(regionType, std::move(processingInstructions));
+}
+
+void PreviewModel::setSelectedRegionMembers(ROIType regionType, Selection const &selection) {
+  switch (regionType) {
+  case ROIType::Signal:
+    m_selectedSignalRegion = std::move(selection);
+    return;
+  case ROIType::Background:
+    m_selectedBackgroundRegion = std::move(selection);
+    return;
+  case ROIType::Transmission:
+    m_selectedTransmissionRegion = std::move(selection);
+    return;
+  }
+  throw std::invalid_argument("Unexpected ROIType provided");
+}
+
+std::optional<IPreviewModel::Selection> const PreviewModel::getSelectedRegion(ROIType regionType) {
+  switch (regionType) {
+  case ROIType::Signal:
+    return m_selectedSignalRegion;
+  case ROIType::Background:
+    return m_selectedBackgroundRegion;
+  case ROIType::Transmission:
+    return m_selectedTransmissionRegion;
+  }
+  throw std::invalid_argument("Unexpected ROIType provided");
 }
 
 void PreviewModel::createRunDetails(const std::string &workspaceName) {
