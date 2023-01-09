@@ -93,12 +93,9 @@ class EmbeddedFindReplaceDialog(object):
 
         if not self.find_in_progress:
             options = self.view.get_options()
-            self.find_in_progress = self.editor.findFirst(search_string,
-                                                          options.regex,
-                                                          options.match_case,
-                                                          options.words,
-                                                          options.wrap_around,
-                                                          forwards)
+            self.find_in_progress = self.editor.findFirst(
+                search_string, options.regex, options.match_case, options.words, options.wrap_around, forwards
+            )
         else:
             self.find_in_progress = self.editor.findNext()
 
@@ -115,8 +112,7 @@ class EmbeddedFindReplaceDialog(object):
         # this allows the user to see where the first match is, instead of having _one_ of the matches
         # being replaced to the replacement string, without knowing which one will be done
 
-        if not self.editor.hasSelectedText() or self.strings_different(self.editor.selectedText(), search_string,
-                                                                       options.match_case):
+        if not self.editor.hasSelectedText() or self.strings_different(self.editor.selectedText(), search_string, options.match_case):
             self.action_next()
             return
 
@@ -148,12 +144,7 @@ class EmbeddedFindReplaceDialog(object):
         self.add_to_field_history(self.view.replace, replaceString)
 
         options = self.view.get_options()
-        self.editor.replaceAll(search_string, replaceString,
-                               options.regex,
-                               options.match_case,
-                               options.words,
-                               options.wrap_around,
-                               True)
+        self.editor.replaceAll(search_string, replaceString, options.regex, options.match_case, options.words, options.wrap_around, True)
 
     def add_to_field_history(self, field, search_string):
         if field.findText(search_string) == -1:

@@ -11,8 +11,7 @@ Custom tree model for DNS to store list of scans with files as children.
 
 import numpy as np
 from qtpy.QtCore import QAbstractItemModel, QModelIndex, Qt
-from mantidqtinterfaces.dns_powder_tof.data_structures.dns_treeitem \
-    import DNSTreeItem, TreeItemEnum
+from mantidqtinterfaces.dns_powder_tof.data_structures.dns_treeitem import DNSTreeItem, TreeItemEnum
 
 
 class DNSTreeModel(QAbstractItemModel):
@@ -80,9 +79,9 @@ class DNSTreeModel(QAbstractItemModel):
         completely.
         """
         scan_command = self._scan_command_from_row(row)
-        scan_command = scan_command.split('#')[1]
-        if '/' in scan_command:
-            scan_command = scan_command.split('/')[1]
+        scan_command = scan_command.split("#")[1]
+        if "/" in scan_command:
+            scan_command = scan_command.split("/")[1]
         if scan_command:
             return int(scan_command.strip())
         return 0
@@ -95,24 +94,20 @@ class DNSTreeModel(QAbstractItemModel):
 
     @staticmethod
     def _get_sample_type(sample):
-        if 'vanadium' in sample or 'vana' in sample:
-            return 'vana'
-        if 'nicr' in sample or 'NiCr' in sample:
-            return 'nicr'
-        if 'empty' in sample or 'leer' in sample:
-            return 'empty'
+        if "vanadium" in sample or "vana" in sample:
+            return "vana"
+        if "nicr" in sample or "NiCr" in sample:
+            return "nicr"
+        if "empty" in sample or "leer" in sample:
+            return "empty"
         return sample
 
     # complex getting
     def _get_scan_rows(self):
-        return [
-            row for row in self._scan_range()
-            if 'scan' in self._scan_command_from_row(row)
-        ]
+        return [row for row in self._scan_range() if "scan" in self._scan_command_from_row(row)]
 
     def _is_scan_complete(self, row):
-        return (self.scan_from_row(row).childCount()
-                >= self._scan_expected_points_from_row(row))
+        return self.scan_from_row(row).childCount() >= self._scan_expected_points_from_row(row)
 
     def text_in_scan(self, row, text):
         return text in self._scan_command_from_row(row)
@@ -128,7 +123,7 @@ class DNSTreeModel(QAbstractItemModel):
         parent_item = item.hasChildren()
         if role == Qt.DisplayRole:
             return item.get_tree_item_data(index.column())
-        if role == Qt.TextAlignmentRole and not parent_item: # center align child items
+        if role == Qt.TextAlignmentRole and not parent_item:  # center align child items
             return Qt.AlignHCenter
         if role == Qt.CheckStateRole and index.column() == 0:
             if item.isChecked() == 2:
@@ -143,9 +138,7 @@ class DNSTreeModel(QAbstractItemModel):
         if not index.isValid():
             return Qt.NoItemFlags
         if index.column() == 0:
-            return (Qt.ItemIsEnabled
-                    | Qt.ItemIsSelectable
-                    | Qt.ItemIsUserCheckable)
+            return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsUserCheckable
         return Qt.ItemIsEnabled | Qt.ItemIsSelectable
 
     def _scan_index_from_row(self, row):
@@ -162,7 +155,7 @@ class DNSTreeModel(QAbstractItemModel):
         item = self._item_from_index(index)
         if item is not None and not item.hasChildren():
             return item.get_tree_item_data(TreeItemEnum.filename.value)
-        return ''
+        return ""
 
     def _index_from_row(self, row, parent):
         return self.index(row, 0, parent)
@@ -191,28 +184,28 @@ class DNSTreeModel(QAbstractItemModel):
         Returns a list of all checked items which do not have children
         list of DNS datafiles.
         """
-        checked = self.match(self.index(0, 0, QModelIndex()),
-                             Qt.CheckStateRole, Qt.Checked, -1,
-                             Qt.MatchExactly | Qt.MatchRecursive)
+        checked = self.match(self.index(0, 0, QModelIndex()), Qt.CheckStateRole, Qt.Checked, -1, Qt.MatchExactly | Qt.MatchRecursive)
         n_checked = []
         for index in checked:
             item = self._item_from_index(index)
             if not item.hasChildren():
                 if full_info:
-                    n_checked.append({
-                        'file_number': int(item.get_tree_item_data(TreeItemEnum.number.value)),
-                        'det_rot': float(item.get_tree_item_data(TreeItemEnum.det_rot.value)),
-                        'sample_rot': float(item.get_tree_item_data(TreeItemEnum.sample_rot.value)),
-                        'field': item.get_tree_item_data(TreeItemEnum.field.value),
-                        'temperature': float(item.get_tree_item_data(TreeItemEnum.temperature.value)),
-                        'sample_name': item.get_tree_item_data(TreeItemEnum.sample.value),
-                        'tof_channels': int(item.get_tree_item_data(TreeItemEnum.tof_channels.value)),
-                        'channel_width': float(item.get_tree_item_data(TreeItemEnum.tof_channel_width.value)),
-                        'filename': item.get_tree_item_data(TreeItemEnum.filename.value),
-                        'wavelength': float(item.get_tree_item_data(TreeItemEnum.wavelength.value)) * 10,
-                        'sample_type': self._get_sample_type(item.get_tree_item_data(TreeItemEnum.sample.value)),
-                        'selector_speed': float(item.get_tree_item_data(TreeItemEnum.selector_speed.value))
-                    })
+                    n_checked.append(
+                        {
+                            "file_number": int(item.get_tree_item_data(TreeItemEnum.number.value)),
+                            "det_rot": float(item.get_tree_item_data(TreeItemEnum.det_rot.value)),
+                            "sample_rot": float(item.get_tree_item_data(TreeItemEnum.sample_rot.value)),
+                            "field": item.get_tree_item_data(TreeItemEnum.field.value),
+                            "temperature": float(item.get_tree_item_data(TreeItemEnum.temperature.value)),
+                            "sample_name": item.get_tree_item_data(TreeItemEnum.sample.value),
+                            "tof_channels": int(item.get_tree_item_data(TreeItemEnum.tof_channels.value)),
+                            "channel_width": float(item.get_tree_item_data(TreeItemEnum.tof_channel_width.value)),
+                            "filename": item.get_tree_item_data(TreeItemEnum.filename.value),
+                            "wavelength": float(item.get_tree_item_data(TreeItemEnum.wavelength.value)) * 10,
+                            "sample_type": self._get_sample_type(item.get_tree_item_data(TreeItemEnum.sample.value)),
+                            "selector_speed": float(item.get_tree_item_data(TreeItemEnum.selector_speed.value)),
+                        }
+                    )
                 else:
                     n_checked.append(int(item.get_tree_item_data(TreeItemEnum.number.value)))
         return n_checked
@@ -245,9 +238,7 @@ class DNSTreeModel(QAbstractItemModel):
         return True
 
     def set_checked_scan(self, row, value):
-        self.setData(self._scan_index_from_row(row),
-                     value,
-                     role=Qt.CheckStateRole)
+        self.setData(self._scan_index_from_row(row), value, role=Qt.CheckStateRole)
 
     def set_checked_from_index(self, index, value=2):
         self.setData(index, value, role=Qt.CheckStateRole)
@@ -293,31 +284,39 @@ class DNSTreeModel(QAbstractItemModel):
         self._last_scan_number = None
 
     def _new_scan_check(self, dns_file):
-        '''
+        """
         Separates scans and measurements with different tof-channels
         or sample names.
-        '''
-        return (dns_file.scan_number != self._last_scan_number
-                or self._last_tof != dns_file.tof_channels
-                or self._last_tof_time != dns_file.channel_width
-                or self._last_sample != dns_file.sample)
+        """
+        return (
+            dns_file.scan_number != self._last_scan_number
+            or self._last_tof != dns_file.tof_channels
+            or self._last_tof_time != dns_file.channel_width
+            or self._last_sample != dns_file.sample
+        )
 
     @staticmethod
     def _get_scan_text(dns_file):
-        return [
-                   f'{dns_file.scan_number} {dns_file.sample}'
-                   f' {dns_file.scan_command}'
-                   f' #{dns_file.scan_points}'
-               ] + 9 * ['']
+        return [f"{dns_file.scan_number} {dns_file.sample}" f" {dns_file.scan_command}" f" #{dns_file.scan_points}"] + 9 * [""]
 
     @staticmethod
     def _get_data_from_dns_file(dns_file):
         return [
-            dns_file.file_number, dns_file.det_rot, dns_file.sample_rot,
-            dns_file.field, dns_file.temp_sample, dns_file.sample,
-            dns_file.end_time, dns_file.tof_channels, dns_file.channel_width,
-            dns_file.filename, dns_file.wavelength, dns_file.selector_speed,
-            dns_file.scan_number, dns_file.scan_command, dns_file.scan_points
+            dns_file.file_number,
+            dns_file.det_rot,
+            dns_file.sample_rot,
+            dns_file.field,
+            dns_file.temp_sample,
+            dns_file.sample,
+            dns_file.end_time,
+            dns_file.tof_channels,
+            dns_file.channel_width,
+            dns_file.filename,
+            dns_file.wavelength,
+            dns_file.selector_speed,
+            dns_file.scan_number,
+            dns_file.scan_command,
+            dns_file.scan_points,
         ]
 
     @staticmethod
@@ -338,8 +337,7 @@ class DNSTreeModel(QAbstractItemModel):
         for dns_file in dns_files:
             if self._new_scan_check(dns_file):
                 self._scan = DNSTreeItem(self._get_scan_text(dns_file), root_item)
-                self.beginInsertRows(QModelIndex(), self.number_of_scans(),
-                                     self.number_of_scans())
+                self.beginInsertRows(QModelIndex(), self.number_of_scans(), self.number_of_scans())
                 root_item.appendChild(self._scan)
                 self.endInsertRows()
                 self._last_scan_number = dns_file.scan_number
@@ -347,9 +345,7 @@ class DNSTreeModel(QAbstractItemModel):
             self._last_tof = dns_file.tof_channels
             self._last_tof_time = dns_file.channel_width
             self._last_sample = dns_file.sample
-            self.beginInsertRows(self._index_from_scan(self._scan),
-                                 self._scan.childCount(),
-                                 self._scan.childCount())
+            self.beginInsertRows(self._index_from_scan(self._scan), self._scan.childCount(), self._scan.childCount())
             child = self._scan.appendChild(DNSTreeItem(file_data, self._scan))
             self._check_child_if_scan_is_checked(self._scan, child)
             self.endInsertRows()
@@ -361,12 +357,11 @@ class DNSTreeModel(QAbstractItemModel):
         total_files = 0
         for row in range(self.number_of_scans()):
             scan = self.scan_from_row(row)
-            prefix, postfix = scan.get_tree_item_data(0).split('#')
+            prefix, postfix = scan.get_tree_item_data(0).split("#")
             prefix = prefix.strip()
-            if '/' in postfix:  # multiple run
-                postfix = postfix.split('/')[1]
-            scan.setData(
-                f'{prefix} #{scan.childCount()}/{postfix}', 0)
+            if "/" in postfix:  # multiple run
+                postfix = postfix.split("/")[1]
+            scan.setData(f"{prefix} #{scan.childCount()}/{postfix}", 0)
             total_files += scan.childCount()
         return total_files
 

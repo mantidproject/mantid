@@ -8,7 +8,7 @@ from re import findall
 from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import convert_to_field, convert_to_freq
 from mantid.simpleapi import RenameWorkspace
 
-UNIT="_unit_"
+UNIT = "_unit_"
 MHz = "MHz"
 GAUSS = "Gauss"
 FREQ = "Frequency"
@@ -16,26 +16,24 @@ FIELD = "Field"
 
 
 class freq_and_field_ws(object):
-
     def __init__(self, ws_name, ws_unit):
         if ws_unit == MHz:
-            self._freq = ws_name+UNIT+MHz
-            self._field = convert_to_field(ws_name, ws_name+UNIT+GAUSS)
+            self._freq = ws_name + UNIT + MHz
+            self._field = convert_to_field(ws_name, ws_name + UNIT + GAUSS)
             RenameWorkspace(InputWorkspace=ws_name, OutputWorkspace=self._freq)
         elif ws_unit == GAUSS:
-            self._field = ws_name+UNIT+GAUSS
-            self._freq = convert_to_freq(ws_name, ws_name+UNIT+MHz)
+            self._field = ws_name + UNIT + GAUSS
+            self._freq = convert_to_freq(ws_name, ws_name + UNIT + MHz)
             RenameWorkspace(InputWorkspace=ws_name, OutputWorkspace=self._field)
 
     def get_ws(self, x_label):
         if x_label == FIELD:
             return self._field
-        #otherwise assume its freq
+        # otherwise assume its freq
         return self._freq
 
 
 class MaxEnt(object):
-
     def __init__(self, run, freq_field_ws):
         self.run = run
         self.ws = freq_field_ws
@@ -44,7 +42,7 @@ class MaxEnt(object):
 class FFT(object):
     # fft has two runs, one for Re and one for Im
 
-    def __init__(self,freq_field_ws, Re_run, Re, Im_run, Im):
+    def __init__(self, freq_field_ws, Re_run, Re, Im_run, Im):
         self.Re_run = Re_run
 
         self.ws = freq_field_ws
@@ -57,7 +55,7 @@ class FFT(object):
             self.Im_run = Im_run
 
 
-FREQUENCY_EXTENSIONS ={"MOD":"mod", "RE":"Re", "IM":"Im", "MAXENT":"MaxEnt", "FFT":"FFT All" }
+FREQUENCY_EXTENSIONS = {"MOD": "mod", "RE": "Re", "IM": "Im", "MAXENT": "MaxEnt", "FFT": "FFT All"}
 
 
 class FrequencyContext(object):
@@ -88,8 +86,9 @@ class FrequencyContext(object):
     def get_group_phase_tables(self, num_groups, instrument):
         if num_groups not in self._group_phase_tables.keys():
             return []
-        return [phase_table.workspace_name for phase_table in self._group_phase_tables[num_groups]
-                if instrument in phase_table.workspace_name]
+        return [
+            phase_table.workspace_name for phase_table in self._group_phase_tables[num_groups] if instrument in phase_table.workspace_name
+        ]
 
     def add_maxEnt(self, run, maxent_ws):
         freq_field_ws = freq_and_field_ws(maxent_ws, GAUSS)
@@ -114,7 +113,7 @@ class FrequencyContext(object):
             return MHz
 
     def get_ws_name(self, name):
-        return name+UNIT+self.unit()
+        return name + UNIT + self.unit()
 
     def _is_it_match(self, run, group, pair, fft_run, fft_group_or_pair):
         return int(run) == int(fft_run) and (fft_group_or_pair in group or fft_group_or_pair in pair)
@@ -156,7 +155,7 @@ class FrequencyContext(object):
                         ws_list[name] = fft.ws
         if frequency_type == "All":
             return [freq_field.get_ws(x_label) for name, freq_field in ws_list.items()]
-        elif frequency_type ==FREQUENCY_EXTENSIONS["FFT"]:
+        elif frequency_type == FREQUENCY_EXTENSIONS["FFT"]:
             return [freq_field.get_ws(x_label) for name, freq_field in ws_list.items() if FREQUENCY_EXTENSIONS["MAXENT"] not in name]
         else:
             output = []

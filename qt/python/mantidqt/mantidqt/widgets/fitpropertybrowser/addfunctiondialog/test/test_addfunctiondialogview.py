@@ -16,7 +16,7 @@ from mantidqt.utils.qt.testing import start_qapplication
 
 @start_qapplication
 class AddFunctionDialogViewTest(unittest.TestCase):
-    TEST_FUNCTION_NAMES = ['func1', 'secondfunc']
+    TEST_FUNCTION_NAMES = ["func1", "secondfunc"]
 
     def test_construction_with_no_functions_gives_empty_list(self):
         view = AddFunctionDialogView()
@@ -31,13 +31,11 @@ class AddFunctionDialogViewTest(unittest.TestCase):
         self.assertEqual(len(self.TEST_FUNCTION_NAMES), view.ui.functionBox.count())
 
     def test_construction_with_functions_and_default_sets_placeholder_to_default(self):
-        view = AddFunctionDialogView(function_names=self.TEST_FUNCTION_NAMES,
-                                     default_function_name=self.TEST_FUNCTION_NAMES[1])
+        view = AddFunctionDialogView(function_names=self.TEST_FUNCTION_NAMES, default_function_name=self.TEST_FUNCTION_NAMES[1])
 
         self.assertTrue(view is not None)
         self.assertEqual(len(self.TEST_FUNCTION_NAMES), view.ui.functionBox.count())
-        self.assertEqual(self.TEST_FUNCTION_NAMES[1],
-                         view.ui.functionBox.lineEdit().placeholderText())
+        self.assertEqual(self.TEST_FUNCTION_NAMES[1], view.ui.functionBox.lineEdit().placeholderText())
 
     def test_pressing_return_in_box_activates_completer(self):
         view = AddFunctionDialogView(function_names=self.TEST_FUNCTION_NAMES)
@@ -53,12 +51,12 @@ class AddFunctionDialogViewTest(unittest.TestCase):
 
     def test_checkbox_exists_if_requested(self):
         view = AddFunctionDialogView(default_checkbox=True)
-        self.assertTrue(hasattr(view, '_default_checkbox'))
+        self.assertTrue(hasattr(view, "_default_checkbox"))
 
     def test_checkbox_not_exists_if_not_requested(self):
         view = AddFunctionDialogView()
-        self.assertFalse(hasattr(view, '_default_checkbox'))
+        self.assertFalse(hasattr(view, "_default_checkbox"))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

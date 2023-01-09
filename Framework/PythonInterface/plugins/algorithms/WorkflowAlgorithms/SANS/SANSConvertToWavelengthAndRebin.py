@@ -11,54 +11,76 @@ import json
 from json import JSONDecodeError
 from typing import List, Tuple
 
-from mantid.api import (DistributedDataProcessorAlgorithm, WorkspaceGroupProperty, MatrixWorkspaceProperty,
-                        AlgorithmFactory, PropertyMode, Progress, WorkspaceGroup)
+from mantid.api import (
+    DistributedDataProcessorAlgorithm,
+    WorkspaceGroupProperty,
+    MatrixWorkspaceProperty,
+    AlgorithmFactory,
+    PropertyMode,
+    Progress,
+    WorkspaceGroup,
+)
 from mantid.dataobjects import EventWorkspace
-from mantid.kernel import (Direction, StringListValidator, Property)
+from mantid.kernel import Direction, StringListValidator, Property
 from sans.common.constants import EMPTY_NAME
-from sans.common.enums import (RebinType, RangeStepType)
-from sans.common.general_functions import (create_unmanaged_algorithm, append_to_sans_file_tag,
-                                           get_input_workspace_as_copy_if_not_same_as_output_workspace)
+from sans.common.enums import RebinType, RangeStepType
+from sans.common.general_functions import (
+    create_unmanaged_algorithm,
+    append_to_sans_file_tag,
+    get_input_workspace_as_copy_if_not_same_as_output_workspace,
+)
 
 
 class SANSConvertToWavelengthAndRebin(DistributedDataProcessorAlgorithm):
     WAV_PAIRS = "WavelengthPairs"
 
     def category(self):
-        return 'SANS\\Wavelength'
+        return "SANS\\Wavelength"
 
     def summary(self):
-        return 'Convert the units of time-of-flight workspace to units of wavelength and performs a rebin.'
+        return "Convert the units of time-of-flight workspace to units of wavelength and performs a rebin."
 
     def PyInit(self):
         # Workspace which is to be masked
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", '',
-                                                     optional=PropertyMode.Mandatory, direction=Direction.Input),
-                             doc='The workspace which is to be converted to wavelength')
+        self.declareProperty(
+            MatrixWorkspaceProperty("InputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Input),
+            doc="The workspace which is to be converted to wavelength",
+        )
 
-        self.declareProperty(self.WAV_PAIRS, defaultValue="", direction=Direction.Input,
-                             doc='A JSON encoded list of wavelength ranges. E.g. [[1., 2.], [2., 3.]]')
-        self.declareProperty('WavelengthStep', defaultValue=Property.EMPTY_DBL, direction=Direction.Input,
-                             doc='The step size of the wavelength binning.')
+        self.declareProperty(
+            self.WAV_PAIRS,
+            defaultValue="",
+            direction=Direction.Input,
+            doc="A JSON encoded list of wavelength ranges. E.g. [[1., 2.], [2., 3.]]",
+        )
+        self.declareProperty(
+            "WavelengthStep", defaultValue=Property.EMPTY_DBL, direction=Direction.Input, doc="The step size of the wavelength binning."
+        )
 
         # Step type
-        allowed_step_types = StringListValidator([RangeStepType.LOG.value,
-                                                  RangeStepType.LIN.value])
-        self.declareProperty('WavelengthStepType', RangeStepType.LIN.value,
-                             validator=allowed_step_types, direction=Direction.Input,
-                             doc='The step type for rebinning.')
+        allowed_step_types = StringListValidator([RangeStepType.LOG.value, RangeStepType.LIN.value])
+        self.declareProperty(
+            "WavelengthStepType",
+            RangeStepType.LIN.value,
+            validator=allowed_step_types,
+            direction=Direction.Input,
+            doc="The step type for rebinning.",
+        )
 
         # Rebin type
-        allowed_rebin_methods = StringListValidator([RebinType.REBIN.value,
-                                                     RebinType.INTERPOLATING_REBIN.value])
-        self.declareProperty("RebinMode", RebinType.REBIN.value,
-                             validator=allowed_rebin_methods, direction=Direction.Input,
-                             doc="The method which is to be applied to the rebinning.")
+        allowed_rebin_methods = StringListValidator([RebinType.REBIN.value, RebinType.INTERPOLATING_REBIN.value])
+        self.declareProperty(
+            "RebinMode",
+            RebinType.REBIN.value,
+            validator=allowed_rebin_methods,
+            direction=Direction.Input,
+            doc="The method which is to be applied to the rebinning.",
+        )
 
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
-                                                    optional=PropertyMode.Mandatory, direction=Direction.Output),
-                             doc='A grouped workspace containing the output workspaces'
-                                 ' in the same order as the input pairs.')
+        self.declareProperty(
+            WorkspaceGroupProperty("OutputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Output),
+            doc="A grouped workspace containing the output workspaces" " in the same order as the input pairs.",
+        )
 
     def PyExec(self):
         workspace = get_input_workspace_as_copy_if_not_same_as_output_workspace(self)
@@ -86,12 +108,9 @@ class SANSConvertToWavelengthAndRebin(DistributedDataProcessorAlgorithm):
     def _get_rebin_params(self, rebin_string, workspace):
         rebin_type = RebinType(self.getProperty("RebinMode").value)
         if rebin_type is RebinType.REBIN:
-            rebin_options = {"InputWorkspace": workspace,
-                             "PreserveEvents": True,
-                             "Params": rebin_string}
+            rebin_options = {"InputWorkspace": workspace, "PreserveEvents": True, "Params": rebin_string}
         else:
-            rebin_options = {"InputWorkspace": workspace,
-                             "Params": rebin_string}
+            rebin_options = {"InputWorkspace": workspace, "Params": rebin_string}
         return rebin_options
 
     def validateInputs(self):
@@ -105,14 +124,17 @@ class SANSConvertToWavelengthAndRebin(DistributedDataProcessorAlgorithm):
             return errors
 
         if not all(isinstance(internal_item, list) for internal_item in wavelengths):
-            errors.update({self.WAV_PAIRS: "A list of pairs (i.e. list of lists) is required."
-                                           " A single pair must be container within an outer list too."})
+            errors.update(
+                {
+                    self.WAV_PAIRS: "A list of pairs (i.e. list of lists) is required."
+                    " A single pair must be container within an outer list too."
+                }
+            )
             return errors  # The below checks aren't really possible as we don't have a clue what we have now
 
         def _check_individual_pair(wavelength_low, wavelength_high):
             if wavelength_low is not None and wavelength_high is not None and wavelength_low > wavelength_high:
-                errors.update({self.WAV_PAIRS: "The lower wavelength setting needs to be smaller "
-                                               "than the higher wavelength setting."})
+                errors.update({self.WAV_PAIRS: "The lower wavelength setting needs to be smaller " "than the higher wavelength setting."})
             if wavelength_low is not None and wavelength_low < 0:
                 errors.update({self.WAV_PAIRS: "The wavelength cannot be smaller than 0."})
             if wavelength_high is not None and wavelength_high < 0:
@@ -134,8 +156,7 @@ class SANSConvertToWavelengthAndRebin(DistributedDataProcessorAlgorithm):
 
     def _convert_units_to_wavelength(self, workspace):
         convert_name = "ConvertUnits"
-        convert_options = {"InputWorkspace": workspace,
-                           "Target": "Wavelength"}
+        convert_options = {"InputWorkspace": workspace, "Target": "Wavelength"}
         convert_alg = create_unmanaged_algorithm(convert_name, **convert_options)
         convert_alg.setPropertyValue("OutputWorkspace", EMPTY_NAME)
         convert_alg.setProperty("OutputWorkspace", workspace)

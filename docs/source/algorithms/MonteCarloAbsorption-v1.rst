@@ -90,7 +90,7 @@ Interpolation
 #############
 
 The default linear interpolation method will produce an absorption curve that is not smooth. CSpline interpolation
-will produce a smoother result by using a 3rd-order polynomial to approximate the original points.
+will produce a smoother result by using a 3rd-order polynomial to approximate the original points - although if the data includes sudden changes it may introduce oscillations including negative values at the interpolated points.
 
 The errors that the Monte Carlo simulation calculates for different wavelength points in a single spectrum may or may not be independent. If the same set of tracks have been used for different wavelengths (ResimulateTracksForDifferentWavelengths=False) then the errors will be correlated. A worst case positive correlation has been assumed giving an error on the interpolated point that is approximately the same as the surrounding simulated points.
 

@@ -16,23 +16,22 @@ app, within_mantid = get_qapplication()
 
 
 class DNSModusTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.parent = DNSReductionGuiWidget()
-        cls.modus = DNSModus('powder_tof', cls.parent)
+        cls.modus = DNSModus("powder_tof", cls.parent)
 
     def test___init__(self):
         self.assertIsInstance(self.modus, DNSModus)
         self.assertIsInstance(self.modus, object)
-        self.assertEqual(self.modus.name, 'powder_tof')
+        self.assertEqual(self.modus.name, "powder_tof")
         self.assertIsInstance(self.modus.widgets, OrderedDict)
 
     def test_change(self):
-        self.modus.change('powder_tof')
-        self.assertEqual(self.modus.name, 'powder_tof')
+        self.modus.change("powder_tof")
+        self.assertEqual(self.modus.name, "powder_tof")
         self.assertEqual(len(self.modus.widgets), 6)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

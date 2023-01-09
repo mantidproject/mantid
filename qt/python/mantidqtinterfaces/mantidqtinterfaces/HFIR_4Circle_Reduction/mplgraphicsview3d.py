@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=R0901,R0902,R0904
+# pylint: disable=R0901,R0902,R0904
 from distutils.version import LooseVersion
 
 import matplotlib
@@ -39,7 +39,7 @@ class MplPlot3dCanvas(FigureCanvas):
         FigureCanvas.updateGeometry(self)
 
         # Axes
-        if LooseVersion('3.4.0') <= LooseVersion(matplotlib.__version__):
+        if LooseVersion("3.4.0") <= LooseVersion(matplotlib.__version__):
             self._myAxes = Axes3D(self._myFigure, auto_add_to_figure=False)  # Canvas figure must be created for mouse rotation
             self._myFigure.add_axes(self._myAxes)
         else:
@@ -73,12 +73,11 @@ class MplPlot3dCanvas(FigureCanvas):
         return
 
     def get_data(self, data_key):
-        """ Get data by data key
+        """Get data by data key
         :param data_key:
         :return:
         """
-        assert data_key in self._dataDict, 'Data key %s does not exist in %s.' % (str(data_key),
-                                                                                  str(self._dataDict.keys()))
+        assert data_key in self._dataDict, "Data key %s does not exist in %s." % (str(data_key), str(self._dataDict.keys()))
 
         return self._dataDict[data_key]
 
@@ -90,7 +89,7 @@ class MplPlot3dCanvas(FigureCanvas):
         :return:
         """
         # check
-        assert isinstance(points, np.ndarray) and points.shape[1] == 3, 'Shape is %s.' % str(points.shape)
+        assert isinstance(points, np.ndarray) and points.shape[1] == 3, "Shape is %s." % str(points.shape)
         assert isinstance(intensities, np.ndarray) and len(points) == len(intensities)
 
         # set
@@ -103,7 +102,7 @@ class MplPlot3dCanvas(FigureCanvas):
         return r_value
 
     def import_data_from_file(self, file_name):
-        """ File will have more than 4 columns, as X, Y, Z, Intensity, ...
+        """File will have more than 4 columns, as X, Y, Z, Intensity, ...
         :param file_name:
         :return:
         """
@@ -111,13 +110,13 @@ class MplPlot3dCanvas(FigureCanvas):
         assert isinstance(file_name, str) and os.path.exists(file_name)
 
         # parse
-        data_file = open(file_name, 'r')
+        data_file = open(file_name, "r")
         raw_lines = data_file.readlines()
         data_file.close()
 
         # construct ND data array
         xyz_points = np.zeros((len(raw_lines), 3))
-        intensities = np.zeros((len(raw_lines), ))
+        intensities = np.zeros((len(raw_lines),))
 
         # parse
         for i in range(len(raw_lines)):
@@ -128,7 +127,7 @@ class MplPlot3dCanvas(FigureCanvas):
                 continue
 
             # set value
-            terms = line.split(',')
+            terms = line.split(",")
             for j in range(3):
                 xyz_points[i][j] = float(terms[j])
             intensities[i] = float(terms[3])
@@ -151,12 +150,11 @@ class MplPlot3dCanvas(FigureCanvas):
         # check: [TO DO] need MORE!
         assert isinstance(points, np.ndarray)
         assert len(points) == len(color_list)
-        assert points.shape[1] == 3, '3D data %s.' % str(points.shape)
+        assert points.shape[1] == 3, "3D data %s." % str(points.shape)
 
         #
         # plot scatters
-        plt = self._myAxes.scatter(points[:, 0], points[:, 1],  points[:, 2],
-                                   zdir='z', c=color_list)
+        plt = self._myAxes.scatter(points[:, 0], points[:, 1], points[:, 2], zdir="z", c=color_list)
         self._currPlotList.append(plt)
 
         self.draw()
@@ -180,7 +178,7 @@ class MplPlot3dCanvas(FigureCanvas):
 
         assert isinstance(points, np.ndarray)
         assert isinstance(points.shape, tuple)
-        assert points.shape[1] == 3, '3D data %s.' % str(points.shape)
+        assert points.shape[1] == 3, "3D data %s." % str(points.shape)
 
         if len(points) > 1:
             # set x, y and z limit
@@ -198,9 +196,9 @@ class MplPlot3dCanvas(FigureCanvas):
             print(z_min, z_max)
 
             # use default setup
-            self._myAxes.set_xlim(x_min-d_x, x_max+d_x)
-            self._myAxes.set_ylim(y_min-d_y, y_max+d_y)
-            self._myAxes.set_zlim(z_min-d_z, z_max+d_z)
+            self._myAxes.set_xlim(x_min - d_x, x_max + d_x)
+            self._myAxes.set_ylim(y_min - d_y, y_max + d_y)
+            self._myAxes.set_zlim(z_min - d_z, z_max + d_z)
         # END-IF
 
         # color map for intensity
@@ -217,7 +215,7 @@ class MplPlot3dCanvas(FigureCanvas):
             max_intensity = max(intensities)
             diff = max_intensity - min_intensity
             b_list = intensities - min_intensity
-            b_list = b_list/diff
+            b_list = b_list / diff
 
             num_points = len(points[:, 2])
             for index in range(num_points):
@@ -227,7 +225,7 @@ class MplPlot3dCanvas(FigureCanvas):
             color_list.append((color_r, color_g, 0.5))
 
         # plot scatters
-        self._myAxes.scatter(points[:, 0], points[:, 1],  points[:, 2], zdir='z', c=color_list)
+        self._myAxes.scatter(points[:, 0], points[:, 1], points[:, 2], zdir="z", c=color_list)
 
         self.draw()
 
@@ -236,11 +234,11 @@ class MplPlot3dCanvas(FigureCanvas):
         Plot surface
         :return:
         """
-        print('Number of surf = ', len(self._currSurfaceList))
+        print("Number of surf = ", len(self._currSurfaceList))
         for surf in self._currSurfaceList:
-            plt = self._myAxes.plot_surface(surf["xx"], surf["yy"], surf["val"],
-                                            rstride=5, cstride=5,  # color map??? cmap=cm.jet,
-                                            linewidth=1, antialiased=True)
+            plt = self._myAxes.plot_surface(
+                surf["xx"], surf["yy"], surf["val"], rstride=5, cstride=5, linewidth=1, antialiased=True  # color map??? cmap=cm.jet,
+            )
             self._currPlotList.append(plt)
         # END-FOR
 
@@ -276,9 +274,9 @@ class MplPlot3dCanvas(FigureCanvas):
         :return:
         """
         # Set color map
-        assert isinstance(color_r, float), 0 <= color_r < 1.
-        assert isinstance(color_g, float), 0 <= color_g < 1.
-        assert isinstance(color_b, float), 0 <= color_b < 1.
+        assert isinstance(color_r, float), 0 <= color_r < 1.0
+        assert isinstance(color_g, float), 0 <= color_g < 1.0
+        assert isinstance(color_b, float), 0 <= color_b < 1.0
 
         self._colorMap = [color_r, color_g, color_b]
 
@@ -288,12 +286,12 @@ class MplPlot3dCanvas(FigureCanvas):
         :param title:
         :return:
         """
-        self._myFigure.suptitle(title,  fontsize=font_size)
+        self._myFigure.suptitle(title, fontsize=font_size)
 
         return
 
     def set_xyz_limits(self, points, limits=None):
-        """ Set XYZ axes limits
+        """Set XYZ axes limits
         :param points:
         :param limits: if None, then use default; otherwise, 3-tuple of 2-tuple
         :return:
@@ -314,7 +312,7 @@ class MplPlot3dCanvas(FigureCanvas):
 
 
 def get_auto_xyz_limit(points):
-    """ Get default limit on X, Y, Z
+    """Get default limit on X, Y, Z
     Requirements: number of data points must be larger than 0.
     :param points:
     :return: 3-tuple of 2-tuple as (min, max) for X, Y and Z respectively
@@ -341,8 +339,8 @@ def get_auto_xyz_limit(points):
     print(z_min, z_max)
 
     # use default setup
-    x_lim = (x_min-d_x, x_max+d_x)
-    y_lim = (y_min-d_y, y_max+d_y)
-    z_lim = (z_min-d_z, z_max+d_z)
+    x_lim = (x_min - d_x, x_max + d_x)
+    y_lim = (y_min - d_y, y_max + d_y)
+    z_lim = (z_min - d_z, z_max + d_z)
 
     return x_lim, y_lim, z_lim

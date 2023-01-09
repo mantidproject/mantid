@@ -18,34 +18,34 @@ class PhaseTableContextTest(unittest.TestCase):
         self.assertEqual(self.context.phase_tables, [])
 
     def test_add_phase_table_adds_phase_table_name_to_list(self):
-        name = create_workspace_wrapper_stub_object('MUSR22222_phase_table')
+        name = create_workspace_wrapper_stub_object("MUSR22222_phase_table")
         self.context.add_phase_table(name)
 
         self.assertEqual(self.context.phase_tables, [name])
 
     def test_get_phase_table_list_retrieves_all_tables_wth_correct_instrument(self):
-        name = create_workspace_wrapper_stub_object('MUSR22222_phase_table')
+        name = create_workspace_wrapper_stub_object("MUSR22222_phase_table")
         self.context.add_phase_table(name)
-        name = create_workspace_wrapper_stub_object('EMU22222_phase_table')
+        name = create_workspace_wrapper_stub_object("EMU22222_phase_table")
         self.context.add_phase_table(name)
-        name = create_workspace_wrapper_stub_object('MUSR33333_phase_table')
+        name = create_workspace_wrapper_stub_object("MUSR33333_phase_table")
         self.context.add_phase_table(name)
 
-        self.assertEqual(self.context.get_phase_table_list('MUSR'), ['MUSR22222_phase_table', 'MUSR33333_phase_table'])
+        self.assertEqual(self.context.get_phase_table_list("MUSR"), ["MUSR22222_phase_table", "MUSR33333_phase_table"])
 
     def test_add_phase_quad_adds_phase_quad_name_to_list(self):
-        name = create_workspace_wrapper_stub_object('MUSR22222_phase_quad')
+        name = create_workspace_wrapper_stub_object("MUSR22222_phase_quad")
 
-        self.context.add_phase_quad(name, '22222')
+        self.context.add_phase_quad(name, "22222")
 
-        self.assertEqual(self.context.phase_quad, {'22222': name})
+        self.assertEqual(self.context.phase_quad, {"22222": name})
 
     def test_get_phase_quad_returns_phase_quad_name_if_run_and_instrument_match(self):
-        name = create_workspace_wrapper_stub_object('MUSR22222_phase_quad')
-        self.context.add_phase_quad(name, '22222')
+        name = create_workspace_wrapper_stub_object("MUSR22222_phase_quad")
+        self.context.add_phase_quad(name, "22222")
 
-        self.assertEqual(self.context.get_phase_quad('MUSR', '22222'), ['MUSR22222_phase_quad'])
+        self.assertEqual(self.context.get_phase_quad("MUSR", "22222"), ["MUSR22222_phase_quad"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

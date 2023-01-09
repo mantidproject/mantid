@@ -8,7 +8,6 @@ from qtpy import QtWidgets
 
 
 class LoadWidgetView(QtWidgets.QWidget):
-
     def __init__(self, parent=None, load_run_view=None, load_file_view=None):
         super(LoadWidgetView, self).__init__(parent)
 
@@ -52,15 +51,17 @@ class LoadWidgetView(QtWidgets.QWidget):
 
         self.group = QtWidgets.QGroupBox("Loading")
         self.group.setFlat(False)
-        self.setStyleSheet("QGroupBox {border: 1px solid grey;border-radius: 10px;margin-top: 1ex; margin-right: 0ex}"
-                           "QGroupBox:title {"
-                           'subcontrol-origin: margin;'
-                           "padding: 0 3px;"
-                           'subcontrol-position: top center;'
-                           'padding-top: 0px;'
-                           'padding-bottom: 0px;'
-                           "padding-right: 10px;"
-                           ' color: grey; }')
+        self.setStyleSheet(
+            "QGroupBox {border: 1px solid grey;border-radius: 10px;margin-top: 1ex; margin-right: 0ex}"
+            "QGroupBox:title {"
+            "subcontrol-origin: margin;"
+            "padding: 0 3px;"
+            "subcontrol-position: top center;"
+            "padding-top: 0px;"
+            "padding-bottom: 0px;"
+            "padding-right: 10px;"
+            " color: grey; }"
+        )
         self.group.setLayout(self.vertical_layout)
 
         self.widget_layout = QtWidgets.QVBoxLayout(self)

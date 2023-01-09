@@ -14,19 +14,16 @@ from unittest.mock import create_autospec, patch, ANY, MagicMock
 from mantid.dataobjects import PeaksWorkspace
 from mantid.kernel import SpecialCoordinateSystem
 from mantidqt.widgets.sliceviewer.peaksviewer import PeaksViewerModel
-from mantidqt.widgets.sliceviewer.peaksviewer.presenter \
-    import PeaksViewerPresenter, PeaksWorkspaceDataPresenter
-from mantidqt.widgets.sliceviewer.peaksviewer.view \
-    import PeaksViewerView, _PeaksWorkspaceTableView
-from mantidqt.widgets.sliceviewer.peaksviewer.test.modeltesthelpers\
-    import create_peaks_viewer_model, create_slice_info  # noqa
+from mantidqt.widgets.sliceviewer.peaksviewer.presenter import PeaksViewerPresenter, PeaksWorkspaceDataPresenter
+from mantidqt.widgets.sliceviewer.peaksviewer.view import PeaksViewerView, _PeaksWorkspaceTableView
+from mantidqt.widgets.sliceviewer.peaksviewer.test.modeltesthelpers import create_peaks_viewer_model, create_slice_info  # noqa
 
 
 def create_test_model(name):
     """Create a test model object from a mock workspace"""
     mock_ws = create_autospec(PeaksWorkspace)
     mock_ws.name.return_value = name
-    return PeaksViewerModel(mock_ws, 'r', 'b')
+    return PeaksViewerModel(mock_ws, "r", "b")
 
 
 def create_mock_model(name):
@@ -43,15 +40,14 @@ def create_mock_view():
     return mock_view
 
 
-@patch("mantidqt.widgets.sliceviewer.peaksviewer.presenter.PeaksWorkspaceDataPresenter",
-       autospec=PeaksWorkspaceDataPresenter)
+@patch("mantidqt.widgets.sliceviewer.peaksviewer.presenter.PeaksWorkspaceDataPresenter", autospec=PeaksWorkspaceDataPresenter)
 class PeaksViewerPresenterTest(unittest.TestCase):
     def setUp(self):
         self.mock_view = create_mock_view()
 
     # -------------------- success tests -----------------------------
     def test_presenter_subscribes_to_view_updates(self, _):
-        presenter = PeaksViewerPresenter(create_peaks_viewer_model([], 'r'), self.mock_view)
+        presenter = PeaksViewerPresenter(create_peaks_viewer_model([], "r"), self.mock_view)
 
         self.mock_view.subscribe.assert_called_once_with(presenter)
 
@@ -83,8 +79,7 @@ class PeaksViewerPresenterTest(unittest.TestCase):
 
         self.assertEqual(2, self.mock_view.painter.remove.call_count)
 
-    def test_slice_point_changed_clears_old_peaks_and_overlays_visible(
-            self, mock_peaks_list_presenter):
+    def test_slice_point_changed_clears_old_peaks_and_overlays_visible(self, mock_peaks_list_presenter):
         centers = ((1, 2, 3), (4, 5, 3.01))
         slice_info = create_slice_info(centers, slice_value=3, slice_width=5)
         test_model = create_peaks_viewer_model(centers, fg_color="r")
@@ -106,7 +101,7 @@ class PeaksViewerPresenterTest(unittest.TestCase):
         self.assertEqual(2, self.mock_view.painter.cross.call_count)
 
     def test_single_peak_selection(self, mock_peaks_list_presenter):
-        name = 'ws1'
+        name = "ws1"
         mock_model = create_mock_model(name)
         mock_model.has_representations_drawn.return_value = True
         viewlimits = (-1, 1), (-2, 2)
@@ -121,7 +116,7 @@ class PeaksViewerPresenterTest(unittest.TestCase):
 
     def test_single_peak_selection_if_peaks_not_drawn(self, mock_peaks_list_presenter):
         # peaks not drawn if one fo viewing axes non-Q
-        name = 'ws1'
+        name = "ws1"
         mock_model = create_mock_model(name)
         mock_model.has_representations_drawn.return_value = False
         self.mock_view.selected_index = 0
@@ -133,15 +128,15 @@ class PeaksViewerPresenterTest(unittest.TestCase):
         self.mock_view.set_axes_limits.assert_not_called()
 
     def test_add_delete_peaks(self, mock_peaks_list_presenter):
-        name = 'ws1'
+        name = "ws1"
         mock_model = create_mock_model(name)
-        self.mock_view.frame = 'Frame'
+        self.mock_view.frame = "Frame"
         presenter = PeaksViewerPresenter(mock_model, self.mock_view)
         presenter.add_peak([1, 2, 3])
-        mock_model.add_peak.assert_called_once_with([1, 2, 3], 'Frame')
+        mock_model.add_peak.assert_called_once_with([1, 2, 3], "Frame")
         presenter.delete_peak([1, 2, 3])
-        mock_model.delete_peak.assert_called_once_with([1, 2, 3], 'Frame')
+        mock_model.delete_peak.assert_called_once_with([1, 2, 3], "Frame")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

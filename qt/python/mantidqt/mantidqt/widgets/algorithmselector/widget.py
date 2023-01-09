@@ -9,8 +9,7 @@ from typing import Callable, Sequence
 
 import qtpy
 from qtpy.QtCore import QModelIndex, Qt
-from qtpy.QtWidgets import (QWidget, QPushButton, QComboBox, QTreeWidget, QVBoxLayout, QHBoxLayout,
-                            QCompleter, QTreeWidgetItem)
+from qtpy.QtWidgets import QWidget, QPushButton, QComboBox, QTreeWidget, QVBoxLayout, QHBoxLayout, QCompleter, QTreeWidgetItem
 
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import block_signals
@@ -31,7 +30,7 @@ def get_name_and_version_from_item_label(item_label):
     :param item_label: A label of a TreeWidgetItem
     :return: SelectedAlgorithm tuple or None if the format is wrong.
     """
-    match = re.match(r'(\w+) v\.(\d+)', item_label)
+    match = re.match(r"(\w+) v\.(\d+)", item_label)
     if match:
         return SelectedAlgorithm(name=match.group(1), version=int(match.group(2)))
     return None
@@ -41,6 +40,7 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
     """
     An algorithm selector view implemented with qtpy.
     """
+
     def __init__(self, parent=None, include_hidden=False):
         """
         Initialise a new instance of AlgorithmSelectorWidget
@@ -82,7 +82,7 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         Make the button that starts the algorithm.
         :return: A QPushButton
         """
-        button = QPushButton('Execute')
+        button = QPushButton("Execute")
         button.clicked.connect(self._on_execute_button_click)
         return button
 
@@ -127,11 +127,11 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
             if key == self.algorithm_key:
                 for name, versions in sorted(sub_tree.items()):
                     versions = sorted(versions)
-                    default_version_item = QTreeWidgetItem([f'{name} v.{versions[-1]}'])
+                    default_version_item = QTreeWidgetItem([f"{name} v.{versions[-1]}"])
                     item_list.append(default_version_item)
                     if len(versions) > 1:
                         for v in versions[:-1]:
-                            default_version_item.addChild(QTreeWidgetItem([f'{name} v.{v}']))
+                            default_version_item.addChild(QTreeWidgetItem([f"{name} v.{v}"]))
             else:
                 cat_item = QTreeWidgetItem([key])
                 item_list.append(cat_item)
@@ -169,7 +169,7 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         :param text: New text in the search box.
         """
         # if the function is called without text, avoid doing anything
-        if text == '':
+        if text == "":
             return
 
         with block_signals(self.tree):
@@ -261,21 +261,19 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
                         enabled.append(property_name)
 
             manager = InterfaceManager()
-            dialog = manager.createDialogFromName(algorithm.name, algorithm.version, None, False,
-                                                  presets, "", enabled)
+            dialog = manager.createDialogFromName(algorithm.name, algorithm.version, None, False, presets, "", enabled)
             dialog.show()
 
 
 class _AlgorithmTreeWidget(QTreeWidget):
-    """Specialised QTreeWidget that executes the selected algorithm on double clicking
-    """
+    """Specialised QTreeWidget that executes the selected algorithm on double clicking"""
+
     def __init__(self, parent: AlgorithmSelectorWidget):
         super().__init__(parent)
 
     def mouseDoubleClickEvent(self, mouse_event):
         if mouse_event.button() == Qt.LeftButton:
-            if self.selectedItems() and get_name_and_version_from_item_label(
-                    self.selectedItems()[0].text(0)):
+            if self.selectedItems() and get_name_and_version_from_item_label(self.selectedItems()[0].text(0)):
                 self.parent().execute_algorithm()
             else:
                 super().mouseDoubleClickEvent(mouse_event)

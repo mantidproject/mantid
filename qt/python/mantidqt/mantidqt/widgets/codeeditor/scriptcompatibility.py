@@ -18,8 +18,7 @@ from qtpy.QtWidgets import QMessageBox
 # local imports
 from mantid import simpleapi
 
-API_IMPORT = ("# import mantid algorithms\n"
-              "from mantid.simpleapi import *\n\n")
+API_IMPORT = "# import mantid algorithms\n" "from mantid.simpleapi import *\n\n"
 
 
 def add_mantid_api_import(editor, content):
@@ -33,14 +32,12 @@ def attr_imported(attr, content):
 
 
 def attr_called(attr, content):
-    return bool(re.search(r'(^|\s)+' + attr + r'\(.*\)', content))
+    return bool(re.search(r"(^|\s)+" + attr + r"\(.*\)", content))
 
 
 def mantid_algorithm_used_without_import(content):
     for attr in dir(simpleapi):
-        if (not attr.startswith('_') and attr[0].isupper()
-                and attr_called(attr, content)
-                and not attr_imported(attr, content)):
+        if not attr.startswith("_") and attr[0].isupper() and attr_called(attr, content) and not attr_imported(attr, content):
             return True
     return False
 
@@ -63,7 +60,7 @@ def mantid_api_import_needed(content):
 
 def mantid_api_imported(content):
     # check for importing specific objects
-    if 'from mantid.simpleapi import' in content:
+    if "from mantid.simpleapi import" in content:
         return True
     return False
 
@@ -71,11 +68,9 @@ def mantid_api_imported(content):
 def permission_box_to_prepend_import():
     msg_box = QMessageBox()
     msg_box.setWindowTitle("Mantid Workbench")
-    msg_box.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
-    msg_box.setText("It looks like this python file uses a Mantid "
-                    "algorithm but does not import the Mantid API.")
-    msg_box.setInformativeText("Would you like to add a line to import "
-                               "the Mantid API?")
+    msg_box.setWindowIcon(QIcon(":/images/MantidIcon.ico"))
+    msg_box.setText("It looks like this python file uses a Mantid " "algorithm but does not import the Mantid API.")
+    msg_box.setInformativeText("Would you like to add a line to import " "the Mantid API?")
     msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
     msg_box.setDefaultButton(QMessageBox.Yes)
     permission = msg_box.exec_()

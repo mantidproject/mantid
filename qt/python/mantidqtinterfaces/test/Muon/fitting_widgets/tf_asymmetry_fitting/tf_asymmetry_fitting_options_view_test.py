@@ -9,13 +9,13 @@ import unittest
 from mantidqt.utils.qt.line_edit_double_validator import LineEditDoubleValidator
 from mantidqt.utils.qt.testing import start_qapplication
 
-from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_fitting_options_view import \
-    TFAsymmetryFittingOptionsView
+from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_fitting_options_view import (
+    TFAsymmetryFittingOptionsView,
+)
 
 
 @start_qapplication
 class TFAsymmetryFittingOptionsViewTest(unittest.TestCase):
-
     def setUp(self):
         self.view = TFAsymmetryFittingOptionsView()
         self.view.show()
@@ -72,5 +72,5 @@ class TFAsymmetryFittingOptionsViewTest(unittest.TestCase):
         self.assertTrue(self.view.is_normalisation_fixed)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -18,7 +18,6 @@ DEFAULT_DETECTOR_PLOTTED_ORDER = ["Detector 3", "Detector 1", "Detector 4", "Det
 
 
 class EAGroupingTablePresenter(object):
-
     def __init__(self, view, model):
         self._view = view
         self._model = model
@@ -65,8 +64,7 @@ class EAGroupingTablePresenter(object):
         self._view.disable_updates()
         assert isinstance(group, EAGroup)
 
-        entry = [str(group.name), str(group.run_number), group.detector, state, str(group.rebin_index),
-                 group.rebin_option]
+        entry = [str(group.name), str(group.run_number), group.detector, state, str(group.rebin_index), group.rebin_option]
         self._view.add_entry_to_table(entry)
         self._view.enable_updates()
 
@@ -94,7 +92,7 @@ class EAGroupingTablePresenter(object):
 
     def handle_data_change(self, row, col):
         changed_item = self._view.get_table_item(row, col)
-        workspace_name = self._view.get_table_item(row, INVERSE_GROUP_TABLE_COLUMNS['workspace_name']).text()
+        workspace_name = self._view.get_table_item(row, INVERSE_GROUP_TABLE_COLUMNS["workspace_name"]).text()
 
         to_analyse_changed = self.handle_to_analyse_column_changed(col, changed_item, workspace_name)
         self.handle_rebin_column_changed(col, row, changed_item)
@@ -104,13 +102,13 @@ class EAGroupingTablePresenter(object):
 
     def handle_to_analyse_column_changed(self, col, changed_item, workspace_name):
         to_analyse_changed = False
-        if col == INVERSE_GROUP_TABLE_COLUMNS['to_analyse']:
+        if col == INVERSE_GROUP_TABLE_COLUMNS["to_analyse"]:
             to_analyse_changed = True
             self.to_analyse_data_checkbox_changed(changed_item.checkState(), workspace_name)
         return to_analyse_changed
 
     def handle_rebin_column_changed(self, col, row, changed_item):
-        if col == INVERSE_GROUP_TABLE_COLUMNS['rebin']:
+        if col == INVERSE_GROUP_TABLE_COLUMNS["rebin"]:
             if changed_item.text() == REBIN_FIXED_OPTION:
                 self._view.rebin_fixed_chosen(row)
             elif changed_item.text() == REBIN_VARIABLE_OPTION:
@@ -119,16 +117,15 @@ class EAGroupingTablePresenter(object):
                 self._view.rebin_none_chosen(row)
 
     def handle_rebin_option_column_changed(self, col, changed_item, workspace_name):
-        if col == INVERSE_GROUP_TABLE_COLUMNS['rebin_options']:
+        if col == INVERSE_GROUP_TABLE_COLUMNS["rebin_options"]:
             params = changed_item.text().split(":")
             if len(params) == 2:
                 if params[0] == "Steps":
                     """
-                       param[1] is a string contain a float with the units KeV at the end of the string so units must
-                       be removed
+                    param[1] is a string contain a float with the units KeV at the end of the string so units must
+                    be removed
                     """
-                    self._model.handle_rebin(name=workspace_name, rebin_type="Fixed",
-                                             rebin_param=float(params[1][0:-3]))
+                    self._model.handle_rebin(name=workspace_name, rebin_type="Fixed", rebin_param=float(params[1][0:-3]))
 
                 if params[0] == "Bin Boundaries":
                     if len(params[1]) >= 1:
@@ -173,13 +170,13 @@ class EAGroupingTablePresenter(object):
         else:
             self._model.remove_group_from_analysis(group_name)
 
-        group_info = {'is_added': group_added, 'name': group_name}
+        group_info = {"is_added": group_added, "name": group_name}
         self.selected_group_changed_notifier.notify_subscribers(group_info)
 
     def plot_default_case(self):
         """
-            Detector 3 should be plotted by default and if not present Detector 1 should be plotted, if neither is
-            present then Detector 4 and finally Detector 2
+        Detector 3 should be plotted by default and if not present Detector 1 should be plotted, if neither is
+        present then Detector 4 and finally Detector 2
         """
         index_sorted_by_detectors = {}
         for row in range(self._view.num_rows()):

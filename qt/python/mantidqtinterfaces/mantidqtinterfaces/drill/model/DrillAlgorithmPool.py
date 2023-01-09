@@ -14,6 +14,7 @@ class DrillAlgorithmPoolSignals(QObject):
     Args:
         int: progress in percent
     """
+
     progressUpdate = Signal(int)
 
     """
@@ -27,6 +28,7 @@ class DrillAlgorithmPool(QThreadPool):
     Class that defines an observer for the algorithms started through the DrILL
     interface.
     """
+
     def __init__(self):
         super(DrillAlgorithmPool, self).__init__()
         self.signals = DrillAlgorithmPoolSignals()

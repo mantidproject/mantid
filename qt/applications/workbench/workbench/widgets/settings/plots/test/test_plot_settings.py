@@ -33,42 +33,46 @@ class PlotsSettingsTest(unittest.TestCase):
         # load current setting is called automatically in the constructor
         PlotSettings(None)
 
-        mock_ConfigService.getString.assert_has_calls([call(PlotProperties.NORMALIZATION.value),
-                                                       call(PlotProperties.SHOW_TITLE.value),
-                                                       call(PlotProperties.SHOW_LEGEND.value),
-                                                       call(PlotProperties.PLOT_FONT.value),
-                                                       call(PlotProperties.X_AXES_SCALE.value),
-                                                       call(PlotProperties.Y_AXES_SCALE.value),
-                                                       call(PlotProperties.AXES_LINE_WIDTH.value),
-                                                       call(PlotProperties.SHOW_TICKS_LEFT.value),
-                                                       call(PlotProperties.SHOW_TICKS_BOTTOM.value),
-                                                       call(PlotProperties.SHOW_TICKS_RIGHT.value),
-                                                       call(PlotProperties.SHOW_TICKS_TOP.value),
-                                                       call(PlotProperties.SHOW_LABELS_LEFT.value),
-                                                       call(PlotProperties.SHOW_LABELS_BOTTOM.value),
-                                                       call(PlotProperties.SHOW_LABELS_RIGHT.value),
-                                                       call(PlotProperties.SHOW_LABELS_TOP.value),
-                                                       call(PlotProperties.MAJOR_TICKS_LENGTH.value),
-                                                       call(PlotProperties.MAJOR_TICKS_WIDTH.value),
-                                                       call(PlotProperties.MAJOR_TICKS_DIRECTION.value),
-                                                       call(PlotProperties.MINOR_TICKS_LENGTH.value),
-                                                       call(PlotProperties.MINOR_TICKS_WIDTH.value),
-                                                       call(PlotProperties.MINOR_TICKS_DIRECTION.value),
-                                                       call(PlotProperties.ENABLE_GRID.value),
-                                                       call(PlotProperties.SHOW_MINOR_TICKS.value),
-                                                       call(PlotProperties.SHOW_MINOR_GRIDLINES.value),
-                                                       call(PlotProperties.LINE_STYLE.value),
-                                                       call(PlotProperties.DRAW_STYLE.value),
-                                                       call(PlotProperties.LINE_WIDTH.value),
-                                                       call(PlotProperties.MARKER_STYLE.value),
-                                                       call(PlotProperties.MARKER_SIZE.value),
-                                                       call(PlotProperties.ERROR_WIDTH.value),
-                                                       call(PlotProperties.CAPSIZE.value),
-                                                       call(PlotProperties.CAP_THICKNESS.value),
-                                                       call(PlotProperties.ERROR_EVERY.value),
-                                                       call(PlotProperties.LEGEND_LOCATION.value),
-                                                       call(PlotProperties.LEGEND_FONT_SIZE.value),
-                                                       call(PlotProperties.COLORMAP.value)])
+        mock_ConfigService.getString.assert_has_calls(
+            [
+                call(PlotProperties.NORMALIZATION.value),
+                call(PlotProperties.SHOW_TITLE.value),
+                call(PlotProperties.SHOW_LEGEND.value),
+                call(PlotProperties.PLOT_FONT.value),
+                call(PlotProperties.X_AXES_SCALE.value),
+                call(PlotProperties.Y_AXES_SCALE.value),
+                call(PlotProperties.AXES_LINE_WIDTH.value),
+                call(PlotProperties.SHOW_TICKS_LEFT.value),
+                call(PlotProperties.SHOW_TICKS_BOTTOM.value),
+                call(PlotProperties.SHOW_TICKS_RIGHT.value),
+                call(PlotProperties.SHOW_TICKS_TOP.value),
+                call(PlotProperties.SHOW_LABELS_LEFT.value),
+                call(PlotProperties.SHOW_LABELS_BOTTOM.value),
+                call(PlotProperties.SHOW_LABELS_RIGHT.value),
+                call(PlotProperties.SHOW_LABELS_TOP.value),
+                call(PlotProperties.MAJOR_TICKS_LENGTH.value),
+                call(PlotProperties.MAJOR_TICKS_WIDTH.value),
+                call(PlotProperties.MAJOR_TICKS_DIRECTION.value),
+                call(PlotProperties.MINOR_TICKS_LENGTH.value),
+                call(PlotProperties.MINOR_TICKS_WIDTH.value),
+                call(PlotProperties.MINOR_TICKS_DIRECTION.value),
+                call(PlotProperties.ENABLE_GRID.value),
+                call(PlotProperties.SHOW_MINOR_TICKS.value),
+                call(PlotProperties.SHOW_MINOR_GRIDLINES.value),
+                call(PlotProperties.LINE_STYLE.value),
+                call(PlotProperties.DRAW_STYLE.value),
+                call(PlotProperties.LINE_WIDTH.value),
+                call(PlotProperties.MARKER_STYLE.value),
+                call(PlotProperties.MARKER_SIZE.value),
+                call(PlotProperties.ERROR_WIDTH.value),
+                call(PlotProperties.CAPSIZE.value),
+                call(PlotProperties.CAP_THICKNESS.value),
+                call(PlotProperties.ERROR_EVERY.value),
+                call(PlotProperties.LEGEND_LOCATION.value),
+                call(PlotProperties.LEGEND_FONT_SIZE.value),
+                call(PlotProperties.COLORMAP.value),
+            ]
+        )
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_normalization_changed(self, mock_ConfigService):
@@ -133,12 +137,12 @@ class PlotsSettingsTest(unittest.TestCase):
         mock_ConfigService.setString.reset_mock()
 
         presenter.action_axes_line_width_changed(2)
-        mock_ConfigService.setString.assert_called_once_with(PlotProperties.AXES_LINE_WIDTH.value, '2')
+        mock_ConfigService.setString.assert_called_once_with(PlotProperties.AXES_LINE_WIDTH.value, "2")
 
         mock_ConfigService.setString.reset_mock()
 
         presenter.action_axes_line_width_changed(3.5)
-        mock_ConfigService.setString.assert_called_once_with(PlotProperties.AXES_LINE_WIDTH.value, '3.5')
+        mock_ConfigService.setString.assert_called_once_with(PlotProperties.AXES_LINE_WIDTH.value, "3.5")
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_enable_grid(self, mock_ConfigService):
@@ -300,12 +304,12 @@ class PlotsSettingsTest(unittest.TestCase):
         # reset any effects from the constructor
         mock_ConfigService.setString.reset_mock()
 
-        presenter.action_marker_style_changed('circle')
+        presenter.action_marker_style_changed("circle")
         mock_ConfigService.setString.assert_called_once_with(PlotProperties.MARKER_STYLE.value, "circle")
 
         mock_ConfigService.setString.reset_mock()
 
-        presenter.action_marker_style_changed('octagon')
+        presenter.action_marker_style_changed("octagon")
         mock_ConfigService.setString.assert_called_once_with(PlotProperties.MARKER_STYLE.value, "octagon")
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
@@ -314,12 +318,12 @@ class PlotsSettingsTest(unittest.TestCase):
         # reset any effects from the constructor
         mock_ConfigService.setString.reset_mock()
 
-        presenter.action_marker_size_changed('8.0')
+        presenter.action_marker_size_changed("8.0")
         mock_ConfigService.setString.assert_called_once_with(PlotProperties.MARKER_SIZE.value, "8.0")
 
         mock_ConfigService.setString.reset_mock()
 
-        presenter.action_marker_size_changed('5.0')
+        presenter.action_marker_size_changed("5.0")
         mock_ConfigService.setString.assert_called_once_with(PlotProperties.MARKER_SIZE.value, "5.0")
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
@@ -426,13 +430,13 @@ class PlotsSettingsTest(unittest.TestCase):
         # reset any effects from the constructor
         mock_ConfigService.setString.reset_mock()
 
-        presenter.action_legend_location_changed('best')
-        mock_ConfigService.setString.assert_called_once_with(PlotProperties.LEGEND_LOCATION.value, 'best')
+        presenter.action_legend_location_changed("best")
+        mock_ConfigService.setString.assert_called_once_with(PlotProperties.LEGEND_LOCATION.value, "best")
 
         mock_ConfigService.setString.reset_mock()
 
-        presenter.action_legend_location_changed('upper left')
-        mock_ConfigService.setString.assert_called_once_with(PlotProperties.LEGEND_LOCATION.value, 'upper left')
+        presenter.action_legend_location_changed("upper left")
+        mock_ConfigService.setString.assert_called_once_with(PlotProperties.LEGEND_LOCATION.value, "upper left")
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_legend_size_changed(self, mock_ConfigService):
@@ -441,12 +445,12 @@ class PlotsSettingsTest(unittest.TestCase):
         mock_ConfigService.setString.reset_mock()
 
         presenter.action_legend_size_changed(10)
-        mock_ConfigService.setString.assert_called_once_with(PlotProperties.LEGEND_FONT_SIZE.value, '10')
+        mock_ConfigService.setString.assert_called_once_with(PlotProperties.LEGEND_FONT_SIZE.value, "10")
 
         mock_ConfigService.setString.reset_mock()
 
         presenter.action_legend_size_changed(8)
-        mock_ConfigService.setString.assert_called_once_with(PlotProperties.LEGEND_FONT_SIZE.value, '8')
+        mock_ConfigService.setString.assert_called_once_with(PlotProperties.LEGEND_FONT_SIZE.value, "8")
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_default_colormap_changed(self, mock_ConfigService):
@@ -467,7 +471,7 @@ class PlotsSettingsTest(unittest.TestCase):
         mock_ConfigService.setString.reset_mock()
 
         presenter.action_default_colormap_changed()
-        mock_ConfigService.setString.assert_called_once_with(PlotProperties.COLORMAP.value, colormap+"_r")
+        mock_ConfigService.setString.assert_called_once_with(PlotProperties.COLORMAP.value, colormap + "_r")
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_font_combo_changed(self, mock_ConfigService):
@@ -481,8 +485,7 @@ class PlotsSettingsTest(unittest.TestCase):
         mock_ConfigService.setString.reset_mock()
 
         presenter.action_font_combo_changed("Something that is not a font")
-        mock_ConfigService.setString.assert_called_once_with(PlotProperties.PLOT_FONT.value,
-                                                             "Something that is not a font")
+        mock_ConfigService.setString.assert_called_once_with(PlotProperties.PLOT_FONT.value, "Something that is not a font")
 
 
 if __name__ == "__main__":

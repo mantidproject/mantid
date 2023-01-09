@@ -12,10 +12,10 @@ from .model import WorkspaceCalculatorModel
 from .view import WorkspaceCalculatorView
 
 
-class WorkspaceCalculator():
+class WorkspaceCalculator:
     """Class containing the presenter for the workspace calculator,
-     that services the signals from the view and calls the model to perform
-     the requested operation."""
+    that services the signals from the view and calls the model to perform
+    the requested operation."""
 
     def __init__(self, parent=None, model=None, view=None):
         # Create model and view, or accept mocked versions
@@ -33,28 +33,26 @@ class WorkspaceCalculator():
     def readParameters(self):
         parameters = dict()
         try:
-            parameters['lhs_scale'] = float(self.view.lhs_scaling.text())
-            parameters['rhs_scale'] = float(self.view.rhs_scaling.text())
+            parameters["lhs_scale"] = float(self.view.lhs_scaling.text())
+            parameters["rhs_scale"] = float(self.view.rhs_scaling.text())
         except ValueError:
             return
-        parameters['lhs_ws'] = self.view.lhs_ws.currentText()
-        parameters['rhs_ws'] = self.view.rhs_ws.currentText()
-        parameters['operation'] = self.view.operation.currentText()
+        parameters["lhs_ws"] = self.view.lhs_ws.currentText()
+        parameters["rhs_ws"] = self.view.rhs_ws.currentText()
+        parameters["operation"] = self.view.operation.currentText()
         output_ws = self.view.output_ws.currentText()
         if output_ws == str():
             output_ws = "output"
-        parameters['output_ws'] = output_ws
+        parameters["output_ws"] = output_ws
         return parameters
 
     def validateInputs(self):
         parameters = self.readParameters()
         if parameters == dict():
             return
-        lhs_ws = parameters['lhs_ws'] if parameters['lhs_ws'] != str() else None
-        rhs_ws = parameters['rhs_ws'] if parameters['rhs_ws'] != str() else None
-        valid_lhs, valid_rhs, err_msg = self.model.validateInputs(lhs_ws=lhs_ws,
-                                                                  rhs_ws=rhs_ws,
-                                                                  operation=parameters['operation'])
+        lhs_ws = parameters["lhs_ws"] if parameters["lhs_ws"] != str() else None
+        rhs_ws = parameters["rhs_ws"] if parameters["rhs_ws"] != str() else None
+        valid_lhs, valid_rhs, err_msg = self.model.validateInputs(lhs_ws=lhs_ws, rhs_ws=rhs_ws, operation=parameters["operation"])
         if lhs_ws:
             self.view.setValidationLabel(ws="LHS", validationValue=valid_lhs, tooltip=err_msg)
         if rhs_ws:

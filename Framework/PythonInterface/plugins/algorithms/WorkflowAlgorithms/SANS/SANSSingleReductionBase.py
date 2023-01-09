@@ -8,14 +8,12 @@
 
 """A base class to share functionality between SANSSingleReduction versions."""
 
-from mantid.api import (DistributedDataProcessorAlgorithm,
-                        MatrixWorkspaceProperty, Progress, PropertyMode)
+from mantid.api import DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, Progress, PropertyMode
 from mantid.kernel import Direction
 from sans.algorithm_detail.bundles import ReductionSettingBundle, CompletedSlices
-from sans.algorithm_detail.single_execution import (get_final_output_workspaces,
-                                                    get_merge_bundle_for_merge_request)
+from sans.algorithm_detail.single_execution import get_final_output_workspaces, get_merge_bundle_for_merge_request
 from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
-from sans.common.enums import (DataType, ReductionMode)
+from sans.common.enums import DataType, ReductionMode
 from sans.common.general_functions import create_child_algorithm
 from sans.data_objects.sans_workflow_algorithm_outputs import SANSWorkflowAlgorithmOutputs
 from sans.state.Serializer import Serializer
@@ -26,62 +24,74 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
         # ----------
         # INPUT
         # ----------
-        self.declareProperty('SANSState', '',
-                             doc='A JSON string which fulfills the SANSState contract.')
+        self.declareProperty("SANSState", "", doc="A JSON string which fulfills the SANSState contract.")
 
-        self.declareProperty("UseOptimizations", True, direction=Direction.Input,
-                             doc="When enabled the ADS is being searched for already loaded and reduced workspaces. "
-                                 "Depending on your concrete reduction, this could provide a significant"
-                                 " performance boost")
+        self.declareProperty(
+            "UseOptimizations",
+            True,
+            direction=Direction.Input,
+            doc="When enabled the ADS is being searched for already loaded and reduced workspaces. "
+            "Depending on your concrete reduction, this could provide a significant"
+            " performance boost",
+        )
 
-        self.declareProperty("SaveCan", False, direction=Direction.Input,
-                             doc="When enabled, the unsubtracted can and sam workspaces are added to the ADS.")
+        self.declareProperty(
+            "SaveCan", False, direction=Direction.Input, doc="When enabled, the unsubtracted can and sam workspaces are added to the ADS."
+        )
 
         # Sample Scatter Workspaces
-        self.declareProperty(MatrixWorkspaceProperty('SampleScatterWorkspace', '',
-                                                     optional=PropertyMode.Mandatory, direction=Direction.Input),
-                             doc='The sample scatter workspace. This workspace does not contain monitors.')
-        self.declareProperty(MatrixWorkspaceProperty('SampleScatterMonitorWorkspace', '',
-                                                     optional=PropertyMode.Mandatory, direction=Direction.Input),
-                             doc='The sample scatter monitor workspace. This workspace only contains monitors.')
+        self.declareProperty(
+            MatrixWorkspaceProperty("SampleScatterWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Input),
+            doc="The sample scatter workspace. This workspace does not contain monitors.",
+        )
+        self.declareProperty(
+            MatrixWorkspaceProperty("SampleScatterMonitorWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Input),
+            doc="The sample scatter monitor workspace. This workspace only contains monitors.",
+        )
 
         # Sample Transmission Workspace
-        self.declareProperty(MatrixWorkspaceProperty('SampleTransmissionWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
-                             doc='The sample transmission workspace.')
+        self.declareProperty(
+            MatrixWorkspaceProperty("SampleTransmissionWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Input),
+            doc="The sample transmission workspace.",
+        )
 
         # Sample Direct Workspace
-        self.declareProperty(MatrixWorkspaceProperty('SampleDirectWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
-                             doc='The sample scatter direct workspace.')
+        self.declareProperty(
+            MatrixWorkspaceProperty("SampleDirectWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Input),
+            doc="The sample scatter direct workspace.",
+        )
 
-        self.setPropertyGroup("SampleScatterWorkspace", 'Sample')
-        self.setPropertyGroup("SampleScatterMonitorWorkspace", 'Sample')
-        self.setPropertyGroup("SampleTransmissionWorkspace", 'Sample')
-        self.setPropertyGroup("SampleDirectWorkspace", 'Sample')
+        self.setPropertyGroup("SampleScatterWorkspace", "Sample")
+        self.setPropertyGroup("SampleScatterMonitorWorkspace", "Sample")
+        self.setPropertyGroup("SampleTransmissionWorkspace", "Sample")
+        self.setPropertyGroup("SampleDirectWorkspace", "Sample")
 
         # Can Scatter Workspaces
-        self.declareProperty(MatrixWorkspaceProperty('CanScatterWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
-                             doc='The can scatter workspace. This workspace does not contain monitors.')
-        self.declareProperty(MatrixWorkspaceProperty('CanScatterMonitorWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
-                             doc='The can scatter monitor workspace. This workspace only contains monitors.')
+        self.declareProperty(
+            MatrixWorkspaceProperty("CanScatterWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Input),
+            doc="The can scatter workspace. This workspace does not contain monitors.",
+        )
+        self.declareProperty(
+            MatrixWorkspaceProperty("CanScatterMonitorWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Input),
+            doc="The can scatter monitor workspace. This workspace only contains monitors.",
+        )
 
         # Sample Transmission Workspace
-        self.declareProperty(MatrixWorkspaceProperty('CanTransmissionWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
-                             doc='The can transmission workspace.')
+        self.declareProperty(
+            MatrixWorkspaceProperty("CanTransmissionWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Input),
+            doc="The can transmission workspace.",
+        )
 
         # Sample Direct Workspace
-        self.declareProperty(MatrixWorkspaceProperty('CanDirectWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
-                             doc='The sample scatter direct workspace.')
+        self.declareProperty(
+            MatrixWorkspaceProperty("CanDirectWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Input),
+            doc="The sample scatter direct workspace.",
+        )
 
-        self.setPropertyGroup("CanScatterWorkspace", 'Can')
-        self.setPropertyGroup("CanScatterMonitorWorkspace", 'Can')
-        self.setPropertyGroup("CanTransmissionWorkspace", 'Can')
-        self.setPropertyGroup("CanDirectWorkspace", 'Can')
+        self.setPropertyGroup("CanScatterWorkspace", "Can")
+        self.setPropertyGroup("CanScatterMonitorWorkspace", "Can")
+        self.setPropertyGroup("CanTransmissionWorkspace", "Can")
+        self.setPropertyGroup("CanDirectWorkspace", "Can")
 
         # ----------
         # OUTPUT
@@ -112,8 +122,7 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
         reduction_alg = create_child_algorithm(self, self._reduction_name(), **{})
 
         # Set up progress
-        progress = self._get_progress(sum([len(event_list) for event_list in reduction_setting_bundles]),
-                                      overall_reduction_mode)
+        progress = self._get_progress(sum([len(event_list) for event_list in reduction_setting_bundles]), overall_reduction_mode)
 
         # --------------------------------------------------------------------------------------------------------------
         # Reduction - here we slice the workspaces and perform the steps which must be carried out after slicing
@@ -171,21 +180,20 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
         if save_can:
             self.set_can_and_sam_on_output(completed_event_slices)
 
-        self.set_transmission_workspaces_on_output(completed_event_slices,
-                                                   state.adjustment.calculate_transmission.fit)
+        self.set_transmission_workspaces_on_output(completed_event_slices, state.adjustment.calculate_transmission.fit)
 
     def do_initial_reduction(self, state, overall_reduction_mode):
         raise NotImplementedError("do_initial_reduction must be implemented.")
 
-    def _get_workspace_names(self, reduction_mode_vs_workspace_names,
-                             event_slice_bundle):
+    def _get_workspace_names(self, reduction_mode_vs_workspace_names, event_slice_bundle):
         raise NotImplementedError("_get_workspace_names must be implemented.")
 
     def _get_merged_workspace_name(self, event_slice_part_bundle):
         raise NotImplementedError("_get_merged_workspace_name must be implemented.")
 
-    def _get_output_workspace_name(self, state, reduction_mode=None, data_type=None,
-                                   can=False, sample=False, transmission=False, fitted=False):
+    def _get_output_workspace_name(
+        self, state, reduction_mode=None, data_type=None, can=False, sample=False, transmission=False, fitted=False
+    ):
         raise NotImplementedError("_get_output_workspace_name must be implemented.")
 
     def set_reduced_can_workspace_on_output(self, output_bundles):
@@ -197,8 +205,7 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
     def set_can_and_sam_on_output(self, output_bundles):
         raise NotImplementedError("set_can_and_sam_on_output.")
 
-    def set_transmission_workspaces_on_output(self, output_transmission_bundles,
-                                              fit_state):
+    def set_transmission_workspaces_on_output(self, output_transmission_bundles, fit_state):
         raise NotImplementedError("set_transmission_workspaces_on_output must be implemented.")
 
     def set_shift_and_scale_output(self, scale_factors, shift_factors):
@@ -249,24 +256,28 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
             reduction_modes = [reduction_mode]
 
         # Create the Scatter information
-        sample_info = self._create_reduction_bundles_for_data_type(state=state,
-                                                                   data_type=DataType.SAMPLE,
-                                                                   reduction_modes=reduction_modes,
-                                                                   output_parts=output_parts,
-                                                                   scatter_name="SampleScatterWorkspace",
-                                                                   scatter_monitor_name="SampleScatterMonitorWorkspace",
-                                                                   transmission_name="SampleTransmissionWorkspace",
-                                                                   direct_name="SampleDirectWorkspace")
+        sample_info = self._create_reduction_bundles_for_data_type(
+            state=state,
+            data_type=DataType.SAMPLE,
+            reduction_modes=reduction_modes,
+            output_parts=output_parts,
+            scatter_name="SampleScatterWorkspace",
+            scatter_monitor_name="SampleScatterMonitorWorkspace",
+            transmission_name="SampleTransmissionWorkspace",
+            direct_name="SampleDirectWorkspace",
+        )
 
         # Create the Can information
-        can_info = self._create_reduction_bundles_for_data_type(state=state,
-                                                                data_type=DataType.CAN,
-                                                                reduction_modes=reduction_modes,
-                                                                output_parts=output_parts,
-                                                                scatter_name="CanScatterWorkspace",
-                                                                scatter_monitor_name="CanScatterMonitorWorkspace",
-                                                                transmission_name="CanTransmissionWorkspace",
-                                                                direct_name="CanDirectWorkspace")
+        can_info = self._create_reduction_bundles_for_data_type(
+            state=state,
+            data_type=DataType.CAN,
+            reduction_modes=reduction_modes,
+            output_parts=output_parts,
+            scatter_name="CanScatterWorkspace",
+            scatter_monitor_name="CanScatterMonitorWorkspace",
+            transmission_name="CanTransmissionWorkspace",
+            direct_name="CanDirectWorkspace",
+        )
         reduction_setting_bundles = sample_info
 
         # Make sure that the can information has at least a scatter and a monitor workspace
@@ -275,9 +286,9 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
                 reduction_setting_bundles.append(can_bundle)
         return reduction_setting_bundles
 
-    def _create_reduction_bundles_for_data_type(self, state, data_type, reduction_modes, output_parts,
-                                                scatter_name, scatter_monitor_name,
-                                                transmission_name, direct_name):
+    def _create_reduction_bundles_for_data_type(
+        self, state, data_type, reduction_modes, output_parts, scatter_name, scatter_monitor_name, transmission_name, direct_name
+    ):
         # Get workspaces
         scatter_workspace = self.getProperty(scatter_name).value
 
@@ -288,14 +299,16 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
         # Iterate over all requested reduction types, i.e. LAB, HAB, ..
         reduction_setting_bundles = []
         for reduction_mode in reduction_modes:
-            reduction_setting_bundle = ReductionSettingBundle(state=state,
-                                                              data_type=data_type,
-                                                              reduction_mode=reduction_mode,
-                                                              output_parts=output_parts,
-                                                              scatter_workspace=scatter_workspace,
-                                                              scatter_monitor_workspace=scatter_monitor_workspace,
-                                                              transmission_workspace=transmission_workspace,
-                                                              direct_workspace=direct_workspace)
+            reduction_setting_bundle = ReductionSettingBundle(
+                state=state,
+                data_type=data_type,
+                reduction_mode=reduction_mode,
+                output_parts=output_parts,
+                scatter_workspace=scatter_workspace,
+                scatter_monitor_workspace=scatter_monitor_workspace,
+                transmission_workspace=transmission_workspace,
+                direct_workspace=direct_workspace,
+            )
             reduction_setting_bundles.append(reduction_setting_bundle)
         return reduction_setting_bundles
 

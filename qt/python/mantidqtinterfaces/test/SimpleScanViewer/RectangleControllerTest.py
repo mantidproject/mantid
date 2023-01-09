@@ -21,18 +21,17 @@ app = QApplication(sys.argv)
 
 
 class RectangleManagerTest(unittest.TestCase):
-
     def setUp(self) -> None:
-        self.facility = config['default.facility']
-        self.instrument = config['default.instrument']
-        config['default.facility'] = "ILL"
-        config['default.instrument'] = "D16"
+        self.facility = config["default.facility"]
+        self.instrument = config["default.instrument"]
+        config["default.facility"] = "ILL"
+        config["default.instrument"] = "D16"
 
         self.manager = RectanglesManager()
 
     def tearDown(self) -> None:
-        config['default.facility'] = self.facility
-        config['default.instrument'] = self.instrument
+        config["default.facility"] = self.facility
+        config["default.instrument"] = self.instrument
         mtd.clear()
 
     def test_add_rectangle(self):
@@ -117,7 +116,7 @@ class RectangleManagerTest(unittest.TestCase):
 
         self.manager.table.item(1, 1).setText("0.123")  # set x0 of the first rectangle
 
-        self.assertEqual(self.manager.get_rectangles()[0].get_xy()[0], .123)
+        self.assertEqual(self.manager.get_rectangles()[0].get_xy()[0], 0.123)
         self.assertEqual(self.manager.get_rectangles()[0].get_width(), 0.877)
         self.assertEqual(self.manager.current_rectangle_index, 1)  # the current rectangle is still the second one
         trigger_check.assert_called_once()

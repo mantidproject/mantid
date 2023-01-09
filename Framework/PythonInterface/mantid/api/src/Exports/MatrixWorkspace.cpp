@@ -159,7 +159,7 @@ void setYFromPyObject(MatrixWorkspace &self, const size_t wsIndex, const boost::
  * @param wsIndex :: The workspace index for the spectrum to set
  * @param values :: A numpy array. The length must match the size of the
  */
-void setEFromPyObject(MatrixWorkspace &self, const size_t wsIndex, const NDArray &values) {
+void setEFromPyObject(MatrixWorkspace &self, const size_t wsIndex, const boost::python::object &values) {
   setSpectrumFromPyObject(self, &MatrixWorkspace::dataE, wsIndex, values);
 }
 

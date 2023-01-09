@@ -61,7 +61,7 @@ class ProjectSaveDialogPresenter:
         self.project.save_altered_workspaces_only = self.view.get_save_altered_workspaces_only()
 
         if self.conf:
-            self.conf.set('project/save_altered_workspaces_only', self.view.get_save_altered_workspaces_only())
+            self.conf.set("project/save_altered_workspaces_only", self.view.get_save_altered_workspaces_only())
 
         self.project.save_as(path=self.view.get_location())
 

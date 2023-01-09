@@ -7,7 +7,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
-from scipy.misc import factorial
+from scipy.special import factorial
 from scipy.optimize import curve_fit
 from mantid.simpleapi import *
 from mantid.kernel import V3D

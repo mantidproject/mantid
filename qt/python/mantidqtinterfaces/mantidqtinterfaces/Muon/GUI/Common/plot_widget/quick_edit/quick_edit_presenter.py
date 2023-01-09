@@ -7,7 +7,6 @@
 
 
 class QuickEditPresenter(object):
-
     def __init__(self, view, plotting_context):
         self._view = view
         self._context = plotting_context
@@ -50,7 +49,7 @@ class QuickEditPresenter(object):
     def uncheck_autoscale(self):
         self._view.uncheck_autoscale()
 
-    def set_autoscale(self, state:bool):
+    def set_autoscale(self, state: bool):
         self._view.set_autoscale(state)
 
     def connect_autoscale_changed(self, slot):
@@ -77,7 +76,7 @@ class QuickEditPresenter(object):
     def set_plot_x_range(self, range):
         self._view.set_plot_x_range(range)
 
-    def set_plot_y_range(self,y_range):
+    def set_plot_y_range(self, y_range):
         self._view.set_plot_y_range(y_range)
 
     def get_plot_x_range(self):
@@ -118,7 +117,6 @@ class QuickEditPresenter(object):
 
 
 class DualQuickEditPresenter(QuickEditPresenter):
-
     def __init__(self, view, plotting_context):
         super().__init__(view, plotting_context)
 

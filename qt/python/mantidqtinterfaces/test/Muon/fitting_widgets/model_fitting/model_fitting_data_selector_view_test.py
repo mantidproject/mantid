@@ -14,7 +14,6 @@ from mantidqtinterfaces.Muon.GUI.Common.results_tab_widget.results_tab_model imp
 
 @start_qapplication
 class ModelFittingDataSelectorViewTest(unittest.TestCase):
-
     def setUp(self):
         self.view = ModelFittingDataSelectorView()
         self.view.show()
@@ -27,8 +26,10 @@ class ModelFittingDataSelectorViewTest(unittest.TestCase):
 
         self.view.update_result_table_names(result_table_names)
 
-        data = [self.view.result_table_selector.dataset_name_combo_box.itemText(i)
-                for i in range(self.view.result_table_selector.dataset_name_combo_box.count())]
+        data = [
+            self.view.result_table_selector.dataset_name_combo_box.itemText(i)
+            for i in range(self.view.result_table_selector.dataset_name_combo_box.count())
+        ]
         self.assertTrue(data, result_table_names)
 
     def test_that_update_result_table_names_will_select_the_previously_selected_item_if_it_still_exists(self):
@@ -56,11 +57,15 @@ class ModelFittingDataSelectorViewTest(unittest.TestCase):
 
     def test_that_update_x_and_y_parameters_will_update_the_x_and_y_parameters(self):
         x_parameters = ["workspace_name", "sample_temp", "A0", "A1"]
-        x_parameter_types = [TableColumnType.NoType.value, TableColumnType.X.value, TableColumnType.Y.value,
-                             TableColumnType.Y.value]
+        x_parameter_types = [TableColumnType.NoType.value, TableColumnType.X.value, TableColumnType.Y.value, TableColumnType.Y.value]
         y_parameters = ["workspace_name", "sample_temp", "A0", "A1", "Chi Squared"]
-        y_parameter_types = [TableColumnType.NoType.value, TableColumnType.X.value, TableColumnType.Y.value,
-                             TableColumnType.Y.value, TableColumnType.Y.value]
+        y_parameter_types = [
+            TableColumnType.NoType.value,
+            TableColumnType.X.value,
+            TableColumnType.Y.value,
+            TableColumnType.Y.value,
+            TableColumnType.Y.value,
+        ]
 
         self.view.update_x_parameters(x_parameters, x_parameter_types)
         self.view.update_y_parameters(y_parameters, y_parameter_types)
@@ -73,5 +78,5 @@ class ModelFittingDataSelectorViewTest(unittest.TestCase):
         self.assertEqual(self.view.y_parameter, "A0")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

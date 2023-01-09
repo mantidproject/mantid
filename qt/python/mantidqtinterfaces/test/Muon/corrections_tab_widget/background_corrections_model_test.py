@@ -11,14 +11,15 @@ from mantid.api import AnalysisDataService, FrameworkManager, FunctionFactory
 from mantid.simpleapi import CreateSampleWorkspace
 
 from mantidqtinterfaces.Muon.GUI.Common.corrections_tab_widget.corrections_model import CorrectionsModel
-from mantidqtinterfaces.Muon.GUI.Common.corrections_tab_widget.background_corrections_model import (BackgroundCorrectionsModel,
-                                                                                                    DEFAULT_USE_RAW)
+from mantidqtinterfaces.Muon.GUI.Common.corrections_tab_widget.background_corrections_model import (
+    BackgroundCorrectionsModel,
+    DEFAULT_USE_RAW,
+)
 from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_context
 from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_data_utils import DEFAULT_X_LOWER, DEFAULT_X_UPPER, X_OFFSET
 
 
 class BackgroundCorrectionsModelTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         FrameworkManager.Instance()
@@ -308,5 +309,5 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
         return function
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

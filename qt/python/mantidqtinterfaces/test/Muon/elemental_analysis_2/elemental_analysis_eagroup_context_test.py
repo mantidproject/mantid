@@ -20,9 +20,9 @@ class EAGroupContextTest(unittest.TestCase):
 
     def create_group_workspace_and_load(self):
         grpws = WorkspaceGroup()
-        ws_detector1 = '9999; Detector 1'
+        ws_detector1 = "9999; Detector 1"
         grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector1))
-        ws_detector2 = '9999; Detector 2'
+        ws_detector2 = "9999; Detector 2"
         grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector2))
         run = 9999
         self.loadedData.add_data(run=[run], workspace=grpws)
@@ -43,7 +43,7 @@ class EAGroupContextTest(unittest.TestCase):
         self.create_group_workspace_and_load()
         self.context.reset_group_to_default(self.loadedData)
         self.assertEqual(len(self.context.groups), 2)
-        group_name1 = '9999; Detector 1'
+        group_name1 = "9999; Detector 1"
         self.assertTrue(group_name1 in self.context.group_names)
 
         self.context.remove_group(group_name1)
@@ -71,7 +71,7 @@ class EAGroupContextTest(unittest.TestCase):
     def test_remove_rebinned_workspace_from_group(self, mock_remove_matches, mock_remove_peak, mock_remove_rebinned):
         mock_group = EAGroup("9999; Detector 1", "detector 1", "9999")
         self.context.add_group(mock_group)
-        self.context.remove_workspace_from_group('9999; Detector 1_EA_Rebinned_Fixed')
+        self.context.remove_workspace_from_group("9999; Detector 1_EA_Rebinned_Fixed")
         mock_remove_rebinned.assert_called_once()
         mock_remove_peak.assert_not_called()
         mock_remove_matches.assert_not_called()
@@ -82,7 +82,7 @@ class EAGroupContextTest(unittest.TestCase):
     def test_remove_peak_table_from_group(self, mock_remove_matches, mock_remove_peak, mock_remove_rebinned):
         mock_group = EAGroup("9999; Detector 1", "detector 1", "9999")
         self.context.add_group(mock_group)
-        self.context.remove_workspace_from_group('9999; Detector 1_EA_peak_table')
+        self.context.remove_workspace_from_group("9999; Detector 1_EA_peak_table")
         mock_remove_rebinned.assert_not_called()
         mock_remove_peak.aassert_called_once()
         mock_remove_matches.assert_not_called()
@@ -93,7 +93,7 @@ class EAGroupContextTest(unittest.TestCase):
     def test_remove_matches_table_from_group(self, mock_remove_matches, mock_remove_peak, mock_remove_rebinned):
         mock_group = EAGroup("9999; Detector 1", "detector 1", "9999")
         self.context.add_group(mock_group)
-        self.context.remove_workspace_from_group('9999; Detector 1_EA_matches')
+        self.context.remove_workspace_from_group("9999; Detector 1_EA_matches")
         mock_remove_rebinned.assert_not_called()
         mock_remove_peak.aassert_not_called()
         mock_remove_matches.assert_called_once()
@@ -101,11 +101,10 @@ class EAGroupContextTest(unittest.TestCase):
     @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.ea_group.EAGroup.remove_rebinned_workspace")
     @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.ea_group.EAGroup.remove_peak_table")
     @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.ea_group.EAGroup.remove_matches_group")
-    def test_remove_workspace_from_group_when_not_in_group(self, mock_remove_matches, mock_remove_peak,
-                                                           mock_remove_rebinned):
+    def test_remove_workspace_from_group_when_not_in_group(self, mock_remove_matches, mock_remove_peak, mock_remove_rebinned):
         mock_group = EAGroup("9999; Detector 1", "detector 1", "9999")
         self.context.add_group(mock_group)
-        self.context.remove_workspace_from_group('mock_workspace')
+        self.context.remove_workspace_from_group("mock_workspace")
         mock_remove_rebinned.assert_not_called()
         mock_remove_peak.aassert_not_called()
         mock_remove_matches.assert_not_called()
@@ -116,7 +115,7 @@ class EAGroupContextTest(unittest.TestCase):
         self.create_group_workspace_and_load()
         self.context.reset_group_to_default(self.loadedData)
         self.assertEqual(len(self.context.groups), 2)
-        group_name1 = '9999; Detector 1'
+        group_name1 = "9999; Detector 1"
         self.assertTrue(group_name1 in self.context.group_names)
         mock_remove_ws.side_effect = ValueError("mock error")
         error_notifier_mock = mock.Mock()
@@ -125,9 +124,10 @@ class EAGroupContextTest(unittest.TestCase):
         self.context.remove_group(group_name1)
         self.assertFalse(group_name1 in self.context.group_names)
         mock_remove_ws.assert_called_once_with(group_name1)
-        error_notifier_mock.notify_subscribers.assert_called_once_with(f"Unexpected error occurred when"
-                                                                       f" deleting group {group_name1}: mock error")
+        error_notifier_mock.notify_subscribers.assert_called_once_with(
+            f"Unexpected error occurred when" f" deleting group {group_name1}: mock error"
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

@@ -4,9 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
-from qtpy.QtCore import (QFileInfo)  # noqa
-from qtpy.QtWidgets import (QFileDialog, QHBoxLayout, QMessageBox, QWidget)  # noqa
+# pylint: disable=invalid-name
+from qtpy.QtCore import QFileInfo  # noqa
+from qtpy.QtWidgets import QFileDialog, QHBoxLayout, QMessageBox, QWidget  # noqa
 import os
 import types
 from mantidqtinterfaces.reduction_gui.settings.application_settings import GeneralSettings
@@ -16,6 +16,7 @@ try:
     import mantidplot
     from mantid.api import AnalysisDataService
     import mantid.simpleapi as api
+
     HAS_INSTRUMENT_VIEW = True
 except:
     pass
@@ -23,8 +24,8 @@ except:
 
 def process_file_parameter(f):
     """
-        Decorator that allows a function parameter to either be
-        a string or a function returning a string
+    Decorator that allows a function parameter to either be
+    a string or a function returning a string
     """
 
     def processed_function(self, file_name=None, **kwargs):
@@ -34,13 +35,15 @@ def process_file_parameter(f):
             return f(self, file_name, **kwargs)
         else:
             return f(self, str(file_name()), **kwargs)
+
     return processed_function
 
 
 class BaseWidget(QWidget):
     """
-        Base widget for reduction UI
+    Base widget for reduction UI
     """
+
     ## Widget name
     name = ""
 
@@ -54,7 +57,7 @@ class BaseWidget(QWidget):
             self._layout.addWidget(self._content)
 
         # Data filter for file dialog
-        self._data_type="Data files (*.xml)"
+        self._data_type = "Data files (*.xml)"
         if data_type is not None:
             self._data_type = data_type
 
@@ -68,7 +71,7 @@ class BaseWidget(QWidget):
             self.initialize_content()
 
         self._instrument_view = None
-        self._data_set_viewed = ''
+        self._data_set_viewed = ""
 
         self._data_proxy = data_proxy
         self._has_instrument_view = HAS_INSTRUMENT_VIEW and self._data_proxy is not None
@@ -77,46 +80,46 @@ class BaseWidget(QWidget):
 
     def is_running(self, is_running):
         """
-            Change running state
+        Change running state
         """
         self._is_running = is_running
 
     def initialize_content(self):
         """
-            Declare the validators and event connections for the
-            widgets loaded through the .ui file.
+        Declare the validators and event connections for the
+        widgets loaded through the .ui file.
         """
         return NotImplemented
 
     def set_state(self, state):
         """
-            Populate the UI elements with the data from the given state.
-            @param state: InstrumentDescription object
+        Populate the UI elements with the data from the given state.
+        @param state: InstrumentDescription object
         """
         return NotImplemented
 
     def get_state(self):
         """
-            Returns an object with the state of the interface
+        Returns an object with the state of the interface
         """
         return NotImplemented
 
     def live_button_widget(self):
         """
-            Returns a reference to a widget that is or contains a live data button
+        Returns a reference to a widget that is or contains a live data button
         """
         return None
 
     def live_button_toggled_actions(self, checked):
         """
-            Actions to take on the widget (e.g. setting or disabling certain items) if the
-            live button has been turned on or off.
-            Default is to do nothing - override this method if you need something to happen.
-            @param checked: True if the button has been checked, false if unchecked
+        Actions to take on the widget (e.g. setting or disabling certain items) if the
+        live button has been turned on or off.
+        Default is to do nothing - override this method if you need something to happen.
+        @param checked: True if the button has been checked, false if unchecked
         """
         pass
 
-    def dir_browse_dialog(self, title: str = 'Select Directory') -> str:
+    def dir_browse_dialog(self, title: str = "Select Directory") -> str:
         r"""Pop up a directory dialog box.
         @param title: string to use as dialog's title
         @returns absolute path to directory
@@ -128,22 +131,21 @@ class BaseWidget(QWidget):
 
     def data_browse_dialog(self, data_type=None, title=None, multi=False):
         """
-            Pop up a file dialog box.
-            @param data_type: string used to filter the files
-            @param title: string to use as title
-            @param multi: multiselection is enabled if True
+        Pop up a file dialog box.
+        @param data_type: string used to filter the files
+        @param title: string to use as title
+        @param multi: multiselection is enabled if True
         """
         if data_type is None:
             data_type = self._data_type
         if title is None:
             title = "Data file - Choose a data file"
 
-        if hasattr(QFileDialog, 'getOpenFileNamesAndFilter'):
+        if hasattr(QFileDialog, "getOpenFileNamesAndFilter"):
             getOpenFileNames = QFileDialog.getOpenFileNamesAndFilter
         else:
             getOpenFileNames = QFileDialog.getOpenFileNames
-        flist, _ = getOpenFileNames(self, title, self._settings.data_path,
-                                    data_type)
+        flist, _ = getOpenFileNames(self, title, self._settings.data_path, data_type)
         if not flist:
             return None
 
@@ -159,17 +161,15 @@ class BaseWidget(QWidget):
 
     def data_save_dialog(self, data_type=None, title=None):
         """
-            Pop up a save file dialog box.
-            @param data_type: string used to filter the files
-            @param title: string to use as title
+        Pop up a save file dialog box.
+        @param data_type: string used to filter the files
+        @param title: string to use as title
         """
         if data_type is None:
             data_type = self._data_type
         if title is None:
             title = "Save file - Set a location and name"
-        fname = QFileDialog.getSaveFileName(self, title,
-                                            self._settings.data_path,
-                                            data_type)
+        fname = QFileDialog.getSaveFileName(self, title, self._settings.data_path, data_type)
         if isinstance(fname, tuple):
             fname = fname[0]
         return QFileInfo(fname).filePath()
@@ -177,13 +177,13 @@ class BaseWidget(QWidget):
     @process_file_parameter
     def show_instrument(self, file_name=None, workspace=None, tab=-1, reload=False, mask=None, data_proxy=None):
         """
-            Show instrument for the given data file.
-            If both file_name and workspace are given, the file will be loaded in
-            a workspace with the given name.
+        Show instrument for the given data file.
+        If both file_name and workspace are given, the file will be loaded in
+        a workspace with the given name.
 
-            @param file_name: Data file path
-            @param workspace: Workspace to create
-            @param tab: Tab to open the instrument window in
+        @param file_name: Data file path
+        @param workspace: Workspace to create
+        @param tab: Tab to open the instrument window in
         """
         file_name = str(file_name)
 
@@ -192,10 +192,8 @@ class BaseWidget(QWidget):
                 return
 
             # Do nothing if the instrument view is already displayed
-            #FIXME: this doesn't seem to work 100% yet
-            if False and self._instrument_view is not None and \
-                    self._data_set_viewed == file_name \
-                    and self._instrument_view.isVisible():
+            # FIXME: this doesn't seem to work 100% yet
+            if False and self._instrument_view is not None and self._data_set_viewed == file_name and self._instrument_view.isVisible():
 
                 # If we want a reload, close the instrument window currently shown
                 if reload:
@@ -217,7 +215,7 @@ class BaseWidget(QWidget):
 
         # Set up workspace name
         if workspace is None:
-            workspace = '__'+os.path.basename(file_name)
+            workspace = "__" + os.path.basename(file_name)
 
         # See if the file is already loaded
         if not reload and _show_ws_instrument(workspace):
@@ -233,7 +231,7 @@ class BaseWidget(QWidget):
                     api.MaskDetectors(Workspace=proxy.data_ws, DetectorList=mask)
                 _show_ws_instrument(proxy.data_ws)
             else:
-                if hasattr(proxy, 'errors'):
+                if hasattr(proxy, "errors"):
                     if isinstance(proxy.errors, list):
                         for e in proxy.errors:
                             print(e)

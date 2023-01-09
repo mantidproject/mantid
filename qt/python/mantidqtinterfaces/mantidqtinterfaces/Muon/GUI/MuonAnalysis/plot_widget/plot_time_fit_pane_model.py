@@ -6,17 +6,18 @@
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.data_pane.plot_group_pair_model import PlotGroupPairModel
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.fit_pane.plot_fit_pane_model import PlotFitPaneModel
 
-from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import (get_fit_function_name_from_workspace,
-                                                                            get_group_or_pair_from_name,
-                                                                            get_run_numbers_as_string_from_workspace_name)
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import (
+    get_fit_function_name_from_workspace,
+    get_group_or_pair_from_name,
+    get_run_numbers_as_string_from_workspace_name,
+)
 
 
 class PlotTimeFitPaneModel(PlotGroupPairModel, PlotFitPaneModel):
-
     def __init__(self, context):
         super().__init__(context, "Fit Data")
         end_x = self.context.default_end_x
-        self.context.plot_panes_context[self.name].set_defaults([0.,end_x], [-0.3, 0.3])
+        self.context.plot_panes_context[self.name].set_defaults([0.0, end_x], [-0.3, 0.3])
 
     @staticmethod
     def get_fit_workspace_and_indices(fit, with_diff=True):
@@ -44,7 +45,7 @@ class PlotTimeFitPaneModel(PlotGroupPairModel, PlotFitPaneModel):
         fit_label = self._get_fit_label(workspace_name, index)
         rebin_label = self._get_rebin_label(workspace_name)
         if not self.context.plot_panes_context[self.name].settings._is_tiled:
-            return "".join([instrument, run, ';', group, fit_label, rebin_label])
+            return "".join([instrument, run, ";", group, fit_label, rebin_label])
         if self.context.plot_panes_context[self.name].settings.is_tiled_by == "Group/Pair":
             return "".join([run, fit_label, rebin_label])
         else:
@@ -52,12 +53,12 @@ class PlotTimeFitPaneModel(PlotGroupPairModel, PlotFitPaneModel):
 
     @staticmethod
     def _get_fit_label(workspace_name, index):
-        label = ''
+        label = ""
         fit_function_name = get_fit_function_name_from_workspace(workspace_name)
         if fit_function_name:
             if index in [1, 3]:
-                workspace_type = 'Calc'
+                workspace_type = "Calc"
             elif index == 2:
-                workspace_type = 'Diff'
+                workspace_type = "Diff"
             label = f";{fit_function_name};{workspace_type}"
         return label

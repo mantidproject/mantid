@@ -19,7 +19,10 @@ class TestDimensions(unittest.TestCase):
     def test_get_dim_limits_returns_limits_for_display_dimensions_for_matrix(self, mock_ws_info):
         xindex, yindex = mock.NonCallableMock(), mock.NonCallableMock()
         mock_ws_info.display_indices.return_value = xindex, yindex
-        xdim, ydim = mock.Mock(), mock.Mock(),
+        xdim, ydim = (
+            mock.Mock(),
+            mock.Mock(),
+        )
         self._mock_ws.getDimension.side_effect = [xdim, ydim]
 
         limits = Dimensions.get_dim_limits(self._mock_ws, slicepoint=(None, None), transpose=False)
@@ -41,19 +44,18 @@ class TestDimensions(unittest.TestCase):
         mock_ws_info.get_ws_type.assert_called_once_with(self._mock_ws)
         mock_ws_info.can_support_dynamic_rebinning.assert_called_once_with(self._mock_ws)
 
-        self.assertEqual(dim.getMinimum(), result['minimum'])
-        self.assertEqual(dim.getMaximum(), result['maximum'])
-        self.assertEqual(dim.getNBins(), result['number_of_bins'])
-        self.assertEqual(dim.getBinWidth(), result['width'])
-        self.assertEqual(dim.getUnits(), result['units'])
-        self.assertEqual(dim.name, result['name'])
-        self.assertEqual(mock_ws_info.get_ws_type().name, result['type'])
-        self.assertEqual(mock_ws_info.can_support_dynamic_rebinning(), result['can_rebin'])
-        self.assertEqual(dim.getMDFrame().isQ(), result['qdim'])
+        self.assertEqual(dim.getMinimum(), result["minimum"])
+        self.assertEqual(dim.getMaximum(), result["maximum"])
+        self.assertEqual(dim.getNBins(), result["number_of_bins"])
+        self.assertEqual(dim.getBinWidth(), result["width"])
+        self.assertEqual(dim.getUnits(), result["units"])
+        self.assertEqual(dim.name, result["name"])
+        self.assertEqual(mock_ws_info.get_ws_type().name, result["type"])
+        self.assertEqual(mock_ws_info.can_support_dynamic_rebinning(), result["can_rebin"])
+        self.assertEqual(dim.getMDFrame().isQ(), result["qdim"])
 
     def test_get_dimensions_info(self):
-        with mock.patch("mantidqt.widgets.sliceviewer.test.test_dimensions.Dimensions.get_dim_info") \
-                as mock_get_dim_info:
+        with mock.patch("mantidqt.widgets.sliceviewer.test.test_dimensions.Dimensions.get_dim_info") as mock_get_dim_info:
             expected_num = 3
             self._mock_ws.getNumDims.return_value = expected_num
             expected_results = [mock.NonCallableMock() for _ in range(expected_num)]
@@ -66,5 +68,5 @@ class TestDimensions(unittest.TestCase):
             self.assertEqual(expected_results, result)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

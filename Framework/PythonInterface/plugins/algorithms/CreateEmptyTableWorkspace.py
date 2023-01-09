@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init
+# pylint: disable=no-init
 from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty, WorkspaceFactory
 from mantid.kernel import Direction
 
@@ -12,21 +12,20 @@ from mantid.kernel import Direction
 
 
 class CreateEmptyTableWorkspace(PythonAlgorithm):
-
     def summary(self):
-        return "Creates an empty TableWorkspace which can be populated with various "\
-               "types of information."
+        return "Creates an empty TableWorkspace which can be populated with various " "types of information."
 
     def category(self):
-        return 'Utility\\Workspaces'
+        return "Utility\\Workspaces"
 
     def seeAlso(self):
-        return [ "DeleteTableRows","SortTableWorkspace" ]
+        return ["DeleteTableRows", "SortTableWorkspace"]
 
     def PyInit(self):
         # Declare properties
-        self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "", Direction.Output),
-                             "The name of the table workspace that will be created.")
+        self.declareProperty(
+            ITableWorkspaceProperty("OutputWorkspace", "", Direction.Output), "The name of the table workspace that will be created."
+        )
 
     def PyExec(self):
         tableWS = WorkspaceFactory.createTable()

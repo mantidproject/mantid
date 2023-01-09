@@ -19,7 +19,6 @@ qapp = QApplication(sys.argv)
 
 
 class SuperplotViewTest(unittest.TestCase):
-
     def setUp(self):
         py_module = "mantidqt.widgets.superplot.view"
 
@@ -47,8 +46,7 @@ class SuperplotViewTest(unittest.TestCase):
 
     def test_show(self):
         self.view.show()
-        calls = [mock.call(Qt.LeftDockWidgetArea, self.m_dock_side),
-                 mock.call(Qt.BottomDockWidgetArea, self.m_dock_bottom)]
+        calls = [mock.call(Qt.LeftDockWidgetArea, self.m_dock_side), mock.call(Qt.BottomDockWidgetArea, self.m_dock_bottom)]
         self.m_window.addDockWidget.has_calls(calls)
         self.m_dock_bottom.setFocus.assert_called_once()
 
@@ -106,11 +104,8 @@ class SuperplotViewTest(unittest.TestCase):
         ws2_item = mock.Mock()
         ws2_item.get_workspace_name.return_value = "ws2"
         ws2_item.parent.return_value = None
-        self.m_dock_side.workspacesList.selectedItems.return_value = [sp1_item,
-                                                                      sp2_item,
-                                                                      ws2_item]
-        self.assertDictEqual(self.view.get_selection(), {"ws1": [1, 2],
-                                                         "ws2": [-1]})
+        self.m_dock_side.workspacesList.selectedItems.return_value = [sp1_item, sp2_item, ws2_item]
+        self.assertDictEqual(self.view.get_selection(), {"ws1": [1, 2], "ws2": [-1]})
 
     def test_modify_spectrum_label(self):
         self.m_dock_side.workspacesList.findItems.return_value = []
@@ -142,9 +137,11 @@ class SuperplotViewTest(unittest.TestCase):
     def test_set_workspaces_list(self):
         self.view.set_workspaces_list(["ws1", "ws2", "ws3"])
         self.m_dock_side.workspacesList.clear.assert_called_once()
-        calls = [mock.call(self.m_dock_side.workspacesList, "ws1"),
-                 mock.call(self.m_dock_side.workspacesList, "ws2"),
-                 mock.call(self.m_dock_side.workspacesList, "ws3")]
+        calls = [
+            mock.call(self.m_dock_side.workspacesList, "ws1"),
+            mock.call(self.m_dock_side.workspacesList, "ws2"),
+            mock.call(self.m_dock_side.workspacesList, "ws3"),
+        ]
         self.m_ws_item.assert_has_calls(calls, any_order=True)
 
     def test_set_spectra_list(self):

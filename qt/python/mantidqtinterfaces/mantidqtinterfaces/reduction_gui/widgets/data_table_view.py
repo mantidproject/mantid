@@ -15,7 +15,8 @@ class DataTableModel(QtCore.QAbstractTableModel):
     """
     DataTable Model for the DataTableView widget.
     """
-    def __init__(self, parent, headers = ()):
+
+    def __init__(self, parent, headers=()):
         QtCore.QAbstractTableModel.__init__(self, parent)
         self._tableData = []
         self.headers = headers
@@ -27,8 +28,9 @@ class DataTableModel(QtCore.QAbstractTableModel):
     @tableData.setter
     def tableData(self, data):
         def checkAndConvertRow(row):
-            assert(len(row) == self.columnCount())
+            assert len(row) == self.columnCount()
             return list(row)
+
         self._tableData = list(map(checkAndConvertRow, data))
 
     def _numRows(self):
@@ -53,7 +55,7 @@ class DataTableModel(QtCore.QAbstractTableModel):
         return all((v is None or not str(v).strip()) for v in self._getRow(row))
 
     def _createEmptyRow(self):
-        return [self._textToData(self._numRows(), i, '') for i in range(self.columnCount())]
+        return [self._textToData(self._numRows(), i, "") for i in range(self.columnCount())]
 
     def _removeTrailingEmptyRows(self):
         """
@@ -93,7 +95,7 @@ class DataTableModel(QtCore.QAbstractTableModel):
         converts a displayable text back to stored data.
         Override this function if you need data types other than str in your table.
         """
-        return text # just return the value, it is already str.
+        return text  # just return the value, it is already str.
 
     def _setCellText(self, row, col, text):
         """
@@ -214,6 +216,7 @@ class DataTableView(QtWidgets.QTableView):
     """
     DataTable Widget for data runs.
     """
+
     def __init__(self, parent, headers, model_cls=None):
         """
         :param headers: tuple of strings of the column headers

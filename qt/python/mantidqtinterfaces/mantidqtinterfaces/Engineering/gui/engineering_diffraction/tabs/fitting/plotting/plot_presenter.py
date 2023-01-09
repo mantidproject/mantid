@@ -88,18 +88,20 @@ class FittingPlotPresenter(object):
         if self.fitprop_list:
             # update last fit in fit browser and save setup
             fitprop = self.fitprop_list[-1]
-            function_string = fitprop['properties']['Function']
-            status = fitprop['status']
-            ws_name = fitprop['properties']['InputWorkspace']
+            function_string = fitprop["properties"]["Function"]
+            status = fitprop["status"]
+            ws_name = fitprop["properties"]["InputWorkspace"]
         self.view.update_browser(status=status, func_str=function_string, setup_name=ws_name)
 
     def do_fit_all_async(self, ws_names_list, do_sequential=True):
         previous_fit_browser = self.view.read_fitprop_from_browser()
-        self.worker = AsyncTask(self.do_fit_all, (previous_fit_browser,
-                                                  ws_names_list, do_sequential),
-                                success_cb=self._on_worker_success,
-                                error_cb=self._on_worker_error,
-                                finished_cb=self._finished)
+        self.worker = AsyncTask(
+            self.do_fit_all,
+            (previous_fit_browser, ws_names_list, do_sequential),
+            success_cb=self._on_worker_success,
+            error_cb=self._on_worker_error,
+            finished_cb=self._finished,
+        )
         self.worker.start()
 
     # =======================
@@ -121,20 +123,20 @@ class FittingPlotPresenter(object):
         prev_fitprop = previous_fitprop
         fitprop_list = []
         for ws_name in ws_name_list:
-            logger.notice(f'Starting to fit workspace {ws_name}')
+            logger.notice(f"Starting to fit workspace {ws_name}")
             fitprop = deepcopy(prev_fitprop)
             # update I/O workspace name
-            fitprop['properties']['Output'] = ws_name
-            fitprop['properties']['InputWorkspace'] = ws_name
+            fitprop["properties"]["Output"] = ws_name
+            fitprop["properties"]["InputWorkspace"] = ws_name
             # do fit
-            fit_output = Fit(**fitprop['properties'])
+            fit_output = Fit(**fitprop["properties"])
             # update results
-            fitprop['status'] = fit_output.OutputStatus
+            fitprop["status"] = fit_output.OutputStatus
             funcstr = str(fit_output.Function.fun)
-            fitprop['properties']['Function'] = funcstr
-            if "success" in fitprop['status'].lower() and do_sequential:
+            fitprop["properties"]["Function"] = funcstr
+            if "success" in fitprop["status"].lower() and do_sequential:
                 # update function in prev fitprop to use for next workspace
-                prev_fitprop['properties']['Function'] = funcstr
+                prev_fitprop["properties"]["Function"] = funcstr
             # append a deep copy to output list (will be initial parameters if not successful)
             fitprop_list.append(fitprop)
 
@@ -164,7 +166,7 @@ class FittingPlotPresenter(object):
 
     def set_final_state_progress_bar(self, output_list, status=None):
         if not status:
-            status = output_list[-1]['status'].lower()
+            status = output_list[-1]["status"].lower()
         if "success" in status:
             self.set_progress_bar_success(status)
         else:
@@ -178,8 +180,7 @@ class FittingPlotPresenter(object):
 
     def set_progress_bar_to_in_progress(self):
         # indeterminate progress bar
-        self.view.set_progress_bar(status="fitting...", minimum=0, maximum=0, value=0,
-                                   style_sheet=IN_PROGRESS_STYLE_SHEET)
+        self.view.set_progress_bar(status="fitting...", minimum=0, maximum=0, value=0, style_sheet=IN_PROGRESS_STYLE_SHEET)
 
     def set_progress_bar_zero(self):
         self.view.set_progress_bar(status="", minimum=0, maximum=100, value=0, style_sheet=EMPTY_STYLE_SHEET)

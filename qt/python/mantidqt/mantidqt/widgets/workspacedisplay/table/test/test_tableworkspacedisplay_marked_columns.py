@@ -21,7 +21,6 @@ class ReferenceHolder:
 
 
 class MarkedColumnsTest(unittest.TestCase):
-
     def test_add_x(self):
         mc = MarkedColumns()
         self.execute_add(mc.add_x, mc.as_x)
@@ -89,8 +88,7 @@ class MarkedColumnsTest(unittest.TestCase):
     def test_add_already_marked(self):
         mc = MarkedColumns()
 
-        relevant_funcs = [ReferenceHolder(mc.add_x, mc.as_x),
-                          ReferenceHolder(mc.add_y, mc.as_y)]
+        relevant_funcs = [ReferenceHolder(mc.add_x, mc.as_x), ReferenceHolder(mc.add_y, mc.as_y)]
         all_combinations = permutations(relevant_funcs, 2)
 
         for combination in all_combinations:
@@ -240,13 +238,13 @@ class MarkedColumnsTest(unittest.TestCase):
         mc.add_y(3)
 
         # note that the max Y label number will decrease as more Y columns are being changed to X
-        expected = [(0, '[Y0]'), (1, '[Y1]'), (2, '[Y2]'), (3, '[Y3]')]
+        expected = [(0, "[Y0]"), (1, "[Y1]"), (2, "[Y2]"), (3, "[Y3]")]
         self.assertEqual(expected, mc.build_labels())
 
-        expected = [(1, '[X0]'), (0, '[Y0]'), (2, '[Y1]'), (3, '[Y2]')]
+        expected = [(1, "[X0]"), (0, "[Y0]"), (2, "[Y1]"), (3, "[Y2]")]
         mc.add_x(1)
         self.assertEqual(expected, mc.build_labels())
-        expected = [(1, '[X0]'), (3, '[X1]'), (0, '[Y0]'), (2, '[Y1]')]
+        expected = [(1, "[X0]"), (3, "[X1]"), (0, "[Y0]"), (2, "[Y1]")]
         mc.add_x(3)
         self.assertEqual(expected, mc.build_labels())
 
@@ -258,12 +256,12 @@ class MarkedColumnsTest(unittest.TestCase):
 
         # change one of the columns to YErr
         mc.add_y_err(ErrorColumn(1, 0))
-        expected = [(0, '[Y0]'), (2, '[Y1]'), (1, '[Y0_YErr]')]
+        expected = [(0, "[Y0]"), (2, "[Y1]"), (1, "[Y0_YErr]")]
         self.assertEqual(expected, mc.build_labels())
 
         # change the last Y column to YErr
         mc.add_y_err(ErrorColumn(2, 0))
-        expected = [(0, '[Y0]'), (2, '[Y0_YErr]')]
+        expected = [(0, "[Y0]"), (2, "[Y0_YErr]")]
         self.assertEqual(expected, mc.build_labels())
 
     def test_build_labels_y_and_yerr_change_first(self):
@@ -275,12 +273,12 @@ class MarkedColumnsTest(unittest.TestCase):
         # change one of the columns to YErr
         mc.add_y_err(ErrorColumn(0, 1))
         # note: the first column is being set -> this decreases the label index of all columns to its right by 1
-        expected = [(1, '[Y0]'), (2, '[Y1]'), (0, '[Y0_YErr]')]
+        expected = [(1, "[Y0]"), (2, "[Y1]"), (0, "[Y0_YErr]")]
         self.assertEqual(expected, mc.build_labels())
 
         # change the last Y column to YErr
         mc.add_y_err(ErrorColumn(2, 1))
-        expected = [(1, '[Y0]'), (2, '[Y0_YErr]')]
+        expected = [(1, "[Y0]"), (2, "[Y0_YErr]")]
         self.assertEqual(expected, mc.build_labels())
 
     def test_build_labels_x_y_and_yerr(self):
@@ -291,14 +289,14 @@ class MarkedColumnsTest(unittest.TestCase):
         mc.add_y(3)
 
         mc.add_y_err(ErrorColumn(1, 0))
-        expected = [(0, '[Y0]'), (2, '[Y1]'), (3, '[Y2]'), (1, '[Y0_YErr]')]
+        expected = [(0, "[Y0]"), (2, "[Y1]"), (3, "[Y2]"), (1, "[Y0_YErr]")]
         self.assertEqual(expected, mc.build_labels())
 
-        expected = [(1, '[X0]'), (0, '[Y0]'), (2, '[Y1]'), (3, '[Y2]')]
+        expected = [(1, "[X0]"), (0, "[Y0]"), (2, "[Y1]"), (3, "[Y2]")]
         mc.add_x(1)
         self.assertEqual(expected, mc.build_labels())
 
-        expected = [(1, '[X0]'), (2, '[Y0]'), (3, '[Y1]'), (0, '[Y1_YErr]')]
+        expected = [(1, "[X0]"), (2, "[Y0]"), (3, "[Y1]"), (0, "[Y1_YErr]")]
         mc.add_y_err(ErrorColumn(0, 3))
         self.assertEqual(expected, mc.build_labels())
 
@@ -306,9 +304,9 @@ class MarkedColumnsTest(unittest.TestCase):
         mc = MarkedColumns()
         mc.add_y(0)
         mc.add_y(1)
-        mc.add_y_err(ErrorColumn(2,1))
+        mc.add_y_err(ErrorColumn(2, 1))
 
-        expected = [(0, '[Y0]'), (1, '[Y1]'), (2, '[Y1_YErr]')]
+        expected = [(0, "[Y0]"), (1, "[Y1]"), (2, "[Y1_YErr]")]
         self.assertEqual(expected, mc.build_labels())
 
     def test_fail_to_add_yerr_for_x(self):
@@ -319,10 +317,10 @@ class MarkedColumnsTest(unittest.TestCase):
         mc.add_y(3)
 
         mc.add_y_err(ErrorColumn(1, 0))
-        expected = [(0, '[Y0]'), (2, '[Y1]'), (3, '[Y2]'), (1, '[Y0_YErr]')]
+        expected = [(0, "[Y0]"), (2, "[Y1]"), (3, "[Y2]"), (1, "[Y0_YErr]")]
         self.assertEqual(expected, mc.build_labels())
 
-        expected = [(1, '[X0]'), (0, '[Y0]'), (2, '[Y1]'), (3, '[Y2]')]
+        expected = [(1, "[X0]"), (0, "[Y0]"), (2, "[Y1]"), (3, "[Y2]")]
         mc.add_x(1)
         self.assertEqual(expected, mc.build_labels())
 
@@ -336,7 +334,7 @@ class MarkedColumnsTest(unittest.TestCase):
         mc.add_y(3)
 
         mc.add_y_err(ErrorColumn(1, 0))
-        expected = [(0, '[Y0]'), (2, '[Y1]'), (3, '[Y2]'), (1, '[Y0_YErr]')]
+        expected = [(0, "[Y0]"), (2, "[Y1]"), (3, "[Y2]"), (1, "[Y0_YErr]")]
         self.assertEqual(expected, mc.build_labels())
 
         self.assertRaises(ValueError, lambda: mc.add_y_err(ErrorColumn(0, 1)))

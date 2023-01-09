@@ -15,7 +15,7 @@ from mantidqt.project.plotsloader import PlotsLoader
 from mantidqt.project.plotssaver import PlotsSaver
 from matplotlib.colors import Normalize, LogNorm
 
-matplotlib.use('AGG')
+matplotlib.use("AGG")
 
 
 class PlotsSaverTest(unittest.TestCase):
@@ -25,131 +25,162 @@ class PlotsSaverTest(unittest.TestCase):
 
         # Make a figure with a given input with all these values already set
         self.loader_plot_dict = {
-            u'axes': [{
-                u'colorbar': {u'exists': False},
-                u'legend': {u'exists': True,
-                            u'visible': True,
-                            u'title': "Legend",
-                            u'background_color': u'#ffffff',
-                            u'edge_color': u'#000000',
-                            u'transparency': 0.5,
-                            u'entries_font': u'DejaVu Sans',
-                            u'entries_size': 10.0,
-                            u'entries_color': u'#000000',
-                            u'title_font': u'DejaVu Sans',
-                            u'title_size': 12.0,
-                            u'title_color': u'#000000',
-                            u'marker_size': 2.0,
-                            u'box_visible': True,
-                            u'shadow': False,
-                            u'round_edges': True,
-                            u'columns': 1,
-                            u'column_spacing': 0.5,
-                            u'label_spacing': 0.5,
-                            u'marker_position': u'Left of Entries',
-                            u'markers': 1,
-                            u'border_padding': 0.5,
-                            u'marker_label_padding': 1.0},
-                u'lines': [{u'alpha': 1,
-                            u'color': u'#1f77b4',
-                            u'label': u'ws1: spec 2',
-                            u'lineIndex': 0,
-                            u'lineStyle': u'-',
-                            u'lineWidth': 1.5,
-                            u'markerStyle': {u'edgeColor': u'#1f77b4',
-                                             u'edgeWidth': 1.0,
-                                             u'faceColor': u'#1f77b4',
-                                             u'markerSize': 6.0,
-                                             u'markerType': u'None',
-                                             u'zOrder': 2},
-                            u'errorbars': {u'exists': False}}],
-                u'properties': {u'axisOn': True, u'bounds': (0.0, 0.0, 0.0, 0.0),
-                                u'dynamic': True,
-                                u'frameOn': True,
-                                u'visible': True,
-                                u'xAxisProperties': {u'fontSize': 10.0,
-                                                     u'gridStyle': {u'gridOn': False},
-                                                     u'majorTickFormat': None,
-                                                     u'majorTickFormatter': u'ScalarFormatter',
-                                                     u'majorTickLocator': u'AutoLocator',
-                                                     u'majorTickLocatorValues': None,
-                                                     u'minorTickFormat': None,
-                                                     u'minorTickFormatter': u'NullFormatter',
-                                                     u'minorTickLocator': u'NullLocator',
-                                                     u'minorTickLocatorValues': None,
-                                                     u'visible': True},
-                                u'xAxisScale': u'linear',
-                                u'xLim': (0.0, 1.0),u"xAutoScale":False,
-                                u'yAxisProperties': {u'fontSize': 10.0,
-                                                     u'gridStyle': {u'gridOn': False},
-                                                     u'majorTickFormat': None,
-                                                     u'majorTickFormatter': u'ScalarFormatter',
-                                                     u'majorTickLocator': u'AutoLocator',
-                                                     u'majorTickLocatorValues': None,
-                                                     u'minorTickFormat': None,
-                                                     u'minorTickFormatter': u'NullFormatter',
-                                                     u'minorTickLocator': u'NullLocator',
-                                                     u'minorTickLocatorValues': None,
-                                                     u'visible': True},
-                                u'yAxisScale': u'linear',
-                                u'yLim': (0.0, 1.0),u"yAutoScale":False,u"facecolor":(0.0,0.0,0.0,0.0),
-                                u'showMinorGrid': False,
-                                u'tickParams': {
-                                    'xaxis': {
-                                        'major': {
-                                            'bottom': True,
-                                            'top': True,
-                                            'labelbottom': True,
-                                            'labeltop': True,
-                                            'direction': 'inout',
-                                            'width': 1,
-                                            'size': 6},
-                                        'minor': {
-                                            'bottom': True,
-                                            'top': True,
-                                            'labelbottom': True,
-                                            'labeltop': True,
-                                            'direction': 'inout',
-                                            'width': 1,
-                                            'size': 3}},
-                                    'yaxis': {
-                                        'major': {
-                                            'left': True,
-                                            'right': True,
-                                            'labelleft': True,
-                                            'labelright': True,
-                                            'direction': 'inout',
-                                            'width': 1, 'size': 6},
-                                        'minor': {
-                                            'left': True,
-                                            'right': True,
-                                            'labelleft': True,
-                                            'labelright': True,
-                                            'direction': 'inout',
-                                            'width': 1,
-                                            'size': 3}}},
-                                u'spineWidths': {'left': 0.4, 'right': 0.4, 'bottom': 0.4, 'top': 0.4}},
-                u'textFromArtists': {},
-                u'texts': [{u'position': (0, 0),
-                            u'style': {u'alpha': 1,
-                                       u'color': u'#000000',
-                                       u'hAlign': u'left',
-                                       u'rotation': 0.0,
-                                       u'textSize': 10.0,
-                                       u'vAlign': u'baseline',
-                                       u'zOrder': 3},
-                            u'text': u'text',
-                            u'useTeX': False}],
-                u'title': u'',
-                u'xAxisTitle': u'',
-                u'yAxisTitle': u''}],
-            u'creationArguments': [[{u"workspaces": u"ws1",
-                                     u"specNum": 2,
-                                     u"function": u"plot"}]],
-            u'label': u'',
-            u'properties': {u'dpi': 100.0,
-                            u'figHeight': 4.8,
-                            u'figWidth': 6.4}
+            "axes": [
+                {
+                    "colorbar": {"exists": False},
+                    "legend": {
+                        "exists": True,
+                        "visible": True,
+                        "title": "Legend",
+                        "background_color": "#ffffff",
+                        "edge_color": "#000000",
+                        "transparency": 0.5,
+                        "entries_font": "DejaVu Sans",
+                        "entries_size": 10.0,
+                        "entries_color": "#000000",
+                        "title_font": "DejaVu Sans",
+                        "title_size": 12.0,
+                        "title_color": "#000000",
+                        "marker_size": 2.0,
+                        "box_visible": True,
+                        "shadow": False,
+                        "round_edges": True,
+                        "columns": 1,
+                        "column_spacing": 0.5,
+                        "label_spacing": 0.5,
+                        "marker_position": "Left of Entries",
+                        "markers": 1,
+                        "border_padding": 0.5,
+                        "marker_label_padding": 1.0,
+                    },
+                    "lines": [
+                        {
+                            "alpha": 1,
+                            "color": "#1f77b4",
+                            "label": "ws1: spec 2",
+                            "lineIndex": 0,
+                            "lineStyle": "-",
+                            "lineWidth": 1.5,
+                            "markerStyle": {
+                                "edgeColor": "#1f77b4",
+                                "edgeWidth": 1.0,
+                                "faceColor": "#1f77b4",
+                                "markerSize": 6.0,
+                                "markerType": "None",
+                                "zOrder": 2,
+                            },
+                            "errorbars": {"exists": False},
+                        }
+                    ],
+                    "properties": {
+                        "axisOn": True,
+                        "bounds": (0.0, 0.0, 0.0, 0.0),
+                        "dynamic": True,
+                        "frameOn": True,
+                        "visible": True,
+                        "xAxisProperties": {
+                            "fontSize": 10.0,
+                            "gridStyle": {"gridOn": False},
+                            "majorTickFormat": None,
+                            "majorTickFormatter": "ScalarFormatter",
+                            "majorTickLocator": "AutoLocator",
+                            "majorTickLocatorValues": None,
+                            "minorTickFormat": None,
+                            "minorTickFormatter": "NullFormatter",
+                            "minorTickLocator": "NullLocator",
+                            "minorTickLocatorValues": None,
+                            "visible": True,
+                        },
+                        "xAxisScale": "linear",
+                        "xLim": (0.0, 1.0),
+                        "xAutoScale": False,
+                        "yAxisProperties": {
+                            "fontSize": 10.0,
+                            "gridStyle": {"gridOn": False},
+                            "majorTickFormat": None,
+                            "majorTickFormatter": "ScalarFormatter",
+                            "majorTickLocator": "AutoLocator",
+                            "majorTickLocatorValues": None,
+                            "minorTickFormat": None,
+                            "minorTickFormatter": "NullFormatter",
+                            "minorTickLocator": "NullLocator",
+                            "minorTickLocatorValues": None,
+                            "visible": True,
+                        },
+                        "yAxisScale": "linear",
+                        "yLim": (0.0, 1.0),
+                        "yAutoScale": False,
+                        "facecolor": (0.0, 0.0, 0.0, 0.0),
+                        "showMinorGrid": False,
+                        "tickParams": {
+                            "xaxis": {
+                                "major": {
+                                    "bottom": True,
+                                    "top": True,
+                                    "labelbottom": True,
+                                    "labeltop": True,
+                                    "direction": "inout",
+                                    "width": 1,
+                                    "size": 6,
+                                },
+                                "minor": {
+                                    "bottom": True,
+                                    "top": True,
+                                    "labelbottom": True,
+                                    "labeltop": True,
+                                    "direction": "inout",
+                                    "width": 1,
+                                    "size": 3,
+                                },
+                            },
+                            "yaxis": {
+                                "major": {
+                                    "left": True,
+                                    "right": True,
+                                    "labelleft": True,
+                                    "labelright": True,
+                                    "direction": "inout",
+                                    "width": 1,
+                                    "size": 6,
+                                },
+                                "minor": {
+                                    "left": True,
+                                    "right": True,
+                                    "labelleft": True,
+                                    "labelright": True,
+                                    "direction": "inout",
+                                    "width": 1,
+                                    "size": 3,
+                                },
+                            },
+                        },
+                        "spineWidths": {"left": 0.4, "right": 0.4, "bottom": 0.4, "top": 0.4},
+                    },
+                    "textFromArtists": {},
+                    "texts": [
+                        {
+                            "position": (0, 0),
+                            "style": {
+                                "alpha": 1,
+                                "color": "#000000",
+                                "hAlign": "left",
+                                "rotation": 0.0,
+                                "textSize": 10.0,
+                                "vAlign": "baseline",
+                                "zOrder": 3,
+                            },
+                            "text": "text",
+                            "useTeX": False,
+                        }
+                    ],
+                    "title": "",
+                    "xAxisTitle": "",
+                    "yAxisTitle": "",
+                }
+            ],
+            "creationArguments": [[{"workspaces": "ws1", "specNum": 2, "function": "plot"}]],
+            "label": "",
+            "properties": {"dpi": 100.0, "figHeight": 4.8, "figWidth": 6.4},
         }
 
         self.fig = self.plots_loader.make_fig(self.loader_plot_dict, create_plot=False)
@@ -166,11 +197,10 @@ class PlotsSaverTest(unittest.TestCase):
         self.assertEqual(return_value, [])
 
     def test_get_dict_from_fig(self):
-        self.fig.axes[0].creation_args = [{u"specNum": 2, "function": "plot"}]
+        self.fig.axes[0].creation_args = [{"specNum": 2, "function": "plot"}]
         return_value = self.plot_saver.get_dict_from_fig(self.fig)
 
-        self.loader_plot_dict[u'creationArguments'] = [[{u"specNum": 2, "function": "plot", u"normalize_by_bin_width":
-                                                                                            True}]]
+        self.loader_plot_dict["creationArguments"] = [[{"specNum": 2, "function": "plot", "normalize_by_bin_width": True}]]
 
         self.maxDiff = None
         self.assertDictEqual(return_value, self.loader_plot_dict)
@@ -179,7 +209,7 @@ class PlotsSaverTest(unittest.TestCase):
         self.plot_saver.figure_creation_args = [{"function": "plot"}]
         return_value = self.plot_saver.get_dict_for_axes(self.fig.axes[0])
 
-        self.loader_plot_dict["axes"][0]['_is_norm'] = True
+        self.loader_plot_dict["axes"][0]["_is_norm"] = True
         expected_value = self.loader_plot_dict["axes"][0]
 
         self.maxDiff = None
@@ -250,30 +280,44 @@ class PlotsSaverTest(unittest.TestCase):
     def test_get_dict_from_fig_properties(self):
         return_value = self.plot_saver.get_dict_from_fig_properties(self.fig)
 
-        expected_value = {u'dpi': 100.0, u'figHeight': 4.8, u'figWidth': 6.4}
+        expected_value = {"dpi": 100.0, "figHeight": 4.8, "figWidth": 6.4}
 
         self.assertDictEqual(return_value, expected_value)
 
     def test_get_dict_from_fig_with_Normalize(self):
-        self.fig.axes[0].creation_args = [{u"specNum": None, "function": "pcolormesh",
-                                                         "norm": Normalize()}]
+        self.fig.axes[0].creation_args = [{"specNum": None, "function": "pcolormesh", "norm": Normalize()}]
         return_value = self.plot_saver.get_dict_from_fig(self.fig)
-        expected_creation_args = [[{'specNum': None, 'function': 'pcolormesh', 'norm':
-                                    {'type': 'Normalize', 'clip': False, 'vmin': None, 'vmax': None}, 'normalize_by_bin_width': True}]]
+        expected_creation_args = [
+            [
+                {
+                    "specNum": None,
+                    "function": "pcolormesh",
+                    "norm": {"type": "Normalize", "clip": False, "vmin": None, "vmax": None},
+                    "normalize_by_bin_width": True,
+                }
+            ]
+        ]
 
-        self.loader_plot_dict[u'creationArguments'] = expected_creation_args
+        self.loader_plot_dict["creationArguments"] = expected_creation_args
 
         self.maxDiff = None
         self.assertDictEqual(return_value, self.loader_plot_dict)
 
     def test_get_dict_from_fig_with_LogNorm(self):
-        self.fig.axes[0].creation_args = [{u"specNum": None, "function": "pcolormesh",
-                                                         "norm": LogNorm()}]
+        self.fig.axes[0].creation_args = [{"specNum": None, "function": "pcolormesh", "norm": LogNorm()}]
         return_value = self.plot_saver.get_dict_from_fig(self.fig)
-        expected_creation_args = [[{'specNum': None, 'function': 'pcolormesh', 'norm':
-                                    {'type': 'LogNorm', 'clip': False, 'vmin': None, 'vmax': None}, 'normalize_by_bin_width': True}]]
+        expected_creation_args = [
+            [
+                {
+                    "specNum": None,
+                    "function": "pcolormesh",
+                    "norm": {"type": "LogNorm", "clip": False, "vmin": None, "vmax": None},
+                    "normalize_by_bin_width": True,
+                }
+            ]
+        ]
 
-        self.loader_plot_dict[u'creationArguments'] = expected_creation_args
+        self.loader_plot_dict["creationArguments"] = expected_creation_args
 
         self.maxDiff = None
         self.assertDictEqual(return_value, self.loader_plot_dict)

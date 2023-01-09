@@ -54,12 +54,11 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
         self.x_min_line_edit.editingFinished.connect(self.set_min_line_from_line_edit)
         self.x_max_line_edit.editingFinished.connect(self.set_max_line_from_line_edit)
 
-        none_one_many_int_float_comma_separated = \
-            QRegExpValidator(QtCore.QRegExp(r"^(?:\d+(?:\.\d*)?|\.\d+)(?:,(?:\d+(?:\.\d*)?|\.\d+))*$"),
-                             self.override_unitcell_length)
+        none_one_many_int_float_comma_separated = QRegExpValidator(
+            QtCore.QRegExp(r"^(?:\d+(?:\.\d*)?|\.\d+)(?:,(?:\d+(?:\.\d*)?|\.\d+))*$"), self.override_unitcell_length
+        )
         self.override_unitcell_length.setValidator(none_one_many_int_float_comma_separated)
-        valid_file_name = QRegExpValidator(QtCore.QRegExp(r'^[^<>:;,"@£$%&\'^!?"*|\\\/]+$'),
-                                           self.project_name_line_edit)
+        valid_file_name = QRegExpValidator(QtCore.QRegExp(r'^[^<>:;,"@£$%&\'^!?"*|\\\/]+$'), self.project_name_line_edit)
         self.project_name_line_edit.setValidator(valid_file_name)
         self.x_min_line_edit.setValidator(LineEditDoubleValidator(self.x_min_line_edit, 0))
         self.x_max_line_edit.setValidator(LineEditDoubleValidator(self.x_max_line_edit, 1))
@@ -130,11 +129,13 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
             self.project_name_invalid.setToolTip("")
 
     def mark_checkboxes_invalid_when_empty(self):
-        if self.refine_microstrain_checkbox.isChecked() and self.refine_sigma_one_checkbox.isChecked() and \
-                self.refine_gamma_y_checkbox.isChecked():
+        if (
+            self.refine_microstrain_checkbox.isChecked()
+            and self.refine_sigma_one_checkbox.isChecked()
+            and self.refine_gamma_y_checkbox.isChecked()
+        ):
             self.checkboxes_invalid.show()
-            self.checkboxes_invalid.setToolTip("Refining the Microstrain with Sigma-1 and Gamma(Y)"
-                                               " may not be advisable.")
+            self.checkboxes_invalid.setToolTip("Refining the Microstrain with Sigma-1 and Gamma(Y)" " may not be advisable.")
         else:
             self.checkboxes_invalid.hide()
             self.checkboxes_invalid.setToolTip("")
@@ -144,13 +145,20 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
     # =================
 
     def get_refinement_parameters(self):
-        return [self.refinement_method_combobox.currentText(), self.override_unitcell_length.text(),
-                self.refine_microstrain_checkbox.isChecked(), self.refine_sigma_one_checkbox.isChecked(),
-                self.refine_gamma_y_checkbox.isChecked()]
+        return [
+            self.refinement_method_combobox.currentText(),
+            self.override_unitcell_length.text(),
+            self.refine_microstrain_checkbox.isChecked(),
+            self.refine_sigma_one_checkbox.isChecked(),
+            self.refine_gamma_y_checkbox.isChecked(),
+        ]
 
     def get_load_parameters(self):
-        return [self.instrument_group_file_finder.getFilenames(), self.phase_file_finder.getFilenames(),
-                self.focused_data_file_finder.getFilenames()]
+        return [
+            self.instrument_group_file_finder.getFilenames(),
+            self.phase_file_finder.getFilenames(),
+            self.focused_data_file_finder.getFilenames(),
+        ]
 
     def get_project_name(self):
         return self.project_name_line_edit.text()
@@ -175,7 +183,7 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
     def setup_figure(self):
         self.figure = Figure()
         self.figure.canvas = FigureCanvas(self.figure)
-        self.figure.canvas.mpl_connect('pick_event', self.on_press)
+        self.figure.canvas.mpl_connect("pick_event", self.on_press)
 
         # self.figure.canvas.mpl_connect('button_press_event', self.mouse_click)
         self.figure.add_subplot(111, projection="mantid")
@@ -193,8 +201,7 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
         self.plot_dock.setWindowTitle("GSAS II Plot")
         self.plot_dock.topLevelChanged.connect(self.make_undocked_plot_larger)
         self.initial_chart_width, self.initial_chart_height = self.plot_dock.width(), self.plot_dock.height()
-        self.plot_dock.setSizePolicy(QSizePolicy(QSizePolicy.MinimumExpanding,
-                                                 QSizePolicy.MinimumExpanding))
+        self.plot_dock.setSizePolicy(QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding))
         self.dock_window.addDockWidget(Qt.BottomDockWidgetArea, self.plot_dock)
         self.vLayout_plot.addWidget(self.dock_window)
 
@@ -248,10 +255,12 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
         in the UI.
         """
         ax = self.get_axes()[0]
-        y0_lab = ax.xaxis.get_tightbbox(renderer=self.figure.canvas.get_renderer()).transformed(
-            self.figure.transFigure.inverted()).y0  # vertical coord of bottom left corner of xlabel in fig ref. frame
-        x0_lab = ax.yaxis.get_tightbbox(renderer=self.figure.canvas.get_renderer()).transformed(
-            self.figure.transFigure.inverted()).x0  # horizontal coord of bottom left corner ylabel in fig ref. frame
+        y0_lab = (
+            ax.xaxis.get_tightbbox(renderer=self.figure.canvas.get_renderer()).transformed(self.figure.transFigure.inverted()).y0
+        )  # vertical coord of bottom left corner of xlabel in fig ref. frame
+        x0_lab = (
+            ax.yaxis.get_tightbbox(renderer=self.figure.canvas.get_renderer()).transformed(self.figure.transFigure.inverted()).x0
+        )  # horizontal coord of bottom left corner ylabel in fig ref. frame
         pos = ax.get_position()
         x0_ax = pos.x0 + 0.05 - x0_lab  # move so that ylabel left bottom corner at horizontal coord 0.05
         y0_ax = pos.y0 + 0.05 - y0_lab  # move so that xlabel left bottom corner at vertical coord 0.05
@@ -297,11 +306,9 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
     def setup_range_markers(self, x_minimum, x_maximum):
         self.x_bounds = self.figure.axes[0].get_xlim()
         self.y_bounds = self.figure.axes[0].get_ylim()
-        self.min_line = lines.Line2D([x_minimum, x_minimum], [self.y_bounds[0], self.y_bounds[1]],
-                                     picker=5, color='green', linestyle="--")
+        self.min_line = lines.Line2D([x_minimum, x_minimum], [self.y_bounds[0], self.y_bounds[1]], picker=5, color="green", linestyle="--")
         self.figure.axes[0].add_line(self.min_line)
-        self.max_line = lines.Line2D([x_maximum, x_maximum], [self.y_bounds[0], self.y_bounds[1]],
-                                     picker=5, color='red', linestyle="--")
+        self.max_line = lines.Line2D([x_maximum, x_maximum], [self.y_bounds[0], self.y_bounds[1]], picker=5, color="red", linestyle="--")
         self.figure.axes[0].add_line(self.max_line)
         self.figure.canvas.draw_idle()
         self.update_figure()

@@ -12,7 +12,7 @@ from functools import partial
 from qtpy import QtGui
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QKeySequence
-from qtpy.QtWidgets import (QAbstractItemView, QAction, QHeaderView, QMenu, QMessageBox, QTabWidget, QTableView)
+from qtpy.QtWidgets import QAbstractItemView, QAction, QHeaderView, QMenu, QMessageBox, QTabWidget, QTableView
 
 import mantidqt.icons
 from mantidqt.widgets.workspacedisplay.matrix.delegate import CustomTextElidingDelegate
@@ -24,7 +24,6 @@ ELIDE_NCHARS_RIGHT = 3
 
 
 class MatrixWorkspaceTableView(QTableView):
-
     def __init__(self, parent):
         super(MatrixWorkspaceTableView, self).__init__(parent)
         self.setSelectionBehavior(QAbstractItemView.SelectItems)
@@ -46,7 +45,6 @@ class MatrixWorkspaceTableView(QTableView):
 
 
 class MatrixWorkspaceDisplayView(QTabWidget):
-
     def __init__(self, presenter, parent=None, window_flags=Qt.Window):
         super(MatrixWorkspaceDisplayView, self).__init__(parent)
 
@@ -140,9 +138,9 @@ class MatrixWorkspaceDisplayView(QTabWidget):
 
     @staticmethod
     def _set_table_model(table, model, expected_model_type):
-        assert model.type == expected_model_type, \
-            "The model for the table with {0} values has a wrong model type: {1}".format(expected_model_type.upper(),
-                                                                                         model.model_type)
+        assert model.type == expected_model_type, "The model for the table with {0} values has a wrong model type: {1}".format(
+            expected_model_type.upper(), model.model_type
+        )
         table.setModel(model)
 
     def ask_confirmation(self, message, title="Mantid Workbench"):
@@ -197,8 +195,11 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         separator = QAction(self)
         separator.setSeparator(True)
         list(
-            map(context_menu.addAction,
-                [plot_bin_action, plot_bin_with_errors_action, separator, overplot_bin_action, overplot_bin_with_errors_action]))
+            map(
+                context_menu.addAction,
+                [plot_bin_action, plot_bin_with_errors_action, separator, overplot_bin_action, overplot_bin_with_errors_action],
+            )
+        )
 
     def setup_plot_spectrum_actions(self, context_menu, table):
         plot_spectrum_action = QAction(self.GRAPH_ICON, "Plot spectrum (values only)", self)
@@ -214,10 +215,17 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         separator = QAction(self)
         separator.setSeparator(True)
         list(
-            map(context_menu.addAction, [
-                plot_spectrum_action, plot_spectrum_with_errors_action, separator, overplot_spectrum_action,
-                overplot_spectrum_with_errors_action
-            ]))
+            map(
+                context_menu.addAction,
+                [
+                    plot_spectrum_action,
+                    plot_spectrum_with_errors_action,
+                    separator,
+                    overplot_spectrum_action,
+                    overplot_spectrum_with_errors_action,
+                ],
+            )
+        )
 
     def setup_copy_bin_actions(self, context_menu, table):
         copy_bin_values = QAction(self.COPY_ICON, "Copy", self)

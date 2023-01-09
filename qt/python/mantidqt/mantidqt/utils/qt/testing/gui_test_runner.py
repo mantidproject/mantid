@@ -17,11 +17,10 @@ from mantidqt.utils.qt.testing.application import get_application
 
 
 def split_qualified_name(qualified_name):
-    parts = qualified_name.split('.')
+    parts = qualified_name.split(".")
     if len(parts) < 2:
-        raise RuntimeError('Qualified name must include name of the module in which it is defined,'
-                           ' found: {0}'.format(qualified_name))
-    module_name = '.'.join(parts[:-1])
+        raise RuntimeError("Qualified name must include name of the module in which it is defined," " found: {0}".format(qualified_name))
+    module_name = ".".join(parts[:-1])
     name = parts[-1]
     return module_name, name
 
@@ -46,6 +45,7 @@ class ScriptRunner(object):
     Generator scripts can yield a positive number. It is treated as the number of seconds
     before the next iteration is called. During the wait time the event loop is running.
     """
+
     def __init__(self, script, widget=None, close_on_finish=True, pause=0, is_cli=False):
         """
         Initialise a runner.
@@ -76,7 +76,7 @@ class ScriptRunner(object):
             self.script_timer.setInterval(self.pause * 1000)
         # Zero-timeout timer runs script_runner() between Qt events
         self.script_timer.timeout.connect(self, Qt.QueuedConnection)
-        QMetaObject.invokeMethod(self.script_timer, 'start', Qt.QueuedConnection)
+        QMetaObject.invokeMethod(self.script_timer, "start", Qt.QueuedConnection)
 
     def __call__(self):
         app = get_application()
@@ -120,8 +120,7 @@ class ScriptRunner(object):
                 self.error = e
 
 
-def open_in_window(widget_or_name, script, attach_debugger=True, pause=0,
-                   close_on_finish=False, is_cli=False, in_workbench=False):
+def open_in_window(widget_or_name, script, attach_debugger=True, pause=0, close_on_finish=False, is_cli=False, in_workbench=False):
 
     """
     Displays a widget in a window.
@@ -155,10 +154,10 @@ def open_in_window(widget_or_name, script, attach_debugger=True, pause=0,
     :param in_workbench: Set to True if the script will be run inside the workbench application.
     """
     if attach_debugger:
-        input('Please attach the Debugger now if required. Press any key to continue')
+        input("Please attach the Debugger now if required. Press any key to continue")
     app = get_application()
     if widget_or_name is not None:
-        widget_name = 'Widget to test'
+        widget_name = "Widget to test"
         if isinstance(widget_or_name, str):
             widget = create_widget(widget_or_name)
             widget_name = widget_or_name
@@ -166,7 +165,7 @@ def open_in_window(widget_or_name, script, attach_debugger=True, pause=0,
             widget = widget_or_name
         else:
             widget = widget_or_name()
-        if hasattr(widget, 'setWindowTitle'):
+        if hasattr(widget, "setWindowTitle"):
             widget.setWindowTitle(widget_name)
         if widget is not None:
             widget.show()

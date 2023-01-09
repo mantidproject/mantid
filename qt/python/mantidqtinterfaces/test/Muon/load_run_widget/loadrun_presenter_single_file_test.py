@@ -39,24 +39,23 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.obj = QWidget()
 
         setup_context_for_tests(self)
-        self.data_context.instrument = 'EMU'
+        self.data_context.instrument = "EMU"
 
         self.view = LoadRunWidgetView(parent=self.obj)
         self.model = LoadRunWidgetModel(self.loaded_data, self.context)
         self.presenter = LoadRunWidgetPresenter(self.view, self.model)
         self.presenter.set_current_instrument("EMU")
 
-        patcher = mock.patch('mantidqtinterfaces.Muon.GUI.Common.load_run_widget.load_run_model.load_utils')
+        patcher = mock.patch("mantidqtinterfaces.Muon.GUI.Common.load_run_widget.load_run_model.load_utils")
         self.addCleanup(patcher.stop)
         self.load_utils_patcher = patcher.start()
-        self.load_utils_patcher.exception_message_for_failed_files.return_value = ''
+        self.load_utils_patcher.exception_message_for_failed_files.return_value = ""
 
     def tearDown(self):
         self.obj = None
 
     def mock_loading_via_user_input_run(self, workspace, filename, run):
-        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(
-            return_value=(workspace, run, filename, False))
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=(workspace, run, filename, False))
         self.view.set_run_edit_text("1234")
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -93,5 +92,5 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.assertEqual(self.view.warning_popup.call_count, 1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

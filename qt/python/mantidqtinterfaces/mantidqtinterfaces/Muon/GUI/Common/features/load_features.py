@@ -11,7 +11,7 @@ def load_features():
     feature_list = {}
     # this allows for a mangled config
     try:
-        feature_list=attempt_load()
+        feature_list = attempt_load()
     except ValueError:
         return {}
     return feature_list
@@ -28,5 +28,5 @@ def attempt_load():
         item_list = string.split(",")
         for item in item_list:
             key, value = item.split(":")
-            feature_list[key.replace(" ","")] = int(value)
+            feature_list[key.replace(" ", "")] = int(value)
     return feature_list

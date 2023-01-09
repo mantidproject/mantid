@@ -21,8 +21,8 @@ from mantidqt.widgets.codeeditor.scriptcompatibility import add_mantid_api_impor
 from mantidqt.widgets.codeeditor.tab_widget.codeeditor_tab_view import CodeEditorTabWidget
 
 
-NEW_TAB_TITLE = 'New'
-MODIFIED_MARKER = '*'
+NEW_TAB_TITLE = "New"
+MODIFIED_MARKER = "*"
 
 
 class MultiPythonFileInterpreter(QWidget):
@@ -81,10 +81,10 @@ class MultiPythonFileInterpreter(QWidget):
     @property
     def stripped_tab_titles(self):
         tab_text = [self._tabs.tabText(i) for i in range(self.editor_count)]
-        tab_text = [txt.rstrip('*') for txt in tab_text]
+        tab_text = [txt.rstrip("*") for txt in tab_text]
         # Some DEs (such as KDE) will automatically assign keyboard shortcuts using the Qt & annotation
         # see Qt Docs - qtabwidget#addTab
-        tab_text = [txt.replace('&', '') for txt in tab_text]
+        tab_text = [txt.replace("&", "") for txt in tab_text]
         return tab_text
 
     def closeEvent(self, event):
@@ -92,8 +92,8 @@ class MultiPythonFileInterpreter(QWidget):
         super(MultiPythonFileInterpreter, self).closeEvent(event)
 
     def load_settings_from_config(self, config):
-        self.confirm_on_save = config.get('project', 'prompt_save_editor_modified', type=bool)
-        self.completion_enabled = config.get('Editors', 'completion_enabled', type=bool)
+        self.confirm_on_save = config.get("project", "prompt_save_editor_modified", type=bool)
+        self.completion_enabled = config.get("Editors", "completion_enabled", type=bool)
         self.on_completion_change()
 
     @property
@@ -134,8 +134,7 @@ class MultiPythonFileInterpreter(QWidget):
             # Or the default (0) if this is the very first tab
             current_zoom = self.zoom_level
 
-        interpreter = PythonFileInterpreter(font, content, filename=filename,
-                                            parent=self, completion_enabled=self.completion_enabled)
+        interpreter = PythonFileInterpreter(font, content, filename=filename, parent=self, completion_enabled=self.completion_enabled)
 
         interpreter.editor.zoomTo(current_zoom)
 
@@ -157,7 +156,7 @@ class MultiPythonFileInterpreter(QWidget):
         interpreter.editor.setFocus()
         if content is not None:
             line_count = content.count(linesep)
-            interpreter.editor.setCursorPosition(line_count,0)
+            interpreter.editor.setCursorPosition(line_count, 0)
         return tab_idx
 
     def abort_current(self):
@@ -237,7 +236,7 @@ class MultiPythonFileInterpreter(QWidget):
     def _emit_code_exec_start(self):
         """Emit signal that code execution has started"""
         if not self.current_editor().filename:
-            filename = self._tabs.tabText(self._tabs.currentIndex()).rstrip('*')
+            filename = self._tabs.tabText(self._tabs.currentIndex()).rstrip("*")
             self.sig_code_exec_start.emit(filename)
         else:
             self.sig_code_exec_start.emit(self.current_editor().filename)
@@ -245,7 +244,7 @@ class MultiPythonFileInterpreter(QWidget):
     @property
     def current_tab_filename(self):
         if not self.current_editor().filename:
-            return self._tabs.tabText(self._tabs.currentIndex()).rstrip('*')
+            return self._tabs.tabText(self._tabs.currentIndex()).rstrip("*")
         return self.current_editor().filename
 
     def execute_current_async(self):
@@ -291,15 +290,15 @@ class MultiPythonFileInterpreter(QWidget):
                 title_new = title_cur
         else:
             if title_cur.endswith(MODIFIED_MARKER):
-                title_new = title_cur.rstrip('*')
+                title_new = title_cur.rstrip("*")
             else:
                 title_new = title_cur
         self._tabs.setTabText(idx, title_new)
 
     def on_filename_modified(self, filename):
-        old_filename = self._tabs.tabToolTip(self._tabs.currentIndex()).rstrip('*')
+        old_filename = self._tabs.tabToolTip(self._tabs.currentIndex()).rstrip("*")
         if not filename:
-            filename = self._tabs.tabText(self._tabs.currentIndex()).rstrip('*')
+            filename = self._tabs.tabText(self._tabs.currentIndex()).rstrip("*")
         self.sig_file_name_changed.emit(old_filename, filename)
         title, tooltip = self._tab_title_and_tooltip(filename)
         idx_cur = self._tabs.currentIndex()
@@ -313,7 +312,7 @@ class MultiPythonFileInterpreter(QWidget):
         :param filepath: A path to an existing file
         :param startup: Flag for if function is being called on startup
         """
-        with open(filepath, 'r') as code_file:
+        with open(filepath, "r") as code_file:
             content = code_file.read()
 
         self.append_new_editor(content=content, filename=filepath)

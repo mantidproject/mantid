@@ -41,8 +41,7 @@ class FittingDataPresenter(object):
         self.fit_all_started_notifier = GenericObservable()
         # Observers
         self.fit_enabled_observer = GenericObserverWithArgPassing(self.set_fit_enabled)
-        self.focus_run_observer = GenericObserverWithArgPassing(
-            self.view.set_default_files)
+        self.focus_run_observer = GenericObserverWithArgPassing(self.view.set_default_files)
 
     def set_fit_enabled(self, fit_enabled):
         self.view.set_fit_buttons_enabled(fit_enabled)
@@ -86,7 +85,7 @@ class FittingDataPresenter(object):
             if old_name in self.plotted:
                 self.plotted.remove(old_name)
                 self.plotted.add(new_name)
-            if old_name in self.row_numbers: #bgsub not in row_numbers
+            if old_name in self.row_numbers:  # bgsub not in row_numbers
                 row_no = self.row_numbers.pop(old_name)
                 self.row_numbers[new_name] = row_no
 
@@ -110,10 +109,13 @@ class FittingDataPresenter(object):
         Load one to many files into mantid that are tracked by the interface.
         :param filenames: Comma separated list of filenames to load
         """
-        self.worker = AsyncTask(self.model.load_files, (filenames,),
-                                error_cb=self._on_worker_error,
-                                finished_cb=self._emit_enable_load_button_signal,
-                                success_cb=self._on_worker_success)
+        self.worker = AsyncTask(
+            self.model.load_files,
+            (filenames,),
+            error_cb=self._on_worker_error,
+            finished_cb=self._emit_enable_load_button_signal,
+            success_cb=self._on_worker_success,
+        )
         self.worker.start()
 
     def _on_worker_error(self, _):
@@ -158,7 +160,7 @@ class FittingDataPresenter(object):
             ws_name = self.row_numbers.pop(row_no)
             removed_ws_list = self.model.delete_workspace(ws_name)
             for ws in removed_ws_list:
-                #plot_removed_notifier will be done in _repopulate_table
+                # plot_removed_notifier will be done in _repopulate_table
                 self.plotted.discard(ws.name())
         self._repopulate_table()
 
@@ -255,8 +257,7 @@ class FittingDataPresenter(object):
             return False
         return True
 
-    def _add_row_to_table(self, ws_name, row, run_no=None, bank=None, plotted=False, bgsub=False, niter=50,
-                          xwindow=None, SG=True):
+    def _add_row_to_table(self, ws_name, row, run_no=None, bank=None, plotted=False, bgsub=False, niter=50, xwindow=None, SG=True):
 
         words = ws_name.split("_")
         # find xwindow from ws xunit if not specified

@@ -11,10 +11,12 @@ from qtpy import QtWidgets, QtCore
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plot_toolbar import PlotToolbar
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model import WorkspacePlotInformation
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view_interface import PlottingCanvasViewInterface
-from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_utils import (_do_single_plot,
-                                                                                                  get_y_min_max_between_x_range,
-                                                                                                  get_num_row_and_col,
-                                                                                                  convert_index_to_row_and_col)
+from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_utils import (
+    _do_single_plot,
+    get_y_min_max_between_x_range,
+    get_num_row_and_col,
+    convert_index_to_row_and_col,
+)
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plot_color_queue import ColorQueue
 from mantid import AnalysisDataService
 from mantid.plots import legend_set_draggable
@@ -32,11 +34,7 @@ DEFAULT_COLOR_CYCLE = ["C" + str(index) for index in range(NUMBER_OF_COLOURS)]
 
 
 class ShadedRegionInfo(object):
-    def __init__(self, workspace_name: str,
-                 axis,
-                 x_values: List[float],
-                 y1_values: List[float],
-                 y2_values: List[float]):
+    def __init__(self, workspace_name: str, axis, x_values: List[float], y1_values: List[float], y2_values: List[float]):
         self.workspace_name = workspace_name
         self.axis = axis
         self.x_values = x_values
@@ -44,10 +42,7 @@ class ShadedRegionInfo(object):
         self.y2_values = y2_values
         self.ID = None
 
-    def update(self, axis,
-               x_values: List[float],
-               y1_values: List[float],
-               y2_values: List[float]):
+    def update(self, axis, x_values: List[float], y1_values: List[float], y2_values: List[float]):
         self.axis = axis
         self.x_values = x_values
         self.y1_values = y1_values
@@ -69,7 +64,7 @@ class ShadedRegionInfo(object):
             self.ID = None
 
 
-def get_color_from_artist(artist:Artist):
+def get_color_from_artist(artist: Artist):
     if isinstance(artist, ErrorbarContainer):
         return artist[0].get_color()
     else:
@@ -77,7 +72,6 @@ def get_color_from_artist(artist:Artist):
 
 
 class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
-
     def __init__(self, quick_edit, settings, parent=None):
         super().__init__(parent)
         # later we will allow these to be changed in the settings
@@ -94,8 +88,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         self.toolBar = PlotToolbar(self.fig.canvas, self)
 
         # Create a set of Mantid axis for the figure
-        self.fig, axes = get_plot_fig(overplot=False, ax_properties=None, axes_num=1,
-                                      fig=self.fig)
+        self.fig, axes = get_plot_fig(overplot=False, ax_properties=None, axes_num=1, fig=self.fig)
         self._number_of_axes = 1
         self._color_queue = [ColorQueue(DEFAULT_COLOR_CYCLE)]
 
@@ -152,8 +145,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         self._number_of_axes = num_axes
         self._color_queue = [ColorQueue(DEFAULT_COLOR_CYCLE) for _ in range(num_axes)]
         self.fig.clf()
-        self.fig, axes = get_plot_fig(overplot=False, ax_properties=None, axes_num=num_axes,
-                                      fig=self.fig)
+        self.fig, axes = get_plot_fig(overplot=False, ax_properties=None, axes_num=num_axes, fig=self.fig)
         if self._settings.is_condensed:
             self.fig.subplots_adjust(wspace=0, hspace=0)
         else:
@@ -172,7 +164,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
 
         for shaded_region in self._shaded_regions:
             shaded_region.remove()
-        self._shaded_regions={}
+        self._shaded_regions = {}
 
         self._plot_information_list = []
 
@@ -188,13 +180,12 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         axis_number = workspace_plot_info.axis
         ax = self.fig.axes[axis_number]
         plot_kwargs = self._get_plot_kwargs(workspace_plot_info)
-        plot_kwargs['color'] = self._color_queue[axis_number]()
+        plot_kwargs["color"] = self._color_queue[axis_number]()
         if workspace_name in self._shaded_regions.keys() and errors:
             errors = False
-            self.shade_region(plot_kwargs['color'], workspace_name)
+            self.shade_region(plot_kwargs["color"], workspace_name)
 
-        _do_single_plot(ax, workspace, ws_index, errors=errors,
-                        plot_kwargs=plot_kwargs)
+        _do_single_plot(ax, workspace, ws_index, errors=errors, plot_kwargs=plot_kwargs)
         return axis_number
 
     def add_workspaces_to_plot(self, workspace_plot_info_list: List[WorkspacePlotInformation]):
@@ -208,24 +199,19 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
             self._set_text_tick_labels(axis_number)
             if self._settings.is_condensed:
                 self.hide_axis(axis_number, nrows, ncols)
-        #remove labels from empty plots
+        # remove labels from empty plots
         if self._settings.is_condensed:
-            for axis_number in range(int(self._number_of_axes), int(nrows*ncols)):
+            for axis_number in range(int(self._number_of_axes), int(nrows * ncols)):
                 self.hide_axis(axis_number, nrows, ncols)
 
     def add_shaded_region(self, workspace_name, axis_number, x_values, y1_values, y2_values):
         axis = self.fig.axes[axis_number]
         if workspace_name in self._shaded_regions.keys():
-            self._shaded_regions[workspace_name].update(axis = axis,
-                                                        x_values = x_values,
-                                                        y1_values = y1_values,
-                                                        y2_values = y2_values)
+            self._shaded_regions[workspace_name].update(axis=axis, x_values=x_values, y1_values=y1_values, y2_values=y2_values)
         else:
-            self._shaded_regions[workspace_name] = ShadedRegionInfo(workspace_name = workspace_name,
-                                                                    axis = axis,
-                                                                    x_values = x_values,
-                                                                    y1_values = y1_values,
-                                                                    y2_values = y2_values)
+            self._shaded_regions[workspace_name] = ShadedRegionInfo(
+                workspace_name=workspace_name, axis=axis, x_values=x_values, y1_values=y1_values, y2_values=y2_values
+            )
 
     def _wrap_labels(self, labels: list) -> list:
         """Wraps a list of labels so that every line is at most self._settings.wrap_width characters long."""
@@ -234,32 +220,32 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
     def _set_text_tick_labels(self, axis_number):
         ax = self.fig.axes[axis_number]
         # set the axes to not "simplify" the values
-        ax.xaxis.set_major_formatter(StrMethodFormatter('{x:g}'))
+        ax.xaxis.set_major_formatter(StrMethodFormatter("{x:g}"))
         ax.xaxis.set_minor_formatter(NullFormatter())
-        ax.yaxis.set_major_formatter(StrMethodFormatter('{x:g}'))
+        ax.yaxis.set_major_formatter(StrMethodFormatter("{x:g}"))
         ax.yaxis.set_minor_formatter(NullFormatter())
         if self._x_tick_labels:
             ax.set_xticks(range(len(self._x_tick_labels)))
             labels = self._wrap_labels(self._x_tick_labels)
-            ax.set_xticklabels(labels, fontsize = self._settings.font_size, rotation = self._settings.rotation, ha = "right")
+            ax.set_xticklabels(labels, fontsize=self._settings.font_size, rotation=self._settings.rotation, ha="right")
         if self._y_tick_labels:
             ax.set_yticks(range(len(self._y_tick_labels)))
             labels = self._wrap_labels(self._y_tick_labels)
-            ax.set_yticklabels(labels, fontsize = self._settings.font_size)
+            ax.set_yticklabels(labels, fontsize=self._settings.font_size)
 
     def hide_axis(self, axis_number, nrows, ncols):
-        row, col = convert_index_to_row_and_col(axis_number,  nrows, ncols)
+        row, col = convert_index_to_row_and_col(axis_number, nrows, ncols)
         ax = self.fig.axes[axis_number]
-        if row != nrows-1:
+        if row != nrows - 1:
             labels = ["" for item in ax.get_xticks().tolist()]
             ax.set_xticklabels(labels)
             ax.xaxis.label.set_visible(False)
-        if col != 0 and col != ncols-1:
+        if col != 0 and col != ncols - 1:
             labels = ["" for item in ax.get_yticks().tolist()]
             ax.set_yticklabels(labels)
             ax.yaxis.label.set_visible(False)
-        elif col == ncols-1 and ncols>1:
-            ax.yaxis.set_label_position('right')
+        elif col == ncols - 1 and ncols > 1:
+            ax.yaxis.set_label_position("right")
             ax.yaxis.tick_right()
 
     def remove_workspace_info_from_plot(self, workspace_plot_info_list: List[WorkspacePlotInformation]):
@@ -273,21 +259,23 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
 
             workspace = AnalysisDataService.Instance().retrieve(workspace_name)
             for plotted_information in self._plot_information_list.copy():
-                if workspace_plot_info.workspace_name == plotted_information.workspace_name and \
-                        workspace_plot_info.axis == plotted_information.axis:
+                if (
+                    workspace_plot_info.workspace_name == plotted_information.workspace_name
+                    and workspace_plot_info.axis == plotted_information.axis
+                ):
                     self._update_color_queue_on_workspace_removal(workspace_plot_info.axis, workspace_name)
                     axis = self.fig.axes[workspace_plot_info.axis]
                     axis.remove_workspace_artists(workspace)
                     self._plot_information_list.remove(plotted_information)
                     # clear shaded regions from plot
-                    if len(axis.collections)>0 and plotted_information.workspace_name in self._shaded_regions.keys():
+                    if len(axis.collections) > 0 and plotted_information.workspace_name in self._shaded_regions.keys():
                         self._shaded_regions[plotted_information.workspace_name].remove()
         # If we have no plotted lines, reset the color cycle
         if self.num_plotted_workspaces == 0:
             self._reset_color_cycle()
 
     def remove_workspace_from_plot(self, workspace):
-        """Remove all references to a workspaces from the plot """
+        """Remove all references to a workspaces from the plot"""
         for workspace_plot_info in self._plot_information_list.copy():
             workspace_name = workspace_plot_info.workspace_name
             if workspace_name == workspace.name():
@@ -341,7 +329,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
     def replot_workspace_with_error_state(self, workspace_name, with_errors: bool):
         for plot_info in self.plotted_workspace_information:
             # update plot info error state -> important for shading
-            plot_info.errors= with_errors
+            plot_info.errors = with_errors
             if plot_info.workspace_name == workspace_name:
                 axis = self.fig.axes[plot_info.axis]
                 workspace_name = plot_info.workspace_name
@@ -389,25 +377,28 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
 
     @property
     def get_xlim_list(self):
-        xlim_list=[]
+        xlim_list = []
         for axis in self.fig.axes:
             min, max = axis.get_xlim()
-            xlim_list.append([min,max])
+            xlim_list.append([min, max])
         return xlim_list
 
     @property
     def get_ylim_list(self):
-        ylim_list=[]
+        ylim_list = []
         for axis in self.fig.axes:
             min, max = axis.get_ylim()
-            ylim_list.append([min,max])
+            ylim_list.append([min, max])
         return ylim_list
 
     def autoscale_selected_y_axis(self, axis_number):
         if axis_number >= len(self.fig.axes):
             return
         axis = self.fig.axes[axis_number]
-        bottom, top, = self._get_y_axis_autoscale_limits(axis)
+        (
+            bottom,
+            top,
+        ) = self._get_y_axis_autoscale_limits(axis)
         axis.set_ylim(bottom, top)
 
     def set_title(self, axis_number, title):
@@ -437,7 +428,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
 
     def _get_plot_kwargs(self, workspace_info: WorkspacePlotInformation):
         label = workspace_info.label
-        plot_kwargs = {'distribution': True, 'autoscale_on_update': False, 'label': label}
+        plot_kwargs = {"distribution": True, "autoscale_on_update": False, "label": label}
         plot_kwargs["marker"] = self._settings.get_marker(workspace_info.workspace_name)
         plot_kwargs["linestyle"] = self._settings.get_linestyle(workspace_info.workspace_name)
         if isinstance(workspace_info.index, int):

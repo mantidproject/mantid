@@ -30,10 +30,10 @@ from mantidqt.utils.asynchronous import AsyncTask, BlockingAsyncTaskWithCallback
 from mantidqt.utils.qt import import_qt
 
 # Core object to execute the code with optinal progress tracking
-CodeExecution = import_qt('..._common', 'mantidqt.widgets.codeeditor', 'CodeExecution')
+CodeExecution = import_qt("..._common", "mantidqt.widgets.codeeditor", "CodeExecution")
 
-EMPTY_FILENAME_ID = '<string>'
-FILE_ATTR = '__file__'
+EMPTY_FILENAME_ID = "<string>"
+FILE_ATTR = "__file__"
 
 
 def _get_imported_from_future(code_str):
@@ -47,10 +47,10 @@ def _get_imported_from_future(code_str):
     try:
         code_str = code_str.encode(detect_encoding(BytesIO(code_str.encode()).readline)[0])
     except UnicodeEncodeError:  # Script contains unicode symbol. Cannot run detect_encoding as it requires ascii.
-        code_str = code_str.encode('utf-8')
+        code_str = code_str.encode("utf-8")
     for node in ast.walk(ast.parse(code_str)):
         if isinstance(node, ast.ImportFrom):
-            if node.module == '__future__':
+            if node.module == "__future__":
                 future_imports.extend([import_alias.name for import_alias in node.names])
                 break
     return future_imports
@@ -76,8 +76,7 @@ def get_future_import_compiler_flags(code_str):
 
 
 def hide_warnings_in_script_editor():
-    warnings.filterwarnings("ignore", message="Starting a Matplotlib GUI outside of the main thread will "
-                                              "likely fail.")
+    warnings.filterwarnings("ignore", message="Starting a Matplotlib GUI outside of the main thread will " "likely fail.")
 
 
 class PythonCodeExecution(QObject):
@@ -85,6 +84,7 @@ class PythonCodeExecution(QObject):
     strings of Python code. It supports
     reporting progress updates in asynchronous execution
     """
+
     sig_exec_success = Signal(object)
     sig_exec_error = Signal(object)
 
@@ -118,15 +118,18 @@ class PythonCodeExecution(QObject):
         # Stack is chopped on error to avoid the  AsyncTask.run->self.execute calls appearing
         # as these are not useful for the user in this context
         if not blocking:
-            task = AsyncTask(self.execute, args=(code_str, filename, line_offset),
-                             success_cb=self._on_success, error_cb=self._on_error)
+            task = AsyncTask(self.execute, args=(code_str, filename, line_offset), success_cb=self._on_success, error_cb=self._on_error)
             task.start()
             self._task = task
             return task
         else:
-            self._task = BlockingAsyncTaskWithCallback(self.execute, args=(code_str, filename, line_offset),
-                                                       success_cb=self._on_success, error_cb=self._on_error,
-                                                       blocking_cb=QApplication.processEvents)
+            self._task = BlockingAsyncTaskWithCallback(
+                self.execute,
+                args=(code_str, filename, line_offset),
+                success_cb=self._on_success,
+                error_cb=self._on_error,
+                blocking_cb=QApplication.processEvents,
+            )
             return self._task.start()
 
     def execute(self, code_str, filename=None, line_offset=0):

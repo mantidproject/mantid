@@ -34,7 +34,7 @@ class MuonLoadData:
         nouns.
         """
         self.params = []
-        self.defaults = {"run": [0], "workspace": [], "filename": "", 'instrument': ''}
+        self.defaults = {"run": [0], "workspace": [], "filename": "", "instrument": ""}
 
     def __iter__(self):
         self._n = -1
@@ -132,21 +132,23 @@ class MuonLoadData:
 
     def get_main_field_direction(self, **kwargs):
         if self.get_data(**kwargs):
-            return self.get_data(**kwargs)['workspace']['MainFieldDirection']
+            return self.get_data(**kwargs)["workspace"]["MainFieldDirection"]
         else:
             return None
 
-    def remove_workspace_by_name(self, workspace_name, instrument=''):
+    def remove_workspace_by_name(self, workspace_name, instrument=""):
         list_of_workspace_names_to_remove = []
         for entry in self.params:
-            if any([workspace.workspace_name == workspace_name for workspace in entry['workspace']['OutputWorkspace']])\
-                    or entry['workspace']['DataDeadTimeTable'] == workspace_name:
+            if (
+                any([workspace.workspace_name == workspace_name for workspace in entry["workspace"]["OutputWorkspace"]])
+                or entry["workspace"]["DataDeadTimeTable"] == workspace_name
+            ):
                 list_of_workspace_names_to_remove.append(entry)
 
         runs_removed = []
         for entry in list_of_workspace_names_to_remove:
-            if instrument == entry['instrument']:
-                runs_removed.append(entry['run'])
+            if instrument == entry["instrument"]:
+                runs_removed.append(entry["run"])
             self.remove_data(**entry)
 
         return runs_removed

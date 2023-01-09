@@ -564,7 +564,8 @@ void DiscusMultipleScatteringCorrection::exec() {
   const int seed = getProperty("SeedValue");
 
   InterpolationOption interpolateOpt;
-  interpolateOpt.set(getPropertyValue("Interpolation"), false, true);
+  bool independentErrors = (m_EMode == DeltaEMode::Direct) ? m_simulateEnergiesIndependently : true;
+  interpolateOpt.set(getPropertyValue("Interpolation"), true, independentErrors);
 
   m_importanceSampling = getProperty("ImportanceSampling");
 
@@ -627,21 +628,27 @@ void DiscusMultipleScatteringCorrection::exec() {
         if (m_importanceSampling)
           prepareCumulativeProbForQ(kinc, componentWorkspaces);
 
-        auto weights = simulatePaths(nSingleScatterEvents, 1, rng, componentWorkspaces, kinc, wValues, detPos, true);
+        auto [weights, weightsErrors] =
+            simulatePaths(nSingleScatterEvents, 1, rng, componentWorkspaces, kinc, wValues, detPos, true);
         if (std::get<1>(kInW[bin]) == -1) {
           noAbsSimulationWS->getSpectrum(i).mutableY() += weights;
+          noAbsSimulationWS->getSpectrum(i).mutableE() += weightsErrors;
         } else {
           noAbsSimulationWS->getSpectrum(i).dataY()[std::get<1>(kInW[bin])] = weights[0];
+          noAbsSimulationWS->getSpectrum(i).dataE()[std::get<1>(kInW[bin])] = weightsErrors[0];
         }
 
         for (int ne = 0; ne < nScatters; ne++) {
           int nEvents = ne == 0 ? nSingleScatterEvents : nMultiScatterEvents;
 
-          weights = simulatePaths(nEvents, ne + 1, rng, componentWorkspaces, kinc, wValues, detPos, false);
+          std::tie(weights, weightsErrors) =
+              simulatePaths(nEvents, ne + 1, rng, componentWorkspaces, kinc, wValues, detPos, false);
           if (std::get<1>(kInW[bin]) == -1.0) {
             simulationWSs[ne]->getSpectrum(i).mutableY() += weights;
+            simulationWSs[ne]->getSpectrum(i).mutableE() += weightsErrors;
           } else {
             simulationWSs[ne]->getSpectrum(i).dataY()[std::get<1>(kInW[bin])] = weights[0];
+            simulationWSs[ne]->getSpectrum(i).dataE()[std::get<1>(kInW[bin])] = weightsErrors[0];
           }
         }
 
@@ -1035,9 +1042,9 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const DiscusData1D 
                                                              const double xmax, std::vector<double> &resultX,
                                                              std::vector<double> &resultY,
                                                              const bool returnCumulative) {
+  assert(h.X.size() == h.Y.size());
   const std::vector<double> &xValues = h.X;
   const std::vector<double> &yValues = h.Y;
-  bool isPoints = xValues.size() == yValues.size();
 
   // set the integral to zero at xmin
   if (returnCumulative) {
@@ -1067,11 +1074,8 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const DiscusData1D 
   // deal with partial initial segments
   if (xmin > xValues[iRight - 1]) {
     if (xmax >= xValues[iRight]) {
-      if (isPoints) {
-        double interpY = linearInterp(xmin, iRight - 1, iRight);
-        yToUse = 0.5 * (interpY + yValues[iRight]);
-      } else
-        yToUse = yValues[iRight - 1];
+      double interpY = linearInterp(xmin, iRight - 1, iRight);
+      yToUse = 0.5 * (interpY + yValues[iRight]);
       sum += yToUse * (xValues[iRight] - xmin);
       if (returnCumulative) {
         resultX.push_back(xValues[iRight]);
@@ -1079,12 +1083,9 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const DiscusData1D 
       }
       iRight++;
     } else {
-      if (isPoints) {
-        double interpY1 = linearInterp(xmin, iRight - 1, iRight);
-        double interpY2 = linearInterp(xmax, iRight - 1, iRight);
-        yToUse = 0.5 * (interpY1 + interpY2);
-      } else
-        yToUse = yValues[iRight - 1];
+      double interpY1 = linearInterp(xmin, iRight - 1, iRight);
+      double interpY2 = linearInterp(xmax, iRight - 1, iRight);
+      yToUse = 0.5 * (interpY1 + interpY2);
       sum += yToUse * (xmax - xmin);
       if (returnCumulative) {
         resultX.push_back(xmax);
@@ -1096,10 +1097,7 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const DiscusData1D 
 
   // integrate the intervals between each pair of points. Do this until right point is at end of vector or > xmax
   for (; iRight < xValues.size() && xValues[iRight] <= xmax; iRight++) {
-    if (isPoints)
-      yToUse = 0.5 * (yValues[iRight - 1] + yValues[iRight]);
-    else
-      yToUse = yValues[iRight - 1];
+    yToUse = 0.5 * (yValues[iRight - 1] + yValues[iRight]);
     double xLeft = xValues[iRight - 1];
     double xRight = xValues[iRight];
     sum += yToUse * (xRight - xLeft);
@@ -1113,11 +1111,8 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const DiscusData1D 
 
   // integrate a partial final interval if xmax is between points
   if ((xmax > xValues[iRight - 1]) && (xmin <= xValues[iRight - 1])) {
-    if (isPoints) {
-      double interpY = linearInterp(xmax, iRight - 1, iRight);
-      yToUse = 0.5 * (yValues[iRight - 1] + interpY);
-    } else
-      yToUse = yValues[iRight - 1];
+    double interpY = linearInterp(xmax, iRight - 1, iRight);
+    yToUse = 0.5 * (yValues[iRight - 1] + interpY);
     sum += yToUse * (xmax - xValues[iRight - 1]);
     if (returnCumulative) {
       resultX.emplace_back(xmax);
@@ -1130,14 +1125,21 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const DiscusData1D 
   }
 }
 
+/**
+ * Create new workspace with y equal to integral across the bins
+ * @param ws The workspace whose spectra need integrating
+ * @return A workspace containing the integrals
+ */
 API::MatrixWorkspace_sptr DiscusMultipleScatteringCorrection::integrateWS(const API::MatrixWorkspace_sptr &ws) {
-  auto wsIntegrals = DataObjects::create<Workspace2D>(*ws, HistogramData::Points{0.});
-  for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
-    std::vector<double> IOfQX, IOfQY;
-    integrateCumulative(DiscusData1D{ws->histogram(i).dataX(), ws->histogram(i).dataY()}, ws->x(i).front(),
-                        ws->x(i).back(), IOfQX, IOfQY, false);
-    wsIntegrals->mutableY(i) = IOfQY.back();
-  }
+  // don't call integrateCumulative function because want error calculation and support for bin edges
+  auto integrateAlgorithm = this->createChildAlgorithm("Integration");
+  integrateAlgorithm->initialize();
+  integrateAlgorithm->setProperty("InputWorkspace", ws);
+  integrateAlgorithm->setProperty("OutputWorkspace", "_");
+  integrateAlgorithm->execute();
+  MatrixWorkspace_sptr wsIntegrals = integrateAlgorithm->getProperty("OutputWorkspace");
+  for (size_t i = 0; i < wsIntegrals->getNumberHistograms(); i++)
+    wsIntegrals->setPoints(i, std::vector<double>{0.});
   return wsIntegrals;
 }
 
@@ -1327,13 +1329,15 @@ double DiscusMultipleScatteringCorrection::Interpolate2D(const ComponentWorkspac
  * @param specialSingleScatterCalc Boolean indicating whether special single
  * @return An average weight across all of the paths
  */
-std::vector<double> DiscusMultipleScatteringCorrection::simulatePaths(
+std::tuple<std::vector<double>, std::vector<double>> DiscusMultipleScatteringCorrection::simulatePaths(
     const int nPaths, const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
     ComponentWorkspaceMappings &componentWorkspaces, const double kinc, const std::vector<double> &wValues,
     const Kernel::V3D &detPos, bool specialSingleScatterCalc) {
+  // countZeroWeights for debugging and analysis of where importance sampling may help
+  std::vector<int> countZeroWeights(wValues.size(), 0);
   std::vector<double> sumOfWeights(wValues.size(), 0.);
-  std::vector<int> countZeroWeights(wValues.size(),
-                                    0); // for debugging and analysis of where importance sampling may help
+  std::vector<double> weightsMeans(wValues.size(), 0.), deltas(wValues.size(), 0.), weightsM2(wValues.size(), 0.),
+      weightsErrors(wValues.size(), 0.);
 
   for (int ie = 0; ie < nPaths; ie++) {
     auto [success, weights] =
@@ -1342,14 +1346,26 @@ std::vector<double> DiscusMultipleScatteringCorrection::simulatePaths(
       std::transform(weights.begin(), weights.end(), sumOfWeights.begin(), sumOfWeights.begin(), std::plus<double>());
       std::transform(weights.begin(), weights.end(), countZeroWeights.begin(), countZeroWeights.begin(),
                      [](double d, int count) { return d > 0. ? count : count + 1; });
+
+      // increment standard deviation using Welford algorithm
+      for (size_t i = 0; i < wValues.size(); i++) {
+        deltas[i] = weights[i] - weightsMeans[i];
+        weightsMeans[i] += deltas[i] / static_cast<double>(ie + 1);
+        weightsM2[i] += deltas[i] * (weights[i] - weightsMeans[i]);
+        // calculate sample SD (M2/n-1)
+        // will give NaN for m_events=1, but that's correct
+        weightsErrors[i] = sqrt(weightsM2[i] / static_cast<double>(ie));
+      }
+
     } else
       ie--;
   }
   for (size_t i = 0; i < wValues.size(); i++) {
     sumOfWeights[i] = sumOfWeights[i] / nPaths;
+    weightsErrors[i] = weightsErrors[i] / sqrt(nPaths);
   }
 
-  return sumOfWeights;
+  return {sumOfWeights, weightsErrors};
 }
 
 /**

@@ -41,5 +41,5 @@ class LoadWidgetModelEATest(unittest.TestCase):
         self.assertEqual(self.model._loaded_data_store.num_items(), 0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

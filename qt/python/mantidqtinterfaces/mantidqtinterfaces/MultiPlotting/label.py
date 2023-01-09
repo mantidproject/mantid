@@ -7,16 +7,7 @@
 
 
 class Label(object):
-
-    def __init__(
-      self,
-      text,
-      xvalue,
-      xrelative,
-      yvalue,
-      yrelative,
-      rotation=0,
-      protected=False):
+    def __init__(self, text, xvalue, xrelative, yvalue, yrelative, rotation=0, protected=False):
         self._text = text
         self._xvalue = xvalue
         self._xrelative = xrelative

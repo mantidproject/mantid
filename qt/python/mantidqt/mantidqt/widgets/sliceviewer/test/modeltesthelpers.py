@@ -15,9 +15,17 @@ from mantid.geometry import IMDDimension
 import numpy as np
 
 
-def create_mock_histoworkspace(ndims: int, coords: SpecialCoordinateSystem, extents: tuple,
-                               signal: np.array, error: np.array, nbins: tuple, names: tuple,
-                               units: tuple, isq: tuple):
+def create_mock_histoworkspace(
+    ndims: int,
+    coords: SpecialCoordinateSystem,
+    extents: tuple,
+    signal: np.array,
+    error: np.array,
+    nbins: tuple,
+    names: tuple,
+    units: tuple,
+    isq: tuple,
+):
     """
     :param ndims: The number of dimensions
     :param coords: MD coordinate system
@@ -35,8 +43,7 @@ def create_mock_histoworkspace(ndims: int, coords: SpecialCoordinateSystem, exte
     return add_dimensions(ws, names, isq, extents, nbins, units)
 
 
-def create_mock_mdeventworkspace(ndims: int, coords: SpecialCoordinateSystem, extents: tuple,
-                                 names: tuple, units: tuple, isq: tuple):
+def create_mock_mdeventworkspace(ndims: int, coords: SpecialCoordinateSystem, extents: tuple, names: tuple, units: tuple, isq: tuple):
     """
     :param ndims: The number of dimensions
     :param coords: MD coordinate system
@@ -46,14 +53,10 @@ def create_mock_mdeventworkspace(ndims: int, coords: SpecialCoordinateSystem, ex
     :param isq: Boolean for each dimension defining if Q or not
     """
     ws = create_mock_workspace(IMDEventWorkspace, coords, has_oriented_lattice=False, ndims=ndims)
-    return add_dimensions(ws, names, isq, extents, nbins=(1, ) * ndims, units=units)
+    return add_dimensions(ws, names, isq, extents, nbins=(1,) * ndims, units=units)
 
 
-def create_mock_matrixworkspace(x_axis: tuple,
-                                y_axis: tuple,
-                                distribution: bool,
-                                names: tuple,
-                                units: tuple = None):
+def create_mock_matrixworkspace(x_axis: tuple, y_axis: tuple, distribution: bool, names: tuple, units: tuple = None):
     """
     :param x_axis: X axis values
     :param y_axis: Y axis values
@@ -70,10 +73,7 @@ def create_mock_matrixworkspace(x_axis: tuple,
     return add_dimensions(ws, names, (False, False), extents, nbins, units)
 
 
-def create_mock_workspace(ws_type,
-                          coords: SpecialCoordinateSystem = None,
-                          has_oriented_lattice: bool = None,
-                          ndims: int = 2):
+def create_mock_workspace(ws_type, coords: SpecialCoordinateSystem = None, has_oriented_lattice: bool = None, ndims: int = 2):
     """
     :param ws_type: Used this as spec for Mock
     :param coords: MD coordinate system for MD workspaces
@@ -81,7 +81,7 @@ def create_mock_workspace(ws_type,
     :param ndims: The number of dimensions
     """
     ws = MagicMock(spec=ws_type)
-    if hasattr(ws, 'getExperimentInfo'):
+    if hasattr(ws, "getExperimentInfo"):
         ws.getNumDims.return_value = ndims
         if ws_type == IMDHistoWorkspace:
             ws.isMDHistoWorkspace.return_value = True
@@ -95,7 +95,7 @@ def create_mock_workspace(ws_type,
         sample.hasOrientedLattice.return_value = has_oriented_lattice
         expt_info.sample.return_value = sample
         ws.getExperimentInfo.return_value = expt_info
-    elif hasattr(ws, 'getNumberHistograms'):
+    elif hasattr(ws, "getNumberHistograms"):
         ws.getNumDims.return_value = 2
         ws.getNumberHistograms.return_value = 3
         mock_dimension = MagicMock()
@@ -104,12 +104,7 @@ def create_mock_workspace(ws_type,
     return ws
 
 
-def add_dimensions(mock_ws,
-                   names,
-                   isq,
-                   extents: tuple = None,
-                   nbins: tuple = None,
-                   units: tuple = None):
+def add_dimensions(mock_ws, names, isq, extents: tuple = None, nbins: tuple = None, units: tuple = None):
     """
     :param mock_ws: An existing mock workspace object
     :param names: The name of each dimension
@@ -118,6 +113,7 @@ def add_dimensions(mock_ws,
     :param nbins: Number of bins in each dimension
     :param units: Unit labels for each dimension
     """
+
     def create_dimension(index):
         dimension = MagicMock(spec=IMDDimension)
         dimension.name = names[index]

@@ -8,20 +8,21 @@
 # Dialog to set up HTTP data downloading server and download HB3A data to local
 ##########
 import os
-from qtpy.QtWidgets import (QDialog, QFileDialog, QMessageBox)  # noqa
+from qtpy.QtWidgets import QDialog, QFileDialog, QMessageBox  # noqa
 import mantidqtinterfaces.HFIR_4Circle_Reduction.fourcircle_utility as hb3a_util
 
 import qtpy  # noqa
 from mantid.kernel import Logger
+
 try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
-    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    Logger("HFIR_4Circle_Reduction").information("Using legacy ui importer")
     from mantidplot import load_ui
 
 
 class DataDownloadDialog(QDialog):
-    """ dialog for set up HTTP server and download files to local computer
+    """dialog for set up HTTP server and download files to local computer
     This feature will be valid until SNS disables the HTTP server for HFIR data
     """
 
@@ -59,7 +60,7 @@ class DataDownloadDialog(QDialog):
             self._myControl = None
             self._myControl = parent.controller
         except AttributeError as att_err:
-            print (att_err)
+            print(att_err)
 
         # experiment number
         self._expNumber = None
@@ -69,13 +70,13 @@ class DataDownloadDialog(QDialog):
         initialize widgets
         :return:
         """
-        self.ui.lineEdit_url.setText('http://neutron.ornl.gov/user_data/hb3a/')
+        self.ui.lineEdit_url.setText("http://neutron.ornl.gov/user_data/hb3a/")
 
     def do_browse_local_cache_dir(self):
-        """ Browse local cache directory
+        """Browse local cache directory
         :return:
         """
-        local_cache_dir = QFileDialog.getExistingDirectory(self, 'Get Local Cache Directory', self._homeSrcDir)
+        local_cache_dir = QFileDialog.getExistingDirectory(self, "Get Local Cache Directory", self._homeSrcDir)
         if isinstance(local_cache_dir, tuple):
             local_cache_dir = local_cache_dir[0]
 
@@ -94,7 +95,7 @@ class DataDownloadDialog(QDialog):
         # self.ui.lineEdit_localSpiceDir.setText(local_cache_dir)
 
     def do_change_data_access_mode(self):
-        """ Change data access mode between downloading from server and local
+        """Change data access mode between downloading from server and local
         Event handling methods
         :return:
         """
@@ -119,13 +120,12 @@ class DataDownloadDialog(QDialog):
         #     self._allowDownload = True
 
     def do_download_spice_data(self):
-        """ Download SPICE data
+        """Download SPICE data
         :return:
         """
         # get experiment number
         exp_no = self._expNumber
-        assert isinstance(exp_no, int), 'Experiment number {0} must be an integer but not a {1}.' \
-                                        ''.format(exp_no, type(exp_no))
+        assert isinstance(exp_no, int), "Experiment number {0} must be an integer but not a {1}." "".format(exp_no, type(exp_no))
 
         # Check scans to download
         scan_list_str = str(self.ui.lineEdit_downloadScans.text())
@@ -139,7 +139,7 @@ class DataDownloadDialog(QDialog):
             # Get all scans
             server_url = str(self.ui.lineEdit_url.text())
             scan_list = hb3a_util.get_scans_list(server_url, exp_no, return_list=True)
-        self.pop_one_button_dialog('Going to download scans %s.' % str(scan_list))
+        self.pop_one_button_dialog("Going to download scans %s." % str(scan_list))
 
         # Check location
         destination_dir = str(self.ui.lineEdit_localSrcDir.text())
@@ -147,7 +147,7 @@ class DataDownloadDialog(QDialog):
         if status is False:
             self.pop_one_button_dialog(error_message)
         else:
-            self.pop_one_button_dialog('Spice files will be downloaded to %s.' % destination_dir)
+            self.pop_one_button_dialog("Spice files will be downloaded to %s." % destination_dir)
 
         # Set up myControl for downloading data
         self._myControl.set_exp_number(exp_no)
@@ -162,14 +162,14 @@ class DataDownloadDialog(QDialog):
         self._myControl.download_data_set(scan_list)
 
     def do_list_scans(self):
-        """ List all scans available and show the information in a pop-up dialog
+        """List all scans available and show the information in a pop-up dialog
         :return:
         """
         # Experiment number
         exp_no = int(self.ui.lineEdit_exp.text())
 
         access_mode = str(self.ui.comboBox_mode.currentText())
-        if access_mode == 'Local':
+        if access_mode == "Local":
             spice_dir = str(self.ui.lineEdit_localSpiceDir.text())
             message = hb3a_util.get_scans_list_local_disk(spice_dir, exp_no)
         else:
@@ -179,8 +179,7 @@ class DataDownloadDialog(QDialog):
         self.pop_one_button_dialog(message)
 
     def do_test_url(self):
-        """ Test whether the root URL provided specified is good
-        """
+        """Test whether the root URL provided specified is good"""
         url = str(self.ui.lineEdit_url.text())
 
         url_is_good, err_msg = hb3a_util.check_url(url)
@@ -194,20 +193,20 @@ class DataDownloadDialog(QDialog):
         return url_is_good
 
     def pop_one_button_dialog(self, message):
-        """ Pop up a one-button dialog
+        """Pop up a one-button dialog
         :param message:
         :return:
         """
-        assert isinstance(message, str), 'Input message %s must a string but not %s.' \
-                                         '' % (str(message), type(message))
-        QMessageBox.information(self, '4-circle Data Reduction', message)
+        assert isinstance(message, str), "Input message %s must a string but not %s." "" % (str(message), type(message))
+        QMessageBox.information(self, "4-circle Data Reduction", message)
 
     def set_experiment_number(self, exp_number):
         """set the experiment number
         :param exp_number:
         :return:
         """
-        assert isinstance(exp_number, int), 'Experiment number {0} to set to download dialog must be an integer but ' \
-                                            'not a {1}.'.format(exp_number, type(exp_number))
+        assert isinstance(exp_number, int), "Experiment number {0} to set to download dialog must be an integer but " "not a {1}.".format(
+            exp_number, type(exp_number)
+        )
 
         self._expNumber = exp_number

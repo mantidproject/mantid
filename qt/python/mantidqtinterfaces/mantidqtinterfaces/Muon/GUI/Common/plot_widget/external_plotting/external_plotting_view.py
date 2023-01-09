@@ -15,7 +15,6 @@ from mantid.plots.utility import legend_set_draggable
 
 
 class ExternalPlottingView(object):
-
     def __init__(self):
         self.number_of_axes = 0
 
@@ -74,13 +73,15 @@ class ExternalPlottingView(object):
         external_axes = fig_window.axes
         for plot_info in data:
             external_axis = external_axes[plot_info.axis]
-            external_axis.plot(plot_info.workspace, specNum=plot_info.specNum, autoscale_on_update=True,
-                               distribution=not plot_info.normalised)
+            external_axis.plot(
+                plot_info.workspace, specNum=plot_info.specNum, autoscale_on_update=True, distribution=not plot_info.normalised
+            )
             legend_set_draggable(external_axis.legend(), True)
         fig_window.show()
 
     def _create_external_workbench_fig_window(self):
         from mantid.plots.plotfunctions import get_plot_fig
+
         external_fig, _ = get_plot_fig(axes_num=self.number_of_axes)
         return external_fig
 
@@ -100,21 +101,21 @@ class ExternalPlottingView(object):
     # private Mantidplot methods
     def _plot_data_mantidplot(self, fig_window, data):
         from mantidplot import plotSpectrum
+
         for i, plot_info in enumerate(data):
             distr_state = self._get_distr_state_mantid_plot(plot_info.normalised)
             if self.number_of_axes == 1:
-                plotSpectrum(plot_info.workspace, plot_info.specNum - 1,
-                             distribution=distr_state, window=fig_window)
+                plotSpectrum(plot_info.workspace, plot_info.specNum - 1, distribution=distr_state, window=fig_window)
             else:
                 lay = fig_window.layer(plot_info.axis + 1)
                 fig_window.setActiveLayer(lay)
-                plotSpectrum(plot_info.workspace, plot_info.specNum - 1,
-                             distribution=distr_state, window=fig_window, type=0)
+                plotSpectrum(plot_info.workspace, plot_info.specNum - 1, distribution=distr_state, window=fig_window, type=0)
         if self.number_of_axes != 1:
             fig_window.arrangeLayers(False, False)
 
     def _create_external_mantidplot_fig_window(self):
         from mantidplot import newGraph
+
         if self.number_of_axes == 1:
             graph_window = newGraph(layers=1)
         else:
@@ -124,6 +125,7 @@ class ExternalPlottingView(object):
 
     def _create_tiled_external_mantidplot_fig_window(self):
         from mantidplot import newGraph
+
         ncols = ceil(sqrt(self.number_of_axes))
         nrows = ceil(self.number_of_axes / ncols)
         graph_window = newGraph()
@@ -157,6 +159,7 @@ class ExternalPlottingView(object):
     @staticmethod
     def _set_mantid_plot_axis_display(window, internal_axis):
         from mantidplot import Layer
+
         xlim = internal_axis.get_xlim()
         title = internal_axis.get_title()
         ylim = internal_axis.get_ylim()
@@ -173,6 +176,7 @@ class ExternalPlottingView(object):
     @staticmethod
     def _get_distr_state_mantid_plot(is_normalised):
         from mantidplot import DistrFlag
+
         if is_normalised:
             return DistrFlag.DistrTrue
         else:

@@ -10,14 +10,14 @@ import sys
 
 from mantid.kernel import config, logger
 
-if config['default.facility'] != 'ILL':
-    logger.error('The scan viewer is enabled only if the facility is set to ILL.')
+if config["default.facility"] != "ILL":
+    logger.error("The scan viewer is enabled only if the facility is set to ILL.")
 else:
     from mantidqt.gui_helper import get_qapplication
     from mantidqtinterfaces.simplescanviewer.presenter import SimpleScanViewerPresenter
 
     app, within_mantid = get_qapplication()
-    if 'SimpleScanViewer' not in globals():
+    if "SimpleScanViewer" not in globals():
         scan_viewer = SimpleScanViewerPresenter()
     else:
         scan_viewer = globals()["SimpleScanViewer"]

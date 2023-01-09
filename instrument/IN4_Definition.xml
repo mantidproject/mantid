@@ -27,7 +27,7 @@ valid-from="1900-01-31 23:59:59" last-modified="2017-02-02 10:35:45">
   <type name="fermi_chopper" is="Source" />
   <!-- Monitors -->
   <idlist idname="monitor_ids">
-    <id val="0" />
+    <id val="100000" />
   </idlist>
   <type name="monitor" is="Monitor">
     <!-- This may not be the real monitor shape. -->

@@ -59,8 +59,12 @@ class LoadRunWidgetView(QtWidgets.QWidget):
 
         self.run_edit = QtWidgets.QLineEdit(self)
         self.run_edit.setToolTip(
-            "Enter run number using " + run_utils.delimiter
-            + " and " + run_utils.range_separator + " as delimiter and range-separator respectively")
+            "Enter run number using "
+            + run_utils.delimiter
+            + " and "
+            + run_utils.range_separator
+            + " as delimiter and range-separator respectively"
+        )
         self.run_edit.setObjectName("runEdit")
 
         self.horizontal_layout = QtWidgets.QHBoxLayout(self)

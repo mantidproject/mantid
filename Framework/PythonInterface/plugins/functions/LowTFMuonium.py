@@ -11,16 +11,14 @@ import numpy as np
 
 
 class LowTFMuonium(IFunction1D):
-
     def category(self):
         return "Muon\\MuonSpecific"
 
     def init(self):
-        self.declareParameter("A0", 0.2, 'Amplitude')
-        self.declareParameter("Field", 0.1, 'Magnetic Field (G)')
-        self.declareParameter(
-            "A", 0.2, 'Isotropic hyperfine coupling constant (MHz)')
-        self.declareParameter("Phi", 0.0, 'Phase (rad)')
+        self.declareParameter("A0", 0.2, "Amplitude")
+        self.declareParameter("Field", 0.1, "Magnetic Field (G)")
+        self.declareParameter("A", 0.2, "Isotropic hyperfine coupling constant (MHz)")
+        self.declareParameter("Phi", 0.0, "Phase (rad)")
 
     def function1D(self, x):
         A0 = self.getParameterValue("A0")
@@ -32,9 +30,9 @@ class LowTFMuonium(IFunction1D):
         fcut = 10**32
         k = (gm + ge) * B / A
         d = (ge - gm) / (gm + ge)
-        delta = k / np.sqrt(1 + k ** 2)
+        delta = k / np.sqrt(1 + k**2)
         E1 = A / 4 * (1 + 2 * d * k)
-        E2 = A / 4 * (-1 + 2 * np.sqrt(1 + k ** 2))
+        E2 = A / 4 * (-1 + 2 * np.sqrt(1 + k**2))
         E3 = A / 4 * (1 - 2 * d * k)
         f12 = E1 - E2
         f23 = E2 - E3

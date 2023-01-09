@@ -8,7 +8,6 @@ from qtpy import QtWidgets
 
 
 class EAAutoPopupTable(QtWidgets.QWidget):
-
     def __init__(self, table_name=""):
         super(EAAutoPopupTable, self).__init__(None)
         self.table = QtWidgets.QTableWidget(self)

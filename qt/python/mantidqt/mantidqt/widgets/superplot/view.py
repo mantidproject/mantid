@@ -6,8 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-from qtpy.QtWidgets import QDockWidget, QHeaderView, QTreeWidgetItem, \
-                           QToolButton
+from qtpy.QtWidgets import QDockWidget, QHeaderView, QTreeWidgetItem, QToolButton
 from qtpy.QtGui import QColor
 from qtpy.QtCore import *
 from qtpy import uic
@@ -20,6 +19,7 @@ class WorkspaceItemSignals(QObject):
     """
     Thrown when the delete button is pressed.
     """
+
     sig_del_clicked = Signal(str)
 
     def __init__(self):
@@ -31,6 +31,7 @@ class WorkspaceItem(QTreeWidgetItem):
     """
     Name of the workspace represented by this item.
     """
+
     _workspace_name = None
 
     """
@@ -52,9 +53,7 @@ class WorkspaceItem(QTreeWidgetItem):
         self._del_button.setText("-")
         self._del_button.setToolTip("Remove the workspace from the list")
         self.signals = WorkspaceItemSignals()
-        self._del_button.clicked.connect(
-                lambda c : self.signals.sig_del_clicked.emit(
-                    self._workspace_name))
+        self._del_button.clicked.connect(lambda c: self.signals.sig_del_clicked.emit(self._workspace_name))
         self.treeWidget().setItemWidget(self, 1, self._del_button)
         self.treeWidget().resizeColumnToContents(1)
 
@@ -76,6 +75,7 @@ class SpectrumItemSignals(QObject):
         str: workspace name
         int: spectrum index
     """
+
     sig_del_clicked = Signal(str, int)
 
     def __init__(self):
@@ -87,6 +87,7 @@ class SpectrumItem(QTreeWidgetItem):
     """
     Index of the spectrum represented by this item.
     """
+
     _spectrum_index = None
 
     """
@@ -114,9 +115,7 @@ class SpectrumItem(QTreeWidgetItem):
         self._del_button.setText("-")
         self._del_button.setToolTip("Remove from the list")
         self.signals = SpectrumItemSignals()
-        self._del_button.clicked.connect(
-                 lambda c : self.signals.sig_del_clicked.emit(
-                     self._workspace_name, self._spectrum_index))
+        self._del_button.clicked.connect(lambda c: self.signals.sig_del_clicked.emit(self._workspace_name, self._spectrum_index))
         self.treeWidget().setItemWidget(self, 1, self._del_button)
         self.treeWidget().resizeColumnToContents(1)
 
@@ -159,10 +158,7 @@ class SuperplotViewSide(QDockWidget):
         ws_list.header().setSectionResizeMode(QHeaderView.Stretch)
         ws_list.header().setSectionResizeMode(1, QHeaderView.Interactive)
         ws_list.setMinimumSize(QSize(size0 + size1, 0))
-        self.workspaceSelector.setWorkspaceTypes(["Workspace2D",
-                                                  "WorkspaceGroup",
-                                                  "EventWorkspace",
-                                                  "RebinnedOutput"])
+        self.workspaceSelector.setWorkspaceTypes(["Workspace2D", "WorkspaceGroup", "EventWorkspace", "RebinnedOutput"])
         self.setAcceptDrops(True)
 
     def dragEnterEvent(self, event):
@@ -237,22 +233,16 @@ class SuperplotView:
 
         side = self._side_view
         side.visibilityChanged.connect(self._presenter.on_visibility_changed)
-        side.normaliseCheckbox.clicked.connect(
-                self._presenter.on_normalise_checked)
+        side.normaliseCheckbox.clicked.connect(self._presenter.on_normalise_checked)
         side.addButton.clicked.connect(self._presenter.on_add_button_clicked)
-        side.workspacesList.itemSelectionChanged.connect(
-                self._presenter.on_workspace_selection_changed)
+        side.workspacesList.itemSelectionChanged.connect(self._presenter.on_workspace_selection_changed)
         side.resized.connect(self._presenter.on_resize)
         side.drop.connect(self._presenter.on_drop)
         bottom = self._bottom_view
-        bottom.holdButton.clicked.connect(
-                self._presenter.on_hold_button_clicked)
-        bottom.spectrumSlider.valueChanged.connect(
-                self._presenter.on_spectrum_slider_moved)
-        bottom.spectrumSpinBox.valueChanged.connect(
-                self._presenter.on_spectrum_spin_box_changed)
-        bottom.modeComboBox.currentTextChanged.connect(
-                self._presenter.on_mode_changed)
+        bottom.holdButton.clicked.connect(self._presenter.on_hold_button_clicked)
+        bottom.spectrumSlider.valueChanged.connect(self._presenter.on_spectrum_slider_moved)
+        bottom.spectrumSpinBox.valueChanged.connect(self._presenter.on_spectrum_spin_box_changed)
+        bottom.modeComboBox.currentTextChanged.connect(self._presenter.on_mode_changed)
         bottom.resized.connect(self._presenter.on_resize)
 
     def show(self):
@@ -332,8 +322,7 @@ class SuperplotView:
             label (str): new label
             color (str): new color (#RRGGBB)
         """
-        ws_item = self._side_view.workspacesList.findItems(ws_name,
-                                                           Qt.MatchExactly, 0)
+        ws_item = self._side_view.workspacesList.findItems(ws_name, Qt.MatchExactly, 0)
         if not ws_item:
             return
         ws_item = ws_item[0]
@@ -358,8 +347,7 @@ class SuperplotView:
         self._side_view.workspacesList.clear()
         for name in names:
             item = WorkspaceItem(self._side_view.workspacesList, name)
-            item.signals.sig_del_clicked.connect(
-                    self._presenter.on_del_button_clicked)
+            item.signals.sig_del_clicked.connect(self._presenter.on_del_button_clicked)
             item.setText(0, name)
         self._side_view.workspacesList.blockSignals(False)
 
@@ -372,13 +360,11 @@ class SuperplotView:
             nums (list(int)): list of the spectrum indexes
         """
         self._side_view.workspacesList.blockSignals(True)
-        ws_item = self._side_view.workspacesList.findItems(
-                name, Qt.MatchExactly, 0)[0]
+        ws_item = self._side_view.workspacesList.findItems(name, Qt.MatchExactly, 0)[0]
         ws_item.takeChildren()
         for num in nums:
             item = SpectrumItem(ws_item, num)
-            item.signals.sig_del_clicked.connect(
-                    self._presenter.on_del_spectrum_button_clicked)
+            item.signals.sig_del_clicked.connect(self._presenter.on_del_spectrum_button_clicked)
             item.setText(0, str(num))
         self._side_view.workspacesList.expandAll()
         self._side_view.workspacesList.blockSignals(False)
@@ -393,9 +379,7 @@ class SuperplotView:
         Returns:
             list(int): list of the spectrum indexes
         """
-        ws_item = self._side_view.workspacesList.findItems(name,
-                                                           Qt.MatchExactly,
-                                                           0)
+        ws_item = self._side_view.workspacesList.findItems(name, Qt.MatchExactly, 0)
         if ws_item:
             ws_item = ws_item[0]
         else:

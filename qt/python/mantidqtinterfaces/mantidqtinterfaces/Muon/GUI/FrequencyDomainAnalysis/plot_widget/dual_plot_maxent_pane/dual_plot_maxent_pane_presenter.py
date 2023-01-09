@@ -9,12 +9,11 @@ from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, Gener
 from mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.frequency_context import FREQ, FIELD, GAUSS, MHz
 
 
-FREQ_X_LABEL = f'Maxent ({MHz}) and Counts'
-FIELD_X_LABEL =  f'Maxent ({GAUSS}) and Counts'
+FREQ_X_LABEL = f"Maxent ({MHz}) and Counts"
+FIELD_X_LABEL = f"Maxent ({GAUSS}) and Counts"
 
 
 class DualPlotMaxentPanePresenter(BasePanePresenter):
-
     def __init__(self, view, model, context, figure_presenter):
         super().__init__(view, model, context, figure_presenter)
         # view set up
@@ -33,18 +32,16 @@ class DualPlotMaxentPanePresenter(BasePanePresenter):
         # private memeber
         self._maxent_ws_name = None
         # connections
-        self.method_changed =  GenericObserverWithArgPassing(self.change_time_plot)
-        self.period_changed =  GenericObserverWithArgPassing(self.change_period)
-        self.new_data_observer = GenericObserverWithArgPassing(
-            self.handle_maxent_data_updated)
-        self.reconstructed_data_observer = GenericObserverWithArgPassing(
-            self.handle_reconstructed_data_updated)
+        self.method_changed = GenericObserverWithArgPassing(self.change_time_plot)
+        self.period_changed = GenericObserverWithArgPassing(self.change_period)
+        self.new_data_observer = GenericObserverWithArgPassing(self.handle_maxent_data_updated)
+        self.reconstructed_data_observer = GenericObserverWithArgPassing(self.handle_reconstructed_data_updated)
         self.instrument_observer = GenericObserver(self.clear)
         self.update_freq_units = GenericObservable()
         self.update_x_label_observer = GenericObserver(self._update_pane)
 
     def change_time_plot(self, method):
-        self._model.set_if_groups(method=="Groups")
+        self._model.set_if_groups(method == "Groups")
         self.clear()
 
     def change_period(self, period):

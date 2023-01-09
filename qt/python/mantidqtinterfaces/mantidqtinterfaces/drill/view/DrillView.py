@@ -142,13 +142,13 @@ class DrillView(QMainWindow):
         self.assistant_process = QProcess(self)
 
         # setup ui
-        uic.loadUi(os.path.join(self.here, 'ui/main.ui'), self)
+        uic.loadUi(os.path.join(self.here, "ui/main.ui"), self)
         self.setup_header()
         self.setup_table()
         self.setFocus()
 
         self.buffer = list()  # for cells cut-copy-paste
-        self.bufferShape = tuple() # (n_rows, n_columns) shape of self.buffer
+        self.bufferShape = tuple()  # (n_rows, n_columns) shape of self.buffer
 
         self._presenter = DrillPresenter(self, self.table)
 
@@ -178,11 +178,9 @@ class DrillView(QMainWindow):
         self.instrumentselector = instrumentselector.InstrumentSelector(self)
         self.instrumentselector.setToolTip("Instrument")
         self.toolbar.insertWidget(0, self.instrumentselector, 0, Qt.AlignLeft)
-        self.instrumentselector.instrumentSelectionChanged.connect(
-                self.instrumentChanged.emit)
+        self.instrumentselector.instrumentSelectionChanged.connect(self.instrumentChanged.emit)
 
-        self.modeSelector.currentTextChanged.connect(
-                self.acquisitionModeChanged.emit)
+        self.modeSelector.currentTextChanged.connect(self.acquisitionModeChanged.emit)
 
         self.cycleNumber.editingFinished.connect(self._changeCycleOrExperiment)
         self.experimentId.editingFinished.connect(self._changeCycleOrExperiment)
@@ -273,7 +271,7 @@ class DrillView(QMainWindow):
         """
         cycle = self.cycleNumber.text()
         exp = self.experimentId.text()
-        if (cycle and exp):
+        if cycle and exp:
             self.cycleAndExperimentChanged.emit(cycle, exp)
 
     def copySelectedCells(self):
@@ -287,8 +285,7 @@ class DrillView(QMainWindow):
             return
         shape = self.table.getSelectionShape()
         if shape == (0, 0):
-            QMessageBox.warning(self, "Selection error",
-                                "Please select adjacent cells")
+            QMessageBox.warning(self, "Selection error", "Please select adjacent cells")
             return
         tmpBufferShape = shape
         tmpBuffer = list()
@@ -333,19 +330,21 @@ class DrillView(QMainWindow):
                 self.table.setCellContents(cell[0], cell[1], self.buffer[0])
         elif shape == self.bufferShape and shape != (0, 0):
             for i in range(len(cells)):
-                self.table.setCellContents(cells[i][0], cells[i][1],
-                                           self.buffer[i])
-        elif ((self.bufferShape[0] == 1) and (shape[1] == self.bufferShape[1])
-                and (shape != (0, 0))):
+                self.table.setCellContents(cells[i][0], cells[i][1], self.buffer[i])
+        elif (self.bufferShape[0] == 1) and (shape[1] == self.bufferShape[1]) and (shape != (0, 0)):
             for i in range(len(cells)):
-                self.table.setCellContents(cells[i][0], cells[i][1],
-                                           self.buffer[int(i / shape[0])])
+                self.table.setCellContents(cells[i][0], cells[i][1], self.buffer[int(i / shape[0])])
         elif self.buffer and shape != self.bufferShape and shape != (0, 0):
-            QMessageBox.warning(self, "Paste error",
-                                "The selection does not correspond to the "
-                                + "clipboard contents ("
-                                + str(self.bufferShape[0]) + " rows * "
-                                + str(self.bufferShape[1]) + " columns)")
+            QMessageBox.warning(
+                self,
+                "Paste error",
+                "The selection does not correspond to the "
+                + "clipboard contents ("
+                + str(self.bufferShape[0])
+                + " rows * "
+                + str(self.bufferShape[1])
+                + " columns)",
+            )
 
     def eraseSelectedCells(self):
         """
@@ -393,7 +392,8 @@ class DrillView(QMainWindow):
         Popup the help window.
         """
         from mantidqt.gui_helper import show_interface_help
-        show_interface_help("DrILL",self.assistant_process,area="ILL")
+
+        show_interface_help("DrILL", self.assistant_process, area="ILL")
 
     def keyPressEvent(self, event):
         """
@@ -402,28 +402,21 @@ class DrillView(QMainWindow):
         Args:
             event (QPressEvent): the key event
         """
-        if (event.key() == Qt.Key_C
-                and event.modifiers() == Qt.ControlModifier):
+        if event.key() == Qt.Key_C and event.modifiers() == Qt.ControlModifier:
             self.copySelectedCells()
-        elif (event.key() == Qt.Key_X
-                and event.modifiers() == Qt.ControlModifier):
+        elif event.key() == Qt.Key_X and event.modifiers() == Qt.ControlModifier:
             self.cutSelectedCells()
-        elif (event.key() == Qt.Key_V
-                and event.modifiers() == Qt.ControlModifier):
+        elif event.key() == Qt.Key_V and event.modifiers() == Qt.ControlModifier:
             self.pasteCells()
-        elif (event.key() == Qt.Key_Delete):
+        elif event.key() == Qt.Key_Delete:
             self.eraseSelectedCells()
-        elif (event.key() == Qt.Key_G
-                and event.modifiers() == Qt.ControlModifier):
+        elif event.key() == Qt.Key_G and event.modifiers() == Qt.ControlModifier:
             self.groupSelectedRows.emit()
-        elif (event.key() == Qt.Key_G
-                and event.modifiers() == Qt.ControlModifier | Qt.ShiftModifier):
+        elif event.key() == Qt.Key_G and event.modifiers() == Qt.ControlModifier | Qt.ShiftModifier:
             self.ungroupSelectedRows.emit()
-        elif (event.key() == Qt.Key_M
-                and event.modifiers() == Qt.ControlModifier):
+        elif event.key() == Qt.Key_M and event.modifiers() == Qt.ControlModifier:
             self.setMasterRow.emit()
-        elif (event.key() == Qt.Key_M
-                and event.modifiers() == Qt.ControlModifier | Qt.ShiftModifier):
+        elif event.key() == Qt.Key_M and event.modifiers() == Qt.ControlModifier | Qt.ShiftModifier:
             self.unsetMasterRow.emit()
 
     def show_directory_manager(self):
@@ -448,9 +441,7 @@ class DrillView(QMainWindow):
         """
         self.setDisabled(True)
         dialog = DrillExportDialog(self)
-        dialog.finished.connect(
-                lambda : self.setDisabled(False)
-                )
+        dialog.finished.connect(lambda: self.setDisabled(False))
         self._presenter.onShowExportDialog(dialog)
         dialog.show()
 
@@ -529,8 +520,7 @@ class DrillView(QMainWindow):
             self.table.setColumnHeaderToolTips(tooltips)
         for i in range(len(columns)):
             self.table.setColumnHidden(i, False)
-        self.menuAddRemoveColumn.aboutToShow.connect(
-                lambda : self.setAddRemoveColumnMenu(columns))
+        self.menuAddRemoveColumn.aboutToShow.connect(lambda: self.setAddRemoveColumnMenu(columns))
         self.table.resizeColumnsToContents()
 
     def setAddRemoveColumnMenu(self, columns):
@@ -554,8 +544,7 @@ class DrillView(QMainWindow):
                 action.setIcon(icons.get_icon("mdi.check"))
             self.menuAddRemoveColumn.addAction(action)
 
-        self.menuAddRemoveColumn.triggered.connect(
-                lambda action: self.table.toggleColumnVisibility(action.text()))
+        self.menuAddRemoveColumn.triggered.connect(lambda action: self.table.toggleColumnVisibility(action.text()))
 
     def set_progress(self, n, nmax):
         """
@@ -615,21 +604,18 @@ class DrillView(QMainWindow):
                                    parameters that the view can deal with
         """
         # folded columns
-        if ("FoldedColumns" in visualSettings):
+        if "FoldedColumns" in visualSettings:
             if isinstance(visualSettings["FoldedColumns"], list):
                 self.table.setFoldedColumns(visualSettings["FoldedColumns"])
             else:
-                self.table.setFoldedColumns(
-                        [c for c in visualSettings["FoldedColumns"]
-                            if visualSettings["FoldedColumns"][c]]
-                        )
+                self.table.setFoldedColumns([c for c in visualSettings["FoldedColumns"] if visualSettings["FoldedColumns"][c]])
 
         # hidden columns
-        if ("HiddenColumns" in visualSettings):
+        if "HiddenColumns" in visualSettings:
             self.table.setHiddenColumns(visualSettings["HiddenColumns"])
 
         # columns order
-        if ("ColumnsOrder" in visualSettings):
+        if "ColumnsOrder" in visualSettings:
             self.table.setColumnsOrder(visualSettings["ColumnsOrder"])
 
     def getVisualSettings(self):

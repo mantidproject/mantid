@@ -4,23 +4,24 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=C0103,W0403
+# pylint: disable=C0103,W0403
 import sys
 import numpy as np
-from qtpy.QtWidgets import (QMainWindow)
+from qtpy.QtWidgets import QMainWindow
 from mantid.kernel import Logger
+
 try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
-    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    Logger("HFIR_4Circle_Reduction").information("Using legacy ui importer")
     from mantidplot import load_ui
-from qtpy.QtWidgets import (QVBoxLayout)
+from qtpy.QtWidgets import QVBoxLayout
 
 
 from mantidqtinterfaces.HFIR_4Circle_Reduction.mplgraphicsview3d import MplPlot3dCanvas
 from mantidqtinterfaces.HFIR_4Circle_Reduction import guiutility
 
-__author__ = 'wzz'
+__author__ = "wzz"
 
 
 class Plot3DWindow(QMainWindow):
@@ -37,16 +38,16 @@ class Plot3DWindow(QMainWindow):
         # Init
         QMainWindow.__init__(self, parent)
 
-        ui_path ="View3DWidget.ui"
+        ui_path = "View3DWidget.ui"
         self.ui = load_ui(__file__, ui_path, baseinstance=self)
         self._promote_widgets()
 
         # Initialize widgets
-        self.ui.lineEdit_baseColorRed.setText('0.5')
-        self.ui.lineEdit_baseColorGreen.setText('0.5')
-        self.ui.lineEdit_baseColorBlue.setText('0.5')
-        self.ui.lineEdit_countsThresholdLower.setText('0')
-        self.ui.comboBox_scans.addItem('unclassified')
+        self.ui.lineEdit_baseColorRed.setText("0.5")
+        self.ui.lineEdit_baseColorGreen.setText("0.5")
+        self.ui.lineEdit_baseColorBlue.setText("0.5")
+        self.ui.lineEdit_countsThresholdLower.setText("0")
+        self.ui.comboBox_scans.addItem("unclassified")
 
         # Event handling
         self.ui.pushButton_plot3D.clicked.connect(self.do_plot_3d)
@@ -64,8 +65,8 @@ class Plot3DWindow(QMainWindow):
 
         # dictionary for group control, key = str(scan), value = list of data keys
         self._groupDict = dict()
-        self._currSessionName = 'unclassified'
-        self._groupDict['unclassified'] = []
+        self._currSessionName = "unclassified"
+        self._groupDict["unclassified"] = []
 
         return
 
@@ -78,10 +79,10 @@ class Plot3DWindow(QMainWindow):
         return
 
     def close_session(self):
-        """ Close session
+        """Close session
         :return:
         """
-        self._currSessionName = 'unclassified'
+        self._currSessionName = "unclassified"
 
         return
 
@@ -95,7 +96,7 @@ class Plot3DWindow(QMainWindow):
 
         # store original one and clear
         if session_key in self._groupDict:
-            self._groupDict['unclassified'].extend(self._groupDict[session_key])
+            self._groupDict["unclassified"].extend(self._groupDict[session_key])
             self._groupDict[session_key] = []
             self._currSessionName = session_key
 
@@ -115,13 +116,13 @@ class Plot3DWindow(QMainWindow):
         return
 
     def do_check_counts(self):
-        """ Check the intensity and count how many data points are above threshold of specified data-key
+        """Check the intensity and count how many data points are above threshold of specified data-key
         :return:
         """
         # get threshold (upper and lower)
-        status, ret_obj = guiutility.parse_integers_editors([self.ui.lineEdit_countsThresholdLower,
-                                                             self.ui.lineEdit_countsThresholdUpper],
-                                                            allow_blank=True)
+        status, ret_obj = guiutility.parse_integers_editors(
+            [self.ui.lineEdit_countsThresholdLower, self.ui.lineEdit_countsThresholdUpper], allow_blank=True
+        )
         assert status, ret_obj
         threshold_lower, threshold_upper = ret_obj
         if threshold_lower is None:
@@ -132,8 +133,7 @@ class Plot3DWindow(QMainWindow):
 
         # get data key
         data_key = int(self.ui.comboBox_dataKey.currentText())
-        assert data_key in self._dataKeyList, 'Data key %d does not exist in ' \
-                                              'key list %s.' % (data_key, str(self._dataKeyList))
+        assert data_key in self._dataKeyList, "Data key %d does not exist in " "key list %s." % (data_key, str(self._dataKeyList))
 
         # get intensity
         points, intensity_array = self.ui.graphicsView.get_data(data_key)
@@ -146,7 +146,7 @@ class Plot3DWindow(QMainWindow):
         # END-FOR
 
         # set value
-        self.ui.label_numberDataPoints.setText('%d' % num_within_threshold)
+        self.ui.label_numberDataPoints.setText("%d" % num_within_threshold)
 
         return
 
@@ -180,7 +180,7 @@ class Plot3DWindow(QMainWindow):
         :return:
         """
         # check
-        assert isinstance(points, np.ndarray) and points.shape[1] == 3, 'Shape is %s.' % str(points.shape)
+        assert isinstance(points, np.ndarray) and points.shape[1] == 3, "Shape is %s." % str(points.shape)
         assert isinstance(intensities, np.ndarray) and len(points) == len(intensities)
 
         data_key = self.ui.graphicsView.import_3d_data(points, intensities)
@@ -198,9 +198,9 @@ class Plot3DWindow(QMainWindow):
         :return:
         """
         # color: get R, G, B
-        status, rgb_values = guiutility.parse_float_editors([self.ui.lineEdit_baseColorRed,
-                                                             self.ui.lineEdit_baseColorGreen,
-                                                             self.ui.lineEdit_baseColorBlue])
+        status, rgb_values = guiutility.parse_float_editors(
+            [self.ui.lineEdit_baseColorRed, self.ui.lineEdit_baseColorGreen, self.ui.lineEdit_baseColorBlue]
+        )
         assert status
 
         # set the color to get change
@@ -209,9 +209,9 @@ class Plot3DWindow(QMainWindow):
         change_b = self.ui.checkBox_changeBlue.isChecked()
 
         # get threshold
-        status, thresholds = guiutility.parse_integers_editors([self.ui.lineEdit_countsThresholdLower,
-                                                                self.ui.lineEdit_countsThresholdUpper],
-                                                               allow_blank=True)
+        status, thresholds = guiutility.parse_integers_editors(
+            [self.ui.lineEdit_countsThresholdLower, self.ui.lineEdit_countsThresholdUpper], allow_blank=True
+        )
         assert status, thresholds
         if thresholds[0] is None:
             thresholds[0] = 0
@@ -228,7 +228,7 @@ class Plot3DWindow(QMainWindow):
         return
 
     def evt_change_scan(self):
-        """ Handling the event that the scan number is changed
+        """Handling the event that the scan number is changed
         :return:
         """
         # get session name
@@ -254,8 +254,7 @@ class Plot3DWindow(QMainWindow):
         :return:
         """
         # Check
-        assert isinstance(data_key, int), 'Date key %s must be an integer' \
-                                          ' but not %s' % (str(data_key), str(type(data_key)))
+        assert isinstance(data_key, int), "Date key %s must be an integer" " but not %s" % (str(data_key), str(type(data_key)))
         assert isinstance(base_color, list)
         assert isinstance(thresholds, list) and len(thresholds) == 2
         assert isinstance(change_color, list)
@@ -310,7 +309,7 @@ class Plot3DWindow(QMainWindow):
 
 
 def filter_points_by_intensity(points, intensities, lower_boundary, upper_boundary):
-    """ Filter the data points by intensity threshold
+    """Filter the data points by intensity threshold
     :param points:
     :param intensities:
     :param lower_boundary:
@@ -329,8 +328,8 @@ def filter_points_by_intensity(points, intensities, lower_boundary, upper_bounda
     # END-FOR
 
     # initialize output arrays
-    new_points = np.ndarray(shape=(new_array_size, 3), dtype='float')
-    new_intensities = np.ndarray(shape=(new_array_size,), dtype='float')
+    new_points = np.ndarray(shape=(new_array_size, 3), dtype="float")
+    new_intensities = np.ndarray(shape=(new_array_size,), dtype="float")
     new_index = 0
     for raw_index in range(raw_array_size):
         if lower_boundary <= intensities[raw_index] <= upper_boundary:

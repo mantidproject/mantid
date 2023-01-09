@@ -7,8 +7,7 @@
 
 import unittest
 
-from mantidqtinterfaces.dns_powder_tof.data_structures.dns_treeitem\
-    import DNSTreeItem
+from mantidqtinterfaces.dns_powder_tof.data_structures.dns_treeitem import DNSTreeItem
 
 
 class DNSTreeItemTest(unittest.TestCase):
@@ -16,8 +15,16 @@ class DNSTreeItemTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.data = [
-            'number', 'det_rot', 'sample_rot', 'field', 'temperature',
-            'sample', 'time', 'tof_channels', 'tof_channel_width', 'filepath'
+            "number",
+            "det_rot",
+            "sample_rot",
+            "field",
+            "temperature",
+            "sample",
+            "time",
+            "tof_channels",
+            "tof_channel_width",
+            "filepath",
         ]
         cls.item = DNSTreeItem(cls.data, parent=None)
 
@@ -66,40 +73,40 @@ class DNSTreeItemTest(unittest.TestCase):
 
     def test_data(self):
         testv = self.item.get_tree_item_data()
-        self.assertEqual(testv, [
-            'number', 'det_rot', 'sample_rot', 'field', 'temperature',
-            'sample', 'time', 'tof_channels', 'tof_channel_width', 'filepath'
-        ])
+        self.assertEqual(
+            testv,
+            ["number", "det_rot", "sample_rot", "field", "temperature", "sample", "time", "tof_channels", "tof_channel_width", "filepath"],
+        )
         testv = self.item.get_tree_item_data(100)
         self.assertIsNone(testv)
         testv = self.item.get_tree_item_data(2)
-        self.assertEqual(testv, 'sample_rot')
+        self.assertEqual(testv, "sample_rot")
 
     def test_get_sample(self):
         self.item.children_items = []
         testv = self.item.get_sample()
-        self.assertEqual(testv, 'sample')
+        self.assertEqual(testv, "sample")
         child = DNSTreeItem([1, 2, 3, 4, 5, 6])
         self.item.children_items = [child]
         testv = self.item.get_sample()
         self.assertEqual(testv, 6)
 
     def test_get_sample_type(self):
-        child = DNSTreeItem([1, 2, 3, 4, 5, '123'])
+        child = DNSTreeItem([1, 2, 3, 4, 5, "123"])
         self.item.children_items = [child]
         testv = self.item.get_sample_type()
-        self.assertEqual(testv, 'sample')
-        child = DNSTreeItem([1, 2, 3, 4, 5, 'vana'])
+        self.assertEqual(testv, "sample")
+        child = DNSTreeItem([1, 2, 3, 4, 5, "vana"])
         self.item.children_items = [child]
         testv = self.item.get_sample_type()
-        self.assertEqual(testv, 'vanadium')
+        self.assertEqual(testv, "vanadium")
 
     def test_is_type(self):
-        child = DNSTreeItem([1, 2, 3, 4, 5, 'vana'])
+        child = DNSTreeItem([1, 2, 3, 4, 5, "vana"])
         self.item.children_items = [child]
-        testv = self.item.is_type('vanadium')
+        testv = self.item.is_type("vanadium")
         self.assertTrue(testv)
-        testv = self.item.is_type('nicr')
+        testv = self.item.is_type("nicr")
         self.assertFalse(testv)
 
     def test_hasChildren(self):
@@ -130,11 +137,11 @@ class DNSTreeItemTest(unittest.TestCase):
         self.assertEqual(self.item._check_state, 0)
 
     def test_setData(self):
-        self.item.setData('x', 0)
-        self.assertEqual(self.item.item_data[0], 'x')
+        self.item.setData("x", 0)
+        self.assertEqual(self.item.item_data[0], "x")
         with self.assertRaises(IndexError):
-            self.item.setData('x', 100)
+            self.item.setData("x", 100)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

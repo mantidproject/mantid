@@ -4,45 +4,43 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 ################################################################################
 # Advanced Setup Widget
 ################################################################################
-from qtpy.QtWidgets import (QDialog, QFrame)  # noqa
-from qtpy.QtGui import (QDoubleValidator, QIntValidator)  # noqa
+from qtpy.QtWidgets import QDialog, QFrame  # noqa
+from qtpy.QtGui import QDoubleValidator, QIntValidator  # noqa
 from mantidqtinterfaces.reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.diffraction.diffraction_adv_setup_script import AdvancedSetupScript
 from mantid.kernel import MaterialBuilder
 from mantidqt.interfacemanager import InterfaceManager
 import functools
+
 try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
     from mantid.kernel import Logger
-    Logger("AdvancedSetupWidget").information('Using legacy ui importer')
+
+    Logger("AdvancedSetupWidget").information("Using legacy ui importer")
     from mantidplot import load_ui
 
 
 class AdvancedSetupWidget(BaseWidget):
-    """ Widget that presents run setup including sample run, optional vanadium run and etc.
-    """
+    """Widget that presents run setup including sample run, optional vanadium run and etc."""
+
     # Widge name
     name = "Advanced Setup"
 
     def __init__(self, parent=None, state=None, settings=None, data_type=None):
-        """ Initialization
-        """
+        """Initialization"""
         super(AdvancedSetupWidget, self).__init__(parent, state, settings, data_type=data_type)
 
         class AdvancedSetFrame(QFrame):
-            """ Define class linked to UI Frame
-            """
+            """Define class linked to UI Frame"""
 
             def __init__(self, parent=None):
                 QFrame.__init__(self, parent)
-                self.ui = load_ui(__file__,
-                                  '../../../ui/diffraction/diffraction_adv_setup.ui',
-                                  baseinstance=self)
+                self.ui = load_ui(__file__, "../../../ui/diffraction/diffraction_adv_setup.ui", baseinstance=self)
 
         self._content = AdvancedSetFrame(self)
         self._layout.addWidget(self._content)
@@ -58,8 +56,7 @@ class AdvancedSetupWidget(BaseWidget):
         return
 
     def initialize_content(self):
-        """ Initialize content/UI
-        """
+        """Initialize content/UI"""
         # Constraints/Validator
         iv4 = QIntValidator(self._content.maxchunksize_edit)
         iv4.setBottom(0)
@@ -131,10 +128,8 @@ class AdvancedSetupWidget(BaseWidget):
         # Handler for events
         # TODO - Need to add an event handler for the change of instrument and facility
 
-        self._content.material_help_button.clicked.connect(
-            functools.partial(self._show_concept_help, "Materials"))
-        self._content.absorption_help_button.clicked.connect(
-            functools.partial(self._show_concept_help, "AbsorptionAndMultipleScattering"))
+        self._content.material_help_button.clicked.connect(functools.partial(self._show_concept_help, "Materials"))
+        self._content.absorption_help_button.clicked.connect(functools.partial(self._show_concept_help, "AbsorptionAndMultipleScattering"))
 
         # Initialization for Caching options
         self._content.cache_dir_browse_1.clicked.connect(self._cache_dir_browse_1)
@@ -146,12 +141,11 @@ class AdvancedSetupWidget(BaseWidget):
         return
 
     def set_state(self, state):
-        """ Populate the UI elements with the data from the given state.
-            @param state: RunSetupScript object
+        """Populate the UI elements with the data from the given state.
+        @param state: RunSetupScript object
         """
 
-        self._content.pushdatapos_combo.setCurrentIndex(
-            self._content.pushdatapos_combo.findText(state.pushdatapositive))
+        self._content.pushdatapos_combo.setCurrentIndex(self._content.pushdatapos_combo.findText(state.pushdatapositive))
         self._content.unwrap_edit.setText(str(state.unwrapref))
         self._content.lowres_edit.setText(str(state.lowresref))
         self._content.removepromptwidth_edit.setText(str(state.removepropmppulsewidth))
@@ -171,13 +165,11 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.numberdensity_edit.setText(str(state.samplenumberdensity))
         self._content.massdensity_edit.setText(str(state.measuredmassdensity))
         if state.samplegeometry:
-            self._content.sampleheight_edit.setText(str(state.samplegeometry['Height']))
+            self._content.sampleheight_edit.setText(str(state.samplegeometry["Height"]))
         else:
             self._content.sampleheight_edit.setText("")
-        self._content.containertype_combo.setCurrentIndex(
-            self._content.containertype_combo.findText(state.containershape))
-        self._content.correctiontype_combo.setCurrentIndex(
-            self._content.correctiontype_combo.findText(state.typeofcorrection))
+        self._content.containertype_combo.setCurrentIndex(self._content.containertype_combo.findText(state.containershape))
+        self._content.correctiontype_combo.setCurrentIndex(self._content.correctiontype_combo.findText(state.typeofcorrection))
 
         self._content.preserveevents_checkbox.setChecked(state.preserveevents)
         self._content.outputfileprefix_edit.setText(state.outputfileprefix)
@@ -195,7 +187,7 @@ class AdvancedSetupWidget(BaseWidget):
         return
 
     def get_state(self):
-        """ Returns a RunSetupScript with the state of Run_Setup_Interface
+        """Returns a RunSetupScript with the state of Run_Setup_Interface
         Set up all the class parameters in RunSetupScrpt with values in the content
         """
         s = AdvancedSetupScript(self._instrument_name)
@@ -224,9 +216,9 @@ class AdvancedSetupWidget(BaseWidget):
         s.samplenumberdensity = self._content.numberdensity_edit.text()
         s.measuredmassdensity = self._content.massdensity_edit.text()
         try:
-            s.samplegeometry = {'Height': float(self._content.sampleheight_edit.text())}
+            s.samplegeometry = {"Height": float(self._content.sampleheight_edit.text())}
         except ValueError:
-            s.samplegeometry = {'Height': self._content.sampleheight_edit.text()}
+            s.samplegeometry = {"Height": self._content.sampleheight_edit.text()}
         s.containershape = self._content.containertype_combo.currentText()
         s.typeofcorrection = self._content.correctiontype_combo.currentText()
 
@@ -242,15 +234,13 @@ class AdvancedSetupWidget(BaseWidget):
         return s
 
     def _detinstrumentchange(self):
-        """
-        """
+        """ """
         self._instrument_name = str(self._content.instrument_combo.currentText())
 
         return
 
     def _stripvanpeaks_clicked(self):
-        """ Handling if strip-vanadium-peak check box is clicked
-        """
+        """Handling if strip-vanadium-peak check box is clicked"""
         self._syncStripVanPeakWidgets(self._content.stripvanpeaks_chkbox.isChecked())
 
         return
@@ -259,61 +249,62 @@ class AdvancedSetupWidget(BaseWidget):
         class HelpDialog(QDialog):
             def __init__(self, parent=None):
                 QDialog.__init__(self, parent)
-                self.ui = load_ui(__file__,
-                                  '../../../ui/diffraction/diffraction_info.ui',
-                                  baseinstance=self)
+                self.ui = load_ui(__file__, "../../../ui/diffraction/diffraction_info.ui", baseinstance=self)
 
         dialog = HelpDialog(self)
         dialog.exec_()
 
     def _show_concept_help(self, concept):
-        InterfaceManager().showHelpPage('qthelp://org.sphinx.mantidproject/doc/'
-                                        f'concepts/{concept}.html')
+        InterfaceManager().showHelpPage("qthelp://org.sphinx.mantidproject/doc/" f"concepts/{concept}.html")
 
     def _syncStripVanPeakWidgets(self, stripvanpeak):
-        """ Synchronize the other widgets with vanadium peak
-        """
+        """Synchronize the other widgets with vanadium peak"""
         self._content.vanpeakfwhm_edit.setEnabled(stripvanpeak)
         self._content.vansmoothpar_edit.setEnabled(stripvanpeak)
         self._content.vanpeaktol_edit.setEnabled(stripvanpeak)
 
     def _validate_formula(self):
         try:
-            if self._content.sampleformula_edit.text().strip() != '':
+            if self._content.sampleformula_edit.text().strip() != "":
                 MaterialBuilder().setFormula(self._content.sampleformula_edit.text().strip())
             self._content.sampleformula_edit.setToolTip("")
             self._content.sampleformula_edit.setStyleSheet("QLineEdit{}")
         except ValueError as e:
-            self._content.sampleformula_edit.setToolTip(
-                str(e).replace("MaterialBuilder::setFormula() - ", ""))
+            self._content.sampleformula_edit.setToolTip(str(e).replace("MaterialBuilder::setFormula() - ", ""))
             self._content.sampleformula_edit.setStyleSheet("QLineEdit{background:salmon;}")
 
     def _calculate_packing_fraction(self):
         try:
-            self._content.packingfraction_edit.setText('{:.5f}'.format(MaterialBuilder().setFormula(
-                self._content.sampleformula_edit.text()).setNumberDensity(
-                    float(self._content.numberdensity_edit.text())).setMassDensity(
-                        float(self._content.massdensity_edit.text())).build().packingFraction))
+            self._content.packingfraction_edit.setText(
+                "{:.5f}".format(
+                    MaterialBuilder()
+                    .setFormula(self._content.sampleformula_edit.text())
+                    .setNumberDensity(float(self._content.numberdensity_edit.text()))
+                    .setMassDensity(float(self._content.massdensity_edit.text()))
+                    .build()
+                    .packingFraction
+                )
+            )
         except ValueError:  # boost.python.ArgumentError are not catchable
             self._content.packingfraction_edit.setText(str(1))
 
     def _cache_dir_browse_1(self):
         r"""Event handling for browsing the cache directory"""
-        dir_path = self.dir_browse_dialog(title='Select the Cache Directory (scan&save)')
+        dir_path = self.dir_browse_dialog(title="Select the Cache Directory (scan&save)")
         if dir_path:
             self._content.cache_dir_edit_1.setText(dir_path)
 
     def _cache_dir_browse_2(self):
         r"""Event handling for browsing the cache directory"""
-        dir_path = self.dir_browse_dialog(title='Select the Cache Directory (scan only)')
+        dir_path = self.dir_browse_dialog(title="Select the Cache Directory (scan only)")
         if dir_path:
             self._content.cache_dir_edit_2.setText(dir_path)
 
     def _cache_dir_browse_3(self):
         r"""Event handling for browsing the cache directory"""
-        dir_path = self.dir_browse_dialog(title='Select the Cache Directory (scan only)')
+        dir_path = self.dir_browse_dialog(title="Select the Cache Directory (scan only)")
         if dir_path:
             self._content.cache_dir_edit_3.setText(dir_path)
 
 
-#ENDCLASSDEF
+# ENDCLASSDEF

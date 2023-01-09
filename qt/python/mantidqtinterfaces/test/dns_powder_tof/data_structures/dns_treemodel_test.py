@@ -9,8 +9,7 @@ import unittest
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_treeitem import DNSTreeItem
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_treemodel import DNSTreeModel
-from mantidqtinterfaces.dns_powder_tof.helpers.helpers_for_testing import (
-    get_dataset, get_first_scan_command)
+from mantidqtinterfaces.dns_powder_tof.helpers.helpers_for_testing import get_dataset, get_first_scan_command
 from qtpy.QtCore import QAbstractItemModel, QModelIndex, Qt
 
 
@@ -50,7 +49,7 @@ class DNSTreeModelTest(unittest.TestCase):
         test_v = self.model.headerData(1, None, None)
         self.assertIsNone(test_v)
         test_v = self.model.headerData(1, Qt.Horizontal, Qt.DisplayRole)
-        self.assertEqual(test_v, 'det_rot')
+        self.assertEqual(test_v, "det_rot")
 
     def test_columnCount(self):
         parent = self.model._scan_index_from_row(1).parent()
@@ -76,8 +75,8 @@ class DNSTreeModelTest(unittest.TestCase):
         self.assertEqual(self.model._scan_range(), range(0, 2))
 
     def test_get_sample_type(self):
-        self.assertEqual(self.model._get_sample_type('123_vanadium'), 'vana')
-        self.assertEqual(self.model._get_sample_type('123_hui'), '123_hui')
+        self.assertEqual(self.model._get_sample_type("123_vanadium"), "vana")
+        self.assertEqual(self.model._get_sample_type("123_hui"), "123_hui")
 
     def test_get_scan_rows(self):
         testv = self.model._get_scan_rows()
@@ -88,8 +87,8 @@ class DNSTreeModelTest(unittest.TestCase):
         self.assertTrue(self.model._is_scan_complete(1))
 
     def test_text_in_scan(self):
-        self.assertTrue(self.model.text_in_scan(0, 'scan'))
-        self.assertFalse(self.model.text_in_scan(0, 'hui'))
+        self.assertTrue(self.model.text_in_scan(0, "scan"))
+        self.assertFalse(self.model.text_in_scan(0, "hui"))
 
     def test_get_last_row(self):
         self.assertEqual(self.model._get_last_row(), 1)
@@ -113,9 +112,7 @@ class DNSTreeModelTest(unittest.TestCase):
         self.assertEqual(self.model.flags(index), Qt.NoItemFlags)
         index = self.model._scan_index_from_row(0)
         test_v = self.model.flags(index)
-        self.assertEqual(test_v, (Qt.ItemIsEnabled
-                                  | Qt.ItemIsSelectable
-                                  | Qt.ItemIsUserCheckable))
+        self.assertEqual(test_v, (Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsUserCheckable))
 
     def test_scan_index_from_row(self):
         index = self.model._scan_index_from_row(0)
@@ -135,10 +132,10 @@ class DNSTreeModelTest(unittest.TestCase):
     def test_get_filename_from_index(self):
         index = self.model._scan_index_from_row(0)
         test_v = self.model.get_filename_from_index(index)
-        self.assertEqual(test_v, '')
+        self.assertEqual(test_v, "")
         index = self.model._index_from_row(0, index)
         test_v = self.model.get_filename_from_index(index)
-        self.assertEqual(test_v, 'service_787463.d_dat')
+        self.assertEqual(test_v, "service_787463.d_dat")
 
     def test_index_from_row(self):
         index = self.model._scan_index_from_row(0)
@@ -263,7 +260,7 @@ class DNSTreeModelTest(unittest.TestCase):
 
     def test_get_data_from_dns_file(self):
         test_v = self.model._get_data_from_dns_file(self.data[0])[0]
-        self.assertEqual(test_v, '787463')
+        self.assertEqual(test_v, "787463")
 
     def test_check_child_if_scan_is_checked(self):
         index = self.model._scan_index_from_row(0)
@@ -284,10 +281,10 @@ class DNSTreeModelTest(unittest.TestCase):
         self.assertTrue(scan.isChecked())
 
     def test_setup_model_data(self):
-        self.assertEqual(self.model._last_scan_number, '14933')
+        self.assertEqual(self.model._last_scan_number, "14933")
         self.assertEqual(self.model._last_tof_time, 1.6)
         self.assertEqual(self.model._last_tof, 1000)
-        self.assertEqual(self.model._last_sample, '4p1K_map')
+        self.assertEqual(self.model._last_sample, "4p1K_map")
         self.assertEqual(self.model.rowCount(), 2)
 
     def test_add_number_of_children(self):
@@ -295,12 +292,12 @@ class DNSTreeModelTest(unittest.TestCase):
         scan = self.model._item_from_index(index)
         test_v = self.model.add_number_of_children()
         self.assertEqual(test_v, 2)
-        postfix = scan.get_tree_item_data(0).split('#')[1].split('/')[0]
-        self.assertEqual(postfix, '1')
+        postfix = scan.get_tree_item_data(0).split("#")[1].split("/")[0]
+        self.assertEqual(postfix, "1")
 
     def test_get_txt(self):
         test_v = self.model.get_txt()
-        self.assertEqual(test_v[0][0:10], '787463 ; -')
+        self.assertEqual(test_v[0][0:10], "787463 ; -")
 
     def test_get_file_number_dict(self):
         test_v = self.model.get_file_number_dict()
@@ -309,5 +306,5 @@ class DNSTreeModelTest(unittest.TestCase):
         self.assertTrue(test_v[788058].isValid())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

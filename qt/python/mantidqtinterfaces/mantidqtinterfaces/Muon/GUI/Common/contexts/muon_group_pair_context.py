@@ -41,12 +41,12 @@ def get_grouping_psi(workspace):
                 grouping_list.append(MuonGroup(sample_log_value, [ii + 1]))
             sample_log_value_list.append(sample_log_value)
 
-    return grouping_list, [], [], ''
+    return grouping_list, [], [], ""
 
 
 def get_default_grouping(workspace, instrument, main_field_direction):
     parameter_name = "Default grouping file"
-    if instrument == "MUSR" or instrument == 'CHRONUS':
+    if instrument == "MUSR" or instrument == "CHRONUS":
         parameter_name += " - " + main_field_direction
 
     if instrument != "PSI":
@@ -57,7 +57,7 @@ def get_default_grouping(workspace, instrument, main_field_direction):
                 grouping_file = workspace.getInstrument().getStringParameter(parameter_name)[0]
 
         except IndexError:
-            return [], [], [], ''
+            return [], [], [], ""
     else:
         return get_grouping_psi(workspace)
     instrument_directory = ConfigServiceImpl.Instance().getInstrumentDirectory()
@@ -96,8 +96,7 @@ def construct_empty_pair(group_names, pair_names, pair_index=0):
     else:
         group1 = None
         group2 = None
-    return MuonPair(pair_name=new_pair_name,
-                    forward_group_name=group1, backward_group_name=group2, alpha=1.0)
+    return MuonPair(pair_name=new_pair_name, forward_group_name=group1, backward_group_name=group2, alpha=1.0)
 
 
 class MessageNotifier(Observable):
@@ -115,8 +114,8 @@ class MuonGroupPairContext(object):
         self._pairs = []
         self._diffs = []
         self._phasequad = []
-        self._selected = ''
-        self._selected_type = ''
+        self._selected = ""
+        self._selected_type = ""
         self._selected_pairs = []
         self._selected_groups = []
         self._selected_diffs = []
@@ -237,9 +236,9 @@ class MuonGroupPairContext(object):
             if self._check_name_unique(group.name):
                 self._groups.append(group)
             else:
-                raise ValueError('Groups and pairs must have unique names')
+                raise ValueError("Groups and pairs must have unique names")
         else:
-            raise ValueError('Invalid detectors in group {}'.format(group.name))
+            raise ValueError("Invalid detectors in group {}".format(group.name))
 
     def remove_group(self, group_name):
         for group in self._groups:
@@ -259,18 +258,19 @@ class MuonGroupPairContext(object):
         elif isinstance(pair, MuonBasePair) and self._check_name_unique(pair.name):
             self._pairs.append(pair)
         else:
-            raise ValueError('Groups and pairs must have unique names')
+            raise ValueError("Groups and pairs must have unique names")
 
     def add_phasequad(self, phasequad):
-        if isinstance(
-            phasequad, MuonPhasequad) and self._check_name_unique(
-            phasequad.Re.name) and self._check_name_unique(
-                phasequad.Im.name):
+        if (
+            isinstance(phasequad, MuonPhasequad)
+            and self._check_name_unique(phasequad.Re.name)
+            and self._check_name_unique(phasequad.Im.name)
+        ):
             self._phasequad.append(phasequad)
             self.add_pair(phasequad.Re)
             self.add_pair(phasequad.Im)
         else:
-            raise ValueError('Groups and pairs must have unique names')
+            raise ValueError("Groups and pairs must have unique names")
 
     def remove_phasequad(self, phasequad_obj):
         for phasequad in self._phasequad:
@@ -292,7 +292,7 @@ class MuonGroupPairContext(object):
         if self._check_name_unique(diff.name):
             self._diffs.append(diff)
         else:
-            raise ValueError('Groups and pairs must have unique names')
+            raise ValueError("Groups and pairs must have unique names")
 
     def remove_diff(self, diff_name):
         for diff in self._diffs:
@@ -318,20 +318,33 @@ class MuonGroupPairContext(object):
 
             for period in periods:
                 for pair in default_pairs:
-                    self._pairs.append(MuonPair(pair.name + str(period), pair.forward_group + str(period),
-                                       pair.backward_group + str(period), pair.alpha, [period]))
+                    self._pairs.append(
+                        MuonPair(
+                            pair.name + str(period),
+                            pair.forward_group + str(period),
+                            pair.backward_group + str(period),
+                            pair.alpha,
+                            [period],
+                        )
+                    )
 
             if default_diffs:
                 for diff in default_diffs:
                     self._diffs.append(MuonDiff(diff.name, diff.forward, diff.backward, diff.group_or_pair, diff.periods))
             else:
-                for index in range(0, floor(len(periods)/2.)):
+                for index in range(0, floor(len(periods) / 2.0)):
                     for pair in default_pairs:
-                        odd_period = index*2 + 1
-                        even_period = odd_period+1
-                        self._diffs.append(MuonDiff("pair_diff"+str(index+1),
-                                                    pair.name + str(odd_period), pair.name + str(even_period), group_or_pair="pair",
-                                                    periods=[odd_period,even_period]))
+                        odd_period = index * 2 + 1
+                        even_period = odd_period + 1
+                        self._diffs.append(
+                            MuonDiff(
+                                "pair_diff" + str(index + 1),
+                                pair.name + str(odd_period),
+                                pair.name + str(even_period),
+                                group_or_pair="pair",
+                                periods=[odd_period, even_period],
+                            )
+                        )
 
             self._selected = self.pair_names[0]
 
@@ -438,7 +451,7 @@ class MuonGroupPairContext(object):
     def get_group_pair_name_and_run_from_workspace_name(self, workspace_name):
         for group_pair in self.all_groups_and_pairs:
             run = group_pair.get_run_for_workspace(workspace_name)
-            if(run):
+            if run:
                 return group_pair.name, str(run)
 
         return None, None

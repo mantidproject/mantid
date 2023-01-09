@@ -35,6 +35,7 @@ class ModalTester(object):
     """
     Helper class for testing modal widgets (dialogs).
     """
+
     _qapp = None
 
     def __init__(self, creator, tester):
@@ -46,7 +47,7 @@ class ModalTester(object):
         """
         qapp = QApplication.instance()
         if qapp is None:
-            self._qapp = QApplication([' '])
+            self._qapp = QApplication([" "])
         else:
             self._qapp = qapp
         self.creator = creator
@@ -65,7 +66,7 @@ class ModalTester(object):
             traceback.print_exc()
             self._qapp.exit(0)
         if self.widget is not None:
-            if hasattr(self.widget, 'exec_'):
+            if hasattr(self.widget, "exec_"):
                 self.widget.exec_()
             else:
                 self.widget.show()

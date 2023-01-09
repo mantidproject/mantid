@@ -16,7 +16,6 @@ from mantidqt.widgets.plotconfigdialog.imagestabwidget.view import ImagesTabWidg
 
 
 class ImagesTabWidgetPresenter:
-
     def __init__(self, fig, view=None, parent=None):
         self.fig = fig
         if not view:
@@ -27,8 +26,7 @@ class ImagesTabWidgetPresenter:
         self.image_names_dict = dict()
         self.populate_select_image_combo_box_and_update_view()
 
-        self.view.select_image_combo_box.currentIndexChanged.connect(
-            self.update_view)
+        self.view.select_image_combo_box.currentIndexChanged.connect(self.update_view)
 
     def apply_properties(self):
         props = self.view.get_properties()
@@ -51,14 +49,18 @@ class ImagesTabWidgetPresenter:
 
         if props.vmin > props.vmax:
             self.view.max_min_value_warning.setVisible(True)
-            self.view.max_min_value_warning.setText("<html> <head/> <body> <p> <span style=\"color:#ff0000;\">Max "
-                                                    "value is less than min value so they have been "
-                                                    "swapped.</span></p></body></html>")
+            self.view.max_min_value_warning.setText(
+                '<html> <head/> <body> <p> <span style="color:#ff0000;">Max '
+                "value is less than min value so they have been "
+                "swapped.</span></p></body></html>"
+            )
         elif props.vmin == props.vmax:
             self.view.max_min_value_warning.setVisible(True)
-            self.view.max_min_value_warning.setText("<html><head/><body><p><span style=\"color:#ff0000;\">Min and max "
-                                                    "value are the same so they have been "
-                                                    "adjusted.</span></p></body></html>")
+            self.view.max_min_value_warning.setText(
+                '<html><head/><body><p><span style="color:#ff0000;">Min and max '
+                "value are the same so they have been "
+                "adjusted.</span></p></body></html>"
+            )
         else:
             self.view.max_min_value_warning.setVisible(False)
 
@@ -82,14 +84,14 @@ class ImagesTabWidgetPresenter:
             self.view.enable_interpolation(True)
             self.view.set_interpolation(img_props.interpolation)
         else:
-            self.view.set_interpolation('None')
+            self.view.set_interpolation("None")
             self.view.enable_interpolation(False)
         self.view.set_scale(img_props.scale)
 
     @staticmethod
     def generate_image_name(image):
         """Generate a name for an image"""
-        label = image.get_label().lstrip('_')
+        label = image.get_label().lstrip("_")
         ax_name = generate_ax_name(image.axes)
         if label:
             return "{} - {}".format(ax_name, label)
@@ -110,7 +112,5 @@ class ImagesTabWidgetPresenter:
     def _populate_select_image_combo_box(self):
         self.view.select_image_combo_box.clear()
         for img in get_images_from_fig(self.fig):
-            self.image_names_dict = self.set_name_in_names_dict(
-                self.generate_image_name(img[0]), img, self.image_names_dict)
-        self.view.populate_select_image_combo_box(
-            sorted(self.image_names_dict.keys()))
+            self.image_names_dict = self.set_name_in_names_dict(self.generate_image_name(img[0]), img, self.image_names_dict)
+        self.view.populate_select_image_combo_box(sorted(self.image_names_dict.keys()))

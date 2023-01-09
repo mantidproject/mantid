@@ -7,7 +7,6 @@
 
 
 class BasePaneModel(object):
-
     def __init__(self, context, name="Plot"):
         self.context = context
         self.name = name
@@ -15,7 +14,7 @@ class BasePaneModel(object):
 
     @staticmethod
     def _generate_run_indices(workspace_list):
-        indices = [0]*len(workspace_list)
+        indices = [0] * len(workspace_list)
         return indices
 
     def get_workspaces_to_plot(self, is_raw, plot_type):
@@ -28,8 +27,8 @@ class BasePaneModel(object):
 
     def get_workspace_list_and_indices_to_plot(self, is_raw, plot_type):
         """
-         :return: a list of workspace names to plot
-         """
+        :return: a list of workspace names to plot
+        """
         workspace_list = self.get_workspaces_to_plot(is_raw, plot_type)
         indices = self._generate_run_indices(workspace_list)
 
@@ -47,11 +46,11 @@ class BasePaneModel(object):
     def create_tiled_keys(self, tiled_by):
         return []
 
-    def _get_workspace_plot_axis(self, workspace_name: str, axes_workspace_map, indicies = None):
+    def _get_workspace_plot_axis(self, workspace_name: str, axes_workspace_map, indicies=None):
         return 0
 
     def _create_workspace_label(self, workspace_name, index):
-        return workspace_name+"_"+str(index)
+        return workspace_name + "_" + str(index)
 
     def _is_guess_workspace(self, workspace_name):
         return False

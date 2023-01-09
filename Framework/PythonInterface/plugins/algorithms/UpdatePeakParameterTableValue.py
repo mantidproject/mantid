@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,invalid-name,redefined-builtin
+# pylint: disable=no-init,invalid-name,redefined-builtin
 import mantid
 import mantid.api
 import mantid.kernel
@@ -12,35 +12,34 @@ import mantid.simpleapi
 
 
 class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
-    """ Class to generate grouping file
-    """
+    """Class to generate grouping file"""
 
     tableColNames = None
     parameternames = None
 
     def category(self):
-        """ Mantid required
-        """
+        """Mantid required"""
         return "Inelastic\\Utility;Transforms\\Grouping"
 
     def name(self):
-        """ Mantid require
-        """
+        """Mantid require"""
         return "UpdatePeakParameterTableValue"
 
     def summary(self):
         return "Update cell value(s) in a TableWorkspace containing instrument peak profile parameters."
 
     def PyInit(self):
-        """ Property definition
-        """
+        """Property definition"""
         tableprop = mantid.api.ITableWorkspaceProperty("InputWorkspace", "", mantid.kernel.Direction.InOut)
         self.declareProperty(tableprop, "TableWorkspace containing peak profile parameters")
 
         colchoices = ["Value", "FitOrTie", "Min", "Max", "StepSize"]
-        self.declareProperty("Column", "Value", mantid.kernel.StringListValidator(colchoices),
-                             "Column name of the cell to have value updated.  Choices include 'FitOrTie', "
-                             + "'Max', 'Min', 'StepSize' and 'Value'")
+        self.declareProperty(
+            "Column",
+            "Value",
+            mantid.kernel.StringListValidator(colchoices),
+            "Column name of the cell to have value updated.  Choices include 'FitOrTie', " + "'Max', 'Min', 'StepSize' and 'Value'",
+        )
 
         rowprop = mantid.kernel.IntArrayProperty("Rows", [])
         self.declareProperty(rowprop, "List of row numbers of the cell to have value updated")
@@ -55,8 +54,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
         return
 
     def PyExec(self):
-        """ Main Execution Body
-        """
+        """Main Execution Body"""
         # 1. Process input parameter TableWorkspace
         tableWS = self.getProperty("InputWorkspace").value
         result = self.parseTableWorkspace(tableWS)
@@ -86,8 +84,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
         if colname in colnamedict:
             icolumn = colnamedict[colname]
         else:
-            raise NotImplementedError("Column name %s does not exist in TableWorkspace %s"
-                                      % (colname, tableWS.name()))
+            raise NotImplementedError("Column name %s does not exist in TableWorkspace %s" % (colname, tableWS.name()))
 
         # 3. Set value
         if colname in ["FitOrTie", "Name"]:
@@ -110,7 +107,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
         return
 
     def convertParameterNameToTableRows(self, parametername, paramnamedict):
-        """ Convert parameter name (incomplete might be) to row number(s)
+        """Convert parameter name (incomplete might be) to row number(s)
         An algorithm to recognize parameter with blurred definition will be use such as
         (1) exactly same and case insensitive;
         (2) *partialname
@@ -124,7 +121,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
 
         Return: List of row numbers (integer), a negative value might exit to represent a non-existing parameter name
         """
-        rownumbers= []
+        rownumbers = []
 
         # 1. make case insensitive
         parnametofit = parametername.lower()
@@ -179,7 +176,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
         return rownumbers
 
     def parseTableWorkspace(self, tablews):
-        """ Get information from table workspace
+        """Get information from table workspace
 
         Return:  dictionary, key = row number, value = name
         """
@@ -189,7 +186,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
         colnames = tablews.getColumnNames()
         self.tableColNames = colnames
         colnamedict = {}
-        for ic in range( len(colnames) ):
+        for ic in range(len(colnames)):
             colnamedict[colnames[ic]] = ic
 
         # 2. Check validity of workspace

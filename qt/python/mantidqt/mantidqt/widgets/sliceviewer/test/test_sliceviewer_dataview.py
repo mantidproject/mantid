@@ -16,17 +16,19 @@ from mantidqt.widgets.sliceviewer.views.view import SliceViewerDataView
 @start_qapplication
 class SliceviewerDataViewTest(unittest.TestCase):
     def setUp(self) -> None:
-        self.patcher = mock.patch.multiple("mantidqt.widgets.sliceviewer.views.dataview",
-                                           DimensionWidget=mock.DEFAULT,
-                                           QGridLayout=mock.DEFAULT,
-                                           QHBoxLayout=mock.DEFAULT,
-                                           QVBoxLayout=mock.DEFAULT,
-                                           QWidget=mock.DEFAULT,
-                                           QLabel=mock.DEFAULT,
-                                           QStatusBar=mock.DEFAULT,
-                                           CurveLinearSubPlot=mock.DEFAULT,
-                                           ColorbarWidget=mock.DEFAULT,
-                                           SliceViewerNavigationToolbar=mock.DEFAULT)
+        self.patcher = mock.patch.multiple(
+            "mantidqt.widgets.sliceviewer.views.dataview",
+            DimensionWidget=mock.DEFAULT,
+            QGridLayout=mock.DEFAULT,
+            QHBoxLayout=mock.DEFAULT,
+            QVBoxLayout=mock.DEFAULT,
+            QWidget=mock.DEFAULT,
+            QLabel=mock.DEFAULT,
+            QStatusBar=mock.DEFAULT,
+            CurveLinearSubPlot=mock.DEFAULT,
+            ColorbarWidget=mock.DEFAULT,
+            SliceViewerNavigationToolbar=mock.DEFAULT,
+        )
         self.patched_objs: Dict[mock.Mock] = self.patcher.start()
         self.presenter = mock.Mock()
         self.view = SliceViewerDataView(presenter=self.presenter, dims_info=mock.MagicMock(), can_normalise=mock.Mock())
@@ -109,20 +111,20 @@ class SliceviewerDataViewTest(unittest.TestCase):
 
         self.view.clear_figure.assert_called_once()
         self.assertFalse(self.view.nonortho_transform)
-        self.view.fig.add_subplot.assert_called_once_with(111, projection='mantid')
+        self.view.fig.add_subplot.assert_called_once_with(111, projection="mantid")
         self.view.ax.grid.assert_called_once_with(self.view._grid_on)
 
     def test_create_axes_orthogonal_redraws_on_zoom(self):
         for redraw in [True, False]:
             self.view.canvas = mock.Mock()
             self.view.create_axes_orthogonal(redraw_on_zoom=redraw)
-            self.view.canvas.enable_zoom_on_scroll.assert_called_once_with(mock.ANY, redraw=redraw, toolbar=mock.ANY,
-                                                                           callback=mock.ANY)
+            self.view.canvas.enable_zoom_on_scroll.assert_called_once_with(mock.ANY, redraw=redraw, toolbar=mock.ANY, callback=mock.ANY)
 
     def test_set_grid_on(self):
         self.view.set_grid_on()
-        self.patched_objs["SliceViewerNavigationToolbar"].return_value.\
-            set_action_checked.assert_called_once_with(ToolItemText.GRID, state=True)
+        self.patched_objs["SliceViewerNavigationToolbar"].return_value.set_action_checked.assert_called_once_with(
+            ToolItemText.GRID, state=True
+        )
 
     def test_clear_figure(self):
         self.view.ax = mock.NonCallableMock()
@@ -175,9 +177,15 @@ class SliceviewerDataViewTest(unittest.TestCase):
         ws = mock.NonCallableMock()
         self.view.plot_matrix(ws)
         self.view.clear_image.assert_called_once()
-        self.view.ax.imshow.assert_called_once_with(ws, origin=mock.ANY, aspect=mock.ANY,
-                                                    interpolation=mock.ANY, transpose=self.view.dimensions.transpose,
-                                                    norm=self.view.colorbar.get_norm(), extent=mock.ANY)
+        self.view.ax.imshow.assert_called_once_with(
+            ws,
+            origin=mock.ANY,
+            aspect=mock.ANY,
+            interpolation=mock.ANY,
+            transpose=self.view.dimensions.transpose,
+            norm=self.view.colorbar.get_norm(),
+            extent=mock.ANY,
+        )
 
     def test_plot_matrix_with_image(self):
         original_image = mock.Mock()
@@ -191,17 +199,22 @@ class SliceviewerDataViewTest(unittest.TestCase):
         ws = mock.NonCallableMock()
         self.view.plot_matrix(ws)
         self.view.clear_image.assert_called_once()
-        self.view.ax.imshow.assert_called_once_with(ws, origin=mock.ANY, aspect=mock.ANY,
-                                                    interpolation=mock.ANY, transpose=self.view.dimensions.transpose,
-                                                    norm=self.view.colorbar.get_norm(),
-                                                    extent=original_image.get_extent())
+        self.view.ax.imshow.assert_called_once_with(
+            ws,
+            origin=mock.ANY,
+            aspect=mock.ANY,
+            interpolation=mock.ANY,
+            transpose=self.view.dimensions.transpose,
+            norm=self.view.colorbar.get_norm(),
+            extent=original_image.get_extent(),
+        )
 
     def test_draw_plot_clears_title(self):
         self.view.ax = mock.Mock()
 
         self.view.draw_plot()
 
-        self.view.ax.set_title.assert_called_once_with('')
+        self.view.ax.set_title.assert_called_once_with("")
 
     def test_draw_plot_draws_canvas(self):
         self.view.ax = mock.Mock()
@@ -261,15 +274,15 @@ class SliceviewerDataViewTest(unittest.TestCase):
     def test_get_default_scale_norm_conf_none(self):
         self.view.conf = None
         scale = self.view.get_default_scale_norm()
-        self.assertEqual(scale, 'Linear')
+        self.assertEqual(scale, "Linear")
 
     def test_get_default_scale_norm_scalenorm(self):
         self.view.conf = mock.Mock()
         self.view.conf.has = mock.Mock(return_value=True)
-        self.view.conf.get = mock.Mock(return_value='Log')
+        self.view.conf.get = mock.Mock(return_value="Log")
         scale = self.view.get_default_scale_norm()
-        self.assertEqual(scale, 'SymmetricLog10')
+        self.assertEqual(scale, "SymmetricLog10")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

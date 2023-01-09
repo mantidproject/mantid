@@ -15,7 +15,6 @@ from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_
 
 
 class GeneralFittingModelTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         FrameworkManager.Instance()
@@ -26,8 +25,9 @@ class GeneralFittingModelTest(unittest.TestCase):
         self.dataset_names = ["Name1", "Name2"]
         self.fit_function = FunctionFactory.createFunction("FlatBackground")
         self.single_fit_functions = [self.fit_function.clone(), self.fit_function.clone()]
-        self.simultaneous_fit_function = FunctionFactory.createInitializedMultiDomainFunction(str(self.fit_function),
-                                                                                              len(self.dataset_names))
+        self.simultaneous_fit_function = FunctionFactory.createInitializedMultiDomainFunction(
+            str(self.fit_function), len(self.dataset_names)
+        )
 
     def tearDown(self):
         self.model = None
@@ -102,8 +102,7 @@ class GeneralFittingModelTest(unittest.TestCase):
         self.model.save_current_fit_function_to_undo_data()
 
         self.assertEqual(len(self.model.fitting_context.simultaneous_fit_functions_for_undo), 1)
-        self.assertEqual(str(self.model.fitting_context.simultaneous_fit_functions_for_undo[0]),
-                         str(self.simultaneous_fit_function))
+        self.assertEqual(str(self.model.fitting_context.simultaneous_fit_functions_for_undo[0]), str(self.simultaneous_fit_function))
 
         self.model.clear_undo_data()
 
@@ -220,9 +219,10 @@ class GeneralFittingModelTest(unittest.TestCase):
 
         self.model.update_parameter_value("A0", 5.0)
 
-        self.assertEqual(str(self.model.simultaneous_fit_function), "composite=MultiDomainFunction,NumDeriv=true;"
-                                                                    "name=FlatBackground,A0=0,$domains=i;"
-                                                                    "name=FlatBackground,A0=5,$domains=i")
+        self.assertEqual(
+            str(self.model.simultaneous_fit_function),
+            "composite=MultiDomainFunction,NumDeriv=true;" "name=FlatBackground,A0=0,$domains=i;" "name=FlatBackground,A0=5,$domains=i",
+        )
 
     def test_that_update_attribute_value_will_update_the_value_of_a_parameter_in_single_fit_mode(self):
         self.model.dataset_names = self.dataset_names
@@ -238,7 +238,8 @@ class GeneralFittingModelTest(unittest.TestCase):
 
         self.fit_function = FunctionFactory.createFunction("Chebyshev")
         self.model.simultaneous_fit_function = FunctionFactory.createInitializedMultiDomainFunction(
-            str(self.fit_function), len(self.dataset_names))
+            str(self.fit_function), len(self.dataset_names)
+        )
 
         self.model.simultaneous_fitting_mode = True
         self.model.current_dataset_index = 1
@@ -246,9 +247,12 @@ class GeneralFittingModelTest(unittest.TestCase):
         self.model.update_attribute_value("StartX", 0.0)
         self.model.update_attribute_value("EndX", 15.0)
 
-        self.assertEqual(str(self.model.simultaneous_fit_function), "composite=MultiDomainFunction,NumDeriv=true;"
-                                                                    "name=Chebyshev,EndX=1,StartX=-1,n=0,A0=0,$domains=i;"
-                                                                    "name=Chebyshev,EndX=15,StartX=0,n=0,A0=0,$domains=i")
+        self.assertEqual(
+            str(self.model.simultaneous_fit_function),
+            "composite=MultiDomainFunction,NumDeriv=true;"
+            "name=Chebyshev,EndX=1,StartX=-1,n=0,A0=0,$domains=i;"
+            "name=Chebyshev,EndX=15,StartX=0,n=0,A0=0,$domains=i",
+        )
 
     def test_that_setting_new_dataset_names_will_reset_the_fit_functions_but_attempt_to_use_the_previous_function(self):
         self.model.dataset_names = self.dataset_names
@@ -261,10 +265,10 @@ class GeneralFittingModelTest(unittest.TestCase):
         self.assertEqual(str(self.model.single_fit_functions[0]), "name=FlatBackground,A0=0")
         self.assertEqual(str(self.model.simultaneous_fit_function), "name=FlatBackground,A0=0")
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel.'
-                '_get_selected_runs')
-    def test_that_get_simultaneous_fit_by_specifiers_to_display_from_context_attempts_to_get_the_runs(self,
-                                                                                                      mock_get_runs):
+    @mock.patch(
+        "mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel." "_get_selected_runs"
+    )
+    def test_that_get_simultaneous_fit_by_specifiers_to_display_from_context_attempts_to_get_the_runs(self, mock_get_runs):
         self.model.simultaneous_fit_by = "Run"
 
         self.model.get_simultaneous_fit_by_specifiers_to_display_from_context()
@@ -272,10 +276,11 @@ class GeneralFittingModelTest(unittest.TestCase):
 
         self.assertEqual(1, mock_get_runs.call_count)
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel.'
-                '_get_selected_groups_and_pairs')
-    def test_that_get_simultaneous_fit_by_specifiers_to_display_from_context_attempts_to_get_the_groups_pairs(self,
-                                                                                                              mock_get_group_pairs):
+    @mock.patch(
+        "mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel."
+        "_get_selected_groups_and_pairs"
+    )
+    def test_that_get_simultaneous_fit_by_specifiers_to_display_from_context_attempts_to_get_the_groups_pairs(self, mock_get_group_pairs):
         self.model.simultaneous_fit_by = "Group/Pair"
 
         self.model.get_simultaneous_fit_by_specifiers_to_display_from_context()
@@ -315,8 +320,7 @@ class GeneralFittingModelTest(unittest.TestCase):
         group_or_pair = ["long"]
         self.model.simultaneous_fitting_mode = True
 
-        self.model._get_selected_runs_groups_and_pairs_for_simultaneous_fit_mode = \
-            mock.MagicMock(return_value=(runs, group_or_pair))
+        self.model._get_selected_runs_groups_and_pairs_for_simultaneous_fit_mode = mock.MagicMock(return_value=(runs, group_or_pair))
 
         self.model.context.get_workspace_names_for = mock.MagicMock(return_value=workspace_names)
         self.model.context.get_workspace_names_of_fit_data_with_run = mock.MagicMock()
@@ -334,8 +338,7 @@ class GeneralFittingModelTest(unittest.TestCase):
         group_or_pair = "long"
         self.model.simultaneous_fitting_mode = True
 
-        self.model._get_selected_runs_groups_and_pairs_for_simultaneous_fit_mode = \
-            mock.MagicMock(return_value=(runs, [group_or_pair]))
+        self.model._get_selected_runs_groups_and_pairs_for_simultaneous_fit_mode = mock.MagicMock(return_value=(runs, [group_or_pair]))
 
         output_runs, output_group_pairs = self.model.get_selected_runs_groups_and_pairs()
         self.assertEqual(output_runs, runs)
@@ -402,13 +405,13 @@ class GeneralFittingModelTest(unittest.TestCase):
         self.model.single_fit_functions = self.single_fit_functions
         self.model.simultaneous_fitting_mode = False
 
-        self.model._do_single_fit = mock.MagicMock(return_value=(self.model.current_single_fit_function, "success",
-                                                                 0.56))
+        self.model._do_single_fit = mock.MagicMock(return_value=(self.model.current_single_fit_function, "success", 0.56))
 
         self.model.perform_fit()
 
-        self.model._do_single_fit.assert_called_once_with(self.model._get_parameters_for_single_fit(
-            self.model.current_dataset_name, self.model.current_single_fit_function))
+        self.model._do_single_fit.assert_called_once_with(
+            self.model._get_parameters_for_single_fit(self.model.current_dataset_name, self.model.current_single_fit_function)
+        )
 
     def test_perform_fit_will_call_the_correct_function_for_a_simultaneous_fit(self):
         self.model.dataset_names = self.dataset_names
@@ -417,13 +420,14 @@ class GeneralFittingModelTest(unittest.TestCase):
         global_parameters = ["A0"]
         self.model.global_parameters = global_parameters
 
-        self.model._do_simultaneous_fit = mock.MagicMock(return_value=(self.model.simultaneous_fit_function, "success",
-                                                                       0.56))
+        self.model._do_simultaneous_fit = mock.MagicMock(return_value=(self.model.simultaneous_fit_function, "success", 0.56))
 
         self.model.perform_fit()
 
-        self.model._do_simultaneous_fit.assert_called_once_with(self.model._get_parameters_for_simultaneous_fit(
-            self.model.dataset_names, self.model.simultaneous_fit_function), global_parameters)
+        self.model._do_simultaneous_fit.assert_called_once_with(
+            self.model._get_parameters_for_simultaneous_fit(self.model.dataset_names, self.model.simultaneous_fit_function),
+            global_parameters,
+        )
 
     def test_that_get_fit_function_parameters_will_return_a_list_of_parameter_names_when_in_single_fit_mode(self):
         self.model.dataset_names = self.dataset_names
@@ -466,9 +470,10 @@ class GeneralFittingModelTest(unittest.TestCase):
 
         self.model.dataset_names = ["New Name1", "New Name2"]
 
-        self.assertEqual(str(self.model.simultaneous_fit_function), "composite=MultiDomainFunction,NumDeriv=true;"
-                                                                    "name=FlatBackground,A0=1,$domains=i;"
-                                                                    "name=FlatBackground,A0=5,$domains=i")
+        self.assertEqual(
+            str(self.model.simultaneous_fit_function),
+            "composite=MultiDomainFunction,NumDeriv=true;" "name=FlatBackground,A0=1,$domains=i;" "name=FlatBackground,A0=5,$domains=i",
+        )
 
     def test_that_the_currently_selected_function_is_copied_for_when_a_larger_number_of_new_datasets_are_loaded(self):
         self.model.dataset_names = self.dataset_names
@@ -483,11 +488,14 @@ class GeneralFittingModelTest(unittest.TestCase):
         # are just given a copy of the previous currently selected function (i.e. A0=1).
         self.model.dataset_names = ["New Name1", "New Name2", "Name1", "Name2"]
 
-        self.assertEqual(str(self.model.simultaneous_fit_function), "composite=MultiDomainFunction,NumDeriv=true;"
-                                                                    "name=FlatBackground,A0=1,$domains=i;"
-                                                                    "name=FlatBackground,A0=1,$domains=i;"
-                                                                    "name=FlatBackground,A0=1,$domains=i;"
-                                                                    "name=FlatBackground,A0=5,$domains=i")
+        self.assertEqual(
+            str(self.model.simultaneous_fit_function),
+            "composite=MultiDomainFunction,NumDeriv=true;"
+            "name=FlatBackground,A0=1,$domains=i;"
+            "name=FlatBackground,A0=1,$domains=i;"
+            "name=FlatBackground,A0=1,$domains=i;"
+            "name=FlatBackground,A0=5,$domains=i",
+        )
 
     def test_that_newly_loaded_datasets_will_reuse_the_existing_functions_when_there_are_fewer_new_datasets(self):
         self.model.dataset_names = self.dataset_names
@@ -530,8 +538,9 @@ class GeneralFittingModelTest(unittest.TestCase):
         self.model._get_runs_groups_and_pairs_for_simultaneous_fit_by_runs.assert_called_once_with("All")
 
     def test_that_get_runs_groups_and_pairs_for_fits_will_attempt_to_get_it_by_groups_when_in_simultaneous_fitting_mode(self):
-        self.model._get_runs_groups_and_pairs_for_simultaneous_fit_by_groups_and_pairs = \
-            mock.Mock(return_value=(["62260;62261;62262"], ["fwd", "bwd"]))
+        self.model._get_runs_groups_and_pairs_for_simultaneous_fit_by_groups_and_pairs = mock.Mock(
+            return_value=(["62260;62261;62262"], ["fwd", "bwd"])
+        )
         self.model.simultaneous_fitting_mode = True
         self.model.simultaneous_fit_by = "Group/Pair"
 
@@ -561,13 +570,11 @@ class GeneralFittingModelTest(unittest.TestCase):
         self.model.simultaneous_fitting_mode = True
 
         self.model.update_ws_fit_function_parameters(self.model.dataset_names[:1], [1.0, 0.0])
-        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.simultaneous_fit_function),
-                         ([1.0, 0.0], [0.0, 0.0]))
+        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.simultaneous_fit_function), ([1.0, 0.0], [0.0, 0.0]))
 
         self.model.update_ws_fit_function_parameters(self.model.dataset_names[1:], [1.0, 2.0])
-        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.simultaneous_fit_function),
-                         ([1.0, 2.0], [0.0, 0.0]))
+        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.simultaneous_fit_function), ([1.0, 2.0], [0.0, 0.0]))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

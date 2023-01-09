@@ -14,7 +14,6 @@ from mantidqtinterfaces.Muon.GUI.Common.muon_load_data import MuonLoadData
 
 @start_qapplication
 class LoadFileWidgetModelEATest(unittest.TestCase):
-
     def setUp(self):
         setup_context_for_tests(self)
         self.model = BrowseFileWidgetModel(self.loaded_data, self.context)
@@ -38,5 +37,5 @@ class LoadFileWidgetModelEATest(unittest.TestCase):
         self.assert_model_empty()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

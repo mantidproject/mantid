@@ -8,9 +8,8 @@ from typing import List
 
 
 class PlotEditContext(object):
-
     def __init__(self):
-        self._xlim = [0.0, 15.]
+        self._xlim = [0.0, 15.0]
         self._ylim = [-0.3, 0.3]
         self._plot_index = 0
         self._errors = False
@@ -28,11 +27,11 @@ class PlotEditContext(object):
     def update_autoscale_state(self, state: bool):
         self._auto = state
 
-    def set_axis(self,index:int):
+    def set_axis(self, index: int):
         self._plot_index = index
 
     @property
-    def axis(self)->int:
+    def axis(self) -> int:
         return self._plot_index
 
     @property

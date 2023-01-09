@@ -12,8 +12,8 @@ import sys
 import os
 import traceback
 from mantidqt.gui_helper import get_qapplication
-from qtpy.QtWidgets import (QAction, QDialog, QFileDialog, QMainWindow, QMessageBox)  # noqa
-from qtpy.QtCore import (QFile, QFileInfo, QSettings)  # noqa
+from qtpy.QtWidgets import QAction, QDialog, QFileDialog, QMainWindow, QMessageBox  # noqa
+from qtpy.QtCore import QFile, QFileInfo, QSettings  # noqa
 from mantid.kernel import Logger
 
 # Check whether Mantid is available
@@ -26,7 +26,7 @@ except ImportError:
 try:
     from mantidqt.utils.qt import load_ui  # noqa
 except ImportError:
-    Logger("ReductionGUI").information('Using legacy ui importer')
+    Logger("ReductionGUI").information("Using legacy ui importer")
     from mantidplot import load_ui  # noqa
 
 unicode = str
@@ -38,7 +38,7 @@ if CAN_REDUCE:
         import reduction  # noqa
 
         if os.path.splitext(os.path.basename(reduction.__file__))[0] == "reduction":
-            home_dir = os.path.expanduser('~')
+            home_dir = os.path.expanduser("~")
             if os.path.abspath(reduction.__file__).startswith(home_dir):
                 STARTUP_WARNING = "The following file is in your home area, please delete it and restart Mantid:\n\n"
             else:
@@ -57,7 +57,7 @@ class ReductionGUI(QMainWindow):
         QMainWindow.__init__(self, parent)
         if window_flags:
             self.setWindowFlags(window_flags)
-        self.ui = load_ui(__file__, 'ui/reduction_main.ui', baseinstance=self)
+        self.ui = load_ui(__file__, "ui/reduction_main.ui", baseinstance=self)
 
         if STARTUP_WARNING:
             message = "The reduction application has problems starting:\n\n"
@@ -69,7 +69,7 @@ class ReductionGUI(QMainWindow):
 
         # Name handle for the instrument
         if instrument is None:
-            instrument = settings.value("instrument_name", '', type=unicode)
+            instrument = settings.value("instrument_name", "", type=unicode)
             if instrument_list is not None and instrument not in instrument_list:
                 instrument = None
 
@@ -88,8 +88,8 @@ class ReductionGUI(QMainWindow):
             self._recent_files = []
 
         # Folder to open files in
-        self._last_directory = settings.value("last_directory", '.', type=unicode)
-        self._last_export_directory = settings.value("last_export_directory", '.', type=unicode)
+        self._last_directory = settings.value("last_directory", ".", type=unicode)
+        self._last_export_directory = settings.value("last_export_directory", ".", type=unicode)
 
         # Current file name
         self._filename = None
@@ -114,8 +114,8 @@ class ReductionGUI(QMainWindow):
 
     def _set_window_title(self):
         """
-            Sets the window title using the instrument name and the
-            current settings file
+        Sets the window title using the instrument name and the
+        current settings file
         """
         title = "%s Reduction" % self._instrument
         if self._filename is not None:
@@ -127,13 +127,13 @@ class ReductionGUI(QMainWindow):
 
     def setup_layout(self, load_last=False):
         """
-            Sets up the instrument-specific part of the UI layout
+        Sets up the instrument-specific part of the UI layout
         """
         # Clean up the widgets that have already been created
         self.tabWidget.clear()
         self.progress_bar.hide()
 
-        if self._instrument == '' or self._instrument is None:
+        if self._instrument == "" or self._instrument is None:
             return self._change_instrument()
 
         self._update_file_menu()
@@ -176,7 +176,7 @@ class ReductionGUI(QMainWindow):
 
     def _update_file_menu(self):
         """
-            Set up the File menu and update the menu with recent files
+        Set up the File menu and update the menu with recent files
         """
         self.file_menu.clear()
 
@@ -255,8 +255,8 @@ class ReductionGUI(QMainWindow):
 
     def _debug_mode(self, mode=None):
         """
-            Set debug mode
-            @param mode: debug mode (True or False). If None, the debug mode will simply be flipped
+        Set debug mode
+        @param mode: debug mode (True or False). If None, the debug mode will simply be flipped
         """
         if mode is None:
             mode = not self.general_settings.debug
@@ -273,18 +273,19 @@ class ReductionGUI(QMainWindow):
 
     def _change_instrument(self):
         """
-            Invoke an instrument selection dialog
+        Invoke an instrument selection dialog
         """
 
         class InstrDialog(QDialog):
             def __init__(self, instrument_list=None):
                 QDialog.__init__(self)
-                self.ui = load_ui(__file__, 'ui/instrument_dialog.ui', baseinstance=self)
+                self.ui = load_ui(__file__, "ui/instrument_dialog.ui", baseinstance=self)
                 self.instrument_list = instrument_list
                 self.instr_combo.clear()
                 self.facility_combo.clear()
-                facilities = sorted([fac for fac in INSTRUMENT_DICT.keys() if
-                                     any([inst in INSTRUMENT_DICT[fac] for inst in instrument_list])])
+                facilities = sorted(
+                    [fac for fac in INSTRUMENT_DICT.keys() if any([inst in INSTRUMENT_DICT[fac] for inst in instrument_list])]
+                )
                 facilities.reverse()
                 for facility in facilities:
                     self.facility_combo.addItem(facility)
@@ -317,7 +318,7 @@ class ReductionGUI(QMainWindow):
 
     def _clear_and_close(self):
         """
-            Clear all QSettings parameters
+        Clear all QSettings parameters
         """
         self._clear_and_restart = True
         self.close()
@@ -328,12 +329,12 @@ class ReductionGUI(QMainWindow):
 
     def closeEvent(self, event):
         """
-            Executed when the application closes
+        Executed when the application closes
         """
         if False:
-            reply = QMessageBox.question(self, 'Message',
-                                         "Are you sure you want to quit this application?",
-                                         QMessageBox.Yes, QMessageBox.No)
+            reply = QMessageBox.question(
+                self, "Message", "Are you sure you want to quit this application?", QMessageBox.Yes, QMessageBox.No
+            )
 
             if reply == QMessageBox.Yes:
                 event.accept()
@@ -355,8 +356,8 @@ class ReductionGUI(QMainWindow):
 
     def reduce_clicked(self):
         """
-            Create an object capable of using the information in the
-            interface and turn it into a reduction process.
+        Create an object capable of using the information in the
+        interface and turn it into a reduction process.
         """
         self.reduce_button.setEnabled(False)
         self.export_button.setEnabled(False)
@@ -377,8 +378,8 @@ class ReductionGUI(QMainWindow):
 
     def open_file(self, file_path=None):
         """
-            Open an XML file and populate the UI
-            @param file_path: path to the file to be loaded
+        Open an XML file and populate the UI
+        @param file_path: path to the file to be loaded
         """
         if file_path is None:
             action = self.sender()
@@ -396,9 +397,12 @@ class ReductionGUI(QMainWindow):
         try:
             found_instrument = self._interface.scripter.verify_instrument(file_path)
         except:
-            msg = "The file you attempted to load doesn't have a recognized format:\n" \
-                  + file_path + "\n\n" \
-                  + "Please make sure it has been produced by this application."
+            msg = (
+                "The file you attempted to load doesn't have a recognized format:\n"
+                + file_path
+                + "\n\n"
+                + "Please make sure it has been produced by this application."
+            )
             QMessageBox.warning(self, "Error loading reduction parameter file", msg)
             print(sys.exc_info()[1])
             return
@@ -429,7 +433,7 @@ class ReductionGUI(QMainWindow):
 
     def _new(self, *argv):
         """
-            Start new reduction
+        Start new reduction
         """
         self._interface.reset()
         self._filename = None
@@ -438,11 +442,11 @@ class ReductionGUI(QMainWindow):
 
     def _file_open(self, *argv):
         """
-            File chooser for loading UI parameters
+        File chooser for loading UI parameters
         """
-        fname = QFileDialog.getOpenFileName(self, "Reduction settings - Choose a settings file",
-                                            self._last_directory,
-                                            "Settings files (*.xml)")
+        fname = QFileDialog.getOpenFileName(
+            self, "Reduction settings - Choose a settings file", self._last_directory, "Settings files (*.xml)"
+        )
         if not fname:
             return
 
@@ -455,8 +459,8 @@ class ReductionGUI(QMainWindow):
 
     def _save(self):
         """
-            Present a file dialog to the user and saves the content of the
-            UI in XML format
+        Present a file dialog to the user and saves the content of the
+        UI in XML format
         """
         if self._filename is None:
             self._save_as()
@@ -473,24 +477,24 @@ class ReductionGUI(QMainWindow):
 
     def _save_as(self):
         """
-            Present a file dialog to the user and saves the content of
-            the UI in XML format.
+        Present a file dialog to the user and saves the content of
+        the UI in XML format.
         """
         if self._filename is not None:
             fname = self._filename
         else:
-            fname = self._instrument + '_'
+            fname = self._instrument + "_"
 
-        fname = QFileDialog.getSaveFileName(self, "Reduction settings - Save settings",
-                                            self._last_directory + '/' + fname,
-                                            "Settings files (*.xml)")
+        fname = QFileDialog.getSaveFileName(
+            self, "Reduction settings - Save settings", self._last_directory + "/" + fname, "Settings files (*.xml)"
+        )
         if not fname:
             return
 
         if isinstance(fname, tuple):
             fname = fname[0]
         fname = str(QFileInfo(fname).filePath())
-        if not fname.endswith('.xml'):
+        if not fname.endswith(".xml"):
             fname += ".xml"
         if fname in self._recent_files:
             self._recent_files.remove(fname)
@@ -503,22 +507,20 @@ class ReductionGUI(QMainWindow):
 
     def _export(self):
         """
-            Exports the current content of the UI to a python script that can
-            be run within MantidPlot
+        Exports the current content of the UI to a python script that can
+        be run within MantidPlot
         """
         if self._interface is None:
             return
 
-        fname = QFileDialog.getSaveFileName(self, "Mantid Python script - Save script",
-                                            self._last_export_directory,
-                                            "Python script (*.py)")
+        fname = QFileDialog.getSaveFileName(self, "Mantid Python script - Save script", self._last_export_directory, "Python script (*.py)")
         if not fname:
             return
 
         if isinstance(fname, tuple):
             fname = fname[0]
         fname = str(fname)
-        if not fname.endswith('.py'):
+        if not fname.endswith(".py"):
             fname += ".py"
         (folder, file_name) = os.path.split(fname)
         self._last_export_directory = folder
@@ -543,5 +545,5 @@ def start():
         sys.exit(app.exec_())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     start()

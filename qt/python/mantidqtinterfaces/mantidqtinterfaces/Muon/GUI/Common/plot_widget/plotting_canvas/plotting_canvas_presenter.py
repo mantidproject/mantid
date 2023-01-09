@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from typing import List
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model import PlottingCanvasModel
-from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter_interface import \
-    PlottingCanvasPresenterInterface
+from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter_interface import (
+    PlottingCanvasPresenterInterface,
+)
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.quick_edit.quick_edit_widget import QuickEditWidget
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view_interface import PlottingCanvasViewInterface
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
@@ -16,9 +17,7 @@ import numpy as np
 
 
 class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
-
-    def __init__(self, view: PlottingCanvasViewInterface, model: PlottingCanvasModel,
-                 options_presenter: QuickEditWidget, context):
+    def __init__(self, view: PlottingCanvasViewInterface, model: PlottingCanvasModel, options_presenter: QuickEditWidget, context):
         self._view = view
         self._model = model
         self._options_view = None
@@ -81,7 +80,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._view.create_new_plot_canvas(num_axes)
 
     def create_single_plot(self):
-        """Creates a blank single plot """
+        """Creates a blank single plot"""
         self._model.is_tiled = False
         self.clear_subplots()
         self._options_presenter.add_subplot("one")
@@ -89,12 +88,12 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._view.create_new_plot_canvas(1)
 
     def get_plotted_workspaces_and_indices(self):
-        """Returns the workspace names and indices which are plotted in the figure """
+        """Returns the workspace names and indices which are plotted in the figure"""
         plotted_workspaces, indices = self._view.plotted_workspaces_and_indices
         return plotted_workspaces, indices
 
     def plot_guess_workspace(self, guess_ws_name: str):
-        """Plots the guess workspace """
+        """Plots the guess workspace"""
         fit_plot_information = self._model.create_plot_information_for_guess_ws(guess_ws_name)
         self._view.add_workspaces_to_plot([fit_plot_information])
         self._view.redraw_figure()
@@ -113,23 +112,25 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._view.set_title(ax_num, title)
 
     # Interface implementation
-    def plot_workspaces(self, workspace_names: List[str], workspace_indices: List[int], hold_on: bool,
-                        autoscale: bool):
+    def plot_workspaces(self, workspace_names: List[str], workspace_indices: List[int], hold_on: bool, autoscale: bool):
         """Plots the input workspace names and indices in the figure window
         If hold_on is True the existing workspaces plotted in the figure are kept"""
         # Create workspace information named tuple from input list
 
-        workspace_plot_info = self._model.create_workspace_plot_information(workspace_names, workspace_indices,
-                                                                            self._options_presenter.get_errors())
+        workspace_plot_info = self._model.create_workspace_plot_information(
+            workspace_names, workspace_indices, self._options_presenter.get_errors()
+        )
         if not hold_on:
             # Remove data which is currently plotted and not in the new workspace_plot_info
-            workspaces_info_to_remove = [plot_info for plot_info in self._view.plotted_workspace_information
-                                         if plot_info not in workspace_plot_info]
+            workspaces_info_to_remove = [
+                plot_info for plot_info in self._view.plotted_workspace_information if plot_info not in workspace_plot_info
+            ]
             self._view.remove_workspace_info_from_plot(workspaces_info_to_remove)
 
         # Add workspace info which is currently not plotted
-        workspace_info_to_add = [plot_info for plot_info in workspace_plot_info if plot_info
-                                 not in self._view.plotted_workspace_information]
+        workspace_info_to_add = [
+            plot_info for plot_info in workspace_plot_info if plot_info not in self._view.plotted_workspace_information
+        ]
         self._view.add_workspaces_to_plot(workspace_info_to_add)
         # check if to force autoscale
         if self._options_presenter.autoscale:
@@ -137,21 +138,18 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._set_axes_limits_and_titles(autoscale)
 
     def add_shaded_region(self, workspaces, indices):
-        workspace_plot_info = self._model.create_workspace_plot_information(workspaces, indices,
-                                                                            self._options_presenter.get_errors())
+        workspace_plot_info = self._model.create_workspace_plot_information(workspaces, indices, self._options_presenter.get_errors())
         for plot_info in workspace_plot_info:
             name = plot_info.workspace_name
             index = plot_info.index
             x_data, y1_data, y2_data = self._model.get_shade_lines(name, index)
 
-            self._view.add_shaded_region(workspace_name = name,
-                                         axis_number = plot_info.axis,
-                                         x_values = x_data,
-                                         y1_values = y1_data,
-                                         y2_values = y2_data)
+            self._view.add_shaded_region(
+                workspace_name=name, axis_number=plot_info.axis, x_values=x_data, y1_values=y1_data, y2_values=y2_data
+            )
 
     def should_update_all(self, selected_subplots):
-        all = len(selected_subplots)==1 and self._options_presenter.get_selection_index()==0
+        all = len(selected_subplots) == 1 and self._options_presenter.get_selection_index() == 0
         return len(selected_subplots) > 1 or all
 
     def _set_axes_limits_and_titles(self, autoscale):
@@ -160,7 +158,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
 
         selected_subplots, _ = self._get_selected_subplots_from_quick_edit_widget()
         if len(selected_subplots) == 1:
-            xlims  = self._context.get_xlim(selected_subplots[0])
+            xlims = self._context.get_xlim(selected_subplots[0])
             ylims = self._context.get_ylim(selected_subplots[0])
         self._view.set_axes_limits(xlims, ylims)
         # override y values
@@ -212,7 +210,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
             ylim = self._context.get_ylim_all
             autoscale = self._context.get_autoscale_all
             error = self._context.get_error_all
-        #update the quick edit
+        # update the quick edit
         self._options_presenter.set_plot_x_range(xlim)
         self._options_presenter.set_plot_y_range(ylim)
         self.set_autoscale(autoscale)
@@ -234,7 +232,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
             indices = [self._context.get_axis(name) for name in subplots]
             return subplots, indices
         else:
-            return [], [] # no subplots are available
+            return [], []  # no subplots are available
 
     def set_subplot_selection(self, selection):
         selected_subplots, indices = self._get_selected_subplots_from_quick_edit_widget()
@@ -349,7 +347,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
     def disable_autoscale(self):
         self._options_presenter.disable_autoscale()
 
-    def set_autoscale(self, state:bool):
+    def set_autoscale(self, state: bool):
         self._options_presenter.set_autoscale(state)
         if state:
             self._options_presenter.disable_yaxis_changer()
@@ -381,7 +379,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
 
     def update_y_limits_of_subplots(self, y_limits_list, selected_subplots, axes):
         # these are seperate to make it easier for debugging if it ever breaks
-        if len(selected_subplots)==0:
+        if len(selected_subplots) == 0:
             return
         elif len(selected_subplots) != len(y_limits_list):
             return

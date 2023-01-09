@@ -35,8 +35,7 @@ def load_full_instrument_calibration():
     if ADS.doesExist("full_inst_calib"):
         full_calib = ADS.retrieve("full_inst_calib")
     else:
-        full_calib_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP,
-                                      output_settings.ENGINEERING_PREFIX, "full_calibration")
+        full_calib_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "full_calibration")
         try:
             full_calib = Load(full_calib_path, OutputWorkspace="full_inst_calib")
         except ValueError:

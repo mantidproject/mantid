@@ -10,4 +10,4 @@
 from mantidqt.utils.qt import import_qt
 
 
-AlgorithmDialog = import_qt('.._common', package='mantidqt.dialogs', attr='AlgorithmDialog')
+AlgorithmDialog = import_qt(".._common", package="mantidqt.dialogs", attr="AlgorithmDialog")

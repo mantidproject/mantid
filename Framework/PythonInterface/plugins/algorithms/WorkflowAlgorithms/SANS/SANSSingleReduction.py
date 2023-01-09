@@ -10,101 +10,119 @@
 
 from SANSSingleReductionBase import SANSSingleReductionBase
 
-from mantid.api import (AlgorithmFactory, PropertyMode, WorkspaceGroup, WorkspaceGroupProperty)
-from mantid.kernel import (Direction, Property)
+from mantid.api import AlgorithmFactory, PropertyMode, WorkspaceGroup, WorkspaceGroupProperty
+from mantid.kernel import Direction, Property
 from mantid.simpleapi import CloneWorkspace
-from sans.algorithm_detail.single_execution import (run_core_reduction, run_optimized_for_can)
-from sans.common.enums import (DataType, ReductionMode)
+from sans.algorithm_detail.single_execution import run_core_reduction, run_optimized_for_can
+from sans.common.enums import DataType, ReductionMode
 from sans.common.general_functions import does_can_workspace_exist_on_ads
 from sans.data_objects.sans_workflow_algorithm_outputs import SANSWorkflowAlgorithmOutputs
 
 
 class SANSSingleReduction(SANSSingleReductionBase):
     def category(self):
-        return 'SANS\\Reduction'
+        return "SANS\\Reduction"
 
     def version(self):
         return 1
 
     def summary(self):
-        return 'Performs a single reduction of SANS data.'
+        return "Performs a single reduction of SANS data."
 
     def _declare_output_properties(self):
-        self.declareProperty('OutScaleFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Output,
-                             doc='Applied scale factor.')
+        self.declareProperty("OutScaleFactor", defaultValue=Property.EMPTY_DBL, direction=Direction.Output, doc="Applied scale factor.")
 
-        self.declareProperty('OutShiftFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Output,
-                             doc='Applied shift factor.')
+        self.declareProperty("OutShiftFactor", defaultValue=Property.EMPTY_DBL, direction=Direction.Output, doc="Applied shift factor.")
 
         # This breaks our flexibility with the reduction mode. We need to check if we can populate this based on
         # the available reduction modes for the state input. TODO: check if this is possible
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceLAB', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The output workspace for the low-angle bank.')
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceHAB', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The output workspace for the high-angle bank.'),
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceHABScaled', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The scaled output HAB workspace when merging')
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceMerged', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The output workspace for the merged reduction.')
-        self.setPropertyGroup("OutScaleFactor", 'Output')
-        self.setPropertyGroup("OutShiftFactor", 'Output')
-        self.setPropertyGroup("OutputWorkspaceLAB", 'Output')
-        self.setPropertyGroup("OutputWorkspaceHAB", 'Output')
-        self.setPropertyGroup("OutputWorkspaceHABScaled", 'Output')
-        self.setPropertyGroup("OutputWorkspaceMerged", 'Output')
+        self.declareProperty(
+            WorkspaceGroupProperty("OutputWorkspaceLAB", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="The output workspace for the low-angle bank.",
+        )
+        self.declareProperty(
+            WorkspaceGroupProperty("OutputWorkspaceHAB", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="The output workspace for the high-angle bank.",
+        ),
+        self.declareProperty(
+            WorkspaceGroupProperty("OutputWorkspaceHABScaled", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="The scaled output HAB workspace when merging",
+        )
+        self.declareProperty(
+            WorkspaceGroupProperty("OutputWorkspaceMerged", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="The output workspace for the merged reduction.",
+        )
+        self.setPropertyGroup("OutScaleFactor", "Output")
+        self.setPropertyGroup("OutShiftFactor", "Output")
+        self.setPropertyGroup("OutputWorkspaceLAB", "Output")
+        self.setPropertyGroup("OutputWorkspaceHAB", "Output")
+        self.setPropertyGroup("OutputWorkspaceHABScaled", "Output")
+        self.setPropertyGroup("OutputWorkspaceMerged", "Output")
 
         # CAN output
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceLABCan', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The can output workspace for the low-angle bank, provided there is one.')
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceHABCan', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The can output workspace for the high-angle bank, provided there is one.')
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceLABSample', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The sample output workspace for the low-angle bank, provided there is one.')
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceHABSample', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The sample output workspace for the high-angle bank, provided there is one')
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceCalculatedTransmission', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The calculated transmission workspace')
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceUnfittedTransmission', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The unfitted transmission workspace')
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceCalculatedTransmissionCan', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The calculated transmission workspace for the can')
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceUnfittedTransmissionCan', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The unfitted transmission workspace for the can')
-        self.setPropertyGroup("OutputWorkspaceLABCan", 'Can Output')
-        self.setPropertyGroup("OutputWorkspaceHABCan", 'Can Output')
-        self.setPropertyGroup("OutputWorkspaceLABSample", 'Can Output')
-        self.setPropertyGroup("OutputWorkspaceHABSample", 'Can Output')
+        self.declareProperty(
+            WorkspaceGroupProperty("OutputWorkspaceLABCan", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="The can output workspace for the low-angle bank, provided there is one.",
+        )
+        self.declareProperty(
+            WorkspaceGroupProperty("OutputWorkspaceHABCan", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="The can output workspace for the high-angle bank, provided there is one.",
+        )
+        self.declareProperty(
+            WorkspaceGroupProperty("OutputWorkspaceLABSample", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="The sample output workspace for the low-angle bank, provided there is one.",
+        )
+        self.declareProperty(
+            WorkspaceGroupProperty("OutputWorkspaceHABSample", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="The sample output workspace for the high-angle bank, provided there is one",
+        )
+        self.declareProperty(
+            WorkspaceGroupProperty("OutputWorkspaceCalculatedTransmission", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="The calculated transmission workspace",
+        )
+        self.declareProperty(
+            WorkspaceGroupProperty("OutputWorkspaceUnfittedTransmission", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="The unfitted transmission workspace",
+        )
+        self.declareProperty(
+            WorkspaceGroupProperty(
+                "OutputWorkspaceCalculatedTransmissionCan", "", optional=PropertyMode.Optional, direction=Direction.Output
+            ),
+            doc="The calculated transmission workspace for the can",
+        )
+        self.declareProperty(
+            WorkspaceGroupProperty(
+                "OutputWorkspaceUnfittedTransmissionCan", "", optional=PropertyMode.Optional, direction=Direction.Output
+            ),
+            doc="The unfitted transmission workspace for the can",
+        )
+        self.setPropertyGroup("OutputWorkspaceLABCan", "Can Output")
+        self.setPropertyGroup("OutputWorkspaceHABCan", "Can Output")
+        self.setPropertyGroup("OutputWorkspaceLABSample", "Can Output")
+        self.setPropertyGroup("OutputWorkspaceHABSample", "Can Output")
 
         # Output CAN Count and Norm for optimizations
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceLABCanNorm', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The can norm output workspace for the low-angle bank, provided there is one.')
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceLABCanCount', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The can count output workspace for the low-angle bank, provided there is one.')
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceHABCanCount', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The can count output workspace for the high-angle bank, provided there is one.')
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceHABCanNorm', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The can norm output workspace for the high-angle bank, provided there is one.')
+        self.declareProperty(
+            WorkspaceGroupProperty("OutputWorkspaceLABCanNorm", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="The can norm output workspace for the low-angle bank, provided there is one.",
+        )
+        self.declareProperty(
+            WorkspaceGroupProperty("OutputWorkspaceLABCanCount", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="The can count output workspace for the low-angle bank, provided there is one.",
+        )
+        self.declareProperty(
+            WorkspaceGroupProperty("OutputWorkspaceHABCanCount", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="The can count output workspace for the high-angle bank, provided there is one.",
+        )
+        self.declareProperty(
+            WorkspaceGroupProperty("OutputWorkspaceHABCanNorm", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="The can norm output workspace for the high-angle bank, provided there is one.",
+        )
 
-        self.setPropertyGroup("OutputWorkspaceLABCanCount", 'Opt Output')
-        self.setPropertyGroup("OutputWorkspaceLABCanNorm", 'Opt Output')
-        self.setPropertyGroup("OutputWorkspaceHABCanCount", 'Opt Output')
-        self.setPropertyGroup("OutputWorkspaceHABCanNorm", 'Opt Output')
+        self.setPropertyGroup("OutputWorkspaceLABCanCount", "Opt Output")
+        self.setPropertyGroup("OutputWorkspaceLABCanNorm", "Opt Output")
+        self.setPropertyGroup("OutputWorkspaceHABCanCount", "Opt Output")
+        self.setPropertyGroup("OutputWorkspaceHABCanNorm", "Opt Output")
 
     def PyInit(self):
         self._pyinit()
@@ -208,8 +226,9 @@ class SANSSingleReduction(SANSSingleReductionBase):
                     elif reduction_mode is ReductionMode.HAB:
                         hab_groups.addWorkspace(output_workspace)
                     else:
-                        raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
-                                           " be set with a can.".format(reduction_mode))
+                        raise RuntimeError(
+                            "SANSSingleReduction: The reduction mode {0} should not" " be set with a can.".format(reduction_mode)
+                        )
 
         self._set_prop_if_group_has_data("OutputWorkspaceLABCan", lab_groups)
         self._set_prop_if_group_has_data("OutputWorkspaceHABCan", hab_groups)
@@ -232,9 +251,12 @@ class SANSSingleReduction(SANSSingleReductionBase):
                 output_workspace_norm = bundle.parts_bundle.output_workspace_norm
                 # Make sure that the output workspace is not None which can be the case if there has never been a
                 # can set for the reduction.
-                if output_workspace_norm is not None and output_workspace_count is not None and \
-                        not does_can_workspace_exist_on_ads(output_workspace_norm) and \
-                        not does_can_workspace_exist_on_ads(output_workspace_count):
+                if (
+                    output_workspace_norm is not None
+                    and output_workspace_count is not None
+                    and not does_can_workspace_exist_on_ads(output_workspace_norm)
+                    and not does_can_workspace_exist_on_ads(output_workspace_count)
+                ):
                     if reduction_mode is ReductionMode.LAB:
                         lab_can_counts.addWorkspace(output_workspace_count)
                         lab_can_norms.addWorkspace(output_workspace_norm)
@@ -242,8 +264,9 @@ class SANSSingleReduction(SANSSingleReductionBase):
                         hab_can_counts.addWorkspace(output_workspace_count)
                         hab_can_norms.addWorkspace(output_workspace_norm)
                     else:
-                        raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
-                                           " be set with a partial can.".format(reduction_mode))
+                        raise RuntimeError(
+                            "SANSSingleReduction: The reduction mode {0} should not" " be set with a partial can.".format(reduction_mode)
+                        )
 
         self._set_prop_if_group_has_data("OutputWorkspaceLABCanCount", lab_can_counts)
         self._set_prop_if_group_has_data("OutputWorkspaceLABCanNorm", lab_can_norms)
@@ -269,8 +292,9 @@ class SANSSingleReduction(SANSSingleReductionBase):
                     elif reduction_mode is ReductionMode.HAB:
                         hab_cans.addWorkspace(output_workspace)
                     else:
-                        raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
-                                           " be set with a can.".format(reduction_mode))
+                        raise RuntimeError(
+                            "SANSSingleReduction: The reduction mode {0} should not" " be set with a can.".format(reduction_mode)
+                        )
             elif bundle.output_bundle.data_type is DataType.SAMPLE:
                 if output_workspace is not None and not does_can_workspace_exist_on_ads(output_workspace):
                     if reduction_mode is ReductionMode.LAB:
@@ -278,8 +302,9 @@ class SANSSingleReduction(SANSSingleReductionBase):
                     elif reduction_mode is ReductionMode.HAB:
                         hab_samples.addWorkspace(output_workspace)
                     else:
-                        raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
-                                           " be set with a sample.".format(reduction_mode))
+                        raise RuntimeError(
+                            "SANSSingleReduction: The reduction mode {0} should not" " be set with a sample.".format(reduction_mode)
+                        )
         self._set_prop_if_group_has_data("OutputWorkspaceLABCan", lab_cans)
         self._set_prop_if_group_has_data("OutputWorkspaceHABCan", hab_cans)
         self._set_prop_if_group_has_data("OutputWorkspaceLABSample", lab_samples)
@@ -299,11 +324,9 @@ class SANSSingleReduction(SANSSingleReductionBase):
                 if does_can_workspace_exist_on_ads(calculated_transmission_workspace):
                     # The workspace is cloned here because the transmission runs are diagnostic output so even though
                     # the values already exist they need to be labelled separately for each reduction.
-                    calculated_transmission_workspace = CloneWorkspace(calculated_transmission_workspace,
-                                                                       StoreInADS=False)
+                    calculated_transmission_workspace = CloneWorkspace(calculated_transmission_workspace, StoreInADS=False)
                 if does_can_workspace_exist_on_ads(unfitted_transmission_workspace):
-                    unfitted_transmission_workspace = CloneWorkspace(unfitted_transmission_workspace,
-                                                                     StoreInADS=False)
+                    unfitted_transmission_workspace = CloneWorkspace(unfitted_transmission_workspace, StoreInADS=False)
                 if calculated_transmission_workspace:
                     calc_can.addWorkspace(calculated_transmission_workspace)
                 if unfitted_transmission_workspace:
@@ -315,8 +338,9 @@ class SANSSingleReduction(SANSSingleReductionBase):
                 if unfitted_transmission_workspace:
                     unfit_sample.addWorkspace(unfitted_transmission_workspace)
             else:
-                raise RuntimeError("SANSSingleReduction: The data type {0} should be"
-                                   " sample or can.".format(bundle.transmission_bundle.data_type))
+                raise RuntimeError(
+                    "SANSSingleReduction: The data type {0} should be" " sample or can.".format(bundle.transmission_bundle.data_type)
+                )
 
         self._set_prop_if_group_has_data("OutputWorkspaceCalculatedTransmission", calc_sample)
         self._set_prop_if_group_has_data("OutputWorkspaceUnfittedTransmission", unfit_sample)

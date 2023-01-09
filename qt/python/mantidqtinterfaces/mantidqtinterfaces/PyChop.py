@@ -12,18 +12,21 @@ Module to import and run the PyChop GUI for use either on the commandline or as 
 
 import sys
 from mantidqtinterfaces.PyChop import PyChopGui
+
 try:
     from mantidqt.gui_helper import set_matplotlib_backend, get_qapplication
 except ImportError:
     within_mantid = False
     from qtpy.QtWidgets import QApplication
+
     app = QApplication(sys.argv)
     parent, flags = None, None
 else:
     set_matplotlib_backend()  # must be called before anything tries to use matplotlib
     app, within_mantid = get_qapplication()
-    if 'workbench' in sys.modules:
+    if "workbench" in sys.modules:
         from workbench.config import get_window_config
+
         parent, flags = get_window_config()
     else:
         parent, flags = None, None

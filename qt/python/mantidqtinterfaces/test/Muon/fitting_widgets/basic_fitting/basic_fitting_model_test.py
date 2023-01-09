@@ -10,9 +10,11 @@ from unittest import mock
 from mantid.api import AnalysisDataService, FrameworkManager, FunctionFactory
 from mantid.simpleapi import CreateEmptyTableWorkspace, CreateSampleWorkspace
 
-from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import (X_FROM_FIT_RANGE,
-                                                                                                X_FROM_DATA_RANGE,
-                                                                                                X_FROM_CUSTOM)
+from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import (
+    X_FROM_FIT_RANGE,
+    X_FROM_DATA_RANGE,
+    X_FROM_CUSTOM,
+)
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel, DEFAULT_START_X
 from mantidqtinterfaces.Muon.GUI.Common.muon_pair import MuonPair
 from mantidqtinterfaces.Muon.GUI.Common.muon_base_pair import MuonBasePair
@@ -22,7 +24,6 @@ from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_utils import StaticW
 
 
 class BasicFittingModelTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         FrameworkManager.Instance()
@@ -505,15 +506,16 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.context = mock.Mock()
         self.model._double_pulse_enabled = mock.Mock(return_value=False)
         self.model._get_plot_guess_name = mock.Mock(return_value=guess_workspace_name)
-        with mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.'
-                        'basic_fitting_model.EvaluateFunction') as mock_evaluate:
-            self.model._get_guess_parameters = mock.Mock(return_value=['func', 'ws'])
+        with mock.patch(
+            "mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting." "basic_fitting_model.EvaluateFunction"
+        ) as mock_evaluate:
+            self.model._get_guess_parameters = mock.Mock(return_value=["func", "ws"])
             self.model.update_plot_guess()
-            mock_evaluate.assert_called_with(InputWorkspace=mock.ANY,
-                                             Function=self.model.current_single_fit_function,
-                                             OutputWorkspace=guess_workspace_name)
+            mock_evaluate.assert_called_with(
+                InputWorkspace=mock.ANY, Function=self.model.current_single_fit_function, OutputWorkspace=guess_workspace_name
+            )
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.EvaluateFunction')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.EvaluateFunction")
     def test_update_plot_guess_notifies_subscribers_with_the_guess_workspace_name_if_plot_guess_is_true(self, mock_evaluate):
         guess_workspace_name = "__frequency_domain_analysis_fitting_guessName1"
         self.model.dataset_names = self.dataset_names
@@ -531,9 +533,9 @@ class BasicFittingModelTest(unittest.TestCase):
         type(self.model.fitting_context).guess_workspace_name = self.mock_context_guess_workspace_name
         self.model.update_plot_guess()
 
-        mock_evaluate.assert_called_with(InputWorkspace=mock.ANY,
-                                         Function=self.model.current_single_fit_function,
-                                         OutputWorkspace=guess_workspace_name)
+        mock_evaluate.assert_called_with(
+            InputWorkspace=mock.ANY, Function=self.model.current_single_fit_function, OutputWorkspace=guess_workspace_name
+        )
 
         self.assertEqual(1, self.mock_context_guess_workspace_name.call_count)
         self.mock_context_guess_workspace_name.assert_called_with(guess_workspace_name)
@@ -567,14 +569,13 @@ class BasicFittingModelTest(unittest.TestCase):
 
         self.model.context = mock.Mock()
         self.model._double_pulse_enabled = mock.Mock(return_value=True)
-        self.model._get_guess_parameters = mock.Mock(return_value=['func', 'ws'])
+        self.model._get_guess_parameters = mock.Mock(return_value=["func", "ws"])
         self.model._get_plot_guess_name = mock.Mock(return_value=guess_workspace_name)
         self.model._evaluate_double_pulse_function = mock.Mock()
 
         self.model.update_plot_guess()
 
-        self.model._evaluate_double_pulse_function.assert_called_once_with(
-            self.model.current_single_fit_function, guess_workspace_name)
+        self.model._evaluate_double_pulse_function.assert_called_once_with(self.model.current_single_fit_function, guess_workspace_name)
 
     def test_update_plot_guess_will_use_tmp_workspace_with_data_range_if_plot_range_type_is_selected(self):
         guess_workspace_name = "__frequency_domain_analysis_fitting_guessName1"
@@ -589,7 +590,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.context = mock.Mock()
         self.model._double_pulse_enabled = mock.Mock(return_value=False)
         self.model._get_plot_guess_name = mock.Mock(return_value=guess_workspace_name)
-        self.model._get_guess_parameters = mock.Mock(return_value=['func', 'ws'])
+        self.model._get_guess_parameters = mock.Mock(return_value=["func", "ws"])
         self.model.update_plot_guess()
 
         guess_workspace = AnalysisDataService.retrieve(guess_workspace_name)
@@ -612,7 +613,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.context = mock.Mock()
         self.model._double_pulse_enabled = mock.Mock(return_value=False)
         self.model._get_plot_guess_name = mock.Mock(return_value=guess_workspace_name)
-        self.model._get_guess_parameters = mock.Mock(return_value=['func', 'ws'])
+        self.model._get_guess_parameters = mock.Mock(return_value=["func", "ws"])
         self.model.update_plot_guess()
 
         guess_workspace = AnalysisDataService.retrieve(guess_workspace_name)
@@ -637,7 +638,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.context = mock.Mock()
         self.model._double_pulse_enabled = mock.Mock(return_value=False)
         self.model._get_plot_guess_name = mock.Mock(return_value=guess_workspace_name)
-        self.model._get_guess_parameters = mock.Mock(return_value=['func', 'ws'])
+        self.model._get_guess_parameters = mock.Mock(return_value=["func", "ws"])
         self.model.update_plot_guess()
 
         guess_workspace = AnalysisDataService.retrieve(guess_workspace_name)
@@ -649,13 +650,13 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.dataset_names = self.dataset_names
         self.model.single_fit_functions = self.single_fit_functions
 
-        self.model._do_single_fit = mock.MagicMock(return_value=(self.model.current_single_fit_function, "success",
-                                                                 0.56))
+        self.model._do_single_fit = mock.MagicMock(return_value=(self.model.current_single_fit_function, "success", 0.56))
 
         self.model.perform_fit()
 
-        self.model._do_single_fit.assert_called_once_with(self.model._get_parameters_for_single_fit(
-            self.model.current_dataset_name, self.model.current_single_fit_function))
+        self.model._do_single_fit.assert_called_once_with(
+            self.model._get_parameters_for_single_fit(self.model.current_dataset_name, self.model.current_single_fit_function)
+        )
 
     def test_that_get_fit_function_parameters_will_return_a_list_of_parameter_names_for_the_current_single_functions(self):
         self.model.dataset_names = self.dataset_names
@@ -700,8 +701,7 @@ class BasicFittingModelTest(unittest.TestCase):
         # The last two datasets are the same as the previously loaded datasets. This means their functions should be
         # reused for these last two single fit functions. The first two single fit functions are completely new, and so
         # are just given a copy of the previous currently selected function (i.e. A0=1).
-        self.model.dataset_names = ["New Name1", "New Name2", "EMU20884; Group; fwd; Asymmetry",
-                                    "EMU20884; Group; top; Asymmetry"]
+        self.model.dataset_names = ["New Name1", "New Name2", "EMU20884; Group; fwd; Asymmetry", "EMU20884; Group; top; Asymmetry"]
 
         self.assertEqual(str(self.model.single_fit_functions[0]), "name=FlatBackground,A0=1")
         self.assertEqual(str(self.model.single_fit_functions[1]), "name=FlatBackground,A0=1")
@@ -826,15 +826,20 @@ class BasicFittingModelTest(unittest.TestCase):
         selection = ["long", "long2", "phase_Re_", "phase_Im_", "phase2_Re_", "phase2_Im_"]
         result = self.model.get_fit_workspace_names_from_groups_and_runs([1, 2, 3], selection)
 
-        self.assertEqual(["MUSR1; Pair Asym; long; Rebin; MA",
-                          "MUSR1; PhaseQuad; phase_Re_; Rebin; MA",
-                          "MUSR1; PhaseQuad; phase2_Im_; Rebin; MA",
-                          "MUSR2; Pair Asym; long; Rebin; MA",
-                          "MUSR2; PhaseQuad; phase_Re_; Rebin; MA",
-                          "MUSR2; PhaseQuad; phase2_Im_; Rebin; MA",
-                          "MUSR3; Pair Asym; long; Rebin; MA",
-                          "MUSR3; PhaseQuad; phase_Re_; Rebin; MA",
-                          "MUSR3; PhaseQuad; phase2_Im_; Rebin; MA"], result)
+        self.assertEqual(
+            [
+                "MUSR1; Pair Asym; long; Rebin; MA",
+                "MUSR1; PhaseQuad; phase_Re_; Rebin; MA",
+                "MUSR1; PhaseQuad; phase2_Im_; Rebin; MA",
+                "MUSR2; Pair Asym; long; Rebin; MA",
+                "MUSR2; PhaseQuad; phase_Re_; Rebin; MA",
+                "MUSR2; PhaseQuad; phase2_Im_; Rebin; MA",
+                "MUSR3; Pair Asym; long; Rebin; MA",
+                "MUSR3; PhaseQuad; phase_Re_; Rebin; MA",
+                "MUSR3; PhaseQuad; phase2_Im_; Rebin; MA",
+            ],
+            result,
+        )
 
     def test_get_fit_workspace_names_from_groups_and_runs_when_fit_to_raw_is_true(self):
         self.model.fit_to_raw = True
@@ -853,15 +858,20 @@ class BasicFittingModelTest(unittest.TestCase):
         selection = ["long", "long2", "phase_Re_", "phase_Im_", "phase2_Re_", "phase2_Im_"]
         result = self.model.get_fit_workspace_names_from_groups_and_runs([1, 2, 3], selection)
 
-        self.assertEqual(["MUSR1; Pair Asym; long; MA",
-                          "MUSR1; PhaseQuad; phase_Re_; MA",
-                          "MUSR1; PhaseQuad; phase2_Im_; MA",
-                          "MUSR2; Pair Asym; long; MA",
-                          "MUSR2; PhaseQuad; phase_Re_; MA",
-                          "MUSR2; PhaseQuad; phase2_Im_; MA",
-                          "MUSR3; Pair Asym; long; MA",
-                          "MUSR3; PhaseQuad; phase_Re_; MA",
-                          "MUSR3; PhaseQuad; phase2_Im_; MA"], result)
+        self.assertEqual(
+            [
+                "MUSR1; Pair Asym; long; MA",
+                "MUSR1; PhaseQuad; phase_Re_; MA",
+                "MUSR1; PhaseQuad; phase2_Im_; MA",
+                "MUSR2; Pair Asym; long; MA",
+                "MUSR2; PhaseQuad; phase_Re_; MA",
+                "MUSR2; PhaseQuad; phase2_Im_; MA",
+                "MUSR3; Pair Asym; long; MA",
+                "MUSR3; PhaseQuad; phase_Re_; MA",
+                "MUSR3; PhaseQuad; phase2_Im_; MA",
+            ],
+            result,
+        )
 
     def test_that_validate_sequential_fit_returns_an_empty_message_when_the_data_provided_is_valid_in_normal_fitting(self):
         self.model.dataset_names = self.dataset_names
@@ -878,10 +888,10 @@ class BasicFittingModelTest(unittest.TestCase):
 
         self.assertEqual(message, "No data or fit function selected for fitting.")
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.make_group')
-    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.add_list_to_group')
-    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.check_if_workspace_exist')
-    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.retrieve_ws')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.make_group")
+    @mock.patch("mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.add_list_to_group")
+    @mock.patch("mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.check_if_workspace_exist")
+    @mock.patch("mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.retrieve_ws")
     def test_add_workspaces_to_group(self, retrieve_ws, check_exists, add_to_group, make_group):
         check_exists.return_value = True
         retrieve_ws.return_value = "group ws"
@@ -891,10 +901,10 @@ class BasicFittingModelTest(unittest.TestCase):
         add_to_group.assert_called_once_with(["ws"], "group ws")
         make_group.assert_not_called()
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.make_group')
-    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.add_list_to_group')
-    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.check_if_workspace_exist')
-    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.retrieve_ws')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.make_group")
+    @mock.patch("mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.add_list_to_group")
+    @mock.patch("mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.check_if_workspace_exist")
+    @mock.patch("mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.retrieve_ws")
     def test_add_workspaces_to_new_group(self, retrieve_ws, check_exists, add_to_group, make_group):
         check_exists.return_value = False
         retrieve_ws.return_value = "group ws"
@@ -912,7 +922,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.end_xs = [15.0, 15.0]
 
         self.assertEqual(self.model.current_start_x, 0.0)
-        self.assertEqual(self.model.current_end_x, 15.)
+        self.assertEqual(self.model.current_end_x, 15.0)
         new_start_x = 5
         new_end_x = 10
 
@@ -928,7 +938,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.end_xs = [15.0, 15.0]
 
         self.assertEqual(self.model.current_start_x, 0.0)
-        self.assertEqual(self.model.current_end_x, 15.)
+        self.assertEqual(self.model.current_end_x, 15.0)
         new_start_x = 30
         new_end_x = 50
 
@@ -944,7 +954,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.end_xs = [15.0, 15.0]
 
         self.assertEqual(self.model.current_start_x, 0.0)
-        self.assertEqual(self.model.current_end_x, 15.)
+        self.assertEqual(self.model.current_end_x, 15.0)
         new_start_x = 50
         new_end_x = 10
 
@@ -953,5 +963,5 @@ class BasicFittingModelTest(unittest.TestCase):
         self.assertEqual(self.model.current_end_x, 15.0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

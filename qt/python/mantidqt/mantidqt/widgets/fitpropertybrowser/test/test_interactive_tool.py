@@ -20,8 +20,7 @@ from mantidqt.widgets.fitpropertybrowser.interactive_tool import FitInteractiveT
 
 @start_qapplication
 class FitInteractiveToolTest(unittest.TestCase):
-
-    @patch('mantidqt.plotting.markers.VerticalMarker')
+    @patch("mantidqt.plotting.markers.VerticalMarker")
     def setUp(self, mock_v_marker) -> None:
         mock_v_marker._get_y0_y1 = MagicMock(return_value=(0, 1))
         canvas = MagicMock()
@@ -33,11 +32,11 @@ class FitInteractiveToolTest(unittest.TestCase):
         del self.interactor
 
     def cursor_hover_over_marker_test_helper(self, above, expected_cursor):
-        with patch('mantidqt.plotting.markers.SingleMarker.is_inside_bounds', return_value=(True, 1)):
-            with patch('mantidqt.plotting.markers.RangeMarker.get_range', return_value=[0, 10]):
+        with patch("mantidqt.plotting.markers.SingleMarker.is_inside_bounds", return_value=(True, 1)):
+            with patch("mantidqt.plotting.markers.RangeMarker.get_range", return_value=[0, 10]):
                 # is_above = True -> cursor is hovering over a marker
                 # is_above = False -> cursor is not hovering ove a marker
-                with patch('mantidqt.plotting.markers.SingleMarker.is_above', return_value=above):
+                with patch("mantidqt.plotting.markers.SingleMarker.is_above", return_value=above):
                     event = MagicMock()
                     event.xdata = 1
                     event.ydata = 2

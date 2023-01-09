@@ -16,7 +16,7 @@ class BackgroundCorrectionsPresenter:
     The BackgroundCorrectionsPresenter has a BackgroundCorrectionsView and BackgroundCorrectionsModel.
     """
 
-    def __init__(self, view: BackgroundCorrectionsView,  model: BackgroundCorrectionsModel, corrections_presenter):
+    def __init__(self, view: BackgroundCorrectionsView, model: BackgroundCorrectionsModel, corrections_presenter):
         """Initialize the DeadTimeCorrectionsPresenter. Sets up the slots and event observers."""
         self.view = view
         self.model = model
@@ -125,9 +125,11 @@ class BackgroundCorrectionsPresenter:
 
         self._corrections_presenter.set_tab_warning(self.model.get_warning_for_correction_tab())
         if self.model.is_background_mode_auto() and self.model.any_negative_backgrounds():
-            self._corrections_presenter.warning_popup("A negative background has been calculated in Auto correction "
-                                                      "mode.\n\nIf this is not expected then please use Manual mode,"
-                                                      " or adjust the fitting range.")
+            self._corrections_presenter.warning_popup(
+                "A negative background has been calculated in Auto correction "
+                "mode.\n\nIf this is not expected then please use Manual mode,"
+                " or adjust the fitting range."
+            )
 
     def _handle_start_or_end_x_changed(self, get_new_x_range) -> None:
         """Handles when a Start X or End X is changed using an appropriate getter to get the new x range."""
@@ -140,15 +142,21 @@ class BackgroundCorrectionsPresenter:
 
     def _get_new_x_range_when_start_x_changed(self, run: str, group: str) -> tuple:
         """Returns the new x range for a domain when the start X has been changed."""
-        return check_start_x_is_valid(self.model.get_counts_workspace_name(run, group),
-                                      self.view.selected_start_x(), self.model.end_x(run, group),
-                                      self.model.start_x(run, group))
+        return check_start_x_is_valid(
+            self.model.get_counts_workspace_name(run, group),
+            self.view.selected_start_x(),
+            self.model.end_x(run, group),
+            self.model.start_x(run, group),
+        )
 
     def _get_new_x_range_when_end_x_changed(self, run: str, group: str) -> tuple:
         """Returns the new x range for a domain when the end X has been changed."""
-        return check_end_x_is_valid(self.model.get_counts_workspace_name(run, group),
-                                    self.model.start_x(run, group), self.view.selected_end_x(),
-                                    self.model.end_x(run, group))
+        return check_end_x_is_valid(
+            self.model.get_counts_workspace_name(run, group),
+            self.model.start_x(run, group),
+            self.view.selected_end_x(),
+            self.model.end_x(run, group),
+        )
 
     def _run_background_corrections_for_all(self) -> None:
         """Runs the background corrections for all stored data in the corrections context."""
@@ -159,11 +167,19 @@ class BackgroundCorrectionsPresenter:
 
     def _update_displayed_corrections_data(self) -> None:
         """Updates the displayed corrections data using the data stored in the model."""
-        runs, groups, use_raws, start_xs, end_xs, backgrounds, background_errors, statuses = \
-            self.model.selected_correction_data()
-        self.view.populate_corrections_table(runs, groups, use_raws, start_xs, end_xs, backgrounds, background_errors,
-                                             statuses, self.model.is_rebin_fixed_selected(),
-                                             self.model.is_background_mode_auto())
+        runs, groups, use_raws, start_xs, end_xs, backgrounds, background_errors, statuses = self.model.selected_correction_data()
+        self.view.populate_corrections_table(
+            runs,
+            groups,
+            use_raws,
+            start_xs,
+            end_xs,
+            backgrounds,
+            background_errors,
+            statuses,
+            self.model.is_rebin_fixed_selected(),
+            self.model.is_background_mode_auto(),
+        )
 
     def _update_use_raw_in_view_and_model(self, run: str, group: str, use_raw: bool) -> None:
         """Updates the Use Raw option in the view and model using the provided value."""
@@ -195,12 +211,12 @@ class BackgroundCorrectionsPresenter:
     def _perform_background_corrections(self, calculation_func, *args) -> None:
         """Performs the background corrections using the provided function and args."""
         try:
-            self.correction_calculation_thread = self._corrections_presenter.create_calculation_thread(calculation_func,
-                                                                                                       *args)
+            self.correction_calculation_thread = self._corrections_presenter.create_calculation_thread(calculation_func, *args)
             self.correction_calculation_thread.threadWrapperSetUp(
                 self._corrections_presenter.handle_thread_calculation_started,
                 self._corrections_presenter.handle_background_corrections_for_all_finished,
-                self._corrections_presenter.handle_thread_error)
+                self._corrections_presenter.handle_thread_error,
+            )
             self.correction_calculation_thread.start()
         except ValueError as error:
             self._corrections_presenter.warning_popup(error)

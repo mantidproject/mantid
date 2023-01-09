@@ -9,11 +9,10 @@ from copy import copy
 
 
 class PlotFitPaneModel(BasePaneModel):
-
     def __init__(self, context, name):
         super().__init__(context, name)
         end_x = self.context.default_end_x
-        self.context.plot_panes_context[self.name].set_defaults([0.,end_x], [-1.0, 1.0])
+        self.context.plot_panes_context[self.name].set_defaults([0.0, end_x], [-1.0, 1.0])
 
     @staticmethod
     def get_fit_workspace_and_indices(fit, with_diff=True):
@@ -37,13 +36,13 @@ class PlotFitPaneModel(BasePaneModel):
 
     @staticmethod
     def _get_fit_label(workspace_name, index):
-        label = ''
+        label = ""
         fit_function_name = get_fit_function_name_from_workspace(workspace_name)
         if fit_function_name:
             if index in [1]:
-                workspace_type = 'Calc'
+                workspace_type = "Calc"
             elif index == 2:
-                workspace_type = 'Diff'
+                workspace_type = "Diff"
             label = f";{fit_function_name};{workspace_type}"
         return label
 

@@ -9,7 +9,7 @@ from qtpy.QtCore import Qt, Slot, QObject
 from mantid.api import AlgorithmManager, AnalysisDataService, ITableWorkspace
 from mantidqt.utils.qt import import_qt
 
-PropertyHandler = import_qt('.._common', 'mantidqt.widgets', 'PropertyHandler')
+PropertyHandler = import_qt(".._common", "mantidqt.widgets", "PropertyHandler")
 
 
 class FitPropertyBrowserPlotInteraction(QObject):
@@ -102,7 +102,7 @@ class FitPropertyBrowserPlotInteraction(QObject):
         """
         fun = self.fit_browser.currentHandler().ifun()
         ws_name = self.fit_browser.workspaceName()
-        if fun == '' or ws_name == '':
+        if fun == "" or ws_name == "":
             return
         out_ws_name = self._get_current_prefixed_function_name()
 
@@ -120,25 +120,25 @@ class FitPropertyBrowserPlotInteraction(QObject):
         :return: Output guess workspace
         """
         workspace = AnalysisDataService.retrieve(ws_name)
-        alg = AlgorithmManager.createUnmanaged('EvaluateFunction')
+        alg = AlgorithmManager.createUnmanaged("EvaluateFunction")
         alg.setChild(True)
         alg.initialize()
-        alg.setProperty('Function', fun)
-        alg.setProperty('InputWorkspace', ws_name)
+        alg.setProperty("Function", fun)
+        alg.setProperty("InputWorkspace", ws_name)
         if isinstance(workspace, ITableWorkspace):
-            alg.setProperty('XColumn', self.fit_browser.getXColumnName())
-            alg.setProperty('YColumn', self.fit_browser.getYColumnName())
+            alg.setProperty("XColumn", self.fit_browser.getXColumnName())
+            alg.setProperty("YColumn", self.fit_browser.getYColumnName())
             if self.fit_browser.getErrColumnName():
-                alg.setProperty('ErrColumn', self.fit_browser.getErrColumnName())
+                alg.setProperty("ErrColumn", self.fit_browser.getErrColumnName())
         else:
-            alg.setProperty('WorkspaceIndex', self.fit_browser.workspaceIndex())
-        alg.setProperty('StartX', self.fit_browser.startX())
-        alg.setProperty('EndX', self.fit_browser.endX())
-        alg.setProperty('IgnoreInvalidData', self.fit_browser.ignoreInvalidData())
-        alg.setProperty('OutputWorkspace', out_ws_name)
+            alg.setProperty("WorkspaceIndex", self.fit_browser.workspaceIndex())
+        alg.setProperty("StartX", self.fit_browser.startX())
+        alg.setProperty("EndX", self.fit_browser.endX())
+        alg.setProperty("IgnoreInvalidData", self.fit_browser.ignoreInvalidData())
+        alg.setProperty("OutputWorkspace", out_ws_name)
         alg.execute()
 
-        return alg.getProperty('OutputWorkspace').value
+        return alg.getProperty("OutputWorkspace").value
 
     def plot_guess_all(self):
         """
@@ -146,15 +146,15 @@ class FitPropertyBrowserPlotInteraction(QObject):
         """
         fun = self.fit_browser.getFittingFunction()
         ws_name = self.fit_browser.workspaceName()
-        if fun == '' or ws_name == '':
+        if fun == "" or ws_name == "":
             return
-        out_ws_name = f'{ws_name}_guess'
+        out_ws_name = f"{ws_name}_guess"
 
         line = self._plot_guess_workspace(ws_name, fun, out_ws_name)
 
         if line:
             self.guess_all_line = line
-            self.fit_browser.setTextPlotGuess('Remove Guess')
+            self.fit_browser.setTextPlotGuess("Remove Guess")
 
     def remove_guess_all(self):
         """
@@ -169,7 +169,7 @@ class FitPropertyBrowserPlotInteraction(QObject):
             pass
         self.guess_all_line = None
         self.update_legend()
-        self.fit_browser.setTextPlotGuess('Plot Guess')
+        self.fit_browser.setTextPlotGuess("Plot Guess")
         self.canvas.draw()
 
     def remove_current_guess(self):
@@ -200,7 +200,7 @@ class FitPropertyBrowserPlotInteraction(QObject):
         """
         fun = self.fit_browser.currentHandler().ifun()
         ws_name = self.fit_browser.workspaceName()
-        if fun == '' or ws_name == '':
+        if fun == "" or ws_name == "":
             return
         out_ws_name = self._get_current_prefixed_function_name()
         line = self.guess_lines[self._get_current_prefixed_function_name()]
@@ -220,9 +220,9 @@ class FitPropertyBrowserPlotInteraction(QObject):
         """
         fun = self.fit_browser.getFittingFunction()
         ws_name = self.fit_browser.workspaceName()
-        if fun == '' or ws_name == '':
+        if fun == "" or ws_name == "":
             return
-        out_ws_name = f'{ws_name}_guess'
+        out_ws_name = f"{ws_name}_guess"
         old_line = self.guess_all_line
         color = old_line.get_color()
         try:
@@ -256,8 +256,7 @@ class FitPropertyBrowserPlotInteraction(QObject):
         Returns the prefixed function name, e.g f0.LinearBackground
         :return: Prefixed function name
         """
-        return self.fit_browser.currentHandler().functionPrefix() + '.' + \
-            self.fit_browser.currentHandler().ifun().name()
+        return self.fit_browser.currentHandler().functionPrefix() + "." + self.fit_browser.currentHandler().ifun().name()
 
     def _plot_guess_workspace(self, workspace_name, function, output_workspace_name, **plotkwargs):
         """
@@ -277,8 +276,15 @@ class FitPropertyBrowserPlotInteraction(QObject):
         legend = ax.get_legend()
 
         # Setting distribution=True prevents the guess being normalised
-        line = ax.plot(out_ws, wkspIndex=1, label=output_workspace_name, distribution=True,
-                       update_axes_labels=False, autoscale_on_update=False, **plotkwargs)[0]
+        line = ax.plot(
+            out_ws,
+            wkspIndex=1,
+            label=output_workspace_name,
+            distribution=True,
+            update_axes_labels=False,
+            autoscale_on_update=False,
+            **plotkwargs,
+        )[0]
         if legend:
             ax.make_legend()
 
@@ -297,9 +303,9 @@ class FitPropertyBrowserPlotInteraction(QObject):
         if not self.guess_lines or removed_prefix[1] == len(self.guess_lines):
             return
         for prefixed_function in reversed(list(self.guess_lines)):
-            prefix_and_function = prefixed_function.split('.')
+            prefix_and_function = prefixed_function.split(".")
             if int(prefix_and_function[0][1]) > int(removed_prefix[1]):
-                new_function_label = 'f' + str(int(prefix_and_function[0][1]) - 1) + '.' + prefix_and_function[1]
+                new_function_label = "f" + str(int(prefix_and_function[0][1]) - 1) + "." + prefix_and_function[1]
                 line = self.guess_lines.pop(prefixed_function)
                 self.guess_lines[new_function_label] = line
                 line.set_label(new_function_label)

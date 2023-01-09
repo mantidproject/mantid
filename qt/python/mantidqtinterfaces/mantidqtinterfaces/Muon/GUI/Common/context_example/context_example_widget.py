@@ -12,8 +12,8 @@ from mantidqtinterfaces.Muon.GUI.Common.context_example.context_example_model im
 class ContextExampleWidget(object):
 
     """
-        An example of how to use the context with a widget class.
-        The widget class exposes the MVP to the rest of the GUI
+    An example of how to use the context with a widget class.
+    The widget class exposes the MVP to the rest of the GUI
     """
 
     def __init__(self, context, parent=None):

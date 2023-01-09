@@ -19,6 +19,7 @@ class TableWorkspaceColumnTypeMapping(object):
     Comparing the integer to a Python enum does not work, as it does not simply compare
     the integer values. So the types are just stored as integers here
     """
+
     NotSet = -1000
     NoType = 0
     X = 1
@@ -37,9 +38,9 @@ def block_model_replacement(model):
 
 
 class TableWorkspaceDisplayModel:
-    SPECTRUM_PLOT_LEGEND_STRING = '{}-{}'
-    BIN_PLOT_LEGEND_STRING = '{}-bin-{}'
-    EDITABLE_COLUMN_NAMES = ['h', 'k', 'l']
+    SPECTRUM_PLOT_LEGEND_STRING = "{}-{}"
+    BIN_PLOT_LEGEND_STRING = "{}-bin-{}"
+    EDITABLE_COLUMN_NAMES = ["h", "k", "l"]
 
     ALLOWED_WORKSPACE_TYPES = [ITableWorkspace]
 
@@ -80,10 +81,10 @@ class TableWorkspaceDisplayModel:
                     self.marked_columns.add_y_err(ErrorColumn(col, err_for_column))
 
     def _get_v3d_from_str(self, string):
-        if '[' in string and ']' in string:
+        if "[" in string and "]" in string:
             string = string[1:-1]
-        if ',' in string:
-            return V3D(*[float(x) for x in string.split(',')])
+        if "," in string:
+            return V3D(*[float(x) for x in string.split(",")])
         else:
             raise ValueError("'{}' is not a valid V3D string.".format(string))
 
@@ -151,26 +152,25 @@ class TableWorkspaceDisplayModel:
 
     def delete_rows(self, selected_rows):
         from mantid.simpleapi import DeleteTableRows
+
         DeleteTableRows(self.ws, selected_rows)
 
     def get_statistics(self, selected_columns):
         from mantid.simpleapi import StatisticsOfTableWorkspace
+
         stats = StatisticsOfTableWorkspace(self.ws, selected_columns)
         return stats
 
     def sort(self, column_index, sort_ascending):
         from mantid.simpleapi import SortPeaksWorkspace, SortTableWorkspace
+
         column_name = self.ws.getColumnNames()[column_index]
         if self.is_peaks_workspace():
-            SortPeaksWorkspace(InputWorkspace=self.ws,
-                               OutputWorkspace=self.ws,
-                               ColumnNameToSortBy=column_name,
-                               SortAscending=sort_ascending)
+            SortPeaksWorkspace(
+                InputWorkspace=self.ws, OutputWorkspace=self.ws, ColumnNameToSortBy=column_name, SortAscending=sort_ascending
+            )
         else:
-            SortTableWorkspace(InputWorkspace=self.ws,
-                               OutputWorkspace=self.ws,
-                               Columns=column_name,
-                               Ascending=sort_ascending)
+            SortTableWorkspace(InputWorkspace=self.ws, OutputWorkspace=self.ws, Columns=column_name, Ascending=sort_ascending)
 
     def set_column_type(self, col, type, linked_col_index=-1):
         self.ws.setPlotType(col, type, linked_col_index)

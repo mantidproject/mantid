@@ -11,10 +11,13 @@ from mantidqtinterfaces.Muon.GUI.Common.muon_phasequad import MuonPhasequad
 from mantidqtinterfaces.Muon.GUI.Common.phase_table_widget.phase_table_view import REAL_PART, IMAGINARY_PART
 from mantidqt.utils.observer_pattern import Observable, GenericObserver, GenericObservable
 import re
-from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import get_phase_table_workspace_name, \
-    get_fitting_workspace_name, get_base_data_directory, \
-    get_run_number_from_workspace_name, \
-    get_run_numbers_as_string_from_workspace_name
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import (
+    get_phase_table_workspace_name,
+    get_fitting_workspace_name,
+    get_base_data_directory,
+    get_run_number_from_workspace_name,
+    get_run_numbers_as_string_from_workspace_name,
+)
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from mantidqtinterfaces.Muon.GUI.Common.utilities.run_string_utils import valid_name_regex
 import mantid
@@ -66,12 +69,10 @@ class PhaseTablePresenter(object):
     def validate_phasequad_name(self, name):
         """Checks if name is in use by another pair of group, and that it is in a valid format"""
         if name in self.context.group_pair_context.pairs:
-            self.view.warning_popup(
-                "Groups and pairs (including phasequads) must have unique names")
+            self.view.warning_popup("Groups and pairs (including phasequads) must have unique names")
             return False
         if not re.match(valid_name_regex, name):
-            self.view.warning_popup(
-                "Phasequad names should only contain digits, characters and _")
+            self.view.warning_popup("Phasequad names should only contain digits, characters and _")
             return False
         return True
 
@@ -121,8 +122,7 @@ class PhaseTablePresenter(object):
         self._validate_data_changed(self.view.last_good_time, "Last Good Data")
 
     def _validate_data_changed(self, data, string):
-        run = float(get_run_number_from_workspace_name(self.view.input_workspace,
-                                                       self.context.data_context.instrument))
+        run = float(get_run_number_from_workspace_name(self.view.input_workspace, self.context.data_context.instrument))
         last_good_time = self.context.last_good_data([run])
         first_good_time = self.context.first_good_data([run])
 
@@ -153,15 +153,16 @@ class PhaseTablePresenter(object):
 
     def create_parameters_for_cal_muon_phase_algorithm(self):
         parameters = {}
-        parameters['FirstGoodData'] = self.context.phase_context.options_dict['first_good_time']
-        parameters['LastGoodData'] = self.context.phase_context.options_dict['last_good_time']
-        parameters['InputWorkspace'] = self.context.phase_context.options_dict['input_workspace']
-        forward_group = self.context.phase_context.options_dict['forward_group']
-        parameters['ForwardSpectra'] = self.context.group_pair_context[forward_group].detectors
-        backward_group = self.context.phase_context.options_dict['backward_group']
-        parameters['BackwardSpectra'] = self.context.group_pair_context[backward_group].detectors
-        parameters['DetectorTable'] = get_phase_table_workspace_name(parameters['InputWorkspace'], forward_group,
-                                                                     backward_group, new_name=self._new_table_name)
+        parameters["FirstGoodData"] = self.context.phase_context.options_dict["first_good_time"]
+        parameters["LastGoodData"] = self.context.phase_context.options_dict["last_good_time"]
+        parameters["InputWorkspace"] = self.context.phase_context.options_dict["input_workspace"]
+        forward_group = self.context.phase_context.options_dict["forward_group"]
+        parameters["ForwardSpectra"] = self.context.group_pair_context[forward_group].detectors
+        backward_group = self.context.phase_context.options_dict["backward_group"]
+        parameters["BackwardSpectra"] = self.context.group_pair_context[backward_group].detectors
+        parameters["DetectorTable"] = get_phase_table_workspace_name(
+            parameters["InputWorkspace"], forward_group, backward_group, new_name=self._new_table_name
+        )
         return parameters
 
     def update_current_phase_tables(self):
@@ -172,17 +173,18 @@ class PhaseTablePresenter(object):
     def calculate_phase_table(self):
         """Runs the algorithm to create a phase table"""
         parameters = self.create_parameters_for_cal_muon_phase_algorithm()
-        fitting_workspace_name = get_fitting_workspace_name(parameters['DetectorTable']) \
-            if self.view.output_fit_information else '__NotUsed'
+        fitting_workspace_name = (
+            get_fitting_workspace_name(parameters["DetectorTable"]) if self.view.output_fit_information else "__NotUsed"
+        )
 
         self.current_alg = mantid.AlgorithmManager.create("CalMuonDetectorPhases")
         detector_table, fitting_information = run_CalMuonDetectorPhases(parameters, self.current_alg, fitting_workspace_name)
         self.current_alg = None
 
         self.add_phase_table_to_ADS(detector_table)
-        self.add_fitting_info_to_ADS_if_required(parameters['DetectorTable'], fitting_information)
+        self.add_fitting_info_to_ADS_if_required(parameters["DetectorTable"], fitting_information)
 
-        return parameters['DetectorTable']
+        return parameters["DetectorTable"]
 
     def handle_phase_table_calculation_started(self):
         """Specific handling when calculating phase table is started"""
@@ -219,20 +221,22 @@ class PhaseTablePresenter(object):
 
         # Calculate the new table in a separate thread
         self.calculation_thread = self.create_phase_table_calculation_thread()
-        self.calculation_thread.threadWrapperSetUp(self.handle_phase_table_calculation_started,
-                                                   self.handle_phase_table_calculation_success,
-                                                   self.handle_phase_table_calculation_error)
+        self.calculation_thread.threadWrapperSetUp(
+            self.handle_phase_table_calculation_started,
+            self.handle_phase_table_calculation_success,
+            self.handle_phase_table_calculation_error,
+        )
         self.calculation_thread.start()
 
     def handle_phase_table_changed(self):
         """Handles when phase table is changed, recalculates any existing phasequads"""
         self.disable_editing_notifier.notify_subscribers()
         self.view.disable_widget()
-        current_table = self.context.phase_context.options_dict['phase_table_for_phase_quad']
+        current_table = self.context.phase_context.options_dict["phase_table_for_phase_quad"]
         new_table = self.view.get_phase_table()
         if new_table == current_table:
             return
-        self.context.phase_context.options_dict['phase_table_for_phase_quad'] = new_table
+        self.context.phase_context.options_dict["phase_table_for_phase_quad"] = new_table
 
         # Update the table stored in each phasequad
         self.context.group_pair_context.update_phase_tables(new_table)
@@ -245,13 +249,10 @@ class PhaseTablePresenter(object):
 
     def calculate_phasequad(self):
         self.context.group_pair_context.add_phasequad(self._phasequad_obj)
-        self.context.calculate_phasequads(
-             self._phasequad_obj)
+        self.context.calculate_phasequads(self._phasequad_obj)
 
-        self.phasequad_calculation_complete_notifier.notify_subscribers(
-            self._phasequad_obj.Re.name)
-        self.phasequad_calculation_complete_notifier.notify_subscribers(
-            self._phasequad_obj.Im.name)
+        self.phasequad_calculation_complete_notifier.notify_subscribers(self._phasequad_obj.Re.name)
+        self.phasequad_calculation_complete_notifier.notify_subscribers(self._phasequad_obj.Im.name)
 
     def remove_last_row(self):
         if self.view.num_rows() > 0:
@@ -307,12 +308,14 @@ class PhaseTablePresenter(object):
             return
 
         elif self.validate_phasequad_name(name):
-            table = self.context.phase_context.options_dict['phase_table_for_phase_quad']
+            table = self.context.phase_context.options_dict["phase_table_for_phase_quad"]
             self._phasequad_obj = MuonPhasequad(str(name), table)
             self.phasequad_calculation_thread = self.create_phasequad_calculation_thread()
-            self.phasequad_calculation_thread.threadWrapperSetUp(self.handle_phasequad_calculation_started,
-                                                                 self.handle_phasequad_calculation_success,
-                                                                 self.handle_phasequad_calculation_error)
+            self.phasequad_calculation_thread.threadWrapperSetUp(
+                self.handle_phasequad_calculation_started,
+                self.handle_phasequad_calculation_success,
+                self.handle_phasequad_calculation_error,
+            )
             self.phasequad_calculation_thread.start()
 
     def handle_remove_phasequad_button_clicked(self):
@@ -348,5 +351,5 @@ class PhaseTablePresenter(object):
 
         # Notify a new phasequad is selected to update the plot
         if notify:
-            group_info = {'is_added': is_added, 'name': name}
+            group_info = {"is_added": is_added, "name": name}
             self.selected_phasequad_changed_notifier.notify_subscribers(group_info)

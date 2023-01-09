@@ -4,24 +4,27 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
-from qtpy.QtWidgets import (QFrame)  # noqa
-from qtpy.QtGui import (QDoubleValidator, QIntValidator)  # noqa
+# pylint: disable=invalid-name
+from qtpy.QtWidgets import QFrame  # noqa
+from qtpy.QtGui import QDoubleValidator, QIntValidator  # noqa
 from mantidqtinterfaces.reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.inelastic.dgs_diagnose_detectors_script import DiagnoseDetectorsScript
 import mantidqtinterfaces.reduction_gui.widgets.util as util
+
 try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
     from mantid.kernel import Logger
-    Logger("DiagnoseDetectorsWidget").information('Using legacy ui importer')
+
+    Logger("DiagnoseDetectorsWidget").information("Using legacy ui importer")
     from mantidplot import load_ui
 
 
 class DiagnoseDetectorsWidget(BaseWidget):
     """
-        Widget that presents data correction options to the user.
+    Widget that presents data correction options to the user.
     """
+
     ## Widget name
     name = "Diagnose Detectors"
 
@@ -31,7 +34,7 @@ class DiagnoseDetectorsWidget(BaseWidget):
         class DiagDetsFrame(QFrame):
             def __init__(self, parent=None):
                 QFrame.__init__(self, parent)
-                self.ui = load_ui(__file__, '../../../ui/inelastic/dgs_diagnose_detectors.ui', baseinstance=self)
+                self.ui = load_ui(__file__, "../../../ui/inelastic/dgs_diagnose_detectors.ui", baseinstance=self)
 
         self._content = DiagDetsFrame(self)
         self._layout.addWidget(self._content)
@@ -46,23 +49,22 @@ class DiagnoseDetectorsWidget(BaseWidget):
     def initialize_content(self):
         # Constraints
         for widget in [
-                self._content.median_test_high_edit,
-                self._content.median_test_low_edit,
-                self._content.median_test_out_high_edit,
-                self._content.median_test_out_low_edit,
-                self._content.errorbar_crit_edit,
-                self._content.ratio_var_crit_edit,
-                self._content.sambkg_median_test_high_edit,
-                self._content.sambkg_median_test_low_edit,
-                self._content.sambkg_errorbar_crit_edit
+            self._content.median_test_high_edit,
+            self._content.median_test_low_edit,
+            self._content.median_test_out_high_edit,
+            self._content.median_test_out_low_edit,
+            self._content.errorbar_crit_edit,
+            self._content.ratio_var_crit_edit,
+            self._content.sambkg_median_test_high_edit,
+            self._content.sambkg_median_test_low_edit,
+            self._content.sambkg_errorbar_crit_edit,
         ]:
 
             dvp = QDoubleValidator(widget)
             dvp.setBottom(0.0)
             widget.setValidator(dvp)
 
-        for widget in [self._content.tof_start_edit,
-                       self._content.tof_end_edit]:
+        for widget in [self._content.tof_start_edit, self._content.tof_end_edit]:
             ivp = QIntValidator(widget)
             ivp.setBottom(0)
             widget.setValidator(ivp)
@@ -77,8 +79,8 @@ class DiagnoseDetectorsWidget(BaseWidget):
 
     def set_state(self, state):
         """
-            Populate the UI elements with the data from the given state.
-            @param state: DiagnoseDetectorsScript object
+        Populate the UI elements with the data from the given state.
+        @param state: DiagnoseDetectorsScript object
         """
         self._content.high_counts_edit.setText(str("%1.e" % state.high_counts))
         self._content.low_counts_edit.setText(str(state.low_counts))
@@ -102,7 +104,7 @@ class DiagnoseDetectorsWidget(BaseWidget):
 
     def get_state(self):
         """
-            Returns an object with the state of the interface
+        Returns an object with the state of the interface
         """
         d = DiagnoseDetectorsScript(self._instrument_name)
         d.high_counts = util._check_and_get_float_line_edit(self._content.high_counts_edit)

@@ -60,11 +60,13 @@ class ProjectSaver(object):
         interfaces = self._return_interfaces_dicts(directory=directory, interfaces_to_save=interfaces_to_save)
 
         # Pass dicts to Project Writer
-        writer = ProjectWriter(workspace_names=saved_workspaces,
-                               plots_to_save=plots_to_save_list,
-                               interfaces_to_save=interfaces,
-                               save_location=file_name,
-                               project_file_ext=self.project_file_ext)
+        writer = ProjectWriter(
+            workspace_names=saved_workspaces,
+            plots_to_save=plots_to_save_list,
+            interfaces_to_save=interfaces,
+            save_location=file_name,
+            project_file_ext=self.project_file_ext,
+        )
         writer.write_out()
 
     @staticmethod
