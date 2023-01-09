@@ -11,19 +11,38 @@ There are several scenarios in which obtaining a benchmark for the accuracy and 
 - From the perspective of a **Scientist**, who wants to know the best Mantid minimizer to use for fitting their model to their data.
 - From the perspective of a **Software Developer**, who wants to optimize their code to improve its accuracy and runtime.
 
-This page will explain how to set up a python virtual environment that can be used to benchmark the accuracy and runtime of different fitting minimizers in Mantid for different fitting problems. To do this, we will use a package called `FitBenchmarking <https://fitbenchmarking.readthedocs.io/en/stable/>`_ which is a cross-platform open source tool for comparing different minimizers and fitting frameworks.
+This page will explain how to benchmark the accuracy and runtime of different fitting minimizers in Mantid for different fitting problems. To do this, we will use a package called `FitBenchmarking <https://fitbenchmarking.readthedocs.io/en/stable/>`_ which is a cross-platform open source tool for comparing different minimizers and fitting frameworks.
+
+Before you continue, make sure you have a recent version of python installed, and access to git bash (which is the recommended terminal to use).
+
+Benchmarking Mantid from Source
+###############################
+
+This section will show you how to benchmark Mantid using a source code directory. This is useful for software developers who want to make quick changes to the code to see how they affect the fit accuracy.
+
+1. Open a git bash terminal and cd to the desired location.
+2. Activate your mantid conda environment.
+3. Pip install the FitBenchmarking package by following the `FitBenchmarking installation instructions <https://fitbenchmarking.readthedocs.io/en/stable/users/install_instructions/fitbenchmarking.html>`_.
+4. Follow the instructions in the :ref:`Running a Benchmark <running-a-benchmark-ref>` section below. Note that you *must* specify the ``PYTHONPATH`` in the last command, where the ``<config>`` is only required on Windows:
+
+.. code-block:: sh
+
+  PYTHONPATH=/path/to/build/bin/<config> fitbenchmarking -o fitting_options.ini -p examples/benchmark_problems/Muon
+
+Benchmarking Mantid from Install
+################################
+
+This section will show you how to benchmark Mantid using an installed version. This is useful when you want a more realistic benchmark for fit runtimes.
 
 Initial Setup
-#############
+-------------
 
-Some initial setup is required on your system before we can start setting up an environment for benchmarking Mantid minimizers. Before you start this process, make sure you have a recent version of python installed, and access to git bash (which is the recommended terminal to use).
-
-1. Download and install the desired version of Mantid from the `downloads <https://download.mantidproject.org/>`_ page (if not already installed). Note its installation path, hereby denoted as ``[INSTALL_PATH]``.
+1. Download and install the desired version of Mantid from the `releases page <https://github.com/mantidproject/mantid/releases>`_. Note its installation path, hereby denoted as ``[INSTALL_PATH]``.
 2. Open a git bash terminal and cd to the desired location.
 3. Pip install the virtual environment package as described in the `'Installing virtualenv' section <https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#installing-virtualenv>`_.
 
 Creating your Benchmarking Environment
-######################################
+--------------------------------------
 
 1. From the same git bash terminal, run the following command:
 
@@ -55,13 +74,9 @@ In this example, ``benchmark-env`` is the name given to your virtual environment
 
 4. Install the FitBenchmarking package by following the `FitBenchmarking installation instructions <https://fitbenchmarking.readthedocs.io/en/stable/users/install_instructions/fitbenchmarking.html>`_. Note that installing FitBenchmarking from source using the editable flag ``-e`` proved to be the most stable installation prior to the release of FitBenchmarking v0.2.
 
-5. It is also recommended you pip install the following packages to avoid needless warning messages:
-
-.. code-block:: sh
-
-  pip install 'h5py>=2.10.0,<3' && pip install 'pyyaml>=5.4.1'
-
 Your environment should now be ready for performing a benchmark of Mantid minimizers.
+
+.. _running-a-benchmark-ref:
 
 Running a Benchmark
 ###################
@@ -107,5 +122,4 @@ Tips
 
 * Make sure your git bash terminal is open in the correct location and has the virtual environment activated when running your benchmark.
 * Each time your run the benchmark, the old results will be overwritten unless you change the directory you run the ``fitbenchmarking`` command from. In later versions of FitBenchmarking (>v1.5) there will be an option to specify the results directory on the command line or via the ``.ini`` file.
-* To do a benchmark of the changes made in a Pull Request, you can create an unstable build by following the `build instructions <https://developer.mantidproject.org/BuildingWithCMake.html>`_. When creating your benchmark environment, you would then use the python.exe found in the Mantid unstable install directory.
 * Be aware that an 'Unexpected Exception' can sometimes occur when running the fitbenchmarking command after installing it from source without the editable flag ``-e``.
