@@ -34,6 +34,26 @@ void assert_increasing(const DateAndTime &startTime, const DateAndTime &stopTime
   }
 }
 
+// if the values are alternating after duplicates are removed, then everything can be considered unique
+bool valuesAreAlternating(const std::vector<bool> &values) {
+  const auto NUM_VALUES = values.size();
+  // should be an even number of values
+  if (NUM_VALUES % 2 != 0)
+    return false;
+
+  // the values must start with use and end with ignore
+  if ((values.front() == ROI_IGNORE) || (values.back() == ROI_USE))
+    return false;
+
+  // even entries should be use and odd should be ignore
+  for (size_t i = 0; i < NUM_VALUES; ++i) {
+    if ((i % 2 == 0) && (values[i] == ROI_IGNORE))
+      return false;
+    else if (values[i] == ROI_USE) // odd entries
+      return false;
+  }
+  return true;
+}
 } // namespace
 
 TimeROI::TimeROI() : m_roi{NAME} {}
@@ -234,27 +254,6 @@ void TimeROI::update_intersection(const TimeROI &other) {
   // remove old values and replace with new ones
   this->replaceValues(times_all, additional_values);
   this->removeRedundantEntries();
-}
-
-// if the values are alternating after duplicates are removed, then everything can be considered unique
-bool valuesAreAlternating(const std::vector<bool> &values) {
-  const auto NUM_VALUES = values.size();
-  // should be an even number of values
-  if (NUM_VALUES % 2 != 0)
-    return false;
-
-  // the values must start with use and end with ignore
-  if ((values.front() == ROI_IGNORE) || (values.back() == ROI_USE))
-    return false;
-
-  // even entries should be use and odd should be ignore
-  for (size_t i = 0; i < NUM_VALUES; ++i) {
-    if ((i % 2 == 0) && (values[i] == ROI_IGNORE))
-      return false;
-    else if (values[i] == ROI_USE) // odd entries
-      return false;
-  }
-  return true;
 }
 
 void TimeROI::removeRedundantEntries() {
