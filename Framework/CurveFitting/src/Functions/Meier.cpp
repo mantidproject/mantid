@@ -65,7 +65,7 @@ void MeierV2::calculateAlphaArrays(std::valarray<double> &sinSQalpha, std::valar
   const double OmegaD = 2 * M_PI * FreqD;
   const double OmegaQ = 2 * M_PI * FreqQ;
 
-  const int size = int(J2 + 2);
+  const size_t size = int(J2 + 2);
   sinSQalpha.resize(size);
   cosSQalpha.resize(size);
   sinSQ2alpha.resize(size);
@@ -75,7 +75,7 @@ void MeierV2::calculateAlphaArrays(std::valarray<double> &sinSQalpha, std::valar
   std::valarray<double> Wm(size);
 
   for (size_t i = 0; i < size; i++) {
-    const double m = i - J;
+    const double m = static_cast<double>(i) - J;
     const double q1 = (OmegaQ + OmegaD) * (2 * m - 1);
     const double q2 = OmegaD * std::sqrt(J * (J + 1) - m * (m - 1));
     const double qq = pow(q1, 2) + pow(q2, 2);
@@ -83,7 +83,7 @@ void MeierV2::calculateAlphaArrays(std::valarray<double> &sinSQalpha, std::valar
 
     Wm[i] = std::sqrt(qq);
 
-    if (i < (J2 + 1)) {
+    if (static_cast<double>(i) < (J2 + 1)) {
       lamp[i] = 0.5 * (q3 + Wm[i]);
     } else {
       lamp[i] = OmegaQ * pow(J, 2) - OmegaD * J;
@@ -127,7 +127,7 @@ void MeierV2::calculatePz(std::valarray<double> &Pz, const std::valarray<double>
                           const std::valarray<double> &lamm, const std::valarray<double> &lamp, const double &J,
                           const double &J2) const {
   std::valarray<double> tz(xValArray.size());
-  for (size_t i = 1; i < int(J2) + 1; i++) {
+  for (size_t i = 1; i < (size_t)J2 + 1; i++) {
     tz = tz + cosSQ2alpha[i] + sinSQ2alpha[i] * std::cos((lamp[i] - lamm[i]) * xValArray);
   }
   Pz = (1 + tz) / (2 * J + 1);
