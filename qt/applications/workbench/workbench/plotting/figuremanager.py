@@ -199,12 +199,12 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         warnings.filterwarnings(
             "once",
             message="Tight layout not applied. The left and right margins cannot be made "
-            "large enough to accommodate all axes decorations."
+            "large enough to accommodate all axes decorations.",
         )
         warnings.filterwarnings(
             "once",
             message="Tight layout not applied. The bottom and top margins cannot be made "
-            "large enough to accommodate all axes decorations."
+            "large enough to accommodate all axes decorations.",
         )
 
         FigureManagerBase.__init__(self, canvas, num)
