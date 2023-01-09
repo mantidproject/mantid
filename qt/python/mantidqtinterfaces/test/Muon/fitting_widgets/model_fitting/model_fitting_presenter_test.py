@@ -13,14 +13,15 @@ from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.model_fitting.model_fitt
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.model_fitting.model_fitting_presenter import ModelFittingPresenter
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.model_fitting.model_fitting_view import ModelFittingView
 from mantidqtinterfaces.Muon.GUI.Common.results_tab_widget.results_tab_model import TableColumnType
-from mantidqtinterfaces.Muon.GUI.Common.test_helpers.fitting_mock_setup import (add_mock_methods_to_model_fitting_model,
-                                                                                add_mock_methods_to_model_fitting_presenter,
-                                                                                add_mock_methods_to_model_fitting_view)
+from mantidqtinterfaces.Muon.GUI.Common.test_helpers.fitting_mock_setup import (
+    add_mock_methods_to_model_fitting_model,
+    add_mock_methods_to_model_fitting_presenter,
+    add_mock_methods_to_model_fitting_view,
+)
 from mantidqtinterfaces.Muon.GUI.Common.thread_model import ThreadModel
 
 
 class ModelFittingPresenterTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         FrameworkManager.Instance()
@@ -85,8 +86,7 @@ class ModelFittingPresenterTest(unittest.TestCase):
         new_table = "Results3"
         self.presenter.handle_new_results_table_created(new_table)
 
-        self.mock_model_result_table_names.assert_has_calls([mock.call(), mock.call(),
-                                                             mock.call(["Results1", "Results2", new_table])])
+        self.mock_model_result_table_names.assert_has_calls([mock.call(), mock.call(), mock.call(["Results1", "Results2", new_table])])
         self.view.add_results_table_name.assert_called_once_with(new_table)
 
     def test_that_handle_new_results_table_will_call_handle_results_table_changed_if_the_provided_table_is_selected(self):
@@ -118,7 +118,8 @@ class ModelFittingPresenterTest(unittest.TestCase):
         self.mock_view_current_result_table_index.assert_called_once_with()
         self.mock_model_current_result_table_index.assert_called_once_with(0)
         self.presenter._create_parameter_combination_workspaces.assert_called_once_with(
-            self.presenter.handle_parameter_combinations_finished)
+            self.presenter.handle_parameter_combinations_finished
+        )
 
     def test_that_handle_selected_x_changed_will_find_a_different_y_parameter_if_it_matches_x(self):
         self.presenter.update_selected_parameter_combination_workspace = mock.Mock()
@@ -213,9 +214,9 @@ class ModelFittingPresenterTest(unittest.TestCase):
     def test_that_update_selected_parameter_combination_workspace_calls_the_expected_methods(self):
         # set up mocks
         new_start_x = -5.2
-        new_end_x = 42.
+        new_end_x = 42.0
         self.model.set_current_start_and_end_x = mock.Mock()
-        self.model._get_new_start_xs_and_end_xs_using_existing_datasets = mock.Mock(return_value=([new_start_x],[new_end_x]))
+        self.model._get_new_start_xs_and_end_xs_using_existing_datasets = mock.Mock(return_value=([new_start_x], [new_end_x]))
         # check current start and end x
         self.assertEqual(self.view.start_x, 0.0)
         self.assertEqual(self.mock_view_start_x.mock_calls, [mock.call()])
@@ -267,21 +268,30 @@ class ModelFittingPresenterTest(unittest.TestCase):
 
     def _setup_mock_model(self):
         self.model = mock.Mock(spec=ModelFittingModel)
-        self.model = add_mock_methods_to_model_fitting_model(self.model, self.dataset_names, self.current_dataset_index,
-                                                             self.fit_function, self.start_x, self.end_x,
-                                                             self.fit_status, self.chi_squared,
-                                                             self.param_combination_name, self.param_group_name,
-                                                             self.result_table_names, self.x_parameters,
-                                                             self.y_parameters, self.x_parameter_types,
-                                                             self.y_parameter_types)
+        self.model = add_mock_methods_to_model_fitting_model(
+            self.model,
+            self.dataset_names,
+            self.current_dataset_index,
+            self.fit_function,
+            self.start_x,
+            self.end_x,
+            self.fit_status,
+            self.chi_squared,
+            self.param_combination_name,
+            self.param_group_name,
+            self.result_table_names,
+            self.x_parameters,
+            self.y_parameters,
+            self.x_parameter_types,
+            self.y_parameter_types,
+        )
 
         # Mock the properties of the model
         self.mock_model_current_dataset_index = mock.PropertyMock(return_value=self.current_dataset_index)
         type(self.model).current_dataset_index = self.mock_model_current_dataset_index
         self.mock_model_dataset_names = mock.PropertyMock(return_value=self.dataset_names)
         type(self.model).dataset_names = self.mock_model_dataset_names
-        self.mock_model_current_dataset_name = mock.PropertyMock(return_value=
-                                                                 self.dataset_names[self.current_dataset_index])
+        self.mock_model_current_dataset_name = mock.PropertyMock(return_value=self.dataset_names[self.current_dataset_index])
         type(self.model).current_dataset_name = self.mock_model_current_dataset_name
         self.mock_model_number_of_datasets = mock.PropertyMock(return_value=len(self.dataset_names))
         type(self.model).number_of_datasets = self.mock_model_number_of_datasets
@@ -339,10 +349,9 @@ class ModelFittingPresenterTest(unittest.TestCase):
 
         # Mock the fit result property
         self.presenter.fitting_calculation_model = mock.Mock(spec=ThreadModel)
-        self.mock_presenter_get_fit_results = mock.PropertyMock(return_value=(self.fit_function, self.fit_status,
-                                                                              self.chi_squared))
+        self.mock_presenter_get_fit_results = mock.PropertyMock(return_value=(self.fit_function, self.fit_status, self.chi_squared))
         type(self.presenter.fitting_calculation_model).result = self.mock_presenter_get_fit_results
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

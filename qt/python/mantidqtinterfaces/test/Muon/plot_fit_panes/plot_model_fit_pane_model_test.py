@@ -22,7 +22,6 @@ class MockFitInfo(object):
 
 @start_qapplication
 class PlotModelFitPaneModelTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.context = setup_context()
@@ -63,5 +62,5 @@ class PlotModelFitPaneModelTest(unittest.TestCase):
         self.assertEqual(self.model._create_workspace_label(workspace_name, 2), workspace_name + ";Diff")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

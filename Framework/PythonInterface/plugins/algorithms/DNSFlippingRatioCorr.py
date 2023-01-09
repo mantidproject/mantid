@@ -18,9 +18,15 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
     This algorithm is written for the DNS @ MLZ,
     but can be adjusted for other instruments if needed.
     """
-    properties_to_compare = ['deterota', 'wavelength', 'slit_i_left_blade_position',
-                             'slit_i_right_blade_position', 'slit_i_lower_blade_position',
-                             'slit_i_upper_blade_position']
+
+    properties_to_compare = [
+        "deterota",
+        "wavelength",
+        "slit_i_left_blade_position",
+        "slit_i_right_blade_position",
+        "slit_i_lower_blade_position",
+        "slit_i_upper_blade_position",
+    ]
 
     def __init__(self):
         """
@@ -35,10 +41,10 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         """
         Returns category
         """
-        return 'Workflow\\MLZ\\DNS;;CorrectionFunctions\\SpecialCorrections'
+        return "Workflow\\MLZ\\DNS;;CorrectionFunctions\\SpecialCorrections"
 
     def seeAlso(self):
-        return [ "DNSComputeDetEffCorrCoefs" ]
+        return ["DNSComputeDetEffCorrCoefs"]
 
     def name(self):
         """
@@ -50,22 +56,35 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         return "Performs flipping ratio correction on a given dataset using the NiCr data."
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty("SFDataWorkspace", "", direction=Direction.Input),
-                             doc="A workspace with spin-flip experimental data from sample.")
-        self.declareProperty(MatrixWorkspaceProperty("NSFDataWorkspace", "", direction=Direction.Input),
-                             doc="A workspace with non spin-flip experimental data from sample.")
-        self.declareProperty(MatrixWorkspaceProperty("SFNiCrWorkspace", "", direction=Direction.Input),
-                             doc="A workspace with spin-flip NiCr data.")
-        self.declareProperty(MatrixWorkspaceProperty("NSFNiCrWorkspace", "", direction=Direction.Input),
-                             doc="A workspace with non spin-flip NiCr data.")
-        self.declareProperty(MatrixWorkspaceProperty("SFBkgrWorkspace", "", direction=Direction.Input),
-                             doc="A workspace with spin-flip background for NiCr.")
-        self.declareProperty(MatrixWorkspaceProperty("NSFBkgrWorkspace", "", direction=Direction.Input),
-                             doc="A workspace with non spin-flip background for NiCr.")
-        self.declareProperty(MatrixWorkspaceProperty("SFOutputWorkspace", "", direction=Direction.Output),
-                             doc="A workspace to save the corrected spin-flip data.")
-        self.declareProperty(MatrixWorkspaceProperty("NSFOutputWorkspace", "", direction=Direction.Output),
-                             doc="A workspace to save the corrected non spin-flip data.")
+        self.declareProperty(
+            MatrixWorkspaceProperty("SFDataWorkspace", "", direction=Direction.Input),
+            doc="A workspace with spin-flip experimental data from sample.",
+        )
+        self.declareProperty(
+            MatrixWorkspaceProperty("NSFDataWorkspace", "", direction=Direction.Input),
+            doc="A workspace with non spin-flip experimental data from sample.",
+        )
+        self.declareProperty(
+            MatrixWorkspaceProperty("SFNiCrWorkspace", "", direction=Direction.Input), doc="A workspace with spin-flip NiCr data."
+        )
+        self.declareProperty(
+            MatrixWorkspaceProperty("NSFNiCrWorkspace", "", direction=Direction.Input), doc="A workspace with non spin-flip NiCr data."
+        )
+        self.declareProperty(
+            MatrixWorkspaceProperty("SFBkgrWorkspace", "", direction=Direction.Input), doc="A workspace with spin-flip background for NiCr."
+        )
+        self.declareProperty(
+            MatrixWorkspaceProperty("NSFBkgrWorkspace", "", direction=Direction.Input),
+            doc="A workspace with non spin-flip background for NiCr.",
+        )
+        self.declareProperty(
+            MatrixWorkspaceProperty("SFOutputWorkspace", "", direction=Direction.Output),
+            doc="A workspace to save the corrected spin-flip data.",
+        )
+        self.declareProperty(
+            MatrixWorkspaceProperty("NSFOutputWorkspace", "", direction=Direction.Output),
+            doc="A workspace to save the corrected non spin-flip data.",
+        )
 
         return
 
@@ -77,20 +96,20 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         # sort workspaces for sf and nsf
         nsf = []
         for key in self.input_workspaces.keys():
-            if 'NSF' in key:
+            if "NSF" in key:
                 nsf.append(key)
         for key in self.input_workspaces.keys():
             wks = api.AnalysisDataService.retrieve(self.input_workspaces[key])
             run = wks.getRun()
-            if not run.hasProperty('flipper'):
+            if not run.hasProperty("flipper"):
                 message = "Workspace " + wks.name() + " does not have flipper sample log!"
                 self.log().error(message)
                 raise RuntimeError(message)
-            flipper = run.getProperty('flipper').value
+            flipper = run.getProperty("flipper").value
             if key in nsf:
-                needed = 'OFF'
+                needed = "OFF"
             else:
-                needed = 'ON'
+                needed = "ON"
             if flipper != needed:
                 message = "Workspace " + wks.name() + " must have flipper " + needed + ", but it is " + flipper
                 self.log().error(message)
@@ -124,7 +143,7 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         """
         for wsname in wslist:
             if api.AnalysisDataService.doesExist(wsname):
-                delete = self.createChildAlgorithm('DeleteWorkspace')
+                delete = self.createChildAlgorithm("DeleteWorkspace")
                 delete.setProperty("Workspace", wsname)
                 delete.execute()
         return
@@ -137,10 +156,10 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         """
         wslist = []
         # 1. retrieve NiCr and Background
-        sf_nicr = api.AnalysisDataService.retrieve(self.input_workspaces['SF_NiCr'])
-        nsf_nicr = api.AnalysisDataService.retrieve(self.input_workspaces['NSF_NiCr'])
-        sf_bkgr = api.AnalysisDataService.retrieve(self.input_workspaces['SF_Background'])
-        nsf_bkgr = api.AnalysisDataService.retrieve(self.input_workspaces['NSF_Background'])
+        sf_nicr = api.AnalysisDataService.retrieve(self.input_workspaces["SF_NiCr"])
+        nsf_nicr = api.AnalysisDataService.retrieve(self.input_workspaces["NSF_NiCr"])
+        sf_bkgr = api.AnalysisDataService.retrieve(self.input_workspaces["SF_Background"])
+        nsf_bkgr = api.AnalysisDataService.retrieve(self.input_workspaces["NSF_Background"])
 
         # 2. subtract background from NiCr
         _sf_nicr_bg_ = sf_nicr - sf_bkgr
@@ -162,8 +181,8 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         _coef_ws_ = api.Divide(LHSWorkspace=_nsf_nicr_bg_, RHSWorkspace=_sf_nicr_bg_, WarnOnZeroDivide=True) - 1.0
         wslist.append(_coef_ws_.name())
         # 4. apply correction raw data
-        sf_data_ws = api.AnalysisDataService.retrieve(self.input_workspaces['SF_Data'])
-        nsf_data_ws = api.AnalysisDataService.retrieve(self.input_workspaces['NSF_Data'])
+        sf_data_ws = api.AnalysisDataService.retrieve(self.input_workspaces["SF_Data"])
+        nsf_data_ws = api.AnalysisDataService.retrieve(self.input_workspaces["NSF_Data"])
         # NSF_corr[i] = NSF[i] + (NSF[i] - SF[i])/(F[i] - 1)
         _diff_ws_ = nsf_data_ws - sf_data_ws
         wslist.append(_diff_ws_.name())
@@ -181,8 +200,13 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
     def validateInputs(self):
         issues = dict()
 
-        workspaces = {"NSFDataWorkspace": None, "SFNiCrWorkspace": None, "NSFNiCrWorkspace": None,
-                      "SFBkgrWorkspace": None, "NSFBkgrWorkspace": None}
+        workspaces = {
+            "NSFDataWorkspace": None,
+            "SFNiCrWorkspace": None,
+            "NSFNiCrWorkspace": None,
+            "SFBkgrWorkspace": None,
+            "NSFBkgrWorkspace": None,
+        }
 
         for key in workspaces.keys():
             workspaces[key] = self.getProperty(key).value
@@ -207,22 +231,22 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         wslist.append(datasf)
         result = api.CompareSampleLogs(wslist, lognames)
         if len(result) > 0:
-            issues['SFDataWorkspace'] = "Cannot apply correction to workspaces with different " + result
+            issues["SFDataWorkspace"] = "Cannot apply correction to workspaces with different " + result
         else:
-            norm = datasf.getRun().getProperty('normalized').value
-            if norm == 'no':
-                issues['SFDataWorkspace'] = "Data must be normalized before correction."
+            norm = datasf.getRun().getProperty("normalized").value
+            if norm == "no":
+                issues["SFDataWorkspace"] = "Data must be normalized before correction."
 
         return issues
 
     def PyExec(self):
         # Input
-        self.input_workspaces['SF_Data'] = self.getPropertyValue("SFDataWorkspace")
-        self.input_workspaces['NSF_Data'] = self.getPropertyValue("NSFDataWorkspace")
-        self.input_workspaces['SF_NiCr'] = self.getPropertyValue("SFNiCrWorkspace")
-        self.input_workspaces['NSF_NiCr'] = self.getPropertyValue("NSFNiCrWorkspace")
-        self.input_workspaces['SF_Background'] = self.getPropertyValue("SFBkgrWorkspace")
-        self.input_workspaces['NSF_Background'] = self.getPropertyValue("NSFBkgrWorkspace")
+        self.input_workspaces["SF_Data"] = self.getPropertyValue("SFDataWorkspace")
+        self.input_workspaces["NSF_Data"] = self.getPropertyValue("NSFDataWorkspace")
+        self.input_workspaces["SF_NiCr"] = self.getPropertyValue("SFNiCrWorkspace")
+        self.input_workspaces["NSF_NiCr"] = self.getPropertyValue("NSFNiCrWorkspace")
+        self.input_workspaces["SF_Background"] = self.getPropertyValue("SFBkgrWorkspace")
+        self.input_workspaces["NSF_Background"] = self.getPropertyValue("NSFBkgrWorkspace")
         self.sf_outws_name = self.getPropertyValue("SFOutputWorkspace")
         self.nsf_outws_name = self.getPropertyValue("NSFOutputWorkspace")
 
@@ -235,10 +259,12 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         sf_outws = api.AnalysisDataService.retrieve(self.sf_outws_name)
 
         # copy sample logs from data workspace to the output workspace
-        api.CopyLogs(InputWorkspace=self.input_workspaces['SF_Data'], OutputWorkspace=self.sf_outws_name,
-                     MergeStrategy='MergeReplaceExisting')
-        api.CopyLogs(InputWorkspace=self.input_workspaces['NSF_Data'], OutputWorkspace=self.nsf_outws_name,
-                     MergeStrategy='MergeReplaceExisting')
+        api.CopyLogs(
+            InputWorkspace=self.input_workspaces["SF_Data"], OutputWorkspace=self.sf_outws_name, MergeStrategy="MergeReplaceExisting"
+        )
+        api.CopyLogs(
+            InputWorkspace=self.input_workspaces["NSF_Data"], OutputWorkspace=self.nsf_outws_name, MergeStrategy="MergeReplaceExisting"
+        )
         self.setProperty("SFOutputWorkspace", sf_outws)
         self.setProperty("NSFOutputWorkspace", nsf_outws)
 

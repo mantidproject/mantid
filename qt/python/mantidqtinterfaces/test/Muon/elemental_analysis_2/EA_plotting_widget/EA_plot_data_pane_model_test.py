@@ -14,7 +14,6 @@ from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_
 
 @start_qapplication
 class EAPlotDataPaneModelTest(unittest.TestCase):
-
     def setUp(self):
         setup_context_for_ea_tests(self)
         self.model = EAPlotDataPaneModel(context=self.context)
@@ -81,24 +80,19 @@ class EAPlotDataPaneModelTest(unittest.TestCase):
         self.model.get_count_workspaces_to_plot.assert_any_call("9999; Detector 4", False)
 
     def test_create_tiled_keys_returns_correctly_for_tiled_by_run(self):
-        self.context.group_context.add_group(EAGroup(group_name="9997; Detector 2", detector="Detector 2",
-                                                     run_number="9997"))
-        self.context.group_context.add_group(EAGroup(group_name="9998; Detector 3", detector="Detector 3",
-                                                     run_number="9998"))
-        self.context.group_context.add_group(EAGroup(group_name="9999; Detector 4", detector="Detector 4",
-                                                     run_number="9999"))
+        self.context.group_context.add_group(EAGroup(group_name="9997; Detector 2", detector="Detector 2", run_number="9997"))
+        self.context.group_context.add_group(EAGroup(group_name="9998; Detector 3", detector="Detector 3", run_number="9998"))
+        self.context.group_context.add_group(EAGroup(group_name="9999; Detector 4", detector="Detector 4", run_number="9999"))
         self.context.group_context._selected_groups = ["9997; Detector 2", "9999; Detector 4"]
         runs = [[9997, 9998, 9999]]
         self.context.data_context.current_runs = runs
         keys = self.model.create_tiled_keys("Run")
 
-        self.assertEqual(keys, ['9997', '9999'])
+        self.assertEqual(keys, ["9997", "9999"])
 
     def test_create_tiled_keys_returns_correctly_for_tiled_by_group(self):
-        self.context.group_context.add_group(EAGroup(group_name="9998; Detector 1", detector="Detector 1",
-                                                     run_number="9999"))
-        self.context.group_context.add_group(EAGroup(group_name="9999; Detector 2", detector="Detector 2",
-                                                     run_number="9998"))
+        self.context.group_context.add_group(EAGroup(group_name="9998; Detector 1", detector="Detector 1", run_number="9999"))
+        self.context.group_context.add_group(EAGroup(group_name="9999; Detector 2", detector="Detector 2", run_number="9998"))
         self.context.group_context._selected_groups = ["9999; Detector 1", "9998; Detector 1", "9999; Detector 2"]
         runs = [[9999], [9998]]
         self.context.data_context.current_runs = runs
@@ -107,5 +101,5 @@ class EAPlotDataPaneModelTest(unittest.TestCase):
         self.assertEqual(keys, ["Detector 1", "Detector 2"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

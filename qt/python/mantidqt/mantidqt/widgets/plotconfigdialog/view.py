@@ -14,12 +14,11 @@ from mantidqt.utils.qt import load_ui
 
 
 class PlotConfigDialogView(QDialog):
-
     def __init__(self, parent=None):
         super(PlotConfigDialogView, self).__init__(parent=parent)
 
-        self.ui = load_ui(__file__, 'plot_config_dialog.ui', baseinstance=self)
-        self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
+        self.ui = load_ui(__file__, "plot_config_dialog.ui", baseinstance=self)
+        self.setWindowIcon(QIcon(":/images/MantidIcon.ico"))
         self.setWindowModality(Qt.WindowModal)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
@@ -43,9 +42,13 @@ class PlotConfigDialogView(QDialog):
 
     def closeEvent(self, event):
         if self.errors_label.isVisible():
-            reply = QMessageBox().question(self, "Are you sure?",
-                                           "There are errors applying plot settings, are you sure?",
-                                           QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            reply = QMessageBox().question(
+                self,
+                "Are you sure?",
+                "There are errors applying plot settings, are you sure?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No,
+            )
             if reply == QMessageBox.Yes:
                 event.accept()
             else:

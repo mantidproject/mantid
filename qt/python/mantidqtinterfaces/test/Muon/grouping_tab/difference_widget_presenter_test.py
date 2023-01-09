@@ -30,7 +30,6 @@ def enter_diff_name_side_effect():
 
 @start_qapplication
 class DifferenceWidgetPresenterTest(unittest.TestCase):
-
     def setUp(self):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
         self.obj = QWidget()
@@ -77,8 +76,8 @@ class DifferenceWidgetPresenterTest(unittest.TestCase):
     def add_two_group_diffs(self):
         if not self.model.group_names:
             self.add_two_groups()
-        diff0 = MuonDiff('group_diff_0', 'group_0', 'group_1')
-        diff1 = MuonDiff('group_diff_1', 'group_1', 'group_0')
+        diff0 = MuonDiff("group_diff_0", "group_0", "group_1")
+        diff1 = MuonDiff("group_diff_1", "group_1", "group_0")
         self.presenter.group_widget.add_diff(diff0)
         self.presenter.group_widget.add_diff(diff1)
 
@@ -87,8 +86,8 @@ class DifferenceWidgetPresenterTest(unittest.TestCase):
             self.add_two_groups()
         if not self.model.pair_names:
             self.add_two_pairs()
-        diff0 = MuonDiff('pair_diff_0', 'pair_0', 'pair_1', group_or_pair='pair')
-        diff1 = MuonDiff('pair_diff_1', 'pair_1', 'pair_0', group_or_pair='pair')
+        diff0 = MuonDiff("pair_diff_0", "pair_0", "pair_1", group_or_pair="pair")
+        diff1 = MuonDiff("pair_diff_1", "pair_1", "pair_0", group_or_pair="pair")
         self.presenter.pair_widget.add_diff(diff0)
         self.presenter.pair_widget.add_diff(diff1)
 
@@ -101,8 +100,8 @@ class DifferenceWidgetPresenterTest(unittest.TestCase):
         self.add_two_pair_diffs()
 
         # Change the model
-        self.model.clear_diffs('group')
-        self.model.clear_diffs('pair')
+        self.model.clear_diffs("group")
+        self.model.clear_diffs("pair")
 
         # Now update the view
         self.presenter.update_view_from_model()
@@ -114,7 +113,7 @@ class DifferenceWidgetPresenterTest(unittest.TestCase):
         self.add_two_group_diffs()
 
         # Change model
-        self.group_context.remove_diff('group_diff_0')
+        self.group_context.remove_diff("group_diff_0")
 
         # Update view
         self.presenter.update_view_from_model()
@@ -126,7 +125,7 @@ class DifferenceWidgetPresenterTest(unittest.TestCase):
         self.add_two_pair_diffs()
 
         # Change model
-        self.group_context.remove_diff('pair_diff_0')
+        self.group_context.remove_diff("pair_diff_0")
 
         # Update view
         self.presenter.update_view_from_model()
@@ -156,11 +155,9 @@ class DifferenceWidgetPresenterTest(unittest.TestCase):
         observer_2 = Observer()
         self.presenter.add_subscribers([observer_1, observer_2])
 
-        self.assertEqual([observer_1, observer_2],
-                         self.presenter.group_widget.selected_diff_changed_notifier._subscribers)
-        self.assertEqual([observer_1, observer_2],
-                         self.presenter.pair_widget.selected_diff_changed_notifier._subscribers)
+        self.assertEqual([observer_1, observer_2], self.presenter.group_widget.selected_diff_changed_notifier._subscribers)
+        self.assertEqual([observer_1, observer_2], self.presenter.pair_widget.selected_diff_changed_notifier._subscribers)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

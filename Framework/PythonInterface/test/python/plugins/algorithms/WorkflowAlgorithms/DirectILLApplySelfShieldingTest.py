@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import (mtd)
-from mantid.simpleapi import (CloneWorkspace)
+from mantid.api import mtd
+from mantid.simpleapi import CloneWorkspace
 import numpy.testing
 from testhelpers import assert_almost_equal, illhelpers, run_algorithm
 import unittest
@@ -14,9 +14,9 @@ import unittest
 
 class DirectILLApplySelfShieldingTest(unittest.TestCase):
     _BKG_LEVEL = 0.0
-    _TEST_WS_NAME = 'testWS_'
+    _TEST_WS_NAME = "testWS_"
 
-    def __init__(self, methodName='runTest'):
+    def __init__(self, methodName="runTest"):
         unittest.TestCase.__init__(self, methodName)
         self._testIN5WS = illhelpers.create_poor_mans_in5_workspace(self._BKG_LEVEL, illhelpers.default_test_detectors)
 
@@ -25,18 +25,18 @@ class DirectILLApplySelfShieldingTest(unittest.TestCase):
 
     def testEmptyContainerSubtraction(self):
         ws = self._cloneTestWorkspace()
-        ecWSName = 'testECWS_'
+        ecWSName = "testECWS_"
         ecWS = self._cloneTestWorkspace(ecWSName)
         ecFactor = 0.13
         ecWS *= ecFactor
-        outWSName = 'outWS'
+        outWSName = "outWS"
         algProperties = {
-            'InputWorkspace': self._TEST_WS_NAME,
-            'OutputWorkspace': outWSName,
-            'EmptyContainerWorkspace': ecWSName,
-            'rethrow': True
+            "InputWorkspace": self._TEST_WS_NAME,
+            "OutputWorkspace": outWSName,
+            "EmptyContainerWorkspace": ecWSName,
+            "rethrow": True,
         }
-        run_algorithm('DirectILLApplySelfShielding', **algProperties)
+        run_algorithm("DirectILLApplySelfShielding", **algProperties)
         self.assertTrue(mtd.doesExist(outWSName))
         outWS = mtd[outWSName]
         self.assertEqual(outWS.getNumberHistograms(), ws.getNumberHistograms())
@@ -46,20 +46,20 @@ class DirectILLApplySelfShieldingTest(unittest.TestCase):
 
     def testEmptyContainerSubtractionWithScaling(self):
         ws = self._cloneTestWorkspace()
-        ecWSName = 'testECWS_'
+        ecWSName = "testECWS_"
         ecWS = self._cloneTestWorkspace(ecWSName)
         ecFactor = 0.13
         ecWS *= ecFactor
-        outWSName = 'outWS'
+        outWSName = "outWS"
         ecScaling = 0.876
         algProperties = {
-            'InputWorkspace': self._TEST_WS_NAME,
-            'OutputWorkspace': outWSName,
-            'EmptyContainerWorkspace': ecWSName,
-            'EmptyContainerScaling': ecScaling,
-            'rethrow': True
+            "InputWorkspace": self._TEST_WS_NAME,
+            "OutputWorkspace": outWSName,
+            "EmptyContainerWorkspace": ecWSName,
+            "EmptyContainerScaling": ecScaling,
+            "rethrow": True,
         }
-        run_algorithm('DirectILLApplySelfShielding', **algProperties)
+        run_algorithm("DirectILLApplySelfShielding", **algProperties)
         self.assertTrue(mtd.doesExist(outWSName))
         outWS = mtd[outWSName]
         self.assertEqual(outWS.getNumberHistograms(), ws.getNumberHistograms())
@@ -70,20 +70,20 @@ class DirectILLApplySelfShieldingTest(unittest.TestCase):
     def testSelfShieldingCorrections(self):
         ws = self._cloneTestWorkspace()
         corrFactor = 0.789
-        corrWS = self._cloneTestWorkspace('correctionWS')
+        corrWS = self._cloneTestWorkspace("correctionWS")
         for i in range(corrWS.getNumberHistograms()):
             ys = corrWS.dataY(i)
             ys.fill(corrFactor)
             es = corrWS.dataE(i)
             es.fill(0)
-        outWSName = 'outWS'
+        outWSName = "outWS"
         algProperties = {
-            'InputWorkspace': self._TEST_WS_NAME,
-            'OutputWorkspace': outWSName,
-            'SelfShieldingCorrectionWorkspace': corrWS,
-            'rethrow': True
+            "InputWorkspace": self._TEST_WS_NAME,
+            "OutputWorkspace": outWSName,
+            "SelfShieldingCorrectionWorkspace": corrWS,
+            "rethrow": True,
         }
-        run_algorithm('DirectILLApplySelfShielding', **algProperties)
+        run_algorithm("DirectILLApplySelfShielding", **algProperties)
         self.assertTrue(mtd.doesExist(outWSName))
         outWS = mtd[outWSName]
         self.assertEqual(outWS.getNumberHistograms(), ws.getNumberHistograms())
@@ -96,31 +96,27 @@ class DirectILLApplySelfShieldingTest(unittest.TestCase):
 
     def testNoOperationClonesInputWorkspace(self):
         ws = self._cloneTestWorkspace()
-        outWSName = 'outWS'
-        algProperties = {
-            'InputWorkspace': self._TEST_WS_NAME,
-            'OutputWorkspace': outWSName,
-            'rethrow': True
-        }
-        run_algorithm('DirectILLApplySelfShielding', **algProperties)
+        outWSName = "outWS"
+        algProperties = {"InputWorkspace": self._TEST_WS_NAME, "OutputWorkspace": outWSName, "rethrow": True}
+        run_algorithm("DirectILLApplySelfShielding", **algProperties)
         # If the previous run didn't clone the input workspace, the two later
         # calls will be triggered to use 'outWS' as the input.
         self.assertTrue(mtd.doesExist(outWSName))
         corrFactor = 0.43
-        corrWS = self._cloneTestWorkspace('correctionWS')
+        corrWS = self._cloneTestWorkspace("correctionWS")
         for i in range(corrWS.getNumberHistograms()):
             ys = corrWS.dataY(i)
             ys.fill(corrFactor)
             es = corrWS.dataE(i)
             es.fill(0)
         algProperties = {
-            'InputWorkspace': self._TEST_WS_NAME,
-            'OutputWorkspace': outWSName,
-            'SelfShieldingCorrectionWorkspace': corrWS,
-            'rethrow': True
+            "InputWorkspace": self._TEST_WS_NAME,
+            "OutputWorkspace": outWSName,
+            "SelfShieldingCorrectionWorkspace": corrWS,
+            "rethrow": True,
         }
-        run_algorithm('DirectILLApplySelfShielding', **algProperties)
-        run_algorithm('DirectILLApplySelfShielding', **algProperties)
+        run_algorithm("DirectILLApplySelfShielding", **algProperties)
+        run_algorithm("DirectILLApplySelfShielding", **algProperties)
         outWS = mtd[outWSName]
         self.assertEqual(outWS.getNumberHistograms(), ws.getNumberHistograms())
         ys = outWS.extractY()
@@ -134,12 +130,12 @@ class DirectILLApplySelfShieldingTest(unittest.TestCase):
         if not wsName:
             # Cannot use as default parameter as 'self' is not know in argument list.
             wsName = self._TEST_WS_NAME
-        tempName = 'temp_testWS_'
+        tempName = "temp_testWS_"
         mtd.addOrReplace(tempName, self._testIN5WS)
-        ws = CloneWorkspace(InputWorkspace=tempName,
-                            OutputWorkspace=wsName)
+        ws = CloneWorkspace(InputWorkspace=tempName, OutputWorkspace=wsName)
         mtd.remove(tempName)
         return ws
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

@@ -11,10 +11,8 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
     """
     Extended table widget for scans to process
     """
-    TableSetup = [('Scan', 'int'),
-                  ('Status', 'str'),
-                  ('File', 'str'),
-                  ('Note', 'str')]
+
+    TableSetup = [("Scan", "int"), ("Status", "str"), ("File", "str"), ("Note", "str")]
 
     def __init__(self, parent):
         """
@@ -49,10 +47,10 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
         self.setColumnWidth(3, 120)
 
         # set the column index
-        self._iColScanNumber = self.TableSetup.index(('Scan', 'int'))
-        self._iColStatus = self.TableSetup.index(('Status', 'str'))
-        self._iColFile = self.TableSetup.index(('File', 'str'))
-        self._iColNote = self.TableSetup.index(('Note', 'str'))
+        self._iColScanNumber = self.TableSetup.index(("Scan", "int"))
+        self._iColStatus = self.TableSetup.index(("Status", "str"))
+        self._iColFile = self.TableSetup.index(("File", "str"))
+        self._iColNote = self.TableSetup.index(("Note", "str"))
 
         return
 
@@ -63,7 +61,7 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
         :return:
         """
         # check input
-        assert isinstance(scan_numbers, list), 'Scan numbers must be given in a list.'
+        assert isinstance(scan_numbers, list), "Scan numbers must be given in a list."
 
         # sort
         scan_numbers.sort()
@@ -76,9 +74,9 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
                 continue
 
             # append scan
-            status, msg = self.append_row([scan_number, '', '', ''])
+            status, msg = self.append_row([scan_number, "", "", ""])
             if not status:
-                raise RuntimeError('Failed to append a new row due to {0}'.format(msg))
+                raise RuntimeError("Failed to append a new row due to {0}".format(msg))
             num_rows = self.rowCount()
             self._scanRowDict[scan_number] = num_rows - 1
             part_dict[scan_number] = num_rows - 1
@@ -104,10 +102,10 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
         :return:
         """
         # check inputs
-        assert isinstance(row_number, int), 'Row number {0} must be an integer.'.format(row_number)
+        assert isinstance(row_number, int), "Row number {0} must be an integer.".format(row_number)
         status = str(status)
         if not isinstance(status, str):
-            print ('[DB] status is an instance of {0}.'.format(type(status)))
+            print("[DB] status is an instance of {0}.".format(type(status)))
 
         self.update_cell_value(row_number, self._iColStatus, status)
 

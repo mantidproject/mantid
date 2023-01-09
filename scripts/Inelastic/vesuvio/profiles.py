@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=too-many-arguments,redefined-builtin
+# pylint: disable=too-many-arguments,redefined-builtin
 """Holds classes that define the mass profiles.
 This is all essentially about parsing the user input and putting it into a form
 the Mantid fitting algorithm will understand
@@ -112,6 +112,7 @@ class MassProfile(object):
 
         return value
 
+
 # --------------------------------------------------------------------------------
 # Gaussian profile
 # --------------------------------------------------------------------------------
@@ -135,10 +136,7 @@ class GaussianMassProfile(MassProfile):
         except ValueError:
             width = cls._parse_float(func_str, "width")
 
-        params = {
-            'width': width,
-            'mass': mass
-        }
+        params = {"width": width, "mass": mass}
 
         return GaussianMassProfile(**params)
 
@@ -149,7 +147,7 @@ class GaussianMassProfile(MassProfile):
         on the object already. Default=None
         :param param_prefix: A string prefix for the parameter as seen by the Mantid Fit algorithm
         """
-        vals_provided = (param_vals is not None)
+        vals_provided = param_vals is not None
 
         if vals_provided:
             def_width = param_vals[param_prefix + "Width"]
@@ -180,6 +178,7 @@ class GaussianMassProfile(MassProfile):
         constraints += "{0}Intensity > 0.0".format(param_prefix)
         return constraints
 
+
 # --------------------------------------------------------------------------------
 # MultivariateGaussian profile
 # --------------------------------------------------------------------------------
@@ -190,7 +189,7 @@ class MultivariateGaussianMassProfile(MassProfile):
     cfunction = "MultivariateGaussianComptonProfile"
     integration_steps = 64
 
-    def __init__(self, width, mass, sigma_x = 1.0, sigma_y = 1.0, sigma_z = 1.0):
+    def __init__(self, width, mass, sigma_x=1.0, sigma_y=1.0, sigma_z=1.0):
         super(MultivariateGaussianMassProfile, self).__init__(width, mass)
 
         self._sigma_x = sigma_x
@@ -210,11 +209,11 @@ class MultivariateGaussianMassProfile(MassProfile):
             raise TypeError("Multivariate Gaussian function string should start with 'function=MultivariateGaussian'")
 
         params = {
-            'width': 0.0,
-            'mass': mass,
-            'sigma_x': cls._parse_float(func_str, "SigmaX", 1.0),
-            'sigma_y': cls._parse_float(func_str, "SigmaY", 1.0),
-            'sigma_z': cls._parse_float(func_str, "SigmaZ", 1.0)
+            "width": 0.0,
+            "mass": mass,
+            "sigma_x": cls._parse_float(func_str, "SigmaX", 1.0),
+            "sigma_y": cls._parse_float(func_str, "SigmaY", 1.0),
+            "sigma_z": cls._parse_float(func_str, "SigmaZ", 1.0),
         }
 
         return MultivariateGaussianMassProfile(**params)
@@ -226,7 +225,7 @@ class MultivariateGaussianMassProfile(MassProfile):
         on the object already. Default=None
         :param param_prefix: A string prefix for the parameter as seen by the Mantid Fit algorithm
         """
-        vals_provided = (param_vals is not None)
+        vals_provided = param_vals is not None
 
         intensity = None
 
@@ -255,15 +254,18 @@ class MultivariateGaussianMassProfile(MassProfile):
 
         :param param_prefix: An optional prefix for the parameter name
         """
-        constraints = "{0}Intensity > 0.0,".format(param_prefix) \
-            + "{0}SigmaX > 0.0,".format(param_prefix) \
-            + "{0}SigmaY > 0.0,".format(param_prefix) \
+        constraints = (
+            "{0}Intensity > 0.0,".format(param_prefix)
+            + "{0}SigmaX > 0.0,".format(param_prefix)
+            + "{0}SigmaY > 0.0,".format(param_prefix)
             + "{0}SigmaZ > 0.0".format(param_prefix)
+        )
         return constraints
 
     def create_ties_str(self, param_prefix=""):
         ties_str = "{0}Mass={1:f}".format(param_prefix, self.mass)
         return ties_str
+
 
 # --------------------------------------------------------------------------------
 # GramCharlier profile
@@ -292,10 +294,12 @@ class GramCharlierMassProfile(MassProfile):
         if not func_str.startswith(profile_prefix):
             raise TypeError("GramCharlier function string should start with 'function=GramCharlier,'")
 
-        key_names = [("width", cls._parse_list),
-                     ("hermite_coeffs", cls._parse_list),
-                     ("k_free", cls._parse_bool_flag),
-                     ("sears_flag", cls._parse_bool_flag)]
+        key_names = [
+            ("width", cls._parse_list),
+            ("hermite_coeffs", cls._parse_list),
+            ("k_free", cls._parse_bool_flag),
+            ("sears_flag", cls._parse_bool_flag),
+        ]
 
         # Possible key names:
         parsed_values = []
@@ -306,11 +310,11 @@ class GramCharlierMassProfile(MassProfile):
                 raise TypeError(str(exc))
 
         params = {
-            'width': parsed_values[0],
-            'mass': mass,
-            'hermite_coeffs': parsed_values[1],
-            'k_free': parsed_values[2],
-            'sears_flag': parsed_values[3]
+            "width": parsed_values[0],
+            "mass": mass,
+            "hermite_coeffs": parsed_values[1],
+            "k_free": parsed_values[2],
+            "sears_flag": parsed_values[3],
         }
 
         hermite_coeff_val_regex = re.compile("[Cc]_([0-9]+)=([0-9.]+)")
@@ -318,12 +322,12 @@ class GramCharlierMassProfile(MassProfile):
         for hermite_val in hermite_coeff_val_regex.findall(func_str):
             hermite_vals[hermite_val[0].upper()] = ast.literal_eval(hermite_val[1])
         if len(hermite_vals) > 0:
-            params['hermite_coeff_vals'] = hermite_vals
+            params["hermite_coeff_vals"] = hermite_vals
 
         fsecoeff_regex = re.compile("fsecoeff=([0-9.]+)")
         fsecoeff_match = fsecoeff_regex.match(func_str)
         if fsecoeff_match:
-            params['fsecoeff'] = ast.literal_eval(fsecoeff_match.group(1))
+            params["fsecoeff"] = ast.literal_eval(fsecoeff_match.group(1))
 
         return GramCharlierMassProfile(**params)
 
@@ -335,7 +339,7 @@ class GramCharlierMassProfile(MassProfile):
         on the object already. Default=None
         :param param_prefix: A string prefix for the parameter as seen by the Mantid Fit algorithm
         """
-        vals_provided = (param_vals is not None)
+        vals_provided = param_vals is not None
 
         if vals_provided:
             def_width = param_vals[param_prefix + "Width"]
@@ -349,16 +353,15 @@ class GramCharlierMassProfile(MassProfile):
             for item in collection:
                 _str += " " + str(item)
             return _str.lstrip()
+
         hermite_str = to_space_sep_str(self.hermite_co)
 
-        fitting_str = "name={0},Mass={1:f},HermiteCoeffs={2},Width={3:f}".format(self.cfunction,
-                                                                                 self.mass, hermite_str,
-                                                                                 def_width)
+        fitting_str = "name={0},Mass={1:f},HermiteCoeffs={2},Width={3:f}".format(self.cfunction, self.mass, hermite_str, def_width)
         if vals_provided:
             par_names = ["FSECoeff"]
             for i, coeff in enumerate(self.hermite_co):
                 if coeff > 0:
-                    par_names.append("C_{0}".format(2*i))
+                    par_names.append("C_{0}".format(2 * i))
             for par_name in par_names:
                 fitting_str += ",{0}={1:f}".format(par_name, param_vals[param_prefix + par_name])
         else:
@@ -383,7 +386,7 @@ class GramCharlierMassProfile(MassProfile):
         # All coefficients should be greater than zero
         for i, coeff in enumerate(self.hermite_co):
             if coeff > 0:
-                constraints += "{0}C_{1} > 0.0,".format(param_prefix, 2*i)
+                constraints += "{0}C_{1} > 0.0,".format(param_prefix, 2 * i)
         return constraints.rstrip(",")
 
     def create_ties_str(self, param_prefix=""):
@@ -411,11 +414,12 @@ class GramCharlierMassProfile(MassProfile):
 # Factory function
 # --------------------------------------------------------------------------------
 
+
 def create_from_str(func_str, mass):
     """Try and parse the function string to give the required profile function
 
-        :param func_str: A string of the form 'function=Name,attr1=val1,attr2=val2'
-        :param mass: The value of the mass for the profile
+    :param func_str: A string of the form 'function=Name,attr1=val1,attr2=val2'
+    :param mass: The value of the mass for the profile
     """
     known_types = [GaussianMassProfile, MultivariateGaussianMassProfile, GramCharlierMassProfile]
     logger.debug("Profile factory string: {0}".format(func_str))

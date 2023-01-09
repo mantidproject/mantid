@@ -9,26 +9,28 @@
 import unittest
 
 import matplotlib as mpl
-mpl.use('Agg')  # noqa
+
+mpl.use("Agg")  # noqa
 import matplotlib.pyplot as plt
 from matplotlib.ticker import LogFormatterSciNotation, ScalarFormatter
 
 from unittest.mock import Mock
-from workbench.plotting.plotscriptgenerator.axes import (generate_axis_limit_commands,
-                                                         generate_axis_label_commands,
-                                                         generate_axis_facecolor_commands)
+from workbench.plotting.plotscriptgenerator.axes import (
+    generate_axis_limit_commands,
+    generate_axis_label_commands,
+    generate_axis_facecolor_commands,
+)
 from workbench.plotting.plotscriptgenerator import generate_script
 
 
 class PlotGeneratorAxisTest(unittest.TestCase):
-
     def test_generate_axis_label_commands_only_returns_commands_for_labels_that_are_set(self):
-        mock_ax = Mock(get_xlabel=lambda: '', get_ylabel=lambda: 'y')
+        mock_ax = Mock(get_xlabel=lambda: "", get_ylabel=lambda: "y")
         expected = ["set_ylabel('y')"]
         self.assertEqual(expected, generate_axis_label_commands(mock_ax))
 
     def test_generate_axis_label_commands_returns_empty_list_when_no_labels_set(self):
-        mock_ax = Mock(get_xlabel=lambda: '', get_ylabel=lambda: '')
+        mock_ax = Mock(get_xlabel=lambda: "", get_ylabel=lambda: "")
         self.assertEqual([], generate_axis_label_commands(mock_ax))
 
     def test_generate_axis_label_commands_returns_x_and_y_command_if_both_labels_set(self):
@@ -61,7 +63,7 @@ class PlotGeneratorAxisTest(unittest.TestCase):
         ax = fig.add_subplot(111)
         ax.plot([-10, 10], [1, 2])
         ax.set_xlim([-5, 5])
-        self.assertEqual(['set_xlim([-5.0, 5.0])'], generate_axis_limit_commands(ax))
+        self.assertEqual(["set_xlim([-5.0, 5.0])"], generate_axis_limit_commands(ax))
         plt.close()
         del fig
 
@@ -71,8 +73,7 @@ class PlotGeneratorAxisTest(unittest.TestCase):
         ax.plot([-10, 10], [1, 2])
         ax.set_xlim([-5, 5])
         ax.set_ylim([0, 4])
-        self.assertEqual(['set_xlim([-5.0, 5.0])', 'set_ylim([0.0, 4.0])'],
-                         generate_axis_limit_commands(ax))
+        self.assertEqual(["set_xlim([-5.0, 5.0])", "set_ylim([0.0, 4.0])"], generate_axis_limit_commands(ax))
         plt.close()
         del fig
 
@@ -99,11 +100,11 @@ class PlotGeneratorAxisTest(unittest.TestCase):
         Set a canvas colour (facecolor) for only one of the subplots in a tiled plot and check
         that commands are generated for only that one.
         """
-        fig, axes = plt.subplots(ncols=2, nrows=2, subplot_kw={'projection': 'mantid'})
+        fig, axes = plt.subplots(ncols=2, nrows=2, subplot_kw={"projection": "mantid"})
         for ax in fig.get_axes():
             ax.plot([-10, 10], [1, 2])
         # Only set the facecolor on one subplot.
-        axes[1][0].set_facecolor('#c0ffee')
+        axes[1][0].set_facecolor("#c0ffee")
         script = generate_script(fig)
         # Should be axes[i][j].set_facecolor for multiple subplots.
         self.assertNotIn("axes.set_facecolor", script)
@@ -120,7 +121,7 @@ class PlotGeneratorAxisTest(unittest.TestCase):
         """
         Check that the tick commands are generated for every plot in the figure.
         """
-        fig, axes = plt.subplots(ncols=2, nrows=2, subplot_kw={'projection': 'mantid'})
+        fig, axes = plt.subplots(ncols=2, nrows=2, subplot_kw={"projection": "mantid"})
         for ax in fig.get_axes():
             ax.plot([-10, 10], [1, 2])
         script = generate_script(fig)
@@ -137,7 +138,7 @@ class PlotGeneratorAxisTest(unittest.TestCase):
         """
         Check that the tick format commands are correctly generated if they are set different to the default.
         """
-        fig, axes = plt.subplots(ncols=2, nrows=2, subplot_kw={'projection': 'mantid'})
+        fig, axes = plt.subplots(ncols=2, nrows=2, subplot_kw={"projection": "mantid"})
         for ax in fig.get_axes():
             ax.plot([-10, 10], [1, 2])
 
@@ -165,9 +166,9 @@ class PlotGeneratorAxisTest(unittest.TestCase):
         Check that tick format commands are correctly generated for a log axis scale.
         """
         fig = plt.figure()
-        axes = fig.add_subplot(1, 1, 1, projection='mantid')
+        axes = fig.add_subplot(1, 1, 1, projection="mantid")
         axes.plot([-10, 10], [1, 2])
-        axes.set_yscale('log')
+        axes.set_yscale("log")
         axes.yaxis.set_major_formatter(ScalarFormatter())
 
         script = generate_script(fig)
@@ -177,5 +178,5 @@ class PlotGeneratorAxisTest(unittest.TestCase):
         self.assertNotIn("_formatter(LogFormatterSciNotation", script)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

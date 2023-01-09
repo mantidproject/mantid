@@ -571,7 +571,7 @@ bool RepoModel::setData(const QModelIndex &index, const QVariant &value, int rol
  */
 Qt::ItemFlags RepoModel::flags(const QModelIndex &index) const {
   if (!index.isValid())
-    return nullptr;
+    return {};
   if (index.column() == 0)
     return QAbstractItemModel::flags(index);
   // define that setData will accept the EditRole.

@@ -14,7 +14,6 @@ from workbench.widgets.settings.presenter import SettingsPresenter
 
 
 class FakeMVP(object):
-
     def __init__(self):
         self.view = MockQWidget()
         self.update_properties = MagicMock()
@@ -52,25 +51,31 @@ class MockSettingsView(object):
 class SettingsPresenterTest(TestCase):
     def test_default_view_shown(self):
         mock_view = MockSettingsView()
-        SettingsPresenter(None, view=mock_view,
-                          general_settings=mock_view.general_settings,
-                          categories_settings=mock_view.categories_settings,
-                          plot_settings=mock_view.plot_settings,
-                          fitting_settings=mock_view.fitting_settings)
+        SettingsPresenter(
+            None,
+            view=mock_view,
+            general_settings=mock_view.general_settings,
+            categories_settings=mock_view.categories_settings,
+            plot_settings=mock_view.plot_settings,
+            fitting_settings=mock_view.fitting_settings,
+        )
 
         expected_calls = [call(mock_view.general_settings.view), call(mock_view.categories_settings.view)]
         mock_view.container.addWidget.assert_has_calls(expected_calls)
 
     def test_action_current_row_changed(self):
         mock_view = MockSettingsView()
-        presenter = SettingsPresenter(None, view=mock_view,
-                                      general_settings=mock_view.general_settings,
-                                      categories_settings=mock_view.categories_settings,
-                                      plot_settings=mock_view.plot_settings,
-                                      fitting_settings=mock_view.fitting_settings)
+        presenter = SettingsPresenter(
+            None,
+            view=mock_view,
+            general_settings=mock_view.general_settings,
+            categories_settings=mock_view.categories_settings,
+            plot_settings=mock_view.plot_settings,
+            fitting_settings=mock_view.fitting_settings,
+        )
 
         mock_view.sections.item = Mock()
-        mock_view.sections.item().text = Mock(return_value = presenter.SETTINGS_TABS['categories_settings'])
+        mock_view.sections.item().text = Mock(return_value=presenter.SETTINGS_TABS["categories_settings"])
         presenter.action_section_changed(1)
 
         self.assertEqual(1, mock_view.container.replaceWidget.call_count)
@@ -79,11 +84,15 @@ class SettingsPresenterTest(TestCase):
     def test_action_save_settings_to_file(self):
         mock_view = MockSettingsView()
         mock_model = MagicMock()
-        presenter = SettingsPresenter(None, view=mock_view, model=mock_model,
-                                      general_settings=mock_view.general_settings,
-                                      categories_settings=mock_view.categories_settings,
-                                      plot_settings=mock_view.plot_settings,
-                                      fitting_settings=mock_view.fitting_settings)
+        presenter = SettingsPresenter(
+            None,
+            view=mock_view,
+            model=mock_model,
+            general_settings=mock_view.general_settings,
+            categories_settings=mock_view.categories_settings,
+            plot_settings=mock_view.plot_settings,
+            fitting_settings=mock_view.fitting_settings,
+        )
 
         presenter.action_save_settings_to_file()
         presenter.model.save_settings_to_file.assert_called_once_with("filename", presenter.all_properties)
@@ -91,11 +100,15 @@ class SettingsPresenterTest(TestCase):
     def test_action_load_settings_from_file(self):
         mock_view = MockSettingsView()
         mock_model = MagicMock()
-        presenter = SettingsPresenter(None, view=mock_view, model = mock_model,
-                                      general_settings=mock_view.general_settings,
-                                      categories_settings=mock_view.categories_settings,
-                                      plot_settings=mock_view.plot_settings,
-                                      fitting_settings=mock_view.fitting_settings)
+        presenter = SettingsPresenter(
+            None,
+            view=mock_view,
+            model=mock_model,
+            general_settings=mock_view.general_settings,
+            categories_settings=mock_view.categories_settings,
+            plot_settings=mock_view.plot_settings,
+            fitting_settings=mock_view.fitting_settings,
+        )
 
         presenter.action_load_settings_from_file()
         presenter.model.load_settings_from_file.assert_called_once_with("filename", presenter.all_properties)
@@ -108,13 +121,17 @@ class SettingsPresenterTest(TestCase):
         mock_view = MagicMock()
         mock_model = MagicMock()
         mock_parent = MagicMock()
-        presenter = SettingsPresenter(mock_parent, view=mock_view, model = mock_model,
-                                      general_settings=mock_view.general_settings,
-                                      categories_settings=mock_view.categories_settings,
-                                      plot_settings=mock_view.plot_settings,
-                                      fitting_settings=mock_view.fitting_settings)
+        presenter = SettingsPresenter(
+            mock_parent,
+            view=mock_view,
+            model=mock_model,
+            general_settings=mock_view.general_settings,
+            categories_settings=mock_view.categories_settings,
+            plot_settings=mock_view.plot_settings,
+            fitting_settings=mock_view.fitting_settings,
+        )
 
-        settings_needing_restart = ["Setting one","Setting two"]
+        settings_needing_restart = ["Setting one", "Setting two"]
         for setting in settings_needing_restart:
             presenter.register_change_needs_restart(setting)
         presenter.view_closing()

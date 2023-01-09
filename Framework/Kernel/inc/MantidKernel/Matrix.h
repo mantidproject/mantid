@@ -154,7 +154,7 @@ public:
 
   T Invert(); ///< LU inversion routine
   // Optimized inversion routine for tridiagonal matrices
-  void invertTridiagonal();
+  void invertTridiagonal(double tolerance = FLT_EPSILON);
   void averSymmetric();                            ///< make Matrix symmetric
   int Diagonalise(Matrix<T> &, Matrix<T> &) const; ///< (only Symmetric matrix)
   void sortEigen(Matrix<T> &);                     ///< Sort eigenvectors

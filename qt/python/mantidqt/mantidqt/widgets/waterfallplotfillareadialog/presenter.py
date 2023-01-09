@@ -14,7 +14,6 @@ from mantidqt.widgets.waterfallplotfillareadialog.view import WaterfallPlotFillA
 
 
 class WaterfallPlotFillAreaDialogPresenter:
-
     def __init__(self, fig, view=None, parent=None):
         self.fig = fig
         self.ax = fig.get_axes()[0]
@@ -43,8 +42,7 @@ class WaterfallPlotFillAreaDialogPresenter:
                 self.view.use_line_colour_radio_button.setChecked(True)
             else:
                 self.view.use_solid_colour_radio_button.setChecked(True)
-                poly = next(poly_collection for poly_collection in self.ax.collections
-                            if isinstance(poly_collection, PolyCollection))
+                poly = next(poly_collection for poly_collection in self.ax.collections if isinstance(poly_collection, PolyCollection))
                 self.view.colour_selector_widget.set_color(convert_color_to_hex(poly.get_facecolor().tolist()[0]))
 
     def set_fill_enabled(self):

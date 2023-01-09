@@ -50,7 +50,7 @@ public:
     // reflectometry
     TS_ASSERT_EQUALS(3, model->rowCount(index));
     // in reflectometry folder should be script.py
-    TS_ASSERT_EQUALS(2, model->rowCount(index.child(2, 0)));
+    TS_ASSERT_EQUALS(2, model->rowCount(model->index(2, 0, index)));
   }
 
   // test the data in the first column is displayed correctly. This column
@@ -198,11 +198,11 @@ private:
   QModelIndex getIndex(RepoModel *model, int row, int column) {
     if (row == 1 || row == 2 || row == 3) {
       auto folderIndex = model->index(0, 0);
-      return folderIndex.child(row - 1, column);
+      return model->index(row - 1, column, folderIndex);
     } else if (row == 4 || row == 5) {
       auto firstFolder = model->index(0, 0);
-      auto secondFolder = firstFolder.child(2, 0);
-      return secondFolder.child(row - 4, column);
+      auto secondFolder = model->index(2, 0, firstFolder);
+      return model->index(row - 4, column, secondFolder);
     } else {
       return model->index(row, column);
     }

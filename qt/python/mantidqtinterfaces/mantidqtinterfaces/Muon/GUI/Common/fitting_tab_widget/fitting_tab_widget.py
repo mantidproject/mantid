@@ -9,8 +9,9 @@ from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitt
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_presenter import BasicFittingPresenter
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_view import BasicFittingView
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_fitting_model import TFAsymmetryFittingModel
-from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_fitting_presenter \
-    import TFAsymmetryFittingPresenter
+from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_fitting_presenter import (
+    TFAsymmetryFittingPresenter,
+)
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_fitting_view import TFAsymmetryFittingView
 
 
@@ -34,10 +35,9 @@ class FittingTabWidget(object):
             self.fitting_tab_model = TFAsymmetryFittingModel(context, context.fitting_context)
             self.fitting_tab_presenter = TFAsymmetryFittingPresenter(self.fitting_tab_view, self.fitting_tab_model)
 
-        context.update_view_from_model_notifier.add_subscriber(
-            self.fitting_tab_presenter.update_view_from_model_observer)
+        context.update_view_from_model_notifier.add_subscriber(self.fitting_tab_presenter.update_view_from_model_observer)
 
-    def show_fit_script_generator(self)->None:
+    def show_fit_script_generator(self) -> None:
         """
         Show the fit script generator in the fitting interface
         """

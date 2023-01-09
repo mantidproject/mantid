@@ -11,7 +11,7 @@ class MainPlotWidgetView(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self._panes = None
-        self.setMinimumSize(600,600)
+        self.setMinimumSize(600, 600)
         self.setEnabled(True)
         self._plot_mode = QtWidgets.QComboBox()
         self._layout = QtWidgets.QVBoxLayout()

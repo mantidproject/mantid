@@ -41,11 +41,11 @@ class CategoriesSettings(object):
         self.view.interface_tree_widget.itemChanged.connect(self.set_hidden_interfaces_string)
 
     def set_hidden_algorithms_string(self, _):
-        categories_string = ';'.join(self._create_hidden_categories_string(self.view.algorithm_tree_widget))
+        categories_string = ";".join(self._create_hidden_categories_string(self.view.algorithm_tree_widget))
         ConfigService.setString(CategoryProperties.HIDDEN_ALGORITHMS.value, categories_string)
 
     def set_hidden_interfaces_string(self, _):
-        categories_string = ';'.join(self._create_hidden_categories_string(self.view.interface_tree_widget))
+        categories_string = ";".join(self._create_hidden_categories_string(self.view.interface_tree_widget))
         ConfigService.setString(CategoryProperties.HIDDEN_INTERFACES.value, categories_string)
 
     def nested_box_clicked(self, item_clicked, column):
@@ -63,7 +63,7 @@ class CategoriesSettings(object):
 
         self._update_partial_ticks(parent)
 
-    def _create_hidden_categories_string(self, widget, parent = None):
+    def _create_hidden_categories_string(self, widget, parent=None):
         results = []
         if parent:
             count = parent.childCount()
@@ -89,7 +89,7 @@ class CategoriesSettings(object):
         interfaces = []
         if self.parent:
             interfaces = self.parent.interface_list
-        hidden_interfaces = ConfigService.getString(CategoryProperties.HIDDEN_INTERFACES.value).split(';')
+        hidden_interfaces = ConfigService.getString(CategoryProperties.HIDDEN_INTERFACES.value).split(";")
         interface_map = {}
         for interface in interfaces:
             if interface in hidden_interfaces:
@@ -108,7 +108,7 @@ class CategoriesSettings(object):
         self.set_algorithm_tree_categories()
         self.set_interface_tree_categories()
 
-    def _set_tree_categories(self, widget, category_and_states, has_nested = True):
+    def _set_tree_categories(self, widget, category_and_states, has_nested=True):
         widget.clear()
         seen_categories = {}
         for category_location in sorted(category_and_states):
@@ -116,8 +116,7 @@ class CategoriesSettings(object):
             if len(split_cat) == 1:
                 # This is a top level category
                 category_name = str(split_cat[0])
-                category_item = self.view.add_checked_widget_item(widget, category_name,
-                                                                  category_and_states[category_location])
+                category_item = self.view.add_checked_widget_item(widget, category_name, category_and_states[category_location])
                 seen_categories[category_name] = category_item
             else:
                 for i in range(0, len(split_cat) - 1):
@@ -127,18 +126,18 @@ class CategoriesSettings(object):
                         # we need to go back up the category tree to find the first seen grandparent
                         # to attach the new tree node to the correct parent
                         grand_parent_cat = None
-                        for k in range (i - 1,-1,-1):
+                        for k in range(i - 1, -1, -1):
                             if split_cat[k] in seen_categories:
                                 grand_parent_cat = seen_categories[split_cat[k]]
-                        parent_category = self.view.add_checked_widget_item(widget, parent_name,
-                                                                            category_and_states[category_location],
-                                                                            grand_parent_cat)
+                        parent_category = self.view.add_checked_widget_item(
+                            widget, parent_name, category_and_states[category_location], grand_parent_cat
+                        )
                         seen_categories[parent_name] = parent_category
 
                 child_name = str(split_cat[-1])
-                child_item = self.view.add_checked_widget_item(widget, child_name,
-                                                               category_and_states[category_location],
-                                                               seen_categories[parent_name])
+                child_item = self.view.add_checked_widget_item(
+                    widget, child_name, category_and_states[category_location], seen_categories[parent_name]
+                )
                 seen_categories[child_name] = child_item
         if has_nested:
             for i in range(0, widget.topLevelItemCount()):

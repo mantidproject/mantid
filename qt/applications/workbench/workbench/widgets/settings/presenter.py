@@ -25,13 +25,16 @@ class SettingsPresenter(object):
     CHANGES_NEED_RESTART_TITLE = "Some changes require restart"
     CHANGES_NEED_RESTART_MESSAGE = "The following changes will be applied when the workbench is restarted:\n\n"
 
-    SETTINGS_TABS = {'general_settings' : "General",
-                     'categories_settings' : "Categories",
-                     'plot_settings': "Plots",
-                     'fitting_settings' : "Fitting"}
+    SETTINGS_TABS = {
+        "general_settings": "General",
+        "categories_settings": "Categories",
+        "plot_settings": "Plots",
+        "fitting_settings": "Fitting",
+    }
 
-    def __init__(self, parent, view=None, model=None, general_settings=None,
-                 categories_settings=None, plot_settings=None, fitting_settings=None):
+    def __init__(
+        self, parent, view=None, model=None, general_settings=None, categories_settings=None, plot_settings=None, fitting_settings=None
+    ):
         self.view = view if view else SettingsView(parent, self)
         self.model = model if model else SettingsModel()
         self.general_settings = general_settings if general_settings else GeneralSettings(parent, None, self)
@@ -89,7 +92,7 @@ class SettingsPresenter(object):
         self.current.show()
 
     def action_open_help_window(self):
-        InterfaceManager().showHelpPage('qthelp://org.mantidproject/doc/workbench/settings.html')
+        InterfaceManager().showHelpPage("qthelp://org.mantidproject/doc/workbench/settings.html")
 
     def view_closing(self):
         """

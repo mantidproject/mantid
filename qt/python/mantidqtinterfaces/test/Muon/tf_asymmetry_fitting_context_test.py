@@ -14,7 +14,6 @@ from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_utils import StaticW
 
 
 class TFAsymmetryFittingContextTest(unittest.TestCase):
-
     def setUp(self):
         self.fitting_context = TFAsymmetryFittingContext()
 
@@ -146,5 +145,5 @@ class TFAsymmetryFittingContextTest(unittest.TestCase):
         self.assertEqual(self.fitting_context.all_latest_fits()[0], fit2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

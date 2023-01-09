@@ -52,6 +52,7 @@ class MemoryView(QWidget):
     """
     Initializes and updates the view of memory(progress) bar.
     """
+
     def __init__(self, parent):
         super(MemoryView, self).__init__(parent)
         self.critical = CRITICAL_PERCENTAGE

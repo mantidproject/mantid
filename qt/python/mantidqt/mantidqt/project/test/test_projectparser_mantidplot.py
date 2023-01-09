@@ -13,25 +13,23 @@ from mantidqt.project.projectparser_mantidplot import MantidPlotProjectParser
 
 
 class ProjectParserMantidPlotTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         for directory in config.getDataSearchDirs():
-            if 'UnitTest' in directory:
-                cls.base_path = path.join(directory, 'project_load', 'Mantidplot')
+            if "UnitTest" in directory:
+                cls.base_path = path.join(directory, "project_load", "Mantidplot")
                 break
         cls.project_with_multiple_workspaces = path.join(cls.base_path, "mantidplot_project_multiple_workspaces.mantid")
         cls.project_with_workspace_group = path.join(cls.base_path, "mantidplot_project_workspace_group.mantid")
         cls.project_with_simple_1d_plot = path.join(cls.base_path, "mantidplot_project_simple_plot.mantid")
         cls.project_with_multiple_1d_plots = path.join(cls.base_path, "mantidplot_project_multiple_plots.mantid")
-        cls.project_plot_with_multiple_lines = path.join(cls.base_path,
-                                                         "mantidplot_project_plot_with_multiple_lines.mantid")
+        cls.project_plot_with_multiple_lines = path.join(cls.base_path, "mantidplot_project_plot_with_multiple_lines.mantid")
         cls.project_with_tiled_lots = path.join(cls.base_path, "mantidplot_project_tiled_plots.mantid")
         cls.project_with_errorbars = path.join(cls.base_path, "mantidplot_project_errorbar_plots.mantid")
         cls.project_with_logscale = path.join(cls.base_path, "mantidplot_project_logscale_plots.mantid")
 
     def test_parsing_workspaces(self):
-        expected_workspaces = ['BASIS_79827_divided_sqw', 'irs26176_graphite002_red', 'MUSR00062261']
+        expected_workspaces = ["BASIS_79827_divided_sqw", "irs26176_graphite002_red", "MUSR00062261"]
         parser = MantidPlotProjectParser(self.project_with_multiple_workspaces)
 
         workspace_list = parser.get_workspaces()
@@ -39,7 +37,7 @@ class ProjectParserMantidPlotTest(unittest.TestCase):
         self.assertCountEqual(workspace_list, expected_workspaces)
 
     def test_parsing_workspace_group(self):
-        expected_workspaces = ['MUSR00015189_1', 'MUSR00015189_2', 'MUSR00062260', 'MUSR00062261']
+        expected_workspaces = ["MUSR00015189_1", "MUSR00015189_2", "MUSR00062260", "MUSR00062261"]
         parser = MantidPlotProjectParser(self.project_with_workspace_group)
 
         workspace_list = parser.get_workspaces()
@@ -48,8 +46,16 @@ class ProjectParserMantidPlotTest(unittest.TestCase):
 
     def test_parsing_simple_1d_plot(self):
         parser = MantidPlotProjectParser(self.project_with_simple_1d_plot)
-        expected_creation_args = {'linestyle': 'solid', 'linewidth': 1.5, 'drawstyle': 'default', 'marker': None,
-                                  'markersize': 6, 'function': 'plot', 'wkspIndex': 1, 'workspaces': 'MUSR00062261'}
+        expected_creation_args = {
+            "linestyle": "solid",
+            "linewidth": 1.5,
+            "drawstyle": "default",
+            "marker": None,
+            "markersize": 6,
+            "function": "plot",
+            "wkspIndex": 1,
+            "workspaces": "MUSR00062261",
+        }
 
         plot_list = parser.get_plots()
         plot_dict = plot_list[0]
@@ -70,8 +76,16 @@ class ProjectParserMantidPlotTest(unittest.TestCase):
 
     def test_parsing_multiple_1d_plots(self):
         parser = MantidPlotProjectParser(self.project_with_multiple_1d_plots)
-        expected_creation_args = {'linestyle': 'solid', 'linewidth': 1.5, 'drawstyle': 'default', 'marker': None,
-                                  'markersize': 6, 'function': 'plot', 'wkspIndex': 1, 'workspaces': 'MUSR00062261'}
+        expected_creation_args = {
+            "linestyle": "solid",
+            "linewidth": 1.5,
+            "drawstyle": "default",
+            "marker": None,
+            "markersize": 6,
+            "function": "plot",
+            "wkspIndex": 1,
+            "workspaces": "MUSR00062261",
+        }
 
         plot_list = parser.get_plots()
         creation_args_1 = plot_list[0]["creationArguments"][0][0]
@@ -123,8 +137,8 @@ class ProjectParserMantidPlotTest(unittest.TestCase):
         axes_dict = plot_dict["axes"]
         axes_properties = axes_dict[0]["properties"]
 
-        self.assertEqual(axes_properties["yAxisScale"], 'linear')
-        self.assertEqual(axes_properties["xAxisScale"], 'log')
+        self.assertEqual(axes_properties["yAxisScale"], "linear")
+        self.assertEqual(axes_properties["xAxisScale"], "log")
 
     def test_error_bars_correctly_loaded_from_project_file(self):
         parser = MantidPlotProjectParser(self.project_with_errorbars)

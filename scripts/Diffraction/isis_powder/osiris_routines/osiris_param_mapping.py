@@ -22,6 +22,6 @@ attr_mapping = [
     ParamMapEntry(ext_name="grouping_filename", int_name="grouping"),
     ParamMapEntry(ext_name="user_name", int_name="user_name"),
     ParamMapEntry(ext_name="vanadium_normalisation", int_name="van_norm"),
-    ParamMapEntry(ext_name="xye_filename", int_name="xye_filename")
+    ParamMapEntry(ext_name="xye_filename", int_name="xye_filename"),
 ]
 attr_mapping.extend(PARAM_MAPPING)

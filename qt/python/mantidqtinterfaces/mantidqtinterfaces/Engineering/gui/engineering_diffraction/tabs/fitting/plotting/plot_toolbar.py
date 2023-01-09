@@ -13,13 +13,13 @@ class FittingPlotToolbar(MantidNavigationToolbar):
     sig_toggle_fit_triggered = QtCore.Signal()
 
     toolitems = (
-        MantidNavigationTool('Home', 'Center display on contents', 'mdi.home', 'on_home_clicked', None),
+        MantidNavigationTool("Home", "Center display on contents", "mdi.home", "on_home_clicked", None),
         MantidStandardNavigationTools.BACK,
         MantidStandardNavigationTools.FORWARD,
         MantidStandardNavigationTools.SEPARATOR,
         MantidStandardNavigationTools.PAN,
         MantidStandardNavigationTools.ZOOM,
-        MantidNavigationTool('Fit', 'Open/close fitting tab', None, 'toggle_fit', False),
+        MantidNavigationTool("Fit", "Open/close fitting tab", None, "toggle_fit", False),
     )
 
     def __init__(self, canvas, parent, coordinates=True):
@@ -34,12 +34,12 @@ class FittingPlotToolbar(MantidNavigationToolbar):
         self.push_current()
 
     def toggle_fit(self):
-        fit_action = self._actions['toggle_fit']
+        fit_action = self._actions["toggle_fit"]
         if fit_action.isChecked():
             # disable pan and zoom
-            if self._actions['zoom'].isChecked():
+            if self._actions["zoom"].isChecked():
                 self.zoom()
-            if self._actions['pan'].isChecked():
+            if self._actions["pan"].isChecked():
                 self.pan()
         self.sig_toggle_fit_triggered.emit()
 
@@ -48,10 +48,10 @@ class FittingPlotToolbar(MantidNavigationToolbar):
         Respond to a signal that user closed self.fit_browser by
         clicking the [x] button.
         """
-        self._actions['toggle_fit'].trigger()
+        self._actions["toggle_fit"].trigger()
 
     def trigger_fit_toggle_action(self):
-        self._actions['toggle_fit'].trigger()
+        self._actions["toggle_fit"].trigger()
 
     def set_fit_checkstate(self, checkstate):
-        self._actions['toggle_fit'].setChecked(checkstate)
+        self._actions["toggle_fit"].setChecked(checkstate)

@@ -115,7 +115,7 @@ class ModelFittingPresenter(BasicFittingPresenter):
         self.view.update_y_parameters(self.model.y_parameters(), self.model.y_parameter_types())
         # Triggers handle_selected_x_changed
         self.view.update_x_parameters(self.model.x_parameters(), self.model.y_parameter_types(), emit_signal=True)
-        #update start and end x
+        # update start and end x
         self.update_selected_parameter_combination_workspace()
 
     def handle_parameter_combinations_error(self, error: str) -> None:
@@ -190,14 +190,13 @@ class ModelFittingPresenter(BasicFittingPresenter):
             start_x_list, end_x_list = self.model._get_new_start_xs_and_end_xs_using_existing_datasets([dataset_name])
             # update values in context
             self.model.set_current_start_and_end_x(start_x_list[0], end_x_list[0])
-            #update values in view
+            # update values in view
             self.view.start_x = start_x_list[0]
             self.view.end_x = end_x_list[0]
 
     def update_plot_fit(self) -> None:
         """Updates the fit results on the plot using the currently active fit results."""
-        x_tick_labels, y_tick_labels = self.model.get_override_x_and_y_tick_labels(self.view.x_parameter(),
-                                                                                   self.view.y_parameter())
+        x_tick_labels, y_tick_labels = self.model.get_override_x_and_y_tick_labels(self.view.x_parameter(), self.view.y_parameter())
         self.update_override_tick_labels_notifier.notify_subscribers([x_tick_labels, y_tick_labels])
 
         x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
@@ -217,11 +216,10 @@ class ModelFittingPresenter(BasicFittingPresenter):
     def _create_parameter_combination_workspaces(self, finished_callback) -> None:
         """Creates a matrix workspace for each possible parameter combination to be used for fitting."""
         try:
-            self.parameter_combination_thread = self._create_parameter_combinations_thread(
-                self.model.create_x_and_y_parameter_combinations)
-            self.parameter_combination_thread.threadWrapperSetUp(self.handle_parameter_combinations_started,
-                                                                 finished_callback,
-                                                                 self.handle_parameter_combinations_error)
+            self.parameter_combination_thread = self._create_parameter_combinations_thread(self.model.create_x_and_y_parameter_combinations)
+            self.parameter_combination_thread.threadWrapperSetUp(
+                self.handle_parameter_combinations_started, finished_callback, self.handle_parameter_combinations_error
+            )
             self.parameter_combination_thread.start()
         except ValueError as error:
             self.view.warning_popup(error)

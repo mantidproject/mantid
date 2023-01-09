@@ -4,17 +4,19 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy.QtWidgets import (QDialog)  # noqa
+from qtpy.QtWidgets import QDialog  # noqa
 from mantid.kernel import Logger
+
 try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
-    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    Logger("HFIR_4Circle_Reduction").information("Using legacy ui importer")
     from mantidplot import load_ui
 
 
 class ViewSpiceDialog(QDialog):
-    """Dialog to view SPICE """
+    """Dialog to view SPICE"""
+
     def __init__(self, parent):
         """Initialization
 
@@ -55,6 +57,6 @@ class ViewSpiceDialog(QDialog):
         :param plain_text:
         :return:
         """
-        self.ui.textBrowser_spice.setText('{}'.format(plain_text))
+        self.ui.textBrowser_spice.setText("{}".format(plain_text))
 
         return

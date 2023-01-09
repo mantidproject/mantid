@@ -21,7 +21,7 @@ class QSequentialTableView(QtWidgets.QTableView):
         self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.setItemDelegateForColumn(FIT_STATUS_COLUMN, FitQualityDelegate(self))
-        self.setItemDelegateForColumn(NUM_DEFAULT_COLUMNS+1, FitQualityDelegate(self))
+        self.setItemDelegateForColumn(NUM_DEFAULT_COLUMNS + 1, FitQualityDelegate(self))
         self.setAlternatingRowColors(True)
 
     def resizeColumnsToContents(self):
@@ -30,7 +30,7 @@ class QSequentialTableView(QtWidgets.QTableView):
         for col in range(self.model().columnCount()):
             if col == 0:
                 self.horizontalHeader().setSectionResizeMode(col, QtWidgets.QHeaderView.Stretch)
-            elif col > NUM_DEFAULT_COLUMNS-1:
+            elif col > NUM_DEFAULT_COLUMNS - 1:
                 self.horizontalHeader().setSectionResizeMode(col, QtWidgets.QHeaderView.ResizeToContents)
                 self.setItemDelegateForColumn(col, DoubleItemDelegate(self))
 

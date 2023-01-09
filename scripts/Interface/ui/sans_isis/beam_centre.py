@@ -8,14 +8,15 @@ from abc import ABCMeta, abstractmethod
 from qtpy import QtGui, QtCore, QtWidgets
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets import messagedisplay
-from sans.gui_logic.gui_common import get_detector_from_gui_selection, \
-     get_detector_strings_for_gui, get_string_for_gui_from_reduction_mode
+from sans.gui_logic.gui_common import get_detector_from_gui_selection, get_detector_strings_for_gui, get_string_for_gui_from_reduction_mode
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
+
     def _fromUtf8(s):
         return s
+
 
 Ui_BeamCentre, _ = load_ui(__file__, "beam_centre.ui")
 
@@ -25,6 +26,7 @@ class BeamCentre(QtWidgets.QWidget, Ui_BeamCentre):
         """
         Defines the elements which a presenter can listen to for the beam centre finder
         """
+
         @abstractmethod
         def on_run_clicked(self):
             pass

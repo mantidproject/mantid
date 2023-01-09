@@ -13,7 +13,6 @@ from mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.Transform.transform_wid
 
 
 class AddRawGroupingTest(unittest.TestCase):
-
     def setUp(self):
         self.GUI = mock.Mock()
         self.GUI.context = mock.MagicMock()
@@ -21,13 +20,13 @@ class AddRawGroupingTest(unittest.TestCase):
         self.GUI.corrections_tab = mock.MagicMock(autospec=CorrectionsTabWidget)
         self.GUI.phase_tab = mock.MagicMock(autospec=PhaseTabWidget)
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.features.add_grouping_workspaces.GenericObserver')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.Common.features.add_grouping_workspaces.GenericObserver")
     def test_get_features_success(self, observer):
         test = {}
         AddGroupingWorkspaces(self.GUI, test)
         observer.assert_called_once_with(self.GUI.context.do_grouping)
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.features.add_grouping_workspaces.GenericObserver')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.Common.features.add_grouping_workspaces.GenericObserver")
     def test_add_observers_to_feature(self, observer):
         group_observer = mock.Mock()
         observer.return_value = group_observer
@@ -35,14 +34,15 @@ class AddRawGroupingTest(unittest.TestCase):
         add = AddGroupingWorkspaces(self.GUI, {})
         add.add_observers_to_feature(self.GUI)
 
-        self.GUI.corrections_tab.corrections_tab_presenter.asymmetry_pair_and_diff_calculations_finished_notifier.\
-                add_subscriber.assert_called_once_with(group_observer)
-        self.GUI.phase_tab.phase_table_presenter.calculation_finished_notifier.add_subscriber.\
-                assert_called_once_with(group_observer)
-        self.GUI.phase_tab.phase_table_presenter.phase_table_calculation_complete_notifier.add_subscriber.\
-                assert_called_once_with(group_observer)
+        self.GUI.corrections_tab.corrections_tab_presenter.asymmetry_pair_and_diff_calculations_finished_notifier.add_subscriber.assert_called_once_with(  # noqa: E501
+            group_observer
+        )
+        self.GUI.phase_tab.phase_table_presenter.calculation_finished_notifier.add_subscriber.assert_called_once_with(group_observer)
+        self.GUI.phase_tab.phase_table_presenter.phase_table_calculation_complete_notifier.add_subscriber.assert_called_once_with(
+            group_observer
+        )
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.features.add_grouping_workspaces.GenericObserver')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.Common.features.add_grouping_workspaces.GenericObserver")
     def test_add_observers_to_feature_with_frequency(self, observer):
         group_observer = mock.Mock()
         observer.return_value = group_observer
@@ -51,14 +51,15 @@ class AddRawGroupingTest(unittest.TestCase):
         add = AddGroupingWorkspaces(self.GUI, {})
         add.add_observers_to_feature(self.GUI)
 
-        self.GUI.corrections_tab.corrections_tab_presenter.asymmetry_pair_and_diff_calculations_finished_notifier.\
-                add_subscriber.assert_called_once_with(group_observer)
-        self.GUI.phase_tab.phase_table_presenter.calculation_finished_notifier.add_subscriber.\
-                assert_called_once_with(group_observer)
-        self.GUI.phase_tab.phase_table_presenter.phase_table_calculation_complete_notifier.add_subscriber.\
-                assert_called_once_with(group_observer)
+        self.GUI.corrections_tab.corrections_tab_presenter.asymmetry_pair_and_diff_calculations_finished_notifier.add_subscriber.assert_called_once_with(  # noqa: E501
+            group_observer
+        )
+        self.GUI.phase_tab.phase_table_presenter.calculation_finished_notifier.add_subscriber.assert_called_once_with(group_observer)
+        self.GUI.phase_tab.phase_table_presenter.phase_table_calculation_complete_notifier.add_subscriber.assert_called_once_with(
+            group_observer
+        )
         self.GUI.transform.new_data_observer.assert_called_once_with(group_observer)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

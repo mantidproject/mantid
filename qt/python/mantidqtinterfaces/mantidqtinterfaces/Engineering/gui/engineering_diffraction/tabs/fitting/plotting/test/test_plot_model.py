@@ -54,5 +54,5 @@ class FittingPlotModelTest(unittest.TestCase):
         self.assertEqual(1, ax.cla.call_count)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

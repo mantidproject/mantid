@@ -29,6 +29,7 @@ class Observable(object):
     The Observable is an object which may be subscribed to by Observers. It maintains a list of subscribers to it,
     and when needed, it will notify those subscribers.
     """
+
     def __init__(self):
         super(Observable, self).__init__()
         self._subscribers = []
@@ -63,6 +64,7 @@ class GenericObserver(Observer):
     """
     General purpose observer wrapping a Python callable.
     """
+
     def __init__(self, callback):
         """
         Initialize the observer

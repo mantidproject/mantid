@@ -10,14 +10,14 @@ from mantid import simpleapi
 
 class CheckForSampleLogsTest(unittest.TestCase):
     def test_simple(self):
-        w = simpleapi.Load('CNCS_7860_event.nxs')
+        w = simpleapi.Load("CNCS_7860_event.nxs")
         result = simpleapi.CheckForSampleLogs(w)
-        self.assertEqual(result, '')
-        result = simpleapi.CheckForSampleLogs(w, 'Phase1')
-        self.assertEqual(result, '')
-        result = simpleapi.CheckForSampleLogs(w, 'Phrase1')
-        self.assertNotEqual(result, '')
+        self.assertEqual(result, "")
+        result = simpleapi.CheckForSampleLogs(w, "Phase1")
+        self.assertEqual(result, "")
+        result = simpleapi.CheckForSampleLogs(w, "Phrase1")
+        self.assertNotEqual(result, "")
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     unittest.main()

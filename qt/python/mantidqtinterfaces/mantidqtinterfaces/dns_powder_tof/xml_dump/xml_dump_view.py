@@ -20,6 +20,7 @@ from mantidqtinterfaces.dns_powder_tof.data_structures.dns_view import DNSView
 # to get mantid version
 try:
     from mantid.kernel import version_str
+
     mantid_version = version_str()
 except (ImportError, ImportWarning):
     mantid_version = None
@@ -29,12 +30,13 @@ class DNSXMLDumpView(DNSView):
     """
     Widget that lets user save or load data reduction xml files.
     """
+
     name = "XmlDump"
     HAS_TAB = False
 
     def __init__(self, parent):
         super().__init__(parent)
-        self.name = 'xml_dump'
+        self.name = "xml_dump"
         self.main_view = parent
         self.setVisible(False)
 
@@ -47,7 +49,8 @@ class DNSXMLDumpView(DNSView):
             caption="Select XML file for loading",
             directory=start_path,
             filter="XML files (*.xml)",
-            options=QFileDialog.DontUseNativeDialog)
+            options=QFileDialog.DontUseNativeDialog,
+        )
         return xml_filepath
 
     def open_save_filename(self, start_path=expanduser("~")):
@@ -59,17 +62,20 @@ class DNSXMLDumpView(DNSView):
             caption="Select XML file for saving",
             directory=start_path,
             filter="XML files (*.xml)",
-            options=QFileDialog.DontUseNativeDialog)
+            options=QFileDialog.DontUseNativeDialog,
+        )
         return xml_filepath
 
     @staticmethod
     def get_file_header():
-        return OrderedDict([
-            ('instrument_name', 'DNS'),
-            ('facility_name', 'MLZ'),
-            ('timestamp_xml_save', time.ctime()),
-            ('python_version', sys.version),
-            ('platform', platform.system()),
-            ('architecture', str(platform.architecture())),
-            ('mantid_version', mantid_version),
-        ])
+        return OrderedDict(
+            [
+                ("instrument_name", "DNS"),
+                ("facility_name", "MLZ"),
+                ("timestamp_xml_save", time.ctime()),
+                ("python_version", sys.version),
+                ("platform", platform.system()),
+                ("architecture", str(platform.architecture())),
+                ("mantid_version", mantid_version),
+            ]
+        )

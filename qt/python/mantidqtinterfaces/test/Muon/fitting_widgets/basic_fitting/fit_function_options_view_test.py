@@ -10,14 +10,15 @@ from mantid.api import FrameworkManager, FunctionFactory
 from mantid.simpleapi import CreateEmptyTableWorkspace
 from mantidqt.utils.qt.testing import start_qapplication
 
-from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.fit_function_options_view import (FitFunctionOptionsView,
-                                                                                                        RAW_DATA_TABLE_ROW)
+from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.fit_function_options_view import (
+    FitFunctionOptionsView,
+    RAW_DATA_TABLE_ROW,
+)
 from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 
 @start_qapplication
 class FitFunctionOptionsViewTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         FrameworkManager.Instance()
@@ -175,5 +176,5 @@ class FitFunctionOptionsViewTest(unittest.TestCase):
         self.view.show_normalised_covariance_matrix(wrapper.workspace, wrapper.workspace_name)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

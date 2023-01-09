@@ -14,19 +14,18 @@ import os
 
 
 class CreateLeBailFitInputTest(unittest.TestCase):
-
     def test_LoadHKLFile(self):
-        """ Test to load a .hkl file
-        """
+        """Test to load a .hkl file"""
         # Set up
-        alg_test = run_algorithm("CreateLeBailFitInput",
-                ReflectionsFile         = "LB4853b2.hkl",
-                FullprofParameterFile   = "2011B_HR60b2.irf",
-                Bank                    = 2,
-                LatticeConstant         = 4.66,
-                InstrumentParameterWorkspace    = "PG3_Bank2_Foo",
-                BraggPeakParameterWorkspace     = "LaB6_Peaks"
-                )
+        alg_test = run_algorithm(
+            "CreateLeBailFitInput",
+            ReflectionsFile="LB4853b2.hkl",
+            FullprofParameterFile="2011B_HR60b2.irf",
+            Bank=2,
+            LatticeConstant=4.66,
+            InstrumentParameterWorkspace="PG3_Bank2_Foo",
+            BraggPeakParameterWorkspace="LaB6_Peaks",
+        )
 
         # Execute
         self.assertTrue(alg_test.isExecuted())
@@ -43,14 +42,13 @@ class CreateLeBailFitInputTest(unittest.TestCase):
             numrowgood = 28
         print("Parameter name of first line = ", paramname0)
 
-        #self.assertEqual(numrowgood, paramws.rowCount())
+        # self.assertEqual(numrowgood, paramws.rowCount())
 
         paramnames = []
         for i in range(paramws.rowCount()):
             paramname = paramws.cell(i, 0)
             paramnames.append(paramname)
         self.assertEqual(paramnames.count("LatticeConstant"), 1)
-
 
         # Bragg peak list
         braggws = AnalysisDataService.retrieve("LaB6_Peaks")
@@ -63,19 +61,19 @@ class CreateLeBailFitInputTest(unittest.TestCase):
         return
 
     def test_genHKLList(self):
-        """ Test to load a .hkl file
-        """
+        """Test to load a .hkl file"""
         # Set up
-        alg_test = run_algorithm("CreateLeBailFitInput",
-                ReflectionsFile         = "",
-                MaxHKL                  = "12,12,12",
-                FullprofParameterFile   = "2011B_HR60b2.irf",
-                Bank                    = 2,
-                LatticeConstant         = 4.66,
-                GenerateBraggReflections        = True,
-                InstrumentParameterWorkspace    = "PG3_Bank2_Foo2",
-                BraggPeakParameterWorkspace     = "Arb_Peaks"
-                )
+        alg_test = run_algorithm(
+            "CreateLeBailFitInput",
+            ReflectionsFile="",
+            MaxHKL="12,12,12",
+            FullprofParameterFile="2011B_HR60b2.irf",
+            Bank=2,
+            LatticeConstant=4.66,
+            GenerateBraggReflections=True,
+            InstrumentParameterWorkspace="PG3_Bank2_Foo2",
+            BraggPeakParameterWorkspace="Arb_Peaks",
+        )
 
         # Execute
         self.assertTrue(alg_test.isExecuted())
@@ -90,16 +88,15 @@ class CreateLeBailFitInputTest(unittest.TestCase):
             numrowgood = 28
         else:
             numrowgood = 27
-        #print "Parameter name of first line = ", paramname0
+        # print "Parameter name of first line = ", paramname0
 
-        #self.assertEqual(numrowgood, paramws.rowCount())
+        # self.assertEqual(numrowgood, paramws.rowCount())
 
         paramnames = []
         for i in range(paramws.rowCount()):
             paramname = paramws.cell(i, 0)
             paramnames.append(paramname)
         self.assertEqual(paramnames.count("LatticeConstant"), 1)
-
 
         # Bragg peak list
         braggws = AnalysisDataService.retrieve("Arb_Peaks")
@@ -111,5 +108,6 @@ class CreateLeBailFitInputTest(unittest.TestCase):
 
         return
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

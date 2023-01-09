@@ -5,12 +5,14 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import FunctionFactory, Workspace, AlgorithmManager, IFunction1D
+import numpy as np
 
 
 class FunctionWrapper(object):
     """
     Wrapper class for Fitting Function
     """
+
     @staticmethod
     def wrap(fun, *args, **kwargs):
         fun_is_str = isinstance(fun, str)
@@ -72,7 +74,7 @@ class FunctionWrapper(object):
         :return: attribute of self.fun instance, or any of the fitting
         parameters or function attributes
         """
-        if 'fun' in self.__dict__:
+        if "fun" in self.__dict__:
             if hasattr(self.fun, item):
                 return getattr(self.fun, item)
             else:
@@ -88,13 +90,13 @@ class FunctionWrapper(object):
         :param key: named attribute
         :param value: new value for the named attribute
         """
-        if key == 'fun':
-            self.__dict__['fun'] = value  # initialize self.fun
-        elif 'fun' in self.__dict__ and hasattr(self.fun, key):
+        if key == "fun":
+            self.__dict__["fun"] = value  # initialize self.fun
+        elif "fun" in self.__dict__ and hasattr(self.fun, key):
             setattr(self.fun, key, value)  # key is attribute of instance self.fun
-        elif 'fun' in self.__dict__ and self.fun.hasAttribute(key):
+        elif "fun" in self.__dict__ and self.fun.hasAttribute(key):
             self.fun.setAttributeValue(key, value)  # key is function attribute
-        elif 'fun' in self.__dict__ and self.fun.hasParameter(key):
+        elif "fun" in self.__dict__ and self.fun.hasParameter(key):
             self.fun.setParameter(key, value)  # key is fitting parameter
         else:
             self.__dict__[key] = value  # initialize self.key
@@ -166,18 +168,16 @@ class FunctionWrapper(object):
         :param x:      x value or list of x values
         :param params: list of parameter values
         """
-        import numpy as np
-
         if isinstance(x, Workspace):
             # If the input is a workspace, simply return the output workspace.
-            return self._execute_algorithm('EvaluateFunction', Function=self.fun, InputWorkspace=x)
+            return self._execute_algorithm("EvaluateFunction", Function=self.fun, InputWorkspace=x)
 
-        list_input =  isinstance(x, list)
+        list_input = isinstance(x, list)
         numpy_input = isinstance(x, np.ndarray)
         if numpy_input:
             # If the input is a numpy array reshape into 1D array, saving
             # original shape to reshape output back to it.
-            x_list = x.reshape(-1, order='C')
+            x_list = x.reshape(-1, order="C")
             x_shape = x.shape
         elif list_input:
             # If the input isn't a list, wrap it in one so we can iterate easily
@@ -188,12 +188,12 @@ class FunctionWrapper(object):
         self._set_parameters(params)
 
         y = x_list[:]
-        ws = self._execute_algorithm('CreateWorkspace', DataX=x_list, DataY=y)
-        out = self._execute_algorithm('EvaluateFunction', Function=self.fun, InputWorkspace=ws)
+        ws = self._execute_algorithm("CreateWorkspace", DataX=x_list, DataY=y)
+        out = self._execute_algorithm("EvaluateFunction", Function=self.fun, InputWorkspace=ws)
         # Create a copy of the calculated spectrum
         output_array = np.array(out.readY(1))
         if numpy_input:
-            return output_array.reshape(x_shape, order='C')
+            return output_array.reshape(x_shape, order="C")
 
         if list_input:
             return output_array
@@ -208,6 +208,7 @@ class FunctionWrapper(object):
                           the function is plotted.
         """
         from mantid import mtd
+
         try:
             from mantidplot import plot
         except:
@@ -258,32 +259,32 @@ class FunctionWrapper(object):
                 raise RuntimeError("startX must be less than EndX")
 
         if haveXValues:
-            spectrumWs = self._execute_algorithm('CreateWorkspace', DataX=xvals, DataY=xvals)
+            spectrumWs = self._execute_algorithm("CreateWorkspace", DataX=xvals, DataY=xvals)
         elif isWorkspace:
             xvals = ws.readX(workspaceIndex)
             if haveStartX and haveEndX:
                 xvals = filter(inRange, xvals)
             if extractSpectrum or (haveStartX and haveEndX):
-                spectrumWs = self._execute_algorithm('CreateWorkspace', DataX=xvals, DataY=xvals)
+                spectrumWs = self._execute_algorithm("CreateWorkspace", DataX=xvals, DataY=xvals)
             else:
                 spectrumWs = ws
         elif haveStartX and haveEndX:
             xvals = np.linspace(start=xMin, stop=xMax, num=nSteps)
-            spectrumWs = self._execute_algorithm('CreateWorkspace', DataX=xvals, DataY=xvals)
+            spectrumWs = self._execute_algorithm("CreateWorkspace", DataX=xvals, DataY=xvals)
         else:
             if not haveStartX:
                 raise RuntimeError("startX must be defined if no workspace or xValues are defined.")
             if not haveEndX:
                 raise RuntimeError("endX must be defined if no workspace or xValues are defined.")
             else:
-                raise RuntimeError("insufficient plotting arguments") # Should not occur.
+                raise RuntimeError("insufficient plotting arguments")  # Should not occur.
 
         outWs = self(spectrumWs)
         vals = outWs.readY(1)
         CreateWorkspace(DataX=xvals, DataY=vals, OutputWorkspace=plotName)
         plot(plotName, 0)
 
-    def tie (self, *args, **kwargs):
+    def tie(self, *args, **kwargs):
         """
         Add ties.
 
@@ -333,7 +334,7 @@ class FunctionWrapper(object):
 
         :param expressions: string of tie expressions
         """
-        self.fun.addConstraints( expressions )
+        self.fun.addConstraints(expressions)
 
     def unconstrain(self, name):
         """
@@ -382,14 +383,14 @@ class FunctionWrapper(object):
         # to pass InputWorkspace into EvaluateFunction before Function.
         # As a special case has been made for this. This case can be removed
         # with ordered kwargs change in Python 3.6.
-        if name == 'EvaluateFunction':
-            alg.setProperty('Function', kwargs['Function'])
-            del kwargs['Function']
-            alg.setProperty('InputWorkspace', kwargs['InputWorkspace'])
-            del kwargs['InputWorkspace']
+        if name == "EvaluateFunction":
+            alg.setProperty("Function", kwargs["Function"])
+            del kwargs["Function"]
+            alg.setProperty("InputWorkspace", kwargs["InputWorkspace"])
+            del kwargs["InputWorkspace"]
         for param in kwargs:
             alg.setProperty(param, kwargs[param])
-        alg.setProperty('OutputWorkspace', 'none')
+        alg.setProperty("OutputWorkspace", "none")
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
 
@@ -398,7 +399,8 @@ class CompositeFunctionWrapper(FunctionWrapper):
     """
     Wrapper class for Composite Fitting Function
     """
-    def __init__ (self, *args, **kwargs):
+
+    def __init__(self, *args, **kwargs):
         """
         Called when creating an instance
 
@@ -426,7 +428,8 @@ class CompositeFunctionWrapper(FunctionWrapper):
         :param kwargs: any parameters or attributes that must be passed to the
                        composite function itself.
         """
-        if len(args) == 1 and  not isinstance(args[0], FunctionWrapper):
+        super().__init__(name=name)
+        if len(args) == 1 and not isinstance(args[0], FunctionWrapper):
             # We have a composite function to wrap
             self.fun = args[0]
         else:
@@ -457,9 +460,9 @@ class CompositeFunctionWrapper(FunctionWrapper):
         get composite parameter name of parameter of
         given name of member function of given index
         """
-        return "f"+str(index)+"."+name
+        return "f" + str(index) + "." + name
 
-    def getIndexOfFunction (self, name):
+    def getIndexOfFunction(self, name):
         """
         get index of function specified by name,
         such as "LinearBackground" for the only
@@ -502,7 +505,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
         index = self.getIndexOfFunction(name)
         return self[index]
 
-    def __getitem__ (self, nameorindex):
+    def __getitem__(self, nameorindex):
         """
         get function of specified index or parameter of specified name
         called for array-like access on RHS.
@@ -513,12 +516,13 @@ class CompositeFunctionWrapper(FunctionWrapper):
         """
 
         comp = self.fun
-        if (isinstance(nameorindex, str) and not comp.hasParameter(nameorindex)) \
-                or (isinstance(nameorindex, int) and nameorindex >= comp.nParams()):
+        if (isinstance(nameorindex, str) and not comp.hasParameter(nameorindex)) or (
+            isinstance(nameorindex, int) and nameorindex >= comp.nParams()
+        ):
             raise AttributeError("Parameter %s not found" % nameorindex)
         item = comp[nameorindex]
         if isinstance(item, float):
-            return  item
+            return item
         elif item.name() == "CompositeFunction":
             return CompositeFunctionWrapper(item)
         elif item.name() == "ProductFunction":
@@ -528,7 +532,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
         else:
             return FunctionWrapper(item)
 
-    def __setitem__ (self, name, newValue):
+    def __setitem__(self, name, newValue):
         """
         Called from array-like access on LHS
 
@@ -538,12 +542,12 @@ class CompositeFunctionWrapper(FunctionWrapper):
         :param newValue: new value for item
         """
         comp = self.fun
-        if isinstance( newValue, FunctionWrapper):
+        if isinstance(newValue, FunctionWrapper):
             comp[name] = newValue.fun
         else:
             comp[name] = newValue
 
-    def __iadd__ (self, other):
+    def __iadd__(self, other):
         """
         Implement += operator.
 
@@ -584,9 +588,9 @@ class CompositeFunctionWrapper(FunctionWrapper):
         :param name: name of parameter
         """
         expr = self.getCompositeParameterName(name, 0)
-        self.tie({self.getCompositeParameterName(name, i): expr for i in range(1,len(self)) })
+        self.tie({self.getCompositeParameterName(name, i): expr for i in range(1, len(self))})
 
-    def fixAll (self, name):
+    def fixAll(self, name):
         """
         Fix all parameters with the given local name.
         Every member function must have a parameter of this name.
@@ -596,7 +600,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
         for f in self:
             f.fix(name)
 
-    def constrainAll (self, expressions):
+    def constrainAll(self, expressions):
         """
         Constrain all parameters according local names in expressions.
 
@@ -611,14 +615,14 @@ class CompositeFunctionWrapper(FunctionWrapper):
                 except:
                     pass
 
-    def unconstrainAll (self, name):
+    def unconstrainAll(self, name):
         """
         Unconstrain all parameters of given local name.
 
         :param name: local name of parameter
         """
         for i in range(0, len(self)):
-            if isinstance( self[i], CompositeFunctionWrapper ):
+            if isinstance(self[i], CompositeFunctionWrapper):
                 self[i].unconstrainAll(name)
             else:
                 try:
@@ -626,7 +630,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
                 except:
                     pass
 
-    def untieAll (self, name):
+    def untieAll(self, name):
         """
         Untie all parameters with the given local name.
         Every member function must have a parameter of this name.
@@ -636,7 +640,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
         for i in range(0, len(self)):
             self.untie(self.getCompositeParameterName(name, i))
 
-    def flatten (self):
+    def flatten(self):
         """
         Return composite function, equal to self, but with
         every composite function within replaced by
@@ -651,20 +655,20 @@ class CompositeFunctionWrapper(FunctionWrapper):
         # If there are no composite functions, do nothing
         needToFlatten = False
         for i in range(0, len(self)):
-            if not needToFlatten and isinstance(self[i],CompositeFunctionWrapper):
+            if not needToFlatten and isinstance(self[i], CompositeFunctionWrapper):
                 needToFlatten = True
 
         if not needToFlatten:
             return self
 
         # Now we know there is a composite function.
-        if isinstance(self,ProductFunctionWrapper):
+        if isinstance(self, ProductFunctionWrapper):
             flatSelf = ProductFunctionWrapper()
         else:
             flatSelf = CompositeFunctionWrapper()
 
         for i in range(0, len(self)):
-            if isinstance(self[i],CompositeFunctionWrapper):
+            if isinstance(self[i], CompositeFunctionWrapper):
                 currentFunction = self[i].flatten()
                 for j in range(0, len(currentFunction)):
                     flatSelf.fun.add(currentFunction[j].fun)
@@ -678,7 +682,8 @@ class ProductFunctionWrapper(CompositeFunctionWrapper):
     """
     Wrapper class for Product Fitting Function
     """
-    def __init__ (self, *args, **kwargs):
+
+    def __init__(self, *args, **kwargs):
         """
         Called when creating an instance
 
@@ -697,7 +702,8 @@ class ConvolutionWrapper(CompositeFunctionWrapper):
     """
     Wrapper class for Convolution Fitting Function
     """
-    def __init__ (self, *args, **kwargs):
+
+    def __init__(self, *args, **kwargs):
         """
         Called when creating an instance
 
@@ -716,7 +722,8 @@ class MultiDomainFunctionWrapper(CompositeFunctionWrapper):
     """
     Wrapper class for Multidomain Fitting Function
     """
-    def __init__ (self, *args, **kwargs):
+
+    def __init__(self, *args, **kwargs):
         """
         Called when creating an instance
 
@@ -731,9 +738,9 @@ class MultiDomainFunctionWrapper(CompositeFunctionWrapper):
         self.pureMultiplication = False
 
         global_parameters = []
-        if 'Global' in kwargs:
-            global_parameters = kwargs['Global']
-            del kwargs['Global']
+        if "Global" in kwargs:
+            global_parameters = kwargs["Global"]
+            del kwargs["Global"]
 
         # Create and populate with copied functions
         self.initByName("MultiDomainFunction", *args, **kwargs)
@@ -747,7 +754,7 @@ class MultiDomainFunctionWrapper(CompositeFunctionWrapper):
             self.fun.setDomainIndex(i, i)
 
     @property
-    def nDomains (self):
+    def nDomains(self):
         """
         Return number of domains
         """
@@ -755,15 +762,15 @@ class MultiDomainFunctionWrapper(CompositeFunctionWrapper):
 
 
 _name_to_constructor_map = {
-    'CompositeFunction': CompositeFunctionWrapper,
-    'ProductFunction': ProductFunctionWrapper,
-    'Convolution': ConvolutionWrapper,
-    'MultiDomainFunction': MultiDomainFunctionWrapper,
-    }
+    "CompositeFunction": CompositeFunctionWrapper,
+    "ProductFunction": ProductFunctionWrapper,
+    "Convolution": ConvolutionWrapper,
+    "MultiDomainFunction": MultiDomainFunctionWrapper,
+}
 
 # Some functions need to be excluded from wrapping, eg
 # if there is an algorithm with the same name.
-_do_not_wrap = ['VesuvioResolution']
+_do_not_wrap = ["VesuvioResolution"]
 
 
 def _create_wrapper_function(name):
@@ -806,6 +813,7 @@ class _IFunction1DWrapperCreator(_ExportedIFunction1D):
     to indicate that an unwrapped instance of the fit function
     must be returned by the constructor.
     """
+
     _used_by_factory = False
 
     def __new__(cls, **kwargs):

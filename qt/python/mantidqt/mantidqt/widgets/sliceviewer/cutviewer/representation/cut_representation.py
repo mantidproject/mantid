@@ -28,9 +28,9 @@ class CutRepresentation:
         self.mid_box_top = None
         self.mid_box_bot = None
         self.current_artist = None
-        self.cid_release = self.canvas.mpl_connect('button_release_event', self.on_release)
-        self.cid_press = self.canvas.mpl_connect('button_press_event', self.on_press)
-        self.cid_motion = self.canvas.mpl_connect('motion_notify_event', self.on_motion)
+        self.cid_release = self.canvas.mpl_connect("button_release_event", self.on_release)
+        self.cid_press = self.canvas.mpl_connect("button_press_event", self.on_press)
+        self.cid_motion = self.canvas.mpl_connect("motion_notify_event", self.on_motion)
         self.draw()
 
     def remove(self):
@@ -56,7 +56,7 @@ class CutRepresentation:
         # vector perp to line in crystal basis
         u = array([self.xmax_c - self.xmin_c, self.ymax_c - self.ymin_c, 0])
         w = cross(u, [0, 0, 1])[0:-1]
-        return w / sqrt(sum(w ** 2))
+        return w / sqrt(sum(w**2))
 
     def get_perp_dir(self):
         w = self.get_perp_dir_crystal()
@@ -66,19 +66,18 @@ class CutRepresentation:
         perp_display_x, perp_display_y = to_display(w[0], w[1])
         w_display = array([perp_display_x, perp_display_y])
 
-        return w_display / sqrt(sum(w_display ** 2))
+        return w_display / sqrt(sum(w_display**2))
 
     def draw_line(self):
         to_display = self.transform.tr
         xmin_d, ymin_d = to_display(self.xmin_c, self.ymin_c)
         xmax_d, ymax_d = to_display(self.xmax_c, self.ymax_c)
 
-        self.start = self.ax.plot(xmin_d, ymin_d, 'ow', label='start')[0]
-        self.end = self.ax.plot(xmax_d, ymax_d, 'ow', label='end')[0]
+        self.start = self.ax.plot(xmin_d, ymin_d, "ow", label="start")[0]
+        self.end = self.ax.plot(xmax_d, ymax_d, "ow", label="end")[0]
 
-        self.mid = self.ax.plot(mean([xmin_d, xmax_d]), mean([ymin_d, ymax_d]),
-                                label='mid', marker='o', color='w', markerfacecolor='w')[0]
-        self.line = self.ax.plot([xmin_d, xmax_d], [ymin_d, ymax_d], '-w')[0]
+        self.mid = self.ax.plot(mean([xmin_d, xmax_d]), mean([ymin_d, ymax_d]), label="mid", marker="o", color="w", markerfacecolor="w")[0]
+        self.line = self.ax.plot([xmin_d, xmax_d], [ymin_d, ymax_d], "-w")[0]
 
     def draw_box(self):
         xmin_d, xmax_d, ymin_d, ymax_d = self.get_start_end_points()
@@ -97,15 +96,13 @@ class CutRepresentation:
         points[2, :] = end - thickness_d * vec / 2
         points[3, :] = end + thickness_d * vec / 2
         points[4, :] = points[0, :]  # close the loop
-        self.box = self.ax.plot(points[:, 0], points[:, 1], '--r')[0]
+        self.box = self.ax.plot(points[:, 0], points[:, 1], "--r")[0]
         # plot mid points
         mid = 0.5 * (start + end)
         mid_top = mid + thickness_d * vec / 2
         mid_bot = mid - thickness_d * vec / 2
-        self.mid_box_top = self.ax.plot(mid_top[0], mid_top[1], 'or', label='mid_box_top',
-                                        markerfacecolor='w')[0]
-        self.mid_box_bot = self.ax.plot(mid_bot[0], mid_bot[1], 'or', label='mid_box_bot',
-                                        markerfacecolor='w')[0]
+        self.mid_box_top = self.ax.plot(mid_top[0], mid_top[1], "or", label="mid_box_top", markerfacecolor="w")[0]
+        self.mid_box_bot = self.ax.plot(mid_bot[0], mid_bot[1], "or", label="mid_box_bot", markerfacecolor="w")[0]
 
     def clear_lines(self, all_lines=False):
         lines_to_clear = [self.mid, self.line, self.box, self.mid_box_top, self.mid_box_bot]
@@ -129,11 +126,11 @@ class CutRepresentation:
         if self.is_valid_event(event) and self.has_current_artist():
             self.clear_lines(all_lines=True)
             from_display = self.transform.inv_tr
-            if 'mid' in self.current_artist.get_label():
+            if "mid" in self.current_artist.get_label():
                 x0, y0 = self.get_mid_point()
                 dx = event.xdata - x0
                 dy = event.ydata - y0
-                if self.current_artist.get_label() == 'mid':
+                if self.current_artist.get_label() == "mid":
                     dx_c, dy_c = from_display(dx, dy)
                     self.xmin_c, self.xmax_c = (x + dx_c for x in (self.xmin_c, self.xmax_c))
                     self.ymin_c, self.ymax_c = (y + dy_c for y in (self.ymin_c, self.ymax_c))
@@ -141,9 +138,9 @@ class CutRepresentation:
                     vec = self.get_perp_dir() * 2 * sqrt(pow(dx, 2) + pow(dy, 2))
                     dx_c, dy_c = from_display(vec[0], vec[1])
                     self.thickness_c = sqrt(pow(dx_c, 2) + pow(dy_c, 2))
-            elif self.current_artist.get_label() == 'start':
+            elif self.current_artist.get_label() == "start":
                 self.xmin_c, self.ymin_c = from_display(event.xdata, event.ydata)
-            elif self.current_artist.get_label() == 'end':
+            elif self.current_artist.get_label() == "end":
                 self.xmax_c, self.ymax_c = from_display(event.xdata, event.ydata)
             self.draw()
 

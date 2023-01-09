@@ -42,7 +42,6 @@ void FindReplaceDialog::initLayout() {
   boxFind->setEditable(true);
   boxFind->setDuplicatesEnabled(false);
   boxFind->setInsertPolicy(QComboBox::InsertAtTop);
-  boxFind->setAutoCompletion(true);
   boxFind->setMaxCount(10);
   boxFind->setMaxVisibleItems(10);
   boxFind->setMinimumWidth(250);
@@ -116,7 +115,6 @@ void FindReplaceDialog::addReplaceBox() {
   boxReplace->setEditable(true);
   boxReplace->setDuplicatesEnabled(false);
   boxReplace->setInsertPolicy(QComboBox::InsertAtTop);
-  boxReplace->setAutoCompletion(true);
   boxReplace->setMaxCount(10);
   boxReplace->setMaxVisibleItems(10);
   boxReplace->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));

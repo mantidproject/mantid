@@ -18,7 +18,7 @@ class IPeaksWorkspaceTest(unittest.TestCase):
     """
 
     def test_interface(self):
-        """ Rudimentary test to get peak and get/set some values """
+        """Rudimentary test to get peak and get/set some values"""
         pws = WorkspaceCreationHelper.createPeaksWorkspace(1)
         self.assertTrue(isinstance(pws, IPeaksWorkspace))
         self.assertEqual(pws.getNumberPeaks(), 1)
@@ -108,7 +108,7 @@ class IPeaksWorkspaceTest(unittest.TestCase):
         self.assertAlmostEqual(p.getQSampleFrame().Z(), 1.0, places=10)
 
         try:
-            p.setQSampleFrame(V3D(1,1,1), 1)
+            p.setQSampleFrame(V3D(1, 1, 1), 1)
         except Exception:
             self.fail("Tried setQSampleFrame with one V3D argument and a double distance")
         self.assertAlmostEqual(p.getQSampleFrame().X(), 1.0, places=10)
@@ -160,10 +160,10 @@ class IPeaksWorkspaceTest(unittest.TestCase):
         q_lab = ki - kf  # inelastic convention
         peak = pws.createPeak(q_lab)
         pws.addPeak(peak)
-        col, row = pws.row(0)['Col'], pws.row(0)['Row']
+        col, row = pws.row(0)["Col"], pws.row(0)["Row"]
         self.assertAlmostEqual(col, 4)
         self.assertAlmostEqual(row, 2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

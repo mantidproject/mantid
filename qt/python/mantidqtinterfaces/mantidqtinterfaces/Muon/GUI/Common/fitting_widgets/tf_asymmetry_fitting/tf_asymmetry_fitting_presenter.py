@@ -132,9 +132,11 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
         """Check that the current datasets are compatible with TF Asymmetry fitting mode."""
         tf_compliant, non_compliant_names = self.model.check_datasets_are_tf_asymmetry_compliant()
         if tf_asymmetry_on and not tf_compliant:
-            self.view.warning_popup(f"Switching to Normal Fitting mode because only Groups can be fitted in TF "
-                                    f"Asymmetry mode. Please unselect the following Pairs/Diffs in the grouping tab: "
-                                    f"{non_compliant_names}")
+            self.view.warning_popup(
+                f"Switching to Normal Fitting mode because only Groups can be fitted in TF "
+                f"Asymmetry mode. Please unselect the following Pairs/Diffs in the grouping tab: "
+                f"{non_compliant_names}"
+            )
             self._switch_to_normal_fitting()
             return False
         return True

@@ -70,8 +70,7 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
             import mantid
 
             # register startup
-            mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface,
-                                                     "Engineering Diffraction", False)
+            mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface, "Engineering Diffraction", False)
         except ImportError:
             pass
 

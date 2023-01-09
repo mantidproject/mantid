@@ -7,14 +7,15 @@
 import re
 from mantid import logger
 
-PARAMETER_NAME_PATTERN = re.compile(r'([a-zA-Z][\w.]+)')
+PARAMETER_NAME_PATTERN = re.compile(r"([a-zA-Z][\w.]+)")
 
 
 class FunctionParameters(object):
     """
     A helper class that simplifies access to parameters of nested composite fitting functions.
     """
-    def __init__(self, function, prefix=''):
+
+    def __init__(self, function, prefix=""):
         self.function = function
         self.prefix = prefix
 
@@ -32,7 +33,8 @@ class FunctionAttributes(object):
     """
     A helper class that simplifies access to attributes of nested composite fitting functions.
     """
-    def __init__(self, function, prefix=''):
+
+    def __init__(self, function, prefix=""):
         self.function = function
         self.prefix = prefix
 
@@ -59,15 +61,16 @@ class Function(object):
                     f.attr['Workspace'] = 'workspace_with_data'
         """
         from mantid.simpleapi import FunctionFactory
+
         if isinstance(name_or_function, str):
             self.function = FunctionFactory.createFunction(name_or_function)
         else:
             self.function = name_or_function
-        if 'prefix' in kwargs:
-            self.prefix = kwargs['prefix']
-            del kwargs['prefix']
+        if "prefix" in kwargs:
+            self.prefix = kwargs["prefix"]
+            del kwargs["prefix"]
         else:
-            self.prefix = ''
+            self.prefix = ""
         # Function attributes.
         self._attrib = FunctionAttributes(self.function, self.prefix)
         # Function parameters.
@@ -141,13 +144,13 @@ class Function(object):
                 constraints('A0 > 0', '0.1 < A1 < 0.9')
         """
         for arg in args:
-            constraint = re.sub(PARAMETER_NAME_PATTERN, '%s\\1' % self.prefix, arg)
+            constraint = re.sub(PARAMETER_NAME_PATTERN, "%s\\1" % self.prefix, arg)
             self.function.addConstraints(constraint)
 
     def toString(self):
         """Create function initialisation string"""
-        if self.prefix != '':
-            raise RuntimeError('Cannot convert to string a part of function')
+        if self.prefix != "":
+            raise RuntimeError("Cannot convert to string a part of function")
         return str(self.function)
 
     def update(self, function):
@@ -163,6 +166,7 @@ class CompositeProperties(object):
     """
     A helper class that simplifies access of attributes and parameters of a composite function.
     """
+
     def __init__(self, function, prefix, kind, first_index):
         """
         Constructor.
@@ -175,7 +179,7 @@ class CompositeProperties(object):
         """
         self.function = function
         self.prefix = prefix
-        self.PropertyType = FunctionAttributes if kind == 'attributes' else FunctionParameters
+        self.PropertyType = FunctionAttributes if kind == "attributes" else FunctionParameters
         self.first_index = first_index
 
     def __getitem__(self, i):
@@ -195,7 +199,7 @@ class CompositeProperties(object):
         Returns:
             FunctionParameters or FunctionAttributes object.
         """
-        return self.PropertyType(self.function, self.prefix + 'f%s.' % (i + self.first_index))
+        return self.PropertyType(self.function, self.prefix + "f%s." % (i + self.first_index))
 
     def update(self, function):
         self.function = function
@@ -208,7 +212,7 @@ class CompositeProperties(object):
                 tie({'A0': 0.1, 'A1': '2*A0'})
         """
         for param, tie in ties_dict.items():
-            tie = re.sub(PARAMETER_NAME_PATTERN, '%s\\1' % self.prefix, tie)
+            tie = re.sub(PARAMETER_NAME_PATTERN, "%s\\1" % self.prefix, tie)
             self.function.tie(self.prefix + param, tie)
 
     def constraints(self, *args):
@@ -219,7 +223,7 @@ class CompositeProperties(object):
                 constraints('A0 > 0', '0.1 < A1 < 0.9')
         """
         for arg in args:
-            constraint = re.sub(PARAMETER_NAME_PATTERN, '%s\\1' % self.prefix, arg)
+            constraint = re.sub(PARAMETER_NAME_PATTERN, "%s\\1" % self.prefix, arg)
             self.function.addConstraints(constraint)
 
 
@@ -236,9 +240,9 @@ class PeaksFunction(object):
         :param first_index: Index of the first peak
         """
         # Collection of all attributes
-        self._attrib = CompositeProperties(function, prefix, 'attributes', first_index)
+        self._attrib = CompositeProperties(function, prefix, "attributes", first_index)
         # Collection of all parameters
-        self._params = CompositeProperties(function, prefix, 'parameters', first_index)
+        self._params = CompositeProperties(function, prefix, "parameters", first_index)
 
     @property
     def attr(self):
@@ -291,8 +295,8 @@ class PeaksFunction(object):
         else:
             start = self._params.first_index
             end = iFirstN + self._params.first_index
-        name, expr = tuple(tie.split('='))
-        name = 'f%s.' + name.strip()
+        name, expr = tuple(tie.split("="))
+        name = "f%s." + name.strip()
         expr = expr.strip()
         ties = {(name % i): expr for i in range(start, end)}
         self.ties(ties)
@@ -317,7 +321,7 @@ class PeaksFunction(object):
             start = self._params.first_index
             end = iFirstN + self._params.first_index
 
-        pattern = re.sub(PARAMETER_NAME_PATTERN, 'f%s.\\1', constraint)
+        pattern = re.sub(PARAMETER_NAME_PATTERN, "f%s.\\1", constraint)
         self.constraints(*[pattern % i for i in range(start, end)])
 
 
@@ -346,11 +350,11 @@ class Background(object):
     def toString(self):
         """Returns the Background object in string format."""
         if len(self.functions) == 0:
-            return ''
+            return ""
         elif len(self.functions) == 1:
             return self.functions[0].toString()
         else:
-            return '(' + ';'.join([function.toString() for function in self.functions]) + ')'
+            return "(" + ";".join([function.toString() for function in self.functions]) + ")"
 
     def update(self, func, index=0):
         """
@@ -363,14 +367,14 @@ class Background(object):
         if index < len(self.functions):
             self.functions[index].update(func)
         else:
-            raise ValueError(f"Invalid index ({index}) provided: Background is made of {len(self.functions)} "
-                             f"Function(s).")
+            raise ValueError(f"Invalid index ({index}) provided: Background is made of {len(self.functions)} " f"Function(s).")
 
 
 class ResolutionModel:
     """
     Encapsulates a resolution model.
     """
+
     default_accuracy = 1e-4
     max_model_size = 100
 
@@ -391,27 +395,26 @@ class ResolutionModel:
                     to tabulate the functions such that linear interpolation between the
                     tabulated points has this accuracy. If not given a default value is used.
         """
-        errmsg = 'Resolution model must be either a tuple of two arrays, a function, PyChop object or list of one of these'
+        errmsg = "Resolution model must be either a tuple of two arrays, a function, PyChop object or list of one of these"
         self.multi = False
-        if hasattr(model, '__call__'):
+        if hasattr(model, "__call__"):
             self.model = self._makeModel(model, xstart, xend, accuracy)
-        elif hasattr(model, 'getEi') and hasattr(model, 'getResolution'):
+        elif hasattr(model, "getEi") and hasattr(model, "getResolution"):
             Ei = model.getEi()
             self.model = self._makeModel(model.getResolution, -Ei, 0.9 * Ei, 0.01)
-        elif hasattr(model, 'model'):
+        elif hasattr(model, "model"):
             self.model = model
         elif isinstance(model, tuple):
             self._checkModel(model)
             self.model = model
-        elif hasattr(model, '__len__'):
+        elif hasattr(model, "__len__"):
             if len(model) == 0:
-                raise RuntimeError('Resolution model cannot be initialised with an empty iterable %s' %
-                                   str(model))
-            if hasattr(model[0], '__call__'):
+                raise RuntimeError("Resolution model cannot be initialised with an empty iterable %s" % str(model))
+            if hasattr(model[0], "__call__"):
                 self.model = [self._makeModel(m, xstart, xend, accuracy) for m in model]
-            elif hasattr(model[0], 'model'):
+            elif hasattr(model[0], "model"):
                 self.model = [m.model for m in model]
-            elif hasattr(model[0], 'getEi') and hasattr(model[0], 'getResolution'):
+            elif hasattr(model[0], "getEi") and hasattr(model[0], "getResolution"):
                 Ei = model[0].getEi()
                 self.model = [self._makeModel(m.getResolution, -Ei, 0.9 * Ei, 0.01) for m in model]
             elif isinstance(model[0], tuple):
@@ -433,27 +436,27 @@ class ResolutionModel:
 
     def _checkModel(self, model):
         if not isinstance(model, tuple):
-            raise RuntimeError('Resolution model must be a tuple of two arrays of floats.\n'
-                               'Found instead:\n\n%s' % str(model))
+            raise RuntimeError("Resolution model must be a tuple of two arrays of floats.\n" "Found instead:\n\n%s" % str(model))
         if len(model) != 2:
-            raise RuntimeError('Resolution model tuple must have exactly two elements.\n'
-                               'Found instead %d' % len(model))
+            raise RuntimeError("Resolution model tuple must have exactly two elements.\n" "Found instead %d" % len(model))
         self._checkArray(model[0])
         self._checkArray(model[1])
         if len(model[0]) != len(model[1]):
-            raise RuntimeError('Resolution model expects two arrays of equal sizes.\n'
-                               'Found sizes %d and %d' % (len(model[0]), len(model[1])))
+            raise RuntimeError(
+                "Resolution model expects two arrays of equal sizes.\n" "Found sizes %d and %d" % (len(model[0]), len(model[1]))
+            )
 
     def _checkArray(self, array):
-        if not hasattr(array, '__len__'):
-            raise RuntimeError('Expected an array of floats, found %s' % str(array))
+        if not hasattr(array, "__len__"):
+            raise RuntimeError("Expected an array of floats, found %s" % str(array))
         if len(array) == 0:
-            raise RuntimeError('Expected a non-empty array of floats.')
+            raise RuntimeError("Expected a non-empty array of floats.")
         if not isinstance(array[0], float) and not isinstance(array[0], int):
-            raise RuntimeError('Expected an array of floats, found %s' % str(array[0]))
+            raise RuntimeError("Expected an array of floats, found %s" % str(array[0]))
 
     def _mergeArrays(self, a, b):
         import numpy as np
+
         c = np.empty(2 * len(a) - 1)
         c[::2] = a
         c[1::2] = b
@@ -461,9 +464,9 @@ class ResolutionModel:
 
     def _makeModel(self, model, xstart, xend, accuracy):
         if xstart is None or xend is None:
-            raise RuntimeError('The x-range must be provided to ResolutionModel via '
-                               'xstart and xend parameters.')
+            raise RuntimeError("The x-range must be provided to ResolutionModel via " "xstart and xend parameters.")
         import numpy as np
+
         if accuracy is None:
             accuracy = self.default_accuracy
 
@@ -491,13 +494,14 @@ class PhysicalProperties(object):
     """
     Contains information about measurement conditions of physical properties
     """
+
     HEATCAPACITY = 1
     SUSCEPTIBILITY = 2
     MAGNETISATION = 3
     MAGNETICMOMENT = 4
 
     def _str2id(self, typeid):
-        mappings = [['cp', 'cv', 'heatcap'], ['chi', 'susc'], ['mag', 'm(h)'], ['mom', 'm(t)']]
+        mappings = [["cp", "cv", "heatcap"], ["chi", "susc"], ["mag", "m(h)"], ["mom", "m(t)"]]
         for id in range(4):
             if any([typeid.lower() in elem for elem in mappings[id]]):
                 return id + 1
@@ -533,39 +537,40 @@ class PhysicalProperties(object):
 
         Defaults are: hdir=[0, 0, 1]; hmag=1; temp=1; inverse=False; unit='cgs'; lambda=chi0=0.
         """
-        self._physpropUnit = 'cgs'
+        self._physpropUnit = "cgs"
         self._suscInverseFlag = False
-        self._hdir = [0., 0., 1.]
-        self._hmag = 1.
-        self._physpropTemperature = 1.
-        self._lambda = 0.    # Exchange parameter (for susceptibility only)
-        self._chi0 = 0.      # Residual/background susceptibility (for susceptibility only)
+        self._hdir = [0.0, 0.0, 1.0]
+        self._hmag = 1.0
+        self._physpropTemperature = 1.0
+        self._lambda = 0.0  # Exchange parameter (for susceptibility only)
+        self._chi0 = 0.0  # Residual/background susceptibility (for susceptibility only)
         self._typeid = self._str2id(typeid) if isinstance(typeid, str) else int(typeid)
         try:
-            initialiser = getattr(self, 'init' + str(self._typeid))
+            initialiser = getattr(self, "init" + str(self._typeid))
         except AttributeError:
-            raise ValueError('Physical property type %s not recognised' % (str(typeid)))
+            raise ValueError("Physical property type %s not recognised" % (str(typeid)))
         initialiser(*args, **kwargs)
 
     def _checkmagunits(self, unit, default=None):
-        """ Checks that unit string is valid and converts to correct case. """
-        if 'cgs' in unit.lower():
-            return 'cgs'
-        elif 'bohr' in unit.lower():
-            return 'bohr'
-        elif 'SI' in unit.upper():
-            return 'SI'
+        """Checks that unit string is valid and converts to correct case."""
+        if "cgs" in unit.lower():
+            return "cgs"
+        elif "bohr" in unit.lower():
+            return "bohr"
+        elif "SI" in unit.upper():
+            return "SI"
         elif default is not None:
             return default
         else:
-            raise ValueError('Unit %s not recognised' % (unit))
+            raise ValueError("Unit %s not recognised" % (unit))
 
     def _checkhdir(self, hdir):
         import numpy as np
+
         try:
             if isinstance(hdir, str):
-                if 'powder' in hdir.lower():
-                    return 'powder'
+                if "powder" in hdir.lower():
+                    return "powder"
                 else:
                     raise TypeError()
             else:
@@ -574,7 +579,7 @@ class PhysicalProperties(object):
                     raise TypeError()
                 hdir * hdir  # Catches most cases where elements not numeric...
         except TypeError:
-            raise ValueError('Magnetic field direction %s not recognised' % (str(self._hdir)))
+            raise ValueError("Magnetic field direction %s not recognised" % (str(self._hdir)))
         return hdir
 
     @property
@@ -595,13 +600,13 @@ class PhysicalProperties(object):
 
     @Inverse.setter
     def Inverse(self, value):
-        if (self._typeid == self.SUSCEPTIBILITY or self._typeid == self.MAGNETICMOMENT):
+        if self._typeid == self.SUSCEPTIBILITY or self._typeid == self.MAGNETICMOMENT:
             if isinstance(value, str):
-                self._suscInverseFlag = value.lower() in ['true', 't', '1', 'yes', 'y']
+                self._suscInverseFlag = value.lower() in ["true", "t", "1", "yes", "y"]
             else:
                 self._suscInverseFlag = bool(value)  # In some cases will always be true...
         else:
-            raise NameError('This physical properties does not support the Inverse attribute')
+            raise NameError("This physical properties does not support the Inverse attribute")
 
     @property
     def Hdir(self):
@@ -609,7 +614,7 @@ class PhysicalProperties(object):
 
     @Hdir.setter
     def Hdir(self, value):
-        if (self._typeid != self.HEATCAPACITY):
+        if self._typeid != self.HEATCAPACITY:
             self._hdir = self._checkhdir(value)
 
     @property
@@ -618,7 +623,7 @@ class PhysicalProperties(object):
 
     @Hmag.setter
     def Hmag(self, value):
-        if (self._typeid == self.MAGNETICMOMENT):
+        if self._typeid == self.MAGNETICMOMENT:
             self._hmag = float(value)
 
     @property
@@ -627,7 +632,7 @@ class PhysicalProperties(object):
 
     @Temperature.setter
     def Temperature(self, value):
-        if (self._typeid == self.MAGNETISATION):
+        if self._typeid == self.MAGNETISATION:
             self._physpropTemperature = float(value)
 
     @property
@@ -636,7 +641,7 @@ class PhysicalProperties(object):
 
     @Lambda.setter
     def Lambda(self, value):
-        if (self._typeid == self.SUSCEPTIBILITY):
+        if self._typeid == self.SUSCEPTIBILITY:
             self._lambda = float(value)
 
     @property
@@ -645,21 +650,21 @@ class PhysicalProperties(object):
 
     @Chi0.setter
     def Chi0(self, value):
-        if (self._typeid == self.SUSCEPTIBILITY):
+        if self._typeid == self.SUSCEPTIBILITY:
             self._chi0 = float(value)
 
     def init1(self, *args, **kwargs):
-        """ Initialises environment for heat capacity data """
+        """Initialises environment for heat capacity data"""
         if len(args) > 0:
-            raise ValueError('No environment arguments should be specified for heat capacity')
+            raise ValueError("No environment arguments should be specified for heat capacity")
 
     def _parseargs(self, mapping, *args, **kwargs):
         args = [_f for _f in list(args) if _f]
         # Handles special case of first argument being a unit type
         if len(args) > 0:
             try:
-                if self._checkmagunits(args[0], 'bad') != 'bad':
-                    kwargs['Unit'] = args.pop(0)
+                if self._checkmagunits(args[0], "bad") != "bad":
+                    kwargs["Unit"] = args.pop(0)
             except AttributeError:
                 pass
         for i in range(len(mapping)):
@@ -669,57 +674,56 @@ class PhysicalProperties(object):
                 setattr(self, mapping[i], kwargs[mapping[i]])
 
     def init2(self, *args, **kwargs):
-        """ Initialises environment for susceptibility data """
-        mapping = ['Hdir', 'Inverse', 'Unit', 'Lambda', 'Chi0']
+        """Initialises environment for susceptibility data"""
+        mapping = ["Hdir", "Inverse", "Unit", "Lambda", "Chi0"]
         self._parseargs(mapping, *args, **kwargs)
 
     def init3(self, *args, **kwargs):
-        """ Initialises environment for M(H) data """
-        mapping = ['Hdir', 'Temperature', 'Unit']
+        """Initialises environment for M(H) data"""
+        mapping = ["Hdir", "Temperature", "Unit"]
         self._parseargs(mapping, *args, **kwargs)
 
     def init4(self, *args, **kwargs):
-        """ Initialises environment for M(T) data """
-        mapping = ['Hmag', 'Hdir', 'Inverse', 'Unit']
+        """Initialises environment for M(T) data"""
+        mapping = ["Hmag", "Hdir", "Inverse", "Unit"]
         self._parseargs(mapping, *args, **kwargs)
 
     def toString(self):
         """Create function initialisation string"""
-        types = ['CrystalFieldHeatCapacity', 'CrystalFieldSusceptibility',
-                 'CrystalFieldMagnetisation', 'CrystalFieldMoment']
-        out = 'name=%s' % (types[self._typeid - 1])
+        types = ["CrystalFieldHeatCapacity", "CrystalFieldSusceptibility", "CrystalFieldMagnetisation", "CrystalFieldMoment"]
+        out = "name=%s" % (types[self._typeid - 1])
         if self._typeid != self.HEATCAPACITY:
-            out += ',Unit=%s' % (self._physpropUnit)
-            if 'powder' in self._hdir:
-                out += ',powder=1'
+            out += ",Unit=%s" % (self._physpropUnit)
+            if "powder" in self._hdir:
+                out += ",powder=1"
             else:
-                out += ',Hdir=(%s)' % (','.join([str(hh) for hh in self._hdir]))
+                out += ",Hdir=(%s)" % (",".join([str(hh) for hh in self._hdir]))
             if self._typeid == self.MAGNETISATION:
-                out += ',Temperature=%s' % (self._physpropTemperature)
-            else:            # either susceptibility or M(T)
-                out += ',inverse=%s' % (1 if self._suscInverseFlag else 0)
-                out += (',Hmag=%s' % (self._hmag)) if self._typeid == self.MAGNETISATION else ''
+                out += ",Temperature=%s" % (self._physpropTemperature)
+            else:  # either susceptibility or M(T)
+                out += ",inverse=%s" % (1 if self._suscInverseFlag else 0)
+                out += (",Hmag=%s" % (self._hmag)) if self._typeid == self.MAGNETISATION else ""
                 if self._typeid == self.SUSCEPTIBILITY and self._lambda != 0:
-                    out += ',Lambda=%s' % (self._lambda)
+                    out += ",Lambda=%s" % (self._lambda)
                 if self._typeid == self.SUSCEPTIBILITY and self._chi0 != 0:
-                    out += ',Chi0=%s' % (self._chi0)
+                    out += ",Chi0=%s" % (self._chi0)
         return out
 
     def getAttributes(self, dataset=None):
         """Returns a dictionary of PhysicalProperties attributes for use with IFunction"""
-        dataset = '' if dataset is None else str(dataset)
+        dataset = "" if dataset is None else str(dataset)
         out = {}
         if self._typeid != self.HEATCAPACITY:
-            out['Unit%s' % (dataset)] = self._physpropUnit
-            if 'powder' in self._hdir:
-                out['powder%s' % (dataset)] = 1
+            out["Unit%s" % (dataset)] = self._physpropUnit
+            if "powder" in self._hdir:
+                out["powder%s" % (dataset)] = 1
             else:
-                out['Hdir%s' % (dataset)] = [float(hh) for hh in self._hdir] # needs to be list
+                out["Hdir%s" % (dataset)] = [float(hh) for hh in self._hdir]  # needs to be list
             if self._typeid != self.MAGNETISATION:  # either susceptibility or M(T)
-                out['inverse%s' % (dataset)] = 1 if self._suscInverseFlag else 0
+                out["inverse%s" % (dataset)] = 1 if self._suscInverseFlag else 0
                 if self._typeid == self.MAGNETICMOMENT:
-                    out['Hmag%s' % (dataset)] = self._hmag
+                    out["Hmag%s" % (dataset)] = self._hmag
                 if self._typeid == self.SUSCEPTIBILITY:
-                    out['Lambda%s' % (dataset)] = self._lambda
-                    out['Chi0%s' % (dataset)] = self._chi0
+                    out["Lambda%s" % (dataset)] = self._lambda
+                    out["Chi0%s" % (dataset)] = self._chi0
         return out

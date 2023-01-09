@@ -58,11 +58,13 @@ class CodeEditorTest(unittest.TestCase):
 
     def test_get_selection_for_non_empty_selection(self):
         widget = CodeEditor(TEST_LANG)
-        widget.setText("""first line
+        widget.setText(
+            """first line
         second line
         third line
         fourth line
-        """)
+        """
+        )
         selected = (0, 2, 3, 4)
         widget.setSelection(*selected)
         res = widget.getSelection()
@@ -81,5 +83,5 @@ class CodeEditorTest(unittest.TestCase):
             self.fail("Expected a Value error to be raised but found a " + exc.__name__)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

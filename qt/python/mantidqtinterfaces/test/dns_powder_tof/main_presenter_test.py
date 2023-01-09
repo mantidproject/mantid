@@ -10,8 +10,7 @@ from unittest import mock
 
 from mantidqt.gui_helper import get_qapplication
 from mantidqtinterfaces.dns_powder_tof.dns_modus import DNSModus
-from mantidqtinterfaces.dns_powder_tof.main_presenter import \
-    DNSReductionGUIPresenter
+from mantidqtinterfaces.dns_powder_tof.main_presenter import DNSReductionGUIPresenter
 from mantidqtinterfaces.dns_powder_tof.main_view import DNSReductionGUIView
 from mantidqtinterfaces.dns_powder_tof.parameter_abo import ParameterAbo
 
@@ -34,7 +33,7 @@ class DNSReductionGUIPresenterTest(unittest.TestCase):
         cls.parameter_abo = mock.create_autospec(ParameterAbo)
         cls.modus = mock.create_autospec(DNSModus)
         cls.widget = mock.Mock()
-        cls.modus.widgets = {'observer1': cls.widget}
+        cls.modus.widgets = {"observer1": cls.widget}
         cls.widget.view = mock.Mock()
         # cls.widget.view.has_tab = True
         cls.widget.view.menus = True
@@ -42,10 +41,7 @@ class DNSReductionGUIPresenterTest(unittest.TestCase):
         cls.widget.presenter.view = cls.widget.view
         cls.parameter_abo.observers = [cls.widget.presenter]
         dummy_observer = mock.Mock()
-        cls.parameter_abo.observer_dict = {
-            'paths': dummy_observer,
-            'file_selector': dummy_observer
-        }
+        cls.parameter_abo.observer_dict = {"paths": dummy_observer, "file_selector": dummy_observer}
 
         cls.view.sig_tab_changed.connect = mock.Mock()
         cls.view.sig_save_as_triggered.connect = mock.Mock()
@@ -54,12 +50,13 @@ class DNSReductionGUIPresenterTest(unittest.TestCase):
         cls.view.sig_modus_change.connect = mock.Mock()
 
         cls.presenter = DNSReductionGUIPresenter(
-            name='reduction_gui',
+            name="reduction_gui",
             view=cls.view,
             parameter_abo=cls.parameter_abo,
             modus=cls.modus,
             parent=cls.parent,
-            command_line_reader=cls.command_line_reader)
+            command_line_reader=cls.command_line_reader,
+        )
 
     def setUp(self):
         self.modus.reset_mock()
@@ -68,11 +65,8 @@ class DNSReductionGUIPresenterTest(unittest.TestCase):
 
     def test___init__(self):
         self.presenter = DNSReductionGUIPresenter(
-            name='reduction_gui',
-            view=self.view,
-            parameter_abo=self.parameter_abo,
-            modus=self.modus,
-            parent=self.parent)
+            name="reduction_gui", view=self.view, parameter_abo=self.parameter_abo, modus=self.modus, parent=self.parent
+        )
         self.assertIsInstance(self.presenter, DNSReductionGUIPresenter)
         self.assertIsInstance(self.presenter, object)
         self.view.clear_subviews.assert_called_once()
@@ -94,7 +88,7 @@ class DNSReductionGUIPresenterTest(unittest.TestCase):
 
     def test__switch_mode(self):
         self.view.clear_subviews.reset_mock()
-        self.presenter._switch_mode('powder_tof')
+        self.presenter._switch_mode("powder_tof")
         self.view.clear_subviews.assert_called_once()
         self.view.clear_submenus.assert_called_once()
         self.modus.change.assert_called_once()
@@ -111,5 +105,5 @@ class DNSReductionGUIPresenterTest(unittest.TestCase):
         self.parameter_abo.notify_focused_tab.assert_called_once()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

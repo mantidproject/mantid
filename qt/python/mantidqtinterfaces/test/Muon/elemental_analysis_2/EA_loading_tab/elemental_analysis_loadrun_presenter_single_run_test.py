@@ -47,7 +47,7 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
 
     def test_user_can_enter_a_run_and_load_it_in_single_run_mode(self):
         """
-            Tests a user inputting a single run
+        Tests a user inputting a single run
         """
         self.view.get_run_edit_text.return_value = "5555"
         self.model.execute = mock.Mock()
@@ -66,8 +66,8 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
 
     def test_clear_loaded_data(self):
         """
-            Tests that clearing loaded data sends calls to clear both
-            the loaded_data in the model and the view
+        Tests that clearing loaded data sends calls to clear both
+        the loaded_data in the model and the view
         """
         self.presenter.clear_loaded_data()
 
@@ -75,5 +75,5 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.assertEqual(self.model.clear_loaded_data.call_count, 1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

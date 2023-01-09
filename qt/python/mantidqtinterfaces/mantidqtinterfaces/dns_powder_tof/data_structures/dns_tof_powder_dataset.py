@@ -12,19 +12,18 @@ Class which loads and stores a single DNS datafile in a dictionary.
 import os
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import ObjectDict
-from mantidqtinterfaces.dns_powder_tof.helpers.list_range_converters import \
-    list_to_multirange as list_to_range
+from mantidqtinterfaces.dns_powder_tof.helpers.list_range_converters import list_to_multirange as list_to_range
 
 
 # copied from dns dataset
 def get_proposal_from_filename(filename, file_number):
-    return filename.replace(f'_{file_number:06d}.d_dat', '')
+    return filename.replace(f"_{file_number:06d}.d_dat", "")
 
 
 def get_bank_positions(sample_data, rounding_limit=0.05):
     new_arr = []
     inside = False
-    banks = set(entry['det_rot'] for entry in sample_data)
+    banks = set(entry["det_rot"] for entry in sample_data)
     for bank in banks:
         for compare in new_arr:
             if abs(compare - bank) < rounding_limit:
@@ -39,13 +38,12 @@ def get_bank_positions(sample_data, rounding_limit=0.05):
 def _get_field_string(fields, line_indent):
     field_items = sorted(fields.items())
     spacer = "".rjust(line_indent)
-    string_list = [(f"{spacer}{key:4.2f}: {value}")
-                   for key, value in field_items]
+    string_list = [(f"{spacer}{key:4.2f}: {value}") for key, value in field_items]
     return ",\n".join(string_list)
 
 
 def _get_path_string(dataset, sample_name):
-    path = dataset[sample_name].pop('path')
+    path = dataset[sample_name].pop("path")
     return f"'path': '{path}',\n"
 
 
@@ -54,15 +52,14 @@ def _get_sample_string(sample_name):
 
 
 def _get_data_path(entry, path):
-    proposal = get_proposal_from_filename(entry['filename'],
-                                          entry['file_number'])
+    proposal = get_proposal_from_filename(entry["filename"], entry["file_number"])
     return os.path.join(path, proposal)
 
 
 def _convert_list_to_range(dataset):
     for sample_typ, det_rots in dataset.items():
         for det_rot, file_numbers in det_rots.items():
-            if det_rot != 'path':
+            if det_rot != "path":
                 dataset[sample_typ][det_rot] = list_to_range(file_numbers)
     return dataset
 
@@ -70,7 +67,7 @@ def _convert_list_to_range(dataset):
 def _get_closest_bank_key(banks, det_rot):
     rounding_limit = 0.05
     compare = det_rot
-    for compare in [x for x in banks.keys() if x != 'path']:
+    for compare in [x for x in banks.keys() if x != "path"]:
         if abs(compare - det_rot) < rounding_limit:
             break
         compare = det_rot
@@ -78,19 +75,16 @@ def _get_closest_bank_key(banks, det_rot):
 
 
 def _create_new_datatype(dataset, datatype, det_rot, entry, path):
-    dataset[datatype] = {
-        det_rot: [entry['file_number']],
-        'path': _get_data_path(entry, path)
-    }
+    dataset[datatype] = {det_rot: [entry["file_number"]], "path": _get_data_path(entry, path)}
 
 
 def _add_or_create_filelist(dataset, datatype, det_rot, entry):
     compare = _get_closest_bank_key(dataset[datatype], det_rot)
     fn_list = dataset[datatype].get(compare, None)
     if fn_list is not None:
-        fn_list.append(entry['file_number'])
+        fn_list.append(entry["file_number"])
     else:
-        dataset[datatype][compare] = [entry['file_number']]
+        dataset[datatype][compare] = [entry["file_number"]]
 
 
 class DNSTofDataset(ObjectDict):
@@ -101,9 +95,9 @@ class DNSTofDataset(ObjectDict):
 
     def __init__(self, data, path, is_sample=True):
         super().__init__()
-        self['is_sample'] = is_sample
-        self['banks'] = get_bank_positions(data)
-        self['data_dic'] = self.create_dataset(data, path)
+        self["is_sample"] = is_sample
+        self["banks"] = get_bank_positions(data)
+        self["data_dic"] = self.create_dataset(data, path)
 
     def format_dataset(self):
         """
@@ -112,7 +106,7 @@ class DNSTofDataset(ObjectDict):
         dataset = self.data_dic
         tab_indent = 4
         special_char_indent = 5
-        dataset_string = '{\n'
+        dataset_string = "{\n"
         for sample_name, fields in dataset.items():
             dataset_string += "".rjust(tab_indent)
             dataset_string += _get_sample_string(sample_name)
@@ -130,23 +124,21 @@ class DNSTofDataset(ObjectDict):
         return 0
 
     def get_vana_scan_name(self):
-        vana_scan_name = [x for x in self.data_dic.keys() if '_vana' in x]
+        vana_scan_name = [x for x in self.data_dic.keys() if "_vana" in x]
         if len(vana_scan_name) == 0:
-            vana_scan_name = ''
+            vana_scan_name = ""
         elif len(vana_scan_name) > 1:
-            vana_scan_name = ''
+            vana_scan_name = ""
         else:
             vana_scan_name = vana_scan_name[0]
         return vana_scan_name
 
     def get_empty_scan_name(self):
-        empty_scan_name = [
-            x for x in self.data_dic.keys() if ('_empty' in x or '_leer' in x)
-        ]
+        empty_scan_name = [x for x in self.data_dic.keys() if ("_empty" in x or "_leer" in x)]
         if len(empty_scan_name) == 0:
-            empty_scan_name = ''
+            empty_scan_name = ""
         elif len(empty_scan_name) > 1:
-            empty_scan_name = ''
+            empty_scan_name = ""
         else:
             empty_scan_name = empty_scan_name[0]
         return empty_scan_name
@@ -172,8 +164,8 @@ class DNSTofDataset(ObjectDict):
         """
         dataset = {}
         for entry in data:
-            datatype = entry['sample_name']
-            det_rot = entry['det_rot']
+            datatype = entry["sample_name"]
+            det_rot = entry["det_rot"]
             if datatype in dataset:
                 _add_or_create_filelist(dataset, datatype, det_rot, entry)
             else:

@@ -39,19 +39,18 @@ class Receiver(QObject):
 
 @start_qapplication
 class PythonCodeExecutionTest(unittest.TestCase):
-
     def test_default_construction_context_contains_builtins(self):
         executor = PythonCodeExecution()
-        self.assertTrue('__builtins__' in executor.globals_ns)
+        self.assertTrue("__builtins__" in executor.globals_ns)
 
     def test_reset_context_remove_user_content(self):
         executor = PythonCodeExecution()
         executor.execute("x = 1", line_offset=0)
-        self.assertTrue('x' in executor.globals_ns)
+        self.assertTrue("x" in executor.globals_ns)
         executor.reset_context()
 
-        self.assertFalse('x' in executor.globals_ns)
-        self.assertTrue('__builtins__' in executor.globals_ns)
+        self.assertFalse("x" in executor.globals_ns)
+        self.assertTrue("__builtins__" in executor.globals_ns)
 
     # ---------------------------------------------------------------------------
     # Successful execution tests
@@ -59,21 +58,21 @@ class PythonCodeExecutionTest(unittest.TestCase):
     def test_execute_places_output_in_globals(self):
         code = "_local=100"
         user_globals = self._verify_serial_execution_successful(code)
-        self.assertEqual(100, user_globals['_local'])
+        self.assertEqual(100, user_globals["_local"])
         user_globals = self._verify_async_execution_successful(code)
-        self.assertEqual(100, user_globals['_local'])
+        self.assertEqual(100, user_globals["_local"])
 
     def test_filename_sets__file__attr(self):
         executor = PythonCodeExecution()
-        test_filename = 'script.py'
-        executor.execute('x=1', filename=test_filename, line_offset=0)
-        self.assertTrue('__file__' in executor.globals_ns)
-        self.assertEqual(test_filename, executor.globals_ns['__file__'])
+        test_filename = "script.py"
+        executor.execute("x=1", filename=test_filename, line_offset=0)
+        self.assertTrue("__file__" in executor.globals_ns)
+        self.assertEqual(test_filename, executor.globals_ns["__file__"])
 
     def test_empty_filename_sets_identifier(self):
         executor = PythonCodeExecution()
-        executor.execute('x=1', line_offset=0)
-        self.assertTrue('__file__' in executor.globals_ns)
+        executor.execute("x=1", line_offset=0)
+        self.assertTrue("__file__" in executor.globals_ns)
 
     def test_execute_async_calls_success_signal_on_completion(self):
         code = "x=1+2"
@@ -83,17 +82,17 @@ class PythonCodeExecutionTest(unittest.TestCase):
 
     def test_script_dir_added_to_path_on_execution(self):
         code = "import sys; syspath = sys.path"
-        test_filename = '/path/to/script/called/script.py'
+        test_filename = "/path/to/script/called/script.py"
         executor = PythonCodeExecution()
         executor.execute(code, filename=test_filename, line_offset=0)
-        self.assertIn('/path/to/script/called', executor.globals_ns['syspath'])
+        self.assertIn("/path/to/script/called", executor.globals_ns["syspath"])
 
     def test_script_dir_removed_from_path_after_execution(self):
         code = "import sys; syspath = sys.path"
-        test_filename = '/path/to/script/called/script.py'
+        test_filename = "/path/to/script/called/script.py"
         executor = PythonCodeExecution()
         executor.execute(code, filename=test_filename, line_offset=0)
-        self.assertNotIn('/path/to/script/called', sys.path)
+        self.assertNotIn("/path/to/script/called", sys.path)
 
     def test_line_offset_forwarded_on(self):
         executor = PythonCodeExecution()
@@ -109,31 +108,27 @@ class PythonCodeExecutionTest(unittest.TestCase):
             self.assertTrue(offset in args, "Line offset was not passed in")
 
     def test_get_imported_from_future_gets_imports_and_ignores_comments(self):
-        code = ("from __future__ import division, print_function\n"
-                "# from __future__ import unicode_literals\n")
+        code = "from __future__ import division, print_function\n" "# from __future__ import unicode_literals\n"
         f_imports = _get_imported_from_future(code)
-        self.assertEqual(['division', 'print_function'], f_imports)
+        self.assertEqual(["division", "print_function"], f_imports)
 
     def test_future_division_active_when_running_script_with_future_import(self):
         global_var = "one_half"
-        code = ("from __future__ import division\n"
-                "{} = 1/2\n".format(global_var))
+        code = "from __future__ import division\n" "{} = 1/2\n".format(global_var)
         executor = PythonCodeExecution()
         executor.execute(code, line_offset=0)
         self.assertAlmostEqual(0.50, executor.globals_ns[global_var])
 
-    @patch('sys.stdout', new_callable=StringIO)
+    @patch("sys.stdout", new_callable=StringIO)
     def test_future_print_function_active_in_scripts_if_imported(self, mock_stdout):
-        code = ("from __future__ import division, print_function\n"
-                "print('This', 'should', 'have', 'no', 'brackets')\n")
+        code = "from __future__ import division, print_function\n" "print('This', 'should', 'have', 'no', 'brackets')\n"
         executor = PythonCodeExecution()
         executor.execute(code, line_offset=0)
         self.assertEqual("This should have no brackets\n", mock_stdout.getvalue())
 
-    @patch('sys.stdout', new_callable=StringIO)
+    @patch("sys.stdout", new_callable=StringIO)
     def test_scripts_can_print_unicode_if_unicode_literals_imported(self, mock_stdout):
-        code = ("from __future__ import unicode_literals\n"
-                "print('£')\n")
+        code = "from __future__ import unicode_literals\n" "print('£')\n"
         executor = PythonCodeExecution()
         executor.execute(code, line_offset=0)
         self.assertEqual("£\n", mock_stdout.getvalue())
@@ -151,9 +146,10 @@ class PythonCodeExecutionTest(unittest.TestCase):
 
         self.assertTrue(recv.error_cb_called)
         self.assertFalse(recv.success_cb_called)
-        self.assertTrue(isinstance(recv.task_exc, SyntaxError),
-                        msg="Unexpected exception found. "
-                            "SyntaxError expected, found {}".format(recv.task_exc.__class__.__name__))
+        self.assertTrue(
+            isinstance(recv.task_exc, SyntaxError),
+            msg="Unexpected exception found. " "SyntaxError expected, found {}".format(recv.task_exc.__class__.__name__),
+        )
         self.assertEqual(1, recv.task_exc.lineno)
 
     def test_execute_returns_failure_on_runtime_error_and_captures_exception(self):
@@ -173,9 +169,10 @@ foo()
         executor, recv = self._run_async_code(code)
         self.assertFalse(recv.success_cb_called)
         self.assertTrue(recv.error_cb_called)
-        self.assertTrue(isinstance(recv.task_exc, NameError),
-                        msg="Unexpected exception found. "
-                            "NameError expected, found {}".format(recv.task_exc.__class__.__name__))
+        self.assertTrue(
+            isinstance(recv.task_exc, NameError),
+            msg="Unexpected exception found. " "NameError expected, found {}".format(recv.task_exc.__class__.__name__),
+        )
         # Test the stack has been chopped as expected
         self.assertEqual(5, len(recv.error_stack))
         # check line numbers
@@ -188,7 +185,7 @@ foo()
     # -------------------------------------------------------------------------
     def test_filename_included_in_traceback_if_supplied(self):
         code = """raise RuntimeError"""
-        filename = 'test.py'
+        filename = "test.py"
         executor, recv = self._run_async_code(code, filename=filename)
         self.assertTrue(recv.error_cb_called)
         self.assertEqual(filename, recv.error_stack[-1][0])

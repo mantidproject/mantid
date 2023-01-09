@@ -15,9 +15,13 @@ are done on the main thread of the application as the default
 """
 from inspect import signature
 from workbench.plotting.figuremanager import (
-    MantidFigureCanvas, QAppThreadCall, draw_if_interactive_impl, show_impl, new_figure_manager as
-    new_figure_manager_impl, new_figure_manager_given_figure as
-    new_figure_manager_given_figure_impl)
+    MantidFigureCanvas,
+    QAppThreadCall,
+    draw_if_interactive_impl,
+    show_impl,
+    new_figure_manager as new_figure_manager_impl,
+    new_figure_manager_given_figure as new_figure_manager_given_figure_impl,
+)
 
 # -----------------------------------------------------------------------------
 # Backend implementation

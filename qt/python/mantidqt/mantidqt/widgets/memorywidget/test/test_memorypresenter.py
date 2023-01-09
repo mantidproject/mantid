@@ -9,8 +9,7 @@
 #
 import time
 
-from mantidqt.widgets.memorywidget.memoryview import MemoryView, \
-    from_normal_to_critical, from_critical_to_normal
+from mantidqt.widgets.memorywidget.memoryview import MemoryView, from_normal_to_critical, from_critical_to_normal
 from mantidqt.widgets.memorywidget.memorypresenter import MemoryPresenter, TIME_INTERVAL_MEMORY_USAGE_UPDATE
 
 import unittest

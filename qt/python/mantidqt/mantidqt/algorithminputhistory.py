@@ -10,12 +10,12 @@
 from mantidqt.utils.qt import import_qt, toQSettings
 
 
-_AlgorithmInputHistory = import_qt('._common', 'mantidqt', 'AlgorithmInputHistory')
+_AlgorithmInputHistory = import_qt("._common", "mantidqt", "AlgorithmInputHistory")
 
 
 class AlgorithmInputHistory(object):
-    '''Wrapper class around MantidQtWidgets::Common::AlgorithmInputHistory
-    '''
+    """Wrapper class around MantidQtWidgets::Common::AlgorithmInputHistory"""
+
     _singleton = _AlgorithmInputHistory.Instance()
 
     def __init__(self):

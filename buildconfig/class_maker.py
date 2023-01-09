@@ -358,7 +358,12 @@ if __name__ == "__main__":
     parser.add_argument("subproject", metavar="SUBPROJECT", type=str, help="The subproject under Framework/; e.g. Kernel")
     parser.add_argument("classname", metavar="CLASSNAME", type=str, help="Name of the class to create")
     parser.add_argument(
-        "--force", dest="force", action="store_const", const=True, default=False, help="Force overwriting existing files. Use with caution!"
+        "--force",
+        dest="force",
+        action="store_const",
+        const=True,
+        default=False,
+        help="Force overwriting existing files. Use with caution!",
     )
     parser.add_argument("--no-header", dest="header", action="store_const", const=False, default=True, help="Don't create the header file")
     parser.add_argument("--no-test", dest="test", action="store_const", const=False, default=True, help="Don't create the test file")

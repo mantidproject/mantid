@@ -16,9 +16,9 @@ import mantid.simpleapi as mantid
 
 # == Set parameters for calibration ==
 
-filename = 'MAP14919.raw'  # Calibration run ( found in \\isis\inst$\NDXMAPS\Instrument\data\cycle_09_5 )
+filename = "MAP14919.raw"  # Calibration run ( found in \\isis\inst$\NDXMAPS\Instrument\data\cycle_09_5 )
 # Set what we want to calibrate (e.g whole instrument or one door )
-CalibratedComponent = 'D2_window'  # Calibrate D2 window
+CalibratedComponent = "D2_window"  # Calibrate D2 window
 
 # Get calibration raw file and integrate it
 rawCalibInstWS = mantid.Load(filename)  # 'raw' in 'rawCalibInstWS' means unintegrated.
@@ -49,8 +49,7 @@ fitPar.setAutomatic(True)
 print("Created objects needed for calibration.")
 
 # == Get the calibration and put results into calibration table ==
-calibrationTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcForm,
-                                  fitPar=fitPar)
+calibrationTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcForm, fitPar=fitPar)
 print("Got calibration (new positions of detectors) ")
 
 # == Apply the Calibation ==

@@ -927,6 +927,18 @@ double numberCounts(const Histogram &histogram, const double xmin, const double 
     total += std::fabs(histogram.y()[i]);
   return total;
 }
+
+//----------------------------------------------------------------------------------------------
+/** Get number of vector elements falling into specified range
+ * @param vector :: vector of type T
+ * @param range :: range boundaries
+ * @return :: number of elements
+ */
+template <typename T> size_t numberElements(const std::vector<T> &elements, const std::pair<T, T> &range) {
+  const auto leftIter = std::lower_bound(elements.cbegin(), elements.cend(), range.first);
+  const auto rightIter = std::upper_bound(elements.cbegin(), elements.cend(), range.second);
+  return std::distance(leftIter, rightIter);
+}
 } // namespace
 
 //----------------------------------------------------------------------------------------------
@@ -1436,6 +1448,11 @@ double FitPeaks::fitIndividualPeak(size_t wi, const API::IAlgorithm_sptr &fitter
 
   // confirm that there is something to fit
   if (numberCounts(m_inputMatrixWS->histogram(wi), fitwindow.first, fitwindow.second) <= m_minPeakHeight)
+    return cost;
+
+  // check if we have enough data points to fit
+  const std::size_t cushion{2}; // using a "cushion" here so that we have a bit more data points than parameters
+  if (numberElements(m_inputMatrixWS->readX(wi), fitwindow) < peakfunction->nParams() + bkgdfunc->nParams() + cushion)
     return cost;
 
   if (m_highBackground) {

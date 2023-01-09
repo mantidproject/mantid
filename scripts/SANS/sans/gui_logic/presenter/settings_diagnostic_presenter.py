@@ -59,7 +59,7 @@ class SettingsDiagnosticPresenter(object):
                 self.display_state_diagnostic_tree(state)
         except RuntimeError as e:
             self.gui_logger.error(str(e))
-            self._parent_presenter.display_warning_box('Warning', 'Unable to find files.', str(e))
+            self._parent_presenter.display_warning_box("Warning", "Unable to find files.", str(e))
 
     def on_update_rows(self):
         """
@@ -112,14 +112,15 @@ class SettingsDiagnosticPresenter(object):
         self._view.set_tree(dict_vals)
 
     def on_save_state(self):
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Settings Diagnostics - Save JSON"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Settings Diagnostics - Save JSON"], False)
         # Get the save location
         save_location = self._view.get_save_location()
         # Check if it exists
         path_dir = os.path.dirname(save_location)
         if not path_dir:
-            self.gui_logger.warning("The provided save location for the SANS state does not seem to exist. "
-                                    "Please provide a validate path")
+            self.gui_logger.warning(
+                "The provided save location for the SANS state does not seem to exist. " "Please provide a validate path"
+            )
             return
 
         file_name, _ = os.path.splitext(save_location)

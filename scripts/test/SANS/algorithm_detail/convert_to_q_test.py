@@ -8,8 +8,8 @@ import unittest
 
 from mantid.simpleapi import DeleteWorkspace
 from sans.algorithm_detail.convert_to_q import convert_workspace
-from sans.common.enums import (SANSFacility, ReductionDimensionality, RangeStepType, SANSInstrument)
-from sans.common.general_functions import (create_unmanaged_algorithm)
+from sans.common.enums import SANSFacility, ReductionDimensionality, RangeStepType, SANSInstrument
+from sans.common.general_functions import create_unmanaged_algorithm
 from sans.state.StateObjects.StateConvertToQ import get_convert_to_q_builder
 from sans.state.StateObjects.StateData import get_data_builder
 from sans.test_helper.file_information_mock import SANSFileInformationMock
@@ -21,24 +21,33 @@ class ConvertToQTest(unittest.TestCase):
     def _get_workspace(is_adjustment):
         bank_pixel_width = 1 if is_adjustment else 2
         sample_name = "CreateSampleWorkspace"
-        sample_options = {"WorkspaceType": "Histogram",
-                          "NumBanks": 1,
-                          "BankPixelWidth": bank_pixel_width,
-                          "OutputWorkspace": "test",
-                          "Function": "Flat background",
-                          "XUnit": "Wavelength",
-                          "XMin": 1.,
-                          "XMax": 10.,
-                          "BinWidth": 2.}
+        sample_options = {
+            "WorkspaceType": "Histogram",
+            "NumBanks": 1,
+            "BankPixelWidth": bank_pixel_width,
+            "OutputWorkspace": "test",
+            "Function": "Flat background",
+            "XUnit": "Wavelength",
+            "XMin": 1.0,
+            "XMax": 10.0,
+            "BinWidth": 2.0,
+        }
         sample_alg = create_unmanaged_algorithm(sample_name, **sample_options)
         sample_alg.execute()
         workspace = sample_alg.getProperty("OutputWorkspace").value
         return workspace
 
     @staticmethod
-    def _get_sample_state(q_min=1., q_max=2., q_step=0.1, q_step_type=RangeStepType.LIN,
-                          q_xy_max=None, q_xy_step=None,
-                          use_gravity=False, dim=ReductionDimensionality.ONE_DIM):
+    def _get_sample_state(
+        q_min=1.0,
+        q_max=2.0,
+        q_step=0.1,
+        q_step_type=RangeStepType.LIN,
+        q_xy_max=None,
+        q_xy_step=None,
+        use_gravity=False,
+        dim=ReductionDimensionality.ONE_DIM,
+    ):
         facility = SANSFacility.ISIS
         file_information = SANSFileInformationMock(instrument=SANSInstrument.LOQ, run_number=74044)
         data_builder = get_data_builder(facility, file_information)
@@ -49,10 +58,10 @@ class ConvertToQTest(unittest.TestCase):
         convert_to_q_builder.set_reduction_dimensionality(dim)
         convert_to_q_builder.set_use_gravity(use_gravity)
         convert_to_q_builder.set_radius_cutoff(0.002)
-        convert_to_q_builder.set_wavelength_cutoff(2.)
+        convert_to_q_builder.set_wavelength_cutoff(2.0)
         convert_to_q_builder.set_q_min(q_min)
         convert_to_q_builder.set_q_max(q_max)
-        prefix = 1. if q_step_type is RangeStepType.LIN else -1.
+        prefix = 1.0 if q_step_type is RangeStepType.LIN else -1.0
         q_step *= prefix
         rebin_string = str(q_min) + "," + str(q_step) + "," + str(q_max)
         convert_to_q_builder.set_q_1d_rebin_string(rebin_string)
@@ -73,11 +82,12 @@ class ConvertToQTest(unittest.TestCase):
         workspace = self._get_workspace(is_adjustment=False)
         adj_workspace = self._get_workspace(is_adjustment=True)
 
-        state = self._get_sample_state(q_min=1., q_max=2., q_step=0.1, q_step_type=RangeStepType.LIN)
+        state = self._get_sample_state(q_min=1.0, q_max=2.0, q_step=0.1, q_step_type=RangeStepType.LIN)
 
         # Act
-        output_dict = convert_workspace(workspace=workspace, output_summed_parts=True,
-                                        state_convert_to_q=state.convert_to_q, wavelength_adj_workspace=adj_workspace)
+        output_dict = convert_workspace(
+            workspace=workspace, output_summed_parts=True, state_convert_to_q=state.convert_to_q, wavelength_adj_workspace=adj_workspace
+        )
 
         output_workspace = output_dict["output"]
         sum_of_counts = output_dict["counts_summed"]
@@ -104,11 +114,11 @@ class ConvertToQTest(unittest.TestCase):
         workspace = self._get_workspace(is_adjustment=False)
         adj_workspace = self._get_workspace(is_adjustment=True)
 
-        state = self._get_sample_state(q_xy_max=2., q_xy_step=0.5,
-                                       dim=ReductionDimensionality.TWO_DIM)
+        state = self._get_sample_state(q_xy_max=2.0, q_xy_step=0.5, dim=ReductionDimensionality.TWO_DIM)
 
-        output_dict = convert_workspace(workspace=workspace, output_summed_parts=True,
-                                        state_convert_to_q=state.convert_to_q, wavelength_adj_workspace=adj_workspace)
+        output_dict = convert_workspace(
+            workspace=workspace, output_summed_parts=True, state_convert_to_q=state.convert_to_q, wavelength_adj_workspace=adj_workspace
+        )
 
         output_workspace = output_dict["output"]
         sum_of_counts = output_dict["counts_summed"]
@@ -132,5 +142,5 @@ class ConvertToQTest(unittest.TestCase):
         DeleteWorkspace(sum_of_norms)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

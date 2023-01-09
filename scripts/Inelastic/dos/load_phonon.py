@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=redefined-builtin
+# pylint: disable=redefined-builtin
 import re
 import numpy as np
 
@@ -29,7 +29,7 @@ def parse_phonon_file(file_name, record_eigenvectors):
     block_count = 0
     frequencies, ir_intensities, raman_intensities, weights, q_vectors, eigenvectors = [], [], [], [], [], []
     data_lists = (frequencies, ir_intensities, raman_intensities)
-    with open(file_name, 'rU') as f_handle:
+    with open(file_name, "rU") as f_handle:
         file_data.update(_parse_phonon_file_header(f_handle))
 
         while True:
@@ -48,8 +48,7 @@ def parse_phonon_file(file_name, record_eigenvectors):
                 q_vectors.append(q_vector)
 
                 # Parse block of frequencies
-                for line_data in _parse_phonon_freq_block(f_handle,
-                                                          file_data['num_branches']):
+                for line_data in _parse_phonon_freq_block(f_handle, file_data["num_branches"]):
                     for data_list, item in zip(data_lists, line_data):
                         data_list.append(item)
 
@@ -57,13 +56,11 @@ def parse_phonon_file(file_name, record_eigenvectors):
             if vector_match:
                 if record_eigenvectors:
                     # Parse eigenvectors for partial dos
-                    vectors = _parse_phonon_eigenvectors(f_handle,
-                                                         file_data['num_ions'],
-                                                         file_data['num_branches'])
+                    vectors = _parse_phonon_eigenvectors(f_handle, file_data["num_ions"], file_data["num_branches"])
                     eigenvectors.append(vectors)
                 else:
                     # Skip over eigenvectors
-                    for _ in range(file_data['num_ions'] * file_data['num_branches']):
+                    for _ in range(file_data["num_ions"] * file_data["num_branches"]):
                         line = f_handle.readline()
                         if not line:
                             raise IOError("Bad file format. Uexpectedly reached end of file.")
@@ -71,21 +68,24 @@ def parse_phonon_file(file_name, record_eigenvectors):
     frequencies = np.asarray(frequencies)
     ir_intensities = np.asarray(ir_intensities)
     raman_intensities = np.asarray(raman_intensities)
-    warray = np.repeat(weights, file_data['num_branches'])
+    warray = np.repeat(weights, file_data["num_branches"])
     eigenvectors = np.asarray(eigenvectors)
 
-    file_data.update({
-        'frequencies': frequencies,
-        'ir_intensities': ir_intensities,
-        'raman_intensities': raman_intensities,
-        'weights': warray,
-        'q_vectors':q_vectors,
-        'eigenvectors': eigenvectors
-        })
+    file_data.update(
+        {
+            "frequencies": frequencies,
+            "ir_intensities": ir_intensities,
+            "raman_intensities": raman_intensities,
+            "weights": warray,
+            "q_vectors": q_vectors,
+            "eigenvectors": eigenvectors,
+        }
+    )
 
     return file_data, element_isotope
 
-#----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
 
 
 def _parse_phonon_file_header(f_handle):
@@ -95,7 +95,7 @@ def _parse_phonon_file_header(f_handle):
     @param f_handle - handle to the file.
     @return List of ions in file as list of tuple of (ion, mode number)
     """
-    file_data = {'ions': []}
+    file_data = {"ions": []}
 
     while True:
         line = f_handle.readline()
@@ -103,37 +103,38 @@ def _parse_phonon_file_header(f_handle):
         if not line:
             raise IOError("Could not find any header information.")
 
-        if 'Number of ions' in line:
-            file_data['num_ions'] = int(line.strip().split()[-1])
-        elif 'Number of branches' in line:
-            file_data['num_branches'] = int(line.strip().split()[-1])
-        elif 'Unit cell vectors' in line:
-            file_data['unit_cell'] = _parse_phonon_unit_cell_vectors(f_handle)
-        elif 'Fractional Co-ordinates' in line:
-            if file_data['num_ions'] is None:
+        if "Number of ions" in line:
+            file_data["num_ions"] = int(line.strip().split()[-1])
+        elif "Number of branches" in line:
+            file_data["num_branches"] = int(line.strip().split()[-1])
+        elif "Unit cell vectors" in line:
+            file_data["unit_cell"] = _parse_phonon_unit_cell_vectors(f_handle)
+        elif "Fractional Co-ordinates" in line:
+            if file_data["num_ions"] is None:
                 raise IOError("Failed to parse file. Invalid file header.")
 
             # Extract the mode number for each of the ion in the data file
-            for _ in range(file_data['num_ions']):
+            for _ in range(file_data["num_ions"]):
                 line = f_handle.readline()
                 line_data = line.strip().split()
 
                 species = line_data[4]
-                ion = {'species': species}
-                ion['fract_coord'] = np.array([float(line_data[1]), float(line_data[2]), float(line_data[3])])
-                ion['isotope_number'] = float(line_data[5])
+                ion = {"species": species}
+                ion["fract_coord"] = np.array([float(line_data[1]), float(line_data[2]), float(line_data[3])])
+                ion["isotope_number"] = float(line_data[5])
                 element_isotope[species] = float(line_data[5])
                 # -1 to convert to zero based indexing
-                ion['index'] = int(line_data[0]) - 1
-                ion['bond_number'] = len([i for i in file_data['ions'] if i['species'] == species]) + 1
-                file_data['ions'].append(ion)
+                ion["index"] = int(line_data[0]) - 1
+                ion["bond_number"] = len([i for i in file_data["ions"] if i["species"] == species]) + 1
+                file_data["ions"].append(ion)
 
-        if 'END header' in line:
-            if file_data['num_ions'] is None or file_data['num_branches'] is None:
+        if "END header" in line:
+            if file_data["num_ions"] is None or file_data["num_branches"] is None:
                 raise IOError("Failed to parse file. Invalid file header.")
             return file_data
 
-#----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
 
 
 def _parse_phonon_freq_block(f_handle, num_branches):
@@ -148,7 +149,8 @@ def _parse_phonon_freq_block(f_handle, num_branches):
         line_data = [float(x) for x in line_data]
         yield line_data
 
-#----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
 
 
 def _parse_phonon_unit_cell_vectors(f_handle):
@@ -167,7 +169,8 @@ def _parse_phonon_unit_cell_vectors(f_handle):
 
     return np.array(data)
 
-#----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
 
 
 def _parse_phonon_eigenvectors(f_handle, num_ions, num_branches):
@@ -185,4 +188,5 @@ def _parse_phonon_eigenvectors(f_handle, num_ions, num_branches):
 
     return np.asarray(vectors)
 
-#----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------

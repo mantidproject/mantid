@@ -9,9 +9,8 @@ from mantidqt.utils.observer_pattern import GenericObserver
 
 
 class RawPanePresenter(BasePanePresenter):
-
-    def __init__(self, view, model, context,figure_presenter):
-        super().__init__(view, model, context,figure_presenter)
+    def __init__(self, view, model, context, figure_presenter):
+        super().__init__(view, model, context, figure_presenter)
         self._data_type = ["Counts"]
         self._sort_by = ["Detector"]
         self.update_view()
@@ -33,8 +32,7 @@ class RawPanePresenter(BasePanePresenter):
     def handle_data_updated(self, autoscale=True, hold_on=False):
         detectors = self._view.get_detectors
         run = self._view.get_run
-        workspace_list, indicies = self._model.get_workspace_list_and_indices_to_plot(True,
-                                                                                      self._view.get_plot_type(), detectors, run)
+        workspace_list, indicies = self._model.get_workspace_list_and_indices_to_plot(True, self._view.get_plot_type(), detectors, run)
         self.add_list_to_plot(workspace_list, indicies, hold=hold_on, autoscale=autoscale)
 
     def handle_plot_tiled_state_changed(self):

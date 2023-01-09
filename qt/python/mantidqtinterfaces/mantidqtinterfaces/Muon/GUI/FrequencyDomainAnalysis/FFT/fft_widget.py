@@ -12,7 +12,6 @@ from qtpy import QtWidgets
 
 
 class FFTWidget(QtWidgets.QWidget):
-
     def __init__(self, load, parent=None):
         super(FFTWidget, self).__init__(parent)
         view = FFTView(parent)

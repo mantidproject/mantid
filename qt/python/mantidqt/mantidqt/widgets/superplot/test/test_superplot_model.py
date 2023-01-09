@@ -14,7 +14,6 @@ from mantidqt.widgets.superplot.model import SuperplotModel
 
 
 class SuperplotModelTest(unittest.TestCase):
-
     def setUp(self):
         py_module = "mantidqt.widgets.superplot.model"
 
@@ -50,10 +49,12 @@ class SuperplotModelTest(unittest.TestCase):
         self.assertEqual(self.model._workspaces, ["ws1"])
         self.model.add_workspace("ws2")
         self.assertEqual(self.model._workspaces, ["ws1", "ws2"])
-        d = {"g1": mock.Mock(spec=WorkspaceGroup),
-             "ws2": mock.Mock(spec=MatrixWorkspace),
-             "ws3": mock.Mock(spec=MatrixWorkspace),
-             "ws4": mock.Mock(spec=MatrixWorkspace)}
+        d = {
+            "g1": mock.Mock(spec=WorkspaceGroup),
+            "ws2": mock.Mock(spec=MatrixWorkspace),
+            "ws3": mock.Mock(spec=MatrixWorkspace),
+            "ws4": mock.Mock(spec=MatrixWorkspace),
+        }
         d["g1"].getNames.return_value = ["ws2", "ws3", "ws4"]
         self.m_mtd.__getitem__.side_effect = d.__getitem__
         self.model.add_workspace("g1")
@@ -94,11 +95,9 @@ class SuperplotModelTest(unittest.TestCase):
         self.model.set_workspace_color("ws1", "color1")
         self.assertDictEqual(self.model._ws_colors, {"ws1": "color1"})
         self.model.set_workspace_color("ws2", "color2")
-        self.assertDictEqual(self.model._ws_colors, {"ws1": "color1",
-                                                     "ws2": "color2"})
+        self.assertDictEqual(self.model._ws_colors, {"ws1": "color1", "ws2": "color2"})
         self.model.set_workspace_color("ws1", "color3")
-        self.assertDictEqual(self.model._ws_colors, {"ws1": "color3",
-                                                     "ws2": "color2"})
+        self.assertDictEqual(self.model._ws_colors, {"ws1": "color3", "ws2": "color2"})
 
     def test_get_workspace_color(self):
         self.model._ws_colors = {"ws1": "color1", "ws2": "color2"}
@@ -172,8 +171,7 @@ class SuperplotModelTest(unittest.TestCase):
         self.assertEqual(data, [("ws1", 1), ("ws1", 2), ("ws2", 1)])
         data = data[0:2]
         self.assertEqual(data, [("ws1", 1), ("ws1", 2)])
-        self.assertEqual(self.model._plotted_data,
-                         [("ws1", 1), ("ws1", 2), ("ws2", 1)])
+        self.assertEqual(self.model._plotted_data, [("ws1", 1), ("ws1", 2), ("ws2", 1)])
 
     def test_on_workspace_deleted(self):
         self.model._workspaces = ["ws1", "ws2", "ws3"]
@@ -182,8 +180,7 @@ class SuperplotModelTest(unittest.TestCase):
         self.model.sig_workspace_deleted = mock.Mock()
         self.model.on_workspace_deleted("ws4")
         self.assertEqual(self.model._workspaces, ["ws1", "ws2", "ws3"])
-        self.assertEqual(self.model._plotted_data,
-                         [("ws1", 1), ("ws1", 3), ("ws3", 10)])
+        self.assertEqual(self.model._plotted_data, [("ws1", 1), ("ws1", 3), ("ws3", 10)])
         self.assertEqual(self.model._plot_mode, self.model.SPECTRUM_MODE)
         self.model.sig_workspace_deleted.emit.assert_not_called()
         self.model.on_workspace_deleted("ws1")
@@ -211,13 +208,11 @@ class SuperplotModelTest(unittest.TestCase):
         self.model.sig_workspace_renamed = mock.Mock()
         self.model.on_workspace_renamed("ws4", "ws5")
         self.assertEqual(self.model._workspaces, ["ws1", "ws2", "ws3"])
-        self.assertEqual(self.model._plotted_data,
-                         [("ws1", 1), ("ws1", 3), ("ws3", 10)])
+        self.assertEqual(self.model._plotted_data, [("ws1", 1), ("ws1", 3), ("ws3", 10)])
         self.model.sig_workspace_renamed.emit.assert_not_called()
         self.model.on_workspace_renamed("ws1", "ws5")
         self.assertEqual(self.model._workspaces, ["ws5", "ws2", "ws3"])
-        self.assertEqual(self.model._plotted_data,
-                         [("ws5", 1), ("ws5", 3), ("ws3", 10)])
+        self.assertEqual(self.model._plotted_data, [("ws5", 1), ("ws5", 3), ("ws3", 10)])
         self.model.sig_workspace_renamed.emit.assert_called_once_with("ws1", "ws5")
 
     def test_on_workspace_replaced(self):

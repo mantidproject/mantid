@@ -15,12 +15,11 @@ from mantidqtinterfaces.dns_powder_tof.data_structures.dns_obs_model import DNSO
 
 
 class DNSTofPowderPlotModel(DNSObsModel):
-
     @staticmethod
     def get_plot_workspace():
         try:
-            if mtd['data1_sqw'].id() == 'WorkspaceGroup':
-                return mtd['data1_sqw'].getItem(0)
-            return mtd['data1_sqw']
+            if mtd["data1_sqw"].id() == "WorkspaceGroup":
+                return mtd["data1_sqw"].getItem(0)
+            return mtd["data1_sqw"]
         except KeyError:
             return False

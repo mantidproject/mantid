@@ -29,9 +29,7 @@ class LoadWidgetPresenterTest(unittest.TestCase):
         self.load_file_view = BrowseFileWidgetView(self.obj)
         self.load_run_view = LoadRunWidgetView(self.obj)
         self.load_run_view.set_current_instrument = mock.Mock()
-        self.view = LoadWidgetView(parent=self.obj,
-                                   load_file_view=self.load_file_view,
-                                   load_run_view=self.load_run_view)
+        self.view = LoadWidgetView(parent=self.obj, load_file_view=self.load_file_view, load_run_view=self.load_run_view)
         self.model = LoadWidgetModel(self.loaded_data, self.context)
         self.model.instrument = mock.Mock()
         self.presenter = LoadWidgetPresenterEA(self.view, self.model)
@@ -72,5 +70,5 @@ class LoadWidgetPresenterTest(unittest.TestCase):
         self.assertEqual(self.load_run_view.get_run_edit_text(), "1234")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

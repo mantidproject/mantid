@@ -9,11 +9,9 @@ import glob
 import os
 import numpy as np
 from mantid import config
-from mantid.api import AlgorithmFactory, AnalysisDataService, PythonAlgorithm, TextAxis, WorkspaceGroup, \
-    WorkspaceGroupProperty
+from mantid.api import AlgorithmFactory, AnalysisDataService, PythonAlgorithm, TextAxis, WorkspaceGroup, WorkspaceGroupProperty
 from mantid.kernel import Direction, IntBoundedValidator
-from mantid.simpleapi import ConvertToHistogram, ConvertToPointData, DeleteWorkspace, LoadAscii, WorkspaceFactory, \
-    CropWorkspaceRagged
+from mantid.simpleapi import ConvertToHistogram, ConvertToPointData, DeleteWorkspace, LoadAscii, WorkspaceFactory, CropWorkspaceRagged
 
 
 TYPE_KEYS = {"10": "Prompt", "20": "Delayed", "99": "Total"}
@@ -30,30 +28,27 @@ class LoadElementalAnalysisData(PythonAlgorithm):
         return "DataHandling"
 
     def PyInit(self):
-        self.declareProperty(name='Run', defaultValue=0, validator=IntBoundedValidator(lower=0),
-                             doc='Run number to load')
+        self.declareProperty(name="Run", defaultValue=0, validator=IntBoundedValidator(lower=0), doc="Run number to load")
 
-        self.declareProperty(WorkspaceGroupProperty(name='GroupWorkspace', defaultValue='',
-                                                    direction=Direction.Output),
-                             doc='Output group workspace for run')
+        self.declareProperty(
+            WorkspaceGroupProperty(name="GroupWorkspace", defaultValue="", direction=Direction.Output), doc="Output group workspace for run"
+        )
 
-        self.declareProperty(name="Directory", defaultValue="", direction=Direction.Output,
-                             doc="provides the directory where the run files were acquired")
+        self.declareProperty(
+            name="Directory", defaultValue="", direction=Direction.Output, doc="provides the directory where the run files were acquired"
+        )
 
     def validateInputs(self):
         issues = dict()
         check_run = self.search_user_dirs()
         if not check_run:
-            issues['Run'] = "Cannot find files for run " + self.getPropertyValue("Run")
+            issues["Run"] = "Cannot find files for run " + self.getPropertyValue("Run")
         return issues
 
     def PyExec(self):
         run = self.getPropertyValue("Run")
         to_load = self.search_user_dirs()
-        workspaces = {
-            path: self.get_filename(path, run)
-            for path in to_load if self.get_filename(path, run) is not None
-        }
+        workspaces = {path: self.get_filename(path, run) for path in to_load if self.get_filename(path, run) is not None}
         unique_workspaces = {}
         for path, workspace in workspaces.items():
             if workspace not in unique_workspaces.values():
@@ -64,11 +59,11 @@ class LoadElementalAnalysisData(PythonAlgorithm):
         self.merge_and_crop_workspaces(workspaces.values())
 
     def pad_run(self):
-        """ Pads run number: i.e. 123 -> 00123; 2695 -> 02695 """
+        """Pads run number: i.e. 123 -> 00123; 2695 -> 02695"""
         return str(self.getProperty("Run").value).zfill(RUN_NUMBER_LENGTH)
 
     def search_user_dirs(self):
-        """ Finds all files for the run number provided """
+        """Finds all files for the run number provided"""
         files = []
         for user_dir in config.getDataSearchDirs():
             path = os.path.join(user_dir, "ral{}.rooth*.dat".format(self.pad_run()))
@@ -90,17 +85,17 @@ class LoadElementalAnalysisData(PythonAlgorithm):
             return None
 
     def format_workspace(self, inputs):
-        """ inputs is a dict mapping filepaths to output names """
+        """inputs is a dict mapping filepaths to output names"""
         for path, output in inputs.items():
             workspace = LoadAscii(path, OutputWorkspace=output)
             workspace.setE(0, np.sqrt(workspace.dataY(0)))
             workspace.getAxis(0).setUnit("Label").setLabel("Energy", "keV")
 
     def merge_and_crop_workspaces(self, workspaces):
-        """ where workspaces is a tuple of form:
-                (filepath, ws name)
+        """where workspaces is a tuple of form:
+        (filepath, ws name)
         """
-        workspace_name = self.getPropertyValue('GroupWorkspace')
+        workspace_name = self.getPropertyValue("GroupWorkspace")
         # detectors is a dictionary of {detector_name : [names_of_workspaces]}
         detectors = {f"{workspace_name}; Detector {x}": [] for x in range(1, 5)}
         # fill dictionary
@@ -131,7 +126,7 @@ class LoadElementalAnalysisData(PythonAlgorithm):
                         maxX.append(xdata[-1])
                     else:
                         maxX.append(xdata[-1] - 1)
-                CropWorkspaceRagged(InputWorkspace=detector, OutputWorkspace=detector, xmin = minX, xmax = maxX)
+                CropWorkspaceRagged(InputWorkspace=detector, OutputWorkspace=detector, xmin=minX, xmax=maxX)
                 overall_ws.addWorkspace(AnalysisDataService.retrieve(detector))
         self.setProperty("GroupWorkspace", overall_ws)
 
@@ -146,9 +141,9 @@ class LoadElementalAnalysisData(PythonAlgorithm):
 
             # create single ws for the merged data, use original ws as a template
             template_ws = next(ws for ws in workspace_list if ws is not None)
-            merged_ws = WorkspaceFactory.create(AnalysisDataService.retrieve(template_ws),
-                                                NVectors=NUM_FILES_PER_DETECTOR, XLength=max_num_bins,
-                                                YLength=max_num_bins)
+            merged_ws = WorkspaceFactory.create(
+                AnalysisDataService.retrieve(template_ws), NVectors=NUM_FILES_PER_DETECTOR, XLength=max_num_bins, YLength=max_num_bins
+            )
 
             # create a merged workspace based on every entry from workspace list
             for i in range(0, NUM_FILES_PER_DETECTOR):
@@ -185,7 +180,7 @@ class LoadElementalAnalysisData(PythonAlgorithm):
             return merged_ws
 
     def set_y_axis_labels(self, workspace, labels):
-        """ adds the spectrum_index to the plot labels """
+        """adds the spectrum_index to the plot labels"""
 
         axis = TextAxis.create(len(labels))
 

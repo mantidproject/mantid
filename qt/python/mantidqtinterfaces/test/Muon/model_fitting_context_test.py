@@ -14,7 +14,6 @@ from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_utils import StaticW
 
 
 class ModelFittingContextTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         FrameworkManager.Instance()
@@ -143,5 +142,5 @@ class ModelFittingContextTest(unittest.TestCase):
         self.assertEqual(self.fitting_context.all_latest_fits()[0], fit2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

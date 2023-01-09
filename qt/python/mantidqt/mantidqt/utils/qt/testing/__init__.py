@@ -24,6 +24,7 @@ def start_qapplication(cls):
     if it is not already started
     @param cls: Class being decorated
     """
+
     def do_nothing(_):
         pass
 
@@ -31,8 +32,8 @@ def start_qapplication(cls):
         get_application()
         setUpClass_orig()
 
-    setUpClass_orig = cls.setUpClass if hasattr(cls, 'setUpClass') else do_nothing
-    setattr(cls, 'setUpClass', classmethod(setUpClass))
+    setUpClass_orig = cls.setUpClass if hasattr(cls, "setUpClass") else do_nothing
+    setattr(cls, "setUpClass", classmethod(setUpClass))
     return cls
 
 

@@ -6,9 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqt.utils.qt import import_qt
 
-FittingMode = import_qt('..._common', 'mantidqt.widgets.fitscriptgenerator', 'FittingMode')
+FittingMode = import_qt("..._common", "mantidqt.widgets.fitscriptgenerator", "FittingMode")
 
-FitScriptGeneratorView = import_qt('..._common', 'mantidqt.widgets.fitscriptgenerator', 'FitScriptGeneratorView')
-FitScriptGeneratorModel = import_qt('..._common', 'mantidqt.widgets.fitscriptgenerator', 'FitScriptGeneratorModel')
-FitScriptGeneratorPresenter = import_qt('..._common', 'mantidqt.widgets.fitscriptgenerator',
-                                        'FitScriptGeneratorPresenter')
+FitScriptGeneratorView = import_qt("..._common", "mantidqt.widgets.fitscriptgenerator", "FitScriptGeneratorView")
+FitScriptGeneratorModel = import_qt("..._common", "mantidqt.widgets.fitscriptgenerator", "FitScriptGeneratorModel")
+FitScriptGeneratorPresenter = import_qt("..._common", "mantidqt.widgets.fitscriptgenerator", "FitScriptGeneratorPresenter")

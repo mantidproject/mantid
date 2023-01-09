@@ -15,7 +15,7 @@ class PeaksPresenter(object):
         self.electron = self.view.electron
         self.peak_checkboxes = self.view.peak_checkboxes
 
-    def set_deselect_elements_slot(self,slot):
+    def set_deselect_elements_slot(self, slot):
         self.view.set_deselect_elements_slot(slot)
 
     def enable_deselect_elements_btn(self):

@@ -14,38 +14,34 @@ from unittest.mock import patch
 from mantid.api import FileFinder
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_file import DNSFile
-from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import \
-    ObjectDict
+from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import ObjectDict
 from mantidqtinterfaces.dns_powder_tof.helpers.file_processing import load_txt
-from mantidqtinterfaces.dns_powder_tof.helpers.helpers_for_testing import (
-    get_dataset, get_filepath)
+from mantidqtinterfaces.dns_powder_tof.helpers.helpers_for_testing import get_dataset, get_filepath
 
 
 class DNSFileTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.filepath = get_filepath()
         cls.data = get_dataset()
         cls.fullfilename = FileFinder.Instance().getFullPath("dnstof.d_dat")
-        cls.file = DNSFile('', cls.fullfilename)
+        cls.file = DNSFile("", cls.fullfilename)
         cls.txt = "".join(load_txt(cls.fullfilename))
 
     def test___init__(self):
         self.assertIsInstance(self.file, ObjectDict)
         self.assertIsInstance(self.file, DNSFile)
 
-    @patch('mantidqtinterfaces.dns_powder_tof.data_structures.dns_file.'
-           'save_txt')
+    @patch("mantidqtinterfaces.dns_powder_tof.data_structures.dns_file." "save_txt")
     def test_write(self, mock_save):
-        self.file.write('', '123.d_dat')
-        mock_save.assert_called_with(self.txt, '123.d_dat', '')
+        self.file.write("", "123.d_dat")
+        mock_save.assert_called_with(self.txt, "123.d_dat", "")
 
     def test_read(self):
         # already read in init
-        self.assertAlmostEqual(self.file['det_rot'], -7.5)
+        self.assertAlmostEqual(self.file["det_rot"], -7.5)
         self.assertEqual(self.file.counts[3, 0], 3)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

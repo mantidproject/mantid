@@ -4,14 +4,13 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
 from mantid.kernel import *
 from mantid.api import *
 
 
 class TestWorkspaceGroupProperty(PythonAlgorithm):
-    """
-    """
+    """ """
 
     def category(self):
         return "Workflow\\Testing"
@@ -23,10 +22,13 @@ class TestWorkspaceGroupProperty(PythonAlgorithm):
         return "Use only for testing"
 
     def PyInit(self):
-        self.declareProperty(WorkspaceGroupProperty("InputWorkspace", "", Direction.Input),
-                             doc="Group workspace that automatically includes all members.")
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace2", "", Direction.Input),
-                             doc="Another group workspace that automatically includes all members.")
+        self.declareProperty(
+            WorkspaceGroupProperty("InputWorkspace", "", Direction.Input), doc="Group workspace that automatically includes all members."
+        )
+        self.declareProperty(
+            MatrixWorkspaceProperty("InputWorkspace2", "", Direction.Input),
+            doc="Another group workspace that automatically includes all members.",
+        )
 
     def PyExec(self):
         ws = self.getProperty("InputWorkspace").value

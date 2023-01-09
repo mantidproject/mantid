@@ -38,14 +38,13 @@ class MuonWorkspaceWrapper(object):
             self._is_in_ads = True
 
     def __str__(self):
-        return "MuonWorkspaceWrapper Object \n" \
-               "In ADS         : {}\n" \
-               "Name           : {}\n" \
-               "Directory      : {}\n" \
-               "Workspace Type : {}\n".format(self._is_in_ads,
-                                              self._workspace_name,
-                                              self._directory_structure,
-                                              type(self._workspace))
+        return (
+            "MuonWorkspaceWrapper Object \n"
+            "In ADS         : {}\n"
+            "Name           : {}\n"
+            "Directory      : {}\n"
+            "Workspace Type : {}\n".format(self._is_in_ads, self._workspace_name, self._directory_structure, type(self._workspace))
+        )
 
     @property
     def is_hidden(self):
@@ -55,7 +54,7 @@ class MuonWorkspaceWrapper(object):
     @property
     def name(self):
         """The current name of the workspace."""
-        directory = self._directory_structure + '/' if self._directory_structure else ''
+        directory = self._directory_structure + "/" if self._directory_structure else ""
         return directory + self._workspace_name
 
     @property
@@ -92,17 +91,15 @@ class MuonWorkspaceWrapper(object):
         if isinstance(value, Workspace):
             self._workspace = value
         else:
-            raise AttributeError("Attempting to set object of type {}, must be"
-                                 " a Mantid Workspace type".format(type(value)))
+            raise AttributeError("Attempting to set object of type {}, must be" " a Mantid Workspace type".format(type(value)))
 
-    def show(self, name=''):
+    def show(self, name=""):
         """
         Show the workspace in the ADS inside the WorkspaceGroup structure specified in name
         name = dirs/../dirs/workspace_name
         """
         if not name and not self.name:
-            raise ValueError("Cannot store workspace in ADS with name : ",
-                             str(name))
+            raise ValueError("Cannot store workspace in ADS with name : ", str(name))
 
         self.name = str(name)
 
@@ -114,8 +111,7 @@ class MuonWorkspaceWrapper(object):
             self._workspace = None
             self._is_in_ads = True
         else:
-            raise ValueError("Cannot store workspace in ADS with name : ",
-                             str(name))
+            raise ValueError("Cannot store workspace in ADS with name : ", str(name))
 
     def hide(self):
         """

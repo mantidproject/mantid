@@ -52,7 +52,7 @@ class FileLoadingTest(unittest.TestCase):
 
                 mocked_parser.get_all_states.side_effect = known_exception
                 with self.assertRaises(UserFileLoadException):
-                    FileLoading.load_user_file('legacy.txt', None)
+                    FileLoading.load_user_file("legacy.txt", None)
 
         not_wrapped = [KeyboardInterrupt(), SystemExit()]
         for unexpected_exception in not_wrapped:
@@ -61,8 +61,8 @@ class FileLoadingTest(unittest.TestCase):
                 mocked_module.return_value = mocked_parser
                 mocked_parser.get_all_states.side_effect = unexpected_exception
                 with self.assertRaises(type(unexpected_exception)):
-                    FileLoading.load_user_file('legacy.txt', None)
+                    FileLoading.load_user_file("legacy.txt", None)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

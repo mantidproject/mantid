@@ -19,35 +19,35 @@ from qtpy.QtTest import QTest
 
 
 def not_on_windows():
-    return sys.platform != 'win32'
+    return sys.platform != "win32"
 
 
 def trigger_action(action):
-    QMetaObject.invokeMethod(action, 'trigger', Qt.QueuedConnection)
+    QMetaObject.invokeMethod(action, "trigger", Qt.QueuedConnection)
 
 
 def find_action_with_text(widget, text):
     for action in widget.findChildren(QAction):
         if action.text() == text:
             return action
-    raise RuntimeError("Couldn't find action with text \"{}\"".format(text))
+    raise RuntimeError('Couldn\'t find action with text "{}"'.format(text))
 
 
 def print_tree(widget, indent=0):
     if indent == 0:
-        print('Children widgets of ', widget.objectName(), type(widget))
-    space = ' ' * indent
+        print("Children widgets of ", widget.objectName(), type(widget))
+    space = " " * indent
     for w in widget.children():
         if isinstance(w, QWidget):
-            text = '({})'.format(w.text()) if hasattr(w, 'text') else ''
-            print('{}{} {} {}'.format(space, w, w.objectName(), text))
+            text = "({})".format(w.text()) if hasattr(w, "text") else ""
+            print("{}{} {} {}".format(space, w, w.objectName(), text))
             print_tree(w, indent + 4)
 
 
 def discover_children(widget, child_type=QWidget):
-    print('Children widgets of ', widget.objectName(), type(widget))
+    print("Children widgets of ", widget.objectName(), type(widget))
     for w in widget.findChildren(child_type):
-        text = '({})'.format(w.text()) if hasattr(w, 'text') else ''
+        text = "({})".format(w.text()) if hasattr(w, "text") else ""
         print(w, w.objectName(), text)
 
 
@@ -62,7 +62,7 @@ def get_child(widget, object_name, child_type=QWidget, timeout=3):
     if len(children) == 0:
         raise RuntimeError("Widget doesn't have child with name {}".format(object_name))
     if len(children) > 1:
-        print('Widget has more than 1 child with name {}'.format(object_name))
+        print("Widget has more than 1 child with name {}".format(object_name))
     return children[0]
 
 
@@ -94,12 +94,12 @@ def mouse_click(widget, pos, button=Qt.LeftButton):
 
 
 def skipIf(test, reason):
-
     def wrap(method):
         def wrapper(self):
             pass
+
         if test:
-            print('Skip {name}. Reason: {reason}'.format(name=method.__name__, reason=reason), file=sys.stderr)
+            print("Skip {name}. Reason: {reason}".format(name=method.__name__, reason=reason), file=sys.stderr)
             if inspect.isclass(method):
                 method._workbench_test_skip_ = True
                 return method
@@ -111,12 +111,11 @@ def skipIf(test, reason):
 
 
 class GuiTestBase(object):
-
     def _call_test_method(self, w):
         self.widget = w
         if hasattr(self, self.call_method):
             return getattr(self, self.call_method)()
-        if self.call_method != 'call':
+        if self.call_method != "call":
             raise RuntimeError("Test class has no method {}".format(self.call_method))
 
     def wait_for(self, var_name):
@@ -140,16 +139,16 @@ class GuiTestBase(object):
     def wait_for_popup(self):
         return self.wait_for_true(self.get_active_popup_widget)
 
-    def run_test(self, method='call', pause=0, close_on_finish=True, attach_debugger=False):
+    def run_test(self, method="call", pause=0, close_on_finish=True, attach_debugger=False):
         self.call_method = method
-        open_in_window(self.create_widget, self._call_test_method, attach_debugger=attach_debugger, pause=pause,
-                       close_on_finish=close_on_finish)
+        open_in_window(
+            self.create_widget, self._call_test_method, attach_debugger=attach_debugger, pause=pause, close_on_finish=close_on_finish
+        )
 
     def get_child(self, child_class, name):
         children = self.widget.findChildren(child_class, name)
         if len(children) == 0:
-            raise RuntimeError("Widget doesn't have children of type {0} with name {1}.".format(child_class.__name__,
-                                                                                                name))
+            raise RuntimeError("Widget doesn't have children of type {0} with name {1}.".format(child_class.__name__, name))
         return children[0]
 
     @staticmethod
@@ -176,21 +175,21 @@ class GuiTestBase(object):
         action, menu = self.get_action(name, get_menu=True)
         if not menu.isVisible():
             raise RuntimeError("Action {} isn't visible.".format(name))
-        QMetaObject.invokeMethod(action, 'trigger', Qt.QueuedConnection)
+        QMetaObject.invokeMethod(action, "trigger", Qt.QueuedConnection)
         menu.close()
 
     def hover_action(self, name):
         action, menu = self.get_action(name, get_menu=True)
         if not menu.isVisible():
             raise RuntimeError("Action {} isn't visible.".format(name))
-        QMetaObject.invokeMethod(action, 'hover', Qt.QueuedConnection)
+        QMetaObject.invokeMethod(action, "hover", Qt.QueuedConnection)
 
     def get_button(self, name):
         return self.get_child(QPushButton, name)
 
     def click_button(self, name):
         button = self.get_button(name)
-        QMetaObject.invokeMethod(button, 'click', Qt.QueuedConnection)
+        QMetaObject.invokeMethod(button, "click", Qt.QueuedConnection)
 
     def show_context_menu(self, widget, pos, pause=0):
         QTest.mouseMove(widget, pos)
@@ -216,11 +215,10 @@ class GuiTestBase(object):
 def is_test_method(value):
     if not (inspect.ismethod(value) or inspect.isfunction(value)):
         return False
-    return value.__name__.startswith('test_')
+    return value.__name__.startswith("test_")
 
 
 class GuiWindowTest(TestCase, GuiTestBase):
-
     @classmethod
     def make_test_wrapper(cls, wrapped_name, skip):
         def wrapper(self):
@@ -232,18 +230,17 @@ class GuiWindowTest(TestCase, GuiTestBase):
 
     @classmethod
     def setUpClass(cls):
-        skip = getattr(cls, '_workbench_test_skip_', False)
+        skip = getattr(cls, "_workbench_test_skip_", False)
         cls.test_methods = []
         cls.widget = None
         for test in inspect.getmembers(cls, is_test_method):
             name = test[0]
-            wrapped_name = '_' + name
+            wrapped_name = "_" + name
             setattr(cls, wrapped_name, test[1])
             setattr(cls, name, cls.make_test_wrapper(wrapped_name, skip))
 
 
 class MultiTestRunner(object):
-
     def __init__(self, methods):
         self.methods = methods
 
@@ -253,7 +250,6 @@ class MultiTestRunner(object):
 
 
 class WorkbenchGuiTest(GuiWindowTest):
-
     @classmethod
     def make_test_wrapper(cls, wrapped_name, skip):
         def wrapper(self):

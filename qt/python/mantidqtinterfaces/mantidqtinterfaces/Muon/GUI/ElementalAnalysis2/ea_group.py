@@ -51,15 +51,15 @@ class EAGroup(object):
 
         except Exception as error:
             """
-                If ADS is deleted before group is deleted, boost.python.ArgumentError is raised and
-                boost.python.ArgumentError are not catchable
+            If ADS is deleted before group is deleted, boost.python.ArgumentError is raised and
+            boost.python.ArgumentError are not catchable
             """
             if "Python argument types in" not in str(error):
                 if self.error_notifier:
                     error_message = f"Unexpected error occurred when deleting group {self.name}: " + str(error)
                     self.error_notifier.notify_subscribers(error_message)
 
-    def set_error_notifier(self, notifier:  GenericObservable):
+    def set_error_notifier(self, notifier: GenericObservable):
         self.error_notifier = notifier
 
     @property
@@ -71,13 +71,12 @@ class EAGroup(object):
         if isinstance(new_workspace, MuonWorkspaceWrapper):
             self._counts_workspace = new_workspace
         else:
-            raise AttributeError("Attempting to set workspace to type " + str(
-                type(new_workspace)) + " but should be MuonWorkspaceWrapper")
+            raise AttributeError("Attempting to set workspace to type " + str(type(new_workspace)) + " but should be MuonWorkspaceWrapper")
 
     def get_counts_workspace_for_run(self, rebin=False):
         """
-            Returns the name of the counts workspace for a given run
-            if the workspace does not exist will raise a KeyError
+        Returns the name of the counts workspace for a given run
+        if the workspace does not exist will raise a KeyError
         """
         if rebin:
             return self._counts_workspace_rebin.workspace_name
@@ -90,9 +89,9 @@ class EAGroup(object):
 
     @name.setter
     def name(self, name):
-        raise AttributeError("Attempting to change name from {} to {}. "
-                             "Cannot change name of EAGroup "
-                             "object".format(self._group_name, name))
+        raise AttributeError(
+            "Attempting to change name from {} to {}. " "Cannot change name of EAGroup " "object".format(self._group_name, name)
+        )
 
     @property
     def n_detectors(self):

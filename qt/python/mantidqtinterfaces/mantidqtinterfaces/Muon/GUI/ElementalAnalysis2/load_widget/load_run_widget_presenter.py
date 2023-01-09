@@ -14,7 +14,6 @@ from mantidqt.utils.observer_pattern import GenericObservable, Observable
 
 
 class LoadRunWidgetPresenterEA(object):
-
     def __init__(self, view, model):
         self._view = view
         self._model = model
@@ -186,9 +185,7 @@ class LoadRunWidgetPresenterEA(object):
     def handle_load_thread_start(self, runs, finished_callback):
         self.on_loading_start()
         self._load_thread = self.create_load_thread()
-        self._load_thread.threadWrapperSetUp(self.disable_loading,
-                                             finished_callback,
-                                             self.error_callback)
+        self._load_thread.threadWrapperSetUp(self.disable_loading, finished_callback, self.error_callback)
         self._load_thread.loadData(runs)
         self._load_thread.start()
 
@@ -218,8 +215,7 @@ class LoadRunWidgetPresenterEA(object):
             self.updated_directory.notify_subscribers(self._model._directory)
             self._view.notify_loading_finished()
         except ValueError:
-            self._view.warning_popup('Attempting to co-add data with different time bins. '
-                                     'This is not currently supported.')
+            self._view.warning_popup("Attempting to co-add data with different time bins. " "This is not currently supported.")
             self._view.reset_run_edit_from_cache()
         except RuntimeError as error:
             self._view.warning_popup(error)
@@ -235,7 +231,6 @@ class LoadRunWidgetPresenterEA(object):
         return path
 
     class DisableEditingNotifier(Observable):
-
         def __init__(self, outer):
             Observable.__init__(self)
             self.outer = outer  # handle to containing class
@@ -244,7 +239,6 @@ class LoadRunWidgetPresenterEA(object):
             Observable.notify_subscribers(self, *args, **kwargs)
 
     class EnableEditingNotifier(Observable):
-
         def __init__(self, outer):
             Observable.__init__(self)
             self.outer = outer  # handle to containing class

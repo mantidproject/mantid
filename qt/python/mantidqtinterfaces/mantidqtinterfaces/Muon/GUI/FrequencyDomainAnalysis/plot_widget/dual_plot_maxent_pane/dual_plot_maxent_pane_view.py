@@ -13,8 +13,8 @@ from mantidqtinterfaces.Muon.GUI.Common.data_selectors.cyclic_data_selector_view
 # might need to have a baseqidget instance and add to layout
 # then have access methods into the base widget
 
-class DualPlotMaxentPaneView(BasePaneView):
 
+class DualPlotMaxentPaneView(BasePaneView):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self._selectors_layout = QtWidgets.QHBoxLayout()
@@ -30,7 +30,7 @@ class DualPlotMaxentPaneView(BasePaneView):
     def set_slot_for_selection_changed(self, slot):
         self._data_selector.set_slot_for_dataset_changed(slot)
 
-    def update_selection(self, selections)->None:
+    def update_selection(self, selections) -> None:
         self._data_selector.update_dataset_name_combo_box(selections)
 
     @property

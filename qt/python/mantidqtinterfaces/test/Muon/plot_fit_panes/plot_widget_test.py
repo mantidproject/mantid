@@ -23,8 +23,7 @@ from mantidqtinterfaces.Muon.GUI.Common.plot_widget.main_plot_widget_presenter i
 
 @start_qapplication
 class PlotWidgetTest(unittest.TestCase):
-
-    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.plot_widget.base_pane.base_pane_view.BasePaneView')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.Common.plot_widget.base_pane.base_pane_view.BasePaneView")
     def setUp(self, basepane_mock):
         self.context = setup_context()
         self.count = 0
@@ -50,7 +49,7 @@ class PlotWidgetTest(unittest.TestCase):
         else:
             return "Fit Data"
 
-    #sets the values of the Plotting Canvas Widget
+    # sets the values of the Plotting Canvas Widget
     def set_plot_values(self, mocked_vals):
         mock_injector = mock.NonCallableMock()
         mock_injector.get_quick_edit_info = mocked_vals
@@ -63,9 +62,10 @@ class PlotWidgetTest(unittest.TestCase):
         self.plot_widget.handle_plot_mode_changed_by_user()
 
         self.assertEqual(self.plot_widget._current_plot_mode, "Fit Data")
-        self.plot_widget.plotting_canvas_widgets["Fit Data"].set_quick_edit_info.assert_called_once_with\
-            ("one", [3.0, 8.0], 2, [-0.323, 0.436], False)
+        self.plot_widget.plotting_canvas_widgets["Fit Data"].set_quick_edit_info.assert_called_once_with(
+            "one", [3.0, 8.0], 2, [-0.323, 0.436], False
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

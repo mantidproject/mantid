@@ -8,8 +8,7 @@
 import unittest
 
 # local imports
-from mantidqt.widgets.sliceviewer.peaksviewer.representation.alpha \
-    import ALPHA_MAX, compute_alpha
+from mantidqt.widgets.sliceviewer.peaksviewer.representation.alpha import ALPHA_MAX, compute_alpha
 
 
 class AlphaTest(unittest.TestCase):

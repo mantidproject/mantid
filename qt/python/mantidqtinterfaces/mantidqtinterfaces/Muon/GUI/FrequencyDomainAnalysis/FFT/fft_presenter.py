@@ -7,12 +7,14 @@
 import mantid.simpleapi as mantid
 
 from mantidqtinterfaces.Muon.GUI.Common import thread_model
-from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import run_PaddingAndApodization, run_FFT, \
-    extract_single_spec
+from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import run_PaddingAndApodization, run_FFT, extract_single_spec
 from mantidqtinterfaces.Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import remove_ws
-from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import get_fft_workspace_name, get_fft_workspace_group_name, \
-    get_group_or_pair_from_name
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import (
+    get_fft_workspace_name,
+    get_fft_workspace_group_name,
+    get_group_or_pair_from_name,
+)
 import re
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from mantidqt.utils.observer_pattern import GenericObservable
@@ -72,8 +74,7 @@ class FFTPresenter(object):
         default_name = None
         # will need to check this exists before using it
         if current_group_pair:
-            default_name = current_group_pair.get_asymmetry_workspace_names(
-                    self.load.data_context.current_runs)
+            default_name = current_group_pair.get_asymmetry_workspace_names(self.load.data_context.current_runs)
         # if the original selection is available we should use it
         if original_Re_name in final_options:
             Re_name_to_use = original_Re_name
@@ -84,26 +85,22 @@ class FFTPresenter(object):
             Im_name_to_use = original_Im_name
         elif default_name:
             Im_name_to_use = default_name[0]
-        self.view.imaginary_workspace=Im_name_to_use
+        self.view.imaginary_workspace = Im_name_to_use
         return
 
     def handle_use_raw_data_changed(self):
         if not self.view.use_raw_data and not self.load._do_rebin():
             self.view.set_raw_checkbox_state(True)
-            self.view.warning_popup('No rebin options specified')
+            self.view.warning_popup("No rebin options specified")
             return
 
         self.getWorkspaceNames()
 
     def tableClicked(self, row, col):
         if row == self.view.getImBoxRow() and col == 1:
-            self.view.changedHideUnTick(
-                self.view.getImBox(),
-                self.view.getImBoxRow() + 1)
+            self.view.changedHideUnTick(self.view.getImBox(), self.view.getImBoxRow() + 1)
         elif row == self.view.getShiftBoxRow() and col == 1:
-            self.view.changed(
-                self.view.getShiftBox(),
-                self.view.getShiftBoxRow() + 1)
+            self.view.changed(self.view.getShiftBox(), self.view.getShiftBoxRow() + 1)
 
     def createThread(self):
         self._phasequad_calculation_model = ThreadModelWrapper(self.calculate_FFT)
@@ -125,21 +122,21 @@ class FFTPresenter(object):
 
     def get_pre_inputs(self):
         pre_inputs = self._get_generic_apodiazation_and_padding_inputs()
-        pre_inputs['InputWorkspace'] = self.view.workspace
+        pre_inputs["InputWorkspace"] = self.view.workspace
 
         return pre_inputs
 
     def get_imaginary_inputs(self):
         pre_inputs = self._get_generic_apodiazation_and_padding_inputs()
 
-        pre_inputs['InputWorkspace'] = self.view.imaginary_workspace
+        pre_inputs["InputWorkspace"] = self.view.imaginary_workspace
 
         return pre_inputs
 
     def _get_generic_apodiazation_and_padding_inputs(self):
         pre_inputs = {}
 
-        pre_inputs['InputWorkspace'] = self.view.imaginary_workspace
+        pre_inputs["InputWorkspace"] = self.view.imaginary_workspace
         pre_inputs["ApodizationFunction"] = self.view.apodization_function
         pre_inputs["DecayConstant"] = self.view.decay_constant
         pre_inputs["NegativePadding"] = self.view.negative_padding
@@ -151,14 +148,14 @@ class FFTPresenter(object):
         FFTInputs = {}
 
         FFTInputs["AcceptXRoundingErrors"] = True
-        FFTInputs['Real'] = 0
-        FFTInputs['InputWorkspace'] = real_workspace
-        FFTInputs['Transform'] = 'Forward'
-        FFTInputs['AutoShift'] = self.view.auto_shift
+        FFTInputs["Real"] = 0
+        FFTInputs["InputWorkspace"] = real_workspace
+        FFTInputs["Transform"] = "Forward"
+        FFTInputs["AutoShift"] = self.view.auto_shift
 
         if self.view.imaginary_data:
-            FFTInputs['InputImagWorkspace'] = imaginary_workspace
-            FFTInputs['Imaginary'] = imanginary
+            FFTInputs["InputImagWorkspace"] = imaginary_workspace
+            FFTInputs["Imaginary"] = imanginary
 
         return FFTInputs
 
@@ -172,39 +169,43 @@ class FFTPresenter(object):
         real_workspace_padding_parameters = self.get_pre_inputs()
         imaginary_workspace_padding_parameters = self.get_imaginary_inputs()
 
-        real_workspace_input = run_PaddingAndApodization(real_workspace_padding_parameters, '__real')
+        real_workspace_input = run_PaddingAndApodization(real_workspace_padding_parameters, "__real")
 
         if self.view.imaginary_data:
-            imaginary_workspace_input = run_PaddingAndApodization(imaginary_workspace_padding_parameters, '__Imag')
+            imaginary_workspace_input = run_PaddingAndApodization(imaginary_workspace_padding_parameters, "__Imag")
         else:
             imaginary_workspace_input = None
-            imaginary_workspace_padding_parameters['InputWorkspace'] = ""
+            imaginary_workspace_padding_parameters["InputWorkspace"] = ""
 
         fft_parameters = self.get_fft_inputs(real_workspace_input, imaginary_workspace_input, imaginary_workspace_index)
 
         frequency_domain_workspace = run_FFT(fft_parameters)
-        self.add_fft_workspace_to_ADS(real_workspace_padding_parameters['InputWorkspace'],
-                                      imaginary_workspace_padding_parameters['InputWorkspace'],
-                                      frequency_domain_workspace)
+        self.add_fft_workspace_to_ADS(
+            real_workspace_padding_parameters["InputWorkspace"],
+            imaginary_workspace_padding_parameters["InputWorkspace"],
+            frequency_domain_workspace,
+        )
         # clean up
         remove_ws(frequency_domain_workspace)
         remove_ws(real_workspace_input)
 
     def add_fft_workspace_to_ADS(self, input_workspace, imaginary_input_workspace, fft_workspace_label):
-        run = re.search('[0-9]+', input_workspace).group()
+        run = re.search("[0-9]+", input_workspace).group()
         fft_workspace = mantid.AnalysisDataService.retrieve(fft_workspace_label)
         fft_workspace.setYUnitLabel("Intensity")
         Im_run = ""
         if imaginary_input_workspace != "":
-            Im_run = re.search('[0-9]+', imaginary_input_workspace).group()
+            Im_run = re.search("[0-9]+", imaginary_input_workspace).group()
         fft_workspace_name = get_fft_workspace_name(input_workspace, imaginary_input_workspace)
-        directory = get_fft_workspace_group_name(fft_workspace_name, self.load.data_context.instrument,
-                                                 self.load.workspace_suffix)
+        directory = get_fft_workspace_group_name(fft_workspace_name, self.load.data_context.instrument, self.load.workspace_suffix)
         Re = get_group_or_pair_from_name(input_workspace)
         Im = get_group_or_pair_from_name(imaginary_input_workspace)
         shift = 3 if fft_workspace.getNumberHistograms() == 6 else 0
-        spectra = {"_" + FREQUENCY_EXTENSIONS["RE"]: 0 + shift, "_" + FREQUENCY_EXTENSIONS["IM"]: 1 + shift,
-                   "_" + FREQUENCY_EXTENSIONS["MOD"]: 2 + shift}
+        spectra = {
+            "_" + FREQUENCY_EXTENSIONS["RE"]: 0 + shift,
+            "_" + FREQUENCY_EXTENSIONS["IM"]: 1 + shift,
+            "_" + FREQUENCY_EXTENSIONS["MOD"]: 2 + shift,
+        }
 
         for spec_type in list(spectra.keys()):
             extracted_ws = extract_single_spec(fft_workspace, spectra[spec_type], fft_workspace_name + spec_type)
@@ -217,7 +218,7 @@ class FFTPresenter(object):
 
         # This is a small hack to get the output name to a location where it can be part of the calculation finished
         # signal.
-        self._output_workspace_name = self.load._frequency_context.get_ws_name(fft_workspace_name + '_mod')
+        self._output_workspace_name = self.load._frequency_context.get_ws_name(fft_workspace_name + "_mod")
 
     def update_view_from_model(self):
         self.getWorkspaceNames()

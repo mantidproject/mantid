@@ -12,15 +12,11 @@ DNS TOF powder Options Presenter - Tab of DNS Reduction GUI.
 import unittest
 from unittest import mock
 
-from mantidqtinterfaces.dns_powder_tof.data_structures.dns_obs_model import \
-    DNSObsModel
+from mantidqtinterfaces.dns_powder_tof.data_structures.dns_obs_model import DNSObsModel
 from mantidqtinterfaces.dns_powder_tof.options import tof_powder_options_model
-from mantidqtinterfaces.dns_powder_tof.options.common_options_model import \
-    DNSCommonOptionsModel
-from mantidqtinterfaces.dns_powder_tof.options.tof_powder_options_model \
-    import DNSTofPowderOptionsModel
-from mantidqtinterfaces.dns_powder_tof.helpers.helpers_for_testing import (
-    get_dataset, get_fake_tof_binning)
+from mantidqtinterfaces.dns_powder_tof.options.common_options_model import DNSCommonOptionsModel
+from mantidqtinterfaces.dns_powder_tof.options.tof_powder_options_model import DNSTofPowderOptionsModel
+from mantidqtinterfaces.dns_powder_tof.helpers.helpers_for_testing import get_dataset, get_fake_tof_binning
 
 
 class DNSTofPowderOptionsModelTest(unittest.TestCase):
@@ -53,12 +49,9 @@ class DNSTofPowderOptionsModelTest(unittest.TestCase):
         self.assertEqual(testv[1], True)
 
     def test_number_of_tof_channels_varies(self):
-        self.assertTrue(
-            tof_powder_options_model.number_of_tof_channels_varies([0, 1]))
-        self.assertFalse(
-            tof_powder_options_model.number_of_tof_channels_varies([1, 1]))
-        self.assertFalse(
-            tof_powder_options_model.number_of_tof_channels_varies([0]))
+        self.assertTrue(tof_powder_options_model.number_of_tof_channels_varies([0, 1]))
+        self.assertFalse(tof_powder_options_model.number_of_tof_channels_varies([1, 1]))
+        self.assertFalse(tof_powder_options_model.number_of_tof_channels_varies([0]))
 
     def test_estimate_q_and_binning(self):
         testv = self.model.estimate_q_and_binning(self.fulldata, 4.74)
@@ -66,5 +59,5 @@ class DNSTofPowderOptionsModelTest(unittest.TestCase):
             self.assertAlmostEqual(value, get_fake_tof_binning()[key])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

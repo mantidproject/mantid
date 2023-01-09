@@ -18,13 +18,13 @@ import mantid.simpleapi as mantid
 
 # == Set parameters for calibration ==
 
-filename = 'MAP14919.raw'  # Name of calibration run
+filename = "MAP14919.raw"  # Name of calibration run
 rangeLower = 2000  # Integrate counts in each spectra from rangeLower to rangeUpper
 rangeUpper = 10000  #
 
 # Set what we want to calibrate (e.g whole instrument or one door )
-CalibratedComponent1 = 'C4_window'  # Calibrate C4 window
-CalibratedComponent2 = 'C3_window'  # Calibrate C3 window
+CalibratedComponent1 = "C4_window"  # Calibrate C4 window
+CalibratedComponent2 = "C3_window"  # Calibrate C3 window
 
 # Get calibration raw file and integrate it
 rawCalibInstWS = mantid.Load(filename)  # 'raw' in 'rawCalibInstWS' means unintegrated.
@@ -48,8 +48,7 @@ print("Created objects needed for calibration.")
 
 # == Get the calibration and put results into calibration table ==
 
-calibrationTable, peakTable = tube.calibrate(CalibInstWS, thisTubeSet, knownPos, funcForm,
-                                             outputPeak=True)
+calibrationTable, peakTable = tube.calibrate(CalibInstWS, thisTubeSet, knownPos, funcForm, outputPeak=True)
 print("Got calibration (new positions of detectors) ")
 
 # == Apply the Calibation ==

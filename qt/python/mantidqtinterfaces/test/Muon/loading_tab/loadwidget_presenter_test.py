@@ -39,7 +39,7 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.obj = QWidget()
 
         setup_context_for_tests(self)
-        self.context.instrument = 'EMU'
+        self.context.instrument = "EMU"
         self.load_file_view = BrowseFileWidgetView(self.obj)
         self.load_run_view = LoadRunWidgetView(self.obj)
         self.load_file_model = BrowseFileWidgetModel(self.loaded_data, self.context)
@@ -47,19 +47,20 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
 
         self.presenter = LoadWidgetPresenter(
             LoadWidgetView(parent=self.obj, load_file_view=self.load_file_view, load_run_view=self.load_run_view),
-            LoadWidgetModel(self.loaded_data, self.context))
+            LoadWidgetModel(self.loaded_data, self.context),
+        )
         self.presenter.set_load_file_widget(BrowseFileWidgetPresenter(self.load_file_view, self.load_file_model))
         self.presenter.set_load_run_widget(LoadRunWidgetPresenter(self.load_run_view, self.load_run_model))
 
-        self.filepath = FileFinder.findRuns('MUSR00022725.nxs')[0]
+        self.filepath = FileFinder.findRuns("MUSR00022725.nxs")[0]
 
-        self.load_patcher = mock.patch(
-            'mantidqtinterfaces.Muon.GUI.Common.load_file_widget.model.load_utils.load_workspace_from_filename')
+        self.load_patcher = mock.patch("mantidqtinterfaces.Muon.GUI.Common.load_file_widget.model.load_utils.load_workspace_from_filename")
         self.addCleanup(self.load_patcher.stop)
         self.load_mock = self.load_patcher.start()
 
         self.load_run_patcher = mock.patch(
-            'mantidqtinterfaces.Muon.GUI.Common.load_run_widget.load_run_model.load_utils.load_workspace_from_filename')
+            "mantidqtinterfaces.Muon.GUI.Common.load_run_widget.load_run_model.load_utils.load_workspace_from_filename"
+        )
         self.addCleanup(self.load_run_patcher.stop)
         self.load_run_mock = self.load_run_patcher.start()
 
@@ -70,28 +71,27 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.presenter.load_file_widget._view.warning_popup = mock.MagicMock()
         self.presenter.load_run_widget._view.warning_popup = mock.MagicMock()
 
-        self.popup_patcher = mock.patch('mantidqtinterfaces.Muon.GUI.Common.thread_model.warning')
+        self.popup_patcher = mock.patch("mantidqtinterfaces.Muon.GUI.Common.thread_model.warning")
         self.addCleanup(self.popup_patcher.stop)
         self.popup_mock = self.popup_patcher.start()
 
         def setGroupAndPairsToEmptyList(grouping_context):
             grouping_context._groups = []
             grouping_context._pairs = []
-        self.group_context.reset_group_and_pairs_to_default = mock.MagicMock(
-            side_effect=setGroupAndPairsToEmptyList(self.group_context))
+
+        self.group_context.reset_group_and_pairs_to_default = mock.MagicMock(side_effect=setGroupAndPairsToEmptyList(self.group_context))
 
     def tearDown(self):
         self.obj = None
 
     def create_fake_workspace(self, name):
         workspace_mock = CreateSampleWorkspace(StoreInADS=False)
-        LoadInstrument(Workspace=workspace_mock, InstrumentName='EMU', RewriteSpectraMap=False, StoreInADS=False)
+        LoadInstrument(Workspace=workspace_mock, InstrumentName="EMU", RewriteSpectraMap=False, StoreInADS=False)
 
-        return {'OutputWorkspace': [MuonWorkspaceWrapper(workspace_mock)], 'MainFieldDirection': 'transverse'}
+        return {"OutputWorkspace": [MuonWorkspaceWrapper(workspace_mock)], "MainFieldDirection": "transverse"}
 
     def mock_loading_from_browse(self, workspace, filename, run):
-        self.load_file_view.show_file_browser_and_return_selection = mock.Mock(
-            return_value=[filename])
+        self.load_file_view.show_file_browser_and_return_selection = mock.Mock(return_value=[filename])
         self.load_mock.return_value = (workspace, run, filename, False)
         self.load_run_mock.return_value = (workspace, run, filename, False)
 
@@ -109,8 +109,7 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.load_run_mock.return_value = (workspace, run, filename, False)
         self.load_mock.return_value = (workspace, run, filename, False)
 
-        self.load_file_view.get_file_edit_text = mock.Mock(
-            return_value=filename)
+        self.load_file_view.get_file_edit_text = mock.Mock(return_value=filename)
 
     def mock_disabling_buttons_in_run_and_file_widget(self):
         self.load_run_view.disable_load_buttons = mock.Mock()
@@ -214,7 +213,7 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
 
     def test_that_user_input_run_is_loaded_into_model_correctly(self):
         self.mock_user_input_single_run(self.mock_workspace, "EMU00012345.nxs", 12345)
-        self.presenter.load_run_widget.set_current_instrument('EMU')
+        self.presenter.load_run_widget.set_current_instrument("EMU")
 
         self.presenter.load_run_widget.handle_run_changed_by_user()
         self.wait_for_thread(self.presenter.load_run_widget._load_thread)
@@ -225,7 +224,7 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
 
     def test_that_user_input_run_is_displayed_correctly_in_the_interface(self):
         self.mock_user_input_single_run(self.mock_workspace, "EMU00012345.nxs", 12345)
-        self.presenter.load_run_widget.set_current_instrument('EMU')
+        self.presenter.load_run_widget.set_current_instrument("EMU")
 
         self.presenter.load_run_widget.handle_run_changed_by_user()
         self.wait_for_thread(self.presenter.load_run_widget._load_thread)
@@ -235,7 +234,7 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
 
     def test_that_loading_via_user_input_run_disables_all_load_buttons(self):
         self.mock_user_input_single_run(self.mock_workspace, "EMU00012345.nxs", 12345)
-        self.presenter.load_run_widget.set_current_instrument('EMU')
+        self.presenter.load_run_widget.set_current_instrument("EMU")
 
         self.mock_disabling_buttons_in_run_and_file_widget()
 
@@ -248,5 +247,5 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.assertEqual(self.load_run_view.enable_load_buttons.call_count, 2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

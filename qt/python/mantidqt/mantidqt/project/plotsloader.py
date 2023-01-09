@@ -9,30 +9,29 @@
 import copy
 
 import matplotlib.axes
-import matplotlib.cm as cm
 import matplotlib.colors
-from matplotlib import axis, ticker  # noqa
-from matplotlib.ticker import NullFormatter,\
-    ScalarFormatter, LogFormatterSciNotation
+from matplotlib import axis, ticker, colormaps  # noqa
+from matplotlib.ticker import NullFormatter, ScalarFormatter, LogFormatterSciNotation
 
 from mantid import logger
 from mantid.api import AnalysisDataService as ADS
 from mantid.plots.legend import LegendProperties
 from mantid.plots.plotfunctions import create_subplots
+
 # Constants set in workbench.plotting.functions but would cause backwards reliability
 from mantidqt.plotting.functions import pcolormesh
 
 SUBPLOT_WSPACE = 0.5
 SUBPLOT_HSPACE = 0.5
 
-TICK_FORMATTERS = {"NullFormatter": NullFormatter(),
-                   "ScalarFormatter": ScalarFormatter(useOffset=True),
-                   "LogFormatterSciNotation": LogFormatterSciNotation()
-                   }
+TICK_FORMATTERS = {
+    "NullFormatter": NullFormatter(),
+    "ScalarFormatter": ScalarFormatter(useOffset=True),
+    "LogFormatterSciNotation": LogFormatterSciNotation(),
+}
 
 
-def get_tick_format(tick_formatters: dict, tick_formatter: str,
-                    tick_format):
+def get_tick_format(tick_formatters: dict, tick_formatter: str, tick_format):
     if tick_formatter == "FixedFormatter":
         fmt = ticker.FixedFormatter(tick_format)
     else:
@@ -65,19 +64,18 @@ class PlotsLoader(object):
     def restore_normalise_obj_from_dict(self, norm_dict):
         supported_norm_types = {
             # matplotlib norms that are supported.
-            'Normalize': matplotlib.colors.Normalize,
-            'LogNorm': matplotlib.colors.LogNorm,
+            "Normalize": matplotlib.colors.Normalize,
+            "LogNorm": matplotlib.colors.LogNorm,
         }
         # If there is a norm dict, but the type is not specified, default to base Normalize class.
-        type = norm_dict['type'] if 'type' in norm_dict.keys() else 'Normalize'
+        type = norm_dict["type"] if "type" in norm_dict.keys() else "Normalize"
 
         if type not in supported_norm_types.keys():
-            logger.debug(
-                f"Color normalisation of type {norm_dict['type']} is not supported. Normalisation will not be set on this plot")
+            logger.debug(f"Color normalisation of type {norm_dict['type']} is not supported. Normalisation will not be set on this plot")
             return None
 
         norm = supported_norm_types[type]
-        return norm(vmin=norm_dict['vmin'], vmax=norm_dict['vmax'], clip=norm_dict['clip'])
+        return norm(vmin=norm_dict["vmin"], vmax=norm_dict["vmax"], clip=norm_dict["clip"])
 
     def make_fig(self, plot_dict, create_plot=True):
         """
@@ -85,19 +83,20 @@ class PlotsLoader(object):
         :param plot_dict: dictionary; A dictionary of various items intended to recreate a figure
         :param create_plot: Bool; whether or not to make the plot, or to return the figure.
         :return: matplotlib.figure; Only returns if create_plot=False
-        """        # Grab creation arguments
+        """  # Grab creation arguments
         creation_args = plot_dict["creationArguments"]
 
         if len(creation_args) == 0:
             logger.information(
                 "A plot could not be loaded from the save file, as it did not have creation_args. "
-                "The original plot title was: {}".format(plot_dict["label"]))
+                "The original plot title was: {}".format(plot_dict["label"])
+            )
             return
 
         for sublist in creation_args:
             for cargs_dict in sublist:
-                if 'norm' in cargs_dict and type(cargs_dict['norm']) is dict:
-                    cargs_dict['norm'] = self.restore_normalise_obj_from_dict(cargs_dict['norm'])
+                if "norm" in cargs_dict and type(cargs_dict["norm"]) is dict:
+                    cargs_dict["norm"] = self.restore_normalise_obj_from_dict(cargs_dict["norm"])
         fig, axes_matrix, _, _ = create_subplots(len(creation_args))
         axes_list = axes_matrix.flatten().tolist()
         for ax, cargs_list in zip(axes_list, creation_args):
@@ -110,7 +109,7 @@ class PlotsLoader(object):
                 elif "function" in cargs:
                     self.plot_func(ax, cargs)
             for cargs in creation_args_copy:
-                cargs.pop('normalize_by_bin_width', None)
+                cargs.pop("normalize_by_bin_width", None)
             ax.creation_args = creation_args_copy
 
         # Update the fig
@@ -153,13 +152,13 @@ class PlotsLoader(object):
             "contourf": axes.contourf,
             "tripcolor": axes.tripcolor,
             "tricontour": axes.tricontour,
-            "tricontourf": axes.tricontourf
+            "tricontourf": axes.tricontourf,
         }
 
         func = function_dict[function_to_call]
         # Plotting is done via an Axes object unless a colorbar needs to be added
         if function_to_call in ["imshow", "pcolormesh"]:
-            func([workspace], fig, color_norm=creation_arg['norm'], normalize_by_bin_width=creation_arg['normalize_by_bin_width'])
+            func([workspace], fig, color_norm=creation_arg["norm"], normalize_by_bin_width=creation_arg["normalize_by_bin_width"])
             self.color_bar_remade = True
         else:
             func(workspace, **creation_arg)
@@ -170,14 +169,11 @@ class PlotsLoader(object):
         :param axes: matplotlib.Axes; Axes to call the function on
         :param creation_arg: The functions' arguments when it was originally called.
         """
-        function_to_call = creation_arg.pop('function')
-        function_dict = {
-            "axhline": axes.axhline,
-            "axvline": axes.axvline
-        }
+        function_to_call = creation_arg.pop("function")
+        function_dict = {"axhline": axes.axhline, "axvline": axes.axvline}
 
         func = function_dict[function_to_call]
-        func(*creation_arg['args'], **creation_arg['kwargs'])
+        func(*creation_arg["args"], **creation_arg["kwargs"])
 
     def restore_figure_data(self, fig, dic):
         self.restore_fig_properties(fig, dic["properties"])
@@ -242,19 +238,21 @@ class PlotsLoader(object):
     @staticmethod
     def create_text_from_dict(ax, dic):
         style_dic = dic["style"]
-        ax.text(x=dic["position"][0],
-                y=dic["position"][1],
-                s=dic["text"],
-                fontdict={
-                    u'alpha': style_dic["alpha"],
-                    u'color': style_dic["color"],
-                    u'rotation': style_dic["rotation"],
-                    u'fontsize': style_dic["textSize"],
-                    u'zorder': style_dic["zOrder"],
-                    u'usetex': dic["useTeX"],
-                    u'horizontalalignment': style_dic["hAlign"],
-                    u'verticalalignment': style_dic["vAlign"]
-                })
+        ax.text(
+            x=dic["position"][0],
+            y=dic["position"][1],
+            s=dic["text"],
+            fontdict={
+                "alpha": style_dic["alpha"],
+                "color": style_dic["color"],
+                "rotation": style_dic["rotation"],
+                "fontsize": style_dic["textSize"],
+                "zorder": style_dic["zOrder"],
+                "usetex": dic["useTeX"],
+                "horizontalalignment": style_dic["hAlign"],
+                "verticalalignment": style_dic["vAlign"],
+            },
+        )
 
     @staticmethod
     def update_lines(ax, line_settings):
@@ -332,8 +330,8 @@ class PlotsLoader(object):
         if "yAxisProperties" in properties:
             self.update_axis(ax.yaxis, properties["yAxisProperties"])
 
-        if 'spineWidths' in properties:
-            for (spine, width) in properties['spineWidths'].items():
+        if "spineWidths" in properties:
+            for (spine, width) in properties["spineWidths"].items():
                 ax.spines[spine].set_linewidth(width)
 
     def update_axis(self, axis_, properties):
@@ -370,7 +368,7 @@ class PlotsLoader(object):
         grid_dict = properties["gridStyle"]
         grid_lines = axis_.get_gridlines()
         if grid_dict["gridOn"]:
-            which = 'both' if grid_dict["minorGridOn"] else "major"
+            which = "both" if grid_dict["minorGridOn"] else "major"
             axis_.axes.grid(True, axis=axis_.axis_name, which=which)
             for grid_line in grid_lines:
                 grid_line.set_alpha(grid_dict["alpha"])
@@ -388,13 +386,9 @@ class PlotsLoader(object):
             axis_.set_minor_locator(ticker.AutoMinorLocator())
 
         # Update Major and Minor TickFormatter
-        fmt = get_tick_format(TICK_FORMATTERS,
-                              properties["majorTickFormatter"],
-                              properties["majorTickFormat"])
+        fmt = get_tick_format(TICK_FORMATTERS, properties["majorTickFormatter"], properties["majorTickFormat"])
         axis_.set_major_formatter(fmt)
-        fmt = get_tick_format(TICK_FORMATTERS,
-                              properties["minorTickFormatter"],
-                              properties["minorTickFormat"])
+        fmt = get_tick_format(TICK_FORMATTERS, properties["minorTickFormatter"], properties["minorTickFormat"])
         axis_.set_minor_formatter(fmt)
 
     @staticmethod
@@ -402,15 +396,13 @@ class PlotsLoader(object):
         # colorbar = image.colorbar
         image.set_clim(*sorted([dic["min"], dic["max"]]))
         image.set_label(dic["label"])
-        image.set_cmap(cm.get_cmap(dic["cmap"]))
+        image.set_cmap(colormaps[dic["cmap"]])
         image.set_interpolation(dic["interpolation"])
         # Try and make the cmap line up but sometimes it wont
         try:
-            image.axes.set_cmap(cm.get_cmap(dic["cmap"]))
+            image.axes.set_cmap(colormaps[dic["cmap"]])
         except AttributeError as e:
-            logger.debug(
-                "PlotsLoader - The Image accessed did not have an axes with the ability to set the cmap: "
-                + str(e))
+            logger.debug("PlotsLoader - The Image accessed did not have an axes with the ability to set the cmap: " + str(e))
 
         # Redraw
         image.axes.figure.canvas.draw()

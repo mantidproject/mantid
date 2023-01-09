@@ -127,6 +127,9 @@
       <enum>QLayout::SetMinimumSize</enum>
      </property>
      <item>
+      <layout class="QHBoxLayout" name="statusbar_layout"/>
+     </item>
+     <item>
       <spacer name="output_tool_spacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>

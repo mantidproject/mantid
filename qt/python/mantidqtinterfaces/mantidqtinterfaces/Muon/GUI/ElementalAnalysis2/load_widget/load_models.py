@@ -81,10 +81,10 @@ class LoadRunWidgetModel(object):
                     detectors = []
                     workspace_list = groupws.getNames()
                     for item in workspace_list:
-                        ''' The workspaces in the groupworkspace are all named in the format [run];[detector]
+                        """The workspaces in the groupworkspace are all named in the format [run];[detector]
                         The line below removes any text up to and including the ; which leaves behind the detector name.
-                        For example 2695; Detector 1 returns as Detector 1'''
-                        detector_name = item.split(';', 1)[-1].lstrip()
+                        For example 2695; Detector 1 returns as Detector 1"""
+                        detector_name = item.split(";", 1)[-1].lstrip()
                         detectors.append(detector_name)
                     run_results = RunObject(run, detectors, groupws)
                     self._data_context.run_info_update(run_results)
@@ -96,8 +96,10 @@ class LoadRunWidgetModel(object):
                 self._data_context._loaded_data.add_data(run=[run], workspace=groupws)
 
         if failed_files:
-            message = "The requested run could not be found. This could be due to: \n - The run does not yet exist." \
-                      "\n - The file was not found locally (please check the user directories)."
+            message = (
+                "The requested run could not be found. This could be due to: \n - The run does not yet exist."
+                "\n - The file was not found locally (please check the user directories)."
+            )
             raise ValueError(message)
 
     def cancel(self):
@@ -123,7 +125,7 @@ class LoadRunWidgetModel(object):
         return self._loaded_data_store.get_parameter("run")
 
     def get_latest_loaded_run(self):
-        return self._loaded_data_store.get_latest_data()['run']
+        return self._loaded_data_store.get_latest_data()["run"]
 
     def get_data(self, run):
         return self._loaded_data_store.get_data(run=run, instrument=self._data_context.instrument)

@@ -4,14 +4,13 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
 
 
 class LRSubtractAverageBackground(PythonAlgorithm):
-
     def category(self):
         return "Reflectometry\\SNS"
 
@@ -25,20 +24,25 @@ class LRSubtractAverageBackground(PythonAlgorithm):
         return "Liquids Reflectometer background subtraction using the average on each side of the peak."
 
     def PyInit(self):
-        self.declareProperty(WorkspaceProperty("InputWorkspace", "",Direction.Input), "The workspace to check.")
-        self.declareProperty(IntArrayProperty("PeakRange", [150, 160],
-                                              IntArrayLengthValidator(2), direction=Direction.Input),
-                             "Pixel range defining the reflectivity peak")
-        self.declareProperty(IntArrayProperty("BackgroundRange", [147, 163],
-                                              IntArrayLengthValidator(2), direction=Direction.Input),
-                             "Pixel range defining the outer range of the background on each side of the peak")
-        self.declareProperty(IntArrayProperty("LowResolutionRange", [94, 160],
-                                              IntArrayLengthValidator(2), direction=Direction.Input),
-                             "Pixel range defining the low-resolution axis to integrate over")
+        self.declareProperty(WorkspaceProperty("InputWorkspace", "", Direction.Input), "The workspace to check.")
+        self.declareProperty(
+            IntArrayProperty("PeakRange", [150, 160], IntArrayLengthValidator(2), direction=Direction.Input),
+            "Pixel range defining the reflectivity peak",
+        )
+        self.declareProperty(
+            IntArrayProperty("BackgroundRange", [147, 163], IntArrayLengthValidator(2), direction=Direction.Input),
+            "Pixel range defining the outer range of the background on each side of the peak",
+        )
+        self.declareProperty(
+            IntArrayProperty("LowResolutionRange", [94, 160], IntArrayLengthValidator(2), direction=Direction.Input),
+            "Pixel range defining the low-resolution axis to integrate over",
+        )
         self.declareProperty("SumPeak", False, doc="If True, the resulting peak will be summed")
-        self.declareProperty("ErrorWeighting", False,
-                             "If True, a weighted average is used to to estimate the background. "
-                             "Otherwise, a simple average is used.")
+        self.declareProperty(
+            "ErrorWeighting",
+            False,
+            "If True, a weighted average is used to to estimate the background. " "Otherwise, a simple average is used.",
+        )
         detector_list = ["2D-Detector", "LinearDetector"]
         self.declareProperty("TypeOfDetector", "2D-Detector", StringListValidator(detector_list), doc="The type of detector used")
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output), "The workspace to check.")
@@ -80,31 +84,39 @@ class LRSubtractAverageBackground(PythonAlgorithm):
                 raise RuntimeError("Instrument does not have parameter number-of-y-pixels")
 
         left_bck = None
-        use_weighted_error = self.getProperty('ErrorWeighting').value
+        use_weighted_error = self.getProperty("ErrorWeighting").value
         if peak_min > bck_min:
-            left_bck = RefRoi(InputWorkspace=workspace, IntegrateY=False,
-                              NXPixel=number_of_pixels_x,
-                              NYPixel=number_of_pixels_y,
-                              ConvertToQ=False,
-                              XPixelMin=x_min,
-                              XPixelMax=x_max,
-                              YPixelMin=bck_min,
-                              YPixelMax=peak_min - 1,
-                              ErrorWeighting=use_weighted_error,
-                              SumPixels=True, NormalizeSum=True)
+            left_bck = RefRoi(
+                InputWorkspace=workspace,
+                IntegrateY=False,
+                NXPixel=number_of_pixels_x,
+                NYPixel=number_of_pixels_y,
+                ConvertToQ=False,
+                XPixelMin=x_min,
+                XPixelMax=x_max,
+                YPixelMin=bck_min,
+                YPixelMax=peak_min - 1,
+                ErrorWeighting=use_weighted_error,
+                SumPixels=True,
+                NormalizeSum=True,
+            )
 
         right_bck = None
         if peak_max < bck_max:
-            right_bck = RefRoi(InputWorkspace=workspace, IntegrateY=False,
-                               NXPixel=number_of_pixels_x,
-                               NYPixel=number_of_pixels_y,
-                               ConvertToQ=False,
-                               XPixelMin=x_min,
-                               XPixelMax=x_max,
-                               YPixelMin=peak_max + 1,
-                               YPixelMax=bck_max,
-                               ErrorWeighting=use_weighted_error,
-                               SumPixels=True, NormalizeSum=True)
+            right_bck = RefRoi(
+                InputWorkspace=workspace,
+                IntegrateY=False,
+                NXPixel=number_of_pixels_x,
+                NYPixel=number_of_pixels_y,
+                ConvertToQ=False,
+                XPixelMin=x_min,
+                XPixelMax=x_max,
+                YPixelMin=peak_max + 1,
+                YPixelMax=bck_max,
+                ErrorWeighting=use_weighted_error,
+                SumPixels=True,
+                NormalizeSum=True,
+            )
 
         if right_bck is not None and left_bck is not None:
             average = (left_bck + right_bck) / 2.0
@@ -113,27 +125,34 @@ class LRSubtractAverageBackground(PythonAlgorithm):
         elif left_bck is not None:
             average = left_bck
         else:
-            average = RefRoi(InputWorkspace=workspace, IntegrateY=False,
-                             NXPixel=number_of_pixels_x,
-                             NYPixel=number_of_pixels_y,
-                             ConvertToQ=False,
-                             XPixelMin=x_min,
-                             XPixelMax=x_max,
-                             YPixelMin=bck_min,
-                             YPixelMax=bck_max,
-                             ErrorWeighting=use_weighted_error,
-                             SumPixels=True, NormalizeSum=True)
+            average = RefRoi(
+                InputWorkspace=workspace,
+                IntegrateY=False,
+                NXPixel=number_of_pixels_x,
+                NYPixel=number_of_pixels_y,
+                ConvertToQ=False,
+                XPixelMin=x_min,
+                XPixelMax=x_max,
+                YPixelMin=bck_min,
+                YPixelMax=bck_max,
+                ErrorWeighting=use_weighted_error,
+                SumPixels=True,
+                NormalizeSum=True,
+            )
 
         output_name = self.getPropertyValue("OutputWorkspace")
         # Integrate over the low-res direction
-        output = RefRoi(InputWorkspace=workspace, IntegrateY=False,
-                        NXPixel=number_of_pixels_x,
-                        NYPixel=number_of_pixels_y,
-                        XPixelMin=x_min,
-                        XPixelMax=x_max,
-                        ConvertToQ=False,
-                        SumPixels=sum_peak,
-                        OutputWorkspace=output_name)
+        output = RefRoi(
+            InputWorkspace=workspace,
+            IntegrateY=False,
+            NXPixel=number_of_pixels_x,
+            NYPixel=number_of_pixels_y,
+            XPixelMin=x_min,
+            XPixelMax=x_max,
+            ConvertToQ=False,
+            SumPixels=sum_peak,
+            OutputWorkspace=output_name,
+        )
         Minus(LHSWorkspace=output, RHSWorkspace=average, OutputWorkspace=output_name)
         # Avoid leaving trash behind
         average_name = str(average)

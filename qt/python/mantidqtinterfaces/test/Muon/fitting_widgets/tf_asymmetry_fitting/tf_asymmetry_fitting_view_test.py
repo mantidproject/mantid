@@ -13,7 +13,6 @@ from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_
 
 @start_qapplication
 class TFAsymmetryFittingViewTest(unittest.TestCase):
-
     def setUp(self):
         self.view = TFAsymmetryFittingView()
         self.view.show()
@@ -62,5 +61,5 @@ class TFAsymmetryFittingViewTest(unittest.TestCase):
         self.assertTrue(self.view.is_normalisation_fixed)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

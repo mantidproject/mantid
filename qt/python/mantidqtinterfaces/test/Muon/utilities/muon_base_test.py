@@ -11,7 +11,7 @@ from mantidqtinterfaces.Muon.GUI.Common.muon_base import MuonBase
 
 class MuonBaseTest(unittest.TestCase):
     """
-        The MuonBase object encapsulates the basic information that describes a group or pair:
+    The MuonBase object encapsulates the basic information that describes a group or pair:
     """
 
     def test_cannot_initialize_without_name(self):
@@ -30,5 +30,5 @@ class MuonBaseTest(unittest.TestCase):
         self.assertEqual(muon_base.name, "base")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

@@ -38,5 +38,5 @@ class DataContextTest(unittest.TestCase):
         self.assert_data_context_empty()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

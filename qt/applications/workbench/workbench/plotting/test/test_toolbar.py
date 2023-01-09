@@ -32,30 +32,30 @@ class ToolBarTest(unittest.TestCase):
     def test_waterfall_buttons_correctly_disabled_for_non_waterfall_plots(self, mock_qappthread):
         mock_qappthread.return_value = mock_qappthread
 
-        fig, axes = plt.subplots(subplot_kw={'projection': 'mantid'})
+        fig, axes = plt.subplots(subplot_kw={"projection": "mantid"})
         axes.plot([-10, 10], [1, 2])
 
-        self.assertFalse(self._is_button_enabled(fig, 'waterfall_offset_amount'))
-        self.assertFalse(self._is_button_enabled(fig, 'waterfall_reverse_order'))
-        self.assertFalse(self._is_button_enabled(fig, 'waterfall_fill_area'))
+        self.assertFalse(self._is_button_enabled(fig, "waterfall_offset_amount"))
+        self.assertFalse(self._is_button_enabled(fig, "waterfall_reverse_order"))
+        self.assertFalse(self._is_button_enabled(fig, "waterfall_fill_area"))
 
     @patch("workbench.plotting.figuremanager.QAppThreadCall")
     def test_waterfall_buttons_correctly_enabled_for_waterfall_plots(self, mock_qappthread):
         mock_qappthread.return_value = mock_qappthread
 
-        fig, axes = plt.subplots(subplot_kw={'projection': 'mantid'})
+        fig, axes = plt.subplots(subplot_kw={"projection": "mantid"})
         ws = CreateSampleWorkspace()
-        plot([ws], wksp_indices=[0,1], fig=fig, waterfall=True)
+        plot([ws], wksp_indices=[0, 1], fig=fig, waterfall=True)
 
-        self.assertTrue(self._is_button_enabled(fig, 'waterfall_offset_amount'))
-        self.assertTrue(self._is_button_enabled(fig, 'waterfall_reverse_order'))
-        self.assertTrue(self._is_button_enabled(fig, 'waterfall_fill_area'))
+        self.assertTrue(self._is_button_enabled(fig, "waterfall_offset_amount"))
+        self.assertTrue(self._is_button_enabled(fig, "waterfall_reverse_order"))
+        self.assertTrue(self._is_button_enabled(fig, "waterfall_fill_area"))
 
     @patch("workbench.plotting.figuremanager.QAppThreadCall")
     def test_button_unchecked_for_plot_with_no_grid(self, mock_qappthread):
         mock_qappthread.return_value = mock_qappthread
 
-        fig, axes = plt.subplots(subplot_kw={'projection': 'mantid'})
+        fig, axes = plt.subplots(subplot_kw={"projection": "mantid"})
         axes.plot([-10, 10], [1, 2])
         # Grid button should be OFF because we have not enabled the grid.
         self.assertFalse(self._is_grid_button_checked(fig))
@@ -64,7 +64,7 @@ class ToolBarTest(unittest.TestCase):
     def test_button_checked_for_plot_with_grid(self, mock_qappthread):
         mock_qappthread.return_value = mock_qappthread
 
-        fig, axes = plt.subplots(subplot_kw={'projection': 'mantid'})
+        fig, axes = plt.subplots(subplot_kw={"projection": "mantid"})
         axes.plot([-10, 10], [1, 2])
         axes.grid()
         # Grid button should be ON because we enabled the grid.
@@ -74,11 +74,11 @@ class ToolBarTest(unittest.TestCase):
     def test_button_checked_for_plot_with_grid_using_kwargs(self, mock_qappthread):
         mock_qappthread.return_value = mock_qappthread
 
-        fig, axes = plt.subplots(subplot_kw={'projection': 'mantid'})
+        fig, axes = plt.subplots(subplot_kw={"projection": "mantid"})
         axes.plot([-10, 10], [1, 2])
         # Set the grid on using kwargs in tick_params, like the plot script generator.
-        axes.tick_params(axis='x', which='major', **{'gridOn': True})
-        axes.tick_params(axis='y', which='major', **{'gridOn': True})
+        axes.tick_params(axis="x", which="major", **{"gridOn": True})
+        axes.tick_params(axis="y", which="major", **{"gridOn": True})
 
         # Grid button should be ON because we enabled the grid on both axes.
         self.assertTrue(self._is_grid_button_checked(fig))
@@ -87,10 +87,10 @@ class ToolBarTest(unittest.TestCase):
     def test_button_unchecked_for_plot_with_only_x_grid_using_kwargs(self, mock_qappthread):
         mock_qappthread.return_value = mock_qappthread
 
-        fig, axes = plt.subplots(subplot_kw={'projection': 'mantid'})
+        fig, axes = plt.subplots(subplot_kw={"projection": "mantid"})
         axes.plot([-10, 10], [1, 2])
         # Set the grid on using kwargs in tick_params, like the plot script generator.
-        axes.tick_params(axis='x', which='major', **{'gridOn': True})
+        axes.tick_params(axis="x", which="major", **{"gridOn": True})
 
         # Grid button should be OFF because we only enabled the grid on one axis.
         self.assertFalse(self._is_grid_button_checked(fig))
@@ -99,7 +99,7 @@ class ToolBarTest(unittest.TestCase):
     def test_button_unchecked_for_tiled_plot_with_no_grids(self, mock_qappthread):
         mock_qappthread.return_value = mock_qappthread
 
-        fig, axes = plt.subplots(ncols=2, nrows=2, subplot_kw={'projection': 'mantid'})
+        fig, axes = plt.subplots(ncols=2, nrows=2, subplot_kw={"projection": "mantid"})
         for ax in fig.get_axes():
             ax.plot([-10, 10], [1, 2])
         # None of the subplots have grids, so grid button should be toggled OFF.
@@ -109,7 +109,7 @@ class ToolBarTest(unittest.TestCase):
     def test_button_checked_for_tiled_plot_with_all_grids(self, mock_qappthread):
         mock_qappthread.return_value = mock_qappthread
 
-        fig, axes = plt.subplots(ncols=2, nrows=2, subplot_kw={'projection': 'mantid'})
+        fig, axes = plt.subplots(ncols=2, nrows=2, subplot_kw={"projection": "mantid"})
         for ax in fig.get_axes():
             ax.plot([-10, 10], [1, 2])
             ax.grid()
@@ -120,7 +120,7 @@ class ToolBarTest(unittest.TestCase):
     def test_button_unchecked_for_tiled_plot_with_some_grids(self, mock_qappthread):
         mock_qappthread.return_value = mock_qappthread
 
-        fig, axes = plt.subplots(ncols=2, nrows=2, subplot_kw={'projection': 'mantid'})
+        fig, axes = plt.subplots(ncols=2, nrows=2, subplot_kw={"projection": "mantid"})
         for ax in fig.get_axes():
             ax.plot([-10, 10], [1, 2])
         # Only show major grid on 3/4 of the subplots.
@@ -144,7 +144,7 @@ class ToolBarTest(unittest.TestCase):
     @patch("workbench.plotting.figuremanager.QAppThreadCall")
     def test_grid_button_state_for_3d_plots(self, mock_qappthread):
         """Check that the gris on/off toolbar button is correctly checked or unchecked for different types of 3D plot"""
-        plot_types = ['surface', 'wireframe', 'contour']
+        plot_types = ["surface", "wireframe", "contour"]
         for plot_type in plot_types:
             # Check that the button state is correct when the grids are on and off.
             for is_grid in (True, False):
@@ -152,10 +152,10 @@ class ToolBarTest(unittest.TestCase):
 
     @patch("workbench.plotting.figuremanager.QAppThreadCall")
     def test_hide_button_hides_window(self, mock_qappthread):
-        """ Check that the window is hidden when hide plot button is pressed"""
+        """Check that the window is hidden when hide plot button is pressed"""
         mock_qappthread.return_value = mock_qappthread
 
-        fig, axes = plt.subplots(subplot_kw={'projection': 'mantid'})
+        fig, axes = plt.subplots(subplot_kw={"projection": "mantid"})
         axes.plot([-10, 10], [1, 2])
 
         canvas = MantidFigureCanvas(fig)
@@ -171,15 +171,14 @@ class ToolBarTest(unittest.TestCase):
         """Check whether grid button check state is correct for a given plot type"""
         mock_qappthread.return_value = mock_qappthread
         ws = CreateSampleWorkspace()
-        plot_function = getattr(functions, f'plot_{plot_type}', None)
+        plot_function = getattr(functions, f"plot_{plot_type}", None)
         self.assertIsNotNone(plot_function)
         fig = plot_function([ws])
         ax = fig.get_axes()
         # Explicitly set grids on or off. In plots with a colour bar, ax[1] is the colour bar.
         ax[0].grid(is_grid)
         # Create a figure manager with a toolbar and check that the grid toggle button has the correct state.
-        self.assertEqual(self._is_grid_button_checked(fig), is_grid,
-                         "Wrong grid button toggle state for " + plot_type + " plot")
+        self.assertEqual(self._is_grid_button_checked(fig), is_grid, "Wrong grid button toggle state for " + plot_type + " plot")
 
     @classmethod
     def _is_grid_button_checked(cls, fig):
@@ -192,7 +191,7 @@ class ToolBarTest(unittest.TestCase):
         fig_manager = FigureManagerWorkbench(canvas, 1)
         # This is only called when show() is called on the figure manager, so we have to manually call it here.
         fig_manager.toolbar.set_buttons_visibility(fig)
-        return fig_manager.toolbar._actions['toggle_grid'].isChecked()
+        return fig_manager.toolbar._actions["toggle_grid"].isChecked()
 
     @classmethod
     def _is_button_enabled(cls, fig, button):
@@ -208,5 +207,5 @@ class ToolBarTest(unittest.TestCase):
         return fig_manager.toolbar._actions[button].isEnabled()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

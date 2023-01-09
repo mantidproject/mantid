@@ -43,8 +43,7 @@ class MuonGroup(object):
         if isinstance(new_workspace, MuonWorkspaceWrapper):
             self._counts_workspace = new_workspace
         else:
-            raise AttributeError("Attempting to set workspace to type " + str(
-                type(new_workspace)) + " but should be MuonWorkspaceWrapper")
+            raise AttributeError("Attempting to set workspace to type " + str(type(new_workspace)) + " but should be MuonWorkspaceWrapper")
 
     """
     Returns the name of the counts workspace for a given run
@@ -69,9 +68,9 @@ class MuonGroup(object):
 
     @name.setter
     def name(self, name):
-        raise AttributeError("Attempting to change name from {} to {}. "
-                             "Cannot change name of MuonGroup "
-                             "object".format(self._group_name, name))
+        raise AttributeError(
+            "Attempting to change name from {} to {}. " "Cannot change name of MuonGroup " "object".format(self._group_name, name)
+        )
 
     @property
     def detectors(self):
@@ -105,15 +104,15 @@ class MuonGroup(object):
         run_object = MuonRun(run)
         run_object not in self._counts_workspace or self._counts_workspace[run_object].show(name)
         run_object not in self._asymmetry_estimate or self._asymmetry_estimate[run_object].show(asym_name)
-        run_object not in self._asymmetry_estimate_unormalised or\
-            self._asymmetry_estimate_unormalised[run_object].show(asym_name_unnorm)
+        run_object not in self._asymmetry_estimate_unormalised or self._asymmetry_estimate_unormalised[run_object].show(asym_name_unnorm)
 
     def show_rebin(self, run, name, asym_name, asym_name_unnorm):
         run_object = MuonRun(run)
         run_object not in self._counts_workspace_rebin or self._counts_workspace_rebin[run_object].show(name)
         run_object not in self._asymmetry_estimate_rebin or self._asymmetry_estimate_rebin[run_object].show(asym_name)
-        run_object not in self._asymmetry_estimate_rebin_unormalised or \
-            self._asymmetry_estimate_rebin_unormalised[run_object].show(asym_name_unnorm)
+        run_object not in self._asymmetry_estimate_rebin_unormalised or self._asymmetry_estimate_rebin_unormalised[run_object].show(
+            asym_name_unnorm
+        )
 
     def update_counts_workspace(self, run: MuonRun, counts_workspace, rebin=False):
         if rebin:
@@ -134,8 +133,11 @@ class MuonGroup(object):
 
         for run in runs:
             run_object = MuonRun(run)
-            if run_object in self._asymmetry_estimate and self._asymmetry_estimate[run_object].workspace_name and not \
-                    self._asymmetry_estimate[run_object].is_hidden:
+            if (
+                run_object in self._asymmetry_estimate
+                and self._asymmetry_estimate[run_object].workspace_name
+                and not self._asymmetry_estimate[run_object].is_hidden
+            ):
                 workspace_list.append(self._asymmetry_estimate[run_object].workspace_name)
 
         return workspace_list
@@ -145,8 +147,11 @@ class MuonGroup(object):
 
         for run in runs:
             run_object = MuonRun(run)
-            if run_object in self._asymmetry_estimate_rebin and self._asymmetry_estimate_rebin[run_object].workspace_name \
-                    and not self._asymmetry_estimate_rebin[run_object].is_hidden:
+            if (
+                run_object in self._asymmetry_estimate_rebin
+                and self._asymmetry_estimate_rebin[run_object].workspace_name
+                and not self._asymmetry_estimate_rebin[run_object].is_hidden
+            ):
 
                 workspace_list.append(self._asymmetry_estimate_rebin[run_object].workspace_name)
 
@@ -172,10 +177,12 @@ class MuonGroup(object):
         return None
 
     def get_run_for_workspace(self, workspace_name):
-        for key, value in itertools.chain(self._asymmetry_estimate.items(),
-                                          self._counts_workspace.items(),
-                                          self._asymmetry_estimate_rebin.items(),
-                                          self._counts_workspace_rebin.items()):
+        for key, value in itertools.chain(
+            self._asymmetry_estimate.items(),
+            self._counts_workspace.items(),
+            self._asymmetry_estimate_rebin.items(),
+            self._counts_workspace_rebin.items(),
+        ):
             if value.workspace_name in workspace_name:
                 return key
 

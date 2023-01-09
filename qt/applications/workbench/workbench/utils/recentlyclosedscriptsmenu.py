@@ -38,13 +38,12 @@ class RecentlyClosedScriptsMenu(QMenu):
         if len(scripts) > 0:
             for script_path in scripts:
                 script_name = self.size_path_correctly(script_path)
-                new_action = create_action(parent=self.mainwindow,
-                                           text=script_name,
-                                           on_triggered=functools.partial(self.open_script, script_path))
+                new_action = create_action(
+                    parent=self.mainwindow, text=script_name, on_triggered=functools.partial(self.open_script, script_path)
+                )
                 self.addAction(new_action)
         else:
-            self.addAction(create_action(parent=self.mainwindow,
-                                         text="No recently closed scripts found"))
+            self.addAction(create_action(parent=self.mainwindow, text="No recently closed scripts found"))
 
     @staticmethod
     def size_path_correctly(path):
@@ -58,10 +57,12 @@ class RecentlyClosedScriptsMenu(QMenu):
         else:
             # Remove path from script settings, then warn user.
             self.remove_script_from_settings(path)
-            QMessageBox().warning(None, "That script no longer exists!",
-                                  "Are all network drives properly mounted? or are there any network connectivity "
-                                  "problems?",
-                                  QMessageBox.Ok)
+            QMessageBox().warning(
+                None,
+                "That script no longer exists!",
+                "Are all network drives properly mounted? or are there any network connectivity " "problems?",
+                QMessageBox.Ok,
+            )
 
     def remove_script_from_settings(self, path):
         scripts = self._get_scripts_from_settings()
@@ -70,7 +71,7 @@ class RecentlyClosedScriptsMenu(QMenu):
             self._store_scripts_to_settings(scripts)
 
     def add_script_to_settings(self, path):
-        if path is None or path == '':
+        if path is None or path == "":
             return
         scripts = self._get_scripts_from_settings()
 
