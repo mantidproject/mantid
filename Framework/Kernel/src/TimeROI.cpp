@@ -256,6 +256,13 @@ void TimeROI::update_intersection(const TimeROI &other) {
   this->removeRedundantEntries();
 }
 
+/**
+ * Remove time/value pairs that are not necessary to describe the TimeROI
+ * - Sort the times/values
+ * - Remove values that are not needed (e.g. IGNORE followed by IGNORE)
+ * - Remove values that are overridden. Overridden values are ones where a new value was added at the same time, the
+ * last one added will be used.
+ */
 void TimeROI::removeRedundantEntries() {
   if (this->numBoundaries() < 2) {
     return; // nothing to do with zero or one elements
