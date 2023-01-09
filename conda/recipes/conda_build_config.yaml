@@ -13,7 +13,7 @@ cxx_compiler_version:          # [unix]
   - 14                         # [osx]
   - 10                         # [linux]
 llvm_openmp:                   # [osx]
-  - 13                         # [osx]
+  - 14                         # [osx]
 
 python:
   - 3.8
