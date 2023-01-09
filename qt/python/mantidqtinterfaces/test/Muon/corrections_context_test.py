@@ -13,7 +13,6 @@ from mantidqtinterfaces.Muon.GUI.Common.muon_load_data import MuonLoadData
 
 
 class CorrectionsContextTest(unittest.TestCase):
-
     def setUp(self):
         self.muon_data = MuonLoadData()
         self.corrections_context = CorrectionsContext(self.muon_data)
@@ -58,8 +57,7 @@ class CorrectionsContextTest(unittest.TestCase):
         self.corrections_context.dead_time_source = "FromFile"
         self.corrections_context.dead_time_table_name_from_ads = table_from_ads
 
-        self.assertEqual(self.corrections_context.current_dead_time_table_name_for_run("MUSR", [62260]),
-                         table_from_file)
+        self.assertEqual(self.corrections_context.current_dead_time_table_name_for_run("MUSR", [62260]), table_from_file)
 
     def test_that_current_dead_time_table_name_returns_the_expected_table_when_the_source_is_from_ads(self):
         table_from_ads = "MUSR62265 dead time table"
@@ -100,8 +98,7 @@ class CorrectionsContextTest(unittest.TestCase):
     def test_that_the_background_correction_data_can_be_set_as_expected(self):
         run_group = tuple(["84447", "fwd"])
         start_x, end_x = 15.0, 30.0
-        self.corrections_context.background_correction_data[run_group] = BackgroundCorrectionData(True, 5, start_x,
-                                                                                                  end_x)
+        self.corrections_context.background_correction_data[run_group] = BackgroundCorrectionData(True, 5, start_x, end_x)
 
         self.assertTrue(run_group in self.corrections_context.background_correction_data)
         self.assertEqual(self.corrections_context.background_correction_data[run_group].use_raw, True)
@@ -110,5 +107,5 @@ class CorrectionsContextTest(unittest.TestCase):
         self.assertEqual(self.corrections_context.background_correction_data[run_group].end_x, end_x)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

@@ -30,8 +30,7 @@ class UserConfig(object):
         form of nested dict instances
         """
         # Loads the saved settings if found
-        self.qsettings = QSettings(QSettings.IniFormat, QSettings.UserScope,
-                                   organization, application)
+        self.qsettings = QSettings(QSettings.IniFormat, QSettings.UserScope, organization, application)
 
         # convert the defaults into something that qsettings can handle
         default_settings = self._flatten_defaults(defaults)
@@ -41,7 +40,7 @@ class UserConfig(object):
             self.set_qsettings_values(default_settings)
         # the editors/sessiontabs are pickled in config so need to remove them
         except ValueError:
-            self.qsettings.remove('Editors/SessionTabs')
+            self.qsettings.remove("Editors/SessionTabs")
             self.set_qsettings_values(default_settings)
 
     def set_qsettings_values(self, default_settings):
@@ -102,8 +101,7 @@ class UserConfig(object):
         self.qsettings.setValue(option, value)
 
     def remove(self, option, second=None):
-        """Removes a key from the settings. Key not existing returns without effect.
-        """
+        """Removes a key from the settings. Key not existing returns without effect."""
         option = self._check_section_option_is_valid(option, second)
         if self.has(option):
             self.qsettings.remove(option)
@@ -131,14 +129,13 @@ class UserConfig(object):
         """
         if second is None:
             if not isinstance(option, str):
-                raise TypeError('Found invalid type ({}) for option ({}) must be a string'.format(type(option), option))
+                raise TypeError("Found invalid type ({}) for option ({}) must be a string".format(type(option), option))
             return option
         else:  # first argument is actually the section/group
             if not isinstance(option, str):
-                raise TypeError(
-                    'Found invalid type ({}) for section ({}) must be a string'.format(type(option), option))
+                raise TypeError("Found invalid type ({}) for section ({}) must be a string".format(type(option), option))
             if not isinstance(second, str):
-                raise TypeError('Found invalid type ({}) for option ({}) must be a string'.format(type(second), second))
+                raise TypeError("Found invalid type ({}) for option ({}) must be a string".format(type(second), second))
             return joinsettings(option, second)
 
     def _get_setting(self, option, second=None, type=None):

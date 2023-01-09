@@ -12,12 +12,11 @@ from mantidqt.utils.qt.testing import start_qapplication
 
 @start_qapplication
 class BasePaneModelTest(unittest.TestCase):
-
     def setUp(self):
         self.model = BasePaneModel(context=setup_context(False))
 
     def test_get_workspace_to_plot(self):
-        self.assertEqual(self.model.get_workspaces_to_plot(True,True),[])
+        self.assertEqual(self.model.get_workspaces_to_plot(True, True), [])
 
     def test_get_workspace_list_and_indices_to_plot_returns_correctly(self):
 
@@ -28,7 +27,7 @@ class BasePaneModelTest(unittest.TestCase):
 
     def test_get_workspaces_to_remove(self):
 
-        workspaces = self.model.get_workspaces_to_remove("fwd",True, "Asymmetry")
+        workspaces = self.model.get_workspaces_to_remove("fwd", True, "Asymmetry")
 
         self.assertEqual(workspaces, [])
 
@@ -39,5 +38,5 @@ class BasePaneModelTest(unittest.TestCase):
         self.assertEqual(keys, [])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

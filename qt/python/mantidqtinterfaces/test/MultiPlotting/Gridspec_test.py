@@ -11,9 +11,9 @@ from mantidqtinterfaces.MultiPlotting.gridspec_engine import gridspecEngine
 
 
 class GridSpecTest(unittest.TestCase):
-    """ We do not need to test
-        the layout from the gridspec
-        as it is tested elsewhere    """
+    """We do not need to test
+    the layout from the gridspec
+    as it is tested elsewhere"""
 
     def test_noMax(self):
         self.engine = gridspecEngine()
@@ -31,10 +31,10 @@ class GridSpecTest(unittest.TestCase):
         self.assertEqual(result, None)
 
     def test_returnType(self):
-        gridspec = GridSpec(1,1)
+        gridspec = GridSpec(1, 1)
         self.engine = gridspecEngine()
         result = self.engine.getGridSpec(1)
-        self.assertEqual(type(result),type(gridspec))
+        self.assertEqual(type(result), type(gridspec))
 
 
 if __name__ == "__main__":

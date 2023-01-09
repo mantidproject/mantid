@@ -21,12 +21,14 @@ from matplotlib.widgets import RectangleSelector
 
 class Selector(RectangleSelector):
     active_handle_alpha = 0.5
-    kwargs = {"useblit": False,  # rectangle persists on button release
-              "button": [1],
-              "minspanx": 5,
-              "minspany": 5,
-              "spancoords": "pixels",
-              "interactive": True}
+    kwargs = {
+        "useblit": False,  # rectangle persists on button release
+        "button": [1],
+        "minspanx": 5,
+        "minspany": 5,
+        "spancoords": "pixels",
+        "interactive": True,
+    }
 
     def __init__(self, region_type: str, color: str, *args):
         if LooseVersion(matplotlib.__version__) >= LooseVersion("3.5.0"):
@@ -94,8 +96,7 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
     def mouse_moved(self, event) -> None:
         """Handles mouse move events on the canvas."""
         # Find selector if it is active and the mouse is hovering over it
-        selector = self._find_selector_if(
-            lambda x: x.active and self._contains_point(x.extents, event.xdata, event.ydata))
+        selector = self._find_selector_if(lambda x: x.active and self._contains_point(x.extents, event.xdata, event.ydata))
 
         # Set an override cursor if a selector is found
         self.view.set_override_cursor(selector is not None)
@@ -156,8 +157,7 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
 
     def _initialise_dimensions(self, workspace):
         self.view.create_dimensions(dims_info=Dimensions.get_dimensions_info(workspace))
-        self.view.create_axes_orthogonal(
-            redraw_on_zoom=not WorkspaceInfo.can_support_dynamic_rebinning(workspace))
+        self.view.create_axes_orthogonal(redraw_on_zoom=not WorkspaceInfo.can_support_dynamic_rebinning(workspace))
 
     def _set_workspace(self, workspace):
         self.model.ws = workspace

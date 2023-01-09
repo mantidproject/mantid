@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=W0403,R0902,R0903,R0904,W0212
+# pylint: disable=W0403,R0902,R0903,R0904,W0212
 from mantidqtinterfaces.HFIR_4Circle_Reduction import mpl2dgraphicsview
 import numpy as np
 import os
@@ -16,6 +16,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
     Customized 2D detector view
 
     """
+
     class MousePress(object):
         RELEASED = 0
         LEFT = 1
@@ -32,9 +33,9 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         mpl2dgraphicsview.Mpl2dGraphicsView.__init__(self, parent)
 
         # connect the mouse motion to interact with the canvas
-        self._myCanvas.mpl_connect('button_press_event', self.on_mouse_press_event)
-        self._myCanvas.mpl_connect('button_release_event', self.on_mouse_release_event)
-        self._myCanvas.mpl_connect('motion_notify_event', self.on_mouse_motion)
+        self._myCanvas.mpl_connect("button_press_event", self.on_mouse_press_event)
+        self._myCanvas.mpl_connect("button_release_event", self.on_mouse_release_event)
+        self._myCanvas.mpl_connect("motion_notify_event", self.on_mouse_motion)
 
         # class variables
         self._myPolygon = None  # matplotlib.patches.Polygon
@@ -50,8 +51,8 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         self._mousePressed = Detector2DView.MousePress.RELEASED
 
         # mouse position and resolution
-        self._currX = 0.
-        self._currY = 0.
+        self._currX = 0.0
+        self._currY = 0.0
         self._resolutionX = 0.005
         self._resolutionY = 0.005
 
@@ -83,8 +84,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         Enter or leave the region of interest (ROI) selection mode
         :return:
         """
-        assert isinstance(roi_state, bool), 'ROI mode state {} must be a boolean but not a {}.' \
-                                            ''.format(roi_state, type(roi_state))
+        assert isinstance(roi_state, bool), "ROI mode state {} must be a boolean but not a {}." "".format(roi_state, type(roi_state))
 
         # set
         self._roiSelectMode = roi_state
@@ -106,6 +106,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         the X values will be the corresponding pixel index either along axis-0 or axis-1
         :return:
         """
+
         def save_to_file(base_file_name, axis, array1d, start_index):
             """
             save the result (1D data) to an ASCII file
@@ -115,21 +116,21 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
             :param start_index:
             :return:
             """
-            file_name = '{0}_axis_{1}.dat'.format(base_file_name, axis)
+            file_name = "{0}_axis_{1}.dat".format(base_file_name, axis)
 
-            wbuf = ''
+            wbuf = ""
             vec_x = np.arange(len(array1d)) + start_index
             for x, d in zip(vec_x, array1d):
-                wbuf += '{0} \t{1}\n'.format(x, d)
+                wbuf += "{0} \t{1}\n".format(x, d)
 
-            ofile = open(file_name, 'w')
+            ofile = open(file_name, "w")
             ofile.write(wbuf)
             ofile.close()
 
             return
 
         matrix = self.array2d
-        assert isinstance(matrix, np.ndarray), 'A matrix must be an ndarray but not {0}.'.format(type(matrix))
+        assert isinstance(matrix, np.ndarray), "A matrix must be an ndarray but not {0}.".format(type(matrix))
 
         # get region of interest
         if self._roiStart is None:
@@ -143,19 +144,19 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         ur_row = max(self._roiStart[0], self._roiEnd[0])
         ur_col = max(self._roiStart[1], self._roiEnd[1])
 
-        #roi_matrix = matrix[ll_col:ur_col, ll_row:ur_row]
-        #sum_0 = roi_matrix.sum(0)
-        #sum_1 = roi_matrix.sum(1)
+        # roi_matrix = matrix[ll_col:ur_col, ll_row:ur_row]
+        # sum_0 = roi_matrix.sum(0)
+        # sum_1 = roi_matrix.sum(1)
         roi_matrix = matrix[ll_col:ur_col, ll_row:ur_row]
         sum_0 = roi_matrix.sum(0)
         sum_1 = roi_matrix.sum(1)
 
         # write to file
-        base_name = os.path.join(output_dir, 'Exp{0}_Scan{1}_Pt{2}'.format(exp_number, scan_number, pt_number))
+        base_name = os.path.join(output_dir, "Exp{0}_Scan{1}_Pt{2}".format(exp_number, scan_number, pt_number))
         save_to_file(base_name, 0, sum_0, ll_row)
         save_to_file(base_name, 1, sum_1, ll_col)
 
-        message = 'Integrated values are saved to {0}...'.format(base_name)
+        message = "Integrated values are saved to {0}...".format(base_name)
 
         return message
 
@@ -199,29 +200,28 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         y_min = 0
         y_max = raw_det_data.shape[1]
 
-        count_plot = self.add_plot_2d(raw_det_data, x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
-                                      hold_prev_image=False)
+        count_plot = self.add_plot_2d(raw_det_data, x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max, hold_prev_image=False)
         if title is None:
-            title = 'No Title'
+            title = "No Title"
         self.set_title(title)
 
         if self._myPolygon is not None:
-            print ('[DB...BAT...] Add PATCH')
+            print("[DB...BAT...] Add PATCH")
             self._myCanvas.add_patch(self._myPolygon)
         else:
-            print ('[DB...BAT...] NO PATCH')
+            print("[DB...BAT...] NO PATCH")
 
-        print ('[DB...BAT...AFTER]  ROI Rect: {0}.  2D plot: {1}'.format(self._myPolygon, count_plot))
+        print("[DB...BAT...AFTER]  ROI Rect: {0}.  2D plot: {1}".format(self._myPolygon, count_plot))
 
         return
 
     def plot_roi(self):
-        """ Plot region of interest (as rectangular) to the canvas from the region set from
+        """Plot region of interest (as rectangular) to the canvas from the region set from
         :return:
         """
         # check
-        assert self._roiStart is not None, 'Starting point of region-of-interest cannot be None'
-        assert self._roiEnd is not None, 'Ending point of region-of-interest cannot be None'
+        assert self._roiStart is not None, "Starting point of region-of-interest cannot be None"
+        assert self._roiEnd is not None, "Ending point of region-of-interest cannot be None"
 
         # create a vertex list of a rectangular
         vertex_array = np.ndarray(shape=(4, 2))
@@ -245,7 +245,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         if self._myPolygon is not None:
             self._myPolygon.remove()
             self._myPolygon = None
-        self._myPolygon = self._myCanvas.plot_polygon(vertex_array, fill=False, color='w')
+        self._myPolygon = self._myCanvas.plot_polygon(vertex_array, fill=False, color="w")
 
         return
 
@@ -254,7 +254,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         Remove the rectangular for region of interest
         :return:
         """
-        print ('[DB...BAT] Try to remove ROI {0}'.format(self._myPolygon))
+        print("[DB...BAT] Try to remove ROI {0}".format(self._myPolygon))
         if self._myPolygon is not None:
             # polygon is of type matplotlib.patches.Polygon
             self._myPolygon.remove()
@@ -267,7 +267,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
             self._roiEnd = None
 
         else:
-            print ('[NOTICE] Polygon is None.  Nothing to remove')
+            print("[NOTICE] Polygon is None.  Nothing to remove")
 
         return
 
@@ -384,7 +384,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         :param parent_window:
         :return:
         """
-        assert parent_window is not None, 'Parent window cannot be None'
+        assert parent_window is not None, "Parent window cannot be None"
 
         self._myParentWindow = parent_window
 
@@ -401,10 +401,8 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         :return:
         """
         # check inputs
-        assert len(lower_left_corner) == 2, 'Lower left corner row/col coordinate {0} must have 2 items.' \
-                                            ''.format(lower_left_corner)
-        assert len(upper_right_corner) == 2, 'Upper right corner row/col coordinate {0} must have 2 items.' \
-                                             ''.format(upper_right_corner)
+        assert len(lower_left_corner) == 2, "Lower left corner row/col coordinate {0} must have 2 items." "".format(lower_left_corner)
+        assert len(upper_right_corner) == 2, "Upper right corner row/col coordinate {0} must have 2 items." "".format(upper_right_corner)
 
         # set lower left corner and upper right corner
         self._roiStart = lower_left_corner
@@ -423,8 +421,8 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         :return:
         """
         # check
-        assert isinstance(cursor_x, float), 'Cursor x coordination {0} must be a float.'.format(cursor_x)
-        assert isinstance(cursor_y, float), 'Cursor y coordination {0} must be a float.'.format(cursor_y)
+        assert isinstance(cursor_x, float), "Cursor x coordination {0} must be a float.".format(cursor_x)
+        assert isinstance(cursor_y, float), "Cursor y coordination {0} must be a float.".format(cursor_y)
 
         # remove the original polygon
         if self._myPolygon is not None:

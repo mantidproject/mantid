@@ -22,9 +22,9 @@ class DNSCommonOptionsPresenter(DNSObserver):
         """
         Getting wavelength from selected DNSFiles, checks for deviations.
         """
-        full_data = self.param_dict['file_selector']['full_data']
+        full_data = self.param_dict["file_selector"]["full_data"]
         if not full_data:
-            self.raise_error('No data selected', critical=True)
+            self.raise_error("No data selected", critical=True)
             return None
         warnings = {
             'wavelength_varies': 'Warning, different wavelengths in'
@@ -42,6 +42,6 @@ class DNSCommonOptionsPresenter(DNSObserver):
             self.view.deactivate_get_wavelength()
         else:
             own_options = self.get_option_dict()
-            own_options['wavelength'] = wavelength
+            own_options["wavelength"] = wavelength
             self.set_view_from_param()
         return wavelength

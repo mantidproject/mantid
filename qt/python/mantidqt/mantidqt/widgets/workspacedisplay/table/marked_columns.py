@@ -88,15 +88,26 @@ class MarkedColumns:
                 break
 
     def _make_labels(self, list, label):
-        return [(col_num, label.format(index),) for index, col_num in enumerate(list)]
+        return [
+            (
+                col_num,
+                label.format(index),
+            )
+            for index, col_num in enumerate(list)
+        ]
 
     def build_labels(self):
         extra_labels = []
         extra_labels.extend(self._make_labels(self.as_x, self.X_LABEL))
         extra_labels.extend(self._make_labels(self.as_y, self.Y_LABEL))
-        err_labels = [(err_col.column, self.Y_ERR_LABEL.format(self.as_y.index(err_col.related_y_column)),) for
-                      index, err_col in
-                      enumerate(self.as_y_err) if self.as_y.count(err_col.related_y_column)>0]
+        err_labels = [
+            (
+                err_col.column,
+                self.Y_ERR_LABEL.format(self.as_y.index(err_col.related_y_column)),
+            )
+            for index, err_col in enumerate(self.as_y_err)
+            if self.as_y.count(err_col.related_y_column) > 0
+        ]
         extra_labels.extend(err_labels)
         return extra_labels
 

@@ -11,7 +11,7 @@ from mantidqtinterfaces.Muon.GUI.Common.plot_widget.quick_edit.axis_changer.axis
 class QuickEditView(QtWidgets.QWidget):
     error_signal = QtCore.Signal(object)
 
-    def __init__(self, subcontext, parent=None, default_msg = "All"):
+    def __init__(self, subcontext, parent=None, default_msg="All"):
         super(QuickEditView, self).__init__(parent)
         self._default_selector_msg = default_msg
         button_layout = QtWidgets.QHBoxLayout()
@@ -20,12 +20,10 @@ class QuickEditView(QtWidgets.QWidget):
         self.plot_selector.setSizeAdjustPolicy(QtWidgets.QComboBox.AdjustToContents)
         self.plot_selector.setMinimumContentsLength(12)
         self.plot_selector.setEditable(True)
-        self.plot_selector.completer().setCompletionMode(
-            QtWidgets.QCompleter.PopupCompletion)
+        self.plot_selector.completer().setCompletionMode(QtWidgets.QCompleter.PopupCompletion)
         self.plot_selector.view().setMinimumWidth(100)
 
-        self.plot_selector.completer().setFilterMode(
-            QtCore.Qt.MatchContains)
+        self.plot_selector.completer().setFilterMode(QtCore.Qt.MatchContains)
 
         self.plot_selector.addItem(self._default_selector_msg)
         self.plot_selector.setEditable(False)
@@ -136,7 +134,7 @@ class QuickEditView(QtWidgets.QWidget):
     def enable_autoscale(self):
         self.autoscale.setEnabled(True)
 
-    def set_autoscale(self, state:bool):
+    def set_autoscale(self, state: bool):
         self.autoscale.setChecked(state)
 
     def uncheck_autoscale(self):

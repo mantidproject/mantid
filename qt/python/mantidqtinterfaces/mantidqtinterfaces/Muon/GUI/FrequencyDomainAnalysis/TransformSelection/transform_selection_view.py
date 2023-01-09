@@ -12,6 +12,7 @@ class TransformSelectionView(QtWidgets.QWidget):
     """
     Create the transformation selection widget's appearance
     """
+
     # signals
     changeMethodSignal = QtCore.Signal(object)
 
@@ -29,6 +30,7 @@ class TransformSelectionView(QtWidgets.QWidget):
         return self.grid
 
         # sets the methods in the selection widget
+
     def setMethodsCombo(self, options):
         self.methods.clear()
         self.methods.addItems(options)

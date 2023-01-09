@@ -9,13 +9,11 @@ from mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_mode
 
 
 class EAAutoTabPresenterTest(unittest.TestCase):
-
     def setUp(self):
         workspaces = ["9999; Detector 1", "9999; Detector 2", "9999; Detector 3", "9999; Detector 4"]
         self.group_context = EAGroupContext()
         for group_name in workspaces:
-            group = EAGroup(group_name, group_name.split(";")[1].strip(),
-                            group_name.split(";")[0].strip())
+            group = EAGroup(group_name, group_name.split(";")[1].strip(), group_name.split(";")[0].strip())
             group.update_peak_table(group_name + PEAKS_WS_SUFFIX)
             group.update_matches_table(group_name + MATCH_GROUP_WS_SUFFIX)
             self.group_context.add_group(group)
@@ -82,8 +80,11 @@ class EAAutoTabPresenterTest(unittest.TestCase):
         # setup
         mock_table = mock.Mock()
         mock_table.rowCount.return_value = 3
-        mock_table.toDict.return_value = {"fake_column1": ["spam", "eggs", "ham"], "fake_column2": [10, 15, 20],
-                                          "fake_column3": [100, 2000, 345]}
+        mock_table.toDict.return_value = {
+            "fake_column1": ["spam", "eggs", "ham"],
+            "fake_column2": [10, 15, 20],
+            "fake_column3": [100, 2000, 345],
+        }
         correct_table_entries = [["spam", "10", "100"], ["eggs", "15", "2000"], ["ham", "20", "345"]]
         mock_retrieve_ws.return_value = mock_table
 
@@ -96,10 +97,16 @@ class EAAutoTabPresenterTest(unittest.TestCase):
     @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_presenter.retrieve_ws")
     def test_update_view(self, mock_retrieve_ws):
         mock_group = mock.Mock()
-        get_names_return_value = ["test;mock_refitted_peaks", "test;mock_peaks", "test;mock_matches",
-                                  "test;mock_workspace",
-                                  "test;fake_refitted_peaks", "test;fake_peaks", "test;fake_matches",
-                                  "test;fake_workspace"]
+        get_names_return_value = [
+            "test;mock_refitted_peaks",
+            "test;mock_peaks",
+            "test;mock_matches",
+            "test;mock_workspace",
+            "test;fake_refitted_peaks",
+            "test;fake_peaks",
+            "test;fake_matches",
+            "test;fake_workspace",
+        ]
 
         mock_group.getNames = lambda: deepcopy(get_names_return_value)
         mock_retrieve_ws.return_value = mock_group
@@ -108,23 +115,18 @@ class EAAutoTabPresenterTest(unittest.TestCase):
 
         self.presenter.update_view()
         # Assert statement
-        self.presenter.view.add_options_to_find_peak_combobox.assert_called_once_with({'9999': ['All', 'Detector 1',
-                                                                                                'Detector 2',
-                                                                                                'Detector 3',
-                                                                                                'Detector 4']})
+        self.presenter.view.add_options_to_find_peak_combobox.assert_called_once_with(
+            {"9999": ["All", "Detector 1", "Detector 2", "Detector 3", "Detector 4"]}
+        )
 
-        self.presenter.view.add_options_to_show_peak_combobox.assert_called_once_with({'9999':
-                                                                                       ['9999; Detector 1_EA_peaks',
-                                                                                        '9999; Detector 2_EA_peaks',
-                                                                                        '9999; Detector 3_EA_peaks',
-                                                                                        '9999; Detector 4_EA_peaks'
-                                                                                        ]})
+        self.presenter.view.add_options_to_show_peak_combobox.assert_called_once_with(
+            {"9999": ["9999; Detector 1_EA_peaks", "9999; Detector 2_EA_peaks", "9999; Detector 3_EA_peaks", "9999; Detector 4_EA_peaks"]}
+        )
 
-        self.presenter.view.add_options_to_show_matches_combobox.assert_called_once_with({'9999':
-                                                                                          get_names_return_value * 4})
+        self.presenter.view.add_options_to_show_matches_combobox.assert_called_once_with({"9999": get_names_return_value * 4})
 
         self.presenter.view.set_peak_info.assert_called_once_with(workspace="mock_peak_info", number_of_peaks=0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

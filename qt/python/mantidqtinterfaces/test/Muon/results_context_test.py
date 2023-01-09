@@ -12,7 +12,6 @@ from mantidqtinterfaces.Muon.GUI.Common.contexts.results_context import ResultsC
 
 
 class ResultsContextTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         FrameworkManager.Instance()
@@ -47,5 +46,5 @@ class ResultsContextTest(unittest.TestCase):
         self.assertEqual(self.results_context.result_table_names, [self.result_table_names[0]])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

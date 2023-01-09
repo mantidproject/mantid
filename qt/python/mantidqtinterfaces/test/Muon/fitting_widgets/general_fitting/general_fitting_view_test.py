@@ -8,14 +8,15 @@ import unittest
 
 from mantidqt.utils.qt.testing import start_qapplication
 
-from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_view import (GeneralFittingView,
-                                                                                                     SIMULTANEOUS_FIT_LABEL,
-                                                                                                     SINGLE_FIT_LABEL)
+from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_view import (
+    GeneralFittingView,
+    SIMULTANEOUS_FIT_LABEL,
+    SINGLE_FIT_LABEL,
+)
 
 
 @start_qapplication
 class GeneralFittingViewTest(unittest.TestCase):
-
     def setUp(self):
         self.view = GeneralFittingView()
 
@@ -30,8 +31,10 @@ class GeneralFittingViewTest(unittest.TestCase):
 
         self.view.update_dataset_name_combo_box(dataset_names)
 
-        data = [self.view.workspace_selector.dataset_name_combo_box.itemText(i)
-                for i in range(self.view.workspace_selector.dataset_name_combo_box.count())]
+        data = [
+            self.view.workspace_selector.dataset_name_combo_box.itemText(i)
+            for i in range(self.view.workspace_selector.dataset_name_combo_box.count())
+        ]
         self.assertTrue(data, dataset_names)
 
     def test_that_update_dataset_name_combo_box_will_select_the_previously_selected_item_if_it_still_exists(self):
@@ -106,10 +109,12 @@ class GeneralFittingViewTest(unittest.TestCase):
 
         self.view.setup_fit_by_specifier(fit_specifiers)
 
-        data = [self.view.general_fitting_options.simul_fit_by_specifier.itemText(i)
-                for i in range(self.view.general_fitting_options.simul_fit_by_specifier.count())]
+        data = [
+            self.view.general_fitting_options.simul_fit_by_specifier.itemText(i)
+            for i in range(self.view.general_fitting_options.simul_fit_by_specifier.count())
+        ]
         self.assertTrue(data, fit_specifiers)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantidqt.utils.observer_pattern import Observer, Observable, GenericObservable,GenericObserver
+from mantidqt.utils.observer_pattern import Observer, Observable, GenericObservable, GenericObserver
 from mantidqt.widgets.muonperiodinfo import MuonPeriodInfo
 import mantidqtinterfaces.Muon.GUI.Common.utilities.muon_file_utils as file_utils
 from mantidqtinterfaces.Muon.GUI.Common.utilities.general_utils import round_value
@@ -26,11 +26,7 @@ class GroupingTabPresenter(object):
     def string_to_list(text):
         return run_string_to_list(text)
 
-    def __init__(self, view, model,
-                 grouping_table_widget=None,
-                 pairing_table_widget=None,
-                 diff_table=None,
-                 parent=None):
+    def __init__(self, view, model, grouping_table_widget=None, pairing_table_widget=None, diff_table=None, parent=None):
         self._view = view
         self._model = model
 
@@ -39,7 +35,7 @@ class GroupingTabPresenter(object):
         self.diff_table = diff_table
         self.period_info_widget = MuonPeriodInfo()
 
-        self._view.set_description_text('')
+        self._view.set_description_text("")
         self._view.on_add_pair_requested(self.add_pair_from_grouping_table)
         self._view.on_clear_grouping_button_clicked(self.on_clear_requested)
         self._view.on_load_grouping_button_clicked(self.handle_load_grouping_from_file)
@@ -87,19 +83,18 @@ class GroupingTabPresenter(object):
         instrument = self._model.instrument
         n_detectors = self._model.num_detectors
         main_field = self._model.main_field_direction
-        text = "{}, {} detectors".format(
-            instrument, n_detectors)
+        text = "{}, {} detectors".format(instrument, n_detectors)
         if main_field:
             text += ", main field : {} to muon polarization".format(main_field)
         return text
 
-    def update_description_text(self, description_text=''):
+    def update_description_text(self, description_text=""):
         if not description_text:
             description_text = self.text_for_description()
         self._view.set_description_text(description_text)
 
     def update_description_text_to_empty(self):
-        self._view.set_description_text('')
+        self._view.set_description_text("")
 
     def add_pair_from_grouping_table(self, group_name1="", group_name2=""):
         """
@@ -112,8 +107,7 @@ class GroupingTabPresenter(object):
         Calculate alpha for the pair for which "Guess Alpha" button was clicked.
         """
         if len(self._model._data.current_runs) > 1:
-            run, index, ok_clicked = RunSelectionDialog.get_run(self._model._data.current_runs,
-                                                                self._model._data.instrument, self._view)
+            run, index, ok_clicked = RunSelectionDialog.get_run(self._model._data.current_runs, self._model._data.instrument, self._view)
             if not ok_clicked:
                 return
             run_to_use = self._model._data.current_runs[index]
@@ -124,14 +118,12 @@ class GroupingTabPresenter(object):
             ws1 = self._model.get_group_workspace(group1_name, run_to_use)
             ws2 = self._model.get_group_workspace(group2_name, run_to_use)
         except KeyError:
-            self._view.display_warning_box('Group workspace not found, try updating all and then recalculating.')
+            self._view.display_warning_box("Group workspace not found, try updating all and then recalculating.")
             return
 
         ws = algorithm_utils.run_AppendSpectra(ws1, ws2)
 
-        new_alpha = algorithm_utils.run_AlphaCalc({"InputWorkspace": ws,
-                                                   "ForwardSpectra": [0],
-                                                   "BackwardSpectra": [1]})
+        new_alpha = algorithm_utils.run_AlphaCalc({"InputWorkspace": ws, "ForwardSpectra": [0], "BackwardSpectra": [1]})
 
         self._model.update_pair_alpha(pair_name, round_value(new_alpha, self._model._context.group_pair_context.alpha_precision))
         self.pairing_table_widget.update_view_from_model()
@@ -143,7 +135,7 @@ class GroupingTabPresenter(object):
         file_filter = file_utils.filter_for_extensions(["xml"])
         filename = self._view.show_file_browser_and_return_selection(file_filter, [""])
 
-        if filename == '':
+        if filename == "":
             return
 
         groups, pairs, diffs, description, default = xml_utils.load_grouping_from_XML(filename)
@@ -218,9 +210,7 @@ class GroupingTabPresenter(object):
 
     def handle_update_all_clicked(self):
         self.update_thread = self.create_update_thread()
-        self.update_thread.threadWrapperSetUp(self.disable_editing,
-                                              self.handle_update_finished,
-                                              self.error_callback)
+        self.update_thread.threadWrapperSetUp(self.disable_editing, self.handle_update_finished, self.error_callback)
         self.update_thread.start()
 
     def error_callback(self, error_message):
@@ -270,8 +260,9 @@ class GroupingTabPresenter(object):
     def handle_save_grouping_file(self):
         filename = self._view.show_file_save_browser_and_return_selection()
         if filename != "":
-            xml_utils.save_grouping_to_XML(self._model.groups, self._model.pairs, self._model.diffs, filename,
-                                           description=self._view.get_description_text())
+            xml_utils.save_grouping_to_XML(
+                self._model.groups, self._model.pairs, self._model.diffs, filename, description=self._view.get_description_text()
+            )
 
     def create_update_thread(self):
         self._update_model = ThreadModelWrapper(self.calculate_all_data)
@@ -328,7 +319,6 @@ class GroupingTabPresenter(object):
         self.handle_update_all_clicked()
 
     class LoadObserver(Observer):
-
         def __init__(self, outer):
             Observer.__init__(self)
             self.outer = outer
@@ -337,7 +327,6 @@ class GroupingTabPresenter(object):
             self.outer.handle_new_data_loaded()
 
     class InstrumentObserver(Observer):
-
         def __init__(self, outer):
             Observer.__init__(self)
             self.outer = outer
@@ -346,7 +335,6 @@ class GroupingTabPresenter(object):
             self.outer.on_clear_requested()
 
     class GuessAlphaObserver(Observer):
-
         def __init__(self, outer):
             Observer.__init__(self)
             self.outer = outer
@@ -363,7 +351,6 @@ class GroupingTabPresenter(object):
             self.outer.handle_update_all_clicked()
 
     class GroupingNotifier(Observable):
-
         def __init__(self, outer):
             Observable.__init__(self)
             self.outer = outer  # handle to containing class
@@ -372,7 +359,6 @@ class GroupingTabPresenter(object):
             Observable.notify_subscribers(self, *args, **kwargs)
 
     class MessageObserver(Observer):
-
         def __init__(self, outer):
             Observer.__init__(self)
             self.outer = outer
@@ -397,7 +383,6 @@ class GroupingTabPresenter(object):
             self.outer.disable_editing()
 
     class DisableEditingNotifier(Observable):
-
         def __init__(self, outer):
             Observable.__init__(self)
             self.outer = outer  # handle to containing class
@@ -406,7 +391,6 @@ class GroupingTabPresenter(object):
             Observable.notify_subscribers(self, *args, **kwargs)
 
     class EnableEditingNotifier(Observable):
-
         def __init__(self, outer):
             Observable.__init__(self)
             self.outer = outer  # handle to containing class

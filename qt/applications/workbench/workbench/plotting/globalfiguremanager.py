@@ -80,6 +80,7 @@ class GlobalFigureManager(object):
           list of *managers*, with active one at the end
 
     """
+
     _activeQue = []
     figs = ObservableDictionary({})
     observers = []
@@ -140,6 +141,7 @@ class GlobalFigureManager(object):
         # this is need to ensure that gc is available in corner cases
         # where modules are being torn down after install with easy_install
         import gc  # noqa
+
         for manager in list(cls.figs.values()):
             manager.canvas.mpl_disconnect(manager._cidgcf)
             manager.destroy()
@@ -193,8 +195,7 @@ class GlobalFigureManager(object):
     def _set_new_active_manager(cls, manager):
         """Adopt *manager* into pyplot and make it the active manager."""
         if not hasattr(manager, "_cidgcf"):
-            manager._cidgcf = manager.canvas.mpl_connect(
-                "button_press_event", lambda event: cls.set_active(manager))
+            manager._cidgcf = manager.canvas.mpl_connect("button_press_event", lambda event: cls.set_active(manager))
         fig = manager.canvas.figure
         fig.number = manager.num
         label = fig.get_label()

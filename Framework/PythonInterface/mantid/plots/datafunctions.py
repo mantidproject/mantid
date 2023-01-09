@@ -927,14 +927,16 @@ def get_errorbar_bounds(container):
     min_x, max_x, min_y, max_y = None, None, None, None
     x_segments = _get_x_errorbar_segments(container)
     if x_segments:
-        coords = [array[:, 0] for array in x_segments]
-        max_x = np.max(coords)
-        min_x = np.min(coords)
+        coords = [array[:, 0] for array in x_segments if len(array.shape) == 2]
+        if coords:
+            max_x = np.max(coords)
+            min_x = np.min(coords)
     y_segments = _get_y_errorbar_segments(container)
     if y_segments:
-        coords = [array[:, 1] for array in y_segments]
-        max_y = np.max(coords)
-        min_y = np.min(coords)
+        coords = [array[:, 1] for array in y_segments if len(array.shape) == 2]
+        if coords:
+            max_y = np.max(coords)
+            min_y = np.min(coords)
     return min_x, max_x, min_y, max_y
 
 

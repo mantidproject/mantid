@@ -55,8 +55,7 @@ class EngineeringDiffractionPresenter(object):
         view.tabs.addTab(cal_view, "Calibration")
 
     def setup_calibration_notifier(self):
-        self.calibration_presenter.calibration_notifier.add_subscriber(
-            self.focus_presenter.calibration_observer)
+        self.calibration_presenter.calibration_notifier.add_subscriber(self.focus_presenter.calibration_observer)
         self.calibration_presenter.calibration_notifier.add_subscriber(self.calibration_observer)
 
     def setup_focus(self, view):
@@ -108,11 +107,9 @@ class EngineeringDiffractionPresenter(object):
 
     @staticmethod
     def get_saved_rb_number() -> str:
-        rb_number = get_setting(output_settings.INTERFACES_SETTINGS_GROUP,
-                                output_settings.ENGINEERING_PREFIX, "rb_number")
+        rb_number = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "rb_number")
         return rb_number
 
     @staticmethod
     def set_saved_rb_number(rb_number) -> None:
-        set_setting(output_settings.INTERFACES_SETTINGS_GROUP,
-                    output_settings.ENGINEERING_PREFIX, "rb_number", rb_number)
+        set_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "rb_number", rb_number)

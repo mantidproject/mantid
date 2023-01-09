@@ -23,5 +23,5 @@ class FittingTabModelTest(unittest.TestCase):
         self.model.set_double_pulse_enabled.called_once_with(True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

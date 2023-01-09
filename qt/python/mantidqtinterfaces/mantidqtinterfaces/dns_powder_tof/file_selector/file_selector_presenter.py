@@ -9,18 +9,11 @@
 DNS file selector tab presenter of DNS Reduction GUI.
 """
 
-from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import \
-    DNSObserver
+from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import DNSObserver
 
 
 class DNSFileSelectorPresenter(DNSObserver):
-
-    def __init__(self,
-                 name=None,
-                 parent=None,
-                 view=None,
-                 model=None,
-                 watcher=None):
+    def __init__(self, name=None, parent=None, view=None, model=None, watcher=None):
         # pylint: disable=too-many-arguments
         super().__init__(parent=parent, name=name, view=view, model=model)
         self.watcher = watcher
@@ -74,10 +67,10 @@ class DNSFileSelectorPresenter(DNSObserver):
         self._read_all(watcher=True)
 
     def _autoload_new(self, state):
-        data_dir = self.param_dict['paths']['data_dir']
+        data_dir = self.param_dict["paths"]["data_dir"]
 
         if not data_dir:
-            self.raise_error('No data directory selected', critical=True)
+            self.raise_error("No data directory selected", critical=True)
 
         if state == 2 and data_dir:
             self.watcher.start_watcher(data_dir)
@@ -99,8 +92,7 @@ class DNSFileSelectorPresenter(DNSObserver):
         number_of_scans_to_check = self.view.get_number_scans_to_check()
         complete = 'complete' in sender_name
         not_hidden_rows = self._get_non_hidden_rows()
-        self.model.check_last_scans(number_of_scans_to_check, complete,
-                                    not_hidden_rows)
+        self.model.check_last_scans(number_of_scans_to_check, complete, not_hidden_rows)
 
     def _check_selected_scans(self):
         indexes = self.view.get_selected_indexes()
@@ -138,9 +130,8 @@ class DNSFileSelectorPresenter(DNSObserver):
         """
         self._show_all_scans()
         filters = self.view.get_standard_filters()
-        active = filters['vanadium'] or filters['empty'] or filters['nicr']
-        hide_scans = self.model.filter_standard_types(filters, active,
-                                                      self._is_modus_tof())
+        active = filters["vanadium"] or filters["empty"] or filters["nicr"]
+        hide_scans = self.model.filter_standard_types(filters, active, self._is_modus_tof())
         for row in hide_scans:
             self.view.hide_scan(row)
 
@@ -157,7 +148,7 @@ class DNSFileSelectorPresenter(DNSObserver):
 
     # change of modi
     def _is_modus_tof(self):
-        return '_tof' in self.modus
+        return "_tof" in self.modus
 
     def _modus_changed(self):
         self._filter_scans()
@@ -174,8 +165,8 @@ class DNSFileSelectorPresenter(DNSObserver):
         """
         Open files in the treeview with right click.
         """
-        data_path = self.param_dict['paths']['data_dir']
-        standard_path = self.param_dict['paths']['standards_dir']
+        data_path = self.param_dict["paths"]["data_dir"]
+        standard_path = self.param_dict["paths"]["standards_dir"]
         self.model.open_datafile(index, data_path, standard_path)
 
     # normal observer function
@@ -226,8 +217,8 @@ class DNSFileSelectorPresenter(DNSObserver):
         self.view.hide_tof(hidden='_tof' not in self.modus)
 
     def process_commandline_request(self, command_dict):
-        start = int(command_dict['files'][0]['start'])
-        end = int(command_dict['files'][0]['end'])
+        start = int(command_dict["files"][0]["start"])
+        end = int(command_dict["files"][0]["end"])
         self._read_all(filtered=True, start=start, end=end)
         self.model.check_file_number_range(start, end)
 

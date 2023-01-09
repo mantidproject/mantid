@@ -39,10 +39,10 @@ class RectangleSelection(RectangleSelector):
         self._eventrelease.x, self._eventrelease.y = xy2
 
         # calculate dimensions of box or line
-        if self.spancoords == 'data':
+        if self.spancoords == "data":
             spanx = abs(self._eventpress.xdata - self._eventrelease.xdata)
             spany = abs(self._eventpress.ydata - self._eventrelease.ydata)
-        elif self.spancoords == 'pixels':
+        elif self.spancoords == "pixels":
             spanx = abs(self._eventpress.x - self._eventrelease.x)
             spany = abs(self._eventpress.y - self._eventrelease.y)
         else:
@@ -50,9 +50,9 @@ class RectangleSelection(RectangleSelector):
 
         # check if drawn distance (if it exists) is not too small in
         # either x or y-direction
-        if (self._drawtype != 'none'
-                and (self.minspanx is not None and spanx < self.minspanx
-                     or self.minspany is not None and spany < self.minspany)):
+        if self._drawtype != "none" and (
+            self.minspanx is not None and spanx < self.minspanx or self.minspany is not None and spany < self.minspany
+        ):
             for artist in self.artists:
                 artist.set_visible(False)
             self.update()

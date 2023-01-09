@@ -8,20 +8,20 @@
 
 from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar, MantidStandardNavigationTools, MantidNavigationTool
 from qtpy.QtWidgets import QApplication
-from qtpy.QtCore import Signal,QSize
+from qtpy.QtCore import Signal, QSize
 
 
 class ToolItemText:
-    HOME = 'Home'
-    PAN = 'Pan'
-    ZOOM = 'Zoom'
-    GRID = 'Grid'
-    LINEPLOTS = 'LinePlots'
-    REGIONSELECTION = 'RegionSelection'
-    OVERLAY_PEAKS = 'OverlayPeaks'
-    NONORTHOGONAL_AXES = 'NonOrthogonalAxes'
-    SAVE = 'Save'
-    NONAXISALIGNEDCUTS = 'NonAxisAlignedCuts'
+    HOME = "Home"
+    PAN = "Pan"
+    ZOOM = "Zoom"
+    GRID = "Grid"
+    LINEPLOTS = "LinePlots"
+    REGIONSELECTION = "RegionSelection"
+    OVERLAY_PEAKS = "OverlayPeaks"
+    NONORTHOGONAL_AXES = "NonOrthogonalAxes"
+    SAVE = "Save"
+    NONAXISALIGNEDCUTS = "NonAxisAlignedCuts"
 
 
 class SliceViewerNavigationToolbar(MantidNavigationToolbar):
@@ -37,25 +37,24 @@ class SliceViewerNavigationToolbar(MantidNavigationToolbar):
     zoomPanFinished = Signal()
 
     toolitems = (
-        MantidNavigationTool(ToolItemText.HOME, 'Reset original view', 'mdi.home', 'homeClicked', None),
+        MantidNavigationTool(ToolItemText.HOME, "Reset original view", "mdi.home", "homeClicked", None),
         MantidStandardNavigationTools.PAN,
-        MantidNavigationTool(ToolItemText.ZOOM, 'Zoom to rectangle', 'mdi.magnify', 'zoom', False),
+        MantidNavigationTool(ToolItemText.ZOOM, "Zoom to rectangle", "mdi.magnify", "zoom", False),
         MantidStandardNavigationTools.SEPARATOR,
-        MantidNavigationTool(ToolItemText.GRID, 'Toggle grid on/off', 'mdi.grid', 'gridClicked', False),
+        MantidNavigationTool(ToolItemText.GRID, "Toggle grid on/off", "mdi.grid", "gridClicked", False),
         MantidStandardNavigationTools.SEPARATOR,
-        MantidNavigationTool(ToolItemText.LINEPLOTS, 'Toggle lineplots on/off', 'mdi.chart-bell-curve',
-                             'linePlotsClicked', False),
-        MantidNavigationTool(ToolItemText.REGIONSELECTION, 'Toggle region selection on/off', 'mdi.vector-rectangle',
-                             'regionSelectionClicked', False),
-        MantidNavigationTool(ToolItemText.NONAXISALIGNEDCUTS, 'Toggle cutting tool', 'mdi.vector-line',
-                             'nonAlignedCutsClicked', False),
+        MantidNavigationTool(ToolItemText.LINEPLOTS, "Toggle lineplots on/off", "mdi.chart-bell-curve", "linePlotsClicked", False),
+        MantidNavigationTool(
+            ToolItemText.REGIONSELECTION, "Toggle region selection on/off", "mdi.vector-rectangle", "regionSelectionClicked", False
+        ),
+        MantidNavigationTool(ToolItemText.NONAXISALIGNEDCUTS, "Toggle cutting tool", "mdi.vector-line", "nonAlignedCutsClicked", False),
         MantidStandardNavigationTools.SEPARATOR,
-        MantidNavigationTool(ToolItemText.OVERLAY_PEAKS, 'Add peaks overlays on/off', 'mdi.chart-bubble',
-                             'peaksOverlayClicked', None),
-        MantidNavigationTool(ToolItemText.NONORTHOGONAL_AXES, 'Toggle nonorthogonal axes on/off', 'mdi.axis',
-                             'nonOrthogonalClicked', False),
+        MantidNavigationTool(ToolItemText.OVERLAY_PEAKS, "Add peaks overlays on/off", "mdi.chart-bubble", "peaksOverlayClicked", None),
+        MantidNavigationTool(
+            ToolItemText.NONORTHOGONAL_AXES, "Toggle nonorthogonal axes on/off", "mdi.axis", "nonOrthogonalClicked", False
+        ),
         MantidStandardNavigationTools.SEPARATOR,
-        MantidNavigationTool(ToolItemText.SAVE, 'Save the figure', 'mdi.content-save', 'save_figure', None)
+        MantidNavigationTool(ToolItemText.SAVE, "Save the figure", "mdi.content-save", "save_figure", None),
     )
 
     def __init__(self, canvas, parent, coordinates=True):
@@ -101,7 +100,7 @@ class SliceViewerNavigationToolbar(MantidNavigationToolbar):
 
         x, y = event.x, event.y
         lastx, lasty = self._pressed_xy
-        if ((abs(x - lastx) < 5) or (abs(y - lasty) < 5)):
+        if (abs(x - lastx) < 5) or (abs(y - lasty) < 5):
             return
         self.zoomPanFinished.emit()
 

@@ -17,12 +17,11 @@ from mantidqt.utils.qt.testing import start_qapplication
 
 
 def plot_at_index(index):
-    return "plot "+str(index)
+    return "plot " + str(index)
 
 
 @start_qapplication
 class DualQuickEditTest(unittest.TestCase):
-
     def setUp(self):
         self.view = mock.Mock(spec=QuickEditView)
         self.context = PlottingContext()
@@ -34,11 +33,11 @@ class DualQuickEditTest(unittest.TestCase):
     # this is the only override
     def test_multiple_plots(self):
         self.view.number_of_plots = mock.Mock(return_value=4)
-        self.view.plot_at_index = mock.Mock(side_effect = plot_at_index)
+        self.view.plot_at_index = mock.Mock(side_effect=plot_at_index)
         # plot names at 0 and 1 are reserved so are excluded
         expected = ["plot 2", "plot 3"]
         self.assertEqual(self.presenter.multiple_plots(), expected)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

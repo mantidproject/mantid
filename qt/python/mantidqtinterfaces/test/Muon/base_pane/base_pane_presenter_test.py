@@ -12,8 +12,9 @@ from mantidqtinterfaces.Muon.GUI.Common.plot_widget.external_plotting.external_p
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.base_pane.base_pane_model import BasePaneModel
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.base_pane.base_pane_presenter import BasePanePresenter
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.base_pane.base_pane_view import BasePaneView
-from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter_interface import \
-    PlottingCanvasPresenterInterface
+from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter_interface import (
+    PlottingCanvasPresenterInterface,
+)
 from mantid import AnalysisDataService
 from mantid.simpleapi import CreateWorkspace
 from mantidqt.utils.qt.testing import start_qapplication
@@ -21,7 +22,6 @@ from mantidqt.utils.qt.testing import start_qapplication
 
 @start_qapplication
 class BasePanePresenterTest(unittest.TestCase):
-
     def setUp(self):
         self.context = mock.MagicMock()
         self.model = mock.Mock(spec=BasePaneModel)
@@ -34,13 +34,17 @@ class BasePanePresenterTest(unittest.TestCase):
         self.figure_presenter = mock.Mock(spec=PlottingCanvasPresenterInterface)
         self.figure_presenter.force_autoscale = mock.Mock()
 
-        self.context.group_pair_context.selected_groups = ['bottom']
+        self.context.group_pair_context.selected_groups = ["bottom"]
         self.context.group_pair_context.selected_pairs = []
 
-        self.presenter = BasePanePresenter(view=self.view, model=self.model, context=self.context,
-                                           figure_presenter=self.figure_presenter,
-                                           external_plotting_view=self.external_plotting_view,
-                                           external_plotting_model=self.external_plotting_model)
+        self.presenter = BasePanePresenter(
+            view=self.view,
+            model=self.model,
+            context=self.context,
+            figure_presenter=self.figure_presenter,
+            external_plotting_view=self.external_plotting_view,
+            external_plotting_model=self.external_plotting_model,
+        )
 
     def create_workspace(self, name):
         x_range = range(1, 100)
@@ -73,7 +77,7 @@ class BasePanePresenterTest(unittest.TestCase):
 
     def test_handle_workspace_replaced_in_ads_calls_update_workspace_correctly(self):
         self.figure_presenter.get_plotted_workspaces_and_indices.return_value = [["fwd", "bwd"], []]
-        ws = self.create_workspace('bwd')
+        ws = self.create_workspace("bwd")
 
         self.presenter.handle_workspace_replaced_in_ads(ws)
 
@@ -81,7 +85,7 @@ class BasePanePresenterTest(unittest.TestCase):
 
     def test_handle_workspace_replaced_in_ads_does_nothing_if_workspace_not_plotted(self):
         self.figure_presenter.get_plotted_workspaces_and_indices.return_value = [["fwd", "bwd"], []]
-        ws = self.create_workspace('top')
+        ws = self.create_workspace("top")
 
         self.presenter.handle_workspace_replaced_in_ads(ws)
 
@@ -89,7 +93,7 @@ class BasePanePresenterTest(unittest.TestCase):
 
     def test_handle_workspace_deleted_from_ads_calls_delete_workspace_correctly(self):
         self.figure_presenter.get_plotted_workspaces_and_indices.return_value = [["fwd", "bwd"], []]
-        ws = self.create_workspace('fwd')
+        ws = self.create_workspace("fwd")
 
         self.presenter.handle_workspace_deleted_from_ads(ws)
 
@@ -97,7 +101,7 @@ class BasePanePresenterTest(unittest.TestCase):
 
     def test_handle_workspace_deleted_from_ads_does_nothing_if_workspace_not_plotted(self):
         self.figure_presenter.get_plotted_workspaces_and_indices.return_value = [["fwd", "bwd"], []]
-        ws = self.create_workspace('top')
+        ws = self.create_workspace("top")
 
         self.presenter.handle_workspace_deleted_from_ads(ws)
 
@@ -105,20 +109,20 @@ class BasePanePresenterTest(unittest.TestCase):
 
     def test_handle_workspace_deleted_from_ads_with_wrong_type(self):
         self.figure_presenter.get_plotted_workspaces_and_indices.return_value = [["fwd", "bwd"], []]
-        ws = self.create_workspace('fwd')
+        ws = self.create_workspace("fwd")
 
         self.presenter.handle_workspace_deleted_from_ads(ws.name)
         self.figure_presenter.remove_workspace_from_plot.assert_not_called()
 
     def test_added_or_removed_plot_add(self):
-        plot_info ={"is_added": True, "name": "fwd"}
+        plot_info = {"is_added": True, "name": "fwd"}
         self.presenter.add_list_to_plot = mock.Mock()
 
         self.presenter.handle_added_or_removed_plot(plot_info)
-        self.presenter.add_list_to_plot.assert_called_once_with(["fwd"],[0])
+        self.presenter.add_list_to_plot.assert_called_once_with(["fwd"], [0])
 
     def test_added_or_removed_plot_remove(self):
-        plot_info ={"is_added": False, "name": "fwd"}
+        plot_info = {"is_added": False, "name": "fwd"}
         self.presenter.remove_list_from_plot = mock.Mock()
 
         self.presenter.handle_added_or_removed_plot(plot_info)
@@ -126,16 +130,15 @@ class BasePanePresenterTest(unittest.TestCase):
 
     def test_add_list_to_plot_no_autoscale(self):
         self.presenter._update_tile_plot = mock.Mock()
-        self.figure_presenter.get_plotted_workspaces_and_indices.return_value = [["fwd", "bwd"], [0,1]]
+        self.figure_presenter.get_plotted_workspaces_and_indices.return_value = [["fwd", "bwd"], [0, 1]]
         self.presenter._update_tile_plot = mock.Mock()
         hold = True
         autoscale = False
-        self.presenter.add_list_to_plot(["top"],[2], hold, autoscale)
+        self.presenter.add_list_to_plot(["top"], [2], hold, autoscale)
 
         self.presenter._update_tile_plot.assert_called_once()
         self.figure_presenter.force_autoscale.assert_not_called()
-        self.figure_presenter.plot_workspaces.assert_called_once_with(["top"], [2],
-                                                                      hold, autoscale)
+        self.figure_presenter.plot_workspaces.assert_called_once_with(["top"], [2], hold, autoscale)
 
     def test_add_list_to_plot_force_autoscale(self):
         self.presenter._update_tile_plot = mock.Mock()
@@ -143,12 +146,11 @@ class BasePanePresenterTest(unittest.TestCase):
         self.presenter._update_tile_plot = mock.Mock()
         hold = True
         autoscale = False
-        self.presenter.add_list_to_plot(["top"],[0], hold, autoscale)
+        self.presenter.add_list_to_plot(["top"], [0], hold, autoscale)
 
         self.presenter._update_tile_plot.assert_called_once()
         self.figure_presenter.force_autoscale.assert_called_once()
-        self.figure_presenter.plot_workspaces.assert_called_once_with(["top"], [0],
-                                                                      hold, autoscale)
+        self.figure_presenter.plot_workspaces.assert_called_once_with(["top"], [0], hold, autoscale)
 
     def test_remove_list_from_plot(self):
         self.presenter._update_tile_plot = mock.Mock()
@@ -169,7 +171,7 @@ class BasePanePresenterTest(unittest.TestCase):
         self.context._do_rebin.return_value = False
 
         self.assertEqual(self.presenter.check_if_can_use_rebin(), False)
-        self.view.warning_popup.assert_called_once_with('No rebin options specified')
+        self.view.warning_popup.assert_called_once_with("No rebin options specified")
 
     def test_handle_check_if_can_use_rebin_rebinned_data(self):
         self.view.is_raw_plot.return_value = False
@@ -230,5 +232,5 @@ class BasePanePresenterTest(unittest.TestCase):
         self.figure_presenter._handle_autoscale_y_axes.assert_called_once()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

@@ -8,7 +8,6 @@ from mantidqtinterfaces.Muon.GUI.Common.home_tab.home_tab_presenter import HomeT
 
 
 class InstrumentWidgetPresenter(HomeTabSubWidget):
-
     def __init__(self, view, model):
         self._view = view
         self._model = model
@@ -157,6 +156,6 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
 
     def handle_double_pulse_enabled(self):
         pulseType = self._view.double_pulse_state()
-        enabled = pulseType == 'Double Pulse'
+        enabled = pulseType == "Double Pulse"
         self._view.double_pulse_edit_enabled(enabled)
         self._model.set_double_pulse_enabled(enabled)

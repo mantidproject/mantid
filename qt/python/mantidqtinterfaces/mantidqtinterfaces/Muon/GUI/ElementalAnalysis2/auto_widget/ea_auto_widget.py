@@ -12,11 +12,9 @@ from mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.auto_widget.ea_match_table_p
 
 
 class EAAutoTabWidget(object):
-
-    def __init__(self,context):
+    def __init__(self, context):
         self.match_table_view = EAMatchTableView()
         self.match_table_presenter = EAMatchTablePresenter(self.match_table_view)
         self.auto_tab_view = EAAutoTabView(self.match_table_view)
         self.auto_tab_model = EAAutoTabModel(context)
-        self.auto_tab_presenter = EAAutoTabPresenter(context, self.auto_tab_view , self.auto_tab_model,
-                                                     self.match_table_presenter)
+        self.auto_tab_presenter = EAAutoTabPresenter(context, self.auto_tab_view, self.auto_tab_model, self.match_table_presenter)

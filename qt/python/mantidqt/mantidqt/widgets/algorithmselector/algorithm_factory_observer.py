@@ -14,6 +14,7 @@ class AlgorithmSelectorFactoryObserver(AlgorithmFactoryObserver):
     """
     Observe updates to the AlgorithmFactory and refresh the held object
     """
+
     def __init__(self, notifyee):
         """
         :param notifyee: An instance of a type with a refresh instance

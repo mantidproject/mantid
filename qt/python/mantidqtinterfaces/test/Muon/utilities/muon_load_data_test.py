@@ -11,16 +11,15 @@ from mantidqtinterfaces.Muon.GUI.Common.muon_load_data import MuonLoadData
 
 
 class MuonLoadDataTest(unittest.TestCase):
-
     def setUp(self):
         self.muon_load_data = MuonLoadData()
         self.workspace = mock.MagicMock()
         self.workspace_last = mock.MagicMock()
-        self.muon_load_data.add_data(run=1, workspace=mock.MagicMock(), filename='path to file')
-        self.muon_load_data.add_data(run=2, workspace=self.workspace, filename='path to file')
-        self.muon_load_data.add_data(run=3, workspace=mock.MagicMock(), filename='matching path')
+        self.muon_load_data.add_data(run=1, workspace=mock.MagicMock(), filename="path to file")
+        self.muon_load_data.add_data(run=2, workspace=self.workspace, filename="path to file")
+        self.muon_load_data.add_data(run=3, workspace=mock.MagicMock(), filename="matching path")
         self.muon_load_data.add_data()
-        self.muon_load_data.add_data(run=4, workspace=self.workspace_last, filename='path to file')
+        self.muon_load_data.add_data(run=4, workspace=self.workspace_last, filename="path to file")
 
     def assert_empty(self, load_data):
         self.assertEqual(load_data.get_parameter("run"), [])
@@ -38,9 +37,9 @@ class MuonLoadDataTest(unittest.TestCase):
 
     def populate_loaded_data(self):
         data = MuonLoadData()
-        data.add_data(run=1234, workspace=[1], filename="C:\\dir1\\file1.nxs", instrument='EMU')
-        data.add_data(run=1235, workspace=[2], filename="C:\\dir1\\file2.nxs", instrument='EMU')
-        data.add_data(run=1236, workspace=[3], filename="C:\\dir1\\file3.nxs", instrument='EMU')
+        data.add_data(run=1234, workspace=[1], filename="C:\\dir1\\file1.nxs", instrument="EMU")
+        data.add_data(run=1235, workspace=[2], filename="C:\\dir1\\file2.nxs", instrument="EMU")
+        data.add_data(run=1236, workspace=[3], filename="C:\\dir1\\file3.nxs", instrument="EMU")
         return data
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -155,9 +154,11 @@ class MuonLoadDataTest(unittest.TestCase):
     def test_iterator_behaviour_of_data(self):
         data = self.populate_loaded_data()
 
-        check = [{"run": 1234, "workspace": [1], "filename": "C:\\dir1\\file1.nxs", 'instrument': 'EMU'},
-                 {"run": 1235, "workspace": [2], "filename": "C:\\dir1\\file2.nxs", 'instrument': 'EMU'},
-                 {"run": 1236, "workspace": [3], "filename": "C:\\dir1\\file3.nxs", 'instrument': 'EMU'}]
+        check = [
+            {"run": 1234, "workspace": [1], "filename": "C:\\dir1\\file1.nxs", "instrument": "EMU"},
+            {"run": 1235, "workspace": [2], "filename": "C:\\dir1\\file2.nxs", "instrument": "EMU"},
+            {"run": 1236, "workspace": [3], "filename": "C:\\dir1\\file3.nxs", "instrument": "EMU"},
+        ]
 
         for data_item in iter(data):
             self.assertEqual(data_item, check.pop(0))
@@ -167,8 +168,10 @@ class MuonLoadDataTest(unittest.TestCase):
 
         data.remove_current_data()
 
-        check = [{"run": 1234, "workspace": [1], "filename": "C:\\dir1\\file1.nxs", 'instrument': 'EMU'},
-                 {"run": 1235, "workspace": [2], "filename": "C:\\dir1\\file2.nxs", 'instrument': 'EMU'}]
+        check = [
+            {"run": 1234, "workspace": [1], "filename": "C:\\dir1\\file1.nxs", "instrument": "EMU"},
+            {"run": 1235, "workspace": [2], "filename": "C:\\dir1\\file2.nxs", "instrument": "EMU"},
+        ]
 
         for data_item in iter(data):
             self.assertEqual(data_item, check.pop(0))
@@ -178,20 +181,22 @@ class MuonLoadDataTest(unittest.TestCase):
 
         data.remove_last_added_data()
 
-        check = [{"run": 1234, "workspace": [1], "filename": "C:\\dir1\\file1.nxs", 'instrument': 'EMU'},
-                 {"run": 1236, "workspace": [3], "filename": "C:\\dir1\\file3.nxs", 'instrument': 'EMU'}]
+        check = [
+            {"run": 1234, "workspace": [1], "filename": "C:\\dir1\\file1.nxs", "instrument": "EMU"},
+            {"run": 1236, "workspace": [3], "filename": "C:\\dir1\\file3.nxs", "instrument": "EMU"},
+        ]
 
         for data_item in iter(data):
             self.assertEqual(data_item, check.pop(0))
 
     def test_that_can_add_data_to_struct(self):
         self.assertEqual(self.muon_load_data.num_items(), 5)
-        self.assertEqual(self.muon_load_data.get_parameter('run')[2], 3)
-        self.assertEqual(self.muon_load_data.get_parameter('workspace')[1], self.workspace)
-        self.assertEqual(self.muon_load_data.get_parameter('filename')[0], 'path to file')
+        self.assertEqual(self.muon_load_data.get_parameter("run")[2], 3)
+        self.assertEqual(self.muon_load_data.get_parameter("workspace")[1], self.workspace)
+        self.assertEqual(self.muon_load_data.get_parameter("filename")[0], "path to file")
 
     def test_that_matches_returns_false_for_all_entries_with_only_one_match(self):
-        match_list = self.muon_load_data._matches(run=1, workspace=self.workspace, filename='matching path')
+        match_list = self.muon_load_data._matches(run=1, workspace=self.workspace, filename="matching path")
 
         self.assertEqual(match_list, [False, False, False, False, False])
 
@@ -201,24 +206,24 @@ class MuonLoadDataTest(unittest.TestCase):
         self.assertEqual(match_list, [True, True, True, True, True])
 
     def test_that_matches_with_unused_parameters_match_none(self):
-        match_list = self.muon_load_data._matches(new_info='new info')
+        match_list = self.muon_load_data._matches(new_info="new info")
 
         self.assertEqual(match_list, [False, False, False, False, False])
 
     def test_that_matches_correctly_with_only_one_parameter_given(self):
-        match_list = self.muon_load_data._matches(filename='path to file')
+        match_list = self.muon_load_data._matches(filename="path to file")
 
         self.assertEqual(match_list, [True, True, False, False, True])
 
     def test_that_get_data_returns_correct_dict(self):
         data_dict = self.muon_load_data.get_data(run=2)
 
-        self.assertEqual(data_dict, {'workspace': self.workspace, 'filename': 'path to file', 'run': 2, 'instrument': ''})
+        self.assertEqual(data_dict, {"workspace": self.workspace, "filename": "path to file", "run": 2, "instrument": ""})
 
     def test_that_get_latest_data_returns_correct_dict(self):
         data_dict = self.muon_load_data.get_latest_data()
 
-        self.assertEqual(data_dict, {'workspace': self.workspace_last, 'filename': 'path to file', 'run': 4, 'instrument': ''})
+        self.assertEqual(data_dict, {"workspace": self.workspace_last, "filename": "path to file", "run": 4, "instrument": ""})
 
 
 if __name__ == "__main__":

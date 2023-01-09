@@ -22,7 +22,8 @@ class DNSFileSelectorView(DNSView):
     """
     Lets user select DNS data files for further reduction.
     """
-    NAME = 'Data'
+
+    NAME = "Data"
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -54,11 +55,9 @@ class DNSFileSelectorView(DNSView):
         }
 
         self._sample_treeview.setContextMenuPolicy(Qt.CustomContextMenu)
-        self._sample_treeview.customContextMenuRequested.connect(
-            self._treeview_clicked)
+        self._sample_treeview.customContextMenuRequested.connect(self._treeview_clicked)
         self._standard_treeview.setContextMenuPolicy(Qt.CustomContextMenu)
-        self._standard_treeview.customContextMenuRequested.connect(
-            self._treeview_clicked)
+        self._standard_treeview.customContextMenuRequested.connect(self._treeview_clicked)
         self._treeview.expanded.connect(self._expanded)
         self._treeview.collapsed.connect(self._expanded)
 
@@ -140,19 +139,19 @@ class DNSFileSelectorView(DNSView):
         Returning chosen filters which should be applied to the list of scans.
         """
         state_dict = self.get_state()
-        free_text = state_dict['filter_free_text']
+        free_text = state_dict["filter_free_text"]
         filters = {
-            'det_rot': state_dict['filter_det_rot'],
-            'sample_rot': state_dict['filter_sample_rot'],
-            ' scan': state_dict['filter_scans'],
+            "det_rot": state_dict["filter_det_rot"],
+            "sample_rot": state_dict["filter_sample_rot"],
+            " scan": state_dict["filter_scans"],
             # space is important not to get cscans
-            'cscan': state_dict['filter_cscans'],
-            free_text: state_dict['filter_free'],
+            "cscan": state_dict["filter_cscans"],
+            free_text: state_dict["filter_free"],
         }
-        if filters[' scan'] and filters['cscan']:
-            filters['scan'] = True
-            filters.pop(' scan')
-            filters.pop('cscan')
+        if filters[" scan"] and filters["cscan"]:
+            filters["scan"] = True
+            filters.pop(" scan")
+            filters.pop("cscan")
         return filters
 
     def get_number_scans_to_check(self):
@@ -164,9 +163,9 @@ class DNSFileSelectorView(DNSView):
     def get_standard_filters(self):
         state_dict = self.get_state()
         filters = {
-            'vanadium': state_dict['filter_vanadium'],
-            'nicr': state_dict['filter_nicr'],
-            'empty': state_dict['filter_empty'],
+            "vanadium": state_dict["filter_vanadium"],
+            "nicr": state_dict["filter_nicr"],
+            "empty": state_dict["filter_empty"],
         }
         return filters
 
@@ -192,9 +191,7 @@ class DNSFileSelectorView(DNSView):
     # progress dialog
     def open_progress_dialog(self, num_of_steps):
         if num_of_steps:
-            self.progress = QProgressDialog(
-                f"Loading {num_of_steps} files...", "Abort Loading", 0,
-                num_of_steps)
+            self.progress = QProgressDialog(f"Loading {num_of_steps} files...", "Abort Loading", 0, num_of_steps)
             self.progress.setWindowModality(Qt.WindowModal)
             self.progress.setMinimumDuration(200)
             self.progress.open(self._progress_canceled)
@@ -272,13 +269,8 @@ class DNSFileSelectorView(DNSView):
         self._ui.pB_sample_data.clicked.connect(self._sample_data_clicked)
 
     def _attach_checkbox_signal_slots(self):
-        self._map['filter_vanadium'].stateChanged.connect(
-            self._filter_standard_checked)
-        self._map['filter_nicr'].stateChanged.connect(
-            self._filter_standard_checked)
-        self._map['filter_empty'].stateChanged.connect(
-            self._filter_standard_checked)
-        self._map['autoload_new'].stateChanged.connect(
-            self._autoload_new_checked)
-        self._map['auto_select_standard'].stateChanged.connect(
-            self._auto_select_standard_clicked)
+        self._map["filter_vanadium"].stateChanged.connect(self._filter_standard_checked)
+        self._map["filter_nicr"].stateChanged.connect(self._filter_standard_checked)
+        self._map["filter_empty"].stateChanged.connect(self._filter_standard_checked)
+        self._map["autoload_new"].stateChanged.connect(self._autoload_new_checked)
+        self._map["auto_select_standard"].stateChanged.connect(self._auto_select_standard_clicked)

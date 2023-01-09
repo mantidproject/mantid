@@ -101,6 +101,7 @@ class DataCopier(UserNotifier):
         # if we have all rows selected, but we are using the custom table model
         # then we have to expand the selection to include non-visible rows
         from mantidqt.widgets.workspacedisplay.table.table_model import TableModel
+
         if isinstance(table.model(), TableModel):
             if (bottom + 1 - top) == table.rowCount():
                 bottom = table.model().max_rows() - 1

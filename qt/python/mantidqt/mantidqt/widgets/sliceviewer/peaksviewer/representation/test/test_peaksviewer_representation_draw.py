@@ -11,10 +11,8 @@ import unittest
 from unittest.mock import MagicMock
 
 # local imports
-from mantidqt.widgets.sliceviewer.peaksviewer.representation.draw \
-    import draw_peak_representation
-from mantidqt.widgets.sliceviewer.peaksviewer.representation.test.shapetesthelpers \
-    import create_ellipsoid_info, create_sphere_info
+from mantidqt.widgets.sliceviewer.peaksviewer.representation.draw import draw_peak_representation
+from mantidqt.widgets.sliceviewer.peaksviewer.representation.test.shapetesthelpers import create_ellipsoid_info, create_sphere_info
 
 
 def draw_shape(shape_name, shape_info=None):
@@ -24,7 +22,7 @@ def draw_shape(shape_name, shape_info=None):
     :param shape_info: The properties of the shape as an optional JSON-encoded str
     """
     peak_origin, fg_color, bg_color = [1, 3, 5], "r", "g"
-    peak_shape, slice_info, painter = (MagicMock(), ) * 3
+    peak_shape, slice_info, painter = (MagicMock(),) * 3
     painter.axes = MagicMock()
     painter.axes.get_xlim.return_value = (-1, 1)
     peak_shape.shapeName.return_value = shape_name
@@ -32,8 +30,8 @@ def draw_shape(shape_name, shape_info=None):
         peak_shape.toJSON.return_value = shape_info
     # identity transform
     slice_info.transform.side_effect = lambda x: x
-    slice_info.z_value = 5.
-    slice_info.z_width = 10.
+    slice_info.z_value = 5.0
+    slice_info.z_width = 10.0
 
     draw_peak_representation(peak_origin, peak_shape, slice_info, painter, fg_color, bg_color)
 
@@ -68,8 +66,7 @@ class DrawTest(unittest.TestCase):
         painter.elliptical_shell.assert_called_once()
 
     def test_draw_peak_representation_for_ellipsoid_shape(self):
-        shape_descr = create_ellipsoid_info((0.5, 0.3, 0.2), ("1 0 0", "0 1 0", "0 0 1"),
-                                            ((1.45, 1.25, 1.15), (1.5, 1.3, 1.2)))
+        shape_descr = create_ellipsoid_info((0.5, 0.3, 0.2), ("1 0 0", "0 1 0", "0 0 1"), ((1.45, 1.25, 1.15), (1.5, 1.3, 1.2)))
         painter = draw_shape("ellipsoid", json.dumps(shape_descr))
 
         painter.cross.assert_called_once()

@@ -4,9 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.kernel import (UsageService, FeatureType)
+from mantid.kernel import UsageService, FeatureType
 
 
 def report_interface_startup(name):
-    #interface startup
+    # interface startup
     UsageService.registerFeatureUsage(FeatureType.Interface, name, False)

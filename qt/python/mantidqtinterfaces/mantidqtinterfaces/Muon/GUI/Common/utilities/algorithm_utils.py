@@ -12,7 +12,7 @@ from copy import copy
 from mantid.kernel import PhysicalConstants as const
 
 
-muon_logger = Logger('Muon-Algs')
+muon_logger = Logger("Muon-Algs")
 
 
 def create_empty_table(name):
@@ -71,9 +71,9 @@ def run_MuonPairingAsymmetry(parameter_dict, workspace_name):
 
 def run_EstimateMuonAsymmetryFromCounts(parameter_dict, workspace_name, unormalised_workspace_name):
     """
-        Apply the run_EstimateMuonAsymmetryFromCounts algorithm with the properties supplied through
-        the input dictionary of {property_name:property_value} pairs.
-        Returns the calculated workspace name.
+    Apply the run_EstimateMuonAsymmetryFromCounts algorithm with the properties supplied through
+    the input dictionary of {property_name:property_value} pairs.
+    Returns the calculated workspace name.
     """
     alg = mantid.AlgorithmManager.create("EstimateMuonAsymmetryFromCounts")
     alg.initialize()
@@ -93,7 +93,7 @@ def run_CalMuonDetectorPhases(parameter_dict, alg, fitted_workspace_name):
     alg.setProperty("DataFitted", fitted_workspace_name)
     alg.setProperties(parameter_dict)
     alg.execute()
-    return alg.getProperty("DetectorTable").valueAsStr, alg.getProperty('DataFitted').valueAsStr
+    return alg.getProperty("DetectorTable").valueAsStr, alg.getProperty("DataFitted").valueAsStr
 
 
 def run_PhaseQuad(parameters_dict, phase_quad_workspace_name):
@@ -144,53 +144,63 @@ def run_MuonMaxent(parameters_dict, alg, output_workspace_name):
 
 
 def run_Fit(parameters_dict, alg):
-    create_output = parameters_dict['CreateOutput'] if 'CreateOutput' in parameters_dict else True
+    create_output = parameters_dict["CreateOutput"] if "CreateOutput" in parameters_dict else True
 
     alg.initialize()
     alg.setAlwaysStoreInADS(True)
     alg.setRethrows(True)
-    alg.setProperty('CreateOutput', create_output)
-    pruned_parameter_dict = {key: value for key, value in parameters_dict.items() if
-                             key not in ['InputWorkspace', 'StartX', 'EndX', 'Exclude']}
+    alg.setProperty("CreateOutput", create_output)
+    pruned_parameter_dict = {
+        key: value for key, value in parameters_dict.items() if key not in ["InputWorkspace", "StartX", "EndX", "Exclude"]
+    }
     alg.setProperties(pruned_parameter_dict)
-    alg.setProperty('InputWorkspace', parameters_dict['InputWorkspace'])
-    alg.setProperty('StartX', parameters_dict['StartX'])
-    alg.setProperty('EndX', parameters_dict['EndX'])
-    if 'Exclude' in parameters_dict:
-        alg.setProperty('Exclude', parameters_dict['Exclude'])
+    alg.setProperty("InputWorkspace", parameters_dict["InputWorkspace"])
+    alg.setProperty("StartX", parameters_dict["StartX"])
+    alg.setProperty("EndX", parameters_dict["EndX"])
+    if "Exclude" in parameters_dict:
+        alg.setProperty("Exclude", parameters_dict["Exclude"])
     alg.execute()
     if create_output:
-        return alg.getProperty("OutputWorkspace").valueAsStr, alg.getProperty("OutputParameters").valueAsStr, \
-               alg.getProperty("Function").value, alg.getProperty('OutputStatus').value, \
-               alg.getProperty('OutputChi2overDoF').value, alg.getProperty("OutputNormalisedCovarianceMatrix").valueAsStr
+        return (
+            alg.getProperty("OutputWorkspace").valueAsStr,
+            alg.getProperty("OutputParameters").valueAsStr,
+            alg.getProperty("Function").value,
+            alg.getProperty("OutputStatus").value,
+            alg.getProperty("OutputChi2overDoF").value,
+            alg.getProperty("OutputNormalisedCovarianceMatrix").valueAsStr,
+        )
     else:
-        return alg.getProperty("Function").value, alg.getProperty('OutputStatus').value, \
-               alg.getProperty('OutputChi2overDoF').value
+        return alg.getProperty("Function").value, alg.getProperty("OutputStatus").value, alg.getProperty("OutputChi2overDoF").value
 
 
 def run_simultaneous_Fit(parameters_dict, alg):
     alg.initialize()
     alg.setAlwaysStoreInADS(True)
     alg.setRethrows(True)
-    alg.setProperty('CreateOutput', True)
-    pruned_parameter_dict = {key: value for key,value in parameters_dict.items() if
-                             key not in ['InputWorkspace', 'StartX', 'EndX', 'Exclude']}
+    alg.setProperty("CreateOutput", True)
+    pruned_parameter_dict = {
+        key: value for key, value in parameters_dict.items() if key not in ["InputWorkspace", "StartX", "EndX", "Exclude"]
+    }
     alg.setProperties(pruned_parameter_dict)
 
-    for index, input_workspace in enumerate(parameters_dict['InputWorkspace']):
-        index_str = '_' + str(index) if index else ''
-        alg.setProperty('InputWorkspace' + index_str, input_workspace)
-        alg.setProperty('StartX' + index_str, parameters_dict['StartX'][index])
-        alg.setProperty('EndX' + index_str, parameters_dict['EndX'][index])
-        if 'Exclude' in parameters_dict:
-            alg.setProperty('Exclude' + index_str, parameters_dict['Exclude'][index])
+    for index, input_workspace in enumerate(parameters_dict["InputWorkspace"]):
+        index_str = "_" + str(index) if index else ""
+        alg.setProperty("InputWorkspace" + index_str, input_workspace)
+        alg.setProperty("StartX" + index_str, parameters_dict["StartX"][index])
+        alg.setProperty("EndX" + index_str, parameters_dict["EndX"][index])
+        if "Exclude" in parameters_dict:
+            alg.setProperty("Exclude" + index_str, parameters_dict["Exclude"][index])
 
     alg.execute()
 
-    return alg.getProperty('OutputWorkspace').valueAsStr, alg.getProperty('OutputParameters').valueAsStr, \
-        alg.getProperty('Function').value, alg.getProperty('OutputStatus').value, alg.getProperty(
-        'OutputChi2overDoF').value, \
-        alg.getProperty("OutputNormalisedCovarianceMatrix").valueAsStr
+    return (
+        alg.getProperty("OutputWorkspace").valueAsStr,
+        alg.getProperty("OutputParameters").valueAsStr,
+        alg.getProperty("Function").value,
+        alg.getProperty("OutputStatus").value,
+        alg.getProperty("OutputChi2overDoF").value,
+        alg.getProperty("OutputNormalisedCovarianceMatrix").valueAsStr,
+    )
 
 
 def run_CalculateMuonAsymmetry(parameters_dict, alg):
@@ -199,9 +209,14 @@ def run_CalculateMuonAsymmetry(parameters_dict, alg):
     alg.setRethrows(True)
     alg.setProperties(parameters_dict)
     alg.execute()
-    return alg.getProperty('OutputWorkspace').valueAsStr, alg.getProperty('OutputParameters').valueAsStr, \
-        alg.getProperty("OutputFunction").value, alg.getProperty('OutputStatus').value, \
-        alg.getProperty('ChiSquared').value, alg.getProperty("OutputNormalisedCovarianceMatrix").valueAsStr
+    return (
+        alg.getProperty("OutputWorkspace").valueAsStr,
+        alg.getProperty("OutputParameters").valueAsStr,
+        alg.getProperty("OutputFunction").value,
+        alg.getProperty("OutputStatus").value,
+        alg.getProperty("ChiSquared").value,
+        alg.getProperty("OutputNormalisedCovarianceMatrix").valueAsStr,
+    )
 
 
 def run_AppendSpectra(ws1, ws2):
@@ -248,7 +263,7 @@ def run_Plus(parameter_dict):
     return alg.getProperty("OutputWorkspace").value
 
 
-#cannot import the strings from the context as it causes a circular import
+# cannot import the strings from the context as it causes a circular import
 def convert_to_field(workspace_name, output_name):
     """
     Apply the ConvertAxisByFormula algorithm to convert from MHz to Field.
@@ -258,9 +273,9 @@ def convert_to_field(workspace_name, output_name):
     alg.setAlwaysStoreInADS(True)
     alg.setProperty("InputWorkspace", workspace_name)
     alg.setProperty("OutputWorkspace", output_name)
-    alg.setProperty("Formula", 'x * 1. / '+str(const.MuonGyromagneticRatio))
-    alg.setProperty("AxisTitle", 'Field')
-    alg.setProperty('AxisUnits', 'Gauss')
+    alg.setProperty("Formula", "x * 1. / " + str(const.MuonGyromagneticRatio))
+    alg.setProperty("AxisTitle", "Field")
+    alg.setProperty("AxisUnits", "Gauss")
     alg.execute()
     return alg.getProperty("OutputWorkspace").valueAsStr
 
@@ -274,9 +289,9 @@ def convert_to_freq(workspace_name, output_name):
     alg.setAlwaysStoreInADS(True)
     alg.setProperty("InputWorkspace", workspace_name)
     alg.setProperty("OutputWorkspace", output_name)
-    alg.setProperty("Formula", 'x * '+str(const.MuonGyromagneticRatio))
-    alg.setProperty("AxisTitle", 'Frequency')
-    alg.setProperty('AxisUnits', 'MHz')
+    alg.setProperty("Formula", "x * " + str(const.MuonGyromagneticRatio))
+    alg.setProperty("AxisTitle", "Frequency")
+    alg.setProperty("AxisUnits", "MHz")
     alg.execute()
     return alg.getProperty("OutputWorkspace").valueAsStr
 

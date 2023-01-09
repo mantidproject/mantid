@@ -24,6 +24,7 @@ class StaticWorkspaceWrapper:
     the ADS. This is to avoid the shared pointer to the workspace in this class becoming a shared pointer to a workspace
     that can be overwritten in the ADS.
     """
+
     workspace_name: str
     workspace: Workspace
 

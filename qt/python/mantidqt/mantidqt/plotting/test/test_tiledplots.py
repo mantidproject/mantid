@@ -14,9 +14,10 @@ from unittest import TestCase, main
 # third party imports
 import matplotlib
 
-matplotlib.use('AGG')  # noqa
+matplotlib.use("AGG")  # noqa
 import matplotlib.pyplot as plt
 from matplotlib import _pylab_helpers
+
 # local imports
 # register mantid projection
 import mantid.plots  # noqa
@@ -60,22 +61,20 @@ class TiledPlotsTest(TestCase):
 
     def setUp(self):
         if self._test_ws is None:
-            self.__class__._test_ws = WorkspaceFactory.Instance().create(
-                "Workspace2D", NVectors=2, YLength=5, XLength=5)
+            self.__class__._test_ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=2, YLength=5, XLength=5)
         if self._test_ws_2 is None:
-            self.__class__._test_ws_2 = WorkspaceFactory.Instance().create(
-                "Workspace2D", NVectors=2, YLength=5, XLength=5)
+            self.__class__._test_ws_2 = WorkspaceFactory.Instance().create("Workspace2D", NVectors=2, YLength=5, XLength=5)
 
-        AnalysisDataService.addOrReplace('test_ws', self._test_ws)
-        AnalysisDataService.addOrReplace('test_ws_2', self._test_ws_2)
+        AnalysisDataService.addOrReplace("test_ws", self._test_ws)
+        AnalysisDataService.addOrReplace("test_ws_2", self._test_ws_2)
 
-        self.get_spectra_selection_patcher = mock.patch('mantidqt.plotting.functions.get_spectra_selection')
+        self.get_spectra_selection_patcher = mock.patch("mantidqt.plotting.functions.get_spectra_selection")
         self.addCleanup(self.get_spectra_selection_patcher.stop)
         self.get_spectra_selection_mock = self.get_spectra_selection_patcher.start()
 
     def tearDown(self):
         AnalysisDataService.Instance().clear()
-        plt.close('all')
+        plt.close("all")
 
     def test_get_plot_fig_returns_same_figure_and_axes_if_figure_provided_and_overplot_is_true(self):
         initial_fig = plt.Figure()
@@ -111,60 +110,61 @@ class TiledPlotsTest(TestCase):
 
     def test_get_plot_fig_with_overplot_true_maintains_axes_scales(self):
         ax = plt.gca()
-        ax.set_xscale('log')
-        ax.set_yscale('log')
+        ax.set_xscale("log")
+        ax.set_yscale("log")
 
         fig, axes = get_plot_fig(overplot=True)
 
-        self.assertEqual(axes[0].get_xscale(), 'log')
-        self.assertEqual(axes[0].get_yscale(), 'log')
+        self.assertEqual(axes[0].get_xscale(), "log")
+        self.assertEqual(axes[0].get_yscale(), "log")
 
     def test_tiled_plot_from_multiple_workspaces_no_errors(self):
-        workspaces = ['test_ws', 'test_ws_2']
+        workspaces = ["test_ws", "test_ws_2"]
 
         fig = self._create_plot(names=workspaces, errors=False, overplot=False)
 
         self.assertEqual(len(fig.axes), 2)
-        self.assertEqual(list(fig.axes[0].tracked_workspaces.keys()), ['test_ws'])
-        self.assertEqual([artist.workspace_index for artist in fig.axes[0].tracked_workspaces['test_ws']], [0])
-        self.assertEqual(list(fig.axes[1].tracked_workspaces.keys()), ['test_ws_2'])
-        self.assertEqual([artist.workspace_index for artist in fig.axes[1].tracked_workspaces['test_ws_2']], [0])
+        self.assertEqual(list(fig.axes[0].tracked_workspaces.keys()), ["test_ws"])
+        self.assertEqual([artist.workspace_index for artist in fig.axes[0].tracked_workspaces["test_ws"]], [0])
+        self.assertEqual(list(fig.axes[1].tracked_workspaces.keys()), ["test_ws_2"])
+        self.assertEqual([artist.workspace_index for artist in fig.axes[1].tracked_workspaces["test_ws_2"]], [0])
 
     def test_tiled_plot_from_multiple_workspaces_with_errors(self):
-        workspaces = ['test_ws', 'test_ws_2']
+        workspaces = ["test_ws", "test_ws_2"]
 
         fig = self._create_plot(names=workspaces, errors=True, overplot=False)
 
         self.assertEqual(len(fig.axes), 2)
-        self.assertEqual(list(fig.axes[0].tracked_workspaces.keys()), ['test_ws'])
-        self.assertEqual([artist.workspace_index for artist in fig.axes[0].tracked_workspaces['test_ws']], [0])
-        self.assertEqual(list(fig.axes[1].tracked_workspaces.keys()), ['test_ws_2'])
-        self.assertEqual([artist.workspace_index for artist in fig.axes[1].tracked_workspaces['test_ws_2']], [0])
+        self.assertEqual(list(fig.axes[0].tracked_workspaces.keys()), ["test_ws"])
+        self.assertEqual([artist.workspace_index for artist in fig.axes[0].tracked_workspaces["test_ws"]], [0])
+        self.assertEqual(list(fig.axes[1].tracked_workspaces.keys()), ["test_ws_2"])
+        self.assertEqual([artist.workspace_index for artist in fig.axes[1].tracked_workspaces["test_ws_2"]], [0])
 
     def test_overplotting_onto_a_tiled_plot(self):
-        workspaces = ['test_ws', 'test_ws_2']
+        workspaces = ["test_ws", "test_ws_2"]
         fig = self._create_plot(names=workspaces, errors=True, overplot=False)
 
-        fig = self._create_plot(names=['test_ws'], errors=True, overplot=fig.axes[1], wksp_indices=[0, 1],
-                                plot_type=SpectraSelection.Individual, fig=fig)
+        fig = self._create_plot(
+            names=["test_ws"], errors=True, overplot=fig.axes[1], wksp_indices=[0, 1], plot_type=SpectraSelection.Individual, fig=fig
+        )
 
         self.assertEqual(len(fig.axes), 2)
-        self.assertEqual(list(fig.axes[0].tracked_workspaces.keys()), ['test_ws'])
-        self.assertEqual([artist.workspace_index for artist in fig.axes[0].tracked_workspaces['test_ws']], [0])
-        self.assertEqual(list(fig.axes[1].tracked_workspaces.keys()).sort(), ['test_ws', 'test_ws_2'].sort())
-        self.assertEqual([artist.workspace_index for artist in fig.axes[1].tracked_workspaces['test_ws_2']], [0])
-        self.assertEqual([artist.workspace_index for artist in fig.axes[1].tracked_workspaces['test_ws']], [0, 1])
+        self.assertEqual(list(fig.axes[0].tracked_workspaces.keys()), ["test_ws"])
+        self.assertEqual([artist.workspace_index for artist in fig.axes[0].tracked_workspaces["test_ws"]], [0])
+        self.assertEqual(list(fig.axes[1].tracked_workspaces.keys()).sort(), ["test_ws", "test_ws_2"].sort())
+        self.assertEqual([artist.workspace_index for artist in fig.axes[1].tracked_workspaces["test_ws_2"]], [0])
+        self.assertEqual([artist.workspace_index for artist in fig.axes[1].tracked_workspaces["test_ws"]], [0, 1])
 
     def test_plotting_tiled_plot_with_multiple_workspaces_and_multiple_indices(self):
-        workspaces = ['test_ws', 'test_ws_2']
+        workspaces = ["test_ws", "test_ws_2"]
 
         fig = self._create_plot(names=workspaces, errors=True, overplot=False, wksp_indices=[0, 1])
 
         self.assertEqual(len(fig.axes), 4)
-        self.assertEqual(list(fig.axes[0].tracked_workspaces.keys()), ['test_ws'])
-        self.assertEqual([artist.workspace_index for artist in fig.axes[0].tracked_workspaces['test_ws']], [0])
-        self.assertEqual(list(fig.axes[2].tracked_workspaces.keys()), ['test_ws_2'])
-        self.assertEqual([artist.workspace_index for artist in fig.axes[2].tracked_workspaces['test_ws_2']], [0])
+        self.assertEqual(list(fig.axes[0].tracked_workspaces.keys()), ["test_ws"])
+        self.assertEqual([artist.workspace_index for artist in fig.axes[0].tracked_workspaces["test_ws"]], [0])
+        self.assertEqual(list(fig.axes[2].tracked_workspaces.keys()), ["test_ws_2"])
+        self.assertEqual([artist.workspace_index for artist in fig.axes[2].tracked_workspaces["test_ws_2"]], [0])
 
     def _create_plot(self, names, errors, overplot, wksp_indices=None, plot_type=SpectraSelection.Tiled, fig=None):
         selection = SpectraSelection(names)
@@ -175,5 +175,5 @@ class TiledPlotsTest(TestCase):
         return plot_from_names(names=names, errors=errors, overplot=overplot, fig=fig)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

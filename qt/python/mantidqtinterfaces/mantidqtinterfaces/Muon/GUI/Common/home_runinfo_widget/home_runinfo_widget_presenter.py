@@ -8,11 +8,10 @@ from mantidqtinterfaces.Muon.GUI.Common.home_tab.home_tab_presenter import HomeT
 from mantidqtinterfaces.Muon.GUI.Common.utilities.general_utils import round_to_min_whole_number_or_sf
 
 
-SAMPLE_PRECISION =4
+SAMPLE_PRECISION = 4
 
 
 class HomeRunInfoWidgetPresenter(HomeTabSubWidget):
-
     def __init__(self, view, model):
         self._view = view
         self._model = model
@@ -34,9 +33,8 @@ class HomeRunInfoWidgetPresenter(HomeTabSubWidget):
         self._view.add_text_line("Counts (MEv)              : " + str(self._model.get_counts_in_MeV(counts)))
         self._view.add_text_line(self.create_text_line("Good Frames              ", "goodfrm"))
         self._view.add_text_line("Counts per Good Frame     : " + str(self._model.get_counts_per_good_frame(counts)))
-        self._view.add_text_line("Counts per Good Frame per det : "
-                                 + str(self._model.get_counts_per_good_frame_per_detector(counts)))
-        self._view.add_text_line("Average Temperature (K)   : "+str(self._model.get_average_temperature()))
+        self._view.add_text_line("Counts per Good Frame per det : " + str(self._model.get_counts_per_good_frame_per_detector(counts)))
+        self._view.add_text_line("Average Temperature (K)   : " + str(self._model.get_average_temperature()))
         self._view.add_text_line(self.create_text_line("Sample Temperature (K)   ", "sample_temp", SAMPLE_PRECISION))
         self._view.add_text_line(self.create_text_line("Sample Magnetic Field (G)", "sample_magn_field", SAMPLE_PRECISION))
         self._view.add_text_line("Number of DAQ Periods     : " + str(self._model.get_periods()))

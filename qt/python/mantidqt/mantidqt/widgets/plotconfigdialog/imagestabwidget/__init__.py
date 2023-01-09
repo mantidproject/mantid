@@ -13,7 +13,6 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 
 class ImageProperties(dict):
-
     def __init__(self, props):
         self.update(props)
 
@@ -26,42 +25,42 @@ class ImageProperties(dict):
             image = image[0]
         props = dict()
 
-        props['label'] = ""
+        props["label"] = ""
         for ax in image.figure.axes:
             if type(ax) == Axes:
-                props['label'] = ax.yaxis.label.get_text()
+                props["label"] = ax.yaxis.label.get_text()
 
         cmap_name = image.cmap.name if hasattr(image, "cmap") else image.get_cmap().name
-        props['colormap'] = cmap_name
-        props['reverse_colormap'] = False
-        if props['colormap'].endswith('_r'):
-            props['colormap'] = props['colormap'][:-2]
-            props['reverse_colormap'] = True
-        props['vmin'], props['vmax'] = image.get_clim()
+        props["colormap"] = cmap_name
+        props["reverse_colormap"] = False
+        if props["colormap"].endswith("_r"):
+            props["colormap"] = props["colormap"][:-2]
+            props["reverse_colormap"] = True
+        props["vmin"], props["vmax"] = image.get_clim()
 
         if isinstance(image, QuadMesh) or isinstance(image, Poly3DCollection):
-            props['interpolation'] = None
+            props["interpolation"] = None
         else:
-            props['interpolation'] = image.get_interpolation()
+            props["interpolation"] = image.get_interpolation()
         if type(image.norm) is LogNorm:
-            props['scale'] = 'Logarithmic'
+            props["scale"] = "Logarithmic"
         else:
-            props['scale'] = 'Linear'
+            props["scale"] = "Linear"
         return cls(props)
 
     @classmethod
     def from_view(cls, view):
         props = dict()
-        props['label'] = view.get_label()
-        props['colormap'] = view.get_colormap()
-        props['reverse_colormap'] = view.get_reverse_colormap()
-        if props['reverse_colormap']:
-            props['colormap'] += '_r'
-        props['vmin'] = view.get_min_value()
-        props['vmax'] = view.get_max_value()
+        props["label"] = view.get_label()
+        props["colormap"] = view.get_colormap()
+        props["reverse_colormap"] = view.get_reverse_colormap()
+        if props["reverse_colormap"]:
+            props["colormap"] += "_r"
+        props["vmin"] = view.get_min_value()
+        props["vmax"] = view.get_max_value()
         if view.interpolation_enabled():
-            props['interpolation'] = view.get_interpolation().lower()
+            props["interpolation"] = view.get_interpolation().lower()
         else:
-            props['interpolation'] = None
-        props['scale'] = view.get_scale()
+            props["interpolation"] = None
+        props["scale"] = view.get_scale()
         return cls(props)

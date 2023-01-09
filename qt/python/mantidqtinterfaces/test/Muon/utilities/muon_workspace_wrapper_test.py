@@ -192,5 +192,5 @@ class MuonWorkspaceTest(unittest.TestCase):
         self.assertFalse(simpleapi.mtd.doesExist("name1"))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

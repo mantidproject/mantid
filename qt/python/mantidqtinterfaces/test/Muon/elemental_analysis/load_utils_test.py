@@ -28,8 +28,8 @@ class LoadUtilsTest(unittest.TestCase):
         for run, padded_run in tests.items():
             self.assertEqual(lutils.pad_run(run), padded_run)
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.LoadWidget.load_utils.glob.iglob')
-    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.LoadWidget.load_utils.os.path.join')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis.LoadWidget.load_utils.glob.iglob")
+    @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis.LoadWidget.load_utils.os.path.join")
     def test_that_search_user_dirs_explores_all_directories(self, mock_join, mock_iglob):
         expected_len = len(config["datasearch.directories"].split(";"))
         lutils.search_user_dirs(self.test_run)
@@ -43,7 +43,7 @@ class LoadUtilsTest(unittest.TestCase):
         self.assertEqual(lutils.get_detectors_num(self.test_path), "1")
 
     def test_get_detectors_num_throws_with_bad_input(self):
-        input = ['only.one_separator', 'one.much_longer32123.three']
+        input = ["only.one_separator", "one.much_longer32123.three"]
         for value in input:
             with self.assertRaises(Exception):
                 lutils.get_detectors_num(value)
@@ -53,8 +53,8 @@ class LoadUtilsTest(unittest.TestCase):
 
     def test_get_run_type(self):
         self.assertEqual(lutils.get_run_type(self.test_path), "Delayed")
-        self.assertEqual(lutils.get_run_type('a.b10.c'), "Prompt")
-        self.assertEqual(lutils.get_run_type('a.b99.c'), "Total")
+        self.assertEqual(lutils.get_run_type("a.b10.c"), "Prompt")
+        self.assertEqual(lutils.get_run_type("a.b99.c"), "Total")
         with self.assertRaises(KeyError):
             lutils.get_run_type(self.bad_path)
 
@@ -100,8 +100,7 @@ class LoadUtilsTest(unittest.TestCase):
         for i in range(0, num_workspaces):
             name = "test_" + str(i)
             workspace_names.append(name)
-            ws = mantid.WorkspaceFactory.create("Workspace2D", NVectors=1,
-                                                XLength=num_bins, YLength=num_bins)
+            ws = mantid.WorkspaceFactory.create("Workspace2D", NVectors=1, XLength=num_bins, YLength=num_bins)
             mantid.mtd.add(name, ws)
             Y_data = Yfunc(X_data, i)
             E_data = Efunc(X_data, i)
@@ -136,8 +135,7 @@ class LoadUtilsTest(unittest.TestCase):
 
         for i in range(0, 2):
             name = names[i]
-            ws = mantid.WorkspaceFactory.create("Workspace2D", NVectors=1,
-                                                XLength=num_bins, YLength=num_bins)
+            ws = mantid.WorkspaceFactory.create("Workspace2D", NVectors=1, XLength=num_bins, YLength=num_bins)
             mantid.mtd.add(name, ws)
             Y_data = Yfunc(X_data, i)
             E_data = Efunc(X_data, i)
@@ -168,8 +166,7 @@ class LoadUtilsTest(unittest.TestCase):
         tests = {self.test_ws_name: "suffix", "_".join([self.test_ws_name, "test"]): "suffix"}
 
         for workspace_name, suffix in tests.items():
-            self.assertEqual(lutils.replace_workspace_name_suffix(workspace_name, suffix),
-                              self.var_ws_name.format(1, suffix))
+            self.assertEqual(lutils.replace_workspace_name_suffix(workspace_name, suffix), self.var_ws_name.format(1, suffix))
 
 
 if __name__ == "__main__":

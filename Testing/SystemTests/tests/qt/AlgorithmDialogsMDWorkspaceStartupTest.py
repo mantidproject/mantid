@@ -17,5 +17,11 @@ class AlgorithmDialogsMDWorkspaceStartupTest(AlgorithmDialogsStartupTestBase):
     def _setup_test(self) -> None:
         self._workspace_type = "MDWorkspace"
 
-        CreateMDWorkspace(Dimensions="3", EventType="MDEvent", Extents='-10,10,-5,5,-1,1',
-                          Names="Q_lab_x,Q_lab_y,Q_lab_z", Units="1\\A,1\\A,1\\A", OutputWorkspace="ws")
+        CreateMDWorkspace(
+            Dimensions="3",
+            EventType="MDEvent",
+            Extents="-10,10,-5,5,-1,1",
+            Names="Q_lab_x,Q_lab_y,Q_lab_z",
+            Units="1\\A,1\\A,1\\A",
+            OutputWorkspace="ws",
+        )

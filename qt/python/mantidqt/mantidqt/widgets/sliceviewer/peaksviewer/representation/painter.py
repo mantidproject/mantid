@@ -24,8 +24,10 @@ class EllipticalShell(Patch):
     """
 
     def __str__(self):
-        return f"EllipticalShell(center={self.center}, width={self.width}, height={self.height}, " \
-               f"frac_thick={self.frac_thick}, angle={self.angle})"
+        return (
+            f"EllipticalShell(center={self.center}, width={self.width}, height={self.height}, "
+            f"frac_thick={self.frac_thick}, angle={self.angle})"
+        )
 
     def __init__(self, center, width, height, frac_thick, angle=0.0, **kwargs):
         """
@@ -60,17 +62,14 @@ class EllipticalShell(Patch):
 
     def _recompute_transform(self):
         """NOTE: This cannot be called until after this has been added
-                 to an Axes, otherwise unit conversion will fail. This
-                 makes it very important to call the accessor method and
-                 not directly access the transformation member variable.
+        to an Axes, otherwise unit conversion will fail. This
+        makes it very important to call the accessor method and
+        not directly access the transformation member variable.
         """
         center = (self.convert_xunits(self.center[0]), self.convert_yunits(self.center[1]))
         width = self.convert_xunits(self.width)
         height = self.convert_yunits(self.height)
-        self._patch_transform = Affine2D() \
-            .scale(width * 0.5, height * 0.5) \
-            .rotate_deg(self.angle) \
-            .translate(*center)
+        self._patch_transform = Affine2D().scale(width * 0.5, height * 0.5).rotate_deg(self.angle).translate(*center)
 
     def get_patch_transform(self):
         self._recompute_transform()
@@ -87,14 +86,13 @@ class MplPainter:
     Implementation of a PeakPainter that uses matplotlib to draw
     """
 
-    def __init__(self, view: 'SliceViewerDataView'):
+    def __init__(self, view: "SliceViewerDataView"):
         """
         :param view: An object defining an axes property.
         """
         self._view = view
         if not hasattr(self._view, "ax"):
-            raise ValueError("Expected to find an 'ax' attribute on the view. Found {}.".format(
-                type(view)))
+            raise ValueError("Expected to find an 'ax' attribute on the view. Found {}.".format(type(view)))
 
     @property
     def axes(self):
@@ -127,8 +125,12 @@ class MplPainter:
         :param half_width: Half-width of cross
         :param kwargs: Additional matplotlib properties to pass to the call
         """
-        verts = ((x - half_width, y + half_width), (x + half_width, y - half_width),
-                 (x + half_width, y + half_width), (x - half_width, y - half_width))
+        verts = (
+            (x - half_width, y + half_width),
+            (x + half_width, y - half_width),
+            (x + half_width, y + half_width),
+            (x - half_width, y - half_width),
+        )
         codes = (Path.MOVETO, Path.LINETO, Path.MOVETO, Path.LINETO)
         return self.axes.add_patch(PathPatch(Path(verts, codes), **kwargs))
 
@@ -153,8 +155,7 @@ class MplPainter:
         :param angle: Angle in degrees w.r.t X axis
         :param kwargs: Additional matplotlib properties to pass to the call
         """
-        return self.axes.add_patch(
-            EllipticalShell((x, y), outer_width, outer_height, frac_thick, angle, **kwargs))
+        return self.axes.add_patch(EllipticalShell((x, y), outer_width, outer_height, frac_thick, angle, **kwargs))
 
     def shell(self, x, y, outer_radius, thick, **kwargs):
         """Draw a wedge on the Axes
@@ -164,8 +165,7 @@ class MplPainter:
         :param thick: The thickness of the shell
         :param kwargs: Additional matplotlib properties to pass to the call
         """
-        return self.axes.add_patch(
-            Wedge((x, y), outer_radius, theta1=0.0, theta2=360., width=thick, **kwargs))
+        return self.axes.add_patch(Wedge((x, y), outer_radius, theta1=0.0, theta2=360.0, width=thick, **kwargs))
 
     def bbox(self, artist):
         """Determine the lower-left and upper-right coordinates of
@@ -176,17 +176,13 @@ class MplPainter:
         # to set the axis limits
         to_data_coords = self.axes.transData.inverted()
         artist_bbox = artist.get_extents()
-        return to_data_coords.transform(artist_bbox.min), \
-            to_data_coords.transform(artist_bbox.max)
+        return to_data_coords.transform(artist_bbox.min), to_data_coords.transform(artist_bbox.max)
 
 
 class Painted:
     """Combine a collection of artists with the painter that created them"""
 
-    def __init__(self,
-                 painter: MplPainter,
-                 artists,
-                 effective_bbox=None):
+    def __init__(self, painter: MplPainter, artists, effective_bbox=None):
         """
         :param painter: A reference to the painter responsible for
                         drawing the artists.

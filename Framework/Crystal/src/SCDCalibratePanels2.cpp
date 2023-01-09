@@ -96,6 +96,8 @@ void SCDCalibratePanels2::init() {
   setPropertySettings("beta", std::make_unique<EnabledWhenProperty>("RecalculateUB", IS_DEFAULT));
   setPropertySettings("gamma", std::make_unique<EnabledWhenProperty>("RecalculateUB", IS_DEFAULT));
 
+  declareProperty("Tolerance", 0.15, mustBeNonNegative, "Peak indexing tolerance");
+
   // Calibration options group
   // NOTE:
   //  The general workflow of calibration is
@@ -887,12 +889,14 @@ void SCDCalibratePanels2::updateUBMatrix(const IPeaksWorkspace_sptr &pws) {
   calcUB_alg->setProperty("gamma", m_gamma);
   calcUB_alg->executeAsChildAlg();
 
+  double tol = getProperty("Tolerance");
+
   // Since UB is updated, we need to redo the indexation
   auto idxpks_alg = createChildAlgorithm("IndexPeaks", -1, -1, false);
   idxpks_alg->setLogging(LOGCHILDALG);
   idxpks_alg->setProperty("PeaksWorkspace", pws);
-  idxpks_alg->setProperty("RoundHKLs", true); // both are using default
-  idxpks_alg->setProperty("Tolerance", 0.15); // values
+  idxpks_alg->setProperty("RoundHKLs", true); // using default
+  idxpks_alg->setProperty("Tolerance", tol);  // values
   idxpks_alg->executeAsChildAlg();
 }
 

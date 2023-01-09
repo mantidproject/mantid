@@ -5,8 +5,19 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from qtpy.QtWidgets import QMainWindow, QHBoxLayout, QVBoxLayout, QPushButton, QSplitter, QLineEdit, QFileDialog, \
-    QGroupBox, QToolButton, QStatusBar, QLabel
+from qtpy.QtWidgets import (
+    QMainWindow,
+    QHBoxLayout,
+    QVBoxLayout,
+    QPushButton,
+    QSplitter,
+    QLineEdit,
+    QFileDialog,
+    QGroupBox,
+    QToolButton,
+    QStatusBar,
+    QLabel,
+)
 from qtpy.QtCore import Signal, Qt
 from qtpy.QtGui import QCloseEvent
 
@@ -25,6 +36,7 @@ from .rectangle_controller import RectanglesManager
 class SimpleScanViewerView(QMainWindow):
 
     """Index of the slice viewer widget in the splitter. Used to replace it when needed."""
+
     SLICE_VIEWER_SPLITTER_INDEX = 0
 
     """Allowed file extensions"""
@@ -85,14 +97,14 @@ class SimpleScanViewerView(QMainWindow):
         self.multiple_button.setCheckable(True)
 
         # button to set/replace the background workspace
-        self.background_button = QPushButton(text='Set background')
+        self.background_button = QPushButton(text="Set background")
         self.background_button.setVisible(True)
         self.background_button.setCheckable(False)
         self.background_button.clicked.connect(self.on_set_background_clicked)
 
         # status bar with the help
         self.status_bar = QStatusBar(parent=self.splitter)
-        self.status_bar.setStyleSheet('QStatusBar::item {border: None;}')  # Hide spacers between button and label
+        self.status_bar.setStyleSheet("QStatusBar::item {border: None;}")  # Hide spacers between button and label
         self.status_bar_label = QLabel()
         self.help_button = QToolButton()
         self.help_button.setText("?")
@@ -266,10 +278,7 @@ class SimpleScanViewerView(QMainWindow):
 
         dialog = QFileDialog()
         dialog.setFileMode(QFileDialog.ExistingFiles)
-        file_path, _ = dialog.getOpenFileName(parent=self,
-                                              caption="Open file",
-                                              directory=base_directory,
-                                              filter=self.FILE_EXTENSION_FILTER)
+        file_path, _ = dialog.getOpenFileName(parent=self, caption="Open file", directory=base_directory, filter=self.FILE_EXTENSION_FILTER)
 
         return file_path
 

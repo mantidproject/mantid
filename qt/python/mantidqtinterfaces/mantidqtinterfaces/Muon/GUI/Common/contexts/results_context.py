@@ -10,13 +10,10 @@ from mantidqt.utils.observer_pattern import GenericObservable
 
 
 class ResultsContext:
-
     def __init__(self):
         self._result_table_names: list = []
 
-        self.ADS_observer = MuonADSObserver(self.remove,
-                                            self.clear,
-                                            self.replaced)
+        self.ADS_observer = MuonADSObserver(self.remove, self.clear, self.replaced)
         self.remove_observable = GenericObservable()
         self.clear_observable = GenericObservable()
         self.replace_observable = GenericObservable()

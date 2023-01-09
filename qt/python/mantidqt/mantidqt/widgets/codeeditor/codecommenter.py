@@ -10,7 +10,6 @@ import re
 
 
 class CodeCommenter:
-
     def __init__(self, editor):
         self.editor = editor
 
@@ -18,7 +17,7 @@ class CodeCommenter:
         selection_idxs = self._get_selection_idxs()
         self._expand_selection(selection_idxs)
         # Note selection indices to restore highlighting later
-        selected_lines = self.editor.selectedText().split('\n')
+        selected_lines = self.editor.selectedText().split("\n")
 
         if self._are_comments(selected_lines) is True:
             toggled_lines = self._uncomment_lines(selected_lines)
@@ -31,13 +30,13 @@ class CodeCommenter:
             selection_idxs[-1] += 2
 
         # Replace lines with commented/uncommented lines
-        self.editor.replaceSelectedText('\n'.join(toggled_lines))
+        self.editor.replaceSelectedText("\n".join(toggled_lines))
 
         # Restore highlighting
         self.editor.setSelection(*selection_idxs)
 
     def _get_selection_idxs(self):
-        if self.editor.selectedText() == '':
+        if self.editor.selectedText() == "":
             cursor_pos = list(self.editor.getCursorPosition())
             return cursor_pos + cursor_pos
         else:
@@ -49,15 +48,14 @@ class CodeCommenter:
         last character of the last selected line.
         :param selection_idxs: Length 4 list, e.g. [row0, col0, row1, col1]
         """
-        line_end_pos = len(self.editor.text().split('\n')[selection_idxs[2]].rstrip())
-        line_selection_idxs = [selection_idxs[0], 0,
-                               selection_idxs[2], line_end_pos]
+        line_end_pos = len(self.editor.text().split("\n")[selection_idxs[2]].rstrip())
+        line_selection_idxs = [selection_idxs[0], 0, selection_idxs[2], line_end_pos]
         self.editor.setSelection(*line_selection_idxs)
 
     def _are_comments(self, code_lines):
         for line in code_lines:
             if line.strip():
-                if not line.strip().startswith('#'):
+                if not line.strip().startswith("#"):
                     return False
         return True
 
@@ -65,15 +63,15 @@ class CodeCommenter:
         # find least indented code in selection
         istart = min(re.match(r"\s*", line).end() for line in lines)  # use of * means will return 0 if no leading \s
         for i in range(len(lines)):
-            lines[i] = lines[i][:istart] + '# ' + lines[i][istart:]
+            lines[i] = lines[i][:istart] + "# " + lines[i][istart:]
         return lines
 
     def _uncomment_lines(self, lines):
         for i in range(len(lines)):
             # Look for optional whitespace and a hash at the start of a line to determine whether to uncomment it.
             # Distinguish between the two cases {space, no space} after the hash to preserve indentation.
-            if re.match(r'\s*# ', lines[i]):
-                lines[i] = lines[i].replace('# ', '', 1)
-            elif re.match(r'\s*#', lines[i]):
-                lines[i] = lines[i].replace('#', '', 1)
+            if re.match(r"\s*# ", lines[i]):
+                lines[i] = lines[i].replace("# ", "", 1)
+            elif re.match(r"\s*#", lines[i]):
+                lines[i] = lines[i].replace("#", "", 1)
         return lines

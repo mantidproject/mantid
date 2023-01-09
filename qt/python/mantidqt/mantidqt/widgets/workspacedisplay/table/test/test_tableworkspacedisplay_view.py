@@ -18,7 +18,6 @@ from mantidqt.widgets.workspacedisplay.table.table_model import BATCH_SIZE
 
 @start_qapplication
 class TableWorkspaceDisplayViewQtTest(unittest.TestCase, QtWidgetFinder):
-
     def test_window_deleted_correctly(self):
         ws = CreateEmptyTableWorkspace()
 
@@ -48,7 +47,6 @@ class TableWorkspaceDisplayViewQtTest(unittest.TestCase, QtWidgetFinder):
 
 @start_qapplication
 class TableWorkspaceDisplayViewTest(unittest.TestCase):
-
     def test_gui_updated_when_row_added_from_dictionary_standard(self):
         ws = CreateEmptyTableWorkspace()
         ws.addColumn("double", "test_col")
@@ -56,7 +54,7 @@ class TableWorkspaceDisplayViewTest(unittest.TestCase):
         presenter = TableWorkspaceDisplay(ws, batch=False)
         presenter.model.block_model_replace = False
         current_rows = presenter.view.rowCount()
-        ws.addRow({'test_col': 1.0})
+        ws.addRow({"test_col": 1.0})
 
         self.assertEqual(current_rows + 1, presenter.view.model().rowCount())
         presenter.close(ws.name())
@@ -79,7 +77,7 @@ class TableWorkspaceDisplayViewTest(unittest.TestCase):
 
         presenter = TableWorkspaceDisplay(ws, batch=True)
         presenter.model.block_model_replace = False
-        ws.removeColumn('test_col')
+        ws.removeColumn("test_col")
 
         self.assertEqual(0, presenter.view.columnCount())
         presenter.close(ws.name())
@@ -91,7 +89,7 @@ class TableWorkspaceDisplayViewTest(unittest.TestCase):
         presenter = TableWorkspaceDisplay(ws, batch=True)
         presenter.model.block_model_replace = False
         current_rows = presenter.view.rowCount()
-        ws.addRow({'test_col': 1.0})
+        ws.addRow({"test_col": 1.0})
 
         self.assertEqual(current_rows + 1, presenter.view.model().max_rows())
         presenter.close(ws.name())
@@ -123,5 +121,5 @@ class TableWorkspaceDisplayViewTest(unittest.TestCase):
         presenter.close(ws.name())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

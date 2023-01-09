@@ -21,23 +21,21 @@ def calcQE(efix, tthlims, **kwargs):
     efix = np.abs(efix)
     qe_array = []
     # Conversion factors
-    E2q = 2. * constants.m_n / (constants.hbar ** 2)  # Energy to (neutron momentum)^2 (==2m_n/hbar^2)
-    meV2J = constants.e / 1000.  # meV to Joules
-    m2A = 1.e10  # metres to Angstrom
+    E2q = 2.0 * constants.m_n / (constants.hbar**2)  # Energy to (neutron momentum)^2 (==2m_n/hbar^2)
+    meV2J = constants.e / 1000.0  # meV to Joules
+    m2A = 1.0e10  # metres to Angstrom
     for myE in efix:
         emax = -myE * 5
-        if 'emax' in kwargs:
-            emax = -kwargs['emax']
-        elif 'emin' in kwargs:
-            emax = kwargs['emin']
+        if "emax" in kwargs:
+            emax = -kwargs["emax"]
+        elif "emin" in kwargs:
+            emax = kwargs["emin"]
         Et0 = np.linspace(emax, myE, 200)
-        q1 = np.sqrt(
-            E2q * (2 * myE - Et0 - 2 * np.sqrt(myE * (myE - Et0)) * np.cos(np.deg2rad(tthlims[0]))) * meV2J) / m2A
+        q1 = np.sqrt(E2q * (2 * myE - Et0 - 2 * np.sqrt(myE * (myE - Et0)) * np.cos(np.deg2rad(tthlims[0]))) * meV2J) / m2A
         q1 = np.concatenate((np.flipud(q1), q1))
         Et = np.concatenate((np.flipud(fc * Et0), fc * Et0))
         for lines in range(1, len(tthlims)):
-            q2 = np.sqrt(E2q * (
-                2 * myE - Et0 - 2 * np.sqrt(myE * (myE - Et0)) * np.cos(np.deg2rad(tthlims[lines]))) * meV2J) / m2A
+            q2 = np.sqrt(E2q * (2 * myE - Et0 - 2 * np.sqrt(myE * (myE - Et0)) * np.cos(np.deg2rad(tthlims[lines]))) * meV2J) / m2A
             q2 = np.concatenate((np.flipud(q2), q2))
             q1 = np.append(q1, q2)
             Et = np.append(Et, np.concatenate((np.flipud(fc * Et0), fc * Et0)))
@@ -69,8 +67,24 @@ class QECoverageGUI(QtWidgets.QWidget):
         self.tab_direct = QtWidgets.QWidget(self.tabs)
         self.direct_grid = QtWidgets.QVBoxLayout()
         self.tab_direct.setLayout(self.direct_grid)
-        self.direct_inst_list = ['LET', 'MAPS', 'MARI', 'MERLIN', 'ARCS', 'CHESS', 'CNCS', 'HYSPEC', 'SEQUOIA',
-                                 'IN4', 'IN5', 'IN6', 'FOCUS', 'MIBEMOL', 'DNS', 'TOFTOF']
+        self.direct_inst_list = [
+            "LET",
+            "MAPS",
+            "MARI",
+            "MERLIN",
+            "ARCS",
+            "CHESS",
+            "CNCS",
+            "HYSPEC",
+            "SEQUOIA",
+            "IN4",
+            "IN5",
+            "IN6",
+            "FOCUS",
+            "MIBEMOL",
+            "DNS",
+            "TOFTOF",
+        ]
         self.direct_inst_box = QtWidgets.QComboBox(self.tab_direct)
         for inst in self.direct_inst_list:
             self.direct_inst_box.addItem(inst)
@@ -130,7 +144,7 @@ class QECoverageGUI(QtWidgets.QWidget):
         self.tab_indirect = QtWidgets.QWidget(self.tabs)
         self.indirect_grid = QtWidgets.QVBoxLayout()
         self.tab_indirect.setLayout(self.indirect_grid)
-        self.indirect_inst_list = ['IRIS', 'OSIRIS', 'TOSCA', 'VESUVIO', 'BASIS', 'VISION']
+        self.indirect_inst_list = ["IRIS", "OSIRIS", "TOSCA", "VESUVIO", "BASIS", "VISION"]
         self.indirect_inst_box = QtWidgets.QComboBox(self.tab_indirect)
         for inst in self.indirect_inst_list:
             self.indirect_inst_box.addItem(inst)
@@ -142,15 +156,16 @@ class QECoverageGUI(QtWidgets.QWidget):
         self.indirect_ef_label = QtWidgets.QLabel("Ef", self.indirect_ef)
         self.indirect_ef_grid.addWidget(self.indirect_ef_label)
         self.indirect_ef_input = QtWidgets.QComboBox(self.indirect_ef)
-        self.indirect_analysers = \
-            {'IRIS': {'PG002': 1.84, 'PG004': 7.38, 'Mica002': 0.207, 'Mica004': 0.826, 'Mica006': 1.86},
-             'OSIRIS': {'PG002': 1.84, 'PG004': 7.38},
-             # Assuming the PG analysers scatter through 90deg (theta=45deg)
-             'TOSCA': {'PG002': 3.634},
-             'VESUVIO': {'AuFoil': 4897},
-             'BASIS': {'Si111': 2.08, 'Si311': 7.64},
-             # From IDF - implies analyser scattering angle is 90deg
-             'VISION': {'PG002': 3.64}}
+        self.indirect_analysers = {
+            "IRIS": {"PG002": 1.84, "PG004": 7.38, "Mica002": 0.207, "Mica004": 0.826, "Mica006": 1.86},
+            "OSIRIS": {"PG002": 1.84, "PG004": 7.38},
+            # Assuming the PG analysers scatter through 90deg (theta=45deg)
+            "TOSCA": {"PG002": 3.634},
+            "VESUVIO": {"AuFoil": 4897},
+            "BASIS": {"Si111": 2.08, "Si311": 7.64},
+            # From IDF - implies analyser scattering angle is 90deg
+            "VISION": {"PG002": 3.64},
+        }
         for ana in self.indirect_analysers[str(self.indirect_inst_box.currentText())]:
             self.indirect_ef_input.addItem(ana)
         self.indirect_ef_grid.addWidget(self.indirect_ef_input)
@@ -186,12 +201,12 @@ class QECoverageGUI(QtWidgets.QWidget):
         self.figure_grid = QtWidgets.QVBoxLayout()
         self.figure_frame.setLayout(self.figure_grid)
         self.figure = Figure()
-        self.figure.patch.set_facecolor('white')
+        self.figure.patch.set_facecolor("white")
         self.canvas = FigureCanvas(self.figure)
         self.axes = self.figure.add_subplot(111)
-        self.axes.axhline(color='k')
-        self.axes.set_xlabel(r'$|Q|$ ($\AA^{-1}$)')
-        self.axes.set_ylabel('Energy Transfer (meV)')
+        self.axes.axhline(color="k")
+        self.axes.set_xlabel(r"$|Q|$ ($\AA^{-1}$)")
+        self.axes.set_ylabel("Energy Transfer (meV)")
         self.canvas.draw()
         self.mainframe_grid.addWidget(self.canvas)
         self.figure_grid.addWidget(self.canvas)
@@ -205,15 +220,15 @@ class QECoverageGUI(QtWidgets.QWidget):
         self.grid.addWidget(self.helpbtn)
         # Matplotlib does seem to rescale x-axis properly after axes.clear()
         self.xlim = 0
-        #help
+        # help
         self.assistant_process = QtCore.QProcess(self)
         # pylint: disable=protected-access
-        self.mantidplot_name='QE Coverage'
-        #register startup
-        mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface,"QECoverage",False)
+        self.mantidplot_name = "QE Coverage"
+        # register startup
+        mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface, "QECoverage", False)
 
     def onHelp(self):
-        show_interface_help(self.mantidplot_name, self.assistant_process, area='utility')
+        show_interface_help(self.mantidplot_name, self.assistant_process, area="utility")
 
     def closeEvent(self, event):
         self.assistant_process.close()
@@ -234,44 +249,60 @@ class QECoverageGUI(QtWidgets.QWidget):
 
     def onDirectInstActivated(self, Inst):
         self.direct_s2.hide()
-        if Inst == 'LET':
+        if Inst == "LET":
             self.tthlims = [2.65, 140]
-        elif Inst == 'MAPS':
+        elif Inst == "MAPS":
             self.tthlims = [3.0, 19.8, 21.1, 29.8, 31.1, 39.8, 41.1, 49.8, 51.1, 59.8]
-        elif Inst == 'MARI':
-            self.tthlims = [3.43, 29.14, 30.86, 44.14, 45.86, 59.15, 60.86, 74.14, 75.86, 89.14, 90.86, 104.14, 105.86,
-                            119.14, 120.86, 134.14]
-        elif Inst == 'MERLIN':
+        elif Inst == "MARI":
+            self.tthlims = [
+                3.43,
+                29.14,
+                30.86,
+                44.14,
+                45.86,
+                59.15,
+                60.86,
+                74.14,
+                75.86,
+                89.14,
+                90.86,
+                104.14,
+                105.86,
+                119.14,
+                120.86,
+                134.14,
+            ]
+        elif Inst == "MERLIN":
             self.tthlims = [2.838, 135.69]
-        elif Inst == 'ARCS':
+        elif Inst == "ARCS":
             self.tthlims = [2.373, 135.955]
-        elif Inst == 'CHESS':
+        elif Inst == "CHESS":
             self.tthlims = [0.0, 140.0]
-        elif Inst == 'CNCS':
+        elif Inst == "CNCS":
             self.tthlims = [3.806, 132.609]
         # HYSPEC special case - detectors can rotate about sample. Coverage is approximately +/-30deg either
         #  side of center.
-        elif Inst == 'HYSPEC':
+        elif Inst == "HYSPEC":
             self.tthlims = [0, 60]
             # reset s2
             self.direct_s2_input.setText("30")
             self.direct_s2.show()
-        elif Inst == 'SEQUOIA':
+        elif Inst == "SEQUOIA":
             self.tthlims = [1.997, 61.926]
-        elif Inst == 'IN4':
+        elif Inst == "IN4":
             self.tthlims = [2.435, 8.738, 13.075, 120.96]
-        elif Inst == 'IN5':
+        elif Inst == "IN5":
             self.tthlims = [0.372, 134.817]
-        elif Inst == 'IN6':
+        elif Inst == "IN6":
             self.tthlims = [10.323, 115.048]
-        elif Inst == 'FOCUS':
+        elif Inst == "FOCUS":
             self.tthlims = [9.64, 129.4]
-        elif Inst == 'MIBEMOL':
+        elif Inst == "MIBEMOL":
             self.tthlims = [23.5, 147.157]
         # DNS information from web page because only polarised IDF available in Mantid.
-        elif Inst == 'DNS':
+        elif Inst == "DNS":
             self.tthlims = [0, 135]
-        elif Inst == 'TOFTOF':
+        elif Inst == "TOFTOF":
             self.tthlims = [7.591, 140.194]
 
     def onIndirectInstActivated(self, Inst):
@@ -279,25 +310,25 @@ class QECoverageGUI(QtWidgets.QWidget):
         for ana in self.indirect_analysers[str(Inst)]:
             self.indirect_ef_input.addItem(ana)
         # IRIS has separate PG and Mica analysers in different positions. Default is PG.
-        if Inst == 'IRIS':
+        if Inst == "IRIS":
             self.tthlims = [27.07, 158.4]
-        elif Inst == 'OSIRIS':
+        elif Inst == "OSIRIS":
             self.tthlims = [11.5, 148]
         # TOSCA is more complicated than here because different analysers select different energies...
-        elif Inst == 'TOSCA':
+        elif Inst == "TOSCA":
             self.tthlims = [38.92, 140.84]
-        elif Inst == 'VESUVIO':
+        elif Inst == "VESUVIO":
             self.tthlims = [32.7, 163.5]
-        elif Inst == 'BASIS':
+        elif Inst == "BASIS":
             self.tthlims = [6.04, 161.2]
-        elif Inst == 'VISION':
+        elif Inst == "VISION":
             self.tthlims = [81.5, 98.5]
 
     def onIndirectEfActivated(self, Ana):
         Inst = self.indirect_inst_box.currentText()
-        if Inst == 'IRIS' and str(Ana).startswith('PG'):
+        if Inst == "IRIS" and str(Ana).startswith("PG"):
             self.tthlims = [27.07, 158.4]
-        elif Inst == 'IRIS' and str(Ana).startswith('Mica'):
+        elif Inst == "IRIS" and str(Ana).startswith("Mica"):
             self.tthlims = [21.7, 158.02]
 
     def onTabChange(self):
@@ -320,11 +351,11 @@ class QECoverageGUI(QtWidgets.QWidget):
         overplot = self.direct_plotover.isChecked()
         createws = self.direct_createws.isChecked()
         ei_str = self.direct_ei_input.text()
-        eierr = '-----------------------------------------------------------------------------------\n'
-        eierr += 'Error: Invalid input Ei. This must be a number or a comma-separated list of numbers\n'
-        eierr += '-----------------------------------------------------------------------------------\n'
+        eierr = "-----------------------------------------------------------------------------------\n"
+        eierr += "Error: Invalid input Ei. This must be a number or a comma-separated list of numbers\n"
+        eierr += "-----------------------------------------------------------------------------------\n"
         ei_vec = []
-        if ',' not in ei_str:
+        if "," not in ei_str:
             try:
                 ei_vec.append(float(ei_str))
                 ei_vec = self.direct_input_check(ei_vec)
@@ -335,7 +366,7 @@ class QECoverageGUI(QtWidgets.QWidget):
 
         else:
             try:
-                ei_vec = [float(val) for val in ei_str.split(',')]
+                ei_vec = [float(val) for val in ei_str.split(",")]
                 ei_vec = self.direct_input_check(ei_vec)
 
             except ValueError:
@@ -351,22 +382,21 @@ class QECoverageGUI(QtWidgets.QWidget):
         if not overplot:
             self.xlim = 0
             self.axes.clear()
-            self.axes.axhline(color='k')
-        if LooseVersion('2.1.0') > LooseVersion(matplotlib.__version__):
-            self.axes.hold(True) # hold is deprecated since 2.1.0, true by default
+            self.axes.axhline(color="k")
+        if LooseVersion("2.1.0") > LooseVersion(matplotlib.__version__):
+            self.axes.hold(True)  # hold is deprecated since 2.1.0, true by default
         Inst = self.direct_inst_box.currentText()
         for n in range(len(qe)):
-            name = Inst + '_Ei=' + str(ei_vec[n])
-            line, = self.axes.plot(qe[n][0], qe[n][1])
+            name = Inst + "_Ei=" + str(ei_vec[n])
+            (line,) = self.axes.plot(qe[n][0], qe[n][1])
             line.set_label(name)
             if max(qe[n][0]) > self.xlim:
                 self.xlim = max(qe[n][0])
             if createws:
-                mantid.simpleapi.CreateWorkspace(DataX=qe[n][0], DataY=qe[n][1], NSpec=1,
-                                                 OutputWorkspace=str('QECoverage_' + name))
+                mantid.simpleapi.CreateWorkspace(DataX=qe[n][0], DataY=qe[n][1], NSpec=1, OutputWorkspace=str("QECoverage_" + name))
         self.axes.set_xlim([0, self.xlim])
-        self.axes.set_xlabel(r'$|Q|$ ($\AA^{-1}$)')
-        self.axes.set_ylabel('Energy Transfer (meV)')
+        self.axes.set_xlabel(r"$|Q|$ ($\AA^{-1}$)")
+        self.axes.set_ylabel("Energy Transfer (meV)")
         self.axes.legend()
         self.canvas.draw()
 
@@ -386,20 +416,19 @@ class QECoverageGUI(QtWidgets.QWidget):
         if not overplot:
             self.xlim = 0
             self.axes.clear()
-            self.axes.axhline(color='k')
+            self.axes.axhline(color="k")
         else:
-            if LooseVersion('2.1.0') > LooseVersion(matplotlib.__version__):
-                self.axes.hold(True) # hold is deprecated since 2.1.0, true by default
-        line, = self.axes.plot(qe[0][0], qe[0][1])
-        line.set_label(inst + '_' + ana)
+            if LooseVersion("2.1.0") > LooseVersion(matplotlib.__version__):
+                self.axes.hold(True)  # hold is deprecated since 2.1.0, true by default
+        (line,) = self.axes.plot(qe[0][0], qe[0][1])
+        line.set_label(inst + "_" + ana)
         if max(qe[0][0]) > self.xlim:
             self.xlim = max(qe[0][0])
         if createws:
-            mantid.simpleapi.CreateWorkspace(DataX=qe[0][0], DataY=qe[0][1], NSpec=1,
-                                             OutputWorkspace=str('QECoverage_' + inst + '_' + ana))
+            mantid.simpleapi.CreateWorkspace(DataX=qe[0][0], DataY=qe[0][1], NSpec=1, OutputWorkspace=str("QECoverage_" + inst + "_" + ana))
         self.axes.set_xlim([0, self.xlim])
-        self.axes.set_xlabel(r'$|Q|$ ($\AA^{-1}$)')
-        self.axes.set_ylabel('Energy Transfer (meV)')
+        self.axes.set_xlabel(r"$|Q|$ ($\AA^{-1}$)")
+        self.axes.set_ylabel("Energy Transfer (meV)")
         self.axes.legend()
         self.canvas.draw()
 
@@ -435,7 +464,7 @@ class QECoverageGUI(QtWidgets.QWidget):
 
             if update_ei_str:
                 self.direct_ei_input.setText(ei_str)
-                ei_vec = [float(val) for val in ei_str.split(',')]
+                ei_vec = [float(val) for val in ei_str.split(",")]
 
             if self.direct_emin_input.text() == "":
                 self.direct_emin_input.setText(str((ei_vec[0] / 2) * -1))
@@ -453,19 +482,19 @@ class QECoverageGUI(QtWidgets.QWidget):
     def indirect_input_check(self, ana):
 
         Emax_min = 0
-        if ana == 'PG002' or ana == 'Mica006':
+        if ana == "PG002" or ana == "Mica006":
             Emax_min = -1
-        elif ana == 'Si111':
+        elif ana == "Si111":
             Emax_min = -2
-        elif ana == 'PG004' or ana == 'Si311':
+        elif ana == "PG004" or ana == "Si311":
             Emax_min = -7
-        elif ana == 'AuFoil':
+        elif ana == "AuFoil":
             Emax_min = -4896
 
-        self.emaxfield_msgbox.setText("Invalid input has been provided for Emax. "
-                                      "Emax cannot be less than "
-                                      + str(Emax_min) + ", when Ef is set as "
-                                      + ana + "! Please try again.")
+        self.emaxfield_msgbox.setText(
+            "Invalid input has been provided for Emax. "
+            "Emax cannot be less than " + str(Emax_min) + ", when Ef is set as " + ana + "! Please try again."
+        )
 
         if float(self.indirect_emax_input.text()) < Emax_min:
             self.indirect_emax_input.setText(str(Emax_min))

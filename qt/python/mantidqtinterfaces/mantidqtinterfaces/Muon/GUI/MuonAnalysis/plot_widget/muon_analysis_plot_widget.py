@@ -90,10 +90,9 @@ class MuonAnalysisPlotWidget(object):
             # make sure the fit and data pane quickedits are sync'd
             pane_to_match = self.mode_name(FIT) if old_plot_mode == self.mode_name(DATA) else self.mode_name(DATA)
             selection, x_range, auto, y_range, errors = self.plotting_canvas_widgets[old_plot_mode].get_quick_edit_info
-            self.plotting_canvas_widgets[pane_to_match].set_quick_edit_info(selection, x_range, auto, y_range,
-                                                                                  errors)
+            self.plotting_canvas_widgets[pane_to_match].set_quick_edit_info(selection, x_range, auto, y_range, errors)
 
-        if self._current_plot_mode==self.mode_name(RAW):
+        if self._current_plot_mode == self.mode_name(RAW):
             # plot the raw data
             self.modes[RAW].handle_data_updated()
 
@@ -106,14 +105,15 @@ class MuonAnalysisPlotWidget(object):
         self.data_model = PlotDataPaneModel(self._context)
         # names need to match the model for the use outside of this file
         name = self.data_model.name
-        self.plotting_canvas_widgets[name] = PlottingCanvasWidget(self._parent, context=
-                                                                        self._context.plot_panes_context[name],
-                                                                        plot_model=self.data_model)
+        self.plotting_canvas_widgets[name] = PlottingCanvasWidget(
+            self._parent, context=self._context.plot_panes_context[name], plot_model=self.data_model
+        )
         self._views[name] = BasePaneView(self._parent)
         self._views[name].add_canvas_widget(self.plotting_canvas_widgets[name].widget)
 
-        self.modes[DATA] = PlotDataPanePresenter(self._views[name], self.data_model,
-                                                 self._context,self.plotting_canvas_widgets[name].presenter)
+        self.modes[DATA] = PlotDataPanePresenter(
+            self._views[name], self.data_model, self._context, self.plotting_canvas_widgets[name].presenter
+        )
         self._panes.append(self.modes[DATA])
 
     @property
@@ -125,18 +125,19 @@ class MuonAnalysisPlotWidget(object):
         return self.modes[DATA]
 
     """ Fit pane """
+
     def create_fit_pane(self):
         self.fit_model = PlotTimeFitPaneModel(self._context)
         name = self.fit_model.name
-        self.plotting_canvas_widgets[name] = PlottingCanvasWidget(self._parent, context=
-                                                                        self._context.plot_panes_context[name],
-                                                                        plot_model=self.fit_model)
+        self.plotting_canvas_widgets[name] = PlottingCanvasWidget(
+            self._parent, context=self._context.plot_panes_context[name], plot_model=self.fit_model
+        )
         self._views[name] = BasePaneView(self._parent)
         self._views[name].add_canvas_widget(self.plotting_canvas_widgets[name].widget)
 
-        self.modes[FIT] = PlotFitPanePresenter(self._views[name], self.fit_model,
-                                               self._context,self._context.fitting_context,
-                                               self.plotting_canvas_widgets[name].presenter)
+        self.modes[FIT] = PlotFitPanePresenter(
+            self._views[name], self.fit_model, self._context, self._context.fitting_context, self.plotting_canvas_widgets[name].presenter
+        )
         self._panes.append(self.modes[FIT])
 
     @property
@@ -148,17 +149,17 @@ class MuonAnalysisPlotWidget(object):
         return self.modes[FIT]
 
     """ raw pane """
+
     def create_raw_pane(self):
         self.raw_model = RawPaneModel(self._context)
-        name =self.raw_model.name
-        self.plotting_canvas_widgets[name] = PlottingCanvasWidget(self._parent, context=
-                                                                        self._context.plot_panes_context[name],
-                                                                        plot_model=self.raw_model)
+        name = self.raw_model.name
+        self.plotting_canvas_widgets[name] = PlottingCanvasWidget(
+            self._parent, context=self._context.plot_panes_context[name], plot_model=self.raw_model
+        )
         self._views[name] = RawPaneView(self._parent)
         self._views[name].add_canvas_widget(self.plotting_canvas_widgets[name].widget)
 
-        self.modes[RAW] = RawPanePresenter(self._views[name], self.raw_model,
-                                                 self._context,self.plotting_canvas_widgets[name].presenter)
+        self.modes[RAW] = RawPanePresenter(self._views[name], self.raw_model, self._context, self.plotting_canvas_widgets[name].presenter)
         self._panes.append(self.modes[RAW])
 
     @property
@@ -174,19 +175,24 @@ class MuonAnalysisPlotWidget(object):
         return self.modes[RAW]
 
     """ model pane """
+
     def create_model_fit_pane(self):
         self.model_fit_model = PlotModelFitPaneModel(self._context)
         name = self.model_fit_model.name
-        self.plotting_canvas_widgets[name] = PlottingCanvasWidget(self._parent, context=
-                                                                        self._context.plot_panes_context[name],
-                                                                        plot_model=self.model_fit_model)
+        self.plotting_canvas_widgets[name] = PlottingCanvasWidget(
+            self._parent, context=self._context.plot_panes_context[name], plot_model=self.model_fit_model
+        )
 
         self._views[name] = BasePaneView(self._parent)
         self._views[name].add_canvas_widget(self.plotting_canvas_widgets[name].widget)
 
-        self.modes[MODEL] = PlotModelFitPanePresenter(self._views[name], self.model_fit_model, self._context,
-                                                        self._context.model_fitting_context,
-                                                        self.plotting_canvas_widgets[name].presenter)
+        self.modes[MODEL] = PlotModelFitPanePresenter(
+            self._views[name],
+            self.model_fit_model,
+            self._context,
+            self._context.model_fitting_context,
+            self.plotting_canvas_widgets[name].presenter,
+        )
         self._panes.append(self.modes[MODEL])
 
     @property

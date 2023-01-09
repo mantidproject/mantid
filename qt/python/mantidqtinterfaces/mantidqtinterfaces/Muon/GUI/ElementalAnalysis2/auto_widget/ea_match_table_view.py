@@ -6,15 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtWidgets
 
-GROUP_TABLE_COLUMNS = {0: 'Run', 1: 'Detector', 2: 'Probable elements'}
-INVERSE_GROUP_TABLE_COLUMNS = {'Run': 0, 'Detector': 1, 'Probable elements': 2}
-GROUP_TABLE_COLUMN_TOOLTIP = {0: "Run number",
-                              1: "Detector number",
-                              2: "3 most probable elements"}
+GROUP_TABLE_COLUMNS = {0: "Run", 1: "Detector", 2: "Probable elements"}
+INVERSE_GROUP_TABLE_COLUMNS = {"Run": 0, "Detector": 1, "Probable elements": 2}
+GROUP_TABLE_COLUMN_TOOLTIP = {0: "Run number", 1: "Detector number", 2: "3 most probable elements"}
 
 
 class EAMatchTableView(QtWidgets.QWidget):
-
     def __init__(self, parent=None):
         super(EAMatchTableView, self).__init__(parent)
         self.table = QtWidgets.QTableWidget(self)

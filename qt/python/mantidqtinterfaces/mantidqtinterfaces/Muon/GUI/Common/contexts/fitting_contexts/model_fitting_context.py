@@ -9,19 +9,18 @@ from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_
 # The PARAMETERUNITS dict contains two copies of each units because the X and Y unit setting options on workspaces take
 # different formatting for special symbols
 PARAMETERUNITS = {
-    'Frequency': ['MHz', 'MHz'],
-    'Lambda': [r'\mu s^{-1}', r'$\mu$ $s^{-1}$'],
-    'Phi': ['Radians', 'Radians'],
-    'run_start_seconds': ['s', 's'],
-    'run_end_seconds': ['s', 's'],
-    'sample_magn_field': ['G', 'G'],
-    'sample_temp': ['K', 'K'],
-    'Sigma': [r'\mu s^{-1}', r'$\mu$ $s^{-1}$']
+    "Frequency": ["MHz", "MHz"],
+    "Lambda": [r"\mu s^{-1}", r"$\mu$ $s^{-1}$"],
+    "Phi": ["Radians", "Radians"],
+    "run_start_seconds": ["s", "s"],
+    "run_end_seconds": ["s", "s"],
+    "sample_magn_field": ["G", "G"],
+    "sample_temp": ["K", "K"],
+    "Sigma": [r"\mu s^{-1}", r"$\mu$ $s^{-1}$"],
 }
 
 
 class ModelFittingContext(BasicFittingContext):
-
     def __init__(self, allow_double_pulse_fitting: bool = False):
         super(ModelFittingContext, self).__init__(allow_double_pulse_fitting)
 

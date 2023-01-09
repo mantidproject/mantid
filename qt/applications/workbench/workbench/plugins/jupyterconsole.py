@@ -9,20 +9,17 @@
 #
 # system imports
 import warnings
-warnings.filterwarnings(action='ignore',
-                        category=DeprecationWarning,
-                        module='ipykernel')
-warnings.filterwarnings(action='ignore',
-                        category=DeprecationWarning,
-                        module='.*jupyter.*')
+
+warnings.filterwarnings(action="ignore", category=DeprecationWarning, module="ipykernel")
+warnings.filterwarnings(action="ignore", category=DeprecationWarning, module=".*jupyter.*")
 
 # third-party library imports
-from mantidqt.widgets.jupyterconsole import InProcessJupyterConsole # noqa
-from qtpy.QtWidgets import QVBoxLayout # noqa
+from mantidqt.widgets.jupyterconsole import InProcessJupyterConsole  # noqa
+from qtpy.QtWidgets import QVBoxLayout  # noqa
 
 # local package imports
-from ..config.fonts import text_font # noqa
-from ..plugins.base import PluginWidget # noqa
+from ..config.fonts import text_font  # noqa
+from ..plugins.base import PluginWidget  # noqa
 
 # from mantidqt.utils.qt import toQSettings when readSettings/writeSettings are implemented
 
@@ -42,13 +39,12 @@ class JupyterConsole(PluginWidget):
 
         # layout
         font = text_font()
-        self.console = InProcessJupyterConsole(self, startup_code=STARTUP_CODE,
-                                               font_family=font.family(), font_size=font.pointSize())
+        self.console = InProcessJupyterConsole(self, startup_code=STARTUP_CODE, font_family=font.family(), font_size=font.pointSize())
         layout = QVBoxLayout()
         layout.addWidget(self.console)
         self.setLayout(layout)
 
-# ----------------- Plugin API --------------------
+    # ----------------- Plugin API --------------------
 
     def get_plugin_title(self):
         return "IPython"

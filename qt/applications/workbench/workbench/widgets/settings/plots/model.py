@@ -28,8 +28,8 @@ class PlotsSettingsModel(object):
 
     @staticmethod
     def get_current_mpl_font():
-        if mpl.rcParams['font.family'][0] in ['sans-serif', 'serif', 'cursive', 'fantasy', 'monospace']:
-            current_mpl_font = mpl.rcParams['font.' + mpl.rcParams['font.family'][0]][0]
+        if mpl.rcParams["font.family"][0] in ["sans-serif", "serif", "cursive", "fantasy", "monospace"]:
+            current_mpl_font = mpl.rcParams["font." + mpl.rcParams["font.family"][0]][0]
         else:
-            current_mpl_font = mpl.rcParams['font.family'][0]
+            current_mpl_font = mpl.rcParams["font.family"][0]
         return current_mpl_font

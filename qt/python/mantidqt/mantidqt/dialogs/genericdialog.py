@@ -10,4 +10,4 @@
 from mantidqt.utils.qt import import_qt
 
 
-GenericDialog = import_qt('.._common', package='mantidqt.dialogs', attr='GenericDialog')
+GenericDialog = import_qt(".._common", package="mantidqt.dialogs", attr="GenericDialog")

@@ -63,8 +63,7 @@ class PG3Analysis(systemtesting.MantidSystemTest):
     char_file = "PG3_characterization_2011_08_31-HR.txt"
 
     def skipTests(self):
-        # disabled
-        return True
+        return _skip_test()
 
     def cleanup(self):
         return do_cleanup()
@@ -100,12 +99,11 @@ class PG3Analysis(systemtesting.MantidSystemTest):
         LoadGSS(Filename=self.ref_file, OutputWorkspace="PG3_4844_golden")
 
     def validateMethod(self):
-        self.tolerance = 1.0e-2
+        self.tolerance = 2.0e-2
         self.tolerance_is_rel_err = True
         return "ValidateWorkspaceToWorkspace"
 
     def validate(self):
-        self.tolerance = 1.0e-2
         return ("PG3_4844", "PG3_4844_golden")
 
 

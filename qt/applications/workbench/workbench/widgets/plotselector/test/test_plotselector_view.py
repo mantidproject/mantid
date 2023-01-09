@@ -20,14 +20,13 @@ from workbench.widgets.plotselector.view import EXPORT_TYPES, PlotSelectorView, 
 
 @start_qapplication
 class PlotSelectorWidgetTest(unittest.TestCase):
-
     def setUp(self):
         self.presenter = mock.Mock(spec=PlotSelectorPresenter)
         self.presenter.get_plot_name_from_number = mock.Mock(side_effect=self.se_plot_name)
         self.presenter.get_initial_last_active_value = mock.Mock(side_effect=self.se_get_initial_last_active_value)
         self.presenter.is_shown_by_filter = mock.Mock(side_effect=self.se_is_shown_by_filter)
 
-        patcher = mock.patch('workbench.widgets.plotselector.view.get_icon')
+        patcher = mock.patch("workbench.widgets.plotselector.view.get_icon")
         self.mock_get_icon = patcher.start()
         self.mock_get_icon.return_value = QIcon()
         self.addCleanup(patcher.stop)
@@ -52,7 +51,7 @@ class PlotSelectorWidgetTest(unittest.TestCase):
 
     def se_get_initial_last_active_value(self, plot_number):
         plot_name = self.se_plot_name(plot_number)
-        return '_' + plot_name
+        return "_" + plot_name
 
     def se_is_shown_by_filter(self, plot_number):
         if plot_number == 0:
@@ -177,14 +176,14 @@ class PlotSelectorWidgetTest(unittest.TestCase):
     # ----------------------- Plot Filtering ------------------------
 
     def test_filter_text_typing_calls_presenter_and_sets_filter_text(self):
-        QTest.keyClicks(self.view.filter_box, 'plot1')
+        QTest.keyClicks(self.view.filter_box, "plot1")
         self.assertEqual(self.presenter.filter_text_changed.call_count, 5)
-        self.assertEqual(self.view.get_filter_text(), 'plot1')
+        self.assertEqual(self.view.get_filter_text(), "plot1")
 
     def test_programtic_filter_box_change_calls_presenter_and_sets_filter_text(self):
-        self.view.filter_box.setText('plot1')
+        self.view.filter_box.setText("plot1")
         self.assertEqual(self.presenter.filter_text_changed.call_count, 1)
-        self.assertEqual(self.view.get_filter_text(), 'plot1')
+        self.assertEqual(self.view.get_filter_text(), "plot1")
 
     def test_filtering_plot_list_hides_plots(self):
         plot_numbers = [0, 1, 2]
@@ -278,7 +277,7 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         self.mock_get_icon.reset_mock()
         self.view.set_visibility_icon(0, True)
 
-        self.mock_get_icon.assert_called_once_with('mdi.eye')
+        self.mock_get_icon.assert_called_once_with("mdi.eye")
 
     def test_set_visibility_icon_to_hidden(self):
         plot_numbers = [0, 1, 2]
@@ -286,7 +285,7 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         self.mock_get_icon.reset_mock()
         self.view.set_visibility_icon(0, False)
 
-        self.mock_get_icon.assert_called_once_with('mdi.eye', 'lightgrey')
+        self.mock_get_icon.assert_called_once_with("mdi.eye", "lightgrey")
 
     # ------------------------ Plot Renaming ------------------------
 
@@ -425,11 +424,7 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         self.view.set_sort_type(Column.LastActive)
         self.view.set_plot_list([0, 1, 2, 42, 19])
 
-        self.view.set_last_active_values({0: 2,
-                                          1: 1,
-                                          2: "_Plot3",
-                                          42: "_Graph99",
-                                          19: "_Plot20"})
+        self.view.set_last_active_values({0: 2, 1: 1, 2: "_Plot3", 42: "_Graph99", 19: "_Plot20"})
 
         self.assert_list_of_plots_is_set_in_widget(["Plot2", "Plot1", "Graph99", "Plot3", "Plot20"])
 
@@ -446,11 +441,7 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         self.view.sort_type = Column.LastShown
         self.view.set_plot_list(["Plot1", "Plot2", "Plot3", "Graph99", "Plot20"])
 
-        self.view.set_sort_keys({"Plot1": 2,
-                                 "Plot2": 1,
-                                 "Plot3": "_Plot3",
-                                 "Graph99": "_Graph99",
-                                 "Plot20": "_Plot20"})
+        self.view.set_sort_keys({"Plot1": 2, "Plot2": 1, "Plot3": "_Plot3", "Graph99": "_Graph99", "Plot20": "_Plot20"})
 
         self.view.append_to_plot_list("Plot15")
 
@@ -463,8 +454,7 @@ class PlotSelectorWidgetTest(unittest.TestCase):
             self.view.export_button.menu().actions()[i].trigger()
 
         for i in range(len(EXPORT_TYPES)):
-            self.assertEqual(self.presenter.export_plots_called.mock_calls[i],
-                             mock.call(EXPORT_TYPES[i][1]))
+            self.assertEqual(self.presenter.export_plots_called.mock_calls[i], mock.call(EXPORT_TYPES[i][1]))
 
     def test_export_context_menu(self):
         plot_numbers = [0, 1, 2]
@@ -474,9 +464,8 @@ class PlotSelectorWidgetTest(unittest.TestCase):
             self.view.export_menu.actions()[i].trigger()
 
         for i in range(len(EXPORT_TYPES)):
-            self.assertEqual(self.presenter.export_plots_called.mock_calls[i],
-                             mock.call(EXPORT_TYPES[i][1]))
+            self.assertEqual(self.presenter.export_plots_called.mock_calls[i], mock.call(EXPORT_TYPES[i][1]))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -45,7 +45,7 @@ class CodeEditorTabWidget(QTabWidget):
         plus_button = QPushButton(self)
         plus_button.setObjectName(self.NEW_EDITOR_PLUS_BTN_OBJECT_NAME)
         plus_button.clicked.connect(parent.plus_button_clicked)
-        plus_button.setShortcut('Ctrl+N')
+        plus_button.setShortcut("Ctrl+N")
         plus_button.setIcon(get_icon("mdi.plus", "black", 1.2))
         self.setCornerWidget(plus_button, Qt.TopLeftCorner)
 
@@ -98,49 +98,77 @@ class CodeEditorTabWidget(QTabWidget):
 
         self.tabCloseRequested.connect(parent.close_tab)
 
-        run_action = create_action(self, "Run", on_triggered=parent.execute_current_async,
-                                   shortcut=("Ctrl+Enter", "Ctrl+Return"),
-                                   shortcut_context=Qt.ApplicationShortcut,
-                                   shortcut_visible_in_context_menu=True)
+        run_action = create_action(
+            self,
+            "Run",
+            on_triggered=parent.execute_current_async,
+            shortcut=("Ctrl+Enter", "Ctrl+Return"),
+            shortcut_context=Qt.ApplicationShortcut,
+            shortcut_visible_in_context_menu=True,
+        )
 
-        run_all_action = create_action(self, "Run All", on_triggered=parent.execute_async,
-                                       shortcut=("Ctrl+Shift+Enter", "Ctrl+Shift+Return"),
-                                       shortcut_context=Qt.ApplicationShortcut,
-                                       shortcut_visible_in_context_menu=True)
+        run_all_action = create_action(
+            self,
+            "Run All",
+            on_triggered=parent.execute_async,
+            shortcut=("Ctrl+Shift+Enter", "Ctrl+Shift+Return"),
+            shortcut_context=Qt.ApplicationShortcut,
+            shortcut_visible_in_context_menu=True,
+        )
 
-        abort_action = create_action(self, "Abort", on_triggered=parent.abort_current, shortcut="Ctrl+D",
-                                     shortcut_context=Qt.ApplicationShortcut, shortcut_visible_in_context_menu=True)
+        abort_action = create_action(
+            self,
+            "Abort",
+            on_triggered=parent.abort_current,
+            shortcut="Ctrl+D",
+            shortcut_context=Qt.ApplicationShortcut,
+            shortcut_visible_in_context_menu=True,
+        )
 
         # menu action to toggle the find/replace dialog
-        toggle_find_replace = create_action(self, 'Find/Replace...', on_triggered=parent.toggle_find_replace_dialog,
-                                            shortcut='Ctrl+F', shortcut_visible_in_context_menu=True)
+        toggle_find_replace = create_action(
+            self,
+            "Find/Replace...",
+            on_triggered=parent.toggle_find_replace_dialog,
+            shortcut="Ctrl+F",
+            shortcut_visible_in_context_menu=True,
+        )
 
-        toggle_comment_action = create_action(self, "Comment/Uncomment", on_triggered=parent.toggle_comment_current,
-                                              shortcut="Ctrl+/", shortcut_context=Qt.ApplicationShortcut,
-                                              shortcut_visible_in_context_menu=True)
+        toggle_comment_action = create_action(
+            self,
+            "Comment/Uncomment",
+            on_triggered=parent.toggle_comment_current,
+            shortcut="Ctrl+/",
+            shortcut_context=Qt.ApplicationShortcut,
+            shortcut_visible_in_context_menu=True,
+        )
 
-        tabs_to_spaces_action = create_action(self, 'Tabs to Spaces', on_triggered=parent.tabs_to_spaces_current,
-                                              shortcut_visible_in_context_menu=True)
+        tabs_to_spaces_action = create_action(
+            self, "Tabs to Spaces", on_triggered=parent.tabs_to_spaces_current, shortcut_visible_in_context_menu=True
+        )
 
-        spaces_to_tabs_action = create_action(self, 'Spaces to Tabs', on_triggered=parent.spaces_to_tabs_current,
-                                              shortcut_visible_in_context_menu=True)
+        spaces_to_tabs_action = create_action(
+            self, "Spaces to Tabs", on_triggered=parent.spaces_to_tabs_current, shortcut_visible_in_context_menu=True
+        )
 
-        toggle_whitespace_action = create_action(self, 'Toggle Whitespace Visible',
-                                                 on_triggered=parent.toggle_whitespace_visible_all,
-                                                 shortcut_visible_in_context_menu=True)
+        toggle_whitespace_action = create_action(
+            self, "Toggle Whitespace Visible", on_triggered=parent.toggle_whitespace_visible_all, shortcut_visible_in_context_menu=True
+        )
 
         # Store actions for adding to menu bar; None will add a separator
-        editor_actions = [run_action,
-                          run_all_action,
-                          abort_action,
-                          None,
-                          toggle_find_replace,
-                          None,
-                          toggle_comment_action,
-                          toggle_whitespace_action,
-                          None,
-                          tabs_to_spaces_action,
-                          spaces_to_tabs_action]
+        editor_actions = [
+            run_action,
+            run_all_action,
+            abort_action,
+            None,
+            toggle_find_replace,
+            None,
+            toggle_comment_action,
+            toggle_whitespace_action,
+            None,
+            tabs_to_spaces_action,
+            spaces_to_tabs_action,
+        ]
 
         add_actions(options_menu, editor_actions)
 

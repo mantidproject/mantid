@@ -18,8 +18,7 @@ class DeadTimeCorrectionsModel:
     The DeadTimeCorrectionsModel calculates Dead Time corrections.
     """
 
-    def __init__(self, corrections_model: CorrectionsModel, data_context: MuonDataContext,
-                 corrections_context: CorrectionsContext):
+    def __init__(self, corrections_model: CorrectionsModel, data_context: MuonDataContext, corrections_context: CorrectionsContext):
         """Initialize the DeadTimeCorrectionsModel with empty data."""
         self._corrections_model = corrections_model
         self._data_context = data_context
@@ -38,7 +37,8 @@ class DeadTimeCorrectionsModel:
     def _current_dead_times(self) -> list:
         """Returns a list of dead times for the currently displayed run and dead time mode."""
         table_name = self._corrections_context.current_dead_time_table_name_for_run(
-            self._data_context.instrument, self._corrections_model.current_runs())
+            self._data_context.instrument, self._corrections_model.current_runs()
+        )
         table = retrieve_ws(table_name) if table_name else None
         return table.toDict()[DEAD_TIME_TABLE_KEY] if table is not None else []
 
@@ -88,11 +88,12 @@ class DeadTimeCorrectionsModel:
         if len(column_names) != 2:
             return f"Expected 2 columns, found {str(max(0, len(column_names)))} columns."
         if column_names[0] != "spectrum" or column_names[1] != DEAD_TIME_TABLE_KEY:
-            return f"Columns have incorrect names. Column 1 should be 'spectrum' and column 2 should be " \
-                   f"'{DEAD_TIME_TABLE_KEY}'."
+            return f"Columns have incorrect names. Column 1 should be 'spectrum' and column 2 should be " f"'{DEAD_TIME_TABLE_KEY}'."
         number_of_rows = table.rowCount()
         number_of_histograms = self._data_context.current_workspace.getNumberHistograms()
         if number_of_rows != number_of_histograms:
-            return f"The number of histograms ({number_of_histograms}) does not match the number of rows " \
-                   f"({number_of_rows}) in dead time table."
+            return (
+                f"The number of histograms ({number_of_histograms}) does not match the number of rows "
+                f"({number_of_rows}) in dead time table."
+            )
         return ""

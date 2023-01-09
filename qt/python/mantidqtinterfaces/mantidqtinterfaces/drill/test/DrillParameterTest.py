@@ -8,10 +8,8 @@
 import unittest
 from unittest import mock
 
-from mantid.kernel import StringPropertyWithValue, BoolPropertyWithValue, \
-                          FloatArrayProperty, IntArrayProperty
-from mantid.api import FileProperty, MultipleFileProperty, \
-                       WorkspaceGroupProperty, MatrixWorkspaceProperty
+from mantid.kernel import StringPropertyWithValue, BoolPropertyWithValue, FloatArrayProperty, IntArrayProperty
+from mantid.api import FileProperty, MultipleFileProperty, WorkspaceGroupProperty, MatrixWorkspaceProperty
 
 from mantidqtinterfaces.drill.model.DrillParameter import DrillParameter
 

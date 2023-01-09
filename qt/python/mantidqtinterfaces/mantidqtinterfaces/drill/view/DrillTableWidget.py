@@ -5,8 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from qtpy.QtWidgets import QTableWidget, QTableWidgetItem, QHeaderView, \
-                           QStyle, QAbstractItemView, QMessageBox
+from qtpy.QtWidgets import QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAbstractItemView, QMessageBox
 from qtpy.QtGui import QBrush, QColor
 from qtpy.QtCore import *
 
@@ -43,8 +42,7 @@ class DrillTableWidget(QTableWidget):
         self.setItemDelegate(delegate)
 
         # set the default row height to fit a text
-        margin = self.style().pixelMetric(QStyle.PM_FocusFrameVMargin,
-                                          None, self)
+        margin = self.style().pixelMetric(QStyle.PM_FocusFrameVMargin, None, self)
         minSize = self.fontMetrics().height() + 2 * margin
         self.verticalHeader().setDefaultSectionSize(minSize)
 
@@ -102,7 +100,7 @@ class DrillTableWidget(QTableWidget):
         if self._disabled:
             return
         n_rows = self.rowCount()
-        if ((position < 0) or (position > n_rows)):
+        if (position < 0) or (position > n_rows):
             return
         self.insertRow(position)
 
@@ -116,7 +114,7 @@ class DrillTableWidget(QTableWidget):
         if self._disabled:
             return
         n_rows = self.rowCount()
-        if ((position < 0) or (position >= n_rows)):
+        if (position < 0) or (position >= n_rows):
             return
         self.removeRow(position)
         del self._samplePresenters[position]
@@ -169,7 +167,7 @@ class DrillTableWidget(QTableWidget):
         if self._disabled:
             return
         n_rows = self.rowCount()
-        if ((position < 0) or (position >= n_rows)):
+        if (position < 0) or (position >= n_rows):
             return
         for column in range(self.columnCount()):
             item = self.item(position, column)
@@ -188,7 +186,7 @@ class DrillTableWidget(QTableWidget):
             return
         n_rows = self.rowCount()
         n_cols = self.columnCount()
-        if ((row < 0) or (row > n_rows) or (column < 0) or (column > n_cols)):
+        if (row < 0) or (row > n_rows) or (column < 0) or (column > n_cols):
             return
         item = self.item(row, column)
         if item:
@@ -252,12 +250,11 @@ class DrillTableWidget(QTableWidget):
         cellsLi = []
         cellsVi = []
         for i in selected_indexes:
-            if (header.isSectionHidden(i.column())):
+            if header.isSectionHidden(i.column()):
                 continue
             cellsLi.append((i.row(), i.column()))
-            cellsVi.append((self.visualRow(i.row()),
-                            self.visualColumn(i.column())))
-        return sorted(cellsLi, key=lambda i : cellsVi[cellsLi.index(i)][1])
+            cellsVi.append((self.visualRow(i.row()), self.visualColumn(i.column())))
+        return sorted(cellsLi, key=lambda i: cellsVi[cellsLi.index(i)][1])
 
     def getSelectionShape(self):
         """
@@ -336,8 +333,7 @@ class DrillTableWidget(QTableWidget):
             return
         n_rows = self.rowCount()
         n_columns = self.columnCount()
-        if ((row < 0) or (row >= n_rows)
-                or (column < 0) or (column >= n_columns)):
+        if (row < 0) or (row >= n_rows) or (column < 0) or (column >= n_columns):
             return
         cell = self.itemPrototype().clone()
         self.setItem(row, column, cell)
@@ -354,7 +350,7 @@ class DrillTableWidget(QTableWidget):
         """
         self.blockSignals(True)
         brush = QBrush(QColor(color))
-        if (row >= self.rowCount()):
+        if row >= self.rowCount():
             return
         for c in range(self.columnCount()):
             item = self.item(row, c)
@@ -482,9 +478,9 @@ class DrillTableWidget(QTableWidget):
                 if self.getCellContents(j, i):
                     empty = False
             if not empty:
-                q = QMessageBox.question(self, "Column is not empty", "Hiding "
-                                         "the column will erase its content. "
-                                         "Do you want to continue?")
+                q = QMessageBox.question(
+                    self, "Column is not empty", "Hiding " "the column will erase its content. " "Do you want to continue?"
+                )
                 if q == QMessageBox.Yes:
                     for j in range(self.rowCount()):
                         self.setCellContents(j, i, "")

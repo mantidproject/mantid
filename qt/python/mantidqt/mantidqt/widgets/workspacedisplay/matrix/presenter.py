@@ -18,6 +18,7 @@ from mantidqt.widgets.observers.observing_presenter import ObservingPresenter
 from mantidqt.widgets.workspacedisplay.status_bar_view import StatusBarView
 from .model import MatrixWorkspaceDisplayModel
 from .view import MatrixWorkspaceDisplayView
+
 # import of CreateEmptyTableWorkspace is inside method where it is used to avoid
 # starting the mantid framework in unit tests when this module is imported
 
@@ -26,17 +27,19 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
     A_LOT_OF_THINGS_TO_PLOT_MESSAGE = "You selected {} spectra to plot. Are you sure you want to plot that many?"
     NUM_SELECTED_FOR_CONFIRMATION = 10
 
-    def __init__(self,
-                 ws,
-                 plot=None,
-                 parent=None,
-                 window_flags=Qt.Window,
-                 model=None,
-                 view=None,
-                 ads_observer=None,
-                 container=None,
-                 window_width=600,
-                 window_height=400):
+    def __init__(
+        self,
+        ws,
+        plot=None,
+        parent=None,
+        window_flags=Qt.Window,
+        model=None,
+        view=None,
+        ads_observer=None,
+        container=None,
+        window_width=600,
+        window_height=400,
+    ):
         """
         Creates a display for the provided workspace.
 
@@ -53,13 +56,19 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
         # Create model and view, or accept mocked versions
         self.model = model if model else MatrixWorkspaceDisplayModel(ws)
         self.view = view if view else MatrixWorkspaceDisplayView(self, parent, window_flags)
-        self.container = container if container else StatusBarView(parent,
-                                                                   self.view,
-                                                                   self.model.get_name(),
-                                                                   window_width=window_width,
-                                                                   window_height=window_height,
-                                                                   presenter=self,
-                                                                   window_flags=window_flags)
+        self.container = (
+            container
+            if container
+            else StatusBarView(
+                parent,
+                self.view,
+                self.model.get_name(),
+                window_width=window_width,
+                window_height=window_height,
+                presenter=self,
+                window_flags=window_flags,
+            )
+        )
 
         super(MatrixWorkspaceDisplay, self).__init__(self.container.status_bar)
         self.plot = plot
@@ -199,18 +208,17 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
             selected = selection_model.selectedColumns()  # type: list
 
         if len(selected) > self.NUM_SELECTED_FOR_CONFIRMATION and not self.view.ask_confirmation(
-                self.A_LOT_OF_THINGS_TO_PLOT_MESSAGE.format(len(selected))):
+            self.A_LOT_OF_THINGS_TO_PLOT_MESSAGE.format(len(selected))
+        ):
             return
 
         plot_kwargs = {"capsize": 3} if plot_errors else {}
         plot_kwargs["axis"] = axis
 
         ws_list = [self.model._ws]
-        self.plot(ws_list,
-                  wksp_indices=[get_index(index) for index in selected],
-                  errors=plot_errors,
-                  overplot=overplot,
-                  plot_kwargs=plot_kwargs)
+        self.plot(
+            ws_list, wksp_indices=[get_index(index) for index in selected], errors=plot_errors, overplot=overplot, plot_kwargs=plot_kwargs
+        )
 
     def action_plot_spectrum(self, table):
         self._do_action_plot(table, MantidAxType.SPECTRUM, lambda index: index.row())
@@ -272,6 +280,7 @@ def _create_empty_table_workspace(name: str, num_rows: int) -> ITableWorkspace:
     """
     # keep import here to avoid framework initialization in tests
     from mantid.simpleapi import CreateEmptyTableWorkspace
+
     table = CreateEmptyTableWorkspace(OutputWorkspace=name)
     table.setRowCount(num_rows)
     return table

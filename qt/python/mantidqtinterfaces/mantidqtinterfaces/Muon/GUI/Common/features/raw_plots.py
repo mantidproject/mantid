@@ -21,7 +21,7 @@ class AddRawPlots(AddFeature):
 
     def _get_features(self, feature_dict):
         features = []
-        if RAWPLOTS in feature_dict.keys() and feature_dict[RAWPLOTS]==ADD:
+        if RAWPLOTS in feature_dict.keys() and feature_dict[RAWPLOTS] == ADD:
             features.append(ADD)
         return features
 
@@ -31,5 +31,4 @@ class AddRawPlots(AddFeature):
 
     def add_observers_to_feature(self, GUI):
         if ADD in self.feature_list:
-            GUI.load_widget.load_widget.loadNotifier.add_subscriber(
-                GUI.plot_widget.raw_mode.new_data_observer)
+            GUI.load_widget.load_widget.loadNotifier.add_subscriber(GUI.plot_widget.raw_mode.new_data_observer)

@@ -15,6 +15,7 @@ class FFTView(QtWidgets.QWidget):
     """
     creates the layout for the FFT GUI
     """
+
     # signals
     buttonSignal = QtCore.Signal()
     tableClickSignal = QtCore.Signal(object, object)
@@ -36,20 +37,15 @@ class FFTView(QtWidgets.QWidget):
         self.FFTTable.setColumnWidth(1, 300)
         self.FFTTable.verticalHeader().setVisible(False)
         self.FFTTable.horizontalHeader().setStretchLastSection(True)
-        self.FFTTable.setHorizontalHeaderLabels(
-            ("FFT Property;Value").split(";"))
+        self.FFTTable.setHorizontalHeaderLabels(("FFT Property;Value").split(";"))
         # populate table
-        options = ['test']
+        options = ["test"]
 
         table_utils.setRowName(self.FFTTable, 0, "Workspace")
         self.ws = table_utils.addComboToTable(self.FFTTable, 0, options)
         self.Im_box_row = 1
-        table_utils.setRowName(
-            self.FFTTable,
-            self.Im_box_row,
-            "Imaginary Data")
-        self.Im_box = table_utils.addCheckBoxToTable(
-            self.FFTTable, False, self.Im_box_row)
+        table_utils.setRowName(self.FFTTable, self.Im_box_row, "Imaginary Data")
+        self.Im_box = table_utils.addCheckBoxToTable(self.FFTTable, False, self.Im_box_row)
 
         table_utils.setRowName(self.FFTTable, 2, "Imaginary Workspace")
         self.Im_ws = table_utils.addComboToTable(self.FFTTable, 2, options)
@@ -57,8 +53,7 @@ class FFTView(QtWidgets.QWidget):
 
         self.shift_box_row = 3
         table_utils.setRowName(self.FFTTable, self.shift_box_row, "Auto shift")
-        self.shift_box = table_utils.addCheckBoxToTable(
-            self.FFTTable, True, self.shift_box_row)
+        self.shift_box = table_utils.addCheckBoxToTable(self.FFTTable, True, self.shift_box_row)
         self.FFTTable.hideRow(3)
 
         table_utils.setRowName(self.FFTTable, 4, "Shift")
@@ -79,30 +74,24 @@ class FFTView(QtWidgets.QWidget):
         self.FFTTableA.setColumnWidth(1, 300)
         self.FFTTableA.verticalHeader().setVisible(False)
         self.FFTTableA.horizontalHeader().setStretchLastSection(True)
-        self.FFTTableA.setHorizontalHeaderLabels(
-            ("Advanced Property;Value").split(";"))
+        self.FFTTableA.setHorizontalHeaderLabels(("Advanced Property;Value").split(";"))
 
         table_utils.setRowName(self.FFTTableA, 0, "Apodization Function")
         options = ["Lorentz", "Gaussian", "None"]
-        self.apodization = table_utils.addComboToTable(
-            self.FFTTableA, 0, options)
+        self.apodization = table_utils.addComboToTable(self.FFTTableA, 0, options)
 
-        table_utils.setRowName(
-            self.FFTTableA,
-            1,
-            "Decay Constant (micro seconds)")
+        table_utils.setRowName(self.FFTTableA, 1, "Decay Constant (micro seconds)")
         self.decay, _ = table_utils.addDoubleToTable(self.FFTTableA, 4.4, 1, minimum=0.0)
 
         table_utils.setRowName(self.FFTTableA, 2, "Negative Padding")
-        self.negativePadding = table_utils.addCheckBoxToTable(
-            self.FFTTableA, True, 2)
+        self.negativePadding = table_utils.addCheckBoxToTable(self.FFTTableA, True, 2)
 
         table_utils.setRowName(self.FFTTableA, 3, "Padding")
         self.padding = table_utils.addSpinBoxToTable(self.FFTTableA, 1, 3)
         self.FFTTableA.resizeRowsToContents()
 
         # make button
-        self.button = QtWidgets.QPushButton('Calculate FFT', self)
+        self.button = QtWidgets.QPushButton("Calculate FFT", self)
         self.button.setStyleSheet("background-color:lightgrey")
         # connects
         self.FFTTable.cellClicked.connect(self.tableClick)

@@ -21,16 +21,17 @@ class SettingsPresenterTest(unittest.TestCase):
         self.view = mock.create_autospec(settings_view.SettingsView)
         self.presenter = settings_presenter.SettingsPresenter(self.model, self.view)
         self.presenter.settings = {}
-        self.settings = {"save_location": "save",
-                         "full_calibration": "cal",
-                         "logs": "some,logs",
-                         "primary_log": "some",
-                         "sort_ascending": True,
-                         "default_peak": "BackToBackExponential",
-                         "path_to_gsas2": "/opt/gsas2/",
-                         "timeout": 10,
-                         "dSpacing_min": 1.0
-                         }
+        self.settings = {
+            "save_location": "save",
+            "full_calibration": "cal",
+            "logs": "some,logs",
+            "primary_log": "some",
+            "sort_ascending": True,
+            "default_peak": "BackToBackExponential",
+            "path_to_gsas2": "/opt/gsas2/",
+            "timeout": 10,
+            "dSpacing_min": 1.0,
+        }
 
     @patch(dir_path + ".path.isfile")
     def test_load_existing_settings(self, mock_isfile):
@@ -51,7 +52,6 @@ class SettingsPresenterTest(unittest.TestCase):
         self.assertEqual(1, self.view.find_save.call_count)
 
     def test_load_invalid_settings(self):
-
         def return_value(self):
             return {"foo": "dud", "bar": "result"}
 
@@ -65,16 +65,17 @@ class SettingsPresenterTest(unittest.TestCase):
 
     def test_load_invalid_settings_correct_keys(self):
         def return_value(self):
-            return {"save_location": "save",
-                    "full_calibration": "", # invalid
-                    "logs": "some,logs",
-                    "primary_log": "some",
-                    "sort_ascending": True,
-                    "default_peak": "BackToBackExponential",
-                    "path_to_gsas2": "/opt/gsas2/",
-                    "timeout": 10,
-                    "dSpacing_min": 1.0
-                    }
+            return {
+                "save_location": "save",
+                "full_calibration": "",  # invalid
+                "logs": "some,logs",
+                "primary_log": "some",
+                "sort_ascending": True,
+                "default_peak": "BackToBackExponential",
+                "path_to_gsas2": "/opt/gsas2/",
+                "timeout": 10,
+                "dSpacing_min": 1.0,
+            }
 
         self.model.get_settings_dict.side_effect = return_value
         self.presenter.savedir_notifier = mock.MagicMock()
@@ -89,11 +90,11 @@ class SettingsPresenterTest(unittest.TestCase):
     @patch(dir_path + ".path.isfile")
     def test_save_new_settings(self, mock_isfile):
         mock_isfile.return_value = True
-        self.view.get_save_location.return_value = self.settings['save_location'][:]
-        self.view.get_full_calibration.return_value = self.settings['full_calibration'][:]
-        self.view.get_checked_logs.return_value = self.settings['logs'][:]
-        self.view.get_primary_log.return_value = self.settings['primary_log'][:]
-        self.view.get_ascending_checked.return_value = self.settings['sort_ascending']
+        self.view.get_save_location.return_value = self.settings["save_location"][:]
+        self.view.get_full_calibration.return_value = self.settings["full_calibration"][:]
+        self.view.get_checked_logs.return_value = self.settings["logs"][:]
+        self.view.get_primary_log.return_value = self.settings["primary_log"][:]
+        self.view.get_ascending_checked.return_value = self.settings["sort_ascending"]
         self.view.get_peak_function.return_value = self.settings["default_peak"]
         self.view.get_path_to_gsas2.return_value = self.settings["path_to_gsas2"]
         self.view.get_timeout.return_value = self.settings["timeout"]
@@ -125,11 +126,11 @@ class SettingsPresenterTest(unittest.TestCase):
     @patch(dir_path + ".path.isfile")
     def test_save_settings_and_close(self, mock_isfile):
         mock_isfile.return_value = True
-        self.view.get_save_location.return_value = self.settings['save_location'][:]
-        self.view.get_full_calibration.return_value = self.settings['full_calibration'][:]
-        self.view.get_checked_logs.return_value = self.settings['logs'][:]
-        self.view.get_primary_log.return_value = self.settings['primary_log'][:]
-        self.view.get_ascending_checked.return_value = self.settings['sort_ascending']
+        self.view.get_save_location.return_value = self.settings["save_location"][:]
+        self.view.get_full_calibration.return_value = self.settings["full_calibration"][:]
+        self.view.get_checked_logs.return_value = self.settings["logs"][:]
+        self.view.get_primary_log.return_value = self.settings["primary_log"][:]
+        self.view.get_ascending_checked.return_value = self.settings["sort_ascending"]
         self.view.get_peak_function.return_value = self.settings["default_peak"]
         self.view.get_path_to_gsas2.return_value = self.settings["path_to_gsas2"]
         self.view.get_timeout.return_value = self.settings["timeout"]
@@ -151,5 +152,5 @@ class SettingsPresenterTest(unittest.TestCase):
         self.assertTrue(path.exists(settings_presenter.DEFAULT_SETTINGS["full_calibration"]))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
