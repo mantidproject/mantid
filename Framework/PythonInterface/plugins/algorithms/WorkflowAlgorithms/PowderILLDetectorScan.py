@@ -252,8 +252,6 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
                 ExtractMonitors(InputWorkspace=name, DetectorWorkspace=name)
                 ApplyDetectorScanEffCorr(InputWorkspace=name, DetectorEfficiencyWorkspace="__det_eff", OutputWorkspace=name)
 
-        instrument = input_group[0].getInstrument()
-        instrument_name = instrument.getName()
         pixels_to_mask = self.getProperty("InitialMask").value
         if pixels_to_mask != 0 and instrument_name == "D2B":
             mask = self._generate_mask(pixels_to_mask, instrument)
