@@ -7,6 +7,7 @@
 
 #include "MantidHistogramData/Interpolate.h"
 #include "MantidHistogramData/Histogram.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
 
 #include <memory>
@@ -22,6 +23,9 @@ enum class InterpolationType { LINEAR, CSPLINE };
 
 constexpr const char *LINEAR_NAME = "Linear";
 constexpr const char *CSPLINE_NAME = "CSpline";
+
+/// static logger
+Mantid::Kernel::Logger g_log("Interpolate");
 
 /**
  * Compute the number of pre-calculated points given the ysize and step size
@@ -106,7 +110,7 @@ void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
                                 const Mantid::HistogramData::Points &points, Mantid::HistogramData::Histogram &output,
                                 const bool calculateErrors = false, const bool independentErrors = true) {
   auto xs = input.dataX();
-  // Error propagation follows method described in Gardner paper
+  // Interpolation and Error propagation follows method described in Gardner paper
   // "Uncertainties in Interpolated Spectral Data", Journal of Research of the
   // National Institute of Standards and Technology, 2003
   // create tridiagonal "h" matrix
@@ -124,6 +128,10 @@ void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
       }
     }
   }
+  double xsMaxEpsilon = *(std::max_element(xs.begin(), xs.end())) * std::numeric_limits<double>::epsilon();
+  // elements with i=j will have the largest value
+  double hMaxEpsilon = xsMaxEpsilon * 2 / 3;
+
   std::vector<double> d(xs.size() - 2);
   auto ys = input.dataY();
   for (size_t i = 0; i < xs.size() - 2; i++) {
@@ -134,7 +142,7 @@ void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
   std::vector<double> ypp(xs.size() - 2);
   // would be quicker to solve linear equation rather than invert h but also
   // need h-1 elements later on
-  h.invertTridiagonal();
+  h.invertTridiagonal(2 * hMaxEpsilon);
   ypp = h * d;
 
   // add in the zero second derivatives at extreme pts to give natural splines
@@ -171,8 +179,11 @@ void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
     }
   }
 
-  // plug the calculated second derivatives into the formula for each cubic
-  // polynomial y = A*y_i + B*y_i+1 + C*ypp_i + D*ypp_i+1
+  // Plug the calculated second derivatives into the formula for each cubic polynomial:
+  // y = A*y_i + B*y_i+1 + C*ypp_i + D*ypp_i+1
+  // Formula is from Gardner paper which references it from Numerical Recipes in C
+  // It is derived from Taylor expansion about x_i with term in yp_i expressed in terms of
+  // y_i, y_i+1, ypp_i, ypp_i+1
   auto &ynew = output.mutableY();
   for (size_t i = 0; i < points.size(); i++) {
     auto it = std::upper_bound(xs.begin(), xs.end(), points[i]);
@@ -243,19 +254,25 @@ void interpolateYLinearInplace(const Mantid::HistogramData::Histogram &input,
   auto &ynew = output.mutableY();
   auto &enew = output.mutableE();
 
+  bool calculateInterpolationErrors = true;
   std::vector<double> secondDeriv(input.size() - 1);
   for (size_t i = 0; i < input.size() - 1; i++) {
     if (calculateErrors) {
       if (xold.size() < 3) {
-        throw std::runtime_error("Number of x points too small to calculate errors");
-      }
-      auto x0_secondDeriv = i < 1 ? 0 : i - 1;
-      auto x1_secondDeriv = x0_secondDeriv + 1 >= xold.size() ? xold.size() - 1 : x0_secondDeriv + 1;
-      auto x2_secondDeriv = x1_secondDeriv + 1;
+        g_log.warning("Number of x points too small to calculate interpolation errors");
+        calculateInterpolationErrors = false;
+      } else {
 
-      auto firstDeriv01 = (yold[x1_secondDeriv] - yold[x0_secondDeriv]) / (xold[x1_secondDeriv] - xold[x0_secondDeriv]);
-      auto firstDeriv12 = (yold[x2_secondDeriv] - yold[x1_secondDeriv]) / (xold[x2_secondDeriv] - xold[x1_secondDeriv]);
-      secondDeriv[i] = (firstDeriv12 - firstDeriv01) / ((xold[x2_secondDeriv] - xold[x0_secondDeriv]) / 2);
+        auto x0_secondDeriv = i < 1 ? 0 : i - 1;
+        auto x1_secondDeriv = x0_secondDeriv + 1 >= xold.size() ? xold.size() - 1 : x0_secondDeriv + 1;
+        auto x2_secondDeriv = x1_secondDeriv + 1;
+
+        auto firstDeriv01 =
+            (yold[x1_secondDeriv] - yold[x0_secondDeriv]) / (xold[x1_secondDeriv] - xold[x0_secondDeriv]);
+        auto firstDeriv12 =
+            (yold[x2_secondDeriv] - yold[x1_secondDeriv]) / (xold[x2_secondDeriv] - xold[x1_secondDeriv]);
+        secondDeriv[i] = (firstDeriv12 - firstDeriv01) / ((xold[x2_secondDeriv] - xold[x0_secondDeriv]) / 2);
+      }
     }
   }
   for (size_t i = 0; i < nypts; ++i) {
@@ -290,7 +307,8 @@ void interpolateYLinearInplace(const Mantid::HistogramData::Histogram &input,
         sourcePointsError = (xp - x1) * e2 + (x2 - xp) * e1;
       }
       // calculate interpolation error
-      auto interpError = 0.5 * (xp - x1) * (x2 - xp) * std::abs(secondDeriv[index - 1]);
+      auto interpError =
+          calculateInterpolationErrors ? 0.5 * (xp - x1) * (x2 - xp) * std::abs(secondDeriv[index - 1]) : 0;
       // combine the two errors
       enew[i] = sqrt(pow(sourcePointsError, 2) + pow(interpError, 2));
     } else {
