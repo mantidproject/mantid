@@ -157,6 +157,9 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
     def _reduce_1D(self, input_group):
         output1D = []
         for height_range in self._height_ranges:
+            output1DName = self._out_ws_name + "_1D"
+            if height_range:
+                output1DName = output1DName + "_" + height_range
             output1D.append(
                 SumOverlappingTubes(
                     InputWorkspaces=input_group,
@@ -164,7 +167,7 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
                     HeightAxis=height_range,
                     MirrorScatteringAngles=self._mirror,
                     CropNegativeScatteringAngles=self._crop_negative,
-                    OutputWorkspace=self._out_ws_name + "_1D_" + height_range,
+                    OutputWorkspace=output1DName,
                 )
             )
         return output1D
@@ -172,7 +175,9 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
     def _reduce_2DTubes(self, input_group):
         output2DTubes = []
         for height_range in self._height_ranges:
-            output2DtubesName = self._out_ws_name + "_2DTubes_" + height_range
+            output2DtubesName = self._out_ws_name + "_2DTubes"
+            if height_range:
+                output2DtubesName = output2DtubesName + "_" + height_range
             output2DTubes.append(
                 SumOverlappingTubes(
                     InputWorkspaces=input_group,
@@ -193,7 +198,9 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
     def _reduce_2D(self, input_group):
         output2D = []
         for height_range in self._height_ranges:
-            output2DName = self._out_ws_name + "_2D_" + height_range
+            output2DName = self._out_ws_name + "_2D"
+            if height_range:
+                output2DName = output2DName + "_" + height_range
             output2D.append(
                 SumOverlappingTubes(
                     InputWorkspaces=input_group,
