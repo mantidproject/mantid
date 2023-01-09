@@ -4,9 +4,14 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import AppendSpectra, DeleteWorkspace, Load, plotSpectrum
+from mantid.simpleapi import AppendSpectra, DeleteWorkspace, Load
 from mantid.api import AnalysisDataService, WorkspaceGroup, AlgorithmManager
 from mantid import mtd, logger, config
+
+try:
+    import plotSpectrum
+except ImportError:
+    logger.warning("plotSpectrum not available")
 
 import os
 import numpy as np
