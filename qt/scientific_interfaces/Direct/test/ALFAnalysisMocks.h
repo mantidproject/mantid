@@ -37,6 +37,8 @@ public:
   MOCK_METHOD0(notifyPeakPickerChanged, void());
   MOCK_METHOD0(notifyPeakCentreEditingFinished, void());
   MOCK_METHOD0(notifyFitClicked, void());
+  MOCK_METHOD0(notifyExportWorkspaceToADSClicked, void());
+  MOCK_METHOD0(notifyExternalPlotClicked, void());
   MOCK_METHOD0(notifyResetClicked, void());
 
   MOCK_CONST_METHOD0(numberOfTubes, std::size_t());
@@ -51,6 +53,9 @@ public:
   MOCK_METHOD1(subscribePresenter, void(IALFAnalysisPresenter *presenter));
 
   MOCK_METHOD0(replot, void());
+
+  MOCK_CONST_METHOD2(openExternalPlot,
+                     void(Mantid::API::MatrixWorkspace_sptr const &workspace, std::vector<int> const &worspaceIndices));
 
   MOCK_CONST_METHOD0(getRange, std::pair<double, double>());
 
@@ -83,6 +88,11 @@ public:
 
   MOCK_METHOD1(doFit, Mantid::API::MatrixWorkspace_sptr(std::pair<double, double> const &range));
   MOCK_METHOD1(calculateEstimate, void(std::pair<double, double> const &range));
+
+  MOCK_CONST_METHOD0(exportWorkspaceCopyToADS, void());
+
+  MOCK_CONST_METHOD0(plottedWorkspace, Mantid::API::MatrixWorkspace_sptr());
+  MOCK_CONST_METHOD0(plottedWorkspaceIndices, std::vector<int>());
 
   MOCK_METHOD1(setPeakParameters, void(Mantid::API::IPeakFunction_const_sptr const &peak));
   MOCK_METHOD1(setPeakCentre, void(double const centre));
