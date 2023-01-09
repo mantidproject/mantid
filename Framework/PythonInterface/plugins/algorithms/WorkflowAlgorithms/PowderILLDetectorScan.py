@@ -93,13 +93,6 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
         )
 
         self.declareProperty(
-            name="InitialMask",
-            defaultValue=20,
-            validator=IntBoundedValidator(lower=0, upper=64),
-            doc="Number of pixels to mask from the bottom and the top of each tube before superposition.",
-        )
-
-        self.declareProperty(
             name="FinalMask",
             defaultValue=30,
             validator=IntBoundedValidator(lower=0, upper=70),
@@ -252,11 +245,6 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
                 ExtractMonitors(InputWorkspace=name, DetectorWorkspace=name)
                 ApplyDetectorScanEffCorr(InputWorkspace=name, DetectorEfficiencyWorkspace="__det_eff", OutputWorkspace=name)
 
-        pixels_to_mask = self.getProperty("InitialMask").value
-        if pixels_to_mask != 0 and instrument_name == "D2B":
-            mask = self._generate_mask(pixels_to_mask, instrument)
-            for ws in input_group:
-                MaskDetectors(Workspace=ws, DetectorList=mask)
         components_to_mask = self.getPropertyValue("ComponentsToMask")
         if components_to_mask:
             for ws in input_group:
