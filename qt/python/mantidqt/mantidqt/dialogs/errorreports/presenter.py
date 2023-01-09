@@ -108,9 +108,11 @@ class ErrorReporterPresenter(object):
         if len(stacktrace) > MAX_STACK_TRACE_LENGTH:
             difference = len(stacktrace) - MAX_STACK_TRACE_LENGTH
             stacktrace = self._cut_down_stacktrace()
-            self.error_log.warning(f"The middle {difference+5} characters of this stack trace has been removed"
-                                   r" and replaced with \n...\n in order to"
-                                   f" reduce it to {MAX_STACK_TRACE_LENGTH} characters")
+            self.error_log.warning(
+                f"The middle {difference+5} characters of this stack trace has been removed"
+                r" and replaced with \n...\n in order to"
+                f" reduce it to {MAX_STACK_TRACE_LENGTH} characters"
+            )
 
         errorReporter = ErrorReporter(
             self._application, uptime, self._exit_code, share_identifiable, str(name), str(email), str(text_box), stacktrace
@@ -129,7 +131,7 @@ class ErrorReporterPresenter(object):
     def _cut_down_stacktrace(self):
         # server has a max size for the stack trace, if exceeded will cause an error
         stacktrace = "".join(self._traceback)
-        return stacktrace[:(MAX_STACK_TRACE_LENGTH//2 - 2)] + "\n...\n" + stacktrace[-(MAX_STACK_TRACE_LENGTH//2 - 3):]
+        return stacktrace[: (MAX_STACK_TRACE_LENGTH // 2 - 2)] + "\n...\n" + stacktrace[-(MAX_STACK_TRACE_LENGTH // 2 - 3) :]
 
     def show_view(self):
         self._view.show()
