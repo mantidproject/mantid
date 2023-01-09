@@ -56,4 +56,4 @@ dependencies:
   # Pinned to same version as conda forge: https://github.com/conda-forge/conda-forge-pinning-feedstock/blob/main/recipe/conda_build_config.yaml
   - clang_osx-64=14
   - clangxx_osx-64=14
-  - llvm-openmp=13
+  - llvm-openmp=14
