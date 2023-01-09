@@ -23,7 +23,6 @@ void MeierV2::init() {
 }
 
 void MeierV2::function1D(double *out, const double *xValues, const size_t nData) const {
-  // maybe copy operation is costly!
   std::valarray<double> xValArray(xValues, nData);
 
   const double A0 = getParameter("A0");
