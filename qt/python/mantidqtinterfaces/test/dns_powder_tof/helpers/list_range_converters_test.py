@@ -28,10 +28,10 @@ class list_range_convertersTest(unittest.TestCase):
         self.assertEqual(testv, "[1, 11] + [*range(12, 17, 1)]" " + [*range(20, 27, 1)]")
 
     def test_get_normalisation(self):
-        testv = get_normalisation({'norm_monitor': True})
-        self.assertEqual(testv, 'monitor')
-        testv = get_normalisation({'norm_monitor': False})
-        self.assertEqual(testv, 'time')
+        testv = get_normalisation({"norm_monitor": True})
+        self.assertEqual(testv, "monitor")
+        testv = get_normalisation({"norm_monitor": False})
+        self.assertEqual(testv, "time")
         testv = get_normalisation({})
         self.assertEqual(testv, "time")
 

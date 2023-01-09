@@ -12,10 +12,8 @@ DNS file selector tab view of DNS reduction GUI.
 from mantidqt.utils.qt import load_ui
 from qtpy.QtCore import QModelIndex, Qt, Signal
 from qtpy.QtWidgets import QProgressDialog
-from mantidqtinterfaces.dns_powder_tof.data_structures.dns_view \
-    import DNSView
-from mantidqtinterfaces.dns_powder_tof.data_structures.dns_treeitem \
-    import TreeItemEnum
+from mantidqtinterfaces.dns_powder_tof.data_structures.dns_view import DNSView
+from mantidqtinterfaces.dns_powder_tof.data_structures.dns_treeitem import TreeItemEnum
 
 
 class DNSFileSelectorView(DNSView):
@@ -27,9 +25,7 @@ class DNSFileSelectorView(DNSView):
 
     def __init__(self, parent):
         super().__init__(parent)
-        self._ui = load_ui(__file__,
-                           'file_selector.ui',
-                           baseinstance=self)
+        self._ui = load_ui(__file__, "file_selector.ui", baseinstance=self)
 
         self._sample_treeview = self._ui.DNS_sample_view
         self._sample_treeview.setUniformRowHeights(True)
@@ -38,20 +34,20 @@ class DNSFileSelectorView(DNSView):
         self._standard_treeview.setUniformRowHeights(True)
 
         self._map = {
-            'filter_scans': self._ui.cB_filter_scans,
-            'filter_free': self._ui.cB_filter_free,
-            'autoload_new': self._ui.cB_autoload_new,
-            'filter_free_text': self._ui.lE_filter_free_text,
-            'filter_empty': self._ui.cB_filter_empty,
-            'filter_cscans': self._ui.cB_filter_cscans,
-            'filter_sample_rot': self._ui.cB_filter_sample_rot,
-            'filter_nicr': self._ui.cB_filter_nicr,
-            'filter_vanadium': self._ui.cB_filter_vanadium,
-            'last_scans': self._ui.sB_last_scans,
-            'filter_det_rot': self._ui.cB_filter_det_rot,
-            'auto_select_standard': self._ui.cB_auto_select_standard,
-            'standard_data_selector': self._ui.pB_standard_data,
-            'sample_data_selector': self._ui.pB_sample_data,
+            "filter_scans": self._ui.cB_filter_scans,
+            "filter_free": self._ui.cB_filter_free,
+            "autoload_new": self._ui.cB_autoload_new,
+            "filter_free_text": self._ui.lE_filter_free_text,
+            "filter_empty": self._ui.cB_filter_empty,
+            "filter_cscans": self._ui.cB_filter_cscans,
+            "filter_sample_rot": self._ui.cB_filter_sample_rot,
+            "filter_nicr": self._ui.cB_filter_nicr,
+            "filter_vanadium": self._ui.cB_filter_vanadium,
+            "last_scans": self._ui.sB_last_scans,
+            "filter_det_rot": self._ui.cB_filter_det_rot,
+            "auto_select_standard": self._ui.cB_auto_select_standard,
+            "standard_data_selector": self._ui.pB_standard_data,
+            "sample_data_selector": self._ui.pB_sample_data,
         }
 
         self._sample_treeview.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -176,14 +172,10 @@ class DNSFileSelectorView(DNSView):
         self._treeview.setRowHidden(row, self._treeview.rootIndex(), False)
 
     def hide_tof(self, hidden=True):
-        self._standard_treeview.setColumnHidden(
-            TreeItemEnum.tof_channels.value, hidden)
-        self._standard_treeview.setColumnHidden(
-            TreeItemEnum.tof_channel_width.value, hidden)
-        self._sample_treeview.setColumnHidden(
-            TreeItemEnum.tof_channels.value, hidden)
-        self._sample_treeview.setColumnHidden(
-            TreeItemEnum.tof_channel_width.value, hidden)
+        self._standard_treeview.setColumnHidden(TreeItemEnum.tof_channels.value, hidden)
+        self._standard_treeview.setColumnHidden(TreeItemEnum.tof_channel_width.value, hidden)
+        self._sample_treeview.setColumnHidden(TreeItemEnum.tof_channels.value, hidden)
+        self._sample_treeview.setColumnHidden(TreeItemEnum.tof_channel_width.value, hidden)
 
     def is_scan_hidden(self, row):
         return self._treeview.isRowHidden(row, self._treeview.rootIndex())
@@ -205,8 +197,7 @@ class DNSFileSelectorView(DNSView):
     # manipulating view
     def set_first_column_spanned(self, scan_range):
         for i in scan_range:
-            self._treeview.setFirstColumnSpanned(
-                i, self._treeview.rootIndex(), True)
+            self._treeview.setFirstColumnSpanned(i, self._treeview.rootIndex(), True)
 
     def set_standard_data_tree_model(self, model):
         self._standard_treeview.setModel(model)
@@ -243,29 +234,20 @@ class DNSFileSelectorView(DNSView):
             self._treeview.resizeColumnToContents(i)
 
     def _attach_button_signal_slots(self):
-        self._ui.cB_filter_det_rot.stateChanged.connect(
-            self._filter_scans_checked)
-        self._ui.cB_filter_sample_rot.stateChanged.connect(
-            self._filter_scans_checked)
-        self._ui.cB_filter_scans.stateChanged.connect(
-            self._filter_scans_checked)
-        self._ui.cB_filter_cscans.stateChanged.connect(
-            self._filter_scans_checked)
-        self._ui.cB_filter_free.stateChanged.connect(
-            self._filter_scans_checked)
-        self._ui.lE_filter_free_text.textChanged.connect(
-            self._filter_scans_checked)
+        self._ui.cB_filter_det_rot.stateChanged.connect(self._filter_scans_checked)
+        self._ui.cB_filter_sample_rot.stateChanged.connect(self._filter_scans_checked)
+        self._ui.cB_filter_scans.stateChanged.connect(self._filter_scans_checked)
+        self._ui.cB_filter_cscans.stateChanged.connect(self._filter_scans_checked)
+        self._ui.cB_filter_free.stateChanged.connect(self._filter_scans_checked)
+        self._ui.lE_filter_free_text.textChanged.connect(self._filter_scans_checked)
         self._ui.pB_expand_all.clicked.connect(self.expand_all)
         self._ui.pB_expand_none.clicked.connect(self._un_expand_all)
         self._ui.pB_check_all.clicked.connect(self._check_all)
         self._ui.pB_check_none.clicked.connect(self._uncheck_all)
         self._ui.pB_check_last_scan.clicked.connect(self._check_last)
-        self._ui.pB_check_last_complete_scan.clicked.connect(
-            self._check_last)
-        self._ui.pB_check_selected.clicked.connect(
-            self._check_selected)
-        self._ui.pB_standard_data.clicked.connect(
-            self._standard_data_clicked)
+        self._ui.pB_check_last_complete_scan.clicked.connect(self._check_last)
+        self._ui.pB_check_selected.clicked.connect(self._check_selected)
+        self._ui.pB_standard_data.clicked.connect(self._standard_data_clicked)
         self._ui.pB_sample_data.clicked.connect(self._sample_data_clicked)
 
     def _attach_checkbox_signal_slots(self):

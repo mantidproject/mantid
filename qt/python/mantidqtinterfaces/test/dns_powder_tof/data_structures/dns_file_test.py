@@ -25,7 +25,7 @@ class DNSFileTest(unittest.TestCase):
         cls.filepath = get_filepath()
         cls.data = get_dataset()
         cls.full_filename = FileFinder.Instance().getFullPath("dnstof.d_dat")
-        cls.file = DNSFile('', cls.full_filename)
+        cls.file = DNSFile("", cls.full_filename)
         cls.txt = "".join(load_txt(cls.full_filename))
 
     def test___init__(self):
