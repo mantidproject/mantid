@@ -314,7 +314,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             R = inWS.getExperimentInfo(0).run().getGoniometer(n).getR()
             R = np.dot(s1offset, R)
             RUBW = np.dot(R, UBW)
-            q = np.round(np.dot(np.linalg.inv(RUBW), qlab.T) / bin_size - offset).astype(np.int)
+            q = np.round(np.dot(np.linalg.inv(RUBW), qlab.T) / bin_size - offset).astype(int)
             q_index = np.ravel_multi_index(q, (dim0_bins + 2, dim1_bins + 2, dim2_bins + 2), mode="clip")
             q_uniq, inverse = np.unique(q_index, return_inverse=True)
             outputr[q_uniq] += np.bincount(inverse, data_array[:, :, n].ravel("F"))
