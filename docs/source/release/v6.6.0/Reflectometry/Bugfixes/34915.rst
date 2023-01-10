@@ -1,0 +1,1 @@
+- Fixed an issue where adding a new batch for instruments other than INTER causes settings on any existing batch tabs to be cleared.
