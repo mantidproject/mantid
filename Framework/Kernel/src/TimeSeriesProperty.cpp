@@ -1901,8 +1901,9 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::eliminateDuplicates() {
   countSize();
 
   // 3. Finish
-  g_log.warning() << "Log " << this->name() << " has " << numremoved << " entries removed due to duplicated time. "
-                  << "\n";
+  if (numremoved > 0)
+    g_log.notice() << "Log " << this->name() << " has " << numremoved << " entries removed due to duplicated time. "
+                   << "\n";
 }
 
 /*
