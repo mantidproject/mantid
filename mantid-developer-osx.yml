@@ -42,8 +42,7 @@ dependencies:
   - setuptools=47.0.0 # Pinned purposefully due to incompatibility with later versions
   - sphinx >= 4.5.*
   - sphinx_bootstrap_theme=>0.8.1
-  - tbb-devel=2020.2.*
-  - tbb=2020.2.*
+  - tbb-devel=2021.*
   - texlive-core>=20180414
   - toml>=0.10.2
   - zlib>=1.2.11
@@ -54,7 +53,7 @@ dependencies:
   - pre-commit>=2.12.0
 
   # Use conda version of clang to get matching CXXFLAGS.
-  # Pinned to same version as conda forge: https://github.com/conda-forge/conda-forge-pinning-feedstock/blob/main/recipe/conda_build_config.yaml#L23
-  - clang_osx-64=12
-  - clangxx_osx-64=12
-  - llvm-openmp=12
+  # Pinned to same version as conda forge: https://github.com/conda-forge/conda-forge-pinning-feedstock/blob/main/recipe/conda_build_config.yaml
+  - clang_osx-64=14
+  - clangxx_osx-64=14
+  - llvm-openmp=14
