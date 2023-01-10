@@ -322,6 +322,23 @@ public:
 
     expectEditROIMode(*mockDockedWidgets);
     expectRunReduction(*mockView, *mockModel, *mockJobManager, *mockRegionSelector);
+    expectRegionSelectionChanged(*mockModel, *mockRegionSelector);
+
+    auto presenter =
+        PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), makeInstViewModel(),
+                                  std::move(mockDockedWidgets), std::move(mockRegionSelector)));
+    presenter.notifyRegionChanged();
+  }
+
+  void test_notify_region_changed_does_not_start_reduction_if_region_unchanged() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+    auto mockJobManager = makeJobManager();
+    auto mockDockedWidgets = makePreviewDockedWidgets();
+    auto mockRegionSelector = makeRegionSelector();
+
+    expectEditROIMode(*mockDockedWidgets);
+    expectRegionSelectionUnchanged(*mockModel, *mockRegionSelector);
 
     auto presenter =
         PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), makeInstViewModel(),
@@ -647,6 +664,41 @@ private:
     EXPECT_CALL(mockDockedWidgets, setRectangularROIState(Eq(false))).Times(1);
   }
 
+  void expectRegionSelectionChanged(MockPreviewModel &mockModel, MockRegionSelector &mockRegionSelector) {
+    auto new_roi = IRegionSelector::Selection{3.5, 11.23};
+    EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Signal)))
+        .Times(1)
+        .WillOnce(Return(new_roi))
+        .RetiresOnSaturation();
+    EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Background)))
+        .Times(1)
+        .WillOnce(Return(new_roi))
+        .RetiresOnSaturation();
+    EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Transmission)))
+        .Times(1)
+        .WillOnce(Return(new_roi))
+        .RetiresOnSaturation();
+    auto old_roi = IRegionSelector::Selection{2.5, 17.56};
+    EXPECT_CALL(mockModel, getSelectedRegion(ROIType::Signal)).Times(1).WillOnce(Return(old_roi)).RetiresOnSaturation();
+    EXPECT_CALL(mockModel, getSelectedRegion(ROIType::Background))
+        .Times(1)
+        .WillOnce(Return(old_roi))
+        .RetiresOnSaturation();
+    EXPECT_CALL(mockModel, getSelectedRegion(ROIType::Transmission))
+        .Times(1)
+        .WillOnce(Return(old_roi))
+        .RetiresOnSaturation();
+  }
+
+  void expectRegionSelectionUnchanged(MockPreviewModel &mockModel, MockRegionSelector &mockRegionSelector) {
+    auto roi = IRegionSelector::Selection{3.5, 11.23};
+    EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Signal)))
+        .Times(1)
+        .WillOnce(Return(roi))
+        .RetiresOnSaturation();
+    EXPECT_CALL(mockModel, getSelectedRegion(ROIType::Signal)).Times(1).WillOnce(Return(roi)).RetiresOnSaturation();
+  }
+
   void expectRunReduction(MockPreviewView &mockView, MockPreviewModel &mockModel, MockJobManager &mockJobManager,
                           MockRegionSelector &mockRegionSelector) {
     EXPECT_CALL(mockView, disableMainWidget()).Times(1);
@@ -657,9 +709,13 @@ private:
     EXPECT_CALL(mockModel, setTheta(theta)).Times(1);
     // Check ROI is set
     auto roi = IRegionSelector::Selection{3.5, 11.23};
-    EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Signal))).Times(1).WillOnce(Return(roi));
-    EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Background))).Times(1).WillOnce(Return(roi));
-    EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Transmission))).Times(1).WillOnce(Return(roi));
+    EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Signal))).Times(1).WillRepeatedly(Return(roi));
+    EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Background)))
+        .Times(1)
+        .WillRepeatedly(Return(roi));
+    EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Transmission)))
+        .Times(1)
+        .WillRepeatedly(Return(roi));
     EXPECT_CALL(mockModel, setSelectedRegion(ROIType::Signal, roi)).Times(1);
     EXPECT_CALL(mockModel, setSelectedRegion(ROIType::Background, roi)).Times(1);
     EXPECT_CALL(mockModel, setSelectedRegion(ROIType::Transmission, roi)).Times(1);

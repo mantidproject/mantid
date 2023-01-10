@@ -213,7 +213,17 @@ void PreviewPresenter::notifyRegionChanged() {
   m_dockedWidgets->setRectangularROIState(false);
   m_dockedWidgets->setEditROIState(true);
 
-  runReduction();
+  if (isRegionSelectionChanged()) {
+    runReduction();
+  }
+}
+
+bool PreviewPresenter::isRegionSelectionChanged() {
+  return m_model->getSelectedRegion(ROIType::Signal) != m_regionSelector->getRegion(roiTypeToString(ROIType::Signal)) &&
+         m_model->getSelectedRegion(ROIType::Background) !=
+             m_regionSelector->getRegion(roiTypeToString(ROIType::Background)) &&
+         m_model->getSelectedRegion(ROIType::Transmission) !=
+             m_regionSelector->getRegion(roiTypeToString(ROIType::Transmission));
 }
 
 void PreviewPresenter::notifyLinePlotExportAdsRequested() { m_model->exportReducedWsToAds(); }

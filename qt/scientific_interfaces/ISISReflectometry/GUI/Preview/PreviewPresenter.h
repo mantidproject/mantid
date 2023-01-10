@@ -118,5 +118,6 @@ private:
   void runReduction();
   void clearRegionSelector();
   void clearReductionPlot();
+  bool isRegionSelectionChanged();
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
