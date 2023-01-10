@@ -34,7 +34,11 @@ void assert_increasing(const DateAndTime &startTime, const DateAndTime &stopTime
   }
 }
 
-// if the values are alternating after duplicates are removed, then everything can be considered unique
+/**
+ * This returns true if the first value is USE, the last value is IGNORE, and all the others alternate.
+ * The assumption is that if the values meet this criteria, there is no reason to try to reduce them because they are
+ * already unique and minimal number of values.
+ */
 bool valuesAreAlternating(const std::vector<bool> &values) {
   const auto NUM_VALUES = values.size();
   // should be an even number of values
@@ -47,10 +51,14 @@ bool valuesAreAlternating(const std::vector<bool> &values) {
 
   // even entries should be use and odd should be ignore
   for (size_t i = 0; i < NUM_VALUES; ++i) {
-    if ((i % 2 == 0) && (values[i] == ROI_IGNORE))
-      return false;
-    else if (values[i] == ROI_USE) // odd entries
-      return false;
+    if (i % 2 == 0) {
+      if (values[i] == ROI_IGNORE) // even entries should be USE
+        return false;
+    } else {
+      if (values[i] == ROI_USE) { // odd entries should be IGNORE
+        return false;
+      }
+    }
   }
   return true;
 }
@@ -256,6 +264,13 @@ void TimeROI::update_intersection(const TimeROI &other) {
   this->removeRedundantEntries();
 }
 
+/**
+ * Remove time/value pairs that are not necessary to describe the TimeROI
+ * - Sort the times/values
+ * - Remove values that are not needed (e.g. IGNORE followed by IGNORE)
+ * - Remove values that are overridden. Overridden values are ones where a new value was added at the same time, the
+ * last one added will be used.
+ */
 void TimeROI::removeRedundantEntries() {
   if (this->numBoundaries() < 2) {
     return; // nothing to do with zero or one elements
