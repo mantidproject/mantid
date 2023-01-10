@@ -221,6 +221,20 @@ public:
     presenter.notifyInstViewShapeChanged();
   }
 
+  void test_notify_inst_view_shape_unchanged() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+    auto mockInstViewModel = makeInstViewModel();
+    auto mockJobManager = makeJobManager();
+    auto mockDockedWidgets = makePreviewDockedWidgets();
+    expectInstViewSetToEditMode(*mockDockedWidgets);
+    expectSumBanksCalledOnUnchangedDetectors(*mockModel, *mockInstViewModel, *mockDockedWidgets, *mockJobManager);
+    // TODO check that the model is called to sum banks
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager),
+                                               std::move(mockInstViewModel), std::move(mockDockedWidgets)));
+    presenter.notifyInstViewShapeChanged();
+  }
+
   void test_notify_region_selector_export_to_ads_requested() {
     auto mockView = makeView();
     auto mockModel = makeModel();
@@ -612,8 +626,22 @@ private:
     auto detIDsStr = ProcessingInstructions{"2-4"};
     EXPECT_CALL(mockDockedWidgets, getSelectedDetectors()).Times(1).WillOnce(Return(detIndices));
     EXPECT_CALL(mockInstViewModel, detIndicesToDetIDs(Eq(detIndices))).Times(1).WillOnce(Return(detIDs));
+    EXPECT_CALL(mockModel, getSelectedBanks()).Times(1);
     EXPECT_CALL(mockModel, setSelectedBanks(Eq(detIDsStr))).Times(1);
     EXPECT_CALL(mockModel, sumBanksAsync(Ref(mockJobManager))).Times(1);
+  }
+
+  void expectSumBanksCalledOnUnchangedDetectors(MockPreviewModel &mockModel, MockInstViewModel &mockInstViewModel,
+                                                MockPreviewDockedWidgets &mockDockedWidgets,
+                                                MockJobManager &mockJobManager) {
+    auto detIndices = std::vector<size_t>{44, 45, 46};
+    auto detIDs = std::vector<Mantid::detid_t>{44, 45, 46};
+    auto detIDsStr = ProcessingInstructions{"44-46"};
+    EXPECT_CALL(mockDockedWidgets, getSelectedDetectors()).Times(1).WillOnce(Return(detIndices));
+    EXPECT_CALL(mockInstViewModel, detIndicesToDetIDs(Eq(detIndices))).Times(1).WillOnce(Return(detIDs));
+    EXPECT_CALL(mockModel, getSelectedBanks()).Times(1).WillOnce(Return(detIDsStr));
+    EXPECT_CALL(mockModel, setSelectedBanks(Eq(detIDsStr))).Times(0);
+    EXPECT_CALL(mockModel, sumBanksAsync(Ref(mockJobManager))).Times(0);
   }
 
   void expectPlotInstView(MockInstViewModel &mockInstViewModel, MockPreviewDockedWidgets &mockDockedWidgets) {

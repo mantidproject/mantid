@@ -188,6 +188,10 @@ void PreviewPresenter::notifyInstViewShapeChanged() {
   // Get the masked workspace indices
   auto indices = m_instViewModel->detIndicesToDetIDs(m_dockedWidgets->getSelectedDetectors());
   auto detIDsStr = Mantid::Kernel::Strings::joinCompress(indices.cbegin(), indices.cend(), ",");
+
+  if (detIDsStr == m_model->getSelectedBanks()) {
+    return;
+  }
   m_model->setSelectedBanks(ProcessingInstructions{detIDsStr});
   // Execute summing the selected banks
   runSumBanks();
