@@ -214,6 +214,7 @@ void PreviewPresenter::notifyRegionChanged() {
   m_dockedWidgets->setEditROIState(true);
 
   if (isRegionSelectionChanged()) {
+    m_regionSelector->deselectAllSelectors();
     runReduction();
   }
 }

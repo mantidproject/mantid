@@ -104,6 +104,11 @@ void RegionSelector::cancelDrawingRegion() {
   pyobj().attr("cancel_drawing_region")();
 }
 
+void RegionSelector::deselectAllSelectors() {
+  GlobalInterpreterLock lock;
+  pyobj().attr("deselect_all_selectors")();
+}
+
 auto RegionSelector::getRegion(const std::string &regionType) -> Selection {
   GlobalInterpreterLock lock;
   auto pyValues = pyobj().attr("get_region")(regionType);

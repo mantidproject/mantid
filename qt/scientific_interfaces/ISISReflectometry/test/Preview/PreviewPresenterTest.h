@@ -678,6 +678,7 @@ private:
         .Times(1)
         .WillOnce(Return(new_roi))
         .RetiresOnSaturation();
+    EXPECT_CALL(mockRegionSelector, deselectAllSelectors()).Times(1);
     auto old_roi = IRegionSelector::Selection{2.5, 17.56};
     EXPECT_CALL(mockModel, getSelectedRegion(ROIType::Signal)).Times(1).WillOnce(Return(old_roi)).RetiresOnSaturation();
     EXPECT_CALL(mockModel, getSelectedRegion(ROIType::Background))
@@ -696,6 +697,7 @@ private:
         .Times(1)
         .WillOnce(Return(roi))
         .RetiresOnSaturation();
+    EXPECT_CALL(mockRegionSelector, deselectAllSelectors()).Times(0);
     EXPECT_CALL(mockModel, getSelectedRegion(ROIType::Signal)).Times(1).WillOnce(Return(roi)).RetiresOnSaturation();
   }
 
