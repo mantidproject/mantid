@@ -100,7 +100,6 @@ if(ENABLE_WORKBENCH AND NOT CONDA_BUILD)
   set(CPACK_COMMAND_HDIUTIL ${CMAKE_SOURCE_DIR}/installers/MacInstaller/hdiutilwrap)
   set(CMAKE_MACOSX_RPATH 1)
   set(CPACK_DMG_BACKGROUND_IMAGE ${CMAKE_SOURCE_DIR}/installers/conda/osx/dmg_background.png)
-  string(REPLACE " " "" CPACK_SYSTEM_NAME ${MACOS_CODENAME})
 
   set(WORKBENCH_BUNDLE MantidWorkbench.app/Contents/)
   set(WORKBENCH_APP MantidWorkbench${CPACK_PACKAGE_SUFFIX_CAMELCASE}.app)
