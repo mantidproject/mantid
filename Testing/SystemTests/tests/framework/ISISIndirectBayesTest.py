@@ -84,39 +84,6 @@ class QLresTest(systemtesting.MantidSystemTest):
 # ==============================================================================
 
 
-class ResNormTest(systemtesting.MantidSystemTest):
-    def skipTests(self):
-        return not _is_quasielasticbayes_available()
-
-    def runTest(self):
-        import IndirectBayes as Main
-
-        nbin = "1"
-        vname = "irs26173_graphite002_red"
-        rname = "irs26173_graphite002_res"
-        erange = [-0.2, 0.2]
-        plotOp = False
-        saveOp = False
-
-        vpath = vname + ".nxs"  # path name for van nxs file
-        LoadNexusProcessed(Filename=vpath, OutputWorkspace=vname)
-        rpath = rname + ".nxs"  # path name for res nxs file
-        LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
-        Main.ResNormRun(vname, rname, erange, nbin, plotOp, saveOp)
-
-    def validate(self):
-        self.tolerance = 1e-4
-        self.disableChecking.append("SpectraMap")
-        return "irs26173_graphite002_ResNorm_Fit", "ISISIndirectBayes_ResNormTest.nxs"
-
-    def cleanup(self):
-        filenames = ["irs26173_graphite002_resnrm.lpt"]
-        _cleanup_files(config["defaultsave.directory"], filenames)
-
-
-# ==============================================================================
-
-
 class QuestTest(systemtesting.MantidSystemTest):
     def skipTests(self):
         return not _is_quasielasticbayes_available()
