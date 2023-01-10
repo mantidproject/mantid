@@ -9,8 +9,7 @@ from typing import Optional
 import Engineering.EnggUtils as EnggUtils
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from Engineering.common.calibration_info import CalibrationInfo
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.model import \
-    load_full_instrument_calibration
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.model import load_full_instrument_calibration
 
 
 class FocusModel(object):
@@ -25,12 +24,20 @@ class FocusModel(object):
     def get_last_focused_files_gsas2(self):
         return self._last_focused_files_gsas2
 
-    def focus_run(self, sample_paths: list, vanadium_path: str, plot_output: bool, rb_num: str,
-                  calibration: CalibrationInfo, save_dir: Optional[str] = None) -> None:
+    def focus_run(
+        self,
+        sample_paths: list,
+        vanadium_path: str,
+        plot_output: bool,
+        rb_num: str,
+        calibration: CalibrationInfo,
+        save_dir: Optional[str] = None,
+    ) -> None:
         if save_dir is None:
             save_dir = output_settings.get_output_path()
         full_calib = load_full_instrument_calibration()
-        focused_files, focused_files_gsas2 = EnggUtils.focus_run(sample_paths, vanadium_path, plot_output, rb_num,
-                                                                 calibration, save_dir, full_calib)
+        focused_files, focused_files_gsas2 = EnggUtils.focus_run(
+            sample_paths, vanadium_path, plot_output, rb_num, calibration, save_dir, full_calib
+        )
         self._last_focused_files = focused_files
         self._last_focused_files_gsas2 = focused_files_gsas2

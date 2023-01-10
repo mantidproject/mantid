@@ -21,8 +21,7 @@ class SettingsModel(object):
 
     @staticmethod
     def get_setting(name, return_type=str):
-        return get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, name,
-                           return_type=return_type)
+        return get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, name, return_type=return_type)
 
     @staticmethod
     def set_setting(name, value):

@@ -19,6 +19,7 @@ class DrillTableItem(QTableWidgetItem):
     """
     Reference to the item presenter.
     """
+
     _presenter = None
 
     signals = None

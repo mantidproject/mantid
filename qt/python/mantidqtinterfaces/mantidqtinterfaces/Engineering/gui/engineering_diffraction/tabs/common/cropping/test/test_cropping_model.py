@@ -35,8 +35,7 @@ class CroppingModelTest(unittest.TestCase):
         self.assertEqual(self.model._clean_spectrum_numbers("1, 2, 5, 76, 3"), "1,2,5,76,3")
 
     def test_clean_spectrum_numbers_irregular_whitespace(self):
-        self.assertEqual(self.model._clean_spectrum_numbers("1 , 2, 5      ,    76, 3     "),
-                         "1,2,5,76,3")
+        self.assertEqual(self.model._clean_spectrum_numbers("1 , 2, 5      ,    76, 3     "), "1,2,5,76,3")
 
     def test_clean_spectrum_numbers_regular_ranges(self):
         self.assertEqual(self.model._clean_spectrum_numbers("1-2, 5-76, 3"), "1-2,5-76,3")
@@ -45,22 +44,22 @@ class CroppingModelTest(unittest.TestCase):
         self.assertEqual(self.model._clean_spectrum_numbers("2-1, 76-5, 3"), "1-2,5-76,3")
 
     def test_clean_spectrum_numbers_equal_range(self):
-        self.assertRaisesRegex(ValueError,
-                               "Ranges cannot contain the same value twice. Invalid Range:*",
-                               self.model._clean_spectrum_numbers, "1-1, 76-76, 3")
+        self.assertRaisesRegex(
+            ValueError, "Ranges cannot contain the same value twice. Invalid Range:*", self.model._clean_spectrum_numbers, "1-1, 76-76, 3"
+        )
 
     def test_validate_and_clean_with_valid_input(self):
-        self.assertEqual(self.model.validate_and_clean_spectrum_numbers("1-6, 7-23, 46, 1"),
-                         ("", "1-6,7-23,46,1"))
+        self.assertEqual(self.model.validate_and_clean_spectrum_numbers("1-6, 7-23, 46, 1"), ("", "1-6,7-23,46,1"))
 
     def test_validate_and_clean_reverse_ranges(self):
-        self.assertEqual(self.model.validate_and_clean_spectrum_numbers("6-1, 7-24, 6-4,1"),
-                         ("", "1-6,7-24,4-6,1"))
+        self.assertEqual(self.model.validate_and_clean_spectrum_numbers("6-1, 7-24, 6-4,1"), ("", "1-6,7-24,4-6,1"))
 
     def test_validate_and_clean_equal_ranges(self):
-        self.assertEqual(self.model.validate_and_clean_spectrum_numbers("6-6, 7-24, 6-4,1"),
-                         ("Ranges cannot contain the same value twice. Invalid Range: 6-6", ""))
+        self.assertEqual(
+            self.model.validate_and_clean_spectrum_numbers("6-6, 7-24, 6-4,1"),
+            ("Ranges cannot contain the same value twice. Invalid Range: 6-6", ""),
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

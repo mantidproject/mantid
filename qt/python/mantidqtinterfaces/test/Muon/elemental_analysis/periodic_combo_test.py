@@ -17,30 +17,32 @@ from mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table 
 class PeriodicComboTest(unittest.TestCase):
     NUMBER_ELEMENTS = 109
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtWidgets.QComboBox.insertItem')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtWidgets.QComboBox.insertItem")
     def test_that_init_defaults_to_all_elements_in_periodic_table_with_details(self, mock_insert_item):
         PeriodicCombo()
         self.assertEqual(mock_insert_item.call_count, self.NUMBER_ELEMENTS)
-        mock_insert_item.assert_called_with(108, 'Mt (109) - meitnerium')
+        mock_insert_item.assert_called_with(108, "Mt (109) - meitnerium")
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtWidgets.QComboBox.insertItem')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtWidgets.QComboBox.insertItem")
     def test_that_init_defaults_to_all_elements_in_periodic_table_without_details(self, mock_insert_item):
         PeriodicCombo(detailed=False)
         self.assertEqual(mock_insert_item.call_count, self.NUMBER_ELEMENTS)
-        mock_insert_item.assert_called_with(108, 'Mt (109)')
+        mock_insert_item.assert_called_with(108, "Mt (109)")
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtWidgets.QComboBox.insertItem')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtWidgets.QComboBox.insertItem")
     def test_that_init_accepts_new_list_elements(self, mock_insert_item):
-        new_elements = [PeriodicTableItem("H", 1, 1, 1, "hydrogen", 1.00800, "diatomic nonmetal"),
-                        PeriodicTableItem("He", 2, 18, 1, "helium", 4.0030, "noble gas"),
-                        PeriodicTableItem("Li", 3, 1, 2, "lithium", 6.94000, "alkali metal")]
+        new_elements = [
+            PeriodicTableItem("H", 1, 1, 1, "hydrogen", 1.00800, "diatomic nonmetal"),
+            PeriodicTableItem("He", 2, 18, 1, "helium", 4.0030, "noble gas"),
+            PeriodicTableItem("Li", 3, 1, 2, "lithium", 6.94000, "alkali metal"),
+        ]
         PeriodicCombo(elements=new_elements, detailed=True)
         self.assertEqual(mock_insert_item.call_count, 3)
-        mock_insert_item.assert_called_with(2, 'Li (3) - lithium')
+        mock_insert_item.assert_called_with(2, "Li (3) - lithium")
 
         PeriodicCombo(elements=new_elements, detailed=False)
-        self.assertEqual(mock_insert_item.call_count, 3+3)
-        mock_insert_item.assert_called_with(2, 'Li (3)')
+        self.assertEqual(mock_insert_item.call_count, 3 + 3)
+        mock_insert_item.assert_called_with(2, "Li (3)")
 
     def test_that_selection_changed_signal_sent(self):
         combo = PeriodicCombo()
@@ -58,7 +60,7 @@ class PeriodicComboTest(unittest.TestCase):
     def test_that_setSelection_sets_correct_selection_if_given_symbol(self):
         combo = PeriodicCombo()
         combo.setCurrentIndex = mock.Mock()
-        combo.setSelection('H')
+        combo.setSelection("H")
 
         combo.setCurrentIndex.assert_called_with(0)
 
@@ -72,8 +74,8 @@ class PeriodicComboTest(unittest.TestCase):
     def test_that_setSelection_throws_if_given_bad_symbol(self):
         combo = PeriodicCombo()
         with self.assertRaises(ValueError):
-            combo.setSelection('I-dont-exist')
+            combo.setSelection("I-dont-exist")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

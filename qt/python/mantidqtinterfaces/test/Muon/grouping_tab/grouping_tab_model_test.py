@@ -13,7 +13,7 @@ class GroupingTabModelTest(unittest.TestCase):
     def setUp(self):
         self.context = mock.MagicMock()
         self._num_periods_store = {62260: 4, 62261: 2, 62263: 1}
-        self.context.num_periods = lambda run : self._num_periods_store[run]
+        self.context.num_periods = lambda run: self._num_periods_store[run]
 
     def test_reset_group_and_pairs_to_default_correctly_identifies_maximum_number_of_periods_for_single_run(self):
         self.context.current_runs = [62260]
@@ -41,5 +41,5 @@ class GroupingTabModelTest(unittest.TestCase):
         self.assertEqual(status, "failed")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

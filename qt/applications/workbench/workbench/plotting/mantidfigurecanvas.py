@@ -12,8 +12,7 @@ from distutils.version import LooseVersion
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QPen
 import matplotlib
-from matplotlib.backends.backend_qt5agg import (  # noqa: F401
-    FigureCanvasQTAgg, draw_if_interactive, show)
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, draw_if_interactive, show  # noqa: F401
 from mantid.plots.mantidimage import MantidImage, ImageIntensity
 
 
@@ -54,6 +53,7 @@ class MantidFigureCanvas(FigureCanvasQTAgg):
                 pen = QPen(self.pen_color, self.pen_thickness / self._dpi_ratio, Qt.DotLine)
                 painter.setPen(pen)
                 painter.drawRect(*(pt / self._dpi_ratio for pt in rect))
+
         else:
             self._drawRect = None
 
@@ -71,7 +71,7 @@ class MantidFigureCanvas(FigureCanvasQTAgg):
         """
         for ax in self.figure.get_axes():
             for img in ax.get_images():
-                if (not isinstance(img, MantidImage)):
+                if not isinstance(img, MantidImage):
                     continue
                 intensity = img.calculate_greyscale_intensity()
                 if intensity == ImageIntensity.DARK:

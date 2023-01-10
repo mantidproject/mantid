@@ -1,0 +1,1 @@
+- Check that there is enough data points before attempting to fit a diffraction peak in :ref:`FitPeaks <algm-FitPeaks>`

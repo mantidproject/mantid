@@ -7,7 +7,6 @@
 
 
 class HomeTabModel(object):
-
     def __init__(self, context=None):
         self._data = context.data_context
         self._context = context

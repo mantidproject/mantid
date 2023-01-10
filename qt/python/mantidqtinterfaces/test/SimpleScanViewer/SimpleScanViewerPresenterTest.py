@@ -22,21 +22,20 @@ app = QApplication(sys.argv)
 
 class SimpleScanViewerPresenterTest(unittest.TestCase):
     def setUp(self) -> None:
-        self.facility = config['default.facility']
-        self.instrument = config['default.instrument']
-        config['default.facility'] = "ILL"
-        config['default.instrument'] = "D16"
+        self.facility = config["default.facility"]
+        self.instrument = config["default.instrument"]
+        config["default.facility"] = "ILL"
+        config["default.instrument"] = "D16"
 
-        patch = mock.patch(
-                'mantidqtinterfaces.simplescanviewer.model.SimpleScanViewerModel')
+        patch = mock.patch("mantidqtinterfaces.simplescanviewer.model.SimpleScanViewerModel")
         self.mocked_model = patch.start()
         self.addCleanup(patch.stop)
 
         self.presenter = SimpleScanViewerPresenter()
 
     def tearDown(self) -> None:
-        config['default.facility'] = self.facility
-        config['default.instrument'] = self.instrument
+        config["default.facility"] = self.facility
+        config["default.instrument"] = self.instrument
         mtd.clear()
 
     def test_additional_peak_info(self):

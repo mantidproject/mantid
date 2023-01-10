@@ -37,9 +37,9 @@ class MultiPlottingContextTest(unittest.TestCase):
         self.subplot = mock.create_autospec(subplotContext)
         with mock.patch("mantidqtinterfaces.MultiPlotting.subplot.subplot_context.subplotContext.addLine") as patch:
             self.context.addSubplot("one", subplot)
-            self.context.addLine("one", ws, spec_num, 'C0')
+            self.context.addLine("one", ws, spec_num, "C0")
             self.assertEqual(patch.call_count, 1)
-            patch.assert_called_with(ws, spec_num, color='C0')
+            patch.assert_called_with(ws, spec_num, color="C0")
 
     def test_add_line_2(self):
         spec_num = 4
@@ -50,9 +50,9 @@ class MultiPlottingContextTest(unittest.TestCase):
         self.subplot = mock.create_autospec(subplotContext)
         with mock.patch("mantidqtinterfaces.MultiPlotting.subplot.subplot_context.subplotContext.addLine") as patch:
             self.context.addSubplot("one", subplot)
-            self.context.addLine("one", ws, spec_num, 'C0')
+            self.context.addLine("one", ws, spec_num, "C0")
             self.assertEqual(patch.call_count, 1)
-            patch.assert_called_with(mock_ws, spec_num, color='C0')
+            patch.assert_called_with(mock_ws, spec_num, color="C0")
 
     def test_update_layout(self):
         # add mocks
@@ -64,8 +64,7 @@ class MultiPlottingContextTest(unittest.TestCase):
 
         gridspec = mock.Mock()
         self.context._gridspec = gridspec
-        with mock.patch(
-                "mantidqtinterfaces.MultiPlotting.subplot.subplot_context.subplotContext.update_gridspec") as patch:
+        with mock.patch("mantidqtinterfaces.MultiPlotting.subplot.subplot_context.subplotContext.update_gridspec") as patch:
             self.context.update_layout(figure)
             self.assertEqual(patch.call_count, 3)
             # only last iteration survives
@@ -91,7 +90,7 @@ class MultiPlottingContextTest(unittest.TestCase):
             for name in names:
                 self.context.addSubplot(name, mock.Mock())
                 for k in range(0, no_lines):
-                    self.context.addLine(name, ws, 1, 'C0')
+                    self.context.addLine(name, ws, 1, "C0")
                 no_lines += 1
 
         for name in names:

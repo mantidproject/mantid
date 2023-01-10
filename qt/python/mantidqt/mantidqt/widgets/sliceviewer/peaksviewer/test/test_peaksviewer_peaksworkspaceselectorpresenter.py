@@ -11,19 +11,21 @@ import unittest
 from unittest.mock import create_autospec
 
 # local imports
-from mantidqt.widgets.sliceviewer.peaksviewer.workspaceselection import \
-    (PeaksWorkspaceSelectorModel, PeaksWorkspaceSelectorPresenter, PeaksWorkspaceSelectorView)
+from mantidqt.widgets.sliceviewer.peaksviewer.workspaceselection import (
+    PeaksWorkspaceSelectorModel,
+    PeaksWorkspaceSelectorPresenter,
+    PeaksWorkspaceSelectorView,
+)
 
 
 class PeaksWorkspaceSelectorPresenterTest(unittest.TestCase):
     def test_construction_subscribes_to_view_and_sets_workspaces(self):
-        mock_view, mock_model = create_autospec(PeaksWorkspaceSelectorView), create_autospec(
-            PeaksWorkspaceSelectorModel)
+        mock_view, mock_model = create_autospec(PeaksWorkspaceSelectorView), create_autospec(PeaksWorkspaceSelectorModel)
         presenter = PeaksWorkspaceSelectorPresenter(mock_view, mock_model)
 
         mock_view.subscribe.assert_called_once_with(presenter)
         mock_model.names_and_statuses.assert_called_once()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

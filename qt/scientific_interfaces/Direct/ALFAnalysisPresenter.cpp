@@ -74,6 +74,14 @@ void ALFAnalysisPresenter::notifyFitClicked() {
   updateRotationAngleInViewFromModel();
 }
 
+void ALFAnalysisPresenter::notifyExportWorkspaceToADSClicked() { m_model->exportWorkspaceCopyToADS(); }
+
+void ALFAnalysisPresenter::notifyExternalPlotClicked() {
+  if (auto const plotWorkspace = m_model->plottedWorkspace()) {
+    m_view->openExternalPlot(plotWorkspace, m_model->plottedWorkspaceIndices());
+  }
+}
+
 void ALFAnalysisPresenter::notifyResetClicked() {
   calculateEstimate();
   updatePeakCentreInViewFromModel();

@@ -20,13 +20,12 @@ from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_
 def pair_name():
     name = []
     for i in range(21):
-        name.append("pair_" + str(i+1))
+        name.append("pair_" + str(i + 1))
     return name
 
 
 @start_qapplication
 class GroupSelectorTest(unittest.TestCase):
-
     def setUp(self):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
         self.obj = QWidget()
@@ -94,14 +93,14 @@ class GroupSelectorTest(unittest.TestCase):
     def test_that_get_index_of_text_returns_correct_index_if_text_exists(self):
         self.presenter.handle_add_pair_button_clicked()
 
-        index = self.view.get_index_of_text(self.get_group_1_selector_from_pair(0), 'my_group_1')
+        index = self.view.get_index_of_text(self.get_group_1_selector_from_pair(0), "my_group_1")
 
         self.assertEqual(index, 1)
 
     def test_that_get_index_of_text_returns_0_if_text_does_not_exists(self):
         self.presenter.handle_add_pair_button_clicked()
 
-        index = self.view.get_index_of_text(self.get_group_1_selector_from_pair(0), 'random string')
+        index = self.view.get_index_of_text(self.get_group_1_selector_from_pair(0), "random string")
 
         self.assertEqual(index, 0)
 
@@ -126,8 +125,7 @@ class GroupSelectorTest(unittest.TestCase):
         self.assertEqual(self.view.on_cell_changed.call_args_list[0][0], (0, 2))
 
     def test_that_removing_groups_and_then_calling_update_removes_groups_from_selections(self):
-        pair = MuonPair(pair_name="my_pair_1", forward_group_name="my_group_1", backward_group_name="my_group_2",
-                        alpha=1.0)
+        pair = MuonPair(pair_name="my_pair_1", forward_group_name="my_group_1", backward_group_name="my_group_2", alpha=1.0)
         self.presenter.add_pair(pair)
         self.group_context.remove_group("my_group_0")
         self.presenter.update_view_from_model()
@@ -142,8 +140,8 @@ class GroupSelectorTest(unittest.TestCase):
 
         self.assertEqual(self.get_group_1_selector_from_pair(0).count(), 3)
         self.assertEqual(self.get_group_2_selector_from_pair(0).count(), 3)
-        self.assertEqual(self.get_group_1_selector_from_pair(0).currentText(), 'my_group_0')
-        self.assertEqual(self.get_group_2_selector_from_pair(0).currentText(), 'my_group_1')
+        self.assertEqual(self.get_group_1_selector_from_pair(0).currentText(), "my_group_0")
+        self.assertEqual(self.get_group_2_selector_from_pair(0).currentText(), "my_group_1")
 
         group4 = MuonGroup(group_name="my_group_4", detector_ids=[4])
         self.group_context.add_group(group4)
@@ -151,8 +149,8 @@ class GroupSelectorTest(unittest.TestCase):
 
         self.assertEqual(self.get_group_1_selector_from_pair(0).count(), 4)
         self.assertEqual(self.get_group_2_selector_from_pair(0).count(), 4)
-        self.assertEqual(self.get_group_1_selector_from_pair(0).currentText(), 'my_group_0')
-        self.assertEqual(self.get_group_2_selector_from_pair(0).currentText(), 'my_group_1')
+        self.assertEqual(self.get_group_1_selector_from_pair(0).currentText(), "my_group_0")
+        self.assertEqual(self.get_group_2_selector_from_pair(0).currentText(), "my_group_1")
 
     def test_removing_group_used_in_pair_handled_gracefully(self):
         self.add_two_pairs_to_table()
@@ -163,25 +161,25 @@ class GroupSelectorTest(unittest.TestCase):
 
         self.assertEqual(self.get_group_1_selector_from_pair(0).count(), 2)
         self.assertEqual(self.get_group_2_selector_from_pair(0).count(), 2)
-        self.assertEqual(self.get_group_1_selector_from_pair(0).currentText(), 'my_group_1')
-        self.assertEqual(self.get_group_2_selector_from_pair(0).currentText(), 'my_group_2')
+        self.assertEqual(self.get_group_1_selector_from_pair(0).currentText(), "my_group_1")
+        self.assertEqual(self.get_group_2_selector_from_pair(0).currentText(), "my_group_2")
 
     def test_group_changed_to_other_group_switches_groups(self):
         self.presenter.handle_add_pair_button_clicked()
 
         self.assertEqual(self.get_group_1_selector_from_pair(0).count(), 3)
         self.assertEqual(self.get_group_2_selector_from_pair(0).count(), 3)
-        self.assertEqual(self.get_group_1_selector_from_pair(0).currentText(), 'my_group_0')
-        self.assertEqual(self.get_group_2_selector_from_pair(0).currentText(), 'my_group_1')
+        self.assertEqual(self.get_group_1_selector_from_pair(0).currentText(), "my_group_0")
+        self.assertEqual(self.get_group_2_selector_from_pair(0).currentText(), "my_group_1")
 
         group_selector = self.get_group_1_selector_from_pair(0)
         group_selector.setCurrentIndex(1)
 
         self.assertEqual(self.get_group_1_selector_from_pair(0).count(), 3)
         self.assertEqual(self.get_group_2_selector_from_pair(0).count(), 3)
-        self.assertEqual(self.get_group_1_selector_from_pair(0).currentText(), 'my_group_1')
-        self.assertEqual(self.get_group_2_selector_from_pair(0).currentText(), 'my_group_0')
+        self.assertEqual(self.get_group_1_selector_from_pair(0).currentText(), "my_group_1")
+        self.assertEqual(self.get_group_2_selector_from_pair(0).currentText(), "my_group_0")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

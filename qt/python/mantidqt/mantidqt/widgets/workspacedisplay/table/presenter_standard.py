@@ -10,7 +10,6 @@ from mantidqt.widgets.workspacedisplay.table.tableworkspace_item import create_t
 
 
 class TableWorkspaceDataPresenterStandard(TableWorkspaceDataPresenterBase):
-
     def __init__(self, view, model):
         super().__init__(view, model)
 

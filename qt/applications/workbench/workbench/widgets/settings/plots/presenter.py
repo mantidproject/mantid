@@ -60,12 +60,21 @@ class PlotProperties(Enum):
 
 
 class PlotSettings(object):
-    AXES_SCALE = ['Linear', 'Log']
-    AXES_Y_POSITION = ['Left', 'Right']
-    AXES_X_POSITION = ['Bottom', 'Top']
-    TICK_DIRECTION = ['In', 'Out', 'InOut']
-    LEGEND_LOCATION_LIST = ['best', 'upper right', 'center right', 'lower right', 'lower center', 'lower left',
-                            'center left', 'upper left', 'upper center']
+    AXES_SCALE = ["Linear", "Log"]
+    AXES_Y_POSITION = ["Left", "Right"]
+    AXES_X_POSITION = ["Bottom", "Top"]
+    TICK_DIRECTION = ["In", "Out", "InOut"]
+    LEGEND_LOCATION_LIST = [
+        "best",
+        "upper right",
+        "center right",
+        "lower right",
+        "lower center",
+        "lower left",
+        "center left",
+        "upper left",
+        "upper center",
+    ]
 
     def __init__(self, parent, view=None, model=None):
         self.view = view if view else PlotsSettingsView(parent, self)
@@ -209,12 +218,10 @@ class PlotSettings(object):
     def setup_images_group(self):
         colormap = ConfigService.getString(PlotProperties.COLORMAP.value)
         if self.view.default_colormap_combo_box.findText(colormap) != -1:
-            self.view.default_colormap_combo_box.setCurrentIndex(
-                self.view.default_colormap_combo_box.findText(colormap))
+            self.view.default_colormap_combo_box.setCurrentIndex(self.view.default_colormap_combo_box.findText(colormap))
             self.view.reverse_colormap_check_box.setChecked(False)
-        elif colormap.endswith('_r') and self.view.default_colormap_combo_box.findText(colormap[:-2]):
-            self.view.default_colormap_combo_box.setCurrentIndex(
-                self.view.default_colormap_combo_box.findText(colormap[:-2]))
+        elif colormap.endswith("_r") and self.view.default_colormap_combo_box.findText(colormap[:-2]):
+            self.view.default_colormap_combo_box.setCurrentIndex(self.view.default_colormap_combo_box.findText(colormap[:-2]))
             self.view.reverse_colormap_check_box.setChecked(True)
         colorbar_scale = ConfigService.getString(PlotProperties.COLORBAR_SCALE.value)
         if colorbar_scale in self.AXES_SCALE:
@@ -398,7 +405,7 @@ class PlotSettings(object):
     def action_default_colormap_changed(self):
         colormap = self.view.default_colormap_combo_box.currentText()
         if self.view.reverse_colormap_check_box.isChecked():
-            colormap += '_r'
+            colormap += "_r"
 
         ConfigService.setString(PlotProperties.COLORMAP.value, colormap)
 

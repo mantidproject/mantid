@@ -14,17 +14,16 @@ from .view import SampleLogsView
 
 
 class SampleLogs(object):
-    """
-    """
+    """ """
+
     def __init__(self, ws, parent=None, window_flags=Qt.Window, model=None, view=None):
         # Create model and view, or accept mocked versions
         self.model = model if model else SampleLogsModel(ws)
-        self.view = view if view else SampleLogsView(self,
-                                                     parent,
-                                                     window_flags,
-                                                     self.model.get_name(),
-                                                     self.model.isMD(),
-                                                     self.model.getNumExperimentInfo())
+        self.view = (
+            view
+            if view
+            else SampleLogsView(self, parent, window_flags, self.model.get_name(), self.model.isMD(), self.model.getNumExperimentInfo())
+        )
         self.filtered = True
         self.setup_table()
 
@@ -43,9 +42,8 @@ class SampleLogs(object):
         self.print_selected_logs()
 
     def log_changed(self):
-        """Update interface aspects
-        """
-        #determine if any of the logs might support filtering
+        """Update interface aspects"""
+        # determine if any of the logs might support filtering
         are_any_logs_filtered = False
         for row in self.view.get_selected_row_indexes():
             if self.model.get_is_log_filtered(self.view.get_row_log_name(row)):
@@ -57,7 +55,7 @@ class SampleLogs(object):
         """Print all selected logs"""
         for row in self.view.get_selected_row_indexes():
             log = self.model.get_log(self.view.get_row_log_name(row))
-            print('# {}'.format(log.name))
+            print("# {}".format(log.name))
             print(log.valueAsPrettyStr())
 
     def plot_clicked(self, event):
@@ -99,17 +97,15 @@ class SampleLogs(object):
 
     def plot_logs(self):
         """Get all selected rows, check if plottable, then plot the logs"""
-        to_plot = [row for row in self.view.get_selected_row_indexes()
-                   if self.model.is_log_plottable(self.view.get_row_log_name(row))]
+        to_plot = [row for row in self.view.get_selected_row_indexes() if self.model.is_log_plottable(self.view.get_row_log_name(row))]
         self.view.plot_selected_logs(self.model.get_ws(), self.model.get_exp(), to_plot)
 
     def new_plot_logs(self):
         """Get all selected rows, check if plottable, then plot the logs in new figure"""
-        to_plot = [row for row in self.view.get_selected_row_indexes()
-                   if self.model.is_log_plottable(self.view.get_row_log_name(row))]
+        to_plot = [row for row in self.view.get_selected_row_indexes() if self.model.is_log_plottable(self.view.get_row_log_name(row))]
         self.view.new_plot_selected_logs(self.model.get_ws(), self.model.get_exp(), to_plot)
 
-    def setup_table(self, search_key=''):
+    def setup_table(self, search_key=""):
         """Set the model in the view to the one create from the model"""
         self.view.show_plot_and_stats(self.model.are_any_logs_plottable())
         self.view.set_model(self.model.getItemModel(search_key))

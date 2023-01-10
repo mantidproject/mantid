@@ -16,7 +16,6 @@ from matplotlib.colors import LogNorm, Normalize, SymLogNorm
 
 @start_qapplication
 class ColorbarWidgetTest(TestCase):
-
     @classmethod
     def setUpClass(cls) -> None:
         cls.data = np.arange(100.0).reshape((10, 10))
@@ -29,7 +28,7 @@ class ColorbarWidgetTest(TestCase):
         self.widget.cmin_value = 0
 
     def tearDown(self) -> None:
-        plt.close('all')
+        plt.close("all")
         self.fig, self.widget = None, None
 
     def test_that_an_integer_vmax_will_not_cause_an_error_when_the_clim_gets_updated(self):
@@ -75,7 +74,7 @@ class ColorbarWidgetTest(TestCase):
             self.assertEqual(self.widget.cmax_value, c_max)
 
     def test_that_all_zero_slice_with_log_normalisation_gives_valid_clim(self):
-        image = plt.imshow(self.data*0, cmap="plasma", norm=Normalize(vmin=None, vmax=None))
+        image = plt.imshow(self.data * 0, cmap="plasma", norm=Normalize(vmin=None, vmax=None))
 
         self.widget.set_mappable(image)
         self.widget.autoscale.setChecked(True)
@@ -87,7 +86,7 @@ class ColorbarWidgetTest(TestCase):
         self.assertEqual(c_max, 1)
 
     def test_that_all_nan_slice_with_log_normalisation_gives_valid_clim(self):
-        image = plt.imshow(self.data*np.nan, cmap="plasma", norm=Normalize(vmin=None, vmax=None))
+        image = plt.imshow(self.data * np.nan, cmap="plasma", norm=Normalize(vmin=None, vmax=None))
 
         self.widget.set_mappable(image)
         self.widget.autoscale.setChecked(True)

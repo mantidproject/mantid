@@ -18,7 +18,6 @@ from mantidqt.widgets.samplematerialdialog.samplematerial_presenter import Sampl
 
 @start_qapplication
 class SampleMaterialPresenterTest(unittest.TestCase):
-
     def setUp(self):
         # Create a workspace and change the sample material to non-trivial values.
         workspace_name = "testWS"
@@ -31,13 +30,15 @@ class SampleMaterialPresenterTest(unittest.TestCase):
         self.coherent_xs = 3.2
         self.incoherent_xs = 3.4
 
-        SetSampleMaterial(InputWorkspace=self.ws,
-                          ChemicalFormula=self.formula,
-                          SampleNumberDensity=self.number_density,
-                          AttenuationXSection=self.absorption_xs,
-                          ScatteringXSection=self.scattering_xs,
-                          CoherentXSection=self.coherent_xs,
-                          IncoherentXSection=self.incoherent_xs)
+        SetSampleMaterial(
+            InputWorkspace=self.ws,
+            ChemicalFormula=self.formula,
+            SampleNumberDensity=self.number_density,
+            AttenuationXSection=self.absorption_xs,
+            ScatteringXSection=self.scattering_xs,
+            CoherentXSection=self.coherent_xs,
+            IncoherentXSection=self.incoherent_xs,
+        )
 
         self.presenter = SampleMaterialDialogPresenter(self.ws)
 
@@ -57,5 +58,5 @@ class SampleMaterialPresenterTest(unittest.TestCase):
         self.assertEqual(self.presenter.view.incoherent_item.text(1), str(self.incoherent_xs))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

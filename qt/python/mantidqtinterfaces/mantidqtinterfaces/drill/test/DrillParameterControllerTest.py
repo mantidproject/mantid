@@ -8,30 +8,25 @@
 import unittest
 from unittest import mock
 
-from mantidqtinterfaces.drill.model.DrillParameterController \
-        import DrillParameterController, DrillControllerSignals
+from mantidqtinterfaces.drill.model.DrillParameterController import DrillParameterController, DrillControllerSignals
 
 
 class DrillParameterControllerTest(unittest.TestCase):
-
     def setUp(self):
-        #mock queue
-        patch = mock.patch(
-                "mantidqtinterfaces.drill.model.DrillParameterController.queue")
+        # mock queue
+        patch = mock.patch("mantidqtinterfaces.drill.model.DrillParameterController.queue")
         self.mQueue = patch.start()
         self.addCleanup(patch.stop)
         self.mQueue = self.mQueue.Queue.return_value
         # mock sapi
-        patch = mock.patch(
-                'mantidqtinterfaces.drill.model.DrillParameterController.sapi')
+        patch = mock.patch("mantidqtinterfaces.drill.model.DrillParameterController.sapi")
         self.mSapi = patch.start()
         self.addCleanup(patch.stop)
 
         self.controller = DrillParameterController("test")
 
     def test_signals(self):
-        self.assertTrue(isinstance(self.controller.signals,
-                                   DrillControllerSignals))
+        self.assertTrue(isinstance(self.controller.signals, DrillControllerSignals))
 
     def test_check(self):
         param = mock.Mock()

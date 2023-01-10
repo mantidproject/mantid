@@ -9,4 +9,4 @@
 
 from mantidqt.utils.qt import import_qt
 
-BaseDecoder = import_qt('._common', 'mantidqt', 'BaseDecoder')
+BaseDecoder = import_qt("._common", "mantidqt", "BaseDecoder")

@@ -9,9 +9,8 @@ from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
 
 
 class PlotDataPanePresenter(BasePanePresenter):
-
-    def __init__(self, view, model, context,figure_presenter):
-        super().__init__(view, model, context,figure_presenter)
+    def __init__(self, view, model, context, figure_presenter):
+        super().__init__(view, model, context, figure_presenter)
         self._data_type = ["Asymmetry", "Counts"]
         self._sort_by = ["Group/Pair", "Run"]
         self.update_view()
@@ -19,8 +18,7 @@ class PlotDataPanePresenter(BasePanePresenter):
         self._view.hide_plot_diff()
         self._view.enable_tile_plotting_options()
         self._view.enable_plot_raw_option()
-        self.added_group_or_pair_observer = GenericObserverWithArgPassing(
-            self.handle_added_or_removed_group_or_pair_to_plot)
+        self.added_group_or_pair_observer = GenericObserverWithArgPassing(self.handle_added_or_removed_group_or_pair_to_plot)
 
     def handle_data_type_changed(self):
         """
@@ -33,17 +31,14 @@ class PlotDataPanePresenter(BasePanePresenter):
         self._figure_presenter.force_autoscale()
 
     def _check_if_counts_and_pairs_selected(self):
-        if len(self.context.group_pair_context.selected_pairs) != 0 and \
-                self._view.get_plot_type() == "Counts":
+        if len(self.context.group_pair_context.selected_pairs) != 0 and self._view.get_plot_type() == "Counts":
             self._view.set_plot_type("Asymmetry")
-            self._view.warning_popup(
-                'Pair workspaces have no counts workspace, plotting Asymmetry')
+            self._view.warning_popup("Pair workspaces have no counts workspace, plotting Asymmetry")
             return True
         return False
 
     def handle_data_updated(self, autoscale=True, hold_on=False):
-        workspace_list, indicies = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
-                                                                                      self._view.get_plot_type())
+        workspace_list, indicies = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(), self._view.get_plot_type())
         self.add_list_to_plot(workspace_list, indicies, hold=hold_on, autoscale=autoscale)
 
     def handle_added_or_removed_group_or_pair_to_plot(self, group_pair_info):
@@ -74,7 +69,8 @@ class PlotDataPanePresenter(BasePanePresenter):
         :param group_or_pair_name: The group or pair name that was removed from the analysis
         """
         workspace_list = self._model.get_workspaces_to_remove(
-            [group_or_pair_name], is_raw=self._view.is_raw_plot(), plot_type=self._view.get_plot_type())
+            [group_or_pair_name], is_raw=self._view.is_raw_plot(), plot_type=self._view.get_plot_type()
+        )
         self.remove_list_from_plot(workspace_list)
         self.handle_data_updated()
 

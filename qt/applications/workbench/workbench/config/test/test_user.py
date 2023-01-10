@@ -23,11 +23,7 @@ class ConfigUserManager(object):
         """
         if not defaults:
             self.defaults = {
-                'main': {
-                    'a_default_key': 100,
-                    'bool_option': False,
-                    'bool_option2': True
-                },
+                "main": {"a_default_key": 100, "bool_option": False, "bool_option2": True},
             }
         else:
             self.defaults = defaults
@@ -53,16 +49,11 @@ class ConfigUserManager(object):
 
 
 class ConfigUserTest(TestCase):
-
     @classmethod
     def setUpClass(cls):
-        if not hasattr(cls, 'cfg'):
+        if not hasattr(cls, "cfg"):
             defaults = {
-                'main': {
-                    'a_default_key': 100,
-                    'bool_option': False,
-                    'bool_option2': True
-                },
+                "main": {"a_default_key": 100, "bool_option": False, "bool_option2": True},
             }
             cls.cfg = UserConfig(cls.__name__, cls.__name__, defaults)
 
@@ -82,46 +73,42 @@ class ConfigUserTest(TestCase):
     # ----------------------------------------------
 
     def test_stored_value_not_in_defaults_is_retrieved(self):
-        self.cfg.set('main', 'key1', 1)
-        self.assertEqual(1, self.cfg.get('main', 'key1', type=int))
+        self.cfg.set("main", "key1", 1)
+        self.assertEqual(1, self.cfg.get("main", "key1", type=int))
 
     def test_value_not_in_settings_retrieves_default_if_it_exists(self):
-        self.assertEqual(100, self.cfg.get('main', 'a_default_key', type=int))
-        self.assertEqual(100, self.cfg.get('main/a_default_key', type=int))
+        self.assertEqual(100, self.cfg.get("main", "a_default_key", type=int))
+        self.assertEqual(100, self.cfg.get("main/a_default_key", type=int))
 
     def test_boolean_with_default_false_can_be_retrieved(self):
-        self.assertEqual(False, self.cfg.get('main', 'bool_option', type=bool))
-        self.assertEqual(False, self.cfg.get('main/bool_option', type=bool))
+        self.assertEqual(False, self.cfg.get("main", "bool_option", type=bool))
+        self.assertEqual(False, self.cfg.get("main/bool_option", type=bool))
 
-        self.assertEqual(True, self.cfg.get('main/bool_option2', type=bool))
+        self.assertEqual(True, self.cfg.get("main/bool_option2", type=bool))
 
     def test_has_keys(self):
-        self.assertTrue(self.cfg.has('main', 'a_default_key'))
-        self.assertTrue(self.cfg.has('main/a_default_key'))
-        self.assertFalse(self.cfg.has('main', 'missing-key'))
-        self.assertFalse(self.cfg.has('main/missing-key'))
+        self.assertTrue(self.cfg.has("main", "a_default_key"))
+        self.assertTrue(self.cfg.has("main/a_default_key"))
+        self.assertFalse(self.cfg.has("main", "missing-key"))
+        self.assertFalse(self.cfg.has("main/missing-key"))
 
     def test_remove_key(self):
-        self.cfg.set('main', 'key1', 1)
-        self.assertTrue(self.cfg.has('main/key1'))
-        self.cfg.remove('main/key1')
-        self.assertFalse(self.cfg.has('main/key1'))
+        self.cfg.set("main", "key1", 1)
+        self.assertTrue(self.cfg.has("main/key1"))
+        self.cfg.remove("main/key1")
+        self.assertFalse(self.cfg.has("main/key1"))
 
     def test_lowercase_bool_loaded_correctly(self):
         defaults = {
-            'main': {
-                'a_default_key': 100,
-                'lowercase_bool_option': 'false',
-                'lowercase_bool_option2': 'true'
-            },
+            "main": {"a_default_key": 100, "lowercase_bool_option": "false", "lowercase_bool_option2": "true"},
         }
         with ConfigUserManager("lowercase", defaults) as cfg:
-            self.assertFalse(cfg.get('main/lowercase_bool_option', type=bool))
-            self.assertTrue(cfg.get('main/lowercase_bool_option2', type=bool))
+            self.assertFalse(cfg.get("main/lowercase_bool_option", type=bool))
+            self.assertTrue(cfg.get("main/lowercase_bool_option2", type=bool))
 
     def test_all_keys_with_specified_group(self):
         with ConfigUserManager("allkeys") as cfg:
-            keys = cfg.all_keys('main')
+            keys = cfg.all_keys("main")
             self.assertEqual(3, len(keys))
 
             # order of the keys isn't guaranteed, so it's just checked that they are
@@ -135,30 +122,30 @@ class ConfigUserTest(TestCase):
     # ----------------------------------------------
 
     def test_get_raises_error_with_invalid_section_type(self):
-        self.assertRaises(TypeError, self.cfg.get, 1, 'key1', type=int)
+        self.assertRaises(TypeError, self.cfg.get, 1, "key1", type=int)
 
     def test_get_raises_error_with_invalid_option_type(self):
-        self.assertRaises(TypeError, self.cfg.get, 'section', 1, type=int)
+        self.assertRaises(TypeError, self.cfg.get, "section", 1, type=int)
 
     def test_get_raises_error_with_missing_key_when_type_provided(self):
-        self.assertRaises(KeyError, self.cfg.get, 'not_a_key', type=bool)
+        self.assertRaises(KeyError, self.cfg.get, "not_a_key", type=bool)
 
     def test_get_raises_error_with_existing_kkey_but_wrong_type(self):
-        self.assertRaises(TypeError, self.cfg.get, 'main', 'bool_option', type='QStringList')
+        self.assertRaises(TypeError, self.cfg.get, "main", "bool_option", type="QStringList")
 
     def test_get_raises_keyerror_with_no_saved_setting_or_default(self):
-        self.assertRaises(KeyError, self.cfg.get, 'main', 'missing-key', type=str)
-        self.assertRaises(KeyError, self.cfg.get, 'main/missing-key', type=str)
+        self.assertRaises(KeyError, self.cfg.get, "main", "missing-key", type=str)
+        self.assertRaises(KeyError, self.cfg.get, "main/missing-key", type=str)
 
     def test_set_raises_error_with_invalid_section_type(self):
-        self.assertRaises(TypeError, self.cfg.set, 1, 'key1', 1)
+        self.assertRaises(TypeError, self.cfg.set, 1, "key1", 1)
 
     def test_set_raises_error_with_invalid_option_type(self):
-        self.assertRaises(TypeError, self.cfg.set, 'section', 1, 1)
+        self.assertRaises(TypeError, self.cfg.set, "section", 1, 1)
 
     def test_set_raises_when_key_is_not_str_and_second_is_none(self):
         self.assertRaises(TypeError, self.cfg.set, 123, None)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

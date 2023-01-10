@@ -36,15 +36,13 @@ class CorrectionsPresenter(QObject):
         self.dead_time_presenter = DeadTimeCorrectionsPresenter(self.view.dead_time_view, self.dead_time_model, self)
 
         self.background_model = BackgroundCorrectionsModel(model, context)
-        self.background_presenter = BackgroundCorrectionsPresenter(self.view.background_view, self.background_model,
-                                                                   self)
+        self.background_presenter = BackgroundCorrectionsPresenter(self.view.background_view, self.background_model, self)
 
         self.initialize_model_options()
 
         self.view.set_slot_for_run_selector_changed(self.handle_run_selector_changed)
 
-        self.update_view_from_model_observer = GenericObserverWithArgPassing(
-            self.handle_ads_clear_or_remove_workspace_event)
+        self.update_view_from_model_observer = GenericObserverWithArgPassing(self.handle_ads_clear_or_remove_workspace_event)
         self.instrument_changed_observer = GenericObserver(self.handle_instrument_changed)
         self.load_observer = GenericObserver(self.handle_runs_loaded)
         self.group_change_observer = GenericObserver(self.handle_groups_changed)
@@ -143,9 +141,9 @@ class CorrectionsPresenter(QObject):
         """Calculate the Asymmetry workspaces, Pairs and Diffs on a thread after background corrections are complete."""
         try:
             self.calculation_thread = self.create_calculation_thread(self._calculate_asymmetry_pairs_and_diffs, *args)
-            self.calculation_thread.threadWrapperSetUp(self.handle_thread_calculation_started,
-                                                       self.handle_asymmetry_pairs_and_diffs_calc_finished,
-                                                       self.handle_thread_error)
+            self.calculation_thread.threadWrapperSetUp(
+                self.handle_thread_calculation_started, self.handle_asymmetry_pairs_and_diffs_calc_finished, self.handle_thread_error
+            )
             self.calculation_thread.start()
         except ValueError as error:
             self.view.warning_popup(error)

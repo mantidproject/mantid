@@ -9,24 +9,23 @@
 # local imports
 from .alpha import compute_alpha
 from .painter import MplPainter, Painted
+
 # 3rd party
 from mantidqt.widgets.sliceviewer.models.sliceinfo import SliceInfo
+
 # standard library
 from typing import Sequence
 
 
 class NonIntegratedPeakRepresentation:
     """Create a collection of PeakDrawable objects for a non-integrated Peak"""
+
     VIEW_FRACTION = 0.015
 
     @classmethod
-    def draw(cls,
-             peak_origin: Sequence,
-             peak_shape,  # unused PeakShape
-             slice_info: SliceInfo,
-             painter: MplPainter,
-             fg_color: str,
-             _) -> Painted:  # unused bg_color
+    def draw(
+        cls, peak_origin: Sequence, peak_shape, slice_info: SliceInfo, painter: MplPainter, fg_color: str, _  # unused PeakShape
+    ) -> Painted:  # unused bg_color
         """
         Draw the representation of a slice through a peak with no shape
         :param peak_origin: Peak origin in original workspace frame
@@ -57,8 +56,6 @@ class NonIntegratedPeakRepresentation:
             if effective_radius > cls.VIEW_FRACTION * deltax:
                 view_radius = cls.VIEW_FRACTION * deltax
 
-            painted = Painted(painter,
-                              (painter.cross(x, y, view_radius, alpha=alpha, color=fg_color), ),
-                              effective_bbox)
+            painted = Painted(painter, (painter.cross(x, y, view_radius, alpha=alpha, color=fg_color),), effective_bbox)
 
         return painted

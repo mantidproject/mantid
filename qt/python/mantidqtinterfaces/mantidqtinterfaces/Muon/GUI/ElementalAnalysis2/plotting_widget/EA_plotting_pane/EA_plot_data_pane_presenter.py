@@ -9,7 +9,6 @@ from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
 
 
 class EAPlotDataPanePresenter(BasePanePresenter):
-
     def __init__(self, view, model, context, figure_presenter):
         super(EAPlotDataPanePresenter, self).__init__(view, model, context, figure_presenter)
         self._data_type = ["Total", "Prompt", "Delayed"]
@@ -31,8 +30,7 @@ class EAPlotDataPanePresenter(BasePanePresenter):
 
     def handle_data_updated(self, autoscale=True, hold_on=False):
         self.check_if_can_use_rebin()
-        workspace_list, indices = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
-                                                                                     self._view.get_plot_type())
+        workspace_list, indices = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(), self._view.get_plot_type())
         self.add_list_to_plot(workspace_list, indices, hold=hold_on, autoscale=autoscale)
 
     def handle_added_or_removed_group_to_plot(self, group_info):

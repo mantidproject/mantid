@@ -25,8 +25,9 @@ class AddGroupingWorkspaces(AddFeature):
 
     def add_observers_to_feature(self, GUI):
         # only do grouping when group/pair changes
-        GUI.corrections_tab.corrections_tab_presenter.asymmetry_pair_and_diff_calculations_finished_notifier.\
-            add_subscriber(GUI.group_observer)
+        GUI.corrections_tab.corrections_tab_presenter.asymmetry_pair_and_diff_calculations_finished_notifier.add_subscriber(
+            GUI.group_observer
+        )
         # phaseqaud finished -> do grouping
         GUI.phase_tab.phase_table_presenter.calculation_finished_notifier.add_subscriber(GUI.group_observer)
         GUI.phase_tab.phase_table_presenter.phase_table_calculation_complete_notifier.add_subscriber(GUI.group_observer)

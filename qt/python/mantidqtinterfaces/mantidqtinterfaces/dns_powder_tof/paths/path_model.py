@@ -14,12 +14,10 @@ import os
 from os.path import expanduser
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_file import DNSFile
-from mantidqtinterfaces.dns_powder_tof.data_structures.dns_obs_model import \
-    DNSObsModel
+from mantidqtinterfaces.dns_powder_tof.data_structures.dns_obs_model import DNSObsModel
 
 
 class DNSPathModel(DNSObsModel):
-
     @staticmethod
     def get_current_directory():
         return os.getcwd()
@@ -27,18 +25,18 @@ class DNSPathModel(DNSObsModel):
     @staticmethod
     def get_user_and_proposal_number(dir_name):
         try:
-            first_filename = next(glob.iglob(f'{dir_name}/*.d_dat'))
+            first_filename = next(glob.iglob(f"{dir_name}/*.d_dat"))
         except StopIteration:
-            return ['', '']
-        dns_file = DNSFile('', first_filename)
-        if dns_file['new_format']:
-            return [dns_file['users'], dns_file['proposal']]
-        return ['', '']
+            return ["", ""]
+        dns_file = DNSFile("", first_filename)
+        if dns_file["new_format"]:
+            return [dns_file["users"], dns_file["proposal"]]
+        return ["", ""]
 
     @staticmethod
     def clear_cache(path):
-        if path and os.path.isfile(path + '/last_filelist.txt'):
-            os.remove(path + '/last_filelist.txt')
+        if path and os.path.isfile(path + "/last_filelist.txt"):
+            os.remove(path + "/last_filelist.txt")
 
     @staticmethod
     def get_start_path_for_dialog(path):

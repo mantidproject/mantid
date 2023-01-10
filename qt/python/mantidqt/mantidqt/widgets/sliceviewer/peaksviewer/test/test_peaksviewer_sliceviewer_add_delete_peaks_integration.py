@@ -10,6 +10,7 @@ import unittest
 from unittest.mock import Mock
 
 import matplotlib
+
 matplotlib.use("agg")
 
 from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer  # noqa: E402
@@ -26,6 +27,7 @@ class AddDeletePeaksTest(unittest.TestCase):
     in the attached peaksworkspace.
 
     """
+
     def tearDown(self):
         # Close windows after each test to ensure none windows remain before program destruction
         for widget in QApplication.topLevelWidgets():
@@ -34,14 +36,12 @@ class AddDeletePeaksTest(unittest.TestCase):
         QApplication.sendPostedEvents()
 
     def test_Q_Sample(self):
-        md = CreateMDWorkspace(Dimensions=3,
-                               Extents='0,10,0,10,0,10',
-                               Names='x,y,z',
-                               Units='r.l.u.,r.l.u.,r.l.u.',
-                               Frames='QSample,QSample,QSample')
+        md = CreateMDWorkspace(
+            Dimensions=3, Extents="0,10,0,10,0,10", Names="x,y,z", Units="r.l.u.,r.l.u.,r.l.u.", Frames="QSample,QSample,QSample"
+        )
 
-        pw_name = 'peaks_add_delete_test'
-        CreatePeaksWorkspace(OutputType='LeanElasticPeak', NUmberOfPeaks=0, OutputWorkspace=pw_name)
+        pw_name = "peaks_add_delete_test"
+        CreatePeaksWorkspace(OutputType="LeanElasticPeak", NUmberOfPeaks=0, OutputWorkspace=pw_name)
 
         self.assertEqual(mtd[pw_name].getNumberPeaks(), 0)
 
@@ -121,15 +121,11 @@ class AddDeletePeaksTest(unittest.TestCase):
         self.assertEqual(mtd[pw_name].getNumberPeaks(), 0)
 
     def test_HKL(self):
-        md = CreateMDWorkspace(Dimensions=3,
-                               Extents='0,10,0,10,0,10',
-                               Names='H,K,L',
-                               Units='r.l.u.,r.l.u.,r.l.u.',
-                               Frames='HKL,HKL,HKL')
+        md = CreateMDWorkspace(Dimensions=3, Extents="0,10,0,10,0,10", Names="H,K,L", Units="r.l.u.,r.l.u.,r.l.u.", Frames="HKL,HKL,HKL")
 
-        pw_name = 'peaks_add_delete_test'
-        CreatePeaksWorkspace(OutputType='LeanElasticPeak', NUmberOfPeaks=0, OutputWorkspace=pw_name)
-        SetUB(pw_name, 2*np.pi, 2*np.pi, 4*np.pi, u='0,0,1', v='1,0,0')
+        pw_name = "peaks_add_delete_test"
+        CreatePeaksWorkspace(OutputType="LeanElasticPeak", NUmberOfPeaks=0, OutputWorkspace=pw_name)
+        SetUB(pw_name, 2 * np.pi, 2 * np.pi, 4 * np.pi, u="0,0,1", v="1,0,0")
 
         self.assertEqual(mtd[pw_name].getNumberPeaks(), 0)
 
@@ -212,5 +208,5 @@ class AddDeletePeaksTest(unittest.TestCase):
         self.assertAlmostEqual(peak.getL(), 3, delta=1e-10)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

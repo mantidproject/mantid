@@ -15,6 +15,7 @@ class ActivateCompleterOnReturn(QObject):
     """Event filter to capture key presses from a QLineEdit
     and activate completion popups if enter is pressed
     """
+
     def __init__(self, lineedit: QLineEdit):
         """
         :param lineedit: The QLineEdit whose key presses should be monitored
@@ -61,7 +62,7 @@ class AddFunctionDialogView(QDialog):
         :param default_checkbox: Whether to add a checkbox for setting the function as the global application default
         """
         super(AddFunctionDialogView, self).__init__(parent)
-        self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
+        self.setWindowIcon(QIcon(":/images/MantidIcon.ico"))
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self._setup_ui(function_names, default_function_name, default_checkbox)
 
@@ -75,13 +76,13 @@ class AddFunctionDialogView(QDialog):
         self.ui.errorMessage.show()
 
     def is_set_global_default(self):
-        if hasattr(self, '_default_checkbox'):
+        if hasattr(self, "_default_checkbox"):
             return self._default_checkbox.checkState() == Qt.Checked
         return False
 
     # private api
     def _setup_ui(self, function_names, default_function_name, default_checkbox):
-        self.ui = load_ui(__file__, 'add_function_dialog.ui', self)
+        self.ui = load_ui(__file__, "add_function_dialog.ui", self)
         functionBox = self.ui.functionBox
         if function_names:
             functionBox.addItems(function_names)

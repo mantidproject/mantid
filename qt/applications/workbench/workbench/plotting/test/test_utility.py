@@ -8,6 +8,7 @@
 import unittest
 
 import matplotlib
+
 matplotlib.use("Agg")  # noqa
 import matplotlib.pyplot as plt
 from mantid.plots.legend import LegendProperties
@@ -18,9 +19,8 @@ from testhelpers import assertRaisesNothing
 
 
 class TestUtility(unittest.TestCase):
-
     def test_zoom_axis_raises_for_invalid_axis(self):
-        self.assertRaises(ValueError, zoom_axis, None, None, 'z', None)
+        self.assertRaises(ValueError, zoom_axis, None, None, "z", None)
 
     def test_zoom_sets_correct_axis_limits(self):
         fig, ax = plt.subplots()
@@ -36,11 +36,11 @@ class TestUtility(unittest.TestCase):
     def test_from_legend_correctly_returns_properties_if_title_is_none(self):
         fig, ax = plt.subplots()
         ax.plot([0, 1, 2], [6, 4, 6])
-        ax.legend(labels='A', title=None)
+        ax.legend(labels="A", title=None)
 
         legend_props = LegendProperties.from_legend(ax.legend_)
 
-        self.assertEqual(legend_props['title'], '')
+        self.assertEqual(legend_props["title"], "")
 
     def test_zoom_out_really_far(self):
         """
@@ -55,7 +55,7 @@ class TestUtility(unittest.TestCase):
         ax.set_ylim([axis_min, axis_max])
 
         zoom_point = [0, 0]
-        zoom_factor = 1/ZOOM_LIMIT
+        zoom_factor = 1 / ZOOM_LIMIT
 
         # Attempt to zoom to +/-10^310
         assertRaisesNothing(self, zoom, ax, *zoom_point, zoom_factor)
@@ -110,7 +110,7 @@ class TestUtility(unittest.TestCase):
         ax.set_ylim([axis_min, axis_max])
 
         zoom_point = [0, 0]
-        zoom_factor = 1/ZOOM_LIMIT
+        zoom_factor = 1 / ZOOM_LIMIT
 
         # Attempt to zoom to -/+10^310
         assertRaisesNothing(self, zoom, ax, *zoom_point, zoom_factor)
@@ -124,5 +124,5 @@ class TestUtility(unittest.TestCase):
         self.assertEqual(axis_max, new_y_max)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -11,8 +11,7 @@ from mantid.simpleapi import CreateWorkspace
 from mantidqt.utils.qt.testing import get_application
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder  # noqa: E402
 
-from mantidqt.widgets.fitscriptgenerator import (FittingMode, FitScriptGeneratorModel, FitScriptGeneratorPresenter,
-                                                 FitScriptGeneratorView)
+from mantidqt.widgets.fitscriptgenerator import FittingMode, FitScriptGeneratorModel, FitScriptGeneratorPresenter, FitScriptGeneratorView
 
 from qtpy.QtWidgets import QApplication
 
@@ -21,14 +20,19 @@ class FitScriptGeneratorStartupTest(systemtesting.MantidSystemTest, QtWidgetFind
     """
     A system test for testing that the Fit Script Generator interface opens ok.
     """
+
     def __init__(self):
         super(FitScriptGeneratorStartupTest, self).__init__()
 
         self._app = get_application()
 
         self.ws_name = "WorkspaceName"
-        test_workspace = CreateWorkspace(DataX=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
-                                         DataY=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], NSpec=4, UnitX="Wavelength")
+        test_workspace = CreateWorkspace(
+            DataX=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+            DataY=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+            NSpec=4,
+            UnitX="Wavelength",
+        )
         AnalysisDataService.addOrReplace(self.ws_name, test_workspace)
 
         self.fsg_model = FitScriptGeneratorModel()

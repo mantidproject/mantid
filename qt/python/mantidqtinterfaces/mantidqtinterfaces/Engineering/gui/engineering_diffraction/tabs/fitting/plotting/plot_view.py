@@ -38,7 +38,7 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
     def setup_figure(self):
         self.figure = Figure()
         self.figure.canvas = FigureCanvas(self.figure)
-        self.figure.canvas.mpl_connect('button_press_event', self.mouse_click)
+        self.figure.canvas.mpl_connect("button_press_event", self.mouse_click)
         self.figure.add_subplot(111, projection="mantid")
         self.toolbar = FittingPlotToolbar(self.figure.canvas, self, False)
         self.toolbar.setMovable(False)
@@ -54,20 +54,27 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         self.plot_dock.setWindowTitle("Fit Plot")
         self.plot_dock.topLevelChanged.connect(self.make_undocked_plot_larger)
         self.initial_chart_width, self.initial_chart_height = self.plot_dock.width(), self.plot_dock.height()
-        self.plot_dock.setSizePolicy(QSizePolicy(QSizePolicy.MinimumExpanding,
-                                                 QSizePolicy.MinimumExpanding))
+        self.plot_dock.setSizePolicy(QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding))
         self.dock_window.addDockWidget(Qt.BottomDockWidgetArea, self.plot_dock)
         self.vLayout_plot.addWidget(self.dock_window)
 
-        self.fit_browser = EngDiffFitPropertyBrowser(self.figure.canvas,
-                                                     ToolbarStateManager(self.toolbar))
+        self.fit_browser = EngDiffFitPropertyBrowser(self.figure.canvas, ToolbarStateManager(self.toolbar))
         # remove SequentialFit from fit menu (implemented a different way)
         qmenu = self.fit_browser.getFitMenu()
         qmenu.removeAction([qact for qact in qmenu.actions() if qact.text() == "Sequential Fit"][0])
         # hide unnecessary properties of browser
-        hide_props = ['Minimizer', 'Cost function', 'Max Iterations', 'Output',
-                      'Ignore invalid data', 'Peak Radius', 'Plot Composite Members',
-                      'Convolve Composite Members', 'Show Parameter Errors', 'Evaluate Function As']
+        hide_props = [
+            "Minimizer",
+            "Cost function",
+            "Max Iterations",
+            "Output",
+            "Ignore invalid data",
+            "Peak Radius",
+            "Plot Composite Members",
+            "Convolve Composite Members",
+            "Show Parameter Errors",
+            "Evaluate Function As",
+        ]
         self.fit_browser.removePropertiesFromSettingsBrowser(hide_props)
         self.fit_browser.toggleWsListVisible()
         self.fit_browser.closing.connect(self.toolbar.handle_fit_browser_close)
@@ -163,14 +170,16 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         in the UI.
         """
         ax = self.get_axes()[0]
-        y0_lab = ax.xaxis.get_tightbbox(renderer=self.figure.canvas.get_renderer()).transformed(
-            self.figure.transFigure.inverted()).y0  # vertical coord of bottom left corner of xlabel in fig ref. frame
-        x0_lab = ax.yaxis.get_tightbbox(renderer=self.figure.canvas.get_renderer()).transformed(
-            self.figure.transFigure.inverted()).x0  # horizontal coord of bottom left corner ylabel in fig ref. frame
+        y0_lab = (
+            ax.xaxis.get_tightbbox(renderer=self.figure.canvas.get_renderer()).transformed(self.figure.transFigure.inverted()).y0
+        )  # vertical coord of bottom left corner of xlabel in fig ref. frame
+        x0_lab = (
+            ax.yaxis.get_tightbbox(renderer=self.figure.canvas.get_renderer()).transformed(self.figure.transFigure.inverted()).x0
+        )  # horizontal coord of bottom left corner ylabel in fig ref. frame
         pos = ax.get_position()
         x0_ax = pos.x0 + 0.05 - x0_lab  # move so that ylabel left bottom corner at horizontal coord 0.05
         y0_ax = pos.y0 + 0.05 - y0_lab  # move so that xlabel left bottom corner at vertical coord 0.05
-        ax.set_position([x0_ax, y0_ax, 0.95-x0_ax, 0.95-y0_ax])
+        ax.set_position([x0_ax, y0_ax, 0.95 - x0_ax, 0.95 - y0_ax])
 
     def update_fitbrowser(self):
         is_visible = self.fit_browser.isVisible()

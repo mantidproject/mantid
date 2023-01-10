@@ -37,7 +37,8 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
         self.log_list_label.setText("Check logs to average when loading focused data")
         self.primary_log_label.setText(
             "Sort workspaces by selected log average in sequential fitting (default is ascending order)\n"
-            "If the box below is empty the workspaces will be fitted in the order they appear in the table.")
+            "If the box below is empty the workspaces will be fitted in the order they appear in the table."
+        )
         self.peak_list_label.setText("Default Peak Function")
 
     # ===============
@@ -73,8 +74,13 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
         return self.finder_fullCalib.getFirstFilename()
 
     def get_checked_logs(self):
-        return ','.join([self.log_list.item(ilog).text() for ilog in range(self.log_list.count()) if
-                         self.log_list.item(ilog).checkState() == QtCore.Qt.Checked])
+        return ",".join(
+            [
+                self.log_list.item(ilog).text()
+                for ilog in range(self.log_list.count())
+                if self.log_list.item(ilog).checkState() == QtCore.Qt.Checked
+            ]
+        )
 
     def get_primary_log(self):
         return self.primary_log.currentText()
@@ -108,7 +114,7 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
         self.check_vanRecalc.setChecked(checked)
 
     def add_log_checkboxs(self, logs):
-        for log in logs.split(','):
+        for log in logs.split(","):
             item = QtWidgets.QListWidgetItem(self.log_list)
             item.setText(log)
             item.setCheckState(QtCore.Qt.Unchecked)
@@ -117,19 +123,19 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
     def set_checked_logs(self, logs):
         # block signal so as not to reset primary log
         self.log_list.blockSignals(True)
-        for log in logs.split(','):
+        for log in logs.split(","):
             items = self.log_list.findItems(log, QtCore.Qt.MatchExactly)
             items[0].setCheckState(QtCore.Qt.Checked)
         self.log_list.blockSignals(False)
 
     def set_primary_log_combobox(self, primary_log):
-        checked_logs = self.get_checked_logs().split(',') + ['']
+        checked_logs = self.get_checked_logs().split(",") + [""]
         self.primary_log.clear()
         self.primary_log.addItems(checked_logs)
         if primary_log in checked_logs:
             self.primary_log.setCurrentText(primary_log)
         else:
-            self.primary_log.setCurrentText('')
+            self.primary_log.setCurrentText("")
 
     def set_ascending_checked(self, checked):
         self.check_ascending.setChecked(checked)
@@ -141,7 +147,7 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
         self.peak_list.setCurrentText(peak_name)
 
     def populate_peak_function_list(self, peak_names):
-        self.peak_list.addItems(peak_names.split(','))
+        self.peak_list.addItems(peak_names.split(","))
 
     def set_path_to_gsas2(self, text):
         self.finder_path_to_gsas2.setText(text)

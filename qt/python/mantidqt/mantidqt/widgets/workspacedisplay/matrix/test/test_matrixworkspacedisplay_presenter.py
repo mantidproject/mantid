@@ -39,8 +39,8 @@ def with_mock_presenter(func):
 
 @start_qapplication
 class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
-    show_mouse_toast_package = 'mantidqt.widgets.workspacedisplay.user_notifier.UserNotifier.show_mouse_toast'
-    copy_to_clipboard_package = 'mantidqt.widgets.workspacedisplay.data_copier.DataCopier.copy_to_clipboard'
+    show_mouse_toast_package = "mantidqt.widgets.workspacedisplay.user_notifier.UserNotifier.show_mouse_toast"
+    copy_to_clipboard_package = "mantidqt.widgets.workspacedisplay.data_copier.DataCopier.copy_to_clipboard"
 
     @classmethod
     def setUpClass(cls):
@@ -85,8 +85,7 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
     @patch(show_mouse_toast_package)
     @patch(copy_to_clipboard_package)
     @with_mock_presenter
-    def test_action_copy_spectrum_values_no_selection(self, ws, view, presenter, mock_copy,
-                                                      mock_show_mouse_toast):
+    def test_action_copy_spectrum_values_no_selection(self, ws, view, presenter, mock_copy, mock_show_mouse_toast):
 
         mock_table = MockQTableView()
         mock_table.mock_selection_model.hasSelection = Mock(return_value=False)
@@ -257,8 +256,7 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         mock_table.mock_selection_model.hasSelection.assert_called_once_with()
         mock_table.mock_selection_model.selectedRows.assert_called_once_with()
 
-        mock_view.ask_confirmation.assert_called_once_with(
-            MatrixWorkspaceDisplay.A_LOT_OF_THINGS_TO_PLOT_MESSAGE.format(num_selected_rows))
+        mock_view.ask_confirmation.assert_called_once_with(MatrixWorkspaceDisplay.A_LOT_OF_THINGS_TO_PLOT_MESSAGE.format(num_selected_rows))
 
         self.assertNotCalled(mock_table.mock_selection_model.selectedColumns)
         self.assertEqual(1, mock_plot.call_count)
@@ -280,8 +278,7 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         mock_table.mock_selection_model.hasSelection.assert_called_once_with()
         mock_table.mock_selection_model.selectedRows.assert_called_once_with()
 
-        mock_view.ask_confirmation.assert_called_once_with(
-            MatrixWorkspaceDisplay.A_LOT_OF_THINGS_TO_PLOT_MESSAGE.format(num_selected_rows))
+        mock_view.ask_confirmation.assert_called_once_with(MatrixWorkspaceDisplay.A_LOT_OF_THINGS_TO_PLOT_MESSAGE.format(num_selected_rows))
 
         self.assertNotCalled(mock_table.mock_selection_model.selectedColumns)
         self.assertNotCalled(mock_plot)
@@ -316,8 +313,7 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         mock_table.mock_selection_model.selectedColumns.assert_called_once_with()
         self.assertNotCalled(mock_table.mock_selection_model.selectedRows)
 
-        mock_view.ask_confirmation.assert_called_once_with(
-            MatrixWorkspaceDisplay.A_LOT_OF_THINGS_TO_PLOT_MESSAGE.format(num_selected_cols))
+        mock_view.ask_confirmation.assert_called_once_with(MatrixWorkspaceDisplay.A_LOT_OF_THINGS_TO_PLOT_MESSAGE.format(num_selected_cols))
         self.assertEqual(1, mock_plot.call_count)
 
     def test_action_plot_bin_plot_many_denied(self):
@@ -335,8 +331,7 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         mock_table.mock_selection_model.hasSelection.assert_called_once_with()
         mock_table.mock_selection_model.selectedColumns.assert_called_once_with()
 
-        mock_view.ask_confirmation.assert_called_once_with(
-            MatrixWorkspaceDisplay.A_LOT_OF_THINGS_TO_PLOT_MESSAGE.format(num_selected_cols))
+        mock_view.ask_confirmation.assert_called_once_with(MatrixWorkspaceDisplay.A_LOT_OF_THINGS_TO_PLOT_MESSAGE.format(num_selected_cols))
 
         self.assertNotCalled(mock_table.mock_selection_model.selectedRows)
         self.assertNotCalled(mock_plot)
@@ -499,5 +494,5 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         self.assertEqual(1, view.set_model.call_count)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

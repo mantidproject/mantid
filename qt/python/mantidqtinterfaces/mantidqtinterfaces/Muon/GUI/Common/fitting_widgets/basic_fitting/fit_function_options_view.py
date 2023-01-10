@@ -9,9 +9,11 @@ from mantidqt.utils.qt import load_ui
 from mantidqt.widgets.functionbrowser import FunctionBrowser
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 
-from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import (X_FROM_FIT_RANGE,
-                                                                                                X_FROM_DATA_RANGE,
-                                                                                                X_FROM_CUSTOM)
+from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import (
+    X_FROM_FIT_RANGE,
+    X_FROM_DATA_RANGE,
+    X_FROM_CUSTOM,
+)
 from mantidqtinterfaces.Muon.GUI.Common.utilities import table_utils
 
 from qtpy.QtCore import Qt
@@ -19,9 +21,17 @@ from qtpy.QtWidgets import QWidget
 
 ui_form, base_widget = load_ui(__file__, "fit_function_options.ui")
 
-ALLOWED_MINIMIZERS = ["Levenberg-Marquardt", "BFGS", "Conjugate gradient (Fletcher-Reeves imp.)",
-                      "Conjugate gradient (Polak-Ribiere imp.)", "Damped GaussNewton",
-                      "Levenberg-MarquardtMD", "Simplex", "SteepestDescent", "Trust Region"]
+ALLOWED_MINIMIZERS = [
+    "Levenberg-Marquardt",
+    "BFGS",
+    "Conjugate gradient (Fletcher-Reeves imp.)",
+    "Conjugate gradient (Polak-Ribiere imp.)",
+    "Damped GaussNewton",
+    "Levenberg-MarquardtMD",
+    "Simplex",
+    "SteepestDescent",
+    "Trust Region",
+]
 START_X_TABLE_ROW = 0
 END_X_TABLE_ROW = 1
 EXCLUDE_RANGE_TABLE_ROW = 2
@@ -184,8 +194,7 @@ class FitFunctionOptionsView(ui_form, base_widget):
         self.function_browser.blockSignals(False)
         self.function_browser.setErrorsEnabled(True)
 
-    def update_function_browser_parameters(self, is_simultaneous_fit: bool, fit_function: IFunction,
-                                           global_parameters: list = []) -> None:
+    def update_function_browser_parameters(self, is_simultaneous_fit: bool, fit_function: IFunction, global_parameters: list = []) -> None:
         """Updates the parameters in the function browser."""
         self.function_browser.blockSignals(True)
 
@@ -401,40 +410,38 @@ class FitFunctionOptionsView(ui_form, base_widget):
         self.fit_options_table.setHorizontalHeaderLabels(["Property", "Value"])
 
         table_utils.setRowName(self.fit_options_table, START_X_TABLE_ROW, "Start X")
-        self.start_x_line_edit, self.start_x_validator = table_utils.addDoubleToTable(self.fit_options_table, 0.0,
-                                                                                      START_X_TABLE_ROW, 1)
+        self.start_x_line_edit, self.start_x_validator = table_utils.addDoubleToTable(self.fit_options_table, 0.0, START_X_TABLE_ROW, 1)
 
         table_utils.setRowName(self.fit_options_table, END_X_TABLE_ROW, "End X")
-        self.end_x_line_edit, self.end_x_validator = table_utils.addDoubleToTable(self.fit_options_table, 15.0,
-                                                                                  END_X_TABLE_ROW, 1)
+        self.end_x_line_edit, self.end_x_validator = table_utils.addDoubleToTable(self.fit_options_table, 15.0, END_X_TABLE_ROW, 1)
 
         table_utils.setRowName(self.fit_options_table, EXCLUDE_RANGE_TABLE_ROW, "Exclude Range")
-        self.exclude_range_checkbox = table_utils.addCheckBoxWidgetToTable(
-            self.fit_options_table, False, EXCLUDE_RANGE_TABLE_ROW)
+        self.exclude_range_checkbox = table_utils.addCheckBoxWidgetToTable(self.fit_options_table, False, EXCLUDE_RANGE_TABLE_ROW)
 
         table_utils.setRowName(self.fit_options_table, EXCLUDE_START_X_TABLE_ROW, "Exclude Start X")
         self.exclude_start_x_line_edit, self.exclude_start_x_validator = table_utils.addDoubleToTable(
-            self.fit_options_table, 15.0, EXCLUDE_START_X_TABLE_ROW, 1)
+            self.fit_options_table, 15.0, EXCLUDE_START_X_TABLE_ROW, 1
+        )
 
         table_utils.setRowName(self.fit_options_table, EXCLUDE_END_X_TABLE_ROW, "Exclude End X")
         self.exclude_end_x_line_edit, self.exclude_end_x_validator = table_utils.addDoubleToTable(
-            self.fit_options_table, 15.0, EXCLUDE_END_X_TABLE_ROW, 1)
+            self.fit_options_table, 15.0, EXCLUDE_END_X_TABLE_ROW, 1
+        )
 
         table_utils.setRowName(self.fit_options_table, RAW_DATA_TABLE_ROW, "Fit To Raw Data")
-        self.fit_to_raw_data_checkbox = table_utils.addCheckBoxWidgetToTable(
-            self.fit_options_table, True, RAW_DATA_TABLE_ROW)
+        self.fit_to_raw_data_checkbox = table_utils.addCheckBoxWidgetToTable(self.fit_options_table, True, RAW_DATA_TABLE_ROW)
 
         table_utils.setRowName(self.fit_options_table, MINIMIZER_TABLE_ROW, "Minimizer")
         self.minimizer_combo = table_utils.addComboToTable(self.fit_options_table, MINIMIZER_TABLE_ROW, [])
         self.minimizer_combo.addItems(ALLOWED_MINIMIZERS)
 
         table_utils.setRowName(self.fit_options_table, EVALUATE_AS_TABLE_ROW, "Evaluate Function As")
-        self.evaluation_combo = table_utils.addComboToTable(self.fit_options_table, EVALUATE_AS_TABLE_ROW,
-                                                            ['CentrePoint', 'Histogram'])
+        self.evaluation_combo = table_utils.addComboToTable(self.fit_options_table, EVALUATE_AS_TABLE_ROW, ["CentrePoint", "Histogram"])
 
         table_utils.setRowName(self.fit_options_table, PLOT_GUESS_TYPE, "Plot guess using")
-        self.plot_guess_type_combo = table_utils.addComboToTable(self.fit_options_table, PLOT_GUESS_TYPE,
-                                                                 [X_FROM_FIT_RANGE, X_FROM_DATA_RANGE, X_FROM_CUSTOM])
+        self.plot_guess_type_combo = table_utils.addComboToTable(
+            self.fit_options_table, PLOT_GUESS_TYPE, [X_FROM_FIT_RANGE, X_FROM_DATA_RANGE, X_FROM_CUSTOM]
+        )
 
         table_utils.setRowName(self.fit_options_table, PLOT_GUESS_POINTS, "Points")
         self.plot_guess_points_spin_box = table_utils.addSpinBoxToTable(self.fit_options_table, 1000, PLOT_GUESS_POINTS)
@@ -443,12 +450,14 @@ class FitFunctionOptionsView(ui_form, base_widget):
 
         table_utils.setRowName(self.fit_options_table, PLOT_GUESS_START_X, "Start X")
         self.plot_guess_start_x_line_edit, self.plot_guess_start_x_validator = table_utils.addDoubleToTable(
-            self.fit_options_table, 0.0, PLOT_GUESS_START_X, 1)
+            self.fit_options_table, 0.0, PLOT_GUESS_START_X, 1
+        )
         self.show_plot_guess_start_x(False)
 
         table_utils.setRowName(self.fit_options_table, PLOT_GUESS_END_X, "End X")
         self.plot_guess_end_x_line_edit, self.plot_guess_end_x_validator = table_utils.addDoubleToTable(
-            self.fit_options_table, 15.0, PLOT_GUESS_END_X, 1)
+            self.fit_options_table, 15.0, PLOT_GUESS_END_X, 1
+        )
         self.show_plot_guess_end_x(False)
 
     def show_plot_guess_points(self, show: bool = True) -> None:

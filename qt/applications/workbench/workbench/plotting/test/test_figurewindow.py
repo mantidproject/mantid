@@ -15,28 +15,23 @@ from mantid.simpleapi import CreateWorkspace
 from mantidqt.utils.qt.testing import start_qapplication
 from workbench.plotting.figurewindow import FigureWindow
 
-matplotlib.use('Qt5Agg')
+matplotlib.use("Qt5Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
 
 @start_qapplication
 class Test(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         # Patch the show method on MainWindow so we don't get GUI pop-ups
-        cls.show_patch = patch('workbench.plotting.figurewindow.QMainWindow.show')
+        cls.show_patch = patch("workbench.plotting.figurewindow.QMainWindow.show")
         cls.show_patch.start()
 
-        cls.fig, axs = plt.subplots(1, 2, subplot_kw={'projection': 'mantid'})
+        cls.fig, axs = plt.subplots(1, 2, subplot_kw={"projection": "mantid"})
         axs[0].plot([0, 1], [1, 0])
         axs[1].plot([0, 2], [2, 0])
         cls.fig_window = FigureWindow(cls.fig.canvas)
-        cls.ws = CreateWorkspace(DataX=[0, 3],
-                                 DataY=[3, 0],
-                                 DataE=[1, 1],
-                                 NSpec=1,
-                                 OutputWorkspace='ws')
+        cls.ws = CreateWorkspace(DataX=[0, 3], DataY=[3, 0], DataE=[1, 1], NSpec=1, OutputWorkspace="ws")
 
     @classmethod
     def tearDownClass(cls):
@@ -48,17 +43,17 @@ class Test(unittest.TestCase):
         dpi_ratio = self.fig.canvas.devicePixelRatio() or 1
         # Find the center of the axes and simulate a drop event there
         # Need to use Qt logical pixels to factor in dpi
-        ax_x_centre = (ax.xaxis.clipbox.min[0] + ax.xaxis.clipbox.width*0.5)/dpi_ratio
-        ax_y_centre = (ax.yaxis.clipbox.min[1] + ax.yaxis.clipbox.height*0.5)/dpi_ratio
+        ax_x_centre = (ax.xaxis.clipbox.min[0] + ax.xaxis.clipbox.width * 0.5) / dpi_ratio
+        ax_y_centre = (ax.yaxis.clipbox.min[1] + ax.yaxis.clipbox.height * 0.5) / dpi_ratio
         mock_pos = Mock(position=lambda: Mock(x=lambda: ax_x_centre, y=lambda: ax_y_centre))
         mock_event = Mock()
         mock_event.mimeData().text.return_value = "ws"
         mock_event.pos.return_value = mock_pos
-        with patch('workbench.plotting.figurewindow.QMainWindow.dropEvent'):
+        with patch("workbench.plotting.figurewindow.QMainWindow.dropEvent"):
             self.fig_window.dropEvent(mock_event)
 
         self.assertEqual(2, len(ax.lines))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

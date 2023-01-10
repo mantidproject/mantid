@@ -23,6 +23,7 @@ from mantidqt.widgets.observers.observing_view import ObservingView
 
 class FigureWindow(QMainWindow, ObservingView):
     """A MainWindow that will hold plots"""
+
     # signals
     activated = Signal()
     closing = Signal()
@@ -40,7 +41,7 @@ class FigureWindow(QMainWindow, ObservingView):
         # attributes
         self._canvas = weakref.proxy(canvas)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
-        self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
+        self.setWindowIcon(QIcon(":/images/MantidIcon.ico"))
 
         self.close_signal.connect(self._run_close)
         self.setAcceptDrops(True)
@@ -88,7 +89,8 @@ class FigureWindow(QMainWindow, ObservingView):
                       data of the action
         """
         from matplotlib.backend_bases import LocationEvent
-        workspace_names = event.mimeData().text().split('\n')
+
+        workspace_names = event.mimeData().text().split("\n")
 
         # This creates a matplotlib LocationEvent so that the axis in which the
         # drop event occurred can be calculated
@@ -102,7 +104,7 @@ class FigureWindow(QMainWindow, ObservingView):
             x = dpi_ratio * event.pos().x()
             y = dpi_ratio * self._canvas.figure.bbox.height / dpi_ratio - event.pos().y()
 
-        location_event = LocationEvent('AxesGetterEvent', self._canvas, x, y)
+        location_event = LocationEvent("AxesGetterEvent", self._canvas, x, y)
         ax = location_event.inaxes if location_event.inaxes else self._canvas.figure.axes[0]
 
         self._plot_on_here(workspace_names, ax)
@@ -144,5 +146,4 @@ class FigureWindow(QMainWindow, ObservingView):
         elif fig_type == FigureType.Contour:
             plot_contour(names, fig=fig)
         else:
-            plot_from_names(names, errors=(fig_type == FigureType.Errorbar),
-                            overplot=ax, fig=fig)
+            plot_from_names(names, errors=(fig_type == FigureType.Errorbar), overplot=ax, fig=fig)

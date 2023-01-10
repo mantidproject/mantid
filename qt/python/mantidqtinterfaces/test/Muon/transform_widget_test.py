@@ -22,14 +22,15 @@ from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_
 
 # pass the call not the object to widget
 
+
 @start_qapplication
 class Transform2Test(unittest.TestCase):
     def setUp(self):
         self.context = setup_context(True)
         # create widget
         self.widget = transform_widget.TransformWidget(self.context, FFTWidget, MaxEntWidget)
-        self.widget._maxent._presenter = mock.MagicMock()#create_autospec(maxent_presenter_new.MaxEntPresenter, spec_set=True)
-        self.widget._fft._presenter = mock.MagicMock()#create_autospec(fft_presenter_new.FFTPresenter, spec_Set=True)
+        self.widget._maxent._presenter = mock.MagicMock()  # create_autospec(maxent_presenter_new.MaxEntPresenter, spec_set=True)
+        self.widget._fft._presenter = mock.MagicMock()  # create_autospec(fft_presenter_new.FFTPresenter, spec_Set=True)
         # create the view
         self.view = mock.create_autospec(transform_view.TransformView, spec_set=False)
         self.view.getView = mock.Mock()
@@ -63,13 +64,13 @@ class Transform2Test(unittest.TestCase):
 
     def test_updateDisplay(self):
         self.widget.updateDisplay(1)
-        assert (self.view.hideAll.call_count == 1)
+        assert self.view.hideAll.call_count == 1
         self.assertEqual(self.view.showMethod.call_count, 1)
 
     def test_new_data(self):
         self.widget.handle_new_data_loaded()
-        self.assertEqual(self.widget._maxent._presenter.runChanged.call_count,1)
-        self.assertEqual(self.widget._fft._presenter.runChanged.call_count,1)
+        self.assertEqual(self.widget._maxent._presenter.runChanged.call_count, 1)
+        self.assertEqual(self.widget._fft._presenter.runChanged.call_count, 1)
 
     def test_new_instrument(self):
         self.mock_widgets()
@@ -106,5 +107,5 @@ class Transform2Test(unittest.TestCase):
         self.widget._fft._presenter.calculation_finished_notifier.add_subscriber.assert_called_once_with(observer)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

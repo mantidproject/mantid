@@ -9,7 +9,7 @@ from mantidqt.gui_helper import get_qapplication
 from mantidqtinterfaces.QECoverage.QECoverageGUI import QECoverageGUI
 
 app, within_mantid = get_qapplication()
-if 'workbench' in sys.modules:
+if "workbench" in sys.modules:
     from workbench.config import get_window_config
 
     parent, flags = get_window_config()

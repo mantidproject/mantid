@@ -8,19 +8,22 @@ from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_can
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.main_plot_widget_presenter import MainPlotWidgetPresenter
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.main_plot_widget_view import MainPlotWidgetView
 from mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.plotting_widget.EA_plotting_pane.EA_plot_data_pane_model import EAPlotDataPaneModel
-from mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.plotting_widget.EA_plotting_pane.EA_plot_data_pane_presenter import \
-    EAPlotDataPanePresenter
+from mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.plotting_widget.EA_plotting_pane.EA_plot_data_pane_presenter import (
+    EAPlotDataPanePresenter,
+)
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.base_pane.base_pane_view import BasePaneView
 
 
 class EAPlotWidget(object):
-
     def __init__(self, context=None, get_active_fit_results=lambda: [], parent=None):
 
         self.data_model = EAPlotDataPaneModel(context)
 
-        self.plotting_canvas_widgets = {self.data_model.name: PlottingCanvasWidget(parent, context=
-                                        context.plot_panes_context[self.data_model.name], plot_model=self.data_model)}
+        self.plotting_canvas_widgets = {
+            self.data_model.name: PlottingCanvasWidget(
+                parent, context=context.plot_panes_context[self.data_model.name], plot_model=self.data_model
+            )
+        }
 
         # The UI view
         self._view1 = BasePaneView(parent)
@@ -31,11 +34,11 @@ class EAPlotWidget(object):
         self.model = EAPlotDataPaneModel(context)
         # generate the presenter
 
-        self.data_mode = EAPlotDataPanePresenter(self._view1, self.data_model,
-                                                 context, self.plotting_canvas_widgets[self.data_model.name].presenter)
+        self.data_mode = EAPlotDataPanePresenter(
+            self._view1, self.data_model, context, self.plotting_canvas_widgets[self.data_model.name].presenter
+        )
 
-        self.presenter = MainPlotWidgetPresenter(self.view,
-                                                 [self.data_mode])
+        self.presenter = MainPlotWidgetPresenter(self.view, [self.data_mode])
         self._current_plot_mode = self.presenter.get_plot_mode
         self.presenter.set_plot_mode_changed_slot(self.handle_plot_mode_changed_by_user)
 

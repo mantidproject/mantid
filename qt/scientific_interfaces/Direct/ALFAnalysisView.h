@@ -42,6 +42,9 @@ public:
 
   virtual void replot() = 0;
 
+  virtual void openExternalPlot(Mantid::API::MatrixWorkspace_sptr const &workspace,
+                                std::vector<int> const &workspaceIndices) const = 0;
+
   virtual std::pair<double, double> getRange() const = 0;
 
   virtual void addSpectrum(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
@@ -74,6 +77,9 @@ public:
 
   void replot() override;
 
+  void openExternalPlot(Mantid::API::MatrixWorkspace_sptr const &workspace,
+                        std::vector<int> const &workspaceIndices) const override;
+
   std::pair<double, double> getRange() const override;
 
   void addSpectrum(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
@@ -97,6 +103,8 @@ private slots:
   void notifyPeakPickerChanged();
   void notifyPeakCentreEditingFinished();
   void notifyFitClicked();
+  void notifyExportWorkspaceToADSClicked();
+  void notifyExternalPlotClicked();
   void notifyResetClicked();
 
 private:
@@ -113,6 +121,8 @@ private:
   MantidWidgets::PeakPicker *m_peakPicker;
   QLineEdit *m_start, *m_end;
   QPushButton *m_fitButton;
+  QPushButton *m_externalPlot;
+  QPushButton *m_exportToADS;
   QPushButton *m_resetButton;
   QLineEdit *m_peakCentre;
   QLabel *m_fitStatus;

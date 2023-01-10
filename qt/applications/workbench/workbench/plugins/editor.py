@@ -25,7 +25,7 @@ from ..plugins.base import PluginWidget
 
 
 # Accepted extensions for drag-and-drop to editor
-ACCEPTED_FILE_EXTENSIONS = ['.py', '.pyw']
+ACCEPTED_FILE_EXTENSIONS = [".py", ".pyw"]
 # QSettings key for session tabs
 TAB_SETTINGS_KEY = "Editors/SessionTabs"
 ZOOM_LEVEL_KEY = "Editors/ZoomLevel"
@@ -47,9 +47,9 @@ class MultiFileEditor(PluginWidget):
             completion_enabled = CONF.get(ENABLE_COMPLETION_KEY, type=bool)
 
         # layout
-        self.editors = MultiPythonFileInterpreter(font=font,
-                                                  default_content=DEFAULT_SCRIPT_CONTENT,
-                                                  parent=self, completion_enabled=completion_enabled)
+        self.editors = MultiPythonFileInterpreter(
+            font=font, default_content=DEFAULT_SCRIPT_CONTENT, parent=self, completion_enabled=completion_enabled
+        )
         layout = QVBoxLayout()
         layout.addWidget(self.editors)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -110,8 +110,7 @@ class MultiFileEditor(PluginWidget):
                 try:
                     self.open_file_in_new_tab(filepath)
                 except IOError as io_error:
-                    logger.warning("Could not load file:\n  '{}'"
-                                   "".format(io_error))
+                    logger.warning("Could not load file:\n  '{}'" "".format(io_error))
 
     def get_plugin_title(self):
         return "Editor"
@@ -145,8 +144,7 @@ class MultiFileEditor(PluginWidget):
             try:
                 self.open_file_in_new_tab(filepath, startup)
             except IOError as io_error:
-                logger.warning("Could not load file:\n  {}"
-                               "".format(io_error))
+                logger.warning("Could not load file:\n  {}" "".format(io_error))
 
     def open_script_in_new_tab(self, content):
         self.editors.append_new_editor(content=content)

@@ -7,8 +7,10 @@
 import unittest
 
 from unittest import mock
-from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model import PlottingCanvasModel, \
-    WorkspacePlotInformation
+from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model import (
+    PlottingCanvasModel,
+    WorkspacePlotInformation,
+)
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter import PlottingCanvasPresenter
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.quick_edit.quick_edit_widget import QuickEditWidget
 
@@ -20,9 +22,7 @@ from mantid.simpleapi import CreateWorkspace, AnalysisDataService
 
 
 def create_test_plot_information(name, index, axis, normalised, errors, label):
-    return WorkspacePlotInformation(workspace_name=name, index=index, axis=axis,
-                                    normalised=normalised,
-                                    errors=errors, label=label)
+    return WorkspacePlotInformation(workspace_name=name, index=index, axis=axis, normalised=normalised, errors=errors, label=label)
 
 
 def create_test_workspaces(ws_names):
@@ -34,13 +34,12 @@ def create_test_workspaces(ws_names):
     return workspaces
 
 
-DEFAULT_X_LIMITS = [0.,15.]
-DEFAULT_Y_LIMITS = [-1.,1.]
+DEFAULT_X_LIMITS = [0.0, 15.0]
+DEFAULT_Y_LIMITS = [-1.0, 1.0]
 
 
 @start_qapplication
 class PlottingCanvasPresenterTest(unittest.TestCase):
-
     def setUp(self):
         self.view = mock.Mock(spec=PlottingCanvasViewInterface)
         self.model = mock.Mock(spec=PlottingCanvasModel)
@@ -54,24 +53,24 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
         AnalysisDataService.Instance().clear()
 
     def get_mock_y_limits(self, axis_number):
-        self._mock_y_min += 1.
-        return axis_number, axis_number, self._mock_y_min, self._mock_y_min+5.
+        self._mock_y_min += 1.0
+        return axis_number, axis_number, self._mock_y_min, self._mock_y_min + 5.0
 
     def test_force_autoscale(self):
         subplots = ["fwd", "bwd"]
         axes = [0, 1]
-        self.view.get_axis_limits = mock.Mock(side_effect = self.get_mock_y_limits)
+        self.view.get_axis_limits = mock.Mock(side_effect=self.get_mock_y_limits)
         self.presenter.update_y_limits_of_subplots = mock.Mock()
         self.presenter._get_selected_subplots_from_quick_edit_widget = mock.Mock(return_value=(subplots, axes))
 
         self.presenter.force_autoscale()
 
-        expected_dict = {"fwd": [3., 8.], "bwd": [4,9]}
+        expected_dict = {"fwd": [3.0, 8.0], "bwd": [4, 9]}
         self.presenter.update_y_limits_of_subplots.assert_called_once_with(expected_dict, subplots, axes)
 
     def test_update_y_limits_of_subplots(self):
         subplots = ["fwd", "bwd", "top"]
-        y_limits = {"fwd": [3., 8.], "bwd": [4,9], "top":[-1,5]}
+        y_limits = {"fwd": [3.0, 8.0], "bwd": [4, 9], "top": [-1, 5]}
         axes = [0, 1, 2]
         self.context.settings.set_condensed(False)
         self.view.set_axis_ylimits = mock.Mock()
@@ -79,13 +78,13 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
         self.view.redraw_figure = mock.Mock()
         self.context.update_ylim = mock.Mock()
         self.context.update_ylim_all = mock.Mock()
-        self.presenter.should_update_all = mock.Mock(return_value = True)
+        self.presenter.should_update_all = mock.Mock(return_value=True)
 
         self.presenter.update_y_limits_of_subplots(y_limits, subplots, axes)
         self.assertEqual(self.view.set_axis_ylimits.call_count, len(subplots))
-        self.view.set_axis_ylimits.assert_any_call(0, [3,8])
-        self.view.set_axis_ylimits.assert_any_call(1, [4,9])
-        self.view.set_axis_ylimits.assert_any_call(2, [-1,5])
+        self.view.set_axis_ylimits.assert_any_call(0, [3, 8])
+        self.view.set_axis_ylimits.assert_any_call(1, [4, 9])
+        self.view.set_axis_ylimits.assert_any_call(2, [-1, 5])
 
         self.assertEqual(self.context.update_ylim.call_count, len(subplots))
         for plot in y_limits.keys():
@@ -99,7 +98,7 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
 
     def test_update_y_limits_of_subplots_condensed(self):
         subplots = ["fwd", "bwd", "top"]
-        y_limits = {"fwd": [3., 8.], "bwd": [4,9], "top":[-1,5]}
+        y_limits = {"fwd": [3.0, 8.0], "bwd": [4, 9], "top": [-1, 5]}
         # max and min y values from any plot
         global_limits = [-1, 9]
         axes = [0, 1, 2]
@@ -110,7 +109,7 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
         self.view.redraw_figure = mock.Mock()
         self.context.update_ylim = mock.Mock()
         self.context.update_ylim_all = mock.Mock()
-        self.presenter.should_update_all = mock.Mock(return_value = True)
+        self.presenter.should_update_all = mock.Mock(return_value=True)
 
         self.presenter.update_y_limits_of_subplots(y_limits, subplots, axes)
         self.assertEqual(self.view.set_axis_ylimits.call_count, len(subplots))
@@ -128,7 +127,7 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
 
     def test_update_y_limits_of_subplots_bad_inputs(self):
         subplots = ["fwd", "bwd", "top"]
-        y_limits = {"fwd": [3., 8.], "bwd": [4,9], "top":[-1,5]}
+        y_limits = {"fwd": [3.0, 8.0], "bwd": [4, 9], "top": [-1, 5]}
         axes = [0, 1, 2]
         self.context.settings.set_condensed(False)
         self.view.set_axis_ylimits = mock.Mock()
@@ -136,7 +135,7 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
         self.view.redraw_figure = mock.Mock()
         self.context.update_ylim = mock.Mock()
         self.context.update_ylim_all = mock.Mock()
-        self.presenter.should_update_all = mock.Mock(return_value = True)
+        self.presenter.should_update_all = mock.Mock(return_value=True)
 
         no_limits = [[], subplots, axes]
         no_subplots = [y_limits, [], axes]
@@ -155,7 +154,7 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
 
     def test_set_quickedit_from_context(self):
         state = True
-        ylims = [0,10]
+        ylims = [0, 10]
         xlims = [5, 15]
         self.context.set_error_all(state)
         self.context.set_autoscale_all(state)
@@ -176,14 +175,14 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
     def test_plot_workspaces_removes_workspace_from_plot_if_hold_on_false(self):
         ws_names = ["MUSR6220"]
         ws_indices = [0]
-        ws_plot_info = create_test_plot_information(name="MUSR62260; Group; fwd", index=0, axis=0,
-                                                    normalised=False, errors=False, label="MUSR62260;fwd")
+        ws_plot_info = create_test_plot_information(
+            name="MUSR62260; Group; fwd", index=0, axis=0, normalised=False, errors=False, label="MUSR62260;fwd"
+        )
         self.view.plotted_workspace_information = [ws_plot_info]
         self.model.create_workspace_plot_information = mock.Mock(return_value=[])
         self.presenter._set_axes_limits_and_titles = mock.Mock()
 
-        self.presenter.plot_workspaces(workspace_names=ws_names, workspace_indices=ws_indices,
-                                       hold_on=False, autoscale=False)
+        self.presenter.plot_workspaces(workspace_names=ws_names, workspace_indices=ws_indices, hold_on=False, autoscale=False)
 
         self.view.remove_workspace_info_from_plot.assert_called_once_with([ws_plot_info])
         self.model.create_workspace_plot_information.assert_called_once()
@@ -191,14 +190,14 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
     def test_plot_workspaces_does_not_replot_existing_workspaces(self):
         ws_names = ["MUSR6220"]
         ws_indices = [0]
-        ws_plot_info = create_test_plot_information(name="MUSR62260; Group; fwd", index=0, axis=0, normalised=False,
-                                                    errors=False, label="MUSR62260;fwd")
+        ws_plot_info = create_test_plot_information(
+            name="MUSR62260; Group; fwd", index=0, axis=0, normalised=False, errors=False, label="MUSR62260;fwd"
+        )
         self.view.plotted_workspace_information = [ws_plot_info]
         self.model.create_workspace_plot_information = mock.Mock(return_value=[ws_plot_info])
         self.presenter._set_axes_limits_and_titles = mock.Mock()
 
-        self.presenter.plot_workspaces(workspace_names=ws_names, workspace_indices=ws_indices,
-                                       hold_on=False, autoscale=False)
+        self.presenter.plot_workspaces(workspace_names=ws_names, workspace_indices=ws_indices, hold_on=False, autoscale=False)
 
         self.view.add_workspaces_to_plot.assert_called_once_with([])
         self.model.create_workspace_plot_information.assert_called_once()
@@ -206,14 +205,14 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
     def test_plot_workspaces_adds_workspaces_to_plot(self):
         ws_names = ["MUSR6220"]
         ws_indices = [0]
-        ws_plot_info = create_test_plot_information(name="MUSR62260; Group; fwd", index=0, axis=0, normalised=False,
-                                                    errors=False, label="MUSR62260;fwd")
+        ws_plot_info = create_test_plot_information(
+            name="MUSR62260; Group; fwd", index=0, axis=0, normalised=False, errors=False, label="MUSR62260;fwd"
+        )
         self.view.plotted_workspace_information = []
         self.model.create_workspace_plot_information = mock.Mock(return_value=[ws_plot_info])
         self.presenter._set_axes_limits_and_titles = mock.Mock()
 
-        self.presenter.plot_workspaces(workspace_names=ws_names, workspace_indices=ws_indices,
-                                       hold_on=False, autoscale=False)
+        self.presenter.plot_workspaces(workspace_names=ws_names, workspace_indices=ws_indices, hold_on=False, autoscale=False)
 
         self.view.add_workspaces_to_plot.assert_called_once_with([ws_plot_info])
         self.model.create_workspace_plot_information.assert_called_once()
@@ -606,27 +605,21 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
         def plot_info_mock(ws_list, indices, errors):
             plot_info_list = []
             for ws, index in zip(ws_list, indices):
-                plot_info_list.append(create_test_plot_information(name=ws, index=index, axis=index,
-                                      normalised=False, errors=False, label=ws))
+                plot_info_list.append(
+                    create_test_plot_information(name=ws, index=index, axis=index, normalised=False, errors=False, label=ws)
+                )
             return plot_info_list
 
         def shade_mock(name, index):
-            return index, index+1, index+2
+            return index, index + 1, index + 2
+
         self.model.get_shade_lines.side_effect = shade_mock
         self.model.create_workspace_plot_information.side_effect = plot_info_mock
-        self.presenter.add_shaded_region(["unit", "test"], [0,1])
-        self.view.add_shaded_region.assert_any_call(workspace_name="unit",
-                                                    axis_number=0,
-                                                    x_values=0,
-                                                    y1_values=1,
-                                                    y2_values=2)
-        self.view.add_shaded_region.assert_any_call(workspace_name="test",
-                                                    axis_number=1,
-                                                    x_values=1,
-                                                    y1_values=2,
-                                                    y2_values=3)
-        self.assertEqual(self.view.add_shaded_region.call_count,2)
+        self.presenter.add_shaded_region(["unit", "test"], [0, 1])
+        self.view.add_shaded_region.assert_any_call(workspace_name="unit", axis_number=0, x_values=0, y1_values=1, y2_values=2)
+        self.view.add_shaded_region.assert_any_call(workspace_name="test", axis_number=1, x_values=1, y1_values=2, y2_values=3)
+        self.assertEqual(self.view.add_shaded_region.call_count, 2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

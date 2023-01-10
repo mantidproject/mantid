@@ -55,8 +55,7 @@ class ProjectLoader(object):
         directory = os.path.dirname(file_name)
         # Load in the workspaces
         if load_workspaces:
-            self.workspace_loader.load_workspaces(directory=directory,
-                                                  workspaces_to_load=self.project_reader.workspace_names)
+            self.workspace_loader.load_workspaces(directory=directory, workspaces_to_load=self.project_reader.workspace_names)
 
         workspace_success = _confirm_all_workspaces_loaded(workspaces_to_confirm=self.project_reader.workspace_names)
 

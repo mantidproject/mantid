@@ -51,7 +51,7 @@ class DataContext(object):
         if self.current_runs:
             loaded_data = self._loaded_data.get_data(run=self.current_runs[0])
 
-        return loaded_data if loaded_data else {"workspace": load_utils.empty_loaded_data(), 'run': []}
+        return loaded_data if loaded_data else {"workspace": load_utils.empty_loaded_data(), "run": []}
 
     @property
     def current_data(self):
@@ -64,7 +64,7 @@ class DataContext(object):
     def get_loaded_data_for_run(self, run):
         loaded_dict = self._loaded_data.get_data(run=run, instrument=self.instrument)
         if loaded_dict:
-            return self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']
+            return self._loaded_data.get_data(run=run, instrument=self.instrument)["workspace"]
         else:
             return None
 

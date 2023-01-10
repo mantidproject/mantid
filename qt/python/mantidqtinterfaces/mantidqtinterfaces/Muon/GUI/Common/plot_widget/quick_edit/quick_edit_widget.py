@@ -9,7 +9,6 @@ from mantidqtinterfaces.Muon.GUI.Common.plot_widget.quick_edit.quick_edit_presen
 
 
 class QuickEditWidgetInterface(object):
-
     def __init__(self, context, view, presenter, parent=None):
         self._view = view
         self._presenter = presenter
@@ -57,7 +56,7 @@ class QuickEditWidgetInterface(object):
     def set_selection_by_index(self, index=0):
         self._presenter.set_selection_by_index(index)
 
-    def set_autoscale(self, state:bool):
+    def set_autoscale(self, state: bool):
         self._presenter.set_autoscale(state)
 
     def set_plot_x_range(self, x_range):
@@ -97,14 +96,12 @@ class QuickEditWidgetInterface(object):
 
 
 class QuickEditWidget(QuickEditWidgetInterface):
-
     def __init__(self, context, parent=None):
         view = QuickEditView(None, parent)
         super().__init__(context, view, QuickEditPresenter(view, context))
 
 
 class DualQuickEditWidget(QuickEditWidgetInterface):
-
     def __init__(self, context, parent=None):
         view = QuickEditView(None, parent, "Time domains")
         super().__init__(context, view, DualQuickEditPresenter(view, context))

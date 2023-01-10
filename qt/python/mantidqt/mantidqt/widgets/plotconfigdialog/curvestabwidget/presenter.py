@@ -14,14 +14,12 @@ from mantid.plots.legend import LegendProperties
 from mantid.plots import datafunctions, MantidAxes
 from mantidqt.utils.qt import block_signals
 from mantidqt.widgets.plotconfigdialog import get_axes_names_dict, curve_in_ax
-from mantidqt.widgets.plotconfigdialog.curvestabwidget import (
-    CurveProperties, curve_has_errors, remove_curve_from_ax)
+from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties, curve_has_errors, remove_curve_from_ax
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.view import CurvesTabWidgetView
 from workbench.plotting.figureerrorsmanager import FigureErrorsManager
 
 
 class CurvesTabWidgetPresenter:
-
     def __init__(self, fig, view=None, parent_view=None, parent_presenter=None, legend_tab=None):
         self.fig = fig
 
@@ -40,25 +38,15 @@ class CurvesTabWidgetPresenter:
         self.update_view()
 
         # Signals
-        self.view.select_axes_combo_box.currentIndexChanged.connect(
-            self.on_axes_index_changed)
-        self.view.select_curve_list.currentRowChanged.connect(
-            self.on_curves_row_changed)
-        self.view.remove_curve_button.clicked.connect(
-            self.remove_selected_curves)
-        self.view.delete_key_pressed.connect(
-            self.remove_selected_curves)
-        self.view.line.apply_to_all_button.clicked.connect(
-            self.line_apply_to_all)
-        self.view.marker.apply_to_all_button.clicked.connect(
-            self.marker_apply_to_all)
-        self.view.marker.marker_style_combo_box.currentTextChanged.connect(
-            self.view.marker.set_colour_fields_enabled)
-        self.view.errorbars.apply_to_all_button.clicked.connect(
-            self.errorbars_apply_to_all)
-        self.view.select_curve_list.itemSelectionChanged.connect(
-            self.on_curves_selection_changed
-        )
+        self.view.select_axes_combo_box.currentIndexChanged.connect(self.on_axes_index_changed)
+        self.view.select_curve_list.currentRowChanged.connect(self.on_curves_row_changed)
+        self.view.remove_curve_button.clicked.connect(self.remove_selected_curves)
+        self.view.delete_key_pressed.connect(self.remove_selected_curves)
+        self.view.line.apply_to_all_button.clicked.connect(self.line_apply_to_all)
+        self.view.marker.apply_to_all_button.clicked.connect(self.marker_apply_to_all)
+        self.view.marker.marker_style_combo_box.currentTextChanged.connect(self.view.marker.set_colour_fields_enabled)
+        self.view.errorbars.apply_to_all_button.clicked.connect(self.errorbars_apply_to_all)
+        self.view.select_curve_list.itemSelectionChanged.connect(self.on_curves_selection_changed)
 
         self.parent_presenter = parent_presenter
 
@@ -193,7 +181,7 @@ class CurvesTabWidgetPresenter:
         for name, ax in self.axes_names_dict.items():
             if curve_in_ax(ax):
                 names.append(name)
-        names = sorted(names, key=lambda x: x[x.rfind("("):])
+        names = sorted(names, key=lambda x: x[x.rfind("(") :])
         self.view.populate_select_axes_combo_box(names)
 
     def remove_selected_curves(self):
@@ -296,12 +284,12 @@ class CurvesTabWidgetPresenter:
     # Private methods
     def _generate_curve_name(self, curve, label):
         if label:
-            if label == '_nolegend_':
+            if label == "_nolegend_":
                 return None
             else:
                 name = label
         else:
-            name = '_nolabel_'
+            name = "_nolabel_"
         # Deal with case of curves sharing the same label
         idx, base_name = 1, name
         while name in self.curve_names_dict:

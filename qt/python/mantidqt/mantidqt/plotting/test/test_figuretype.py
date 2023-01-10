@@ -7,14 +7,15 @@
 #  This file is part of the mantid workbench.
 #
 #
-from __future__  import absolute_import
+from __future__ import absolute_import
 
 # std imports
 from unittest import TestCase, main
 
 # thirdparty imports
 import matplotlib
-matplotlib.use('AGG')  # noqa
+
+matplotlib.use("AGG")  # noqa
 import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
@@ -24,7 +25,6 @@ from mantidqt.plotting.figuretype import figure_type, FigureType
 
 
 class FigureTypeTest(TestCase):
-
     def test_figure_type_empty_figure_returns_empty(self):
         self.assertEqual(FigureType.Empty, figure_type(plt.figure()))
 
@@ -49,13 +49,13 @@ class FigureTypeTest(TestCase):
 
     def test_surface_plot_returns_surface(self):
         a = np.array([[1]])
-        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
+        fig, ax = plt.subplots(subplot_kw={"projection": "mantid3d"})
         ax.plot_surface(a, a, a)
         self.assertEqual(FigureType.Surface, figure_type(ax.figure))
 
     def test_wireframe_plot_returns_wireframe(self):
         a = np.array([[1]])
-        ax = plt.subplot(111, projection='3d')
+        ax = plt.subplot(111, projection="3d")
         ax.plot_wireframe(a, a, a)
         self.assertEqual(FigureType.Wireframe, figure_type(ax.figure))
 
@@ -68,10 +68,10 @@ class FigureTypeTest(TestCase):
     def test_mesh_plot_returns_mesh(self):
         a = np.array([[[1, 1, 1], [2, 2, 2], [3, 3, 3]]])
         mesh_polygon = Poly3DCollection(a)
-        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
+        fig, ax = plt.subplots(subplot_kw={"projection": "mantid3d"})
         ax.add_collection3d(mesh_polygon)
         self.assertEqual(FigureType.Mesh, figure_type(ax.figure))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

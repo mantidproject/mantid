@@ -8,13 +8,23 @@ from mantid.py36compat import dataclass
 
 from mantid.api import AlgorithmManager, CompositeFunction, FunctionFactory, IFunction, Workspace
 from mantid.kernel import PhysicalConstants
-from mantidqtinterfaces.Muon.GUI.Common.contexts.corrections_context import (BACKGROUND_MODE_NONE, BACKGROUND_MODE_AUTO,
-                                                                             BACKGROUND_MODE_MANUAL, FLAT_BACKGROUND,
-                                                                             FLAT_BACKGROUND_AND_EXP_DECAY, RUNS_ALL, GROUPS_ALL)
+from mantidqtinterfaces.Muon.GUI.Common.contexts.corrections_context import (
+    BACKGROUND_MODE_NONE,
+    BACKGROUND_MODE_AUTO,
+    BACKGROUND_MODE_MANUAL,
+    FLAT_BACKGROUND,
+    FLAT_BACKGROUND_AND_EXP_DECAY,
+    RUNS_ALL,
+    GROUPS_ALL,
+)
 from mantidqtinterfaces.Muon.GUI.Common.contexts.muon_context import MuonContext
 from mantidqtinterfaces.Muon.GUI.Common.corrections_tab_widget.corrections_model import CorrectionsModel
-from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import (run_Fit, run_clone_workspace, run_create_single_valued_workspace,
-                                                                          run_minus)
+from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import (
+    run_Fit,
+    run_clone_workspace,
+    run_create_single_valued_workspace,
+    run_minus,
+)
 from mantidqtinterfaces.Muon.GUI.Common.utilities.run_string_utils import run_string_to_list
 from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_data_utils import x_limits_of_workspace
 
@@ -33,6 +43,7 @@ class BackgroundCorrectionData:
     """
     The background correction data associated with a specific group of a run.
     """
+
     uncorrected_workspace_name: str
     workspace_name: str
     uncorrected_rebin_workspace_name: str
@@ -47,8 +58,15 @@ class BackgroundCorrectionData:
     exp_decay: IFunction
     status: str = NO_CORRECTION_STATUS
 
-    def __init__(self, use_raw: bool, rebin_fixed_step: int, start_x: float, end_x: float,
-                 flat_background: IFunction = None, exp_decay: IFunction = None):
+    def __init__(
+        self,
+        use_raw: bool,
+        rebin_fixed_step: int,
+        start_x: float,
+        end_x: float,
+        flat_background: IFunction = None,
+        exp_decay: IFunction = None,
+    ):
         self.use_raw = use_raw
         self.rebin_fixed_step = rebin_fixed_step
         self.start_x = start_x
@@ -80,8 +98,7 @@ class BackgroundCorrectionData:
         self.rebin_workspace_name = rebin_workspace_name
         if self.rebin_workspace_name is not None:
             self.uncorrected_rebin_workspace_name = f"__{rebin_workspace_name}_uncorrected"
-            run_clone_workspace({"InputWorkspace": self.rebin_workspace_name,
-                                 "OutputWorkspace": self.uncorrected_rebin_workspace_name})
+            run_clone_workspace({"InputWorkspace": self.rebin_workspace_name, "OutputWorkspace": self.uncorrected_rebin_workspace_name})
 
     def reset(self) -> None:
         """Resets the background correction data by replacing the corrected data with the original uncorrected data."""
@@ -89,8 +106,7 @@ class BackgroundCorrectionData:
         run_clone_workspace({"InputWorkspace": self.uncorrected_workspace_name, "OutputWorkspace": self.workspace_name})
 
         if self.rebin_workspace_name is not None:
-            run_clone_workspace({"InputWorkspace": self.uncorrected_rebin_workspace_name,
-                                 "OutputWorkspace": self.rebin_workspace_name})
+            run_clone_workspace({"InputWorkspace": self.uncorrected_rebin_workspace_name, "OutputWorkspace": self.rebin_workspace_name})
 
     def create_background_output_workspaces(self, fit_function: IFunction) -> tuple:
         """Creates the output workspaces for the currently stored background data."""
@@ -105,18 +121,19 @@ class BackgroundCorrectionData:
 
         self._handle_background_fit_output(function, fit_status, chi_squared)
 
-    def _get_parameters_for_background_fit(self, fit_function: IFunction, create_output: bool,
-                                           max_iterations: int = 500) -> dict:
+    def _get_parameters_for_background_fit(self, fit_function: IFunction, create_output: bool, max_iterations: int = 500) -> dict:
         """Gets the parameters to use for the background Fit."""
         input_name = self.uncorrected_workspace_name if self._use_raw_data() else self.uncorrected_rebin_workspace_name
-        return {"Function": fit_function,
-                "InputWorkspace": input_name,
-                "StartX": self.start_x,
-                "EndX": self.end_x,
-                "CreateOutput": create_output,
-                "CalcErrors": True,
-                "MaxIterations": max_iterations,
-                "IgnoreInvalidData": True}
+        return {
+            "Function": fit_function,
+            "InputWorkspace": input_name,
+            "StartX": self.start_x,
+            "EndX": self.end_x,
+            "CreateOutput": create_output,
+            "CalcErrors": True,
+            "MaxIterations": max_iterations,
+            "IgnoreInvalidData": True,
+        }
 
     def _handle_background_fit_output(self, function: IFunction, fit_status: str, chi_squared: float) -> None:
         """Handles the output of the background fit."""
@@ -150,8 +167,7 @@ class BackgroundCorrectionData:
         """Performs the background subtraction on the counts workspace, and then generates the asymmetry workspace."""
         run_minus(self.uncorrected_workspace_name, self._create_background_workspace(rebin=False), self.workspace_name)
         if self.rebin_workspace_name is not None:
-            run_minus(self.uncorrected_rebin_workspace_name, self._create_background_workspace(rebin=True),
-                      self.rebin_workspace_name)
+            run_minus(self.uncorrected_rebin_workspace_name, self._create_background_workspace(rebin=True), self.rebin_workspace_name)
 
     def _create_background_workspace(self, rebin: bool) -> Workspace:
         """Creates the background workspace to use for the background subtraction."""
@@ -165,9 +181,7 @@ class BackgroundCorrectionData:
             background *= self.rebin_fixed_step
             background_error *= self.rebin_fixed_step
 
-        return {"DataValue": background,
-                "ErrorValue": background_error,
-                "OutputWorkspace": TEMPORARY_BACKGROUND_WORKSPACE_NAME}
+        return {"DataValue": background, "ErrorValue": background_error, "OutputWorkspace": TEMPORARY_BACKGROUND_WORKSPACE_NAME}
 
     def _use_raw_data(self) -> bool:
         """Returns true if the raw data should be used to calculate the background."""
@@ -312,7 +326,8 @@ class BackgroundCorrectionsModel:
 
             self._corrections_context.background_correction_data[run_group] = background_data
             self._corrections_context.background_correction_data[run_group].setup_uncorrected_workspace(
-                workspace_name, rebin_workspace_name)
+                workspace_name, rebin_workspace_name
+            )
 
     def _create_background_correction_data(self, previous_data: dict, run_group: tuple) -> BackgroundCorrectionData:
         """Creates the BackgroundCorrectionData for a newly loaded data. It tries to reuse previous data."""
@@ -321,13 +336,25 @@ class BackgroundCorrectionsModel:
         run, group = run_group
         if run_group in previous_data:
             data = previous_data[run_group]
-            return BackgroundCorrectionData(data.use_raw if is_rebin_fixed else DEFAULT_USE_RAW, rebin_fixed, data.start_x,
-                                            data.end_x, data.flat_background, data.exp_decay)
+            return BackgroundCorrectionData(
+                data.use_raw if is_rebin_fixed else DEFAULT_USE_RAW,
+                rebin_fixed,
+                data.start_x,
+                data.end_x,
+                data.flat_background,
+                data.exp_decay,
+            )
         else:
             for key, value in previous_data.items():
                 if key[1] == group:
-                    return BackgroundCorrectionData(value.use_raw if is_rebin_fixed else DEFAULT_USE_RAW, rebin_fixed,
-                                                    value.start_x, value.end_x, value.flat_background, value.exp_decay)
+                    return BackgroundCorrectionData(
+                        value.use_raw if is_rebin_fixed else DEFAULT_USE_RAW,
+                        rebin_fixed,
+                        value.start_x,
+                        value.end_x,
+                        value.flat_background,
+                        value.exp_decay,
+                    )
 
         start_x, end_x = self.default_x_range(run, group)
         return BackgroundCorrectionData(DEFAULT_USE_RAW, rebin_fixed, start_x, end_x)
@@ -367,8 +394,11 @@ class BackgroundCorrectionsModel:
             fit_function = self._get_fit_function_for_background_fit(correction_data)
             correction_data.calculate_background(fit_function)
         elif self.is_background_mode_manual():
-            correction_data.status = CORRECTION_SUCCESS_STATUS \
-                if correction_data.flat_background.getParameterValue(BACKGROUND_PARAM) != 0.0 else NO_CORRECTION_STATUS
+            correction_data.status = (
+                CORRECTION_SUCCESS_STATUS
+                if correction_data.flat_background.getParameterValue(BACKGROUND_PARAM) != 0.0
+                else NO_CORRECTION_STATUS
+            )
 
         correction_data.perform_background_subtraction()
 
@@ -415,14 +445,14 @@ class BackgroundCorrectionsModel:
 
     def selected_correction_data(self) -> tuple:
         """Returns lists of the selected correction data to display in the view."""
-        runs, groups, use_raws, start_xs, end_xs, backgrounds, background_errors, statuses = \
-            self._selected_correction_data_for(self._selected_runs(), self._selected_groups())
+        runs, groups, use_raws, start_xs, end_xs, backgrounds, background_errors, statuses = self._selected_correction_data_for(
+            self._selected_runs(), self._selected_groups()
+        )
         return runs, groups, use_raws, start_xs, end_xs, backgrounds, background_errors, statuses
 
     def _selected_correction_data_for(self, selected_runs: list, selected_groups: list) -> tuple:
         """Returns lists of the selected correction data to display in the view."""
-        runs_list, groups_list, use_raws, start_xs, end_xs, backgrounds, background_errors, statuses = [], [], [], [], \
-                                                                                                       [], [], [], []
+        runs_list, groups_list, use_raws, start_xs, end_xs, backgrounds, background_errors, statuses = [], [], [], [], [], [], [], []
         for run_group, correction_data in self._corrections_context.background_correction_data.items():
             if run_group[0] in selected_runs and run_group[1] in selected_groups:
                 runs_list.append(run_group[0])

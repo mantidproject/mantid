@@ -15,20 +15,13 @@ from mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.PeakSelector.pe
 
 @start_qapplication
 class PeakSelectorViewTest(unittest.TestCase):
-
     def setUp(self):
-        self.element = 'He'
+        self.element = "He"
         self.element_data = {
             "Z": 2,
             "A": 4.003,
-            "Primary": {
-                "K(2->1)": 8.22
-            },
-            "Secondary": {
-                "K(3->1)": 9.74,
-                "K(4->1)": 10.28,
-                "K(5->1)": 10.48
-            }
+            "Primary": {"K(2->1)": 8.22},
+            "Secondary": {"K(3->1)": 9.74, "K(4->1)": 10.28, "K(5->1)": 10.48},
         }
         self.view = PeakSelectorView(self.element_data, self.element)
 
@@ -40,50 +33,50 @@ class PeakSelectorViewTest(unittest.TestCase):
 
     def test_get_checked_returns_primary_only_on_set_up(self):
         new_data = self.view.get_checked()
-        self.assertEqual(new_data, self.element_data['Primary'])
+        self.assertEqual(new_data, self.element_data["Primary"])
 
     def test_update_new_data_sets_new_data_to_only_the_primary(self):
-        self.view.new_data = self.element_data['Secondary']
+        self.view.new_data = self.element_data["Secondary"]
         self.view.update_new_data(self.element_data)
-        self.assertEqual(self.view.new_data.keys(), self.element_data['Primary'].keys())
+        self.assertEqual(self.view.new_data.keys(), self.element_data["Primary"].keys())
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.PeakSelector.peak_selector_view.Checkbox')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.PeakSelector.peak_selector_view.Checkbox")
     def test_setup_checkboxes_sets_check_to_true(self, mock_Checkbox):
         self.view.list.addWidget = mock.Mock()
         checkbox = self.view._setup_checkbox("{}: {}".format("K(2->1)", 8.22), True)
         checkbox.setChecked.assert_called_with(True)
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.PeakSelector.peak_selector_view.Checkbox')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.PeakSelector.peak_selector_view.Checkbox")
     def test_setup_checkboxes_sets_check_to_false(self, mock_Checkbox):
         self.view.list.addWidget = mock.Mock()
         checkbox = self.view._setup_checkbox("{}: {}".format("K(2->1)", 8.22), False)
         checkbox.setChecked.assert_called_with(False)
 
     def test_create_checkbox_list_returns_list_of_checkboxes(self):
-        heading = 'Primary'
+        heading = "Primary"
         checkboxes = self.view._create_checkbox_list(heading, self.element_data[heading])
         self.assertIsInstance(checkboxes, list)
         self.assertIsInstance(checkboxes[0], Checkbox)
 
     def test_parse_checkbox_name_splits_string(self):
-        name = 'type: value'
+        name = "type: value"
         peak_type, value = self.view._parse_checkbox_name(name)
-        self.assertEqual(peak_type, 'type')
-        self.assertEqual(value, ' value')
+        self.assertEqual(peak_type, "type")
+        self.assertEqual(value, " value")
 
     def test_parse_checkbox_name_does_not_convert_value_to_float(self):
-        name = 'type: 1.0'
+        name = "type: 1.0"
         peak_type, value = self.view._parse_checkbox_name(name)
-        self.assertEqual(value, ' 1.0')
+        self.assertEqual(value, " 1.0")
 
     def test_remove_value_from_new_data_removes_existing_key_from_new_data(self):
-        self.view.new_data['type'] = 'value'
-        checkbox = Checkbox('type: value')
+        self.view.new_data["type"] = "value"
+        checkbox = Checkbox("type: value")
         self.view._remove_value_from_new_data(checkbox)
-        self.assertIs('type' in self.view.new_data.keys(), False)
+        self.assertIs("type" in self.view.new_data.keys(), False)
 
     def test_remove_value_from_new_data_does_not_raise_KeyError_if_type_not_in_new_data(self):
-        checkbox = Checkbox('type: value')
+        checkbox = Checkbox("type: value")
         try:
             self.view._remove_value_from_new_data(checkbox)
         except KeyError:
@@ -91,10 +84,10 @@ class PeakSelectorViewTest(unittest.TestCase):
 
     def test_add_value_to_new_data(self):
         self.new_data = {}
-        checkbox = Checkbox('type: value')
+        checkbox = Checkbox("type: value")
         self.view._add_value_to_new_data(checkbox)
-        self.assertIs('type' in self.view.new_data.keys(), True)
+        self.assertIs("type" in self.view.new_data.keys(), True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

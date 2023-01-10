@@ -17,8 +17,8 @@ class ExceptionHandlerTest(unittest.TestCase):
     def tearDownClass(cls):
         UsageService.setEnabled(False)
 
-    @patch('workbench.plugins.exception_handler.WorkbenchErrorMessageBox')
-    @patch('workbench.plugins.exception_handler.logger')
+    @patch("workbench.plugins.exception_handler.WorkbenchErrorMessageBox")
+    @patch("workbench.plugins.exception_handler.logger")
     def test_exception_logged_no_UsageService(self, mock_logger, mock_WorkbenchErrorMessageBox):
         UsageService.setEnabled(False)
 
@@ -32,8 +32,8 @@ class ExceptionHandlerTest(unittest.TestCase):
         self.assertEqual(1, mock_WorkbenchErrorMessageBox.call_count)
         mock_errorbox.exec_.assert_called_once_with()
 
-    @patch('workbench.plugins.exception_handler.CrashReportPage')
-    @patch('workbench.plugins.exception_handler.logger')
+    @patch("workbench.plugins.exception_handler.CrashReportPage")
+    @patch("workbench.plugins.exception_handler.logger")
     def test_exception_logged(self, mock_logger, mock_CrashReportPage):
         UsageService.setEnabled(True)
 

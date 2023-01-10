@@ -14,12 +14,11 @@ from mantidqt.utils.qt import load_ui
 
 
 class WaterfallPlotOffsetDialogView(QDialog):
-
     def __init__(self, parent=None):
         super(WaterfallPlotOffsetDialogView, self).__init__(parent=parent)
 
-        self.ui = load_ui(__file__, 'waterfall_plot_offset_dialog.ui', baseinstance=self)
-        self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
+        self.ui = load_ui(__file__, "waterfall_plot_offset_dialog.ui", baseinstance=self)
+        self.setWindowIcon(QIcon(":/images/MantidIcon.ico"))
         self.setModal(True)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 

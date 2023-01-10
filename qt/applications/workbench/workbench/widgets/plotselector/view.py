@@ -9,8 +9,21 @@
 #
 import re
 from qtpy.QtCore import Qt, Signal, QMutex, QMutexLocker
-from qtpy.QtWidgets import (QAbstractItemView, QAction, QActionGroup, QFileDialog, QHBoxLayout, QHeaderView, QLineEdit,
-                            QMenu, QPushButton, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
+from qtpy.QtWidgets import (
+    QAbstractItemView,
+    QAction,
+    QActionGroup,
+    QFileDialog,
+    QHBoxLayout,
+    QHeaderView,
+    QLineEdit,
+    QMenu,
+    QPushButton,
+    QTableWidget,
+    QTableWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
 
 from enum import IntEnum
 
@@ -20,12 +33,7 @@ from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 
 DEBUG_MODE = False
 
-EXPORT_TYPES = [
-    ('Export to EPS', '.eps'),
-    ('Export to PDF', '.pdf'),
-    ('Export to PNG', '.png'),
-    ('Export to SVG', '.svg')
-]
+EXPORT_TYPES = [("Export to EPS", ".eps"), ("Export to PDF", ".pdf"), ("Export to PNG", ".png"), ("Export to SVG", ".svg")]
 
 
 class Column(IntEnum):
@@ -58,12 +66,12 @@ class PlotSelectorView(QWidget):
         self.mutex = QMutex()
         self.active_plot_number = -1
 
-        self.show_button = QPushButton('Show')
-        self.hide_button = QPushButton('Hide')
+        self.show_button = QPushButton("Show")
+        self.hide_button = QPushButton("Hide")
         # Note this button is labeled delete, but for consistency
         # with matplotlib 'close' is used in the code
-        self.close_button = QPushButton('Delete')
-        self.select_all_button = QPushButton('Select All')
+        self.close_button = QPushButton("Delete")
+        self.select_all_button = QPushButton("Select All")
         self.sort_button = self._make_sort_button()
         self.export_button = self._make_export_button()
         self.filter_box = self._make_filter_box()
@@ -86,7 +94,7 @@ class PlotSelectorView(QWidget):
         filter_layout.addWidget(self.filter_box)
 
         layout = QVBoxLayout()
-        layout.setContentsMargins(0,0,0,0)
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.addLayout(buttons_layout)
         layout.addLayout(filter_layout)
         layout.addWidget(self.table_widget)
@@ -158,19 +166,22 @@ class PlotSelectorView(QWidget):
         :return: A QTableWidget object which will contain plot widgets
         """
         table_widget = QTableWidget(0, 3, self)
-        table_widget.setHorizontalHeaderLabels(['No.', 'Plot Name', 'Last Active Order (hidden)'])
+        table_widget.setHorizontalHeaderLabels(["No.", "Plot Name", "Last Active Order (hidden)"])
 
         table_widget.verticalHeader().setVisible(False)
 
         # Fix the size of 'No.' and let 'Plot Name' fill the space
         top_header = table_widget.horizontalHeader()
 
-        table_widget.horizontalHeaderItem(Column.Number).setToolTip('This is the matplotlib figure number.\n\nFrom a '
-                                                                    'script use plt.figure(N), where N is this figure '
-                                                                    'number, to get a handle to the plot.')
+        table_widget.horizontalHeaderItem(Column.Number).setToolTip(
+            "This is the matplotlib figure number.\n\nFrom a "
+            "script use plt.figure(N), where N is this figure "
+            "number, to get a handle to the plot."
+        )
 
-        table_widget.horizontalHeaderItem(Column.Name).setToolTip('The plot name, also used  as the file name when '
-                                                                  'saving multiple plots.')
+        table_widget.horizontalHeaderItem(Column.Name).setToolTip(
+            "The plot name, also used  as the file name when " "saving multiple plots."
+        )
 
         table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
         table_widget.setSelectionMode(QAbstractItemView.ExtendedSelection)
@@ -302,7 +313,7 @@ class PlotSelectorView(QWidget):
         with QMutexLocker(self.mutex):
             row, widget = self._get_row_and_widget_from_plot_number(plot_number)
             if row is None or widget is None:
-                raise ValueError(f'Unable to find row and/or widget from plot_number {plot_number}')
+                raise ValueError(f"Unable to find row and/or widget from plot_number {plot_number}")
 
             font = self.table_widget.item(row, Column.Number).font()
             font.setBold(is_active)
@@ -353,7 +364,7 @@ class PlotSelectorView(QWidget):
         with QMutexLocker(self.mutex):
             row, widget = self._get_row_and_widget_from_plot_number(plot_number)
             if row is None or widget is None:
-                raise ValueError(f'Unable to find row and/or widget from plot_number {plot_number}')
+                raise ValueError(f"Unable to find row and/or widget from plot_number {plot_number}")
             widget.set_visibility_icon(is_visible)
 
     # ----------------------- Plot Filtering ------------------------
@@ -394,7 +405,7 @@ class PlotSelectorView(QWidget):
         Rename a plot in the plot list, also setting the sort key
         :param plot_number: The unique number in GlobalFigureManager
         :param new_name: The new plot name
-          """
+        """
         with QMutexLocker(self.mutex):
             row, widget = self._get_row_and_widget_from_plot_number(plot_number)
 
@@ -488,12 +499,9 @@ class PlotSelectorView(QWidget):
         order = self.table_widget.horizontalHeader().sortIndicatorOrder()
         column = self.table_widget.horizontalHeader().sortIndicatorSection()
 
-        sort_order_map = {Qt.AscendingOrder: 'Ascending',
-                          Qt.DescendingOrder: 'Descending'}
+        sort_order_map = {Qt.AscendingOrder: "Ascending", Qt.DescendingOrder: "Descending"}
 
-        sort_type_map = {Column.Number.value: 'Number',
-                         Column.Name.value: 'Name',
-                         Column.LastActive.value: 'Last Active'}
+        sort_type_map = {Column.Number.value: "Number", Column.Name.value: "Name", Column.LastActive.value: "Last Active"}
 
         order_string = sort_order_map.get(order)
         column_string = sort_type_map.get(column)
@@ -588,8 +596,7 @@ class PlotSelectorView(QWidget):
         :return absolute_path: The absolute path to save to
         """
         # Returns a tuple containing the filename and extension
-        absolute_path = QFileDialog.getSaveFileName(caption='Select filename for exported plot',
-                                                    filter='*{}'.format(extension))
+        absolute_path = QFileDialog.getSaveFileName(caption="Select filename for exported plot", filter="*{}".format(extension))
         return absolute_path[0]
 
     def get_directory_name_for_saving(self):
@@ -600,7 +607,7 @@ class PlotSelectorView(QWidget):
         # Note that the native dialog does not always show the files
         # in the directory on Linux, but using the non-native dialog
         # is not very pleasant on Windows or Mac
-        directory = QFileDialog.getExistingDirectory(caption='Select folder for exported plots')
+        directory = QFileDialog.getExistingDirectory(caption="Select folder for exported plots")
         return directory
 
 
@@ -623,8 +630,10 @@ class PlotNameWidget(QWidget):
         self.line_edit.setReadOnly(True)
         self.line_edit.setFrame(False)
         # changes the line edit to look like normal even when
-        self.line_edit.setStyleSheet("""* { background-color: rgba(0, 0, 0, 0); }
-        QLineEdit:disabled { color: black; }""")
+        self.line_edit.setStyleSheet(
+            """* { background-color: rgba(0, 0, 0, 0); }
+        QLineEdit:disabled { color: black; }"""
+        )
         self.line_edit.setAttribute(Qt.WA_TransparentForMouseEvents, True)
         self.line_edit.editingFinished.connect(self.rename_plot)
         # Disabling the line edit prevents it from temporarily
@@ -632,24 +641,24 @@ class PlotNameWidget(QWidget):
         # the editingFinished signal, which was causing #26305
         self.line_edit.setDisabled(True)
 
-        shown_icon = get_icon('mdi.eye')
+        shown_icon = get_icon("mdi.eye")
         self.hide_button = QPushButton(shown_icon, "")
-        self.hide_button.setToolTip('Hide')
+        self.hide_button.setToolTip("Hide")
         self.hide_button.setFlat(True)
         self.hide_button.setMaximumWidth(int(self.hide_button.iconSize().width() * 5 / 3))
         self.hide_button.clicked.connect(self.toggle_visibility)
 
-        rename_icon = get_icon('mdi.square-edit-outline')
+        rename_icon = get_icon("mdi.square-edit-outline")
         self.rename_button = QPushButton(rename_icon, "")
-        self.rename_button.setToolTip('Rename')
+        self.rename_button.setToolTip("Rename")
         self.rename_button.setFlat(True)
         self.rename_button.setMaximumWidth(int(self.rename_button.iconSize().width() * 5 / 3))
         self.rename_button.setCheckable(True)
         self.rename_button.toggled.connect(self.rename_button_toggled)
 
-        close_icon = get_icon('mdi.close')
+        close_icon = get_icon("mdi.close")
         self.close_button = QPushButton(close_icon, "")
-        self.close_button.setToolTip('Delete')
+        self.close_button.setToolTip("Delete")
         self.close_button.setFlat(True)
         self.close_button.setMaximumWidth(int(self.close_button.iconSize().width() * 5 / 3))
         self.close_button.clicked.connect(lambda: self.close_pressed(self.plot_number))
@@ -733,11 +742,11 @@ class PlotNameWidget(QWidget):
         :param is_shown: True if plot is shown, false if hidden
         """
         if is_shown:
-            self.hide_button.setIcon(get_icon('mdi.eye'))
-            self.hide_button.setToolTip('Hide')
+            self.hide_button.setIcon(get_icon("mdi.eye"))
+            self.hide_button.setToolTip("Hide")
         else:
-            self.hide_button.setIcon(get_icon('mdi.eye', 'lightgrey'))
-            self.hide_button.setToolTip('Show')
+            self.hide_button.setIcon(get_icon("mdi.eye", "lightgrey"))
+            self.hide_button.setToolTip("Show")
 
     def rename_plot(self):
         """
@@ -783,6 +792,6 @@ class HumanReadableSortItem(QTableWidgetItem):
         then uses Python list comparison to get the result we want.
         :param other: The other HumanReadableSortItem to compare with
         """
-        self_key = [self.convert(c) for c in re.split('([0-9]+)', self.data(self.role))]
-        other_key = [self.convert(c) for c in re.split('([0-9]+)', other.data(self.role))]
+        self_key = [self.convert(c) for c in re.split("([0-9]+)", self.data(self.role))]
+        other_key = [self.convert(c) for c in re.split("([0-9]+)", other.data(self.role))]
         return self_key < other_key

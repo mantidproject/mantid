@@ -21,6 +21,7 @@ class PlotSelectorPresenter(object):
     the GlobalFigureManager as an argument, or the presenter and view
     can be passed as arguments (only intended for testing).
     """
+
     def __init__(self, global_figure_manager, view=None, model=None):
         """
         Initialise the presenter, creating the view and model, and
@@ -201,7 +202,7 @@ class PlotSelectorPresenter(object):
         Replaces a name in the plot list
         :param plot_number: The unique number in GlobalFigureManager
         :param new_name: The new plot name
-         """
+        """
         try:
             self.model.rename_figure(plot_number, new_name)
         except ValueError as e:
@@ -280,7 +281,7 @@ class PlotSelectorPresenter(object):
         :param plot_number: The unique number in GlobalFigureManager
         :return: A string with the last active value
         """
-        return '_' + self.model.get_plot_name_from_number(plot_number)
+        return "_" + self.model.get_plot_name_from_number(plot_number)
 
     def get_renamed_last_active_value(self, plot_number, old_last_active_value):
         """
@@ -364,7 +365,7 @@ class PlotSelectorPresenter(object):
         :param string: The string to replace characters in
         :return: The string with special characters replace by '-'
         """
-        return re.sub(r'[<>:"/|\\?*]', r'-', string)
+        return re.sub(r'[<>:"/|\\?*]', r"-", string)
 
     def _make_unique_name(self, name, dictionary):
         """
@@ -377,7 +378,7 @@ class PlotSelectorPresenter(object):
         """
         i = 1
         while True:
-            plot_name_attempt = name + ' ({})'.format(str(i))
+            plot_name_attempt = name + " ({})".format(str(i))
             if plot_name_attempt not in dictionary.values():
                 break
             i += 1

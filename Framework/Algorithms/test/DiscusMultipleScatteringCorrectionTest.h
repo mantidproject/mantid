@@ -436,23 +436,6 @@ public:
     testResultY.clear();
     alg.integrateCumulative(data, 0.5, 0.9, testResultX, testResultY, true);
     TS_ASSERT_EQUALS(testResultY[1], 0.4);
-    // bin edges tests
-    testResultX.clear();
-    testResultY.clear();
-    auto ws_edges = Mantid::DataObjects::create<Workspace2D>(
-        1, Mantid::HistogramData::Histogram(Mantid::HistogramData::BinEdges({0., 1., 2., 3.}),
-                                            Mantid::HistogramData::Frequencies({1., 1., 2.})));
-    DiscusData1D data_edges{ws_edges->getSpectrum(0).readX(), ws_edges->getSpectrum(0).readY()};
-    alg.integrateCumulative(data_edges, 0., 2.2, testResultX, testResultY, true);
-    TS_ASSERT_DELTA(testResultY[3], 2.4, 1E-10);
-    testResultX.clear();
-    testResultY.clear();
-    alg.integrateCumulative(data_edges, 0., 2.0, testResultX, testResultY, true);
-    TS_ASSERT_EQUALS(testResultY[2], 2.0);
-    testResultX.clear();
-    testResultY.clear();
-    alg.integrateCumulative(data_edges, 0., 2.0, testResultX, testResultY, false);
-    TS_ASSERT_EQUALS(testResultY[0], 2.0);
   }
 
   void test_inelastic_with_importance_sampling() {
@@ -789,6 +772,39 @@ public:
     TS_ASSERT_DELTA(doubleScatterResult3->y(0)[0], doubleScatterResult->y(0)[0], 1E-6);
 
     Mantid::API::AnalysisDataService::Instance().deepRemoveGroup("MuscatResults");
+  }
+
+  void test_errors_calculated() {
+    // don't use a flat plate here because weights for the NoAbs workspace are all same for flat plates (so error=0)
+    auto inputWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithGeographicalDetectors(1, 180, 1.0, 1, 0.5, 1.0,
+                                                                                              "testinst", "Momentum");
+
+    auto cylinderShape =
+        ComponentCreationHelper::createCappedCylinder(0.01, 0.04, {0., -0.02, 0.}, {0., 1., 0.}, "test");
+    auto mat = Mantid::Kernel::Material("Ni", Mantid::PhysicalConstants::getNeutronAtom(28, 0), 0.091337537);
+    cylinderShape->setMaterial(mat);
+    inputWorkspace->mutableSample().setShape(cylinderShape);
+    auto alg = createAlgorithm();
+
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWorkspace));
+    const int NSCATTERINGS = 3;
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NumberScatterings", NSCATTERINGS));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NeutronPathsSingle", 10));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NeutronPathsMultiple", 10));
+    TS_ASSERT_THROWS_NOTHING(alg->execute(););
+    TS_ASSERT(alg->isExecuted());
+    if (alg->isExecuted()) {
+      auto output =
+          Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
+
+      Mantid::API::Workspace_sptr wsPtr;
+      for (size_t i = 0; i < output->size(); i++) {
+        TS_ASSERT_THROWS_NOTHING(wsPtr = output->getItem(i));
+        auto matrixWsPtr = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr);
+        auto eData = matrixWsPtr->dataE(0);
+        TS_ASSERT(std::all_of(eData.cbegin(), eData.cend(), [](double i) { return i > 0; }));
+      }
+    }
   }
 
   //---------------------------------------------------------------------------

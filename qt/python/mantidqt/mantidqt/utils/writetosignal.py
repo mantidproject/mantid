@@ -24,7 +24,7 @@ class WriteToSignal(QObject):
         # If the file descriptor of the stream is < 0 then we are running in a no-external-console mode
         try:
             self._original_out = original_out
-            if not hasattr(original_out, 'fileno') or original_out.fileno() < 0:
+            if not hasattr(original_out, "fileno") or original_out.fileno() < 0:
                 self._original_out = None
         except UnsupportedOperation:
             # In some cases fileno may be defined but throw this instead,
@@ -45,9 +45,11 @@ class WriteToSignal(QObject):
             try:
                 self._original_out.write(txt)
             except IOError as e:
-                self.sig_write_received.emit("Error: Unable to write to the console of the process.\n"
-                                             "This error is not related to your script's execution.\n"
-                                             "Original error: {}\n\n".format(str(e)))
+                self.sig_write_received.emit(
+                    "Error: Unable to write to the console of the process.\n"
+                    "This error is not related to your script's execution.\n"
+                    "Original error: {}\n\n".format(str(e))
+                )
             except UnicodeEncodeError:
                 """
                 Scripts containing unicode characters could fail to run if mantid is not started from the

@@ -15,6 +15,7 @@ from mantidqt.utils.qt.qappthreadcall import force_method_calls_to_qapp_thread
 
 def safe_qthread(func):
     """decorator function to move given call to main QappThread"""
+
     @functools.wraps(func)
     def _wrapped(*args, **kwargs):
         return QAppThreadCall(func)(*args, **kwargs)
@@ -26,6 +27,7 @@ def get_instrumentview(workspace, wait=True):
     """Return a handle to the instrument view of given workspace
     :param ws: input workspace
     """
+
     def _wrappper(ws):
         return force_method_calls_to_qapp_thread(InstrumentViewPresenter(ws))
 

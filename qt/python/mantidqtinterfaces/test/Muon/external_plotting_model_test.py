@@ -16,7 +16,6 @@ NORMALISATION_STATE = False
 
 
 class ExternalPlottingModelTest(unittest.TestCase):
-
     def setUp(self):
         self.external_plotting_model = ExternalPlottingModel()
         self.mock_artist = mock.NonCallableMock()
@@ -36,8 +35,7 @@ class ExternalPlottingModelTest(unittest.TestCase):
         for i in range(NUM_AXES):
             ws = EXAMPLE_DATA[i][0]
             index = EXAMPLE_DATA[i][1]
-            plot_information.append(PlotInformation(workspace=ws, specNum=index, axis=i,
-                                                    normalised=NORMALISATION_STATE))
+            plot_information.append(PlotInformation(workspace=ws, specNum=index, axis=i, normalised=NORMALISATION_STATE))
         return plot_information
 
     def test_get_plotted_workspace_and_indicies_from_axes_calls_correct_functions(self):
@@ -58,5 +56,5 @@ class ExternalPlottingModelTest(unittest.TestCase):
             self.assertEqual(return_plot_info, expected_plot_info)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

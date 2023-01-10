@@ -65,40 +65,31 @@ class GeneralSettingsTest(unittest.TestCase):
     def test_setup_checkbox_signals(self):
         presenter = GeneralSettings(None)
 
-        self.assert_connected_once(presenter.view.crystallography_convention,
-                                   presenter.view.crystallography_convention.stateChanged)
+        self.assert_connected_once(presenter.view.crystallography_convention, presenter.view.crystallography_convention.stateChanged)
 
-        self.assert_connected_once(presenter.view.use_open_gl,
-                                   presenter.view.use_open_gl.stateChanged)
+        self.assert_connected_once(presenter.view.use_open_gl, presenter.view.use_open_gl.stateChanged)
 
-        self.assert_connected_once(presenter.view.show_invisible_workspaces,
-                                   presenter.view.show_invisible_workspaces.stateChanged)
+        self.assert_connected_once(presenter.view.show_invisible_workspaces, presenter.view.show_invisible_workspaces.stateChanged)
 
-        self.assert_connected_once(presenter.view.project_recovery_enabled,
-                                   presenter.view.project_recovery_enabled.stateChanged)
+        self.assert_connected_once(presenter.view.project_recovery_enabled, presenter.view.project_recovery_enabled.stateChanged)
 
-        self.assert_connected_once(presenter.view.time_between_recovery,
-                                   presenter.view.time_between_recovery.valueChanged)
+        self.assert_connected_once(presenter.view.time_between_recovery, presenter.view.time_between_recovery.valueChanged)
 
-        self.assert_connected_once(presenter.view.total_number_checkpoints,
-                                   presenter.view.total_number_checkpoints.valueChanged)
+        self.assert_connected_once(presenter.view.total_number_checkpoints, presenter.view.total_number_checkpoints.valueChanged)
 
-        self.assert_connected_once(presenter.view.completion_enabled,
-                                   presenter.view.completion_enabled.stateChanged)
+        self.assert_connected_once(presenter.view.completion_enabled, presenter.view.completion_enabled.stateChanged)
 
     def test_font_dialog_signals(self):
         presenter = GeneralSettings(None)
-        with patch.object(presenter.view, 'create_font_dialog', MagicMock()) as font_dialog:
+        with patch.object(presenter.view, "create_font_dialog", MagicMock()) as font_dialog:
             presenter.action_main_font_button_clicked()
             self.assertEqual(1, font_dialog().fontSelected.connect.call_count)
 
     def test_setup_general_group_signals(self):
         presenter = GeneralSettings(None)
 
-        self.assert_connected_once(presenter.view.main_font,
-                                   presenter.view.main_font.clicked)
-        self.assert_connected_once(presenter.view.window_behaviour,
-                                   presenter.view.window_behaviour.currentTextChanged)
+        self.assert_connected_once(presenter.view.main_font, presenter.view.main_font.clicked)
+        self.assert_connected_once(presenter.view.window_behaviour, presenter.view.window_behaviour.currentTextChanged)
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_facility_changed(self, mock_ConfigService):
@@ -116,11 +107,9 @@ class GeneralSettingsTest(unittest.TestCase):
         presenter = GeneralSettings(None)
 
         # check that the signals are connected to something
-        self.assert_connected_once(presenter.view.prompt_save_on_close,
-                                   presenter.view.prompt_save_on_close.stateChanged)
+        self.assert_connected_once(presenter.view.prompt_save_on_close, presenter.view.prompt_save_on_close.stateChanged)
 
-        self.assert_connected_once(presenter.view.prompt_save_editor_modified,
-                                   presenter.view.prompt_save_editor_modified.stateChanged)
+        self.assert_connected_once(presenter.view.prompt_save_editor_modified, presenter.view.prompt_save_editor_modified.stateChanged)
 
     @patch(WORKBENCH_CONF_CLASSPATH)
     def test_action_prompt_save_on_close(self, mock_conf):
@@ -185,17 +174,26 @@ class GeneralSettingsTest(unittest.TestCase):
         GeneralSettings(None)
 
         # 'any_order' is used to avoid having to assert call().__index__ is called due to 'get' returning a mock object
-        mock_CONF.get.assert_has_calls([call(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value, type=bool),
-                                        call(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value, type=bool),
-                                        call(GeneralProperties.PROMPT_ON_DELETING_WORKSPACE.value, type=bool),
-                                        call(GeneralProperties.COMPLETION_ENABLED.value, type=bool)], any_order=True)
+        mock_CONF.get.assert_has_calls(
+            [
+                call(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value, type=bool),
+                call(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value, type=bool),
+                call(GeneralProperties.PROMPT_ON_DELETING_WORKSPACE.value, type=bool),
+                call(GeneralProperties.COMPLETION_ENABLED.value, type=bool),
+            ],
+            any_order=True,
+        )
 
-        mock_ConfigService.getString.assert_has_calls([call(GeneralProperties.PR_RECOVERY_ENABLED.value),
-                                                       call(GeneralProperties.PR_TIME_BETWEEN_RECOVERY.value),
-                                                       call(GeneralProperties.PR_NUMBER_OF_CHECKPOINTS.value),
-                                                       call(GeneralProperties.USE_NOTIFICATIONS.value),
-                                                       call(GeneralProperties.CRYSTALLOGRAPY_CONV.value),
-                                                       call(GeneralProperties.OPENGL.value)])
+        mock_ConfigService.getString.assert_has_calls(
+            [
+                call(GeneralProperties.PR_RECOVERY_ENABLED.value),
+                call(GeneralProperties.PR_TIME_BETWEEN_RECOVERY.value),
+                call(GeneralProperties.PR_NUMBER_OF_CHECKPOINTS.value),
+                call(GeneralProperties.USE_NOTIFICATIONS.value),
+                call(GeneralProperties.CRYSTALLOGRAPY_CONV.value),
+                call(GeneralProperties.OPENGL.value),
+            ]
+        )
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_project_recovery_enabled(self, mock_ConfigService):
@@ -229,8 +227,7 @@ class GeneralSettingsTest(unittest.TestCase):
 
         num_checkpoints = "532532"
         presenter.action_total_number_checkpoints(num_checkpoints)
-        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.PR_NUMBER_OF_CHECKPOINTS.value,
-                                                             num_checkpoints)
+        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.PR_NUMBER_OF_CHECKPOINTS.value, num_checkpoints)
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_instrument_changed(self, mock_ConfigService):
@@ -249,8 +246,7 @@ class GeneralSettingsTest(unittest.TestCase):
         mock_ConfigService.setString.reset_mock()
 
         presenter.action_crystallography_convention(Qt.Checked)
-        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.CRYSTALLOGRAPY_CONV.value,
-                                                             "Crystallography")
+        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.CRYSTALLOGRAPY_CONV.value, "Crystallography")
 
         mock_ConfigService.setString.reset_mock()
 
@@ -326,21 +322,21 @@ class GeneralSettingsTest(unittest.TestCase):
     def test_fill_layout_display(self, mock_CONF):
         presenter = GeneralSettings(None, view=Mock())
         # setup CONF.get returns dictionary
-        test_dict = {'a': 1, 'b': 2, 'c': 3}
+        test_dict = {"a": 1, "b": 2, "c": 3}
         mock_CONF.get.return_value = test_dict
         # setup mock commands
         presenter.view.layout_display.addItem = Mock()
 
         presenter.fill_layout_display()
 
-        calls = [call('a'), call('b'), call('c')]
+        calls = [call("a"), call("b"), call("c")]
         presenter.view.layout_display.addItem.assert_has_calls(calls)
 
     @patch(WORKBENCH_CONF_CLASSPATH)
     def test_get_layout_dict(self, mock_CONF):
         presenter = GeneralSettings(None, view=Mock())
         # setup CONF.get returns dictionary
-        test_dict = {'a': 1}
+        test_dict = {"a": 1}
         mock_CONF.get.return_value = test_dict
 
         self.assertEqual(test_dict, presenter.get_layout_dict())
@@ -361,16 +357,15 @@ class GeneralSettingsTest(unittest.TestCase):
         mock_parent.saveState.return_value = "value"
         presenter.parent = mock_parent
         # setup CONF.get returns dictionary
-        test_dict = {'a': 1}
+        test_dict = {"a": 1}
         mock_CONF.get = Mock(return_value=test_dict)
         # setup mock commands
-        presenter.view.new_layout_name.text = Mock(return_value='key')
+        presenter.view.new_layout_name.text = Mock(return_value="key")
         presenter.view.new_layout_name.clear = Mock()
 
         presenter.save_layout()
 
-        calls = [call(GeneralProperties.USER_LAYOUT.value, type=dict),
-                 call(GeneralProperties.USER_LAYOUT.value, type=dict)]
+        calls = [call(GeneralProperties.USER_LAYOUT.value, type=dict), call(GeneralProperties.USER_LAYOUT.value, type=dict)]
         mock_CONF.get.assert_has_calls(calls)
         mock_parent.saveState.assert_called_once_with(SAVE_STATE_VERSION)
         mock_parent.populate_layout_menu.assert_called_once_with()
@@ -383,16 +378,16 @@ class GeneralSettingsTest(unittest.TestCase):
         presenter.parent = mock_parent
         # setup item selection
         list_item = Mock()
-        list_item.text.return_value = 'a'
+        list_item.text.return_value = "a"
         presenter.view.layout_display.currentItem = Mock(return_value=list_item)
         # setup CONF.get returns dictionary
-        test_dict = {'a': 1}
+        test_dict = {"a": 1}
         mock_CONF.get = Mock(return_value=test_dict)
 
         presenter.load_layout()
 
         mock_CONF.get.assert_called_once_with(GeneralProperties.USER_LAYOUT.value, type=dict)
-        mock_parent.restoreState.assert_called_once_with(test_dict['a'], SAVE_STATE_VERSION)
+        mock_parent.restoreState.assert_called_once_with(test_dict["a"], SAVE_STATE_VERSION)
 
     @patch(WORKBENCH_CONF_CLASSPATH)
     def test_delete_layout(self, mock_CONF):
@@ -402,16 +397,15 @@ class GeneralSettingsTest(unittest.TestCase):
         presenter.parent = mock_parent
         # setup item selection
         list_item = Mock()
-        list_item.text.return_value = 'a'
+        list_item.text.return_value = "a"
         presenter.view.layout_display.currentItem = Mock(return_value=list_item)
         # setup CONF.get returns dictionary
-        test_dict = {'a': 1}
+        test_dict = {"a": 1}
         mock_CONF.get = Mock(return_value=test_dict)
 
         presenter.delete_layout()
 
-        calls = [call(GeneralProperties.USER_LAYOUT.value, type=dict),
-                 call(GeneralProperties.USER_LAYOUT.value, type=dict)]
+        calls = [call(GeneralProperties.USER_LAYOUT.value, type=dict), call(GeneralProperties.USER_LAYOUT.value, type=dict)]
         mock_CONF.get.assert_has_calls(calls)
         mock_CONF.set.assert_called_once_with(GeneralProperties.USER_LAYOUT.value, {})
         mock_parent.populate_layout_menu.assert_called_once_with()

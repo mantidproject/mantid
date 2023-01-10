@@ -13,7 +13,6 @@ from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_
 
 @start_qapplication
 class PlotGroupPairModelTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.context = setup_context()
@@ -37,19 +36,19 @@ class PlotGroupPairModelTest(unittest.TestCase):
 
     def test_create_tiled_keys_returns_correctly_for_tiled_by_run(self):
         keys = self.model.create_tiled_keys("Run")
-        self.assertEqual(keys, ['62260', '62261'])
+        self.assertEqual(keys, ["62260", "62261"])
 
     def test_create_tiled_keys_returns_correctly_for_summed_runs_tiled_by_run(self):
         runs = [[62260, 62261]]
         self.context.data_context.current_runs = runs
 
         keys = self.model.create_tiled_keys("Run")
-        self.assertEqual(keys, ['62260-62261'])
+        self.assertEqual(keys, ["62260-62261"])
 
     def test_create_tiled_keys_returns_correctly_for_tiled_by_group(self):
         keys = self.model.create_tiled_keys("Group/Pair")
         self.assertEqual(keys, ["fwd", "bwd", "top"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

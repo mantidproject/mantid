@@ -10,7 +10,6 @@ from mantidqtinterfaces.Muon.GUI.Common.contexts.plotting_context import Plottin
 
 
 class MuonPlottingContextTest(unittest.TestCase):
-
     def setUp(self):
         self.context = PlottingContext()
 
@@ -24,15 +23,15 @@ class MuonPlottingContextTest(unittest.TestCase):
         self.assertEqual(0.20, self.context.y_axis_margin)
 
     def test_default_xlims(self):
-        self.assertEqual([-0.1,0.1], self.context.default_xlims)
+        self.assertEqual([-0.1, 0.1], self.context.default_xlims)
 
     def test_default_ylims(self):
-        self.assertEqual([-10.,10.], self.context.default_ylims)
+        self.assertEqual([-10.0, 10.0], self.context.default_ylims)
 
     def test_set_defaults(self):
-        self.context.set_defaults([1., 15.], [-0.3, 0.3])
-        self.assertEqual([1.,15.], self.context.default_xlims)
-        self.assertEqual([-0.3,0.3], self.context.default_ylims)
+        self.context.set_defaults([1.0, 15.0], [-0.3, 0.3])
+        self.assertEqual([1.0, 15.0], self.context.default_xlims)
+        self.assertEqual([-0.3, 0.3], self.context.default_ylims)
 
     def test_add_subplot(self):
         self.assertEqual({}, self.context._subplots)
@@ -52,15 +51,15 @@ class MuonPlottingContextTest(unittest.TestCase):
         self.assertEqual([-0.1, 0.1], self.context.get_xlim_all)
 
     def test_update_xlim_all(self):
-        self.context.update_xlim_all([1., 10.])
-        self.assertEqual([1.0, 10.], self.context.get_xlim_all)
+        self.context.update_xlim_all([1.0, 10.0])
+        self.assertEqual([1.0, 10.0], self.context.get_xlim_all)
 
     def test_get_ylim_all(self):
-        self.assertEqual([-10., 10.], self.context.get_ylim_all)
+        self.assertEqual([-10.0, 10.0], self.context.get_ylim_all)
 
     def test_update_ylim_all(self):
-        self.context.update_ylim_all([1., 10.])
-        self.assertEqual([1.0, 10.], self.context.get_ylim_all)
+        self.context.update_ylim_all([1.0, 10.0])
+        self.assertEqual([1.0, 10.0], self.context.get_ylim_all)
 
     def test_get_autoscale_all(self):
         self.assertEqual(False, self.context.get_autoscale_all)
@@ -85,7 +84,7 @@ class MuonPlottingContextTest(unittest.TestCase):
 
     def test_update_xlim(self):
         self.add_subplot()
-        values = {"a": [1., 10.], "b": [2., 11.], "c": [3., 12.]}
+        values = {"a": [1.0, 10.0], "b": [2.0, 11.0], "c": [3.0, 12.0]}
         for name in values.keys():
             self.context.update_xlim(name, values[name])
 
@@ -94,7 +93,7 @@ class MuonPlottingContextTest(unittest.TestCase):
 
     def test_update_ylim(self):
         self.add_subplot()
-        values = {"a": [1., 10.], "b": [2., 11.], "c": [3., 12.]}
+        values = {"a": [1.0, 10.0], "b": [2.0, 11.0], "c": [3.0, 12.0]}
         for name in values.keys():
             self.context.update_ylim(name, values[name])
 
@@ -103,25 +102,25 @@ class MuonPlottingContextTest(unittest.TestCase):
 
     def test_update_xlim_all_with_sub_plot(self):
         self.add_subplot()
-        values = {"a": [1., 10.], "b": [2., 11.], "c": [3., 12.]}
+        values = {"a": [1.0, 10.0], "b": [2.0, 11.0], "c": [3.0, 12.0]}
         for name in values.keys():
             self.context.update_xlim(name, values[name])
-        self.context.update_xlim("All", [5.,50.])
+        self.context.update_xlim("All", [5.0, 50.0])
 
-        self.assertEqual([5., 50.], self.context.get_xlim("All"))
+        self.assertEqual([5.0, 50.0], self.context.get_xlim("All"))
         for name in values.keys():
-            self.assertEqual([5., 50.], self.context.get_xlim(name))
+            self.assertEqual([5.0, 50.0], self.context.get_xlim(name))
 
     def test_update_ylim_all_with_sub_plot(self):
         self.add_subplot()
-        values = {"a": [1., 10.], "b": [2., 11.], "c" : [3., 12.]}
+        values = {"a": [1.0, 10.0], "b": [2.0, 11.0], "c": [3.0, 12.0]}
         for name in values.keys():
             self.context.update_ylim(name, values[name])
-        self.context.update_ylim("All", [5., 50.])
+        self.context.update_ylim("All", [5.0, 50.0])
 
-        self.assertEqual([5., 50.], self.context.get_ylim("All"))
+        self.assertEqual([5.0, 50.0], self.context.get_ylim("All"))
         for name in values.keys():
-            self.assertEqual([5., 50.], self.context.get_ylim(name))
+            self.assertEqual([5.0, 50.0], self.context.get_ylim(name))
 
     def test_autoscale_state(self):
         self.add_subplot()
@@ -187,5 +186,5 @@ class MuonPlottingContextTest(unittest.TestCase):
         self.assertEqual(6, self.context.get_axis("new"))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

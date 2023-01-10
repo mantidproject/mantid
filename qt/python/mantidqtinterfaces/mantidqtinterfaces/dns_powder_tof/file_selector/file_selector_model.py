@@ -11,12 +11,16 @@ Presenter for DNS path panel.
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_file import DNSFile
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_obs_model import DNSObsModel
-from mantidqtinterfaces.dns_powder_tof.data_structures.dns_treemodel import DNSTreeModel, \
-    TreeItemEnum
+from mantidqtinterfaces.dns_powder_tof.data_structures.dns_treemodel import DNSTreeModel, TreeItemEnum
 from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import ObjectDict
 from mantidqtinterfaces.dns_powder_tof.helpers.file_processing import (
-    filter_filenames, load_txt, open_editor, return_filelist, save_txt,
-    unzip_latest_standard)
+    filter_filenames,
+    load_txt,
+    open_editor,
+    return_filelist,
+    save_txt,
+    unzip_latest_standard,
+)
 
 
 class DNSFileSelectorModel(DNSObsModel):
@@ -33,10 +37,7 @@ class DNSFileSelectorModel(DNSObsModel):
 
     def _filter_out_already_loaded(self, all_datafiles, watcher):
         if watcher:
-            datafiles = [
-                data_file for data_file in all_datafiles
-                if data_file not in self.old_data_set
-            ]
+            datafiles = [data_file for data_file in all_datafiles if data_file not in self.old_data_set]
         else:
             datafiles = all_datafiles
         return datafiles
@@ -55,8 +56,8 @@ class DNSFileSelectorModel(DNSObsModel):
 
     def _get_start_end_file_numbers(self):
         if self.all_datafiles:
-            start = int(self.all_datafiles[0].split('_')[-2][:-2])
-            end = int(self.all_datafiles[-1].split('_')[-2][:-2])
+            start = int(self.all_datafiles[0].split("_")[-2][:-2])
+            end = int(self.all_datafiles[-1].split("_")[-2][:-2])
             return [start, end]
         return [0, 0]
 
@@ -79,8 +80,7 @@ class DNSFileSelectorModel(DNSObsModel):
             self.update_progress(i, len(datafiles))
             if self.loading_canceled:
                 break
-            dns_file = self._load_file_from_cache_or_new(
-                loaded, filename, data_path)
+            dns_file = self._load_file_from_cache_or_new(loaded, filename, data_path)
             if dns_file.new_format:  # ignore files with old format
                 self.sample_data_tree_model.setup_model_data([dns_file])
         self.old_data_set = set(self.all_datafiles)
@@ -126,13 +126,13 @@ class DNSFileSelectorModel(DNSObsModel):
         """
         loaded = {}
         try:
-            txt = load_txt('last_filelist.txt', path)
+            txt = load_txt("last_filelist.txt", path)
         except IOError:
             return loaded
         try:
             for line in txt:
                 dns_file = ObjectDict()
-                data = line[0:-1].split(' ; ')
+                data = line[0:-1].split(" ; ")
                 if len(data) < 15:
                     continue
                 dns_file.file_number = data[TreeItemEnum.number.value]
@@ -163,8 +163,7 @@ class DNSFileSelectorModel(DNSObsModel):
         return range(self.get_number_of_scans())
 
     # scan checking
-    def check_last_scans(self, number_of_scans_to_check, complete,
-                         not_hidden_rows):
+    def check_last_scans(self, number_of_scans_to_check, complete, not_hidden_rows):
         self.uncheck_all_scans()
         scans = not_hidden_rows
         if complete:
@@ -185,8 +184,7 @@ class DNSFileSelectorModel(DNSObsModel):
         file_number_dict = self.sample_data_tree_model.get_file_number_dict()
         for file_number in file_numbers:
             try:
-                self.sample_data_tree_model.set_checked_from_index(
-                    file_number_dict[file_number])
+                self.sample_data_tree_model.set_checked_from_index(file_number_dict[file_number])
             except KeyError:
                 not_found += 1
         return not_found
@@ -241,10 +239,7 @@ class DNSFileSelectorModel(DNSObsModel):
         hide_scans = self._filter_tof_scans(is_tof)
         for row in self.get_scan_range():
             scan = self.active_model.scan_from_row(row)
-            hidden = [
-                filters[sample_type] and scan.is_type(sample_type)
-                for sample_type in ['vanadium', 'nicr', 'empty']
-            ]
+            hidden = [filters[sample_type] and scan.is_type(sample_type) for sample_type in ["vanadium", "nicr", "empty"]]
             if not any(hidden) and active:
                 hide_scans.add(row)
         return hide_scans
@@ -270,7 +265,7 @@ class DNSFileSelectorModel(DNSObsModel):
     def _save_filelist(self, data_path):
         txt = "".join(self.sample_data_tree_model.get_txt())
         try:
-            save_txt(txt, 'last_filelist.txt', data_path)
+            save_txt(txt, "last_filelist.txt", data_path)
         except PermissionError:
             pass
 

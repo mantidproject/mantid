@@ -32,6 +32,7 @@ class MockQTable:
     """
     Mocks the necessary functions to replace a QTableView on which data is being set.
     """
+
     def __init__(self):
         self.setItem = Mock()
         self.setRowCount = Mock()
@@ -49,6 +50,7 @@ def with_mock_presenter(add_selection_model=False, add_plot=False):
     :param add_selection_model: Adds a mock selection model to the presenter
     :param add_plot: Adds mock plotting to the presenter
     """
+
     def real_decorator(func, *args, **kwargs):
         def wrapper(self, *args):
             ws = MockWorkspace()
@@ -58,16 +60,10 @@ def with_mock_presenter(add_selection_model=False, add_plot=False):
             container.status_bar = Mock(spec=QStatusBar)
             if add_selection_model:
                 mock_selection_model = MockQSelectionModel(has_selection=True)
-                mock_selection_model.selectedRows = Mock(return_value=[
-                    MockQModelIndex(1, 1),
-                    MockQModelIndex(2, 2),
-                    MockQModelIndex(3, 3)
-                ])
-                mock_selection_model.selectedColumns = Mock(return_value=[
-                    MockQModelIndex(1, 1),
-                    MockQModelIndex(2, 2),
-                    MockQModelIndex(3, 3)
-                ])
+                mock_selection_model.selectedRows = Mock(return_value=[MockQModelIndex(1, 1), MockQModelIndex(2, 2), MockQModelIndex(3, 3)])
+                mock_selection_model.selectedColumns = Mock(
+                    return_value=[MockQModelIndex(1, 1), MockQModelIndex(2, 2), MockQModelIndex(3, 3)]
+                )
                 view.mock_selection_model = mock_selection_model
                 view.selectionModel.return_value = mock_selection_model
             twd = TableWorkspaceDisplay(ws, view=view, container=container)
@@ -82,8 +78,8 @@ def with_mock_presenter(add_selection_model=False, add_plot=False):
 
 @start_qapplication
 class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
-    notify_no_selection_to_copy_package = 'mantidqt.widgets.workspacedisplay.user_notifier.UserNotifier.notify_no_selection_to_copy'
-    copy_cells_package = 'mantidqt.widgets.workspacedisplay.data_copier.DataCopier.copy_cells'
+    notify_no_selection_to_copy_package = "mantidqt.widgets.workspacedisplay.user_notifier.UserNotifier.notify_no_selection_to_copy"
+    copy_cells_package = "mantidqt.widgets.workspacedisplay.data_copier.DataCopier.copy_cells"
 
     @classmethod
     def setUpClass(cls):
@@ -148,8 +144,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
             item.row.assert_called_once_with()
             item.column.assert_called_once_with()
             ws.setCell.assert_called_once_with(5, 5, "magic parameter")
-            view.show_warning.assert_called_once_with(
-                TableWorkspaceDisplay.ITEM_CHANGED_INVALID_DATA_MESSAGE)
+            view.show_warning.assert_called_once_with(TableWorkspaceDisplay.ITEM_CHANGED_INVALID_DATA_MESSAGE)
             self.assertNotCalled(item.update)
             item.reset.assert_called_once_with()
 
@@ -171,8 +166,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
             item.row.assert_called_once_with()
             item.column.assert_called_once_with()
             ws.setCell.assert_called_once_with(ws.ROWS, ws.COLS, "magic parameter")
-            view.show_warning.assert_called_once_with(
-                TableWorkspaceDisplay.ITEM_CHANGED_UNKNOWN_ERROR_MESSAGE.format(error_message))
+            view.show_warning.assert_called_once_with(TableWorkspaceDisplay.ITEM_CHANGED_UNKNOWN_ERROR_MESSAGE.format(error_message))
             self.assertNotCalled(item.update)
             item.reset.assert_called_once_with()
 
@@ -264,16 +258,12 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
     @with_mock_presenter(add_selection_model=True)
     def test_get_selected_columns_over_max_selected(self, ws, view, twd):
         mock_message = "Hi."
-        self.assertRaises(ValueError,
-                          twd._get_selected_columns,
-                          max_selected=1,
-                          message_if_over_max=mock_message)
+        self.assertRaises(ValueError, twd._get_selected_columns, max_selected=1, message_if_over_max=mock_message)
         view.show_warning.assert_called_once_with(mock_message)
 
     @patch(notify_no_selection_to_copy_package)
     @with_mock_presenter(add_selection_model=True)
-    def test_get_selected_columns_has_selected_but_no_columns(self, ws, view, twd,
-                                                              mock_no_selection_toast):
+    def test_get_selected_columns_has_selected_but_no_columns(self, ws, view, twd, mock_no_selection_toast):
         """
         There is a case where the user could have a selection (of cells or rows), but not columns.
         """
@@ -282,8 +272,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         self.assertEqual(1, mock_no_selection_toast.call_count)
         view.mock_selection_model.selectedColumns.assert_called_once_with()
 
-    @patch('mantidqt.widgets.workspacedisplay.table.presenter.TableWorkspaceDisplay',
-           spec=TableWorkspaceDisplay)
+    @patch("mantidqt.widgets.workspacedisplay.table.presenter.TableWorkspaceDisplay", spec=TableWorkspaceDisplay)
     @with_mock_presenter(add_selection_model=True)
     def test_action_statistics_on_columns(self, ws, view, twd, mock_TableWorkspaceDisplay):
         twd.action_statistics_on_columns()
@@ -342,8 +331,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
     @with_mock_presenter(add_selection_model=True)
     def test_action_set_as_y_err_too_many_selected(self, ws, view, twd):
         twd.action_set_as_y_err(2)
-        view.show_warning.assert_called_once_with(
-            TableWorkspaceDisplay.TOO_MANY_TO_SET_AS_Y_ERR_MESSAGE)
+        view.show_warning.assert_called_once_with(TableWorkspaceDisplay.TOO_MANY_TO_SET_AS_Y_ERR_MESSAGE)
 
     @with_mock_presenter(add_selection_model=True)
     def test_action_set_as_y_err_failed_to_create_ErrorColumn(self, ws, view, twd):
@@ -357,23 +345,21 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         view.mock_selection_model.selectedColumns = Mock(return_value=[MockQModelIndex(0, 0)])
         ascending = True
         twd.action_sort(ascending)
-        self.mock_SortTableWorkspace.assert_called_once_with(InputWorkspace=twd.model.ws,
-                                                             OutputWorkspace=twd.model.ws,
-                                                             Columns="col0",
-                                                             Ascending=ascending)
+        self.mock_SortTableWorkspace.assert_called_once_with(
+            InputWorkspace=twd.model.ws, OutputWorkspace=twd.model.ws, Columns="col0", Ascending=ascending
+        )
 
     @with_mock_presenter(add_selection_model=True)
     def test_action_sort_peaks_ws(self, ws, view, twd):
         view.mock_selection_model.selectedColumns = Mock(return_value=[MockQModelIndex(0, 0)])
         ascending = True
         with patch(
-                'mantidqt.widgets.workspacedisplay.table.model.TableWorkspaceDisplayModel.is_peaks_workspace',
-                return_value=True) as mock_is_peaks_workspace:
+            "mantidqt.widgets.workspacedisplay.table.model.TableWorkspaceDisplayModel.is_peaks_workspace", return_value=True
+        ) as mock_is_peaks_workspace:
             twd.action_sort(ascending)
-            self.mock_SortPeaksWorkspace.assert_called_once_with(InputWorkspace=twd.model.ws,
-                                                                 OutputWorkspace=twd.model.ws,
-                                                                 ColumnNameToSortBy="col0",
-                                                                 SortAscending=ascending)
+            self.mock_SortPeaksWorkspace.assert_called_once_with(
+                InputWorkspace=twd.model.ws, OutputWorkspace=twd.model.ws, ColumnNameToSortBy="col0", SortAscending=ascending
+            )
             mock_is_peaks_workspace.assert_called_once_with()
 
     @with_mock_presenter(add_selection_model=True)
@@ -414,15 +400,13 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
 
     @with_mock_presenter(add_selection_model=True)
     def test_action_plot_more_than_one_x(self, ws, view, twd):
-        view.mock_selection_model.selectedColumns.return_value = [
-            MockQModelIndex(1, 1), MockQModelIndex(1, 2)
-        ]
+        view.mock_selection_model.selectedColumns.return_value = [MockQModelIndex(1, 1), MockQModelIndex(1, 2)]
         twd.action_set_as_x()
         twd.action_plot(PlotType.LINEAR)
         view.mock_selection_model.selectedColumns.assert_has_calls([call(), call()])
         view.show_warning.assert_called_once_with(TableWorkspaceDisplay.TOO_MANY_SELECTED_FOR_X)
 
-    @patch('mantidqt.widgets.workspacedisplay.table.presenter.TableWorkspaceDisplay._do_plot')
+    @patch("mantidqt.widgets.workspacedisplay.table.presenter.TableWorkspaceDisplay._do_plot")
     @with_mock_presenter(add_selection_model=True)
     def test_action_plot_x_in_selection(self, ws, view, twd, mock_do_plot):
         """
@@ -433,13 +417,11 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         # set only the first column to be X
         twd.action_set_as_x()
         # add a second selected column, that should be used for Y
-        view.mock_selection_model.selectedColumns.return_value = [
-            MockQModelIndex(1, 1), MockQModelIndex(1, 2)
-        ]
+        view.mock_selection_model.selectedColumns.return_value = [MockQModelIndex(1, 1), MockQModelIndex(1, 2)]
         twd.action_plot(PlotType.LINEAR)
         mock_do_plot.assert_called_once_with([2], 1, PlotType.LINEAR)
 
-    @patch('mantidqt.widgets.workspacedisplay.table.presenter.TableWorkspaceDisplay._do_plot')
+    @patch("mantidqt.widgets.workspacedisplay.table.presenter.TableWorkspaceDisplay._do_plot")
     @with_mock_presenter(add_selection_model=True)
     def test_action_plot_x_marked_but_not_selected(self, ws, view, twd, mock_do_plot):
         """
@@ -454,7 +436,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         twd.action_plot(PlotType.LINEAR)
         mock_do_plot.assert_called_once_with([2], 1, PlotType.LINEAR)
 
-    @patch('mantidqt.widgets.workspacedisplay.table.presenter.TableWorkspaceDisplay._do_plot')
+    @patch("mantidqt.widgets.workspacedisplay.table.presenter.TableWorkspaceDisplay._do_plot")
     @with_mock_presenter(add_selection_model=True)
     def test_action_plot_selection_without_x(self, ws, view, twd, mock_do_plot):
         view.mock_selection_model.selectedColumns.return_value = [MockQModelIndex(1, 1)]
@@ -472,8 +454,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         twd.action_set_as_x()
         # change the selection to a second column, that should be used for Y, but is not marked as anything
         twd.action_plot(PlotType.LINEAR)
-        view.show_warning.assert_called_once_with(
-            TableWorkspaceDisplay.CANNOT_PLOT_AGAINST_SELF_MESSAGE)
+        view.show_warning.assert_called_once_with(TableWorkspaceDisplay.CANNOT_PLOT_AGAINST_SELF_MESSAGE)
 
     @with_mock_presenter(add_selection_model=True)
     def test_do_action_plot_with_errors_missing_yerr_for_y_column(self, ws, view, twd):
@@ -481,25 +462,23 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         twd.action_set_as_x()
 
         y_column_index = 2
-        view.mock_selection_model.selectedColumns.return_value = [
-            MockQModelIndex(1, y_column_index)
-        ]
+        view.mock_selection_model.selectedColumns.return_value = [MockQModelIndex(1, y_column_index)]
         twd.action_set_as_y()
 
         twd.action_plot(PlotType.LINEAR_WITH_ERR)
         view.show_warning.assert_called_once_with(
-            TableWorkspaceDisplay.NO_ASSOCIATED_YERR_FOR_EACH_Y_MESSAGE.format(
-                ws._column_names[y_column_index]))
+            TableWorkspaceDisplay.NO_ASSOCIATED_YERR_FOR_EACH_Y_MESSAGE.format(ws._column_names[y_column_index])
+        )
 
-    @patch('mantidqt.widgets.workspacedisplay.table.presenter.logger.error')
+    @patch("mantidqt.widgets.workspacedisplay.table.presenter.logger.error")
     @with_mock_presenter(add_selection_model=True, add_plot=True)
     def test_do_action_plot__plot_func_throws_error(self, ws, view, twd, mock_logger_error):
         mock_plot_function = Mock()
         error_message = "See bottom of keyboard for HEALTH WARNING"
         mock_plot_function.side_effect = ValueError(error_message)
         with patch(
-                'mantidqt.widgets.workspacedisplay.table.presenter.TableWorkspaceDisplay._get_plot_function_from_type') \
-                as mock_get_plot_function_from_type:
+            "mantidqt.widgets.workspacedisplay.table.presenter.TableWorkspaceDisplay._get_plot_function_from_type"
+        ) as mock_get_plot_function_from_type:
             mock_get_plot_function_from_type.return_value = mock_plot_function
             view.mock_selection_model.selectedColumns.return_value = [MockQModelIndex(1, 1)]
             twd.action_set_as_x()
@@ -508,10 +487,9 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
             twd.action_plot(PlotType.LINEAR)
 
             view.show_warning.assert_called_once_with(
-                TableWorkspaceDisplay.PLOT_FUNCTION_ERROR_MESSAGE.format(error_message),
-                TableWorkspaceDisplay.INVALID_DATA_WINDOW_TITLE)
-            mock_logger_error.assert_called_once_with(
-                TableWorkspaceDisplay.PLOT_FUNCTION_ERROR_MESSAGE.format(error_message))
+                TableWorkspaceDisplay.PLOT_FUNCTION_ERROR_MESSAGE.format(error_message), TableWorkspaceDisplay.INVALID_DATA_WINDOW_TITLE
+            )
+            mock_logger_error.assert_called_once_with(TableWorkspaceDisplay.PLOT_FUNCTION_ERROR_MESSAGE.format(error_message))
         self.assertNotCalled(twd.plot.mock_fig.show)
         self.assertNotCalled(twd.plot.mock_ax.legend)
 
@@ -528,15 +506,14 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         view.mock_selection_model.selectedColumns.return_value = [MockQModelIndex(1, col_as_y)]
         twd.action_plot(PlotType.LINEAR)
 
-        twd.plot.subplots.assert_called_once_with(subplot_kw={'projection': 'mantid'})
+        twd.plot.subplots.assert_called_once_with(subplot_kw={"projection": "mantid"})
         twd.plot.mock_fig.canvas.manager.set_window_title.assert_called_once_with(twd.model.get_name())
         twd.plot.mock_ax.set_xlabel.assert_called_once_with(twd.model.get_column_header(col_as_x))
         col_y_name = twd.model.get_column_header(col_as_y)
         twd.plot.mock_ax.set_ylabel.assert_called_once_with(col_y_name)
         twd.plot.mock_ax.plot.assert_called_once_with(
-            expected_x_data,
-            expected_y_data,
-            label=TableWorkspaceDisplay.COLUMN_DISPLAY_LABEL.format(col_y_name))
+            expected_x_data, expected_y_data, label=TableWorkspaceDisplay.COLUMN_DISPLAY_LABEL.format(col_y_name)
+        )
         twd.plot.mock_fig.show.assert_called_once_with()
         twd.plot.mock_ax.legend.assert_called_once_with()
 
@@ -552,13 +529,10 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         view.mock_selection_model.selectedColumns.return_value = [MockQModelIndex(1, col_as_x)]
         twd.action_set_as_x()
 
-        view.mock_selection_model.selectedColumns.return_value = [
-            MockQModelIndex(1, col_as_y1),
-            MockQModelIndex(1, col_as_y2)
-        ]
+        view.mock_selection_model.selectedColumns.return_value = [MockQModelIndex(1, col_as_y1), MockQModelIndex(1, col_as_y2)]
         twd.action_plot(PlotType.LINEAR)
 
-        twd.plot.subplots.assert_called_once_with(subplot_kw={'projection': 'mantid'})
+        twd.plot.subplots.assert_called_once_with(subplot_kw={"projection": "mantid"})
         twd.plot.mock_fig.canvas.manager.set_window_title.assert_called_once_with(twd.model.get_name())
         twd.plot.mock_ax.set_xlabel.assert_called_once_with(twd.model.get_column_header(col_as_x))
 
@@ -566,14 +540,12 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         col_y2_name = twd.model.get_column_header(col_as_y2)
         twd.plot.mock_ax.set_ylabel.assert_has_calls([call(col_y1_name), call(col_y2_name)])
 
-        twd.plot.mock_ax.plot.assert_has_calls([
-            call(expected_x_data,
-                 expected_y1_data,
-                 label=TableWorkspaceDisplay.COLUMN_DISPLAY_LABEL.format(col_y1_name)),
-            call(expected_x_data,
-                 expected_y2_data,
-                 label=TableWorkspaceDisplay.COLUMN_DISPLAY_LABEL.format(col_y2_name))
-        ])
+        twd.plot.mock_ax.plot.assert_has_calls(
+            [
+                call(expected_x_data, expected_y1_data, label=TableWorkspaceDisplay.COLUMN_DISPLAY_LABEL.format(col_y1_name)),
+                call(expected_x_data, expected_y2_data, label=TableWorkspaceDisplay.COLUMN_DISPLAY_LABEL.format(col_y2_name)),
+            ]
+        )
         twd.plot.mock_fig.show.assert_called_once_with()
         twd.plot.mock_ax.legend.assert_called_once_with()
 
@@ -589,7 +561,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         """
         Test for _Scatter_ plotting (with errors) a single Y column in selection, which has an associated Y error column
         """
-        self.do_test_plot_single_y_with_error(view, twd, PlotType.SCATTER_WITH_ERR, {'fmt': 'o'})
+        self.do_test_plot_single_y_with_error(view, twd, PlotType.SCATTER_WITH_ERR, {"fmt": "o"})
 
     @with_mock_presenter(add_selection_model=True, add_plot=True)
     def test_do_action_plot_linear_error_plot_append_yerr(self, ws, view, twd):
@@ -598,10 +570,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
 
         This tests the case where the Y Error column is part of the user's selection
         """
-        self.do_test_plot_single_y_with_error(view,
-                                              twd,
-                                              PlotType.LINEAR_WITH_ERR,
-                                              append_yerr_to_selection=True)
+        self.do_test_plot_single_y_with_error(view, twd, PlotType.LINEAR_WITH_ERR, append_yerr_to_selection=True)
 
     @with_mock_presenter(add_selection_model=True, add_plot=True)
     def test_do_action_plot_scatter_error_plot_append_yerr(self, ws, view, twd):
@@ -610,17 +579,9 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
 
         This tests the case where the Y Error column is part of the user's selection
         """
-        self.do_test_plot_single_y_with_error(view,
-                                              twd,
-                                              PlotType.SCATTER_WITH_ERR, {'fmt': 'o'},
-                                              append_yerr_to_selection=True)
+        self.do_test_plot_single_y_with_error(view, twd, PlotType.SCATTER_WITH_ERR, {"fmt": "o"}, append_yerr_to_selection=True)
 
-    def do_test_plot_single_y_with_error(self,
-                                         view,
-                                         twd,
-                                         plot_type,
-                                         extra_errorbar_assert_kwargs=None,
-                                         append_yerr_to_selection=False):
+    def do_test_plot_single_y_with_error(self, view, twd, plot_type, extra_errorbar_assert_kwargs=None, append_yerr_to_selection=False):
         """
         Does the test for plotting with a single Y column that has an associated error
         :param twd: The presenter
@@ -644,12 +605,11 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         twd.action_set_as_y_err(col_as_y)
         view.mock_selection_model.selectedColumns.return_value = [MockQModelIndex(1, col_as_y)]
         if append_yerr_to_selection:
-            view.mock_selection_model.selectedColumns.return_value.append(
-                MockQModelIndex(1, col_as_y_err))
+            view.mock_selection_model.selectedColumns.return_value.append(MockQModelIndex(1, col_as_y_err))
 
         twd.action_plot(plot_type)
 
-        twd.plot.subplots.assert_called_once_with(subplot_kw={'projection': 'mantid'})
+        twd.plot.subplots.assert_called_once_with(subplot_kw={"projection": "mantid"})
 
         twd.plot.mock_fig.canvas.manager.set_window_title.assert_called_once_with(twd.model.get_name())
         twd.plot.mock_ax.set_xlabel.assert_called_once_with(twd.model.get_column_header(col_as_x))
@@ -660,7 +620,8 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
             expected_y_data,
             label=TableWorkspaceDisplay.COLUMN_DISPLAY_LABEL.format(col_y_name),
             yerr=expected_y_err_data,
-            **extra_errorbar_assert_kwargs)
+            **extra_errorbar_assert_kwargs
+        )
         twd.plot.mock_fig.show.assert_called_once_with()
         twd.plot.mock_ax.legend.assert_called_once_with()
 
@@ -678,8 +639,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         Test for _Scatter_ plotting (with errors) multiple Y columns in selection,
         each of which has an associated Y error column
         """
-        self.do_test_action_plot_multiple_y_error_plot(view, twd, PlotType.SCATTER_WITH_ERR,
-                                                       {'fmt': 'o'})
+        self.do_test_action_plot_multiple_y_error_plot(view, twd, PlotType.SCATTER_WITH_ERR, {"fmt": "o"})
 
     @with_mock_presenter(add_selection_model=True, add_plot=True)
     def test_do_action_plot_multiple_y_linear_error_plot_append_yerrs(self, ws, view, twd):
@@ -689,24 +649,15 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
 
         This tests the case where the Y Error columns are part of the user's selection
         """
-        self.do_test_action_plot_multiple_y_error_plot(view,
-                                                       twd,
-                                                       PlotType.LINEAR_WITH_ERR,
-                                                       append_yerr_to_selection=True)
+        self.do_test_action_plot_multiple_y_error_plot(view, twd, PlotType.LINEAR_WITH_ERR, append_yerr_to_selection=True)
 
     @with_mock_presenter(add_selection_model=True, add_plot=True)
     def test_do_action_plot_multiple_y_scatter_error_plot_append_yerrs(self, ws, view, twd):
-        self.do_test_action_plot_multiple_y_error_plot(view,
-                                                       twd,
-                                                       PlotType.SCATTER_WITH_ERR, {'fmt': 'o'},
-                                                       append_yerr_to_selection=True)
+        self.do_test_action_plot_multiple_y_error_plot(view, twd, PlotType.SCATTER_WITH_ERR, {"fmt": "o"}, append_yerr_to_selection=True)
 
-    def do_test_action_plot_multiple_y_error_plot(self,
-                                                  view,
-                                                  twd,
-                                                  plot_type,
-                                                  extra_errorbar_assert_kwargs=None,
-                                                  append_yerr_to_selection=False):
+    def do_test_action_plot_multiple_y_error_plot(
+        self, view, twd, plot_type, extra_errorbar_assert_kwargs=None, append_yerr_to_selection=False
+    ):
         """
         Does the test for plotting with multiple Y columns. Each of them has an associated error
         :param twd: The presenter
@@ -737,17 +688,14 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         view.mock_selection_model.selectedColumns.return_value = [MockQModelIndex(1, col_as_y2_err)]
         twd.action_set_as_y_err(col_as_y2)
 
-        view.mock_selection_model.selectedColumns.return_value = [
-            MockQModelIndex(1, col_as_y1),
-            MockQModelIndex(1, col_as_y2)
-        ]
+        view.mock_selection_model.selectedColumns.return_value = [MockQModelIndex(1, col_as_y1), MockQModelIndex(1, col_as_y2)]
         if append_yerr_to_selection:
             view.mock_selection_model.selectedColumns.return_value.extend(
-                [MockQModelIndex(1, col_as_y1_err),
-                 MockQModelIndex(1, col_as_y2_err)])
+                [MockQModelIndex(1, col_as_y1_err), MockQModelIndex(1, col_as_y2_err)]
+            )
         twd.action_plot(plot_type)
 
-        twd.plot.subplots.assert_called_once_with(subplot_kw={'projection': 'mantid'})
+        twd.plot.subplots.assert_called_once_with(subplot_kw={"projection": "mantid"})
         twd.plot.mock_fig.canvas.manager.set_window_title.assert_called_once_with(twd.model.get_name())
         twd.plot.mock_ax.set_xlabel.assert_called_once_with(twd.model.get_column_header(col_as_x))
 
@@ -755,18 +703,24 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         col_y2_name = twd.model.get_column_header(col_as_y2)
         twd.plot.mock_ax.set_ylabel.assert_has_calls([call(col_y1_name), call(col_y2_name)])
 
-        twd.plot.mock_ax.errorbar.assert_has_calls([
-            call(expected_x_data,
-                 expected_y1_data,
-                 label=TableWorkspaceDisplay.COLUMN_DISPLAY_LABEL.format(col_y1_name),
-                 yerr=expected_y1_err_data,
-                 **extra_errorbar_assert_kwargs),
-            call(expected_x_data,
-                 expected_y2_data,
-                 label=TableWorkspaceDisplay.COLUMN_DISPLAY_LABEL.format(col_y2_name),
-                 yerr=expected_y2_err_data,
-                 **extra_errorbar_assert_kwargs)
-        ])
+        twd.plot.mock_ax.errorbar.assert_has_calls(
+            [
+                call(
+                    expected_x_data,
+                    expected_y1_data,
+                    label=TableWorkspaceDisplay.COLUMN_DISPLAY_LABEL.format(col_y1_name),
+                    yerr=expected_y1_err_data,
+                    **extra_errorbar_assert_kwargs
+                ),
+                call(
+                    expected_x_data,
+                    expected_y2_data,
+                    label=TableWorkspaceDisplay.COLUMN_DISPLAY_LABEL.format(col_y2_name),
+                    yerr=expected_y2_err_data,
+                    **extra_errorbar_assert_kwargs
+                ),
+            ]
+        )
         twd.plot.mock_fig.show.assert_called_once_with()
         twd.plot.mock_ax.legend.assert_called_once_with()
 
@@ -797,9 +751,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
 
     @with_mock_presenter()
     def test_replace_incorrect_workspace(self, ws, view, presenter):
-        with patch(
-                'mantidqt.widgets.workspacedisplay.table.presenter.TableWorkspaceDataPresenterStandard.load_data'
-        ) as mock_load_data:
+        with patch("mantidqt.widgets.workspacedisplay.table.presenter.TableWorkspaceDataPresenterStandard.load_data") as mock_load_data:
             presenter.replace_workspace(ws.TEST_NAME + "123", ws)
             self.assertNotCalled(mock_load_data)
             self.assertNotCalled(view.emit_repaint)
@@ -809,12 +761,10 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         # patch this out after the constructor of the presenter has finished,
         # so that we reset any calls it might have made
         presenter.model.block_model_replace = False
-        with patch(
-                'mantidqt.widgets.workspacedisplay.table.presenter.TableWorkspaceDataPresenterStandard.load_data'
-        ) as mock_load_data:
+        with patch("mantidqt.widgets.workspacedisplay.table.presenter.TableWorkspaceDataPresenterStandard.load_data") as mock_load_data:
             presenter.replace_workspace(ws.TEST_NAME, ws)
             mock_load_data.assert_called_once_with(view)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

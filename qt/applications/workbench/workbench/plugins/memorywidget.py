@@ -18,6 +18,7 @@ class MemoryWidget(PluginWidget):
     """
     Widget to display system memory usage
     """
+
     def __init__(self, parent, view=None):
         super(MemoryWidget, self).__init__(parent)
 

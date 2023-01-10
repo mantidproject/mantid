@@ -23,6 +23,7 @@ from mantid.plots import MantidAxes
 
 class FigureType(Enum):
     """Enumerate possible types of Figure"""
+
     # The values are irrelevant
 
     # A figure with no axes

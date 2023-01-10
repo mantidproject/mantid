@@ -228,8 +228,9 @@ class GroupingTabModel(object):
             return "failed"
         maximum_number_of_periods = max([self._context.num_periods(run) for run in self._context.current_runs])
 
-        self._groups_and_pairs.reset_group_and_pairs_to_default(self._data.current_workspace, self._data.instrument,
-                                                                self._data.main_field_direction, maximum_number_of_periods)
+        self._groups_and_pairs.reset_group_and_pairs_to_default(
+            self._data.current_workspace, self._data.instrument, self._data.main_field_direction, maximum_number_of_periods
+        )
         return "success"
 
     def reset_selected_groups_and_pairs(self):
@@ -255,9 +256,7 @@ class GroupingTabModel(object):
 
     def get_last_data_from_file(self):
         if self._data.current_runs:
-            return round(max(
-                self._data.get_loaded_data_for_run(self._data.current_runs[-1])['OutputWorkspace'][0].workspace.dataX(
-                    0)), 3)
+            return round(max(self._data.get_loaded_data_for_run(self._data.current_runs[-1])["OutputWorkspace"][0].workspace.dataX(0)), 3)
         else:
             return 1.0
 
