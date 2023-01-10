@@ -80,7 +80,7 @@ public:
 
   void testInitInstrumentListUpdatesView() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_view, setInstrumentList(m_instruments)).Times(1);
+    EXPECT_CALL(m_view, setInstrumentList(m_instruments, _)).Times(1);
     presenter.initInstrumentList();
     verifyAndClear();
   }

@@ -72,7 +72,9 @@ RunsPresenter::~RunsPresenter() {
  */
 void RunsPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) { m_mainPresenter = mainPresenter; }
 
-void RunsPresenter::initInstrumentList() { m_view->setInstrumentList(m_instruments); }
+void RunsPresenter::initInstrumentList(const std::string &selectedInstrument) {
+  m_view->setInstrumentList(m_instruments, selectedInstrument);
+}
 
 RunsTable const &RunsPresenter::runsTable() const { return tablePresenter()->runsTable(); }
 
