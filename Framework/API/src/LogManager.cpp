@@ -58,8 +58,13 @@ bool convertTimeSeriesToDouble(const Property *property, double &value, const Ma
     case Math::Median:
       value = log->getStatistics().median;
       break;
+    case Math::StdDev:
+      value = log->getStatistics().standard_deviation;
+      break;
+    case Math::TimeAverageStdDev:
+      throw std::invalid_argument("Statistic type \"TimeAverageStdDev\" is not currently supported");
     default: // should not happen
-      throw std::invalid_argument("Statistic type not recognised/supported");
+      throw std::invalid_argument("Statistic type not recognised");
     }
     return true;
   } else {
