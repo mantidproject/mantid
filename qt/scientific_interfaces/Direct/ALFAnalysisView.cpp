@@ -107,7 +107,7 @@ QWidget *ALFAnalysisView::createPlotWidget() {
   m_plot->canvas()->gcf().setFaceColor("None");
   m_plot->canvas()->setStyleSheet("background-color:transparent;");
 
-  m_peakPicker = new MantidWidgets::PeakPicker(m_plot, Qt::red);
+  m_peakPicker = new MantidWidgets::PeakPicker(m_plot);
   m_peakPicker->setVisible(false);
   connect(m_peakPicker, SIGNAL(changed()), this, SLOT(notifyPeakPickerChanged()));
 

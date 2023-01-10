@@ -13,12 +13,10 @@ using namespace MantidQt::Widgets::MplCpp;
 
 namespace MantidQt::MantidWidgets {
 
-PeakPicker::PeakPicker(PreviewPlot *plot, const QColor &colour)
+PeakPicker::PeakPicker(PreviewPlot *plot)
     : QObject(), m_plot(plot), m_peak(nullptr),
       m_peakMarker(std::make_unique<PeakMarker>(m_plot->canvas(), 1, std::get<0>(m_plot->getAxisRange()),
                                                 std::get<1>(m_plot->getAxisRange(AxisID::YLeft)), 0.0, 0.0)) {
-  UNUSED_ARG(colour);
-
   m_plot->canvas()->draw();
 
   connect(m_plot, SIGNAL(mouseDown(QPoint)), this, SLOT(handleMouseDown(QPoint)));
@@ -35,8 +33,7 @@ void PeakPicker::remove() { m_peakMarker->remove(); }
 
 void PeakPicker::setPeak(const Mantid::API::IPeakFunction_const_sptr &peak) {
   if (peak) {
-    m_peak = std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(
-        Mantid::API::FunctionFactory::Instance().createInitialized(peak->asString()));
+    m_peak = std::dynamic_pointer_cast<IPeakFunction>(peak->clone());
     m_peakMarker->updatePeak(peak->centre(), peak->height(), peak->fwhm());
   }
 }
@@ -66,10 +63,10 @@ void PeakPicker::handleMouseMove(const QPoint &point) {
 
   if (markerMoved) {
     m_plot->replot();
-    const auto properties = m_peakMarker->peakProperties();
-    m_peak->setCentre(std::get<0>(properties));
-    m_peak->setHeight(std::get<1>(properties));
-    m_peak->setFwhm(std::get<2>(properties));
+    const auto [centre, height, fwhm] = m_peakMarker->peakProperties();
+    m_peak->setCentre(centre);
+    m_peak->setHeight(height);
+    m_peak->setFwhm(fwhm);
     emit changed();
   }
 }
