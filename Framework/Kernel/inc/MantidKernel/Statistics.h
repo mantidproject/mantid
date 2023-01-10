@@ -15,7 +15,17 @@ namespace Math {
 /**
  * Maps a "statistic" to a number
  */
-enum StatisticType { FirstValue, LastValue, Minimum, Maximum, Mean, TimeAveragedMean, Median };
+enum StatisticType {
+  FirstValue,
+  LastValue,
+  Minimum,
+  Maximum,
+  Mean,
+  TimeAveragedMean,
+  Median,
+  StdDev,
+  TimeAverageStdDev
+};
 } // namespace Math
 
 /**
