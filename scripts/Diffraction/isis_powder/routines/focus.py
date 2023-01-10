@@ -62,6 +62,11 @@ def _focus_one_ws(
     empty_can_subtraction_method,
     paalman_pings_events_per_point=None,
 ):
+    # per_detector routine validation
+    if instrument._inst_settings.per_detector:
+        if not instrument._inst_settings.placzek_run_number:
+            raise ValueError("When running a per detector routine a 'placzek_run_number' must be supplied")
+
     run_details = instrument._get_run_details(run_number_string=run_number)
     if perform_vanadium_norm:
         _test_splined_vanadium_exists(instrument, run_details)
@@ -85,13 +90,21 @@ def _focus_one_ws(
             empty_ws_string=run_details.sample_empty, instrument=instrument, scale_factor=scale_factor
         )
 
-    input_workspace = _absorb_and_empty_corrections(input_workspace, instrument, run_details, sample_details, absorb, summed_empty,
-                                                    empty_can_subtraction_method)
-    placzek_run_number = instrument._inst_settings.placzek_run_number
-    if placzek_run_number:
-        if instrument._inst_settings.per_detector:
-            input_workspace = apply_per_detector_placzek(input_workspace, instrument, perform_vanadium_norm,
-                                                         vanadium_path, placzek_run_number, sample_details, run_details)
+    input_workspace = _absorb_and_empty_corrections(
+        input_workspace, instrument, run_details, sample_details, absorb, summed_empty, empty_can_subtraction_method
+    )
+
+    if instrument._inst_settings.per_detector:
+        # per detector routine
+        input_workspace = apply_per_detector_placzek(
+            input_workspace,
+            instrument,
+            perform_vanadium_norm,
+            vanadium_path,
+            instrument._inst_settings.placzek_run_number,
+            sample_details,
+            run_details,
+        )
 
     # Align
     mantid.ApplyDiffCal(InstrumentWorkspace=input_workspace, CalibrationFile=run_details.offset_file_path)
@@ -107,12 +120,14 @@ def _focus_one_ws(
                                              GroupingFileName=run_details.grouping_file_path)
     instrument.apply_calibration_to_focused_data(focused_ws)
 
-    if not instrument._inst_settings.per_detector or not placzek_run_number:
-        calibrated_spectra = _apply_vanadium_corrections(instrument=instrument,
-                                                         input_workspace=focused_ws,
-                                                         perform_vanadium_norm=perform_vanadium_norm,
-                                                         vanadium_splines=vanadium_path)
+    if not instrument._inst_settings.per_detector:
+        # per bank routine
+        calibrated_spectra = _apply_vanadium_corrections(
+            instrument=instrument, input_workspace=focused_ws, perform_vanadium_norm=perform_vanadium_norm, vanadium_splines=vanadium_path
+        )
     else:
+        # in per detector routine, format data like _apply_vanandium_corrections() does for per bank routine
+        mantid.ConvertToDistribution(input_workspace)
         calibrated_spectra = common.extract_ws_spectra(focused_ws)
 
     output_spectra = instrument._crop_banks_to_user_tof(calibrated_spectra)
