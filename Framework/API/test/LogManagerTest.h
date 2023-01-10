@@ -74,7 +74,7 @@ template <typename T> void addTestTimeSeries(LogManager &run, const std::string 
   timeSeries->addValue("2012-07-19T16:18:00", 21);
   timeSeries->addValue("2012-07-19T16:18:10", 22);
   timeSeries->addValue("2012-07-19T16:19:20", 23);
-  timeSeries->addValue("2012-07-19T16:19:20", 24);
+  timeSeries->addValue("2012-07-19T16:19:20", 24); // effectively replaces the 23 for time average
   run.addProperty(timeSeries);
 }
 } // namespace
@@ -271,7 +271,7 @@ public:
     LogManager runInfo;
     const std::string name = "string_prop", value = "1";
     runInfo.addProperty<std::string>(name, value);
-    double result = std::nan("1");
+    double result = std::numeric_limits<double>::quiet_NaN();
     TS_ASSERT_THROWS_NOTHING(result = runInfo.getPropertyAsSingleValue(name));
     TS_ASSERT_DELTA(1.0, result, 1e-12);
   }
@@ -349,12 +349,43 @@ public:
     const std::string name = "series";
     addTestTimeSeries<double>(runInfo, name);
 
+    // time average values remain unchanged
+    // all values were calculated using a independent implementation in python
+    const double FIRST_VALUE{2.}; // also the min
+    const double LAST_VALUE{24.}; // also the max
+    const double TIME_AVG_MEAN{15.357142857142858};
+    // const double TIME_AVG_STDDEV {8.523975789812294};
+
+    TS_ASSERT_EQUALS(runInfo.getProperty(name)->size(), 10);
     TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Mean), 13.0, 1e-12);
-    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Minimum), 2.0, 1e-12);
-    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Maximum), 24.0, 1e-12);
-    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::FirstValue), 2.0, 1e-12);
-    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::LastValue), 24.0, 1e-12);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Minimum), FIRST_VALUE, 1e-12);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Maximum), LAST_VALUE, 1e-12);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::FirstValue), FIRST_VALUE, 1e-12);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::LastValue), LAST_VALUE, 1e-12);
     TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Median), 13.0, 1e-12);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::StdDev), 9.1104335791443, 1e-12);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::TimeAveragedMean), TIME_AVG_MEAN, 1e-12);
+    // TODO not ready
+    // TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::TimeAverageStdDev), TIME_AVG_STDDEV, 1e-12);
+
+    // TODO currently the old values are cached so we need a new LogManager to get nw math done
+    LogManager runInfo2;
+    addTestTimeSeries<double>(runInfo2, name);
+
+    // have the duplicate values (two values for the same time) removed
+    // this will remove the second to last value which will change the mean, median, and stddev
+    dynamic_cast<TimeSeriesProperty<double> *>(runInfo2.getProperty(name))->eliminateDuplicates();
+    TS_ASSERT_EQUALS(runInfo2.getProperty(name)->size(), 9);
+    TS_ASSERT_DELTA(runInfo2.getPropertyAsSingleValue(name, Math::Mean), 11.88888888888889, 1e-12);   // TODO
+    TS_ASSERT_DELTA(runInfo2.getPropertyAsSingleValue(name, Math::Minimum), FIRST_VALUE, 1e-12);      // TODO
+    TS_ASSERT_DELTA(runInfo2.getPropertyAsSingleValue(name, Math::Maximum), LAST_VALUE, 1e-12);       // TODO
+    TS_ASSERT_DELTA(runInfo2.getPropertyAsSingleValue(name, Math::FirstValue), FIRST_VALUE, 1e-12);   // TODO
+    TS_ASSERT_DELTA(runInfo2.getPropertyAsSingleValue(name, Math::LastValue), LAST_VALUE, 1e-12);     // TODO
+    TS_ASSERT_DELTA(runInfo2.getPropertyAsSingleValue(name, Math::Median), 6.0, 1e-12);               // TODO
+    TS_ASSERT_DELTA(runInfo2.getPropertyAsSingleValue(name, Math::StdDev), 8.937367800973425, 1e-12); // TODO
+    TS_ASSERT_DELTA(runInfo2.getPropertyAsSingleValue(name, Math::TimeAveragedMean), TIME_AVG_MEAN, 1e-12);
+    // TODO not ready
+    // TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::TimeAverageStdDev), TIME_AVG_STDDEV, 1e-12);
   }
 
   void test_GetPropertyAsSingleValue_Returns_Expected_Single_Value_On_Successive_Calls_With_Different_Stat_Types() {
