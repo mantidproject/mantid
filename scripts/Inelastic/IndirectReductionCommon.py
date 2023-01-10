@@ -4,9 +4,15 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import AppendSpectra, DeleteWorkspace, Load, plotSpectrum
+from mantid.simpleapi import AppendSpectra, DeleteWorkspace, Load
 from mantid.api import AnalysisDataService, WorkspaceGroup, AlgorithmManager
 from mantid import mtd, logger, config
+
+try:
+    import plotSpectrum
+except ImportError:
+    logger.warning("plotSpectrum not available")
+    plotSpectrum = None
 
 import os
 import numpy as np
@@ -885,6 +891,10 @@ def plot_reduction(workspace_name, plot_type):
 
     if plot_type == "Spectra" or plot_type == "Both":
         num_spectra = mtd[workspace_name].getNumberHistograms()
+        if plotSpectrum is None:
+            logger.error("plotSpectrum is not available. Please check your Mantid installation.")
+            raise RuntimeError("plotSpectrum is not available. Please check your Mantid installation.")
+
         try:
             plotSpectrum(workspace_name, range(0, num_spectra))
         except RuntimeError:
