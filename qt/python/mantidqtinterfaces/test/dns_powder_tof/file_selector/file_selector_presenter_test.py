@@ -303,6 +303,7 @@ class DNSFileSelectorPresenterTest(unittest.TestCase):
     def test_format_view(self):
         self.model.get_active_model_column_count.return_value = 5
         self.model.get_scan_range.return_value = range(2)
+        self.model.get_number_of_files_in_treeview.return_value = 10
         self.presenter._format_view()
         self.view.set_first_column_spanned.assert_called_once_with(range(2))
         self.view.expand_all.assert_called_once()
