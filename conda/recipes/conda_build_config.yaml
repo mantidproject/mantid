@@ -36,7 +36,7 @@ pycifrw:
   - 4.4.1
 
 setuptools:
-  - 47.0
+  - 49.6
 
 sphinx:
   - 5.1.1
