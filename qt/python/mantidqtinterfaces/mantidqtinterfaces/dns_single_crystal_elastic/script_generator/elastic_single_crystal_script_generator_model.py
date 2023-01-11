@@ -8,10 +8,10 @@
 Common Presenter for DNS Script generators
 """
 
-from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_dataset import \
-    DNSDataset
+from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_elastic_powder_dataset import \
+    DNSElasticDataset
 from mantidqtinterfaces.dns_powder_tof.helpers.list_range_converters import \
-    get_normation
+    get_normalisation
 from mantidqtinterfaces.dns_powder_tof.script_generator. \
     common_script_generator_model import \
     DNSScriptGeneratorModel
@@ -70,14 +70,13 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
                        and bool(self._export_path))
         self._nexus = (paths["nexus"] and paths["export"]
                        and bool(self._export_path))
-        self._norm = get_normation(options)
+        self._norm = get_normalisation(options)
 
         self._setup_sample_data(paths, file_selector)
         self._setup_standard_data(paths, file_selector)
-        self._interpolate_standard()
         self._set_loop()
 
-        # startin wrting script
+        # starting writing script
         self._add_lines_to_script(self._get_header_lines())
         self._add_lines_to_script(self._get_sample_data_lines())
         self._add_lines_to_script(self._get_standard_data_lines())
@@ -90,17 +89,17 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
         return self._script, ''
 
     def _setup_sample_data(self, paths, f_selector):
-        self._sample_data = DNSDataset(data=f_selector['full_data'],
-                                       path=paths['data_dir'],
-                                       is_sample=True)
+        self._sample_data = DNSElasticDataset(data=f_selector['full_data'],
+                                              path=paths['data_dir'],
+                                              is_sample=True)
         self._plotlist = self._sample_data.create_subtract()
 
     def _setup_standard_data(self, paths, f_selector):
         if self._corrections:
-            self._standard_data = DNSDataset(data=f_selector['standard_data'],
-                                             path=paths['standards_dir'],
-                                             is_sample=False,
-                                             fields=self._sample_data.fields)
+            self._standard_data = DNSElasticDataset(data=f_selector['standard_data'],
+                                                    path=paths['standards_dir'],
+                                                    is_sample=False,
+                                                    fields=self._sample_data.fields)
 
     def _interpolate_standard(self):
         self._standard_data.interpolate_standard(
