@@ -7,6 +7,7 @@
 from mantid.api import AlgorithmFactory, FileProperty, FileAction, WorkspaceProperty, PythonAlgorithm
 from mantid.kernel import Direction
 from mantid.geometry import SymmetryOperationFactory, SpaceGroupFactory
+from os import path, makedirs
 
 
 class SaveINS(PythonAlgorithm):
@@ -90,6 +91,9 @@ class SaveINS(PythonAlgorithm):
         cell = sample.getOrientedLattice()
         spgr = SpaceGroupFactory.createSpaceGroup(spgr_sym) if spgr_sym else sample.getCrystalStructure().getSpaceGroup()
         material = sample.getMaterial()
+        dirname = path.dirname(filename)
+        if not path.exists(dirname):
+            makedirs(dirname)
         with open(filename, "w") as f_handle:
             f_handle.write(f"TITL {ws.name()}\n")  # title
             f_handle.write("REM This file was produced by mantid using SaveINS\n")  # comment line
