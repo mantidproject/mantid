@@ -271,3 +271,11 @@ class DNSFileSelectorModel(DNSObsModel):
 
     def get_active_model_column_count(self):
         return self.active_model.rootItem.columnCount()
+
+    def get_number_of_files_in_treeview(self):
+        total_count = 0
+        for row in self.active_model._scan_range():
+            scan = self.active_model.scan_from_row(row)
+            scan_file_count = scan.childCount()
+            total_count += scan_file_count
+        return total_count
