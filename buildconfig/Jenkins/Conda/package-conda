@@ -26,6 +26,7 @@
 #   --git-tag: specify a tag for a release or nightly version
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $SCRIPT_DIR/mamba-utils
+start_time=$(date +%s)
 
 # Setup expected variables
 REPO_ROOT_DIR=$SCRIPT_DIR/../../..
@@ -74,6 +75,7 @@ do
   shift
 done
 
+
 # Mamba
 setup_mamba $WORKSPACE/mambaforge "package-conda" true
 mamba install --yes boa conda-verify versioningit
@@ -120,3 +122,8 @@ fi
 if [[ $ENABLE_BUILD_WORKBENCH == true ]]; then
     conda mambabuild ./mantidworkbench/ $EXTRA_BUILD_OPTIONS
 fi
+
+# elapsed time with second resolution
+end_time=$(date +%s)
+elapsed=$(( end_time - start_time ))
+echo "Conda packaging script took $elapsed seconds."
