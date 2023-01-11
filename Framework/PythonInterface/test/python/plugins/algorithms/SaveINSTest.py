@@ -49,13 +49,16 @@ class SaveINSTest(unittest.TestCase):
         ClearUB(self.ws)
         output_file = path.join(self._tmp_directory, "test.ins")
 
-        self.assertRaises(RuntimeError, SaveINS, Filename=output_file, InputWorkspace=self.ws, Spacegroup="P 1 21/n 1")
+        self.assertRaisesRegex(RuntimeError, "Workspace must have an oriented lattice defined.",
+                               SaveINS, Filename=output_file, InputWorkspace=self.ws, Spacegroup="P 1 21/n 1")
+
         self.assertFalse(path.exists(output_file))
 
     def test_save_ins_throws_if_no_spgr_or_crystal_structure(self):
         output_file = path.join(self._tmp_directory, "test.ins")
 
-        self.assertRaises(RuntimeError, SaveINS, InputWorkspace=self.ws, Filename=output_file)
+        self.assertRaisesRegex(RuntimeError, "The workspace does not have a crystal structure defined",
+                               SaveINS, InputWorkspace=self.ws, Filename=output_file)
         self.assertFalse(path.exists(output_file))
 
     def test_save_ins_throws_if_no_sample_material(self):
@@ -63,7 +66,8 @@ class SaveINSTest(unittest.TestCase):
         SetUB(Workspace=ws_nomat)
         output_file = path.join(self._tmp_directory, "test.ins")
 
-        self.assertRaises(RuntimeError, SaveINS, InputWorkspace=ws_nomat, Filename=output_file)
+        self.assertRaisesRegex(RuntimeError, "Workspace must have a sample material set.",
+                               SaveINS, InputWorkspace=ws_nomat, Filename=output_file)
         self.assertFalse(path.exists(output_file))
 
     def test_save_ins_natural_isotopic_abundance_true(self):
