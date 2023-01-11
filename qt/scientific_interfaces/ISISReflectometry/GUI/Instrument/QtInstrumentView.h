@@ -53,11 +53,16 @@ public:
   void setMonitorIntegralMax(double value) override;
   void showMonitorIntegralRangeInvalid() override;
   void showMonitorIntegralRangeValid() override;
+  void showCalibrationFilePathInvalid() override;
+  void showCalibrationFilePathValid() override;
 
   bool getCorrectDetectors() const override;
   void setCorrectDetectors(bool value) override;
   std::string getDetectorCorrectionType() const override;
   void setDetectorCorrectionType(std::string const &value) override;
+
+  std::string getCalibrationFilePath() const override;
+  void setCalibrationFilePath(std::string const &value) override;
 
   void disableAll() override;
   void enableAll() override;
@@ -67,6 +72,7 @@ public:
 public slots:
   void onSettingsChanged();
   void onRestoreDefaultsRequested();
+  void browseToCalibrationFile();
 
 private:
   /// Initialise the interface

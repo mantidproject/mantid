@@ -11,6 +11,8 @@
 #include "MonitorCorrections.h"
 #include "RangeInLambda.h"
 
+#include <string>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
@@ -24,12 +26,13 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL Instrument {
 public:
   Instrument();
   Instrument(boost::optional<RangeInLambda> wavelengthRange, MonitorCorrections monitorCorrections,
-             DetectorCorrections detectorCorrections);
+             DetectorCorrections detectorCorrections, std::string calibrationFilePath);
 
   boost::optional<RangeInLambda> const &wavelengthRange() const;
   bool integratedMonitors() const;
   MonitorCorrections const &monitorCorrections() const;
   DetectorCorrections const &detectorCorrections() const;
+  std::string const &calibrationFilePath() const;
 
   size_t monitorIndex() const;
   boost::optional<RangeInLambda> monitorIntegralRange() const;
@@ -41,6 +44,7 @@ private:
   boost::optional<RangeInLambda> m_wavelengthRange;
   MonitorCorrections m_monitorCorrections;
   DetectorCorrections m_detectorCorrections;
+  std::string m_calibrationFilePath;
 };
 
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(Instrument const &lhs, Instrument const &rhs);
