@@ -224,8 +224,9 @@ pipeline {
           selector: specific('${BUILD_NUMBER}'),
           target: 'conda-packages',
           flatten: true
-        sh '${CISCRIPT_DIR}/publish-to-anaconda\
-          ${WORKSPACE} ${ANACONDA_TOKEN} ${ANACONDA_CHANNEL} ${ANACONDA_CHANNEL_LABEL} ${WORKSPACE}/conda-packages/*.tar.bz2'
+        // Single quotes are required for token variables to avoid them leaking
+        sh "${CISCRIPT_DIR}/publish-to-anaconda ${WORKSPACE}" + ' ${ANACONDA_TOKEN} ' +\
+          "${ANACONDA_CHANNEL} ${ANACONDA_CHANNEL_LABEL} ${WORKSPACE}/conda-packages/*.tar.bz2"
         // Standalone packages next
         sh 'rm -fr ${WORKSPACE}/standalone-packages'
         copyArtifacts filter: '*.exe, *.dmg, *.tar.xz',
@@ -234,8 +235,8 @@ pipeline {
           selector: specific('${BUILD_NUMBER}'),
           target: 'standalone-packages',
           flatten: true
-        sh '${CISCRIPT_DIR}/publish-to-github\
-          ${WORKSPACE} ${GITHUB_TOKEN} ${GITHUB_RELEASES_REPO} ${generate_git_tag()} ${GIT_SHA} ${prerelease_option()} ${WORKSPACE}/standalone-packages/*'
+        sh "${CISCRIPT_DIR}/publish-to-github ${WORKSPACE}" + ' ${GITHUB_TOKEN} ' +\
+          "${GITHUB_RELEASES_REPO} ${generate_git_tag()} ${GIT_SHA} ${prerelease_option()} ${WORKSPACE}/standalone-packages/*"
       }
     }
     stage ('Delete old non-main packages from Anaconda') {
@@ -252,8 +253,8 @@ pipeline {
       environment { ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}") }
       steps {
         checkoutSource("${GIT_SHA}")
-        sh '${CISCRIPT_DIR}/delete-old-packages.sh\
-         ${WORKSPACE} ${ANACONDA_TOKEN} --channel mantid --label ${ANACONDA_CHANNEL_LABEL} mantid mantidqt mantiddocs mantidworkbench'
+        sh "${CISCRIPT_DIR}/delete-old-packages.sh ${WORKSPACE}" + ' ${ANACONDA_TOKEN} ' +\
+         "--channel mantid --label ${ANACONDA_CHANNEL_LABEL} mantid mantidqt mantiddocs mantidworkbench"
       }
     }
   }
