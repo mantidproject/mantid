@@ -91,7 +91,14 @@ def _focus_one_ws(
         )
 
     input_workspace = _absorb_and_empty_corrections(
-        input_workspace, instrument, run_details, sample_details, absorb, summed_empty, empty_can_subtraction_method
+        input_workspace,
+        instrument,
+        run_details,
+        sample_details,
+        absorb,
+        summed_empty,
+        empty_can_subtraction_method,
+        paalman_pings_events_per_point,
     )
 
     if instrument._inst_settings.per_detector:
@@ -151,10 +158,18 @@ def _focus_one_ws(
     return d_spacing_group
 
 
-def _absorb_and_empty_corrections(input_workspace, instrument, run_details, sample_details, absorb, summed_empty,
-                                  empty_can_subtraction_method):
-    if absorb and empty_can_subtraction_method == 'PaalmanPings':
-        if run_details.sample_empty: # need summed_empty including container
+def _absorb_and_empty_corrections(
+    input_workspace,
+    instrument,
+    run_details,
+    sample_details,
+    absorb,
+    summed_empty,
+    empty_can_subtraction_method,
+    paalman_pings_events_per_point,
+):
+    if absorb and empty_can_subtraction_method == "PaalmanPings":
+        if run_details.sample_empty:  # need summed_empty including container
             input_workspace = instrument._apply_paalmanpings_absorb_and_subtract_empty(
                 input_workspace=input_workspace,
                 summed_empty=summed_empty,
