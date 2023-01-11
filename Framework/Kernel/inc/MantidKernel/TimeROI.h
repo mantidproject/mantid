@@ -33,11 +33,13 @@ public:
   void addMask(const std::time_t &startTime, const std::time_t &stopTime);
   bool valueAtTime(const Types::Core::DateAndTime &time) const;
   void replaceROI(const TimeSeriesProperty<bool> *roi);
+  void replaceROI(const TimeROI &other);
   void update_union(const TimeROI &other);
   void update_intersection(const TimeROI &other);
   void removeRedundantEntries();
   bool operator==(const TimeROI &other) const;
   void debugPrint() const;
+  size_t getMemorySize() const;
 
   // nexus items
   void saveNexus(::NeXus::File *file) const;

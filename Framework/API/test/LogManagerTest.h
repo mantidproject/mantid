@@ -357,6 +357,7 @@ public:
     // const double TIME_AVG_STDDEV {8.523975789812294};
 
     TS_ASSERT_EQUALS(runInfo.getProperty(name)->size(), 10);
+    TS_ASSERT_LESS_THAN(0, runInfo.getMemorySize()); // memory is non-zero
     TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Mean), 13.0, 1e-12);
     TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Minimum), FIRST_VALUE, 1e-12);
     TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Maximum), LAST_VALUE, 1e-12);
@@ -368,22 +369,21 @@ public:
     // TODO not ready
     // TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::TimeAverageStdDev), TIME_AVG_STDDEV, 1e-12);
 
-    // TODO currently the old values are cached so we need a new LogManager to get nw math done
-    LogManager runInfo2;
-    addTestTimeSeries<double>(runInfo2, name);
+    // the old values are cached so we need clear it to get nw math done
+    dynamic_cast<TimeSeriesProperty<double> *>(runInfo.getProperty(name))->eliminateDuplicates();
+    runInfo.clearSingleValueCache();
 
     // have the duplicate values (two values for the same time) removed
     // this will remove the second to last value which will change the mean, median, and stddev
-    dynamic_cast<TimeSeriesProperty<double> *>(runInfo2.getProperty(name))->eliminateDuplicates();
-    TS_ASSERT_EQUALS(runInfo2.getProperty(name)->size(), 9);
-    TS_ASSERT_DELTA(runInfo2.getPropertyAsSingleValue(name, Math::Mean), 11.88888888888889, 1e-12);   // TODO
-    TS_ASSERT_DELTA(runInfo2.getPropertyAsSingleValue(name, Math::Minimum), FIRST_VALUE, 1e-12);      // TODO
-    TS_ASSERT_DELTA(runInfo2.getPropertyAsSingleValue(name, Math::Maximum), LAST_VALUE, 1e-12);       // TODO
-    TS_ASSERT_DELTA(runInfo2.getPropertyAsSingleValue(name, Math::FirstValue), FIRST_VALUE, 1e-12);   // TODO
-    TS_ASSERT_DELTA(runInfo2.getPropertyAsSingleValue(name, Math::LastValue), LAST_VALUE, 1e-12);     // TODO
-    TS_ASSERT_DELTA(runInfo2.getPropertyAsSingleValue(name, Math::Median), 6.0, 1e-12);               // TODO
-    TS_ASSERT_DELTA(runInfo2.getPropertyAsSingleValue(name, Math::StdDev), 8.937367800973425, 1e-12); // TODO
-    TS_ASSERT_DELTA(runInfo2.getPropertyAsSingleValue(name, Math::TimeAveragedMean), TIME_AVG_MEAN, 1e-12);
+    TS_ASSERT_EQUALS(runInfo.getProperty(name)->size(), 9);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Mean), 11.88888888888889, 1e-12);   // TODO
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Minimum), FIRST_VALUE, 1e-12);      // TODO
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Maximum), LAST_VALUE, 1e-12);       // TODO
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::FirstValue), FIRST_VALUE, 1e-12);   // TODO
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::LastValue), LAST_VALUE, 1e-12);     // TODO
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Median), 6.0, 1e-12);               // TODO
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::StdDev), 8.937367800973425, 1e-12); // TODO
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::TimeAveragedMean), TIME_AVG_MEAN, 1e-12);
     // TODO not ready
     // TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::TimeAverageStdDev), TIME_AVG_STDDEV, 1e-12);
   }

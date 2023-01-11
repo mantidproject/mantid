@@ -160,6 +160,9 @@ public:
   /// Empty all but the last value out of all TimeSeriesProperty logs
   void clearOutdatedTimeSeriesLogValues();
 
+  const Kernel::TimeROI &timeROI() const;
+  void timeROI(const Kernel::TimeROI &);
+
   /// Save the run to a NeXus file with a given group name
   virtual void saveNexus(::NeXus::File *file, const std::string &group, bool keepOpen = false) const;
 
@@ -180,6 +183,9 @@ public:
   virtual void loadNexus(::NeXus::File *file, const std::string &group, bool keepOpen = false);
   /// Clear the logs
   void clearLogs();
+
+  /// Clear ou the cache of calculated statistics
+  void clearSingleValueCache();
 
   // returns true if the log has a matching invalid values log filter
   bool hasInvalidValuesFilter(const std::string &logName) const;
@@ -204,7 +210,8 @@ protected:
 
 private:
   /// Cache for the retrieved single values
-  std::unique_ptr<Kernel::Cache<std::pair<std::string, Kernel::Math::StatisticType>, double>> m_singleValueCache;
+  mutable std::unique_ptr<Kernel::Cache<std::pair<std::string, Kernel::Math::StatisticType>, double>>
+      m_singleValueCache;
 };
 /// shared pointer to the logManager base class
 using LogManager_sptr = std::shared_ptr<LogManager>;

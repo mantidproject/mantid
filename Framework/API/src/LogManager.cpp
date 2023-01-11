@@ -238,7 +238,7 @@ void LogManager::splitByTime(TimeSplitterType &splitter, std::vector<LogManager 
 void LogManager::filterByLog(const Kernel::TimeSeriesProperty<bool> &filter,
                              const std::vector<std::string> &excludedFromFiltering) {
   // This will invalidate the cache
-  m_singleValueCache->clear();
+  this->clearSingleValueCache();
   m_manager->filterByProperty(filter, excludedFromFiltering);
 }
 
@@ -297,12 +297,13 @@ const std::vector<Kernel::Property *> &LogManager::getProperties() const { retur
 /** Return the total memory used by the run object, in bytes.
  */
 size_t LogManager::getMemorySize() const {
-  size_t total = 0;
-  std::vector<Property *> props = m_manager->getProperties();
-  for (auto p : props) {
+  size_t total{m_timeroi->getMemorySize()};
+
+  for (const auto &p : m_manager->getProperties()) {
     if (p)
       total += p->getMemorySize() + sizeof(Property *);
   }
+
   return total;
 }
 
@@ -441,6 +442,10 @@ void LogManager::clearOutdatedTimeSeriesLogValues() {
     }
   }
 }
+
+const Kernel::TimeROI &LogManager::timeROI() const { return *(m_timeroi.get()); }
+
+void LogManager::timeROI(const Kernel::TimeROI &timeroi) { m_timeroi->replaceROI(timeroi); }
 
 //--------------------------------------------------------------------------------------------
 /** Save the object to an open NeXus file.
@@ -588,6 +593,8 @@ void LogManager::loadNexus(::NeXus::File *file, const std::map<std::string, std:
  * Clear the logs.
  */
 void LogManager::clearLogs() { m_manager->clear(); }
+
+void LogManager::clearSingleValueCache() { m_singleValueCache->clear(); }
 
 /// Gets the correct log name for the matching invalid values log for a given
 /// log name

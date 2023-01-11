@@ -216,6 +216,12 @@ void TimeROI::replaceROI(const TimeSeriesProperty<bool> *roi) {
   this->replaceValues(times, values);
 }
 
+void TimeROI::replaceROI(const TimeROI &other) {
+  const auto times = other.m_roi.timesAsVector();
+  const auto values = other.m_roi.valuesAsVector();
+  this->replaceValues(times, values);
+}
+
 /**
  * Updates the TimeROI values with the union with another TimeROI.
  * See https://en.wikipedia.org/wiki/Union_(set_theory) for more details
@@ -332,6 +338,8 @@ void TimeROI::debugPrint() const {
     std::cout << i << ": " << times[i] << ", " << values[i] << std::endl;
   }
 }
+
+size_t TimeROI::getMemorySize() const { return m_roi.getMemorySize(); }
 
 /**
  * Duration of the whole TimeROI
