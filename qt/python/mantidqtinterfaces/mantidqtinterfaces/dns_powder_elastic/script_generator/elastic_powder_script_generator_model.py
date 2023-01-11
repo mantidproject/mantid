@@ -271,7 +271,6 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
 
         self._setup_sample_data(paths, file_selector)
         self._setup_standard_data(paths, file_selector)
-        self._interpolate_standard()
         self._set_loop()
         # validate if input makes sense, otherwise return
         # an empty script and error message
