@@ -223,12 +223,19 @@ void PreviewPresenter::notifyRegionChanged() {
   }
 }
 
+namespace {
+bool isRegionChanged(std::optional<std::vector<double>> modelValue, std::vector<double> viewValue) {
+  return !(!modelValue.has_value() && viewValue.empty()) && modelValue != viewValue;
+}
+} // namespace
+
 bool PreviewPresenter::isRegionSelectionChanged() {
-  return m_model->getSelectedRegion(ROIType::Signal) != m_regionSelector->getRegion(roiTypeToString(ROIType::Signal)) &&
-         m_model->getSelectedRegion(ROIType::Background) !=
-             m_regionSelector->getRegion(roiTypeToString(ROIType::Background)) &&
-         m_model->getSelectedRegion(ROIType::Transmission) !=
-             m_regionSelector->getRegion(roiTypeToString(ROIType::Transmission));
+  return isRegionChanged(m_model->getSelectedRegion(ROIType::Signal),
+                         m_regionSelector->getRegion(roiTypeToString(ROIType::Signal))) ||
+         isRegionChanged(m_model->getSelectedRegion(ROIType::Background),
+                         m_regionSelector->getRegion(roiTypeToString(ROIType::Background))) ||
+         isRegionChanged(m_model->getSelectedRegion(ROIType::Transmission),
+                         m_regionSelector->getRegion(roiTypeToString(ROIType::Transmission)));
 }
 
 void PreviewPresenter::notifyLinePlotExportAdsRequested() { m_model->exportReducedWsToAds(); }

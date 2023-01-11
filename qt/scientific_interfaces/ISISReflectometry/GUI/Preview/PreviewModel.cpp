@@ -114,6 +114,7 @@ boost::optional<ProcessingInstructions> PreviewModel::getProcessingInstructions(
 
 void PreviewModel::setSelectedRegion(ROIType regionType, Selection const &selection) {
   if (selection.size() == 0) {
+    setSelectedRegionMembers(regionType, selection);
     m_runDetails->setProcessingInstructions(regionType, boost::none);
     return;
   }

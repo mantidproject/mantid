@@ -344,6 +344,23 @@ public:
     presenter.notifyRegionChanged();
   }
 
+  void test_notify_one_region_changed_starts_reduction() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+    auto mockJobManager = makeJobManager();
+    auto mockDockedWidgets = makePreviewDockedWidgets();
+    auto mockRegionSelector = makeRegionSelector();
+
+    expectEditROIMode(*mockDockedWidgets);
+    expectRunReduction(*mockView, *mockModel, *mockJobManager, *mockRegionSelector);
+    expectRegionSelectionSomeChanged(*mockModel, *mockRegionSelector);
+
+    auto presenter =
+        PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), makeInstViewModel(),
+                                  std::move(mockDockedWidgets), std::move(mockRegionSelector)));
+    presenter.notifyRegionChanged();
+  }
+
   void test_notify_region_changed_does_not_start_reduction_if_region_unchanged() {
     auto mockView = makeView();
     auto mockModel = makeModel();
@@ -698,22 +715,26 @@ private:
         .Times(1)
         .WillOnce(Return(new_roi))
         .RetiresOnSaturation();
+    EXPECT_CALL(mockRegionSelector, deselectAllSelectors()).Times(1);
+    auto old_roi = IRegionSelector::Selection{2.5, 17.56};
+    EXPECT_CALL(mockModel, getSelectedRegion(ROIType::Signal)).Times(1).WillOnce(Return(old_roi)).RetiresOnSaturation();
+  }
+
+  void expectRegionSelectionSomeChanged(MockPreviewModel &mockModel, MockRegionSelector &mockRegionSelector) {
+    auto old_roi = IRegionSelector::Selection{2.5, 17.56};
+    auto new_roi = IRegionSelector::Selection{3.5, 11.23};
+    EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Signal)))
+        .Times(1)
+        .WillOnce(Return(old_roi))
+        .RetiresOnSaturation();
     EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Background)))
         .Times(1)
         .WillOnce(Return(new_roi))
         .RetiresOnSaturation();
-    EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Transmission)))
-        .Times(1)
-        .WillOnce(Return(new_roi))
-        .RetiresOnSaturation();
     EXPECT_CALL(mockRegionSelector, deselectAllSelectors()).Times(1);
-    auto old_roi = IRegionSelector::Selection{2.5, 17.56};
+
     EXPECT_CALL(mockModel, getSelectedRegion(ROIType::Signal)).Times(1).WillOnce(Return(old_roi)).RetiresOnSaturation();
     EXPECT_CALL(mockModel, getSelectedRegion(ROIType::Background))
-        .Times(1)
-        .WillOnce(Return(old_roi))
-        .RetiresOnSaturation();
-    EXPECT_CALL(mockModel, getSelectedRegion(ROIType::Transmission))
         .Times(1)
         .WillOnce(Return(old_roi))
         .RetiresOnSaturation();
@@ -725,8 +746,22 @@ private:
         .Times(1)
         .WillOnce(Return(roi))
         .RetiresOnSaturation();
+    EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Background)))
+        .Times(1)
+        .WillOnce(Return(roi))
+        .RetiresOnSaturation();
+    EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Transmission)))
+        .Times(1)
+        .WillOnce(Return(roi))
+        .RetiresOnSaturation();
     EXPECT_CALL(mockRegionSelector, deselectAllSelectors()).Times(0);
+
     EXPECT_CALL(mockModel, getSelectedRegion(ROIType::Signal)).Times(1).WillOnce(Return(roi)).RetiresOnSaturation();
+    EXPECT_CALL(mockModel, getSelectedRegion(ROIType::Background)).Times(1).WillOnce(Return(roi)).RetiresOnSaturation();
+    EXPECT_CALL(mockModel, getSelectedRegion(ROIType::Transmission))
+        .Times(1)
+        .WillOnce(Return(roi))
+        .RetiresOnSaturation();
   }
 
   void expectRunReduction(MockPreviewView &mockView, MockPreviewModel &mockModel, MockJobManager &mockJobManager,
