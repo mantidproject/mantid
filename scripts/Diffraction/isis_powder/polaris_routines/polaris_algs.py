@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 import math
+from typing import Union
 
 import mantid.simpleapi as mantid
 from mantid.api import WorkspaceGroup, MatrixWorkspace
@@ -107,6 +108,7 @@ def generate_ts_pdf(
     pdf_type="G(r)",
     lorch_filter=None,
     freq_params=None,
+    per_detector=False,
     debug=False,
 ):
     if sample_details is None:
@@ -117,29 +119,9 @@ def generate_ts_pdf(
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode="Elastic")
 
-    raw_ws = mantid.Load(Filename="POLARIS" + str(run_number))
-    sample_geometry_json = sample_details.generate_sample_geometry()
-    sample_material_json = sample_details.generate_sample_material()
-
-    self_scattering_correction = mantid.TotScatCalculateSelfScattering(
-        InputWorkspace=raw_ws,
-        CalFileName=cal_file_name,
-        SampleGeometry=sample_geometry_json,
-        SampleMaterial=sample_material_json,
-        PlaczekOrder=placzek_order,
-        SampleTemp=sample_temp,
-    )
-
-    ws_group_list = []
-    for i in range(self_scattering_correction.getNumberHistograms()):
-        ws_name = "correction_" + str(i)
-        mantid.ExtractSpectra(InputWorkspace=self_scattering_correction, OutputWorkspace=ws_name, WorkspaceIndexList=[i])
-        ws_group_list.append(ws_name)
-    self_scattering_correction = mantid.GroupWorkspaces(InputWorkspaces=ws_group_list)
-    self_scattering_correction = mantid.RebinToWorkspace(WorkspaceToRebin=self_scattering_correction, WorkspaceToMatch=focused_ws)
-    if not compare_ws_compatibility(focused_ws, self_scattering_correction):
-        raise RuntimeError("To use create_total_scattering_pdf you need to run focus with " "do_van_normalisation=true first.")
-    focused_ws = mantid.Subtract(LHSWorkspace=focused_ws, RHSWorkspace=self_scattering_correction)
+    if not per_detector:
+        # in the per_detector routine, the placzek (and vanadium) corrections were applied before focussing
+        apply_placzek_correction_per_bank(focused_ws, run_number, sample_details, cal_file_name, placzek_order, sample_temp)
     if debug:
         dcs_corrected = mantid.CloneWorkspace(InputWorkspace=focused_ws)
 
@@ -199,7 +181,7 @@ def generate_ts_pdf(
     return pdf_output
 
 
-def _obtain_focused_run(run_number, focus_file_path):
+def _obtain_focused_run(run_number, focus_file_path) -> Union[MatrixWorkspace, WorkspaceGroup]:
     """
     Searches for the focused workspace to use (based on user specified run number) in the ADS and then the output
     directory.
@@ -210,19 +192,53 @@ def _obtain_focused_run(run_number, focus_file_path):
     """
     # Try the ADS first to avoid undesired loading
     if mantid.mtd.doesExist("%s-ResultTOF" % run_number):
-        focused_ws = mantid.mtd["%s-ResultTOF" % run_number]
+        focused_workspaces = mantid.mtd["%s-ResultTOF" % run_number]
     elif mantid.mtd.doesExist("%s-ResultD" % run_number):
-        focused_ws = mantid.mtd["%s-ResultD" % run_number]
+        focused_workspaces = mantid.mtd["%s-ResultD" % run_number]
     else:
         # Check output directory
         print("No loaded focused files found. Searching in output directory...")
         try:
-            focused_ws = mantid.LoadNexus(Filename=focus_file_path, OutputWorkspace="focused_ws").OutputWorkspace
+            focused_workspaces = mantid.LoadNexus(Filename=focus_file_path, OutputWorkspace="focused_workspaces").OutputWorkspace
         except ValueError:
             raise ValueError(
                 "Could not find focused file for run number:%s\n"
                 "Please ensure a focused file has been produced and is located in the output directory." % run_number
             )
+    return focused_workspaces
+
+
+def apply_placzek_correction_per_bank(
+    focused_ws,
+    run_number,
+    sample_details,
+    cal_file_name,
+    placzek_order,
+    sample_temp,
+):
+    raw_ws = mantid.Load(Filename="POLARIS" + str(run_number))
+    sample_geometry_json = sample_details.generate_sample_geometry()
+    sample_material_json = sample_details.generate_sample_material()
+
+    self_scattering_correction = mantid.TotScatCalculateSelfScattering(
+        InputWorkspace=raw_ws,
+        CalFileName=cal_file_name,
+        SampleGeometry=sample_geometry_json,
+        SampleMaterial=sample_material_json,
+        PlaczekOrder=placzek_order,
+        SampleTemp=sample_temp,
+    )
+
+    ws_group_list = []
+    for i in range(self_scattering_correction.getNumberHistograms()):
+        ws_name = "correction_" + str(i)
+        mantid.ExtractSpectra(InputWorkspace=self_scattering_correction, OutputWorkspace=ws_name, WorkspaceIndexList=[i])
+        ws_group_list.append(ws_name)
+    self_scattering_correction = mantid.GroupWorkspaces(InputWorkspaces=ws_group_list)
+    self_scattering_correction = mantid.RebinToWorkspace(WorkspaceToRebin=self_scattering_correction, WorkspaceToMatch=focused_ws)
+    if not compare_ws_compatibility(focused_ws, self_scattering_correction):
+        raise RuntimeError("To use create_total_scattering_pdf you need to run focus with " "do_van_normalisation=true first.")
+    focused_ws = mantid.Subtract(LHSWorkspace=focused_ws, RHSWorkspace=self_scattering_correction)
     return focused_ws
 
 

@@ -195,6 +195,20 @@ class ISISPowderFocusUnitTest(TestCase):
         mock_placzek.assert_called_once()
         mock_vanadium.assert_called_once()
 
+    def test_create_pdf_per_bank(self):
+        pdf_inst_obj = self.setup_inst_object("PDF")
+        pdf_inst_obj.create_vanadium(first_cycle_run_no=98532, do_absorb_corrections=True, multiple_scattering=False)
+        pdf_inst_obj.focus(
+            run_number=98533,
+            do_van_normalisation=True,
+            do_absorb_corrections=True,
+            input_mode="Summed",
+        )
+        pdf_inst_obj.create_total_scattering_pdf(run_number="98533", merge_banks=False)
+        # expected_per_bank = Load("/home/danielmurphy/Desktop/focus/focused_per_detector.nxs")
+        # match_bool, _ = CompareWorkspaces(expected_per_bank, output)
+        # self.assertTrue(match_bool)
+
 
 if __name__ == "__main__":
     main()

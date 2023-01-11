@@ -98,6 +98,7 @@ class Polaris(AbstractInst):
             pdf_type=self._inst_settings.pdf_type,
             lorch_filter=self._inst_settings.lorch_filter,
             freq_params=self._inst_settings.freq_params,
+            per_detector=self._inst_settings.per_detector,
             debug=self._inst_settings.debug,
         )
         return pdf_output
