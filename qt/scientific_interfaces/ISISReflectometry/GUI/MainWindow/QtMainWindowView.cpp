@@ -49,7 +49,10 @@ IBatchView *QtMainWindowView::newBatch() {
 
 void QtMainWindowView::removeBatch(int batchIndex) {
   m_batchViews.erase(m_batchViews.begin() + batchIndex);
+  auto *batchToRemove = m_ui.mainTabs->widget(batchIndex);
   m_ui.mainTabs->removeTab(batchIndex);
+  // Calling removeTab doesn't deallocate the memory for the QtBatchView, so we must do that here
+  delete batchToRemove;
   if (m_ui.mainTabs->count() == 0) {
     m_notifyee->notifyNewBatchRequested();
   }
