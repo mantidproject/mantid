@@ -131,9 +131,8 @@ def _focus_one_ws(
             instrument=instrument, input_workspace=focused_ws, perform_vanadium_norm=perform_vanadium_norm, vanadium_splines=vanadium_path
         )
     else:
-        # in per detector routine, format data like _apply_vanandium_corrections() does for per bank routine
-        mantid.ConvertToDistribution(input_workspace)
-        calibrated_spectra = common.extract_ws_spectra(focused_ws)
+        # per detector routine
+        calibrated_spectra = _restructure_data_in_per_detector_routine(focused_ws, cal_filepath=run_details.offset_file_path)
 
     output_spectra = instrument._crop_banks_to_user_tof(calibrated_spectra)
 
@@ -239,6 +238,34 @@ def _apply_vanadium_corrections_per_detector(
     return processed_spectra
 
 
+def _restructure_data_in_per_detector_routine(focused_workspace, cal_filepath):
+    focused_workspace = divide_by_number_of_detectors_in_bank(focused_workspace, cal_filepath)
+    mantid.ConvertToDistribution(focused_workspace)
+    calibrated_spectra = common.extract_ws_spectra(focused_workspace)
+    return calibrated_spectra
+
+
+def divide_by_number_of_detectors_in_bank(focussed_data, cal_filepath):
+    # Divide each spectrum by number of detectors in their bank
+    cal_workspace = mantid.LoadCalFile(
+        InputWorkspace=focussed_data,
+        CalFileName=cal_filepath,
+        Workspacename="cal_workspace",
+        MakeOffsetsWorkspace=False,
+        MakeMaskWorkspace=False,
+        MakeGroupingWorkspace=False,
+    )
+    n_pixel = np.zeros(focussed_data.getNumberHistograms())
+    for bank_index in range(cal_workspace.getNumberHistograms()):
+        grouping = cal_workspace.dataY(bank_index)
+        if grouping[0] > 0:
+            n_pixel[int(grouping[0] - 1)] += 1
+    number_detectors_in_bank_ws = mantid.CreateWorkspace(DataY=n_pixel, DataX=[0, 1], NSpec=focussed_data.getNumberHistograms())
+    focussed_data = mantid.Divide(LHSWorkspace=focussed_data, RHSWorkspace=number_detectors_in_bank_ws)
+    common.remove_intermediate_workspace(number_detectors_in_bank_ws)
+    return focussed_data
+
+
 def _apply_placzek_corrections(
     input_workspace, instrument, perform_vanadium_norm, vanadium_path, placzek_run_number, sample_details, run_details
 ):
@@ -268,12 +295,20 @@ def _prepare_for_correction(data_workspace: Workspace2D, correction_workspace: W
 
     # Remove Masked and Monitor spectra
     mantid.ExtractMonitors(
-        InputWorkspace=correction_workspace, DetectorWorkspace="correction_workspace", MonitorWorkspace="correction_workspace_monitors"
+        InputWorkspace=correction_workspace,
+        DetectorWorkspace="correction_workspace",
+        MonitorWorkspace="correction_workspace_monitors",
+        EnableLogging=False,
     )
     correction_workspace = mantid.RemoveMaskedSpectra(InputWorkspace="correction_workspace")
     correction_workspace.clearMonitorWorkspace()
 
-    mantid.ExtractMonitors(InputWorkspace=data_workspace, DetectorWorkspace="data_workspace", MonitorWorkspace="data_workspace_monitors")
+    mantid.ExtractMonitors(
+        InputWorkspace=data_workspace,
+        DetectorWorkspace="data_workspace",
+        MonitorWorkspace="data_workspace_monitors",
+        EnableLogging=False,
+    )
     data_workspace = mantid.RemoveMaskedSpectra(InputWorkspace="data_workspace")
     data_workspace.clearMonitorWorkspace()
 
