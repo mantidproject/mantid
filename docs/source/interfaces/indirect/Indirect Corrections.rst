@@ -291,10 +291,10 @@ Maximum Scatter Point Attempts
 Sparse Instrument
   Whether to spatially approximate the instrument for faster calculation.
 
-Number Of DetectorRows
+Number Of Detector Rows
   Number of detector rows in the detector grid of the sparse instrument.
 
-Number Of DetectorColumns
+Number Of Detector Columns
   Number of detector columns in the detector grid of the sparse instrument.
 
 Beam Height
