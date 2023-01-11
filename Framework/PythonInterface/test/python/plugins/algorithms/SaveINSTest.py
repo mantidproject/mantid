@@ -45,6 +45,14 @@ class SaveINSTest(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self._tmp_directory)
 
+    def test_save_ins_throws_if_invalid_spgr(self):
+        output_file = path.join(self._tmp_directory, "test.ins")
+
+        self.assertRaisesRegex(RuntimeError, "Workspace must have an oriented lattice defined.",
+                               SaveINS, Filename=output_file, InputWorkspace=self.ws, Spacegroup="invalid")
+
+        self.assertFalse(path.exists(output_file))
+
     def test_save_ins_throws_if_no_oriented_lattice(self):
         ClearUB(self.ws)
         output_file = path.join(self._tmp_directory, "test.ins")
