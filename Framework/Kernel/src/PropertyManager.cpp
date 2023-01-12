@@ -197,6 +197,8 @@ void PropertyManager::filterByProperty(const Kernel::TimeSeriesProperty<bool> &f
                                        const std::vector<std::string> &excludedFromFiltering) {
   // convert to splitters
   const auto splitter = TimeROI(filter).toSplitters();
+  if (splitter.empty())
+    return;
 
   for (auto &orderedProperty : m_orderedProperties) {
     if (std::find(excludedFromFiltering.cbegin(), excludedFromFiltering.cend(), orderedProperty->name()) !=
