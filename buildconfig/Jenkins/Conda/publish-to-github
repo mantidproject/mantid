@@ -46,7 +46,7 @@ mamba install --yes gh
 # Create a release and attach the given assets.
 export GITHUB_TOKEN
 if [[ $PRERELEASE == true ]]; then
-  title="Release $RELEASES_TAG_NAME"
+  title="Nightly $RELEASES_TAG_NAME"
   notes="Nightly build. Use with caution. Not recommended for production use."
   options="--draft=false --prerelease"
   echo "Creating prerelease $RELEASES_TAG_NAME"
@@ -84,4 +84,3 @@ for asset in "$@"; do
     echo "Uploading $asset, labelled as $asset#$label, to $RELEASES_TAG_NAME tag under $RELEASES_REPO"
     github_release_cmd upload --clobber $RELEASES_TAG_NAME "$asset#$label"
 done
-
