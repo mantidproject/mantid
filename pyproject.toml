@@ -4,6 +4,7 @@ line-length = 140
 [tool.versioningit.vcs]
 method = "git"
 default-tag = "0.0.0"
+exclude = ["nightly"]
 
 [tool.versioningit.next-version]
 method = "minor"
