@@ -10,6 +10,7 @@ from typing import Optional
 from qtpy.QtCore import QSettings
 
 from mantid.kernel import ConfigService, ErrorReporter, Logger, UsageService
+from mantidqt.dialogs.errorreports.report import MAX_STACK_TRACE_LENGTH
 
 
 class ErrorReporterPresenter(object):
@@ -103,9 +104,20 @@ class ErrorReporterPresenter(object):
             self.error_log.error("Continue working.")
 
     def _send_report_to_server(self, share_identifiable=False, name="", email="", uptime="", text_box=""):
+        stacktrace = "".join(self._traceback)
+        if len(stacktrace) > MAX_STACK_TRACE_LENGTH:
+            difference = len(stacktrace) - MAX_STACK_TRACE_LENGTH
+            stacktrace = self._cut_down_stacktrace()
+            self.error_log.warning(
+                f"The middle {difference+5} characters of this stack trace has been removed"
+                r" and replaced with \n...\n in order to"
+                f" reduce it to {MAX_STACK_TRACE_LENGTH} characters"
+            )
+
         errorReporter = ErrorReporter(
-            self._application, uptime, self._exit_code, share_identifiable, str(name), str(email), str(text_box), "".join(self._traceback)
+            self._application, uptime, self._exit_code, share_identifiable, str(name), str(email), str(text_box), stacktrace
         )
+
         status = errorReporter.sendErrorReport()
 
         if status != 201:
@@ -115,6 +127,11 @@ class ErrorReporterPresenter(object):
             self.error_log.error("Failed to send error report http request returned status {}".format(status))
 
         return status
+
+    def _cut_down_stacktrace(self):
+        # server has a max size for the stack trace, if exceeded will cause an error
+        stacktrace = "".join(self._traceback)
+        return stacktrace[: (MAX_STACK_TRACE_LENGTH // 2 - 2)] + "\n...\n" + stacktrace[-(MAX_STACK_TRACE_LENGTH // 2 - 3) :]
 
     def show_view(self):
         self._view.show()
