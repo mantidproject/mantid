@@ -17,7 +17,7 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidQtWidgets/Common/MantidDesktopServices.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/Figure.h"
 #include "MantidQtWidgets/MplCpp/MantidAxes.h"
@@ -33,7 +33,7 @@
 #include <json/reader.h>
 
 namespace MantidQt {
-using API::MantidDesktopServices;
+using API::HelpWindow;
 
 namespace CustomInterfaces {
 
@@ -708,9 +708,7 @@ void StepScan::checkForVaryingLogs(const std::string &wsName) {
   }
 }
 
-void StepScan::helpClicked() {
-  MantidDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Step_Scan_Interface"));
-}
+void StepScan::helpClicked() { HelpWindow::showCustomInterface(QStringLiteral("Step_Scan_Analysis")); }
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
