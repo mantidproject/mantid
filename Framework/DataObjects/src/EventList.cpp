@@ -3770,7 +3770,7 @@ void EventList::filterByTimeAtSample(Types::Core::DateAndTime start, Types::Core
 
 //------------------------------------------------------------------------------------------------
 /** Perform an in-place filtering on a vector of either TofEvent's or
- *WeightedEvent's
+ *WeightedEvent's.
  *
  * @param splitter :: a TimeSplitterType where all the entries (start/end time)
  *indicate events
@@ -3779,6 +3779,30 @@ void EventList::filterByTimeAtSample(Types::Core::DateAndTime start, Types::Core
  */
 template <class T>
 void EventList::filterInPlaceHelper(Kernel::TimeSplitterType &splitter, typename std::vector<T> &events) {
+  // ---------
+  // DEV NOTES
+  // ---------
+  // The current algorithm for inplace filter is using a two pointer technique where
+  // - itOut: the storage pointer
+  // - itev: the scan pointer
+  // When itev is traversing through the list of events, it will check against the
+  // current splitter interval identified by itspl.
+  // If itev->m_pulsetime is within the interval, the event, *itev, will be copied
+  // to the location pointed by itOut, and itOut will be incremented.
+  // When either splitter intervals or events are exhausted, truncate the events list
+  // to the current location of itOut.
+  //
+  // This linear scanning ensures that
+  // - it will only traverse the events once in the worst case.
+  // - overlapping splitter intervals will be handled correctly.
+  // - the memory usage is capped at the size of the events list.
+  //
+  // Due to the linear scanning process, the splitter intervals must be sorted by
+  // start time, which is not enforced in this helper function and is expected to
+  // be implicitly followed by the caller.
+  //
+  // Also, a future version using TimeROI will automatically sort the intervals.
+
   // Iterate through the splitter at the same time
   auto itspl = splitter.begin();
   auto itspl_end = splitter.end();
