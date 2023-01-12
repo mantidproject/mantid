@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InelasticDataManipulationIqtTab.h"
 
+#include "IndirectSettingsHelper.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -508,6 +509,51 @@ MatrixWorkspace_sptr InelasticDataManipulationIqtTab::getInputWorkspace() const 
  */
 void InelasticDataManipulationIqtTab::setInputWorkspace(MatrixWorkspace_sptr inputWorkspace) {
   m_inputWorkspace = std::move(inputWorkspace);
+}
+
+/**
+ * Plots the current preview workspace, if none is set, plots
+ * the selected spectrum of the current input workspace.
+ */
+void InelasticDataManipulationIqtTab::plotCurrentPreview() {
+  auto previewWs = getPreviewPlotWorkspace();
+  auto inputWs = getInputWorkspace();
+  auto index = boost::numeric_cast<size_t>(m_selectedSpectrum);
+  auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
+
+  // Check a workspace has been selected
+  if (previewWs) {
+
+    if (inputWs && previewWs->getName() == inputWs->getName()) {
+      m_plotter->plotSpectra(previewWs->getName(), std::to_string(index), errorBars);
+    } else {
+      m_plotter->plotSpectra(previewWs->getName(), "0-2", errorBars);
+    }
+  } else if (inputWs && index < inputWs->getNumberHistograms()) {
+    m_plotter->plotSpectra(inputWs->getName(), std::to_string(index), errorBars);
+  } else
+    showMessageBox("Workspace not found - data may not be loaded.");
+}
+
+/**
+ * Retrieves the workspace containing the data to be displayed in
+ * the preview plot.
+ *
+ * @return  The workspace containing the data to be displayed in
+ *          the preview plot.
+ */
+MatrixWorkspace_sptr InelasticDataManipulationIqtTab::getPreviewPlotWorkspace() {
+  return m_previewPlotWorkspace.lock();
+}
+
+/**
+ * Sets the workspace containing the data to be displayed in the
+ * preview plot.
+ *
+ * @param previewPlotWorkspace The workspace to set.
+ */
+void InelasticDataManipulationIqtTab::setPreviewPlotWorkspace(const MatrixWorkspace_sptr &previewPlotWorkspace) {
+  m_previewPlotWorkspace = previewPlotWorkspace;
 }
 
 } // namespace MantidQt::CustomInterfaces::IDA
