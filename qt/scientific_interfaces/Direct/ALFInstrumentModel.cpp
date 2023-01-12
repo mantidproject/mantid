@@ -59,28 +59,6 @@ void appendTwoThetaClosestToZero(std::vector<double> &twoThetas,
   }
 }
 
-/*
- * Finds all the detector indices in a tube if at least one detector index from that tube is provided.
- * @param componentInfo : The component info object which stores info about all detectors in their tubes
- * @param partTubeDetectorIndices : The detector indices that could come from different parts of multiple tubes
- * @return A vector of detector indices for representing entire tubes being selected.
- */
-std::vector<std::size_t> findWholeTubeDetectors(Mantid::Geometry::ComponentInfo const &componentInfo,
-                                                std::vector<std::size_t> const &partTubeDetectorIndices) {
-  std::vector<std::size_t> wholeTubeIndices;
-  for (auto const &detectorIndex : partTubeDetectorIndices) {
-    auto const iter = std::find(wholeTubeIndices.cbegin(), wholeTubeIndices.cend(), detectorIndex);
-    // Check that the indices for this tube haven't already been added
-    if (iter == wholeTubeIndices.cend()) {
-      // Find all of the detector indices for the whole tube
-      auto const detectors = componentInfo.detectorsInSubtree(componentInfo.parent(detectorIndex));
-      std::transform(detectors.cbegin(), detectors.cend(), std::back_inserter(wholeTubeIndices),
-                     [](auto const &index) { return index; });
-    }
-  }
-  return wholeTubeIndices;
-}
-
 double calculateError(Mantid::HistogramData::HistogramE const &eValues, std::size_t const binIndexMin,
                       std::size_t const binIndexMax) {
   // Calculate the squared values
@@ -191,7 +169,7 @@ MatrixWorkspace_sptr scaleX(MatrixWorkspace_sptr const &inputWorkspace, double c
 
 namespace MantidQt::CustomInterfaces {
 
-ALFInstrumentModel::ALFInstrumentModel() : m_detectorIndices() { loadEmptyInstrument("ALF", loadedWsName()); }
+ALFInstrumentModel::ALFInstrumentModel() : m_tubes() { loadEmptyInstrument("ALF", loadedWsName()); }
 
 /*
  * Loads data into the ALFView. Normalises and converts to DSpacing if necessary.
@@ -228,15 +206,39 @@ std::size_t ALFInstrumentModel::runNumber() const {
   return 0u;
 }
 
-void ALFInstrumentModel::setSelectedDetectors(Mantid::Geometry::ComponentInfo const &componentInfo,
-                                              std::vector<std::size_t> const &detectorIndices) {
-  m_detectorIndices = findWholeTubeDetectors(componentInfo, detectorIndices);
+bool ALFInstrumentModel::setSelectedTubes(std::vector<DetectorTube> tubes) {
+  // If the number of tubes is different then we need definitely need to update the stored tubes
+  if (tubes.size() != m_tubes.size()) {
+    m_tubes = std::move(tubes);
+    return true;
+  }
+
+  // Check if a new tube exists in the provided tubes
+  const auto hasNewTube =
+      std::any_of(tubes.cbegin(), tubes.cend(), [&](const auto &tube) { return !tubeExists(tube); });
+  if (hasNewTube) {
+    m_tubes = std::move(tubes);
+  }
+  return hasNewTube;
+}
+
+bool ALFInstrumentModel::addSelectedTube(DetectorTube const &tube) {
+  auto const isNewTube = !tubeExists(tube);
+  if (isNewTube) {
+    m_tubes.emplace_back(tube);
+  }
+
+  return isNewTube;
+}
+
+bool ALFInstrumentModel::tubeExists(DetectorTube const &tube) const {
+  return std::find(m_tubes.cbegin(), m_tubes.cend(), tube) != m_tubes.cend();
 }
 
 std::tuple<MatrixWorkspace_sptr, std::vector<double>>
 ALFInstrumentModel::generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::IInstrumentActor const &actor) const {
   std::vector<double> twoThetas;
-  if (m_detectorIndices.empty()) {
+  if (m_tubes.empty()) {
     return {nullptr, twoThetas};
   }
 
@@ -248,7 +250,7 @@ ALFInstrumentModel::generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::II
   // Convert x axis from radians to degrees
   workspace = scaleX(workspace, 180.0 / M_PI);
   // Rebin and average the workspace based on the number of tubes that are selected
-  workspace = rebunch(workspace, numberOfTubes(actor));
+  workspace = rebunch(workspace, numberOfTubes());
   return {workspace, twoThetas};
 }
 
@@ -278,50 +280,39 @@ void ALFInstrumentModel::collectAndSortYByX(std::map<double, double> &xy, std::m
                                             MatrixWorkspace_const_sptr const &workspace,
                                             Mantid::Geometry::ComponentInfo const &componentInfo,
                                             Mantid::Geometry::DetectorInfo const &detectorInfo) const {
-  auto const nDetectorsPerTube = numberOfDetectorsPerTube(componentInfo);
+  auto const nDetectorsPerTube = m_tubes.front().size();
   auto const samplePosition = componentInfo.samplePosition();
   auto const instrument = actor.getInstrument();
 
   Mantid::Kernel::V3D normal;
   std::size_t imin, imax;
   std::optional<std::pair<double, std::size_t>> workspaceIndexClosestToZeroX = std::nullopt;
-  for (auto i = 0u; i < m_detectorIndices.size(); ++i) {
-    auto const detectorIndex = m_detectorIndices[i];
-    auto const workspaceIndex = actor.getWorkspaceIndex(detectorIndex);
+  for (auto const &tubeDetectorIndices : m_tubes) {
+    for (auto i = 0u; i < tubeDetectorIndices.size(); ++i) {
+      auto const detectorIndex = tubeDetectorIndices[i];
+      auto const workspaceIndex = actor.getWorkspaceIndex(detectorIndex);
 
-    if (i % nDetectorsPerTube == 0) {
-      normal = normalize(componentInfo.position(m_detectorIndices[i + 1]) - componentInfo.position(detectorIndex));
-      actor.getBinMinMaxIndex(workspaceIndex, imin, imax);
-      appendTwoThetaClosestToZero(twoThetas, workspaceIndexClosestToZeroX, workspace, instrument);
-    }
+      if (i % nDetectorsPerTube == 0) {
+        normal = normalize(componentInfo.position(tubeDetectorIndices[i + 1]) - componentInfo.position(detectorIndex));
+        actor.getBinMinMaxIndex(workspaceIndex, imin, imax);
+        appendTwoThetaClosestToZero(twoThetas, workspaceIndexClosestToZeroX, workspace, instrument);
+      }
 
-    if (workspaceIndex != MantidQt::MantidWidgets::InstrumentActor::INVALID_INDEX &&
-        componentInfo.isDetector(detectorIndex)) {
+      if (workspaceIndex != MantidQt::MantidWidgets::InstrumentActor::INVALID_INDEX &&
+          componentInfo.isDetector(detectorIndex)) {
 
-      auto const xValue = calculateOutOfPlaneAngle(detectorInfo.position(detectorIndex), samplePosition, normal);
-      xy[xValue] = calculateYCounts(workspace->y(workspaceIndex), imin, imax);
-      xe[xValue] = calculateError(workspace->e(workspaceIndex), imin, imax);
+        auto const xValue = calculateOutOfPlaneAngle(detectorInfo.position(detectorIndex), samplePosition, normal);
+        xy[xValue] = calculateYCounts(workspace->y(workspaceIndex), imin, imax);
+        xe[xValue] = calculateError(workspace->e(workspaceIndex), imin, imax);
 
-      auto const absXValue = std::abs(xValue);
-      if (!workspaceIndexClosestToZeroX || absXValue < (*workspaceIndexClosestToZeroX).first) {
-        workspaceIndexClosestToZeroX = std::make_pair(absXValue, workspaceIndex);
+        auto const absXValue = std::abs(xValue);
+        if (!workspaceIndexClosestToZeroX || absXValue < (*workspaceIndexClosestToZeroX).first) {
+          workspaceIndexClosestToZeroX = std::make_pair(absXValue, workspaceIndex);
+        }
       }
     }
   }
-
   appendTwoThetaClosestToZero(twoThetas, workspaceIndexClosestToZeroX, workspace, instrument);
-}
-
-std::size_t ALFInstrumentModel::numberOfDetectorsPerTube(Mantid::Geometry::ComponentInfo const &componentInfo) const {
-  return componentInfo.detectorsInSubtree(componentInfo.parent(m_detectorIndices[0])).size();
-}
-
-std::size_t ALFInstrumentModel::numberOfTubes(MantidQt::MantidWidgets::IInstrumentActor const &actor) const {
-  auto const nDetectorsPerTube = numberOfDetectorsPerTube(actor.componentInfo());
-  if (nDetectorsPerTube == 0u) {
-    return 0u;
-  }
-  return static_cast<std::size_t>(m_detectorIndices.size() / nDetectorsPerTube);
 }
 
 } // namespace MantidQt::CustomInterfaces

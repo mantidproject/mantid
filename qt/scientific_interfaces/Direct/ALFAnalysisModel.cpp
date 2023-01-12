@@ -221,7 +221,7 @@ std::optional<double> ALFAnalysisModel::rotationAngle() const {
   if (!twoTheta) {
     return std::nullopt;
   }
-  return peakCentre() / (2 * sin(*twoTheta));
+  return peakCentre() / (2 * sin((*twoTheta) * M_PI / 180.0));
 }
 
 } // namespace MantidQt::CustomInterfaces

@@ -21,6 +21,8 @@
 #include <QApplication>
 #include <QMenu>
 #include <QMouseEvent>
+#include <QPoint>
+#include <QSize>
 #include <QTransform>
 
 #include <cfloat>
@@ -401,6 +403,27 @@ void UnwrappedSurface::setFlippedView(bool on) {
       m_zoomStack[i].xFlip();
     }
   }
+}
+
+QRect UnwrappedSurface::detectorQRectInPixels(const std::size_t detectorIndex) const {
+  const auto detIter =
+      std::find_if(m_unwrappedDetectors.cbegin(), m_unwrappedDetectors.cend(),
+                   [&detectorIndex](const auto &detector) { return detector.detIndex == detectorIndex; });
+
+  if (detIter == m_unwrappedDetectors.cend()) {
+    return QRect();
+  }
+
+  const int vwidth = m_viewImage->width();
+  const int vheight = m_viewImage->height();
+  const double dw = fabs(m_viewRect.width() / vwidth);
+  const double dh = fabs(m_viewRect.height() / vheight);
+
+  const auto size = QSize(int((*detIter).width / dw), int((*detIter).height / dh));
+  const auto position =
+      QPoint(int(static_cast<int>(((*detIter).u - m_viewRect.x0()) / dw - size.width() / 2.0)),
+             int(vheight - static_cast<int>(((*detIter).v - m_viewRect.y0()) / dh) - size.height() / 2.0));
+  return QRect(position, size);
 }
 
 /**

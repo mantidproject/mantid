@@ -7,11 +7,12 @@
 #pragma once
 
 #include "ALFInstrumentModel.h"
+#include "DetectorTube.h"
 #include "DllConfig.h"
 
 #include <optional>
 #include <string>
-#include <utility>
+#include <vector>
 
 #include <QWidget>
 
@@ -31,7 +32,9 @@ public:
 
   virtual void loadRunNumber() = 0;
 
+  virtual void notifyInstrumentActorReset() = 0;
   virtual void notifyShapeChanged() = 0;
+  virtual void notifyTubesSelected(std::vector<DetectorTube> const &tubes) = 0;
 };
 
 class MANTIDQT_DIRECT_DLL ALFInstrumentPresenter final : public IALFInstrumentPresenter {
@@ -46,10 +49,14 @@ public:
 
   void loadRunNumber() override;
 
+  void notifyInstrumentActorReset() override;
   void notifyShapeChanged() override;
+  void notifyTubesSelected(std::vector<DetectorTube> const &tubes) override;
 
 private:
   std::optional<std::string> loadAndTransform(const std::string &run);
+  void updateInstrumentViewFromModel();
+  void updateAnalysisViewFromModel();
 
   IALFAnalysisPresenter *m_analysisPresenter;
 

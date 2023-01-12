@@ -12,6 +12,7 @@
 #include "ALFAnalysisMocks.h"
 #include "ALFInstrumentMocks.h"
 #include "ALFInstrumentPresenter.h"
+#include "DetectorTube.h"
 #include "MockInstrumentActor.h"
 
 #include "MantidAPI/FrameworkManager.h"
@@ -135,14 +136,71 @@ public:
     m_presenter->loadRunNumber();
   }
 
+  void test_notifyInstrumentActorReset_generates_an_angle_workspace_and_notifies_the_analysis_presenter() {
+    expectUpdateAnalysisViewFromModel();
+    m_presenter->notifyInstrumentActorReset();
+  }
+
   void test_notifyShapeChanged_generates_an_angle_workspace_and_notifies_the_analysis_presenter() {
-    auto const componentInfo = createComponentInfoObject();
-    auto const detectors = std::vector<std::size_t>{2500u, 2501u, 2502u};
+    auto const detectors = std::vector<DetectorTube>{{2500u, 2501u, 2502u}};
 
-    EXPECT_CALL(*m_view, componentInfo()).Times(1).WillOnce(ReturnRef(*componentInfo));
     EXPECT_CALL(*m_view, getSelectedDetectors()).Times(1).WillOnce(Return(detectors));
-    EXPECT_CALL(*m_model, setSelectedDetectors(_, detectors)).Times(1);
+    EXPECT_CALL(*m_model, setSelectedTubes(detectors)).Times(1).WillOnce(Return(true));
 
+    expectUpdateInstrumentViewFromModel(detectors);
+    expectUpdateAnalysisViewFromModel();
+
+    m_presenter->notifyShapeChanged();
+  }
+
+  void test_notifyShapeChanged_does_not_update_views_if_detectors_are_not_set() {
+    auto const detectors = std::vector<DetectorTube>{{2500u, 2501u, 2502u}};
+
+    EXPECT_CALL(*m_view, getSelectedDetectors()).Times(1).WillOnce(Return(detectors));
+    EXPECT_CALL(*m_model, setSelectedTubes(detectors)).Times(1).WillOnce(Return(false));
+
+    expectUpdateInstrumentViewFromModelNotCalled();
+    expectUpdateAnalysisViewFromModelNotCalled();
+
+    m_presenter->notifyShapeChanged();
+  }
+
+  void test_notifyTubesSelected_generates_an_angle_workspace_and_notifies_the_analysis_presenter() {
+    auto const detectors = std::vector<DetectorTube>{{2500u, 2501u, 2502u}};
+
+    EXPECT_CALL(*m_model, addSelectedTube(detectors.front())).Times(1).WillOnce(Return(true));
+
+    expectUpdateInstrumentViewFromModel(detectors);
+    expectUpdateAnalysisViewFromModel();
+
+    m_presenter->notifyTubesSelected(detectors);
+  }
+
+  void test_notifyTubesSelected_does_not_update_views_if_tube_is_not_added() {
+    auto const detectors = std::vector<DetectorTube>{{2500u, 2501u, 2502u}};
+
+    EXPECT_CALL(*m_model, addSelectedTube(detectors.front())).Times(1).WillOnce(Return(false));
+
+    expectUpdateInstrumentViewFromModelNotCalled();
+    expectUpdateAnalysisViewFromModelNotCalled();
+
+    m_presenter->notifyTubesSelected(detectors);
+  }
+
+private:
+  void expectUpdateInstrumentViewFromModel(std::vector<DetectorTube> const &tubes) {
+    EXPECT_CALL(*m_view, clearShapes()).Times(1);
+    EXPECT_CALL(*m_model, selectedTubes()).Times(1).WillOnce(Return(tubes));
+    EXPECT_CALL(*m_view, drawRectanglesAbove(tubes)).Times(1);
+  }
+
+  void expectUpdateInstrumentViewFromModelNotCalled() {
+    EXPECT_CALL(*m_view, clearShapes()).Times(0);
+    EXPECT_CALL(*m_model, selectedTubes()).Times(0);
+    EXPECT_CALL(*m_view, drawRectanglesAbove(_)).Times(0);
+  }
+
+  void expectUpdateAnalysisViewFromModel() {
     MatrixWorkspace_sptr const expectedExtractedWorkspace = nullptr;
     auto const expectedTwoTheta = std::vector<double>{1.1, 2.2};
     std::tuple<MatrixWorkspace_sptr, std::vector<double>> const expectedReturn = {expectedExtractedWorkspace,
@@ -152,19 +210,12 @@ public:
     EXPECT_CALL(*m_model, generateOutOfPlaneAngleWorkspace(_)).Times(1).WillOnce(Return(expectedReturn));
 
     EXPECT_CALL(*m_analysisPresenter, setExtractedWorkspace(expectedExtractedWorkspace, expectedTwoTheta)).Times(1);
-
-    m_presenter->notifyShapeChanged();
   }
 
-private:
-  std::unique_ptr<Mantid::Geometry::ComponentInfo> createComponentInfoObject() {
-    auto visitee = ComponentCreationHelper::createMinimalInstrument(V3D(0, 0, 0),   // Source position
-                                                                    V3D(10, 0, 0),  // Sample position
-                                                                    V3D(11, 0, 0)); // Detector position
-    InstrumentVisitor visitor(visitee);
-
-    // Return the ComponentInfo object
-    return InstrumentVisitor::makeWrappers(*visitee, nullptr).first;
+  void expectUpdateAnalysisViewFromModelNotCalled() {
+    EXPECT_CALL(*m_view, getInstrumentActor()).Times(0);
+    EXPECT_CALL(*m_model, generateOutOfPlaneAngleWorkspace(_)).Times(0);
+    EXPECT_CALL(*m_analysisPresenter, setExtractedWorkspace(_, _)).Times(0);
   }
 
   NiceMock<MockALFInstrumentModel> *m_model;

@@ -8,6 +8,7 @@
 
 #include "DllConfig.h"
 
+#include "DetectorTube.h"
 #include "MantidKernel/V3D.h"
 
 #include <optional>
@@ -48,9 +49,11 @@ public:
   virtual void setRunQuietly(std::string const &runNumber) = 0;
 
   virtual MantidWidgets::IInstrumentActor const &getInstrumentActor() const = 0;
-  virtual Mantid::Geometry::ComponentInfo const &componentInfo() const = 0;
 
-  virtual std::vector<std::size_t> getSelectedDetectors() const = 0;
+  virtual std::vector<DetectorTube> getSelectedDetectors() const = 0;
+
+  virtual void clearShapes() = 0;
+  virtual void drawRectanglesAbove(std::vector<DetectorTube> const &tubes) = 0;
 
   virtual void warningBox(std::string const &message) = 0;
 };
@@ -72,17 +75,21 @@ public:
   void setRunQuietly(std::string const &runNumber) override;
 
   MantidWidgets::IInstrumentActor const &getInstrumentActor() const override;
-  Mantid::Geometry::ComponentInfo const &componentInfo() const override;
 
-  std::vector<std::size_t> getSelectedDetectors() const override;
+  std::vector<DetectorTube> getSelectedDetectors() const override;
+
+  void clearShapes() override;
+  void drawRectanglesAbove(std::vector<DetectorTube> const &tubes) override;
 
   void warningBox(std::string const &message) override;
 
 private slots:
   void reconnectInstrumentActor();
   void fileLoaded();
+  void notifyInstrumentActorReset();
   void notifyShapeChanged();
   void selectWholeTube();
+  void notifyWholeTubeSelected(size_t pickID);
 
 private:
   API::FileFinderWidget *m_files;
