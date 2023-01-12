@@ -70,6 +70,18 @@ TimeROI::TimeROI(const Types::Core::DateAndTime &startTime, const Types::Core::D
   this->addROI(startTime, stopTime);
 }
 
+TimeROI::TimeROI(const Kernel::TimeSeriesProperty<bool> &filter) : m_roi{NAME} {
+  const auto &times = filter.timesAsVector();
+  const auto &values = filter.valuesAsVector();
+
+  const auto NUM_VAL = times.size();
+  for (size_t i = 0; i < NUM_VAL; ++i) {
+    m_roi.addValue(times[i], values[i]);
+  }
+  // assuming the filter was not well specified, clean things up
+  this->removeRedundantEntries();
+}
+
 void TimeROI::addROI(const std::string &startTime, const std::string &stopTime) {
   this->addROI(DateAndTime(startTime), DateAndTime(stopTime));
 }

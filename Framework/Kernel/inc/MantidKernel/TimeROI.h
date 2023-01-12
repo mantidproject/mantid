@@ -21,6 +21,7 @@ public:
 
   TimeROI();
   TimeROI(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime);
+  TimeROI(const Kernel::TimeSeriesProperty<bool> &filter);
   double durationInSeconds() const;
   double durationInSeconds(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) const;
   std::size_t numBoundaries() const;
