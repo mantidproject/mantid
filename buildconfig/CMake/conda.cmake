@@ -5,4 +5,3 @@ add_custom_target(
   COMMAND python conda_update_recipe.py
   WORKING_DIRECTORY ${CONDA_WORKDIR}
 )
-
