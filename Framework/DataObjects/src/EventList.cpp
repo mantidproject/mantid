@@ -4712,4 +4712,12 @@ void EventList::checkIsYAndEWritable() const {
                            "generated automatically based on the events");
 }
 
+template <class T> void copy_if(std::vector<T> &events, std::vector<T> &output, bool (*pf)()) {
+  for (auto it = events.begin(); it != events.end(); it++) {
+    if (pf()) {
+      output.emplace_back(it);
+    }
+  }
+}
+
 } // namespace Mantid::DataObjects
