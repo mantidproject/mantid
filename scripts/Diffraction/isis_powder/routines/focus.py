@@ -134,7 +134,11 @@ def _focus_one_ws(
         )
     else:
         # per detector routine
-        calibrated_spectra = _restructure_data_in_per_detector_routine(focused_ws, cal_filepath=run_details.offset_file_path)
+        calibrated_spectra = _restructure_data_in_per_detector_routine(
+            focused_ws,
+            cal_filepath=run_details.offset_file_path,
+            instrument_name=instrument.get_instrument_prefix(),
+        )
 
     output_spectra = instrument._crop_banks_to_user_tof(calibrated_spectra)
 
@@ -239,24 +243,24 @@ def _apply_vanadium_corrections_per_detector(instrument, input_workspace: Worksp
     return processed_spectra
 
 
-def _restructure_data_in_per_detector_routine(focused_workspace, cal_filepath):
-    focused_workspace = divide_by_number_of_detectors_in_bank(focused_workspace, cal_filepath)
+def _restructure_data_in_per_detector_routine(focused_workspace, cal_filepath, instrument_name):
+    focused_workspace = divide_by_number_of_detectors_in_bank(focused_workspace, cal_filepath, instrument_name)
     mantid.ConvertToDistribution(focused_workspace)
     calibrated_spectra = common.extract_ws_spectra(focused_workspace)
     return calibrated_spectra
 
 
-def divide_by_number_of_detectors_in_bank(focussed_data, cal_filepath):
+def divide_by_number_of_detectors_in_bank(focussed_data, cal_filepath, instrument_name):
     # Divide each spectrum by number of detectors in their bank
     cal_workspace = mantid.LoadCalFile(
-        InputWorkspace=focussed_data,
+        InstrumentName=instrument_name,
         CalFileName=cal_filepath,
-        Workspacename="cal_workspace",
+        WorkspaceName="cal_workspace",
         MakeOffsetsWorkspace=False,
         MakeMaskWorkspace=False,
-        MakeGroupingWorkspace=False,
+        MakeGroupingWorkspace=True,
     )
-    n_pixel = np.zeros(focussed_data.getNumberHistograms())
+    n_pixel = numpy.zeros(focussed_data.getNumberHistograms())
     for bank_index in range(cal_workspace.getNumberHistograms()):
         grouping = cal_workspace.dataY(bank_index)
         if grouping[0] > 0:
