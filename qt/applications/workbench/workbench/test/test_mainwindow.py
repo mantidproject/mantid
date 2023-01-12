@@ -348,7 +348,7 @@ class MainWindowTest(unittest.TestCase):
 
         cpp_interface_factory = Mock()
         cpp_interface_factory.keys.return_value = ["ALFView", "TOFCalculator"]
-        cpp_interface_factory.categories.side_effect = lambda name: ["Direct"] if name == "ALF View" else []
+        cpp_interface_factory.categories.side_effect = lambda name: ["Direct"] if name == "ALFView" else []
         mock_UserSubWindowFactory.Instance.return_value = cpp_interface_factory
 
         all_interfaces = self.main_window._discover_cpp_interfaces(
