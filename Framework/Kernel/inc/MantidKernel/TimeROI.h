@@ -8,6 +8,7 @@
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/TimeSplitter.h"
 
 namespace Mantid {
 namespace Kernel {
@@ -38,6 +39,7 @@ public:
   void update_union(const TimeROI &other);
   void update_intersection(const TimeROI &other);
   void removeRedundantEntries();
+  const std::vector<SplittingInterval> toSplitters() const;
   bool operator==(const TimeROI &other) const;
   void debugPrint() const;
   size_t getMemorySize() const;
