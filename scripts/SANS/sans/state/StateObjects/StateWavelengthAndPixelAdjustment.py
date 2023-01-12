@@ -11,11 +11,11 @@
 import copy
 import json
 
-from sans.common.enums import (RangeStepType, DetectorType)
+from sans.common.enums import RangeStepType, DetectorType
 from sans.state.JsonSerializable import JsonSerializable
 from sans.state.StateObjects.wavelength_interval import WavelengthInterval
 from sans.state.automatic_setters import automatic_setters
-from sans.state.state_functions import (one_is_none, validation_message)
+from sans.state.state_functions import one_is_none, validation_message
 
 
 class StateAdjustmentFiles(metaclass=JsonSerializable):
@@ -30,8 +30,7 @@ class StateAdjustmentFiles(metaclass=JsonSerializable):
         #       This is very low priority, but would be nice to have.
 
         if is_invalid:
-            raise ValueError("StateAdjustmentFiles: The provided inputs are illegal. "
-                             "Please see: {0}".format(json.dumps(is_invalid)))
+            raise ValueError("StateAdjustmentFiles: The provided inputs are illegal. " "Please see: {0}".format(json.dumps(is_invalid)))
 
 
 class StateWavelengthAndPixelAdjustment(metaclass=JsonSerializable):
@@ -42,8 +41,7 @@ class StateWavelengthAndPixelAdjustment(metaclass=JsonSerializable):
 
         self.idf_path = None  # : Str()
 
-        self.adjustment_files = {DetectorType.LAB.value: StateAdjustmentFiles(),
-                                 DetectorType.HAB.value: StateAdjustmentFiles()}
+        self.adjustment_files = {DetectorType.LAB.value: StateAdjustmentFiles(), DetectorType.HAB.value: StateAdjustmentFiles()}
 
     @property
     def wavelength_step_type_lin_log(self):
@@ -51,25 +49,32 @@ class StateWavelengthAndPixelAdjustment(metaclass=JsonSerializable):
         # LIN/LOG. This is not ideal but is required for workflow algorithms
         # which only accept a subset of the values in the enum
         value = self.wavelength_step_type
-        result = RangeStepType.LIN if value in [RangeStepType.LIN, RangeStepType.RANGE_LIN] else \
-            RangeStepType.LOG if value in [RangeStepType.LOG, RangeStepType.RANGE_LOG] else \
-            RangeStepType.NOT_SET
+        result = (
+            RangeStepType.LIN
+            if value in [RangeStepType.LIN, RangeStepType.RANGE_LIN]
+            else RangeStepType.LOG
+            if value in [RangeStepType.LOG, RangeStepType.RANGE_LOG]
+            else RangeStepType.NOT_SET
+        )
         return result
 
     def validate(self):
         is_invalid = {}
 
         if one_is_none([self.wavelength_interval, self.wavelength_step_type]):
-            entry = validation_message("A wavelength entry has not been set.",
-                                       "Make sure that all entries are set.",
-                                       {"wavelength_low": self.wavelength_interval,
-                                        "wavelength_step_type": self.wavelength_step_type})
+            entry = validation_message(
+                "A wavelength entry has not been set.",
+                "Make sure that all entries are set.",
+                {"wavelength_low": self.wavelength_interval, "wavelength_step_type": self.wavelength_step_type},
+            )
             is_invalid.update(entry)
 
         if self.wavelength_step_type is RangeStepType.NOT_SET:
-            entry = validation_message("A wavelength entry has not been set.",
-                                       "Make sure that all entries are set.",
-                                       {"wavelength_step_type": self.wavelength_step_type})
+            entry = validation_message(
+                "A wavelength entry has not been set.",
+                "Make sure that all entries are set.",
+                {"wavelength_step_type": self.wavelength_step_type},
+            )
             is_invalid.update(entry)
 
         try:
@@ -79,8 +84,9 @@ class StateWavelengthAndPixelAdjustment(metaclass=JsonSerializable):
             is_invalid.update({"adjustment_files": str(e)})
 
         if is_invalid:
-            raise ValueError("StateWavelengthAndPixelAdjustment: The provided inputs are illegal. "
-                             "Please see: {0}".format(json.dumps(is_invalid)))
+            raise ValueError(
+                "StateWavelengthAndPixelAdjustment: The provided inputs are illegal. " "Please see: {0}".format(json.dumps(is_invalid))
+            )
 
 
 # ----------------------------------------------------------------------------------------------------------------------

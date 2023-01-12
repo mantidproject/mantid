@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 """
     Data catalog for HFIR SANS
 """
@@ -18,28 +18,29 @@ import time
 try:
     from mantid.api import AnalysisDataService
     import mantid.simpleapi as api
+
     HAS_MANTID = True
 except:
     HAS_MANTID = False
 
 try:
     import mantidplot  # noqa
+
     IN_MANTIDPLOT = True
 except:
     IN_MANTIDPLOT = False
 
 
 class HFIRDataType(DataType):
-    TABLE_NAME="hfir_datatype"
+    TABLE_NAME = "hfir_datatype"
 
 
 class HFIRDataSet(DataSet):
-    TABLE_NAME="hfir_dataset"
+    TABLE_NAME = "hfir_dataset"
     data_type_cls = HFIRDataType
 
     def __init__(self, run_number, title, run_start, duration, sdd):
-        super(HFIRDataSet, self).__init__(run_number, title, run_start,
-                                          duration, sdd)
+        super(HFIRDataSet, self).__init__(run_number, title, run_start, duration, sdd)
 
     @classmethod
     def load_meta_data(cls, file_path, outputWorkspace):
@@ -58,10 +59,10 @@ class HFIRDataSet(DataSet):
     @classmethod
     def handle(cls, file_path):
         """
-            Return a DB handle for the given file, such as a run number
+        Return a DB handle for the given file, such as a run number
         """
         handle = os.path.splitext(os.path.basename(file_path))[0]
-        if handle=="":
+        if handle == "":
             return None
         return handle
 
@@ -83,8 +84,8 @@ class HFIRDataSet(DataSet):
 
         title = read_prop("run_title")
         t_str = read_prop("start_time")
-        t = time.strptime(t_str, '%Y-%m-%d %H:%M:%S')
-        run_start = time.strftime('%y-%m-%d %H:%M', t)
+        t = time.strptime(t_str, "%Y-%m-%d %H:%M:%S")
+        run_start = time.strftime("%y-%m-%d %H:%M", t)
 
         duration = read_prop("timer")
         try:

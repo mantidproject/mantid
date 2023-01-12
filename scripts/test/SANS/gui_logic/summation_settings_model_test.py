@@ -40,7 +40,7 @@ class SummationSettingsBinSettingsTest(SummationSettingsTestCase):
         self.assertFalse(self.summation_settings.has_bin_settings())
 
     def test_can_set_bin_settings_when_in_custom(self):
-        bin_settings = '1,24,545,23'
+        bin_settings = "1,24,545,23"
         self.summation_settings.bin_settings = bin_settings
         self.assertEqual(bin_settings, self.summation_settings.bin_settings)
 
@@ -57,8 +57,7 @@ class SummationSettingsBinSettingsTest(SummationSettingsTestCase):
         self.assertDoesNotHaveBinSettings()
 
 
-class SummationSettingsAdditionalTimeShiftsTest(SummationSettingsTestCase,
-                                                SummationSettingsOverlayEventWorkspaceTestCase):
+class SummationSettingsAdditionalTimeShiftsTest(SummationSettingsTestCase, SummationSettingsOverlayEventWorkspaceTestCase):
     def assertHasAdditionalTimeShifts(self):
         self.assertTrue(self.summation_settings.has_additional_time_shifts())
 
@@ -84,13 +83,13 @@ class SummationSettingsAdditionalTimeShiftsTest(SummationSettingsTestCase,
     def test_can_set_additional_time_shifts_when_available(self):
         self.setUpWithInitialType(BinningType.SAVE_AS_EVENT_DATA)
         self.summation_settings.enable_overlay_event_workspaces()
-        additional_time_shifts = '1,24,545,23'
+        additional_time_shifts = "1,24,545,23"
         self.summation_settings.additional_time_shifts = additional_time_shifts
         self.assertEqual(additional_time_shifts, self.summation_settings.additional_time_shifts)
 
     def test_stores_additional_time_shifts_between_mode_switches(self):
-        bin_settings = '232,2132,123'
-        additional_time_shifts = '32,252,12'
+        bin_settings = "232,2132,123"
+        additional_time_shifts = "32,252,12"
         self.setUpWithInitialType(BinningType.CUSTOM)
         self.summation_settings.bin_settings = bin_settings
         self.summation_settings.set_histogram_binning_type(BinningType.SAVE_AS_EVENT_DATA)
@@ -101,8 +100,7 @@ class SummationSettingsAdditionalTimeShiftsTest(SummationSettingsTestCase,
         self.assertEqual(additional_time_shifts, self.summation_settings.additional_time_shifts)
 
 
-class SummationSettingsOverlayEventWorkspace(SummationSettingsTestCase,
-                                             SummationSettingsOverlayEventWorkspaceTestCase):
+class SummationSettingsOverlayEventWorkspace(SummationSettingsTestCase, SummationSettingsOverlayEventWorkspaceTestCase):
     def test_custom_binning_does_not_have_overlay_event_workspaces(self):
         self.setUpWithInitialType(BinningType.CUSTOM)
         self.assertDoesNotHaveOverlayEventWorkspaces()
@@ -132,5 +130,5 @@ class SummationSettingsOverlayEventWorkspace(SummationSettingsTestCase,
         self.assertOverlayEventWorkspacesDisabled()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

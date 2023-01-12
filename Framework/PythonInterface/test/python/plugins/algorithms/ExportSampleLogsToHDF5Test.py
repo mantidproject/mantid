@@ -36,27 +36,22 @@ class ExportSampleLogsToHDF5Test(unittest.TestCase):
         self._add_log_to_workspace(input_ws, "Test1", 1.0)
         self._add_log_to_workspace(input_ws, "Test2", "Test2")
 
-        test_alg = run_algorithm(self.ALG_NAME,
-                                 InputWorkspace=input_ws,
-                                 Filename=self.TEMP_FILE_NAME)
+        test_alg = run_algorithm(self.ALG_NAME, InputWorkspace=input_ws, Filename=self.TEMP_FILE_NAME)
 
         self.assertTrue(test_alg.isExecuted())
 
         with h5py.File(self.TEMP_FILE_NAME, "r") as output_file:
             self.assertTrue("Sample Logs" in output_file)
             logs_group = output_file["Sample Logs"]
-            self.assertEqual(logs_group["Test1"].value, 1.0)
-            self.assertEqual(logs_group["Test2"].value[0], b"Test2")
+            self.assertEqual(logs_group["Test1"][()], 1.0)
+            self.assertEqual(logs_group["Test2"][()], b"Test2")
 
     def test_blacklistExcludesLogs(self):
         input_ws = self._create_sample_workspace()
         self._add_log_to_workspace(input_ws, "ToInclude", 1)
         self._add_log_to_workspace(input_ws, "ToExclude", 2)
 
-        run_algorithm(self.ALG_NAME,
-                      InputWorkspace=input_ws,
-                      Filename=self.TEMP_FILE_NAME,
-                      BlackList="ToExclude")
+        run_algorithm(self.ALG_NAME, InputWorkspace=input_ws, Filename=self.TEMP_FILE_NAME, BlackList="ToExclude")
 
         with h5py.File(self.TEMP_FILE_NAME, "r") as output_file:
             logs_group = output_file["Sample Logs"]
@@ -66,18 +61,15 @@ class ExportSampleLogsToHDF5Test(unittest.TestCase):
     def test_timeSeriesAreTimeAveraged(self):
         input_ws = self._create_sample_workspace()
         self._add_log_to_workspace(input_ws, "TestLog", [1.0, 2.0, 3.0])
-        run_algorithm(self.ALG_NAME,
-                      InputWorkspace=input_ws,
-                      Filename=self.TEMP_FILE_NAME)
+        run_algorithm(self.ALG_NAME, InputWorkspace=input_ws, Filename=self.TEMP_FILE_NAME)
 
         with h5py.File(self.TEMP_FILE_NAME, "r") as output_file:
             logs_group = output_file["Sample Logs"]
-            self.assertEqual(logs_group["TestLog"].value, 1.5)
+            self.assertEqual(logs_group["TestLog"][()], 1.5)
 
     def test_unitAreAddedIfPresent(self):
         input_ws = self._create_sample_workspace()
-        mantid.AddSampleLog(Workspace=input_ws, LogName="TestLog", LogText="1",
-                            LogType="Number", LogUnit="uAmps")
+        mantid.AddSampleLog(Workspace=input_ws, LogName="TestLog", LogText="1", LogType="Number", LogUnit="uAmps")
         run_algorithm(self.ALG_NAME, InputWorkspace=input_ws, Filename=self.TEMP_FILE_NAME)
 
         with h5py.File(self.TEMP_FILE_NAME, "r") as output_file:
@@ -85,12 +77,12 @@ class ExportSampleLogsToHDF5Test(unittest.TestCase):
             self.assertEqual(logs_group["TestLog"].attrs["Units"], "uAmps")
 
     def test_create_timeSeries(self):
-        """ Tests that the correct TimeSeriesProperty is returned when given a
-            name and a list of values of a given type."""
+        """Tests that the correct TimeSeriesProperty is returned when given a
+        name and a list of values of a given type."""
 
         # Test for Int32TimeSeriesProperty
         int_log_name = "Int32Series"
-        int_log_values = [1,2,3,4,5,6,7]
+        int_log_values = [1, 2, 3, 4, 5, 6, 7]
         int_prop = PropertyFactory.createTimeSeries(int_log_name, int_log_values)
         self.assertEqual(type(int_prop), Int32TimeSeriesProperty)
 
@@ -108,7 +100,7 @@ class ExportSampleLogsToHDF5Test(unittest.TestCase):
 
         # Test for FloatTimeSeriesProperty
         float_log_name = "FloatSeries"
-        float_log_values = [1.0 ,2.1, 3.2, 4.3, 5.6, 6.7, 7.8]
+        float_log_values = [1.0, 2.1, 3.2, 4.3, 5.6, 6.7, 7.8]
         float_prop = PropertyFactory.createTimeSeries(float_log_name, float_log_values)
         self.assertTrue(type(float_prop), FloatTimeSeriesProperty)
 
@@ -117,16 +109,16 @@ class ExportSampleLogsToHDF5Test(unittest.TestCase):
             ws.mutableRun()[log_name] = self._create_time_series_log(log_name, log_value)
 
         else:
-            mantid.AddSampleLog(Workspace=ws, LogName=log_name, LogText=str(log_value),
-                                LogType="String" if isinstance(log_value, str) else "Number")
+            mantid.AddSampleLog(
+                Workspace=ws, LogName=log_name, LogText=str(log_value), LogType="String" if isinstance(log_value, str) else "Number"
+            )
 
     def _create_sample_workspace(self):
         x = np.array([1.0, 2.0, 3.0, 4.0])
         y = np.array([1.0, 2.0, 3.0])
         e = np.sqrt(y)
 
-        ws = mantid.CreateWorkspace(DataX=x, DataY=y, DataE=e, NSpec=1, UnitX="TOF",
-                                    OutputWorkspace=self.TEST_WS_NAME)
+        ws = mantid.CreateWorkspace(DataX=x, DataY=y, DataE=e, NSpec=1, UnitX="TOF", OutputWorkspace=self.TEST_WS_NAME)
         return ws
 
     def _create_time_series_log(self, log_name, log_value):
@@ -135,6 +127,7 @@ class ExportSampleLogsToHDF5Test(unittest.TestCase):
             prop.addValue(i, value)
 
         return prop
+
 
 if __name__ == "__main__":
     unittest.main()

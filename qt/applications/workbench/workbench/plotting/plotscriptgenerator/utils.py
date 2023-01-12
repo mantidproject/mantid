@@ -27,13 +27,12 @@ def convert_value_to_arg_string(value):
     if isinstance(value, str):
         return "'{}'".format(value)
     if isinstance(value, (list, np.ndarray, tuple)):
-        return "[{}]".format(', '.join([convert_value_to_arg_string(v) for v in value]))
+        return "[{}]".format(", ".join([convert_value_to_arg_string(v) for v in value]))
     if isinstance(value, dict):
         kv_pairs = []
         for key, val in value.items():
-            kv_pairs.append("{}: {}".format(convert_value_to_arg_string(key),
-                                            convert_value_to_arg_string(val)))
-        return "{{{}}}".format(', '.join(kv_pairs))
+            kv_pairs.append("{}: {}".format(convert_value_to_arg_string(key), convert_value_to_arg_string(val)))
+        return "{{{}}}".format(", ".join(kv_pairs))
     if isinstance(value, float):
         return str(round_to_sig_figs(value, 5))
     return str(value)
@@ -47,7 +46,7 @@ def convert_args_to_string(args, kwargs):
     arg_strings = [str(arg) for arg in args] if args else []
     for kwarg, value in sorted(kwargs.items()):  # sorting makes this testable
         arg_strings.append("{}={}".format(kwarg, convert_value_to_arg_string(value)))
-    return ', '.join(arg_strings)
+    return ", ".join(arg_strings)
 
 
 def get_plotted_workspaces_names(fig):
@@ -71,13 +70,12 @@ def generate_workspace_retrieval_commands(fig):
 
 def clean_variable_name(name):
     """Converts a string into a valid Python variable name"""
-    return re.sub(r'\W|^(?=\d)', '_', name)
+    return re.sub(r"\W|^(?=\d)", "_", name)
 
 
 def sorted_lines_in(ax, artists):
     lines = ax.get_lines()
-    err_containers = [cont for cont in ax.containers
-                      if isinstance(cont, ErrorbarContainer)]
+    err_containers = [cont for cont in ax.containers if isinstance(cont, ErrorbarContainer)]
     sorted_lines = []
     for line in lines + err_containers:
         if line in artists:

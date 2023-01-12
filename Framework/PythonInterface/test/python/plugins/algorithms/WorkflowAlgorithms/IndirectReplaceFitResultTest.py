@@ -5,9 +5,15 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import (CompareWorkspaces, ConvolutionFitSequential, ConvolutionFitSimultaneous, LoadNexus,
-                              IndirectReplaceFitResult, RenameWorkspace)
-from mantid.api import (AnalysisDataService, MatrixWorkspace, WorkspaceGroup)
+from mantid.simpleapi import (
+    CompareWorkspaces,
+    ConvolutionFitSequential,
+    ConvolutionFitSimultaneous,
+    LoadNexus,
+    IndirectReplaceFitResult,
+    RenameWorkspace,
+)
+from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup
 from mantid.buildconfig import GSL_VERSION
 
 
@@ -20,64 +26,68 @@ def add_to_ads(workspace_name, workspace):
 
 
 def execute_algorithm(input_workspace, single_fit_workspace, output_name):
-    IndirectReplaceFitResult(InputWorkspace=input_workspace,
-                             SingleFitWorkspace=single_fit_workspace,
-                             OutputWorkspace=output_name)
+    IndirectReplaceFitResult(InputWorkspace=input_workspace, SingleFitWorkspace=single_fit_workspace, OutputWorkspace=output_name)
 
 
 def get_sequential_input_string(workspace_name, number_of_histograms):
-    input_string = ''
+    input_string = ""
     for i in range(number_of_histograms):
-        input_string += '{0},i{1};'.format(workspace_name, i)
+        input_string += "{0},i{1};".format(workspace_name, i)
     return input_string
 
 
 def current_os_has_gslv2():
-    """ Check whether the current OS is using GSLv2 """
+    """Check whether the current OS is using GSLv2"""
     return int(GSL_VERSION[0]) >= 2
 
 
 class IndirectReplaceFitResultTest(unittest.TestCase):
     def setUp(self):
-        self._input_name = 'iris26176_graphite002_conv_1L_s0_to_17__Result'
-        self._single_fit_name = 'iris26176_graphite002_red_conv_1L_1__Result'
-        self._result_group_name = 'iris26176_graphite002_conv_1L_s0_to_17_Results'
-        self._single_fit_group_name = 'iris26176_graphite002_red_conv_1L_1_Results'
-        self._output_name = 'iris26176_graphite002_conv_1L_s0_to_17_Result_Edit'
+        self._input_name = "iris26176_graphite002_conv_1L_s0_to_17__Result"
+        self._single_fit_name = "iris26176_graphite002_red_conv_1L_1__Result"
+        self._result_group_name = "iris26176_graphite002_conv_1L_s0_to_17_Results"
+        self._single_fit_group_name = "iris26176_graphite002_red_conv_1L_1_Results"
+        self._output_name = "iris26176_graphite002_conv_1L_s0_to_17_Result_Edit"
 
-        red_name = 'iris26176_graphite002_red'
-        res_name = 'iris26173_graphite002_res'
-        fit_function = 'composite=Convolution,FixResolution=true,NumDeriv=true;name=Resolution, ' \
-                       'Workspace=__ConvFitResolution0,WorkspaceIndex=0,X=(),Y=();name=Lorentzian,'
-        start_x = '-0.54761329492537092'
-        end_x = '0.54325428563315703'
+        red_name = "iris26176_graphite002_red"
+        res_name = "iris26173_graphite002_res"
+        fit_function = (
+            "composite=Convolution,FixResolution=true,NumDeriv=true;name=Resolution, "
+            "Workspace=__ConvFitResolution0,WorkspaceIndex=0,X=(),Y=();name=Lorentzian,"
+        )
+        start_x = "-0.54761329492537092"
+        end_x = "0.54325428563315703"
         convolve_members = True
-        max_iterations = '5000'
+        max_iterations = "5000"
 
         # Perform fits to produce the result workspaces to use for a data replacement
-        LoadNexus(Filename=red_name + '.nxs', OutputWorkspace=red_name)
-        LoadNexus(Filename=res_name + '.nxs', OutputWorkspace=res_name)
-        LoadNexus(Filename='conv_fit_resolution.nxs', OutputWorkspace='__ConvFitResolution0')
-        ConvolutionFitSequential(Input=get_sequential_input_string(red_name, 18),
-                                 Function=fit_function + 'Amplitude=1,PeakCentre=0,FWHM=0.0175',
-                                 MaxIterations=max_iterations,
-                                 ConvolveMembers=convolve_members,
-                                 PassWSIndexToFunction='1',
-                                 StartX=start_x,
-                                 EndX=end_x,
-                                 OutputWorkspace=self._result_group_name,
-                                 OutputParameterWorkspace='iris26176_graphite002_conv_1L_s0_to_17_Parameters',
-                                 OutputWorkspaceGroup='iris26176_graphite002_conv_1L_s0_to_17_Workspaces')
-        ConvolutionFitSimultaneous(InputWorkspace=red_name,
-                                   Function=fit_function + 'Amplitude=4.96922,PeakCentre=-0.000735068,FWHM=0.0671319',
-                                   MaxIterations=max_iterations,
-                                   ConvolveMembers=convolve_members,
-                                   WorkspaceIndex='1',
-                                   StartX=start_x,
-                                   EndX=end_x,
-                                   OutputWorkspace=self._single_fit_group_name,
-                                   OutputParameterWorkspace='iris26176_graphite002_conv_1L_s1_Parameters',
-                                   OutputWorkspaceGroup='iris26176_graphite002_conv_1L_s1_Workspaces')
+        LoadNexus(Filename=red_name + ".nxs", OutputWorkspace=red_name)
+        LoadNexus(Filename=res_name + ".nxs", OutputWorkspace=res_name)
+        LoadNexus(Filename="conv_fit_resolution.nxs", OutputWorkspace="__ConvFitResolution0")
+        ConvolutionFitSequential(
+            Input=get_sequential_input_string(red_name, 18),
+            Function=fit_function + "Amplitude=1,PeakCentre=0,FWHM=0.0175",
+            MaxIterations=max_iterations,
+            ConvolveMembers=convolve_members,
+            PassWSIndexToFunction="1",
+            StartX=start_x,
+            EndX=end_x,
+            OutputWorkspace=self._result_group_name,
+            OutputParameterWorkspace="iris26176_graphite002_conv_1L_s0_to_17_Parameters",
+            OutputWorkspaceGroup="iris26176_graphite002_conv_1L_s0_to_17_Workspaces",
+        )
+        ConvolutionFitSimultaneous(
+            InputWorkspace=red_name,
+            Function=fit_function + "Amplitude=4.96922,PeakCentre=-0.000735068,FWHM=0.0671319",
+            MaxIterations=max_iterations,
+            ConvolveMembers=convolve_members,
+            WorkspaceIndex="1",
+            StartX=start_x,
+            EndX=end_x,
+            OutputWorkspace=self._single_fit_group_name,
+            OutputParameterWorkspace="iris26176_graphite002_conv_1L_s1_Parameters",
+            OutputWorkspaceGroup="iris26176_graphite002_conv_1L_s1_Workspaces",
+        )
 
         # RenameWorkspace(InputWorkspace=self._input_name, OutputWorkspace=self._input_name)
         # RenameWorkspace(InputWorkspace=self._single_fit_name, OutputWorkspace=self._single_fit_name)
@@ -123,7 +133,7 @@ class IndirectReplaceFitResultTest(unittest.TestCase):
 
     def test_that_the_algorithm_will_throw_when_provided_an_empty_output_workspace_name(self):
         with self.assertRaises(RuntimeError):
-            execute_algorithm(self._input_workspace, self._single_fit_workspace, '')
+            execute_algorithm(self._input_workspace, self._single_fit_workspace, "")
 
     def test_that_the_algorithm_will_throw_when_provided_an_single_fit_workspace_which_is_a_group(self):
         with self.assertRaises(RuntimeError):
@@ -133,8 +143,8 @@ class IndirectReplaceFitResultTest(unittest.TestCase):
         execute_algorithm(self._input_workspace, self._single_fit_workspace, self._output_name)
 
         output = get_ads_workspace(self._output_name)
-        expected_name = self._output_name + '_gslv2' if current_os_has_gslv2() else self._output_name
-        expected_output = LoadNexus(Filename=expected_name + '.nxs')
+        expected_name = self._output_name + "_gslv2" if current_os_has_gslv2() else self._output_name
+        expected_output = LoadNexus(Filename=expected_name + ".nxs")
         result, _ = CompareWorkspaces(output, expected_output, Tolerance=0.0001)
         self.assertTrue(result)
 
@@ -148,10 +158,12 @@ class IndirectReplaceFitResultTest(unittest.TestCase):
 
     def test_that_fit_parameter_missing_returns_false_when_there_are_no_fit_parameters_missing(self):
         from IndirectReplaceFitResult import fit_parameter_missing
-        self.assertFalse(fit_parameter_missing(self._single_fit_workspace, self._input_workspace, ['Chi_squared']))
+
+        self.assertFalse(fit_parameter_missing(self._single_fit_workspace, self._input_workspace, ["Chi_squared"]))
 
     def test_that_fit_parameter_missing_returns_true_when_a_fit_parameter_is_missing(self):
         from IndirectReplaceFitResult import fit_parameter_missing
+
         self.assertFalse(fit_parameter_missing(self._single_fit_workspace, self._input_workspace, []))
 
     def test_that_get_x_insertion_index_returns_the_expected_insertion_index(self):
@@ -162,5 +174,5 @@ class IndirectReplaceFitResultTest(unittest.TestCase):
         self.assertEqual(index, 1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -17,8 +17,8 @@ class PlottingContext(object):
     def __init__(self, gridspec_engine=gridspecEngine()):
         self.context = {}
         self.subplots = {}
-        self.context[xBounds] = [0., 0.]
-        self.context[yBounds] = [0., 0.]
+        self.context[xBounds] = [0.0, 0.0]
+        self.context[yBounds] = [0.0, 0.0]
         self._gridspec_engine = gridspec_engine
         self._gridspec = None
 

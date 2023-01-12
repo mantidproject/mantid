@@ -8,6 +8,7 @@ import os
 from isis_powder.routines import calibrate, focus, common, common_enums, common_output
 from mantid.kernel import config, logger
 import mantid.simpleapi as mantid
+
 # This class provides common hooks for instruments to override
 # if they want to define the behaviour of the hook. Otherwise it
 # returns the object passed in without manipulating it as a default
@@ -29,9 +30,7 @@ class AbstractInst(object):
         try:
             self._inst_prefix_short = config.getInstrument(inst_prefix).shortName()
         except RuntimeError:
-            logger.warning(
-                "Unknown instrument {}. Setting short prefix equal to full prefix".format(
-                    inst_prefix))
+            logger.warning("Unknown instrument {}. Setting short prefix equal to full prefix".format(inst_prefix))
             self._inst_prefix_short = inst_prefix
         self._output_dir = output_dir
         self._is_vanadium = None
@@ -59,17 +58,17 @@ class AbstractInst(object):
         """
         self._is_vanadium = True
         run_details = self._get_run_details(run_number_string)
-        return calibrate.create_van(instrument=self,
-                                    run_details=run_details,
-                                    absorb=do_absorb_corrections)
+        return calibrate.create_van(instrument=self, run_details=run_details, absorb=do_absorb_corrections)
 
-    def _focus(self,
-               run_number_string,
-               do_van_normalisation,
-               do_absorb_corrections,
-               sample_details=None,
-               empty_can_subtraction_method=None,
-               paalman_pings_events_per_point=None):
+    def _focus(
+        self,
+        run_number_string,
+        do_van_normalisation,
+        do_absorb_corrections,
+        sample_details=None,
+        empty_can_subtraction_method=None,
+        paalman_pings_events_per_point=None,
+    ):
         """
         Focuses the user specified run - should be called by the concrete instrument
         :param run_number_string: The run number(s) to be processed
@@ -77,13 +76,15 @@ class AbstractInst(object):
         :return:
         """
         self._is_vanadium = False
-        return focus.focus(run_number_string=run_number_string,
-                           perform_vanadium_norm=do_van_normalisation,
-                           instrument=self,
-                           absorb=do_absorb_corrections,
-                           sample_details=sample_details,
-                           empty_can_subtraction_method=empty_can_subtraction_method,
-                           paalman_pings_events_per_point=paalman_pings_events_per_point)
+        return focus.focus(
+            run_number_string=run_number_string,
+            perform_vanadium_norm=do_van_normalisation,
+            instrument=self,
+            absorb=do_absorb_corrections,
+            sample_details=sample_details,
+            empty_can_subtraction_method=empty_can_subtraction_method,
+            paalman_pings_events_per_point=paalman_pings_events_per_point,
+        )
 
     def mask_prompt_pulses_if_necessary(self, ws_list):
         """
@@ -108,7 +109,7 @@ class AbstractInst(object):
         if height <= 0 or width <= 0:
             raise ValueError("Beam height and width must be more than 0.")
         else:
-            self._beam_parameters = {'height': height, 'width': width}
+            self._beam_parameters = {"height": height, "width": width}
 
     def should_subtract_empty_inst(self):
         """
@@ -144,26 +145,23 @@ class AbstractInst(object):
 
     def _apply_absorb_corrections(self, run_details, ws_to_correct):
         """
-                Generates absorption corrections to compensate for the container. The overriding instrument
-                should handle the difference between a vanadium workspace and regular workspace
-                :param ws_to_correct: A reference vanadium workspace to match the binning of or correct
-                :return: A workspace containing the corrections
+        Generates absorption corrections to compensate for the container. The overriding instrument
+        should handle the difference between a vanadium workspace and regular workspace
+        :param ws_to_correct: A reference vanadium workspace to match the binning of or correct
+        :return: A workspace containing the corrections
         """
-        raise NotImplementedError(
-            "apply_absorb_corrections Not implemented for this instrument yet")
+        raise NotImplementedError("apply_absorb_corrections Not implemented for this instrument yet")
 
-    def _apply_paalmanpings_absorb_and_subtract_empty(self, workspace, summed_empty, sample_details,
-                                                      paalman_pings_events_per_point=None):
+    def _apply_paalmanpings_absorb_and_subtract_empty(self, workspace, summed_empty, sample_details, paalman_pings_events_per_point=None):
         """
-                Generates absorption corrections to compensate for the container.
-                :param workspace: the workspace to correct
-                :param summed_empty: The summed and normalised empty runs
-                :param sample_details: the sample details that may include container details
-                :param run_number: focus run number
-                :return: A workspace containing the corrections
+        Generates absorption corrections to compensate for the container.
+        :param workspace: the workspace to correct
+        :param summed_empty: The summed and normalised empty runs
+        :param sample_details: the sample details that may include container details
+        :param run_number: focus run number
+        :return: A workspace containing the corrections
         """
-        raise NotImplementedError(
-            "apply_paalmanpings_absorb_and_subtract_empty Not implemented for this instrument yet")
+        raise NotImplementedError("apply_paalmanpings_absorb_and_subtract_empty Not implemented for this instrument yet")
 
     def _generate_output_file_name(self, run_number_string):
         """
@@ -181,13 +179,10 @@ class AbstractInst(object):
         :return: The splined vanadium workspaces as a list
         """
         if self._inst_settings.masking_file_name is not None:
-            masking_file_path = os.path.join(self.calibration_dir,
-                                             self._inst_settings.masking_file_name)
+            masking_file_path = os.path.join(self.calibration_dir, self._inst_settings.masking_file_name)
             bragg_mask_list = common.read_masking_file(masking_file_path)
-            focused_vanadium_banks = common.apply_bragg_peaks_masking(focused_vanadium_banks,
-                                                                      mask_list=bragg_mask_list)
-        output = common.spline_workspaces(focused_vanadium_spectra=focused_vanadium_banks,
-                                          num_splines=self._inst_settings.spline_coeff)
+            focused_vanadium_banks = common.apply_bragg_peaks_masking(focused_vanadium_banks, mask_list=bragg_mask_list)
+        output = common.spline_workspaces(focused_vanadium_spectra=focused_vanadium_banks, num_splines=self._inst_settings.spline_coeff)
         return output
 
     def _crop_banks_to_user_tof(self, focused_banks):
@@ -276,11 +271,11 @@ class AbstractInst(object):
         :return: d-spacing group of the processed output workspaces
         """
         d_spacing_group, tof_group = common_output.split_into_tof_d_spacing_groups(
-            run_details=run_details, processed_spectra=processed_spectra)
+            run_details=run_details, processed_spectra=processed_spectra
+        )
         common_output.save_focused_data(
-            d_spacing_group=d_spacing_group,
-            tof_group=tof_group,
-            output_paths=self._generate_out_file_paths(run_details=run_details))
+            d_spacing_group=d_spacing_group, tof_group=tof_group, output_paths=self._generate_out_file_paths(run_details=run_details)
+        )
 
         return d_spacing_group, tof_group
 
@@ -303,8 +298,7 @@ class AbstractInst(object):
 
     def apply_calibration_to_focused_data(self, focused_ws):
         # convert back to TOF based on engineered detector positions
-        mantid.ApplyDiffCal(InstrumentWorkspace=focused_ws,
-                            ClearCalibration=True)
+        mantid.ApplyDiffCal(InstrumentWorkspace=focused_ws, ClearCalibration=True)
 
     # Steps applicable to all instruments
 
@@ -325,11 +319,9 @@ class AbstractInst(object):
         output_directory = os.path.abspath(os.path.expanduser(output_directory))
         dat_files_directory = output_directory
         if self._inst_settings.dat_files_directory:
-            dat_files_directory = os.path.join(output_directory,
-                                               self._inst_settings.dat_files_directory)
+            dat_files_directory = os.path.join(output_directory, self._inst_settings.dat_files_directory)
 
-        file_type = "" if run_details.file_extension is None else run_details.file_extension.lstrip(
-            ".")
+        file_type = "" if run_details.file_extension is None else run_details.file_extension.lstrip(".")
         out_file_names = {"output_folder": output_directory}
         format_options = {
             "inst": self._inst_prefix,
@@ -338,7 +330,7 @@ class AbstractInst(object):
             "runno": run_details.output_run_string,
             "fileext": file_type,
             "_fileext": "_" + file_type if file_type else "",
-            "suffix": run_details.output_suffix if run_details.output_suffix else ""
+            "suffix": run_details.output_suffix if run_details.output_suffix else "",
         }
         format_options = self._add_formatting_options(format_options)
 
@@ -346,15 +338,13 @@ class AbstractInst(object):
             "nxs_filename": output_directory,
             "gss_filename": output_directory,
             "tof_xye_filename": dat_files_directory,
-            "dspacing_xye_filename": dat_files_directory
+            "dspacing_xye_filename": dat_files_directory,
         }
         for key, output_dir in output_formats.items():
-            filepath = os.path.join(output_dir,
-                                    getattr(self._inst_settings, key).format(**format_options))
+            filepath = os.path.join(output_dir, getattr(self._inst_settings, key).format(**format_options))
             out_file_names[key] = filepath
 
-        out_file_names['output_name'] = os.path.splitext(
-            os.path.basename(out_file_names['nxs_filename']))[0]
+        out_file_names["output_name"] = os.path.splitext(os.path.basename(out_file_names["nxs_filename"]))[0]
         return out_file_names
 
     def _generate_inst_filename(self, run_number, file_ext):

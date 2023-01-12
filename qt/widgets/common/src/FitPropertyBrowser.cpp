@@ -1431,13 +1431,28 @@ void FitPropertyBrowser::stringChanged(QtProperty *prop) {
 
     QString parName = h->functionPrefix() + "." + parProp->propertyName();
 
-    QString str = m_stringManager->value(prop);
+    // Get the tie expression stored in the function in case the new expression is invalid
+    // and the GUI needs to be reset
+    const auto parIndex = compositeFunction()->parameterIndex(parName.toStdString());
+    const auto oldTie = compositeFunction()->getTie(parIndex);
+    const auto oldTieStr = oldTie->asString();
+    const auto oldExp = QString::fromStdString(oldTieStr.substr(oldTieStr.find("=") + 1));
+
+    const auto exp = m_stringManager->value(prop);
+
+    if (oldExp == exp)
+      return;
+
     Mantid::API::ParameterTie *tie = new Mantid::API::ParameterTie(compositeFunction().get(), parName.toStdString());
     try {
-      tie->set(str.toStdString());
-      h->addTie(parName + "=" + str);
+      tie->set(exp.toStdString());
+      h->addTie(parName + "=" + exp);
     } catch (...) {
-      g_log.warning() << "Failed to update tie on " << parName.toLatin1().constData() << "\n";
+      const auto msg =
+          "Failed to update tie on " + parName.toStdString() + ". Expression " + exp.toStdString() + " is invalid.";
+      QMessageBox::critical(this, "Mantid - Error", msg.c_str());
+
+      m_stringManager->setValue(prop, oldExp);
     }
     delete tie;
   } else if (getHandler()->setAttribute(prop)) { // setting an attribute may
@@ -1556,6 +1571,7 @@ void FitPropertyBrowser::doFit(int maxIterations) {
   }
 
   try {
+    emit algorithmStarted(QString::fromStdString(wsName));
     m_initialParameters.resize(compositeFunction()->nParams());
     for (size_t i = 0; i < compositeFunction()->nParams(); i++) {
       m_initialParameters[i] = compositeFunction()->getParameter(i);

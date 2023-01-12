@@ -89,5 +89,5 @@ class MultiPythonFileInterpreterDeletionTest(unittest.TestCase, QtWidgetFinder):
         self.assert_no_toplevel_widgets()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

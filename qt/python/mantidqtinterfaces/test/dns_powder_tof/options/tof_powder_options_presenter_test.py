@@ -12,14 +12,10 @@ DNS TOF powder Options Presenter - Tab of DNS Reduction GUI.
 import unittest
 from unittest import mock
 
-from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import \
-    DNSObserver
-from mantidqtinterfaces.dns_powder_tof.options.common_options_presenter import \
-    DNSCommonOptionsPresenter
-from mantidqtinterfaces.dns_powder_tof.options.tof_powder_options_presenter\
-    import DNSTofPowderOptionsPresenter
-from mantidqtinterfaces.dns_powder_tof.helpers.helpers_for_testing import (
-    get_fake_param_dict, get_fake_tof_binning, get_fake_tof_errors)
+from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import DNSObserver
+from mantidqtinterfaces.dns_powder_tof.options.common_options_presenter import DNSCommonOptionsPresenter
+from mantidqtinterfaces.dns_powder_tof.options.tof_powder_options_presenter import DNSTofPowderOptionsPresenter
+from mantidqtinterfaces.dns_powder_tof.helpers.helpers_for_testing import get_fake_param_dict, get_fake_tof_binning, get_fake_tof_errors
 
 
 class DNSTofPowderOptionsPresenterTest(unittest.TestCase):
@@ -35,25 +31,22 @@ class DNSTofPowderOptionsPresenterTest(unittest.TestCase):
         cls.parent = mock.Mock()
         cls.view = mock.Mock()
         cls.model = mock.Mock()
-        cls.presenter = DNSTofPowderOptionsPresenter(view=cls.view,
-                                                     model=cls.model,
-                                                     parent=cls.parent,
-                                                     name='tof_powder_options')
-        cls.view.get_state = mock.Mock(return_value={
-            'wavelength': 4.74,
-            'get_wavelength': False,
-            'dE_step': 0,
-        })
+        cls.presenter = DNSTofPowderOptionsPresenter(view=cls.view, model=cls.model, parent=cls.parent, name="tof_powder_options")
+        cls.view.get_state = mock.Mock(
+            return_value={
+                "wavelength": 4.74,
+                "get_wavelength": False,
+                "dE_step": 0,
+            }
+        )
         cls.view.raise_error = mock.Mock()
         cls.view.set_state = mock.Mock()
         cls.view.show_status_message = mock.Mock()
 
         cls.presenter.param_dict = get_fake_param_dict()
-        cls.presenter.param_dict['tof_powder_options'] = {'123': 123}
+        cls.presenter.param_dict["tof_powder_options"] = {"123": 123}
         # fake one file tof set
-        cls.model.estimate_q_and_binning = mock.Mock(
-            return_value=[get_fake_tof_binning(),
-                          get_fake_tof_errors()])
+        cls.model.estimate_q_and_binning = mock.Mock(return_value=[get_fake_tof_binning(), get_fake_tof_errors()])
 
     def setUp(self):
         self.view.raise_error.reset_mock()
@@ -69,7 +62,7 @@ class DNSTofPowderOptionsPresenterTest(unittest.TestCase):
         self.assertEqual(self.view.raise_error.call_count, 2)
         self.view.raise_error.reset_mock()
         self.view.set_state.assert_called_once()
-        self.presenter.param_dict['file_selector']['full_data'] = False
+        self.presenter.param_dict["file_selector"]["full_data"] = False
         testv = self.presenter._estimate_q_and_binning()
         self.assertFalse(testv)
         self.view.raise_error.assert_called_once()
@@ -80,5 +73,5 @@ class DNSTofPowderOptionsPresenterTest(unittest.TestCase):
         self.view.raise_error.assert_called()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

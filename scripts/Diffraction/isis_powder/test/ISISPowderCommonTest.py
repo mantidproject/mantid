@@ -11,7 +11,6 @@ from isis_powder.routines import common, common_enums
 
 
 class ISISPowderCommonTest(unittest.TestCase):
-
     def test_cal_map_dict_helper(self):
         missing_key_name = "wrong_key"
         correct_key_name = "right_key"
@@ -25,20 +24,19 @@ class ISISPowderCommonTest(unittest.TestCase):
         # Check it correctly appends the passed error message when raising
         appended_e_msg = "test append message"
         with self.assertRaisesRegex(KeyError, appended_e_msg):
-            common.cal_map_dictionary_key_helper(dictionary=dict_with_key, key=missing_key_name,
-                                                 append_to_error_message=appended_e_msg)
+            common.cal_map_dictionary_key_helper(dictionary=dict_with_key, key=missing_key_name, append_to_error_message=appended_e_msg)
 
         # Check that it correctly returns the key value where it exists
-        self.assertEqual(common.cal_map_dictionary_key_helper(dictionary=dict_with_key, key=correct_key_name),
-                         expected_val)
+        self.assertEqual(common.cal_map_dictionary_key_helper(dictionary=dict_with_key, key=correct_key_name), expected_val)
 
         # Check it is not case sensitive
         different_case_name = "tEsT_key"
         dict_with_mixed_key = {different_case_name: expected_val}
 
         try:
-            self.assertEqual(common.cal_map_dictionary_key_helper(dictionary=dict_with_mixed_key,
-                                                                  key=different_case_name.lower()), expected_val)
+            self.assertEqual(
+                common.cal_map_dictionary_key_helper(dictionary=dict_with_mixed_key, key=different_case_name.lower()), expected_val
+            )
         except KeyError:
             # It tried to use the key without accounting for the case difference
             self.fail("cal_map_dictionary_key_helper attempted to use a key without accounting for case")
@@ -68,14 +66,12 @@ class ISISPowderCommonTest(unittest.TestCase):
             common.crop_banks_using_crop_list(bank_list=bank_list[1:], crop_values_list=cropping_value_list)
 
         # Check we can crop a single workspace from the list
-        cropped_single_ws_list = common.crop_banks_using_crop_list(bank_list=[bank_list[0]],
-                                                                   crop_values_list=[cropping_value])
+        cropped_single_ws_list = common.crop_banks_using_crop_list(bank_list=[bank_list[0]], crop_values_list=[cropping_value])
         self.assertEqual(cropped_single_ws_list[0].blocksize(), expected_number_of_bins)
         mantid.DeleteWorkspace(Workspace=cropped_single_ws_list[0])
 
         # Check we can crop a whole list
-        cropped_ws_list = common.crop_banks_using_crop_list(bank_list=bank_list[1:],
-                                                            crop_values_list=cropping_value_list[1:])
+        cropped_ws_list = common.crop_banks_using_crop_list(bank_list=bank_list[1:], crop_values_list=cropping_value_list[1:])
         for ws in cropped_ws_list[1:]:
             self.assertEqual(ws.blocksize(), expected_number_of_bins)
             mantid.DeleteWorkspace(Workspace=ws)
@@ -86,7 +82,7 @@ class ISISPowderCommonTest(unittest.TestCase):
         x_min = 500
         x_max = 1000
 
-        expected_number_of_bins = x_max * cropping_value[-1] - x_min * (1+cropping_value[0])
+        expected_number_of_bins = x_max * cropping_value[-1] - x_min * (1 + cropping_value[0])
 
         for i in range(0, 3):
             out_name = "crop_banks_in_tof-" + str(i)
@@ -101,14 +97,12 @@ class ISISPowderCommonTest(unittest.TestCase):
             common.crop_banks_using_crop_list(bank_list=bank_list[0], crop_values_list=cropping_value)
 
         # Check we can crop a single workspace from the list
-        cropped_single_ws_list = common.crop_banks_using_crop_list(bank_list=[bank_list[0]],
-                                                                   crop_values_list=cropping_value)
+        cropped_single_ws_list = common.crop_banks_using_crop_list(bank_list=[bank_list[0]], crop_values_list=cropping_value)
         self.assertEqual(cropped_single_ws_list[0].blocksize(), expected_number_of_bins)
         mantid.DeleteWorkspace(Workspace=cropped_single_ws_list[0])
 
         # Check we can crop a whole list
-        cropped_ws_list = common.crop_banks_using_crop_list(bank_list=bank_list[1:],
-                                                            crop_values_list=cropping_value)
+        cropped_ws_list = common.crop_banks_using_crop_list(bank_list=bank_list[1:], crop_values_list=cropping_value)
         for ws in cropped_ws_list[1:]:
             self.assertEqual(ws.blocksize(), expected_number_of_bins)
             mantid.DeleteWorkspace(Workspace=ws)
@@ -179,8 +173,7 @@ class ISISPowderCommonTest(unittest.TestCase):
 
         for i in range(0, 3):
             out_name = "crop_banks_in_dSpacing-" + str(i)
-            ws_list.append(mantid.CreateSampleWorkspace(OutputWorkspace=out_name, XMin=0, XMax=20000, BinWidth=1,
-                                                        XUnit="dSpacing"))
+            ws_list.append(mantid.CreateSampleWorkspace(OutputWorkspace=out_name, XMin=0, XMax=20000, BinWidth=1, XUnit="dSpacing"))
 
         # Crop a single workspace from d_spacing and check the number of bins
         tof_single_ws = common.crop_in_tof(ws_to_crop=ws_list[0], x_min=x_min, x_max=x_max)
@@ -233,14 +226,13 @@ class ISISPowderCommonTest(unittest.TestCase):
 
     def test_extract_ws_spectra(self):
         number_of_expected_banks = 5
-        ws_to_split = mantid.CreateSampleWorkspace(XMin=0, XMax=2, BankPixelWidth=1,
-                                                   NumBanks=number_of_expected_banks)
+        ws_to_split = mantid.CreateSampleWorkspace(XMin=0, XMax=2, BankPixelWidth=1, NumBanks=number_of_expected_banks)
         input_name = ws_to_split.name()
 
         extracted_banks = common.extract_ws_spectra(ws_to_split=ws_to_split)
         self.assertEqual(len(extracted_banks), number_of_expected_banks)
         for i, ws in enumerate(extracted_banks):
-            expected_name = input_name + '-' + str(i + 1)
+            expected_name = input_name + "-" + str(i + 1)
             self.assertEqual(expected_name, ws.name())
 
     def test_generate_run_numbers(self):
@@ -282,8 +274,8 @@ class ISISPowderCommonTest(unittest.TestCase):
 
         # Check that it correctly processes unnamed args
         output = common.generate_splined_name(reference_vanadium_name, sample_arg_one, sample_arg_two)
-        expected_output = "VanSplined_" + reference_vanadium_name + '_' + sample_arg_one + '_' + str(sample_arg_two)
-        expected_output += '.nxs'
+        expected_output = "VanSplined_" + reference_vanadium_name + "_" + sample_arg_one + "_" + str(sample_arg_two)
+        expected_output += ".nxs"
         self.assertEqual(expected_output, output)
 
         # Check it can handle lists to append
@@ -291,16 +283,16 @@ class ISISPowderCommonTest(unittest.TestCase):
 
         expected_output = "VanSplined_" + reference_vanadium_name
         for arg in sample_arg_list:
-            expected_output += '_' + str(arg)
-        expected_output += '.nxs'
+            expected_output += "_" + str(arg)
+        expected_output += ".nxs"
         output = common.generate_splined_name(reference_vanadium_name, sample_arg_list)
         self.assertEqual(expected_output, output)
 
         # Check is can handle mixed inputs
-        expected_output = "VanSplined_" + reference_vanadium_name + '_' + sample_arg_one
+        expected_output = "VanSplined_" + reference_vanadium_name + "_" + sample_arg_one
         for arg in sample_arg_list:
-            expected_output += '_' + str(arg)
-        expected_output += '_' + str(sample_arg_two) + '.nxs'
+            expected_output += "_" + str(arg)
+        expected_output += "_" + str(sample_arg_two) + ".nxs"
 
         output = common.generate_splined_name(reference_vanadium_name, sample_arg_one, sample_arg_list, sample_arg_two)
         self.assertEqual(expected_output, output)
@@ -324,8 +316,7 @@ class ISISPowderCommonTest(unittest.TestCase):
         second_run_bin_value = 1.48682782
 
         # Check it handles a single workspace correctly
-        single_workspace = common.load_current_normalised_ws_list(run_number_string=run_number_single,
-                                                                  instrument=ISISPowderMockInst())
+        single_workspace = common.load_current_normalised_ws_list(run_number_string=run_number_single, instrument=ISISPowderMockInst())
         # Get the only workspace in the list, ask for the 0th spectrum and the value at the 200th bin
         self.assertTrue(isinstance(single_workspace, list))
         self.assertEqual(len(single_workspace), 1)
@@ -334,8 +325,8 @@ class ISISPowderCommonTest(unittest.TestCase):
 
         # Does it return multiple workspaces when instructed
         multiple_ws = common.load_current_normalised_ws_list(
-            run_number_string=run_number_range, instrument=ISISPowderMockInst(),
-            input_batching=common_enums.INPUT_BATCHING.Individual)
+            run_number_string=run_number_range, instrument=ISISPowderMockInst(), input_batching=common_enums.INPUT_BATCHING.Individual
+        )
 
         self.assertTrue(isinstance(multiple_ws, list))
         self.assertEqual(len(multiple_ws), 2)
@@ -348,8 +339,8 @@ class ISISPowderCommonTest(unittest.TestCase):
 
         # Does it sum workspaces when instructed
         summed_ws = common.load_current_normalised_ws_list(
-            run_number_string=run_number_range, instrument=ISISPowderMockInst(),
-            input_batching=common_enums.INPUT_BATCHING.Summed)
+            run_number_string=run_number_range, instrument=ISISPowderMockInst(), input_batching=common_enums.INPUT_BATCHING.Summed
+        )
 
         self.assertTrue(isinstance(summed_ws, list))
         self.assertEqual(len(summed_ws), 1)
@@ -369,14 +360,16 @@ class ISISPowderCommonTest(unittest.TestCase):
         result_ext_two = 1.15126361
 
         # Check that it respects the ext flag - try the first extension of this name
-        returned_ws_one = common.load_current_normalised_ws_list(instrument=ISISPowderMockInst(file_ext=file_ext_one),
-                                                                 run_number_string=run_number)
+        returned_ws_one = common.load_current_normalised_ws_list(
+            instrument=ISISPowderMockInst(file_ext=file_ext_one), run_number_string=run_number
+        )
         # Have to store result and delete the ws as they share the same name so will overwrite
         result_ws_one = returned_ws_one[0].readY(0)[bin_index]
         mantid.DeleteWorkspace(returned_ws_one[0])
 
-        returned_ws_two = common.load_current_normalised_ws_list(instrument=ISISPowderMockInst(file_ext=file_ext_two),
-                                                                 run_number_string=run_number)
+        returned_ws_two = common.load_current_normalised_ws_list(
+            instrument=ISISPowderMockInst(file_ext=file_ext_two), run_number_string=run_number
+        )
         result_ws_two = returned_ws_two[0].readY(0)[bin_index]
         mantid.DeleteWorkspace(returned_ws_two[0])
 
@@ -388,8 +381,14 @@ class ISISPowderCommonTest(unittest.TestCase):
         self.assertNotAlmostEqual(result_ext_one, result_ext_two)
 
     def test_rebin_bin_boundary_defaults(self):
-        ws = mantid.CreateSampleWorkspace(OutputWorkspace='test_rebin_bin_boundary_default',
-                                          Function='Flat background', NumBanks=1, BankPixelWidth=1, XMax=10, BinWidth=1)
+        ws = mantid.CreateSampleWorkspace(
+            OutputWorkspace="test_rebin_bin_boundary_default",
+            Function="Flat background",
+            NumBanks=1,
+            BankPixelWidth=1,
+            XMax=10,
+            BinWidth=1,
+        )
         new_bin_width = 0.5
         # Originally had bins at 1 unit each. So binning of 0.5 should give us 2n bins back
         original_number_bins = ws.blocksize()
@@ -408,8 +407,14 @@ class ISISPowderCommonTest(unittest.TestCase):
         mantid.DeleteWorkspace(ws)
 
     def test_rebin_bin_boundary_specified(self):
-        ws = mantid.CreateSampleWorkspace(OutputWorkspace='test_rebin_bin_boundary_specified',
-                                          Function='Flat background', NumBanks=1, BankPixelWidth=1, XMax=10, BinWidth=1)
+        ws = mantid.CreateSampleWorkspace(
+            OutputWorkspace="test_rebin_bin_boundary_specified",
+            Function="Flat background",
+            NumBanks=1,
+            BankPixelWidth=1,
+            XMax=10,
+            BinWidth=1,
+        )
         # Originally we had 10 bins from 0, 10. Resize from 0, 0.5, 5 so we should have the same number of output
         # bins with different boundaries
         new_bin_width = 0.5
@@ -418,8 +423,7 @@ class ISISPowderCommonTest(unittest.TestCase):
         expected_start_x = 1
         expected_end_x = 6
 
-        ws = common.rebin_workspace(workspace=ws, new_bin_width=new_bin_width,
-                                    start_x=expected_start_x, end_x=expected_end_x)
+        ws = common.rebin_workspace(workspace=ws, new_bin_width=new_bin_width, start_x=expected_start_x, end_x=expected_end_x)
 
         # Check number of bins is the same as we halved the bin width and interval so we should have n bins
         self.assertEqual(ws.blocksize(), original_number_bins)
@@ -438,8 +442,11 @@ class ISISPowderCommonTest(unittest.TestCase):
         ws_list = []
         for i in range(number_of_ws):
             out_name = "test_rebin_workspace_list_defaults_" + str(i)
-            ws_list.append(mantid.CreateSampleWorkspace(OutputWorkspace=out_name, Function='Flat background',
-                                                        NumBanks=1, BankPixelWidth=1, XMax=10, BinWidth=1))
+            ws_list.append(
+                mantid.CreateSampleWorkspace(
+                    OutputWorkspace=out_name, Function="Flat background", NumBanks=1, BankPixelWidth=1, XMax=10, BinWidth=1
+                )
+            )
         # What if the item passed in is not a list
         err_msg_not_list = "was not a list"
         with self.assertRaisesRegex(RuntimeError, err_msg_not_list):
@@ -473,20 +480,26 @@ class ISISPowderCommonTest(unittest.TestCase):
         ws_list = []
         for i in range(number_of_ws):
             out_name = "test_rebin_workspace_list_defaults_" + str(i)
-            ws_list.append(mantid.CreateSampleWorkspace(OutputWorkspace=out_name, Function='Flat background',
-                                                        NumBanks=1, BankPixelWidth=1, XMax=10, BinWidth=1))
+            ws_list.append(
+                mantid.CreateSampleWorkspace(
+                    OutputWorkspace=out_name, Function="Flat background", NumBanks=1, BankPixelWidth=1, XMax=10, BinWidth=1
+                )
+            )
 
         # Are the lengths checked
         incorrect_length = [1] * (number_of_ws - 1)
         with self.assertRaisesRegex(ValueError, "The number of starting bin values"):
-            common.rebin_workspace_list(workspace_list=ws_list, bin_width_list=ws_bin_widths,
-                                        start_x_list=incorrect_length, end_x_list=end_x_list)
+            common.rebin_workspace_list(
+                workspace_list=ws_list, bin_width_list=ws_bin_widths, start_x_list=incorrect_length, end_x_list=end_x_list
+            )
         with self.assertRaisesRegex(ValueError, "The number of ending bin values"):
-            common.rebin_workspace_list(workspace_list=ws_list, bin_width_list=ws_bin_widths,
-                                        start_x_list=start_x_list, end_x_list=incorrect_length)
+            common.rebin_workspace_list(
+                workspace_list=ws_list, bin_width_list=ws_bin_widths, start_x_list=start_x_list, end_x_list=incorrect_length
+            )
 
-        output_list = common.rebin_workspace_list(workspace_list=ws_list, bin_width_list=ws_bin_widths,
-                                                  start_x_list=start_x_list, end_x_list=end_x_list)
+        output_list = common.rebin_workspace_list(
+            workspace_list=ws_list, bin_width_list=ws_bin_widths, start_x_list=start_x_list, end_x_list=end_x_list
+        )
         self.assertEqual(len(output_list), number_of_ws)
         for ws in output_list:
             self.assertEqual(ws.readX(0)[0], new_start_x)
@@ -498,14 +511,12 @@ class ISISPowderCommonTest(unittest.TestCase):
         ws_names_list = []
 
         ws_single_name = "remove_intermediate_ws-single"
-        ws_single = mantid.CreateSampleWorkspace(OutputWorkspace=ws_single_name, NumBanks=1, BankPixelWidth=1,
-                                                 XMax=10, BinWidth=1)
+        ws_single = mantid.CreateSampleWorkspace(OutputWorkspace=ws_single_name, NumBanks=1, BankPixelWidth=1, XMax=10, BinWidth=1)
 
         for i in range(0, 3):
             out_name = "remove_intermediate_ws_" + str(i)
             ws_names_list.append(out_name)
-            ws_list.append(mantid.CreateSampleWorkspace(OutputWorkspace=out_name, NumBanks=1, BankPixelWidth=1,
-                                                        XMax=10, BinWidth=1))
+            ws_list.append(mantid.CreateSampleWorkspace(OutputWorkspace=out_name, NumBanks=1, BankPixelWidth=1, XMax=10, BinWidth=1))
 
         # Check single workspaces are removed
         self.assertEqual(True, mantid.mtd.doesExist(ws_single_name))
@@ -523,14 +534,14 @@ class ISISPowderCommonTest(unittest.TestCase):
 
     def test_run_normalise_by_current(self):
         initial_value = 17
-        prtn_charge = '10.0'
+        prtn_charge = "10.0"
         expected_value = initial_value / float(prtn_charge)
 
         # Create two workspaces
         ws = mantid.CreateWorkspace(DataX=0, DataY=initial_value)
 
         # Add Good Proton Charge Log
-        mantid.AddSampleLog(Workspace=ws, LogName='gd_prtn_chrg', LogText=prtn_charge, LogType='Number')
+        mantid.AddSampleLog(Workspace=ws, LogName="gd_prtn_chrg", LogText=prtn_charge, LogType="Number")
 
         self.assertEqual(initial_value, ws.dataY(0)[0])
         common.run_normalise_by_current(ws)
@@ -540,8 +551,7 @@ class ISISPowderCommonTest(unittest.TestCase):
         ws_list = []
         for i in range(1, 4):
             out_name = "test_spline_vanadium-" + str(i)
-            ws_list.append(mantid.CreateSampleWorkspace(OutputWorkspace=out_name, NumBanks=1, BankPixelWidth=1,
-                                                        XMax=100, BinWidth=1))
+            ws_list.append(mantid.CreateSampleWorkspace(OutputWorkspace=out_name, NumBanks=1, BankPixelWidth=1, XMax=100, BinWidth=1))
 
         splined_list = common.spline_workspaces(focused_vanadium_spectra=ws_list, num_splines=10)
         for ws in splined_list:
@@ -560,12 +570,13 @@ class ISISPowderCommonTest(unittest.TestCase):
         original_y = original_ws.readY(0)
         scale_factor = 0.75
 
-        scaled_ws = common.generate_summed_runs(empty_sample_ws_string=sample_empty_number, instrument=ISISPowderMockInst(),
-                                                scale_factor=scale_factor)
+        scaled_ws = common.generate_summed_runs(
+            empty_ws_string=sample_empty_number, instrument=ISISPowderMockInst(), scale_factor=scale_factor
+        )
         scaled_y_values = scaled_ws.readY(0)
-        self.assertAlmostEqual(scaled_y_values[2], original_y[2]*scale_factor)
-        self.assertAlmostEqual(scaled_y_values[4], original_y[4]*scale_factor)
-        self.assertAlmostEqual(scaled_y_values[7], original_y[7]*scale_factor)
+        self.assertAlmostEqual(scaled_y_values[2], original_y[2] * scale_factor)
+        self.assertAlmostEqual(scaled_y_values[4], original_y[4] * scale_factor)
+        self.assertAlmostEqual(scaled_y_values[7], original_y[7] * scale_factor)
 
         mantid.DeleteWorkspace(original_ws)
         mantid.DeleteWorkspace(scaled_ws)
@@ -576,17 +587,16 @@ class ISISPowderCommonTest(unittest.TestCase):
         ws_file_name = "POL" + sample_empty_number
         original_ws = mantid.Load(ws_file_name)
         # add a current to ensure subtract_summed_runs gets past initial check
-        mantid.AddSampleLog(Workspace=original_ws, LogName='gd_prtn_chrg', LogText="10.0", LogType='Number')
+        mantid.AddSampleLog(Workspace=original_ws, LogName="gd_prtn_chrg", LogText="10.0", LogType="Number")
         no_scale_ws = mantid.CloneWorkspace(InputWorkspace=original_ws)
         empty_ws = mantid.CloneWorkspace(InputWorkspace=original_ws)
         empty_ws = empty_ws * 0.3
 
-        returned_ws = common.subtract_summed_runs(ws_to_correct=no_scale_ws,
-                                                  empty_sample=empty_ws)
+        returned_ws = common.subtract_summed_runs(ws_to_correct=no_scale_ws, empty_ws=empty_ws)
         y_values = returned_ws.readY(0)
         original_y_values = original_ws.readY(0)
         for i in range(returned_ws.blocksize()):
-            self.assertAlmostEqual(y_values[i], original_y_values[i]*0.7)
+            self.assertAlmostEqual(y_values[i], original_y_values[i] * 0.7)
 
         mantid.DeleteWorkspace(no_scale_ws)
         mantid.DeleteWorkspace(empty_ws)
@@ -602,8 +612,7 @@ class ISISPowderCommonTest(unittest.TestCase):
         empty_ws = mantid.CloneWorkspace(InputWorkspace=original_ws)
         empty_ws = empty_ws * 0.3
 
-        returned_ws = common.subtract_summed_runs(ws_to_correct=ws_to_correct,
-                                                  empty_sample=empty_ws)
+        returned_ws = common.subtract_summed_runs(ws_to_correct=ws_to_correct, empty_ws=empty_ws)
         y_values = returned_ws.readY(0)
         original_y_values = original_ws.readY(0)
         # subtraction should be skipped leaving original values
@@ -617,14 +626,13 @@ class ISISPowderCommonTest(unittest.TestCase):
     def test_subtract_summed_runs_throw_on_tof_mismatch(self):
         # Create a sample workspace which will have mismatched TOF range
         sample_ws = mantid.CreateSampleWorkspace()
-        mantid.AddSampleLog(Workspace=sample_ws, LogName='gd_prtn_chrg', LogText="10.0", LogType='Number')
-        ws_file_name = "POL100" # Load POL100
+        mantid.AddSampleLog(Workspace=sample_ws, LogName="gd_prtn_chrg", LogText="10.0", LogType="Number")
+        ws_file_name = "POL100"  # Load POL100
         empty_ws = mantid.Load(ws_file_name)
 
         # This should throw as the TOF ranges do not match
         with self.assertRaisesRegex(ValueError, "specified for this file do not have matching binning. Do the "):
-            common.subtract_summed_runs(ws_to_correct=sample_ws,
-                                        empty_sample=empty_ws)
+            common.subtract_summed_runs(ws_to_correct=sample_ws, empty_ws=empty_ws)
 
         mantid.DeleteWorkspace(sample_ws)
 

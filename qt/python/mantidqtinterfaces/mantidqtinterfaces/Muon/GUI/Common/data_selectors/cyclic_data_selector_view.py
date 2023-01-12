@@ -130,7 +130,7 @@ class CyclicDataSelectorView(ui_form, base_widget):
     def set_current_dataset_index(self, index: int) -> None:
         """Sets the index of the currently displayed dataset."""
         if index >= self.number_of_datasets():
-            self.dataset_name_combo_box.setCurrentIndex(self.number_of_datasets()-1)
+            self.dataset_name_combo_box.setCurrentIndex(self.number_of_datasets() - 1)
         else:
             self.dataset_name_combo_box.setCurrentIndex(index)
 

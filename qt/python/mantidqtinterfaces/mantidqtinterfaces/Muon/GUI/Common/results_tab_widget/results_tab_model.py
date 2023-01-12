@@ -11,15 +11,23 @@ from mantid.kernel import FloatTimeSeriesProperty
 from enum import Enum
 
 # Constants
-DEFAULT_TABLE_NAME = 'ResultsTable'
-ALLOWED_NON_TIME_SERIES_LOGS = ("run_number", "run_start", "run_end", "group",
-                                "period", "sample_temp", "sample_magn_field",
-                                "analysis_asymmetry_norm", "analysis_group_name")
-ERROR_COL_SUFFIX = 'Error'
+DEFAULT_TABLE_NAME = "ResultsTable"
+ALLOWED_NON_TIME_SERIES_LOGS = (
+    "run_number",
+    "run_start",
+    "run_end",
+    "group",
+    "period",
+    "sample_temp",
+    "sample_magn_field",
+    "analysis_asymmetry_norm",
+    "analysis_group_name",
+)
+ERROR_COL_SUFFIX = "Error"
 # This is not a particularly robust way of ignoring this as it
 # depends on how Fit chooses to output the name of that value
-RESULTS_TABLE_COLUMNS_NO_ERRS = ['Cost function value']
-WORKSPACE_NAME_COL = 'workspace_name'
+RESULTS_TABLE_COLUMNS_NO_ERRS = ["Cost function value"]
+WORKSPACE_NAME_COL = "workspace_name"
 
 
 class TableColumnType(Enum):
@@ -134,17 +142,13 @@ class ResultsTabModel(object):
         [(workspace, fit_position),...]
         It is assumed this is not empty and ordered as it should be displayed.
         """
-        self._raise_error_on_incompatible_selection(log_selection,
-                                                    results_selection)
+        self._raise_error_on_incompatible_selection(log_selection, results_selection)
         all_fits = self._fit_context.all_latest_fits()
-        results_table = self._create_empty_results_table(
-            log_selection, results_selection, all_fits)
+        results_table = self._create_empty_results_table(log_selection, results_selection, all_fits)
         for _, position in results_selection:
             fit = all_fits[position]
             fit_parameters = fit.parameters
-            row_dict = {
-                WORKSPACE_NAME_COL: fit_parameters.parameter_workspace_name
-            }
+            row_dict = {WORKSPACE_NAME_COL: fit_parameters.parameter_workspace_name}
             row_dict = self._add_logs_to_table(row_dict, fit, log_selection)
             results_table.addRow(self._add_parameters_to_table(row_dict, fit_parameters))
 
@@ -160,9 +164,10 @@ class ResultsTabModel(object):
         :param log_selection: The current selection of logs as a list of names
         :return: The updated row values dict
         """
+
         def format_values_for_time_parameters(value: str) -> str:
-            value = value.split(' to')[0]
-            val = datetime.strptime(value, '%Y-%m-%dT%H:%M:%S')
+            value = value.split(" to")[0]
+            val = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S")
             return (val - datetime(1970, 1, 1)).total_seconds()
 
         if not log_selection:
@@ -171,10 +176,10 @@ class ResultsTabModel(object):
         for log_name in log_selection:
             values = fit.log_value_and_error(log_name)
             row_dict.update({log_name: values[0]})
-            if values[1]!="":
+            if values[1] != "":
                 row_dict.update({_error_column_name(log_name): values[1]})
-            if log_name in ['run_start', 'run_end']:
-                row_dict.update({log_name+'_seconds': format_values_for_time_parameters(fit.log_value(log_name))})
+            if log_name in ["run_start", "run_end"]:
+                row_dict.update({log_name + "_seconds": format_values_for_time_parameters(fit.log_value(log_name))})
         return row_dict
 
     def _add_parameters_to_table(self, row_dict, fit_parameters):
@@ -187,15 +192,11 @@ class ResultsTabModel(object):
         for param_name in fit_parameters.names():
             row_dict.update({param_name: fit_parameters.value(param_name)})
             if _param_error_should_be_displayed(param_name):
-                row_dict.update({
-                    _error_column_name(param_name):
-                    fit_parameters.error(param_name)
-                })
+                row_dict.update({_error_column_name(param_name): fit_parameters.error(param_name)})
 
         return row_dict
 
-    def _raise_error_on_incompatible_selection(self, log_selection,
-                                               results_selection):
+    def _raise_error_on_incompatible_selection(self, log_selection, results_selection):
         """If the selected results cannot be displayed together then raise an error
 
         :param log_selection: See create_results_output
@@ -205,8 +206,7 @@ class ResultsTabModel(object):
         self._raise_if_log_selection_invalid(log_selection, results_selection)
         self._raise_if_result_selection_is_invalid(results_selection)
 
-    def _raise_if_log_selection_invalid(self, log_selection,
-                                        results_selection):
+    def _raise_if_log_selection_invalid(self, log_selection, results_selection):
         """
         Raise a RuntimeError if the log selection is invalid.
         :param results_selection: The selected fit results
@@ -222,8 +222,7 @@ class ResultsTabModel(object):
                     if not fit.has_log(log_name):
                         missing.append(log_name)
                 if missing:
-                    missing_msg.append("  Fit '{}' is missing the logs {}".format(
-                        fit.parameters.parameter_workspace_name, missing))
+                    missing_msg.append("  Fit '{}' is missing the logs {}".format(fit.parameters.parameter_workspace_name, missing))
         if missing_msg:
             raise RuntimeError("The logs for each selected fit do not match:\n" + "\n".join(missing_msg))
 
@@ -233,17 +232,12 @@ class ResultsTabModel(object):
         :param results_selection: The selected fit results
         """
         all_fits = self._fit_context.all_latest_fits()
-        nparams_selected = [
-            len(all_fits[position].parameters)
-            for _, position in results_selection
-        ]
+        nparams_selected = [len(all_fits[position].parameters) for _, position in results_selection]
         if nparams_selected[1:] != nparams_selected[:-1]:
             msg = "The number of parameters for each selected fit does not match:\n"
-            for (_, position), nparams in zip(results_selection,
-                                              nparams_selected):
+            for (_, position), nparams in zip(results_selection, nparams_selected):
                 fit = all_fits[position]
-                msg += "  {}: {}\n".format(
-                    fit.parameters.parameter_workspace_name, nparams)
+                msg += "  {}: {}\n".format(fit.parameters.parameter_workspace_name, nparams)
             raise RuntimeError(msg)
 
     def _create_empty_results_table(self, log_selection, results_selection, all_fits):
@@ -254,7 +248,7 @@ class ResultsTabModel(object):
         :return: A new TableWorkspace
         """
         table = WorkspaceFactory.Instance().createTable()
-        table.addColumn('str', 'workspace_name', TableColumnType.NoType.value)
+        table.addColumn("str", "workspace_name", TableColumnType.NoType.value)
 
         def float_log(wksp_name, log_name):
             try:
@@ -276,27 +270,26 @@ class ResultsTabModel(object):
 
         for log_name in log_selection:
             wksp_name = all_fits[0].input_workspaces[0]
-            if log_name in ['run_start', 'run_end']:
-                table.addColumn('str', log_name, TableColumnType.X.value)
-                table.addColumn('float', log_name+'_seconds', TableColumnType.X.value)
+            if log_name in ["run_start", "run_end"]:
+                table.addColumn("str", log_name, TableColumnType.X.value)
+                table.addColumn("float", log_name + "_seconds", TableColumnType.X.value)
             else:
                 if float_log(wksp_name, log_name):
-                    table.addColumn('float', log_name, TableColumnType.X.value)
+                    table.addColumn("float", log_name, TableColumnType.X.value)
                     # only add the errors column if the value is numerical
-                    table.addColumn('float', _error_column_name(log_name), TableColumnType.XErr.value)
+                    table.addColumn("float", _error_column_name(log_name), TableColumnType.XErr.value)
                 else:
-                    table.addColumn('str', log_name, TableColumnType.X.value)
+                    table.addColumn("str", log_name, TableColumnType.X.value)
         # assume all fit functions are the same in fit_selection and take
         # the parameter names from the first fit.
         parameters = self._find_parameters_for_table(results_selection)
         for name in parameters.names():
-            table.addColumn('float', name, TableColumnType.Y.value)
+            table.addColumn("float", name, TableColumnType.Y.value)
             if _param_error_should_be_displayed(name):
-                table.addColumn('float', _error_column_name(name),
-                                TableColumnType.YErr.value)
+                table.addColumn("float", _error_column_name(name), TableColumnType.YErr.value)
                 # The error column will be the most recent one added (columnCount-1) and is corresponding value will be
                 # the second to last (columnCount-2).
-                table.setLinkedYCol(table.columnCount()-1, table.columnCount()-2)
+                table.setLinkedYCol(table.columnCount() - 1, table.columnCount() - 2)
         return table
 
     def on_new_fit_performed(self):
@@ -334,8 +327,7 @@ class ResultsTabModel(object):
 # Private helper functions
 def _log_should_be_displayed(log):
     """Returns true if the given log should be included in the display"""
-    return isinstance(log, FloatTimeSeriesProperty) or \
-        log.name in ALLOWED_NON_TIME_SERIES_LOGS
+    return isinstance(log, FloatTimeSeriesProperty) or log.name in ALLOWED_NON_TIME_SERIES_LOGS
 
 
 def _param_error_should_be_displayed(param_name):

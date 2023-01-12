@@ -22,9 +22,9 @@ from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtGui import QDoubleValidator, QIcon
 from qtpy.QtWidgets import QDialog, QWidget
 
-TREAT_LOG_NEGATIVE_VALUES = 'clip'
-DECIMAL_FORMAT = 'Decimal Format'
-SCIENTIFIC_FORMAT = 'Scientific Format'
+TREAT_LOG_NEGATIVE_VALUES = "clip"
+DECIMAL_FORMAT = "Decimal Format"
+SCIENTIFIC_FORMAT = "Scientific Format"
 
 
 class PropertiesEditorBase(QDialog):
@@ -40,7 +40,7 @@ class PropertiesEditorBase(QDialog):
         self.ui = load_ui(__file__, ui_file, baseinstance=self)
         self.ui.buttonBox.accepted.connect(self.on_ok)
         self.ui.buttonBox.rejected.connect(self.reject)
-        self.ui.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
+        self.ui.setWindowIcon(QIcon(":/images/MantidIcon.ico"))
 
     def on_ok(self):
         try:
@@ -64,7 +64,6 @@ class PropertiesEditorBase(QDialog):
 
 
 class LabelEditorModel(object):
-
     def __init__(self, label_text):
         self.label_text = label_text
 
@@ -75,8 +74,8 @@ class LabelEditor(PropertiesEditorBase):
     def __init__(self, canvas, target):
         """
         :param target: A reference to the label being edited
-       """
-        super(LabelEditor, self).__init__('labeleditor.ui', canvas)
+        """
+        super(LabelEditor, self).__init__("labeleditor.ui", canvas)
         self.ui.errors.hide()
 
         self.target = target
@@ -98,7 +97,6 @@ class LabelEditor(PropertiesEditorBase):
 
 
 class LegendEditorModel(object):
-
     def __init__(self, label_text):
         self.label_text = label_text
 
@@ -110,8 +108,8 @@ class LegendEditor(PropertiesEditorBase):
         """
         :param target: A reference to the label being edited
         :param target_curve: A reference to the curve whose legend is being edited
-       """
-        super().__init__('labeleditor.ui', canvas)
+        """
+        super().__init__("labeleditor.ui", canvas)
         self.ui.errors.hide()
 
         self.target = target
@@ -143,7 +141,6 @@ class AxisEditorModel(object):
 
 
 class AxisEditor(PropertiesEditorBase):
-
     def __init__(self, canvas, axes, axis_id):
         """
 
@@ -151,7 +148,7 @@ class AxisEditor(PropertiesEditorBase):
         :param axes: The axes object holding the properties to be edited
         :param axis_id: A string ID for the axis
         """
-        super(AxisEditor, self).__init__('axiseditor.ui', canvas)
+        super(AxisEditor, self).__init__("axiseditor.ui", canvas)
         # suppress errors
         self.ui.errors.hide()
         # Ensure that only floats can be entered
@@ -164,26 +161,26 @@ class AxisEditor(PropertiesEditorBase):
         self.ui.editor_format.addItem(SCIENTIFIC_FORMAT)
         self.axes = axes
         self.axis_id = axis_id
-        self.lim_getter = getattr(axes, 'get_{}lim'.format(axis_id))
+        self.lim_getter = getattr(axes, "get_{}lim".format(axis_id))
 
         if isinstance(axes, Axes3D):
-            self.lim_setter = getattr(axes, 'set_{}lim3d'.format(axis_id))
+            self.lim_setter = getattr(axes, "set_{}lim3d".format(axis_id))
         else:
-            self.lim_setter = getattr(axes, 'set_{}lim'.format(axis_id))
+            self.lim_setter = getattr(axes, "set_{}lim".format(axis_id))
 
-        self.scale_setter = getattr(axes, 'set_{}scale'.format(axis_id))
-        self.nonposkw = 'nonpos' + axis_id if LooseVersion(matplotlib_version) < LooseVersion("3.3.1") else 'nonpositive'
+        self.scale_setter = getattr(axes, "set_{}scale".format(axis_id))
+        self.nonposkw = "nonpos" + axis_id if LooseVersion(matplotlib_version) < LooseVersion("3.3.1") else "nonpositive"
 
         # Store the axis for attributes that can't be directly accessed
         # from axes object (e.g. grid and tick parameters).
-        self.axis = getattr(axes, '{}axis'.format(axis_id))
+        self.axis = getattr(axes, "{}axis".format(axis_id))
 
     def create_model(self):
         memento = AxisEditorModel()
         self._memento = memento
-        memento.min, memento.max = getattr(self.axes, 'get_{}lim'.format(self.axis_id))()
-        memento.log = getattr(self.axes, 'get_{}scale'.format(self.axis_id))() != 'linear'
-        memento.grid = self.axis.grid_on() if hasattr(self.axis, 'grid_on') else self.axis._major_tick_kw.get('gridOn', False)
+        memento.min, memento.max = getattr(self.axes, "get_{}lim".format(self.axis_id))()
+        memento.log = getattr(self.axes, "get_{}scale".format(self.axis_id))() != "linear"
+        memento.grid = self.axis.grid_on() if hasattr(self.axis, "grid_on") else self.axis._major_tick_kw.get("gridOn", False)
         if type(self.axis.get_major_formatter()) is ScalarFormatter:
             memento.formatter = DECIMAL_FORMAT
         elif type(self.axis.get_major_formatter()) is LogFormatterSciNotation:
@@ -197,13 +194,13 @@ class AxisEditor(PropertiesEditorBase):
 
         self.limit_min, self.limit_max = float(self.ui.editor_min.text()), float(self.ui.editor_max.text())
         if self.ui.logBox.isChecked():
-            self.scale_setter('log', **{self.nonposkw: TREAT_LOG_NEGATIVE_VALUES})
+            self.scale_setter("log", **{self.nonposkw: TREAT_LOG_NEGATIVE_VALUES})
             self.limit_min, self.limit_max = self._check_log_limits(self.limit_min, self.limit_max)
         else:
-            self.scale_setter('linear')
+            self.scale_setter("linear")
         self.lim_setter(self.limit_min, self.limit_max)
         self._set_tick_format()
-        which = 'both' if hasattr(axes, 'show_minor_gridlines') and axes.show_minor_gridlines else 'major'
+        which = "both" if hasattr(axes, "show_minor_gridlines") and axes.show_minor_gridlines else "major"
         # visible will always be True if you pass axis or which argument into axes.grid due to matplotlib
         if self.ui.gridBox.isChecked():
             axes.grid(visible=True, axis=self.axis_id, which=which)
@@ -238,35 +235,31 @@ class AxisEditor(PropertiesEditorBase):
             fmt = ScalarFormatter(useOffset=True)
         elif formatter == SCIENTIFIC_FORMAT:
             fmt = LogFormatterSciNotation()
-        getattr(self.axes, '{}axis'.format(self.axis_id)).set_major_formatter(fmt)
+        getattr(self.axes, "{}axis".format(self.axis_id)).set_major_formatter(fmt)
         return
 
 
 class XAxisEditor(AxisEditor):
-
     def __init__(self, canvas, axes):
-        super(XAxisEditor, self).__init__(canvas, axes, 'x')
+        super(XAxisEditor, self).__init__(canvas, axes, "x")
         self.create_model()
 
 
 class YAxisEditor(AxisEditor):
-
     def __init__(self, canvas, axes):
-        super(YAxisEditor, self).__init__(canvas, axes, 'y')
+        super(YAxisEditor, self).__init__(canvas, axes, "y")
         self.create_model()
 
 
 class ZAxisEditor(AxisEditor):
-
     def __init__(self, canvas, axes):
-        super(ZAxisEditor, self).__init__(canvas, axes, 'z')
+        super(ZAxisEditor, self).__init__(canvas, axes, "z")
         self.create_model()
 
 
 class ColorbarAxisEditor(AxisEditor):
-
     def __init__(self, canvas, axes):
-        super(ColorbarAxisEditor, self).__init__(canvas, axes, 'y')
+        super(ColorbarAxisEditor, self).__init__(canvas, axes, "y")
 
         self.ui.gridBox.hide()
 
@@ -361,8 +354,7 @@ class MarkerEditor(QWidget):
         if new_name == "":
             raise RuntimeError("Marker names cannot be empty")
         if new_name in self.used_names and new_name != old_name:
-            raise RuntimeError("Marker names cannot be duplicated.\n Another marker is named '{}'"
-                               .format(new_name))
+            raise RuntimeError("Marker names cannot be duplicated.\n Another marker is named '{}'".format(new_name))
         try:
             marker.set_name(new_name)
         except:
@@ -372,7 +364,7 @@ class MarkerEditor(QWidget):
         marker.set_position(float(self.widget.position.text()))
         marker.draggable = not self.widget.fixed_marker.isChecked()
         marker.set_style(self.widget.style.currentText())
-        marker.set_color(self.colors.get(self.widget.color.currentText(), 'C2'))
+        marker.set_color(self.colors.get(self.widget.color.currentText(), "C2"))
         marker.set_label_visible(self.widget.display_label.isChecked())
 
         x_pos = float(self.widget.label_x_pos.text())
@@ -389,10 +381,10 @@ class SingleMarkerEditor(PropertiesEditorBase):
         :param valid_style: list of valid line styles (eg. 'solid', 'dashed'...) used by matplotlib
         :param valid_colors: dictionary of valid colours
         """
-        super(SingleMarkerEditor, self).__init__('singlemarkereditor.ui', canvas)
+        super(SingleMarkerEditor, self).__init__("singlemarkereditor.ui", canvas)
         self.ui.errors.hide()
 
-        self._widget = MarkerEditor('markeredit.ui', valid_style, valid_colors, used_names)
+        self._widget = MarkerEditor("markeredit.ui", valid_style, valid_colors, used_names)
         layout = self.ui.layout()
         layout.addWidget(self._widget, 1, 0)
 
@@ -420,14 +412,14 @@ class GlobalMarkerEditor(PropertiesEditorBase):
         :param valid_style: list of valid line styles (eg. 'solid', 'dashed'...) used by matplotlib
         :param valid_colors: dictionary of valid colours
         """
-        super(GlobalMarkerEditor, self).__init__('globalmarkereditor.ui', canvas)
+        super(GlobalMarkerEditor, self).__init__("globalmarkereditor.ui", canvas)
         self.ui.errors.hide()
         self.ui.marker.currentIndexChanged.connect(self.update_marker_data)
 
         self.markers = sorted(markers, key=lambda _marker: _marker.name)
         self._names = [str(_marker.name) for _marker in self.markers]
 
-        self._widget = MarkerEditor('markeredit.ui', valid_style, valid_colors, self._names)
+        self._widget = MarkerEditor("markeredit.ui", valid_style, valid_colors, self._names)
         layout = self.ui.layout()
         layout.addWidget(self._widget, 2, 0, 1, 2)
 

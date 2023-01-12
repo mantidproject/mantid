@@ -9,6 +9,7 @@ import sys
 from qtpy import QtWidgets, QtCore
 from mantidqt.utils.qt.line_edit_double_validator import LineEditDoubleValidator
 from qtpy.QtWidgets import QLineEdit, QStyledItemDelegate
+
 """
 This module contains the methods for
 adding information to tables.
@@ -93,16 +94,16 @@ def set_table_item_flags(item: QtWidgets.QTableWidgetItem, editable: bool, enabl
     return item
 
 
-def create_string_table_item(text: str, editable: bool = True, enabled: bool = True, alignment: int = QtCore.Qt.AlignCenter) \
-        -> QtWidgets.QTableWidgetItem:
+def create_string_table_item(
+    text: str, editable: bool = True, enabled: bool = True, alignment: int = QtCore.Qt.AlignCenter
+) -> QtWidgets.QTableWidgetItem:
     item = QtWidgets.QTableWidgetItem(text)
     item.setTextAlignment(alignment)
     item = set_table_item_flags(item, editable, enabled)
     return item
 
 
-def create_double_table_item(value: float, editable: bool = True, enabled: bool = True, decimals: int = 3) \
-        -> QtWidgets.QTableWidgetItem:
+def create_double_table_item(value: float, editable: bool = True, enabled: bool = True, decimals: int = 3) -> QtWidgets.QTableWidgetItem:
     return create_string_table_item(f"{value:.{decimals}f}", editable, enabled)
 
 
@@ -120,10 +121,10 @@ def create_checkbox_table_item(state: bool, enabled: bool = True, tooltip: str =
     return item
 
 
-def addComboToTable(table,row,options,col=1):
-    combo=QtWidgets.QComboBox()
+def addComboToTable(table, row, options, col=1):
+    combo = QtWidgets.QComboBox()
     combo.addItems(options)
-    table.setCellWidget(row,col,combo)
+    table.setCellWidget(row, col, combo)
     return combo
 
 
@@ -138,13 +139,13 @@ def addDoubleToTable(table, value, row, col=1, minimum=None, decimals=3):
     return number_widget, validator
 
 
-def addCheckBoxToTable(table,state,row,col=1):
+def addCheckBoxToTable(table, state, row, col=1):
     item = create_checkbox_table_item(state)
     table.setItem(row, col, item)
     return item
 
 
-def addCheckBoxWidgetToTable(table,state,row,col=1):
+def addCheckBoxWidgetToTable(table, state, row, col=1):
     check_box_widget = QtWidgets.QWidget()
     layout = QtWidgets.QHBoxLayout(check_box_widget)
     layout.setAlignment(QtCore.Qt.AlignCenter)
@@ -154,16 +155,16 @@ def addCheckBoxWidgetToTable(table,state,row,col=1):
 
     layout.addWidget(box)
 
-    table.setCellWidget(row,col, check_box_widget)
+    table.setCellWidget(row, col, check_box_widget)
     return box
 
 
-def addSpinBoxToTable(table,default,row,col=1):
+def addSpinBoxToTable(table, default, row, col=1):
     box = QtWidgets.QSpinBox()
     if default > 99:
         box.setMaximum(default * 10)
     box.setValue(default)
-    table.setCellWidget(row,col,box)
+    table.setCellWidget(row, col, box)
     return box
 
 
@@ -175,23 +176,24 @@ def setTableHeaders(table):
     if QtCore.QSysInfo.productType() != "windows":
         return
     WINDOWS_10 = "10"
-    if (QtCore.QSysInfo.productVersion() == WINDOWS_10):
-        styleSheet = \
-            "QHeaderView::section{" \
-            + "border-top:0px solid #D8D8D8;" \
-            + "border-left:0px solid #D8D8D8;" \
-            + "border-right:1px solid #D8D8D8;" \
-            + "border-bottom: 1px solid #D8D8D8;" \
-            + "background-color:white;" \
-            + "padding:4px;" \
-            + "}" \
-            + "QTableCornerButton::section{" \
-            + "border-top:0px solid #D8D8D8;" \
-            + "border-left:0px solid #D8D8D8;" \
-            + "border-right:1px solid #D8D8D8;" \
-            + "border-bottom: 1px solid #D8D8D8;" \
-            + "background-color:white;" \
+    if QtCore.QSysInfo.productVersion() == WINDOWS_10:
+        styleSheet = (
+            "QHeaderView::section{"
+            + "border-top:0px solid #D8D8D8;"
+            + "border-left:0px solid #D8D8D8;"
+            + "border-right:1px solid #D8D8D8;"
+            + "border-bottom: 1px solid #D8D8D8;"
+            + "background-color:white;"
+            + "padding:4px;"
             + "}"
+            + "QTableCornerButton::section{"
+            + "border-top:0px solid #D8D8D8;"
+            + "border-left:0px solid #D8D8D8;"
+            + "border-right:1px solid #D8D8D8;"
+            + "border-bottom: 1px solid #D8D8D8;"
+            + "background-color:white;"
+            + "}"
+        )
         table.setStyleSheet(styleSheet)
         return styleSheet
     return

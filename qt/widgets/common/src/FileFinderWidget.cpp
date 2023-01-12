@@ -82,7 +82,7 @@ FileFinderWidget::FileFinderWidget(QWidget *parent)
   if (m_lastDir.isEmpty()) {
     QStringList dataDirs =
         QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories"))
-            .split(";", QString::SkipEmptyParts);
+            .split(";", Qt::SkipEmptyParts);
 
     if (!dataDirs.isEmpty())
       m_lastDir = dataDirs[0];
@@ -549,7 +549,7 @@ const QString FileFinderWidget::findFilesGetSearchText(QString &searchText) {
     }
     // If it is a list we need to prepend the instrument to all run numbers
     else if (boost::regex_match(searchText.toStdString(), runNumberListExp)) {
-      QStringList runNumbers = searchText.split(",", QString::SkipEmptyParts);
+      QStringList runNumbers = searchText.split(",", Qt::SkipEmptyParts);
       QStringList newRunNumbers;
 
       for (auto &runNumber : runNumbers)
@@ -637,7 +637,7 @@ void FileFinderWidget::readSettings(const QString &group) {
   if (m_lastDir == "") {
     QStringList datadirs =
         QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories"))
-            .split(";", QString::SkipEmptyParts);
+            .split(";", Qt::SkipEmptyParts);
     if (!datadirs.isEmpty())
       m_lastDir = datadirs[0];
   }
@@ -780,7 +780,7 @@ QString FileFinderWidget::openFileDialog() {
   QStringList filenames;
   QString dir;
 
-  auto prevFileNames = getText().split(",", QString::SkipEmptyParts);
+  auto prevFileNames = getText().split(",", Qt::SkipEmptyParts);
   for (auto &prevFileName : prevFileNames)
     prevFileName = prevFileName.trimmed();
 

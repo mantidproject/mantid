@@ -16,7 +16,7 @@ class RebinRagged(PythonAlgorithm):
         return "Transforms\\Splitting"
 
     def seeAlso(self):
-        return ['Rebin', 'ResampleX']
+        return ["Rebin", "ResampleX"]
 
     def name(self):
         return "RebinRagged"
@@ -33,10 +33,8 @@ class RebinRagged(PythonAlgorithm):
             MatrixWorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
             "output workspace",
         )
-        self.declareProperty(FloatArrayProperty("XMin"),
-                             "minimum x values with NaN meaning no minimum")
-        self.declareProperty(FloatArrayProperty("XMax"),
-                             "maximum x values with NaN meaning no maximum")
+        self.declareProperty(FloatArrayProperty("XMin"), "minimum x values with NaN meaning no minimum")
+        self.declareProperty(FloatArrayProperty("XMax"), "maximum x values with NaN meaning no maximum")
         self.declareProperty(FloatArrayProperty("Delta"), "step parameter for rebin")
         self.declareProperty("PreserveEvents", True, "False converts event workspaces to histograms")
 
@@ -75,7 +73,7 @@ class RebinRagged(PythonAlgorithm):
             if numMax > 1 and numMax != numSpec:
                 errors["XMax"] = "Must specify max for each spectra ({}!={})".format(numMax, numSpec)
         else:
-            errors['InputWorkspace'] = "The InputWorkspace must be a MatrixWorkspace."
+            errors["InputWorkspace"] = "The InputWorkspace must be a MatrixWorkspace."
 
         return errors
 
@@ -100,9 +98,9 @@ class RebinRagged(PythonAlgorithm):
     def __extend_value(self, numSpec, array, replaceNan):
         # change it to be the right length
         if len(array) == 0:
-            array = np.full((numSpec, ), Property.EMPTY_DBL)
+            array = np.full((numSpec,), Property.EMPTY_DBL)
         elif len(array) == 1:
-            array = np.full((numSpec, ), array[0])
+            array = np.full((numSpec,), array[0])
         # replace nan with EMPTY_DBL
         indices = np.where(np.invert(np.isfinite(array)))
         array[indices] = Property.EMPTY_DBL
@@ -156,37 +154,43 @@ class RebinRagged(PythonAlgorithm):
 
                 try:
                     # extract the range of the spectrum requested
-                    ExtractSpectra(InputWorkspace=inputWS,
-                                   OutputWorkspace=name,
-                                   StartWorkspaceIndex=i,
-                                   EndWorkspaceIndex=i,
-                                   XMin=xmin,
-                                   XMax=xmax,
-                                   startProgress=progStart,
-                                   endProgress=(progStart + progStep),
-                                   EnableLogging=False)
+                    ExtractSpectra(
+                        InputWorkspace=inputWS,
+                        OutputWorkspace=name,
+                        StartWorkspaceIndex=i,
+                        EndWorkspaceIndex=i,
+                        XMin=xmin,
+                        XMax=xmax,
+                        startProgress=progStart,
+                        endProgress=(progStart + progStep),
+                        EnableLogging=False,
+                    )
 
                     # rebin the data
-                    Rebin(InputWorkspace=name,
-                          OutputWorkspace=name,
-                          Params=(xmin, delta, xmax),
-                          PreserveEvents = preserveEvents,
-                          startProgress=progStart,
-                          endProgress=(progStart + progStep),
-                          EnableLogging=False)
+                    Rebin(
+                        InputWorkspace=name,
+                        OutputWorkspace=name,
+                        Params=(xmin, delta, xmax),
+                        PreserveEvents=preserveEvents,
+                        startProgress=progStart,
+                        endProgress=(progStart + progStep),
+                        EnableLogging=False,
+                    )
                 except Exception as e:
-                    raise RuntimeError('for index={}: {}'.format(i, e)) from e
+                    raise RuntimeError("for index={}: {}".format(i, e)) from e
 
                 # accumulate
                 if accumulationWS is None:
                     accumulationWS = name  # messes up progress during very first step
                 else:
                     # this deletes both input workspaces
-                    ConjoinWorkspaces(InputWorkspace1=accumulationWS,
-                                      InputWorkspace2=name,
-                                      startProgress=(progStart + 2 * progStep),
-                                      endProgress=(progStart + 3 * progStep),
-                                      EnableLogging=False)
+                    ConjoinWorkspaces(
+                        InputWorkspace1=accumulationWS,
+                        InputWorkspace2=name,
+                        startProgress=(progStart + 2 * progStep),
+                        endProgress=(progStart + 3 * progStep),
+                        EnableLogging=False,
+                    )
             self.setProperty("OutputWorkspace", mtd[accumulationWS])
             DeleteWorkspace(accumulationWS, EnableLogging=False)
 

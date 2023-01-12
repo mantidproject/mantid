@@ -26,7 +26,7 @@ from unittest import mock
 
 def setup_context_for_tests(parent_object):
     parent_object.loaded_data = MuonLoadData()
-    parent_object.loaded_data.get_main_field_direction = mock.MagicMock(return_value='transverse')
+    parent_object.loaded_data.get_main_field_direction = mock.MagicMock(return_value="transverse")
     parent_object.data_context = MuonDataContext(load_data=parent_object.loaded_data)
     parent_object.gui_context = MuonGuiContext()
     parent_object.group_context = MuonGroupPairContext(parent_object.data_context.check_group_contains_valid_detectors)
@@ -36,20 +36,22 @@ def setup_context_for_tests(parent_object):
     parent_object.results_context = ResultsContext()
     parent_object.plot_panes_context = PlotPanesContext()
     parent_object.model_fitting_context = ModelFittingContext()
-    parent_object.context = DataAnalysisContext(muon_data_context=parent_object.data_context,
-                                                muon_group_context=parent_object.group_context,
-                                                muon_gui_context=parent_object.gui_context,
-                                                muon_phase_context=parent_object.phase_table_context,
-                                                corrections_context=parent_object.corrections_context,
-                                                fitting_context=parent_object.fitting_context,
-                                                results_context=parent_object.results_context,
-                                                model_fitting_context=parent_object.model_fitting_context,
-                                                plot_panes_context=parent_object.plot_panes_context)
+    parent_object.context = DataAnalysisContext(
+        muon_data_context=parent_object.data_context,
+        muon_group_context=parent_object.group_context,
+        muon_gui_context=parent_object.gui_context,
+        muon_phase_context=parent_object.phase_table_context,
+        corrections_context=parent_object.corrections_context,
+        fitting_context=parent_object.fitting_context,
+        results_context=parent_object.results_context,
+        model_fitting_context=parent_object.model_fitting_context,
+        plot_panes_context=parent_object.plot_panes_context,
+    )
 
 
 def setup_context(freq=False):
     loaded_data = MuonLoadData()
-    loaded_data.get_main_field_direction = mock.MagicMock(return_value='transverse')
+    loaded_data.get_main_field_direction = mock.MagicMock(return_value="transverse")
     data_context = MuonDataContext(load_data=loaded_data)
     gui_context = MuonGuiContext()
     group_context = MuonGroupPairContext(data_context.check_group_contains_valid_detectors)
@@ -59,24 +61,28 @@ def setup_context(freq=False):
     plot_panes_context = PlotPanesContext()
 
     if freq:
-        return FrequencyDomainAnalysisContext(muon_data_context=data_context,
-                                              muon_group_context=group_context,
-                                              muon_gui_context=gui_context,
-                                              muon_phase_context=phase_table_context,
-                                              corrections_context=corrections_context,
-                                              fitting_context=BasicFittingContext(allow_double_pulse_fitting=True),
-                                              frequency_context=freq_context,
-                                              plot_panes_context=plot_panes_context)
+        return FrequencyDomainAnalysisContext(
+            muon_data_context=data_context,
+            muon_group_context=group_context,
+            muon_gui_context=gui_context,
+            muon_phase_context=phase_table_context,
+            corrections_context=corrections_context,
+            fitting_context=BasicFittingContext(allow_double_pulse_fitting=True),
+            frequency_context=freq_context,
+            plot_panes_context=plot_panes_context,
+        )
     else:
-        return DataAnalysisContext(muon_data_context=data_context,
-                                   muon_group_context=group_context,
-                                   muon_gui_context=gui_context,
-                                   corrections_context=corrections_context,
-                                   muon_phase_context=phase_table_context,
-                                   fitting_context=TFAsymmetryFittingContext(allow_double_pulse_fitting=True),
-                                   results_context=ResultsContext(),
-                                   model_fitting_context=ModelFittingContext(),
-                                   plot_panes_context=plot_panes_context)
+        return DataAnalysisContext(
+            muon_data_context=data_context,
+            muon_group_context=group_context,
+            muon_gui_context=gui_context,
+            corrections_context=corrections_context,
+            muon_phase_context=phase_table_context,
+            fitting_context=TFAsymmetryFittingContext(allow_double_pulse_fitting=True),
+            results_context=ResultsContext(),
+            model_fitting_context=ModelFittingContext(),
+            plot_panes_context=plot_panes_context,
+        )
 
 
 def setup_context_for_ea_tests(parent_object):
@@ -85,5 +91,6 @@ def setup_context_for_ea_tests(parent_object):
     parent_object.gui_context = MuonGuiContext()
     parent_object.plot_panes_context = PlotPanesContext()
     parent_object.group_context = EAGroupContext(parent_object.data_context.check_group_contains_valid_detectors)
-    parent_object.context = ElementalAnalysisContext(parent_object.data_context, parent_object.group_context,
-                                                     parent_object.gui_context, parent_object.plot_panes_context)
+    parent_object.context = ElementalAnalysisContext(
+        parent_object.data_context, parent_object.group_context, parent_object.gui_context, parent_object.plot_panes_context
+    )

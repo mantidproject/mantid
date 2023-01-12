@@ -11,6 +11,7 @@ from mantidqt.usersubwindowfactory import UserSubWindowFactory
 from mantidqt.utils.qt.testing import get_application
 
 from qtpy.QtCore import Qt
+
 # Import sip after Qt. Modern versions of PyQt ship an internal sip module
 # located at PyQt5X.sip. Importing PyQt first sets a shim sip module to point
 # to the correct place
@@ -21,6 +22,7 @@ class CppInterfacesStartupTest(systemtesting.MantidSystemTest):
     """
     A system test for testing that the c++ interfaces open ok.
     """
+
     def __init__(self):
         super(CppInterfacesStartupTest, self).__init__()
 

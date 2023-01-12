@@ -13,7 +13,6 @@ import functools
 
 
 class SeqFittingTabPresenter(object):
-
     def __init__(self, view, model, context):
         self.view = view
         self.model = model
@@ -38,10 +37,8 @@ class SeqFittingTabPresenter(object):
         self.fit_parameter_updated_observer = GenericObserver(self.handle_fit_function_parameter_changed)
         self.fit_parameter_changed_in_view = GenericObserverWithArgPassing(self.handle_updated_fit_parameter_in_table)
         self.selected_sequential_fit_notifier = GenericObservable()
-        self.disable_tab_observer = GenericObserver(lambda: self.view.
-                                                    setEnabled(False))
-        self.enable_tab_observer = GenericObserver(lambda: self.view.
-                                                   setEnabled(self.model.number_of_datasets > 0))
+        self.disable_tab_observer = GenericObserver(lambda: self.view.setEnabled(False))
+        self.enable_tab_observer = GenericObserver(lambda: self.view.setEnabled(self.model.number_of_datasets > 0))
 
     def create_thread(self, callback):
         self.fitting_calculation_model = ThreadModelWrapperWithOutput(callback)
@@ -60,8 +57,10 @@ class SeqFittingTabPresenter(object):
     def _get_fit_function_parameter_values_from_fitting_model(self):
         display_type = self.view.selected_data_type()
 
-        parameter_values = [self.model.get_all_fit_function_parameter_values_for(fit_function)
-                            for row, fit_function in enumerate(self.model.get_all_fit_functions_for(display_type))]
+        parameter_values = [
+            self.model.get_all_fit_function_parameter_values_for(fit_function)
+            for row, fit_function in enumerate(self.model.get_all_fit_functions_for(display_type))
+        ]
         if len(parameter_values) != self.view.fit_table.get_number_of_fits():
             parameter_values *= self.view.fit_table.get_number_of_fits()
         return parameter_values
@@ -109,13 +108,16 @@ class SeqFittingTabPresenter(object):
 
         parameter_values = [self.view.fit_table.get_fit_parameter_values_from_row(row) for row in self.selected_rows]
 
-        calculation_function = functools.partial(self.model.perform_sequential_fit, workspace_names, parameter_values,
-                                                 self.view.use_initial_values_for_fits())
+        calculation_function = functools.partial(
+            self.model.perform_sequential_fit, workspace_names, parameter_values, self.view.use_initial_values_for_fits()
+        )
         self.calculation_thread = self.create_thread(calculation_function)
 
-        self.calculation_thread.threadWrapperSetUp(on_thread_start_callback=self.handle_fit_started,
-                                                   on_thread_end_callback=self.handle_seq_fit_finished,
-                                                   on_thread_exception_callback=self.handle_fit_error)
+        self.calculation_thread.threadWrapperSetUp(
+            on_thread_start_callback=self.handle_fit_started,
+            on_thread_end_callback=self.handle_seq_fit_finished,
+            on_thread_exception_callback=self.handle_fit_error,
+        )
         self.calculation_thread.start()
 
     def handle_seq_fit_finished(self):
@@ -123,8 +125,7 @@ class SeqFittingTabPresenter(object):
             return
 
         fit_functions, fit_statuses, fit_chi_squareds = self.fitting_calculation_model.result
-        for fit_function, fit_status, fit_chi_squared, row in zip(fit_functions, fit_statuses, fit_chi_squareds,
-                                                                  self.selected_rows):
+        for fit_function, fit_status, fit_chi_squared, row in zip(fit_functions, fit_statuses, fit_chi_squareds, self.selected_rows):
             parameter_values = self.model.get_all_fit_function_parameter_values_for(fit_function)
             self.view.fit_table.set_parameter_values_for_row(row, parameter_values)
             self.view.fit_table.set_fit_quality(row, fit_status, fit_chi_squared)
@@ -174,8 +175,7 @@ class SeqFittingTabPresenter(object):
         fit_information = []
         for i, row in enumerate(rows):
             workspaces = self.get_workspaces_for_row_in_fit_table(row)
-            fit = self.context.fitting_context.find_fit_for_input_workspace_list_and_function(
-                workspaces, self.model.function_name)
+            fit = self.context.fitting_context.find_fit_for_input_workspace_list_and_function(workspaces, self.model.function_name)
             fit_information += [FitPlotInformation(input_workspaces=workspaces, fit=fit)]
 
         self.selected_sequential_fit_notifier.notify_subscribers(fit_information)

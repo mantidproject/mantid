@@ -5,8 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT, create_error_message, \
-    CalibrationObserver
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import (
+    INSTRUMENT_DICT,
+    create_error_message,
+    CalibrationObserver,
+)
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting, set_setting
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from Engineering.common.calibration_info import CalibrationInfo
@@ -37,8 +40,7 @@ class FocusPresenter(object):
         self.instrument = "ENGINX"
         self.rb_num = None
 
-        last_van_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
-                                    "last_vanadium_run")
+        last_van_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "last_vanadium_run")
         if last_van_path:
             self.view.set_van_file_text_with_search(last_van_path)
 
@@ -54,14 +56,11 @@ class FocusPresenter(object):
         focus_paths = self.view.get_focus_filenames()
         van_path = self.view.get_vanadium_filename()
         if self._number_of_files_warning(focus_paths):
-            self.start_focus_worker(focus_paths, van_path, self.view.get_plot_output(), self.rb_num,
-                                    self.current_calibration)
+            self.start_focus_worker(focus_paths, van_path, self.view.get_plot_output(), self.rb_num, self.current_calibration)
         van_run = self.view.get_vanadium_run()
-        set_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
-                    "last_vanadium_run", van_run)
+        set_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "last_vanadium_run", van_run)
 
-    def start_focus_worker(self, focus_paths: list, van_path: str, plot_output: bool, rb_num: str,
-                           calibration: CalibrationInfo) -> None:
+    def start_focus_worker(self, focus_paths: list, van_path: str, plot_output: bool, rb_num: str, calibration: CalibrationInfo) -> None:
         """
         Focus data in a separate thread to stop the main GUI from hanging.
         :param focus_paths: List of paths to the files containing the data to focus.
@@ -69,10 +68,12 @@ class FocusPresenter(object):
         :param rb_num: The RB Number from the main window (often an experiment id)
         :param regions_dict: Dictionary containing the regions to focus over, mapping region_name -> grouping_ws_name
         """
-        self.worker = AsyncTask(self.model.focus_run,
-                                (focus_paths, van_path, plot_output, rb_num, calibration),
-                                error_cb=self._on_worker_error,
-                                finished_cb=self._on_worker_success)
+        self.worker = AsyncTask(
+            self.model.focus_run,
+            (focus_paths, van_path, plot_output, rb_num, calibration),
+            error_cb=self._on_worker_error,
+            finished_cb=self._on_worker_success,
+        )
         self.set_focus_controls_enabled(False)
         self.worker.start()
 
@@ -104,23 +105,25 @@ class FocusPresenter(object):
             create_error_message(self.view, "Check vanadium run number/path is valid.")
             return False
         if not self.current_calibration.is_valid():
-            create_error_message(
-                self.view, "Create or Load a calibration via the Calibration tab before focusing.")
+            create_error_message(self.view, "Create or Load a calibration via the Calibration tab before focusing.")
             return False
         if self.current_calibration.get_instrument() != self.instrument:
             create_error_message(
                 self.view,
                 "Please make sure the selected instrument matches instrument for the current calibration.\n"
-                "The instrument for the current calibration is: " + self.current_calibration.get_instrument())
+                "The instrument for the current calibration is: " + self.current_calibration.get_instrument(),
+            )
             return False
         return True
 
     def _number_of_files_warning(self, paths):
         if len(paths) > 10:  # Just a guess on the warning for now. May change in future.
             response = QMessageBox.warning(
-                self.view, 'Engineering Diffraction - Warning',
-                'You are attempting to focus {} workspaces. This may take some time.\n\n Would you like to continue?'
-                .format(len(paths)), QMessageBox.Ok | QMessageBox.Cancel)
+                self.view,
+                "Engineering Diffraction - Warning",
+                "You are attempting to focus {} workspaces. This may take some time.\n\n Would you like to continue?".format(len(paths)),
+                QMessageBox.Ok | QMessageBox.Cancel,
+            )
             return response == QMessageBox.Ok
         else:
             return True

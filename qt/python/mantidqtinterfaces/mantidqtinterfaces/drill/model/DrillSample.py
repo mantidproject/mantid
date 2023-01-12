@@ -17,6 +17,7 @@ class DrillSample(QObject):
     """
     Status of sample when its processing is done.
     """
+
     STATUS_PROCESSED = "processing_done"
 
     """
@@ -261,15 +262,13 @@ class DrillSample(QObject):
         Returns:
             dict(str: str): parameters
         """
-        return {name: param.getValue()
-                for name, param in self._parameters.items()}
+        return {name: param.getValue() for name, param in self._parameters.items()}
 
     def onProcessStarted(self):
         """
         Triggered when the sample processing starts.
         """
-        logger.information("Starting of sample {0} processing"
-                           .format(self._index + 1))
+        logger.information("Starting of sample {0} processing".format(self._index + 1))
         self._status = self.STATUS_PENDING
         self.statusChanged.emit()
 
@@ -277,8 +276,7 @@ class DrillSample(QObject):
         """
         Triggered when the sample process succeed.
         """
-        logger.information("Processing of sample {0} finished with sucess"
-                           .format(self._index + 1))
+        logger.information("Processing of sample {0} finished with sucess".format(self._index + 1))
         if self._exporter is not None:
             self._exporter.run(self)
         self._status = self.STATUS_PROCESSED
@@ -292,8 +290,7 @@ class DrillSample(QObject):
             msg (str): error message
         """
         if msg:
-            logger.error("Error while processing sample {0}: {1}"
-                         .format(self._index + 1, msg))
+            logger.error("Error while processing sample {0}: {1}".format(self._index + 1, msg))
         self._status = self.STATUS_ERROR
         self.statusChanged.emit()
 

@@ -38,7 +38,7 @@ class MantidPlotProjectParser(object):
         ws_match = re.search(self.workspaces_pattern, self.text, re.DOTALL)
         if ws_match:
             # split by tab
-            mantid_workspace_entries = ws_match.group(1).split('\t')
+            mantid_workspace_entries = ws_match.group(1).split("\t")
             if len(mantid_workspace_entries) > 1 and mantid_workspace_entries[0] == "WorkspaceNames":
                 # Load workspace groups
                 return self._load_workspaces(mantid_workspace_entries[1:])
@@ -55,8 +55,8 @@ class MantidPlotProjectParser(object):
         ws_group_members = []
         for ws_entry in workspace_entries:
             # if the entry within the <mantidworkspaces> contains a "," it defines a workspace group
-            if ',' in ws_entry:
-                ws_group = ws_entry.split(',')
+            if "," in ws_entry:
+                ws_group = ws_entry.split(",")
                 # First entry is group name, remainder of the line contains members of the group
                 ws_group_members.extend(ws_group[1:])
             else:
@@ -83,9 +83,12 @@ class MantidPlotProjectParser(object):
         graph_creation_args = self._get_graph_creation_arguments_in_layer(layer_index)
         axes_creation_args = self._get_axes_creation_arguments(layer_index)
         layer_label = self._get_plot_label_from_layer(layer_index)
-        layer_creation_args = {'creationArguments': graph_creation_args, 'axes': axes_creation_args,
-                               'label': layer_label,
-                               'properties': self._get_default_fig_properties()}
+        layer_creation_args = {
+            "creationArguments": graph_creation_args,
+            "axes": axes_creation_args,
+            "label": layer_label,
+            "properties": self._get_default_fig_properties(),
+        }
         return layer_creation_args
 
     def _get_axes_creation_arguments(self, layer_index):
@@ -105,7 +108,7 @@ class MantidPlotProjectParser(object):
             axes_args["yAxisTitle"] = axes_titles[2] if axes_titles else None
             axes_args["lines"] = self._get_line_creation_arguments_from_graph_entry(graph_text)
             axes_args["properties"] = self._get_axes_properties_from_graph_entry(graph_text)
-            axes_args['legend'] = self._get_legend_properties_from_graph_entry(graph_text)
+            axes_args["legend"] = self._get_legend_properties_from_graph_entry(graph_text)
             axes_creation_arguments.append(axes_args)
         return axes_creation_arguments
 
@@ -116,7 +119,7 @@ class MantidPlotProjectParser(object):
         """
         # label for the layer is defined as the first item in the first line of the layer settings
         layer_text = self.layer_text[layer_index]
-        label = layer_text.split('\n', maxsplit=1)[0].split('\t')[0]
+        label = layer_text.split("\n", maxsplit=1)[0].split("\t")[0]
         return label
 
     def _get_graph_creation_arguments_in_layer(self, layer_index):
@@ -177,13 +180,20 @@ class MantidPlotProjectParser(object):
         _, plot_title = self.find_option_in_raw_text("PlotTitle", graph_text)[0]
         properties["title"] = plot_title[1] if plot_title else None
         # axesproperties
-        default_axis_properties = {'majorTickLocator': 'AutoLocator', 'minorTickLocator': 'NullLocator',
-                                   'majorTickFormatter': 'ScalarFormatter', 'minorTickFormatter': 'NullFormatter',
-                                   'gridStyle': {'gridOn': False},
-                                   'visible': True, 'position': 'Bottom', 'majorTickLocatorValues': None,
-                                   'minorTickLocatorValues': None, 'majorTickFormat': None,
-                                   'minorTickFormat': None,
-                                   'fontSize': 10.0}
+        default_axis_properties = {
+            "majorTickLocator": "AutoLocator",
+            "minorTickLocator": "NullLocator",
+            "majorTickFormatter": "ScalarFormatter",
+            "minorTickFormatter": "NullFormatter",
+            "gridStyle": {"gridOn": False},
+            "visible": True,
+            "position": "Bottom",
+            "majorTickLocatorValues": None,
+            "minorTickLocatorValues": None,
+            "majorTickFormat": None,
+            "minorTickFormat": None,
+            "fontSize": 10.0,
+        }
         properties["xAxisProperties"] = default_axis_properties
         properties["yAxisProperties"] = default_axis_properties
 
@@ -197,13 +207,31 @@ class MantidPlotProjectParser(object):
         _, legend_entry = self.find_option_in_raw_text("<legend>", graph_text)[0]
         exists = bool(legend_entry)
         visible = bool(legend_entry)
-        return {'exists': exists, 'visible': visible, 'title': '', 'title_font': 'DejaVu Sans', 'title_size': 10.0,
-                'title_color': '#000000', 'box_visible': True, 'background_color': '#ffffff',
-                'edge_color': '#cccccc',
-                'transparency': 0.8, 'entries_font': 'DejaVu Sans', 'entries_size': 8.0, 'entries_color': '#000000',
-                'marker_size': 2.0, 'shadow': False, 'round_edges': True, 'columns': 1, 'column_spacing': 2.0,
-                'label_spacing': 0.5, 'marker_position': 'Left of Entries', 'markers': 1, 'border_padding': 0.4,
-                'marker_label_padding': 0.8}
+        return {
+            "exists": exists,
+            "visible": visible,
+            "title": "",
+            "title_font": "DejaVu Sans",
+            "title_size": 10.0,
+            "title_color": "#000000",
+            "box_visible": True,
+            "background_color": "#ffffff",
+            "edge_color": "#cccccc",
+            "transparency": 0.8,
+            "entries_font": "DejaVu Sans",
+            "entries_size": 8.0,
+            "entries_color": "#000000",
+            "marker_size": 2.0,
+            "shadow": False,
+            "round_edges": True,
+            "columns": 1,
+            "column_spacing": 2.0,
+            "label_spacing": 0.5,
+            "marker_position": "Left of Entries",
+            "markers": 1,
+            "border_padding": 0.4,
+            "marker_label_padding": 0.8,
+        }
 
     def _get_1d_graph_creation_args_from_graph_entry(self, graph_text):
         """
@@ -215,10 +243,14 @@ class MantidPlotProjectParser(object):
         for line_number, curve_settings in curve_entries:
             # remove extraneous white space
             curve_settings = [entry.strip() for entry in curve_settings]
-            creation_args = {"linestyle": "solid", "linewidth": 1.5,
-                             "drawstyle": "default", "marker": None,
-                             "markersize": 6,
-                             "function": self.get_graph_1d_plot_function(line_number, graph_text)}
+            creation_args = {
+                "linestyle": "solid",
+                "linewidth": 1.5,
+                "drawstyle": "default",
+                "marker": None,
+                "markersize": 6,
+                "function": self.get_graph_1d_plot_function(line_number, graph_text),
+            }
             workspace = curve_settings[1]
             # Mantid project files contain the workspace index
             sp = curve_settings[curve_settings.index("sp") + 1]
@@ -229,18 +261,16 @@ class MantidPlotProjectParser(object):
 
     @staticmethod
     def _get_default_fig_properties():
-        fig_size = mpl.rcParams['figure.figsize']
-        return {'figWidth': fig_size[0],
-                'figHeight': fig_size[1],
-                'dpi': mpl.rcParams['figure.dpi']}
+        fig_size = mpl.rcParams["figure.figsize"]
+        return {"figWidth": fig_size[0], "figHeight": fig_size[1], "dpi": mpl.rcParams["figure.dpi"]}
 
     @staticmethod
     def find_option_in_raw_text(option, text):
-        return [(i, line.split('\t')) for i, line in enumerate(text.split('\n')) if option == line.split(maxsplit=1)[0]]
+        return [(i, line.split("\t")) for i, line in enumerate(text.split("\n")) if option == line.split(maxsplit=1)[0]]
 
     @staticmethod
     def get_graph_1d_plot_function(curve_entry_line_number, graph_text):
-        if "<MantidYErrors>1" in graph_text.split('\n')[curve_entry_line_number + 1]:
+        if "<MantidYErrors>1" in graph_text.split("\n")[curve_entry_line_number + 1]:
             return "errorbar"
         else:
             return "plot"

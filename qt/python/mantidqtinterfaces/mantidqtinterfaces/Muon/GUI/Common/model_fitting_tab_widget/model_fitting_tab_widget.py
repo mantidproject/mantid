@@ -20,11 +20,9 @@ class ModelFittingTabWidget(object):
         self.model_fitting_tab_view.hide_fit_raw_checkbox()
         self.model_fitting_tab_view.hide_evaluate_function_as_checkbox()
         self.model_fitting_tab_model = ModelFittingModel(context, context.model_fitting_context)
-        self.model_fitting_tab_presenter = ModelFittingPresenter(self.model_fitting_tab_view,
-                                                                 self.model_fitting_tab_model)
+        self.model_fitting_tab_presenter = ModelFittingPresenter(self.model_fitting_tab_view, self.model_fitting_tab_model)
 
-        context.update_view_from_model_notifier.add_subscriber(
-            self.model_fitting_tab_presenter.update_view_from_model_observer)
+        context.update_view_from_model_notifier.add_subscriber(self.model_fitting_tab_presenter.update_view_from_model_observer)
 
         context.results_context.clear_observable.add_subscriber(self.model_fitting_tab_presenter.clear_observer)
         context.results_context.remove_observable.add_subscriber(self.model_fitting_tab_presenter.remove_observer)

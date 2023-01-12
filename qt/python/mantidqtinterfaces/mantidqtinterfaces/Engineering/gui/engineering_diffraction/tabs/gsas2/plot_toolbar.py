@@ -13,7 +13,7 @@ class GSAS2PlotToolbar(MantidNavigationToolbar):
     sig_toggle_fit_triggered = QtCore.Signal()
 
     toolitems = (
-        MantidNavigationTool('Home', 'Center display on contents', 'mdi.home', 'on_home_clicked', None),
+        MantidNavigationTool("Home", "Center display on contents", "mdi.home", "on_home_clicked", None),
         MantidStandardNavigationTools.BACK,
         MantidStandardNavigationTools.FORWARD,
         MantidStandardNavigationTools.SEPARATOR,

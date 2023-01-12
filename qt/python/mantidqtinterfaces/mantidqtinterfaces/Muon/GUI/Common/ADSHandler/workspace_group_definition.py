@@ -30,9 +30,9 @@ def add_list_to_group(ws_names, group):
 def add_to_group(instrument, extension):
     str_names = AnalysisDataService.getObjectNames()
     # only group things for the current instrument
-    ws_list =  AnalysisDataService.retrieveWorkspaces(str_names)
+    ws_list = AnalysisDataService.retrieveWorkspaces(str_names)
 
-    #just the groups
+    # just the groups
     groups = [ws for ws in ws_list if ws.isGroup()]
 
     # just the workspaces
@@ -43,11 +43,11 @@ def add_to_group(instrument, extension):
 
     names = [string_name(ws) for ws in ws_list if safe_to_add_to_group(ws, instrument, groups, extension)]
     # make sure we include the groups that we already have in the ADS
-    group_names = {key.name():[] for key in groups}
+    group_names = {key.name(): [] for key in groups}
     # put ws into groups
     for name in names:
         run = get_run_number_from_workspace_name(name, instrument)
-        tmp = instrument+run
+        tmp = instrument + run
         # check the names are not already group workspaces
         if tmp in list(group_names.keys()):
             group_names[tmp] += [name]
@@ -61,5 +61,5 @@ def add_to_group(instrument, extension):
 
     # create new groups
     for group in group_names.keys():
-        if group not in [group.name() for group in groups] :
+        if group not in [group.name() for group in groups]:
             make_group(group_names[group], group)

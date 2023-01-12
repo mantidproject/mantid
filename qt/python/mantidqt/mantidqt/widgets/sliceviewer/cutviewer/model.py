@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-from numpy import isclose, sum, argsort, ones, sqrt, zeros,  mean, where, dot, cross, array, vstack
+from numpy import isclose, sum, argsort, ones, sqrt, zeros, mean, where, dot, cross, array, vstack
 from numpy.linalg import det
 
 DEFAULT_NBINS = 50
@@ -43,7 +43,7 @@ class CutViewerModel:
             extents[:, iaxis] = [start, stop]
         # get extents of dimension out of plane of slice
         width = self.get_slicewidth(dims)
-        extents[:, -1] = [slicept - width/2, slicept + width/2]
+        extents[:, -1] = [slicept - width / 2, slicept + width / 2]
         return vectors, extents, nbins
 
     def valid_bin_params(self, vectors, extents, nbins):
@@ -100,15 +100,15 @@ class CutViewerModel:
         self.xvec = self.proj_matrix[states.index(0), :]
         self.xvec /= sqrt(sum(self.xvec**2))
         self.yvec = self.proj_matrix[states.index(1), :]
-        self.yvec /= sqrt(sum(self.yvec ** 2))
+        self.yvec /= sqrt(sum(self.yvec**2))
         # find x/y coord of start/end point of cut
         cens = mean(extents, axis=0)  # in u{1..3} basis of view table
-        icut = where(nbins > 1)[0][0] if where(nbins > 1)[0].size > 0 else 0 # index of cut axis
+        icut = where(nbins > 1)[0][0] if where(nbins > 1)[0].size > 0 else 0  # index of cut axis
         ivecs = list(range(len(vectors)))
         ivecs.pop(icut)
         zero_vec = zeros(vectors[0].shape)  # position at  0 along cut axis
         for ivec in ivecs:
-            zero_vec = zero_vec + cens[ivec]*vectors[ivec]
+            zero_vec = zero_vec + cens[ivec] * vectors[ivec]
         start = zero_vec + extents[0, icut] * vectors[icut, :]
         end = zero_vec + extents[1, icut] * vectors[icut, :]
         xmin = dot(start, self.xvec)
@@ -117,7 +117,7 @@ class CutViewerModel:
         ymax = dot(end, self.yvec)
         # get thickness of cut defined for unit vector perp to cut (so scale by magnitude of vector in the table)
         iint = nbins[:-1].tolist().index(1)
-        thickness = (extents[1, iint]-extents[0, iint])*sqrt(sum(vectors[iint, :]**2))
+        thickness = (extents[1, iint] - extents[0, iint]) * sqrt(sum(vectors[iint, :] ** 2))
         return xmin, xmax, ymin, ymax, thickness
 
     def calc_bin_params_from_cut_representation(self, xmin, xmax, ymin, ymax, thickness, out_plane_vector):
@@ -125,11 +125,11 @@ class CutViewerModel:
         start = xmin * self.xvec + ymin * self.yvec
         stop = xmax * self.xvec + ymax * self.yvec
         u1 = stop - start
-        u1 = u1 / sqrt(sum(u1 ** 2))
+        u1 = u1 / sqrt(sum(u1**2))
         u1_min, u1_max = dot(start, u1), dot(stop, u1)
         # get integrated dim vector and thickness
         u2 = cross(u1, out_plane_vector)
-        u2 = u2 / sqrt(sum(u2 ** 2))
+        u2 = u2 / sqrt(sum(u2**2))
         u2_cen = dot(start, u2)
         u2_min, u2_max = u2_cen - thickness / 2, u2_cen + thickness / 2
         return vstack((u1, u2)), array([[u1_min, u2_min], [u1_max, u2_max]]), [50, 1]  # vecs, extents, nbins (first 2 rows)

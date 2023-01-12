@@ -25,7 +25,7 @@ class StretchedExpFT(IFunction1D):
         self._parmList = list()
 
     def category(self):
-        return 'QuasiElastic'
+        return "QuasiElastic"
 
     @surrogate
     def init(self):
@@ -38,7 +38,7 @@ class StretchedExpFT(IFunction1D):
         pass
 
     def function1D(self, xvals, **optparms):
-        r""" Fourier transform of the Symmetrized Stretched Exponential
+        r"""Fourier transform of the Symmetrized Stretched Exponential
 
         The Symmetrized Stretched Exponential:
                 height * exp( - |t/tau|**beta )
@@ -48,12 +48,10 @@ class StretchedExpFT(IFunction1D):
             F(E) is normalized:
                 \int_{-infty}^{infty} dE F(E) = 1
         """
-        parms, de, energies, fourier = function1Dcommon(
-            self, xvals, **optparms)
+        parms, de, energies, fourier = function1Dcommon(self, xvals, **optparms)
         if parms is None:
             return fourier  # return zeros if parameters not valid
-        transform = parms['Height'] * \
-            np.interp(xvals-parms['Centre'], energies, fourier)
+        transform = parms["Height"] * np.interp(xvals - parms["Centre"], energies, fourier)
         return transform
 
     @surrogate

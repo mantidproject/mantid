@@ -5,12 +5,13 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # Dialog for message
-from qtpy.QtWidgets import (QDialog)  # noqa
+from qtpy.QtWidgets import QDialog  # noqa
 from mantid.kernel import Logger
+
 try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
-    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    Logger("HFIR_4Circle_Reduction").information("Using legacy ui importer")
     from mantidplot import load_ui
 
 
@@ -18,6 +19,7 @@ class MessageDialog(QDialog):
     """
     extension of QDialog
     """
+
     def __init__(self, parent):
         """
         initialization of customized dialog box
@@ -48,7 +50,7 @@ class MessageDialog(QDialog):
         :param text:
         :return:
         """
-        assert isinstance(text, str), 'Input text of type {0} must be a string.'.format(type(text))
+        assert isinstance(text, str), "Input text of type {0} must be a string.".format(type(text))
         self.ui.plainTextEdit_message.setPlainText(text)
 
         return
@@ -61,19 +63,19 @@ class MessageDialog(QDialog):
         :param pt_intensity_vec:
         :return:
         """
-        text = '# Pt. \tIntensity \tMotor Position\n'
+        text = "# Pt. \tIntensity \tMotor Position\n"
         num_loops = max(len(motor_pos_vec), len(pt_intensity_vec))
 
         for pt in range(num_loops):
-            text += '{0} \t'.format(pt+1)
+            text += "{0} \t".format(pt + 1)
             if pt < len(pt_intensity_vec):
-                text += '{0} \t'.format(pt_intensity_vec[pt])
+                text += "{0} \t".format(pt_intensity_vec[pt])
             else:
-                text += '     \t'
+                text += "     \t"
             if pt < len(motor_pos_vec):
-                text += '{0}\n'.format(motor_pos_vec[pt])
+                text += "{0}\n".format(motor_pos_vec[pt])
             else:
-                text += '   \n'
+                text += "   \n"
         # END-FOR
 
         self.set_text(text)

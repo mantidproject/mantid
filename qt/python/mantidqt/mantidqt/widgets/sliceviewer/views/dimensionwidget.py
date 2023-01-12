@@ -7,8 +7,7 @@
 #  This file is part of the mantid workbench.
 #
 #
-from qtpy.QtWidgets import (QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButton, QSlider,
-                            QDoubleSpinBox, QSpinBox)
+from qtpy.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButton, QSlider, QDoubleSpinBox, QSpinBox
 from qtpy.QtCore import Qt, Signal
 from enum import IntEnum
 
@@ -37,6 +36,7 @@ class DimensionWidget(QWidget):
     window.show()
     app.exec_()
     """
+
     def __init__(self, dims_info, parent=None):
         super().__init__(parent)
 
@@ -45,8 +45,8 @@ class DimensionWidget(QWidget):
         layout.setSpacing(0)
         self.dims, self.qflags = [], []
         for n, dim in enumerate(dims_info):
-            self.qflags.append(dim['qdim'])
-            if dim['can_rebin']:
+            self.qflags.append(dim["qdim"])
+            if dim["can_rebin"]:
                 self.dims.append(DimensionNonIntegrated(dim, number=n, parent=self))
             else:
                 self.dims.append(Dimension(dim, number=n, parent=self))
@@ -54,7 +54,7 @@ class DimensionWidget(QWidget):
         for widget in self.dims:
             widget.stateChanged.connect(self.change_dims)
             widget.valueChanged.connect(self.valueChanged)
-            if hasattr(widget, 'binningChanged'):
+            if hasattr(widget, "binningChanged"):
                 widget.binningChanged.connect(self.dimensionsChanged)
             layout.addWidget(widget)
 
@@ -118,7 +118,7 @@ class DimensionWidget(QWidget):
 
     def get_slicepoint(self):
         """:return: A list of elements where None indicates a non-slice dimension and a
-          float indicates the current slice point in that dimension.
+        float indicates the current slice point in that dimension.
         """
         return [None if d.get_state() in (State.X, State.Y) else d.get_value() for d in self.dims]
 
@@ -127,17 +127,11 @@ class DimensionWidget(QWidget):
         :return: A list of enumerating the range in each slice dimension. None indicates a non-slice
         dimension and are in the same positions as the list returned from get_slicepoint
         """
-        return [
-            None if d.get_state() in (State.X, State.Y) else
-            (d.spinbox.minimum(), d.spinbox.maximum()) for d in self.dims
-        ]
+        return [None if d.get_state() in (State.X, State.Y) else (d.spinbox.minimum(), d.spinbox.maximum()) for d in self.dims]
 
     def get_bin_params(self):
         try:
-            return [
-                d.get_bins() if d.get_state() in (State.X, State.Y) else d.get_thickness()
-                for d in self.dims
-            ]
+            return [d.get_bins() if d.get_state() in (State.X, State.Y) else d.get_thickness() for d in self.dims]
         except AttributeError:
             return None
 
@@ -185,28 +179,29 @@ class Dimension(QWidget):
     window.show()
     app.exec_()
     """
+
     def __init__(self, dim_info, number=0, state=State.NONE, parent=None):
         super().__init__(parent)
 
-        self.minimum = dim_info['minimum']
-        self.nbins = dim_info['number_of_bins']
-        self.width = dim_info['width']
+        self.minimum = dim_info["minimum"]
+        self.nbins = dim_info["number_of_bins"]
+        self.width = dim_info["width"]
         self.number = number
 
         self.layout = QHBoxLayout(self)
         self.layout.setContentsMargins(0, 2, 0, 0)
 
-        self.name = QLabel(dim_info['name'])
-        self.units = QLabel(dim_info['units'])
+        self.name = QLabel(dim_info["name"])
+        self.units = QLabel(dim_info["units"])
 
-        self.x = QPushButton('X')
+        self.x = QPushButton("X")
         self.x.setCheckable(True)
         self.x.clicked.connect(self.x_clicked)
         # square button based on height. Default sizeHint is too large
         self.x.setFixedWidth(self.x.sizeHint().height())
         self.x.setToolTip("Swap X and Y axes")
 
-        self.y = QPushButton('Y')
+        self.y = QPushButton("Y")
         self.y.setCheckable(True)
         self.y.clicked.connect(self.y_clicked)
         self.y.setFixedWidth(self.y.sizeHint().height())
@@ -331,15 +326,16 @@ class DimensionNonIntegrated(Dimension):
     window.show()
     app.exec_()
     """
+
     def __init__(self, dim_info, number=0, state=State.NONE, parent=None):
         # hack in a number_of_bins for MDEventWorkspace
-        if dim_info['type'] == 'MDE':
-            dim_info['number_of_bins'] = 100
-            dim_info['width'] = (dim_info['maximum'] - dim_info['minimum']) / 100
+        if dim_info["type"] == "MDE":
+            dim_info["number_of_bins"] = 100
+            dim_info["width"] = (dim_info["maximum"] - dim_info["minimum"]) / 100
 
         self.spinBins = QSpinBox()
         self.spinBins.setRange(2, 9999)
-        self.spinBins.setValue(dim_info['number_of_bins'])
+        self.spinBins.setValue(dim_info["number_of_bins"])
         self.spinBins.hide()
         self.spinBins.setMinimumWidth(110)
         self.spinThick = QDoubleSpinBox()
@@ -371,15 +367,15 @@ class DimensionNonIntegrated(Dimension):
         if self.state == State.X:
             self.spinBins.show()
             self.spinThick.hide()
-            self.rebinLabel.setText('bins')
+            self.rebinLabel.setText("bins")
         elif self.state == State.Y:
             self.spinBins.show()
             self.spinThick.hide()
-            self.rebinLabel.setText('bins')
+            self.rebinLabel.setText("bins")
         elif self.state == State.NONE:
             self.spinBins.hide()
             self.spinThick.show()
-            self.rebinLabel.setText('thick')
+            self.rebinLabel.setText("thick")
         else:
             self.spinBins.hide()
             self.spinThick.hide()

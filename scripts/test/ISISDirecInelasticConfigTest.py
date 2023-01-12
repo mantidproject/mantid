@@ -26,28 +26,28 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         self.cycle = "CYCLE20151"
         nrbnumber = "1310168"
         self.rbnumber = "RB" + nrbnumber
-        self.start_date = '20150503'
-        self.userID = 'tuf666699'
+        self.start_date = "20150503"
+        self.userID = "tuf666699"
         return super(ISISDirectInelasticConfigTest, self).__init__(methodName)
 
     def get_save_dir(self):
-        targetDir = config['defaultsave.directory']
+        targetDir = config["defaultsave.directory"]
         if targetDir is None or len(targetDir) == 0:
-            if platform.system() == 'Windows':
-                targetDir = str(os.environ['TEMP'])
+            if platform.system() == "Windows":
+                targetDir = str(os.environ["TEMP"])
             else:
-                targetDir = '/tmp'
+                targetDir = "/tmp"
         return targetDir
 
     def write_test_file(self, filename):
         """Method writes test file with name provided and
-           specified contents
+        specified contents
         """
         dir_name = os.path.dirname(filename)
         if not os.path.exists(dir_name):
             os.makedirs(dir_name)
 
-        fh = open(filename, 'w')
+        fh = open(filename, "w")
         fh.write("****************************************\n")
         fh.write("first test variable = AAAA # something\n")
         fh.write("second test var  Test_reduction_file # other\n ")
@@ -59,8 +59,8 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         targetDir = self.get_save_dir()
 
         self.rbdir = os.path.join(targetDir, self.userID, self.rbnumber)
-        self.UserScriptRepoDir = os.path.join(targetDir, 'UserScripts')
-        self.MapMaskDir = os.path.join(targetDir, 'MapMaskDir')
+        self.UserScriptRepoDir = os.path.join(targetDir, "UserScripts")
+        self.MapMaskDir = os.path.join(targetDir, "MapMaskDir")
         self.userRootDir = os.path.join(targetDir, self.userID)
         if not os.path.exists(self.rbdir):
             os.makedirs(self.rbdir)
@@ -78,7 +78,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         for instr in all_instr_names:
             instr_name = instr
 
-            file_path = os.path.join(self.UserScriptRepoDir, 'direct_inelastic', instr_name.upper())
+            file_path = os.path.join(self.UserScriptRepoDir, "direct_inelastic", instr_name.upper())
             if not os.path.exists(file_path):
                 os.makedirs(file_path)
 
@@ -87,12 +87,12 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
             full_file = os.path.join(file_path, file_name)
             if os.path.isfile(full_file):
                 os.remove(full_file)
-            fh = open(full_file, 'w')
-            fh.write('#Test reduction file\n')
+            fh = open(full_file, "w")
+            fh.write("#Test reduction file\n")
             if contents is None:
-                fh.write('Contents=Fake_reduction_file_for_{0}'.format(instr_name))
+                fh.write("Contents=Fake_reduction_file_for_{0}".format(instr_name))
             else:
-                fh.write('Contents={0}'.format(contents))
+                fh.write("Contents={0}".format(contents))
             fh.close()
         if len(all_files) > 1:
             return all_files
@@ -113,39 +113,39 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
     def test_UserProperties(self):
         user = UserProperties(self.userID)
 
-        user.set_user_properties(self.instrument, self.rbdir, 'CYCLE20144B', self.start_date)
-        self.assertEqual(user.cycleID, '2014_4B')
+        user.set_user_properties(self.instrument, self.rbdir, "CYCLE20144B", self.start_date)
+        self.assertEqual(user.cycleID, "2014_4B")
 
         # set_user_properties(self,instrument,rb_folder_or_id,cycle,start_date):
         user.set_user_properties(self.instrument, self.rbdir, self.cycle, self.start_date)
 
         id = user._recent_dateID
-        self.assertEqual(user._instrument[id], 'MERLIN')
-        self.assertEqual(user._cycle_IDs[id], ('2015', '1'))
+        self.assertEqual(user._instrument[id], "MERLIN")
+        self.assertEqual(user._cycle_IDs[id], ("2015", "1"))
         self.assertEqual(user._start_dates[id], datetime.date(2015, 5, 3))
         self.assertEqual(user._rb_dirs[id], self.rbdir)
         self.assertEqual(user.userID, self.userID)
 
-        self.assertEqual(user.instrument, 'MERLIN')
-        self.assertEqual(user.cycleID, '2015_1')
+        self.assertEqual(user.instrument, "MERLIN")
+        self.assertEqual(user.cycleID, "2015_1")
         self.assertEqual(user.start_date, datetime.date(2015, 5, 3))
         self.assertEqual(user.rb_dir, self.rbdir)
 
-        self.assertRaises(RuntimeError, user.set_user_properties, 'SANS2D', self.rbdir, self.cycle, self.start_date)
-        self.assertRaises(RuntimeError, user.set_user_properties, 'HET', self.rbdir, self.cycle, '201400000')
+        self.assertRaises(RuntimeError, user.set_user_properties, "SANS2D", self.rbdir, self.cycle, self.start_date)
+        self.assertRaises(RuntimeError, user.set_user_properties, "HET", self.rbdir, self.cycle, "201400000")
         # self.assertRaises(RuntimeError,user.set_user_properties,'HET',self.rbdir,'20144',self.start_date)
-        self.assertRaises(RuntimeError, user.set_user_properties, 'HET', self.rbdir, 'CYC20144', self.start_date)
-        self.assertRaises(RuntimeError, user.set_user_properties, 'HET', self.rbdir, 'CYCLE201444', self.start_date)
+        self.assertRaises(RuntimeError, user.set_user_properties, "HET", self.rbdir, "CYC20144", self.start_date)
+        self.assertRaises(RuntimeError, user.set_user_properties, "HET", self.rbdir, "CYCLE201444", self.start_date)
 
-        self.assertRaises(RuntimeError, user.set_user_properties, 'HET', 'missing/folder', self.cycle, "19990101")
+        self.assertRaises(RuntimeError, user.set_user_properties, "HET", "missing/folder", self.cycle, "19990101")
         # user.set_user_properties('HET','missing/folder',self.cycle,"19990101")
         # this refers to recent experiment, not the old one
         self.assertTrue(user.rb_dir_exist)
 
-        rbdir = os.path.join(self.userRootDir, 'RB1000666')
+        rbdir = os.path.join(self.userRootDir, "RB1000666")
         if not os.path.exists(rbdir):
             os.makedirs(rbdir)
-        user.set_user_properties('MARI', rbdir, 'CYCLE20001', '20000112')
+        user.set_user_properties("MARI", rbdir, "CYCLE20001", "20000112")
         if os.path.exists(rbdir):
             shutil.rmtree(rbdir)
 
@@ -153,20 +153,20 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         self.assertEqual(len(user._instrument), 2)
 
         self.assertEqual(user._recent_dateID, id)
-        self.assertEqual(user._start_dates['2000-01-12'], datetime.date(2000, 1, 12))
+        self.assertEqual(user._start_dates["2000-01-12"], datetime.date(2000, 1, 12))
 
-        rbdir = os.path.join(self.userRootDir, 'RB1999666')
+        rbdir = os.path.join(self.userRootDir, "RB1999666")
         if not os.path.exists(rbdir):
             os.makedirs(rbdir)
-        user.set_user_properties('MERLIN', rbdir, 'CYCLE20163', '20161201')
+        user.set_user_properties("MERLIN", rbdir, "CYCLE20163", "20161201")
         if os.path.exists(rbdir):
             shutil.rmtree(rbdir)
 
         self.assertEqual(len(user._instrument), 3)
         id = user._recent_dateID
-        self.assertEqual(id, '2016-12-01')
-        self.assertEqual(user._instrument[id], 'MERLIN')
-        self.assertEqual(user.instrument, 'MERLIN')
+        self.assertEqual(id, "2016-12-01")
+        self.assertEqual(user._instrument[id], "MERLIN")
+        self.assertEqual(user.instrument, "MERLIN")
 
     def test_build_config(self):
 
@@ -177,21 +177,21 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
 
         mcf = MantidConfigDirectInelastic(MantidDir, HomeRootDir, self.UserScriptRepoDir, self.MapMaskDir)
 
-        self.assertRaises(RuntimeError, MantidConfigDirectInelastic, 'MissingMantidFolder', HomeRootDir,
-                          self.UserScriptRepoDir, self.MapMaskDir)
-        self.assertRaises(RuntimeError, MantidConfigDirectInelastic, MantidDir, 'MissingUserRootFolder',
-                          self.UserScriptRepoDir, self.MapMaskDir)
-        self.assertRaises(RuntimeError, MantidConfigDirectInelastic, MantidDir, HomeRootDir, 'MissingUserScriptRepoDir',
-                          self.MapMaskDir)
-        self.assertRaises(RuntimeError, MantidConfigDirectInelastic, MantidDir, HomeRootDir, self.UserScriptRepoDir,
-                          'MissingMapMaskDir')
+        self.assertRaises(
+            RuntimeError, MantidConfigDirectInelastic, "MissingMantidFolder", HomeRootDir, self.UserScriptRepoDir, self.MapMaskDir
+        )
+        self.assertRaises(
+            RuntimeError, MantidConfigDirectInelastic, MantidDir, "MissingUserRootFolder", self.UserScriptRepoDir, self.MapMaskDir
+        )
+        self.assertRaises(RuntimeError, MantidConfigDirectInelastic, MantidDir, HomeRootDir, "MissingUserScriptRepoDir", self.MapMaskDir)
+        self.assertRaises(RuntimeError, MantidConfigDirectInelastic, MantidDir, HomeRootDir, self.UserScriptRepoDir, "MissingMapMaskDir")
 
         user = UserProperties(self.userID)
         user.set_user_properties(self.instrument, self.rbdir, self.cycle, self.start_date)
 
         # clear up the previous
-        if os.path.exists(os.path.join(self.userRootDir, '.mantid')):
-            shutil.rmtree(os.path.join(self.userRootDir, '.mantid'))
+        if os.path.exists(os.path.join(self.userRootDir, ".mantid")):
+            shutil.rmtree(os.path.join(self.userRootDir, ".mantid"))
 
         mcf.init_user(user)
         self.makeFakeSourceReductionFile(mcf)
@@ -200,8 +200,8 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
 
         mcf.generate_config()
 
-        config_file = os.path.join(self.userRootDir, '.mantid', 'Mantid.user.properties')
-        self.assertTrue(os.path.exists(os.path.join(self.userRootDir, '.mantid')))
+        config_file = os.path.join(self.userRootDir, ".mantid", "Mantid.user.properties")
+        self.assertTrue(os.path.exists(os.path.join(self.userRootDir, ".mantid")))
         self.assertTrue(os.path.exists(config_file))
 
         cur_cycleID = mcf._user.cycleID
@@ -218,8 +218,8 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         os.utime(config_file, (time_user_touched, time_user_touched))
         self.assertFalse(mcf.config_need_replacing(config_file))
         # clear up
-        if os.path.exists(os.path.join(self.userRootDir, '.mantid')):
-            shutil.rmtree(os.path.join(self.userRootDir, '.mantid'))
+        if os.path.exists(os.path.join(self.userRootDir, ".mantid")):
+            shutil.rmtree(os.path.join(self.userRootDir, ".mantid"))
 
     def test_build_3Experiments_config(self):
         # script verifies the presence of a folder, not its contents.
@@ -231,34 +231,34 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         user = UserProperties(self.userID)
         user.set_user_properties(self.instrument, self.rbdir, self.cycle, self.start_date)
 
-        rbnum2 = 'RB1999000'
+        rbnum2 = "RB1999000"
 
         targetDir = self.get_save_dir()
         rbdir2 = os.path.join(targetDir, self.userID, rbnum2)
         if not os.path.exists(rbdir2):
             os.makedirs(rbdir2)
-        user.set_user_properties('MARI', rbdir2, 'CYCLE20001', '20000124')
+        user.set_user_properties("MARI", rbdir2, "CYCLE20001", "20000124")
 
-        rbnum3 = 'RB1204000'
+        rbnum3 = "RB1204000"
         rbdir3 = os.path.join(targetDir, self.userID, rbnum3)
         if not os.path.exists(rbdir3):
             os.makedirs(rbdir3)
-        user.set_user_properties('MAPS', rbdir3, 'CYCLE20044', '20041207')
+        user.set_user_properties("MAPS", rbdir3, "CYCLE20044", "20041207")
 
         # clear up the previous
-        if os.path.exists(os.path.join(self.userRootDir, '.mantid')):
-            shutil.rmtree(os.path.join(self.userRootDir, '.mantid'))
+        if os.path.exists(os.path.join(self.userRootDir, ".mantid")):
+            shutil.rmtree(os.path.join(self.userRootDir, ".mantid"))
 
         mcf.init_user(user)
 
         self.makeFakeSourceReductionFile(mcf)
         self.assertEqual(len(mcf._dynamic_configuration), 6)
-        self.assertEqual(mcf._dynamic_configuration[1], 'default.instrument=MERLIN')
+        self.assertEqual(mcf._dynamic_configuration[1], "default.instrument=MERLIN")
 
         mcf.generate_config()
 
-        config_file = os.path.join(self.userRootDir, '.mantid', 'Mantid.user.properties')
-        self.assertTrue(os.path.exists(os.path.join(self.userRootDir, '.mantid')))
+        config_file = os.path.join(self.userRootDir, ".mantid", "Mantid.user.properties")
+        self.assertTrue(os.path.exists(os.path.join(self.userRootDir, ".mantid")))
         self.assertTrue(os.path.exists(config_file))
 
         self.assertTrue(mcf.config_need_replacing(config_file))
@@ -268,22 +268,22 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         os.utime(config_file, (time_in_a_past, time_in_a_past))
         self.assertFalse(mcf.config_need_replacing(config_file))
         # --------------------------------------------------------------------
-        user1ID = 'tuf299966'
+        user1ID = "tuf299966"
         user1RootDir = os.path.join(self.get_save_dir(), user1ID)
         if not os.path.exists(user1RootDir):
             os.makedirs(user1RootDir)
         #
         user1 = UserProperties(user1ID)
-        user1.set_user_properties('MARI', rbdir2, 'CYCLE20991', '20990124')
+        user1.set_user_properties("MARI", rbdir2, "CYCLE20991", "20990124")
 
         mcf.init_user(user1)
         self.makeFakeSourceReductionFile(mcf)
 
         mcf.generate_config()
         self.assertEqual(len(mcf._dynamic_configuration), 6)
-        self.assertEqual(mcf._dynamic_configuration[1], 'default.instrument=MARI')
-        config_file = os.path.join(self.userRootDir, '.mantid', 'Mantid.user.properties')
-        self.assertTrue(os.path.exists(os.path.join(user1RootDir, '.mantid')))
+        self.assertEqual(mcf._dynamic_configuration[1], "default.instrument=MARI")
+        config_file = os.path.join(self.userRootDir, ".mantid", "Mantid.user.properties")
+        self.assertTrue(os.path.exists(os.path.join(user1RootDir, ".mantid")))
         self.assertTrue(os.path.exists(config_file))
         #
         # Check sample reduction file
@@ -305,8 +305,8 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
 
         # --------------------------------------------------------------------
         # clean up
-        if os.path.exists(os.path.join(self.userRootDir, '.mantid')):
-            shutil.rmtree(os.path.join(self.userRootDir, '.mantid'), ignore_errors=True)
+        if os.path.exists(os.path.join(self.userRootDir, ".mantid")):
+            shutil.rmtree(os.path.join(self.userRootDir, ".mantid"), ignore_errors=True)
         if os.path.exists(rbdir2):
             shutil.rmtree(rbdir2, ignore_errors=True)
         if os.path.exists(rbdir3):
@@ -319,15 +319,15 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         user = UserProperties("wkc26243")
         user.set_user_properties(self.instrument, self.rbdir, self.cycle, self.start_date)
 
-        targ_string = user.replace_variables('$instrument$ReductionScript$cycleID$.py')
-        self.assertEqual(self.instrument + 'ReductionScript2015_1.py', targ_string)
-        self.assertEqual(user.GID, '1310168')
+        targ_string = user.replace_variables("$instrument$ReductionScript$cycleID$.py")
+        self.assertEqual(self.instrument + "ReductionScript2015_1.py", targ_string)
+        self.assertEqual(user.GID, "1310168")
 
     def test_parse_file_description(self):
 
         this_file = os.path.realpath(__file__)
         file_dir = os.path.dirname(this_file)
-        test_xml = os.path.join(file_dir, 'User_files_description_test.xml')
+        test_xml = os.path.join(file_dir, "User_files_description_test.xml")
         self.assertTrue(os.path.exists(test_xml))
 
         MantidDir = os.path.split(os.path.realpath(__file__))[0]
@@ -344,8 +344,8 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         source = files_to_copy[0][0]
         dest = files_to_copy[0][1]
         repl = files_to_copy[0][2]
-        self.assertEqual(os.path.basename(source), 'MERLINReduction_Sample.py')
-        self.assertEqual(os.path.basename(dest), 'MERLINReduction_2015_1.py')
+        self.assertEqual(os.path.basename(source), "MERLINReduction_Sample.py")
+        self.assertEqual(os.path.basename(dest), "MERLINReduction_2015_1.py")
         self.assertEqual(repl, None)
 
         # test files defined by test xml file
@@ -392,23 +392,23 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         user2 = mcf._user
         self.assertEqual(user, user2)
 
-        self.assertRaises(RuntimeError, mcf.init_user, 'bla_bla_bla')
+        self.assertRaises(RuntimeError, mcf.init_user, "bla_bla_bla")
 
     def test_various_user_constructors(self):
 
-        user = UserProperties('tusxxx MARI RB1040506 153 150821')
+        user = UserProperties("tusxxx MARI RB1040506 153 150821")
         sus = str(user)
-        self.assertEqual(sus, 'tusxxx MARI RB1040506 2015_3 2015-08-21')
+        self.assertEqual(sus, "tusxxx MARI RB1040506 2015_3 2015-08-21")
 
         user1 = UserProperties(sus)
         sus1 = str(user1)
         self.assertEqual(sus, sus1)
 
-        user2 = UserProperties('tusxxx', 'MARI', 'RB1040506', '2015_3', '20150821')
+        user2 = UserProperties("tusxxx", "MARI", "RB1040506", "2015_3", "20150821")
         sus2 = str(user2)
         self.assertEqual(sus, sus2)
 
-        user2.rb_dir = 'bla_bla_bla'
+        user2.rb_dir = "bla_bla_bla"
         self.assertFalse(user2.rb_dir_exist)
 
         user3 = UserProperties(self.userID, self.instrument, self.rbdir, self.cycle, self.start_date)
@@ -431,23 +431,23 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         user = UserProperties(self.userID)
         user.set_user_properties(self.instrument, self.rbdir, self.cycle, self.start_date)
 
-        rbnum2 = 'RB1999000'
+        rbnum2 = "RB1999000"
 
         targetDir = self.get_save_dir()
         rbdir2 = os.path.join(targetDir, self.userID, rbnum2)
         if not os.path.exists(rbdir2):
             os.makedirs(rbdir2)
-        user.set_user_properties('MARI', rbdir2, 'CYCLE20001', '20000124')
+        user.set_user_properties("MARI", rbdir2, "CYCLE20001", "20000124")
 
-        rbnum3 = 'RB1204000'
+        rbnum3 = "RB1204000"
         rbdir3 = os.path.join(targetDir, self.userID, rbnum3)
         if not os.path.exists(rbdir3):
             os.makedirs(rbdir3)
-        user.set_user_properties('MAPS', rbdir3, 'CYCLE20044', '20041207')
+        user.set_user_properties("MAPS", rbdir3, "CYCLE20044", "20041207")
 
         # clear up the previous
-        if os.path.exists(os.path.join(self.userRootDir, '.mantid')):
-            shutil.rmtree(os.path.join(self.userRootDir, '.mantid'))
+        if os.path.exists(os.path.join(self.userRootDir, ".mantid")):
+            shutil.rmtree(os.path.join(self.userRootDir, ".mantid"))
 
         mcf.init_user(user)
         # Generate fake test files to copy to test users
@@ -460,17 +460,17 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         #
         # Sample file for MERLIN:
         rbdir1 = self.rbdir
-        mer_file = os.path.join(rbdir1, 'MERLINReduction_2015_1.py')
+        mer_file = os.path.join(rbdir1, "MERLINReduction_2015_1.py")
         self.assertTrue(os.path.isfile(mer_file))
-        mar_file = os.path.join(rbdir2, 'MARIReduction_2015_1.py')
+        mar_file = os.path.join(rbdir2, "MARIReduction_2015_1.py")
         self.assertTrue(os.path.isfile(mar_file))
-        maps_file = os.path.join(rbdir3, 'MAPSReduction_2015_1.py')
+        maps_file = os.path.join(rbdir3, "MAPSReduction_2015_1.py")
         self.assertTrue(os.path.isfile(maps_file))
 
         # --------------------------------------------------------------------
         # clean up
-        if os.path.exists(os.path.join(self.userRootDir, '.mantid')):
-            shutil.rmtree(os.path.join(self.userRootDir, '.mantid'), ignore_errors=True)
+        if os.path.exists(os.path.join(self.userRootDir, ".mantid")):
+            shutil.rmtree(os.path.join(self.userRootDir, ".mantid"), ignore_errors=True)
         if os.path.exists(rbdir2):
             shutil.rmtree(rbdir2, ignore_errors=True)
         if os.path.exists(rbdir3):
@@ -487,17 +487,17 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         user = UserProperties(self.userID)
         user.set_user_properties(self.instrument, self.rbdir, self.cycle, self.start_date)
 
-        rbnum2 = 'RB1999000'
+        rbnum2 = "RB1999000"
 
         targetDir = self.get_save_dir()
         rbdir2 = os.path.join(targetDir, self.userID, rbnum2)
         if not os.path.exists(rbdir2):
             os.makedirs(rbdir2)
-        user.set_user_properties('MERLIN', rbdir2, 'CYCLE20151', '20150508')
+        user.set_user_properties("MERLIN", rbdir2, "CYCLE20151", "20150508")
 
         # clear up the previous
-        if os.path.exists(os.path.join(self.userRootDir, '.mantid')):
-            shutil.rmtree(os.path.join(self.userRootDir, '.mantid'))
+        if os.path.exists(os.path.join(self.userRootDir, ".mantid")):
+            shutil.rmtree(os.path.join(self.userRootDir, ".mantid"))
 
         mcf.init_user(user)
         # Generate fake test files to copy to test users
@@ -509,15 +509,15 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         #
         # Sample file for MERLIN:
         rbdir1 = self.rbdir
-        mer_file = os.path.join(rbdir1, 'MERLINReduction_2015_1.py')
+        mer_file = os.path.join(rbdir1, "MERLINReduction_2015_1.py")
         self.assertTrue(os.path.isfile(mer_file))
-        mar_file = os.path.join(rbdir2, 'MERLINReduction_2015_1.py')
+        mar_file = os.path.join(rbdir2, "MERLINReduction_2015_1.py")
         self.assertTrue(os.path.isfile(mar_file))
 
         # --------------------------------------------------------------------
         # clean up
-        if os.path.exists(os.path.join(self.userRootDir, '.mantid')):
-            shutil.rmtree(os.path.join(self.userRootDir, '.mantid'), ignore_errors=True)
+        if os.path.exists(os.path.join(self.userRootDir, ".mantid")):
+            shutil.rmtree(os.path.join(self.userRootDir, ".mantid"), ignore_errors=True)
         if os.path.exists(rbdir2):
             shutil.rmtree(rbdir2, ignore_errors=True)
         #

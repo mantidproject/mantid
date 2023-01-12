@@ -5,10 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_view import GeneralFittingView
-from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_fitting_options_view \
-    import TFAsymmetryFittingOptionsView
-from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_mode_switcher_view \
-    import TFAsymmetryModeSwitcherView
+from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_fitting_options_view import (
+    TFAsymmetryFittingOptionsView,
+)
+from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_mode_switcher_view import (
+    TFAsymmetryModeSwitcherView,
+)
 
 from qtpy.QtWidgets import QWidget
 

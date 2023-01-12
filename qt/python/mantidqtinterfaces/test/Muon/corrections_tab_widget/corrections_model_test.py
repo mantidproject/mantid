@@ -16,28 +16,27 @@ from mantidqtinterfaces.Muon.GUI.Common.utilities.load_utils import load_workspa
 
 
 class CorrectionsModelTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         FrameworkManager.Instance()
 
     def setUp(self):
-        self.filepath = FileFinder.findRuns('EMU00019489.nxs')[0]
+        self.filepath = FileFinder.findRuns("EMU00019489.nxs")[0]
         self.load_result, self.run_number, self.filename, _ = load_workspace_from_filename(self.filepath)
 
         self.context = setup_context()
-        self.context.gui_context.update({'RebinType': 'None'})
+        self.context.gui_context.update({"RebinType": "None"})
         self.model = CorrectionsModel(self.context)
         self.runs = [[84447], [84448], [84449]]
         self.coadd_runs = [[84447, 84448, 84449]]
 
-        self.context.data_context.instrument = 'EMU'
-        self.context.data_context._loaded_data.add_data(workspace=self.load_result, run=[self.run_number],
-                                                        filename=self.filename, instrument='EMU')
+        self.context.data_context.instrument = "EMU"
+        self.context.data_context._loaded_data.add_data(
+            workspace=self.load_result, run=[self.run_number], filename=self.filename, instrument="EMU"
+        )
         self.context.data_context.current_runs = [[self.run_number]]
         self.context.data_context.update_current_data()
-        self.context.group_pair_context.reset_group_and_pairs_to_default(
-            self.load_result['OutputWorkspace'][0].workspace, 'EMU', '', 1)
+        self.context.group_pair_context.reset_group_and_pairs_to_default(self.load_result["OutputWorkspace"][0].workspace, "EMU", "", 1)
 
     def _setup_for_multiple_runs(self):
         self.mock_current_runs = mock.PropertyMock(return_value=self.runs)
@@ -101,7 +100,7 @@ class CorrectionsModelTest(unittest.TestCase):
         self._assert_workspaces_exist(["EMU19489; Pair Asym; long; MA"])
 
     def test_that_calculate_diffs_for_will_calculate_the_expected_diff_asymmetry_workspaces(self):
-        diff = MuonDiff('group_diff', 'fwd', 'bwd')
+        diff = MuonDiff("group_diff", "fwd", "bwd")
         self.context.group_pair_context.add_diff(diff)
 
         self.context.calculate_all_counts()
@@ -117,5 +116,5 @@ class CorrectionsModelTest(unittest.TestCase):
             self.assertTrue(workspace_name in ads_list)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

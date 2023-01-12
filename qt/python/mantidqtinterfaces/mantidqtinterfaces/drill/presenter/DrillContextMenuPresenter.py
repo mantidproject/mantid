@@ -11,6 +11,7 @@ class DrillContextMenuPresenter:
     """
     Main DrILL view.
     """
+
     _view = None
 
     """

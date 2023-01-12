@@ -10,17 +10,25 @@ from mantid.simpleapi import CopyLogs, EvaluateFunction
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_group_definition import add_list_to_group
 
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist, retrieve_ws, make_group
-from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import (check_phasequad_name, create_covariance_matrix_name,
-                                                                            create_fitted_workspace_name, create_parameter_table_name,
-                                                                            get_diff_asymmetry_name, get_group_asymmetry_name,
-                                                                            get_group_or_pair_from_name, get_pair_asymmetry_name,
-                                                                            get_pair_phasequad_name,
-                                                                            get_run_numbers_as_string_from_workspace_name)
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import (
+    check_phasequad_name,
+    create_covariance_matrix_name,
+    create_fitted_workspace_name,
+    create_parameter_table_name,
+    get_diff_asymmetry_name,
+    get_group_asymmetry_name,
+    get_group_or_pair_from_name,
+    get_pair_asymmetry_name,
+    get_pair_phasequad_name,
+    get_run_numbers_as_string_from_workspace_name,
+)
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
-from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import (BasicFittingContext,
-                                                                                                X_FROM_FIT_RANGE,
-                                                                                                X_FROM_DATA_RANGE,
-                                                                                                X_FROM_CUSTOM)
+from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import (
+    BasicFittingContext,
+    X_FROM_FIT_RANGE,
+    X_FROM_DATA_RANGE,
+    X_FROM_CUSTOM,
+)
 from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FitInformation
 from mantidqtinterfaces.Muon.GUI.Common.contexts.muon_context import MuonContext
 from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import run_Fit, run_create_workspace_without_storing
@@ -53,6 +61,7 @@ class FitPlotInformation(NamedTuple):
     """
     This class is used to send fit data to the plot widget for plotting.
     """
+
     input_workspaces: List[str]
     fit: FitInformation
 
@@ -118,8 +127,7 @@ class BasicFittingModel:
 
     def current_normalised_covariance_matrix(self) -> StaticWorkspaceWrapper:
         """Returns the Normalised Covariance matrix for the currently selected data."""
-        return self._get_normalised_covariance_matrix_for(self.get_active_workspace_names(),
-                                                          self.fitting_context.function_name)
+        return self._get_normalised_covariance_matrix_for(self.get_active_workspace_names(), self.fitting_context.function_name)
 
     def has_normalised_covariance_matrix(self) -> bool:
         """Returns true if a Normalised Covariance matrix exists for the currently selected dataset."""
@@ -289,8 +297,7 @@ class BasicFittingModel:
     def save_current_fit_function_to_undo_data(self) -> None:
         """Saves the current single fit function and other data before performing a fit."""
         self.fitting_context.dataset_indices_for_undo.append(self.fitting_context.current_dataset_index)
-        self.fitting_context.single_fit_functions_for_undo.append(self._clone_function(
-            self.current_single_fit_function))
+        self.fitting_context.single_fit_functions_for_undo.append(self._clone_function(self.current_single_fit_function))
         self.fitting_context.fit_statuses_for_undo.append(self.current_fit_status)
         self.fitting_context.chi_squared_for_undo.append(self.current_chi_squared)
 
@@ -500,8 +507,10 @@ class BasicFittingModel:
         """Resets the current dataset index stored by the context."""
         if self.fitting_context.number_of_datasets == 0:
             self.fitting_context.current_dataset_index = None
-        elif self.fitting_context.current_dataset_index is None or \
-                self.fitting_context.current_dataset_index >= self.fitting_context.number_of_datasets:
+        elif (
+            self.fitting_context.current_dataset_index is None
+            or self.fitting_context.current_dataset_index >= self.fitting_context.number_of_datasets
+        ):
             self.fitting_context.current_dataset_index = 0
 
     def reset_start_xs_and_end_xs(self) -> None:
@@ -535,8 +544,7 @@ class BasicFittingModel:
     def _reset_start_xs(self) -> None:
         """Resets the start Xs stored by the context."""
         if self.fitting_context.number_of_datasets > 0:
-            self.fitting_context.start_xs = [self.retrieve_first_good_data_from(name)
-                                             for name in self.fitting_context.dataset_names]
+            self.fitting_context.start_xs = [self.retrieve_first_good_data_from(name) for name in self.fitting_context.dataset_names]
         else:
             self.fitting_context.start_xs = []
 
@@ -565,8 +573,9 @@ class BasicFittingModel:
             return self.fitting_context.start_xs[dataset_names.index(new_dataset_name)]
         else:
             x_lower, x_upper = self.x_limits_of_workspace(new_dataset_name)
-            return self.current_start_x if x_lower < self.current_start_x < x_upper \
-                else self.retrieve_first_good_data_from(new_dataset_name)
+            return (
+                self.current_start_x if x_lower < self.current_start_x < x_upper else self.retrieve_first_good_data_from(new_dataset_name)
+            )
 
     def _get_new_end_x_for(self, new_dataset_name: str) -> float:
         """Returns the end X to use for the new dataset. It tries to use an existing end X if possible."""
@@ -607,8 +616,9 @@ class BasicFittingModel:
         """Returns the function to use for the new dataset. It tries to use an existing function if possible."""
         dataset_names = self.fitting_context.dataset_names
         if new_dataset_name in dataset_names:
-            return self._clear_function_errors(self._clone_function(
-                self.fitting_context.single_fit_functions[dataset_names.index(new_dataset_name)]))
+            return self._clear_function_errors(
+                self._clone_function(self.fitting_context.single_fit_functions[dataset_names.index(new_dataset_name)])
+            )
         else:
             return self._clear_function_errors(self._clone_function(self.current_single_fit_function))
 
@@ -640,8 +650,7 @@ class BasicFittingModel:
     def get_active_fit_results(self) -> list:
         """Returns the results of the currently active fit. For Single Fit there is only one fit result."""
         if self.fitting_context.number_of_datasets > 0:
-            return self._create_fit_plot_information(self.get_active_workspace_names(),
-                                                     self.fitting_context.function_name)
+            return self._create_fit_plot_information(self.get_active_workspace_names(), self.fitting_context.function_name)
         else:
             return []
 
@@ -672,18 +681,22 @@ class BasicFittingModel:
 
     def _do_single_fit(self, parameters: dict) -> tuple:
         """Does a single fit and returns the fit function, status and chi squared. Adds the results to the ADS."""
-        output_workspace, parameter_table, function, fit_status, chi_squared, covariance_matrix = \
-            self._do_single_fit_and_return_workspace_parameters_and_fit_function(parameters)
+        (
+            output_workspace,
+            parameter_table,
+            function,
+            fit_status,
+            chi_squared,
+            covariance_matrix,
+        ) = self._do_single_fit_and_return_workspace_parameters_and_fit_function(parameters)
 
-        self._add_single_fit_results_to_ADS_and_context(parameters["InputWorkspace"], parameter_table, output_workspace,
-                                                        covariance_matrix)
+        self._add_single_fit_results_to_ADS_and_context(parameters["InputWorkspace"], parameter_table, output_workspace, covariance_matrix)
         return function, fit_status, chi_squared
 
     def _do_single_fit_and_return_workspace_parameters_and_fit_function(self, parameters: dict) -> tuple:
         """Does a single fit and returns the fit function, status and chi squared."""
         alg = self._create_fit_algorithm()
-        output_workspace, parameter_table, function, fit_status, chi_squared, covariance_matrix = run_Fit(parameters,
-                                                                                                          alg)
+        output_workspace, parameter_table, function, fit_status, chi_squared, covariance_matrix = run_Fit(parameters, alg)
         CopyLogs(InputWorkspace=parameters["InputWorkspace"], OutputWorkspace=output_workspace, StoreInADS=False)
         return output_workspace, parameter_table, function, fit_status, chi_squared, covariance_matrix
 
@@ -700,8 +713,7 @@ class BasicFittingModel:
 
     def _get_common_parameters(self) -> dict:
         """Returns the parameters which are common across different fitting modes."""
-        return {"Minimizer": self.fitting_context.minimizer,
-                "EvaluationType": self.fitting_context.evaluation_type}
+        return {"Minimizer": self.fitting_context.minimizer, "EvaluationType": self.fitting_context.evaluation_type}
 
     def _create_fit_algorithm(self) -> IAlgorithm:
         """Creates the Fit or DoublePulseFit algorithm depending if Double Pulse fit is selected."""
@@ -712,7 +724,7 @@ class BasicFittingModel:
 
     def _create_double_pulse_alg(self) -> IAlgorithm:
         """Creates the DoublePulseFit algorithm."""
-        offset = self.context.gui_context['DoublePulseTime']
+        offset = self.context.gui_context["DoublePulseTime"]
         first_pulse_weighting, second_pulse_weighting = self._get_pulse_weightings(offset, 2.2)
 
         alg = AlgorithmManager.create("DoublePulseFit")
@@ -739,8 +751,9 @@ class BasicFittingModel:
         else:
             make_group(ws_names, group_name)
 
-    def _add_single_fit_results_to_ADS_and_context(self, input_workspace_name: str, parameters_table, output_workspace,
-                                                   covariance_matrix) -> None:
+    def _add_single_fit_results_to_ADS_and_context(
+        self, input_workspace_name: str, parameters_table, output_workspace, covariance_matrix
+    ) -> None:
         """Adds the results of a single fit to the ADS and context."""
         function_name = self.fitting_context.function_name
 
@@ -757,19 +770,25 @@ class BasicFittingModel:
         covariance_workspace_wrap = StaticWorkspaceWrapper(covariance_matrix_name, retrieve_ws(covariance_matrix_name))
 
         self._add_workspaces_to_group([output_workspace_name, parameter_table_name, covariance_matrix_name], directory[:-1])
-        self._add_fit_to_context([input_workspace_name], [output_workspace_wrap], parameter_workspace_wrap,
-                                 covariance_workspace_wrap)
+        self._add_fit_to_context([input_workspace_name], [output_workspace_wrap], parameter_workspace_wrap, covariance_workspace_wrap)
 
-    def _add_fit_to_context(self, input_workspace_names: list, output_workspaces: list,
-                            parameter_workspace: StaticWorkspaceWrapper, covariance_workspace: StaticWorkspaceWrapper) -> None:
+    def _add_fit_to_context(
+        self,
+        input_workspace_names: list,
+        output_workspaces: list,
+        parameter_workspace: StaticWorkspaceWrapper,
+        covariance_workspace: StaticWorkspaceWrapper,
+    ) -> None:
         """Adds the results of a single fit to the context."""
-        self.fitting_context.add_fit_from_values(input_workspace_names, self.fitting_context.function_name,
-                                                 output_workspaces, parameter_workspace, covariance_workspace)
+        self.fitting_context.add_fit_from_values(
+            input_workspace_names, self.fitting_context.function_name, output_workspaces, parameter_workspace, covariance_workspace
+        )
 
     def _create_fit_plot_information(self, workspace_names: list, function_name: str) -> list:
         """Creates the FitPlotInformation storing fit data to be plotted in the plot widget."""
-        return [FitPlotInformation(input_workspaces=workspace_names,
-                                   fit=self._get_fit_results_from_context(workspace_names, function_name))]
+        return [
+            FitPlotInformation(input_workspaces=workspace_names, fit=self._get_fit_results_from_context(workspace_names, function_name))
+        ]
 
     def _get_normalised_covariance_matrix_for(self, workspace_names: list, function_name: str) -> StaticWorkspaceWrapper:
         """Returns the Normalised Covariance Matrix associated with some input workspaces and a function name."""
@@ -782,8 +801,7 @@ class BasicFittingModel:
 
     def _get_equivalent_binned_or_unbinned_workspaces(self):
         """Returns the equivalent binned or unbinned workspaces for the current datasets."""
-        return self.context.get_list_of_binned_or_unbinned_workspaces_from_equivalents(
-            self.fitting_context.dataset_names)
+        return self.context.get_list_of_binned_or_unbinned_workspaces_from_equivalents(self.fitting_context.dataset_names)
 
     @staticmethod
     def _clone_function(function: IFunction) -> IFunction:
@@ -824,21 +842,19 @@ class BasicFittingModel:
             data_ws = retrieve_ws(self.current_dataset_name)
             data = np.linspace(data_ws.dataX(0)[0], data_ws.dataX(0)[-1], self.fitting_context.plot_guess_points)
         elif self.fitting_context.plot_guess_type == X_FROM_CUSTOM:
-            data = np.linspace(self.fitting_context.plot_guess_start_x, self.fitting_context.plot_guess_end_x,
-                               self.fitting_context.plot_guess_points)
+            data = np.linspace(
+                self.fitting_context.plot_guess_start_x, self.fitting_context.plot_guess_end_x, self.fitting_context.plot_guess_points
+            )
         else:
             raise ValueError(f"Plot guess type '{self.fitting_context.plot_guess_type}' is not recognised.")
 
-        extended_workspace = run_create_workspace_without_storing(x_data=data, y_data=data,
-                                                                  name='extended_workspace')
+        extended_workspace = run_create_workspace_without_storing(x_data=data, y_data=data, name="extended_workspace")
 
         try:
             if self._double_pulse_enabled():
                 self._evaluate_double_pulse_function(fit_function, output_workspace)
             else:
-                EvaluateFunction(InputWorkspace=extended_workspace,
-                                 Function=fit_function,
-                                 OutputWorkspace=output_workspace)
+                EvaluateFunction(InputWorkspace=extended_workspace, Function=fit_function, OutputWorkspace=output_workspace)
         except RuntimeError:
             logger.error("Failed to plot guess.")
             return ""
@@ -901,8 +917,7 @@ class BasicFittingModel:
         for name in self.fitting_context.dataset_names:
             runs.append(get_run_numbers_as_string_from_workspace_name(name, self.context.data_context.instrument))
             groups_and_pairs.append(get_group_or_pair_from_name(name))
-        return self._get_datasets_containing_string(display_type, self.fitting_context.dataset_names, runs,
-                                                    groups_and_pairs)
+        return self._get_datasets_containing_string(display_type, self.fitting_context.dataset_names, runs, groups_and_pairs)
 
     @staticmethod
     def _get_datasets_containing_string(display_type: str, dataset_names: list, *corresponding_dataset_args) -> tuple:
@@ -987,24 +1002,29 @@ class BasicFittingModel:
         :param use_initial_values: If false the parameters at the end of each fit are passed on to the next fit.
         """
         workspaces = self._flatten_workspace_names(workspaces)
-        return self._perform_sequential_fit_using_func(self._do_sequential_fit, workspaces, parameter_values,
-                                                       use_initial_values)
+        return self._perform_sequential_fit_using_func(self._do_sequential_fit, workspaces, parameter_values, use_initial_values)
 
-    def _perform_sequential_fit_using_func(self, fitting_func, workspaces: list, parameter_values: list,
-                                           use_initial_values: bool = False) -> tuple:
+    def _perform_sequential_fit_using_func(
+        self, fitting_func, workspaces: list, parameter_values: list, use_initial_values: bool = False
+    ) -> tuple:
         """Performs a sequential fit of the workspace names provided for the current fitting mode."""
         functions, fit_statuses, chi_squared_list = self._evaluate_sequential_fit(
-            fitting_func, workspaces, parameter_values, use_initial_values)
+            fitting_func, workspaces, parameter_values, use_initial_values
+        )
 
         self._update_fit_functions_after_sequential_fit(workspaces, functions)
         self._update_fit_statuses_and_chi_squared_after_sequential_fit(workspaces, fit_statuses, chi_squared_list)
         return functions, fit_statuses, chi_squared_list
 
-    def _do_sequential_fit(self, row_index: int, workspace_name: str, parameter_values: list, functions: list,
-                           use_initial_values: bool = False):
+    def _do_sequential_fit(
+        self, row_index: int, workspace_name: str, parameter_values: list, functions: list, use_initial_values: bool = False
+    ):
         """Performs a sequential fit of the single fit data."""
-        single_function = functions[row_index - 1].clone() if not use_initial_values and row_index >= 1 else \
-            self._get_single_function_with_parameters(parameter_values)
+        single_function = (
+            functions[row_index - 1].clone()
+            if not use_initial_values and row_index >= 1
+            else self._get_single_function_with_parameters(parameter_values)
+        )
 
         params = self._get_parameters_for_single_fit(workspace_name, single_function)
 
@@ -1017,14 +1037,14 @@ class BasicFittingModel:
         return single_fit_function
 
     @staticmethod
-    def _evaluate_sequential_fit(fitting_func, workspace_names: list, parameter_values: list,
-                                 use_initial_values: bool = False):
+    def _evaluate_sequential_fit(fitting_func, workspace_names: list, parameter_values: list, use_initial_values: bool = False):
         """Evaluates a sequential fit using the provided fitting func. The workspace_names is either a 1D or 2D list."""
         functions, fit_statuses, chi_squared_list = [], [], []
 
         for row_index, row_workspaces in enumerate(workspace_names):
-            function, fit_status, chi_squared = fitting_func(row_index, row_workspaces, parameter_values[row_index],
-                                                             functions, use_initial_values)
+            function, fit_status, chi_squared = fitting_func(
+                row_index, row_workspaces, parameter_values[row_index], functions, use_initial_values
+            )
 
             functions.append(function)
             fit_statuses.append(fit_status)

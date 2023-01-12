@@ -116,6 +116,7 @@ private:
     TS_ASSERT_EQUALS(gui->m_ui.correctDetectorsCheckBox->isChecked(), map[QString("correctDetectorsCheckBox")].toBool())
     TS_ASSERT_EQUALS(gui->m_ui.detectorCorrectionTypeComboBox->currentIndex(),
                      map[QString("detectorCorrectionTypeComboBox")].toInt())
+    TS_ASSERT_EQUALS(gui->m_ui.calibrationPathEdit->text(), map[QString("calibrationPathEdit")].toString())
   }
 
   void testRuns(const QtRunsView *gui, const ReductionJobs *redJobs, QtCatalogSearcher *searcher,
@@ -307,6 +308,7 @@ public:
     declareProperty("Params", "");
     declareProperty("ScaleRHSWorkspace", "");
     declareProperty("PolarizationAnalysis", "");
+    declareProperty("PolarizationEfficiencies", "");
     declareProperty("ReductionType", "");
     declareProperty("SummationType", "");
     declareProperty("IncludePartialBins", "");
@@ -328,6 +330,7 @@ public:
     declareProperty("DetectorCorrectionType", "");
     declareProperty("CorrectDetectors", "");
     declareProperty("ROIDetectorIDs", "");
+    declareProperty("CalibrationFile", "");
   }
   void exec() override {}
 };

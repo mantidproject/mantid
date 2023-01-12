@@ -1,4 +1,4 @@
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
 
 from mantid.simpleapi import *
 import matplotlib.pyplot as plt
@@ -6,14 +6,14 @@ import numpy as np
 
 # Load incident flux
 Load(
-    Filename='fluxSmoothedNOM161959.nxs',
-    OutputWorkspace='influx',
+    Filename="fluxSmoothedNOM161959.nxs",
+    OutputWorkspace="influx",
 )
-CropWorkspace(InputWorkspace='influx', OutputWorkspace='influx', XMin=0.1, XMax=2.9)
+CropWorkspace(InputWorkspace="influx", OutputWorkspace="influx", XMin=0.1, XMax=2.9)
 
 # Load 6 summed spectrum from NOM as input workspace
-Load(Filename='inputwsNOM_164109.nxs', OutputWorkspace='NOM_164109')
-SetSampleMaterial(InputWorkspace='NOM_164109', ChemicalFormula='Cs-Cl', SampleMassDensity=3.99)
+Load(Filename="inputwsNOM_164109.nxs", OutputWorkspace="NOM_164109")
+SetSampleMaterial(InputWorkspace="NOM_164109", ChemicalFormula="Cs-Cl", SampleMassDensity=3.99)
 CalculatePlaczek(
     InputWorkspace="NOM_164109",
     IncidentSpectra="influx",
@@ -25,7 +25,7 @@ CalculatePlaczek(
     OutputWorkspace="NOM_P1",
 )
 # convert to q
-ConvertUnits(InputWorkspace='NOM_P1', OutputWorkspace='NOM_P1', Target='MomentumTransfer')
+ConvertUnits(InputWorkspace="NOM_P1", OutputWorkspace="NOM_P1", Target="MomentumTransfer")
 
 
 # plot

@@ -82,12 +82,9 @@ class DrillSampleTest(unittest.TestCase):
         self.sample._controller = mock.Mock()
         self.sample.addParameter("test")
         mParam.assert_called_once_with("test")
-        mParam.return_value.setController.assert_called_once_with(
-                self.sample._controller)
-        self.assertDictEqual(self.sample._parameters,
-                             {"test": mParam.return_value})
-        self.sample.newParameter.emit.assert_called_once_with(
-                mParam.return_value)
+        mParam.return_value.setController.assert_called_once_with(self.sample._controller)
+        self.assertDictEqual(self.sample._parameters, {"test": mParam.return_value})
+        self.sample.newParameter.emit.assert_called_once_with(mParam.return_value)
 
     def test_getParameter(self):
         self.assertDictEqual(self.sample._parameters, {})
@@ -106,8 +103,7 @@ class DrillSampleTest(unittest.TestCase):
         p2 = mock.Mock()
         p2.getValue.return_value = "v2"
         self.sample._parameters = {"p1": p1, "p2": p2}
-        self.assertDictEqual(self.sample.getParameterValues(),
-                             {"p1": "v1", "p2": "v2"})
+        self.assertDictEqual(self.sample.getParameterValues(), {"p1": "v1", "p2": "v2"})
 
     @mock.patch("mantidqtinterfaces.drill.model.DrillSample.logger")
     def test_onProcessStarted(self, mLogger):

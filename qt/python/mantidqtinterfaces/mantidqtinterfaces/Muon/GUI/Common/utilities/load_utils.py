@@ -108,7 +108,7 @@ class LoadUtils(object):
 def get_default_instrument():
     default_instrument = ConfigServiceImpl.Instance().getInstrument().name()
     if default_instrument not in file_utils.allowed_instruments:
-        default_instrument = 'MUSR'
+        default_instrument = "MUSR"
     return default_instrument
 
 
@@ -129,31 +129,24 @@ def run_LoadInstrument(parameter_dict):
 def __default_workspace():
     default_instrument = get_default_instrument()
     workspace = api.WorkspaceFactoryImpl.Instance().create("Workspace2D", 2, 10, 10)
-    workspace = run_LoadInstrument(
-        {"Workspace": workspace,
-         "RewriteSpectraMap": True,
-         "InstrumentName": default_instrument})
+    workspace = run_LoadInstrument({"Workspace": workspace, "RewriteSpectraMap": True, "InstrumentName": default_instrument})
     return MuonWorkspaceWrapper(workspace)
 
 
 # Dictionary of (property name):(property value) pairs to put into Load algorithm
 # NOT including "OutputWorkspace" and "Filename"
-DEFAULT_INPUTS = {
-    "DeadTimeTable": "__notUsed",
-    "DetectorGroupingTable": "__notUsed"}
+DEFAULT_INPUTS = {"DeadTimeTable": "__notUsed", "DetectorGroupingTable": "__notUsed"}
 # List of property names to be extracted from the result of the Load algorithm
-DEFAULT_OUTPUTS = ["OutputWorkspace",
-                   "DeadTimeTable",
-                   "DetectorGroupingTable",
-                   "TimeZero",
-                   "FirstGoodData",
-                   "MainFieldDirection"]
+DEFAULT_OUTPUTS = ["OutputWorkspace", "DeadTimeTable", "DetectorGroupingTable", "TimeZero", "FirstGoodData", "MainFieldDirection"]
 # List of default values for the DEFAULT_OUTPUTS list
-DEFAULT_OUTPUT_VALUES = [[__default_workspace()],
-                         None,  # api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace"),
-                         api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace"),
-                         0.0,
-                         0.0, "Unknown direction"]
+DEFAULT_OUTPUT_VALUES = [
+    [__default_workspace()],
+    None,  # api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace"),
+    api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace"),
+    0.0,
+    0.0,
+    "Unknown direction",
+]
 
 
 def is_workspace_group(workspace):
@@ -212,9 +205,7 @@ def get_correct_file_path(filename_in, alg):
     return filename.replace(filename_all_caps, correct_filename)
 
 
-def load_workspace_from_filename(filename,
-                                 input_properties=DEFAULT_INPUTS,
-                                 output_properties=DEFAULT_OUTPUTS):
+def load_workspace_from_filename(filename, input_properties=DEFAULT_INPUTS, output_properties=DEFAULT_OUTPUTS):
     try:
         alg, psi_data = create_load_algorithm(filename, input_properties)
         alg.execute()
@@ -236,7 +227,7 @@ def load_workspace_from_filename(filename,
         for table in deadtime_tables[1:]:
             DeleteWorkspace(Workspace=table)
 
-        load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 3)
+        load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result["TimeZero"], 3)
         UnGroupWorkspace(load_result["DeadTimeTable"])
         load_result["DeadTimeTable"] = None
         UnGroupWorkspace(workspace.name())
@@ -249,7 +240,7 @@ def load_workspace_from_filename(filename,
 
         load_result["DataDeadTimeTable"] = load_result["DeadTimeTable"]
         load_result["DeadTimeTable"] = None
-        load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 3)
+        load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result["TimeZero"], 3)
 
     return load_result, run, filename, psi_data
 
@@ -265,8 +256,8 @@ def create_load_algorithm(filename, property_dictionary):
     alg.setAlwaysStoreInADS(True)
     alg.setProperty("Filename", filename)
     alg.setProperty("OutputWorkspace", output_filename)
-    alg.setProperty("DeadTimeTable", output_filename + '_deadtime_table')
-    alg.setProperty("DetectorGroupingTable", '__notUsed')
+    alg.setProperty("DeadTimeTable", output_filename + "_deadtime_table")
+    alg.setProperty("DetectorGroupingTable", "__notUsed")
     # Assume if .bin it is a PSI file so return True, else return False
     return (alg, True) if ".bin" in filename else (alg, False)
 
@@ -274,6 +265,7 @@ def create_load_algorithm(filename, property_dictionary):
 def _get_algorithm_properties(alg, property_dict):
     def _get_non_None_value(alg, key):
         return alg.getProperty(key).value if alg.getProperty(key).value is not None else alg.getProperty(key).valueAsStr
+
     return {key: _get_non_None_value(alg, key) for key in alg.keys() if key in property_dict}
 
 
@@ -289,13 +281,13 @@ def get_table_workspace_names_from_ADS():
 def combine_loaded_runs(model, run_list, delete_added=False):
     period_list = [model._data_context.num_periods([run]) for run in run_list]
     if max(period_list) != min(period_list):
-        raise RuntimeError('Inconsistent periods across co-added runs. This is not supported.')
+        raise RuntimeError("Inconsistent periods across co-added runs. This is not supported.")
     return_ws = model._loaded_data_store.get_data(run=[run_list[0]])["workspace"]
     running_total = []
 
     for index in range(min(period_list)):
         workspace = return_ws["OutputWorkspace"][index]
-        running_total_item = workspace.workspace.name() + 'CoAdd'
+        running_total_item = workspace.workspace.name() + "CoAdd"
         CloneWorkspace(InputWorkspace=workspace.workspace.name(), OutputWorkspace=running_total_item)
         for run in run_list[1:]:
             ws = model._loaded_data_store.get_data(run=[run])["workspace"]["OutputWorkspace"][index].workspace
@@ -303,22 +295,23 @@ def combine_loaded_runs(model, run_list, delete_added=False):
 
         running_total.append(running_total_item)
 
-    return_ws_actual = {key: return_ws[key] for key in ['MainFieldDirection', 'TimeZero', 'FirstGoodData']}
+    return_ws_actual = {key: return_ws[key] for key in ["MainFieldDirection", "TimeZero", "FirstGoodData"]}
     try:
-        return_ws_actual['DetectorGroupingTable'] = return_ws['DetectorGroupingTable']
+        return_ws_actual["DetectorGroupingTable"] = return_ws["DetectorGroupingTable"]
     except KeyError:
         pass  # PSI Data does not include Detector Grouping table as it's read from sample logs instead
     try:
-        return_ws_actual['DeadTimeTable'] = return_ws['DeadTimeTable']
+        return_ws_actual["DeadTimeTable"] = return_ws["DeadTimeTable"]
     except KeyError:
         pass  # Again, PSI data does not always include DeadTimeTable either
-    return_ws_actual["OutputWorkspace"] = [MuonWorkspaceWrapper(running_total_period) for running_total_period in
-                                           running_total]
-    return_ws_actual['DataDeadTimeTable'] = CloneWorkspace(InputWorkspace=return_ws['DataDeadTimeTable'],
-                                                           OutputWorkspace=return_ws['DataDeadTimeTable'] + 'CoAdd').name()
+    return_ws_actual["OutputWorkspace"] = [MuonWorkspaceWrapper(running_total_period) for running_total_period in running_total]
+    return_ws_actual["DataDeadTimeTable"] = CloneWorkspace(
+        InputWorkspace=return_ws["DataDeadTimeTable"], OutputWorkspace=return_ws["DataDeadTimeTable"] + "CoAdd"
+    ).name()
     model._loaded_data_store.remove_data(run=flatten_run_list(run_list), instrument=model._data_context.instrument)
-    model._loaded_data_store.add_data(run=flatten_run_list(run_list), workspace=return_ws_actual,
-                                      filename="Co-added", instrument=model._data_context.instrument)
+    model._loaded_data_store.add_data(
+        run=flatten_run_list(run_list), workspace=return_ws_actual, filename="Co-added", instrument=model._data_context.instrument
+    )
 
 
 def flatten_run_list(run_list):
@@ -338,5 +331,5 @@ def flatten_run_list(run_list):
 def exception_message_for_failed_files(failed_file_list):
     message = "Could not load the following files : \n "
     for failure in failed_file_list:
-        message += '{} ; {}'.format(os.path.split(failure[0])[-1], failure[1])
+        message += "{} ; {}".format(os.path.split(failure[0])[-1], failure[1])
     return message

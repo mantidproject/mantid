@@ -4,54 +4,54 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 ################################################################################
 # Event Filtering (and advanced) Setup Widget
 ################################################################################
 from mantid.kernel import Logger
 from mantid.simpleapi import ExportTimeSeriesLog, Load
 import matplotlib.pyplot as plt
-from qtpy.QtWidgets import (QDialog, QFrame)  # noqa
-from qtpy.QtGui import (QDoubleValidator, QIntValidator)  # noqa
+from qtpy.QtWidgets import QDialog, QFrame  # noqa
+from qtpy.QtGui import QDoubleValidator, QIntValidator  # noqa
 from mantidqtinterfaces.reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.diffraction.diffraction_filter_setup_script import FilterSetupScript
 import os
+
 try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
-    Logger("FilterSetupWidget").information('Using legacy ui importer')
+    Logger("FilterSetupWidget").information("Using legacy ui importer")
     from mantidplot import load_ui
 IS_IN_MANTIDPLOT = False
 try:
     import mantidplot  # noqa
+
     IS_IN_MANTIDPLOT = True
 except:
     pass
 
 
 class FilterSetupWidget(BaseWidget):
-    """ Widget that presents event filters setup
-    """
+    """Widget that presents event filters setup"""
+
     # Widge name
     name = "Event Filters Setup"
 
     _metaws = None
 
     def __init__(self, parent=None, state=None, settings=None, data_type=None):
-        """ Initialization
-        """
+        """Initialization"""
         super(FilterSetupWidget, self).__init__(parent, state, settings, data_type=data_type)
 
-        #print "[FilterSetupWidget.Init]: settings is of type %s.  data type is of type %s.
+        # print "[FilterSetupWidget.Init]: settings is of type %s.  data type is of type %s.
         #       DBx237. " % (type(settings), type(data_type))
 
         class FilterSetFrame(QFrame):
-            """ Define class linked to UI Frame
-            """
+            """Define class linked to UI Frame"""
 
             def __init__(self, parent=None):
                 QFrame.__init__(self, parent)
-                self.ui = load_ui(__file__, '../../../ui/diffraction/diffraction_filter_setup.ui', baseinstance=self)
+                self.ui = load_ui(__file__, "../../../ui/diffraction/diffraction_filter_setup.ui", baseinstance=self)
 
         self._content = FilterSetFrame(self)
         self._layout.addWidget(self._content)
@@ -63,11 +63,10 @@ class FilterSetupWidget(BaseWidget):
             self.set_state(state)
         else:
             self.set_state(FilterSetupScript(self._instrument_name))
-        self.fig = None # handle to the pop-out for sample log figure
+        self.fig = None  # handle to the pop-out for sample log figure
 
     def initialize_content(self):
-        """ Initialize content/UI
-        """
+        """Initialize content/UI"""
         # Initial value
         #   combo-boxes
         self._content.timeunit_combo.setCurrentIndex(0)
@@ -109,15 +108,15 @@ class FilterSetupWidget(BaseWidget):
 
         #   floats
         dv0 = QDoubleValidator(self._content.starttime_edit)
-        dv0.setBottom(0.)
+        dv0.setBottom(0.0)
         self._content.starttime_edit.setValidator(dv0)
 
         dv1 = QDoubleValidator(self._content.stoptime_edit)
-        dv1.setBottom(0.)
+        dv1.setBottom(0.0)
         self._content.stoptime_edit.setValidator(dv1)
 
         dv2 = QDoubleValidator(self._content.timintervallength_edit)
-        dv2.setBottom(0.)
+        dv2.setBottom(0.0)
         self._content.timintervallength_edit.setValidator(dv2)
 
         # Default states
@@ -143,8 +142,8 @@ class FilterSetupWidget(BaseWidget):
         return
 
     def set_state(self, state):
-        """ Populate the UI elements with the data from the given state, i.e., a coupled FilterSetupScript.
-            @param state: FilterSetupScript object
+        """Populate the UI elements with the data from the given state, i.e., a coupled FilterSetupScript.
+        @param state: FilterSetupScript object
         """
         # Title
         self._content.title_edit.setText(str(state.titleofsplitters))
@@ -195,8 +194,9 @@ class FilterSetupWidget(BaseWidget):
                 self._content.valuechange_combo.setCurrentIndex(index)
             else:
                 self._content.valuechange_combo.setCurrentIndex(0)
-                print("Input value of filter log value by changing direction '%s' is not allowed." %
-                      (state.filterlogvaluebychangingdirection))
+                print(
+                    "Input value of filter log value by changing direction '%s' is not allowed." % (state.filterlogvaluebychangingdirection)
+                )
         else:
             # Default
             self._content.valuechange_combo.setCurrentIndex(0)
@@ -222,46 +222,46 @@ class FilterSetupWidget(BaseWidget):
         return
 
     def get_state(self):
-        """ Returns a FilterSetupScript with the state of Filter_Setup_Interface
+        """Returns a FilterSetupScript with the state of Filter_Setup_Interface
         Set up all the class parameters in FilterSetupScrpt with values in the content
         """
         s = FilterSetupScript(self._instrument_name)
 
         # Title
-        s.titleofsplitters    = self._content.title_edit.text()
+        s.titleofsplitters = self._content.title_edit.text()
 
         # General
-        s.starttime           = self._content.starttime_edit.text()
-        s.stoptime            = self._content.stoptime_edit.text()
+        s.starttime = self._content.starttime_edit.text()
+        s.stoptime = self._content.stoptime_edit.text()
 
         # Filter by time
-        s.filterbytime        = self._content.timefilter_checkBox.isChecked()
+        s.filterbytime = self._content.timefilter_checkBox.isChecked()
         # s.numbertimeinterval  = self._content.numtimeinterval_edit.text()
-        s.lengthtimeinterval  = self._content.timintervallength_edit.text()
-        s.unitoftime          = self._content.timeunit_combo.currentText()
+        s.lengthtimeinterval = self._content.timintervallength_edit.text()
+        s.unitoftime = self._content.timeunit_combo.currentText()
 
         # Filter by log value
-        s.filterbylogvalue    = self._content.logvaluefilter_checkBox.isChecked()
-        s.logname             = self._content.logname_edit.text()
-        s.minimumlogvalue     = self._content.logminvalue_edit.text()
-        s.maximumlogvalue     = self._content.logmaxvalue_edit.text()
-        s.logvalueinterval    = self._content.logintervalvalue_edit.text()
+        s.filterbylogvalue = self._content.logvaluefilter_checkBox.isChecked()
+        s.logname = self._content.logname_edit.text()
+        s.minimumlogvalue = self._content.logminvalue_edit.text()
+        s.maximumlogvalue = self._content.logmaxvalue_edit.text()
+        s.logvalueinterval = self._content.logintervalvalue_edit.text()
         # if self._content.usesize_radiob.isChecked():
         #     s.numlogvalueinterval = ""
         #     s.logvalueinterval    = self._content.logintervalvalue_edit.text()
         # elif self._content.usenumstep_radiob.isChecked():
         #     s.numlogvalueinterval = self._content.numloginterval_edit.text()
         #     s.logvalueinterval    = ""
-        s.timetolerance       = self._content.timetol_edit.text()
-        s.logboundary         = self._content.logbound_combo.currentText()
-        s.logvaluetolerance   = self._content.logtol_edit.text()
+        s.timetolerance = self._content.timetol_edit.text()
+        s.logboundary = self._content.logbound_combo.currentText()
+        s.logvaluetolerance = self._content.logtol_edit.text()
         # s.logvaluetimesections = self._content.logvaluesection_edit.text()
-        s.filterlogvaluebychangingdirection =  self._content.valuechange_combo.currentText()
+        s.filterlogvaluebychangingdirection = self._content.valuechange_combo.currentText()
 
         return s
 
     def _run_number_changed(self):
-        """ Handling event if run number is changed... If it is a valid run number,
+        """Handling event if run number is changed... If it is a valid run number,
         the load the meta data
         """
 
@@ -282,7 +282,8 @@ class FilterSetupWidget(BaseWidget):
         # 3. Update the log name combo box
         if metaws is None:
             self._content.info_text_browser.setText(
-                str("Error! Failed to load data file %s.  Current working directory is %s. " % (eventnxsname, os.getcwd())))
+                str("Error! Failed to load data file %s.  Current working directory is %s. " % (eventnxsname, os.getcwd()))
+            )
         else:
             self._metaws = metaws
 
@@ -297,7 +298,7 @@ class FilterSetupWidget(BaseWidget):
                 if p.__class__.__name__ == "FloatTimeSeriesProperty":
                     if p.size() > 1:
                         properties.append(p.name)
-                        Logger('FilterSetupWidget').information('{}[{}]'.format(p.name, p.size()))
+                        Logger("FilterSetupWidget").information("{}[{}]".format(p.name, p.size()))
             # ENDFOR p
             properties = sorted(properties)
 
@@ -312,7 +313,7 @@ class FilterSetupWidget(BaseWidget):
         self.fig = None
 
     def _plot_log_clicked(self):
-        """ Handling event if plog-log button is clicked.
+        """Handling event if plog-log button is clicked.
         The log selected will be plotted in MantidPlot window
         """
         self.closeFig()
@@ -324,28 +325,26 @@ class FilterSetupWidget(BaseWidget):
         # Check with exception
         if self._metaws is None:
             msg2 = str("Error! Workspace does not exist!  Unable to plot log %s.\n" % (logname))
-            self._content.info_text_browser.setText(str(msg1 +  msg2))
+            self._content.info_text_browser.setText(str(msg1 + msg2))
             return
 
         # Get property
         run = self._metaws.getRun()
         if str(logname) not in run:
             # Unable to plot
-            msg3 = str("Error! Workspace %s does not contain log %s. " % (str(self._metaws),
-                                                                          logname))
-            self._content.info_text_browser.setText(str(msg1+msg3))
+            msg3 = str("Error! Workspace %s does not contain log %s. " % (str(self._metaws), logname))
+            self._content.info_text_browser.setText(str(msg1 + msg3))
             return
 
         if IS_IN_MANTIDPLOT:  # use mantidplot widget
             # Construct workspace to plot
             try:
-                logws = ExportTimeSeriesLog(InputWorkspace = str(self._metaws),
-                                            OutputWorkspace = str(logname),
-                                            LogName = str(logname),
-                                            IsEventWorkspace = False)
+                logws = ExportTimeSeriesLog(
+                    InputWorkspace=str(self._metaws), OutputWorkspace=str(logname), LogName=str(logname), IsEventWorkspace=False
+                )
             except IndexError:
                 msg4 = str("Error! Workspace %s is unable to convert log %s to workspace. " % (str(self._metaws), str(logname)))
-                self._content.info_text_browser.setText(str(msg1+msg4))
+                self._content.info_text_browser.setText(str(msg1 + msg4))
                 return
 
             # Plot!
@@ -355,21 +354,20 @@ class FilterSetupWidget(BaseWidget):
 
             # TODO close window when interface closes
             # TODO attach x-lines in a separate PR
-            self.fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+            self.fig, ax = plt.subplots(subplot_kw={"projection": "mantid"})
             ax.plot(self._metaws, LogName=str(logname), StartFromLog=True)
             xmin = self._content.starttime_edit.text()
             if len(xmin) > 0:
                 xmin = float(xmin)
-                ax.plot((xmin, xmin), (stats.minimum, stats.maximum), 'b--')
+                ax.plot((xmin, xmin), (stats.minimum, stats.maximum), "b--")
             xmax = self._content.stoptime_edit.text()
             if len(xmax) > 0:
                 xmax = float(xmax)
-                ax.plot((xmax, xmax), (stats.minimum, stats.maximum), 'g--')
+                ax.plot((xmax, xmax), (stats.minimum, stats.maximum), "g--")
             self.fig.show()
 
     def _filterbytime_statechanged(self):
-        """ Handling event if Filter-by-time is selected
-        """
+        """Handling event if Filter-by-time is selected"""
         if self._content.timefilter_checkBox.isChecked():
             self._content.logvaluefilter_checkBox.setChecked(False)
 
@@ -394,8 +392,7 @@ class FilterSetupWidget(BaseWidget):
         return
 
     def _filterbylogvalue_statechanged(self):
-        """ Handling event if Filter-by-logvalue is selected
-        """
+        """Handling event if Filter-by-logvalue is selected"""
         if self._content.logvaluefilter_checkBox.isChecked():
             self._content.timefilter_checkBox.setChecked(False)
 
@@ -426,8 +423,7 @@ class FilterSetupWidget(BaseWidget):
         return
 
     def _sync_logname_clicked(self):
-        """ Synchronize the log name from FilterAssistant to FilterByLog
-        """
+        """Synchronize the log name from FilterAssistant to FilterByLog"""
         logname = self._content.log_name_combo.currentText()
         if logname is None or logname == "":
             # Error situlation
@@ -439,8 +435,7 @@ class FilterSetupWidget(BaseWidget):
         return
 
     def plot(self, ws, minwidget, maxwidget):
-        """ Plot
-        """
+        """Plot"""
 
         # Local definition of call back
         def call_back(xmin, xmax):
@@ -448,20 +443,18 @@ class FilterSetupWidget(BaseWidget):
             maxwidget.setText("%-f" % float(xmax))
             return
 
-        self.logvalue_vs_time_distribution(workspace=ws,
-                                           callback=call_back)
+        self.logvalue_vs_time_distribution(workspace=ws, callback=call_back)
 
         return
 
     def logvalue_vs_time_distribution(self, workspace, callback):
-        """ Plot
-        """
+        """Plot"""
         xmin = workspace.dataX(0)[0]
         xmax = workspace.dataX(0)[-1]
         if callback is not None:
             from LargeScaleStructures import data_stitching  # TODO make this qt4/5 compatible
-            data_stitching.RangeSelector.connect([workspace], callback,
-                                                 xmin=xmin, xmax=xmax)
+
+            data_stitching.RangeSelector.connect([workspace], callback, xmin=xmin, xmax=xmax)
 
         return
 
@@ -469,10 +462,12 @@ class FilterSetupWidget(BaseWidget):
         class HelpDialog(QDialog):
             def __init__(self, parent=None):
                 QDialog.__init__(self, parent)
-                self.ui = load_ui(__file__, '../../../ui/diffraction/filter_info.ui', baseinstance=self)
+                self.ui = load_ui(__file__, "../../../ui/diffraction/filter_info.ui", baseinstance=self)
+
         dialog = HelpDialog(self)
         dialog.exec_()
 
         return
 
-#ENDCLASSDEF
+
+# ENDCLASSDEF

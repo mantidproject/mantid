@@ -16,17 +16,17 @@ from typing import Optional
 
 
 class PeakActionsView(QtWidgets.QWidget):
-    def __init__(self, parent: Optional['PeaksViewerCollectionView'] = None):
+    def __init__(self, parent: Optional["PeaksViewerCollectionView"] = None):
         super(PeakActionsView, self).__init__(parent=parent)
-        self._presenter: 'PeaksViewerCollectionPresenter' = None
+        self._presenter: "PeaksViewerCollectionPresenter" = None
         self.ui = None
         self._setup_ui()
 
     @property
-    def presenter(self) -> 'PeaksViewerCollectionPresenter':
+    def presenter(self) -> "PeaksViewerCollectionPresenter":
         return self._presenter
 
-    def subscribe(self, presenter: 'PeaksViewerCollectionPresenter') -> None:
+    def subscribe(self, presenter: "PeaksViewerCollectionPresenter") -> None:
         r"""
         @brief Subscribe a presenter to the viever
         @details The presenter must have method 'response_function' able to handle the event
@@ -67,7 +67,7 @@ class PeakActionsView(QtWidgets.QWidget):
         self.ui.active_peaks_combobox.setCurrentText(current_name)
 
     def _setup_ui(self):
-        self.ui = load_ui(__file__, 'actions.ui', self)
+        self.ui = load_ui(__file__, "actions.ui", self)
         # Styling
         self.ui.add_peaks_button.setStyleSheet("background-color:lightgrey")
         self.ui.remove_peaks_button.setStyleSheet("background-color:lightgrey")

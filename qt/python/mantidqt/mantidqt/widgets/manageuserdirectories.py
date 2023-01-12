@@ -9,4 +9,4 @@
 #
 from mantidqt.utils.qt import import_qt
 
-ManageUserDirectories = import_qt('.._common', 'mantidqt.widgets', 'ManageUserDirectories')
+ManageUserDirectories = import_qt(".._common", "mantidqt.widgets", "ManageUserDirectories")

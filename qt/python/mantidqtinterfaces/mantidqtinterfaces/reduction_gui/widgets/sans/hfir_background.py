@@ -4,23 +4,24 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
-from qtpy.QtWidgets import (QFrame)  # noqa
-from qtpy.QtGui import (QDoubleValidator)  # noqa
+# pylint: disable=invalid-name
+from qtpy.QtWidgets import QFrame  # noqa
+from qtpy.QtGui import QDoubleValidator  # noqa
 import mantidqtinterfaces.reduction_gui.widgets.util as util
 from reduction_gui.reduction.sans.hfir_background_script import Background
 from mantidqtinterfaces.reduction_gui.widgets.base_widget import BaseWidget
 from mantidqtinterfaces.reduction_gui.widgets.sans.hfir_sample_data import BeamSpreader, DirectBeam
+
 try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
     from mantid.kernel import Logger
-    Logger("BckDirectBeam").information('Using legacy ui importer')
+
+    Logger("BckDirectBeam").information("Using legacy ui importer")
     from mantidplot import load_ui
 
 
 class BckDirectBeam(DirectBeam):
-
     def __init__(self, parent=None, state=None, settings=None, data_type=None, data_proxy=None):
         super(BckDirectBeam, self).__init__(parent, state, settings, data_type, data_proxy=data_proxy)
 
@@ -37,7 +38,6 @@ class BckDirectBeam(DirectBeam):
 
 
 class BckBeamSpreader(BeamSpreader):
-
     def __init__(self, parent=None, state=None, settings=None, data_type=None, data_proxy=None):
         super(BckBeamSpreader, self).__init__(parent, state, settings, data_type, data_proxy=data_proxy)
 
@@ -55,8 +55,9 @@ class BckBeamSpreader(BeamSpreader):
 
 class BackgroundWidget(BaseWidget):
     """
-        Widget that presents the transmission options to the user
+    Widget that presents the transmission options to the user
     """
+
     _method_box = None
 
     ## Widget name
@@ -68,7 +69,7 @@ class BackgroundWidget(BaseWidget):
         class BckFrame(QFrame):
             def __init__(self, parent=None):
                 QFrame.__init__(self, parent)
-                self.ui = load_ui(__file__, '../../../ui/sans/hfir_background.ui', baseinstance=self)
+                self.ui = load_ui(__file__, "../../../ui/sans/hfir_background.ui", baseinstance=self)
 
         self._content = BckFrame(self)
         self._layout.addWidget(self._content)
@@ -89,13 +90,13 @@ class BackgroundWidget(BaseWidget):
 
     def initialize_content(self):
         """
-            Declare the validators and event connections for the
-            widgets loaded through the .ui file.
+        Declare the validators and event connections for the
+        widgets loaded through the .ui file.
         """
         # Validators
         self._content.transmission_edit.setValidator(QDoubleValidator(self._content.transmission_edit))
         self._content.dtransmission_edit.setValidator(QDoubleValidator(self._content.dtransmission_edit))
-        #self._content.thickness_edit.setValidator(QDoubleValidator(self._content.thickness_edit))
+        # self._content.thickness_edit.setValidator(QDoubleValidator(self._content.thickness_edit))
 
         # Connections
         self._content.calculate_trans_chk.clicked.connect(self._calculate_clicked)
@@ -135,8 +136,8 @@ class BackgroundWidget(BaseWidget):
 
     def set_state(self, state):
         """
-            Populate the UI elements with the data from the given state.
-            @param state: Transmission object
+        Populate the UI elements with the data from the given state.
+        @param state: Transmission object
         """
         bck_file = str(self._content.background_edit.text()).strip()
         self._content.background_chk.setChecked(state.background_corr)
@@ -148,7 +149,7 @@ class BackgroundWidget(BaseWidget):
         if self.show_transmission:
             self._content.transmission_edit.setText(str("%6.4f" % state.bck_transmission))
             self._content.dtransmission_edit.setText(str("%6.4f" % state.bck_transmission_spread))
-            #self._content.thickness_edit.setText("%6.4f" % state.sample_thickness)
+            # self._content.thickness_edit.setText("%6.4f" % state.sample_thickness)
 
             if isinstance(state.trans_calculation_method, state.DirectBeam):
                 self._content.trans_direct_chk.setChecked(True)
@@ -164,7 +165,7 @@ class BackgroundWidget(BaseWidget):
 
     def get_state(self):
         """
-            Returns an object with the state of the interface
+        Returns an object with the state of the interface
         """
         m = Background()
         m.background_corr = self._content.background_chk.isChecked()
@@ -172,7 +173,7 @@ class BackgroundWidget(BaseWidget):
 
         m.bck_transmission_enabled = self.show_transmission
         if self.show_transmission:
-            #m.sample_thickness = util._check_and_get_float_line_edit(self._content.thickness_edit)
+            # m.sample_thickness = util._check_and_get_float_line_edit(self._content.thickness_edit)
             m.bck_transmission = util._check_and_get_float_line_edit(self._content.transmission_edit)
             m.bck_transmission_spread = util._check_and_get_float_line_edit(self._content.dtransmission_edit)
             m.calculate_transmission = self._content.calculate_trans_chk.isChecked()
@@ -180,7 +181,7 @@ class BackgroundWidget(BaseWidget):
             m.trans_dark_current = self._content.trans_dark_current_edit.text()
 
             if self._method_box is not None:
-                m.trans_calculation_method=self._method_box.get_state()
+                m.trans_calculation_method = self._method_box.get_state()
         return m
 
     def _trans_dark_current_browse(self):
@@ -194,8 +195,9 @@ class BackgroundWidget(BaseWidget):
         if isinstance(self._method_box, BckBeamSpreader):
             self._last_spreader_state = self._method_box.get_state()
         if self.show_transmission:
-            self._replace_method(BckDirectBeam(self, state=state, settings=self._settings,
-                                               data_type=self._data_type, data_proxy=self._data_proxy))
+            self._replace_method(
+                BckDirectBeam(self, state=state, settings=self._settings, data_type=self._data_type, data_proxy=self._data_proxy)
+            )
 
     def _beam_spreader(self, state=None):
         if state is None:
@@ -203,8 +205,9 @@ class BackgroundWidget(BaseWidget):
         if isinstance(self._method_box, BckDirectBeam):
             self._last_direct_state = self._method_box.get_state()
         if self.show_transmission:
-            self._replace_method(BckBeamSpreader(self, state=state, settings=self._settings,
-                                                 data_type=self._data_type, data_proxy=self._data_proxy))
+            self._replace_method(
+                BckBeamSpreader(self, state=state, settings=self._settings, data_type=self._data_type, data_proxy=self._data_proxy)
+            )
 
     def _replace_method(self, widget):
         if self._method_box is not None:
@@ -217,8 +220,8 @@ class BackgroundWidget(BaseWidget):
 
     def _background_clicked(self, is_checked):
         self._content.background_edit.setEnabled(is_checked)
-        #self._content.thickness_edit.setEnabled(is_checked)
-        #self._content.thickness_label.setEnabled(is_checked)
+        # self._content.thickness_edit.setEnabled(is_checked)
+        # self._content.thickness_label.setEnabled(is_checked)
         self._content.geometry_options_groupbox.setEnabled(is_checked)
         self._content.background_browse.setEnabled(is_checked)
         self._content.background_plot_button.setEnabled(is_checked)
@@ -254,15 +257,15 @@ class BackgroundWidget(BaseWidget):
 
     def get_data_info(self):
         """
-            Retrieve information from the data file and update the display
+        Retrieve information from the data file and update the display
         """
         if self._data_proxy is None:
             return
 
         fname = str(self._content.background_edit.text())
-        if len(str(fname).strip())>0:
+        if len(str(fname).strip()) > 0:
             dataproxy = self._data_proxy(fname, "__background_raw")
-            if len(dataproxy.errors)>0:
+            if len(dataproxy.errors) > 0:
                 return
 
             self._settings.last_data_ws = dataproxy.data_ws

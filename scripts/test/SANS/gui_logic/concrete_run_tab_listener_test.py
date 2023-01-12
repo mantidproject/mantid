@@ -20,5 +20,5 @@ class ConcreteRunTabListenerTest(unittest.TestCase):
         mocked_presenter.update_model_from_view.assert_called_once()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

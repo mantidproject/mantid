@@ -10,12 +10,12 @@ import unittest
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 
-from mantid.dataobjects import (Workspace2D, EventWorkspace)
-from mantid.api import (AnalysisDataService, AlgorithmManager)
+from mantid.dataobjects import Workspace2D, EventWorkspace
+from mantid.api import AnalysisDataService, AlgorithmManager
 
 from sans.algorithm_detail.load_data import SANSLoadDataFactory
 from sans.common.log_tagger import has_tag
-from sans.common.constants import (CALIBRATION_WORKSPACE_TAG, SANS_FILE_TAG)
+from sans.common.constants import CALIBRATION_WORKSPACE_TAG, SANS_FILE_TAG
 
 # Not clear why the names in the module are not found by Pylint, but it seems to get confused. Hence this check
 # needs to be disabled here.
@@ -84,10 +84,21 @@ class SANSLoadFactoryTest(unittest.TestCase):
 @ISISSansSystemTest(SANSInstrument.LARMOR, SANSInstrument.SANS2D)
 class SANSLoadTest(unittest.TestCase):
     @staticmethod
-    def _get_simple_state(sample_scatter, sample_trans=None, sample_direct=None,
-                          can_scatter=None, can_trans=None, can_direct=None, calibration=None,
-                          sample_scatter_period=None, sample_trans_period=None, sample_direct_period=None,
-                          can_scatter_period=None, can_trans_period=None, can_direct_period=None):
+    def _get_simple_state(
+        sample_scatter,
+        sample_trans=None,
+        sample_direct=None,
+        can_scatter=None,
+        can_trans=None,
+        can_direct=None,
+        calibration=None,
+        sample_scatter_period=None,
+        sample_trans_period=None,
+        sample_direct_period=None,
+        can_scatter_period=None,
+        can_trans_period=None,
+        can_direct_period=None,
+    ):
         file_information_factory = SANSFileInformationFactory()
         file_information = file_information_factory.create_sans_file_information(sample_scatter)
 
@@ -155,17 +166,27 @@ class SANSLoadTest(unittest.TestCase):
 
     def _do_test_output(self, load_alg, expected_number_of_workspaces, expected_number_on_ads, workspace_type):
         #  Check the number of workspaces
-        tags_numbers = ["NumberOfSampleScatterWorkspaces", "NumberOfSampleTransmissionWorkspaces",
-                        "NumberOfSampleDirectWorkspaces", "NumberOfCanScatterWorkspaces",
-                        "NumberOfCanTransmissionWorkspaces", "NumberOfCanDirectWorkspaces"]
+        tags_numbers = [
+            "NumberOfSampleScatterWorkspaces",
+            "NumberOfSampleTransmissionWorkspaces",
+            "NumberOfSampleDirectWorkspaces",
+            "NumberOfCanScatterWorkspaces",
+            "NumberOfCanTransmissionWorkspaces",
+            "NumberOfCanDirectWorkspaces",
+        ]
         for num_workspaces, num_name in zip(expected_number_of_workspaces, tags_numbers):
             number_of_workspaces = load_alg.getProperty(num_name).value
-            self.assertEqual(number_of_workspaces,  num_workspaces)
+            self.assertEqual(number_of_workspaces, num_workspaces)
 
         # Check that workspaces were loaded
-        tags_workspaces = ["SampleScatterWorkspace", "SampleTransmissionWorkspace",
-                           "SampleDirectWorkspace", "CanScatterWorkspace",
-                           "CanTransmissionWorkspace", "CanDirectWorkspace"]
+        tags_workspaces = [
+            "SampleScatterWorkspace",
+            "SampleTransmissionWorkspace",
+            "SampleDirectWorkspace",
+            "CanScatterWorkspace",
+            "CanTransmissionWorkspace",
+            "CanDirectWorkspace",
+        ]
         index = 0
         for num_workspaces, workspace_name in zip(expected_number_of_workspaces, tags_workspaces):
             self._evaluate_workspace_type(load_alg, num_workspaces, workspace_name, workspace_type, index)
@@ -182,7 +203,7 @@ class SANSLoadTest(unittest.TestCase):
 
         # Confirm there is nothing on the ADS
         workspaces_on_the_ads = AnalysisDataService.getObjectNames()
-        self.assertEqual(len(workspaces_on_the_ads),  expected_number_on_ads)
+        self.assertEqual(len(workspaces_on_the_ads), expected_number_on_ads)
 
     @staticmethod
     def _has_calibration_been_applied(load_alg):
@@ -194,8 +215,9 @@ class SANSLoadTest(unittest.TestCase):
         return has_calibration_tag and has_file_tag
 
     @staticmethod
-    def _run_load(state, publish_to_cache, use_cached, move_workspace=False, beam_coordinates=None,
-                  component=None, output_workspace_names=None):
+    def _run_load(
+        state, publish_to_cache, use_cached, move_workspace=False, beam_coordinates=None, component=None, output_workspace_names=None
+    ):
         load_alg = AlgorithmManager.createUnmanaged("SANSLoad")
         load_alg.setChild(True)
         load_alg.setRethrows(True)
@@ -220,37 +242,49 @@ class SANSLoadTest(unittest.TestCase):
 
     def test_that_when_transmission_is_event_monitor_is_used(self):
         # Arrange
-        state = SANSLoadTest._get_simple_state(sample_scatter="SANS2D00028827",
-                                               sample_trans="SANS2D00028827",
-                                               sample_direct="SANS2D00028827")
+        state = SANSLoadTest._get_simple_state(
+            sample_scatter="SANS2D00028827", sample_trans="SANS2D00028827", sample_direct="SANS2D00028827"
+        )
 
         # Act
-        output_workspace_names = {"SampleScatterWorkspace": "sample_scatter",
-                                  "SampleScatterMonitorWorkspace": "sample_monitor_scatter",
-                                  "SampleTransmissionWorkspace": "sample_transmission",
-                                  "SampleDirectWorkspace": "sample_direct"}
+        output_workspace_names = {
+            "SampleScatterWorkspace": "sample_scatter",
+            "SampleScatterMonitorWorkspace": "sample_monitor_scatter",
+            "SampleTransmissionWorkspace": "sample_transmission",
+            "SampleDirectWorkspace": "sample_direct",
+        }
 
-        kwargs = {"state": state, "publish_to_cache": True, "use_cached": True, "move_workspace": False,
-                  "output_workspace_names": output_workspace_names}
+        kwargs = {
+            "state": state,
+            "publish_to_cache": True,
+            "use_cached": True,
+            "move_workspace": False,
+            "output_workspace_names": output_workspace_names,
+        }
         load_alg = self._run_load(**kwargs)
         transmission_workspace = load_alg.getProperty("SampleTransmissionWorkspace").value
-        self.assertEqual(transmission_workspace.getNumberHistograms(),  8)
+        self.assertEqual(transmission_workspace.getNumberHistograms(), 8)
 
     def test_that_runs_for_isis_nexus_file_with_event_data_and_single_period(self):
         # Arrange
-        state = SANSLoadTest._get_simple_state(sample_scatter="SANS2D00028827",
-                                               sample_trans="SANS2D00028784",
-                                               sample_direct="SANS2D00028804",
-                                               calibration="TUBE_SANS2D_BOTH_27345_20Mar15.nxs")
+        state = SANSLoadTest._get_simple_state(
+            sample_scatter="SANS2D00028827",
+            sample_trans="SANS2D00028784",
+            sample_direct="SANS2D00028804",
+            calibration="TUBE_SANS2D_BOTH_27345_20Mar15.nxs",
+        )
 
         # Act
-        output_workspace_names = {"SampleScatterWorkspace": "sample_scatter",
-                                  "SampleScatterMonitorWorkspace": "sample_monitor_scatter",
-                                  "SampleTransmissionWorkspace": "sample_transmission",
-                                  "SampleDirectWorkspace": "sample_direct"}
+        output_workspace_names = {
+            "SampleScatterWorkspace": "sample_scatter",
+            "SampleScatterMonitorWorkspace": "sample_monitor_scatter",
+            "SampleTransmissionWorkspace": "sample_transmission",
+            "SampleDirectWorkspace": "sample_direct",
+        }
 
-        load_alg = self._run_load(state, publish_to_cache=False, use_cached=False, move_workspace=False,
-                                  output_workspace_names=output_workspace_names)
+        load_alg = self._run_load(
+            state, publish_to_cache=False, use_cached=False, move_workspace=False, output_workspace_names=output_workspace_names
+        )
 
         # Assert
         expected_number_of_workspaces = [1, 1, 1, 0, 0, 0]
@@ -263,17 +297,20 @@ class SANSLoadTest(unittest.TestCase):
 
     def test_that_runs_for_isis_nexus_file_with_histogram_data_and_single_period(self):
         # Arrange
-        state = SANSLoadTest._get_simple_state(sample_scatter="SANS2D00000808",
-                                               sample_trans="SANS2D00028784",
-                                               sample_direct="SANS2D00028804")
+        state = SANSLoadTest._get_simple_state(
+            sample_scatter="SANS2D00000808", sample_trans="SANS2D00028784", sample_direct="SANS2D00028804"
+        )
 
         # Act
-        output_workspace_names = {"SampleScatterWorkspace": "sample_scatter",
-                                  "SampleScatterMonitorWorkspace": "sample_monitor_scatter",
-                                  "SampleTransmissionWorkspace": "sample_transmission",
-                                  "SampleDirectWorkspace": "sample_direct"}
-        load_alg = self._run_load(state, publish_to_cache=False, use_cached=False, move_workspace=False,
-                                  output_workspace_names=output_workspace_names)
+        output_workspace_names = {
+            "SampleScatterWorkspace": "sample_scatter",
+            "SampleScatterMonitorWorkspace": "sample_monitor_scatter",
+            "SampleTransmissionWorkspace": "sample_transmission",
+            "SampleDirectWorkspace": "sample_direct",
+        }
+        load_alg = self._run_load(
+            state, publish_to_cache=False, use_cached=False, move_workspace=False, output_workspace_names=output_workspace_names
+        )
 
         # Assert
         expected_number_of_workspaces = [1, 1, 1, 0, 0, 0]
@@ -286,17 +323,20 @@ class SANSLoadTest(unittest.TestCase):
 
     def test_that_runs_for_raw_file_with_histogram_data_and_single_period(self):
         # Arrange
-        state = SANSLoadTest._get_simple_state(sample_scatter="SANS2D00000808.raw",
-                                               sample_trans="SANS2D00028784",
-                                               sample_direct="SANS2D00028804")
+        state = SANSLoadTest._get_simple_state(
+            sample_scatter="SANS2D00000808.raw", sample_trans="SANS2D00028784", sample_direct="SANS2D00028804"
+        )
 
         # Act
-        output_workspace_names = {"SampleScatterWorkspace": "sample_scatter",
-                                  "SampleScatterMonitorWorkspace": "sample_monitor_scatter",
-                                  "SampleTransmissionWorkspace": "sample_transmission",
-                                  "SampleDirectWorkspace": "sample_direct"}
-        load_alg = self._run_load(state, publish_to_cache=False, use_cached=False, move_workspace=False,
-                                  output_workspace_names=output_workspace_names)
+        output_workspace_names = {
+            "SampleScatterWorkspace": "sample_scatter",
+            "SampleScatterMonitorWorkspace": "sample_monitor_scatter",
+            "SampleTransmissionWorkspace": "sample_transmission",
+            "SampleDirectWorkspace": "sample_direct",
+        }
+        load_alg = self._run_load(
+            state, publish_to_cache=False, use_cached=False, move_workspace=False, output_workspace_names=output_workspace_names
+        )
 
         # Assert
         expected_number_of_workspaces = [1, 1, 1, 0, 0, 0]
@@ -312,10 +352,10 @@ class SANSLoadTest(unittest.TestCase):
         state = SANSLoadTest._get_simple_state(sample_scatter="SANS2D00005512.nxs")
 
         # Act
-        output_workspace_names = {"SampleScatterWorkspace": "sample_scatter",
-                                  "SampleScatterMonitorWorkspace": "sample_monitor_scatter"}
-        load_alg = self._run_load(state, publish_to_cache=False, use_cached=False, move_workspace=False,
-                                  output_workspace_names=output_workspace_names)
+        output_workspace_names = {"SampleScatterWorkspace": "sample_scatter", "SampleScatterMonitorWorkspace": "sample_monitor_scatter"}
+        load_alg = self._run_load(
+            state, publish_to_cache=False, use_cached=False, move_workspace=False, output_workspace_names=output_workspace_names
+        )
 
         # Assert
         expected_number_of_workspaces = [13, 0, 0, 0, 0, 0]
@@ -329,14 +369,13 @@ class SANSLoadTest(unittest.TestCase):
     def test_that_runs_for_isis_nexus_file_with_histogram_data_and_multi_period_and_select_single_period(self):
         # Arrange
         special_selection_on_group = 3
-        state = SANSLoadTest._get_simple_state(sample_scatter="SANS2D00005512.nxs",
-                                               sample_scatter_period=special_selection_on_group)
+        state = SANSLoadTest._get_simple_state(sample_scatter="SANS2D00005512.nxs", sample_scatter_period=special_selection_on_group)
 
         # Act
-        output_workspace_names = {"SampleScatterWorkspace": "sample_scatter",
-                                  "SampleScatterMonitorWorkspace": "sample_monitor_scatter"}
-        load_alg = self._run_load(state, publish_to_cache=False, use_cached=False, move_workspace=False,
-                                  output_workspace_names=output_workspace_names)
+        output_workspace_names = {"SampleScatterWorkspace": "sample_scatter", "SampleScatterMonitorWorkspace": "sample_monitor_scatter"}
+        load_alg = self._run_load(
+            state, publish_to_cache=False, use_cached=False, move_workspace=False, output_workspace_names=output_workspace_names
+        )
 
         # Assert
         expected_number_of_workspaces = [1, 0, 0, 0, 0, 0]
@@ -349,14 +388,15 @@ class SANSLoadTest(unittest.TestCase):
 
     def test_that_can_load_isis_nexus_file_with_event_data_and_multi_period(self):
         # Arrange
-        state = SANSLoadTest._get_simple_state(sample_scatter="LARMOR00013065.nxs",
-                                               calibration="80tubeCalibration_18-04-2016_r9330-9335.nxs")
+        state = SANSLoadTest._get_simple_state(
+            sample_scatter="LARMOR00013065.nxs", calibration="80tubeCalibration_18-04-2016_r9330-9335.nxs"
+        )
 
         # Act
-        output_workspace_names = {"SampleScatterWorkspace": "sample_scatter",
-                                  "SampleScatterMonitorWorkspace": "sample_monitor_scatter"}
-        load_alg = self._run_load(state, publish_to_cache=True, use_cached=True, move_workspace=False,
-                                  output_workspace_names=output_workspace_names)
+        output_workspace_names = {"SampleScatterWorkspace": "sample_scatter", "SampleScatterMonitorWorkspace": "sample_monitor_scatter"}
+        load_alg = self._run_load(
+            state, publish_to_cache=True, use_cached=True, move_workspace=False, output_workspace_names=output_workspace_names
+        )
 
         # Assert
         expected_number_of_workspaces = [4, 0, 0, 0, 0, 0]
@@ -381,14 +421,13 @@ class SANSLoadTest(unittest.TestCase):
     def test_that_runs_for_isis_nexus_file_with_event_data_and_multi_period_and_select_single_period(self):
         # Arrange
         special_selection_on_group = 3
-        state = SANSLoadTest._get_simple_state(sample_scatter="LARMOR00013065.nxs",
-                                               sample_scatter_period=special_selection_on_group)
+        state = SANSLoadTest._get_simple_state(sample_scatter="LARMOR00013065.nxs", sample_scatter_period=special_selection_on_group)
 
         # Act
-        output_workspace_names = {"SampleScatterWorkspace": "sample_scatter",
-                                  "SampleScatterMonitorWorkspace": "sample_monitor_scatter"}
-        load_alg = self._run_load(state, publish_to_cache=True, use_cached=True, move_workspace=False,
-                                  output_workspace_names=output_workspace_names)
+        output_workspace_names = {"SampleScatterWorkspace": "sample_scatter", "SampleScatterMonitorWorkspace": "sample_monitor_scatter"}
+        load_alg = self._run_load(
+            state, publish_to_cache=True, use_cached=True, move_workspace=False, output_workspace_names=output_workspace_names
+        )
 
         # Assert
         expected_number_of_workspaces = [1, 0, 0, 0, 0, 0]
@@ -405,14 +444,15 @@ class SANSLoadTest(unittest.TestCase):
     def test_that_can_load_single_period_from_added_multi_period_histogram_file(self):
         # Arrange
         special_selection_on_group = 7
-        state = SANSLoadTest._get_simple_state(sample_scatter="AddedMultiPeriodHistogram-add.nxs",
-                                               sample_scatter_period=special_selection_on_group)
+        state = SANSLoadTest._get_simple_state(
+            sample_scatter="AddedMultiPeriodHistogram-add.nxs", sample_scatter_period=special_selection_on_group
+        )
 
         # Act
-        output_workspace_names = {"SampleScatterWorkspace": "sample_scatter",
-                                  "SampleScatterMonitorWorkspace": "sample_monitor_scatter"}
-        load_alg = self._run_load(state, publish_to_cache=True, use_cached=True, move_workspace=False,
-                                  output_workspace_names=output_workspace_names)
+        output_workspace_names = {"SampleScatterWorkspace": "sample_scatter", "SampleScatterMonitorWorkspace": "sample_monitor_scatter"}
+        load_alg = self._run_load(
+            state, publish_to_cache=True, use_cached=True, move_workspace=False, output_workspace_names=output_workspace_names
+        )
 
         # Assert
         expected_number_of_workspaces = [1, 0, 0, 0, 0, 0]
@@ -431,10 +471,10 @@ class SANSLoadTest(unittest.TestCase):
         state = SANSLoadTest._get_simple_state(sample_scatter="AddedMultiPeriodHistogram-add.nxs")
 
         # Act
-        output_workspace_names = {"SampleScatterWorkspace": "sample_scatter",
-                                  "SampleScatterMonitorWorkspace": "sample_monitor_scatter"}
-        load_alg = self._run_load(state, publish_to_cache=False, use_cached=False, move_workspace=False,
-                                  output_workspace_names=output_workspace_names)
+        output_workspace_names = {"SampleScatterWorkspace": "sample_scatter", "SampleScatterMonitorWorkspace": "sample_monitor_scatter"}
+        load_alg = self._run_load(
+            state, publish_to_cache=False, use_cached=False, move_workspace=False, output_workspace_names=output_workspace_names
+        )
 
         # Assert
         expected_number_of_workspaces = [13, 0, 0, 0, 0, 0]
@@ -451,14 +491,15 @@ class SANSLoadTest(unittest.TestCase):
     def test_that_can_load_single_period_from_added_multi_period_event_file(self):
         # Arrange
         special_selection_on_group = 2
-        state = SANSLoadTest._get_simple_state(sample_scatter="AddedMultiPeriodEvent-add.nxs",
-                                               sample_scatter_period=special_selection_on_group)
+        state = SANSLoadTest._get_simple_state(
+            sample_scatter="AddedMultiPeriodEvent-add.nxs", sample_scatter_period=special_selection_on_group
+        )
 
         # Act
-        output_workspace_names = {"SampleScatterWorkspace": "sample_scatter",
-                                  "SampleScatterMonitorWorkspace": "sample_monitor_scatter"}
-        load_alg = self._run_load(state, publish_to_cache=True, use_cached=True, move_workspace=False,
-                                  output_workspace_names=output_workspace_names)
+        output_workspace_names = {"SampleScatterWorkspace": "sample_scatter", "SampleScatterMonitorWorkspace": "sample_monitor_scatter"}
+        load_alg = self._run_load(
+            state, publish_to_cache=True, use_cached=True, move_workspace=False, output_workspace_names=output_workspace_names
+        )
 
         # Assert
         expected_number_of_workspaces = [1, 0, 0, 0, 0, 0]
@@ -477,10 +518,10 @@ class SANSLoadTest(unittest.TestCase):
         state = SANSLoadTest._get_simple_state(sample_scatter="AddedMultiPeriodEvent-add.nxs")
 
         # Act
-        output_workspace_names = {"SampleScatterWorkspace": "sample_scatter",
-                                  "SampleScatterMonitorWorkspace": "sample_monitor_scatter"}
-        load_alg = self._run_load(state, publish_to_cache=True, use_cached=True, move_workspace=False,
-                                  output_workspace_names=output_workspace_names)
+        output_workspace_names = {"SampleScatterWorkspace": "sample_scatter", "SampleScatterMonitorWorkspace": "sample_monitor_scatter"}
+        load_alg = self._run_load(
+            state, publish_to_cache=True, use_cached=True, move_workspace=False, output_workspace_names=output_workspace_names
+        )
 
         # Assert
         expected_number_of_workspaces = [4, 0, 0, 0, 0, 0]
@@ -502,8 +543,8 @@ class SANSLoadDataRunnerTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         suite = unittest.TestSuite()
-        suite.addTest(unittest.makeSuite(SANSLoadFactoryTest, 'test'))
-        suite.addTest(unittest.makeSuite(SANSLoadTest, 'test'))
+        suite.addTest(unittest.makeSuite(SANSLoadFactoryTest, "test"))
+        suite.addTest(unittest.makeSuite(SANSLoadTest, "test"))
         runner = unittest.TextTestRunner()
         res = runner.run(suite)
         if res.wasSuccessful():

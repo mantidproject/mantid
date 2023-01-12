@@ -18,7 +18,6 @@ from mantidqt.widgets.codeeditor.editor import CodeEditor
 
 @start_qapplication
 class CodeCommenterTest(unittest.TestCase):
-
     def setUp(self):
         self.lines = [
             "# Mantid Repository : https://github.com/mantidproject/mantid",
@@ -33,18 +32,19 @@ class CodeCommenterTest(unittest.TestCase):
             "# import mantid",
             "for ii in range(2):",
             "   do_something()",
-            "do_something_else()"]
+            "do_something_else()",
+        ]
 
         self.editor = CodeEditor("AlternateCSPython", QFont())
-        self.editor.setText('\n'.join(self.lines))
+        self.editor.setText("\n".join(self.lines))
         self.commenter = CodeCommenter(self.editor)
 
     def test_comment_single_line_no_selection(self):
         self.editor.setCursorPosition(8, 1)
         self.commenter.toggle_comment()
         expected_lines = copy(self.lines)
-        expected_lines[8] = '# ' + expected_lines[8]
-        self.assertEqual(self.editor.text(), '\n'.join(expected_lines))
+        expected_lines[8] = "# " + expected_lines[8]
+        self.assertEqual(self.editor.text(), "\n".join(expected_lines))
 
     def test_uncomment_with_inline_comment(self):
         """
@@ -52,23 +52,25 @@ class CodeCommenterTest(unittest.TestCase):
         uncommented.
         """
         commented_lines = [
-            '#do_something() # inline comment',
-            '#do_something() #inline comment',
-            '# do_something() # inline comment',
-            '# do_something() #inline comment',
-            '    #do_something() # inline comment',
-            '    #do_something() #inline comment',
-            '    # do_something() # inline comment',
-            '    # do_something() #inline comment']
+            "#do_something() # inline comment",
+            "#do_something() #inline comment",
+            "# do_something() # inline comment",
+            "# do_something() #inline comment",
+            "    #do_something() # inline comment",
+            "    #do_something() #inline comment",
+            "    # do_something() # inline comment",
+            "    # do_something() #inline comment",
+        ]
         expected_uncommented_lines = [
-            'do_something() # inline comment',
-            'do_something() #inline comment',
-            'do_something() # inline comment',
-            'do_something() #inline comment',
-            '    do_something() # inline comment',
-            '    do_something() #inline comment',
-            '    do_something() # inline comment',
-            '    do_something() #inline comment']
+            "do_something() # inline comment",
+            "do_something() #inline comment",
+            "do_something() # inline comment",
+            "do_something() #inline comment",
+            "    do_something() # inline comment",
+            "    do_something() #inline comment",
+            "    do_something() # inline comment",
+            "    do_something() #inline comment",
+        ]
         uncommented_lines = self.commenter._uncomment_lines(commented_lines)
         self.assertEqual(expected_uncommented_lines, uncommented_lines)
 
@@ -77,35 +79,31 @@ class CodeCommenterTest(unittest.TestCase):
         self.editor.setSelection(0, 2, 3, 2)
         self.commenter.toggle_comment()
         expected_lines = copy(self.lines)
-        expected_lines[start_line:end_line + 1] = [
-            line.replace('# ', '') for line in expected_lines[0:end_line + 1]]
-        self.assertEqual(self.editor.text(), '\n'.join(expected_lines))
+        expected_lines[start_line : end_line + 1] = [line.replace("# ", "") for line in expected_lines[0 : end_line + 1]]
+        self.assertEqual(self.editor.text(), "\n".join(expected_lines))
 
     def test_multiline_comment_for_mix_of_commented_and_uncommented_lines(self):
         start_line, end_line = 5, 8
         self.editor.setSelection(start_line, 5, end_line, 5)
         self.commenter.toggle_comment()
         expected_lines = copy(self.lines)
-        expected_lines[start_line:end_line + 1] = [
-            '# ' + line for line in expected_lines[start_line:end_line + 1]]
-        self.assertEqual(self.editor.text(), '\n'.join(expected_lines))
+        expected_lines[start_line : end_line + 1] = ["# " + line for line in expected_lines[start_line : end_line + 1]]
+        self.assertEqual(self.editor.text(), "\n".join(expected_lines))
 
     def test_multiline_comment_uses_top_level_indentation(self):
         start_line, end_line = 10, 13
         self.editor.setSelection(start_line, 5, end_line, 5)
         self.commenter.toggle_comment()
-        expected_lines = ["# for ii in range(2):",
-                          "#    do_something()",
-                          "# do_something_else()"]
-        self.assertEqual(self.editor.text().split('\n')[start_line:end_line], expected_lines)
+        expected_lines = ["# for ii in range(2):", "#    do_something()", "# do_something_else()"]
+        self.assertEqual(self.editor.text().split("\n")[start_line:end_line], expected_lines)
 
     def test_comment_preserves_indenting_on_single_line(self):
         iline = 11
         self.editor.setSelection(iline, 5, iline, 6)
         self.commenter.toggle_comment()
         # check commented at indented position
-        self.assertEqual(self.editor.text().split('\n')[iline], "   # do_something()")
+        self.assertEqual(self.editor.text().split("\n")[iline], "   # do_something()")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

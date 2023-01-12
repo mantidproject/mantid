@@ -9,9 +9,11 @@
 from .noshape import NonIntegratedPeakRepresentation
 from .ellipsoid import EllipsoidalIntegratedPeakRepresentation
 from .painter import MplPainter, Painted
+
 # 3rd party
 from mantid.geometry import PeakShape
 from mantidqt.widgets.sliceviewer.models.sliceinfo import SliceInfo
+
 # standard library
 from typing import Sequence
 
@@ -20,7 +22,7 @@ from typing import Sequence
 _PEAK_REPRESENTATION_FACTORY = {
     "none": NonIntegratedPeakRepresentation,
     "spherical": EllipsoidalIntegratedPeakRepresentation,
-    "ellipsoid": EllipsoidalIntegratedPeakRepresentation
+    "ellipsoid": EllipsoidalIntegratedPeakRepresentation,
 }
 
 
@@ -35,17 +37,14 @@ def _get_factory(peak_shape: PeakShape):
         return _PEAK_REPRESENTATION_FACTORY[shape_name.lower()]
     except KeyError:
         from mantid.kernel import logger
-        logger.warning(
-            f"An {shape_name} shape is not yet supported. Only the peak center will be shown.")
+
+        logger.warning(f"An {shape_name} shape is not yet supported. Only the peak center will be shown.")
         return NonIntegratedPeakRepresentation
 
 
-def draw_peak_representation(peak_origin: Sequence,
-                             peak_shape: PeakShape,
-                             slice_info: SliceInfo,
-                             painter: MplPainter,
-                             fg_color: str,
-                             bg_color: str) -> Painted:
+def draw_peak_representation(
+    peak_origin: Sequence, peak_shape: PeakShape, slice_info: SliceInfo, painter: MplPainter, fg_color: str, bg_color: str
+) -> Painted:
     """
     A factory function to create an appropriate PeakRepresentation
     object for a peak and draw it.
@@ -57,5 +56,4 @@ def draw_peak_representation(peak_origin: Sequence,
     :param bg_color: A str representing the color of the background region if applicable
     :returns: A collection of drawn objects or None if nothing is visible
     """
-    return _get_factory(peak_shape).draw(peak_origin, peak_shape, slice_info, painter, fg_color,
-                                         bg_color)
+    return _get_factory(peak_shape).draw(peak_origin, peak_shape, slice_info, painter, fg_color, bg_color)

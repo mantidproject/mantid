@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
-from Muon.MaxentTools.chosol import  CHOSOL
+from Muon.MaxentTools.chosol import CHOSOL
 
 # translation of chinow.for
 """
@@ -16,10 +16,10 @@ from Muon.MaxentTools.chosol import  CHOSOL
 
 
 def CHINOW(ax, SPACE_c1, SPACE_c2, SPACE_s1, SPACE_s2, mylog):
-    bx = 1. - ax
+    bx = 1.0 - ax
     a = bx * SPACE_c2 - ax * SPACE_s2
     b = -(bx * SPACE_c1 - ax * SPACE_s1)
     SPACE_beta = CHOSOL(a, b, mylog)
     z = np.dot(SPACE_c2, SPACE_beta)
     w = np.sum(SPACE_beta * (SPACE_c1 + 0.5 * z))
-    return 1. + w, SPACE_beta
+    return 1.0 + w, SPACE_beta

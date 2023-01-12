@@ -15,9 +15,10 @@ from mantid.kernel import *
 
 class PeakFinderDerivation(object):
     """
-        Determine various types of peak for reflectivity.
-        Those include specular peaks and low-resolution direction signal range.
+    Determine various types of peak for reflectivity.
+    Those include specular peaks and low-resolution direction signal range.
     """
+
     xdata_firstderi = []
     ydata_firstderi = []
     five_highest_ydata = []
@@ -43,7 +44,7 @@ class PeakFinderDerivation(object):
 
     def compute(self):
         """
-            Perform the computation
+        Perform the computation
         """
         self.initArrays()
         self.calculate_five_highest_points()
@@ -56,7 +57,7 @@ class PeakFinderDerivation(object):
 
     def initArrays(self):
         """
-            Initialize internal data members
+        Initialize internal data members
         """
         self.xdata_firstderi = []
         self.ydata_firstderi = []
@@ -134,7 +135,7 @@ class PeakFinderDerivation(object):
 
     def calculate_min_max_signal_pixels(self):
         """
-            Determine specular peak region
+        Determine specular peak region
         """
         _counts = self.ydata_firstderi
         _pixel = self.xdata_firstderi
@@ -145,16 +146,20 @@ class PeakFinderDerivation(object):
         _std_deviation_counts_firstderi = self.std_deviation_counts_firstderi
 
         px_offset = 0
-        while int(_deri_min_pixel_value - px_offset) < len(_counts) \
-                and int(_deri_min_pixel_value - px_offset) > 0 \
-                and abs(_counts[int(_deri_min_pixel_value - px_offset)]) > _std_deviation_counts_firstderi:
+        while (
+            int(_deri_min_pixel_value - px_offset) < len(_counts)
+            and int(_deri_min_pixel_value - px_offset) > 0
+            and abs(_counts[int(_deri_min_pixel_value - px_offset)]) > _std_deviation_counts_firstderi
+        ):
             px_offset += 1
         _peak_min_final_value = _pixel[int(_deri_min_pixel_value - px_offset)]
 
         px_offset = 0
-        while int(round(_deri_max_pixel_value + px_offset)) < len(_counts)-1 \
-                and int(round(_deri_max_pixel_value + px_offset)) >= 0 \
-                and abs(_counts[int(round(_deri_max_pixel_value + px_offset))]) > _std_deviation_counts_firstderi:
+        while (
+            int(round(_deri_max_pixel_value + px_offset)) < len(_counts) - 1
+            and int(round(_deri_max_pixel_value + px_offset)) >= 0
+            and abs(_counts[int(round(_deri_max_pixel_value + px_offset))]) > _std_deviation_counts_firstderi
+        ):
             px_offset += 1
         _peak_max_final_value = _pixel[int(round(_deri_max_pixel_value + px_offset))]
 
@@ -162,7 +167,7 @@ class PeakFinderDerivation(object):
 
     def low_resolution_range(self):
         """
-            Determine the x range of the signal
+        Determine the x range of the signal
         """
         y_integrated = []
         total = 0.0
@@ -238,22 +243,22 @@ class LRPeakSelection(PythonAlgorithm):
 
     def clocking_range(self, workspace):
         """
-            Determine the primary fraction range
-            @param workspace: workspace to determine the range from
+        Determine the primary fraction range
+        @param workspace: workspace to determine the range from
         """
         # Get the full range
         pf = PeakFinderDerivation(workspace, back_offset=0)
         [left_max, right_min] = pf.low_res
         # Process left-end data
-        pf.ydata = workspace.dataY(0)[0: left_max]
+        pf.ydata = workspace.dataY(0)[0:left_max]
         pf.xdata = np.arange(len(pf.ydata))
         pf.compute()
         left_clocking = pf.low_resolution_range()[0]
 
-        pf.ydata = workspace.dataY(0)[right_min: -1]
+        pf.ydata = workspace.dataY(0)[right_min:-1]
         pf.xdata = np.arange(len(pf.ydata))
         pf.compute()
-        right_clocking = pf.low_resolution_range()[1]+right_min
+        right_clocking = pf.low_resolution_range()[1] + right_min
 
         return [left_clocking, right_clocking]
 

@@ -11,19 +11,17 @@ import sys
 
 Name = "Elemental_Analysis"
 
-if 'workbench' in sys.modules:
+if "workbench" in sys.modules:
     from workbench.config import get_window_config
 
     parent, flags = get_window_config()
 else:
     parent, flags = None, None
 
-if 'Elemental_Analysis' in globals():
-    Elemental_Analysis = globals()['Elemental_Analysis']
+if "Elemental_Analysis" in globals():
+    Elemental_Analysis = globals()["Elemental_Analysis"]
     if not Elemental_Analysis.isHidden():
-        Elemental_Analysis.setWindowState(
-            Elemental_Analysis.windowState(
-            ) & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
+        Elemental_Analysis.setWindowState(Elemental_Analysis.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
         Elemental_Analysis.activateWindow()
     else:
         Elemental_Analysis = ElementalAnalysisGui(parent, flags)

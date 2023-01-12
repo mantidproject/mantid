@@ -4,24 +4,27 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
-from qtpy.QtWidgets import (QButtonGroup, QFrame)  # noqa
-from qtpy.QtGui import (QIntValidator)  # noqa
+# pylint: disable=invalid-name
+from qtpy.QtWidgets import QButtonGroup, QFrame  # noqa
+from qtpy.QtGui import QIntValidator  # noqa
 from mantidqtinterfaces.reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.inelastic.dgs_data_corrections_script import DataCorrectionsScript
 import mantidqtinterfaces.reduction_gui.widgets.util as util
+
 try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
     from mantid.kernel import Logger
-    Logger("DataCorrectionsWidget").information('Using legacy ui importer')
+
+    Logger("DataCorrectionsWidget").information("Using legacy ui importer")
     from mantidplot import load_ui
 
 
 class DataCorrectionsWidget(BaseWidget):
     """
-        Widget that presents data correction options to the user.
+    Widget that presents data correction options to the user.
     """
+
     ## Widget name
     name = "Data Corrections"
 
@@ -35,7 +38,7 @@ class DataCorrectionsWidget(BaseWidget):
         class DataCorrsFrame(QFrame):
             def __init__(self, parent=None):
                 QFrame.__init__(self, parent)
-                self.ui = load_ui(__file__, '../../../ui/inelastic/dgs_data_corrections.ui', baseinstance=self)
+                self.ui = load_ui(__file__, "../../../ui/inelastic/dgs_data_corrections.ui", baseinstance=self)
 
         self._content = DataCorrsFrame(self)
         self._layout.addWidget(self._content)
@@ -111,8 +114,8 @@ class DataCorrectionsWidget(BaseWidget):
 
     def set_state(self, state):
         """
-            Populate the UI elements with the data from the given state.
-            @param state: DataCorrectionsScript object
+        Populate the UI elements with the data from the given state.
+        @param state: DataCorrectionsScript object
         """
         self._content.filter_bad_pulses_chkbox.setChecked(state.filter_bad_pulses)
         button_index = DataCorrectionsScript.INCIDENT_BEAM_NORM_TYPES.index(state.incident_beam_norm)
@@ -136,7 +139,7 @@ class DataCorrectionsWidget(BaseWidget):
 
     def get_state(self):
         """
-            Returns an object with the state of the interface
+        Returns an object with the state of the interface
         """
         d = DataCorrectionsScript(self._instrument_name)
         d.filter_bad_pulses = self._content.filter_bad_pulses_chkbox.isChecked()
@@ -157,7 +160,7 @@ class DataCorrectionsWidget(BaseWidget):
         d.use_proc_detvan = self._content.use_procdetvan_cb.isChecked()
         return d
 
-    def live_button_toggled_actions(self,checked):
+    def live_button_toggled_actions(self, checked):
         if checked:
             self._old_norm_button = self.incident_beam_norm_grp.checkedId()
             self._old_backgnd_sub = self._content.background_sub_gb.isChecked()

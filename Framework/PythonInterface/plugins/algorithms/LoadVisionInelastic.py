@@ -4,9 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,invalid-name
-#from mantid.api import AlgorithmFactory
-#from mantid.simpleapi import PythonAlgorithm, WorkspaceProperty
+# pylint: disable=no-init,invalid-name
+# from mantid.api import AlgorithmFactory
+# from mantid.simpleapi import PythonAlgorithm, WorkspaceProperty
 # from mantid.kernel import Direction
 from mantid.api import *
 from mantid.kernel import *
@@ -22,7 +22,7 @@ class LoadVisionInelastic(PythonAlgorithm):
         return "DataHandling\\Nexus"
 
     def seeAlso(self):
-        return [ "LoadVisionElasticBS","LoadVisionElasticEQ" ]
+        return ["LoadVisionElasticBS", "LoadVisionElasticEQ"]
 
     def name(self):
         return "LoadVisionInelastic"
@@ -50,7 +50,7 @@ class LoadVisionInelastic(PythonAlgorithm):
         banks_list_integers = banks_integers.split(",")
         banks_list_integers = list(set(banks_list_integers))
         banks_list_integers.sort(key=int)
-        banks_list = ['bank{0}'.format(i) for i in banks_list_integers]
+        banks_list = ["bank{0}".format(i) for i in banks_list_integers]
         banks = ",".join(banks_list)
 
         wksp_name = "__tmp"

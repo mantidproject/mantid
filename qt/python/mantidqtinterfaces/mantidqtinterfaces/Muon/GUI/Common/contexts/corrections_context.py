@@ -65,4 +65,4 @@ class CorrectionsContext:
 
     def set_default_dead_time_table_name_for_run(self, instrument: str, run: list, dead_time_name: str) -> None:
         """Sets the default loaded dead time table for a specific instrument run."""
-        self._loaded_data.get_data(instrument=instrument, run=run)['workspace']['DataDeadTimeTable'] = dead_time_name
+        self._loaded_data.get_data(instrument=instrument, run=run)["workspace"]["DataDeadTimeTable"] = dead_time_name

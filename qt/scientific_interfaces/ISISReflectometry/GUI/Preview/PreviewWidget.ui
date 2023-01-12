@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1000</width>
-    <height>873</height>
+    <height>633</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -97,158 +97,27 @@
     </layout>
    </item>
    <item>
-    <widget class="QSplitter" name="inst_view_2d_plot_splitter">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="verticalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
      </property>
-     <widget class="QWidget" name="instViewayoutWidget">
-      <layout class="QVBoxLayout" name="inst_view_layout">
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents_2">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>980</width>
+        <height>546</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <layout class="QHBoxLayout" name="inst_view_toolbar_layout">
-         <property name="sizeConstraint">
-          <enum>QLayout::SetMinimumSize</enum>
-         </property>
-         <item>
-          <widget class="QToolButton" name="iv_zoom_button">
-           <property name="toolTip">
-            <string>Move the instrument</string>
-           </property>
-           <property name="text">
-            <string>Zoom</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QToolButton" name="iv_edit_button">
-           <property name="toolTip">
-            <string>Select and edit shapes</string>
-           </property>
-           <property name="text">
-            <string>Edit</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QToolButton" name="iv_rect_select_button">
-           <property name="toolTip">
-            <string>Draw a rectangle</string>
-           </property>
-           <property name="text">
-            <string>Rect. Select</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="iv_toolbar_spacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QWidget" name="inst_view_placeholder" native="true"/>
+        <layout class="QVBoxLayout" name="dockable_widgets_layout"/>
        </item>
       </layout>
-     </widget>
-     <widget class="QSplitter" name="subplot_splitter">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-      <property name="handleWidth">
-       <number>2</number>
-      </property>
-      <widget class="QWidget" name="rsPlotLayoutWidget">
-       <layout class="QVBoxLayout" name="rs_plot_layout">
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout">
-          <item>
-           <widget class="QToolButton" name="rs_ads_export_button">
-            <property name="toolTip">
-             <string>Export the summed workspace to the workspaces list</string>
-            </property>
-            <property name="text">
-             <string>Export summed workspace</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="rs_edit_button">
-            <property name="toolTip">
-             <string>Edit a rectangular region of interest</string>
-            </property>
-            <property name="text">
-             <string>Edit ROI</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="rs_rect_select_button">
-            <property name="toolTip">
-             <string>Select a rectangular region of interest</string>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="popupMode">
-             <enum>QToolButton::MenuButtonPopup</enum>
-            </property>
-            <property name="toolButtonStyle">
-             <enum>Qt::ToolButtonTextBesideIcon</enum>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="rs_toolbar_spacer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <widget class="QWidget" name="region_selector" native="true"/>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="linePlotLayoutWidget">
-       <layout class="QVBoxLayout" name="line_plot_layout">
-        <item>
-         <widget class="QToolButton" name="lp_ads_export_button">
-          <property name="toolTip">
-           <string>Export the reduced workspace to the workspaces list</string>
-          </property>
-          <property name="text">
-           <string>Export reduced workspace</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="MantidQt::MantidWidgets::QtPlotView" name="line_plot" native="true">
-          <property name="toolTip">
-           <string>Reduced data. Use right-click for plot options</string>
-          </property>
-          <property name="toolTipDuration">
-           <number>2000</number>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
      </widget>
     </widget>
    </item>
@@ -258,7 +127,20 @@
       <enum>QLayout::SetMinimumSize</enum>
      </property>
      <item>
-      <widget class="QTableWidget" name="tableWidget_2"/>
+      <layout class="QHBoxLayout" name="statusbar_layout"/>
+     </item>
+     <item>
+      <spacer name="output_tool_spacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
      <item>
       <widget class="QPushButton" name="apply_button">
@@ -271,19 +153,8 @@
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>MantidQt::MantidWidgets::QtPlotView</class>
-   <extends>QWidget</extends>
-   <header>MantidQtWidgets/Plotting/PlotWidget/QtPlotView.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <tabstops>
   <tabstop>workspace_line_edit</tabstop>
-  <tabstop>rs_ads_export_button</tabstop>
-  <tabstop>lp_ads_export_button</tabstop>
-  <tabstop>tableWidget_2</tabstop>
   <tabstop>apply_button</tabstop>
  </tabstops>
  <resources>

@@ -15,14 +15,9 @@
 
 #include <QWidget>
 
-namespace MantidQt {
+namespace MantidQt::CustomInterfaces {
 
-namespace MantidWidgets {
-class InstrumentWidget;
-} // namespace MantidWidgets
-
-namespace CustomInterfaces {
-
+class ALFInstrumentWidget;
 class IALFInstrumentView;
 class IALFAnalysisPresenter;
 
@@ -30,7 +25,7 @@ class MANTIDQT_DIRECT_DLL IALFInstrumentPresenter {
 
 public:
   virtual QWidget *getLoadWidget() = 0;
-  virtual MantidWidgets::InstrumentWidget *getInstrumentView() = 0;
+  virtual ALFInstrumentWidget *getInstrumentView() = 0;
 
   virtual void subscribeAnalysisPresenter(IALFAnalysisPresenter *presenter) = 0;
 
@@ -45,7 +40,7 @@ public:
   ALFInstrumentPresenter(IALFInstrumentView *view, std::unique_ptr<IALFInstrumentModel> model);
 
   QWidget *getLoadWidget() override;
-  MantidWidgets::InstrumentWidget *getInstrumentView() override;
+  ALFInstrumentWidget *getInstrumentView() override;
 
   void subscribeAnalysisPresenter(IALFAnalysisPresenter *presenter) override;
 
@@ -62,5 +57,4 @@ private:
   std::unique_ptr<IALFInstrumentModel> m_model;
 };
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

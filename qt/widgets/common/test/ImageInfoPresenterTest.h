@@ -32,6 +32,7 @@ public:
                void(const double x, const double y, const double signal, const QMap<QString, QString> &extraValues));
   MOCK_METHOD1(showInfo, void(const ImageInfoModel::ImageInfo &info));
   MOCK_METHOD1(setWorkspace, void(const Mantid::API::Workspace_sptr &ws));
+  MOCK_METHOD1(setRowCount, void(const int count));
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
@@ -46,13 +47,15 @@ public:
   void test_constructor_calls_view_set_row_count() {
     auto mockView = std::make_unique<StrictMock<MockImageInfoView>>();
 
+    EXPECT_CALL(*mockView, setRowCount(2)).Times(1);
+
     ImageInfoPresenter presenter(mockView.get());
-    TS_ASSERT_EQUALS(mockView->rowCount(), 2);
   }
 
   void test_cursorAt_calls_view_showInfo() {
     auto mockView = std::make_unique<StrictMock<MockImageInfoView>>();
 
+    EXPECT_CALL(*mockView, setRowCount(2)).Times(1);
     EXPECT_CALL(*mockView, showInfo(_)).Times(1);
 
     ImageInfoPresenter presenter(mockView.get());

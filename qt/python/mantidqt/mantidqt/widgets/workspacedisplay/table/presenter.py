@@ -21,44 +21,43 @@ from mantidqt.widgets.workspacedisplay.table.presenter_batch import TableWorkspa
 from mantidqt.widgets.workspacedisplay.table.presenter_standard import TableWorkspaceDataPresenterStandard
 from mantidqt.widgets.workspacedisplay.table.table_model import TableModel
 from mantidqt.widgets.workspacedisplay.table.view import TableWorkspaceDisplayView
-from mantidqt.widgets.workspacedisplay.table.tableworkspace_item import (QStandardItem, create_table_item,  # noqa: F401
-                                                                         RevertibleItem)  # noqa: F401
+from mantidqt.widgets.workspacedisplay.table.tableworkspace_item import QStandardItem, create_table_item, RevertibleItem  # noqa: F401
 
 
 class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
-    A_LOT_OF_THINGS_TO_PLOT_MESSAGE = (
-        "You selected {} spectra to plot. Are you sure you want to plot that many?")
-    TOO_MANY_SELECTED_FOR_X = ("Too many columns are selected to use as X. Please select only 1.")
-    TOO_MANY_SELECTED_TO_SORT = ("Too many columns are selected to sort by. Please select only 1.")
-    TOO_MANY_SELECTED_FOR_PLOT = ("Too many columns are selected to plot. Please select only 1.")
+    A_LOT_OF_THINGS_TO_PLOT_MESSAGE = "You selected {} spectra to plot. Are you sure you want to plot that many?"
+    TOO_MANY_SELECTED_FOR_X = "Too many columns are selected to use as X. Please select only 1."
+    TOO_MANY_SELECTED_TO_SORT = "Too many columns are selected to sort by. Please select only 1."
+    TOO_MANY_SELECTED_FOR_PLOT = "Too many columns are selected to plot. Please select only 1."
     NUM_SELECTED_FOR_CONFIRMATION = 10
     NO_COLUMN_MARKED_AS_X = "No columns marked as X."
-    ITEM_CHANGED_INVALID_DATA_MESSAGE = ("Error: Trying to set invalid data for the column.")
+    ITEM_CHANGED_INVALID_DATA_MESSAGE = "Error: Trying to set invalid data for the column."
     ITEM_CHANGED_UNKNOWN_ERROR_MESSAGE = "Unknown error occurred: {}"
     TOO_MANY_TO_SET_AS_Y_ERR_MESSAGE = "Too many selected to set as Y Error"
     CANNOT_PLOT_AGAINST_SELF_MESSAGE = "Cannot plot column against itself."
     NO_ASSOCIATED_YERR_FOR_EACH_Y_MESSAGE = (
         "Column '{}' does not have an associated Y error column."
         "\n\nPlease set it by doing: Right click on column ->"
-        " Set error for Y -> The label shown on the Y column")
+        " Set error for Y -> The label shown on the Y column"
+    )
     PLOT_FUNCTION_ERROR_MESSAGE = "One or more of the columns being plotted contain invalid data for Matplotlib.\n\nError message:\n{}"
     INVALID_DATA_WINDOW_TITLE = "Invalid data - Mantid Workbench"
     COLUMN_DISPLAY_LABEL = "Column {}"
 
     def __init__(
-            self,
-            ws,
-            parent=None,
-            window_flags=Qt.Window,
-            plot=None,
-            model=None,
-            view=None,
-            name=None,
-            ads_observer=None,
-            container=None,
-            window_width=600,
-            window_height=400,
-            batch=False,
+        self,
+        ws,
+        parent=None,
+        window_flags=Qt.Window,
+        plot=None,
+        model=None,
+        view=None,
+        name=None,
+        ads_observer=None,
+        container=None,
+        window_width=600,
+        window_height=400,
+        batch=False,
     ):
         """
         Creates a display for the provided workspace.
@@ -78,22 +77,26 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
         self.view = view
         self.model = model
         self.name = name if name else model.get_name()
-        self.container = (container if container else StatusBarView(
-            parent,
-            view,
-            self.name,
-            window_width=window_width,
-            window_height=window_height,
-            window_flags=window_flags,
-            presenter=self,
-        ))
+        self.container = (
+            container
+            if container
+            else StatusBarView(
+                parent,
+                view,
+                self.name,
+                window_width=window_width,
+                window_height=window_height,
+                window_flags=window_flags,
+                presenter=self,
+            )
+        )
 
         DataCopier.__init__(self, self.container.status_bar)
 
         self.parent = parent
         self.plot = plot
 
-        self.ads_observer = (ads_observer if ads_observer else WorkspaceDisplayADSObserver(self))
+        self.ads_observer = ads_observer if ads_observer else WorkspaceDisplayADSObserver(self)
 
         self.presenter.refresh()
 
@@ -117,8 +120,9 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
     def _create_table_batch(self, ws, parent, window_flags, view, model):
         model = model if model is not None else TableWorkspaceDisplayModel(ws)
         table_model = TableModel(parent=parent, data_model=model)
-        view = view if view else TableWorkspaceDisplayView(presenter=self, parent=parent, window_flags=window_flags,
-                                                           table_model=table_model)
+        view = (
+            view if view else TableWorkspaceDisplayView(presenter=self, parent=parent, window_flags=window_flags, table_model=table_model)
+        )
         self.presenter = TableWorkspaceDataPresenterBatch(model, view)
         return view, model
 
@@ -192,9 +196,7 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
             return
 
         stats = self.presenter.model.get_statistics(selected_columns)
-        TableWorkspaceDisplay(stats,
-                              parent=self.parent,
-                              name="Column Statistics of {}".format(self.name))
+        TableWorkspaceDisplay(stats, parent=self.parent, name="Column Statistics of {}".format(self.name))
 
     def action_hide_selected(self):
         try:
@@ -308,7 +310,7 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
         self._do_plot(selected_columns, selected_x, plot_type)
 
     def _is_error_plot(self, plot_type):
-        return (plot_type == PlotType.LINEAR_WITH_ERR or plot_type == PlotType.SCATTER_WITH_ERR)
+        return plot_type == PlotType.LINEAR_WITH_ERR or plot_type == PlotType.SCATTER_WITH_ERR
 
     def _do_plot(self, selected_columns, selected_x, plot_type):
         if self._is_error_plot(plot_type):
@@ -324,8 +326,8 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
             if len(yerr) != len(selected_columns):
                 column_headers = self.presenter.model.original_column_headers()
                 self.presenter.view.show_warning(
-                    self.NO_ASSOCIATED_YERR_FOR_EACH_Y_MESSAGE.format(",".join(
-                        [column_headers[col] for col in selected_columns])))
+                    self.NO_ASSOCIATED_YERR_FOR_EACH_Y_MESSAGE.format(",".join([column_headers[col] for col in selected_columns]))
+                )
                 return
         x = self.presenter.model.get_column(selected_x)
 

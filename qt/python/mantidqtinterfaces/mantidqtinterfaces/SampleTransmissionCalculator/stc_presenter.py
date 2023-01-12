@@ -28,20 +28,20 @@ class SampleTransmissionCalculatorPresenter(object):
         if not validations:
             try:
                 output = self.model.calculate(input_dict)
-                statistics = self.model.calculate_statistics(output['y'])
-                self.view.set_output_table(statistics, output['scattering'])
-                self.view.plot(output['x'], output['y'])
-                self.view.set_validation_label('')
+                statistics = self.model.calculate_statistics(output["y"])
+                self.view.set_output_table(statistics, output["scattering"])
+                self.view.plot(output["x"], output["y"])
+                self.view.set_validation_label("")
             except RuntimeError:
-                self.view.set_error_indicator('chemical_formula')
-                self.view.set_validation_label('Unable to parse chemical formula.')
+                self.view.set_error_indicator("chemical_formula")
+                self.view.set_validation_label("Unable to parse chemical formula.")
         else:
-            warning = ''
+            warning = ""
             for key in validations:
                 self.view.set_error_indicator(key)
-                warning += validations[key] + ' '
+                warning += validations[key] + " "
             self.view.set_validation_label(warning)
 
     def help_window(self):
-        gui_name = 'Sample Transmission Calculator'
-        InterfaceManager().showCustomInterfaceHelp(gui_name,'general')
+        gui_name = "Sample Transmission Calculator"
+        InterfaceManager().showCustomInterfaceHelp(gui_name, "general")

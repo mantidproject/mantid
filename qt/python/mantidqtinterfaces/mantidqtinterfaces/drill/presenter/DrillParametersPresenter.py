@@ -15,6 +15,7 @@ class DrillParametersPresenter:
     """
     Reference to the table model (QTableWidget).
     """
+
     _table = None
 
     """
@@ -76,27 +77,25 @@ class DrillParametersPresenter:
             return
         text = ""
         parameters = dict()
-        for param in value.split(';'):
-            if param and '=' not in param:
-                QMessageBox.warning(self._table, "Error", "Please provide "
-                                    "semicolon separated key=value pairs.")
+        for param in value.split(";"):
+            if param and "=" not in param:
+                QMessageBox.warning(self._table, "Error", "Please provide " "semicolon separated key=value pairs.")
                 break
             try:
                 name = param.split("=")[0].strip()
                 value = param.split("=")[1].strip()
             except:
-                QMessageBox.warning(self._table, "Error", "Please provide "
-                                    "semicolon separated key=value pairs.")
+                QMessageBox.warning(self._table, "Error", "Please provide " "semicolon separated key=value pairs.")
                 break
             if name in parameters:
-                QMessageBox.warning(self._table, "Error", "Parameter \"{}\" "
-                                    "provided several times. Only the first "
-                                    "one will be used.".format(name))
+                QMessageBox.warning(
+                    self._table, "Error", 'Parameter "{}" ' "provided several times. Only the first " "one will be used.".format(name)
+                )
                 break
             if self._table.itemFromName(self._sample.getIndex(), name):
-                QMessageBox.warning(self._table, "Error", "Use the dedicated "
-                                    "column to set the value of \"{}\". This "
-                                    "one will be ignored.".format(name))
+                QMessageBox.warning(
+                    self._table, "Error", "Use the dedicated " 'column to set the value of "{}". This ' "one will be ignored.".format(name)
+                )
                 break
             if isinstance(value, str) and value.lower() == "true":
                 value = True
@@ -105,7 +104,7 @@ class DrillParametersPresenter:
             p = self._sample.addParameter(name)
             p.checked.connect(self.onChecked)
             p.setValue(value)
-            text += str(name) + '=' + str(value) + ';'
+            text += str(name) + "=" + str(value) + ";"
         self._table.blockSignals(True)
         self._item.setText(text[:-1])
         self._table.blockSignals(False)
@@ -144,9 +143,9 @@ class DrillParametersPresenter:
             param = self._sample.getParameter(name)
             value = param.getValue()
             text += name
-            text += '='
+            text += "="
             text += str(value)
-            text += ';'
+            text += ";"
         text = text[:-1]
         self._item.signals.blockSignals(True)
         self._item.setText(text)

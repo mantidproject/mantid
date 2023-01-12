@@ -18,7 +18,7 @@ from mantidqtinterfaces.Muon.GUI.Common.utilities.muon_test_helpers import Itera
 class LoadRunWidgetModelTest(unittest.TestCase):
     def setUp(self):
         setup_context_for_tests(self)
-        self.data_context.instrument = 'EMU'
+        self.data_context.instrument = "EMU"
         self.model = LoadRunWidgetModel(self.loaded_data, self.context)
 
     def test_model_initialized_with_empty_lists_of_loaded_data(self):
@@ -32,10 +32,10 @@ class LoadRunWidgetModelTest(unittest.TestCase):
         self.assertEqual(self.model.loaded_filenames, [])
         self.assertEqual(self.model.loaded_runs, [])
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.load_run_widget.load_run_model.load_utils')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.Common.load_run_widget.load_run_model.load_utils")
     def test_execute_successfully_loads_valid_files(self, load_utils_mock):
         # Mock the load algorithm
-        files = [r'EMU00019489.nxs', r'EMU00019490.nxs', r'EMU00019491.nxs']
+        files = [r"EMU00019489.nxs", r"EMU00019490.nxs", r"EMU00019491.nxs"]
         load_return_vals = [([1, 2, 3], 19489 + i, filename, False) for i, filename in enumerate(files)]
 
         load_utils_mock.load_workspace_from_filename = mock.MagicMock()
@@ -50,9 +50,9 @@ class LoadRunWidgetModelTest(unittest.TestCase):
         self.assertEqual(self.model.loaded_runs[1], [19490])
         self.assertEqual(self.model.loaded_runs[2], [19491])
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.load_run_widget.load_run_model.load_utils')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.Common.load_run_widget.load_run_model.load_utils")
     def test_model_is_cleared_correctly(self, load_utils_mock):
-        files = [r'EMU00019489.nxs', r'EMU00019490.nxs', r'EMU00019491.nxs']
+        files = [r"EMU00019489.nxs", r"EMU00019490.nxs", r"EMU00019491.nxs"]
         load_return_vals = [([1, 2, 3], filename, 19489 + i, False) for i, filename in enumerate(files)]
 
         load_utils_mock.load_workspace_from_filename = mock.Mock()
@@ -66,9 +66,9 @@ class LoadRunWidgetModelTest(unittest.TestCase):
         self.assertEqual(self.model.loaded_filenames, [])
         self.assertEqual(self.model.loaded_runs, [])
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.load_run_widget.load_run_model.load_utils')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.Common.load_run_widget.load_run_model.load_utils")
     def test_execute_throws_if_one_file_does_not_load_correctly_but_still_loads_other_files(self, load_utils_mock):
-        files = [r'EMU00019489.nxs', r'EMU00019490.nxs', r'EMU00019491.nxs']
+        files = [r"EMU00019489.nxs", r"EMU00019490.nxs", r"EMU00019491.nxs"]
         load_return_vals = [([1, 2, 3], 19489 + i, filename, False) for i, filename in enumerate(files)]
 
         load_utils_mock.load_workspace_from_filename = mock.MagicMock()
@@ -85,5 +85,5 @@ class LoadRunWidgetModelTest(unittest.TestCase):
         self.assertEqual(self.model.loaded_runs[1], [19491])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

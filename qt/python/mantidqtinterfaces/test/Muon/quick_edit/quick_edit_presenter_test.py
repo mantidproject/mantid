@@ -17,12 +17,11 @@ from mantidqt.utils.qt.testing import start_qapplication
 
 
 def plot_at_index(index):
-    return "plot "+str(index)
+    return "plot " + str(index)
 
 
 @start_qapplication
 class QuickEditTest(unittest.TestCase):
-
     def setUp(self):
         self.view = QuickEditView(None, None)
         self.context = PlottingContext()
@@ -32,7 +31,7 @@ class QuickEditTest(unittest.TestCase):
         AnalysisDataService.Instance().clear()
 
     def add_plots(self, num_plots):
-        for i in range(1, num_plots+1):
+        for i in range(1, num_plots + 1):
             self.view.plot_selector.addItem("Plot " + str(i))
 
     def test_add_subplot(self):
@@ -94,11 +93,11 @@ class QuickEditTest(unittest.TestCase):
 
     def test_multiple_plots(self):
         self.view.number_of_plots = mock.Mock(return_value=4)
-        self.view.plot_at_index = mock.Mock(side_effect = plot_at_index)
+        self.view.plot_at_index = mock.Mock(side_effect=plot_at_index)
         # plot  name at index 0 is reserved so its excluded
         expected = ["plot 1", "plot 2", "plot 3"]
         self.assertEqual(self.presenter.multiple_plots(), expected)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

@@ -21,5 +21,5 @@ class ElementalAnalysisGUITest(unittest.TestCase):
             self.assertEqual("GUI did not close correctly", "")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

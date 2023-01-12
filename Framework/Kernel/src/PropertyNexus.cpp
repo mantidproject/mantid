@@ -130,13 +130,6 @@ void getTimeAndStart(::NeXus::File *file, std::vector<double> &timeSec, std::str
  */
 std::unique_ptr<Property> loadPropertyCommon(::NeXus::File *file, const std::string &group,
                                              const std::vector<double> &timeSec, std::string &startStr) {
-  // Check the type. Boolean stored as UINT8
-  bool typeIsBool(false);
-  // Check for boolean attribute
-  if (file->hasAttr("boolean")) {
-    typeIsBool = true;
-  }
-
   std::vector<Types::Core::DateAndTime> times;
   if (!timeSec.empty()) {
     // Use a default start time
@@ -173,10 +166,16 @@ std::unique_ptr<Property> loadPropertyCommon(::NeXus::File *file, const std::str
   case ::NeXus::CHAR:
     retVal = makeStringProperty(file, group, times);
     break;
-  case ::NeXus::UINT8:
+  case ::NeXus::UINT8: {
+    // Check the type at the group level. Boolean stored as UINT8
+    file->closeData();
+    const bool typeIsBool = file->hasAttr("boolean");
+    file->openData("value");
+
     if (typeIsBool)
       retVal = makeTimeSeriesBoolProperty(file, group, times);
     break;
+  }
   case ::NeXus::INT8:
   case ::NeXus::INT16:
   case ::NeXus::UINT16:
@@ -184,13 +183,15 @@ std::unique_ptr<Property> loadPropertyCommon(::NeXus::File *file, const std::str
     break;
   }
 
+  // verifying that the attribute exists makes this very slow in NeXus v4.4.3
+  // because of the change in how nxgetnextattr is implemented
   std::string unitsStr;
-  if (file->hasAttr("units")) {
-    try {
-      file->getAttr("units", unitsStr);
-    } catch (::NeXus::Exception &) {
-    }
+  try {
+    file->getAttr("units", unitsStr);
+  } catch (::NeXus::Exception &) {
+    // let it drop on the floor
   }
+
   file->closeData();
   file->closeGroup();
   // add units

@@ -15,7 +15,7 @@ def warning(error, parent=None):
 
 def question(question, parent=None):
     qm = QtWidgets.QMessageBox
-    ret = qm.question(parent, '', question, qm.Yes | qm.No)
+    ret = qm.question(parent, "", question, qm.Yes | qm.No)
 
     if ret == qm.Yes:
         return True

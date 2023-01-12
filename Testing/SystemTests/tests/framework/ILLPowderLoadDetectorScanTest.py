@@ -13,7 +13,6 @@ from mantid import config
 # TODO: Once the nexus saver for a scanned workspace is implemented,
 # replace the assertions with compare workspaces with the reference
 class ILLPowderLoadDetectorScanTest(systemtesting.MantidSystemTest):
-
     def __init__(self):
         super(ILLPowderLoadDetectorScanTest, self).__init__()
         self.setUp()
@@ -24,13 +23,13 @@ class ILLPowderLoadDetectorScanTest(systemtesting.MantidSystemTest):
 
     def setUp(self):
 
-        config['default.facility'] = 'ILL'
-        config['default.instrument'] = 'D20'
-        config.appendDataSearchSubDir('ILL/D20/')
+        config["default.facility"] = "ILL"
+        config["default.instrument"] = "D20"
+        config.appendDataSearchSubDir("ILL/D20/")
 
     def d20_detector_scan_test(self):
         # tests the loading for D20 calibration run (detector scan)
-        ws = LoadILLDiffraction('967076.nxs')
+        ws = LoadILLDiffraction("967076.nxs")
         self.assertEqual(ws.blocksize(), 1)
         self.assertEqual(ws.getNumberHistograms(), (2 * 1536 + 1) * 571)
         self.assertEqual(ws.readY(0)[0], 523944)

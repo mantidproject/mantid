@@ -5,25 +5,33 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import CreateEmptyTableWorkspace, ApplyCalibration, CloneWorkspace
-from mantid.api import (AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, WorkspaceProperty,
-                        FileAction, FileProperty, PropertyMode)
+from mantid.api import (
+    AlgorithmFactory,
+    AnalysisDataService,
+    DataProcessorAlgorithm,
+    WorkspaceProperty,
+    FileAction,
+    FileProperty,
+    PropertyMode,
+)
 from mantid.kernel import Direction
 import csv
 import math
 
 
 class ReflectometryISISCalibration(DataProcessorAlgorithm):
-    _WORKSPACE = 'InputWorkspace'
-    _CALIBRATION_FILE = 'CalibrationFile'
-    _OUTPUT_WORKSPACE = 'OutputWorkspace'
+    _WORKSPACE = "InputWorkspace"
+    _CALIBRATION_FILE = "CalibrationFile"
+    _OUTPUT_WORKSPACE = "OutputWorkspace"
+    _DEBUG = "Debug"
 
     def category(self):
         """Return the categories of the algorithm."""
-        return 'Reflectometry\\ISIS;Workflow\\Reflectometry'
+        return "Reflectometry\\ISIS;Workflow\\Reflectometry"
 
     def name(self):
         """Return the name of the algorithm."""
-        return 'ReflectometryISISCalibration'
+        return "ReflectometryISISCalibration"
 
     def summary(self):
         """Return a summary of the algorithm."""
@@ -31,20 +39,21 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
 
     def seeAlso(self):
         """Return a list of related algorithm names."""
-        return ['ReflectometryISISLoadAndProcess']
+        return ["ReflectometryISISLoadAndProcess"]
 
     def PyInit(self):
         self.declareProperty(
-            WorkspaceProperty(self._WORKSPACE, '', direction=Direction.Input, optional=PropertyMode.Mandatory),
-            doc='An input workspace or workspace group')
-        self.declareProperty(FileProperty(self._CALIBRATION_FILE, "",
-                                          action=FileAction.OptionalLoad,
-                                          direction=Direction.Input,
-                                          extensions=["dat"]),
-                             doc="Calibration data file containing Y locations for detector pixels in mm.")
+            WorkspaceProperty(self._WORKSPACE, "", direction=Direction.Input, optional=PropertyMode.Mandatory),
+            doc="An input workspace or workspace group",
+        )
         self.declareProperty(
-            WorkspaceProperty(self._OUTPUT_WORKSPACE, '', direction=Direction.Output),
-            doc='The calibrated output workspace.')
+            FileProperty(self._CALIBRATION_FILE, "", action=FileAction.OptionalLoad, direction=Direction.Input, extensions=["dat"]),
+            doc="Calibration data file containing Y locations for detector pixels in mm.",
+        )
+        self.declareProperty(
+            WorkspaceProperty(self._OUTPUT_WORKSPACE, "", direction=Direction.Output), doc="The calibrated output workspace."
+        )
+        self.copyProperties("ReflectometryReductionOneAuto", [self._DEBUG])
 
     def PyExec(self):
         ws = self.getProperty(self._WORKSPACE).value
@@ -58,7 +67,10 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         output_ws = CloneWorkspace(InputWorkspace=ws)
         ApplyCalibration(Workspace=output_ws, CalibrationTable=calib_table)
         self.setProperty(self._OUTPUT_WORKSPACE, output_ws)
-        AnalysisDataService.remove('output_ws')
+        AnalysisDataService.remove("output_ws")
+        if self.getProperty(self._DEBUG).isDefault:
+            # Only output the calibration table if we're in debug mode
+            AnalysisDataService.remove(calib_table.name())
 
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""
@@ -67,8 +79,22 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         calibration_file = self.getPropertyValue(self._CALIBRATION_FILE)
         if not calibration_file:
             issues[self._CALIBRATION_FILE] = "Calibration file path must be provided"
-
+        else:
+            calib_file_error = self._validate_calibration_filepath(calibration_file)
+            if calib_file_error:
+                issues[self._CALIBRATION_FILE] = calib_file_error
         return issues
+
+    def _validate_calibration_filepath(self, filepath):
+        try:
+            self._scanned_pixel_positions = self._get_pixel_positions_from_file(filepath)
+            if len(self._scanned_pixel_positions) == 0:
+                return "Calibration file provided contains no data"
+        except FileNotFoundError:
+            return "Calibration file path cannot be found"
+        except Exception:
+            return "Could not read contents of calibration file, please see documentation to check the required format"
+        return ""
 
     def _find_specular_pixel_index(self, ws, det_info):
         # Determine position of the specular pixel from the workspace:
@@ -103,10 +129,10 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
 
         return specular_pixel_idx
 
-    def _get_pixel_positions_from_file(self):
+    def _get_pixel_positions_from_file(self, filepath):
         # Create dictionary of pixel spectrum number and position from scan
         scanned_pixel_positions = {}
-        with open(self.getPropertyValue(self._CALIBRATION_FILE), 'r') as file:
+        with open(filepath, "r") as file:
             pixels = csv.reader(file)
             for pixel in pixels:
                 pixel_info = pixel[0].split()
@@ -114,12 +140,10 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         return scanned_pixel_positions
 
     def _create_calibration_table_from_scan(self, ws, det_info, comp_info, specular_pixel_idx):
-        scanned_pixel_positions = self._get_pixel_positions_from_file()
-
         # Get the current specular pixel Y position and the position of the specular pixel from the calibration scan
         specpixel_y = ws.getDetector(specular_pixel_idx).getPos().Y()
 
-        scanned_specpixel_y = scanned_pixel_positions.get(specular_pixel_idx)
+        scanned_specpixel_y = self._scanned_pixel_positions.get(specular_pixel_idx)
         if not scanned_specpixel_y:
             raise RuntimeError(f"Missing calibration data for specular pixel with workspace index {specular_pixel_idx}")
 
@@ -131,7 +155,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         table.addColumn(type="double", name="Detector Width")
 
         # Populate the table with the calibrated data
-        for ws_id, scanned_pixel_pos in scanned_pixel_positions.items():
+        for ws_id, scanned_pixel_pos in self._scanned_pixel_positions.items():
             try:
                 det = ws.getDetector(ws_id)
             except RuntimeError:
@@ -141,12 +165,13 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
             box = comp_info.shape(det_idx).getBoundingBox().width()
             scalings = comp_info.scaleFactor(det_idx)
 
-            next_row = {'Detector ID': det.getID(),
-                        'Detector Position': det.getPos(),
-                        'Detector Y Coordinate': self._calculate_calibrated_y_pos(specpixel_y, scanned_specpixel_y,
-                                                                                  scanned_pixel_pos),
-                        'Detector Width': box[0] * scalings[0],
-                        'Detector Height': box[1] * scalings[1]}
+            next_row = {
+                "Detector ID": det.getID(),
+                "Detector Position": det.getPos(),
+                "Detector Y Coordinate": self._calculate_calibrated_y_pos(specpixel_y, scanned_specpixel_y, scanned_pixel_pos),
+                "Detector Width": box[0] * scalings[0],
+                "Detector Height": box[1] * scalings[1],
+            }
             table.addRow(next_row)
         return table
 

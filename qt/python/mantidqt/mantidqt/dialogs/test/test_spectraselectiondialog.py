@@ -27,21 +27,19 @@ class SpectraSelectionDialogTest(unittest.TestCase):
     def setUp(self):
         # patch away getting a real icon as it can hit a race condition when running tests
         # in parallel
-        patcher = mock.patch('mantidqt.dialogs.spectraselectordialog.get_icon')
+        patcher = mock.patch("mantidqt.dialogs.spectraselectordialog.get_icon")
         self._mock_get_icon = patcher.start()
         self._mock_get_icon.return_value = QIcon()
         self.addCleanup(patcher.stop)
         if self._single_spec_ws is None:
-            self.__class__._single_spec_ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=1,
-                                                                                XLength=1, YLength=1)
-            self.__class__._multi_spec_ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=200,
-                                                                               XLength=1, YLength=1)
+            self.__class__._single_spec_ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=1, XLength=1, YLength=1)
+            self.__class__._multi_spec_ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=200, XLength=1, YLength=1)
         SpectraSelectionDialog._check_number_of_plots = mock.Mock(return_value=True)
 
         spectraselectordialog.RED_ASTERISK = None
 
         # replaceWidget doesn't exist in Qt4
-        replace_widget_patcher = mock.patch.object(QVBoxLayout, 'replaceWidget', create=True)
+        replace_widget_patcher = mock.patch.object(QVBoxLayout, "replaceWidget", create=True)
         replace_widget_patcher.start()
         self.addCleanup(replace_widget_patcher.stop)
 
@@ -57,8 +55,7 @@ class SpectraSelectionDialogTest(unittest.TestCase):
         self.assertEqual("valid range: 0-199", dlg._ui.wkspIndices.placeholderText())
 
     def test_filling_workspace_details_multiple_workspaces_of_same_size(self):
-        workspaces = [self._multi_spec_ws,
-                      self._multi_spec_ws]
+        workspaces = [self._multi_spec_ws, self._multi_spec_ws]
         dlg = SpectraSelectionDialog(workspaces)
         self.assertEqual("valid range: 1-200", dlg._ui.specNums.placeholderText())
         self.assertEqual("valid range: 0-199", dlg._ui.wkspIndices.placeholderText())
@@ -76,7 +73,7 @@ class SpectraSelectionDialogTest(unittest.TestCase):
         for i in range(10):
             gappy_ws.getSpectrum(i).setSpectrumNo(1 + i)
         for i in range(10, 16):
-            gappy_ws.getSpectrum(i).setSpectrumNo(1 + (2*i))
+            gappy_ws.getSpectrum(i).setSpectrumNo(1 + (2 * i))
         for i in range(17, 20):
             gappy_ws.getSpectrum(i).setSpectrumNo(1 + i)
         for i in range(20, gappy_ws.getNumberHistograms()):
@@ -89,7 +86,7 @@ class SpectraSelectionDialogTest(unittest.TestCase):
         gappy_ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=50, XLength=1, YLength=1)
         for i in range(20):
             gappy_ws.getSpectrum(i).setSpectrumNo(1 + i)
-        for i in range(20,gappy_ws.getNumberHistograms()):
+        for i in range(20, gappy_ws.getNumberHistograms()):
             gappy_ws.getSpectrum(i).setSpectrumNo(161 + i)
         dlg = SpectraSelectionDialog([gappy_ws, self._multi_spec_ws])
         self.assertEqual("valid range: 1-20, 181-200", dlg._ui.specNums.placeholderText())
@@ -128,39 +125,38 @@ class SpectraSelectionDialogTest(unittest.TestCase):
         dlg._ui.wkspIndices.setText("50-60")
         dlg._ui.buttonBox.button(QDialogButtonBox.Ok).click()
 
-        self._mock_get_icon.assert_called_once_with('mdi.asterisk', 'red', 0.6)
+        self._mock_get_icon.assert_called_once_with("mdi.asterisk", "red", 0.6)
         self.assertNotEqual(dlg.selection, None)
         self.assertEqual(dlg.selection.spectra, None)
         self.assertEqual(list(range(50, 61)), dlg.selection.wksp_indices)
 
     def test_parse_selection_str_single_number(self):
-        s = '1'
+        s = "1"
         self.assertEqual([1], parse_selection_str(s, 1, 3))
-        s = '2'
+        s = "2"
         self.assertEqual([2], parse_selection_str(s, 1, 3))
-        s = '3'
+        s = "3"
         self.assertEqual([3], parse_selection_str(s, 1, 3))
-        s = '-1'
+        s = "-1"
         self.assertEqual(parse_selection_str(s, 1, 1), None)
-        s = '1'
+        s = "1"
         self.assertEqual(parse_selection_str(s, 2, 2), None)
-        s = '1'
+        s = "1"
         self.assertEqual(parse_selection_str(s, 2, 3), None)
 
     def test_parse_selection_str_single_range(self):
-        s = '1-3'
+        s = "1-3"
         self.assertEqual([1, 2, 3], parse_selection_str(s, 1, 3))
-        s = '2-4'
+        s = "2-4"
         self.assertEqual([2, 3, 4], parse_selection_str(s, 1, 5))
-        s = '2-4'
+        s = "2-4"
         self.assertEqual(parse_selection_str(s, 2, 3), None)
-        s = '2-4'
+        s = "2-4"
         self.assertEqual(parse_selection_str(s, 3, 5), None)
 
     def test_parse_selection_str_mix_number_range_spaces(self):
-        s = '1-3, 5,8,10, 11 ,12-14 , 15 -16, 16- 19'
-        self.assertEqual([1, 2, 3, 5, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
-                         parse_selection_str(s, 1, 20))
+        s = "1-3, 5,8,10, 11 ,12-14 , 15 -16, 16- 19"
+        self.assertEqual([1, 2, 3, 5, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], parse_selection_str(s, 1, 20))
 
     def test_construction_with_non_MatrixWorkspace_type_removes_non_MatrixWorkspaces_from_list(self):
         table = WorkspaceFactory.Instance().createTable()
@@ -178,7 +174,7 @@ class SpectraSelectionDialogTest(unittest.TestCase):
     def test_advanced_options_widget_created_when_advanced_is_true(self):
         workspaces = [self._single_spec_ws]
         ssd = SpectraSelectionDialog(workspaces, advanced=True)
-        self.assertTrue(hasattr(ssd._ui, 'advanced_options_widget'))
+        self.assertTrue(hasattr(ssd._ui, "advanced_options_widget"))
 
     def test_advanced_plots_includes_surface_and_contour_when_there_are_more_than_two_workspaces(self):
         workspaces = [self._single_spec_ws] * 3
@@ -204,7 +200,7 @@ class SpectraSelectionDialogTest(unittest.TestCase):
         custom_index = ssd._ui.advanced_options_widget.ui.log_value_combo_box.count() - 1
         ssd._ui.advanced_options_widget.ui.log_value_combo_box.setCurrentIndex(custom_index)
 
-        self._mock_get_icon.assert_called_once_with('mdi.asterisk', 'red', 0.6)
+        self._mock_get_icon.assert_called_once_with("mdi.asterisk", "red", 0.6)
         self.assertTrue(ssd._ui.advanced_options_widget.ui.custom_log_line_edit.isEnabled())
 
     def test_log_value_combo_box_contains_custom_option(self):
@@ -349,8 +345,8 @@ class SpectraSelectionDialogTest(unittest.TestCase):
         spectra_1 = ExtractSpectra(InputWorkspace=self._multi_spec_ws, StartWorkspaceIndex=0, EndWorkspaceIndex=5)
         spectra_2 = ExtractSpectra(InputWorkspace=self._multi_spec_ws, StartWorkspaceIndex=6, EndWorkspaceIndex=10)
         workspaces = [spectra_1, spectra_2]
-        self.assertRaises(Exception, 'Error: Workspaces have no common spectra.', SpectraSelectionDialog, workspaces)
+        self.assertRaises(Exception, "Error: Workspaces have no common spectra.", SpectraSelectionDialog, workspaces)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-name-in-module
+# pylint: disable=no-name-in-module
 from mantid.simpleapi import CrystalFieldEnergies
 import numpy as np
 import warnings
@@ -39,8 +39,7 @@ def energies(nre, **kwargs):
         a tuple of energies (1D numpy array), wavefunctions (2D numpy array)
         and the hamiltonian (2D numpy array).
     """
-    warnings.warn('This function is under development and can be changed/removed in the future',
-                  FutureWarning)
+    warnings.warn("This function is under development and can be changed/removed in the future", FutureWarning)
     # Do the calculations
     res = CrystalFieldEnergies(nre, **kwargs)
 

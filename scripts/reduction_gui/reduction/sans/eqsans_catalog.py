@@ -4,12 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 """
     Data catalog for EQSANS
 """
 from reduction_gui.reduction.sans.data_cat import DataCatalog as BaseCatalog
-from reduction_gui.reduction.sans.data_cat import DataSet,  DataType
+from reduction_gui.reduction.sans.data_cat import DataSet, DataType
 from reduction_gui.reduction.scripter import execute_script
 import re
 import datetime
@@ -18,23 +18,25 @@ import datetime
 try:
     from mantid.api import AnalysisDataService
     from mantid.simpleapi import LoadEventNexus
+
     HAS_MANTID = True
 except:
     HAS_MANTID = False
 
 try:
     import mantidplot  # noqa
+
     IN_MANTIDPLOT = True
 except:
     IN_MANTIDPLOT = False
 
 
 class EQSANSDataType(DataType):
-    TABLE_NAME="eqsans_datatype"
+    TABLE_NAME = "eqsans_datatype"
 
 
 class EQSANSDataSet(DataSet):
-    TABLE_NAME="eqsans_dataset"
+    TABLE_NAME = "eqsans_dataset"
     data_type_cls = EQSANSDataType
 
     def __init__(self, run_number, title, run_start, duration, sdd):
@@ -57,10 +59,10 @@ class EQSANSDataSet(DataSet):
     @classmethod
     def handle(cls, file_path):
         """
-            Return a DB handle for the given file, such as a run number
-            This will handle file formats in two formats:
-            EQSANS_([0-9]+)_event
-            EQSANS_([0-9]+).nxs
+        Return a DB handle for the given file, such as a run number
+        This will handle file formats in two formats:
+        EQSANS_([0-9]+)_event
+        EQSANS_([0-9]+).nxs
         """
         file_path = file_path.strip()
         r_re = re.search(r"EQSANS_([0-9]+)(_event|\.nxs)", file_path)
@@ -91,20 +93,20 @@ class EQSANSDataSet(DataSet):
                 return -1
 
         runno = read_prop("run_number")
-        if runno=="":
+        if runno == "":
             runno = run
 
         title = read_prop("run_title")
         t_str = read_prop("start_time")
         # Get rid of the training microseconds
-        toks = t_str.split('.')
-        if len(toks)>=2:
-            t_str=toks[0]
-        t = datetime.datetime.strptime(t_str, '%Y-%m-%dT%H:%M:%S')
+        toks = t_str.split(".")
+        if len(toks) >= 2:
+            t_str = toks[0]
+        t = datetime.datetime.strptime(t_str, "%Y-%m-%dT%H:%M:%S")
         # TZ offset
-        offset = datetime.datetime.now()-datetime.datetime.utcnow()
-        t = t+offset
-        run_start = t.strftime('%y-%m-%d %H:%M')
+        offset = datetime.datetime.now() - datetime.datetime.utcnow()
+        t = t + offset
+        run_start = t.strftime("%y-%m-%d %H:%M")
 
         duration = read_prop("duration")
         try:

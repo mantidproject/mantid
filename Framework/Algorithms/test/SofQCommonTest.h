@@ -200,10 +200,11 @@ public:
     s.initCachedValues(*ws, &alg);
     const auto &detectorInfo = ws->detectorInfo();
     const auto testDeltaE = -Ei / 1.8;
+    const auto allowedDelta(1e-10);
     for (size_t i = 0; i < detectorInfo.size(); ++i) {
       const auto twoTheta = detectorInfo.twoTheta(i);
       const auto expected = directQ(Ei, testDeltaE, twoTheta);
-      TS_ASSERT_EQUALS(s.q(testDeltaE, twoTheta, nullptr), expected)
+      TS_ASSERT_DELTA(s.q(testDeltaE, twoTheta, nullptr), expected, allowedDelta)
     }
   }
 

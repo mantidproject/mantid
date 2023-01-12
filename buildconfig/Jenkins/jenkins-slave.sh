@@ -4,12 +4,29 @@
 # It also downloads the slave.jar to /tmp if it does not already
 # exist.
 #
-# The settings at the top must be filled in for each slave.
+# The variables in the User configuration section below
+# must be updated for each agent.
 #####################################################################
-# Crontab setting should be something like
-# 0,30 * * * * /home/builder/jenkins-linode/jenkins-slave.sh nodename secret
-# or (on mac)
-# 0,30 * * * * /Users/builder/jenkins-linode/jenkins-slave.sh nodename secret
+# Setting up a scheduled task using crontab to ensure agent stays
+# connected
+#####################################################################
+# Download this script to a path under the account that will run the agent
+# Run "crontab -e" under the user that will connect to jenkins and add
+# a line such as
+#
+# 0,5 * * * * <downloaded path>/jenkins-slave.sh nodename secret
+#
+# If you have installed a newer version of Java then this can be used
+# by specifying the JAVA environment variable on the line above, e.g.
+#
+# 0,5 * * * * env JAVA=<full-path-to-java-executable> <downloaded path>/jenkins-slave.sh nodename secret
+#
+# Note that for the Adoptium Java releases the java path is usually something
+# like /Library/Java/JavaVirtualMachines/temurin-11.jre/Contents/Home/bin/java
+# It may also be necessary to customize the PATH for the crontab entry if
+# other software has been installed in /usr/local for example,
+#
+# 0,5 * * * * env PATH=<path1>:<path2>:$PATH JAVA=<full-path-to-java-executable> <downloaded path>/jenkins-slave.sh nodename secret
 #####################################################################
 # User configuration
 #####################################################################

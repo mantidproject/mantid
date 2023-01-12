@@ -13,7 +13,6 @@ from mantidqtinterfaces.Muon.GUI.Common.corrections_tab_widget.corrections_view 
 
 @start_qapplication
 class CorrectionsViewTest(unittest.TestCase):
-
     def setUp(self):
         self.view = CorrectionsView()
         self.view.show()
@@ -39,8 +38,9 @@ class CorrectionsViewTest(unittest.TestCase):
         runs = ["62260", "62261", "62262"]
         self.view.update_run_selector_combo_box(runs)
 
-        items = [self.view.run_selector.dataset_name_combo_box.itemText(i)
-                 for i in range(self.view.run_selector.dataset_name_combo_box.count())]
+        items = [
+            self.view.run_selector.dataset_name_combo_box.itemText(i) for i in range(self.view.run_selector.dataset_name_combo_box.count())
+        ]
         self.assertEqual(items, runs)
 
     def test_that_current_run_string_will_return_the_current_run_as_a_string(self):
@@ -52,5 +52,5 @@ class CorrectionsViewTest(unittest.TestCase):
         self.assertEqual(run_string, "62260")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

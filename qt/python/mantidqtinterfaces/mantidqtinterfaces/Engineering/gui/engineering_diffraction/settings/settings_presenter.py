@@ -10,36 +10,103 @@ from mantidqt.utils.observer_pattern import Observable
 from Engineering.EnggUtils import CALIB_DIR
 
 DEFAULT_FULL_INST_CALIB = "ENGINX_full_instrument_calibration_193749.nxs"
-SETTINGS_DICT = {"save_location": str, "full_calibration": str, "logs": str,
-                 "primary_log": str, "sort_ascending": bool, "default_peak": str,
-                 "path_to_gsas2": str, "timeout": str, "dSpacing_min": str}
+SETTINGS_DICT = {
+    "save_location": str,
+    "full_calibration": str,
+    "logs": str,
+    "primary_log": str,
+    "sort_ascending": bool,
+    "default_peak": str,
+    "path_to_gsas2": str,
+    "timeout": str,
+    "dSpacing_min": str,
+}
 
 DEFAULT_SETTINGS = {
     "full_calibration": path.join(CALIB_DIR, DEFAULT_FULL_INST_CALIB),
     "save_location": path.join(path.expanduser("~"), "Engineering_Mantid"),
-    "logs": ','.join(
-        ['Temp_1', 'W_position', 'X_position', 'Y_position', 'Z_position', 'stress', 'strain', 'stressrig_go']),
-    "primary_log": 'strain',
+    "logs": ",".join(["Temp_1", "W_position", "X_position", "Y_position", "Z_position", "stress", "strain", "stressrig_go"]),
+    "primary_log": "strain",
     "sort_ascending": True,
     "default_peak": "BackToBackExponential",
     "path_to_gsas2": "/opt/gsas2",  # default on IDAaaS
     "timeout": "10",  # seconds
-    "dSpacing_min": "1.0"  # angstroms
+    "dSpacing_min": "1.0",  # angstroms
 }
 
-ALL_LOGS = ','.join(
-    ['ADC1_0', 'ADC1_2', 'ADC1_3', 'C6_master_freq', 'C6_master_phase', 'C6_slave_freq', 'C6_slave_phase',
-     'C9_master_freq', 'C9_master_phase', 'C9_slave_freq', 'C9_slave_phase', 'Cyba_a', 'Cyba_b', 'Cyba_c',
-     'ICP_DAE_TD', 'ICP_SYS_TD', 'Max_output_1', 'Max_output_2', 'Max_output_3', 'North_X', 'North_X_hlim',
-     'North_X_llim', 'Output_1', 'Output_2', 'RampRate', 'Rampon_3', 'Ramprate_3', 'S_position', 'South_X',
-     'South_X_hlim', 'South_X_llim', 'Temp_1', 'Temp_2', 'Temp_3', 'W_position', 'X_position', 'Y_position',
-     'Z_position', 'amplitude', 'control_channel', 'control_channel_string', 'count_rate', 'cycle_rbv', 'cycles',
-     'dae_beam_current', 'frequency', 'good_uah_log', 'jaws1_hgap', 'jaws2_hgap', 'jaws3_hgap', 'jaws3_vgap',
-     'np_ratio', 'pos_step_time', 'position', 'position_sp_rbv', 'proton_charge', 'raw_uah_log', 'strain',
-     'strain_sp_rbv', 'strain_step_time', 'stress', 'stress_sp_rbv', 'stress_step_time', 'stressrig_go',
-     'wave_running', 'wave_start', 'wave_type'])
+ALL_LOGS = ",".join(
+    [
+        "ADC1_0",
+        "ADC1_2",
+        "ADC1_3",
+        "C6_master_freq",
+        "C6_master_phase",
+        "C6_slave_freq",
+        "C6_slave_phase",
+        "C9_master_freq",
+        "C9_master_phase",
+        "C9_slave_freq",
+        "C9_slave_phase",
+        "Cyba_a",
+        "Cyba_b",
+        "Cyba_c",
+        "ICP_DAE_TD",
+        "ICP_SYS_TD",
+        "Max_output_1",
+        "Max_output_2",
+        "Max_output_3",
+        "North_X",
+        "North_X_hlim",
+        "North_X_llim",
+        "Output_1",
+        "Output_2",
+        "RampRate",
+        "Rampon_3",
+        "Ramprate_3",
+        "S_position",
+        "South_X",
+        "South_X_hlim",
+        "South_X_llim",
+        "Temp_1",
+        "Temp_2",
+        "Temp_3",
+        "W_position",
+        "X_position",
+        "Y_position",
+        "Z_position",
+        "amplitude",
+        "control_channel",
+        "control_channel_string",
+        "count_rate",
+        "cycle_rbv",
+        "cycles",
+        "dae_beam_current",
+        "frequency",
+        "good_uah_log",
+        "jaws1_hgap",
+        "jaws2_hgap",
+        "jaws3_hgap",
+        "jaws3_vgap",
+        "np_ratio",
+        "pos_step_time",
+        "position",
+        "position_sp_rbv",
+        "proton_charge",
+        "raw_uah_log",
+        "strain",
+        "strain_sp_rbv",
+        "strain_step_time",
+        "stress",
+        "stress_sp_rbv",
+        "stress_step_time",
+        "stressrig_go",
+        "wave_running",
+        "wave_start",
+        "wave_type",
+    ]
+)
 
-ALL_PEAKS = ','.join(["BackToBackExponential", "Gaussian", "Lorentzian", "Voigt"])
+ALL_PEAKS = ",".join(["BackToBackExponential", "Gaussian", "Lorentzian", "Voigt"])
 
 
 class SettingsPresenter(object):

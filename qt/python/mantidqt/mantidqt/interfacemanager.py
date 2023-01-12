@@ -9,4 +9,4 @@
 from mantidqt import resources  # noqa: F401
 from mantidqt.utils.qt import import_qt
 
-InterfaceManager = import_qt('._common', 'mantidqt', 'InterfaceManager')
+InterfaceManager = import_qt("._common", "mantidqt", "InterfaceManager")

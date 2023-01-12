@@ -12,107 +12,134 @@ from copy import deepcopy
 
 from SANSSingleReductionBase import SANSSingleReductionBase
 
-from mantid.api import (AlgorithmFactory, AnalysisDataService,
-                        MatrixWorkspaceProperty, PropertyMode,
-                        WorkspaceGroup, WorkspaceGroupProperty)
+from mantid.api import AlgorithmFactory, AnalysisDataService, MatrixWorkspaceProperty, PropertyMode, WorkspaceGroup, WorkspaceGroupProperty
 from mantid.kernel import Direction
 from mantid.simpleapi import CloneWorkspace
 from sans.algorithm_detail.bundles import EventSliceSettingBundle
-from sans.algorithm_detail.single_execution import (run_initial_event_slice_reduction, run_core_event_slice_reduction,
-                                                    get_reduction_mode_vs_output_bundles, run_optimized_for_can)
-from sans.common.enums import (DataType, ReductionMode, FitType)
-from sans.common.general_functions import (create_child_algorithm, does_can_workspace_exist_on_ads,
-                                           get_transmission_output_name, get_output_name)
+from sans.algorithm_detail.single_execution import (
+    run_initial_event_slice_reduction,
+    run_core_event_slice_reduction,
+    get_reduction_mode_vs_output_bundles,
+    run_optimized_for_can,
+)
+from sans.common.enums import DataType, ReductionMode, FitType
+from sans.common.general_functions import (
+    create_child_algorithm,
+    does_can_workspace_exist_on_ads,
+    get_transmission_output_name,
+    get_output_name,
+)
 
 
 class SANSSingleReduction(SANSSingleReductionBase):
     def category(self):
-        return 'SANS\\Reduction'
+        return "SANS\\Reduction"
 
     def version(self):
         return 2
 
     def summary(self):
-        return 'Performs a single reduction of SANS data, optimised for event slices.'
+        return "Performs a single reduction of SANS data, optimised for event slices."
 
     def _declare_output_properties(self):
-        self.declareProperty(MatrixWorkspaceProperty('OutShiftAndScaleFactor', '', optional=PropertyMode.Optional,
-                                                     direction=Direction.Output),
-                             doc='A workspace containing the applied shift factor as X data and applied scale factor '
-                                 'as Y data.')
+        self.declareProperty(
+            MatrixWorkspaceProperty("OutShiftAndScaleFactor", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="A workspace containing the applied shift factor as X data and applied scale factor " "as Y data.",
+        )
 
         # This breaks our flexibility with the reduction mode. We need to check if we can populate this based on
         # the available reduction modes for the state input. TODO: check if this is possible
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceLAB', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The output workspace for the low-angle bank.')
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceHAB', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The output workspace for the high-angle bank.')
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceMerged', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The output workspace for the merged reduction.')
-        self.setPropertyGroup("OutShiftAndScaleFactor", 'Output')
-        self.setPropertyGroup("OutputWorkspaceLAB", 'Output')
-        self.setPropertyGroup("OutputWorkspaceHAB", 'Output')
-        self.setPropertyGroup("OutputWorkspaceMerged", 'Output')
+        self.declareProperty(
+            WorkspaceGroupProperty("OutputWorkspaceLAB", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="The output workspace for the low-angle bank.",
+        )
+        self.declareProperty(
+            WorkspaceGroupProperty("OutputWorkspaceHAB", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="The output workspace for the high-angle bank.",
+        )
+        self.declareProperty(
+            WorkspaceGroupProperty("OutputWorkspaceMerged", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="The output workspace for the merged reduction.",
+        )
+        self.setPropertyGroup("OutShiftAndScaleFactor", "Output")
+        self.setPropertyGroup("OutputWorkspaceLAB", "Output")
+        self.setPropertyGroup("OutputWorkspaceHAB", "Output")
+        self.setPropertyGroup("OutputWorkspaceMerged", "Output")
 
         # CAN output
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceLABCan', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The can output workspace group for the low-angle bank, provided there is one. '
-                                 'Each workspace in the group is one event slice.')
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceHABCan', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The can output workspace group for the high-angle bank, provided there is one. '
-                                 'Each workspace in the group is one event slice.')
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceLABSample', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The sample output workspace group for the low-angle bank, provided there is one. '
-                                 'Each workspace in the group is one event slice.')
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceHABSample', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The sample output workspace group for the high-angle bank, provided there is one. '
-                                 'Each workspace in the group is one event slice.')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceCalculatedTransmission', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The calculated transmission workspace.')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceUnfittedTransmission', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The unfitted transmission workspace.')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceCalculatedTransmissionCan', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The calculated transmission workspace for the can.')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceUnfittedTransmissionCan', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The unfitted transmission workspace for the can.')
-        self.setPropertyGroup("OutputWorkspaceLABCan", 'Can Output')
-        self.setPropertyGroup("OutputWorkspaceHABCan", 'Can Output')
-        self.setPropertyGroup("OutputWorkspaceLABSample", 'Can Output')
-        self.setPropertyGroup("OutputWorkspaceHABSample", 'Can Output')
+        self.declareProperty(
+            WorkspaceGroupProperty("OutputWorkspaceLABCan", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="The can output workspace group for the low-angle bank, provided there is one. "
+            "Each workspace in the group is one event slice.",
+        )
+        self.declareProperty(
+            WorkspaceGroupProperty("OutputWorkspaceHABCan", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="The can output workspace group for the high-angle bank, provided there is one. "
+            "Each workspace in the group is one event slice.",
+        )
+        self.declareProperty(
+            WorkspaceGroupProperty("OutputWorkspaceLABSample", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="The sample output workspace group for the low-angle bank, provided there is one. "
+            "Each workspace in the group is one event slice.",
+        )
+        self.declareProperty(
+            WorkspaceGroupProperty("OutputWorkspaceHABSample", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="The sample output workspace group for the high-angle bank, provided there is one. "
+            "Each workspace in the group is one event slice.",
+        )
+        self.declareProperty(
+            MatrixWorkspaceProperty(
+                "OutputWorkspaceCalculatedTransmission", "", optional=PropertyMode.Optional, direction=Direction.Output
+            ),
+            doc="The calculated transmission workspace.",
+        )
+        self.declareProperty(
+            MatrixWorkspaceProperty("OutputWorkspaceUnfittedTransmission", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="The unfitted transmission workspace.",
+        )
+        self.declareProperty(
+            MatrixWorkspaceProperty(
+                "OutputWorkspaceCalculatedTransmissionCan", "", optional=PropertyMode.Optional, direction=Direction.Output
+            ),
+            doc="The calculated transmission workspace for the can.",
+        )
+        self.declareProperty(
+            MatrixWorkspaceProperty(
+                "OutputWorkspaceUnfittedTransmissionCan", "", optional=PropertyMode.Optional, direction=Direction.Output
+            ),
+            doc="The unfitted transmission workspace for the can.",
+        )
+        self.setPropertyGroup("OutputWorkspaceLABCan", "Can Output")
+        self.setPropertyGroup("OutputWorkspaceHABCan", "Can Output")
+        self.setPropertyGroup("OutputWorkspaceLABSample", "Can Output")
+        self.setPropertyGroup("OutputWorkspaceHABSample", "Can Output")
 
         # Output CAN Count and Norm for optimizations
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceLABCanNorm', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The can norm output workspace group for the low-angle bank, provided there is one. '
-                                 'Each workspace in the group is one event slice.')
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceLABCanCount', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The can count output workspace group for the low-angle bank, provided there is one. '
-                                 'Each workspace in the group is one event slice.')
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceHABCanCount', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The can count output workspace group for the high-angle bank, provided there is one. '
-                                 'Each workspace in the group is one event slice.')
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceHABCanNorm', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The can norm output workspace group for the high-angle bank, provided there is one. '
-                                 'Each workspace in the group is one event slice.')
+        self.declareProperty(
+            WorkspaceGroupProperty("OutputWorkspaceLABCanNorm", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="The can norm output workspace group for the low-angle bank, provided there is one. "
+            "Each workspace in the group is one event slice.",
+        )
+        self.declareProperty(
+            WorkspaceGroupProperty("OutputWorkspaceLABCanCount", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="The can count output workspace group for the low-angle bank, provided there is one. "
+            "Each workspace in the group is one event slice.",
+        )
+        self.declareProperty(
+            WorkspaceGroupProperty("OutputWorkspaceHABCanCount", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="The can count output workspace group for the high-angle bank, provided there is one. "
+            "Each workspace in the group is one event slice.",
+        )
+        self.declareProperty(
+            WorkspaceGroupProperty("OutputWorkspaceHABCanNorm", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="The can norm output workspace group for the high-angle bank, provided there is one. "
+            "Each workspace in the group is one event slice.",
+        )
 
-        self.setPropertyGroup("OutputWorkspaceLABCanCount", 'Opt Output')
-        self.setPropertyGroup("OutputWorkspaceLABCanNorm", 'Opt Output')
-        self.setPropertyGroup("OutputWorkspaceHABCanCount", 'Opt Output')
-        self.setPropertyGroup("OutputWorkspaceHABCanNorm", 'Opt Output')
+        self.setPropertyGroup("OutputWorkspaceLABCanCount", "Opt Output")
+        self.setPropertyGroup("OutputWorkspaceLABCanNorm", "Opt Output")
+        self.setPropertyGroup("OutputWorkspaceHABCanCount", "Opt Output")
+        self.setPropertyGroup("OutputWorkspaceHABCanNorm", "Opt Output")
 
     def PyInit(self):
         self._pyinit()
@@ -137,8 +164,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
         # --------------------------------------------------------------------------------------------------------------
         intermediate_bundles = []
         for reduction_setting_bundle in reduction_setting_bundles:
-            intermediate_bundles.append(run_initial_event_slice_reduction(initial_reduction_alg,
-                                                                          reduction_setting_bundle))
+            intermediate_bundles.append(run_initial_event_slice_reduction(initial_reduction_alg, reduction_setting_bundle))
         return self._get_slice_reduction_setting_bundles(intermediate_bundles)
 
     def do_reduction(self, reduction_alg, reduction_setting_bundles, use_optimizations, progress):
@@ -167,13 +193,13 @@ class SANSSingleReduction(SANSSingleReductionBase):
                 # settings and is stored in the ADS, then we should use it
                 # (provided the user has optimizations enabled).
                 if use_optimizations and slice_bundle.data_type is DataType.CAN:
-                    output_bundle, output_parts_bundle, \
-                        output_transmission_bundle = run_optimized_for_can(reduction_alg,
-                                                                           slice_bundle,
-                                                                           event_slice_optimisation=True)
+                    output_bundle, output_parts_bundle, output_transmission_bundle = run_optimized_for_can(
+                        reduction_alg, slice_bundle, event_slice_optimisation=True
+                    )
                 else:
-                    output_bundle, output_parts_bundle, \
-                        output_transmission_bundle = run_core_event_slice_reduction(reduction_alg, slice_bundle)
+                    output_bundle, output_parts_bundle, output_transmission_bundle = run_core_event_slice_reduction(
+                        reduction_alg, slice_bundle
+                    )
                 slice_bundles.append(output_bundle)
                 slice_parts_bundles.append(output_parts_bundle)
                 output_transmission_bundles.append(output_transmission_bundle)
@@ -189,11 +215,11 @@ class SANSSingleReduction(SANSSingleReductionBase):
     @staticmethod
     def _get_slice_bundles(bundle):
         """
-            Splits a reduction package object into several reduction package objects if it
-            contains several event slice settings
+        Splits a reduction package object into several reduction package objects if it
+        contains several event slice settings
 
-            :param bundle: a EventSliceSettingBundle tuple
-            :return: a list of EventSliceSettingBundle tuples where each tuple contains only one event slice.
+        :param bundle: a EventSliceSettingBundle tuple
+        :return: a list of EventSliceSettingBundle tuples where each tuple contains only one event slice.
         """
         slice_bundles = []
         state = bundle.state
@@ -211,15 +237,19 @@ class SANSSingleReduction(SANSSingleReductionBase):
 
         for state in states:
             new_state = deepcopy(state)
-            slice_bundles.append(EventSliceSettingBundle(state=new_state,
-                                                         data_type=bundle.data_type,
-                                                         reduction_mode=bundle.reduction_mode,
-                                                         output_parts=bundle.output_parts,
-                                                         scatter_workspace=bundle.scatter_workspace,
-                                                         dummy_mask_workspace=bundle.dummy_mask_workspace,
-                                                         scatter_monitor_workspace=bundle.scatter_monitor_workspace,
-                                                         direct_workspace=bundle.direct_workspace,
-                                                         transmission_workspace=bundle.transmission_workspace))
+            slice_bundles.append(
+                EventSliceSettingBundle(
+                    state=new_state,
+                    data_type=bundle.data_type,
+                    reduction_mode=bundle.reduction_mode,
+                    output_parts=bundle.output_parts,
+                    scatter_workspace=bundle.scatter_workspace,
+                    dummy_mask_workspace=bundle.dummy_mask_workspace,
+                    scatter_monitor_workspace=bundle.scatter_monitor_workspace,
+                    direct_workspace=bundle.direct_workspace,
+                    transmission_workspace=bundle.transmission_workspace,
+                )
+            )
         return slice_bundles
 
     def _get_slice_reduction_setting_bundles(self, intermediate_bundles):
@@ -242,8 +272,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
         return list(map(list, zip(*sliced_bundles)))
 
     def set_shift_and_scale_output(self, scale_factors, shift_factors):
-        create_workspace_alg = create_child_algorithm(self, "CreateWorkspace", **{"DataX": scale_factors,
-                                                                                  "DataY": shift_factors})
+        create_workspace_alg = create_child_algorithm(self, "CreateWorkspace", **{"DataX": scale_factors, "DataY": shift_factors})
         create_workspace_alg.execute()
         self.setProperty("OutShiftAndScaleFactor", create_workspace_alg.getProperty("OutputWorkspace").value)
 
@@ -276,8 +305,10 @@ class SANSSingleReduction(SANSSingleReductionBase):
                 elif reduction_mode is ReductionMode.HAB:
                     workspace_group_hab.addWorkspace(output_workspace)
                 else:
-                    raise RuntimeError("SANSSingleReduction: Cannot set the output workspace. "
-                                       "The selected reduction mode {0} is unknown.".format(reduction_mode))
+                    raise RuntimeError(
+                        "SANSSingleReduction: Cannot set the output workspace. "
+                        "The selected reduction mode {0} is unknown.".format(reduction_mode)
+                    )
         if workspace_group_merged.size() > 0:
             self.setProperty("OutputWorkspaceMerged", workspace_group_merged)
         if workspace_group_lab.size() > 0:
@@ -305,16 +336,16 @@ class SANSSingleReduction(SANSSingleReductionBase):
                     # Make sure that the output workspace is not None which can be the case if there has never been a
                     # can set for the reduction.
                     if output_workspace is not None and not does_can_workspace_exist_on_ads(output_workspace):
-                        name = self._get_output_workspace_name(output_bundle.state, output_bundle.reduction_mode,
-                                                               can=True)
+                        name = self._get_output_workspace_name(output_bundle.state, output_bundle.reduction_mode, can=True)
                         AnalysisDataService.addOrReplace(name, output_workspace)
                         if reduction_mode is ReductionMode.LAB:
                             workspace_group_lab_can.addWorkspace(output_workspace)
                         elif reduction_mode is ReductionMode.HAB:
                             workspace_group_hab_can.addWorkspace(output_workspace)
                         else:
-                            raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
-                                               " be set with a can.".format(reduction_mode))
+                            raise RuntimeError(
+                                "SANSSingleReduction: The reduction mode {0} should not" " be set with a can.".format(reduction_mode)
+                            )
         if workspace_group_lab_can.size() > 0:
             # LAB group workspace is non-empty, so we want to set it as output
             self.setProperty("OutputWorkspaceLABCan", workspace_group_lab_can)
@@ -345,9 +376,12 @@ class SANSSingleReduction(SANSSingleReductionBase):
                     output_workspace_norm = output_bundle_part.output_workspace_norm
                     # Make sure that the output workspace is not None which can be the case if there has never been a
                     # can set for the reduction.
-                    if output_workspace_norm is not None and output_workspace_count is not None and \
-                            not does_can_workspace_exist_on_ads(output_workspace_norm) and \
-                            not does_can_workspace_exist_on_ads(output_workspace_count):
+                    if (
+                        output_workspace_norm is not None
+                        and output_workspace_count is not None
+                        and not does_can_workspace_exist_on_ads(output_workspace_norm)
+                        and not does_can_workspace_exist_on_ads(output_workspace_count)
+                    ):
                         name = self._get_output_workspace_name(output_bundle_part.state, output_bundle_part.reduction_mode)
                         count_name = name + "_hab_can_count"
                         norm_name = name + "_hab_can_norm"
@@ -360,8 +394,10 @@ class SANSSingleReduction(SANSSingleReductionBase):
                             workspace_group_hab_can_count.addWorkspace(output_workspace_count)
                             workspace_group_hab_can_norm.addWorkspace(output_workspace_norm)
                         else:
-                            raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
-                                               " be set with a partial can.".format(reduction_mode))
+                            raise RuntimeError(
+                                "SANSSingleReduction: The reduction mode {0} should not"
+                                " be set with a partial can.".format(reduction_mode)
+                            )
         if workspace_group_lab_can_count.size() > 0:
             self.setProperty("OutputWorkspaceLABCanCount", workspace_group_lab_can_count)
         if workspace_group_lab_can_norm.size() > 0:
@@ -394,31 +430,31 @@ class SANSSingleReduction(SANSSingleReductionBase):
                     output_workspace = output_bundle.output_workspace
 
                     if output_workspace is not None and not does_can_workspace_exist_on_ads(output_workspace):
-                        can_name = self._get_output_workspace_name(output_bundle.state, output_bundle.reduction_mode,
-                                                                   can=True)
+                        can_name = self._get_output_workspace_name(output_bundle.state, output_bundle.reduction_mode, can=True)
                         AnalysisDataService.addOrReplace(can_name, output_workspace)
                         if reduction_mode is ReductionMode.LAB:
                             workspace_group_lab_can.addWorkspace(output_workspace)
                         elif reduction_mode is ReductionMode.HAB:
                             workspace_group_hab_can.addWorkspace(output_workspace)
                         else:
-                            raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
-                                               " be set with a can.".format(reduction_mode))
+                            raise RuntimeError(
+                                "SANSSingleReduction: The reduction mode {0} should not" " be set with a can.".format(reduction_mode)
+                            )
                 elif output_bundle.data_type is DataType.SAMPLE:
                     reduction_mode = output_bundle.reduction_mode
                     output_workspace = output_bundle.output_workspace
 
                     if output_workspace is not None:
-                        sample_name = self._get_output_workspace_name(output_bundle.state, output_bundle.reduction_mode,
-                                                                      sample=True)
+                        sample_name = self._get_output_workspace_name(output_bundle.state, output_bundle.reduction_mode, sample=True)
                         AnalysisDataService.addOrReplace(sample_name, output_workspace)
                         if reduction_mode is ReductionMode.LAB:
                             workspace_group_lab_sample.addWorkspace(output_workspace)
                         elif reduction_mode is ReductionMode.HAB:
                             workspace_group_hab_sample.addWorkspace(output_workspace)
                         else:
-                            raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
-                                               " be set with a sample.".format(reduction_mode))
+                            raise RuntimeError(
+                                "SANSSingleReduction: The reduction mode {0} should not" " be set with a sample.".format(reduction_mode)
+                            )
 
         if workspace_group_hab_can.size() > 0:
             self.setProperty("OutputWorkspaceHABCan", workspace_group_hab_can)
@@ -438,8 +474,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
                 if does_can_workspace_exist_on_ads(calculated_transmission_workspace):
                     # The workspace is cloned here because the transmission runs are diagnostic output so even though
                     # the values already exist they need to be labelled seperately for each reduction.
-                    calculated_transmission_workspace = CloneWorkspace(calculated_transmission_workspace,
-                                                                       StoreInADS=False)
+                    calculated_transmission_workspace = CloneWorkspace(calculated_transmission_workspace, StoreInADS=False)
                 if does_can_workspace_exist_on_ads(unfitted_transmission_workspace):
                     unfitted_transmission_workspace = CloneWorkspace(unfitted_transmission_workspace, StoreInADS=False)
                 if fit_performed:
@@ -450,8 +485,9 @@ class SANSSingleReduction(SANSSingleReductionBase):
                     self.setProperty("OutputWorkspaceCalculatedTransmission", calculated_transmission_workspace)
                 self.setProperty("OutputWorkspaceUnfittedTransmission", unfitted_transmission_workspace)
             else:
-                raise RuntimeError("SANSSingleReduction: The data type {0} should be"
-                                   " sample or can.".format(transmission_bundle.data_type))
+                raise RuntimeError(
+                    "SANSSingleReduction: The data type {0} should be" " sample or can.".format(transmission_bundle.data_type)
+                )
 
     def _get_workspace_names(self, reduction_mode_vs_workspace_names, output_bundle):
         output_workspace_names = self._get_final_workspace_names(output_bundle)
@@ -469,9 +505,14 @@ class SANSSingleReduction(SANSSingleReductionBase):
         final_output_workspace_names = {}
         for reduction_mode, output_bundles in reduction_mode_vs_output_bundles.items():
             # Find the sample in the data collection
-            state, reduction_mode = next(((output_bundle.state, output_bundle.reduction_mode)
-                                          for output_bundle in output_bundles
-                                          if output_bundle.data_type == DataType.SAMPLE), None)
+            state, reduction_mode = next(
+                (
+                    (output_bundle.state, output_bundle.reduction_mode)
+                    for output_bundle in output_bundles
+                    if output_bundle.data_type == DataType.SAMPLE
+                ),
+                None,
+            )
 
             # Get the workspace name
             name = self._get_output_workspace_name(state, reduction_mode=reduction_mode)
@@ -481,15 +522,16 @@ class SANSSingleReduction(SANSSingleReductionBase):
 
     def _get_merged_workspace_name(self, output_parts_bundle):
         """This method gets the output workspace names for a merged bundle. This only occurs
-         if the reduction mode is Merged.
-         :param output_parts_bundle: a list of OutputBundles containing workspaces for a single event slice.
-         :return: a workspace name
-         """
+        if the reduction mode is Merged.
+        :param output_parts_bundle: a list of OutputBundles containing workspaces for a single event slice.
+        :return: a workspace name
+        """
         state = output_parts_bundle[0].state
         return self._get_output_workspace_name(state, reduction_mode=ReductionMode.MERGED)
 
-    def _get_output_workspace_name(self, state, reduction_mode=None, data_type=None,
-                                   can=False, sample=False, transmission=False, fitted=False):
+    def _get_output_workspace_name(
+        self, state, reduction_mode=None, data_type=None, can=False, sample=False, transmission=False, fitted=False
+    ):
         """
         Get the output names for the sliced workspaces (within the group workspaces, which are already named).
 
@@ -503,9 +545,11 @@ class SANSSingleReduction(SANSSingleReductionBase):
         :param fitted: optional bool. If true then workspace is a fitted transmission workspace, otherwise unfitted
         :return: name of the workspace
         """
-        _multi = {"event_slice": True,
-                  "period": self.getProperty("Period").value,
-                  "wavelength_range": self.getProperty("WavelengthRange").value}
+        _multi = {
+            "event_slice": True,
+            "period": self.getProperty("Period").value,
+            "wavelength_range": self.getProperty("WavelengthRange").value,
+        }
 
         if not transmission:
             _suffix = ""

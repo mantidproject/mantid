@@ -36,16 +36,17 @@ class SliceInfo:
         axes_angles: matrix of angles between Q axes
     """
 
-    def __init__(self,
-                 *,
-                 point: SlicePointType,
-                 transpose: bool,
-                 range: DimensionRangeCollection,
-                 qflags: Sequence[bool],
-                 axes_angles: Optional[np.ndarray] = None):
+    def __init__(
+        self,
+        *,
+        point: SlicePointType,
+        transpose: bool,
+        range: DimensionRangeCollection,
+        qflags: Sequence[bool],
+        axes_angles: Optional[np.ndarray] = None
+    ):
         assert len(point) == len(qflags)
-        assert 3 >= sum(1 for i in filter(
-            lambda x: x is True, qflags)), "A maximum of 3 spatial dimensions can be specified"
+        assert 3 >= sum(1 for i in filter(lambda x: x is True, qflags)), "A maximum of 3 spatial dimensions can be specified"
         self.slicepoint = point
         self.range = range
         self._slicevalue_z, self._slicewidth_z = (None,) * 2
@@ -148,7 +149,7 @@ class SliceInfo:
             ix = self.adjust_index_for_preceding_nonq_dims(self._display_x)
             iy = self.adjust_index_for_preceding_nonq_dims(self._display_y)
             angle = axes_angles[ix, iy]
-            if abs(angle-(np.pi/2)) < 1e-5:
+            if abs(angle - (np.pi / 2)) < 1e-5:
                 self._transform = OrthogonalTransform()  # use OrthogonalTransform for performance
             else:
                 self._transform = NonOrthogonalTransform(axes_angles[ix, iy])

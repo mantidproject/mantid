@@ -9,7 +9,7 @@ import unittest
 from unittest import mock
 from unittest.mock import patch
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focus import model, view, presenter
-from Engineering.common.calibration_info  import CalibrationInfo
+from Engineering.common.calibration_info import CalibrationInfo
 
 tab_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focus"
 
@@ -86,19 +86,15 @@ class FocusPresenterTest(unittest.TestCase):
         self.view.is_searching.return_value = False
 
         self.assertFalse(self.presenter._validate())
-        create_error.assert_called_with(
-            self.presenter.view,
-            "Create or Load a calibration via the Calibration tab before focusing.")
+        create_error.assert_called_with(self.presenter.view, "Create or Load a calibration via the Calibration tab before focusing.")
 
     @patch(tab_path + ".presenter.create_error_message")
     def test_validate_while_searching(self, create_error):
         self.view.is_searching.return_value = True
 
         self.assertFalse(self.presenter._validate())
-        create_error.assert_called_with(
-            self.presenter.view,
-            "Mantid is searching for data files. Please wait.")
+        create_error.assert_called_with(self.presenter.view, "Mantid is searching for data files. Please wait.")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

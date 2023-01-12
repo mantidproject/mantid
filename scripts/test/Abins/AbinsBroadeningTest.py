@@ -26,8 +26,7 @@ class BroadeningTest(unittest.TestCase):
         self.assertLess(max(diff), 1e-8)
 
         sigma, offset = 1.5, 4
-        diff = np.abs(spnorm.pdf((x - offset) / sigma) / (sigma)
-                      - broadening.gaussian(sigma=sigma, points=x, center=offset))
+        diff = np.abs(spnorm.pdf((x - offset) / sigma) / (sigma) - broadening.gaussian(sigma=sigma, points=x, center=offset))
         self.assertLess(max(diff), 1e-8)
 
     def test_mesh_gaussian_value(self):
@@ -35,24 +34,25 @@ class BroadeningTest(unittest.TestCase):
         # Numerical values were not checked against an external reference
         # so they are only useful for detecting if the results have _changed_.
 
-        self.assertEqual(broadening.mesh_gaussian(sigma=5, points=[], center=1).shape,
-                         (0,))
+        self.assertEqual(broadening.mesh_gaussian(sigma=5, points=[], center=1).shape, (0,))
 
-        zero_result = broadening.mesh_gaussian(sigma=np.array([[5]]),
-                                               points=np.array([0, ]),
-                                               center=np.array([[3]]))
+        zero_result = broadening.mesh_gaussian(
+            sigma=np.array([[5]]),
+            points=np.array(
+                [
+                    0,
+                ]
+            ),
+            center=np.array([[3]]),
+        )
         self.assertEqual(zero_result.shape, (1, 1))
         self.assertFalse(zero_result.any())
 
-        assert_array_almost_equal(broadening.mesh_gaussian(sigma=2,
-                                                           points=np.array([0, 1]),
-                                                           center=0),
-                                  np.array([0.199471, 0.176033]))
-        assert_array_almost_equal(broadening.mesh_gaussian(sigma=np.array([[2], [2]]),
-                                                           points=np.array([0, 1, 2]),
-                                                           center=np.array([[0], [1]])),
-                                  np.array([[0.199471, 0.176033, 0.120985],
-                                            [0.176033, 0.199471, 0.176033]]))
+        assert_array_almost_equal(broadening.mesh_gaussian(sigma=2, points=np.array([0, 1]), center=0), np.array([0.199471, 0.176033]))
+        assert_array_almost_equal(
+            broadening.mesh_gaussian(sigma=np.array([[2], [2]]), points=np.array([0, 1, 2]), center=np.array([[0], [1]])),
+            np.array([[0.199471, 0.176033, 0.120985], [0.176033, 0.199471, 0.176033]]),
+        )
 
     def test_mesh_gaussian_sum(self):
         """Check sum of mesh_gaussian is correctly adapted to bin width"""
@@ -86,35 +86,28 @@ class BroadeningTest(unittest.TestCase):
         s_dft = np.zeros(npts)
         s_dft[npts // 2] = 2
 
-        schemes = ['gaussian', 'gaussian_truncated',
-                   'normal', 'normal_truncated',
-                   'interpolate']
+        schemes = ["gaussian", "gaussian_truncated", "normal", "normal_truncated", "interpolate"]
 
         results = {}
         for scheme in schemes:
-            _, results[scheme] = broadening.broaden_spectrum(
-                freq_points, bins, s_dft, sigma, scheme)
+            _, results[scheme] = broadening.broaden_spectrum(freq_points, bins, s_dft, sigma, scheme)
 
         for scheme in schemes:
             # Interpolate scheme is approximate so just check a couple of sig.fig.
-            if scheme == 'interpolate':
+            if scheme == "interpolate":
                 places = 3
             else:
                 places = 6
-            self.assertAlmostEqual(results[scheme][(npts // 2) + 20],
-                                   0.01257,
-                                   places=places)
+            self.assertAlmostEqual(results[scheme][(npts // 2) + 20], 0.01257, places=places)
 
     def test_out_of_bounds(self):
         """Check schemes allowing arbitrary placement can handle data beyond bins"""
-        frequencies = np.array([2000.])
+        frequencies = np.array([2000.0])
         bins = np.linspace(0, 100, 100)
-        s_dft = np.array([1.])
-        sigma = np.array([3.])
+        s_dft = np.array([1.0])
+        sigma = np.array([3.0])
 
-        schemes = ['none',
-                   'gaussian', 'gaussian_truncated',
-                   'normal', 'normal_truncated']
+        schemes = ["none", "gaussian", "gaussian_truncated", "normal", "normal_truncated"]
 
         for scheme in schemes:
             broadening.broaden_spectrum(frequencies, bins, s_dft, sigma, scheme=scheme)
@@ -137,34 +130,32 @@ class BroadeningTest(unittest.TestCase):
         pre_broadening_total = sum(s_dft)
 
         # Full Gaussian should reproduce null total
-        for scheme in ('none', 'gaussian'):
-            freq_points, spectrum = broadening.broaden_spectrum(
-                frequencies, bins, s_dft, sigma, scheme=scheme)
-            self.assertAlmostEqual(sum(spectrum),
-                                   pre_broadening_total, )
+        for scheme in ("none", "gaussian"):
+            freq_points, spectrum = broadening.broaden_spectrum(frequencies, bins, s_dft, sigma, scheme=scheme)
+            self.assertAlmostEqual(
+                sum(spectrum),
+                pre_broadening_total,
+            )
 
         # Normal scheme reproduces area as well as total;
-        freq_points, full_spectrum = broadening.broaden_spectrum(
-            frequencies, bins, s_dft, sigma, scheme='normal')
-        self.assertAlmostEqual(np.trapz(spectrum, x=freq_points),
-                               pre_broadening_total * (bins[1] - bins[0]), )
+        freq_points, full_spectrum = broadening.broaden_spectrum(frequencies, bins, s_dft, sigma, scheme="normal")
+        self.assertAlmostEqual(
+            np.trapz(spectrum, x=freq_points),
+            pre_broadening_total * (bins[1] - bins[0]),
+        )
         self.assertAlmostEqual(sum(spectrum), pre_broadening_total)
 
         # truncated forms will be a little off but shouldn't be _too_ off
-        for scheme in ('gaussian_truncated', 'normal_truncated'):
-            freq_points, trunc_spectrum = broadening.broaden_spectrum(
-                frequencies, bins, s_dft, sigma, scheme)
-            self.assertLess(abs(sum(full_spectrum) - sum(trunc_spectrum)) / sum(full_spectrum),
-                            0.03)
+        for scheme in ("gaussian_truncated", "normal_truncated"):
+            freq_points, trunc_spectrum = broadening.broaden_spectrum(frequencies, bins, s_dft, sigma, scheme)
+            self.assertLess(abs(sum(full_spectrum) - sum(trunc_spectrum)) / sum(full_spectrum), 0.03)
 
         # Interpolated methods need histogram input and smooth sigma
         hist_spec, _ = np.histogram(frequencies, bins, weights=s_dft)
         hist_sigma = sigma_func(freq_points)
-        freq_points, interp_spectrum = broadening.broaden_spectrum(
-            freq_points, bins, hist_spec, hist_sigma, scheme='interpolate')
-        self.assertLess(abs(sum(interp_spectrum) - pre_broadening_total) / pre_broadening_total,
-                        0.05)
+        freq_points, interp_spectrum = broadening.broaden_spectrum(freq_points, bins, hist_spec, hist_sigma, scheme="interpolate")
+        self.assertLess(abs(sum(interp_spectrum) - pre_broadening_total) / pre_broadening_total, 0.05)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

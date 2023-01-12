@@ -7,22 +7,20 @@
 
 import unittest
 
-from mantidqtinterfaces.dns_powder_tof.data_structures.dns_obs_model import \
-    DNSObsModel
+from mantidqtinterfaces.dns_powder_tof.data_structures.dns_obs_model import DNSObsModel
 
 
 class DNSObsModelTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
-        cls.parent = 'test'
+        cls.parent = "test"
         cls.model = DNSObsModel(parent=cls.parent)
 
     def test___init__(self):
         self.assertIsInstance(self.model, object)
         self.assertIsInstance(self.model, DNSObsModel)
-        self.assertEqual(self.model.parent, 'test')
+        self.assertEqual(self.model.parent, "test")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

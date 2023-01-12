@@ -19,27 +19,21 @@ class ImageIntensity(Enum):
 
 
 class MantidImage(mimage.AxesImage):
-    def __init__(self,
-                 ax,
-                 cmap=None,
-                 norm=None,
-                 interpolation=None,
-                 origin=None,
-                 extent=None,
-                 filternorm=1,
-                 filterrad=4.0,
-                 resample=False,
-                 **kwargs):
-        super().__init__(ax,
-                         cmap=cmap,
-                         norm=norm,
-                         interpolation=interpolation,
-                         origin=origin,
-                         extent=extent,
-                         filternorm=filternorm,
-                         filterrad=filterrad,
-                         resample=resample,
-                         **kwargs)
+    def __init__(
+        self, ax, cmap=None, norm=None, interpolation=None, origin=None, extent=None, filternorm=1, filterrad=4.0, resample=False, **kwargs
+    ):
+        super().__init__(
+            ax,
+            cmap=cmap,
+            norm=norm,
+            interpolation=interpolation,
+            origin=origin,
+            extent=extent,
+            filternorm=filternorm,
+            filterrad=filterrad,
+            resample=resample,
+            **kwargs
+        )
 
     def calculate_greyscale_intensity(self) -> ImageIntensity:
         """

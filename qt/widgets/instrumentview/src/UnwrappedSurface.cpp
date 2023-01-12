@@ -322,6 +322,17 @@ void UnwrappedSurface::getMaskedDetectors(std::vector<size_t> &detIndices) const
   }
 }
 
+void UnwrappedSurface::getIntersectingDetectors(std::vector<size_t> &detIndices) const {
+  detIndices.clear();
+  if (m_maskShapes.isEmpty())
+    return;
+  for (const auto &udet : m_unwrappedDetectors) {
+    if (!udet.empty() && m_maskShapes.isIntersecting(udet.toQRectF())) {
+      detIndices.emplace_back(udet.detIndex);
+    }
+  }
+}
+
 void UnwrappedSurface::changeColorMap() {
   for (auto &udet : m_unwrappedDetectors) {
     udet.color = m_instrActor->getColor(udet.detIndex);

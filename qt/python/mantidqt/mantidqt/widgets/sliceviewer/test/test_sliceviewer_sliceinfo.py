@@ -75,13 +75,18 @@ class SliceInfoTest(unittest.TestCase):
         angles[0, 1] = radians(60)
         angles[1, 0] = radians(60)
         # dims: E,H,K,L - viewing (X,Y) = (K,H) with H,K non-orthog (angle=60 deg)
-        info = make_sliceinfo(point=(0., None, None, -1.), dimrange=[(-1., 1.), None, None, (-2., 2.)],
-                              qflags=(False, True, True, True), axes_angles=angles, transpose=True)
-        slice_pt = -1.
+        info = make_sliceinfo(
+            point=(0.0, None, None, -1.0),
+            dimrange=[(-1.0, 1.0), None, None, (-2.0, 2.0)],
+            qflags=(False, True, True, True),
+            axes_angles=angles,
+            transpose=True,
+        )
+        slice_pt = -1.0
         frame_point = (2.0, 0.0, slice_pt)
         slice_frame = info.transform(frame_point)
         self.assertAlmostEqual(slice_frame[0], 1.0, delta=1e-6)
-        self.assertAlmostEqual(slice_frame[1], 2*sin(angles[0, 1]), delta=1e-6)
+        self.assertAlmostEqual(slice_frame[1], 2 * sin(angles[0, 1]), delta=1e-6)
         self.assertAlmostEqual(slice_frame[2], slice_pt, delta=1e-6)
         self.assertEqual(slice_pt, info.z_value)
 
@@ -112,10 +117,11 @@ class SliceInfoTest(unittest.TestCase):
         self.assertEqual(slice_pt, info.z_value)
 
     def test_inverse_transform_preceding_nonQdim_4D_MD_ws(self):
-        info = make_sliceinfo(point=(0., None, None, -1.), dimrange=[(-1., 1.), None, None, (-2., 2.)],
-                              qflags=(False, True, True,True), transpose=True) # dims: E,H,K,L - viewing (X,Y) = (K,H)
-        slice_pt = -1.
-        frame_point = (1., 2., slice_pt)
+        info = make_sliceinfo(
+            point=(0.0, None, None, -1.0), dimrange=[(-1.0, 1.0), None, None, (-2.0, 2.0)], qflags=(False, True, True, True), transpose=True
+        )  # dims: E,H,K,L - viewing (X,Y) = (K,H)
+        slice_pt = -1.0
+        frame_point = (1.0, 2.0, slice_pt)
         slice_frame = info.inverse_transform(frame_point)
         self.assertAlmostEqual(slice_frame[0], 2.0, delta=1e-6)
         self.assertAlmostEqual(slice_frame[1], 1.0, delta=1e-6)
@@ -127,10 +133,15 @@ class SliceInfoTest(unittest.TestCase):
         angles[0, 1] = radians(60)
         angles[1, 0] = radians(60)
         # dims: E,H,K,L - viewing (X,Y) = (K,H) with H,K non-orthog (angle=60 deg)
-        info = make_sliceinfo(point=(0., None, None, -1.), dimrange=[(-1., 1.), None, None, (-2., 2.)],
-                              qflags=(False, True, True, True), axes_angles=angles, transpose=True)
-        slice_pt = -1.
-        frame_point = (1., 2*sin(angles[0, 1]), slice_pt)
+        info = make_sliceinfo(
+            point=(0.0, None, None, -1.0),
+            dimrange=[(-1.0, 1.0), None, None, (-2.0, 2.0)],
+            qflags=(False, True, True, True),
+            axes_angles=angles,
+            transpose=True,
+        )
+        slice_pt = -1.0
+        frame_point = (1.0, 2 * sin(angles[0, 1]), slice_pt)
         slice_frame = info.inverse_transform(frame_point)
         self.assertAlmostEqual(slice_frame[0], 2.0, delta=1e-6)
         self.assertAlmostEqual(slice_frame[1], 0.0, delta=1e-6)
@@ -144,13 +155,19 @@ class SliceInfoTest(unittest.TestCase):
             point=(1, None, None, 4),
             transpose=True,
             range=[(-15, 15), None, None, (-5, -5)],
-            qflags=(True, True, True, True))
+            qflags=(True, True, True, True),
+        )
 
 
-def make_sliceinfo(point=(None, None, 0.5), transpose=False, dimrange=(None, None, (-15, 15)),
-                   qflags=[True, True, True], axes_angles=full((3, 3), radians(90))):
+def make_sliceinfo(
+    point=(None, None, 0.5),
+    transpose=False,
+    dimrange=(None, None, (-15, 15)),
+    qflags=[True, True, True],
+    axes_angles=full((3, 3), radians(90)),
+):
     return SliceInfo(point=point, transpose=transpose, range=dimrange, qflags=qflags, axes_angles=axes_angles)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

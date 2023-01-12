@@ -25,17 +25,15 @@ class SpectraSelectionUtilsTest(unittest.TestCase):
     def setUp(self):
         # patch away getting a real icon as it can hit a race condition when running tests
         # in parallel
-        patcher = mock.patch('mantidqt.dialogs.spectraselectordialog.get_icon')
+        patcher = mock.patch("mantidqt.dialogs.spectraselectordialog.get_icon")
         self._mock_get_icon = patcher.start()
         self._mock_get_icon.return_value = QIcon()
         self.addCleanup(patcher.stop)
         if self._single_spec_ws is None:
-            self.__class__._single_spec_ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=1,
-                                                                                XLength=1, YLength=1)
-            self.__class__._multi_spec_ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=200,
-                                                                               XLength=1, YLength=1)
+            self.__class__._single_spec_ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=1, XLength=1, YLength=1)
+            self.__class__._multi_spec_ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=200, XLength=1, YLength=1)
 
-    @mock.patch('mantidqt.dialogs.spectraselectorutils.SpectraSelectionDialog', autospec=True)
+    @mock.patch("mantidqt.dialogs.spectraselectorutils.SpectraSelectionDialog", autospec=True)
     def test_get_spectra_selection_cancelled_returns_None(self, mock_SpectraSelectionDialog):
         # a new instance of the mock created inside get_user_action_and_selection will return
         # dialog_mock
@@ -51,7 +49,7 @@ class SpectraSelectionUtilsTest(unittest.TestCase):
         mock_SpectraSelectionDialog.exec_.assert_called_once_with()
         self.assertTrue(selection is None)
 
-    @mock.patch('mantidqt.dialogs.spectraselectorutils.SpectraSelectionDialog')
+    @mock.patch("mantidqt.dialogs.spectraselectorutils.SpectraSelectionDialog")
     def test_get_spectra_selection_does_not_use_dialog_for_single_spectrum(self, dialog_mock):
         dialog_mock.get_compatible_workspaces.return_value = [self._single_spec_ws]
         selection = get_spectra_selection([self._single_spec_ws])
@@ -60,7 +58,7 @@ class SpectraSelectionUtilsTest(unittest.TestCase):
         self.assertEqual([0], selection.wksp_indices)
         self.assertEqual([self._single_spec_ws], selection.workspaces)
 
-    @mock.patch('mantidqt.dialogs.spectraselectorutils.SpectraSelectionDialog')
+    @mock.patch("mantidqt.dialogs.spectraselectorutils.SpectraSelectionDialog")
     def test_get_spectra_selection_does_not_use_dialog_for_multiple__single_spectrum(self, dialog_mock):
         spectra_1 = ExtractSpectra(InputWorkspace=self._multi_spec_ws, StartWorkspaceIndex=0, EndWorkspaceIndex=0)
         spectra_2 = ExtractSpectra(InputWorkspace=self._multi_spec_ws, StartWorkspaceIndex=1, EndWorkspaceIndex=1)
@@ -72,5 +70,5 @@ class SpectraSelectionUtilsTest(unittest.TestCase):
         self.assertEqual([spectra_1, spectra_2], selection.workspaces)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

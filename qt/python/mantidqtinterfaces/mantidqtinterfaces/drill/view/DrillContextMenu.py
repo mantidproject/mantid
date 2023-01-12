@@ -16,6 +16,7 @@ class DrillContextMenu(QMenu):
     """
     DrillContextMenuPresenter
     """
+
     _presenter = None
 
     """
@@ -83,13 +84,10 @@ class DrillContextMenu(QMenu):
         """
         for column in allColumns:
             if column in hiddenColumns:
-                action = self._colMenu.addAction(icons.get_icon("mdi.close"),
-                                                 column)
+                action = self._colMenu.addAction(icons.get_icon("mdi.close"), column)
             else:
-                action = self._colMenu.addAction(icons.get_icon("mdi.check"),
-                                                 column)
-            action.triggered.connect(lambda _, c=column:
-                                     self.toogleColumnVisibility.emit(c))
+                action = self._colMenu.addAction(icons.get_icon("mdi.check"), column)
+            action.triggered.connect(lambda _, c=column: self.toogleColumnVisibility.emit(c))
 
     def setGroups(self, groups):
         """
@@ -100,8 +98,7 @@ class DrillContextMenu(QMenu):
         """
         for group in groups:
             action = self._groupMenu.addAction(group)
-            action.triggered.connect(lambda _, g=group:
-                                     self.addToGroup.emit(g))
+            action.triggered.connect(lambda _, g=group: self.addToGroup.emit(g))
 
     def show(self):
         """

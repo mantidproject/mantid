@@ -30,6 +30,7 @@ class DrillModel(QObject):
     """
     Data directory on Linux.
     """
+
     LINUX_BASE_DATA_PATH = "/net4/serdon/illdata/"
 
     """
@@ -146,18 +147,17 @@ class DrillModel(QObject):
         self.exportModel = None
 
         # When the user changes the facility after DrILL has been started
-        if config['default.facility'] != 'ILL':
-            logger.error('Drill is enabled only if the facility is set to ILL.')
+        if config["default.facility"] != "ILL":
+            logger.error("Drill is enabled only if the facility is set to ILL.")
             return
 
-        if (instrument in RundexSettings.ACQUISITION_MODES):
-            config['default.instrument'] = instrument
+        if instrument in RundexSettings.ACQUISITION_MODES:
+            config["default.instrument"] = instrument
             self.instrument = instrument
             self.setAcquisitionMode(RundexSettings.ACQUISITION_MODES[instrument][0])
         else:
             if log:
-                logger.error('Instrument {0} is not supported yet.'
-                             .format(instrument))
+                logger.error("Instrument {0} is not supported yet.".format(instrument))
 
     def getInstrument(self):
         """
@@ -177,9 +177,7 @@ class DrillModel(QObject):
         Args:
             mode (str): aquisition mode name
         """
-        if ((self.instrument is None)
-                or (mode not in RundexSettings.ACQUISITION_MODES[
-                    self.instrument])):
+        if (self.instrument is None) or (mode not in RundexSettings.ACQUISITION_MODES[self.instrument]):
             return
         self._samples = list()
         self._sampleGroups = dict()
@@ -211,7 +209,7 @@ class DrillModel(QObject):
         """
         Get the list of acquisition mode available for the current instrument.
         """
-        if (self.instrument is None):
+        if self.instrument is None:
             return list()
         return RundexSettings.ACQUISITION_MODES[self.instrument]
 
@@ -250,25 +248,22 @@ class DrillModel(QObject):
             return
 
         # data
-        dataDir = os.path.join(baseDir, "{0}/{1}/{2}"
-                                        .format(cycle,
-                                                self.instrument.lower(),
-                                                experiment))
+        dataDir = os.path.join(baseDir, "{0}/{1}/{2}".format(cycle, self.instrument.lower(), experiment))
         rawDataDir = os.path.join(dataDir, self.RAW_DATA_DIR)
         processedDataDir = os.path.join(dataDir, self.PROCESSED_DATA_DIR)
         if not os.path.isdir(dataDir):
-            logger.warning("Cycle number and experiment ID do not lead to a "
-                           "valid directory in the usual data directory ({0}): "
-                           "{1} does not exist."
-                           .format(baseDir, dataDir))
+            logger.warning(
+                "Cycle number and experiment ID do not lead to a "
+                "valid directory in the usual data directory ({0}): "
+                "{1} does not exist.".format(baseDir, dataDir)
+            )
             return
 
         # add in user directories if needed
         userDirs = ConfigService.getDataSearchDirs()
-        if ((os.path.isdir(rawDataDir)) and (rawDataDir not in userDirs)):
+        if (os.path.isdir(rawDataDir)) and (rawDataDir not in userDirs):
             ConfigService.appendDataSearchDir(rawDataDir)
-        if ((os.path.isdir(processedDataDir))
-                and (processedDataDir not in userDirs)):
+        if (os.path.isdir(processedDataDir)) and (processedDataDir not in userDirs):
             ConfigService.appendDataSearchDir(processedDataDir)
 
     def getCycleAndExperiment(self):
@@ -333,6 +328,7 @@ class DrillModel(QObject):
             sampleIndexes (list(int)): sample indexes
             groupName (str): optional name for the new group
         """
+
         def incrementName(name):
             """
             Increment the group name from A to Z, AA to AZ, ...
@@ -341,15 +337,15 @@ class DrillModel(QObject):
                 name (str): group name
             """
             name = list(name)
-            if name[-1] == 'Z':
-                name[-1] = 'A'
-                name += 'A'
+            if name[-1] == "Z":
+                name[-1] = "A"
+                name += "A"
             else:
                 name[-1] = chr(ord(name[-1]) + 1)
-            return ''.join(name)
+            return "".join(name)
 
         if not groupName:
-            groupName = 'A'
+            groupName = "A"
             while groupName in self._sampleGroups:
                 groupName = incrementName(groupName)
 
@@ -479,7 +475,7 @@ class DrillModel(QObject):
                 for name, value in sParameters.items():
                     if name in RundexSettings.GROUPED_COLUMNS[self.acquisitionMode]:
                         if name in processingParams:
-                            processingParams[name] += ("," + str(value))
+                            processingParams[name] += "," + str(value)
                         else:
                             processingParams[name] = str(value)
                     elif sample == master:
@@ -545,8 +541,7 @@ class DrillModel(QObject):
                 continue
             group = self._samples[e].getGroup()
             if group is not None:
-                sampleIndexes += [sample.getIndex()
-                                  for sample in group.getSamples()]
+                sampleIndexes += [sample.getIndex() for sample in group.getSamples()]
         return self.process(sampleIndexes)
 
     def _onProcessingProgress(self, progress):
@@ -616,7 +611,7 @@ class DrillModel(QObject):
             vs (dict(str:str)): visual settings
         """
         if vs:
-            self.visualSettings = {k:v for k,v in vs.items()}
+            self.visualSettings = {k: v for k, v in vs.items()}
         else:
             self.visualSettings = dict()
 
@@ -627,7 +622,7 @@ class DrillModel(QObject):
         Returns:
             dict: visual settings that the view understands
         """
-        return {k:v for k,v in self.visualSettings.items()}
+        return {k: v for k, v in self.visualSettings.items()}
 
     def addSample(self, index):
         """

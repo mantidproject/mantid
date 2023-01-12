@@ -14,6 +14,7 @@ class DrillSamplePresenter:
     """
     Reference to the dril table.
     """
+
     _table = None
 
     """
@@ -58,15 +59,12 @@ class DrillSamplePresenter:
         Args:
             parameter (Drillparameter): the new parameter
         """
-        item = self._table.itemFromName(self._sample.getIndex(),
-                                        parameter.getName())
+        item = self._table.itemFromName(self._sample.getIndex(), parameter.getName())
         if item is None:
-            item = self._table.itemFromName(self._sample.getIndex(),
-                                            self.CUSTOM_OPTIONS)
+            item = self._table.itemFromName(self._sample.getIndex(), self.CUSTOM_OPTIONS)
             presenter = item.getPresenter()
             if presenter is None:
-                presenter = DrillParametersPresenter(self._table, item,
-                                                     self._sample)
+                presenter = DrillParametersPresenter(self._table, item, self._sample)
             presenter.addParameter(parameter.getName())
         else:
             DrillParameterPresenter(item, self._sample, parameter)
@@ -81,10 +79,9 @@ class DrillSamplePresenter:
             self._table.delRowLabel(index)
         else:
             groupName = group.getName()
-            isMaster = (group.getMaster() == self._sample)
+            isMaster = group.getMaster() == self._sample
             groupIndex = group.getSampleIndex(self._sample)
-            self._table.setRowLabel(index, groupName + str(groupIndex + 1),
-                                    bold=isMaster)
+            self._table.setRowLabel(index, groupName + str(groupIndex + 1), bold=isMaster)
         self._table.setWindowModified(True)
 
     def onStatusChanged(self):

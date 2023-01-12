@@ -19,10 +19,8 @@ class AxisChangerTwoViewTest(unittest.TestCase):
         self.view = AxisChangerView(label)
         self.test_bounds = ["10", "20"]
 
-        self.view.lower_bound.text = mock.Mock(
-            return_value=self.test_bounds[0])
-        self.view.upper_bound.text = mock.Mock(
-            return_value=self.test_bounds[1])
+        self.view.lower_bound.text = mock.Mock(return_value=self.test_bounds[0])
+        self.view.upper_bound.text = mock.Mock(return_value=self.test_bounds[1])
 
         self.view.lower_bound.setText = mock.Mock()
         self.view.upper_bound.setText = mock.Mock()
@@ -38,9 +36,7 @@ class AxisChangerTwoViewTest(unittest.TestCase):
         self.slot = mock.Mock()
 
     def test_get_bounds(self):
-        self.assertEqual(
-            self.view.get_bounds(), [
-                int(bound) for bound in self.test_bounds])
+        self.assertEqual(self.view.get_bounds(), [int(bound) for bound in self.test_bounds])
 
     def test_set_bounds(self):
         self.view.set_bounds(self.test_bounds)
@@ -54,8 +50,7 @@ class AxisChangerTwoViewTest(unittest.TestCase):
 
     def test_bound_changed(self):
         self.view._bound_changed()
-        self.view.sig_bound_changed.emit.assert_called_with(
-            list(self.view.get_bounds()))
+        self.view.sig_bound_changed.emit.assert_called_with(list(self.view.get_bounds()))
 
     def test_on_bound_changed(self):
         self.view.on_bound_changed(self.slot)
@@ -63,8 +58,7 @@ class AxisChangerTwoViewTest(unittest.TestCase):
 
     def test_unreg_on_bound_changed(self):
         self.view.unreg_bound_changed(self.slot)
-        self.view.sig_bound_changed.disconnect.assert_called_with(
-            self.slot)
+        self.view.sig_bound_changed.disconnect.assert_called_with(self.slot)
 
 
 if __name__ == "__main__":

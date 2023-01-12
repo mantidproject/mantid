@@ -14,7 +14,6 @@ from mantidqt.project.project import Project
 
 
 class SaveProjectDialogTest(unittest.TestCase):
-
     def setUp(self):
         self.project = Project(Mock(), Mock())
         self.project.save_as = Mock()
@@ -44,4 +43,4 @@ class SaveProjectDialogTest(unittest.TestCase):
 
         self.presenter.save_as()
 
-        self.assertEqual(self.mock_conf.get('project/save_altered_workspaces_only', type=bool), True)
+        self.assertEqual(self.mock_conf.get("project/save_altered_workspaces_only", type=bool), True)

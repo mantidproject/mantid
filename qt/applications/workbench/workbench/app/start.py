@@ -26,6 +26,7 @@ plugins.setup_library_paths()
 from qtpy.QtGui import QIcon  # noqa
 from qtpy.QtWidgets import QApplication  # noqa
 from qtpy.QtCore import QCoreApplication, Qt  # noqa
+
 # Importing resources loads the data in. This must be imported before the
 # QApplication is created or paths to Qt's resources will not be set up correctly
 from workbench.app.resources import qCleanupResources  # noqa
@@ -38,7 +39,7 @@ SYSCHECK_INTERVAL = 50
 ORIGINAL_SYS_EXIT = sys.exit
 ORIGINAL_STDOUT = sys.stdout
 ORIGINAL_STDERR = sys.stderr
-STACKTRACE_FILE = 'workbench_stacktrace.txt'
+STACKTRACE_FILE = "workbench_stacktrace.txt"
 
 
 def qapplication():
@@ -71,7 +72,7 @@ def qapplication():
         UsageService.setApplicationName(APPNAME)
 
         app.setAttribute(Qt.AA_UseHighDpiPixmaps)
-        if hasattr(Qt, 'AA_DisableWindowContextHelpButton'):
+        if hasattr(Qt, "AA_DisableWindowContextHelpButton"):
             app.setAttribute(Qt.AA_DisableWindowContextHelpButton)
 
     return app
@@ -85,12 +86,13 @@ def initialize():
 
     :return: A reference to the existing application instance
     """
-    if sys.platform == 'win32':
+    if sys.platform == "win32":
         # Tornado requires WindowsSelectorEventLoop
         # https://www.tornadoweb.org/en/stable/#installation
         import asyncio
+
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-    if sys.platform == 'darwin':
+    if sys.platform == "darwin":
         qtutils.force_layer_backing_BigSur()
 
     app = qapplication()
@@ -108,6 +110,7 @@ def initialize():
 def initialise_qapp_and_launch_workbench(command_line_options):
     # Set the global figure manager in matplotlib. Very important this happens first.
     from workbench.plotting.config import init_mpl_gcf
+
     init_mpl_gcf()
 
     # cleanup static resources at exit
@@ -153,6 +156,7 @@ def create_and_launch_workbench(app, command_line_options):
 
         # Set the mainwindow as the parent for additional QMainWindow instances
         from workbench.config import set_additional_windows_parent
+
         set_additional_windows_parent(main_window)
 
         # decorates the excepthook callback with the reference to the main window
@@ -161,15 +165,16 @@ def create_and_launch_workbench(app, command_line_options):
 
         # Load matplotlib as early as possible and set our defaults
         # Setup our custom backend and monkey patch in custom current figure manager
-        main_window.set_splash('Preloading matplotlib')
+        main_window.set_splash("Preloading matplotlib")
         from workbench.plotting.config import initialize_matplotlib  # noqa
+
         initialize_matplotlib()
 
         # Setup widget layouts etc. mantid.simple cannot be used before this
         # or the log messages don't get through to the widget
         main_window.setup()
         # start mantid
-        main_window.set_splash('Initializing mantid framework')
+        main_window.set_splash("Initializing mantid framework")
         FrameworkManagerImpl.Instance()
         main_window.post_mantid_init()
 
@@ -193,7 +198,7 @@ def create_and_launch_workbench(app, command_line_options):
                 return int(editor_task.exit_code) if editor_task else 0
 
         main_window.show()
-        main_window.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
+        main_window.setWindowIcon(QIcon(":/images/MantidIcon.ico"))
         # Project Recovery on startup
         main_window.project_recovery.repair_checkpoints()
         if main_window.project_recovery.check_for_recover_checkpoint():
@@ -210,13 +215,14 @@ def create_and_launch_workbench(app, command_line_options):
     except BaseException:
         # We count this as a crash
         import traceback
+
         # This is type of thing we want to capture and have reports
         # about. Prints to stderr as we can't really count on anything
         # else
         traceback.print_exc(file=ORIGINAL_STDERR)
         try:
             print_file_path = os.path.join(ConfigService.getAppDataDirectory(), STACKTRACE_FILE)
-            with open(print_file_path, 'w') as print_file:
+            with open(print_file_path, "w") as print_file:
                 traceback.print_exc(file=print_file)
         except OSError:
             pass

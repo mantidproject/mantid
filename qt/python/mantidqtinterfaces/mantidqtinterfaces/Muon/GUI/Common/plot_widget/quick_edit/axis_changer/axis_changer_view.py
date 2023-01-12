@@ -18,7 +18,7 @@ class AxisChangerView(QtWidgets.QWidget):
         layout = QtWidgets.QHBoxLayout()
         self._label = QtWidgets.QLabel(label)
 
-        self._min_label = QtWidgets.QLabel(label+" min")
+        self._min_label = QtWidgets.QLabel(label + " min")
         self.lower_bound = QtWidgets.QLineEdit()
         self.lower_bound.setMaxLength(MAXIMUM_BOUND_PRECISION)
         self.lower_bound_validator = LineEditDoubleValidator(self.lower_bound, 0.0)
@@ -26,7 +26,7 @@ class AxisChangerView(QtWidgets.QWidget):
         self.lower_bound.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         self.lower_bound.returnPressed.connect(self._bound_changed)
 
-        self._max_label =  QtWidgets.QLabel(label+" max")
+        self._max_label = QtWidgets.QLabel(label + " max")
         self.upper_bound = QtWidgets.QLineEdit()
         self.upper_bound.setMaxLength(MAXIMUM_BOUND_PRECISION)
         self.upper_bound_validator = LineEditDoubleValidator(self.upper_bound, 15.0)

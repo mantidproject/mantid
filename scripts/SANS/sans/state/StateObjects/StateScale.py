@@ -19,7 +19,6 @@ from sans.state.automatic_setters import automatic_setters
 
 
 class StateScale(metaclass=JsonSerializable):
-
     def __init__(self):
         super(StateScale, self).__init__()
         self.shape = None
@@ -33,9 +32,9 @@ class StateScale(metaclass=JsonSerializable):
         self.shape_from_file = SampleShape.DISC
 
         # The default values are 1mm
-        self.thickness_from_file = 1.  # : Float (Positive)
-        self.width_from_file = 1.  # : Float (Positive)
-        self.height_from_file = 1.  # : Float (Positive)
+        self.thickness_from_file = 1.0  # : Float (Positive)
+        self.width_from_file = 1.0  # : Float (Positive)
+        self.height_from_file = 1.0  # : Float (Positive)
 
     def validate(self):
         pass
@@ -81,5 +80,6 @@ def get_scale_builder(data_info, file_information=None):
     if facility is SANSFacility.ISIS:
         return StateScaleBuilder(file_information)
     else:
-        raise NotImplementedError("StateScaleBuilder: Could not find any valid scale builder for the "
-                                  "specified StateData object {0}".format(str(data_info)))
+        raise NotImplementedError(
+            "StateScaleBuilder: Could not find any valid scale builder for the " "specified StateData object {0}".format(str(data_info))
+        )

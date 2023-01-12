@@ -11,18 +11,17 @@ from mantid.simpleapi import AlgorithmManager, LoadElementalAnalysisData
 
 
 class LoadElementalAnalysisRunTest(unittest.TestCase):
-
     def test_incorrect_run_number(self):
-        alg = AlgorithmManager.create('LoadElementalAnalysisData')
+        alg = AlgorithmManager.create("LoadElementalAnalysisData")
         alg.setChild(True)
         alg.initialize()
-        alg.setProperty('Run', 1)
-        alg.setProperty('GroupWorkspace', '1')
+        alg.setProperty("Run", 1)
+        alg.setProperty("GroupWorkspace", "1")
         errors = alg.validateInputs()
         self.assertTrue("Run" in errors)
         self.assertEqual(len(errors), 1)
         self.assertFalse(AnalysisDataService.doesExist("1"))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

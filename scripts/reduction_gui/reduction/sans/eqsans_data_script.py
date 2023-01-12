@@ -21,15 +21,15 @@ class DataSets(BaseSampleData):
 
     def reset(self):
         """
-            Reset state
+        Reset state
         """
         super(DataSets, self).reset()
         self.background.reset()
 
     def to_script(self, data_file=None):
         """
-            Generate reduction script
-            @param execute: if true, the script will be executed
+        Generate reduction script
+        @param execute: if true, the script will be executed
         """
         script_sample = super(DataSets, self).to_script(data_file)
         script_bck = self.background.to_script()
@@ -37,7 +37,7 @@ class DataSets(BaseSampleData):
 
     def to_xml(self):
         """
-            Create XML from the current data.
+        Create XML from the current data.
         """
         xml_sample = super(DataSets, self).to_xml()
         xml_bck = self.background.to_xml()
@@ -45,8 +45,8 @@ class DataSets(BaseSampleData):
 
     def from_xml(self, xml_str):
         """
-            Read in data from XML
-            @param xml_str: text to read the data from
+        Read in data from XML
+        @param xml_str: text to read the data from
         """
         self.reset()
         super(DataSets, self).from_xml(xml_str)
@@ -54,9 +54,9 @@ class DataSets(BaseSampleData):
 
     def from_setup_info(self, xml_str):
         """
-            Read in data from XML using the string representation of the setup algorithm used
-            to prepare the reduction properties.
-            @param xml_str: text to read the data from
+        Read in data from XML using the string representation of the setup algorithm used
+        to prepare the reduction properties.
+        @param xml_str: text to read the data from
         """
         self.reset()
         super(DataSets, self).from_setup_info(xml_str)

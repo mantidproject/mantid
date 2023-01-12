@@ -10,11 +10,10 @@ import numpy
 
 
 class DirectBeamResolution:
-
     def __call__(self, q):
         if isinstance(q, numpy.ndarray):
             if q.ndim > 1:
-                raise NotImplementedError('Resolution calculation not supported for arrays with more than one dimension.')
+                raise NotImplementedError("Resolution calculation not supported for arrays with more than one dimension.")
             else:
                 return numpy.array([self._delta_q(qi) for qi in q])
         elif isinstance(q, list):
@@ -33,9 +32,9 @@ class DirectBeamResolution:
         """
         self._wavelength = wavelength
         self._delta_wavelength = delta_wavelength**2
-        self._delta_theta = (beam_width*0.5)**2 # converts 2theta to theta
-        self._wavelength_coeff = (1/(2.0 * math.sqrt(2.0*math.log(2.0))))**2
-        self._k2 = (4.0 * math.pi / self._wavelength)**2
+        self._delta_theta = (beam_width * 0.5) ** 2  # converts 2theta to theta
+        self._wavelength_coeff = (1 / (2.0 * math.sqrt(2.0 * math.log(2.0)))) ** 2
+        self._k2 = (4.0 * math.pi / self._wavelength) ** 2
 
     def _delta_q(self, q):
         """

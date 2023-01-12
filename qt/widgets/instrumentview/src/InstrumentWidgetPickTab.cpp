@@ -58,6 +58,9 @@ namespace MantidQt::MantidWidgets {
 using namespace boost::math;
 
 namespace {
+
+int constexpr N_TOOLBAR_COLUMNS(7);
+
 // Get the phi angle between the detector with reference to the origin
 // Makes assumptions about beam direction. Legacy code and not robust.
 double getPhi(const Mantid::Kernel::V3D &pos) { return std::atan2(pos[1], pos[0]); }
@@ -87,7 +90,8 @@ void rebin(const T &inputWorkspace, const std::string &rebinString, const bool p
  * Constructor.
  * @param instrWidget :: Parent InstrumentWidget.
  */
-InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
+InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget,
+                                                 std::vector<IWPickToolType> const &tools)
     : InstrumentWidgetTab(instrWidget), m_freezePlot(false), m_originalWorkspace(nullptr), m_tubeXUnitsCache(0),
       m_plotTypeCache(0),
       m_addedActions(std::vector<std::pair<QAction *, std::function<bool(std::map<std::string, bool>)>>>{}) {
@@ -307,24 +311,6 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_peakAlign->setIcon(QIcon(":/PickTools/selection-peak-plane.png"));
   m_peakAlign->setToolTip("Crystal peak alignment tool");
 
-  auto *toolBox = new QGridLayout();
-  toolBox->addWidget(m_zoom, 0, 0);
-  toolBox->addWidget(m_edit, 0, 1);
-  toolBox->addWidget(m_ellipse, 0, 2);
-  toolBox->addWidget(m_rectangle, 0, 3);
-  toolBox->addWidget(m_ring_ellipse, 0, 4);
-  toolBox->addWidget(m_ring_rectangle, 0, 5);
-  toolBox->addWidget(m_sector, 0, 6);
-  toolBox->addWidget(m_free_draw, 0, 7);
-  toolBox->addWidget(m_one, 1, 0);
-  toolBox->addWidget(m_whole, 1, 1);
-  toolBox->addWidget(m_tube, 1, 2);
-  toolBox->addWidget(m_peakAdd, 1, 3);
-  toolBox->addWidget(m_peakErase, 1, 4);
-  toolBox->addWidget(m_peakCompare, 1, 5);
-  toolBox->addWidget(m_peakAlign, 1, 6);
-  toolBox->setColumnStretch(8, 1);
-  toolBox->setSpacing(2);
   connect(m_zoom, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_one, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_whole, SIGNAL(clicked()), this, SLOT(setSelectionType()));
@@ -342,9 +328,80 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   connect(m_edit, SIGNAL(clicked()), this, SLOT(setSelectionType()));
 
   // lay out the widgets
+  m_toolBox = new QGridLayout();
+  setAvailableTools(tools);
+  m_toolBox->setColumnStretch(8, 1);
+  m_toolBox->setSpacing(2);
   layout->addWidget(m_activeTool);
-  layout->addLayout(toolBox);
+  layout->addLayout(m_toolBox);
   layout->addWidget(panelStack);
+}
+
+void InstrumentWidgetPickTab::setAvailableTools(std::vector<IWPickToolType> const &toolTypes) {
+  int row(0), column(0);
+  for (const auto &toolType : toolTypes) {
+    addToolbarWidget(toolType, row, column);
+  }
+}
+
+void InstrumentWidgetPickTab::addToolbarWidget(const IWPickToolType toolType, int &row, int &column) {
+  switch (toolType) {
+  case IWPickToolType::Zoom:
+    addToolbarWidget(m_zoom, row, column);
+    break;
+  case IWPickToolType::EditShape:
+    addToolbarWidget(m_edit, row, column);
+    break;
+  case IWPickToolType::DrawEllipse:
+    addToolbarWidget(m_ellipse, row, column);
+    break;
+  case IWPickToolType::DrawRectangle:
+    addToolbarWidget(m_rectangle, row, column);
+    break;
+  case IWPickToolType::DrawRingEllipse:
+    addToolbarWidget(m_ring_ellipse, row, column);
+    break;
+  case IWPickToolType::DrawRingRectangle:
+    addToolbarWidget(m_ring_rectangle, row, column);
+    break;
+  case IWPickToolType::DrawSector:
+    addToolbarWidget(m_sector, row, column);
+    break;
+  case IWPickToolType::DrawFree:
+    addToolbarWidget(m_free_draw, row, column);
+    break;
+  case IWPickToolType::PixelSelect:
+    addToolbarWidget(m_one, row, column);
+    break;
+  case IWPickToolType::WholeInstrumentSelect:
+    addToolbarWidget(m_whole, row, column);
+    break;
+  case IWPickToolType::TubeSelect:
+    addToolbarWidget(m_tube, row, column);
+    break;
+  case IWPickToolType::PeakSelect:
+    addToolbarWidget(m_peakAdd, row, column);
+    break;
+  case IWPickToolType::PeakErase:
+    addToolbarWidget(m_peakErase, row, column);
+    break;
+  case IWPickToolType::PeakCompare:
+    addToolbarWidget(m_peakCompare, row, column);
+    break;
+  case IWPickToolType::PeakAlign:
+    addToolbarWidget(m_peakAlign, row, column);
+    break;
+  }
+}
+
+void InstrumentWidgetPickTab::addToolbarWidget(QPushButton *toolbarButton, int &row, int &column) const {
+  m_toolBox->addWidget(toolbarButton, row, column);
+  if (column == 0 || column % N_TOOLBAR_COLUMNS != 0) {
+    ++column;
+  } else {
+    column = 0;
+    ++row;
+  }
 }
 
 QPushButton *InstrumentWidgetPickTab::getSelectTubeButton() { return m_tube; }
@@ -755,7 +812,7 @@ bool InstrumentWidgetPickTab::addToDisplayContextMenu(QMenu &context) const {
  * Select a tool on the tab
  * @param tool One of the enumerated tool types, @see ToolType
  */
-void InstrumentWidgetPickTab::selectTool(const ToolType tool) {
+void InstrumentWidgetPickTab::selectTool(const IWPickToolType tool) {
   switch (tool) {
   case Zoom:
     m_zoom->setChecked(true);
@@ -910,7 +967,7 @@ void InstrumentWidgetPickTab::resetOriginalWorkspace() { m_originalWorkspace.res
 void InstrumentWidgetPickTab::clearWidgets() {
   m_plotController->clear();
   m_infoController->clear();
-  selectTool(ToolType::PixelSelect);
+  selectTool(IWPickToolType::PixelSelect);
   collapsePlotPanel();
 }
 
@@ -1293,11 +1350,7 @@ void DetectorPlotController::addPeakLabels(const std::vector<size_t> &detIndices
 /**
  * Update the miniplot for a selected detector.
  */
-void DetectorPlotController::updatePlot() {
-  if (!m_instrWidget->isTabFolded()) {
-    m_plot->replot();
-  }
-}
+void DetectorPlotController::updatePlot() { m_plot->replot(); }
 
 /**
  * Clear the plot.
@@ -1589,14 +1642,14 @@ void DetectorPlotController::prepareDataForIntegralsPlot(size_t detindex, std::v
         continue;
       // get the y-value for detector idet
       const auto &Y = ws->y(index);
-      xymap[xvalue] = std::accumulate(Y.begin() + imin, Y.begin() + imax, 0);
+      xymap[xvalue] = std::accumulate(Y.begin() + imin, Y.begin() + imax, 0.0);
       if (err) {
         const auto &E = ws->e(index);
         std::vector<double> tmp(imax - imin);
         // take squares of the errors
         std::transform(E.begin() + imin, E.begin() + imax, E.begin() + imin, tmp.begin(), std::multiplies<double>());
         // sum them
-        const double sum = std::accumulate(tmp.begin(), tmp.end(), 0);
+        const double sum = std::accumulate(tmp.begin(), tmp.end(), 0.0);
         // take sqrt
         errmap[xvalue] = sqrt(sum);
       }

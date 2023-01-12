@@ -66,6 +66,11 @@ public:
     TS_ASSERT_EQUALS(result.detectorCorrections(), expected);
   }
 
+  void testDefaultCalibrationFilePathOptions() {
+    auto result = getDefaults();
+    TS_ASSERT_EQUALS(result.calibrationFilePath(), "");
+  }
+
   void testValidDetectorOptionsFromParamsFile() {
     auto result = getDefaultsFromParamsFile("Instrument");
     auto expected = DetectorCorrections(true, DetectorCorrectionType::RotateAroundSample);

@@ -84,5 +84,5 @@ class MuonPairTest(unittest.TestCase):
             pair.alpha = "-1.0"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

@@ -79,10 +79,10 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         self.plotButton = QtWidgets.QPushButton("Plot", self)
         self.oplotButton = QtWidgets.QPushButton("Overplot", self)
         self.helpButton = QtWidgets.QPushButton("?", self)
-        self.colorLabel = QtWidgets.QLabel('Color by angle', self)
+        self.colorLabel = QtWidgets.QLabel("Color by angle", self)
         self.colorButton = QtWidgets.QCheckBox(self)
         self.colorButton.toggle()
-        self.aspectLabel = QtWidgets.QLabel('Aspect ratio 1:1', self)
+        self.aspectLabel = QtWidgets.QLabel("Aspect ratio 1:1", self)
         self.aspectButton = QtWidgets.QCheckBox(self)
         self.saveButton = QtWidgets.QPushButton("Save Figure", self)
         plotControlLayout.addWidget(self.plotButton, 0, 0)
@@ -101,11 +101,11 @@ class DGSPlannerGUI(QtWidgets.QWidget):
 
         # figure
         self.figure = Figure()
-        self.figure.patch.set_facecolor('white')
+        self.figure.patch.set_facecolor("white")
         self.canvas = FigureCanvas(self.figure)
         self.grid_helper = GridHelperCurveLinear((self.tr, self.inv_tr))
         self.trajfig = Subplot(self.figure, 1, 1, 1, grid_helper=self.grid_helper)
-        if LooseVersion('2.1.0') > LooseVersion(matplotlib.__version__):
+        if LooseVersion("2.1.0") > LooseVersion(matplotlib.__version__):
             self.trajfig.hold(True)  # hold is deprecated since 2.1.0, true by default
         self.figure.add_subplot(self.trajfig)
         self.toolbar = MantidNavigationToolbar(self.canvas, self)
@@ -114,7 +114,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         figureLayout.addWidget(self.canvas, 1)
         self.layout().addLayout(figureLayout)
         self.needToClear = False
-        self.saveDir = ''
+        self.saveDir = ""
 
         # connections
         self.matrix.UBmodel.changed.connect(self.updateUB)
@@ -135,7 +135,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         # help
         self.assistant_process = QtCore.QProcess(self)
         # pylint: disable=protected-access
-        self.mantidplot_name = 'DGS Planner'
+        self.mantidplot_name = "DGS Planner"
         # control for cancel button
         self.iterations = 0
         self.progress_canceled = False
@@ -151,15 +151,15 @@ class DGSPlannerGUI(QtWidgets.QWidget):
 
     def eiWavelengthUpdateEvent(self):
         if self.instrumentElastic:
-            ei = UnitConversion.run('Wavelength', 'Energy', self.masterDict['Ei'], 0, 0, 0, Elastic, 0)
+            ei = UnitConversion.run("Wavelength", "Energy", self.masterDict["Ei"], 0, 0, 0, Elastic, 0)
             offset = ei * 0.01
-            lowerBound = - offset
+            lowerBound = -offset
             upperBound = offset
             self.dimensionWidget.set_editMin4(lowerBound)
             self.dimensionWidget.set_editMax4(upperBound)
 
     def instrumentUpdateEvent(self):
-        changeToElastic = self.masterDict['instrument'] in ['WAND\u00B2']
+        changeToElastic = self.masterDict["instrument"] in ["WAND\u00B2"]
         if changeToElastic != self.instrumentElastic:
             self.instrumentElastic = changeToElastic
             self.dimensionWidget.toggleDeltaE(not changeToElastic)
@@ -169,14 +169,14 @@ class DGSPlannerGUI(QtWidgets.QWidget):
     def updateParams(self, d):
         if self.sender() is self.instrumentWidget:
             self.updatedInstrument = True
-        if 'dimBasis' in d and 'dimBasis' in self.masterDict and d['dimBasis'] != self.masterDict['dimBasis']:
+        if "dimBasis" in d and "dimBasis" in self.masterDict and d["dimBasis"] != self.masterDict["dimBasis"]:
             self.needToClear = True
-        if 'dimIndex' in d and 'dimIndex' in self.masterDict and d['dimIndex'] != self.masterDict['dimIndex']:
+        if "dimIndex" in d and "dimIndex" in self.masterDict and d["dimIndex"] != self.masterDict["dimIndex"]:
             self.needToClear = True
         self.masterDict.update(copy.deepcopy(d))
 
     def help(self):
-        show_interface_help(self.mantidplot_name, self.assistant_process, area='direct')
+        show_interface_help(self.mantidplot_name, self.assistant_process, area="direct")
 
     def closeEvent(self, event):
         self.assistant_process.close()
@@ -201,13 +201,12 @@ class DGSPlannerGUI(QtWidgets.QWidget):
 
                     groupingStrings.append(name)
                     mantid.simpleapi.CloneWorkspace("__temp_instrument", OutputWorkspace=name)
-                    mantid.simpleapi.SetGoniometer(Workspace=name,
-                                                   Axis0=str(g0) + "," + self.masterDict['gonioDirs'][0]
-                                                   + "," + str(self.masterDict['gonioSenses'][0]),
-                                                   Axis1=str(g1) + "," + self.masterDict['gonioDirs'][1]
-                                                   + "," + str(self.masterDict['gonioSenses'][1]),
-                                                   Axis2=str(g2) + "," + self.masterDict['gonioDirs'][2]
-                                                   + "," + str(self.masterDict['gonioSenses'][2]))
+                    mantid.simpleapi.SetGoniometer(
+                        Workspace=name,
+                        Axis0=str(g0) + "," + self.masterDict["gonioDirs"][0] + "," + str(self.masterDict["gonioSenses"][0]),
+                        Axis1=str(g1) + "," + self.masterDict["gonioDirs"][1] + "," + str(self.masterDict["gonioSenses"][1]),
+                        Axis2=str(g2) + "," + self.masterDict["gonioDirs"][2] + "," + str(self.masterDict["gonioSenses"][2]),
+                    )
         return groupingStrings
 
     # pylint: disable=too-many-locals
@@ -216,75 +215,93 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         if self.updatedInstrument or self.progress_canceled:
             self.progress_canceled = False
             # get goniometer settings first
-            gonioAxis0values = numpy.arange(self.masterDict['gonioMinvals'][0],
-                                            self.masterDict['gonioMaxvals'][0] + 0.1 * self.masterDict['gonioSteps'][0],
-                                            self.masterDict['gonioSteps'][0])
-            gonioAxis1values = numpy.arange(self.masterDict['gonioMinvals'][1],
-                                            self.masterDict['gonioMaxvals'][1] + 0.1 * self.masterDict['gonioSteps'][1],
-                                            self.masterDict['gonioSteps'][1])
-            gonioAxis2values = numpy.arange(self.masterDict['gonioMinvals'][2],
-                                            self.masterDict['gonioMaxvals'][2] + 0.1 * self.masterDict['gonioSteps'][2],
-                                            self.masterDict['gonioSteps'][2])
+            gonioAxis0values = numpy.arange(
+                self.masterDict["gonioMinvals"][0],
+                self.masterDict["gonioMaxvals"][0] + 0.1 * self.masterDict["gonioSteps"][0],
+                self.masterDict["gonioSteps"][0],
+            )
+            gonioAxis1values = numpy.arange(
+                self.masterDict["gonioMinvals"][1],
+                self.masterDict["gonioMaxvals"][1] + 0.1 * self.masterDict["gonioSteps"][1],
+                self.masterDict["gonioSteps"][1],
+            )
+            gonioAxis2values = numpy.arange(
+                self.masterDict["gonioMinvals"][2],
+                self.masterDict["gonioMaxvals"][2] + 0.1 * self.masterDict["gonioSteps"][2],
+                self.masterDict["gonioSteps"][2],
+            )
             self.iterations = len(gonioAxis0values) * len(gonioAxis1values) * len(gonioAxis2values)
             if self.iterations > 10:
-                reply = QtWidgets.QMessageBox.warning(self, 'Goniometer',
-                                                      "More than 10 goniometer settings. This might be long.\n"
-                                                      "Are you sure you want to proceed?",
-                                                      QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
-                                                      QtWidgets.QMessageBox.No)
+                reply = QtWidgets.QMessageBox.warning(
+                    self,
+                    "Goniometer",
+                    "More than 10 goniometer settings. This might be long.\n" "Are you sure you want to proceed?",
+                    QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                    QtWidgets.QMessageBox.No,
+                )
                 if reply == QtWidgets.QMessageBox.No:
                     return
 
-            if self.wg is not None:
+            try:
                 mantid.simpleapi.DeleteWorkspace(self.wg)
+            except:
+                pass
 
-            instrumentName = self.masterDict['instrument']
-            if instrumentName == 'WAND\u00B2':
-                instrumentName = 'WAND'
+            instrumentName = self.masterDict["instrument"]
+            if instrumentName == "WAND\u00B2":
+                instrumentName = "WAND"
 
             mantid.simpleapi.LoadEmptyInstrument(
-                mantid.api.ExperimentInfo.getInstrumentFilename(instrumentName),
-                OutputWorkspace="__temp_instrument"
+                mantid.api.ExperimentInfo.getInstrumentFilename(instrumentName), OutputWorkspace="__temp_instrument"
+            )
+            if self.masterDict["instrument"] == "HYSPEC":
+                mantid.simpleapi.AddSampleLog(Workspace="__temp_instrument", LogName="msd", LogText="1798.5", LogType="Number Series")
+                mantid.simpleapi.AddSampleLog(
+                    Workspace="__temp_instrument", LogName="s2", LogText=str(self.masterDict["S2"]), LogType="Number Series"
                 )
-            if self.masterDict['instrument'] == 'HYSPEC':
-                mantid.simpleapi.AddSampleLog(Workspace="__temp_instrument", LogName='msd', LogText='1798.5',
-                                              LogType='Number Series')
-                mantid.simpleapi.AddSampleLog(Workspace="__temp_instrument", LogName='s2',
-                                              LogText=str(self.masterDict['S2']), LogType='Number Series')
-                mantid.simpleapi.LoadInstrument(Workspace="__temp_instrument", RewriteSpectraMap=True,
-                                                InstrumentName="HYSPEC")
-            elif self.masterDict['instrument'] == 'EXED':
-                mantid.simpleapi.RotateInstrumentComponent(Workspace="__temp_instrument",
-                                                           ComponentName='Tank',
-                                                           Y=1,
-                                                           Angle=str(self.masterDict['S2']),
-                                                           RelativeRotation=False)
-            elif instrumentName == 'WAND':
-                mantid.simpleapi.AddSampleLog(Workspace="__temp_instrument", LogName='HB2C:Mot:s2.RBV',
-                                              LogText=str(self.masterDict['S2']), LogType='Number Series')
-                mantid.simpleapi.AddSampleLog(Workspace="__temp_instrument", LogName='HB2C:Mot:detz.RBV',
-                                              LogText=str(self.masterDict['DetZ']), LogType='Number Series')
-                mantid.simpleapi.LoadInstrument(Workspace="__temp_instrument", RewriteSpectraMap=True,
-                                                InstrumentName="WAND")
+                mantid.simpleapi.LoadInstrument(Workspace="__temp_instrument", RewriteSpectraMap=True, InstrumentName="HYSPEC")
+            elif self.masterDict["instrument"] == "EXED":
+                mantid.simpleapi.RotateInstrumentComponent(
+                    Workspace="__temp_instrument", ComponentName="Tank", Y=1, Angle=str(self.masterDict["S2"]), RelativeRotation=False
+                )
+            elif instrumentName == "WAND":
+                mantid.simpleapi.AddSampleLog(
+                    Workspace="__temp_instrument", LogName="HB2C:Mot:s2.RBV", LogText=str(self.masterDict["S2"]), LogType="Number Series"
+                )
+                mantid.simpleapi.AddSampleLog(
+                    Workspace="__temp_instrument",
+                    LogName="HB2C:Mot:detz.RBV",
+                    LogText=str(self.masterDict["DetZ"]),
+                    LogType="Number Series",
+                )
+                mantid.simpleapi.LoadInstrument(Workspace="__temp_instrument", RewriteSpectraMap=True, InstrumentName="WAND")
             # masking
-            if 'maskFilename' in self.masterDict and len(self.masterDict['maskFilename'].strip()) > 0:
+            if "maskFilename" in self.masterDict and len(self.masterDict["maskFilename"].strip()) > 0:
                 try:
-                    __maskWS = mantid.simpleapi.Load(self.masterDict['maskFilename'])
+                    __maskWS = mantid.simpleapi.Load(self.masterDict["maskFilename"])
                     mantid.simpleapi.MaskDetectors(Workspace="__temp_instrument", MaskedWorkspace=__maskWS)
                 except (ValueError, RuntimeError) as e:
-                    reply = QtWidgets.QMessageBox.critical(self, 'Error',
-                                                           "The following error has occurred in loading the mask:\n"
-                                                           + str(e) + "\nDo you want to continue without mask?",
-                                                           QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
-                                                           QtWidgets.QMessageBox.No)
+                    reply = QtWidgets.QMessageBox.critical(
+                        self,
+                        "Error",
+                        "The following error has occurred in loading the mask:\n" + str(e) + "\nDo you want to continue without mask?",
+                        QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                        QtWidgets.QMessageBox.No,
+                    )
                     if reply == QtWidgets.QMessageBox.No:
                         return
-            if self.masterDict['makeFast']:
+            if self.masterDict["makeFast"]:
                 sp = numpy.arange(mantid.mtd["__temp_instrument"].getNumberHistograms())
-                if self.masterDict['instrument'] == 'WAND\u00B2':
-                    sp = sp.reshape(-1,512)
-                    tomask = sp[:,1::4].ravel().tolist() + sp[:,2::4].ravel().tolist() + sp[:,3::4].ravel().tolist()\
-                           + sp[1::4,:].ravel().tolist() + sp[2::4,:].ravel().tolist() + sp[3::4,:].ravel().tolist()
+                if self.masterDict["instrument"] == "WAND\u00B2":
+                    sp = sp.reshape(-1, 512)
+                    tomask = (
+                        sp[:, 1::4].ravel().tolist()
+                        + sp[:, 2::4].ravel().tolist()
+                        + sp[:, 3::4].ravel().tolist()
+                        + sp[1::4, :].ravel().tolist()
+                        + sp[2::4, :].ravel().tolist()
+                        + sp[3::4, :].ravel().tolist()
+                    )
                 else:
                     tomask = sp[1::4].tolist() + sp[2::4].tolist() + sp[3::4].tolist()
                 mantid.simpleapi.MaskDetectors("__temp_instrument", SpectraList=tomask)
@@ -295,8 +312,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
             progressDialog.setRange(0, self.iterations)
             progressDialog.setWindowTitle("DGSPlanner progress")
 
-            groupingStrings = self._create_goniometer_workspaces(gonioAxis0values, gonioAxis1values, gonioAxis2values,
-                                                                 progressDialog)
+            groupingStrings = self._create_goniometer_workspaces(gonioAxis0values, gonioAxis1values, gonioAxis2values, progressDialog)
             if groupingStrings is None:
                 return
 
@@ -309,17 +325,17 @@ class DGSPlannerGUI(QtWidgets.QWidget):
             mantid.simpleapi.SetUB(self.wg, UB=self.ol.getUB())
             self.updatedOL = False
         # calculate coverage
-        dimensions = ['Q1', 'Q2', 'Q3', 'DeltaE']
+        dimensions = ["Q1", "Q2", "Q3", "DeltaE"]
         progressDialog = QtWidgets.QProgressDialog(self)
         progressDialog.setMinimumDuration(0)
         progressDialog.setCancelButtonText("&Cancel")
         progressDialog.setRange(0, self.iterations)
         progressDialog.setWindowTitle("DGSPlanner progress")
 
-        if self.masterDict['instrument'] == 'WAND\u00B2':
-            ei = UnitConversion.run('Wavelength', 'Energy', self.masterDict['Ei'], 0, 0, 0, Elastic, 0)
+        if self.masterDict["instrument"] == "WAND\u00B2":
+            ei = UnitConversion.run("Wavelength", "Energy", self.masterDict["Ei"], 0, 0, 0, Elastic, 0)
         else:
-            ei = self.masterDict['Ei']
+            ei = self.masterDict["Ei"]
 
         for i in range(self.iterations):
             progressDialog.setValue(i)
@@ -330,35 +346,37 @@ class DGSPlannerGUI(QtWidgets.QWidget):
                 progressDialog.close()
                 return
 
-            __mdws = mantid.simpleapi.CalculateCoverageDGS(self.wg[i],
-                                                           Q1Basis=self.masterDict['dimBasis'][0],
-                                                           Q2Basis=self.masterDict['dimBasis'][1],
-                                                           Q3Basis=self.masterDict['dimBasis'][2],
-                                                           IncidentEnergy=ei,
-                                                           Dimension1=dimensions[self.masterDict['dimIndex'][0]],
-                                                           Dimension1Min=float2Input(self.masterDict['dimMin'][0]),
-                                                           Dimension1Max=float2Input(self.masterDict['dimMax'][0]),
-                                                           Dimension1Step=float2Input(self.masterDict['dimStep'][0]),
-                                                           Dimension2=dimensions[self.masterDict['dimIndex'][1]],
-                                                           Dimension2Min=float2Input(self.masterDict['dimMin'][1]),
-                                                           Dimension2Max=float2Input(self.masterDict['dimMax'][1]),
-                                                           Dimension2Step=float2Input(self.masterDict['dimStep'][1]),
-                                                           Dimension3=dimensions[self.masterDict['dimIndex'][2]],
-                                                           Dimension3Min=float2Input(self.masterDict['dimMin'][2]),
-                                                           Dimension3Max=float2Input(self.masterDict['dimMax'][2]),
-                                                           Dimension4=dimensions[self.masterDict['dimIndex'][3]],
-                                                           Dimension4Min=float2Input(self.masterDict['dimMin'][3]),
-                                                           Dimension4Max=float2Input(self.masterDict['dimMax'][3]))
+            __mdws = mantid.simpleapi.CalculateCoverageDGS(
+                self.wg[i],
+                Q1Basis=self.masterDict["dimBasis"][0],
+                Q2Basis=self.masterDict["dimBasis"][1],
+                Q3Basis=self.masterDict["dimBasis"][2],
+                IncidentEnergy=ei,
+                Dimension1=dimensions[self.masterDict["dimIndex"][0]],
+                Dimension1Min=float2Input(self.masterDict["dimMin"][0]),
+                Dimension1Max=float2Input(self.masterDict["dimMax"][0]),
+                Dimension1Step=float2Input(self.masterDict["dimStep"][0]),
+                Dimension2=dimensions[self.masterDict["dimIndex"][1]],
+                Dimension2Min=float2Input(self.masterDict["dimMin"][1]),
+                Dimension2Max=float2Input(self.masterDict["dimMax"][1]),
+                Dimension2Step=float2Input(self.masterDict["dimStep"][1]),
+                Dimension3=dimensions[self.masterDict["dimIndex"][2]],
+                Dimension3Min=float2Input(self.masterDict["dimMin"][2]),
+                Dimension3Max=float2Input(self.masterDict["dimMax"][2]),
+                Dimension4=dimensions[self.masterDict["dimIndex"][3]],
+                Dimension4Min=float2Input(self.masterDict["dimMin"][3]),
+                Dimension4Max=float2Input(self.masterDict["dimMax"][3]),
+            )
 
             if i == 0:
-                intensity = __mdws.getSignalArray()[:, :, 0, 0] * 1.  # to make it writeable
+                intensity = __mdws.getSignalArray()[:, :, 0, 0] * 1.0  # to make it writeable
             else:
                 if self.colorButton.isChecked():
                     tempintensity = __mdws.getSignalArray()[:, :, 0, 0]
-                    intensity[numpy.where(tempintensity > 0)] = i + 1.
+                    intensity[numpy.where(tempintensity > 0)] = i + 1.0
                 else:
                     tempintensity = __mdws.getSignalArray()[:, :, 0, 0]
-                    intensity[numpy.where(tempintensity > 0)] = 1.
+                    intensity[numpy.where(tempintensity > 0)] = 1.0
         progressDialog.close()
         x = numpy.linspace(__mdws.getDimension(0).getMinimum(), __mdws.getDimension(0).getMaximum(), intensity.shape[0])
         y = numpy.linspace(__mdws.getDimension(1).getMinimum(), __mdws.getDimension(1).getMaximum(), intensity.shape[1])
@@ -375,82 +393,100 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         self.trajfig.pcolorfast(xx, yy, Z)
 
         if self.aspectButton.isChecked():
-            self.trajfig.set_aspect(1.)
+            self.trajfig.set_aspect(1.0)
         else:
-            self.trajfig.set_aspect('auto')
-        self.trajfig.set_xlabel(self.masterDict['dimNames'][0])
-        self.trajfig.set_ylabel(self.masterDict['dimNames'][1])
+            self.trajfig.set_aspect("auto")
+        self.trajfig.set_xlabel(self.masterDict["dimNames"][0])
+        self.trajfig.set_ylabel(self.masterDict["dimNames"][1])
         self.trajfig.grid(True)
         self.canvas.draw()
         mantid.simpleapi.DeleteWorkspace(__mdws)
 
     def save(self):
-        fileName = QtWidgets.QFileDialog.getSaveFileName(self, 'Save Plot', self.saveDir, '*.png')
+        fileName = QtWidgets.QFileDialog.getSaveFileName(self, "Save Plot", self.saveDir, "*.png")
         if isinstance(fileName, tuple):
             fileName = fileName[0]
         if not fileName:
             return
-        data = "Instrument " + self.masterDict['instrument'] + '\n'
-        if self.masterDict['instrument'] == 'HYSPEC':
-            data += "S2 = " + str(self.masterDict['S2']) + '\n'
-        data += "Ei = " + str(self.masterDict['Ei']) + ' meV\n'
+        data = "Instrument " + self.masterDict["instrument"] + "\n"
+        if self.masterDict["instrument"] == "HYSPEC":
+            data += "S2 = " + str(self.masterDict["S2"]) + "\n"
+        data += "Ei = " + str(self.masterDict["Ei"]) + " meV\n"
         data += "Goniometer values:\n"
-        gonioAxis0values = numpy.arange(self.masterDict['gonioMinvals'][0], self.masterDict['gonioMaxvals'][0]
-                                        + 0.1 * self.masterDict['gonioSteps'][0], self.masterDict['gonioSteps'][0])
-        gonioAxis1values = numpy.arange(self.masterDict['gonioMinvals'][1], self.masterDict['gonioMaxvals'][1]
-                                        + 0.1 * self.masterDict['gonioSteps'][1], self.masterDict['gonioSteps'][1])
-        gonioAxis2values = numpy.arange(self.masterDict['gonioMinvals'][2], self.masterDict['gonioMaxvals'][2]
-                                        + 0.1 * self.masterDict['gonioSteps'][2], self.masterDict['gonioSteps'][2])
+        gonioAxis0values = numpy.arange(
+            self.masterDict["gonioMinvals"][0],
+            self.masterDict["gonioMaxvals"][0] + 0.1 * self.masterDict["gonioSteps"][0],
+            self.masterDict["gonioSteps"][0],
+        )
+        gonioAxis1values = numpy.arange(
+            self.masterDict["gonioMinvals"][1],
+            self.masterDict["gonioMaxvals"][1] + 0.1 * self.masterDict["gonioSteps"][1],
+            self.masterDict["gonioSteps"][1],
+        )
+        gonioAxis2values = numpy.arange(
+            self.masterDict["gonioMinvals"][2],
+            self.masterDict["gonioMaxvals"][2] + 0.1 * self.masterDict["gonioSteps"][2],
+            self.masterDict["gonioSteps"][2],
+        )
         for g0 in gonioAxis0values:
             for g1 in gonioAxis1values:
                 for g2 in gonioAxis2values:
-                    data += "    " + self.masterDict['gonioLabels'][0] + " = " + str(g0)
-                    data += "    " + self.masterDict['gonioLabels'][1] + " = " + str(g1)
-                    data += "    " + self.masterDict['gonioLabels'][2] + " = " + str(g2) + '\n'
+                    data += "    " + self.masterDict["gonioLabels"][0] + " = " + str(g0)
+                    data += "    " + self.masterDict["gonioLabels"][1] + " = " + str(g1)
+                    data += "    " + self.masterDict["gonioLabels"][2] + " = " + str(g2) + "\n"
         data += "Lattice parameters:\n"
-        data += "    a = " + str(self.ol.a()) + "    b = " + str(self.ol.b()) + "    c = " + str(self.ol.c()) + '\n'
-        data += "    alpha = " + str(self.ol.alpha()) + "    beta = " + str(self.ol.beta()) + "    gamma = " + str(
-            self.ol.gamma()) + '\n'
+        data += "    a = " + str(self.ol.a()) + "    b = " + str(self.ol.b()) + "    c = " + str(self.ol.c()) + "\n"
+        data += "    alpha = " + str(self.ol.alpha()) + "    beta = " + str(self.ol.beta()) + "    gamma = " + str(self.ol.gamma()) + "\n"
         data += "Orientation vectors:\n"
-        data += "    u = " + str(self.ol.getuVector()) + '\n'
-        data += "    v = " + str(self.ol.getvVector()) + '\n'
-        data += "Integrated " + self.masterDict['dimNames'][2] + " between " + \
-                str(self.masterDict['dimMin'][2]) + " and " + str(self.masterDict['dimMax'][2]) + '\n'
-        data += "Integrated " + self.masterDict['dimNames'][3] + " between " + \
-                str(self.masterDict['dimMin'][3]) + " and " + str(self.masterDict['dimMax'][3]) + '\n'
+        data += "    u = " + str(self.ol.getuVector()) + "\n"
+        data += "    v = " + str(self.ol.getvVector()) + "\n"
+        data += (
+            "Integrated "
+            + self.masterDict["dimNames"][2]
+            + " between "
+            + str(self.masterDict["dimMin"][2])
+            + " and "
+            + str(self.masterDict["dimMax"][2])
+            + "\n"
+        )
+        data += (
+            "Integrated "
+            + self.masterDict["dimNames"][3]
+            + " between "
+            + str(self.masterDict["dimMin"][3])
+            + " and "
+            + str(self.masterDict["dimMax"][3])
+            + "\n"
+        )
 
-        info = self.figure.text(0.2, 0, data, verticalalignment='top')
-        self.figure.savefig(fileName, bbox_inches='tight', additional_artists=info)
+        info = self.figure.text(0.2, 0, data, verticalalignment="top")
+        self.figure.savefig(fileName, bbox_inches="tight", additional_artists=info)
         self.saveDir = os.path.dirname(fileName)
 
     def tr(self, x, y):
         x, y = numpy.asarray(x), numpy.asarray(y)
         # one of the axes is energy
-        if self.masterDict['dimIndex'][0] == 3 or self.masterDict['dimIndex'][1] == 3:
+        if self.masterDict["dimIndex"][0] == 3 or self.masterDict["dimIndex"][1] == 3:
             return x, y
         else:
-            h1, k1, l1 = (float(temp) for temp in
-                          self.masterDict['dimBasis'][self.masterDict['dimIndex'][0]].split(','))
-            h2, k2, l2 = (float(temp) for temp in
-                          self.masterDict['dimBasis'][self.masterDict['dimIndex'][1]].split(','))
+            h1, k1, l1 = (float(temp) for temp in self.masterDict["dimBasis"][self.masterDict["dimIndex"][0]].split(","))
+            h2, k2, l2 = (float(temp) for temp in self.masterDict["dimBasis"][self.masterDict["dimIndex"][1]].split(","))
             angle = numpy.radians(self.ol.recAngle(h1, k1, l1, h2, k2, l2))
-            return 1. * x + numpy.cos(angle) * y, numpy.sin(angle) * y
+            return 1.0 * x + numpy.cos(angle) * y, numpy.sin(angle) * y
 
     def inv_tr(self, x, y):
         x, y = numpy.asarray(x), numpy.asarray(y)
         # one of the axes is energy
-        if self.masterDict['dimIndex'][0] == 3 or self.masterDict['dimIndex'][1] == 3:
+        if self.masterDict["dimIndex"][0] == 3 or self.masterDict["dimIndex"][1] == 3:
             return x, y
         else:
-            h1, k1, l1 = (float(temp) for temp in
-                          self.masterDict['dimBasis'][self.masterDict['dimIndex'][0]].split(','))
-            h2, k2, l2 = (float(temp) for temp in
-                          self.masterDict['dimBasis'][self.masterDict['dimIndex'][1]].split(','))
+            h1, k1, l1 = (float(temp) for temp in self.masterDict["dimBasis"][self.masterDict["dimIndex"][0]].split(","))
+            h2, k2, l2 = (float(temp) for temp in self.masterDict["dimBasis"][self.masterDict["dimIndex"][1]].split(","))
             angle = numpy.radians(self.ol.recAngle(h1, k1, l1, h2, k2, l2))
-            return 1. * x - y / numpy.tan(angle), y / numpy.sin(angle)
+            return 1.0 * x - y / numpy.tan(angle), y / numpy.sin(angle)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     orl = mantid.geometry.OrientedLattice(2, 3, 4, 90, 90, 90)
     mainForm = DGSPlannerGUI()

@@ -18,31 +18,30 @@ from qtpy.QtCore import Qt
 
 
 class MockConfigService(object):
-
     def __init__(self):
         self.setString = StrictMock()
-        self.getString = Mock(return_value='')
+        self.getString = Mock(return_value="")
 
 
 class MockQTreeWidgetParentItem(MockQWidget):
     def __init__(self):
         self.addChild = StrictMock()
-        self.childCount = Mock(return_value = 0)
+        self.childCount = Mock(return_value=0)
         self.setCheckState = Mock()
-        self.parent = Mock(return_value = False)
-        self.childCount = Mock(return_value = 1)
-        self.child = Mock(return_value = MockQTreeWidgetChildItem(self))
+        self.parent = Mock(return_value=False)
+        self.childCount = Mock(return_value=1)
+        self.child = Mock(return_value=MockQTreeWidgetChildItem(self))
 
 
 class MockQTreeWidgetChildItem(MockQWidget):
     def __init__(self, parent=None):
         self.addChild = StrictMock()
-        self.childCount = Mock(return_value = 0)
+        self.childCount = Mock(return_value=0)
         self.setCheckState = Mock()
         self.checkState = Mock()
-        self.parent = Mock(return_value = parent)
-        self.childCount = Mock(return_value = 0)
-        self.child = Mock(return_value = False)
+        self.parent = Mock(return_value=parent)
+        self.childCount = Mock(return_value=0)
+        self.child = Mock(return_value=False)
 
 
 class MockQTreeWidget(MockQWidget):
@@ -50,8 +49,8 @@ class MockQTreeWidget(MockQWidget):
         self.clear = StrictMock()
         self.setHeaderLabel = StrictMock()
         self.addTopLevelItem = StrictMock()
-        self.topLevelItemCount = Mock(return_value = 3)
-        self.topLevelItem = StrictMock(return_value = MockQTreeWidgetParentItem())
+        self.topLevelItemCount = Mock(return_value=3)
+        self.topLevelItem = StrictMock(return_value=MockQTreeWidgetParentItem())
         self.itemClicked = Mock()
         self.itemChanged = Mock()
 
@@ -65,25 +64,27 @@ class MockCategoriesView(object):
 
 class MockMainWindow(MockQWidget):
     def __init__(self):
-        self.interface_list = ['Direct', 'Indirect', 'Muon', 'Reflectometry', 'SANS']
+        self.interface_list = ["Direct", "Indirect", "Muon", "Reflectometry", "SANS"]
 
 
-algorithm_and_states = {'Arithmetic' : False,
-                        'Arithmetic\\Errors' : True,
-                        'Arithmetic\\FFT' : False,
-                        'ISIS' : False,
-                        'Workflow' : True,
-                        'Workflow\\Diffraction\\DataHandling' : True,
-                        'Workflow\\Diffraction' : True}
+algorithm_and_states = {
+    "Arithmetic": False,
+    "Arithmetic\\Errors": True,
+    "Arithmetic\\FFT": False,
+    "ISIS": False,
+    "Workflow": True,
+    "Workflow\\Diffraction\\DataHandling": True,
+    "Workflow\\Diffraction": True,
+}
 
-mock_get_category_and_state = Mock(return_value = algorithm_and_states)
+mock_get_category_and_state = Mock(return_value=algorithm_and_states)
 
 
 @start_qapplication
 class CategoriesSettingsTest(unittest.TestCase):
     CONFIG_SERVICE_CLASSPATH = "workbench.widgets.settings.categories.presenter.ConfigService"
 
-    @patch.object(AlgorithmFactoryImpl, 'getCategoriesandState', mock_get_category_and_state)
+    @patch.object(AlgorithmFactoryImpl, "getCategoriesandState", mock_get_category_and_state)
     def test_algorithm_state_correct_when_created(self):
         mock_view = MockCategoriesView()
         CategoriesSettings(None, mock_view)
@@ -127,26 +128,25 @@ class CategoriesSettingsTest(unittest.TestCase):
         mock_view = MockCategoriesView()
         presenter = CategoriesSettings(None, mock_view)
         hidden_algorthim_string = [i for i in sorted(algorithm_and_states.keys()) if algorithm_and_states[i] is True]
-        presenter._create_hidden_categories_string = Mock(return_value = hidden_algorthim_string)
+        presenter._create_hidden_categories_string = Mock(return_value=hidden_algorthim_string)
         # reset any effects from the constructor
         mock_ConfigService.setString.reset_mock()
 
         presenter.set_hidden_algorithms_string(None)
-        mock_ConfigService.setString.assert_called_once_with(CategoryProperties.HIDDEN_ALGORITHMS.value,
-                                                             ';'.join(hidden_algorthim_string))
+        mock_ConfigService.setString.assert_called_once_with(CategoryProperties.HIDDEN_ALGORITHMS.value, ";".join(hidden_algorthim_string))
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_interface_state_correct_when_created(self, mock_ConfigService):
         mock_main_window = MockMainWindow()
         mock_view = MockCategoriesView()
-        hidden_interfaces = 'Indirect; Muon; Reflectometry'
+        hidden_interfaces = "Indirect; Muon; Reflectometry"
         mock_ConfigService.getString = Mock(return_value=hidden_interfaces)
         CategoriesSettings(mock_main_window, mock_view)
 
         expected_calls = []
         for category in mock_main_window.interface_list:
             is_hidden = False
-            if category in hidden_interfaces.split(';'):
+            if category in hidden_interfaces.split(";"):
                 is_hidden = True
             expected_calls.append(call(mock_view.interface_tree_widget, category, is_hidden))
 
@@ -155,13 +155,12 @@ class CategoriesSettingsTest(unittest.TestCase):
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_set_hidden_interface_string(self, mock_ConfigService):
         mock_view = MockCategoriesView()
-        mock_ConfigService.getString = Mock(return_value='')
+        mock_ConfigService.getString = Mock(return_value="")
         presenter = CategoriesSettings(None, mock_view)
-        hidden_interface_string = 'Indirect; Muon; Reflectometry'
+        hidden_interface_string = "Indirect; Muon; Reflectometry"
 
         # reset any effects from the constructor
         mock_ConfigService.setString.reset_mock()
         presenter._create_hidden_categories_string = Mock(return_value=hidden_interface_string)
         presenter.set_hidden_interfaces_string(None)
-        mock_ConfigService.setString.assert_called_once_with(CategoryProperties.HIDDEN_INTERFACES.value,
-                                                             ';'.join(hidden_interface_string))
+        mock_ConfigService.setString.assert_called_once_with(CategoryProperties.HIDDEN_INTERFACES.value, ";".join(hidden_interface_string))

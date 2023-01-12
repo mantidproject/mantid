@@ -27,7 +27,6 @@ double calculateTOF(double, double);
 double getInstrumentProperty(const API::MatrixWorkspace_sptr &, const std::string &);
 void addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, const std::string &entryName = "",
                            bool useFullPath = false);
-void dumpNexusAttributes(NXhandle nxfileID);
 std::string dateTimeInIsoFormat(const std::string &);
 
 void moveComponent(const API::MatrixWorkspace_sptr &ws, const std::string &componentName, const Kernel::V3D &newPos);
@@ -36,6 +35,25 @@ Kernel::V3D getComponentPosition(const API::MatrixWorkspace_sptr &ws, const std:
 
 void loadEmptyInstrument(const API::MatrixWorkspace_sptr &ws, const std::string &instrumentName,
                          const std::string &instrumentPath = "");
+
+void fillStaticWorkspace(const API::MatrixWorkspace_sptr &, const Mantid::NeXus::NXInt &,
+                         const std::vector<double> &xAxis, int initialSpectrum = 0, bool pointData = false,
+                         const std::vector<int> &detectorIDs = std::vector<int>(),
+                         const std::set<int> &acceptedID = std::set<int>(),
+                         const std::tuple<short, short, short> &axisOrder = std::tuple<short, short, short>(0, 1, 2));
+
+void fillMovingWorkspace(const API::MatrixWorkspace_sptr &, const Mantid::NeXus::NXInt &,
+                         const std::vector<double> &xAxis, int initialSpectrum = 0,
+                         const std::set<int> &acceptedID = std::set<int>(),
+                         const std::vector<int> &customID = std::vector<int>(),
+                         const std::tuple<short, short, short> &axisOrder = std::tuple<short, short, short>(0, 1, 2));
+
+void loadingOrder(const std::tuple<short, short, short> &axisOrder, int *dataIndices);
+
+NeXus::NXInt getIntDataset(const NeXus::NXEntry &, const std::string &);
+NeXus::NXDouble getDoubleDataset(const NeXus::NXEntry &, const std::string &);
+
+void replaceZeroErrors(const API::MatrixWorkspace_sptr &, double);
 
 void recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, std::string &parent_name,
                                      std::string &parent_class, int level, bool useFullPath);

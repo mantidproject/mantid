@@ -4,7 +4,6 @@ from mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.auto_widget.ea_match_table_p
 
 
 class EAMatchTablePresenterTest(unittest.TestCase):
-
     def setUp(self):
         self.presenter = EAMatchTablePresenter(mock.Mock())
 
@@ -12,7 +11,8 @@ class EAMatchTablePresenterTest(unittest.TestCase):
         self.presenter = None
 
     @mock.patch(
-        "mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.auto_widget.ea_match_table_presenter.EAMatchTablePresenter.find_entry_index")
+        "mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.auto_widget.ea_match_table_presenter.EAMatchTablePresenter.find_entry_index"
+    )
     @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.auto_widget.ea_match_table_presenter.EAMatchTablePresenter.remove_entry")
     def test_update_table(self, mock_remove_entry, mock_find_entry_index):
         mock_find_entry_index.return_value = -1
@@ -25,7 +25,8 @@ class EAMatchTablePresenterTest(unittest.TestCase):
         self.assertEqual(["mock_entry"], self.presenter.table_entries)
 
     @mock.patch(
-        "mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.auto_widget.ea_match_table_presenter.EAMatchTablePresenter.find_entry_index")
+        "mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.auto_widget.ea_match_table_presenter.EAMatchTablePresenter.find_entry_index"
+    )
     @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.auto_widget.ea_match_table_presenter.EAMatchTablePresenter.remove_entry")
     def test_update_table_when_entry_is_present(self, mock_remove_entry, mock_find_entry_index):
         index = 3
@@ -49,21 +50,25 @@ class EAMatchTablePresenterTest(unittest.TestCase):
 
     def test_find_entry_index(self):
         # first test, when entry is present
-        self.presenter.table_entries = [["mock_run", "mock_detector", "mock_elements"],
-                                        ["fake_run", "fake_detector", "fake_elements"], ["spam", "eggs", "ham"]]
+        self.presenter.table_entries = [
+            ["mock_run", "mock_detector", "mock_elements"],
+            ["fake_run", "fake_detector", "fake_elements"],
+            ["spam", "eggs", "ham"],
+        ]
 
-        index = self.presenter.find_entry_index(["fake_run", "fake_detector",
-                                                 "This doesn't matter because it doesn't check this"])
+        index = self.presenter.find_entry_index(["fake_run", "fake_detector", "This doesn't matter because it doesn't check this"])
         self.assertEqual(index, 1)
 
         # second test, when entry is absent
-        index = self.presenter.find_entry_index(["run", "detector",
-                                                 "This doesn't matter because it doesn't check this"])
+        index = self.presenter.find_entry_index(["run", "detector", "This doesn't matter because it doesn't check this"])
         self.assertEqual(index, -1)
 
     def test_clear_table(self):
-        self.presenter.table_entries = [["mock_run", "mock_detector", "mock_elements"],
-                                        ["fake_run", "fake_detector", "fake_elements"], ["spam", "eggs", "ham"]]
+        self.presenter.table_entries = [
+            ["mock_run", "mock_detector", "mock_elements"],
+            ["fake_run", "fake_detector", "fake_elements"],
+            ["spam", "eggs", "ham"],
+        ]
 
         self.presenter.clear_table()
 
@@ -72,5 +77,5 @@ class EAMatchTablePresenterTest(unittest.TestCase):
         self.presenter.view.clear_table.assert_called_once()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

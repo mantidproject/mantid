@@ -1,0 +1,1 @@
+- Corrected a repeated call to the loader while merging runs in the :ref:`PelicanReduction <algm-PelicanReduction>` algorithm.

@@ -10,7 +10,7 @@ import unittest
 
 import matplotlib
 
-matplotlib.use('AGG')  # noqa
+matplotlib.use("AGG")  # noqa
 
 import numpy as np
 import time
@@ -39,43 +39,43 @@ class FitPropertyBrowserTest(unittest.TestCase):
     def tearDown(self):
         AnalysisDataService.clear()
 
-    @patch('mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowser.normaliseData')
+    @patch("mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowser.normaliseData")
     def test_normalise_data_set_on_fit_menu_shown(self, normaliseData_mock):
         for normalised in [True, False]:
             ws_artist_mock = Mock(is_normalized=normalised, workspace_index=0)
-            axes_mock = Mock(tracked_workspaces={'ws_name': [ws_artist_mock]})
+            axes_mock = Mock(tracked_workspaces={"ws_name": [ws_artist_mock]})
             property_browser = self._create_widget()
-            with patch.object(property_browser, 'get_axes', lambda: axes_mock):
-                with patch.object(property_browser, 'workspaceName', lambda: 'ws_name'):
+            with patch.object(property_browser, "get_axes", lambda: axes_mock):
+                with patch.object(property_browser, "workspaceName", lambda: "ws_name"):
                     property_browser.getFitMenu().aboutToShow.emit()
             property_browser.normaliseData.assert_called_once_with(normalised)
             normaliseData_mock.reset_mock()
 
-    @patch('mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowser.normaliseData')
+    @patch("mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowser.normaliseData")
     def test_normalise_data_set_to_false_for_distribution_workspace(self, normaliseData_mock):
-        fig, canvas, _ = self._create_and_plot_matrix_workspace('ws_name', distribution=True)
+        fig, canvas, _ = self._create_and_plot_matrix_workspace("ws_name", distribution=True)
         property_browser = self._create_widget(canvas=canvas)
-        with patch.object(property_browser, 'workspaceName', lambda: 'ws_name'):
+        with patch.object(property_browser, "workspaceName", lambda: "ws_name"):
             property_browser.getFitMenu().aboutToShow.emit()
         property_browser.normaliseData.assert_called_once_with(False)
 
     def test_workspace_index_selector_updates_if_new_curve_added(self):
-        fig, canvas, ws = self._create_and_plot_matrix_workspace('ws_name', distribution=True)
+        fig, canvas, ws = self._create_and_plot_matrix_workspace("ws_name", distribution=True)
         property_browser = self._create_widget(canvas=canvas)
-        property_browser.setWorkspaceName('ws_name')
+        property_browser.setWorkspaceName("ws_name")
         plot([ws], spectrum_nums=[3], overplot=True, fig=fig)
         property_browser.setWorkspaceIndex(2)
         self.assertEqual(property_browser.workspaceIndex(), 2)
         property_browser.hide()
 
     def test_workspace_index_selector_updates_if_curve_removed(self):
-        fig, canvas, ws = self._create_and_plot_matrix_workspace('ws_name', distribution=True)
+        fig, canvas, ws = self._create_and_plot_matrix_workspace("ws_name", distribution=True)
         property_browser = self._create_widget(canvas=canvas)
-        property_browser.setWorkspaceName('ws_name')
+        property_browser.setWorkspaceName("ws_name")
         plot([ws], spectrum_nums=[3], overplot=True, fig=fig)
         property_browser.show()
         # remove first spectrum
-        fig.axes[0].tracked_workspaces['ws_name'].pop(0)
+        fig.axes[0].tracked_workspaces["ws_name"].pop(0)
         fig.canvas.draw()
         # we removed the workspaceIndex 0 line, so spinbox should now show 2.
         self.assertEqual(property_browser.workspaceIndex(), 2)
@@ -91,15 +91,11 @@ class FitPropertyBrowserTest(unittest.TestCase):
 
         for plot_diff in [True, False]:
             # create fake fit output results
-            matrixWorkspace = WorkspaceFactory.Instance().create("Workspace2D",
-                                                                 NVectors=3,
-                                                                 YLength=5,
-                                                                 XLength=5)
+            matrixWorkspace = WorkspaceFactory.Instance().create("Workspace2D", NVectors=3, YLength=5, XLength=5)
             tableWorkspace = WorkspaceFactory.createTable()
             AnalysisDataService.Instance().addOrReplace("ws_Workspace", matrixWorkspace)
             AnalysisDataService.Instance().addOrReplace("ws_Parameters", tableWorkspace)
-            AnalysisDataService.Instance().addOrReplace("ws_NormalisedCovarianceMatrix",
-                                                        tableWorkspace)
+            AnalysisDataService.Instance().addOrReplace("ws_NormalisedCovarianceMatrix", tableWorkspace)
 
             property_browser.plotDiff = Mock(return_value=plot_diff)
             property_browser.fitting_done_slot("ws_Workspace")
@@ -194,23 +190,23 @@ class FitPropertyBrowserTest(unittest.TestCase):
         full_ax_limits = ax.axis()
         # zoom in x2 based on the central x and y values and recapture limits
         # note, zoom turns autoscale off
-        zoom(ax, 0.5*(full_ax_limits[0]+full_ax_limits[1]), 0.5*(full_ax_limits[2]+full_ax_limits[3]), 2)
+        zoom(ax, 0.5 * (full_ax_limits[0] + full_ax_limits[1]), 0.5 * (full_ax_limits[2] + full_ax_limits[3]), 2)
         ax_limits = ax.axis()
         canvas.draw()
         widget = self._create_widget(canvas=canvas)
         fit_ws_name = "fit_ws"
         # create fit workspace containing 3 spectra (data\calc\diff)
-        CreateWorkspace(OutputWorkspace=fit_ws_name, DataX=[ax_limits[0], ax_limits[1]], DataY=[1]*6,
-                        NSpec=3, Distribution=False)
+        CreateWorkspace(OutputWorkspace=fit_ws_name, DataX=[ax_limits[0], ax_limits[1]], DataY=[1] * 6, NSpec=3, Distribution=False)
         widget.fitting_done_slot(fit_ws_name)
         self.assertEqual(ax_limits, fig.get_axes()[0].axis())
         # user picks x range bigger than current zoom (but still within ws data range). Plot limits still don't change
-        CreateWorkspace(OutputWorkspace=fit_ws_name, DataX=[full_ax_limits[0], full_ax_limits[1]], DataY=[1]*6,
-                        NSpec=3, Distribution=False)
+        CreateWorkspace(
+            OutputWorkspace=fit_ws_name, DataX=[full_ax_limits[0], full_ax_limits[1]], DataY=[1] * 6, NSpec=3, Distribution=False
+        )
         widget.fitting_done_slot(fit_ws_name)
         self.assertEqual(ax_limits, fig.get_axes()[0].axis())
 
-    @patch('matplotlib.pyplot.get_figlabels')
+    @patch("matplotlib.pyplot.get_figlabels")
     def test_output_workspace_name_changes_if_more_than_one_plot_of_same_workspace(self, figure_labels_mock):
         # create a workspace
         ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=2, YLength=5, XLength=5)
@@ -229,27 +225,27 @@ class FitPropertyBrowserTest(unittest.TestCase):
             output_name.append(browser.outputName())
         self.assertNotEqual(output_name[0], output_name[1])
 
-    @patch('mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowser.setPeakFwhmOf')
-    @patch('mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowser.isParameterExplicitlySetOf')
-    @patch('mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowser.getWidthParameterNameOf')
+    @patch("mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowser.setPeakFwhmOf")
+    @patch("mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowser.isParameterExplicitlySetOf")
+    @patch("mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowser.getWidthParameterNameOf")
     def test_set_peak_initial_fwhm(self, mock_getWidthName, mock_parameterSet, mock_setFwhm):
         property_browser = self._create_widget()
         mock_getWidthName.side_effect = lambda prefix: "S" if prefix == "f0" else ""
         mock_parameterSet.return_value = True
         fwhm = 1.0
         # check width isn't set if already set when initialised (as can happen for B2B exp funcs)
-        property_browser._set_peak_initial_fwhm('f0', fwhm)
+        property_browser._set_peak_initial_fwhm("f0", fwhm)
         mock_setFwhm.assert_not_called()
         # fwhm should be set if width parameter not specified for that peak func
-        property_browser._set_peak_initial_fwhm('f1', fwhm)
-        mock_setFwhm.assert_called_once_with('f1', fwhm)
+        property_browser._set_peak_initial_fwhm("f1", fwhm)
+        mock_setFwhm.assert_called_once_with("f1", fwhm)
 
     def test_new_fit_browser_has_correct_peak_type_when_not_changing_global_default(self):
         """
         Change the default peak type in a fit browser without specifying that the global value should change and check
         that a new fit browser still has the default value from the config.
         """
-        default_peak_type = ConfigService['curvefitting.defaultPeak']
+        default_peak_type = ConfigService["curvefitting.defaultPeak"]
 
         fit_browser = self._create_widget_with_interactive_tool()
 
@@ -267,31 +263,31 @@ class FitPropertyBrowserTest(unittest.TestCase):
         self.assertEqual(fit_browser.defaultPeakType(), new_peak_type)
 
         # Make sure the default peak type in the config didn't change.
-        self.assertEqual(ConfigService['curvefitting.defaultPeak'], default_peak_type)
+        self.assertEqual(ConfigService["curvefitting.defaultPeak"], default_peak_type)
 
         # A new fit browser should have the default peak type from the config.
         new_fit_browser = self._create_widget_with_interactive_tool()
         self.assertNotEqual(new_fit_browser.defaultPeakType(), fit_browser.defaultPeakType())
         self.assertEqual(new_fit_browser.defaultPeakType(), default_peak_type)
 
-    @patch('mantidqt.widgets.fitpropertybrowser.interactive_tool.ConfigService', new_callable=MockConfigService)
+    @patch("mantidqt.widgets.fitpropertybrowser.interactive_tool.ConfigService", new_callable=MockConfigService)
     def test_new_fit_browser_has_correct_peak_type_when_changing_global_default(self, mock_config_service):
         """
         Check that the config service default peak is updated when explicitly requesting it from the fit browser
         interactive tool.
         """
         fit_browser = self._create_widget_with_interactive_tool()
-        fit_browser.tool.action_peak_added('Lorentzian', set_global_default=True)
+        fit_browser.tool.action_peak_added("Lorentzian", set_global_default=True)
 
-        mock_config_service.setString.assert_called_once_with('curvefitting.defaultPeak', 'Lorentzian')
+        mock_config_service.setString.assert_called_once_with("curvefitting.defaultPeak", "Lorentzian")
 
     def test_fit_property_browser_correctly_updates_contents_from_fitted_func(self):
-        fig, canvas, ws = self._create_and_plot_matrix_workspace('ws_name', distribution=True)
+        fig, canvas, ws = self._create_and_plot_matrix_workspace("ws_name", distribution=True)
         property_browser = self._create_widget(canvas=canvas)
         property_browser.show()
         property_browser.setStartX(0)
         property_browser.setEndX(1)
-        property_browser.loadFunction('name=LinearBackground,A0=0,A1=0')
+        property_browser.loadFunction("name=LinearBackground,A0=0,A1=0")
 
         # run the fit
         property_browser.fit()
@@ -303,27 +299,27 @@ class FitPropertyBrowserTest(unittest.TestCase):
         func = property_browser.currentHandler().ifun()
 
         # it should show a linear line with intercept 2 and gradient 1
-        self.assertEqual(str(func.getFunction(0)), 'name=LinearBackground,A0=2,A1=1')
+        self.assertEqual(str(func.getFunction(0)), "name=LinearBackground,A0=2,A1=1")
 
     def test_fit_property_browser_correctly_handles_bin_plots(self):
         # create & plot workspace
-        fig, canvas, ws = self._create_and_plot_matrix_workspace('ws_name', distribution=True)
+        fig, canvas, ws = self._create_and_plot_matrix_workspace("ws_name", distribution=True)
 
-        #set bin plot kwargs
+        # set bin plot kwargs
         plot_kwargs = {"axis": MantidAxType.BIN}
 
-        #overplot bin plot
+        # overplot bin plot
         plot([ws], wksp_indices=[0], plot_kwargs=plot_kwargs, fig=fig, overplot=True)
 
         property_browser = self._create_widget(canvas=canvas)
 
-        #if only 1 spectra is returned, bin spectra has been correctly excluded, spectra correctly included
-        self.assertEqual(len(property_browser._get_allowed_spectra()),1)
+        # if only 1 spectra is returned, bin spectra has been correctly excluded, spectra correctly included
+        self.assertEqual(len(property_browser._get_allowed_spectra()), 1)
 
-        #remove valid spectra plot, leaving a single bin plot
-        fig.get_axes()[0].remove_artists_if(lambda artist: artist.get_label() == 'ws_name: spec 1')
+        # remove valid spectra plot, leaving a single bin plot
+        fig.get_axes()[0].remove_artists_if(lambda artist: artist.get_label() == "ws_name: spec 1")
 
-        #check no spectra is now returned.
+        # check no spectra is now returned.
         self.assertFalse(property_browser._get_allowed_spectra())
 
     # Private helper functions
@@ -332,7 +328,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
         return FitPropertyBrowser(canvas, toolbar_manager)
 
     @classmethod
-    @patch('mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowserBase.show')
+    @patch("mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowserBase.show")
     def _create_widget_with_interactive_tool(cls, _):
         """
         Need to mock some functions and call "show()" in order for the fit browser to create its FitInteractiveTool
@@ -353,12 +349,11 @@ class FitPropertyBrowserTest(unittest.TestCase):
 
     @classmethod
     def _create_and_plot_matrix_workspace(cls, name="workspace", distribution=False):
-        ws = CreateWorkspace(OutputWorkspace=name, DataX=np.arange(10), DataY=2+np.arange(10),
-                             NSpec=5, Distribution=distribution)
+        ws = CreateWorkspace(OutputWorkspace=name, DataX=np.arange(10), DataY=2 + np.arange(10), NSpec=5, Distribution=distribution)
         fig = plot([ws], spectrum_nums=[1])
         canvas = fig.canvas
         return fig, canvas, ws
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

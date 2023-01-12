@@ -15,6 +15,7 @@ import types
 # by preferring PyQt5 as we would like
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QApplication
+
 try:
     # Later versions of Qtconsole are part of Jupyter
     from qtconsole.rich_jupyter_widget import RichJupyterWidget
@@ -31,7 +32,6 @@ from workbench.utils.io import input_qinputdialog
 
 
 class InProcessJupyterConsole(RichJupyterWidget):
-
     def __init__(self, *args, **kwargs):
         """
         A constructor matching that of RichJupyterWidget
@@ -49,7 +49,7 @@ class InProcessJupyterConsole(RichJupyterWidget):
         kernel_manager = QtInProcessKernelManager()
         kernel_manager.start_kernel()
         kernel = kernel_manager.kernel
-        kernel.gui = 'qt'
+        kernel.gui = "qt"
 
         # use a separate thread for execution
         shell = kernel.shell
@@ -96,15 +96,13 @@ def async_wrapper(orig_run_code, shell_instance):
         """
         # Different target arguments depending on IPython's version
         function_parameters = getfullargspec(orig_run_code)
-        if 'result' in function_parameters.args:
-            if hasattr(function_parameters, 'kwonlyargs') and 'async_' in function_parameters.kwonlyargs:
+        if "result" in function_parameters.args:
+            if hasattr(function_parameters, "kwonlyargs") and "async_" in function_parameters.kwonlyargs:
                 return orig_run_code(code_obj, result, async_=async_)  # return coroutine to be awaited
             else:
-                task = BlockingAsyncTaskWithCallback(target=orig_run_code, args=(code_obj, result),
-                                                     blocking_cb=QApplication.processEvents)
+                task = BlockingAsyncTaskWithCallback(target=orig_run_code, args=(code_obj, result), blocking_cb=QApplication.processEvents)
         else:
-            task = BlockingAsyncTaskWithCallback(target=orig_run_code, args=(code_obj,),
-                                                 blocking_cb=QApplication.processEvents)
+            task = BlockingAsyncTaskWithCallback(target=orig_run_code, args=(code_obj,), blocking_cb=QApplication.processEvents)
         return task.start()
 
     return types.MethodType(async_run_code, shell_instance)

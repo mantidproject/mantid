@@ -18,7 +18,7 @@ class WorkspaceCalculatorView(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.ui = load_ui(__file__, 'workspace_calculator.ui', baseinstance=self)
+        self.ui = load_ui(__file__, "workspace_calculator.ui", baseinstance=self)
 
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
@@ -35,14 +35,14 @@ class WorkspaceCalculatorView(QWidget):
         self.output_ws.setOptional(True)
 
         # connecting ADS observers
-        self.lhs_ws.focussed.connect(lambda: self.connectADS('lhs'))
-        self.rhs_ws.focussed.connect(lambda: self.connectADS('rhs'))
-        self.output_ws.focussed.connect(lambda: self.connectADS('output'))
+        self.lhs_ws.focussed.connect(lambda: self.connectADS("lhs"))
+        self.rhs_ws.focussed.connect(lambda: self.connectADS("rhs"))
+        self.output_ws.focussed.connect(lambda: self.connectADS("output"))
 
         # cases for disconnecting ADS observers
-        self.lhs_ws.activated.connect(lambda: self.disconnectADS('lhs'))
-        self.rhs_ws.activated.connect(lambda: self.disconnectADS('rhs'))
-        self.output_ws.activated.connect(lambda: self.disconnectADS('output'))
+        self.lhs_ws.activated.connect(lambda: self.disconnectADS("lhs"))
+        self.rhs_ws.activated.connect(lambda: self.disconnectADS("rhs"))
+        self.output_ws.activated.connect(lambda: self.disconnectADS("output"))
 
         # by default the observers to the ADS should be disconnected, and connected only when user focuses on the widget
         self.lhs_ws.disconnectObservers()
@@ -71,7 +71,7 @@ class WorkspaceCalculatorView(QWidget):
         elif selector_name == "output" and not self.output_ws.isConnected():
             self.output_ws.connectObservers()
 
-    def disconnectADS(self, selector_name = ""):
+    def disconnectADS(self, selector_name=""):
         """Disconnects connected workspace selectors from signals coming from the ADS."""
         if selector_name == "lhs":
             self.lhs_ws.disconnectObservers()

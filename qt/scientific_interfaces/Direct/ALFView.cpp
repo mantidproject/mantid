@@ -10,9 +10,10 @@
 #include "ALFAnalysisView.h"
 #include "ALFInstrumentModel.h"
 #include "ALFInstrumentView.h"
+#include "ALFInstrumentWidget.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 
+#include <QSplitter>
 #include <QString>
 #include <QVBoxLayout>
 
@@ -37,9 +38,15 @@ void ALFView::initLayout() {
   splitter->addWidget(m_instrumentPresenter->getInstrumentView());
   splitter->addWidget(m_analysisPresenter->getView());
 
+  splitter->setCollapsible(0, false);
+  splitter->setCollapsible(1, false);
+
   auto mainWidget = new QSplitter(Qt::Vertical);
   mainWidget->addWidget(m_instrumentPresenter->getLoadWidget());
   mainWidget->addWidget(splitter);
+
+  mainWidget->setCollapsible(0, false);
+  mainWidget->setCollapsible(1, false);
 
   auto centralWidget = new QWidget();
   auto verticalLayout = new QVBoxLayout(centralWidget);

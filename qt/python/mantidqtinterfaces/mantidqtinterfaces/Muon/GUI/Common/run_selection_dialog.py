@@ -8,27 +8,23 @@ from qtpy import QtWidgets, QtCore
 
 
 class RunSelectionDialog(QtWidgets.QDialog):
-
     def __init__(self, current_runs, instrument, parent=None):
         QtWidgets.QDialog.__init__(self, parent)
 
-        self.setWindowTitle('Run Selection')
+        self.setWindowTitle("Run Selection")
         layout = QtWidgets.QVBoxLayout(self)
 
         self.message = QtWidgets.QLabel()
-        self.message.setText('Which run do you wish to use for calculation?')
+        self.message.setText("Which run do you wish to use for calculation?")
         layout.addWidget(self.message)
 
-        current_runs_as_string = [
-            instrument + str(run[0]) for run in current_runs]
+        current_runs_as_string = [instrument + str(run[0]) for run in current_runs]
         self.run_selector_combo = QtWidgets.QComboBox()
         self.run_selector_combo.addItems(current_runs_as_string)
 
         layout.addWidget(self.run_selector_combo)
 
-        buttons = QtWidgets.QDialogButtonBox(
-            QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel,
-            QtCore.Qt.Horizontal, self)
+        buttons = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel, QtCore.Qt.Horizontal, self)
 
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)

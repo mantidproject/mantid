@@ -10,9 +10,14 @@ from unittest import mock
 
 from mantid.api import WorkspaceGroup, AnalysisDataService
 from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces
-from sans.algorithm_detail.batch_execution import (get_all_names_to_save, get_transmission_names_to_save,
-                                                   ReductionPackage, select_reduction_alg, save_workspace_to_file,
-                                                   delete_reduced_workspaces)
+from sans.algorithm_detail.batch_execution import (
+    get_all_names_to_save,
+    get_transmission_names_to_save,
+    ReductionPackage,
+    select_reduction_alg,
+    save_workspace_to_file,
+    delete_reduced_workspaces,
+)
 from sans.common.enums import SaveType
 
 
@@ -41,22 +46,31 @@ class ADSMock(object):
 class GetAllNamesToSaveTest(unittest.TestCase):
     def setUp(self):
         state = mock.MagicMock()
-        workspaces = ['Sample', 'Transmission', 'Direct']
-        monitors = ['monitor1']
+        workspaces = ["Sample", "Transmission", "Direct"]
+        monitors = ["monitor1"]
         self.reduction_package_merged = ReductionPackage(state, workspaces, monitors)
         self.reduction_package = ReductionPackage(state, workspaces, monitors)
         self.reduction_package_transmissions = ReductionPackage(state, workspaces, monitors)
-        self.reduction_package_transmissions.unfitted_transmission_base_name = 'Base'
-        self.reduction_package_transmissions.unfitted_transmission_name = ['transmission']
-        self.reduction_package_transmissions.unfitted_transmission_can_base_name = 'Base'
-        self.reduction_package_transmissions.unfitted_transmission_can_name = ['transmission_can']
+        self.reduction_package_transmissions.unfitted_transmission_base_name = "Base"
+        self.reduction_package_transmissions.unfitted_transmission_name = ["transmission"]
+        self.reduction_package_transmissions.unfitted_transmission_can_base_name = "Base"
+        self.reduction_package_transmissions.unfitted_transmission_can_name = ["transmission_can"]
 
         def _create_sample_ws_group(ws_name):
             # This has to be done as two steps or the simple API can't figure out the output name
             ws_group = WorkspaceGroup()
-            ws_group.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_name, Function='Flat background',
-                                                        NumBanks=1, BankPixelWidth=1, NumEvents=1,
-                                                        XMin=1, XMax=14, BinWidth=2))
+            ws_group.addWorkspace(
+                CreateSampleWorkspace(
+                    OutputWorkspace=ws_name,
+                    Function="Flat background",
+                    NumBanks=1,
+                    BankPixelWidth=1,
+                    NumEvents=1,
+                    XMin=1,
+                    XMax=14,
+                    BinWidth=2,
+                )
+            )
             return ws_group
 
         # Some tests rely on the names being in the ADS - so manually inject them so we don't have to
@@ -78,8 +92,8 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         self.reduction_package_merged.reduced_hab_can = reduced_hab_can
         self.reduction_package_merged.reduced_lab_sample = reduced_lab_sample
         self.reduction_package_merged.reduced_hab_sample = reduced_hab_sample
-        self.reduction_package_merged.unfitted_transmission = ''
-        self.reduction_package_merged.unfitted_transmission_can = ''
+        self.reduction_package_merged.unfitted_transmission = ""
+        self.reduction_package_merged.unfitted_transmission_can = ""
 
         self.reduction_package.reduced_lab = lab_workspace
         self.reduction_package.reduced_hab = hab_workspace
@@ -87,8 +101,8 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         self.reduction_package.reduced_hab_can = reduced_hab_can
         self.reduction_package.reduced_lab_sample = reduced_lab_sample
         self.reduction_package.reduced_hab_sample = reduced_hab_sample
-        self.reduction_package.unfitted_transmission = ''
-        self.reduction_package.unfitted_transmission_can = ''
+        self.reduction_package.unfitted_transmission = ""
+        self.reduction_package.unfitted_transmission_can = ""
 
         self.reduction_package_transmissions.reduced_lab = lab_workspace
         self.reduction_package_transmissions.reduced_hab = hab_workspace
@@ -103,19 +117,25 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         reduction_packages = [self.reduction_package_merged]
         names_to_save = get_all_names_to_save(reduction_packages, save_can=False)
 
-        self.assertEqual(names_to_save, [(['merged_workspace'], [], [])])
+        self.assertEqual(names_to_save, [(["merged_workspace"], [], [])])
 
     def test_hab_and_lab_workspaces_returned_if_merged_workspace_not_present(self):
         reduction_packages = [self.reduction_package]
         names_to_save = get_all_names_to_save(reduction_packages, save_can=False)
 
-        self.assertEqual(names_to_save, [(['lab_workspace'], [], []), (['hab_workspace'], [], [])])
+        self.assertEqual(names_to_save, [(["lab_workspace"], [], []), (["hab_workspace"], [], [])])
 
     def test_can_workspaces_returned_if_save_can_selected(self):
         names_to_save = get_all_names_to_save([self.reduction_package_merged], True)
-        names = {'merged_workspace', 'lab_workspace', 'hab_workspace',
-                 'reduced_lab_can', 'reduced_hab_can',
-                 'reduced_lab_sample', 'reduced_hab_sample'}
+        names = {
+            "merged_workspace",
+            "lab_workspace",
+            "hab_workspace",
+            "reduced_lab_can",
+            "reduced_hab_can",
+            "reduced_lab_sample",
+            "reduced_hab_sample",
+        }
         names_expected = [([name], [], []) for name in names]
         self.assertEqual(sorted(names_to_save), sorted(names_expected))
 
@@ -123,9 +143,7 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         reduction_packages = [self.reduction_package]
         names_to_save = get_all_names_to_save(reduction_packages, True)
 
-        names = {'lab_workspace', 'hab_workspace',
-                 'reduced_lab_can', 'reduced_hab_can',
-                 'reduced_lab_sample', 'reduced_hab_sample'}
+        names = {"lab_workspace", "hab_workspace", "reduced_lab_can", "reduced_hab_can", "reduced_lab_sample", "reduced_hab_sample"}
         names_expected = [([name], [], []) for name in names]
         self.assertEqual(sorted(names_to_save), sorted(names_expected))
 
@@ -134,59 +152,83 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         reduction_package = self.reduction_package
         reduction_package.unfitted_transmission_base_name = None
         returned_name = get_transmission_names_to_save(reduction_package, False)
-        self.assertEqual(returned_name, [], "Should have returned an empty string because "
-                                            "transmission sample base name was None. "
-                                            "Returned {} instead".format(returned_name))
+        self.assertEqual(
+            returned_name,
+            [],
+            "Should have returned an empty string because "
+            "transmission sample base name was None. "
+            "Returned {} instead".format(returned_name),
+        )
 
         # Test when base name is not None but name is None
-        reduction_package.unfitted_transmission_base_name = 'Base'
+        reduction_package.unfitted_transmission_base_name = "Base"
         reduction_package.unfitted_transmission_name = None
         returned_name = get_transmission_names_to_save(reduction_package, False)
-        self.assertEqual(returned_name, [], "Should have returned an empty string because "
-                                            "transmission sample name was None. "
-                                            "Returned {} instead".format(returned_name))
+        self.assertEqual(
+            returned_name,
+            [],
+            "Should have returned an empty string because "
+            "transmission sample name was None. "
+            "Returned {} instead".format(returned_name),
+        )
 
     @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService", new=ADSMock(False))
     def test_no_transmission_workspace_names_returned_if_not_in_ADS(self):
         # Check transmission sample
         returned_name = get_transmission_names_to_save(self.reduction_package_transmissions, False)
-        self.assertEqual(returned_name, [], "Should have returned an empty string because "
-                                            "transmission sample was not in the ADS. "
-                                            "Returned {} instead.".format(returned_name))
+        self.assertEqual(
+            returned_name,
+            [],
+            "Should have returned an empty string because "
+            "transmission sample was not in the ADS. "
+            "Returned {} instead.".format(returned_name),
+        )
 
         # Check transmission_can
         returned_name = get_transmission_names_to_save(self.reduction_package_transmissions, True)
-        self.assertEqual(returned_name, [], "Should have returned an empty string because "
-                                            "transmission can was not in the ADS. "
-                                            "Returned {} instead".format(returned_name))
+        self.assertEqual(
+            returned_name,
+            [],
+            "Should have returned an empty string because "
+            "transmission can was not in the ADS. "
+            "Returned {} instead".format(returned_name),
+        )
 
     @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService", new=ADSMock(True))
     def test_transmission_workspace_names_from_reduction_package_are_returned_if_in_ADS(self):
         reduction_package = self.reduction_package_transmissions
-        reduction_package.unfitted_transmission_base_name = 'Base'
-        reduction_package.unfitted_transmission_name = ['transmission']
-        reduction_package.unfitted_transmission_can_base_name = 'Base'
-        reduction_package.unfitted_transmission_can_name = ['transmission_can']
+        reduction_package.unfitted_transmission_base_name = "Base"
+        reduction_package.unfitted_transmission_name = ["transmission"]
+        reduction_package.unfitted_transmission_can_base_name = "Base"
+        reduction_package.unfitted_transmission_can_name = ["transmission_can"]
 
         # Check transmission sample
         returned_name = get_transmission_names_to_save(reduction_package, False)
-        self.assertEqual(returned_name, ['transmission'], "Should have transmission as name because "
-                                                          "transmission sample was in the ADS. "
-                                                          "Returned {} instead.".format(returned_name))
+        self.assertEqual(
+            returned_name,
+            ["transmission"],
+            "Should have transmission as name because " "transmission sample was in the ADS. " "Returned {} instead.".format(returned_name),
+        )
 
         # Check transmission_can
         returned_name = get_transmission_names_to_save(reduction_package, True)
-        self.assertEqual(returned_name, ['transmission_can'], "Should have returned transmission can as name because "
-                                                              "transmission can was not in the ADS. "
-                                                              "Returned {} instead.".format(returned_name))
+        self.assertEqual(
+            returned_name,
+            ["transmission_can"],
+            "Should have returned transmission can as name because "
+            "transmission can was not in the ADS. "
+            "Returned {} instead.".format(returned_name),
+        )
 
     @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService", new=ADSMock(True))
     def test_transmission_names_added_to_correct_workspaces_when_not_saving_can(self):
         reduction_packages = [self.reduction_package_transmissions]
         names_to_save = get_all_names_to_save(reduction_packages, False)
 
-        names_expected = [(['lab_workspace'], ['transmission'], ['transmission_can']),
-                          (['hab_workspace'], ['transmission'], ['transmission_can'])]
+        names_expected = [
+            (["lab_workspace"], ["transmission"], ["transmission_can"]),
+            (["hab_workspace"], ["transmission"], ["transmission_can"]),
+        ]
 
         self.assertEqual(names_to_save, names_expected)
 
@@ -195,12 +237,14 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         reduction_packages = [self.reduction_package_transmissions]
         names_to_save = get_all_names_to_save(reduction_packages, True)
 
-        names_expected = [(['lab_workspace'], ['transmission'], ['transmission_can']),
-                          (['hab_workspace'], ['transmission'], ['transmission_can']),
-                          (['reduced_lab_can'], [], ['transmission_can']),
-                          (['reduced_hab_can'], [], ['transmission_can']),
-                          (['reduced_lab_sample'], ['transmission'], []),
-                          (['reduced_hab_sample'], ['transmission'], [])]
+        names_expected = [
+            (["lab_workspace"], ["transmission"], ["transmission_can"]),
+            (["hab_workspace"], ["transmission"], ["transmission_can"]),
+            (["reduced_lab_can"], [], ["transmission_can"]),
+            (["reduced_hab_can"], [], ["transmission_can"]),
+            (["reduced_lab_sample"], ["transmission"], []),
+            (["reduced_hab_sample"], ["transmission"], []),
+        ]
 
         self.assertEqual(names_to_save, names_expected)
 
@@ -208,8 +252,9 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         require_event_slices = False
         compatibility_mode = False
         event_slice_optimisation_checkbox = True
-        actual_using_event_slice_optimisation, _ = select_reduction_alg(require_event_slices, compatibility_mode,
-                                                                        event_slice_optimisation_checkbox, [])
+        actual_using_event_slice_optimisation, _ = select_reduction_alg(
+            require_event_slices, compatibility_mode, event_slice_optimisation_checkbox, []
+        )
         self.assertEqual(actual_using_event_slice_optimisation, False)
 
     @mock.patch("sans.algorithm_detail.batch_execution.split_reduction_packages_for_event_slice_packages")
@@ -217,8 +262,9 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         require_event_slices = True
         compatibility_mode = True
         event_slice_optimisation_checkbox = True
-        actual_using_event_slice_optimisation, _ = select_reduction_alg(require_event_slices, compatibility_mode,
-                                                                        event_slice_optimisation_checkbox, [])
+        actual_using_event_slice_optimisation, _ = select_reduction_alg(
+            require_event_slices, compatibility_mode, event_slice_optimisation_checkbox, []
+        )
         self.assertEqual(actual_using_event_slice_optimisation, False)
         # Test that reduction packages have been split into event slices
         event_slice_splitter_mock.assert_called_once_with([])
@@ -228,8 +274,9 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         require_event_slices = True
         compatibility_mode = False
         event_slice_optimisation_checkbox = False
-        actual_using_event_slice_optimisation, _ = select_reduction_alg(require_event_slices, compatibility_mode,
-                                                                        event_slice_optimisation_checkbox, [])
+        actual_using_event_slice_optimisation, _ = select_reduction_alg(
+            require_event_slices, compatibility_mode, event_slice_optimisation_checkbox, []
+        )
         self.assertEqual(actual_using_event_slice_optimisation, False)
         # Test that reduction packages have been split into event slices
         event_slice_splitter_mock.assert_called_once_with([])
@@ -238,29 +285,34 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         require_event_slices = True
         compatibility_mode = False
         event_slice_optimisation_checkbox = True
-        actual_using_event_slice_optimisation, _ = select_reduction_alg(require_event_slices, compatibility_mode,
-                                                                        event_slice_optimisation_checkbox, [])
+        actual_using_event_slice_optimisation, _ = select_reduction_alg(
+            require_event_slices, compatibility_mode, event_slice_optimisation_checkbox, []
+        )
         self.assertEqual(actual_using_event_slice_optimisation, True)
 
     @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
     def test_that_save_workspace_to_file_includes_run_numbers_in_options(self, mock_alg_manager):
         ws_name = "wsName"
         filename = "fileName"
-        additional_run_numbers = {"SampleTransmissionRunNumber": "5",
-                                  "SampleDirectRunNumber": "6",
-                                  "CanScatterRunNumber": "7",
-                                  "CanDirectRunNumber": "8"}
+        additional_run_numbers = {
+            "SampleTransmissionRunNumber": "5",
+            "SampleDirectRunNumber": "6",
+            "CanScatterRunNumber": "7",
+            "CanDirectRunNumber": "8",
+        }
 
         save_workspace_to_file(ws_name, [], filename, additional_run_numbers)
 
-        expected_options = {"InputWorkspace": ws_name,
-                            "Filename": filename,
-                            "Transmission": "",
-                            "TransmissionCan": "",
-                            "SampleTransmissionRunNumber": "5",
-                            "SampleDirectRunNumber": "6",
-                            "CanScatterRunNumber": "7",
-                            "CanDirectRunNumber": "8"}
+        expected_options = {
+            "InputWorkspace": ws_name,
+            "Filename": filename,
+            "Transmission": "",
+            "TransmissionCan": "",
+            "SampleTransmissionRunNumber": "5",
+            "SampleDirectRunNumber": "6",
+            "CanScatterRunNumber": "7",
+            "CanDirectRunNumber": "8",
+        }
         mock_alg_manager.assert_called_once_with("SANSSave", **expected_options)
 
     @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
@@ -268,21 +320,22 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         ws_name = "wsName"
         filename = "fileName"
         additional_run_numbers = {}
-        file_types = [SaveType.NEXUS, SaveType.CAN_SAS, SaveType.NX_CAN_SAS, SaveType.NIST_QXY, SaveType.RKH,
-                      SaveType.CSV]
+        file_types = [SaveType.NEXUS, SaveType.CAN_SAS, SaveType.NX_CAN_SAS, SaveType.NIST_QXY, SaveType.RKH, SaveType.CSV]
 
         save_workspace_to_file(ws_name, file_types, filename, additional_run_numbers)
 
-        expected_options = {"InputWorkspace": ws_name,
-                            "Filename": filename,
-                            "Transmission": "",
-                            "TransmissionCan": "",
-                            "Nexus": True,
-                            "CanSAS": True,
-                            "NXcanSAS": True,
-                            "NistQxy": True,
-                            "RKH": True,
-                            "CSV": True}
+        expected_options = {
+            "InputWorkspace": ws_name,
+            "Filename": filename,
+            "Transmission": "",
+            "TransmissionCan": "",
+            "Nexus": True,
+            "CanSAS": True,
+            "NXcanSAS": True,
+            "NistQxy": True,
+            "RKH": True,
+            "CSV": True,
+        }
         mock_alg_manager.assert_called_once_with("SANSSave", **expected_options)
 
     @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
@@ -294,13 +347,21 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         transmission_name = "transName"
         transmission_can_name = "transCanName"
 
-        save_workspace_to_file(ws_name, file_types, filename, additional_run_numbers,
-                               transmission_name=transmission_name, transmission_can_name=transmission_can_name)
+        save_workspace_to_file(
+            ws_name,
+            file_types,
+            filename,
+            additional_run_numbers,
+            transmission_name=transmission_name,
+            transmission_can_name=transmission_can_name,
+        )
 
-        expected_options = {"InputWorkspace": ws_name,
-                            "Filename": filename,
-                            "Transmission": transmission_name,
-                            "TransmissionCan": transmission_can_name}
+        expected_options = {
+            "InputWorkspace": ws_name,
+            "Filename": filename,
+            "Transmission": transmission_name,
+            "TransmissionCan": transmission_can_name,
+        }
         mock_alg_manager.assert_called_once_with("SANSSave", **expected_options)
 
 
@@ -320,8 +381,7 @@ class DeleteMethodsTest(unittest.TestCase):
     def _create_non_ads_sample_workspaces():
         ws_group = WorkspaceGroup()
         for i in range(2):
-            ws_group.addWorkspace(CreateSampleWorkspace(OutputWorkspace=str(uuid.uuid4()),
-                                  StoreInADS=False))
+            ws_group.addWorkspace(CreateSampleWorkspace(OutputWorkspace=str(uuid.uuid4()), StoreInADS=False))
         return ws_group
 
     @staticmethod
@@ -353,5 +413,5 @@ class DeleteMethodsTest(unittest.TestCase):
             self.assertFalse(i)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

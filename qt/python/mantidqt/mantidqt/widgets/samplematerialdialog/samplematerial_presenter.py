@@ -17,6 +17,7 @@ class SampleMaterialDialogPresenter(AlgorithmObserver):
     Presenter for the sample material dialog view. User can view the material,
     set the material, or copy the material to another workspace.
     """
+
     def __init__(self, workspace, parent=None, view=None):
         super(SampleMaterialDialogPresenter, self).__init__()
         # Optional view argument allows mocking of the view.
@@ -34,26 +35,30 @@ class SampleMaterialDialogPresenter(AlgorithmObserver):
 
     def update_material(self):
         material = self.workspace.sample().getMaterial()
-        self.view.update_material(formula=material.name(),
-                                  number_density=material.numberDensity,
-                                  temperature=material.temperature,
-                                  pressure=material.pressure,
-                                  absorption=material.absorbXSection(),
-                                  total=material.totalScatterXSection(),
-                                  coherent=material.cohScatterXSection(),
-                                  incoherent=material.incohScatterXSection())
+        self.view.update_material(
+            formula=material.name(),
+            number_density=material.numberDensity,
+            temperature=material.temperature,
+            pressure=material.pressure,
+            absorption=material.absorbXSection(),
+            total=material.totalScatterXSection(),
+            coherent=material.cohScatterXSection(),
+            incoherent=material.incohScatterXSection(),
+        )
 
     def copy_material(self):
         """
         Open a CopySample algorithm dialog with the CopyMaterial option.
         """
-        presets = {"InputWorkspace": self.workspace.name(),
-                   "CopyName": "0",
-                   "CopyMaterial": "1",
-                   "CopyEnvironment": "0",
-                   "CopyShape": "0",
-                   "CopyLattice": "0",
-                   "CopyOrientationOnly": "0"}
+        presets = {
+            "InputWorkspace": self.workspace.name(),
+            "CopyName": "0",
+            "CopyMaterial": "1",
+            "CopyEnvironment": "0",
+            "CopyShape": "0",
+            "CopyLattice": "0",
+            "CopyOrientationOnly": "0",
+        }
 
         manager = InterfaceManager()
         dialog = manager.createDialogFromName("CopySample", -1, self.view, False, presets)

@@ -46,7 +46,7 @@ class DifferenceView(QtWidgets.QWidget):
         self.vertical_layout.addLayout(self.horizontal_layout)
         self.vertical_layout.addWidget(self._group_table)
         self.vertical_layout.addWidget(self._pair_table)
-        self.vertical_layout.setContentsMargins(0,0,0,0)
+        self.vertical_layout.setContentsMargins(0, 0, 0, 0)
         self._group_table.hide()
         self.setLayout(self.vertical_layout)
 

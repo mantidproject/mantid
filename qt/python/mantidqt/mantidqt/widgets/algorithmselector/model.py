@@ -7,14 +7,15 @@
 from mantid.api import AlgorithmFactory, AlgorithmManager, IWorkspaceProperty
 from mantid.kernel import Direction
 
-CATEGORY_SEP = '\\'
+CATEGORY_SEP = "\\"
 
 
 class AlgorithmSelectorModel(object):
     """
     This is a model for the algorithm selector widget.
     """
-    algorithm_key = '_'
+
+    algorithm_key = "_"
 
     def __init__(self, presenter, include_hidden=False):
         """
@@ -80,8 +81,7 @@ class AlgorithmSelectorModel(object):
 
         # Add hidden algs to search box (hidden on tree)
         include_hidden = True
-        unique_alg_names = set(descr.name
-                               for descr in algm_factory.getDescriptors(include_hidden, include_alias))
+        unique_alg_names = set(descr.name for descr in algm_factory.getDescriptors(include_hidden, include_alias))
         return sorted(unique_alg_names), data
 
     def find_input_workspace_property(self, algorithm):

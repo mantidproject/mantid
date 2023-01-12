@@ -9,36 +9,21 @@ from isis_powder.hrpd_routines.hrpd_enums import HRPD_TOF_WINDOWS
 absorption_correction_params = {
     "cylinder_sample_height": 2.0,
     "cylinder_sample_radius": 0.3,
-    "cylinder_position": [0., 0., 0.],
-    "chemical_formula": "V"
+    "cylinder_position": [0.0, 0.0, 0.0],
+    "chemical_formula": "V",
 }
 
 # Default cropping values are 5% off each end
 
-window_10_50_params = {
-    "vanadium_tof_cropping": (0.05, 0.95),
-    "focused_cropping_values": (0.05, 0.95)
-}
+window_10_50_params = {"vanadium_tof_cropping": (0.05, 0.95), "focused_cropping_values": (0.05, 0.95)}
 
-window_10_110_params = {
-    "vanadium_tof_cropping": (0.05, 0.95),
-    "focused_cropping_values": (0.05, 0.95)
-}
+window_10_110_params = {"vanadium_tof_cropping": (0.05, 0.95), "focused_cropping_values": (0.05, 0.95)}
 
-window_30_130_params = {
-    "vanadium_tof_cropping": (0.05, 0.95),
-    "focused_cropping_values": (0.05, 0.95)
-}
+window_30_130_params = {"vanadium_tof_cropping": (0.05, 0.95), "focused_cropping_values": (0.05, 0.95)}
 
-window_100_200_params = {
-    "vanadium_tof_cropping": (0.05, 0.95),
-    "focused_cropping_values": (0.05, 0.95)
-}
+window_100_200_params = {"vanadium_tof_cropping": (0.05, 0.95), "focused_cropping_values": (0.05, 0.95)}
 
-window_180_280_params = {
-    "vanadium_tof_cropping": (0.05, 0.95),
-    "focused_cropping_values": (0.05, 0.95)
-}
+window_180_280_params = {"vanadium_tof_cropping": (0.05, 0.95), "focused_cropping_values": (0.05, 0.95)}
 
 file_names = {
     "vanadium_peaks_masking_file": "VanaPeaks.dat",
@@ -52,12 +37,8 @@ file_names = {
 
 general_params = {
     "spline_coefficient": 70,
-    "focused_bin_widths": [
-        -0.0003,  # Bank 1
-        -0.0007,  # Bank 2
-        -0.0012  # Bank 3
-    ],
-    "mode": "coupled"
+    "focused_bin_widths": [-0.0003, -0.0007, -0.0012],  # Bank 1  # Bank 2  # Bank 3
+    "mode": "coupled",
 }
 
 

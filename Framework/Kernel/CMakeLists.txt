@@ -1,5 +1,4 @@
 set(SRC_FILES
-    src/SetValueWhenProperty.cpp
     src/ANN_complete.cpp
     src/ArrayBoundedValidator.cpp
     src/ArrayLengthValidator.cpp
@@ -95,6 +94,7 @@ set(SRC_FILES
     src/ReadLock.cpp
     src/RebinParamsValidator.cpp
     src/RegexStrings.cpp
+    src/SetValueWhenProperty.cpp
     src/SingletonHolder.cpp
     src/SobolSequence.cpp
     src/StartsWithValidator.cpp
@@ -107,6 +107,7 @@ set(SRC_FILES
     src/ThreadPool.cpp
     src/ThreadPoolRunnable.cpp
     src/ThreadSafeLogStream.cpp
+    src/TimeROI.cpp
     src/TimeSeriesProperty.cpp
     src/TimeSplitter.cpp
     src/Timer.cpp
@@ -139,7 +140,6 @@ set(SRC_UNITY_IGNORE_FILES
 )
 
 set(INC_FILES
-    inc/MantidKernel/SetValueWhenProperty.h
     inc/MantidKernel/ANN/ANN.h
     inc/MantidKernel/ANN/ANNperf.h
     inc/MantidKernel/ANN/ANNx.h
@@ -265,6 +265,7 @@ set(INC_FILES
     inc/MantidKernel/RebinParamsValidator.h
     inc/MantidKernel/RegexStrings.h
     inc/MantidKernel/RegistrationHelper.h
+    inc/MantidKernel/SetValueWhenProperty.h
     inc/MantidKernel/SingletonHolder.h
     inc/MantidKernel/SobolSequence.h
     inc/MantidKernel/SpecialCoordinateSystem.h
@@ -282,6 +283,7 @@ set(INC_FILES
     inc/MantidKernel/ThreadSafeLogStream.h
     inc/MantidKernel/ThreadScheduler.h
     inc/MantidKernel/ThreadSchedulerMutexes.h
+    inc/MantidKernel/TimeROI.h
     inc/MantidKernel/TimeSeriesProperty.h
     inc/MantidKernel/TimeSplitter.h
     inc/MantidKernel/Timer.h
@@ -426,6 +428,7 @@ set(TEST_FILES
     ThreadPoolTest.h
     ThreadSchedulerMutexesTest.h
     ThreadSchedulerTest.h
+    TimeROITest.h
     TimeSeriesPropertyTest.h
     TimeSplitterTest.h
     TimerTest.h

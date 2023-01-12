@@ -12,43 +12,43 @@ from enum import Enum
 #  Named tuples for passing around data in a structured way, a bit like a plain old c-struct.
 # ----------------------------------------------------------------------------------------------------------------------
 # General
-range_entry = namedtuple('range_entry', 'start, stop')
-range_entry_with_detector = namedtuple('range_entry_with_detector', 'start, stop, detector_type')
-single_entry_with_detector = namedtuple('range_entry_with_detector', 'entry, detector_type')
+range_entry = namedtuple("range_entry", "start, stop")
+range_entry_with_detector = namedtuple("range_entry_with_detector", "start, stop, detector_type")
+single_entry_with_detector = namedtuple("range_entry_with_detector", "entry, detector_type")
 
 # Back
-back_single_monitor_entry = namedtuple('back_single_monitor_entry', 'monitor, start, stop')
+back_single_monitor_entry = namedtuple("back_single_monitor_entry", "monitor, start, stop")
 
 # Limits
-mask_angle_entry = namedtuple('mask_angle_entry', 'min, max, use_mirror')
-simple_range = namedtuple('simple_range', 'start, stop, step, step_type')
-q_xy_range = namedtuple('q_xy_range', 'start, stop, step')
-complex_range = namedtuple('complex_steps', 'start, step1, mid, step2, stop, step_type1, step_type2')
-rebin_string_values = namedtuple('rebin_string_values', 'value')
-event_binning_string_values = namedtuple('event_binning_string_values', 'value')
-q_rebin_values = namedtuple('q_rebin_values', 'min, max, rebin_string')
+mask_angle_entry = namedtuple("mask_angle_entry", "min, max, use_mirror")
+simple_range = namedtuple("simple_range", "start, stop, step, step_type")
+q_xy_range = namedtuple("q_xy_range", "start, stop, step")
+complex_range = namedtuple("complex_steps", "start, step1, mid, step2, stop, step_type1, step_type2")
+rebin_string_values = namedtuple("rebin_string_values", "value")
+event_binning_string_values = namedtuple("event_binning_string_values", "value")
+q_rebin_values = namedtuple("q_rebin_values", "min, max, rebin_string")
 
 
 # Mask
-mask_line = namedtuple('mask_line', 'width, angle, x, y')
-mask_block = namedtuple('mask_block', 'horizontal1, horizontal2, vertical1, vertical2, detector_type')
-mask_block_cross = namedtuple('mask_block_cross', 'horizontal, vertical, detector_type')
+mask_line = namedtuple("mask_line", "width, angle, x, y")
+mask_block = namedtuple("mask_block", "horizontal1, horizontal2, vertical1, vertical2, detector_type")
+mask_block_cross = namedtuple("mask_block_cross", "horizontal, vertical, detector_type")
 
 # Set
-position_entry = namedtuple('position_entry', 'pos1, pos2, detector_type')
-set_scales_entry = namedtuple('set_scales_entry', 's, a, b, c, d')
+position_entry = namedtuple("position_entry", "pos1, pos2, detector_type")
+set_scales_entry = namedtuple("set_scales_entry", "s, a, b, c, d")
 
 # Fit
-range_entry_fit = namedtuple('range_entry_fit', 'start, stop, fit_type')
-fit_general = namedtuple('fit_general', 'start, stop, fit_type, data_type, polynomial_order')
+range_entry_fit = namedtuple("range_entry_fit", "start, stop, fit_type")
+fit_general = namedtuple("fit_general", "start, stop, fit_type, data_type, polynomial_order")
 
 # Mon
-monitor_length = namedtuple('monitor_length', 'length, spectrum, interpolate')
-monitor_spectrum = namedtuple('monitor_spectrum', 'spectrum, is_trans, interpolate')
-monitor_file = namedtuple('monitor_file', 'file_path, detector_type')
+monitor_length = namedtuple("monitor_length", "length, spectrum, interpolate")
+monitor_spectrum = namedtuple("monitor_spectrum", "spectrum, is_trans, interpolate")
+monitor_file = namedtuple("monitor_file", "file_path, detector_type")
 
 # Det
-det_fit_range = namedtuple('det_fit_range', 'start, stop, use_fit')
+det_fit_range = namedtuple("det_fit_range", "start, stop, use_fit")
 
 
 class DetectorId(Enum):

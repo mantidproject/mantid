@@ -9,6 +9,7 @@ import unittest
 from unittest import mock
 from unittest.mock import patch
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2 import model, view, presenter
+
 # from testhelpers import assertRaisesNothing
 
 presenter_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2"
@@ -26,11 +27,12 @@ class TestGSAS2Presenter(unittest.TestCase):
     @patch(presenter_path + ".presenter.GSAS2Presenter.save_latest_load_parameters")
     @patch(presenter_path + ".presenter.GSAS2Presenter.get_limits_if_same_load_parameters")
     @patch(presenter_path + ".presenter.GSAS2Presenter.clear_plot")
-    def test_on_refine_clicked_refined_successful(self, mock_clear, mock_saved_limits, mock_save_load, mock_get_load,
-                                                  mock_get_project, mock_get_refine):
-        mock_get_load.return_value = ['inst', 'phase', 'data']
-        mock_get_project.return_value = 'project_name'
-        mock_get_refine.return_value = ['Pawley', '3.65', False, True, True]
+    def test_on_refine_clicked_refined_successful(
+        self, mock_clear, mock_saved_limits, mock_save_load, mock_get_load, mock_get_project, mock_get_refine
+    ):
+        mock_get_load.return_value = ["inst", "phase", "data"]
+        mock_get_project.return_value = "project_name"
+        mock_get_refine.return_value = ["Pawley", "3.65", False, True, True]
         mock_saved_limits.return_value = [18500, 50000]
         self.model.x_min = [0, 1, 2]
         self.model.x_max = [3, 4, 5]
@@ -81,28 +83,28 @@ class TestGSAS2Presenter(unittest.TestCase):
         self.assertEqual(mock_plot_result.call_count, 1)
 
     def test_get_limits_if_same_load_parameters(self):
-        self.presenter.latest_load_parameters = ['inst', 'phase', 'data']
+        self.presenter.latest_load_parameters = ["inst", "phase", "data"]
         self.view.initial_x_limits = [17000, 51000]
 
         # no new load params
         self.view.get_load_parameters.return_value = []
         self.assertEqual(self.presenter.get_limits_if_same_load_parameters(), None)
         # load params different
-        self.view.get_load_parameters.return_value = ['inst_DIFFERENT', 'phase', 'data']
+        self.view.get_load_parameters.return_value = ["inst_DIFFERENT", "phase", "data"]
         self.assertEqual(self.presenter.get_limits_if_same_load_parameters(), None)
         # no current limits
         self.view.get_x_limits_from_line_edits.return_value = None
-        self.view.get_load_parameters.return_value = ['inst', 'phase', 'data']
+        self.view.get_load_parameters.return_value = ["inst", "phase", "data"]
         self.assertEqual(self.presenter.get_limits_if_same_load_parameters(), None)
         # Success
         self.view.get_x_limits_from_line_edits.return_value = [18000, 50000]
-        self.view.get_load_parameters.return_value = ['inst', 'phase', 'data']
+        self.view.get_load_parameters.return_value = ["inst", "phase", "data"]
         self.assertEqual(self.presenter.get_limits_if_same_load_parameters(), [18000, 50000])
         # Success with limits reversed
         self.view.get_x_limits_from_line_edits.return_value = [50000, 18000]
-        self.view.get_load_parameters.return_value = ['inst', 'phase', 'data']
+        self.view.get_load_parameters.return_value = ["inst", "phase", "data"]
         self.assertEqual(self.presenter.get_limits_if_same_load_parameters(), [18000, 50000])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

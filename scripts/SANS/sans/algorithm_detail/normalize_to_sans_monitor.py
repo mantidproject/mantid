@@ -13,8 +13,9 @@ from sans.state.StateObjects.StateNormalizeToMonitor import StateNormalizeToMoni
 from sans.state.StateObjects.StateWavelength import StateWavelength
 
 
-def normalize_to_monitor(normalize_to_monitor: StateNormalizeToMonitor, wavelengths: StateWavelength,
-                         workspace, wav_range, scale_factor=1.0):
+def normalize_to_monitor(
+    normalize_to_monitor: StateNormalizeToMonitor, wavelengths: StateWavelength, workspace, wav_range, scale_factor=1.0
+):
     # 1. Extract the spectrum of the incident monitor
     incident_monitor_spectrum_number = normalize_to_monitor.incident_monitor
     workspace = _extract_monitor(workspace=workspace, spectrum_number=incident_monitor_spectrum_number)
@@ -30,7 +31,7 @@ def normalize_to_monitor(normalize_to_monitor: StateNormalizeToMonitor, waveleng
     workspace = _perform_flat_background_correction(workspace, normalize_to_monitor)
 
     # 5. Convert to wavelength with the specified bin settings.
-    workspace = _convert_to_wavelength(workspace, wavelengths,  normalize_to_monitor, wav_range)
+    workspace = _convert_to_wavelength(workspace, wavelengths, normalize_to_monitor, wav_range)
 
     return workspace
 
@@ -47,10 +48,7 @@ def _scale(workspace, factor):
     :return: a scaled workspace.
     """
     scale_name = "Scale"
-    scale_options = {"InputWorkspace": workspace,
-                     "OutputWorkspace": EMPTY_NAME,
-                     "Factor": factor,
-                     "Operation": "Multiply"}
+    scale_options = {"InputWorkspace": workspace, "OutputWorkspace": EMPTY_NAME, "Factor": factor, "Operation": "Multiply"}
     scale_alg = create_unmanaged_algorithm(scale_name, **scale_options)
     scale_alg.execute()
     return scale_alg.getProperty("OutputWorkspace").value
@@ -67,9 +65,7 @@ def _extract_monitor(workspace, spectrum_number):
     """
     workspace_index = workspace.getIndexFromSpectrumNumber(spectrum_number)
     extract_name = "ExtractSingleSpectrum"
-    extract_options = {"InputWorkspace": workspace,
-                       "OutputWorkspace": EMPTY_NAME,
-                       "WorkspaceIndex": workspace_index}
+    extract_options = {"InputWorkspace": workspace, "OutputWorkspace": EMPTY_NAME, "WorkspaceIndex": workspace_index}
     extract_alg = create_unmanaged_algorithm(extract_name, **extract_options)
     extract_alg.execute()
     return extract_alg.getProperty("OutputWorkspace").value
@@ -95,11 +91,13 @@ def _perform_prompt_peak_correction(workspace, normalize_to_monitor_state):
     # were explicitly set. Some instruments require it, others don't.
     if prompt_peak_correction_enabled and prompt_peak_correction_start is not None and prompt_peak_correction_stop is not None:
         remove_name = "RemoveBins"
-        remove_options = {"InputWorkspace": workspace,
-                          "OutputWorkspace": EMPTY_NAME,
-                          "XMin": prompt_peak_correction_start,
-                          "XMax": prompt_peak_correction_stop,
-                          "Interpolation": "Linear"}
+        remove_options = {
+            "InputWorkspace": workspace,
+            "OutputWorkspace": EMPTY_NAME,
+            "XMin": prompt_peak_correction_start,
+            "XMax": prompt_peak_correction_stop,
+            "Interpolation": "Linear",
+        }
         remove_alg = create_unmanaged_algorithm(remove_name, **remove_options)
         remove_alg.execute()
         workspace = remove_alg.getProperty("OutputWorkspace").value
@@ -124,8 +122,9 @@ def _perform_flat_background_correction(workspace, normalize_to_monitor_state):
     background_tof_monitor_start = normalize_to_monitor_state.background_TOF_monitor_start
     background_tof_monitor_stop = normalize_to_monitor_state.background_TOF_monitor_stop
 
-    if incident_monitor_spectrum_as_string in list(background_tof_monitor_start.keys()) and \
-       incident_monitor_spectrum_as_string in list(background_tof_monitor_stop.keys()):
+    if incident_monitor_spectrum_as_string in list(background_tof_monitor_start.keys()) and incident_monitor_spectrum_as_string in list(
+        background_tof_monitor_stop.keys()
+    ):
         start_tof = background_tof_monitor_start[incident_monitor_spectrum_as_string]
         stop_tof = background_tof_monitor_stop[incident_monitor_spectrum_as_string]
     else:
@@ -135,19 +134,14 @@ def _perform_flat_background_correction(workspace, normalize_to_monitor_state):
     # Only if a TOF range was set, do we have to perform a correction
     if start_tof and stop_tof:
         flat_name = "CalculateFlatBackground"
-        flat_options = {"InputWorkspace": workspace,
-                        "OutputWorkspace": EMPTY_NAME,
-                        "StartX": start_tof,
-                        "EndX": stop_tof,
-                        "Mode": "Mean"}
+        flat_options = {"InputWorkspace": workspace, "OutputWorkspace": EMPTY_NAME, "StartX": start_tof, "EndX": stop_tof, "Mode": "Mean"}
         flat_alg = create_unmanaged_algorithm(flat_name, **flat_options)
         flat_alg.execute()
         workspace = flat_alg.getProperty("OutputWorkspace").value
     return workspace
 
 
-def _convert_to_wavelength(workspace, wavelength_state: StateWavelength,
-                           norm_state: StateNormalizeToMonitor, wav_range):
+def _convert_to_wavelength(workspace, wavelength_state: StateWavelength, norm_state: StateNormalizeToMonitor, wav_range):
     """
     Converts the workspace from time-of-flight units to wavelength units
 
@@ -159,11 +153,13 @@ def _convert_to_wavelength(workspace, wavelength_state: StateWavelength,
     wavelength_step = wavelength_state.wavelength_interval.wavelength_step
     wavelength_step_type = wavelength_state.wavelength_step_type_lin_log
     convert_name = "SANSConvertToWavelengthAndRebin"
-    convert_options = {"InputWorkspace": workspace,
-                       "WavelengthPairs": json.dumps([(wav_range[0], wav_range[1])]),
-                       "WavelengthStep": wavelength_step,
-                       "WavelengthStepType": wavelength_step_type.value,
-                       "RebinMode": norm_state.rebin_type.value}
+    convert_options = {
+        "InputWorkspace": workspace,
+        "WavelengthPairs": json.dumps([(wav_range[0], wav_range[1])]),
+        "WavelengthStep": wavelength_step,
+        "WavelengthStepType": wavelength_step_type.value,
+        "RebinMode": norm_state.rebin_type.value,
+    }
 
     convert_alg = create_unmanaged_algorithm(convert_name, **convert_options)
     convert_alg.setPropertyValue("OutputWorkspace", EMPTY_NAME)

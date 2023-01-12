@@ -10,9 +10,8 @@ from mantid.api import AlgorithmObserver, AlgorithmManager, AlgorithmFactory, Py
 
 
 class MockAlgorithm(PythonAlgorithm):
-
     def category(self):
-        return 'Tests'
+        return "Tests"
 
     def PyInit(self):
         self.declareProperty("Error", False)
@@ -20,9 +19,9 @@ class MockAlgorithm(PythonAlgorithm):
     def PyExec(self):
         error = self.getProperty("Error").value
         if error:
-            raise RuntimeError('Error in algorithm')
+            raise RuntimeError("Error in algorithm")
         progress = Progress(self, 0.0, 1.0, 2)
-        progress.report('Half way')
+        progress.report("Half way")
         progress.report()
 
 
@@ -30,7 +29,6 @@ AlgorithmFactory.subscribe(MockAlgorithm)
 
 
 class MockObserver(AlgorithmObserver):
-
     def __init__(self):
         super(MockObserver, self).__init__()
         self.finish_handled = False
@@ -47,7 +45,6 @@ class MockObserver(AlgorithmObserver):
 
 
 class MockObserverStarting(AlgorithmObserver):
-
     def __init__(self):
         super(MockObserverStarting, self).__init__()
         self.starting_handled = False
@@ -57,7 +54,6 @@ class MockObserverStarting(AlgorithmObserver):
 
 
 class TestAlgorithmObserver(unittest.TestCase):
-
     def test_starting_handle(self):
         observer = MockObserverStarting()
         observer.observeStarting()
@@ -81,4 +77,4 @@ class TestAlgorithmObserver(unittest.TestCase):
         observer.observeError(algorithm)
         algorithm.execute()
         self.assertTrue(observer.finish_handled)
-        self.assertTrue(observer.error_message.startswith('Error in algorithm'))
+        self.assertTrue(observer.error_message.startswith("Error in algorithm"))

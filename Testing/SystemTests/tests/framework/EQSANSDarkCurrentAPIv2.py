@@ -4,11 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,attribute-defined-outside-init
+# pylint: disable=no-init,attribute-defined-outside-init
 import systemtesting
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.sns_command_interface import *
-from reduction_workflow.instruments.sans.hfir_command_interface import DarkCurrent,SetTransmission
+from reduction_workflow.instruments.sans.hfir_command_interface import DarkCurrent, SetTransmission
 from mantid.api import *
 
 import os
@@ -16,8 +16,8 @@ import os
 
 class EQSANSDarkCurrent(systemtesting.MantidSystemTest):
     """
-        Analysis Tests for EQSANS
-        Testing that the I(Q) output of is correct
+    Analysis Tests for EQSANS
+    Testing that the I(Q) output of is correct
     """
 
     def cleanup(self):
@@ -28,7 +28,7 @@ class EQSANSDarkCurrent(systemtesting.MantidSystemTest):
 
     def runTest(self):
         configI = ConfigService.Instance()
-        configI["facilityName"]='SNS'
+        configI["facilityName"] = "SNS"
         # The new version of dark current subtraction only works on histograms
         EQSANS(False)
         SolidAngle()
@@ -39,19 +39,18 @@ class EQSANSDarkCurrent(systemtesting.MantidSystemTest):
         SetTOFTailsCutoff(low_cut=0.00, high_cut=0.00)
         UseConfigMask(False)
         TotalChargeNormalization(normalize_to_beam=False)
-        SetTransmission(1.0,0.0, False)
+        SetTransmission(1.0, 0.0, False)
         DarkCurrent("EQSANS_4061_event.nxs")
         AppendDataFile("EQSANS_1466_event.nxs")
         Reduce1D()
         # Scale up to match correct scaling.
-        Scale(InputWorkspace="EQSANS_1466_event_Iq", Factor=2777.81,
-              Operation='Multiply', OutputWorkspace="EQSANS_1466_event_Iq")
+        Scale(InputWorkspace="EQSANS_1466_event_Iq", Factor=2777.81, Operation="Multiply", OutputWorkspace="EQSANS_1466_event_Iq")
 
     def validate(self):
         self.tolerance = 1.0
-        self.disableChecking.append('Instrument')
-        self.disableChecking.append('Sample')
-        self.disableChecking.append('SpectraMap')
-        self.disableChecking.append('Axes')
+        self.disableChecking.append("Instrument")
+        self.disableChecking.append("Sample")
+        self.disableChecking.append("SpectraMap")
+        self.disableChecking.append("Axes")
 
-        return "EQSANS_1466_event_Iq", 'EQSANSDarkCurrent.nxs'
+        return "EQSANS_1466_event_Iq", "EQSANSDarkCurrent.nxs"
