@@ -265,25 +265,11 @@ std::map<std::string, std::string> ExperimentPresenter::stitchParametersFromView
   auto maybeStitchParameters = parseOptions(m_view->getStitchOptions());
   if (maybeStitchParameters.is_initialized()) {
     m_view->showStitchParametersValid();
-    replaceBoolTextWithBoolValue(maybeStitchParameters.get());
     return maybeStitchParameters.get();
   }
 
   m_view->showStitchParametersInvalid();
   return std::map<std::string, std::string>();
-}
-
-void ExperimentPresenter::replaceBoolTextWithBoolValue(std::map<std::string, std::string> &stitchParams) {
-  for (auto &[_, value] : stitchParams) {
-    auto lower_value = boost::algorithm::to_lower_copy(value); // Avoid changing the original value unless we need to.
-    if (lower_value == "true") {
-      value = "1";
-      return;
-    }
-    if (lower_value == "false") {
-      value = "0";
-    }
-  }
 }
 
 bool ExperimentPresenter::hasValidSettings() const noexcept { return m_validationResult.isValid(); }
