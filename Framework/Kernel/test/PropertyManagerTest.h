@@ -12,7 +12,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PropertyManager.h"
@@ -118,13 +117,13 @@ public:
     for (auto iter : props) {
       Property *prop = iter;
       std::string msg = "Property " + prop->name() + " has not been changed to a FilteredTimeSeries";
-      auto filteredProp = dynamic_cast<FilteredTimeSeriesProperty<double> *>(iter);
+      auto filteredProp = dynamic_cast<TimeSeriesProperty<double> *>(iter);
       TSM_ASSERT(msg, filteredProp);
     }
 
     // Also check the single getter
     Property *log2 = manager.getProperty("log2");
-    auto filteredProp = dynamic_cast<FilteredTimeSeriesProperty<double> *>(log2);
+    auto filteredProp = dynamic_cast<TimeSeriesProperty<double> *>(log2);
     TSM_ASSERT("getProperty has not returned a FilteredProperty as expected", filteredProp);
 
     delete filter;

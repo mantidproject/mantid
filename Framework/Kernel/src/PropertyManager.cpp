@@ -14,6 +14,7 @@
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/PropertyWithValueJSON.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/TimeROI.h"
 
 #include <json/json.h>
 
@@ -194,6 +195,9 @@ void PropertyManager::splitByTime(std::vector<SplittingInterval> &splitter,
  */
 void PropertyManager::filterByProperty(const Kernel::TimeSeriesProperty<bool> &filter,
                                        const std::vector<std::string> &excludedFromFiltering) {
+  // convert to splitters
+  const auto splitter = TimeROI(filter).toSplitters();
+
   for (auto &orderedProperty : m_orderedProperties) {
     if (std::find(excludedFromFiltering.cbegin(), excludedFromFiltering.cend(), orderedProperty->name()) !=
         excludedFromFiltering.cend()) {
@@ -201,29 +205,9 @@ void PropertyManager::filterByProperty(const Kernel::TimeSeriesProperty<bool> &f
       continue;
     }
 
-    Property *currentProp = orderedProperty;
-    if (auto doubleSeries = dynamic_cast<TimeSeriesProperty<double> *>(currentProp)) {
-      // don't filter the invalid values filters
-      if (PropertyManager::isAnInvalidValuesFilterLog(currentProp->name()))
-        break;
-      std::unique_ptr<Property> filtered(nullptr);
-      if (this->existsProperty(PropertyManager::getInvalidValuesFilterLogName(currentProp->name()))) {
-        // add the filter to the passed in filters
-        auto logFilter = std::make_unique<LogFilter>(filter);
-        auto filterProp = getPointerToProperty(PropertyManager::getInvalidValuesFilterLogName(currentProp->name()));
-        auto tspFilterProp = dynamic_cast<TimeSeriesProperty<bool> *>(filterProp);
-        if (!tspFilterProp)
-          break;
-        logFilter->addFilter(*tspFilterProp);
-
-        filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(doubleSeries, *logFilter->filter());
-      } else {
-        filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(doubleSeries, filter);
-      }
-      orderedProperty = filtered.get();
-      // Now replace in the map
-      this->m_properties[createKey(currentProp->name())] = std::move(filtered);
-    }
+    auto prop = dynamic_cast<ITimeSeriesProperty *>(orderedProperty);
+    if (prop)
+      prop->filterByTimes(splitter);
   }
 }
 
