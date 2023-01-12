@@ -136,7 +136,7 @@ public:
   /// Filter out a run by time.
   void filterByTime(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop) override;
   /// Filter by a range of times
-  void filterByTimes(const std::vector<SplittingInterval> &splittervec);
+  void filterByTimes(const std::vector<SplittingInterval> &splittervec) override;
 
   /// Split out a time series property by time intervals.
   void splitByTime(std::vector<SplittingInterval> &splitter, std::vector<Property *> outputs,

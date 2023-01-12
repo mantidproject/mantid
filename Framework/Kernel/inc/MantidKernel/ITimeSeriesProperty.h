@@ -36,6 +36,7 @@ public:
   // After trying to use return type covariance, but that showed Error C2908
   // Using property seemed to be the most straightforward solution.
   virtual Property *cloneWithTimeShift(const double timeShift) const = 0;
+  virtual void filterByTimes(const std::vector<SplittingInterval> &splittervec) = 0;
   /// Calculate the time-weighted average of a property in a filtered range
   virtual double averageValueInFilter(const std::vector<SplittingInterval> &filter) const = 0;
   /// Calculate the time-weighted average and standard deviation of a property
