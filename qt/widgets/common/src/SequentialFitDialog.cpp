@@ -15,7 +15,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
-#include "MantidQtWidgets/Common/MantidDesktopServices.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/PropertyHandler.h"
 #include "MantidQtWidgets/Common/SelectWorkspacesDialog.h"
 
@@ -27,7 +27,7 @@
 #include <QUrl>
 
 namespace MantidQt {
-using API::MantidDesktopServices;
+using API::HelpWindow;
 
 namespace {
 Mantid::Kernel::Logger g_log("SequentialFitDialog");
@@ -410,9 +410,7 @@ void SequentialFitDialog::getFitResults() {
   m_fitBrowser->getHandler()->updateErrors();
 }
 
-void SequentialFitDialog::helpClicked() {
-  MantidDesktopServices::openUrl(QUrl("http://www.mantidproject.org/PlotPeakByLogValue"));
-}
+void SequentialFitDialog::helpClicked() { HelpWindow::showAlgorithm(QStringLiteral("PlotPeakByLogValue")); }
 
 /**
  * Slot. Called in response to QTableWidget's cellChanged signal.
