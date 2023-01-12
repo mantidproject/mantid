@@ -138,11 +138,7 @@ class SuperplotPresenter:
         """
         Triggered when the window/dockwidgets is(are) resized.
         """
-        try:
-            self._canvas.figure.tight_layout()
-        except ValueError:
-            pass
-        self._canvas.draw_idle()
+        self._redraw()
 
     def _sync_with_current_plot(self):
         """
@@ -223,11 +219,7 @@ class SuperplotPresenter:
             visible (bool): True if the widget is now visible
         """
         if visible:
-            try:
-                self._canvas.figure.tight_layout()
-            except ValueError:
-                pass
-            self._canvas.draw_idle()
+            self._redraw()
 
     def on_normalise_checked(self, checked: bool):
         """
@@ -384,21 +376,31 @@ class SuperplotPresenter:
         self._remove_unneeded_curves(replot)
         self._plot_selection()
 
-        legend = axes.get_legend()
-        if legend:
-            legend.remove()
         if selection or plotted_data:
             axes.set_axis_on()
-            try:
-                figure.tight_layout()
-            except ValueError:
-                pass
-            legend = axes.legend()
-            if legend:
-                legend_set_draggable(legend, True)
+            self._redraw()
         else:
             axes.set_axis_off()
             axes.set_title("")
+        self._canvas.draw_idle()
+
+    def _redraw(self):
+        """
+        Redraw the matplotlib canvas using a tight layout. The function takes
+        care of the legend and avoid that it interfere with the layout.
+        """
+        figure = self._canvas.figure
+        axes = figure.gca()
+        legend = axes.get_legend()
+        if legend:
+            legend.remove()
+        try:
+            figure.tight_layout()
+        except ValueError:
+            pass
+        legend = axes.legend()
+        if legend:
+            legend_set_draggable(legend, True)
         self._canvas.draw_idle()
 
     def _remove_unneeded_curves(self, replot: bool):
