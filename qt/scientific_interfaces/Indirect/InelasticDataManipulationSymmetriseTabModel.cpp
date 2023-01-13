@@ -65,8 +65,7 @@ std::string InelasticDataManipulationSymmetriseTabModel::setupSymmetriseAlgorith
   return m_outputWorkspace;
 }
 
-void InelasticDataManipulationSymmetriseTabModel::reflectNegativeToPositive(
-    MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner) {
+void InelasticDataManipulationSymmetriseTabModel::reflectNegativeToPositive() {
   IAlgorithm_sptr scaleXAlg = AlgorithmManager::Instance().create("ScaleX");
   scaleXAlg->initialize();
   scaleXAlg->setProperty("InputWorkspace", m_inputWorkspace);
