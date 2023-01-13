@@ -116,7 +116,7 @@ template <> std::string dtype(TimeSeriesProperty<std::string> &self) {
            (arg("self")))                                                                                              \
       .def("timeAverageValue",                                                                                         \
            (double (TimeSeriesProperty<TYPE>::*)(const Mantid::Kernel::TimeROI &)) &                                   \
-               TimeSeriesProperty<TYPE>::timeAverageValue2,                                                            \
+               TimeSeriesProperty<TYPE>::timeAverageValue,                                                             \
            (arg("self"), arg("time_roi")))                                                                             \
       .def("dtype", &dtype<TYPE>, arg("self"));
 

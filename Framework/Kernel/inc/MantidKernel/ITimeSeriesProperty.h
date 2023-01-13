@@ -49,7 +49,7 @@ public:
    * @param timeRoi  Object that holds information about when the time measurement was active.
    * @return The time-weighted average value of the log when the time measurement was active.
    */
-  virtual double timeAverageValue2(const TimeROI &timeRoi) const = 0;
+  virtual double timeAverageValue(const TimeROI &timeRoi) const = 0;
   /// Returns the real size of the time series property map:
   virtual int realSize() const = 0;
   /// Deletes the series of values in the property

@@ -159,7 +159,7 @@ public:
   /// @copydoc Mantid::Kernel::ITimeSeriesProperty::timeAverageValue()
   double timeAverageValue() const override;
   /// @copydoc Mantid::Kernel::ITimeSeriesProperty::timeAverageValue(const TimeROI &timeRoi)
-  double timeAverageValue2(const TimeROI &timeRoi) const override;
+  double timeAverageValue(const TimeROI &timeRoi) const override;
   /// generate constant time-step histogram from the property values
   void histogramData(const Types::Core::DateAndTime &tMin, const Types::Core::DateAndTime &tMax,
                      std::vector<double> &counts) const;

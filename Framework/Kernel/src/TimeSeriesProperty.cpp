@@ -807,7 +807,7 @@ template <typename TYPE> double TimeSeriesProperty<TYPE>::timeAverageValue() con
  * @param timeRoi  Object that holds information about when the time measurement was active.
  * @return The time-weighted average value of the log when the time measurement was active.
  */
-template <typename TYPE> double TimeSeriesProperty<TYPE>::timeAverageValue2(const TimeROI &timeRoi) const {
+template <typename TYPE> double TimeSeriesProperty<TYPE>::timeAverageValue(const TimeROI &timeRoi) const {
   double retVal = 0.0;
   try {
     const auto &filter = timeRoi.toSplitters();
