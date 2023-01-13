@@ -30,7 +30,7 @@ void InelasticDataManipulationSymmetriseTabModel::setupPreviewAlgorithm(
     MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, std::vector<long> spectraRange) {
 
   if (!m_isPositiveReflect) {
-    reflectNegativeToPositive(batchAlgoRunner);
+    reflectNegativeToPositive();
   }
   // Run the algorithm on the preview spectrum only, these outputs are only for plotting in the preview window and are
   // not accessed by users directly.
@@ -51,7 +51,7 @@ std::string InelasticDataManipulationSymmetriseTabModel::setupSymmetriseAlgorith
     MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner) {
 
   if (!m_isPositiveReflect) {
-    reflectNegativeToPositive(batchAlgoRunner);
+    reflectNegativeToPositive();
   }
   IAlgorithm_sptr symmetriseAlg = AlgorithmManager::Instance().create("Symmetrise");
   symmetriseAlg->initialize();
