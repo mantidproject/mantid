@@ -544,5 +544,5 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                 presenter = MatrixWorkspaceDisplay(ws, plot=plot)
                 presenter.show_view()
             elif isinstance(ws, ITableWorkspace):
-                presenter = TableWorkspaceDisplay(ws, plot=matplotlib.pyplot)
+                presenter = TableWorkspaceDisplay(ws, plot=matplotlib.pyplot, batch=True)
                 presenter.show_view()
