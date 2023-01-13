@@ -371,6 +371,7 @@ class SuperplotPresenter:
         plotted_data = self._model.get_plotted_data()
 
         figure = self._canvas.figure
+        figure.set_visible(True)
         axes = figure.gca()
 
         self._remove_unneeded_curves(replot)
@@ -380,9 +381,8 @@ class SuperplotPresenter:
             axes.set_axis_on()
             self._redraw()
         else:
-            axes.set_axis_off()
-            axes.set_title("")
-        self._canvas.draw_idle()
+            figure.set_visible(False)
+            self._canvas.draw_idle()
 
     def _redraw(self):
         """
