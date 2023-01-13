@@ -4,8 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS Options Widget = View - Tab of DNS Reduction GUI
+DNS single crystal elastic options tab view of DNS reduction GUI.
 """
 
 from qtpy.QtCore import Signal
@@ -17,7 +18,7 @@ from mantidqtinterfaces.dns_powder_tof.data_structures.dns_view import DNSView
 
 class DNSElasticSCOptionsView(DNSView):
     """
-        Widget that lets user select redcution options
+    Widget that lets user select reduction options.
     """
     NAME = "Options"
 
@@ -27,23 +28,33 @@ class DNSElasticSCOptionsView(DNSView):
                                 'elastic_single_crystal_options.ui',
                                 baseinstance=self)
         self._map = {
-            # 'multiple_scattering': self._content.dSB_multiple_scattering,
-            'norm_time': self._content.rB_norm_time,
-            'separation_coh_inc': self._content.rB_separation_coh_inc,
-            # 'sum_vana_det_pos': self._content.cB_sum_vana_det_pos,
-            'sum_vana_sf_nsf': self._content.cB_sum_vana_sf_nsf,
-            'ignore_vana_fields': self._content.cB_ignore_vana_fields,
-            'separation': self._content.gB_separation,
-            'det_efficiency': self._content.cB_det_efficiency,
-            'flipping_ratio': self._content.cB_flipping_ratio,
-            'separation_xyz': self._content.rB_separation_xyz,
-            'subtract_background_from_sample':
-                self._content.cB_subtract_background_from_sample,
-            'corrections': self._content.gB_corrections,
-            'background_factor': self._content.dSB_background_factor,
-            'norm_monitor': self._content.rB_norm_monitor,
             'wavelength': self._content.dSB_wavelength,
             'get_wavelength': self._content.cB_get_wavelength,
+
+            'norm_time': self._content.rB_norm_time,
+            'norm_monitor': self._content.rB_norm_monitor,
+
+            'separation': self._content.gB_separation,
+            'separation_xyz': self._content.rB_separation_xyz,
+            'separation_coh_inc': self._content.rB_separation_coh_inc,
+
+            'corrections': self._content.gB_corrections,
+            'det_efficiency': self._content.cB_det_efficiency,
+            'sum_vana_sf_nsf': self._content.cB_sum_vana_sf_nsf,
+            'ignore_vana_fields': self._content.cB_ignore_vana_fields,
+            'flipping_ratio': self._content.cB_flipping_ratio,
+            'subtract_background_from_sample':
+                self._content.cB_subtract_background_from_sample,
+            'background_factor': self._content.dSB_background_factor,
+
+            'automatic_binning': self._content.cB_automatic_binning,
+            'two_theta_min': self._content.dSB_two_theta_min,
+            'two_theta_max': self._content.dSB_two_theta_max,
+            'two_theta_bin_size': self._content.dSB_two_theta_bin_size,
+            'omega_min': self._content.dSB_omega_min,
+            'omega_max': self._content.dSB_omega_max,
+            'omega_bin_size': self._content.dSB_omega_bin_size,
+
             'a': self._content.dSB_a,
             'b': self._content.dSB_b,
             'c': self._content.dSB_c,
@@ -53,13 +64,6 @@ class DNSElasticSCOptionsView(DNSView):
             'hkl1': self._content.lE_hkl1,
             'hkl2': self._content.lE_hkl2,
             'omega_offset': self._content.dSB_omega_offset,
-            'automatic_binning': self._content.cB_automatic_binning,
-            'ttheta_min': self._content.dSB_ttheta_min,
-            'ttheta_max': self._content.dSB_ttheta_max,
-            'ttheta_nbin': self._content.sB_ttheta_nbins,
-            'omega_min': self._content.dSB_omega_min,
-            'omega_max': self._content.dSB_omega_max,
-            'omega_nbin': self._content.sB_omega_nbins,
             'filter_standard': self._content.cB_filter_standard,
             'use_dx_dy': self._content.cB_use_dx_dy,
             'dx': self._content.dSB_dx,
@@ -79,6 +83,9 @@ class DNSElasticSCOptionsView(DNSView):
     # Signals
 
     sig_get_wavelength = Signal()
+    sig_two_theta_max_changed = Signal()
+    sig_two_theta_min_changed = Signal()
+    sig_auto_binning_clicked = Signal(int)
 
     def _disable_lattice(self, state):
         self._map['a'].setEnabled(not state)
@@ -95,12 +102,12 @@ class DNSElasticSCOptionsView(DNSView):
         self._map['filter_standard'].setEnabled(not state)
 
     def _disable_automatic_binning(self, state):
-        self._map['ttheta_min'].setEnabled(not state)
-        self._map['ttheta_max'].setEnabled(not state)
-        self._map['ttheta_nbin'].setEnabled(not state)
+        self._map['two_theta_min'].setEnabled(not state)
+        self._map['two_theta_max'].setEnabled(not state)
+        self._map['two_theta_bin_size'].setEnabled(not state)
         self._map['omega_min'].setEnabled(not state)
         self._map['omega_max'].setEnabled(not state)
-        self._map['omega_nbin'].setEnabled(not state)
+        self._map['omega_bin_size'].setEnabled(not state)
 
     def _disable_sub_det_efficiency(self, state):
         self._map['ignore_vana_fields'].setEnabled(state)
