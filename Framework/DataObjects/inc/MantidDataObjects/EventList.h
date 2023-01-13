@@ -456,8 +456,6 @@ private:
                                 Mantid::Kernel::Unit *toUnit);
   template <class T>
   void convertUnitsQuicklyHelper(typename std::vector<T> &events, const double &factor, const double &power);
-
-  template <class T> void copy_if(std::vector<T> &events, std::vector<T> &output, bool (*pf)());
 };
 
 // Methods overloaded to get event vectors.

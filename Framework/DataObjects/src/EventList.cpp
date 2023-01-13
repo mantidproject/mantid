@@ -3658,13 +3658,8 @@ void EventList::divide(const double value, const double error) {
 template <class T>
 void EventList::filterByPulseTimeHelper(std::vector<T> &events, DateAndTime start, DateAndTime stop,
                                         std::vector<T> &output) {
-  auto itev = events.begin();
-  auto itev_end = events.end();
-  // Find the first event with m_pulsetime >= start
-  while ((itev != itev_end) && (itev->m_pulsetime < start))
-    itev++;
-
-  std::copy_if(itev, itev_end, std::back_inserter(output), [stop](T &t) { return t.m_pulsetime < stop; });
+  std::copy_if(events.begin(), events.end(), std::back_inserter(output),
+               [start, stop](T &t) { return (t.m_pulsetime > start) && (t.m_pulsetime < stop); });
 }
 
 /** Filter a vector of events into another based on time at sample.
@@ -3679,14 +3674,9 @@ void EventList::filterByPulseTimeHelper(std::vector<T> &events, DateAndTime star
 template <class T>
 void EventList::filterByTimeAtSampleHelper(std::vector<T> &events, DateAndTime start, DateAndTime stop,
                                            double tofFactor, double tofOffset, std::vector<T> &output) {
-  auto itev = events.begin();
-  auto itev_end = events.end();
-  // Find the first event with m_pulsetime >= start
-  while ((itev != itev_end) && (calculateCorrectedFullTime(*itev, tofFactor, tofOffset) < start.totalNanoseconds()))
-    itev++;
-
-  std::copy_if(itev, itev_end, std::back_inserter(output), [stop, tofFactor, tofOffset](T &t) {
-    return calculateCorrectedFullTime(t, tofFactor, tofOffset) < stop.totalNanoseconds();
+  std::copy_if(events.begin(), events.end(), std::back_inserter(output), [start, stop, tofFactor, tofOffset](T &t) {
+    return (calculateCorrectedFullTime(t, tofFactor, tofOffset) > start.totalNanoseconds()) &&
+           (calculateCorrectedFullTime(t, tofFactor, tofOffset) < stop.totalNanoseconds());
   });
 }
 
