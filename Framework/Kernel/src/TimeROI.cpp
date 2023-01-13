@@ -22,6 +22,7 @@ Logger g_log("TimeROI");
 
 const bool ROI_USE{true};
 const bool ROI_IGNORE{false};
+const DateAndTime FAR_OFF_FUTURE("2100-01-01T00:01");
 
 /// @throws std::runtime_error if not in increasing order
 void assert_increasing(const DateAndTime &startTime, const DateAndTime &stopTime) {
@@ -65,11 +66,13 @@ bool valuesAreAlternating(const std::vector<bool> &values) {
   return true;
 }
 
-bool valuesAreAllUse(const std::vector<bool> &values) {
-  if (values.empty())
+bool valuesAreSame(const std::vector<bool> &values) {
+  if (values.empty()) {
     return true;
-  else
-    return std::all_of(values.cbegin(), values.cend(), [](const bool value) { return value == ROI_USE; });
+  } else {
+    const bool expected = values.front();
+    return std::all_of(values.cbegin(), values.cend(), [expected](const bool value) { return value == expected; });
+  }
 }
 } // namespace
 
@@ -81,15 +84,23 @@ TimeROI::TimeROI(const Types::Core::DateAndTime &startTime, const Types::Core::D
   this->addROI(startTime, stopTime);
 }
 
-TimeROI::TimeROI(const Kernel::TimeSeriesProperty<bool> &filter) : m_roi{NAME} {
-  const auto &values = filter.valuesAsVector();
+TimeROI::TimeROI(const Kernel::TimeSeriesProperty<bool> &filter) : m_roi{NAME} { this->initializeFromTSP(&filter); }
 
-  // only need to do something if values aren't all USE
-  if (!valuesAreAllUse(values)) {
-    const auto &times = filter.timesAsVector();
+TimeROI::TimeROI(const Kernel::TimeSeriesProperty<bool> *filter) : m_roi{NAME} { this->initializeFromTSP(filter); }
+
+void TimeROI::initializeFromTSP(const Kernel::TimeSeriesProperty<bool> *filter) {
+  const auto &values = filter->valuesAsVector();
+
+  // only need to do something if values aren't all USE or IGNORE
+  if (!valuesAreSame(values)) {
+    const auto &times = filter->timesAsVector();
     const auto NUM_VAL = times.size();
     for (size_t i = 0; i < NUM_VAL; ++i) {
       m_roi.addValue(times[i], values[i]);
+    }
+    // /
+    if (values.back() == ROI_USE) {
+      m_roi.addValue(FAR_OFF_FUTURE, ROI_IGNORE);
     }
 
     // assuming the filter was not well specified, clean things up

@@ -23,6 +23,7 @@ public:
   TimeROI();
   TimeROI(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime);
   TimeROI(const Kernel::TimeSeriesProperty<bool> &filter);
+  TimeROI(const Kernel::TimeSeriesProperty<bool> *filter);
   double durationInSeconds() const;
   double durationInSeconds(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) const;
   std::size_t numBoundaries() const;
@@ -48,6 +49,7 @@ public:
   void saveNexus(::NeXus::File *file) const;
 
 private:
+  void initializeFromTSP(const Kernel::TimeSeriesProperty<bool> *filter);
   std::vector<Types::Core::DateAndTime> getAllTimes(const TimeROI &other);
   void replaceValues(const std::vector<Types::Core::DateAndTime> &times, const std::vector<bool> &values);
   bool isCompletelyInROI(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) const;
