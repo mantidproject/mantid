@@ -1,0 +1,1 @@
+- Add option for negative reflection to the indrect data manipulation symmetrise tab
