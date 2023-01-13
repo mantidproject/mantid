@@ -391,8 +391,10 @@ class SuperplotPresenter:
         """
         figure = self._canvas.figure
         axes = figure.gca()
+        hasLegend = False
         legend = axes.get_legend()
         if legend:
+            hasLegend = legend.get_visible()
             legend.remove()
         try:
             figure.tight_layout()
@@ -400,6 +402,7 @@ class SuperplotPresenter:
             pass
         legend = axes.legend()
         if legend:
+            legend.set_visible(hasLegend)
             legend_set_draggable(legend, True)
         self._canvas.draw_idle()
 
