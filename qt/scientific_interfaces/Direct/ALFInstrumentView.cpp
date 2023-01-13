@@ -129,11 +129,7 @@ void ALFInstrumentView::setVanadiumRun(std::string const &runNumber) {
 }
 
 void ALFInstrumentView::sampleLoaded() {
-  if (m_sample->getText().isEmpty()) {
-    return;
-  }
-
-  if (!m_sample->isValid()) {
+  if (!m_sample->getText().isEmpty() && !m_sample->isValid()) {
     warningBox(m_sample->getFileProblem().toStdString());
     return;
   }

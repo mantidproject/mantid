@@ -47,15 +47,14 @@ void ALFInstrumentPresenter::loadSettings() { m_view->loadSettings(); }
 void ALFInstrumentPresenter::saveSettings() { m_view->saveSettings(); }
 
 void ALFInstrumentPresenter::loadSample() {
-  auto const filepath = m_view->getSampleFile();
-  if (!filepath) {
-    return;
-  }
-
   m_analysisPresenter->clear();
 
-  m_model->setSample(loadAndNormalise(*filepath));
-  m_view->setSampleRun(std::to_string(m_model->sampleRun()));
+  if (auto const filepath = m_view->getSampleFile()) {
+    m_model->setSample(loadAndNormalise(*filepath));
+    m_view->setSampleRun(std::to_string(m_model->sampleRun()));
+  } else {
+    m_model->setSample(nullptr);
+  }
 
   generateLoadedWorkspace();
 }
