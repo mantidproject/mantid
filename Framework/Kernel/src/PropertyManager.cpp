@@ -189,7 +189,8 @@ void PropertyManager::splitByTime(std::vector<SplittingInterval> &splitter,
  * Filter the managed properties by the given boolean property mask. It replaces
  * all time
  * series properties with filtered time series properties
- * @param filter :: A boolean time series to filter each property on
+ * @param filter :: A boolean time series to filter each property on. This is used as a default if there is not a
+ * getInvalidValuesFilterLogName in the property manager.
  * @param excludedFromFiltering :: A string list of properties that
  * will be excluded from filtering
  */
@@ -197,19 +198,36 @@ void PropertyManager::filterByProperty(const Kernel::TimeSeriesProperty<bool> &f
                                        const std::vector<std::string> &excludedFromFiltering) {
   // convert to splitters
   const auto splitter = TimeROI(filter).toSplitters();
-  if (splitter.empty())
-    return;
 
   for (auto &orderedProperty : m_orderedProperties) {
-    if (std::find(excludedFromFiltering.cbegin(), excludedFromFiltering.cend(), orderedProperty->name()) !=
-        excludedFromFiltering.cend()) {
+    const auto name = orderedProperty->name();
+    if (std::find(excludedFromFiltering.cbegin(), excludedFromFiltering.cend(), name) != excludedFromFiltering.cend()) {
       // this log should be excluded from filtering
       continue;
     }
+    // if it is used to denote other logs are bad, skip it
+    if (PropertyManager::isAnInvalidValuesFilterLog(name))
+      continue;
 
-    auto prop = dynamic_cast<ITimeSeriesProperty *>(orderedProperty);
-    if (prop)
-      prop->filterByTimes(splitter);
+    const auto invalidFilterName = PropertyManager::getInvalidValuesFilterLogName(name);
+    if (this->existsProperty(invalidFilterName)) {
+      // add the filter to the passed in filters
+      auto filterProp = getPointerToProperty(invalidFilterName);
+      auto tspFilterProp = dynamic_cast<TimeSeriesProperty<bool> *>(filterProp);
+      if (tspFilterProp) {
+        const auto splitter = TimeROI(tspFilterProp).toSplitters();
+        if (!splitter.empty()) {
+          auto prop = dynamic_cast<ITimeSeriesProperty *>(orderedProperty);
+
+          prop->filterByTimes(splitter);
+        }
+      }
+
+    } else if (!splitter.empty()) { // use the default when supplied splitter is not empty
+      auto prop = dynamic_cast<ITimeSeriesProperty *>(orderedProperty);
+      if (prop)
+        prop->filterByTimes(splitter);
+    }
   }
 }
 
