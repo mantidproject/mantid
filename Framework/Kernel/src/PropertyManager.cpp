@@ -215,11 +215,11 @@ void PropertyManager::filterByProperty(const Kernel::TimeSeriesProperty<bool> &f
       auto filterProp = getPointerToProperty(invalidFilterName);
       auto tspFilterProp = dynamic_cast<TimeSeriesProperty<bool> *>(filterProp);
       if (tspFilterProp) {
-        const auto splitter = TimeROI(tspFilterProp).toSplitters();
-        if (!splitter.empty()) {
+        const auto mysplitter = TimeROI(tspFilterProp).toSplitters();
+        if (!mysplitter.empty()) {
           auto prop = dynamic_cast<ITimeSeriesProperty *>(orderedProperty);
 
-          prop->filterByTimes(splitter);
+          prop->filterByTimes(mysplitter);
         }
       }
 
