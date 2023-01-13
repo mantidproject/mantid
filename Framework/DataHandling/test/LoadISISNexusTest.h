@@ -15,7 +15,6 @@
 #include "MantidDataHandling/LoadISISNexus2.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <cmath>
@@ -64,7 +63,7 @@ private:
     // Check time series properties have been filtered by period
     p = nullptr;
     TSM_ASSERT_THROWS_NOTHING("Cannot retrieve stheta log", p = workspace->run().getLogData("stheta"));
-    auto stheta = dynamic_cast<FilteredTimeSeriesProperty<double> *>(p);
+    auto stheta = dynamic_cast<TimeSeriesProperty<double> *>(p);
     TSM_ASSERT("stheta log has not been converted to a FilteredTimeSeries", stheta);
     TS_ASSERT(42 > stheta->size());
   }
