@@ -372,13 +372,11 @@ class SuperplotPresenter:
 
         figure = self._canvas.figure
         figure.set_visible(True)
-        axes = figure.gca()
 
         self._remove_unneeded_curves(replot)
         self._plot_selection()
 
         if selection or plotted_data:
-            axes.set_axis_on()
             self._redraw()
         else:
             figure.set_visible(False)
