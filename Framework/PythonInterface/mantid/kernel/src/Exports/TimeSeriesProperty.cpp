@@ -112,10 +112,10 @@ template <> std::string dtype(TimeSeriesProperty<std::string> &self) {
            "returns :class:`mantid.kernel.DateAndTime`")                                                               \
       .def("getStatistics", &TimeSeriesProperty<TYPE>::getStatistics, arg("self"),                                     \
            "returns :class:`mantid.kernel.TimeSeriesPropertyStatistics`")                                              \
-      .def("timeAverageValue", (double (TimeSeriesProperty<TYPE>::*)()) & TimeSeriesProperty<TYPE>::timeAverageValue,  \
-           (arg("self")))                                                                                              \
       .def("timeAverageValue",                                                                                         \
-           (double (TimeSeriesProperty<TYPE>::*)(const Mantid::Kernel::TimeROI &)) &                                   \
+           (double (TimeSeriesProperty<TYPE>::*)() const) & TimeSeriesProperty<TYPE>::timeAverageValue, (arg("self"))) \
+      .def("timeAverageValue",                                                                                         \
+           (double (TimeSeriesProperty<TYPE>::*)(const Mantid::Kernel::TimeROI &) const) &                             \
                TimeSeriesProperty<TYPE>::timeAverageValue,                                                             \
            (arg("self"), arg("time_roi")))                                                                             \
       .def("dtype", &dtype<TYPE>, arg("self"));
