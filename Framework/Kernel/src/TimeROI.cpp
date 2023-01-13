@@ -64,6 +64,13 @@ bool valuesAreAlternating(const std::vector<bool> &values) {
   }
   return true;
 }
+
+bool valuesAreAllUse(const std::vector<bool> &values) {
+  if (values.empty())
+    return true;
+  else
+    return std::all_of(values.cbegin(), values.cend(), [](const bool value) { return value == ROI_USE; });
+}
 } // namespace
 
 const std::string TimeROI::NAME = "Kernel_TimeROI";
@@ -78,7 +85,7 @@ TimeROI::TimeROI(const Kernel::TimeSeriesProperty<bool> &filter) : m_roi{NAME} {
   const auto &values = filter.valuesAsVector();
 
   // only need to do something if values aren't all USE
-  if (!std::all_of(values.cbegin(), values.cend(), [](const bool value) { return value == ROI_USE; })) {
+  if (!valuesAreAllUse(values)) {
     const auto &times = filter.timesAsVector();
     const auto NUM_VAL = times.size();
     for (size_t i = 0; i < NUM_VAL; ++i) {
@@ -87,6 +94,12 @@ TimeROI::TimeROI(const Kernel::TimeSeriesProperty<bool> &filter) : m_roi{NAME} {
 
     // assuming the filter was not well specified, clean things up
     this->removeRedundantEntries();
+    // there should only be even number of entries now
+    if (this->numBoundaries() % 2) {
+      std::stringstream msg;
+      msg << this->numBoundaries() << " is not an even number of bin boundaries";
+      throw std::runtime_error(msg.str());
+    }
   }
 }
 
@@ -354,9 +367,7 @@ void TimeROI::removeRedundantEntries() {
  * This method is to lend itself to be compatible with existing implementation
  */
 const std::vector<SplittingInterval> TimeROI::toSplitters() const {
-  std::cout << "TimeROI::toSplitters()" << std::endl;
-  this->debugPrint();
-
+  // always create output
   std::vector<SplittingInterval> output;
 
   if (!(this->empty())) {
