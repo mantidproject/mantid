@@ -8,6 +8,7 @@
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/TimeSplitter.h"
 
@@ -43,6 +44,8 @@ class TimeSeriesPropertyTest : public CxxTest::TestSuite {
     }
     return log;
   }
+
+  // create a small TimeROI object.
 
 public:
   void setUp() override {

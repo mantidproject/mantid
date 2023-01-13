@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/TimeROI.h"
 #include "MantidPythonInterface/core/Converters/ContainerDtype.h"
 #include "MantidPythonInterface/core/Converters/DateAndTime.h"
 #include "MantidPythonInterface/core/GetPointer.h"
@@ -111,7 +112,12 @@ template <> std::string dtype(TimeSeriesProperty<std::string> &self) {
            "returns :class:`mantid.kernel.DateAndTime`")                                                               \
       .def("getStatistics", &TimeSeriesProperty<TYPE>::getStatistics, arg("self"),                                     \
            "returns :class:`mantid.kernel.TimeSeriesPropertyStatistics`")                                              \
-      .def("timeAverageValue", &TimeSeriesProperty<TYPE>::timeAverageValue, arg("self"))                               \
+      .def("timeAverageValue", (double (TimeSeriesProperty<TYPE>::*)()) & TimeSeriesProperty<TYPE>::timeAverageValue,  \
+           (arg("self")))                                                                                              \
+      .def("timeAverageValue",                                                                                         \
+           (double (TimeSeriesProperty<TYPE>::*)(const Mantid::Kernel::TimeROI &)) &                                   \
+               TimeSeriesProperty<TYPE>::timeAverageValue2,                                                            \
+           (arg("self"), arg("time_roi")))                                                                             \
       .def("dtype", &dtype<TYPE>, arg("self"));
 
 } // namespace

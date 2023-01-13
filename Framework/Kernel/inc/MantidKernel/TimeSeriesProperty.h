@@ -13,6 +13,7 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/ITimeSeriesProperty.h"
 #include "MantidKernel/Property.h"
+
 #include "MantidKernel/Statistics.h"
 #include <cstdint>
 #include <utility>
@@ -157,6 +158,8 @@ public:
   std::pair<double, double> averageAndStdDevInFilter(const std::vector<SplittingInterval> &filter) const override;
   /// @copydoc Mantid::Kernel::ITimeSeriesProperty::timeAverageValue()
   double timeAverageValue() const override;
+  /// @copydoc Mantid::Kernel::ITimeSeriesProperty::timeAverageValue(const TimeROI &timeRoi)
+  double timeAverageValue2(const TimeROI &timeRoi) const override;
   /// generate constant time-step histogram from the property values
   void histogramData(const Types::Core::DateAndTime &tMin, const Types::Core::DateAndTime &tMax,
                      std::vector<double> &counts) const;
