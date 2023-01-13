@@ -77,14 +77,14 @@ boost::optional<boost::regex> parseTitleMatcher(std::string const &titleMatcher)
 
 namespace {
 std::map<std::string, std::string> replaceBoolTextWithBoolValue(std::map<std::string, std::string> stitchParams) {
-  for (auto &[_, value] : stitchParams) {
-    auto lower_value = boost::algorithm::to_lower_copy(value); // Avoid changing the original value unless we need to.
+  for (auto &paramPair : stitchParams) {
+    auto lower_value = boost::algorithm::to_lower_copy(paramPair.second); // Avoid changing the original value.
     if (lower_value == "true") {
-      value = "1";
+      paramPair.second = "1";
       continue;
     }
     if (lower_value == "false") {
-      value = "0";
+      paramPair.second = "0";
     }
   }
   return stitchParams;
