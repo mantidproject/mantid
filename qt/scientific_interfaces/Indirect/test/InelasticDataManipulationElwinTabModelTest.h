@@ -136,6 +136,17 @@ public:
     TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("LoadedWsName"));
   }
 
+  void test_createGroupedWorkspaces() {
+    auto workspace1 = WorkspaceCreationHelper::create2DWorkspace(5, 4);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("Workspace_name1_sqw", workspace1);
+    m_model->createGroupedWorkspaces(workspace1, FunctionModelSpectra("0,1"));
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("Workspace_name1_sqw_extracted_spectra"));
+    TS_ASSERT_EQUALS(Mantid::API::AnalysisDataService::Instance()
+                         .retrieveWS<MatrixWorkspace>("Workspace_name1_sqw_extracted_spectra")
+                         ->getNumberHistograms(),
+                     2);
+  }
+
 private:
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<InelasticDataManipulationElwinTabModel> m_model;

@@ -9,6 +9,7 @@
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "IndirectSettingsHelper.h"
+#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
@@ -201,12 +202,19 @@ void InelasticDataManipulationElwinTab::runWorkspaceInput() {
   std::string inputGroupWsName = "IDA_Elwin_Input";
 
   // Load input files
-  std::string inputWorkspacesString = m_view->getCurrentPreview().toStdString();
+  std::string inputWorkspacesString;
+  auto domains = m_dataModel->getNumberOfWorkspaces();
+  for (WorkspaceID i = 0; i < m_dataModel->getNumberOfWorkspaces(); i++) {
 
+    auto workspace = m_dataModel->getWorkspace(i);
+    auto spectra = m_dataModel->getSpectra(i);
+    auto spectraWS = m_model->createGroupedWorkspaces(workspace, spectra);
+    inputWorkspacesString += spectraWS + ",";
+  }
   // Group input workspaces
   m_model->setupGroupAlgorithm(m_batchAlgoRunner, inputWorkspacesString, inputGroupWsName);
 
-  m_model->setupElasticWindowMultiple(m_batchAlgoRunner, m_view->getCurrentPreview(), inputGroupWsName,
+  m_model->setupElasticWindowMultiple(m_batchAlgoRunner, "ELWIN_workspace_output", inputGroupWsName,
                                       m_view->getLogName(), m_view->getLogValue());
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(unGroupInput(bool)));
