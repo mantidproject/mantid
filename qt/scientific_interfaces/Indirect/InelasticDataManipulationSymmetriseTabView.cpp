@@ -38,6 +38,7 @@ InelasticDataManipulationSymmetriseTabView::InelasticDataManipulationSymmetriseT
   m_uiForm.setupUi(parent);
   m_dblManager = new QtDoublePropertyManager();
   m_grpManager = new QtGroupPropertyManager();
+  m_enumManager = new QtEnumPropertyManager(); // "Suggestion"
 
   m_uiForm.ppRawPlot->setCanvasColour(QColor(240, 240, 240));
   m_uiForm.ppPreviewPlot->setCanvasColour(QColor(240, 240, 240));
@@ -54,6 +55,8 @@ InelasticDataManipulationSymmetriseTabView::InelasticDataManipulationSymmetriseT
   // Editor Factories
   auto *doubleEditorFactory = new DoubleEditorFactory();
   m_propTrees["SymmPropTree"]->setFactoryForManager(m_dblManager, doubleEditorFactory);
+  auto *enumEditorFactory = new QtEnumEditorFactory();
+  m_propTrees["SymmPropTree"]->setFactoryForManager(m_enumManager, enumEditorFactory);
 
   // Raw Properties
   m_properties["EMin"] = m_dblManager->addProperty("EMin");
@@ -69,6 +72,14 @@ InelasticDataManipulationSymmetriseTabView::InelasticDataManipulationSymmetriseT
   m_properties["PreviewSpec"] = m_dblManager->addProperty("Spectrum No");
   m_dblManager->setDecimals(m_properties["PreviewSpec"], 0);
   rawPlotProps->addSubProperty(m_properties["PreviewSpec"]);
+
+  m_properties["ReflectType"] = m_enumManager->addProperty("Reflect Type");
+  QStringList types;
+  types << "Positive to Negative"
+        << "Negative to Positive";
+  m_enumManager->setEnumNames(m_properties["ReflectType"], types);
+  m_enumManager->setValue(m_properties["ReflectType"], 0);
+  m_propTrees["SymmPropTree"]->addProperty(m_properties["ReflectType"]);
 
   // Preview Properties
   // Mainly used for display rather than getting user input
@@ -114,8 +125,10 @@ InelasticDataManipulationSymmetriseTabView::InelasticDataManipulationSymmetriseT
 
   // SIGNAL/SLOT CONNECTIONS
   // Validate the E range when it is changed
-
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SIGNAL(valueChanged(QtProperty *, double)));
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SIGNAL(doubleValueChanged(QtProperty *, double)));
+  connect(m_enumManager, SIGNAL(valueChanged(QtProperty *, int)), this, SIGNAL(enumValueChanged(QtProperty *, int)));
+  connect(m_enumManager, SIGNAL(valueChanged(QtProperty *, int)), this, SLOT(reflectTypeChanged(QtProperty *, int)));
   // Plot miniplot when file has finished loading
   connect(m_uiForm.dsInput, SIGNAL(dataReady(QString const &)), this, SIGNAL(dataReady(QString const &)));
   // Preview symmetrise
@@ -140,6 +153,9 @@ void InelasticDataManipulationSymmetriseTabView::setDefaults() {
   // Set default X range values
   m_dblManager->setValue(m_properties["EMax"], 0.5);
   m_dblManager->setValue(m_properties["EMin"], 0.1);
+
+  // Set default reflection type
+  m_enumManager->setValue(m_properties["ReflectType"], 0);
 
   // Set default x axis range
   QPair<double, double> defaultRange(-1.0, 1.0);
@@ -242,6 +258,26 @@ void InelasticDataManipulationSymmetriseTabView::xRangeMaxChanged(double value) 
   m_uiForm.pbPreview->setEnabled(true);
 }
 
+void InelasticDataManipulationSymmetriseTabView::resetEDefaults(bool isPositive, QPair<double, double> range) {
+  if (isPositive) {
+    m_dblManager->setValue(m_properties["EMax"], range.second);
+    m_dblManager->setValue(m_properties["EMin"], range.second / 10);
+  } else {
+    m_dblManager->setValue(m_properties["EMax"], range.first);
+    m_dblManager->setValue(m_properties["EMin"], range.first / 10);
+  }
+}
+
+void InelasticDataManipulationSymmetriseTabView::reflectTypeChanged(QtProperty *prop, int value) {
+  if (prop->propertyName() == "Reflect Type") {
+    QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
+    MatrixWorkspace_sptr sampleWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName.toStdString());
+    auto const axisRange = getXRangeFromWorkspace(sampleWS);
+    resetEDefaults(value == 0, axisRange);
+  }
+}
+
 void InelasticDataManipulationSymmetriseTabView::updateRunButton(bool enabled, std::string const &enableOutputButtons,
                                                                  QString const &message, QString const &tooltip) {
   setRunEnabled(enabled);
@@ -287,8 +323,7 @@ void InelasticDataManipulationSymmetriseTabView::plotNewData(QString const &work
   positiveESelector->setRange(0, symmRange);
 
   // Set some default (and valid) values for E range
-  m_dblManager->setValue(m_properties["EMax"], axisRange.second);
-  m_dblManager->setValue(m_properties["EMin"], axisRange.second / 10);
+  resetEDefaults(m_enumManager->value(m_properties["ReflectType"]) == 0, axisRange);
 
   updateMiniPlots();
 
