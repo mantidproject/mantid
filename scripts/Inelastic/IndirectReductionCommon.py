@@ -9,7 +9,7 @@ from mantid.api import AnalysisDataService, WorkspaceGroup, AlgorithmManager
 from mantid import mtd, logger, config
 
 try:
-    import plotSpectrum
+    from mantid.simpleapi import plotSpectrum
 except ImportError:
     logger.warning("plotSpectrum not available")
     plotSpectrum = None
