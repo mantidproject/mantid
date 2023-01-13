@@ -3664,11 +3664,7 @@ void EventList::filterByPulseTimeHelper(std::vector<T> &events, DateAndTime star
   while ((itev != itev_end) && (itev->m_pulsetime < start))
     itev++;
 
-  while ((itev != itev_end) && (itev->m_pulsetime < stop)) {
-    // Add the copy to the output
-    output.emplace_back(*itev);
-    ++itev;
-  }
+  std::copy_if(itev, itev_end, std::back_inserter(output), [stop](T &t) { return t.m_pulsetime < stop; });
 }
 
 /** Filter a vector of events into another based on time at sample.
@@ -3689,11 +3685,9 @@ void EventList::filterByTimeAtSampleHelper(std::vector<T> &events, DateAndTime s
   while ((itev != itev_end) && (calculateCorrectedFullTime(*itev, tofFactor, tofOffset) < start.totalNanoseconds()))
     itev++;
 
-  while ((itev != itev_end) && (calculateCorrectedFullTime(*itev, tofFactor, tofOffset) < stop.totalNanoseconds())) {
-    // Add the copy to the output
-    output.emplace_back(*itev);
-    ++itev;
-  }
+  std::copy_if(itev, itev_end, std::back_inserter(output), [stop, tofFactor, tofOffset](T &t) {
+    return calculateCorrectedFullTime(t, tofFactor, tofOffset) < stop.totalNanoseconds();
+  });
 }
 
 //------------------------------------------------------------------------------------------------
@@ -4710,14 +4704,6 @@ void EventList::checkWorksWithPoints() const {
 void EventList::checkIsYAndEWritable() const {
   throw std::runtime_error("EventList: Cannot set Y or E data, these data are "
                            "generated automatically based on the events");
-}
-
-template <class T> void copy_if(std::vector<T> &events, std::vector<T> &output, bool (*pf)()) {
-  for (auto it = events.begin(); it != events.end(); it++) {
-    if (pf()) {
-      output.emplace_back(it);
-    }
-  }
 }
 
 } // namespace Mantid::DataObjects
