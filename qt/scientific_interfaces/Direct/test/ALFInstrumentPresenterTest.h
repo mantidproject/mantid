@@ -83,9 +83,14 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
   }
 
-  void test_getLoadWidget_gets_the_load_widget_from_the_view() {
-    EXPECT_CALL(*m_view, generateLoadWidget()).Times(1);
-    m_presenter->getLoadWidget();
+  void test_getSampleLoadWidget_gets_the_sample_load_widget_from_the_view() {
+    EXPECT_CALL(*m_view, generateSampleLoadWidget()).Times(1);
+    m_presenter->getSampleLoadWidget();
+  }
+
+  void test_getVanadiumLoadWidget_gets_the_vanadium_load_widget_from_the_view() {
+    EXPECT_CALL(*m_view, generateVanadiumLoadWidget()).Times(1);
+    m_presenter->getVanadiumLoadWidget();
   }
 
   void test_getInstrumentView_gets_the_instrument_view_widget_from_the_view() {
@@ -93,47 +98,44 @@ public:
     m_presenter->getInstrumentView();
   }
 
-  void test_loadRunNumber_will_not_attempt_a_load_when_an_empty_filepath_is_provided() {
-    EXPECT_CALL(*m_view, getFile()).Times(1).WillOnce(Return(std::nullopt));
+  void test_loadSettings_will_load_the_settings_in_the_view() {
+    EXPECT_CALL(*m_view, loadSettings()).Times(1);
+    m_presenter->loadSettings();
+  }
+
+  void test_saveSettings_will_save_the_settings_in_the_view() {
+    EXPECT_CALL(*m_view, saveSettings()).Times(1);
+    m_presenter->saveSettings();
+  }
+
+  void test_loadSample_will_not_attempt_a_load_when_an_empty_filepath_is_provided() {
+    EXPECT_CALL(*m_view, getSampleFile()).Times(1).WillOnce(Return(std::nullopt));
 
     // Expect no calls to these methods
     EXPECT_CALL(*m_analysisPresenter, clear()).Times(0);
-    EXPECT_CALL(*m_model, loadAndTransform(_)).Times(0);
+    EXPECT_CALL(*m_model, loadAndNormalise(_)).Times(0);
 
-    m_presenter->loadRunNumber();
+    m_presenter->loadSample();
   }
 
-  void test_loadRunNumber_will_show_a_warning_message_when_there_is_a_loading_error() {
-    std::size_t const run(82301u);
-    std::string const filename("ALF82301");
-    std::string const errorMessage("Loading of the data failed");
-
-    EXPECT_CALL(*m_view, getFile()).Times(1).WillOnce(Return(filename));
-    EXPECT_CALL(*m_analysisPresenter, clear()).Times(1);
-    EXPECT_CALL(*m_model, loadAndTransform(filename)).Times(1).WillOnce(Return(errorMessage));
-    EXPECT_CALL(*m_view, warningBox(errorMessage)).Times(1);
-
-    EXPECT_CALL(*m_model, runNumber()).Times(1).WillOnce(Return(run));
-    EXPECT_CALL(*m_view, setRunQuietly(std::to_string(run))).Times(1);
-
-    m_presenter->loadRunNumber();
-  }
-
-  void test_loadRunNumber_will_not_show_a_warning_when_loading_is_successful() {
+  void test_loadSample_will_not_show_a_warning_when_loading_is_successful() {
     std::size_t const run(82301u);
     std::string const filename("ALF82301");
 
-    EXPECT_CALL(*m_view, getFile()).Times(1).WillOnce(Return(filename));
+    EXPECT_CALL(*m_view, getSampleFile()).Times(1).WillOnce(Return(filename));
     EXPECT_CALL(*m_analysisPresenter, clear()).Times(1);
-    EXPECT_CALL(*m_model, loadAndTransform(filename)).Times(1).WillOnce(Return(std::nullopt));
+    EXPECT_CALL(*m_model, loadAndNormalise(filename)).Times(1).WillOnce(Return(nullptr));
+    EXPECT_CALL(*m_model, setSample(_)).Times(1);
 
     // Expect no call to warningBox
     EXPECT_CALL(*m_view, warningBox(_)).Times(0);
 
-    EXPECT_CALL(*m_model, runNumber()).Times(1).WillOnce(Return(run));
-    EXPECT_CALL(*m_view, setRunQuietly(std::to_string(run))).Times(1);
+    EXPECT_CALL(*m_model, sampleRun()).Times(1).WillOnce(Return(run));
+    EXPECT_CALL(*m_view, setSampleRun(std::to_string(run))).Times(1);
 
-    m_presenter->loadRunNumber();
+    EXPECT_CALL(*m_model, generateLoadedWorkspace()).Times(1);
+
+    m_presenter->loadSample();
   }
 
   void test_notifyInstrumentActorReset_generates_an_angle_workspace_and_notifies_the_analysis_presenter() {

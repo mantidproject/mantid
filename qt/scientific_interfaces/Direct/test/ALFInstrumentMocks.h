@@ -41,13 +41,20 @@ class MockALFInstrumentView : public IALFInstrumentView {
 public:
   MOCK_METHOD1(setUpInstrument, void(const std::string &fileName));
 
-  MOCK_METHOD0(generateLoadWidget, QWidget *());
+  MOCK_METHOD0(generateSampleLoadWidget, QWidget *());
+  MOCK_METHOD0(generateVanadiumLoadWidget, QWidget *());
   MOCK_METHOD0(getInstrumentView, ALFInstrumentWidget *());
 
   MOCK_METHOD1(subscribePresenter, void(IALFInstrumentPresenter *presenter));
 
-  MOCK_METHOD0(getFile, std::optional<std::string>());
-  MOCK_METHOD1(setRunQuietly, void(std::string const &runNumber));
+  MOCK_METHOD0(loadSettings, void());
+  MOCK_METHOD0(saveSettings, void());
+
+  MOCK_CONST_METHOD0(getSampleFile, std::optional<std::string>());
+  MOCK_CONST_METHOD0(getVanadiumFile, std::optional<std::string>());
+
+  MOCK_METHOD1(setSampleRun, void(std::string const &runNumber));
+  MOCK_METHOD1(setVanadiumRun, void(std::string const &runNumber));
 
   MOCK_CONST_METHOD0(getInstrumentActor, MantidWidgets::IInstrumentActor const &());
 
@@ -61,10 +68,16 @@ public:
 
 class MockALFInstrumentModel : public IALFInstrumentModel {
 public:
-  MOCK_METHOD1(loadAndTransform, std::optional<std::string>(std::string const &filename));
+  MOCK_METHOD1(loadAndNormalise, Mantid::API::MatrixWorkspace_sptr(std::string const &filename));
+  MOCK_METHOD0(generateLoadedWorkspace, void());
+
+  MOCK_METHOD1(setSample, void(Mantid::API::MatrixWorkspace_sptr const &sample));
+  MOCK_METHOD1(setVanadium, void(Mantid::API::MatrixWorkspace_sptr const &vanadium));
 
   MOCK_CONST_METHOD0(loadedWsName, std::string());
-  MOCK_CONST_METHOD0(runNumber, std::size_t());
+
+  MOCK_CONST_METHOD0(sampleRun, std::size_t());
+  MOCK_CONST_METHOD0(vanadiumRun, std::size_t());
 
   MOCK_METHOD1(setSelectedTubes, bool(std::vector<DetectorTube> tubes));
   MOCK_METHOD1(addSelectedTube, bool(DetectorTube const &tube));
@@ -77,12 +90,14 @@ public:
 
 class MockALFInstrumentPresenter : public IALFInstrumentPresenter {
 public:
-  MOCK_METHOD0(getLoadWidget, QWidget *());
+  MOCK_METHOD0(getSampleLoadWidget, QWidget *());
+  MOCK_METHOD0(getVanadiumLoadWidget, QWidget *());
   MOCK_METHOD0(getInstrumentView, ALFInstrumentWidget *());
 
   MOCK_METHOD1(subscribeAnalysisPresenter, void(IALFAnalysisPresenter *presenter));
 
-  MOCK_METHOD0(loadRunNumber, void());
+  MOCK_METHOD0(loadSample, void());
+  MOCK_METHOD0(loadVanadium, void());
 
   MOCK_METHOD0(notifyInstrumentActorReset, void());
   MOCK_METHOD0(notifyShapeChanged, void());

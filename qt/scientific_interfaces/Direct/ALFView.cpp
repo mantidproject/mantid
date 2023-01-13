@@ -33,6 +33,8 @@ ALFView::ALFView(QWidget *parent) : UserSubWindow(parent), m_instrumentPresenter
   m_instrumentPresenter->subscribeAnalysisPresenter(m_analysisPresenter.get());
 }
 
+ALFView::~ALFView() { m_instrumentPresenter->saveSettings(); }
+
 void ALFView::initLayout() {
   auto *splitter = new QSplitter(Qt::Horizontal);
   splitter->addWidget(m_instrumentPresenter->getInstrumentView());
@@ -42,7 +44,13 @@ void ALFView::initLayout() {
   splitter->setCollapsible(1, false);
 
   auto mainWidget = new QSplitter(Qt::Vertical);
-  mainWidget->addWidget(m_instrumentPresenter->getLoadWidget());
+
+  auto loadWidget = new QWidget();
+  auto loadLayout = new QVBoxLayout(loadWidget);
+  loadLayout->addWidget(m_instrumentPresenter->getSampleLoadWidget());
+  loadLayout->addWidget(m_instrumentPresenter->getVanadiumLoadWidget());
+
+  mainWidget->addWidget(loadWidget);
   mainWidget->addWidget(splitter);
 
   mainWidget->setCollapsible(0, false);
@@ -54,6 +62,8 @@ void ALFView::initLayout() {
   verticalLayout->addWidget(createHelpWidget());
 
   this->setCentralWidget(centralWidget);
+
+  m_instrumentPresenter->loadSettings();
 }
 
 QWidget *ALFView::createHelpWidget() {
