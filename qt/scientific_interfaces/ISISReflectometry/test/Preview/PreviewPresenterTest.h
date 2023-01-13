@@ -66,6 +66,7 @@ public:
     auto const workspaceName = std::string("test workspace");
 
     EXPECT_CALL(*mockView, getWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
+    EXPECT_CALL(*mockView, disableMainWidget()).Times(1);
     EXPECT_CALL(*mockModel, loadWorkspaceFromAds(workspaceName)).Times(1).WillOnce(Return(false));
     EXPECT_CALL(*mockModel, loadAndPreprocessWorkspaceAsync(Eq(workspaceName), Ref(*mockJobManager))).Times(1);
 
@@ -82,6 +83,7 @@ public:
     auto const workspaceName = std::string("test workspace");
 
     EXPECT_CALL(*mockView, getWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
+    EXPECT_CALL(*mockView, disableMainWidget()).Times(1);
     EXPECT_CALL(*mockModel, loadWorkspaceFromAds(workspaceName)).Times(1).WillOnce(Return(true));
     EXPECT_CALL(*mockModel, loadAndPreprocessWorkspaceAsync(_, _)).Times(0);
     expectLoadWorkspaceCompletedUpdatesInstrumentView(*mockDockedWidgets, *mockModel, *mockInstViewModel);
@@ -98,8 +100,10 @@ public:
     auto error = std::runtime_error("Test error");
 
     EXPECT_CALL(*mockView, getWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
+    EXPECT_CALL(*mockView, disableMainWidget()).Times(1);
     EXPECT_CALL(*mockModel, loadWorkspaceFromAds(workspaceName)).Times(1).WillOnce(Throw(error));
     EXPECT_CALL(*mockModel, loadAndPreprocessWorkspaceAsync(_, _)).Times(0);
+    EXPECT_CALL(*mockView, enableMainWidget()).Times(1);
 
     auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel)));
     TS_ASSERT_THROWS_NOTHING(presenter.notifyLoadWorkspaceRequested());
@@ -112,6 +116,7 @@ public:
     auto error = std::invalid_argument("Test error");
 
     EXPECT_CALL(*mockView, getWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
+    EXPECT_CALL(*mockView, disableMainWidget()).Times(1);
     EXPECT_CALL(*mockModel, loadWorkspaceFromAds(workspaceName)).Times(1).WillOnce(Throw(error));
     EXPECT_CALL(*mockModel, loadAndPreprocessWorkspaceAsync(_, _)).Times(0);
 
@@ -168,6 +173,16 @@ public:
     presenter.notifyLoadWorkspaceCompleted();
   }
 
+  void test_notify_load_workspace_error_reenables_load_widgets() {
+    auto mockModel = makeModel();
+    auto mockView = std::make_unique<MockPreviewView>();
+
+    EXPECT_CALL(*mockView, enableMainWidget()).Times(1);
+
+    auto presenter = PreviewPresenter(packDeps(mockView.get()));
+    presenter.notifyLoadWorkspaceAlgorithmError();
+  }
+
   void test_notify_inst_view_select_rect_requested() {
     auto mockDockedWidgets = makePreviewDockedWidgets();
     expectInstViewSetToSelectRectMode(*mockDockedWidgets);
@@ -200,6 +215,20 @@ public:
     auto mockDockedWidgets = makePreviewDockedWidgets();
     expectInstViewSetToEditMode(*mockDockedWidgets);
     expectSumBanksCalledOnSelectedDetectors(*mockModel, *mockInstViewModel, *mockDockedWidgets, *mockJobManager);
+    // TODO check that the model is called to sum banks
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager),
+                                               std::move(mockInstViewModel), std::move(mockDockedWidgets)));
+    presenter.notifyInstViewShapeChanged();
+  }
+
+  void test_notify_inst_view_shape_unchanged() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+    auto mockInstViewModel = makeInstViewModel();
+    auto mockJobManager = makeJobManager();
+    auto mockDockedWidgets = makePreviewDockedWidgets();
+    expectInstViewSetToEditMode(*mockDockedWidgets);
+    expectSumBanksCalledOnUnchangedDetectors(*mockModel, *mockInstViewModel, *mockDockedWidgets, *mockJobManager);
     // TODO check that the model is called to sum banks
     auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager),
                                                std::move(mockInstViewModel), std::move(mockDockedWidgets)));
@@ -307,6 +336,40 @@ public:
 
     expectEditROIMode(*mockDockedWidgets);
     expectRunReduction(*mockView, *mockModel, *mockJobManager, *mockRegionSelector);
+    expectRegionSelectionChanged(*mockModel, *mockRegionSelector);
+
+    auto presenter =
+        PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), makeInstViewModel(),
+                                  std::move(mockDockedWidgets), std::move(mockRegionSelector)));
+    presenter.notifyRegionChanged();
+  }
+
+  void test_notify_one_region_changed_starts_reduction() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+    auto mockJobManager = makeJobManager();
+    auto mockDockedWidgets = makePreviewDockedWidgets();
+    auto mockRegionSelector = makeRegionSelector();
+
+    expectEditROIMode(*mockDockedWidgets);
+    expectRunReduction(*mockView, *mockModel, *mockJobManager, *mockRegionSelector);
+    expectRegionSelectionSomeChanged(*mockModel, *mockRegionSelector);
+
+    auto presenter =
+        PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), makeInstViewModel(),
+                                  std::move(mockDockedWidgets), std::move(mockRegionSelector)));
+    presenter.notifyRegionChanged();
+  }
+
+  void test_notify_region_changed_does_not_start_reduction_if_region_unchanged() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+    auto mockJobManager = makeJobManager();
+    auto mockDockedWidgets = makePreviewDockedWidgets();
+    auto mockRegionSelector = makeRegionSelector();
+
+    expectEditROIMode(*mockDockedWidgets);
+    expectRegionSelectionUnchanged(*mockModel, *mockRegionSelector);
 
     auto presenter =
         PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), makeInstViewModel(),
@@ -337,7 +400,7 @@ public:
     auto mainPresenter = MockBatchPresenter();
 
     expectProcessingEnabled(mainPresenter);
-    expectApplyButtonDisabled(*mockView);
+    EXPECT_CALL(*mockView, disableMainWidget());
 
     auto presenter = PreviewPresenter(packDeps(mockView.get()));
     presenter.acceptMainPresenter(&mainPresenter);
@@ -349,7 +412,7 @@ public:
     auto mainPresenter = MockBatchPresenter();
 
     expectProcessingDisabled(mainPresenter);
-    expectApplyButtonEnabled(*mockView);
+    EXPECT_CALL(*mockView, enableMainWidget());
 
     auto presenter = PreviewPresenter(packDeps(mockView.get()));
     presenter.acceptMainPresenter(&mainPresenter);
@@ -361,7 +424,7 @@ public:
     auto mainPresenter = MockBatchPresenter();
 
     expectAutoreducingEnabled(mainPresenter);
-    expectApplyButtonDisabled(*mockView);
+    EXPECT_CALL(*mockView, disableMainWidget());
 
     auto presenter = PreviewPresenter(packDeps(mockView.get()));
     presenter.acceptMainPresenter(&mainPresenter);
@@ -373,7 +436,7 @@ public:
     auto mainPresenter = MockBatchPresenter();
 
     expectAutoreducingDisabled(mainPresenter);
-    expectApplyButtonEnabled(*mockView);
+    EXPECT_CALL(*mockView, enableMainWidget());
 
     auto presenter = PreviewPresenter(packDeps(mockView.get()));
     presenter.acceptMainPresenter(&mainPresenter);
@@ -460,6 +523,7 @@ public:
 
     expectRegionSelectorCleared(rawMockDockableWidgets, rawMockRegionSelector);
     expectReductionPlotCleared(rawMockPlotPresenter);
+    EXPECT_CALL(*mockView, enableMainWidget());
 
     presenter.notifySumBanksAlgorithmError();
   }
@@ -579,8 +643,22 @@ private:
     auto detIDsStr = ProcessingInstructions{"2-4"};
     EXPECT_CALL(mockDockedWidgets, getSelectedDetectors()).Times(1).WillOnce(Return(detIndices));
     EXPECT_CALL(mockInstViewModel, detIndicesToDetIDs(Eq(detIndices))).Times(1).WillOnce(Return(detIDs));
+    EXPECT_CALL(mockModel, getSelectedBanks()).Times(1);
     EXPECT_CALL(mockModel, setSelectedBanks(Eq(detIDsStr))).Times(1);
     EXPECT_CALL(mockModel, sumBanksAsync(Ref(mockJobManager))).Times(1);
+  }
+
+  void expectSumBanksCalledOnUnchangedDetectors(MockPreviewModel &mockModel, MockInstViewModel &mockInstViewModel,
+                                                MockPreviewDockedWidgets &mockDockedWidgets,
+                                                MockJobManager &mockJobManager) {
+    auto detIndices = std::vector<size_t>{44, 45, 46};
+    auto detIDs = std::vector<Mantid::detid_t>{44, 45, 46};
+    auto detIDsStr = ProcessingInstructions{"44-46"};
+    EXPECT_CALL(mockDockedWidgets, getSelectedDetectors()).Times(1).WillOnce(Return(detIndices));
+    EXPECT_CALL(mockInstViewModel, detIndicesToDetIDs(Eq(detIndices))).Times(1).WillOnce(Return(detIDs));
+    EXPECT_CALL(mockModel, getSelectedBanks()).Times(1).WillOnce(Return(detIDsStr));
+    EXPECT_CALL(mockModel, setSelectedBanks(Eq(detIDsStr))).Times(0);
+    EXPECT_CALL(mockModel, sumBanksAsync(Ref(mockJobManager))).Times(0);
   }
 
   void expectPlotInstView(MockInstViewModel &mockInstViewModel, MockPreviewDockedWidgets &mockDockedWidgets) {
@@ -631,8 +709,64 @@ private:
     EXPECT_CALL(mockDockedWidgets, setRectangularROIState(Eq(false))).Times(1);
   }
 
+  void expectRegionSelectionChanged(MockPreviewModel &mockModel, MockRegionSelector &mockRegionSelector) {
+    auto new_roi = IRegionSelector::Selection{3.5, 11.23};
+    EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Signal)))
+        .Times(1)
+        .WillOnce(Return(new_roi))
+        .RetiresOnSaturation();
+    EXPECT_CALL(mockRegionSelector, deselectAllSelectors()).Times(1);
+    auto old_roi = IRegionSelector::Selection{2.5, 17.56};
+    EXPECT_CALL(mockModel, getSelectedRegion(ROIType::Signal)).Times(1).WillOnce(Return(old_roi)).RetiresOnSaturation();
+  }
+
+  void expectRegionSelectionSomeChanged(MockPreviewModel &mockModel, MockRegionSelector &mockRegionSelector) {
+    auto old_roi = IRegionSelector::Selection{2.5, 17.56};
+    auto new_roi = IRegionSelector::Selection{3.5, 11.23};
+    EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Signal)))
+        .Times(1)
+        .WillOnce(Return(old_roi))
+        .RetiresOnSaturation();
+    EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Background)))
+        .Times(1)
+        .WillOnce(Return(new_roi))
+        .RetiresOnSaturation();
+    EXPECT_CALL(mockRegionSelector, deselectAllSelectors()).Times(1);
+
+    EXPECT_CALL(mockModel, getSelectedRegion(ROIType::Signal)).Times(1).WillOnce(Return(old_roi)).RetiresOnSaturation();
+    EXPECT_CALL(mockModel, getSelectedRegion(ROIType::Background))
+        .Times(1)
+        .WillOnce(Return(old_roi))
+        .RetiresOnSaturation();
+  }
+
+  void expectRegionSelectionUnchanged(MockPreviewModel &mockModel, MockRegionSelector &mockRegionSelector) {
+    auto roi = IRegionSelector::Selection{3.5, 11.23};
+    EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Signal)))
+        .Times(1)
+        .WillOnce(Return(roi))
+        .RetiresOnSaturation();
+    EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Background)))
+        .Times(1)
+        .WillOnce(Return(roi))
+        .RetiresOnSaturation();
+    EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Transmission)))
+        .Times(1)
+        .WillOnce(Return(roi))
+        .RetiresOnSaturation();
+    EXPECT_CALL(mockRegionSelector, deselectAllSelectors()).Times(0);
+
+    EXPECT_CALL(mockModel, getSelectedRegion(ROIType::Signal)).Times(1).WillOnce(Return(roi)).RetiresOnSaturation();
+    EXPECT_CALL(mockModel, getSelectedRegion(ROIType::Background)).Times(1).WillOnce(Return(roi)).RetiresOnSaturation();
+    EXPECT_CALL(mockModel, getSelectedRegion(ROIType::Transmission))
+        .Times(1)
+        .WillOnce(Return(roi))
+        .RetiresOnSaturation();
+  }
+
   void expectRunReduction(MockPreviewView &mockView, MockPreviewModel &mockModel, MockJobManager &mockJobManager,
                           MockRegionSelector &mockRegionSelector) {
+    EXPECT_CALL(mockView, disableMainWidget()).Times(1);
     EXPECT_CALL(mockView, setUpdateAngleButtonEnabled(false)).Times(1);
     // Check theta is set
     auto theta = 0.3;
@@ -640,19 +774,19 @@ private:
     EXPECT_CALL(mockModel, setTheta(theta)).Times(1);
     // Check ROI is set
     auto roi = IRegionSelector::Selection{3.5, 11.23};
-    EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Signal))).Times(1).WillOnce(Return(roi));
-    EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Background))).Times(1).WillOnce(Return(roi));
-    EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Transmission))).Times(1).WillOnce(Return(roi));
+    EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Signal))).Times(1).WillRepeatedly(Return(roi));
+    EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Background)))
+        .Times(1)
+        .WillRepeatedly(Return(roi));
+    EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Transmission)))
+        .Times(1)
+        .WillRepeatedly(Return(roi));
     EXPECT_CALL(mockModel, setSelectedRegion(ROIType::Signal, roi)).Times(1);
     EXPECT_CALL(mockModel, setSelectedRegion(ROIType::Background, roi)).Times(1);
     EXPECT_CALL(mockModel, setSelectedRegion(ROIType::Transmission, roi)).Times(1);
     // Check reduction is executed
     EXPECT_CALL(mockModel, reduceAsync(Ref(mockJobManager))).Times(1);
   }
-
-  void expectApplyButtonDisabled(MockPreviewView &mockView) { EXPECT_CALL(mockView, disableApplyButton()).Times(1); }
-
-  void expectApplyButtonEnabled(MockPreviewView &mockView) { EXPECT_CALL(mockView, enableApplyButton()).Times(1); }
 
   void expectProcessingEnabled(MockBatchPresenter &mainPresenter) {
     EXPECT_CALL(mainPresenter, isProcessing()).Times(AtLeast(1)).WillRepeatedly(Return(true));

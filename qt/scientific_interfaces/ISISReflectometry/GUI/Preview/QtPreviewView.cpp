@@ -34,9 +34,9 @@ QLayout *QtPreviewView::getDockedWidgetsLayout() noexcept { return m_ui.dockable
 
 MantidWidgets::IImageInfoWidget *QtPreviewView::getImageInfo() noexcept { return m_imageInfo; }
 
-void QtPreviewView::enableApplyButton() { m_ui.apply_button->setEnabled(true); }
+void QtPreviewView::enableMainWidget() { this->setEnabled(true); }
 
-void QtPreviewView::disableApplyButton() { m_ui.apply_button->setEnabled(false); }
+void QtPreviewView::disableMainWidget() { this->setEnabled(false); }
 
 void QtPreviewView::connectSignals() const {
   // Loading section
