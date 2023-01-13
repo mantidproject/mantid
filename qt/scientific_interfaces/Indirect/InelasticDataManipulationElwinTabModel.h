@@ -8,11 +8,13 @@
 
 #include "DllConfig.h"
 #include "IndirectDataValidationHelper.h"
+#include "IndirectFitDataModel.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
 #include <typeinfo>
 
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets;
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -24,6 +26,7 @@ public:
   ~InelasticDataManipulationElwinTabModel() = default;
   void setupLoadAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, std::string const &filepath,
                           std::string const &outputName);
+  std::string createGroupedWorkspaces(MatrixWorkspace_sptr workspace, FunctionModelSpectra spectra);
   void setupGroupAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
                            std::string const &inputWorkspacesString, std::string const &inputGroupWsName);
   void setupElasticWindowMultiple(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, QString workspaceBaseName,
