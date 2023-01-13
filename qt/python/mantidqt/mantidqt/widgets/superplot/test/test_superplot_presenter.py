@@ -243,6 +243,31 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.presenter._plot_selection.assert_called_once()
         self.presenter._redraw.assert_called_once_with(True)
 
+    @mock.patch("mantidqt.widgets.superplot.presenter.legend_set_draggable")
+    def test_redraw(self, m_legend_set_draggable):
+        # empty plot
+        self.m_figure.reset_mock()
+        self.m_canvas.reset_mock()
+        self.presenter._redraw(True)
+        self.m_figure.set_visible.assert_called_once_with(False)
+        self.m_canvas.draw_idle.assert_called_once()
+        # non empty plot
+        self.m_figure.reset_mock()
+        self.m_axes.reset_mock()
+        m_legend = mock.Mock()
+        m_legend.get_visible.return_value = True
+        self.m_axes.get_legend.return_value = m_legend
+        self.m_axes.legend.return_value = m_legend
+        self.m_canvas.reset_mock()
+        self.presenter._redraw(False)
+        self.m_axes.get_legend.assert_called_once()
+        m_legend.get_visible.assert_called_once()
+        m_legend.remove.assert_called_once()
+        self.m_figure.tight_layout.assert_called_once()
+        m_legend.set_visible.assert_called_once_with(True)
+        m_legend_set_draggable.assert_called_once()
+        self.m_canvas.draw_idle.assert_called_once()
+
     def test_remove_unneeded_curves(self):
         self.m_mtd.__contains__.return_value = True
         self.m_axes.reset_mock()
