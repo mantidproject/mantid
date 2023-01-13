@@ -399,9 +399,8 @@ class SuperplotPresenter:
         except ValueError:
             pass
         legend = axes.legend()
-        if legend:
-            legend.set_visible(hasLegend)
-            legend_set_draggable(legend, True)
+        legend.set_visible(hasLegend)
+        legend_set_draggable(legend, True)
         self._canvas.draw_idle()
 
     def _remove_unneeded_curves(self, replot: bool):
