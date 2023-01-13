@@ -65,7 +65,7 @@ class SaveINS(PythonAlgorithm):
         if spgr_sym:
             if not SpaceGroupFactory.isSubscribedSymbol(spgr_sym):
                 issues["Spacegroup"] = "Not a valid spacegroup symbol."
-        elif not ws.sample().hasCrystalStructure:
+        elif not ws.sample().hasCrystalStructure():
             issues["InputWorkspace"] = "The workspace does not have a crystal structure defined, a spacegroup must " "be provided as input."
         # check the workspace has a UB defined
         if not sample.hasOrientedLattice():

@@ -50,7 +50,7 @@ class SaveINSTest(unittest.TestCase):
 
         self.assertRaisesRegex(
             RuntimeError,
-            "Workspace must have an oriented lattice defined.",
+            "Not a valid spacegroup symbol",
             SaveINS,
             Filename=output_file,
             InputWorkspace=self.ws,
