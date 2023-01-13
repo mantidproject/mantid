@@ -376,31 +376,34 @@ class SuperplotPresenter:
         self._remove_unneeded_curves(replot)
         self._plot_selection()
 
-        if selection or plotted_data:
-            self._redraw()
-        else:
-            figure.set_visible(False)
-            self._canvas.draw_idle()
+        self._redraw(not selection and not plotted_data)
 
-    def _redraw(self):
+    def _redraw(self, empty=False):
         """
         Redraw the matplotlib canvas using a tight layout. The function takes
         care of the legend and avoid that it interfere with the layout.
+
+        Args:
+            empty (bool): True if the plot is empty. In this case, the figure is
+                          not drawn
         """
         figure = self._canvas.figure
-        axes = figure.gca()
-        hasLegend = False
-        legend = axes.get_legend()
-        if legend:
-            hasLegend = legend.get_visible()
-            legend.remove()
-        try:
-            figure.tight_layout()
-        except ValueError:
-            pass
-        legend = axes.legend()
-        legend.set_visible(hasLegend)
-        legend_set_draggable(legend, True)
+        if empty:
+            figure.set_visible(False)
+        else:
+            axes = figure.gca()
+            hasLegend = False
+            legend = axes.get_legend()
+            if legend:
+                hasLegend = legend.get_visible()
+                legend.remove()
+            try:
+                figure.tight_layout()
+            except ValueError:
+                pass
+            legend = axes.legend()
+            legend.set_visible(hasLegend)
+            legend_set_draggable(legend, True)
         self._canvas.draw_idle()
 
     def _remove_unneeded_curves(self, replot: bool):
