@@ -1,0 +1,1 @@
+- Fixed transcription error in Table 3 of :ref:`Crystal Field Threory` documentation
