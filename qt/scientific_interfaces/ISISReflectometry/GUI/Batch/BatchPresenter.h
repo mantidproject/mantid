@@ -57,7 +57,7 @@ public:
 
   // IBatchPresenter overrides
   void acceptMainPresenter(IMainWindowPresenter *mainPresenter) override;
-  void initInstrumentList() override;
+  void initInstrumentList(const std::string &selectedInstrument = "") override;
   void notifyPauseReductionRequested() override;
   void notifyResumeReductionRequested() override;
   void notifyResumeAutoreductionRequested() override;
