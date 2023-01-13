@@ -435,7 +435,7 @@ QString ProjectionSurface::getInfoText() const {
   case EditShapeMode:
     return "Select a tool button to draw a new shape. "
            "Click on shapes to select. Click and move to edit. Press Ctrl+C "
-           "/ Ctrl+V to copy/paste";
+           "/ Ctrl+V to copy/paste. Press Delete key to remove a shape.";
   case DrawFreeMode:
     return "Draw by holding the left button down. "
            "Erase with the right button.";

@@ -179,7 +179,7 @@ class MainWindowTest(unittest.TestCase):
     def test_interfaces_menu_texts_are_correct(self, _):
         example_interfaces = {
             "General": ["TOFCalculator"],
-            "Direct": ["DGS_Reduction.py", "DGSPlanner.py", "PyChop.py", "MSlice.py", "ALF View"],
+            "Direct": ["DGS_Reduction.py", "DGSPlanner.py", "PyChop.py", "MSlice.py", "ALFView"],
         }
 
         with patch(
@@ -197,7 +197,7 @@ class MainWindowTest(unittest.TestCase):
         expected_menu_texts = ["Direct", "General"]  # Alphabetical order
         actual_menu_texts = [action.text() for action in self.main_window.interfaces_menu.actions()]
         self.assertEqual(expected_menu_texts, actual_menu_texts)
-        expected_direct_texts = ["ALF View", "DGSPlanner", "DGS Reduction", "MSlice", "PyChop"]
+        expected_direct_texts = ["ALFView", "DGSPlanner", "DGS Reduction", "MSlice", "PyChop"]
         expected_general_texts = ["TOFCalculator"]
         submenus = list(filter(lambda child: isinstance(child, QMenu), self.main_window.interfaces_menu.children()))
         actual_direct_texts = [action.text() for action in submenus[0].actions()]
@@ -347,8 +347,8 @@ class MainWindowTest(unittest.TestCase):
         cpp interfaces are discovered correctly using the Direct interfaces as an example."""
 
         cpp_interface_factory = Mock()
-        cpp_interface_factory.keys.return_value = ["ALF View", "TOFCalculator"]
-        cpp_interface_factory.categories.side_effect = lambda name: ["Direct"] if name == "ALF View" else []
+        cpp_interface_factory.keys.return_value = ["ALFView", "TOFCalculator"]
+        cpp_interface_factory.categories.side_effect = lambda name: ["Direct"] if name == "ALFView" else []
         mock_UserSubWindowFactory.Instance.return_value = cpp_interface_factory
 
         all_interfaces = self.main_window._discover_cpp_interfaces(
@@ -356,7 +356,7 @@ class MainWindowTest(unittest.TestCase):
         )
 
         expected_interfaces = {
-            "Direct": ["DGS_Reduction.py", "DGSPlanner.py", "PyChop.py", "MSlice.py", "ALF View"],
+            "Direct": ["DGS_Reduction.py", "DGSPlanner.py", "PyChop.py", "MSlice.py", "ALFView"],
             "General": ["TOFCalculator"],
         }
         self.assertDictEqual(expected_interfaces, all_interfaces)
