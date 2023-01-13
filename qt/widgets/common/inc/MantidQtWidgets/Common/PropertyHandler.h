@@ -54,7 +54,7 @@ public:
   // properties from the browser
   void removeFunction();
 
-  void renameChildren(std::shared_ptr<Mantid::API::CompositeFunction> cf);
+  void renameChildren(const Mantid::API::CompositeFunction &cf);
 
   /// Creates name for this function to be displayed
   /// in the browser

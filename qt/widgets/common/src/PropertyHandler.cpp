@@ -461,19 +461,19 @@ void PropertyHandler::removeFunction() {
         break;
       }
     }
-    ph->renameChildren(cf);
+    ph->renameChildren(*cf);
     m_browser->setFitEnabled(cf->nFunctions() > 0);
   }
 }
 
-void PropertyHandler::renameChildren(std::shared_ptr<Mantid::API::CompositeFunction> cf) {
+void PropertyHandler::renameChildren(const Mantid::API::CompositeFunction &cf) {
   m_browser->m_changeSlotsEnabled = false;
   QMap<QString, QtProperty *>::const_iterator it = m_ties.begin();
   for (; it != m_ties.end(); ++it) {
     QString parName = it.key();
     QString fullName = functionPrefix() + "." + parName;
     QtProperty *prop = it.value();
-    Mantid::API::ParameterTie *tie = cf->getTie(cf->parameterIndex(fullName.toStdString()));
+    Mantid::API::ParameterTie *tie = cf.getTie(cf.parameterIndex(fullName.toStdString()));
     if (!tie) {
       // In this case the tie has been removed from the composite function since it contained a refference to
       // the function which was removed
