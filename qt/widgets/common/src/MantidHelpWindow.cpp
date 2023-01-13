@@ -48,15 +48,23 @@ QPointer<pqHelpWindow> MantidHelpWindow::g_helpWindow;
 
 /// name of the collection file itself
 const QString COLLECTION_FILE("MantidProject.qhc");
+/// QtHelp scheme
+const QString QTHELP_SCHEME("qthelp");
 /// Base url for all of the files in the QtHelp project.
-const QString QTHELP_BASE_URL("qthelp://org.mantidproject/doc/");
+const QString QTHELP_HOST("org.mantidproject");
+/// Base path for all files in collection
+const QString QTHELP_BASE_PATH("/doc/");
+/// HTML scheme
+const QString HTML_SCHEME("https");
 /// Base url for all of the files in the online html
-const QString HTML_BASE_URL("https://docs.mantidproject.org/");
+const QString HTML_HOST("docs.mantidproject.org");
+/// Base path for all files in collection
+const QString HTML_BASE_PATH("/");
 /// Page to display if nothing provided
 const QString DEFAULT_PAGENAME("index");
 
 /**
- * Default constructor shows the @link DEFAULT_URL @endlink.
+ * Default constructor shows the base index page.
  */
 MantidHelpWindow::MantidHelpWindow(const Qt::WindowFlags &flags)
     : MantidHelpInterface(), m_collectionFile(""), m_cacheFile(""), m_firstRun(true) {
@@ -126,17 +134,33 @@ void MantidHelpWindow::openWebpage(const QUrl &url) {
 void MantidHelpWindow::showPage(const QString &url) { this->showPage(QUrl(url)); }
 
 void MantidHelpWindow::showPage(const QUrl &url) {
+  // Compute Url from input.
+  // An absolute Url is used as is. For relative urls
+  // it is assumed the path of the URL is relative to
+  // the base directory of that scheme where the data
+  // is hosted.
+
+  QUrl targetUrl;
+  if (url.isRelative()) {
+    const QString pagePath = url.isEmpty() ? DEFAULT_PAGENAME + ".html" : url.path();
+    if (helpWindowExists()) {
+      targetUrl.setScheme(QTHELP_SCHEME);
+      targetUrl.setHost(QTHELP_HOST);
+      targetUrl.setPath(QTHELP_BASE_PATH + pagePath);
+    } else {
+      targetUrl.setScheme(HTML_SCHEME);
+      targetUrl.setHost(HTML_HOST);
+      targetUrl.setPath(HTML_BASE_PATH + pagePath);
+    }
+  } else {
+    targetUrl = url;
+  }
+
   if (helpWindowExists()) {
-    if (url.isEmpty())
-      this->showHelp(QTHELP_BASE_URL + DEFAULT_PAGENAME + ".html");
-    else
-      this->showHelp(url.toString());
+    this->showHelp(targetUrl.toString());
   } else // qt-assistant disabled
   {
-    if (url.isEmpty())
-      this->openWebpage(HTML_BASE_URL + DEFAULT_PAGENAME);
-    else
-      this->openWebpage(url);
+    this->openWebpage(targetUrl.toString());
   }
 }
 
@@ -144,8 +168,9 @@ void MantidHelpWindow::showPage(const QUrl &url) {
  * Have the help window show a specific url. If the url doesn't exist
  * this just pops up the default view for the help.
  *
- * @param url The url to open. This should start with @link BASE_URL @endlink.
- * If it is empty show the default page.
+ * @param url The url to open. A relative path is assumed to be relative
+ *            to the base url. An absolute path is used as given.
+ *            If it is empty show the default page.
  */
 void MantidHelpWindow::showPage(const string &url) { this->showPage(QUrl(QString(url.c_str()))); }
 
@@ -183,21 +208,12 @@ void MantidHelpWindow::showAlgorithm(const QString &name, const int version) {
     const auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(name.toStdString());
     helpUrl = QString::fromStdString(alg->helpURL());
   }
-  const QString pageName = name.isEmpty() ? DEFAULT_PAGENAME : name;
-  const QString pagePath = QString("algorithms/%1%2.html").arg(pageName, versionStr);
-  if (helpWindowExists()) {
-    if (helpUrl.isEmpty()) {
-      QString url;
-      this->showHelp(QTHELP_BASE_URL + pagePath);
-    } else {
-      this->showHelp(helpUrl);
-    }
-  } else { // qt-assistant disabled
-    if (helpUrl.isEmpty()) {
-      this->showPage(HTML_BASE_URL + pagePath);
-    } else {
-      this->showPage(helpUrl);
-    }
+  if (helpUrl.isEmpty()) {
+    const QString pageName = name.isEmpty() ? DEFAULT_PAGENAME : name;
+    const QString pagePath = QString("algorithms/%1%2.html").arg(pageName, versionStr);
+    this->showPage(pagePath);
+  } else {
+    this->showPage(helpUrl);
   }
 }
 
@@ -218,12 +234,7 @@ void MantidHelpWindow::showConcept(const string &name) { this->showConcept(QStri
 void MantidHelpWindow::showConcept(const QString &name) {
   const QString pageName = name.isEmpty() ? DEFAULT_PAGENAME : name;
   const QString pagePath = QString("concepts/%1.html").arg(pageName);
-  if (helpWindowExists()) {
-    this->showHelp(QTHELP_BASE_URL + pagePath);
-  } else // qt-assistant disabled
-  {
-    this->showPage(HTML_BASE_URL + pagePath);
-  }
+  this->showPage(pagePath);
 }
 
 /**
@@ -245,12 +256,7 @@ void MantidHelpWindow::showFitFunction(const std::string &name) { this->showFitF
 void MantidHelpWindow::showFitFunction(const QString &name) {
   const QString pageName = name.isEmpty() ? DEFAULT_PAGENAME : name;
   const QString pagePath = QString("fitting/fitfunctions/%1.html").arg(pageName);
-  if (helpWindowExists()) {
-    this->showHelp(QTHELP_BASE_URL + pagePath);
-  } else // qt-assistant disabled
-  {
-    this->showPage(HTML_BASE_URL + pagePath);
-  }
+  this->showPage(pagePath);
 }
 
 /**
@@ -261,12 +267,10 @@ void MantidHelpWindow::showFitFunction(const QString &name) {
  * @param section :: the section of the interface to show
  */
 void MantidHelpWindow::showCustomInterface(const QString &name, const QString &area, const QString &section) {
-  if (helpWindowExists()) {
-    const QString areaPath = area.isEmpty() ? "" : QString("%1/").arg(area);
-    const QString pagePath = QString("%1.html").arg(name.isEmpty() ? DEFAULT_PAGENAME : name);
-    const QString sectionAnchor = section.isEmpty() ? "" : QString("#%1").arg(section);
-    this->showHelp(QTHELP_BASE_URL + "interfaces/" + areaPath + pagePath + sectionAnchor);
-  }
+  const QString areaPath = area.isEmpty() ? "" : QString("%1/").arg(area);
+  const QString pagePath = QString("%1.html").arg(name.isEmpty() ? DEFAULT_PAGENAME : name);
+  const QString sectionAnchor = section.isEmpty() ? "" : QString("#%1").arg(section);
+  this->showPage("interfaces/" + areaPath + pagePath + sectionAnchor);
 }
 
 /**

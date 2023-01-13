@@ -3189,9 +3189,7 @@ void FitPropertyBrowser::functionHelp() {
  * Show online browser help
  */
 void FitPropertyBrowser::browserHelp() {
-  MantidDesktopServices::openUrl(QUrl("http://www.mantidproject.org/"
-                                      "MantidPlot:_Simple_Peak_Fitting_with_the_Fit_"
-                                      "Wizard#Fit_Properties_Browser"));
+  MantidQt::API::HelpWindow::showPage(QStringLiteral("workbench/plotwindow.html"));
 }
 
 /**=================================================================================================
