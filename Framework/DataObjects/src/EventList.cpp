@@ -3659,7 +3659,7 @@ template <class T>
 void EventList::filterByPulseTimeHelper(std::vector<T> &events, DateAndTime start, DateAndTime stop,
                                         std::vector<T> &output) {
   std::copy_if(events.begin(), events.end(), std::back_inserter(output),
-               [start, stop](const T &t) { return (t.m_pulsetime > start) && (t.m_pulsetime < stop); });
+               [start, stop](const T &t) { return (t.m_pulsetime >= start) && (t.m_pulsetime < stop); });
 }
 
 /** Filter a vector of events into another based on time at sample.
@@ -3676,7 +3676,7 @@ void EventList::filterByTimeAtSampleHelper(std::vector<T> &events, DateAndTime s
                                            double tofFactor, double tofOffset, std::vector<T> &output) {
   std::copy_if(events.begin(), events.end(), std::back_inserter(output),
                [start, stop, tofFactor, tofOffset](const T &t) {
-                 return (calculateCorrectedFullTime(t, tofFactor, tofOffset) > start.totalNanoseconds()) &&
+                 return (calculateCorrectedFullTime(t, tofFactor, tofOffset) >= start.totalNanoseconds()) &&
                         (calculateCorrectedFullTime(t, tofFactor, tofOffset) < stop.totalNanoseconds());
                });
 }
