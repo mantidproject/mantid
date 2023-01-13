@@ -220,31 +220,28 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.m_view.set_spectra_list.assert_has_calls(calls)
 
     def test_update_plot(self):
+        # non empty plot
         self.m_view.get_selection.return_value = {"ws1": [10]}
         self.m_model.get_plotted_data.return_value = [("ws1", 10), ("ws2", 1)]
-        self.m_axes.reset_mock()
         self.m_figure.reset_mock()
         self.presenter._remove_unneeded_curves = mock.Mock()
         self.presenter._plot_selection = mock.Mock()
+        self.presenter._redraw = mock.Mock()
         self.presenter._update_plot()
         self.presenter._remove_unneeded_curves.assert_called_once()
         self.presenter._plot_selection.assert_called_once()
-        self.m_axes.set_axis_on.assert_called_once()
-        self.m_figure.tight_layout.assert_called_once()
-        self.m_axes.legend.assert_called_once()
+        self.presenter._redraw.assert_called_once_with(False)
+        # empty plot
         self.m_view.get_selection.return_value = {}
         self.m_model.get_plotted_data.return_value = []
-        self.m_axes.reset_mock()
         self.m_figure.reset_mock()
         self.presenter._remove_unneeded_curves.reset_mock()
         self.presenter._plot_selection.reset_mock()
+        self.presenter._redraw.reset_mock()
         self.presenter._update_plot()
         self.presenter._remove_unneeded_curves.assert_called_once()
         self.presenter._plot_selection.assert_called_once()
-        self.m_axes.get_legend.assert_called_once()
-        self.m_axes.set_axis_off.assert_called_once()
-        self.m_axes.set_title.assert_called_once_with("")
-        self.m_canvas.draw_idle.assert_called()
+        self.presenter._redraw.assert_called_once_with(True)
 
     def test_remove_unneeded_curves(self):
         self.m_mtd.__contains__.return_value = True
