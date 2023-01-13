@@ -45,7 +45,7 @@ dependencies:
   - tbb-devel=2021.*
   - texlive-core>=20180414
   - toml>=0.10.2
-  - zlib>=1.2.11
+  - versioningit>=2.1
 
   # Not Windows, OpenGL implementation:
   - mesalib>=18.0.0

@@ -1,0 +1,62 @@
+{% set version = load_setup_py_data().get('version', '0.0.0') %}
+
+package:
+  name: mantidqt
+  version: {{ version }}
+
+source:
+  path: ../../../
+
+build:
+  number: 0
+  run_exports:
+    - {{ pin_subpackage('mantidqt', max_pin='x.x.x') }}
+
+requirements:
+  build:
+    - {{ compiler("c") }}
+    - {{ compiler("cxx") }}
+    - llvm-openmp  # [osx]
+    - libgomp  # [linux]
+    - ninja  # [unix]
+    - cmake
+    - git
+    - {{ cdt('mesa-libgl-devel') }}  # [linux]
+    - {{ cdt('mesa-dri-drivers') }}  # [linux]
+    - {{ cdt('libxxf86vm') }}  # [linux]
+    - {{ cdt('libx11-devel') }}  # [linux]
+    - {{ cdt('xorg-x11-proto-devel') }}  # [linux]
+
+  host:
+    - eigen
+    - jemalloc  # [unix]
+    - mantid {{ version }}
+    - python {{ python }}
+    - pyqt {{ pyqt }}
+    - qscintilla2 {{ qscintilla2 }}
+    - qt-webengine
+    - setuptools {{ setuptools }}
+    - tbb-devel {{ tbb }}
+    - versioningit
+
+  run:
+    - matplotlib {{ matplotlib }}
+    - {{ pin_compatible("qscintilla2", max_pin="x.x") }}
+    - qtpy
+    - python
+
+test:
+  imports:
+    - mantidqt
+    - mantidqt.icons
+
+about:
+  home: https://github.com/mantidproject/mantid
+  license: GPL-3.0-or-later
+  summary: Mantid provides a framework that supports high-performance computing and visualisation of materials science data.
+
+extra:
+  recipe-maintainers:
+    - thomashampson
+    - sf1919
+    - martyngigg

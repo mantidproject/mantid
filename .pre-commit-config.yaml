@@ -21,6 +21,7 @@ repos:
       - id: check-xml
       - id: check-yaml
         args: [--allow-multiple-documents]
+        exclude: conda/recipes/mantid/meta.yaml|conda/recipes/mantidqt/meta.yaml|conda/recipes/mantiddocs/meta.yaml|conda/recipes/mantidworkbench/meta.yaml
 
   - repo: https://github.com/mantidproject/pre-commit-hooks.git
     rev: 82e4b72a17c058d99f510771e3f531fb98c3fe73
