@@ -18,7 +18,7 @@ The ``InputWorkspace`` must have a UB set (from which the lattice parameters are
 the function, or from the crystal structure if one has been set on the workspace.
 
 By default it is assumed that atoms have a ratio of isotopes seen in nature, however if
-``UseNaturalIsotopicAbundances=False`` the scattering scattering cross-sections defined for the isotopes specified in
+``UseNaturalIsotopicAbundances=False`` the scattering cross-sections defined for the isotopes specified in
 the sample material will be used. In this case there are other atomic properties that are output, one of these is the
 covalent radius (which SHELX uses for the purposes of outputting bonds/geometry information) which is set to be
 1 Angstrom (if ``UseNaturalIsotopicAbundances=True`` SHELX will look up the covalent radii of atoms itself).
