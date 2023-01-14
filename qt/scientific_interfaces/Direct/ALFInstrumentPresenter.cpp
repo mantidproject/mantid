@@ -13,17 +13,6 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-#include <map>
-
-namespace {
-
-// A map of the message to display for a returned exception.
-static std::map<std::string, std::string> const EXCEPTION_MAP{
-    {"X arrays must match when dividing 2D workspaces.",
-     "Vanadium normalisation failed:\nX arrays must match when dividing two workspaces."}};
-
-} // namespace
-
 namespace MantidQt::CustomInterfaces {
 
 ALFInstrumentPresenter::ALFInstrumentPresenter(IALFInstrumentView *view, std::unique_ptr<IALFInstrumentModel> model)
@@ -85,8 +74,7 @@ void ALFInstrumentPresenter::generateLoadedWorkspace() {
   try {
     m_model->generateLoadedWorkspace();
   } catch (std::exception const &ex) {
-    auto const iter = EXCEPTION_MAP.find(ex.what());
-    m_view->warningBox(iter != EXCEPTION_MAP.cend() ? iter->second : ex.what());
+    m_view->warningBox(std::string("Vanadium normalisation failed: ") + ex.what());
   }
 }
 
