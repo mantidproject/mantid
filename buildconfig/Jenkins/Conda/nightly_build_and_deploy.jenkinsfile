@@ -287,9 +287,9 @@ def build_and_test(platform) {
   if(platform.startsWith('win')) {
     workspace_unix_style = toUnixStylePath("${WORKSPACE}")
     bat "\"${WIN_BASH}\" -ex -c \"${buildscript_path}\
-      ${workspace_unix_style} ${cmake_preset} ${common_args}\""
+      ${workspace_unix_style}/${CHECKOUT_DIR} ${cmake_preset} ${common_args}\""
   } else {
-    sh "${buildscript_path} ${WORKSPACE} ${cmake_preset} ${common_args} --enable-doctests"
+    sh "${buildscript_path} ${WORKSPACE}/${CHECKOUT_DIR} ${cmake_preset} ${common_args} --enable-doctests"
   }
 }
 
