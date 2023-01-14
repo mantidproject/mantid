@@ -295,8 +295,8 @@ def build_and_test(platform) {
 
 def publish_test_reports() {
   xunit thresholds: [failed(failureThreshold: '0')],
-  tools: [CTest(excludesPattern: '', pattern: 'build/Testing/**/*.xml', stopProcessingIfError: true)]
-  junit 'build/Testing/SystemTests/scripts/TEST-*.xml'
+    tools: [CTest(excludesPattern: '', pattern: "${CHECKOUT_DIR}/build/Testing/**/*.xml", stopProcessingIfError: true)]
+  junit "${CHECKOUT_DIR}/build/Testing/SystemTests/scripts/TEST-*.xml"
 }
 
 def package_conda(platform, base_or_workbench) {
