@@ -276,7 +276,7 @@ def toUnixStylePath(path) {
 
 def checkoutSource(sha) {
   dir(CHECKOUT_DIR) {
-    checkout scm: [$class: 'GitSCM', branches: [[name: sha]], extensions: [[$class: 'CleanCheckout'], pruneTags(true)]]
+    checkout scm: [$class: 'GitSCM', branches: [[name: sha]], extensions: [[$class: 'CleanCheckout', deleteUntrackedNestedRepositories: true], pruneTags(true)]]
   }
 }
 
