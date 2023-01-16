@@ -143,7 +143,7 @@ void InelasticDataManipulationIqtTabView::setup() {
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SIGNAL(plotCurrentPreview()));
   connect(m_uiForm.cbCalculateErrors, SIGNAL(stateChanged(int)), this, SIGNAL(errorsClicked(int)));
   connect(m_uiForm.cbCalculateErrors, SIGNAL(stateChanged(int)), this, SLOT(handleErrorsClicked(int)));
-  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this, SIGNAL(PreviewSpectrumChanged(int)));
+  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this, SIGNAL(previewSpectrumChanged(int)));
   connect(m_uiForm.ckSymmetricEnergy, SIGNAL(stateChanged(int)), this, SLOT(updateEnergyRange(int)));
   connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(rangeChanged(double, double)));
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,

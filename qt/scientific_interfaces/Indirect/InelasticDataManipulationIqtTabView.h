@@ -49,7 +49,7 @@ signals:
   void resDataReady(const QString &);
   void iterationsChanged(int);
   void errorsClicked(int);
-  void PreviewSpectrumChanged(int);
+  void previewSpectrumChanged(int);
   void runClicked();
   void saveClicked();
   void plotCurrentPreview();

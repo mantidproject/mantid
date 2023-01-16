@@ -51,7 +51,7 @@ void InelasticDataManipulationIqtTab::setup() {
   connect(m_view.get(), SIGNAL(saveClicked()), this, SLOT(saveClicked()));
   connect(m_view.get(), SIGNAL(plotCurrentPreview()), this, SLOT(plotCurrentPreview()));
 
-  connect(m_view.get(), SIGNAL(PreviewSpectrumChanged(int)), this, SLOT(handlePreviewSpectrumChanged(int)));
+  connect(m_view.get(), SIGNAL(previewSpectrumChanged(int)), this, SLOT(handlePreviewSpectrumChanged(int)));
 
   m_view->setup();
 }
