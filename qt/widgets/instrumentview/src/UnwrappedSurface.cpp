@@ -405,6 +405,11 @@ void UnwrappedSurface::setFlippedView(bool on) {
   }
 }
 
+/**
+ * Calculate the QRect of a particular detector in units of pixels.
+ * @param detectorIndex :: The index of the detector to calculate the QRect for.
+ * @returns The bounding QRect of a particular detector in units of pixels.
+ */
 QRect UnwrappedSurface::detectorQRectInPixels(const std::size_t detectorIndex) const {
   const auto detIter =
       std::find_if(m_unwrappedDetectors.cbegin(), m_unwrappedDetectors.cend(),
@@ -419,10 +424,18 @@ QRect UnwrappedSurface::detectorQRectInPixels(const std::size_t detectorIndex) c
   const double dw = fabs(m_viewRect.width() / vwidth);
   const double dh = fabs(m_viewRect.height() / vheight);
 
-  const auto size = QSize(int((*detIter).width / dw), int((*detIter).height / dh));
-  const auto position =
-      QPoint(int(static_cast<int>(((*detIter).u - m_viewRect.x0()) / dw - size.width() / 2.0)),
-             int(vheight - static_cast<int>(((*detIter).v - m_viewRect.y0()) / dh) - size.height() / 2.0));
+  const auto detRect = detIter->toQRectF();
+
+  // Calculate the centre position of the QRect. The x position will be different depending on if the view is flipped
+  const auto xCentre =
+      m_flippedView ? (m_viewRect.x0() - detRect.center().x()) / dw : (detRect.center().x() - m_viewRect.x0()) / dw;
+  const auto yCentre = (detRect.center().y() - m_viewRect.y0()) / dh;
+
+  // Calculate the width and height of the QRect
+  const auto size = QSize(static_cast<int>(detRect.width() / dw), static_cast<int>(detRect.height() / dh));
+  // Calculate the position of the top left corner of the QRect
+  const auto position = QPoint(static_cast<int>(xCentre) - static_cast<int>(size.width() / 2.0),
+                               vheight - static_cast<int>(yCentre) - static_cast<int>(size.height() / 2.0));
   return QRect(position, size);
 }
 
