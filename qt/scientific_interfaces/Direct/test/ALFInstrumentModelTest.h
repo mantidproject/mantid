@@ -68,13 +68,9 @@ MatrixWorkspace_sptr changeBinOffset(MatrixWorkspace_sptr const &inputWorkspace)
 
 class ALFInstrumentModelTest : public CxxTest::TestSuite {
 public:
-  ALFInstrumentModelTest() { FrameworkManager::Instance(); }
+  ALFInstrumentModelTest() {
+    FrameworkManager::Instance();
 
-  static ALFInstrumentModelTest *createSuite() { return new ALFInstrumentModelTest(); }
-
-  static void destroySuite(ALFInstrumentModelTest *suite) { delete suite; }
-
-  void setUp() override {
     m_nonALFData = "IRIS00072464.raw";
     m_ALFData = "ALF82301.raw";
     m_ALFEdgeCaseData = "ALF83743.raw";
@@ -82,25 +78,62 @@ public:
     m_singleTubeDetectorIDs = std::vector<DetectorTube>{{2500u, 2501u, 2502u}};
     m_multiTubeDetectorIDs = std::vector<DetectorTube>{{2500u, 2501u, 2502u}, {3500u, 3501u, 3502u}};
 
-    m_instrumentActor = std::make_unique<NiceMock<MockInstrumentActor>>();
     m_model = std::make_unique<ALFInstrumentModel>();
+
+    m_loadedWs = m_model->loadAndNormalise(m_ALFData);
+  }
+
+  static ALFInstrumentModelTest *createSuite() { return new ALFInstrumentModelTest(); }
+
+  static void destroySuite(ALFInstrumentModelTest *suite) { delete suite; }
+
+  void setUp() override {
+    m_instrumentActor = std::make_unique<NiceMock<MockInstrumentActor>>();
+
+    // Clear the model
+    m_model->setSample(nullptr);
+    m_model->setVanadium(nullptr);
+    m_model->setSelectedTubes({});
   }
 
   void tearDown() override { ADS.clear(); }
 
   void test_loadedWsName_returns_the_expected_instrument() { TS_ASSERT_EQUALS("ALFData", m_model->loadedWsName()); }
 
+  void test_loadAndNormalise_returns_a_non_null_workspace_if_the_data_is_valid() { TS_ASSERT(m_loadedWs); }
+
   void test_loadAndNormalise_throws_an_error_if_the_data_is_not_ALF_data() {
     TS_ASSERT_THROWS(m_model->loadAndNormalise(m_nonALFData), std::invalid_argument const &);
-  }
-
-  void test_loadAndNormalise_returns_a_non_null_workspace_if_the_data_is_valid() {
-    TS_ASSERT(m_model->loadAndNormalise(m_ALFData));
   }
 
   void test_loadAndNormalise_does_not_transform_to_dSpacing() {
     auto const workspace = m_model->loadAndNormalise(m_ALFData);
     TS_ASSERT_DIFFERS("dSpacing", workspace->getAxis(0)->unit()->unitID());
+
+  void test_setSample_will_not_load_an_empty_instrument_workspace_if_the_sample_was_previously_null() {
+    ADS.clear();
+
+    m_model->setSample(m_loadedWs);
+
+    TS_ASSERT(!ADS.doesExist("ALFData"));
+  }
+
+  void test_setSample_does_not_load_an_instrument_workspace_if_the_sample_provided_is_not_null() {
+    m_model->setSample(m_loadedWs);
+    ADS.clear();
+
+    m_model->setSample(m_loadedWs);
+
+    TS_ASSERT(!ADS.doesExist("ALFData"));
+  }
+
+  void test_setSample_loads_an_instrument_workspace_if_previous_sample_is_not_null_and_new_sample_is_null() {
+    m_model->setSample(m_loadedWs);
+    ADS.clear();
+
+    m_model->setSample(nullptr);
+
+    TS_ASSERT(ADS.doesExist("ALFData"));
   }
 
   void test_sampleRun_and_vanadiumRun_returns_zero_when_no_data_is_loaded() {
@@ -109,12 +142,12 @@ public:
   }
 
   void test_sampleRun_returns_the_run_number_of_the_loaded_data() {
-    m_model->setSample(m_model->loadAndNormalise(m_ALFData));
+    m_model->setSample(m_loadedWs);
     TS_ASSERT_EQUALS(82301u, m_model->sampleRun());
   }
 
   void test_vanadiumRun_returns_the_run_number_of_the_loaded_data() {
-    m_model->setVanadium(m_model->loadAndNormalise(m_ALFData));
+    m_model->setVanadium(m_loadedWs);
     TS_ASSERT_EQUALS(82301u, m_model->vanadiumRun());
   }
 
@@ -198,22 +231,21 @@ public:
   }
 
   void test_generateLoadedWorkspace_outputs_the_sample_workspace_when_no_vanadium_is_set() {
-    auto const sample = m_model->loadAndNormalise(m_ALFData);
-    m_model->setSample(sample);
+    m_model->setSample(m_loadedWs);
 
     m_model->generateLoadedWorkspace();
 
     TS_ASSERT(ADS.doesExist("ALFData"));
 
     auto const workspace = ADS.retrieveWS<MatrixWorkspace>("ALFData");
+
     TS_ASSERT_EQUALS("dSpacing", workspace->getAxis(0)->unit()->unitID());
-    TS_ASSERT_EQUALS(sample->y(0), workspace->y(0));
+    TS_ASSERT_EQUALS(m_loadedWs->y(0), workspace->y(0));
   }
 
   void test_generateLoadedWorkspace_outputs_a_normalised_workspace_when_the_vanadium_is_set() {
-    auto const dataWs = m_model->loadAndNormalise(m_ALFData);
-    m_model->setSample(dataWs);
-    m_model->setVanadium(dataWs);
+    m_model->setSample(m_loadedWs);
+    m_model->setVanadium(m_loadedWs);
 
     m_model->generateLoadedWorkspace();
 
@@ -279,21 +311,19 @@ public:
 
 private:
   void setSingleTubeSelected() {
-    auto const sample = m_model->loadAndNormalise(m_ALFData);
-    m_model->setSample(sample);
+    m_model->setSample(m_loadedWs);
     m_model->generateLoadedWorkspace();
 
-    m_singleTubeDetectorIDs = findWholeTubes(sample->componentInfo(), {2500u, 2501u, 2502u});
+    m_singleTubeDetectorIDs = findWholeTubes(m_loadedWs->componentInfo(), {2500u, 2501u, 2502u});
 
     TS_ASSERT(m_model->setSelectedTubes(m_singleTubeDetectorIDs));
   }
 
   void setMultipleTubesSelected() {
-    auto const sample = m_model->loadAndNormalise(m_ALFData);
-    m_model->setSample(sample);
+    m_model->setSample(m_loadedWs);
     m_model->generateLoadedWorkspace();
 
-    m_multiTubeDetectorIDs = findWholeTubes(sample->componentInfo(), {2500u, 2501u, 2502u, 3500u, 3501u, 3502u});
+    m_multiTubeDetectorIDs = findWholeTubes(m_loadedWs->componentInfo(), {2500u, 2501u, 2502u, 3500u, 3501u, 3502u});
 
     TS_ASSERT(m_model->setSelectedTubes(m_multiTubeDetectorIDs));
   }
@@ -313,6 +343,8 @@ private:
   std::string m_nonALFData;
   std::string m_ALFData;
   std::string m_ALFEdgeCaseData;
+
+  Mantid::API::MatrixWorkspace_sptr m_loadedWs;
 
   std::vector<DetectorTube> m_singleTubeDetectorIDs;
   std::vector<DetectorTube> m_multiTubeDetectorIDs;
