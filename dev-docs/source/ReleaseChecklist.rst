@@ -36,38 +36,41 @@ are responsible for ensuring that the work gets done.
 Timeline
 --------
 
-+---------------------------+-----------------------------------------------+--------------------------------------------------------------------------+--------------------------+
-| | Key Event(s)            | | Task Priorities                             | | Actions Required from                                                  | | Time Until Release     |
-|                           |                                               |                                                                          |                          |
-+===========================+===============================================+==========================================================================+==========================+
-| 1 week before Code Freeze | Development, Testing & Documentation          | | :ref:`Local Project Manager(s) <local-project-managers-checklist>`     |  4+ weeks                |
-|                           |                                               | | :ref:`Release Manager <release-manager-checklist>`                     |                          |
-+---------------------------+-----------------------------------------------+--------------------------------------------------------------------------+--------------------------+
-| **Code Freeze Begins**    | Final Development, Testing & Documentation    | | :ref:`Local Project Manager(s) <local-project-managers-checklist>`     |  3 weeks + 1 working day |
-|                           |                                               | | :ref:`Release Manager <release-manager-checklist>`                     |                          |
-|                           |                                               | | :ref:`Technical Release Manager <technical-release-manager-checklist>` |                          |
-+---------------------------+-----------------------------------------------+--------------------------------------------------------------------------+--------------------------+
-| **Manual Testing**        | Blocker bug fixes, Testing & Release Notes    | | :ref:`Quality Assurance Manager <quality-assurance-manager-checklist>` |  3 weeks                 |
-|                           |                                               | | :ref:`Release Manager <release-manager-checklist>`                     |                          |
-+---------------------------+-----------------------------------------------+--------------------------------------------------------------------------+--------------------------+
-| **Beta Testing Begins**   | Blocker bug fixes, Testing, Release Notes,    | | :ref:`Local Project Manager(s) <local-project-managers-checklist>`     |  2.5 weeks               |
-|                           | Maintenance Tasks & Next release development  | | :ref:`Release Editor <release-editor-checklist>`                       |                          |
-|                           |                                               | | :ref:`Release Manager <release-manager-checklist>`                     |                          |
-+---------------------------+-----------------------------------------------+--------------------------------------------------------------------------+--------------------------+
-| Reminder Email for Beta   | Blocker bug fixes, Testing, Release Notes,    | | :ref:`Release Manager <release-manager-checklist>`                     |  1.5 weeks               |
-|                           | Maintenance Tasks & Next release development  |                                                                          |                          |
-+---------------------------+-----------------------------------------------+--------------------------------------------------------------------------+--------------------------+
-| **Beta Testing Ends**     | Blocker bug fixes, Testing, Release Notes,    | | :ref:`Release Editor <release-editor-checklist>`                       |  ~ 4 working days        |
-|                           | Maintenance Tasks & Next release development  | | :ref:`Release Manager <release-manager-checklist>`                     |                          |
-|                           |                                               | | :ref:`Quality Assurance Manager <quality-assurance-manager-checklist>` |                          |
-+---------------------------+-----------------------------------------------+--------------------------------------------------------------------------+--------------------------+
-| **Smoke Testing**         | Blocker bug fixes, Testing & Packaging        | | :ref:`Quality Assurance Manager <quality-assurance-manager-checklist>` |  1 working day           |
-|                           |                                               | | :ref:`Release Manager <release-manager-checklist>`                     |                          |
-|                           |                                               | | :ref:`Technical Release Manager <technical-release-manager-checklist>` |                          |
-+---------------------------+-----------------------------------------------+--------------------------------------------------------------------------+--------------------------+
-| **Release Day**           | Blocker bug fixes, Testing & Release          | | :ref:`Release Manager <release-manager-checklist>`                     |  0                       |
-|                           | Announcements                                 | | :ref:`Technical Release Manager <technical-release-manager-checklist>` |                          |
-+---------------------------+-----------------------------------------------+--------------------------------------------------------------------------+--------------------------+
++-----------------------------+-----------------------------------------------+--------------------------------------------------------------------------+--------------------------+
+| | Key Event(s)              | | Task Priorities                             | | Actions Required from                                                  | | Time Until Release     |
+|                             |                                               |                                                                          |                          |
++=============================+===============================================+==========================================================================+==========================+
+| 2-3 weeks before Feature    | Development, Testing & Documentation          | | :ref:`Release Manager <release-manager-checklist>`                     |  4-6+ weeks              |
+| Freeze                      |                                               |                                                                          |                          |
++-----------------------------+-----------------------------------------------+--------------------------------------------------------------------------+--------------------------+
+| | 1 week before Feature     | Development, Testing & Documentation          | | :ref:`Local Project Manager(s) <local-project-managers-checklist>`     |  4+ weeks                |
+| | Freeze                    |                                               | | :ref:`Release Manager <release-manager-checklist>`                     |                          |
++-----------------------------+-----------------------------------------------+--------------------------------------------------------------------------+--------------------------+
+| **Feature Freeze Begins**   | Final Development, Testing & Documentation    | | :ref:`Local Project Manager(s) <local-project-managers-checklist>`     |  3 weeks + 1 working day |
+|                             |                                               | | :ref:`Release Manager <release-manager-checklist>`                     |                          |
+|                             |                                               | | :ref:`Technical Release Manager <technical-release-manager-checklist>` |                          |
++-----------------------------+-----------------------------------------------+--------------------------------------------------------------------------+--------------------------+
+| **Manual Testing**          | Blocker bug fixes, Testing & Release Notes    | | :ref:`Quality Assurance Manager <quality-assurance-manager-checklist>` |  3 weeks                 |
+|                             |                                               | | :ref:`Release Manager <release-manager-checklist>`                     |                          |
++-----------------------------+-----------------------------------------------+--------------------------------------------------------------------------+--------------------------+
+| **Beta Testing Begins**     | Blocker bug fixes, Testing, Release Notes,    | | :ref:`Local Project Manager(s) <local-project-managers-checklist>`     |  2.5 weeks               |
+|                             | Maintenance Tasks & Next release development  | | :ref:`Release Editor <release-editor-checklist>`                       |                          |
+|                             |                                               | | :ref:`Release Manager <release-manager-checklist>`                     |                          |
++-----------------------------+-----------------------------------------------+--------------------------------------------------------------------------+--------------------------+
+| Reminder Email for Beta     | Blocker bug fixes, Testing, Release Notes,    | | :ref:`Release Manager <release-manager-checklist>`                     |  1.5 weeks               |
+|                             | Maintenance Tasks & Next release development  |                                                                          |                          |
++-----------------------------+-----------------------------------------------+--------------------------------------------------------------------------+--------------------------+
+| **Beta Testing Ends**       | Blocker bug fixes, Testing, Release Notes,    | | :ref:`Release Editor <release-editor-checklist>`                       |  ~ 4 working days        |
+|                             | Maintenance Tasks & Next release development  | | :ref:`Release Manager <release-manager-checklist>`                     |                          |
+|                             |                                               | | :ref:`Quality Assurance Manager <quality-assurance-manager-checklist>` |                          |
++-----------------------------+-----------------------------------------------+--------------------------------------------------------------------------+--------------------------+
+| **Smoke Testing**           | Blocker bug fixes, Testing & Packaging        | | :ref:`Quality Assurance Manager <quality-assurance-manager-checklist>` |  1 working day           |
+|                             |                                               | | :ref:`Release Manager <release-manager-checklist>`                     |                          |
+|                             |                                               | | :ref:`Technical Release Manager <technical-release-manager-checklist>` |                          |
++-----------------------------+-----------------------------------------------+--------------------------------------------------------------------------+--------------------------+
+| **Release Day**             | Blocker bug fixes, Testing & Release          | | :ref:`Release Manager <release-manager-checklist>`                     |  0                       |
+|                             | Announcements                                 | | :ref:`Technical Release Manager <technical-release-manager-checklist>` |                          |
++-----------------------------+-----------------------------------------------+--------------------------------------------------------------------------+--------------------------+
 
 .. _local-project-managers-checklist:
 
@@ -209,31 +212,52 @@ Release Manager Checklist
 is to reiterate the timeline and be the collection point for information between
 all of the Local Project Managers.
 
-1 week before Code Freeze
-#########################
+2-3 weeks before Code Freeze
+############################
 
-*  Check that all people with release roles are added to the *\#release-roles*
-   Slack channel and others are removed.
-*  Post on the *\#general* slack channel reminding developers of the impending
-   release and stating that they have only 5 days left before the code freeze.
-*  Send an email to beta test users explaining the dates for the testing, and
-   stating they will have more detail on the start of the first day (cc the Local
-   Project Manager(s) so they can organise a similar message at their facilities).
+* Schedule a release showcase meeting for all facilities to present work that
+  is intended to be part of the upcoming release.
+  This meeting should aim to be in the week leading up to the feature freeze
+  and include a timeline for the release along with a description of those
+  taking on each of the release roles.
+  It can also include a preview of work aimed for the release after the
+  upcoming one.
 
-Code Freeze Begins
-##################
+1 week before Feature Freeze
+############################
 
-*  Post on the *\#general* slack channel asking everyone to ensure they have moved
-   any incomplete issues to the next milestone, stating the code freeze is in place,
-   and warning developers that non-blocker issues will be moved from the milestone
-   on Monday morning.
-*  Attempt to drive the pull requests for this milestone down to 0, in collaboration
-   with the Local Project Managers.
+* Check that all people with release roles are added to the *\#release-roles*
+  Slack channel and others are removed.
+* Post on the *\#annoucements* slack channel reminding developers of the impending
+  release and stating that they have only 5 days left before the feature freeze.
+* Hold the release showcase meeting described above.
+
+Feature Freeze Begins
+#####################
+
+* Ask the technical release managers to organize for the release branch to be created.
+* Create a `project board <https://github.com/orgs/mantidproject/projects/>`__ to
+  track the issues for the release
+* After the message that the release branch has been created, post on the
+  *\#annoucements* slack channel that only critical work should be merged to
+  that branch. You can use an adapted version of the
+  following announcement:
+
+  * We are now in feature freeze. Only critical work should be added to the release-next branch.
+    I have created a project board to track work for release *<version>* - please add any critical issues/PRs to this project, and ensure they have the *<version>* milestone.
+    I will be clearing the *<version>* milestone from anything not in this project later today (you can always re-add it if necessary).
+    Non critical work can be added to the *<version+1>* milestone and merged to the main branch as usual.
+
+    *<project link url>*
+
+
+*  Monitor the release project board and ensure items are assigned and moving through the board.
+   Show the board at standups.
 
 Manual Testing
 ##############
 
-*  Ensure that PR testing has been completed for PRs from before the code freeze.
+*  Ensure that PR testing has been completed for PRs from before the feature freeze.
 
 **Clearing the project board**
 
@@ -254,13 +278,46 @@ Go through the issues for the release milestone (not the sprint milestone), ensu
 Beta Testing Begins
 ###################
 
-*  Before sending an email to users regarding the beginning of beta testing, ensure that
-   the Usage data .zip file containing usage data is up-to-date. This is done by
-   downloading the current .zip from sourceforge, adding any missing files, and
-   resending it.
+*  On the date when the beta-testing is scheduled to start check with the technical
+   release managers that a build has been successful that we are happy to put out.
 *  Send an email to beta test users explaining where to download the installers and how
    to report issues (cc the Local Project Managers so they can organise a similar message
-   at their facilities).
+   at their facilities). The following emails are used for beta testing:
+
+   ``ISISInstsci<AT>stfc.ac.uk``
+
+   ``twg<AT>mantidproject.org``
+
+   ``swg<AT>mantidproject.org``
+
+   using the template as a guide:
+
+   * Dear all,
+
+     We are busy making preparations for the release of version *<version>* of Mantid.
+     We have completed our first round of developer testing and are now ready for beta-testing feedback.
+     The beta testing period for this release is between today (*<start date>*) and the end of play on *<end date>*.
+     We then hope to release the following week.
+
+     Packages
+
+     The nightly test installers for this version are available here to download: https://www.mantidproject.org/installation/index#nightly-build.
+     The nightly builds install alongside a full release and so will not affect its operation but will overwrite any other nightly builds you have.
+     For Windows users at ISIS, install Mantid as your standard user account (not an 03 account).
+     It will install just for your user, rather than for the whole PC.
+
+     We have an early draft of the release notes at https://docs.mantidproject.org/nightly/release/<version>/index.html.
+     Please report any bugs to ``mantid-help@mantidproject.org`` and
+     if the problem is a bug that would prevent your normal workflow from working then start the email subject with ``URGENT:``.
+     It would be most helpful for the team if bugs are communicated back to us as soon as possible.
+
+     Thank you all for your help.
+
+     Regards,
+
+     Mantid Team
+
+* Ensure the other facilities forward the beta-testing email to their relevant internal lists.
 
 Reminder Email for Beta
 #######################
@@ -273,7 +330,7 @@ Reminder Email for Beta
 Beta Testing Ends
 #################
 
-*  At the end of the day email the beta test users thanking them.
+*  At the end of the day, email the beta test users thanking them.
 *  Review the complete set of release notes to make sure there are no glaring mistakes.
 
 Smoke Testing
