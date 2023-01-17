@@ -158,7 +158,10 @@ public:
   std::pair<double, double> averageAndStdDevInFilter(const std::vector<SplittingInterval> &filter) const override;
   /// @copydoc Mantid::Kernel::ITimeSeriesProperty::timeAverageValue()
   double timeAverageValue() const override;
-  /// @copydoc Mantid::Kernel::ITimeSeriesProperty::timeAverageValue(const TimeROI &timeRoi)
+  /** Returns the calculated time weighted average value.
+   * @param timeRoi  Object that holds information about when the time measurement was active.
+   * @return The time-weighted average value of the log when the time measurement was active.
+   */
   double timeAverageValue(const TimeROI &timeRoi) const override;
   /// generate constant time-step histogram from the property values
   void histogramData(const Types::Core::DateAndTime &tMin, const Types::Core::DateAndTime &tMax,
