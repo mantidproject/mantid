@@ -11,7 +11,7 @@ from mantid.simpleapi import *
 from scipy.interpolate import interp1d
 from scipy.ndimage.filters import convolve
 import ICConvoluted as ICC
-import BivariateGaussian as BivariateGaussian
+from mantid.simpleapi import BivariateGaussian
 
 plt.ion()
 
