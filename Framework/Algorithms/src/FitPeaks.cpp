@@ -850,6 +850,7 @@ std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> FitPeaks::fitPeak
   const int nThreads = FrameworkManager::Instance().getNumOMPThreads();
   size_t chunkSize = num_fit_result / nThreads;
 
+  size_t all_spectra_peaks_not_enough_datapoints{0};
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )
   for (int ithread = 0; ithread < nThreads; ithread++) {
     PARALLEL_START_INTERRUPT_REGION
@@ -869,17 +870,24 @@ std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> FitPeaks::fitPeak
       std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result =
           std::make_shared<FitPeaksAlgorithm::PeakFitResult>(m_numPeaksToFit, numfuncparams);
 
-      fitSpectrumPeaks(static_cast<size_t>(wi), expected_peak_centers, fit_result, lastGoodPeakParameters);
+      size_t spectrum_peaks_not_enough_datapoints{0};
+      fitSpectrumPeaks(static_cast<size_t>(wi), expected_peak_centers, fit_result, lastGoodPeakParameters,
+                       spectrum_peaks_not_enough_datapoints);
 
       PARALLEL_CRITICAL(FindPeaks_WriteOutput) {
         writeFitResult(static_cast<size_t>(wi), expected_peak_centers, fit_result);
         fit_result_vector[wi - m_startWorkspaceIndex] = fit_result;
+        all_spectra_peaks_not_enough_datapoints += spectrum_peaks_not_enough_datapoints;
       }
       prog.report();
     }
     PARALLEL_END_INTERRUPT_REGION
   }
   PARALLEL_CHECK_INTERRUPT_REGION
+
+  if (all_spectra_peaks_not_enough_datapoints > 0)
+    g_log.notice() << all_spectra_peaks_not_enough_datapoints << " peaks rejected: not enough X(Y) datapoints."
+                   << std::endl;
 
   return fit_result_vector;
 }
@@ -946,7 +954,9 @@ template <typename T> size_t numberElements(const std::vector<T> &elements, cons
  */
 void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_peak_centers,
                                 const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result,
-                                std::vector<std::vector<double>> &lastGoodPeakParameters) {
+                                std::vector<std::vector<double>> &lastGoodPeakParameters,
+                                size_t &spectrum_peaks_not_enough_datapoints) {
+  spectrum_peaks_not_enough_datapoints = 0;
   // Spectrum contains very weak signal: do not proceed and return
   if (numberCounts(m_inputMatrixWS->histogram(wi)) <= m_minPeakHeight) {
     for (size_t i = 0; i < fit_result->getNumberPeaks(); ++i)
@@ -1092,8 +1102,11 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
 
       // do fitting with peak and background function (no analysis at this
       // point)
+      bool not_enough_datapoints{false};
       cost = fitIndividualPeak(wi, peak_fitter, expected_peak_pos, peak_window_i, observe_peak_width, peakfunction,
-                               bkgdfunction);
+                               bkgdfunction, not_enough_datapoints);
+      if (not_enough_datapoints)
+        spectrum_peaks_not_enough_datapoints++;
     }
 
     // process fitting result
@@ -1443,17 +1456,25 @@ bool FitPeaks::fitBackground(const size_t &ws_index, const std::pair<double, dou
 double FitPeaks::fitIndividualPeak(size_t wi, const API::IAlgorithm_sptr &fitter, const double expected_peak_center,
                                    const std::pair<double, double> &fitwindow, const bool estimate_peak_width,
                                    const API::IPeakFunction_sptr &peakfunction,
-                                   const API::IBackgroundFunction_sptr &bkgdfunc) {
+                                   const API::IBackgroundFunction_sptr &bkgdfunc, bool &not_enough_datapoints) {
   double cost(DBL_MAX);
+  not_enough_datapoints = false;
 
   // confirm that there is something to fit
   if (numberCounts(m_inputMatrixWS->histogram(wi), fitwindow.first, fitwindow.second) <= m_minPeakHeight)
     return cost;
 
   // check if we have enough data points to fit
-  const std::size_t cushion{2}; // using a "cushion" here so that we have a bit more data points than parameters
-  if (numberElements(m_inputMatrixWS->readX(wi), fitwindow) < peakfunction->nParams() + bkgdfunc->nParams() + cushion)
+  // estimateBackgroundParameters() method requires to have at least 20 data points. Adding 3 datapoints to that as a
+  // magic number.
+  size_t minimum_number_of_datapoints{23};
+  // make sure the minimum number of data points satisfies the number of parameters to fit plus a magic cushion of 2.
+  minimum_number_of_datapoints =
+      std::max(minimum_number_of_datapoints, peakfunction->nParams() + bkgdfunc->nParams() + 2);
+  if (numberElements(m_inputMatrixWS->readX(wi), fitwindow) < minimum_number_of_datapoints) {
+    not_enough_datapoints = true;
     return cost;
+  }
 
   if (m_highBackground) {
     // fit peak with high background!
