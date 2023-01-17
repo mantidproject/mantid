@@ -16,6 +16,7 @@ class AcquisitionType(Enum):
     """
     Different acquisition types that can be found.
     """
+
     DEFAULT = 0
     MONO = 1
     TOF = 2
@@ -56,32 +57,34 @@ class PreviewFinder:
     """
     Dictionary linking each instrument to its preview(s), depending on the acquisition mode
     """
-    prev = {D11:     {AcquisitionType.DEFAULT: PreviewType.IVIEW},
-            D11lr:   {AcquisitionType.DEFAULT: PreviewType.IVIEW},
-            D11B:    {AcquisitionType.DEFAULT: PreviewType.IVIEW},
-            D16:     {AcquisitionType.DEFAULT: PreviewType.IVIEW},
-            D22:     {AcquisitionType.DEFAULT: PreviewType.IVIEW},
-            D22B:    {AcquisitionType.DEFAULT: PreviewType.IVIEW},
-            D33:     {AcquisitionType.DEFAULT: PreviewType.IVIEW},
-            PANTHER: {AcquisitionType.DEFAULT: PreviewType.IVIEW},
-            SHARP:   {AcquisitionType.DEFAULT: PreviewType.IVIEW},
-            IN5:     {AcquisitionType.DEFAULT: PreviewType.IVIEW},
-            IN4:     {AcquisitionType.DEFAULT: PreviewType.IVIEW},
-            IN6:     {AcquisitionType.DEFAULT: PreviewType.IVIEW},
-            D17:     {AcquisitionType.DEFAULT: PreviewType.PLOT2D},
-            FIGARO:  {AcquisitionType.DEFAULT: PreviewType.PLOT2D},
-            IN16B:   {AcquisitionType.DEFAULT: PreviewType.PLOT2D},
-            D1B:     {AcquisitionType.DEFAULT: PreviewType.PLOT1D},
-            D2B:     {AcquisitionType.DEFAULT: PreviewType.SVIEW},
-            D20:     {AcquisitionType.MONO: PreviewType.PLOT1D, AcquisitionType.SCAN: PreviewType.PLOT2D},
-            D7:      {AcquisitionType.MONO: PreviewType.PLOT1D, AcquisitionType.TOF: PreviewType.PLOT2D},
-            D9:      {AcquisitionType.DEFAULT: PreviewType.SVIEW},
-            D10:     {AcquisitionType.DEFAULT: PreviewType.SVIEW},
-            D19:     {AcquisitionType.DEFAULT: PreviewType.SVIEW}
-            }
+    prev = {
+        D11: {AcquisitionType.DEFAULT: PreviewType.IVIEW},
+        D11lr: {AcquisitionType.DEFAULT: PreviewType.IVIEW},
+        D11B: {AcquisitionType.DEFAULT: PreviewType.IVIEW},
+        D16: {AcquisitionType.DEFAULT: PreviewType.IVIEW},
+        D22: {AcquisitionType.DEFAULT: PreviewType.IVIEW},
+        D22B: {AcquisitionType.DEFAULT: PreviewType.IVIEW},
+        D33: {AcquisitionType.DEFAULT: PreviewType.IVIEW},
+        PANTHER: {AcquisitionType.DEFAULT: PreviewType.IVIEW},
+        SHARP: {AcquisitionType.DEFAULT: PreviewType.IVIEW},
+        IN5: {AcquisitionType.DEFAULT: PreviewType.IVIEW},
+        IN4: {AcquisitionType.DEFAULT: PreviewType.IVIEW},
+        IN6: {AcquisitionType.DEFAULT: PreviewType.IVIEW},
+        D17: {AcquisitionType.DEFAULT: PreviewType.PLOT2D},
+        FIGARO: {AcquisitionType.DEFAULT: PreviewType.PLOT2D},
+        IN16B: {AcquisitionType.DEFAULT: PreviewType.PLOT2D},
+        D1B: {AcquisitionType.DEFAULT: PreviewType.PLOT1D},
+        D2B: {AcquisitionType.DEFAULT: PreviewType.SVIEW},
+        D20: {AcquisitionType.MONO: PreviewType.PLOT1D, AcquisitionType.SCAN: PreviewType.PLOT2D},
+        D7: {AcquisitionType.MONO: PreviewType.PLOT1D, AcquisitionType.TOF: PreviewType.PLOT2D},
+        D9: {AcquisitionType.DEFAULT: PreviewType.SVIEW},
+        D10: {AcquisitionType.DEFAULT: PreviewType.SVIEW},
+        D19: {AcquisitionType.DEFAULT: PreviewType.SVIEW},
+    }
 
-    def get_preview(self, instrument_name: str, acquisition_mode: AcquisitionType = AcquisitionType.DEFAULT,
-                    is_group: bool = False) -> PreviewType:
+    def get_preview(
+        self, instrument_name: str, acquisition_mode: AcquisitionType = AcquisitionType.DEFAULT, is_group: bool = False
+    ) -> PreviewType:
         """
         Get the preview associated with an instrument with a given acquisition mode.
         @param instrument_name: the name of instrument to look for

@@ -14,6 +14,7 @@ class RawDataExplorerFileTree(QTreeView):
     """
     List of filters for the file system tree widget.
     """
+
     _FILE_SYSTEM_FILTERS = ["*.nxs"]
 
     """

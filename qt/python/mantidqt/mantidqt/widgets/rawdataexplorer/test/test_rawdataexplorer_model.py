@@ -37,7 +37,6 @@ class PreviewModelTest(unittest.TestCase):
 
 
 class RawDataExplorerModelTest(unittest.TestCase):
-
     def setUp(self):
         self.mocked_presenter = mock.MagicMock()
         self.mocked_memory_manager = mock.MagicMock()
@@ -88,16 +87,15 @@ class RawDataExplorerModelTest(unittest.TestCase):
 
     def test_choose_preview(self):
         # test PLOT1D
-        inst_name = 'd7'  # acquisition type NON-TOF
-        LoadEmptyInstrument(OutputWorkspace=inst_name, InstrumentName='D7')
+        inst_name = "d7"  # acquisition type NON-TOF
+        LoadEmptyInstrument(OutputWorkspace=inst_name, InstrumentName="D7")
         preview_d7 = self.model.choose_preview(inst_name)
         self.assertEqual(preview_d7, PreviewType.PLOT1D)
 
         # test PLOT2D
-        ws_name = 'd7_tof'
-        CreateWorkspace(OutputWorkspace=ws_name, DataX=[0, 1]*(132+1), DataY=[0, 0]*(132+1), NSpec=133,
-                        UnitX="TOF")
-        inst_name = 'D7'  # this time, the acquisition type is TOF
+        ws_name = "d7_tof"
+        CreateWorkspace(OutputWorkspace=ws_name, DataX=[0, 1] * (132 + 1), DataY=[0, 0] * (132 + 1), NSpec=133, UnitX="TOF")
+        inst_name = "D7"  # this time, the acquisition type is TOF
         LoadInstrument(Workspace=ws_name, InstrumentName=inst_name, RewriteSpectraMap=True)
         preview_d7_tof = self.model.choose_preview(ws_name)
         self.assertEqual(preview_d7_tof, PreviewType.PLOT2D)
@@ -106,52 +104,52 @@ class RawDataExplorerModelTest(unittest.TestCase):
         # will need to be implemented when support of this preview type is added
 
         # test DEFAULT
-        inst_name = 'BILBY'  # example of unsupported but plottable instrument
+        inst_name = "BILBY"  # example of unsupported but plottable instrument
         LoadEmptyInstrument(OutputWorkspace=inst_name, InstrumentName=inst_name)
         preview_default = self.model.choose_preview(inst_name)
         self.assertEqual(preview_default, PreviewType.IVIEW)
 
     def test_determine_acquisition_mode(self):
-        ws = CreateWorkspace(DataX='1,1,1,1', DataY='1,4,2,7', NSpec=4)
+        ws = CreateWorkspace(DataX="1,1,1,1", DataY="1,4,2,7", NSpec=4)
 
         acq = self.model.determine_acquisition_mode(ws)
         self.assertEqual(acq, AcquisitionType.MONO)
 
-        ws = CreateWorkspace(DataX='1,1,1,1', DataY='1,4,2,7', NSpec=2, UnitX="Empty")
+        ws = CreateWorkspace(DataX="1,1,1,1", DataY="1,4,2,7", NSpec=2, UnitX="Empty")
 
         acq = self.model.determine_acquisition_mode(ws)
         self.assertEqual(acq, AcquisitionType.SCAN)
 
-        ws = CreateWorkspace(DataX='1,1,1,1', DataY='1,4,2,7', NSpec=2, UnitX="TOF")
+        ws = CreateWorkspace(DataX="1,1,1,1", DataY="1,4,2,7", NSpec=2, UnitX="TOF")
 
         acq = self.model.determine_acquisition_mode(ws)
         self.assertEqual(acq, AcquisitionType.TOF)
 
     @mock.patch("mantidqt.widgets.rawdataexplorer.model.error_reporting")
     def test_determine_acquisition_mode_failure_to_find(self, error_reporting):
-        ws = CreateWorkspace(DataX='1,1,1,1', DataY='1,4,2,7', NSpec=2, UnitX="AtomicDistance")
+        ws = CreateWorkspace(DataX="1,1,1,1", DataY="1,4,2,7", NSpec=2, UnitX="AtomicDistance")
 
         acq = self.model.determine_acquisition_mode(ws)
         self.assertEqual(acq, AcquisitionType.TOF)
         error_reporting.assert_called_once()
 
     def test_accumulate(self):
-        ws_1 = 'ws1'
-        ws_2 = 'ws2'
+        ws_1 = "ws1"
+        ws_2 = "ws2"
 
-        CreateWorkspace(OutputWorkspace=ws_1, DataX='1,1,1', DataY='1,4,2', NSpec=3)
-        CreateWorkspace(OutputWorkspace=ws_2, DataX='1,1,1', DataY='3,7,11', NSpec=3)
+        CreateWorkspace(OutputWorkspace=ws_1, DataX="1,1,1", DataY="1,4,2", NSpec=3)
+        CreateWorkspace(OutputWorkspace=ws_2, DataX="1,1,1", DataY="3,7,11", NSpec=3)
 
         acc = self.model.accumulate(ws_1, ws_2)
-        self.assertEqual(acc, ws_1 + '_' + ws_2)
+        self.assertEqual(acc, ws_1 + "_" + ws_2)
         self.assertTrue(mtd.doesExist(acc))
         self.assertEqual(mtd[acc].dataY(0), 4)
         self.assertEqual(mtd[acc].dataY(1), 11)
 
     @mock.patch("mantidqt.widgets.rawdataexplorer.model.error_reporting")
     def test_accumulate_failure(self, error_reporting):
-        ws_1 = 'ws1'
-        CreateWorkspace(OutputWorkspace=ws_1, DataX='1,1,1', DataY='1,4,2', NSpec=3)
+        ws_1 = "ws1"
+        CreateWorkspace(OutputWorkspace=ws_1, DataX="1,1,1", DataY="1,4,2", NSpec=3)
 
         # cannot check the error case is handled well: the popup blocks the test
         acc = self.model.accumulate(ws_1, "ws_that_does_not_exist")

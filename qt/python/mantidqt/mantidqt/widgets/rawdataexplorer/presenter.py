@@ -23,6 +23,7 @@ class PreviewPresenter:
     """
     Raw data explorer main view.
     """
+
     _main_view = None
 
     """
@@ -43,14 +44,15 @@ class PreviewPresenter:
     """
     Conversion dictionary between PreviewType and PreviewView
     """
-    _conversion_dict = {PreviewType.IVIEW: PreviewView.IVIEW,
-                        PreviewType.SVIEW: PreviewView.SVIEW,
-                        PreviewType.PLOT1D: PreviewView.PLOT1D,
-                        PreviewType.PLOT2D: PreviewView.PLOT2D,
-                        PreviewType.PLOTSPECTRUM: PreviewView.PLOTSPECTRUM}
+    _conversion_dict = {
+        PreviewType.IVIEW: PreviewView.IVIEW,
+        PreviewType.SVIEW: PreviewView.SVIEW,
+        PreviewType.PLOT1D: PreviewView.PLOT1D,
+        PreviewType.PLOT2D: PreviewView.PLOT2D,
+        PreviewType.PLOTSPECTRUM: PreviewView.PLOTSPECTRUM,
+    }
 
-    def __init__(self, main_view: RawDataExplorerView, view: PreviewView, main_model: RawDataExplorerModel,
-                 model: PreviewModel):
+    def __init__(self, main_view: RawDataExplorerView, view: PreviewView, main_model: RawDataExplorerModel, model: PreviewModel):
         self._main_view = main_view
         self._view = view
         view.set_presenter(self)

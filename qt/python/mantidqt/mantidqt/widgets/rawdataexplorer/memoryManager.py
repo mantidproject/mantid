@@ -162,6 +162,7 @@ class RDExpADSObserver(AnalysisDataServiceObserver):
     """
     ADS observer for the memory manager of the raw data explorer, that monitors workspace creation and deletion.
     """
+
     def __init__(self):
         super().__init__()
         self.observeDelete(True)

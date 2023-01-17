@@ -28,7 +28,7 @@ class RawDataExplorer(PluginWidget):
         layout.addWidget(self.raw_data_explorer_widget)
         self.setLayout(layout)
 
-# ----------------- Plugin API --------------------
+    # ----------------- Plugin API --------------------
 
     def register_plugin(self):
         self.main.add_dockwidget(self)

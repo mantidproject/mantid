@@ -27,6 +27,7 @@ class PreviewModel(QObject):
     """
     Type of the preview.
     """
+
     _type = None
 
     """
@@ -232,9 +233,9 @@ class RawDataExplorerModel(QObject):
 
         # basically the conditions for "Show instrument" to be clickable
         # Should root out most of the cases when the data cannot be displayed, since it is not handled gracefully later
-        if preview == PreviewType.IVIEW and not(workspace.getInstrument()
-                                                and workspace.getInstrument().getName()
-                                                and workspace.getAxis(1).isSpectra()):
+        if preview == PreviewType.IVIEW and not (
+            workspace.getInstrument() and workspace.getInstrument().getName() and workspace.getAxis(1).isSpectra()
+        ):
             message = "Cannot open the instrument viewer for the provided data."
             error_reporting(message)
             return None
@@ -249,10 +250,10 @@ class RawDataExplorerModel(QObject):
         """
         if workspace.blocksize() > 1:
             unit = workspace.getAxis(0).getUnit().unitID()
-            if unit == 'Empty':
+            if unit == "Empty":
                 # SCAN case
                 return AcquisitionType.SCAN
-            elif unit in ['TOF', 'Label']:
+            elif unit in ["TOF", "Label"]:
                 # TOF case
                 return AcquisitionType.TOF
             else:

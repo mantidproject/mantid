@@ -28,6 +28,7 @@ class PreviewView(QObject):
     Type of the preview when the instrument viewer widget is used to show the
     data.
     """
+
     IVIEW = "instrument_viewer"
 
     """
@@ -153,8 +154,7 @@ class PreviewView(QObject):
             pcolormesh([workspace_name], self._widget)
             self._presenter.get_main_view().fileTree.set_ignore_next_focus_out(True)
         elif self._type == self.PLOT1D:
-            plotBin(workspace_name, 0, error_bars=True, window=self._widget,
-                    clearWindow=True)
+            plotBin(workspace_name, 0, error_bars=True, window=self._widget, clearWindow=True)
             self._presenter.get_main_view().fileTree.set_ignore_next_focus_out(True)
         elif self._type == self.PLOTSPECTRUM:
             plotSpectrum(workspace_name, 0, error_bars=True, window=self._widget, clearWindow=True)
@@ -192,7 +192,7 @@ class RawDataExplorerView(QWidget):
     def __init__(self, presenter: "RawDataExplorerPresenter", parent=None):
         super().__init__(parent)
 
-        self.ui = load_ui(__file__, 'rawdataexplorer.ui', baseinstance=self)
+        self.ui = load_ui(__file__, "rawdataexplorer.ui", baseinstance=self)
 
         self._presenter = presenter
 
@@ -238,8 +238,7 @@ class RawDataExplorerView(QWidget):
         Select only the last clicked valid item
         """
         self.fileTree.clear_selection()
-        self.fileTree.selectionModel().setCurrentIndex(self._last_clicked_index,
-                                                       QItemSelectionModel.Select | QItemSelectionModel.Rows)
+        self.fileTree.selectionModel().setCurrentIndex(self._last_clicked_index, QItemSelectionModel.Select | QItemSelectionModel.Rows)
         self._current_selection = set(self.get_path(self._last_clicked_index))
 
     def get_last_clicked(self) -> str:
@@ -310,9 +309,11 @@ class RawDataExplorerView(QWidget):
 
         # we have to use the DontUseNativeDialog flag because without it, the ShowDirsOnly flag is ignored on Linux
         dialog = QFileDialog()
-        file_tree_path = dialog.getExistingDirectory(parent=self,
-                                                     caption="Select a directory",
-                                                     directory=base_directory,
-                                                     options=QFileDialog.DontUseNativeDialog | QFileDialog.ShowDirsOnly)
+        file_tree_path = dialog.getExistingDirectory(
+            parent=self,
+            caption="Select a directory",
+            directory=base_directory,
+            options=QFileDialog.DontUseNativeDialog | QFileDialog.ShowDirsOnly,
+        )
 
         self.file_tree_path_changed.emit(file_tree_path)

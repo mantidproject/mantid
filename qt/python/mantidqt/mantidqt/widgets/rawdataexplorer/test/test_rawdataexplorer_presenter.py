@@ -29,8 +29,7 @@ class PreviewPresenterTest(unittest.TestCase):
         self.mocked_model = mock.MagicMock()
         self.mocked_main_view = mock.MagicMock()
         self.mocked_view = mock.MagicMock()
-        self.preview_presenter = PreviewPresenter(self.mocked_main_view, self.mocked_view,
-                                                  self.mocked_main_model, self.mocked_model)
+        self.preview_presenter = PreviewPresenter(self.mocked_main_view, self.mocked_view, self.mocked_main_model, self.mocked_model)
 
     def test_close_preview_not_requested(self):
         self.preview_presenter.close_preview(requested_by_user=False)
@@ -65,7 +64,6 @@ class PreviewPresenterTest(unittest.TestCase):
 
 
 class RawDataExplorerPresenterTest(unittest.TestCase):
-
     def setUp(self) -> None:
         # we need to mock the model because it holds the memory manager
         self.presenter = RawDataExplorerPresenter(model=mock.MagicMock())
@@ -121,7 +119,7 @@ class RawDataExplorerPresenterTest(unittest.TestCase):
         self.presenter.view.repositoryPath = mock.Mock()
         self.presenter.view.fileTree = mock.Mock()
 
-        path = os.path.abspath('/')
+        path = os.path.abspath("/")
         self.presenter.set_working_directory(path)
         self.presenter.view.repositoryPath.setText.assert_called_once_with(path)
         self.presenter.view.fileTree.model().setRootPath.assert_called_with(path)
@@ -134,7 +132,7 @@ class RawDataExplorerPresenterTest(unittest.TestCase):
 
         self.presenter.set_working_directory.assert_called_with(os.path.abspath(os.sep))
 
-    @mock.patch('mantidqt.widgets.rawdataexplorer.presenter.logger')
+    @mock.patch("mantidqt.widgets.rawdataexplorer.presenter.logger")
     def test_on_qlineedit_invalid(self, logger):
         path = "/invalid/path"
         self.presenter.view.repositoryPath.setText(path)
@@ -162,7 +160,7 @@ class RawDataExplorerPresenterTest(unittest.TestCase):
         self.presenter.view.fileTree.selectionModel.assert_has_calls([mock.call().clearSelection()])
         self.presenter.set_selection_mode.assert_called_once()
 
-    @mock.patch('mantidqt.widgets.rawdataexplorer.presenter.os')
+    @mock.patch("mantidqt.widgets.rawdataexplorer.presenter.os")
     def test_on_selection_changed(self, os_mod):
         last_ind = mock.Mock()
         self.presenter.view.get_last_clicked = mock.Mock(return_value=last_ind)
@@ -174,7 +172,7 @@ class RawDataExplorerPresenterTest(unittest.TestCase):
         self.presenter.model.modify_preview.assert_called_with(last_ind)
         self.presenter.set_selection_mode.assert_has_calls([mock.call(False), mock.call(True)])
 
-    @mock.patch('mantidqt.widgets.rawdataexplorer.presenter.PreviewPresenter')
+    @mock.patch("mantidqt.widgets.rawdataexplorer.presenter.PreviewPresenter")
     def test_on_new_preview(self, prev):
         mock_view = mock.Mock()
         mock_model = mock.Mock()
