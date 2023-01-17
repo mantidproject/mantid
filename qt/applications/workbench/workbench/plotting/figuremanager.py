@@ -14,6 +14,7 @@ import io
 import sys
 import re
 from functools import wraps
+import warnings
 
 import matplotlib
 from matplotlib.axes import Axes
@@ -38,7 +39,10 @@ from mantidqt.widgets.waterfallplotoffsetdialog.presenter import WaterfallPlotOf
 from workbench.config import get_window_config
 from workbench.plotting.globalfiguremanager import GlobalFigureManager
 from workbench.plotting.mantidfigurecanvas import (  # noqa: F401
-    MantidFigureCanvas, draw_if_interactive as draw_if_interactive_impl, show as show_impl)
+    MantidFigureCanvas,
+    draw_if_interactive as draw_if_interactive_impl,
+    show as show_impl,
+)
 from workbench.plotting.figureinteraction import FigureInteraction
 from workbench.plotting.figurewindow import FigureWindow
 from workbench.plotting.plotscriptgenerator import generate_script
@@ -47,7 +51,7 @@ from workbench.plotting.plothelppages import PlotHelpPages
 
 
 def _replace_workspace_name_in_string(old_name, new_name, string):
-    return re.sub(rf'\b{old_name}\b', new_name, string)
+    return re.sub(rf"\b{old_name}\b", new_name, string)
 
 
 def _catch_exceptions(func):
@@ -60,6 +64,7 @@ def _catch_exceptions(func):
         except Exception:
             sys.stderr.write("Error occurred in handler:\n")
             import traceback
+
             traceback.print_exc()
 
     return wrapper
@@ -155,8 +160,7 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
                 ax.make_legend()
             ax.set_title(_replace_workspace_name_in_string(oldName, newName, ax.get_title()))
         if self.canvas.manager is not None:
-            self.canvas.manager.set_window_title(
-                _replace_workspace_name_in_string(oldName, newName, self.canvas.get_window_title()))
+            self.canvas.manager.set_window_title(_replace_workspace_name_in_string(oldName, newName, self.canvas.get_window_title()))
         self.canvas.draw()
 
 
@@ -176,8 +180,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
     """
 
     def __init__(self, canvas, num):
-        assert QAppThreadCall.is_qapp_thread(
-        ), "FigureManagerWorkbench cannot be created outside of the QApplication thread"
+        assert QAppThreadCall.is_qapp_thread(), "FigureManagerWorkbench cannot be created outside of the QApplication thread"
         QObject.__init__(self)
 
         parent, flags = get_window_config()
@@ -189,6 +192,22 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         self.window.setWindowTitle("Figure %d" % num)
         canvas.figure.set_label("Figure %d" % num)
+
+        # Set tight layout so axes labels remain visible
+        canvas.figure.set_layout_engine(layout="tight")
+        # Matplotlib issues a warnings if the window is made too small in the vertical or horizontal direction
+        # Filtering it to only warn once per plot per axis so that it doesn't give a warning everytime the plot window
+        # is resized, filling up the console with warnings
+        warnings.filterwarnings(
+            "once",
+            message="Tight layout not applied. The left and right margins cannot be made "
+            "large enough to accommodate all axes decorations.",
+        )
+        warnings.filterwarnings(
+            "once",
+            message="Tight layout not applied. The bottom and top margins cannot be made "
+            "large enough to accommodate all axes decorations.",
+        )
 
         FigureManagerBase.__init__(self, canvas, num)
         # Give the keyboard focus to the figure instead of the
@@ -218,20 +237,14 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.toolbar.sig_copy_to_clipboard_triggered.connect(self.copy_to_clipboard)
             self.toolbar.sig_plot_options_triggered.connect(self.launch_plot_options)
             self.toolbar.sig_plot_help_triggered.connect(self.launch_plot_help)
-            self.toolbar.sig_generate_plot_script_clipboard_triggered.connect(
-                self.generate_plot_script_clipboard)
-            self.toolbar.sig_generate_plot_script_file_triggered.connect(
-                self.generate_plot_script_file)
+            self.toolbar.sig_generate_plot_script_clipboard_triggered.connect(self.generate_plot_script_clipboard)
+            self.toolbar.sig_generate_plot_script_file_triggered.connect(self.generate_plot_script_file)
             self.toolbar.sig_home_clicked.connect(self.set_figure_zoom_to_display_all)
-            self.toolbar.sig_waterfall_reverse_order_triggered.connect(
-                self.waterfall_reverse_line_order)
-            self.toolbar.sig_waterfall_offset_amount_triggered.connect(
-                self.launch_waterfall_offset_options)
-            self.toolbar.sig_waterfall_fill_area_triggered.connect(
-                self.launch_waterfall_fill_area_options)
+            self.toolbar.sig_waterfall_reverse_order_triggered.connect(self.waterfall_reverse_line_order)
+            self.toolbar.sig_waterfall_offset_amount_triggered.connect(self.launch_waterfall_offset_options)
+            self.toolbar.sig_waterfall_fill_area_triggered.connect(self.launch_waterfall_fill_area_options)
             self.toolbar.sig_waterfall_conversion.connect(self.update_toolbar_waterfall_plot)
-            self.toolbar.sig_change_line_collection_colour_triggered.connect(
-                self.change_line_collection_colour)
+            self.toolbar.sig_change_line_collection_colour_triggered.connect(self.change_line_collection_colour)
             self.toolbar.sig_hide_plot_triggered.connect(self.hide_plot)
             self.toolbar.setFloatable(False)
             tbs_height = self.toolbar.sizeHint().height()
@@ -382,8 +395,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                 # The grid toggle function for 3D plots doesn't let you choose between major and minor lines.
                 ax.grid(on)
             else:
-                which = 'both' if hasattr(
-                    ax, 'show_minor_gridlines') and ax.show_minor_gridlines else 'major'
+                which = "both" if hasattr(ax, "show_minor_gridlines") and ax.show_minor_gridlines else "major"
                 ax.grid(on, which=which)
         canvas.draw_idle()
 
@@ -401,8 +413,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         """Show the superplot"""
         self.superplot = Superplot(self.canvas, self.window)
         if not self.superplot.is_valid():
-            logger.warning("Superplot cannot be opened on data not linked "
-                           "to a workspace.")
+            logger.warning("Superplot cannot be opened on data not linked " "to a workspace.")
             self.superplot = None
             self.toolbar._actions["toggle_superplot"].setChecked(False)
         else:
@@ -434,7 +445,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.toolbar.trigger_fit_toggle_action()
 
     def hold(self):
-        """ Mark this figure as held"""
+        """Mark this figure as held"""
         self.toolbar.hold()
 
     def get_window_title(self):
@@ -466,14 +477,16 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
     def generate_plot_script_file(self):
         script = generate_script(self.canvas.figure)
-        filepath = open_a_file_dialog(parent=self.canvas,
-                                      default_suffix=".py",
-                                      file_filter="Python Files (*.py)",
-                                      accept_mode=QFileDialog.AcceptSave,
-                                      file_mode=QFileDialog.AnyFile)
+        filepath = open_a_file_dialog(
+            parent=self.canvas,
+            default_suffix=".py",
+            file_filter="Python Files (*.py)",
+            accept_mode=QFileDialog.AcceptSave,
+            file_mode=QFileDialog.AnyFile,
+        )
         if filepath:
             try:
-                with open(filepath, 'w') as f:
+                with open(filepath, "w") as f:
                     f.write(script)
             except IOError as io_error:
                 logger.error("Could not write file: {}\n{}" "".format(filepath, io_error))
@@ -489,9 +502,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                     if ax.lines:  # Relim causes issues with colour plots, which have no lines.
                         ax.relim()
                     elif isinstance(ax, Axes3D):
-                        if hasattr(ax, 'original_data_surface'):
+                        if hasattr(ax, "original_data_surface"):
                             ax.collections[0]._vec = copy.deepcopy(ax.original_data_surface)
-                        elif hasattr(ax, 'original_data_wireframe'):
+                        elif hasattr(ax, "original_data_wireframe"):
                             ax.collections[0].set_segments(copy.deepcopy(ax.original_data_wireframe))
                         else:
                             ax.view_init()
@@ -522,8 +535,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         elif LooseVersion(matplotlib.__version__) < LooseVersion("3.2"):
             ax.collections += fills
         else:
-            raise NotImplementedError("ArtistList will become an immutable tuple in matplotlib 3.7 and thus, "
-                                      "this code doesn't work anymore.")
+            raise NotImplementedError(
+                "ArtistList will become an immutable tuple in matplotlib 3.7 and thus, " "this code doesn't work anymore."
+            )
         ax.collections.reverse()
         ax.update_waterfall(x, y)
 
@@ -571,13 +585,14 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 def new_figure_manager(num, *args, **kwargs):
     """Create a new figure manager instance"""
     from matplotlib.figure import Figure  # noqa
-    figure_class = kwargs.pop('FigureClass', Figure)
+
+    figure_class = kwargs.pop("FigureClass", Figure)
     this_fig = figure_class(*args, **kwargs)
     return new_figure_manager_given_figure(num, this_fig)
 
 
 def new_figure_manager_given_figure(num, figure):
-    """Create a new manager from a num & figure """
+    """Create a new manager from a num & figure"""
 
     def _new_figure_manager_given_figure_impl(num: int, figure):
         """Create a new figure manager instance for the given figure.

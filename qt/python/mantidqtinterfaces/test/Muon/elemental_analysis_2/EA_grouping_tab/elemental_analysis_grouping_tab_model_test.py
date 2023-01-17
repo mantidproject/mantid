@@ -46,5 +46,5 @@ class EAGroupingTabModelTest(unittest.TestCase):
         self.model._groups.add_group.assert_called_once_with(mock_group)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

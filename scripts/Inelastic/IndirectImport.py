@@ -12,7 +12,7 @@ We also deal with importing the mantidplot module outside of MantidPlot here.
 """
 import importlib
 
-BAYES_PACKAGE_NAME = 'quasielasticbayes'
+BAYES_PACKAGE_NAME = "quasielasticbayes"
 UNSUPPORTED_PLATFORM_MESSAGE = """Functionality not currently available on your platform.
 Please try installing the extra package: python -m pip install --user quasielasticbayes
 """

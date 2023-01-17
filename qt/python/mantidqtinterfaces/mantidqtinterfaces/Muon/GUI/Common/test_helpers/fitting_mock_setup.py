@@ -50,8 +50,9 @@ def add_mock_methods_to_basic_fitting_view(view):
     return view
 
 
-def add_mock_methods_to_basic_fitting_model(model, dataset_names, current_dataset_index, fit_function, start_x, end_x,
-                                            fit_status, chi_squared):
+def add_mock_methods_to_basic_fitting_model(
+    model, dataset_names, current_dataset_index, fit_function, start_x, end_x, fit_status, chi_squared
+):
     # Mock the methods of the model
     model.clear_single_fit_functions = mock.Mock()
     model.get_single_fit_function_for = mock.Mock(return_value=fit_function)
@@ -120,12 +121,26 @@ def add_mock_methods_to_model_fitting_view(view):
     return view
 
 
-def add_mock_methods_to_model_fitting_model(model, dataset_names, current_dataset_index, fit_function, start_x, end_x,
-                                            fit_status, chi_squared, param_combination_name, param_group_name,
-                                            results_table_names, x_parameters, y_parameters, x_parameter_types,
-                                            y_parameter_types):
-    model = add_mock_methods_to_basic_fitting_model(model, dataset_names, current_dataset_index, fit_function, start_x,
-                                                    end_x, fit_status, chi_squared)
+def add_mock_methods_to_model_fitting_model(
+    model,
+    dataset_names,
+    current_dataset_index,
+    fit_function,
+    start_x,
+    end_x,
+    fit_status,
+    chi_squared,
+    param_combination_name,
+    param_group_name,
+    results_table_names,
+    x_parameters,
+    y_parameters,
+    x_parameter_types,
+    y_parameter_types,
+):
+    model = add_mock_methods_to_basic_fitting_model(
+        model, dataset_names, current_dataset_index, fit_function, start_x, end_x, fit_status, chi_squared
+    )
 
     model.parameter_combination_workspace_name = mock.Mock(return_value=param_combination_name)
     model.parameter_combination_group_name = mock.Mock(return_value=param_group_name)
@@ -147,7 +162,6 @@ def add_mock_methods_to_model_fitting_presenter(presenter):
 
 
 class MockBasicFitting:
-
     def _setup_mock_view(self):
         self.view = mock.Mock(spec=BasicFittingView)
         self.view = add_mock_methods_to_basic_fitting_view(self.view)
@@ -180,17 +194,23 @@ class MockBasicFitting:
 
     def _setup_mock_model(self):
         self.model = mock.Mock(spec=BasicFittingModel)
-        self.model = add_mock_methods_to_basic_fitting_model(self.model, self.dataset_names, self.current_dataset_index,
-                                                             self.fit_function, self.start_x, self.end_x,
-                                                             self.fit_status, self.chi_squared)
+        self.model = add_mock_methods_to_basic_fitting_model(
+            self.model,
+            self.dataset_names,
+            self.current_dataset_index,
+            self.fit_function,
+            self.start_x,
+            self.end_x,
+            self.fit_status,
+            self.chi_squared,
+        )
 
         # Mock the properties of the model
         self.mock_model_current_dataset_index = mock.PropertyMock(return_value=self.current_dataset_index)
         type(self.model).current_dataset_index = self.mock_model_current_dataset_index
         self.mock_model_dataset_names = mock.PropertyMock(return_value=self.dataset_names)
         type(self.model).dataset_names = self.mock_model_dataset_names
-        self.mock_model_current_dataset_name = mock.PropertyMock(return_value=
-                                                                 self.dataset_names[self.current_dataset_index])
+        self.mock_model_current_dataset_name = mock.PropertyMock(return_value=self.dataset_names[self.current_dataset_index])
         type(self.model).current_dataset_name = self.mock_model_current_dataset_name
         self.mock_model_number_of_datasets = mock.PropertyMock(return_value=len(self.dataset_names))
         type(self.model).number_of_datasets = self.mock_model_number_of_datasets
@@ -247,6 +267,5 @@ class MockBasicFitting:
 
         # Mock the fit result property
         self.presenter.fitting_calculation_model = mock.Mock(spec=ThreadModel)
-        self.mock_presenter_get_fit_results = mock.PropertyMock(return_value=(self.fit_function, self.fit_status,
-                                                                              self.chi_squared))
+        self.mock_presenter_get_fit_results = mock.PropertyMock(return_value=(self.fit_function, self.fit_status, self.chi_squared))
         type(self.presenter.fitting_calculation_model).result = self.mock_presenter_get_fit_results

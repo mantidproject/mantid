@@ -155,5 +155,5 @@ class SettingsHelperTest(unittest.TestCase):
         self.assertRaises(TypeError, get_setting, GROUP, PREFIX, "something", return_type=bool)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

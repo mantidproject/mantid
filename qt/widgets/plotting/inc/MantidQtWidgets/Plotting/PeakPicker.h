@@ -23,7 +23,7 @@ class EXPORT_OPT_MANTIDQT_PLOTTING PeakPicker : public QObject {
   Q_OBJECT
 
 public:
-  PeakPicker(PreviewPlot *plot, const QColor &colour = Qt::black);
+  PeakPicker(PreviewPlot *plot);
 
   void redraw();
   void remove();

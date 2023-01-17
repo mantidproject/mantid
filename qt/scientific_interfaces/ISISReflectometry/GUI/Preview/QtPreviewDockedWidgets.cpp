@@ -115,9 +115,13 @@ void QtPreviewDockedWidgets::plotInstView(MantidWidgets::InstrumentActor *instAc
   // We need to recreate the surface so disconnect any existing signals first
   if (m_instDisplay->getSurface()) {
     disconnect(m_instDisplay->getSurface().get(), SIGNAL(shapeChangeFinished()));
+    disconnect(m_instDisplay->getSurface().get(), SIGNAL(shapesRemoved()));
+    disconnect(m_instDisplay->getSurface().get(), SIGNAL(shapesCleared()));
   }
   m_instDisplay->setSurface(std::make_shared<MantidWidgets::UnwrappedCylinder>(instActor, samplePos, axis));
   connect(m_instDisplay->getSurface().get(), SIGNAL(shapeChangeFinished()), this, SLOT(onInstViewShapeChanged()));
+  connect(m_instDisplay->getSurface().get(), SIGNAL(shapesRemoved()), this, SLOT(onInstViewShapeChanged()));
+  connect(m_instDisplay->getSurface().get(), SIGNAL(shapesCleared()), this, SLOT(onInstViewShapeChanged()));
 }
 
 QLayout *QtPreviewDockedWidgets::getRegionSelectorLayout() const { return m_ui.rs_plot_layout; }

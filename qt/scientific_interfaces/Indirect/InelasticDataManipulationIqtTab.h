@@ -8,10 +8,10 @@
 
 #include "InelasticDataManipulationTab.h"
 #include "ui_InelasticDataManipulationIqtTab.h"
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+using namespace Mantid::API;
 class DLLExport InelasticDataManipulationIqtTab : public InelasticDataManipulationTab {
   Q_OBJECT
 
@@ -30,6 +30,10 @@ private:
   int getSelectedSpectrum() const;
   /// Sets the selected spectrum
   virtual void setSelectedSpectrum(int spectrum);
+
+  MatrixWorkspace_sptr getPreviewPlotWorkspace();
+  void setPreviewPlotWorkspace(const MatrixWorkspace_sptr &previewPlotWorkspace);
+  std::weak_ptr<MatrixWorkspace> m_previewPlotWorkspace;
 
   /// Retrieve input workspace
   Mantid::API::MatrixWorkspace_sptr getInputWorkspace() const;
@@ -62,6 +66,7 @@ private slots:
   void saveClicked();
   void errorsClicked();
   void updateEnergyRange(int state);
+  void plotCurrentPreview();
 };
 } // namespace IDA
 } // namespace CustomInterfaces

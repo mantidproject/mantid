@@ -200,6 +200,33 @@ public:
     m_presenter->notifyFitClicked();
   }
 
+  void test_that_notifyExportWorkspaceToADSClicked_calls_the_expected_model_function() {
+    EXPECT_CALL(*m_model, exportWorkspaceCopyToADS()).Times(1);
+    m_presenter->notifyExportWorkspaceToADSClicked();
+  }
+
+  void test_that_notifyExternalPlotClicked_will_open_an_external_plot_from_view() {
+    auto const workspace = WorkspaceCreationHelper::create2DWorkspace(1, 100);
+    std::vector<int> const workspaceIndices{0, 1};
+
+    EXPECT_CALL(*m_model, plottedWorkspace()).Times(1).WillOnce(Return(workspace));
+
+    EXPECT_CALL(*m_model, plottedWorkspaceIndices()).Times(1).WillOnce(Return(workspaceIndices));
+    EXPECT_CALL(*m_view, openExternalPlot(Eq(workspace), workspaceIndices)).Times(1);
+
+    m_presenter->notifyExternalPlotClicked();
+  }
+
+  void test_that_notifyExternalPlotClicked_will_not_open_external_plot_if_workspace_is_null() {
+    EXPECT_CALL(*m_model, plottedWorkspace()).Times(1).WillOnce(Return(nullptr));
+
+    // Assert not called
+    EXPECT_CALL(*m_model, plottedWorkspaceIndices()).Times(0);
+    EXPECT_CALL(*m_view, openExternalPlot(_, _)).Times(0);
+
+    m_presenter->notifyExternalPlotClicked();
+  }
+
   void test_that_calculateEstimate_is_not_called_when_data_is_not_extracted() {
     EXPECT_CALL(*m_model, isDataExtracted()).Times(1).WillOnce(Return(false));
 

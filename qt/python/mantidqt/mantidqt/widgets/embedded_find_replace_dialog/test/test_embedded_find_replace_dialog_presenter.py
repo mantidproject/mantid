@@ -293,8 +293,8 @@ class EmbeddedFindReplaceDialogTest(TestCase):
         self.assertEqual(2, editor.findNext.call_count)
 
     @with_mock_presenter
-    @patch('mantidqt.widgets.embedded_find_replace_dialog.presenter.EmbeddedFindReplaceDialog.action_next')
-    @patch('mantidqt.widgets.embedded_find_replace_dialog.presenter.EmbeddedFindReplaceDialog.action_previous')
+    @patch("mantidqt.widgets.embedded_find_replace_dialog.presenter.EmbeddedFindReplaceDialog.action_next")
+    @patch("mantidqt.widgets.embedded_find_replace_dialog.presenter.EmbeddedFindReplaceDialog.action_previous")
     def test_action_enter_pressed(self, view, presenter, editor, mock_action_previous, mock_action_next):
         presenter.current_direction = SearchDirection.BACKWARD
 

@@ -54,7 +54,7 @@ public:
 
   void testInitInstrumentListUpdatesRunsPresenter() {
     auto presenter = makePresenter(makeModel());
-    EXPECT_CALL(*m_runsPresenter, initInstrumentList()).Times(1);
+    EXPECT_CALL(*m_runsPresenter, initInstrumentList(_)).Times(1);
     presenter->initInstrumentList();
     verifyAndClear();
   }

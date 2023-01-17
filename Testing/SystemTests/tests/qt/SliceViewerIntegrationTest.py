@@ -18,9 +18,17 @@ from numpy import hstack
 from mantidqt.widgets.colorbar.colorbar import MIN_LOG_VALUE
 from mantidqt.widgets.sliceviewer.views.dataview import SCALENORM
 from mantid.simpleapi import (
-    CreateMDHistoWorkspace, CreateMDWorkspace, CreateSampleWorkspace, DeleteWorkspace, FakeMDEventData,
-    ConvertToDistribution, Scale,
-    SetUB, RenameWorkspace, ClearUB)
+    CreateMDHistoWorkspace,
+    CreateMDWorkspace,
+    CreateSampleWorkspace,
+    DeleteWorkspace,
+    FakeMDEventData,
+    ConvertToDistribution,
+    Scale,
+    SetUB,
+    RenameWorkspace,
+    ClearUB,
+)
 from mantid.api import AnalysisDataService
 from mantidqt.utils.qt.testing import get_application
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
@@ -44,36 +52,42 @@ class MockConfig(object):
 
 
 def create_histo_ws():
-    histo_ws = CreateMDHistoWorkspace(Dimensionality=3,
-                                      Extents='-3,3,-10,10,-1,1',
-                                      SignalInput=range(100),
-                                      ErrorInput=range(100),
-                                      NumberOfBins='5,5,4',
-                                      Names='Dim1,Dim2,Dim3',
-                                      Units='MomentumTransfer,EnergyTransfer,Angstrom',
-                                      OutputWorkspace='ws_MD_2d')
+    histo_ws = CreateMDHistoWorkspace(
+        Dimensionality=3,
+        Extents="-3,3,-10,10,-1,1",
+        SignalInput=range(100),
+        ErrorInput=range(100),
+        NumberOfBins="5,5,4",
+        Names="Dim1,Dim2,Dim3",
+        Units="MomentumTransfer,EnergyTransfer,Angstrom",
+        OutputWorkspace="ws_MD_2d",
+    )
     return histo_ws
 
 
 def create_histo_ws_positive():
-    histo_ws_positive = CreateMDHistoWorkspace(Dimensionality=3,
-                                               Extents='-3,3,-10,10,-1,1',
-                                               SignalInput=range(1, 101),
-                                               ErrorInput=range(100),
-                                               NumberOfBins='5,5,4',
-                                               Names='Dim1,Dim2,Dim3',
-                                               Units='MomentumTransfer,EnergyTransfer,Angstrom',
-                                               OutputWorkspace='ws_MD_2d_pos')
+    histo_ws_positive = CreateMDHistoWorkspace(
+        Dimensionality=3,
+        Extents="-3,3,-10,10,-1,1",
+        SignalInput=range(1, 101),
+        ErrorInput=range(100),
+        NumberOfBins="5,5,4",
+        Names="Dim1,Dim2,Dim3",
+        Units="MomentumTransfer,EnergyTransfer,Angstrom",
+        OutputWorkspace="ws_MD_2d_pos",
+    )
     return histo_ws_positive
 
 
 def create_hkl_ws():
-    hkl_ws = CreateMDWorkspace(Dimensions=3,
-                               Extents='-10,10,-9,9,-8,8',
-                               Names='A,B,C',
-                               Units='r.l.u.,r.l.u.,r.l.u.',
-                               Frames='HKL,HKL,HKL',
-                               OutputWorkspace='hkl_ws')
+    hkl_ws = CreateMDWorkspace(
+        Dimensions=3,
+        Extents="-10,10,-9,9,-8,8",
+        Names="A,B,C",
+        Units="r.l.u.,r.l.u.,r.l.u.",
+        Frames="HKL,HKL,HKL",
+        OutputWorkspace="hkl_ws",
+    )
     expt_info = CreateSampleWorkspace()
     hkl_ws.addExperimentInfo(expt_info)
     SetUB(hkl_ws, 1, 1, 1, 90, 90, 90)
@@ -84,6 +98,7 @@ class HelperTestingClass(QtWidgetFinder):
     """
     Base class for system tests for testing sliceviewer integration with qt and matplotlib.
     """
+
     def __init__(self):
         self._qapp = get_application()
 
@@ -109,8 +124,7 @@ class HelperTestingClass(QtWidgetFinder):
             op_thread = Thread(target=operation)
             op_thread.start()
             op_thread.join()
-            self.assertTrue('Error occurred in handler' not in stderr_capture.getvalue(),
-                            msg=stderr_capture.getvalue())
+            self.assertTrue("Error occurred in handler" not in stderr_capture.getvalue(), msg=stderr_capture.getvalue())
         finally:
             sys.stderr = stderr_orig
 
@@ -136,7 +150,8 @@ class SliceViewerTestNonorthogonalViewDisablesLineplots(systemtesting.MantidSyst
         hkl_ws = create_hkl_ws()
         pres = SliceViewer(hkl_ws)
         line_plots_action, region_sel_action, non_ortho_action = toolbar_actions(
-            pres, (ToolItemText.LINEPLOTS, ToolItemText.REGIONSELECTION, ToolItemText.NONORTHOGONAL_AXES))
+            pres, (ToolItemText.LINEPLOTS, ToolItemText.REGIONSELECTION, ToolItemText.NONORTHOGONAL_AXES)
+        )
         line_plots_action.trigger()
         self._qapp.sendPostedEvents()
 
@@ -155,8 +170,13 @@ class SliceViewerTestNonorthogonalViewDisablesLineplots(systemtesting.MantidSyst
 class SliceViewerTestNonorthogonalViewDisabledWhenEaxisViewed(systemtesting.MantidSystemTest, HelperTestingClass):
     def runTest(self):
         HelperTestingClass.__init__(self)
-        ws_4D = CreateMDWorkspace(Dimensions=4, Extents=[-1, 1, -1, 1, -1, 1, -1, 1], Names="E,H,K,L",
-                                  Frames='General Frame,HKL,HKL,HKL', Units='meV,r.l.u.,r.l.u.,r.l.u.')
+        ws_4D = CreateMDWorkspace(
+            Dimensions=4,
+            Extents=[-1, 1, -1, 1, -1, 1, -1, 1],
+            Names="E,H,K,L",
+            Frames="General Frame,HKL,HKL,HKL",
+            Units="meV,r.l.u.,r.l.u.,r.l.u.",
+        )
         expt_info_4D = CreateSampleWorkspace()
         ws_4D.addExperimentInfo(expt_info_4D)
         SetUB(ws_4D, 1, 1, 2, 90, 90, 120)
@@ -332,11 +352,9 @@ class SliceViewerTestViewUpdatedOnReplaceWhenModelPropertiesNotChangedMDEventWs(
         def scale_ws(ws):
             ws = ws * 100
 
-        ws = CreateMDWorkspace(Dimensions='3',
-                               EventType='MDEvent',
-                               Extents='-10,10,-5,5,-1,1',
-                               Names='Q_lab_x,Q_lab_y,Q_lab_z',
-                               Units='1\\A,1\\A,1\\A')
+        ws = CreateMDWorkspace(
+            Dimensions="3", EventType="MDEvent", Extents="-10,10,-5,5,-1,1", Names="Q_lab_x,Q_lab_y,Q_lab_z", Units="1\\A,1\\A,1\\A"
+        )
         FakeMDEventData(ws, UniformParams="1000000")
         pres = SliceViewer(ws)
         self._assertNoErrorInADSHandlerFromSeparateThread(partial(scale_ws, ws))
@@ -399,10 +417,15 @@ class SliceViewerTestViewClosedOnADSCleared(systemtesting.MantidSystemTest, Help
 class SliceViewerTestClosedOnReplaceWhenChangedNonorthogonalTransformSupport(systemtesting.MantidSystemTest, HelperTestingClass):
     def runTest(self):
         HelperTestingClass.__init__(self)
-        ws_non_ortho = CreateMDWorkspace(Dimensions='3', Extents='-6,6,-4,4,-0.5,0.5',
-                                         Names='H,K,L', Units='r.l.u.,r.l.u.,r.l.u.',
-                                         Frames='HKL,HKL,HKL',
-                                         SplitInto='2', SplitThreshold='50')
+        ws_non_ortho = CreateMDWorkspace(
+            Dimensions="3",
+            Extents="-6,6,-4,4,-0.5,0.5",
+            Names="H,K,L",
+            Units="r.l.u.,r.l.u.,r.l.u.",
+            Frames="HKL,HKL,HKL",
+            SplitInto="2",
+            SplitThreshold="50",
+        )
         expt_info_nonortho = CreateSampleWorkspace()
         ws_non_ortho.addExperimentInfo(expt_info_nonortho)
         SetUB(ws_non_ortho, 1, 1, 2, 90, 90, 120)
@@ -463,11 +486,13 @@ class SliceViewerTestAxesLimitsRespectNonorthogonalTransform(systemtesting.Manti
     def runTest(self):
         HelperTestingClass.__init__(self)
         limits = (-10.0, 10.0, -9.0, 9.0)
-        ws_nonrotho = CreateMDWorkspace(Dimensions=3,
-                                        Extents=','.join([str(lim) for lim in limits]) + ',-8,8',
-                                        Names='A,B,C',
-                                        Units='r.l.u.,r.l.u.,r.l.u.',
-                                        Frames='HKL,HKL,HKL')
+        ws_nonrotho = CreateMDWorkspace(
+            Dimensions=3,
+            Extents=",".join([str(lim) for lim in limits]) + ",-8,8",
+            Names="A,B,C",
+            Units="r.l.u.,r.l.u.,r.l.u.",
+            Frames="HKL,HKL,HKL",
+        )
         expt_info_nonortho = CreateSampleWorkspace()
         ws_nonrotho.addExperimentInfo(expt_info_nonortho)
         SetUB(ws_nonrotho, 1, 1, 2, 90, 90, 120)

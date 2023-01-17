@@ -4,10 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,non-parent-init-called,R0901,R0902,too-many-branches,C0302
+# pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,non-parent-init-called,R0901,R0902,too-many-branches,C0302
 import os
 import numpy as np
-from qtpy.QtWidgets import (QWidget, QVBoxLayout, QSizePolicy)
+from qtpy.QtWidgets import QWidget, QVBoxLayout, QSizePolicy
 from mantidqt.MPLwidgets import FigureCanvasQTAgg as FigureCanvas
 from mantidqt.MPLwidgets import NavigationToolbar2QT as NavigationToolbar2
 from matplotlib.figure import Figure
@@ -16,13 +16,12 @@ from matplotlib import pyplot as plt
 
 
 class Mpl2dGraphicsView(QWidget):
-    """ A combined graphics view including matplotlib canvas and
+    """A combined graphics view including matplotlib canvas and
     a navigation tool bar for 2D image specifically
     """
 
     def __init__(self, parent):
-        """ Initialization
-        """
+        """Initialization"""
         # Initialize parent
         QWidget.__init__(self, parent)
 
@@ -69,8 +68,7 @@ class Mpl2dGraphicsView(QWidget):
         return self._2dPlot
 
     def add_image(self, imagefilename):
-        """ Add an image to canvas from an image file
-        """
+        """Add an image to canvas from an image file"""
         # check
         if os.path.exists(imagefilename) is False:
             raise NotImplementedError("Image file %s does not exist." % (imagefilename))
@@ -81,24 +79,22 @@ class Mpl2dGraphicsView(QWidget):
 
     @property
     def canvas(self):
-        """ Get the canvas
+        """Get the canvas
         :return:
         """
         return self._myCanvas
 
     def clear_canvas(self):
-        """ Clear canvas
-        """
+        """Clear canvas"""
         return self._myCanvas.clear_canvas()
 
     def draw(self):
-        """ Draw to commit the change
-        """
+        """Draw to commit the change"""
         return self._myCanvas.draw()
 
     @staticmethod
     def evt_view_updated():
-        """ Event handling as canvas size updated
+        """Event handling as canvas size updated
         :return:
         """
         # There is no operation that is defined now
@@ -151,32 +147,31 @@ class Mpl2dGraphicsView(QWidget):
 
     @property
     def y_min(self):
-        """ minimum y of the canvas
+        """minimum y of the canvas
         :return:
         """
         return self._myCanvas.y_min
 
     @property
     def y_max(self):
-        """ maximum y of the canvas
+        """maximum y of the canvas
         :return:
         """
         return self._myCanvas.y_max
 
 
 class Qt4Mpl2dCanvas(FigureCanvas):
-    """  A customized Qt widget for matplotlib 2D image.
+    """A customized Qt widget for matplotlib 2D image.
     It can be used to replace GraphicsView
     """
 
     def __init__(self, parent):
-        """  Initialization
-        """
+        """Initialization"""
         # Instantiating matplotlib Figure
         self.fig = Figure()
-        self.fig.patch.set_facecolor('white')
+        self.fig.patch.set_facecolor("white")
 
-        self.axes = self.fig.add_subplot(111) # return: matplotlib.axes.AxesSubplot
+        self.axes = self.fig.add_subplot(111)  # return: matplotlib.axes.AxesSubplot
 
         # Initialize parent class and set parent
         FigureCanvas.__init__(self, self.fig)
@@ -197,8 +192,8 @@ class Qt4Mpl2dCanvas(FigureCanvas):
         self._imagePlotDict = dict()
 
         # image size
-        self._xLimit = [0., 1.]
-        self._yLimit = [0., 1.]
+        self._xLimit = [0.0, 1.0]
+        self._yLimit = [0.0, 1.0]
 
         return
 
@@ -211,7 +206,7 @@ class Qt4Mpl2dCanvas(FigureCanvas):
         return self._currentArray2D
 
     def add_2d_plot(self, array2d, x_min, x_max, y_min, y_max, hold_prev, yticklabels=None):
-        """ Add a 2D plot
+        """Add a 2D plot
         Requirements:
         (1) a valid 2-dimensional numpy.ndarray
         (2) x_min, x_max, y_min, y_max are of right order
@@ -226,19 +221,22 @@ class Qt4Mpl2dCanvas(FigureCanvas):
         :return:
         """
         # Check
-        assert isinstance(array2d, np.ndarray), 'Input array2d must be a numpy array but not %s.' % str(type(array2d))
-        assert isinstance(x_min, int) and isinstance(x_max, int) and x_min < x_max, \
-            'x_min = %s (of type %s) should be less than x_max = %s (of type %s).' \
-            '' % (str(x_min), str(type(x_min)), str(x_max), str(type(x_max)))
+        assert isinstance(array2d, np.ndarray), "Input array2d must be a numpy array but not %s." % str(type(array2d))
+        assert (
+            isinstance(x_min, int) and isinstance(x_max, int) and x_min < x_max
+        ), "x_min = %s (of type %s) should be less than x_max = %s (of type %s)." "" % (
+            str(x_min),
+            str(type(x_min)),
+            str(x_max),
+            str(type(x_max)),
+        )
         assert isinstance(y_min, int) and isinstance(y_max, int) and y_min < y_max
 
         # Release the current image
         self.axes.hold(hold_prev)
 
         # show image
-        img_plot = self.axes.imshow(array2d,
-                                    extent=[x_min, x_max, y_min, y_max],
-                                    interpolation='none')
+        img_plot = self.axes.imshow(array2d, extent=[x_min, x_max, y_min, y_max], interpolation="none")
         self._currentArray2D = array2d
 
         # set y ticks as an option:
@@ -246,15 +244,15 @@ class Qt4Mpl2dCanvas(FigureCanvas):
             # it will always label the first N ticks even image is zoomed in
             # FUTURE-VZ : The way to set up the Y-axis ticks is wrong!"
             # self.axes.set_yticklabels(yticklabels)
-            print('[Warning] The method to set up the Y-axis ticks to 2D image is wrong!')
+            print("[Warning] The method to set up the Y-axis ticks to 2D image is wrong!")
 
         # explicitly set aspect ratio of the image
-        self.axes.set_aspect('auto')
+        self.axes.set_aspect("auto")
 
         # Set color bar.  plt.colorbar() does not work!
         if self._colorBar is None:
             # set color map type
-            img_plot.set_cmap('spectral')
+            img_plot.set_cmap("spectral")
             self._colorBar = self.fig.colorbar(img_plot)
         else:
             self._colorBar.update_bruteforce(img_plot)
@@ -282,20 +280,19 @@ class Qt4Mpl2dCanvas(FigureCanvas):
         return
 
     def addImage(self, imagefilename):
-        """ Add an image by file
-        """
+        """Add an image by file"""
         # set aspect to auto mode
-        self.axes.set_aspect('auto')
+        self.axes.set_aspect("auto")
 
         img = matplotlib.image.imread(str(imagefilename))
         # lum_img = img[:,:,0]
         # FUTURE : refactor for image size, interpolation and origin
-        imgplot = self.axes.imshow(img, extent=[0, 1000, 800, 0], interpolation='none', origin='lower')
+        imgplot = self.axes.imshow(img, extent=[0, 1000, 800, 0], interpolation="none", origin="lower")
 
         # Set color bar.  plt.colorbar() does not work!
         if self._colorBar is None:
             # set color map type
-            imgplot.set_cmap('spectral')
+            imgplot.set_cmap("spectral")
             self._colorBar = self.fig.colorbar(imgplot)
         else:
             self._colorBar.update_bruteforce(imgplot)
@@ -305,8 +302,7 @@ class Qt4Mpl2dCanvas(FigureCanvas):
         return
 
     def clear_canvas(self):
-        """ Clear data including lines and image from canvas
-        """
+        """Clear data including lines and image from canvas"""
         # clear the image for next operation
         self.axes.hold(False)
 
@@ -327,7 +323,7 @@ class Qt4Mpl2dCanvas(FigureCanvas):
 
         return
 
-    def plot_polygon(self, vertex_array, fill=False, color='w'):
+    def plot_polygon(self, vertex_array, fill=False, color="w"):
         """
         Plot a new polygon
         :param vertex_array:
@@ -351,45 +347,46 @@ class Qt4Mpl2dCanvas(FigureCanvas):
 
     @property
     def x_min(self):
-        """ x minimum
+        """x minimum
         :return:
         """
         return self._xLimit[0]
 
     @property
     def x_max(self):
-        """ maximum x
+        """maximum x
         :return:
         """
         return self._xLimit[1]
 
     @property
     def y_min(self):
-        """ minimum y
+        """minimum y
         :return:
         """
         return self._yLimit[0]
 
     @property
     def y_max(self):
-        """ maximum y
+        """maximum y
         :return:
         """
         return self._yLimit[1]
 
     def _flush(self):
-        """ A dirty hack to flush the image
-        """
+        """A dirty hack to flush the image"""
         w, h = self.get_width_height()
-        self.resize(w+1, h)
+        self.resize(w + 1, h)
         self.resize(w, h)
 
         return
+
+
 # END-OF-CLASS (MplGraphicsView)
 
 
 class MyNavigationToolbar(NavigationToolbar2):
-    """ A customized navigation tool bar attached to canvas
+    """A customized navigation tool bar attached to canvas
     Note:
     * home, left, right: will not disable zoom/pan mode
     * zoom and pan: will turn on/off both's mode
@@ -397,13 +394,13 @@ class MyNavigationToolbar(NavigationToolbar2):
     Other methods
     * drag_pan(self, event): event handling method for dragging canvas in pan-mode
     """
+
     NAVIGATION_MODE_NONE = 0
     NAVIGATION_MODE_PAN = 1
     NAVIGATION_MODE_ZOOM = 2
 
     def __init__(self, parent, canvas):
-        """ Initialization
-        """
+        """Initialization"""
         NavigationToolbar2.__init__(self, canvas, canvas)
 
         self._myParent = parent

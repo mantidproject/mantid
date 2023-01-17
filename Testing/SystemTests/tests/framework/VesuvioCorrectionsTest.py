@@ -18,29 +18,26 @@ import numpy as np
 from mantid.api import *
 import mantid.simpleapi as ms
 from mantid import *
+
 # ====================================Helper Functions=======================================
 
 
 def setup():
-    test_ws = ms.LoadVesuvio(Filename="15039-15045", InstrumentParFile="IP0004_10.par",
-                             Mode="SingleDifference", SpectrumList="135-136")
-    test_container_ws = ms.LoadVesuvio(Filename="15036", InstrumentParFile="IP0004_10.par",
-                                       Mode="SingleDifference", SpectrumList="135-136")
+    test_ws = ms.LoadVesuvio(Filename="15039-15045", InstrumentParFile="IP0004_10.par", Mode="SingleDifference", SpectrumList="135-136")
+    test_container_ws = ms.LoadVesuvio(Filename="15036", InstrumentParFile="IP0004_10.par", Mode="SingleDifference", SpectrumList="135-136")
 
     return test_ws, test_container_ws
 
 
 def setup_back_scattering():
-    test_ws = ms.LoadVesuvio(Filename="15039-15045", InstrumentParFile="IP0004_10.par",
-                             Mode="SingleDifference", SpectrumList="3-6")
-    test_container_ws = ms.LoadVesuvio(Filename="15036", InstrumentParFile="IP0004_10.par",
-                                       Mode="SingleDifference", SpectrumList="3-6")
+    test_ws = ms.LoadVesuvio(Filename="15039-15045", InstrumentParFile="IP0004_10.par", Mode="SingleDifference", SpectrumList="3-6")
+    test_container_ws = ms.LoadVesuvio(Filename="15036", InstrumentParFile="IP0004_10.par", Mode="SingleDifference", SpectrumList="3-6")
 
     return test_ws, test_container_ws
 
 
 def tear_down():
-    workspace_names = ['__Correction', '__Corrected', '__Output', '__LinearFit']
+    workspace_names = ["__Correction", "__Corrected", "__Output", "__LinearFit"]
     for name in workspace_names:
         if mtd.doesExist(name):
             mtd.remove(name)
@@ -60,72 +57,72 @@ def _create_algorithm(**kwargs):
 
 
 def _create_dummy_fit_parameters_ws_index_1():
-    params = ms.CreateEmptyTableWorkspace(OutputWorkspace='__VesuvioCorrections_test_fit_params')
+    params = ms.CreateEmptyTableWorkspace(OutputWorkspace="__VesuvioCorrections_test_fit_params")
 
-    params.addColumn('str', 'Name')
-    params.addColumn('float', 'Value')
-    params.addColumn('float', 'Error')
+    params.addColumn("str", "Name")
+    params.addColumn("float", "Value")
+    params.addColumn("float", "Error")
 
-    params.addRow(['f0.Mass', 1.0079, 0.0])
-    params.addRow(['f0.Width', 3.70295, 0.199336])
-    params.addRow(['f0.FSECoeff', 0.436396, 0])
-    params.addRow(['f0.C_0', 21.2616, 0.750185])
-    params.addRow(['f1.Mass', 16.0, 0.0])
-    params.addRow(['f1.Width', 10.0, 0.0])
-    params.addRow(['f1.Intensity', 4.03064, 0.41762])
-    params.addRow(['f2.Mass', 27.0, 0.0])
-    params.addRow(['f2.Width', 13.0, 0.0])
-    params.addRow(['f2.Intensity', 3.23823, 0.447593])
-    params.addRow(['f3.Mass', 133.0, 0.0])
-    params.addRow(['f3.Width', 30.0, 0.0])
-    params.addRow(['f3.Intensity', 0.882613, 0.218913])
-    params.addRow(['Cost function value', 3.19573, 0.0])
+    params.addRow(["f0.Mass", 1.0079, 0.0])
+    params.addRow(["f0.Width", 3.70295, 0.199336])
+    params.addRow(["f0.FSECoeff", 0.436396, 0])
+    params.addRow(["f0.C_0", 21.2616, 0.750185])
+    params.addRow(["f1.Mass", 16.0, 0.0])
+    params.addRow(["f1.Width", 10.0, 0.0])
+    params.addRow(["f1.Intensity", 4.03064, 0.41762])
+    params.addRow(["f2.Mass", 27.0, 0.0])
+    params.addRow(["f2.Width", 13.0, 0.0])
+    params.addRow(["f2.Intensity", 3.23823, 0.447593])
+    params.addRow(["f3.Mass", 133.0, 0.0])
+    params.addRow(["f3.Width", 30.0, 0.0])
+    params.addRow(["f3.Intensity", 0.882613, 0.218913])
+    params.addRow(["Cost function value", 3.19573, 0.0])
 
     return params
 
 
 def _create_dummy_fit_parameters_ws_index_2():
-    params = ms.CreateEmptyTableWorkspace(OutputWorkspace='__VesuvioCorrections_test_fit_params')
+    params = ms.CreateEmptyTableWorkspace(OutputWorkspace="__VesuvioCorrections_test_fit_params")
 
-    params.addColumn('str', 'Name')
-    params.addColumn('float', 'Value')
-    params.addColumn('float', 'Error')
+    params.addColumn("str", "Name")
+    params.addColumn("float", "Value")
+    params.addColumn("float", "Error")
 
-    params.addRow(['f0.Mass', 1.0079, 0.0])
-    params.addRow(['f0.Width', 4.34424, 0.205241])
-    params.addRow(['f0.FSECoeff', 0.511974, 0])
-    params.addRow(['f0.C_0', 21.6463, 0.726012])
-    params.addRow(['f1.Mass', 16.0, 0.0])
-    params.addRow(['f1.Width', 10.0, 0.0])
-    params.addRow(['f1.Intensity', 4.49586, 0.438959])
-    params.addRow(['f2.Mass', 27.0, 0.0])
-    params.addRow(['f2.Width', 13.0, 0.0])
-    params.addRow(['f2.Intensity', 2.60706, 0.482777])
-    params.addRow(['f3.Mass', 133.0, 0.0])
-    params.addRow(['f3.Width', 30.0, 0.0])
-    params.addRow(['f3.Intensity', 1.11099, 0.232988])
-    params.addRow(['Cost function value', 2.98231, 0.0])
+    params.addRow(["f0.Mass", 1.0079, 0.0])
+    params.addRow(["f0.Width", 4.34424, 0.205241])
+    params.addRow(["f0.FSECoeff", 0.511974, 0])
+    params.addRow(["f0.C_0", 21.6463, 0.726012])
+    params.addRow(["f1.Mass", 16.0, 0.0])
+    params.addRow(["f1.Width", 10.0, 0.0])
+    params.addRow(["f1.Intensity", 4.49586, 0.438959])
+    params.addRow(["f2.Mass", 27.0, 0.0])
+    params.addRow(["f2.Width", 13.0, 0.0])
+    params.addRow(["f2.Intensity", 2.60706, 0.482777])
+    params.addRow(["f3.Mass", 133.0, 0.0])
+    params.addRow(["f3.Width", 30.0, 0.0])
+    params.addRow(["f3.Intensity", 1.11099, 0.232988])
+    params.addRow(["Cost function value", 2.98231, 0.0])
 
     return params
 
 
 def _create_dummy_fit_parameters_no_hydrogen():
-    params = ms.CreateEmptyTableWorkspace(OutputWorkspace='__VesuvioCorrections_test_fit_params')
+    params = ms.CreateEmptyTableWorkspace(OutputWorkspace="__VesuvioCorrections_test_fit_params")
 
-    params.addColumn('str', 'Name')
-    params.addColumn('float', 'Value')
-    params.addColumn('float', 'Error')
+    params.addColumn("str", "Name")
+    params.addColumn("float", "Value")
+    params.addColumn("float", "Error")
 
-    params.addRow(['f0.Mass', 16.0, 0.0])
-    params.addRow(['f0.Width', 10.0, 0.0])
-    params.addRow(['f0.Intensity', 4.03064, 0.41762])
-    params.addRow(['f1.Mass', 27.0, 0.0])
-    params.addRow(['f1.Width', 13.0, 0.0])
-    params.addRow(['f1.Intensity', 3.23823, 0.447593])
-    params.addRow(['f2.Mass', 133.0, 0.0])
-    params.addRow(['f2.Width', 30.0, 0.0])
-    params.addRow(['f2.Intensity', 0.882613, 0.218913])
-    params.addRow(['Cost function value', 3.19573, 0.0])
+    params.addRow(["f0.Mass", 16.0, 0.0])
+    params.addRow(["f0.Width", 10.0, 0.0])
+    params.addRow(["f0.Intensity", 4.03064, 0.41762])
+    params.addRow(["f1.Mass", 27.0, 0.0])
+    params.addRow(["f1.Width", 13.0, 0.0])
+    params.addRow(["f1.Intensity", 3.23823, 0.447593])
+    params.addRow(["f2.Mass", 133.0, 0.0])
+    params.addRow(["f2.Width", 30.0, 0.0])
+    params.addRow(["f2.Intensity", 0.882613, 0.218913])
+    params.addRow(["Cost function value", 3.19573, 0.0])
 
     return params
 
@@ -135,13 +132,16 @@ def _create_dummy_masses():
 
 
 def _create_dummy_profiles():
-    return "function=GramCharlier,hermite_coeffs=[1, 0, 0],k_free=0,sears_flag=1," \
-           + "width=[2, 5, 7];function=Gaussian,width=10;function=Gaussian,width=13;" \
-           + "function=Gaussian,width=30"
+    return (
+        "function=GramCharlier,hermite_coeffs=[1, 0, 0],k_free=0,sears_flag=1,"
+        + "width=[2, 5, 7];function=Gaussian,width=10;function=Gaussian,width=13;"
+        + "function=Gaussian,width=30"
+    )
 
 
 # ===========================================================================================
 # ========================================Success cases======================================
+
 
 class TestGammaAndMsCorrectWorkspaceIndexOne(systemtesting.MantidSystemTest):
     _algorithm = None
@@ -152,11 +152,13 @@ class TestGammaAndMsCorrectWorkspaceIndexOne(systemtesting.MantidSystemTest):
     def runTest(self):
         test_ws, _ = setup()
         self._input_bins = test_ws.blocksize()
-        self._algorithm = _create_algorithm(InputWorkspace=test_ws,
-                                            GammaBackground=True,
-                                            FitParameters=_create_dummy_fit_parameters_ws_index_1(),
-                                            Masses=_create_dummy_masses(),
-                                            MassProfiles=_create_dummy_profiles())
+        self._algorithm = _create_algorithm(
+            InputWorkspace=test_ws,
+            GammaBackground=True,
+            FitParameters=_create_dummy_fit_parameters_ws_index_1(),
+            Masses=_create_dummy_masses(),
+            MassProfiles=_create_dummy_profiles(),
+        )
 
         self._algorithm.execute()
 
@@ -208,12 +210,14 @@ class TestGammaAndMsCorrectWorkspaceIndexTwo(systemtesting.MantidSystemTest):
     def runTest(self):
         test_ws, _ = setup()
         self._input_bins = test_ws.blocksize()
-        self._algorithm = _create_algorithm(InputWorkspace=test_ws,
-                                            GammaBackground=True,
-                                            FitParameters=_create_dummy_fit_parameters_ws_index_2(),
-                                            Masses=_create_dummy_masses(),
-                                            MassProfiles=_create_dummy_profiles(),
-                                            WorkspaceIndex=1)
+        self._algorithm = _create_algorithm(
+            InputWorkspace=test_ws,
+            GammaBackground=True,
+            FitParameters=_create_dummy_fit_parameters_ws_index_2(),
+            Masses=_create_dummy_masses(),
+            MassProfiles=_create_dummy_profiles(),
+            WorkspaceIndex=1,
+        )
 
         self._algorithm.execute()
 
@@ -263,12 +267,14 @@ class TestMsCorrectWithContainer(systemtesting.MantidSystemTest):
     def runTest(self):
         test_ws, test_container_ws = setup()
         self._input_bins = test_ws.blocksize()
-        self._algorithm = _create_algorithm(InputWorkspace=test_ws,
-                                            ContainerWorkspace=test_container_ws,
-                                            GammaBackground=False,
-                                            FitParameters=_create_dummy_fit_parameters_ws_index_1(),
-                                            Masses=_create_dummy_masses(),
-                                            MassProfiles=_create_dummy_profiles())
+        self._algorithm = _create_algorithm(
+            InputWorkspace=test_ws,
+            ContainerWorkspace=test_container_ws,
+            GammaBackground=False,
+            FitParameters=_create_dummy_fit_parameters_ws_index_1(),
+            Masses=_create_dummy_masses(),
+            MassProfiles=_create_dummy_profiles(),
+        )
 
         self._algorithm.execute()
 
@@ -320,11 +326,13 @@ class TestGammaAndMsCorrectWithContainer(systemtesting.MantidSystemTest):
     def runTest(self):
         test_ws, test_container_ws = setup()
         self._input_bins = test_ws.blocksize()
-        self._algorithm = _create_algorithm(InputWorkspace=test_ws,
-                                            ContainerWorkspace=test_container_ws,
-                                            FitParameters=_create_dummy_fit_parameters_ws_index_1(),
-                                            Masses=_create_dummy_masses(),
-                                            MassProfiles=_create_dummy_profiles())
+        self._algorithm = _create_algorithm(
+            InputWorkspace=test_ws,
+            ContainerWorkspace=test_container_ws,
+            FitParameters=_create_dummy_fit_parameters_ws_index_1(),
+            Masses=_create_dummy_masses(),
+            MassProfiles=_create_dummy_profiles(),
+        )
 
     def validate(self):
         self._algorithm.execute()
@@ -374,14 +382,16 @@ class TestGammaAndMsCorrectWithContainerFixedScaling(systemtesting.MantidSystemT
     def runTest(self):
         test_ws, test_container_ws = setup()
         self._input_bins = test_ws.blocksize()
-        self._algorithm = _create_algorithm(InputWorkspace=test_ws,
-                                            ContainerWorkspace=test_container_ws,
-                                            GammaBackground=True,
-                                            FitParameters=_create_dummy_fit_parameters_ws_index_1(),
-                                            Masses=_create_dummy_masses(),
-                                            MassProfiles=_create_dummy_profiles(),
-                                            ContainerScale=0.1,
-                                            GammaBackgroundScale=0.2)
+        self._algorithm = _create_algorithm(
+            InputWorkspace=test_ws,
+            ContainerWorkspace=test_container_ws,
+            GammaBackground=True,
+            FitParameters=_create_dummy_fit_parameters_ws_index_1(),
+            Masses=_create_dummy_masses(),
+            MassProfiles=_create_dummy_profiles(),
+            ContainerScale=0.1,
+            GammaBackgroundScale=0.2,
+        )
 
         self._algorithm.execute()
 
@@ -420,7 +430,7 @@ class TestGammaAndMsCorrectWithContainerFixedScaling(systemtesting.MantidSystemT
         # Test Linear fit Result Workspace
         linear_params = self._algorithm.getProperty("LinearFitResult").value
         _validate_table_workspace(self, linear_params, 10, 3)
-        expected_table_values = [0.1, 0.0, 1.0, 0.2, 0.0, 1.0, 'skip', 0.0, 1.0]
+        expected_table_values = [0.1, 0.0, 1.0, 0.2, 0.0, 1.0, "skip", 0.0, 1.0]
         _validate_table_values_top_to_bottom(self, linear_params, expected_table_values)
         tear_down()
 
@@ -432,19 +442,21 @@ class TestCorrectionsInBackScatteringSpectra(systemtesting.MantidSystemTest):
     def runTest(self):
         test_ws, test_container_ws = setup_back_scattering()
         self._input_bins = test_ws.blocksize()
-        index_to_symbol = {'0': 'H', '1': 'O'}
-        hydrogen_constraints = {'O': {'factor': 2.0}}
+        index_to_symbol = {"0": "H", "1": "O"}
+        hydrogen_constraints = {"O": {"factor": 2.0}}
 
-        self._algorithm = _create_algorithm(InputWorkspace=test_ws,
-                                            ContainerWorkspace=test_container_ws,
-                                            GammaBackground=True,
-                                            FitParameters=_create_dummy_fit_parameters_no_hydrogen(),
-                                            Masses=_create_dummy_masses(),
-                                            MassProfiles=_create_dummy_profiles(),
-                                            MassIndexToSymbolMap=index_to_symbol,
-                                            HydrogenConstraints=hydrogen_constraints,
-                                            ContainerScale=0.1,
-                                            GammaBackgroundScale=0.2)
+        self._algorithm = _create_algorithm(
+            InputWorkspace=test_ws,
+            ContainerWorkspace=test_container_ws,
+            GammaBackground=True,
+            FitParameters=_create_dummy_fit_parameters_no_hydrogen(),
+            Masses=_create_dummy_masses(),
+            MassProfiles=_create_dummy_profiles(),
+            MassIndexToSymbolMap=index_to_symbol,
+            HydrogenConstraints=hydrogen_constraints,
+            ContainerScale=0.1,
+            GammaBackgroundScale=0.2,
+        )
 
         self._algorithm.execute()
 
@@ -456,13 +468,15 @@ class TestCorrectionsInBackScatteringSpectra(systemtesting.MantidSystemTest):
         _validate_group_structure(self, corrections_wsg, 3)
         corrections_ts_peak = 0.131359579675
         corrections_ms_peak = 0.001551
-        corrections_ts_bin  = 701
+        corrections_ts_bin = 701
         corrections_ms_bin = 48
 
-        _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak, corrections_ts_bin,
-                                     tolerance=0.2, bin_tolerance=5)
-        _validate_matrix_peak_height(self, corrections_wsg.getItem(2), corrections_ms_peak, corrections_ms_bin,
-                                     tolerance=0.2, bin_tolerance=5)
+        _validate_matrix_peak_height(
+            self, corrections_wsg.getItem(1), corrections_ts_peak, corrections_ts_bin, tolerance=0.2, bin_tolerance=5
+        )
+        _validate_matrix_peak_height(
+            self, corrections_wsg.getItem(2), corrections_ms_peak, corrections_ms_bin, tolerance=0.2, bin_tolerance=5
+        )
 
         # Test Corrected Workspaces
         corrected_wsg = self._algorithm.getProperty("CorrectedWorkspaces").value
@@ -472,36 +486,32 @@ class TestCorrectionsInBackScatteringSpectra(systemtesting.MantidSystemTest):
         corrected_ts_bin = 17
         correction_ms_bin = 17
 
-        _validate_matrix_peak_height(self, corrected_wsg.getItem(1), corrected_ts_peak, corrected_ts_bin,
-                                     tolerance=0.2, bin_tolerance=3)
-        _validate_matrix_peak_height(self, corrected_wsg.getItem(2), corrected_ms_peak, correction_ms_bin,
-                                     tolerance=0.2, bin_tolerance=3)
+        _validate_matrix_peak_height(self, corrected_wsg.getItem(1), corrected_ts_peak, corrected_ts_bin, tolerance=0.2, bin_tolerance=3)
+        _validate_matrix_peak_height(self, corrected_wsg.getItem(2), corrected_ms_peak, correction_ms_bin, tolerance=0.2, bin_tolerance=3)
 
         # Test OutputWorkspace
         output_ws = self._algorithm.getProperty("OutputWorkspace").value
         _validate_matrix_structure(self, output_ws, 1, self._input_bins)
         output_expected_peak = 0.226039019062
-        _validate_matrix_peak_height(self, output_ws, output_expected_peak, 17,
-                                     tolerance=0.2, bin_tolerance=0.3)
+        _validate_matrix_peak_height(self, output_ws, output_expected_peak, 17, tolerance=0.2, bin_tolerance=0.3)
 
         # Test Linear fit Result Workspace
         linear_params = self._algorithm.getProperty("LinearFitResult").value
         _validate_table_workspace(self, linear_params, 7, 3)
-        expected_table_values = [0.1,0.0,1.0,'skip',0.0,1.0,'skip']
+        expected_table_values = [0.1, 0.0, 1.0, "skip", 0.0, 1.0, "skip"]
         _validate_table_values_top_to_bottom(self, linear_params, expected_table_values)
         tear_down()
 
 
 # ========================================Failure cases======================================
 
+
 class TestRunningWithoutFitParamsRaisesError(systemtesting.MantidSystemTest):
     _algorithm = None
 
     def runTest(self):
         test_ws, _ = setup()
-        self._algorithm = _create_algorithm(InputWorkspace=test_ws,
-                                            Masses=_create_dummy_masses(),
-                                            MassProfiles=_create_dummy_profiles())
+        self._algorithm = _create_algorithm(InputWorkspace=test_ws, Masses=_create_dummy_masses(), MassProfiles=_create_dummy_profiles())
 
     def validate(self):
         self.assertRaises(RuntimeError, self._algorithm.execute)
@@ -512,9 +522,9 @@ class TestRunningWithoutMassesRaisesError(systemtesting.MantidSystemTest):
 
     def runTest(self):
         test_ws, _ = setup()
-        self._algorithm = _create_algorithm(InputWorkspace=test_ws,
-                                            FitParameters=_create_dummy_fit_parameters_ws_index_1(),
-                                            MassProfiles=_create_dummy_profiles())
+        self._algorithm = _create_algorithm(
+            InputWorkspace=test_ws, FitParameters=_create_dummy_fit_parameters_ws_index_1(), MassProfiles=_create_dummy_profiles()
+        )
 
     def validate(self):
         self.assertRaises(RuntimeError, self._algorithm.execute)
@@ -525,9 +535,9 @@ class TestRunningWithoutProfilesRaisesError(systemtesting.MantidSystemTest):
 
     def runTest(self):
         test_ws, _ = setup()
-        self._algorithm = _create_algorithm(InputWorkspace=test_ws,
-                                            FitParameters=_create_dummy_fit_parameters_ws_index_1(),
-                                            Masses=_create_dummy_masses())
+        self._algorithm = _create_algorithm(
+            InputWorkspace=test_ws, FitParameters=_create_dummy_fit_parameters_ws_index_1(), Masses=_create_dummy_masses()
+        )
 
     def validate(self):
         self.assertRaises(RuntimeError, self._algorithm.execute)
@@ -535,6 +545,7 @@ class TestRunningWithoutProfilesRaisesError(systemtesting.MantidSystemTest):
 
 # =========================================Validation======================================
 # =========================================Structure=======================================
+
 
 def _validate_group_structure(self, ws_group, expected_entries):
     """
@@ -557,12 +568,14 @@ def _validate_matrix_structure(self, matrix_ws, expected_hist, expected_bins):
     self.assertTrue(isinstance(matrix_ws, MatrixWorkspace))
     num_hists = matrix_ws.getNumberHistograms()
     num_bins = matrix_ws.blocksize()
-    self.assertEqual(num_hists, expected_hist,
-                     msg="Expected Number of Histograms: " + str(expected_hist)
-                         + "\nActual Number of Histograms: " + str(num_hists))
-    self.assertEqual(num_bins, expected_bins,
-                     msg="Expected Number of Bins: " + str(expected_bins)
-                         + "\nActual Number of Bins: " + str(num_bins))
+    self.assertEqual(
+        num_hists,
+        expected_hist,
+        msg="Expected Number of Histograms: " + str(expected_hist) + "\nActual Number of Histograms: " + str(num_hists),
+    )
+    self.assertEqual(
+        num_bins, expected_bins, msg="Expected Number of Bins: " + str(expected_bins) + "\nActual Number of Bins: " + str(num_bins)
+    )
 
 
 def _validate_table_workspace(self, table_ws, expected_rows, expected_columns):
@@ -575,12 +588,14 @@ def _validate_table_workspace(self, table_ws, expected_rows, expected_columns):
     self.assertTrue(isinstance(table_ws, ITableWorkspace))
     num_rows = table_ws.rowCount()
     num_columns = table_ws.columnCount()
-    self.assertEqual(num_rows, expected_rows,
-                     msg="Expected Number of Rows: " + str(expected_rows)
-                         + "\nActual Number of Rows: " + str(num_rows))
-    self.assertEqual(num_columns, expected_columns,
-                     msg="Expected Number of Columns: " + str(expected_columns)
-                         + "\nActual Number of Columns: " + str(num_columns))
+    self.assertEqual(
+        num_rows, expected_rows, msg="Expected Number of Rows: " + str(expected_rows) + "\nActual Number of Rows: " + str(num_rows)
+    )
+    self.assertEqual(
+        num_columns,
+        expected_columns,
+        msg="Expected Number of Columns: " + str(expected_columns) + "\nActual Number of Columns: " + str(num_columns),
+    )
 
 
 # =======================================Values===========================================
@@ -595,12 +610,21 @@ def _validate_table_values_top_to_bottom(self, table_ws, expected_values, tolera
                            that value will not be tested.
     """
     for i in range(0, len(expected_values)):
-        if expected_values[i] != 'skip':
+        if expected_values[i] != "skip":
             tolerance_value = expected_values[i] * tolerance
             abs_difference = abs(expected_values[i] - table_ws.cell(i, 1))
-            self.assertLessEqual(abs_difference, abs(tolerance_value),
-                                 msg="Expected Value in Cell " + str(i) + ": " + str(expected_values[i])
-                                     + "\nActual Value in Cell " + str(i) + ": " + str(table_ws.cell(i, 1)))
+            self.assertLessEqual(
+                abs_difference,
+                abs(tolerance_value),
+                msg="Expected Value in Cell "
+                + str(i)
+                + ": "
+                + str(expected_values[i])
+                + "\nActual Value in Cell "
+                + str(i)
+                + ": "
+                + str(table_ws.cell(i, 1)),
+            )
 
 
 # pylint: disable=too-many-arguments
@@ -620,7 +644,9 @@ def _validate_matrix_peak_height(self, matrix_ws, expected_height, expected_bin,
     peak_bin = np.argmax(y_data)
     tolerance_value = expected_height * tolerance
     abs_difference = abs(expected_height - peak_height)
-    self.assertLessEqual(abs_difference, abs(tolerance_value),
-                         msg="abs({:.6f} - {:.6f}) > {:.6f}".format(expected_height,peak_height, tolerance_value))
-    self.assertTrue(abs(peak_bin - expected_bin) <= bin_tolerance,
-                    msg="abs({:.6f} - {:.6f}) > {:.6f}".format(peak_bin, expected_bin, bin_tolerance))
+    self.assertLessEqual(
+        abs_difference, abs(tolerance_value), msg="abs({:.6f} - {:.6f}) > {:.6f}".format(expected_height, peak_height, tolerance_value)
+    )
+    self.assertTrue(
+        abs(peak_bin - expected_bin) <= bin_tolerance, msg="abs({:.6f} - {:.6f}) > {:.6f}".format(peak_bin, expected_bin, bin_tolerance)
+    )

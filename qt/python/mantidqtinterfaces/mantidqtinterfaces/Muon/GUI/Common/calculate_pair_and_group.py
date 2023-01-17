@@ -31,8 +31,9 @@ def calculate_pair_data(pair: MuonPair, forward_group: str, backward_group: str,
 def estimate_group_asymmetry_data(context, group, run, workspace_name, unormalised_workspace_name, periods):
     params = _get_EstimateMuonAsymmetryFromCounts_parameters(context, group, run, periods)
     params["InputWorkspace"] = workspace_name.replace("Asymmetry", "Counts")
-    group_asymmetry, group_asymmetry_unnorm = \
-        algorithm_utils.run_EstimateMuonAsymmetryFromCounts(params, workspace_name, unormalised_workspace_name)
+    group_asymmetry, group_asymmetry_unnorm = algorithm_utils.run_EstimateMuonAsymmetryFromCounts(
+        params, workspace_name, unormalised_workspace_name
+    )
 
     return group_asymmetry, group_asymmetry_unnorm
 
@@ -53,20 +54,19 @@ def _get_pre_processing_params(context, run, rebin):
     pre_process_params = {}
 
     try:
-        if context.gui_context['FirstGoodDataFromFile']:
+        if context.gui_context["FirstGoodDataFromFile"]:
             time_min = context.data_context.get_loaded_data_for_run(run)["FirstGoodData"]
         else:
-            time_min = context.gui_context['FirstGoodData']
+            time_min = context.gui_context["FirstGoodData"]
         pre_process_params["TimeMin"] = time_min
     except KeyError:
         pass
 
     try:
-        if context.gui_context['TimeZeroFromFile']:
+        if context.gui_context["TimeZeroFromFile"]:
             time_offset = 0.0
         else:
-            time_offset = context.data_context.get_loaded_data_for_run(run)["TimeZero"] - context.gui_context[
-                'TimeZero']
+            time_offset = context.data_context.get_loaded_data_for_run(run)["TimeZero"] - context.gui_context["TimeZero"]
         pre_process_params["TimeOffset"] = time_offset
     except KeyError:
         pass
@@ -75,8 +75,7 @@ def _get_pre_processing_params(context, run, rebin):
         _setup_rebin_options(context, pre_process_params, run)
 
     try:
-        dead_time_table = context.corrections_context.current_dead_time_table_name_for_run(
-            context.data_context.instrument, run)
+        dead_time_table = context.corrections_context.current_dead_time_table_name_for_run(context.data_context.instrument, run)
         if dead_time_table is not None:
             pre_process_params["DeadTimeTable"] = dead_time_table
     except KeyError:
@@ -89,15 +88,16 @@ def _get_pre_processing_params(context, run, rebin):
 
 def _setup_rebin_options(context, pre_process_params, run):
     try:
-        if context.gui_context['RebinType'] == 'Variable' and context.gui_context["RebinVariable"]:
+        if context.gui_context["RebinType"] == "Variable" and context.gui_context["RebinVariable"]:
             pre_process_params["RebinArgs"] = context.gui_context["RebinVariable"]
     except KeyError:
         pass
 
     try:
-        if context.gui_context['RebinType'] == 'Fixed' and context.gui_context["RebinFixed"]:
-            x_data = context.data_context._loaded_data.get_data(run=run, instrument=context.data_context.instrument
-                                                                )['workspace']['OutputWorkspace'][0].workspace.dataX(0)
+        if context.gui_context["RebinType"] == "Fixed" and context.gui_context["RebinFixed"]:
+            x_data = context.data_context._loaded_data.get_data(run=run, instrument=context.data_context.instrument)["workspace"][
+                "OutputWorkspace"
+            ][0].workspace.dataX(0)
             original_step = x_data[1] - x_data[0]
             pre_process_params["RebinArgs"] = float(context.gui_context["RebinFixed"]) * original_step
     except KeyError:
@@ -118,17 +118,17 @@ def _get_MuonGroupingCounts_parameters(group, periods):
 def _get_EstimateMuonAsymmetryFromCounts_parameters(context, group, run, periods):
     params = {}
 
-    if 'GroupRangeMin' in context.gui_context:
-        params['StartX'] = context.gui_context['GroupRangeMin']
+    if "GroupRangeMin" in context.gui_context:
+        params["StartX"] = context.gui_context["GroupRangeMin"]
     else:
-        params['StartX'] = context.data_context.get_loaded_data_for_run(run)["FirstGoodData"]
+        params["StartX"] = context.data_context.get_loaded_data_for_run(run)["FirstGoodData"]
 
-    if 'GroupRangeMax' in context.gui_context:
-        params['EndX'] = context.gui_context['GroupRangeMax']
+    if "GroupRangeMax" in context.gui_context:
+        params["EndX"] = context.gui_context["GroupRangeMax"]
     else:
-        params['EndX'] = max(context.data_context.get_loaded_data_for_run(run)['OutputWorkspace'][0].workspace.dataX(0))
+        params["EndX"] = max(context.data_context.get_loaded_data_for_run(run)["OutputWorkspace"][0].workspace.dataX(0))
 
-    params['OutputUnNormData'] = True
+    params["OutputUnNormData"] = True
 
     return params
 

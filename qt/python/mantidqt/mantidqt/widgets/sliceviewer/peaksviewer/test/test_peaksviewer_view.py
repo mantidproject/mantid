@@ -24,7 +24,7 @@ class PeaksViewerViewTest(unittest.TestCase):
         npeaks = 5
         peaks_ws = WorkspaceCreationHelper.createPeaksWorkspace(npeaks)
         view = PeaksViewerView(None, None)
-        model = PeaksViewerModel(peaks_ws, fg_color='r', bg_color='w')
+        model = PeaksViewerModel(peaks_ws, fg_color="r", bg_color="w")
         presenter = PeaksViewerPresenter(model, view)
         table_view = view.table_view
         table_model = table_view.model()
@@ -37,16 +37,15 @@ class PeaksViewerViewTest(unittest.TestCase):
 
             self.assertEqual(npeaks, view.table_view.rowCount())
             # assert sort has happened
-            col_values = [
-                table_model.index(i, column_index).data(PeaksWorkspaceDataPresenter.DATA_SORT_ROLE)
-                for i in range(npeaks)
-            ]
-            self.assertTrue(all(col_values[i + 1] < col_values[i] for i in range(npeaks - 1)),
-                            msg="TOF values have not been sorted into descending order")
+            col_values = [table_model.index(i, column_index).data(PeaksWorkspaceDataPresenter.DATA_SORT_ROLE) for i in range(npeaks)]
+            self.assertTrue(
+                all(col_values[i + 1] < col_values[i] for i in range(npeaks - 1)),
+                msg="TOF values have not been sorted into descending order",
+            )
 
         view.close()
         del presenter
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

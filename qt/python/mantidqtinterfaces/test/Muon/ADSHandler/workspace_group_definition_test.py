@@ -6,8 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_group_definition import check_not_in_group,\
-        safe_to_add_to_group, add_list_to_group, add_to_group
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_group_definition import (
+    check_not_in_group,
+    safe_to_add_to_group,
+    add_list_to_group,
+    add_to_group,
+)
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import make_group, retrieve_ws
 from mantid.api import AnalysisDataService as ADS
 from mantid import simpleapi
@@ -18,8 +22,8 @@ def create_workspace(name):
     alg.initialize()
     alg.setAlwaysStoreInADS(True)
     alg.setLogging(False)
-    alg.setProperty("dataX", [0,1])
-    alg.setProperty("dataY", [0,1])
+    alg.setProperty("dataX", [0, 1])
+    alg.setProperty("dataY", [0, 1])
     alg.setProperty("OutputWorkspace", name)
     alg.execute()
     return retrieve_ws(name)
@@ -36,9 +40,8 @@ def create_table_workspace(name):
 
 
 class WorkspaceGroupDefinitionTest(unittest.TestCase):
-
     def setUp(self):
-        self.assertEqual(ADS.getObjectNames(),[])
+        self.assertEqual(ADS.getObjectNames(), [])
 
     def tearDown(self):
         ADS.clear()
@@ -59,7 +62,7 @@ class WorkspaceGroupDefinitionTest(unittest.TestCase):
         instrument = "MUSR"
         extension = "MA"
 
-        ws = create_workspace(instrument+"test"+extension)
+        ws = create_workspace(instrument + "test" + extension)
         tmp = create_workspace("dummy")
         make_group([tmp], "group")
         # get the group
@@ -71,7 +74,7 @@ class WorkspaceGroupDefinitionTest(unittest.TestCase):
         instrument = "MUSR"
         extension = "MA"
 
-        ws = create_workspace("EMU"+"test"+extension)
+        ws = create_workspace("EMU" + "test" + extension)
         tmp = create_workspace("dummy")
         make_group([tmp], "group")
         # get the group
@@ -83,9 +86,9 @@ class WorkspaceGroupDefinitionTest(unittest.TestCase):
         instrument = "MUSR"
         extension = "MA"
 
-        ws = create_workspace(instrument+"test"+extension)
+        ws = create_workspace(instrument + "test" + extension)
         tmp = create_workspace("dummy")
-        make_group([tmp,ws], "group")
+        make_group([tmp, ws], "group")
         # get the group
         group = retrieve_ws("group")
 
@@ -95,7 +98,7 @@ class WorkspaceGroupDefinitionTest(unittest.TestCase):
         instrument = "MUSR"
         extension = "MA"
 
-        ws = create_workspace(instrument+"test"+"FD")
+        ws = create_workspace(instrument + "test" + "FD")
         tmp = create_workspace("dummy")
         make_group([tmp], "group")
         # get the group
@@ -126,16 +129,16 @@ class WorkspaceGroupDefinitionTest(unittest.TestCase):
         instrument = "MUSR"
         extension = "MA"
         run = "62260"
-        ws = create_workspace(instrument+run+"fwd"+extension)
-        ws2 = create_workspace(instrument+run+"bwd"+extension)
-        _ = create_workspace("EMU"+run+"fwd"+extension)
-        _ = create_workspace(instrument+run+"fwd"+"FD")
+        ws = create_workspace(instrument + run + "fwd" + extension)
+        ws2 = create_workspace(instrument + run + "bwd" + extension)
+        _ = create_workspace("EMU" + run + "fwd" + extension)
+        _ = create_workspace(instrument + run + "fwd" + "FD")
         # there was a bug that meant tables didnt work
-        table_name = create_table_workspace(instrument+run+"table"+extension)
+        table_name = create_table_workspace(instrument + run + "table" + extension)
 
         add_to_group(instrument, extension)
 
-        group = retrieve_ws(instrument+run)
+        group = retrieve_ws(instrument + run)
         expected = [ws.name(), ws2.name(), table_name]
 
         self.assertEqual(len(group.getNames()), len(expected))
@@ -148,19 +151,19 @@ class WorkspaceGroupDefinitionTest(unittest.TestCase):
         extension = "MA"
         run = "62260"
         run2 = "06226"
-        ws = create_workspace(instrument+run+"fwd"+extension)
-        ws2 = create_workspace(instrument+run+"bwd"+extension)
-        ws3 = create_workspace(instrument+run2+"fwd"+extension)
-        ws4 = create_workspace(instrument+run2+"bwd"+extension)
-        _ = create_workspace("EMU"+run+"fwd"+extension)
-        _ = create_workspace(instrument+run+"fwd"+"FD")
+        ws = create_workspace(instrument + run + "fwd" + extension)
+        ws2 = create_workspace(instrument + run + "bwd" + extension)
+        ws3 = create_workspace(instrument + run2 + "fwd" + extension)
+        ws4 = create_workspace(instrument + run2 + "bwd" + extension)
+        _ = create_workspace("EMU" + run + "fwd" + extension)
+        _ = create_workspace(instrument + run + "fwd" + "FD")
         # there was a bug that meant tables didnt work
-        table_name = create_table_workspace(instrument+run+"table"+extension)
+        table_name = create_table_workspace(instrument + run + "table" + extension)
 
         add_to_group(instrument, extension)
 
         # check run
-        group = retrieve_ws(instrument+run)
+        group = retrieve_ws(instrument + run)
         expected = [ws.name(), ws2.name(), table_name]
 
         self.assertEqual(len(group.getNames()), len(expected))
@@ -169,7 +172,7 @@ class WorkspaceGroupDefinitionTest(unittest.TestCase):
             expected.remove(name)
 
         # check run2
-        group = retrieve_ws(instrument+run2)
+        group = retrieve_ws(instrument + run2)
         expected = [ws3.name(), ws4.name()]
 
         self.assertEqual(len(group.getNames()), len(expected))
@@ -181,17 +184,17 @@ class WorkspaceGroupDefinitionTest(unittest.TestCase):
         instrument = "MUSR"
         extension = "MA"
         run = "62260"
-        ws = create_workspace(instrument+run+"fwd"+extension)
-        ws2 = create_workspace(instrument+run+"bwd"+extension)
-        _ = create_workspace("EMU"+run+"fwd"+extension)
-        _ = create_workspace(instrument+run+"fwd"+"FD")
+        ws = create_workspace(instrument + run + "fwd" + extension)
+        ws2 = create_workspace(instrument + run + "bwd" + extension)
+        _ = create_workspace("EMU" + run + "fwd" + extension)
+        _ = create_workspace(instrument + run + "fwd" + "FD")
         # there was a bug that meant tables didnt work
-        table_name = create_table_workspace(instrument+run+"table"+extension)
+        table_name = create_table_workspace(instrument + run + "table" + extension)
 
         make_group([ws2], "group")
         add_to_group(instrument, extension)
 
-        group = retrieve_ws(instrument+run)
+        group = retrieve_ws(instrument + run)
         expected = [ws.name(), table_name]
 
         self.assertEqual(len(group.getNames()), len(expected))
@@ -200,5 +203,5 @@ class WorkspaceGroupDefinitionTest(unittest.TestCase):
             expected.remove(name)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

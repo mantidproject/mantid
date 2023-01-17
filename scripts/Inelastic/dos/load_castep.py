@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=redefined-builtin
+# pylint: disable=redefined-builtin
 import re
 import numpy as np
 
@@ -29,7 +29,7 @@ def parse_castep_file(file_name, ir_or_raman):
     block_count = 0
     frequencies, ir_intensities, raman_intensities, weights, q_vectors, bonds = [], [], [], [], [], []
     data_lists = (frequencies, ir_intensities, raman_intensities)
-    with open(file_name, 'rU') as f_handle:
+    with open(file_name, "rU") as f_handle:
         file_data.update(_parse_castep_file_header(f_handle))
 
         while True:
@@ -50,7 +50,7 @@ def parse_castep_file(file_name, ir_or_raman):
                 _find_castep_freq_block(f_handle, data_regex)
 
                 # Parse block of frequencies
-                for line_data in _parse_castep_freq_block(f_handle, file_data['num_branches'], ir_or_raman):
+                for line_data in _parse_castep_freq_block(f_handle, file_data["num_branches"], ir_or_raman):
                     for data_list, item in zip(data_lists, line_data):
                         data_list.append(item)
 
@@ -62,22 +62,25 @@ def parse_castep_file(file_name, ir_or_raman):
     frequencies = np.asarray(frequencies)
     ir_intensities = np.asarray(ir_intensities)
     raman_intensities = np.asarray(raman_intensities)
-    warray = np.repeat(weights, file_data['num_branches'])
+    warray = np.repeat(weights, file_data["num_branches"])
 
-    file_data.update({
-        'frequencies': frequencies,
-        'ir_intensities': ir_intensities,
-        'raman_intensities': raman_intensities,
-        'weights': warray,
-        'q_vectors':q_vectors
-        })
+    file_data.update(
+        {
+            "frequencies": frequencies,
+            "ir_intensities": ir_intensities,
+            "raman_intensities": raman_intensities,
+            "weights": warray,
+            "q_vectors": q_vectors,
+        }
+    )
 
     if len(bonds) > 0:
-        file_data['bonds'] = bonds
+        file_data["bonds"] = bonds
 
     return file_data
 
-#----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
 
 
 def _parse_castep_file_header(f_handle):
@@ -95,16 +98,17 @@ def _parse_castep_file_header(f_handle):
         if not line:
             raise IOError("Could not find any header information.")
 
-        if 'Total number of ions in cell =' in line:
-            file_data['num_ions'] = int(line.strip().split()[-1])
-        elif 'Total number of species in cell = ' in line:
+        if "Total number of ions in cell =" in line:
+            file_data["num_ions"] = int(line.strip().split()[-1])
+        elif "Total number of species in cell = " in line:
             num_species = int(line.strip().split()[-1])
 
-        if num_species > 0 and file_data['num_ions'] > 0:
-            file_data['num_branches'] = num_species * file_data['num_ions']
+        if num_species > 0 and file_data["num_ions"] > 0:
+            file_data["num_branches"] = num_species * file_data["num_ions"]
             return file_data
 
-#----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
 
 
 def _parse_castep_freq_block(f_handle, num_branches, ir_or_raman):
@@ -124,7 +128,7 @@ def _parse_castep_freq_block(f_handle, num_branches, ir_or_raman):
         intensities = []
         for value, active in zip(intensity_data[::2], intensity_data[1::2]):
             if ir_or_raman:
-                if active == 'N' and value != 0:
+                if active == "N" and value != 0:
                     value = 0.0
             intensities.append(value)
 
@@ -133,7 +137,8 @@ def _parse_castep_freq_block(f_handle, num_branches, ir_or_raman):
         yield line_data
 
 
-#----------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+
 
 def _find_castep_freq_block(f_handle, data_regex):
     """
@@ -154,7 +159,8 @@ def _find_castep_freq_block(f_handle, data_regex):
             f_handle.seek(pos)
             return
 
-#----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
 
 
 def _parse_castep_bond(bond_match):
@@ -166,11 +172,12 @@ def _parse_castep_bond(bond_match):
     """
     bond = dict()
 
-    bond['atom_a'] = (bond_match.group(1), int(bond_match.group(2)))
-    bond['atom_b'] = (bond_match.group(3), int(bond_match.group(4)))
-    bond['population'] = float(bond_match.group(5))
-    bond['length'] = float(bond_match.group(6))
+    bond["atom_a"] = (bond_match.group(1), int(bond_match.group(2)))
+    bond["atom_b"] = (bond_match.group(3), int(bond_match.group(4)))
+    bond["population"] = float(bond_match.group(5))
+    bond["length"] = float(bond_match.group(6))
 
     return bond
 
-#----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------

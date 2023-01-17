@@ -26,7 +26,7 @@ def deprecated_alias(deprecation_date):  # decorator factory
     try:
         parse_date(deprecation_date)
     except ValueError:
-        logger.error(f'Alias deprecation date {deprecation_date} must be in ISO8601 format')
+        logger.error(f"Alias deprecation date {deprecation_date} must be in ISO8601 format")
 
     def decorator_instance(cls):
         cls_aliasDeprecated = cls.aliasDeprecated
@@ -52,7 +52,7 @@ def deprecated_algorithm(new_name, deprecation_date):  # decorator factory
     try:
         parse_date(deprecation_date)
     except ValueError:
-        logger.error(f'Algorithm deprecation date {deprecation_date} must be in ISO8601 format')
+        logger.error(f"Algorithm deprecation date {deprecation_date} must be in ISO8601 format")
 
     def decorator_instance(cls):
         depr_msg = f'Algorithm "{cls.__name__}" is deprecated since {deprecation_date}.'
@@ -65,7 +65,8 @@ def deprecated_algorithm(new_name, deprecation_date):  # decorator factory
         @functools.wraps(cls_category)
         def new_category(self):
             r"""Add the Deprecated category"""
-            return cls_category(self) + ';Deprecated'
+            return cls_category(self) + ";Deprecated"
+
         cls.category = new_category
 
         cls_PyExec = cls.PyExec
@@ -73,10 +74,12 @@ def deprecated_algorithm(new_name, deprecation_date):  # decorator factory
         @functools.wraps(cls_PyExec)
         def new_PyExec(self):
             r"""decorate PyExec to raise or log an error message"""
-            if ConfigService.Instance()['algorithms.deprecated'].lower() == 'raise':
+            if ConfigService.Instance()["algorithms.deprecated"].lower() == "raise":
                 raise RuntimeError(raise_msg)
             cls_PyExec(self)
             logger.error(depr_msg)  # show error after execution
+
         cls.PyExec = new_PyExec
         return cls
+
     return decorator_instance

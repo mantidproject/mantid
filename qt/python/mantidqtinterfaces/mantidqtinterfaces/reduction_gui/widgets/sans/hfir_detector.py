@@ -4,18 +4,20 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
-from qtpy.QtWidgets import (QFrame, QMessageBox)  # noqa
-from qtpy.QtGui import (QDoubleValidator)  # noqa
+# pylint: disable=invalid-name
+from qtpy.QtWidgets import QFrame, QMessageBox  # noqa
+from qtpy.QtGui import QDoubleValidator  # noqa
 import mantidqtinterfaces.reduction_gui.widgets.util as util
 import sys
 from reduction_gui.reduction.sans.hfir_detector_script import Detector
 from mantidqtinterfaces.reduction_gui.widgets.base_widget import BaseWidget
+
 try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
     from mantid.kernel import Logger
-    Logger("DetectorWidget").information('Using legacy ui importer')
+
+    Logger("DetectorWidget").information("Using legacy ui importer")
     from mantidplot import load_ui
 from mantid.api import AnalysisDataService
 from reduction_gui.reduction.scripter import execute_script
@@ -25,21 +27,31 @@ unicode = str
 
 class DetectorWidget(BaseWidget):
     """
-        Widget that presents the detector options to the user
+    Widget that presents the detector options to the user
     """
+
     _method_box = None
 
     ## Widget name
     name = "Detector"
 
-    def __init__(self, parent=None, state=None, settings=None, show_transmission=True, data_type=None,
-                 data_proxy=None, use_sample_dc=False, options_callback=None):
+    def __init__(
+        self,
+        parent=None,
+        state=None,
+        settings=None,
+        show_transmission=True,
+        data_type=None,
+        data_proxy=None,
+        use_sample_dc=False,
+        options_callback=None,
+    ):
         super(DetectorWidget, self).__init__(parent, state, settings, data_type, data_proxy=data_proxy)
 
         class DetFrame(QFrame):
             def __init__(self, parent=None):
                 QFrame.__init__(self, parent)
-                self.ui = load_ui(__file__, '../../../ui/sans/hfir_detector.ui', baseinstance=self)
+                self.ui = load_ui(__file__, "../../../ui/sans/hfir_detector.ui", baseinstance=self)
 
         self._content = DetFrame(self)
         self._layout.addWidget(self._content)
@@ -59,8 +71,8 @@ class DetectorWidget(BaseWidget):
 
     def initialize_content(self):
         """
-            Declare the validators and event connections for the
-            widgets loaded through the .ui file.
+        Declare the validators and event connections for the
+        widgets loaded through the .ui file.
         """
         # Validators
         self._content.x_pos_edit.setValidator(QDoubleValidator(self._content.x_pos_edit))
@@ -141,8 +153,7 @@ class DetectorWidget(BaseWidget):
 
     def _draw_patch(self):
         if self._has_instrument_view:
-            self.show_instrument(self._content.sensitivity_file_edit.text,
-                                 workspace=self.patch_ws, tab=2, reload=True, data_proxy=None)
+            self.show_instrument(self._content.sensitivity_file_edit.text, workspace=self.patch_ws, tab=2, reload=True, data_proxy=None)
 
     def _create_sensitivity(self):
         # Get patch information
@@ -153,7 +164,7 @@ class DetectorWidget(BaseWidget):
         try:
             reduction_table_ws = self.options_callback()
             filename = self._content.sensitivity_file_edit.text()
-            script  = "ComputeSensitivity(Filename='%s',\n" % filename
+            script = "ComputeSensitivity(Filename='%s',\n" % filename
             script += "                   ReductionProperties='%s',\n" % reduction_table_ws
             script += "                   OutputWorkspace='sensitivity',\n"
             script += "                   PatchWorkspace='%s')\n" % patch_ws
@@ -177,8 +188,8 @@ class DetectorWidget(BaseWidget):
 
     def set_state(self, state):
         """
-            Populate the UI elements with the data from the given state.
-            @param state: Transmission object
+        Populate the UI elements with the data from the given state.
+        @param state: Transmission object
         """
         popup_warning = ""
         # Beam finder
@@ -230,12 +241,12 @@ class DetectorWidget(BaseWidget):
         self._sensitivity_clicked(self._content.sensitivity_chk.isChecked())
         self._use_sample_center_changed(self._content.use_sample_center_checkbox.isChecked())
 
-        if len(popup_warning)>0:
+        if len(popup_warning) > 0:
             QMessageBox.warning(self, "Turn ON advanced interface", popup_warning)
 
     def get_state(self):
         """
-            Returns an object with the state of the interface
+        Returns an object with the state of the interface
         """
         m = Detector()
 
@@ -308,14 +319,14 @@ class DetectorWidget(BaseWidget):
 
     def _use_beam_finder_changed(self, is_checked):
         """
-            Call-back method for when the user toggles between using a
-            beam finder or setting the beam center by hand
+        Call-back method for when the user toggles between using a
+        beam finder or setting the beam center by hand
         """
         # Center by hand
         self._content.x_pos_edit.setEnabled(not is_checked)
         self._content.y_pos_edit.setEnabled(not is_checked)
-        #self._content.x_pos_label.setEnabled(not is_checked)
-        #self._content.y_pos_label.setEnabled(not is_checked)
+        # self._content.x_pos_label.setEnabled(not is_checked)
+        # self._content.y_pos_label.setEnabled(not is_checked)
 
         # Center computed
         self._content.direct_beam.setEnabled(is_checked)

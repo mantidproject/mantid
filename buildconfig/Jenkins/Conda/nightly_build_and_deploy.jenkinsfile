@@ -1,41 +1,43 @@
 // This script expects the following environment variables to be set by the Jenkins job:
-// GITHUB_USER_NAME - The name of the user, being used with pushing/pulling from conda-recipes
-// GITHUB_USER_EMAIL - The email of the user, being used with pushing/pulling from conda-recipes
-// GITHUB_TOKEN_CREDENTIAL_ID - The name of the credentials token in Jenkins that you want to use for cloning and pushing to the conda-recipes repo
+// GITHUB_USER_NAME - The name of the user, being used with pushing/pulling from git
+// GITHUB_USER_EMAIL - The email of the user, being used with pushing/pulling from git
+// GITHUB_TOKEN_CREDENTIAL_ID - The name of the credentials token in Jenkins that you want to use for cloning and pushing to the mantid repo
 // ANACONDA_TOKEN_CREDENTIAL_ID - The name of the credentials token in Jenkins that you want to use for publishing conda packages
 
 // Determine default values of parameters. Some are based on the branch.
 ANACONDA_CHANNEL_DEFAULT = 'mantid'
 GITHUB_RELEASES_REPO_DEFAULT = 'mantidproject/mantid'
-CONDA_RECIPES_BRANCH_NAME_DEFAULT = 'main'
 GIT_BRANCH = git_branch_name()
 switch(GIT_BRANCH) {
   case ['main', 'release-next']:
     PUBLISH_PACKAGES_DEFAULT = true
     PACKAGE_SUFFIX_DEFAULT = 'Nightly'
     ANACONDA_CHANNEL_LABEL_DEFAULT = 'nightly'
-    GITHUB_RELEASES_TAG_DEFAULT = 'nightly'
+    GITHUB_RELEASES_TAG_DEFAULT = ''
     PLATFORM_CHOICES = ['all']
     break
   default:
     PUBLISH_PACKAGES_DEFAULT = false
     PACKAGE_SUFFIX_DEFAULT = 'Unstable'
     ANACONDA_CHANNEL_LABEL_DEFAULT = 'unstable'
-    GITHUB_RELEASES_TAG_DEFAULT = 'unstable'
+    GITHUB_RELEASES_TAG_DEFAULT = ''
     PLATFORM_CHOICES = ['none', 'all', 'linux-64', 'win-64', 'osx-64']
     break
 }
 
+// conda-build can't copy a local source if the conda-bld directory is
+// also part of the source. Checkout to a subdirectory to avoid this.
+CHECKOUT_DIR = 'source'
+CISCRIPT_DIR = "${CHECKOUT_DIR}/buildconfig/Jenkins/Conda"
 pipeline {
   agent none
+  options { checkoutToSubdirectory(CHECKOUT_DIR) }
   parameters {
       // Check these match the PLATFORM matrix values below (without all).
       choice(name: 'BUILD_DEVEL', choices: PLATFORM_CHOICES,
               description: 'Choose a platform to build & test the developer configuration.')
       choice(name: 'BUILD_PACKAGE', choices: PLATFORM_CHOICES,
               description: 'Choose a platform to build just this standalone package')
-      string(name: 'CONDA_RECIPES_BRANCH_NAME', defaultValue: CONDA_RECIPES_BRANCH_NAME_DEFAULT,
-             description: 'The name of the conda-recipes branch to build')
       string(name: 'PACKAGE_SUFFIX', defaultValue: PACKAGE_SUFFIX_DEFAULT,
              description: 'A string to append to the standalone package name')
       booleanParam(name: 'PUBLISH_PACKAGES', defaultValue: PUBLISH_PACKAGES_DEFAULT,
@@ -47,18 +49,22 @@ pipeline {
       string(name: 'GITHUB_RELEASES_REPO', defaultValue: GITHUB_RELEASES_REPO_DEFAULT,
              description: 'The repository to house the release')
       string(name: 'GITHUB_RELEASES_TAG', defaultValue: GITHUB_RELEASES_TAG_DEFAULT,
-             description: 'The name of the tag for the release')
+             description: 'The name of the tag for the release. Use this only for release candidate builds.')
   }
   environment {
     WIN_BASH = "C:\\Program Files\\git\\bin\\bash.exe"
+    GIT_AUTHOR_NAME = "${GITHUB_USER_NAME}"
+    GIT_AUTHOR_EMAIL = "${GITHUB_USER_EMAIL}"
+    GIT_COMMITTER_NAME = "${GITHUB_USER_NAME}"
+    GIT_COMMITTER_EMAIL = "${GITHUB_USER_EMAIL}"
   }
   stages {
     // Store the git commit hash in an environment variable so that we can use
     // the same commit for all stages of the pipeline. This is perfomed by using
     // the following step at the start of each subsequent stage:
-    //   checkout scm: [$class: 'GitSCM', branches: [[name: "${GIT_SHA}"]]]
+    //   checkout scm: [$class: 'GitSCM', branches: [[name: "${GIT_SHA}"]], extensions: [[pruneTags: true]]]
     stage('Store git commit') {
-      agent any
+      agent { label 'linux-64' }
       steps {
         script {
           env.GIT_SHA = GIT_COMMIT
@@ -98,7 +104,7 @@ pipeline {
             agent { label "${PLATFORM}" }
             options { timestamps () }
             steps {
-              checkout scm: [$class: 'GitSCM', branches: [[name: "${GIT_SHA}"]]]
+              checkoutSource("${GIT_SHA}")
               build_and_test("${PLATFORM}")
             }
             post {
@@ -130,12 +136,12 @@ pipeline {
                 retry(3)
             }
             steps {
-              checkout scm: [$class: 'GitSCM', branches: [[name: "${GIT_SHA}"]]]
               // Clean up conda-bld before we start to avoid any
               // confusion with old packages
-               dir('conda-bld') {
+              dir('conda-bld') {
                  deleteDir()
-               }
+              }
+              checkoutSource("${GIT_SHA}")
               // Build the base set of packages (ones not required for mantidworkbench)
               // in parallel
               package_conda("${PLATFORM}", "base")
@@ -170,12 +176,12 @@ pipeline {
                 retry(3)
             }
             steps {
-              checkout scm: [$class: 'GitSCM', branches: [[name: "${GIT_SHA}"]]]
               // Clean up conda-bld before we start to avoid any
               // confusion with old packages
               dir('conda-bld') {
                 deleteDir()
               }
+              checkoutSource("${GIT_SHA}")
               // Copy base packages to build workbench
               copyArtifacts filter: "**/conda-bld/noarch/*.tar.bz2, **/conda-bld/${PLATFORM}/*.tar.bz2",
                 fingerprintArtifacts: true,
@@ -185,7 +191,7 @@ pipeline {
                 flatten: false
               package_conda("${PLATFORM}", "workbench")
               archive_conda_packages("${PLATFORM}", false)
-              package_standalone("${PLATFORM}")
+              package_standalone()
               archive_standalone_package("${PLATFORM}")
             }
           }
@@ -209,7 +215,7 @@ pipeline {
         GITHUB_TOKEN = credentials("${GITHUB_TOKEN_CREDENTIAL_ID}")
       }
       steps {
-        checkout scm: [$class: 'GitSCM', branches: [[name: "${GIT_SHA}"]]]
+        checkoutSource("${GIT_SHA}")
         // Conda first
         sh 'rm -fr ${WORKSPACE}/conda-packages'
         copyArtifacts filter: '**/conda-bld/**/*.tar.bz2',
@@ -218,8 +224,9 @@ pipeline {
           selector: specific('${BUILD_NUMBER}'),
           target: 'conda-packages',
           flatten: true
-        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/publish-to-anaconda\
-          ${WORKSPACE} ${ANACONDA_TOKEN} ${ANACONDA_CHANNEL} ${ANACONDA_CHANNEL_LABEL} ${WORKSPACE}/conda-packages/*.tar.bz2'
+        // Single quotes are required for token variables to avoid them leaking
+        sh "${CISCRIPT_DIR}/publish-to-anaconda ${WORKSPACE}" + ' ${ANACONDA_TOKEN} ' +\
+          "${ANACONDA_CHANNEL} ${ANACONDA_CHANNEL_LABEL} ${WORKSPACE}/conda-packages/*.tar.bz2"
         // Standalone packages next
         sh 'rm -fr ${WORKSPACE}/standalone-packages'
         copyArtifacts filter: '*.exe, *.dmg, *.tar.xz',
@@ -228,8 +235,8 @@ pipeline {
           selector: specific('${BUILD_NUMBER}'),
           target: 'standalone-packages',
           flatten: true
-        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/publish-to-github\
-          ${WORKSPACE} ${GITHUB_TOKEN} ${GITHUB_RELEASES_REPO} ${GITHUB_RELEASES_TAG} ${GIT_SHA} ${WORKSPACE}/standalone-packages/*'
+        sh "${CISCRIPT_DIR}/publish-to-github ${WORKSPACE}" + ' ${GITHUB_TOKEN} ' +\
+          "${GITHUB_RELEASES_REPO} ${generate_git_tag()} ${GIT_SHA} ${prerelease_option()} ${WORKSPACE}/standalone-packages/*"
       }
     }
     stage ('Delete old non-main packages from Anaconda') {
@@ -245,25 +252,9 @@ pipeline {
       options { timestamps () }
       environment { ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}") }
       steps {
-        checkout scm: [$class: 'GitSCM', branches: [[name: "${GIT_SHA}"]]]
-        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/delete-old-packages.sh\
-         ${WORKSPACE} ${ANACONDA_TOKEN} --channel mantid --label ${ANACONDA_CHANNEL_LABEL} mantid mantidqt mantiddocs mantidworkbench'
-      }
-    }
-    stage('Update conda-recipes') {
-      when {
-        beforeAgent true
-        beforeOptions true
-        expression { env.PUBLISH_PACKAGES == 'true' }
-      }
-      agent { label 'linux-64' }
-      environment {
-        GITHUB_TOKEN = credentials("${GITHUB_TOKEN_CREDENTIAL_ID}")
-        RECIPE_UPDATE_OPTIONS = recipe_update_options()
-      }
-      steps {
-        checkout scm: [$class: 'GitSCM', branches: [[name: "${GIT_SHA}"]]]
-        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/update-conda-recipes.sh ${GITHUB_TOKEN} ${GITHUB_USER_NAME} ${GITHUB_USER_EMAIL} ${RECIPE_UPDATE_OPTIONS}'
+        checkoutSource("${GIT_SHA}")
+        sh "${CISCRIPT_DIR}/delete-old-packages.sh ${WORKSPACE}" + ' ${ANACONDA_TOKEN} ' +\
+         "--channel mantid --label ${ANACONDA_CHANNEL_LABEL} mantid mantidqt mantiddocs mantidworkbench"
       }
     }
   }
@@ -283,33 +274,39 @@ def toUnixStylePath(path) {
   return path.replaceAll("\\\\", "/")
 }
 
+def checkoutSource(sha) {
+  dir(CHECKOUT_DIR) {
+    checkout scm: [$class: 'GitSCM', branches: [[name: sha]], extensions: [[$class: 'CleanCheckout', deleteUntrackedNestedRepositories: true], pruneTags(true)]]
+  }
+}
+
 def build_and_test(platform) {
-  buildscript_path = 'buildconfig/Jenkins/Conda/conda-buildscript'
+  buildscript_path = "${CISCRIPT_DIR}/conda-buildscript"
   common_args = '--clean-build --clean-external-projects --enable-systemtests'
   cmake_preset = "${platform}-ci"
   if(platform.startsWith('win')) {
     workspace_unix_style = toUnixStylePath("${WORKSPACE}")
-    bat "\"${WIN_BASH}\" -ex -c \"${workspace_unix_style}/${buildscript_path}\
-      ${workspace_unix_style} ${cmake_preset} ${common_args}\""
+    bat "\"${WIN_BASH}\" -ex -c \"${buildscript_path}\
+      ${workspace_unix_style}/${CHECKOUT_DIR} ${cmake_preset} ${common_args}\""
   } else {
-    sh "${WORKSPACE}/${buildscript_path} ${WORKSPACE} ${cmake_preset} ${common_args} --enable-doctests"
+    sh "${buildscript_path} ${WORKSPACE}/${CHECKOUT_DIR} ${cmake_preset} ${common_args} --enable-doctests"
   }
 }
 
 def publish_test_reports() {
   xunit thresholds: [failed(failureThreshold: '0')],
-  tools: [CTest(excludesPattern: '', pattern: 'build/Testing/**/*.xml', stopProcessingIfError: true)]
-  junit 'build/Testing/SystemTests/scripts/TEST-*.xml'
+    tools: [CTest(excludesPattern: '', pattern: "${CHECKOUT_DIR}/build/Testing/**/*.xml", stopProcessingIfError: true)]
+  junit "${CHECKOUT_DIR}/build/Testing/SystemTests/scripts/TEST-*.xml"
 }
 
 def package_conda(platform, base_or_workbench) {
-  packagescript_path = 'buildconfig/Jenkins/Conda/package-conda'
+  packagescript_path = "${CISCRIPT_DIR}/package-conda"
   if(platform.startsWith('win')) {
     workspace_unix_style = toUnixStylePath("${WORKSPACE}")
-    bat "\"${WIN_BASH}\" -ex -c \"${workspace_unix_style}/${packagescript_path}\
+    bat "\"${WIN_BASH}\" -ex -c \"${packagescript_path}\
       ${workspace_unix_style} ${package_conda_options(platform, base_or_workbench)}\""
   } else {
-    sh "${WORKSPACE}/${packagescript_path}\
+    sh "${packagescript_path}\
       ${WORKSPACE} ${package_conda_options(platform, base_or_workbench)}"
   }
 }
@@ -319,7 +316,7 @@ def package_conda_options(platform, base_or_workbench) {
   if(base_or_workbench == 'base') {
     docs_flags = ""
     if(platform.startsWith('linux')) {
-      docs_flags = '--build-docs'
+      docs_flags = "--build-docs"
     }
     package_flags = "--build-mantid --build-qt ${docs_flags}"
   }
@@ -327,32 +324,58 @@ def package_conda_options(platform, base_or_workbench) {
     package_flags = "--build-workbench"
   }
 
-  release_version = ""
-  if(PACKAGE_SUFFIX.trim() == '') {
-    release_version = ' --release-version'
-  }
-  package_options = "${package_flags} ${release_version} \
-    --build-current-branch --recipes-tag ${CONDA_RECIPES_BRANCH_NAME}"
+  package_options = "${package_flags} --git-tag ${generate_git_tag()}"
   return package_options.trim()
 }
 
-def package_standalone(platform) {
-  packagescript_path = 'buildconfig/Jenkins/Conda/package-standalone'
-  if(platform.startsWith('win')) {
-    workspace_unix_style = toUnixStylePath("${WORKSPACE}")
-    bat "\"${WIN_BASH}\" -ex -c \"${workspace_unix_style}/${packagescript_path} ${workspace_unix_style}\
-      ${package_standalone_options(platform)}\""
+def generate_git_tag() {
+  git_tag = ""
+  if(GITHUB_RELEASES_TAG.trim() != '') {
+    git_tag = "${GITHUB_RELEASES_TAG}"
+  }
+  else {
+    versionscript_path = "${CISCRIPT_DIR}/generate-version-number"
+    if(isUnix()) {
+      git_tag = sh(
+        script: "${versionscript_path}", returnStdout: true
+      ).trim()
+    } else {
+      workspace_unix_style = toUnixStylePath("${WORKSPACE}")
+      // @ suppresses the inclusion of the command itself in the output
+      // https://www.jenkins.io/doc/pipeline/steps/workflow-durable-task-step/#bat-windows-batch-script
+      git_tag = bat(script: "@\"${WIN_BASH}\" -ex -c \"${versionscript_path}\"", returnStdout: true).trim()
+    }
+  }
+  return git_tag
+}
+
+def package_standalone() {
+  packagescript_path = "${CISCRIPT_DIR}/package-standalone"
+  if(isUnix()) {
+    sh "${packagescript_path} ${WORKSPACE} ${package_standalone_options()}"
   } else {
-    sh "${WORKSPACE}/buildconfig/Jenkins/Conda/package-standalone ${WORKSPACE} ${package_standalone_options(platform)}"
+    workspace_unix_style = toUnixStylePath("${WORKSPACE}")
+    bat "\"${WIN_BASH}\" -ex -c \"${packagescript_path} ${workspace_unix_style}\
+      ${package_standalone_options()}\""
   }
 }
 
-def package_standalone_options(platform) {
+def package_standalone_options() {
   package_options = ""
   if(PACKAGE_SUFFIX.trim() != '') {
-      package_options += " --package-suffix ${PACKAGE_SUFFIX}"
+    package_options += " --package-suffix ${PACKAGE_SUFFIX}"
   }
   return package_options.trim()
+}
+
+// Determine whether this build should be marked as a prerelease on GitHub.
+def prerelease_option() {
+  prerelease_flag = ""
+  // If a tag has not been specified, we assume it's for a prerelease version.
+  if(GITHUB_RELEASES_TAG.trim() == '') {
+    prerelease_flag = "--prerelease"
+  }
+  return prerelease_flag
 }
 
 def archive_conda_packages(platform, allowEmpty) {
@@ -378,18 +401,10 @@ def archive_standalone_package(platform) {
       fingerprint: true,
       onlyIfSuccessful: true
   } else {
-    unstable("Unknown platform (${platform}) detected while archving standalone package. Archiving skipped.")
+    unstable("Unknown platform (${platform}) detected while archiving standalone package. Archiving skipped.")
   }
-}
-
-def recipe_update_options() {
-  recipe_options = "--recipes-tag ${CONDA_RECIPES_BRANCH_NAME}"
-  if(PACKAGE_SUFFIX.trim() == '') {
-    recipe_options += ' --release-version'
-  }
-  return recipe_options
 }
 
 def archive_ctest_log(){
-  archiveArtifacts artifacts: 'build/ctest_log/*.log', fingerprint: true
+  archiveArtifacts artifacts: "${CHECKOUT_DIR}/build/ctest_log/*.log", fingerprint: true
 }

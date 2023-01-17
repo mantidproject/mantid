@@ -16,10 +16,7 @@ import copy
 Peak width for detectors are constant between runs are defined below for each detector,
 data was extracted from run 2749
 """
-PEAK_WIDTH = {"Detector 1": [0.5, 1, 2.5],
-              "Detector 2": [0.5, 1, 3],
-              "Detector 3": [0.1, 0.5, 1.5],
-              "Detector 4": [0.1, 0.7, 1.5]}
+PEAK_WIDTH = {"Detector 1": [0.5, 1, 2.5], "Detector 2": [0.5, 1, 3], "Detector 3": [0.1, 0.5, 1.5], "Detector 4": [0.1, 0.7, 1.5]}
 
 NUMBER_OF_ELEMENTS_DISPLAYED = 3
 
@@ -27,28 +24,43 @@ NUMBER_OF_ELEMENTS_DISPLAYED = 3
 REFITTED_PEAKS_WS_SUFFIX = "_EA_refitted_peaks"
 PEAKS_WS_SUFFIX = "_EA_peaks"
 ERRORS_WS_SUFFIX = "_with_errors"
-MATCH_TABLE_WS_SUFFIXES = ["_EA_all_matches", "_EA_primary_matches", "_EA_secondary_matches",
-                           "_EA_all_matches_sorted_by_energy", "_EA_likelihood"]
+MATCH_TABLE_WS_SUFFIXES = [
+    "_EA_all_matches",
+    "_EA_primary_matches",
+    "_EA_secondary_matches",
+    "_EA_all_matches_sorted_by_energy",
+    "_EA_likelihood",
+]
 MATCH_GROUP_WS_SUFFIX = "_EA_matches"
 
 
-def find_peak_algorithm(workspace, spectrum_number, min_energy, max_energy, threshold, min_width,
-                        estimate_width, max_width):
-    FindPeaksAutomatic(InputWorkspace=retrieve_ws(workspace), SpectrumNumber=spectrum_number, StartXValue=min_energy,
-                       EndXValue=max_energy, AcceptanceThreshold=threshold,
-                       PeakPropertiesTableName=workspace + PEAKS_WS_SUFFIX,
-                       RefitPeakPropertiesTableName=workspace + REFITTED_PEAKS_WS_SUFFIX, MinPeakSigma=min_width,
-                       EstimatePeakSigma=estimate_width, MaxPeakSigma=max_width)
+def find_peak_algorithm(workspace, spectrum_number, min_energy, max_energy, threshold, min_width, estimate_width, max_width):
+    FindPeaksAutomatic(
+        InputWorkspace=retrieve_ws(workspace),
+        SpectrumNumber=spectrum_number,
+        StartXValue=min_energy,
+        EndXValue=max_energy,
+        AcceptanceThreshold=threshold,
+        PeakPropertiesTableName=workspace + PEAKS_WS_SUFFIX,
+        RefitPeakPropertiesTableName=workspace + REFITTED_PEAKS_WS_SUFFIX,
+        MinPeakSigma=min_width,
+        EstimatePeakSigma=estimate_width,
+        MaxPeakSigma=max_width,
+    )
 
 
 def peak_matching_algorithm(workspace, match_table_names):
-    PeakMatching(PeakTable=workspace + PEAKS_WS_SUFFIX, AllPeaks=match_table_names[0],
-                 PrimaryPeaks=match_table_names[1], SecondaryPeaks=match_table_names[2],
-                 SortedByEnergy=match_table_names[3], ElementLikelihood=match_table_names[4])
+    PeakMatching(
+        PeakTable=workspace + PEAKS_WS_SUFFIX,
+        AllPeaks=match_table_names[0],
+        PrimaryPeaks=match_table_names[1],
+        SecondaryPeaks=match_table_names[2],
+        SortedByEnergy=match_table_names[3],
+        ElementLikelihood=match_table_names[4],
+    )
 
 
 class EAAutoTabModel(object):
-
     def __init__(self, context):
         self.context = context
         self.table_entries = Queue()
@@ -74,9 +86,7 @@ class EAAutoTabModel(object):
     def handle_peak_algorithms(self, parameters):
         self.peak_algo_model = ThreadModelWrapper(lambda: self._run_peak_algorithms(parameters))
         self.peak_algo_thread = thread_model.ThreadModel(self.peak_algo_model)
-        self.peak_algo_thread.threadWrapperSetUp(self.handle_calculation_started,
-                                                 self.calculation_success,
-                                                 self.handle_calculation_error)
+        self.peak_algo_thread.threadWrapperSetUp(self.handle_calculation_started, self.calculation_success, self.handle_calculation_error)
         self.peak_algo_thread.start()
 
     def handle_calculation_started(self):

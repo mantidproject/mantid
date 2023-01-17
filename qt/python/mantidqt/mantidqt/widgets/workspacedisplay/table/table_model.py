@@ -21,6 +21,7 @@ class TableModel(QAbstractTableModel):
     This implementation loads rows of the table in batches
     More batches are loaded when the user scrolls down in the table
     """
+
     ITEM_CHANGED_INVALID_DATA_MESSAGE = "Error: Trying to set invalid data for the column."
     ITEM_CHANGED_UNKNOWN_ERROR_MESSAGE = "Unknown error occurred: {}"
 
@@ -117,8 +118,7 @@ class TableModel(QAbstractTableModel):
     def _update_row_batch_size(self):
         num_data_columns = self._data_model.get_number_of_columns()
         if num_data_columns > 0:
-            self._row_batch_size = max(int(BATCH_SIZE/num_data_columns),
-                                       MINIMUM_BATCH_SIZE_ROWS)
+            self._row_batch_size = max(int(BATCH_SIZE / num_data_columns), MINIMUM_BATCH_SIZE_ROWS)
         else:
             self._row_batch_size = MINIMUM_BATCH_SIZE_ROWS
 

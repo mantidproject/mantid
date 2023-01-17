@@ -10,15 +10,16 @@ from unittest import mock
 from mantid.api import FrameworkManager, FunctionFactory
 from mantid.simpleapi import CreateEmptyTableWorkspace
 from mantidqt.widgets.fitscriptgenerator import FittingMode
-from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import (X_FROM_FIT_RANGE,
-                                                                                                X_FROM_DATA_RANGE,
-                                                                                                X_FROM_CUSTOM)
+from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import (
+    X_FROM_FIT_RANGE,
+    X_FROM_DATA_RANGE,
+    X_FROM_CUSTOM,
+)
 from mantidqtinterfaces.Muon.GUI.Common.test_helpers.fitting_mock_setup import MockBasicFitting
 from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 
 class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
-
     @classmethod
     def setUpClass(cls):
         FrameworkManager.Instance()
@@ -193,8 +194,7 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
 
         self.presenter.enable_editing_notifier.notify_subscribers.assert_called_once_with()
         self.mock_presenter_get_fit_results.assert_called_once_with()
-        self.presenter.handle_fitting_finished.assert_called_once_with(self.fit_function, self.fit_status,
-                                                                       self.chi_squared)
+        self.presenter.handle_fitting_finished.assert_called_once_with(self.fit_function, self.fit_status, self.chi_squared)
         self.view.set_number_of_undos.assert_called_once_with(1)
         self.mock_view_plot_guess.assert_called_once_with(False)
         self.mock_model_plot_guess.assert_called_once_with(False)
@@ -233,9 +233,7 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
 
         self.mock_model_simultaneous_fitting_mode.assert_called_once_with()
         self.mock_model_dataset_names.assert_called_once_with()
-        self.presenter._open_fit_script_generator_interface.assert_called_once_with(self.dataset_names,
-                                                                                    FittingMode.SEQUENTIAL,
-                                                                                    fit_options)
+        self.presenter._open_fit_script_generator_interface.assert_called_once_with(self.dataset_names, FittingMode.SEQUENTIAL, fit_options)
 
     def test_that_handle_covariance_matrix_clicked_calls_the_expected_functions(self):
         ws = CreateEmptyTableWorkspace()
@@ -506,8 +504,7 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
         self.mock_model_current_dataset_index.assert_called_once_with()
 
         self.view.update_local_fit_status_and_chi_squared.assert_called_once_with(self.fit_status, self.chi_squared)
-        self.view.update_global_fit_status.assert_called_once_with([self.fit_status] * len(self.dataset_names),
-                                                                   self.current_dataset_index)
+        self.view.update_global_fit_status.assert_called_once_with([self.fit_status] * len(self.dataset_names), self.current_dataset_index)
 
     def test_that_update_start_and_end_x_in_view_from_model_will_update_the_start_and_end_x_in_the_view(self):
         self.presenter.update_start_and_end_x_in_view_from_model()
@@ -518,5 +515,5 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
         self.mock_view_end_x.assert_called_once_with(self.end_x)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

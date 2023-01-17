@@ -4,20 +4,22 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
-from qtpy.QtWidgets import (QFileDialog, QFrame)  # noqa
-from qtpy.QtGui import (QDoubleValidator, QIntValidator)  # noqa
+# pylint: disable=invalid-name
+from qtpy.QtWidgets import QFileDialog, QFrame  # noqa
+from qtpy.QtGui import QDoubleValidator, QIntValidator  # noqa
 from functools import partial
 from mantidqtinterfaces.reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.inelastic.dgs_sample_data_setup_script import SampleSetupScript
 from qtpy import PYQT4  # noqa
 import mantidqtinterfaces.reduction_gui.widgets.util as util
 import os
+
 try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
     from mantid.kernel import Logger
-    Logger("SampleSetupWidget").information('Using legacy ui importer')
+
+    Logger("SampleSetupWidget").information("Using legacy ui importer")
     from mantidplot import load_ui
 
 IS_IN_MANTIDPLOT = False
@@ -26,6 +28,7 @@ if PYQT4:
     try:
         import mantidqtpython
         from mantid.kernel import config
+
         IS_IN_MANTIDPLOT = True
     except:
         pass
@@ -33,8 +36,9 @@ if PYQT4:
 
 class SampleSetupWidget(BaseWidget):
     """
-        Widget that presents sample setup options to the user.
+    Widget that presents sample setup options to the user.
     """
+
     ## Widget name
     name = "Sample Setup"
 
@@ -44,7 +48,7 @@ class SampleSetupWidget(BaseWidget):
         class SamSetFrame(QFrame):
             def __init__(self, parent=None):
                 QFrame.__init__(self, parent)
-                self.ui = load_ui(__file__, '../../../ui/inelastic/dgs_sample_setup.ui', baseinstance=self)
+                self.ui = load_ui(__file__, "../../../ui/inelastic/dgs_sample_setup.ui", baseinstance=self)
 
         self._content = SamSetFrame(self)
         self._instrument_name = settings.instrument_name
@@ -102,10 +106,10 @@ class SampleSetupWidget(BaseWidget):
         self._content.sample_edit = mantidqtpython.MantidQt.API.FileFinderWidget()
         # Unfortunately, can only use live if default instrument = gui-set instrument
         if self._instrument_name == config.getInstrument().name():
-            self._content.sample_edit.setProperty("liveButton","Show")
-        self._content.sample_edit.setProperty("multipleFiles",True)
-        self._content.sample_edit.setProperty("algorithmAndProperty","Load|Filename")
-        self._content.sample_edit.setProperty("label",labeltext)
+            self._content.sample_edit.setProperty("liveButton", "Show")
+        self._content.sample_edit.setProperty("multipleFiles", True)
+        self._content.sample_edit.setProperty("algorithmAndProperty", "Load|Filename")
+        self._content.sample_edit.setProperty("label", labeltext)
         self._content.sample_edit.setLabelMinWidth(self._content.sample_label.minimumWidth())
         self._content.horizontalLayout.addWidget(self._content.sample_edit)
         self._content.horizontalLayout.addItem(spacer)
@@ -119,7 +123,7 @@ class SampleSetupWidget(BaseWidget):
 
     def _check_and_set_lineedit_content(self, lineedit, content):
         lineedit.setText(content)
-        util.set_valid(lineedit, not lineedit.text() == '')
+        util.set_valid(lineedit, not lineedit.text() == "")
 
     def _connect_validated_lineedit(self, ui_ctrl):
         call_back = partial(self._validate_edit, ctrl=ui_ctrl)
@@ -133,7 +137,7 @@ class SampleSetupWidget(BaseWidget):
 
     def _validate_edit(self, ctrl=None):
         is_valid = True
-        if "isValid" in dir(ctrl): # For mwRunFiles widget
+        if "isValid" in dir(ctrl):  # For mwRunFiles widget
             if not ctrl.isValid():
                 is_valid = False
         else:
@@ -162,10 +166,12 @@ class SampleSetupWidget(BaseWidget):
             self._content.grouping_edit.setText(fname)
 
     def _savedir_browse(self):
-        save_dir = QFileDialog.getExistingDirectory(self, "Output Directory - Choose a directory",
-                                                          os.path.expanduser('~'),
-                                                          QFileDialog.ShowDirsOnly
-                                                          | QFileDialog.DontResolveSymlinks)
+        save_dir = QFileDialog.getExistingDirectory(
+            self,
+            "Output Directory - Choose a directory",
+            os.path.expanduser("~"),
+            QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks,
+        )
         if not save_dir:
             return
         if isinstance(save_dir, tuple):
@@ -174,20 +180,18 @@ class SampleSetupWidget(BaseWidget):
 
     def set_state(self, state):
         """
-            Populate the UI elements with the data from the given state.
-            @param state: SampleSetupScript object
+        Populate the UI elements with the data from the given state.
+        @param state: SampleSetupScript object
         """
         if IS_IN_MANTIDPLOT:
             self._content.sample_edit.setUserInput(state.sample_file)
             self._content.sample_edit.liveButtonSetChecked(state.live_button)
         else:
-            self._check_and_set_lineedit_content(self._content.sample_edit,
-                                                 state.sample_file)
+            self._check_and_set_lineedit_content(self._content.sample_edit, state.sample_file)
         self._content.output_ws_edit.setText(state.output_wsname)
         self._content.detcal_edit.setText(state.detcal_file)
         if "SNS" != self._facility_name:
-            self._check_and_set_lineedit_content(self._content.ei_guess_edit,
-                                                 state.incident_energy_guess)
+            self._check_and_set_lineedit_content(self._content.ei_guess_edit, state.incident_energy_guess)
         self._content.use_ei_guess_chkbox.setChecked(state.use_ei_guess)
         self._content.tzero_guess_edit.setText(str(state.tzero_guess))
         self._content.monitor1_specid_edit.setText(str(state.monitor1_specid))
@@ -204,7 +208,7 @@ class SampleSetupWidget(BaseWidget):
 
     def get_state(self):
         """
-            Returns an object with the state of the interface
+        Returns an object with the state of the interface
         """
         s = SampleSetupScript(self._instrument_name)
         s.sample_file = self._content.sample_edit.text()
@@ -230,12 +234,12 @@ class SampleSetupWidget(BaseWidget):
 
     def live_button_widget(self):
         """
-            Returns a reference to the FileFinderWidget that contains the live button
-            (if using interface inside MantidPlot)
+        Returns a reference to the FileFinderWidget that contains the live button
+        (if using interface inside MantidPlot)
         """
         return self._livebuttonwidget
 
-    def live_button_toggled_actions(self,checked):
+    def live_button_toggled_actions(self, checked):
         if checked:
             self._old_ei_guess_state = self._content.use_ei_guess_chkbox.isChecked()
             self._content.use_ei_guess_chkbox.setChecked(True)

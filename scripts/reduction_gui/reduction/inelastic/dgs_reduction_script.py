@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 """
     Classes for each reduction step. Those are kept separately
     from the the interface class so that the DgsReduction class could
@@ -17,10 +17,11 @@ from reduction_gui.reduction.scripter import BaseReductionScripter
 
 class DgsReductionScripter(BaseReductionScripter):
     """
-        Organizes the set of reduction parameters that will be used to
-        create a reduction script. Parameters are organized by groups that
-        will each have their own UI representation.
+    Organizes the set of reduction parameters that will be used to
+    create a reduction script. Parameters are organized by groups that
+    will each have their own UI representation.
     """
+
     TOPLEVEL_WORKFLOWALG = "DgsReduction"
     WIDTH_END = "".join([" " for i in range(len(TOPLEVEL_WORKFLOWALG))])
     WIDTH = WIDTH_END + " "
@@ -30,8 +31,8 @@ class DgsReductionScripter(BaseReductionScripter):
 
     def to_script(self, file_name=None):
         """
-            Generate reduction script
-            @param file_name: name of the file to write the script to
+        Generate reduction script
+        @param file_name: name of the file to write the script to
         """
 
         for item in self._observers:
@@ -53,19 +54,19 @@ class DgsReductionScripter(BaseReductionScripter):
         script += "\n"
         script += 'DGS_input_data=Load("' + data_list + '")\n'
         script += "DGS_output_data=%s(\n" % DgsReductionScripter.TOPLEVEL_WORKFLOWALG
-        script += DgsReductionScripter.WIDTH + 'SampleInputWorkspace=DGS_input_data,\n'
+        script += DgsReductionScripter.WIDTH + "SampleInputWorkspace=DGS_input_data,\n"
         for item in self._observers:
             if item.state() is not None:
-                for subitem in str(item.state()).split('\n'):
+                for subitem in str(item.state()).split("\n"):
                     if len(subitem) and subitem.find("SampleInputFile") == -1 and subitem.find("OutputDirectory") == -1:
                         script += DgsReductionScripter.WIDTH + subitem + "\n"
                     elif len(subitem) and subitem.find("OutputDirectory") != -1:
-                        out_dir_line = subitem.strip(',') + "\n"
+                        out_dir_line = subitem.strip(",") + "\n"
         script += DgsReductionScripter.WIDTH_END + ")\n"
         script += "\n"
 
         if len(out_dir_line) == 0:
-            output_dir = mantid.config['defaultsave.directory']
+            output_dir = mantid.config["defaultsave.directory"]
             out_dir_line = 'OutputDirectory="%s"\n' % output_dir
 
         script += out_dir_line
@@ -74,16 +75,16 @@ class DgsReductionScripter(BaseReductionScripter):
         if len(filenames) == 1:
             script += "OutputFilename=os.path.join(OutputDirectory,DGS_output_data[0].getInstrument().getName()"
             script += "+str(DGS_output_data[0].getRunNumber())+'.nxs')\n"
-            script += 'SaveNexus(DGS_output_data[0],OutputFilename)\n'
+            script += "SaveNexus(DGS_output_data[0],OutputFilename)\n"
         else:
             script += "for i in range(" + str(len(filenames)) + "):\n"
             script += DgsReductionScripter.WIDTH
             script += "OutputFilename=os.path.join(OutputDirectory,DGS_output_data[0][i].getInstrument().getName()"
             script += "+str(DGS_output_data[0][i].getRunNumber())+'.nxs')\n"
-            script += DgsReductionScripter.WIDTH + 'SaveNexus(DGS_output_data[0][i],OutputFilename)\n'
+            script += DgsReductionScripter.WIDTH + "SaveNexus(DGS_output_data[0][i],OutputFilename)\n"
 
         if file_name is not None:
-            f = open(file_name, 'w')
+            f = open(file_name, "w")
             f.write(script)
             f.close()
 
@@ -91,27 +92,27 @@ class DgsReductionScripter(BaseReductionScripter):
 
     def to_live_script(self):
         """
-            Generate the script for live data reduction
+        Generate the script for live data reduction
         """
         # Need to construct Dgs call slightly differently: no line breaks & extract output workspace
         options = ""
         for item in self._observers:
             if item.state() is not None:
-                for subitem in str(item.state()).split('\n'):
+                for subitem in str(item.state()).split("\n"):
                     if len(subitem):
-                        if 'OutputWorkspace' in subitem:
+                        if "OutputWorkspace" in subitem:
                             output_workspace = subitem
                             options += "OutputWorkspace=output,"
                         else:
                             options += subitem
 
-        if '_spe' in output_workspace:
+        if "_spe" in output_workspace:
             output_workspace = 'OutputWorkspace="live_spe"'
 
         script = """StartLiveData(UpdateEvery='10',Instrument='"""
         script += self.instrument_name
         script += """',ProcessingScript='"""
-        script += DgsReductionScripter.TOPLEVEL_WORKFLOWALG + '('
+        script += DgsReductionScripter.TOPLEVEL_WORKFLOWALG + "("
         script += options
         script += ")"
 
@@ -122,8 +123,7 @@ class DgsReductionScripter(BaseReductionScripter):
         return script
 
     def to_batch(self):
-        """
-        """
+        """ """
         data_files = []
         for item in self._observers:
             state = item.state()
@@ -149,22 +149,22 @@ class DgsReductionScripter(BaseReductionScripter):
             script += "\n"
 
             if isinstance(data_file, list):
-                data_file = '+'.join(data_file)
+                data_file = "+".join(data_file)
             script += 'DGS_input_data=Load("' + data_file + '")\n'
             script += "DGS_output_data=%s(\n" % DgsReductionScripter.TOPLEVEL_WORKFLOWALG
-            script += DgsReductionScripter.WIDTH + 'SampleInputWorkspace=DGS_input_data,\n'
+            script += DgsReductionScripter.WIDTH + "SampleInputWorkspace=DGS_input_data,\n"
             for item in self._observers:
                 if item.state() is not None:
-                    for subitem in str(item.state()).split('\n'):
+                    for subitem in str(item.state()).split("\n"):
                         if len(subitem) and subitem.find("SampleInputFile") == -1 and subitem.find("OutputDirectory") == -1:
                             script += DgsReductionScripter.WIDTH + subitem + "\n"
                         elif len(subitem) and subitem.find("OutputDirectory") != -1:
-                            out_dir_line = subitem.strip(',') + "\n"
+                            out_dir_line = subitem.strip(",") + "\n"
             script += DgsReductionScripter.WIDTH_END + ")\n"
 
             script += "\n"
             if len(out_dir_line) == 0:
-                output_dir = mantid.config['defaultsave.directory']
+                output_dir = mantid.config["defaultsave.directory"]
                 out_dir_line = 'OutputDirectory="%s"\n' % output_dir
             script += out_dir_line
 
@@ -179,5 +179,5 @@ class DgsReductionScripter(BaseReductionScripter):
     def filenameParser(self, filename):
         alg = mantid.api.AlgorithmManager.createUnmanaged("Load")
         alg.initialize()
-        alg.setPropertyValue('Filename', str(filename))
-        return alg.getProperty('Filename').value
+        alg.setPropertyValue("Filename", str(filename))
+        return alg.getProperty("Filename").value

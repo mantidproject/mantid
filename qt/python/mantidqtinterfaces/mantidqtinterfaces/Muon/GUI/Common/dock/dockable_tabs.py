@@ -111,7 +111,7 @@ class DetachableTabWidget(QtWidgets.QTabWidget):
         self.detachedTabs[name] = detached_tab
 
     def determine_insert_position(self, name):
-        tabs_to_check = self.tab_order[self.tab_order.index(name) + 1:]
+        tabs_to_check = self.tab_order[self.tab_order.index(name) + 1 :]
         for tab in tabs_to_check:
             if tab in self.attached_tab_names:
                 return self.attached_tab_names.index(tab)
@@ -193,6 +193,7 @@ class DetachableTabWidget(QtWidgets.QTabWidget):
         can be re-attached by closing the dialog or by double clicking on its
         window frame.
         """
+
         onCloseSignal = QtCore.Signal(QtWidgets.QWidget, str, QtGui.QIcon)
         onDropSignal = QtCore.Signal(str, QtCore.QPoint)
 

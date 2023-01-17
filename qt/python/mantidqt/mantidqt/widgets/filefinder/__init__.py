@@ -12,5 +12,6 @@ from mantidqt.widgets.filefinderwidget import FileFinderWidget
 
 def FileFinder(*args, **kwargs):
     from warnings import warn
+
     warn("The name FileFinder is deprecated, please use FileFinderWidget instead.")
     return FileFinderWidget(*args, **kwargs)

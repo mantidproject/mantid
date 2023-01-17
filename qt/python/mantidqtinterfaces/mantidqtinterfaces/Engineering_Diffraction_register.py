@@ -7,8 +7,10 @@
 from mantidqt.project.decoderfactory import DecoderFactory
 from mantidqt.project.encoderfactory import EncoderFactory
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.engineering_diffraction import EngineeringDiffractionGui
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.engineering_diffraction_io import EngineeringDiffractionEncoder, \
-    EngineeringDiffractionDecoder
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.engineering_diffraction_io import (
+    EngineeringDiffractionEncoder,
+    EngineeringDiffractionDecoder,
+)
 
 
 def compatible_check_for_encoder(obj, _):

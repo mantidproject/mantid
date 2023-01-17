@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "DetectorTube.h"
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDetector.h"
@@ -34,14 +35,20 @@ class MANTIDQT_DIRECT_DLL IALFInstrumentModel {
 public:
   virtual ~IALFInstrumentModel() = default;
 
-  virtual std::optional<std::string> loadAndTransform(std::string const &filename) = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr loadAndNormalise(std::string const &filename) = 0;
+  virtual void generateLoadedWorkspace() = 0;
+
+  virtual void setSample(Mantid::API::MatrixWorkspace_sptr const &sample) = 0;
+  virtual void setVanadium(Mantid::API::MatrixWorkspace_sptr const &vanadium) = 0;
 
   virtual std::string loadedWsName() const = 0;
-  virtual std::size_t runNumber() const = 0;
 
-  virtual void setSelectedDetectors(Mantid::Geometry::ComponentInfo const &componentInfo,
-                                    std::vector<std::size_t> const &detectorIndices) = 0;
-  virtual std::vector<std::size_t> selectedDetectors() const = 0;
+  virtual std::size_t sampleRun() const = 0;
+  virtual std::size_t vanadiumRun() const = 0;
+
+  virtual bool setSelectedTubes(std::vector<DetectorTube> tubes) = 0;
+  virtual bool addSelectedTube(DetectorTube const &tube) = 0;
+  virtual std::vector<DetectorTube> selectedTubes() const = 0;
 
   virtual std::tuple<Mantid::API::MatrixWorkspace_sptr, std::vector<double>>
   generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::IInstrumentActor const &actor) const = 0;
@@ -52,19 +59,29 @@ class MANTIDQT_DIRECT_DLL ALFInstrumentModel final : public IALFInstrumentModel 
 public:
   ALFInstrumentModel();
 
-  std::optional<std::string> loadAndTransform(const std::string &filename) override;
+  Mantid::API::MatrixWorkspace_sptr loadAndNormalise(std::string const &filename) override;
+  void generateLoadedWorkspace() override;
+
+  void setSample(Mantid::API::MatrixWorkspace_sptr const &sample) override;
+  void setVanadium(Mantid::API::MatrixWorkspace_sptr const &vanadium) override;
 
   inline std::string loadedWsName() const noexcept override { return "ALFData"; };
-  std::size_t runNumber() const override;
 
-  void setSelectedDetectors(Mantid::Geometry::ComponentInfo const &componentInfo,
-                            std::vector<std::size_t> const &detectorIndices) override;
-  inline std::vector<std::size_t> selectedDetectors() const noexcept override { return m_detectorIndices; };
+  std::size_t sampleRun() const override;
+  std::size_t vanadiumRun() const override;
+
+  bool setSelectedTubes(std::vector<DetectorTube> tubes) override;
+  bool addSelectedTube(DetectorTube const &tube) override;
+  inline std::vector<DetectorTube> selectedTubes() const noexcept override { return m_tubes; };
 
   std::tuple<Mantid::API::MatrixWorkspace_sptr, std::vector<double>>
   generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::IInstrumentActor const &actor) const override;
 
 private:
+  std::size_t runNumber(Mantid::API::MatrixWorkspace_sptr const &workspace) const;
+
+  bool tubeExists(DetectorTube const &tube) const;
+
   void collectXAndYData(MantidQt::MantidWidgets::IInstrumentActor const &actor, std::vector<double> &x,
                         std::vector<double> &y, std::vector<double> &e, std::vector<double> &twoThetas) const;
   void collectAndSortYByX(std::map<double, double> &xy, std::map<double, double> &xe, std::vector<double> &twoThetas,
@@ -72,10 +89,12 @@ private:
                           Mantid::API::MatrixWorkspace_const_sptr const &workspace,
                           Mantid::Geometry::ComponentInfo const &componentInfo,
                           Mantid::Geometry::DetectorInfo const &detectorInfo) const;
-  std::size_t numberOfDetectorsPerTube(Mantid::Geometry::ComponentInfo const &componentInfo) const;
-  std::size_t numberOfTubes(MantidQt::MantidWidgets::IInstrumentActor const &actor) const;
 
-  std::vector<std::size_t> m_detectorIndices;
+  inline std::size_t numberOfTubes() const noexcept { return m_tubes.size(); }
+
+  Mantid::API::MatrixWorkspace_sptr m_sample;
+  Mantid::API::MatrixWorkspace_sptr m_vanadium;
+  std::vector<DetectorTube> m_tubes;
 };
 
 } // namespace CustomInterfaces

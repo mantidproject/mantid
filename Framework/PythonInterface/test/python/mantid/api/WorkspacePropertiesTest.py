@@ -9,19 +9,26 @@ property types
 """
 import unittest
 import testhelpers
-from mantid.api import (WorkspaceProperty, WorkspaceGroupProperty, MatrixWorkspaceProperty,
-                        IEventWorkspaceProperty, ITableWorkspaceProperty,
-                        IMDWorkspaceProperty, IMDHistoWorkspaceProperty, IMDEventWorkspaceProperty,
-                        PropertyMode, LockMode)
+from mantid.api import (
+    WorkspaceProperty,
+    WorkspaceGroupProperty,
+    MatrixWorkspaceProperty,
+    IEventWorkspaceProperty,
+    ITableWorkspaceProperty,
+    IMDWorkspaceProperty,
+    IMDHistoWorkspaceProperty,
+    IMDEventWorkspaceProperty,
+    PropertyMode,
+    LockMode,
+)
 from mantid.kernel import Direction, Property
 
 
 class WorkspacePropertiesTest(unittest.TestCase):
-
     def _do_test(self, classtype):
-       self.assertTrue(issubclass(WorkspaceGroupProperty, Property))
-       self._do_construction_with_name_default_direction(classtype)
-       self._do_construction_with_name_default_direction_optional(classtype)
+        self.assertTrue(issubclass(WorkspaceGroupProperty, Property))
+        self._do_construction_with_name_default_direction(classtype)
+        self._do_construction_with_name_default_direction_optional(classtype)
 
     def _do_construction_with_name_default_direction(self, classtype):
         prop = classtype("NoValidation", "test", Direction.Output)
@@ -70,6 +77,7 @@ class WorkspacePropertiesTest(unittest.TestCase):
 
     def test_IMDWorkspaceProperty_can_be_instantiated(self):
         self._do_test(IMDWorkspaceProperty)
+
 
 if __name__ == "__main__":
     unittest.main()

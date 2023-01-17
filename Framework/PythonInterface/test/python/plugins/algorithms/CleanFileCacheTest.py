@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,multiple-statements
+# pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,multiple-statements
 import unittest
 from mantid.kernel import *
 from mantid.api import *
@@ -16,10 +16,8 @@ import os, sys, hashlib, tempfile, glob, shutil, time
 
 
 class CleanFileCache(unittest.TestCase):
-
     def test1(self):
-        """CleanFileCache: simple test with two cache files and two normal files
-        """
+        """CleanFileCache: simple test with two cache files and two normal files"""
         # create a temporary directory with fake cache files
         # and other files
         cache_root = tempfile.mkdtemp()
@@ -44,7 +42,7 @@ class CleanFileCache(unittest.TestCase):
         # executed?
         # self.assertTrue(alg_test.isExecuted())
         # Verify ....
-        files_remained = glob.glob(os.path.join(cache_root, '*'))
+        files_remained = glob.glob(os.path.join(cache_root, "*"))
         try:
             self.assertEqual(set(files_remained), set(non_cache))
         finally:
@@ -53,8 +51,7 @@ class CleanFileCache(unittest.TestCase):
         return
 
     def test2(self):
-        """CleanFileCache: 'normal' files with 39 and 41-character filenames etc
-        """
+        """CleanFileCache: 'normal' files with 39 and 41-character filenames etc"""
         # create a temporary directory with fake cache files
         # and other files
         cache_root = tempfile.mkdtemp()
@@ -67,11 +64,12 @@ class CleanFileCache(unittest.TestCase):
         touch(cache1)
         touch(cache2)
         non_cache = [
-            os.path.join(cache_root, f) for f in [
-                'a' * 39 + ".nxs",
-                '0' * 41 + ".nxs",
-                'alpha_' + 'b' * 39 + ".nxs",
-                'beta_' + 'e' * 41 + ".nxs",
+            os.path.join(cache_root, f)
+            for f in [
+                "a" * 39 + ".nxs",
+                "0" * 41 + ".nxs",
+                "alpha_" + "b" * 39 + ".nxs",
+                "beta_" + "e" * 41 + ".nxs",
             ]
         ]
         for p in non_cache:
@@ -86,7 +84,7 @@ class CleanFileCache(unittest.TestCase):
         # executed?
         # self.assertTrue(alg_test.isExecuted())
         # Verify ....
-        files_remained = glob.glob(os.path.join(cache_root, '*'))
+        files_remained = glob.glob(os.path.join(cache_root, "*"))
         try:
             self.assertEqual(set(files_remained), set(non_cache))
         finally:
@@ -95,8 +93,7 @@ class CleanFileCache(unittest.TestCase):
         return
 
     def test3(self):
-        """CleanFileCache: "age" parameter
-        """
+        """CleanFileCache: "age" parameter"""
         age = 10
         # create a temporary directory with fake cache files
         # and other files
@@ -119,17 +116,18 @@ class CleanFileCache(unittest.TestCase):
         print(f"cache3={cache3}", flush=True)
         createFile(cache3, age + 1, display=True)
         non_cache = [
-            os.path.join(cache_root, f) for f in [
-                'a' * 39 + ".nxs",
-                '0' * 41 + ".nxs",
-                'alpha_' + 'b' * 39 + ".nxs",
-                'beta_' + 'e' * 41 + ".nxs",
+            os.path.join(cache_root, f)
+            for f in [
+                "a" * 39 + ".nxs",
+                "0" * 41 + ".nxs",
+                "alpha_" + "b" * 39 + ".nxs",
+                "beta_" + "e" * 41 + ".nxs",
             ]
         ]
         for p in non_cache:
             touch(p)
         print("Cache files:", flush=True)
-        print(glob.glob(os.path.join(cache_root, '*')), flush=True)
+        print(glob.glob(os.path.join(cache_root, "*")), flush=True)
         print(f"Time before running CleanFileCache algorithm: {time.time()}", flush=True)
 
         # Execute
@@ -141,7 +139,7 @@ class CleanFileCache(unittest.TestCase):
         # executed?
         # self.assertTrue(alg_test.isExecuted())
         # Verify ....
-        files_remained = glob.glob(os.path.join(cache_root, '*'))
+        files_remained = glob.glob(os.path.join(cache_root, "*"))
         try:
             self.assertEqual(set(files_remained), set(non_cache + [cache1]))
         finally:
@@ -167,10 +165,10 @@ def computeTime(daysbefore):
 
 
 def touch(f):
-    with open(f, 'w') as stream:
-        stream.write('\n')
+    with open(f, "w") as stream:
+        stream.write("\n")
     return
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -11,10 +11,10 @@ from mantid.geometry import Group, SpaceGroupFactory, PointGroupFactory, UnitCel
 
 class GroupTest(unittest.TestCase):
     def test_creationFromString(self):
-        group = Group('x,y,z')
+        group = Group("x,y,z")
         self.assertEqual(group.getOrder(), 1)
 
-        self.assertRaises(RuntimeError, Group, 'invalid')
+        self.assertRaises(RuntimeError, Group, "invalid")
 
     def test_creationFromVector(self):
         spaceGroup = SpaceGroupFactory.createSpaceGroup("P 63/m m c")
@@ -36,8 +36,8 @@ class GroupTest(unittest.TestCase):
         self.assertFalse(group.isGroup())
 
     def test_isInvariant_tolerance(self):
-        pg3barHex = PointGroupFactory.createPointGroup('-3')
-        pg3barRh = PointGroupFactory.createPointGroup('-3 r')
+        pg3barHex = PointGroupFactory.createPointGroup("-3")
+        pg3barRh = PointGroupFactory.createPointGroup("-3 r")
 
         cellHex = UnitCell(3, 3, 6, 90, 90, 120)
         cellRh = UnitCell(3, 3, 3, 75, 75, 75)
@@ -49,5 +49,5 @@ class GroupTest(unittest.TestCase):
         self.assertFalse(pg3barRh.isInvariant(cellHex.getG()))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -22,7 +22,6 @@ class MockFitInfo(object):
 
 @start_qapplication
 class PlotFreqFitPaneModelTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.context = setup_context(freq=True)
@@ -40,7 +39,7 @@ class PlotFreqFitPaneModelTest(unittest.TestCase):
         ws, indices = self.model.get_fit_workspace_and_indices(fit, False)
 
         self.assertEqual(ws, ["test", "unit"])
-        self.assertEqual(indices, [1,1])
+        self.assertEqual(indices, [1, 1])
 
     def test_get_fit_ws_and_indicies_with_diff(self):
         fit = MockFitInfo(["test", "unit"])
@@ -48,20 +47,20 @@ class PlotFreqFitPaneModelTest(unittest.TestCase):
         ws, indices = self.model.get_fit_workspace_and_indices(fit, True)
 
         self.assertEqual(ws, ["test", "test", "unit", "unit"])
-        self.assertEqual(indices, [1,2,1,2])
+        self.assertEqual(indices, [1, 2, 1, 2])
 
     def test_get_fft_label(self):
-        ws_name = 'FFT; Re MUSR62260; Pair Asym; long; FD_Re'
-        self.assertEqual(';FFT;Re', self.model._get_freq_label(ws_name))
+        ws_name = "FFT; Re MUSR62260; Pair Asym; long; FD_Re"
+        self.assertEqual(";FFT;Re", self.model._get_freq_label(ws_name))
 
     def test_get_maxent_label(self):
-        ws_name = 'MUSR62260_raw_data FD; MaxEnt'
-        self.assertEqual(';MaxEnt', self.model._get_freq_label(ws_name))
+        ws_name = "MUSR62260_raw_data FD; MaxEnt"
+        self.assertEqual(";MaxEnt", self.model._get_freq_label(ws_name))
 
     def test_get_label_when_not_fft_or_maxent(self):
-        ws_name = 'test'
-        self.assertEqual('', self.model._get_freq_label(ws_name))
+        ws_name = "test"
+        self.assertEqual("", self.model._get_freq_label(ws_name))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

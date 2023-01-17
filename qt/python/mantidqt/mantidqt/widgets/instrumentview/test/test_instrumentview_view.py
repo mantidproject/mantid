@@ -18,7 +18,6 @@ from mantidqt.utils.qt.testing import start_qapplication
 
 @start_qapplication
 class InstrumentViewManagerTest(unittest.TestCase):
-
     def test_presenter_close_called_correctly_on_view_close(self):
         """
         Check that the presenter's close function is called with the workspace name so that
@@ -31,5 +30,5 @@ class InstrumentViewManagerTest(unittest.TestCase):
         mock_presenter.close.assert_called_once_with(ws.name())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

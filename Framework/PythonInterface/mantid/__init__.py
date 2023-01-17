@@ -53,7 +53,7 @@ def _bin_dirs():
     yield os.path.dirname(sys.executable)
 
     # conda windows layout
-    yield os.path.join(os.path.dirname(sys.executable), 'Library', 'bin')
+    yield os.path.join(os.path.dirname(sys.executable), "Library", "bin")
 
     # iterate over the PYTHONPATH, to scan all possible bin dirs
     for path in sys.path:
@@ -70,8 +70,8 @@ for path in _bin_dirs():
 
 if _bindir is None:
     raise ImportError(
-        "Broken installation! Unable to find Mantid.properties file.\n"
-        "Directories searched: {}".format(', '.join(_bin_dirs())))
+        "Broken installation! Unable to find Mantid.properties file.\n" "Directories searched: {}".format(", ".join(_bin_dirs()))
+    )
 
 # Windows doesn't have rpath settings so make sure the C-extensions can find the rest of the
 # mantid dlls. We assume they will be next to the properties file.
@@ -94,12 +94,10 @@ except ImportError:
 import warnings as _warnings  # noqa: E402
 
 # Default we see everything
-_warnings.filterwarnings("default", category=DeprecationWarning,
-                         module="mantid.*")
+_warnings.filterwarnings("default", category=DeprecationWarning, module="mantid.*")
 # We can't do anything about numpy.oldnumeric being deprecated but
 # still used in other libraries, e.g scipy, so just ignore those
-_warnings.filterwarnings("ignore", category=DeprecationWarning,
-                         module="numpy.oldnumeric")
+_warnings.filterwarnings("ignore", category=DeprecationWarning, module="numpy.oldnumeric")
 
 ###############################################################################
 # Load all non-plugin subpackages that contain a C-extension. The boost.python
@@ -116,6 +114,6 @@ from mantid.api._aliases import *  # noqa: F401, E402
 
 # Make the version string and info accessible in the standard way
 from mantid.kernel import version_str as _version_str  # noqa: E402
-from mantid.kernel import version    # noqa: F401, E402
+from mantid.kernel import version  # noqa: F401, E402
 
 __version__ = _version_str()

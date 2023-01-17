@@ -22,13 +22,12 @@ from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_
 def pair_name():
     name = []
     for i in range(21):
-        name.append("pair_" + str(i+1))
+        name.append("pair_" + str(i + 1))
     return name
 
 
 @start_qapplication
 class AlphaTest(unittest.TestCase):
-
     def setUp(self):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
         self.obj = QWidget()
@@ -136,7 +135,7 @@ class AlphaTest(unittest.TestCase):
             self.view.pairing_table.setCurrentCell(0, 4)
             self.view.pairing_table.item(0, 4).setText(valid_alpha)
             # make presenter update
-            self.presenter.handle_data_change(0,4)
+            self.presenter.handle_data_change(0, 4)
             self.assertEqual(float(self.view.get_table_item_text(0, 4)), expected_alpha)
 
     def test_that_negative_alpha_is_not_allowed(self):
@@ -159,9 +158,10 @@ class AlphaTest(unittest.TestCase):
         self.view.pairing_table.cellWidget(1, 5).clicked.emit(True)
 
         self.assertEqual(self.presenter.guessAlphaNotifier.notify_subscribers.call_count, 1)
-        self.assertEqual(self.presenter.guessAlphaNotifier.notify_subscribers.call_args_list[0][0][0],
-                         ["pair_2", "my_group_0", "my_group_1"])
+        self.assertEqual(
+            self.presenter.guessAlphaNotifier.notify_subscribers.call_args_list[0][0][0], ["pair_2", "my_group_0", "my_group_1"]
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

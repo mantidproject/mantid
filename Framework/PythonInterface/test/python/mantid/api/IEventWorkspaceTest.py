@@ -8,8 +8,7 @@ import unittest
 
 from testhelpers import run_algorithm, can_be_instantiated, WorkspaceCreationHelper
 
-from mantid.api import (IEventWorkspace, IEventList, IWorkspaceProperty,
-                        AlgorithmManager)
+from mantid.api import IEventWorkspace, IEventList, IWorkspaceProperty, AlgorithmManager
 
 
 class IEventWorkspaceTest(unittest.TestCase):
@@ -20,8 +19,7 @@ class IEventWorkspaceTest(unittest.TestCase):
 
     def setUp(self):
         if self._test_ws is None:
-            self.__class__._test_ws = \
-              WorkspaceCreationHelper.createEventWorkspace2(self._npixels, self._nbins)
+            self.__class__._test_ws = WorkspaceCreationHelper.createEventWorkspace2(self._npixels, self._nbins)
 
     def test_that_it_cannot_be_directly_instantiated(self):
         self.assertFalse(can_be_instantiated(IEventWorkspace))
@@ -48,24 +46,24 @@ class IEventWorkspaceTest(unittest.TestCase):
         el = self._test_ws.getSpectrum(0)
         self.assertTrue(isinstance(el, IEventList))
         TofList = el.getTofs()
-        self.assertEqual(len(TofList), el.getNumberEvents()) #check length
-        self.assertAlmostEqual(TofList[0], 0.5) #first value
+        self.assertEqual(len(TofList), el.getNumberEvents())  # check length
+        self.assertAlmostEqual(TofList[0], 0.5)  # first value
 
     def test_event_list_getWeights(self):
         el = self._test_ws.getSpectrum(0)
         self.assertTrue(isinstance(el, IEventList))
         weightList = el.getWeights()
-        self.assertEqual(len(weightList), el.getNumberEvents()) #check length
-        self.assertAlmostEqual(weightList[0], 1.0) #first value
-        self.assertAlmostEqual(weightList[len(weightList)-1], 1.0) #last value
+        self.assertEqual(len(weightList), el.getNumberEvents())  # check length
+        self.assertAlmostEqual(weightList[0], 1.0)  # first value
+        self.assertAlmostEqual(weightList[len(weightList) - 1], 1.0)  # last value
 
     def test_event_list_getWeightErrors(self):
         el = self._test_ws.getSpectrum(0)
         self.assertTrue(isinstance(el, IEventList))
         weightErrorList = el.getWeightErrors()
-        self.assertEqual(len(weightErrorList), el.getNumberEvents()) #check length
-        self.assertAlmostEqual(weightErrorList[0], 1.0) #first value
-        self.assertAlmostEqual(weightErrorList[len(weightErrorList)-1], 1.0) #last value
+        self.assertEqual(len(weightErrorList), el.getNumberEvents())  # check length
+        self.assertAlmostEqual(weightErrorList[0], 1.0)  # first value
+        self.assertAlmostEqual(weightErrorList[len(weightErrorList) - 1], 1.0)  # last value
 
     def test_deprecated_getEventList(self):
         el = self._test_ws.getEventList(0)
@@ -73,5 +71,5 @@ class IEventWorkspaceTest(unittest.TestCase):
         self.assertEqual(el.getNumberEvents(), 200)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

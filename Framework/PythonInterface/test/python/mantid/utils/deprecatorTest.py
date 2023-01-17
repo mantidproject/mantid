@@ -21,14 +21,13 @@ import tempfile
 import unittest
 
 
-@deprecated_algorithm('MyNewAlg', '2020-12-25')
+@deprecated_algorithm("MyNewAlg", "2020-12-25")
 class MyOldAlg(PythonAlgorithm):
-
     def category(self):
-        return 'Inelastic\\Reduction'
+        return "Inelastic\\Reduction"
 
     def PyInit(self):
-        self.declareProperty('Meaning', 42, 'Assign a meaning to the Universe')
+        self.declareProperty("Meaning", 42, "Assign a meaning to the Universe")
 
     def PyExec(self):
         logger.notice(f'The meaning of the Universe is {self.getPropertyValue("Meaning")}')
@@ -51,7 +50,7 @@ class RedirectStdOut:
         self._stdout = sys.stdout
         sys.stdout = self._string_io = StringIO()
         # redirect log messages to log_file
-        self._config[self.CONFIG_KEY] = 'PythonStdoutChannel'
+        self._config[self.CONFIG_KEY] = "PythonStdoutChannel"
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -66,20 +65,20 @@ class DeprecatorTest(unittest.TestCase):
     @staticmethod
     def _exec_alg(log_type: str) -> str:
         config = ConfigService.Instance()
-        original_conf = config['algorithms.deprecated']
+        original_conf = config["algorithms.deprecated"]
         with RedirectStdOut() as log_file:
             alg = MyOldAlg()
             alg.initialize()
             alg.setProperty("Meaning", 42)
-            config['algorithms.deprecated'] = log_type
+            config["algorithms.deprecated"] = log_type
             alg.execute()
 
-        config['algorithms.deprecated'] = original_conf
+        config["algorithms.deprecated"] = original_conf
         return str(log_file)
 
     def test_deprecated_algorithm_raise(self):
         log_file = self._exec_alg("raise")
-        self.assertTrue('Error in execution of algorithm MyOldAlg' in log_file)
+        self.assertTrue("Error in execution of algorithm MyOldAlg" in log_file)
 
     def test_deprecated_algorithm_log(self):
         log_file = self._exec_alg("log")

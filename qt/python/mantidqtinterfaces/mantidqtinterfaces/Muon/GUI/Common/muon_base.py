@@ -35,7 +35,7 @@ class MuonRun(object):
         return isinstance(other, self.__class__) and other._runs == self._runs
 
     def __repr__(self):
-        return 'MuonRun({})'.format(self._runs)
+        return "MuonRun({})".format(self._runs)
 
     """
     We need to be able to hash this class so it can be used as
@@ -77,8 +77,7 @@ class MuonBase(object):
         if isinstance(new_workspace, MuonWorkspaceWrapper):
             self._workspace = new_workspace
         else:
-            raise AttributeError("Attempting to set workspace to type " + str(type(new_workspace))
-                                 + " but should be MuonWorkspaceWrapper")
+            raise AttributeError("Attempting to set workspace to type " + str(type(new_workspace)) + " but should be MuonWorkspaceWrapper")
 
     @property
     def name(self):
@@ -86,26 +85,18 @@ class MuonBase(object):
 
     def show_raw(self, run, name):
         run_object = MuonRun(run)
-        run_object not in self._workspace or self._workspace[run_object].show(
-            name)
+        run_object not in self._workspace or self._workspace[run_object].show(name)
 
     def show_rebin(self, run, name):
         run_object = MuonRun(run)
-        run_object not in self.workspace_rebin or self.workspace_rebin[run_object].show(
-            name)
+        run_object not in self.workspace_rebin or self.workspace_rebin[run_object].show(name)
 
-    def update_asymmetry_workspace(
-            self,
-            asymmetry_workspace,
-            run,
-            rebin=False):
+    def update_asymmetry_workspace(self, asymmetry_workspace, run, rebin=False):
         run_object = MuonRun(run)
         if not rebin:
-            self._workspace.update(
-                {run_object: MuonWorkspaceWrapper(asymmetry_workspace)})
+            self._workspace.update({run_object: MuonWorkspaceWrapper(asymmetry_workspace)})
         else:
-            self.workspace_rebin.update(
-                {run_object: MuonWorkspaceWrapper(asymmetry_workspace)})
+            self.workspace_rebin.update({run_object: MuonWorkspaceWrapper(asymmetry_workspace)})
 
     def get_asymmetry_workspace_names(self, runs):
         workspace_list = []
@@ -113,8 +104,7 @@ class MuonBase(object):
         for run in runs:
             run_object = MuonRun(run)
             if run_object in self._workspace and self._workspace[run_object].workspace_name:
-                workspace_list.append(
-                    self._workspace[run_object].workspace_name)
+                workspace_list.append(self._workspace[run_object].workspace_name)
 
         return workspace_list
 
@@ -122,10 +112,8 @@ class MuonBase(object):
         workspace_list = []
         for run in runs:
             run_object = MuonRun(run)
-            if run_object in self.workspace_rebin and self.workspace_rebin[
-                    run_object].workspace_name:
-                workspace_list.append(
-                    self.workspace_rebin[run_object].workspace_name)
+            if run_object in self.workspace_rebin and self.workspace_rebin[run_object].workspace_name:
+                workspace_list.append(self.workspace_rebin[run_object].workspace_name)
 
         return workspace_list
 
@@ -141,8 +129,7 @@ class MuonBase(object):
         return None
 
     def get_run_for_workspace(self, workspace_name):
-        for key, value in itertools.chain(self._workspace.items(),
-                                          self.workspace_rebin.items()):
+        for key, value in itertools.chain(self._workspace.items(), self.workspace_rebin.items()):
             if value.workspace_name in workspace_name:
                 return key
 
@@ -150,12 +137,12 @@ class MuonBase(object):
 
     def remove_workspace_by_name(self, workspace_name):
         """
-                Searches through all of the stored workspaces and remmves any which match the name given. This is used to handle
-                workspaces being removed from the ADS.
-                :param workspace_name:
-                :return:
+        Searches through all of the stored workspaces and remmves any which match the name given. This is used to handle
+        workspaces being removed from the ADS.
+        :param workspace_name:
+        :return:
 
-                """
+        """
 
         def _remove_workspace_from_dict_by_name(workspace_name, dictionary):
             set_of_keys_to_remove = set()
@@ -167,5 +154,4 @@ class MuonBase(object):
                 dictionary.pop(key)
 
         _remove_workspace_from_dict_by_name(workspace_name, self._workspace)
-        _remove_workspace_from_dict_by_name(
-            workspace_name, self.workspace_rebin)
+        _remove_workspace_from_dict_by_name(workspace_name, self.workspace_rebin)

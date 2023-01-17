@@ -4,6 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-__all__ = ['qangle', 'ErrorCodes']
+__all__ = ["qangle", "ErrorCodes"]
 
 from ._geometry import qangle, ErrorCodes

@@ -1,0 +1,1 @@
+- Fixed an issue where Mantid could crash when workspaces were cleared from the ADS after deleting a batch from the ISIS Reflectometry GUI.

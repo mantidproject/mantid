@@ -191,6 +191,15 @@ void AbsorptionCorrections::run() {
   long const maxAttempts = static_cast<long>(m_uiForm.spMaxScatterPtAttempts->value());
   monteCarloAbsCor->setProperty("MaxScatterPtAttempts", maxAttempts);
 
+  bool const isSparseInstrument = m_uiForm.cbSparseInstrument->isChecked();
+  if (isSparseInstrument) {
+    monteCarloAbsCor->setProperty("SparseInstrument", isSparseInstrument);
+    long const numberOfDetectorRows = static_cast<long>(m_uiForm.spNumberDetectorRows->value());
+    monteCarloAbsCor->setProperty("NumberOfDetectorRows", numberOfDetectorRows);
+    long const numberOfDetectorColumns = static_cast<long>(m_uiForm.spNumberDetectorColumns->value());
+    monteCarloAbsCor->setProperty("NumberOfDetectorColumns", numberOfDetectorColumns);
+  }
+
   QString const sampleShape = m_uiForm.cbShape->currentText().replace(" ", "");
   const bool isPreset = sampleShape == "Preset";
   monteCarloAbsCor->setProperty("Shape", sampleShape.toStdString());

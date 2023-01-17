@@ -10,8 +10,12 @@ import unittest
 
 from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces
 from mantid.api import AnalysisDataService as ADS
-from workbench.utils.workspacehistorygeneration import get_workspace_history_list, guarantee_unique_lines, \
-    get_all_workspace_history_from_ads, convert_list_to_string
+from workbench.utils.workspacehistorygeneration import (
+    get_workspace_history_list,
+    guarantee_unique_lines,
+    get_all_workspace_history_from_ads,
+    convert_list_to_string,
+)
 
 
 def generate_commands(script):
@@ -34,8 +38,7 @@ class WorkspaceHistoryGenerationTest(unittest.TestCase):
 
         self.assertEqual(len(history_list), 1)
         commands = generate_commands(history_list[0])
-        self.assertEqual(commands[0],
-                         "CreateSampleWorkspace(OutputWorkspace='ws')")
+        self.assertEqual(commands[0], "CreateSampleWorkspace(OutputWorkspace='ws')")
 
     def test_guarantee_unique_lines(self):
         CreateSampleWorkspace(OutputWorkspace="ws")

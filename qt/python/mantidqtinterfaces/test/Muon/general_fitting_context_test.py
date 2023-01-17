@@ -14,7 +14,6 @@ from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_utils import StaticW
 
 
 class GeneralFittingContextTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         FrameworkManager.Instance()
@@ -25,8 +24,9 @@ class GeneralFittingContextTest(unittest.TestCase):
         self.dataset_names = ["Name1", "Name2"]
         self.fit_function = FunctionFactory.createFunction("FlatBackground")
         self.single_fit_functions = [self.fit_function.clone(), self.fit_function.clone()]
-        self.simultaneous_fit_function = FunctionFactory.createInitializedMultiDomainFunction(str(self.fit_function),
-                                                                                              len(self.dataset_names))
+        self.simultaneous_fit_function = FunctionFactory.createInitializedMultiDomainFunction(
+            str(self.fit_function), len(self.dataset_names)
+        )
 
     def test_that_allow_double_pulse_fitting_is_set_to_false_by_default(self):
         self.assertFalse(self.fitting_context.allow_double_pulse_fitting)
@@ -149,5 +149,5 @@ class GeneralFittingContextTest(unittest.TestCase):
         self.assertEqual(self.fitting_context.all_latest_fits()[0], fit2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

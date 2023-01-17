@@ -9,7 +9,6 @@ find_dependency(Python @Python_VERSION_MAJOR@.@Python_VERSION_MINOR@ REQUIRED
 find_dependency(Boost COMPONENTS date_time regex serialization filesystem system python${Python_VERSION_MAJOR}${Python_VERSION_MINOR})
 find_dependency(Poco COMPONENTS Foundation Util XML Net Crypto NetSSL)
 find_dependency(GSL)
-find_dependency(ZLIB)
 find_dependency(HDF5)
 find_dependency(OpenSSL)
 find_dependency(OpenMP COMPONENTS CXX)

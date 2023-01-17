@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init
+# pylint: disable=no-init
 
 # package imports
 from mantid.api import PythonAlgorithm, AlgorithmFactory
@@ -15,50 +15,44 @@ from mantid.utils.deprecator import deprecated_alias
 import numpy
 
 
-@deprecated_alias('2021-09-16')
+@deprecated_alias("2021-09-16")
 class HYSPECSuggestTIB(PythonAlgorithm):
-    """ Check if certain sample logs exists on a workspace
-    """
+    """Check if certain sample logs exists on a workspace"""
 
     def alias(self):
         r"""Alternative name to this algorithm"""
-        return 'SuggestTibHYSPEC'
+        return "SuggestTibHYSPEC"
 
     def category(self):
-        """ Return category
-        """
+        """Return category"""
         return "Inelastic\\Utility"
 
     def seeAlso(self):
         return ["CNCSSuggestTIB"]
 
     def name(self):
-        """ Return name
-        """
+        """Return name"""
         return "HYSPECSuggestTIB"
 
     def summary(self):
-        """ Return summary
-        """
+        """Return summary"""
         return "Suggest possible time independent background range for HYSPEC"
 
     def PyInit(self):
-        """ Declare properties
-        """
+        """Declare properties"""
         val = FloatBoundedValidator()
         val.setBounds(3, 100)  # reasonable incident nergy range for HYSPEC
-        self.declareProperty("IncidentEnergy", 0., val, "Incident energy (3 to 100 meV)")
-        self.declareProperty("TibMin", 0., Direction.Output)
-        self.declareProperty("TibMax", 0., Direction.Output)
+        self.declareProperty("IncidentEnergy", 0.0, val, "Incident energy (3 to 100 meV)")
+        self.declareProperty("TibMin", 0.0, Direction.Output)
+        self.declareProperty("TibMax", 0.0, Direction.Output)
         return
 
     def e2v(self, energy):
         return numpy.sqrt(energy / 5.227e-6)
 
     def PyExec(self):
-        """ Main execution body
-        """
-        #get parameter
+        """Main execution body"""
+        # get parameter
         energy = self.getProperty("IncidentEnergy").value
 
         msd = 1800.0
@@ -81,44 +75,40 @@ class HYSPECSuggestTIB(PythonAlgorithm):
         MinTIB_us = 2000.0
         slop_frac = 0.2
         # print t_focEle_us,pre_lead_us,frame_start_us,MinTIB_us,slop_frac
-        if (t_focEle_us < pre_lead_us) and (t_focEle_us-frame_start_us > MinTIB_us * (slop_frac + 1.0)):
-            logger.debug('choosing TIB just before focus element-1')
+        if (t_focEle_us < pre_lead_us) and (t_focEle_us - frame_start_us > MinTIB_us * (slop_frac + 1.0)):
+            logger.debug("choosing TIB just before focus element-1")
             TIB_high_us = t_focEle_us - MinTIB_us * slop_frac / 2.0
             TIB_low_us = TIB_high_us - MinTIB_us
-        elif (frame_start_us>pre_tail_us) and (t_focEle_us-frame_start_us > MinTIB_us * (slop_frac + 1.0)):
-            logger.debug('choosing TIB just before focus element-2')
+        elif (frame_start_us > pre_tail_us) and (t_focEle_us - frame_start_us > MinTIB_us * (slop_frac + 1.0)):
+            logger.debug("choosing TIB just before focus element-2")
             TIB_high_us = t_focEle_us - MinTIB_us * slop_frac / 2.0
             TIB_low_us = TIB_high_us - MinTIB_us
-        elif t_focEle_us-pre_tail_us > MinTIB_us * (slop_frac + 1.0) and\
-                (t_focEle_us - frame_start_us > MinTIB_us * (slop_frac + 1.0)):
-            logger.debug('choosing TIB just before focus element-3')
+        elif t_focEle_us - pre_tail_us > MinTIB_us * (slop_frac + 1.0) and (t_focEle_us - frame_start_us > MinTIB_us * (slop_frac + 1.0)):
+            logger.debug("choosing TIB just before focus element-3")
             TIB_high_us = t_focEle_us - MinTIB_us * slop_frac / 2.0
             TIB_low_us = TIB_high_us - MinTIB_us
-        elif t_samp_us-pre_tail_us > MinTIB_us * (slop_frac + 1.0) and\
-                (t_samp_us - frame_start_us > MinTIB_us * (slop_frac + 1.0)):
-            logger.debug('choosing TIB just before sample-1')
+        elif t_samp_us - pre_tail_us > MinTIB_us * (slop_frac + 1.0) and (t_samp_us - frame_start_us > MinTIB_us * (slop_frac + 1.0)):
+            logger.debug("choosing TIB just before sample-1")
             TIB_high_us = t_samp_us - MinTIB_us * slop_frac / 2.0
             TIB_low_us = TIB_high_us - MinTIB_us
-        elif t_samp_us-pre_tail_us > MinTIB_us / 1.5 * (slop_frac + 1.0) and\
-                (t_samp_us - frame_start_us > MinTIB_us * (slop_frac + 1.0)):
-            logger.debug('choosing TIB just before sample-2')
+        elif t_samp_us - pre_tail_us > MinTIB_us / 1.5 * (slop_frac + 1.0) and (t_samp_us - frame_start_us > MinTIB_us * (slop_frac + 1.0)):
+            logger.debug("choosing TIB just before sample-2")
             TIB_high_us = t_samp_us - MinTIB_us / 1.5 * slop_frac / 2.0
             TIB_low_us = TIB_high_us - MinTIB_us / 1.5
-        elif t_samp_us-pre_tail_us > MinTIB_us / 2.0 * (slop_frac + 1.0) and\
-                (t_samp_us - frame_start_us > MinTIB_us * (slop_frac + 1.0)):
-            logger.debug('choosing TIB just before sample-3')
+        elif t_samp_us - pre_tail_us > MinTIB_us / 2.0 * (slop_frac + 1.0) and (t_samp_us - frame_start_us > MinTIB_us * (slop_frac + 1.0)):
+            logger.debug("choosing TIB just before sample-3")
             TIB_high_us = t_samp_us - MinTIB_us / 2.0 * slop_frac / 2.0
             TIB_low_us = TIB_high_us - MinTIB_us / 2.0
         elif (pre_lead_us - frame_start_us > MinTIB_us * (slop_frac + 1.0)) and (t_focEle_us > pre_lead_us):
-            logger.debug('choosing TIB just before leading edge before elastic-1')
+            logger.debug("choosing TIB just before leading edge before elastic-1")
             TIB_high_us = pre_lead_us - MinTIB_us * slop_frac / 2.0
             TIB_low_us = TIB_high_us - MinTIB_us
         elif (pre_lead_us - frame_start_us > MinTIB_us / 1.5 * (slop_frac + 1.0)) and (t_focEle_us > pre_lead_us):
-            logger.debug('choosing TIB just before leading edge before elastic-2')
+            logger.debug("choosing TIB just before leading edge before elastic-2")
             TIB_high_us = pre_lead_us - MinTIB_us / 1.5 * slop_frac / 2.0
             TIB_low_us = TIB_high_us - MinTIB_us / 1.5
         elif (pre_lead_us - frame_start_us > MinTIB_us / 2.0 * (slop_frac + 1.0)) and (t_focEle_us > pre_lead_us):
-            logger.debug('choosing TIB just before leading edge before elastic-3')
+            logger.debug("choosing TIB just before leading edge before elastic-3")
             TIB_high_us = pre_lead_us - MinTIB_us / 2.0 * slop_frac / 2.0
             TIB_low_us = TIB_high_us - MinTIB_us / 2.0
         # elif (pre_tail_us > frame_start_us) and (t_focEle_us - pre_tail_us > MinTIB_us * (slop_frac + 1.0)):
@@ -126,19 +116,19 @@ class HYSPECSuggestTIB(PythonAlgorithm):
         # TIB_low_us = pre_tail_us + MinTIB_us * slop_frac / 2.0
         # TIB_high_us = TIB_low_us + MinTIB_us
         elif post_lead_us > frame_end_us:
-            logger.debug('choosing TIB at end of frame')
+            logger.debug("choosing TIB at end of frame")
             TIB_high_us = frame_end_us - MinTIB_us * slop_frac / 2.0
             TIB_low_us = TIB_high_us - MinTIB_us
         elif post_lead_us - t_det_us > MinTIB_us * (slop_frac + 1.0):
-            logger.debug('choosing TIB between elastic peak and later prompt pulse leading edge')
+            logger.debug("choosing TIB between elastic peak and later prompt pulse leading edge")
             TIB_high_us = post_lead_us - MinTIB_us * slop_frac / 2.0
             TIB_low_us = TIB_high_us - MinTIB_us
         else:
-            logger.debug('I cannot find a good TIB range')
+            logger.debug("I cannot find a good TIB range")
             TIB_low_us = 0.0
             TIB_high_us = 0.0
 
-        #return the result
+        # return the result
         self.setProperty("TibMin", TIB_low_us)
         self.setProperty("TibMax", TIB_high_us)
         return

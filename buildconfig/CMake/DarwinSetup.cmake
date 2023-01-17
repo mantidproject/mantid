@@ -31,25 +31,13 @@ if(MACOS_VERSION VERSION_LESS 10.13)
   message(FATAL_ERROR "The minimum supported version of Mac OS X is 10.13 (High Sierra).")
 endif()
 
-if(MACOS_VERSION VERSION_GREATER 10.13 OR MACOS_VERSION VERSION_EQUAL 10.13)
-  set(MACOS_CODENAME "High Sierra")
-elseif(MACOS_VERSION VERSION_GREATER 10.14 OR MACOS_VERSION VERSION_EQUAL 10.14)
-  set(MACOS_CODENAME "Mojave")
-else()
-  message(FATAL_ERROR "Unknown version of macOS")
-endif()
-
 # Export variables globally
 set(MACOS_VERSION
     ${MACOS_VERSION}
     CACHE INTERNAL ""
 )
-set(MACOS_CODENAME
-    ${MACOS_CODENAME}
-    CACHE INTERNAL ""
-)
 
-message(STATUS "Operating System: Mac OS X ${MACOS_VERSION} (${MACOS_CODENAME})")
+message(STATUS "Operating System: macOS ${MACOS_VERSION}")
 
 # Enable the use of the -isystem flag to mark headers in Third_Party as system headers
 set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
@@ -112,7 +100,6 @@ if(ENABLE_WORKBENCH AND NOT CONDA_BUILD)
   set(CPACK_COMMAND_HDIUTIL ${CMAKE_SOURCE_DIR}/installers/MacInstaller/hdiutilwrap)
   set(CMAKE_MACOSX_RPATH 1)
   set(CPACK_DMG_BACKGROUND_IMAGE ${CMAKE_SOURCE_DIR}/installers/conda/osx/dmg_background.png)
-  string(REPLACE " " "" CPACK_SYSTEM_NAME ${MACOS_CODENAME})
 
   set(WORKBENCH_BUNDLE MantidWorkbench.app/Contents/)
   set(WORKBENCH_APP MantidWorkbench${CPACK_PACKAGE_SUFFIX_CAMELCASE}.app)

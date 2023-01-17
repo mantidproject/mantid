@@ -7,12 +7,10 @@
 
 import unittest
 
-from mantidqtinterfaces.dns_powder_tof.data_structures.dns_error import \
-    DNSError
+from mantidqtinterfaces.dns_powder_tof.data_structures.dns_error import DNSError
 
 
 class DNSErrorTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.error = DNSError()
@@ -21,5 +19,5 @@ class DNSErrorTest(unittest.TestCase):
         self.assertIsInstance(self.error, BaseException)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

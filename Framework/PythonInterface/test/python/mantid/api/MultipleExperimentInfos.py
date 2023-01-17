@@ -11,7 +11,6 @@ from mantid.simpleapi import CreateSampleWorkspace, CreateMDWorkspace
 
 
 class MultipleExperimentInfoTest(unittest.TestCase):
-
     def tearDown(self):
         AnalysisDataService.clear()
 
@@ -25,7 +24,9 @@ class MultipleExperimentInfoTest(unittest.TestCase):
 
     def test_add_experiment_info(self):
         ws1 = CreateSampleWorkspace()
-        md = CreateMDWorkspace(Dimensions=1, Extents='-1,1', Names='A', Units='U')
+        md = CreateMDWorkspace(Dimensions=1, Extents="-1,1", Names="A", Units="U")
         md.addExperimentInfo(ws1)
 
-if __name__ == '__main__': unittest.main()
+
+if __name__ == "__main__":
+    unittest.main()

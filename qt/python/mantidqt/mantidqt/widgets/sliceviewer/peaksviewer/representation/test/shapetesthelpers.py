@@ -10,19 +10,11 @@ import json
 from unittest.mock import MagicMock
 
 # local imports
-from mantidqt.widgets.sliceviewer.peaksviewer.test.modeltesthelpers \
-    import create_slice_info
+from mantidqt.widgets.sliceviewer.peaksviewer.test.modeltesthelpers import create_slice_info
 import numpy as np
 
 
-def draw_representation(cls,
-                        peak_origin,
-                        shape_info,
-                        painter,
-                        fg_color,
-                        bg_color,
-                        slice_transform=None,
-                        shape_name = "ellipsoid"):
+def draw_representation(cls, peak_origin, shape_info, painter, fg_color, bg_color, slice_transform=None, shape_name="ellipsoid"):
     """
     Calls draw on a given representation type
     :param cls: The representation type expected to have a classmethod called draw
@@ -42,12 +34,12 @@ def draw_representation(cls,
     peak_shape.toJSON.return_value = json.dumps(shape_info)
     if slice_transform is None:
         slice_transform = identity
-    slice_info = create_slice_info(slice_transform, slice_value=3., slice_width=10.)
+    slice_info = create_slice_info(slice_transform, slice_value=3.0, slice_width=10.0)
 
     return cls.draw(peak_origin, peak_shape, slice_info, painter, fg_color, bg_color)
 
 
-def create_ellipsoid_info(radii, axes, bkgd_radii, translation = [0,0,0]):
+def create_ellipsoid_info(radii, axes, bkgd_radii, translation=[0, 0, 0]):
     """
     Create a dict describing an ellipsoid.
     :param radii: 3-tuple containing radii for each axis
@@ -69,7 +61,7 @@ def create_ellipsoid_info(radii, axes, bkgd_radii, translation = [0,0,0]):
         "background_inner_radius2": bkgd_radii[0][2],
         "translation0": translation[0],
         "translation1": translation[1],
-        "translation2": translation[2]
+        "translation2": translation[2],
     }
 
 
@@ -84,10 +76,7 @@ def create_sphere_info(radius, bkgd_radii=(0.0, 0.0), specify_bkgd=True):
         "radius": radius,
     }
     if specify_bkgd:
-        shape_descr.update({
-            "background_inner_radius": bkgd_radii[0],
-            "background_outer_radius": bkgd_radii[1]
-        })
+        shape_descr.update({"background_inner_radius": bkgd_radii[0], "background_outer_radius": bkgd_radii[1]})
 
     return shape_descr
 

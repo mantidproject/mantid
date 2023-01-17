@@ -61,7 +61,7 @@ class CrystalStructureTest(unittest.TestCase):
 
         self.assertEqual(len(hkls), len(dValues))
         self.assertAlmostEqual(dValues[0], 5.431, places=10)
-        self.assertAlmostEqual(dValues[1], 5.431 / np.sqrt(3.), places=10)
+        self.assertAlmostEqual(dValues[1], 5.431 / np.sqrt(3.0), places=10)
 
     def test_getFsSquared(self):
         generator = ReflectionGenerator(self.crystalStructure)
@@ -71,5 +71,6 @@ class CrystalStructureTest(unittest.TestCase):
 
         self.assertEqual(len(fsSquared), len(hkls))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

@@ -15,12 +15,11 @@ from mantidqt.widgets.plotconfigdialog.colorselector import ColorSelector
 
 
 class WaterfallPlotFillAreaDialogView(QDialog):
-
     def __init__(self, parent=None):
         super(WaterfallPlotFillAreaDialogView, self).__init__(parent=parent)
 
-        self.ui = load_ui(__file__, 'waterfall_plot_fill_area_dialog.ui', baseinstance=self)
-        self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
+        self.ui = load_ui(__file__, "waterfall_plot_fill_area_dialog.ui", baseinstance=self)
+        self.setWindowIcon(QIcon(":/images/MantidIcon.ico"))
         self.setModal(True)
         self.colour_selector_widget = ColorSelector(parent=self)
         self.vertical_layout_2.replaceWidget(self.colour_selector_dummy_widget, self.colour_selector_widget)

@@ -55,10 +55,7 @@ def functionDeriv1D(function, xvals, jacobian):
         return
     f0 = function.function1D(xvals)
     # Add these quantities to original parameter values
-    dp = {'Tau': 1.0,  # change by 1ps
-          'Beta': 0.01,
-          'Centre': 0.0001  # change by 0.1 micro-eV
-          }
+    dp = {"Tau": 1.0, "Beta": 0.01, "Centre": 0.0001}  # change by 1ps  # change by 0.1 micro-eV
     for name in dp.keys():
         pp = copy.copy(p)
         pp[name] += dp[name]
@@ -66,8 +63,8 @@ def functionDeriv1D(function, xvals, jacobian):
     # Analytical derivative for Height parameter. Note we don't use
     # f0/p['Height'] in case p['Height'] was set to zero by the user
     pp = copy.copy(p)
-    pp['Height'] = 1.0
-    partials['Height'] = function.function1D(xvals, **pp)
+    pp["Height"] = 1.0
+    partials["Height"] = function.function1D(xvals, **pp)
     function.fillJacobian(xvals, jacobian, partials)
 
 
@@ -76,13 +73,13 @@ def init(function):
     :param function: instance of StretchedExpFT or PrimStretchedExpFT
     """
     # Active fitting parameters
-    function.declareParameter('Height', 0.1, 'Intensity at the origin')
-    function.declareParameter('Tau', 100.0, 'Relaxation time')
-    function.declareParameter('Beta', 1.0, 'Stretching exponent')
-    function.declareParameter('Centre', 0.0, 'Centre of the peak')
+    function.declareParameter("Height", 0.1, "Intensity at the origin")
+    function.declareParameter("Tau", 100.0, "Relaxation time")
+    function.declareParameter("Beta", 1.0, "Stretching exponent")
+    function.declareParameter("Centre", 0.0, "Centre of the peak")
     # Keep order in which parameters are declared. Should be a class
     # variable but we initialize it just below parameter declaration
-    function._parmList = ['Height', 'Tau', 'Beta', 'Centre']
+    function._parmList = ["Height", "Tau", "Beta", "Centre"]
 
 
 def validateParams(function):
@@ -90,20 +87,22 @@ def validateParams(function):
     :param function: instance of StretchedExpFT or PrimStretchedExpFT
     :return: dictionary of validated parameters
     """
-    height = function.getParameterValue('Height')
-    tau = function.getParameterValue('Tau')
-    beta = function.getParameterValue('Beta')
-    Centre = function.getParameterValue('Centre')
+    height = function.getParameterValue("Height")
+    tau = function.getParameterValue("Tau")
+    beta = function.getParameterValue("Beta")
+    Centre = function.getParameterValue("Centre")
     for value in (height, tau, beta):
         if value <= 0:
             return None
-    return {'Height': height, 'Tau': tau, 'Beta': beta, 'Centre': Centre}
+    return {"Height": height, "Tau": tau, "Beta": beta, "Centre": Centre}
 
 
-surrogates = {'fillJacobian': fillJacobian,
-              'functionDeriv1D': functionDeriv1D,
-              'init': init,
-              'validateParams': validateParams, }
+surrogates = {
+    "fillJacobian": fillJacobian,
+    "functionDeriv1D": functionDeriv1D,
+    "init": init,
+    "validateParams": validateParams,
+}
 
 
 def surrogate(method):
@@ -124,7 +123,7 @@ def function1Dcommon(function, xvals, refine_factor=16, **optparms):
     :param optparms: optional parameters used when evaluating the numerical derivative
     :return: parameters, energy width, energies, and function values
     """
-    planck_constant = constants.Planck / constants.e * 1E15  # meV*psec
+    planck_constant = constants.Planck / constants.e * 1e15  # meV*psec
     p = function.validateParams()
     if p is None:
         # return zeros if parameters not valid
@@ -144,19 +143,17 @@ def function1Dcommon(function, xvals, refine_factor=16, **optparms):
     # round to an upper power of two
     nt = 2 ** (1 + int(np.log(tmax / dt) / np.log(2)))
     sampled_times = dt * np.arange(-nt, nt)
-    decay = np.exp(-(np.abs(sampled_times) / p['Tau']) ** p['Beta'])
+    decay = np.exp(-((np.abs(sampled_times) / p["Tau"]) ** p["Beta"]))
     # The Fourier transform introduces an extra factor exp(i*pi*E/de),
     # which amounts to alternating sign every time E increases by de,
     # the energy bin width. Thus, we take the absolute value
     fourier = np.abs(fft(decay).real)  # notice the reverse of decay array
     fourier /= fourier[0]  # set maximum to unity
     # Normalize the integral in energies to unity
-    fourier *= 2*p['Tau']*gamma(1./p['Beta']) / (p['Beta']*planck_constant)
+    fourier *= 2 * p["Tau"] * gamma(1.0 / p["Beta"]) / (p["Beta"] * planck_constant)
     # symmetrize to negative energies
-    fourier = np.concatenate(
-        [fourier[nt:], fourier[:nt]])  # increasing ordering
+    fourier = np.concatenate([fourier[nt:], fourier[:nt]])  # increasing ordering
     # Find energy values corresponding to the fourier values
     energies = planck_constant * fftfreq(2 * nt, d=dt)  # standard ordering
-    energies = np.concatenate(
-        [energies[nt:], energies[:nt]])  # increasing ordering
+    energies = np.concatenate([energies[nt:], energies[:nt]])  # increasing ordering
     return p, de, energies, fourier

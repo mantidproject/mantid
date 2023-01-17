@@ -20,6 +20,9 @@
   #if __GNUC__ >= 5
     #pragma GCC diagnostic ignored "-Wsuggest-override"
   #endif
+#elif defined(__clang__)
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wmissing-field-initializers"
 #endif
 %End
 
@@ -28,6 +31,18 @@
 
 %ModuleCode
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
+#include "MantidKernel/WarningSuppressions.h"
+
+#if defined(__GNUC__) && !defined(__clang__)
+  // We need default visibility for this module so that
+  // python can see the init function.
+  #pragma GCC visibility push(default)
+#endif
+MSVC_DIAG_OFF(4290)
+GNU_DIAG_OFF("pedantic")
+GNU_DIAG_OFF("suggest-override")
+GNU_DIAG_OFF("missing-field-initializers")
+
 // Allows suppression of namespaces within the module
 using namespace MantidQt::MantidWidgets;
 %End

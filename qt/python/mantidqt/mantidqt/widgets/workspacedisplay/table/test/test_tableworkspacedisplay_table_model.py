@@ -28,7 +28,6 @@ def with_mock_workspace(func):
 
 
 class TableWorkspaceDisplayTableModelTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         # Allow the MockWorkspace to work within the model
@@ -53,5 +52,5 @@ class TableWorkspaceDisplayTableModelTest(unittest.TestCase):
         self.model._update_row_batch_size.assert_called_once_with()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

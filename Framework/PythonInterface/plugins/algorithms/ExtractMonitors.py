@@ -6,33 +6,33 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import *
 from mantid.kernel import *
-from mantid.api import (MatrixWorkspaceProperty, DataProcessorAlgorithm, PropertyMode)
+from mantid.api import MatrixWorkspaceProperty, DataProcessorAlgorithm, PropertyMode
 
 
 class ExtractMonitors(DataProcessorAlgorithm):
     def category(self):
-        return 'Utility\\Workspaces'
+        return "Utility\\Workspaces"
 
     def summary(self):
-        return 'Separates the monitors and/or detectors into separate workspaces.'
+        return "Separates the monitors and/or detectors into separate workspaces."
 
     def seeAlso(self):
-        return [ "ExtractMonitorWorkspace" ]
+        return ["ExtractMonitorWorkspace"]
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '',
-                                                     direction=Direction.Input),
-                             doc='A workspace with detectors and monitors')
+        self.declareProperty(
+            MatrixWorkspaceProperty("InputWorkspace", "", direction=Direction.Input), doc="A workspace with detectors and monitors"
+        )
 
-        self.declareProperty(MatrixWorkspaceProperty('DetectorWorkspace', '',
-                                                     direction=Direction.Output,
-                                                     optional=PropertyMode.Optional),
-                             doc='The output workspace with detectors only')
+        self.declareProperty(
+            MatrixWorkspaceProperty("DetectorWorkspace", "", direction=Direction.Output, optional=PropertyMode.Optional),
+            doc="The output workspace with detectors only",
+        )
 
-        self.declareProperty(MatrixWorkspaceProperty('MonitorWorkspace', '',
-                                                     direction=Direction.Output,
-                                                     optional=PropertyMode.Optional),
-                             doc='The output workspace with monitors only')
+        self.declareProperty(
+            MatrixWorkspaceProperty("MonitorWorkspace", "", direction=Direction.Output, optional=PropertyMode.Optional),
+            doc="The output workspace with monitors only",
+        )
 
     def validateInputs(self):
         issues = {}
@@ -73,16 +73,24 @@ class ExtractMonitors(DataProcessorAlgorithm):
 
         if detector_ws_name:
             if detectors:
-                detector_ws = ExtractSpectra(InputWorkspace=in_ws, WorkspaceIndexList=detectors, StoreInADS=False,
-                                             OutputWorkspace=self.getPropertyValue("DetectorWorkspace"))
+                detector_ws = ExtractSpectra(
+                    InputWorkspace=in_ws,
+                    WorkspaceIndexList=detectors,
+                    StoreInADS=False,
+                    OutputWorkspace=self.getPropertyValue("DetectorWorkspace"),
+                )
                 self.setProperty("DetectorWorkspace", detector_ws)
             else:
                 self.log().error("No detectors found in input workspace. No detector output workspace created.")
 
         if monitor_ws_name:
             if monitors:
-                monitor_ws = ExtractSpectra(InputWorkspace=in_ws, WorkspaceIndexList=monitors, StoreInADS=False,
-                                            OutputWorkspace=self.getPropertyValue("MonitorWorkspace"))
+                monitor_ws = ExtractSpectra(
+                    InputWorkspace=in_ws,
+                    WorkspaceIndexList=monitors,
+                    StoreInADS=False,
+                    OutputWorkspace=self.getPropertyValue("MonitorWorkspace"),
+                )
                 self.setProperty("MonitorWorkspace", monitor_ws)
             else:
                 self.log().error("No monitors found in input workspace. No monitor output workspace created.")

@@ -28,7 +28,7 @@ class DateAndTimeTest(unittest.TestCase):
 
     def test_convert_to_np(self):
         dt = DateAndTime(598471118000000000)
-        dt_np = timedelta64(dt.totalNanoseconds(), 'ns') + datetime64('1990-01-01T00:00')
+        dt_np = timedelta64(dt.totalNanoseconds(), "ns") + datetime64("1990-01-01T00:00")
 
         # convert both into ISO8601 strings up to the seconds
         dt = str(dt)[:19]
@@ -36,15 +36,15 @@ class DateAndTimeTest(unittest.TestCase):
         self.assertEqual(dt, dt_np)
 
     def test_convert_from_np(self):
-        if LooseVersion(numpy.__version__) < LooseVersion('1.9'):
-            dt_np = datetime64('2000-01-01T00:00Z')
-        else: # newer numpy only uses UTC and warns on specifying timezones
-            dt_np = datetime64('2000-01-01T00:00')
+        if LooseVersion(numpy.__version__) < LooseVersion("1.9"):
+            dt_np = datetime64("2000-01-01T00:00Z")
+        else:  # newer numpy only uses UTC and warns on specifying timezones
+            dt_np = datetime64("2000-01-01T00:00")
         dt = DateAndTime(dt_np)
 
         # convert both into ISO8601 strings up to the minutes b/c time was only specified that much
         dt = str(dt)
-        dt_np = dt_np.item().strftime('%Y-%m-%dT%M:%S')
+        dt_np = dt_np.item().strftime("%Y-%m-%dT%M:%S")
         length = min(len(dt), len(dt_np))
         dt = dt[:length]
         dt_np = dt_np[:length]

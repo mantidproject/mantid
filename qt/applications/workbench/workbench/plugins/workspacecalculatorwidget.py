@@ -14,6 +14,7 @@ from workbench.plugins.base import PluginWidget
 
 class WorkspaceCalculatorWidget(PluginWidget):
     """Provides a Workspace Widget for workspace manipulation"""
+
     def __init__(self, parent):
         super(WorkspaceCalculatorWidget, self).__init__(parent)
 

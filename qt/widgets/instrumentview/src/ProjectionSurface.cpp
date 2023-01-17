@@ -435,7 +435,7 @@ QString ProjectionSurface::getInfoText() const {
   case EditShapeMode:
     return "Select a tool button to draw a new shape. "
            "Click on shapes to select. Click and move to edit. Press Ctrl+C "
-           "/ Ctrl+V to copy/paste";
+           "/ Ctrl+V to copy/paste. Press Delete key to remove a shape.";
   case DrawFreeMode:
     return "Draw by holding the left button down. "
            "Erase with the right button.";
@@ -650,6 +650,26 @@ void ProjectionSurface::saveShapesToTableWorkspace() { m_maskShapes.saveToTableW
 void ProjectionSurface::loadShapesFromTableWorkspace(const Mantid::API::ITableWorkspace_const_sptr &ws) {
   m_maskShapes.loadFromTableWorkspace(ws);
 }
+
+/**
+ * Draw a 2D shape onto the surface with the given coordinates
+ * @param type :: The shape type such as 'rectangle'
+ * @param borderColor :: The color of the shapes border
+ * @param fillColor :: The color of the shapes fill
+ * @param topLeftPos :: The position of the top left corner in pixels
+ * @param bottomRightPos :: The position of the bottom right corner in pixels
+ * @param select :: True if you want the shape to be selected immediately after drawing
+ */
+void ProjectionSurface::drawShape2D(const QString &type, const QColor &borderColor, const QColor &fillColor,
+                                    const QPoint &topLeftPos, const QPoint &bottomRightPos, const bool select) {
+  m_maskShapes.addShape(type, topLeftPos.x(), topLeftPos.y(), borderColor, fillColor);
+  m_maskShapes.moveRightBottomTo(bottomRightPos.x(), bottomRightPos.y());
+  if (!select) {
+    m_maskShapes.deselectAll();
+  }
+}
+
+void ProjectionSurface::clearMaskedShapes() { m_maskShapes.clear(); }
 
 /**
  * Return a combined list of peak parkers from all overlays

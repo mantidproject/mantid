@@ -10,7 +10,7 @@ import unittest
 from unittest.mock import ANY, MagicMock
 
 # 3rd party imports
-#from matplotlib.backend_bases import FigureCanvas
+# from matplotlib.backend_bases import FigureCanvas
 from mantidqt.widgets.sliceviewer.presenters.zoom import ScrollZoomMixin
 
 
@@ -25,7 +25,7 @@ class ScrollZoomMixinTest(unittest.TestCase):
         axes = MagicMock()
         canvas.enable_zoom_on_scroll(axes)
 
-        canvas.mpl_connect.assert_called_once_with('scroll_event', ANY)
+        canvas.mpl_connect.assert_called_once_with("scroll_event", ANY)
         axes.set_xlim.assert_not_called()
         axes.set_ylim.assert_not_called()
 
@@ -45,5 +45,5 @@ class ScrollZoomMixinTest(unittest.TestCase):
         canvas.mpl_disconnect(cid)
 
 
-if __name__ == '__name':
+if __name__ == "__name":
     unittest.main()

@@ -32,8 +32,8 @@ public:
   static void destroySuite(ALFAnalysisModelTest *suite) { delete suite; }
 
   void setUp() override {
-    m_workspace = WorkspaceCreationHelper::create2DWorkspace(1, 100);
-    m_workspaceName = "test";
+    m_workspace = WorkspaceCreationHelper::create2DWorkspacePoints(1, 100);
+    m_exportWorkspaceName = "ALFView_exported";
     m_range = std::make_pair<double, double>(0.0, 100.0);
     m_twoThetas = std::vector<double>{29.5, 30.4, 31.0};
 
@@ -74,16 +74,19 @@ public:
   }
 
   void test_that_calculateEstimate_returns_an_estimate_if_the_extracted_workspace_is_set() {
+    // Set a maximum y value at x = 5.0
+    m_workspace->mutableY(0)[5] = 3.0;
+
     m_model->setExtractedWorkspace(m_workspace, m_twoThetas);
 
     m_model->calculateEstimate(m_range);
 
-    TS_ASSERT_EQUALS(0.5, m_model->peakCentre());
+    TS_ASSERT_DELTA(5.0, m_model->peakCentre(), 0.00001);
     TS_ASSERT_EQUALS("", m_model->fitStatus());
   }
 
   void test_that_calculateEstimate_returns_zero_peak_centre_if_the_crop_range_is_invalid() {
-    m_workspace = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100, 300.0);
+    m_workspace = WorkspaceCreationHelper::create2DWorkspacePoints(1, 100, 300.0);
     m_model->setExtractedWorkspace(m_workspace, m_twoThetas);
 
     m_model->calculateEstimate(m_range);
@@ -165,12 +168,64 @@ public:
     m_model->setPeakCentre(0.1);
     m_model->doFit(m_range);
 
-    TS_ASSERT_DELTA(-0.0557, *m_model->rotationAngle(), 0.0001);
+    TS_ASSERT_DELTA(0.0991, *m_model->rotationAngle(), 0.0001);
+  }
+
+  void test_plottedWorkspace_returns_nullptr_data_is_not_extracted() {
+    TS_ASSERT_EQUALS(nullptr, m_model->plottedWorkspace());
+  }
+
+  void test_plottedWorkspace_returns_a_non_null_value_if_data_is_extracted() {
+    m_model->setExtractedWorkspace(m_workspace, m_twoThetas);
+    TS_ASSERT(m_model->plottedWorkspace());
+  }
+
+  void test_plottedWorkspaceIndices_returns_zero_if_there_is_no_fitted_workspace() {
+    auto const expectedIndices = std::vector<int>{0};
+    TS_ASSERT_EQUALS(expectedIndices, m_model->plottedWorkspaceIndices());
+  }
+
+  void test_plottedWorkspaceIndices_returns_zero_and_one_if_there_is_a_fitted_workspace() {
+    m_model->setExtractedWorkspace(m_workspace, m_twoThetas);
+    m_model->doFit(m_range);
+
+    auto const expectedIndices = std::vector<int>{0, 1};
+    TS_ASSERT_EQUALS(expectedIndices, m_model->plottedWorkspaceIndices());
+  }
+
+  void test_exportWorkspaceCopyToADS_does_not_create_an_exported_workspace_if_data_is_not_extracted() {
+    m_model->exportWorkspaceCopyToADS();
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist(m_exportWorkspaceName));
+  }
+
+  void test_exportWorkspaceCopyToADS_exports_a_workspace_with_three_spectra_when_fit_workspace_exists() {
+    m_model->setExtractedWorkspace(m_workspace, m_twoThetas);
+    m_model->doFit(m_range);
+
+    m_model->exportWorkspaceCopyToADS();
+
+    auto &ads = AnalysisDataService::Instance();
+    TS_ASSERT(ads.doesExist(m_exportWorkspaceName));
+
+    auto const workspace = ads.retrieveWS<MatrixWorkspace>(m_exportWorkspaceName);
+    TS_ASSERT_EQUALS(3u, workspace->getNumberHistograms());
+  }
+
+  void test_exportWorkspaceCopyToADS_exports_a_workspace_with_one_spectra_when_fit_workspace_does_not_exist() {
+    m_model->setExtractedWorkspace(m_workspace, m_twoThetas);
+
+    m_model->exportWorkspaceCopyToADS();
+
+    auto &ads = AnalysisDataService::Instance();
+    TS_ASSERT(ads.doesExist(m_exportWorkspaceName));
+
+    auto const workspace = ads.retrieveWS<MatrixWorkspace>(m_exportWorkspaceName);
+    TS_ASSERT_EQUALS(1u, workspace->getNumberHistograms());
   }
 
 private:
   MatrixWorkspace_sptr m_workspace;
-  std::string m_workspaceName;
+  std::string m_exportWorkspaceName;
   std::pair<double, double> m_range;
   std::vector<double> m_twoThetas;
 

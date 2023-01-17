@@ -6,12 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqtinterfaces.Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.base_pane.base_pane_model import BasePaneModel
-from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import (get_group_or_pair_from_name, REBIN_STR,
-                                                                            get_run_numbers_as_string_from_workspace_name)
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import (
+    get_group_or_pair_from_name,
+    REBIN_STR,
+    get_run_numbers_as_string_from_workspace_name,
+)
 
 
 class PlotGroupPairModel(BasePaneModel):
-
     def __init__(self, context, name):
         super().__init__(context, name)
 
@@ -34,7 +36,7 @@ class PlotGroupPairModel(BasePaneModel):
         else:
             return f"{group}{rebin_label}"
 
-    def _get_workspace_plot_axis(self, workspace_name: str, axes_workspace_map, index = 0):
+    def _get_workspace_plot_axis(self, workspace_name: str, axes_workspace_map, index=0):
         if not self.context.plot_panes_context[self.name].settings._is_tiled:
             return 0
 
@@ -51,6 +53,6 @@ class PlotGroupPairModel(BasePaneModel):
     @staticmethod
     def _get_rebin_label(workspace_name):
         if REBIN_STR in workspace_name:
-            return ';' + REBIN_STR
+            return ";" + REBIN_STR
         else:
-            return ''
+            return ""

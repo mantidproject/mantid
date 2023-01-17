@@ -7,16 +7,14 @@
 import unittest
 import testhelpers
 
-from mantid.kernel import IntArrayOrderedPairsValidator, FloatArrayOrderedPairsValidator, \
-    IntArrayProperty, FloatArrayProperty
+from mantid.kernel import IntArrayOrderedPairsValidator, FloatArrayOrderedPairsValidator, IntArrayProperty, FloatArrayProperty
 from mantid.api import PythonAlgorithm
 
 
 class ArrayOrderedPairsValidatorTest(unittest.TestCase):
-
     def test_fail_odd_entries(self):
         alg = self._create_alg()
-        int_vals = [5,7,13]
+        int_vals = [5, 7, 13]
         float_vals = [2.1]
         self.assertRaises(ValueError, alg.setProperty, "IntInput", int_vals)
         self.assertRaises(ValueError, alg.setProperty, "FloatInput", float_vals)
@@ -37,10 +35,10 @@ class ArrayOrderedPairsValidatorTest(unittest.TestCase):
 
     def _create_alg(self):
         """
-            Creates a test algorithm with a ordered pairs validator
+        Creates a test algorithm with a ordered pairs validator
         """
-        class TestAlgorithm(PythonAlgorithm):
 
+        class TestAlgorithm(PythonAlgorithm):
             def PyInit(self):
                 int_validator = IntArrayOrderedPairsValidator()
                 self.declareProperty(IntArrayProperty("IntInput", int_validator))
@@ -54,5 +52,6 @@ class ArrayOrderedPairsValidatorTest(unittest.TestCase):
         alg.initialize()
         return alg
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

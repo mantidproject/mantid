@@ -15,17 +15,16 @@ import os
 
 
 class LoadFullprofFileTest(unittest.TestCase):
-
     def test_LoadHKLFile(self):
-        """ Test to load a .hkl file
-        """
+        """Test to load a .hkl file"""
         # 1. Create a test file
         hklfilename = "test.hkl"
         self._createHKLFile(hklfilename)
 
         # 2.
-        alg_test = run_algorithm("LoadFullprofFile", Filename = hklfilename,
-                OutputWorkspace = "Foo", PeakParameterWorkspace = "PeakParameterTable")
+        alg_test = run_algorithm(
+            "LoadFullprofFile", Filename=hklfilename, OutputWorkspace="Foo", PeakParameterWorkspace="PeakParameterTable"
+        )
 
         self.assertTrue(alg_test.isExecuted())
 
@@ -44,34 +43,38 @@ class LoadFullprofFileTest(unittest.TestCase):
         return
 
     def _createHKLFile(self, filename):
-        """ Create a .hkl file
-        """
+        """Create a .hkl file"""
         hklfile = open(filename, "w")
 
         hklfile.write("!Phase no.:   1 LaB6 T=300.00 K    381 r")
-        hklfile.write("   h   k   l     d-sp        tof        alpha       beta       sigma2     gamma2   m*|F^2|        lambda     dev.     FWHM     pkX \n")
-        hklfile.write("  11   5   1 .3428545     7809.654        0.34252    0.16469      6.94167    0.00000 455.0977         0.4883     7.2343    13.5123   1.0000\n")
-        hklfile.write("  12   1   1 .3440267     7836.354        0.34242    0.16439      7.02898    0.00000 419.2758         0.4899     7.2500    13.7391   1.0000\n")
-        hklfile.write("  12   1   0 .3452109     7863.330        0.34231    0.16409      7.11804    0.00000 328.4061         0.4916     7.2659    13.6199   1.0000\n")
-        hklfile.write("  12   0   0 .3464075     7890.586        0.34221    0.16378      7.20892    0.00000 82.99092         0.4933     7.2819    13.6682   1.0000")
+        hklfile.write(
+            "   h   k   l     d-sp        tof        alpha       beta       sigma2     gamma2   m*|F^2|        lambda     dev.     FWHM     pkX \n"
+        )
+        hklfile.write(
+            "  11   5   1 .3428545     7809.654        0.34252    0.16469      6.94167    0.00000 455.0977         0.4883     7.2343    13.5123   1.0000\n"
+        )
+        hklfile.write(
+            "  12   1   1 .3440267     7836.354        0.34242    0.16439      7.02898    0.00000 419.2758         0.4899     7.2500    13.7391   1.0000\n"
+        )
+        hklfile.write(
+            "  12   1   0 .3452109     7863.330        0.34231    0.16409      7.11804    0.00000 328.4061         0.4916     7.2659    13.6199   1.0000\n"
+        )
+        hklfile.write(
+            "  12   0   0 .3464075     7890.586        0.34221    0.16378      7.20892    0.00000 82.99092         0.4933     7.2819    13.6682   1.0000"
+        )
 
         hklfile.close()
 
         return
 
-
     def test_LoadPRFFile(self):
-        """ Test to load a .prf file
-        """
+        """Test to load a .prf file"""
         # 1. Create  test .prf file
         prffilename = "test.prf"
         self._createPrfFile(prffilename)
 
         # 2. Execute the algorithm
-        alg_test = run_algorithm("LoadFullprofFile",
-                Filename = prffilename,
-                OutputWorkspace = "Data",
-                PeakParameterWorkspace = "Info")
+        alg_test = run_algorithm("LoadFullprofFile", Filename=prffilename, OutputWorkspace="Data", PeakParameterWorkspace="Info")
 
         self.assertTrue(alg_test.isExecuted())
 
@@ -89,16 +92,15 @@ class LoadFullprofFileTest(unittest.TestCase):
         AnalysisDataService.remove("Data")
         AnalysisDataService.remove("Info")
 
-
         return
 
-
     def _createPrfFile(self, filename):
-        """ Create a .prf file for teset
-        """
+        """Create a .prf file for teset"""
         prffile = open(filename, "w")
 
-        prffile.write("LaB6 NIST SRM-660b standard 2013-A Dec PAC    CELL:    4.15689   4.15689   4.15689   90.0000   90.0000   90.0000   SPGR: P m -3 m\n")
+        prffile.write(
+            "LaB6 NIST SRM-660b standard 2013-A Dec PAC    CELL:    4.15689   4.15689   4.15689   90.0000   90.0000   90.0000   SPGR: P m -3 m\n"
+        )
         prffile.write("1   5741     1.00000     1.00000     2.33738 22580.59180     0.00000    1\n")
         prffile.write("1539    0    0\n")
         prffile.write(" T.O.F.    Yobs	Ycal	Yobs-Ycal	Backg	Posr	(hkl)	K       \n")
@@ -166,5 +168,6 @@ class LoadFullprofFileTest(unittest.TestCase):
 
         prffile.close()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

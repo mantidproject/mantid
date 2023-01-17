@@ -19,11 +19,11 @@ scriptLog = None
 
 def createScriptLog(path):
     global scriptLog
-    scriptLog = open(path,'w')
+    scriptLog = open(path, "w")
 
 
 def stop(installer):
-    ''' Save the log, uninstall the package and exit with error code 0 '''
+    """Save the log, uninstall the package and exit with error code 0"""
     try:
         installer.uninstall()
     except Exception as exc:
@@ -33,30 +33,30 @@ def stop(installer):
 
 
 def log(txt):
-    ''' Write text to the script log file '''
+    """Write text to the script log file"""
     if scriptLog is None:
         return
     if txt and len(txt) > 0:
         scriptLog.write(txt)
-        if not txt.endswith('\n'):
-            scriptLog.write('\n')
+        if not txt.endswith("\n"):
+            scriptLog.write("\n")
         print(txt)
 
 
 def failure(installer):
-    ''' Report failure of test(s), try to uninstall package and exit with code 1 '''
+    """Report failure of test(s), try to uninstall package and exit with code 1"""
     try:
         installer.uninstall()
     except Exception as exc:
         log("Could not uninstall package %s: %s" % (installer.mantidInstaller, str(exc)))
 
-    log('Tests failed')
-    print('Tests failed')
+    log("Tests failed")
+    print("Tests failed")
     sys.exit(1)
 
 
 def scriptfailure(txt, installer=None):
-    '''Report failure of this script, try to uninstall package and exit with code 1 '''
+    """Report failure of this script, try to uninstall package and exit with code 1"""
     if txt:
         log(txt)
     if installer is not None:
@@ -75,18 +75,19 @@ def get_installer(package_dir, do_install=True):
         @param do_install :: True if installation is to be performed
     """
     import os
-    if os.environ.get('MANTID_FRAMEWORK_CONDA_SYSTEMTEST'):
+
+    if os.environ.get("MANTID_FRAMEWORK_CONDA_SYSTEMTEST"):
         return CondaInstaller(package_dir, do_install)
     else:
         raise scriptfailure("Unsupported platform")
 
+
 def run(cmd):
     """Run a command in a subprocess"""
     try:
-        stdout = subprocess.check_output(cmd, shell=True,
-                                         stderr=subprocess.STDOUT).decode('utf-8')
+        stdout = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT).decode("utf-8")
     except subprocess.CalledProcessError as exc:
-        log(f'Error in subprocess {exc}')
+        log(f"Error in subprocess {exc}")
         raise
     log(stdout)
     return stdout
@@ -96,13 +97,13 @@ class MantidInstaller(object):
     """
     Base-class for installer objects
     """
+
     mantidInstaller = None
     no_uninstall = False
     python_cmd = None
     python_args = "--classic"
 
-    def __init__(self, package_dir, filepattern,
-                 do_install):
+    def __init__(self, package_dir, filepattern, do_install):
         """Initialized with a pattern to
         find a path to an installer
         """
@@ -150,28 +151,27 @@ class CondaInstaller(MantidInstaller):
         self.python_cmd = sys.executable
 
     def do_install(self):
-        """Uses gdebi to run the install
-        """
+        """Uses gdebi to run the install"""
         thisdir = os.path.dirname(__file__)
-        script = os.path.join(thisdir, 'install_conda_mantid.sh')
-        run('%s %s' % (script, self.mantidInstaller))
+        script = os.path.join(thisdir, "install_conda_mantid.sh")
+        run("%s %s" % (script, self.mantidInstaller))
 
     def do_uninstall(self):
-        """Removes the conda package
-        """
+        """Removes the conda package"""
         # run('rm -rf %s' % self.conda_mantid_env_prefix)
 
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Main
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # If called as a standalone script then this can be used to install/uninstall
 # Mantid
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser(description="Commands available: install, uninstall")
-    parser.add_argument('command', choices=['install', 'uninstall'], help='command to run')
-    parser.add_argument('directory', help='package directory')
+    parser.add_argument("command", choices=["install", "uninstall"], help="command to run")
+    parser.add_argument("directory", help="package directory")
 
     options = parser.parse_args()
 

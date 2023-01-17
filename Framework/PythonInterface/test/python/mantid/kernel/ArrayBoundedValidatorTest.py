@@ -12,16 +12,15 @@ from mantid.api import PythonAlgorithm
 
 
 class ArrayBoundedValidatorTest(unittest.TestCase):
-
     def test_empty_constructor_gives_no_lower_upper_bound_set(self):
         validator = FloatArrayBoundedValidator()
         self.assertFalse(validator.hasLower())
         self.assertFalse(validator.hasUpper())
 
     def test_exclusive_constructor(self):
-        validator = FloatArrayBoundedValidator(lower=-1., upper=3., exclusive=True)
-        self.assertEqual(validator.lower(), -1.)
-        self.assertEqual(validator.upper(), 3.)
+        validator = FloatArrayBoundedValidator(lower=-1.0, upper=3.0, exclusive=True)
+        self.assertEqual(validator.lower(), -1.0)
+        self.assertEqual(validator.upper(), 3.0)
         self.assertTrue(validator.isLowerExclusive())
         self.assertTrue(validator.isUpperExclusive())
 
@@ -55,28 +54,31 @@ class ArrayBoundedValidatorTest(unittest.TestCase):
         self.assertFalse(validator.hasLower())
         self.assertFalse(validator.hasUpper())
 
-
     def test_values_within_array_bounds_are_accepted_by_validator(self):
-       alg = self._create_alg_with_ArrayBoundedValidator(5.1, 10.4)
-       input_vals = [5.1, 5.6, 10.4, 9.2]
-       testhelpers.assertRaisesNothing(self, alg.setProperty, "Input", input_vals)
+        alg = self._create_alg_with_ArrayBoundedValidator(5.1, 10.4)
+        input_vals = [5.1, 5.6, 10.4, 9.2]
+        testhelpers.assertRaisesNothing(self, alg.setProperty, "Input", input_vals)
 
     def test_values_lower_than_array_bounds_are_not_accepted_by_validator(self):
-       alg = self._create_alg_with_ArrayBoundedValidator(5.1, 10.4)
-       input_vals = [5.4, 6.2, 1.3]
-       self.assertRaises(ValueError, alg.setProperty, "Input", input_vals)
+        alg = self._create_alg_with_ArrayBoundedValidator(5.1, 10.4)
+        input_vals = [5.4, 6.2, 1.3]
+        self.assertRaises(ValueError, alg.setProperty, "Input", input_vals)
 
     def test_values_greater_than_array_bounds_are_not_accepted_by_validator(self):
-       alg = self._create_alg_with_ArrayBoundedValidator(5.1, 10.4)
-       input_vals = [5.4, 20.1, 8.3, ]
-       self.assertRaises(ValueError, alg.setProperty, "Input", input_vals)
+        alg = self._create_alg_with_ArrayBoundedValidator(5.1, 10.4)
+        input_vals = [
+            5.4,
+            20.1,
+            8.3,
+        ]
+        self.assertRaises(ValueError, alg.setProperty, "Input", input_vals)
 
     def _create_alg_with_ArrayBoundedValidator(self, lower, upper):
         """
-            Creates a test algorithm with a bounded validator
+        Creates a test algorithm with a bounded validator
         """
-        class TestAlgorithm(PythonAlgorithm):
 
+        class TestAlgorithm(PythonAlgorithm):
             def PyInit(self):
                 validator = FloatArrayBoundedValidator(lower, upper)
                 self.declareProperty(FloatArrayProperty("Input", validator))
@@ -88,5 +90,6 @@ class ArrayBoundedValidatorTest(unittest.TestCase):
         alg.initialize()
         return alg
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

@@ -16,7 +16,6 @@ class PlottingViewMeta(type(QtWidgets.QWidget), abc.ABCMeta):
 
 
 class PlottingCanvasViewInterface(metaclass=PlottingViewMeta):
-
     @property
     @abc.abstractmethod
     def num_plotted_workspaces(self):
@@ -87,7 +86,7 @@ class PlottingCanvasViewInterface(metaclass=PlottingViewMeta):
     @abc.abstractmethod
     def remove_workspace_from_plot(self, workspace):
         """Remove a list of workspaces to the plot - The workspaces are contained in a list PlotInformation
-           The PlotInformation contains the workspace name, workspace index and target axis."""
+        The PlotInformation contains the workspace name, workspace index and target axis."""
         pass
 
     @abc.abstractmethod

@@ -21,7 +21,7 @@ TextPropertyWidget::TextPropertyWidget(Mantid::Kernel::Property *prop, QWidget *
   m_label = new QLabel(QString::fromStdString(prop->name()), m_parent);
   m_label->setToolTip(m_doc);
   setLabelFont(prop, m_label);
-  m_gridLayout->addWidget(m_label, m_row, 0, nullptr);
+  m_gridLayout->addWidget(m_label, m_row, 0);
   m_widgets.push_back(m_label);
 
   // Text box at column 1
@@ -32,7 +32,7 @@ TextPropertyWidget::TextPropertyWidget(Mantid::Kernel::Property *prop, QWidget *
   this->setValue(QString::fromStdString(m_prop->value()));
   // Make sure the connection comes after updating any values
   connect(m_textbox, SIGNAL(editingFinished()), this, SLOT(userEditedProperty()));
-  m_gridLayout->addWidget(m_textbox, m_row, 1, nullptr);
+  m_gridLayout->addWidget(m_textbox, m_row, 1);
   m_widgets.push_back(m_textbox);
 
   // Check if this is a masked property

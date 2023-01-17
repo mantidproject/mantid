@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.kernel import DateAndTime
-from mantid.geometry import(Component, Detector, Instrument, ObjComponent, ReferenceFrame)
+from mantid.geometry import Component, Detector, Instrument, ObjComponent, ReferenceFrame
 from testhelpers import can_be_instantiated, WorkspaceCreationHelper
 
 
@@ -16,8 +16,7 @@ class InstrumentTest(unittest.TestCase):
 
     def setUp(self):
         if self.__testws is None:
-            self.__class__.__testws = \
-                WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(1,1)
+            self.__class__.__testws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(1, 1)
 
     def test_Instrument_cannot_be_instantiated(self):
         self.assertFalse(can_be_instantiated(Instrument))
@@ -59,5 +58,6 @@ class InstrumentTest(unittest.TestCase):
         base_inst = inst.getBaseInstrument()
         self.assertEqual("testInst", base_inst.getName())
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

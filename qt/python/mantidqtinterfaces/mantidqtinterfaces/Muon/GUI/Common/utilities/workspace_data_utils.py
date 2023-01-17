@@ -30,8 +30,9 @@ def is_equal_to_n_decimals(value1: float, value2: float, n_decimals: int) -> boo
     return f"{value1:.{n_decimals}f}" == f"{value2:.{n_decimals}f}"
 
 
-def _check_start_x_is_valid(x_lower: float, x_upper: float, view_start_x: float, view_end_x: float,
-                            model_start_x: float, check_is_equal: bool = True) -> tuple:
+def _check_start_x_is_valid(
+    x_lower: float, x_upper: float, view_start_x: float, view_end_x: float, model_start_x: float, check_is_equal: bool = True
+) -> tuple:
     """Check that the start x is valid. If it isn't, the exclude range is adjusted to be valid."""
     if view_start_x < x_lower:
         new_start_x, new_end_x = x_lower, view_end_x
@@ -50,8 +51,9 @@ def _check_start_x_is_valid(x_lower: float, x_upper: float, view_start_x: float,
     return new_start_x, new_end_x
 
 
-def _check_end_x_is_valid(x_lower: float, x_upper: float, view_start_x: float, view_end_x: float, model_end_x: float,
-                          check_is_equal: bool = True) -> tuple:
+def _check_end_x_is_valid(
+    x_lower: float, x_upper: float, view_start_x: float, view_end_x: float, model_end_x: float, check_is_equal: bool = True
+) -> tuple:
     """Check that the exclude end x is valid. If it isn't, the exclude range is adjusted to be valid."""
     if view_end_x < x_lower:
         if not is_equal_to_n_decimals(view_start_x, x_lower, 3):
@@ -82,22 +84,21 @@ def check_end_x_is_valid(workspace_name: str, view_start_x: float, view_end_x: f
     return _check_end_x_is_valid(x_lower, x_upper, view_start_x, view_end_x, model_end_x)
 
 
-def check_exclude_start_x_is_valid(x_lower: float, x_upper: float, view_exclude_start_x: float,
-                                   view_exclude_end_x: float, model_exclude_start_x: float) -> tuple:
+def check_exclude_start_x_is_valid(
+    x_lower: float, x_upper: float, view_exclude_start_x: float, view_exclude_end_x: float, model_exclude_start_x: float
+) -> tuple:
     """Check that the exclude start x is valid. If it isn't, the exclude range is adjusted to be valid."""
-    return _check_start_x_is_valid(x_lower, x_upper, view_exclude_start_x, view_exclude_end_x, model_exclude_start_x,
-                                   check_is_equal=False)
+    return _check_start_x_is_valid(x_lower, x_upper, view_exclude_start_x, view_exclude_end_x, model_exclude_start_x, check_is_equal=False)
 
 
-def check_exclude_end_x_is_valid(x_lower: float, x_upper: float, view_exclude_start_x: float, view_exclude_end_x: float,
-                                 model_exclude_end_x: float) -> tuple:
+def check_exclude_end_x_is_valid(
+    x_lower: float, x_upper: float, view_exclude_start_x: float, view_exclude_end_x: float, model_exclude_end_x: float
+) -> tuple:
     """Check that the exclude end x is valid. If it isn't, the exclude range is adjusted to be valid."""
-    return _check_end_x_is_valid(x_lower, x_upper, view_exclude_start_x, view_exclude_end_x, model_exclude_end_x,
-                                 check_is_equal=False)
+    return _check_end_x_is_valid(x_lower, x_upper, view_exclude_start_x, view_exclude_end_x, model_exclude_end_x, check_is_equal=False)
 
 
-def check_exclude_start_and_end_x_is_valid(x_lower: float, x_upper: float, exclude_start_x: float,
-                                           exclude_end_x: float) -> tuple:
+def check_exclude_start_and_end_x_is_valid(x_lower: float, x_upper: float, exclude_start_x: float, exclude_end_x: float) -> tuple:
     """Check that the new exclude start and end X are valid. If not they are adjusted."""
     if exclude_start_x < x_lower or exclude_start_x > x_upper:
         exclude_start_x = x_upper

@@ -11,21 +11,20 @@ from mantidqtinterfaces.Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget im
 
 
 class AddFittingTest(unittest.TestCase):
-
     def setUp(self):
         self.GUI = mock.Mock()
         self.GUI.fitting_tab = mock.MagicMock(autospec=FittingTabWidget)
 
     def test_get_features_success(self):
-        test = {"fit_wizard":1}
+        test = {"fit_wizard": 1}
         AddFitting(self.GUI, test)
         self.GUI.fitting_tab.show_fit_script_generator.assert_called_once_with()
 
     def test_get_features_fail(self):
-        test = {"fit_wizard":0}
+        test = {"fit_wizard": 0}
         AddFitting(self.GUI, test)
         self.GUI.fitting_tab.show_fit_script_generator.assert_not_called()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

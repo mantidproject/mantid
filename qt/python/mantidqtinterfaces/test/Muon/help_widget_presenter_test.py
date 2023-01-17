@@ -23,11 +23,11 @@ class HelpWidgetPresenterTest(unittest.TestCase):
     def tearDown(self):
         self.view = None
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.help_widget.help_widget_view.manageuserdirectories.ManageUserDirectories')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.Common.help_widget.help_widget_view.manageuserdirectories.ManageUserDirectories")
     def test_that_manage_directories_button_clicked_opens_directory_manager(self, mud_mock):
         self.view.manage_user_dir_button.clicked.emit(True)
         self.assertEqual(1, mud_mock.openManageUserDirectories.call_count)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

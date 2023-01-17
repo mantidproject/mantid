@@ -252,7 +252,12 @@ if __name__ == "__main__":
                     increment=int(changed),
                 )
                 (facility_added, found_added) = _assign_change_to_facility(
-                    domains=domains, changes=email_changes, year=year, date_key=date_key, facility_dict=facility_added, increment=int(added)
+                    domains=domains,
+                    changes=email_changes,
+                    year=year,
+                    date_key=date_key,
+                    facility_dict=facility_added,
+                    increment=int(added),
                 )
                 (facility_removed, found_removed) = _assign_change_to_facility(
                     domains=domains,

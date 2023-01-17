@@ -123,7 +123,7 @@ public:
   void testInstrumentSettingsWithPreviewRow() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto result = Reduction::createAlgorithmRuntimeProps(model, makePreviewRow());
-    checkMatchesInstrument(*result);
+    checkMatchesInstrument(*result, true);
   }
 
   void testSettingsForSlicingWithEmptyRow() {
@@ -398,7 +398,7 @@ private:
     TS_ASSERT_EQUALS(result.getPropertyValue("BackgroundProcessingInstructions"), "3,7");
   }
 
-  void checkMatchesInstrument(IAlgorithmRuntimeProps const &result) {
+  void checkMatchesInstrument(IAlgorithmRuntimeProps const &result, bool isPreview = false) {
     assertProperty(result, "WavelengthMin", 2.3);
     assertProperty(result, "WavelengthMax", 14.4);
     TS_ASSERT_EQUALS(result.getPropertyValue("I0MonitorIndex"), "2");
@@ -409,6 +409,12 @@ private:
     assertProperty(result, "MonitorIntegrationWavelengthMax", 10.8);
     TS_ASSERT_EQUALS(result.getPropertyValue("CorrectDetectors"), "1");
     TS_ASSERT_EQUALS(result.getPropertyValue("DetectorCorrectionType"), "RotateAroundSample");
+    if (isPreview) {
+      auto props = result.getDeclaredPropertyNames();
+      TS_ASSERT(std::none_of(props.begin(), props.end(), [](std::string prop) { return prop == "CalibrationFile"; }));
+    } else {
+      TS_ASSERT_EQUALS(result.getPropertyValue("CalibrationFile"), "test/calib_file.dat");
+    }
   }
 
   void checkMatchesSlicing(IAlgorithmRuntimeProps const &result) { assertProperty(result, "TimeInterval", 123.4); }

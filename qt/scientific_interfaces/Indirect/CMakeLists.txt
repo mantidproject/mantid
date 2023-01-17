@@ -81,6 +81,8 @@ set(SRC_FILES
     IndirectTransmissionCalc.cpp
     InelasticDataManipulation.cpp
     InelasticDataManipulationElwinTab.cpp
+    InelasticDataManipulationElwinTabModel.cpp
+    InelasticDataManipulationElwinTabView.cpp
     InelasticDataManipulationIqtTab.cpp
     InelasticDataManipulationMomentsTab.cpp
     InelasticDataManipulationMomentsTabModel.cpp
@@ -166,6 +168,8 @@ set(MOC_FILES
     IndirectFitPropertyBrowser.h
     InelasticDataManipulation.h
     InelasticDataManipulationElwinTab.h
+    InelasticDataManipulationElwinTabModel.h
+    InelasticDataManipulationElwinTabView.h
     InelasticDataManipulationIqtTab.h
     InelasticDataManipulationMomentsTab.h
     InelasticDataManipulationMomentsTabView.h
@@ -173,7 +177,6 @@ set(MOC_FILES
     InelasticDataManipulationSqwTabView.h
     InelasticDataManipulationSymmetriseTab.h
     InelasticDataManipulationSymmetriseTabView.h
-    InelasticDataManipulationSymmetriseTabModel.h
     InelasticDataManipulationTab.h
     ISISCalibration.h
     ISISDiagnostics.h
@@ -202,6 +205,7 @@ set(INC_FILES
     IndirectSettingsHelper.h
     InelasticDataManipulationMomentsTabModel.h
     InelasticDataManipulationSqwTabModel.h
+    InelasticDataManipulationSymmetriseTabModel.h
     IqtFitModel.h
     MSDFitModel.h
     Notifier.h

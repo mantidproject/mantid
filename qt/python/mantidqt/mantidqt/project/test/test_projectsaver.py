@@ -39,8 +39,8 @@ class ProjectSaverTest(unittest.TestCase):
         ADS.addOrReplace(ws1_name, CreateSampleWorkspace(OutputWorkspace=ws1_name))
         project_saver = projectsaver.ProjectSaver(project_file_ext)
 
-        workspaces_string = "\"workspaces\": [\"ws1\"]"
-        plots_string = "\"plots\": []"
+        workspaces_string = '"workspaces": ["ws1"]'
+        plots_string = '"plots": []'
 
         project_saver.save_project(workspace_to_save=[ws1_name], file_name=working_project_file)
 
@@ -69,11 +69,10 @@ class ProjectSaverTest(unittest.TestCase):
         CreateSampleWorkspace(OutputWorkspace=ws5_name)
         project_saver = projectsaver.ProjectSaver(project_file_ext)
 
-        workspaces_string = "\"workspaces\": [\"ws1\", \"ws2\", \"ws3\", \"ws4\", \"ws5\"]"
-        plots_string = "\"plots\": []"
+        workspaces_string = '"workspaces": ["ws1", "ws2", "ws3", "ws4", "ws5"]'
+        plots_string = '"plots": []'
 
-        project_saver.save_project(workspace_to_save=[ws1_name, ws2_name, ws3_name, ws4_name, ws5_name],
-                                   file_name=working_project_file)
+        project_saver.save_project(workspace_to_save=[ws1_name, ws2_name, ws3_name, ws4_name, ws5_name], file_name=working_project_file)
 
         # Check project file is saved correctly
         f = open(working_project_file, "r")
@@ -100,8 +99,8 @@ class ProjectSaverTest(unittest.TestCase):
         CreateSampleWorkspace(OutputWorkspace=ws3_name)
         project_saver = projectsaver.ProjectSaver(project_file_ext)
 
-        workspaces_string = "\"workspaces\": [\"ws1\"]"
-        plots_string = "\"plots\": []"
+        workspaces_string = '"workspaces": ["ws1"]'
+        plots_string = '"plots": []'
 
         project_saver.save_project(workspace_to_save=[ws1_name], file_name=working_project_file)
 
@@ -125,28 +124,32 @@ class ProjectSaverTest(unittest.TestCase):
 
         project_saver = projectsaver.ProjectSaver(project_file_ext)
 
-        project_saver.save_project(file_name=working_project_file,
-                                   plots_to_save={1: fig_manager})
+        project_saver.save_project(file_name=working_project_file, plots_to_save={1: fig_manager})
 
-        plots_dict = {u"creationArguments": [], u"axes": [], u"label": u"", u"properties": {u"figWidth": 6.4,
-                                                                                            u"figHeight": 4.8,
-                                                                                            u"dpi": 100.0}}
+        plots_dict = {"creationArguments": [], "axes": [], "label": "", "properties": {"figWidth": 6.4, "figHeight": 4.8, "dpi": 100.0}}
 
         f = open(working_project_file, "r")
         file_dict = json.load(f)
         self.assertDictEqual(plots_dict, file_dict["plots"][0])
 
-    @mock.patch('mantidqt.project.projectsaver.ProjectWriter')
+    @mock.patch("mantidqt.project.projectsaver.ProjectWriter")
     def test_save_workspaces_path_when_false(self, pwriter):
-        CreateSampleWorkspace(OutputWorkspace='ws1')
-        file_ext = '.recfile'
+        CreateSampleWorkspace(OutputWorkspace="ws1")
+        file_ext = ".recfile"
         saver = projectsaver.ProjectSaver(file_ext)
 
         saver.save_project(file_name=working_project_file, project_recovery=False)
 
-        self.assertEqual(pwriter.call_args, mock.call(interfaces_to_save=[], plots_to_save=[],
-                                                      project_file_ext=file_ext, save_location=working_project_file,
-                                                      workspace_names=['ws1']))
+        self.assertEqual(
+            pwriter.call_args,
+            mock.call(
+                interfaces_to_save=[],
+                plots_to_save=[],
+                project_file_ext=file_ext,
+                save_location=working_project_file,
+                workspace_names=["ws1"],
+            ),
+        )
 
 
 class ProjectWriterTest(unittest.TestCase):
@@ -164,15 +167,19 @@ class ProjectWriterTest(unittest.TestCase):
         workspace_list = []
         plots_to_save = []
         interfaces_to_save = []
-        project_writer = projectsaver.ProjectWriter(save_location=working_project_file, workspace_names=workspace_list,
-                                                    project_file_ext=project_file_ext, plots_to_save=plots_to_save,
-                                                    interfaces_to_save=interfaces_to_save)
-        workspaces_string = "\"workspaces\": []"
-        plots_string = "\"plots\": []"
+        project_writer = projectsaver.ProjectWriter(
+            save_location=working_project_file,
+            workspace_names=workspace_list,
+            project_file_ext=project_file_ext,
+            plots_to_save=plots_to_save,
+            interfaces_to_save=interfaces_to_save,
+        )
+        workspaces_string = '"workspaces": []'
+        plots_string = '"plots": []'
 
         project_writer.write_out()
 
-        with open(working_project_file, 'r') as f:
+        with open(working_project_file, "r") as f:
             file_string = f.read()
         self.assertTrue(workspaces_string in file_string)
         self.assertTrue(plots_string in file_string)
@@ -181,14 +188,18 @@ class ProjectWriterTest(unittest.TestCase):
         plots_to_save = []
         workspace_list = ["ws1", "ws2", "ws3", "ws4"]
         interfaces_to_save = []
-        project_writer = projectsaver.ProjectWriter(save_location=working_project_file, workspace_names=workspace_list,
-                                                    project_file_ext=project_file_ext, plots_to_save=plots_to_save,
-                                                    interfaces_to_save=interfaces_to_save)
-        workspaces_string = "\"workspaces\": [\"ws1\", \"ws2\", \"ws3\", \"ws4\"]"
-        plots_string = "\"plots\": []"
+        project_writer = projectsaver.ProjectWriter(
+            save_location=working_project_file,
+            workspace_names=workspace_list,
+            project_file_ext=project_file_ext,
+            plots_to_save=plots_to_save,
+            interfaces_to_save=interfaces_to_save,
+        )
+        workspaces_string = '"workspaces": ["ws1", "ws2", "ws3", "ws4"]'
+        plots_string = '"plots": []'
 
         project_writer.write_out()
-        with open(working_project_file, 'r') as f:
+        with open(working_project_file, "r") as f:
             file_string = f.read()
         self.assertTrue(workspaces_string in file_string)
         self.assertTrue(plots_string in file_string)
@@ -197,15 +208,19 @@ class ProjectWriterTest(unittest.TestCase):
         plots_to_save = [{"plots1": {"plot-information": "axes data"}}]
         workspace_list = []
         interfaces_to_save = []
-        project_writer = projectsaver.ProjectWriter(save_location=working_project_file, workspace_names=workspace_list,
-                                                    project_file_ext=project_file_ext, plots_to_save=plots_to_save,
-                                                    interfaces_to_save=interfaces_to_save)
-        workspaces_string = "\"workspaces\": []"
-        plots_string = "\"plots\": [{\"plots1\": {\"plot-information\": \"axes data\"}}]"
+        project_writer = projectsaver.ProjectWriter(
+            save_location=working_project_file,
+            workspace_names=workspace_list,
+            project_file_ext=project_file_ext,
+            plots_to_save=plots_to_save,
+            interfaces_to_save=interfaces_to_save,
+        )
+        workspaces_string = '"workspaces": []'
+        plots_string = '"plots": [{"plots1": {"plot-information": "axes data"}}]'
 
         project_writer.write_out()
 
-        with open(working_project_file, 'r') as f:
+        with open(working_project_file, "r") as f:
             file_string = f.read()
         self.assertTrue(workspaces_string in file_string)
         self.assertTrue(plots_string in file_string)
@@ -214,15 +229,19 @@ class ProjectWriterTest(unittest.TestCase):
         plots_to_save = [{"plots1": {"plot-information": "axes data"}}]
         workspace_list = ["ws1", "ws2", "ws3", "ws4"]
         interfaces_to_save = []
-        project_writer = projectsaver.ProjectWriter(save_location=working_project_file, workspace_names=workspace_list,
-                                                    project_file_ext=project_file_ext, plots_to_save=plots_to_save,
-                                                    interfaces_to_save=interfaces_to_save)
-        workspaces_string = "\"workspaces\": [\"ws1\", \"ws2\", \"ws3\", \"ws4\"]"
-        plots_string = "\"plots\": [{\"plots1\": {\"plot-information\": \"axes data\"}}]"
+        project_writer = projectsaver.ProjectWriter(
+            save_location=working_project_file,
+            workspace_names=workspace_list,
+            project_file_ext=project_file_ext,
+            plots_to_save=plots_to_save,
+            interfaces_to_save=interfaces_to_save,
+        )
+        workspaces_string = '"workspaces": ["ws1", "ws2", "ws3", "ws4"]'
+        plots_string = '"plots": [{"plots1": {"plot-information": "axes data"}}]'
 
         project_writer.write_out()
 
-        with open(working_project_file, 'r') as f:
+        with open(working_project_file, "r") as f:
             file_string = f.read()
         self.assertTrue(workspaces_string in file_string)
         self.assertTrue(plots_string in file_string)
@@ -231,31 +250,39 @@ class ProjectWriterTest(unittest.TestCase):
         plots_to_save = []
         workspace_list = []
         interfaces_to_save = [{"interface1": {"interface data": "data"}}]
-        project_writer = projectsaver.ProjectWriter(save_location=working_project_file, workspace_names=workspace_list,
-                                                    project_file_ext=project_file_ext, plots_to_save=plots_to_save,
-                                                    interfaces_to_save=interfaces_to_save)
-        workspaces_string = "\"workspaces\": []"
-        plots_string = "\"plots\": []"
-        interface_string = "\"interfaces\": [{\"interface1\": {\"interface data\": \"data\"}}]"
+        project_writer = projectsaver.ProjectWriter(
+            save_location=working_project_file,
+            workspace_names=workspace_list,
+            project_file_ext=project_file_ext,
+            plots_to_save=plots_to_save,
+            interfaces_to_save=interfaces_to_save,
+        )
+        workspaces_string = '"workspaces": []'
+        plots_string = '"plots": []'
+        interface_string = '"interfaces": [{"interface1": {"interface data": "data"}}]'
 
         project_writer.write_out()
 
-        with open(working_project_file, 'r') as f:
+        with open(working_project_file, "r") as f:
             file_string = f.read()
         self.assertTrue(workspaces_string in file_string)
         self.assertTrue(plots_string in file_string)
         self.assertTrue(interface_string in file_string)
 
-    @mock.patch('mantidqt.project.projectsaver.logger')
+    @mock.patch("mantidqt.project.projectsaver.logger")
     def test_exception_in_open_logs_error(self, mock_logger):
         workspace_list = []
         plots_to_save = []
         interfaces_to_save = []
-        project_writer = projectsaver.ProjectWriter(save_location=working_project_file, workspace_names=workspace_list,
-                                                    project_file_ext=project_file_ext, plots_to_save=plots_to_save,
-                                                    interfaces_to_save=interfaces_to_save)
+        project_writer = projectsaver.ProjectWriter(
+            save_location=working_project_file,
+            workspace_names=workspace_list,
+            project_file_ext=project_file_ext,
+            plots_to_save=plots_to_save,
+            interfaces_to_save=interfaces_to_save,
+        )
         mock_open = mock.mock_open()
-        with mock.patch('mantidqt.project.projectsaver.open', mock_open):
+        with mock.patch("mantidqt.project.projectsaver.open", mock_open):
             mock_open.side_effect = OSError
             project_writer.write_out()
 

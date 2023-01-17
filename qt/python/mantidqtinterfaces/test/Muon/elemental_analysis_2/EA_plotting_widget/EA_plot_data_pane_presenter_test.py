@@ -3,8 +3,9 @@ from unittest import mock
 
 from mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.plotting_widget.EA_plotting_pane.EA_plot_data_pane_model import EAPlotDataPaneModel
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.base_pane.base_pane_view import BasePaneView
-from mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.plotting_widget.EA_plotting_pane.EA_plot_data_pane_presenter import \
-    EAPlotDataPanePresenter
+from mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.plotting_widget.EA_plotting_pane.EA_plot_data_pane_presenter import (
+    EAPlotDataPanePresenter,
+)
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter import PlottingCanvasPresenter
 from mantid import AnalysisDataService
 
@@ -13,7 +14,6 @@ from mantidqt.utils.qt.testing import start_qapplication
 
 @start_qapplication
 class EAPlotDataPanePresenterTest(unittest.TestCase):
-
     def setUp(self):
         self.context = mock.MagicMock()
         self.model = mock.Mock(spec=EAPlotDataPaneModel)
@@ -24,8 +24,9 @@ class EAPlotDataPanePresenterTest(unittest.TestCase):
 
         self.context.group_context.selected_groups = ["9999; Detector 1"]
 
-        self.presenter = EAPlotDataPanePresenter(view=self.view, model=self.model, context=self.context,
-                                                 figure_presenter=self.figure_presenter)
+        self.presenter = EAPlotDataPanePresenter(
+            view=self.view, model=self.model, context=self.context, figure_presenter=self.figure_presenter
+        )
 
     def tearDown(self):
         AnalysisDataService.Instance().clear()
@@ -40,8 +41,7 @@ class EAPlotDataPanePresenterTest(unittest.TestCase):
         self.figure_presenter.force_autoscale.assert_called_once()
 
     def test_handle_data_updated(self):
-        self.model.get_workspace_list_and_indices_to_plot.return_value = ["9999; Detector 2", "9999; Detector 3"], [0,
-                                                                                                                    0]
+        self.model.get_workspace_list_and_indices_to_plot.return_value = ["9999; Detector 2", "9999; Detector 3"], [0, 0]
         self.presenter.add_list_to_plot = mock.Mock()
         self.view.is_raw_plot.return_value = True
         self.view.get_plot_type.return_value = "Delayed"
@@ -49,8 +49,9 @@ class EAPlotDataPanePresenterTest(unittest.TestCase):
         self.presenter.handle_data_updated(True, False)
 
         self.model.get_workspace_list_and_indices_to_plot.assert_called_once_with(True, "Delayed")
-        self.presenter.add_list_to_plot.assert_called_once_with(["9999; Detector 2", "9999; Detector 3"], [0, 0],
-                                                                hold=False, autoscale=True)
+        self.presenter.add_list_to_plot.assert_called_once_with(
+            ["9999; Detector 2", "9999; Detector 3"], [0, 0], hold=False, autoscale=True
+        )
 
     def test_handle_added_or_removed_group_to_plot_add(self):
         self.presenter.handle_added_group_to_plot = mock.Mock()
@@ -104,5 +105,5 @@ class EAPlotDataPanePresenterTest(unittest.TestCase):
         self.presenter.handle_data_updated.assert_not_called()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

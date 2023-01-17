@@ -56,7 +56,7 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool observeADS)
     : QWidget(parent), m_canvas{new FigureCanvasQt(111, MANTID_PROJECTION, parent)}, m_panZoomTool(m_canvas),
       m_wsRemovedObserver(*this, &PreviewPlot::onWorkspaceRemoved),
       m_wsReplacedObserver(*this, &PreviewPlot::onWorkspaceReplaced), m_axis("both"), m_style("sci"), m_useOffset(true),
-      m_xAxisScale("linear"), m_yAxisScale("linear") {
+      m_xAxisScale("linear"), m_yAxisScale("linear"), m_redrawOnPaint(false) {
   createLayout();
   createActions();
 
@@ -310,7 +310,7 @@ std::tuple<double, double> PreviewPlot::getAxisRange(AxisID axisID) {
 void PreviewPlot::replot() {
   if (m_allowRedraws) {
     m_canvas->drawIdle();
-    emit redraw();
+    m_redrawOnPaint = true;
   }
 }
 
@@ -413,6 +413,12 @@ bool PreviewPlot::eventFilter(QObject *watched, QEvent *evt) {
     break;
   case QEvent::Resize:
     stopEvent = handleWindowResizeEvent();
+    break;
+  case QEvent::Paint:
+    if (m_redrawOnPaint) {
+      m_redrawOnPaint = false;
+      emit redraw();
+    }
     break;
   default:
     break;
@@ -517,7 +523,7 @@ void PreviewPlot::createLayout() {
   auto plotLayout = new QVBoxLayout(this);
   plotLayout->setContentsMargins(0, 0, 0, 0);
   plotLayout->setSpacing(0);
-  plotLayout->addWidget(m_canvas, 0, 0);
+  plotLayout->addWidget(m_canvas, 0);
   setLayout(plotLayout);
 }
 

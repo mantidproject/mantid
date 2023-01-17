@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 """
     This class holds all the necessary information to create a reduction script.
     This is a fake version of the Reducer for testing purposes.
@@ -16,6 +16,7 @@ from reduction_gui.reduction.scripter import BaseReductionScripter
 HAS_MANTID = False
 try:
     import mantidplot  # noqa
+
     HAS_MANTID = True
 except:
     pass
@@ -23,9 +24,9 @@ except:
 
 class HFIRReductionScripter(BaseReductionScripter):
     """
-        Organizes the set of reduction parameters that will be used to
-        create a reduction script. Parameters are organized by groups that
-        will each have their own UI representation.
+    Organizes the set of reduction parameters that will be used to
+    create a reduction script. Parameters are organized by groups that
+    will each have their own UI representation.
     """
 
     def __init__(self, name="BIOSANS", settings=None):
@@ -34,8 +35,8 @@ class HFIRReductionScripter(BaseReductionScripter):
 
     def to_script(self, file_name=None):
         """
-            Spits out the text of a reduction script with the current state.
-            @param file_name: name of the file to write the script to
+        Spits out the text of a reduction script with the current state.
+        @param file_name: name of the file to write the script to
         """
         script = "# HFIR reduction script\n"
         script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
@@ -48,7 +49,7 @@ class HFIRReductionScripter(BaseReductionScripter):
             if item.state() is not None:
                 script += str(item.state())
 
-        xml_process = ''
+        xml_process = ""
         if file_name is None:
             xml_process = os.path.join(self._output_directory, "HFIRSANS_process.xml")
             xml_process = os.path.normpath(xml_process)
@@ -58,7 +59,7 @@ class HFIRReductionScripter(BaseReductionScripter):
         script += "Reduce()\n"
 
         if file_name is not None:
-            f = open(file_name, 'w')
+            f = open(file_name, "w")
             f.write(script)
             f.close()
 
@@ -66,7 +67,7 @@ class HFIRReductionScripter(BaseReductionScripter):
 
     def set_options(self):
         """
-            Set up the reduction options, without executing
+        Set up the reduction options, without executing
         """
         if HAS_MANTID:
             self.update()

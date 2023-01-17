@@ -23,12 +23,8 @@ from mantidqtinterfaces.dns_powder_tof.script_generator.\
 
 
 class DNSTofPowderScriptGeneratorWidget(DNSWidget):
-
     def __init__(self, name, parent):
         super().__init__(name, parent)
         self.view = DNSScriptGeneratorView(parent=parent.view)
         self.model = DNSTofPowderScriptGeneratorModel(parent=self)
-        self.presenter = DNSTofPowderScriptGeneratorPresenter(parent=self,
-                                                              view=self.view,
-                                                              model=self.model,
-                                                              name=name)
+        self.presenter = DNSTofPowderScriptGeneratorPresenter(parent=self, view=self.view, model=self.model, name=name)

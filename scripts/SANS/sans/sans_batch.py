@@ -7,8 +7,8 @@
 # pylint: disable=invalid-name
 """ SANBatchReduction algorithm is the starting point for any new type reduction, event single reduction"""
 from sans.state.AllStates import AllStates
-from sans.algorithm_detail.batch_execution import (single_reduction_for_batch)
-from sans.common.enums import (OutputMode, FindDirectionEnum, DetectorType)
+from sans.algorithm_detail.batch_execution import single_reduction_for_batch
+from sans.common.enums import OutputMode, FindDirectionEnum, DetectorType
 from sans.algorithm_detail.centre_finder_new import centre_finder_new, centre_finder_mass
 
 
@@ -16,8 +16,9 @@ class SANSBatchReduction(object):
     def __init__(self):
         super(SANSBatchReduction, self).__init__()
 
-    def __call__(self, states, use_optimizations=True, output_mode=OutputMode.PUBLISH_TO_ADS, plot_results = False,
-                 output_graph='', save_can=False):
+    def __call__(
+        self, states, use_optimizations=True, output_mode=OutputMode.PUBLISH_TO_ADS, plot_results=False, output_graph="", save_can=False
+    ):
         """
         This is the start of any reduction.
 
@@ -38,9 +39,9 @@ class SANSBatchReduction(object):
         out_scale_factors_list = []
         out_shift_factors_list = []
         for state in states:
-            out_scale_factors, out_shift_factors = \
-                single_reduction_for_batch(state, use_optimizations, output_mode, plot_results, output_graph,
-                                           save_can=save_can)
+            out_scale_factors, out_shift_factors = single_reduction_for_batch(
+                state, use_optimizations, output_mode, plot_results, output_graph, save_can=save_can
+            )
             out_shift_factors_list.append(out_shift_factors)
             out_scale_factors_list.append(out_scale_factors)
         return out_scale_factors_list, out_shift_factors_list
@@ -55,25 +56,25 @@ class SANSBatchReduction(object):
 
         for state in states:
             if not isinstance(state, AllStates):
-                raise RuntimeError("The entries have to be sans state objects. "
-                                   "The provided type is {0}".format(type(state)))
+                raise RuntimeError("The entries have to be sans state objects. " "The provided type is {0}".format(type(state)))
 
         if not isinstance(use_optimizations, bool):
-            raise RuntimeError("The optimization has to be a boolean. The provided type is"
-                               " {0}".format(type(use_optimizations)))
+            raise RuntimeError("The optimization has to be a boolean. The provided type is" " {0}".format(type(use_optimizations)))
 
         if not isinstance(plot_results, bool):
-            raise RuntimeError("The plot_result has to be a boolean. The provided type is"
-                               " {0}".format(type(plot_results)))
+            raise RuntimeError("The plot_result has to be a boolean. The provided type is" " {0}".format(type(plot_results)))
 
         if plot_results and not output_graph:
-            raise RuntimeError("The output_graph must be set if plot_results is true. The provided value is"
-                               " {0}".format(output_graph))
+            raise RuntimeError("The output_graph must be set if plot_results is true. The provided value is" " {0}".format(output_graph))
 
-        if output_mode is not OutputMode.PUBLISH_TO_ADS and output_mode is not OutputMode.SAVE_TO_FILE and\
-                        output_mode is not OutputMode.BOTH:  # noqa
-            raise RuntimeError("The output mode has to be an enum of type OutputMode. The provided type is"
-                               " {0}".format(type(output_mode)))
+        if (
+            output_mode is not OutputMode.PUBLISH_TO_ADS
+            and output_mode is not OutputMode.SAVE_TO_FILE
+            and output_mode is not OutputMode.BOTH
+        ):  # noqa
+            raise RuntimeError(
+                "The output mode has to be an enum of type OutputMode. The provided type is" " {0}".format(type(output_mode))
+            )
 
         errors = self._validate_inputs(states)
         if errors:
@@ -95,9 +96,20 @@ class SANSCentreFinder(object):
     def __init__(self):
         super(SANSCentreFinder, self).__init__()
 
-    def __call__(self, state, r_min = 60, r_max = 280, max_iter = 20, x_start = 0.0, y_start = 0.0,
-                 tolerance = 1.251e-4, find_direction = FindDirectionEnum.ALL, reduction_method = True, verbose=False,
-                 component=DetectorType.LAB):
+    def __call__(
+        self,
+        state,
+        r_min=60,
+        r_max=280,
+        max_iter=20,
+        x_start=0.0,
+        y_start=0.0,
+        tolerance=1.251e-4,
+        find_direction=FindDirectionEnum.ALL,
+        reduction_method=True,
+        verbose=False,
+        component=DetectorType.LAB,
+    ):
         """
         This is the start of the beam centre finder algorithm.
 
@@ -115,8 +127,9 @@ class SANSCentreFinder(object):
         self.validate_inputs(state, r_min, r_max, max_iter, x_start, y_start, tolerance)
 
         if reduction_method:
-            return self._execute_reduction_method(state, r_min, r_max, max_iter, x_start, y_start, tolerance,
-                                                  find_direction, verbose, component)
+            return self._execute_reduction_method(
+                state, r_min, r_max, max_iter, x_start, y_start, tolerance, find_direction, verbose, component
+            )
         else:
             return self._execute_mass_method(state, r_min, max_iter, x_start, y_start, tolerance, component)
 
@@ -138,32 +151,25 @@ class SANSCentreFinder(object):
         # 4. max_iter has to be an integer
 
         if not isinstance(state, AllStates):
-            raise RuntimeError("The entries have to be sans state objects. "
-                               "The provided type is {0}".format(type(state)))
+            raise RuntimeError("The entries have to be sans state objects. " "The provided type is {0}".format(type(state)))
 
         if not isinstance(r_min, float):
-            raise RuntimeError("The minimum radius has to be a float. The provided type is"
-                               " {0}".format(type(r_min)))
+            raise RuntimeError("The minimum radius has to be a float. The provided type is" " {0}".format(type(r_min)))
 
         if not isinstance(r_max, float):
-            raise RuntimeError("The maximum radius has to be a float. The provided type is"
-                               " {0}".format(type(r_max)))
+            raise RuntimeError("The maximum radius has to be a float. The provided type is" " {0}".format(type(r_max)))
 
         if not isinstance(xstart, float):
-            raise RuntimeError("The x starting position has to be a float. The provided type is"
-                               " {0}".format(type(xstart)))
+            raise RuntimeError("The x starting position has to be a float. The provided type is" " {0}".format(type(xstart)))
 
         if not isinstance(tolerance, float):
-            raise RuntimeError("The tolerance has to be a float. The provided type is"
-                               " {0}".format(type(tolerance)))
+            raise RuntimeError("The tolerance has to be a float. The provided type is" " {0}".format(type(tolerance)))
 
         if not isinstance(max_iter, int):
-            raise RuntimeError("The iteration number must be an integer. The provided type is"
-                               " {0}".format(type(max_iter)))
+            raise RuntimeError("The iteration number must be an integer. The provided type is" " {0}".format(type(max_iter)))
 
         if not isinstance(ystart, float):
-            raise RuntimeError("The y starting position has to be a float. The provided type is"
-                               " {0}".format(type(ystart)))
+            raise RuntimeError("The y starting position has to be a float. The provided type is" " {0}".format(type(ystart)))
 
         errors = self._validate_inputs(state)
         if errors:

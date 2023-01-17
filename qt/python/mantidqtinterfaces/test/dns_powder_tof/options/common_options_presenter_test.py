@@ -13,10 +13,8 @@ DNS TOF powder Options Presenter - Tab of DNS Reduction GUI.
 import unittest
 from unittest import mock
 
-from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import \
-    DNSObserver
-from mantidqtinterfaces.dns_powder_tof.options.common_options_presenter \
-    import DNSCommonOptionsPresenter
+from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import DNSObserver
+from mantidqtinterfaces.dns_powder_tof.options.common_options_presenter import DNSCommonOptionsPresenter
 
 
 class DNSCommonOptionsPresenterTest(unittest.TestCase):
@@ -30,10 +28,7 @@ class DNSCommonOptionsPresenterTest(unittest.TestCase):
         cls.parent = mock.Mock()
         cls.view = mock.Mock()
         cls.model = mock.Mock()
-        cls.presenter = DNSCommonOptionsPresenter(view=cls.view,
-                                                  model=cls.model,
-                                                  parent=cls.parent,
-                                                  name='common_options')
+        cls.presenter = DNSCommonOptionsPresenter(view=cls.view, model=cls.model, parent=cls.parent, name="common_options")
 
         cls.view.deactivate_get_wavelength = mock.Mock()
         cls.view.raise_error = mock.Mock()
@@ -47,17 +42,13 @@ class DNSCommonOptionsPresenterTest(unittest.TestCase):
         self.assertIsInstance(self.presenter, DNSObserver)
 
     def test_determine_wavelength(self):
-        self.presenter.param_dict = {'file_selector': {'full_data': []}}
+        self.presenter.param_dict = {"file_selector": {"full_data": []}}
         testv = self.presenter._determine_wavelength()
         self.view.raise_error.assert_called_once()
         self.view.raise_error.reset_mock()
         self.assertIsNone(testv)
-        self.presenter.param_dict = {'file_selector': {'full_data': [123]}}
-        self.model.determine_wavelength.return_value = [
-            4.74, {
-                'wavelength_varies': 1
-            }
-        ]
+        self.presenter.param_dict = {"file_selector": {"full_data": [123]}}
+        self.model.determine_wavelength.return_value = [4.74, {"wavelength_varies": 1}]
         testv = self.presenter._determine_wavelength()
         self.view.raise_error.assert_called_once()
         self.view.raise_error.reset_mock()
@@ -70,5 +61,5 @@ class DNSCommonOptionsPresenterTest(unittest.TestCase):
         self.assertEqual(testv, 4.74)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

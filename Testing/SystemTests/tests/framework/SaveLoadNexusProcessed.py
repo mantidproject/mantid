@@ -13,18 +13,18 @@ from mantid.dataobjects import MaskWorkspace
 
 
 def create_file_path(base_name):
-    temp_save_dir = config['defaultsave.directory']
-    if temp_save_dir == '':
+    temp_save_dir = config["defaultsave.directory"]
+    if temp_save_dir == "":
         temp_save_dir = os.getcwd()
-    filename = os.path.join(temp_save_dir, base_name + '.nxs')
+    filename = os.path.join(temp_save_dir, base_name + ".nxs")
     return filename
 
 
 class SaveLoadNexusProcessedTestBase(systemtesting.MantidSystemTest, metaclass=ABCMeta):
 
     filename = None
-    test_ws_name = 'input_ws'
-    loaded_ws_name = 'loaded'
+    test_ws_name = "input_ws"
+    loaded_ws_name = "loaded"
 
     @abstractmethod
     def createTestWorkspace(self):
@@ -59,31 +59,27 @@ class SaveLoadNexusProcessedTestBase(systemtesting.MantidSystemTest, metaclass=A
 
 
 class SaveLoadNexusProcessedBasicTest(SaveLoadNexusProcessedTestBase):
-
     def createTestWorkspace(self):
-        CreateSampleWorkspace(OutputWorkspace=self.test_ws_name, Function='Flat background',
-                              BankPixelWidth=1, XMax=15,
-                              BinWidth=0.75, NumBanks=4)
-        MaskBins(InputWorkspace=self.test_ws_name, OutputWorkspace=self.test_ws_name,
-                 XMin=0, XMax=2, SpectraList='0')
-        MaskBins(InputWorkspace=self.test_ws_name, OutputWorkspace=self.test_ws_name,
-                 XMin=0, XMax=1.5, SpectraList='1')
+        CreateSampleWorkspace(
+            OutputWorkspace=self.test_ws_name, Function="Flat background", BankPixelWidth=1, XMax=15, BinWidth=0.75, NumBanks=4
+        )
+        MaskBins(InputWorkspace=self.test_ws_name, OutputWorkspace=self.test_ws_name, XMin=0, XMax=2, SpectraList="0")
+        MaskBins(InputWorkspace=self.test_ws_name, OutputWorkspace=self.test_ws_name, XMin=0, XMax=1.5, SpectraList="1")
 
     def savedFilename(self):
-        return 'tmp_saveload_nexusprocessed_maskbins'
+        return "tmp_saveload_nexusprocessed_maskbins"
 
 
 class SaveLoadNexusProcessedMaskWorkspaceTest(SaveLoadNexusProcessedTestBase):
-
     def createTestWorkspace(self):
-        CreateSampleWorkspace(OutputWorkspace=self.test_ws_name, Function='Flat background',
-                              BankPixelWidth=1, XMax=15,
-                              BinWidth=0.75, NumBanks=4)
+        CreateSampleWorkspace(
+            OutputWorkspace=self.test_ws_name, Function="Flat background", BankPixelWidth=1, XMax=15, BinWidth=0.75, NumBanks=4
+        )
         MaskDetectors(Workspace=self.test_ws_name, WorkspaceIndexList=[1, 3])
         ExtractMask(InputWorkspace=self.test_ws_name, OutputWorkspace=self.test_ws_name)
 
     def savedFilename(self):
-        return 'tmp_saveload_nexusprocessed_maskworkspace'
+        return "tmp_saveload_nexusprocessed_maskworkspace"
 
     def validate(self):
         loaded_ws = AnalysisDataService.Instance()[self.loaded_ws_name]
@@ -92,28 +88,24 @@ class SaveLoadNexusProcessedMaskWorkspaceTest(SaveLoadNexusProcessedTestBase):
 
 
 class SaveLoadNexusProcessedEmptySampleNameTest(SaveLoadNexusProcessedTestBase):
-
     def createTestWorkspace(self):
-        CreateSampleWorkspace(OutputWorkspace=self.test_ws_name,
-                              BankPixelWidth=1, XMax=15.,
-                              BinWidth=15., NumBanks=1)
-        assert(mtd[self.test_ws_name].sample().getName() == '')
+        CreateSampleWorkspace(OutputWorkspace=self.test_ws_name, BankPixelWidth=1, XMax=15.0, BinWidth=15.0, NumBanks=1)
+        assert mtd[self.test_ws_name].sample().getName() == ""
 
     def savedFilename(self):
-        return 'tmp_saveload_nexusprocessed_emptysamplename'
+        return "tmp_saveload_nexusprocessed_emptysamplename"
 
     def validate(self):
         return self.compareWorkspaces()
 
 
 class SaveLoadNexusProcessedNoDetectorsSpectraNumbersTest(SaveLoadNexusProcessedTestBase):
-
     def createTestWorkspace(self):
-        ws = CreateWorkspace([0.], [-1., -2., -3.], NSpec=3, StoreInADS=False)
+        ws = CreateWorkspace([0.0], [-1.0, -2.0, -3.0], NSpec=3, StoreInADS=False)
         ExtractSingleSpectrum(ws, 1, OutputWorkspace=self.test_ws_name)
 
     def savedFilename(self):
-        return 'tmp_saveload_nexusprocessed_nodetectorsspectranumbers'
+        return "tmp_saveload_nexusprocessed_nodetectorsspectranumbers"
 
     def validate(self):
         return self.compareWorkspaces()

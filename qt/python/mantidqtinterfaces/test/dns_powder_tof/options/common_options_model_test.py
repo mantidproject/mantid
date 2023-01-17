@@ -13,11 +13,9 @@ DNS TOF powder Options Presenter - Tab of DNS Reduction GUI.
 import unittest
 from unittest import mock
 
-from mantidqtinterfaces.dns_powder_tof.data_structures.dns_obs_model import \
-    DNSObsModel
+from mantidqtinterfaces.dns_powder_tof.data_structures.dns_obs_model import DNSObsModel
 from mantidqtinterfaces.dns_powder_tof.options import common_options_model
-from mantidqtinterfaces.dns_powder_tof.options.common_options_model import \
-    DNSCommonOptionsModel
+from mantidqtinterfaces.dns_powder_tof.options.common_options_model import DNSCommonOptionsModel
 
 
 class DNSCommonOptionsModelTest(unittest.TestCase):
@@ -28,15 +26,10 @@ class DNSCommonOptionsModelTest(unittest.TestCase):
     def setUpClass(cls):
         cls.parent = mock.Mock
         cls.model = DNSCommonOptionsModel(parent=cls.parent)
-        cls.fulldata = [{
-            'det_rot': -5,
-            'selector_speed': 1000,
-            'wavelength': 47.4
-        }, {
-            'det_rot': -6,
-            'selector_speed': 200,
-            'wavelength': 31.4
-        }]
+        cls.fulldata = [
+            {"det_rot": -5, "selector_speed": 1000, "wavelength": 47.4},
+            {"det_rot": -6, "selector_speed": 200, "wavelength": 31.4},
+        ]
 
     def test___init__(self):
         self.assertIsInstance(self.model, DNSObsModel)
@@ -81,10 +74,10 @@ class DNSCommonOptionsModelTest(unittest.TestCase):
     def test_determine_wavelength(self):
         testv = self.model.determine_wavelength(self.fulldata)
         self.assertAlmostEqual(testv[0], 4.74)
-        self.assertTrue(testv[1]['wavelength_varies'])
-        self.assertTrue(testv[1]['selector_wavelength_missmatch'])
-        self.assertTrue(testv[1]['selector_speed_varies'])
+        self.assertTrue(testv[1]["wavelength_varies"])
+        self.assertTrue(testv[1]["selector_wavelength_missmatch"])
+        self.assertTrue(testv[1]["selector_speed_varies"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

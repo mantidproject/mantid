@@ -8,13 +8,13 @@ import unittest
 
 from mantidqt.utils.qt.testing import start_qapplication
 
-from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_mode_switcher_view import \
-    TFAsymmetryModeSwitcherView
+from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_mode_switcher_view import (
+    TFAsymmetryModeSwitcherView,
+)
 
 
 @start_qapplication
 class TFAsymmetryModeSwitcherViewTest(unittest.TestCase):
-
     def setUp(self):
         self.view = TFAsymmetryModeSwitcherView()
         self.view.show()
@@ -44,5 +44,5 @@ class TFAsymmetryModeSwitcherViewTest(unittest.TestCase):
         self.assertTrue(self.view.fitting_type_combo_box.isHidden())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

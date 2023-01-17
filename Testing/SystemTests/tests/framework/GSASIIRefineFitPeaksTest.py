@@ -78,8 +78,7 @@ class _AbstractGSASIIRefineFitPeaksTest(systemtesting.MantidSystemTest):
         return self._path_to_gsas
 
     def phase_file_paths(self):
-        return mantid.FileFinder.getFullPath(self._PHASE_FILENAME_1) + "," + \
-               mantid.FileFinder.getFullPath(self._PHASE_FILENAME_2)
+        return mantid.FileFinder.getFullPath(self._PHASE_FILENAME_1) + "," + mantid.FileFinder.getFullPath(self._PHASE_FILENAME_2)
 
     def remove_all_gsas_files(self, gsas_filename_without_extension):
         for filename in os.listdir(self._TEMP_DIR):
@@ -93,18 +92,21 @@ class _AbstractGSASIIRefineFitPeaksTest(systemtesting.MantidSystemTest):
         if not gsas_path:
             self.fail("Could not find GSAS-II installation")
 
-        self.fitted_peaks_ws, self.lattice_params_table, self.rwp, self.sigma, self.gamma = \
-            GSASIIRefineFitPeaks(RefinementMethod=self._get_refinement_method(),
-                                 OutputWorkspace=self._FITTED_PEAKS_WS_NAME,
-                                 InputWorkspace=self.input_ws,
-                                 PhaseInfoFiles=self.phase_file_paths(),
-                                 InstrumentFile=self.inst_param_file_path(),
-                                 PathToGSASII=gsas_path,
-                                 SaveGSASIIProjectFile=self._get_gsas_proj_filename(),
-                                 MuteGSASII=True,
-                                 XMin=10000, XMax=40000,
-                                 LatticeParameters=self._LATTICE_PARAM_TBL_NAME,
-                                 RefineSigma=True, RefineGamma=True)
+        self.fitted_peaks_ws, self.lattice_params_table, self.rwp, self.sigma, self.gamma = GSASIIRefineFitPeaks(
+            RefinementMethod=self._get_refinement_method(),
+            OutputWorkspace=self._FITTED_PEAKS_WS_NAME,
+            InputWorkspace=self.input_ws,
+            PhaseInfoFiles=self.phase_file_paths(),
+            InstrumentFile=self.inst_param_file_path(),
+            PathToGSASII=gsas_path,
+            SaveGSASIIProjectFile=self._get_gsas_proj_filename(),
+            MuteGSASII=True,
+            XMin=10000,
+            XMax=40000,
+            LatticeParameters=self._LATTICE_PARAM_TBL_NAME,
+            RefineSigma=True,
+            RefineGamma=True,
+        )
 
     def skipTests(self):
         # Skip this test, as it's just a wrapper for the Rietveld and Pawley tests
@@ -113,12 +115,15 @@ class _AbstractGSASIIRefineFitPeaksTest(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-4
         self.assertAlmostEqual(self.rwp, self._get_expected_rwp(), delta=1e-5)
-        return (self._LATTICE_PARAM_TBL_NAME, mantid.FileFinder.getFullPath(self._get_fit_params_reference_filename()),
-                self._FITTED_PEAKS_WS_NAME, mantid.FileFinder.getFullPath(self._get_fitted_peaks_reference_filename()))
+        return (
+            self._LATTICE_PARAM_TBL_NAME,
+            mantid.FileFinder.getFullPath(self._get_fit_params_reference_filename()),
+            self._FITTED_PEAKS_WS_NAME,
+            mantid.FileFinder.getFullPath(self._get_fitted_peaks_reference_filename()),
+        )
 
 
 class GSASIIRefineFitPeaksRietveldTest(_AbstractGSASIIRefineFitPeaksTest):
-
     def skipTests(self):
         return not self.path_to_gsas()
 
@@ -139,7 +144,6 @@ class GSASIIRefineFitPeaksRietveldTest(_AbstractGSASIIRefineFitPeaksTest):
 
 
 class GSASIIRefineFitPeaksPawleyTest(_AbstractGSASIIRefineFitPeaksTest):
-
     def skipTests(self):
         return not self.path_to_gsas()
 

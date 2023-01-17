@@ -7,8 +7,11 @@
 import unittest
 
 from unittest import mock
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.cropping import cropping_model, \
-    cropping_view, cropping_presenter
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.cropping import (
+    cropping_model,
+    cropping_view,
+    cropping_presenter,
+)
 from Engineering.EnggUtils import GROUP
 
 dir_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.cropping"
@@ -95,5 +98,5 @@ class CroppingPresenterTest(unittest.TestCase):
         self.assertFalse(self.presenter.calfile_valid)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

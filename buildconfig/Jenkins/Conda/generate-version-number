@@ -1,0 +1,34 @@
+#!/bin/bash
+# Generate a version number in the nightly format of v.X.Y.DATE.TIME,
+# where X and Y are taken from the latest git tag and the date and
+# time are taken from the last git commit.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Ensure we are inside the repository. It doesn't matter
+# where for these commands.
+cd ${SCRIPT_DIR}
+
+# Find the latest version tag. Anything that starts with v is considered
+# The '-' prefixing version:refname sorts in descending order
+LATEST_VERSION_TAG=$(git tag --list  --sort -version:refname 'v*' | head -n 1)
+VERSION_START=""
+
+if [[ $LATEST_VERSION_TAG =~ v[0-9]+.[0-9]+. ]]; then
+    VERSION_START=${BASH_REMATCH}
+else
+    echo "Failed to find suitable git tag to generate version number."
+    exit 1
+fi
+
+LATEST_GIT_SHA_DATE=$(command git log -1 --format=format:%ci)
+
+YEAR=${LATEST_GIT_SHA_DATE:0:4}
+MONTH=${LATEST_GIT_SHA_DATE:5:2}
+DAY=${LATEST_GIT_SHA_DATE:8:2}
+HOUR=${LATEST_GIT_SHA_DATE:11:2}
+MINS=${LATEST_GIT_SHA_DATE:14:2}
+PATCH_VERSION=$YEAR$MONTH$DAY.$HOUR$MINS
+
+VERSION_NUMBER=$VERSION_START$PATCH_VERSION
+
+echo $VERSION_NUMBER

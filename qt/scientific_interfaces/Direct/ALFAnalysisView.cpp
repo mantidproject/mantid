@@ -9,6 +9,7 @@
 
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidQtIcons/Icon.h"
+#include "MantidQtWidgets/MplCpp/Plot.h"
 #include "MantidQtWidgets/Plotting/PeakPicker.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
 
@@ -106,7 +107,7 @@ QWidget *ALFAnalysisView::createPlotWidget() {
   m_plot->canvas()->gcf().setFaceColor("None");
   m_plot->canvas()->setStyleSheet("background-color:transparent;");
 
-  m_peakPicker = new MantidWidgets::PeakPicker(m_plot, Qt::red);
+  m_peakPicker = new MantidWidgets::PeakPicker(m_plot);
   m_peakPicker->setVisible(false);
   connect(m_peakPicker, SIGNAL(changed()), this, SLOT(notifyPeakPickerChanged()));
 
@@ -117,6 +118,14 @@ QWidget *ALFAnalysisView::createPlotWidget() {
 }
 
 QWidget *ALFAnalysisView::createPlotToolbar() {
+  m_exportToADS = new QPushButton(MantidQt::Icons::getIcon("mdi.download"), "");
+  m_exportToADS->setToolTip("Generate workspace from plot. The workspace is named 'ALFView_exported'");
+  connect(m_exportToADS, SIGNAL(clicked()), this, SLOT(notifyExportWorkspaceToADSClicked()));
+
+  m_externalPlot = new QPushButton(MantidQt::Icons::getIcon("mdi.open-in-new"), "");
+  m_externalPlot->setToolTip("Open plot in new window. The new window has more plotting options.");
+  connect(m_externalPlot, SIGNAL(clicked()), this, SLOT(notifyExternalPlotClicked()));
+
   m_resetButton = new QPushButton(MantidQt::Icons::getIcon("mdi.replay"), "");
   m_resetButton->setToolTip("Reset extracted plot");
   connect(m_resetButton, SIGNAL(clicked()), this, SLOT(notifyResetClicked()));
@@ -125,6 +134,8 @@ QWidget *ALFAnalysisView::createPlotToolbar() {
   auto *toolbarLayout = new QHBoxLayout(toolbarWidget);
   toolbarLayout->setMargin(0);
   toolbarLayout->addItem(new QSpacerItem(80, 0, QSizePolicy::Expanding, QSizePolicy::Fixed));
+  toolbarLayout->addWidget(m_exportToADS);
+  toolbarLayout->addWidget(m_externalPlot);
   toolbarLayout->addWidget(m_resetButton);
 
   return toolbarWidget;
@@ -216,9 +227,19 @@ void ALFAnalysisView::notifyPeakCentreEditingFinished() { m_presenter->notifyPea
 
 void ALFAnalysisView::notifyFitClicked() { m_presenter->notifyFitClicked(); }
 
+void ALFAnalysisView::notifyExportWorkspaceToADSClicked() { m_presenter->notifyExportWorkspaceToADSClicked(); }
+
+void ALFAnalysisView::notifyExternalPlotClicked() { m_presenter->notifyExternalPlotClicked(); }
+
 void ALFAnalysisView::notifyResetClicked() { m_presenter->notifyResetClicked(); }
 
 void ALFAnalysisView::replot() { m_plot->replot(); }
+
+void ALFAnalysisView::openExternalPlot(Mantid::API::MatrixWorkspace_sptr const &workspace,
+                                       std::vector<int> const &workspaceIndices) const {
+  // Externally plot the plotted workspace.
+  MantidQt::Widgets::MplCpp::plot({workspace}, boost::none, workspaceIndices);
+}
 
 std::pair<double, double> ALFAnalysisView::getRange() const {
   return std::make_pair(m_start->text().toDouble(), m_end->text().toDouble());

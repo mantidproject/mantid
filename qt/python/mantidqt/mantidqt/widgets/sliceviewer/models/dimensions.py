@@ -25,15 +25,15 @@ class Dimensions:
         """
         dim = workspace.getDimension(n)
         return {
-            'minimum': dim.getMinimum(),
-            'maximum': dim.getMaximum(),
-            'number_of_bins': dim.getNBins(),
-            'width': dim.getBinWidth(),
-            'name': dim.name,
-            'units': dim.getUnits(),
-            'type': WorkspaceInfo.get_ws_type(workspace).name,
-            'can_rebin': WorkspaceInfo.can_support_dynamic_rebinning(workspace),
-            'qdim': dim.getMDFrame().isQ()
+            "minimum": dim.getMinimum(),
+            "maximum": dim.getMaximum(),
+            "number_of_bins": dim.getNBins(),
+            "width": dim.getBinWidth(),
+            "name": dim.name,
+            "units": dim.getUnits(),
+            "type": WorkspaceInfo.get_ws_type(workspace).name,
+            "can_rebin": WorkspaceInfo.can_support_dynamic_rebinning(workspace),
+            "qdim": dim.getMDFrame().isQ(),
         }
 
     @staticmethod

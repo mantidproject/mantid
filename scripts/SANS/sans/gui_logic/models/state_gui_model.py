@@ -11,25 +11,22 @@ are not available in the model associated with the data table.
 """
 from typing import Union
 
-from sans.common.enums import (ReductionDimensionality, ReductionMode, RangeStepType, SaveType,
-                               DetectorType, FitModeForMerge)
+from sans.common.enums import ReductionDimensionality, ReductionMode, RangeStepType, SaveType, DetectorType, FitModeForMerge
 from sans.common.general_functions import get_ranges_from_event_slice_setting, wav_ranges_to_str
 from sans.gui_logic.models.model_common import ModelCommon
 from sans.state.AllStates import AllStates
-from sans.gui_logic.gui_common import (meter_2_millimeter, millimeter_2_meter, apply_selective_view_scaling,
-                                       undo_selective_view_scaling)
+from sans.gui_logic.gui_common import meter_2_millimeter, millimeter_2_meter, apply_selective_view_scaling, undo_selective_view_scaling
 from sans.user_file.parser_helpers.wavelength_parser import parse_range_wavelength
 
 
 class StateGuiModel(ModelCommon):
     def __init__(self, all_states: AllStates):
-        assert (isinstance(all_states, AllStates)), \
-            "Expected AllStates, got %r, could be a legacy API caller" % repr(all_states)
+        assert isinstance(all_states, AllStates), "Expected AllStates, got %r, could be a legacy API caller" % repr(all_states)
         super(StateGuiModel, self).__init__(all_states)
 
         # This is transformed in State* objects so we need the
         # unparsed string for the GUI to display
-        self._wavelength_range = ''
+        self._wavelength_range = ""
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
@@ -336,13 +333,17 @@ class StateGuiModel(ModelCommon):
     def _get_wavelength_objs(self, attr_name):
         if attr_name in ["wavelength_full_range", "wavelength_step", "selected_ranges"]:
             # These attrs are in wavelength_interval
-            to_check = [self._all_states.adjustment.calculate_transmission.wavelength_interval,
-                        self._all_states.adjustment.wavelength_and_pixel_adjustment.wavelength_interval,
-                        self._all_states.wavelength.wavelength_interval]
+            to_check = [
+                self._all_states.adjustment.calculate_transmission.wavelength_interval,
+                self._all_states.adjustment.wavelength_and_pixel_adjustment.wavelength_interval,
+                self._all_states.wavelength.wavelength_interval,
+            ]
         else:
-            to_check = [self._all_states.adjustment.calculate_transmission,
-                        self._all_states.adjustment.wavelength_and_pixel_adjustment,
-                        self._all_states.wavelength]
+            to_check = [
+                self._all_states.adjustment.calculate_transmission,
+                self._all_states.adjustment.wavelength_and_pixel_adjustment,
+                self._all_states.wavelength,
+            ]
         return to_check
 
     def _assert_all_wavelength_same(self, attr_name):
@@ -351,7 +352,7 @@ class StateGuiModel(ModelCommon):
         to_check = self._get_wavelength_objs(attr_name)
         seen = getattr(to_check[0], attr_name)
         for o in to_check:
-            assert(getattr(o, attr_name) == seen)
+            assert getattr(o, attr_name) == seen
 
     def _set_on_all_wavelength(self, attr_name, value):
         objs_to_set = self._get_wavelength_objs(attr_name)
@@ -409,15 +410,14 @@ class StateGuiModel(ModelCommon):
     def wavelength_range(self):
         val = self._wavelength_range
         if not val:
-            val = wav_ranges_to_str(self.all_states.wavelength.wavelength_interval.selected_ranges,
-                                    remove_full_range=True)
+            val = wav_ranges_to_str(self.all_states.wavelength.wavelength_interval.selected_ranges, remove_full_range=True)
         return self._get_val_or_default(val)
 
     @wavelength_range.setter
     def wavelength_range(self, value):
         full_range, pairs = parse_range_wavelength(value)
         self._set_on_all_wavelength("wavelength_full_range", full_range)
-        self._set_on_all_wavelength('selected_ranges', pairs)
+        self._set_on_all_wavelength("selected_ranges", pairs)
         # Ensure the GUI remembers the original user string
         self._wavelength_range = value
 

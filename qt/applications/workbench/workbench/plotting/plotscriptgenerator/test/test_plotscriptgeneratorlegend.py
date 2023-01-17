@@ -9,6 +9,7 @@
 import unittest
 
 import matplotlib
+
 matplotlib.use("Agg")  # noqa
 import matplotlib.pyplot as plt
 
@@ -16,33 +17,27 @@ from mantid.simpleapi import CreateWorkspace
 from workbench.plotting.plotscriptgenerator.legend import *
 
 DEFAULT_TITLE_FONT_KWARGS = {
-    'font': mpl_default_kwargs['title_font'],
-    'size': mpl_default_kwargs['title_size'],
-    'color': mpl_default_kwargs['title_color']
+    "font": mpl_default_kwargs["title_font"],
+    "size": mpl_default_kwargs["title_size"],
+    "color": mpl_default_kwargs["title_color"],
 }
 
-DEFAULT_LABEL_FONT_KWARGS = {
-    'font': mpl_default_kwargs['entries_font'],
-    'color': mpl_default_kwargs['entries_color']
-}
+DEFAULT_LABEL_FONT_KWARGS = {"font": mpl_default_kwargs["entries_font"], "color": mpl_default_kwargs["entries_color"]}
 
-TEST_FONT_COLOUR = '#ff0000'  # red
-TEST_FONT_SIZE = 'x-large'
+TEST_FONT_COLOUR = "#ff0000"  # red
+TEST_FONT_SIZE = "x-large"
 
 
 class PlotScriptGeneratorLegendTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
-        cls.test_ws = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30],
-                                      DataY=[2, 3, 4, 5],
-                                      DataE=[1, 2, 3, 4],
-                                      NSpec=2,
-                                      OutputWorkspace='test_ws')
+        cls.test_ws = CreateWorkspace(
+            DataX=[10, 20, 30, 10, 20, 30], DataY=[2, 3, 4, 5], DataE=[1, 2, 3, 4], NSpec=2, OutputWorkspace="test_ws"
+        )
 
     def setUp(self):
         fig = plt.figure()
-        self.ax = fig.add_subplot(1, 1, 1, projection='mantid')
+        self.ax = fig.add_subplot(1, 1, 1, projection="mantid")
         self.ax.plot(self.test_ws, wkspIndex=0)
         self.ax.plot(self.test_ws, wkspIndex=1)
 
@@ -91,22 +86,22 @@ class PlotScriptGeneratorLegendTest(unittest.TestCase):
         Set some legend properties, making sure they're not default. Check that the correct properties are returned.
         """
         test_kwargs = {
-            'background_color': '#ff0000',
-            'edge_color': '#ff0000',
-            'transparency': mpl_default_kwargs['transparency'] * 0.5,
-            'entries_size': 20,
-            'columns': mpl_default_kwargs['columns'] + 1,
-            'markers': mpl_default_kwargs['markers'] + 1,
-            'marker_position': "Right of Entries",
-            'box_visible': not mpl_default_kwargs['box_visible'],
-            'round_edges': not mpl_default_kwargs['round_edges'],
-            'shadow': not mpl_default_kwargs['shadow'],
-            'title': 'Test title',
-            'border_padding': mpl_default_kwargs['border_padding'] * 0.5,
-            'label_spacing': mpl_default_kwargs['label_spacing'] * 0.5,
-            'marker_size': mpl_default_kwargs['marker_size'] + 2,
-            'marker_label_padding': mpl_default_kwargs['marker_label_padding'] * 0.5,
-            'column_spacing': mpl_default_kwargs['column_spacing'] * 0.5
+            "background_color": "#ff0000",
+            "edge_color": "#ff0000",
+            "transparency": mpl_default_kwargs["transparency"] * 0.5,
+            "entries_size": 20,
+            "columns": mpl_default_kwargs["columns"] + 1,
+            "markers": mpl_default_kwargs["markers"] + 1,
+            "marker_position": "Right of Entries",
+            "box_visible": not mpl_default_kwargs["box_visible"],
+            "round_edges": not mpl_default_kwargs["round_edges"],
+            "shadow": not mpl_default_kwargs["shadow"],
+            "title": "Test title",
+            "border_padding": mpl_default_kwargs["border_padding"] * 0.5,
+            "label_spacing": mpl_default_kwargs["label_spacing"] * 0.5,
+            "marker_size": mpl_default_kwargs["marker_size"] + 2,
+            "marker_label_padding": mpl_default_kwargs["marker_label_padding"] * 0.5,
+            "column_spacing": mpl_default_kwargs["column_spacing"] * 0.5,
         }
         # Convert the mantid kwargs to mpl kwargs.
         mpl_test_kwargs = get_mpl_kwargs(test_kwargs)
@@ -149,5 +144,5 @@ class PlotScriptGeneratorLegendTest(unittest.TestCase):
         self.assertEqual(1, len(visible_command))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

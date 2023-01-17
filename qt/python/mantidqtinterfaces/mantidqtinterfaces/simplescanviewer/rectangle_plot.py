@@ -32,9 +32,8 @@ class UserInteraction(Enum):
 
 class MultipleRectangleSelectionLinePlot(KeyHandler):
 
-    STATUS_MESSAGE = "Press key to export: c=both cuts, x=X, y=Y, p=peaks. 'Del' deletes a ROI. " \
-                     "'f' interpolates rectangles."
-    SELECTION_KEYS = ('c', 'x', 'y', 'f', "delete", 'p')
+    STATUS_MESSAGE = "Press key to export: c=both cuts, x=X, y=Y, p=peaks. 'Del' deletes a ROI. " "'f' interpolates rectangles."
+    SELECTION_KEYS = ("c", "x", "y", "f", "delete", "p")
     EPSILON = 1e-3
 
     def __init__(self, plotter: LinePlots, exporter: Any):
@@ -100,15 +99,24 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         y1 = y0 + self.current_rectangle.get_height()
 
         # if one corner didn't change from the currently selected rectangle, we assume it has been reshaped
-        if self.is_almost_equal(x0, click_event.xdata) or self.is_almost_equal(x0, release_event.xdata) or \
-                self.is_almost_equal(x1, click_event.xdata) or self.is_almost_equal(x1, release_event.xdata):
-            if self.is_almost_equal(y0, click_event.ydata) or self.is_almost_equal(y0, release_event.ydata) or \
-                    self.is_almost_equal(y1, click_event.ydata) or self.is_almost_equal(y1, release_event.ydata):
+        if (
+            self.is_almost_equal(x0, click_event.xdata)
+            or self.is_almost_equal(x0, release_event.xdata)
+            or self.is_almost_equal(x1, click_event.xdata)
+            or self.is_almost_equal(x1, release_event.xdata)
+        ):
+            if (
+                self.is_almost_equal(y0, click_event.ydata)
+                or self.is_almost_equal(y0, release_event.ydata)
+                or self.is_almost_equal(y1, click_event.ydata)
+                or self.is_almost_equal(y1, release_event.ydata)
+            ):
                 return UserInteraction.RECTANGLE_RESHAPED
 
         # if the shape didn't change from the currently selected rectangle, we assume it has been moved
-        if self.is_almost_equal(self.current_rectangle.get_width(), abs(click_event.xdata - release_event.xdata)) and \
-                self.is_almost_equal(self.current_rectangle.get_height(), abs(click_event.ydata - release_event.ydata)):
+        if self.is_almost_equal(self.current_rectangle.get_width(), abs(click_event.xdata - release_event.xdata)) and self.is_almost_equal(
+            self.current_rectangle.get_height(), abs(click_event.ydata - release_event.ydata)
+        ):
             return UserInteraction.RECTANGLE_MOVED
 
         return UserInteraction.RECTANGLE_CREATED
@@ -153,8 +161,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
 
             return edge
 
-        def find_nearest_with_gap(axis: np.ndarray, first_value: float, second_value: float, mini: float, maxi: float)\
-                -> (float, float):
+        def find_nearest_with_gap(axis: np.ndarray, first_value: float, second_value: float, mini: float, maxi: float) -> (float, float):
             """
             Find the nearest edges for each values so that they are not the same.
             Most of the times it is just the closest one, but if both are closest to the same one,
@@ -230,7 +237,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         @param width: the width of the rectangle. Can be negative.
         @param height: the height of the rectangle. Can be negative.
         """
-        rectangle_patch = Rectangle(point, width, height, edgecolor="black", facecolor='none', alpha=.7)
+        rectangle_patch = Rectangle(point, width, height, edgecolor="black", facecolor="none", alpha=0.7)
         self.plotter.image_axes.add_patch(rectangle_patch)
         self._manager.add_rectangle(rectangle_patch)
         peak = self._find_peak(self.current_rectangle)
@@ -383,8 +390,10 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         elif len(rectangles) == 2:
             self._place_interpolate_linear()
         else:
-            logger.warning("Cannot place more regions of interest: current number of regions invalid "
-                           "(1 or 2 expected, {} found)".format(len(rectangles)))
+            logger.warning(
+                "Cannot place more regions of interest: current number of regions invalid "
+                "(1 or 2 expected, {} found)".format(len(rectangles))
+            )
             return
 
         self._update_plot_values()
@@ -410,10 +419,12 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
                 return False
             rect0, rect1 = rect
 
-            return (self.is_almost_equal(rect0.get_x() + rect0.get_width() / 2, rect1.get_x() + rect1.get_width() / 2)
-                    and self.is_almost_equal(rect0.get_y() + rect0.get_height() / 2, rect1.get_y() + rect1.get_height() / 2)
-                    and self.is_almost_equal(abs(rect0.get_width()), abs(rect1.get_width()))
-                    and self.is_almost_equal(abs(rect0.get_height()), abs(rect1.get_height())))
+            return (
+                self.is_almost_equal(rect0.get_x() + rect0.get_width() / 2, rect1.get_x() + rect1.get_width() / 2)
+                and self.is_almost_equal(rect0.get_y() + rect0.get_height() / 2, rect1.get_y() + rect1.get_height() / 2)
+                and self.is_almost_equal(abs(rect0.get_width()), abs(rect1.get_width()))
+                and self.is_almost_equal(abs(rect0.get_height()), abs(rect1.get_height()))
+            )
 
         if len(rectangles) == 1 or two_same_rectangles(rectangles):
 
@@ -496,8 +507,8 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
             # since the x axis is 2*theta, omega = theta means y = x/2
             if self.rectangle_fit_on_image((v, v / 2), width, height):
                 self._draw_rectangle((v - width / 2, v / 2 - height / 2), width, height)
-            if self.rectangle_fit_on_image((- v, -v / 2), width, height):
-                self._draw_rectangle((- v - width / 2, - v / 2 - height / 2), width, height)
+            if self.rectangle_fit_on_image((-v, -v / 2), width, height):
+                self._draw_rectangle((-v - width / 2, -v / 2 - height / 2), width, height)
 
             i += 1
             v = np.rad2deg(np.arcsin(i * sin_theta))
@@ -512,14 +523,18 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         """
         xmin, xmax, ymin, ymax = self.plotter.image.get_extent()
 
-        return xmin <= center[0] + width / 2 <= xmax and xmin <= center[0] - height / 2 <= xmax and \
-            ymin <= center[1] + height / 2 <= ymax and ymin <= center[1] - height / 2 <= ymax
+        return (
+            xmin <= center[0] + width / 2 <= xmax
+            and xmin <= center[0] - height / 2 <= xmax
+            and ymin <= center[1] + height / 2 <= ymax
+            and ymin <= center[1] - height / 2 <= ymax
+        )
 
     def _extract_peaks(self):
         """
         Extract the peaks to a table workspace
         """
-        table_ws = CreateEmptyTableWorkspace(OutputWorkspace='peaks')
+        table_ws = CreateEmptyTableWorkspace(OutputWorkspace="peaks")
         table_ws.addColumn("int", "Peak")
         table_ws.addColumn("float", "2Theta")
         table_ws.addColumn("float", "Omega")
@@ -596,7 +611,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         """
         indexes = self._manager.find_controllers(*get_opposing_corners(rect.get_xy(), rect.get_width(), rect.get_height()))
         for index in indexes:
-            plot = self.plotter.image_axes.plot(*peak, marker='+', color='r')[0]
+            plot = self.plotter.image_axes.plot(*peak, marker="+", color="r")[0]
             controller = self._manager.rectangles[index][0]
             controller.set_peak_plot(plot)
 
@@ -624,13 +639,13 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         if key not in self.SELECTION_KEYS:
             return
 
-        if key in ('c', 'x', 'y'):
-            self._extract_projections(extract_x=key in ('c', 'x'), extract_y=key in ('c', 'y'))
-        if key == 'f':
+        if key in ("c", "x", "y"):
+            self._extract_projections(extract_x=key in ("c", "x"), extract_y=key in ("c", "y"))
+        if key == "f":
             self._place_interpolated_rectangles()
-        if key == 'p':
+        if key == "p":
             self._extract_peaks()
-        if key == 'delete':
+        if key == "delete":
             self._delete_current()
 
     @property

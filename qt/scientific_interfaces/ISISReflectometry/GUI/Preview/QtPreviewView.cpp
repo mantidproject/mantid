@@ -21,9 +21,10 @@
 using namespace Mantid::Kernel;
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
-QtPreviewView::QtPreviewView(QWidget *parent) : QWidget(parent) {
+QtPreviewView::QtPreviewView(QWidget *parent)
+    : QWidget(parent), m_imageInfo(new MantidQt::MantidWidgets::ImageInfoWidgetMini(this)) {
   m_ui.setupUi(this);
-
+  m_ui.statusbar_layout->addWidget(m_imageInfo);
   connectSignals();
 }
 
@@ -31,9 +32,11 @@ void QtPreviewView::subscribe(PreviewViewSubscriber *notifyee) noexcept { m_noti
 
 QLayout *QtPreviewView::getDockedWidgetsLayout() noexcept { return m_ui.dockable_widgets_layout; }
 
-void QtPreviewView::enableApplyButton() { m_ui.apply_button->setEnabled(true); }
+MantidWidgets::IImageInfoWidget *QtPreviewView::getImageInfo() noexcept { return m_imageInfo; }
 
-void QtPreviewView::disableApplyButton() { m_ui.apply_button->setEnabled(false); }
+void QtPreviewView::enableMainWidget() { this->setEnabled(true); }
+
+void QtPreviewView::disableMainWidget() { this->setEnabled(false); }
 
 void QtPreviewView::connectSignals() const {
   // Loading section

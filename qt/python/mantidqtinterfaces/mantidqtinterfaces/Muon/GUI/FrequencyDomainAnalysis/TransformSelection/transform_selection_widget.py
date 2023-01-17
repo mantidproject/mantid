@@ -11,7 +11,6 @@ from qtpy import QtWidgets
 
 
 class TransformSelectionWidget(QtWidgets.QWidget):
-
     def __init__(self, parent=None):
         super(TransformSelectionWidget, self).__init__(parent)
         view = TransformSelectionView(parent)

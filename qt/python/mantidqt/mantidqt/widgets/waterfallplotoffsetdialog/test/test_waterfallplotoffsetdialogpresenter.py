@@ -8,13 +8,12 @@
 
 import unittest
 
-from mantid.plots import MantidAxes # noqa
+from mantid.plots import MantidAxes  # noqa
 from unittest.mock import Mock
 from mantidqt.widgets.waterfallplotoffsetdialog.presenter import WaterfallPlotOffsetDialogPresenter
 
 
 class WaterfallPlotOffsetDialogPresenterTest(unittest.TestCase):
-
     def setUp(self):
         self.fig = Mock()
         self.ax = Mock()
@@ -60,5 +59,5 @@ class WaterfallPlotOffsetDialogPresenterTest(unittest.TestCase):
         self.presenter.view.set_x_offset.assert_called_with(5)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

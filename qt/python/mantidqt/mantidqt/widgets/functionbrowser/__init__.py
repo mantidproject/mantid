@@ -11,4 +11,4 @@
 # flake8: noqa
 from mantidqt.utils.qt import import_qt
 
-FunctionBrowser = import_qt('.._common', 'mantidqt.widgets', 'FunctionBrowser')
+FunctionBrowser = import_qt(".._common", "mantidqt.widgets", "FunctionBrowser")

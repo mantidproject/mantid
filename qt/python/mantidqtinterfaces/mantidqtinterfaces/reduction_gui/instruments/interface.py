@@ -4,11 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 """
     Base class for instrument-specific user interface
 """
-from qtpy.QtWidgets import (QMessageBox)  # noqa
+from qtpy.QtWidgets import QMessageBox  # noqa
 import sys
 import os
 import traceback
@@ -19,8 +19,9 @@ unicode = str
 
 class InstrumentInterface(object):
     """
-        Defines the instrument-specific widgets
+    Defines the instrument-specific widgets
     """
+
     ## List of widgets with associated observers
     widgets = []
     ERROR_REPORT_NAME = "sans_error_report.xml"
@@ -29,9 +30,9 @@ class InstrumentInterface(object):
 
     def __init__(self, name, settings):
         """
-            Initialization
-            @param name: name of the instrument (string)
-            @param settings:
+        Initialization
+        @param name: name of the instrument (string)
+        @param settings:
         """
         ## List of widgets with associated observers
         self.widgets = []
@@ -46,14 +47,14 @@ class InstrumentInterface(object):
         self._settings = settings
 
         # Error report directory
-        self.ERROR_REPORT_DIR = os.path.expanduser('~')
+        self.ERROR_REPORT_DIR = os.path.expanduser("~")
         self.ERROR_REPORT_NAME = InstrumentInterface.ERROR_REPORT_DIR
         self.LAST_REDUCTION_NAME = InstrumentInterface.LAST_REDUCTION_NAME
 
     def attach(self, widget):
         """
-            Attach a widget to the interface and hook it up to its observer/scripter.
-            @param widget: QWidget object
+        Attach a widget to the interface and hook it up to its observer/scripter.
+        @param widget: QWidget object
         """
         self.widgets.append(widget)
         if widget.live_button_widget() is not None:
@@ -63,7 +64,7 @@ class InstrumentInterface(object):
 
     def destroy(self):
         """
-            Destroys all the widget owner by this interface
+        Destroys all the widget owner by this interface
         """
         for i in range(len(self.widgets)):
             self.widgets.pop().destroy()
@@ -71,13 +72,13 @@ class InstrumentInterface(object):
 
     def _warning(self, title, message):
         """
-            Pop up a dialog and warn the user
-            @param title: dialog box title
-            @param message: message to be displayed
+        Pop up a dialog and warn the user
+        @param title: dialog box title
+        @param message: message to be displayed
 
-            #TODO: change this to signals and slots mechanism
+        #TODO: change this to signals and slots mechanism
         """
-        if len(self.widgets)>0:
+        if len(self.widgets) > 0:
             QMessageBox.warning(self.widgets[0], title, message)
 
     def load_last_reduction(self):
@@ -93,31 +94,31 @@ class InstrumentInterface(object):
 
     def load_file(self, file_name):
         """
-            Load an XML file containing reduction parameters and
-            populate the UI with them
-            @param file_name: XML file to be loaded
+        Load an XML file containing reduction parameters and
+        populate the UI with them
+        @param file_name: XML file to be loaded
         """
-        if self.scripter.check_xml_compatibility(file_name, 'mantid_version'):
+        if self.scripter.check_xml_compatibility(file_name, "mantid_version"):
             self.scripter.from_xml(file_name)
             self.scripter.push_state()
-        elif self.scripter.check_xml_compatibility(file_name, 'SetupInfo'):
+        elif self.scripter.check_xml_compatibility(file_name, "SetupInfo"):
             self.scripter.from_xml(file_name, True)
             self.scripter.push_state()
 
     def save_file(self, file_name):
         """
-            Save the content of the UI as a settings file that can
-            be reloaded
-            @param file_name: XML file to be saved
+        Save the content of the UI as a settings file that can
+        be reloaded
+        @param file_name: XML file to be saved
         """
         self.scripter.update()
         self.scripter.to_xml(file_name)
 
     def export(self, file_name):
         """
-            Export the content of the UI as a python script that can
-            be run within Mantid
-            @param file_name: name of the python script to be saved
+        Export the content of the UI as a python script that can
+        be run within Mantid
+        @param file_name: name of the python script to be saved
         """
         self.scripter.update()
         try:
@@ -143,9 +144,9 @@ class InstrumentInterface(object):
 
     def remote_resources_available(self):
         """
-            Returns whether or not the application is cluster-enabled.
-            The Remote algorithms have to be available and the
-            cluster submission property has to be ON.
+        Returns whether or not the application is cluster-enabled.
+        The Remote algorithms have to be available and the
+        cluster submission property has to be ON.
         """
         # Check whether Mantid is available
         try:
@@ -154,18 +155,17 @@ class InstrumentInterface(object):
 
             if "SubmitRemoteJob" in AlgorithmFactory.getRegisteredAlgorithms(True):
                 config = ConfigService.Instance()
-                if config.hasProperty("cluster.submission") \
-                        and config.getString("cluster.submission").lower()=='on':
+                if config.hasProperty("cluster.submission") and config.getString("cluster.submission").lower() == "on":
                     return True
 
             return False
         except:
             return False
 
-    #pylint: disable=bare-except
+    # pylint: disable=bare-except
     def reduce(self):
         """
-            Pass the interface data to the scripter and reduce
+        Pass the interface data to the scripter and reduce
         """
         try:
             self.scripter.update()
@@ -209,15 +209,15 @@ class InstrumentInterface(object):
         # Update widgets
         self.scripter.push_state()
 
-    def _error_report(self, trace=''):
+    def _error_report(self, trace=""):
         """
-            Try to dump the state of the UI to a file, with a traceback
-            if available.
+        Try to dump the state of the UI to a file, with a traceback
+        if available.
         """
-        trace = trace.replace('<', ' ')
-        trace = trace.replace('>', ' ')
+        trace = trace.replace("<", " ")
+        trace = trace.replace(">", " ")
         log_path = os.path.join(self.ERROR_REPORT_DIR, self.ERROR_REPORT_NAME)
-        f = open(log_path, 'w')
+        f = open(log_path, "w")
         reduction = self.scripter.to_xml()
         f.write("<Report>\n")
         f.write(str(reduction))
@@ -229,8 +229,8 @@ class InstrumentInterface(object):
 
     def get_tabs(self):
         """
-            Returns a list of widgets used to populate the central tab widget
-            of the interface.
+        Returns a list of widgets used to populate the central tab widget
+        of the interface.
         """
         tab_list = []
         for item in self.widgets:
@@ -239,41 +239,41 @@ class InstrumentInterface(object):
 
     def set_running(self, is_running=True):
         """
-            Tell the widgets whether they are running or not
+        Tell the widgets whether they are running or not
         """
         for widget in self.widgets:
             widget.is_running(is_running)
 
     def has_advanced_version(self):
         """
-            Returns true if the instrument has simple and advanced views
+        Returns true if the instrument has simple and advanced views
         """
         return False
 
     def is_live_enabled(self):
         """
-            Returns true if the instrument interface includes a live data button
+        Returns true if the instrument interface includes a live data button
         """
         return self._livebuttonwidget is not None
 
     def live_button_is_checked(self):
         """
-            Returns true if there is a live button and it is selected
+        Returns true if there is a live button and it is selected
         """
         return self.is_live_enabled() and self._livebuttonwidget.liveButtonIsChecked()
 
-    def live_button_toggled(self,checked):
+    def live_button_toggled(self, checked):
         """
-            Called as a slot when the live button is pressed to make any necessary settings
-            to other widgets.
-            @param checked: True if the button has been checked, false if unchecked
+        Called as a slot when the live button is pressed to make any necessary settings
+        to other widgets.
+        @param checked: True if the button has been checked, false if unchecked
         """
         for item in self.widgets:
             item.live_button_toggled_actions(checked)
 
     def reset(self):
         """
-            Reset the interface
+        Reset the interface
         """
         self.scripter.reset()
         self.scripter.push_state()

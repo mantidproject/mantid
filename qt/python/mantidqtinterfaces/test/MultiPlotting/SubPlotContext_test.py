@@ -62,10 +62,7 @@ class SubPlotContextTest(unittest.TestCase):
                 self.context.addLine(ws, 3)
                 self.assertEqual(plot.call_count, 1)
                 self.assertEqual(patch.call_count, 1)
-                patch.assert_called_with(self.subplot,
-                                         ws,
-                                         specNum=3,
-                                         distribution=True)
+                patch.assert_called_with(self.subplot, ws, specNum=3, distribution=True)
 
     def test_redraw_errors(self):
         ws = mock.MagicMock()
@@ -82,13 +79,15 @@ class SubPlotContextTest(unittest.TestCase):
                 # redraw
                 self.context.redraw(lines.get_label())
                 self.assertEqual(patch.call_count, 2)
-                patch.assert_called_with(self.subplot,
-                                         ws,
-                                         specNum=3,
-                                         color=lines.get_color(),
-                                         marker=lines.get_marker(),
-                                         label=lines.get_label(),
-                                         distribution=True)
+                patch.assert_called_with(
+                    self.subplot,
+                    ws,
+                    specNum=3,
+                    color=lines.get_color(),
+                    marker=lines.get_marker(),
+                    label=lines.get_label(),
+                    distribution=True,
+                )
 
     def test_redraw_no_errors(self):
         ws = mock.MagicMock()
@@ -101,13 +100,9 @@ class SubPlotContextTest(unittest.TestCase):
             # redraw
             self.context.redraw(lines.get_label())
             self.assertEqual(patch.call_count, 2)
-            patch.assert_called_with(self.subplot,
-                                     ws,
-                                     specNum=3,
-                                     color=lines.get_color(),
-                                     marker=lines.get_marker(),
-                                     label=lines.get_label(),
-                                     distribution=True)
+            patch.assert_called_with(
+                self.subplot, ws, specNum=3, color=lines.get_color(), marker=lines.get_marker(), label=lines.get_label(), distribution=True
+            )
 
     def test_change_errors(self):
         self.context._lines = {"one": 1, "two": 2, "three": 3}
@@ -122,11 +117,7 @@ class SubPlotContextTest(unittest.TestCase):
         self.assertEqual(self.context._subplot.autoscale.call_count, 3)
 
     def test_vlines(self):
-        self.context._labelObjects = {
-            "one": label("one", True),
-            "two": label("two", False),
-            "three": label("three", False)
-        }
+        self.context._labelObjects = {"one": label("one", True), "two": label("two", False), "three": label("three", False)}
         self.context._vLines = {"two": mock.MagicMock(), "four": mock.MagicMock()}
         result = self.context.vlines
         expect = ["two", "three", "four"]

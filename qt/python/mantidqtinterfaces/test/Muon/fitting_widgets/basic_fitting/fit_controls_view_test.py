@@ -13,7 +13,6 @@ from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.fit_contro
 
 @start_qapplication
 class FitControlsViewTest(unittest.TestCase):
-
     def setUp(self):
         self.view = FitControlsView()
         self.view.show()
@@ -66,5 +65,5 @@ class FitControlsViewTest(unittest.TestCase):
         self.assertEqual(self.view.global_fit_status_label.text(), "2 of 5 fits failed")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

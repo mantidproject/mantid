@@ -26,13 +26,13 @@ class EISFDiffCylinder(IFunction1D):
     cos_theta = np.cos(theta)
 
     def category(self):
-        return 'QuasiElastic'
+        return "QuasiElastic"
 
     def init(self):
         # Active fitting parameters
-        self.declareParameter('A', 1.0, 'Amplitude, or Scaling factor')
-        self.declareParameter('R', 1.0, 'Cylinder radius, inverse units of Q.')
-        self.declareParameter('L', 2.0, 'Cylinder length, inverse units of Q.')
+        self.declareParameter("A", 1.0, "Amplitude, or Scaling factor")
+        self.declareParameter("R", 1.0, "Cylinder radius, inverse units of Q.")
+        self.declareParameter("L", 2.0, "Cylinder length, inverse units of Q.")
 
     def function1D(self, xvals):
         r"""Calculate the intensities
@@ -50,19 +50,18 @@ class EISFDiffCylinder(IFunction1D):
         numpy.ndarray
             Function values
         """
-        radius = self.getParameterValue('R')
-        length = self.getParameterValue('L')
+        radius = self.getParameterValue("R")
+        length = self.getParameterValue("L")
         x = np.asarray(xvals)  # Q values
         z = length * np.outer(x, self.cos_theta)
         # EISF along cylinder Z-axis
         a = np.square(np.where(z < 1e-9, 1 - z * z / 6, np.sin(z) / z))
         z = radius * np.outer(x, self.sin_theta)
         #  EISF on cylinder cross-section (diffusion on a disc)
-        b = np.square(np.where(z < 1e-6, 1 - z * z / 10,
-                               3 * (np.sin(z) - z * np.cos(z)) / (z * z * z)))
+        b = np.square(np.where(z < 1e-6, 1 - z * z / 10, 3 * (np.sin(z) - z * np.cos(z)) / (z * z * z)))
         # integrate in theta
         eisf = self.d_theta * np.sum(self.sin_theta * a * b, axis=1)
-        return self.getParameterValue('A') * eisf
+        return self.getParameterValue("A") * eisf
 
 
 # Required to have Mantid recognise the new function

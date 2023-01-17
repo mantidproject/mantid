@@ -11,8 +11,8 @@ from mantidqtinterfaces.Muon.GUI.Common.usage_report import report_interface_sta
 
 Name = "Elemental_Analysis_2"
 
-if 'elemental_analysis_2' in globals():
-    elemental_analysis = globals()['elemental_analysis_2']
+if "elemental_analysis_2" in globals():
+    elemental_analysis = globals()["elemental_analysis_2"]
     # If the object is deleted in the C++ side it can still exist in the
     # python globals list. The try catch block below checks for this.
     try:
@@ -20,9 +20,7 @@ if 'elemental_analysis_2' in globals():
     except RuntimeError:
         is_hidden = True
     if not is_hidden:
-        elemental_analysis.setWindowState(
-            elemental_analysis.windowState(
-            ) & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
+        elemental_analysis.setWindowState(elemental_analysis.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
         elemental_analysis.activateWindow()
     else:
         elemental_analysis = ElementalAnalysisGui()

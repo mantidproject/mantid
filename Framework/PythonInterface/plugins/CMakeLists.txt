@@ -158,7 +158,6 @@ set(PYTHON_PLUGINS
     algorithms/RefinePowderDiffProfileSeq.py
     algorithms/ReflectometryReductionOneLiveData.py
     algorithms/ReflectometrySliceEventWorkspace.py
-    algorithms/ResNorm.py
     algorithms/RetrieveRunInfo.py
     algorithms/SANSSubtract.py
     algorithms/SANSWideAngleCorrection.py
@@ -167,6 +166,7 @@ set(PYTHON_PLUGINS
     algorithms/SaveGEMMAUDParamFile.py
     algorithms/SaveGSSCW.py
     algorithms/SaveHKLCW.py
+    algorithms/SaveINS.py
     algorithms/SaveNexusPD.py
     algorithms/SaveP2D.py
     algorithms/SavePlot1DAsJson.py

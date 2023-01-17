@@ -1,0 +1,1 @@
+- :ref:`IntegratePeaksProfileFitting <algm-IntegratePeaksProfileFitting>` library `ICCFitTools` module updated to support more recent versions of SciPy where the factorial function moved from `scipy.misc.factorial` to `scipy.special.factorial`. On newer versions of SciPy, the algorithm previously failed.

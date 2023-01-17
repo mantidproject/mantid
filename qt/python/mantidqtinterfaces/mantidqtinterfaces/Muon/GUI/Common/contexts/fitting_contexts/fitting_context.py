@@ -16,11 +16,11 @@ from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import creat
 from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 # Magic values for names of columns in the fit parameter table
-NAME_COL = 'Name'
-VALUE_COL = 'Value'
-ERRORS_COL = 'Error'
+NAME_COL = "Name"
+VALUE_COL = "Value"
+ERRORS_COL = "Error"
 
-GLOBAL_PARAM_PREFIX_RE = re.compile(r'^f\d+\.')
+GLOBAL_PARAM_PREFIX_RE = re.compile(r"^f\d+\.")
 
 
 def is_same_parameter(prefixed_name, unprefixed_name):
@@ -78,8 +78,7 @@ def _create_unique_param_lookup(parameter_workspace, global_parameters):
             continue
 
         if not exists:
-            parameter = Parameter(name, row[VALUE_COL], row[ERRORS_COL],
-                                  is_global)
+            parameter = Parameter(name, row[VALUE_COL], row[ERRORS_COL], is_global)
             unique_params[parameter.pretty_name] = parameter
 
     return _move_globals_to_front(unique_params)
@@ -91,8 +90,7 @@ def _move_globals_to_front(unique_params):
     :param unique_params: An list containing the current parameters in the original order
     :return: The updated parameters list reordered
     """
-    return OrderedDict(
-        sorted(unique_params.items(), key=lambda x: not x[1].is_global))
+    return OrderedDict(sorted(unique_params.items(), key=lambda x: not x[1].is_global))
 
 
 class Parameter(object):
@@ -142,12 +140,10 @@ class FitParameters(object):
         """
         self._parameter_workspace = parameter_workspace
         self._global_parameters = global_parameters if global_parameters is not None else []
-        self._unique_params = _create_unique_param_lookup(
-            parameter_workspace, global_parameters)
+        self._unique_params = _create_unique_param_lookup(parameter_workspace, global_parameters)
 
     def __eq__(self, other):
-        return self._parameter_workspace == other._parameter_workspace and \
-            self._global_parameters == other._global_parameters
+        return self._parameter_workspace == other._parameter_workspace and self._global_parameters == other._global_parameters
 
     def __ne__(self, other):
         return not self == other
@@ -186,14 +182,16 @@ class FitParameters(object):
 class FitInformation(object):
     """Data-object encapsulating a single fit"""
 
-    def __init__(self,
-                 input_workspace_names: list,
-                 fit_function_name: str,
-                 output_workspaces: list,
-                 parameter_workspace: StaticWorkspaceWrapper,
-                 covariance_workspace: StaticWorkspaceWrapper,
-                 global_parameters: list = None,
-                 tf_asymmetry_fit: bool = False):
+    def __init__(
+        self,
+        input_workspace_names: list,
+        fit_function_name: str,
+        output_workspaces: list,
+        parameter_workspace: StaticWorkspaceWrapper,
+        covariance_workspace: StaticWorkspaceWrapper,
+        global_parameters: list = None,
+        tf_asymmetry_fit: bool = False,
+    ):
         """
         :param input_workspace_names: A list of input workspace names containing the original data.
         :param fit_function_name: The name of the function used.
@@ -214,12 +212,14 @@ class FitInformation(object):
 
     def __eq__(self, other):
         """Objects are equal if each member is equal to the other"""
-        return self.input_workspaces == other.input_workspaces and \
-            self.fit_function_name == other.fit_function_name and \
-            self.output_workspace_names() == other.output_workspace_names() and \
-            self.parameter_workspace.workspace_name == other.parameter_workspace.workspace_name and \
-            self.covariance_workspace.workspace_name == other.covariance_workspace.workspace_name and \
-            self.tf_asymmetry_fit == other.tf_asymmetry_fit
+        return (
+            self.input_workspaces == other.input_workspaces
+            and self.fit_function_name == other.fit_function_name
+            and self.output_workspace_names() == other.output_workspace_names()
+            and self.parameter_workspace.workspace_name == other.parameter_workspace.workspace_name
+            and self.covariance_workspace.workspace_name == other.covariance_workspace.workspace_name
+            and self.tf_asymmetry_fit == other.tf_asymmetry_fit
+        )
 
     def output_workspaces_objects(self) -> list:
         """Returns a list of output workspaces. Do not try place these objects into the ADS as they are not copied."""
@@ -301,7 +301,7 @@ class FitInformation(object):
         def value_from_workspace(output_workspace):
             run = output_workspace.run()
             prop = run.getProperty(log_name)
-            if hasattr(prop, 'getStatistics'):
+            if hasattr(prop, "getStatistics"):
                 stats = prop.getStatistics()
                 return stats.time_mean, stats.time_standard_deviation
             else:
@@ -375,14 +375,16 @@ class FittingContext(object):
             if workspace_name in fit.output_workspace_names() or workspace_name == fit.parameter_workspace_name:
                 fits_history.remove(fit)
 
-    def add_fit_from_values(self,
-                            input_workspace_names: list,
-                            fit_function_name: str,
-                            output_workspaces: list,
-                            parameter_workspace: StaticWorkspaceWrapper,
-                            covariance_workspace: StaticWorkspaceWrapper,
-                            global_parameters: list = None,
-                            tf_asymmetry_fit: bool = False) -> None:
+    def add_fit_from_values(
+        self,
+        input_workspace_names: list,
+        fit_function_name: str,
+        output_workspaces: list,
+        parameter_workspace: StaticWorkspaceWrapper,
+        covariance_workspace: StaticWorkspaceWrapper,
+        global_parameters: list = None,
+        tf_asymmetry_fit: bool = False,
+    ) -> None:
         """
         Add a new fit information object based on the raw values.
         :param input_workspace_names: A list of input workspace names containing the original data.
@@ -393,8 +395,17 @@ class FittingContext(object):
         :param global_parameters: An optional list of global parameters that were tied together during the fit.
         :param tf_asymmetry_fit: An optional flag indicating whether the data is from a TF Asymmetry fit or not.
         """
-        self.add_fit(FitInformation(input_workspace_names, fit_function_name, output_workspaces, parameter_workspace,
-                                    covariance_workspace, global_parameters, tf_asymmetry_fit))
+        self.add_fit(
+            FitInformation(
+                input_workspace_names,
+                fit_function_name,
+                output_workspaces,
+                parameter_workspace,
+                covariance_workspace,
+                global_parameters,
+                tf_asymmetry_fit,
+            )
+        )
 
     def add_fit(self, fit: FitInformation) -> None:
         """

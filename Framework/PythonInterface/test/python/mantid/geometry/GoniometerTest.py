@@ -13,7 +13,6 @@ import numpy as np
 
 
 class GoniometerTest(unittest.TestCase):
-
     def test_Goniometer_can_be_instantiated(self):
         self.assertTrue(can_be_instantiated(Goniometer))
 
@@ -25,7 +24,7 @@ class GoniometerTest(unittest.TestCase):
 
     def test_setR_getR(self):
         g = Goniometer()
-        r = np.array([(1., 0., 0.), (0., 0., 1.), (0., -1., 0.)])
+        r = np.array([(1.0, 0.0, 0.0), (0.0, 0.0, 1.0), (0.0, -1.0, 0.0)])
         g.setR(r)
         self.assertTrue((g.getR() == r).all())
 
@@ -33,7 +32,7 @@ class GoniometerTest(unittest.TestCase):
         """
         Default goniometer is the identity matrix
         """
-        alg = run_algorithm('CreateWorkspace', DataX=[1, 2, 3, 4, 5], DataY=[1, 2, 3, 4, 5], NSpec=1, child=True)
+        alg = run_algorithm("CreateWorkspace", DataX=[1, 2, 3, 4, 5], DataY=[1, 2, 3, 4, 5], NSpec=1, child=True)
         ws = alg.getProperty("OutputWorkspace").value
         run = ws.run()
         g = run.getGoniometer()
@@ -45,15 +44,15 @@ class GoniometerTest(unittest.TestCase):
         Get the default gonimoter
         Set it to something else and make sure it was successfully changed
         """
-        alg = run_algorithm('CreateWorkspace', DataX=[1, 2, 3, 4, 5], DataY=[1, 2, 3, 4, 5], NSpec=1, child=True)
+        alg = run_algorithm("CreateWorkspace", DataX=[1, 2, 3, 4, 5], DataY=[1, 2, 3, 4, 5], NSpec=1, child=True)
         ws = alg.getProperty("OutputWorkspace").value
         run = ws.run()
         g = run.getGoniometer()
         # change the matrix:
-        r = np.array([(1., 0., 0.), (0., 0., 1.), (0., -1., 0.)])
+        r = np.array([(1.0, 0.0, 0.0), (0.0, 0.0, 1.0), (0.0, -1.0, 0.0)])
         g.setR(r)
         self.assertTrue((g.getR() == r).all())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

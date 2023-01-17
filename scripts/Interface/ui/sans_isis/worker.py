@@ -8,6 +8,7 @@ from qtpy.QtCore import QRunnable, Slot, Signal, QObject
 
 import traceback
 import sys
+
 # Following https://martinfitzpatrick.name/article/multithreading-pyqt-applications-with-qthreadpool/
 
 

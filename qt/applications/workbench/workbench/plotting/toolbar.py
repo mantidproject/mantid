@@ -22,13 +22,10 @@ def _create_script_action(self, text, tooltip_text, mdi_icon, *args):
     # Add a QMenu under the QToolButton for "Create Script"
     a = self.addAction(get_icon(mdi_icon), text, lambda: None)
     # This is the only way I could find of getting hold of the QToolButton object
-    button = [child for child in self.children()
-              if isinstance(child, QtWidgets.QToolButton)][-1]
-    menu =  QtWidgets.QMenu("Menu", parent=button)
-    menu.addAction("Script to file",
-                   self.sig_generate_plot_script_file_triggered.emit)
-    menu.addAction("Script to clipboard",
-                   self.sig_generate_plot_script_clipboard_triggered.emit)
+    button = [child for child in self.children() if isinstance(child, QtWidgets.QToolButton)][-1]
+    menu = QtWidgets.QMenu("Menu", parent=button)
+    menu.addAction("Script to file", self.sig_generate_plot_script_file_triggered.emit)
+    menu.addAction("Script to clipboard", self.sig_generate_plot_script_clipboard_triggered.emit)
     button.setMenu(menu)
     button.setPopupMode(QtWidgets.QToolButton.InstantPopup)
     return a
@@ -54,34 +51,39 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
     sig_hide_plot_triggered = QtCore.Signal()
 
     toolitems = (
-        MantidNavigationTool('Home', 'Reset axes limits', 'mdi.home', 'on_home_clicked', None),
+        MantidNavigationTool("Home", "Reset axes limits", "mdi.home", "on_home_clicked", None),
         MantidStandardNavigationTools.BACK,
         MantidStandardNavigationTools.FORWARD,
         MantidStandardNavigationTools.SEPARATOR,
         MantidStandardNavigationTools.PAN,
         MantidStandardNavigationTools.ZOOM,
         MantidStandardNavigationTools.SEPARATOR,
-        MantidNavigationTool('Grid', 'Grids on/off', 'mdi.grid', 'toggle_grid', False),
-        MantidNavigationTool('Copy', 'Copy image to clipboard', 'mdi.content-copy', 'copy_to_clipboard', None),
+        MantidNavigationTool("Grid", "Grids on/off", "mdi.grid", "toggle_grid", False),
+        MantidNavigationTool("Copy", "Copy image to clipboard", "mdi.content-copy", "copy_to_clipboard", None),
         MantidStandardNavigationTools.SAVE,
-        MantidNavigationTool('Print', 'Print image', 'mdi.printer', 'print_figure', None),
+        MantidNavigationTool("Print", "Print image", "mdi.printer", "print_figure", None),
         MantidStandardNavigationTools.SEPARATOR,
-        MantidNavigationTool('Customize', 'Options menu', 'mdi.settings', 'launch_plot_options', None),
+        MantidNavigationTool("Customize", "Options menu", "mdi.settings", "launch_plot_options", None),
         MantidStandardNavigationTools.SEPARATOR,
-        MantidNavigationTool('Create Script', 'Generate script to recreate the current figure',
-                             'mdi.script-text-outline', 'generate_plot_script', None, _create_script_action),
+        MantidNavigationTool(
+            "Create Script",
+            "Generate script to recreate the current figure",
+            "mdi.script-text-outline",
+            "generate_plot_script",
+            None,
+            _create_script_action,
+        ),
         MantidStandardNavigationTools.SEPARATOR,
-        MantidNavigationTool('Fit', 'Open/close fitting tab', None, 'toggle_fit', False),
+        MantidNavigationTool("Fit", "Open/close fitting tab", None, "toggle_fit", False),
         MantidStandardNavigationTools.SEPARATOR,
-        MantidNavigationTool('Superplot', 'Open/close superplot tab', None, 'toggle_superplot', False),
+        MantidNavigationTool("Superplot", "Open/close superplot tab", None, "toggle_superplot", False),
         MantidStandardNavigationTools.SEPARATOR,
-        MantidNavigationTool('Offset', 'Adjust curve offset %', 'mdi.arrow-expand-horizontal',
-                             'waterfall_offset_amount', None),
-        MantidNavigationTool('Reverse Order', 'Reverse curve order', 'mdi.swap-horizontal', 'waterfall_reverse_order', None),
-        MantidNavigationTool('Fill Area', 'Fill area under curves', 'mdi.format-color-fill', 'waterfall_fill_area', None),
+        MantidNavigationTool("Offset", "Adjust curve offset %", "mdi.arrow-expand-horizontal", "waterfall_offset_amount", None),
+        MantidNavigationTool("Reverse Order", "Reverse curve order", "mdi.swap-horizontal", "waterfall_reverse_order", None),
+        MantidNavigationTool("Fill Area", "Fill area under curves", "mdi.format-color-fill", "waterfall_fill_area", None),
         MantidStandardNavigationTools.SEPARATOR,
-        MantidNavigationTool('Help', 'Open plotting help documentation', 'mdi.help', 'launch_plot_help', None),
-        MantidNavigationTool('Hide', 'Hide the plot', 'mdi.eye', 'hide_plot', None)
+        MantidNavigationTool("Help", "Open plotting help documentation", "mdi.help", "launch_plot_help", None),
+        MantidNavigationTool("Hide", "Hide the plot", "mdi.eye", "hide_plot", None),
     )
 
     def __init__(self, canvas, parent, coordinates=True):
@@ -103,18 +105,18 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
     def toggle_grid(self, enable=None):
         if enable is None:
             # Toggle grid to whatever state the toolbar button is in
-            enable = self._actions['toggle_grid'].isChecked()
+            enable = self._actions["toggle_grid"].isChecked()
         else:
             # Otherwise toggle grid to whatever state we were given
-            self._actions['toggle_grid'].setChecked(enable)
+            self._actions["toggle_grid"].setChecked(enable)
         self.sig_grid_toggle_triggered.emit(enable)
 
     def toggle_fit(self):
-        fit_action = self._actions['toggle_fit']
+        fit_action = self._actions["toggle_fit"]
         if fit_action.isChecked():
-            if self._actions['zoom'].isChecked():
+            if self._actions["zoom"].isChecked():
                 self.zoom()
-            if self._actions['pan'].isChecked():
+            if self._actions["pan"].isChecked():
                 self.pan()
         self.sig_toggle_fit_triggered.emit()
 
@@ -122,7 +124,7 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
         self.sig_toggle_superplot_triggered.emit()
 
     def trigger_fit_toggle_action(self):
-        self._actions['toggle_fit'].trigger()
+        self._actions["toggle_fit"].trigger()
 
     def launch_plot_help(self):
         self.sig_plot_help_triggered.emit()
@@ -134,8 +136,7 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
         if print_dlg.exec_() == QtWidgets.QDialog.Accepted:
             painter = QtGui.QPainter(printer)
             page_size = printer.pageRect()
-            pixmap = self.canvas.grab().scaled(page_size.width(), page_size.height(),
-                                               QtCore.Qt.KeepAspectRatio)
+            pixmap = self.canvas.grab().scaled(page_size.width(), page_size.height(), QtCore.Qt.KeepAspectRatio)
             painter.drawPixmap(0, 0, pixmap)
             painter.end()
 
@@ -150,31 +151,31 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
         self.sig_waterfall_conversion.emit(is_waterfall)
 
     def set_waterfall_options_enabled(self, on):
-        for action in ['waterfall_offset_amount', 'waterfall_reverse_order', 'waterfall_fill_area']:
+        for action in ["waterfall_offset_amount", "waterfall_reverse_order", "waterfall_fill_area"]:
             toolbar_action = self._actions[action]
             toolbar_action.setEnabled(on)
             toolbar_action.setVisible(on)
 
         # Show/hide the separator between this button and help button
-        action = self._actions['waterfall_fill_area']
+        action = self._actions["waterfall_fill_area"]
         self.toggle_separator_visibility(action, on)
 
     def set_generate_plot_script_enabled(self, enabled):
-        action = self._actions['generate_plot_script']
+        action = self._actions["generate_plot_script"]
         action.setEnabled(enabled)
         action.setVisible(enabled)
         # Show/hide the separator between this button and the "Fit" button
         self.toggle_separator_visibility(action, enabled)
 
     def set_fit_enabled(self, on):
-        action = self._actions['toggle_fit']
+        action = self._actions["toggle_fit"]
         action.setEnabled(on)
         action.setVisible(on)
         # Show/hide the separator between this button and help button / waterfall options
         self.toggle_separator_visibility(action, on)
 
     def set_superplot_enabled(self, on):
-        action = self._actions['toggle_superplot']
+        action = self._actions["toggle_superplot"]
         action.setEnabled(on)
         action.setVisible(on)
         # Show/hide the separator between this button and help button / waterfall options
@@ -190,14 +191,14 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
         self.sig_waterfall_fill_area_triggered.emit()
 
     def adjust_for_3d_plots(self):
-        self._actions['toggle_grid'].setChecked(True)
+        self._actions["toggle_grid"].setChecked(True)
 
-        for action in ['back', 'forward', 'pan', 'zoom']:
+        for action in ["back", "forward", "pan", "zoom"]:
             toolbar_action = self._actions[action]
             toolbar_action.setEnabled(False)
             toolbar_action.setVisible(False)
 
-        action = self._actions['forward']
+        action = self._actions["forward"]
         self.toggle_separator_visibility(action, False)
 
     def toggle_separator_visibility(self, action, enabled):
@@ -227,8 +228,7 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
 
         # For plot-to-script button to show, every axis must be a MantidAxes with lines in it
         # Plot-to-script currently doesn't work with waterfall plots so the button is hidden for that plot type.
-        if not all((isinstance(ax, MantidAxes) and curve_in_ax(ax)) for ax in fig.get_axes()) or \
-                fig.get_axes()[0].is_waterfall():
+        if not all((isinstance(ax, MantidAxes) and curve_in_ax(ax)) for ax in fig.get_axes()) or fig.get_axes()[0].is_waterfall():
             self.set_generate_plot_script_enabled(False)
 
         # reenable script generation for colormaps
@@ -253,20 +253,23 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
             # Don't look for grids on colour bars.
             if self._is_colorbar(ax):
                 continue
-            if hasattr(ax, 'grid_on'):
+            if hasattr(ax, "grid_on"):
                 is_major_grid_on = ax.grid_on()
             else:
-                is_major_grid_on = ax.xaxis._major_tick_kw.get('gridOn', False) and ax.yaxis._major_tick_kw.get('gridOn', False)
+                is_major_grid_on = ax.xaxis._major_tick_kw.get("gridOn", False) and ax.yaxis._major_tick_kw.get("gridOn", False)
             # If ANY of the axes have no grid, set the button to unchecked.
             if not is_major_grid_on:
                 break
-        self._actions['toggle_grid'].setChecked(is_major_grid_on)
+        self._actions["toggle_grid"].setChecked(is_major_grid_on)
 
     def is_colormap(self, fig):
         """Identify as a single colour map if it has a axes, one with the plot and the other the colorbar"""
         if figure_type(fig) in [FigureType.Image] and len(fig.get_axes()) == 2:
-            if len(fig.get_axes()[0].get_images()) == 1 and len(fig.get_axes()[1].get_images()) == 0 \
-                    and self._is_colorbar(fig.get_axes()[1]):
+            if (
+                len(fig.get_axes()[0].get_images()) == 1
+                and len(fig.get_axes()[1].get_images()) == 0
+                and self._is_colorbar(fig.get_axes()[1])
+            ):
                 return True
         else:
             return False
@@ -274,15 +277,15 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
     @classmethod
     def _is_colorbar(cls, ax):
         """Determine whether an axes object is a colorbar"""
-        return not hasattr(ax, 'get_subplotspec')
+        return not hasattr(ax, "get_subplotspec")
 
     def set_up_color_selector_toolbar_button(self, fig):
         # check if the action is already in the toolbar
-        if self._actions.get('line_colour'):
+        if self._actions.get("line_colour"):
             return
 
-        a = self.addAction(get_icon('mdi.palette'), "Line Colour", lambda: None)
-        self._actions['line_colour'] = a
+        a = self.addAction(get_icon("mdi.palette"), "Line Colour", lambda: None)
+        self._actions["line_colour"] = a
 
         if figure_type(fig) == FigureType.Wireframe:
             a.setToolTip("Set the colour of the wireframe.")
@@ -324,13 +327,13 @@ class ToolbarStateManager(object):
         """
         Check if the Zoom button is checked
         """
-        return self._toolbar._actions['zoom'].isChecked()
+        return self._toolbar._actions["zoom"].isChecked()
 
     def is_pan_active(self):
         """
         Check if the Pan button is checked
         """
-        return self._toolbar._actions['pan'].isChecked()
+        return self._toolbar._actions["pan"].isChecked()
 
     def is_tool_active(self):
         """
@@ -342,10 +345,10 @@ class ToolbarStateManager(object):
         """
         Check if the fit button is checked
         """
-        return self._toolbar._actions['toggle_fit'].isChecked()
+        return self._toolbar._actions["toggle_fit"].isChecked()
 
     def toggle_fit_button_checked(self):
-        fit_action = self._toolbar._actions['toggle_fit']
+        fit_action = self._toolbar._actions["toggle_fit"]
         if fit_action.isChecked():
             fit_action.setChecked(False)
         else:

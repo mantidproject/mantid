@@ -21,6 +21,7 @@ repos:
       - id: check-xml
       - id: check-yaml
         args: [--allow-multiple-documents]
+        exclude: conda/recipes/mantid/meta.yaml|conda/recipes/mantidqt/meta.yaml|conda/recipes/mantiddocs/meta.yaml|conda/recipes/mantidworkbench/meta.yaml
 
   - repo: https://github.com/mantidproject/pre-commit-hooks.git
     rev: 82e4b72a17c058d99f510771e3f531fb98c3fe73
@@ -38,6 +39,12 @@ repos:
     - id: cmake-format
     #- id: cmake-lint <- not ready yet
 
+  - repo: https://github.com/psf/black
+    rev: 22.12.0
+    hooks:
+      - id: black
+        exclude: scripts/templates/reference/|Testing/Tools/cxxtest
+
   - repo: https://github.com/PyCQA/flake8.git
     rev: 6.0.0
     hooks:
@@ -45,10 +52,3 @@ repos:
         # Have to manually copy this from the .flake8 as flake8 will just ignore the config if the file is passed
         exclude: Framework/PythonInterface/test|qt/applications/workbench/workbench/app/resources.py|qt/python/mantidqt/mantidqt/resources.py|qt/python/mantidqt/mantidqt/dialogs/errorreports/resources_qt4.py|qt/python/mantidqt/mantidqt/dialogs/errorreports/resources_qt5.py|Testing/PerformanceTests|Testing/SystemTests/lib|Testing/SystemTests/scripts|Testing/SystemTests/tests/framework/reference|scripts/ErrorReporter/ui_errorreport.py
         args: ['--extend-ignore=E999,F821,E402,E127']
-
-  - repo: https://github.com/psf/black
-    rev: 22.12.0
-    hooks:
-      - id: black
-        # this is matching the version mantid builds with in conda
-        exclude: Framework|qt|scripts|Testing

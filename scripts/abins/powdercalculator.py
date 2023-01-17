@@ -16,6 +16,7 @@ class PowderCalculator:
     """
     Class for calculating powder data.
     """
+
     def __init__(self, *, filename: str, abins_data: abins.AbinsData) -> None:
         """
         :param filename:  name of input DFT filename
@@ -38,8 +39,7 @@ class PowderCalculator:
 
         self._masses = np.asarray([atoms_data[atom]["mass"] for atom in range(len(atoms_data))])
 
-        self._clerk = abins.IO(input_filename=filename,
-                               group_name=abins.parameters.hdf_groups['powder_data'])
+        self._clerk = abins.IO(input_filename=filename, group_name=abins.parameters.hdf_groups["powder_data"])
 
     def _calculate_powder(self) -> abins.PowderData:
         """
@@ -56,10 +56,7 @@ class PowderCalculator:
             a_tensors[k_index] = tensors[i][0]
             b_tensors[k_index] = tensors[i][1]
 
-        powder = abins.PowderData(a_tensors=a_tensors,
-                                  b_tensors=b_tensors,
-                                  frequencies=self._frequencies,
-                                  num_atoms=len(self._masses))
+        powder = abins.PowderData(a_tensors=a_tensors, b_tensors=b_tensors, frequencies=self._frequencies, num_atoms=len(self._masses))
         return powder
 
     def _calculate_powder_k(self, *, k: str) -> Tuple[np.ndarray, np.ndarray]:
@@ -81,11 +78,10 @@ class PowderCalculator:
         disp: np.array = self._displacements[k]
 
         # factor[num_atoms, num_freq]
-        factor = np.einsum('ij,j->ij', 1.0 / masses, CONSTANT / self._frequencies[k])
+        factor = np.einsum("ij,j->ij", 1.0 / masses, CONSTANT / self._frequencies[k])
 
         # b_tensors[num_atoms, num_freq, dim, dim]
-        b_tensors = np.einsum('ijkl,ij->ijkl',
-                              np.einsum('lki, lkj->lkij', disp, disp.conjugate()).real, factor)
+        b_tensors = np.einsum("ijkl,ij->ijkl", np.einsum("lki, lkj->lkij", disp, disp.conjugate()).real, factor)
 
         # Replace tensor values close to zero with a small finite value.
         # Not clear why this is done; we never divide by these values?
@@ -154,4 +150,5 @@ class PowderCalculator:
         # logger has to be imported locally
 
         from mantid.kernel import logger
+
         logger.notice(msg)

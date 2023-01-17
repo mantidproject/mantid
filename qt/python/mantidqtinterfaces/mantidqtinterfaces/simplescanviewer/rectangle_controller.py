@@ -205,10 +205,7 @@ class RectangleController:
         self.header = None
         self.set_header_items()
 
-        self.fields = [DoubleProperty('x0', x0),
-                       DoubleProperty('y0', y0),
-                       DoubleProperty('x1', x1),
-                       DoubleProperty('y1', y1)]
+        self.fields = [DoubleProperty("x0", x0), DoubleProperty("y0", y0), DoubleProperty("x1", x1), DoubleProperty("y1", y1)]
 
         self.peak_plot = None
 

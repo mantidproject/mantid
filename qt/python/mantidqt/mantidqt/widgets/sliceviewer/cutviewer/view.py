@@ -121,16 +121,16 @@ class CutViewerView(QWidget):
 
     def plot_cut_ws(self, wsname):
         if len(self.figure.axes[0].tracked_workspaces) == 0:
-            self.figure.axes[0].errorbar(ADS.retrieve(wsname), wkspIndex=None, marker='o', capsize=2, color='k',
-                                         markersize=3)
+            self.figure.axes[0].errorbar(ADS.retrieve(wsname), wkspIndex=None, marker="o", capsize=2, color="k", markersize=3)
         self._format_cut_figure()
         self.figure.canvas.draw()
 
     def plot_cut_representation(self):
         if self.cut_rep is not None:
             self.cut_rep.remove()
-        self.cut_rep = CutRepresentation(self.canvas, self.presenter.update_bin_params_from_cut_representation,
-                                         *self.presenter.get_cut_representation_parameters())
+        self.cut_rep = CutRepresentation(
+            self.canvas, self.presenter.update_bin_params_from_cut_representation, *self.presenter.get_cut_representation_parameters()
+        )
 
     # private api
     def _setup_ui(self):
@@ -152,12 +152,13 @@ class CutViewerView(QWidget):
         :return: A QTableWidget object which will contain plot widgets
         """
         table_widget = QTableWidget(3, 7, self)
-        table_widget.setVerticalHeaderLabels(['u1', 'u2', 'u3'])
-        col_headers = ['a*', 'b*', 'c*'] if self.frame == SpecialCoordinateSystem.HKL else ['Qx', 'Qy', 'Qz']
-        col_headers.extend(['start', 'stop', 'nbins', 'step'])
+        table_widget.setVerticalHeaderLabels(["u1", "u2", "u3"])
+        col_headers = ["a*", "b*", "c*"] if self.frame == SpecialCoordinateSystem.HKL else ["Qx", "Qy", "Qz"]
+        col_headers.extend(["start", "stop", "nbins", "step"])
         table_widget.setHorizontalHeaderLabels(col_headers)
         table_widget.setFixedHeight(
-            table_widget.verticalHeader().defaultSectionSize() * (table_widget.rowCount() + 1))  # +1 to include headers
+            table_widget.verticalHeader().defaultSectionSize() * (table_widget.rowCount() + 1)
+        )  # +1 to include headers
         for icol in range(table_widget.columnCount()):
             table_widget.setColumnWidth(icol, 50)
         table_widget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
@@ -193,7 +194,7 @@ class CutViewerView(QWidget):
 
     def _format_cut_figure(self):
         self.figure.axes[0].ignore_existing_data_limits = True
-        self.figure.axes[0].autoscale(axis='both', tight=False)
+        self.figure.axes[0].autoscale(axis="both", tight=False)
         self._format_cut_xlabel()
         for textobj in self.figure.findobj(text.Text):
             textobj.set_fontsize(8)
@@ -204,8 +205,8 @@ class CutViewerView(QWidget):
 
     def _format_cut_xlabel(self):
         xlab = self.figure.axes[0].get_xlabel()
-        istart = xlab.index('(')
-        iend = xlab.index(')')
-        xunit_str = xlab[iend + 1:].replace('Ang^-1', '$\\AA^{-1}$)').replace('(', '').replace(')', '')
-        xlab = xlab[0:istart] + xlab[istart:iend + 1].replace(' ', ', ') + xunit_str
+        istart = xlab.index("(")
+        iend = xlab.index(")")
+        xunit_str = xlab[iend + 1 :].replace("Ang^-1", "$\\AA^{-1}$)").replace("(", "").replace(")", "")
+        xlab = xlab[0:istart] + xlab[istart : iend + 1].replace(" ", ", ") + xunit_str
         self.figure.axes[0].set_xlabel(xlab)

@@ -23,7 +23,7 @@ if ENGG_UI_INSTANCE is not None and ENGG_UI_INSTANCE.isHidden():
     ENGG_UI_INSTANCE.setWindowState(ENGG_UI_INSTANCE.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
     ENGG_UI_INSTANCE.activateWindow()
 else:
-    if 'workbench' in sys.modules:
+    if "workbench" in sys.modules:
         from workbench.config import get_window_config
 
         parent, flags = get_window_config()

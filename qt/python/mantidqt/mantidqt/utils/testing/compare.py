@@ -9,8 +9,8 @@ import numpy as np
 
 
 class ArraysEqual:
-    """Compare arrays for equality in mock.assert_called_with calls.
-    """
+    """Compare arrays for equality in mock.assert_called_with calls."""
+
     def __init__(self, expected):
         self._expected = expected
 

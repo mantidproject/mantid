@@ -11,7 +11,6 @@ from mantidqtinterfaces.MultiPlotting.subplot.subplot_ADS_observer import Subplo
 
 
 class SubplotADSObserverTest(unittest.TestCase):
-
     def setUp(self):
         self.subplot = mock.Mock()
         self.obs = SubplotADSObserver(self.subplot)

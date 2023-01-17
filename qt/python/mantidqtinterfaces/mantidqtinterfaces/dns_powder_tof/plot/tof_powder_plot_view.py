@@ -19,7 +19,8 @@ class DNSTofPowderPlotView(DNSView):
     """
     Widget for basic plotting of DNS powder TOF data.
     """
-    NAME = 'Plotting'
+
+    NAME = "Plotting"
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -29,12 +30,12 @@ class DNSTofPowderPlotView(DNSView):
 
     def set_plot(self, workspace):
         if self.slice_viewer is None:
-            np.seterr(divide='ignore', invalid='ignore')
+            np.seterr(divide="ignore", invalid="ignore")
             self.slice_viewer = SliceViewer(workspace)
             self.layout.addWidget(self.slice_viewer.view)
-            np.seterr(divide='warn', invalid='warn')
+            np.seterr(divide="warn", invalid="warn")
         else:
-            np.seterr(divide='ignore', invalid='ignore')
+            np.seterr(divide="ignore", invalid="ignore")
             self.slice_viewer.update_plot_data()
             self.slice_viewer.view.data_view.on_home_clicked()
-            np.seterr(divide='warn', invalid='warn')
+            np.seterr(divide="warn", invalid="warn")

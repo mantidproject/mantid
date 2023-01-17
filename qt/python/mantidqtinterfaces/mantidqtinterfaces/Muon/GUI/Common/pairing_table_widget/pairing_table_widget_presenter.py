@@ -14,11 +14,10 @@ from mantidqtinterfaces.Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_
 from mantidqtinterfaces.Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import row_colors, row_tooltips
 
 
-pair_columns = ['pair_name', 'to_analyse', 'group_1', 'group_2', 'alpha']
+pair_columns = ["pair_name", "to_analyse", "group_1", "group_2", "alpha"]
 
 
 class PairingTablePresenter(object):
-
     def __init__(self, view, model):
         self._view = view
         self._model = model
@@ -68,21 +67,21 @@ class PairingTablePresenter(object):
         changed_item_text = self._view.get_table_item_text(row, col)
         pair_name = self._view.get_table_item_text(row, 0)
         update_model = True
-        if pair_columns[col] == 'pair_name' and not self.validate_pair_name(changed_item_text):
+        if pair_columns[col] == "pair_name" and not self.validate_pair_name(changed_item_text):
             update_model = False
-        if pair_columns[col] == 'group_1':
-            if changed_item_text == self._view.get_table_item_text(row, pair_columns.index('group_2')):
-                table[row][pair_columns.index('group_2')] = self._model.pairs[row].forward_group
-        if pair_columns[col] == 'group_2':
-            if changed_item_text == self._view.get_table_item_text(row, pair_columns.index('group_1')):
-                table[row][pair_columns.index('group_1')] = self._model.pairs[row].backward_group
-        if pair_columns[col] == 'alpha':
+        if pair_columns[col] == "group_1":
+            if changed_item_text == self._view.get_table_item_text(row, pair_columns.index("group_2")):
+                table[row][pair_columns.index("group_2")] = self._model.pairs[row].forward_group
+        if pair_columns[col] == "group_2":
+            if changed_item_text == self._view.get_table_item_text(row, pair_columns.index("group_1")):
+                table[row][pair_columns.index("group_1")] = self._model.pairs[row].backward_group
+        if pair_columns[col] == "alpha":
             if not self.validate_alpha(changed_item_text):
                 update_model = False
             else:
                 rounded_item = round_value(changed_item_text, self._model._context.group_pair_context.alpha_precision)
                 table[row][col] = rounded_item
-        if pair_columns[col] == 'to_analyse':
+        if pair_columns[col] == "to_analyse":
             update_model = False
             self.to_analyse_data_checkbox_changed(changed_item.checkState(), row, pair_name)
 
@@ -98,12 +97,14 @@ class PairingTablePresenter(object):
             table = self._view.get_table_contents()
         self._model.clear_pairs()
         for entry in table:
-            periods = self._model.get_periods(str(entry[2]))+self._model.get_periods(str(entry[3]))
-            pair = MuonPair(pair_name=str(entry[0]),
-                            backward_group_name=str(entry[3]),
-                            forward_group_name=str(entry[2]),
-                            alpha=float(entry[4]),
-                            periods = periods)
+            periods = self._model.get_periods(str(entry[2])) + self._model.get_periods(str(entry[3]))
+            pair = MuonPair(
+                pair_name=str(entry[0]),
+                backward_group_name=str(entry[3]),
+                forward_group_name=str(entry[2]),
+                alpha=float(entry[4]),
+                periods=periods,
+            )
             self._model.add_pair(pair)
 
     def update_view_from_model(self):
@@ -117,9 +118,9 @@ class PairingTablePresenter(object):
                 backward_group_periods = self._model._context.group_pair_context[pair.backward_group].periods
                 forward_period_warning = self._model.validate_periods_list(forward_group_periods)
                 backward_period_warning = self._model.validate_periods_list(backward_group_periods)
-                if forward_period_warning==RowValid.invalid_for_all_runs or backward_period_warning == RowValid.invalid_for_all_runs:
+                if forward_period_warning == RowValid.invalid_for_all_runs or backward_period_warning == RowValid.invalid_for_all_runs:
                     display_period_warning = RowValid.invalid_for_all_runs
-                elif forward_period_warning==RowValid.valid_for_some_runs or backward_period_warning == RowValid.valid_for_some_runs:
+                elif forward_period_warning == RowValid.valid_for_some_runs or backward_period_warning == RowValid.valid_for_some_runs:
                     display_period_warning = RowValid.valid_for_some_runs
                 else:
                     display_period_warning = RowValid.valid_for_all_runs
@@ -139,7 +140,7 @@ class PairingTablePresenter(object):
             self._model.add_pair_to_analysis(pair_name)
         else:
             self._model.remove_pair_from_analysis(pair_name)
-        pair_info = {'is_added': pair_added, 'name': pair_name}
+        pair_info = {"is_added": pair_added, "name": pair_name}
         self.selected_pair_changed_notifier.notify_subscribers(pair_info)
 
     def plot_default_case(self):
@@ -163,8 +164,9 @@ class PairingTablePresenter(object):
     def add_pair_to_model(self, pair):
         self._model.add_pair(pair)
 
-    def add_pair_to_view(self, pair, to_analyse=False, color=row_colors[RowValid.valid_for_all_runs],
-                         tool_tip=row_tooltips[RowValid.valid_for_all_runs]):
+    def add_pair_to_view(
+        self, pair, to_analyse=False, color=row_colors[RowValid.valid_for_all_runs], tool_tip=row_tooltips[RowValid.valid_for_all_runs]
+    ):
         self._view.disable_updates()
         self.update_group_selections()
         assert isinstance(pair, MuonPair)
@@ -180,7 +182,7 @@ class PairingTablePresenter(object):
     def handle_add_pair_button_checked_state(self):
         self.handle_add_pair_button_clicked()
 
-    def handle_add_pair_button_clicked(self, group_1='', group_2=''):
+    def handle_add_pair_button_clicked(self, group_1="", group_2=""):
         if len(self._model.group_names) == 0 or len(self._model.group_names) == 1:
             self._view.warning_popup("At least two groups are required to create a pair")
         else:
@@ -192,9 +194,10 @@ class PairingTablePresenter(object):
             elif self.validate_pair_name(new_pair_name):
                 group1 = self._model.group_names[0] if not group_1 else group_1
                 group2 = self._model.group_names[1] if not group_2 else group_2
-                periods = self._model.get_periods(group1)+self._model.get_periods(group2)
-                pair = MuonPair(pair_name=str(new_pair_name),
-                                forward_group_name=group1, backward_group_name=group2, alpha=1.0, periods=periods)
+                periods = self._model.get_periods(group1) + self._model.get_periods(group2)
+                pair = MuonPair(
+                    pair_name=str(new_pair_name), forward_group_name=group1, backward_group_name=group2, alpha=1.0, periods=periods
+                )
                 self.add_pair(pair)
                 self.notify_data_changed()
 
@@ -212,7 +215,7 @@ class PairingTablePresenter(object):
         for name, index in pair_names:
             used_by = self._model.check_if_used_by_diff(name)
             if used_by:
-                warnings+=used_by+"\n"
+                warnings += used_by + "\n"
             else:
                 safe_to_rm.append([index, name])
         for index, name in reversed(safe_to_rm):
@@ -239,8 +242,7 @@ class PairingTablePresenter(object):
 
     def _is_edited_name_duplicated(self, new_name):
         is_name_column_being_edited = self._view.pairing_table.currentColumn() == 0
-        is_name_unique = (sum(
-            [new_name == name for name in self._model.group_and_pair_names]) == 0)
+        is_name_unique = sum([new_name == name for name in self._model.group_and_pair_names]) == 0
         return is_name_column_being_edited and not is_name_unique
 
     def validate_pair_name(self, text):

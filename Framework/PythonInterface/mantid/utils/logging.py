@@ -40,27 +40,27 @@ def capture_logs(level=None) -> io.StringIO:
     try:
         # backup the logging channel and sys.stdout
         config = ConfigService.Instance()
-        backup = dict(channel=config['logging.channels.consoleChannel.class'], stdout=sys.stdout)
+        backup = dict(channel=config["logging.channels.consoleChannel.class"], stdout=sys.stdout)
         # backup the logging level?
         if level:
-            assert level.lower() in ['debug', 'information', 'notice', 'warning', 'error']
-            current_level = config['logging.loggers.root.level']
-            backup['level'] = current_level if current_level else 'notice'
-            config['logging.loggers.root.level'] = level
+            assert level.lower() in ["debug", "information", "notice", "warning", "error"]
+            current_level = config["logging.loggers.root.level"]
+            backup["level"] = current_level if current_level else "notice"
+            config["logging.loggers.root.level"] = level
         # redirect messages to log_file
-        config['logging.channels.consoleChannel.class'] = 'PythonStdoutChannel'
+        config["logging.channels.consoleChannel.class"] = "PythonStdoutChannel"
         str_buffer = io.StringIO()
         sys.stdout = str_buffer
         yield str_buffer
     finally:
         str_buffer.close()
-        config['logging.channels.consoleChannel.class'] = backup['channel']
+        config["logging.channels.consoleChannel.class"] = backup["channel"]
         if level:
-            config['logging.loggers.root.level'] = backup['level']
-        sys.stdout = backup['stdout']
+            config["logging.loggers.root.level"] = backup["level"]
+        sys.stdout = backup["stdout"]
 
 
-def log_to_python(level='debug'):
+def log_to_python(level="debug"):
     r"""
     Modify Mantid's logger to forward messages to Python's logging framework instead
     of outputting them itself. This allows users to configure the logger from Python
@@ -74,10 +74,10 @@ def log_to_python(level='debug'):
         'information', 'notice', 'warning', 'error', 'critical', 'fatal'.
     """
     config = ConfigService.Instance()
-    config['logging.loggers.root.level'] = level
-    config['logging.channels.consoleChannel.formatter'] = 'f1'
+    config["logging.loggers.root.level"] = level
+    config["logging.channels.consoleChannel.formatter"] = "f1"
     # Output only the message text and let Python take care of formatting.
-    config['logging.formatters.f1.class'] = 'PatternFormatter'
-    config['logging.formatters.f1.pattern'] = '%t'
+    config["logging.formatters.f1.class"] = "PatternFormatter"
+    config["logging.formatters.f1.pattern"] = "%t"
     # Important: Do this one last because it triggers re-init of logging system!
-    config['logging.channels.consoleChannel.class'] = 'PythonLoggingChannel'
+    config["logging.channels.consoleChannel.class"] = "PythonLoggingChannel"
