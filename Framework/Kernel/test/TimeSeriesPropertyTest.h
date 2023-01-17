@@ -47,10 +47,10 @@ class TimeSeriesPropertyTest : public CxxTest::TestSuite {
 
   // create a TimeROI object with two ROIS. Overlaps with the TimeSeriesProperty
   // returned by createDoubleTSP()
-  TimeRoi *createTimeRoi() {
+  TimeROI *createTimeRoi() {
     TimeROI *rois = new TimeROI;
-    rois.addROI("2007-11-30T16:17:05", "2007-11-30T16:17:15");
-    rois.addROI("2007-11-30T16:17:25", "2007-11-30T16:17:35");
+    rois->addROI("2007-11-30T16:17:05", "2007-11-30T16:17:15");
+    rois->addROI("2007-11-30T16:17:25", "2007-11-30T16:17:35");
     return rois;
   }
 
@@ -654,7 +654,7 @@ public:
 
   void test_timeAverageValueWithROI() {
     auto dblLog = createDoubleTSP();
-    auto rois = createTimeRoi();
+    TimeROI *rois = createTimeRoi();
     const double dblMean = dblLog->timeAverageValue(*rois);
     delete dblLog; // clean up
     delete rois;
