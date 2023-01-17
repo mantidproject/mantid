@@ -886,8 +886,7 @@ std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> FitPeaks::fitPeak
   PARALLEL_CHECK_INTERRUPT_REGION
 
   if (all_spectra_peaks_not_enough_datapoints > 0)
-    g_log.notice() << all_spectra_peaks_not_enough_datapoints << " peaks rejected: not enough X(Y) datapoints."
-                   << std::endl;
+    g_log.notice() << all_spectra_peaks_not_enough_datapoints << " peaks rejected: not enough X(Y) datapoints.\n";
 
   return fit_result_vector;
 }
