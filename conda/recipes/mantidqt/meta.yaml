@@ -32,7 +32,7 @@ requirements:
     - jemalloc  # [unix]
     - mantid {{ version }}
     - python {{ python }}
-    - qt {{ qt }}
+    - qt-main {{ qt_main }}
     - pyqt {{ pyqt }}
     - qscintilla2 {{ qscintilla2 }}
     - qt-webengine

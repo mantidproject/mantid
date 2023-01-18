@@ -42,7 +42,7 @@ sphinx_bootstrap_theme:
 pyqt:
   - 5.15
 
-qt:
+qt_main:
   - 5.15.4
 
 qscintilla2:
