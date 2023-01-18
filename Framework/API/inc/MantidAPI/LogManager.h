@@ -30,6 +30,7 @@ template <typename TYPE> class TimeSeriesProperty;
 class SplittingInterval;
 using TimeSplitterType = std::vector<SplittingInterval>;
 class PropertyManager;
+class TimeROI;
 } // namespace Kernel
 
 namespace API {
@@ -159,6 +160,9 @@ public:
   /// Empty all but the last value out of all TimeSeriesProperty logs
   void clearOutdatedTimeSeriesLogValues();
 
+  const Kernel::TimeROI &timeROI() const;
+  void timeROI(const Kernel::TimeROI &);
+
   /// Save the run to a NeXus file with a given group name
   virtual void saveNexus(::NeXus::File *file, const std::string &group, bool keepOpen = false) const;
 
@@ -180,6 +184,9 @@ public:
   /// Clear the logs
   void clearLogs();
 
+  /// Clear ou the cache of calculated statistics
+  void clearSingleValueCache();
+
   // returns true if the log has a matching invalid values log filter
   bool hasInvalidValuesFilter(const std::string &logName) const;
 
@@ -196,13 +203,15 @@ protected:
   void loadNexus(::NeXus::File *file, const std::map<std::string, std::string> &entries);
   /// A pointer to a property manager
   std::unique_ptr<Kernel::PropertyManager> m_manager;
+  std::unique_ptr<Kernel::TimeROI> m_timeroi;
   /// Name of the log entry containing the proton charge when retrieved using
   /// getProtonCharge
   static const char *PROTON_CHARGE_LOG_NAME;
 
 private:
   /// Cache for the retrieved single values
-  std::unique_ptr<Kernel::Cache<std::pair<std::string, Kernel::Math::StatisticType>, double>> m_singleValueCache;
+  mutable std::unique_ptr<Kernel::Cache<std::pair<std::string, Kernel::Math::StatisticType>, double>>
+      m_singleValueCache;
 };
 /// shared pointer to the logManager base class
 using LogManager_sptr = std::shared_ptr<LogManager>;

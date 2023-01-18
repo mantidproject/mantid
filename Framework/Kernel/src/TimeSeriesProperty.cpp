@@ -8,6 +8,7 @@
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSplitter.h"
 
 #include <json/value.h>
@@ -794,6 +795,22 @@ template <typename TYPE> double TimeSeriesProperty<TYPE>::timeAverageValue() con
   double retVal = 0.0;
   try {
     const auto &filter = getSplittingIntervals();
+    retVal = this->averageValueInFilter(filter);
+  } catch (std::exception &) {
+    // just return nan
+    retVal = std::numeric_limits<double>::quiet_NaN();
+  }
+  return retVal;
+}
+
+/** Returns the calculated time weighted average value.
+ * @param timeRoi  Object that holds information about when the time measurement was active.
+ * @return The time-weighted average value of the log when the time measurement was active.
+ */
+template <typename TYPE> double TimeSeriesProperty<TYPE>::timeAverageValue(const TimeROI &timeRoi) const {
+  double retVal = 0.0;
+  try {
+    const auto &filter = timeRoi.toSplitters();
     retVal = this->averageValueInFilter(filter);
   } catch (std::exception &) {
     // just return nan
@@ -2100,7 +2117,7 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::applyFilter() const {
         } else {
           // ii.  Register the end of a valid log
           if (ilastlog < 0)
-            throw std::logic_error("LastLog is not expected to be less than 0");
+            throw std::logic_error(" LastLog is not expected to be less than 0");
 
           int delta_numintervals = icurlog - ilastlog;
           if (delta_numintervals < 0)

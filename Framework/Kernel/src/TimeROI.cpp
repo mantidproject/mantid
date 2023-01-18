@@ -19,8 +19,6 @@ using Mantid::Types::Core::DateAndTime;
 namespace {
 /// static Logger definition
 Logger g_log("TimeROI");
-/// the underlying property needs a name
-const std::string NAME{"Kernel_TimeROI"};
 
 const bool ROI_USE{true};
 const bool ROI_IGNORE{false};
@@ -40,6 +38,10 @@ void assert_increasing(const DateAndTime &startTime, const DateAndTime &stopTime
  * already unique and minimal number of values.
  */
 bool valuesAreAlternating(const std::vector<bool> &values) {
+  // empty object is fine
+  if (values.empty())
+    return true;
+
   const auto NUM_VALUES = values.size();
   // should be an even number of values
   if (NUM_VALUES % 2 != 0)
@@ -64,10 +66,28 @@ bool valuesAreAlternating(const std::vector<bool> &values) {
 }
 } // namespace
 
+const std::string TimeROI::NAME = "Kernel_TimeROI";
+
 TimeROI::TimeROI() : m_roi{NAME} {}
 
 TimeROI::TimeROI(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) : m_roi{NAME} {
   this->addROI(startTime, stopTime);
+}
+
+TimeROI::TimeROI(const Kernel::TimeSeriesProperty<bool> &filter) : m_roi{NAME} {
+  const auto &values = filter.valuesAsVector();
+
+  // only need to do something if values aren't all USE
+  if (!std::all_of(values.cbegin(), values.cend(), [](const bool value) { return value == ROI_USE; })) {
+    const auto &times = filter.timesAsVector();
+    const auto NUM_VAL = times.size();
+    for (size_t i = 0; i < NUM_VAL; ++i) {
+      m_roi.addValue(times[i], values[i]);
+    }
+
+    // assuming the filter was not well specified, clean things up
+    this->removeRedundantEntries();
+  }
 }
 
 void TimeROI::addROI(const std::string &startTime, const std::string &stopTime) {
@@ -201,12 +221,25 @@ void TimeROI::replaceValues(const std::vector<DateAndTime> &times, const std::ve
   this->m_roi.clear();
 
   // see if everything to add is "IGNORE"
-  bool set_values = std::any_of(values.cbegin(), values.cend(), [](bool value) { return value; });
+  bool set_values = std::any_of(values.cbegin(), values.cend(), [](const bool value) { return value == ROI_USE; });
 
   // set the values if there are any use regions
   if (set_values) {
     this->m_roi.addValues(times, values);
   }
+}
+
+void TimeROI::replaceROI(const TimeSeriesProperty<bool> *roi) {
+  // this is used by LogManager::loadNexus
+  const auto times = roi->timesAsVector();
+  const auto values = roi->valuesAsVector();
+  this->replaceValues(times, values);
+}
+
+void TimeROI::replaceROI(const TimeROI &other) {
+  const auto times = other.m_roi.timesAsVector();
+  const auto values = other.m_roi.valuesAsVector();
+  this->replaceValues(times, values);
 }
 
 /**
@@ -267,6 +300,7 @@ void TimeROI::update_intersection(const TimeROI &other) {
 /**
  * Remove time/value pairs that are not necessary to describe the TimeROI
  * - Sort the times/values
+ * - Ensure that values start with USE and should end with IGNORE
  * - Remove values that are not needed (e.g. IGNORE followed by IGNORE)
  * - Remove values that are overridden. Overridden values are ones where a new value was added at the same time, the
  * last one added will be used.
@@ -316,6 +350,35 @@ void TimeROI::removeRedundantEntries() {
     m_roi.replaceValues(times_new, values_new);
 }
 
+/**
+ * This method is to lend itself to be compatible with existing implementation
+ */
+const std::vector<SplittingInterval> TimeROI::toSplitters() const {
+  std::cout << "TimeROI::toSplitters()" << std::endl;
+  this->debugPrint();
+
+  std::vector<SplittingInterval> output;
+
+  if (!(this->empty())) {
+    // since this is const, complain if there is something not right with assumptions
+    if (!(valuesAreAlternating(m_roi.valuesAsVector()))) {
+      throw std::runtime_error(
+          "Must call TimeROI::removeRedundantEntries() before using TimeROI::toSplitters() to have "
+          "minimal number of splitters");
+    }
+
+    // and the current times
+    const auto times = m_roi.timesAsVector();
+    const auto NUM_TIMES = times.size();
+
+    // convert to a vector of splitters
+    for (size_t i = 0; i < NUM_TIMES - 1; i += 2)
+      output.push_back(SplittingInterval(times[i], times[i + 1]));
+  }
+
+  return output;
+}
+
 bool TimeROI::operator==(const TimeROI &other) const { return this->m_roi == other.m_roi; }
 
 void TimeROI::debugPrint() const {
@@ -325,6 +388,8 @@ void TimeROI::debugPrint() const {
     std::cout << i << ": " << times[i] << ", " << values[i] << std::endl;
   }
 }
+
+size_t TimeROI::getMemorySize() const { return m_roi.getMemorySize(); }
 
 /**
  * Duration of the whole TimeROI
@@ -371,6 +436,9 @@ double TimeROI::durationInSeconds(const Types::Core::DateAndTime &startTime,
 std::size_t TimeROI::numBoundaries() const { return static_cast<std::size_t>(m_roi.size()); }
 
 bool TimeROI::empty() const { return bool(this->numBoundaries() == 0); }
+
+// serialization / deserialization items
+void TimeROI::saveNexus(::NeXus::File *file) const { const_cast<TimeSeriesProperty<bool> &>(m_roi).saveProperty(file); }
 
 } // namespace Kernel
 } // namespace Mantid
