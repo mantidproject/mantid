@@ -349,7 +349,6 @@ set(PYTHON_PLUGINS
     functions/ICConvoluted.py
     functions/Lorentz.py
     functions/LowTFMuonium.py
-    functions/Meier.py
     functions/ModOsc.py
     functions/MsdGauss.py
     functions/MsdPeters.py
