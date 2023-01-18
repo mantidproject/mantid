@@ -135,7 +135,7 @@ Usage Example for Sequential Fitting
 
 7. Add a second ``Lorentzian`` function in the same way.
 
-8. Change the ``Height`` parameter value to 1.5
+8. Change the ``Amplitude`` parameter values to 1.5
 
 9. Make sure the ``Fitting Mode`` is Sequential
 
@@ -143,7 +143,7 @@ Usage Example for Sequential Fitting
 
 11. Run the script and you will see the results of a sequential fit.
 
-.. image::  ../../images/FitScriptGenerator_SequentialFit.PNG
+.. image::  ../../images/FitScriptGenerator_SequentialFit.png
    :align: center
    :height: 300px
 
@@ -190,7 +190,7 @@ Usage Example for Simultaneous Fitting
 
 11. Add another ``Lorentzian`` so there are two in each of the domains.
 
-12. Change the ``Height`` parameter values in each of the domains to 1.5.
+12. Change the ``Amplitude`` parameter values in each of the domains to 1.5.
 
 13. Select any table row that isn't the first domain table row.
 
@@ -200,7 +200,7 @@ Usage Example for Simultaneous Fitting
 
 16. Run the script and you will see the results of a simultaneous fit. Notice the background in the first spectrum has been accounted for.
 
-.. image::  ../../images/FitScriptGenerator_SimultaneousFit.PNG
+.. image::  ../../images/FitScriptGenerator_SimultaneousFit.png
    :align: center
    :height: 300px
 
