@@ -38,6 +38,8 @@ create_and_activate_env() {
   else
     mamba env create --force --name $env_name --file $env_file
   fi
+  filename = $env_name + `_dependencies.txt`
+  mamba list -e > filename
   mamba activate $env_name
 }
 
