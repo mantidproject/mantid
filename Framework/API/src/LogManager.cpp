@@ -298,18 +298,16 @@ const std::vector<Kernel::Property *> &LogManager::getProperties() const { retur
 /** Return the total memory used by the run object, in bytes.
  */
 size_t LogManager::getMemorySize() const {
+  size_t total{m_timeroi->getMemorySize()};
 
-  /// lambda function to calculate the size of a property and add it to a cumulant variable
-  auto propSize = [&](size_t cumulant, Property *p) {
-    if (p)
-      cumulant += p->getMemorySize() + sizeof(Property *);
-    return cumulant;
-  };
+  for (const auto &p : m_manager->getProperties()) {
+    if (p) {
+      // cppcheck-suppress useStlAlgorithm
+      total += p->getMemorySize() + sizeof(Property *); // cppcheck-suppress useStlAlgorithm
+    }
+  }
 
-  // accumulate the size of the logged properties
-  size_t allPropsSize = static_cast<size_t>(
-      std::accumulate(m_manager->getProperties().cbegin(), m_manager->getProperties().cend(), 0.0, propSize));
-  return m_timeroi->getMemorySize() + allPropsSize;
+  return total;
 }
 
 /**
