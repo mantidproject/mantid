@@ -1,3 +1,9 @@
+// Mantid Repository : https: // github.com/mantidproject/mantid
+//
+// Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
+// NScD Oak Ridge National Laboratory, European Spallation Source,
+// Institut Laue - Langevin &CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier : GPL - 3.0 +
 #include "MantidCurveFitting/Functions/Meier.h"
 #include "MantidAPI/FunctionFactory.h"
 #include <cmath>
@@ -11,67 +17,80 @@ using namespace Kernel;
 
 using namespace API;
 
-DECLARE_FUNCTION(MeierV2)
+DECLARE_FUNCTION(Meier)
 
-void MeierV2::init() {
+void Meier::init() {
   declareParameter("A0", 0.5, "Amplitude");
-  declareParameter("FreqD", 0.01, "Frequency due to dipolar coupling (MHz)");
-  declareParameter("FreqQ", 0.05, "Frequency due to quadrupole interaction of the nuclear spin (MHz)");
+  declareParameter("FreqD", 0.01, "Angular Frequency due to dipolar coupling (MHz)");
+  declareParameter("FreqQ", 0.05,
+                   "Angular Frequency due to quadrupole interaction of the nuclear spin (MHz) due to a field gradient "
+                   "exerted by the presence of the muon");
   declareParameter("Sigma", 0.2, "Gaussian decay rate");
   declareParameter("Lambda", 0.1, "Exponential decay rate");
+  // J, Total angular momentum quanutm number
   declareAttribute("Spin", API::IFunction::Attribute(3.5));
 }
 
-void MeierV2::function1D(double *out, const double *xValues, const size_t nData) const {
+void Meier::function1D(double *out, const double *xValues, const size_t nData) const {
+  const double A0 = getParameter("A0");
+  const double J2 = round(getAttribute("Spin").asDouble() * 2);
+  const double Lambda = getParameter("Lambda");
+  const double Sigma = getParameter("Sigma");
+
   std::valarray<double> xValArray(xValues, nData);
 
-  const double A0 = getParameter("A0");
-  double J = getAttribute("Spin").asDouble();
-  const double Lambda = getParameter("Lambda");
-  const double sigma = getParameter("Sigma");
-
-  const std::valarray<double> gau = std::exp(-0.5 * pow((sigma * xValArray), 2));
+  const std::valarray<double> gau = std::exp(-0.5 * pow((Sigma * xValArray), 2));
   const std::valarray<double> Lor = std::exp(-Lambda * xValArray);
 
-  const double J2 = round(2 * J);
-  J = J2 / 2;
+  std::valarray<double> positiveLambda;
+  std::valarray<double> negativeLambda;
+  std::valarray<double> cos2AlphaSquared;
+  std::valarray<double> sin2AlphaSquared;
+  std::valarray<double> cosAlphaSquared;
+  std::valarray<double> sinAlphaSquared;
 
-  std::valarray<double> lamp;
-  std::valarray<double> lamm;
-  std::valarray<double> cosSQ2alpha;
-  std::valarray<double> sinSQ2alpha;
-  std::valarray<double> cosSQalpha;
-  std::valarray<double> sinSQalpha;
-
-  calculateAlphaArrays(sinSQalpha, cosSQalpha, sinSQ2alpha, cosSQ2alpha, lamm, lamp, J, J2);
+  precomputeIntermediateSteps(sinAlphaSquared, cosAlphaSquared, sin2AlphaSquared, cos2AlphaSquared, negativeLambda,
+                              positiveLambda, J2);
 
   std::valarray<double> Px;
-  calculatePx(Px, xValArray, sinSQalpha, cosSQalpha, lamm, lamp, J, J2);
+  calculatePx(Px, xValArray, sinAlphaSquared, cosAlphaSquared, negativeLambda, positiveLambda, J2);
 
   std::valarray<double> Pz;
-  calculatePz(Pz, xValArray, sinSQ2alpha, cosSQ2alpha, lamm, lamp, J, J2);
+  calculatePz(Pz, xValArray, sin2AlphaSquared, cos2AlphaSquared, negativeLambda, positiveLambda, J2);
 
   const std::valarray<double> outValArray = A0 * gau * Lor * (1. / 3.) * (2 * Px + Pz);
   std::copy(begin(outValArray), end(outValArray), out);
 }
 
-void MeierV2::calculateAlphaArrays(std::valarray<double> &sinSQalpha, std::valarray<double> &cosSQalpha,
-                                   std::valarray<double> &sinSQ2alpha, std::valarray<double> &cosSQ2alpha,
-                                   std::valarray<double> &lamm, std::valarray<double> &lamp, const double &J,
-                                   const double &J2) const {
+/**
+ * Precomputes intermediate terms used to calculate the polrization in the x and z directions. All value arrays will be
+ * resized to J2 + 2 and set to their respective quantities
+ * @param sinAlphaSquared :: sin of alpha squared
+ * @param cosAlphaSquared :: cos of alpha squared
+ * @param sin2AlphaSquared :: sin of 2*alpha squared
+ * @param cos2AlphaSquared :: cos of 2*alpha squared
+ * @param positiveLambda :: negative lambda
+ * @param negativeLambda :: positive lambda
+ * @param J2 :: 2 * total angular momentum quantum number
+ */
+void Meier::precomputeIntermediateSteps(std::valarray<double> &sinAlphaSquared, std::valarray<double> &cosAlphaSquared,
+                                        std::valarray<double> &sin2AlphaSquared,
+                                        std::valarray<double> &cos2AlphaSquared, std::valarray<double> &negativeLambda,
+                                        std::valarray<double> &positiveLambda, const double &J2) const {
   const double FreqD = getParameter("FreqD");
   const double FreqQ = getParameter("FreqQ");
+  const double J = J2 / 2;
 
   const double OmegaD = 2 * M_PI * FreqD;
   const double OmegaQ = 2 * M_PI * FreqQ;
 
   const size_t size = int(J2 + 2);
-  sinSQalpha.resize(size);
-  cosSQalpha.resize(size);
-  sinSQ2alpha.resize(size);
-  cosSQ2alpha.resize(size);
-  lamm.resize(size);
-  lamp.resize(size);
+  sinAlphaSquared.resize(size);
+  cosAlphaSquared.resize(size);
+  sin2AlphaSquared.resize(size);
+  cos2AlphaSquared.resize(size);
+  negativeLambda.resize(size);
+  positiveLambda.resize(size);
   std::valarray<double> Wm(size);
 
   for (size_t i = 0; i < size; i++) {
@@ -84,52 +103,82 @@ void MeierV2::calculateAlphaArrays(std::valarray<double> &sinSQalpha, std::valar
     Wm[i] = std::sqrt(qq);
 
     if (static_cast<double>(i) < (J2 + 1)) {
-      lamp[i] = 0.5 * (q3 + Wm[i]);
+      positiveLambda[i] = 0.5 * (q3 + Wm[i]);
     } else {
-      lamp[i] = OmegaQ * pow(J, 2) - OmegaD * J;
+      positiveLambda[i] = OmegaQ * pow(J, 2) - OmegaD * J;
     }
 
     if (i > 0) {
-      lamm[i] = 0.5 * (q3 - Wm[i]);
+      negativeLambda[i] = 0.5 * (q3 - Wm[i]);
     } else {
-      lamm[i] = OmegaQ * pow(J, 2) - OmegaD * J;
+      negativeLambda[i] = OmegaQ * pow(J, 2) - OmegaD * J;
     }
 
     if (qq > 0) {
-      cosSQ2alpha[i] = pow(q1, 2) / qq;
+      cos2AlphaSquared[i] = pow(q1, 2) / qq;
     } else {
-      cosSQ2alpha[i] = 0;
+      cos2AlphaSquared[i] = 0;
     }
-    sinSQ2alpha[i] = 1 - cosSQ2alpha[i];
+    sin2AlphaSquared[i] = 1 - cos2AlphaSquared[i];
 
-    cosSQalpha[i] = 0.5 * (1 + std::sqrt(cosSQ2alpha[i]));
-    sinSQalpha[i] = 1 - cosSQalpha[i];
+    cosAlphaSquared[i] = 0.5 * (1 + std::sqrt(cos2AlphaSquared[i]));
+    sinAlphaSquared[i] = 1 - cosAlphaSquared[i];
   }
 }
 
-void MeierV2::calculatePx(std::valarray<double> &Px, const std::valarray<double> &xValArray,
-                          const std::valarray<double> &sinSQalpha, const std::valarray<double> &cosSQalpha,
-                          const std::valarray<double> &lamm, const std::valarray<double> &lamp, const double &J,
-                          const double &J2) const {
-  std::valarray<double> tx(xValArray.size());
+/**
+ * Calculates the polarization in the x direction
+ * @param Px :: the polarization in the x direction
+ * @param xValues :: input x values
+ * @param sinAlphaSquared :: sin of alpha squared
+ * @param cosAlphaSquared :: cos of alpha squared
+ * @param sin2AlphaSquared :: sin of 2*alpha squared
+ * @param cos2AlphaSquared :: cos of 2*alpha squared
+ * @param positiveLambda :: negative lambda
+ * @param negativeLambda :: positive lambda
+ * @param J2 :: 2 * total angular momentum quantum number multiplied by 2
+ */
+void Meier::calculatePx(std::valarray<double> &Px, const std::valarray<double> &xValues,
+                        const std::valarray<double> &sinAlphaSquared, const std::valarray<double> &cosAlphaSquared,
+                        const std::valarray<double> &negativeLambda, const std::valarray<double> &positiveLambda,
+                        const double &J2) const {
+  std::valarray<double> tx(xValues.size());
   for (int i = 0; i < int(J2) + 1; i++) {
-    const std::valarray<double> a = cosSQalpha[i + 1] * sinSQalpha[i] * std::cos((lamp[i + 1] - lamp[i]) * xValArray);
-    const std::valarray<double> b = cosSQalpha[i + 1] * cosSQalpha[i] * std::cos((lamp[i + 1] - lamm[i]) * xValArray);
-    const std::valarray<double> c = sinSQalpha[i + 1] * sinSQalpha[i] * std::cos((lamm[i + 1] - lamp[i]) * xValArray);
-    const std::valarray<double> d = sinSQalpha[i + 1] * cosSQalpha[i] * std::cos((lamm[i + 1] - lamm[i]) * xValArray);
+    const std::valarray<double> a =
+        cosAlphaSquared[i + 1] * sinAlphaSquared[i] * std::cos((positiveLambda[i + 1] - positiveLambda[i]) * xValues);
+    const std::valarray<double> b =
+        cosAlphaSquared[i + 1] * cosAlphaSquared[i] * std::cos((positiveLambda[i + 1] - negativeLambda[i]) * xValues);
+    const std::valarray<double> c =
+        sinAlphaSquared[i + 1] * sinAlphaSquared[i] * std::cos((negativeLambda[i + 1] - positiveLambda[i]) * xValues);
+    const std::valarray<double> d =
+        sinAlphaSquared[i + 1] * cosAlphaSquared[i] * std::cos((negativeLambda[i + 1] - negativeLambda[i]) * xValues);
     tx = tx + a + b + c + d;
   }
+  const double J = J2 / 2;
   Px = tx / (2 * J + 1);
 }
 
-void MeierV2::calculatePz(std::valarray<double> &Pz, const std::valarray<double> &xValArray,
-                          const std::valarray<double> &sinSQ2alpha, const std::valarray<double> &cosSQ2alpha,
-                          const std::valarray<double> &lamm, const std::valarray<double> &lamp, const double &J,
-                          const double &J2) const {
-  std::valarray<double> tz(xValArray.size());
+/**
+ * Calculates the polarization in the z direction
+ * @param Pz :: the polarization in the x direction
+ * @param xValues :: input x values
+ * @param sinAlphaSquared :: sin of alpha squared
+ * @param cosAlphaSquared :: cos of alpha squared
+ * @param sin2AlphaSquared :: sin of 2*alpha squared
+ * @param cos2AlphaSquared :: cos of 2*alpha squared
+ * @param positiveLambda :: negative lambda
+ * @param negativeLambda :: positive lambda
+ * @param J2 :: 2 * total angular momentum quantum number multiplied by 2
+ */
+void Meier::calculatePz(std::valarray<double> &Pz, const std::valarray<double> &xValues,
+                        const std::valarray<double> &sin2AlphaSquared, const std::valarray<double> &cos2AlphaSquared,
+                        const std::valarray<double> &negativeLambda, const std::valarray<double> &positiveLambda,
+                        const double &J2) const {
+  std::valarray<double> tz(xValues.size());
   for (size_t i = 1; i < (size_t)J2 + 1; i++) {
-    tz = tz + cosSQ2alpha[i] + sinSQ2alpha[i] * std::cos((lamp[i] - lamm[i]) * xValArray);
+    tz = tz + cos2AlphaSquared[i] + sin2AlphaSquared[i] * std::cos((positiveLambda[i] - negativeLambda[i]) * xValues);
   }
+  const double J = J2 / 2;
   Pz = (1 + tz) / (2 * J + 1);
 }
 } // namespace Mantid::CurveFitting::Functions
