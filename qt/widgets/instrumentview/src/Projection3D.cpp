@@ -71,8 +71,8 @@ Projection3D::Projection3D(const InstrumentActor *rootActor, QSize viewportSize)
 
 /**
  * Resize the surface on the screen.
- * @param w :: New width of the surface in pixels.
- * @param h :: New height of the surface in pixels.
+ * @param w :: New width of the surface in device pixels.
+ * @param h :: New height of the surface in device pixels.
  */
 void Projection3D::resize(int w, int h) {
   m_viewport.resize(QSize(w, h));
@@ -203,7 +203,7 @@ void Projection3D::getSelectedDetectors(std::vector<size_t> &detIndices) {
   double xmin, xmax, ymin, ymax, zmin, zmax;
   m_viewport.getInstantProjection(xmin, xmax, ymin, ymax, zmin, zmax);
   QRect rect = selectionRect();
-  auto size = m_viewport.dimensions();
+  auto size = m_viewport.sizeInDevicePixels();
   const auto w(size.width()), h(size.height());
 
   double xLeft = xmin + (xmax - xmin) * rect.left() / w;

@@ -21,31 +21,31 @@ namespace MantidQt::MantidWidgets {
  * Initialize with defaults.
  * @param glWidgetDimensions Viewport width/height in device pixels
  */
-Viewport::Viewport(QSize dimensions)
-    : m_projectionType(Viewport::ORTHO), m_dimensions(dimensions), m_left(-1), m_right(1), m_bottom(-1), m_top(1),
-      m_near(-1), m_far(1), m_rotationspeed(180.0 / M_PI), m_zoomFactor(1.0), m_xTrans(0.0), m_yTrans(0.0),
+Viewport::Viewport(QSize sizeInDevicePixels)
+    : m_projectionType(Viewport::ORTHO), m_sizeInDevicePixels(sizeInDevicePixels), m_left(-1), m_right(1), m_bottom(-1),
+      m_top(1), m_near(-1), m_far(1), m_rotationspeed(180.0 / M_PI), m_zoomFactor(1.0), m_xTrans(0.0), m_yTrans(0.0),
       m_zTrans(0.0) {
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
 }
 
 /**
  * Resize the viewport = size of the displaying widget.
- * @param dimensions Viewport width/height in device pixels
+ * @param sizeInDevicePixels Viewport width/height in device pixels
  */
-void Viewport::resize(QSize dimensions) { m_dimensions = dimensions; }
+void Viewport::resize(QSize sizeInDevicePixels) { m_sizeInDevicePixels = sizeInDevicePixels; }
 
 /**
  * Get the size of the viewport in logical pixels (size of the displaying
  * widget).
  */
-QSize Viewport::dimensions() const { return m_dimensions; }
+QSize Viewport::sizeInDevicePixels() const { return m_sizeInDevicePixels; }
 
 /**
- * This will set the projection. The parameters describe the dimensions of a
+ * This will set the projection. The parameters describe the sizeInDevicePixels of a
  *scene
  * which has to be fully visible in this viewport by default. These don't set
  * the actual projection sizes because they have to be adjusted for the aspect
- * ratio of the displaying widget. The actual projection dimensions can be
+ * ratio of the displaying widget. The actual projection sizeInDevicePixels can be
  * retrieved by calling getInstantProjection() method.
  *
  * @param l :: left side of the scene (xmin)
@@ -130,7 +130,7 @@ void Viewport::correctForAspectRatioAndZoom(double &xmin, double &xmax, double &
   // and correct the extent to make it loook normal
   double xSize = m_right - m_left;
   double ySize = m_top - m_bottom;
-  double r = ySize * m_dimensions.width() / (xSize * m_dimensions.height());
+  double r = ySize * m_sizeInDevicePixels.width() / (xSize * m_sizeInDevicePixels.height());
   if (r < 1.0) {
     // ySize is too small
     ySize /= r;
@@ -171,7 +171,7 @@ void Viewport::setTranslation(double xval, double yval) {
  * Issue the OpenGL commands that define the viewport and projection.
  */
 void Viewport::applyProjection() const {
-  glViewport(0, 0, m_dimensions.width(), m_dimensions.height());
+  glViewport(0, 0, m_sizeInDevicePixels.width(), m_sizeInDevicePixels.height());
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   OpenGLError::check("GLViewport::issueGL()");
@@ -215,8 +215,8 @@ void Viewport::applyProjection() const {
 void Viewport::projectOnSphere(int a, int b, Mantid::Kernel::V3D &point) const {
   // z initiaised to zero if out of the sphere
   double z = 0;
-  auto x = static_cast<double>((2.0 * a - m_dimensions.width()) / m_dimensions.width());
-  auto y = static_cast<double>((m_dimensions.height() - 2.0 * b) / m_dimensions.height());
+  auto x = static_cast<double>((2.0 * a - m_sizeInDevicePixels.width()) / m_sizeInDevicePixels.width());
+  auto y = static_cast<double>((m_sizeInDevicePixels.height() - 2.0 * b) / m_sizeInDevicePixels.height());
   double norm = x * x + y * y;
   if (norm > 1.0) // The point is inside the sphere
   {
@@ -361,11 +361,11 @@ void Viewport::setRotation(const Mantid::Kernel::Quat &rot) {
 void Viewport::initZoomFrom(int a, int b) {
   if (a <= 0 || b <= 0)
     return;
-  if (a >= m_dimensions.width() || b >= m_dimensions.height())
+  if (a >= m_sizeInDevicePixels.width() || b >= m_sizeInDevicePixels.height())
     return;
   double z = 0;
-  auto x = static_cast<double>(m_dimensions.width() - a);
-  auto y = static_cast<double>(b - m_dimensions.height());
+  auto x = static_cast<double>(m_sizeInDevicePixels.width() - a);
+  auto y = static_cast<double>(b - m_sizeInDevicePixels.height());
   m_lastpoint(x, y, z);
 }
 
@@ -376,9 +376,9 @@ void Viewport::initZoomFrom(int a, int b) {
  * @param b :: The y mouse coordinate
  */
 void Viewport::generateZoomTo(int a, int b) {
-  if (a >= m_dimensions.width() || b >= m_dimensions.height() || a <= 0 || b <= 0)
+  if (a >= m_sizeInDevicePixels.width() || b >= m_sizeInDevicePixels.height() || a <= 0 || b <= 0)
     return;
-  auto y = static_cast<double>(b - m_dimensions.height());
+  auto y = static_cast<double>(b - m_sizeInDevicePixels.height());
   if (y == 0)
     y = m_lastpoint[1];
   double diff = m_lastpoint[1] / y;
@@ -480,8 +480,9 @@ void Viewport::generateTranslationPoint(int a, int b, Mantid::Kernel::V3D &point
   double x, y, z = 0.0;
   double xmin, xmax, ymin, ymax, zmin, zmax;
   correctForAspectRatioAndZoom(xmin, xmax, ymin, ymax, zmin, zmax);
-  x = static_cast<double>((xmin + ((xmax - xmin) * ((double)a / (double)m_dimensions.width()))));
-  y = static_cast<double>((ymin + ((ymax - ymin) * (m_dimensions.height() - b) / m_dimensions.height())));
+  x = static_cast<double>((xmin + ((xmax - xmin) * ((double)a / (double)m_sizeInDevicePixels.width()))));
+  y = static_cast<double>(
+      (ymin + ((ymax - ymin) * (m_sizeInDevicePixels.height() - b) / m_sizeInDevicePixels.height())));
   point(x, y, z);
 }
 

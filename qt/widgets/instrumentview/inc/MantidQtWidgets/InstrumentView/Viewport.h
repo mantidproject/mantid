@@ -49,10 +49,10 @@ public:
   enum ProjectionType { ORTHO, PERSPECTIVE };
   /// Constructor with Width (w) and Height(h) as inputs
   /// Called by the display device when viewport is resized
-  explicit Viewport(QSize glWidgetDimensions);
-  void resize(QSize glWidgetDimensions);
+  explicit Viewport(QSize sizeInDevicePixels);
+  void resize(QSize sizeInDevicePixels);
   /// Get the viewport width and height.
-  QSize dimensions() const;
+  QSize sizeInDevicePixels() const;
   /// Return the projection type.
   ProjectionType getProjectionType() const;
   /// Set a projection.
@@ -136,9 +136,8 @@ protected:
   void generateTranslationPoint(int x, int y, Mantid::Kernel::V3D &p) const;
 
   /* Projection */
-
   ProjectionType m_projectionType; ///< Type of display projection
-  QSize m_dimensions;
+  QSize m_sizeInDevicePixels;
   double m_left; ///< Ortho/Prespective Projection xmin value (Left side of the
   /// x axis)
   double m_right; ///< Ortho/Prespective Projection xmax value (Right side of
