@@ -5,7 +5,7 @@ exclude: ^$|instrument/
 
 ci:
   autofix_prs: true
-  skip: [clang-format]
+  skip: [black,clang-format]
 
 repos:
 
