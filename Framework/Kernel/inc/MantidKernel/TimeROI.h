@@ -39,7 +39,7 @@ public:
   void update_union(const TimeROI &other);
   void update_intersection(const TimeROI &other);
   void removeRedundantEntries();
-  const std::vector<SplittingInterval> toSplitters() const;
+  const Kernel::SplittingIntervalVec toSplitters() const;
   bool operator==(const TimeROI &other) const;
   void debugPrint() const;
   size_t getMemorySize() const;
