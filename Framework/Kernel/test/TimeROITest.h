@@ -216,9 +216,9 @@ public:
   }
 
   void test_valueAtTime() {
-    TS_ASSERT_EQUALS(DECEMBER.valueAtTime(DECEMBER_STOP), 0);
-    TS_ASSERT_EQUALS(DECEMBER.valueAtTime(CHRISTMAS_START), 1);
-    TS_ASSERT_EQUALS(DECEMBER.valueAtTime(DECEMBER_START), 1);
+    TS_ASSERT_EQUALS(DECEMBER.valueAtTime(DECEMBER_STOP), false);
+    TS_ASSERT_EQUALS(DECEMBER.valueAtTime(CHRISTMAS_START), true);
+    TS_ASSERT_EQUALS(DECEMBER.valueAtTime(DECEMBER_START), true);
   }
 
   void runIntersectionTest(const TimeROI &left, const TimeROI &right, const double exp_duration) {
