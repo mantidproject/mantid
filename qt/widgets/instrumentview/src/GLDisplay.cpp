@@ -27,7 +27,7 @@
 
 namespace MantidQt::MantidWidgets {
 
-const Qt::CursorShape cursorShape = Qt::ArrowCursor;
+constexpr Qt::CursorShape GLCursor = Qt::ArrowCursor;
 
 /**
  * Return the size of a widget in device pixels and not Qt's default
@@ -71,8 +71,8 @@ void GLDisplay::setSurface(std::shared_ptr<ProjectionSurface> surface) {
  * is initialized.
  */
 void GLDisplay::initializeGL() {
-  setCursor(cursorShape); // This is to set the initial window mouse cursor to
-                          // Hand icon
+  setCursor(GLCursor); // This is to set the initial window mouse cursor to
+                       // Hand icon
 
   // Set the relevant OpenGL rendering options
   setRenderingOptions();
@@ -227,7 +227,7 @@ void GLDisplay::keyPressEvent(QKeyEvent *event) {
  */
 void GLDisplay::keyReleaseEvent(QKeyEvent *event) {
   releaseKeyboard();
-  setCursor(cursorShape);
+  setCursor(GLCursor);
   m_isKeyPressed = false;
   if (!event->isAutoRepeat()) {
     update();
