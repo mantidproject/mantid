@@ -79,8 +79,8 @@ QString UnwrappedSurface::getDimInfo() const {
  */
 void UnwrappedSurface::drawSurface(GLDisplay *widget, bool picking) const {
   // dimensions of the screen to draw on
-  int widget_width = widget->width();
-  int widget_height = widget->height();
+  const auto sizeforDevice = sizeInDevicePixels(widget);
+  const auto widget_width(sizeforDevice.width()), widget_height(sizeforDevice.height());
 
   // view rectangle in the OpenGL coordinates
   double view_left = m_viewRect.x0();
