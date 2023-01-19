@@ -8,7 +8,7 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/LogManager.h"
-#include "MantidKernel/TimeSplitter.h"
+#include "MantidKernel/SplittingInterval.h"
 
 #include <vector>
 

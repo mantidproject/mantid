@@ -14,7 +14,7 @@
 #pragma once
 
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/TimeSplitter.h"
+#include "MantidKernel/SplittingInterval.h"
 #include <ctime>
 #include <cxxtest/TestSuite.h>
 

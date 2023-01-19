@@ -8,8 +8,8 @@
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/SplittingInterval.h"
 #include "MantidKernel/TimeROI.h"
-#include "MantidKernel/TimeSplitter.h"
 
 #include <json/value.h>
 #include <nexus/NeXusFile.hpp>

@@ -8,9 +8,9 @@
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/SplittingInterval.h"
 #include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/TimeSplitter.h"
 
 #include <cxxtest/TestSuite.h>
 

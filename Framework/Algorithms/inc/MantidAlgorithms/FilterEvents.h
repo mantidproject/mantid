@@ -13,8 +13,8 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/SplittingInterval.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/TimeSplitter.h"
 
 namespace Mantid {
 namespace Algorithms {

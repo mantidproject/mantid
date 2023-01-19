@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/SplittingInterval.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/TimeSplitter.h"
 
 namespace Mantid {
 namespace Kernel {
