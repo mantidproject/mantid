@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-from typing import Sequence, Tuple, Optional
+from typing import List, Sequence, Tuple, Optional
 
 from mantid.api import MatrixWorkspace, MultipleExperimentInfos
 from mantid.kernel import SpecialCoordinateSystem
@@ -504,7 +504,7 @@ class SliceViewerModel(SliceViewerBaseModel):
     def get_proj_matrix(self):
         ws = self._get_ws()
         ws_type = WorkspaceInfo.get_ws_type(ws)
-        if not ws_type == WS_TYPE.MATRIX:
+        if ws_type != WS_TYPE.MATRIX:
             proj_matrix = np.eye(3)  # needs to be 3x3 even if 2D ws as columns passed to recAngle when calc axes angles
             if ws_type == WS_TYPE.MDH:
                 ndims = ws.getNumDims()
@@ -576,13 +576,27 @@ class SliceViewerModel(SliceViewerBaseModel):
 
         return xcut_name, ycut_name, help_msg
 
-    def get_hkl_from_xyz(self, xdim, ydim, zdim, xdata, ydata, zdata):
+    @staticmethod
+    def get_dim_indices(slice_point: List[float], qdims: List[int], transpose: bool) -> Tuple[int]:
+        """Returns the indices of the selected x and y axes. It also returns the index of the first non x or y axis."""
+        xdim, ydim = WorkspaceInfo.display_indices(slice_point, transpose)
+        # Get the index of the first axis which is not x or y. Here it is called z.
+        zdim = next(i for i, v in enumerate(slice_point) if v is not None and i in qdims)
+        return xdim, ydim, zdim
+
+    def get_hkl_from_full_point(self, full_point: List[float], qdims: List[int], xdim: int, ydim: int, zdim: int):
+        """Gets the values of h, k and l from a full point which can include 3 or more dimensions."""
         basis_transform = self.get_proj_matrix()
-        if basis_transform is not None:
-            hkl = basis_transform[:, xdim] * xdata + basis_transform[:, ydim] * ydata + basis_transform[:, zdim] * zdata
-        else:
-            hkl = {0.0, 0.0, 0.0}
-        return hkl
+        if basis_transform is None:
+            return 0.0, 0.0, 0.0
+
+        # Get the values for h, k and l
+        hkl_point = tuple(full_point[q_i] for q_i in qdims)
+
+        h_i, k_i, l_i = np.argsort([xdim, ydim, zdim])
+        return (
+            basis_transform[:, h_i] * hkl_point[h_i] + basis_transform[:, k_i] * hkl_point[k_i] + basis_transform[:, l_i] * hkl_point[l_i]
+        )
 
 
 # private functions
