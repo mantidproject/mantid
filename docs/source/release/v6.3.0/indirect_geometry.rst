@@ -20,7 +20,7 @@ Improvements
 - The Indirect Simulation :ref:`DensityOfStates interface <DensityOfStates_Interface>` (and corresponding :ref:`SimulatedDensityOfStates <algm-SimulatedDensityOfStates>` algorithm) can import force constants data
   from CASTEP or Phonopy calculations, then sample an appropriate q-point mesh on-the-fly to create a phonon DOS. This feature requires the Euphonic library to be installed. This library is
   included in the Windows package, but for other platforms an installer is provided in the Script Repository.
-- In Inelastic Data Analysis the :ref:`Elwin Tab <Elwin-iqt-ref>` has had its UI updated to be more user friendly.
+- In Inelastic Data Analysis the :ref:`Elwin Tab <elwin>` has had its UI updated to be more user friendly.
 - :ref:`VesuvioAnalysis <algm-VesuvioAnalysis>` excludes back scattering spectra for now to avoid problems with the analysis.
 - Updated documentation for :ref:`VesuvioAnalysis <algm-VesuvioAnalysis>`.
 
@@ -28,7 +28,7 @@ Bugfixes
 --------
 - The :ref:`Abins Algorithm <algm-Abins>` can also import force constants data from CASTEP or Phonopy calculations, using the Euphonic library. (See above.)
 - Contour workspaces are now saved when saving in ``Bayes stretch``.
-- Fixed a bug which prevented workspaces being loaded into the :ref:`Elwin Tab <Elwin-iqt-ref>` .
+- Fixed a bug which prevented workspaces being loaded into the :ref:`Elwin Tab <elwin>` .
 - Fixed a bug that caused :ref:`ISIS Calibration <interface-indirect-isis-calibration>` to ignore ``ScaleFactor`` if set to 1.0.
 - Fixed a bug that caused :ref:`ISIS Calibration <interface-indirect-isis-calibration>` to not set valid defaults for certain runs.
 - Fixed a bug in the :ref:`Symmetrise<algm-Symmetrise>` algorithm where workspaces in different bin widths would sometimes cause exceptions.
