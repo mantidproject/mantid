@@ -44,8 +44,6 @@ public slots:
 
 protected:
   void initializeGL() override;
-  void resetWidget();
-  void MakeObject();
   void paintEvent(QPaintEvent *event) override;
   void paintGL() override;
   void resizeGL(int /*w*/, int /*h*/) override;
@@ -59,7 +57,6 @@ protected:
   void enterEvent(QEvent * /*unused*/) override;
   void leaveEvent(QEvent * /*unused*/) override;
   void draw();
-  void checkGLError(const QString &funName);
 
 private:
   void setRenderingOptions();

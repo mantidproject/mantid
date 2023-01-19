@@ -71,10 +71,7 @@ void GLDisplay::setSurface(std::shared_ptr<ProjectionSurface> surface) {
  * is initialized.
  */
 void GLDisplay::initializeGL() {
-  setCursor(GLCursor); // This is to set the initial window mouse cursor to
-                       // Hand icon
-
-  // Set the relevant OpenGL rendering options
+  setCursor(GLCursor);
   setRenderingOptions();
   glViewport(0, 0, width(), height());
 }
@@ -266,14 +263,6 @@ void GLDisplay::saveToFile(const QString &filename) {
   this->swapBuffers(); // swap them back
   OpenGLError::check("GLDisplay::saveToFile");
   image.save(filename);
-}
-
-/**
- * Resets the widget for new instrument definition
- */
-void GLDisplay::resetWidget() {
-  // setActorCollection(std::shared_ptr<GLActorCollection>(new
-  // GLActorCollection()));
 }
 
 /**
