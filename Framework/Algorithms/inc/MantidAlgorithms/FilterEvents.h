@@ -153,7 +153,7 @@ private:
 
   std::set<int> m_targetWorkspaceIndexSet;
   int m_maxTargetIndex;
-  Kernel::TimeSplitterType m_splitters;
+  Kernel::SplittingIntervalVec m_splitters;
   std::map<int, DataObjects::EventWorkspace_sptr> m_outputWorkspacesMap;
   std::vector<std::string> m_wsNames;
 

@@ -390,7 +390,7 @@ public:
     Mantid::Kernel::SplittingInterval interval0(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:40"),
                                                 0);
 
-    Mantid::Kernel::TimeSplitterType splitters;
+    Mantid::Kernel::SplittingIntervalVec splitters;
     splitters.emplace_back(interval0);
 
     // Since the filter is < stop, the last one is not counted, so there are  3
@@ -413,7 +413,7 @@ public:
     Mantid::Kernel::SplittingInterval interval1(DateAndTime("2007-11-30T16:18:05"), DateAndTime("2007-11-30T16:18:25"),
                                                 0);
 
-    Mantid::Kernel::TimeSplitterType splitters;
+    Mantid::Kernel::SplittingIntervalVec splitters;
     splitters.emplace_back(interval0);
     splitters.emplace_back(interval1);
 
@@ -473,7 +473,7 @@ public:
     TS_ASSERT_EQUALS(log->realSize(), 6);
 
     // Test centred log value boundaries
-    TimeSplitterType splitter;
+    SplittingIntervalVec splitter;
     log->makeFilterByValue(splitter, 1.8, 2.2, 1.0, true);
 
     TS_ASSERT_EQUALS(splitter.size(), 2);
@@ -517,7 +517,7 @@ public:
 
   void test_makeFilterByValue_throws_for_string_property() {
     TimeSeriesProperty<std::string> log("StringTSP");
-    TimeSplitterType splitter;
+    SplittingIntervalVec splitter;
     TS_ASSERT_THROWS(log.makeFilterByValue(splitter, 0.0, 0.0, 0.0, true), const Exception::NotImplementedError &);
   }
 
@@ -533,7 +533,7 @@ public:
     // Create a TimeInterval that's wider than this log
     TimeInterval interval(DateAndTime("2007-11-30T16:16:00"), DateAndTime("2007-11-30T16:18:50"));
 
-    TimeSplitterType splitter;
+    SplittingIntervalVec splitter;
     // Test good at both ends
     log.makeFilterByValue(splitter, 1.0, 2.2, 1.0, false);
     log.expandFilterToRange(splitter, 1.0, 2.2, interval);
@@ -580,7 +580,7 @@ public:
 
   void test_expandFilterToRange_throws_for_string_property() {
     TimeSeriesProperty<std::string> log("StringTSP");
-    TimeSplitterType splitter;
+    SplittingIntervalVec splitter;
     TS_ASSERT_THROWS(log.expandFilterToRange(splitter, 0.0, 0.0, TimeInterval()),
                      const Exception::NotImplementedError &);
   }
@@ -590,7 +590,7 @@ public:
     auto intLog = createIntegerTSP(5);
 
     // Test a filter that's fully within the range of both properties
-    TimeSplitterType filter;
+    SplittingIntervalVec filter;
     filter.emplace_back(SplittingInterval(DateAndTime("2007-11-30T16:17:05"), DateAndTime("2007-11-30T16:17:29")));
     TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 7.308, 0.001);
     TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 2.167, 0.001);
@@ -663,7 +663,7 @@ public:
   }
 
   void test_averageValueInFilter_throws_for_string_property() {
-    TimeSplitterType splitter;
+    SplittingIntervalVec splitter;
     TS_ASSERT_THROWS(sProp->averageValueInFilter(splitter), const Exception::NotImplementedError &);
     TS_ASSERT_THROWS(sProp->averageAndStdDevInFilter(splitter), const Exception::NotImplementedError &);
   }
@@ -680,7 +680,7 @@ public:
 
     // Make a splitter
     DateAndTime start, stop;
-    TimeSplitterType splitter;
+    SplittingIntervalVec splitter;
     start = DateAndTime("2007-11-30T16:17:10");
     stop = DateAndTime("2007-11-30T16:17:40");
     splitter.emplace_back(SplittingInterval(start, stop, 0));
@@ -730,7 +730,7 @@ public:
 
     // Make a splitter
     DateAndTime start, stop;
-    TimeSplitterType splitter;
+    SplittingIntervalVec splitter;
     start = DateAndTime("2007-11-30T16:17:10");
     stop = DateAndTime("2007-11-30T16:17:40");
     splitter.emplace_back(SplittingInterval(start, stop, 0));

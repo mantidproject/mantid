@@ -139,10 +139,10 @@ Run &Run::operator+=(const Run &rhs) {
  *
  * Total proton charge will get re-integrated after filtering.
  *
- * @param splitter :: TimeSplitterType with the intervals and destinations.
+ * @param splitter :: SplittingIntervalVec with the intervals and destinations.
  * @param outputs :: Vector of output runs.
  */
-void Run::splitByTime(TimeSplitterType &splitter, std::vector<LogManager *> outputs) const {
+void Run::splitByTime(SplittingIntervalVec &splitter, std::vector<LogManager *> outputs) const {
 
   // std::vector<LogManager *> outputsBase(outputs.begin(),outputs.end());
   LogManager::splitByTime(splitter, outputs);

@@ -390,7 +390,7 @@ void TimeSeriesProperty<TYPE>::filterByTimes(const std::vector<SplittingInterval
  * NOTE: If the input TSP has a single value, it is assumed to be a constant
  *  and so is not split, but simply copied to all output.
  *
- * @param splitter :: a TimeSplitterType object containing the list of intervals
+ * @param splitter :: a SplittingIntervalVec object containing the list of intervals
  *                     and destinations.
  * @param outputs  :: A vector of output TimeSeriesProperty
  * pointers of the same type.
@@ -624,7 +624,7 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(const std::vector<DateAndTime> 
 #endif
 
 /**
- * Fill a TimeSplitterType that will filter the events by matching
+ * Fill a SplittingIntervalVec that will filter the events by matching
  * log values >= min and <= max. Creates SplittingInterval's where
  * times match the log values, and going to index==0.
  * This method is used by the FilterByLogValue algorithm.
@@ -759,7 +759,7 @@ void TimeSeriesProperty<TYPE>::expandFilterToRange(std::vector<SplittingInterval
   // Assume everything before the 1st value is constant
   double val = static_cast<double>(firstValue());
   if ((val >= min) && (val <= max)) {
-    TimeSplitterType extraFilter;
+    SplittingIntervalVec extraFilter;
     extraFilter.emplace_back(range.begin(), firstTime(), 0);
     // Include everything from the start of the run to the first time measured
     // (which may be a null time interval; this'll be ignored)
@@ -769,7 +769,7 @@ void TimeSeriesProperty<TYPE>::expandFilterToRange(std::vector<SplittingInterval
   // Assume everything after the LAST value is constant
   val = static_cast<double>(lastValue());
   if ((val >= min) && (val <= max)) {
-    TimeSplitterType extraFilter;
+    SplittingIntervalVec extraFilter;
     extraFilter.emplace_back(lastTime(), range.end(), 0);
     // Include everything from the start of the run to the first time measured
     // (which may be a null time interval; this'll be ignored)
@@ -870,7 +870,8 @@ double TimeSeriesProperty<TYPE>::averageValueInFilter(const std::vector<Splittin
 /** Function specialization for TimeSeriesProperty<std::string>
  *  @throws Kernel::Exception::NotImplementedError always
  */
-template <> double TimeSeriesProperty<std::string>::averageValueInFilter(const TimeSplitterType & /*filter*/) const {
+template <>
+double TimeSeriesProperty<std::string>::averageValueInFilter(const SplittingIntervalVec & /*filter*/) const {
   throw Exception::NotImplementedError("TimeSeriesProperty::"
                                        "averageValueInFilter is not "
                                        "implemented for string properties");
@@ -935,7 +936,7 @@ TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<SplittingIn
  */
 template <>
 std::pair<double, double>
-TimeSeriesProperty<std::string>::averageAndStdDevInFilter(const TimeSplitterType & /*filter*/) const {
+TimeSeriesProperty<std::string>::averageAndStdDevInFilter(const SplittingIntervalVec & /*filter*/) const {
   throw Exception::NotImplementedError("TimeSeriesProperty::"
                                        "averageAndStdDevInFilter is not "
                                        "implemented for string properties");
