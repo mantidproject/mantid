@@ -24,7 +24,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/LogFilter.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Strings.h"
