@@ -45,7 +45,7 @@ QSize sizeInDevicePixels(const QWidget *widget) noexcept {
 }
 
 GLDisplay::GLDisplay(QWidget *parent)
-    : IGLDisplay(QGLFormat(QGL::DepthBuffer | QGL::NoAlphaChannel), parent), m_isKeyPressed(false), m_firstFrame(true) {
+    : IGLDisplay(QGLFormat(QGL::DepthBuffer | QGL::NoAlphaChannel), parent), m_isKeyPressed(false) {
 
   if (!this->format().depth()) {
     std::cout << "Warning! OpenGL Depth buffer could not be initialized.\n";
@@ -63,7 +63,6 @@ GLDisplay::~GLDisplay() = default;
 void GLDisplay::setSurface(std::shared_ptr<ProjectionSurface> surface) {
   m_surface = std::move(surface);
   connect(m_surface.get(), SIGNAL(redrawRequired()), this, SLOT(repaint()), Qt::QueuedConnection);
-  m_firstFrame = true;
 }
 
 /**
@@ -131,10 +130,6 @@ void GLDisplay::paintEvent(QPaintEvent *event) {
   }
   m_surface->draw(this);
   OpenGLError::check("paintEvent");
-
-  if (m_firstFrame) {
-    m_firstFrame = false;
-  }
 }
 
 /**
