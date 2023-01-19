@@ -751,7 +751,7 @@ void FilterEvents::splitTimeSeriesProperty(Kernel::TimeSeriesProperty<TYPE> *tsp
 
 //----------------------------------------------------------------------------------------------
 /** Purpose:
- *    Convert SplitterWorkspace object to TimeSplitterType (sorted vector)
+ *    Convert SplitterWorkspace object to SplittingIntervalVec (sorted vector)
  *    and create a map for all workspace group number
  *  Requirements:
  *  Gaurantees:
