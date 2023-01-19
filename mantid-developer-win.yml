@@ -35,7 +35,7 @@ dependencies:
   - python=3.8.*
   - pyyaml>=5.4.1
   - qscintilla2
-  - qt>=5.15,<6
+  - qt=5.15.4  # 5.15.6 causing issues with rendering of tabs on GUIs using the instrument viewer.
   - qtconsole>=5.0.3,<6
   - qtpy>=1.9.0
   - requests>=2.25.1

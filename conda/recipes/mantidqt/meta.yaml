@@ -34,6 +34,7 @@ requirements:
     - python {{ python }}
     - pyqt {{ pyqt }}
     - qscintilla2 {{ qscintilla2 }}
+    - qt-main {{ qt_main }}
     - qt-webengine
     - setuptools {{ setuptools }}
     - tbb-devel {{ tbb }}
@@ -42,6 +43,7 @@ requirements:
   run:
     - matplotlib {{ matplotlib }}
     - {{ pin_compatible("qscintilla2", max_pin="x.x") }}
+    - {{ pin_compatible("qt-main", upper_bound="5.15.6") }}
     - qtpy
     - python
 
