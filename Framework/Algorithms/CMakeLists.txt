@@ -1043,6 +1043,10 @@ endif()
 
 # Add a precompiled header where they are supported
 enable_precompiled_headers(inc/MantidAlgorithms/PrecompiledHeader.h SRC_FILES)
+# Disable optimization for certain Segfault as the key lines that cause the segfault can be optimized away but this
+# algorithm is only ever intended to test the crashing behaviour of the framework
+set_source_files_properties(src/Segfault.cpp PROPERTIES COMPILE_FLAGS -O0)
+
 # Add the target for this directory
 add_library(Algorithms ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
 add_library(Mantid::Algorithms ALIAS Algorithms)
