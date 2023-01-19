@@ -34,7 +34,6 @@ public:
   void setBackgroundColor(const QColor & /*input*/) override;
   QColor currentBackgroundColor() const override;
   void saveToFile(const QString &filename) override;
-  // int getLightingState() const {return m_lightingState;}
 
 public slots:
   void enableLighting(bool /*on*/) override;
@@ -65,9 +64,7 @@ private:
   void setRenderingOptions();
   void resetBackgroundColor();
 
-  // int m_lightingState;           ///< 0 = light off; 2 = light on
   bool m_isKeyPressed;
-  bool m_firstFrame;
 
   /// Surface
   std::shared_ptr<ProjectionSurface> m_surface;

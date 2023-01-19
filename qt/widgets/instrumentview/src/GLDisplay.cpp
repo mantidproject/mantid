@@ -26,9 +26,9 @@
 #include <utility>
 
 namespace MantidQt::MantidWidgets {
-//#ifndef GL_MULTISAMPLE
-//#define GL_MULTISAMPLE  0x809D
-//#endif
+// #ifndef GL_MULTISAMPLE
+// #define GL_MULTISAMPLE  0x809D
+// #endif
 
 // NOTES:
 // 1) if the sample buffers are not available then the paint of image on the mdi
@@ -38,10 +38,7 @@ namespace MantidQt::MantidWidgets {
 const Qt::CursorShape cursorShape = Qt::ArrowCursor;
 
 GLDisplay::GLDisplay(QWidget *parent)
-    : IGLDisplay(QGLFormat(QGL::DepthBuffer | QGL::NoAlphaChannel), parent),
-      // m_polygonMode(SOLID),
-      // m_lightingState(0),
-      m_isKeyPressed(false), m_firstFrame(true) {
+    : IGLDisplay(QGLFormat(QGL::DepthBuffer | QGL::NoAlphaChannel), parent), m_isKeyPressed(false) {
 
   if (!this->format().depth()) {
     std::cout << "Warning! OpenGL Depth buffer could not be initialized.\n";
@@ -59,7 +56,6 @@ GLDisplay::~GLDisplay() = default;
 void GLDisplay::setSurface(std::shared_ptr<ProjectionSurface> surface) {
   m_surface = std::move(surface);
   connect(m_surface.get(), SIGNAL(redrawRequired()), this, SLOT(repaint()), Qt::QueuedConnection);
-  m_firstFrame = true;
 }
 
 /**
@@ -127,10 +123,6 @@ void GLDisplay::paintEvent(QPaintEvent *event) {
   }
   m_surface->draw(this);
   OpenGLError::check("paintEvent");
-
-  if (m_firstFrame) {
-    m_firstFrame = false;
-  }
 }
 
 /**
