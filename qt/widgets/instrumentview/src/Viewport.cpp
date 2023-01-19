@@ -19,7 +19,7 @@ namespace MantidQt::MantidWidgets {
 
 /**
  * Initialize with defaults.
- * @param glWidgetDimensions Viewport width/height in device pixels
+ * @param sizeInDevicePixels Viewport width/height in device pixels
  */
 Viewport::Viewport(QSize sizeInDevicePixels)
     : m_projectionType(Viewport::ORTHO), m_sizeInDevicePixels(sizeInDevicePixels), m_left(-1), m_right(1), m_bottom(-1),

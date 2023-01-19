@@ -615,7 +615,7 @@ void InstrumentWidget::setSurfaceType(int type) {
         if (m_instrumentActor->hasGridBank())
           m_maskTab->setDisabled(true);
 
-        surface = new Projection3D(m_instrumentActor.get(), glWidgetDimensions());
+        surface = new Projection3D(m_instrumentActor.get(), sizeInDevicePixels(m_instrumentDisplay->currentWidget()));
       } else if (surfaceType <= CYLINDRICAL_Z) {
         m_renderTab->forceLayers(true);
         surface = new UnwrappedCylinder(m_instrumentActor.get(), sample_pos, axis);
@@ -1370,21 +1370,6 @@ void InstrumentWidget::setSurface(ProjectionSurface *surface) {
   if (unwrappedSurface) {
     m_renderTab->flipUnwrappedView(unwrappedSurface->isFlippedView());
   }
-}
-
-/// Return the size of the OpenGL display widget in logical pixels
-QSize InstrumentWidget::glWidgetDimensions() {
-  auto sizeinLogicalPixels = [](const QWidget *w) -> QSize {
-    const auto devicePixelRatio = w->window()->devicePixelRatio();
-    return QSize(w->width() * devicePixelRatio, w->height() * devicePixelRatio);
-  };
-
-  if (m_instrumentDisplay->getGLDisplay())
-    return sizeinLogicalPixels(m_instrumentDisplay->getGLDisplay());
-  else if (m_instrumentDisplay->getQtDisplay())
-    return sizeinLogicalPixels(m_instrumentDisplay->getQtDisplay());
-  else
-    return QSize(0, 0);
 }
 
 /// Redraw the instrument view

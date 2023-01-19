@@ -18,11 +18,12 @@ namespace MantidQt {
 namespace MantidWidgets {
 class ProjectionSurface;
 
+QSize sizeInDevicePixels(const QWidget *widget) noexcept;
+
 /**
 \class  GLDisplay
 \brief  OpenGL Qt Widget which renders Mantid Geometry ObjComponents
 */
-
 class GLDisplay final : public IGLDisplay {
   Q_OBJECT
 public:
@@ -72,5 +73,6 @@ private:
   /// Surface
   std::shared_ptr<ProjectionSurface> m_surface;
 };
+
 } // namespace MantidWidgets
 } // namespace MantidQt

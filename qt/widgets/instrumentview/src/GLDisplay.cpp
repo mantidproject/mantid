@@ -26,22 +26,26 @@
 #include <utility>
 
 namespace MantidQt::MantidWidgets {
-//#ifndef GL_MULTISAMPLE
-//#define GL_MULTISAMPLE  0x809D
-//#endif
-
-// NOTES:
-// 1) if the sample buffers are not available then the paint of image on the mdi
-// windows
-//   seems to not work on intel chipset
 
 const Qt::CursorShape cursorShape = Qt::ArrowCursor;
 
+/**
+ * Return the size of a widget in device pixels and not Qt's default
+ * device-independent coordinates. See https://doc.qt.io/qt-5/highdpi.html#high-dpi-support-on-a-system-level
+ * This is only relevant for interacting with the low-level OpenGL api that has no
+ * knowledge of the device-independent coordinate system. Commands such as glViewport
+ * must be given sizes in device pixels or on high-resolution screens, e.g. retina
+ * screens, the viewport will not fill the expected area.
+ * @param widget The widget whose size is to be determined
+ * @return A QSize object
+ */
+QSize sizeInDevicePixels(const QWidget *widget) noexcept {
+  const auto devicePixelRatio = widget->window()->devicePixelRatio();
+  return QSize(widget->width() * devicePixelRatio, widget->height() * devicePixelRatio);
+}
+
 GLDisplay::GLDisplay(QWidget *parent)
-    : IGLDisplay(QGLFormat(QGL::DepthBuffer | QGL::NoAlphaChannel), parent),
-      // m_polygonMode(SOLID),
-      // m_lightingState(0),
-      m_isKeyPressed(false), m_firstFrame(true) {
+    : IGLDisplay(QGLFormat(QGL::DepthBuffer | QGL::NoAlphaChannel), parent), m_isKeyPressed(false), m_firstFrame(true) {
 
   if (!this->format().depth()) {
     std::cout << "Warning! OpenGL Depth buffer could not be initialized.\n";
