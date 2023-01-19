@@ -21,7 +21,7 @@
 using namespace Mantid::Kernel;
 using Mantid::Types::Core::DateAndTime;
 
-class TimeSplitterTest : public CxxTest::TestSuite {
+class SplittingIntervalTest : public CxxTest::TestSuite {
 public:
   //----------------------------------------------------------------------------
   /** Tests the AND operator checking for overlap between two
