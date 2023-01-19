@@ -197,12 +197,17 @@ void PropertyManager::splitByTime(std::vector<SplittingInterval> &splitter,
 void PropertyManager::filterByProperty(const Kernel::TimeSeriesProperty<bool> &filter,
                                        const std::vector<std::string> &excludedFromFiltering) {
   // convert to splitters
-  const auto splitter = TimeROI(filter).toSplitters();
+  auto time_roi = TimeROI(filter);
+  const auto splitter = time_roi.toSplitters();
 
   for (auto &orderedProperty : m_orderedProperties) {
     const auto name = orderedProperty->name();
     if (std::find(excludedFromFiltering.cbegin(), excludedFromFiltering.cend(), name) != excludedFromFiltering.cend()) {
       // this log should be excluded from filtering
+      continue;
+    }
+    // skip icpevents
+    if (name == "ICPevent" || name == "icp_event") {
       continue;
     }
     // if it is used to denote other logs are bad, skip it
@@ -215,7 +220,9 @@ void PropertyManager::filterByProperty(const Kernel::TimeSeriesProperty<bool> &f
       auto filterProp = getPointerToProperty(invalidFilterName);
       auto tspFilterProp = dynamic_cast<TimeSeriesProperty<bool> *>(filterProp);
       if (tspFilterProp) {
-        const auto mysplitter = TimeROI(tspFilterProp).toSplitters();
+        auto time_roi_mysplitter = TimeROI(tspFilterProp);
+        time_roi_mysplitter.update_intersection(time_roi);
+        const auto mysplitter = time_roi_mysplitter.toSplitters();
         if (!mysplitter.empty()) {
           auto prop = dynamic_cast<ITimeSeriesProperty *>(orderedProperty);
 
