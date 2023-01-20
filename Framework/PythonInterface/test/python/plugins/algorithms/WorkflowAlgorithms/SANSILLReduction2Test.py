@@ -9,6 +9,8 @@ from mantid.api import MatrixWorkspace, Run
 from mantid.simpleapi import SANSILLReduction, config, mtd
 from mantid.geometry import Instrument
 
+import numpy as np
+
 
 class SANSILLReduction2Test(unittest.TestCase):
 
@@ -104,6 +106,13 @@ class SANSILLReduction2Test(unittest.TestCase):
         SANSILLReduction(Runs="042610", ProcessAs="Sample", OutputWorkspace="sample", NormaliseBy="Time")
         self._check_output_tof(mtd["sample"], 200, 256 * 256 + 2)
         self._check_process_flag(mtd["sample"], "Sample")
+
+    def test_finite_sensitivity(self):
+        SANSILLReduction(Runs="022846", ProcessAs="Water", OutputSensitivityWorkspace="sens", OutputWorkspace="_", MaxThreshold=5)
+        self._check_output(mtd["sens"], 1, 320 * 320 + 2)
+        self._check_process_flag(mtd["sens"], "Water")
+        for spec_no in range(mtd["sens"].getNumberHistograms()):
+            self.assertFalse(np.isnan(mtd["sens"].readY(spec_no)))
 
     def _check_process_flag(self, ws, value):
         self.assertTrue(ws.getRun().getLogData("ProcessedAs").value, value)
