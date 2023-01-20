@@ -117,8 +117,7 @@ For the simple types (integer, double or string), the basic syntax is::
 An optional :ref:`validator <Properties Validators>` or
 :ref:`directional argument <Properties Directions>` (input, output or both)
 can also be appended. The syntax for other property types (``WorkspaceProperty`` & ``ArrayProperty``) is more
-complex - see the :ref:`properties <Properties>` page or the
-example algorithms in `UserAlgorithms <https://www.mantidproject.org/UserAlgorithms>`__ for further details.
+complex - see the :ref:`properties <Properties>` page.
 
 Execution
 #########

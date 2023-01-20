@@ -11,8 +11,7 @@ Description
 
 The algorithm is used transform existing :ref:`Event <EventWorkspace>`
 or :ref:`Matrix <MatrixWorkspace>` workspace into
-:ref:`Multidimensional workspace <MDWorkspace>` using
-`MD Transformations Factory <http://www.mantidproject.org/MD_Transformation_factory>`_.
+:ref:`Multidimensional workspace <MDWorkspace>`.
 
 If  the target workspace does not exist, the algorithm creates :ref:`MDEventWorkspace <MDWorkspace>`
 with selected dimensions, e.g. the reciprocal space of momentums **(Qx, Qy, Qz)** or momentums modules **\|Q|**, energy transfer **dE** if available
@@ -89,7 +88,7 @@ How to write custom ConvertToMD plugin
 
 This information intended for developers who have at least basic
 knowledge of C++ and needs to write its own
-plugin using `custom ConvertTo MD transformation <http://www.mantidproject.org/Writing_custom_ConvertTo_MD_transformation>`__.
+plugin using :ref:`WritingCustomConvertToMDTransformation`.
 
 Usage examples
 --------------

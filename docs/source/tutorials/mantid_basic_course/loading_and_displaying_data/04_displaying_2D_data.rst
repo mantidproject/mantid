@@ -26,7 +26,7 @@ If you would like to create your own colormap, see :ref:`custom-colormap-mantidw
 
 
 Slice Viewer
-===============
+============
 
 This is a useful tool to investigate 2D image data. You
 can rapidly look through the spectrum and bin data, by hovering your mouse cursor over the
