@@ -23,10 +23,10 @@ html_theme_options = {
     "navbar_site_name": "Mantid",
     # Add links to the nav bar. Third param of tuple is true to create absolute url.
     "navbar_links": [
-        ("Home", "http://www.mantidproject.org", True),
-        ("Download", "http://download.mantidproject.org", True),
-        ("Documentation", "http://docs.mantidproject.org/nightly/", True),
-        ("Contact Us", "http://www.mantidproject.org/Contact", True),
+        ("Home", "https://www.mantidproject.org", True),
+        ("Download", "https://download.mantidproject.org", True),
+        ("Documentation", "https://docs.mantidproject.org", True),
+        ("Contact Us", "https://www.mantidproject.org/contact", True),
     ],
     # Do not show the "Show source" button.
     "source_link_position": "no",
