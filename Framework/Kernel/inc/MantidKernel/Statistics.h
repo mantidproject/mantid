@@ -43,6 +43,9 @@ struct Statistics {
   double median;
   /// standard_deviation of the values
   double standard_deviation;
+
+  /// Default value for everything is nan
+  Statistics();
 };
 
 /// Controls the computation of statisical data
