@@ -539,7 +539,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
     def get_extra_image_info_columns(self, xdata, ydata):
         qdims = [i for i, v in enumerate(self.view.data_view.dimensions.qflags) if v]
 
-        if len(qdims) != 3 and self.get_frame() != SpecialCoordinateSystem.HKL:
+        if len(qdims) != 3 or self.get_frame() != SpecialCoordinateSystem.HKL:
             return {}
 
         if xdata == DBLMAX and ydata == DBLMAX:
