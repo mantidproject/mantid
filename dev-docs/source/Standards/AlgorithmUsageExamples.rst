@@ -227,6 +227,12 @@ In order to execute the usage examples tests, you can run the cmake `docs-doctes
 
    cmake --build . --target docs-doctest
 
+If you use ninja, in your build folder you can also run:
+
+.. code-block:: rest
+
+   ninja docs-doctest
+
 On some machines, the usage examples may take a while to run completely.
 
 
