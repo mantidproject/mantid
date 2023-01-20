@@ -17,22 +17,23 @@ class SANSILLReductionTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        cls._data_search_dirs = config["datasearch.directories"]
+        cls._facility = config["default.facility"]
+        cls._instrument = config["default.instrument"]
+
         config.appendDataSearchSubDir("ILL/D11/")
         config.appendDataSearchSubDir("ILL/D33/")
-
-    def setUp(self):
-        self._facility = config["default.facility"]
-        self._instrument = config["default.instrument"]
-
         config["default.facility"] = "ILL"
         config["default.instrument"] = "D11"
 
     def tearDown(self):
-        if self._facility:
-            config["default.facility"] = self._facility
-        if self._instrument:
-            config["default.instrument"] = self._instrument
         mtd.clear()
+
+    @classmethod
+    def tearDownClass(cls):
+        config["default.facility"] = cls._facility
+        config["default.instrument"] = cls._instrument
+        config["datasearch.directories"] = cls._data_search_dirs
 
     def test_absorber(self):
         SANSILLReduction(Run="010462", ProcessAs="Absorber", OutputWorkspace="Cd", Version=1)
