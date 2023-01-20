@@ -225,7 +225,7 @@ In order to execute the usage examples tests, you can run the cmake `docs-doctes
 
 .. code-block:: rest
 
-   cmake --build --target docs-doctest
+   cmake --build . --target docs-doctest
 
 On some machines, the usage examples may take a while to run completely.
 
