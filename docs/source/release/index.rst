@@ -41,4 +41,5 @@ Release Notes
 * :doc:`v3.5.2 <v3.5.2/index>`
 
 
-For release notes prior to version 3.5.2 please see the `wiki <http://www.mantidproject.org/Category:Release_Notes>`_.
+For release notes prior to version 3.5.2 please see the
+`wiki archive <http://archive.mantidproject.org/Category:Release_Notes>`_.

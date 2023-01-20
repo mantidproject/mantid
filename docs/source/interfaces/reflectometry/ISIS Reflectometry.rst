@@ -709,8 +709,9 @@ Interface to re-link it.
 
 Live data monitoring has the following requirements:
 
-- CaChannel must be installed in Mantid. See the instructions `here <https://www.mantidproject.org/CaChannel_In_Mantid>`_.
-- The instrument must be on IBEX or have additional processes installed to supply the EPICS values. If it does not, you will get an error that live values could not be found for `Theta` and the slits.
+- CaChannel must be installed in Mantid. See the instructions :ref:`here <cachannel>`.
+- The instrument must be on IBEX or have additional processes installed to supply the EPICS values.
+- If it does not, you will get an error that live values could not be found for `Theta` and the slits.
 
 .. _refl_event_handling:
 

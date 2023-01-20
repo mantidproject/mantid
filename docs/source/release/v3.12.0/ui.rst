@@ -109,6 +109,7 @@ An error report will be sent to errorreports.mantidproject.org. It will contain 
 
 All the information from the non-identifiable information will be shared. In addition the optional name and email will be shared if given.
 
-Full details of the privacy policy are available `from the homepage <https://www.mantidproject.org/MantidProject:Privacy_policy>`_.
+Full details of the privacy policy are available
+`from the homepage <https://archive.mantidproject.org/MantidProject:Privacy_policy>`_.
 
 :ref:`Release 3.12.0 <v3.12.0>`
