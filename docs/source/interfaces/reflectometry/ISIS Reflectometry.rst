@@ -849,7 +849,7 @@ specified, then they will be stitched using the options specified.
 
   *Transmission run options*
 
-.. _refl_preview::
+.. _refl_preview:
 
 Reduction Preview Tab
 ~~~~~~~~~~~~~~~~~~~~~

@@ -17,6 +17,7 @@ detectors accordingly. The `Instrument View <https://www.mantidproject.org/Instr
 can be activated by right clicking on the loaded workspace and selecting the "Show Instrument".
 
 .. _vector example:
+
 **Example - Loads raw SANS-1 data file with extension .001.**
 
 .. testcode:: ExLoad

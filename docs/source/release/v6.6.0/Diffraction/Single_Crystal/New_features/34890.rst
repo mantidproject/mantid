@@ -1,0 +1,1 @@
+* Exposed indexing tolerance for :ref:`SCDCalibratePanels  <algm-SCDCalibratePanels>` when using `RecalculateUB` option.
