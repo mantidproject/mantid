@@ -31,7 +31,7 @@ openssl:
   - 1.1.*
 
 setuptools:
-  - 48.0
+  - 47.0
 
 sphinx:
   - 5.1.1
