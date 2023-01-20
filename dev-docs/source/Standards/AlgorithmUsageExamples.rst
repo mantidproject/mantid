@@ -221,4 +221,13 @@ as shown in the example below. This will generate a note to the user explaining 
 Running the Tests
 =================
 
-See :ref:`here <DocumentationGuideForDevs>` for how to run and test the usage examples locally.
+In order to execute the usage examples tests, you can run the cmake `docs-doctest` target inside of your build folder.
+
+.. code-block:: rest
+
+   cmake --build --target docs-doctest
+
+On some machines, the usage examples may take a while to run completely.
+
+
+See :ref:`here <DocumentationGuideForDevs>` for more info on writing documentation.
