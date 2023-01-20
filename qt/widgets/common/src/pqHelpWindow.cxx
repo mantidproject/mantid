@@ -370,12 +370,12 @@ void pqHelpWindow::showLinkedPage(const QUrl &url) { this->showPage(url, true); 
 //-----------------------------------------------------------------------------
 void pqHelpWindow::printPage() {
   auto *printer = new QPrinter();
-  auto dialog = QPrintDialog(printer, this);
+  QPrintDialog dialog(printer, this);
   dialog.setWindowTitle(tr("Print Document"));
   if (dialog.exec() != QDialog::Accepted)
     return;
 #if defined(USE_QTWEBKIT)
-  m_browser->print(&printer);
+  m_browser->print(printer);
 #else
   m_browser->page()->print(printer, [](bool) {});
 #endif
