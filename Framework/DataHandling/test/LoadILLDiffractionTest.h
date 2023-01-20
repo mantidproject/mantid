@@ -108,7 +108,6 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "967100.nxs"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DataType", "Raw"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
@@ -179,23 +178,6 @@ public:
     TS_ASSERT_DELTA(ei, 14.09, 0.01)
     TS_ASSERT_EQUALS(outputWS->run().getProperty("Detector.calibration_file")->value(), "none")
     checkTimeFormat(outputWS);
-  }
-
-  void test_D20_no_scan_requesting_calibrated_throws() {
-    // Tests the no-scan case for D20
-    // Temperature ramp is not a motor scan so produces a file per T
-
-    LoadILLDiffraction alg;
-    // Don't put output in ADS by default
-    alg.setChild(true);
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "967100.nxs"))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DataType", "Calibrated"))
-    std::string err_msg("Some invalid Properties found: \n"
-                        " DataType: Calibrated data requested, but only raw data exists in this NeXus file.");
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e, std::string(e.what()), err_msg);
   }
 
   void test_D20_scan() {
@@ -365,6 +347,7 @@ public:
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "535401.nxs"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__outWS"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("AlignTubes", true));
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
@@ -409,7 +392,7 @@ public:
     checkTimeFormat(outputWS);
   }
 
-  void do_test_D2B_single_file(const std::string &dataType) {
+  void test_D2B_single_file() {
     // Test a D2B detector scan file with 25 detector positions
 
     const int NUMBER_OF_TUBES = 128;
@@ -422,7 +405,6 @@ public:
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "508093.nxs"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DataType", dataType))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
@@ -499,48 +481,23 @@ public:
     TS_ASSERT_DELTA(outputWS->readE(0)[0], 447.21359, 1E-5)
     TS_ASSERT_DELTA(outputWS->readY(detInfo.scanCount() - 1)[0], 200000.0, 1E-5)
     TS_ASSERT_DELTA(outputWS->readE(detInfo.scanCount() - 1)[0], 447.21359, 1E-5)
-    if (dataType == "Raw") {
-      // second, data, tube 1, isolated counts or high counts
-      TS_ASSERT_DELTA(outputWS->readY(370)[0], 1.0, 1E-5)
-      TS_ASSERT_DELTA(outputWS->readE(370)[0], 1.0, 1E-5)
-      TS_ASSERT_DELTA(outputWS->readY(427)[0], 2.0, 1E-5)
-      TS_ASSERT_DELTA(outputWS->readE(427)[0], 1.41421, 1E-5)
-      // tube 2, to ensure proper order of tube filling
-      TS_ASSERT_DELTA(outputWS->readY(3201)[0], 3.0, 1E-5)
-      TS_ASSERT_DELTA(outputWS->readE(3201)[0], 1.73205, 1E-5)
-      TS_ASSERT_DELTA(outputWS->readY(3640)[0], 1.0, 1E-5)
-      TS_ASSERT_DELTA(outputWS->readE(3640)[0], 1.0, 1E-5)
-      // next tubes, isolated counts or high counts
-      TS_ASSERT_DELTA(outputWS->readY(391031)[0], 4.0, 1E-5)
-      TS_ASSERT_DELTA(outputWS->readE(391031)[0], 2.0, 1E-5)
-      TS_ASSERT_DELTA(outputWS->readY(409405)[0], 2.0, 1E-5)
-      TS_ASSERT_DELTA(outputWS->readE(409405)[0], 1.41421, 1E-5)
-      TS_ASSERT_EQUALS(outputWS->run().getProperty("Detector.calibration_file")->value(), "none")
-    } else {
-      // second, data, tube 1, isolated counts or high counts
-      TS_ASSERT_DELTA(outputWS->readY(234)[0], 1.0, 1E-5)
-      TS_ASSERT_DELTA(outputWS->readE(234)[0], 1.0, 1E-5)
-      TS_ASSERT_DELTA(outputWS->readY(457)[0], 2.0, 1E-5)
-      TS_ASSERT_DELTA(outputWS->readE(457)[0], 1.41421, 1E-5)
-      // tube 2, to ensure proper order of tube filling
-      TS_ASSERT_DELTA(outputWS->readY(3201)[0], 3.0, 1E-5)
-      TS_ASSERT_DELTA(outputWS->readE(3201)[0], 1.73205, 1E-5)
-      TS_ASSERT_DELTA(outputWS->readY(3583)[0], 1.0, 1E-5)
-      TS_ASSERT_DELTA(outputWS->readE(3583)[0], 1.0, 1E-5)
-      // next tubes, isolated counts or high counts
-      TS_ASSERT_DELTA(outputWS->readY(314228)[0], 3.0, 1E-5)
-      TS_ASSERT_DELTA(outputWS->readE(314228)[0], 1.73205, 1E-5)
-      TS_ASSERT_DELTA(outputWS->readY(409620)[0], 3.0, 1E-5)
-      TS_ASSERT_DELTA(outputWS->readE(409620)[0], 1.73205, 1E-5)
-      TS_ASSERT_EQUALS(outputWS->run().getProperty("Detector.calibration_file")->value(), "d2bcal_23Nov16_c.2d")
-    }
+    // second, data, tube 1, isolated counts or high counts
+    TS_ASSERT_DELTA(outputWS->readY(234)[0], 1.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->readE(234)[0], 1.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->readY(457)[0], 2.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->readE(457)[0], 1.41421, 1E-5)
+    // tube 2, to ensure proper order of tube filling
+    TS_ASSERT_DELTA(outputWS->readY(3201)[0], 3.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->readE(3201)[0], 1.73205, 1E-5)
+    TS_ASSERT_DELTA(outputWS->readY(3583)[0], 1.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->readE(3583)[0], 1.0, 1E-5)
+    // next tubes, isolated counts or high counts
+    TS_ASSERT_DELTA(outputWS->readY(314228)[0], 3.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->readE(314228)[0], 1.73205, 1E-5)
+    TS_ASSERT_DELTA(outputWS->readY(409620)[0], 3.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->readE(409620)[0], 1.73205, 1E-5)
+    TS_ASSERT_EQUALS(outputWS->run().getProperty("Detector.calibration_file")->value(), "d2bcal_23Nov16_c.2d")
   }
-
-  void test_D2B_single_file() { do_test_D2B_single_file("Auto"); }
-
-  void test_D2B_single_file_calibrated() { do_test_D2B_single_file("Calibrated"); }
-
-  void test_D2B_single_file_raw() { do_test_D2B_single_file("Raw"); }
 
   void test_D2B_single_point_scan() {
     LoadILLDiffraction alg;
