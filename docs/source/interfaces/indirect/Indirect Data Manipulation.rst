@@ -265,6 +265,8 @@ the :ref:`sqw-example-workflow`.
    :ref:`SofQWMoments <algm-SofQWMoments>` algorithm. The output workspace ends
    with suffix _moments and is called ``iris26176_graphite002_moments``.
 
+.. _elwin:
+
 Elwin
 -----
 
