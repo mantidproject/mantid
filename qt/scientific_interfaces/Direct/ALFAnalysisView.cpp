@@ -273,7 +273,7 @@ void ALFAnalysisView::setPeak(Mantid::API::IPeakFunction_const_sptr const &peak,
   setPeakCentre(peak->getParameter("PeakCentre"));
 
   m_peakPicker->setPeak(peak, background);
-  m_peakPicker->select(false);
+  m_peakPicker->select(true);
 }
 
 Mantid::API::IPeakFunction_const_sptr ALFAnalysisView::getPeak() const { return m_peakPicker->peak(); }
