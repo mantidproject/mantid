@@ -62,10 +62,9 @@ private:
   void setRenderingOptions();
   void resetBackgroundColor();
 
-  bool m_isKeyPressed;
-
-  /// Surface
+  qreal m_pixelRatioLastPaint{1.0};
   std::shared_ptr<ProjectionSurface> m_surface;
+  bool m_isKeyPressed;
 };
 
 } // namespace MantidWidgets

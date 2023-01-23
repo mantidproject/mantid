@@ -125,6 +125,14 @@ void GLDisplay::paintEvent(QPaintEvent *event) {
     resetBackgroundColor();
     return;
   }
+  const auto pixelRatioThisPaint{this->window()->devicePixelRatio()};
+  if (pixelRatioThisPaint != m_pixelRatioLastPaint) {
+    // Force the view to be updated on the next draw (note that this does not
+    // perform the update just flag that the update needs to happen)
+    updateView();
+    m_pixelRatioLastPaint = pixelRatioThisPaint;
+  }
+
   m_surface->draw(this);
   OpenGLError::check("paintEvent");
 }
