@@ -498,7 +498,7 @@ class PeakMarker(QObject):
     peak_moved = Signal(int, float, float)
     fwhm_changed = Signal(int, float)
 
-    def __init__(self, canvas, peak_id, x, y_top, y_bottom, fwhm):
+    def __init__(self, canvas, peak_id, x, height, fwhm, background):
         """
         Init the marker.
         :param canvas: The MPL canvas.
@@ -510,7 +510,7 @@ class PeakMarker(QObject):
         """
         super(PeakMarker, self).__init__()
         self.peak_id = peak_id
-        self.centre_marker = CentreMarker(canvas, x, y0=y_bottom, y1=y_top)
+        self.centre_marker = CentreMarker(canvas, x, y0=background, y1=background + height)
         self.left_width = WidthMarker(canvas, x - fwhm / 2)
         self.right_width = WidthMarker(canvas, x + fwhm / 2)
         self.is_selected = False
