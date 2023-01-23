@@ -149,14 +149,6 @@ private:
   void setupParameterTableWorkspace(const API::ITableWorkspace_sptr &table_ws,
                                     const std::vector<std::string> &param_names, bool with_chi2);
 
-  /// get vector X, Y and E in a given range
-  void getRangeData(size_t iws, const std::pair<double, double> &fit_window, std::vector<double> &vec_x,
-                    std::vector<double> &vec_y, std::vector<double> &vec_e);
-
-  /// Reduce background
-  void reduceByBackground(const API::IBackgroundFunction_sptr &bkgd_func, const std::vector<double> &vec_x,
-                          std::vector<double> &vec_y);
-
   API::MatrixWorkspace_sptr createMatrixWorkspace(const std::vector<double> &vec_x, const std::vector<double> &vec_y,
                                                   const std::vector<double> &vec_e);
 
@@ -280,6 +272,9 @@ private:
   //----- Result criterias ---------------
   /// peak positon tolerance case b, c and d
   bool m_peakPosTolCase234;
+
+  // Criteria for rejecting non-peaks or weak peaks from fitting
+  double m_minSignalToNoiseRatio;
 };
 
 } // namespace Algorithms

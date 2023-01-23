@@ -80,6 +80,7 @@ const std::string OUTPUT_WKSP_MODEL("FittedPeaksWorkspace");
 const std::string OUTPUT_WKSP_PARAMS("OutputPeakParametersWorkspace");
 const std::string OUTPUT_WKSP_PARAM_ERRS("OutputParameterFitErrorsWorkspace");
 const std::string RAW_PARAMS("RawPeakParameters");
+const std::string PEAK_MIN_SIGNAL_TO_NOISE_RATIO("MinimumSignalToNoiseRatio");
 
 } // namespace PropertyNames
 } // namespace
@@ -196,7 +197,7 @@ void PeakFitResult::setBadRecord(size_t ipeak, const double peak_position) {
 //----------------------------------------------------------------------------------------------
 FitPeaks::FitPeaks()
     : m_fitPeaksFromRight(true), m_fitIterations(50), m_numPeaksToFit(0), m_minPeakHeight(20.), m_bkgdSimga(1.),
-      m_peakPosTolCase234(false) {}
+      m_peakPosTolCase234(false), m_minSignalToNoiseRatio(1.) {}
 
 //----------------------------------------------------------------------------------------------
 /** initialize the properties
@@ -359,6 +360,10 @@ void FitPeaks::init() {
                   "false generates table with effective centre/width/height "
                   "parameters. true generates a table with peak function "
                   "parameters");
+
+  declareProperty(PropertyNames::PEAK_MIN_SIGNAL_TO_NOISE_RATIO, 1.,
+                  "Minimum estimated signal-to-noise ratio such that all peaks with"
+                  "lower ratio will be excluded from fitting.");
 
   const std::string addoutgrp("Analysis");
   setPropertyGroup(PropertyNames::OUTPUT_WKSP_PARAMS, addoutgrp);
@@ -798,6 +803,11 @@ void FitPeaks::processInputPeakTolerance() {
   if (isEmpty(m_minPeakHeight) || m_minPeakHeight < 0.)
     m_minPeakHeight = 0.;
 
+  // if signal-to-noise threshold is not specified, set it to zero so it has no effect
+  m_minSignalToNoiseRatio = getProperty(PropertyNames::PEAK_MIN_SIGNAL_TO_NOISE_RATIO);
+  if (isEmpty(m_minSignalToNoiseRatio) || m_minSignalToNoiseRatio < 0.)
+    m_minSignalToNoiseRatio = 0.;
+
   return;
 }
 
@@ -892,10 +902,25 @@ std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> FitPeaks::fitPeak
 }
 
 namespace {
+// Forward declarations
+void getRangeData(const Histogram &histogram, const std::pair<double, double> &fit_window, std::vector<double> &vec_x,
+                  std::vector<double> &vec_y, std::vector<double> &vec_e);
+bool estimateBackgroundParameters(const Histogram &histogram, const std::pair<size_t, size_t> &peak_window,
+                                  const API::IBackgroundFunction_sptr &bkgd_function);
+void reduceByBackground(const API::IBackgroundFunction_sptr &bkgd_func, const std::vector<double> &vec_x,
+                        std::vector<double> &vec_y);
+template <typename vector_like>
+void rangeToIndexBounds(const vector_like &vecx, const double range_left, const double range_right, size_t &left_index,
+                        size_t &right_index);
+
 /// Supported peak profiles for observation
 std::vector<std::string> supported_peak_profiles{"Gaussian", "Lorentzian", "PseudoVoigt", "Voigt",
                                                  "BackToBackExponential"};
-
+//----------------------------------------------------------------------------------------------
+/** Sum up all counts in a histogram
+ * @param histogram :: histogram instance
+ * @return :: total number of counts
+ */
 double numberCounts(const Histogram &histogram) {
   double total = 0.;
   for (const auto &value : histogram.y())
@@ -904,40 +929,70 @@ double numberCounts(const Histogram &histogram) {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Get number of counts in a specified range of a histogram
- * @param histogram :: histogram instance
- * @param xmin :: left boundary
- * @param xmax :: right boundary
- * @return :: counts
+/** Estimate background noise given a peak-window Y-vector
+ * @param vec_y :: a peak window of Y-values
+ * @return :: noise estimate
  */
-double numberCounts(const Histogram &histogram, const double xmin, const double xmax) {
-  const auto &vector_x = histogram.points();
+double estimateBackgroundNoise(const std::vector<double> &vec_y) {
+  // assume that the first 10 and the last 10 data points are background. Estimate the noise as the standard deviation
+  // of that combined data set.
+  assert(vec_y.size() > 20);
+  std::vector<double> vec_bkg;
+  vec_bkg.resize(20);
+  std::copy(vec_y.begin(), vec_y.begin() + 10, vec_bkg.begin());
+  std::copy(vec_y.end() - 10, vec_y.end(), back_inserter(vec_bkg));
 
-  // determine left boundary
-  auto start_iter = vector_x.begin();
-  if (xmin > vector_x.front())
-    start_iter = std::lower_bound(vector_x.begin(), vector_x.end(), xmin);
-  if (start_iter == vector_x.end())
-    return 0.; // past the end of the data means nothing to integrate
-  // determine right boundary
-  auto stop_iter = vector_x.end();
-  if (xmax < vector_x.back()) // will set at end of vector if too large
-    stop_iter = std::lower_bound(start_iter, stop_iter, xmax);
-
-  // convert to indexes to sum over y
-  size_t start_index = static_cast<size_t>(start_iter - vector_x.begin());
-  size_t stop_index = static_cast<size_t>(stop_iter - vector_x.begin());
-
-  // integrate
-  double total = 0.;
-  for (size_t i = start_index; i < stop_index; ++i)
-    total += std::fabs(histogram.y()[i]);
-  return total;
+  auto intensityStatistics = Kernel::getStatistics(vec_bkg, StatOptions::CorrectedStdDev);
+  return intensityStatistics.standard_deviation;
 }
 
 //----------------------------------------------------------------------------------------------
-/** Get number of vector elements falling into specified range
- * @param vector :: vector of type T
+/** Calculate signal-to-noise ratio for a histogram range
+ * @param histogram :: histogram instance
+ * @param range :: histogram range
+ * @return :: signal-to-noise ratio
+ */
+double calculateSignalToNoiseRatio(const Histogram &histogram, const std::pair<double, double> &range,
+                                   const API::IBackgroundFunction_sptr &bkgd_function) {
+  // convert X range boundaries to index boundaries
+  size_t left_index, right_index;
+  const auto &orig_x = histogram.x();
+  rangeToIndexBounds(orig_x, range.first, range.second, left_index, right_index);
+
+  // handle an invalid range case
+  if (left_index >= right_index)
+    return 0.0;
+
+  // estimate background by Y(X) fitting
+  if (!estimateBackgroundParameters(histogram, std::pair<size_t, size_t>(left_index, right_index), bkgd_function))
+    return 0.0;
+
+  // get X,Y,and E for the data range
+  std::vector<double> vec_x, vec_y, vec_e;
+  getRangeData(histogram, range, vec_x, vec_y, vec_e);
+  if (vec_x.empty())
+    return 0.0;
+  assert(vec_x.size() == vec_y.size() && vec_x.size() == vec_e.size());
+
+  // reduce all Y-values in the data range by the background
+  reduceByBackground(bkgd_function, vec_x, vec_y);
+
+  // estimate the noise as the variation of the background
+  double noise = estimateBackgroundNoise(vec_y);
+  if (std::fabs(noise) <= DBL_MIN)
+    return 0.;
+
+  // estimate the signal as the highest Y-value in the peak window
+  auto it_max = std::max_element(vec_y.begin(), vec_y.end());
+  double signal = vec_y[it_max - vec_y.begin()];
+
+  // finally, calculate the signal-to-noise ratio
+  return signal / noise;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Get the count of vector elements in a range of values
+ * @param elems :: vector of type T
  * @param range :: range boundaries
  * @return :: number of elements
  */
@@ -945,6 +1000,81 @@ template <typename T> size_t numberElements(const std::vector<T> &elements, cons
   const auto leftIter = std::lower_bound(elements.cbegin(), elements.cend(), range.first);
   const auto rightIter = std::upper_bound(elements.cbegin(), elements.cend(), range.second);
   return std::distance(leftIter, rightIter);
+}
+
+//----------------------------------------------------------------------------------------------
+/** Convert vector range boundaries to index boundaries
+ * @param elems :: vector-like container
+ * @param range_left :: left range boundary
+ * @param range_right :: right range boundary
+ * @param left_index :: (output) left index boundary
+ * @param right_index :: (output) right index boundary
+ */
+template <typename vector_like>
+void rangeToIndexBounds(const vector_like &elems, const double range_left, const double range_right, size_t &left_index,
+                        size_t &right_index) {
+  const auto left_iter = std::lower_bound(elems.cbegin(), elems.cend(), range_left);
+  const auto right_iter = std::upper_bound(elems.cbegin(), elems.cend(), range_right);
+
+  left_index = std::distance(elems.cbegin(), left_iter);
+  right_index = std::distance(elems.cbegin(), right_iter);
+
+  // Apply a "hack" here: adjust the right index. Otherwise, existing downstream code outputs an error
+  // for some of the peak windows, saying their right index exceeds X-vector length.
+  if (right_index >= elems.size() - 1)
+    right_index = elems.size() - 2;
+}
+
+//----------------------------------------------------------------------------------------------
+/** get vector X, Y and E in a given range
+ */
+void getRangeData(const Histogram &histogram, const std::pair<double, double> &fit_window, std::vector<double> &vec_x,
+                  std::vector<double> &vec_y, std::vector<double> &vec_e) {
+
+  // convert X range boundaries to index boundaries
+  const auto &orig_x = histogram.x();
+  size_t left_index, right_index;
+  rangeToIndexBounds(orig_x, fit_window.first, fit_window.second, left_index, right_index);
+  // handle an invalid range case
+  if (left_index >= right_index) {
+    std::stringstream err_ss;
+    err_ss << "Unable to get a valid subset of histogram from given fit window. "
+           << "Fit window: " << fit_window.first << ", " << fit_window.second << ". Vector X's range is "
+           << orig_x.front() << ", " << orig_x.back();
+    throw std::runtime_error(err_ss.str());
+  }
+
+  // copy X, Y and E
+  size_t num_elements = right_index - left_index;
+  vec_x.resize(num_elements);
+  std::copy(orig_x.begin() + left_index, orig_x.begin() + right_index, vec_x.begin());
+
+  const std::vector<double> orig_y = histogram.y().rawData();
+  const std::vector<double> orig_e = histogram.e().rawData();
+  vec_y.resize(num_elements);
+  vec_e.resize(num_elements);
+  std::copy(orig_y.begin() + left_index, orig_y.begin() + right_index, vec_y.begin());
+  std::copy(orig_e.begin() + left_index, orig_e.begin() + right_index, vec_e.begin());
+}
+
+//----------------------------------------------------------------------------------------------
+/** Reduce Y value with given background function
+ * @param bkgd_func :: background function pointer
+ * @param vec_x :: vector of X valye
+ * @param vec_y :: (input/output) vector Y to be reduced by background function
+ */
+void reduceByBackground(const API::IBackgroundFunction_sptr &bkgd_func, const std::vector<double> &vec_x,
+                        std::vector<double> &vec_y) {
+  // calculate the background
+  FunctionDomain1DVector vectorx(vec_x.begin(), vec_x.end());
+  FunctionValues vector_bkgd(vectorx);
+  bkgd_func->function(vectorx, vector_bkgd);
+
+  // subtract the background from the supplied data
+  for (size_t i = 0; i < vec_y.size(); ++i) {
+    (vec_y)[i] -= vector_bkgd[i];
+    // it is better not to mess up with E here
+  }
 }
 } // namespace
 
@@ -1354,8 +1484,8 @@ void FitPeaks::calculateFittedPeaks(std::vector<std::shared_ptr<FitPeaksAlgorith
   return;
 }
 namespace {
-double estimateBackgroundParameters(const Histogram &histogram, const std::pair<size_t, size_t> &peak_window,
-                                    const API::IBackgroundFunction_sptr &bkgd_function) {
+bool estimateBackgroundParameters(const Histogram &histogram, const std::pair<size_t, size_t> &peak_window,
+                                  const API::IBackgroundFunction_sptr &bkgd_function) {
   // for estimating background parameters
   // 0 = constant, 1 = linear
   const auto POLYNOMIAL_ORDER = std::min<size_t>(1, bkgd_function->nParams());
@@ -1372,15 +1502,14 @@ double estimateBackgroundParameters(const Histogram &histogram, const std::pair<
   const size_t iback_start = peak_window.first + 10;
   const size_t iback_stop = peak_window.second - 10;
 
-  double chisq{DBL_MAX}; // how well the fit worked
-
   // use the simple way to find linear background
   // there aren't enough bins in the window to try to estimate so just leave the
   // estimate at zero
   if (iback_start < iback_stop) {
-    double bkgd_a0{0.}; // will be fit
-    double bkgd_a1{0.}; // may be fit
-    double bkgd_a2{0.}; // will be ignored
+    double bkgd_a0{0.};    // will be fit
+    double bkgd_a1{0.};    // may be fit
+    double bkgd_a2{0.};    // will be ignored
+    double chisq{DBL_MAX}; // how well the fit worked
     HistogramData::estimateBackground(POLYNOMIAL_ORDER, histogram, peak_window.first, peak_window.second, iback_start,
                                       iback_stop, bkgd_a0, bkgd_a1, bkgd_a2, chisq);
     // update the background function with the result
@@ -1388,9 +1517,12 @@ double estimateBackgroundParameters(const Histogram &histogram, const std::pair<
     if (nParams > 1)
       bkgd_function->setParameter(1, bkgd_a1);
     // quadratic term is always estimated to be zero
+
+    // TODO: return false if chisq is too large
+    return true;
   }
 
-  return chisq;
+  return false; // too few data points for the fit
 }
 } // anonymous namespace
 
@@ -1459,10 +1591,6 @@ double FitPeaks::fitIndividualPeak(size_t wi, const API::IAlgorithm_sptr &fitter
   double cost(DBL_MAX);
   not_enough_datapoints = false;
 
-  // confirm that there is something to fit
-  if (numberCounts(m_inputMatrixWS->histogram(wi), fitwindow.first, fitwindow.second) <= m_minPeakHeight)
-    return cost;
-
   // check if we have enough data points to fit
   // estimateBackgroundParameters() method requires to have at least 20 data points. Adding 3 datapoints to that as a
   // magic number.
@@ -1474,6 +1602,10 @@ double FitPeaks::fitIndividualPeak(size_t wi, const API::IAlgorithm_sptr &fitter
     not_enough_datapoints = true;
     return cost;
   }
+
+  // reject a non-peak or a weak peak
+  if (calculateSignalToNoiseRatio(m_inputMatrixWS->histogram(wi), fitwindow, bkgdfunc) < m_minSignalToNoiseRatio)
+    return cost;
 
   if (m_highBackground) {
     // fit peak with high background!
@@ -1502,30 +1634,32 @@ double FitPeaks::fitFunctionSD(const IAlgorithm_sptr &fit, const API::IPeakFunct
   std::stringstream errorid;
   errorid << "(WorkspaceIndex=" << wsindex << " PeakCentre=" << expected_peak_center << ")";
 
-  // generate peak window
+  // validate peak window
   if (peak_range.first >= peak_range.second) {
     std::stringstream msg;
     msg << "Invalid peak window: xmin>xmax (" << peak_range.first << ", " << peak_range.second << ")" << errorid.str();
     throw std::runtime_error(msg.str());
   }
 
-  // determine the peak window in array index
+  // determine the peak window in terms of vector indexes
   const auto &histogram = dataws->histogram(wsindex);
   const auto &vector_x = histogram.points();
   const auto start_index = findXIndex(vector_x, peak_range.first);
   const auto stop_index = findXIndex(vector_x, peak_range.second, start_index);
   if (start_index == stop_index)
-    throw std::runtime_error("Range size is zero in estimatePeakParameters");
-  std::pair<size_t, size_t> peak_window = std::make_pair(start_index, stop_index);
+    throw std::runtime_error("Range size is zero in fitFunctionSD");
+  std::pair<size_t, size_t> peak_index_window = std::make_pair(start_index, stop_index);
 
   // Estimate background
   if (estimate_background) {
-    estimateBackgroundParameters(histogram, peak_window, bkgd_function);
+    if (!estimateBackgroundParameters(histogram, peak_index_window, bkgd_function)) {
+      return DBL_MAX;
+    }
   }
 
   // Estimate peak profile parameter
   peak_function->setCentre(expected_peak_center); // set expected position first
-  int result = estimatePeakParameters(histogram, peak_window, peak_function, bkgd_function, estimate_peak_width,
+  int result = estimatePeakParameters(histogram, peak_index_window, peak_function, bkgd_function, estimate_peak_width,
                                       m_peakWidthEstimateApproach, m_peakWidthPercentage, m_minPeakHeight);
   if (result != GOOD) {
     peak_function->setCentre(expected_peak_center);
@@ -1574,7 +1708,7 @@ double FitPeaks::fitFunctionSD(const IAlgorithm_sptr &fit, const API::IPeakFunct
     }
   } catch (std::invalid_argument &e) {
     errorid << ": " << e.what();
-    g_log.warning() << "While fitting " + errorid.str();
+    g_log.warning() << "\nWhile fitting " + errorid.str();
     return DBL_MAX; // probably the wrong thing to do
   }
 
@@ -1664,7 +1798,7 @@ double FitPeaks::fitFunctionHighBackground(const IAlgorithm_sptr &fit, const std
 
   // Get partial of the data
   std::vector<double> vec_x, vec_y, vec_e;
-  getRangeData(ws_index, fit_window, vec_x, vec_y, vec_e);
+  getRangeData(m_inputMatrixWS->histogram(ws_index), fit_window, vec_x, vec_y, vec_e);
 
   // Reduce the background
   reduceByBackground(high_bkgd_function, vec_x, vec_y);
@@ -1932,72 +2066,6 @@ std::pair<double, double> FitPeaks::getPeakFitWindow(size_t wi, size_t ipeak) {
   }
 
   return std::make_pair(left, right);
-}
-
-//----------------------------------------------------------------------------------------------
-/** get vector X, Y and E in a given range
- */
-void FitPeaks::getRangeData(size_t iws, const std::pair<double, double> &fit_window, std::vector<double> &vec_x,
-                            std::vector<double> &vec_y, std::vector<double> &vec_e) {
-
-  // get the original vector of X and determine the start and end index
-  const auto &orig_x = m_inputMatrixWS->histogram(iws).x();
-  size_t left_index = findXIndex(orig_x, fit_window.first);
-  size_t right_index = findXIndex(orig_x, fit_window.second, left_index);
-
-  if (left_index >= right_index) {
-    std::stringstream err_ss;
-    err_ss << "Unable to get subset of histogram from given fit window. "
-           << "Fit window: " << fit_window.first << ", " << fit_window.second << ". Vector X's range is "
-           << orig_x.front() << ", " << orig_x.back();
-    throw std::runtime_error(err_ss.str());
-  }
-
-  // copy X, Y and E
-  size_t num_elements = right_index - left_index;
-  vec_x.resize(num_elements);
-  std::copy(orig_x.begin() + left_index, orig_x.begin() + right_index, vec_x.begin());
-
-  // modify right_index if it is at the end
-  if (m_inputMatrixWS->isHistogramData() && right_index == orig_x.size() - 1) {
-    right_index -= 1;
-    if (right_index == left_index)
-      throw std::runtime_error("Histogram workspace have same left and right "
-                               "boundary index for Y and E.");
-    num_elements -= 1;
-  }
-
-  // get original vector of Y and E
-  const std::vector<double> orig_y = m_inputMatrixWS->histogram(iws).y().rawData();
-  const std::vector<double> orig_e = m_inputMatrixWS->histogram(iws).e().rawData();
-  vec_y.resize(num_elements);
-  vec_e.resize(num_elements);
-  std::copy(orig_y.begin() + left_index, orig_y.begin() + right_index, vec_y.begin());
-  std::copy(orig_e.begin() + left_index, orig_e.begin() + right_index, vec_e.begin());
-
-  return;
-}
-
-//----------------------------------------------------------------------------------------------
-/** Reduce Y value with given background function
- * @param bkgd_func :: bacground function pointer
- * @param vec_x :: vector of X valye
- * @param vec_y :: (input/output) vector Y to be reduced by background function
- */
-void FitPeaks::reduceByBackground(const API::IBackgroundFunction_sptr &bkgd_func, const std::vector<double> &vec_x,
-                                  std::vector<double> &vec_y) {
-  // calculate the background
-  FunctionDomain1DVector vectorx(vec_x.begin(), vec_x.end());
-  FunctionValues vector_bkgd(vectorx);
-  bkgd_func->function(vectorx, vector_bkgd);
-
-  // subtract the background from the supplied data
-  for (size_t i = 0; i < vec_y.size(); ++i) {
-    (vec_y)[i] -= vector_bkgd[i];
-    // it is better not to mess up with E here
-  }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
