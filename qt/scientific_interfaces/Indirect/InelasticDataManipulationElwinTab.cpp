@@ -203,8 +203,7 @@ void InelasticDataManipulationElwinTab::runWorkspaceInput() {
 
   // Load input files
   std::string inputWorkspacesString;
-  auto domains = m_dataModel->getNumberOfWorkspaces();
-  for (WorkspaceID i = 0; i < m_dataModel->getNumberOfWorkspaces(); i++) {
+  for (WorkspaceID i = 0; i < m_dataModel->getNumberOfWorkspaces(); ++i) {
 
     auto workspace = m_dataModel->getWorkspace(i);
     auto spectra = m_dataModel->getSpectra(i);
