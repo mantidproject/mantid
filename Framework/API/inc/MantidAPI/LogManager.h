@@ -28,7 +28,7 @@ namespace Kernel {
 template <class KEYTYPE, class VALUETYPE> class Cache;
 template <typename TYPE> class TimeSeriesProperty;
 class SplittingInterval;
-using TimeSplitterType = std::vector<SplittingInterval>;
+using SplittingIntervalVec = std::vector<SplittingInterval>;
 class PropertyManager;
 class TimeROI;
 } // namespace Kernel
@@ -67,7 +67,7 @@ public:
   /// Filter the logs by time
   virtual void filterByTime(const Types::Core::DateAndTime start, const Types::Core::DateAndTime stop);
   /// Split the logs based on the given intervals
-  virtual void splitByTime(Kernel::TimeSplitterType &splitter, std::vector<LogManager *> outputs) const;
+  virtual void splitByTime(Kernel::SplittingIntervalVec &splitter, std::vector<LogManager *> outputs) const;
   /// Filter the run by the given boolean log
   void filterByLog(const Kernel::TimeSeriesProperty<bool> &filter,
                    const std::vector<std::string> &excludedFromFiltering = std::vector<std::string>());

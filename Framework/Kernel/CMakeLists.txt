@@ -97,6 +97,7 @@ set(SRC_FILES
     src/SetValueWhenProperty.cpp
     src/SingletonHolder.cpp
     src/SobolSequence.cpp
+    src/SplittingInterval.cpp
     src/StartsWithValidator.cpp
     src/Statistics.cpp
     src/StdoutChannel.cpp
@@ -109,7 +110,6 @@ set(SRC_FILES
     src/ThreadSafeLogStream.cpp
     src/TimeROI.cpp
     src/TimeSeriesProperty.cpp
-    src/TimeSplitter.cpp
     src/Timer.cpp
     src/TopicInfo.cpp
     src/Unit.cpp
@@ -269,6 +269,7 @@ set(INC_FILES
     inc/MantidKernel/SingletonHolder.h
     inc/MantidKernel/SobolSequence.h
     inc/MantidKernel/SpecialCoordinateSystem.h
+    inc/MantidKernel/SplittingInterval.h
     inc/MantidKernel/StartsWithValidator.h
     inc/MantidKernel/Statistics.h
     inc/MantidKernel/StdoutChannel.h
@@ -285,7 +286,6 @@ set(INC_FILES
     inc/MantidKernel/ThreadSchedulerMutexes.h
     inc/MantidKernel/TimeROI.h
     inc/MantidKernel/TimeSeriesProperty.h
-    inc/MantidKernel/TimeSplitter.h
     inc/MantidKernel/Timer.h
     inc/MantidKernel/Tolerance.h
     inc/MantidKernel/TopicInfo.h
@@ -417,6 +417,7 @@ set(TEST_FILES
     ShrinkToFitTest.h
     SobolSequenceTest.h
     SpecialCoordinateSystemTest.h
+    SplittingIntervalTest.h
     StartsWithValidatorTest.h
     StatisticsTest.h
     StdoutChannelTest.h
@@ -430,7 +431,6 @@ set(TEST_FILES
     ThreadSchedulerTest.h
     TimeROITest.h
     TimeSeriesPropertyTest.h
-    TimeSplitterTest.h
     TimerTest.h
     TopicInfoTest.h
     TypedValidatorTest.h

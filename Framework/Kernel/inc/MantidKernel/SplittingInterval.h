@@ -57,13 +57,13 @@ private:
  * It is a vector of SplittingInterval classes.
  *
  */
-using TimeSplitterType = std::vector<SplittingInterval>;
+using SplittingIntervalVec = std::vector<SplittingInterval>;
 
 // -------------- Operators ---------------------
-MANTID_KERNEL_DLL TimeSplitterType operator+(const TimeSplitterType &a, const TimeSplitterType &b);
-MANTID_KERNEL_DLL TimeSplitterType operator&(const TimeSplitterType &a, const TimeSplitterType &b);
-MANTID_KERNEL_DLL TimeSplitterType operator|(const TimeSplitterType &a, const TimeSplitterType &b);
-MANTID_KERNEL_DLL TimeSplitterType operator~(const TimeSplitterType &a);
+MANTID_KERNEL_DLL SplittingIntervalVec operator+(const SplittingIntervalVec &a, const SplittingIntervalVec &b);
+MANTID_KERNEL_DLL SplittingIntervalVec operator&(const SplittingIntervalVec &a, const SplittingIntervalVec &b);
+MANTID_KERNEL_DLL SplittingIntervalVec operator|(const SplittingIntervalVec &a, const SplittingIntervalVec &b);
+MANTID_KERNEL_DLL SplittingIntervalVec operator~(const SplittingIntervalVec &a);
 
 } // Namespace Kernel
 } // Namespace Mantid

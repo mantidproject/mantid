@@ -168,7 +168,7 @@ private:
   bool m_forFastLog;
 
   /// SplitterType
-  Kernel::TimeSplitterType m_splitters;
+  Kernel::SplittingIntervalVec m_splitters;
   /// Vector as date and time
   std::vector<Types::Core::DateAndTime> m_vecSplitterTime;
   std::vector<int> m_vecSplitterGroup;

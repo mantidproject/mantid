@@ -211,10 +211,10 @@ void LogManager::filterByTime(const Types::Core::DateAndTime start, const Types:
  * Split a run by time (splits the TimeSeriesProperties contained).
  *
  *
- * @param splitter :: TimeSplitterType with the intervals and destinations.
+ * @param splitter :: SplittingIntervalVec with the intervals and destinations.
  * @param outputs :: Vector of output runs.
  */
-void LogManager::splitByTime(TimeSplitterType &splitter, std::vector<LogManager *> outputs) const {
+void LogManager::splitByTime(SplittingIntervalVec &splitter, std::vector<LogManager *> outputs) const {
   // Make a vector of managers for the splitter. Fun!
   const size_t n = outputs.size();
   std::vector<PropertyManager *> output_managers(outputs.size(), nullptr);

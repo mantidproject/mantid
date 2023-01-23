@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidKernel/TimeSplitter.h"
+#include "MantidKernel/SplittingInterval.h"
 
 namespace Mantid {
 
@@ -79,12 +79,12 @@ bool compareSplittingInterval(const SplittingInterval &si1, const SplittingInter
 }
 
 //------------------------------------------------------------------------------------------------
-/** Return true if the TimeSplitterType provided is a filter,
+/** Return true if the SplittingIntervalVec provided is a filter,
  * meaning that it only has an output index of 0.
  */
-bool isFilter(const TimeSplitterType &a) {
+bool isFilter(const SplittingIntervalVec &a) {
   int max = -1;
-  TimeSplitterType::const_iterator it;
+  SplittingIntervalVec::const_iterator it;
   for (it = a.begin(); it != a.end(); ++it)
     if (it->index() > max)
       max = it->index();
@@ -92,16 +92,16 @@ bool isFilter(const TimeSplitterType &a) {
 }
 
 //------------------------------------------------------------------------------------------------
-/** Plus operator for TimeSplitterType.
+/** Plus operator for SplittingIntervalVec.
  * Combines a filter and a splitter by removing entries that are filtered out
  *from the splitter.
  * Also, will combine two filters together by "and"ing them
  *
- * @param a :: TimeSplitterType splitter OR filter
- * @param b :: TimeSplitterType splitter OR filter.
+ * @param a :: SplittingIntervalVec splitter OR filter
+ * @param b :: SplittingIntervalVec splitter OR filter.
  * @throw std::invalid_argument if two splitters are given.
  */
-TimeSplitterType operator+(const TimeSplitterType &a, const TimeSplitterType &b) {
+SplittingIntervalVec operator+(const SplittingIntervalVec &a, const SplittingIntervalVec &b) {
   bool a_filter, b_filter;
   a_filter = isFilter(a);
   b_filter = isFilter(b);
@@ -123,25 +123,25 @@ TimeSplitterType operator+(const TimeSplitterType &a, const TimeSplitterType &b)
 }
 
 //------------------------------------------------------------------------------------------------
-/** AND operator for TimeSplitterType
+/** AND operator for SplittingIntervalVec
  * Works on Filters - combines them to only keep times where both Filters are
  *TRUE.
  * Works on splitter + filter if (a) is a splitter and b is a filter.
  *  In general, use the + operator since it will resolve the order for you.
  *
- * @param a :: TimeSplitterType filter or Splitter.
- * @param b :: TimeSplitterType filter.
+ * @param a :: SplittingIntervalVec filter or Splitter.
+ * @param b :: SplittingIntervalVec filter.
  * @return the ANDed filter
  */
-TimeSplitterType operator&(const TimeSplitterType &a, const TimeSplitterType &b) {
-  TimeSplitterType out;
+SplittingIntervalVec operator&(const SplittingIntervalVec &a, const SplittingIntervalVec &b) {
+  SplittingIntervalVec out;
   // If either is empty, then no entries in the filter (aka everything is
   // removed)
   if ((a.empty()) || (b.empty()))
     return out;
 
-  TimeSplitterType::const_iterator ait;
-  TimeSplitterType::const_iterator bit;
+  SplittingIntervalVec::const_iterator ait;
+  SplittingIntervalVec::const_iterator bit;
 
   // For now, a simple double iteration. Can be made smarter if a and b are
   // sorted.
@@ -162,10 +162,10 @@ TimeSplitterType operator&(const TimeSplitterType &a, const TimeSplitterType &b)
 //------------------------------------------------------------------------------------------------
 /** Remove any overlap in a filter (will not work properly on a splitter)
  *
- * @param a :: TimeSplitterType filter.
+ * @param a :: SplittingIntervalVec filter.
  */
-TimeSplitterType removeFilterOverlap(const TimeSplitterType &a) {
-  TimeSplitterType out;
+SplittingIntervalVec removeFilterOverlap(const SplittingIntervalVec &a) {
+  SplittingIntervalVec out;
   out.reserve(a.size());
 
   // Now we have to merge duplicate/overlapping intervals together
@@ -192,23 +192,23 @@ TimeSplitterType removeFilterOverlap(const TimeSplitterType &a) {
 }
 
 //------------------------------------------------------------------------------------------------
-/** OR operator for TimeSplitterType
+/** OR operator for SplittingIntervalVec
  * Only works on Filters, not splitters. Combines the splitters
  * to only keep times where EITHER Filter is TRUE.
  *
- * @param a :: TimeSplitterType filter.
- * @param b :: TimeSplitterType filter.
+ * @param a :: SplittingIntervalVec filter.
+ * @param b :: SplittingIntervalVec filter.
  * @return the ORed filter
  */
-TimeSplitterType operator|(const TimeSplitterType &a, const TimeSplitterType &b) {
-  TimeSplitterType out;
+SplittingIntervalVec operator|(const SplittingIntervalVec &a, const SplittingIntervalVec &b) {
+  SplittingIntervalVec out;
 
   // Concatenate the two lists
-  TimeSplitterType temp;
+  SplittingIntervalVec temp;
   // temp.insert(temp.end(), b.begin(), b.end());
 
   // Add the intervals, but don't add any invalid (empty) ranges
-  TimeSplitterType::const_iterator it;
+  SplittingIntervalVec::const_iterator it;
   ;
   for (it = a.begin(); it != a.end(); ++it)
     if (it->stop() > it->start())
@@ -226,14 +226,14 @@ TimeSplitterType operator|(const TimeSplitterType &a, const TimeSplitterType &b)
 }
 
 //------------------------------------------------------------------------------------------------
-/** NOT operator for TimeSplitterType
+/** NOT operator for SplittingIntervalVec
  * Only works on Filters. Returns a filter with the reversed
  * time intervals as the incoming filter.
  *
- * @param a :: TimeSplitterType filter.
+ * @param a :: SplittingIntervalVec filter.
  */
-TimeSplitterType operator~(const TimeSplitterType &a) {
-  TimeSplitterType out, temp;
+SplittingIntervalVec operator~(const SplittingIntervalVec &a) {
+  SplittingIntervalVec out, temp;
   // First, you must remove any overlapping intervals, otherwise the output is
   // stupid.
   temp = removeFilterOverlap(a);
@@ -244,7 +244,7 @@ TimeSplitterType operator~(const TimeSplitterType &a) {
     return out;
   }
 
-  TimeSplitterType::const_iterator ait;
+  SplittingIntervalVec::const_iterator ait;
   ait = temp.begin();
   if (ait != temp.end()) {
     // First entry; start at -infinite time

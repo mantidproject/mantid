@@ -14,14 +14,14 @@
 #pragma once
 
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/TimeSplitter.h"
+#include "MantidKernel/SplittingInterval.h"
 #include <ctime>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel;
 using Mantid::Types::Core::DateAndTime;
 
-class TimeSplitterTest : public CxxTest::TestSuite {
+class SplittingIntervalTest : public CxxTest::TestSuite {
 public:
   //----------------------------------------------------------------------------
   /** Tests the AND operator checking for overlap between two
@@ -156,7 +156,7 @@ public:
   void test_AND() {
     // Make a splitter
     DateAndTime start, stop;
-    TimeSplitterType a, b;
+    SplittingIntervalVec a, b;
     start = DateAndTime("2007-11-30T16:17:00");
     stop = DateAndTime("2007-11-30T16:17:10");
     a.emplace_back(SplittingInterval(start, stop, 0));
@@ -191,7 +191,7 @@ public:
     b.emplace_back(SplittingInterval(start, stop, 0));
 
     // Now AND the splitters (filters) together
-    TimeSplitterType c;
+    SplittingIntervalVec c;
     c = a & b;
 
     TS_ASSERT_EQUALS(c.size(), 5);
@@ -220,7 +220,7 @@ public:
   void test_OR() {
     // Make a splitter
     DateAndTime start, stop;
-    TimeSplitterType a, b;
+    SplittingIntervalVec a, b;
     start = DateAndTime("2007-11-30T16:17:00");
     stop = DateAndTime("2007-11-30T16:17:10");
     a.emplace_back(SplittingInterval(start, stop, 0));
@@ -259,7 +259,7 @@ public:
     b.emplace_back(SplittingInterval(start, stop, 0));
 
     // Now AND the splitters (filters) together
-    TimeSplitterType c;
+    SplittingIntervalVec c;
     c = a | b;
 
     TS_ASSERT_EQUALS(c.size(), 4);
@@ -285,7 +285,7 @@ public:
   void test_OR_with_a_bad_input() {
     // Make a splitter
     DateAndTime start, stop;
-    TimeSplitterType a, b;
+    SplittingIntervalVec a, b;
 
     start = DateAndTime("2007-11-30T16:17:20");
     stop = DateAndTime("2007-11-30T16:17:30");
@@ -307,7 +307,7 @@ public:
     b.emplace_back(SplittingInterval(start, stop, 0));
 
     // Now AND the splitters (filters) together
-    TimeSplitterType c;
+    SplittingIntervalVec c;
     c = a | b;
 
     TS_ASSERT_EQUALS(c.size(), 1);
@@ -323,7 +323,7 @@ public:
   //----------------------------------------------------------------------------
   void test_NOT_Normal() {
     DateAndTime start, stop;
-    TimeSplitterType a, b, c;
+    SplittingIntervalVec a, b, c;
     SplittingInterval i;
 
     //---- Normal Case ------
@@ -356,7 +356,7 @@ public:
   //----------------------------------------------------------------------------
   void test_NOT_empty() {
     DateAndTime start, stop;
-    TimeSplitterType a, b, c;
+    SplittingIntervalVec a, b, c;
     SplittingInterval i;
 
     //---- Empty case ----------
@@ -372,7 +372,7 @@ public:
   //----------------------------------------------------------------------------
   void test_NOT_overlap() {
     DateAndTime start, stop;
-    TimeSplitterType a, b, c;
+    SplittingIntervalVec a, b, c;
     SplittingInterval i;
     // Overlapping case ------
     start = DateAndTime("2007-11-30T16:17:00");
@@ -399,7 +399,7 @@ public:
   //----------------------------------------------------------------------------
   void test_PLUS() {
     DateAndTime start, stop;
-    TimeSplitterType a, b, c;
+    SplittingIntervalVec a, b, c;
     SplittingInterval i;
 
     //  the splitter ------
@@ -479,7 +479,7 @@ public:
   //----------------------------------------------------------------------------
   void test_sort() {
     DateAndTime start, stop;
-    TimeSplitterType b;
+    SplittingIntervalVec b;
 
     //  the splitter ------
     start = DateAndTime("2007-11-30T16:15:00");
@@ -509,7 +509,7 @@ public:
   //----------------------------------------------------------------------------
   void test_find() {
     DateAndTime start, stop;
-    TimeSplitterType b;
+    SplittingIntervalVec b;
 
     //  the splitter ------
     start = DateAndTime("2007-11-30T16:15:00");
@@ -530,7 +530,7 @@ public:
 
     std::sort(b.begin(), b.end());
 
-    TimeSplitterType::iterator sit;
+    SplittingIntervalVec::iterator sit;
 
     SplittingInterval temp1(DateAndTime("2007-11-30T16:17:00"), DateAndTime("2007-11-30T16:17:00"), -1);
     sit = std::lower_bound(b.begin(), b.end(), temp1);

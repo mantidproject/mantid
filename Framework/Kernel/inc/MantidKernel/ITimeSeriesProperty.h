@@ -26,7 +26,7 @@ class TimeROI;
  */
 class ITimeSeriesProperty {
 public:
-  /// Fill a TimeSplitterType that will filter the events by matching
+  /// Fill a SplittingIntervalVec that will filter the events by matching
   virtual void makeFilterByValue(std::vector<SplittingInterval> &split, double min, double max, double TimeTolerance,
                                  bool centre = true) const = 0;
   /// Make sure an existing filter covers the full time range given

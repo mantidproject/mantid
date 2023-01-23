@@ -353,11 +353,8 @@ void TimeROI::removeRedundantEntries() {
 /**
  * This method is to lend itself to be compatible with existing implementation
  */
-const std::vector<SplittingInterval> TimeROI::toSplitters() const {
-  std::cout << "TimeROI::toSplitters()" << std::endl;
-  this->debugPrint();
-
-  std::vector<SplittingInterval> output;
+const Kernel::SplittingIntervalVec TimeROI::toSplitters() const {
+  Kernel::SplittingIntervalVec output;
 
   if (!(this->empty())) {
     // since this is const, complain if there is something not right with assumptions
