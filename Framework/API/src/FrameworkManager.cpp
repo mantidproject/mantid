@@ -43,6 +43,13 @@
 #endif
 
 namespace {
+// We use a raw pointer over a unique_ptr to avoid problems with static deallocation order of static
+// variables. In certain circumstances, e.g. unit testing, the shutdown method on FrameworkManager is
+// not called. In this situation unique_ptr causes the tbb::global_control object to be destroyed
+// *after* its own internal static data has been destroyed and we see a random segfault.
+// We have technically introduced a leak by not deleting this object in the situation where
+// `FrameworkManager::shutdown` is not called but the memory cannot be used again by the program since
+// it survives for the duration of the program. It will ultimately be reclaimed by the OS.
 tbb::global_control *GLOBAL_TBB_CONTROL = nullptr;
 } // namespace
 
