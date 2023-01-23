@@ -59,125 +59,13 @@ namespace {
 constexpr auto QTHELP_SCHEME = "qthelp";
 } // namespace
 
-#if defined(USE_QTWEBKIT)
-#include <QNetworkReply>
-#include <QWebHistory>
-#include <QWebView>
-
-// ****************************************************************************
-//            CLASS pqHelpWindowNetworkReply
-// ****************************************************************************
-/// Internal class used to add support to QWeb(Engine)View to load files from
-/// QHelpEngine.
-class pqHelpWindowNetworkReply : public QNetworkReply {
-  using Superclass = QNetworkReply;
-
-public:
-  pqHelpWindowNetworkReply(const QUrl &url, QHelpEngineCore *helpEngine, QObject *parent = nullptr);
-
-  void abort() override {}
-
-  qint64 bytesAvailable() const override {
-    return (this->RawData.size() - this->Offset) + this->Superclass::bytesAvailable();
-  }
-  bool isSequential() const override { return true; }
-
-protected:
-  qint64 readData(char *data, qint64 maxSize) override;
-
-  QByteArray RawData;
-  qint64 Offset;
-
-private:
-  Q_DISABLE_COPY(pqHelpWindowNetworkReply)
-};
-
-//-----------------------------------------------------------------------------
-pqHelpWindowNetworkReply::pqHelpWindowNetworkReply(const QUrl &my_url, QHelpEngineCore *engine, QObject *parent)
-    : Superclass(parent), Offset(0) {
-  Q_ASSERT(engine);
-
-  this->RawData = engine->fileData(my_url);
-
-  QString content_type = "text/plain";
-  QString extension = QFileInfo(my_url.path()).suffix().toLower();
-  QMap<QString, QString> extension_type_map;
-  extension_type_map["jpg"] = "image/jpeg";
-  extension_type_map["jpeg"] = "image/jpeg";
-  extension_type_map["png"] = "image/png";
-  extension_type_map["gif"] = "image/gif";
-  extension_type_map["tiff"] = "image/tiff";
-  extension_type_map["htm"] = "text/html";
-  extension_type_map["html"] = "text/html";
-  extension_type_map["css"] = "text/css";
-  extension_type_map["xml"] = "text/xml";
-
-  if (extension_type_map.contains(extension)) {
-    content_type = extension_type_map[extension];
-  }
-
-  this->setHeader(QNetworkRequest::ContentLengthHeader, QVariant(this->RawData.size()));
-  this->setHeader(QNetworkRequest::ContentTypeHeader, content_type);
-  this->open(QIODevice::ReadOnly | QIODevice::Unbuffered);
-  this->setUrl(my_url);
-  QTimer::singleShot(0, this, SIGNAL(readyRead()));
-  QTimer::singleShot(0, this, SLOT(finished()));
-}
-
-//-----------------------------------------------------------------------------
-qint64 pqHelpWindowNetworkReply::readData(char *data, qint64 maxSize) {
-  if (this->Offset <= this->RawData.size()) {
-    qint64 end = qMin(this->Offset + maxSize, static_cast<qint64>(this->RawData.size()));
-    qint64 delta = end - this->Offset;
-    memcpy(data, this->RawData.constData() + this->Offset, delta);
-    this->Offset += delta;
-    return delta;
-  }
-  return -1;
-}
-
-// ****************************************************************************
-//    CLASS pqHelpWindow::pqNetworkAccessManager
-// ****************************************************************************
-//-----------------------------------------------------------------------------
-class pqHelpWindow::pqNetworkAccessManager : public QNetworkAccessManager {
-  using Superclass = QNetworkAccessManager;
-  QPointer<QHelpEngineCore> Engine;
-
-public:
-  pqNetworkAccessManager(QHelpEngineCore *helpEngine, QNetworkAccessManager *manager, QObject *parentObject)
-      : Superclass(parentObject), Engine(helpEngine) {
-    Q_ASSERT(manager != nullptr && helpEngine != nullptr);
-
-    this->setCache(manager->cache());
-    this->setCookieJar(manager->cookieJar());
-    this->setProxy(manager->proxy());
-    this->setProxyFactory(manager->proxyFactory());
-  }
-
-protected:
-  QNetworkReply *createRequest(Operation operation, const QNetworkRequest &request, QIODevice *device) override {
-    if (request.url().scheme() == QTHELP_SCHEME && operation == GetOperation) {
-      return new pqHelpWindowNetworkReply(request.url(), this->Engine, this);
-    } else {
-      return this->Superclass::createRequest(operation, request, device);
-    }
-  }
-
-private:
-  Q_DISABLE_COPY(pqNetworkAccessManager)
-};
-
-#else // !USE_WEBKIT
 #include <QWebEngineHistory>
 #include <QWebEnginePage>
 #include <QWebEngineProfile>
 #include <QWebEngineUrlRequestJob>
+#include <QWebEngineUrlScheme>
 #include <QWebEngineUrlSchemeHandler>
 #include <QWebEngineView>
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-#include <QWebEngineUrlScheme>
 
 /// Register on the scheme on library load as it must be done before
 /// QApplication is created
@@ -190,7 +78,6 @@ struct QtHelpSchemeRegistration {
 };
 
 const QtHelpSchemeRegistration QTHELP_REGISTRATION;
-#endif // end QT_VERSION >= 5.12
 
 /// Adds support for qthelp scheme links that load content from them QHelpEngine
 class QtHelpUrlHandler : public QWebEngineUrlSchemeHandler {
@@ -223,8 +110,6 @@ private:
 private:
   QHelpEngineCore *m_helpEngine;
 };
-
-#endif
 
 // ****************************************************************************
 //            CLASS pqHelpWindow
@@ -290,26 +175,13 @@ pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject, const Qt:
   // connect the index page to the content pane
   connect(this->m_helpEngine->indexWidget(), SIGNAL(linkActivated(QUrl, QString)), this, SLOT(showPage(QUrl)));
 
-// setup the content pane
-#if defined(USE_QTWEBKIT)
-  m_browser = new QWebView(this);
-  QNetworkAccessManager *oldManager = m_browser->page()->networkAccessManager();
-  auto *newManager = new pqNetworkAccessManager(m_helpEngine, oldManager, this);
-  m_browser->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
-  m_browser->page()->setNetworkAccessManager(newManager);
-  m_browser->page()->setForwardUnsupportedContent(false);
-  connect(m_browser, SIGNAL(linkClicked(QUrl)), this, SLOT(showPage(QUrl)));
-  // set up the status bar
-  connect(m_browser->page(), SIGNAL(linkHovered(QString, QString, QString)), this,
-          SLOT(linkHovered(QString, QString, QString)));
-#else
+  // setup the content pane
   QWebEngineProfile::defaultProfile()->installUrlSchemeHandler(QTHELP_SCHEME, new QtHelpUrlHandler(engine, this));
   m_browser = new QWebEngineView(this);
   m_browser->setPage(new DelegatingWebPage(m_browser));
   connect(m_browser->page(), SIGNAL(linkClicked(QUrl)), this, SLOT(showLinkedPage(QUrl)));
   // set up the status bar
   connect(m_browser->page(), SIGNAL(linkHovered(QString)), this, SLOT(linkHovered(QString)));
-#endif
   this->setCentralWidget(this->m_browser);
 
   // connect the navigation buttons
@@ -369,16 +241,12 @@ void pqHelpWindow::showLinkedPage(const QUrl &url) { this->showPage(url, true); 
 
 //-----------------------------------------------------------------------------
 void pqHelpWindow::printPage() {
-  QPrinter printer;
-  QPrintDialog dialog(&printer, this);
+  auto *printer = new QPrinter();
+  QPrintDialog dialog(printer, this);
   dialog.setWindowTitle(tr("Print Document"));
   if (dialog.exec() != QDialog::Accepted)
     return;
-#if defined(USE_QTWEBKIT)
-  m_browser->print(&printer);
-#else
-  m_browser->page()->print(&printer, [](bool) {});
-#endif
+  m_browser->page()->print(printer, [printer](bool) { printer->~QPrinter(); });
 }
 
 //-----------------------------------------------------------------------------
