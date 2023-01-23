@@ -270,7 +270,7 @@ class FitInteractiveTool(QObject):
         if fwhm is None:
             fwhm = self.fwhm
         peak_id = self._make_peak_id()
-        peak = PeakMarker(self.canvas, peak_id, x, y_top, y_bottom, fwhm=fwhm)
+        peak = PeakMarker(self.canvas, peak_id, x, y_top - y_bottom, fwhm=fwhm, background=y_bottom)
         peak.peak_moved.connect(self.peak_moved)
         peak.fwhm_changed.connect(self.peak_fwhm_changed_slot)
         self.peak_markers.append(peak)
