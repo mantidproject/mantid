@@ -30,10 +30,10 @@ void PeakPicker::redraw() { m_peakMarker->redraw(); }
 
 void PeakPicker::remove() { m_peakMarker->remove(); }
 
-void PeakPicker::setPeak(const Mantid::API::IPeakFunction_const_sptr &peak) {
+void PeakPicker::setPeak(const Mantid::API::IPeakFunction_const_sptr &peak, const double background) {
   if (peak) {
     m_peak = std::dynamic_pointer_cast<IPeakFunction>(peak->clone());
-    m_peakMarker->updatePeak(peak->centre(), peak->height(), peak->fwhm());
+    m_peakMarker->updatePeak(peak->centre(), peak->height(), peak->fwhm(), background);
   }
 }
 
