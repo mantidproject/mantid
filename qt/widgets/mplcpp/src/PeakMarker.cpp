@@ -59,8 +59,8 @@ void PeakMarker::remove() { callMethodNoCheck<void>(pyobj(), "remove"); }
  * @param height The new height.
  * @param fwhm The new height.
  */
-void PeakMarker::updatePeak(double centre, double height, double fwhm) {
-  callMethodNoCheck<void>(pyobj(), "update_peak", centre, height, fwhm);
+void PeakMarker::updatePeak(double centre, double height, double fwhm, double background) {
+  callMethodNoCheck<void>(pyobj(), "update_peak", centre, height, fwhm, background);
 }
 
 /**

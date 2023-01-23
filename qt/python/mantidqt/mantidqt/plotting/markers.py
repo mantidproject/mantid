@@ -640,14 +640,16 @@ class PeakMarker(QObject):
         """
         return self.centre(), self.height(), self.fwhm()
 
-    def update_peak(self, centre, height, fwhm):
+    def update_peak(self, centre, height, fwhm, background=0.0):
         """
         Update this marker.
         :param centre: A new peak centre.
         :param height: A new peak height.
         :param fwhm: A new peak FWHM.
+        :param background: The background to place the peak on top of.
         """
         self.centre_marker.x = centre
+        self.centre_marker.y0 = background
         self.centre_marker.set_height(height)
         dx = fwhm / 2
         self.left_width.x = centre - dx

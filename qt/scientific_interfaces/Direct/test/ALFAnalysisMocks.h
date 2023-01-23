@@ -63,7 +63,7 @@ public:
   MOCK_METHOD1(addFitSpectrum, void(Mantid::API::MatrixWorkspace_sptr const &workspace));
   MOCK_METHOD0(removeFitSpectrum, void());
 
-  MOCK_METHOD1(setPeak, void(Mantid::API::IPeakFunction_const_sptr const &peak));
+  MOCK_METHOD2(setPeak, void(Mantid::API::IPeakFunction_const_sptr const &peak, double const background));
   MOCK_CONST_METHOD0(getPeak, Mantid::API::IPeakFunction_const_sptr());
 
   MOCK_METHOD1(setPeakCentre, void(double const centre));
@@ -97,6 +97,7 @@ public:
   MOCK_METHOD1(setPeakParameters, void(Mantid::API::IPeakFunction_const_sptr const &peak));
   MOCK_METHOD1(setPeakCentre, void(double const centre));
   MOCK_CONST_METHOD0(peakCentre, double());
+  MOCK_CONST_METHOD0(background, double());
   MOCK_CONST_METHOD0(getPeakCopy, Mantid::API::IPeakFunction_const_sptr());
 
   MOCK_CONST_METHOD0(fitStatus, std::string());
