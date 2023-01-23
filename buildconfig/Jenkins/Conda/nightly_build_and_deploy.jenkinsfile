@@ -233,8 +233,10 @@ pipeline {
       when {
         beforeAgent true
         beforeOptions true
-        expression { env.PUBLISH_PACKAGES == 'true' }
-        expression { env.GITHUB_RELEASES_REPO.trim() != '' }
+        allOf {
+          expression { env.PUBLISH_PACKAGES == 'true' }
+          expression { env.GITHUB_RELEASES_REPO.trim() != '' }
+        }
       }
       agent { label 'linux-64' } // Use linux for simplicity with shell scripts
       options {
