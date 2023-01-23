@@ -73,7 +73,6 @@ void GLDisplay::setSurface(std::shared_ptr<ProjectionSurface> surface) {
 void GLDisplay::initializeGL() {
   setCursor(GLCursor);
   setRenderingOptions();
-  glViewport(0, 0, width(), height());
 }
 
 /**
