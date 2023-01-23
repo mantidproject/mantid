@@ -9,9 +9,9 @@ list of available ones can seem daunting at first but it can be done by followin
 FqFit
 -----
 
-In the `FQFitConstants.h` file there are sets of maps of {"Function name", "FunctionString"}, e.g.
+In the `FQFitConstants.h` file, there are sets of maps of {"Fit function class name", "Fit function class initialization string"}, e.g.
 `{std::string("TeixeiraWater"), std::string("name=TeixeiraWater, Tau=1, L=1.5, constraints=(Tau>0, L>0)")}`. To add
-a new function to FqFit you simply need to add it to this list of available functions. Currently we divide up the
+a new fit function to FqFit you simply need to add it to this list of available functions. Currently, we divide up the
 functions into Width, EISF, and All with the intent that the list of functions would change depending on what data is
 loaded into the tab, however as it is not yet implemented for the workspace input it uses the list for All.
 
@@ -25,7 +25,7 @@ e.e. `parameterEstimation.addParameterEstimationFunction(MSDGAUSSFUNC, estimateM
 IqtFit
 ------
 
-The fitting functions in IqtFit are hard coded into the template browser and is not expected for other functions to be
+The fitting functions in IqtFit are hard coded into the template browser because it is not expected for other functions to be
 added to it.
 
 ConvFit
@@ -33,10 +33,10 @@ ConvFit
 
 ConvFit has the most involved process of adding a function to it's library and it needs to be added in its entirety.
 
-Firstly, In `ConvTypes.h` add the function name to the enumerated list FitType e.g. `TeixeiraWater`, and in the paramID
-enum add an entry for each parameter in the function along with a uniqure prefix denoting which function they are for.
+Firstly, in `ConvTypes.h` add the function name to the enumerated list FitType e.g. `TeixeiraWater`, and in the paramID
+enum add an entry for each parameter in the function along with a unique prefix denoting which function they are for.
 e.g. `TW_HEIGHT, TW_DIFFCOEFF, TW_TAU, TW_CENTRE`. Make sure to preserve the ordering of the current enum and
-add the parameters of the function along each other.
+add the parameters of the function along with each other.
 
 Secondly, in ConvTypes.cpp add QDependency for the function as either true or false in the `FitTypeQDepends` map based on if
 the function is Q dependant.
@@ -45,7 +45,7 @@ the function is Q dependant.
 
    {FitType::TeixeiraWater, true},
 
-Then, in the FitTypeEnumToString and FitTypeStringToEnum add the mapping of FitType from the header onto the function name
+Then, in the FitTypeEnumToString and FitTypeStringToEnum add the mapping of FitType from the enum type onto the function name
 
 .. code-block:: cpp
 
@@ -53,8 +53,10 @@ Then, in the FitTypeEnumToString and FitTypeStringToEnum add the mapping of FitT
 
     {"TeixeiraWaterSQE", FitType::TeixeiraWater}
 
-After that, In the g_paramName add ParamID from the header and parameter names for each parameter in the function. The order of these
-is important so add them in the same order as they appear in the header.
+After that, in the g_paramName add ParamID from the header and parameter names for each parameter in the function. The order of these
+is important so add them in the same order as they appear in the header. Make sure the function is in the right range. If it is Lorentzian
+add it between the range from LOR1_AMPLITUDE to LOR2_FWHM_2 and if it is a fit function add it between the range from TW_HEIGHT to IIRD_CENTRE and
+if it is a background function add it between the range from FLAT_BG_A0 to LINEAR_BG_A1. Note that, background functions have *_BG_* format.
 
 .. code-block:: cpp
 
@@ -64,15 +66,15 @@ is important so add them in the same order as they appear in the header.
     {ParamID::TW_CENTRE, "Centre"},
 
 Moreover, to tie it all together add param ranges to g_typeMap in the form
-`{FitType, {"Function name displayed in tab", "FunctionName", {ParamID::first, ParamID::last}}}` this allows the template
-to cnostruct a function out of the related parameters. There are several places where this can be added, those being FitType,
-LorentzianType, and BackgroundType. ConvFit can run fits with one of each Fit, Lorentzian and Background but only one of each.
+`{FitType, {"Function name displayed in tab", "Function class name", {ParamID::first, ParamID::last}}}` this allows the template
+to construct a function out of the related parameters. There are several places where this can be added, those being FitType,
+LorentzianType, and BackgroundType. ConvFit can run fits with one of each Fit, Lorentzian, and Background but only one of each.
 
 .. code-block:: cpp
 
     {FitType::TeixeiraWater, {"Teixeira Water", "TeixeiraWaterSQE", {ParamID::TW_HEIGHT, ParamID::TW_CENTRE}}},
 
-Finally, In IndirectDataAnalysisConvFitTab in setupFitTab add to m_fitStrings with fit function name and shorterned key,
+Finally, in IndirectDataAnalysisConvFitTab in setupFitTab add to m_fitStrings with the fit function name and shortened key,
     this key will be used in the output workspace from the fit.
 
 .. code-block:: cpp
@@ -88,7 +90,7 @@ In ConvFunctionModel add the build function string function
       "constraints=(Height>0, DiffCoeff>0, Tau>0)";
     }
 
-and then add else if to buildPeaksFunctionString and buildLorentzianPeaksString/buildFitTypeString
+and then add else if case to buildPeaksFunctionString, buildLorentzianPeaksString or buildFitTypeString.
 
 .. code-block:: cpp
 
