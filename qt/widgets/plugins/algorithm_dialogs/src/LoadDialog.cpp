@@ -41,18 +41,6 @@ struct HoldFlag {
 };
 } // namespace
 
-// Blocks signals sent to the load button for the duration
-// of it's lifetime.
-class PreventLoadRequests {
-public:
-  explicit PreventLoadRequests(LoadDialog &dialog) : m_dialog(dialog) { m_dialog.disableLoadRequests(); }
-
-  ~PreventLoadRequests() { m_dialog.enableLoadRequests(); }
-
-private:
-  LoadDialog &m_dialog;
-};
-
 // Declare the dialog. Name must match the class name
 DECLARE_DIALOG(LoadDialog)
 
@@ -62,7 +50,8 @@ DECLARE_DIALOG(LoadDialog)
 
 /// Default constructor
 LoadDialog::LoadDialog(QWidget *parent)
-    : API::AlgorithmDialog(parent), m_form(), m_currentFiles(), m_initialHeight(0), m_populating(false) {
+    : API::AlgorithmDialog(parent), m_form(), m_currentFiles(), m_initialHeight(0), m_populating(false),
+      m_userAccept(false) {
   // We will handle parsing the input ourselves on startup
   m_autoParseOnInit = false;
 }
@@ -122,22 +111,22 @@ void LoadDialog::enableNameSuggestion(const bool on) {
   }
 }
 
-void LoadDialog::enableLoadRequests() { m_okButton->blockSignals(false); }
-
-void LoadDialog::disableLoadRequests() { m_okButton->blockSignals(true); }
-
 /**
  * Called when the run button is clicked
  */
 void LoadDialog::accept() {
-  // The file widget may have been edited but not lost focus so that the search
-  // wasn't attempted for the new contents. Force one here.
-  // The widget does nothing if the contents have not changed so it will be
-  // quick for this case
-  PreventLoadRequests preventLoadRequestsWhileAlive(*this);
-  m_form.fileWidget->findFiles();
-  while (m_form.fileWidget->isSearching() || m_populating)
-    QApplication::instance()->processEvents();
+  // If the LoadDialog is already loading data, or is populating, then ignore the accept
+  if (!m_form.fileWidget->isSearching() && !m_populating) {
+    m_userAccept = true;
+    m_form.fileWidget->findFiles();
+  }
+}
+
+void LoadDialog::resultInspectionFinished() {
+  if (!m_userAccept) {
+    return;
+  }
+  m_userAccept = false;
 
   // Makes it so the dialog is still resizable if it is kept open
   m_form.propertyLayout->setEnabled(true);
@@ -147,8 +136,9 @@ void LoadDialog::accept() {
   if (!errMess.empty()) {
     m_currentFiles = "";
     createDynamicWidgets();
-  } else
+  } else {
     AlgorithmDialog::accept();
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -185,6 +175,8 @@ void LoadDialog::initLayout() {
   // then we
   // know what extra properties to create
   connect(m_form.fileWidget, SIGNAL(filesFound()), this, SLOT(createDynamicWidgets()));
+  connect(m_form.fileWidget, SIGNAL(fileInspectionFinished()), this, SLOT(resultInspectionFinished()));
+
   tieStaticWidgets(true);
 }
 

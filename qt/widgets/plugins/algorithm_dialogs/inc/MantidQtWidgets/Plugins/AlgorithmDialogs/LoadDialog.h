@@ -43,11 +43,9 @@ namespace CustomDialogs {
   @author Martyn Gigg, Tessella plc
   @date 31/01/2011
 */
-class PreventLoadRequests;
 
 class LoadDialog final : public API::AlgorithmDialog {
   Q_OBJECT
-  friend PreventLoadRequests;
 
 public:
   /// Default constructor
@@ -66,6 +64,8 @@ private slots:
   void enableNameSuggestion(const bool on = false);
   /// Override accept() slot
   void accept() override;
+  ///  Accept the load dialog when user input is inspected and is valid
+  void resultInspectionFinished();
 
 private:
   /// Initialize the layout
@@ -80,10 +80,6 @@ private:
   void createDynamicLayout();
   /// Create the widgets for a given property
   int createWidgetsForProperty(const Mantid::Kernel::Property *prop, QVBoxLayout *propertyLayout, QWidget *parent);
-  /// Ignore requests to load until they are re-enabled.
-  void disableLoadRequests();
-  /// Accept requests to load until they are disabled.
-  void enableLoadRequests();
 
 private:
   /// Form
@@ -94,6 +90,8 @@ private:
   int m_initialHeight;
   /// Flag to indicating if we are populating the dialog
   bool m_populating;
+  /// Flag to indicate the user accepted the load dialog
+  bool m_userAccept;
 };
 } // namespace CustomDialogs
 } // namespace MantidQt
