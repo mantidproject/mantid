@@ -235,5 +235,11 @@ If you use ninja, in your build folder you can also run:
 
 On some machines, the usage examples may take a while to run completely.
 
+If you want to only execute tests from a single file, you can run the following from your build folder:
+
+.. code-block:: rest
+
+   python -m sphinx --no-color -b doctest -d docs/doctrees <sourcedir>/docs/source docs/doctest <sourcedir>/docs/source/<path-to-rst-file>
+
 
 See :ref:`here <DocumentationGuideForDevs>` for more info on writing documentation.
