@@ -216,9 +216,18 @@ public:
   }
 
   void test_valueAtTime() {
-    TS_ASSERT_EQUALS(DECEMBER.valueAtTime(DECEMBER_STOP), false);
-    TS_ASSERT_EQUALS(DECEMBER.valueAtTime(CHRISTMAS_START), true);
-    TS_ASSERT_EQUALS(DECEMBER.valueAtTime(DECEMBER_START), true);
+    // to understand the checks, note that
+    // USE = true
+    // IGNORE = false
+
+    // values outside of the TimeROI should be ignore
+    TS_ASSERT_EQUALS(CHRISTMAS.valueAtTime(DECEMBER_START), false);
+    TS_ASSERT_EQUALS(CHRISTMAS.valueAtTime(DECEMBER_STOP), false);
+
+    // tests for more interesting values
+    TS_ASSERT_EQUALS(DECEMBER.valueAtTime(DECEMBER_START), true);  // first in region
+    TS_ASSERT_EQUALS(DECEMBER.valueAtTime(CHRISTMAS_START), true); // middle of region
+    TS_ASSERT_EQUALS(DECEMBER.valueAtTime(DECEMBER_STOP), false);  // last of region
   }
 
   void runIntersectionTest(const TimeROI &left, const TimeROI &right, const double exp_duration) {
