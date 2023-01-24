@@ -30,6 +30,13 @@ const TimeROI CHRISTMAS{CHRISTMAS_START, CHRISTMAS_STOP};
 const std::string NEW_YEARS_START("2022-12-31T00:01");
 const std::string NEW_YEARS_STOP("2023-01-01T00:01");
 
+const DateAndTime ONE("2023-01-01T00:01");
+const DateAndTime TWO("2023-01-02T00:01");
+const DateAndTime THREE("2023-01-03T00:01");
+const DateAndTime FOUR("2023-01-04T00:01");
+const DateAndTime FIVE("2023-01-05T00:01");
+const DateAndTime SIX("2023-01-06T00:01");
+
 class TimeROITest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -99,13 +106,27 @@ public:
     TS_ASSERT_EQUALS(value.numBoundaries(), 4);
   }
 
-  void test_addOverlapping() {
-    const DateAndTime ONE("2023-01-01T00:01");
-    const DateAndTime TWO("2023-01-02T00:01");
-    const DateAndTime THREE("2023-01-03T00:01");
-    const DateAndTime FOUR("2023-01-04T00:01");
-    const DateAndTime FIVE("2023-01-05T00:01");
+  void test_addROI() {
+    TimeROI value{THREE, FOUR}; // 3-4
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 1.);
 
+    value.addROI(TWO, FIVE); // 2-5
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 3.);
+
+    value.addROI(TWO, SIX); // 2-6
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 4.);
+
+    value.addROI(THREE, FIVE); // 2-6
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 4.);
+
+    value.addROI(ONE, TWO); // 1-6
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 5.);
+
+    value.addMask(ONE, SIX); // empty
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 0.);
+  }
+
+  void test_addOverlapping() {
     TimeROI value{ONE, FOUR}; // 1-4
     TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 3.);
     TS_ASSERT_EQUALS(value.numBoundaries(), 2);
@@ -169,7 +190,7 @@ public:
     TimeROI value;
     // add New Year's eve
     value.addROI(DateAndTime(NEW_YEARS_START), DateAndTime(NEW_YEARS_STOP));
-    TS_ASSERT_EQUALS(value.durationInSeconds(), ONE_DAY_DURATION);
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 1.);
     TS_ASSERT_EQUALS(value.numBoundaries(), 2);
 
     // add Hanukkah
