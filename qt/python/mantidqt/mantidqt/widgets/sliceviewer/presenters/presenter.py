@@ -372,6 +372,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
                 data_view.enable_tool_button(tool)
             if self.get_sliceinfo().can_support_nonorthogonal_axes():
                 data_view.enable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
+            self._cutviewer_presenter = None
 
     def replace_workspace(self, workspace_name, workspace):
         """
