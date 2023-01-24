@@ -1,0 +1,1 @@
+- A crash caused by closing the Load Dialog while it is still attempting to loading a file has been fixed.
