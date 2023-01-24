@@ -119,7 +119,7 @@ private:
   void fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_peak_centers,
                         const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result,
                         std::vector<std::vector<double>> &lastGoodPeakParameters,
-                        size_t &spectrum_peaks_not_enough_datapoints);
+                        size_t &spectrum_peaks_not_enough_datapoints, size_t &spectrum_peaks_low_snr);
 
   /// fit background
   bool fitBackground(const size_t &ws_index, const std::pair<double, double> &fit_window,
@@ -129,7 +129,7 @@ private:
   double fitIndividualPeak(size_t wi, const API::IAlgorithm_sptr &fitter, const double expected_peak_center,
                            const std::pair<double, double> &fitwindow, const bool estimate_peak_width,
                            const API::IPeakFunction_sptr &peakfunction, const API::IBackgroundFunction_sptr &bkgdfunc,
-                           bool &not_enough_datapoints);
+                           bool &not_enough_datapoints, bool &low_snr);
 
   /// Methods to fit functions (general)
   double fitFunctionSD(const API::IAlgorithm_sptr &fit, const API::IPeakFunction_sptr &peak_function,
