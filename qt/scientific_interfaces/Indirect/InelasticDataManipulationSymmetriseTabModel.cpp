@@ -36,7 +36,7 @@ void InelasticDataManipulationSymmetriseTabModel::setupPreviewAlgorithm(
   // not accessed by users directly.
   IAlgorithm_sptr symmetriseAlg = AlgorithmManager::Instance().create("Symmetrise");
   symmetriseAlg->initialize();
-  symmetriseAlg->setProperty("InputWorkspace", m_isPositiveReflect ? m_inputWorkspace : m_refelctedInputWorkspace);
+  symmetriseAlg->setProperty("InputWorkspace", m_isPositiveReflect ? m_inputWorkspace : m_reflctedInputWorkspace);
   symmetriseAlg->setProperty("XMin", m_eMin);
   symmetriseAlg->setProperty("XMax", m_eMax);
   symmetriseAlg->setProperty("SpectraRange", spectraRange);
@@ -55,7 +55,7 @@ std::string InelasticDataManipulationSymmetriseTabModel::setupSymmetriseAlgorith
   }
   IAlgorithm_sptr symmetriseAlg = AlgorithmManager::Instance().create("Symmetrise");
   symmetriseAlg->initialize();
-  symmetriseAlg->setProperty("InputWorkspace", m_isPositiveReflect ? m_inputWorkspace : m_refelctedInputWorkspace);
+  symmetriseAlg->setProperty("InputWorkspace", m_isPositiveReflect ? m_inputWorkspace : m_reflctedInputWorkspace);
   symmetriseAlg->setProperty("XMin", m_eMin);
   symmetriseAlg->setProperty("XMax", m_eMax);
   symmetriseAlg->setProperty("OutputWorkspace", m_outputWorkspace);
@@ -71,19 +71,19 @@ void InelasticDataManipulationSymmetriseTabModel::reflectNegativeToPositive() {
   scaleXAlg->setProperty("InputWorkspace", m_inputWorkspace);
   scaleXAlg->setProperty("Operation", "Multiply");
   scaleXAlg->setProperty("Factor", -1.0);
-  scaleXAlg->setProperty("OutputWorkspace", m_refelctedInputWorkspace);
+  scaleXAlg->setProperty("OutputWorkspace", m_reflctedInputWorkspace);
   scaleXAlg->execute();
 
   IAlgorithm_sptr sortXAxisAlg = AlgorithmManager::Instance().create("SortXAxis");
   sortXAxisAlg->initialize();
-  sortXAxisAlg->setProperty("InputWorkspace", m_refelctedInputWorkspace);
-  sortXAxisAlg->setProperty("OutputWorkspace", m_refelctedInputWorkspace);
+  sortXAxisAlg->setProperty("InputWorkspace", m_reflctedInputWorkspace);
+  sortXAxisAlg->setProperty("OutputWorkspace", m_reflctedInputWorkspace);
   sortXAxisAlg->execute();
 }
 
 void InelasticDataManipulationSymmetriseTabModel::setWorkspaceName(QString workspaceName) {
   m_inputWorkspace = workspaceName.toStdString();
-  m_refelctedInputWorkspace = m_inputWorkspace + "_reflected";
+  m_reflctedInputWorkspace = m_inputWorkspace + "_reflected";
   // the last 4 characters in the workspace name are '_red' the ouput weorkspace name is inserting '_sym' before that
   // '_red'
   m_outputWorkspace = (workspaceName.left(workspaceName.length() - 4) + "_sym" + workspaceName.right(4)).toStdString();

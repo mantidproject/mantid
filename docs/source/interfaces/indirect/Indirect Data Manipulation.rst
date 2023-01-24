@@ -68,7 +68,7 @@ EMin & EMax
   Sets the energy range that is to be reflected about :math:`y=0`.
 
 Reflect Type
-  Wheather to do *Positive to Negative* or *Negative to Positive* reflection.
+  Whether to do *Positive to Negative* or *Negative to Positive* reflection.
 
 Spectrum No
   Changes the spectrum shown in the preview plots.
