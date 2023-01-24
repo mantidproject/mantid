@@ -32,7 +32,7 @@ enum StatisticType {
    Simple struct to store statistics.
 
  */
-struct Statistics {
+struct MANTID_KERNEL_DLL Statistics {
   /// Minimum value
   double minimum;
   /// Maximum value
