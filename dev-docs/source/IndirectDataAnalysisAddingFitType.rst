@@ -74,8 +74,8 @@ LorentzianType, and BackgroundType. ConvFit can run fits with one of each Fit, L
 
     {FitType::TeixeiraWater, {"Teixeira Water", "TeixeiraWaterSQE", {ParamID::TW_HEIGHT, ParamID::TW_CENTRE}}},
 
-Finally, in IndirectDataAnalysisConvFitTab in setupFitTab add to m_fitStrings with the fit function name and shortened key,
-    this key will be used in the output workspace from the fit.
+
+Finally, in IndirectDataAnalysisConvFitTab in setupFitTab add to m_fitStrings with the fit function name and shortened key, this key will be used in the output workspace from the fit.
 
 .. code-block:: cpp
 
