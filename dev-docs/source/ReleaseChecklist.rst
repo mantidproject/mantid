@@ -212,7 +212,7 @@ Release Manager Checklist
 is to reiterate the timeline and be the collection point for information between
 all of the Local Project Managers.
 
-2-3 weeks before Code Freeze
+2-3 weeks before Feature Freeze
 ############################
 
 * Schedule a release showcase meeting for all facilities to present work that
