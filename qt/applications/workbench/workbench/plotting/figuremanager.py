@@ -9,7 +9,6 @@
 #
 """Provides our custom figure manager to wrap the canvas, window and our custom toolbar"""
 import copy
-from distutils.version import LooseVersion
 import io
 import sys
 import re
@@ -23,7 +22,6 @@ from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtCore import QObject, Qt
 from qtpy.QtGui import QImage
 from qtpy.QtWidgets import QApplication, QLabel, QFileDialog
-from qtpy import QT_VERSION
 
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver, ITableWorkspace, MatrixWorkspace
 from mantid.kernel import logger
@@ -251,11 +249,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         self.superplot = None
 
-        # Need this line to stop the bug where the dock window snaps back to its original size after resizing.
-        # 0 argument is arbitrary and has no effect on fit widget size
-        # This is a qt bug reported at (https://bugreports.qt.io/browse/QTBUG-65592)
-        if QT_VERSION >= LooseVersion("5.6"):
-            self.window.resizeDocks([self.fit_browser], [1], Qt.Horizontal)
         self.fit_browser.hide()
 
         if matplotlib.is_interactive():
