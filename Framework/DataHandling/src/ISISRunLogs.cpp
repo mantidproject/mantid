@@ -7,8 +7,8 @@
 // Includes
 #include "MantidDataHandling/ISISRunLogs.h"
 
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/LogFilter.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 
 namespace Mantid::DataHandling {
 namespace {
@@ -16,6 +16,7 @@ namespace {
 Kernel::Logger g_log("ISISRunLogs");
 } // namespace
 
+using Kernel::FilteredTimeSeriesProperty;
 using Kernel::LogFilter;
 using Kernel::LogParser;
 using Kernel::TimeSeriesProperty;
@@ -70,11 +71,13 @@ void ISISRunLogs::addPeriodLogs(const int period, API::Run &exptRun) {
  * @param exptRun :: The run for this period
  */
 void ISISRunLogs::applyLogFiltering(Mantid::API::Run &exptRun) {
-  const TimeSeriesProperty<bool> *maskProp{nullptr};
+  const FilteredTimeSeriesProperty<bool> *maskProp{nullptr};
   std::unique_ptr<LogFilter> logFilter{nullptr};
   try {
     auto runningLog = exptRun.getTimeSeriesProperty<bool>(LogParser::statusLogName());
-    logFilter = std::make_unique<LogFilter>(*runningLog);
+    auto runningLog_filtered = dynamic_cast<FilteredTimeSeriesProperty<bool> *>(runningLog);
+    if (runningLog_filtered)
+      logFilter = std::make_unique<LogFilter>(*runningLog_filtered);
   } catch (std::exception &) {
     g_log.warning("Cannot find status log. Logs will be not be filtered by run status");
   }
@@ -101,10 +104,10 @@ void ISISRunLogs::applyLogFiltering(Mantid::API::Run &exptRun) {
   // If there is more than 1 period filter the logs by period as well
   if (multiperiod) {
     if (logFilter) {
-      logFilter->addFilter(*currentPeriodLog);
+      logFilter->addFilter(*dynamic_cast<FilteredTimeSeriesProperty<bool> *>(currentPeriodLog));
       maskProp = logFilter->filter();
     } else
-      maskProp = currentPeriodLog;
+      maskProp = dynamic_cast<FilteredTimeSeriesProperty<bool> *>(currentPeriodLog);
   } else if (logFilter) {
     maskProp = logFilter->filter();
   }

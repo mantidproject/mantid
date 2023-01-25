@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/LogFilter.h"
-#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include <boost/python/class.hpp>
 #include <boost/python/return_by_value.hpp>
 

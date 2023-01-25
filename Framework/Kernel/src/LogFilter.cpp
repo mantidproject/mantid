@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/LogFilter.h"
-#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 
 namespace Mantid::Kernel {
 /**
@@ -15,7 +15,7 @@ namespace Mantid::Kernel {
  * @param filter :: A reference to a TimeSeriesProperty<bool> that will act as a
  * filter
  */
-LogFilter::LogFilter(const TimeSeriesProperty<bool> &filter) : m_prop(), m_filter() { addFilter(filter); }
+LogFilter::LogFilter(const FilteredTimeSeriesProperty<bool> &filter) : m_prop(), m_filter() { addFilter(filter); }
 
 /**
  * Constructor
@@ -28,7 +28,7 @@ LogFilter::LogFilter(const Property *prop) : m_prop(), m_filter() { m_prop.reset
  * / Constructor from a TimeSeriesProperty<double> object to avoid overhead of
  * casts
  */
-LogFilter::LogFilter(const TimeSeriesProperty<double> *timeSeries) : m_prop(), m_filter() {
+LogFilter::LogFilter(const FilteredTimeSeriesProperty<double> *timeSeries) : m_prop(), m_filter() {
   m_prop.reset(timeSeries->clone());
 }
 
@@ -38,16 +38,16 @@ LogFilter::LogFilter(const TimeSeriesProperty<double> *timeSeries) : m_prop(), m
  * The object is cloned
  * @param filter :: Filtering mask
  */
-void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
+void LogFilter::addFilter(const FilteredTimeSeriesProperty<bool> &filter) {
   if (filter.size() == 0)
     return;
   if (!m_filter || m_filter->size() == 0)
     m_filter.reset(filter.clone());
   else {
-    auto filterProperty = std::make_unique<TimeSeriesProperty<bool>>("tmp");
+    auto filterProperty = std::make_unique<FilteredTimeSeriesProperty<bool>>("tmp");
 
-    TimeSeriesProperty<bool> *filter1 = m_filter.get();
-    auto filter2 = std::unique_ptr<TimeSeriesProperty<bool>>(filter.clone());
+    FilteredTimeSeriesProperty<bool> *filter1 = m_filter.get();
+    auto filter2 = std::unique_ptr<FilteredTimeSeriesProperty<bool>>(filter.clone());
 
     TimeInterval time1 = filter1->nthInterval(filter1->size() - 1);
     TimeInterval time2 = filter2->nthInterval(filter2->size() - 1);
@@ -122,11 +122,11 @@ void LogFilter::clear() {
 //--------------------------------------------------------------------------------------------------
 namespace {
 template <typename SrcType> struct ConvertToTimeSeriesDouble {
-  static TimeSeriesProperty<double> *apply(const Property *prop) {
-    auto srcTypeSeries = dynamic_cast<const TimeSeriesProperty<SrcType> *>(prop);
+  static FilteredTimeSeriesProperty<double> *apply(const Property *prop) {
+    auto srcTypeSeries = dynamic_cast<const FilteredTimeSeriesProperty<SrcType> *>(prop);
     if (!srcTypeSeries)
       return nullptr;
-    auto converted = new TimeSeriesProperty<double>(prop->name());
+    auto converted = new FilteredTimeSeriesProperty<double>(prop->name());
     auto pmap = srcTypeSeries->valueAsMap();
     for (auto it = pmap.begin(); it != pmap.end(); ++it) {
       converted->addValue(it->first, double(it->second));
@@ -137,8 +137,8 @@ template <typename SrcType> struct ConvertToTimeSeriesDouble {
 
 /// Specialization for a double so that it just clones the input
 template <> struct ConvertToTimeSeriesDouble<double> {
-  static TimeSeriesProperty<double> *apply(const Property *prop) {
-    auto doubleSeries = dynamic_cast<const TimeSeriesProperty<double> *>(prop);
+  static FilteredTimeSeriesProperty<double> *apply(const Property *prop) {
+    auto doubleSeries = dynamic_cast<const FilteredTimeSeriesProperty<double> *>(prop);
     if (!doubleSeries)
       return nullptr;
     return doubleSeries->clone();
@@ -153,7 +153,7 @@ template <> struct ConvertToTimeSeriesDouble<double> {
  * @return A new TimeSeriesProperty<double> object converted from the input.
  * Throws std::invalid_argument if not possible
  */
-TimeSeriesProperty<double> *LogFilter::convertToTimeSeriesOfDouble(const Property *prop) {
+FilteredTimeSeriesProperty<double> *LogFilter::convertToTimeSeriesOfDouble(const Property *prop) {
   if (auto doubleSeries = ConvertToTimeSeriesDouble<double>::apply(prop)) {
     return doubleSeries;
   } else if (auto doubleSeries = ConvertToTimeSeriesDouble<int>::apply(prop)) {

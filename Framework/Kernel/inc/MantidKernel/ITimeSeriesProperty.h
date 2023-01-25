@@ -59,6 +59,10 @@ public:
   virtual void clear() = 0;
   /// Deletes all but the 'last entry' in the property
   virtual void clearOutdated() = 0;
+
+  // Returns whether the time series has been filtered
+  virtual bool isFiltered() const = 0;
+
   /// Virtual destructor
   virtual ~ITimeSeriesProperty() = default;
 };
