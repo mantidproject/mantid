@@ -21,7 +21,7 @@ namespace Kernel {
 // Forward declarations
 //----------------------------------------------------------------------
 class Property;
-template <class TYPE> class TimeSeriesProperty;
+template <class TYPE> class FilteredTimeSeriesProperty;
 
 /**
 This class is for filtering TimeSeriesProperty data
@@ -37,31 +37,31 @@ public:
 
   /// Constructor taking a filter. Allows filters to be combined without being
   /// applied to a property
-  LogFilter(const TimeSeriesProperty<bool> &filter);
+  LogFilter(const FilteredTimeSeriesProperty<bool> &filter);
   /// Constructor taking any property type
   LogFilter(const Property *prop);
   /// Constructor from a TimeSeriesProperty<double> object to avoid overhead of
   /// casts
-  LogFilter(const TimeSeriesProperty<double> *timeSeries);
+  LogFilter(const FilteredTimeSeriesProperty<double> *timeSeries);
 
   /// Adds a filter using boolean AND
-  void addFilter(const TimeSeriesProperty<bool> &filter);
+  void addFilter(const FilteredTimeSeriesProperty<bool> &filter);
   ///  Returns reference to the filtered property
-  inline TimeSeriesProperty<double> *data() const { return m_prop.get(); }
+  inline FilteredTimeSeriesProperty<double> *data() const { return m_prop.get(); }
   /// Returns a reference to the filter
-  inline const TimeSeriesProperty<bool> *filter() const { return m_filter.get(); }
+  inline const FilteredTimeSeriesProperty<bool> *filter() const { return m_filter.get(); }
   /// Clears filters
   void clear();
 
 private:
   /// Converts the given property to a TimeSeriesProperty<double>, throws if
   /// invalid.
-  TimeSeriesProperty<double> *convertToTimeSeriesOfDouble(const Property *prop);
+  FilteredTimeSeriesProperty<double> *convertToTimeSeriesOfDouble(const Property *prop);
 
   /// Owned pointer to the filtered property
-  std::unique_ptr<TimeSeriesProperty<double>> m_prop;
+  std::unique_ptr<FilteredTimeSeriesProperty<double>> m_prop;
   /// Owned pointer to the filter mask
-  std::unique_ptr<TimeSeriesProperty<bool>> m_filter;
+  std::unique_ptr<FilteredTimeSeriesProperty<bool>> m_filter;
 };
 
 } // namespace Kernel

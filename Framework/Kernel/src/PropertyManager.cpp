@@ -209,11 +209,11 @@ void PropertyManager::filterByProperty(const Kernel::TimeSeriesProperty<bool> &f
       std::unique_ptr<Property> filtered(nullptr);
       if (this->existsProperty(PropertyManager::getInvalidValuesFilterLogName(currentProp->name()))) {
         // add the filter to the passed in filters
-        auto logFilter = std::make_unique<LogFilter>(filter);
         auto filterProp = getPointerToProperty(PropertyManager::getInvalidValuesFilterLogName(currentProp->name()));
-        auto tspFilterProp = dynamic_cast<TimeSeriesProperty<bool> *>(filterProp);
+        auto tspFilterProp = dynamic_cast<FilteredTimeSeriesProperty<bool> *>(filterProp);
         if (!tspFilterProp)
           break;
+        auto logFilter = std::make_unique<LogFilter>(tspFilterProp);
         logFilter->addFilter(*tspFilterProp);
 
         filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(doubleSeries, *logFilter->filter());

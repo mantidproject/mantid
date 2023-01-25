@@ -92,8 +92,6 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(timeAverageValue_Overloads, timeAverageVa
                                            return_value_policy<VectorToNumpy>()))                                      \
       .add_property("filtered_value", make_function(&Mantid::Kernel::TimeSeriesProperty<TYPE>::filteredValuesAsVector, \
                                                     return_value_policy<VectorToNumpy>()))                             \
-      .add_property("filtered_times", make_function(&Mantid::Kernel::TimeSeriesProperty<TYPE>::filteredTimesAsVector,  \
-                                                    return_value_policy<VectorToNumpy>()))                             \
       .def("addValue",                                                                                                 \
            (void (TimeSeriesProperty<TYPE>::*)(const DateAndTime &, const TYPE &)) &                                   \
                TimeSeriesProperty<TYPE>::addValue,                                                                     \

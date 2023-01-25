@@ -225,8 +225,7 @@ public:
 
   /// Return the time series's times as a vector<DateAndTime>
   std::vector<Types::Core::DateAndTime> timesAsVector() const override;
-  /// Get filtered times as a vector
-  std::vector<Types::Core::DateAndTime> filteredTimesAsVector() const;
+
   /// Return the series as list of times, where the time is the number of
   /// seconds since the start.
   std::vector<double> timesAsVectorSeconds() const;
@@ -303,13 +302,8 @@ public:
   /// Returns n-th time. NOTE: Complexity is order(n)! regardless of filter
   Types::Core::DateAndTime nthTime(int n) const;
 
-  /// Divide the property into  allowed and disallowed time intervals according
-  /// to \a filter.
-  void filterWith(const TimeSeriesProperty<bool> *filter);
-  /// Restores the property to the unsorted state
-  void clearFilter();
   // Returns whether the time series has been filtered
-  bool isFiltered() const { return m_filterApplied; }
+  bool isFiltered() const override { return false; }
 
   /// Updates size()
   void countSize() const;
@@ -342,7 +336,7 @@ public:
   /// If filtering by log, get the time intervals for splitting
   std::vector<Mantid::Kernel::SplittingInterval> getSplittingIntervals() const;
 
-private:
+protected:
   //----------------------------------------------------------------------------------------------
   /// Saves the time vector has time + start attribute
   void saveTimeVector(::NeXus::File *file);
@@ -352,15 +346,12 @@ private:
   int findIndex(Types::Core::DateAndTime t) const;
   ///  Find the upper_bound of time t in container.
   int upperBound(Types::Core::DateAndTime t, int istart, int iend) const;
-  /// Apply a filter
-  void applyFilter() const;
-  /// A new algorithm to find Nth index.  It is simple and leave a lot work to
-  /// the callers
-  size_t findNthIndexFromQuickRef(int n) const;
+
   /// Set a value from another property
   std::string setValueFromProperty(const Property &right) override;
-  /// Find if time lies in a filtered region
-  bool isTimeFiltered(const Types::Core::DateAndTime &time) const;
+
+  /// Time weighted mean and standard deviation
+  std::pair<double, double> timeAverageValueAndStdDev() const;
 
   /// Holds the time series data
   mutable std::vector<TimeValueUnit<TYPE>> m_values;
@@ -371,13 +362,6 @@ private:
 
   /// Flag to state whether mP is sorted or not
   mutable TimeSeriesSortStatus m_propSortedFlag;
-
-  /// The filter
-  mutable std::vector<std::pair<Types::Core::DateAndTime, bool>> m_filter;
-  /// Quick reference regions for filter
-  mutable std::vector<std::pair<size_t, size_t>> m_filterQuickRef;
-  /// True if a filter has been applied
-  mutable bool m_filterApplied;
 };
 
 /// Function filtering double TimeSeriesProperties according to the requested
