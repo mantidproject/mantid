@@ -1563,19 +1563,10 @@ template <typename TYPE> TimeInterval TimeSeriesProperty<TYPE>::nthInterval(int 
     ;
   } else if (n == static_cast<int>(m_values.size()) - 1) {
     // 2. Last one by making up an end time.
-    // the last time is the last thing known
-    const auto ultimate = m_values.rbegin()->time();
-    // go backwards from the time before it that is different
-    int counter = 0;
-    while (DateAndTime::secondsFromDuration(ultimate - (m_values.rbegin() + counter)->time()) == 0.) {
-      counter += 1;
-    }
-    // get the last time that is different
-    time_duration lastDuration = m_values.rbegin()->time() - (m_values.rbegin() + counter)->time();
-    // the last duration is equal to the previous, non-zero, duration
-    DateAndTime endTime = m_values.rbegin()->time() + lastDuration;
-
-    deltaT = Kernel::TimeInterval(m_values.rbegin()->time(), endTime);
+    time_duration d = m_values.rbegin()->time() - (m_values.rbegin() + 1)->time();
+    DateAndTime endTime = m_values.rbegin()->time() + d;
+    Kernel::TimeInterval dt(m_values.rbegin()->time(), endTime);
+    deltaT = dt;
   } else {
     // 3. Regular
     DateAndTime startT = m_values[static_cast<std::size_t>(n)].time();
@@ -2056,24 +2047,14 @@ void TimeSeriesProperty<std::string>::histogramData(const Types::Core::DateAndTi
  * @param roi :: ROI regions validating any query time.
  * @returns :: Vector of included values only.
  */
-template <typename TYPE> std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredValuesAsVector(const TimeROI *roi) const {
-  if (roi && !roi->empty()) {
-    std::vector<TYPE> filteredValues;
-    for (const auto &timeAndValue : this->m_values)
-      if (roi->valueAtTime(timeAndValue.time()))
-        filteredValues.emplace_back(timeAndValue.value());
-    return filteredValues;
-  } else
-    return this->valuesAsVector();
+template <typename TYPE> std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredValuesAsVector() const {
+  return this->valuesAsVector(); // no filtering to do
 }
 
 /**
- * Splitting interval for the whole time series.
- * The interval's starting time is that of the first log entry. The interval's ending time is that of the last log
- * entry plus an additional extra time. This extra time is the time span between the last two log entries.
- * The extra time ensures that the mean and the time-weighted mean are the same for time series
- * containing log entries equally spaced in time.
- * @returns :: Vector containing a single splitting interval.
+ * Get a list of the splitting intervals, if filtering is enabled.
+ * Otherwise the interval is just first time - last time.
+ * @returns :: Vector of splitting intervals
  */
 template <typename TYPE> std::vector<SplittingInterval> TimeSeriesProperty<TYPE>::getSplittingIntervals() const {
   std::vector<SplittingInterval> intervals;

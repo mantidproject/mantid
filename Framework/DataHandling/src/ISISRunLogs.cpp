@@ -106,10 +106,10 @@ void ISISRunLogs::applyLogFiltering(Mantid::API::Run &exptRun) {
   // If there is more than 1 period filter the logs by period as well
   if (multiperiod) {
     if (logFilter) {
-      logFilter->addFilter(*currentPeriodLog);
+      logFilter->addFilter(*dynamic_cast<FilteredTimeSeriesProperty<bool> *>(currentPeriodLog));
       maskProp = logFilter->filter();
     } else
-      maskProp = currentPeriodLog;
+      maskProp = dynamic_cast<FilteredTimeSeriesProperty<bool> *>(currentPeriodLog);
   } else if (logFilter) {
     maskProp = logFilter->filter();
   }

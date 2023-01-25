@@ -208,6 +208,15 @@ void PropertyManager::filterByProperty(const Kernel::TimeSeriesProperty<bool> &f
       // does the property name ends with substring "_invalid_values" ?
       if (PropertyManager::isAnInvalidValuesFilterLog(currentProp->name()))
         break;
+      std::unique_ptr<Property> filtered(nullptr);
+      if (this->existsProperty(PropertyManager::getInvalidValuesFilterLogName(currentProp->name()))) {
+        // add the filter to the passed in filters
+        auto filterProp = getPointerToProperty(PropertyManager::getInvalidValuesFilterLogName(currentProp->name()));
+        auto tspFilterProp = dynamic_cast<FilteredTimeSeriesProperty<bool> *>(filterProp);
+        if (!tspFilterProp)
+          break;
+        auto logFilter = std::make_unique<LogFilter>(tspFilterProp);
+        logFilter->addFilter(*tspFilterProp);
 
       // companionPropName == currentProp->name() + "_invalid_values"
       std::string companionPropName = PropertyManager::getInvalidValuesFilterLogName(currentProp->name());
