@@ -9,8 +9,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/TimeROI.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 using Mantid::Kernel::TimeROI;
+using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Types::Core::DateAndTime;
 
 constexpr double ONE_DAY_DURATION{24 * 3600};
@@ -81,6 +83,25 @@ public:
     // past the end
     TS_ASSERT_EQUALS(value.durationInSeconds(CHRISTMAS_START, HANUKKAH_STOP) / ONE_DAY_DURATION, 1.);
     TS_ASSERT_EQUALS(value.durationInSeconds(CHRISTMAS_START, NEW_YEARS_STOP) / ONE_DAY_DURATION, 1.);
+  }
+
+  void test_replaceFromTSP() {
+    TimeROI value{CHRISTMAS_START, CHRISTMAS_STOP};
+
+    TimeSeriesProperty<bool> tsp("junk");
+    value.replaceROI(&tsp);
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 0.);
+
+    tsp.addValue(CHRISTMAS_START, true);
+    tsp.addValue(CHRISTMAS_STOP, false);
+    value.replaceROI(&tsp);
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 1.);
+
+    tsp.addValue(DECEMBER_START, false); // should get ignored
+    tsp.addValue(CHRISTMAS_STOP, true);  // should override previous value
+    tsp.addValue(DECEMBER_STOP, false);  // new endpoint
+    value.replaceROI(&tsp);
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 7.);
   }
 
   void test_sortedROI() {
