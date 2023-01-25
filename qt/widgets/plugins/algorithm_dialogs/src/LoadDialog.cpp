@@ -116,10 +116,11 @@ void LoadDialog::enableNameSuggestion(const bool on) {
  */
 void LoadDialog::accept() {
   // If the LoadDialog is already loading data, or is populating, then ignore the accept
-  if (!m_form.fileWidget->isSearching() && !m_populating) {
-    m_userAccept = true;
-    m_form.fileWidget->findFiles();
+  if (m_form.fileWidget->isSearching() || m_populating) {
+    return;
   }
+  m_userAccept = true;
+  m_form.fileWidget->findFiles();
 }
 
 void LoadDialog::resultInspectionFinished() {
