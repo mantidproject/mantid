@@ -33,7 +33,8 @@ public:
 private:
   std::string m_inputWorkspace;
   std::string m_reflctedInputWorkspace;
-  std::string m_outputWorkspace;
+  std::string m_negativeOutputWorkspace;
+  std::string m_positiveOutputWorkspace;
   double m_eMin;
   double m_eMax;
   bool m_isPositiveReflect;

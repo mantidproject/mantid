@@ -50,19 +50,22 @@ void InelasticDataManipulationSymmetriseTabModel::setupPreviewAlgorithm(
 std::string InelasticDataManipulationSymmetriseTabModel::setupSymmetriseAlgorithm(
     MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner) {
 
+  std::string outputWorkspace = m_positiveOutputWorkspace;
   if (!m_isPositiveReflect) {
     reflectNegativeToPositive();
+    outputWorkspace = m_negativeOutputWorkspace;
   }
+
   IAlgorithm_sptr symmetriseAlg = AlgorithmManager::Instance().create("Symmetrise");
   symmetriseAlg->initialize();
   symmetriseAlg->setProperty("InputWorkspace", m_isPositiveReflect ? m_inputWorkspace : m_reflctedInputWorkspace);
   symmetriseAlg->setProperty("XMin", m_eMin);
   symmetriseAlg->setProperty("XMax", m_eMax);
-  symmetriseAlg->setProperty("OutputWorkspace", m_outputWorkspace);
+  symmetriseAlg->setProperty("OutputWorkspace", outputWorkspace);
   symmetriseAlg->setProperty("OutputPropertiesTable", "__SymmetriseProps_temp");
 
   batchAlgoRunner->addAlgorithm(symmetriseAlg);
-  return m_outputWorkspace;
+  return outputWorkspace;
 }
 
 void InelasticDataManipulationSymmetriseTabModel::reflectNegativeToPositive() {
@@ -86,7 +89,10 @@ void InelasticDataManipulationSymmetriseTabModel::setWorkspaceName(QString works
   m_reflctedInputWorkspace = m_inputWorkspace + "_reflected";
   // the last 4 characters in the workspace name are '_red' the ouput weorkspace name is inserting '_sym' before that
   // '_red'
-  m_outputWorkspace = (workspaceName.left(workspaceName.length() - 4) + "_sym" + workspaceName.right(4)).toStdString();
+  m_positiveOutputWorkspace =
+      (workspaceName.left(workspaceName.length() - 4) + "_sym" + "_pn" + workspaceName.right(4)).toStdString();
+  m_negativeOutputWorkspace =
+      (workspaceName.left(workspaceName.length() - 4) + "_sym" + "_np" + workspaceName.right(4)).toStdString();
 }
 
 void InelasticDataManipulationSymmetriseTabModel::setEMin(double value) { m_eMin = value; }

@@ -129,7 +129,7 @@ produce this file is IRIS, the analyser is graphite and the reflection is 002. S
 
 4. Click **Run** and wait for the interface to finish processing. This will run the
    :ref:`Symmetrise <algm-Symmetrise>` algorithm. The output workspace is called
-   ``iris26176_graphite002_sym_red``.
+   ``iris26176_graphite002_sym_pn_red``.
 
 5. Click **Plot Spectra** to produce a spectra plot of the output workspace. Other indices can be
    plotted by entering indices in the box next to the **Plot Spectra** button. For example,
