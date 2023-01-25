@@ -1858,13 +1858,8 @@ template <typename TYPE> bool TimeSeriesProperty<TYPE>::isDefault() const { retu
  * N.B. This method DOES take filtering into account
  */
 template <typename TYPE> TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics() const {
-  TimeSeriesPropertyStatistics out;
-  Mantid::Kernel::Statistics raw_stats = Mantid::Kernel::getStatistics(this->filteredValuesAsVector());
-  out.mean = raw_stats.mean;
-  out.standard_deviation = raw_stats.standard_deviation;
-  out.median = raw_stats.median;
-  out.minimum = raw_stats.minimum;
-  out.maximum = raw_stats.maximum;
+  TimeSeriesPropertyStatistics out(Mantid::Kernel::getStatistics(this->filteredValuesAsVector()));
+
   if (this->size() > 0) {
     const auto &intervals = this->getSplittingIntervals();
     const double duration_sec =
