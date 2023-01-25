@@ -42,10 +42,6 @@ public:
   void replotNewSpectrum(double value);
   void verifyERange(QtProperty *prop, double value);
 
-public slots:
-  void updateRunButton(bool enabled = true, std::string const &enableOutputButtons = "unchanged",
-                       QString const &message = "Run", QString const &tooltip = "");
-
 signals:
   void doubleValueChanged(QtProperty *, double);
   void enumValueChanged(QtProperty *, int);
@@ -61,8 +57,6 @@ private slots:
   void reflectTypeChanged(QtProperty *, int value);
 
 private:
-  void setRunEnabled(bool enabled);
-  void setSaveEnabled(bool enabled);
   void resetEDefaults(bool isPositive, QPair<double, double> range);
   Ui::InelasticDataManipulationSymmetriseTab m_uiForm;
 

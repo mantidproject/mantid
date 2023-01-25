@@ -220,7 +220,7 @@ void InelasticDataManipulationElwinTab::runWorkspaceInput() {
   m_batchAlgoRunner->executeBatchAsync();
 
   // Set the result workspace for Python script export
-  m_pythonExportWsName = (m_view->getCurrentPreview() + "_elwin_eq2").toStdString();
+  m_pythonExportWsName = "ELWIN_workspace_output_elwin_eq2";
 }
 
 /**
