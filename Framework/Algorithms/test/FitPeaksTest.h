@@ -86,6 +86,9 @@ public:
     fitpeaks.initialize();
     TS_ASSERT(fitpeaks.isInitialized());
 
+    // make sure the number of data points is not checked, so the test could proceed
+    fitpeaks.SetCheckNumberOfDataPoints(false);
+
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", data_ws_name));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 1));
@@ -149,6 +152,9 @@ public:
 
     fitpeaks.initialize();
     TS_ASSERT(fitpeaks.isInitialized());
+
+    // make sure the number of data points is not checked, so the test could proceed
+    fitpeaks.SetCheckNumberOfDataPoints(false);
 
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
@@ -248,6 +254,9 @@ public:
 
     fitpeaks.initialize();
     TS_ASSERT(fitpeaks.isInitialized());
+
+    // make sure the number of data points is not checked, so the test could proceed
+    fitpeaks.SetCheckNumberOfDataPoints(false);
 
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
@@ -352,6 +361,9 @@ public:
     fit_peaks_alg.initialize();
     TS_ASSERT(fit_peaks_alg.isInitialized());
 
+    // make sure the number of data points is not checked, so the test could proceed
+    fit_peaks_alg.SetCheckNumberOfDataPoints(false);
+
     TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("InputWorkspace", input_ws_name));
 
     TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("PeakCenters",
@@ -426,6 +438,9 @@ public:
 
     fit_peaks_alg.initialize();
     TS_ASSERT(fit_peaks_alg.isInitialized());
+
+    // make sure the number of data points is not checked, so the test could proceed
+    fit_peaks_alg.SetCheckNumberOfDataPoints(false);
 
     TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("InputWorkspace", input_ws_name));
 
@@ -523,6 +538,9 @@ public:
     fitpeaks.initialize();
     TS_ASSERT(fitpeaks.isInitialized());
 
+    // make sure the number of data points is not checked, so the test could proceed
+    fitpeaks.SetCheckNumberOfDataPoints(false);
+
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", input_ws_name));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", static_cast<int>(start_ws_index)));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", static_cast<int>(stop_ws_index)));
@@ -618,6 +636,9 @@ public:
 
     fitpeaks.initialize();
     TS_ASSERT(fitpeaks.isInitialized());
+
+    // make sure the number of data points is not checked, so the test could proceed
+    fitpeaks.SetCheckNumberOfDataPoints(false);
 
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", input_ws_name));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", static_cast<int>(min_ws_index)));
@@ -750,6 +771,9 @@ public:
     fitpeaks.initialize();
     TS_ASSERT(fitpeaks.isInitialized());
 
+    // make sure the number of data points is not checked, so the test could proceed
+    fitpeaks.SetCheckNumberOfDataPoints(false);
+
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", input_ws_name));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", static_cast<int>(min_ws_index)));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", static_cast<int>(max_ws_index)));
@@ -847,6 +871,9 @@ public:
     fitpeaks.initialize();
     TS_ASSERT(fitpeaks.isInitialized());
 
+    // make sure the number of data points is not checked, so the test could proceed
+    fitpeaks.SetCheckNumberOfDataPoints(false);
+
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 2));
@@ -917,7 +944,7 @@ public:
   void test_notEnoughPeakDataPoints() {
     // Generate an input workspace
     const std::string data_ws_name("data_nepdp");
-    generateTestDataGaussian(data_ws_name, 1 /*spectra*/, 20 /*data points*/, 1 /*peaks*/, 0.5 /*resolution*/);
+    generateTestDataGaussian(data_ws_name, 1 /*spectra*/, 20 /*data points*/, 1 /*peaks*/, 0.75 /*resolution*/);
 
     // Generate peak and background parameters
     std::vector<string> par_names;
@@ -943,7 +970,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 1));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakFunction", "Gaussian"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCentersWorkspace", peak_center_ws_name));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitPeakWindowWorkspace", fit_window_ws_name))
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitPeakWindowWorkspace", fit_window_ws_name));
 
     fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS3");
     fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS3");

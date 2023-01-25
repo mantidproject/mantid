@@ -60,6 +60,26 @@ private:
   /// fitted peak and background parameters' fitting error
   std::vector<std::vector<double>> m_function_errors_vector;
 };
+
+class PeakFitPreCheckResult {
+public:
+  PeakFitPreCheckResult() : m_low_count{0}, m_not_enough_datapoints{0}, m_low_snr{0} {}
+  PeakFitPreCheckResult &operator+=(const PeakFitPreCheckResult &another);
+
+public:
+  void SetNumberOfPeaksWithLowCount(const size_t n);
+  void SetNumberOfPeaksWithNotEnoughDataPoints(const size_t n);
+  void SetNumberOfPeaksWithLowSignalToNoise(const size_t n);
+  void Report(Kernel::Logger &logger);
+
+private:
+  // number of peaks rejected due to low signal count
+  size_t m_low_count;
+  // number of peask rejected due to not enough data points
+  size_t m_not_enough_datapoints;
+  // number of peaks rejected due to low signal-to-noise ratio
+  size_t m_low_snr;
+};
 } // namespace FitPeaksAlgorithm
 
 class MANTID_ALGORITHMS_DLL FitPeaks final : public API::Algorithm {
@@ -79,6 +99,8 @@ public:
   const std::string category() const override { return "Optimization"; }
 
   std::map<std::string, std::string> validateInputs() override;
+
+  void SetCheckNumberOfDataPoints(const bool check) { m_checkNumberOfDataPoints = check; }
 
 private:
   /// Init
@@ -119,7 +141,7 @@ private:
   void fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_peak_centers,
                         const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result,
                         std::vector<std::vector<double>> &lastGoodPeakParameters,
-                        size_t &spectrum_peaks_not_enough_datapoints, size_t &spectrum_peaks_low_snr);
+                        const std::shared_ptr<FitPeaksAlgorithm::PeakFitPreCheckResult> &pre_check_result);
 
   /// fit background
   bool fitBackground(const size_t &ws_index, const std::pair<double, double> &fit_window,
@@ -129,7 +151,7 @@ private:
   double fitIndividualPeak(size_t wi, const API::IAlgorithm_sptr &fitter, const double expected_peak_center,
                            const std::pair<double, double> &fitwindow, const bool estimate_peak_width,
                            const API::IPeakFunction_sptr &peakfunction, const API::IBackgroundFunction_sptr &bkgdfunc,
-                           bool &not_enough_datapoints, bool &low_snr);
+                           const std::shared_ptr<FitPeaksAlgorithm::PeakFitPreCheckResult> &pre_check_result);
 
   /// Methods to fit functions (general)
   double fitFunctionSD(const API::IAlgorithm_sptr &fit, const API::IPeakFunction_sptr &peak_function,
@@ -265,6 +287,12 @@ private:
   /// for observed peak parameter
   double m_minPeakHeight;
 
+  // flag for a number-of-data-points check
+  bool m_checkNumberOfDataPoints;
+
+  // Criteria for rejecting non-peaks or weak peaks from fitting
+  double m_minSignalToNoiseRatio;
+
   /// flag for high background
   bool m_highBackground;
   double m_bkgdSimga; // TODO - add to properties
@@ -272,9 +300,6 @@ private:
   //----- Result criterias ---------------
   /// peak positon tolerance case b, c and d
   bool m_peakPosTolCase234;
-
-  // Criteria for rejecting non-peaks or weak peaks from fitting
-  double m_minSignalToNoiseRatio;
 };
 
 } // namespace Algorithms

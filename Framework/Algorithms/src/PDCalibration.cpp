@@ -236,8 +236,8 @@ void PDCalibration::init() {
                   "height under this value will be excluded.");
 
   declareProperty("MinimumSignalToNoiseRatio", 3.,
-                  "Minimum estimated signal-to-noise ratio (SNR) in the peak window such that all the peaks with "
-                  "SNR under this value will be excluded.");
+                  "Minimum signal-to-noise ratio such that all the peaks with "
+                  "signal-to-noise ratio under this value will be excluded.");
 
   declareProperty("MaxChiSq", 100., "Maximum chisq value for individual peak fit allowed. (Default: 100)");
 
