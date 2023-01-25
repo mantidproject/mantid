@@ -17,6 +17,7 @@
 #include "MantidKernel/V3D.h"
 #include <cmath>
 #include <cxxtest/TestSuite.h>
+#include <initializer_list>
 #include <json/value.h>
 
 using namespace Mantid::Kernel;
@@ -47,6 +48,11 @@ public:
 private:
   std::string m_value = "Nothing";
 };
+
+template <typename T> void addTestPropertyWithValue(LogManager &run, const std::string &name, const T &value) {
+  auto singleValue = new PropertyWithValue<T>(name, value);
+  run.addProperty(singleValue);
+}
 
 void addTestTimeSeriesFilter(LogManager &run, const std::string &name) {
   auto timeSeries = new TimeSeriesProperty<bool>(name);
@@ -422,6 +428,57 @@ public:
     TS_ASSERT_DELTA(run.getTimeAveragedStd(name), 8.5239, 0.001);
   }
 
+  void test_getStatistics() {
+    LogManager run;
+
+    // test valid single value property
+    double value = 42.0;
+    addTestPropertyWithValue<size_t>(run, "single-size_t", 42);
+    addTestPropertyWithValue<int>(run, "single-int", 42);
+    addTestPropertyWithValue<float>(run, "single-float", 42.0);
+    addTestPropertyWithValue<double>(run, "single-double", 42.0);
+    for (std::string name : {"single-size_t", "single-int", "single-float", "single-double"}) {
+      auto stats = run.getStatistics(name);
+      TS_ASSERT_DELTA(stats.minimum, value, 0.001);
+      TS_ASSERT_DELTA(stats.maximum, value, 0.001);
+      TS_ASSERT_DELTA(stats.mean, value, 0.001);
+      TS_ASSERT_DELTA(stats.standard_deviation, 0.0, 0.001);
+      TS_ASSERT_DELTA(stats.time_mean, value, 0.001);
+      TS_ASSERT_DELTA(stats.time_standard_deviation, 0.0, 0.001);
+      TS_ASSERT_EQUALS(isnan(stats.duration), true);
+    }
+
+    // test invalid single value property
+    {
+      addTestPropertyWithValue<std::string>(run, "single-string", "42");
+      auto stats = run.getStatistics("single-string");
+      TS_ASSERT_EQUALS(isnan(stats.minimum), true);
+      TS_ASSERT_EQUALS(isnan(stats.maximum), true);
+      TS_ASSERT_EQUALS(isnan(stats.mean), true);
+      TS_ASSERT_EQUALS(isnan(stats.standard_deviation), true);
+      TS_ASSERT_EQUALS(isnan(stats.time_mean), true);
+      TS_ASSERT_EQUALS(isnan(stats.time_standard_deviation), true);
+      TS_ASSERT_EQUALS(isnan(stats.duration), true);
+    }
+
+    // test time series
+    addTestTimeSeries<size_t>(run, "series-size_t");
+    addTestTimeSeries<int>(run, "series-int");
+    addTestTimeSeries<float>(run, "series-float");
+    addTestTimeSeries<double>(run, "series-double");
+    for (std::string name : {"series-size_t", "series-int", "series-float", "series-double"}) {
+      auto stats = run.getStatistics(name);
+      TS_ASSERT_DELTA(stats.minimum, 2.0, 0.001);
+      TS_ASSERT_DELTA(stats.maximum, 24.0, 0.001);
+      TS_ASSERT_DELTA(stats.mean, 13.0, 0.001);
+      TS_ASSERT_DELTA(stats.median, 13.0, 0.001);
+      TS_ASSERT_DELTA(stats.standard_deviation, 9.1104, 0.001);
+      TS_ASSERT_DELTA(stats.time_mean, 15.3571, 0.001);
+      TS_ASSERT_DELTA(stats.time_standard_deviation, 8.5239, 0.001);
+      TS_ASSERT_DELTA(stats.duration, 140.0, 0.001);
+    }
+  }
+
   void test_clear() {
     // Set up a Run object with 3 properties in it (1 time series, 2 single
     // value)
@@ -437,14 +494,14 @@ public:
     // Check it's set up right
     TS_ASSERT_EQUALS(runInfo.getProperties().size(), 3);
     auto tsp = runInfo.getTimeSeriesProperty<double>(tspProp);
-    TS_ASSERT_EQUALS(tsp->realSize(), 10)
+    TS_ASSERT_EQUALS(tsp->realSize(), 10);
 
     // Do the clearing work
     TS_ASSERT_THROWS_NOTHING(runInfo.clearTimeSeriesLogs());
 
     // Check the time-series property is empty, but not the others
     TS_ASSERT_EQUALS(runInfo.getProperties().size(), 3);
-    TS_ASSERT_EQUALS(tsp->realSize(), 0)
+    TS_ASSERT_EQUALS(tsp->realSize(), 0);
     TS_ASSERT_EQUALS(runInfo.getPropertyValueAsType<std::string>(stringProp), stringVal);
     TS_ASSERT_EQUALS(runInfo.getPropertyValueAsType<int>(intProp), 99);
   }

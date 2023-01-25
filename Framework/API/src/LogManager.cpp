@@ -335,6 +335,56 @@ double LogManager::getTimeAveragedStd(const std::string &name) const {
 }
 
 /**
+ * Returns various statistics computations for a given property. If not empty, the time filter is applied when
+ * computing.
+ * @param name :: The name of the property.
+ * @return A TimeSeriesPropertyStatistics object containing values for Minimum, Maximum, Mean, Median,
+ * standard deviation, time weighted average, and time weighted standard deviation.
+ */
+Kernel::TimeSeriesPropertyStatistics LogManager::getStatistics(const std::string &name) const {
+  const Kernel::Property *prop = getProperty(name);
+  double nan = std::numeric_limits<double>::quiet_NaN();
+
+  // helper function to assign statistics to a single value
+  auto fromSingleValue = [&](double value) {
+    TimeSeriesPropertyStatistics stats;
+    stats.minimum = value;
+    stats.maximum = value;
+    stats.mean = value;
+    stats.standard_deviation = 0.0;
+    stats.time_mean = value;
+    stats.time_standard_deviation = 0.0;
+    stats.duration = nan; // duration is an ill-concept of a single value
+    return stats;
+  };
+
+  // statistics from a PropertyWithValue object
+  if (auto *singleValueProp = dynamic_cast<const Kernel::PropertyWithValue<size_t> *>(prop))
+    return fromSingleValue(static_cast<double>((*singleValueProp)()));
+  if (auto *singleValueProp = dynamic_cast<const Kernel::PropertyWithValue<int> *>(prop))
+    return fromSingleValue(static_cast<double>((*singleValueProp)()));
+  if (auto *singleValueProp = dynamic_cast<const Kernel::PropertyWithValue<float> *>(prop))
+    return fromSingleValue(static_cast<double>((*singleValueProp)()));
+  if (auto *singleValueProp = dynamic_cast<const Kernel::PropertyWithValue<double> *>(prop))
+    return fromSingleValue((*singleValueProp)());
+
+  // statistics from a TimeSeriesProperty object
+  if (auto *timeSeriesProp = dynamic_cast<const Kernel::TimeSeriesProperty<size_t> *>(prop))
+    return timeSeriesProp->getStatistics();
+  if (auto *timeSeriesProp = dynamic_cast<const Kernel::TimeSeriesProperty<int> *>(prop))
+    return timeSeriesProp->getStatistics();
+  if (auto *timeSeriesProp = dynamic_cast<const Kernel::TimeSeriesProperty<float> *>(prop))
+    return timeSeriesProp->getStatistics();
+  if (auto *timeSeriesProp = dynamic_cast<const Kernel::TimeSeriesProperty<double> *>(prop))
+    return timeSeriesProp->getStatistics();
+
+  // return values set to NAN, signaling no statistics can be obtained
+  TimeSeriesPropertyStatistics invalid;
+  invalid.setAllToNan();
+  return invalid;
+}
+
+/**
  * Get the value of a property as the requested type. Throws if the type is not
  * correct
  * @param name :: The name of the property

@@ -51,6 +51,18 @@ struct TimeSeriesPropertyStatistics {
   double time_standard_deviation;
   /// Duration in seconds
   double duration;
+
+  void setAllToNan() {
+    double nan = std::numeric_limits<double>::quiet_NaN();
+    minimum = nan;
+    maximum = nan;
+    mean = nan;
+    median = nan;
+    standard_deviation = nan;
+    time_mean = nan;
+    time_standard_deviation = nan;
+    duration = nan;
+  }
 };
 
 //================================================================================================
@@ -157,6 +169,8 @@ public:
   /// @copydoc Mantid::Kernel::ITimeSeriesProperty::averageAndStdDevInFilter()
   std::pair<double, double> averageAndStdDevInFilter(const std::vector<SplittingInterval> &filter) const override;
   /// @copydoc Mantid::Kernel::ITimeSeriesProperty::timeAverageValue()
+  /// Time weighted mean and standard deviation
+  std::pair<double, double> timeAverageValueAndStdDev() const;
   double timeAverageValue() const override;
   /** Returns the calculated time weighted average value.
    * @param timeRoi  Object that holds information about when the time measurement was active.
@@ -316,8 +330,6 @@ private:
   std::string setValueFromProperty(const Property &right) override;
   /// Find if time lies in a filtered region
   bool isTimeFiltered(const Types::Core::DateAndTime &time) const;
-  /// Time weighted mean and standard deviation
-  std::pair<double, double> timeAverageValueAndStdDev() const;
 
   /// Holds the time series data
   mutable std::vector<TimeValueUnit<TYPE>> m_values;
