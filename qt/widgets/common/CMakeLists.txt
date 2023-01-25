@@ -505,7 +505,6 @@ set(INC_FILES
     inc/MantidQtWidgets/Common/QtJSONUtils.h
     inc/MantidQtWidgets/Common/ScriptRepositoryView.h
     inc/MantidQtWidgets/Common/SelectionNotificationService.h
-    inc/MantidQtWidgets/Common/SignalBlocker.h
     inc/MantidQtWidgets/Common/UserSubWindowFactory.h
     inc/MantidQtWidgets/Common/TSVSerialiser.h
     inc/MantidQtWidgets/Common/UserInputValidator.h
@@ -712,7 +711,6 @@ set(TEST_FILES
     test/ProjectSaveModelTest.h
     test/ProjectSavePresenterTest.h
     test/SelectionNotificationServiceTest.h
-    test/SignalBlockerTest.h
     test/TrackedActionTest.h
     test/QtJSONUtilsTest.h
     test/Batch/BuildSubtreeItemsTest.h
