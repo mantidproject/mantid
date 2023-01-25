@@ -160,10 +160,7 @@ void InelasticDataManipulation::filterUiForFacility(const QString &facility) {
 
   // First remove all tabs
   while (m_uiForm.twIDRTabs->count() > 0) {
-    // Disconnect the instrument changed signal
     QString tabName = m_uiForm.twIDRTabs->tabText(0);
-    disconnect(this, SIGNAL(newInstrumentConfiguration()), m_tabs[tabName].second,
-               SIGNAL(newInstrumentConfiguration()));
 
     // Remove the tab
     m_uiForm.twIDRTabs->removeTab(0);
@@ -173,10 +170,6 @@ void InelasticDataManipulation::filterUiForFacility(const QString &facility) {
 
   // Add the required tabs
   for (auto &enabledTab : enabledTabs) {
-    // Connect the insturment changed signal
-    connect(this, SIGNAL(newInstrumentConfiguration()), m_tabs[enabledTab].second,
-            SIGNAL(newInstrumentConfiguration()));
-
     // Add the tab
     m_uiForm.twIDRTabs->addTab(m_tabs[enabledTab].first, enabledTab);
 

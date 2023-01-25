@@ -139,9 +139,6 @@ InelasticDataManipulationSymmetriseTabView::InelasticDataManipulationSymmetriseT
   // Handle running, plotting and saving
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SIGNAL(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SIGNAL(saveClicked()));
-
-  connect(this, SIGNAL(updateRunButton(bool, std::string const &, QString const &, QString const &)), this,
-          SLOT(updateRunButton(bool, std::string const &, QString const &, QString const &)));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -277,19 +274,6 @@ void InelasticDataManipulationSymmetriseTabView::reflectTypeChanged(QtProperty *
     resetEDefaults(value == 0, axisRange);
   }
 }
-
-void InelasticDataManipulationSymmetriseTabView::updateRunButton(bool enabled, std::string const &enableOutputButtons,
-                                                                 QString const &message, QString const &tooltip) {
-  setRunEnabled(enabled);
-  m_uiForm.pbRun->setText(message);
-  m_uiForm.pbRun->setToolTip(tooltip);
-  if (enableOutputButtons != "unchanged")
-    setSaveEnabled(enableOutputButtons == "enable");
-}
-
-void InelasticDataManipulationSymmetriseTabView::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
-
-void InelasticDataManipulationSymmetriseTabView::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
 void InelasticDataManipulationSymmetriseTabView::setFBSuffixes(QStringList const suffix) {
   m_uiForm.dsInput->setFBSuffixes(suffix);
