@@ -34,7 +34,7 @@ enum TimeSeriesSortStatus { TSUNKNOWN, TSUNSORTED, TSSORTED };
 /** Struct holding some useful statistics for a TimeSeriesProperty
  *
  */
-struct TimeSeriesPropertyStatistics {
+struct MANTID_KERNEL_DLL TimeSeriesPropertyStatistics {
   /// Minimum value
   double minimum;
   /// Maximum value
@@ -51,6 +51,16 @@ struct TimeSeriesPropertyStatistics {
   double time_standard_deviation;
   /// Duration in seconds
   double duration;
+
+  TimeSeriesPropertyStatistics() = default;
+
+  TimeSeriesPropertyStatistics(const Statistics &stats) {
+    minimum = stats.minimum;
+    maximum = stats.maximum;
+    median = stats.median;
+    mean = stats.median;
+    standard_deviation = stats.standard_deviation;
+  }
 
   void setAllToNan() {
     double nan = std::numeric_limits<double>::quiet_NaN();
