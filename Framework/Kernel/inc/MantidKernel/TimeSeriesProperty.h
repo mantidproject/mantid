@@ -54,12 +54,34 @@ struct MANTID_KERNEL_DLL TimeSeriesPropertyStatistics {
 
   TimeSeriesPropertyStatistics() = default;
 
+  /**
+   * Initialize only the statistics that are time-weighted independent.
+   * Quantities are minimum, maximum, median, mean, and standard-deviation.
+   * @param stats :: a reference to a Statistics object.
+   */
   TimeSeriesPropertyStatistics(const Statistics &stats) {
     minimum = stats.minimum;
     maximum = stats.maximum;
     median = stats.median;
-    mean = stats.median;
+    mean = stats.mean;
     standard_deviation = stats.standard_deviation;
+  }
+
+  /**
+   * Statistics of a value that is constant throughout time.
+   * "duration" is assigned the value of NaN.
+   * @param value :: the value constant in time.
+   */
+  TimeSeriesPropertyStatistics(double value) {
+    minimum = value;
+    maximum = value;
+    mean = value;
+    median = value;
+    standard_deviation = 0.0;
+    time_mean = value;
+    time_standard_deviation = 0.0;
+    duration = std::numeric_limits<double>::quiet_NaN();
+    ;
   }
 
   void setAllToNan() {
