@@ -126,9 +126,10 @@ void GLDisplay::paintEvent(QPaintEvent *event) {
   }
   const auto pixelRatioThisPaint{this->window()->devicePixelRatio()};
   if (pixelRatioThisPaint != m_pixelRatioLastPaint) {
-    // Force the view to be updated on the next draw (note that this does not
-    // perform the update just flag that the update needs to happen)
-    updateView();
+    // Force a resize of the surface to take into account a different number
+    // of device pixels.
+    const auto sizeforDevice = sizeInDevicePixels(this);
+    m_surface->resize(sizeforDevice.width(), sizeforDevice.height());
     m_pixelRatioLastPaint = pixelRatioThisPaint;
   }
 
