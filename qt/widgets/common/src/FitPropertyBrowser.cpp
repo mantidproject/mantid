@@ -1459,14 +1459,14 @@ void FitPropertyBrowser::stringChanged(QtProperty *prop) {
 /** Get the tie expression stored in the function in case the new expression is invalid and the GUI needs to be reset
  * @param parameterName :: A pointer to the parameter name
  */
-QString FitPropertyBrowser::getOldExpressionAsString(QString &parameterName) const {
+QString FitPropertyBrowser::getOldExpressionAsString(const QString &parameterName) const {
   // Note this only finds the oldTie if it was a tie to a function (e.g. f0.Height=f1.Height)
   // but not if it was a custom tie (e.g. f0.Height=2.0)
   QString oldExp;
   size_t parIndex;
   try {
     parIndex = compositeFunction()->parameterIndex(parameterName.toStdString());
-  } catch (std::exception) {
+  } catch (std::exception &) {
     return "";
   }
   const auto oldTie = compositeFunction()->getTie(parIndex);

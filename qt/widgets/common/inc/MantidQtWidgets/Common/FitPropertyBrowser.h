@@ -444,7 +444,7 @@ private slots:
   void clearFitResultStatus();
 
 public: // functions declared public for testing
-  QString getOldExpressionAsString(QString &parameterName) const;
+  QString getOldExpressionAsString(const QString &parameterName) const;
   /// Create CompositeFunction from string
   void createCompositeFunction(const QString &str = "");
 
