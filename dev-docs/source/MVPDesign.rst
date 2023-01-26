@@ -307,7 +307,7 @@ Designer
 As with the C++ GUI the Qt Designer should be used for layouts of all
 widgets and the main interface. It is recommended that the ``.ui``
 files be placed in a ``ui`` subdirectory of the interface package. To
-generate PyQt code from the UI xml you will need to run the ``pyuic4``
-program that ships with PyQt4. It is also recommended that the output
+generate PyQt code from the UI xml you will need to run the ``pyuic5``
+program that ships with PyQt5. It is also recommended that the output
 file is named, using the ``-o`` argument, ``ui_[widgetname].py`` and
 placed in the ``ui`` subdirectory.

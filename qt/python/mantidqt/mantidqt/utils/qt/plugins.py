@@ -15,7 +15,7 @@ import os
 #  be determined at runtime. The two options are:
 #    1. using a qt.conf file: requires it to be next to the application
 #       executable but this would be python.exe and then would not allow
-#       switching between Qt4/Qt5
+#       switching between Qt Major versions
 #    2. add extra paths to the LibraryPath list here
 # As we can dynamically determine the Qt version here we choose option 2.
 

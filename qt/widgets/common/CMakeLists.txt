@@ -609,16 +609,6 @@ set(UI_FILES
     inc/MantidQtWidgets/Common/pqHelpWindow.ui
 )
 
-# Temporary workaround to remove stale ui_* header files after they were moved to a separate library. They cause build
-# problems if they're not deleted
-set(OLD_UI_HEADERS
-    ${CMAKE_CURRENT_BINARY_DIR}/qt4/ui_ColorBarWidget.h ${CMAKE_CURRENT_BINARY_DIR}/qt4/ui_DisplayCurveFit.h
-    ${CMAKE_CURRENT_BINARY_DIR}/qt4/ui_PreviewPlot.h
-)
-foreach(_header ${OLD_UI_HEADERS})
-  file(REMOVE ${_header})
-endforeach()
-
 set(TARGET_LIBRARIES ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
