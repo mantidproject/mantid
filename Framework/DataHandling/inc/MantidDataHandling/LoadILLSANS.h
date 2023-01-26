@@ -52,6 +52,7 @@ private:
 
   void init() override;
   void exec() override;
+  void applySensitivityMap();
   void setInstrumentName(const NeXus::NXEntry &, const std::string &);
   DetectorPosition getDetectorPositionD33(const NeXus::NXEntry &, const std::string &);
   void setNumberOfMonitors();

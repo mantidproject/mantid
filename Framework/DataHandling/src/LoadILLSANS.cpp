@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadILLSANS.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -15,6 +16,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadHelper.h"
+#include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -92,6 +94,8 @@ void LoadILLSANS::init() {
   declareProperty("Wavelength", 0.0, mustBePositive,
                   "The wavelength of the experiment, in angstroms. Used only for D16. Will "
                   "override the nexus' value if there is one.");
+  declareProperty(std::make_unique<FileProperty>("SensitivityMap", "", FileProperty::OptionalLoad, ".nxs"),
+                  "Name of the file containing sensitivity map.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -188,7 +192,9 @@ void LoadILLSANS::exec() {
       moveDetectorHorizontal(-offset / 1000, "detector"); // mm to meter
     }
   }
-
+  if (m_instrumentName.find("D16") != std::string::npos && !isDefault("SensitivityMap")) {
+    applySensitivityMap();
+  }
   progress.report("Setting sample logs");
   setFinalProperties(filename);
   setProperty("OutputWorkspace", m_localWorkspace);
@@ -216,6 +222,28 @@ void LoadILLSANS::setInstrumentName(const NeXus::NXEntry &firstEntry, const std:
                              " is not supported. Only D11, D16, D22 and D33 are supported");
   }
   g_log.debug() << "Instrument name set to: " + m_instrumentName << '\n';
+}
+
+/**
+ * Applies sensitivity map correction to the loaded D16B data.
+ *
+ */
+void LoadILLSANS::applySensitivityMap() {
+  // loading nexus processed returns Workspace type, so cannot be used as a child algorithm
+  LoadNexusProcessed loader;
+  loader.initialize();
+  loader.setPropertyValue("Filename", getPropertyValue("SensitivityMap"));
+  loader.setPropertyValue("OutputWorkspace", "sensitivity_map");
+  loader.execute();
+  MatrixWorkspace_sptr sensitivityMap = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("sensitivity_map");
+  // The sensitivity map is most likely calculated on a workspace with monitors extracted,
+  // while m_localWorkspace still contains them, so using Divide algorithm directly
+  // causes a spectra number mismatch.
+  for (size_t specNo = 0; specNo < sensitivityMap->getNumberHistograms(); specNo++) {
+    const auto sensitivityValue = sensitivityMap->readY(specNo);
+    m_localWorkspace->mutableY(specNo) /= sensitivityValue;
+    m_localWorkspace->mutableE(specNo) /= sensitivityValue;
+  }
 }
 
 /**
