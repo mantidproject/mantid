@@ -159,7 +159,9 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
                 ax.make_legend()
             ax.set_title(_replace_workspace_name_in_string(oldName, newName, ax.get_title()))
         if self.canvas.manager is not None:
-            self.canvas.manager.set_window_title(_replace_workspace_name_in_string(oldName, newName, self.canvas.get_window_title()))
+            self.canvas.manager.set_window_title(
+                _replace_workspace_name_in_string(oldName, newName, self.canvas.manager.get_window_title())
+            )
         self.canvas.draw()
 
 
