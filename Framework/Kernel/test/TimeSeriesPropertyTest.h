@@ -672,14 +672,13 @@ public:
   }
 
   void test_timeAverageValue() {
+    // values are equally spaced
     auto dblLog = createDoubleTSP();
     auto intLog = createIntegerTSP(5);
 
     // average values
-    const double dblMean = dblLog->timeAverageValue();
-    TS_ASSERT_DELTA(dblMean, 7.6966, .0001);
-    const double intMean = intLog->timeAverageValue();
-    TS_ASSERT_DELTA(intMean, 2.5, .0001);
+    TS_ASSERT_DELTA(dblLog->timeAverageValue(), dblLog->mean(), .0001);
+    TS_ASSERT_DELTA(intLog->timeAverageValue(), intLog->mean(), .0001);
 
     // Clean up
     delete dblLog;
@@ -1096,11 +1095,11 @@ public:
     TS_ASSERT_DELTA(stats.maximum, 11.0, 1e-3);
     TS_ASSERT_DELTA(stats.median, 6.0, 1e-3);
     TS_ASSERT_DELTA(stats.mean, 6.0, 1e-3);
-    TS_ASSERT_DELTA(stats.duration, 100.0, 1e-3);
+    TS_ASSERT_DELTA(stats.duration, 110.0, 1e-3);
     TS_ASSERT_DELTA(stats.standard_deviation, 3.1622, 1e-3);
-    TS_ASSERT_DELTA(log->timeAverageValue(), 5.5, 1e-3);
-    TS_ASSERT_DELTA(stats.time_mean, 5.5, 1e-3);
-    TS_ASSERT_DELTA(stats.time_standard_deviation, 2.872, 1e-3);
+    TS_ASSERT_DELTA(log->timeAverageValue(), stats.mean, 1e-3);
+    TS_ASSERT_DELTA(stats.time_mean, stats.mean, 1e-3);
+    TS_ASSERT_DELTA(stats.time_standard_deviation, stats.standard_deviation, 1e-3);
 
     delete log;
   }
@@ -2262,7 +2261,7 @@ public:
   void test_filterByTime_out_of_range_filters_nothing() {
     TimeSeriesProperty<int> *log = createIntegerTSP(6);
 
-    size_t original_size = log->realSize();
+    size_t original_size = std::size_t(log->realSize());
 
     TS_ASSERT_EQUALS(original_size, 6);
 
@@ -2313,7 +2312,12 @@ public:
     TS_ASSERT_EQUALS(intervals.size(), 1);
     const auto &range = intervals.front();
     TS_ASSERT_EQUALS(range.begin(), log->firstTime());
-    TS_ASSERT_EQUALS(range.end(), log->lastTime());
+
+    // the range is extended by the last difference in times
+    // this is to make the last value count as much as the penultimate
+    const auto lastDuration = log->nthInterval(log->size() - 1).length();
+    const auto stop = log->lastTime() + lastDuration;
+    TS_ASSERT_EQUALS(range.end(), stop);
   }
 
   void test_getSplittingIntervals_repeatedEntries() {
