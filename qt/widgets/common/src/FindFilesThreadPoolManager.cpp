@@ -112,7 +112,7 @@ void FindFilesThreadPoolManager::cancelWorker() {
 
 /** Check if a search is currently executing.
  *
- * @returns true if no worker threads are active
+ * @returns true if at least one worker thread is active
  */
 bool FindFilesThreadPoolManager::isSearchRunning() const { return poolInstance()->activeThreadCount() > 0; }
 
