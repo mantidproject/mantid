@@ -113,12 +113,7 @@ template <> std::string dtype(TimeSeriesProperty<std::string> &self) {
       .def("nthTime", &TimeSeriesProperty<TYPE>::nthTime, (arg("self"), arg("index")),                                 \
            "returns :class:`mantid.kernel.DateAndTime`")                                                               \
       .def("getStatistics", &TimeSeriesProperty<TYPE>::getStatistics, getStatistics_overloads())                       \
-      .def("timeAverageValue",                                                                                         \
-           (double (TimeSeriesProperty<TYPE>::*)() const) & TimeSeriesProperty<TYPE>::timeAverageValue, (arg("self"))) \
-      .def("timeAverageValue",                                                                                         \
-           (double (TimeSeriesProperty<TYPE>::*)(const Mantid::Kernel::TimeROI &) const) &                             \
-               TimeSeriesProperty<TYPE>::timeAverageValue,                                                             \
-           (arg("self"), arg("time_roi")))                                                                             \
+      .def("timeAverageValue", &TimeSeriesProperty<TYPE>::timeAverageValue, (arg("self"), arg("time_roi") = nullptr))  \
       .def("dtype", &dtype<TYPE>, arg("self"));
 
 } // namespace
