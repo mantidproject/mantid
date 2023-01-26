@@ -627,14 +627,14 @@ endif()
 
 # Target Additional components for this module
 find_package(
-  Qt5
+  Qt5 ${QT_MIN_VERSION}
   COMPONENTS Concurrent Help Network PrintSupport
   REQUIRED
 )
 # Prefer WebEngineWidgets over WebkitWidgets
 unset(Qt5_FOUND)
 find_package(
-  Qt5
+  Qt5 ${QT_MIN_VERSION}
   COMPONENTS WebEngineWidgets
   QUIET
 )
@@ -642,7 +642,7 @@ if(Qt5_FOUND)
   set(_webwidgets_tgt Qt5::WebEngineWidgets)
 else()
   find_package(
-    Qt5
+    Qt5 ${QT_MIN_VERSION}
     COMPONENTS WebKitWidgets
     QUIET
   )

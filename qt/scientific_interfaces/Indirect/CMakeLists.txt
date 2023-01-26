@@ -265,7 +265,7 @@ set(RES_FILES IndirectInterfaceResources.qrc)
 
 # XML is required to parse the settings file
 find_package(
-  Qt5
+  Qt5 ${QT_MIN_VERSION}
   COMPONENTS Concurrent Xml
   REQUIRED
 )

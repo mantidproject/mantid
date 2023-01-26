@@ -93,7 +93,7 @@ add_sphinx_build_target(doctest "sphinx.ext.mathjax")
 # qthelp if building workbench
 if(DOCS_QTHELP)
   find_package(
-    Qt5
+    Qt5 ${QT_MIN_VERSION}
     COMPONENTS Help
     REQUIRED
   )
