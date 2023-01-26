@@ -20,7 +20,7 @@ namespace Kernel {
 //---------------------------------------------------------------------------
 class SplittingInterval;
 class TimeInterval;
-class TimeSeriesPropertyStatistics;
+struct TimeSeriesPropertyStatistics;
 class Property;
 class TimeROI;
 /** A non-templated interface to a TimeSeriesProperty.
