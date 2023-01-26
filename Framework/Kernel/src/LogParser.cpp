@@ -11,6 +11,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <fstream>
@@ -309,37 +310,14 @@ bool LogParser::isICPEventLogNewStyle(const std::multimap<Types::Core::DateAndTi
  * @return The mean value over time.
  * @throw runtime_error if the property is not TimeSeriesProperty<double>
  */
-double timeMean(const Kernel::Property *p) {
+double timeMean(const Kernel::Property *p, const Kernel::TimeROI *roi) {
   const auto *dp = dynamic_cast<const Kernel::TimeSeriesProperty<double> *>(p);
   if (!dp) {
     throw std::runtime_error("Property of a wrong type. Cannot be cast to a "
                              "TimeSeriesProperty<double>.");
   }
 
-  // Special case for only one value - the algorithm
-  if (dp->size() == 1) {
-    return dp->nthValue(1);
-  }
-  double res = 0.;
-  Types::Core::time_duration total(0, 0, 0, 0);
-  size_t dp_size = dp->size();
-  for (size_t i = 0; i < dp_size; i++) {
-    Kernel::TimeInterval t = dp->nthInterval(static_cast<int>(i));
-    Types::Core::time_duration dt = t.length();
-    total += dt;
-    res += dp->nthValue(static_cast<int>(i)) * Types::Core::DateAndTime::secondsFromDuration(dt);
-  }
-
-  double total_seconds = Types::Core::DateAndTime::secondsFromDuration(total);
-
-  // If all the time stamps were the same, just return the first value.
-  if (total_seconds == 0.0)
-    res = dp->nthValue(1);
-
-  if (total_seconds > 0)
-    res /= total_seconds;
-
-  return res;
+  return dp->timeAverageValue(roi);
 }
 
 } // namespace Kernel
