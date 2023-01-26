@@ -51,7 +51,6 @@ public:
     TS_ASSERT_EQUALS(value.durationInSeconds(), 0.);
     TS_ASSERT(value.empty());
     TS_ASSERT_EQUALS(value.numBoundaries(), 0);
-    value.removeRedundantEntries();
   }
 
   void test_badRegions() {
@@ -123,7 +122,6 @@ public:
     TS_ASSERT_EQUALS(value.numBoundaries(), 4);
 
     // get rid of entries that have no effect
-    value.removeRedundantEntries();
     TS_ASSERT_EQUALS(value.numBoundaries(), 4);
   }
 
@@ -204,7 +202,6 @@ public:
     TS_ASSERT_EQUALS(value.numBoundaries(), 2);
     value.addROI(CHRISTMAS_START, CHRISTMAS_STOP);
     TS_ASSERT_EQUALS(value.numBoundaries(), 2);
-    value.removeRedundantEntries();
   }
 
   void test_reversesortedROI() {
@@ -228,7 +225,6 @@ public:
 
     // since it ends with "on" the duration is infinite
     TS_ASSERT_EQUALS(value.durationInSeconds(), 0.);
-    value.removeRedundantEntries();
     TS_ASSERT(value.empty());
   }
 
@@ -242,7 +238,6 @@ public:
 
     value1.addROI(DateAndTime(NEW_YEARS_START), DateAndTime(NEW_YEARS_STOP));
     TS_ASSERT_EQUALS(value1.durationInSeconds(), ONE_DAY_DURATION);
-    value1.removeRedundantEntries();
     TS_ASSERT_EQUALS(value1.numBoundaries(), 2);
 
     // roi first
@@ -253,7 +248,6 @@ public:
 
     value2.addMask(DateAndTime(NEW_YEARS_START), DateAndTime(NEW_YEARS_STOP));
     TS_ASSERT_EQUALS(value2.durationInSeconds(), 0.);
-    value2.removeRedundantEntries();
     TS_ASSERT_EQUALS(value2.numBoundaries(), 0);
   }
 
