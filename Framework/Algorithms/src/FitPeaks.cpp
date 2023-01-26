@@ -194,21 +194,45 @@ void PeakFitResult::setBadRecord(size_t ipeak, const double peak_position) {
 }
 
 PeakFitPreCheckResult &PeakFitPreCheckResult::operator+=(const PeakFitPreCheckResult &another) {
-  m_low_count += another.m_low_count;
+  m_submitted_spectrum_peaks += another.m_submitted_spectrum_peaks;
+  m_submitted_individual_peaks += another.m_submitted_individual_peaks;
+  m_low_count_spectrum += another.m_low_count_spectrum;
+  m_out_of_range += another.m_out_of_range;
+  m_low_count_individual += another.m_low_count_individual;
   m_not_enough_datapoints += another.m_not_enough_datapoints;
   m_low_snr += another.m_low_snr;
+
   return *this;
 }
 
-void PeakFitPreCheckResult::SetNumberOfPeaksWithLowCount(const size_t n) { m_low_count = n; }
+void PeakFitPreCheckResult::setNumberOfSubmittedSpectrumPeaks(const size_t n) { m_submitted_spectrum_peaks = n; }
 
-void PeakFitPreCheckResult::SetNumberOfPeaksWithNotEnoughDataPoints(const size_t n) { m_not_enough_datapoints = n; }
+void PeakFitPreCheckResult::setNumberOfSubmittedIndividualPeaks(const size_t n) { m_submitted_individual_peaks = n; }
 
-void PeakFitPreCheckResult::SetNumberOfPeaksWithLowSignalToNoise(const size_t n) { m_low_snr = n; }
+void PeakFitPreCheckResult::setNumberOfSpectrumPeaksWithLowCount(const size_t n) { m_low_count_spectrum = n; }
 
-void PeakFitPreCheckResult::Report(Kernel::Logger &logger) {
-  if (m_low_count > 0)
-    logger.notice() << m_low_count << " peak(s) rejected: low signal count.\n";
+void PeakFitPreCheckResult::setNumberOfOutOfRangePeaks(const size_t n) { m_out_of_range = n; }
+
+void PeakFitPreCheckResult::setNumberOfIndividualPeaksWithLowCount(const size_t n) { m_low_count_individual = n; }
+
+void PeakFitPreCheckResult::setNumberOfPeaksWithNotEnoughDataPoints(const size_t n) { m_not_enough_datapoints = n; }
+
+void PeakFitPreCheckResult::setNumberOfPeaksWithLowSignalToNoise(const size_t n) { m_low_snr = n; }
+
+void PeakFitPreCheckResult::report(Kernel::Logger &logger) {
+  assert(m_submitted_individual_peaks <= m_submitted_spectrum_peaks);
+
+  // if no peaks were rejected by the pre-check, keep quiet
+  if (m_low_count_spectrum + m_out_of_range + m_low_count_individual + m_not_enough_datapoints + m_low_snr == 0)
+    return;
+
+  logger.notice() << "Total number of peaks pre-checked before fitting: " << m_submitted_spectrum_peaks << "\n";
+  if (m_low_count_spectrum > 0)
+    logger.notice() << m_low_count_spectrum << " peak(s) rejected: low signal count (whole spectrum).\n";
+  if (m_out_of_range > 0)
+    logger.notice() << m_out_of_range << " peak(s) rejected: out of range.\n";
+  if (m_low_count_individual > 0)
+    logger.notice() << m_low_count_individual << " peak(s) rejected: low signal count (individual peak).\n";
   if (m_not_enough_datapoints > 0)
     logger.notice() << m_not_enough_datapoints << " peak(s) rejected: not enough X(Y) datapoints.\n";
   if (m_low_snr > 0)
@@ -219,7 +243,7 @@ void PeakFitPreCheckResult::Report(Kernel::Logger &logger) {
 //----------------------------------------------------------------------------------------------
 FitPeaks::FitPeaks()
     : m_fitPeaksFromRight(true), m_fitIterations(50), m_numPeaksToFit(0), m_minPeakHeight(20.),
-      m_checkNumberOfDataPoints(true), m_minSignalToNoiseRatio(0.), m_bkgdSimga(1.), m_peakPosTolCase234(false) {}
+      m_minSignalToNoiseRatio(0.), m_bkgdSimga(1.), m_peakPosTolCase234(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** initialize the properties
@@ -351,7 +375,9 @@ void FitPeaks::init() {
 
   declareProperty(PropertyNames::PEAK_MIN_HEIGHT, 0.,
                   "Minimum peak height such that all the fitted peaks with "
-                  "height under this value will be excluded.");
+                  "height under this value will be excluded. The same property is used "
+                  "for pre-checking peaks before fitting, such that all the peaks with the total Y-count "
+                  "under this value will be excluded.");
 
   declareProperty(PropertyNames::PEAK_MIN_SIGNAL_TO_NOISE_RATIO, 0.,
                   "Minimum signal-to-noise ratio such that all the peaks with "
@@ -920,7 +946,7 @@ std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> FitPeaks::fitPeak
     PARALLEL_END_INTERRUPT_REGION
   }
   PARALLEL_CHECK_INTERRUPT_REGION
-  pre_check_result->Report(g_log);
+  reportPreCheckResults(*pre_check_result);
   return fit_result_vector;
 }
 
@@ -1119,6 +1145,23 @@ void reduceByBackground(const API::IBackgroundFunction_sptr &bkgd_func, const st
     // it is better not to mess up with E here
   }
 }
+
+//----------------------------------------------------------------------------------------------
+/** Temporarily suspend the algorithm logging offset within the scope of a method where this sentry
+ * is instantiated.
+ */
+class LoggingOffsetSentry {
+public:
+  LoggingOffsetSentry(Algorithm *const alg) : m_alg(alg) {
+    m_loggingOffset = m_alg->getLoggingOffset();
+    m_alg->setLoggingOffset(0);
+  }
+  ~LoggingOffsetSentry() { m_alg->setLoggingOffset(m_loggingOffset); }
+
+private:
+  Algorithm *const m_alg;
+  int m_loggingOffset;
+};
 } // namespace
 
 //----------------------------------------------------------------------------------------------
@@ -1128,12 +1171,13 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
                                 const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result,
                                 std::vector<std::vector<double>> &lastGoodPeakParameters,
                                 const std::shared_ptr<FitPeaksAlgorithm::PeakFitPreCheckResult> &pre_check_result) {
+  pre_check_result->setNumberOfSubmittedSpectrumPeaks(fit_result->getNumberPeaks());
   if (m_minPeakHeight >= 0.) {
     // if spectrum contains a very weak signal, do not proceed and return
     if (numberCounts(m_inputMatrixWS->histogram(wi)) <= m_minPeakHeight) {
       for (size_t i = 0; i < fit_result->getNumberPeaks(); ++i)
         fit_result->setBadRecord(i, -1.);
-      pre_check_result->SetNumberOfPeaksWithLowCount(fit_result->getNumberPeaks());
+      pre_check_result->setNumberOfSpectrumPeaksWithLowCount(fit_result->getNumberPeaks());
       return; // don't do anything
     }
   }
@@ -1163,7 +1207,7 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
   // index of previous peak in same spectrum (initially invalid)
   size_t prev_peak_index = m_numPeaksToFit;
   bool neighborPeakSameSpectrum = false;
-
+  size_t number_of_out_of_range_peaks{0};
   for (size_t fit_index = 0; fit_index < m_numPeaksToFit; ++fit_index) {
     // convert fit index to peak index (in ascending order)
     size_t peak_index(fit_index);
@@ -1258,6 +1302,7 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
     if (expected_peak_pos <= x0 || expected_peak_pos >= xf) {
       // out of range and there won't be any fit
       peakfunction->setIntensity(0);
+      number_of_out_of_range_peaks++;
     } else {
       // find out the peak position to fit
       std::pair<double, double> peak_window_i = getPeakFitWindow(wi, peak_index);
@@ -1281,6 +1326,7 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
                                bkgdfunction, peak_pre_check_result);
       *pre_check_result += *peak_pre_check_result;
     }
+    pre_check_result->setNumberOfOutOfRangePeaks(number_of_out_of_range_peaks);
 
     // process fitting result
     FitPeaksAlgorithm::FitFunction fit_function;
@@ -1633,31 +1679,30 @@ double FitPeaks::fitIndividualPeak(size_t wi, const API::IAlgorithm_sptr &fitter
                                    const API::IPeakFunction_sptr &peakfunction,
                                    const API::IBackgroundFunction_sptr &bkgdfunc,
                                    const std::shared_ptr<FitPeaksAlgorithm::PeakFitPreCheckResult> &pre_check_result) {
+  pre_check_result->setNumberOfSubmittedIndividualPeaks(1);
   double cost(DBL_MAX);
-  if (m_checkNumberOfDataPoints) {
-    // check if we have enough data points to fit
-    // estimateBackgroundParameters() method requires to have at least 20 data points. Adding 3 datapoints to that as a
-    // magic number.
-    size_t minimum_number_of_datapoints{23};
-    // make sure the minimum number of data points satisfies the number of parameters to fit plus a magic cushion of 2.
-    minimum_number_of_datapoints =
-        std::max(minimum_number_of_datapoints, peakfunction->nParams() + bkgdfunc->nParams() + 2);
-    if (numberElements(m_inputMatrixWS->readX(wi), fitwindow) < minimum_number_of_datapoints) {
-      pre_check_result->SetNumberOfPeaksWithNotEnoughDataPoints(1);
-      return cost;
-    }
+  // check if we have enough data points to fit
+  // estimateBackgroundParameters() method requires to have at least 20 data points. Adding 3 datapoints to that as a
+  // magic number.
+  size_t minimum_number_of_datapoints{23};
+  // make sure the minimum number of data points satisfies the number of parameters to fit plus a magic cushion of 2.
+  minimum_number_of_datapoints =
+      std::max(minimum_number_of_datapoints, peakfunction->nParams() + bkgdfunc->nParams() + 2);
+  if (numberElements(m_inputMatrixWS->readX(wi), fitwindow) < minimum_number_of_datapoints) {
+    pre_check_result->setNumberOfPeaksWithNotEnoughDataPoints(1);
+    return cost;
   }
 
   // check the number of counts in the peak window
   if (m_minPeakHeight >= 0.0 && numberCounts(m_inputMatrixWS->histogram(wi), fitwindow) <= m_minPeakHeight) {
-    pre_check_result->SetNumberOfPeaksWithLowCount(1);
+    pre_check_result->setNumberOfIndividualPeaksWithLowCount(1);
     return cost;
   }
 
   // exclude a peak with a low signal-to-noise ratio
   if (m_minSignalToNoiseRatio > 0.0 &&
       calculateSignalToNoiseRatio(m_inputMatrixWS->histogram(wi), fitwindow, bkgdfunc) < m_minSignalToNoiseRatio) {
-    pre_check_result->SetNumberOfPeaksWithLowSignalToNoise(1);
+    pre_check_result->setNumberOfPeaksWithLowSignalToNoise(1);
     return cost;
   }
 
@@ -2256,6 +2301,10 @@ std::string FitPeaks::getPeakHeightParameterName(const API::IPeakFunction_const_
   return height_name;
 }
 
+void FitPeaks::reportPreCheckResults(FitPeaksAlgorithm::PeakFitPreCheckResult &result) {
+  LoggingOffsetSentry sentry(this);
+  result.report(g_log);
+}
 DECLARE_ALGORITHM(FitPeaks)
 
 } // namespace Mantid::Algorithms

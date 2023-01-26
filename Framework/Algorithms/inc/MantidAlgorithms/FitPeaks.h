@@ -63,18 +63,33 @@ private:
 
 class PeakFitPreCheckResult {
 public:
-  PeakFitPreCheckResult() : m_low_count{0}, m_not_enough_datapoints{0}, m_low_snr{0} {}
+  PeakFitPreCheckResult()
+      : m_submitted_spectrum_peaks{0}, m_submitted_individual_peaks{0}, m_low_count_spectrum{0}, m_out_of_range{0},
+        m_low_count_individual{0}, m_not_enough_datapoints{0}, m_low_snr{0} {}
   PeakFitPreCheckResult &operator+=(const PeakFitPreCheckResult &another);
 
 public:
-  void SetNumberOfPeaksWithLowCount(const size_t n);
-  void SetNumberOfPeaksWithNotEnoughDataPoints(const size_t n);
-  void SetNumberOfPeaksWithLowSignalToNoise(const size_t n);
-  void Report(Kernel::Logger &logger);
+  void setNumberOfSubmittedSpectrumPeaks(const size_t n);
+  void setNumberOfSubmittedIndividualPeaks(const size_t n);
+  void setNumberOfSpectrumPeaksWithLowCount(const size_t n);
+  void setNumberOfOutOfRangePeaks(const size_t n);
+  void setNumberOfIndividualPeaksWithLowCount(const size_t n);
+  void setNumberOfPeaksWithNotEnoughDataPoints(const size_t n);
+  void setNumberOfPeaksWithLowSignalToNoise(const size_t n);
+  void report(Kernel::Logger &logger);
 
 private:
-  // number of peaks rejected due to low signal count
-  size_t m_low_count;
+  // number of peaks submitted for spectrum fitting
+  size_t m_submitted_spectrum_peaks;
+  // number of peaks submitted for individual fitting. Since some spectra might fail a pre-check, not all peaks might
+  // make it to the individual fitting
+  size_t m_submitted_individual_peaks;
+  // number of peaks rejected as a whole spectrum due to its low signal count
+  size_t m_low_count_spectrum;
+  // number of peaks rejected individually because their predicted position is out of range
+  size_t m_out_of_range;
+  // number of peaks rejected individually due to low signal count
+  size_t m_low_count_individual;
   // number of peask rejected due to not enough data points
   size_t m_not_enough_datapoints;
   // number of peaks rejected due to low signal-to-noise ratio
@@ -99,8 +114,6 @@ public:
   const std::string category() const override { return "Optimization"; }
 
   std::map<std::string, std::string> validateInputs() override;
-
-  void SetCheckNumberOfDataPoints(const bool check) { m_checkNumberOfDataPoints = check; }
 
 private:
   /// Init
@@ -199,6 +212,8 @@ private:
   /// parameters (width!)
   bool isObservablePeakProfile(const std::string &peakprofile);
 
+  void reportPreCheckResults(FitPeaksAlgorithm::PeakFitPreCheckResult &result);
+
   //------- Workspaces-------------------------------------
   /// mandatory input and output workspaces
   API::MatrixWorkspace_sptr m_inputMatrixWS;
@@ -286,9 +301,6 @@ private:
   /// minimum peak height without background and it also serves as the criteria
   /// for observed peak parameter
   double m_minPeakHeight;
-
-  // flag for a number-of-data-points check
-  bool m_checkNumberOfDataPoints;
 
   // Criteria for rejecting non-peaks or weak peaks from fitting
   double m_minSignalToNoiseRatio;

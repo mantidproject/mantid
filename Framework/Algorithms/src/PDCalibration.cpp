@@ -233,7 +233,9 @@ void PDCalibration::init() {
 
   declareProperty("MinimumPeakHeight", 2.,
                   "Minimum peak height such that all the fitted peaks with "
-                  "height under this value will be excluded.");
+                  "height under this value will be excluded. The same property is used "
+                  "for pre-checking peaks before fitting, such that all the peaks with the total Y-count "
+                  "under this value will be excluded.");
 
   declareProperty("MinimumSignalToNoiseRatio", 3.,
                   "Minimum signal-to-noise ratio such that all the peaks with "
