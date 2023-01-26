@@ -81,7 +81,6 @@ struct MANTID_KERNEL_DLL TimeSeriesPropertyStatistics {
     time_mean = value;
     time_standard_deviation = 0.0;
     duration = std::numeric_limits<double>::quiet_NaN();
-    ;
   }
 
   void setAllToNan() {
