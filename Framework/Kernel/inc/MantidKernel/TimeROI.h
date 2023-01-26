@@ -22,7 +22,7 @@ public:
 
   TimeROI();
   TimeROI(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime);
-  TimeROI(const Kernel::TimeSeriesProperty<bool> &filter);
+  TimeROI(const Kernel::TimeSeriesProperty<bool> *filter);
   double durationInSeconds() const;
   double durationInSeconds(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) const;
   std::size_t numBoundaries() const;
@@ -38,7 +38,6 @@ public:
   void replaceROI(const TimeROI &other);
   void update_union(const TimeROI &other);
   void update_intersection(const TimeROI &other);
-  void removeRedundantEntries();
   const Kernel::SplittingIntervalVec toSplitters() const;
   bool operator==(const TimeROI &other) const;
   void debugPrint(const std::size_t type = 0) const;

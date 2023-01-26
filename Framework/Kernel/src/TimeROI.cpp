@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include <iostream> // TODO REMOVE
+#include <iostream>
 #include <limits>
 
 #include "MantidKernel/Logger.h"
@@ -43,7 +43,7 @@ TimeROI::TimeROI(const Types::Core::DateAndTime &startTime, const Types::Core::D
   this->addROI(startTime, stopTime);
 }
 
-TimeROI::TimeROI(const Kernel::TimeSeriesProperty<bool> &filter) { this->replaceROI(filter); }
+TimeROI::TimeROI(const Kernel::TimeSeriesProperty<bool> *filter) { this->replaceROI(filter); }
 
 void TimeROI::addROI(const std::string &startTime, const std::string &stopTime) {
   this->addROI(DateAndTime(startTime), DateAndTime(stopTime));
@@ -340,61 +340,6 @@ void TimeROI::update_intersection(const TimeROI &other) {
   if (m_roi.back() > other.m_roi.back()) {
     this->addMask(other.m_roi.back(), m_roi.back());
   }
-}
-
-/**
- * Remove time/value pairs that are not necessary to describe the TimeROI
- * - Sort the times/values
- * - Ensure that values start with USE and should end with IGNORE
- * - Remove values that are not needed (e.g. IGNORE followed by IGNORE)
- * - Remove values that are overridden. Overridden values are ones where a new value was added at the same time, the
- * last one added will be used.
- */
-void TimeROI::removeRedundantEntries() {
-  /* TODO
-if (this->numBoundaries() < 2) {
-  return; // nothing to do with zero or one elements
-}
-
-// when an individual time has multiple values, use the last value added
-m_roi.eliminateDuplicates();
-
-// get a copy of the current roi
-const auto values_old = m_roi.valuesAsVector();
-if (valuesAreAlternating(values_old)) {
-  // there is nothing more to do
-  return;
-}
-const auto times_old = m_roi.timesAsVector();
-const auto ORIG_SIZE = values_old.size();
-
-// create new vector to put result into
-std::vector<bool> values_new;
-std::vector<DateAndTime> times_new;
-
-// skip ahead to first time that isn't ignore
-// since before being in the ROI means ignore
-std::size_t index_old = 0;
-while (values_old[index_old] == ROI_IGNORE) {
-  index_old++;
-}
-// add the current location which will always start with use
-values_new.push_back(ROI_USE);
-times_new.push_back(times_old[index_old]);
-index_old++; // advance past location just added
-
-// copy in values that aren't the same as the ones before them
-for (; index_old < ORIG_SIZE; ++index_old) {
-  if (values_old[index_old] != values_old[index_old - 1]) {
-    values_new.push_back(values_old[index_old]);
-    times_new.push_back(times_old[index_old]);
-  }
-}
-
-// update the member value if anything has changed
-if (values_new.size() != ORIG_SIZE)
-  m_roi.replaceValues(times_new, values_new);
-  */
 }
 
 /**
