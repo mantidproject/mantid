@@ -33,6 +33,15 @@ template <typename T> bool convertSingleValue(const Property *property, double &
   }
 }
 
+bool convertSingleValueToDouble(const Property *property, double &value) {
+  // Order these with double and int first, and less likely options later.
+  // The first one to succeed short-circuits and the value is returned.
+  // If all fail, returns false.
+  return convertSingleValue<double>(property, value) || convertSingleValue<int32_t>(property, value) ||
+         convertSingleValue<int64_t>(property, value) || convertSingleValue<uint32_t>(property, value) ||
+         convertSingleValue<uint64_t>(property, value) || convertSingleValue<float>(property, value);
+}
+
 /// Templated method to convert time series property to single double
 template <typename T>
 bool convertTimeSeriesToDouble(const Property *property, double &value, const Math::StatisticType &function) {
@@ -345,19 +354,14 @@ double LogManager::getTimeAveragedStd(const std::string &name) const {
 Kernel::TimeSeriesPropertyStatistics LogManager::getStatistics(const std::string &name) const {
   const Kernel::Property *prop = getProperty(name);
 
-  // statistics from a PropertyWithValue object
-  if (auto *singleValueProp = dynamic_cast<const Kernel::PropertyWithValue<size_t> *>(prop))
-    return TimeSeriesPropertyStatistics(static_cast<double>((*singleValueProp)()));
-  if (auto *singleValueProp = dynamic_cast<const Kernel::PropertyWithValue<int> *>(prop))
-    return TimeSeriesPropertyStatistics(static_cast<double>((*singleValueProp)()));
-  if (auto *singleValueProp = dynamic_cast<const Kernel::PropertyWithValue<float> *>(prop))
-    return TimeSeriesPropertyStatistics(static_cast<double>((*singleValueProp)()));
-  if (auto *singleValueProp = dynamic_cast<const Kernel::PropertyWithValue<double> *>(prop))
-    return TimeSeriesPropertyStatistics((*singleValueProp)());
-
   // statistics from a TimeSeriesProperty object
   if (auto *timeSeriesProp = dynamic_cast<const Kernel::ITimeSeriesProperty *>(prop))
     return timeSeriesProp->getStatistics();
+
+  // statistics from a PropertyWithValue object
+  double value;
+  if (Mantid::API::convertSingleValueToDouble(prop, value))
+    return TimeSeriesPropertyStatistics(value);
 
   // return values set to NAN, signaling no statistics can be obtained
   TimeSeriesPropertyStatistics invalid;
