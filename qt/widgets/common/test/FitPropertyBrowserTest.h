@@ -54,8 +54,7 @@ public:
 
     // create a FunctionBrowser
     auto fpBrowser = std::make_unique<MantidQt::MantidWidgets::FitPropertyBrowser>();
-    // initialise it - this adds an observer on the function factory update
-    // message
+    // initialise it - this adds an observer on the function factory update message
     fpBrowser->init();
     // delete the FunctionBrowser
     fpBrowser.reset();
@@ -64,7 +63,7 @@ public:
   }
 
   void test_getOldExpressionAsString_returns_empty_string_when_tie_is_null() {
-    // initialise it fitPropertyBrowser- this adds an observer on the function factory update message
+    // initialise fitPropertyBrowser- this adds an observer on the function factory update message
     m_fitPropertyBrowser->init();
     m_fitPropertyBrowser->createCompositeFunction("name=Gaussian,Height=100,PeakCentre=1.45,Sigma=0.2;");
     QString parameterName = "f0.Height";
@@ -73,7 +72,7 @@ public:
   }
 
   void test_getOldExpressionAsString_returns_empty_string_when_parameter_is_null() {
-    // initialise it fitPropertyBrowser- this adds an observer on the function factory update message
+    // initialise fitPropertyBrowser- this adds an observer on the function factory update message
     m_fitPropertyBrowser->init();
     m_fitPropertyBrowser->createCompositeFunction("name=Gaussian,Height=100,PeakCentre=1.45,Sigma=0.2;");
     QString parameterName = "InvalidParameterName";
