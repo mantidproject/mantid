@@ -689,7 +689,7 @@ public:
   void test_timeAverageValueWithROI() {
     auto dblLog = createDoubleTSP();
     TimeROI *rois = createTimeRoi();
-    const double dblMean = dblLog->timeAverageValue(*rois);
+    const double dblMean = dblLog->timeAverageValue(rois);
     delete dblLog; // clean up
     delete rois;
     const double expected = (5.0 * 9.99 + 5.0 * 7.55 + 5.0 * 5.55 + 5.0 * 10.55) / (5.0 + 5.0 + 5.0 + 5.0);
