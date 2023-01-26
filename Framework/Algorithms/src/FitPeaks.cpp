@@ -971,9 +971,7 @@ std::vector<std::string> supported_peak_profiles{"Gaussian", "Lorentzian", "Pseu
  * @return :: total number of counts
  */
 double numberCounts(const Histogram &histogram) {
-  double total = 0.;
-  for (const auto &value : histogram.y())
-    total += std::fabs(value);
+  double total = std::accumulate(histogram.y().begin(), histogram.y().end(), 0.);
   return total;
 }
 
@@ -988,11 +986,8 @@ double numberCounts(const Histogram &histogram, const std::pair<double, double> 
   std::vector<double> vec_x, vec_y, vec_e;
   getRangeData(histogram, range, vec_x, vec_y, vec_e);
   // sum up all counts
-  double signal{0.0};
-  for (auto a : vec_y)
-    signal += a;
-
-  return signal;
+  double total = std::accumulate(vec_y.begin(), vec_y.end(), 0.);
+  return total;
 }
 
 //----------------------------------------------------------------------------------------------
