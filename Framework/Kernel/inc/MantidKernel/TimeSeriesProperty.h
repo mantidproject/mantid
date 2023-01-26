@@ -326,7 +326,11 @@ public:
   bool isDefault() const override;
 
   /// Return a TimeSeriesPropertyStatistics object
+<<<<<<< HEAD
   TimeSeriesPropertyStatistics getStatistics(const Kernel::TimeROI * = nullptr) const;
+=======
+  TimeSeriesPropertyStatistics getStatistics() const override;
+>>>>>>> 1c06af57296 (TimeSeriesPropertyStatistics constructor with single value.)
 
   /// Detects whether there are duplicated entries (of time) in property &
   /// eliminates them

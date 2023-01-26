@@ -344,7 +344,6 @@ double LogManager::getTimeAveragedStd(const std::string &name) const {
  */
 Kernel::TimeSeriesPropertyStatistics LogManager::getStatistics(const std::string &name) const {
   const Kernel::Property *prop = getProperty(name);
-  double nan = std::numeric_limits<double>::quiet_NaN();
 
   // statistics from a PropertyWithValue object
   if (auto *singleValueProp = dynamic_cast<const Kernel::PropertyWithValue<size_t> *>(prop))
@@ -357,13 +356,7 @@ Kernel::TimeSeriesPropertyStatistics LogManager::getStatistics(const std::string
     return TimeSeriesPropertyStatistics((*singleValueProp)());
 
   // statistics from a TimeSeriesProperty object
-  if (auto *timeSeriesProp = dynamic_cast<const Kernel::TimeSeriesProperty<size_t> *>(prop))
-    return timeSeriesProp->getStatistics();
-  if (auto *timeSeriesProp = dynamic_cast<const Kernel::TimeSeriesProperty<int> *>(prop))
-    return timeSeriesProp->getStatistics();
-  if (auto *timeSeriesProp = dynamic_cast<const Kernel::TimeSeriesProperty<float> *>(prop))
-    return timeSeriesProp->getStatistics();
-  if (auto *timeSeriesProp = dynamic_cast<const Kernel::TimeSeriesProperty<double> *>(prop))
+  if (auto *timeSeriesProp = dynamic_cast<const Kernel::ITimeSeriesProperty *>(prop))
     return timeSeriesProp->getStatistics();
 
   // return values set to NAN, signaling no statistics can be obtained
