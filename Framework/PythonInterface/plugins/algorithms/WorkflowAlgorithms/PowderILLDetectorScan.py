@@ -44,13 +44,14 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
         if self.getPropertyValue("ComponentsToReduce") and self.getProperty("CropNegativeScatteringAngles").value:
             issues["CropNegativeScatteringAngles"] = "For component-wise reduction, this has to be unchecked."
 
-        detectorHeights = self.getPropertyValue("HeightRange").split(",")
-        for height in detectorHeights:
-            try:
-                if float(height) > 0.15 or float(height) < -0.15:
-                    issues["HeightRange"] = "The height of the detector ranges from -0.15m to 0.15m"
-            except ValueError:
-                issues["HeightRange"] = "The height of the detector must be expressed in meters"
+        if self.getPropertyValue("HeightRange"):
+            detectorHeights = self.getPropertyValue("HeightRange").split(",")
+            for height in detectorHeights:
+                try:
+                    if float(height) > 0.15 or float(height) < -0.15:
+                        issues["HeightRange"] = "The height of the detector ranges from -0.15m to 0.15m"
+                except ValueError:
+                    issues["HeightRange"] = "The height of the detector must be expressed in meters"
 
         return issues
 
