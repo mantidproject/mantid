@@ -126,7 +126,7 @@ public:
   /// Save settings for the widget tab to a project file
   virtual std::string saveToProject() const;
 
-protected:
+private:
   /// Correct for aspect ratio
   void correctForAspectRatioAndZoom(double &xmin, double &xmax, double &ymin, double &ymax, double &zmin,
                                     double &zmax) const;
