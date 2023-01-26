@@ -1,0 +1,1 @@
+- the aspect ratio of detector banks are now maintained in the 2D views in the instrument viewer regardless of the dimensions of the plot area
