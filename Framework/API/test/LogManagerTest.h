@@ -442,10 +442,11 @@ public:
       TS_ASSERT_DELTA(stats.minimum, value, 0.001);
       TS_ASSERT_DELTA(stats.maximum, value, 0.001);
       TS_ASSERT_DELTA(stats.mean, value, 0.001);
+      TS_ASSERT_DELTA(stats.median, value, 0.001);
       TS_ASSERT_DELTA(stats.standard_deviation, 0.0, 0.001);
       TS_ASSERT_DELTA(stats.time_mean, value, 0.001);
       TS_ASSERT_DELTA(stats.time_standard_deviation, 0.0, 0.001);
-      TS_ASSERT_EQUALS(isnan(stats.duration), true);
+      TS_ASSERT(isnan(stats.duration));
     }
 
     // test invalid single value property

@@ -346,29 +346,15 @@ Kernel::TimeSeriesPropertyStatistics LogManager::getStatistics(const std::string
   const Kernel::Property *prop = getProperty(name);
   double nan = std::numeric_limits<double>::quiet_NaN();
 
-  // helper function to assign statistics to a single value
-  auto fromSingleValue = [&](double value) {
-    TimeSeriesPropertyStatistics stats;
-    stats.minimum = value;
-    stats.maximum = value;
-    stats.mean = value;
-    stats.median = value;
-    stats.standard_deviation = 0.0;
-    stats.time_mean = value;
-    stats.time_standard_deviation = 0.0;
-    stats.duration = nan; // duration is an ill-concept of a single value
-    return stats;
-  };
-
   // statistics from a PropertyWithValue object
   if (auto *singleValueProp = dynamic_cast<const Kernel::PropertyWithValue<size_t> *>(prop))
-    return fromSingleValue(static_cast<double>((*singleValueProp)()));
+    return TimeSeriesPropertyStatistics(static_cast<double>((*singleValueProp)()));
   if (auto *singleValueProp = dynamic_cast<const Kernel::PropertyWithValue<int> *>(prop))
-    return fromSingleValue(static_cast<double>((*singleValueProp)()));
+    return TimeSeriesPropertyStatistics(static_cast<double>((*singleValueProp)()));
   if (auto *singleValueProp = dynamic_cast<const Kernel::PropertyWithValue<float> *>(prop))
-    return fromSingleValue(static_cast<double>((*singleValueProp)()));
+    return TimeSeriesPropertyStatistics(static_cast<double>((*singleValueProp)()));
   if (auto *singleValueProp = dynamic_cast<const Kernel::PropertyWithValue<double> *>(prop))
-    return fromSingleValue((*singleValueProp)());
+    return TimeSeriesPropertyStatistics((*singleValueProp)());
 
   // statistics from a TimeSeriesProperty object
   if (auto *timeSeriesProp = dynamic_cast<const Kernel::TimeSeriesProperty<size_t> *>(prop))
