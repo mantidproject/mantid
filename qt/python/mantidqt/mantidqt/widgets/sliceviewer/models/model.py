@@ -582,10 +582,10 @@ class SliceViewerModel(SliceViewerBaseModel):
         if basis_transform is None:
             return 0.0, 0.0, 0.0
 
-        # Get the values for the h, k and l projections
-        hkl_projection = tuple(full_point[q_i] for q_i in qdims_i)
+        # Get the x, y, z values for the q dimensions
+        q_xyz = tuple(full_point[q_i] for q_i in qdims_i)
 
-        return np.matmul(basis_transform, hkl_projection)
+        return np.matmul(basis_transform, q_xyz)
 
 
 # private functions
