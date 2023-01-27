@@ -397,14 +397,6 @@ void MantidHelpWindow::determineFileLocs() {
   if (dataLoc.endsWith("mantidproject")) {
     Poco::Path path(dataLoc.toStdString(), m_cacheFile);
     m_cacheFile = path.absolute().toString();
-  } else if (dataLoc.endsWith("MantidPlot")) // understood to end in "Mantid/MantidPlot"
-  {
-    Poco::Path path(dataLoc.toStdString());
-    path = path.parent(); // drop off "MantidPlot"
-    path = path.parent(); // drop off "Mantid"
-    path = Poco::Path(path, "mantidproject");
-    path = Poco::Path(path, m_cacheFile);
-    m_cacheFile = path.absolute().toString();
   } else {
     g_log.debug() << "Failed to determine help cache file location\n"; // REMOVE
     Poco::Path path(dataLoc.toStdString(), "mantidproject");
