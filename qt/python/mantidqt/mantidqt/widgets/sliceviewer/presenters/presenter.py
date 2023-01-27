@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-from typing import Callable, Tuple
+from typing import Callable, List, Tuple
 import sys
 
 from mantid.kernel import Logger, SpecialCoordinateSystem
@@ -538,19 +538,29 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
 
     def get_extra_image_info_columns(self, xdata, ydata):
         qdims = [i for i, v in enumerate(self.view.data_view.dimensions.qflags) if v]
-        if len(qdims) == 3 and self.get_frame() == SpecialCoordinateSystem.HKL:
-            slice_point = self.get_slicepoint()
-            xdim, ydim = WorkspaceInfo.display_indices(slice_point, self.view.data_view.dimensions.transpose)
-            zdim = next(i for i, v in enumerate(slice_point) if v is not None and i in qdims)
-            if xdata == DBLMAX and ydata == DBLMAX:
-                hkl_as_strings = ["-", "-", "-"]
-            else:
-                hkl = self.model.get_hkl_from_xyz(xdim, ydim, zdim, xdata, ydata, slice_point[zdim])
-                hkl_as_strings = ["{:.4f}".format(element) for element in hkl]
-            extra_cols = {"H": hkl_as_strings[0], "K": hkl_as_strings[1], "L": hkl_as_strings[2]}
-        else:
-            extra_cols = {}
-        return extra_cols
+
+        if len(qdims) != 3 or self.get_frame() != SpecialCoordinateSystem.HKL:
+            return {}
+
+        if xdata == DBLMAX and ydata == DBLMAX:
+            return {"H": "-", "K": "-", "L": "-"}
+
+        slice_point = self.get_slicepoint()
+        xdim, ydim = WorkspaceInfo.display_indices(slice_point, self.view.data_view.dimensions.transpose)
+        full_point = self._get_full_point(slice_point, xdata, ydata, xdim, ydim)
+
+        hkl = self.model.get_hkl_from_full_point(full_point, qdims)
+
+        hkl_as_strings = [f"{element:.4f}" for element in hkl]
+        return {"H": hkl_as_strings[0], "K": hkl_as_strings[1], "L": hkl_as_strings[2]}
+
+    @staticmethod
+    def _get_full_point(slice_point: List[float], xdata: float, ydata: float, xdim: int, ydim: int) -> List[float]:
+        """Construct a list containing the full cursor coordinate i.e. x, y, z, and any other dimensions"""
+        full_point = slice_point.copy()
+        full_point[xdim] = xdata
+        full_point[ydim] = ydata
+        return full_point
 
 
 class SliceViewXAxisEditor(XAxisEditor):
