@@ -16,7 +16,7 @@ from mantid.simpleapi import *
 
 class PowderILLDetectorScan(DataProcessorAlgorithm):
     _progress = None
-    _height_ranges = [""]
+    _height_ranges = None
     _mirror = None
     _crop_negative = None
     _out_ws_name = None
@@ -243,6 +243,7 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
                 MaskDetectors(Workspace=ws, ComponentList=components_to_mask)
 
         height_range_prop = self.getProperty("HeightRange").value
+        self._height_ranges = [""]
         if len(height_range_prop) % 2 == 0:
             i = 0
             while i < len(height_range_prop) - 1:
