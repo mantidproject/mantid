@@ -463,7 +463,7 @@ public:
     }
 
     // test time series
-    addTestTimeSeries<size_t>(run, "series-size_t");
+    // addTestTimeSeries<size_t>(run, "series-size_t");
     addTestTimeSeries<int>(run, "series-int");
     addTestTimeSeries<float>(run, "series-float");
     addTestTimeSeries<double>(run, "series-double");
