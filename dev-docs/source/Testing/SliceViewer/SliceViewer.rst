@@ -271,12 +271,12 @@ It should only be enabled for the `ws_3D` and `ws_3D_QLab` workspaces (see comme
     # make some fake data
     FakeMDEventData(ws, UniformParams='1e5', PeakParams='1e+05,0,0,1,0.3', RandomSeed='3873875')
 
-4. Click on non-ortho view of H and K axes - this should disable the cutting tool button
-5. Turn off non-ortho view and check that opening the cut tool:
 
-    - Disables non-ortho view
-    - Disables ROI tool
-    - Disables line plots
+4. Open the cut tool and check that:
+
+    - Disabled non-ortho view
+    - Disabled ROI tool
+    - Disabled line plots
     - Sliceviewer should look like
 
 .. figure:: ../../images/SliceViewer/CutViewer_HKplane.png
@@ -311,10 +311,10 @@ It should only be enabled for the `ws_3D` and `ws_3D_QLab` workspaces (see comme
 17. Set the step of u2 = 2 in the table, check that it sets (start,stop) = (-1,1)
 18. Drag the top white marker of the cut representation up to L~2
 
-    - u1 ~ [0,0,-1]  and u2 ~ [0,-1,0]
-    - There should be a peak in the 1D plot at x~-1
+    - u1 ~ [0,0,1]  and u2 ~ [0,1,0]
+    - There should be a peak in the 1D plot at x~1
 
-19. For u1 change c* = -1 and b* = 0 - check that u2 = [0,-1,0]
+19. For u1 change c* = -1 and b* = 0 - check that u2 = [0,-1,0] and there is a peak at x~-1
 20. To change the centre of the cut move the central white marker of the cut representation to (K,L) ~ (2,0),
 
     - The entire cut representation should move
@@ -330,6 +330,11 @@ It should only be enabled for the `ws_3D` and `ws_3D_QLab` workspaces (see comme
     - The peak in the 1D plot should move from x= 1 -> -1
     - Check u2 = [0,-1,0]
 
+26. Turn on non-orthogonal view and play around with the cut tool representation
+
+    - Check that the table values are updated correctly (use the HKL in the cursor info table to help determine this)
+
+27. Produce a non-axis aligned cut where the peak is not in the center of the x-range. Take the x-value at the peak maximum and plug it into the axis label - it should produce the HKL of the peak (0,0,1).
 
 Specific Tests
 --------------
