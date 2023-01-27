@@ -75,7 +75,7 @@ class FitInteractiveTool(QObject):
         self._cids.append(canvas.mpl_connect("motion_notify_event", self.motion_notify_callback))
         self._cids.append(canvas.mpl_connect("button_press_event", self.button_press_callback))
         self._cids.append(canvas.mpl_connect("button_release_event", self.button_release_callback))
-        self._cids.append(canvas.mpl_connect("figure_leave_event", self.stop_add_peak))
+        self._cids.append(canvas.mpl_connect("axes_leave_event", self.stop_add_peak))
 
         # The mouse state machine that handles responses to the mouse events.
         self.mouse_state = StateMachine(self)
@@ -152,13 +152,16 @@ class FitInteractiveTool(QObject):
         if x is None or y is None:
             return
 
+        cursor = QApplication.overrideCursor()
         if self.fit_range.min_marker.is_above(x, y) or self.fit_range.max_marker.is_above(x, y):
-            QApplication.setOverrideCursor(Qt.SizeHorCursor)
+            if not cursor:
+                QApplication.setOverrideCursor(Qt.SizeHorCursor)
             return
 
         for pm in self.peak_markers:
             if pm.left_width.is_above(x, y) or pm.right_width.is_above(x, y) or pm.centre_marker.is_above(x, y):
-                QApplication.setOverrideCursor(Qt.SizeHorCursor)
+                if not cursor:
+                    QApplication.setOverrideCursor(Qt.SizeHorCursor)
                 return
 
         QApplication.restoreOverrideCursor()
