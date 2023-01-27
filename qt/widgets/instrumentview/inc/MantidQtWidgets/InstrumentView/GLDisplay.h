@@ -9,7 +9,6 @@
 #include "IGLDisplay.h"
 #include "MantidGeometry/IComponent.h"
 
-#include <QGLWidget>
 #include <QString>
 
 #include <memory>
@@ -43,9 +42,8 @@ public slots:
 
 protected:
   void initializeGL() override;
-  void paintEvent(QPaintEvent *event) override;
   void paintGL() override;
-  void resizeGL(int /*w*/, int /*h*/) override;
+  void resizeGL(int width, int height) override;
   void contextMenuEvent(QContextMenuEvent * /*unused*/) override;
   void mousePressEvent(QMouseEvent * /*unused*/) override;
   void mouseMoveEvent(QMouseEvent * /*unused*/) override;

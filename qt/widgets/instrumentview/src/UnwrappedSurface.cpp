@@ -106,7 +106,6 @@ void UnwrappedSurface::drawSurface(GLDisplay *widget, bool picking) const {
   }
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glViewport(0, 0, widget_width, widget_height);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   glOrtho(view_left, view_right, view_bottom, view_top, -10, 10);

@@ -8,7 +8,7 @@
 
 #include "MantidGeometry/IComponent.h"
 
-#include <QGLWidget>
+#include <QOpenGLWidget>
 #include <QString>
 
 #include <memory>
@@ -22,10 +22,10 @@ class ProjectionSurface;
 \brief  Interface for the Qt Widget which renders Mantid Geometry ObjComponents
 */
 
-class IGLDisplay : public QGLWidget {
+class IGLDisplay : public QOpenGLWidget {
 public:
   IGLDisplay() {}
-  template <typename... Params> IGLDisplay(Params &&...params) : QGLWidget(std::forward<Params>(params)...) {}
+  template <typename... Params> IGLDisplay(Params &&...params) : QOpenGLWidget(std::forward<Params>(params)...) {}
   virtual ~IGLDisplay() = default;
 
   virtual void setSurface(std::shared_ptr<ProjectionSurface> surface) = 0;

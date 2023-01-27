@@ -201,7 +201,7 @@ void ProjectionSurface::draw(GLDisplay *widget, bool picking) const {
     if (*image) {
       delete (*image);
     }
-    (*image) = new QImage(widget->grabFrameBuffer());
+    (*image) = new QImage(widget->grabFramebuffer());
 
     if (!picking) {
       QPainter painter(widget);

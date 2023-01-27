@@ -171,7 +171,6 @@ void Viewport::setTranslation(double xval, double yval) {
  * Issue the OpenGL commands that define the viewport and projection.
  */
 void Viewport::applyProjection() const {
-  glViewport(0, 0, m_dimensions.width(), m_dimensions.height());
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   OpenGLError::check("GLViewport::issueGL()");
