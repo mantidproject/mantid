@@ -235,15 +235,13 @@ void LoadILLSANS::applySensitivityMap() {
   loader.setPropertyValue("Filename", getPropertyValue("SensitivityMap"));
   loader.setPropertyValue("OutputWorkspace", "sensitivity_map");
   loader.execute();
-  MatrixWorkspace_sptr sensitivityMap = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("sensitivity_map");
-  // The sensitivity map is most likely calculated on a workspace with monitors extracted,
-  // while m_localWorkspace still contains them, so using Divide algorithm directly
-  // causes a spectra number mismatch.
-  for (size_t specNo = 0; specNo < sensitivityMap->getNumberHistograms(); specNo++) {
-    const auto sensitivityValue = sensitivityMap->readY(specNo);
-    m_localWorkspace->mutableY(specNo) /= sensitivityValue;
-    m_localWorkspace->mutableE(specNo) /= sensitivityValue;
-  }
+  auto divide = createChildAlgorithm("Divide");
+  divide->setProperty("LHSWorkspace", m_localWorkspace);
+  divide->setPropertyValue("RHSWorkspace", "sensitivity_map");
+  divide->setProperty("AllowDifferentNumberSpectra",
+                      true); // in case the localWorkspace contains monitors but sensitivityMap does not
+  divide->executeAsChildAlg();
+  m_localWorkspace = divide->getProperty("OutputWorkspace");
 }
 
 /**
