@@ -545,10 +545,10 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             return {"H": "-", "K": "-", "L": "-"}
 
         slice_point = self.get_slicepoint()
-        xdim, ydim, zdim = self.model.get_dim_indices(slice_point, qdims, self.view.data_view.dimensions.transpose)
+        xdim, ydim = WorkspaceInfo.display_indices(slice_point, self.view.data_view.dimensions.transpose)
         full_point = self._get_full_point(slice_point, xdata, ydata, xdim, ydim)
 
-        hkl = self.model.get_hkl_from_full_point(full_point, qdims, xdim, ydim, zdim)
+        hkl = self.model.get_hkl_from_full_point(full_point, qdims)
 
         hkl_as_strings = [f"{element:.4f}" for element in hkl]
         return {"H": hkl_as_strings[0], "K": hkl_as_strings[1], "L": hkl_as_strings[2]}

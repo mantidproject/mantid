@@ -831,82 +831,51 @@ class SliceViewerModelTest(unittest.TestCase):
         for export_type in ("r", "c", "x", "y"):
             assert_error_returned_in_help(self.ws_MDE_3D, export_type, mock_binmd, "BinMD failed")
 
-    def test_get_dim_indices_for_3D_slice_point(self):
-        slice_point = [None, None, 3.0]  # [x, y, z]
-        qdims = [0, 1, 2]
-
-        model = SliceViewerModel(self.ws_MDE_3D)
-        dim_indices = model.get_dim_indices(slice_point, qdims, False)
-
-        self.assertEqual((0, 1, 2), dim_indices)
-
-    def test_get_dim_indices_for_3D_slice_point_transpose(self):
-        slice_point = [None, None, 3.0]  # [x, y, z]
-        qdims = [0, 1, 2]
-
-        model = SliceViewerModel(self.ws_MDE_3D)
-        dim_indices = model.get_dim_indices(slice_point, qdims, True)
-
-        self.assertEqual((1, 0, 2), dim_indices)
-
-    def test_get_dim_indices_for_4D_slice_point(self):
-        slice_point = [1.0, 2.0, None, None]  # [e, z, x, y]
-        qdims = [1, 2, 3]
-
-        model = SliceViewerModel(self.ws_MDE_4D)
-        dim_indices = model.get_dim_indices(slice_point, qdims, False)
-
-        self.assertEqual((2, 3, 1), dim_indices)
-
     @patch("mantidqt.widgets.sliceviewer.models.model.SliceViewerModel.get_proj_matrix")
     def test_get_hkl_from_full_point_returns_zeros_for_a_none_transform(self, mock_get_proj_matrix):
         qdims = [0, 1, 2]
-        xdim, ydim, zdim = 0, 1, 2
         point_3d = [1.0, 2.0, 3.0]
 
         model = SliceViewerModel(self.ws_MDE_3D)
         mock_get_proj_matrix.return_value = None
 
-        hkl = model.get_hkl_from_full_point(point_3d, qdims, xdim, ydim, zdim)
+        hkl = model.get_hkl_from_full_point(point_3d, qdims)
 
         self.assertEqual((0.0, 0.0, 0.0), hkl)
 
     @patch("mantidqt.widgets.sliceviewer.models.model.SliceViewerModel.get_proj_matrix")
     def test_get_hkl_from_full_point_for_3D_point(self, mock_get_proj_matrix):
         qdims = [0, 1, 2]
-        xdim, ydim, zdim = 0, 1, 2
         point_3d = [1.0, 2.0, 3.0]  # [x, y, z] = [h, k, l]
 
         model = SliceViewerModel(self.ws_MDE_3D)
         mock_get_proj_matrix.return_value = np.array([[0, 1, -1], [0, 1, 1], [1, 0, 0]])
 
-        hkl = model.get_hkl_from_full_point(point_3d, qdims, xdim, ydim, zdim)
+        hkl = model.get_hkl_from_full_point(point_3d, qdims)
 
         self.assertEqual([-1.0, 5.0, 1.0], list(hkl))
 
     @patch("mantidqt.widgets.sliceviewer.models.model.SliceViewerModel.get_proj_matrix")
     def test_get_hkl_from_full_point_for_4D_point(self, mock_get_proj_matrix):
         qdims = [1, 2, 3]
-        xdim, ydim, zdim = 1, 0, 2
         point_4d = [1.0, 2.0, 3.0, 4.0]  # [y, x, z, ...] = [e, h, k, l]
 
         model = SliceViewerModel(self.ws_MDE_4D)
         mock_get_proj_matrix.return_value = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
 
-        hkl = model.get_hkl_from_full_point(point_4d, qdims, xdim, ydim, zdim)
+        hkl = model.get_hkl_from_full_point(point_4d, qdims)
 
         self.assertEqual([2.0, 3.0, 4.0], list(hkl))
 
     @patch("mantidqt.widgets.sliceviewer.models.model.SliceViewerModel.get_proj_matrix")
     def test_get_hkl_from_full_point_for_4D_point_with_transformation(self, mock_get_proj_matrix):
         qdims = [1, 2, 3]
-        xdim, ydim, zdim = 3, 0, 1
         point_4d = [1.0, 2.0, 3.0, 4.0]  # [y, z, ..., x] = [e, h, k, l]
 
         model = SliceViewerModel(self.ws_MDE_4D)
         mock_get_proj_matrix.return_value = np.array([[2, 0, 0], [0, -1, 0], [0, 0, 3]])
 
-        hkl = model.get_hkl_from_full_point(point_4d, qdims, xdim, ydim, zdim)
+        hkl = model.get_hkl_from_full_point(point_4d, qdims)
 
         self.assertEqual([4.0, -3.0, 12.0], list(hkl))
 
