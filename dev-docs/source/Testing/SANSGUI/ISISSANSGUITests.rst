@@ -89,8 +89,8 @@ In the ``Settings`` tab:
 #. Go to ``Mask``.
 #. Click ``Display Mask``.
 #. This should give an instrument view with a circle at the centre.
-#. Go to ``Q, Wavelength, Detector Limits`` sub-tab.
 #. Close the Instrument View window
+#. Go to ``Q, Wavelength, Detector Limits`` sub-tab.
 #. Change the ``Phi Limit`` to read 0 to 45 and uncheck ``use mirror sector``.
 #. Go to ``Mask`` sub-tab.
 #. Click ``Display Mask``.
@@ -112,8 +112,8 @@ Processing
    group workspaces and four 1D workspaces.
 #. Check your default save directory. For each reduction two banks (HAB/main) should
    be saved. In total there should be 8 workspaces (4 .xml and 4 .nxs) saved.
-#. Clear the newly created files and workspaces to make the next test easier
 #. Double-click the 1D workspaces and you should get a single line plot.
+#. Clear the newly created files and workspaces to make the next test easier
 #. Change the contents of the first cell in the first row to ``74045`` and click
    ``Process Selected``.
 #. The row should turn blue; hovering over the row should give an error message.
