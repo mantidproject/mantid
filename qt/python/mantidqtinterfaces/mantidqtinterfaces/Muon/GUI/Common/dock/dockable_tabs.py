@@ -10,6 +10,11 @@ from qtpy import QtWidgets, QtCore, QtGui
 from qtpy.QtCore import Slot
 from qtpy.QtGui import QIcon
 
+"""
+Original code by user Blackwood, Jan 2018.
+https://stackoverflow.com/questions/47267195/in-pyqt4-is-it-possible-to-detach-tabs-from-a-qtabwidget
+"""
+
 
 class DetachableTabWidget(QtWidgets.QTabWidget):
     """
