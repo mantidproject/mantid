@@ -13,6 +13,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -153,6 +154,19 @@ MatrixWorkspace_sptr convertUnits(MatrixWorkspace_sptr const &inputWorkspace, st
   return outputWorkspace;
 }
 
+MatrixWorkspace_sptr rebinToWorkspace(MatrixWorkspace_sptr const &workspaceToRebin,
+                                      MatrixWorkspace_sptr const &workspaceToMatch) {
+  auto alg = AlgorithmManager::Instance().create("RebinToWorkspace");
+  alg->initialize();
+  alg->setAlwaysStoreInADS(false);
+  alg->setProperty("WorkspaceToRebin", workspaceToRebin);
+  alg->setProperty("WorkspaceToMatch", workspaceToMatch);
+  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
+  alg->execute();
+  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
+  return outputWorkspace;
+}
+
 MatrixWorkspace_sptr scaleX(MatrixWorkspace_sptr const &inputWorkspace, double const factor) {
   auto alg = AlgorithmManager::Instance().create("ScaleX");
   alg->initialize();
@@ -215,7 +229,9 @@ void ALFInstrumentModel::generateLoadedWorkspace() {
   }
 
   if (m_vanadium) {
-    ADS.addOrReplace(loadedWsName(), replaceSpecialValues(m_sample / m_vanadium));
+    auto const vanadium =
+        !WorkspaceHelpers::matchingBins(*m_sample, *m_vanadium) ? rebinToWorkspace(m_vanadium, m_sample) : m_vanadium;
+    ADS.addOrReplace(loadedWsName(), replaceSpecialValues(m_sample / vanadium));
   } else {
     ADS.addOrReplace(loadedWsName(), m_sample->clone());
   }
