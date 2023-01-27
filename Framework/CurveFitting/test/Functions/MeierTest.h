@@ -23,7 +23,7 @@ class MeierTest : public CxxTest::TestSuite {
 public:
   void testFunctionName() {
     auto meier = createFunction();
-    TS_ASSERT_EQUALS(meier->name(), "MeierV2");
+    TS_ASSERT_EQUALS(meier->name(), "Meier");
   }
 
   void testFunctionCategory() {
@@ -31,7 +31,7 @@ public:
     TS_ASSERT_EQUALS(meier->category(), "Muon\\MuonSpecific");
   }
 
-  void testFunctionRegisteredInFactory() { FunctionFactory::Instance().createInitialized("name=MeierV2"); }
+  void testFunctionRegisteredInFactory() { FunctionFactory::Instance().createInitialized("name=Meier"); }
 
   void testFunctionHasExpectedOrderedParameters() {
     auto meier = createFunction();
@@ -66,7 +66,7 @@ public:
   }
 
   void testFunctionGivesExpectedValueForGivenInput() {
-    MeierV2 meier;
+    Meier meier;
     meier.initialize();
 
     meier.setParameter("A0", 0.5);
@@ -141,7 +141,7 @@ private:
   }
 
   IFunction_sptr createFunction() {
-    auto fun = std::make_shared<MeierV2>();
+    auto fun = std::make_shared<Meier>();
     fun->initialize();
     return fun;
   }
