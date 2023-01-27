@@ -576,27 +576,16 @@ class SliceViewerModel(SliceViewerBaseModel):
 
         return xcut_name, ycut_name, help_msg
 
-    @staticmethod
-    def get_dim_indices(slice_point: List[float], qdims: List[int], transpose: bool) -> Tuple[int]:
-        """Returns the indices of the selected x and y axes. It also returns the index of the first non x or y axis."""
-        xdim, ydim = WorkspaceInfo.display_indices(slice_point, transpose)
-        # Get the index of the first axis which is not x or y. Here it is called z.
-        zdim = next(i for i, v in enumerate(slice_point) if v is not None and i in qdims)
-        return xdim, ydim, zdim
-
-    def get_hkl_from_full_point(self, full_point: List[float], qdims: List[int], xdim: int, ydim: int, zdim: int):
+    def get_hkl_from_full_point(self, full_point: List[float], qdims_i: List[int]):
         """Gets the values of h, k and l from a full point which can include 3 or more dimensions."""
         basis_transform = self.get_proj_matrix()
         if basis_transform is None:
             return 0.0, 0.0, 0.0
 
-        # Get the values for h, k and l
-        hkl_point = tuple(full_point[q_i] for q_i in qdims)
+        # Get the values for the h, k and l projections
+        hkl_projection = tuple(full_point[q_i] for q_i in qdims_i)
 
-        h_i, k_i, l_i = np.argsort([xdim, ydim, zdim])
-        return (
-            basis_transform[:, h_i] * hkl_point[h_i] + basis_transform[:, k_i] * hkl_point[k_i] + basis_transform[:, l_i] * hkl_point[l_i]
-        )
+        return np.matmul(basis_transform, hkl_projection)
 
 
 # private functions

@@ -125,7 +125,6 @@ class SliceViewerTest(unittest.TestCase):
         self.model.get_data = mock.Mock()
         self.model.rebin = mock.Mock()
         self.model.workspace_equals = mock.Mock()
-        self.model.get_dim_indices.return_value = (0, 1, 2)
         self.model.get_hkl_from_full_point.return_value = [1.0, 1.0, 1.0]
         self.model.get_properties.return_value = {
             "workspace_type": "WS_TYPE.MATRIX",
@@ -606,6 +605,8 @@ class SliceViewerTest(unittest.TestCase):
 
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceViewer.get_frame")
     def test_workspace_requests_hkl_for_image_info(self, mock_get_frame):
+        self.patched_deps["WorkspaceInfo"].display_indices.return_value = (0, 1)
+
         def run_requests_hkl_test(pres, ncols, callcount):
             mock_get_frame.return_value = SpecialCoordinateSystem.HKL
             self.model.get_hkl_from_full_point.reset_mock()
@@ -627,7 +628,7 @@ class SliceViewerTest(unittest.TestCase):
 
         hkl = pres3D_no_q_dim.get_extra_image_info_columns(1.0, 2.0)
 
-        self.assertEquals({}, hkl)
+        self.assertEqual({}, hkl)
 
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceViewer.get_frame")
     def test_get_extra_image_info_columns_for_double_max(self, mock_get_frame):
@@ -636,10 +637,11 @@ class SliceViewerTest(unittest.TestCase):
 
         hkl = pres3D.get_extra_image_info_columns(DBLMAX, DBLMAX)
 
-        self.assertEquals({"H": "-", "K": "-", "L": "-"}, hkl)
+        self.assertEqual({"H": "-", "K": "-", "L": "-"}, hkl)
 
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceViewer.get_frame")
     def test_get_extra_image_info_columns_returns_values_with_the_expected_format(self, mock_get_frame):
+        self.patched_deps["WorkspaceInfo"].display_indices.return_value = (0, 1)
         mock_get_frame.return_value = SpecialCoordinateSystem.HKL
         self.model.get_hkl_from_full_point.return_value = [1.0, 2.0, 3.0]
 
@@ -647,7 +649,7 @@ class SliceViewerTest(unittest.TestCase):
 
         hkl = pres3D.get_extra_image_info_columns(1.0, 2.0)
 
-        self.assertEquals({"H": "1.0000", "K": "2.0000", "L": "3.0000"}, hkl)
+        self.assertEqual({"H": "1.0000", "K": "2.0000", "L": "3.0000"}, hkl)
 
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceViewXAxisEditor")
     def test_x_axes_editor_is_opened_on_x_axes_double_click(self, mock_xaxis_editor):
