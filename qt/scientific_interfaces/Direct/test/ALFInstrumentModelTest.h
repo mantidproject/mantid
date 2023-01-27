@@ -10,6 +10,7 @@
 #include <gmock/gmock.h>
 
 #include "ALFInstrumentModel.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -49,6 +50,18 @@ std::vector<DetectorTube> findWholeTubes(Mantid::Geometry::ComponentInfo const &
     }
   }
   return tubes;
+}
+
+MatrixWorkspace_sptr changeBinOffset(MatrixWorkspace_sptr const &inputWorkspace) {
+  auto alg = AlgorithmManager::Instance().create("ChangeBinOffset");
+  alg->initialize();
+  alg->setAlwaysStoreInADS(false);
+  alg->setProperty("InputWorkspace", inputWorkspace);
+  alg->setProperty("Offset", 0.1);
+  alg->setProperty("OutputWorkspace", "__not_in_ads");
+  alg->execute();
+  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
+  return outputWorkspace;
 }
 
 } // namespace
@@ -200,6 +213,20 @@ public:
     auto const dataWs = m_model->loadAndNormalise(m_ALFData);
     m_model->setSample(dataWs);
     m_model->setVanadium(dataWs);
+
+    m_model->generateLoadedWorkspace();
+
+    TS_ASSERT(ADS.doesExist("ALFData"));
+
+    auto const workspace = ADS.retrieveWS<MatrixWorkspace>("ALFData");
+    TS_ASSERT_EQUALS(1.0, workspace->y(0)[0]);
+    TS_ASSERT_EQUALS(1.0, workspace->y(0)[1]);
+  }
+
+  void test_generateLoadedWorkspace_handles_vanadium_with_different_binning() {
+    auto const dataWs = m_model->loadAndNormalise(m_ALFData);
+    m_model->setSample(dataWs);
+    m_model->setVanadium(changeBinOffset(dataWs));
 
     m_model->generateLoadedWorkspace();
 
