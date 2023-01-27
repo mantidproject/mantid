@@ -431,13 +431,8 @@ public:
   void test_getStatistics() {
     LogManager run;
 
-    // test valid single value property
-    double value = 42.0;
-    addTestPropertyWithValue<size_t>(run, "single-size_t", 42);
-    addTestPropertyWithValue<int>(run, "single-int", 42);
-    addTestPropertyWithValue<float>(run, "single-float", 42.0);
-    addTestPropertyWithValue<double>(run, "single-double", 42.0);
-    for (std::string name : {"single-size_t", "single-int", "single-float", "single-double"}) {
+    // local helper function
+    auto assertSingleValue = [&](const std::string &name, double value) {
       auto stats = run.getStatistics(name);
       TS_ASSERT_DELTA(stats.minimum, value, 0.001);
       TS_ASSERT_DELTA(stats.maximum, value, 0.001);
@@ -447,11 +442,21 @@ public:
       TS_ASSERT_DELTA(stats.time_mean, value, 0.001);
       TS_ASSERT_DELTA(stats.time_standard_deviation, 0.0, 0.001);
       TS_ASSERT(isnan(stats.duration));
-    }
+    };
+
+    // test valid single value property
+    addTestPropertyWithValue<size_t>(run, "single-size_t", 42);
+    assertSingleValue("single-size_t", 42.0);
+    addTestPropertyWithValue<int>(run, "single-int", 43);
+    assertSingleValue("single-int", 43.0);
+    addTestPropertyWithValue<float>(run, "single-float", 44.0);
+    assertSingleValue("single-float", 44.0);
+    addTestPropertyWithValue<double>(run, "single-double", 45.0);
+    assertSingleValue("single-double", 45.0);
 
     // test invalid single value property
     {
-      addTestPropertyWithValue<std::string>(run, "single-string", "42");
+      addTestPropertyWithValue<std::string>(run, "single-string", "46");
       auto stats = run.getStatistics("single-string");
       TS_ASSERT_EQUALS(isnan(stats.minimum), true);
       TS_ASSERT_EQUALS(isnan(stats.maximum), true);
