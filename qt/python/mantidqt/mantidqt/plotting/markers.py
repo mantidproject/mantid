@@ -551,7 +551,7 @@ class PeakMarker(QObject):
         if self.centre_marker.is_moving:
             self.left_width.is_moving = True
             self.right_width.is_moving = True
-        else:
+        elif self.is_selected:
             self.left_width.mouse_move_start(x, y)
             self.right_width.mouse_move_start(x, y)
 
@@ -583,7 +583,7 @@ class PeakMarker(QObject):
             self.left_width.mouse_move(x - dx, y)
             self.right_width.mouse_move(x + dx, y)
             self.peak_moved.emit(self.peak_id, x, self.height())
-        else:
+        elif self.is_selected:
             moved = self.left_width.mouse_move(x, y)
             if moved:
                 self.right_width.x = 2 * self.centre_marker.x - x
