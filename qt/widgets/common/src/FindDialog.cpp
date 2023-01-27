@@ -19,6 +19,6 @@
 #include <QVBoxLayout>
 
 FindDialog::FindDialog(ScriptEditor *editor) : FindReplaceDialog(editor) {
-  setWindowTitle(tr("MantidPlot") + " - " + tr("Find"));
+  setWindowTitle(tr("MantidWorkbench") + " - " + tr("Find"));
   initLayout();
 }

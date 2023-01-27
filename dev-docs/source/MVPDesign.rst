@@ -11,7 +11,7 @@ Summary
 #######
 
 This page describes guidelines that should be followed when
-implementing an interface in MantidPlot. The aim is to encourage a
+implementing an interface in MantidWorkbench. The aim is to encourage a
 consistent approach to developing interfaces.
 
 .. _MVPDesignIntro:
@@ -284,7 +284,7 @@ structured to avoid placing all of the code in a single file,
 i.e. separate files for different classes etc. Sub packages are
 recommended for grouping together logical sets of files.
 
-For the interface to appear from within MantidPlot create a startup
+For the interface to appear from within MantidWorkbench, create a startup
 python file under the ``Code/Mantid/scripts`` directory. Assuming the code
 for the interface is in a directory called foo_app then the startup
 file would look like:

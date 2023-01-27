@@ -476,7 +476,7 @@ Custom Colormap (MantidWorkbench)
 You can view the premade Colormaps `here <https://matplotlib.org/2.2.3/gallery/color/colormap_reference.html?highlight=colormap>`_.
 These Colormaps can be registered and remain for the current session, but need to be rerun if Mantid has been reopened. Choose the location to Save your Colormap file wisely, outside of your MantidInstall folder!
 
-The following methods show how to Load, Convert from MantidPlot format, Create from Scratch and Visualise a Custom Colormap.
+The following methods show how to Load, Convert from Mantid format, Create from Scratch and Visualise a Custom Colormap.
 
 - If you already have a Colormap file in an (N by 4) format, with all values between 0 and 1, then use:
 
@@ -504,9 +504,9 @@ The following methods show how to Load, Convert from MantidPlot format, Create f
   Listed_CustomCmap_r = ListedColormap(Reverse, name=(Cmap_Name + '_r') )
   plt.register_cmap(name=(Cmap_Name + '_r'), cmap= Listed_CustomCmap_r)
 
-- If you have a Colormap file in a MantidPlot format (N by 3) with all values between 0 and 255, firstly **rename the file extension from .map to .txt**, then use:
+- If you have a Colormap file in a Mantid format (N by 3) with all values between 0 and 255, firstly **rename the file extension from .map to .txt**, then use:
 
-*1b. Convert MantidPlot Colormap and Register*
+*1b. Convert Mantid Colormap and Register*
 
 .. code-block:: python
 

@@ -83,7 +83,7 @@ boilerplate C++ code (changing each occurrence of 'MyAlg' to your chosen algorit
 
 At this point you will already have something that will compile and run. To do so (on Windows), copy the files
 ``build.bat`` & ``SConstruct`` from ``UserAlgorithms`` into the directory containing your code and execute ``build.bat``.
-If you then start MantidPlot your algorithm will appear in the list of available algorithms and could be run.
+If you then start MantidWorkbench your algorithm will appear in the list of available algorithms and could be run.
 But, of course, it won't do anything of interest until you have written some algorithm code...
 
 Coding the Algorithm
@@ -204,7 +204,7 @@ tool in understanding the running of your algorithms.
 Enhancing asynchronous running
 ------------------------------
 
-Any algorithm can be run asynchronously (e.g. by MantidPlot) without modification. However, some features
+Any algorithm can be run asynchronously without modification. However, some features
 are only enabled if code is added within the ``exec()`` method. ``Algorithm::interruption_point()`` should
 be called at appropriate intervals so that the algorithm's execution can be interrupted.
 ``Algorithm::progress(double p)`` reports the progress of the algorithm. ``p`` must be between
@@ -237,7 +237,7 @@ signifying no errors.
 It will be called in dialogs **after** parsing all inputs and setting the properties, but **before** executing.
 It is also called again in the ``execute()`` call, which will throw if this returns something.
 
-In the MantidPlot GUI, this will set a "star" ``*`` label next to each property that is reporting an error.
+This will set a "star" ``*`` label next to each property that is reporting an error.
 This makes it easier for users to find where they went wrong.
 
 If your ``validateInputs()`` method validates an input workspace property, bear in mind that the user

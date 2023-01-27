@@ -638,7 +638,7 @@ void InstrumentWidget::setSurfaceType(int type) {
     if (!errorMessage.isNull()) {
       // if exception was thrown roll back to the current surface type.
       QApplication::restoreOverrideCursor();
-      QMessageBox::critical(this, "MantidPlot - Error",
+      QMessageBox::critical(this, "Mantid Error",
                             "Surface cannot be created because of an exception:\n\n  " + errorMessage +
                                 "\n\nPlease select a different surface type.");
       // if suface change was initialized by the GUI this should ensure its
@@ -844,7 +844,7 @@ QString InstrumentWidget::confirmDetectorOperation(const QString &opName, const 
   QString message("This operation will affect %1 detectors.\nSelect output "
                   "workspace option:");
   QMessageBox prompt(this);
-  prompt.setWindowTitle("MantidPlot");
+  prompt.setWindowTitle("MantidWorkbench");
   prompt.setText(message.arg(QString::number(ndets)));
   QPushButton *replace = prompt.addButton("Replace", QMessageBox::ActionRole);
   QPushButton *create = prompt.addButton("New", QMessageBox::ActionRole);
@@ -971,7 +971,7 @@ void InstrumentWidget::saveImage(QString filename) {
         msg += itr.next() + ", ";
       }
       msg.chop(2); // Remove last space and comma
-      QMessageBox::warning(this, "MantidPlot", msg);
+      QMessageBox::warning(this, "Mantid Warning", msg);
       return;
     }
   }

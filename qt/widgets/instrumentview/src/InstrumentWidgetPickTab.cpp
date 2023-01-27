@@ -1737,7 +1737,7 @@ void DetectorPlotController::savePlotToWorkspace() {
     }
     if (!x.empty()) {
       if (nbins > 0 && x.size() != nbins) {
-        QMessageBox::critical(nullptr, "MantidPlot - Error", "Curves have different sizes.");
+        QMessageBox::critical(nullptr, "Mantid Error", "Curves have different sizes.");
         return;
       } else {
         nbins = x.size();
@@ -1941,7 +1941,7 @@ void DetectorPlotController::addPeak(double x, double y) {
       alg->execute();
     }
   } catch (std::exception &e) {
-    QMessageBox::critical(m_tab, "MantidPlot -Error",
+    QMessageBox::critical(m_tab, "Mantid Error",
                           "Cannot create a Peak object because of the error:\n" + QString(e.what()));
   }
 }

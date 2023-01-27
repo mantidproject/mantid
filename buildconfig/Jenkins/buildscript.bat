@@ -210,7 +210,7 @@ set USERPROPS=bin\%BUILD_CONFIG%\Mantid.user.properties
 del %USERPROPS%
 set CONFIGDIR=%APPDATA%\mantidproject
 rmdir /S /Q %CONFIGDIR%
-:: remove old MantidPlot state (sets errorlevel on failure but we don't check so script continues)
+:: remove old Mantid state (sets errorlevel on failure but we don't check so script continues)
 reg delete HKCU\Software\Mantid /f
 :: create the config directory to avoid any race conditions
 mkdir %CONFIGDIR%\mantid
@@ -231,7 +231,7 @@ if "%BUILDPKG%" == "yes" (
   :: Build offline documentation
   cmake --build . --target docs-qthelp -- /p:Configuration=%BUILD_CONFIG%  /verbosity:minimal
   :: Ignore errors as the exit code of msbuild is wrong here.
-  :: It always marks the build as a failure even though MantidPlot exits correctly
+  :: It always marks the build as a failure even though Mantid exits correctly
   echo Building package
   cpack.exe -C %BUILD_CONFIG% --config CPackConfig.cmake
 )

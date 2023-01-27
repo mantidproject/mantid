@@ -213,7 +213,7 @@ bool SequentialFitDialog::validateLogs(const QString &wsName) {
         }
       }
       if (ui.cbLogValue->count() == 0) {
-        QMessageBox::warning(m_fitBrowser, "MantidPlot - Warning",
+        QMessageBox::warning(m_fitBrowser, "Mantid Warning",
                              "The list of the log names is empty:\n"
                              "The selected workspaces do not have common logs");
         return false;

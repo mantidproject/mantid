@@ -109,7 +109,7 @@ void FindReplaceDialog::initLayout() {
 
 /// Add replace box
 void FindReplaceDialog::addReplaceBox() {
-  setWindowTitle(tr("MantidPlot") + " - " + tr("Find and Replace"));
+  setWindowTitle(tr("MantidWorkbench") + " - " + tr("Find and Replace"));
   m_topLayout->addWidget(new QLabel(tr("Replace with")), 1, 0);
   boxReplace = new QComboBox();
   boxReplace->setEditable(true);

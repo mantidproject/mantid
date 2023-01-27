@@ -1048,7 +1048,7 @@ void InstrumentWidgetMaskTab::saveMaskingToTableWorkspace(bool invertMask) {
 
     outputWS->setTitle("MaskBinTable");
   } else {
-    QMessageBox::critical(this, "MantidPlot - Error", "Algorithm ExtractMaskToTable fails to execute. ");
+    QMessageBox::critical(this, "Mantid Error", "Algorithm ExtractMaskToTable fails to execute. ");
   }
 }
 

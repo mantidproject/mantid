@@ -65,7 +65,7 @@ to refer to either an issue or a PR on this page*)
 
   - **Framework**: tickets relating to Algorithms, Workspaces and
     SimpleAPI
-  - **GUI** - tickets relating either to the main MantidPlot GUI, or
+  - **GUI** - tickets relating either to the main MantidWorkbench GUI, or
     one if its custom interfaces
   - **Python** - whether the change will be implemented in
     Python. This is useful for labelling PRs, as branches in which all
