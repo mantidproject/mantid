@@ -98,7 +98,7 @@ In terms of sliceviewer functionality, the key difference is that MDHistoWorkspa
 
 MDWorkspace (with events)
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-1. Create a 3D and 4D MDWorkspaces with some data - repeat the following tests with both ``md_4D`` and ``md_3D``
+1. Create a 3D and 4D MDWorkspaces with some data - repeat the following tests with both ``md_4D`` and ``md_3D``. Note this will throw a warning relating to the ``SlicingAlgorithm``.
 
 .. code-block:: python
 
@@ -106,10 +106,7 @@ MDWorkspace (with events)
 
     md_4D = CreateMDWorkspace(Dimensions=4, Extents=[0,2,-1,1,-1.5,1.5,-0.25,0.25], Names="H,K,L,E", Frames='HKL,HKL,HKL,General Frame',Units='r.l.u.,r.l.u.,r.l.u.,meV')
     FakeMDEventData(InputWorkspace=md_4D, UniformParams='5e5') # 4D data
-    tmp = CreateMDWorkspace(Dimensions=4, Extents=[0.25,0.75,-1,-0.5,-1.5,-1, -0.25,0], Names="H,K,L,E", Frames='HKL,HKL,HKL,General Frame',Units='r.l.u.,r.l.u.,r.l.u.,meV')
-    FakeMDEventData(InputWorkspace=tmp, UniformParams='1e5') # 4D data
-    md_4D += tmp
-    DeleteWorkspace(tmp)
+    FakeMDEventData(InputWorkspace=md_4D, UniformParams='1e5,0.5,1.5,-0.5,0.5,-0.75,0.75,-0.1,0.1') # 4D data
 
     # Add a non-orthogonal UB
     expt_info = CreateSampleWorkspace()
@@ -128,6 +125,7 @@ MDWorkspace (with events)
 2. Test the toolbar buttons pan, zoom, line plots, ROI as in step 3 of the :ref:`toolbar-checklist` instructions.
 
     - This workspace should be dynamically rebinned - i.e. the number of bins within the view limits along each axis should be preserved when zooming.
+    - The cursor info table should also display the HKL of the cursor
 
 3. Change the number of bins along one of the viewing axes (easier to pick a small number e.g. 2)
 4. Change the integration-width/slice-thickness (spinbox to the left of the word `thick`) along the non-viewed axes.
@@ -138,6 +136,7 @@ MDWorkspace (with events)
 
     a. Confirm the slider moves when the spinbox value is updated.
     b. Confirm moving the slider updates the spinbox.
+    c. Check the slicepoint is updated in the cursor info table.
 
 Test the :ref:`Nonorthogonal view<mantid:sliceviewer_nonortho>`
 
@@ -198,6 +197,8 @@ Test the :ref:`Peak Overlay<mantid:sliceviewer_peaks_overlay>`
     - The cross should be removed from the plot
 
 8. Repeat the above steps 1-7 in non-orthogonal view.
+
+9. Check the ``Concise View`` checkbox above one of the peak tables on the right hand side - this should hide some columns.
 
 MDHistoWorkspace
 ~~~~~~~~~~~~~~~~
