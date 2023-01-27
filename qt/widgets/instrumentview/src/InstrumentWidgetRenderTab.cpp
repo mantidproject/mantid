@@ -184,6 +184,10 @@ QPushButton *InstrumentWidgetRenderTab::setupDisplaySettings() {
   m_UCorrection = new QAction("U Correction", this);
   m_UCorrection->setToolTip("Manually set the limits on the horizontal axis.");
   connect(m_UCorrection, SIGNAL(triggered()), this, SLOT(setUCorrection()));
+  m_maintainAspectRatio = new QAction("Maintain Aspect Ratio", this);
+  m_maintainAspectRatio->setCheckable(true);
+  m_maintainAspectRatio->setChecked(true);
+  connect(m_maintainAspectRatio, SIGNAL(toggled(bool)), m_instrWidget, SLOT(setMaintainAspectRatio(bool)));
   m_tooltipInfo = new QAction("Tooltip", this);
   m_tooltipInfo->setToolTip("Show detector info in a tooltip when hovering.");
   m_tooltipInfo->setCheckable(true);
@@ -211,6 +215,7 @@ QPushButton *InstrumentWidgetRenderTab::setupDisplaySettings() {
   displaySettingsMenu->addAction(m_lighting);
   displaySettingsMenu->addAction(m_GLView);
   displaySettingsMenu->addAction(m_UCorrection);
+  displaySettingsMenu->addAction(m_maintainAspectRatio);
   displaySettingsMenu->addAction(m_tooltipInfo);
 
   displaySettings->setMenu(displaySettingsMenu);
@@ -707,10 +712,12 @@ void InstrumentWidgetRenderTab::displaySettingsAboutToshow() {
   if (m_instrWidget->getSurfaceType() == InstrumentWidget::FULL3D) {
     // in 3D mode use GL widget only and allow lighting
     m_GLView->setEnabled(false);
+    m_maintainAspectRatio->setEnabled(false);
     m_lighting->setEnabled(true);
   } else {
     // in flat view mode allow changing to simple, non-GL viewer
     m_GLView->setEnabled(true);
+    m_maintainAspectRatio->setEnabled(true);
     // allow lighting in GL viewer only
     if (!m_GLView->isChecked()) {
       m_lighting->setEnabled(false);
@@ -726,6 +733,7 @@ void InstrumentWidgetRenderTab::displaySettingsAboutToshow() {
  */
 void InstrumentWidgetRenderTab::setSurfaceType(int index) {
   if ((int)m_instrWidget->getSurfaceType() != index) {
+    m_instrWidget->setMaintainAspectRatio(m_maintainAspectRatio->isChecked());
     m_instrWidget->setSurfaceType(index);
     toggleTooltip(m_tooltipInfo->isChecked());
     m_instrWidget->setWireframe(m_wireframe->isChecked());

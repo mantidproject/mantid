@@ -62,7 +62,8 @@ namespace MantidWidgets {
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW UnwrappedSurface : public ProjectionSurface {
   Q_OBJECT
 public:
-  explicit UnwrappedSurface(const InstrumentActor *rootActor, const bool correctAspectRatio = true);
+  explicit UnwrappedSurface(const InstrumentActor *rootActor, const QSize &widgetSize,
+                            const bool correctAspectRatio = true);
 
   /** @name Implemented public virtual methods */
   //@{
@@ -113,6 +114,8 @@ public:
 
   /// Get the QRect of the top left corner of a detector, and its size, in terms of pixels.
   QRect detectorQRectInPixels(const std::size_t detectorIndex) const;
+
+  void resize(int /*unused*/, int /*unused*/) override;
 
 protected slots:
 
@@ -179,6 +182,8 @@ protected:
 
   /// Zoom stack
   QStack<RectF> m_zoomStack;
+
+  QSize m_widgetSize;
 
   bool m_correctAspectRatio; ///< whether to maintain aspect ratio if widget has different aspect ratio to the data
 };

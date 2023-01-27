@@ -19,7 +19,8 @@ namespace MantidWidgets {
  */
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW RotationSurface : public UnwrappedSurface {
 public:
-  RotationSurface(const InstrumentActor *rootActor, const Mantid::Kernel::V3D &origin, const Mantid::Kernel::V3D &axis);
+  RotationSurface(const InstrumentActor *rootActor, const Mantid::Kernel::V3D &origin, const Mantid::Kernel::V3D &axis,
+                  const QSize &widgetSize, const bool correctAspectRatio);
   void init() override;
   // Get the value of the u-correction - a shift in the u-coord added to
   // automatically determined uv coordinates

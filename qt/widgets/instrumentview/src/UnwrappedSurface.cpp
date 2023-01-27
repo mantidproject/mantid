@@ -49,9 +49,10 @@ QRectF getArea(const UnwrappedDetector &udet, double maxWidth, double maxHeight)
  * Constructor.
  * @param rootActor :: The instrument actor.
  */
-UnwrappedSurface::UnwrappedSurface(const InstrumentActor *rootActor, const bool correctAspectRatio)
+UnwrappedSurface::UnwrappedSurface(const InstrumentActor *rootActor, const QSize &widgetSize,
+                                   const bool correctAspectRatio)
     : ProjectionSurface(rootActor), m_u_min(DBL_MAX), m_u_max(-DBL_MAX), m_v_min(DBL_MAX), m_v_max(-DBL_MAX),
-      m_height_max(0), m_width_max(0), m_flippedView(false), m_startPeakShapes(false),
+      m_height_max(0), m_width_max(0), m_flippedView(false), m_startPeakShapes(false), m_widgetSize(widgetSize),
       m_correctAspectRatio(correctAspectRatio) {
   // create and set the move input controller
   InputControllerMoveUnwrapped *moveController = new InputControllerMoveUnwrapped(this);
@@ -424,7 +425,10 @@ QString UnwrappedSurface::getInfoText() const {
   return ProjectionSurface::getInfoText();
 }
 
-RectF UnwrappedSurface::getSurfaceBounds() const { return m_viewRect; }
+RectF UnwrappedSurface::getSurfaceBounds() const {
+  auto expandedViewRect = correctForAspectRatioAndZoom(m_widgetSize.width(), m_widgetSize.height());
+  return expandedViewRect;
+}
 
 /**
  * Set a peaks workspace to be drawn ontop of the workspace.
@@ -762,6 +766,17 @@ Mantid::API::IPeaksWorkspace_sptr UnwrappedSurface::retrievePeaksWorkspace(const
  */
 std::string UnwrappedSurface::saveToProject() const {
   throw std::runtime_error("UnwrappedSurface::saveToProject() not implemented for Qt >= 5");
+}
+
+/**
+ * Resize the surface on the screen.
+ * @param w :: New width of the surface in pixels.
+ * @param h :: New height of the surface in pixels.
+ */
+void UnwrappedSurface::resize(int w, int h) {
+  m_widgetSize.setHeight(h);
+  m_widgetSize.setWidth(w);
+  updateView();
 }
 
 } // namespace MantidQt::MantidWidgets

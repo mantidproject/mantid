@@ -36,6 +36,9 @@ public:
 
   void updateView(bool picking) override;
 
+  /// Return the size of the display widget in device pixels
+  QSize widgetDimensions() override;
+
 private:
   std::unique_ptr<IGLDisplay> m_glDisplay;
   std::unique_ptr<IQtDisplay> m_qtDisplay;

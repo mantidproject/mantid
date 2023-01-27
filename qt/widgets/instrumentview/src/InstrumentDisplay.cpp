@@ -72,4 +72,19 @@ void InstrumentDisplay::updateView(bool picking) {
     m_qtDisplay->updateView(picking);
   }
 }
+
+/// Return the size of the OpenGL or Qt display widget in logical pixels
+QSize InstrumentDisplay::widgetDimensions() {
+  auto sizeinLogicalPixels = [](const QWidget *w) -> QSize {
+    const auto devicePixelRatio = w->window()->devicePixelRatio();
+    return QSize(w->width() * devicePixelRatio, w->height() * devicePixelRatio);
+  };
+
+  if (currentWidget() == dynamic_cast<QWidget *>(m_glDisplay.get()))
+    return sizeinLogicalPixels(getGLDisplay());
+  else if (currentWidget() == dynamic_cast<QWidget *>(m_qtDisplay.get()))
+    return sizeinLogicalPixels(getQtDisplay());
+  else
+    return QSize(0, 0);
+}
 } // namespace MantidQt::MantidWidgets
