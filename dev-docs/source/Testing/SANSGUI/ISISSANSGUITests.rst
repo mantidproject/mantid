@@ -177,8 +177,8 @@ In the ``Sum Runs`` tab:
 
 #. Enter ``74044, 74019`` in the top line.
 #. Click ``Add`` at the side.
-#. Enter ``LOQ74044-add`` as Output file.
-#. In the top-right, click ``Select Save Directory`` and select a directory in your managed paths.
+#. Check that ``LOQ74044-add`` is automatically entered as the Save File at the bottom of the tab.
+#. At the top-right of the tab, click the ``Select Save Directory`` button and select a directory in your managed paths.
 #. Click ``Sum`` at the bottom.
 #. Go back to the ``Runs`` tab.
 #. Remove all rows.
