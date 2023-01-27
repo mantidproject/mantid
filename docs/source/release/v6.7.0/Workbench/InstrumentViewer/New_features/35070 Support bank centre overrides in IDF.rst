@@ -1,0 +1,1 @@
+- the display position of detector banks in the instrument viewer side by side view can now be specified in the instrument definition file. Positions have been set up for the SXD instrument using the new feature
