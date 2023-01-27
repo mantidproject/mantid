@@ -17,6 +17,12 @@
     <xs:attribute name="z"/>
   </xs:attributeGroup>
 
+  <!-- Define Cartesian 2D Coordinates Attribute Group-->
+  <xs:attributeGroup name="cartesian2d">
+    <xs:attribute name="x"/>
+    <xs:attribute name="y"/>
+  </xs:attributeGroup>
+
   <!-- Define spherical polar Coordinates Attribute Group-->
   <xs:attributeGroup name="spherical">
     <xs:attribute name="r"/>
@@ -282,6 +288,11 @@
     <xs:attributeGroup ref="idf:axes"/>
   </xs:complexType>
 
+  <!-- Define <side-by-side-view-location> Type-->
+  <xs:complexType name="sideBySideLocationType">
+    <xs:attributeGroup ref="idf:cartesian2d"/>
+  </xs:complexType>
+
   <!-- Define <component> Type  -->
   <xs:complexType name="componentType">
     <xs:choice maxOccurs="unbounded">
@@ -326,6 +337,7 @@
       </xs:element>
       <!--LOCATION ELEMENT-->
       <xs:element name="location" type="idf:locationType" maxOccurs="unbounded" minOccurs="1"/>
+      <xs:element name="side-by-side-view-location" type="idf:sideBySideLocationType"/>
     </xs:choice>
     <xs:attribute name="type" use="required"/>
     <xs:attribute name="name"/>

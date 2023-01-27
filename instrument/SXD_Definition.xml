@@ -48,6 +48,7 @@
     <rot val="0.00000" axis-x="1" axis-y="0" axis-z="0" />
   </rot>
 </location>
+<side-by-side-view-location x="0.1" y="0.7"/>
 </component> 
 
 <component type="panel" idstart="4097" idfillbyfirst="y" idstepbyrow="64">
@@ -56,6 +57,7 @@
     <rot val="0.00000" axis-x="1" axis-y="0" axis-z="0" />
   </rot>
 </location>
+<side-by-side-view-location x="0.3" y="0.7"/>
 </component> 
 
 <component type="panel1346" idstart="8193" idfillbyfirst="y" idstepbyrow="64">
@@ -64,6 +66,7 @@
     <rot val="0.00000" axis-x="1" axis-y="0" axis-z="0" />
   </rot>
 </location>
+<side-by-side-view-location x="0.5" y="0.7"/>
 </component> 
 
 <component type="panel1346" idstart="12289" idfillbyfirst="y" idstepbyrow="64">
@@ -72,6 +75,7 @@
     <rot val="0.00000" axis-x="1" axis-y="0" axis-z="0" />
   </rot>
 </location>
+<side-by-side-view-location x="0.7" y="0.7"/>
 </component> 
 
 <component type="panel" idstart="16385" idfillbyfirst="y" idstepbyrow="64">
@@ -80,6 +84,7 @@
     <rot val="0.00000" axis-x="1" axis-y="0" axis-z="0" />
   </rot>
 </location>
+<side-by-side-view-location x="0.9" y="0.7"/>
 </component> 
 
 <component type="panel1346" idstart="20481" idfillbyfirst="y" idstepbyrow="64">
@@ -88,6 +93,7 @@
     <rot val="0.00000" axis-x="1" axis-y="0" axis-z="0" />
   </rot>
 </location>
+<side-by-side-view-location x="1.1" y="0.7"/>
 </component> 
 
 <component type="panel" idstart="24577" idfillbyfirst="x" idstepbyrow="64">
@@ -96,12 +102,14 @@
     <rot val="45.00000" axis-x="1" axis-y="0" axis-z="0" />
   </rot>
 </location>
+<side-by-side-view-location x="0.3" y="0.4"/>
 </component> 
 
 <component type="panel" idstart="28673" idfillbyfirst="x" idstepbyrow="64">
 <location x="0.000" y="-0.190919" z="0.190919" name="bank8">
   <rot val="45.00000" axis-x="1" axis-y="0" axis-z="0" />
 </location>
+<side-by-side-view-location x="0.6" y="0.4"/>
 </component> 
 
 <component type="panel1346" idstart="32769" idfillbyfirst="x" idstepbyrow="64">
@@ -110,12 +118,14 @@
     <rot val="-45.00000" axis-x="1" axis-y="0" axis-z="0" />
  </rot>
 </location>
+<side-by-side-view-location x="0.9" y="0.4"/>
 </component> 
 
 <component type="panel1346" idstart="36865" idfillbyfirst="x" idstepbyrow="64">
 <location x="0.000" y="-0.190919" z="-0.190919" name="bank10">
   <rot val="-45.00000" axis-x="1" axis-y="0" axis-z="0" />
 </location>
+<side-by-side-view-location x="1.2" y="0.4"/>
 </component> 
 
 <component type="panel11" idstart="40961" idfillbyfirst="x" idstepbyrow="64">
@@ -124,6 +134,7 @@
     <rot val="0.00000" axis-x="1" axis-y="0" axis-z="0" />
   </rot>
 </location>
+<side-by-side-view-location x="0.6" y="0.1"/>
 </component> 
 
 <!--
