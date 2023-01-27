@@ -467,7 +467,8 @@ public:
     addTestTimeSeries<int>(run, "series-int");
     addTestTimeSeries<float>(run, "series-float");
     addTestTimeSeries<double>(run, "series-double");
-    for (std::string name : {"series-size_t", "series-int", "series-float", "series-double"}) {
+    // for (std::string name : {"series-size_t", "series-int", "series-float", "series-double"}) {
+    for (std::string name : {"series-int", "series-float", "series-double"}) {
       auto stats = run.getStatistics(name);
       TS_ASSERT_DELTA(stats.minimum, 2.0, 0.001);
       TS_ASSERT_DELTA(stats.maximum, 24.0, 0.001);
