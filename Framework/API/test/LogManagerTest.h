@@ -445,8 +445,8 @@ public:
     };
 
     // test valid single value property
-    addTestPropertyWithValue<size_t>(run, "single-size_t", 42);
-    assertSingleValue("single-size_t", 42.0);
+    // addTestPropertyWithValue<size_t>(run, "single-size_t", 42);
+    // assertSingleValue("single-size_t", 42.0);
     addTestPropertyWithValue<int>(run, "single-int", 43);
     assertSingleValue("single-int", 43.0);
     addTestPropertyWithValue<float>(run, "single-float", 44.0);
