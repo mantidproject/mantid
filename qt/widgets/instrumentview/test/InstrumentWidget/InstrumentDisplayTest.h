@@ -121,6 +121,19 @@ public:
     }
   }
 
+  void test_widget_dimensions() {
+    auto glMock = makeGLDisplay();
+    glMock->resize(QSize(12, 34));
+    auto qtMock = makeQtDisplay();
+    qtMock->resize(QSize(56, 78));
+    auto layoutMock = makeLayout();
+    expectCurrentWidget(layoutMock.get(), glMock.get());
+    auto inst = makeInstDisplay(std::move(glMock), std::move(qtMock), std::move(layoutMock));
+    auto widgetDims = inst.widgetDimensions();
+    TS_ASSERT_EQUALS(widgetDims.width(), 12);
+    TS_ASSERT_EQUALS(widgetDims.height(), 34);
+  }
+
 private:
   std::unique_ptr<QtMock> makeQtDisplay() const { return std::make_unique<QtMock>(); }
   std::unique_ptr<GLMock> makeGLDisplay() { return std::make_unique<GLMock>(); }

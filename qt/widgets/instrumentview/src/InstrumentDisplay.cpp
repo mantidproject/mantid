@@ -74,7 +74,7 @@ void InstrumentDisplay::updateView(bool picking) {
 }
 
 /// Return the size of the OpenGL or Qt display widget in logical pixels
-QSize InstrumentDisplay::widgetDimensions() {
+QSize InstrumentDisplay::widgetDimensions() const {
   auto sizeinLogicalPixels = [](const QWidget *w) -> QSize {
     const auto devicePixelRatio = w->window()->devicePixelRatio();
     return QSize(w->width() * devicePixelRatio, w->height() * devicePixelRatio);

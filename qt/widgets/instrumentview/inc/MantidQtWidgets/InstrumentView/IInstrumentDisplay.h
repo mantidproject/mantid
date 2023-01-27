@@ -37,6 +37,6 @@ public:
   virtual void updateView(bool picking) = 0;
 
   /// Return the size of the display widget in device pixels
-  virtual QSize widgetDimensions() = 0;
+  virtual QSize widgetDimensions() const = 0;
 };
 } // namespace MantidQt::MantidWidgets
