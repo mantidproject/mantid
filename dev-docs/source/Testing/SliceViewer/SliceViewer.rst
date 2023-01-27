@@ -24,7 +24,7 @@ MatrixWorkspace
 Do the following tests with an EventWorkspace (e.g. ``CNCS_7860_event.nxs``) and a Workspace2D (e.g. ``MAR11060.raw``) from the `TrainingCourseData <https://download.mantidproject.org/>`_.
 
 1. Load the workspace and open in sliceviewer (right-click on the workspace in the ADS > Show Slice Viewer).
-2. Confirm that for MatrixWorkspaces the :ref:`Peak overlay<mantid:sliceviewer_roi>` and :ref:`Nonorthogonal view<mantid:sliceviewer_nonortho>` buttons should be disabled (greyed out).
+2. Confirm that for MatrixWorkspaces the :ref:`Peak overlay<mantid:sliceviewer_roi>`, :ref:`Nonorthogonal view<mantid:sliceviewer_nonortho>` and :ref:`Non-axis aligned cutting tool <mantid:sliceviewer_nonaxiscuts>` buttons should be disabled (greyed out).
 3. Check the other toolbar buttons.
 
     a. Pan and Zoom (use mouse scroll and magnifying glass tool) and Home
@@ -73,21 +73,19 @@ Do the following tests with an EventWorkspace (e.g. ``CNCS_7860_event.nxs``) and
     b. Change the scale type to e.g. Log
 
         * In Log scale bins with 0 counts should appear white
-        * When you zoom in to a region comprising only of bins with 0 counts it will set the color axis limits to (0,0) and force the scale to be linear
+        * When you zoom in to a region comprising only of bins with 0 counts it will set the color axis limits to (0.1,1) and force the scale to be linear
         * Zoom in to a region outside the extent of the data, check the Log colorscale option is disabled.
 
     c. Change colormap
     d. Reverse colormap
 
-6. Test the :ref:`Cursor Information Widget<mantid:sliceviewer_cursor>` (table at top of sliceviewer window with TOF, spectrum, DetID etc.)
+6. Test transposing axes: click the Y button to the right of the Time-of-flight label (top left corner) - the image should be transposed and the axes labels updated.
 
-    a. Confirm it tracks with the cursor when Track Cursor is unchecked
+7. Test the :ref:`Cursor Information Widget<mantid:sliceviewer_cursor>` (table at top of sliceviewer window with TOF, spectrum, DetID etc.)
+
+    a. Confirm it tracks with the cursor when Track Cursor is checked
     b. Uncheck the track cursor and confirm it updates when the cursor is clicked.
-
-7. Test transposing axes
-
-    a. Click the Y button to the right of the Time-of-flight label (top left corner) - the image should be transposed and the axes labels updated.
-    b. Repeat the test for the cursor info table.
+    c. Transpose the axes (as in step 6) and confirm the cursor position displayed is still correct.
 
 8. Resize the sliceviewer window, check the widgets, buttons etc. are still visible and clear for reasonable aspect ratios.
 
@@ -230,7 +228,7 @@ MDHistoWorkspace
 CutViewer Tool
 --------------
 
-1. Check the cutting tool button is only enabled for 3D MD workspaces where all dimensions are Q by opening the following workspaces in sliceviewer.
+1. Check the :ref:`Non-axis aligned cutting tool <mantid:sliceviewer_nonaxiscuts>` button is only enabled for 3D MD workspaces where all dimensions are Q by opening the following workspaces in sliceviewer.
 It should only be enabled for the `ws_3D` and `ws_3D_QLab` workspaces (see comment for details) - the first 3 column headers for the vectors should be a*,b*,c* and Qx,Qy,Qz for the two workspaces respectively.
 
 .. code-block:: python
