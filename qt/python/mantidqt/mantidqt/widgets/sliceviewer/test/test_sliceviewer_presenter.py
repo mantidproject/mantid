@@ -334,15 +334,18 @@ class SliceViewerTest(unittest.TestCase):
     def test_cut_view_toggled_off(self, mock_get_sliceinfo):
         presenter = SliceViewer(None, model=self.model, view=self.view)
         presenter._cutviewer_presenter = mock.MagicMock()
+        self.hide_view_called = False
+        presenter._cutviewer_presenter.hide_view.side_effect = lambda: setattr(self, "hide_view_called", True)
         mock_get_sliceinfo.return_value.can_support_nonorthogonal_axes.return_value = True
 
         presenter.non_axis_aligned_cut(False)
 
-        presenter._cutviewer_presenter.hide_view.assert_called_once()
+        self.assertTrue(self.hide_view_called)
         # test correct buttons disabled
         self.view.data_view.enable_tool_button.assert_has_calls(
             [mock.call(tool) for tool in (ToolItemText.REGIONSELECTION, ToolItemText.LINEPLOTS, ToolItemText.NONORTHOGONAL_AXES)]
         )
+        self.assertTrue(presenter._cutviewer_presenter is None)
 
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceViewer.new_plot_MDH")
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceInfo")
