@@ -8,6 +8,7 @@
 # std imports
 import math
 from typing import List
+import warnings
 
 import numpy as np
 from collections.abc import Sequence
@@ -204,6 +205,16 @@ def plot(
 
     fig, axes = get_plot_fig(overplot, ax_properties, window_title, num_axes, fig)
 
+    fig.set_layout_engine(layout="tight")
+    warnings.filterwarnings(
+        "once",
+        message="Tight layout not applied. The left and right margins cannot be made " "large enough to accommodate all axes decorations.",
+    )
+    warnings.filterwarnings(
+        "once",
+        message="Tight layout not applied. The bottom and top margins cannot be made " "large enough to accommodate all axes decorations.",
+    )
+
     # Convert to a MantidAxes if it isn't already. Ignore legend since
     # a new one will be drawn later
     axes = [MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend]) if not isinstance(ax, MantidAxes) else ax for ax in axes]
@@ -225,8 +236,11 @@ def plot(
 
     show_legend = "on" == ConfigService.getString("plots.ShowLegend").lower()
     for ax in axes:
-        if ax.get_legend() is not None:
-            ax.get_legend().set_visible(show_legend)
+        legend = ax.get_legend()
+        if legend is not None:
+            legend.set_visible(show_legend)
+            # Stop legend messing with the tight layout
+            legend.set_in_layout(False)
 
     # Can't have a waterfall plot with only one line.
     if len(nums) * len(workspaces) == 1 and waterfall:
