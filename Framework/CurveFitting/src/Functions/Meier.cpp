@@ -19,11 +19,19 @@ using namespace API;
 
 DECLARE_FUNCTION(Meier)
 
+namespace {
+bool isMultipleOf05(double value) {
+  double quantum = 0.01;
+  double threshold = quantum / 2;
+  return std::fmod(value, 0.5) < threshold;
+}
+} // namespace
+
 void Meier::init() {
   declareParameter("A0", 0.5, "Amplitude");
   declareParameter("FreqD", 0.01, "Angular Frequency due to dipolar coupling (MHz)");
   declareParameter("FreqQ", 0.05,
-                   "Angular Frequency due to quadrupole interaction of the nuclear spin (MHz) due to a field gradient "
+                   "Angular Frequency due to quadrupole interaction of the nuclear spin (MHz) due to a field gradient"
                    "exerted by the presence of the muon");
   declareParameter("Sigma", 0.2, "Gaussian decay rate");
   declareParameter("Lambda", 0.1, "Exponential decay rate");
@@ -32,8 +40,13 @@ void Meier::init() {
 }
 
 void Meier::function1D(double *out, const double *xValues, const size_t nData) const {
+  const double J = getAttribute("Spin").asDouble();
+  if (!isMultipleOf05(J)) {
+    throw std::invalid_argument("Spin value is not a multiple of 0.5");
+  }
+
   const double A0 = getParameter("A0");
-  const double J2 = round(getAttribute("Spin").asDouble() * 2);
+  const double J2 = round(2 * J);
   const double Lambda = getParameter("Lambda");
   const double Sigma = getParameter("Sigma");
 
@@ -93,7 +106,22 @@ void Meier::precomputeIntermediateSteps(std::valarray<double> &sinAlphaSquared, 
   positiveLambda.resize(size);
   std::valarray<double> Wm(size);
 
-  for (size_t i = 0; i < size; i++) {
+  size_t i = 0;
+  const double m = -J;
+  const double q1 = (OmegaQ + OmegaD) * (2 * m - 1);
+  const double q2 = OmegaD * std::sqrt(J * (J + 1) - m * (m - 1));
+  const double qq = pow(q1, 2) + pow(q2, 2);
+  const double q3 = OmegaQ * (2 * pow(m, 2) - 2 * m + 1) + OmegaD;
+
+  Wm[i] = std::sqrt(qq);
+  positiveLambda[i] = getPositiveLambda(i, J2, q3, Wm[i], OmegaD, OmegaQ);
+  negativeLambda[i] = OmegaQ * pow(J, 2) - OmegaD * J;
+  cos2AlphaSquared[i] = getCos2AlphaSquared(q1, qq);
+  sin2AlphaSquared[i] = 1 - cos2AlphaSquared[i];
+  cosAlphaSquared[i] = 0.5 * (1 + std::sqrt(cos2AlphaSquared[i]));
+  sinAlphaSquared[i] = 1 - cosAlphaSquared[i];
+
+  for (i = 1; i < size; i++) {
     const double m = static_cast<double>(i) - J;
     const double q1 = (OmegaQ + OmegaD) * (2 * m - 1);
     const double q2 = OmegaD * std::sqrt(J * (J + 1) - m * (m - 1));
@@ -102,29 +130,39 @@ void Meier::precomputeIntermediateSteps(std::valarray<double> &sinAlphaSquared, 
 
     Wm[i] = std::sqrt(qq);
 
-    if (static_cast<double>(i) < (J2 + 1)) {
-      positiveLambda[i] = 0.5 * (q3 + Wm[i]);
-    } else {
-      positiveLambda[i] = OmegaQ * pow(J, 2) - OmegaD * J;
-    }
-
-    if (i > 0) {
-      negativeLambda[i] = 0.5 * (q3 - Wm[i]);
-    } else {
-      negativeLambda[i] = OmegaQ * pow(J, 2) - OmegaD * J;
-    }
-
-    if (qq > 0) {
-      cos2AlphaSquared[i] = pow(q1, 2) / qq;
-    } else {
-      cos2AlphaSquared[i] = 0;
-    }
+    positiveLambda[i] = getPositiveLambda(i, J2, q3, Wm[i], OmegaD, OmegaQ);
+    negativeLambda[i] = 0.5 * (q3 - Wm[i]);
+    cos2AlphaSquared[i] = getCos2AlphaSquared(q1, qq);
     sin2AlphaSquared[i] = 1 - cos2AlphaSquared[i];
-
     cosAlphaSquared[i] = 0.5 * (1 + std::sqrt(cos2AlphaSquared[i]));
     sinAlphaSquared[i] = 1 - cosAlphaSquared[i];
   }
 }
+
+/**
+ * Calculates and returns the value of positive lambda at a given index i
+ * This function is used by **precomputeIntermediateSteps** to calculate intermediate steps
+ * @param i :: index
+ * @param J2 :: 2 * total angular momentum quantum number
+ * @param q3 :: the value of q3 at index i
+ * @param Wm :: the value of Wm at index i
+ * @param OmegaD :: angular arequency due to dipolar coupling (MHz)
+ * @param OmegaQ :: angular frequency due to quadrupole interaction of the nuclear spin (MHz) due to a field gradient
+ */
+double Meier::getPositiveLambda(const size_t &i, const double &J2, const double &q3, const double &Wm,
+                                const double &OmegaD, const double &OmegaQ) const {
+  const double J = J2 / 2;
+  return static_cast<double>(i) < (J2 + 1) ? 0.5 * (q3 + Wm) : OmegaQ * pow(J, 2) - OmegaD * J;
+}
+
+/**
+ * Calculates and returns the value of cos 2*alpha sequared at a given index i
+ * This function is used by **precomputeIntermediateSteps** to calculate intermediate steps
+ * @param i :: index
+ * @param q1 :: the value of q1 at index i
+ * @param q1 :: the value of qq at index i
+ */
+double Meier::getCos2AlphaSquared(const double &q1, const double &qq) const { return qq > 0 ? pow(q1, 2) / qq : 0; }
 
 /**
  * Calculates the polarization in the x direction
@@ -152,7 +190,7 @@ void Meier::calculatePx(std::valarray<double> &Px, const std::valarray<double> &
         sinAlphaSquared[i + 1] * sinAlphaSquared[i] * std::cos((negativeLambda[i + 1] - positiveLambda[i]) * xValues);
     const std::valarray<double> d =
         sinAlphaSquared[i + 1] * cosAlphaSquared[i] * std::cos((negativeLambda[i + 1] - negativeLambda[i]) * xValues);
-    tx = tx + a + b + c + d;
+    tx += a + b + c + d;
   }
   const double J = J2 / 2;
   Px = tx / (2 * J + 1);
@@ -176,7 +214,7 @@ void Meier::calculatePz(std::valarray<double> &Pz, const std::valarray<double> &
                         const double &J2) const {
   std::valarray<double> tz(xValues.size());
   for (size_t i = 1; i < (size_t)J2 + 1; i++) {
-    tz = tz + cos2AlphaSquared[i] + sin2AlphaSquared[i] * std::cos((positiveLambda[i] - negativeLambda[i]) * xValues);
+    tz += cos2AlphaSquared[i] + sin2AlphaSquared[i] * std::cos((positiveLambda[i] - negativeLambda[i]) * xValues);
   }
   const double J = J2 / 2;
   Pz = (1 + tz) / (2 * J + 1);

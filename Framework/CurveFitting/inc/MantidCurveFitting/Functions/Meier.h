@@ -45,6 +45,13 @@ private:
                                    std::valarray<double> &negativeLambda, std::valarray<double> &positiveLambda,
                                    const double &J2) const;
 
+  // Calculates and returns the value of lambda
+  double getPositiveLambda(const size_t &i, const double &J2, const double &q3, const double &Wm, const double &OmegaD,
+                           const double &OmegaQ) const;
+
+  // Calculates and returns the value of cost 2*alpha sequared
+  double getCos2AlphaSquared(const double &q1, const double &qq) const;
+
   // Calculates the polarization in the x direction
   void calculatePx(std::valarray<double> &Px, const std::valarray<double> &xValues,
                    const std::valarray<double> &sinAlphaSquared, const std::valarray<double> &cosAlphaSquared,
