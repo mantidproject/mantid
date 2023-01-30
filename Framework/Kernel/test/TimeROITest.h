@@ -9,8 +9,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/TimeROI.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 using Mantid::Kernel::TimeROI;
+using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Types::Core::DateAndTime;
 
 constexpr double ONE_DAY_DURATION{24 * 3600};
@@ -30,6 +32,13 @@ const TimeROI CHRISTMAS{CHRISTMAS_START, CHRISTMAS_STOP};
 const std::string NEW_YEARS_START("2022-12-31T00:01");
 const std::string NEW_YEARS_STOP("2023-01-01T00:01");
 
+const DateAndTime ONE("2023-01-01T00:01");
+const DateAndTime TWO("2023-01-02T00:01");
+const DateAndTime THREE("2023-01-03T00:01");
+const DateAndTime FOUR("2023-01-04T00:01");
+const DateAndTime FIVE("2023-01-05T00:01");
+const DateAndTime SIX("2023-01-06T00:01");
+
 class TimeROITest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -42,7 +51,6 @@ public:
     TS_ASSERT_EQUALS(value.durationInSeconds(), 0.);
     TS_ASSERT(value.empty());
     TS_ASSERT_EQUALS(value.numBoundaries(), 0);
-    value.removeRedundantEntries();
   }
 
   void test_badRegions() {
@@ -76,6 +84,25 @@ public:
     TS_ASSERT_EQUALS(value.durationInSeconds(CHRISTMAS_START, NEW_YEARS_STOP) / ONE_DAY_DURATION, 1.);
   }
 
+  void test_replaceFromTSP() {
+    TimeROI value{CHRISTMAS_START, CHRISTMAS_STOP};
+
+    TimeSeriesProperty<bool> tsp("junk");
+    value.replaceROI(&tsp);
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 0.);
+
+    tsp.addValue(CHRISTMAS_START, true);
+    tsp.addValue(CHRISTMAS_STOP, false);
+    value.replaceROI(&tsp);
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 1.);
+
+    tsp.addValue(DECEMBER_START, false); // should get ignored
+    tsp.addValue(CHRISTMAS_STOP, true);  // should override previous value
+    tsp.addValue(DECEMBER_STOP, false);  // new endpoint
+    value.replaceROI(&tsp);
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 7.);
+  }
+
   void test_sortedROI() {
     TimeROI value;
     // add Hanukkah
@@ -95,17 +122,30 @@ public:
     TS_ASSERT_EQUALS(value.numBoundaries(), 4);
 
     // get rid of entries that have no effect
-    value.removeRedundantEntries();
     TS_ASSERT_EQUALS(value.numBoundaries(), 4);
   }
 
-  void test_addOverlapping() {
-    const DateAndTime ONE("2023-01-01T00:01");
-    const DateAndTime TWO("2023-01-02T00:01");
-    const DateAndTime THREE("2023-01-03T00:01");
-    const DateAndTime FOUR("2023-01-04T00:01");
-    const DateAndTime FIVE("2023-01-05T00:01");
+  void test_addROI() {
+    TimeROI value{THREE, FOUR}; // 3-4
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 1.);
 
+    value.addROI(TWO, FIVE); // 2-5
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 3.);
+
+    value.addROI(TWO, SIX); // 2-6
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 4.);
+
+    value.addROI(THREE, FIVE); // 2-6
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 4.);
+
+    value.addROI(ONE, TWO); // 1-6
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 5.);
+
+    value.addMask(ONE, SIX); // empty
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 0.);
+  }
+
+  void test_addOverlapping() {
     TimeROI value{ONE, FOUR}; // 1-4
     TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 3.);
     TS_ASSERT_EQUALS(value.numBoundaries(), 2);
@@ -162,14 +202,13 @@ public:
     TS_ASSERT_EQUALS(value.numBoundaries(), 2);
     value.addROI(CHRISTMAS_START, CHRISTMAS_STOP);
     TS_ASSERT_EQUALS(value.numBoundaries(), 2);
-    value.removeRedundantEntries();
   }
 
   void test_reversesortedROI() {
     TimeROI value;
     // add New Year's eve
     value.addROI(DateAndTime(NEW_YEARS_START), DateAndTime(NEW_YEARS_STOP));
-    TS_ASSERT_EQUALS(value.durationInSeconds(), ONE_DAY_DURATION);
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 1.);
     TS_ASSERT_EQUALS(value.numBoundaries(), 2);
 
     // add Hanukkah
@@ -186,7 +225,6 @@ public:
 
     // since it ends with "on" the duration is infinite
     TS_ASSERT_EQUALS(value.durationInSeconds(), 0.);
-    value.removeRedundantEntries();
     TS_ASSERT(value.empty());
   }
 
@@ -200,7 +238,6 @@ public:
 
     value1.addROI(DateAndTime(NEW_YEARS_START), DateAndTime(NEW_YEARS_STOP));
     TS_ASSERT_EQUALS(value1.durationInSeconds(), ONE_DAY_DURATION);
-    value1.removeRedundantEntries();
     TS_ASSERT_EQUALS(value1.numBoundaries(), 2);
 
     // roi first
@@ -211,14 +248,22 @@ public:
 
     value2.addMask(DateAndTime(NEW_YEARS_START), DateAndTime(NEW_YEARS_STOP));
     TS_ASSERT_EQUALS(value2.durationInSeconds(), 0.);
-    value2.removeRedundantEntries();
     TS_ASSERT_EQUALS(value2.numBoundaries(), 0);
   }
 
   void test_valueAtTime() {
-    TS_ASSERT_EQUALS(DECEMBER.valueAtTime(DECEMBER_STOP), false);
-    TS_ASSERT_EQUALS(DECEMBER.valueAtTime(CHRISTMAS_START), true);
-    TS_ASSERT_EQUALS(DECEMBER.valueAtTime(DECEMBER_START), true);
+    // to understand the checks, note that
+    // USE = true
+    // IGNORE = false
+
+    // values outside of the TimeROI should be ignore
+    TS_ASSERT_EQUALS(CHRISTMAS.valueAtTime(DECEMBER_START), false);
+    TS_ASSERT_EQUALS(CHRISTMAS.valueAtTime(DECEMBER_STOP), false);
+
+    // tests for more interesting values
+    TS_ASSERT_EQUALS(DECEMBER.valueAtTime(DECEMBER_START), true);  // first in region
+    TS_ASSERT_EQUALS(DECEMBER.valueAtTime(CHRISTMAS_START), true); // middle of region
+    TS_ASSERT_EQUALS(DECEMBER.valueAtTime(DECEMBER_STOP), false);  // last of region
   }
 
   void runIntersectionTest(const TimeROI &left, const TimeROI &right, const double exp_duration) {
