@@ -47,7 +47,7 @@ Output:
 .. testoutput:: ExFindEPP
 
     The fit status is success
-    The peak centre is at 6005.25 microseconds
+    The peak centre is at 6000.0 microseconds
     The peak height is 4.84
 
 
