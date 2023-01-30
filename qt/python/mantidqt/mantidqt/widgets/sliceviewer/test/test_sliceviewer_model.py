@@ -121,6 +121,7 @@ def _create_mock_workspace(ws_type, coords: SpecialCoordinateSystem = None, has_
             ws.hasOriginalWorkspace.return_value = False
             basis_mat = np.eye(ndims)
             ws.getBasisVector.side_effect = lambda idim: basis_mat[:, idim]
+            ws.getDimension().getMDFrame().isQ.return_value = True
         else:
             ws.isMDHistoWorkspace.return_value = False
 
