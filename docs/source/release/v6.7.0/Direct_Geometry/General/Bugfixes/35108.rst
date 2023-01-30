@@ -1,0 +1,1 @@
+- The 'Reset View' button on the 'Render' tab of ALFView will no longer prevent the 'Pick' tab tools from working.
