@@ -186,6 +186,8 @@ void ALFAnalysisModel::setPeakCentre(double const centre) {
 
 double ALFAnalysisModel::peakCentre() const { return m_function->getParameter("f1.PeakCentre"); }
 
+double ALFAnalysisModel::background() const { return m_function->getParameter("f0.A0"); }
+
 Mantid::API::IPeakFunction_const_sptr ALFAnalysisModel::getPeakCopy() const {
   auto const gaussian = m_function->getFunction(1)->clone();
   return std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(gaussian);
