@@ -344,9 +344,9 @@ double LogManager::getTimeAveragedStd(const std::string &name) const {
 }
 
 /**
- * Returns various statistics computations for a given property. If not empty, the time filter is applied when
+ * Returns various statistics computations for a given property. The time filter, if not-empty, is applied when
  * computing.
- * The statistics return will all be NAN when the property
+ * The returned statistics will all be NAN when statistics cannot be computed, such as for a string property.
  * @param name :: The name of the property.
  * @return A TimeSeriesPropertyStatistics object containing values for Minimum, Maximum, Mean, Median,
  * standard deviation, time weighted average, and time weighted standard deviation.
