@@ -18,6 +18,7 @@
 
 using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets;
 
 namespace MantidQt::CustomInterfaces {
 
@@ -91,6 +92,29 @@ void InelasticDataManipulationElwinTabModel::ungroupAlgorithm(std::string const 
   ungroupAlg->initialize();
   ungroupAlg->setProperty("InputWorkspace", InputWorkspace);
   ungroupAlg->execute();
+}
+
+std::string InelasticDataManipulationElwinTabModel::createGroupedWorkspaces(MatrixWorkspace_sptr workspace,
+                                                                            FunctionModelSpectra spectra) {
+  auto extractSpectra = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
+  extractSpectra->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);
+  extractSpectra->setProperty("OutputWorkspace", workspace->getName() + "_extracted_spectra");
+  extractSpectra->setProperty("WorkspaceIndex", std::to_string(spectra[0].value));
+  extractSpectra->execute();
+
+  for (size_t j = 1; j < spectra.size().value; j++) {
+    extractSpectra->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);
+    extractSpectra->setProperty("OutputWorkspace", "specWSnext");
+    extractSpectra->setProperty("WorkspaceIndex", std::to_string(spectra[j].value));
+    extractSpectra->execute();
+    auto appendSpectra = AlgorithmManager::Instance().create("AppendSpectra");
+    appendSpectra->setProperty("InputWorkspace1", workspace->getName() + "_extracted_spectra");
+    appendSpectra->setProperty("InputWorkspace2", "specWSnext");
+    appendSpectra->setProperty("OutputWorkspace", workspace->getName() + "_extracted_spectra");
+    appendSpectra->execute();
+  }
+  AnalysisDataService::Instance().remove("specWSnext");
+  return workspace->getName() + "_extracted_spectra";
 }
 
 void InelasticDataManipulationElwinTabModel::setIntegrationStart(double integrationStart) {
