@@ -877,18 +877,6 @@ double TimeSeriesProperty<std::string>::averageValueInFilter(const SplittingInte
                                        "implemented for string properties");
 }
 
-template <typename TYPE> std::pair<double, double> TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev() const {
-  std::pair<double, double> retVal{0., 0.}; // mean and stddev
-  try {
-    const auto &filter = getSplittingIntervals();
-    retVal = this->averageAndStdDevInFilter(filter);
-  } catch (std::exception &) {
-    retVal.first = std::numeric_limits<double>::quiet_NaN();
-    retVal.second = std::numeric_limits<double>::quiet_NaN();
-  }
-  return retVal;
-}
-
 template <typename TYPE>
 std::pair<double, double>
 TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<SplittingInterval> &filter) const {
@@ -929,6 +917,18 @@ TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<SplittingIn
 
   // Normalise by the total time
   return std::pair<double, double>{mean, std::sqrt(numerator / totalTime)};
+}
+
+template <typename TYPE> std::pair<double, double> TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev() const {
+  std::pair<double, double> retVal{0., 0.}; // mean and stddev
+  try {
+    const auto &filter = getSplittingIntervals();
+    retVal = this->averageAndStdDevInFilter(filter);
+  } catch (std::exception &) {
+    retVal.first = std::numeric_limits<double>::quiet_NaN();
+    retVal.second = std::numeric_limits<double>::quiet_NaN();
+  }
+  return retVal;
 }
 
 /** Function specialization for TimeSeriesProperty<std::string>
@@ -1858,13 +1858,8 @@ template <typename TYPE> bool TimeSeriesProperty<TYPE>::isDefault() const { retu
  * N.B. This method DOES take filtering into account
  */
 template <typename TYPE> TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics() const {
-  TimeSeriesPropertyStatistics out;
-  Mantid::Kernel::Statistics raw_stats = Mantid::Kernel::getStatistics(this->filteredValuesAsVector());
-  out.mean = raw_stats.mean;
-  out.standard_deviation = raw_stats.standard_deviation;
-  out.median = raw_stats.median;
-  out.minimum = raw_stats.minimum;
-  out.maximum = raw_stats.maximum;
+  TimeSeriesPropertyStatistics out(Mantid::Kernel::getStatistics(this->filteredValuesAsVector()));
+
   if (this->size() > 0) {
     const auto &intervals = this->getSplittingIntervals();
     const double duration_sec =

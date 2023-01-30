@@ -9,6 +9,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/SplittingInterval.h"
+#include "MantidKernel/Statistics.h"
 #include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -22,6 +23,39 @@
 
 using namespace Mantid::Kernel;
 using Mantid::Types::Core::DateAndTime;
+
+class TimeSeriesPropertyStatisticsTest : public CxxTest::TestSuite {
+
+public:
+  // Instantiate from a Kernel::Statistics object
+  void test_fromKernelStatistics() {
+    Statistics raw_stats;
+    raw_stats.minimum = 1.0;
+    raw_stats.maximum = 2.0;
+    raw_stats.mean = 3.0;
+    raw_stats.median = 4.0;
+    raw_stats.standard_deviation = 5.0;
+    auto stats = TimeSeriesPropertyStatistics(raw_stats);
+    TS_ASSERT_DELTA(stats.minimum, 1.0, 0.1);
+    TS_ASSERT_DELTA(stats.maximum, 2.0, 0.1);
+    TS_ASSERT_DELTA(stats.mean, 3.0, 0.1);
+    TS_ASSERT_DELTA(stats.median, 4.0, 0.1);
+    TS_ASSERT_DELTA(stats.standard_deviation, 5.0, 0.1);
+  }
+
+  // Instantiate from a single value, constant in time
+  void test_fromSingleValue() {
+    auto stats = TimeSeriesPropertyStatistics(42.0);
+    TS_ASSERT_DELTA(stats.minimum, 42.0, 1.0);
+    TS_ASSERT_DELTA(stats.maximum, 42.0, 1.0);
+    TS_ASSERT_DELTA(stats.mean, 42.0, 1.0);
+    TS_ASSERT_DELTA(stats.median, 42.0, 1.0);
+    TS_ASSERT_DELTA(stats.standard_deviation, 0.0, 0.001);
+    TS_ASSERT_DELTA(stats.time_mean, 42.0, 1.0);
+    TS_ASSERT_DELTA(stats.time_standard_deviation, 0.0, 0.001);
+    TS_ASSERT(std::isnan(stats.duration));
+  }
+};
 
 class TimeSeriesPropertyTest : public CxxTest::TestSuite {
   // Create a small TSP<double>. Callee owns the returned object.

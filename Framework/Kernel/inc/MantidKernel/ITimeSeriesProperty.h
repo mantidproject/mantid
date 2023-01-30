@@ -20,6 +20,7 @@ namespace Kernel {
 //---------------------------------------------------------------------------
 class SplittingInterval;
 class TimeInterval;
+struct TimeSeriesPropertyStatistics;
 class Property;
 class TimeROI;
 /** A non-templated interface to a TimeSeriesProperty.
@@ -50,6 +51,8 @@ public:
    * @return The time-weighted average value of the log when the time measurement was active.
    */
   virtual double timeAverageValue(const TimeROI &timeRoi) const = 0;
+  /// Return a TimeSeriesPropertyStatistics object
+  virtual TimeSeriesPropertyStatistics getStatistics() const = 0;
   /// Returns the real size of the time series property map:
   virtual int realSize() const = 0;
   /// Deletes the series of values in the property
