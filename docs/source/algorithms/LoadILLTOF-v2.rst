@@ -69,7 +69,7 @@ Output:
 
 .. testcode:: LoadILLTOF2IN5ScanExample
 
-  ws = LoadILLTOF2(Filename='ILL/IN5/199857.nxs')
+  ws = LoadILLTOF(Filename='ILL/IN5/199857.nxs')
 
   print('The output has {0} bin (omega scan) and {1} spectra'.format(ws.blocksize(), ws.getNumberHistograms()))
 
