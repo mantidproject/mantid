@@ -259,7 +259,7 @@ std::size_t ALFInstrumentModel::runNumber(Mantid::API::MatrixWorkspace_sptr cons
 }
 
 bool ALFInstrumentModel::setSelectedTubes(std::vector<DetectorTube> tubes) {
-  // If the number of tubes is different then we need definitely need to update the stored tubes
+  // If the number of tubes is different then we definitely need to update the stored tubes
   if (tubes.size() != m_tubes.size()) {
     m_tubes = std::move(tubes);
     return true;

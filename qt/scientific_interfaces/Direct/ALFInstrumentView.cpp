@@ -33,6 +33,7 @@ void ALFInstrumentView::setUpInstrument(std::string const &fileName) {
 
   connect(m_instrumentWidget, SIGNAL(instrumentActorReset()), this, SLOT(reconnectInstrumentActor()));
   connect(m_instrumentWidget, SIGNAL(surfaceTypeChanged(int)), this, SLOT(reconnectSurface()));
+  connect(m_instrumentWidget, SIGNAL(surfaceTypeChanged(int)), this, SLOT(notifyShapeChanged()));
   reconnectInstrumentActor();
   reconnectSurface();
 
