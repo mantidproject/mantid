@@ -32,16 +32,9 @@ void ALFInstrumentView::setUpInstrument(std::string const &fileName) {
   m_instrumentWidget = new ALFInstrumentWidget(QString::fromStdString(fileName));
 
   connect(m_instrumentWidget, SIGNAL(instrumentActorReset()), this, SLOT(reconnectInstrumentActor()));
+  connect(m_instrumentWidget, SIGNAL(surfaceTypeChanged(int)), this, SLOT(reconnectSurface()));
   reconnectInstrumentActor();
-
-  auto surface = m_instrumentWidget->getInstrumentDisplay()->getSurface().get();
-  // This signal has been disconnected as we do not want a copy and paste event to update the analysis plot, unless
-  // the pasted shape is subsequently moved
-  // connect(surface, SIGNAL(shapeCreated()), this, SLOT(notifyShapeChanged()));
-  connect(surface, SIGNAL(shapeChangeFinished()), this, SLOT(notifyShapeChanged()));
-  connect(surface, SIGNAL(shapesRemoved()), this, SLOT(notifyShapeChanged()));
-  connect(surface, SIGNAL(shapesCleared()), this, SLOT(notifyShapeChanged()));
-  connect(surface, SIGNAL(singleComponentPicked(size_t)), this, SLOT(notifyWholeTubeSelected(size_t)));
+  reconnectSurface();
 
   auto pickTab = m_instrumentWidget->getPickTab();
   connect(pickTab->getSelectTubeButton(), SIGNAL(clicked()), this, SLOT(selectWholeTube()));
@@ -96,6 +89,18 @@ void ALFInstrumentView::saveSettings() {
 
 void ALFInstrumentView::reconnectInstrumentActor() {
   connect(&m_instrumentWidget->getInstrumentActor(), SIGNAL(refreshView()), this, SLOT(notifyInstrumentActorReset()));
+}
+
+void ALFInstrumentView::reconnectSurface() {
+  auto surface = m_instrumentWidget->getInstrumentDisplay()->getSurface().get();
+
+  // This signal has been disconnected as we do not want a copy and paste event to update the analysis plot, unless
+  // the pasted shape is subsequently moved
+  // connect(surface, SIGNAL(shapeCreated()), this, SLOT(notifyShapeChanged()));
+  connect(surface, SIGNAL(shapeChangeFinished()), this, SLOT(notifyShapeChanged()));
+  connect(surface, SIGNAL(shapesRemoved()), this, SLOT(notifyShapeChanged()));
+  connect(surface, SIGNAL(shapesCleared()), this, SLOT(notifyShapeChanged()));
+  connect(surface, SIGNAL(singleComponentPicked(size_t)), this, SLOT(notifyWholeTubeSelected(size_t)));
 }
 
 void ALFInstrumentView::subscribePresenter(IALFInstrumentPresenter *presenter) { m_presenter = presenter; }
