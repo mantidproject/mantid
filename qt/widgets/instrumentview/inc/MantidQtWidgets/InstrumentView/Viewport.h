@@ -15,52 +15,35 @@ namespace MantidWidgets {
 
 /**
 \class  Viewport
-\brief  class handling OpenGL Viewport
-\author Chapon Laurent & Srikanth Nagella
-\date   August 2008
-\author Roman Tolchenov
-\date   March 2013
-\version 1.0
 
-Viewport sets up OpenGL projection (orthographic or perspective) and privides
-methods for
+Viewport sets up OpenGL orthographic projection and provides methods for
 navigating around a 3D scene. With the orthographic projection it rotates,
 scales and translates
-the scene in plane parallel to the screen. Navigation in the persective
-projection isn't fully
-implemented.
+the scene in plane parallel to the screen.
 
 A Viewport is initialized with the size of a GL widget it will be used with.
 When the widget is
 resized the viewport must also be resized by calling resize() method.
 
-The projection type must be set along with the dimensions of the scene by
-calling
+The dimensions of the scene by calling
 setProjection(...) method. This method doesn't issue any GL commands only sets
-the projection type.
+the bounds for future calls.
 
 Call applyProjection() to issue the GL projection command and applyRotation() to
-apply the
-transformation to the model.
-
+apply the transformation to the model.
 */
 class Viewport {
 public:
-  enum ProjectionType { ORTHO, PERSPECTIVE };
-  /// Constructor with Width (w) and Height(h) as inputs
-  /// Called by the display device when viewport is resized
-  explicit Viewport(QSize glWidgetDimensions);
-  void resize(QSize glWidgetDimensions);
+  /// Constructor with size of the viewport
+  explicit Viewport(QSize size);
+  /// Called to resize the viewport
+  void resize(QSize size);
   /// Get the viewport width and height.
   QSize dimensions() const;
-  /// Return the projection type.
-  ProjectionType getProjectionType() const;
-  /// Set a projection.
-  void setProjection(double /*l*/, double /*r*/, double /*b*/, double /*t*/, double /*nearz*/, double /*farz*/,
-                     ProjectionType type = Viewport::ORTHO);
-  /// Set a projection.
-  void setProjection(const Mantid::Kernel::V3D &minBounds, const Mantid::Kernel::V3D &maxBounds,
-                     ProjectionType type = Viewport::ORTHO);
+  /// Set a projection by individual values
+  void setProjection(double xmin, double xmax, double ymin, double ymax, double zmin, double zmax);
+  /// Set a projection by vector of min/max bounds
+  void setProjection(const Mantid::Kernel::V3D &minBounds, const Mantid::Kernel::V3D &maxBounds);
   void setProjectionZPlane(const Mantid::Kernel::V3D &minBounds, const Mantid::Kernel::V3D &maxBounds);
   /// Apply the projection to OpenGL engine
   void applyProjection() const;
@@ -136,29 +119,31 @@ private:
   void generateTranslationPoint(int x, int y, Mantid::Kernel::V3D &p) const;
 
   /* Projection */
-
-  ProjectionType m_projectionType; ///< Type of display projection
   QSize m_dimensions;
-  double m_left; ///< Ortho/Prespective Projection xmin value (Left side of the
-  /// x axis)
-  double m_right; ///< Ortho/Prespective Projection xmax value (Right side of
-  /// the x axis)
-  double m_bottom; ///< Ortho/Prespective Projection ymin value (Bottom side of
-  /// the y axis)
-  double m_top; ///< Ortho/Prespective Projection ymax value (Top side of the y
-  /// axis)
-  double m_near; ///< Ortho/Prespective Projection zmin value (Near side of the
-  /// z axis)
-  double m_far; ///< Ortho/Prespective Projection zmax value (Far side of the z
-  /// axis)
+  /// Ortho projection xmin value (Left side of the x axis)
+  double m_left;
+  /// Ortho projection xmax value (Right side of the x axis)
+  double m_right;
+  /// Ortho projection ymin value (Bottom side of the y axis)
+  double m_bottom;
+  /// Ortho projection ymax value (Top side of the y axis)
+  double m_top;
+  /// Ortho zmin value (Near side of the z axis)
+  double m_near;
+  /// Ortho zmax value (Far side of the z axis)
+  double m_far;
+  /// Minimum Z value of the bounding box
+  double m_zmin;
+  /// Maximum Z value of the bounding box
+  double m_zmax;
+
+  // Cached copies of values when first set
   double m_leftOrig;
   double m_rightOrig;
   double m_bottomOrig;
   double m_topOrig;
   double m_zminOrig;
   double m_zmaxOrig;
-  double m_zmin;
-  double m_zmax;
 
   /* Trackball rotation */
 
@@ -172,11 +157,9 @@ private:
   double m_rotationspeed;
 
   /* Zooming */
-
   double m_zoomFactor;
 
   /* Translation */
-
   /// Translation in x direction
   double m_xTrans;
   /// Translation in y direction
