@@ -548,6 +548,27 @@ class SliceViewerModelTest(unittest.TestCase):
         axes_angles = model.get_axes_angles(force_orthogonal=True)
         self.assertAlmostEqual(axes_angles[1, 2], np.pi / 2, delta=1e-10)
 
+    def test_calc_proj_matrix_4D_workspace_nonQ_dims(self):
+        ws = _create_mock_histoworkspace(
+            ndims=4,
+            coords=SpecialCoordinateSystem.NONE,
+            extents=(-3, 3, -10, 10, -1, 1, -2, 2),
+            signal=np.arange(100.0).reshape(5, 5, 2, 2),
+            error=np.arange(100.0).reshape(5, 5, 2, 2),
+            nbins=(5, 5, 2, 2),
+            names=("00L", "HH0", "-KK0", "E"),
+            units=("rlu", "rlu", "rlu", "EnergyTransfer"),
+            isq=(True, True, True, False),
+        )
+        # basis vectors as if ws was produced from BinMD call on MDEvent with dims E, H, K, L
+        basis_mat = np.array([[0, 0, 0, 1], [0, 1, -1, 0], [0, 1, 1, 0], [1, 0, 0, 0]])
+        ws.getBasisVector.side_effect = lambda idim: basis_mat[:, idim]
+        model = SliceViewerModel(ws)
+
+        proj_mat = model.get_proj_matrix()
+
+        self.assertTrue(np.all(np.isclose(proj_mat, [[0, 1, -1], [0, 1, 1], [1, 0, 0]])))
+
     @patch.multiple("mantidqt.widgets.sliceviewer.models.roi", ExtractSpectra=DEFAULT, Rebin=DEFAULT, SumSpectra=DEFAULT, Transpose=DEFAULT)
     def test_export_roi_for_matrixworkspace(self, ExtractSpectra, **_):
         xmin, xmax, ymin, ymax = -1.0, 3.0, 2.0, 4.0
