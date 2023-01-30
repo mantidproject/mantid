@@ -42,9 +42,16 @@ Symmetrise
 This tab allows you to take an asymmetric reduced file (*_red.nxs*) and symmetrise it about
 the Y axis.
 
-The curve is symmetrised such that the range of positive values between :math:`EMin`
+The curve can be symmetrised using two methods depending on the value of **Reflect Type**:
+
+1. *Positive to Negative* (default): the range of the positive values between :math:`EMin`
 and :math:`EMax` are reflected about the Y axis and replaces the negative values
 in the range :math:`-EMax` to :math:`-EMin`, the curve between :math:`-EMin` and
+:math:`EMin` is not modified.
+
+2. *Negative to Positive*: the range of the negative values between :math:`-EMax`
+and :math:`EMin` are reflected about the Y axis and replaces the positive values
+in the range :math:`EMin` to :math:`-EMax`, the curve between :math:`-EMin` and
 :math:`EMin` is not modified.
 
 .. interface:: Data Manipulation
@@ -59,6 +66,9 @@ Input
 
 EMin & EMax
   Sets the energy range that is to be reflected about :math:`y=0`.
+
+Reflect Type
+  Whether to do *Positive to Negative* or *Negative to Positive* reflection.
 
 Spectrum No
   Changes the spectrum shown in the preview plots.
@@ -119,7 +129,7 @@ produce this file is IRIS, the analyser is graphite and the reflection is 002. S
 
 4. Click **Run** and wait for the interface to finish processing. This will run the
    :ref:`Symmetrise <algm-Symmetrise>` algorithm. The output workspace is called
-   ``iris26176_graphite002_sym_red``.
+   ``iris26176_graphite002_sym_pn_red``.
 
 5. Click **Plot Spectra** to produce a spectra plot of the output workspace. Other indices can be
    plotted by entering indices in the box next to the **Plot Spectra** button. For example,

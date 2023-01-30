@@ -9,6 +9,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
 #include "ui_InelasticDataManipulationSymmetriseTab.h"
@@ -46,7 +47,8 @@ public slots:
                        QString const &message = "Run", QString const &tooltip = "");
 
 signals:
-  void valueChanged(QtProperty *, double);
+  void doubleValueChanged(QtProperty *, double);
+  void enumValueChanged(QtProperty *, int);
   void dataReady(QString const &);
   void previewClicked();
   void runClicked();
@@ -56,10 +58,12 @@ signals:
 private slots:
   void xRangeMaxChanged(double value);
   void xRangeMinChanged(double value);
+  void reflectTypeChanged(QtProperty *, int value);
 
 private:
   void setRunEnabled(bool enabled);
   void setSaveEnabled(bool enabled);
+  void resetEDefaults(bool isPositive, QPair<double, double> range);
   Ui::InelasticDataManipulationSymmetriseTab m_uiForm;
 
   /// Tree of the properties
@@ -68,6 +72,7 @@ private:
   QMap<QString, QtProperty *> m_properties;
   QtDoublePropertyManager *m_dblManager;
   QtGroupPropertyManager *m_grpManager;
+  QtEnumPropertyManager *m_enumManager;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
