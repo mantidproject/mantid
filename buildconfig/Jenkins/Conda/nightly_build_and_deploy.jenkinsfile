@@ -8,16 +8,18 @@
 ANACONDA_CHANNEL_DEFAULT = 'mantid'
 GITHUB_RELEASES_REPO_DEFAULT = 'mantidproject/mantid'
 GIT_BRANCH = git_branch_name()
+// Only Publish one of the nightly builds by default. BRANCH_TO_PUBLISH is a global
+// environment variable set in the Jenkins system configuration global properties.
+PUBLISH_PACKAGES_DEFAULT = (GIT_BRANCH == "${BRANCH_TO_PUBLISH}")
+
 switch(GIT_BRANCH) {
   case ['main', 'release-next']:
-    PUBLISH_PACKAGES_DEFAULT = true
     PACKAGE_SUFFIX_DEFAULT = 'Nightly'
     ANACONDA_CHANNEL_LABEL_DEFAULT = 'nightly'
     GITHUB_RELEASES_TAG_DEFAULT = ''
     PLATFORM_CHOICES = ['all']
     break
   default:
-    PUBLISH_PACKAGES_DEFAULT = false
     PACKAGE_SUFFIX_DEFAULT = 'Unstable'
     ANACONDA_CHANNEL_LABEL_DEFAULT = 'unstable'
     GITHUB_RELEASES_TAG_DEFAULT = ''
