@@ -137,6 +137,8 @@ void export_Property() {
                     make_function(&Property::documentation, return_value_policy<copy_const_reference>()),
                     "The property's doc string")
 
+      .def("setDocumentation", &Property::setDocumentation, (arg("doc")), "Setting documentation for property")
+
       .add_property("type", make_function(&Property::type), "Returns a string identifier for the type")
 
       .add_property("units", &unitAsUnicode, &Property::setUnits, "The units attached to this property")
