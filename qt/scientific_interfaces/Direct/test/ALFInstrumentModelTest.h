@@ -109,6 +109,7 @@ public:
   void test_loadAndNormalise_does_not_transform_to_dSpacing() {
     auto const workspace = m_model->loadAndNormalise(m_ALFData);
     TS_ASSERT_DIFFERS("dSpacing", workspace->getAxis(0)->unit()->unitID());
+  }
 
   void test_setSample_will_not_load_an_empty_instrument_workspace_if_the_sample_was_previously_null() {
     ADS.clear();

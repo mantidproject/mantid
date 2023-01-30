@@ -1,0 +1,1 @@
+- Removing the sample on the ALFView interface will now clear the InstrumentWidget plot.
