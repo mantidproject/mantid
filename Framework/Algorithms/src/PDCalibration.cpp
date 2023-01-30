@@ -237,7 +237,7 @@ void PDCalibration::init() {
                   "for pre-checking peaks before fitting, such that all the peaks with the total Y-count "
                   "under this value will be excluded.");
 
-  declareProperty("MinimumSignalToNoiseRatio", 3.,
+  declareProperty("MinimumSignalToNoiseRatio", 0.,
                   "Minimum signal-to-noise ratio such that all the peaks with "
                   "signal-to-noise ratio under this value will be excluded.");
 
