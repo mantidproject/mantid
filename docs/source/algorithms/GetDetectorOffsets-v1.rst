@@ -74,16 +74,17 @@ Output
 
 .. testoutput::
 
-  # Calibration file for instrument basic_rect written on ...
-  # Format: number    UDET         offset    select    group
-          0            100     -0.0014265       1       1
-          1            101     -0.0014265       1       1
-          2            102     -0.0014265       1       1
-          3            103     -0.0014265       1       1
-          4            104     -0.0014265       1       1
-          5            105     -0.0014265       1       1
-          6            106     -0.0014265       1       1
-          7            107     -0.0014265       1       1
+    # Calibration file for instrument basic_rect written on ...
+    # Format: number    UDET         offset    select    group
+            0            100     -0.0014312       1       1
+            1            101     -0.0014312       1       1
+            2            102     -0.0014312       1       1
+            3            103     -0.0014312       1       1
+            4            104     -0.0014312       1       1
+            5            105     -0.0014312       1       1
+            6            106     -0.0014312       1       1
+            7            107     -0.0014312       1       1
+
 
 .. testcleanup::
 
