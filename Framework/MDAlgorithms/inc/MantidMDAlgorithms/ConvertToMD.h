@@ -24,12 +24,8 @@ namespace MDAlgorithms {
    factory.
    * Intended to cover wide range of cases;
    *
-   * The description of the algorithm is available at:
-   <http://www.mantidproject.org/ConvertToMD>
-   * The detailed description of the algorithm is provided at:
-   <http://www.mantidproject.org/Writing_custom_ConvertTo_MD_transformation>
-
-   * @date 11-10-2011
+   * The detailed description of the algorithm is provided at
+   * dev-docs/source/WritingCustomConvertToMDTransformation.rst.
 */
 
 /// Convert to MD Events class itself:

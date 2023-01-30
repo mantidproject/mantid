@@ -12,8 +12,8 @@ Description
 This algorithm loads the raw data files produced by the SANS-1 instrument at MLZ into mantid workspace.
 
 The loader reads out the detector positions from the instrument definition file
-(`IDF <https://docs.mantidproject.org/nightly/concepts/InstrumentDefinitionFile.html>`_) and places the
-detectors accordingly. The `Instrument View <https://www.mantidproject.org/Instrument_View>`_ window
+(:ref:`IDF <InstrumentDefinitionFile>`) and places the detectors accordingly.
+The :ref:`Instrument View <InstrumentViewer>` window
 can be activated by right clicking on the loaded workspace and selecting the "Show Instrument".
 
 .. _vector example:
@@ -33,8 +33,7 @@ Output:
     This workspace has 16386 spectra.
 
 The information from all sections of the raw data file is written to Sample Logs. To get access to
-Sample Logs, a user needs to use the
-`keys method <https://docs.mantidproject.org/nightly/tutorials/python_in_mantid/further_alg_ws/04_run_logs.html>`_;
+Sample Logs, a user needs to use the :ref:`keys method <04_run_logs>`;
 the key consists of a section's title followed by a dot and the parameter of interest that belongs
 to that section. The most relevant parameters, such as "wavelength", "collimation",
 "l2", "duration", "monitor1", "monitor2", "thickness" and "position" can be accessed
@@ -65,7 +64,7 @@ Data visualization
 
 Whenever the loader is used then the output is written to a 2D Workspace. As a result, the data
 can be visualised by right clicking on the loaded workspace and selecting the "Show Instrument"
-option, which activates the `Instrument View <https://www.mantidproject.org/Instrument_View>`_ tool.
+option, which activates the `Instrument View <InstrumentViewer>`_ tool.
 
 .. figure:: /images/LoadSANS1MLZ_show_instrument.png
     :align: center

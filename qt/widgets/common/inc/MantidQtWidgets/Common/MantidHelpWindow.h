@@ -32,8 +32,6 @@ public:
   void showPage(const std::string &url = std::string()) override;
   void showPage(const QString &url) override;
   void showPage(const QUrl &url) override;
-  void showWikiPage(const std::string &page = std::string()) override;
-  void showWikiPage(const QString &page) override;
   void showAlgorithm(const std::string &name = std::string(), const int version = -1) override;
   void showAlgorithm(const QString &name, const int version = -1) override;
   void showConcept(const std::string &name) override;

@@ -260,7 +260,7 @@ private:
   /// parameter files.
   /// By default this one is empty meaning that the default of angle=degree etc
   /// are used
-  /// see <http://www.mantidproject.org/IDF>
+  /// see docs/source/concepts/InstrumentDefinitionFile.rst
   /// However if map below contains e.g. <"angle", "radian"> it means
   /// that all "angle"-parameters in the _logfileCache are assumed to have been
   /// specified

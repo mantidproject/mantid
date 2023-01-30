@@ -66,7 +66,6 @@ public:
   const std::string category() const override { return "DataHandling\\SPE;Inelastic\\DataHandling"; }
 
   /// the mask flag (=-1e30) from the SPE specification
-  /// http://www.mantidproject.org/images/3/3d/Spe_file_format.pdf
   static const double MASK_FLAG;
 
 private:
@@ -93,7 +92,6 @@ private:
 
   /// the error value (=0.0) for spectra whose detectors are all masked, from
   /// the SPE specification
-  /// http://www.mantidproject.org/images/3/3d/Spe_file_format.pdf
   static const double MASK_ERROR;
 
   // temporary variable to keep verified signal values for current spectra
