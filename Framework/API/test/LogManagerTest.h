@@ -431,12 +431,23 @@ public:
   void test_getStatistics() {
     LogManager run;
 
+<<<<<<< HEAD
     // local helper function
     auto assertSingleValue = [&](const std::string &name, double value) {
+=======
+    // test valid single value property
+    double value = 42.0;
+    addTestPropertyWithValue<size_t>(run, "single-size_t", 42);
+    addTestPropertyWithValue<int>(run, "single-int", 42);
+    addTestPropertyWithValue<float>(run, "single-float", 42.0);
+    addTestPropertyWithValue<double>(run, "single-double", 42.0);
+    for (std::string name : {"single-size_t", "single-int", "single-float", "single-double"}) {
+>>>>>>> 0f976fcdd03 (add logManager::getStatistics and unite test)
       auto stats = run.getStatistics(name);
       TS_ASSERT_DELTA(stats.minimum, value, 0.001);
       TS_ASSERT_DELTA(stats.maximum, value, 0.001);
       TS_ASSERT_DELTA(stats.mean, value, 0.001);
+<<<<<<< HEAD
       TS_ASSERT_DELTA(stats.median, value, 0.001);
       TS_ASSERT_DELTA(stats.standard_deviation, 0.0, 0.001);
       TS_ASSERT_DELTA(stats.time_mean, value, 0.001);
@@ -457,6 +468,17 @@ public:
     // test invalid single value property
     {
       addTestPropertyWithValue<std::string>(run, "single-string", "46");
+=======
+      TS_ASSERT_DELTA(stats.standard_deviation, 0.0, 0.001);
+      TS_ASSERT_DELTA(stats.time_mean, value, 0.001);
+      TS_ASSERT_DELTA(stats.time_standard_deviation, 0.0, 0.001);
+      TS_ASSERT_EQUALS(isnan(stats.duration), true);
+    }
+
+    // test invalid single value property
+    {
+      addTestPropertyWithValue<std::string>(run, "single-string", "42");
+>>>>>>> 0f976fcdd03 (add logManager::getStatistics and unite test)
       auto stats = run.getStatistics("single-string");
       TS_ASSERT_EQUALS(isnan(stats.minimum), true);
       TS_ASSERT_EQUALS(isnan(stats.maximum), true);
@@ -468,12 +490,20 @@ public:
     }
 
     // test time series
+<<<<<<< HEAD
     // addTestTimeSeries<size_t>(run, "series-size_t");
     addTestTimeSeries<int>(run, "series-int");
     addTestTimeSeries<float>(run, "series-float");
     addTestTimeSeries<double>(run, "series-double");
     // for (std::string name : {"series-size_t", "series-int", "series-float", "series-double"}) {
     for (std::string name : {"series-int", "series-float", "series-double"}) {
+=======
+    addTestTimeSeries<size_t>(run, "series-size_t");
+    addTestTimeSeries<int>(run, "series-int");
+    addTestTimeSeries<float>(run, "series-float");
+    addTestTimeSeries<double>(run, "series-double");
+    for (std::string name : {"series-size_t", "series-int", "series-float", "series-double"}) {
+>>>>>>> 0f976fcdd03 (add logManager::getStatistics and unite test)
       auto stats = run.getStatistics(name);
       TS_ASSERT_DELTA(stats.minimum, 2.0, 0.001);
       TS_ASSERT_DELTA(stats.maximum, 24.0, 0.001);

@@ -156,7 +156,11 @@ public:
   /// Get the time averaged standard deviation for a log
   double getTimeAveragedStd(const std::string &name) const;
 
+<<<<<<< HEAD
   /// Returns various statistics computations for a given property.
+=======
+  /// Get the time averaged standard deviation for a log
+>>>>>>> 0f976fcdd03 (add logManager::getStatistics and unite test)
   Kernel::TimeSeriesPropertyStatistics getStatistics(const std::string &name) const;
 
   /// Empty the values out of all TimeSeriesProperty logs

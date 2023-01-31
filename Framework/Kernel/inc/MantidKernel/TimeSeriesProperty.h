@@ -52,6 +52,7 @@ struct MANTID_KERNEL_DLL TimeSeriesPropertyStatistics {
   /// Duration in seconds
   double duration;
 
+<<<<<<< HEAD
   TimeSeriesPropertyStatistics() = default;
 
   /**
@@ -83,6 +84,8 @@ struct MANTID_KERNEL_DLL TimeSeriesPropertyStatistics {
     duration = std::numeric_limits<double>::quiet_NaN();
   }
 
+=======
+>>>>>>> 0f976fcdd03 (add logManager::getStatistics and unite test)
   void setAllToNan() {
     double nan = std::numeric_limits<double>::quiet_NaN();
     minimum = nan;
