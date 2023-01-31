@@ -107,11 +107,11 @@ void Meier::precomputeIntermediateSteps(std::valarray<double> &sinAlphaSquared, 
   std::valarray<double> Wm(size);
 
   size_t i = 0;
-  const double m = -J;
-  const double q1 = (OmegaQ + OmegaD) * (2 * m - 1);
-  const double q2 = OmegaD * std::sqrt(J * (J + 1) - m * (m - 1));
-  const double qq = pow(q1, 2) + pow(q2, 2);
-  const double q3 = OmegaQ * (2 * pow(m, 2) - 2 * m + 1) + OmegaD;
+  double m = -J;
+  double q1 = (OmegaQ + OmegaD) * (2 * m - 1);
+  double q2 = OmegaD * std::sqrt(J * (J + 1) - m * (m - 1));
+  double qq = pow(q1, 2) + pow(q2, 2);
+  double q3 = OmegaQ * (2 * pow(m, 2) - 2 * m + 1) + OmegaD;
 
   Wm[i] = std::sqrt(qq);
   positiveLambda[i] = getPositiveLambda(i, J2, q3, Wm[i], OmegaD, OmegaQ);
@@ -122,11 +122,11 @@ void Meier::precomputeIntermediateSteps(std::valarray<double> &sinAlphaSquared, 
   sinAlphaSquared[i] = 1 - cosAlphaSquared[i];
 
   for (i = 1; i < size; i++) {
-    const double m = static_cast<double>(i) - J;
-    const double q1 = (OmegaQ + OmegaD) * (2 * m - 1);
-    const double q2 = OmegaD * std::sqrt(J * (J + 1) - m * (m - 1));
-    const double qq = pow(q1, 2) + pow(q2, 2);
-    const double q3 = OmegaQ * (2 * pow(m, 2) - 2 * m + 1) + OmegaD;
+    m = static_cast<double>(i) - J;
+    q1 = (OmegaQ + OmegaD) * (2 * m - 1);
+    q2 = OmegaD * std::sqrt(J * (J + 1) - m * (m - 1));
+    qq = pow(q1, 2) + pow(q2, 2);
+    q3 = OmegaQ * (2 * pow(m, 2) - 2 * m + 1) + OmegaD;
 
     Wm[i] = std::sqrt(qq);
 
