@@ -42,18 +42,6 @@ shift
 CMAKE_PRESET=$1
 shift
 
-# Check if preset is valid, if not try old style preset.
-grep -q $CMAKE_PRESET $WORKSPACE/CMakePresets.json
-if [[ $? == 1 ]]; then
-  if [[ $CMAKE_PRESET == 'win'* ]]; then
-    CMAKE_PRESET='win'
-  elif [[ $CMAKE_PRESET == 'linux'* ]]; then
-    CMAKE_PRESET='linux-ci'
-  elif [[ $CMAKE_PRESET == 'osx'* ]]; then
-    CMAKE_PRESET='osx-ci'
-  fi
-fi
-
 if [[ -z "$BUILD_THREADS" ]]; then
     if [[ $OSTYPE == 'darwin'* ]]; then
         BUILD_THREADS="$(sysctl -n hw.logicalcpu)"
