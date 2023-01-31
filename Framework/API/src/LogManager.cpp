@@ -45,9 +45,10 @@ bool convertSingleValueToDouble(const Property *property, double &value) {
 
 /// Templated method to convert time series property to single double
 template <typename T>
-bool convertTimeSeriesToDouble(const Property *property, double &value, const Math::StatisticType &function) {
+bool convertTimeSeriesToDouble(const Property *property, double &value, const Math::StatisticType &function,
+                               const Kernel::TimeROI *timeRoi = nullptr) {
   if (const auto *log = dynamic_cast<const ITimeSeriesProperty *>(property)) {
-    value = log->extractStatistic(function);
+    value = log->extractStatistic(function, timeRoi);
     return true;
   } else {
     return false;
@@ -56,21 +57,23 @@ bool convertTimeSeriesToDouble(const Property *property, double &value, const Ma
 
 /// Templated method to convert a property to a single double
 template <typename T>
-bool convertPropertyToDouble(const Property *property, double &value, const Math::StatisticType &function) {
-  return convertSingleValue<T>(property, value) || convertTimeSeriesToDouble<T>(property, value, function);
+bool convertPropertyToDouble(const Property *property, double &value, const Math::StatisticType &function,
+                             const Kernel::TimeROI *timeRoi = nullptr) {
+  return convertSingleValue<T>(property, value) || convertTimeSeriesToDouble<T>(property, value, function, timeRoi);
 }
 
 /// Converts a property to a single double
-bool convertPropertyToDouble(const Property *property, double &value, const Math::StatisticType &function) {
+bool convertPropertyToDouble(const Property *property, double &value, const Math::StatisticType &function,
+                             const Kernel::TimeROI *timeRoi = nullptr) {
   // Order these with double and int first, and less likely options later.
   // The first one to succeed short-circuits and the value is returned.
   // If all fail, returns false.
-  return convertPropertyToDouble<double>(property, value, function) ||
-         convertPropertyToDouble<int32_t>(property, value, function) ||
-         convertPropertyToDouble<int64_t>(property, value, function) ||
-         convertPropertyToDouble<uint32_t>(property, value, function) ||
-         convertPropertyToDouble<uint64_t>(property, value, function) ||
-         convertPropertyToDouble<float>(property, value, function);
+  return convertPropertyToDouble<double>(property, value, function, timeRoi) ||
+         convertPropertyToDouble<int32_t>(property, value, function, timeRoi) ||
+         convertPropertyToDouble<int64_t>(property, value, function, timeRoi) ||
+         convertPropertyToDouble<uint32_t>(property, value, function, timeRoi) ||
+         convertPropertyToDouble<uint64_t>(property, value, function, timeRoi) ||
+         convertPropertyToDouble<float>(property, value, function, timeRoi);
 }
 } // namespace
 
@@ -369,7 +372,8 @@ double LogManager::getPropertyAsSingleValue(const std::string &name, Kernel::Mat
   const auto key = std::make_pair(name, statistic);
   if (!m_singleValueCache->getCache(key, singleValue)) {
     const Property *log = getProperty(name);
-    if (!convertPropertyToDouble(log, singleValue, statistic)) {
+    const TimeROI &filter = this->timeROI();
+    if (!convertPropertyToDouble(log, singleValue, statistic, &filter)) {
       if (const auto stringLog = dynamic_cast<const PropertyWithValue<std::string> *>(log)) {
         // Try to lexically cast string to a double
         try {

@@ -354,17 +354,17 @@ public:
     LogManager runInfo;
     const std::string name = "series";
     addTestTimeSeries<double>(runInfo, name);
-
     // time average values remain unchanged
     // all values were calculated using a independent implementation in python
     const double FIRST_VALUE{2.}; // also the min
     const double LAST_VALUE{24.}; // also the max
+    const double MEAN{13};
     const double TIME_AVG_MEAN{18.2380952348};
     // const double TIME_AVG_STDDEV {8.523975789812294};
 
     TS_ASSERT_EQUALS(runInfo.getProperty(name)->size(), 10);
     TS_ASSERT_LESS_THAN(0, runInfo.getMemorySize()); // memory is non-zero
-    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Mean), 13.0, 1e-12);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Mean), MEAN, 1e-12);
     TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Minimum), FIRST_VALUE, 1e-12);
     TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Maximum), LAST_VALUE, 1e-12);
     TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::FirstValue), FIRST_VALUE, 1e-12);
