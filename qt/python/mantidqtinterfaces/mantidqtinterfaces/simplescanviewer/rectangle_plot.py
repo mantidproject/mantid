@@ -16,7 +16,7 @@ from qtpy.QtWidgets import QWidget
 import numpy as np
 
 from mantidqt.widgets.sliceviewer.presenters.lineplots import LinePlots, KeyHandler, cursor_info
-from mantid.simpleapi import CreateWorkspace, CreateEmptyTableWorkspace
+from mantid.simpleapi import CreateWorkspace, CreateEmptyTableWorkspace, Fit
 from mantid.kernel import logger
 
 from .rectangle_controller import RectanglesManager
@@ -438,7 +438,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
             new_width = rect_0.get_width()
 
             peak = self._find_peak(rectangles[0])
-            center_0 = np.array(peak)
+            center_0 = np.array([peak[0], peak[1]])
 
             # we act as if there was a second rectangle with the same size center around (0, 0)
             center_1 = np.array((0, 0))
@@ -557,6 +557,51 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
 
             table_ws.addRow(peak_dict)
 
+    @staticmethod
+    def _fit_projection(axis: np.ndarray, data: np.ndarray) -> float:
+        """
+        Fits the provided data with a single gaussian and flat background and returns fitted peak centre value.
+
+        Args:
+        axis: Array containing position information related to intensities stored in data
+        data: Array containing intensities to be fitted
+
+        Returns: Fitted peak centre
+        """
+        ws = CreateWorkspace(DataX=axis, DataY=data, DataE=np.sqrt(data), StoreInADS=False)
+
+        # prepare inputs for fitting function and constraints
+        average_count = np.sum(data) / len(data)
+        pos_max = axis[np.argmax(data)]
+        max_value = np.max(data) - average_count
+        axis_range = axis[-1] - axis[0]
+        gauss_width = 0.2 * axis_range
+
+        # define fitting function: flat background + one gaussian and constraints to keep the found peak in the ROI
+        fit_function = "name=FlatBackground, A0={0}; name=Gaussian, PeakCentre={1}, Height={2}, Sigma={3}"
+        fit_constraints = "f1.Height > {0}, f1.Sigma < {1}, {2} < f1.PeakCentre < {3}"
+
+        # try to fit the output
+        try:
+            fit_output = Fit(
+                Function=fit_function.format(average_count, pos_max, max_value, gauss_width),
+                Constraints=fit_constraints.format(str(0.5 * max_value), str(0.5 * axis_range), axis[0], axis[-1]),
+                InputWorkspace=ws,
+                CreateOutput=True,
+                IgnoreInvalidData=True,
+                StoreInADS=False,
+            )
+        except (RuntimeError, ValueError):  # if fit fails, default the peak centre to the rectangle centre
+            peak_pos = axis[0] + 0.5 * axis_range
+        else:
+            peak_pos = fit_output.OutputParameters.row(2)["Value"]
+
+        # if the fit returned the peak position outside of ROI, place the peak at the ROI's centre
+        if not (axis[0] < peak_pos < axis[-1]):
+            peak_pos = axis[0] + 0.5 * axis_range
+
+        return peak_pos
+
     def _find_peak(self, rect: Rectangle) -> (float, float):
         """
         Find the peak at the center of mass of the rectangle
@@ -590,16 +635,17 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         slice_cut = arr[y0_ind:y1_ind, x0_ind:x1_ind]
 
         total_sum = slice_cut.sum()
-
         # if there is no counts or the sum is masked, we return the middle point
         if total_sum == 0 or np.ma.is_masked(total_sum):
             return (x0 + x1) / 2, (y0 + y1) / 2
 
-        x_mean = np.dot(np.sum(slice_cut, axis=0), np.arange(len(slice_cut[0]))) / total_sum
-        y_mean = np.dot(np.sum(slice_cut, axis=1), np.arange(len(slice_cut))) / total_sum
+        x_cut = np.sum(slice_cut, axis=0)
+        x_axis = np.linspace(x0, x1, len(slice_cut[0]))
+        y_cut = np.sum(slice_cut, axis=1)
+        y_axis = np.linspace(y0, y1, len(slice_cut))
 
-        x_peak_pos = (x_mean + x0_ind) * x_step + xmin
-        y_peak_pos = (y_mean + y0_ind) * y_step + ymin
+        x_peak_pos = self._fit_projection(x_axis, x_cut)
+        y_peak_pos = self._fit_projection(y_axis, y_cut)
 
         return x_peak_pos, y_peak_pos
 
