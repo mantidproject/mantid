@@ -202,7 +202,6 @@ public:
   /// @copydoc Mantid::Kernel::ITimeSeriesProperty::timeAverageValue()
   /// Time weighted mean and standard deviation
   std::pair<double, double> timeAverageValueAndStdDev() const;
-  double timeAverageValue() const override;
   /** Returns the calculated time weighted average value.
    * @param timeRoi  Object that holds information about when the time measurement was active.
    * @return The time-weighted average value of the log when the time measurement was active.
