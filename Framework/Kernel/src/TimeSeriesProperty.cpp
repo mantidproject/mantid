@@ -1550,10 +1550,19 @@ template <typename TYPE> TimeInterval TimeSeriesProperty<TYPE>::nthInterval(int 
       ;
     } else if (n == static_cast<int>(m_values.size()) - 1) {
       // 2. Last one by making up an end time.
-      time_duration d = m_values.rbegin()->time() - (m_values.rbegin() + 1)->time();
-      DateAndTime endTime = m_values.rbegin()->time() + d;
-      Kernel::TimeInterval dt(m_values.rbegin()->time(), endTime);
-      deltaT = dt;
+      // the last time is the last thing known
+      const auto ultimate = m_values.rbegin()->time();
+      // go backwards from the time before it that is different
+      int counter = 0;
+      while (DateAndTime::secondsFromDuration(ultimate - (m_values.rbegin() + counter)->time()) == 0.) {
+        counter += 1;
+      }
+      // get the last time that is different
+      time_duration lastDuration = m_values.rbegin()->time() - (m_values.rbegin() + counter)->time();
+      // the last duration is equal to the previous, non-zero, duration
+      DateAndTime endTime = m_values.rbegin()->time() + lastDuration;
+
+      deltaT = Kernel::TimeInterval(m_values.rbegin()->time(), endTime);
     } else {
       // 3. Regular
       DateAndTime startT = m_values[static_cast<std::size_t>(n)].time();
