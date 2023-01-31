@@ -329,10 +329,17 @@ public:
 
   /// Return a TimeSeriesPropertyStatistics object
 <<<<<<< HEAD
+<<<<<<< HEAD
   TimeSeriesPropertyStatistics getStatistics(const Kernel::TimeROI * = nullptr) const;
 =======
   TimeSeriesPropertyStatistics getStatistics() const override;
 >>>>>>> 1c06af57296 (TimeSeriesPropertyStatistics constructor with single value.)
+=======
+  TimeSeriesPropertyStatistics getStatistics() const override;
+=======
+  TimeSeriesPropertyStatistics getStatistics(const Kernel::TimeROI * = nullptr) const;
+>>>>>>> 4e9c90ec68a (Change instrument to include TimeROI)
+>>>>>>> a0439e01588 (Change instrument to include TimeROI)
 
   /// Detects whether there are duplicated entries (of time) in property &
   /// eliminates them
