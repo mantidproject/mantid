@@ -201,15 +201,8 @@ void ProjectionSurface::draw(GLDisplay *widget, bool picking) const {
   };
 
   QImage **image = picking ? &m_pickImage : &m_viewImage;
-
-  if (!*image || (*image)->width() != widget->width() || (*image)->height() != widget->height()) {
-    m_viewChanged = true;
-  }
-
   if (m_viewChanged) {
-
     this->drawSurface(widget, picking);
-
     if (*image) {
       delete (*image);
     }
