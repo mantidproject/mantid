@@ -69,22 +69,16 @@ class DNSElasticSCOptionsView(DNSView):
             'dx': self._content.dSB_dx,
             'dy': self._content.dSB_dy,
         }
+
         # connect signals
-        self._map['get_wavelength'].stateChanged.connect(
-            self._get_wavelength)
-        self._map['automatic_binning'].stateChanged.connect(
-            self._disable_automatic_binning)
-        self._map['det_efficiency'].stateChanged.connect(
-            self._disable_sub_det_efficiency)
-        self._map['subtract_background_from_sample'].stateChanged.connect(
-            self._disable_sub_sample_back)
-        self._map['use_dx_dy'].stateChanged.connect(self._disable_lattice)
+        self._attach_signal_slots()
 
-    # Signals
-
+    # signals
     sig_get_wavelength = Signal()
     sig_two_theta_max_changed = Signal()
     sig_two_theta_min_changed = Signal()
+    sig_omega_max_changed = Signal()
+    sig_omega_min_changed = Signal()
     sig_auto_binning_clicked = Signal(int)
 
     def _disable_lattice(self, state):
@@ -101,13 +95,14 @@ class DNSElasticSCOptionsView(DNSView):
         self._map['filter_standard'].setChecked(1)
         self._map['filter_standard'].setEnabled(not state)
 
-    def _disable_automatic_binning(self, state):
+    def _automatic_binning_clicked(self, state):
         self._map['two_theta_min'].setEnabled(not state)
         self._map['two_theta_max'].setEnabled(not state)
         self._map['two_theta_bin_size'].setEnabled(not state)
         self._map['omega_min'].setEnabled(not state)
         self._map['omega_max'].setEnabled(not state)
         self._map['omega_bin_size'].setEnabled(not state)
+        self.sig_auto_binning_clicked.emit(state)
 
     def _disable_sub_det_efficiency(self, state):
         self._map['ignore_vana_fields'].setEnabled(state)
@@ -123,3 +118,36 @@ class DNSElasticSCOptionsView(DNSView):
     def _get_wavelength(self, state):
         if state:
             self.sig_get_wavelength.emit()
+
+    def _two_theta_min_changed(self):
+        self.sig_two_theta_min_changed.emit()
+
+    def _two_theta_max_changed(self):
+        self.sig_two_theta_max_changed.emit()
+
+    def _omega_min_changed(self):
+        self.sig_omega_min_changed.emit()
+
+    def _omega_max_changed(self):
+        self.sig_omega_max_changed.emit()
+
+    def _attach_signal_slots(self):
+        self._map['get_wavelength'].stateChanged.connect(
+            self._get_wavelength)
+        self._map['automatic_binning'].stateChanged.connect(
+            self._automatic_binning_clicked)
+        self._map['det_efficiency'].stateChanged.connect(
+            self._disable_sub_det_efficiency)
+        self._map['subtract_background_from_sample'].stateChanged.connect(
+            self._disable_sub_sample_back)
+        self._map['use_dx_dy'].stateChanged.connect(self._disable_lattice)
+        self._map['two_theta_min'].valueChanged.connect(
+            self._two_theta_min_changed)
+        self._map['two_theta_max'].valueChanged.connect(
+            self._two_theta_max_changed)
+        self._map['omega_min'].valueChanged.connect(
+            self._omega_min_changed)
+        self._map['omega_max'].valueChanged.connect(
+            self._omega_max_changed)
+        self._map['automatic_binning'].stateChanged.connect(
+            self._automatic_binning_clicked)
