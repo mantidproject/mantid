@@ -311,17 +311,16 @@ void PanelsSurface::processStructured(size_t rootIndex) {
   info->startDetectorIndex = firstRow.front();
   info->endDetectorIndex = lastRow.back();
 
-  // set the outline
-  std::vector<V3D> cornersInXZ;
+  std::vector<V3D> projCornersInXY;
   for (auto &corner : corners) {
     auto pos = corner - ref;
     info->rotation.rotate(pos);
     pos += ref;
-    cornersInXZ.push_back(V3D(pos.X(), pos.Y(), 0.));
+    projCornersInXY.push_back(V3D(pos.X(), pos.Y(), 0.));
   }
 
   // further rotate in xy plane so all banks parallel
-  auto leftVector = cornersInXZ[3] - cornersInXZ[0];
+  auto leftVector = projCornersInXY[3] - projCornersInXY[0];
   leftVector.normalize();
   if (abs(leftVector.scalar_prod(m_yaxis)) < 1.0) {
     // Quat constructor crashes if given opposite vectors??
@@ -330,6 +329,7 @@ void PanelsSurface::processStructured(size_t rootIndex) {
     info->rotation = xyRotation * info->rotation;
   }
 
+  // set the outline
   QVector<QPointF> verts;
   for (auto &corner : corners) {
     auto pos = corner - ref;
@@ -490,7 +490,7 @@ void PanelsSurface::processUnstructured(size_t rootIndex, std::vector<bool> &vis
     if (child == children[0])
       pos0 = pos;
     else if (child == children[1]) {
-      // at first set the normal to an argbitrary vector orthogonal to
+      // at first set the normal to an arbitrary vector orthogonal to
       // the line between the first two detectors
       y = normalize(pos - pos0);
       setupBasisAxes(y, normal, x);
