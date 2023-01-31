@@ -199,8 +199,9 @@ public:
   double averageValueInFilter(const std::vector<SplittingInterval> &filter) const override;
   /// @copydoc Mantid::Kernel::ITimeSeriesProperty::averageAndStdDevInFilter()
   std::pair<double, double> averageAndStdDevInFilter(const std::vector<SplittingInterval> &filter) const override;
-  /// @copydoc Mantid::Kernel::ITimeSeriesProperty::timeAverageValue()
-  /// Time weighted mean and standard deviation
+  /** Returns the calculated time weighted mean and standard deviation values.
+   * @return The time-weighted average value of the log when the time measurement was active.
+   */
   std::pair<double, double> timeAverageValueAndStdDev() const;
   /** Returns the calculated time weighted average value.
    * @param timeRoi  Object that holds information about when the time measurement was active.
