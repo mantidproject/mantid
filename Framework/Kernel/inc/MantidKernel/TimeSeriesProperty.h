@@ -325,7 +325,7 @@ public:
   bool isDefault() const override;
 
   /// Return a TimeSeriesPropertyStatistics object
-  TimeSeriesPropertyStatistics getStatistics() const override;
+  TimeSeriesPropertyStatistics getStatistics(const TimeROI *timeRoi = nullptr) const override;
 
   /// Detects whether there are duplicated entries (of time) in property &
   /// eliminates them

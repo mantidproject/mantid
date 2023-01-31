@@ -1857,7 +1857,9 @@ template <typename TYPE> bool TimeSeriesProperty<TYPE>::isDefault() const { retu
  *
  * N.B. This method DOES take filtering into account
  */
-template <typename TYPE> TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics() const {
+template <typename TYPE>
+TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics(const TimeROI *timeRoi) const {
+
   TimeSeriesPropertyStatistics out(Mantid::Kernel::getStatistics(this->filteredValuesAsVector()));
 
   if (this->size() > 0) {
