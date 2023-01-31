@@ -368,7 +368,7 @@ class RectanglePlotTest(unittest.TestCase):
         self.rectangle_plot._manager.add_rectangle(rect1)
         self.rectangle_plot._manager.add_rectangle(rect2)
 
-        peaks = {rect1: (5, 5), rect2: (40, 40)}
+        peaks = {rect1: (5, 5, 5, 5), rect2: (40, 40, 10, 10)}
 
         self.rectangle_plot._find_peak = mock.Mock()
         self.rectangle_plot._find_peak.side_effect = lambda x: peaks[x] if x in peaks else None
@@ -378,10 +378,12 @@ class RectanglePlotTest(unittest.TestCase):
         self.assertTrue(mtd.doesExist("peaks"))
         peak_ws = mtd["peaks"]
         self.assertEqual(peak_ws.rowCount(), 2)
-        self.assertEqual(peak_ws.columnCount(), 3)
+        self.assertEqual(peak_ws.columnCount(), 5)
         self.assertEqual(peak_ws.cell(0, 0), 0)
         self.assertEqual(peak_ws.cell(1, 1), 40)
         self.assertEqual(peak_ws.cell(0, 2), 5)
+        self.assertEqual(peak_ws.cell(0, 3), 5)
+        self.assertEqual(peak_ws.cell(0, 4), 5)
 
     def test_find_peaks(self):
         extent = (0, 500, 0, 500)

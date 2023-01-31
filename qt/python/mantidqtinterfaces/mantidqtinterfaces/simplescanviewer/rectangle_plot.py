@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from typing import Any
+from typing import Any, Tuple
 from enum import Enum
 from bisect import bisect_left
 
@@ -537,7 +537,9 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         table_ws = CreateEmptyTableWorkspace(OutputWorkspace="peaks")
         table_ws.addColumn("int", "Peak")
         table_ws.addColumn("float", "2Theta")
+        table_ws.addColumn("float", "2ThetaWidth")
         table_ws.addColumn("float", "Omega")
+        table_ws.addColumn("float", "OmegaWidth")
 
         additional_data = self._manager.additional_peaks_info(self.get_rectangles())
 
@@ -549,8 +551,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         for index, rect in enumerate(self.get_rectangles()):
             peak = self._find_peak(rect)
             self._show_peak(rect, peak)
-
-            peak_dict = {"Peak": index, "2Theta": peak[0], "Omega": peak[1]}
+            peak_dict = {"Peak": index, "2Theta": peak[0], "2ThetaWidth": peak[2], "Omega": peak[1], "OmegaWidth": peak[3]}
 
             for key in additional_data.keys():
                 peak_dict[key] = additional_data[key][index]
@@ -558,15 +559,15 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
             table_ws.addRow(peak_dict)
 
     @staticmethod
-    def _fit_projection(axis: np.ndarray, data: np.ndarray) -> float:
+    def _fit_projection(axis: np.ndarray, data: np.ndarray) -> Tuple[float, float]:
         """
-        Fits the provided data with a single gaussian and flat background and returns fitted peak centre value.
+        Fits the provided data with a single gaussian and flat background and returns fitted peak centre value and width.
 
         Args:
         axis: Array containing position information related to intensities stored in data
         data: Array containing intensities to be fitted
 
-        Returns: Fitted peak centre
+        Returns: Fitted peak centre and width
         """
         ws = CreateWorkspace(DataX=axis, DataY=data, DataE=np.sqrt(data), StoreInADS=False)
 
@@ -591,18 +592,22 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
                 IgnoreInvalidData=True,
                 StoreInADS=False,
             )
-        except (RuntimeError, ValueError):  # if fit fails, default the peak centre to the rectangle centre
+        except (RuntimeError, ValueError):
+            # if fit fails, default the peak centre to the rectangle centre and width to rectangle's width
             peak_pos = axis[0] + 0.5 * axis_range
+            peak_width = 0.5 * axis_range
         else:
             peak_pos = fit_output.OutputParameters.row(2)["Value"]
+            peak_width = fit_output.OutputParameters.row(3)["Value"]
 
         # if the fit returned the peak position outside of ROI, place the peak at the ROI's centre
         if not (axis[0] < peak_pos < axis[-1]):
             peak_pos = axis[0] + 0.5 * axis_range
+            peak_width = 0.5 * axis_range
 
-        return peak_pos
+        return peak_pos, peak_width
 
-    def _find_peak(self, rect: Rectangle) -> (float, float):
+    def _find_peak(self, rect: Rectangle) -> Tuple[float, float, float, float]:
         """
         Find the peak at the center of mass of the rectangle
         @param rect: the relevant rectangle
@@ -637,27 +642,28 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         total_sum = slice_cut.sum()
         # if there is no counts or the sum is masked, we return the middle point
         if total_sum == 0 or np.ma.is_masked(total_sum):
-            return (x0 + x1) / 2, (y0 + y1) / 2
+            return (x0 + x1) / 2, (y0 + y1) / 2, (x1 - x0) / 2, (y1 - y0) / 2
 
         x_cut = np.sum(slice_cut, axis=0)
         x_axis = np.linspace(x0, x1, len(slice_cut[0]))
         y_cut = np.sum(slice_cut, axis=1)
         y_axis = np.linspace(y0, y1, len(slice_cut))
 
-        x_peak_pos = self._fit_projection(x_axis, x_cut)
-        y_peak_pos = self._fit_projection(y_axis, y_cut)
+        x_peak_pos, x_peak_width = self._fit_projection(x_axis, x_cut)
+        y_peak_pos, y_peak_width = self._fit_projection(y_axis, y_cut)
 
-        return x_peak_pos, y_peak_pos
+        return x_peak_pos, y_peak_pos, x_peak_width, y_peak_width
 
-    def _show_peak(self, rect: Rectangle, peak: (float, float)):
+    def _show_peak(self, rect: Rectangle, peak: Tuple[float, float, float, float]):
         """
         Display the peak on the figure, replacing previous one if needed
         @param rect: the rectangle whose peak is shown
         @param peak: the position of the peak to show
         """
         indexes = self._manager.find_controllers(*get_opposing_corners(rect.get_xy(), rect.get_width(), rect.get_height()))
+        peak_pos = (peak[0], peak[1])
         for index in indexes:
-            plot = self.plotter.image_axes.plot(*peak, marker="+", color="r")[0]
+            plot = self.plotter.image_axes.plot(*peak_pos, marker="+", color="r")[0]
             controller = self._manager.rectangles[index][0]
             controller.set_peak_plot(plot)
 
