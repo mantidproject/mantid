@@ -45,9 +45,10 @@ bool convertSingleValueToDouble(const Property *property, double &value) {
 
 /// Templated method to convert time series property to single double
 template <typename T>
-bool convertTimeSeriesToDouble(const Property *property, double &value, const Math::StatisticType &function) {
+bool convertTimeSeriesToDouble(const Property *property, double &value, const Math::StatisticType &function,
+                               const Kernel::TimeROI *timeRoi = nullptr) {
   if (const auto *log = dynamic_cast<const ITimeSeriesProperty *>(property)) {
-    value = log->extractStatistic(function);
+    value = log->extractStatistic(function, timeRoi);
     return true;
   } else {
     return false;
