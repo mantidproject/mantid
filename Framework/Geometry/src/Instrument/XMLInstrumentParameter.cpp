@@ -13,6 +13,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/LogParser.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <boost/regex.hpp>
 #include <ctime>
@@ -87,7 +88,7 @@ XMLInstrumentParameter::XMLInstrumentParameter(std::string logfileID, std::strin
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
  *instrument definition file
  */
-double XMLInstrumentParameter::createParamValue(TimeSeriesProperty<double> *logData) const {
+double XMLInstrumentParameter::createParamValue(TimeSeriesProperty<double> *logData, const Kernel::TimeROI *roi) const {
   // If this parameter is a <look-up-table> or <formula> return 0.0. Such
   // parameter types are
   // associated with 'fitting' parameters. In some sense this method should
@@ -137,7 +138,7 @@ double XMLInstrumentParameter::createParamValue(TimeSeriesProperty<double> *logD
     if (m_extractSingleValueAs == "mean") {
       extractedValue = timeMean(logData);
     } else if (bUsingStandardStatistics) {
-      extractedValue = Kernel::filterByStatistic(logData, (*statisics_choice).second);
+      extractedValue = Kernel::filterByStatistic(logData, (*statisics_choice).second, roi);
     }
     // Looking for string: "position n", where n is an integer and is a 1-based
     // index

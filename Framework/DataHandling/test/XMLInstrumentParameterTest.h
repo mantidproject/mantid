@@ -17,6 +17,7 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 using namespace Mantid::API;
@@ -93,10 +94,11 @@ public:
                                           "bla bla bla", "false");
 
     TimeSeriesProperty<double> *dummy = nullptr;
-    TS_ASSERT_DELTA(testParamEntry.createParamValue(dummy), 1000.0, 0.0001);
+    Mantid::Kernel::TimeROI *roi = nullptr;
+    TS_ASSERT_DELTA(testParamEntry.createParamValue(dummy, roi), 1000.0, 0.0001);
     TS_ASSERT_EQUALS(testParamEntry.m_visible, "false");
 
     interpolation->addPoint(201.0, 60);
-    TS_ASSERT_DELTA(testParamEntry.createParamValue(dummy), 0.0, 0.0001);
+    TS_ASSERT_DELTA(testParamEntry.createParamValue(dummy, roi), 0.0, 0.0001);
   }
 };

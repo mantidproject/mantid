@@ -110,8 +110,15 @@ template <> std::string dtype(TimeSeriesProperty<std::string> &self) {
       .def("nthValue", &TimeSeriesProperty<TYPE>::nthValue, (arg("self"), arg("index")))                               \
       .def("nthTime", &TimeSeriesProperty<TYPE>::nthTime, (arg("self"), arg("index")),                                 \
            "returns :class:`mantid.kernel.DateAndTime`")                                                               \
-      .def("getStatistics", &TimeSeriesProperty<TYPE>::getStatistics, arg("self"),                                     \
-           "returns :class:`mantid.kernel.TimeSeriesPropertyStatistics`")                                              \
+      .def("getStatistics",                                                                                            \
+           (Mantid::Kernel::TimeSeriesPropertyStatistics(TimeSeriesProperty<TYPE>::*)() const) &                       \
+               TimeSeriesProperty<TYPE>::getStatistics,                                                                \
+           arg("self"), "returns :class:`mantid.kernel.TimeSeriesPropertyStatistics`")                                 \
+      .def("getStatistics",                                                                                            \
+           (Mantid::Kernel::TimeSeriesPropertyStatistics(TimeSeriesProperty<TYPE>::*)(const Mantid::Kernel::TimeROI *) \
+                const) &                                                                                               \
+               TimeSeriesProperty<TYPE>::getStatistics,                                                                \
+           (arg("self"), arg("roi") = 0), "returns :class:`mantid.kernel.TimeSeriesPropertyStatistics`")               \
       .def("timeAverageValue",                                                                                         \
            (double (TimeSeriesProperty<TYPE>::*)() const) & TimeSeriesProperty<TYPE>::timeAverageValue, (arg("self"))) \
       .def("timeAverageValue",                                                                                         \

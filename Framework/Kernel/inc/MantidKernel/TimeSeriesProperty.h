@@ -294,7 +294,7 @@ public:
   bool isDefault() const override;
 
   /// Return a TimeSeriesPropertyStatistics object
-  TimeSeriesPropertyStatistics getStatistics() const;
+  TimeSeriesPropertyStatistics getStatistics(const Kernel::TimeROI * = nullptr) const;
 
   /// Detects whether there are duplicated entries (of time) in property &
   /// eliminates them
@@ -352,7 +352,7 @@ private:
 /// Function filtering double TimeSeriesProperties according to the requested
 /// statistics.
 double DLLExport filterByStatistic(TimeSeriesProperty<double> const *const propertyToFilter,
-                                   Kernel::Math::StatisticType statisticType);
+                                   Kernel::Math::StatisticType statisticType, const Kernel::TimeROI *roi = nullptr);
 
 } // namespace Kernel
 } // namespace Mantid
