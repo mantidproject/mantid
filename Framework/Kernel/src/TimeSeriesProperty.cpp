@@ -1854,6 +1854,7 @@ template <typename TYPE> bool TimeSeriesProperty<TYPE>::isDefault() const { retu
 /**
  * Return a TimeSeriesPropertyStatistics struct containing the
  * statistics of this TimeSeriesProperty object.
+ *  @param roi : optional TimeROI object of active times.
  *
  * N.B. This method DOES take filtering into account
  */
@@ -2475,6 +2476,7 @@ namespace Mantid::Kernel {
  * statistics.
  *  @param propertyToFilter : Property to filter the statistics on.
  *  @param statisticType : Enum indicating the type of statistics to use.
+ *  @param roi : TimeROI object of active times
  *  @return The TimeSeriesProperty filtered by the requested statistics.
  */
 double filterByStatistic(TimeSeriesProperty<double> const *const propertyToFilter,
