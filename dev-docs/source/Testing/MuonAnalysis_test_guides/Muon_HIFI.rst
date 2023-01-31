@@ -46,7 +46,7 @@ HIFI Transverse Field Simultaneous Fitting
 	  *ExpDecOsc*)
 	- Set all parameters to **Global**, except **Frequency**
 	- Click **Fit**
-- The fit should fail with a large **Chi** value (``>100``)
+- The fit might work but with a large **Chi-squared** Squared value (``>100``)
 - Now to try the fit a different way.
 	- Click **Undo Fits**
 	- Click the value for the **Frequency** parameter; A ``...`` should appear

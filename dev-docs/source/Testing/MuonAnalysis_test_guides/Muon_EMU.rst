@@ -94,6 +94,7 @@ Superconducting Copper Test
 	- Set the ``Select Data`` to ``field_danfysik`` and ``Lambda``
 	- The plot will look similar to the one below
 	- Add a peak function (e.g. Gaussian)
+	- Move the peak centre to around 0.75
 	- You should be able to fit to the data
 	- Pressing the ``Covariance Matrix`` button will give a pop up containing it
 	- Ticking the ``Errors`` box below the plot will show the error bars on the data along with a shaded region
