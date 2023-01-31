@@ -307,6 +307,7 @@ bool LogParser::isICPEventLogNewStyle(const std::multimap<Types::Core::DateAndTi
  *
  * @param p :: Property with the data. Will throw if not
  *             TimeSeriesProperty<double>.
+ * @param roi :: TimeROI for when the log is being used
  * @return The mean value over time.
  * @throw runtime_error if the property is not TimeSeriesProperty<double>
  */
