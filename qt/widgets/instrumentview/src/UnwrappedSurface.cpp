@@ -19,6 +19,7 @@
 #include "MantidQtWidgets/Common/InputController.h"
 
 #include <QApplication>
+#include <QDebug>
 #include <QMenu>
 #include <QMouseEvent>
 #include <QPoint>
@@ -82,7 +83,7 @@ void UnwrappedSurface::drawSurface(GLDisplay *widget, bool picking) const {
   int widget_width = widget->width();
   int widget_height = widget->height();
 
-  // view rectangle in the OpenGL coordinates
+  // view rectangle
   double view_left = m_viewRect.x0();
   double view_top = m_viewRect.y1();
   double view_right = m_viewRect.x1();
@@ -102,7 +103,7 @@ void UnwrappedSurface::drawSurface(GLDisplay *widget, bool picking) const {
   const double dh = fabs((view_top - view_bottom) / widget_height);
 
   if (m_startPeakShapes) {
-    createPeakShapes(widget->rect());
+    createPeakShapes();
   }
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -375,15 +376,13 @@ void UnwrappedSurface::setPeaksWorkspace(const std::shared_ptr<Mantid::API::IPea
 /** Create the peak labels from the peaks set by setPeaksWorkspace.
  * The method is called from the draw(...) method
  *
- * @param window :: The screen window rectangle in pixels.
  */
-void UnwrappedSurface::createPeakShapes(const QRect &window) const {
+void UnwrappedSurface::createPeakShapes() const {
   if (!m_peakShapes.isEmpty()) {
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     PeakOverlay &peakShapes = *m_peakShapes.last();
     PeakMarker2D::Style style = peakShapes.getDefaultStyle(m_peakShapesStyle);
     m_peakShapesStyle++;
-    peakShapes.setWindow(getSurfaceBounds(), window);
     peakShapes.createMarkers(style);
     QApplication::restoreOverrideCursor();
   }
@@ -457,11 +456,8 @@ void UnwrappedSurface::drawSimpleToImage(QImage *image, bool picking) const {
   const double dw = fabs(m_viewRect.width() / vwidth);
   const double dh = fabs(m_viewRect.height() / vheight);
 
-  // std::cerr << m_viewRect.left() << ' ' << m_viewRect.right() << " : " <<
-  // m_viewRect.bottom() << ' ' << m_viewRect.top() << '\n';
-
   if (m_startPeakShapes) {
-    createPeakShapes(image->rect());
+    createPeakShapes();
   }
 
   for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {

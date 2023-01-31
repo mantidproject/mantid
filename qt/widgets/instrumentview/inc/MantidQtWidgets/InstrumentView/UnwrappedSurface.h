@@ -155,7 +155,7 @@ protected:
   /** @name Protected methods */
   //@{
   void setColor(size_t index, bool picking) const;
-  void createPeakShapes(const QRect &viewport) const;
+  void createPeakShapes() const;
   //@}
 
   double m_u_min;      ///< Minimum u

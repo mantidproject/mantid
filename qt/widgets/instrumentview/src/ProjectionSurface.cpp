@@ -188,6 +188,18 @@ void ProjectionSurface::draw(GLDisplay *widget) const {
  * @param picking :: Picking / normal drawing switch.
  */
 void ProjectionSurface::draw(GLDisplay *widget, bool picking) const {
+  // By default the viewport and window on the QPainter is set to
+  // the dimensions of the number of physical pixels on the device
+  // when used with an OpenGLWidget whereas methods like widget->width()/height()
+  // return logical pixels. All subsequent commands for 2D
+  // overlays assume logical pixels so we configure the painter
+  // such that the internal transformations take care o the mapping of logical
+  // to physical appropriately.
+  auto configurePainter = [widget](QPainter &painter) {
+    painter.setWindow(0, 0, widget->width(), widget->height());
+    painter.setViewport(0, 0, widget->width(), widget->height());
+  };
+
   QImage **image = picking ? &m_pickImage : &m_viewImage;
 
   if (!*image || (*image)->width() != widget->width() || (*image)->height() != widget->height()) {
@@ -205,6 +217,7 @@ void ProjectionSurface::draw(GLDisplay *widget, bool picking) const {
 
     if (!picking) {
       QPainter painter(widget);
+      configurePainter(painter);
       drawMaskShapes(painter);
       drawPeakMarkers(painter);
       drawPeakComparisonLine(painter);
@@ -214,8 +227,8 @@ void ProjectionSurface::draw(GLDisplay *widget, bool picking) const {
     }
   } else if (!picking) {
     QPainter painter(widget);
+    configurePainter(painter);
     painter.drawImage(0, 0, **image);
-
     drawMaskShapes(painter);
     drawPeakMarkers(painter);
     drawPeakComparisonLine(painter);
@@ -407,7 +420,9 @@ void ProjectionSurface::setInteractionMode(int mode) {
   controller->onEnabled();
   if (mode != EditShapeMode && mode != DrawFreeMode) {
     m_maskShapes.deselectAll();
-    foreach (PeakOverlay *po, m_peakShapes) { po->deselectAll(); }
+    foreach (PeakOverlay *po, m_peakShapes) {
+      po->deselectAll();
+    }
   }
 }
 
@@ -499,7 +514,9 @@ void ProjectionSurface::setPeakVisibility() const {
     QString unitID = QString::fromStdString(unit->unitID());
     double xmin = m_instrActor->minBinValue();
     double xmax = m_instrActor->maxBinValue();
-    foreach (PeakOverlay *po, m_peakShapes) { po->setPeakVisibility(xmin, xmax, unitID); }
+    foreach (PeakOverlay *po, m_peakShapes) {
+      po->setPeakVisibility(xmin, xmax, unitID);
+    }
   }
 }
 
@@ -988,7 +1005,9 @@ void ProjectionSurface::enableLighting(bool on) { m_isLightingOn = on; }
  */
 QStringList ProjectionSurface::getPeaksWorkspaceNames() const {
   QStringList names;
-  foreach (PeakOverlay *po, m_peakShapes) { names << QString::fromStdString(po->getPeaksWorkspace()->getName()); }
+  foreach (PeakOverlay *po, m_peakShapes) {
+    names << QString::fromStdString(po->getPeaksWorkspace()->getName());
+  }
   return names;
 }
 
