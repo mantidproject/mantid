@@ -417,8 +417,10 @@ QRect UnwrappedSurface::detectorQRectInPixels(const std::size_t detectorIndex) c
     return QRect();
   }
 
-  const int vwidth = m_viewImage->width();
-  const int vheight = m_viewImage->height();
+  const QSizeF viewSizeLogical(m_viewImage->width() / m_viewImage->devicePixelRatio(),
+                               m_viewImage->height() / m_viewImage->devicePixelRatio());
+  const double vwidth = viewSizeLogical.width();
+  const double vheight = viewSizeLogical.height();
   const double dw = fabs(m_viewRect.width() / vwidth);
   const double dh = fabs(m_viewRect.height() / vheight);
 
@@ -432,8 +434,9 @@ QRect UnwrappedSurface::detectorQRectInPixels(const std::size_t detectorIndex) c
   // Calculate the width and height of the QRect
   const auto size = QSize(static_cast<int>(detRect.width() / dw), static_cast<int>(detRect.height() / dh));
   // Calculate the position of the top left corner of the QRect
-  const auto position = QPoint(static_cast<int>(xCentre) - static_cast<int>(size.width() / 2.0),
-                               vheight - static_cast<int>(yCentre) - static_cast<int>(size.height() / 2.0));
+  const auto position =
+      QPoint(static_cast<int>(xCentre) - static_cast<int>(size.width() / 2.0),
+             static_cast<int>(vheight) - static_cast<int>(yCentre) - static_cast<int>(size.height() / 2.0));
   return QRect(position, size);
 }
 
