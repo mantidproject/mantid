@@ -31,6 +31,7 @@
 #include <QActionGroup>
 #include <QApplication>
 #include <QCheckBox>
+#include <QCoreApplication>
 #include <QGridLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -1737,7 +1738,7 @@ void DetectorPlotController::savePlotToWorkspace() {
     }
     if (!x.empty()) {
       if (nbins > 0 && x.size() != nbins) {
-        QMessageBox::critical(nullptr, "Mantid Error", "Curves have different sizes.");
+        QMessageBox::critical(nullptr, QCoreApplication::applicationName() + " Error", "Curves have different sizes.");
         return;
       } else {
         nbins = x.size();
@@ -1941,7 +1942,7 @@ void DetectorPlotController::addPeak(double x, double y) {
       alg->execute();
     }
   } catch (std::exception &e) {
-    QMessageBox::critical(m_tab, "Mantid Error",
+    QMessageBox::critical(m_tab, QCoreApplication::applicationName() + " Error ",
                           "Cannot create a Peak object because of the error:\n" + QString(e.what()));
   }
 }

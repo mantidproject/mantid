@@ -12,6 +12,7 @@
 #include <QButtonGroup>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QCoreApplication>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QLabel>
@@ -19,6 +20,6 @@
 #include <QVBoxLayout>
 
 FindDialog::FindDialog(ScriptEditor *editor) : FindReplaceDialog(editor) {
-  setWindowTitle(tr("MantidWorkbench") + " - " + tr("Find"));
+  setWindowTitle(QCoreApplication::applicationName() + " - Find");
   initLayout();
 }

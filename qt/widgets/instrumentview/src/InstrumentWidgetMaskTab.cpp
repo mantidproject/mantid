@@ -45,6 +45,7 @@
 #include <QAction>
 #include <QApplication>
 #include <QCheckBox>
+#include <QCoreApplication>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
@@ -1048,7 +1049,8 @@ void InstrumentWidgetMaskTab::saveMaskingToTableWorkspace(bool invertMask) {
 
     outputWS->setTitle("MaskBinTable");
   } else {
-    QMessageBox::critical(this, "Mantid Error", "Algorithm ExtractMaskToTable fails to execute. ");
+    QMessageBox::critical(this, QCoreApplication::applicationName() + " Error",
+                          "Algorithm ExtractMaskToTable fails to execute. ");
   }
 }
 
