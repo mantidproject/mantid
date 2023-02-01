@@ -52,7 +52,7 @@ public:
   /** Stream output operator  */
   friend MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &s, const Mantid::Kernel::TimeInterval &t);
 
-private:
+protected:
   /// begin
   Types::Core::DateAndTime m_begin;
   /// end

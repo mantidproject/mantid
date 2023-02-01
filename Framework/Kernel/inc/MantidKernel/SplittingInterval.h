@@ -20,7 +20,7 @@ namespace Kernel {
  *
  * Author: Janik Zikovsky, SNS
  */
-class MANTID_KERNEL_DLL SplittingInterval {
+class MANTID_KERNEL_DLL SplittingInterval : public TimeInterval {
 public:
   /// Default constructor
   SplittingInterval();
@@ -44,10 +44,6 @@ public:
   bool operator>(const SplittingInterval &b) const;
 
 private:
-  /// begin
-  Types::Core::DateAndTime m_start;
-  /// end
-  Types::Core::DateAndTime m_stop;
   /// Index of the destination
   int m_index;
 };

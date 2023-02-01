@@ -12,70 +12,66 @@ using namespace Types::Core;
 namespace Kernel {
 
 /// Default constructor
-SplittingInterval::SplittingInterval() : m_start(), m_stop(), m_index(-1) {}
+SplittingInterval::SplittingInterval() : TimeInterval(), m_index(-1) {}
 
 /// Constructor using DateAndTime
 SplittingInterval::SplittingInterval(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop,
                                      const int index)
-    : m_start(start), m_stop(stop), m_index(index) {}
+    : TimeInterval(start, stop), m_index(index) {}
 
 /// Return the start time
-DateAndTime SplittingInterval::start() const { return m_start; }
+DateAndTime SplittingInterval::start() const { return this->begin(); }
 
 /// Return the stop time
-DateAndTime SplittingInterval::stop() const { return m_stop; }
+DateAndTime SplittingInterval::stop() const { return this->end(); }
 
 /// Returns the duration in seconds
-double SplittingInterval::duration() const { return DateAndTime::secondsFromDuration(m_stop - m_start); }
+double SplittingInterval::duration() const { return DateAndTime::secondsFromDuration(end() - begin()); }
 
 /// Return the index (destination of this split time block)
 int SplittingInterval::index() const { return m_index; }
 
 /// Return true if the b SplittingInterval overlaps with this one.
 bool SplittingInterval::overlaps(const SplittingInterval &b) const {
-  return ((b.m_start < this->m_stop) && (b.m_start >= this->m_start)) ||
-         ((b.m_stop < this->m_stop) && (b.m_stop >= this->m_start)) ||
-         ((this->m_start < b.m_stop) && (this->m_start >= b.m_start)) ||
-         ((this->m_stop < b.m_stop) && (this->m_stop >= b.m_start));
+  return ((b.begin() < this->end()) && (b.begin() >= this->begin())) ||
+         ((b.end() < this->end()) && (b.end() >= this->begin())) ||
+         ((this->begin() < b.end()) && (this->begin() >= b.begin())) ||
+         ((this->end() < b.end()) && (this->end() >= b.begin()));
 }
 
 /// @cond DOXYGEN_BUG
 /// And operator. Return the smallest time interval where both intervals are
 /// TRUE.
 SplittingInterval SplittingInterval::operator&(const SplittingInterval &b) const {
-  SplittingInterval out(*this);
-  if (b.m_start > this->m_start)
-    out.m_start = b.m_start;
-  if (b.m_stop < this->m_stop)
-    out.m_stop = b.m_stop;
-  return out;
+  const auto begin = std::max(this->begin(), b.begin());
+  const auto end = std::min(this->end(), b.end());
+
+  return SplittingInterval(begin, end, this->index());
 }
 /// @endcond DOXYGEN_BUG
 
 /// Or operator. Return the largest time interval.
 SplittingInterval SplittingInterval::operator|(const SplittingInterval &b) const {
-  SplittingInterval out(*this);
   if (!this->overlaps(b))
     throw std::invalid_argument("SplittingInterval: cannot apply the OR (|) "
                                 "operator to non-overlapping "
                                 "SplittingInterval's.");
 
-  if (b.m_start < this->m_start)
-    out.m_start = b.m_start;
-  if (b.m_stop > this->m_stop)
-    out.m_stop = b.m_stop;
-  return out;
+  const auto begin = std::min(this->begin(), b.begin());
+  const auto end = std::max(this->end(), b.end());
+
+  return SplittingInterval(begin, end, this->index());
 }
 
 /// Compare two splitter by the begin time
-bool SplittingInterval::operator<(const SplittingInterval &b) const { return (this->m_start < b.m_start); }
+bool SplittingInterval::operator<(const SplittingInterval &b) const { return (this->begin() < b.begin()); }
 
 /// Compare two splitter by the begin time
-bool SplittingInterval::operator>(const SplittingInterval &b) const { return (this->m_start > b.m_start); }
+bool SplittingInterval::operator>(const SplittingInterval &b) const { return (this->begin() > b.begin()); }
 
 /** Comparator for sorting lists of SplittingInterval */
 bool compareSplittingInterval(const SplittingInterval &si1, const SplittingInterval &si2) {
-  return (si1.start() < si2.start());
+  return (si1.begin() < si2.begin());
 }
 
 //------------------------------------------------------------------------------------------------
@@ -172,16 +168,16 @@ SplittingIntervalVec removeFilterOverlap(const SplittingIntervalVec &a) {
   auto it = a.cbegin();
   while (it != a.cend()) {
     // All following intervals will start at or after this one
-    DateAndTime start = it->start();
-    DateAndTime stop = it->stop();
+    DateAndTime start = it->begin();
+    DateAndTime stop = it->end();
 
     // Keep looking for the next interval where there is a gap (start > old
     // stop);
-    while ((it != a.cend()) && (it->start() <= stop)) {
+    while ((it != a.cend()) && (it->begin() <= stop)) {
       // Extend the stop point (the start cannot be extended since the list is
       // sorted)
-      if (it->stop() > stop)
-        stop = it->stop();
+      if (it->end() > stop)
+        stop = it->end();
       ++it;
     }
     // We've reached a gap point. Output this merged interval and move on.
@@ -211,10 +207,10 @@ SplittingIntervalVec operator|(const SplittingIntervalVec &a, const SplittingInt
   SplittingIntervalVec::const_iterator it;
   ;
   for (it = a.begin(); it != a.end(); ++it)
-    if (it->stop() > it->start())
+    if (it->end() > it->begin())
       temp.emplace_back(*it);
   for (it = b.begin(); it != b.end(); ++it)
-    if (it->stop() > it->start())
+    if (it->end() > it->begin())
       temp.emplace_back(*it);
 
   // Sort by start time
@@ -248,16 +244,16 @@ SplittingIntervalVec operator~(const SplittingIntervalVec &a) {
   ait = temp.begin();
   if (ait != temp.end()) {
     // First entry; start at -infinite time
-    out.emplace_back(DateAndTime::minimum(), ait->start(), 0);
+    out.emplace_back(DateAndTime::minimum(), ait->begin(), 0);
     // Now start at the second entry
     while (ait != temp.end()) {
       DateAndTime start, stop;
-      start = ait->stop();
+      start = ait->end();
       ++ait;
       if (ait == temp.end()) { // Reached the end - go to inf
         stop = DateAndTime::maximum();
       } else { // Stop at the start of the next entry
-        stop = ait->start();
+        stop = ait->begin();
       }
       out.emplace_back(start, stop, 0);
     }
