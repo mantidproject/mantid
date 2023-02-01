@@ -472,8 +472,8 @@ void InstrumentWidgetPickTab::plotContextMenu() {
     // the remove menu
     QMenu *removeCurves = new QMenu("Remove", this);
     QSignalMapper *signalMapper = new QSignalMapper(this);
-    QStringList labels = m_plot->getLabels();
-    foreach (QString label, labels) {
+    const QStringList labels = m_plot->getLabels();
+    for (const auto &label : labels) {
       QColor c = m_plot->getCurveColor(label);
       QPixmap pixmap(16, 2);
       pixmap.fill(c);
@@ -1381,8 +1381,10 @@ void DetectorPlotController::plotSingle(size_t detindex) {
   // find any markers
   auto surface = m_tab->getSurface();
   if (surface) {
-    QList<PeakMarker2D *> markers = surface->getMarkersWithID(detid);
-    foreach (PeakMarker2D *marker, markers) { m_plot->addPeakLabel(marker); }
+    const QList<PeakMarker2D *> markers = surface->getMarkersWithID(detid);
+    for (auto marker : markers) {
+      m_plot->addPeakLabel(marker);
+    }
   }
 }
 
