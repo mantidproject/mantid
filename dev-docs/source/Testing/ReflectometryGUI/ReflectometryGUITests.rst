@@ -16,6 +16,7 @@ Set up
 
 - These instructions assume use of MantidWorkbench or MantidPlot 3.7 or higher.
 - Ensure you have the `ISIS Sample Data <http://download.mantidproject.org>`__ in your Mantid user directories.
+- Ensure you have added this path to your Mantid user directories: `[path to your build directory]/ExternalData/Testing/Data/UnitTest`. This is required for testing the Preview tab.
 - Ensure you have the ISIS archive enabled.
 - Open the ISIS Reflectometry interface.
 - Go to the menu ``Tools->Options`` and ensure all of the warnings are ticked. On the Rounding tab, set the precision to 2 decimal places.
@@ -174,7 +175,7 @@ Preview tab
 ---------------
 
 - Go to the Reduction Preview tab.
-- Type `INTER45455_inst` into the `Run` input. Set the `Angle` to `1` and click `Load`. The instrument view plot should display the data.
+- Type `INTER45455` into the `Run` input. Set the `Angle` to `1` and click `Load`. The instrument view plot should display the data. If the plot remains blank then check that you have added the path to your unit test data to your Mantid user directories (see set up instructions).
 - Click the rectangle-select button above the plot and draw a region onto the instrument view. The selected detector segments should be summed and the result plotted on the second (slice viewer) plot.
 - To see the counts on the slice viewer plot more clearly, select `SymmetricLog10` from the drop-down underneath the color scale.
 - Click the rectangle select button above the slice viewer plot and draw a `Signal` region on the plot. A reduction will now be triggered for the selected spectra and the result plotted on the 1D plot.
