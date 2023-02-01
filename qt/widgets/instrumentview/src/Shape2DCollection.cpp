@@ -460,13 +460,10 @@ void Shape2DCollection::addToSelection(Shape2D *shape) {
  * @param shape :: Pointer to a shape to deselect.
  */
 void Shape2DCollection::removeFromSelection(Shape2D *selectedShape) {
-  for (auto shape : std::as_const(m_selectedShapes)) {
-    if (shape == selectedShape) {
-      shape->setSelected(false);
-      shape->edit(false);
-      m_selectedShapes.removeOne(shape);
-      return;
-    }
+  if (m_selectedShapes.contains(selectedShape)) {
+    selectedShape->setSelected(false);
+    selectedShape->edit(false);
+    m_selectedShapes.removeOne(selectedShape);
   }
 }
 
