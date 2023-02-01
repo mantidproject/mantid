@@ -159,16 +159,18 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
                     "}", ""]
 
     def _get_binning_lines(self, options):
-        bin_edge_min = options['two_theta_min'] - options['two_theta_bin_size'] / 2
-        bin_edge_max = options['two_theta_max'] + options['two_theta_bin_size'] / 2
-        num_bins = int(round((bin_edge_max - bin_edge_min) / options['two_theta_bin_size']))
-        binning = [bin_edge_min, bin_edge_max, num_bins]
+        two_theta_bin_edge_min = options['two_theta_min'] - options['two_theta_bin_size'] / 2
+        two_theta_bin_edge_max = options['two_theta_max'] + options['two_theta_bin_size'] / 2
+        two_theta_num_bins = int(round((two_theta_bin_edge_max - two_theta_bin_edge_min) / options['two_theta_bin_size']))
+        two_theta_binning = [two_theta_bin_edge_min, two_theta_bin_edge_max, two_theta_num_bins]
+        omega_bin_edge_min = options['omega_min'] - options['omega_bin_size'] / 2
+        omega_bin_edge_max = options['omega_max'] + options['omega_bin_size'] / 2
+        omega_num_bins = int(round((omega_bin_edge_max - omega_bin_edge_min) / options['omega_bin_size']))
+        omega_binning = [omega_bin_edge_min, omega_bin_edge_max, omega_num_bins]
+
         lines = [
-            f"binning = {{'twoTheta': {binning},\n"
-            f"           'Omega':  ["
-            f"{self._sample_data.omega.bin_edge_min:.3f},"
-            f" {self._sample_data.omega.bin_edge_max:.3f},"
-            f" {self._sample_data.omega.nbins:d}]}} # min, max,"
+            f"binning = {{'two_theta_binning': {two_theta_binning},\n"
+            f"           'omega_binning': {omega_binning}}} # min, max,"
             " number_of_bins"]
         return lines
 
