@@ -420,7 +420,9 @@ void ProjectionSurface::setInteractionMode(int mode) {
   controller->onEnabled();
   if (mode != EditShapeMode && mode != DrawFreeMode) {
     m_maskShapes.deselectAll();
-    foreach (PeakOverlay *po, m_peakShapes) { po->deselectAll(); }
+    for (auto peakOverlay : std::as_const(m_peakShapes)) {
+      peakOverlay->deselectAll();
+    }
   }
 }
 
@@ -526,7 +528,9 @@ void ProjectionSurface::setPeakVisibility() const {
     QString unitID = QString::fromStdString(unit->unitID());
     double xmin = m_instrActor->minBinValue();
     double xmax = m_instrActor->maxBinValue();
-    foreach (PeakOverlay *po, m_peakShapes) { po->setPeakVisibility(xmin, xmax, unitID); }
+    for (auto peakOverlay : std::as_const(m_peakShapes)) {
+      peakOverlay->setPeakVisibility(xmin, xmax, unitID);
+    }
   }
 }
 
@@ -1015,7 +1019,9 @@ void ProjectionSurface::enableLighting(bool on) { m_isLightingOn = on; }
  */
 QStringList ProjectionSurface::getPeaksWorkspaceNames() const {
   QStringList names;
-  foreach (PeakOverlay *po, m_peakShapes) { names << QString::fromStdString(po->getPeaksWorkspace()->getName()); }
+  for (auto peakOverlay : std::as_const(m_peakShapes)) {
+    names << QString::fromStdString(peakOverlay->getPeaksWorkspace()->getName());
+  }
   return names;
 }
 
