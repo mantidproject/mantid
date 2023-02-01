@@ -375,7 +375,7 @@ class RectangleSelectionLinePlot(KeyHandler):
         if not self._selector.artists[0].get_visible():
             return
 
-        rect = self._selector.to_draw
+        rect = self._selector._selection_artist
         ll_x, ll_y = rect.get_xy()
         limits = ((ll_x, ll_x + rect.get_width()), (ll_y, ll_y + rect.get_height()))
 
