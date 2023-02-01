@@ -69,6 +69,7 @@ via `BraggAngle` property. This rotation takes place in either in horizontal or 
 .. testsetup:: LoadingD17DirectBeam
 
     config['default.facility'] = 'ILL'
+    config['default.instrument'] = 'D17'
     config.appendDataSearchSubDir('ILL/D17/')
 
 .. testcode:: LoadingD17DirectBeam
