@@ -101,8 +101,6 @@ private:
 
   void updateLookupRowProcessingInstructions(PreviewRow const &previewRow, LookupRow &lookupRow, ROIType regionType);
 
-  void replaceBoolTextWithBoolValue(std::map<std::string, std::string> &stitchParams);
-
   bool isProcessing() const;
   bool isAutoreducing() const;
 
