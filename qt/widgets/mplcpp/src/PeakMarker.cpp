@@ -18,13 +18,14 @@ using Mantid::PythonInterface::PythonException;
 
 namespace {
 
-Python::Object newMarker(FigureCanvasQt *canvas, int peakID, double x, double yTop, double yBottom, double fwhm,
+Python::Object newMarker(FigureCanvasQt *canvas, int peakID, double x, double height, double fwhm, double background,
                          boost::optional<QHash<QString, QVariant>> const &otherKwargs) {
   GlobalInterpreterLock lock;
 
   Python::Object markersModule{Python::NewRef(PyImport_ImportModule("mantidqt.plotting.markers"))};
 
-  auto const args = Python::NewRef(Py_BuildValue("(Oidddd)", canvas->pyobj().ptr(), peakID, x, yTop, yBottom, fwhm));
+  auto const args =
+      Python::NewRef(Py_BuildValue("(Oidddd)", canvas->pyobj().ptr(), peakID, x, height, fwhm, background));
   Python::Dict kwargs = Python::qHashToDict(otherKwargs.get());
 
   auto const marker = markersModule.attr("PeakMarker")(*args, **kwargs);
@@ -38,9 +39,9 @@ namespace MantidQt::Widgets::MplCpp {
 /**
  * @brief Create a PeakMarker instance
  */
-PeakMarker::PeakMarker(FigureCanvasQt *canvas, int peakID, double x, double yTop, double yBottom, double fwhm,
+PeakMarker::PeakMarker(FigureCanvasQt *canvas, int peakID, double x, double height, double fwhm, double background,
                        QHash<QString, QVariant> const &otherKwargs)
-    : InstanceHolder(newMarker(canvas, peakID, x, yTop, yBottom, fwhm, otherKwargs)) {}
+    : InstanceHolder(newMarker(canvas, peakID, x, height, fwhm, background, otherKwargs)) {}
 
 /**
  * @brief Redraw the PeakMarker
@@ -58,8 +59,8 @@ void PeakMarker::remove() { callMethodNoCheck<void>(pyobj(), "remove"); }
  * @param height The new height.
  * @param fwhm The new height.
  */
-void PeakMarker::updatePeak(double centre, double height, double fwhm) {
-  callMethodNoCheck<void>(pyobj(), "update_peak", centre, height, fwhm);
+void PeakMarker::updatePeak(double centre, double height, double fwhm, double background) {
+  callMethodNoCheck<void>(pyobj(), "update_peak", centre, height, fwhm, background);
 }
 
 /**

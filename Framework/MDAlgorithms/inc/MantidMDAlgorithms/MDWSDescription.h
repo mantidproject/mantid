@@ -36,12 +36,8 @@ namespace MDAlgorithms {
    of MD workspace
    *
    *
-   * See http://www.mantidproject.org/Writing_custom_ConvertTo_MD_transformation
-   for detailed description of this
+   *   See dev-docs/source/WritingCustomConvertToMDTransformation.rst for detailed description of this
    * class place in the algorithms hierarchy.
-   *
-
-   @date 2011-28-12
 */
 
 /// helper class describes the properties of target MD workspace, which should

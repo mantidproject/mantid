@@ -133,9 +133,6 @@ Once the testing has passed:
   clean RHEL 7 build from the `release pipeline <release-pipeline>`_ but use the
   suffix XY, where ``X`` is the major version and ``Y`` is the minor
   version (currently used at SNS)
-* Have someone at the SNS follow the instructions
-  `here <http://www.mantidproject.org/Fermi_cluster_at_ORNL>`__ to
-  deploy an MPI version of the patch release.
 * Create new DOI using the scripts in the codebase and instructions on
   :ref:`release checklist <ReleaseChecklist>`.
 * Open a PR to update the relevant metadata in the ``CITATION.cff`` file as

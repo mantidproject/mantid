@@ -203,7 +203,7 @@ void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int
   for (int value = minVal; value <= maxVal; ++value) {
     const int row = value - minVal;
     // Create a filter giving the times when this log has the current value
-    TimeSplitterType filter;
+    SplittingIntervalVec filter;
     log->makeFilterByValue(filter, value,
                            value); // min & max are the same of course
 
@@ -355,7 +355,7 @@ std::vector<std::pair<std::string, const Kernel::ITimeSeriesProperty *>> SumEven
  *  @returns The summed proton charge
  */
 double SumEventsByLogValue::sumProtonCharge(const Kernel::TimeSeriesProperty<double> *protonChargeLog,
-                                            const Kernel::TimeSplitterType &filter) {
+                                            const Kernel::SplittingIntervalVec &filter) {
   // Clone the proton charge log and filter the clone on this log value
   std::unique_ptr<Kernel::TimeSeriesProperty<double>> protonChargeLogClone(protonChargeLog->clone());
   protonChargeLogClone->filterByTimes(filter);

@@ -10,6 +10,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtIcons/Icon.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidQtWidgets/Common/RepoModel.h"
 
@@ -29,20 +30,21 @@ namespace {
 Mantid::Kernel::Logger g_log("ScriptRepositoryView");
 } // namespace
 
-const QString install_mantid_label = "<html><head/><body><p>The <span style=\" font-weight:600;\">"
-                                     "Script Repository</span> allows you to:</p>"
-                                     "<p>  * Share your scripts and reduction algorithms;</p>"
-                                     "<p>  * Get <span style=\" font-weight:600;\">Mantid</span> Scripts from "
-                                     "the mantid developers and the community. </p>"
-                                     "<p><span style=\" font-style:italic;\">"
-                                     "N.B. The installation usually requires a couple of minutes, depending on "
-                                     "your network bandwidth. </span></p>"
-                                     "<p>More Information available at "
-                                     "<a href=\"http://www.mantidproject.org/ScriptRepository\"><span style=\" "
-                                     "text-decoration: underline; color:#0000ff;\">"
-                                     "http://www.mantidproject.org/ScriptRepository</span></a></p></br><p><span "
-                                     "style=\" font-weight:600;\">"
-                                     "Would you like to install it now?</span></p></body></html>";
+const QString install_mantid_label =
+    "<html><head/><body><p>The <span style=\" font-weight:600;\">"
+    "Script Repository</span> allows you to:</p>"
+    "<p>  * Share your scripts and reduction algorithms;</p>"
+    "<p>  * Get <span style=\" font-weight:600;\">Mantid</span> Scripts from "
+    "the mantid developers and the community. </p>"
+    "<p><span style=\" font-style:italic;\">"
+    "N.B. The installation usually requires a couple of minutes, depending on "
+    "your network bandwidth. </span></p>"
+    "<p>More Information available at "
+    "<a href=\"http://docs.mantidproject.org/workbench/scriptrepository\"><span style=\" "
+    "text-decoration: underline; color:#0000ff;\">"
+    "http://docs.mantidproject.org/workbench/scriptrepository</span></a></p></br><p><span "
+    "style=\" font-weight:600;\">"
+    "Would you like to install it now?</span></p></body></html>";
 
 const QString installation_in_progress = "<html><head/><body><p><span style=\" font-weight:600;\">"
                                          "Installing Script Repository Installation in background!</span></p>"
@@ -267,7 +269,7 @@ void ScriptRepositoryView::currentChanged(const QModelIndex &in) {
 
 /** Open the ScriptRepository Page on Web Browser*/
 void ScriptRepositoryView::helpClicked() {
-  MantidDesktopServices::openUrl(QUrl("http://www.mantidproject.org/ScriptRepository"));
+  HelpWindow::showPage(QStringLiteral("qthelp://org.mantidproject/doc/workbench/scriptrepository.html"));
 }
 
 //////////////////////////////////////////////////

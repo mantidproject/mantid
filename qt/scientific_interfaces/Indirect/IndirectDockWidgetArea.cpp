@@ -21,6 +21,13 @@ IndirectDockWidgetArea::IndirectDockWidgetArea(QWidget *parent) : QMainWindow(pa
   plotViewArea->setWidget(m_fitPlotView);
   plotViewArea->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
 
+  QFrame *line = new QFrame();
+  line->setFrameShape(QFrame::HLine);
+  line->setFrameShadow(QFrame::Raised);
+  line->setLineWidth(0);
+  line->setMidLineWidth(1);
+  setCentralWidget(line);
+
   addDockWidget(Qt::BottomDockWidgetArea, m_fitPropertyBrowser);
   addDockWidget(Qt::BottomDockWidgetArea, plotViewArea);
   resizeDocks({m_fitPropertyBrowser, plotViewArea}, {20, 20}, Qt::Horizontal);

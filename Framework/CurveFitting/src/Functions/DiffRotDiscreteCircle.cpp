@@ -4,18 +4,12 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-// Mantid Coding standards <http://www.mantidproject.org/Coding_Standards>
-// Main Module Header
 #include "MantidCurveFitting/Functions/DiffRotDiscreteCircle.h"
-// Mantid Headers from the same project
-#include "MantidCurveFitting/Functions/ElasticDiffRotDiscreteCircle.h"
-#include "MantidCurveFitting/Functions/InelasticDiffRotDiscreteCircle.h"
-// Mantid headers from other projects
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ImmutableCompositeFunction.h"
-// 3rd party library headers (N/A)
-// standard library headers  (N/A)
+#include "MantidCurveFitting/Functions/ElasticDiffRotDiscreteCircle.h"
+#include "MantidCurveFitting/Functions/InelasticDiffRotDiscreteCircle.h"
 
 namespace {
 Mantid::Kernel::Logger g_log("DiffRotDiscreteCircle");

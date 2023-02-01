@@ -12,12 +12,10 @@ Introduction
 Mantid's :ref:`plugin <Plugin>` architecture has been engineered so that it is easy for a user
 to write their own algorithm. This page is a primer for the user about to write their first algorithm and assumes no
 great knowledge of C++.
-It covers the basics, with links to more advanced options where appropriate. Note if you are looking to add a
-:ref:`plugin <Plugin>` fit function rather than an algorithm then see
-`Writing a Fit Function <https://www.mantidproject.org/Writing_a_Fit_Function>`__.
+It covers the basics, with links to more advanced options where appropriate.
 There is special description for the case when you are looking to add a custom :ref:`MD conversion plugin <WritingCustomConvertToMDTransformation>`.
 
-Alternatively, you can implement your algorithm in :ref:`Python <emwp_py_fit_funcs>`.
+Alternatively, you can implement your algorithm in :ref:`Python <emwp_intro>`.
 See :ref:`Python Vs C++ Algorithms <PythonVSCppAlgorithms>` for a comparison of Mantid's
 two programming languages.
 
@@ -119,8 +117,7 @@ For the simple types (integer, double or string), the basic syntax is::
 An optional :ref:`validator <Properties Validators>` or
 :ref:`directional argument <Properties Directions>` (input, output or both)
 can also be appended. The syntax for other property types (``WorkspaceProperty`` & ``ArrayProperty``) is more
-complex - see the :ref:`properties <Properties>` page or the
-example algorithms in `UserAlgorithms <https://www.mantidproject.org/UserAlgorithms>`__ for further details.
+complex - see the :ref:`properties <Properties>` page.
 
 Execution
 #########

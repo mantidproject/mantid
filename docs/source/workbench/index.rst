@@ -35,6 +35,7 @@ completed much faster than they were in MantidPlot.
     * :ref:`WorkbenchAlgorithmToolbox`: Shows a list of all of the algorithms available to users to run on the workspaces loaded into
       the Workspace Toolbox.
     * :ref:`WorkbenchScriptWindow`: Provides the ability to edit and execute Python scripts.
+    * :ref:`WorkbenchScriptRepository`: Provides interaction with a repository of user/community scripts.
     * :ref:`WorkbenchMessagesWindow`: Displays mantid log messages and Python output.
     * :ref:`WorkbenchPlotsToolbox`: A way of controlling all available plots.
     * :ref:`WorkbenchIPythonConsole`: Provides an IPython console allowing the immediate execution of Python commands.

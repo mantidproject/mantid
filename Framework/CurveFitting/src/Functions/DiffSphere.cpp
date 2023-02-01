@@ -4,18 +4,12 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-// Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
-// Main Module Header
 #include "MantidCurveFitting/Functions/DiffSphere.h"
-// Mantid Headers from the same project
-#include "MantidCurveFitting/Functions/ElasticDiffSphere.h"
-#include "MantidCurveFitting/Functions/InelasticDiffSphere.h"
-// Mantid headers from other projects
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ImmutableCompositeFunction.h"
-// third party library headers (N/A)
-// standard library headers (N/A)
+#include "MantidCurveFitting/Functions/ElasticDiffSphere.h"
+#include "MantidCurveFitting/Functions/InelasticDiffSphere.h"
 
 #include <boost/math/special_functions/bessel.hpp>
 

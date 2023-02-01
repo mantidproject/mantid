@@ -18,8 +18,7 @@ namespace CurveFitting {
 namespace Functions {
 /**
 Provide Ikeda-Carpenter-pseudo-Voigt peak shape function interface to
-IPeakFunction. See wiki
-page www.mantidproject.org/IkedaCarpenterPV for documentation for this function.
+IPeakFunction.
 
 @author Anders Markvardsen, ISIS, RAL
 @date 3/11/2009

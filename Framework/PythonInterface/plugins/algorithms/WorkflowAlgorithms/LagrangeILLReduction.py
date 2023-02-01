@@ -67,6 +67,9 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         self.convert_to_wavenumber = self.getProperty("ConvertToWaveNumber").value
         self.normalise_by = self.getPropertyValue("NormaliseBy")
 
+        # the list of all the intermediate workspaces to group at the end
+        self.intermediate_workspaces = []
+
     def PyInit(self):
         self.declareProperty(MultipleFileProperty("SampleRuns", action=FileAction.Load, extensions=[""]), doc="Sample run(s).")
 
@@ -93,9 +96,6 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         self.declareProperty(name="UseIncidentEnergy", defaultValue=False, doc="Show the energies as incident energies, not transfer ones.")
 
         self.declareProperty(name="ConvertToWaveNumber", defaultValue=False, doc="Convert axis unit to energy in wave number (cm-1)")
-
-        # the list of all the intermediate workspaces to group at the end
-        self.intermediate_workspaces = []
 
     def PyExec(self):
         self.setup()

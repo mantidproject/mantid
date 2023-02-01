@@ -244,11 +244,6 @@ void InterfaceManager::showHelpPage(const QString &url) {
   window->showPage(url);
 }
 
-void InterfaceManager::showWikiPage(const QString &page) {
-  auto window = createHelpWindow();
-  window->showWikiPage(page);
-}
-
 void InterfaceManager::showAlgorithmHelp(const QString &name, const int version) {
   auto window = createHelpWindow();
   window->showAlgorithm(name, version);

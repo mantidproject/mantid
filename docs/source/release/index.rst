@@ -11,6 +11,7 @@ Release Notes
 
    */index
 
+* :doc:`v6.7.0 <v6.7.0/index>`
 * :doc:`v6.6.0 <v6.6.0/index>`
 * :doc:`v6.5.0 <v6.5.0/index>`
 * :doc:`v6.4.0 <v6.4.0/index>`
@@ -40,4 +41,5 @@ Release Notes
 * :doc:`v3.5.2 <v3.5.2/index>`
 
 
-For release notes prior to version 3.5.2 please see the `wiki <http://www.mantidproject.org/Category:Release_Notes>`_.
+For release notes prior to version 3.5.2 please see the
+`wiki archive <http://archive.mantidproject.org/Category:Release_Notes>`_.

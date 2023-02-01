@@ -36,7 +36,7 @@ class UsageReportingVerificationView(QDialog):
             """Are you sure you want to disable reporting of <a
                         href='https://reports.mantidproject.org'>usage data</a>?
                         (full details in our <a
-                        href='https://www.mantidproject.org/MantidProject:Privacy_policy#Usage_Data_recorded_in_Mantid'
+                        href='https://www.mantidproject.org/privacy'
                         >Privacy Policy</a>)"""
         )
         textLayout.addWidget(labelQuestion)

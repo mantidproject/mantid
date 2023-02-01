@@ -8,9 +8,11 @@
 #include "MantidKernel/Cache.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyNexus.h"
+#include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <nexus/NeXusFile.hpp>
+#include <numeric>
 
 namespace Mantid::API {
 
@@ -29,6 +31,15 @@ template <typename T> bool convertSingleValue(const Property *property, double &
   } else {
     return false;
   }
+}
+
+bool convertSingleValueToDouble(const Property *property, double &value) {
+  // Order these with double and int first, and less likely options later.
+  // The first one to succeed short-circuits and the value is returned.
+  // If all fail, returns false.
+  return convertSingleValue<double>(property, value) || convertSingleValue<int32_t>(property, value) ||
+         convertSingleValue<int64_t>(property, value) || convertSingleValue<uint32_t>(property, value) ||
+         convertSingleValue<uint64_t>(property, value) || convertSingleValue<float>(property, value);
 }
 
 /// Templated method to convert time series property to single double
@@ -57,8 +68,13 @@ bool convertTimeSeriesToDouble(const Property *property, double &value, const Ma
     case Math::Median:
       value = log->getStatistics().median;
       break;
+    case Math::StdDev:
+      value = log->getStatistics().standard_deviation;
+      break;
+    case Math::TimeAverageStdDev:
+      throw std::invalid_argument("Statistic type \"TimeAverageStdDev\" is not currently supported");
     default: // should not happen
-      throw std::invalid_argument("Statistic type not recognised/supported");
+      throw std::invalid_argument("Statistic type not recognised");
     }
     return true;
   } else {
@@ -94,12 +110,13 @@ const char *LogManager::PROTON_CHARGE_LOG_NAME = "gd_prtn_chrg";
 //----------------------------------------------------------------------
 
 LogManager::LogManager()
-    : m_manager(std::make_unique<Kernel::PropertyManager>()),
+    : m_manager(std::make_unique<Kernel::PropertyManager>()), m_timeroi(std::make_unique<Kernel::TimeROI>()),
       m_singleValueCache(
           std::make_unique<Kernel::Cache<std::pair<std::string, Kernel::Math::StatisticType>, double>>()) {}
 
 LogManager::LogManager(const LogManager &other)
     : m_manager(std::make_unique<Kernel::PropertyManager>(*other.m_manager)),
+      m_timeroi(std::make_unique<Kernel::TimeROI>(*other.m_timeroi)),
       m_singleValueCache(std::make_unique<Kernel::Cache<std::pair<std::string, Kernel::Math::StatisticType>, double>>(
           *other.m_singleValueCache)) {}
 
@@ -203,10 +220,10 @@ void LogManager::filterByTime(const Types::Core::DateAndTime start, const Types:
  * Split a run by time (splits the TimeSeriesProperties contained).
  *
  *
- * @param splitter :: TimeSplitterType with the intervals and destinations.
+ * @param splitter :: SplittingIntervalVec with the intervals and destinations.
  * @param outputs :: Vector of output runs.
  */
-void LogManager::splitByTime(TimeSplitterType &splitter, std::vector<LogManager *> outputs) const {
+void LogManager::splitByTime(SplittingIntervalVec &splitter, std::vector<LogManager *> outputs) const {
   // Make a vector of managers for the splitter. Fun!
   const size_t n = outputs.size();
   std::vector<PropertyManager *> output_managers(outputs.size(), nullptr);
@@ -231,7 +248,7 @@ void LogManager::splitByTime(TimeSplitterType &splitter, std::vector<LogManager 
 void LogManager::filterByLog(const Kernel::TimeSeriesProperty<bool> &filter,
                              const std::vector<std::string> &excludedFromFiltering) {
   // This will invalidate the cache
-  m_singleValueCache->clear();
+  this->clearSingleValueCache();
   m_manager->filterByProperty(filter, excludedFromFiltering);
 }
 
@@ -290,12 +307,15 @@ const std::vector<Kernel::Property *> &LogManager::getProperties() const { retur
 /** Return the total memory used by the run object, in bytes.
  */
 size_t LogManager::getMemorySize() const {
-  size_t total = 0;
-  std::vector<Property *> props = m_manager->getProperties();
-  for (auto p : props) {
-    if (p)
-      total += p->getMemorySize() + sizeof(Property *);
+  size_t total{m_timeroi->getMemorySize()};
+
+  for (const auto &p : m_manager->getProperties()) {
+    if (p) {
+      // cppcheck-suppress useStlAlgorithm
+      total += p->getMemorySize() + sizeof(Property *); // cppcheck-suppress useStlAlgorithm
+    }
   }
+
   return total;
 }
 
@@ -321,6 +341,32 @@ template <typename T> Kernel::TimeSeriesProperty<T> *LogManager::getTimeSeriesPr
  */
 double LogManager::getTimeAveragedStd(const std::string &name) const {
   return getTimeSeriesProperty<double>(name)->getStatistics().time_standard_deviation;
+}
+
+/**
+ * Returns various statistics computations for a given property. The time filter, if not-empty, is applied when
+ * computing.
+ * The returned statistics will all be NAN when statistics cannot be computed, such as for a string property.
+ * @param name :: The name of the property.
+ * @return A TimeSeriesPropertyStatistics object containing values for Minimum, Maximum, Mean, Median,
+ * standard deviation, time weighted average, and time weighted standard deviation.
+ */
+Kernel::TimeSeriesPropertyStatistics LogManager::getStatistics(const std::string &name) const {
+  const Kernel::Property *prop = getProperty(name);
+
+  // statistics from a TimeSeriesProperty object
+  if (auto *timeSeriesProp = dynamic_cast<const Kernel::ITimeSeriesProperty *>(prop))
+    return timeSeriesProp->getStatistics();
+
+  // statistics from a PropertyWithValue object
+  double value;
+  if (Mantid::API::convertSingleValueToDouble(prop, value))
+    return TimeSeriesPropertyStatistics(value);
+
+  // return values set to NAN, signaling no statistics can be obtained
+  TimeSeriesPropertyStatistics invalid;
+  invalid.setAllToNan();
+  return invalid;
 }
 
 /**
@@ -435,6 +481,10 @@ void LogManager::clearOutdatedTimeSeriesLogValues() {
   }
 }
 
+const Kernel::TimeROI &LogManager::timeROI() const { return *(m_timeroi.get()); }
+
+void LogManager::timeROI(const Kernel::TimeROI &timeroi) { m_timeroi->replaceROI(timeroi); }
+
 //--------------------------------------------------------------------------------------------
 /** Save the object to an open NeXus file.
  * @param file :: open NeXus file
@@ -455,6 +505,10 @@ void LogManager::saveNexus(::NeXus::File *file, const std::string &group, bool k
       g_log.warning(exc.what());
     }
   }
+  // save the timeROI to the nexus file
+  if (!(m_timeroi->empty()))
+    m_timeroi->saveNexus(file);
+
   if (!keepOpen)
     file->closeGroup();
 }
@@ -470,7 +524,9 @@ void LogManager::saveNexus(::NeXus::File *file, const std::string &group, bool k
  */
 void LogManager::loadNexus(::NeXus::File * /*file*/, const std::string & /*group*/,
                            const Mantid::Kernel::NexusHDF5Descriptor & /*fileInfo*/, const std::string & /*prefix*/,
-                           bool /*keepOpen*/) {}
+                           bool /*keepOpen*/) {
+  throw std::runtime_error("LogManager::loadNexus should not be used");
+}
 
 //--------------------------------------------------------------------------------------------
 /** Load the object from an open NeXus file.
@@ -524,10 +580,18 @@ void LogManager::loadNexus(::NeXus::File *file, const Mantid::Kernel::NexusHDF5D
 
     auto prop = PropertyNexus::loadProperty(file, nameClass, fileInfo, prefix);
     if (prop) {
-      if (m_manager->existsProperty(prop->name())) {
-        m_manager->removeProperty(prop->name());
+      // get TimeROI
+      if (prop->name() == Kernel::TimeROI::NAME) {
+        auto boolProp = dynamic_cast<TimeSeriesProperty<bool> *>(prop.get());
+        if (boolProp) {
+          m_timeroi->replaceROI(boolProp);
+        } else {
+          throw std::runtime_error("Kernel_TimeROI is not a TimeSeriesPropertyBool");
+        }
+      } else {
+        // everything else gets added to the list of properties
+        m_manager->declareOrReplaceProperty(std::move(prop));
       }
-      m_manager->declareProperty(std::move(prop));
     }
   }
 }
@@ -546,10 +610,18 @@ void LogManager::loadNexus(::NeXus::File *file, const std::map<std::string, std:
     if (name_class.second == "NXlog") {
       auto prop = PropertyNexus::loadProperty(file, name_class.first);
       if (prop) {
-        if (m_manager->existsProperty(prop->name())) {
-          m_manager->removeProperty(prop->name());
+        // get TimeROI
+        if (prop->name() == Kernel::TimeROI::NAME) {
+          auto boolProp = dynamic_cast<TimeSeriesProperty<bool> *>(prop.get());
+          if (boolProp) {
+            m_timeroi->replaceROI(boolProp);
+          } else {
+            throw std::runtime_error("Kernel_TimeROI is not a TimeSeriesPropertyBool");
+          }
+        } else {
+          // everything else gets added to the list of properties
+          m_manager->declareOrReplaceProperty(std::move(prop));
         }
-        m_manager->declareProperty(std::move(prop));
       }
     }
   }
@@ -559,6 +631,8 @@ void LogManager::loadNexus(::NeXus::File *file, const std::map<std::string, std:
  * Clear the logs.
  */
 void LogManager::clearLogs() { m_manager->clear(); }
+
+void LogManager::clearSingleValueCache() { m_singleValueCache->clear(); }
 
 /// Gets the correct log name for the matching invalid values log for a given
 /// log name

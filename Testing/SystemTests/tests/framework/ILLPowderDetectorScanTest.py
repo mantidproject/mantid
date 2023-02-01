@@ -78,7 +78,6 @@ class D20_NoMask_ReductionTest(_DiffReductionTest):
             Run="967076",
             NormaliseTo="None",
             CropNegativeScatteringAngles=False,
-            UseCalibratedData=False,
             InitialMask=0,
             OutputWorkspace="out",
         )
@@ -101,7 +100,6 @@ class D2B_Component_ReductionTest(_DiffReductionTest):
     def runTest(self):
         PowderILLDetectorScan(
             Run="508093",
-            UseCalibratedData=False,
             Output2DTubes=True,
             Output1D=False,
             CropNegativeScatteringAngles=False,
@@ -111,7 +109,6 @@ class D2B_Component_ReductionTest(_DiffReductionTest):
         )
         PowderILLDetectorScan(
             Run="508093",
-            UseCalibratedData=False,
             Output2DTubes=True,
             Output1D=False,
             CropNegativeScatteringAngles=False,
@@ -133,7 +130,6 @@ class D2B_HeightRange_ReductionTest(_DiffReductionTest):
             Output1D=False,
             InitialMask=0,
             FinalMask=0,
-            UseCalibratedData=False,
             NormaliseTo="None",
             OutputWorkspace="out",
         )
@@ -143,7 +139,6 @@ class D2B_HeightRange_ReductionTest(_DiffReductionTest):
             Output1D=False,
             InitialMask=0,
             FinalMask=0,
-            UseCalibratedData=False,
             NormaliseTo="None",
             OutputWorkspace="out_height",
             HeightRange="-0.05,0.05",

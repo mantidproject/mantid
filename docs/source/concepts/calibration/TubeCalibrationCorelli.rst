@@ -9,7 +9,8 @@ Introduction
 Mantid has specific functionality for the Corelli instrument at Oak Ridge National Laboratory (ORNL). The Python scripts are located at: ``**MANTIDINSTALL**/scripts/corelli/calibration`` (`github link <https://github.com/mantidproject/mantid/tree/master/scripts/corelli/calibration>`__).
 These scripts can be launched on MantidWorkbench.
 
-The overarching goal is to create and update the information from the applied calibration functions as new cycles are performed. The result is a database of calibrated vertical "Y"-coordinates stored for each bank as a `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ with pixel_id and Y-coordinate columns.
+The overarching goal is to create and update the information from the applied calibration functions as new cycles are performed.
+The result is a database of calibrated vertical "Y"-coordinates stored for each bank as a :ref:`Table Workspaces` with pixel_id and Y-coordinate columns.
 
 Performing a Calibration
 ------------------------

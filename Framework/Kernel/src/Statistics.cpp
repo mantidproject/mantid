@@ -17,31 +17,32 @@
 #include <algorithm>
 #include <cfloat>
 #include <cmath>
+#include <limits>
 #include <sstream>
 
 namespace Mantid::Kernel {
 namespace {
 Logger logger("Statistics");
+
+void assertMomentIsValid(const int maxMoment) {
+  if (maxMoment < 0) {
+    std::stringstream msg;
+    msg << "moment = " << maxMoment << " is statistically meaningless";
+    throw std::runtime_error(msg.str());
+  }
 }
+} // namespace
 
 using std::string;
 using std::vector;
 
-/**
- * Generate a Statistics object where all of the values are NaN. This is a good
- * initial default.
- */
-Statistics getNanStatistics() {
-  double nan = std::numeric_limits<double>::quiet_NaN();
-
-  Statistics stats;
-  stats.minimum = nan;
-  stats.maximum = nan;
-  stats.mean = nan;
-  stats.median = nan;
-  stats.standard_deviation = nan;
-
-  return stats;
+Statistics::Statistics() {
+  constexpr double nan = std::numeric_limits<double>::quiet_NaN();
+  minimum = nan;
+  maximum = nan;
+  mean = nan;
+  median = nan;
+  standard_deviation = nan;
 }
 
 /**
@@ -165,7 +166,7 @@ template <typename TYPE> std::vector<double> getModifiedZscore(const vector<TYPE
  * @param flags A set of flags to control the computation of the stats
  */
 template <typename TYPE> Statistics getStatistics(const vector<TYPE> &data, const unsigned int flags) {
-  Statistics statistics = getNanStatistics();
+  Statistics statistics;
   if (data.empty()) { // don't do anything
     return statistics;
   }
@@ -209,14 +210,14 @@ template <typename TYPE> Statistics getStatistics(const vector<TYPE> &data, cons
 template <> DLLExport Statistics getStatistics<string>(const vector<string> &data, const unsigned int flags) {
   UNUSED_ARG(flags);
   UNUSED_ARG(data);
-  return getNanStatistics();
+  return Statistics(); // default is all nan
 }
 
 /// Getting statistics of a boolean array should just give a bunch of NaNs
 template <> DLLExport Statistics getStatistics<bool>(const vector<bool> &data, const unsigned int flags) {
   UNUSED_ARG(flags);
   UNUSED_ARG(data);
-  return getNanStatistics();
+  return Statistics(); // default is all nan
 }
 
 /** Return the Rwp of a diffraction pattern data
@@ -293,6 +294,8 @@ Rfactor getRFactor(const std::vector<double> &obsI, const std::vector<double> &c
  */
 template <typename TYPE>
 std::vector<double> getMomentsAboutOrigin(const std::vector<TYPE> &x, const std::vector<TYPE> &y, const int maxMoment) {
+  assertMomentIsValid(maxMoment);
+
   // densities have the same number of x and y
   bool isDensity(x.size() == y.size());
 
@@ -304,7 +307,7 @@ std::vector<double> getMomentsAboutOrigin(const std::vector<TYPE> &x, const std:
   }
 
   // initialize a result vector with all zeros
-  std::vector<double> result(maxMoment + 1, 0.);
+  std::vector<double> result(std::size_t(maxMoment + 1), 0.);
 
   // cache the maximum index
   size_t numPoints = y.size();
@@ -349,12 +352,14 @@ std::vector<double> getMomentsAboutOrigin(const std::vector<TYPE> &x, const std:
  */
 template <typename TYPE>
 std::vector<double> getMomentsAboutMean(const std::vector<TYPE> &x, const std::vector<TYPE> &y, const int maxMoment) {
+  assertMomentIsValid(maxMoment);
+
   // get the zeroth (integrated value) and first moment (mean)
   std::vector<double> momentsAboutOrigin = getMomentsAboutOrigin(x, y, 1);
   const double mean = momentsAboutOrigin[1];
 
   // initialize a result vector with all zeros
-  std::vector<double> result(maxMoment + 1, 0.);
+  std::vector<double> result(std::size_t(maxMoment + 1), 0.);
   result[0] = momentsAboutOrigin[0];
 
   // escape early if we need to

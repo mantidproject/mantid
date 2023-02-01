@@ -125,12 +125,21 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
             doc="Maximal y-index taken in the integration. Default is based on D16B geometry.",
         )
 
+        self.copyProperties("CalculateEfficiency", ["MinThreshold", "MaxThreshold"])
+        # override default documentation of copied parameters to make them understandable by user
+        threshold_property = self.getProperty("MinThreshold")
+        threshold_property.setDocumentation("Minimum threshold for calculated efficiency.")
+        threshold_property = self.getProperty("MaxThreshold")
+        threshold_property.setDocumentation("Maximum threshold for calculated efficiency.")
+
         self.setPropertyGroup("SensitivityMap", "Options")
         self.setPropertyGroup("DefaultMaskFile", "Options")
         self.setPropertyGroup("NormaliseBy", "Options")
         self.setPropertyGroup("Observable", "Options")
         self.setPropertyGroup("PixelYMin", "Options")
         self.setPropertyGroup("PixelYMax", "Options")
+        self.setPropertyGroup("MinThreshold", "Options")
+        self.setPropertyGroup("MaxThreshold", "Options")
 
     def PyExec(self):
 
@@ -231,6 +240,8 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
             OutputWorkspace=sorted_ws,
             startProgress=0.8,
             endProgress=0.95,
+            MinThreshold=self.getProperty("MinThreshold").value,
+            MaxThreshold=self.getProperty("MaxThreshold").value,
             Version=2,
         )
 
