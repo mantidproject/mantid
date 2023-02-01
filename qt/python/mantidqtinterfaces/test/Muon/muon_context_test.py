@@ -121,6 +121,8 @@ class MuonContextTest(unittest.TestCase):
         self.assertEqual(runs, [[19489]])
 
     def test_get_runs_coadd(self):
+        # need to update the run list
+        self.run_list = [19489, 19491]
         runs = self.context.get_runs(" 19489, 19491 ")
         self.assertEqual(runs, [[19489, 19491]])
 
