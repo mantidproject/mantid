@@ -227,7 +227,7 @@ double Meier::getCos2AlphaSquared(const double &q1, const double &qq) const { re
  * @param J2 :: 2 * total angular momentum quantum number multiplied by 2 (input parameter)
  */
 void Meier::calculatePx(std::valarray<double> &Px, const std::valarray<double> &xValues,
-                        std::valarray<double> &cos2AlphaSquared, const std::valarray<double> &negativeLambda,
+                        const std::valarray<double> &cos2AlphaSquared, const std::valarray<double> &negativeLambda,
                         const std::valarray<double> &positiveLambda, const double &J2) const {
   std::valarray<double> tx(xValues.size());
   for (int i = 0; i < int(J2) + 1; i++) {
