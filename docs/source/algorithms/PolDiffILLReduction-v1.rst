@@ -307,6 +307,7 @@ This example below performs a complete reduction for D7 data.
 .. testsetup:: ExPolDiffILLReduction
 
     config['default.facility'] = 'ILL'
+    config['default.instrument'] = 'D7'
     config.appendDataSearchSubDir('ILL/D7/')
 
 .. testcode:: ExPolDiffILLReduction
