@@ -159,7 +159,11 @@ class FitInteractiveTool(QObject):
             return
 
         for pm in self.peak_markers:
-            if pm.left_width.is_above(x, y) or pm.right_width.is_above(x, y) or pm.centre_marker.is_above(x, y):
+            if pm.centre_marker.is_above(x, y):
+                if not cursor:
+                    QApplication.setOverrideCursor(Qt.SizeHorCursor)
+                return
+            if pm.is_selected and (pm.left_width.is_above(x, y) or pm.right_width.is_above(x, y)):
                 if not cursor:
                     QApplication.setOverrideCursor(Qt.SizeHorCursor)
                 return

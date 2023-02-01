@@ -1,0 +1,1 @@
+- Fixed a bug where the user could drag the width handles of an unselected peak in the fit browser.
