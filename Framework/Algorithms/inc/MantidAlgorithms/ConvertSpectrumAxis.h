@@ -16,7 +16,7 @@
 namespace Mantid {
 namespace Algorithms {
 /** Converts the representation of the vertical axis (the one up the side of
-    a matrix in MantidPlot) of a Workspace2D from its default of holding the
+    a matrix) of a Workspace2D from its default of holding the
     spectrum number to the target unit given.
     At present, the only implemented unit is theta (actually TwoTheta). The
    spectra

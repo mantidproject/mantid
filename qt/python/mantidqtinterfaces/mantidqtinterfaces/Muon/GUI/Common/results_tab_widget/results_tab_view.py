@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqt.utils.qt import load_ui
-from qtpy import PYQT4, QtCore, QtWidgets
+from qtpy import QtCore, QtWidgets
 
 from mantidqtinterfaces.Muon.GUI.Common.list_selector.list_selector_presenter import ListSelectorPresenter
 from mantidqtinterfaces.Muon.GUI.Common.list_selector.list_selector_view import ListSelectorView
@@ -97,10 +97,7 @@ class ResultsTabView(QtWidgets.QWidget, ui_fitting_tab):
         """
         Set the fit function in the QComboBox
         """
-        if PYQT4:
-            self.fit_function_selector.setCurrentIndex(self.fit_function_selector.findText(function))
-        else:
-            self.fit_function_selector.setCurrentText(function)
+        self.fit_function_selector.setCurrentText(function)
 
     def selected_fit_function(self):
         """Return the text of the selected item in the function

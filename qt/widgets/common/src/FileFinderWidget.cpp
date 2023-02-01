@@ -73,8 +73,6 @@ FileFinderWidget::FileFinderWidget(QWidget *parent)
   setFocusPolicy(Qt::StrongFocus);
   setFocusProxy(m_uiForm.fileEditor);
 
-  // When first used try to starting directory better than the directory
-  // MantidPlot is installed in
   // First try default save directory
   m_lastDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
 

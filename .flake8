@@ -15,7 +15,6 @@ exclude =
     instrument,
     qt/applications/workbench/workbench/app/resources.py,
     qt/python/mantidqt/resources.py,
-    qt/python/mantidqt/dialogs/errorreports/resources_qt4.py
     qt/python/mantidqt/dialogs/errorreports/resources_qt5.py
     qt/scientific_interfaces,
     qt/widgets,

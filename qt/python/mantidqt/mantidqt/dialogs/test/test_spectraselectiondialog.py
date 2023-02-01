@@ -7,7 +7,7 @@
 #  This file is part of the mantidqt package
 import unittest
 from qtpy.QtGui import QIcon
-from qtpy.QtWidgets import QDialogButtonBox, QVBoxLayout
+from qtpy.QtWidgets import QDialogButtonBox
 
 from mantid.api import WorkspaceFactory
 from unittest import mock
@@ -37,11 +37,6 @@ class SpectraSelectionDialogTest(unittest.TestCase):
         SpectraSelectionDialog._check_number_of_plots = mock.Mock(return_value=True)
 
         spectraselectordialog.RED_ASTERISK = None
-
-        # replaceWidget doesn't exist in Qt4
-        replace_widget_patcher = mock.patch.object(QVBoxLayout, "replaceWidget", create=True)
-        replace_widget_patcher.start()
-        self.addCleanup(replace_widget_patcher.stop)
 
     def test_initial_dialog_setup(self):
         workspaces = [self._multi_spec_ws]

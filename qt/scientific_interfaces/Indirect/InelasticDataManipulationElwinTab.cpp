@@ -12,7 +12,6 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <QFileInfo>
 

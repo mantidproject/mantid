@@ -10,7 +10,6 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidQtWidgets/Common/SignalBlocker.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
