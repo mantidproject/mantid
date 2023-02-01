@@ -101,6 +101,13 @@ public:
     TS_ASSERT_EQUALS(result.get(), expected);
   }
 
+  void testParseOptionsReplacesBoolTextStrings() {
+    auto result = parseOptions("key1=True, key2=false, key3=falser");
+    std::map<std::string, std::string> const expected = {{{"key1", "1"}, {"key2", "0"}, {"key3", "falser"}}};
+    TS_ASSERT(result.is_initialized());
+    TS_ASSERT_EQUALS(result.get(), expected);
+  }
+
   void testParseOptionsHandlesWhitespace() {
     auto result = parseOptions("\t key1=value1,   key2  =value2\t");
     std::map<std::string, std::string> expected = {{"key1", "value1"}, {"key2", "value2"}};

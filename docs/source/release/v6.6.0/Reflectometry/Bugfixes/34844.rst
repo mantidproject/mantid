@@ -1,0 +1,1 @@
+- It is now possible to use ``True`` and ``False`` in algorithm option inputs (such as the Options cells on the Run tab or the Output Stitch Properties on the Experiment Settings tab) rather than needing to use ``1`` and ``0``.
