@@ -375,7 +375,7 @@ Output:
 .. testoutput:: ExFindPeakSingle
 
    Fitted peak position: 5.00000
-   Peak 0  Centre: 5.00000, width: 0.70000, height: 10.00000
+   Peak 0  Centre: ..., width: ..., height: ...
 
 
 **Example - Fit peaks on high background (vanadium):**

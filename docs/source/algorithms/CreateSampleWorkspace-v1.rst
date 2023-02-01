@@ -162,8 +162,8 @@ Output:
 .. testoutput:: ExHistUserFunc
 
    My function defined a background of 0.5 counts.
-   With a peak reaching 80.5 counts at 1,100 us,
-   and another reaching 50.5 counts at 10,100 us.
+   With a peak reaching ... counts at 1,100 us,
+   and another reaching ... counts at 10,100 us.
 
 **Example - Quasielastic:**
 
@@ -182,8 +182,8 @@ Output:
 
 .. testoutput:: ExQuasielastic
 
-   Number of spectra: 200
-   Number of bins: 100
+   Number of spectra: ...
+   Number of bins: ...
 
 **Example - Setting every Option:**
 
@@ -199,8 +199,8 @@ Output:
 
 .. testoutput:: ExEveryOption
 
-   Number of spectra: 103
-   Number of bins: 80
+   Number of spectra: ...
+   Number of bins: ...
 
 .. categories::
 

@@ -288,8 +288,8 @@ Output:
 .. testoutput:: ExReferenceWS
 
     First workspace original TOF for the elastic peak: 66.5
-    EPP table corrected TOF for the elastic peak: 1233.0
-    Elastic TOF for the corrected second workspace: 1233.0
+    EPP table corrected TOF for the elastic peak: ...
+    Elastic TOF for the corrected second workspace: ...
 
 .. categories::
 

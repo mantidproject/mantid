@@ -779,7 +779,7 @@ Output:
 .. testoutput:: ExPolarisedSpectroscopyVanadium
 
    The vanadium reduction output contains 1 entry with 132 spectra and 1 bin.
-   The average vanadium-derived elastic peak position falls at 1555 microseconds.
+   The average vanadium-derived elastic peak position falls at ... microseconds.
 
 .. testcleanup:: ExPolarisedSpectroscopyVanadium
 

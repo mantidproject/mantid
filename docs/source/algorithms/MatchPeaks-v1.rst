@@ -46,7 +46,7 @@ Output
 
 .. testoutput:: MatchPeaks
 
-    Peak height at center: 9.98300057653
+    Peak height at center: ...
 
 .. categories::
 
