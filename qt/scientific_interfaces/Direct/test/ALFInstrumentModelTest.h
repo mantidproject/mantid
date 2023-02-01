@@ -98,9 +98,9 @@ public:
     TS_ASSERT(m_model->loadAndNormalise(m_ALFData));
   }
 
-  void test_loadAndNormalise_transforms_the_data_to_dSpacing_if_not_already() {
+  void test_loadAndNormalise_does_not_transform_to_dSpacing() {
     auto const workspace = m_model->loadAndNormalise(m_ALFData);
-    TS_ASSERT_EQUALS("dSpacing", workspace->getAxis(0)->unit()->unitID());
+    TS_ASSERT_DIFFERS("dSpacing", workspace->getAxis(0)->unit()->unitID());
   }
 
   void test_sampleRun_and_vanadiumRun_returns_zero_when_no_data_is_loaded() {
@@ -206,6 +206,7 @@ public:
     TS_ASSERT(ADS.doesExist("ALFData"));
 
     auto const workspace = ADS.retrieveWS<MatrixWorkspace>("ALFData");
+    TS_ASSERT_EQUALS("dSpacing", workspace->getAxis(0)->unit()->unitID());
     TS_ASSERT_EQUALS(sample->y(0), workspace->y(0));
   }
 
@@ -219,6 +220,7 @@ public:
     TS_ASSERT(ADS.doesExist("ALFData"));
 
     auto const workspace = ADS.retrieveWS<MatrixWorkspace>("ALFData");
+    TS_ASSERT_EQUALS("dSpacing", workspace->getAxis(0)->unit()->unitID());
     TS_ASSERT_EQUALS(1.0, workspace->y(0)[0]);
     TS_ASSERT_EQUALS(1.0, workspace->y(0)[1]);
   }
@@ -233,6 +235,7 @@ public:
     TS_ASSERT(ADS.doesExist("ALFData"));
 
     auto const workspace = ADS.retrieveWS<MatrixWorkspace>("ALFData");
+    TS_ASSERT_EQUALS("dSpacing", workspace->getAxis(0)->unit()->unitID());
     TS_ASSERT_EQUALS(1.0, workspace->y(0)[0]);
     TS_ASSERT_EQUALS(1.0, workspace->y(0)[1]);
   }
