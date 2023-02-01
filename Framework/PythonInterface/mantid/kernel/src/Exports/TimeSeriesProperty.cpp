@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/TimeROI.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/Converters/ContainerDtype.h"
 #include "MantidPythonInterface/core/Converters/DateAndTime.h"
 #include "MantidPythonInterface/core/GetPointer.h"
@@ -126,7 +127,7 @@ template <> std::string dtype(TimeSeriesProperty<std::string> &self) {
 // Seen with GCC 7.1.1 and Boost 1.63.0
 GNU_DIAG_OFF("conversion")
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getStatistics_overloads, getStatistics, 0, 1)
-GNU_DIAG_ON("conversion")
+
 void export_TimeSeriesProperty_Double() { EXPORT_TIMESERIES_PROP(double, Float); }
 
 void export_TimeSeriesProperty_Bool() { EXPORT_TIMESERIES_PROP(bool, Bool); }
@@ -136,7 +137,7 @@ void export_TimeSeriesProperty_Int32() { EXPORT_TIMESERIES_PROP(int32_t, Int32);
 void export_TimeSeriesProperty_Int64() { EXPORT_TIMESERIES_PROP(int64_t, Int64); }
 
 void export_TimeSeriesProperty_String() { EXPORT_TIMESERIES_PROP(std::string, String); }
-
+GNU_DIAG_ON("conversion")
 void export_TimeSeriesPropertyStatistics() {
   class_<Mantid::Kernel::TimeSeriesPropertyStatistics>("TimeSeriesPropertyStatistics", no_init)
       .add_property("minimum", &Mantid::Kernel::TimeSeriesPropertyStatistics::minimum)
