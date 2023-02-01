@@ -28,22 +28,24 @@ TimeInterval::TimeInterval(const Types::Core::DateAndTime &from, const Types::Co
     m_end = from;
 }
 
+bool TimeInterval::overlaps(const TimeInterval *t) const {
+  return ((t->begin() < this->end()) && (t->begin() >= this->begin())) ||
+         ((t->end() < this->end()) && (t->end() >= this->begin())) ||
+         ((this->begin() < t->end()) && (this->begin() >= t->begin())) ||
+         ((this->end() < t->end()) && (this->end() >= t->begin()));
+}
+
 /**  Returns an intersection of this interval with \a ti
      @param ti :: Time interval
      @return A valid time interval if this interval intersects with \a ti or
              an empty interval otherwise.
  */
 TimeInterval TimeInterval::intersection(const TimeInterval &ti) const {
-  if (!isValid() || !ti.isValid())
+  if (!isValid() || !ti.isValid() || !this->overlaps(&ti))
     return TimeInterval();
 
-  DateAndTime t1 = begin();
-  if (ti.begin() > t1)
-    t1 = ti.begin();
-
-  DateAndTime t2 = end();
-  if (ti.end() < t2)
-    t2 = ti.end();
+  const auto t1 = std::max(begin(), ti.begin());
+  const auto t2 = std::min(end(), ti.end());
 
   return t1 < t2 ? TimeInterval(t1, t2) : TimeInterval();
 }

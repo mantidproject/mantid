@@ -32,12 +32,7 @@ double SplittingInterval::duration() const { return DateAndTime::secondsFromDura
 int SplittingInterval::index() const { return m_index; }
 
 /// Return true if the b SplittingInterval overlaps with this one.
-bool SplittingInterval::overlaps(const SplittingInterval &b) const {
-  return ((b.begin() < this->end()) && (b.begin() >= this->begin())) ||
-         ((b.end() < this->end()) && (b.end() >= this->begin())) ||
-         ((this->begin() < b.end()) && (this->begin() >= b.begin())) ||
-         ((this->end() < b.end()) && (this->end() >= b.begin()));
-}
+bool SplittingInterval::overlaps(const SplittingInterval &b) const { return TimeInterval::overlaps(&b); }
 
 /// @cond DOXYGEN_BUG
 /// And operator. Return the smallest time interval where both intervals are

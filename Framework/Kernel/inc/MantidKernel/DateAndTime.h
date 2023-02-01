@@ -40,6 +40,9 @@ public:
 
   /// True if the interval contains \a t.
   bool contains(const Types::Core::DateAndTime &t) const { return t >= begin() && t < end(); }
+  /// Return true if the b SplittingInterval overlaps with this one.
+  bool overlaps(const TimeInterval *t) const;
+
   /// Returns an intersection of two intervals
   TimeInterval intersection(const TimeInterval &ti) const;
   /// Returns true if this interval ends before \a ti starts
