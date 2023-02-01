@@ -40,29 +40,42 @@ public:
 
 private:
   // Precomputes intermediate terms used to calculate the polrization in the x and z directions
-  void precomputeIntermediateSteps(std::valarray<double> &sinAlphaSquared, std::valarray<double> &cosAlphaSquared,
-                                   std::valarray<double> &sin2AlphaSquared, std::valarray<double> &cos2AlphaSquared,
-                                   std::valarray<double> &negativeLambda, std::valarray<double> &positiveLambda,
-                                   const double &J2) const;
-
-  // Calculates and returns the value of lambda
-  double getPositiveLambda(const size_t &i, const double &J2, const double &q3, const double &Wm, const double &OmegaD,
-                           const double &OmegaQ) const;
+  void precomputeIntermediateSteps(std::valarray<double> &cos2AlphaSquared, std::valarray<double> &negativeLambda,
+                                   std::valarray<double> &positiveLambda, const double &J2) const;
 
   // Calculates and returns the value of cost 2*alpha sequared
   double getCos2AlphaSquared(const double &q1, const double &qq) const;
 
+  // Calculates and returns the value of q1
+  double getQ1(const double &m, const double &OmegaQ, const double &OmegaD) const;
+
+  // Calculates and returns the value of q2
+  double getQ2(const double &m, const double &J, const double &OmegaD) const;
+
+  // Calculates and returns the value of q3
+  double getQ3(const double &J, const double &OmegaQ, const double &OmegaD) const;
+
+  // Calculates and returns the value of qq
+  double getQQ(const double &q1, const double &q2) const;
+
+  // Calculates and returns the value of positive lambda
+  double getPositiveLambda(const double &q3, const double &Wm) const;
+
+  // Calculates and returns the value of negative lambda
+  double getNegativeLambda(const double &q3, const double &Wm) const;
+
+  // Calculates and returns the value of lambda for the special cases
+  double getBaseLambda(const double &OmegaQ, const double &OmegaD, const double &J) const;
+
   // Calculates the polarization in the x direction
   void calculatePx(std::valarray<double> &Px, const std::valarray<double> &xValues,
-                   const std::valarray<double> &sinAlphaSquared, const std::valarray<double> &cosAlphaSquared,
-                   const std::valarray<double> &negativeLambda, const std::valarray<double> &positiveLambda,
-                   const double &J2) const;
+                   std::valarray<double> &cos2AlphaSquared, const std::valarray<double> &negativeLambda,
+                   const std::valarray<double> &positiveLambda, const double &J2) const;
 
   // Calculates the polarization in the z direction
   void calculatePz(std::valarray<double> &Pz, const std::valarray<double> &xValues,
-                   const std::valarray<double> &sin2AlphaSquared, const std::valarray<double> &cos2AlphaSquared,
-                   const std::valarray<double> &negativeLambda, const std::valarray<double> &positiveLambda,
-                   const double &J2) const;
+                   const std::valarray<double> &cos2AlphaSquared, const std::valarray<double> &negativeLambda,
+                   const std::valarray<double> &positiveLambda, const double &J2) const;
 };
 } // namespace Functions
 } // namespace CurveFitting
