@@ -12,6 +12,8 @@
 #include <QWheelEvent>
 
 #include <QApplication>
+#include <QFont>
+#include <QFontInfo>
 #include <QLine>
 #include <QMap>
 #include <QRectF>
@@ -86,7 +88,7 @@ size_t Shape2D::getNControlPoints() const { return NCommonCP + this->getShapeNCo
 /**
  * Return the radius to use for the control points.
  */
-int Shape2D::controlPointSize() const { return QApplication::font().pointSize(); }
+int Shape2D::controlPointSize() const { return QFontInfo(QFont(QApplication::font().family(), 2)).pixelSize(); }
 
 /**
  * Return coordinates of i-th control point.
