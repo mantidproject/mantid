@@ -172,10 +172,10 @@ Python ``h5py`` library.
    with h5py.File(filename, "r") as f:
        fit_results_group = f["Bank 1"]["GSAS-II Fitting"]
 
-       print("Lattice parameter a: {}".format(fit_results_group["Lattice Parameters"]["a"].value))
-       print("XMin: {}".format(fit_results_group["Refinement Parameters"]["XMin"].value))
+       print("Lattice parameter a: {}".format(fit_results_group["Lattice Parameters"]["a"][()]))
+       print("XMin: {}".format(fit_results_group["Refinement Parameters"]["XMin"][()]))
        print("RefineSigma: {}".format(bool(fit_results_group["Refinement Parameters"]["RefineSigma"])))
-       print("Sigma: {}".format(fit_results_group["Profile Coefficients"]["Sigma"].value))
+       print("Sigma: {}".format(fit_results_group["Profile Coefficients"]["Sigma"][()]))
 
 .. testcleanup:: EnggSaveGSASIIFitResultsToHDF5
 
