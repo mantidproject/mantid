@@ -201,7 +201,7 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         if process_absorber:
             self.progress.report(0, "Processing dark current")
             SANSILLReduction(
-                Run=self.absorber, ProcessAs="DarkCurrent", NormaliseBy=self.normalise, OutputWorkspace=absorber_name, Version=2
+                Runs=self.absorber, ProcessAs="DarkCurrent", NormaliseBy=self.normalise, OutputWorkspace=absorber_name, Version=2
             )
 
         process_container, container_name = needs_processing(self.container, "Container")
@@ -209,12 +209,11 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         if process_container:
             self.progress.report(0, "Processing container")
             SANSILLReduction(
-                Run=self.container,
+                Runs=self.container,
                 ProcessAs="EmptyContainer",
                 OutputWorkspace=container_name,
-                AbsorberInputWorkspace=absorber_name,
-                CacheSolidAngle=True,
-                DefaultMaskWorkspace=self.default_mask,
+                DarkCurrentWorkspace=absorber_name,
+                DefaultMaskWorkspace=self.default_mask_ws,
                 NormaliseBy=self.normalise,
                 Version=2,
             )
