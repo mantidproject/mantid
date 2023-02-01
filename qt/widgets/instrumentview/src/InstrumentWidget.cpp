@@ -657,7 +657,9 @@ void InstrumentWidget::setSurfaceType(int type) {
     setSurface(surface);
 
     // init tabs with new surface
-    foreach (InstrumentWidgetTab *tab, m_tabs) { tab->initSurface(); }
+    for (auto tab : std::as_const(m_tabs)) {
+      tab->initSurface();
+    }
 
     m_qtConnect->connect(surface, SIGNAL(executeAlgorithm(Mantid::API::IAlgorithm_sptr)), this,
                          SLOT(executeAlgorithm(Mantid::API::IAlgorithm_sptr)));
@@ -1027,7 +1029,9 @@ void InstrumentWidget::saveSettings() {
     // only save tab states if the instrument actor loading finished and this widget was updated
     // through initWidget
     if (m_finished) {
-      foreach (InstrumentWidgetTab *tab, m_tabs) { tab->saveSettings(settings); }
+      for (auto tab : std::as_const(m_tabs)) {
+        tab->saveSettings(settings);
+      }
     }
   }
   settings.endGroup();
@@ -1184,7 +1188,7 @@ void InstrumentWidget::dropEvent(QDropEvent *e) {
   QString name = e->mimeData()->objectName();
   if (name == "MantidWorkspace") {
     QStringList wsNames = e->mimeData()->text().split("\n");
-    foreach (const auto &wsName, wsNames) {
+    for (const auto &wsName : std::as_const(wsNames)) {
       if (this->overlay(wsName))
         e->accept();
     }
