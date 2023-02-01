@@ -1031,7 +1031,10 @@ template <typename TYPE> std::vector<DateAndTime> TimeSeriesProperty<TYPE>::time
  * Return the time series's filtered times as a vector<DateAndTime>
  * @return A vector of DateAndTime objects
  */
-template <typename TYPE> std::vector<DateAndTime> TimeSeriesProperty<TYPE>::filteredTimesAsVector() const {
+template <typename TYPE>
+std::vector<DateAndTime> TimeSeriesProperty<TYPE>::filteredTimesAsVector(const TimeROI *timeRoi) const {
+  UNUSED_ARG(timeRoi);
+
   if (m_filter.empty()) {
     return this->timesAsVector(); // no filtering to do
   }
@@ -1865,6 +1868,7 @@ template <typename TYPE> bool TimeSeriesProperty<TYPE>::isDefault() const { retu
  */
 template <typename TYPE>
 TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics(const TimeROI *timeRoi) const {
+  UNUSED_ARG(timeRoi);
 
   TimeSeriesPropertyStatistics out(Mantid::Kernel::getStatistics(this->filteredValuesAsVector()));
 
@@ -2334,7 +2338,10 @@ void TimeSeriesProperty<std::string>::histogramData(const Types::Core::DateAndTi
  * false.
  * @returns :: Vector of included values only
  */
-template <typename TYPE> std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredValuesAsVector() const {
+template <typename TYPE>
+std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredValuesAsVector(const TimeROI *timeRoi) const {
+  UNUSED_ARG(timeRoi);
+
   if (m_filter.empty()) {
     return this->valuesAsVector(); // no filtering to do
   }

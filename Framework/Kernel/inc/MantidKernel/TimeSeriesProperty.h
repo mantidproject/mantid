@@ -221,12 +221,12 @@ public:
   ///  values
   std::multimap<Types::Core::DateAndTime, TYPE> valueAsMultiMap() const;
   /// Get filtered values as a vector
-  std::vector<TYPE> filteredValuesAsVector() const;
+  std::vector<TYPE> filteredValuesAsVector(const TimeROI *timeRoi = nullptr) const;
 
   /// Return the time series's times as a vector<DateAndTime>
   std::vector<Types::Core::DateAndTime> timesAsVector() const override;
   /// Get filtered times as a vector
-  std::vector<Types::Core::DateAndTime> filteredTimesAsVector() const;
+  std::vector<Types::Core::DateAndTime> filteredTimesAsVector(const TimeROI *timeRoi = nullptr) const;
   /// Return the series as list of times, where the time is the number of
   /// seconds since the start.
   std::vector<double> timesAsVectorSeconds() const;
