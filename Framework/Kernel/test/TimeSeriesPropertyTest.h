@@ -696,6 +696,18 @@ public:
     TS_ASSERT_DELTA(dblMean, expected, .0001);
   }
 
+  void test_timeAverageValueAndStdDev() {
+    auto dblLog = createDoubleTSP();
+    TimeROI *rois = createTimeRoi(); // rois contains two ROI's
+    std::pair<double, double> av_dev = dblLog->timeAverageValueAndStdDev(rois);
+    double avX = (5.0 * 9.99 + 5.0 * 7.55 + 5.0 * 5.55 + 5.0 * 10.55) / (5.0 + 5.0 + 5.0 + 5.0);
+    TS_ASSERT_DELTA(av_dev.first, avX, .0001);
+    double devX = std::sqrt((5.0 * (9.99 - avX) * (9.99 - avX) + 5.0 * (7.55 - avX) * (7.55 - avX) +
+                             5.0 * (5.55 - avX) * (5.55 - avX) + 5.0 * (10.55 - avX) * (10.55 - avX)) /
+                            (5.0 + 5.0 + 5.0 + 5.0));
+    TS_ASSERT_DELTA(av_dev.second, devX, .0001);
+  }
+
   void test_averageValueInFilter_throws_for_string_property() {
     SplittingIntervalVec splitter;
     TS_ASSERT_THROWS(sProp->averageValueInFilter(splitter), const Exception::NotImplementedError &);

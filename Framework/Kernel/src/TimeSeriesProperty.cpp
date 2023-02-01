@@ -919,11 +919,17 @@ TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<SplittingIn
   return std::pair<double, double>{mean, std::sqrt(numerator / totalTime)};
 }
 
-template <typename TYPE> std::pair<double, double> TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev() const {
+template <typename TYPE>
+std::pair<double, double> TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev(const TimeROI *timeRoi) const {
   std::pair<double, double> retVal{0., 0.}; // mean and stddev
   try {
-    const auto &filter = getSplittingIntervals();
-    retVal = this->averageAndStdDevInFilter(filter);
+    if (timeRoi) {
+      const auto filter = timeRoi->toSplitters();
+      retVal = this->averageAndStdDevInFilter(filter);
+    } else { // to be deleted once we remove m_filter
+      const auto &filter = getSplittingIntervals();
+      retVal = this->averageAndStdDevInFilter(filter);
+    }
   } catch (std::exception &) {
     retVal.first = std::numeric_limits<double>::quiet_NaN();
     retVal.second = std::numeric_limits<double>::quiet_NaN();
