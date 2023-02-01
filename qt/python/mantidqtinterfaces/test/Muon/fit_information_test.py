@@ -168,7 +168,7 @@ class FitInformationTest(unittest.TestCase):
         fake1 = create_test_workspace("fake1", time_series_logs)
         fit = FitInformation(mock.MagicMock(), "func1", [StaticWorkspaceWrapper(fake1.name(), fake1)], mock.MagicMock(), mock.MagicMock())
 
-        time_average = (10 * 5 + 290 * 20) / 300.0
+        time_average = (10 * 5 + 290 * 20 + 290 * 30) / 590.0
         self.assertAlmostEqual(time_average, fit.log_value("ts_1"), places=6)
 
     def test_time_series_log_value_from_fit_with_multiple_workspaces_uses_average_of_time_average(self):
@@ -184,8 +184,8 @@ class FitInformationTest(unittest.TestCase):
             mock.MagicMock(),
         )
 
-        time_average1 = (10 * 5 + 290 * 20) / 300.0
-        time_average2 = (75 * 10 + 195 * 30) / 270.0
+        time_average1 = (10 * 5 + 290 * 20 + 290 * 30) / 590
+        time_average2 = (75 * 10 + 195 * 30 + 195 * 40) / 465
         all_average = 0.5 * (time_average1 + time_average2)
         self.assertAlmostEqual(all_average, fit.log_value("ts_1"), places=6)
 
