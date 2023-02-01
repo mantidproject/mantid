@@ -40,12 +40,12 @@ def load_binned(workspace_name, binning, params, path, file_numbers, standard):
     """
     Loading of multiple DNS datafiles into a single workspace.
     """
-    ad0 = f"Theta,{binning['twoTheta'][0] / 2.0}," \
-          f"{binning['twoTheta'][1] / 2.0}," \
-          f"{binning['twoTheta'][2]}"
-    ad1 = f"Omega,{binning['Omega'][0]}," \
-          f"{binning['Omega'][1]}," \
-          f"{binning['Omega'][2]}"
+    ad0 = f"Theta,{binning['two_theta_binning'][0] / 2.0}," \
+          f"{binning['two_theta_binning'][1] / 2.0}," \
+          f"{binning['two_theta_binning'][2]}"
+    ad1 = f"Omega,{binning['omega_binning'][0]}," \
+          f"{binning['omega_binning'][1]}," \
+          f"{binning['omega_binning'][2]}"
     filepaths = [f"{path}_{number:06d}.d_dat" for number in list(file_numbers)]
     filepaths = ', '.join(filepaths)
     norm_name = "_".join((workspace_name, 'norm'))
