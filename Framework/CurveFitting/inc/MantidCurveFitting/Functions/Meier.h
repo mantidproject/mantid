@@ -69,7 +69,7 @@ private:
 
   // Calculates the polarization in the x direction
   void calculatePx(std::valarray<double> &Px, const std::valarray<double> &xValues,
-                   std::valarray<double> &cos2AlphaSquared, const std::valarray<double> &negativeLambda,
+                   const std::valarray<double> &cos2AlphaSquared, const std::valarray<double> &negativeLambda,
                    const std::valarray<double> &positiveLambda, const double &J2) const;
 
   // Calculates the polarization in the z direction

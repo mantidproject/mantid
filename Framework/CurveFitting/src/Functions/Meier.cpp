@@ -120,7 +120,7 @@ void Meier::precomputeIntermediateSteps(std::valarray<double> &cos2AlphaSquared,
     cos2AlphaSquared[i] = getCos2AlphaSquared(q1, qq);
   }
 
-  m = size - 1 - J;
+  m = static_cast<double>(size) - 1 - J;
   q1 = getQ1(m, OmegaQ, OmegaD);
   q2 = getQ2(m, J, OmegaD);
   q3 = getQ3(m, OmegaQ, OmegaD);
