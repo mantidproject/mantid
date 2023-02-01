@@ -11,6 +11,7 @@
 #include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
 
+#include <boost/python.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/implicit.hpp>
 #include <boost/python/init.hpp>
@@ -110,8 +111,7 @@ template <> std::string dtype(TimeSeriesProperty<std::string> &self) {
       .def("nthValue", &TimeSeriesProperty<TYPE>::nthValue, (arg("self"), arg("index")))                               \
       .def("nthTime", &TimeSeriesProperty<TYPE>::nthTime, (arg("self"), arg("index")),                                 \
            "returns :class:`mantid.kernel.DateAndTime`")                                                               \
-      .def("getStatistics", &TimeSeriesProperty<TYPE>::getStatistics, arg("self"),                                     \
-           "returns :class:`mantid.kernel.TimeSeriesPropertyStatistics`")                                              \
+      .def("getStatistics", &TimeSeriesProperty<TYPE>::getStatistics, getStatistics_overloads())                       \
       .def("timeAverageValue",                                                                                         \
            (double (TimeSeriesProperty<TYPE>::*)() const) & TimeSeriesProperty<TYPE>::timeAverageValue, (arg("self"))) \
       .def("timeAverageValue",                                                                                         \
@@ -122,6 +122,7 @@ template <> std::string dtype(TimeSeriesProperty<std::string> &self) {
 
 } // namespace
 
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getStatistics_overloads, getStatistics, 0, 1)
 void export_TimeSeriesProperty_Double() { EXPORT_TIMESERIES_PROP(double, Float); }
 
 void export_TimeSeriesProperty_Bool() { EXPORT_TIMESERIES_PROP(bool, Bool); }

@@ -1857,18 +1857,30 @@ template <typename TYPE> bool TimeSeriesProperty<TYPE>::isDefault() const { retu
  *
  * N.B. This method DOES take filtering into account
  */
-template <typename TYPE> TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics() const {
+template <typename TYPE>
+TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics(const TimeROI *roi) const {
   TimeSeriesPropertyStatistics out(Mantid::Kernel::getStatistics(this->filteredValuesAsVector()));
 
   if (this->size() > 0) {
-    const auto &intervals = this->getSplittingIntervals();
-    const double duration_sec =
-        std::accumulate(intervals.cbegin(), intervals.cend(), 0.,
-                        [](double sum, const auto &interval) { return sum + interval.duration(); });
-    out.duration = duration_sec;
-    const auto time_weighted = this->timeAverageValueAndStdDev();
-    out.time_mean = time_weighted.first;
-    out.time_standard_deviation = time_weighted.second;
+    if (roi == nullptr || roi->empty()) {
+      const auto &intervals = this->getSplittingIntervals();
+      const double duration_sec =
+          std::accumulate(intervals.cbegin(), intervals.cend(), 0.,
+                          [](double sum, const auto &interval) { return sum + interval.duration(); });
+      out.duration = duration_sec;
+      const auto time_weighted = this->timeAverageValueAndStdDev();
+      out.time_mean = time_weighted.first;
+      out.time_standard_deviation = time_weighted.second;
+    } else {
+      const auto &intervals = roi->toSplitters();
+      const double duration_sec =
+          std::accumulate(intervals.cbegin(), intervals.cend(), 0.,
+                          [](double sum, const auto &interval) { return sum + interval.duration(); });
+      out.duration = duration_sec;
+      const auto time_weighted = this->timeAverageValueAndStdDev();
+      out.time_mean = this->timeAverageValue(*roi);
+      out.time_standard_deviation = time_weighted.second;
+    }
   } else {
     out.time_mean = std::numeric_limits<double>::quiet_NaN();
     out.time_standard_deviation = std::numeric_limits<double>::quiet_NaN();
@@ -2461,7 +2473,7 @@ namespace Mantid::Kernel {
  *  @return The TimeSeriesProperty filtered by the requested statistics.
  */
 double filterByStatistic(TimeSeriesProperty<double> const *const propertyToFilter,
-                         Kernel::Math::StatisticType statisticType) {
+                         Kernel::Math::StatisticType statisticType, const TimeROI *roi) {
   using namespace Kernel::Math;
   double singleValue = 0;
   switch (statisticType) {
@@ -2472,16 +2484,16 @@ double filterByStatistic(TimeSeriesProperty<double> const *const propertyToFilte
     singleValue = propertyToFilter->nthValue(propertyToFilter->size() - 1);
     break;
   case Minimum:
-    singleValue = propertyToFilter->getStatistics().minimum;
+    singleValue = propertyToFilter->getStatistics(roi).minimum;
     break;
   case Maximum:
-    singleValue = propertyToFilter->getStatistics().maximum;
+    singleValue = propertyToFilter->getStatistics(roi).maximum;
     break;
   case Mean:
-    singleValue = propertyToFilter->getStatistics().mean;
+    singleValue = propertyToFilter->getStatistics(roi).mean;
     break;
   case Median:
-    singleValue = propertyToFilter->getStatistics().median;
+    singleValue = propertyToFilter->getStatistics(roi).median;
     break;
   default:
     throw std::invalid_argument("filterByStatistic - Unknown statistic type: " +
