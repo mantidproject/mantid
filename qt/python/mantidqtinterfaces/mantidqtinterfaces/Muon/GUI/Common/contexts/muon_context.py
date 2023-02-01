@@ -517,7 +517,9 @@ class MuonContext(object):
         if runs == "All":
             run_list = self.data_context.current_runs
         else:
-            run_list = [run_string_to_list(item) for item in runs.replace(" ", "").split(",")]
+            # runs will always be the current "run"
+            # so either a single run or a co-add list
+            run_list = [run_string_to_list(runs.replace(" ", ""))]
             flat_list = []
             for sublist in run_list:
                 flat_list += [[run] for run in sublist if len(sublist) > 1]

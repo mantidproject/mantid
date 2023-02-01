@@ -120,6 +120,10 @@ class MuonContextTest(unittest.TestCase):
         runs = self.context.get_runs(" 19489 ")
         self.assertEqual(runs, [[19489]])
 
+    def test_get_runs_coadd(self):
+        runs = self.context.get_runs(" 19489, 19491 ")
+        self.assertEqual(runs, [[19489, 19491]])
+
     def test_get_group_or_pair(self):
         group_and_pair = self.context.get_group_and_pair("All")
         self.assertEqual(group_and_pair, (["fwd", "bwd"], ["long"]))
