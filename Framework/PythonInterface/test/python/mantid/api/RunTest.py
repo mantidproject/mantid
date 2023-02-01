@@ -130,7 +130,7 @@ class RunTest(unittest.TestCase):
             temp1.addValue(start_time + i * nanosec, vals[i])
         run.addProperty(temp1.name, temp1, True)
         # ignore the last value
-        expected = vals[:-1].std()
+        expected = vals.std()
         self.assertEqual(run.getTimeAveragedStd("TEMP1"), expected)
 
     def do_test_copyable(self, copy_op):
