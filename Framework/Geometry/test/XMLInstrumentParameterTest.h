@@ -176,7 +176,6 @@ public:
   }
 
   void test_help_string() {
-    Kernel::TimeROI *roi = nullptr;
     std::vector<std::string> constr;
     std::string penaltyFactor;
     XMLInstrumentParameter testPar("logfileID", "value", std::make_shared<Interpolation>(), "formula", "sourceFU",
@@ -187,7 +186,6 @@ public:
   }
 
   void test_parameter_not_visible() {
-    Kernel::TimeROI *roi = nullptr;
     std::vector<std::string> constr;
     std::string penaltyFactor;
     XMLInstrumentParameter testPar("logfileID", "value", std::make_shared<Interpolation>(), "formula", "sourceFU",

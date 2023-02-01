@@ -83,6 +83,7 @@ XMLInstrumentParameter::XMLInstrumentParameter(std::string logfileID, std::strin
  *return that.
  *
  *  @param logData :: Data in logfile
+ *  @param roi :: TimeROI object to get active time
  *  @return parameter value
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
