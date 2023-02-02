@@ -79,7 +79,7 @@ You are now ready to CMake and build the Mantid code. Follow the Ubuntu 18.04 or
 Using Graphical User Interfaces (GUI)
 #####################################
 
-WSL does not currently support GUIs. In order to display a GUI from an application running in WSL you will therefore need to use an XServer. Failure to do so will result in a crash upon launching `workbench`.
+WSL does not currently support GUIs. In order to display a GUI from an application running in WSL you will need to use an XServer. Failure to do so will result in a crash upon launching `workbench`.
 
 To use an XServer:
 
