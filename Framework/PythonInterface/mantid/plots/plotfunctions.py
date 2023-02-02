@@ -207,11 +207,11 @@ def plot(
 
     fig.set_layout_engine(layout="tight")
     warnings.filterwarnings(
-        "once",
+        "always",
         message="Tight layout not applied. The left and right margins cannot be made large enough to accommodate all axes decorations.",
     )
     warnings.filterwarnings(
-        "once",
+        "always",
         message="Tight layout not applied. The bottom and top margins cannot be made large enough to accommodate all axes decorations.",
     )
 

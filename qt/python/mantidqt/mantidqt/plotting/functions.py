@@ -13,8 +13,10 @@ our custom window.
 
 # std imports
 from distutils.version import LooseVersion
+import warnings
 
 import matplotlib
+from mpl_toolkits.axes_grid1.axes_divider import make_axes_area_auto_adjustable, make_axes_locatable
 import numpy as np
 
 # local imports
@@ -253,6 +255,16 @@ def pcolormesh(workspaces, fig=None, color_norm=None, normalize_by_bin_width=Non
     workspaces_len = len(workspaces)
     fig, axes, nrows, ncols = create_subplots(workspaces_len, fig=fig)
 
+    fig.set_layout_engine(layout="tight")
+    warnings.filterwarnings(
+        "always",
+        message="Tight layout not applied. The left and right margins cannot be made large enough to accommodate all axes decorations.",
+    )
+    warnings.filterwarnings(
+        "always",
+        message="Tight layout not applied. The bottom and top margins cannot be made large enough to accommodate all axes decorations.",
+    )
+
     plots = []
     row_idx, col_idx = 0, 0
     for subplot_idx in range(nrows * ncols):
@@ -285,7 +297,10 @@ def pcolormesh(workspaces, fig=None, color_norm=None, normalize_by_bin_width=Non
     fig.subplots_adjust(wspace=SUBPLOT_WSPACE, hspace=SUBPLOT_HSPACE)
 
     axes = axes.ravel()
-    colorbar = fig.colorbar(pcm, ax=axes.tolist(), pad=0.06)
+    div = make_axes_locatable(fig.gca())
+    cax = div.append_axes("right", size="5%", pad=0.06)
+    # colorbar = fig.colorbar(pcm, ax=axes.tolist(), pad=0.06)
+    colorbar = fig.colorbar(pcm, cax=cax)
     add_colorbar_label(colorbar, axes)
 
     if fig.canvas.manager is not None:
@@ -362,6 +377,7 @@ def plot_surface(workspaces, fig=None):
 
         surface = ax.plot_surface(ws, cmap=ConfigService.getString("plots.images.Colormap"))
         ax.set_title(ws.name())
+        make_axes_area_auto_adjustable(ax, pad=0, adjust_dirs=["left", "right", "bottom"])
         fig.colorbar(surface, ax=[ax])
         fig.show()
 
@@ -378,6 +394,16 @@ def plot_wireframe(workspaces, fig=None):
             ax = fig.add_subplot(111, projection="mantid3d")
         else:
             fig, ax = plt.subplots(subplot_kw={"projection": "mantid3d"})
+
+        fig.set_layout_engine(layout="tight")
+        warnings.filterwarnings(
+            "always",
+            message="Tight layout not applied. The left and right margins cannot be made large enough to accommodate all axes decorations.",
+        )
+        warnings.filterwarnings(
+            "always",
+            message="Tight layout not applied. The bottom and top margins cannot be made large enough to accommodate all axes decorations.",
+        )
 
         ax.plot_wireframe(ws)
         ax.set_title(ws.name())
