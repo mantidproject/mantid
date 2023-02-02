@@ -14,19 +14,20 @@ The Toolbar
 | |PickTabToolButtons.png|
 
 - |PickTabZoomButton.png| - Navigate in the instrument display window (Zoom).
-- |PickTabEditButton.png| - Edit a shape.
-- |PickTabEllipseButton.png| - Draw an ellipse.
-- |PickTabRectButton.png| - Draw a rectangle.
-- |PickTabElRingButton.png| - Draw an elliptical ring.
-- |PickTabRectRingButton.png| - Draw a rectangular ring.
-- |PickTabSectorButton.png| - Draw a circular sector.
-- |PickTabArbitraryShape.png| - Draw an arbitrary shape.
 - |PickTabPickPixelButton.png| - Select a single detector.
+- |PickTabSelectWholeInstButton.png| - Select the whole instrument.
 - |PickTabPickTubeButton.png| - Select a tube/bank.
 - |PickTabAddPeakButton.png| - Add a single crystal peak.
 - |PickTabEraseButton.png| - Erase a peak.
 - |PickTabCPCompare.png| - Compare single crystal peaks.
 - |PickTabCPAlign.png| - Crystal Peak alignment tool.
+- |PickTabEllipseButton.png| - Draw an ellipse.
+- |PickTabRectButton.png| - Draw a rectangle.
+- |PickTabSectorButton.png| - Draw a circular sector.
+- |PickTabArbitraryShape.png| - Draw an arbitrary shape.
+- |PickTabEditButton.png| - Edit a shape.
+- |PickTabElRingButton.png| - Draw an elliptical ring.
+- |PickTabRectRingButton.png| - Draw a rectangular ring.
 
 
 Picking a Single Detector
@@ -97,8 +98,7 @@ which is the same as in Render Tab.
 Selecting Arbitrary Sets of Detectors
 =====================================
 
-The rest of the buttons in the top row are for making complex
-selections. Buttons
+The buttons in the bottom row are for making complex selections. Buttons
 |PickTabEllipseButton.png|\ |PickTabRectButton.png|\ |PickTabElRingButton.png|\ |PickTabRectRingButton.png|
 are for drawing shapes, |PickTabEditButton.png| is for editing them.
 
@@ -169,3 +169,4 @@ the shapes and plots this vs time of flight.
 .. |PickTabCPCompare.png| image:: /images/PickTabCPCompare.png
 .. |PickTabCPAlign.png| image:: /images/PickTabCPAlign.png
 .. |PickTabArbitraryShape.png| image:: /images/PickTabArbitraryShape.png
+.. |PickTabSelectWholeInstButton.png| image:: /images/PickTabSelectWholeInstButton.png
