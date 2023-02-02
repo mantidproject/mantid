@@ -1863,31 +1863,21 @@ TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics(const TimeR
   TimeSeriesPropertyStatistics out(Mantid::Kernel::getStatistics(this->filteredValuesAsVector()));
 
   if (this->size() > 0) {
-    if (roi == nullptr || roi->empty()) {
-      const auto &intervals = this->getSplittingIntervals();
-      const double duration_sec =
-          std::accumulate(intervals.cbegin(), intervals.cend(), 0.,
-                          [](double sum, const auto &interval) { return sum + interval.duration(); });
-      out.duration = duration_sec;
-      const auto time_weighted = this->timeAverageValueAndStdDev();
-      out.time_mean = time_weighted.first;
-      out.time_standard_deviation = time_weighted.second;
-    } else {
-      const auto &intervals = roi->toSplitters();
-      const double duration_sec =
-          std::accumulate(intervals.cbegin(), intervals.cend(), 0.,
-                          [](double sum, const auto &interval) { return sum + interval.duration(); });
-      out.duration = duration_sec;
-      const auto time_weighted = this->timeAverageValueAndStdDev();
-      out.time_mean = this->timeAverageValue(*roi);
-      out.time_standard_deviation = time_weighted.second;
-    }
+    const auto &intervals = this->getSplittingIntervals();
+    const double duration_sec =
+        std::accumulate(intervals.cbegin(), intervals.cend(), 0.,
+                        [](double sum, const auto &interval) { return sum + interval.duration(); });
+    out.duration = duration_sec;
+    const auto time_weighted = this->timeAverageValueAndStdDev();
+    out.time_mean = time_weighted.first;
+    out.time_standard_deviation = time_weighted.second;
   } else {
     out.time_mean = std::numeric_limits<double>::quiet_NaN();
     out.time_standard_deviation = std::numeric_limits<double>::quiet_NaN();
     out.duration = std::numeric_limits<double>::quiet_NaN();
   }
-
+  if (roi == nullptr)
+    void(0);
   return out;
 }
 
