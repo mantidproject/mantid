@@ -98,7 +98,7 @@ To use an XServer:
 
      `export DISPLAY=$(route.exe print | grep 0.0.0.0 | head -1 | awk '{print $4}'):0.0`.
   3. Exit and re-enter WSL via the command prompt.
-  4. Echo the `DISPLAY` variable, you should see the value `<host machine IP Address>:0.0`. You can compare this output IP address to that found in `ipconfig /all`.
+  4. Echo the `DISPLAY` variable, you should see the value `<host machine IP Address>:0.0`. You can compare this output IP address to that output when running `ipconfig /all` through the command line on the host machine.
 
 Tips
 ####
