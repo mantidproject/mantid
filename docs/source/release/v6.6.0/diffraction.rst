@@ -42,16 +42,16 @@ Single Crystal Diffraction
 
 New features
 ############
-* Added new option to :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>`: to get initial TOF window from back-to-back exponential coefficients if specified in the instrument parameters.xml
-* Added back-to-back exponential coefficients to SXD parameters.xml file
-* Simplified input arguments to :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>`: the parameter `FractionalTOFWindow` has been removed, if a user wants to integrate with an initial window dTOF/TOF = constant for all peaks then this can be achieved by setting ThetaWidth = 0 - note this is technically a breaking change.
-* New algorithm :ref:`SaveINS <algm-SaveINS>` to write a .ins input file for SHELX
-* Added two options to :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>`: to scale angular resolution parameter (``ThetaWidth``) by wavelength, and to specify minimum number of TOF bins in a valid peak (``NTOFBinsMin``).
-* Improve estimation of resolution parameters in :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>` (more robust to outliers).
-* Made Lorentz correction in :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>` optional.
-* Added back bank 14 to TOPAZ for a total of 20 banks
-* Exposed indexing tolerance for :ref:`SCDCalibratePanels  <algm-SCDCalibratePanels>` when using `RecalculateUB` option.
-* Parallelize loop over peaks in IntegratePEaksMD which provides significant speed-up for ellipsoid integration.
+- Added new option to :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>`: to get initial TOF window from back-to-back exponential coefficients if specified in the instrument parameters.xml
+- Added back-to-back exponential coefficients to SXD parameters.xml file
+- Simplified input arguments to :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>`: the parameter `FractionalTOFWindow` has been removed, if a user wants to integrate with an initial window dTOF/TOF = constant for all peaks then this can be achieved by setting ThetaWidth = 0 - note this is technically a breaking change.
+- New algorithm :ref:`SaveINS <algm-SaveINS>` to write a .ins input file for SHELX
+- Added two options to :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>`: to scale angular resolution parameter (``ThetaWidth``) by wavelength, and to specify minimum number of TOF bins in a valid peak (``NTOFBinsMin``).
+- Improve estimation of resolution parameters in :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>` (more robust to outliers).
+- Made Lorentz correction in :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>` optional.
+- Added back bank 14 to TOPAZ for a total of 20 banks
+- Exposed indexing tolerance for :ref:`SCDCalibratePanels  <algm-SCDCalibratePanels>` when using `RecalculateUB` option.
+- Parallelize loop over peaks in IntegratePEaksMD which provides significant speed-up for ellipsoid integration.
 
 Bugfixes
 ############
