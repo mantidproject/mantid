@@ -37,7 +37,8 @@ template <typename HeldType>
 FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(TimeSeriesProperty<HeldType> *seriesProp,
                                                                  const TimeSeriesProperty<bool> &filterProp)
     : TimeSeriesProperty<HeldType>(*seriesProp),
-      m_unfiltered(std::unique_ptr<const TimeSeriesProperty<HeldType>>(seriesProp->clone())), m_filterApplied() {
+      m_unfiltered(std::unique_ptr<const TimeSeriesProperty<HeldType>>(seriesProp->clone())), m_filter(),
+      m_filterQuickRef(), m_filterApplied() {
   // Now filter us with the filter
   this->filterWith(&filterProp);
 }
@@ -76,6 +77,36 @@ template <typename HeldType> FilteredTimeSeriesProperty<HeldType> *FilteredTimeS
   return new FilteredTimeSeriesProperty<HeldType>(*this);
 }
 
+template <typename HeldType>
+FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(const FilteredTimeSeriesProperty &prop)
+    : TimeSeriesProperty<HeldType>(prop.name(), prop.timesAsVector(), prop.valuesAsVector()), m_unfiltered(),
+      m_filter(prop.m_filter), m_filterQuickRef(prop.m_filterQuickRef), m_filterApplied(prop.m_filterApplied) {}
+
+/**
+ * Get a vector of values taking the filter into account.
+ * Values will be excluded if their times lie in a region where the filter is
+ * false.
+ * @returns :: Vector of included values only
+ */
+template <typename TYPE> std::vector<TYPE> FilteredTimeSeriesProperty<TYPE>::filteredValuesAsVector() const {
+  if (this->m_filter.empty()) {
+    return this->valuesAsVector(); // no filtering to do
+  }
+  if (!this->m_filterApplied) {
+    applyFilter();
+  }
+  this->sortIfNecessary();
+
+  std::vector<TYPE> filteredValues;
+  for (const auto &value : this->m_values) {
+    if (isTimeFiltered(value.time())) {
+      filteredValues.emplace_back(value.value());
+    }
+  }
+
+  return filteredValues;
+}
+
 /**
  * Return the time series's filtered times as a vector<DateAndTime>
  * @return A vector of DateAndTime objects
@@ -99,6 +130,12 @@ std::vector<DateAndTime> FilteredTimeSeriesProperty<HeldType>::filteredTimesAsVe
   }
 
   return out;
+}
+
+template <typename TYPE> double FilteredTimeSeriesProperty<TYPE>::mean() const {
+  Mantid::Kernel::Statistics raw_stats =
+      Mantid::Kernel::getStatistics(this->filteredValuesAsVector(), StatOptions::Mean);
+  return raw_stats.mean;
 }
 
 /** Returns n-th valid time interval, in a very inefficient way.

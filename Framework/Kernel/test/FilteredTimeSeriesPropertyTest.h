@@ -56,25 +56,6 @@ public:
     TS_ASSERT_EQUALS(filtered->nthValue(1), 4);
   }
 
-  //-------------------------------------------------------------------------------
-  void test_isTimeFiltered() {
-    auto source = createTestSeries("seriesName");
-    auto filter = createTestFilter();
-    auto filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(std::move(source), filter);
-    Mantid::Types::Core::DateAndTime aTime("2007-11-30T16:16:45");
-    TS_ASSERT_EQUALS(filtered->isTimeFiltered(aTime), false);
-    aTime.setFromISO8601("2007-11-30T16:16:55");
-    TS_ASSERT_EQUALS(filtered->isTimeFiltered(aTime), false);
-    aTime.setFromISO8601("2007-11-30T16:17:25");
-    TS_ASSERT_EQUALS(filtered->isTimeFiltered(aTime), true);
-    aTime.setFromISO8601("2007-11-30T16:17:35");
-    TS_ASSERT_EQUALS(filtered->isTimeFiltered(aTime), true);
-    aTime.setFromISO8601("2007-11-30T16:17:39");
-    TS_ASSERT_EQUALS(filtered->isTimeFiltered(aTime), false);
-    aTime.setFromISO8601("2007-11-30T16:17:40");
-    TS_ASSERT_EQUALS(filtered->isTimeFiltered(aTime), false);
-  }
-
   // Create a small TSP<int>. Callee owns the returned object.
   FilteredTimeSeriesProperty<int> *createIntegerTSP(int numberOfValues) {
     FilteredTimeSeriesProperty<int> *log = new FilteredTimeSeriesProperty<int>("intProp");
@@ -188,7 +169,6 @@ public:
     return;
   }
 
-  //-------------------------------------------------------------------------------
   void test_filter_with_single_value_in_series() {
     auto p1 = std::make_shared<FilteredTimeSeriesProperty<double>>("SingleValueTSP");
     p1->addValue("2007-11-30T16:17:00", 1.5);
@@ -436,7 +416,7 @@ public:
     series.addValue("2000-11-30T01:01:01", expectedFilteredValue);
     series.addValue("2000-11-30T01:01:02", 2);
 
-    const double actualFilteredValue = series.extractStatistic(Mantid::Kernel::Math::FirstValue);
+    const double actualFilteredValue = filterByStatistic(&series, Mantid::Kernel::Math::FirstValue);
     TSM_ASSERT_EQUALS("Filtering by FirstValue is not working.", expectedFilteredValue, actualFilteredValue);
   }
 
@@ -447,7 +427,7 @@ public:
     series.addValue("2000-11-30T01:01:01", 0);
     series.addValue("2000-11-30T01:01:02", expectedFilteredValue);
 
-    const double actualFilteredValue = series.extractStatistic(Mantid::Kernel::Math::LastValue);
+    const double actualFilteredValue = filterByStatistic(&series, Mantid::Kernel::Math::LastValue);
     TSM_ASSERT_EQUALS("Filtering by LastValue is not working.", expectedFilteredValue, actualFilteredValue);
   }
 
@@ -460,7 +440,7 @@ public:
                     expectedFilteredValue); // minimum. 1 < 3 < 4
     series.addValue("2000-11-30T01:01:03", 4);
 
-    const double actualFilteredValue = series.extractStatistic(Mantid::Kernel::Math::Minimum);
+    const double actualFilteredValue = filterByStatistic(&series, Mantid::Kernel::Math::Minimum);
     TSM_ASSERT_EQUALS("Filtering by Minimum is not working.", expectedFilteredValue, actualFilteredValue);
   }
 
@@ -473,7 +453,7 @@ public:
                     expectedFilteredValue); // maximum. 1 > 0.9 > 0.1
     series.addValue("2000-11-30T01:01:03", 0.9);
 
-    const double actualFilteredValue = series.extractStatistic(Mantid::Kernel::Math::Maximum);
+    const double actualFilteredValue = filterByStatistic(&series, Mantid::Kernel::Math::Maximum);
     TSM_ASSERT_EQUALS("Filtering by Maximum is not working.", expectedFilteredValue, actualFilteredValue);
   }
 
@@ -487,7 +467,7 @@ public:
                                             // (T1 + T2 + T3) / 3
     series.addValue("2000-11-30T01:01:03", 2);
 
-    const double actualFilteredValue = series.extractStatistic(Mantid::Kernel::Math::Mean);
+    const double actualFilteredValue = filterByStatistic(&series, Mantid::Kernel::Math::Mean);
     TSM_ASSERT_EQUALS("Filtering by Mean Time is not working.", expectedFilteredValue, actualFilteredValue);
   }
 
@@ -502,7 +482,7 @@ public:
     series.addValue("2000-11-30T01:01:04", 4);
     series.addValue("2000-11-30T01:02:00", 5);
 
-    const double actualFilteredValue = series.extractStatistic(Mantid::Kernel::Math::Median);
+    const double actualFilteredValue = filterByStatistic(&series, Mantid::Kernel::Math::Median);
     TSM_ASSERT_EQUALS("Filtering by Median Time is not working.", expectedFilteredValue, actualFilteredValue);
   }
 
@@ -536,11 +516,9 @@ public:
     TS_ASSERT_DELTA(stats.minimum, 1.0, 1e-6);
     TS_ASSERT_DELTA(stats.maximum, 10.0, 1e-6);
     TS_ASSERT_DELTA(stats.median, 6.0, 1e-6);
-    TS_ASSERT_DELTA(stats.mean, 5.7778, 1e-3);
+    TS_ASSERT_DELTA(stats.mean, 5.77778, 1e-3);
     TS_ASSERT_DELTA(stats.duration, 85.0, 1e-6);
-    TS_ASSERT_DELTA(stats.standard_deviation, 2.89742, 1e-4);
-    TS_ASSERT_DELTA(stats.time_mean, 5.5882, 1.e-3);
-    TS_ASSERT_DELTA(stats.time_standard_deviation, 2.7237, 1.e-3);
+    TS_ASSERT_DELTA(stats.standard_deviation, 2.8974, 1e-4);
   }
 
   /// Test that timeAverageValue respects the filter

@@ -39,10 +39,7 @@ public:
   /// "Virtual" copy constructor
   FilteredTimeSeriesProperty<HeldType> *clone() const override;
 
-  FilteredTimeSeriesProperty(const FilteredTimeSeriesProperty &prop)
-      : TimeSeriesProperty<HeldType>(prop.name(), prop.timesAsVector(), prop.valuesAsVector()),
-        m_unfiltered(prop.unfiltered()->clone()), m_filter(prop.m_filter), m_filterQuickRef(prop.m_filterQuickRef),
-        m_filterApplied(prop.m_filterApplied) {}
+  FilteredTimeSeriesProperty(const FilteredTimeSeriesProperty &prop);
 
   /// Destructor
   ~FilteredTimeSeriesProperty() override;

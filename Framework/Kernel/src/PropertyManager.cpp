@@ -202,10 +202,8 @@ void PropertyManager::filterByProperty(const Kernel::TimeSeriesProperty<bool> &f
     }
 
     Property *currentProp = orderedProperty;
-    if (auto doubleSeries = dynamic_cast<TimeSeriesProperty<double> *>(currentProp)) {
-      std::unique_ptr<Property> filtered(nullptr); // will point to the new FilteredTimeSeriesProperty
-
-      // does the property name ends with substring "_invalid_values" ?
+    if (auto doubleSeries = dynamic_cast<FilteredTimeSeriesProperty<double> *>(currentProp)) {
+      // don't filter the invalid values filters
       if (PropertyManager::isAnInvalidValuesFilterLog(currentProp->name()))
         break;
       std::unique_ptr<Property> filtered(nullptr);
