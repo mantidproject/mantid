@@ -129,6 +129,8 @@ fi
 
 # Clean up artifacts from previous builds
 rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz *.exe
+# Remove ctest logs from previous builds
+rm -rf  $BUILD_DIR/ctest_log
 
 # Run the script that handles the build
 $SCRIPT_DIR/build $WORKSPACE $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS "$EXTRA_CMAKE_FLAGS" $BUILD_THREADS
