@@ -1854,7 +1854,7 @@ template <typename TYPE> bool TimeSeriesProperty<TYPE>::isDefault() const { retu
 /**
  * Return a TimeSeriesPropertyStatistics struct containing the
  * statistics of this TimeSeriesProperty object.
- * @param : Optional TimeROI pointer to get statistics for active time.
+ * @param roi : Optional TimeROI pointer to get statistics for active time.
  *
  * N.B. This method DOES take filtering into account
  */
