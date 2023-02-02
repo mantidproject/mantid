@@ -194,6 +194,6 @@ Preview tab
   - View the history for `ReflectometryReductionOneAuto` and check that the inputs for `ProcessingInstructions`, `BackgroundProcessingInstructions` and `TransmissionProcessingInstructions` correspond to the ranges of spectra you selected.
   - View the history for `ReflectometryISISSumBanks` and check that the input for `ROIDetectorIDs` matches the range of detector IDs you selected.
 
-- Back in the Reflectometry interface, go to the Runs tab. In the Process Runs table on the right-hand panel of the tab, enter Run `INTER45455_inst` and Angle `1` into the first child row. Click Process.
+- Back in the Reflectometry interface, go to the Runs tab. In the Process Runs table on the right-hand panel of the tab, enter Run `INTER45455` and Angle `1` into the first child row. Click Process.
 - Compare plots of the `preview_summed_ws` (from the Preview reduction) with `IvsQ_45455` (from the batch reduction). They should be the same.
 - The plots on the Reduction Preview tab are located within three dockable widgets. Check that the widgets can be undocked, re-docked, re-sized etc. without error or loss of functionality.
