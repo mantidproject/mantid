@@ -820,9 +820,6 @@ double TimeSeriesProperty<TYPE>::averageValueInFilter(const std::vector<Splittin
   // TODO: Consider logs that aren't giving starting values.
 
   // If there's just a single value in the log, return that.
-  if (realSize() == 1) {
-    return static_cast<double>(m_values.front().value());
-  }
   if (size() == 1) {
     return static_cast<double>(this->firstValue());
   }
