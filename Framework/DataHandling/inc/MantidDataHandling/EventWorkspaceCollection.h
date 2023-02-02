@@ -10,7 +10,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include <boost/function.hpp>
 #include <memory>
 #include <vector>
@@ -41,7 +41,7 @@ public:
   EventWorkspaceCollection &operator=(const EventWorkspaceCollection &other) = delete;
   virtual ~EventWorkspaceCollection() = default;
 
-  void setNPeriods(size_t nPeriods, std::unique_ptr<const Kernel::TimeSeriesProperty<int>> &periodLog);
+  void setNPeriods(size_t nPeriods, std::unique_ptr<const Kernel::FilteredTimeSeriesProperty<int>> &periodLog);
   void reserveEventListAt(size_t wi, size_t size);
   size_t nPeriods() const;
   DataObjects::EventWorkspace_sptr getSingleHeldWorkspace();

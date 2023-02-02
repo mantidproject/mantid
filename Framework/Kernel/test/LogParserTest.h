@@ -11,9 +11,9 @@
 #include <fstream>
 #include <numeric>
 
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/LogParser.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -54,7 +54,7 @@ public:
     const LogParser lp(icp_log.get());
     const auto &p1 = std::unique_ptr<Property>(lp.createLogProperty(log_num_good.path(), "good"));
     TS_ASSERT(p1);
-    TimeSeriesProperty<double> *tp1 = dynamic_cast<TimeSeriesProperty<double> *>(p1.get());
+    FilteredTimeSeriesProperty<double> *tp1 = dynamic_cast<FilteredTimeSeriesProperty<double> *>(p1.get());
     std::map<DateAndTime, double> vmap = tp1->valueAsMap();
     std::map<DateAndTime, double>::iterator v = vmap.begin();
     // time 1
@@ -99,7 +99,7 @@ public:
     const LogParser lp(icp_log.get());
     const auto &p1 = std::unique_ptr<Property>(lp.createLogProperty(log_num_late.path(), "late"));
     TS_ASSERT(p1);
-    TimeSeriesProperty<double> *tp1 = dynamic_cast<TimeSeriesProperty<double> *>(p1.get());
+    FilteredTimeSeriesProperty<double> *tp1 = dynamic_cast<FilteredTimeSeriesProperty<double> *>(p1.get());
     std::map<DateAndTime, double> vmap = tp1->valueAsMap();
     std::map<DateAndTime, double>::iterator v = vmap.begin();
 
@@ -134,7 +134,7 @@ public:
     const LogParser lp(icp_log.get());
     const auto &p1 = std::unique_ptr<Property>(lp.createLogProperty(log_num_early.path(), "early"));
     TS_ASSERT(p1);
-    TimeSeriesProperty<double> *tp1 = dynamic_cast<TimeSeriesProperty<double> *>(p1.get());
+    FilteredTimeSeriesProperty<double> *tp1 = dynamic_cast<FilteredTimeSeriesProperty<double> *>(p1.get());
     std::map<DateAndTime, double> vmap = tp1->valueAsMap();
     std::map<DateAndTime, double>::iterator v = vmap.begin();
 
@@ -168,7 +168,7 @@ public:
     const LogParser lp(icp_log.get());
     const auto &p1 = std::unique_ptr<Property>(lp.createLogProperty(log_num_single.path(), "single"));
     TS_ASSERT(p1);
-    TimeSeriesProperty<double> *tp1 = dynamic_cast<TimeSeriesProperty<double> *>(p1.get());
+    FilteredTimeSeriesProperty<double> *tp1 = dynamic_cast<FilteredTimeSeriesProperty<double> *>(p1.get());
     std::map<DateAndTime, double> vmap = tp1->valueAsMap();
     std::map<DateAndTime, double>::iterator v = vmap.begin();
 
@@ -189,7 +189,7 @@ public:
     const LogParser lp(icp_log.get());
     const auto &p1 = std::unique_ptr<Property>(lp.createLogProperty(log_str.path(), "str"));
     TS_ASSERT(p1);
-    TimeSeriesProperty<std::string> *tp1 = dynamic_cast<TimeSeriesProperty<std::string> *>(p1.get());
+    FilteredTimeSeriesProperty<std::string> *tp1 = dynamic_cast<FilteredTimeSeriesProperty<std::string> *>(p1.get());
     std::map<DateAndTime, std::string> vmap = tp1->valueAsMap();
     std::map<DateAndTime, std::string>::iterator v = vmap.begin();
     // time 1
@@ -221,7 +221,7 @@ public:
     const auto &icp_log = std::unique_ptr<Property>(LogParser::createLogProperty(icp_file.path(), "icpevent"));
     const LogParser lp(icp_log.get());
     const auto &prop = std::unique_ptr<Property>(lp.createAllPeriodsLog());
-    const auto *timeseriesprop = dynamic_cast<const TimeSeriesProperty<int> *>(prop.get());
+    const auto *timeseriesprop = dynamic_cast<const FilteredTimeSeriesProperty<int> *>(prop.get());
     TS_ASSERT(timeseriesprop);
     // Check the size
     TS_ASSERT_EQUALS(4, timeseriesprop->size());
@@ -233,7 +233,7 @@ public:
   }
 
   void testConstructionFromPropertyUsingICPVariant_CHANGE_PERIOD() {
-    auto log = std::make_unique<TimeSeriesProperty<std::string>>("ICPLog");
+    auto log = std::make_unique<FilteredTimeSeriesProperty<std::string>>("ICPLog");
     // Notice we are using "CHANGE_PERIOD"
     TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:15:00", "CHANGE_PERIOD 1"));
     TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:16:00", "CHANGE_PERIOD 2"));
@@ -243,7 +243,7 @@ public:
     const LogParser logparser(log.get());
 
     const auto &prop = std::unique_ptr<Property>(logparser.createAllPeriodsLog());
-    const auto *timeseriesprop = dynamic_cast<const TimeSeriesProperty<int> *>(prop.get());
+    const auto *timeseriesprop = dynamic_cast<const FilteredTimeSeriesProperty<int> *>(prop.get());
     TS_ASSERT(timeseriesprop);
     // Check the size
     TS_ASSERT_EQUALS(4, timeseriesprop->size());
@@ -255,7 +255,7 @@ public:
   }
 
   void testConstructionFromPropertyUsingICPVariant_CHANGE_SPACE_PERIOD() {
-    auto log = std::make_unique<TimeSeriesProperty<std::string>>("ICPLog");
+    auto log = std::make_unique<FilteredTimeSeriesProperty<std::string>>("ICPLog");
     // Notice we are using "CHANGE PERIOD"
     TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:15:00", "CHANGE PERIOD 1"));
     TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:16:00", "CHANGE PERIOD 2"));
@@ -265,7 +265,7 @@ public:
     const LogParser logparser(log.get());
 
     const auto &prop = std::unique_ptr<Property>(logparser.createAllPeriodsLog());
-    const auto *timeseriesprop = dynamic_cast<const TimeSeriesProperty<int> *>(prop.get());
+    const auto *timeseriesprop = dynamic_cast<const FilteredTimeSeriesProperty<int> *>(prop.get());
     TS_ASSERT(timeseriesprop);
     // Check the size
     TS_ASSERT_EQUALS(4, timeseriesprop->size());
@@ -279,7 +279,7 @@ public:
   // Check that periods that don't have a full "CHANGE PERIOD" flag are not
   // added.
   void testWontAddPeriodWithoutPERIODpartOfCHANGE_SPACE_PERIOD() {
-    auto log = std::make_unique<TimeSeriesProperty<std::string>>("ICPLog");
+    auto log = std::make_unique<FilteredTimeSeriesProperty<std::string>>("ICPLog");
     // Notice we are using "CHANGE PERIOD"
     TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:15:00", "CHANGE PERIOD 1"));
     TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:16:00", "CHANGE PERIOD 2"));
@@ -290,7 +290,7 @@ public:
     const LogParser logparser(log.get());
 
     const auto &prop = std::unique_ptr<Property>(logparser.createAllPeriodsLog());
-    const auto *timeseriesprop = dynamic_cast<const TimeSeriesProperty<int> *>(prop.get());
+    const auto *timeseriesprop = dynamic_cast<const FilteredTimeSeriesProperty<int> *>(prop.get());
     TS_ASSERT(timeseriesprop);
     // Check the size
     TS_ASSERT_EQUALS(3, timeseriesprop->size());
@@ -315,7 +315,7 @@ public:
     const LogParser lp(icp_log.get());
     const auto &p1 = std::unique_ptr<Property>(lp.createLogProperty(log_num_good.path(), "good"));
     TS_ASSERT(p1);
-    TimeSeriesProperty<double> *tp1 = dynamic_cast<TimeSeriesProperty<double> *>(p1.get());
+    FilteredTimeSeriesProperty<double> *tp1 = dynamic_cast<FilteredTimeSeriesProperty<double> *>(p1.get());
     std::map<DateAndTime, double> vmap = tp1->valueAsMap();
     std::map<DateAndTime, double>::iterator v = vmap.begin();
 
@@ -343,7 +343,7 @@ public:
   //----------------------------------------------------------------------------
   void test_timeMean() {
     constexpr size_t logSize(11);
-    auto log = std::make_unique<TimeSeriesProperty<double>>("MydoubleLog");
+    auto log = std::make_unique<FilteredTimeSeriesProperty<double>>("MydoubleLog");
     std::vector<double> values(logSize);
     std::iota(values.begin(), values.end(), 1);
     DateAndTime firstTime("2007-11-30T16:17:00");
@@ -355,7 +355,7 @@ public:
   }
 
   void test_timeMean_one_Value() {
-    auto log = std::make_unique<TimeSeriesProperty<double>>("MydoubleLog");
+    auto log = std::make_unique<FilteredTimeSeriesProperty<double>>("MydoubleLog");
     TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:17:00", 56));
     TS_ASSERT_EQUALS(log->realSize(), 1);
 
@@ -365,7 +365,7 @@ public:
   /// Tests to see if we can cope with duplicate log values that have the same
   /// time.
   void test_timeMean_duplicate_values_with_same_timestamp() {
-    auto log = std::make_unique<TimeSeriesProperty<double>>("MydoubleLog");
+    auto log = std::make_unique<FilteredTimeSeriesProperty<double>>("MydoubleLog");
     // Add the same value twice
     TS_ASSERT_THROWS_NOTHING(log->addValue("2012-07-19T20:00:00", 666));
     TS_ASSERT_THROWS_NOTHING(log->addValue("2012-07-19T20:00:00", 666));
@@ -374,7 +374,7 @@ public:
   }
 
   void test_isICPEventLogNewStyle_works() {
-    auto oldlog = std::make_unique<TimeSeriesProperty<std::string>>("MyOldICPevent");
+    auto oldlog = std::make_unique<FilteredTimeSeriesProperty<std::string>>("MyOldICPevent");
     TS_ASSERT_THROWS_NOTHING(oldlog->addValue("2012-07-19T20:00:00", "START"));
     TS_ASSERT_THROWS_NOTHING(oldlog->addValue("2012-07-19T20:00:01", "BEGIN"));
     TS_ASSERT_THROWS_NOTHING(oldlog->addValue("2012-07-19T20:00:02", "PAUSE"));
@@ -382,7 +382,7 @@ public:
     const auto &oldLogm = oldlog->valueAsMultiMap();
     TS_ASSERT(!LogParser::isICPEventLogNewStyle(oldLogm));
 
-    auto newlog = std::make_unique<TimeSeriesProperty<std::string>>("MyNewICPevent");
+    auto newlog = std::make_unique<FilteredTimeSeriesProperty<std::string>>("MyNewICPevent");
     TS_ASSERT_THROWS_NOTHING(newlog->addValue("2012-07-19T20:00:00", "START"));
     TS_ASSERT_THROWS_NOTHING(newlog->addValue("2012-07-19T20:00:01", "START_COLLECTION PERIOD 1"));
     TS_ASSERT_THROWS_NOTHING(newlog->addValue("2012-07-19T20:00:02", "PAUSE"));
@@ -390,7 +390,7 @@ public:
     const auto &logm = newlog->valueAsMultiMap();
     TS_ASSERT(LogParser::isICPEventLogNewStyle(logm));
 
-    newlog.reset(new TimeSeriesProperty<std::string>("MyNewICPevent1"));
+    newlog.reset(new FilteredTimeSeriesProperty<std::string>("MyNewICPevent1"));
     TS_ASSERT_THROWS_NOTHING(newlog->addValue("2012-07-19T20:00:00", "START"));
     TS_ASSERT_THROWS_NOTHING(newlog->addValue("2012-07-19T20:00:01", "STOP_COLLECTION PERIOD 1"));
     TS_ASSERT_THROWS_NOTHING(newlog->addValue("2012-07-19T20:00:02", "PAUSE"));
@@ -400,7 +400,7 @@ public:
   }
 
   void test_new_style_command_parsing() {
-    auto log = std::make_unique<TimeSeriesProperty<std::string>>("MyICPevent");
+    auto log = std::make_unique<FilteredTimeSeriesProperty<std::string>>("MyICPevent");
     log->addValue("2013-10-16T19:04:47", "CHANGE_PERIOD 1");
     log->addValue("2013-10-16T19:04:48", "RESUME");
     log->addValue("2013-10-16T19:04:48", "START_COLLECTION PERIOD 1 GF 60015 RF 75039 GUAH 69.875610");
@@ -438,7 +438,7 @@ public:
     const LogParser logparser(log.get());
 
     auto prop = std::unique_ptr<Property>(logparser.createAllPeriodsLog());
-    const auto *allPeriodsProp = dynamic_cast<const TimeSeriesProperty<int> *>(prop.get());
+    const auto *allPeriodsProp = dynamic_cast<const FilteredTimeSeriesProperty<int> *>(prop.get());
     TS_ASSERT(allPeriodsProp);
 
     TS_ASSERT_EQUALS(5, allPeriodsProp->size());
@@ -451,7 +451,7 @@ public:
     }
 
     prop.reset(logparser.createRunningLog());
-    const auto *runningProp = dynamic_cast<const TimeSeriesProperty<bool> *>(prop.get());
+    const auto *runningProp = dynamic_cast<const FilteredTimeSeriesProperty<bool> *>(prop.get());
     TS_ASSERT(runningProp);
 
     TS_ASSERT_EQUALS(8, runningProp->size());
@@ -467,7 +467,7 @@ public:
   void test_str_repeat() {
     mkStrRepeat();
     const auto &prop = std::unique_ptr<Property>(LogParser::createLogProperty(log_str_repeat.path(), "log"));
-    const auto *log = dynamic_cast<const TimeSeriesProperty<std::string> *>(prop.get());
+    const auto *log = dynamic_cast<const FilteredTimeSeriesProperty<std::string> *>(prop.get());
     TS_ASSERT(log);
     const auto &logm = log->valueAsMultiMap();
     auto it = logm.begin();
@@ -494,7 +494,7 @@ public:
   void test_num_repeat() {
     mkNumRepeat();
     const auto &prop = std::unique_ptr<Property>(LogParser::createLogProperty(log_str_repeat.path(), "log"));
-    const auto *log = dynamic_cast<const TimeSeriesProperty<double> *>(prop.get());
+    const auto *log = dynamic_cast<const FilteredTimeSeriesProperty<double> *>(prop.get());
     TS_ASSERT(log);
     const auto &logm = log->valueAsMultiMap();
     auto it = logm.begin();
@@ -521,7 +521,7 @@ public:
   void test_str_continuation() {
     mkStrContinuations();
     const auto &prop = std::unique_ptr<Property>(LogParser::createLogProperty(log_str_continuations.path(), "log"));
-    const auto *log = dynamic_cast<const TimeSeriesProperty<std::string> *>(prop.get());
+    const auto *log = dynamic_cast<const FilteredTimeSeriesProperty<std::string> *>(prop.get());
     TS_ASSERT(log);
     const auto &logm = log->valueAsMultiMap();
     auto it = logm.begin();
@@ -539,7 +539,7 @@ public:
   /// If a run is aborted and then restarted, the "running" log should be set to
   /// false at all times during the aborted run.
   void test_abort_runningLogAlwaysFalseBeforeRestart() {
-    auto log = std::make_unique<TimeSeriesProperty<std::string>>("MyICPevent");
+    auto log = std::make_unique<FilteredTimeSeriesProperty<std::string>>("MyICPevent");
 
     // (This is a cut-down version of EMU66122)
     const DateAndTime timeZero{"2016-10-01T10:01:44"};
@@ -569,7 +569,7 @@ public:
     const LogParser logparser(log.get());
 
     const auto &prop = std::unique_ptr<Property>(logparser.createRunningLog());
-    const auto *runningProp = dynamic_cast<const TimeSeriesProperty<bool> *>(prop.get());
+    const auto *runningProp = dynamic_cast<const FilteredTimeSeriesProperty<bool> *>(prop.get());
     TS_ASSERT(runningProp);
     TS_ASSERT_EQUALS(expectedRunning.size(), runningProp->size());
     const auto &runningMap = runningProp->valueAsMultiMap();
@@ -579,7 +579,7 @@ public:
   /// If a run is aborted and then restarted, the "running" log should be set to
   /// false at all times during the aborted run.
   void test_abort_runningLogAlwaysFalseBeforeRestart_oldStyleCommands() {
-    auto log = std::make_unique<TimeSeriesProperty<std::string>>("MyICPevent");
+    auto log = std::make_unique<FilteredTimeSeriesProperty<std::string>>("MyICPevent");
 
     // (This is a cut-down version of EMU66122, changed to "old style" commands)
     const DateAndTime timeZero{"2016-10-01T10:01:44"};
@@ -597,7 +597,7 @@ public:
     const LogParser logparser(log.get());
 
     const auto &prop = std::unique_ptr<Property>(logparser.createRunningLog());
-    const auto *runningProp = dynamic_cast<const TimeSeriesProperty<bool> *>(prop.get());
+    const auto *runningProp = dynamic_cast<const FilteredTimeSeriesProperty<bool> *>(prop.get());
     TS_ASSERT(runningProp);
     TS_ASSERT_EQUALS(expectedRunning.size(), runningProp->size());
     const auto &runningMap = runningProp->valueAsMultiMap();
@@ -607,7 +607,7 @@ public:
 private:
   /// Helper method to run common test code for checking period logs.
   void doTestCurrentPeriodLog(const int &expected_period) {
-    const auto &log = std::make_unique<TimeSeriesProperty<std::string>>("ICPLog");
+    const auto &log = std::make_unique<FilteredTimeSeriesProperty<std::string>>("ICPLog");
     const LogParser logparser(log.get());
     const auto prop = std::unique_ptr<Property>(logparser.createCurrentPeriodLog(expected_period));
     const auto *prop_with_value = dynamic_cast<PropertyWithValue<int> *>(prop.get());

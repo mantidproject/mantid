@@ -15,8 +15,8 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadNexusLogs.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
@@ -47,7 +47,7 @@ public:
     const std::vector<Property *> &logs = run.getLogData();
     TS_ASSERT_EQUALS(logs.size(), 75);
     Property *prop;
-    TimeSeriesProperty<double> *dProp;
+    FilteredTimeSeriesProperty<double> *dProp;
 
     prop = run.getLogData("Speed3");
     TS_ASSERT(prop);
@@ -55,16 +55,16 @@ public:
     TS_ASSERT_EQUALS(prop->units(), "Hz");
 
     prop = run.getLogData("PhaseRequest1");
-    dProp = dynamic_cast<TimeSeriesProperty<double> *>(prop);
+    dProp = dynamic_cast<FilteredTimeSeriesProperty<double> *>(prop);
     TS_ASSERT(dProp);
     val = dProp->nthValue(0);
     TS_ASSERT_DELTA(val, 13712.77, 1e-2);
     TS_ASSERT_EQUALS(prop->units(), "microsecond");
 
-    TimeSeriesProperty<double> *tsp;
+    FilteredTimeSeriesProperty<double> *tsp;
 
     prop = run.getLogData("Phase1");
-    tsp = dynamic_cast<TimeSeriesProperty<double> *>(prop);
+    tsp = dynamic_cast<FilteredTimeSeriesProperty<double> *>(prop);
     TS_ASSERT(tsp);
     TS_ASSERT_EQUALS(tsp->units(), "microsecond");
     TS_ASSERT_DELTA(tsp->nthValue(1), 13715.55, 2);
@@ -90,26 +90,28 @@ public:
                      36); // 34 logs in file + 1 synthetic nperiods log
                           // + 1 proton_charge_by_period log
 
-    TimeSeriesProperty<std::string> *slog =
-        dynamic_cast<TimeSeriesProperty<std::string> *>(run.getLogData("icp_event"));
+    FilteredTimeSeriesProperty<std::string> *slog =
+        dynamic_cast<FilteredTimeSeriesProperty<std::string> *>(run.getLogData("icp_event"));
     TS_ASSERT(slog);
     std::string str = slog->value();
     TS_ASSERT_EQUALS(str.size(), 1023);
     TS_ASSERT_EQUALS(str.substr(0, 37), "2009-Apr-28 09:20:29  CHANGE_PERIOD 1");
 
-    slog = dynamic_cast<TimeSeriesProperty<std::string> *>(run.getLogData("icp_debug"));
+    slog = dynamic_cast<FilteredTimeSeriesProperty<std::string> *>(run.getLogData("icp_debug"));
     TS_ASSERT(slog);
     TS_ASSERT_EQUALS(slog->size(), 50);
 
-    TimeSeriesProperty<int> *ilog = dynamic_cast<TimeSeriesProperty<int> *>(run.getLogData("total_counts"));
+    FilteredTimeSeriesProperty<int> *ilog =
+        dynamic_cast<FilteredTimeSeriesProperty<int> *>(run.getLogData("total_counts"));
     TS_ASSERT(ilog);
     TS_ASSERT_EQUALS(ilog->size(), 172);
 
-    ilog = dynamic_cast<TimeSeriesProperty<int> *>(run.getLogData("period"));
+    ilog = dynamic_cast<FilteredTimeSeriesProperty<int> *>(run.getLogData("period"));
     TS_ASSERT(ilog);
     TS_ASSERT_EQUALS(ilog->size(), 172);
 
-    TimeSeriesProperty<double> *dlog = dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData("proton_charge"));
+    FilteredTimeSeriesProperty<double> *dlog =
+        dynamic_cast<FilteredTimeSeriesProperty<double> *>(run.getLogData("proton_charge"));
     TS_ASSERT(dlog);
     TS_ASSERT_EQUALS(dlog->size(), 172);
   }
@@ -125,8 +127,8 @@ public:
 
     const API::Run &run = testWS->run();
 
-    TimeSeriesProperty<std::string> *putLog =
-        dynamic_cast<TimeSeriesProperty<std::string> *>(run.getLogData("EPICS_PUTLOG"));
+    FilteredTimeSeriesProperty<std::string> *putLog =
+        dynamic_cast<FilteredTimeSeriesProperty<std::string> *>(run.getLogData("EPICS_PUTLOG"));
     TS_ASSERT(putLog);
     std::string str = putLog->value();
     TS_ASSERT_EQUALS(str.size(), 340);
@@ -175,7 +177,7 @@ public:
     TSM_ASSERT("Should have period_log now we have run LoadNexusLogs", hasPeriods);
 
     auto *temp = run.getProperty("period_log");
-    auto *periodLog = dynamic_cast<TimeSeriesProperty<int> *>(temp);
+    auto *periodLog = dynamic_cast<FilteredTimeSeriesProperty<int> *>(temp);
     TSM_ASSERT("Period log should be an int time series property", periodLog);
 
     std::vector<int> periodValues = periodLog->valuesAsVector();
@@ -218,7 +220,8 @@ public:
     loader.setPropertyValue("Filename", "REF_M_9709_event.nxs");
     loader.execute();
     auto run = testWS->run();
-    TimeSeriesProperty<double> *pclog = dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData("proton_charge"));
+    FilteredTimeSeriesProperty<double> *pclog =
+        dynamic_cast<FilteredTimeSeriesProperty<double> *>(run.getLogData("proton_charge"));
     TS_ASSERT(pclog);
     TS_ASSERT_EQUALS(pclog->size(), 23806);
     TS_ASSERT(pclog->getStatistics().duration > 4e9);
@@ -232,7 +235,7 @@ public:
     loader.setProperty("NXentryName", "entry-On_Off");
     loader.execute();
     run = testWS->run();
-    pclog = dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData("proton_charge"));
+    pclog = dynamic_cast<FilteredTimeSeriesProperty<double> *>(run.getLogData("proton_charge"));
     TS_ASSERT(pclog);
     TS_ASSERT_EQUALS(pclog->size(), 24150);
     TS_ASSERT(pclog->getStatistics().duration < 3e9);
@@ -259,7 +262,7 @@ public:
     TS_ASSERT(ld.isExecuted());
 
     auto run = ws->run();
-    auto pclog = dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData("PhaseRequest1"));
+    auto pclog = dynamic_cast<FilteredTimeSeriesProperty<double> *>(run.getLogData("PhaseRequest1"));
 
     TS_ASSERT(pclog);
 
@@ -288,14 +291,14 @@ public:
     TS_ASSERT_THROWS_ANYTHING(run.getLogData(LogManager::getInvalidValuesFilterLogName("cryo_Sample")));
 
     // these two both contain invalid data
-    auto pclog1 = dynamic_cast<TimeSeriesProperty<bool> *>(
+    auto pclog1 = dynamic_cast<FilteredTimeSeriesProperty<bool> *>(
         run.getLogData(LogManager::getInvalidValuesFilterLogName("cryo_temp1")));
     TS_ASSERT_EQUALS(pclog1->size(), 3);
     TS_ASSERT_EQUALS(pclog1->nthValue(0), true);
     TS_ASSERT_EQUALS(pclog1->nthValue(1), false);
     TS_ASSERT_EQUALS(pclog1->nthValue(2), true);
 
-    auto pclog2 = dynamic_cast<TimeSeriesProperty<bool> *>(
+    auto pclog2 = dynamic_cast<FilteredTimeSeriesProperty<bool> *>(
         run.getLogData(LogManager::getInvalidValuesFilterLogName("cryo_temp2")));
     TS_ASSERT_EQUALS(pclog2->size(), 3);
     TS_ASSERT_EQUALS(pclog2->nthValue(0), false);
@@ -303,15 +306,15 @@ public:
     TS_ASSERT_EQUALS(pclog2->nthValue(2), false);
 
     // force the filtering by passing in an empty log
-    auto emptyProperty = new TimeSeriesProperty<bool>("empty");
+    auto emptyProperty = new FilteredTimeSeriesProperty<bool>("empty");
     run.filterByLog(*emptyProperty);
 
-    auto pclogFiltered1 = dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData("cryo_temp1"));
+    auto pclogFiltered1 = dynamic_cast<FilteredTimeSeriesProperty<double> *>(run.getLogData("cryo_temp1"));
     // middle value is invalid and is filtered out
     TS_ASSERT_DELTA(pclogFiltered1->nthValue(0), 3, 1e-5);
     TS_ASSERT_DELTA(pclogFiltered1->nthValue(1), 7, 1e-5);
 
-    auto pclogFiltered2 = dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData("cryo_temp2"));
+    auto pclogFiltered2 = dynamic_cast<FilteredTimeSeriesProperty<double> *>(run.getLogData("cryo_temp2"));
     std::vector<double> correctFiltered2{3., 5., 7.};
     // Here the entire log is filtered out
     // Our filtering in this case does not filter anything.

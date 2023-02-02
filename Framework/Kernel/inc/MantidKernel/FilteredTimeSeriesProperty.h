@@ -27,6 +27,11 @@ public:
   /// Construct with a source time series & a filter property
   FilteredTimeSeriesProperty(TimeSeriesProperty<HeldType> *seriesProp, const TimeSeriesProperty<bool> &filterProp);
 
+  FilteredTimeSeriesProperty(const std::string &name, const std::vector<Types::Core::DateAndTime> &times,
+                             const std::vector<HeldType> &values);
+
+  FilteredTimeSeriesProperty(TimeSeriesProperty<HeldType> *seriesProp);
+
   /// Construct with a source time series to take ownership of & a filter
   /// property
   FilteredTimeSeriesProperty(std::unique_ptr<const TimeSeriesProperty<HeldType>> seriesProp,
@@ -34,10 +39,7 @@ public:
   /// "Virtual" copy constructor
   FilteredTimeSeriesProperty<HeldType> *clone() const override;
 
-  FilteredTimeSeriesProperty(const FilteredTimeSeriesProperty &prop)
-      : TimeSeriesProperty<HeldType>(prop.name(), prop.timesAsVector(), prop.valuesAsVector()),
-        m_unfiltered(prop.unfiltered()->clone()), m_filter(prop.m_filter), m_filterQuickRef(prop.m_filterQuickRef),
-        m_filterApplied(prop.m_filterApplied) {}
+  FilteredTimeSeriesProperty(const FilteredTimeSeriesProperty &prop);
 
   /// Destructor
   ~FilteredTimeSeriesProperty() override;
@@ -49,6 +51,9 @@ public:
   std::vector<HeldType> filteredValuesAsVector() const;
   /// Get filtered times as a vector
   std::vector<Types::Core::DateAndTime> filteredTimesAsVector() const;
+
+  /// Returns the mean value found in the series
+  double mean() const;
 
   /// Returns n-th valid time interval, in a very inefficient way.
   TimeInterval nthInterval(int n) const;

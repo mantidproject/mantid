@@ -8,20 +8,20 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/LogFilter.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include <ctime>
 
 using namespace Mantid::Kernel;
 
 class LogFilterTest : public CxxTest::TestSuite {
-  TimeSeriesProperty<double> *p;
+  FilteredTimeSeriesProperty<double> *p;
 
 public:
   static LogFilterTest *createSuite() { return new LogFilterTest(); }
   static void destroySuite(LogFilterTest *suite) { delete suite; }
 
-  LogFilterTest() : p(new TimeSeriesProperty<double>("test")) {
+  LogFilterTest() : p(new FilteredTimeSeriesProperty<double>("test")) {
     p->addValue("2007-11-30T16:17:00", 1);
     p->addValue("2007-11-30T16:17:10", 2);
     p->addValue("2007-11-30T16:17:20", 3);
@@ -145,7 +145,7 @@ public:
     auto mask2 = createTestFilter(3);
     LogFilter filterer(*mask1);
     filterer.addFilter(*mask2);
-    const TimeSeriesProperty<bool> *finalFilter = filterer.filter();
+    const FilteredTimeSeriesProperty<bool> *finalFilter = filterer.filter();
 
     TSM_ASSERT("Filter is NULL", finalFilter);
     if (!finalFilter)
@@ -179,17 +179,17 @@ public:
   }
 
   void test_filtered_size_when_combined_filter_is_invalid() {
-    TimeSeriesProperty<double> *p = new TimeSeriesProperty<double>("doubleProp");
+    FilteredTimeSeriesProperty<double> *p = new FilteredTimeSeriesProperty<double>("doubleProp");
     TS_ASSERT_THROWS_NOTHING(p->addValue("2009-Apr-28 09:20:52", -0.00161));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2009-Apr-28 09:21:57", -0.00161));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2009-Apr-28 09:23:01", -0.00161));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2009-Apr-28 09:25:10", -0.00161));
 
-    TimeSeriesProperty<bool> *running = new TimeSeriesProperty<bool>("running");
+    FilteredTimeSeriesProperty<bool> *running = new FilteredTimeSeriesProperty<bool>("running");
     running->addValue("2009-Apr-28 09:20:30", true);
     running->addValue("2009-Apr-28 09:20:51", false);
 
-    TimeSeriesProperty<bool> *period = new TimeSeriesProperty<bool>("period 1");
+    FilteredTimeSeriesProperty<bool> *period = new FilteredTimeSeriesProperty<bool>("period 1");
     running->addValue("2009-Apr-28 09:20:29", true);
 
     LogFilter filter(p);
@@ -224,7 +224,7 @@ public:
 
   void testFilterByPeriod() // Test for Wendou to look at
   {
-    TimeSeriesProperty<double> height_log("height_log");
+    FilteredTimeSeriesProperty<double> height_log("height_log");
     height_log.addValue("2008-Jun-17 11:10:44", -0.86526);
     height_log.addValue("2008-Jun-17 11:10:45", -1.17843);
     height_log.addValue("2008-Jun-17 11:10:47", -1.27995);
@@ -252,7 +252,7 @@ public:
     height_log.addValue("2008-Jun-17 11:21:24", -0.08519);
     height_log.addValue("2008-Jun-17 11:21:25", 0);
 
-    TimeSeriesProperty<bool> period_log("period 7");
+    FilteredTimeSeriesProperty<bool> period_log("period 7");
     period_log.addValue("2008-Jun-17 11:11:13", false);
     period_log.addValue("2008-Jun-17 11:11:13", false);
     period_log.addValue("2008-Jun-17 11:11:18", false);
@@ -291,15 +291,15 @@ public:
 
     LogFilter filter(&height_log);
     filter.addFilter(period_log);
-    const TimeSeriesProperty<double> *filteredLog = filter.data();
+    const FilteredTimeSeriesProperty<double> *filteredLog = filter.data();
     TS_ASSERT_EQUALS(filteredLog->size(), 6)
   }
 
 private:
   /// Creates a test boolean filter
   /// @param type :: Which variant to create
-  std::shared_ptr<TimeSeriesProperty<bool>> createTestFilter(const int type) {
-    std::shared_ptr<TimeSeriesProperty<bool>> filter(new TimeSeriesProperty<bool>("filter"));
+  std::shared_ptr<FilteredTimeSeriesProperty<bool>> createTestFilter(const int type) {
+    std::shared_ptr<FilteredTimeSeriesProperty<bool>> filter(new FilteredTimeSeriesProperty<bool>("filter"));
     if (type == 1) {
       filter->addValue("2007-11-30T16:16:50", true);
       filter->addValue("2007-11-30T16:17:25", false);

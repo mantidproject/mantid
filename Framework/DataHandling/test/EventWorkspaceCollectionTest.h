@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -30,7 +30,7 @@ EventWorkspaceCollection_uptr makeEventWorkspaceCollection(unsigned int decorato
 
   auto decorator = std::make_unique<EventWorkspaceCollection>();
 
-  auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log");
+  auto periodLog = std::make_unique<const FilteredTimeSeriesProperty<int>>("period_log");
 
   decorator->setNPeriods(decoratorSize, periodLog);
 
@@ -59,7 +59,7 @@ public:
   void test_output_multiple_workspaces() {
     EventWorkspaceCollection decorator;
 
-    auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log");
+    auto periodLog = std::make_unique<const FilteredTimeSeriesProperty<int>>("period_log");
     decorator.setNPeriods(3, periodLog);
 
     WorkspaceGroup_sptr outWS = std::dynamic_pointer_cast<WorkspaceGroup>(decorator.combinedWorkspace());
@@ -134,7 +134,7 @@ public:
 
   void test_setIndexInfo() {
     EventWorkspaceCollection collection;
-    auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log");
+    auto periodLog = std::make_unique<const FilteredTimeSeriesProperty<int>>("period_log");
     const size_t periods = 2;
     collection.setNPeriods(periods, periodLog);
     // Set some arbitrary data to ensure that it is preserved.

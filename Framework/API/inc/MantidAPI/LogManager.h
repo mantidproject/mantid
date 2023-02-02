@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/DllConfig.h"
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/NexusHDF5Descriptor.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Statistics.h"
@@ -27,6 +28,7 @@ class DateAndTime;
 namespace Kernel {
 template <class KEYTYPE, class VALUETYPE> class Cache;
 template <typename TYPE> class TimeSeriesProperty;
+template <typename TYPE> class FilteredTimeSeriesProperty;
 class SplittingInterval;
 using SplittingIntervalVec = std::vector<SplittingInterval>;
 class PropertyManager;
@@ -97,7 +99,7 @@ public:
 
   /// Returns a property as a time series property. It will throw if it is not
   /// valid
-  template <typename T> Kernel::TimeSeriesProperty<T> *getTimeSeriesProperty(const std::string &name) const;
+  template <typename T> Kernel::FilteredTimeSeriesProperty<T> *getTimeSeriesProperty(const std::string &name) const;
   /// Get the value of a property as the given TYPE. Throws if the type is not
   /// correct
   template <typename HeldType> HeldType getPropertyValueAsType(const std::string &name) const;
@@ -196,7 +198,7 @@ public:
 
   // returns the invalid values log if the log has a matching invalid values log
   // filter
-  Kernel::TimeSeriesProperty<bool> *getInvalidValuesFilter(const std::string &logName) const;
+  Kernel::FilteredTimeSeriesProperty<bool> *getInvalidValuesFilter(const std::string &logName) const;
 
   bool operator==(const LogManager &other) const;
   bool operator!=(const LogManager &other) const;
