@@ -294,8 +294,10 @@ void MantidHelpWindow::shutdown() {
   // close the window and delete the object
   // Deleting the object ensures the help engine's destructor is called and
   // avoids a segfault when workbench is closed
-  g_helpWindow->setAttribute(Qt::WA_DeleteOnClose);
-  g_helpWindow->close();
+  if (helpWindowExists()) {
+    g_helpWindow->setAttribute(Qt::WA_DeleteOnClose);
+    g_helpWindow->close();
+  }
 }
 
 /**
