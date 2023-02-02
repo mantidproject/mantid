@@ -8,6 +8,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/LogParser.h"
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Strings.h"
@@ -98,7 +99,7 @@ Kernel::Property *LogParser::createLogProperty(const std::string &logFName, cons
     return nullptr;
 
   if (isNumeric) {
-    auto logv = new Kernel::TimeSeriesProperty<double>(name);
+    auto logv = new Kernel::FilteredTimeSeriesProperty<double>(name);
     auto it = change_times.begin();
     for (; it != change_times.end(); ++it) {
       std::istringstream istr(it->second);
@@ -108,7 +109,7 @@ Kernel::Property *LogParser::createLogProperty(const std::string &logFName, cons
     }
     return logv;
   } else {
-    auto logv = new Kernel::TimeSeriesProperty<std::string>(name);
+    auto logv = new Kernel::FilteredTimeSeriesProperty<std::string>(name);
     auto it = change_times.begin();
     for (; it != change_times.end(); ++it) {
       logv->addValue(it->first, it->second);
@@ -156,7 +157,7 @@ Try to pass the periods
 @param periods : periods data to update
 */
 void LogParser::tryParsePeriod(const std::string &scom, const DateAndTime &time, std::istringstream &idata,
-                               Kernel::TimeSeriesProperty<int> *const periods) {
+                               Kernel::FilteredTimeSeriesProperty<int> *const periods) {
   int ip = -1;
   bool shouldAddPeriod = false;
   // Handle the version where log flag is CHANGE PERIOD
@@ -187,12 +188,12 @@ void LogParser::tryParsePeriod(const std::string &scom, const DateAndTime &time,
  *  @param log :: A pointer to the property
  */
 LogParser::LogParser(const Kernel::Property *log) : m_nOfPeriods(1) {
-  Kernel::TimeSeriesProperty<int> *periods = new Kernel::TimeSeriesProperty<int>(periodsLogName());
-  Kernel::TimeSeriesProperty<bool> *status = new Kernel::TimeSeriesProperty<bool>(statusLogName());
+  Kernel::FilteredTimeSeriesProperty<int> *periods = new Kernel::FilteredTimeSeriesProperty<int>(periodsLogName());
+  Kernel::FilteredTimeSeriesProperty<bool> *status = new Kernel::FilteredTimeSeriesProperty<bool>(statusLogName());
   m_periods.reset(periods);
   m_status.reset(status);
 
-  const auto *icpLog = dynamic_cast<const Kernel::TimeSeriesProperty<std::string> *>(log);
+  const auto *icpLog = dynamic_cast<const Kernel::FilteredTimeSeriesProperty<std::string> *>(log);
   if (!icpLog || icpLog->size() == 0) {
     periods->addValue(Types::Core::DateAndTime(), 1);
     status->addValue(Types::Core::DateAndTime(), true);
@@ -239,12 +240,13 @@ LogParser::LogParser(const Kernel::Property *log) : m_nOfPeriods(1) {
  *  @param period :: The data period
  *  @return times requested period was active
  */
-Kernel::TimeSeriesProperty<bool> *LogParser::createPeriodLog(int period) const {
-  auto *periods = dynamic_cast<Kernel::TimeSeriesProperty<int> *>(m_periods.get());
+Kernel::FilteredTimeSeriesProperty<bool> *LogParser::createPeriodLog(int period) const {
+  auto *periods = dynamic_cast<Kernel::FilteredTimeSeriesProperty<int> *>(m_periods.get());
   if (!periods) {
     throw std::logic_error("Failed to cast periods to TimeSeriesProperty");
   }
-  Kernel::TimeSeriesProperty<bool> *p = new Kernel::TimeSeriesProperty<bool>(LogParser::currentPeriodLogName(period));
+  Kernel::FilteredTimeSeriesProperty<bool> *p =
+      new Kernel::FilteredTimeSeriesProperty<bool>(LogParser::currentPeriodLogName(period));
   std::map<Types::Core::DateAndTime, int> pMap = periods->valueAsMap();
   auto it = pMap.begin();
   if (it->second != period)
@@ -275,7 +277,7 @@ Kernel::Property *LogParser::createCurrentPeriodLog(const int &period) const {
 Kernel::Property *LogParser::createAllPeriodsLog() const { return m_periods->clone(); }
 
 /// Creates a TimeSeriesProperty<bool> with running status
-Kernel::TimeSeriesProperty<bool> *LogParser::createRunningLog() const { return m_status->clone(); }
+Kernel::FilteredTimeSeriesProperty<bool> *LogParser::createRunningLog() const { return m_status->clone(); }
 
 namespace {
 /// Define operator for checking for new-style icp events
@@ -310,10 +312,10 @@ bool LogParser::isICPEventLogNewStyle(const std::multimap<Types::Core::DateAndTi
  * @throw runtime_error if the property is not TimeSeriesProperty<double>
  */
 double timeMean(const Kernel::Property *p) {
-  const auto *dp = dynamic_cast<const Kernel::TimeSeriesProperty<double> *>(p);
+  const auto *dp = dynamic_cast<const Kernel::FilteredTimeSeriesProperty<double> *>(p);
   if (!dp) {
     throw std::runtime_error("Property of a wrong type. Cannot be cast to a "
-                             "TimeSeriesProperty<double>.");
+                             "FilteredTimeSeriesProperty<double>.");
   }
 
   // Special case for only one value - the algorithm

@@ -12,11 +12,11 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/Glob.h"
 #include "MantidKernel/LogParser.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 
 #include "MantidTypes/Core/DateAndTimeHelpers.h"
 
@@ -352,9 +352,9 @@ bool LoadLog::LoadSNSText() {
                                 "columns in a SNS-style text log file.");
 
   // Ok, create all the logs
-  std::vector<TimeSeriesProperty<double> *> props;
+  std::vector<FilteredTimeSeriesProperty<double> *> props;
   for (size_t i = 0; i < numCols; i++) {
-    auto p = new TimeSeriesProperty<double>(names[i]);
+    auto p = new FilteredTimeSeriesProperty<double>(names[i]);
     if (units.size() == numCols)
       p->setUnits(units[i]);
     props.emplace_back(p);

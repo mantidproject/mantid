@@ -24,12 +24,12 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/FileValidator.h"
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/Glob.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
@@ -542,7 +542,7 @@ void LoadEventPreNexus2::processImbedLogs() {
  */
 void LoadEventPreNexus2::addToWorkspaceLog(const std::string &logtitle, size_t mindex) {
   // Create TimeSeriesProperty
-  auto property = new TimeSeriesProperty<double>(logtitle);
+  auto property = new FilteredTimeSeriesProperty<double>(logtitle);
 
   // Add entries
   size_t nbins = this->wrongdetid_pulsetimes[mindex].size();
@@ -1127,7 +1127,7 @@ void LoadEventPreNexus2::setProtonCharge(DataObjects::EventWorkspace_sptr &works
   Run &run = workspace->mutableRun();
 
   // Add the proton charge entries.
-  TimeSeriesProperty<double> *log = new TimeSeriesProperty<double>("proton_charge");
+  FilteredTimeSeriesProperty<double> *log = new FilteredTimeSeriesProperty<double>("proton_charge");
   log->setUnits("picoCoulombs");
 
   // Add the time and associated charge to the log

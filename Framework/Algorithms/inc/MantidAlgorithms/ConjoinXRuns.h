@@ -9,6 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 
 #include <list>
 

@@ -7,9 +7,9 @@
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/PropertyManager.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VectorHelper.h"
 
 #include <nexus/NeXusFile.hpp>
@@ -206,11 +206,11 @@ double Run::getProtonCharge() const {
  * If "proton_charge" is not found, the value is not stored
  */
 void Run::integrateProtonCharge(const std::string &logname) const {
-  Kernel::TimeSeriesProperty<double> *log = nullptr;
+  Kernel::FilteredTimeSeriesProperty<double> *log = nullptr;
 
   if (this->hasProperty(logname)) {
     try {
-      log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(this->getProperty(logname));
+      log = dynamic_cast<Kernel::FilteredTimeSeriesProperty<double> *>(this->getProperty(logname));
     } catch (Exception::NotFoundError &) {
       g_log.warning(logname + " log was not found. The value of the total proton "
                               "charge has not been set");

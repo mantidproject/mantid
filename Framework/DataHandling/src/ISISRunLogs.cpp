@@ -82,7 +82,7 @@ void ISISRunLogs::applyLogFiltering(Mantid::API::Run &exptRun) {
     g_log.warning("Cannot find status log. Logs will be not be filtered by run status");
   }
 
-  TimeSeriesProperty<bool> *currentPeriodLog = nullptr;
+  FilteredTimeSeriesProperty<bool> *currentPeriodLog = nullptr;
   bool multiperiod = false;
   try {
     auto period = exptRun.getPropertyAsIntegerValue(LogParser::currentPeriodLogName());
@@ -104,10 +104,10 @@ void ISISRunLogs::applyLogFiltering(Mantid::API::Run &exptRun) {
   // If there is more than 1 period filter the logs by period as well
   if (multiperiod) {
     if (logFilter) {
-      logFilter->addFilter(*dynamic_cast<FilteredTimeSeriesProperty<bool> *>(currentPeriodLog));
+      logFilter->addFilter(*currentPeriodLog);
       maskProp = logFilter->filter();
     } else
-      maskProp = dynamic_cast<FilteredTimeSeriesProperty<bool> *>(currentPeriodLog);
+      maskProp = currentPeriodLog;
   } else if (logFilter) {
     maskProp = logFilter->filter();
   }

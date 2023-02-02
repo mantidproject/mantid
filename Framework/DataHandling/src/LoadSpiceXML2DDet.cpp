@@ -13,8 +13,8 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/OptionalBool.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -277,7 +277,7 @@ bool LoadSpiceXML2DDet::setupSampleLogs(const API::MatrixWorkspace_sptr &outws) 
   if (!outws->run().hasProperty("2theta") && outws->run().hasProperty("_2theta")) {
     // Set up 2theta if it is not set up yet
     double logvalue = std::stod(outws->run().getProperty("_2theta")->value());
-    TimeSeriesProperty<double> *newlogproperty = new TimeSeriesProperty<double>("2theta");
+    FilteredTimeSeriesProperty<double> *newlogproperty = new FilteredTimeSeriesProperty<double>("2theta");
     newlogproperty->addValue(anytime, logvalue);
     outws->mutableRun().addProperty(newlogproperty);
     g_log.information() << "Set 2theta from _2theta (as XML node) with value " << logvalue << "\n";
@@ -288,17 +288,17 @@ bool LoadSpiceXML2DDet::setupSampleLogs(const API::MatrixWorkspace_sptr &outws) 
   }
 
   // set up the caibrated detector center to beam
-  TimeSeriesProperty<double> *det_dx = new TimeSeriesProperty<double>("deltax");
+  FilteredTimeSeriesProperty<double> *det_dx = new FilteredTimeSeriesProperty<double>("deltax");
   det_dx->addValue(anytime, m_detXShift);
   outws->mutableRun().addProperty(det_dx);
 
-  TimeSeriesProperty<double> *det_dy = new TimeSeriesProperty<double>("deltay");
+  FilteredTimeSeriesProperty<double> *det_dy = new FilteredTimeSeriesProperty<double>("deltay");
   det_dy->addValue(anytime, m_detYShift);
   outws->mutableRun().addProperty(det_dy);
 
   // set up Sample-detetor distance calibration
   double sampledetdistance = m_detSampleDistanceShift;
-  TimeSeriesProperty<double> *distproperty = new TimeSeriesProperty<double>("diffr");
+  FilteredTimeSeriesProperty<double> *distproperty = new FilteredTimeSeriesProperty<double>("diffr");
   distproperty->addValue(anytime, sampledetdistance);
   outws->mutableRun().addProperty(distproperty);
 
@@ -895,7 +895,7 @@ void LoadSpiceXML2DDet::setupSampleLogFromSpiceTable(const MatrixWorkspace_sptr 
     for (size_t ic = 1; ic < colnames.size(); ++ic) {
       double logvalue = spicetablews->cell<double>(ir, ic);
       std::string &logname = colnames[ic];
-      auto newlogproperty = new TimeSeriesProperty<double>(logname);
+      auto newlogproperty = new FilteredTimeSeriesProperty<double>(logname);
       newlogproperty->addValue(anytime, logvalue);
       matrixws->mutableRun().addProperty(newlogproperty);
     }
@@ -925,8 +925,8 @@ bool LoadSpiceXML2DDet::getHB3AWavelength(const MatrixWorkspace_sptr &dataws, do
 
   if (dataws->run().hasProperty("_m1")) {
     g_log.notice("[DB] Data workspace has property _m1!");
-    Kernel::TimeSeriesProperty<double> *ts =
-        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(dataws->run().getProperty("_m1"));
+    Kernel::FilteredTimeSeriesProperty<double> *ts =
+        dynamic_cast<Kernel::FilteredTimeSeriesProperty<double> *>(dataws->run().getProperty("_m1"));
 
     if (ts && ts->size() > 0) {
       double m1pos = ts->valuesAsVector()[0];

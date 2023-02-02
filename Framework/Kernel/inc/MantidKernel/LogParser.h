@@ -31,6 +31,7 @@ namespace Kernel {
 //-------------------------------------------------------------------------
 class Property;
 template <typename T> class TimeSeriesProperty;
+template <typename T> class FilteredTimeSeriesProperty;
 
 /**
 LogParser parses the instrument log files to select records corresponding
@@ -65,7 +66,7 @@ public:
 
   /// Creates a TimeSeriesProperty<bool> showing times when a particular period
   /// was active
-  Kernel::TimeSeriesProperty<bool> *createPeriodLog(int period) const;
+  Kernel::FilteredTimeSeriesProperty<bool> *createPeriodLog(int period) const;
 
   /// Creates a log value for the current period.
   Kernel::Property *createCurrentPeriodLog(const int &period) const;
@@ -74,16 +75,18 @@ public:
   Kernel::Property *createAllPeriodsLog() const;
 
   /// Creates a TimeSeriesProperty<bool> with running status
-  Kernel::TimeSeriesProperty<bool> *createRunningLog() const;
+  Kernel::FilteredTimeSeriesProperty<bool> *createRunningLog() const;
 
 private:
   /// Parse the icp event log with old style commands
   void parseOldStyleCommands(const std::multimap<Types::Core::DateAndTime, std::string> &logm,
-                             Kernel::TimeSeriesProperty<int> *periods, Kernel::TimeSeriesProperty<bool> *status);
+                             Kernel::FilteredTimeSeriesProperty<int> *periods,
+                             Kernel::FilteredTimeSeriesProperty<bool> *status);
 
   /// Parse the icp event log with new style commands
   void parseNewStyleCommands(const std::multimap<Types::Core::DateAndTime, std::string> &logm,
-                             Kernel::TimeSeriesProperty<int> *periods, Kernel::TimeSeriesProperty<bool> *status);
+                             Kernel::FilteredTimeSeriesProperty<int> *periods,
+                             Kernel::FilteredTimeSeriesProperty<bool> *status);
 
   /// Available commands.
   enum class commands { NONE = 0, BEGIN, END, CHANGE_PERIOD, ABORT };
@@ -96,7 +99,7 @@ private:
   std::shared_ptr<Kernel::Property> m_periods;
 
   /// TimeSeriesProperty<bool> containing running status. Created by LogParser
-  std::shared_ptr<Kernel::TimeSeriesProperty<bool>> m_status;
+  std::shared_ptr<Kernel::FilteredTimeSeriesProperty<bool>> m_status;
 
   /// Number of periods
   int m_nOfPeriods;
@@ -106,7 +109,7 @@ private:
 
   /// Try to parse period data.
   void tryParsePeriod(const std::string &scom, const Types::Core::DateAndTime &time, std::istringstream &idata,
-                      Kernel::TimeSeriesProperty<int> *const periods);
+                      Kernel::FilteredTimeSeriesProperty<int> *const periods);
 };
 
 /// Returns the mean value if the property is TimeSeriesProperty<double>

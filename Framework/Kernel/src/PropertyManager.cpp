@@ -202,7 +202,7 @@ void PropertyManager::filterByProperty(const Kernel::TimeSeriesProperty<bool> &f
     }
 
     Property *currentProp = orderedProperty;
-    if (auto doubleSeries = dynamic_cast<TimeSeriesProperty<double> *>(currentProp)) {
+    if (auto doubleSeries = dynamic_cast<FilteredTimeSeriesProperty<double> *>(currentProp)) {
       // don't filter the invalid values filters
       if (PropertyManager::isAnInvalidValuesFilterLog(currentProp->name()))
         break;

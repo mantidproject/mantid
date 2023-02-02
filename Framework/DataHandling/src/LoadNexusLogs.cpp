@@ -9,6 +9,7 @@
 #include "MantidAPI/LogManager.h"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <locale>
 #include <nexus/NeXusException.hpp>
@@ -215,7 +216,7 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file, const st
       throw;
     }
     // Make an int TSP
-    auto tsp = std::make_unique<TimeSeriesProperty<int>>(propName);
+    auto tsp = std::make_unique<FilteredTimeSeriesProperty<int>>(propName);
     tsp->create(start_time, time_double, values);
     tsp->setUnits(value_units);
     log.debug() << "   done reading \"value\" array\n";
@@ -238,7 +239,7 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file, const st
     // these
     std::replace_if(
         values.begin(), values.end(), [&](const char &c) { return isControlValue(c, propName, log); }, ' ');
-    auto tsp = std::make_unique<TimeSeriesProperty<std::string>>(propName);
+    auto tsp = std::make_unique<FilteredTimeSeriesProperty<std::string>>(propName);
     std::vector<DateAndTime> times;
     DateAndTime::createVector(start_time, time_double, times);
     const size_t ntimes = times.size();
@@ -258,7 +259,7 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file, const st
       file.closeData();
       throw;
     }
-    auto tsp = std::make_unique<TimeSeriesProperty<double>>(propName);
+    auto tsp = std::make_unique<FilteredTimeSeriesProperty<double>>(propName);
     tsp->create(start_time, time_double, values);
     tsp->setUnits(value_units);
     log.debug() << "   done reading \"value\" array\n";
@@ -330,7 +331,7 @@ std::unique_ptr<Kernel::Property> createTimeSeriesValidityFilter(::NeXus::File &
   }
   if (invalidDataFound) {
     const auto tspName = API::LogManager::getInvalidValuesFilterLogName(prop.name());
-    auto tsp = std::make_unique<TimeSeriesProperty<bool>>(tspName);
+    auto tsp = std::make_unique<FilteredTimeSeriesProperty<bool>>(tspName);
     tsp->create(times, boolValues);
     log.debug() << "   done reading \"value_valid\" array\n";
 
@@ -357,7 +358,7 @@ std::unique_ptr<Kernel::Property> createTimeSeriesValidityFilter(::NeXus::File &
  */
 void appendEndTimeLog(Kernel::Property *prop, const API::Run &run) {
   try {
-    auto tsLog = dynamic_cast<TimeSeriesProperty<double> *>(prop);
+    auto tsLog = dynamic_cast<FilteredTimeSeriesProperty<double> *>(prop);
     const auto endTime = run.endTime();
 
     // First check if it is valid to add a additional log entry
@@ -578,12 +579,13 @@ void LoadNexusLogs::execLoader() {
     file.openPath("/" + entry_name);
     if (!event_frame_number.empty()) // ISIS indirection - see above comments
     {
-      Kernel::TimeSeriesProperty<double> *plog =
-          dynamic_cast<Kernel::TimeSeriesProperty<double> *>(workspace->mutableRun().getProperty("proton_log"));
+      Kernel::FilteredTimeSeriesProperty<double> *plog =
+          dynamic_cast<Kernel::FilteredTimeSeriesProperty<double> *>(workspace->mutableRun().getProperty("proton_log"));
       if (!plog)
         throw std::runtime_error("Could not cast (interpret) proton_log as a time "
                                  "series property. Cannot continue.");
-      Kernel::TimeSeriesProperty<double> *pcharge = new Kernel::TimeSeriesProperty<double>("proton_charge");
+      Kernel::FilteredTimeSeriesProperty<double> *pcharge =
+          new Kernel::FilteredTimeSeriesProperty<double>("proton_charge");
       std::vector<double> pval;
       std::vector<Mantid::Types::Core::DateAndTime> ptime;
       pval.reserve(event_frame_number.size());
@@ -676,7 +678,7 @@ void LoadNexusLogs::loadVetoPulses(::NeXus::File &file, const std::shared_ptr<AP
 
   // Fake values with zeroes.
   std::vector<double> values(time_double.size(), 0.0);
-  TimeSeriesProperty<double> *tsp = new TimeSeriesProperty<double>("veto_pulse_time");
+  FilteredTimeSeriesProperty<double> *tsp = new FilteredTimeSeriesProperty<double>("veto_pulse_time");
   tsp->create(start, time_double, values);
   tsp->setUnits("");
 

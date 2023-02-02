@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/LogManager.h"
 #include "MantidKernel/Cache.h"
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyNexus.h"
 #include "MantidKernel/TimeROI.h"
@@ -45,7 +46,7 @@ bool convertSingleValueToDouble(const Property *property, double &value) {
 /// Templated method to convert time series property to single double
 template <typename T>
 bool convertTimeSeriesToDouble(const Property *property, double &value, const Math::StatisticType &function) {
-  if (const auto *log = dynamic_cast<const TimeSeriesProperty<T> *>(property)) {
+  if (const auto *log = dynamic_cast<const FilteredTimeSeriesProperty<T> *>(property)) {
     switch (function) {
     case Math::TimeAveragedMean:
       value = static_cast<double>(log->timeAverageValue());
@@ -325,9 +326,10 @@ size_t LogManager::getMemorySize() const {
  * @param name The name of a time-series property
  * @return A pointer to the time-series property
  */
-template <typename T> Kernel::TimeSeriesProperty<T> *LogManager::getTimeSeriesProperty(const std::string &name) const {
+template <typename T>
+Kernel::FilteredTimeSeriesProperty<T> *LogManager::getTimeSeriesProperty(const std::string &name) const {
   Kernel::Property *prop = getProperty(name);
-  if (auto *tsp = dynamic_cast<Kernel::TimeSeriesProperty<T> *>(prop)) {
+  if (auto *tsp = dynamic_cast<Kernel::FilteredTimeSeriesProperty<T> *>(prop)) {
     return tsp;
   } else {
     throw std::invalid_argument("Run::getTimeSeriesProperty - '" + name + "' is not a TimeSeriesProperty");
@@ -647,10 +649,10 @@ bool LogManager::hasInvalidValuesFilter(const std::string &logName) const {
 
 /// returns the invalid values log if the log has a matching invalid values log
 /// filter
-Kernel::TimeSeriesProperty<bool> *LogManager::getInvalidValuesFilter(const std::string &logName) const {
+Kernel::FilteredTimeSeriesProperty<bool> *LogManager::getInvalidValuesFilter(const std::string &logName) const {
   try {
     auto log = getLogData(getInvalidValuesFilterLogName(logName));
-    if (auto tsp = dynamic_cast<TimeSeriesProperty<bool> *>(log)) {
+    if (auto tsp = dynamic_cast<FilteredTimeSeriesProperty<bool> *>(log)) {
       return tsp;
     }
   } catch (Exception::NotFoundError &) {
@@ -670,8 +672,8 @@ bool LogManager::operator!=(const LogManager &other) const { return *m_manager !
 /** @cond */
 /// Macro to instantiate concrete template members
 #define INSTANTIATE(TYPE)                                                                                              \
-  template MANTID_API_DLL Kernel::TimeSeriesProperty<TYPE> *LogManager::getTimeSeriesProperty(const std::string &)     \
-      const;                                                                                                           \
+  template MANTID_API_DLL Kernel::FilteredTimeSeriesProperty<TYPE> *LogManager::getTimeSeriesProperty(                 \
+      const std::string &) const;                                                                                      \
   template MANTID_API_DLL TYPE LogManager::getPropertyValueAsType(const std::string &) const;
 
 INSTANTIATE(double)

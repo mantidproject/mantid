@@ -16,9 +16,9 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/lexical_cast.hpp>
@@ -559,7 +559,7 @@ void LoadSpice2D::detectorDistance(std::map<std::string, std::string> &metadata)
 
   // Add to the log!
   API::Run &runDetails = m_workspace->mutableRun();
-  auto *p = new Mantid::Kernel::TimeSeriesProperty<double>("sdd");
+  auto *p = new Mantid::Kernel::FilteredTimeSeriesProperty<double>("sdd");
   p->addValue(DateAndTime::getCurrentTime(), total_sample_detector_distance);
   runDetails.addLogData(p);
 
@@ -576,7 +576,7 @@ void LoadSpice2D::detectorTranslation(std::map<std::string, std::string> &metada
   from_string<double>(detectorTranslation, metadata["Motor_Positions/detector_trans"], std::dec);
   // Add to the log!
   API::Run &runDetails = m_workspace->mutableRun();
-  auto *p = new Mantid::Kernel::TimeSeriesProperty<double>("detector-translation");
+  auto *p = new Mantid::Kernel::FilteredTimeSeriesProperty<double>("detector-translation");
   p->addValue(DateAndTime::getCurrentTime(), detectorTranslation);
   runDetails.addLogData(p);
 
@@ -627,7 +627,7 @@ void LoadSpice2D::rotateDetector(const double &angle) {
   g_log.notice() << "Rotating Wing Detector " << angle << " degrees." << '\n';
 
   API::Run &runDetails = m_workspace->mutableRun();
-  auto *p = new Mantid::Kernel::TimeSeriesProperty<double>("rotangle");
+  auto *p = new Mantid::Kernel::FilteredTimeSeriesProperty<double>("rotangle");
   //	auto p = boost::make_shared <Mantid::Kernel::TimeSeriesProperty<double>
   //>("rotangle");
 
