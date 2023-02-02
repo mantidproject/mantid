@@ -24,6 +24,10 @@ Bugfixes
 Engineering Diffraction
 -----------------------
 
+.. image:: ../../images/6_6_release/diffraction/DiffractionUpdateEngineeringFitting.png
+    :align: right
+    :height: 500px
+
 New features
 ############
 - On the ``GSASII`` tab of the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>`, when a successful refinement is run, the output table workspace for the lattice parameters now includes the ``Microstrain`` value and the column title is marked when this parameter has been refined. A similar instrument parameter table workspace is now also generated which includes ``Sigma-1`` and ``Gamma(Y)``, with a refined flag, and the fitting range. The Pawley reflections are output to a separate table workspace if they are available.
