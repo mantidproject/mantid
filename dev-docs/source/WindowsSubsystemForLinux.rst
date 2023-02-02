@@ -83,7 +83,7 @@ WSL does not currently support GUIs. In order to display a GUI from an applicati
 
 To use an XServer:
 
-1. Download a compatible XServer onto the host Windows machine. `MobaXterm <https://mobaxterm.mobatek.net/>`_ is recommended and has been confirmed to work with Mantid workbench.
+1. Download a compatible XServer onto the host Windows machine. `MobaXterm <https://mobaxterm.mobatek.net/>`_ is recommended and has been confirmed to work with Mantid Workbench.
 
 2. Install `MobaXterm` and open the MobaXterm app upon completion. Using the `Settings` drop down menu select `Configure`. On the `X11` tab ensure that `X11 server display mode` is set to
    `Multiwindow mode` and that `X11 remote access` is set to `full`.
