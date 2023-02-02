@@ -39,16 +39,17 @@ data in the mini-plot at the bottom of the tab.
    :alt: Miniplot.png
 
 Hover the mouse over a detector and see the mini-plot update.
-To zoom in on this mini-plot, select the |PickTabAddPeakButton.png| button, then click and drag on the mini-plot.
+To zoom in on this mini-plot, select the |PickTabAddPeakButton.png| button, click on a detector and then drag on the mini-plot.
 If you don't drag (just click), you will add a SingleCrystalPeak (appearing in a new TableWorkspace).
 
 Picking a Tube
 ==============
 
 The Tube selection tool |PickTube.png| is useful for tube instruments.
-When it's on the mini-plot displays the integrated data in the whole
-tube. The integration is done either over the detectors in the tube (Sum
-option) or over time (Integrate). To switch between the options, right-click on the mini-plot
+When it's on, the mini-plot displays the integrated data in the whole
+tube. The integration is done either over the detectors in the tube (Sum)
+or over time (Integrate). To switch between the options, click on a detector and hold the mouse button
+down as you move your cursor to the mini-plot. Then, with your cursor over the mini-plot, right-click
 to display the following menu:
 
 .. figure:: /images/SumIntegrateMenu.png
