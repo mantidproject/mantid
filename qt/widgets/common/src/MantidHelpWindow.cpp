@@ -72,47 +72,51 @@ MantidHelpWindow::MantidHelpWindow(const Qt::WindowFlags &flags)
   if (!helpWindowExists()) {
     this->determineFileLocs();
 
-    // see if chache file exists and remove it - shouldn't be necessary, but it
-    // is
-    if (!m_cacheFile.empty()) {
-      if (Poco::File(m_cacheFile).exists()) {
-        g_log.debug() << "Removing help cache file \"" << m_cacheFile << "\"\n";
-        Poco::File(m_cacheFile).remove();
-      } else {
-        Poco::Path direcPath = Poco::Path(m_cacheFile).parent(); // drop off the filename
-        Poco::File direcFile(direcPath.absolute().toString());
-        if (!direcFile.exists()) {
-          direcFile.createDirectories();
+    if (!m_collectionFile.empty()) {
+      // see if chache file exists and remove it - shouldn't be necessary, but it
+      // is
+      if (!m_cacheFile.empty()) {
+        if (Poco::File(m_cacheFile).exists()) {
+          g_log.debug() << "Removing help cache file \"" << m_cacheFile << "\"\n";
+          Poco::File(m_cacheFile).remove();
+        } else {
+          Poco::Path direcPath = Poco::Path(m_cacheFile).parent(); // drop off the filename
+          Poco::File direcFile(direcPath.absolute().toString());
+          if (!direcFile.exists()) {
+            direcFile.createDirectories();
+          }
         }
       }
-    }
 
-    // create the help engine with the found location
-    g_log.debug() << "Loading " << m_collectionFile << "\n";
-    auto helpEngine = new QHelpEngine(QString(m_collectionFile.c_str()));
-    QObject::connect(helpEngine, SIGNAL(warning(QString)), this, SLOT(warning(QString)));
-    g_log.debug() << "Making local cache copy for saving information at " << m_cacheFile << "\n";
+      // create the help engine with the found location
+      g_log.debug() << "Loading " << m_collectionFile << "\n";
+      auto helpEngine = new QHelpEngine(QString(m_collectionFile.c_str()));
+      QObject::connect(helpEngine, SIGNAL(warning(QString)), this, SLOT(warning(QString)));
+      g_log.debug() << "Making local cache copy for saving information at " << m_cacheFile << "\n";
 
-    if (helpEngine->copyCollectionFile(QString(m_cacheFile.c_str()))) {
-      helpEngine->setCollectionFile(QString(m_cacheFile.c_str()));
+      if (helpEngine->copyCollectionFile(QString(m_cacheFile.c_str()))) {
+        helpEngine->setCollectionFile(QString(m_cacheFile.c_str()));
+      } else {
+        g_log.warning("Failed to copy collection file");
+        g_log.debug(helpEngine->error().toStdString());
+      }
+      g_log.debug() << "helpengine.setupData() returned " << helpEngine->setupData() << "\n";
+
+      // create a new help window
+      g_helpWindow = new pqHelpWindow(helpEngine, this, flags);
+      g_helpWindow->setWindowTitle(QString("Mantid - Help"));
+      g_helpWindow->setWindowIcon(QIcon(":/images/MantidIcon.ico"));
+
+      // show the home page on startup
+      auto registeredDocs = helpEngine->registeredDocumentations();
+      if (registeredDocs.size() > 0) {
+        g_helpWindow->showHomePage(registeredDocs[0]);
+      }
+      g_helpWindow->show();
+      g_helpWindow->raise();
     } else {
-      g_log.warning("Failed to copy collection file");
-      g_log.debug(helpEngine->error().toStdString());
+      g_log.information("Without collection file redirecting help to default web browser");
     }
-    g_log.debug() << "helpengine.setupData() returned " << helpEngine->setupData() << "\n";
-
-    // create a new help window
-    g_helpWindow = new pqHelpWindow(helpEngine, this, flags);
-    g_helpWindow->setWindowTitle(QString("Mantid - Help"));
-    g_helpWindow->setWindowIcon(QIcon(":/images/MantidIcon.ico"));
-
-    // show the home page on startup
-    auto registeredDocs = helpEngine->registeredDocumentations();
-    if (registeredDocs.size() > 0) {
-      g_helpWindow->showHomePage(registeredDocs[0]);
-    }
-    g_helpWindow->show();
-    g_helpWindow->raise();
   }
 }
 
