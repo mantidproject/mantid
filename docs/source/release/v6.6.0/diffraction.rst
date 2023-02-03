@@ -12,7 +12,7 @@ New features
 ############
 - Introduced an input parameter in :ref:`WANDPowderReduction <algm-WANDPowderReduction>` to specify that the input workspaces are from event filtering. In such a situation, the overall reduction time may be significantly reduced.
 - Added support for ILL D4C instrument, a liquid diffractometer. This adds a new algorithm responsible for the reduction stage: :ref:`D4ILLReduction <algm-D4ILLReduction>`, which handles calling the loader, correcting for dead time, bank position offsets, relative efficiency, and normalisation to monitor or time.
-- Increased the speed of the fourier filter in the POLARIS total scattering reduction by reducing the ``Rmax`` parameter used in the pair of (forward and backward) ``PDFFourierTransform`` calls and optimising the integration code inside :ref:`PDFFourierTransform v2 <algm-PDFFourierTransform-v2>`.
+- Increased the speed of the Fourier filter in the POLARIS total scattering reduction by reducing the ``Rmax`` parameter used in the pair of (forward and backward) ``PDFFourierTransform`` calls and optimising the integration code inside :ref:`PDFFourierTransform v2 <algm-PDFFourierTransform-v2>`.
 
 Bugfixes
 ########
@@ -38,7 +38,7 @@ Bugfixes
 - Corrected the tabbing order between widgets on the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>`.
 - Add a scrollbar to the ``GSASII`` tab, on the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>`, to allow a smaller interface height, similar to the ``Fitting`` tab.
 - A check has been added to ensure there are enough data points before attempting to fit a diffraction peak in :ref:`FitPeaks <algm-FitPeaks>`.
-- The :ref:`SaveVulcanGSS <algm-SaveVulcanGSS>` algorithm has marked as deprecated as of 2022-11-30.
+- The :ref:`SaveVulcanGSS <algm-SaveVulcanGSS>` algorithm has been marked as deprecated as of 2022-11-30.
 
 
 Single Crystal Diffraction
@@ -64,8 +64,8 @@ Bugfixes
 - :ref:`algm-SaveReflections` now warns if an empty peak table is saved and doesn't fail with an error.
 - The deprecated Matplotlib ``bivariate_normal`` function has been replaced in ``BVGFitTools.py``.
 - :ref:`LoadIsawPeaks <algm-LoadIsawPeaks>` no longer fails when loading peaks with modulation vectors that cannot recover the modulated UB matrix.
-- Ensuring colorscale max > min (found for weak peaks with pixels having 0 intensity) checks have been added to :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>`.
-- :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>` will now close a generated figure if an error occurred while trying to write to the file (e.g. file of same name was already open).
+- Checks to ensure that colourscale max > min have been added to :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>`.
+- :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>` will now close a generated figure if an error occurred while trying to write to a file (e.g. a file of same name was already open).
 - HKL of peak if ``UpdatePeakPosition = True`` in :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>` is now set properly.
 - :ref:`SelectCellWithForm <algm-SelectCellWithForm>` and :ref:`SelectCellOfType <algm-SelectCellOfType>` now correctly transform modulation vectors.
 - Modulation vectors are now correctly transformed in :ref:`TransformHKL <algm-TransformHKL>`.
