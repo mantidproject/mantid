@@ -606,7 +606,7 @@ bool FilteredTimeSeriesProperty<TYPE>::isTimeFiltered(const Types::Core::DateAnd
   // If time == a filter time then the value is taken to belong to that filter
   // region and not the previous
 
-  // Find first fitler time strictly greater than time
+  // Find first filter time strictly greater than time
   auto filterEntry = std::lower_bound(m_filter.begin(), m_filter.end(), time,
                                       [](const std::pair<Types::Core::DateAndTime, bool> &filterEntry,
                                          const Types::Core::DateAndTime &t) { return filterEntry.first <= t; });

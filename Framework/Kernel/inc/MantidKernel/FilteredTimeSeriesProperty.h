@@ -77,6 +77,9 @@ public:
   /// If filtering by log, get the time intervals for splitting
   std::vector<Mantid::Kernel::SplittingInterval> getSplittingIntervals() const;
 
+  /// Find if time lies in a filtered region
+  bool isTimeFiltered(const Types::Core::DateAndTime &time) const;
+
 private:
   /// Apply a filter
   void applyFilter() const;
@@ -86,9 +89,6 @@ private:
 
   /// Set a value from another property
   std::string setValueFromProperty(const Property &right) override;
-
-  /// Find if time lies in a filtered region
-  bool isTimeFiltered(const Types::Core::DateAndTime &time) const;
 
   /// The original unfiltered property as an owned pointer
   std::unique_ptr<const TimeSeriesProperty<HeldType>> m_unfiltered;

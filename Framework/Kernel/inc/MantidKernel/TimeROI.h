@@ -27,6 +27,7 @@ public:
   double durationInSeconds(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) const;
   std::size_t numBoundaries() const;
   bool empty() const;
+  void clear();
   void addROI(const std::string &startTime, const std::string &stopTime);
   void addROI(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime);
   void addROI(const std::time_t &startTime, const std::time_t &stopTime);
@@ -34,6 +35,7 @@ public:
   void addMask(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime);
   void addMask(const std::time_t &startTime, const std::time_t &stopTime);
   bool valueAtTime(const Types::Core::DateAndTime &time) const;
+
   void replaceROI(const TimeSeriesProperty<bool> *roi);
   void replaceROI(const TimeROI &other);
   void update_union(const TimeROI &other);

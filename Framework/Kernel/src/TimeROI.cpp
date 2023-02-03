@@ -441,6 +441,9 @@ std::size_t TimeROI::numBoundaries() const { return static_cast<std::size_t>(m_r
 
 bool TimeROI::empty() const { return bool(this->numBoundaries() == 0); }
 
+/// Removes all ROI's, leaving an empty object
+void TimeROI::clear() { m_roi.clear(); }
+
 // serialization / deserialization items
 void TimeROI::saveNexus(::NeXus::File *file) const {
   // create a local TimeSeriesProperty which will do the actual work

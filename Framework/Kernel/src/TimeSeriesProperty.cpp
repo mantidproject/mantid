@@ -1635,6 +1635,8 @@ template <typename TYPE> bool TimeSeriesProperty<TYPE>::isDefault() const { retu
  */
 template <typename TYPE>
 TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics(const TimeROI *roi) const {
+
+  // Start with statistics that are not weighted by duration
   TimeSeriesPropertyStatistics out(Mantid::Kernel::getStatistics(this->filteredValuesAsVector()));
 
   if (this->size() > 0) {
@@ -1956,13 +1958,22 @@ void TimeSeriesProperty<std::string>::histogramData(const Types::Core::DateAndTi
 }
 
 /**
- * Get a vector of values taking the filter into account.
- * Values will be excluded if their times lie in a region where the filter is
- * false.
- * @returns :: Vector of included values only
+ * Series values within the ROI's regions.
+ * A values will be excluded if its times lie outside the ROI's regions or coincides with the upper boundary
+ * of a ROI region. For instance, time "2007-11-30T16:17:30" is excluded in the ROI
+ * [2007-11-30T16:17:00", 2007-11-30T16:17:30").
+ * @param roi :: ROI regions validating any query time.
+ * @returns :: Vector of included values only.
  */
-template <typename TYPE> std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredValuesAsVector() const {
-  return this->valuesAsVector(); // no filtering to do
+template <typename TYPE> std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredValuesAsVector(const TimeROI *roi) const {
+  if (roi) {
+    std::vector<TYPE> filteredValues;
+    for (const auto &timeAndValue : this->m_values)
+      if (roi->valueAtTime(timeAndValue.time()))
+        filteredValues.emplace_back(timeAndValue.value());
+    return filteredValues;
+  } else
+    return this->valuesAsVector();
 }
 
 /**
