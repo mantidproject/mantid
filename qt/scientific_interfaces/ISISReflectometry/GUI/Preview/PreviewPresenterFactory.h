@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "Common/DllConfig.h"
-#include "GUI/Common/QtJobRunner.h"
 #include "IPreviewModel.h"
 #include "IPreviewPresenter.h"
 #include "IPreviewView.h"
 #include "InstViewModel.h"
+#include "MantidQtWidgets/Common/QtJobRunner.h"
 #include "PreviewJobManager.h"
 #include "PreviewModel.h"
 #include "PreviewPresenter.h"
@@ -23,7 +23,7 @@ public:
   PreviewPresenterFactory() = default;
 
   std::unique_ptr<IPreviewPresenter> make(IPreviewView *view, std::unique_ptr<IReflAlgorithmFactory> algFactory) {
-    auto jobRunner = std::make_unique<QtJobRunner>();
+    auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>();
     auto jobManager = std::make_unique<PreviewJobManager>(std::move(jobRunner), std::move(algFactory));
     auto dependencies = PreviewPresenter::Dependencies{view, std::make_unique<PreviewModel>(), std::move(jobManager),
                                                        std::make_unique<InstViewModel>()};

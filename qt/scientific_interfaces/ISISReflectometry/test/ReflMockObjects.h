@@ -14,7 +14,6 @@
 #include "GUI/Common/IEncoder.h"
 #include "GUI/Common/IFileHandler.h"
 #include "GUI/Common/IJobManager.h"
-#include "GUI/Common/IJobRunner.h"
 #include "GUI/Common/IPlotter.h"
 #include "GUI/Common/IPythonRunner.h"
 #include "GUI/Common/IReflMessageHandler.h"
@@ -286,15 +285,6 @@ public:
   MOCK_METHOD1(loadJSONFromFile, QMap<QString, QVariant>(const std::string &));
   MOCK_CONST_METHOD2(saveCSVToFile, void(std::string const &, std::string const &));
   MOCK_CONST_METHOD1(fileExists, bool(std::string const &));
-};
-
-class MockJobRunner : public IJobRunner {
-public:
-  MOCK_METHOD1(subscribe, void(JobRunnerSubscriber *));
-  MOCK_METHOD0(clearAlgorithmQueue, void());
-  MOCK_METHOD1(setAlgorithmQueue, void(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>));
-  MOCK_METHOD0(executeAlgorithmQueue, void());
-  MOCK_METHOD0(cancelAlgorithmQueue, void());
 };
 
 class MockJobManager : public IJobManager {

@@ -10,6 +10,7 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/MockJobRunner.h"
 #include "PreviewJobManager.h"
 
 #include "test/Batch/BatchJobManagerTest.h"

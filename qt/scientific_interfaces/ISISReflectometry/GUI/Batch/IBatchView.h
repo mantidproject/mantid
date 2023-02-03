@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "GUI/Common/IJobRunner.h"
 #include "GUI/Event/IEventView.h"
 #include "GUI/Experiment/IExperimentView.h"
 #include "GUI/Instrument/IInstrumentView.h"

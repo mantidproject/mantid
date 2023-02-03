@@ -9,8 +9,8 @@
 #include "GUI/Batch/IBatchJobAlgorithm.h"
 #include "GUI/Batch/IReflAlgorithmFactory.h"
 #include "GUI/Batch/ReflAlgorithmFactory.h"
-#include "GUI/Common/IJobRunner.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/IJobRunner.h"
 #include "Reduction/Item.h"
 
 #include <memory>
@@ -42,7 +42,7 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 using MantidQt::API::IConfiguredAlgorithm_sptr;
 
-PreviewJobManager::PreviewJobManager(std::unique_ptr<IJobRunner> jobRunner,
+PreviewJobManager::PreviewJobManager(std::unique_ptr<API::IJobRunner> jobRunner,
                                      std::unique_ptr<IReflAlgorithmFactory> algFactory)
     : m_jobRunner(std::move(jobRunner)), m_algFactory(std::move(algFactory)) {
   m_jobRunner->subscribe(this);

@@ -5,14 +5,14 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "QtJobRunner.h"
-#include "GUI/Common/IJobRunner.h"
+#include "MantidQtWidgets/Common/QtJobRunner.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/IConfiguredAlgorithm.h"
+#include "MantidQtWidgets/Common/IJobRunner.h"
 
 using namespace MantidQt::API;
 
-namespace MantidQt::CustomInterfaces::ISISReflectometry {
+namespace MantidQt::API {
 
 QtJobRunner::QtJobRunner() : QWidget(), m_batchAlgoRunner(this) {
   qRegisterMetaType<API::IConfiguredAlgorithm_sptr>("MantidQt::API::IConfiguredAlgorithm_sptr");
@@ -59,4 +59,4 @@ void QtJobRunner::onAlgorithmError(API::IConfiguredAlgorithm_sptr algorithm, con
   m_notifyee->notifyAlgorithmError(algorithm, message);
 }
 
-} // namespace MantidQt::CustomInterfaces::ISISReflectometry
+} // namespace MantidQt::API
