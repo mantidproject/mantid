@@ -221,7 +221,7 @@ public:
   ///  values
   std::multimap<Types::Core::DateAndTime, TYPE> valueAsMultiMap() const;
   /// Get filtered values as a vector
-  std::vector<TYPE> filteredValuesAsVector() const;
+  std::vector<TYPE> filteredValuesAsVector(const Kernel::TimeROI *roi = nullptr) const;
 
   /// Return the time series's times as a vector<DateAndTime>
   std::vector<Types::Core::DateAndTime> timesAsVector() const override;
