@@ -481,7 +481,7 @@ public:
     DateAndTime start, stop;
     SplittingIntervalVec b;
 
-    //  the splitter ------
+    //  the splitter intentionally has overlapping intervals
     start = DateAndTime("2007-11-30T16:15:00");
     stop = DateAndTime("2007-11-30T16:16:00");
     b.emplace_back(SplittingInterval(start, stop, 0));
@@ -498,6 +498,7 @@ public:
     stop = DateAndTime("2007-11-30T16:18:00");
     b.emplace_back(SplittingInterval(start, stop, 1));
 
+    // sort using the operator<
     std::sort(b.begin(), b.end());
 
     TS_ASSERT_EQUALS(b[0].start(), DateAndTime("2007-11-30T16:15:00"));
