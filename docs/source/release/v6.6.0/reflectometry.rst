@@ -9,6 +9,13 @@ New Features
 ------------
 - :ref:`ReflectometryISISLoadAndProcess <algm-ReflectometryISISLoadAndProcess>` can now take a polarization efficiencies workspace to make polarization corrections. This workspace can be set via the ``Polarization Efficiencies`` combo box on the :ref:`Experiment Settings tab <refl_exp_instrument_settings>`.
 - A new graphical tool has been added to the ISIS Reflectometry interface to allow interactive selection of various regions of interest. It shows an on-the-fly preview showing the effect of the selections on the reduced reflectivity curve. It also adds the ability to select and sum across segments on a 2D detector. See the :ref:`Reduction Preview <refl_preview>` documentation for more detail.
+
+.. figure:: /images/ISISReflectometryInterface/preview_tab.png
+  :class: screenshot
+  :width: 800px
+  :align: center
+  :alt: The reduction preview tab
+
 - It is now possible to provide a calibration file on the :ref:`Instrument Settings <refl_exp_instrument_settings>` tab of the ISIS Reflectometry interface. The calibration step will be applied as part of pre-processing when a reduction is run or previewed. See :ref:`ReflectometryISISLoadAndProcess <algm-ReflectometryISISLoadAndProcess>` for more details.
 - :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>` can now load NeXus files v3 from D17 and FIGARO measurements from cycle 192 onwards.
 - Gravity correction has been implemented for FIGARO data reduction in :ref:`ReflectometryILLPreProcess <algm-ReflectometryILLPreProcess>` and :ref:`ReflectometryILLConvertToQ <algm-ReflectometryILLConvertToQ>`.
