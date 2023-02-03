@@ -61,6 +61,7 @@ New features
 
 .. image:: ../../images/6_6_release/Mantidworkbench/grey_zero_detectors.png
     :align: center
+    :width: 800
 
 - Added the ``Keep original workspace`` rebin option on the :ref:`Pick tab <instrumentviewer_pick_tab>`. When ticked, this will ensure the originally loaded data is rebinned, and not the previously rebinned data.
 - Control points on the shapes drawn using the :ref:`Pick <instrumentviewer_pick_tab>` or :ref:`Draw <instrumentviewer_draw_tab>` tab now give cursor feedback.
