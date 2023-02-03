@@ -58,17 +58,6 @@ SplittingInterval SplittingInterval::operator|(const SplittingInterval &b) const
   return SplittingInterval(begin, end, this->index());
 }
 
-/// Compare two splitter by the begin time
-bool SplittingInterval::operator<(const SplittingInterval &b) const { return (this->begin() < b.begin()); }
-
-/// Compare two splitter by the begin time
-bool SplittingInterval::operator>(const SplittingInterval &b) const { return (this->begin() > b.begin()); }
-
-/** Comparator for sorting lists of SplittingInterval */
-bool compareSplittingInterval(const SplittingInterval &si1, const SplittingInterval &si2) {
-  return (si1.begin() < si2.begin());
-}
-
 //------------------------------------------------------------------------------------------------
 /** Return true if the SplittingIntervalVec provided is a filter,
  * meaning that it only has an output index of 0.
@@ -196,20 +185,16 @@ SplittingIntervalVec operator|(const SplittingIntervalVec &a, const SplittingInt
 
   // Concatenate the two lists
   SplittingIntervalVec temp;
-  // temp.insert(temp.end(), b.begin(), b.end());
+  for (auto &it : a)
+    if (it.isValid())
+      temp.emplace_back(it);
+  for (auto &it : b)
+    if (it.isValid())
+      temp.emplace_back(it);
 
-  // Add the intervals, but don't add any invalid (empty) ranges
-  SplittingIntervalVec::const_iterator it;
-  ;
-  for (it = a.begin(); it != a.end(); ++it)
-    if (it->end() > it->begin())
-      temp.emplace_back(*it);
-  for (it = b.begin(); it != b.end(); ++it)
-    if (it->end() > it->begin())
-      temp.emplace_back(*it);
-
-  // Sort by start time
-  std::sort(temp.begin(), temp.end(), compareSplittingInterval);
+  // Sort by start time rather than the default
+  std::sort(temp.begin(), temp.end(),
+            [](const SplittingInterval &left, const SplittingInterval &right) { return left.begin() < right.begin(); });
 
   out = removeFilterOverlap(temp);
 
