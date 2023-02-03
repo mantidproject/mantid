@@ -95,7 +95,7 @@ function(mtd_add_sip_module)
   endif()
 
   if(PARSED_INSTALL_DIR AND (ENABLE_WORKBENCH OR BUILD_MANTIDQT))
-    mtd_install_qt_library(${PARSED_PYQT_VERSION} ${PARSED_TARGET_NAME} "" ${PARSED_INSTALL_DIR})
+    mtd_install_qt_library(${PARSED_PYQT_VERSION} ${PARSED_TARGET_NAME} ${PARSED_INSTALL_DIR})
   endif()
 
   if(WIN32)

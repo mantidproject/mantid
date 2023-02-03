@@ -1,8 +1,4 @@
-# ######################################################################################################################
-# Set the SYSTEM_PACKAGE_TARGET to RUNTIME as we only want to package dlls
-# ######################################################################################################################
-set(SYSTEM_PACKAGE_TARGET RUNTIME)
-# Also include MSVC runtime libraries when running install commands
+# Include MSVC runtime libraries when running install commands
 set(CMAKE_INSTALL_OPENMP_LIBRARIES TRUE)
 include(InstallRequiredSystemLibraries)
 

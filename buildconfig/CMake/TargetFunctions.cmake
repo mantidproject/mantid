@@ -14,9 +14,16 @@ function(mtd_install_targets)
     return()
   endif()
   _sanitize_install_dirs(_install_dirs ${PARSED_INSTALL_DIRS})
+
+  set(install_target_type "")
+  if(WIN32)
+    # Install only DLLs on Windows
+    set(install_target_type RUNTIME)
+  endif()
+
   foreach(_dir ${_install_dirs})
     install(
-      TARGETS ${PARSED_TARGETS} ${SYSTEM_PACKAGE_TARGET}
+      TARGETS ${PARSED_TARGETS} ${install_target_type}
       DESTINATION ${_dir}
       COMPONENT Runtime
     )

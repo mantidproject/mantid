@@ -13,10 +13,6 @@ if(POLICY CMP0074)
   cmake_policy(SET CMP0074 NEW)
 endif()
 
-# System package target is important for the windows builds as it allows us to package only the dlls and exes and
-# exclude libs. Defaults to empty for other platforms.
-set(SYSTEM_PACKAGE_TARGET "")
-
 # Add the path to our custom 'find' modules
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
 # Send libraries to common place, reference in several places so must be at top level

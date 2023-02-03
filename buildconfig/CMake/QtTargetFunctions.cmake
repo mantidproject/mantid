@@ -200,7 +200,7 @@ function(mtd_add_qt_target)
     endif()
 
     foreach(_dir ${_install_dirs})
-      mtd_install_qt_library(${PARSED_QT_VERSION} ${_target} "${SYSTEM_PACKAGE_TARGET}" ${_dir})
+      mtd_install_qt_library(${PARSED_QT_VERSION} ${_target} ${_dir})
     endforeach()
   endif()
 
@@ -220,7 +220,14 @@ endfunction()
 # install_target_type The type of target that should be installed. See
 # https://cmake.org/cmake/help/latest/command/install.html?highlight=install - install_dir A relative directory to
 # install_prefix
-function(mtd_install_qt_library qt_version target install_target_type install_dir)
+function(mtd_install_qt_library qt_version target install_dir)
+  get_target_property(target_type ${target} TYPE)
+  set(install_target_type "")
+  if(WIN32 AND NOT target_type STREQUAL "MODULE_LIBRARY")
+    # Install only DLLs on Windows
+    set(install_target_type RUNTIME)
+  endif()
+
   if(qt_version EQUAL 5 AND (ENABLE_WORKBENCH OR BUILD_MANTIDQT))
     install(
       TARGETS ${target} ${install_target_type}
