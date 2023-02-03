@@ -19,9 +19,11 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
+# Control which components of the project to build
 option(ENABLE_MANTIDQT "Enable Qt5-based components" ON)
 option(ENABLE_WORKBENCH "Enable Qt5-based gui" ON)
 
+# Option to control whether the framework libraries are built or expected to be installed
 set(MANTID_FRAMEWORK_LIB
     "BUILD"
     CACHE STRING "Mantid framework build options, valid options are (BUILD, SYSTEM).
