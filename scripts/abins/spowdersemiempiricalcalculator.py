@@ -276,9 +276,9 @@ class SPowderSemiEmpiricalCalculator:
         from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS, TWO_DIMENSIONAL_INSTRUMENTS
 
         # Compute tensors and traces, write to cache for access during atomic s calculations
-        powder_calculator = abins.PowderCalculator(filename=self._input_filename,
-                                                   abins_data=self._abins_data,
-                                                   temperature=self._temperature)
+        powder_calculator = abins.PowderCalculator(
+            filename=self._input_filename, abins_data=self._abins_data, temperature=self._temperature
+        )
         self._powder_data = powder_calculator.get_formatted_data()
 
         # Dispatch to appropriate routine
@@ -494,9 +494,10 @@ class SPowderSemiEmpiricalCalculator:
 
         Returns an N_atoms x N_frequencies array.
         """
-        average_a_traces = np.sum([self._powder_data.get_a_traces(k_index) * kpoint.weight
-                                   for k_index, kpoint in enumerate(self._abins_data.get_kpoints_data())],
-                                  axis=0)
+        average_a_traces = np.sum(
+            [self._powder_data.get_a_traces(k_index) * kpoint.weight for k_index, kpoint in enumerate(self._abins_data.get_kpoints_data())],
+            axis=0,
+        )
         iso_dw = self._isotropic_dw(q2=q2, a_trace=average_a_traces[:, None])
 
         # For 2-D case we need to reshuffle axes after numpy broadcasting
@@ -713,13 +714,8 @@ class SPowderSemiEmpiricalCalculator:
             )
 
             scattering_intensities = calculate_order[order](
-                q2=q2,
-                frequencies=frequencies,
-                indices=coefficients,
-                a_tensor=a_tensor,
-                a_trace=a_trace,
-                b_tensor=b_tensor,
-                b_trace=b_trace)
+                q2=q2, frequencies=frequencies, indices=coefficients, a_tensor=a_tensor, a_trace=a_trace, b_tensor=b_tensor, b_trace=b_trace
+            )
             rebinned_spectrum, _ = np.histogram(frequencies, bins=bins, weights=(scattering_intensities * kpoint_weight), density=False)
             sdata.add_dict({f"atom_{atom_index}": {"s": {f"order_{order}": rebinned_spectrum}}})
 
@@ -750,11 +746,16 @@ class SPowderSemiEmpiricalCalculator:
 
         return freq, coeff
 
-    def _calculate_order_one_dw(self, *, q2: np.ndarray,
-                                frequencies: np.ndarray,
-                                a_tensor=None, a_trace=None,
-                                b_tensor=None, b_trace=None,
-                                ):
+    def _calculate_order_one_dw(
+        self,
+        *,
+        q2: np.ndarray,
+        frequencies: np.ndarray,
+        a_tensor=None,
+        a_trace=None,
+        b_tensor=None,
+        b_trace=None,
+    ):
         """
         Calculate mode-dependent Debye-Waller factor for the first order quantum event for one atom.
         :param q2: squared values of momentum transfer vectors
@@ -765,7 +766,7 @@ class SPowderSemiEmpiricalCalculator:
         :param b_trace: frequency dependent MSD trace for the given atom
         :returns: s for the first quantum order event for the given atom
         """
-        trace_ba = np.einsum('kli, il->k', b_tensor, a_tensor)
+        trace_ba = np.einsum("kli, il->k", b_tensor, a_tensor)
 
         dw = np.exp(-q2 * (a_trace + 2.0 * trace_ba / b_trace) / 5.0)
 
@@ -834,6 +835,6 @@ class SPowderSemiEmpiricalCalculator:
                   + np.einsum('kli, kil->k',
                               np.take(b_tensor, indices=indices[:, 1], axis=0),
                               np.take(b_tensor, indices=indices[:, 0], axis=0))
-            ) / (30.0 * factor)
+                  ) / (30.0 * factor)
         # fmt: on
         return s
