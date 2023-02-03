@@ -304,6 +304,8 @@ void MantidHelpWindow::shutdown() {
   if (helpWindowExists()) {
     g_helpWindow->setAttribute(Qt::WA_DeleteOnClose);
     g_helpWindow->close();
+  } else {
+    g_log.warning("Something really wrong in MantidHelpWindow::shutdown()");
   }
 }
 
