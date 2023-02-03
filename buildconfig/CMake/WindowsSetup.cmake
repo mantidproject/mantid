@@ -96,13 +96,6 @@ endif()
 # HDF5 uses threads::threads target
 find_package(Threads)
 
-# ######################################################################################################################
-# Qt5 is always in the same place
-# ######################################################################################################################
-if(NOT CONDA_ENV)
-  set(Qt5_DIR ${THIRD_PARTY_DIR}/lib/qt5/lib/cmake/Qt5)
-endif()
-
 option(CONSOLE "Switch for enabling/disabling the console" ON)
 
 # ######################################################################################################################
