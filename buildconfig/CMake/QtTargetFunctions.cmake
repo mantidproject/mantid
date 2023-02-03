@@ -30,25 +30,37 @@ function(mtd_add_qt_executable)
   endforeach()
 endfunction()
 
-# Target agnostic function to add either an executable or library linked to Qt option: LIBRARY If included define a
-# library target option: EXECUTABLE If included define an executable target option: NO_SUFFIX If included, no suffix is
-# added to the target name option: EXCLUDE_FROM_ALL If included, the target is excluded from target ALL keyword:
-# TARGET_NAME The name of the target. The target will have -Qt{QT_VERSION} appended to it. keyword: OUTPUT_NAME An
-# optional filename for the library keyword: QT_VERSION The major version of Qt to build against keyword: SRC .cpp files
-# to include in the target build keyword: QT5_SRC .cpp files to include in a Qt5 build keyword: MOC Header files that
-# are to be parsed by moc keyword: UI Qt designer ui files that are to be parsed by the UI compiler keyword: NOMOC
-# Additional headers that are not to be passed to moc keyword: RES Any resource .qrc files keyword: DEFS Compiler
-# definitions to set for all targets. Also QTX_DEFS can be used to set per-version targets keyword: OUTPUT_DIR_BASE Base
-# directory the build output. The final product goes into a subdirectory based on the Qt version keyword: OUTPUT_SUBDIR
-# Additional directory to added to the final output path keyword: INCLUDE_DIRS A list of include directories to add to
-# the target keyword: SYSTEM_INCLUDE_DIRS A list of include directories to add to the target and marked as system
-# headers keyword: PRECOMPILED A name of the precompiled header keyword: LINK_LIBS A list of additional libraries to
-# link to the target that are not dependent on Qt keyword: QT5_LINK_LIBS A list of additional Qt libraries to link to.
-# QtWidgets islinked to by default keyword: MTD_QT_LINK_LIBS A list of additional libraries to link to the target. It is
-# assumed each was produced with this function and will have the -Qt{QT_VERSION} suffix appended. keyword: INSTALL_DIR A
-# destination directory for the install command. keyword: INSTALL_DIR_BASE Base directory the build output. The final
-# product goes into a subdirectory based on the Qt version. keyword: OSX_INSTALL_RPATH Install path for osx version >
-# 10.8 keyword: LINUX_INSTALL_RPATH Install path for CMAKE_SYSTEM_NAME == Linux
+# Target agnostic function to add either an executable or library linked to Qt:
+#
+# * option: LIBRARY If included define a library target
+# * option: EXECUTABLE If included define an executable target
+# * option: NO_SUFFIX If included, no suffix is added to the target name
+# * option: EXCLUDE_FROM_ALL If included, the target is excluded from target ALL
+# * keyword: TARGET_NAME The name of the target. The target will have -Qt{QT_VERSION} appended to it.
+# * keyword: OUTPUT_NAME An optional filename for the library
+# * keyword: QT_VERSION The major version of Qt to build against
+# * keyword: SRC .cpp files to include in the target build
+# * keyword: QT5_SRC .cpp files to include in a Qt5 build
+# * keyword: MOC Header files that are to be parsed by moc
+# * keyword: UI Qt designer ui files that are to be parsed by the UI compiler
+# * keyword: NOMOC Additional headers that are not to be passed to moc
+# * keyword: RES Any resource .qrc files
+# * keyword: DEFS Compiler definitions to set for all targets. Also QTX_DEFS can be used to set per-version targets
+# * keyword: OUTPUT_DIR_BASE Base directory the build output. The final product goes into a subdirectory based on the Qt
+#   version
+# * keyword: OUTPUT_SUBDIR Additional directory to added to the final output path
+# * keyword: INCLUDE_DIRS A list of include directories to add to the target
+# * keyword: SYSTEM_INCLUDE_DIRS A list of include directories to add to the target and marked as system headers
+# * keyword: PRECOMPILED A name of the precompiled header
+# * keyword: LINK_LIBS A list of additional libraries to link to the target that are not dependent on Qt
+# * keyword: QT5_LINK_LIBS A list of additional Qt libraries to link to. QtWidgets is linked to by default
+# * keyword: MTD_QT_LINK_LIBS A list of additional libraries to link to the target. It is assumed each was produced with
+#   this function and will have the -Qt{QT_VERSION} suffix appended.
+# * keyword: INSTALL_DIR A destination directory for the install command.
+# * keyword: INSTALL_DIR_BASE Base directory the build output. The final product goes into a subdirectory based on the
+#   Qt version.
+# * keyword: OSX_INSTALL_RPATH Install path for osx version > 10.8
+# * keyword: LINUX_INSTALL_RPATH Install path for CMAKE_SYSTEM_NAME == Linux
 function(mtd_add_qt_target)
   set(options LIBRARY EXECUTABLE NO_SUFFIX EXCLUDE_FROM_ALL)
   set(oneValueArgs TARGET_NAME OUTPUT_NAME QT_VERSION OUTPUT_DIR_BASE OUTPUT_SUBDIR PRECOMPILED)
