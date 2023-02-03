@@ -824,8 +824,8 @@ void FilterEvents::convertSplittersWorkspaceToVectors() {
   for (size_t i_splitter = 0; i_splitter < num_splitters; ++i_splitter) {
     // get splitter
     Kernel::SplittingInterval splitter = m_splitters[i_splitter];
-    int64_t start_time_i64 = splitter.start().totalNanoseconds();
-    int64_t stop_time_i64 = splitter.stop().totalNanoseconds();
+    int64_t start_time_i64 = splitter.begin().totalNanoseconds();
+    int64_t stop_time_i64 = splitter.end().totalNanoseconds();
     if (m_vecSplitterTime.empty()) {
       // first entry: add
       m_vecSplitterTime.emplace_back(start_time_i64);
@@ -1100,9 +1100,8 @@ void FilterEvents::createOutputWorkspacesSplitters() {
       if (descriptiveNames && splitByTime) {
         auto splitter = m_splitters[wsgroup];
         auto startTimeInSeconds =
-            Mantid::Types::Core::DateAndTime::secondsFromDuration(splitter.start() - m_runStartTime);
-        auto stopTimeInSeconds =
-            Mantid::Types::Core::DateAndTime::secondsFromDuration(splitter.stop() - m_runStartTime);
+            Mantid::Types::Core::DateAndTime::secondsFromDuration(splitter.begin() - m_runStartTime);
+        auto stopTimeInSeconds = Mantid::Types::Core::DateAndTime::secondsFromDuration(splitter.end() - m_runStartTime);
         wsname << startTimeInSeconds << "_" << stopTimeInSeconds;
       } else if (descriptiveNames) {
         auto infoiter = infomap.find(wsgroup);
@@ -1843,15 +1842,15 @@ void FilterEvents::generateSplitterTSPalpha(
     if (itarget >= static_cast<int>(split_tsp_vec.size()))
       throw std::runtime_error("Target workspace index is out of range!");
 
-    if (splitter.start() == m_runStartTime) {
+    if (splitter.begin() == m_runStartTime) {
       // there should be only 1 value in the splitter and clear it.
       if (split_tsp_vec[itarget]->size() != 1) {
         throw std::runtime_error("Splitter must have 1 value with initialization.");
       }
       split_tsp_vec[itarget]->clear();
     }
-    split_tsp_vec[itarget]->addValue(splitter.start(), 1);
-    split_tsp_vec[itarget]->addValue(splitter.stop(), 0);
+    split_tsp_vec[itarget]->addValue(splitter.begin(), 1);
+    split_tsp_vec[itarget]->addValue(splitter.end(), 0);
   }
 
   return;

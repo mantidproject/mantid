@@ -516,15 +516,15 @@ public:
 
     s = splitter[0];
     t = DateAndTime("2007-11-30T16:17:09");
-    TS_ASSERT_DELTA(s.start(), t, 1e-3);
+    TS_ASSERT_DELTA(s.begin(), t, 1e-3);
     t = DateAndTime("2007-11-30T16:17:11");
-    TS_ASSERT_DELTA(s.stop(), t, 1e-3);
+    TS_ASSERT_DELTA(s.end(), t, 1e-3);
 
     s = splitter[1];
     t = DateAndTime("2007-11-30T16:17:29");
-    TS_ASSERT_DELTA(s.start(), t, 1e-3);
+    TS_ASSERT_DELTA(s.begin(), t, 1e-3);
     t = DateAndTime("2007-11-30T16:17:41");
-    TS_ASSERT_DELTA(s.stop(), t, 1e-3);
+    TS_ASSERT_DELTA(s.end(), t, 1e-3);
 
     // Now test with left-aligned log value boundaries
     log->makeFilterByValue(splitter, 1.8, 2.2, 1.0);
@@ -533,15 +533,15 @@ public:
 
     s = splitter[0];
     t = DateAndTime("2007-11-30T16:17:10");
-    TS_ASSERT_DELTA(s.start(), t, 1e-3);
+    TS_ASSERT_DELTA(s.begin(), t, 1e-3);
     t = DateAndTime("2007-11-30T16:17:20");
-    TS_ASSERT_DELTA(s.stop(), t, 1e-3);
+    TS_ASSERT_DELTA(s.end(), t, 1e-3);
 
     s = splitter[1];
     t = DateAndTime("2007-11-30T16:17:30");
-    TS_ASSERT_DELTA(s.start(), t, 1e-3);
+    TS_ASSERT_DELTA(s.begin(), t, 1e-3);
     t = DateAndTime("2007-11-30T16:17:50");
-    TS_ASSERT_DELTA(s.stop(), t, 1e-3);
+    TS_ASSERT_DELTA(s.end(), t, 1e-3);
 
     // Check throws if min > max
     TS_ASSERT_THROWS(log->makeFilterByValue(splitter, 2.0, 1.0, 0.0, true), const std::invalid_argument &);
@@ -572,33 +572,33 @@ public:
     log.makeFilterByValue(splitter, 1.0, 2.2, 1.0, false);
     log.expandFilterToRange(splitter, 1.0, 2.2, interval);
     TS_ASSERT_EQUALS(splitter.size(), 2);
-    TS_ASSERT_DELTA(splitter[0].start(), DateAndTime("2007-11-30T16:16:00"), 1e-3);
-    TS_ASSERT_DELTA(splitter[0].stop(), DateAndTime("2007-11-30T16:17:20"), 1e-3);
-    TS_ASSERT_DELTA(splitter[1].start(), DateAndTime("2007-11-30T16:17:50"), 1e-3);
-    TS_ASSERT_DELTA(splitter[1].stop(), DateAndTime("2007-11-30T16:18:50"), 1e-3);
+    TS_ASSERT_DELTA(splitter[0].begin(), DateAndTime("2007-11-30T16:16:00"), 1e-3);
+    TS_ASSERT_DELTA(splitter[0].end(), DateAndTime("2007-11-30T16:17:20"), 1e-3);
+    TS_ASSERT_DELTA(splitter[1].begin(), DateAndTime("2007-11-30T16:17:50"), 1e-3);
+    TS_ASSERT_DELTA(splitter[1].end(), DateAndTime("2007-11-30T16:18:50"), 1e-3);
 
     // Test bad at both ends
     log.makeFilterByValue(splitter, 2.5, 10.0, 0.0, false);
     log.expandFilterToRange(splitter, 2.5, 10.0, interval);
     TS_ASSERT_EQUALS(splitter.size(), 1);
-    TS_ASSERT_DELTA(splitter[0].start(), DateAndTime("2007-11-30T16:17:20"), 1e-3);
-    TS_ASSERT_DELTA(splitter[0].stop(), DateAndTime("2007-11-30T16:17:50"), 1e-3);
+    TS_ASSERT_DELTA(splitter[0].begin(), DateAndTime("2007-11-30T16:17:20"), 1e-3);
+    TS_ASSERT_DELTA(splitter[0].end(), DateAndTime("2007-11-30T16:17:50"), 1e-3);
 
     // Test good at start, bad at end
     log.makeFilterByValue(splitter, -1.0, 1.5, 0.0, false);
     log.expandFilterToRange(splitter, -1.0, 1.5, interval);
     TS_ASSERT_EQUALS(splitter.size(), 1);
-    TS_ASSERT_DELTA(splitter[0].start(), DateAndTime("2007-11-30T16:16:00"), 1e-3);
-    TS_ASSERT_DELTA(splitter[0].stop(), DateAndTime("2007-11-30T16:17:10"), 1e-3);
+    TS_ASSERT_DELTA(splitter[0].begin(), DateAndTime("2007-11-30T16:16:00"), 1e-3);
+    TS_ASSERT_DELTA(splitter[0].end(), DateAndTime("2007-11-30T16:17:10"), 1e-3);
 
     // Test good at end, bad at start
     log.makeFilterByValue(splitter, 1.99, 2.5, 1.0, false);
     log.expandFilterToRange(splitter, 1.99, 2.5, interval);
     TS_ASSERT_EQUALS(splitter.size(), 2);
-    TS_ASSERT_DELTA(splitter[0].start(), DateAndTime("2007-11-30T16:17:10"), 1e-3);
-    TS_ASSERT_DELTA(splitter[0].stop(), DateAndTime("2007-11-30T16:17:20"), 1e-3);
-    TS_ASSERT_DELTA(splitter[1].start(), DateAndTime("2007-11-30T16:17:50"), 1e-3);
-    TS_ASSERT_DELTA(splitter[1].stop(), DateAndTime("2007-11-30T16:18:50"), 1e-3);
+    TS_ASSERT_DELTA(splitter[0].begin(), DateAndTime("2007-11-30T16:17:10"), 1e-3);
+    TS_ASSERT_DELTA(splitter[0].end(), DateAndTime("2007-11-30T16:17:20"), 1e-3);
+    TS_ASSERT_DELTA(splitter[1].begin(), DateAndTime("2007-11-30T16:17:50"), 1e-3);
+    TS_ASSERT_DELTA(splitter[1].end(), DateAndTime("2007-11-30T16:18:50"), 1e-3);
 
     // Check throws if min > max
     TS_ASSERT_THROWS(log.expandFilterToRange(splitter, 2.0, 1.0, interval), const std::invalid_argument &);
@@ -608,8 +608,8 @@ public:
     log.makeFilterByValue(splitter, 0.0, 10.0, 0.0, false);
     log.expandFilterToRange(splitter, 0.0, 10.0, narrowinterval);
     TS_ASSERT_EQUALS(splitter.size(), 1);
-    TS_ASSERT_DELTA(splitter[0].start(), DateAndTime("2007-11-30T16:17:00"), 1e-3);
-    TS_ASSERT_DELTA(splitter[0].stop(), DateAndTime("2007-11-30T16:17:50"), 1e-3);
+    TS_ASSERT_DELTA(splitter[0].begin(), DateAndTime("2007-11-30T16:17:00"), 1e-3);
+    TS_ASSERT_DELTA(splitter[0].end(), DateAndTime("2007-11-30T16:17:50"), 1e-3);
   }
 
   void test_expandFilterToRange_throws_for_string_property() {
@@ -2312,8 +2312,8 @@ public:
     const auto &intervals = log->getSplittingIntervals();
     TS_ASSERT_EQUALS(intervals.size(), 1);
     const auto &range = intervals.front();
-    TS_ASSERT_EQUALS(range.start(), log->firstTime());
-    TS_ASSERT_EQUALS(range.stop(), log->lastTime());
+    TS_ASSERT_EQUALS(range.begin(), log->firstTime());
+    TS_ASSERT_EQUALS(range.end(), log->lastTime());
   }
 
   void test_getSplittingIntervals_repeatedEntries() {
@@ -2333,10 +2333,10 @@ public:
     TS_ASSERT_EQUALS(intervals.size(), 2);
     if (intervals.size() == 2) {
       const auto &firstRange = intervals.front(), &secondRange = intervals.back();
-      TS_ASSERT_EQUALS(firstRange.start(), firstStart);
-      TS_ASSERT_EQUALS(firstRange.stop(), firstEnd);
-      TS_ASSERT_EQUALS(secondRange.start(), secondStart);
-      TS_ASSERT_EQUALS(secondRange.stop(), secondEnd);
+      TS_ASSERT_EQUALS(firstRange.begin(), firstStart);
+      TS_ASSERT_EQUALS(firstRange.end(), firstEnd);
+      TS_ASSERT_EQUALS(secondRange.begin(), secondStart);
+      TS_ASSERT_EQUALS(secondRange.end(), secondEnd);
     }
   }
 
@@ -2355,12 +2355,12 @@ public:
     const auto &intervals = log->getSplittingIntervals();
     TS_ASSERT_EQUALS(intervals.size(), 3);
     if (intervals.size() == 3) {
-      TS_ASSERT_EQUALS(intervals[0].start(), log->firstTime());
-      TS_ASSERT_EQUALS(intervals[0].stop(), firstEnd);
-      TS_ASSERT_EQUALS(intervals[1].start(), secondStart);
-      TS_ASSERT_EQUALS(intervals[1].stop(), secondEnd);
-      TS_ASSERT_EQUALS(intervals[2].start(), thirdStart);
-      TS_ASSERT(intervals[2].stop() > thirdStart);
+      TS_ASSERT_EQUALS(intervals[0].begin(), log->firstTime());
+      TS_ASSERT_EQUALS(intervals[0].end(), firstEnd);
+      TS_ASSERT_EQUALS(intervals[1].begin(), secondStart);
+      TS_ASSERT_EQUALS(intervals[1].end(), secondEnd);
+      TS_ASSERT_EQUALS(intervals[2].begin(), thirdStart);
+      TS_ASSERT(intervals[2].end() > thirdStart);
     }
   }
 

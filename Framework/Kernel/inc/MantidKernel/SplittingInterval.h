@@ -27,9 +27,6 @@ public:
 
   SplittingInterval(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop, const int index = 0);
 
-  Types::Core::DateAndTime start() const;
-  Types::Core::DateAndTime stop() const;
-
   double duration() const;
 
   int index() const;

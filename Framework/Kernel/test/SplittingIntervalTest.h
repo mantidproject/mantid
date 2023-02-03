@@ -41,8 +41,8 @@ public:
     b = SplittingInterval(start_b, stop_b, 0);
     c = a & b;
     TS_ASSERT(a.overlaps(b));
-    TS_ASSERT_EQUALS(c.start(), start_b);
-    TS_ASSERT_EQUALS(c.stop(), stop_b);
+    TS_ASSERT_EQUALS(c.begin(), start_b);
+    TS_ASSERT_EQUALS(c.end(), stop_b);
 
     // a is all inside b
     start_b = DateAndTime("2007-11-30T16:17:05");
@@ -50,8 +50,8 @@ public:
     b = SplittingInterval(start_b, stop_b, 0);
     c = a & b;
     TS_ASSERT(a.overlaps(b));
-    TS_ASSERT_EQUALS(c.start(), start_a);
-    TS_ASSERT_EQUALS(c.stop(), stop_a);
+    TS_ASSERT_EQUALS(c.begin(), start_a);
+    TS_ASSERT_EQUALS(c.end(), stop_a);
 
     // b goes past the end of a
     start_b = DateAndTime("2007-11-30T16:17:12");
@@ -59,8 +59,8 @@ public:
     b = SplittingInterval(start_b, stop_b, 0);
     c = a & b;
     TS_ASSERT(a.overlaps(b));
-    TS_ASSERT_EQUALS(c.start(), start_b);
-    TS_ASSERT_EQUALS(c.stop(), stop_a);
+    TS_ASSERT_EQUALS(c.begin(), start_b);
+    TS_ASSERT_EQUALS(c.end(), stop_a);
 
     // b starts before a and ends before
     start_b = DateAndTime("2007-11-30T16:17:05");
@@ -68,8 +68,8 @@ public:
     b = SplittingInterval(start_b, stop_b, 0);
     c = a & b;
     TS_ASSERT(a.overlaps(b));
-    TS_ASSERT_EQUALS(c.start(), start_a);
-    TS_ASSERT_EQUALS(c.stop(), stop_b);
+    TS_ASSERT_EQUALS(c.begin(), start_a);
+    TS_ASSERT_EQUALS(c.end(), stop_b);
 
     // No overlap (b < a)
     start_b = DateAndTime("2007-11-30T16:17:01");
@@ -106,8 +106,8 @@ public:
     b = SplittingInterval(start_b, stop_b, 0);
     c = a | b;
     TS_ASSERT(a.overlaps(b));
-    TS_ASSERT_EQUALS(c.start(), start_a);
-    TS_ASSERT_EQUALS(c.stop(), stop_a);
+    TS_ASSERT_EQUALS(c.begin(), start_a);
+    TS_ASSERT_EQUALS(c.end(), stop_a);
 
     // a is all inside b
     start_b = DateAndTime("2007-11-30T16:17:05");
@@ -115,8 +115,8 @@ public:
     b = SplittingInterval(start_b, stop_b, 0);
     c = a | b;
     TS_ASSERT(a.overlaps(b));
-    TS_ASSERT_EQUALS(c.start(), start_b);
-    TS_ASSERT_EQUALS(c.stop(), stop_b);
+    TS_ASSERT_EQUALS(c.begin(), start_b);
+    TS_ASSERT_EQUALS(c.end(), stop_b);
 
     // b goes past the end of a
     start_b = DateAndTime("2007-11-30T16:17:12");
@@ -124,8 +124,8 @@ public:
     b = SplittingInterval(start_b, stop_b, 0);
     c = a | b;
     TS_ASSERT(a.overlaps(b));
-    TS_ASSERT_EQUALS(c.start(), start_a);
-    TS_ASSERT_EQUALS(c.stop(), stop_b);
+    TS_ASSERT_EQUALS(c.begin(), start_a);
+    TS_ASSERT_EQUALS(c.end(), stop_b);
 
     // b starts before a and ends before
     start_b = DateAndTime("2007-11-30T16:17:05");
@@ -133,8 +133,8 @@ public:
     b = SplittingInterval(start_b, stop_b, 0);
     c = a | b;
     TS_ASSERT(a.overlaps(b));
-    TS_ASSERT_EQUALS(c.start(), start_b);
-    TS_ASSERT_EQUALS(c.stop(), stop_a);
+    TS_ASSERT_EQUALS(c.begin(), start_b);
+    TS_ASSERT_EQUALS(c.end(), stop_a);
 
     // No overlap (b < a) - This throws an exception because you need two
     // outputs!
@@ -200,20 +200,20 @@ public:
 
     SplittingInterval i;
     i = c[0];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:01"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:10"));
+    TS_ASSERT_EQUALS(i.begin(), DateAndTime("2007-11-30T16:17:01"));
+    TS_ASSERT_EQUALS(i.end(), DateAndTime("2007-11-30T16:17:10"));
     i = c[1];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:20"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:25"));
+    TS_ASSERT_EQUALS(i.begin(), DateAndTime("2007-11-30T16:17:20"));
+    TS_ASSERT_EQUALS(i.end(), DateAndTime("2007-11-30T16:17:25"));
     i = c[2];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:26"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:27"));
+    TS_ASSERT_EQUALS(i.begin(), DateAndTime("2007-11-30T16:17:26"));
+    TS_ASSERT_EQUALS(i.end(), DateAndTime("2007-11-30T16:17:27"));
     i = c[3];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:45"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:50"));
+    TS_ASSERT_EQUALS(i.begin(), DateAndTime("2007-11-30T16:17:45"));
+    TS_ASSERT_EQUALS(i.end(), DateAndTime("2007-11-30T16:17:50"));
     i = c[4];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:18:00"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:18:10"));
+    TS_ASSERT_EQUALS(i.begin(), DateAndTime("2007-11-30T16:18:00"));
+    TS_ASSERT_EQUALS(i.end(), DateAndTime("2007-11-30T16:18:10"));
   }
 
   //----------------------------------------------------------------------------
@@ -268,17 +268,17 @@ public:
 
     SplittingInterval i;
     i = c[0];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:00"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:30"));
+    TS_ASSERT_EQUALS(i.begin(), DateAndTime("2007-11-30T16:17:00"));
+    TS_ASSERT_EQUALS(i.end(), DateAndTime("2007-11-30T16:17:30"));
     i = c[1];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:40"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:18:15"));
+    TS_ASSERT_EQUALS(i.begin(), DateAndTime("2007-11-30T16:17:40"));
+    TS_ASSERT_EQUALS(i.end(), DateAndTime("2007-11-30T16:18:15"));
     i = c[2];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:18:20"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:18:30"));
+    TS_ASSERT_EQUALS(i.begin(), DateAndTime("2007-11-30T16:18:20"));
+    TS_ASSERT_EQUALS(i.end(), DateAndTime("2007-11-30T16:18:30"));
     i = c[3];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:18:50"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:18:55"));
+    TS_ASSERT_EQUALS(i.begin(), DateAndTime("2007-11-30T16:18:50"));
+    TS_ASSERT_EQUALS(i.end(), DateAndTime("2007-11-30T16:18:55"));
   }
 
   //----------------------------------------------------------------------------
@@ -316,8 +316,8 @@ public:
 
     SplittingInterval i;
     i = c[0];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:20"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:30"));
+    TS_ASSERT_EQUALS(i.begin(), DateAndTime("2007-11-30T16:17:20"));
+    TS_ASSERT_EQUALS(i.end(), DateAndTime("2007-11-30T16:17:30"));
   }
 
   //----------------------------------------------------------------------------
@@ -343,14 +343,14 @@ public:
       return; // avoid segfaults if this part of the test fails
 
     i = c[0];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime::minimum());
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:00"));
+    TS_ASSERT_EQUALS(i.begin(), DateAndTime::minimum());
+    TS_ASSERT_EQUALS(i.end(), DateAndTime("2007-11-30T16:17:00"));
     i = c[1];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:10"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:20"));
+    TS_ASSERT_EQUALS(i.begin(), DateAndTime("2007-11-30T16:17:10"));
+    TS_ASSERT_EQUALS(i.end(), DateAndTime("2007-11-30T16:17:20"));
     i = c[2];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:30"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime::maximum());
+    TS_ASSERT_EQUALS(i.begin(), DateAndTime("2007-11-30T16:17:30"));
+    TS_ASSERT_EQUALS(i.end(), DateAndTime::maximum());
   }
 
   //----------------------------------------------------------------------------
@@ -365,8 +365,8 @@ public:
     if (c.size() < 1)
       return; // avoid segfaults if this part of the test fails
     i = c[0];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime::minimum());
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime::maximum());
+    TS_ASSERT_EQUALS(i.begin(), DateAndTime::minimum());
+    TS_ASSERT_EQUALS(i.end(), DateAndTime::maximum());
   }
 
   //----------------------------------------------------------------------------
@@ -389,11 +389,11 @@ public:
       return; // avoid segfaults if this part of the test fails
 
     i = c[0];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime::minimum());
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:00"));
+    TS_ASSERT_EQUALS(i.begin(), DateAndTime::minimum());
+    TS_ASSERT_EQUALS(i.end(), DateAndTime("2007-11-30T16:17:00"));
     i = c[1];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:30"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime::maximum());
+    TS_ASSERT_EQUALS(i.begin(), DateAndTime("2007-11-30T16:17:30"));
+    TS_ASSERT_EQUALS(i.end(), DateAndTime::maximum());
   }
 
   //----------------------------------------------------------------------------
@@ -448,28 +448,28 @@ public:
       return; // avoid segfaults if this part of the test fails
 
     i = c[0];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:00"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:10"));
+    TS_ASSERT_EQUALS(i.begin(), DateAndTime("2007-11-30T16:17:00"));
+    TS_ASSERT_EQUALS(i.end(), DateAndTime("2007-11-30T16:17:10"));
     TS_ASSERT_EQUALS(i.index(), 1);
 
     i = c[1];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:20"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:30"));
+    TS_ASSERT_EQUALS(i.begin(), DateAndTime("2007-11-30T16:17:20"));
+    TS_ASSERT_EQUALS(i.end(), DateAndTime("2007-11-30T16:17:30"));
     TS_ASSERT_EQUALS(i.index(), 1);
 
     i = c[2];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:40"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:18:00"));
+    TS_ASSERT_EQUALS(i.begin(), DateAndTime("2007-11-30T16:17:40"));
+    TS_ASSERT_EQUALS(i.end(), DateAndTime("2007-11-30T16:18:00"));
     TS_ASSERT_EQUALS(i.index(), 1);
 
     i = c[3];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:18:00"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:18:10"));
+    TS_ASSERT_EQUALS(i.begin(), DateAndTime("2007-11-30T16:18:00"));
+    TS_ASSERT_EQUALS(i.end(), DateAndTime("2007-11-30T16:18:10"));
     TS_ASSERT_EQUALS(i.index(), 2);
 
     i = c[4];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:18:50"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:18:55"));
+    TS_ASSERT_EQUALS(i.begin(), DateAndTime("2007-11-30T16:18:50"));
+    TS_ASSERT_EQUALS(i.end(), DateAndTime("2007-11-30T16:18:55"));
     TS_ASSERT_EQUALS(i.index(), 2);
 
     // This fails since you can't add splitters together
@@ -501,10 +501,10 @@ public:
     // sort using the operator<
     std::sort(b.begin(), b.end());
 
-    TS_ASSERT_EQUALS(b[0].start(), DateAndTime("2007-11-30T16:15:00"));
-    TS_ASSERT_EQUALS(b[1].start(), DateAndTime("2007-11-30T16:17:00"));
-    TS_ASSERT_EQUALS(b[2].start(), DateAndTime("2007-11-30T16:18:00"));
-    TS_ASSERT_EQUALS(b[3].start(), DateAndTime("2007-11-30T16:19:00"));
+    TS_ASSERT_EQUALS(b[0].begin(), DateAndTime("2007-11-30T16:15:00"));
+    TS_ASSERT_EQUALS(b[1].begin(), DateAndTime("2007-11-30T16:17:00"));
+    TS_ASSERT_EQUALS(b[2].begin(), DateAndTime("2007-11-30T16:18:00"));
+    TS_ASSERT_EQUALS(b[3].begin(), DateAndTime("2007-11-30T16:19:00"));
   }
 
   //----------------------------------------------------------------------------

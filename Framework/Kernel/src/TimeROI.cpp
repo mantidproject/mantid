@@ -310,7 +310,7 @@ void TimeROI::update_union(const TimeROI &other) {
 
   // add all the intervals from the other
   for (const auto interval : other.toSplitters()) {
-    this->addROI(interval.start(), interval.stop());
+    this->addROI(interval.begin(), interval.end());
   }
 }
 
@@ -446,8 +446,8 @@ void TimeROI::saveNexus(::NeXus::File *file) const {
   // create a local TimeSeriesProperty which will do the actual work
   TimeSeriesProperty<bool> tsp(NAME);
   for (const auto interval : this->toSplitters()) {
-    tsp.addValue(interval.start(), ROI_USE);
-    tsp.addValue(interval.stop(), ROI_IGNORE);
+    tsp.addValue(interval.begin(), ROI_USE);
+    tsp.addValue(interval.end(), ROI_IGNORE);
   }
 
   // save things to to disk

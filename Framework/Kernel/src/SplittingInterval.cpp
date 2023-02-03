@@ -19,14 +19,8 @@ SplittingInterval::SplittingInterval(const Types::Core::DateAndTime &start, cons
                                      const int index)
     : TimeInterval(start, stop), m_index(index) {}
 
-/// Return the start time
-DateAndTime SplittingInterval::start() const { return this->begin(); }
-
-/// Return the stop time
-DateAndTime SplittingInterval::stop() const { return this->end(); }
-
 /// Returns the duration in seconds
-double SplittingInterval::duration() const { return DateAndTime::secondsFromDuration(end() - begin()); }
+double SplittingInterval::duration() const { return DateAndTime::secondsFromDuration(this->length()); }
 
 /// Return the index (destination of this split time block)
 int SplittingInterval::index() const { return m_index; }
