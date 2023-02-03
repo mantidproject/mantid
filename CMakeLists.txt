@@ -29,7 +29,7 @@ option(ENABLE_WORKBENCH "Enable Qt5-based gui" ON)
 set(MANTID_FRAMEWORK_LIB
     "BUILD"
     CACHE STRING "Mantid framework build options, valid options are (BUILD, SYSTEM).
-If system is specificed a valid mantid framework installation must be present on the system, e.g from conda"
+If system is specified a valid mantid framework installation must be present on the system, e.g. from conda"
 )
 set_property(CACHE MANTID_FRAMEWORK_LIB PROPERTY STRINGS "BUILD" "SYSTEM")
 
@@ -54,7 +54,7 @@ if(NOT
     OR MANTID_FRAMEWORK_LIB STREQUAL "BUILD"
     OR ENABLE_DOCS)
 )
-  message(FATAL_ERROR "Must select atleast one component to build")
+  message(FATAL_ERROR "Must select at least one component to build")
 endif()
 
 # Create two internal BUILD_* variables. With these, we can do consistent checks throughout, e.g: if(BUILD_MANTIDQT OR
