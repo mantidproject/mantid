@@ -4,11 +4,11 @@ cmake_minimum_required(VERSION 3.16)
 # Define the project name.
 project(Mantid)
 
-# Policy settings
+# Use modern >=2.8.12 INTERFACE_LINK_LIBRARIES behaviour: https://cmake.org/cmake/help/latest/policy/CMP0022.html
 if(POLICY CMP0022)
   cmake_policy(SET CMP0022 NEW)
 endif()
-
+# find_package() uses <PackageName>_ROOT variables: https://cmake.org/cmake/help/latest/policy/CMP0074.html
 if(POLICY CMP0074)
   cmake_policy(SET CMP0074 NEW)
 endif()
