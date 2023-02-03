@@ -291,7 +291,6 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/LogValueFinder.h
     inc/MantidQtWidgets/Common/MantidDesktopServices.h
     inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
-    inc/MantidQtWidgets/Common/MockJobRunner.h
     inc/MantidQtWidgets/Common/MultifitSetupDialog.h
     inc/MantidQtWidgets/Common/MuonPeriodInfo.h
     inc/MantidQtWidgets/Common/ParseKeyValueString.h
@@ -320,6 +319,8 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/Batch/FindSubtreeRoots.h
     inc/MantidQtWidgets/Common/Batch/BuildSubtreeItems.h
     inc/MantidQtWidgets/Common/JobRunners/IJobRunner.h
+    inc/MantidQtWidgets/Common/JobRunners/MockAlgorithmRunner.h
+    inc/MantidQtWidgets/Common/JobRunners/MockJobRunner.h
     inc/MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h
     inc/MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h
     inc/MantidQtWidgets/Common/WorkspacePresenter/ViewNotifiable.h

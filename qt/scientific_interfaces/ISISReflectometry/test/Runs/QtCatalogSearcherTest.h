@@ -12,7 +12,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidQtWidgets/Common/MockAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/JobRunners/MockAlgorithmRunner.h"
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
