@@ -27,18 +27,6 @@ include_directories(${Boost_INCLUDE_DIRS})
 # Add a definition that's used to guard MPI-specific parts of the main code
 add_definitions(-DMPI_BUILD)
 
-# Add the ability to build a 'mantid-mpi' rpm
-set(CPACK_PACKAGE_NAME mantid-mpi)
-include(CPackCommon)
-include(CPackLinuxSetup)
-# Framework dependencies
-set(CPACK_RPM_PACKAGE_REQUIRES "boost >= 1.34.1,nexus,gsl,glibc,OCE-modeling,OCE-foundation,muParser,numpy")
-set(CPACK_RPM_PACKAGE_REQUIRES
-    "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-util,poco-xml,poco-net,poco-netssl,poco-foundation"
-)
-set(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},gperftools-libs >= 2.0")
-set(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},boost-openmpi")
-
 # Configure a module file This is where the software tree will be that we want the modulefile to point into. The
 # 'normal' install location is the default, but this should normally be set manually in the cmake configuration for a
 # build
@@ -48,10 +36,3 @@ set(INSTALL_ROOT
 )
 # Remove old module file
 execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/modulefile)
-# Create new module file
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/../installers/LinuxInstaller/modulefile.template
-  ${CMAKE_BINARY_DIR}/modulefile/${CPACK_PACKAGE_VERSION}
-)
-
-include(CPack)

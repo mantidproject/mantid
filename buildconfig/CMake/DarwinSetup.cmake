@@ -66,39 +66,3 @@ set(ETC_DIR etc)
 set(LIB_DIR lib)
 set(SITE_PACKAGES lib)
 set(PLUGINS_DIR plugins)
-
-# ######################################################################################################################
-# Mac-specific installation setup
-# ######################################################################################################################
-if(ENABLE_WORKBENCH AND NOT CONDA_BUILD)
-  set(CPACK_GENERATOR DragNDrop)
-  set(CMAKE_INSTALL_PREFIX
-      ""
-      CACHE PATH ""
-  )
-  # Replace hdiutil command to retry on detach failure
-  set(CPACK_COMMAND_HDIUTIL ${CMAKE_SOURCE_DIR}/installers/MacInstaller/hdiutilwrap)
-  set(CMAKE_MACOSX_RPATH 1)
-  set(CPACK_DMG_BACKGROUND_IMAGE ${CMAKE_SOURCE_DIR}/installers/conda/osx/dmg_background.png)
-
-  set(WORKBENCH_BUNDLE MantidWorkbench.app/Contents/)
-  set(WORKBENCH_APP MantidWorkbench${CPACK_PACKAGE_SUFFIX_CAMELCASE}.app)
-  set(WORKBENCH_BUNDLE ${WORKBENCH_APP}/Contents/)
-  set(WORKBENCH_BIN_DIR ${WORKBENCH_BUNDLE}MacOS)
-  set(WORKBENCH_LIB_DIR ${WORKBENCH_BUNDLE}MacOS)
-  set(WORKBENCH_SITE_PACKAGES ${WORKBENCH_BUNDLE}MacOS)
-  set(WORKBENCH_PLUGINS_DIR ${WORKBENCH_BUNDLE}PlugIns)
-
-  install(
-    FILES ${CMAKE_SOURCE_DIR}/images/mantid_workbench${CPACK_PACKAGE_SUFFIX}.icns
-    DESTINATION ${WORKBENCH_BUNDLE}Resources/
-    COMPONENT Runtime
-  )
-  set(BUNDLES ${INBUNDLE} ${WORKBENCH_BUNDLE})
-
-  # Produce script to move icons in finder window to the correct locations
-  configure_file(
-    ${CMAKE_SOURCE_DIR}/installers/MacInstaller/CMakeDMGSetup.scpt.in ${CMAKE_BINARY_DIR}/DMGSetup.scpt @ONLY
-  )
-  set(CPACK_DMG_DS_STORE_SETUP_SCRIPT ${CMAKE_BINARY_DIR}/DMGSetup.scpt)
-endif()

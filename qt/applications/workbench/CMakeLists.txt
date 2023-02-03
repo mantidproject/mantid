@@ -127,52 +127,6 @@ if(MANTID_QT_LIB STREQUAL "BUILD")
   add_dependencies(workbench mantidqtinterfaces)
 endif()
 
-# macOS package fixes
-if(APPLE AND NOT CONDA_BUILD)
-  # create Info.plist
-  set(MAC_BUNDLE_EXECUTABLE ${PACKAGE_EXECUTABLE})
-  set(MAC_BUNDLE_IDENTIFIER "org.mantidproject.${PACKAGE_EXECUTABLE}")
-  set(MAC_BUNDLE_ICON mantid_workbench${CPACK_PACKAGE_SUFFIX}.icns)
-  set(MAC_BUNDLE_NAME ${PACKAGE_EXECUTABLE})
-  configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../../installers/MacInstaller/Info.plist.in ${CMAKE_CURRENT_BINARY_DIR}/Info.plist
-    @ONLY
-  )
-  # Determine Qt install prefix
-  set(_qt_install_prefix ${Qt5Core_DIR})
-  foreach(_i RANGE 2)
-    get_filename_component(_qt_install_prefix ${_qt_install_prefix} DIRECTORY)
-  endforeach()
-  install(
-    FILES ${CMAKE_CURRENT_BINARY_DIR}/Info.plist
-    DESTINATION ${WORKBENCH_BUNDLE}
-    COMPONENT Runtime
-  )
-
-  # We can't do this in a conda_env as it looks for homebrew packages
-  if(NOT CONDA_ENV)
-    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-      # This is a horrible hack to remove the directories that eigen installs as it does not seem possible to change the
-      # location without editing the install command within the eigen source. This will not be an issue when we stop
-      # using eigen as an external project.
-      install(CODE "file(REMOVE_RECURSE \${CMAKE_INSTALL_PREFIX}/include \${CMAKE_INSTALL_PREFIX}/share)")
-    endif()
-    install(
-      CODE "
-      execute_process(COMMAND ${CMAKE_SOURCE_DIR}/installers/MacInstaller/make_package.rb
-                              \${CMAKE_INSTALL_PREFIX}/${WORKBENCH_APP} ${Python_EXECUTABLE} ${_qt_install_prefix}
-                      RESULT_VARIABLE install_name_tool_result OUTPUT_VARIABLE _out ERROR_VARIABLE _out COMMAND_ECHO STDOUT)
-      if(NOT install_name_tool_result EQUAL 0)
-        message(\"\${_out}\")
-        message(FATAL_ERROR \"Package script failed!!!\n\")
-      endif()
-  "
-    )
-
-  endif()
-
-endif()
-
 # Testing
 set(TEST_FILES
     workbench/config/test/test_user.py
