@@ -1675,6 +1675,9 @@ template <typename TYPE> bool TimeSeriesProperty<TYPE>::isDefault() const { retu
 template <typename TYPE>
 TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics(const TimeROI *roi) const {
 
+  // Start with statistics that are not weighted by duration
+  TimeSeriesPropertyStatistics out(Mantid::Kernel::getStatistics(this->filteredValuesAsVector()));
+
   // Start with statistics that are not time-weighted
   TimeSeriesPropertyStatistics out(Mantid::Kernel::getStatistics(this->filteredValuesAsVector(roi)));
   out.duration = this->durationInSeconds(roi);
@@ -2047,8 +2050,15 @@ void TimeSeriesProperty<std::string>::histogramData(const Types::Core::DateAndTi
  * @param roi :: ROI regions validating any query time.
  * @returns :: Vector of included values only.
  */
-template <typename TYPE> std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredValuesAsVector() const {
-  return this->valuesAsVector(); // no filtering to do
+template <typename TYPE> std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredValuesAsVector(const TimeROI *roi) const {
+  if (roi) {
+    std::vector<TYPE> filteredValues;
+    for (const auto &timeAndValue : this->m_values)
+      if (roi->valueAtTime(timeAndValue.time()))
+        filteredValues.emplace_back(timeAndValue.value());
+    return filteredValues;
+  } else
+    return this->valuesAsVector();
 }
 
 /**

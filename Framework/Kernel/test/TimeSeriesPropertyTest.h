@@ -374,6 +374,31 @@ public:
   }
 
   //----------------------------------------------------------------------------
+  void test_filteredValuesAsVector() {
+    TimeSeriesProperty<double> *log = createDoubleTSP();
+    // no filter
+    this->assert_two_vectors(log->filteredValuesAsVector(), log->valuesAsVector(), 0.01);
+    // filter encompassing all the time domain
+    TimeROI *rois = new TimeROI;
+    rois->addROI("2007-11-30T16:17:00", "2007-11-30T16:17:31");
+    this->assert_two_vectors(log->filteredValuesAsVector(rois), log->valuesAsVector(), 0.01);
+    // times are outside the ROI's. Some times are at the upper boundaries of the ROI's, thus are excluded
+    rois->clear();
+    rois->addROI("2007-11-30T16:16:00", "2007-11-30T16:17:00"); // before the first time, including the first time
+    rois->addROI("2007-11-30T16:17:01", "2007-11-30T16:17:09"); // between times 1st and 2nd
+    rois->addROI("2007-11-30T16:17:15", "2007-11-30T16:17:20"); // between times 2nd and 3rd, including time 3rd
+    rois->addROI("2007-11-30T16:17:45", "2007-11-30T16:18:00"); // after last time
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(rois).size(), 0);
+    //
+    rois->clear();
+    rois->addROI("2007-11-30T16:16:30", "2007-11-30T16:17:05"); // capture the first time
+    rois->addROI("2007-11-30T16:17:10", "2007-11-30T16:17:20"); // capture second time, exclude the third
+    rois->addROI("2007-11-30T16:17:30", "2007-11-30T16:18:00"); // ROI after last time, including last time
+    std::vector<double> expected{9.99, 7.55, 10.55};
+    this->assert_two_vectors(log->filteredValuesAsVector(rois), expected, 0.01);
+  }
+
+  //----------------------------------------------------------------------------
   void test_filterByTime() {
     TimeSeriesProperty<int> *log = createIntegerTSP(6);
     TS_ASSERT_EQUALS(log->realSize(), 6);

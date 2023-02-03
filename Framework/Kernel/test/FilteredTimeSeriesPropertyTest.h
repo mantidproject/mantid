@@ -56,6 +56,25 @@ public:
     TS_ASSERT_EQUALS(filtered->nthValue(1), 4);
   }
 
+  //-------------------------------------------------------------------------------
+  void test_isTimeFiltered() {
+    auto source = createTestSeries("seriesName");
+    auto filter = createTestFilter();
+    auto filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(std::move(source), filter);
+    Mantid::Types::Core::DateAndTime aTime("2007-11-30T16:16:45");
+    TS_ASSERT_EQUALS(filtered->isTimeFiltered(aTime), false);
+    aTime.setFromISO8601("2007-11-30T16:16:55");
+    TS_ASSERT_EQUALS(filtered->isTimeFiltered(aTime), false);
+    aTime.setFromISO8601("2007-11-30T16:17:25");
+    TS_ASSERT_EQUALS(filtered->isTimeFiltered(aTime), true);
+    aTime.setFromISO8601("2007-11-30T16:17:35");
+    TS_ASSERT_EQUALS(filtered->isTimeFiltered(aTime), true);
+    aTime.setFromISO8601("2007-11-30T16:17:39");
+    TS_ASSERT_EQUALS(filtered->isTimeFiltered(aTime), false);
+    aTime.setFromISO8601("2007-11-30T16:17:40");
+    TS_ASSERT_EQUALS(filtered->isTimeFiltered(aTime), false);
+  }
+
   // Create a small TSP<int>. Callee owns the returned object.
   FilteredTimeSeriesProperty<int> *createIntegerTSP(int numberOfValues) {
     FilteredTimeSeriesProperty<int> *log = new FilteredTimeSeriesProperty<int>("intProp");
@@ -169,6 +188,7 @@ public:
     return;
   }
 
+  //-------------------------------------------------------------------------------
   void test_filter_with_single_value_in_series() {
     auto p1 = std::make_shared<FilteredTimeSeriesProperty<double>>("SingleValueTSP");
     p1->addValue("2007-11-30T16:17:00", 1.5);
