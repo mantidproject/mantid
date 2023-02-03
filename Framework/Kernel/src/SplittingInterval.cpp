@@ -25,9 +25,6 @@ double SplittingInterval::duration() const { return DateAndTime::secondsFromDura
 /// Return the index (destination of this split time block)
 int SplittingInterval::index() const { return m_index; }
 
-/// Return true if the b SplittingInterval overlaps with this one.
-bool SplittingInterval::overlaps(const SplittingInterval &b) const { return TimeInterval::overlaps(&b); }
-
 /// @cond DOXYGEN_BUG
 /// And operator. Return the smallest time interval where both intervals are
 /// TRUE.
@@ -41,7 +38,7 @@ SplittingInterval SplittingInterval::operator&(const SplittingInterval &b) const
 
 /// Or operator. Return the largest time interval.
 SplittingInterval SplittingInterval::operator|(const SplittingInterval &b) const {
-  if (!this->overlaps(b))
+  if (!this->overlaps(&b))
     throw std::invalid_argument("SplittingInterval: cannot apply the OR (|) "
                                 "operator to non-overlapping "
                                 "SplittingInterval's.");
@@ -121,7 +118,7 @@ SplittingIntervalVec operator&(const SplittingIntervalVec &a, const SplittingInt
   // sorted.
   for (ait = a.begin(); ait != a.end(); ++ait) {
     for (bit = b.begin(); bit != b.end(); ++bit) {
-      if (ait->overlaps(*bit)) {
+      if (ait->overlaps(&(*bit))) {
         // The & operator for SplittingInterval keeps the index of the
         // left-hand-side (ait in this case)
         //  meaning that a has to be the splitter because the b index is

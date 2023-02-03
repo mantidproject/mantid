@@ -31,7 +31,6 @@ public:
 
   int index() const;
 
-  bool overlaps(const SplittingInterval &b) const;
   /// @cond
   SplittingInterval operator&(const SplittingInterval &b) const;
   /// @endcond
