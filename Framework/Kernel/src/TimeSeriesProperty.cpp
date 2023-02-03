@@ -1854,10 +1854,12 @@ template <typename TYPE> bool TimeSeriesProperty<TYPE>::isDefault() const { retu
 /**
  * Return a TimeSeriesPropertyStatistics struct containing the
  * statistics of this TimeSeriesProperty object.
+ * @param roi : Optional TimeROI pointer to get statistics for active time.
  *
  * N.B. This method DOES take filtering into account
  */
-template <typename TYPE> TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics() const {
+template <typename TYPE>
+TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics(const TimeROI *roi) const {
   TimeSeriesPropertyStatistics out(Mantid::Kernel::getStatistics(this->filteredValuesAsVector()));
 
   if (this->size() > 0) {
@@ -1874,7 +1876,8 @@ template <typename TYPE> TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::
     out.time_standard_deviation = std::numeric_limits<double>::quiet_NaN();
     out.duration = std::numeric_limits<double>::quiet_NaN();
   }
-
+  if (roi == nullptr)
+    void(0);
   return out;
 }
 
@@ -2458,10 +2461,11 @@ namespace Mantid::Kernel {
  * statistics.
  *  @param propertyToFilter : Property to filter the statistics on.
  *  @param statisticType : Enum indicating the type of statistics to use.
+ *  @param roi : optional pointer to TimeROI object for active time.
  *  @return The TimeSeriesProperty filtered by the requested statistics.
  */
 double filterByStatistic(TimeSeriesProperty<double> const *const propertyToFilter,
-                         Kernel::Math::StatisticType statisticType) {
+                         Kernel::Math::StatisticType statisticType, const TimeROI *roi) {
   using namespace Kernel::Math;
   double singleValue = 0;
   switch (statisticType) {
@@ -2472,16 +2476,16 @@ double filterByStatistic(TimeSeriesProperty<double> const *const propertyToFilte
     singleValue = propertyToFilter->nthValue(propertyToFilter->size() - 1);
     break;
   case Minimum:
-    singleValue = propertyToFilter->getStatistics().minimum;
+    singleValue = propertyToFilter->getStatistics(roi).minimum;
     break;
   case Maximum:
-    singleValue = propertyToFilter->getStatistics().maximum;
+    singleValue = propertyToFilter->getStatistics(roi).maximum;
     break;
   case Mean:
-    singleValue = propertyToFilter->getStatistics().mean;
+    singleValue = propertyToFilter->getStatistics(roi).mean;
     break;
   case Median:
-    singleValue = propertyToFilter->getStatistics().median;
+    singleValue = propertyToFilter->getStatistics(roi).median;
     break;
   default:
     throw std::invalid_argument("filterByStatistic - Unknown statistic type: " +

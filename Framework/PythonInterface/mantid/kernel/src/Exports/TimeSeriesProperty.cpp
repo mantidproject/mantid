@@ -6,11 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/TimeROI.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/Converters/ContainerDtype.h"
 #include "MantidPythonInterface/core/Converters/DateAndTime.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
 
+#include <boost/python.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/implicit.hpp>
 #include <boost/python/init.hpp>
@@ -110,8 +112,7 @@ template <> std::string dtype(TimeSeriesProperty<std::string> &self) {
       .def("nthValue", &TimeSeriesProperty<TYPE>::nthValue, (arg("self"), arg("index")))                               \
       .def("nthTime", &TimeSeriesProperty<TYPE>::nthTime, (arg("self"), arg("index")),                                 \
            "returns :class:`mantid.kernel.DateAndTime`")                                                               \
-      .def("getStatistics", &TimeSeriesProperty<TYPE>::getStatistics, arg("self"),                                     \
-           "returns :class:`mantid.kernel.TimeSeriesPropertyStatistics`")                                              \
+      .def("getStatistics", &TimeSeriesProperty<TYPE>::getStatistics, getStatistics_overloads())                       \
       .def("timeAverageValue",                                                                                         \
            (double (TimeSeriesProperty<TYPE>::*)() const) & TimeSeriesProperty<TYPE>::timeAverageValue, (arg("self"))) \
       .def("timeAverageValue",                                                                                         \
@@ -122,6 +123,11 @@ template <> std::string dtype(TimeSeriesProperty<std::string> &self) {
 
 } // namespace
 
+// Ignore -Wconversion warnings coming from boost::python
+// Seen with GCC 7.1.1 and Boost 1.63.0
+GNU_DIAG_OFF("conversion")
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getStatistics_overloads, getStatistics, 0, 1)
+
 void export_TimeSeriesProperty_Double() { EXPORT_TIMESERIES_PROP(double, Float); }
 
 void export_TimeSeriesProperty_Bool() { EXPORT_TIMESERIES_PROP(bool, Bool); }
@@ -131,7 +137,7 @@ void export_TimeSeriesProperty_Int32() { EXPORT_TIMESERIES_PROP(int32_t, Int32);
 void export_TimeSeriesProperty_Int64() { EXPORT_TIMESERIES_PROP(int64_t, Int64); }
 
 void export_TimeSeriesProperty_String() { EXPORT_TIMESERIES_PROP(std::string, String); }
-
+GNU_DIAG_ON("conversion")
 void export_TimeSeriesPropertyStatistics() {
   class_<Mantid::Kernel::TimeSeriesPropertyStatistics>("TimeSeriesPropertyStatistics", no_init)
       .add_property("minimum", &Mantid::Kernel::TimeSeriesPropertyStatistics::minimum)
