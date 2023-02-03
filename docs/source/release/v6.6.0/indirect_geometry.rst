@@ -7,7 +7,12 @@ Indirect Geometry Changes
 
 New Features
 ------------
-- A new interface has been created: the :ref:`Indirect Data Manipulation Interface <interface-inelastic-data-manipulation>`, from the Indirect Data Analysis interface the :ref:`Sqw <indirect-sqw>`, :ref:`Moments <indirect-moments>`, and :ref:`Symmetrise <indirect-symmetrise>` tabs have been moved into the new interface along with :ref:`Elwin <elwin>` and :ref:`Iqt <iqt>` from the Indirect Data Analysis interface.
+- A new interface has been created: the :ref:`Indirect Data Manipulation Interface <interface-inelastic-data-manipulation>`, the :ref:`Sqw <indirect-sqw>`, :ref:`Moments <indirect-moments>`, and :ref:`Symmetrise <indirect-symmetrise>` tabs have been moved from the Indirect Data Reduction interface into the new interface along with :ref:`Elwin <elwin>` and :ref:`Iqt <iqt>` from the Indirect Data Analysis interface.
+
+.. image:: ../../images/6_6_release/Indirect/ManipulationTab.png
+    :align: center
+    :width: 600
+
 - :ref:`LoadEMU <algm-LoadEMU>` now loads data from the beam monitor and adds missing environment parameters, reactor power, and scan period to the log when loading EMU event files.
 - Added support for sparse workspace features in the :ref:`Indirect Correction Interface <interface-indirect-corrections>`.
 
