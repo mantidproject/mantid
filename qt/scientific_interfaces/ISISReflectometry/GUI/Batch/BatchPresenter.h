@@ -15,7 +15,7 @@
 #include "GUI/Save/ISavePresenter.h"
 #include "IBatchJobManager.h"
 #include "IBatchPresenter.h"
-#include "MantidQtWidgets/Common/IJobRunner.h"
+#include "MantidQtWidgets/Common/JobRunners/IJobRunner.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include <memory>
 

@@ -9,8 +9,6 @@
 #include "GUI/Batch/IReflAlgorithmFactory.h"
 #include "Reduction/PreviewRow.h"
 
-#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
-
 #include <gmock/gmock.h>
 
 class MockReflAlgorithmFactory : public IReflAlgorithmFactory {

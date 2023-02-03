@@ -9,7 +9,7 @@
 #include "DllConfig.h"
 #include "IndirectDataValidationHelper.h"
 #include "IndirectFitDataModel.h"
-#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/JobRunners/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
 #include <typeinfo>
 

@@ -7,7 +7,7 @@
 #include "AlgorithmProperties.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/JobRunners/BatchAlgorithmRunner.h"
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry::AlgorithmProperties {
 

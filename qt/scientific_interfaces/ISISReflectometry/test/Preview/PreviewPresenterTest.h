@@ -11,7 +11,6 @@
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/IPropertyManager.h"
-#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MockInstViewModel.h"
 #include "MockPlotPresenter.h"

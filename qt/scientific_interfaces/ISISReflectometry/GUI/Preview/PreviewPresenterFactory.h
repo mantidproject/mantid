@@ -10,7 +10,7 @@
 #include "IPreviewPresenter.h"
 #include "IPreviewView.h"
 #include "InstViewModel.h"
-#include "MantidQtWidgets/Common/QtJobRunner.h"
+#include "MantidQtWidgets/Common/JobRunners/QtJobRunner.h"
 #include "PreviewJobManager.h"
 #include "PreviewModel.h"
 #include "PreviewPresenter.h"

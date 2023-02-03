@@ -37,8 +37,8 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
-#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/Hint.h"
+#include "MantidQtWidgets/Common/JobRunners/BatchAlgorithmRunner.h"
 #include "Reduction/PreviewRow.h"
 
 #include <QMap>

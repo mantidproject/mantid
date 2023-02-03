@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/JobRunners/BatchAlgorithmRunner.h"
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 

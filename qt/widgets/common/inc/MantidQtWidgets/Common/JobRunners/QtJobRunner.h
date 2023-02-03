@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllOption.h"
 #include "IJobRunner.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
-#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/DllOption.h"
+#include "MantidQtWidgets/Common/JobRunners/BatchAlgorithmRunner.h"
 #include <QWidget>
 #include <deque>
 #include <vector>

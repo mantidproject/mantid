@@ -14,7 +14,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
-#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/JobRunners/BatchAlgorithmRunner.h"
 #include "Reduction/Item.h"
 #include "Reduction/PreviewRow.h"
 

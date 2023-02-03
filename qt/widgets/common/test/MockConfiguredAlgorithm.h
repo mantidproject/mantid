@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
 
 #include <gmock/gmock.h>

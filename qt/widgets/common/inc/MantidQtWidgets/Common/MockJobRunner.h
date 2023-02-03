@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidQtWidgets/Common/IJobRunner.h"
+#include "MantidQtWidgets/Common/JobRunners/IJobRunner.h"
 
 #include <gmock/gmock.h>
 #include <memory>

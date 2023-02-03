@@ -9,7 +9,7 @@
 #include "DllOption.h"
 #include "ui_DataSelector.h"
 
-#include "MantidQtWidgets/Common/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/JobRunners/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 
 #include <QWidget>

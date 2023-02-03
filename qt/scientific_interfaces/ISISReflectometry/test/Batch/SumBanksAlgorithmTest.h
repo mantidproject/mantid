@@ -12,7 +12,6 @@
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
-#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MockBatch.h"
 
 #include <cxxtest/TestSuite.h>

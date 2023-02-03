@@ -11,7 +11,7 @@
 #include "InelasticDataManipulationTab.h"
 
 #include "MantidGeometry/IComponent.h"
-#include "MantidQtWidgets/Common/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/JobRunners/AlgorithmRunner.h"
 
 #include <QRegExp>
 #include <QScrollArea>

@@ -8,8 +8,8 @@
 
 #include "Common/DllConfig.h"
 #include "GUI/Batch/RowProcessingAlgorithm.h"
-#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
+#include "MantidQtWidgets/Common/JobRunners/BatchAlgorithmRunner.h"
 #include "Reduction/Batch.h"
 
 #include <boost/optional.hpp>
