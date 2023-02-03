@@ -78,7 +78,7 @@ class MuonFileUtilsTest(unittest.TestCase):
         user_input = (
             "C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "EMU0001234.nxs;"
             "C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "EMU0001244.nxs_v1;"
-            "C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "EMU0001245.nxs_v2"
+            "C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "EMU0001245.nxs_v2;"
             "C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "PSI0001245.bin"
         )
         files = [
