@@ -350,9 +350,6 @@ protected:
   /// Set a value from another property
   std::string setValueFromProperty(const Property &right) override;
 
-  /// Time weighted mean and standard deviation
-  std::pair<double, double> timeAverageValueAndStdDev() const;
-
   /// Holds the time series data
   mutable std::vector<TimeValueUnit<TYPE>> m_values;
 
