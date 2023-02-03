@@ -46,7 +46,8 @@ public:
   /// Returns an intersection of two intervals
   TimeInterval intersection(const TimeInterval &ti) const;
   /// Returns true if this interval ends before \a ti starts
-  bool operator<(const TimeInterval &ti) const { return end() < ti.begin(); }
+  bool operator<(const TimeInterval &ti) const;
+  bool operator>(const TimeInterval &ti) const;
   /// String representation of the begin time
   std::string begin_str() const;
   /// String representation of the end time
@@ -55,7 +56,7 @@ public:
   /** Stream output operator  */
   friend MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &s, const Mantid::Kernel::TimeInterval &t);
 
-protected:
+private:
   /// begin
   Types::Core::DateAndTime m_begin;
   /// end

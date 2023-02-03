@@ -50,6 +50,23 @@ TimeInterval TimeInterval::intersection(const TimeInterval &ti) const {
   return t1 < t2 ? TimeInterval(t1, t2) : TimeInterval();
 }
 
+bool TimeInterval::operator<(const TimeInterval &ti) const {
+  if (end() < ti.begin())
+    return true;
+  else if (end() == ti.begin())
+    return begin() < ti.begin();
+  else
+    return false;
+}
+bool TimeInterval::operator>(const TimeInterval &ti) const {
+  if (begin() < ti.end())
+    return true;
+  else if (begin() == ti.end())
+    return begin() > ti.begin();
+  else
+    return false;
+}
+
 /// String representation of the begin time
 std::string TimeInterval::begin_str() const { return boost::posix_time::to_simple_string(this->m_begin.to_ptime()); }
 
