@@ -47,10 +47,6 @@ signals:
   // Signal emitted to cancel any already running workers
   void disconnectWorkers();
 
-private slots:
-  // Handle when a search is finished
-  void searchFinished();
-
 private:
   /// Get a handle to the static file finder thread pool instance
   const std::unique_ptr<QThreadPool> &poolInstance() const;
@@ -61,8 +57,6 @@ private:
 
   /// Handle to the allocator function for creating new worker threads
   ThreadAllocator m_workerAllocator;
-  /// Flag set if a search is currently running
-  bool m_searchIsRunning;
 };
 
 } // namespace API
