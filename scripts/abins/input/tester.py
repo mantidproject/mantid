@@ -10,6 +10,7 @@ from numpy.testing import assert_allclose
 
 import abins
 from abins.input import AbInitioLoader
+from abins.test_helpers import dict_arrays_to_lists
 
 
 class Tester(object):
@@ -220,19 +221,4 @@ class Tester(object):
                 eigenvector.flatten().view(float).tofile(f, sep=" ")
 
         with open("{seedname}_data.txt".format(seedname=seedname), "wt") as f:
-            json.dump(cls._arrays_to_lists(data), f, indent=4, sort_keys=True)
-
-    @classmethod
-    def _arrays_to_lists(cls, mydict):
-        """Recursively convert numpy arrays in a nested dict to lists (i.e. valid JSON)
-
-        Returns a processed *copy* of the input dictionary: in-place values will not be altered."""
-        clean_dict = {}
-        for key, value in mydict.items():
-            if isinstance(value, np.ndarray):
-                clean_dict[key] = value.tolist()
-            elif isinstance(value, dict):
-                clean_dict[key] = cls._arrays_to_lists(value)
-            else:
-                clean_dict[key] = value
-        return clean_dict
+            json.dump(dict_arrays_to_lists(data), f, indent=4, sort_keys=True)

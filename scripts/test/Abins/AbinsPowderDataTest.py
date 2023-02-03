@@ -30,6 +30,7 @@ class AbinsPowderDataTest(unittest.TestCase):
                 )
             },
             "frequencies": {0: np.asarray([2.34, 5.67, 8.90])},
+            "n_plus_1": {0: np.asarray([1.0, 1.0, 1.0])},
         }
 
     def test_bad_num_atoms(self):
@@ -55,7 +56,8 @@ class AbinsPowderDataTest(unittest.TestCase):
         bad_items = {
             "a_tensors": {0: np.asarray([[[0.01, 0.02, 0.03], [0.01, 0.02, 0.03], [0.01, 0.02, 0.03]]])},
             "b_tensors": {0: np.asarray([[[0.01, 0.02, 0.03], [0.01, 0.02, 0.03], [0.01, 0.02, 0.03]]])},
-            "frequencies": {0: np.asarray([[[1.23, 4.56, 7.89]]])},
+            "frequencies": {0: np.asarray([1.23, 4.56, 7.89])},
+            "n_plus_1": {0: np.asarray([1.0, 1.0, 1.0])},
         }
         with self.assertRaises(ValueError):
             PowderData(**bad_items, num_atoms=2)

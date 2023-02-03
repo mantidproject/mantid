@@ -24,7 +24,11 @@ class PowderData:
     :param num_atoms: Expected number of atoms in tensor data. If provided,
         this value is used for sanity-checking
 
+    :param n_plus_1: Bose occupation <n+1> values corresponding to
+        modes. b_tensors should already be scaled by <n+1>, a_tensors by <2n+1>
+
     """
+
     def __init__(
         self,
         *,
@@ -32,7 +36,8 @@ class PowderData:
         b_tensors: Dict[int, np.ndarray],
         frequencies: Dict[int, np.ndarray],
         num_atoms: Optional[int] = None,
-        n_plus_1: Dict[int, np.ndarray]):
+        n_plus_1: Dict[int, np.ndarray],
+    ):
 
         self._data = {"a_tensors": a_tensors, "b_tensors": b_tensors, "frequencies": frequencies, "n_plus_1": n_plus_1}  # type: PowderDict
 
