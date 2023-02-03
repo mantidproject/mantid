@@ -1,5 +1,5 @@
 # ######################################################################################################################
-# Controls various project wide sanitizer options
+# Controls various project wide sanitizer options https://developer.mantidproject.org/RunningSanitizers.html
 # ######################################################################################################################
 
 set(USE_SANITIZER
