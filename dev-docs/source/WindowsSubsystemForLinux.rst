@@ -76,6 +76,30 @@ The Mantid code can then be retrieved in the usual way using `git clone` from th
 
 You are now ready to CMake and build the Mantid code. Follow the Ubuntu 18.04 or Centos 7 build instructions `here <https://developer.mantidproject.org/GettingStarted.html#linux>`_.
 
+Using Graphical User Interfaces (GUI)
+#####################################
+
+WSL does not currently support GUIs. In order to display a GUI from an application running in WSL you will need to use an XServer. Failure to do so will result in a crash upon launching `workbench`.
+
+To use an XServer:
+
+1. Download a compatible XServer onto the host Windows machine. `MobaXterm <https://mobaxterm.mobatek.net/>`_ is recommended and has been confirmed to work with Mantid Workbench.
+
+2. Install `MobaXterm` and open the MobaXterm app upon completion. Using the `Settings` drop down menu select `Configure`. On the `X11` tab ensure that `X11 server display mode` is set to
+   `Multiwindow mode` and that `X11 remote access` is set to `full`.
+
+3. The XServer should be running by default - this can be checked by clicking the `X server` icon in the top right hand corner of the `MobaXterm` interface.
+
+4. Configure the `DISPLAY` variable on WSL. The manner in which this is done differs between WSL1 and WSL2. To check which version you have use the command `wsl -l -v` in the command prompt on the host machine.
+   If you have WSL1, it is recommended to upgrade to `WSL2 <https://learn.microsoft.com/en-us/windows/wsl/install>`_.
+
+  1. On WSL, use `cd` to navigate to your home directory containing the `.bashrc` file.
+  2. Using `vi .bashrc` append the following to the file contents:
+
+     `export DISPLAY=$(route.exe print | grep 0.0.0.0 | head -1 | awk '{print $4}'):0.0`.
+  3. Exit and re-enter WSL via the command prompt.
+  4. Echo the `DISPLAY` variable, you should see the value `<host machine IP Address>:0.0`. You can compare this output IP address to that output when running `ipconfig /all` through the command line on the host machine.
+
 Tips
 ####
 
