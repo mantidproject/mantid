@@ -15,6 +15,7 @@ class WorkerSignals(QtCore.QObject):
     """
     Defines the signals available from a running ThreadModelWorker.
     """
+
     started = Signal()
     finished = Signal()
     error = Signal(str)
@@ -62,6 +63,7 @@ class ThreadModel(QtWidgets.QWidget):
     A wrapper to allow threading with
     the MaxEnt models.
     """
+
     exceptionSignal = QtCore.Signal(str)
 
     def __init__(self, model):
@@ -78,13 +80,11 @@ class ThreadModel(QtWidgets.QWidget):
     def check_model_has_correct_attributes(self):
         if hasattr(self.model, "execute"):
             return
-        raise AttributeError("Please ensure the model passed to ThreadModel has implemented"
-                             " execute() method")
+        raise AttributeError("Please ensure the model passed to ThreadModel has implemented" " execute() method")
 
     def setup_thread_and_start(self):
         # Construct the Async thread
-        self.worker = AsyncTaskQtAdaptor(target=self.model.execute, error_cb=self.warning,
-                                         finished_cb=self.threadWrapperTearDown)
+        self.worker = AsyncTaskQtAdaptor(target=self.model.execute, error_cb=self.warning, finished_cb=self.threadWrapperTearDown)
         self.worker.start()
 
         # trigger the slot for the start of the process
@@ -111,22 +111,20 @@ class ThreadModel(QtWidgets.QWidget):
     # if there are multiple inputs (alg>1)
     def loadData(self, inputs):
         if not hasattr(self.model, "loadData"):
-            raise AttributeError("The model passed to ThreadModel has not implemented"
-                                 " loadData() method, which it is attempting to call.")
+            raise AttributeError(
+                "The model passed to ThreadModel has not implemented" " loadData() method, which it is attempting to call."
+            )
         self.model.loadData(inputs)
 
-    def threadWrapperSetUp(self,
-                           on_thread_start_callback=lambda: 0,
-                           on_thread_end_callback=lambda: 0,
-                           on_thread_exception_callback=None):
+    def threadWrapperSetUp(self, on_thread_start_callback=lambda: 0, on_thread_end_callback=lambda: 0, on_thread_exception_callback=None):
 
-        assert hasattr(on_thread_start_callback, '__call__')
-        assert hasattr(on_thread_end_callback, '__call__')
+        assert hasattr(on_thread_start_callback, "__call__")
+        assert hasattr(on_thread_end_callback, "__call__")
 
         self.start_slot = on_thread_start_callback
         self.end_slot = on_thread_end_callback
         if on_thread_exception_callback is not None:
-            assert hasattr(on_thread_exception_callback, '__call__')
+            assert hasattr(on_thread_exception_callback, "__call__")
             self._exception_callback = on_thread_exception_callback
         else:
             self._exception_callback = self._default_exception_callback

@@ -29,5 +29,5 @@ class MaskWorkspaceTest(unittest.TestCase):
         self.assertIsNotNone(mask_with_mask_files(mask_info, inst_info, workspace=None))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

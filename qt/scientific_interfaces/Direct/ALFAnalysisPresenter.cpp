@@ -11,6 +11,16 @@
 
 #include <exception>
 
+namespace {
+
+double constexpr EPSILON = std::numeric_limits<double>::epsilon();
+
+bool equalWithinTolerance(double const val1, double const val2, double const tolerance = 0.000001) {
+  return std::abs(val1 - val2) <= (tolerance + 2.0 * EPSILON);
+}
+
+} // namespace
+
 namespace MantidQt::CustomInterfaces {
 
 ALFAnalysisPresenter::ALFAnalysisPresenter(IALFAnalysisView *view, std::unique_ptr<IALFAnalysisModel> model)
@@ -20,13 +30,32 @@ ALFAnalysisPresenter::ALFAnalysisPresenter(IALFAnalysisView *view, std::unique_p
 
 QWidget *ALFAnalysisPresenter::getView() { return m_view->getView(); }
 
-void ALFAnalysisPresenter::subscribeInstrumentPresenter(IALFInstrumentPresenter *presenter) {
-  m_instrumentPresenter = presenter;
+void ALFAnalysisPresenter::setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace,
+                                                 std::vector<double> const &twoThetas) {
+  m_model->setExtractedWorkspace(workspace, twoThetas);
+  calculateEstimate();
+  updateViewFromModel();
+}
+
+void ALFAnalysisPresenter::notifyPeakPickerChanged() {
+  m_model->setPeakParameters(m_view->getPeak());
+
+  auto const fitStatus = m_model->fitStatus();
+
+  m_view->setPeakCentre(m_model->peakCentre());
+  m_view->setPeakCentreStatus(fitStatus);
+  if (fitStatus.empty()) {
+    m_view->removeFitSpectrum();
+  }
 }
 
 void ALFAnalysisPresenter::notifyPeakCentreEditingFinished() {
-  m_model->setPeakCentre(m_view->peakCentre());
-  m_view->setPeakCentreStatus(m_model->fitStatus());
+  auto const newPeakCentre = m_view->peakCentre();
+  if (!equalWithinTolerance(m_model->peakCentre(), newPeakCentre)) {
+    m_model->setPeakCentre(newPeakCentre);
+    updatePeakCentreInViewFromModel();
+    updateRotationAngleInViewFromModel();
+  }
 }
 
 void ALFAnalysisPresenter::notifyFitClicked() {
@@ -35,35 +64,44 @@ void ALFAnalysisPresenter::notifyFitClicked() {
     return;
   }
 
-  auto const extractedWsName = m_instrumentPresenter->extractedWsName();
   try {
-    m_model->doFit(extractedWsName, m_view->getRange());
-  } catch (...) {
-    m_view->displayWarning("Fit failed");
+    auto const fitWorkspace = m_model->doFit(m_view->getRange());
+    m_view->addFitSpectrum(fitWorkspace);
+  } catch (std::exception const &ex) {
+    m_view->displayWarning(ex.what());
   }
   updatePeakCentreInViewFromModel();
-  m_view->addFitSpectrum(extractedWsName + "_fits_Workspace");
+  updateRotationAngleInViewFromModel();
 }
 
-void ALFAnalysisPresenter::notifyUpdateEstimateClicked() {
-  auto const validationMessage = validateFitValues();
-  if (!validationMessage) {
-    m_model->calculateEstimate(m_instrumentPresenter->extractedWsName(), m_view->getRange());
-    updatePeakCentreInViewFromModel();
-  } else {
-    m_view->displayWarning(*validationMessage);
+void ALFAnalysisPresenter::notifyExportWorkspaceToADSClicked() { m_model->exportWorkspaceCopyToADS(); }
+
+void ALFAnalysisPresenter::notifyExternalPlotClicked() {
+  if (auto const plotWorkspace = m_model->plottedWorkspace()) {
+    m_view->openExternalPlot(plotWorkspace, m_model->plottedWorkspaceIndices());
   }
+}
+
+void ALFAnalysisPresenter::notifyResetClicked() {
+  calculateEstimate();
+  updatePeakCentreInViewFromModel();
+  updateRotationAngleInViewFromModel();
 }
 
 std::optional<std::string> ALFAnalysisPresenter::validateFitValues() const {
-  if (!m_instrumentPresenter->checkDataIsExtracted())
+  if (!m_model->isDataExtracted())
     return "Need to have extracted data to do a fit or estimate.";
   if (!checkPeakCentreIsWithinFitRange())
     return "The Peak Centre provided is outside the fit range.";
   return std::nullopt;
 }
 
-void ALFAnalysisPresenter::notifyTubeExtracted() { m_view->addSpectrum(m_instrumentPresenter->extractedWsName()); }
+std::size_t ALFAnalysisPresenter::numberOfTubes() const { return m_model->numberOfTubes(); }
+
+void ALFAnalysisPresenter::clear() {
+  m_model->clear();
+  updateViewFromModel();
+}
 
 bool ALFAnalysisPresenter::checkPeakCentreIsWithinFitRange() const {
   auto const peakCentre = m_view->peakCentre();
@@ -71,9 +109,36 @@ bool ALFAnalysisPresenter::checkPeakCentreIsWithinFitRange() const {
   return range.first < peakCentre && peakCentre < range.second;
 }
 
-void ALFAnalysisPresenter::updatePeakCentreInViewFromModel() {
-  m_view->setPeakCentre(m_model->peakCentre());
-  m_view->setPeakCentreStatus(m_model->fitStatus());
+void ALFAnalysisPresenter::calculateEstimate() {
+  if (m_model->isDataExtracted()) {
+    m_model->calculateEstimate(m_view->getRange());
+  }
 }
+
+void ALFAnalysisPresenter::updateViewFromModel() {
+  updatePlotInViewFromModel();
+  updateTwoThetaInViewFromModel();
+  updatePeakCentreInViewFromModel();
+  updateRotationAngleInViewFromModel();
+}
+
+void ALFAnalysisPresenter::updatePlotInViewFromModel() { m_view->addSpectrum(m_model->extractedWorkspace()); }
+
+void ALFAnalysisPresenter::updateTwoThetaInViewFromModel() {
+  m_view->setAverageTwoTheta(m_model->averageTwoTheta(), m_model->allTwoThetas());
+}
+
+void ALFAnalysisPresenter::updatePeakCentreInViewFromModel() {
+  m_view->setPeak(m_model->getPeakCopy(), m_model->background());
+
+  auto const fitStatus = m_model->fitStatus();
+  m_view->setPeakCentreStatus(fitStatus);
+  if (fitStatus.empty()) {
+    m_view->removeFitSpectrum();
+  }
+  m_view->replot();
+}
+
+void ALFAnalysisPresenter::updateRotationAngleInViewFromModel() { m_view->setRotationAngle(m_model->rotationAngle()); }
 
 } // namespace MantidQt::CustomInterfaces

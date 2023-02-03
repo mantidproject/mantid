@@ -17,14 +17,13 @@ absorption_correction_params = {
     # Therefore they cannot be overridden using basic config files or keyword arguments.
     "cylinder_sample_height": 4.0,
     "cylinder_sample_radius": 0.25,
-    "cylinder_position": [0., 0., 0.],
-
+    "cylinder_position": [0.0, 0.0, 0.0],
     "chemical_formula": "V",
 }
 
 file_names = {
     "vanadium_peaks_masking_file": "VanaPeaks.dat",
-    "grouping_file_name": "Master_copy_of_grouping_file_with_essential_masks.cal"
+    "grouping_file_name": "Master_copy_of_grouping_file_with_essential_masks.cal",
 }
 
 script_params = {
@@ -33,15 +32,15 @@ script_params = {
 }
 
 pdf_focused_cropping_values = [
-    (700,  30000),  # Bank 1
+    (700, 30000),  # Bank 1
     (1200, 24900),  # Bank 2
     (1100, 19950),  # Bank 3
     (1100, 19950),  # Bank 4
     (1100, 19950),  # Bank 5
-    ]
+]
 
 rietveld_focused_cropping_values = [
-    (700,  30000),  # Bank 1
+    (700, 30000),  # Bank 1
     (1200, 24900),  # Bank 2
     (1100, 19950),  # Bank 3
     (1100, 19950),  # Bank 4
@@ -71,25 +70,21 @@ sample_empty_scale = 1.0
 variable_help = {
     "file_names": {
         "vanadium_peaks_masking_file": "Specifies the name of the of the file containing the positions of the vanadium "
-                                       "Bragg Peaks to mask out. This must be located at the root of the calibration "
-                                       "folder the user has specified."
+        "Bragg Peaks to mask out. This must be located at the root of the calibration "
+        "folder the user has specified."
     },
-
     "script_params": {
         "raw_data_cropping_values": "This specifies the valid range in TOF of the raw data. This is applied before any "
-                                    "processing takes place to remove negative counts at very low TOF values",
-        "spline_coefficient": "The coefficient to use when calculating the vanadium splines during the calibration "
-                              "step."
+        "processing takes place to remove negative counts at very low TOF values",
+        "spline_coefficient": "The coefficient to use when calculating the vanadium splines during the calibration " "step.",
     },
-
     "focused_cropping_values": "These values are used to determine the TOF range to crop a focused (not Vanadium Cal.) "
-                               "workspace to. These are applied on a bank by bank basis. They must be less than "
-                               "the values specified for raw_data_cropping_values.",
-
+    "workspace to. These are applied on a bank by bank basis. They must be less than "
+    "the values specified for raw_data_cropping_values.",
     "vanadium_cropping_values": "These values are use to determine the TOF range to crop a vanadium workspace to during"
-                                " calibration step. These are applied on a bank by bank basis and must be smaller than"
-                                " the range specified in raw_data_cropping_values and larger than the values specified"
-                                " in focused_cropping_values."
+    " calibration step. These are applied on a bank by bank basis and must be smaller than"
+    " the range specified in raw_data_cropping_values and larger than the values specified"
+    " in focused_cropping_values.",
 }
 
 variables = {
@@ -98,19 +93,19 @@ variables = {
     "script_params": script_params,
     "vanadium_cropping_values": vanadium_cropping_values,
     "focused_bin_widths": focused_bin_widths,
-    "sample_empty_scale": sample_empty_scale
+    "sample_empty_scale": sample_empty_scale,
 }
 
 
 def get_mode_specific_dict(mode):
     if mode is None:
-        return {"focused_cropping_values": 'auto', "van_normalisation_method": "Relative"}
+        return {"focused_cropping_values": "auto", "van_normalisation_method": "Relative"}
     mode = mode.lower()
     if mode == "pdf":
         return {"focused_cropping_values": pdf_focused_cropping_values, "van_normalisation_method": "Absolute"}
     if mode == "rietveld":
         return {"focused_cropping_values": rietveld_focused_cropping_values, "van_normalisation_method": "Relative"}
-    raise ValueError("Invalid chopper mode: \"{}\"".format(mode))
+    raise ValueError('Invalid chopper mode: "{}"'.format(mode))
 
 
 def get_all_adv_variables(mode=None):

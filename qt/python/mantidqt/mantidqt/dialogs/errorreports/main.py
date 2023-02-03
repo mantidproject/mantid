@@ -24,7 +24,7 @@ def main(argv: Sequence[str] = None) -> int:
     command_line_args = parse_commandline(argv)
     exit_code_str = command_line_args.exit_code
     exit_code = int(exit_code_str)
-    if mantid.config['usagereports.enabled'] != '1':
+    if mantid.config["usagereports.enabled"] != "1":
         return exit_code
 
     # On Windows/macOS the plugin locations need to be known before starting
@@ -33,12 +33,13 @@ def main(argv: Sequence[str] = None) -> int:
         QCoreApplication.addLibraryPath(command_line_args.qtdir)
 
     # Qt resources must be imported before QApplication starts
-    importlib.import_module(f'mantidqt.dialogs.errorreports.resources_qt{QT_VERSION[0]}')
+    importlib.import_module(f"mantidqt.dialogs.errorreports.resources_qt{QT_VERSION[0]}")
 
-    if sys.platform == 'darwin':
+    if sys.platform == "darwin":
         qtutils.force_layer_backing_BigSur()
 
     from qtpy.QtWidgets import QApplication
+
     app = QApplication(argv)
     # The strings APPNAME, ORG_DOMAIN, ORGANIZATION are duplicated from workbench.config
     app.setOrganizationName(command_line_args.org_name)
@@ -57,14 +58,14 @@ def parse_commandline(argv: Sequence[str]) -> argparse.Namespace:
     """
     Parse the command line arguments and return them to the caller
     """
-    parser = argparse.ArgumentParser(description='Pass in exit_code')
-    parser.add_argument('--exitcode', dest='exit_code', default="1")
-    parser.add_argument('--qtdir', dest='qtdir', default='')
-    parser.add_argument('--orgname', dest='org_name', default='unknown')
-    parser.add_argument('--orgdomain', dest='org_domain', default='unknown')
-    parser.add_argument('--application', dest='application', default='unknown')
+    parser = argparse.ArgumentParser(description="Pass in exit_code")
+    parser.add_argument("--exitcode", dest="exit_code", default="1")
+    parser.add_argument("--qtdir", dest="qtdir", default="")
+    parser.add_argument("--orgname", dest="org_name", default="unknown")
+    parser.add_argument("--orgdomain", dest="org_domain", default="unknown")
+    parser.add_argument("--application", dest="application", default="unknown")
     return parser.parse_args(argv)
 
 
-if __name__ == '__main__':  # if we're running file directly and not importing it
+if __name__ == "__main__":  # if we're running file directly and not importing it
     sys.exit(main())  # run the main function

@@ -17,12 +17,12 @@ from mantidqtinterfaces.Muon.GUI.Common.muon_pair import MuonPair
 def _create_XML_subElement_for_groups(root_node, groups):
     group_nodes = []
     for group in groups:
-        child = ET.SubElement(root_node, 'group', name=group.name)
+        child = ET.SubElement(root_node, "group", name=group.name)
         id_string = run_string_utils.run_list_to_string(group.detectors)
-        ids = ET.SubElement(child, 'ids', val=id_string)
+        ids = ET.SubElement(child, "ids", val=id_string)
         child.extend(ids)
         period_string = run_string_utils.run_list_to_string(group.periods)
-        periods = ET.SubElement(child, 'periods', val=period_string)
+        periods = ET.SubElement(child, "periods", val=period_string)
         child.extend(periods)
         group_nodes += [child]
     return group_nodes
@@ -31,11 +31,11 @@ def _create_XML_subElement_for_groups(root_node, groups):
 def _create_XML_subElement_for_pairs(root_node, pairs):
     pair_nodes = []
     for pair in pairs:
-        child = ET.SubElement(root_node, 'pair', name=pair.name)
-        fwd_group = ET.SubElement(child, 'forward-group', val=pair.forward_group)
-        bwd_group = ET.SubElement(child, 'backward-group', val=pair.backward_group)
-        alpha = ET.SubElement(child, 'alpha', val=str(pair.alpha))
-        periods = ET.SubElement(child, 'periods', val=pair.periods)
+        child = ET.SubElement(root_node, "pair", name=pair.name)
+        fwd_group = ET.SubElement(child, "forward-group", val=pair.forward_group)
+        bwd_group = ET.SubElement(child, "backward-group", val=pair.backward_group)
+        alpha = ET.SubElement(child, "alpha", val=str(pair.alpha))
+        periods = ET.SubElement(child, "periods", val=pair.periods)
         child.extend(fwd_group)
         child.extend(bwd_group)
         child.extend(alpha)
@@ -47,11 +47,11 @@ def _create_XML_subElement_for_pairs(root_node, pairs):
 def _create_XML_subElement_for_diffs(root_node, diffs):
     diff_nodes = []
     for diff in diffs:
-        child = ET.SubElement(root_node, 'diff', name=diff.name)
-        positive = ET.SubElement(child, 'positive', val=diff.positive)
-        negative = ET.SubElement(child, 'negative', val=diff.negative)
-        group_or_pair = ET.SubElement(child, 'group-or-pair', val=diff.group_or_pair)
-        periods = ET.SubElement(child, 'periods', val=diff.periods)
+        child = ET.SubElement(root_node, "diff", name=diff.name)
+        positive = ET.SubElement(child, "positive", val=diff.positive)
+        negative = ET.SubElement(child, "negative", val=diff.negative)
+        group_or_pair = ET.SubElement(child, "group-or-pair", val=diff.group_or_pair)
+        periods = ET.SubElement(child, "periods", val=diff.periods)
         child.extend(positive)
         child.extend(negative)
         child.extend(group_or_pair)
@@ -60,7 +60,7 @@ def _create_XML_subElement_for_diffs(root_node, diffs):
     return diff_nodes
 
 
-def save_grouping_to_XML(groups,  pairs, diffs, filename, save=True, description=''):
+def save_grouping_to_XML(groups, pairs, diffs, filename, save=True, description=""):
     """
     Save a set of muon group and pair parameters to XML format file. Fewer checks are performed
     than with the XML loading.
@@ -85,13 +85,13 @@ def save_grouping_to_XML(groups,  pairs, diffs, filename, save=True, description
         raise AttributeError("diffs must be MuonDiff type")
     root = ET.Element("detector-grouping")
     if description:
-        root.set('description', description)
+        root.set("description", description)
 
     # handle groups
     _create_XML_subElement_for_groups(root, groups)
     # handle pairs
     _create_XML_subElement_for_pairs(root, pairs)
-    #handle diffs
+    # handle diffs
     _create_XML_subElement_for_diffs(root, diffs)
 
     if save:
@@ -110,13 +110,13 @@ def load_grouping_from_XML(filename):
     """
     tree = ET.parse(filename)
     root = tree.getroot()
-    description = root.get('description')
+    description = root.get("description")
     if not description:
         description = filename
     try:
-        default = root.find('default').get('name')
+        default = root.find("default").get("name")
     except (AttributeError, KeyError):
-        default = ''
+        default = ""
 
     group_names, group_ids, periods = _get_groups_from_XML(root)
     pair_names, pair_groups, pair_alphas, pair_periods = _get_pairs_from_XML(root)
@@ -125,8 +125,7 @@ def load_grouping_from_XML(filename):
 
     for i, group_name in enumerate(group_names):
         period = periods[i] if periods and i < len(periods) else [1]
-        groups += [MuonGroup(group_name=group_name,
-                             detector_ids=group_ids[i], periods=period)]
+        groups += [MuonGroup(group_name=group_name, detector_ids=group_ids[i], periods=period)]
 
     for i, pair_name in enumerate(pair_names):
         if pair_periods:
@@ -134,11 +133,15 @@ def load_grouping_from_XML(filename):
         else:
             pair_periods_converted = [1]
 
-        pairs += [MuonPair(pair_name=pair_name,
-                           forward_group_name=pair_groups[i][0],
-                           backward_group_name=pair_groups[i][1],
-                           alpha=pair_alphas[i],
-                           periods=pair_periods_converted)]
+        pairs += [
+            MuonPair(
+                pair_name=pair_name,
+                forward_group_name=pair_groups[i][0],
+                backward_group_name=pair_groups[i][1],
+                alpha=pair_alphas[i],
+                periods=pair_periods_converted,
+            )
+        ]
 
     for i, diff_name in enumerate(diff_names):
         if diff_periods:
@@ -154,10 +157,10 @@ def _get_groups_from_XML(root):
     names, ids, periods = [], [], []
     for child in root:
         if child.tag == "group":
-            names += [child.attrib['name']]
-            ids += [run_string_utils.run_string_to_list(child.find('ids').attrib['val'])]
+            names += [child.attrib["name"]]
+            ids += [run_string_utils.run_string_to_list(child.find("ids").attrib["val"])]
             try:
-                periods += [run_string_utils.run_string_to_list(child.find('periods').attrib['val'])]
+                periods += [run_string_utils.run_string_to_list(child.find("periods").attrib["val"])]
             except AttributeError:
                 # Using an old style xml file where grouping information is not stored
                 pass
@@ -168,10 +171,11 @@ def _get_diffs_from_XML(root):
     names, groups, periods = [], [], []
     for child in root:
         if child.tag == "diff":
-            names += [child.attrib['name']]
-            groups += [[child.find('positive').attrib['val'], child.find('negative').attrib['val'],
-                        child.find('group-or-pair').attrib['val']]]
-            periods += [child.find('periods').attrib['val']]
+            names += [child.attrib["name"]]
+            groups += [
+                [child.find("positive").attrib["val"], child.find("negative").attrib["val"], child.find("group-or-pair").attrib["val"]]
+            ]
+            periods += [child.find("periods").attrib["val"]]
     return names, groups, periods
 
 
@@ -179,11 +183,11 @@ def _get_pairs_from_XML(root):
     names, groups, alphas, periods = [], [], [], []
     for child in root:
         if child.tag == "pair":
-            names += [child.attrib['name']]
-            groups += [[child.find('forward-group').attrib['val'], child.find('backward-group').attrib['val']]]
-            alphas += [child.find('alpha').attrib['val']]
+            names += [child.attrib["name"]]
+            groups += [[child.find("forward-group").attrib["val"], child.find("backward-group").attrib["val"]]]
+            alphas += [child.find("alpha").attrib["val"]]
             try:
-                periods += [child.find('periods').attrib['val']]
+                periods += [child.find("periods").attrib["val"]]
             except AttributeError:
                 pass
     return names, groups, alphas, periods

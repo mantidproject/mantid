@@ -39,15 +39,15 @@ CSS_DEFAULT = """QLineEdit{}"""
 
 def _check_and_get_float_line_edit(line_edit, min=None):
     """
-        Reads the value of a QLineEdit as a double
-        and changes the background of the widget
-        according to whether it is valid or not.
-        @param line_edit: QLineEdit object
+    Reads the value of a QLineEdit as a double
+    and changes the background of the widget
+    according to whether it is valid or not.
+    @param line_edit: QLineEdit object
     """
     value = 0.0
     try:
         value = float(line_edit.text())
-        if min is None or value>min:
+        if min is None or value > min:
             line_edit.setStyleSheet(CSS_DEFAULT)
         else:
             line_edit.setStyleSheet(CSS_INVALID)
@@ -58,10 +58,10 @@ def _check_and_get_float_line_edit(line_edit, min=None):
 
 def _check_and_get_int_line_edit(line_edit):
     """
-        Reads the value of a QLineEdit as an integer
-        and changes the background of the widget
-        according to whether it is valid or not.
-        @param line_edit: QLineEdit object
+    Reads the value of a QLineEdit as an integer
+    and changes the background of the widget
+    according to whether it is valid or not.
+    @param line_edit: QLineEdit object
     """
     value = 0
     try:

@@ -10,4 +10,4 @@
 from mantidqt.utils.qt import import_qt
 
 
-InstrumentSelector = import_qt('.._common', 'mantidqt.widgets', 'InstrumentSelector')
+InstrumentSelector = import_qt(".._common", "mantidqt.widgets", "InstrumentSelector")

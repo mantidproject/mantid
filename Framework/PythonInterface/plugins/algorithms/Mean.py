@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
 import numpy
 
 from mantid.simpleapi import *
@@ -13,12 +13,11 @@ from mantid.kernel import *
 
 
 class Mean(PythonAlgorithm):
-
     def category(self):
         return "Arithmetic"
 
     def seeAlso(self):
-        return [ "MostLikelyMean","WeightedMean","WeightedMeanOfWorkspace" ]
+        return ["MostLikelyMean", "WeightedMean", "WeightedMeanOfWorkspace"]
 
     def name(self):
         return "Mean"
@@ -29,16 +28,19 @@ class Mean(PythonAlgorithm):
     def PyInit(self):
         mustHaveWorkspaceNames = StringMandatoryValidator()
 
-        self.declareProperty("Workspaces", "", validator=mustHaveWorkspaceNames,
-                             direction=Direction.Input,
-                             doc="Input workspaces. Comma separated workspace names")
+        self.declareProperty(
+            "Workspaces",
+            "",
+            validator=mustHaveWorkspaceNames,
+            direction=Direction.Input,
+            doc="Input workspaces. Comma separated workspace names",
+        )
 
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),
-                             doc="Output mean workspace")
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output), doc="Output mean workspace")
 
     def validateInputs(self):
         issues = dict()
-        workspaces = self.getProperty("Workspaces").value.split(',')
+        workspaces = self.getProperty("Workspaces").value.split(",")
         name = workspaces[0].strip()
         if name not in mtd:
             issues["Workspaces"] = f"Workspace '{name}' does not exist"
@@ -57,8 +59,8 @@ class Mean(PythonAlgorithm):
                 issues["Workspaces"] = "Input Workspaces are not the same shape."
                 # cannot run the next test if this fails
                 return issues
-            for spectra in range(0,nSpectra):
-                if not numpy.allclose(ws1.readX(spectra) ,ws2.readX(spectra)):
+            for spectra in range(0, nSpectra):
+                if not numpy.allclose(ws1.readX(spectra), ws2.readX(spectra)):
                     issues["Workspaces"] = "The data should have the same order for x values. Sort your data first"
         return issues
 
@@ -68,9 +70,8 @@ class Mean(PythonAlgorithm):
         return match_bins and match_histograms
 
     def PyExec(self):
-        workspaces = self.getProperty("Workspaces").value.split(',')
-        out_ws = CloneWorkspace(InputWorkspace=mtd[workspaces[0]],
-                                OutputWorkspace=self.getPropertyValue("OutputWorkspace"))
+        workspaces = self.getProperty("Workspaces").value.split(",")
+        out_ws = CloneWorkspace(InputWorkspace=mtd[workspaces[0]], OutputWorkspace=self.getPropertyValue("OutputWorkspace"))
         for index in range(1, len(workspaces)):
             name = workspaces[index].strip()
             workspace = mtd[name]

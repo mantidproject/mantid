@@ -11,11 +11,11 @@ import warnings
 # Have to patch warnings at runtime to not print the source code. This is even advertised as a 'feature' of
 # the warnings library in the documentation: https://docs.python.org/3/library/warnings.html#warnings.showwarning
 def _warning_no_source(msg, *_, **__):
-    return str(msg) + '\n'
+    return str(msg) + "\n"
 
 
 warnings.formatwarning = _warning_no_source
-warnings.simplefilter('always', UserWarning) # changed to warnings.simplefilter('default') by unittest runner
+warnings.simplefilter("always", UserWarning)  # changed to warnings.simplefilter('default') by unittest runner
 
 
 class InstrumentSettings(object):
@@ -30,8 +30,10 @@ class InstrumentSettings(object):
         if kwargs:
             config_file_path = kwargs.get("config_file", None)
             if not config_file_path:
-                warnings.warn("No config file was specified. If a configuration file  was meant to be used "
-                              "the path to the file is set with the 'config_file' parameter.\n")
+                warnings.warn(
+                    "No config file was specified. If a configuration file  was meant to be used "
+                    "the path to the file is set with the 'config_file' parameter.\n"
+                )
             # Always do this so we have a known state of the internal variable
             self._basic_conf_dict = yaml_parser.open_yaml_file_as_dictionary(config_file_path)
 
@@ -64,8 +66,10 @@ class InstrumentSettings(object):
             # has asked for a class attribute which does not exist. These attributes are set in a mapping file which
             # is passed in whilst InstrumentSettings is being constructed. Check that the 'script name' (i.e. not user
             # friendly name) is typed correctly in both the script(s) and mapping file.
-            raise AttributeError("The attribute in the script with name " + str(item) + " was not found in the "
-                                 "mapping file. \nPlease contact the development team.")
+            raise AttributeError(
+                "The attribute in the script with name " + str(item) + " was not found in the "
+                "mapping file. \nPlease contact the development team."
+            )
 
     def update_attributes(self, advanced_config=None, basic_config=None, kwargs=None, suppress_warnings=False):
         self._adv_config_dict = advanced_config if advanced_config else self._adv_config_dict
@@ -80,8 +84,7 @@ class InstrumentSettings(object):
         if advanced_config:
             self._parse_attributes(self._adv_config_dict, suppress_warnings=suppress_warnings)
         if advanced_config or basic_config:
-            self._parse_attributes(self._basic_conf_dict,
-                                   suppress_warnings=(not basic_config or suppress_warnings))
+            self._parse_attributes(self._basic_conf_dict, suppress_warnings=(not basic_config or suppress_warnings))
         if advanced_config or basic_config or kwargs:
             self._parse_attributes(self._kwargs, suppress_warnings=(not kwargs or suppress_warnings))
 
@@ -96,13 +99,12 @@ class InstrumentSettings(object):
                 continue  # Skip so we don't accidentally re-add this dictionary
 
             # Update attributes from said dictionary
-            found_param_entry = next((param_entry for param_entry in self._param_map
-                                      if config_key == param_entry.ext_name), None)
+            found_param_entry = next((param_entry for param_entry in self._param_map if config_key == param_entry.ext_name), None)
             if found_param_entry:
                 # Update the internal parameter entry
                 self._update_attribute(
-                    param_map=found_param_entry, param_val=dict_to_parse[found_param_entry.ext_name],
-                    suppress_warnings=suppress_warnings)
+                    param_map=found_param_entry, param_val=dict_to_parse[found_param_entry.ext_name], suppress_warnings=suppress_warnings
+                )
             else:
                 # Key is unknown to us
                 _print_known_keys(self._param_map)
@@ -136,8 +138,15 @@ class InstrumentSettings(object):
             if previous_value is not None and previous_value != param_val:
 
                 # Print warning of what we value we are replacing for which parameter
-                warnings.warn("Replacing parameter: '" + str(param_map.ext_name) + "' which was previously set to: '"
-                              + str(getattr(self, attribute_name)) + "' with new value: '" + str(param_val) + "'")
+                warnings.warn(
+                    "Replacing parameter: '"
+                    + str(param_map.ext_name)
+                    + "' which was previously set to: '"
+                    + str(getattr(self, attribute_name))
+                    + "' with new value: '"
+                    + str(param_val)
+                    + "'"
+                )
 
         # Finally set the new attribute value
         setattr(self, attribute_name, param_val)
@@ -174,7 +183,7 @@ def _check_value_is_in_enum(val, enum):
         e_msg = "The user specified value: '" + str(val) + "' is unknown. "
         e_msg += "Known values for " + enum.enum_friendly_name + " are: \n"
         for key in enum_known_vals:
-            e_msg += '\'' + key + '\' '
+            e_msg += "'" + key + "' "
 
         raise ValueError(e_msg)
 
@@ -197,9 +206,9 @@ def _get_enum_values(enum_cls):
 
 
 def _print_known_keys(master_mapping):
-    print ("\nKnown keys are:")
+    print("\nKnown keys are:")
     print("----------------------------------")
     sorted_attributes = sorted(master_mapping, key=lambda param_map_entry: param_map_entry.ext_name)
     for param_entry in sorted_attributes:
-        print (param_entry.ext_name + ', ', end="")
+        print(param_entry.ext_name + ", ", end="")
     print("\n----------------------------------")

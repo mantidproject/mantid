@@ -493,6 +493,8 @@ void PDFFourierTransform2::exec() {
   auto &outputE = outputWS->mutableE(0);
 
   // do the math
+  // Evaluate integral of Qsin(QR) over the Q bin width rather than just take value at bin centre
+  // Useful if Q bins widths are large - width typically increases with Q for TOF data. Following Gudrun approach
 
   double corr = 0.5 / M_PI / M_PI / rho0;
   if (direction == BACKWARD) {
@@ -503,27 +505,33 @@ void PDFFourierTransform2::exec() {
     const double outXFac = corr / (outX * outX * outX);
 
     double fs = 0;
-    double error = 0;
+    double errorSquared = 0;
+    auto pdfIntegral = [outX](const double x) -> double { return sin(x * outX) - x * outX * cos(x * outX); };
+    double inX2 = inputX[Xmin_index];
+    double integralX2 = pdfIntegral(inX2);
+    const double inXMax = inputX[Xmax_index];
+
     for (size_t inXIndex = Xmin_index; inXIndex < Xmax_index; inXIndex++) {
-      const double inX1 = inputX[inXIndex];
-      const double inX2 = inputX[inXIndex + 1];
-      const double sinx1 = sin(inX1 * outX) - inX1 * outX * cos(inX1 * outX);
-      const double sinx2 = sin(inX2 * outX) - inX2 * outX * cos(inX2 * outX);
-      double sinus = sinx2 - sinx1;
+      const double inX1 = inX2;
+      inX2 = inputX[inXIndex + 1];
+      const double integralX1 = integralX2;
+      integralX2 = pdfIntegral(inX2);
+      double defIntegral = integralX2 - integralX1;
 
       // multiply by filter function sin(q*pi/qmax)/(q*pi/qmax)
       if (filter && inX1 != 0) {
-        const double lorchKernel = inX1 * M_PI / inputX[Xmax_index];
-        sinus *= sin(lorchKernel) / lorchKernel;
+        const double lorchKernel = inX1 * M_PI / inXMax;
+        defIntegral *= sin(lorchKernel) / lorchKernel;
       }
-      fs += sinus * inputY[inXIndex];
+      fs += defIntegral * inputY[inXIndex];
 
-      error += (sinus * inputDY[inXIndex]) * (sinus * inputDY[inXIndex]);
+      const double error = defIntegral * inputDY[inXIndex];
+      errorSquared += error * error;
     }
 
     // put the information into the output
     outputY[outXIndex] = fs * outXFac;
-    outputE[outXIndex] = sqrt(error) * outXFac;
+    outputE[outXIndex] = sqrt(errorSquared) * outXFac;
   }
 
   if (direction == FORWARD) {

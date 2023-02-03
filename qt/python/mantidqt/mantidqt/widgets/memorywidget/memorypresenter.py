@@ -19,6 +19,7 @@ class MemoryPresenter(object):
     every TIME_INTERVAL_MEMORY_USAGE_UPDATE (s) using threading.Timer; Also, sets the style of the memory(progress) bar
     on construction.
     """
+
     def __init__(self, view):
         self.view = view
         self.update_allowed = True
@@ -69,8 +70,7 @@ class MemoryPresenter(object):
         """
         if self.update_allowed:
             system_memory_bar = get_memory_info()
-            self.view.invoke_set_value(system_memory_bar.used_percent, system_memory_bar.used_GB,
-                                       system_memory_bar.system_total_GB)
+            self.view.invoke_set_value(system_memory_bar.used_percent, system_memory_bar.used_GB, system_memory_bar.system_total_GB)
 
     def update_mantid_memory_usage(self):
         """
@@ -78,8 +78,7 @@ class MemoryPresenter(object):
         """
         if self.update_allowed:
             mantid_memory_bar = get_mantid_memory_info()
-            self.view.invoke_mantid_set_value(mantid_memory_bar.used_percent, mantid_memory_bar.used_GB,
-                                              mantid_memory_bar.system_total_GB)
+            self.view.invoke_mantid_set_value(mantid_memory_bar.used_percent, mantid_memory_bar.used_GB, mantid_memory_bar.system_total_GB)
 
     def cancel_memory_update(self):
         """

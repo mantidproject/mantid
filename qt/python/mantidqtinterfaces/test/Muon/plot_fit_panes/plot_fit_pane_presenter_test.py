@@ -10,8 +10,9 @@ from unittest import mock
 from mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.plot_time_fit_pane_model import PlotTimeFitPaneModel
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.base_pane.base_pane_view import BasePaneView
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.fit_pane.plot_fit_pane_presenter import PlotFitPanePresenter
-from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter_interface import \
-    PlottingCanvasPresenterInterface
+from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter_interface import (
+    PlottingCanvasPresenterInterface,
+)
 from mantid import AnalysisDataService
 
 from mantidqt.utils.qt.testing import start_qapplication
@@ -25,7 +26,6 @@ class MockFitInfo(object):
 
 @start_qapplication
 class PlotFitPanePresenterTest(unittest.TestCase):
-
     def setUp(self):
         self.context = mock.MagicMock()
         self.model = mock.Mock(spec=PlotTimeFitPaneModel)
@@ -34,18 +34,22 @@ class PlotFitPanePresenterTest(unittest.TestCase):
         self.view.warning_popup = mock.MagicMock()
         self.figure_presenter = mock.Mock(spec=PlottingCanvasPresenterInterface)
         self.figure_presenter.force_autoscale = mock.Mock()
-        self.presenter = PlotFitPanePresenter(view=self.view, model=self.model, context=self.context,
-                                              fitting_context=self.context.fitting_context,
-                                              figure_presenter=self.figure_presenter)
+        self.presenter = PlotFitPanePresenter(
+            view=self.view,
+            model=self.model,
+            context=self.context,
+            fitting_context=self.context.fitting_context,
+            figure_presenter=self.figure_presenter,
+        )
 
     def tearDown(self):
         AnalysisDataService.Instance().clear()
 
     def test_handle_plot_selected_fit(self):
         fits = []
-        a= MockFitInfo(["unit", "test"])
+        a = MockFitInfo(["unit", "test"])
         fits.append(a)
-        self.model.get_fit_workspace_and_indices = mock.MagicMock(return_value=(["fit"], [0,1]))
+        self.model.get_fit_workspace_and_indices = mock.MagicMock(return_value=(["fit"], [0, 1]))
         self.view.is_raw_plot.return_value = mock.MagicMock(False)
         self.view.is_plot_diff.return_value = mock.MagicMock(False)
         self.figure_presenter.plot_workspaces = mock.MagicMock()
@@ -91,5 +95,5 @@ class PlotFitPanePresenterTest(unittest.TestCase):
         self.assertEqual(names, ["MUSR62260; Group; unit; Asymmetry; MA"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

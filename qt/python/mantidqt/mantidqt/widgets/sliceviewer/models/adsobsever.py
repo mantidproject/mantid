@@ -23,13 +23,13 @@ def _catch_exceptions(func):
         except Exception:
             sys.stderr.write("Error occurred in handler:\n")
             import traceback
+
             traceback.print_exc()
 
     return wrapper
 
 
 class SliceViewerADSObserver(AnalysisDataServiceObserver):
-
     def __init__(self, on_replace, on_rename, on_clear, on_delete):
         super(SliceViewerADSObserver, self).__init__()
 

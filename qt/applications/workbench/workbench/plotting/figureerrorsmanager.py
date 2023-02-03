@@ -86,7 +86,7 @@ class FigureErrorsManager(object):
 
     @staticmethod
     def _supported_ax(ax):
-        return hasattr(ax, 'creation_args')
+        return hasattr(ax, "creation_args")
 
     @staticmethod
     def get_errorbars_from_ax(ax):
@@ -106,24 +106,24 @@ class FigureErrorsManager(object):
     def toggle_errors(curve, view_props):
         if curve_has_errors(curve):
             hide_errors = view_props.hide_errors or view_props.hide
-            setattr(curve, 'hide_errors', hide_errors)
+            setattr(curve, "hide_errors", hide_errors)
             set_errorbars_hidden(curve, hide_errors)
 
     @classmethod
     def replot_curve(cls, ax, curve, plot_kwargs):
         if isinstance(ax, MantidAxes):
             if ax.creation_args:
-                axis = ax.creation_args[0].get('axis', None)
+                axis = ax.creation_args[0].get("axis", None)
                 if axis:
-                    plot_kwargs['axis'] = axis
+                    plot_kwargs["axis"] = axis
             try:
                 new_curve = ax.replot_artist(curve, errorbars=curve_has_errors(curve), **plot_kwargs)
             except ValueError:  # ValueError raised if Artist not tracked by Axes
                 new_curve = cls._replot_mpl_curve(ax, curve, plot_kwargs)
         else:
             new_curve = cls._replot_mpl_curve(ax, curve, plot_kwargs)
-        if hasattr(new_curve, 'errorevery'):
-            setattr(new_curve, 'errorevery', plot_kwargs.get('errorevery', 1))
+        if hasattr(new_curve, "errorevery"):
+            setattr(new_curve, "errorevery", plot_kwargs.get("errorevery", 1))
         return new_curve
 
     @staticmethod
@@ -136,17 +136,14 @@ class FigureErrorsManager(object):
         """
         remove_curve_from_ax(curve)
         if isinstance(curve, Line2D):
-            [plot_kwargs.pop(arg, None) for arg in
-             ['capsize', 'capthick', 'ecolor', 'elinewidth', 'errorevery']]
-            new_curve = ax.plot(curve.get_xdata(), curve.get_ydata(),
-                                **plot_kwargs)[0]
+            [plot_kwargs.pop(arg, None) for arg in ["capsize", "capthick", "ecolor", "elinewidth", "errorevery"]]
+            new_curve = ax.plot(curve.get_xdata(), curve.get_ydata(), **plot_kwargs)[0]
         elif isinstance(curve, ErrorbarContainer):
             # Because of "error every" option, we need to store the original
             # error bar data on the curve or we will lose data on re-plotting
-            x, y, xerr, yerr = getattr(curve, 'errorbar_data',
-                                       get_data_from_errorbar_container(curve))
+            x, y, xerr, yerr = getattr(curve, "errorbar_data", get_data_from_errorbar_container(curve))
             new_curve = ax.errorbar(x, y, xerr=xerr, yerr=yerr, **plot_kwargs)
-            setattr(new_curve, 'errorbar_data', [x, y, xerr, yerr])
+            setattr(new_curve, "errorbar_data", [x, y, xerr, yerr])
         else:
             raise ValueError("Curve must have type 'Line2D' or 'ErrorbarContainer'. Found '{}'".format(type(curve)))
         return new_curve

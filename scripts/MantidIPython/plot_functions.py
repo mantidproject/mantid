@@ -22,29 +22,26 @@ def _plot_with_options(axes_option, workspace, options_list, plot_number):
     Plot with or without errorbars.
     """
     ws_plot = ConvertToPointData(workspace)
-    if options_list['errorbars']:
-        axes_option.errorbar(ws_plot.readX(0), ws_plot.readY(0),
-                             yerr=ws_plot.readE(0), label=workspace.name())
+    if options_list["errorbars"]:
+        axes_option.errorbar(ws_plot.readX(0), ws_plot.readY(0), yerr=ws_plot.readE(0), label=workspace.name())
     else:
-        axes_option.plot(ws_plot.readX(0),
-                         ws_plot.readY(0),
-                         label=workspace.name())
+        axes_option.plot(ws_plot.readX(0), ws_plot.readY(0), label=workspace.name())
 
-    axes_option.grid(options_list['grid'])
-    axes_option.set_xscale(options_list['xScale'])
-    axes_option.set_yscale(options_list['yScale'])
-    if options_list['xLimits'] != 'auto':
-        axes_option.set_xlim(options_list['xLimits'])
-    if options_list['yLimits'] != 'auto':
-        axes_option.set_ylim(options_list['yLimits'])
+    axes_option.grid(options_list["grid"])
+    axes_option.set_xscale(options_list["xScale"])
+    axes_option.set_yscale(options_list["yScale"])
+    if options_list["xLimits"] != "auto":
+        axes_option.set_xlim(options_list["xLimits"])
+    if options_list["yLimits"] != "auto":
+        axes_option.set_ylim(options_list["yLimits"])
 
     # If a list of titles was given, use it to title each subplot
-    if hasattr(options_list['title'], "__iter__"):
-        axes_option.set_title(options_list['title'][plot_number])
-    if options_list['legend'] and hasattr(options_list['legendLocation'], "__iter__"):
-        axes_option.legend(loc=options_list['legendLocation'][plot_number])
-    elif options_list['legend']:
-        axes_option.legend(loc=options_list['legendLocation'])
+    if hasattr(options_list["title"], "__iter__"):
+        axes_option.set_title(options_list["title"][plot_number])
+    if options_list["legend"] and hasattr(options_list["legendLocation"], "__iter__"):
+        axes_option.legend(loc=options_list["legendLocation"][plot_number])
+    elif options_list["legend"]:
+        axes_option.legend(loc=options_list["legendLocation"])
 
 
 def plots(list_of_workspaces, *args, **kwargs):
@@ -68,10 +65,7 @@ def plots(list_of_workspaces, *args, **kwargs):
     ops = _process_arguments(args, kwargs)
 
     # Create subplots for workspaces in the list
-    fig, axes_handle = plt.subplots(1,
-                                    len(list_of_workspaces),
-                                    sharey=ops['sharedAxes'],
-                                    figsize=(6 * len(list_of_workspaces), 4))
+    fig, axes_handle = plt.subplots(1, len(list_of_workspaces), sharey=ops["sharedAxes"], figsize=(6 * len(list_of_workspaces), 4))
 
     if not hasattr(axes_handle, "__iter__"):
         axes_handle = [axes_handle]
@@ -85,8 +79,8 @@ def plots(list_of_workspaces, *args, **kwargs):
             _plot_with_options(axes_handle[plot_number], workspace, ops, plot_number)
 
     # If a single title was given, use it to title the whole figure
-    if not hasattr(ops['title'], "__iter__"):
-        fig.suptitle(ops['title'])
+    if not hasattr(ops["title"], "__iter__"):
+        fig.suptitle(ops["title"])
     plt.show()
 
     return plt.gcf()
@@ -96,9 +90,8 @@ def _process_arguments(input_args, input_kwargs):
     """
     Build a dictionary of plotting options
     """
-    key_list = ['title', 'grid', 'legend', 'legendLocation',
-                'xScale', 'yScale', 'xLimits', 'yLimits', 'sharedAxes', 'errorbars']
-    default_values = ['', True, True, 1, 'log', 'log', 'auto', 'auto', True, 'True']
+    key_list = ["title", "grid", "legend", "legendLocation", "xScale", "yScale", "xLimits", "yLimits", "sharedAxes", "errorbars"]
+    default_values = ["", True, True, 1, "log", "log", "auto", "auto", True, "True"]
 
     # Fill ops with the default values
     for i in range(len(input_args)):  # copy in values provided in args

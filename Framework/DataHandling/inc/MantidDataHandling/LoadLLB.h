@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
-#include "MantidDataHandling/LoadHelper.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
@@ -58,8 +58,6 @@ private:
   size_t m_numberOfHistograms;
   double m_wavelength;
   double m_channelWidth;
-
-  LoadHelper m_loader;
 };
 
 } // namespace DataHandling

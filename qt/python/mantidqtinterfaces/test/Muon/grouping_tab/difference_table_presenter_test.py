@@ -30,7 +30,6 @@ def enter_diff_name_side_effect():
 
 @start_qapplication
 class DifferenceTablePresenterTest(unittest.TestCase):
-
     def setUp(self):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
         self.obj = QWidget()
@@ -76,16 +75,16 @@ class DifferenceTablePresenterTest(unittest.TestCase):
 
     def add_two_group_diffs(self):
         self.add_two_groups()
-        diff0 = MuonDiff('group_diff_0', 'group_0', 'group_1')
-        diff1 = MuonDiff('group_diff_1', 'group_1', 'group_0')
+        diff0 = MuonDiff("group_diff_0", "group_0", "group_1")
+        diff1 = MuonDiff("group_diff_1", "group_1", "group_0")
         self.presenter.group_widget.add_diff(diff0)
         self.presenter.group_widget.add_diff(diff1)
 
     def add_two_pair_diffs(self):
         self.add_two_groups()
         self.add_two_pairs()
-        diff0 = MuonDiff('pair_diff_0', 'pair_0', 'pair_1', group_or_pair='pair')
-        diff1 = MuonDiff('pair_diff_1', 'pair_1', 'pair_0', group_or_pair='pair')
+        diff0 = MuonDiff("pair_diff_0", "pair_0", "pair_1", group_or_pair="pair")
+        diff1 = MuonDiff("pair_diff_1", "pair_1", "pair_0", group_or_pair="pair")
         self.presenter.pair_widget.add_diff(diff0)
         self.presenter.pair_widget.add_diff(diff1)
 
@@ -104,10 +103,10 @@ class DifferenceTablePresenterTest(unittest.TestCase):
         self.assert_view_empty()
 
     def test_header_labels_set_correctly(self):
-        self.assertEqual('Group 1', self.presenter.group_view.diff_table.horizontalHeaderItem(2).text())
-        self.assertEqual('Group 2', self.presenter.group_view.diff_table.horizontalHeaderItem(3).text())
-        self.assertEqual('Pair 1', self.presenter.pair_view.diff_table.horizontalHeaderItem(2).text())
-        self.assertEqual('Pair 2', self.presenter.pair_view.diff_table.horizontalHeaderItem(3).text())
+        self.assertEqual("Group 1", self.presenter.group_view.diff_table.horizontalHeaderItem(2).text())
+        self.assertEqual("Group 2", self.presenter.group_view.diff_table.horizontalHeaderItem(3).text())
+        self.assertEqual("Pair 1", self.presenter.pair_view.diff_table.horizontalHeaderItem(2).text())
+        self.assertEqual("Pair 2", self.presenter.pair_view.diff_table.horizontalHeaderItem(3).text())
 
     # ------------------------------------------------------------------------------------------------------------------
     # TESTS : Adding and removing diffs
@@ -121,26 +120,26 @@ class DifferenceTablePresenterTest(unittest.TestCase):
         self.assertEqual("group_diff_1", self.presenter.group_view.get_table_item_text(1, 0))
 
     def test_cannot_add_group_diff_without_two_groups(self):
-        self.presenter.group_widget.handle_add_diff_button_clicked() # No groups
+        self.presenter.group_widget.handle_add_diff_button_clicked()  # No groups
         group0 = MuonGroup(group_name="group_0", detector_ids=[1])
         self.model.add_group(group0)
-        self.presenter.group_widget.handle_add_diff_button_clicked() # 1 group
+        self.presenter.group_widget.handle_add_diff_button_clicked()  # 1 group
         group1 = MuonGroup(group_name="group_1", detector_ids=[2])
         self.model.add_group(group1)
         self.presenter.group_widget.handle_add_diff_button_clicked()  # 2 groups
-        self.assertEqual(2,self.presenter.group_view.warning_popup.call_count)
+        self.assertEqual(2, self.presenter.group_view.warning_popup.call_count)
 
     def test_add_diff_button_adds_group_diff(self):
-        self.add_two_groups() # Required for a group diff
+        self.add_two_groups()  # Required for a group diff
         self.presenter.group_widget.handle_add_diff_button_clicked()
 
         self.assertEqual(1, self.presenter.group_view.num_rows())
         self.assertEqual(1, len(self.model.diffs))
-        self.assertEqual('group', self.model.diffs[0].group_or_pair)
-        self.assertEqual("diff_0",
-                         self.presenter.group_view.get_table_item_text(self.presenter.group_view.num_rows() - 1,
-                                                                       0))  # Check added to end of table
-        self.assertEqual(0, self.presenter.pair_view.num_rows()) # Check no pair diffs
+        self.assertEqual("group", self.model.diffs[0].group_or_pair)
+        self.assertEqual(
+            "diff_0", self.presenter.group_view.get_table_item_text(self.presenter.group_view.num_rows() - 1, 0)
+        )  # Check added to end of table
+        self.assertEqual(0, self.presenter.pair_view.num_rows())  # Check no pair diffs
 
     def test_add_two_pair_diffs_function(self):
         self.add_two_pair_diffs()
@@ -165,9 +164,10 @@ class DifferenceTablePresenterTest(unittest.TestCase):
 
         self.assertEqual(1, self.presenter.pair_view.num_rows())
         self.assertEqual(1, len(self.model.diffs))
-        self.assertEqual('pair', self.model.diffs[0].group_or_pair)
-        self.assertEqual("diff_0", self.presenter.pair_view.get_table_item_text(self.presenter.pair_view.num_rows() - 1,
-                                                                                0))  # Check added to end of table
+        self.assertEqual("pair", self.model.diffs[0].group_or_pair)
+        self.assertEqual(
+            "diff_0", self.presenter.pair_view.get_table_item_text(self.presenter.pair_view.num_rows() - 1, 0)
+        )  # Check added to end of table
         self.assertEqual(0, self.presenter.group_view.num_rows())  # Check no group diffs
 
     def test_remove_diff_button(self):
@@ -179,7 +179,7 @@ class DifferenceTablePresenterTest(unittest.TestCase):
 
     def test_remove_diff_button_when_diffs_are_selected(self):
         self.add_two_group_diffs()
-        self.presenter.group_view.get_selected_diff_names = mock.Mock(return_value=['group_diff_0'])
+        self.presenter.group_view.get_selected_diff_names = mock.Mock(return_value=["group_diff_0"])
         self.presenter.group_widget.handle_remove_diff_button_clicked()
 
         self.assertEqual("group_diff_1", self.presenter.group_view.get_table_item_text(self.presenter.group_view.num_rows() - 1, 0))
@@ -193,7 +193,7 @@ class DifferenceTablePresenterTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------------------------------------
 
     def test_context_menu_adds_diff_with_no_rows_selected(self):
-        self.add_two_groups() # Required for a group diff
+        self.add_two_groups()  # Required for a group diff
         self.presenter.group_view.contextMenuEvent(0)
         self.presenter.group_view.add_diff_action.triggered.emit(True)
 
@@ -213,7 +213,7 @@ class DifferenceTablePresenterTest(unittest.TestCase):
 
         self.assertEqual(1, len(self.model.diffs))
         self.assertEqual(1, self.presenter.group_view.num_rows())
-        self.assertEqual('group_diff_0', self.presenter.group_view.get_table_item_text(0, 0))
+        self.assertEqual("group_diff_0", self.presenter.group_view.get_table_item_text(0, 0))
 
     def test_context_menu_removes_selected_diffs(self):
         self.add_two_group_diffs()
@@ -223,7 +223,7 @@ class DifferenceTablePresenterTest(unittest.TestCase):
 
         self.assertEqual(1, len(self.model.diffs))
         self.assertEqual(1, self.presenter.group_view.num_rows())
-        self.assertEqual('group_diff_1', self.presenter.group_view.get_table_item_text(0, 0))
+        self.assertEqual("group_diff_1", self.presenter.group_view.get_table_item_text(0, 0))
 
     def test_context_menu_cannot_remove_diff_if_no_diffs_in_table(self):
         self.presenter.group_view.contextMenuEvent(0)
@@ -236,7 +236,7 @@ class DifferenceTablePresenterTest(unittest.TestCase):
     def test_warning_using_duplicated_name(self):
         self.add_two_pair_diffs()
 
-        self.presenter.group_view.enter_diff_name = mock.Mock(return_value="group_0") # Diff name same as group
+        self.presenter.group_view.enter_diff_name = mock.Mock(return_value="group_0")  # Diff name same as group
         self.presenter.group_widget.handle_add_diff_button_clicked()
 
         self.presenter.pair_view.enter_diff_name = mock.Mock(return_value="pair_0")  # Diff name same as pair
@@ -248,9 +248,9 @@ class DifferenceTablePresenterTest(unittest.TestCase):
         self.presenter.pair_view.enter_diff_name = mock.Mock(return_value="new_diff")  # New diff name
         self.presenter.pair_widget.handle_add_diff_button_clicked()
 
-        self.assertEqual(1, self.presenter.group_view.warning_popup.call_count) # Group name duplicated
+        self.assertEqual(1, self.presenter.group_view.warning_popup.call_count)  # Group name duplicated
         self.assertEqual(2, self.presenter.pair_view.warning_popup.call_count)  # Pair and Diff name duplicated
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

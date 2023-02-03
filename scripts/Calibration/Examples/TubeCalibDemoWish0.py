@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 #
 # TUBE CALIBRATION DEMONSTRATION PROGRAM - Execute this
 #
@@ -18,24 +18,23 @@
 import tube
 import mantid.simpleapi as mantid
 
-filename = 'WISH00017701.raw' # Calibration run ( found in \\isis\inst$\NDXWISH\Instrument\data\cycle_11_1 )
+filename = "WISH00017701.raw"  # Calibration run ( found in \\isis\inst$\NDXWISH\Instrument\data\cycle_11_1 )
 rawCalibInstWS = mantid.Load(filename)  #'raw' in 'rawCalibInstWS' means unintegrated.
-CalibInstWS = mantid.Integration( rawCalibInstWS, RangeLower=1, RangeUpper=20000 )
+CalibInstWS = mantid.Integration(rawCalibInstWS, RangeLower=1, RangeUpper=20000)
 mantid.DeleteWorkspace(rawCalibInstWS)
 print("Created workspace (CalibInstWS) with integrated data from run and instrument to calibrate")
 
-CalibratedComponent = 'WISH/panel03'
+CalibratedComponent = "WISH/panel03"
 
-knownPos = [-0.41,-0.31,-0.21,-0.11,-0.02, 0.09, 0.18, 0.28, 0.39 ]
-funcForm = 9*[1] # all special points are gaussian peaks
+knownPos = [-0.41, -0.31, -0.21, -0.11, -0.02, 0.09, 0.18, 0.28, 0.39]
+funcForm = 9 * [1]  # all special points are gaussian peaks
 
 print("Created objects needed for calibration.")
 
 # Get the calibration and put it into the calibration table
-calibrationTable = tube.calibrate(CalibInstWS, CalibratedComponent,
-                                  knownPos, funcForm)
+calibrationTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcForm)
 print("Got calibration (new positions of detectors)")
 
-#Apply the calibration
+# Apply the calibration
 mantid.ApplyCalibration(Workspace=CalibInstWS, CalibrationTable=calibrationTable)
 print("Applied calibration")

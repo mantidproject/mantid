@@ -24,8 +24,12 @@ attr_mapping = [
     ParamMapEntry(ext_name="cross_corr_x_min", int_name="cross_corr_x_min"),
     ParamMapEntry(ext_name="cross_corr_x_max", int_name="cross_corr_x_max"),
     ParamMapEntry(ext_name="do_absorb_corrections", int_name="absorb_corrections"),
-    ParamMapEntry(ext_name="empty_can_subtraction_method", int_name="empty_can_subtraction_method",
-                  enum_class=EMPTY_CAN_SUBTRACTION_METHOD, optional=True),
+    ParamMapEntry(
+        ext_name="empty_can_subtraction_method",
+        int_name="empty_can_subtraction_method",
+        enum_class=EMPTY_CAN_SUBTRACTION_METHOD,
+        optional=True,
+    ),
     ParamMapEntry(ext_name="file_ext", int_name="file_extension", optional=True),
     ParamMapEntry(ext_name="focused_bin_widths", int_name="focused_bin_widths"),
     ParamMapEntry(ext_name="custom_focused_bin_widths", int_name="custom_focused_bin_widths"),
@@ -60,10 +64,8 @@ attr_mapping = [
     ParamMapEntry(ext_name="tt_mode", int_name="tt_mode", enum_class=PEARL_TT_MODES),
     ParamMapEntry(ext_name="user_name", int_name="user_name"),
     ParamMapEntry(ext_name="vanadium_absorb_filename", int_name="van_absorb_file"),
-    ParamMapEntry(ext_name="absorb_corrections_out_filename",
-                  int_name="absorb_out_file",
-                  optional=True),
+    ParamMapEntry(ext_name="absorb_corrections_out_filename", int_name="absorb_out_file", optional=True),
     ParamMapEntry(ext_name="vanadium_tof_cropping", int_name="van_tof_cropping"),
-    ParamMapEntry(ext_name="vanadium_normalisation", int_name="van_norm")
+    ParamMapEntry(ext_name="vanadium_normalisation", int_name="van_norm"),
 ]
 attr_mapping.extend(PARAM_MAPPING)

@@ -21,13 +21,8 @@ class Progress;
 namespace MDAlgorithms {
 /** The class to transform matrix workspace into MDEvent workspace when matrix
   workspace is ragged 2D workspace
-  *
-  *
-  * See http://www.mantidproject.org/Writing_custom_ConvertTo_MD_transformation
-  for detailed description of this
-  * class place in the algorithms hierarchy.
-  *
-  * @date 11-10-2011
+  See dev-docs/source/WritingCustomConvertToMDTransformation.rst for detailed description of this
+  class place in the algorithms hierarchy.
 */
 
 //-----------------------------------------------

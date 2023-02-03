@@ -16,17 +16,21 @@ maximum_number_of_groups = 20
 
 
 # Row colours specified in RGB. i.e. (255, 0, 0) is red and (255, 255, 0) is yellow.
-row_colors = {RowValid.invalid_for_all_runs: (255, 0, 0), RowValid.valid_for_some_runs: (255, 255, 0),
-              RowValid.valid_for_all_runs: (255, 255, 255)}
+row_colors = {
+    RowValid.invalid_for_all_runs: (255, 0, 0),
+    RowValid.valid_for_some_runs: (255, 255, 0),
+    RowValid.valid_for_all_runs: (255, 255, 255),
+}
 
 
-row_tooltips = {RowValid.invalid_for_all_runs: 'Warning: group periods invalid for all runs',
-                RowValid.valid_for_some_runs: 'Warning: group periods invalid for some runs',
-                RowValid.valid_for_all_runs: ''}
+row_tooltips = {
+    RowValid.invalid_for_all_runs: "Warning: group periods invalid for all runs",
+    RowValid.valid_for_some_runs: "Warning: group periods invalid for some runs",
+    RowValid.valid_for_all_runs: "",
+}
 
 
 class GroupingTablePresenter(object):
-
     def __init__(self, view, model):
         self._view = view
         self._model = model
@@ -78,8 +82,7 @@ class GroupingTablePresenter(object):
 
     def validate_detector_ids(self, text):
         try:
-            if re.match(run_utils.run_string_regex, text) and \
-                    self._validate_detector_ids_list(run_utils.run_string_to_list(text, False)):
+            if re.match(run_utils.run_string_regex, text) and self._validate_detector_ids_list(run_utils.run_string_to_list(text, False)):
                 return True
         except OverflowError:
             pass
@@ -125,8 +128,13 @@ class GroupingTablePresenter(object):
     def add_group_to_view(self, group, state, color, tooltip):
         self._view.disable_updates()
         assert isinstance(group, MuonGroup)
-        entry = [str(group.name), run_utils.run_list_to_string(group.periods), state, run_utils.run_list_to_string(group.detectors, False),
-                 str(group.n_detectors)]
+        entry = [
+            str(group.name),
+            run_utils.run_list_to_string(group.periods),
+            state,
+            run_utils.run_list_to_string(group.detectors, False),
+            str(group.n_detectors),
+        ]
         self._view.add_entry_to_table(entry, color, tooltip)
         self._view.enable_updates()
 
@@ -154,13 +162,13 @@ class GroupingTablePresenter(object):
         for name, index in group_names:
             used_by = self._model.check_group_in_use(name)
             if used_by:
-                warnings+=used_by+"\n"
+                warnings += used_by + "\n"
             else:
                 safe_to_rm.append([index, name])
         for index, name in reversed(safe_to_rm):
             self._model.remove_group_from_analysis(name)
             self._view.remove_group_by_index(index)
-        self._model.remove_groups_by_name([name for _,name in safe_to_rm])
+        self._model.remove_groups_by_name([name for _, name in safe_to_rm])
         if warnings:
             self._view.warning_popup(warnings)
 
@@ -177,16 +185,16 @@ class GroupingTablePresenter(object):
 
     def handle_data_change(self, row, col):
         changed_item = self._view.get_table_item(row, col)
-        group_name = self._view.get_table_item(row, inverse_group_table_columns['group_name']).text()
+        group_name = self._view.get_table_item(row, inverse_group_table_columns["group_name"]).text()
         update_model = True
-        if col == inverse_group_table_columns['group_name'] and not self.validate_group_name(changed_item.text()):
+        if col == inverse_group_table_columns["group_name"] and not self.validate_group_name(changed_item.text()):
             update_model = False
-        if col == inverse_group_table_columns['detector_ids'] and not self.validate_detector_ids(changed_item.text()):
+        if col == inverse_group_table_columns["detector_ids"] and not self.validate_detector_ids(changed_item.text()):
             update_model = False
-        if col == inverse_group_table_columns['to_analyse']:
+        if col == inverse_group_table_columns["to_analyse"]:
             update_model = False
             self.to_analyse_data_checkbox_changed(changed_item.checkState(), row, group_name)
-        if col == inverse_group_table_columns['periods'] and self.validate_periods(changed_item.text()) == RowValid.invalid_for_all_runs:
+        if col == inverse_group_table_columns["periods"] and self.validate_periods(changed_item.text()) == RowValid.invalid_for_all_runs:
             self._view.warning_popup("One or more of the periods specified missing from all runs")
             update_model = False
 
@@ -201,7 +209,7 @@ class GroupingTablePresenter(object):
             self._view.warning_popup(error)
 
         # if the column containing the "to_analyse" flag is changed, then we don't need to update anything group related
-        if col != inverse_group_table_columns['to_analyse']:
+        if col != inverse_group_table_columns["to_analyse"]:
             self.update_view_from_model()
             self.notify_data_changed()
 
@@ -209,8 +217,8 @@ class GroupingTablePresenter(object):
         table = self._view.get_table_contents()
         self._model.clear_groups()
         for entry in table:
-            detector_list = run_utils.run_string_to_list(str(entry[inverse_group_table_columns['detector_ids']]), False)
-            periods = run_utils.run_string_to_list(str(entry[inverse_group_table_columns['periods']]))
+            detector_list = run_utils.run_string_to_list(str(entry[inverse_group_table_columns["detector_ids"]]), False)
+            periods = run_utils.run_string_to_list(str(entry[inverse_group_table_columns["periods"]]))
             group = MuonGroup(group_name=str(entry[0]), detector_ids=detector_list, periods=periods)
             self._model.add_group(group)
 
@@ -254,7 +262,7 @@ class GroupingTablePresenter(object):
         else:
             self._model.remove_group_from_analysis(group_name)
 
-        group_info = {'is_added': group_added, 'name': group_name}
+        group_info = {"is_added": group_added, "name": group_name}
         self.selected_group_changed_notifier.notify_subscribers(group_info)
 
     def plot_default_case(self):
@@ -268,48 +276,50 @@ class GroupingTablePresenter(object):
             self._view.group_range_min.setText(str(self._model.get_first_good_data_from_file()))
 
             self._view.group_range_min.setEnabled(False)
-            if 'GroupRangeMin' in self._model._context.gui_context:
+            if "GroupRangeMin" in self._model._context.gui_context:
                 # Remove variable from model if value from file is to be used
-                self._model._context.gui_context.pop('GroupRangeMin')
+                self._model._context.gui_context.pop("GroupRangeMin")
                 self._model._context.gui_context.update_and_send_signal()
         else:
             self._view.group_range_min.setEnabled(True)
-            self._model._context.gui_context.update_and_send_signal(
-                GroupRangeMin=float(self._view.group_range_min.text()))
+            self._model._context.gui_context.update_and_send_signal(GroupRangeMin=float(self._view.group_range_min.text()))
 
     def from_file_checkbox_changed(self):
         if self._view.group_range_use_last_data.isChecked():
             self._view.group_range_max.setText(str(self._model.get_last_data_from_file()))
 
             self._view.group_range_max.setEnabled(False)
-            if 'GroupRangeMax' in self._model._context.gui_context:
+            if "GroupRangeMax" in self._model._context.gui_context:
                 # Remove variable from model if value from file is to be used
-                self._model._context.gui_context.pop('GroupRangeMax')
+                self._model._context.gui_context.pop("GroupRangeMax")
                 self._model._context.gui_context.update_and_send_signal()
 
         else:
             self._view.group_range_max.setEnabled(True)
-            self._model._context.gui_context.update_and_send_signal(
-                GroupRangeMax=float(self._view.group_range_max.text()))
+            self._model._context.gui_context.update_and_send_signal(GroupRangeMax=float(self._view.group_range_max.text()))
 
     def handle_group_range_min_updated(self):
         range_min_new = float(self._view.group_range_min.text())
-        range_max_current = self._model._context.gui_context['GroupRangeMax'] if 'GroupRangeMax' in \
-                                                                                 self._model._context.gui_context \
+        range_max_current = (
+            self._model._context.gui_context["GroupRangeMax"]
+            if "GroupRangeMax" in self._model._context.gui_context
             else self._model.get_last_data_from_file()
+        )
         if range_min_new < range_max_current:
             self._model._context.gui_context.update_and_send_signal(GroupRangeMin=range_min_new)
         else:
-            self._view.group_range_min.setText(str(self._model._context.gui_context['GroupRangeMin']))
-            self._view.warning_popup('Minimum of group asymmetry range must be less than maximum')
+            self._view.group_range_min.setText(str(self._model._context.gui_context["GroupRangeMin"]))
+            self._view.warning_popup("Minimum of group asymmetry range must be less than maximum")
 
     def handle_group_range_max_updated(self):
         range_max_new = float(self._view.group_range_max.text())
-        range_min_current = self._model._context.gui_context['GroupRangeMin'] if 'GroupRangeMin' in \
-                                                                                 self._model._context.gui_context \
+        range_min_current = (
+            self._model._context.gui_context["GroupRangeMin"]
+            if "GroupRangeMin" in self._model._context.gui_context
             else self._model.get_first_good_data_from_file()
+        )
         if range_max_new > range_min_current:
             self._model._context.gui_context.update_and_send_signal(GroupRangeMax=range_max_new)
         else:
-            self._view.group_range_max.setText(str(self._model._context.gui_context['GroupRangeMax']))
-            self._view.warning_popup('Maximum of group asymmetry range must be greater than minimum')
+            self._view.group_range_max.setText(str(self._model._context.gui_context["GroupRangeMax"]))
+            self._view.warning_popup("Maximum of group asymmetry range must be greater than minimum")

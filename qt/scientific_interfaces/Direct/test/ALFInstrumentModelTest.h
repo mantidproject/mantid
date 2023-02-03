@@ -10,6 +10,7 @@
 #include <gmock/gmock.h>
 
 #include "ALFInstrumentModel.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -19,6 +20,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MockInstrumentActor.h"
 
 #include <memory>
 #include <string>
@@ -32,22 +34,34 @@ using namespace testing;
 namespace {
 auto &ADS = AnalysisDataService::Instance();
 
-void addCurvesWorkspaceToADS(std::string const &unit, std::string const &label = "", double const yValue = 0.2) {
-  auto workspace = WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(1, 10, false, 0.1, yValue, 0.01, 0.3);
-
-  std::shared_ptr<Instrument> instrument = std::make_shared<Instrument>();
-  instrument->setName("ALF");
-  workspace->setInstrument(instrument);
-
-  workspace->getAxis(0)->setUnit(unit);
-
-  if (!label.empty()) {
-    auto xUnit = std::dynamic_pointer_cast<Units::Label>(UnitFactory::Instance().create("Label"));
-    xUnit->setLabel("Label", label);
-    workspace->getAxis(0)->unit() = xUnit;
+std::vector<DetectorTube> findWholeTubes(Mantid::Geometry::ComponentInfo const &componentInfo,
+                                         std::vector<std::size_t> const &partTubeDetectorIndices) {
+  std::vector<DetectorTube> tubes;
+  std::vector<std::size_t> allocatedIndices;
+  for (auto const &detectorIndex : partTubeDetectorIndices) {
+    auto const iter = std::find(allocatedIndices.cbegin(), allocatedIndices.cend(), detectorIndex);
+    // Check that the indices for this tube haven't already been added
+    if (iter == allocatedIndices.cend() && componentInfo.isDetector(detectorIndex)) {
+      // Find all of the detector indices for the whole tube
+      auto tubeDetectorIndices = componentInfo.detectorsInSubtree(componentInfo.parent(detectorIndex));
+      std::transform(tubeDetectorIndices.cbegin(), tubeDetectorIndices.cend(), std::back_inserter(allocatedIndices),
+                     [](auto const &index) { return index; });
+      tubes.emplace_back(tubeDetectorIndices);
+    }
   }
+  return tubes;
+}
 
-  ADS.addOrReplace("Curves", workspace);
+MatrixWorkspace_sptr changeBinOffset(MatrixWorkspace_sptr const &inputWorkspace) {
+  auto alg = AlgorithmManager::Instance().create("ChangeBinOffset");
+  alg->initialize();
+  alg->setAlwaysStoreInADS(false);
+  alg->setProperty("InputWorkspace", inputWorkspace);
+  alg->setProperty("Offset", 0.1);
+  alg->setProperty("OutputWorkspace", "__not_in_ads");
+  alg->execute();
+  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
+  return outputWorkspace;
 }
 
 } // namespace
@@ -63,176 +77,246 @@ public:
   void setUp() override {
     m_nonALFData = "IRIS00072464.raw";
     m_ALFData = "ALF82301.raw";
+    m_ALFEdgeCaseData = "ALF83743.raw";
 
+    m_singleTubeDetectorIDs = std::vector<DetectorTube>{{2500u, 2501u, 2502u}};
+    m_multiTubeDetectorIDs = std::vector<DetectorTube>{{2500u, 2501u, 2502u}, {3500u, 3501u, 3502u}};
+
+    m_instrumentActor = std::make_unique<NiceMock<MockInstrumentActor>>();
     m_model = std::make_unique<ALFInstrumentModel>();
   }
 
   void tearDown() override { ADS.clear(); }
 
-  void test_instrumentName_returns_the_expected_instrument() { TS_ASSERT_EQUALS("ALF", m_model->instrumentName()); }
-
   void test_loadedWsName_returns_the_expected_instrument() { TS_ASSERT_EQUALS("ALFData", m_model->loadedWsName()); }
 
-  void test_loadAndTransform_returns_an_error_if_the_data_is_not_ALF_data() {
-    auto const message = m_model->loadAndTransform(m_nonALFData);
-
-    TS_ASSERT(message);
-    TS_ASSERT_EQUALS("The loaded data is not from the ALF instrument", *message);
+  void test_loadAndNormalise_throws_an_error_if_the_data_is_not_ALF_data() {
+    TS_ASSERT_THROWS(m_model->loadAndNormalise(m_nonALFData), std::invalid_argument const &);
   }
 
-  void test_loadAndTransform_returns_a_nullopt_if_the_data_is_valid() {
-    auto const message = m_model->loadAndTransform(m_ALFData);
-    TS_ASSERT(!message);
+  void test_loadAndNormalise_returns_a_non_null_workspace_if_the_data_is_valid() {
+    TS_ASSERT(m_model->loadAndNormalise(m_ALFData));
   }
 
-  void test_loadAndTransform_transforms_the_data_to_dSpacing_if_not_already() {
-    auto const message = m_model->loadAndTransform(m_ALFData);
+  void test_loadAndNormalise_does_not_transform_to_dSpacing() {
+    auto const workspace = m_model->loadAndNormalise(m_ALFData);
+    TS_ASSERT_DIFFERS("dSpacing", workspace->getAxis(0)->unit()->unitID());
+  }
 
-    TS_ASSERT(ADS.doesExist(m_model->loadedWsName()));
+  void test_sampleRun_and_vanadiumRun_returns_zero_when_no_data_is_loaded() {
+    TS_ASSERT_EQUALS(0u, m_model->sampleRun());
+    TS_ASSERT_EQUALS(0u, m_model->vanadiumRun());
+  }
 
-    auto workspace = ADS.retrieveWS<MatrixWorkspace>(m_model->loadedWsName());
+  void test_sampleRun_returns_the_run_number_of_the_loaded_data() {
+    m_model->setSample(m_model->loadAndNormalise(m_ALFData));
+    TS_ASSERT_EQUALS(82301u, m_model->sampleRun());
+  }
+
+  void test_vanadiumRun_returns_the_run_number_of_the_loaded_data() {
+    m_model->setVanadium(m_model->loadAndNormalise(m_ALFData));
+    TS_ASSERT_EQUALS(82301u, m_model->vanadiumRun());
+  }
+
+  void test_setSelectedTubes_will_set_an_empty_vector_of_tubes_when_provided_an_empty_vector() {
+    TS_ASSERT(m_model->setSelectedTubes({{0u, 1u}}));
+
+    TS_ASSERT(m_model->setSelectedTubes({}));
+
+    TS_ASSERT(m_model->selectedTubes().empty());
+  }
+
+  void test_setSelectedTubes_returns_false_when_trying_to_set_the_tubes_to_a_list_which_is_the_same_as_previous() {
+    TS_ASSERT(m_model->setSelectedTubes({{0u, 1u}}));
+    TS_ASSERT(!m_model->setSelectedTubes({{0u, 1u}}));
+  }
+
+  void test_setSelectedTubes_will_select_the_detectors_in_an_entire_tube() {
+    setSingleTubeSelected();
+
+    auto const tubes = m_model->selectedTubes();
+    TS_ASSERT_EQUALS(1u, tubes.size());
+    TS_ASSERT_EQUALS(512u, tubes[0].size());
+  }
+
+  void test_setSelectedTubes_will_select_the_detectors_in_two_entire_tubes() {
+    setMultipleTubesSelected();
+
+    auto const tubes = m_model->selectedTubes();
+    TS_ASSERT_EQUALS(2u, tubes.size());
+    TS_ASSERT_EQUALS(512u, tubes[0].size());
+    TS_ASSERT_EQUALS(512u, tubes[1].size());
+  }
+
+  void test_addSelectedTube_will_add_a_tube_to_the_model_when_it_is_new() {
+    TS_ASSERT(m_model->addSelectedTube({{0u, 1u}}));
+    TS_ASSERT(m_model->addSelectedTube({{1u, 2u}}));
+
+    TS_ASSERT_EQUALS(2u, m_model->selectedTubes().size());
+  }
+
+  void test_addSelectedTube_will_not_add_a_tube_to_the_model_if_it_already_exists() {
+    TS_ASSERT(m_model->addSelectedTube({{0u, 1u}}));
+    TS_ASSERT(!m_model->addSelectedTube({{0u, 1u}}));
+
+    TS_ASSERT_EQUALS(1u, m_model->selectedTubes().size());
+  }
+
+  void test_generateOutOfPlaneAngleWorkspace_returns_nullptr_when_no_selected_detectors() {
+    auto [workspace, twoThetas] = m_model->generateOutOfPlaneAngleWorkspace(*m_instrumentActor);
+
+    TS_ASSERT_EQUALS(nullptr, workspace);
+    TS_ASSERT(twoThetas.empty());
+  }
+
+  void test_generateOutOfPlaneAngleWorkspace_does_not_return_a_nullptr_when_single_tube_selected() {
+    setSingleTubeSelected();
+    expectInstrumentActorCalls();
+
+    auto [workspace, twoThetas] = m_model->generateOutOfPlaneAngleWorkspace(*m_instrumentActor);
+
+    TS_ASSERT(workspace);
+    TS_ASSERT_EQUALS(1u, twoThetas.size());
+    TS_ASSERT_DELTA(39.879471, twoThetas[0], 0.00001);
+  }
+
+  void test_generateOutOfPlaneAngleWorkspace_does_not_return_a_nullptr_when_multiple_tubes_selected() {
+    setMultipleTubesSelected();
+    expectInstrumentActorCalls();
+
+    auto [workspace, twoThetas] = m_model->generateOutOfPlaneAngleWorkspace(*m_instrumentActor);
+
+    TS_ASSERT(workspace);
+    TS_ASSERT_EQUALS(2u, twoThetas.size());
+    // The two thetas are the same because we use the same workspace index in the expectations
+    TS_ASSERT_DELTA(39.879471, twoThetas[0], 0.00001);
+    TS_ASSERT_DELTA(39.879471, twoThetas[1], 0.00001);
+  }
+
+  void test_generateLoadedWorkspace_does_not_throw_when_no_sample_is_set() {
+    TS_ASSERT_THROWS_NOTHING(m_model->generateLoadedWorkspace());
+  }
+
+  void test_generateLoadedWorkspace_outputs_the_sample_workspace_when_no_vanadium_is_set() {
+    auto const sample = m_model->loadAndNormalise(m_ALFData);
+    m_model->setSample(sample);
+
+    m_model->generateLoadedWorkspace();
+
+    TS_ASSERT(ADS.doesExist("ALFData"));
+
+    auto const workspace = ADS.retrieveWS<MatrixWorkspace>("ALFData");
     TS_ASSERT_EQUALS("dSpacing", workspace->getAxis(0)->unit()->unitID());
+    TS_ASSERT_EQUALS(sample->y(0), workspace->y(0));
   }
 
-  void test_runNumber_returns_zero_when_no_data_is_loaded() { TS_ASSERT_EQUALS(0u, m_model->runNumber()); }
+  void test_generateLoadedWorkspace_outputs_a_normalised_workspace_when_the_vanadium_is_set() {
+    auto const dataWs = m_model->loadAndNormalise(m_ALFData);
+    m_model->setSample(dataWs);
+    m_model->setVanadium(dataWs);
 
-  void test_runNumber_returns_the_run_number_of_the_loaded_data() {
-    m_model->loadAndTransform(m_ALFData);
-    TS_ASSERT_EQUALS(82301u, m_model->runNumber());
-  }
+    m_model->generateLoadedWorkspace();
 
-  void test_extractedWsName_returns_a_workspace_name_ending_in_zero_if_the_extracted_workspace_does_not_exist() {
-    TS_ASSERT_EQUALS("extractedTubes_ALF0", m_model->extractedWsName());
-  }
+    TS_ASSERT(ADS.doesExist("ALFData"));
 
-  void test_extractedWsName_returns_the_expected_extracted_workspace_name() {
-    m_model->loadAndTransform(m_ALFData);
-
-    addCurvesWorkspaceToADS("dSpacing");
-
-    TS_ASSERT_EQUALS("extractedTubes_ALF82301", m_model->extractedWsName());
-  }
-
-  void test_extractSingleTube_will_not_change_the_number_of_tubes_if_a_single_tube_workspace_cannot_be_found() {
-    m_model->extractSingleTube();
-
-    TS_ASSERT(!ADS.doesExist(m_model->extractedWsName()));
-    TS_ASSERT_EQUALS(0u, m_model->numberOfTubesInAverage());
-  }
-
-  void test_extractSingleTube_will_set_the_number_of_tubes_to_one_if_a_single_tube_workspace_exists() {
-    m_model->loadAndTransform(m_ALFData);
-    addCurvesWorkspaceToADS("dSpacing");
-
-    m_model->extractSingleTube();
-
-    TS_ASSERT(ADS.doesExist(m_model->extractedWsName()));
-    TS_ASSERT_EQUALS(1u, m_model->numberOfTubesInAverage());
-  }
-
-  void test_extractSingleTube_will_create_a_workspace_with_the_expected_dSpacing_units_and_y_values() {
-    m_model->loadAndTransform(m_ALFData);
-    addCurvesWorkspaceToADS("dSpacing");
-
-    m_model->extractSingleTube();
-
-    auto workspace = ADS.retrieveWS<MatrixWorkspace>(m_model->extractedWsName());
-
+    auto const workspace = ADS.retrieveWS<MatrixWorkspace>("ALFData");
     TS_ASSERT_EQUALS("dSpacing", workspace->getAxis(0)->unit()->unitID());
-    TS_ASSERT_DELTA(workspace->readX(0)[1], 0.6, 0.000001);
-    TS_ASSERT_DELTA(workspace->readX(0)[2], 1.6, 0.000001);
-    TS_ASSERT_DELTA(workspace->readY(0)[1], 0.2, 0.000001);
-    TS_ASSERT_DELTA(workspace->readY(0)[2], 0.2, 0.000001);
+    TS_ASSERT_EQUALS(1.0, workspace->y(0)[0]);
+    TS_ASSERT_EQUALS(1.0, workspace->y(0)[1]);
   }
 
-  void test_extractSingleTube_will_create_a_workspace_with_the_expected_phi_units_and_y_values() {
-    m_model->loadAndTransform(m_ALFData);
-    addCurvesWorkspaceToADS("Phi");
+  void test_generateLoadedWorkspace_handles_vanadium_with_different_binning() {
+    auto const dataWs = m_model->loadAndNormalise(m_ALFData);
+    m_model->setSample(dataWs);
+    m_model->setVanadium(changeBinOffset(dataWs));
 
-    m_model->extractSingleTube();
+    m_model->generateLoadedWorkspace();
 
-    auto workspace = ADS.retrieveWS<MatrixWorkspace>(m_model->extractedWsName());
+    TS_ASSERT(ADS.doesExist("ALFData"));
 
-    TS_ASSERT_EQUALS("Phi", workspace->getAxis(0)->unit()->unitID());
-    TS_ASSERT_DELTA(workspace->readX(0)[1], 0.6 * 180.0 / M_PI, 0.000001);
-    TS_ASSERT_DELTA(workspace->readX(0)[2], 1.6 * 180.0 / M_PI, 0.000001);
-    TS_ASSERT_DELTA(workspace->readY(0)[1], 0.2, 0.000001);
-    TS_ASSERT_DELTA(workspace->readY(0)[2], 0.2, 0.000001);
+    auto const workspace = ADS.retrieveWS<MatrixWorkspace>("ALFData");
+    TS_ASSERT_EQUALS("dSpacing", workspace->getAxis(0)->unit()->unitID());
+    TS_ASSERT_EQUALS(1.0, workspace->y(0)[0]);
+    TS_ASSERT_EQUALS(1.0, workspace->y(0)[1]);
   }
 
-  void test_extractSingleTube_will_create_a_workspace_with_the_expected_out_of_plane_angle_label_and_y_values() {
-    m_model->loadAndTransform(m_ALFData);
-    addCurvesWorkspaceToADS("Degrees", "Out of plane angle");
+  void
+  test_generateOutOfPlaneAngleWorkspace_will_create_a_workspace_with_the_expected_out_of_plane_angle_label_and_y_values() {
+    setSingleTubeSelected();
+    expectInstrumentActorCalls();
 
-    m_model->extractSingleTube();
-
-    auto workspace = ADS.retrieveWS<MatrixWorkspace>(m_model->extractedWsName());
+    auto [workspace, _] = m_model->generateOutOfPlaneAngleWorkspace(*m_instrumentActor);
 
     TS_ASSERT_EQUALS("Label", workspace->getAxis(0)->unit()->unitID());
-    TS_ASSERT_DELTA(workspace->readX(0)[1], 0.6 * 180.0 / M_PI, 0.000001);
-    TS_ASSERT_DELTA(workspace->readX(0)[2], 1.6 * 180.0 / M_PI, 0.000001);
-    TS_ASSERT_DELTA(workspace->readY(0)[1], 0.2, 0.000001);
-    TS_ASSERT_DELTA(workspace->readY(0)[2], 0.2, 0.000001);
+    TS_ASSERT_EQUALS("Out of plane angle", std::string(workspace->getAxis(0)->unit()->label()));
+
+    TS_ASSERT_DELTA(workspace->readX(0)[1], -20.544269, 0.000001);
+    TS_ASSERT_DELTA(workspace->readX(0)[2], -20.472433, 0.000001);
+    TS_ASSERT_DELTA(workspace->readY(0)[1], 0.0, 0.000001);
+    TS_ASSERT_DELTA(workspace->readY(0)[2], 0.0, 0.000001);
   }
 
-  void test_averageTube_increments_the_number_of_averaged_tubes() {
-    m_model->loadAndTransform(m_ALFData);
-    addCurvesWorkspaceToADS("Degrees", "Out of plane angle");
+  void test_generateOutOfPlaneAngleWorkspace_will_create_a_workspace_with_the_expected_data_for_an_edge_case_dataset() {
+    auto const sample = m_model->loadAndNormalise(m_ALFEdgeCaseData);
+    m_model->setSample(sample);
+    m_model->generateLoadedWorkspace();
 
-    m_model->extractSingleTube();
-    addCurvesWorkspaceToADS("Degrees", "Out of plane angle");
+    m_singleTubeDetectorIDs = findWholeTubes(sample->componentInfo(), {2500u, 2501u, 2502u});
+    TS_ASSERT(m_model->setSelectedTubes(m_singleTubeDetectorIDs));
 
-    m_model->averageTube();
+    expectInstrumentActorCalls(12288u);
 
-    TS_ASSERT(!ADS.doesExist("Curves"));
-    TS_ASSERT(ADS.doesExist(m_model->extractedWsName()));
-    TS_ASSERT_EQUALS(2u, m_model->numberOfTubesInAverage());
-  }
+    auto [workspace, _] = m_model->generateOutOfPlaneAngleWorkspace(*m_instrumentActor);
 
-  void test_averageTube_creates_an_average_with_the_existing_extracted_workspace() {
-    m_model->loadAndTransform(m_ALFData);
-    addCurvesWorkspaceToADS("Degrees", "Out of plane angle", 0.2);
-
-    m_model->extractSingleTube();
-    addCurvesWorkspaceToADS("Degrees", "Out of plane angle", 0.4);
-
-    m_model->averageTube();
-
-    auto workspace = ADS.retrieveWS<MatrixWorkspace>(m_model->extractedWsName());
     TS_ASSERT_EQUALS("Label", workspace->getAxis(0)->unit()->unitID());
-    TS_ASSERT_DELTA(workspace->readX(0)[1], 0.6 * 180.0 / M_PI, 0.000001);
-    TS_ASSERT_DELTA(workspace->readX(0)[2], 1.6 * 180.0 / M_PI, 0.000001);
-    TS_ASSERT_DELTA(workspace->readY(0)[1], 0.3, 0.000001);
-    TS_ASSERT_DELTA(workspace->readY(0)[2], 0.3, 0.000001);
-  }
+    TS_ASSERT_EQUALS("Out of plane angle", std::string(workspace->getAxis(0)->unit()->label()));
 
-  void test_checkDataIsExtracted_returns_false_if_number_of_tubes_is_zero() {
-    ADS.addOrReplace(m_model->extractedWsName(), WorkspaceCreationHelper::create2DWorkspace(1, 2));
-    TS_ASSERT(!m_model->checkDataIsExtracted());
-  }
-
-  void test_checkDataIsExtracted_returns_false_if_extracted_workspace_does_not_exist() {
-    m_model->loadAndTransform(m_ALFData);
-    addCurvesWorkspaceToADS("Degrees", "Out of plane angle", 0.2);
-
-    m_model->extractSingleTube();
-    ADS.remove(m_model->extractedWsName());
-
-    TS_ASSERT(!m_model->checkDataIsExtracted());
-  }
-
-  void test_checkDataIsExtracted_returns_true_if_a_tube_has_already_been_extracted() {
-    m_model->loadAndTransform(m_ALFData);
-    addCurvesWorkspaceToADS("Degrees", "Out of plane angle", 0.2);
-
-    m_model->extractSingleTube();
-
-    TS_ASSERT(m_model->checkDataIsExtracted());
+    TS_ASSERT_DELTA(workspace->readX(0)[1], -20.318228, 0.000001);
+    TS_ASSERT_DELTA(workspace->readX(0)[2], -20.242194, 0.000001);
+    TS_ASSERT_DELTA(workspace->readY(0)[1], 0.001780, 0.000001);
+    TS_ASSERT_DELTA(workspace->readY(0)[2], 0.001780, 0.000001);
   }
 
 private:
+  void setSingleTubeSelected() {
+    auto const sample = m_model->loadAndNormalise(m_ALFData);
+    m_model->setSample(sample);
+    m_model->generateLoadedWorkspace();
+
+    m_singleTubeDetectorIDs = findWholeTubes(sample->componentInfo(), {2500u, 2501u, 2502u});
+
+    TS_ASSERT(m_model->setSelectedTubes(m_singleTubeDetectorIDs));
+  }
+
+  void setMultipleTubesSelected() {
+    auto const sample = m_model->loadAndNormalise(m_ALFData);
+    m_model->setSample(sample);
+    m_model->generateLoadedWorkspace();
+
+    m_multiTubeDetectorIDs = findWholeTubes(sample->componentInfo(), {2500u, 2501u, 2502u, 3500u, 3501u, 3502u});
+
+    TS_ASSERT(m_model->setSelectedTubes(m_multiTubeDetectorIDs));
+  }
+
+  void expectInstrumentActorCalls(std::size_t const workspaceIndex = 0u) {
+    auto const loadedWorkspace = ADS.retrieveWS<MatrixWorkspace>(m_model->loadedWsName());
+
+    EXPECT_CALL(*m_instrumentActor, getWorkspace()).WillRepeatedly(Return(loadedWorkspace));
+    EXPECT_CALL(*m_instrumentActor, componentInfo()).WillRepeatedly(ReturnRef(loadedWorkspace->componentInfo()));
+    EXPECT_CALL(*m_instrumentActor, detectorInfo()).WillOnce(ReturnRef(loadedWorkspace->detectorInfo()));
+    EXPECT_CALL(*m_instrumentActor, getInstrument()).WillOnce(Return(loadedWorkspace->getInstrument()));
+    EXPECT_CALL(*m_instrumentActor, getWorkspaceIndex(_)).WillRepeatedly(Return(workspaceIndex));
+    EXPECT_CALL(*m_instrumentActor, getBinMinMaxIndex(workspaceIndex, _, _))
+        .WillRepeatedly(DoAll(SetArgReferee<1>(0u), SetArgReferee<2>(50u)));
+  }
+
   std::string m_nonALFData;
   std::string m_ALFData;
+  std::string m_ALFEdgeCaseData;
 
+  std::vector<DetectorTube> m_singleTubeDetectorIDs;
+  std::vector<DetectorTube> m_multiTubeDetectorIDs;
+
+  std::unique_ptr<NiceMock<MockInstrumentActor>> m_instrumentActor;
   std::unique_ptr<ALFInstrumentModel> m_model;
 };

@@ -21,12 +21,20 @@ from mantidqt.widgets.sliceviewer.models.transform import NonOrthogonalTransform
 # Constants
 DBLMAX = sys.float_info.max
 
-ImageInfoWidget = import_qt('.._common', 'mantidqt.widgets', 'ImageInfoWidget')
+ImageInfoWidget = import_qt(".._common", "mantidqt.widgets", "ImageInfoWidget")
+ImageInfoWidgetMini = import_qt(".._common", "mantidqt.widgets", "ImageInfoWidgetMini")
 
 
 class ImageInfoTracker(CursorTracker):
-    def __init__(self, image: Union[AxesImage, QuadMesh], presenter, transform: NonOrthogonalTransform,
-                 do_transform: bool, widget: ImageInfoWidget, cursor_transform: tuple = None):
+    def __init__(
+        self,
+        image: Union[AxesImage, QuadMesh],
+        presenter,
+        transform: NonOrthogonalTransform,
+        do_transform: bool,
+        widget: ImageInfoWidget,
+        cursor_transform: tuple = None,
+    ):
         """
         Update the image that the widget refers too.
         :param: An AxesImage or Mesh instance to track
@@ -43,10 +51,11 @@ class ImageInfoTracker(CursorTracker):
         self._widget = widget
         self._cursor_transform = None
         if cursor_transform is not None:
-            self._cursor_transform = Bbox([[cursor_transform[1][0], cursor_transform[0][0]],
-                                           [cursor_transform[1][1], cursor_transform[0][1]]])
+            self._cursor_transform = Bbox(
+                [[cursor_transform[1][0], cursor_transform[0][0]], [cursor_transform[1][1], cursor_transform[0][1]]]
+            )
 
-        if hasattr(image, 'get_extent'):
+        if hasattr(image, "get_extent"):
             self.on_cursor_at = self._on_cursor_at_axesimage
         else:
             self.on_cursor_at = self._on_cursor_at_mesh

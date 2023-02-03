@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadEventNexus.h"
+
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IEventWorkspace.h"
@@ -888,8 +889,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
       NXstatus nxStat = NXopen(m_filename.c_str(), NXACC_READ, &nxHandle);
 
       if (nxStat != NX_ERROR) {
-        LoadHelper loadHelper;
-        loadHelper.addNexusFieldsToWsRun(nxHandle, m_ws->mutableRun(), "", true);
+        LoadHelper::addNexusFieldsToWsRun(nxHandle, m_ws->mutableRun(), "", true);
         NXclose(&nxHandle);
       }
     }

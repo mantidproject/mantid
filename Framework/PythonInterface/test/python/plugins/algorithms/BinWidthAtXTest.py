@@ -12,14 +12,8 @@ import unittest
 
 
 class BinWidthAtXTest(unittest.TestCase):
-
-    def _make_algorithm_params(self, ws, x, rounding='None'):
-        return {
-            'InputWorkspace': ws,
-            'X': x,
-            'rethrow': True,  # Let exceptions through for testing.
-            'Rounding': rounding
-        }
+    def _make_algorithm_params(self, ws, x, rounding="None"):
+        return {"InputWorkspace": ws, "X": x, "rethrow": True, "Rounding": rounding}  # Let exceptions through for testing.
 
     def _make_boundaries(self, xBegin, binWidths):
         return numpy.cumsum(numpy.append(numpy.array([xBegin]), binWidths))
@@ -38,10 +32,10 @@ class BinWidthAtXTest(unittest.TestCase):
         return ws, middleBinX, middleBinWidth
 
     def _run_algorithm(self, params):
-        algorithm = testhelpers.create_algorithm('BinWidthAtX', **params)
+        algorithm = testhelpers.create_algorithm("BinWidthAtX", **params)
         testhelpers.assertRaisesNothing(self, algorithm.execute)
         self.assertTrue(algorithm.isExecuted())
-        return algorithm.getProperty('BinWidth').value
+        return algorithm.getProperty("BinWidth").value
 
     def test_success_single_histogram(self):
         ws, X, expectedWidth = self._make_single_histogram_ws()
@@ -69,7 +63,7 @@ class BinWidthAtXTest(unittest.TestCase):
 
     def test_rounding(self):
         ws, X, unused = self._make_single_histogram_ws()
-        params = self._make_algorithm_params(ws, X, '10^n')
+        params = self._make_algorithm_params(ws, X, "10^n")
         binWidth = self._run_algorithm(params)
         expectedWidth = 0.01
         self.assertAlmostEqual(binWidth, expectedWidth)
@@ -79,7 +73,7 @@ class BinWidthAtXTest(unittest.TestCase):
         ws, unused, unused = self._make_single_histogram_ws()
         X = sys.float_info.max
         params = self._make_algorithm_params(ws, X)
-        algorithm = testhelpers.create_algorithm('BinWidthAtX', **params)
+        algorithm = testhelpers.create_algorithm("BinWidthAtX", **params)
         self.assertRaises(RuntimeError, algorithm.execute)
         self.assertFalse(algorithm.isExecuted())
         DeleteWorkspace(ws)
@@ -90,8 +84,7 @@ class BinWidthAtXTest(unittest.TestCase):
         ws = CreateWorkspace(DataX=xs, DataY=ys)
         X = -0.3
         params = self._make_algorithm_params(ws, X)
-        self.assertRaises(ValueError, testhelpers.create_algorithm,
-                          'BinWidthAtX', **params)
+        self.assertRaises(ValueError, testhelpers.create_algorithm, "BinWidthAtX", **params)
         DeleteWorkspace(ws)
 
     def test_positive_output_even_if_descending_x(self):
@@ -103,6 +96,7 @@ class BinWidthAtXTest(unittest.TestCase):
         expectedBinWidth = 20.0
         self.assertAlmostEqual(binWidth, expectedBinWidth)
         DeleteWorkspace(ws)
+
 
 if __name__ == "__main__":
     unittest.main()

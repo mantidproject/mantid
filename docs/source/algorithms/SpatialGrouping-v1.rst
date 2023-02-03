@@ -19,8 +19,8 @@ This algorithm creates an XML Grouping file of the form:
     <group name="bwd"><detids val="33,36,38,60,64"/> </group>
     </detector-grouping>
 
-Based on information retrieved from the
-`Nearest Neighbours <http://www.mantidproject.org/Nearest_Neighbours>`_
+nased on information retrieved from the
+`Nearest Neighbours <https://github.com/mantidproject/mantid/blob/main/Framework/Kernel/inc/MantidKernel/NearestNeighbours.h>`_
 class in Mantid Geometry.
 
 Usage

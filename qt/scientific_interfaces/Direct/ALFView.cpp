@@ -10,9 +10,10 @@
 #include "ALFAnalysisView.h"
 #include "ALFInstrumentModel.h"
 #include "ALFInstrumentView.h"
+#include "ALFInstrumentWidget.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 
+#include <QSplitter>
 #include <QString>
 #include <QVBoxLayout>
 
@@ -21,7 +22,7 @@ namespace MantidQt::CustomInterfaces {
 DECLARE_SUBWINDOW(ALFView)
 
 ALFView::ALFView(QWidget *parent) : UserSubWindow(parent), m_instrumentPresenter(), m_analysisPresenter() {
-  this->setWindowTitle("ALF View");
+  this->setWindowTitle("ALFView");
 
   m_instrumentPresenter =
       std::make_unique<ALFInstrumentPresenter>(new ALFInstrumentView(this), std::make_unique<ALFInstrumentModel>());
@@ -30,17 +31,30 @@ ALFView::ALFView(QWidget *parent) : UserSubWindow(parent), m_instrumentPresenter
                                                                std::make_unique<ALFAnalysisModel>());
 
   m_instrumentPresenter->subscribeAnalysisPresenter(m_analysisPresenter.get());
-  m_analysisPresenter->subscribeInstrumentPresenter(m_instrumentPresenter.get());
 }
+
+ALFView::~ALFView() { m_instrumentPresenter->saveSettings(); }
 
 void ALFView::initLayout() {
   auto *splitter = new QSplitter(Qt::Horizontal);
   splitter->addWidget(m_instrumentPresenter->getInstrumentView());
   splitter->addWidget(m_analysisPresenter->getView());
 
+  splitter->setCollapsible(0, false);
+  splitter->setCollapsible(1, false);
+
   auto mainWidget = new QSplitter(Qt::Vertical);
-  mainWidget->addWidget(m_instrumentPresenter->getLoadWidget());
+
+  auto loadWidget = new QWidget();
+  auto loadLayout = new QVBoxLayout(loadWidget);
+  loadLayout->addWidget(m_instrumentPresenter->getSampleLoadWidget());
+  loadLayout->addWidget(m_instrumentPresenter->getVanadiumLoadWidget());
+
+  mainWidget->addWidget(loadWidget);
   mainWidget->addWidget(splitter);
+
+  mainWidget->setCollapsible(0, false);
+  mainWidget->setCollapsible(1, false);
 
   auto centralWidget = new QWidget();
   auto verticalLayout = new QVBoxLayout(centralWidget);
@@ -48,6 +62,8 @@ void ALFView::initLayout() {
   verticalLayout->addWidget(createHelpWidget());
 
   this->setCentralWidget(centralWidget);
+
+  m_instrumentPresenter->loadSettings();
 }
 
 QWidget *ALFView::createHelpWidget() {
@@ -62,6 +78,6 @@ QWidget *ALFView::createHelpWidget() {
   return helpWidget;
 }
 
-void ALFView::openHelp() { MantidQt::API::HelpWindow::showCustomInterface(QString("direct/ALF View")); }
+void ALFView::openHelp() { MantidQt::API::HelpWindow::showCustomInterface(QString("direct/ALFView")); }
 
 } // namespace MantidQt::CustomInterfaces

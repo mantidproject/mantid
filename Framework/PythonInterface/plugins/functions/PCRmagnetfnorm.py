@@ -11,15 +11,14 @@ import numpy as np
 
 
 class PCRmagnetfnorm(IFunction1D):
-
     def category(self):
         return "Muon\\MuonSpecific"
 
     def init(self):
-        self.declareParameter("A0", 0.2, 'Amplitude')
-        self.declareParameter("SigmaOverW", 0.1, 'Normalised relaxation rate')
-        self.declareParameter("H0", 3.0, 'Local magnetic field')
-        self.declareParameter("Toff", 0.1, 'Time offset')
+        self.declareParameter("A0", 0.2, "Amplitude")
+        self.declareParameter("SigmaOverW", 0.1, "Normalised relaxation rate")
+        self.declareParameter("H0", 3.0, "Local magnetic field")
+        self.declareParameter("Toff", 0.1, "Time offset")
 
     def function1D(self, x):
         A0 = self.getParameterValue("A0")
@@ -29,7 +28,7 @@ class PCRmagnetfnorm(IFunction1D):
         gmu = 2 * np.pi * 0.01355342
         w = H0 * gmu
         x = x - Toff
-        return A0 * (1./3 + 2./3 * np.exp(- (sigma * w * x) ** 2 / 2) * np.cos(w * x))
+        return A0 * (1.0 / 3 + 2.0 / 3 * np.exp(-((sigma * w * x) ** 2) / 2) * np.cos(w * x))
 
 
 FunctionFactory.subscribe(PCRmagnetfnorm)

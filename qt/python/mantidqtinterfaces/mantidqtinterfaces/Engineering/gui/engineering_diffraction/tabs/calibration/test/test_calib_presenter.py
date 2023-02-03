@@ -10,9 +10,9 @@ from unittest.mock import patch, MagicMock
 from unittest import mock
 from Engineering.EnggUtils import GROUP
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration import model, view, presenter
-from Engineering.common.calibration_info  import CalibrationInfo
+from Engineering.common.calibration_info import CalibrationInfo
 
-tab_path = 'mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration'
+tab_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration"
 
 
 class CalibrationPresenterTest(unittest.TestCase):
@@ -82,8 +82,7 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.presenter.current_calibration.set_calibration_paths.assert_called_once_with("ENGINX", "193749")
         self.presenter.current_calibration.set_group.assert_called_once_with(self.presenter.cropping_widget.get_group())
         self.presenter.current_calibration.set_cal_file.assert_not_called()
-        self.presenter.current_calibration.set_spectra_list.assert_called_once_with(self.presenter.cropping_widget.
-                                                                                    get_custom_spectra())
+        self.presenter.current_calibration.set_spectra_list.assert_called_once_with(self.presenter.cropping_widget.get_custom_spectra())
 
     def test_update_calibration_from_view_custom_calfile(self):
         self.view.get_load_checked.return_value = False
@@ -99,8 +98,7 @@ class CalibrationPresenterTest(unittest.TestCase):
 
         self.presenter.current_calibration.set_calibration_paths.assert_called_once_with("ENGINX", "193749")
         self.presenter.current_calibration.set_group.assert_called_once_with(self.presenter.cropping_widget.get_group())
-        self.presenter.current_calibration.set_cal_file.assert_called_once_with(self.presenter.cropping_widget.
-                                                                                    get_custom_calfile())
+        self.presenter.current_calibration.set_cal_file.assert_called_once_with(self.presenter.cropping_widget.get_custom_calfile())
         self.presenter.current_calibration.set_spectra_list.assert_not_called()
 
     @patch(tab_path + ".presenter.create_error_message")
@@ -278,5 +276,5 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.assertEqual(a.get_instrument(), b.get_instrument())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

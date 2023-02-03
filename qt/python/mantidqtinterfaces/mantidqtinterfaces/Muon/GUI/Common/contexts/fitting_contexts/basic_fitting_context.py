@@ -8,13 +8,12 @@ from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import check_if_wor
 from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FittingContext
 
 SINGLE_FITS_KEY = "SingleFits"
-X_FROM_FIT_RANGE = 'x from fit range'
-X_FROM_DATA_RANGE = 'Uniform points across data range'
-X_FROM_CUSTOM = 'Custom x range'
+X_FROM_FIT_RANGE = "x from fit range"
+X_FROM_DATA_RANGE = "Uniform points across data range"
+X_FROM_CUSTOM = "Custom x range"
 
 
 class BasicFittingContext(FittingContext):
-
     def __init__(self, allow_double_pulse_fitting: bool = False):
         super(BasicFittingContext, self).__init__()
 

@@ -71,7 +71,7 @@ class ProjectRecoverySaverTest(unittest.TestCase):
         self.assertTrue(os.path.exists(os.path.join(checkpoint, "0.py")))
         self.assertEqual(self.pr_saver._spin_off_another_time_thread.call_count, 1)
 
-    @mock.patch('workbench.projectrecovery.projectrecoverysaver.find_all_windows_that_are_savable')
+    @mock.patch("workbench.projectrecovery.projectrecoverysaver.find_all_windows_that_are_savable")
     def test_recovery_save_with_just_interfaces(self, windows_that_are_savable):
         CreateSampleWorkspace(OutputWorkspace="ws")
         windows_that_are_savable.return_value = [[FakeEncoder(), FakeEncoder()]]
@@ -104,7 +104,7 @@ class ProjectRecoverySaverTest(unittest.TestCase):
 
         self.assertTrue(self.pr_saver._empty_group_workspace(group_workspace))
 
-    @mock.patch('workbench.projectrecovery.projectrecoverysaver.Timer')
+    @mock.patch("workbench.projectrecovery.projectrecoverysaver.Timer")
     def test_spin_of_another_thread(self, timer):
         self.pr_saver._spin_off_another_time_thread()
         timer.assert_has_calls([mock.call().start()])
@@ -132,7 +132,7 @@ class ProjectRecoverySaverTest(unittest.TestCase):
             self.assertEqual(len(dictionary["interfaces"]), 0)
             self.assertEqual(len(dictionary["workspaces"]), 0)
 
-    @mock.patch('workbench.projectrecovery.projectrecoverysaver.find_all_windows_that_are_savable')
+    @mock.patch("workbench.projectrecovery.projectrecoverysaver.find_all_windows_that_are_savable")
     def test_recovery_save_with_both_workspace_and_interfaces(self, windows_that_are_savable):
         CreateSampleWorkspace(OutputWorkspace="ws")
         windows_that_are_savable.return_value = [[FakeEncoder(), FakeEncoder()]]

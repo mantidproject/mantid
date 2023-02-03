@@ -19,7 +19,6 @@ from mantid.api import IFunction1D, FunctionFactory
 
 
 class Example1DFunction(IFunction1D):
-
     def category(self):
         """
         Optional method to return the category that this
@@ -45,7 +44,7 @@ class Example1DFunction(IFunction1D):
         Computes the function on the set of values given and returns
         the answer as a numpy array of floats
         """
-        return self.getParameterValue("A0") + self.getParameterValue("A1")*xvals
+        return self.getParameterValue("A0") + self.getParameterValue("A1") * xvals
 
     def functionDeriv1D(self, xvals, jacobian):
         """

@@ -23,13 +23,13 @@ def create_simple_workspace(data_x, data_y, run_number=0):
     alg.setProperty("OutputWorkspace", "__notUsed")
     alg.execute()
     ws = alg.getProperty("OutputWorkspace").value
-    ws.getRun().addProperty('run_number', run_number, 'NonDim', True)
+    ws.getRun().addProperty("run_number", run_number, "NonDim", True)
     return ws
 
 
 class MuonFileUtilsTest(unittest.TestCase):
     def test_get_run_from_multi_period_data(self):
-        simple_workspace = create_simple_workspace(data_x=[1,2,3,4], data_y=[10,20,30,40], run_number=74044)
+        simple_workspace = create_simple_workspace(data_x=[1, 2, 3, 4], data_y=[10, 20, 30, 40], run_number=74044)
         workspace_list = [simple_workspace] * 5
 
         run_number = utils.get_run_from_multi_period_data(workspace_list)
@@ -44,58 +44,58 @@ class MuonFileUtilsTest(unittest.TestCase):
         self.assertRaises(ValueError, utils.get_run_from_multi_period_data, workspace_list)
 
     def test_default_instrument_returns_default_instrument_if_muon_instrument(self):
-        ConfigService['default.instrument'] = 'MUSR'
+        ConfigService["default.instrument"] = "MUSR"
 
         instrument = utils.get_default_instrument()
 
-        self.assertEqual(instrument, 'MUSR')
+        self.assertEqual(instrument, "MUSR")
 
     def test_default_instrument_returns_MUSR_if_default_instrument_is_not_muon_instrument(self):
-        ConfigService['default.instrument'] = 'LOQ'
+        ConfigService["default.instrument"] = "LOQ"
 
         instrument = utils.get_default_instrument()
 
-        self.assertEqual(instrument, 'MUSR')
+        self.assertEqual(instrument, "MUSR")
 
     def test_that_load_dead_time_from_filename_places_table_in_ADS(self):
         ConfigService.Instance().setString("default.facility", "ISIS")
-        filename = 'MUSR00022725.nsx'
+        filename = "MUSR00022725.nsx"
 
         name = utils.load_dead_time_from_filename(filename)
-        dead_time_table = AnalysisDataService.retrieve('MUSR00022725.nsx_deadtime_table')
+        dead_time_table = AnalysisDataService.retrieve("MUSR00022725.nsx_deadtime_table")
 
-        self.assertEqual(name, 'MUSR00022725.nsx_deadtime_table')
+        self.assertEqual(name, "MUSR00022725.nsx_deadtime_table")
         self.assertTrue(isinstance(dead_time_table, ITableWorkspace))
         ConfigService.Instance().setString("default.facility", " ")
 
     def test_load_workspace_from_filename_for_existing_file(self):
         ConfigService.Instance().setString("default.facility", "ISIS")
-        filename = 'MUSR00022725.nsx'
+        filename = "MUSR00022725.nsx"
         load_result, run, filename, _ = utils.load_workspace_from_filename(filename)
 
-        self.assertEqual(load_result['DeadTimeTable'], None)
-        self.assertEqual(load_result['FirstGoodData'], 0.106)
-        self.assertEqual(load_result['MainFieldDirection'], 'Transverse')
-        self.assertAlmostEqual(load_result['TimeZero'], 0.55000, 5)
+        self.assertEqual(load_result["DeadTimeTable"], None)
+        self.assertEqual(load_result["FirstGoodData"], 0.106)
+        self.assertEqual(load_result["MainFieldDirection"], "Transverse")
+        self.assertAlmostEqual(load_result["TimeZero"], 0.55000, 5)
         self.assertEqual(run, 22725)
         ConfigService.Instance().setString("default.facility", " ")
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.utilities.load_utils.get_filename_from_alg')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.Common.utilities.load_utils.get_filename_from_alg")
     def test_filename_not_caps(self, mock_get_name):
         alg = mock.Mock()
 
-        mock_path = 'C:/users/test/data/'
-        wrong_path = 'C:/users/t/data/'
+        mock_path = "C:/users/test/data/"
+        wrong_path = "C:/users/t/data/"
 
         instrument_names = ["hifi", "Hifi", "hIfI", "hifI"]
         run_number = "125846.nxs"
         for name in instrument_names:
             # this will alway return all caps for the name -> use upper
-            mock_get_name.return_value = mock_path+name.upper()+run_number
+            mock_get_name.return_value = mock_path + name.upper() + run_number
             # load will have correct path -> use wrong path for filename
-            filename = utils.get_correct_file_path(wrong_path+name+run_number, alg)
+            filename = utils.get_correct_file_path(wrong_path + name + run_number, alg)
 
-            self.assertEqual(filename, mock_path+name+run_number)
+            self.assertEqual(filename, mock_path + name + run_number)
 
     def test_create_load_alg_for_nxs_files(self):
         filename = "EMU00019489.nxs"
@@ -118,17 +118,24 @@ class MuonFileUtilsTest(unittest.TestCase):
         alg, psi_data = utils.create_load_algorithm(filename, inputs)
         self.assertTrue(psi_data)
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.utilities.load_utils.CloneWorkspace')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.Common.utilities.load_utils.CloneWorkspace")
     def test_combine_loaded_runs_for_psi_data(self, clone_mock):
         workspace = mock.MagicMock()
         workspace.workspace.name = "name"
         model = mock.MagicMock()
         model._data_context.num_periods = mock.Mock(return_value=1)
         # Workspace is missing DeadTimeTable and DetectorGroupingTable which should be handled without raising
-        model._loaded_data_store.get_data = mock.Mock(return_value={"workspace": {"OutputWorkspace": workspace,
-                                                                                  "MainFieldDirection": 0,
-                                                                                  "TimeZero": 0, "FirstGoodData": 0,
-                                                                                  "DataDeadTimeTable": "dtt"}})
+        model._loaded_data_store.get_data = mock.Mock(
+            return_value={
+                "workspace": {
+                    "OutputWorkspace": workspace,
+                    "MainFieldDirection": 0,
+                    "TimeZero": 0,
+                    "FirstGoodData": 0,
+                    "DataDeadTimeTable": "dtt",
+                }
+            }
+        )
         run_list = [1529]
         utils.combine_loaded_runs(model, run_list)
 

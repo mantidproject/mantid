@@ -7,7 +7,6 @@ from mantidqtinterfaces.Muon.GUI.Common.plot_widget.fit_pane.plot_fit_pane_model
 
 
 class PlotModelFitPaneModel(PlotFitPaneModel):
-
     def __init__(self, context):
         super().__init__(context, "Model Data")
         self.settings = self.context.plot_panes_context[self.name].settings

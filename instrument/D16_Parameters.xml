@@ -4,7 +4,7 @@
     <component-link name="D16">
       <!-- Logs to sum when merging the runs -->
       <parameter name="sample_logs_sum" type="string" visible="false">
-        <value val="time, duration, timer" />
+        <value val="time, duration, Detector1.detsum" />
       </parameter>
       <!-- The pixel sizes [mm] used by SolidAngle, resolution and default Q binning calculations.
       Note that for the panels, often pixels have transposed shape, but the surface is the same.

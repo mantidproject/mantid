@@ -9,12 +9,13 @@ Containing a set of classes used for finding (calculating and refining) UB matri
 """
 import os
 from . import guiutility
-from qtpy.QtWidgets import (QDialog, QFileDialog)  # noqa
+from qtpy.QtWidgets import QDialog, QFileDialog  # noqa
 from mantid.kernel import Logger
+
 try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
-    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    Logger("HFIR_4Circle_Reduction").information("Using legacy ui importer")
     from mantidplot import load_ui
 
 
@@ -22,6 +23,7 @@ class AddScansForUBDialog(QDialog):
     """
     Dialog class to add scans to UB scans' table for calculating and
     """
+
     def __init__(self, parent):
         """
         initialization
@@ -31,7 +33,7 @@ class AddScansForUBDialog(QDialog):
         self._myParent = parent
 
         # set up UI
-        ui_path =  "AddUBPeaksDialog.ui"
+        ui_path = "AddUBPeaksDialog.ui"
         self.ui = load_ui(__file__, ui_path, baseinstance=self)
 
         # initialize widgets
@@ -86,13 +88,13 @@ class AddScansForUBDialog(QDialog):
         if status:
             hkl, vec_q = ret_obj
             if len(hkl) > 0:
-                self.ui.lineEdit_H.setText('%.2f' % hkl[0])
-                self.ui.lineEdit_K.setText('%.2f' % hkl[1])
-                self.ui.lineEdit_L.setText('%.2f' % hkl[2])
+                self.ui.lineEdit_H.setText("%.2f" % hkl[0])
+                self.ui.lineEdit_K.setText("%.2f" % hkl[1])
+                self.ui.lineEdit_L.setText("%.2f" % hkl[2])
 
-            self.ui.lineEdit_sampleQx.setText('%.5E' % vec_q[0])
-            self.ui.lineEdit_sampleQy.setText('%.5E' % vec_q[1])
-            self.ui.lineEdit_sampleQz.setText('%.5E' % vec_q[2])
+            self.ui.lineEdit_sampleQx.setText("%.5E" % vec_q[0])
+            self.ui.lineEdit_sampleQy.setText("%.5E" % vec_q[1])
+            self.ui.lineEdit_sampleQz.setText("%.5E" % vec_q[2])
         # END-IF
 
     def do_load_scans(self):
@@ -104,7 +106,7 @@ class AddScansForUBDialog(QDialog):
         # get file name
         scan_file = str(self.ui.lineEdit_scansFile.text())
         if os.path.exists(scan_file) is False:
-            raise RuntimeError('Scan file {0} does not exist.'.format(scan_file))
+            raise RuntimeError("Scan file {0} does not exist.".format(scan_file))
 
         # parse file
         exp_number, scans_str = guiutility.import_scans_text_file(scan_file)
@@ -123,6 +125,7 @@ class SelectUBMatrixScansDialog(QDialog):
     """
     Dialog to select scans for processing UB matrix
     """
+
     def __init__(self, parent):
         """
         initialization
@@ -158,24 +161,23 @@ class SelectUBMatrixScansDialog(QDialog):
         scans_list.sort()
 
         # form the output string
-        output_str = '# Exp = {0}.\n'.format(self._myParent.current_exp_number)
+        output_str = "# Exp = {0}.\n".format(self._myParent.current_exp_number)
         for scan in scans_list:
-            output_str += '{0}, '.format(scan)
+            output_str += "{0}, ".format(scan)
 
         # trim the last
         output_str = output_str[:-2]
 
         # get the output file name
-        file_filter = 'Text Files (*.dat);;All Files (*.*)'
-        file_name = QFileDialog.getSaveFileName(self, 'File to export selected scans',
-                                                self._myParent.working_directory, file_filter)
+        file_filter = "Text Files (*.dat);;All Files (*.*)"
+        file_name = QFileDialog.getSaveFileName(self, "File to export selected scans", self._myParent.working_directory, file_filter)
         if not file_name:
             return
         if isinstance(file_name, tuple):
             file_name = file_name[0]
 
         # write file
-        out_file = open(file_name, 'w')
+        out_file = open(file_name, "w")
         out_file.write(output_str)
         out_file.close()
 
@@ -199,25 +201,24 @@ class SelectUBMatrixScansDialog(QDialog):
             select_args = dict()
 
             if self.ui.checkBox_selectNuclearPeaks.isChecked():
-                status, ret_obj = guiutility.parse_float_editors([self.ui.lineEdit_nuclearPeaksTolerance],
-                                                                 allow_blank=False)
+                status, ret_obj = guiutility.parse_float_editors([self.ui.lineEdit_nuclearPeaksTolerance], allow_blank=False)
                 if not status:
                     raise RuntimeError(ret_obj)
                 hkl_tol = ret_obj[0]
-                select_args['nuclear_peaks'] = True
-                select_args['hkl_tolerance'] = hkl_tol
+                select_args["nuclear_peaks"] = True
+                select_args["hkl_tolerance"] = hkl_tol
 
             if self.ui.checkBox_wavelength.isChecked():
                 # wave length selection
-                status, ret_obj = guiutility.parse_float_editors([self.ui.lineEdit_wavelength,
-                                                                  self.ui.lineEdit_wavelengthTolerance],
-                                                                 allow_blank=False)
+                status, ret_obj = guiutility.parse_float_editors(
+                    [self.ui.lineEdit_wavelength, self.ui.lineEdit_wavelengthTolerance], allow_blank=False
+                )
                 if status:
                     wave_length, wave_length_tol = ret_obj
-                    select_args['wavelength'] = wave_length
-                    select_args['wavelength_tolerance'] = wave_length_tol
+                    select_args["wavelength"] = wave_length
+                    select_args["wavelength_tolerance"] = wave_length_tol
                 else:
-                    select_args['wavelength'] = None
+                    select_args["wavelength"] = None
 
             # select with filters
             self._myParent.ub_matrix_processing_table.select_scans(**select_args)

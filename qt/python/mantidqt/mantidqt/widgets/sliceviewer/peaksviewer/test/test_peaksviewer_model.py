@@ -25,36 +25,35 @@ class PeaksViewerModelTest(unittest.TestCase):
     # -------------------------- Success Tests --------------------------------
     def test_peaks_workspace_returns_same_workspace_given_to_model(self):
         peaks_workspace = create_autospec(PeaksWorkspace)
-        model = PeaksViewerModel(peaks_workspace, 'b', '1.0')
+        model = PeaksViewerModel(peaks_workspace, "b", "1.0")
 
         self.assertEqual(peaks_workspace, model.peaks_workspace)
 
     def test_color_returns_string_identifier_given_to_model(self):
-        fg_color, bg_color = 'b', '0.5'
+        fg_color, bg_color = "b", "0.5"
         model = PeaksViewerModel(create_autospec(PeaksWorkspace), fg_color, bg_color)
 
         self.assertEqual(fg_color, model.fg_color)
         self.assertEqual(bg_color, model.bg_color)
 
-    @patch('mantidqt.widgets.sliceviewer.peaksviewer.model._get_peaksworkspace')
+    @patch("mantidqt.widgets.sliceviewer.peaksviewer.model._get_peaksworkspace")
     def test_create_peaksviewermodel_uses_given_colors(self, mock_get_peaks_workspace):
         mock_get_peaks_workspace.return_value = MagicMock(spec=PeaksWorkspace)
 
-        first_model = create_peaksviewermodel('test', 'red', 'gray')
-        second_model = create_peaksviewermodel('test', 'blue', 'white')
+        first_model = create_peaksviewermodel("test", "red", "gray")
+        second_model = create_peaksviewermodel("test", "blue", "white")
 
-        self.assertEqual('red', first_model.fg_color)
-        self.assertEqual('gray', first_model.bg_color)
-        self.assertEqual('blue', second_model.fg_color)
-        self.assertEqual('white', second_model.bg_color)
+        self.assertEqual("red", first_model.fg_color)
+        self.assertEqual("gray", first_model.bg_color)
+        self.assertEqual("blue", second_model.fg_color)
+        self.assertEqual("white", second_model.bg_color)
 
     def test_draw_peaks(self):
-        fg_color = 'r'
+        fg_color = "r"
         # create 2 peaks: 1 visible, 1 not (far outside Z range)
         visible_peak_center, invisible_center = (0.5, 0.2, 0.25), (0.4, 0.3, 25)
 
-        _, mock_painter = draw_peaks(
-            (visible_peak_center, invisible_center), fg_color, slice_value=0.5, slice_width=30)
+        _, mock_painter = draw_peaks((visible_peak_center, invisible_center), fg_color, slice_value=0.5, slice_width=30)
 
         self.assertEqual(1, mock_painter.cross.call_count)
         call_args, call_kwargs = mock_painter.cross.call_args
@@ -67,8 +66,7 @@ class PeaksViewerModelTest(unittest.TestCase):
     def test_clear_peaks_removes_all_drawn(self):
         # create 2 peaks: 1 visible, 1 not (far outside Z range)
         visible_peak_center, invisible_center = (0.5, 0.2, 0.25), (0.4, 0.3, 25)
-        model, mock_painter = draw_peaks(
-            (visible_peak_center, invisible_center), fg_color='r', slice_value=0.5, slice_width=30)
+        model, mock_painter = draw_peaks((visible_peak_center, invisible_center), fg_color="r", slice_value=0.5, slice_width=30)
 
         model.clear_peak_representations()
 
@@ -99,8 +97,7 @@ class PeaksViewerModelTest(unittest.TestCase):
 
     def test_viewlimits(self):
         visible_peak_center, invisible_center = (0.5, 0.2, 0.25), (0.4, 0.3, 25)
-        model, mock_painter = draw_peaks(
-            (visible_peak_center, invisible_center), fg_color='r', slice_value=0.5, slice_width=30)
+        model, mock_painter = draw_peaks((visible_peak_center, invisible_center), fg_color="r", slice_value=0.5, slice_width=30)
 
         xlim, ylim = model.viewlimits(0)
 
@@ -118,7 +115,7 @@ class PeaksViewerModelTest(unittest.TestCase):
 
     def test_peaks_workspace_add_peak(self):
         peaks_workspace = create_autospec(PeaksWorkspace)
-        model = PeaksViewerModel(peaks_workspace, 'b', '1.0')
+        model = PeaksViewerModel(peaks_workspace, "b", "1.0")
 
         model.add_peak([1, 1, 1], SpecialCoordinateSystem.QLab)
         peaks_workspace.addPeak.assert_called_with([1, 1, 1], SpecialCoordinateSystem.QLab)
@@ -129,9 +126,8 @@ class PeaksViewerModelTest(unittest.TestCase):
 
     # -------------------------- Failure Tests --------------------------------
     def test_model_accepts_only_peaks_workspaces(self):
-        self.assertRaises(ValueError, PeaksViewerModel, create_autospec(MatrixWorkspace), 'w',
-                          '1.0')
+        self.assertRaises(ValueError, PeaksViewerModel, create_autospec(MatrixWorkspace), "w", "1.0")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

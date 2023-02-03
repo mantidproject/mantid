@@ -12,7 +12,7 @@ import unittest
 from os.path import isdir
 from shutil import rmtree
 
-matplotlib.use('AGG')
+matplotlib.use("AGG")
 
 from os.path import isdir, join  # noqa
 from shutil import rmtree  # noqa
@@ -61,7 +61,7 @@ class ProjectLoaderTest(unittest.TestCase):
         self.assertTrue(projectloader._confirm_all_workspaces_loaded(workspaces_to_confirm=[ws1_name]))
 
     def test_workspace_loader_load_workspaces_not_called_when_load_workspaces_is_false(self):
-        loader = projectloader.ProjectLoader('.recfile')
+        loader = projectloader.ProjectLoader(".recfile")
 
         loader.workspace_loader = mock.MagicMock()
 
@@ -87,13 +87,15 @@ class ProjectReaderTest(unittest.TestCase):
         self.assertEqual(["ws1"], project_reader.workspace_names)
 
     def test_mantidplot_project_reading(self):
-        mantidplot_project_partial = "MantidPlot 0.9.5 project file\n" + \
-                                     "<scripting-lang>	Python\n" + \
-                                     "<windows>	3\n" + \
-                                     "<mantidworkspaces>\n" + \
-                                     "WorkspaceNames\tws1\tws2\n" + \
-                                     "</mantidworkspaces>\n" + \
-                                     "<scriptwindow>\n"
+        mantidplot_project_partial = (
+            "MantidPlot 0.9.5 project file\n"
+            + "<scripting-lang>	Python\n"
+            + "<windows>	3\n"
+            + "<mantidworkspaces>\n"
+            + "WorkspaceNames\tws1\tws2\n"
+            + "</mantidworkspaces>\n"
+            + "<scriptwindow>\n"
+        )
 
         mplot_project_file = join(working_directory, "mplot_temp.mantid")
         with open(mplot_project_file, "w") as f:

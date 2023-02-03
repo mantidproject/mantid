@@ -9,8 +9,7 @@
 Description
 -----------
 
-Convolution of two workspaces using :ref:`Convolution <func-Convolution>` from
-CurveFitting. Workspaces must have the same number of spectra.
+Convolution of two workspaces using the :ref:`Convolution <func-Convolution>` function. Workspaces must have the same number of spectra.
 
 Usage
 -----

@@ -72,6 +72,8 @@ public:
 
   bool getPolarizationCorrectionOption() const override;
   void setPolarizationCorrectionOption(bool enable) override;
+  std::string getPolarizationEfficienciesWorkspace() const override;
+  void setPolarizationEfficienciesWorkspace(std::string const &workspace) override;
 
   std::string getFloodCorrectionType() const override;
   void setFloodCorrectionType(std::string const &correction) override;
@@ -106,6 +108,8 @@ public:
 
   void enablePolarizationCorrections() override;
   void disablePolarizationCorrections() override;
+  void enablePolarizationEfficiencies() override;
+  void disablePolarizationEfficiencies() override;
 
   void enableFloodCorrectionInputs() override;
   void disableFloodCorrectionInputs() override;
@@ -139,6 +143,7 @@ private:
   void initLayout(const Mantid::API::IAlgorithm_sptr &algorithmForTooltips);
   void initOptionsTable(const Mantid::API::IAlgorithm_sptr &algorithmForTooltips);
   void initFloodControls();
+  void initPolCorrEfficienciesControls();
   void registerSettingsWidgets(const Mantid::API::IAlgorithm_sptr &alg);
   void registerExperimentSettingsWidgets(const Mantid::API::IAlgorithm_sptr &alg);
   void setToolTipAsPropertyDocumentation(QWidget &widget, std::string const &propertyName,

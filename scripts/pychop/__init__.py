@@ -24,7 +24,12 @@ resolution, flux = Instrument.calculate(inst='maps', chtyp='a', freq=500, ei=600
 
 def PyChop2(*args, **kwargs):
     import warnings
-    warnings.warn("Deprecation Warning: Importing 'PyChop2' from the 'mantidqtinterfaces.PyChop' module is deprecated."
-                  "Please import 'Instrument' from the 'pychop.Instruments' module instead.", DeprecationWarning)
+
+    warnings.warn(
+        "Deprecation Warning: Importing 'PyChop2' from the 'mantidqtinterfaces.PyChop' module is deprecated."
+        "Please import 'Instrument' from the 'pychop.Instruments' module instead.",
+        DeprecationWarning,
+    )
     from pychop.Instruments import Instrument
+
     return Instrument(*args, **kwargs)

@@ -120,6 +120,11 @@ public:
     checkData(input, output, {}, expectedE);
   }
 
+  void test_interpolateLinearPointDataSet_Too_Few_Points_For_Error_Calc() {
+    Histogram input(Points(5, LinearGenerator(0, 0.5)), {-2, 0, 0, 0, 2}, CountStandardDeviations{1., 0., 0., 0., 1.});
+    TS_ASSERT_THROWS_NOTHING(interpolateLinear(input, 4, true));
+  }
+
   void test_interpolateLinearInplace_interpolates() {
     Histogram input(Points(2, LinearGenerator(0, 1.0)), {-0.72, -0.72});
     Histogram output(Points(1, LinearGenerator(0.5, 1.0)), {0.0});
@@ -344,11 +349,6 @@ public:
   void test_interpolatelinear_throws_if_stepsize_greater_or_equal_number_points() {
     TS_ASSERT_THROWS(interpolateLinear(Histogram(Points(6, LinearGenerator(0, 0.5))), 6), const std::runtime_error &);
     TS_ASSERT_THROWS(interpolateLinear(Histogram(Points(6, LinearGenerator(0, 0.5))), 7), const std::runtime_error &);
-  }
-
-  void test_interpolateLinearPointDataSet_Errors_Too_Few_Points() {
-    Histogram input(Points(5, LinearGenerator(0, 0.5)), {-2, 0, 0, 0, 2}, CountStandardDeviations{1., 0., 0., 0., 1.});
-    TS_ASSERT_THROWS(interpolateLinear(input, 4, true), const std::runtime_error &);
   }
 
   // ---------------------------------------------------------------------------

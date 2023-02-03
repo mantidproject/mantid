@@ -9,7 +9,6 @@ from mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.frequency_context impor
 
 
 class PlotFreqFitPanePresenter(PlotFitPanePresenter):
-
     def __init__(self, view, model, context, fitting_context, figure_presenter):
         super().__init__(view, model, context, fitting_context, figure_presenter)
         self._data_type = [FREQ, FIELD]

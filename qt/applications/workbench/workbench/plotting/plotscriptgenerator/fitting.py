@@ -8,13 +8,13 @@
 import json
 
 BASE_FIT_COMMAND = "Fit"
-BASE_FIT_INCLUDE = 'from mantid.simpleapi import Fit'
+BASE_FIT_INCLUDE = "from mantid.simpleapi import Fit"
 
 FIT_COMMANDS_ORDER = {"Function": 1, "InputWorkspace": 2, "WorkspaceIndex": 3, "Output": 4, "StartX": 5, "EndX": 6}
 
 
 def get_fit_cmds(fig):
-    if not hasattr(fig.canvas.manager, 'fit_browser'):
+    if not hasattr(fig.canvas.manager, "fit_browser"):
         return [], []
     cmds = []
     fit_headers = [BASE_FIT_INCLUDE]
@@ -23,8 +23,8 @@ def get_fit_cmds(fig):
         fit_parameters = json.loads(fit_browser.getFitAlgorithmParameters())
         # Fit parameters is a Json object with the following entries
         # {name: 'algorithm', properties: {json object containing all the properties of the alg'}
-        cmds.extend(_get_fit_variable_assigment_commands(fit_parameters['properties']))
-        cmds.append(_get_fit_call_command(fit_parameters['properties']))
+        cmds.extend(_get_fit_variable_assigment_commands(fit_parameters["properties"]))
+        cmds.append(_get_fit_call_command(fit_parameters["properties"]))
         return cmds, fit_headers
     else:
         return [], []
@@ -32,7 +32,7 @@ def get_fit_cmds(fig):
 
 def _get_fit_variable_assignment_command(fit_property, property_value):
     if type(property_value) == str:
-        return "{}=\"{}\"".format(fit_property, property_value)
+        return '{}="{}"'.format(fit_property, property_value)
     elif type(property_value) == float:
         return "{0}={1:.5f}".format(fit_property, property_value)
     else:
@@ -43,7 +43,7 @@ def _get_fit_variable_assigment_commands(fit_properties):
     cmds = []
     for fit_property in fit_properties:
         cmds.append(_get_fit_variable_assignment_command(fit_property, fit_properties[fit_property]))
-    cmds.sort(key=lambda x: FIT_COMMANDS_ORDER[x.split('=')[0]] if x.split('=')[0] in FIT_COMMANDS_ORDER else 999)
+    cmds.sort(key=lambda x: FIT_COMMANDS_ORDER[x.split("=")[0]] if x.split("=")[0] in FIT_COMMANDS_ORDER else 999)
     return cmds
 
 

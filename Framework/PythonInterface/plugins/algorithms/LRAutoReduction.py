@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init, invalid-name, no-self-use, attribute-defined-outside-init
+# pylint: disable=no-init, invalid-name, no-self-use, attribute-defined-outside-init
 """
     Top-level auto-reduction algorithm for the SNS Liquids Reflectometer
 """
@@ -21,73 +21,71 @@ from reduction_gui.reduction.reflectometer.refl_data_series import DataSeries
 
 
 class LRAutoReduction(PythonAlgorithm):
-
     def category(self):
-        """ Return category """
+        """Return category"""
         return "Reflectometry\\SNS"
 
     def name(self):
-        """ Return name """
+        """Return name"""
         return "LRAutoReduction"
 
     def version(self):
-        """ Return version number """
+        """Return version number"""
         return 1
 
     def summary(self):
-        """ Short description """
+        """Short description"""
         return "Find reflectivity peak and return its pixel range."
 
     def PyInit(self):
-        """ Property declarations """
-        self.declareProperty(FileProperty("Filename", "", FileAction.OptionalLoad, ['.nxs']),
-                             "Data file to reduce")
-        self.declareProperty(WorkspaceProperty("InputWorkspace", "",
-                                               Direction.Input, PropertyMode.Optional),
-                             "Optionally, we can provide a workspace directly")
-        self.declareProperty(FileProperty("TemplateFile", "", FileAction.OptionalLoad, ['.xml']),
-                             "Template reduction file")
+        """Property declarations"""
+        self.declareProperty(FileProperty("Filename", "", FileAction.OptionalLoad, [".nxs"]), "Data file to reduce")
+        self.declareProperty(
+            WorkspaceProperty("InputWorkspace", "", Direction.Input, PropertyMode.Optional),
+            "Optionally, we can provide a workspace directly",
+        )
+        self.declareProperty(FileProperty("TemplateFile", "", FileAction.OptionalLoad, [".xml"]), "Template reduction file")
 
         # ------------ Properties that should be in the meta data -------------
-        self.declareProperty("ScaleToUnity", True,
-                             "If true, the reflectivity under the Q cutoff will be scaled to 1")
-        self.declareProperty(IntArrayProperty("DirectBeamList", [], direction=Direction.Input),
-                             "List of direct beam run numbers (integers)")
-        self.declareProperty(FileProperty("ScalingFactorFile", "", FileAction.OptionalLoad,
-                                          extensions=['.cfg', '.txt']), "Scaling factor file")
+        self.declareProperty("ScaleToUnity", True, "If true, the reflectivity under the Q cutoff will be scaled to 1")
+        self.declareProperty(
+            IntArrayProperty("DirectBeamList", [], direction=Direction.Input), "List of direct beam run numbers (integers)"
+        )
+        self.declareProperty(
+            FileProperty("ScalingFactorFile", "", FileAction.OptionalLoad, extensions=[".cfg", ".txt"]), "Scaling factor file"
+        )
         self.declareProperty("IncidentMedium", "medium", "Name of the incident medium")
         # ---------------------------------------------------------------------
 
-        self.declareProperty("ScalingFactorTOFStep", 200.0,
-                             "Bin width in TOF for fitting scaling factors")
-        self.declareProperty("WavelengthOffset", 0.0,
-                             "Wavelength offset used for TOF range determination")
-        self.declareProperty("ScalingWavelengthCutoff", 10.0,
-                             "Wavelength above which the scaling factors are assumed to be one")
-        self.declareProperty("ReadSequenceFromFile", False,
-                             "Read the run sequence information from the file, not the title")
-        self.declareProperty("ForceSequenceNumber", 0,
-                             "Force the sequence number value if it's not available")
-        self.declareProperty("OrderDirectBeamsByRunNumber", False,
-                             "Force the sequence of direct beam files to be ordered by run number")
-        self.declareProperty("ComputeResolution", True,
-                             "If True, the Q resolution will be computed")
-        self.declareProperty(FileProperty('OutputFilename', '', action=FileAction.OptionalSave, extensions=["txt"]),
-                             doc='Name of the reflectivity file output')
+        self.declareProperty("ScalingFactorTOFStep", 200.0, "Bin width in TOF for fitting scaling factors")
+        self.declareProperty("WavelengthOffset", 0.0, "Wavelength offset used for TOF range determination")
+        self.declareProperty("ScalingWavelengthCutoff", 10.0, "Wavelength above which the scaling factors are assumed to be one")
+        self.declareProperty("ReadSequenceFromFile", False, "Read the run sequence information from the file, not the title")
+        self.declareProperty("ForceSequenceNumber", 0, "Force the sequence number value if it's not available")
+        self.declareProperty("OrderDirectBeamsByRunNumber", False, "Force the sequence of direct beam files to be ordered by run number")
+        self.declareProperty("ComputeResolution", True, "If True, the Q resolution will be computed")
+        self.declareProperty(
+            FileProperty("OutputFilename", "", action=FileAction.OptionalSave, extensions=["txt"]),
+            doc="Name of the reflectivity file output",
+        )
         self.declareProperty(FileProperty("OutputDirectory", "", FileAction.Directory))
 
-        self.declareProperty(IntArrayProperty("SequenceInfo", [0, 0, 0], direction=Direction.Output),
-                             "Run sequence information (run number, sequence ID, sequence number).")
+        self.declareProperty(
+            IntArrayProperty("SequenceInfo", [0, 0, 0], direction=Direction.Output),
+            "Run sequence information (run number, sequence ID, sequence number).",
+        )
         self.declareProperty("SlitTolerance", 0.02, doc="Tolerance for matching slit positions")
-        self.declareProperty("NormalizationType", "DirectBeam",
-                             doc="Normalization type for reduction. Allowed values: ['DirectBeam', 'WithReference']")
-        self.declareProperty("Refl1DModelParameters", "",
-                             doc="JSON string for Refl1D theoretical model parameters for 'NormalizationType'=='WithReference' ")
+        self.declareProperty(
+            "NormalizationType", "DirectBeam", doc="Normalization type for reduction. Allowed values: ['DirectBeam', 'WithReference']"
+        )
+        self.declareProperty(
+            "Refl1DModelParameters", "", doc="JSON string for Refl1D theoretical model parameters for 'NormalizationType'=='WithReference' "
+        )
 
     def load_data(self):
         """
-            Load the data. We can either load it from the specified
-            run numbers, or use the input workspace if no runs are specified.
+        Load the data. We can either load it from the specified
+        run numbers, or use the input workspace if no runs are specified.
         """
         filename = self.getProperty("Filename").value
         ws_event_data = self.getProperty("InputWorkspace").value
@@ -100,11 +98,11 @@ class LRAutoReduction(PythonAlgorithm):
 
     def _get_series_info(self):
         """
-            Retrieve the information about the scan series so
-            that we know how to put all the pieces together.
+        Retrieve the information about the scan series so
+        that we know how to put all the pieces together.
 
-            At some point this should all be in the data logs.
-            We can also pull some of the information from the title.
+        At some point this should all be in the data logs.
+        We can also pull some of the information from the title.
         """
         # Load meta data to decide what to do
         self.event_data = self.load_data()
@@ -122,10 +120,12 @@ class LRAutoReduction(PythonAlgorithm):
 
         # Look for meta data information, available with the new DAS
         # If it's not available, parse the title.
-        elif read_sequence_from_file is True \
-                and meta_data_run.hasProperty("sequence_number") \
-                and meta_data_run.hasProperty("sequence_id") \
-                and meta_data_run.hasProperty("data_type"):
+        elif (
+            read_sequence_from_file is True
+            and meta_data_run.hasProperty("sequence_number")
+            and meta_data_run.hasProperty("sequence_id")
+            and meta_data_run.hasProperty("data_type")
+        ):
             sequence_number = meta_data_run.getProperty("sequence_number").value[0]
             first_run_of_set = meta_data_run.getProperty("sequence_id").value[0]
             data_type = meta_data_run.getProperty("data_type").value[0]
@@ -139,15 +139,14 @@ class LRAutoReduction(PythonAlgorithm):
             first_run_of_set, sequence_number, is_direct_beam = self._parse_title(meta_data_run, run_number)
             do_reduction = not is_direct_beam
 
-        self.setProperty("SequenceInfo",
-                         [int(run_number), int(first_run_of_set), int(sequence_number)])
+        self.setProperty("SequenceInfo", [int(run_number), int(first_run_of_set), int(sequence_number)])
         return run_number, first_run_of_set, sequence_number, do_reduction, is_direct_beam
 
     def _parse_title(self, meta_data_run, run_number):
         """
-            Parse the title to get the first run number of the set and the sequence number
-            @param meta_data_run: run object for the workspace
-            @param run_number: run number
+        Parse the title to get the first run number of the set and the sequence number
+        @param meta_data_run: run object for the workspace
+        @param run_number: run number
         """
         logger.notice("Parsing sequence ID and sequence number from title!")
         first_run_of_set = int(run_number)
@@ -160,14 +159,14 @@ class LRAutoReduction(PythonAlgorithm):
             logger.notice("Direct beam found in the title")
             is_direct_beam = True
 
-        thi = meta_data_run.getProperty('thi').value[0]
-        tthd = meta_data_run.getProperty('tthd').value[0]
+        thi = meta_data_run.getProperty("thi").value[0]
+        tthd = meta_data_run.getProperty("tthd").value[0]
         if math.fabs(thi - tthd) < 0.001:
             logger.notice("Angle appears to be zero: probably a direct beam run")
             is_direct_beam = True
 
         # Determine the sequence ID and sequence number
-        #pylint: disable=bare-except
+        # pylint: disable=bare-except
         try:
             m = re.search(r"Run:(\d+)-(\d+)\.", title)
             if m is not None:
@@ -195,8 +194,8 @@ class LRAutoReduction(PythonAlgorithm):
 
     def _read_template(self, sequence_number):
         """
-            Read template from file.
-            @param sequence_number: the ID of the data set within the sequence of runs
+        Read template from file.
+        @param sequence_number: the ID of the data set within the sequence of runs
         """
         template_file = self.getProperty("TemplateFile").value
         fd = open(template_file, "r")
@@ -217,10 +216,10 @@ class LRAutoReduction(PythonAlgorithm):
 
     def _get_template(self, run_number, first_run_of_set, sequence_number):
         """
-            Get a template, either from file or creating one.
-            @param run_number: run number according to the data file name
-            @param first_run_of_set: first run in the sequence (sequence ID)
-            @param sequence_number: the ID of the data set within the sequence of runs
+        Get a template, either from file or creating one.
+        @param run_number: run number according to the data file name
+        @param first_run_of_set: first run in the sequence (sequence ID)
+        @param sequence_number: the ID of the data set within the sequence of runs
         """
         # Check whether we need to read a template file
         filename = self.getProperty("TemplateFile").value
@@ -233,17 +232,17 @@ class LRAutoReduction(PythonAlgorithm):
 
         # Get incident medium as a simple string
         _incident_medium_str = str(data_set.incident_medium_list[0])
-        _list = _incident_medium_str.split(',')
+        _list = _incident_medium_str.split(",")
         incident_medium = _list[data_set.incident_medium_index_selected]
 
         return data_set, incident_medium
 
     def _read_property(self, meta_data_run, key, default, is_string=False):
         """
-            Read the value for the given key in the sample run logs
-            @param meta_data_run: Run object from the Mantid workspace
-            @param key: name of the property to read
-            @param default: default value to return if we don't find the key
+        Read the value for the given key in the sample run logs
+        @param meta_data_run: Run object from the Mantid workspace
+        @param key: name of the property to read
+        @param default: default value to return if we don't find the key
         """
         if meta_data_run.hasProperty(key):
             value = meta_data_run.getProperty(key).value[0]
@@ -262,11 +261,11 @@ class LRAutoReduction(PythonAlgorithm):
 
     def _write_template(self, data_set, run_number, first_run_of_set, sequence_number):
         """
-            Write out a template using the reduction parameters that we have used.
-            @param data_set: DataSets object
-            @param run_number: run number according to the data file name
-            @param first_run_of_set: first run in the sequence (sequence ID)
-            @param sequence_number: the ID of the data set within the sequence of runs
+        Write out a template using the reduction parameters that we have used.
+        @param data_set: DataSets object
+        @param run_number: run number according to the data file name
+        @param first_run_of_set: first run in the sequence (sequence ID)
+        @param sequence_number: the ID of the data set within the sequence of runs
         """
         # Write out a template for this run
         xml_str = "<Reduction>\n"
@@ -281,8 +280,7 @@ class LRAutoReduction(PythonAlgorithm):
         new_data_sets = []
         for i in range(int(run_number) - int(first_run_of_set) + 1):
             if i >= len(self.data_series_template.data_sets):
-                logger.warning("Sequence is corrupted: run=%s, first run of set=%s" % (str(run_number),
-                                                                                       str(first_run_of_set)))
+                logger.warning("Sequence is corrupted: run=%s, first run of set=%s" % (str(run_number), str(first_run_of_set)))
                 break
             d = self.data_series_template.data_sets[i]
             d.data_files = [int(first_run_of_set) + i]
@@ -294,17 +292,17 @@ class LRAutoReduction(PythonAlgorithm):
 
         xml_str += self.data_series_template.to_xml()
         xml_str += "</Reduction>\n"
-        template_file = open(self._get_output_template_path(first_run_of_set), 'w')
+        template_file = open(self._get_output_template_path(first_run_of_set), "w")
         template_file.write(xml_str)
         template_file.close()
 
     def _save_partial_output(self, data_set, first_run_of_set, sequence_number, run_number):
         """
-            Stitch and save the full reflectivity curve, or as much as we have at the moment.
-            @param data_set: DataSets object
-            @param run_number: run number according to the data file name
-            @param first_run_of_set: first run in the sequence (sequence ID)
-            @param sequence_number: the ID of the data set within the sequence of runs
+        Stitch and save the full reflectivity curve, or as much as we have at the moment.
+        @param data_set: DataSets object
+        @param run_number: run number according to the data file name
+        @param first_run_of_set: first run in the sequence (sequence ID)
+        @param sequence_number: the ID of the data set within the sequence of runs
         """
         output_dir = self.getProperty("OutputDirectory").value
         output_file = self.getProperty("OutputFilename").value
@@ -313,7 +311,7 @@ class LRAutoReduction(PythonAlgorithm):
         # Save partial output
         n_ts = 0
         output_ws = None
-        prefix = 'reflectivity_%s_%s_%s' % (first_run_of_set, sequence_number, run_number)
+        prefix = "reflectivity_%s_%s_%s" % (first_run_of_set, sequence_number, run_number)
         for ws in AnalysisDataService.getObjectNames():
             if ws.endswith("ts") and ws.startswith(prefix):
                 output_ws = ws
@@ -340,9 +338,9 @@ class LRAutoReduction(PythonAlgorithm):
         if len(input_ws_list) == 0:
             logger.notice("No data sets to stitch.")
             return
-        input_ws_list = sorted(input_ws_list, key=lambda _ws: int(_ws.split('_')[2]))
+        input_ws_list = sorted(input_ws_list, key=lambda _ws: int(_ws.split("_")[2]))
 
-        default_file_name = 'REFL_%s_combined_data_auto.txt' % first_run_of_set
+        default_file_name = "REFL_%s_combined_data_auto.txt" % first_run_of_set
         file_path = os.path.join(output_dir, default_file_name)
         scale_to_unity = self.getProperty("ScaleToUnity").value
         wl_cutoff = self.getProperty("ScalingWavelengthCutoff").value
@@ -353,10 +351,16 @@ class LRAutoReduction(PythonAlgorithm):
         dQ_constant = data_set.fourth_column_dq0
         dQ_slope = data_set.fourth_column_dq_over_q
         compute_resolution = self.getProperty("ComputeResolution").value
-        LRReflectivityOutput(ReducedWorkspaces=input_ws_list, ScaleToUnity=scale_to_unity,
-                             ScalingWavelengthCutoff=wl_cutoff, OutputBinning=output_binning,
-                             DQConstant=dQ_constant, DQSlope=dQ_slope,
-                             ComputeDQ=compute_resolution, OutputFilename=file_path)
+        LRReflectivityOutput(
+            ReducedWorkspaces=input_ws_list,
+            ScaleToUnity=scale_to_unity,
+            ScalingWavelengthCutoff=wl_cutoff,
+            OutputBinning=output_binning,
+            DQConstant=dQ_constant,
+            DQSlope=dQ_slope,
+            ComputeDQ=compute_resolution,
+            OutputFilename=file_path,
+        )
         for ws in input_ws_list:
             AnalysisDataService.remove(str(ws))
 
@@ -364,16 +368,16 @@ class LRAutoReduction(PythonAlgorithm):
 
     def _get_sequence_total(self, default=10):
         """
-            Return the total number of runs in the current sequence.
-            If reading sequence information from file was turned off,
-            or if the information was not found, return the given default.
+        Return the total number of runs in the current sequence.
+        If reading sequence information from file was turned off,
+        or if the information was not found, return the given default.
 
-            For direct beams, a default of 10 is not efficient but is a
-            good value to avoid processing runs we know will be processed later.
-            That is because most direct beam run sets are either 13 (for 30 Hz)
-            or 21 (for 60 Hz).
+        For direct beams, a default of 10 is not efficient but is a
+        good value to avoid processing runs we know will be processed later.
+        That is because most direct beam run sets are either 13 (for 30 Hz)
+        or 21 (for 60 Hz).
 
-            @param default: default value for when the info is not available
+        @param default: default value for when the info is not available
         """
         meta_data_run = self.event_data.getRun()
         # Get the total number of direct beams in a set.
@@ -390,9 +394,9 @@ class LRAutoReduction(PythonAlgorithm):
 
         # Determine where we are in the scan
         run_number, first_run_of_set, sequence_number, do_reduction, is_direct_beam = self._get_series_info()
-        logger.information("Run %s - Sequence %s [%s/%s]" % (run_number, first_run_of_set,
-                                                             sequence_number,
-                                                             self._get_sequence_total(default=-1)))
+        logger.information(
+            "Run %s - Sequence %s [%s/%s]" % (run_number, first_run_of_set, sequence_number, self._get_sequence_total(default=-1))
+        )
 
         # If we have a direct beam, compute the scaling factors
         if is_direct_beam:
@@ -409,15 +413,18 @@ class LRAutoReduction(PythonAlgorithm):
             # so either use the medium in the data file or a default name
             meta_data_run = self.event_data.getRun()
             _incident_medium = self.getProperty("IncidentMedium").value
-            incident_medium = self._read_property(meta_data_run, "incident_medium",
-                                                  _incident_medium, is_string=True)
+            incident_medium = self._read_property(meta_data_run, "incident_medium", _incident_medium, is_string=True)
             file_id = incident_medium.replace("medium", "")
-            LRDirectBeamSort(RunList=list(range(first_run_of_set, first_run_of_set + sequence_number)),
-                             UseLowResCut=True, ComputeScalingFactors=True, TOFSteps=sf_tof_step,
-                             IncidentMedium=incident_medium,
-                             SlitTolerance=slit_tolerance,
-                             OrderDirectBeamsByRunNumber=order_by_runs,
-                             ScalingFactorFile=os.path.join(output_dir, "sf_%s_%s_auto.cfg" % (first_run_of_set, file_id)))
+            LRDirectBeamSort(
+                RunList=list(range(first_run_of_set, first_run_of_set + sequence_number)),
+                UseLowResCut=True,
+                ComputeScalingFactors=True,
+                TOFSteps=sf_tof_step,
+                IncidentMedium=incident_medium,
+                SlitTolerance=slit_tolerance,
+                OrderDirectBeamsByRunNumber=order_by_runs,
+                ScalingFactorFile=os.path.join(output_dir, "sf_%s_%s_auto.cfg" % (first_run_of_set, file_id)),
+            )
             return
         elif not do_reduction:
             logger.notice("The data is of a type that does not have to be reduced")
@@ -455,7 +462,7 @@ class LRAutoReduction(PythonAlgorithm):
             "SlitsWidthFlag": data_set.slits_width_flag,
             "ApplyPrimaryFraction": False,
             "SlitTolerance": slit_tolerance,
-            "OutputWorkspace": 'reflectivity_%s_%s_%s' % (first_run_of_set, sequence_number, run_number)
+            "OutputWorkspace": "reflectivity_%s_%s_%s" % (first_run_of_set, sequence_number, run_number),
         }
 
         # Execute the reduction for the selected normalization type
@@ -466,11 +473,11 @@ class LRAutoReduction(PythonAlgorithm):
         elif "WithReference":
             # Get Refl1D parameters for theoretical model
             refl1d_parameters = self.getProperty("Refl1DModelParameters").value
-            kwargs['Refl1DModelParameters'] = refl1d_parameters
+            kwargs["Refl1DModelParameters"] = refl1d_parameters
 
             # Modify output wksp name to match backwards compatibility for UI
             _time = int(time.time())
-            kwargs["OutputWorkspace"] = kwargs["OutputWorkspace"] + '_#' + str(_time) + 'ts'
+            kwargs["OutputWorkspace"] = kwargs["OutputWorkspace"] + "_#" + str(_time) + "ts"
 
             LRReductionWithReference(**kwargs)
 

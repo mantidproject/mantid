@@ -1,0 +1,1 @@
+- Added :ref:`LagrangeILLReduction <algm-LagrangeILLReduction>`, which handles loading and data reduction from IN1 - Lagrange at ILL.

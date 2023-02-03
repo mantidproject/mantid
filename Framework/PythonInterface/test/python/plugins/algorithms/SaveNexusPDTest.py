@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name,too-many-public-methods,too-many-arguments
+# pylint: disable=invalid-name,too-many-public-methods,too-many-arguments
 import mantid
 from mantid.api import AnalysisDataService
 from mantid.simpleapi import CreateWorkspace, SaveNexusPD
@@ -22,8 +22,8 @@ except ImportError:
 
 class SaveNexusPDTest(unittest.TestCase):
     def saveFilePath(self, wkspname):
-        dataDir = mantid.config.getString('defaultsave.directory')
-        return os.path.join(dataDir, wkspname+'.h5')
+        dataDir = mantid.config.getString("defaultsave.directory")
+        return os.path.join(dataDir, wkspname + ".h5")
 
     def cleanup(self, filename, wkspname):
         if os.path.exists(filename):
@@ -32,8 +32,7 @@ class SaveNexusPDTest(unittest.TestCase):
             mantid.api.AnalysisDataService.remove(wkspname)
 
     def testSaveOneSpectrumNoInstrument(self):
-        """ Test to Save one spectrum without and instrument
-        """
+        """Test to Save one spectrum without and instrument"""
         if not runTests:
             return
 
@@ -49,8 +48,7 @@ class SaveNexusPDTest(unittest.TestCase):
             self.cleanup(filename, wkspname)
 
     def testSaveMultiSpectra(self):
-        """ Test to Save multiple spectra with instrument
-        """
+        """Test to Save multiple spectra with instrument"""
         if not runTests:
             return
 
@@ -67,57 +65,54 @@ class SaveNexusPDTest(unittest.TestCase):
 
     def checkDataFields(self, nxitem, withInstrument):
         keys = nxitem.keys()
-        for fieldname in ['data', 'errors', 'tof']:
+        for fieldname in ["data", "errors", "tof"]:
             self.assertTrue(fieldname in keys)
         if withInstrument:
-            for fieldname in ['Q', 'dspacing']:
+            for fieldname in ["Q", "dspacing"]:
                 self.assertTrue(fieldname in keys)
 
     def checkDetectorFields(self, nxitem, withInstrument):
         if not withInstrument:
             return
         keys = nxitem.keys()
-        for fieldname in ['distance',
-                          'azimuthal_angle', 'polar_angle']:
+        for fieldname in ["distance", "azimuthal_angle", "polar_angle"]:
             self.assertTrue(fieldname in keys)
 
     def check(self, filename, withInstrument):
-        with h5py.File(filename, 'r') as handle:
+        with h5py.File(filename, "r") as handle:
             nxentry = handle[sorted(handle.keys())[0]]
-            nxinstrument = nxentry['instrument']
+            nxinstrument = nxentry["instrument"]
 
-            nxmoderator = nxinstrument['moderator']
+            nxmoderator = nxinstrument["moderator"]
             if withInstrument:
-                self.assertLess(nxmoderator['distance'][0], 0.)
+                self.assertLess(nxmoderator["distance"][0], 0.0)
 
             for name in nxinstrument.keys():
-                if name == 'moderator':
+                if name == "moderator":
                     continue
                 nxdetector = nxinstrument[name]
                 self.checkDataFields(nxdetector, withInstrument)
                 self.checkDetectorFields(nxdetector, withInstrument)
 
             for name in nxentry.keys():
-                if name == 'instrument':
+                if name == "instrument":
                     continue
-                if name == 'proton_charge':
+                if name == "proton_charge":
                     continue
                 nxdata = nxentry[name]
                 self.checkDataFields(nxdata, withInstrument)
 
     def _createOneSpectrum(self, wkspname):
-        x = np.arange(300, 16667, 15.)
-        y = np.random.random(len(x)-1)  # histogram
+        x = np.arange(300, 16667, 15.0)
+        y = np.random.random(len(x) - 1)  # histogram
         e = np.sqrt(y)
 
-        CreateWorkspace(OutputWorkspace=wkspname,
-                        DataX=x, DataY=y, DataE=e, NSpec=1,
-                        UnitX='TOF',
-                        YUnitlabel="stuff")
+        CreateWorkspace(OutputWorkspace=wkspname, DataX=x, DataY=y, DataE=e, NSpec=1, UnitX="TOF", YUnitlabel="stuff")
 
     def _createMultiSpectra(self, wkspname):
         wksp = WCH.create2DWorkspaceWithFullInstrument(30, 5, False, False)
         AnalysisDataService.add(wkspname, wksp)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

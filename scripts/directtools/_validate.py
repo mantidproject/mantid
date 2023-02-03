@@ -9,13 +9,13 @@
 def _isDOS(workspace):
     """Return True if workspace looks like a valid DOS workspace, False otherwise."""
     singleHistogram = workspace.getNumberHistograms() == 1
-    unitsInDeltaE = workspace.getAxis(0).getUnit().unitID() == 'DeltaE'
+    unitsInDeltaE = workspace.getAxis(0).getUnit().unitID() == "DeltaE"
     return singleHistogram and unitsInDeltaE
 
 
 def _isSofQW(workspace):
     """Return True if workspace looks like a valid S(Q,E) workspace, False otherwise."""
-    validUnits = ['q', 'Energy transfer']
+    validUnits = ["q", "Energy transfer"]
     unit1 = workspace.getAxis(0).getUnit().caption()
     unit2 = workspace.getAxis(1).getUnit().caption()
     return unit1 != unit2 and unit1 in validUnits and unit2 in validUnits
@@ -31,5 +31,5 @@ def _styleordie(style):
     """Raise an exception if style is not a valid style string."""
     if not isinstance(style, str):
         raise RuntimeError("The 'style' argument '{}' is not a valid string.".format(str(style)))
-    if 'm' not in style and 'l' not in style:
+    if "m" not in style and "l" not in style:
         raise RuntimeError("The 'style' argument '{}' does not contain either 'm' or 'l'.".format(style))

@@ -15,7 +15,7 @@ from mantid import config
 from isis_powder import HRPD, SampleDetails
 
 
-DIRS = config['datasearch.directories'].split(';')
+DIRS = config["datasearch.directories"].split(";")
 user_name = "Test"
 cycle_number = "16_5"
 WINDOW = "10-110"
@@ -50,7 +50,7 @@ spline_path = os.path.join(calibration_dir, spline_rel_path)
 class CreateVanadiumNoSolidAngleTest(systemtesting.MantidSystemTest):
 
     calibration_results = None
-    existing_config = config['datasearch.directories']
+    existing_config = config["datasearch.directories"]
 
     def requiredFiles(self):
         return _gen_required_files()
@@ -61,8 +61,7 @@ class CreateVanadiumNoSolidAngleTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 0.05  # Required for difference in spline data between operating systems
-        return self.calibration_results.name(
-        ), "ISIS_Powder-HRPD-VanSplined_66031_hrpd_new_072_01_corr.cal.nxs"
+        return self.calibration_results.name(), "ISIS_Powder-HRPD-VanSplined_66031_hrpd_new_072_01_corr.cal.nxs"
 
     def cleanup(self):
         try:
@@ -70,7 +69,7 @@ class CreateVanadiumNoSolidAngleTest(systemtesting.MantidSystemTest):
             _try_delete(spline_path)
         finally:
             mantid.mtd.clear()
-            config['datasearch.directories'] = self.existing_config
+            config["datasearch.directories"] = self.existing_config
 
 
 class FocusNoSolidAngleTest(systemtesting.MantidSystemTest):
@@ -89,12 +88,10 @@ class FocusNoSolidAngleTest(systemtesting.MantidSystemTest):
     def validate(self):
         # check output files as expected
         def generate_error_message(expected_file, output_dir):
-            return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir,
-                                                                  os.listdir(output_dir))
+            return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir, os.listdir(output_dir))
 
         def assert_output_file_exists(directory, filename):
-            self.assertTrue(os.path.isfile(os.path.join(directory, filename)),
-                            msg=generate_error_message(filename, directory))
+            self.assertTrue(os.path.isfile(os.path.join(directory, filename)), msg=generate_error_message(filename, directory))
 
         def first_x_value(filepath):
             with open(filepath) as dat:
@@ -103,23 +100,24 @@ class FocusNoSolidAngleTest(systemtesting.MantidSystemTest):
                 return float(columns[0])
 
         user_output = os.path.join(output_dir, cycle_number, user_name)
-        assert_output_file_exists(user_output, 'hrpd66063.nxs')
-        assert_output_file_exists(user_output, 'hrpd66063.gss')
-        output_dat_dir = os.path.join(user_output, 'dat_files')
+        assert_output_file_exists(user_output, "hrpd66063.nxs")
+        assert_output_file_exists(user_output, "hrpd66063.gss")
+        output_dat_dir = os.path.join(user_output, "dat_files")
         for bankno in range(1, 4):
-            d_filename = 'hrpd66063_b{}_D.dat'.format(bankno)
+            d_filename = "hrpd66063_b{}_D.dat".format(bankno)
             assert_output_file_exists(output_dat_dir, d_filename)
             # looks like dSpacing data
-            self.assertTrue(0.20 < first_x_value(os.path.join(output_dat_dir, d_filename)) < 0.8,
-                            msg="First D value={}".format(
-                                first_x_value(os.path.join(output_dat_dir, d_filename))))
-            tof_filename = 'hrpd66063_b{}_TOF.dat'.format(bankno)
+            self.assertTrue(
+                0.20 < first_x_value(os.path.join(output_dat_dir, d_filename)) < 0.8,
+                msg="First D value={}".format(first_x_value(os.path.join(output_dat_dir, d_filename))),
+            )
+            tof_filename = "hrpd66063_b{}_TOF.dat".format(bankno)
             assert_output_file_exists(output_dat_dir, tof_filename)
             # looks like TOF data
             self.assertTrue(
                 9700 < first_x_value(os.path.join(output_dat_dir, tof_filename)) < 10500,
-                msg="First TOF value={}".format(
-                    first_x_value(os.path.join(output_dat_dir, tof_filename))))
+                msg="First TOF value={}".format(first_x_value(os.path.join(output_dat_dir, tof_filename))),
+            )
 
         if platform.system() == "Darwin":  # OSX requires higher tolerance for splines
             self.tolerance = 0.47
@@ -168,34 +166,29 @@ class VanadiumAndFocusWithSolidAngleTest(systemtesting.MantidSystemTest):
 
 def _gen_required_files():
     required_run_numbers = gen_required_run_numbers()
-    input_files = [
-        os.path.join(input_dir, (inst_name + number + ".raw")) for number in required_run_numbers
-    ]
+    input_files = [os.path.join(input_dir, (inst_name + number + ".raw")) for number in required_run_numbers]
     input_files.append(calibration_map_path)
     return input_files
 
 
 def gen_required_run_numbers():
-    return [
-        "66028",  # Sample empty
-        "66031",  # Vanadium
-        "66063"
-    ]  # Run to focus
+    return ["66028", "66031", "66063"]  # Sample empty  # Vanadium  # Run to focus
 
 
 def run_vanadium_calibration(do_solid_angle_corrections):
     vanadium_run = 66031  # Choose arbitrary run from cycle 16_5
     inst_obj = setup_inst_object()
-    inst_obj.create_vanadium(first_cycle_run_no=vanadium_run,
-                             do_solid_angle_corrections=do_solid_angle_corrections,
-                             do_absorb_corrections=True,
-                             multiple_scattering=False,
-                             window=WINDOW)
+    inst_obj.create_vanadium(
+        first_cycle_run_no=vanadium_run,
+        do_solid_angle_corrections=do_solid_angle_corrections,
+        do_absorb_corrections=True,
+        multiple_scattering=False,
+        window=WINDOW,
+    )
 
     # Check the spline looks good and was saved
     if not os.path.exists(spline_path):
-        raise RuntimeError(
-            "Could not find output spline at the following path: {}".format(spline_path))
+        raise RuntimeError("Could not find output spline at the following path: {}".format(spline_path))
     splined_ws = mantid.Load(Filename=spline_path)
 
     return splined_ws
@@ -217,27 +210,31 @@ def run_focus(do_solid_angle_corrections):
     sample.set_material(chemical_formula="Si")
     inst_object.set_sample_details(sample=sample)
 
-    return inst_object.focus(run_number=run_number,
-                             window=WINDOW,
-                             sample_empty=sample_empty,
-                             sample_empty_scale=sample_empty_scale,
-                             vanadium_normalisation=True,
-                             do_solid_angle_corrections=do_solid_angle_corrections,
-                             do_absorb_corrections=True,
-                             multiple_scattering=False)
+    return inst_object.focus(
+        run_number=run_number,
+        window=WINDOW,
+        sample_empty=sample_empty,
+        sample_empty_scale=sample_empty_scale,
+        vanadium_normalisation=True,
+        do_solid_angle_corrections=do_solid_angle_corrections,
+        do_absorb_corrections=True,
+        multiple_scattering=False,
+    )
 
 
 def setup_inst_object():
-    inst_obj = HRPD(user_name=user_name,
-                    calibration_mapping_file=calibration_map_path,
-                    calibration_directory=calibration_dir,
-                    output_directory=output_dir)
+    inst_obj = HRPD(
+        user_name=user_name,
+        calibration_mapping_file=calibration_map_path,
+        calibration_directory=calibration_dir,
+        output_directory=output_dir,
+    )
     return inst_obj
 
 
 def setup_mantid_paths():
-    config['datasearch.directories'] += ";" + input_dir
-    config['datasearch.directories'] += ";" + os.path.join(calibration_dir, cycle_number)
+    config["datasearch.directories"] += ";" + input_dir
+    config["datasearch.directories"] += ";" + os.path.join(calibration_dir, cycle_number)
 
 
 def _try_delete(path):

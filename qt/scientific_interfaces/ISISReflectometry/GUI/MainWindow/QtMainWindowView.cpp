@@ -17,6 +17,8 @@
 #include "MantidKernel/UsageService.h"
 #include "MantidQtWidgets/Common/QtJSONUtils.h"
 #include "MantidQtWidgets/Common/SlitCalculator.h"
+#include <Poco/File.h>
+#include <Poco/Path.h>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QToolButton>
@@ -47,7 +49,10 @@ IBatchView *QtMainWindowView::newBatch() {
 
 void QtMainWindowView::removeBatch(int batchIndex) {
   m_batchViews.erase(m_batchViews.begin() + batchIndex);
+  auto *batchToRemove = m_ui.mainTabs->widget(batchIndex);
   m_ui.mainTabs->removeTab(batchIndex);
+  // Calling removeTab doesn't deallocate the memory for the QtBatchView, so we must do that here
+  delete batchToRemove;
   if (m_ui.mainTabs->count() == 0) {
     m_notifyee->notifyNewBatchRequested();
   }
@@ -86,7 +91,7 @@ void QtMainWindowView::initLayout() {
   auto makeEventPresenter = EventPresenterFactory();
   auto makeSaveSettingsPresenter = SavePresenterFactory();
   auto makeExperimentPresenter = ExperimentPresenterFactory(thetaTolerance);
-  auto makeInstrumentPresenter = InstrumentPresenterFactory();
+  auto makeInstrumentPresenter = InstrumentPresenterFactory(fileHandler, messageHandler);
   auto makePreviewPresenter = PreviewPresenterFactory();
 
   auto makeBatchPresenter = std::make_unique<BatchPresenterFactory>(
@@ -235,6 +240,22 @@ void QtMainWindowView::saveCSVToFile(const std::string &filename, const std::str
   }
   outFile << content;
   outFile.close();
+}
+
+bool QtMainWindowView::fileExists(std::string const &filepath) const {
+  if (filepath.empty())
+    return false;
+
+  try {
+    auto pocoPath = Poco::Path().parseDirectory(filepath);
+    auto pocoFile = Poco::File(pocoPath);
+    if (!pocoFile.exists())
+      return false;
+  } catch (Poco::PathSyntaxException &) {
+    return false;
+  }
+
+  return true;
 }
 
 } // namespace CustomInterfaces::ISISReflectometry

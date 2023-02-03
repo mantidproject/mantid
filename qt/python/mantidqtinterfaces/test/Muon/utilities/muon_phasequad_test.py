@@ -11,7 +11,6 @@ from unittest import mock
 
 
 class MuonPhasequadTest(unittest.TestCase):
-
     def test_name(self):
         phasequad = MuonPhasequad("test", "table")
         self.assertEqual(phasequad.name, "test")
@@ -56,5 +55,5 @@ class MuonPhasequadTest(unittest.TestCase):
         phasequad._Im.update_asymmetry_workspace.assert_called_once_with(Im, 42, rebin=True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

@@ -18,13 +18,15 @@ set(TEST_FILES
     IndirectFitPlotPresenterTest.h
     IndirectFitPropertyBrowserTest.h
     IndirectFittingModelTest.h
-    IndirectMomentsModelTest.h
     IndirectPlotOptionsModelTest.h
     IndirectPlotOptionsPresenterTest.h
     IndirectSettingsModelTest.h
     IndirectSettingsPresenterTest.h
-    IndirectSqwModelTest.h
-    IndirectSymmetriseModelTest.h
+    InelasticDataManipulationElwinTabModelTest.h
+    InelasticDataManipulationIqtTabModelTest.h
+    InelasticDataManipulationMomentsTabModelTest.h
+    InelasticDataManipulationSqwTabModelTest.h
+    InelasticDataManipulationSymmetriseTabModelTest.h
     IqtFitModelTest.h
 )
 

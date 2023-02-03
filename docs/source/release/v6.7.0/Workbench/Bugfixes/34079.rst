@@ -1,0 +1,1 @@
+- Corrected plotting zoom box location on MacOS

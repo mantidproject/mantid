@@ -4,21 +4,24 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy.QtWidgets import (QFrame)  # noqa
+from qtpy.QtWidgets import QFrame  # noqa
 from reduction_gui.reduction.output_script import Output
 from mantidqtinterfaces.reduction_gui.widgets.base_widget import BaseWidget
+
 try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
     from mantid.kernel import Logger
-    Logger("OutputWidget").information('Using legacy ui importer')
+
+    Logger("OutputWidget").information("Using legacy ui importer")
     from mantidplot import load_ui
 
 
 class OutputWidget(BaseWidget):
     """
-        Widget that presents the transmission options to the user
+    Widget that presents the transmission options to the user
     """
+
     _plot = None
 
     ## Widget name
@@ -30,7 +33,7 @@ class OutputWidget(BaseWidget):
         class OutputFrame(QFrame):
             def __init__(self, parent=None):
                 QFrame.__init__(self, parent)
-                self.ui = load_ui(__file__, '../../ui/hfir_output.ui', baseinstance=self)
+                self.ui = load_ui(__file__, "../../ui/hfir_output.ui", baseinstance=self)
 
         self._content = OutputFrame(self)
         self._layout.addWidget(self._content)
@@ -38,8 +41,8 @@ class OutputWidget(BaseWidget):
 
     def initialize_content(self):
         """
-            Declare the validators and event connections for the
-            widgets loaded through the .ui file.
+        Declare the validators and event connections for the
+        widgets loaded through the .ui file.
         """
 
         # Clear data list
@@ -58,6 +61,6 @@ class OutputWidget(BaseWidget):
 
     def get_state(self):
         """
-            Returns an object with the state of the interface
+        Returns an object with the state of the interface
         """
         return Output()

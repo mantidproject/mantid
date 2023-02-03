@@ -12,17 +12,21 @@ from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QWidget, QTableWidgetItem
 
 from mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_model import EAGroupingTabModel
-from mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_presenter import EAGroupingTablePresenter, \
-    REBIN_FIXED_OPTION, REBIN_VARIABLE_OPTION
-from mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_view import EAGroupingTableView, \
-    INVERSE_GROUP_TABLE_COLUMNS
+from mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_presenter import (
+    EAGroupingTablePresenter,
+    REBIN_FIXED_OPTION,
+    REBIN_VARIABLE_OPTION,
+)
+from mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_view import (
+    EAGroupingTableView,
+    INVERSE_GROUP_TABLE_COLUMNS,
+)
 from mantidqt.utils.observer_pattern import Observer
 from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_context_for_ea_tests
 
 
 @start_qapplication
 class GroupingTablePresenterTest(unittest.TestCase):
-
     def setUp(self):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
         self.obj = QWidget()
@@ -50,11 +54,11 @@ class GroupingTablePresenterTest(unittest.TestCase):
 
     def create_group_workspace_and_load(self):
         grpws = WorkspaceGroup()
-        ws_detector1 = '9999; Detector 1'
+        ws_detector1 = "9999; Detector 1"
         grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector1))
-        ws_detector2 = '9999; Detector 2'
+        ws_detector2 = "9999; Detector 2"
         grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector2))
-        ws_detector3 = '9999; Detector 3'
+        ws_detector3 = "9999; Detector 3"
         grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector3))
         run = 9999
         self.context.data_context._loaded_data.add_data(run=[run], workspace=grpws)
@@ -115,13 +119,13 @@ class GroupingTablePresenterTest(unittest.TestCase):
 
     def test_plot_default_case_with_detector_3_present(self):
         grpws = WorkspaceGroup()
-        ws_detector1 = '9999; Detector 1'
+        ws_detector1 = "9999; Detector 1"
         grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector1))
-        ws_detector2 = '9999; Detector 2'
+        ws_detector2 = "9999; Detector 2"
         grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector2))
-        ws_detector3 = '9999; Detector 3'
+        ws_detector3 = "9999; Detector 3"
         grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector3))
-        ws_detector4 = '9998; Detector 3'
+        ws_detector4 = "9998; Detector 3"
         grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector4))
         run = [9999, 9998]
         self.context.data_context._loaded_data.add_data(run=run, workspace=grpws)
@@ -137,17 +141,17 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.assertEqual(analyse_checkbox.checkState(), 0)
 
         self.presenter.plot_default_case()
-        self.assertCountEqual(self.context.group_context.selected_groups, ['9999; Detector 3', '9998; Detector 3'])
+        self.assertCountEqual(self.context.group_context.selected_groups, ["9999; Detector 3", "9998; Detector 3"])
 
     def test_plot_default_case_with_detector_3_not_present(self):
         grpws = WorkspaceGroup()
-        ws_detector1 = '9999; Detector 1'
+        ws_detector1 = "9999; Detector 1"
         grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector1))
-        ws_detector2 = '9999; Detector 2'
+        ws_detector2 = "9999; Detector 2"
         grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector2))
-        ws_detector3 = '9999; Detector 4'
+        ws_detector3 = "9999; Detector 4"
         grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector3))
-        ws_detector4 = '9998; Detector 1'
+        ws_detector4 = "9998; Detector 1"
         grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector4))
         run = [9999, 9998]
         self.context.data_context._loaded_data.add_data(run=run, workspace=grpws)
@@ -163,15 +167,15 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.assertEqual(analyse_checkbox.checkState(), 0)
 
         self.presenter.plot_default_case()
-        self.assertCountEqual(self.context.group_context.selected_groups, ['9999; Detector 1', '9998; Detector 1'])
+        self.assertCountEqual(self.context.group_context.selected_groups, ["9999; Detector 1", "9998; Detector 1"])
 
     def test_plot_default_case_with_detector_1_not_present(self):
         grpws = WorkspaceGroup()
-        ws_detector1 = '9999; Detector 4'
+        ws_detector1 = "9999; Detector 4"
         grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector1))
-        ws_detector2 = '9998; Detector 2'
+        ws_detector2 = "9998; Detector 2"
         grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector2))
-        ws_detector3 = '9998; Detector 4'
+        ws_detector3 = "9998; Detector 4"
         grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector3))
         run = [9999, 9998]
         self.context.data_context._loaded_data.add_data(run=run, workspace=grpws)
@@ -187,11 +191,11 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.assertEqual(analyse_checkbox.checkState(), 0)
 
         self.presenter.plot_default_case()
-        self.assertCountEqual(self.context.group_context.selected_groups, ['9999; Detector 4', '9998; Detector 4'])
+        self.assertCountEqual(self.context.group_context.selected_groups, ["9999; Detector 4", "9998; Detector 4"])
 
     def test_plot_default_case_with_detector_4_not_present(self):
         grpws = WorkspaceGroup()
-        ws_detector2 = '9998; Detector 2'
+        ws_detector2 = "9998; Detector 2"
         grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector2))
         run = [9998]
         self.context.data_context._loaded_data.add_data(run=run, workspace=grpws)
@@ -205,7 +209,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.assertEqual(analyse_checkbox.checkState(), 0)
 
         self.presenter.plot_default_case()
-        self.assertCountEqual(self.context.group_context.selected_groups, ['9998; Detector 2'])
+        self.assertCountEqual(self.context.group_context.selected_groups, ["9998; Detector 2"])
 
     def test_remove_selected_rows_in_view_and_model(self):
         self.test_setup()
@@ -214,8 +218,8 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.assertEqual(self.view.num_rows(), 3)
         self.assertEqual(len(self.model.groups), 3)
 
-        groups_remove = ['9999; Detector 1', '9999; Detector 3']
-        groups_remaining = ['9999; Detector 2']
+        groups_remove = ["9999; Detector 1", "9999; Detector 3"]
+        groups_remaining = ["9999; Detector 2"]
         self.view._get_selected_row_indices = mock.Mock(return_value=[0, 2])
         self.presenter.remove_selected_rows_in_view_and_model(groups_remove)
 
@@ -229,7 +233,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
             self.presenter.add_group_to_view(group, True)
         self.assertEqual(self.view.num_rows(), 3)
         self.assertEqual(len(self.model.groups), 3)
-        group_name3 = '9999; Detector 3'
+        group_name3 = "9999; Detector 3"
         self.assertTrue(group_name3 in self.model.group_names)
 
         self.presenter.remove_last_row_in_view_and_model()
@@ -252,8 +256,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.assertEqual(self.presenter.notify_data_changed.call_count, 0)
         self.assertEqual(self.presenter.update_view_from_model.call_count, 0)
         self.assertEqual(mock_text.call_count, 2)
-        self.presenter._model.handle_rebin.assert_has_calls([mock.call(name="Steps:3 KeV", rebin_type="Fixed",
-                                                                       rebin_param=3)])
+        self.presenter._model.handle_rebin.assert_has_calls([mock.call(name="Steps:3 KeV", rebin_type="Fixed", rebin_param=3)])
 
     @mock.patch("qtpy.QtWidgets.QTableWidgetItem.text")
     def test_rebin_with_variable_is_called(self, mock_text):
@@ -271,14 +274,15 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.assertEqual(self.presenter.notify_data_changed.call_count, 0)
         self.assertEqual(self.presenter.update_view_from_model.call_count, 0)
         self.assertEqual(mock_text.call_count, 2)
-        self.presenter._model.handle_rebin.assert_has_calls([mock.call(name="Bin Boundaries:3,2,10",
-                                                                       rebin_type="Variable", rebin_param="3,2,10")])
+        self.presenter._model.handle_rebin.assert_has_calls(
+            [mock.call(name="Bin Boundaries:3,2,10", rebin_type="Variable", rebin_param="3,2,10")]
+        )
 
     def test_validate_group_name(self):
         self.test_setup()
         self.assertTrue(self.presenter.validate_group_name("mock_group_name"))
-        self.assertFalse(self.presenter.validate_group_name('9999; Detector 1'))
-        self.assertFalse(self.presenter.validate_group_name('invalid_name$%'))
+        self.assertFalse(self.presenter.validate_group_name("9999; Detector 1"))
+        self.assertFalse(self.presenter.validate_group_name("invalid_name$%"))
 
     def test_handle_remove_group_button_clicked_with_nothing_selected(self):
         # setup
@@ -337,15 +341,13 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.presenter.handle_data_change(row, column)
 
         # Assert statements
-        self.presenter.handle_to_analyse_column_changed.assert_called_once_with(column, mock_table_item,
-                                                                                "mock_workspace_name")
+        self.presenter.handle_to_analyse_column_changed.assert_called_once_with(column, mock_table_item, "mock_workspace_name")
         self.presenter.handle_rebin_column_changed.assert_called_once_with(column, row, mock_table_item)
-        self.presenter.handle_rebin_option_column_changed.assert_called_once_with(column, mock_table_item,
-                                                                                  "mock_workspace_name")
+        self.presenter.handle_rebin_option_column_changed.assert_called_once_with(column, mock_table_item, "mock_workspace_name")
         self.presenter.handle_update.assert_called_once_with("mock_value")
-        self.presenter._view.get_table_item.assert_has_calls([mock.call(row, column),
-                                                              mock.call(row,
-                                                                        INVERSE_GROUP_TABLE_COLUMNS['workspace_name'])])
+        self.presenter._view.get_table_item.assert_has_calls(
+            [mock.call(row, column), mock.call(row, INVERSE_GROUP_TABLE_COLUMNS["workspace_name"])]
+        )
 
     def test_handle_to_analyse_column_changed_if_column_is_to_analyse(self):
         # setup
@@ -354,8 +356,9 @@ class GroupingTablePresenterTest(unittest.TestCase):
         mock_changed_item = mock.Mock()
         mock_changed_item.checkState.return_value = "mock_state"
 
-        to_analyse_changed = self.presenter.handle_to_analyse_column_changed(INVERSE_GROUP_TABLE_COLUMNS['to_analyse'],
-                                                                             mock_changed_item, ws_name)
+        to_analyse_changed = self.presenter.handle_to_analyse_column_changed(
+            INVERSE_GROUP_TABLE_COLUMNS["to_analyse"], mock_changed_item, ws_name
+        )
         # Assert statements
         # method should return False
         self.assertEqual(to_analyse_changed, True)
@@ -370,8 +373,8 @@ class GroupingTablePresenterTest(unittest.TestCase):
         mock_changed_item.checkState.return_value = "mock_state"
 
         to_analyse_changed = self.presenter.handle_to_analyse_column_changed(
-            INVERSE_GROUP_TABLE_COLUMNS['workspace_name'],
-            mock_changed_item, ws_name)
+            INVERSE_GROUP_TABLE_COLUMNS["workspace_name"], mock_changed_item, ws_name
+        )
         # Assert statements
         # method should return True
         self.assertEqual(to_analyse_changed, False)
@@ -383,7 +386,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.presenter._view.rebin_variable_chosen = mock.Mock()
         mock_changed_item = "mock_item"
 
-        self.presenter.handle_rebin_column_changed(INVERSE_GROUP_TABLE_COLUMNS['to_analyse'], 1, mock_changed_item)
+        self.presenter.handle_rebin_column_changed(INVERSE_GROUP_TABLE_COLUMNS["to_analyse"], 1, mock_changed_item)
 
         # Assert statements
         self.presenter._view.rebin_variable_chosen.assert_not_called()
@@ -396,7 +399,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         mock_changed_item.text.return_value = REBIN_FIXED_OPTION
         row = 1
 
-        self.presenter.handle_rebin_column_changed(INVERSE_GROUP_TABLE_COLUMNS['rebin'], row, mock_changed_item)
+        self.presenter.handle_rebin_column_changed(INVERSE_GROUP_TABLE_COLUMNS["rebin"], row, mock_changed_item)
 
         # Assert statements
         self.presenter._view.rebin_fixed_chosen.assert_called_once_with(row)
@@ -410,7 +413,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         mock_changed_item.text.return_value = REBIN_VARIABLE_OPTION
         row = 4
 
-        self.presenter.handle_rebin_column_changed(INVERSE_GROUP_TABLE_COLUMNS['rebin'], row, mock_changed_item)
+        self.presenter.handle_rebin_column_changed(INVERSE_GROUP_TABLE_COLUMNS["rebin"], row, mock_changed_item)
 
         # Assert statements
         self.presenter._view.rebin_variable_chosen.assert_called_once_with(row)
@@ -422,8 +425,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         mock_changed_item = mock.Mock()
         ws_name = "mock_name"
 
-        self.presenter.handle_rebin_option_column_changed(INVERSE_GROUP_TABLE_COLUMNS['to_analyse'], mock_changed_item,
-                                                          ws_name)
+        self.presenter.handle_rebin_option_column_changed(INVERSE_GROUP_TABLE_COLUMNS["to_analyse"], mock_changed_item, ws_name)
 
         # Assert statements
         mock_changed_item.text.assert_not_called()
@@ -436,8 +438,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         mock_changed_item.text.return_value = "Steps: 3 KeV"
         ws_name = "mock_name"
 
-        self.presenter.handle_rebin_option_column_changed(INVERSE_GROUP_TABLE_COLUMNS['rebin_options'],
-                                                          mock_changed_item, ws_name)
+        self.presenter.handle_rebin_option_column_changed(INVERSE_GROUP_TABLE_COLUMNS["rebin_options"], mock_changed_item, ws_name)
 
         # Assert statements
         mock_changed_item.text.assert_called_once()
@@ -450,15 +451,13 @@ class GroupingTablePresenterTest(unittest.TestCase):
         mock_changed_item.text.return_value = "Bin Boundaries: 3,10,8"
         ws_name = "mock_name"
 
-        self.presenter.handle_rebin_option_column_changed(INVERSE_GROUP_TABLE_COLUMNS['rebin_options'],
-                                                          mock_changed_item, ws_name)
+        self.presenter.handle_rebin_option_column_changed(INVERSE_GROUP_TABLE_COLUMNS["rebin_options"], mock_changed_item, ws_name)
 
         # Assert statements
         mock_changed_item.text.assert_called_once()
         self.presenter._view.warning_popup.assert_not_called()
-        self.presenter._model.handle_rebin.assert_called_once_with(name=ws_name, rebin_type="Variable",
-                                                                   rebin_param=" 3,10,8")
+        self.presenter._model.handle_rebin.assert_called_once_with(name=ws_name, rebin_type="Variable", rebin_param=" 3,10,8")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

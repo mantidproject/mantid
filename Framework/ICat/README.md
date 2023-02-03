@@ -40,4 +40,4 @@ For namespaces to work correctly three new files were generated from an empty fi
     touch soapserializers.h
     soapcpp2 -psoapserializers soapserializers.h
 
-The generated files contained the default SOAP Header and Fault serialization codes. This was needed as the GSoap library could not access these methods from inside ICat3/4 namespaces.
+The generated files contained the default SOAP Header and Fault serialization codes. This was needed as the GSoap library could not access these methods from inside the ICat4 namespace.

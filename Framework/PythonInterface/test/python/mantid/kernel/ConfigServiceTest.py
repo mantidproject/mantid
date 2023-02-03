@@ -10,25 +10,24 @@ import os
 import testhelpers
 import unittest
 
-from mantid.kernel import (ConfigService, ConfigServiceImpl, config,
-                           std_vector_str, FacilityInfo, InstrumentInfo)
+from mantid.kernel import ConfigService, ConfigServiceImpl, config, std_vector_str, FacilityInfo, InstrumentInfo
 
 
 class ConfigServiceTest(unittest.TestCase):
 
     __dirs_to_rm = []
-    __init_dir_list = ''
+    __init_dir_list = ""
 
     def test_singleton_returns_instance_of_ConfigService(self):
         self.assertTrue(isinstance(config, ConfigServiceImpl))
 
     def test_getLocalFilename(self):
         local = config.getLocalFilename().lower()
-        self.assertTrue('local' in local)
+        self.assertTrue("local" in local)
 
     def test_getUserFilename(self):
         user = config.getUserFilename().lower()
-        self.assertTrue('user' in user)
+        self.assertTrue("user" in user)
 
     def test_getFacilityReturns_A_FacilityInfo_Object(self):
         facility = config.getFacility()
@@ -48,13 +47,13 @@ class ConfigServiceTest(unittest.TestCase):
         names = config.getFacilityNames()
 
         self.assertGreater(len(names), 0)
-        self.assertEqual(len(names),len(facilities))
+        self.assertEqual(len(names), len(facilities))
         for i in range(len(names)):
-            self.assertEqual(names[i],facilities[i].name())
+            self.assertEqual(names[i], facilities[i].name())
 
     def test_update_and_set_facility(self):
         self.assertFalse("TEST" in config.getFacilityNames())
-        ConfigService.updateFacilities(os.path.join(ConfigService.getInstrumentDirectory(),"unit_testing/UnitTestFacilities.xml"))
+        ConfigService.updateFacilities(os.path.join(ConfigService.getInstrumentDirectory(), "unit_testing/UnitTestFacilities.xml"))
         ConfigService.setFacility("TEST")
         self.assertEqual(config.getFacility().name(), "TEST")
         self.assertRaises(RuntimeError, config.getFacility, "SNS")
@@ -92,8 +91,7 @@ class ConfigServiceTest(unittest.TestCase):
         config.setString(test_prop, old_value)
 
     def test_getting_search_paths(self):
-        """Retrieve the search paths
-        """
+        """Retrieve the search paths"""
         paths = config.getDataSearchDirs()
         self.assertEqual(type(paths), std_vector_str)
         self.assert_(len(paths) > 0)
@@ -106,8 +104,8 @@ class ConfigServiceTest(unittest.TestCase):
             # it doesn't bring all the other tests down
             self._clean_up_test_areas()
             self.assertEqual(len(newpaths), 2)
-            self.assertTrue('tmp' in newpaths[0])
-            self.assertTrue('tmp_2' in newpaths[1])
+            self.assertTrue("tmp" in newpaths[0])
+            self.assertTrue("tmp_2" in newpaths[1])
 
         new_path_list = self._setup_test_areas()
         # test with list
@@ -116,7 +114,7 @@ class ConfigServiceTest(unittest.TestCase):
         # reset test areas or the directories don't exist to be added
         new_path_list = self._setup_test_areas()
         # test with single string
-        do_test(';'.join(new_path_list))
+        do_test(";".join(new_path_list))
 
     def test_appending_paths(self):
         new_path_list = self._setup_test_areas()
@@ -127,7 +125,7 @@ class ConfigServiceTest(unittest.TestCase):
         finally:
             self._clean_up_test_areas()
 
-        self.assertEqual(num_of_dirs+1, len(updated_paths))
+        self.assertEqual(num_of_dirs + 1, len(updated_paths))
 
     def test_setting_log_channel_levels(self):
         testhelpers.assertRaisesNothing(self, config.setLogLevel, 4, True)
@@ -135,51 +133,68 @@ class ConfigServiceTest(unittest.TestCase):
     def test_properties_documented(self):
         # location of the rst file relative to this file this will break if either moves
         doc_filename = os.path.split(inspect.getfile(self.__class__))[0]
-        doc_filename = os.path.join(doc_filename, '../../../../../../docs/source/concepts/PropertiesFile.rst')
+        doc_filename = os.path.join(doc_filename, "../../../../../../docs/source/concepts/PropertiesFile.rst")
         doc_filename = os.path.abspath(doc_filename)
 
         # read in the user documentation
-        print ('Parsing', doc_filename)
+        print("Parsing", doc_filename)
         documented_keys = []
         with open(doc_filename) as handle:
             text = handle.read()
 
         # these will be ignored - the list should get shorter over time
-        hidden_prefixes = ['CheckMantidVersion.DownloadURL',  # shouldn't be changed by users
-                           'CheckMantidVersion.GitHubReleaseURL', # shouldn't be changed by users
-                           'UpdateInstrumentDefinitions.URL', # shouldn't be changed by users
-                           'docs.html.root', # shouldn't be changed by users
-                           'errorreports.rooturl', # shouldn't be changed by users
-                           'usagereports.rooturl', # shouldn't be changed by users
-                           'workspace.sendto.SansView.arguments', 'workspace.sendto.SansView.saveusing', # related to SASview in menu
-                           'workspace.sendto.SansView.target', 'workspace.sendto.SansView.visible', # related to SASview in menu
-                           'workspace.sendto.name.SansView', # related to SASview in menu
-                           # Shouldn't be changed by users.
-                           'catalog.oncat.token.accessToken', 'catalog.oncat.token.expiresIn', 'catalog.oncat.token.refreshToken', 'catalog.oncat.token.scope', 'catalog.oncat.token.tokenType',
-
-                           ########## TODO should be documented!
-                           'filefinder.casesensitive',
-                           'graph1d.autodistribution',
-                           'groupingFiles.directory',
-                           'icatDownload.directory', 'icatDownload.mountPoint',
-                           'instrument.view.geometry',
-                           'interfaces.categories.hidden',
-                           'loading.multifile', 'loading.multifilelimit',
-                           'maskFiles.directory',
-                           'pythonalgorithms.refresh.allowed',
-                           'sliceviewer.nonorthogonal',
-
-                           ########## TODO should these be documented?
-                           'curvefitting.defaultPeak', 'curvefitting.findPeaksFWHM', 'curvefitting.findPeaksTolerance', 'curvefitting.guiExclude',
-                           'logging.channels.consoleChannel.class', 'logging.channels.consoleChannel.formatter', 'logging.formatters.f1.class', 'logging.formatters.f1.pattern', 'logging.formatters.f1.times', 'logging.loggers.root.channel.channel1', 'logging.loggers.root.channel.class',
-                           'MantidOptions.ReusePlotInstances',
-                           'mantidqt.python_interfaces']
+        hidden_prefixes = [
+            "CheckMantidVersion.DownloadURL",  # shouldn't be changed by users
+            "CheckMantidVersion.GitHubReleaseURL",  # shouldn't be changed by users
+            "UpdateInstrumentDefinitions.URL",  # shouldn't be changed by users
+            "docs.html.root",  # shouldn't be changed by users
+            "errorreports.rooturl",  # shouldn't be changed by users
+            "usagereports.rooturl",  # shouldn't be changed by users
+            "workspace.sendto.SansView.arguments",
+            "workspace.sendto.SansView.saveusing",  # related to SASview in menu
+            "workspace.sendto.SansView.target",
+            "workspace.sendto.SansView.visible",  # related to SASview in menu
+            "workspace.sendto.name.SansView",  # related to SASview in menu
+            # Shouldn't be changed by users.
+            "catalog.oncat.token.accessToken",
+            "catalog.oncat.token.expiresIn",
+            "catalog.oncat.token.refreshToken",
+            "catalog.oncat.token.scope",
+            "catalog.oncat.token.tokenType",
+            ########## TODO should be documented!
+            "filefinder.casesensitive",
+            "graph1d.autodistribution",
+            "groupingFiles.directory",
+            "icatDownload.directory",
+            "icatDownload.mountPoint",
+            "instrument.view.geometry",
+            "interfaces.categories.hidden",
+            "loading.multifile",
+            "loading.multifilelimit",
+            "maskFiles.directory",
+            "pythonalgorithms.refresh.allowed",
+            "sliceviewer.nonorthogonal",
+            ########## TODO should these be documented?
+            "curvefitting.defaultPeak",
+            "curvefitting.findPeaksFWHM",
+            "curvefitting.findPeaksTolerance",
+            "curvefitting.guiExclude",
+            "logging.channels.consoleChannel.class",
+            "logging.channels.consoleChannel.formatter",
+            "logging.formatters.f1.class",
+            "logging.formatters.f1.pattern",
+            "logging.formatters.f1.times",
+            "logging.loggers.root.channel.channel1",
+            "logging.loggers.root.channel.class",
+            "MantidOptions.ReusePlotInstances",
+            "mantidqt.python_interfaces",
+        ]
 
         # create the list of things
         undocumented = []
         properties_defined = ConfigService.keys()
         for property in properties_defined:
-            property_tag = '``{}``'.format(property)
+            property_tag = "``{}``".format(property)
 
             if property_tag not in text:
                 for hidden in hidden_prefixes:
@@ -190,22 +205,21 @@ class ConfigServiceTest(unittest.TestCase):
 
         # everything should be documented
         if len(undocumented) > 0:
-            raise AssertionError('{} undocumented properties: {}'.format(len(undocumented), undocumented))
+            raise AssertionError("{} undocumented properties: {}".format(len(undocumented), undocumented))
 
     def test_contains(self):
-        assert 'docs.html.root' in ConfigService
+        assert "docs.html.root" in ConfigService
         # verify check against None
         self.assertFalse(None in ConfigService)
         # verify check against things that bool to False
-        self.assertFalse('' in ConfigService)
+        self.assertFalse("" in ConfigService)
         self.assertFalse(0 in ConfigService)
         # verify check for converting checked value to string
         self.assertFalse(1 in ConfigService)
 
     def _setup_test_areas(self):
-        """Create a new data search path string
-        """
-        self.__init_dir_list = config['datasearch.directories']
+        """Create a new data search path string"""
+        self.__init_dir_list = config["datasearch.directories"]
         # Set new paths - Make a temporary directory so that I know where it is
         test_path = os.path.join(os.getcwd(), "tmp")
         try:
@@ -224,7 +238,7 @@ class ConfigServiceTest(unittest.TestCase):
         return [test_path, test_path_two]
 
     def _clean_up_test_areas(self):
-        config['datasearch.directories'] = self.__init_dir_list
+        config["datasearch.directories"] = self.__init_dir_list
 
         # Remove temp directories
         for p in self.__dirs_to_rm:
@@ -234,5 +248,5 @@ class ConfigServiceTest(unittest.TestCase):
                 pass
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

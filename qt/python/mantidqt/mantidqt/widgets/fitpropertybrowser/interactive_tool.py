@@ -26,7 +26,7 @@ class FitInteractiveTool(QObject):
     add_background_requested = Signal(str)
     add_other_requested = Signal(str)
 
-    default_background = 'LinearBackground'
+    default_background = "LinearBackground"
 
     def __init__(self, canvas, toolbar_manager, current_peak_type, default_background=None):
         """
@@ -43,12 +43,12 @@ class FitInteractiveTool(QObject):
         ax = canvas.figure.get_axes()[0]
         self.ax = ax
         xlim = ax.get_xlim()
-        dx = (xlim[1] - xlim[0]) / 20.
+        dx = (xlim[1] - xlim[0]) / 20.0
         # The fitting range: [StartX, EndX]
         start_x = xlim[0] + dx
         end_x = xlim[1] - dx
         # The interactive range marker drawn on the canvas as vertical lines that represent the fitting range.
-        self.fit_range = RangeMarker(canvas, 'green', start_x, end_x, 'XMinMax', '--')
+        self.fit_range = RangeMarker(canvas, "green", start_x, end_x, "XMinMax", "--")
         self.fit_range.range_changed.connect(self.fit_range_changed)
 
         # A list of interactive peak markers
@@ -71,11 +71,11 @@ class FitInteractiveTool(QObject):
 
         # Connect MPL events to callbacks and store connection ids in a cache
         self._cids = []
-        self._cids.append(canvas.mpl_connect('draw_event', self.draw_callback))
-        self._cids.append(canvas.mpl_connect('motion_notify_event', self.motion_notify_callback))
-        self._cids.append(canvas.mpl_connect('button_press_event', self.button_press_callback))
-        self._cids.append(canvas.mpl_connect('button_release_event', self.button_release_callback))
-        self._cids.append(canvas.mpl_connect('figure_leave_event', self.stop_add_peak))
+        self._cids.append(canvas.mpl_connect("draw_event", self.draw_callback))
+        self._cids.append(canvas.mpl_connect("motion_notify_event", self.motion_notify_callback))
+        self._cids.append(canvas.mpl_connect("button_press_event", self.button_press_callback))
+        self._cids.append(canvas.mpl_connect("button_release_event", self.button_release_callback))
+        self._cids.append(canvas.mpl_connect("axes_leave_event", self.stop_add_peak))
 
         # The mouse state machine that handles responses to the mouse events.
         self.mouse_state = StateMachine(self)
@@ -152,13 +152,20 @@ class FitInteractiveTool(QObject):
         if x is None or y is None:
             return
 
+        cursor = QApplication.overrideCursor()
         if self.fit_range.min_marker.is_above(x, y) or self.fit_range.max_marker.is_above(x, y):
-            QApplication.setOverrideCursor(Qt.SizeHorCursor)
+            if not cursor:
+                QApplication.setOverrideCursor(Qt.SizeHorCursor)
             return
 
         for pm in self.peak_markers:
-            if pm.left_width.is_above(x, y) or pm.right_width.is_above(x, y) or pm.centre_marker.is_above(x, y):
-                QApplication.setOverrideCursor(Qt.SizeHorCursor)
+            if pm.centre_marker.is_above(x, y):
+                if not cursor:
+                    QApplication.setOverrideCursor(Qt.SizeHorCursor)
+                return
+            if pm.is_selected and (pm.left_width.is_above(x, y) or pm.right_width.is_above(x, y)):
+                if not cursor:
+                    QApplication.setOverrideCursor(Qt.SizeHorCursor)
                 return
 
         QApplication.restoreOverrideCursor()
@@ -220,26 +227,25 @@ class FitInteractiveTool(QObject):
         A QAction callback. Start adding a new peak. The tool will expect the user to click on the canvas to
         where the peak should be placed.
         """
-        self.mouse_state.transition_to('add_peak')
+        self.mouse_state.transition_to("add_peak")
 
     def add_peak_dialog(self):
         """
         A QAction callback. Start a dialog to choose a peak function name. After that the tool will expect the user
         to click on the canvas to where the peak should be placed.
         """
-        dialog = AddFunctionDialog(parent=self.canvas,
-                                   function_names=self.peak_names,
-                                   default_function_name=self.current_peak_type,
-                                   default_checkbox=True)
+        dialog = AddFunctionDialog(
+            parent=self.canvas, function_names=self.peak_names, default_function_name=self.current_peak_type, default_checkbox=True
+        )
         dialog.view.function_added.connect(self.action_peak_added)
         dialog.view.open()
 
     def action_peak_added(self, function_name, set_global_default=False):
         self.peak_type_changed.emit(function_name)
-        self.mouse_state.transition_to('add_peak')
+        self.mouse_state.transition_to("add_peak")
 
         if set_global_default:
-            ConfigService.setString('curvefitting.defaultPeak', function_name)
+            ConfigService.setString("curvefitting.defaultPeak", function_name)
 
     def add_background_dialog(self):
         """
@@ -271,7 +277,7 @@ class FitInteractiveTool(QObject):
         if fwhm is None:
             fwhm = self.fwhm
         peak_id = self._make_peak_id()
-        peak = PeakMarker(self.canvas, peak_id, x, y_top, y_bottom, fwhm=fwhm)
+        peak = PeakMarker(self.canvas, peak_id, x, y_top - y_bottom, fwhm=fwhm, background=y_bottom)
         peak.peak_moved.connect(self.peak_moved)
         peak.fwhm_changed.connect(self.peak_fwhm_changed_slot)
         self.peak_markers.append(peak)

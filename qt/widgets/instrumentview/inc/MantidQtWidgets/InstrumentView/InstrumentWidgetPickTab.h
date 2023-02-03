@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/InstrumentView/MiniPlot.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/ICompAssembly.h"
@@ -27,6 +28,7 @@ class QActionGroup;
 class QSignalMapper;
 class QMenu;
 class QLineEdit;
+class QGridLayout;
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -37,6 +39,23 @@ class ProjectionSurface;
 class ComponentInfoController;
 class DetectorPlotController;
 
+enum EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IWPickToolType {
+  Zoom,
+  PixelSelect,
+  WholeInstrumentSelect,
+  TubeSelect,
+  PeakSelect,
+  PeakErase,
+  PeakCompare,
+  PeakAlign,
+  DrawEllipse,
+  DrawRectangle,
+  DrawSector,
+  DrawFree,
+  EditShape,
+  DrawRingEllipse,
+  DrawRingRectangle
+};
 enum EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IWPickPlotType { SINGLE = 0, DETECTOR_SUM, TUBE_SUM, TUBE_INTEGRAL };
 enum EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IWPickXUnits {
   DETECTOR_ID = 0,
@@ -79,33 +98,19 @@ public:
     Tube,
     Draw
   };
-  enum ToolType {
-    Zoom,
-    PixelSelect,
-    WholeInstrumentSelect,
-    TubeSelect,
-    PeakSelect,
-    PeakErase,
-    PeakCompare,
-    PeakAlign,
-    DrawEllipse,
-    DrawRectangle,
-    DrawSector,
-    DrawFree,
-    EditShape
-  };
 
-  explicit InstrumentWidgetPickTab(InstrumentWidget *instrWidget);
+  explicit InstrumentWidgetPickTab(InstrumentWidget *instrWidget, std::vector<IWPickToolType> const &tools);
   bool canUpdateTouchedDetector() const;
   void initSurface() override;
   void saveSettings(QSettings &settings) const override;
   void loadSettings(const QSettings &settings) override;
   bool addToDisplayContextMenu(QMenu & /*unused*/) const override;
   void expandPlotPanel();
-  void selectTool(const ToolType tool);
+  void selectTool(const IWPickToolType tool);
   SelectionType getSelectionType() const { return m_selectionType; }
   std::shared_ptr<ProjectionSurface> getSurface() const;
   const InstrumentWidget *getInstrumentWidget() const;
+  void resetOriginalWorkspace();
   void clearWidgets();
   /// Load settings for the pick tab from a project file
   virtual void loadFromProject(const std::string &lines) override;
@@ -114,6 +119,7 @@ public:
   void addToContextMenu(QAction *action, std::function<bool(std::map<std::string, bool>)> &actionCondition);
   QPushButton *getSelectTubeButton();
   void setPlotType(const IWPickPlotType type);
+  void setAvailableTools(std::vector<IWPickToolType> const &toolTypes);
 
 public slots:
   void setTubeXUnits(int units);
@@ -139,8 +145,11 @@ private slots:
   void updatePlotMultipleDetectors();
   void onRunRebin();
   void onRebinParamsWritten(const QString &text);
+  void onKeepOriginalStateChanged(int state);
 
 private:
+  void addToolbarWidget(const IWPickToolType toolType, int &row, int &column);
+  void addToolbarWidget(QPushButton *toolbarButton, int &row, int &column) const;
   void showEvent(QShowEvent * /*unused*/) override;
   QColor getShapeBorderColor() const;
   void collapsePlotPanel();
@@ -164,6 +173,7 @@ private:
   QPushButton *m_free_draw;      ///< Button switching on drawing a region of arbitrary shape
   QPushButton *m_edit;           ///< Button switching on editing the selection region
   bool m_plotSum;
+  QGridLayout *m_toolBox;
 
   // Actions to set integration option for the detector's parent selection mode
   QAction *m_sumDetectors;      ///< Sets summation over detectors (m_plotSum = true)
@@ -198,7 +208,12 @@ private:
   QLineEdit *m_rebinParams;
   QCheckBox *m_rebinUseReverseLog;
   QCheckBox *m_rebinSaveToHisto;
+  QCheckBox *m_rebinKeepOriginal;
+  QLabel *m_rebinKeepOriginalWarning;
   QPushButton *m_runRebin;
+
+  /// The original workspace to be used for rebinning. Do not add this to the ADS (if you don't want a memory leak)
+  Mantid::API::Workspace_sptr m_originalWorkspace;
 
   // Temporary caches for values from settings
   int m_tubeXUnitsCache;

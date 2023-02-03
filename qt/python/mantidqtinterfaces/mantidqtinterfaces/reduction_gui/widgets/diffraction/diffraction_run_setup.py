@@ -4,26 +4,28 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 ################################################################################
 # This is my first attempt to make a tab from quasi-scratch
 ################################################################################
-from qtpy.QtWidgets import (QDialog, QFrame)  # noqa
-from qtpy.QtCore import (QRegExp)  # noqa
-from qtpy.QtGui import (QDoubleValidator, QIntValidator, QRegExpValidator)  # noqa
+from qtpy.QtWidgets import QDialog, QFrame  # noqa
+from qtpy.QtCore import QRegExp  # noqa
+from qtpy.QtGui import QDoubleValidator, QIntValidator, QRegExpValidator  # noqa
 from mantidqtinterfaces.reduction_gui.widgets.base_widget import BaseWidget
 from mantid.kernel import Logger
 from reduction_gui.reduction.diffraction.diffraction_run_setup_script import RunSetupScript
+
 try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
-    Logger("SampleSetupWidget").information('Using legacy ui importer')
+    Logger("SampleSetupWidget").information("Using legacy ui importer")
     from mantidplot import load_ui
 
 IS_IN_MANTIDPLOT = False
 try:
-    from mantid.api import * # noqa
-    from mantid.kernel import * # noqa
+    from mantid.api import *  # noqa
+    from mantid.kernel import *  # noqa
+
     IS_IN_MANTIDPLOT = True
 except:
     pass
@@ -35,31 +37,29 @@ def generateRegExpValidator(widget, expression):
 
 
 class RunSetupWidget(BaseWidget):
-    """ Widget that presents run setup including sample run, optional vanadium run and etc.
-    """
+    """Widget that presents run setup including sample run, optional vanadium run and etc."""
+
     # Widge name
     name = "Experiment Run Setup"
 
     def __init__(self, parent=None, state=None, settings=None, data_type=None):
-        """ Initialization
-        """
+        """Initialization"""
         super(RunSetupWidget, self).__init__(parent, state, settings, data_type=data_type)
 
         class RunSetFrame(QFrame):
-            """ Define class linked to UI Frame
-            """
+            """Define class linked to UI Frame"""
 
             def __init__(self, parent=None):
                 QFrame.__init__(self, parent)
-                self.ui = load_ui(__file__, '../../../ui/diffraction/diffraction_run_setup.ui', baseinstance=self)
+                self.ui = load_ui(__file__, "../../../ui/diffraction/diffraction_run_setup.ui", baseinstance=self)
+
         # END-DEF RunSetFrame
 
         # Instrument and facility information
         self._instrument_name = settings.instrument_name
         self._facility_name = settings.facility_name
 
-        msg='run_setup: facility = %s instrument = % s' % \
-            (self._facility_name, self._instrument_name)
+        msg = "run_setup: facility = %s instrument = % s" % (self._facility_name, self._instrument_name)
         Logger("RunSetupWidget").debug(str(msg))
 
         self._content = RunSetFrame(self)
@@ -75,8 +75,7 @@ class RunSetupWidget(BaseWidget):
         return
 
     def initialize_content(self):
-        """ Initialize content/UI
-        """
+        """Initialize content/UI"""
         # Initial values for combo boxes
         # Combo boxes
         self._content.saveas_combo.setCurrentIndex(1)
@@ -95,12 +94,12 @@ class RunSetupWidget(BaseWidget):
 
         # Label
         if self._instrument_name is not False:
-            self._content.label.setText('Instrument: %s' % self._instrument_name.upper())
+            self._content.label.setText("Instrument: %s" % self._instrument_name.upper())
         else:
-            self._content.label.setText('Instrument has not been set up.  You may not launch correctly.')
+            self._content.label.setText("Instrument has not been set up.  You may not launch correctly.")
 
         # Enable disable
-        if self._instrument_name.lower().startswith('nom') is False:
+        if self._instrument_name.lower().startswith("nom") is False:
             self._content.lineEdit_expIniFile.setEnabled(False)
             self._content.pushButton_browseExpIniFile.setEnabled(False)
         else:
@@ -114,7 +113,7 @@ class RunSetupWidget(BaseWidget):
         self._content.resamplex_edit.setEnabled(False)
 
         # Constraints/Validator
-        expression = r'[\d,-]*'
+        expression = r"[\d,-]*"
         iv0 = generateRegExpValidator(self._content.emptyrun_edit, expression)
         self._content.emptyrun_edit.setValidator(iv0)
 
@@ -157,11 +156,11 @@ class RunSetupWidget(BaseWidget):
         self._content._binning_edit_mutex = False
 
     def set_state(self, state):
-        """ Populate the UI elements with the data from the given state.
-            @param state: RunSetupScript object
+        """Populate the UI elements with the data from the given state.
+        @param state: RunSetupScript object
         """
         self._content.runnumbers_edit.setText(state.runnumbers)
-        self._content.runnumbers_edit.setValidator(generateRegExpValidator(self._content.runnumbers_edit, r'[\d,-:]*'))
+        self._content.runnumbers_edit.setValidator(generateRegExpValidator(self._content.runnumbers_edit, r"[\d,-:]*"))
 
         self._content.calfile_edit.setText(state.calibfilename)
         self._content.groupfile_edit.setText(state.groupfilename)
@@ -172,7 +171,7 @@ class RunSetupWidget(BaseWidget):
         # Set binning parameter
         try:
             binning_float = float(state.binning)
-            binning_str = '%.6f' % abs(binning_float)
+            binning_str = "%.6f" % abs(binning_float)
         except ValueError:
             binning_str = str(state.binning)
         self._content._binning_edit_mutex = True
@@ -180,7 +179,7 @@ class RunSetupWidget(BaseWidget):
         # Set ResampleX
         try:
             resamplex_i = int(state.resamplex)
-            resamplex_str = '%d' % abs(resamplex_i)
+            resamplex_str = "%d" % abs(resamplex_i)
         except ValueError:
             resamplex_str = str(state.resamplex)
         self._content.resamplex_edit.setText(resamplex_str)
@@ -201,7 +200,7 @@ class RunSetupWidget(BaseWidget):
             self._content.usebin_button.setChecked(True)
             self._content.binning_edit.setEnabled(True)
             self._content.resamplex_edit.setEnabled(False)
-            if state.binning > 0.:
+            if state.binning > 0.0:
                 bintype_index = 0
         # END-IF-ELSE
         self._content.bintype_combo.setCurrentIndex(bintype_index)
@@ -234,7 +233,7 @@ class RunSetupWidget(BaseWidget):
         return
 
     def get_state(self):
-        """ Returns a RunSetupScript with the state of Run_Setup_Interface
+        """Returns a RunSetupScript with the state of Run_Setup_Interface
         Set up all the class parameters in RunSetupScrpt with values in the content
         i.e., get the all parameters from GUI
         """
@@ -264,28 +263,28 @@ class RunSetupWidget(BaseWidget):
             try:
                 s.resamplex = int(self._content.resamplex_edit.text())
             except ValueError:
-                raise RuntimeError('ResampleX parameter is not given!')
+                raise RuntimeError("ResampleX parameter is not given!")
 
-            if s.resamplex < 0 and bintypestr.startswith('Linear'):
+            if s.resamplex < 0 and bintypestr.startswith("Linear"):
                 self._content.bintype_combo.setCurrentIndex(1)
-            elif s.resamplex > 0 and bintypestr.startswith('Logarithmic'):
+            elif s.resamplex > 0 and bintypestr.startswith("Logarithmic"):
                 s.resamplex = -1 * s.resamplex
             elif s.resamplex == 0:
-                raise RuntimeError('ResampleX\'s parameter cannot be equal to 0!')
+                raise RuntimeError("ResampleX's parameter cannot be equal to 0!")
         else:
             # use binning: do not touch pre-saved s.resamplex
             s.doresamplex = False
             try:
                 s.binning = float(self._content.binning_edit.text())
             except ValueError:
-                raise RuntimeError('Binning parameter is not given!')
+                raise RuntimeError("Binning parameter is not given!")
 
-            if s.binning < 0. and bintypestr.startswith('Linear'):
+            if s.binning < 0.0 and bintypestr.startswith("Linear"):
                 self._content.bintype_combo.setCurrentIndex(1)
-            elif s.binning > 0. and bintypestr.startswith('Logarithmic'):
+            elif s.binning > 0.0 and bintypestr.startswith("Logarithmic"):
                 s.binning = -1 * s.binning
-            elif abs(s.binning) < 1.0E-20:
-                raise RuntimeError('Binning\'s parameter cannot be equal to 0!')
+            elif abs(s.binning) < 1.0e-20:
+                raise RuntimeError("Binning's parameter cannot be equal to 0!")
         # END-IF-ELSE (binning/resampleX)
 
         s.outputdir = self._content.outputdir_edit.text()
@@ -304,28 +303,25 @@ class RunSetupWidget(BaseWidget):
         return s
 
     def _calfile_browse(self):
-        """ Event handing for browsing calibration file
-        """
+        """Event handing for browsing calibration file"""
         fname = self.data_browse_dialog(data_type="*.h5;;*.cal;;*.hd5;;*.hdf;;*")
         if fname:
             self._content.calfile_edit.setText(fname)
 
     def _charfile_browse(self):
-        """ Event handing for browsing calibration file
-        """
+        """Event handing for browsing calibration file"""
         fname = self.data_browse_dialog("*.txt;;*", multi=True)
         if fname:
-            self._content.charfile_edit.setText(','.join(fname))
+            self._content.charfile_edit.setText(",".join(fname))
 
     def _groupfile_browse(self):
-        ''' Event handling for browsing for a grouping file
-        '''
-        fname = self.data_browse_dialog(data_type='*.xml;;*.h5;;*')
+        """Event handling for browsing for a grouping file"""
+        fname = self.data_browse_dialog(data_type="*.xml;;*.h5;;*")
         if fname:
             self._content.groupfile_edit.setText(fname)
 
     def do_browse_ini_file(self):
-        """ Event handling for browsing Exp Ini file
+        """Event handling for browsing Exp Ini file
         :return:
         """
         exp_ini_file_name = self.data_browse_dialog(data_type="*.ini;;*")
@@ -333,15 +329,13 @@ class RunSetupWidget(BaseWidget):
             self._content.lineEdit_expIniFile.setText(exp_ini_file_name)
 
     def _outputdir_browse(self):
-        """ Event handling for browing output directory
-        """
+        """Event handling for browing output directory"""
         dirname = self.dir_browse_dialog()
         if dirname:
             self._content.outputdir_edit.setText(dirname)
 
     def _binvalue_edit(self):
-        """ Handling event for binning value changed
-        """
+        """Handling event for binning value changed"""
         if self._content.resamplex_button.isChecked():
             fvalue = int(self._content.resamplex_edit.text())
         else:
@@ -352,8 +346,7 @@ class RunSetupWidget(BaseWidget):
             self._content.bintype_combo.setCurrentIndex(0)
 
     def _bintype_process(self):
-        """ Handling bin type changed
-        """
+        """Handling bin type changed"""
         if self._content._binning_edit_mutex:
             return
         currindex = self._content.bintype_combo.currentIndex()
@@ -363,12 +356,12 @@ class RunSetupWidget(BaseWidget):
             if currindex == 0:
                 self._content.binning_edit.setText(str(abs(curbinning)))
             else:
-                self._content.binning_edit.setText(str(-1.0*abs(curbinning)))
-            #ENDIFELSE
-        #ENDIF
+                self._content.binning_edit.setText(str(-1.0 * abs(curbinning)))
+            # ENDIFELSE
+        # ENDIF
 
     def validateIntegerList(self, intliststring):
-        """ Validate whether the string can be divided into integer strings.
+        """Validate whether the string can be divided into integer strings.
         Allowed: a, b, c-d, e, f, g:h
         and replace ':' by ':'
         :return: 3-tuple: state/error message/new integer list string
@@ -378,7 +371,7 @@ class RunSetupWidget(BaseWidget):
             return True, "", intliststring
 
         # replace ':' by '-'
-        intliststring = intliststring.replace(':', '-')
+        intliststring = intliststring.replace(":", "-")
 
         # 1. Split by ","
         termlevel0s = intliststring.split(",")
@@ -392,11 +385,11 @@ class RunSetupWidget(BaseWidget):
                 try:
                     intvalue = int(valuestr)
                     if str(intvalue) != valuestr:
-                        err_msg = 'String {0} cannot be converted to an integer properly.'.format(valuestr)
-                        return False, err_msg, ''
+                        err_msg = "String {0} cannot be converted to an integer properly.".format(valuestr)
+                        return False, err_msg, ""
                 except ValueError:
-                    err_msg = 'String {0} cannot be converted to an integer.'.format(valuestr)
-                    return False, err_msg, ''
+                    err_msg = "String {0} cannot be converted to an integer.".format(valuestr)
+                    return False, err_msg, ""
 
             elif numdashes == 1:
                 # Integer range
@@ -414,11 +407,10 @@ class RunSetupWidget(BaseWidget):
                 return False, level0term, intliststring
         # ENDFOR
 
-        return True, '', intliststring
+        return True, "", intliststring
 
     def _overrideemptyrun_clicked(self):
-        """ Handling event if overriding empty run
-        """
+        """Handling event if overriding empty run"""
         if self._content.override_emptyrun_checkBox.isChecked() is True:
             self._content.emptyrun_edit.setEnabled(True)
             self._content.disablebkgdcorr_chkbox.setChecked(False)
@@ -429,8 +421,7 @@ class RunSetupWidget(BaseWidget):
         return
 
     def _overridevanrun_clicked(self):
-        """ Handling event if overriding empty run
-        """
+        """Handling event if overriding empty run"""
         if self._content.override_vanrun_checkBox.isChecked() is True:
             self._content.vanrun_edit.setEnabled(True)
             self._content.disablebkgdcorr_chkbox.setChecked(False)
@@ -441,8 +432,7 @@ class RunSetupWidget(BaseWidget):
         return
 
     def _overridevanbkgdrun_clicked(self):
-        """ Handling event if overriding empty run
-        """
+        """Handling event if overriding empty run"""
         if self._content.override_vanbkgdrun_checkBox.isChecked() is True:
             self._content.vanbkgdrun_edit.setEnabled(True)
         else:
@@ -452,44 +442,40 @@ class RunSetupWidget(BaseWidget):
         return
 
     def _disablebkgdcorr_clicked(self):
-        """ Handling event if disable empty run check box is clicked
-        """
+        """Handling event if disable empty run check box is clicked"""
         if self._content.disablebkgdcorr_chkbox.isChecked() is True:
             self._content.emptyrun_edit.setEnabled(False)
             self._content.emptyrun_edit.setText("")
-            #self._content.override_emptyrun_checkBox.setChecked(False)
+            # self._content.override_emptyrun_checkBox.setChecked(False)
         else:
             self._content.emptyrun_edit.setEnabled(True)
 
         return
 
     def _disablevancorr_clicked(self):
-        """ Handling event if disable empty run check box is clicked
-        """
+        """Handling event if disable empty run check box is clicked"""
         if self._content.disablevancorr_chkbox.isChecked() is True:
             self._content.vanrun_edit.setEnabled(False)
             self._content.vanrun_edit.setText("")
-            #self._content.override_vanrun_checkBox.setChecked(False)
+            # self._content.override_vanrun_checkBox.setChecked(False)
         else:
             self._content.vanrun_edit.setEnabled(True)
 
         return
 
     def _disablevanbkgdcorr_clicked(self):
-        """ Handling event if disable empty run check box is clicked
-        """
+        """Handling event if disable empty run check box is clicked"""
         if self._content.disablevanbkgdcorr_chkbox.isChecked() is True:
             self._content.vanbkgdrun_edit.setEnabled(False)
             self._content.vanbkgdrun_edit.setText("")
-            #self._content.override_vanbkgdrun_checkBox.setChecked(False)
+            # self._content.override_vanbkgdrun_checkBox.setChecked(False)
         else:
             self._content.vanbkgdrun_edit.setEnabled(True)
 
         return
 
     def _usebin_clicked(self):
-        """ Handling event if 'Binning' button is clicked
-        """
+        """Handling event if 'Binning' button is clicked"""
         if self._content.usebin_button.isChecked() is True:
             self._content.binning_edit.setEnabled(True)
             self._content.resamplex_edit.setEnabled(False)
@@ -500,8 +486,7 @@ class RunSetupWidget(BaseWidget):
         return
 
     def _resamplex_clicked(self):
-        """ Handling event if 'ResampleX' is clicked
-        """
+        """Handling event if 'ResampleX' is clicked"""
         if self._content.resamplex_button.isChecked() is True:
             self._content.binning_edit.setEnabled(False)
             self._content.resamplex_edit.setEnabled(True)
@@ -515,6 +500,7 @@ class RunSetupWidget(BaseWidget):
         class HelpDialog(QDialog):
             def __init__(self, parent=None):
                 QDialog.__init__(self, parent)
-                self.ui = load_ui(__file__, '../../../ui/diffraction/diffraction_info.ui', baseinstance=self)
+                self.ui = load_ui(__file__, "../../../ui/diffraction/diffraction_info.ui", baseinstance=self)
+
         dialog = HelpDialog(self)
         dialog.exec_()

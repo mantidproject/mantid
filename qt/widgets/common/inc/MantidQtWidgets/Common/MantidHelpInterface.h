@@ -30,8 +30,6 @@ public:
   virtual void showPage(const std::string &url = std::string());
   virtual void showPage(const QString &url);
   virtual void showPage(const QUrl &url);
-  virtual void showWikiPage(const std::string &page = std::string());
-  virtual void showWikiPage(const QString &page);
   virtual void showAlgorithm(const std::string &name = std::string(), const int version = -1);
   virtual void showAlgorithm(const QString &name, const int version = -1);
   virtual void showConcept(const std::string &name);

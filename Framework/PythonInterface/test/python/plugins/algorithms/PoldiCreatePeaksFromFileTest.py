@@ -24,13 +24,15 @@ class PoldiCreatePeaksFromFileTest(unittest.TestCase):
         assertRaisesNothing(self, AlgorithmManager.create, ("PoldiCreatePeaksFromFile"))
 
     def test_FileOneCompoundOneAtom(self):
-        fileHelper = TemporaryFileHelper("""Silicon {
+        fileHelper = TemporaryFileHelper(
+            """Silicon {
                                                 Lattice: 5.43 5.43 5.43 90.0 90.0 90.0
                                                 Spacegroup: F d -3 m
                                                 Atoms: {
                                                     Si 0 0 0 1.0 0.05
                                                 }
-                                            }""")
+                                            }"""
+        )
         ws = PoldiCreatePeaksFromFile(fileHelper.getName(), 0.7, 10.0)
 
         # Check output GroupWorkspace
@@ -47,7 +49,8 @@ class PoldiCreatePeaksFromFileTest(unittest.TestCase):
 
     def test_FileOneCompoundTwoAtoms(self):
         # It's the same structure and the same reflections, just the structure factors are different
-        fileHelper = TemporaryFileHelper("""SiliconCarbon {
+        fileHelper = TemporaryFileHelper(
+            """SiliconCarbon {
                                                 Lattice: 5.43 5.43 5.43 90.0 90.0 90.0
                                                 Spacegroup: F d -3 m
                                                 Atoms: {
@@ -55,14 +58,14 @@ class PoldiCreatePeaksFromFileTest(unittest.TestCase):
                                                     C 0 0 0 0.1 0.05
                                                 }
                                                 # Comment
-                                            }""")
+                                            }"""
+        )
         ws = PoldiCreatePeaksFromFile(fileHelper.getName(), 0.7, 10.0)
 
         self.assertEqual(ws.getNumberOfEntries(), 1)
         self.assertTrue(ws.contains("SiliconCarbon"))
 
-        ws_expected = PoldiCreatePeaksFromCell("F d -3 m", "Si 0 0 0 0.9 0.05; C 0 0 0 0.1 0.05", a=5.43,
-                                               LatticeSpacingMin=0.7)
+        ws_expected = PoldiCreatePeaksFromCell("F d -3 m", "Si 0 0 0 0.9 0.05; C 0 0 0 0.1 0.05", a=5.43, LatticeSpacingMin=0.7)
         si_ws = AnalysisDataService.retrieve("SiliconCarbon")
         self._tablesAreEqual(si_ws, ws_expected)
 
@@ -71,7 +74,8 @@ class PoldiCreatePeaksFromFileTest(unittest.TestCase):
 
     def test_FileTwoCompounds(self):
         # Using two imaginary structures to check that two compounds are parsed correctly as well
-        fileHelper = TemporaryFileHelper("""SiliconCarbon {
+        fileHelper = TemporaryFileHelper(
+            """SiliconCarbon {
                                                 Lattice: 5.43 5.43 5.43 90.0 90.0 120.0
                                                 Spacegroup: P 63/m m c
                                                 Atoms: {
@@ -85,7 +89,8 @@ class PoldiCreatePeaksFromFileTest(unittest.TestCase):
                                                 Atoms: {
                                                     Si 1/2 1/2 0 1.0 0.05
                                                 }
-                                            }""")
+                                            }"""
+        )
         ws = PoldiCreatePeaksFromFile(fileHelper.getName(), 0.7, 10.0)
 
         self.assertEqual(ws.getNumberOfEntries(), 2)
@@ -95,73 +100,89 @@ class PoldiCreatePeaksFromFileTest(unittest.TestCase):
         self._cleanWorkspaces([ws])
 
     def test_FileFaultyLatticeStrings(self):
-        fhLatticeMissing = TemporaryFileHelper("""Silicon {
+        fhLatticeMissing = TemporaryFileHelper(
+            """Silicon {
                                                     Spacegroup: F d -3 m
                                                     Atoms: {
                                                         Si 0 0 0 1.0 0.05
                                                     }
-                                                  }""")
+                                                  }"""
+        )
 
-        fhNoLattice = TemporaryFileHelper("""Silicon {
+        fhNoLattice = TemporaryFileHelper(
+            """Silicon {
                                                 Lattice:
                                                 Spacegroup: F d -3 m
                                                 Atoms: {
                                                     Si 0 0 0 1.0 0.05
                                                 }
-                                             }""")
+                                             }"""
+        )
 
-        fhInvalidLattice = TemporaryFileHelper("""Silicon {
+        fhInvalidLattice = TemporaryFileHelper(
+            """Silicon {
                                                     Lattice: invalid
                                                     Spacegroup: F d -3 m
                                                     Atoms: {
                                                         Si 0 0 0 1.0 0.05
                                                     }
-                                                  }""")
+                                                  }"""
+        )
 
-        self.assertRaises(RuntimeError, PoldiCreatePeaksFromFile, *(fhLatticeMissing.getName(), 0.7, 10.0, 'ws'))
-        self.assertRaises(RuntimeError, PoldiCreatePeaksFromFile, *(fhNoLattice.getName(), 0.7, 10.0, 'ws'))
-        self.assertRaises(RuntimeError, PoldiCreatePeaksFromFile, *(fhInvalidLattice.getName(), 0.7, 10.0, 'ws'))
+        self.assertRaises(RuntimeError, PoldiCreatePeaksFromFile, *(fhLatticeMissing.getName(), 0.7, 10.0, "ws"))
+        self.assertRaises(RuntimeError, PoldiCreatePeaksFromFile, *(fhNoLattice.getName(), 0.7, 10.0, "ws"))
+        self.assertRaises(RuntimeError, PoldiCreatePeaksFromFile, *(fhInvalidLattice.getName(), 0.7, 10.0, "ws"))
 
     def test_FileFaultySpaceGroupStrings(self):
-        fhSgMissing = TemporaryFileHelper("""Silicon {
+        fhSgMissing = TemporaryFileHelper(
+            """Silicon {
                                                 Lattice: 5.43 5.43 5.43 90.0 90.0 90.0
                                                 Atoms: {
                                                     Si 0 0 0 1.0 0.05
                                                 }
-                                             }""")
+                                             }"""
+        )
 
-        fhSgInvalid = TemporaryFileHelper("""Silicon {
+        fhSgInvalid = TemporaryFileHelper(
+            """Silicon {
                                                     Lattice: 5.43 5.43 5.43 90.0 90.0 90.0
                                                     Spacegroup: invalid
                                                     Atoms: {
                                                         Si 0 0 0 1.0 0.05
                                                     }
-                                                  }""")
+                                                  }"""
+        )
 
-        self.assertRaises(RuntimeError, PoldiCreatePeaksFromFile, *(fhSgMissing.getName(), 0.7, 10.0, 'ws'))
-        self.assertRaises(RuntimeError, PoldiCreatePeaksFromFile, *(fhSgInvalid.getName(), 0.7, 10.0, 'ws'))
+        self.assertRaises(RuntimeError, PoldiCreatePeaksFromFile, *(fhSgMissing.getName(), 0.7, 10.0, "ws"))
+        self.assertRaises(RuntimeError, PoldiCreatePeaksFromFile, *(fhSgInvalid.getName(), 0.7, 10.0, "ws"))
 
     def test_FileFaultyAtomStrings(self):
-        fhAtomsMissing = TemporaryFileHelper("""Silicon {
+        fhAtomsMissing = TemporaryFileHelper(
+            """Silicon {
                                                 Lattice: 5.43 5.43 5.43 90.0 90.0 90.0
                                                 Spacegroup: F d -3 m
-                                             }""")
+                                             }"""
+        )
 
-        fhAtomsNoBraces = TemporaryFileHelper("""Silicon {
+        fhAtomsNoBraces = TemporaryFileHelper(
+            """Silicon {
                                                     Lattice: 5.43 5.43 5.43 90.0 90.0 90.0
                                                     Spacegroup: invalid
                                                     Atoms:
                                                         Sis 0 0 0 1.0 0.05
-                                                  }""")
-        fhAtomsEmpty = TemporaryFileHelper("""Silicon {
+                                                  }"""
+        )
+        fhAtomsEmpty = TemporaryFileHelper(
+            """Silicon {
                                                     Lattice: 5.43 5.43 5.43 90.0 90.0 90.0
                                                     Spacegroup: invalid
                                                     Atoms: { }
-                                                  }""")
+                                                  }"""
+        )
 
-        self.assertRaises(RuntimeError, PoldiCreatePeaksFromFile, *(fhAtomsMissing.getName(), 0.7, 10.0, 'ws'))
-        self.assertRaises(RuntimeError, PoldiCreatePeaksFromFile, *(fhAtomsNoBraces.getName(), 0.7, 10.0, 'ws'))
-        self.assertRaises(RuntimeError, PoldiCreatePeaksFromFile, *(fhAtomsEmpty.getName(), 0.7, 10.0, 'ws'))
+        self.assertRaises(RuntimeError, PoldiCreatePeaksFromFile, *(fhAtomsMissing.getName(), 0.7, 10.0, "ws"))
+        self.assertRaises(RuntimeError, PoldiCreatePeaksFromFile, *(fhAtomsNoBraces.getName(), 0.7, 10.0, "ws"))
+        self.assertRaises(RuntimeError, PoldiCreatePeaksFromFile, *(fhAtomsEmpty.getName(), 0.7, 10.0, "ws"))
 
     def _tablesAreEqual(self, lhs, rhs):
         self.assertEqual(lhs.rowCount(), rhs.rowCount(), msg="Row count of tables is different")
@@ -174,7 +195,7 @@ class PoldiCreatePeaksFromFileTest(unittest.TestCase):
             DeleteWorkspace(ws)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Only test if algorithm is registered (pyparsing dependency).
     if AlgorithmFactory.exists("PoldiCreatePeaksFromFile"):
         unittest.main()

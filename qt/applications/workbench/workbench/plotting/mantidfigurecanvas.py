@@ -8,12 +8,9 @@
 """
 Qt-based matplotlib canvas
 """
-from distutils.version import LooseVersion
 from qtpy.QtCore import Qt
-from qtpy.QtGui import QPen
-import matplotlib
-from matplotlib.backends.backend_qt5agg import (  # noqa: F401
-    FigureCanvasQTAgg, draw_if_interactive, show)
+from qtpy.QtGui import QPen, QColor
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, draw_if_interactive, show  # noqa: F401
 from mantid.plots.mantidimage import MantidImage, ImageIntensity
 
 
@@ -21,9 +18,7 @@ class MantidFigureCanvas(FigureCanvasQTAgg):
     def __init__(self, figure):
         super().__init__(figure=figure)
         self._pen_color = Qt.black
-        self._pen_thickness = 1.5
-        if LooseVersion(matplotlib.__version__) >= LooseVersion("3.5.0"):
-            self._dpi_ratio = self.devicePixelRatio() or 1
+        self._pen_thickness = 1.0
 
     # options controlling the pen used by tools that manipulate the graph - e.g the zoom box
     @property
@@ -44,18 +39,38 @@ class MantidFigureCanvas(FigureCanvasQTAgg):
 
     # Method used by the zoom box tool on the matplotlib toolbar
     def drawRectangle(self, rect):
+        """Override of matplotlib.lib.matplotlib.backends.backend_qt.drawRectangle
+        only to update the zoombox pen color.
+        """
         self.update_pen_color()
         # Draw the zoom rectangle to the QPainter.  _draw_rect_callback needs
         # to be called at the end of paintEvent.
         if rect is not None:
-            self._drawRect = [pt / self._dpi_ratio for pt in rect]
+            x0, y0, w, h = [int(pt / self.device_pixel_ratio) for pt in rect]
+            x1 = x0 + w
+            y1 = y0 + h
 
             def _draw_rect_callback(painter):
-                pen = QPen(self.pen_color, self.pen_thickness / self._dpi_ratio, Qt.DotLine)
-                painter.setPen(pen)
-                painter.drawRect(*(pt / self._dpi_ratio for pt in rect))
+                pen = QPen(
+                    self.pen_color,
+                    self.pen_thickness / self.device_pixel_ratio,
+                )
+                pen.setDashPattern([3, 3])
+                for color, offset in [
+                    (QColor("black"), 0),
+                    (QColor("white"), 3),
+                ]:
+                    pen.setDashOffset(offset)
+                    pen.setColor(color)
+                    painter.setPen(pen)
+                    # Draw the lines from x0, y0 towards x1, y1 so that the
+                    # dashes don't "jump" when moving the zoom box.
+                    painter.drawLine(x0, y0, x0, y1)
+                    painter.drawLine(x0, y0, x1, y0)
+                    painter.drawLine(x0, y1, x1, y1)
+                    painter.drawLine(x1, y0, x1, y1)
+
         else:
-            self._drawRect = None
 
             def _draw_rect_callback(painter):
                 return
@@ -71,7 +86,7 @@ class MantidFigureCanvas(FigureCanvasQTAgg):
         """
         for ax in self.figure.get_axes():
             for img in ax.get_images():
-                if (not isinstance(img, MantidImage)):
+                if not isinstance(img, MantidImage):
                     continue
                 intensity = img.calculate_greyscale_intensity()
                 if intensity == ImageIntensity.DARK:

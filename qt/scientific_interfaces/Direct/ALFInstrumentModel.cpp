@@ -13,8 +13,12 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Unit.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 
 #include <memory>
 #include <utility>
@@ -24,7 +28,6 @@ using namespace Mantid::API;
 namespace {
 auto &ADS = AnalysisDataService::Instance();
 
-std::string const CURVES = "Curves";
 std::string const NOT_IN_ADS = "not_stored_in_ads";
 
 bool isALFData(MatrixWorkspace_const_sptr const &workspace) { return workspace->getInstrument()->getName() == "ALF"; }
@@ -33,16 +36,50 @@ bool isAxisDSpacing(MatrixWorkspace_const_sptr const &workspace) {
   return workspace->getAxis(0)->unit()->unitID() == "dSpacing";
 }
 
-std::optional<double> xConversionFactor(MatrixWorkspace_const_sptr const &workspace) {
-  if (!workspace)
+std::optional<double> getTwoTheta(Mantid::Geometry::Instrument_const_sptr instrument,
+                                  Mantid::Geometry::IDetector_const_sptr detector) {
+  if (!instrument || !detector) {
     return std::nullopt;
-
-  if (const auto axis = workspace->getAxis(0)) {
-    const auto unit = axis->unit()->unitID();
-    const auto label = std::string(axis->unit()->label());
-    return unit == "Phi" || label == "Out of plane angle" ? 180.0 / M_PI : 1.0;
   }
-  return std::nullopt;
+  auto const sample = instrument->getSample()->getPos();
+  auto const source = instrument->getSource()->getPos();
+
+  return detector->getTwoTheta(sample, sample - source) * 180.0 / M_PI;
+}
+
+void appendTwoThetaClosestToZero(std::vector<double> &twoThetas,
+                                 std::optional<std::pair<double, std::size_t>> &workspaceIndexClosestToZero,
+                                 MatrixWorkspace_const_sptr const &workspace,
+                                 Mantid::Geometry::Instrument_const_sptr instrument) {
+  if (workspaceIndexClosestToZero) {
+    auto const twoTheta = getTwoTheta(instrument, workspace->getDetector((*workspaceIndexClosestToZero).second));
+    if (twoTheta) {
+      twoThetas.emplace_back(*twoTheta);
+    }
+    workspaceIndexClosestToZero = std::nullopt;
+  }
+}
+
+double calculateError(Mantid::HistogramData::HistogramE const &eValues, std::size_t const binIndexMin,
+                      std::size_t const binIndexMax) {
+  // Calculate the squared values
+  std::vector<double> squaredValues;
+  squaredValues.reserve(binIndexMax - binIndexMin);
+  std::transform(eValues.cbegin() + binIndexMin, eValues.cbegin() + binIndexMax, eValues.cbegin() + binIndexMin,
+                 squaredValues.begin(), std::multiplies<double>());
+  // Sum them and then take the sqrt
+  return sqrt(std::accumulate(squaredValues.begin(), squaredValues.end(), 0.0));
+}
+
+double calculateYCounts(Mantid::HistogramData::HistogramY const &yValues, std::size_t const binIndexMin,
+                        std::size_t const binIndexMax) {
+  return std::accumulate(yValues.cbegin() + binIndexMin, yValues.cbegin() + binIndexMax, 0.0);
+}
+
+double calculateOutOfPlaneAngle(Mantid::Kernel::V3D const &pos, Mantid::Kernel::V3D const &origin,
+                                Mantid::Kernel::V3D const &normal) {
+  auto const vec = normalize(pos - origin);
+  return asin(vec.scalar_prod(normal));
 }
 
 void loadEmptyInstrument(std::string const &instrumentName, std::string const &outputName) {
@@ -64,25 +101,30 @@ MatrixWorkspace_sptr load(std::string const &filename) {
   return std::dynamic_pointer_cast<MatrixWorkspace>(outputWorkspace);
 }
 
-MatrixWorkspace_sptr rebinToWorkspace(MatrixWorkspace_sptr const &workspaceToRebin,
-                                      MatrixWorkspace_sptr const &workspaceToMatch) {
-  auto alg = AlgorithmManager::Instance().create("RebinToWorkspace");
+MatrixWorkspace_sptr createWorkspace(std::string const &parentName, std::vector<double> const &x,
+                                     std::vector<double> const &y, std::vector<double> const &e,
+                                     std::size_t const numberOfSpectra, std::string const &unitX) {
+  auto alg = AlgorithmManager::Instance().create("CreateWorkspace");
   alg->initialize();
   alg->setAlwaysStoreInADS(false);
-  alg->setProperty("WorkspaceToRebin", workspaceToRebin);
-  alg->setProperty("WorkspaceToMatch", workspaceToMatch);
-  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
+  alg->setProperty("ParentWorkspace", parentName);
+  alg->setProperty("DataX", x);
+  alg->setProperty("DataY", y);
+  alg->setProperty("DataE", e);
+  alg->setProperty("NSpec", static_cast<int>(numberOfSpectra));
+  alg->setProperty("UnitX", unitX);
+  alg->setPropertyValue("OutputWorkspace", NOT_IN_ADS);
   alg->execute();
   MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
   return outputWorkspace;
 }
 
-MatrixWorkspace_sptr plus(MatrixWorkspace_sptr const &lhsWorkspace, MatrixWorkspace_sptr const &rhsWorkspace) {
-  auto alg = AlgorithmManager::Instance().create("Plus");
+MatrixWorkspace_sptr rebunch(MatrixWorkspace_sptr const &inputWorkspace, std::size_t const nBunch) {
+  auto alg = Mantid::API::AlgorithmManager::Instance().create("Rebunch");
   alg->initialize();
   alg->setAlwaysStoreInADS(false);
-  alg->setProperty("LHSWorkspace", lhsWorkspace);
-  alg->setProperty("RHSWorkspace", rhsWorkspace);
+  alg->setProperty("InputWorkspace", inputWorkspace);
+  alg->setProperty("NBunch", static_cast<int>(nBunch));
   alg->setProperty("OutputWorkspace", NOT_IN_ADS);
   alg->execute();
   MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
@@ -112,6 +154,19 @@ MatrixWorkspace_sptr convertUnits(MatrixWorkspace_sptr const &inputWorkspace, st
   return outputWorkspace;
 }
 
+MatrixWorkspace_sptr rebinToWorkspace(MatrixWorkspace_sptr const &workspaceToRebin,
+                                      MatrixWorkspace_sptr const &workspaceToMatch) {
+  auto alg = AlgorithmManager::Instance().create("RebinToWorkspace");
+  alg->initialize();
+  alg->setAlwaysStoreInADS(false);
+  alg->setProperty("WorkspaceToRebin", workspaceToRebin);
+  alg->setProperty("WorkspaceToMatch", workspaceToMatch);
+  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
+  alg->execute();
+  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
+  return outputWorkspace;
+}
+
 MatrixWorkspace_sptr scaleX(MatrixWorkspace_sptr const &inputWorkspace, double const factor) {
   auto alg = AlgorithmManager::Instance().create("ScaleX");
   alg->initialize();
@@ -124,11 +179,14 @@ MatrixWorkspace_sptr scaleX(MatrixWorkspace_sptr const &inputWorkspace, double c
   return outputWorkspace;
 }
 
-MatrixWorkspace_sptr convertToHistogram(MatrixWorkspace_sptr const &inputWorkspace) {
-  auto alg = AlgorithmManager::Instance().create("ConvertToHistogram");
+MatrixWorkspace_sptr replaceSpecialValues(MatrixWorkspace_sptr const &inputWorkspace) {
+  auto alg = AlgorithmManager::Instance().create("ReplaceSpecialValues");
   alg->initialize();
   alg->setAlwaysStoreInADS(false);
   alg->setProperty("InputWorkspace", inputWorkspace);
+  alg->setProperty("InfinityValue", 0.0);
+  alg->setProperty("NaNValue", 1.0);
+  alg->setProperty("CheckErrorAxis", true);
   alg->setProperty("OutputWorkspace", NOT_IN_ADS);
   alg->execute();
   MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
@@ -139,99 +197,174 @@ MatrixWorkspace_sptr convertToHistogram(MatrixWorkspace_sptr const &inputWorkspa
 
 namespace MantidQt::CustomInterfaces {
 
-ALFInstrumentModel::ALFInstrumentModel() : m_numberOfTubesInAverage(0u) {
-  loadEmptyInstrument(instrumentName(), loadedWsName());
+ALFInstrumentModel::ALFInstrumentModel() : m_sample(), m_vanadium(), m_tubes() {
+  loadEmptyInstrument("ALF", loadedWsName());
 }
 
 /*
- * Loads data into the ALFView. Normalises and converts to DSpacing if necessary.
- * @param filename:: The filepath to the ALFData
- * @return An optional error message
+ * Loads the provided ALF file and normalises it by current.
+ * @param filename:: The filepath to the ALF data
+ * @return The loaded and normalised workspace
  */
-std::optional<std::string> ALFInstrumentModel::loadAndTransform(std::string const &filename) {
+MatrixWorkspace_sptr ALFInstrumentModel::loadAndNormalise(std::string const &filename) {
   auto loadedWorkspace = load(filename);
 
   if (!isALFData(loadedWorkspace)) {
-    return "The loaded data is not from the ALF instrument";
+    throw std::invalid_argument("The loaded data is not from the ALF instrument");
   }
 
-  m_numberOfTubesInAverage = 0u;
-
-  if (!isAxisDSpacing(loadedWorkspace)) {
-    loadedWorkspace = convertUnits(normaliseByCurrent(loadedWorkspace), "dSpacing");
-  }
-
-  ADS.addOrReplace(loadedWsName(), loadedWorkspace);
-  return std::nullopt;
-}
-
-std::string ALFInstrumentModel::extractedWsName() const {
-  return "extractedTubes_" + instrumentName() + std::to_string(runNumber());
+  return normaliseByCurrent(loadedWorkspace);
 }
 
 /*
- * Retrieves the run number from the currently loaded workspace.
+ * Normalises the sample by the vanadium if a vanadium has been loaded. Converts the result to dSpacing if it is not
+ * already in these units. Adds the resulting workspace to the ADS.
  */
-std::size_t ALFInstrumentModel::runNumber() const {
-  auto const loadedName = loadedWsName();
-  if (!ADS.doesExist(loadedName)) {
+void ALFInstrumentModel::generateLoadedWorkspace() {
+  if (!m_sample) {
+    return;
+  }
+
+  // Rebin the vanadium to match the sample binning if the bins do not match
+  if (m_vanadium && !WorkspaceHelpers::matchingBins(*m_sample, *m_vanadium)) {
+    m_vanadium = rebinToWorkspace(m_vanadium, m_sample);
+  }
+
+  // Normalise the sample using the vanadium if it is provided
+  auto const normalised = m_vanadium ? replaceSpecialValues(m_sample / m_vanadium) : m_sample;
+  // Convert the normalisation result to dSpacing, and add it to the ADS
+  auto const normalisedDSpacing = !isAxisDSpacing(normalised) ? convertUnits(normalised, "dSpacing") : normalised;
+  ADS.addOrReplace(loadedWsName(), normalisedDSpacing);
+}
+
+void ALFInstrumentModel::setSample(MatrixWorkspace_sptr const &sample) { m_sample = sample; }
+
+void ALFInstrumentModel::setVanadium(MatrixWorkspace_sptr const &vanadium) { m_vanadium = vanadium; }
+
+/*
+ * Retrieves the sample run number from the currently loaded sample workspace.
+ */
+std::size_t ALFInstrumentModel::sampleRun() const { return runNumber(m_sample); }
+
+/*
+ * Retrieves the vanadium run number from the currently loaded vanadium workspace.
+ */
+std::size_t ALFInstrumentModel::vanadiumRun() const { return runNumber(m_vanadium); }
+
+std::size_t ALFInstrumentModel::runNumber(Mantid::API::MatrixWorkspace_sptr const &workspace) const {
+  if (!workspace) {
     return 0u;
   }
+  return static_cast<std::size_t>(workspace->getRunNumber());
+}
 
-  if (auto workspace = ADS.retrieveWS<MatrixWorkspace>(loadedName)) {
-    return static_cast<std::size_t>(workspace->getRunNumber());
+bool ALFInstrumentModel::setSelectedTubes(std::vector<DetectorTube> tubes) {
+  // If the number of tubes is different then we definitely need to update the stored tubes
+  if (tubes.size() != m_tubes.size()) {
+    m_tubes = std::move(tubes);
+    return true;
   }
-  return 0u;
-}
 
-/*
- * Extracts a single tube. Increments the average counter.
- */
-void ALFInstrumentModel::extractSingleTube() {
-  if (auto const extractedWorkspace = retrieveSingleTube()) {
-    ADS.addOrReplace(extractedWsName(), extractedWorkspace);
-    m_numberOfTubesInAverage = 1u;
+  // Check if a new tube exists in the provided tubes
+  const auto hasNewTube =
+      std::any_of(tubes.cbegin(), tubes.cend(), [&](const auto &tube) { return !tubeExists(tube); });
+  if (hasNewTube) {
+    m_tubes = std::move(tubes);
   }
+  return hasNewTube;
 }
 
-MatrixWorkspace_sptr ALFInstrumentModel::retrieveSingleTube() {
-  if (!ADS.doesExist(CURVES))
-    return nullptr;
-
-  // Get a handle on the curve workspace and then delete it from the ADS
-  auto const curveWorkspace = ADS.retrieveWS<MatrixWorkspace>(CURVES);
-  ADS.remove(CURVES);
-
-  if (auto const scaleFactor = xConversionFactor(curveWorkspace)) {
-    // Convert to degrees if the XAxis is an angle in radians, and then convert to histograms.
-    return convertToHistogram(scaleX(curveWorkspace, *scaleFactor));
+bool ALFInstrumentModel::addSelectedTube(DetectorTube const &tube) {
+  auto const isNewTube = !tubeExists(tube);
+  if (isNewTube) {
+    m_tubes.emplace_back(tube);
   }
-  return nullptr;
+
+  return isNewTube;
 }
 
-void ALFInstrumentModel::averageTube() {
-  // Multiply up the current average
-  auto existingAverageTube = ADS.retrieveWS<MatrixWorkspace>(extractedWsName());
-  existingAverageTube *= double(m_numberOfTubesInAverage);
-
-  // Get the recently selected tube, and rebin to match previous extracted workspace
-  auto newExtractedWorkspace = retrieveSingleTube();
-  newExtractedWorkspace = rebinToWorkspace(newExtractedWorkspace, existingAverageTube);
-
-  // Do an average
-  auto averagedWorkspace = plus(newExtractedWorkspace, existingAverageTube);
-  m_numberOfTubesInAverage++;
-  averagedWorkspace->mutableY(0) /= double(m_numberOfTubesInAverage);
-
-  // Add the result back into the ADS
-  ADS.addOrReplace(extractedWsName(), averagedWorkspace);
+bool ALFInstrumentModel::tubeExists(DetectorTube const &tube) const {
+  return std::find(m_tubes.cbegin(), m_tubes.cend(), tube) != m_tubes.cend();
 }
 
-/*
- * Returns true if the option to average a tube should be shown.
- */
-bool ALFInstrumentModel::checkDataIsExtracted() const {
-  return m_numberOfTubesInAverage > 0u && ADS.doesExist(extractedWsName());
+std::tuple<MatrixWorkspace_sptr, std::vector<double>>
+ALFInstrumentModel::generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::IInstrumentActor const &actor) const {
+  std::vector<double> twoThetas;
+  if (m_tubes.empty()) {
+    return {nullptr, twoThetas};
+  }
+
+  std::vector<double> x, y, e;
+  collectXAndYData(actor, x, y, e, twoThetas);
+
+  // Create workspace containing the out of plane angle data in one spectrum
+  auto workspace = createWorkspace(actor.getWorkspace()->getName(), x, y, e, 1u, "Out of plane angle");
+  // Convert x axis from radians to degrees
+  workspace = scaleX(workspace, 180.0 / M_PI);
+  // Rebin and average the workspace based on the number of tubes that are selected
+  workspace = rebunch(workspace, numberOfTubes());
+  return {workspace, twoThetas};
+}
+
+void ALFInstrumentModel::collectXAndYData(MantidQt::MantidWidgets::IInstrumentActor const &actor,
+                                          std::vector<double> &x, std::vector<double> &y, std::vector<double> &e,
+                                          std::vector<double> &twoThetas) const {
+  auto const &componentInfo = actor.componentInfo();
+  auto const &detectorInfo = actor.detectorInfo();
+
+  Mantid::API::MatrixWorkspace_const_sptr workspace = actor.getWorkspace();
+
+  // Collect and sort Y and E values by X
+  std::map<double, double> xymap, xemap;
+  collectAndSortYByX(xymap, xemap, twoThetas, actor, workspace, componentInfo, detectorInfo);
+
+  x.reserve(xymap.size());
+  y.reserve(xymap.size());
+  e.reserve(xemap.size());
+  std::transform(xymap.cbegin(), xymap.cend(), std::back_inserter(x), [](auto const &xy) { return xy.first; });
+  std::transform(xymap.cbegin(), xymap.cend(), std::back_inserter(y), [](auto const &xy) { return xy.second; });
+  std::transform(xemap.cbegin(), xemap.cend(), std::back_inserter(e), [](auto const &xe) { return xe.second; });
+}
+
+void ALFInstrumentModel::collectAndSortYByX(std::map<double, double> &xy, std::map<double, double> &xe,
+                                            std::vector<double> &twoThetas,
+                                            MantidQt::MantidWidgets::IInstrumentActor const &actor,
+                                            MatrixWorkspace_const_sptr const &workspace,
+                                            Mantid::Geometry::ComponentInfo const &componentInfo,
+                                            Mantid::Geometry::DetectorInfo const &detectorInfo) const {
+  auto const nDetectorsPerTube = m_tubes.front().size();
+  auto const samplePosition = componentInfo.samplePosition();
+  auto const instrument = actor.getInstrument();
+
+  Mantid::Kernel::V3D normal;
+  std::size_t imin, imax;
+  std::optional<std::pair<double, std::size_t>> workspaceIndexClosestToZeroX = std::nullopt;
+  for (auto const &tubeDetectorIndices : m_tubes) {
+    for (auto i = 0u; i < tubeDetectorIndices.size(); ++i) {
+      auto const detectorIndex = tubeDetectorIndices[i];
+      auto const workspaceIndex = actor.getWorkspaceIndex(detectorIndex);
+
+      if (i % nDetectorsPerTube == 0) {
+        normal = normalize(componentInfo.position(tubeDetectorIndices[i + 1]) - componentInfo.position(detectorIndex));
+        actor.getBinMinMaxIndex(workspaceIndex, imin, imax);
+        appendTwoThetaClosestToZero(twoThetas, workspaceIndexClosestToZeroX, workspace, instrument);
+      }
+
+      if (workspaceIndex != MantidQt::MantidWidgets::InstrumentActor::INVALID_INDEX &&
+          componentInfo.isDetector(detectorIndex)) {
+
+        auto const xValue = calculateOutOfPlaneAngle(detectorInfo.position(detectorIndex), samplePosition, normal);
+        xy[xValue] = calculateYCounts(workspace->y(workspaceIndex), imin, imax);
+        xe[xValue] = calculateError(workspace->e(workspaceIndex), imin, imax);
+
+        auto const absXValue = std::abs(xValue);
+        if (!workspaceIndexClosestToZeroX || absXValue < (*workspaceIndexClosestToZeroX).first) {
+          workspaceIndexClosestToZeroX = std::make_pair(absXValue, workspaceIndex);
+        }
+      }
+    }
+  }
+  appendTwoThetaClosestToZero(twoThetas, workspaceIndexClosestToZeroX, workspace, instrument);
 }
 
 } // namespace MantidQt::CustomInterfaces

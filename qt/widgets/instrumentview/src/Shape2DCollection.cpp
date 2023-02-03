@@ -175,7 +175,7 @@ Shape2D *Shape2DCollection::createShape(const QString &type, int x, int y) const
     return new Shape2DFree(p);
   }
 
-  QStringList complexType = type.split(' ', QString::SkipEmptyParts);
+  QStringList complexType = type.split(' ', Qt::SkipEmptyParts);
 
   if (complexType.size() < 2)
     return nullptr;
@@ -285,14 +285,50 @@ void Shape2DCollection::moveShapeOrControlPointBy(int dx, int dy) {
  * override the cursor image.
  */
 void Shape2DCollection::touchShapeOrControlPointAt(int x, int y) {
-  if (selectControlPointAt(x, y) || isOverSelectionAt(x, y)) {
-    if (!m_overridingCursor) {
+  if (selectControlPointAt(x, y)) {
+    if (!m_overridingCursor || m_cursorOverShape) {
       m_overridingCursor = true;
+      m_cursorOverControlPoint = true;
+      m_cursorOverShape = false;
+      QApplication::restoreOverrideCursor();
+
+      // Since shapes can be flipped by, for example, dragging the bottom left point past the bottom right,
+      // m_currentCP can't be relyed upon to describe a point's relative position (e.g top left)
+      QPointF centre = m_currentShape->origin();
+      QPointF cp = m_currentShape->getControlPoint(m_currentCP);
+      QPointF difference = centre - cp;
+
+      if (difference.x() > 0) {
+        if (difference.y() > 0)
+          QApplication::setOverrideCursor(Qt::SizeBDiagCursor);
+        else if (difference.y() < 0)
+          QApplication::setOverrideCursor(Qt::SizeFDiagCursor);
+        else
+          QApplication::setOverrideCursor(Qt::SizeHorCursor);
+      } else if (difference.x() < 0) {
+        if (difference.y() > 0)
+          QApplication::setOverrideCursor(Qt::SizeFDiagCursor);
+        else if (difference.y() < 0)
+          QApplication::setOverrideCursor(Qt::SizeBDiagCursor);
+        else
+          QApplication::setOverrideCursor(Qt::SizeHorCursor);
+      } else {
+        QApplication::setOverrideCursor(Qt::SizeVerCursor);
+      }
+    }
+  } else if (isOverSelectionAt(x, y)) {
+    if (!m_overridingCursor || m_cursorOverControlPoint) {
+      m_overridingCursor = true;
+      m_cursorOverShape = true;
+      m_cursorOverControlPoint = false;
+      QApplication::restoreOverrideCursor();
       QApplication::setOverrideCursor(Qt::SizeAllCursor);
     }
   } else if (m_overridingCursor) {
     deselectControlPoint();
     m_overridingCursor = false;
+    m_cursorOverShape = false;
+    m_cursorOverControlPoint = false;
     QApplication::restoreOverrideCursor();
   }
 }
@@ -482,12 +518,10 @@ bool Shape2DCollection::selectControlPointAt(int x, int y) {
   QPointF p = QPointF(x, y);
   if (!m_currentShape)
     return false;
+  auto const cpSensitivity = m_currentShape->controlPointSize() + 2;
   for (size_t i = 0; i < m_currentShape->getNControlPoints(); ++i) {
-    // QPointF cp = m_currentShape->getControlPoint(i) - p;
     QPointF cp = m_transform.map(m_currentShape->getControlPoint(i)) - p;
-    if (fabs(cp.x()) + fabs(cp.y()) <= sizeCP + 2)
-    // if (cp.manhattanLength() <= sizeCP + 2)
-    {
+    if (fabs(cp.x()) + fabs(cp.y()) <= cpSensitivity) {
       m_currentCP = i;
       return true;
     }
@@ -656,6 +690,15 @@ bool Shape2DCollection::isMasked(double x, double y) const {
   QPointF p(x, y);
   foreach (Shape2D *shape, m_shapes) {
     if (shape->isMasked(p)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool Shape2DCollection::isIntersecting(const QRectF &rect) const {
+  foreach (Shape2D *shape, m_shapes) {
+    if (shape->isIntersecting(rect)) {
       return true;
     }
   }

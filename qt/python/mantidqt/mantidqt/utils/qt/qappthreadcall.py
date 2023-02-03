@@ -25,11 +25,13 @@ class QAppThreadCall(QObject):
     @dataclass
     class CallArgs:
         """Encapsulate the arguments to a callable"""
+
         args: list
 
     @dataclass
     class CallResult:
         """Encapsulate the result of a object call"""
+
         result: Any
         exc_info: Optional[tuple]
 
@@ -143,7 +145,7 @@ def force_method_calls_to_qapp_thread(instance, *, all_methods=False):
         return results
 
     for name, method in getmethods(instance):
-        if all_methods or not name.startswith('_'):
+        if all_methods or not name.startswith("_"):
             setattr(instance, name, QAppThreadCall(method))
 
     return instance

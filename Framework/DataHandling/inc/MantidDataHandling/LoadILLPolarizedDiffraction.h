@@ -9,7 +9,6 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
-#include "MantidDataHandling/LoadHelper.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
@@ -44,7 +43,6 @@ private:
   void loadData();
   void loadMetaData();
   API::WorkspaceGroup_sptr sortPolarisations();
-  void loadInstrument(const API::MatrixWorkspace_sptr &, const std::string &);
   std::vector<double> loadTwoThetaDetectors(const API::MatrixWorkspace_sptr &, const NeXus::NXEntry &, const int);
   std::vector<double> loadBankParameters(const API::MatrixWorkspace_sptr &, const int);
   void moveTwoTheta(const NeXus::NXEntry &, const API::MatrixWorkspace_sptr &);
@@ -62,7 +60,6 @@ private:
 
   double m_wavelength; // wavelength value is read from the YIG IPF
 
-  LoadHelper m_loadHelper;                                       ///< a helper for metadata
   std::vector<API::MatrixWorkspace_sptr> m_outputWorkspaceGroup; ///< vector with output workspaces
 };
 

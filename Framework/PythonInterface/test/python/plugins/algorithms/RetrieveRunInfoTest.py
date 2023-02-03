@@ -19,7 +19,7 @@ class RetrieveRunInfoTest(unittest.TestCase):
 
     def setUp(self):
         # Set up every time.
-        config['default.instrument'] = 'IRIS'
+        config["default.instrument"] = "IRIS"
         config["default.facility"] = "ISIS"
 
         # Only set up once.
@@ -27,80 +27,63 @@ class RetrieveRunInfoTest(unittest.TestCase):
             class_has_been_set_up = True
 
             # Create a workspace that is not a table workspace.
-            pre_existing_matrix_workspace_alg = run_algorithm(
-                "CreateWorkspace",
-                OutputWorkspace='matrix_ws',
-                DataX='0',
-                DataY='1')
-            self.__pre_existing_matrix_workspace_name = \
-                pre_existing_matrix_workspace_alg.getPropertyValue("OutputWorkspace")
+            pre_existing_matrix_workspace_alg = run_algorithm("CreateWorkspace", OutputWorkspace="matrix_ws", DataX="0", DataY="1")
+            self.__pre_existing_matrix_workspace_name = pre_existing_matrix_workspace_alg.getPropertyValue("OutputWorkspace")
 
             # Create an empty table workspace.
-            table_workspace_alg = run_algorithm(
-                "CreateEmptyTableWorkspace",
-                OutputWorkspace='__empty_table')
-            self.__empty_table_workspace_name = \
-                table_workspace_alg.getPropertyValue("OutputWorkspace")
+            table_workspace_alg = run_algorithm("CreateEmptyTableWorkspace", OutputWorkspace="__empty_table")
+            self.__empty_table_workspace_name = table_workspace_alg.getPropertyValue("OutputWorkspace")
 
-            self.__existing_range_of_run_files = '21360, 26173, 38633'
-            self.__nonexistant_run_file = '99999'
+            self.__existing_range_of_run_files = "21360, 26173, 38633"
+            self.__nonexistant_run_file = "99999"
 
     def test_wrong_facility_throws(self):
-        ''' Dont expect to be able to support non-ISIS runs. '''
+        """Dont expect to be able to support non-ISIS runs."""
         config["default.facility"] = "SNS"
         self.assertRaises(
-            RuntimeError,
-            run_algorithm,
-            'RetrieveRunInfo',
-            Runs = self.__existing_range_of_run_files,
-            OutputWorkspace = "test",
-            rethrow = True)
+            RuntimeError, run_algorithm, "RetrieveRunInfo", Runs=self.__existing_range_of_run_files, OutputWorkspace="test", rethrow=True
+        )
 
     def test_missing_run_file_throws(self):
-        ''' Check that ALL files are present before proceeding. '''
+        """Check that ALL files are present before proceeding."""
         self.assertRaises(
-            RuntimeError,
-            run_algorithm,
-            'RetrieveRunInfo',
-            Runs = self.__nonexistant_run_file,
-            OutputWorkspace = "test",
-            rethrow = True)
+            RuntimeError, run_algorithm, "RetrieveRunInfo", Runs=self.__nonexistant_run_file, OutputWorkspace="test", rethrow=True
+        )
 
     def test_pre_existing_non_table_workspace_throws(self):
-        ''' Only allow TableWorkspaces. '''
+        """Only allow TableWorkspaces."""
         self.assertRaises(
             RuntimeError,
             run_algorithm,
-            'RetrieveRunInfo',
-            Runs = self.__existing_range_of_run_files,
-            OutputWorkspace = self.__pre_existing_matrix_workspace_name,
-            rethrow = True)
+            "RetrieveRunInfo",
+            Runs=self.__existing_range_of_run_files,
+            OutputWorkspace=self.__pre_existing_matrix_workspace_name,
+            rethrow=True,
+        )
 
     def test_existing_table_workspace_throws(self):
-        ''' Dont bother trying to append.  If it exists already, we throw. '''
+        """Dont bother trying to append.  If it exists already, we throw."""
         self.assertRaises(
             RuntimeError,
             run_algorithm,
-            'RetrieveRunInfo',
-            Runs = self.__existing_range_of_run_files,
-            OutputWorkspace = self.__empty_table_workspace_name,
-            rethrow = True)
+            "RetrieveRunInfo",
+            Runs=self.__existing_range_of_run_files,
+            OutputWorkspace=self.__empty_table_workspace_name,
+            rethrow=True,
+        )
 
     def test_output_ws_correct_size(self):
-        ''' Does a standard example return a table with the right amount of
-        stuff in it? '''
-        run_algorithm(
-            'RetrieveRunInfo',
-            Runs = self.__existing_range_of_run_files,
-            OutputWorkspace = 'test',
-            rethrow = True)
+        """Does a standard example return a table with the right amount of
+        stuff in it?"""
+        run_algorithm("RetrieveRunInfo", Runs=self.__existing_range_of_run_files, OutputWorkspace="test", rethrow=True)
 
-        output_ws = mtd['test']
+        output_ws = mtd["test"]
 
-        self.assertEqual(output_ws.columnCount(), 5) # Five log props.
-        self.assertEqual(output_ws.rowCount(), 3) # Three runs.
+        self.assertEqual(output_ws.columnCount(), 5)  # Five log props.
+        self.assertEqual(output_ws.rowCount(), 3)  # Three runs.
 
-        DeleteWorkspace(Workspace = 'test')
+        DeleteWorkspace(Workspace="test")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

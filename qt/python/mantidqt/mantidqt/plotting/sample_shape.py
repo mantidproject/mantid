@@ -18,8 +18,9 @@ from workbench.plotting.toolbar import ToolbarStateManager
 
 
 class SampleShapePlot:
-
-    def __init__(self, ):
+    def __init__(
+        self,
+    ):
         self.ads_observer = None
         self.figure = None
         self.workspace_name = None
@@ -69,7 +70,7 @@ class SampleShapePlot:
             axes = figure.gca()
         else:
             self.plot_visible = True
-            figure, axes = plt.subplots(subplot_kw={'projection': 'mantid3d', 'proj_type': 'ortho'})
+            figure, axes = plt.subplots(subplot_kw={"projection": "mantid3d", "proj_type": "ortho"})
 
         sample_plotted, container_plotted, components_plotted = try_to_plot_all_sample_shapes(workspace, figure)
         if int(sample_plotted) + int(container_plotted) + int(components_plotted) == 0:
@@ -83,8 +84,9 @@ class SampleShapePlot:
         if workspace.sample().hasOrientedLattice():
             plot_lattice_vectors(axes, workspace)
 
-        self.ads_observer = SampleShapePlotADSObserver(self.on_replace_workspace, self.on_rename_workspace,
-                                                       self.on_clear, self.on_delete_workspace)
+        self.ads_observer = SampleShapePlotADSObserver(
+            self.on_replace_workspace, self.on_rename_workspace, self.on_clear, self.on_delete_workspace
+        )
         self.set_and_save_figure(workspace_name, figure)
         self.connect_to_home_toolbar_button()
         if test:
@@ -151,7 +153,7 @@ def is_visible(plot_number):
     """
     figure_manager = GlobalFigureManager.figs.get(plot_number)
     if figure_manager is None:
-        raise ValueError('Error in is_visible, could not find a plot with the number {}.'.format(plot_number))
+        raise ValueError("Error in is_visible, could not find a plot with the number {}.".format(plot_number))
 
     return figure_manager.window.isVisible()
 
@@ -243,11 +245,23 @@ def plot_sample_only(workspace, figure):
     if shape:
         mesh = shape.getMesh()
         if len(mesh) < 13:
-            face_colors = ['purple', 'mediumorchid', 'royalblue', 'b', 'red', 'firebrick',
-                           'green', 'darkgreen', 'grey', 'black', 'gold', 'orange']
-            mesh_polygon = Poly3DCollection(mesh, facecolors=face_colors, edgecolors='black', alpha=1.0, linewidths=0.1)
+            face_colors = [
+                "purple",
+                "mediumorchid",
+                "royalblue",
+                "b",
+                "red",
+                "firebrick",
+                "green",
+                "darkgreen",
+                "grey",
+                "black",
+                "gold",
+                "orange",
+            ]
+            mesh_polygon = Poly3DCollection(mesh, facecolors=face_colors, edgecolors="black", alpha=1.0, linewidths=0.1)
         else:
-            mesh_polygon = Poly3DCollection(mesh, facecolors='red', edgecolors='black', alpha=1.0, linewidths=0.1)
+            mesh_polygon = Poly3DCollection(mesh, facecolors="red", edgecolors="black", alpha=1.0, linewidths=0.1)
             mesh_polygon.set_facecolor((1, 0, 0, 0.5))
         axes.add_collection3d(mesh_polygon)
         return True
@@ -259,7 +273,7 @@ def plot_container(workspace, figure):
     axes = figure.gca()
     container_shape = get_valid_container_shape_from_workspace(workspace)
     container_mesh = container_shape.getMesh()
-    mesh_polygon = Poly3DCollection(container_mesh, edgecolors='black', alpha=0.1, linewidths=0.05, zorder=0.5)
+    mesh_polygon = Poly3DCollection(container_mesh, edgecolors="black", alpha=0.1, linewidths=0.05, zorder=0.5)
     mesh_polygon.set_facecolor((0, 1, 0, 0.5))
     axes.add_collection3d(mesh_polygon)
     return True
@@ -271,7 +285,7 @@ def plot_components(workspace, figure):
     for component_index in range(1, number_of_components):
         component_shape = get_valid_component_shape_from_workspace(workspace, component_index)
         component_mesh = component_shape.getMesh()
-        mesh_polygon_loop = Poly3DCollection(component_mesh, edgecolors='black', alpha=0.1, linewidths=0.05, zorder=0.5)
+        mesh_polygon_loop = Poly3DCollection(component_mesh, edgecolors="black", alpha=0.1, linewidths=0.05, zorder=0.5)
         mesh_polygon_loop.set_facecolor((0, 0, 1, 0.5))
         axes.add_collection3d(mesh_polygon_loop)
     return True
@@ -306,9 +320,9 @@ def show_the_figure(plot_figure):
 
 
 def set_axes_labels(plot_axes):
-    plot_axes.set_xlabel('X / m')
-    plot_axes.set_ylabel('Y / m')
-    plot_axes.set_zlabel('Z / m')
+    plot_axes.set_xlabel("X / m")
+    plot_axes.set_ylabel("Y / m")
+    plot_axes.set_zlabel("Z / m")
 
 
 def direction_not_valid(direction):
@@ -324,9 +338,8 @@ def set_perspective(plot_axes, workspace=None, beam_direction=None):
     # assume beam_direction Z (X) means pointingUp direction Y (Z)
     if direction_not_valid(beam_direction) and not workspace:
         # guess the original beam_direction and raise warning
-        plot_axes.view_init(vertical_axis='y', elev=30, azim=-135)
+        plot_axes.view_init(vertical_axis="y", elev=30, azim=-135)
         raise Exception("set_perspective must be called with either beam_direction or a workspace")
-
     if direction_not_valid(beam_direction):
         frame = workspace.getInstrument().getReferenceFrame()
         if frame.pointingUpAxis() == "Y" and frame.pointingAlongBeamAxis() == "Z":
@@ -336,9 +349,9 @@ def set_perspective(plot_axes, workspace=None, beam_direction=None):
             beam_direction = "X"
 
     if beam_direction == "Z":
-        plot_axes.view_init(vertical_axis='y', elev=30, azim=-135)
+        plot_axes.view_init(vertical_axis="y", elev=30, azim=-135)
     else:
-        plot_axes.view_init(vertical_axis='z', elev=30, azim=-135)
+        plot_axes.view_init(vertical_axis="z", elev=30, azim=-135)
 
     return beam_direction
 
@@ -426,40 +439,44 @@ def add_beam_arrow(plot_axes, workspace):
     # Add arrow along beam direction
     source = workspace.getInstrument().getSource()
     sample = workspace.getInstrument().getSample()
-    if source and sample:
+    if source is not None and sample is not None:
         beam_origin = plot_axes.get_xlim3d()[0], plot_axes.get_ylim3d()[0], plot_axes.get_zlim3d()[0]
         beam_direction = calculate_beam_direction(source, sample)
         add_arrow(plot_axes, beam_direction, origin=beam_origin)
 
 
-def add_arrow(ax, vector, origin=None, relative_factor=None, color='black', linestyle='-'):
+def add_arrow(ax, vector, origin=None, relative_factor=None, color="black", linestyle="-"):
     # Add arrows for Beam or Crystal lattice
     if origin is None:
         origin = (ax.get_xlim3d()[1], ax.get_ylim3d()[1], ax.get_zlim3d()[0])
     lims = ax.get_xlim3d()
-    factor = (lims[1]-lims[0]) / 3.0
+    factor = (lims[1] - lims[0]) / 3.0
     if relative_factor:
         factor *= relative_factor
     vector_norm = vector / np.linalg.norm(vector)
     ax.quiver(
-        origin[0], origin[1], origin[2],
-        vector_norm[0]*factor, vector_norm[1]*factor, vector_norm[2]*factor,
+        origin[0],
+        origin[1],
+        origin[2],
+        vector_norm[0] * factor,
+        vector_norm[1] * factor,
+        vector_norm[2] * factor,
         color=color,
-        linestyle=linestyle
+        linestyle=linestyle,
     )
 
 
 def plot_lattice_vectors(plot_axes, workspace):
     """Add arrows for real and reciprocal lattice vectors"""
     real_lattice_vectors, reciprocal_lattice_vectors = calculate_lattice_vectors(workspace)
-    colors = ['r', 'g', 'b']
+    colors = ["r", "g", "b"]
     plot_real_lattice_vectors(plot_axes, real_lattice_vectors, colors)
     plot_reciprocal_lattice_vectors(plot_axes, reciprocal_lattice_vectors, colors)
 
 
 def plot_reciprocal_lattice_vectors(plot_axes, reciprocal_lattice, colors):
     for i in range(3):  # plot reciprocal_lattice with '--' dashed linestyle
-        add_arrow(plot_axes, reciprocal_lattice[:, i], color=colors[i], linestyle='--')
+        add_arrow(plot_axes, reciprocal_lattice[:, i], color=colors[i], linestyle="--")
 
 
 def plot_real_lattice_vectors(plot_axes, real_lattice, colors):
@@ -473,6 +490,6 @@ def calculate_lattice_vectors(workspace):
     q_sample = np.matmul(ub_matrix, hkl)
     goniometer = workspace.getRun().getGoniometer().getR()
     reciprocal_lattice_vectors = np.matmul(goniometer, q_sample)  # QLab
-    real_lattice_vectors = (2.0*np.pi)*np.linalg.inv(np.transpose(reciprocal_lattice_vectors))
+    real_lattice_vectors = (2.0 * np.pi) * np.linalg.inv(np.transpose(reciprocal_lattice_vectors))
 
     return real_lattice_vectors, reciprocal_lattice_vectors

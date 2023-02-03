@@ -11,7 +11,6 @@ from mantidqt.utils.testing.mocks.mock_qt import MockQTab, MockQTableView
 
 
 class MockMatrixWorkspaceDisplayView:
-
     def __init__(self):
         self.set_context_menu_actions = Mock()
         self.table_x = MockQTableView()

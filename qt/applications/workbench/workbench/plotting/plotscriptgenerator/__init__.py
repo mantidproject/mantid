@@ -12,19 +12,23 @@ from mantid.plots.mantidaxes import MantidAxes
 from mantid.plots.utility import row_num, col_num
 from mantidqt.widgets.plotconfigdialog import curve_in_ax
 from workbench.config import DEFAULT_SCRIPT_CONTENT
-from workbench.plotting.plotscriptgenerator.axes import (generate_axis_limit_commands,
-                                                         generate_axis_label_commands,
-                                                         generate_set_title_command,
-                                                         generate_axis_scale_commands,
-                                                         generate_axis_facecolor_commands,
-                                                         generate_tick_commands,
-                                                         generate_tick_formatter_commands)
+from workbench.plotting.plotscriptgenerator.axes import (
+    generate_axis_limit_commands,
+    generate_axis_label_commands,
+    generate_set_title_command,
+    generate_axis_scale_commands,
+    generate_axis_facecolor_commands,
+    generate_tick_commands,
+    generate_tick_formatter_commands,
+)
 from workbench.plotting.plotscriptgenerator.figure import generate_subplots_command
 from workbench.plotting.plotscriptgenerator.lines import generate_plot_command
-from workbench.plotting.plotscriptgenerator.legend import (generate_legend_commands,
-                                                           generate_title_font_commands,
-                                                           generate_label_font_commands,
-                                                           generate_visible_command)
+from workbench.plotting.plotscriptgenerator.legend import (
+    generate_legend_commands,
+    generate_title_font_commands,
+    generate_label_font_commands,
+    generate_visible_command,
+)
 from workbench.plotting.plotscriptgenerator.colorfills import generate_plot_2d_command
 from workbench.plotting.plotscriptgenerator.utils import generate_workspace_retrieval_commands, sorted_lines_in
 from workbench.plotting.plotscriptgenerator.fitting import get_fit_cmds
@@ -37,8 +41,7 @@ if hasattr(Legend, "set_draggable"):
     SET_DRAGGABLE_METHOD = "set_draggable(True)"
 else:
     SET_DRAGGABLE_METHOD = "draggable()"
-FIT_DOCUMENTATION_STRING = "# Fit definition, see https://docs.mantidproject.org/algorithms/Fit-v1.html for more " \
-                           "details"
+FIT_DOCUMENTATION_STRING = "# Fit definition, see https://docs.mantidproject.org/algorithms/Fit-v1.html for more " "details"
 TICKER_FORMATTER_IMPORT = "from matplotlib.ticker import NullFormatter, ScalarFormatter, LogFormatterSciNotation"
 
 
@@ -69,7 +72,7 @@ def generate_script(fig, exclude_headers=False):
     :return: A String. A script to recreate the given figure
     """
     plot_commands = []
-    plot_headers = ['import matplotlib.pyplot as plt', "from mantid.plots.utility import MantidAxType"]
+    plot_headers = ["import matplotlib.pyplot as plt", "from mantid.plots.utility import MantidAxType"]
 
     for ax in fig.get_axes():
         if not isinstance(ax, MantidAxes):
@@ -94,12 +97,12 @@ def generate_script(fig, exclude_headers=False):
         # Only add the ticker import to headers if it's needed.
         formatter_commands = get_tick_formatter_commands(ax, ax_object_var)
         if len(formatter_commands) > 0:
-            plot_commands.extend(formatter_commands) # ax.{x,y}axis.set_major_formatter
+            plot_commands.extend(formatter_commands)  # ax.{x,y}axis.set_major_formatter
             if TICKER_FORMATTER_IMPORT not in plot_headers:
                 plot_headers.append(TICKER_FORMATTER_IMPORT)
 
         plot_commands.extend(get_legend_cmds(ax, ax_object_var))  # ax.legend
-        plot_commands.append('')
+        plot_commands.append("")
 
     if not plot_commands:
         return
@@ -113,23 +116,22 @@ def generate_script(fig, exclude_headers=False):
         cmds.extend(plot_headers)
     if fit_commands:
         cmds.append(FIT_DOCUMENTATION_STRING)
-        cmds.extend(fit_commands + [''])
-    cmds.extend(generate_workspace_retrieval_commands(fig) + [''])
+        cmds.extend(fit_commands + [""])
+    cmds.extend(generate_workspace_retrieval_commands(fig) + [""])
     cmds.append("{}, {} = {}".format(FIG_VARIABLE, AXES_VARIABLE, generate_subplots_command(fig)))
     cmds.extend(plot_commands)
     cmds.append("plt.show()")
     cmds.append("# Scripting Plots in Mantid:")
     cmds.append("# https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/02_scripting_plots.html")
 
-    return '\n'.join(cmds)
+    return "\n".join(cmds)
 
 
 def get_plot_cmds(ax, ax_object_var):
     """Get commands such as axes.plot or axes.errorbar"""
     cmds = []
     for artist in sorted_lines_in(ax, ax.get_tracked_artists()):
-        cmds.append("{ax_obj}.{cmd}".format(ax_obj=ax_object_var,
-                                            cmd=generate_plot_command(artist)))
+        cmds.append("{ax_obj}.{cmd}".format(ax_obj=ax_object_var, cmd=generate_plot_command(artist)))
     return cmds
 
 
@@ -178,11 +180,14 @@ def get_legend_cmds(ax, ax_object_var):
     """Get commands for setting legend properties"""
     cmds = []
     if ax.legend_:
-        cmds.append("{legend_object} = {ax_obj}.legend({legend_commands}).{draggable_method}.legend".format(
-            legend_object=LEGEND_VARIABLE,
-            ax_obj=ax_object_var,
-            legend_commands=generate_legend_commands(ax.legend_),
-            draggable_method=SET_DRAGGABLE_METHOD))
+        cmds.append(
+            "{legend_object} = {ax_obj}.legend({legend_commands}).{draggable_method}.legend".format(
+                legend_object=LEGEND_VARIABLE,
+                ax_obj=ax_object_var,
+                legend_commands=generate_legend_commands(ax.legend_),
+                draggable_method=SET_DRAGGABLE_METHOD,
+            )
+        )
         cmds.extend(generate_title_font_commands(ax.legend_, LEGEND_VARIABLE))
         cmds.extend(generate_label_font_commands(ax.legend_, LEGEND_VARIABLE))
         cmds.extend(generate_visible_command(ax.legend_, LEGEND_VARIABLE))

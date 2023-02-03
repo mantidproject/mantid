@@ -22,7 +22,6 @@ class MockFitInfo(object):
 
 @start_qapplication
 class PlotTimeFitPaneModelTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.context = setup_context()
@@ -35,38 +34,38 @@ class PlotTimeFitPaneModelTest(unittest.TestCase):
         self.model = PlotTimeFitPaneModel(context=self.context)
 
     def test_get_fit_ws_and_indicies(self):
-        fit = MockFitInfo(["test","unit"])
+        fit = MockFitInfo(["test", "unit"])
         ws, indices = self.model.get_fit_workspace_and_indices(fit, False)
 
         self.assertEqual(ws, ["test", "unit"])
-        self.assertEqual(indices, [1,1])
+        self.assertEqual(indices, [1, 1])
 
     def test_get_fit_ws_and_indicies_with_diff(self):
-        fit = MockFitInfo(["test","unit"])
+        fit = MockFitInfo(["test", "unit"])
 
         ws, indices = self.model.get_fit_workspace_and_indices(fit, True)
 
         self.assertEqual(ws, ["test", "test", "unit", "unit"])
-        self.assertEqual(indices, [1,2,1,2])
+        self.assertEqual(indices, [1, 2, 1, 2])
 
     def test_get_fit_ws_and_indicies_TF(self):
-        fit = MockFitInfo(["test","unit"])
+        fit = MockFitInfo(["test", "unit"])
         fit.tf_asymmetry_fit = True
 
         ws, indices = self.model.get_fit_workspace_and_indices(fit, False)
 
         self.assertEqual(ws, ["test", "unit"])
-        self.assertEqual(indices, [3,3])
+        self.assertEqual(indices, [3, 3])
 
     def test_get_fit_ws_and_indicies_with_diff_TF(self):
-        fit = MockFitInfo(["test","unit"])
+        fit = MockFitInfo(["test", "unit"])
         fit.tf_asymmetry_fit = True
 
         ws, indices = self.model.get_fit_workspace_and_indices(fit, True)
 
         self.assertEqual(ws, ["test", "test", "unit", "unit"])
-        self.assertEqual(indices, [3,2,3,2])
+        self.assertEqual(indices, [3, 2, 3, 2])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

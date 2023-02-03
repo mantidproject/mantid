@@ -16,13 +16,13 @@ from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_
 def create_results_table():
     table = WorkspaceFactory.createTable()
 
-    table.addColumn(type='str', name='workspace_name')
-    table.addColumn(type='float', name='A0')
-    table.addColumn(type='float', name='A1')
-    table.addColumn(type='float', name='Sigma')
-    table.addColumn(type='float', name='Lambda')
-    table.addColumn(type='float', name='f1.Sigma')
-    table.addColumn(type='float', name='f1.Lambda')
+    table.addColumn(type="str", name="workspace_name")
+    table.addColumn(type="float", name="A0")
+    table.addColumn(type="float", name="A1")
+    table.addColumn(type="float", name="Sigma")
+    table.addColumn(type="float", name="Lambda")
+    table.addColumn(type="float", name="f1.Sigma")
+    table.addColumn(type="float", name="f1.Lambda")
     table.addRow(["MUSR62260; Group; bottom; Asymmetry; MA", 0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
     table.addRow(["MUSR62260; Group; top; Asymmetry; MA", 0.3, 0.4, 0.5, 0.6, 0.7, 0.8])
     table.addRow(["MUSR62260; Group; fwd; Asymmetry; MA", 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
@@ -30,7 +30,6 @@ def create_results_table():
 
 
 class ModelFittingModelTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         FrameworkManager.Instance()
@@ -78,8 +77,7 @@ class ModelFittingModelTest(unittest.TestCase):
 
         for table_index in range(len(self.model.result_table_names)):
             self.model.current_result_table_index = table_index
-            self.assertEqual(self.model.current_result_table_name,
-                             self.model.result_table_names[self.model.current_result_table_index])
+            self.assertEqual(self.model.current_result_table_name, self.model.result_table_names[self.model.current_result_table_index])
 
     def test_that_current_result_table_name_will_return_none_when_there_are_no_results_tables_loaded(self):
         self.assertEqual(self.model.current_result_table_name, None)
@@ -169,9 +167,10 @@ class ModelFittingModelTest(unittest.TestCase):
         self.assertAlmostEqual(self.model.fitting_context.y_parameters["f1.Lambda"][0][1], 0.8, delta=0.000001)
         self.assertAlmostEqual(self.model.fitting_context.y_parameters["f1.Lambda"][0][2], 1.0, delta=0.000001)
 
-        self.assertEqual(self.model.fitting_context.y_parameters["workspace_name"][0],
-                         ["MUSR62260; Group; bottom; Asymmetry; MA", "MUSR62260; Group; top; Asymmetry; MA",
-                          "MUSR62260; Group; fwd; Asymmetry; MA"])
+        self.assertEqual(
+            self.model.fitting_context.y_parameters["workspace_name"][0],
+            ["MUSR62260; Group; bottom; Asymmetry; MA", "MUSR62260; Group; top; Asymmetry; MA", "MUSR62260; Group; fwd; Asymmetry; MA"],
+        )
 
     def test_that_create_x_and_y_parameter_combinations_will_not_create_the_parameter_workspaces(self):
         self.model.result_table_names = self.result_table_names
@@ -226,13 +225,13 @@ class ModelFittingModelTest(unittest.TestCase):
         self.assertTrue(not check_if_workspace_exist("Result1; A1 vs A1"))
 
         unit_test_ws = retrieve_ws("Result1; Lambda vs Sigma")
-        self.assertTrue(str(unit_test_ws.getAxis(0).getUnit().symbol()) == '\\mu s^{-1}')
-        self.assertTrue(str(unit_test_ws.YUnit()) == 'Lambda ($\\mu$ $s^{-1}$)')
+        self.assertTrue(str(unit_test_ws.getAxis(0).getUnit().symbol()) == "\\mu s^{-1}")
+        self.assertTrue(str(unit_test_ws.YUnit()) == "Lambda ($\\mu$ $s^{-1}$)")
 
         unit_test_ws = retrieve_ws("Result1; f1.Lambda vs f1.Sigma")
-        self.assertTrue(str(unit_test_ws.getAxis(0).getUnit().symbol()) == '\\mu s^{-1}')
-        self.assertTrue(str(unit_test_ws.YUnit()) == 'f1.Lambda ($\\mu$ $s^{-1}$)')
+        self.assertTrue(str(unit_test_ws.getAxis(0).getUnit().symbol()) == "\\mu s^{-1}")
+        self.assertTrue(str(unit_test_ws.YUnit()) == "f1.Lambda ($\\mu$ $s^{-1}$)")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

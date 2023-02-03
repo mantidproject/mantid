@@ -14,7 +14,6 @@ from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_utils import StaticW
 
 
 class BasicFittingContextTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         FrameworkManager.Instance()
@@ -48,7 +47,7 @@ class BasicFittingContextTest(unittest.TestCase):
         self.assertEqual(self.fitting_context.fit_statuses, [])
         self.assertEqual(self.fitting_context.chi_squared, [])
         self.assertEqual(self.fitting_context.plot_guess, False)
-        self.assertEqual(self.fitting_context.plot_guess_type, 'x from fit range')
+        self.assertEqual(self.fitting_context.plot_guess_type, "x from fit range")
         self.assertEqual(self.fitting_context.plot_guess_points, None)
         self.assertEqual(self.fitting_context.plot_guess_start_x, None)
         self.assertEqual(self.fitting_context.plot_guess_end_x, None)
@@ -177,5 +176,5 @@ class BasicFittingContextTest(unittest.TestCase):
         self.assertEqual(self.fitting_context.all_latest_fits()[0], fit2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

@@ -13,7 +13,7 @@ Functionality for unpacking mantid objects for plotting with matplotlib.
 
 # This file should be left free of PyQt imports to allow quick importing
 # of the main package.
-from collections.abc import Iterable   # noqa: F401
+from collections.abc import Iterable  # noqa: F401
 from matplotlib.projections import register_projection
 from matplotlib.scale import register_scale
 

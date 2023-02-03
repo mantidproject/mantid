@@ -30,7 +30,7 @@ class CompareSampleLogs(PythonAlgorithm):
         return "Utility\\Workspaces"
 
     def seeAlso(self):
-        return [ "CompareWorkspaces","CheckForSampleLogs","CopySample" ]
+        return ["CompareWorkspaces", "CheckForSampleLogs", "CopySample"]
 
     def name(self):
         """
@@ -43,16 +43,24 @@ class CompareSampleLogs(PythonAlgorithm):
 
     def PyInit(self):
         validator = StringArrayLengthValidator()
-        validator.setLengthMin(1)   # one group may be given
-        self.declareProperty(StringArrayProperty(name="InputWorkspaces", direction=Direction.Input, validator=validator),
-                             doc="Comma separated list of workspaces or groups of workspaces.")
+        validator.setLengthMin(1)  # one group may be given
+        self.declareProperty(
+            StringArrayProperty(name="InputWorkspaces", direction=Direction.Input, validator=validator),
+            doc="Comma separated list of workspaces or groups of workspaces.",
+        )
 
-        self.declareProperty(StringArrayProperty(name="SampleLogs", direction=Direction.Input, validator=validator),
-                             doc="Comma separated list of sample logs to compare.")
-        self.declareProperty("Tolerance", 1e-3, validator=FloatBoundedValidator(lower=1e-7),
-                             doc="Tolerance for comparison of numeric values.")
-        self.declareProperty("Result", "A string that will be empty if all the logs match, "
-                             "otherwise will contain a comma separated list of  not matching logs", Direction.Output)
+        self.declareProperty(
+            StringArrayProperty(name="SampleLogs", direction=Direction.Input, validator=validator),
+            doc="Comma separated list of sample logs to compare.",
+        )
+        self.declareProperty(
+            "Tolerance", 1e-3, validator=FloatBoundedValidator(lower=1e-7), doc="Tolerance for comparison of numeric values."
+        )
+        self.declareProperty(
+            "Result",
+            "A string that will be empty if all the logs match, " "otherwise will contain a comma separated list of  not matching logs",
+            Direction.Output,
+        )
 
         return
 
@@ -92,8 +100,9 @@ class CompareSampleLogs(PythonAlgorithm):
         nprop = len(properties)
         # if some workspaces do not have this property, return False
         if nprop != wsnum:
-            message = "Number of properties " + str(nprop) + " for property " + pname +\
-                      " is not equal to number of workspaces " + str(wsnum)
+            message = (
+                "Number of properties " + str(nprop) + " for property " + pname + " is not equal to number of workspaces " + str(wsnum)
+            )
             self.log().information(message)
             return False
 
@@ -102,8 +111,15 @@ class CompareSampleLogs(PythonAlgorithm):
             # check for nan
             idx_nan = np.where(np.isnan(properties))[0]
             if len(idx_nan) > 0:
-                message = "Sample log " + pname + " contains nan values. \n" +\
-                          "Workspaces: " + ", ".join(self.wslist) + "\n Values: " + str(properties)
+                message = (
+                    "Sample log "
+                    + pname
+                    + " contains nan values. \n"
+                    + "Workspaces: "
+                    + ", ".join(self.wslist)
+                    + "\n Values: "
+                    + str(properties)
+                )
                 self.log().information(message)
                 return False
 
@@ -114,8 +130,15 @@ class CompareSampleLogs(PythonAlgorithm):
             if properties.count(pvalue) != nprop:
                 match = False
         if not match:
-            message = "Sample log " + pname + " is not identical in the given list of workspaces. \n" +\
-                      "Workspaces: " + ", ".join(self.wslist) + "\n Values: " + str(properties)
+            message = (
+                "Sample log "
+                + pname
+                + " is not identical in the given list of workspaces. \n"
+                + "Workspaces: "
+                + ", ".join(self.wslist)
+                + "\n Values: "
+                + str(properties)
+            )
             self.log().information(message)
         return match
 
@@ -144,12 +167,18 @@ class CompareSampleLogs(PythonAlgorithm):
                     self.log().warning(message)
                 else:
                     curprop = run.getProperty(prop)
-                    if curprop.type == 'string' or curprop.type == 'number':
+                    if curprop.type == "string" or curprop.type == "number":
                         properties.append(curprop.value)
 
                     else:
-                        message = "Comparison of " + str(curprop.type) + " properties is not yet supported. Property " +\
-                            prop + " in the workspace " + wsname
+                        message = (
+                            "Comparison of "
+                            + str(curprop.type)
+                            + " properties is not yet supported. Property "
+                            + prop
+                            + " in the workspace "
+                            + wsname
+                        )
                         self.log().warning(message)
 
             # sometimes numbers are presented as strings
@@ -178,7 +207,7 @@ class CompareSampleLogs(PythonAlgorithm):
 
         lognames = self.getProperty("SampleLogs").value
         self.tolerance = self.getProperty("Tolerance").value
-        result = ''
+        result = ""
         do_not_match = self.compare_properties(lognames)
 
         # return list of not matching properties

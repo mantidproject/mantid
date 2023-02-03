@@ -43,8 +43,9 @@ class SansRunTabAsync(IQtAsync):
         self.notify_error(str(result))
 
     @qt_async_task
-    def process_states_on_thread(self, row_index_pairs, get_states_func, use_optimizations,
-                                 output_mode, plot_results, output_graph, save_can=False):
+    def process_states_on_thread(
+        self, row_index_pairs, get_states_func, use_optimizations, output_mode, plot_results, output_graph, save_can=False
+    ):
         for row, index in row_index_pairs:
             try:
                 states, errors = get_states_func(row_entries=[row])
@@ -61,9 +62,9 @@ class SansRunTabAsync(IQtAsync):
             state = list(states.values())[0]
 
             try:
-                out_scale_factors, out_shift_factors = \
-                    self.batch_processor([state.all_states], use_optimizations,
-                                         output_mode, plot_results, output_graph, save_can)
+                out_scale_factors, out_shift_factors = self.batch_processor(
+                    [state.all_states], use_optimizations, output_mode, plot_results, output_graph, save_can
+                )
             except Exception as e:
                 self._mark_row_error(row, e)
                 continue

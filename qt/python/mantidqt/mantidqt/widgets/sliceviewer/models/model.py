@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-from typing import Sequence, Tuple, Optional
+from typing import List, Sequence, Tuple, Optional
 
 from mantid.api import MatrixWorkspace, MultipleExperimentInfos
 from mantid.kernel import SpecialCoordinateSystem
@@ -52,10 +52,10 @@ class SliceViewerModel(SliceViewerBaseModel):
             raise ValueError("only works for MatrixWorkspace and MDWorkspace")
 
         wsname = self.get_ws_name()
-        self._rebinned_name = wsname + '_svrebinned'
-        self._xcut_name, self._ycut_name = wsname + '_cut_x', wsname + '_cut_y'
-        self._roi_name = wsname + '_roi'
-        self._1Dcut_name = wsname + '_1Dcut'
+        self._rebinned_name = wsname + "_svrebinned"
+        self._xcut_name, self._ycut_name = wsname + "_cut_x", wsname + "_cut_y"
+        self._roi_name = wsname + "_roi"
+        self._1Dcut_name = wsname + "_1Dcut"
 
         ws_type = WorkspaceInfo.get_ws_type(self._get_ws())
         if ws_type == WS_TYPE.MDE:
@@ -153,13 +153,15 @@ class SliceViewerModel(SliceViewerBaseModel):
         """
         if not ws_name:
             ws_name = self.get_ws_name()
-        return f'Sliceviewer - {ws_name}'
+        return f"Sliceviewer - {ws_name}"
 
-    def get_ws_MDE(self,
-                   slicepoint: Sequence[Optional[float]],
-                   bin_params: Optional[Sequence[float]],
-                   limits: Optional[tuple] = None,
-                   dimension_indices: Optional[tuple] = None):
+    def get_ws_MDE(
+        self,
+        slicepoint: Sequence[Optional[float]],
+        bin_params: Optional[Sequence[float]],
+        limits: Optional[tuple] = None,
+        dimension_indices: Optional[tuple] = None,
+    ):
         """
         :param slicepoint: ND sequence of either None or float. A float defines the point
                         in that dimension for the slice.
@@ -171,7 +173,7 @@ class SliceViewerModel(SliceViewerBaseModel):
         workspace = self._get_ws()
 
         params, _, __ = _roi_binmd_parameters(workspace, slicepoint, bin_params, limits, dimension_indices)
-        params['EnableLogging'] = LOG_GET_WS_MDE_ALGORITHM_CALLS
+        params["EnableLogging"] = LOG_GET_WS_MDE_ALGORITHM_CALLS
         binned = BinMD(InputWorkspace=workspace, OutputWorkspace=self._rebinned_name, **params)
         return binned
 
@@ -193,11 +195,9 @@ class SliceViewerModel(SliceViewerBaseModel):
         :param transpose: If true then transpose the data before returning
         """
         if transpose:
-            return np.ma.masked_invalid(
-                self.get_ws_MDE(slicepoint, bin_params, limits, dimension_indices).getSignalArray().squeeze()).T
+            return np.ma.masked_invalid(self.get_ws_MDE(slicepoint, bin_params, limits, dimension_indices).getSignalArray().squeeze()).T
         else:
-            return np.ma.masked_invalid(
-                self.get_ws_MDE(slicepoint, bin_params, limits, dimension_indices).getSignalArray().squeeze())
+            return np.ma.masked_invalid(self.get_ws_MDE(slicepoint, bin_params, limits, dimension_indices).getSignalArray().squeeze())
 
     def get_properties(self):
         """
@@ -209,7 +209,7 @@ class SliceViewerModel(SliceViewerBaseModel):
             "supports_normalise": self.can_normalize_workspace(),
             "supports_nonorthogonal_axes": self.can_support_nonorthogonal_axes(),
             "supports_dynamic_rebinning": WorkspaceInfo.can_support_dynamic_rebinning(self._get_ws()),
-            "supports_peaks_overlays": self.can_support_peaks_overlays()
+            "supports_peaks_overlays": self.can_support_peaks_overlays(),
         }
 
     def get_axes_angles(self, force_orthogonal: bool = False) -> Optional[np.ndarray]:
@@ -222,9 +222,14 @@ class SliceViewerModel(SliceViewerBaseModel):
         else:
             return self._axes_angles
 
-    def export_roi_to_workspace_mdevent(self, slicepoint: Sequence[Optional[float]],
-                                        bin_params: Sequence[float], limits: tuple,
-                                        transpose: bool, dimension_indices: Sequence[int]):
+    def export_roi_to_workspace_mdevent(
+        self,
+        slicepoint: Sequence[Optional[float]],
+        bin_params: Sequence[float],
+        limits: tuple,
+        transpose: bool,
+        dimension_indices: Sequence[int],
+    ):
         """
         Export 2D roi to a separate workspace.
         :param slicepoint: ND sequence of either None or float. A float defines the point
@@ -238,17 +243,23 @@ class SliceViewerModel(SliceViewerBaseModel):
         """
         workspace = self._get_ws()
         params, xindex, yindex = _roi_binmd_parameters(workspace, slicepoint, bin_params, limits, dimension_indices)
-        params['OutputWorkspace'] = self._roi_name
+        params["OutputWorkspace"] = self._roi_name
         roi_ws = BinMD(InputWorkspace=self._get_ws(), **params)
         roi_ws.clearOriginalWorkspaces()
         if transpose:
             _inplace_transposemd(self._roi_name, axes=[yindex, xindex])
 
-        return f'ROI created: {self._roi_name}'
+        return f"ROI created: {self._roi_name}"
 
-    def export_cuts_to_workspace_mdevent(self, slicepoint: Sequence[Optional[float]],
-                                         bin_params: Sequence[float], limits: tuple,
-                                         transpose: bool, dimension_indices: Sequence[int], cut: str):
+    def export_cuts_to_workspace_mdevent(
+        self,
+        slicepoint: Sequence[Optional[float]],
+        bin_params: Sequence[float],
+        limits: tuple,
+        transpose: bool,
+        dimension_indices: Sequence[int],
+        cut: str,
+    ):
         """
         Export 1D cuts in the X/Y direction for the extent.
         :param slicepoint: ND sequence of either None or float. A float defines the point
@@ -262,24 +273,24 @@ class SliceViewerModel(SliceViewerBaseModel):
         workspace = self._get_ws()
         xcut_name, ycut_name, help_msg = self._cut_names(cut)
         params, xindex, yindex = _roi_binmd_parameters(workspace, slicepoint, bin_params, limits, dimension_indices)
-        output_bins = params['OutputBins']
+        output_bins = params["OutputBins"]
         xbins, ybins = output_bins[xindex], output_bins[yindex]
         if transpose:
             xindex, yindex = yindex, xindex
             xbins, ybins = ybins, xbins
 
         if xcut_name:
-            params['OutputWorkspace'] = xcut_name
+            params["OutputWorkspace"] = xcut_name
             output_bins[xindex] = xbins
             output_bins[yindex] = 1
-            params['OutputBins'] = output_bins
+            params["OutputBins"] = output_bins
             BinMD(InputWorkspace=self._get_ws(), **params)
             _keep_dimensions(xcut_name, xindex)
         if ycut_name:
-            params['OutputWorkspace'] = ycut_name
+            params["OutputWorkspace"] = ycut_name
             output_bins[xindex] = 1
             output_bins[yindex] = ybins
-            params['OutputBins'] = output_bins
+            params["OutputBins"] = output_bins
             BinMD(InputWorkspace=self._get_ws(), **params)
             _keep_dimensions(ycut_name, yindex)
 
@@ -288,39 +299,54 @@ class SliceViewerModel(SliceViewerBaseModel):
     def perform_non_axis_aligned_cut_to_workspace(self, vectors, extents, nbins):
         projection_params = {}
         # construct projection string for x-axis label
-        cens = np.mean(extents.reshape(2, len(vectors), order='F'), axis=0)  # in u{1..3} basis
+        cens = np.mean(extents.reshape(2, len(vectors), order="F"), axis=0)  # in u{1..3} basis
         ix = np.where(nbins > 1)[0][0]  # index of x-axis
         ivecs = list(range(len(vectors)))
         ivecs.pop(ix)
-        cen_vec = np.zeros(vectors[0].shape) # position at x = 0
+        cen_vec = np.zeros(vectors[0].shape)  # position at x = 0
         for ivec in ivecs:
-            cen_vec = cen_vec + cens[ivec]*vectors[ivec]
-        proj_str = '(' + ' '.join([f'{np.round(c,2)}+{np.round(x,2)}x' if abs(x) > 0 else f'{np.round(c,2)}'
-                                        for c, x in zip(cen_vec, vectors[ix])]) + ')'
-        proj_str = proj_str.replace('+-', '-')
+            cen_vec = cen_vec + cens[ivec] * vectors[ivec]
+        proj_str = (
+            "("
+            + " ".join([f"{np.round(c,2)}+{np.round(x,2)}x" if abs(x) > 0 else f"{np.round(c,2)}" for c, x in zip(cen_vec, vectors[ix])])
+            + ")"
+        )
+        proj_str = proj_str.replace("+-", "-")
         for ivec, vec in enumerate(vectors):
             # calc length
             length = None
             if self.get_frame() == SpecialCoordinateSystem.HKL:
                 try:
                     lattice = self._get_ws().getExperimentInfo(0).sample().getOrientedLattice()
-                    length = 2*np.pi/lattice.d(*vec)
+                    length = 2 * np.pi / lattice.d(*vec)
                 except:
                     pass
             else:
                 length = np.sqrt(np.sum(vec**2))
-            unit_str = f'in {np.round(length,2)} Ang^-1' if length is not None else 'r.l.u.'
-            xlab = proj_str if ivec == ix else f'u{ivec+1}'
-            vec_str = ','.join(str(v) for v in vec)
-            projection_params[f'BasisVector{ivec}'] = ', '.join([xlab, unit_str, vec_str])
+            unit_str = f"in {np.round(length,2)} Ang^-1" if length is not None else "r.l.u."
+            xlab = proj_str if ivec == ix else f"u{ivec+1}"
+            vec_str = ",".join(str(v) for v in vec)
+            projection_params[f"BasisVector{ivec}"] = ", ".join([xlab, unit_str, vec_str])
 
-        BinMD(InputWorkspace=self._get_ws(), AxisAligned=False, OutputExtents=extents,
-              OutputBins=nbins, NormalizeBasisVectors=False, OutputWorkspace=self._1Dcut_name, **projection_params)
+        BinMD(
+            InputWorkspace=self._get_ws(),
+            AxisAligned=False,
+            OutputExtents=extents,
+            OutputBins=nbins,
+            NormalizeBasisVectors=False,
+            OutputWorkspace=self._1Dcut_name,
+            **projection_params,
+        )
         return self._1Dcut_name
 
-    def export_roi_to_workspace_mdhisto(self, slicepoint: Sequence[Optional[float]],
-                                        bin_params: Sequence[float], limits: tuple,
-                                        transpose: bool, dimension_indices: Sequence[int]):
+    def export_roi_to_workspace_mdhisto(
+        self,
+        slicepoint: Sequence[Optional[float]],
+        bin_params: Sequence[float],
+        limits: tuple,
+        transpose: bool,
+        dimension_indices: Sequence[int],
+    ):
         """
         Export 2D ROI to a workspace.
         :param slicepoint: ND sequence of either None or float. A float defines the point
@@ -333,23 +359,29 @@ class SliceViewerModel(SliceViewerBaseModel):
         workspace = self._get_ws()
         dim_limits = _dimension_limits(workspace, slicepoint, bin_params, dimension_indices, limits)
         # Construct parameters to integrate everything first and override per cut
-        params = {f'P{n + 1}Bin': [*dim_limits[n]] for n in range(workspace.getNumDims())}
+        params = {f"P{n + 1}Bin": [*dim_limits[n]] for n in range(workspace.getNumDims())}
 
         xindex, yindex = WorkspaceInfo.display_indices(slicepoint)
         xdim_min, xdim_max = dim_limits[xindex]
         ydim_min, ydim_max = dim_limits[yindex]
-        params['OutputWorkspace'] = self._roi_name
-        params[f'P{xindex + 1}Bin'] = [xdim_min, 0, xdim_max]
-        params[f'P{yindex + 1}Bin'] = [ydim_min, 0, ydim_max]
+        params["OutputWorkspace"] = self._roi_name
+        params[f"P{xindex + 1}Bin"] = [xdim_min, 0, xdim_max]
+        params[f"P{yindex + 1}Bin"] = [ydim_min, 0, ydim_max]
         IntegrateMDHistoWorkspace(InputWorkspace=workspace, **params)
         if transpose:
             _inplace_transposemd(self._roi_name, axes=[yindex, xindex])
 
-        return f'ROI created: {self._roi_name}'
+        return f"ROI created: {self._roi_name}"
 
-    def export_cuts_to_workspace_mdhisto(self, slicepoint: Sequence[Optional[float]],
-                                         bin_params: Sequence[float], limits: tuple,
-                                         transpose: bool,  dimension_indices: Sequence[int], cut: str):
+    def export_cuts_to_workspace_mdhisto(
+        self,
+        slicepoint: Sequence[Optional[float]],
+        bin_params: Sequence[float],
+        limits: tuple,
+        transpose: bool,
+        dimension_indices: Sequence[int],
+        cut: str,
+    ):
         """
         Export 1D cuts in the X/Y direction for the extent.
         :param slicepoint: ND sequence of either None or float. A float defines the point
@@ -364,28 +396,29 @@ class SliceViewerModel(SliceViewerBaseModel):
         dim_limits = _dimension_limits(workspace, slicepoint, bin_params, dimension_indices, limits)
 
         # Construct paramters to integrate everything first and overrid per cut
-        params = {f'P{n + 1}Bin': [*dim_limits[n]] for n in range(workspace.getNumDims())}
+        params = {f"P{n + 1}Bin": [*dim_limits[n]] for n in range(workspace.getNumDims())}
         xindex, yindex = WorkspaceInfo.display_indices(slicepoint, transpose)
 
         xcut_name, ycut_name, help_msg = self._cut_names(cut)
         xdim_min, xdim_max = dim_limits[xindex]
         ydim_min, ydim_max = dim_limits[yindex]
         if xcut_name:
-            params['OutputWorkspace'] = xcut_name
-            params[f'P{xindex + 1}Bin'] = [xdim_min, 0, xdim_max]
+            params["OutputWorkspace"] = xcut_name
+            params[f"P{xindex + 1}Bin"] = [xdim_min, 0, xdim_max]
             IntegrateMDHistoWorkspace(InputWorkspace=workspace, **params)
             _keep_dimensions(xcut_name, xindex)
         if ycut_name:
-            params['OutputWorkspace'] = ycut_name
-            params[f'P{xindex + 1}Bin'] = [xdim_min, xdim_max]
-            params[f'P{yindex + 1}Bin'] = [ydim_min, 0, ydim_max]
+            params["OutputWorkspace"] = ycut_name
+            params[f"P{xindex + 1}Bin"] = [xdim_min, xdim_max]
+            params[f"P{yindex + 1}Bin"] = [ydim_min, 0, ydim_max]
             IntegrateMDHistoWorkspace(InputWorkspace=workspace, **params)
             _keep_dimensions(ycut_name, yindex)
 
         return help_msg
 
-    def export_cuts_to_workspace_matrix(self, slicepoint, bin_params, limits: tuple,
-                                        transpose: bool,  dimension_indices: Sequence[int], cut: str):
+    def export_cuts_to_workspace_matrix(
+        self, slicepoint, bin_params, limits: tuple, transpose: bool, dimension_indices: Sequence[int], cut: str
+    ):
         """
         Export 1D cuts in the X/Y direction for the extent. Signature matches other export functions.
         slicepoint, bin_params are unused
@@ -407,12 +440,11 @@ class SliceViewerModel(SliceViewerBaseModel):
         if yaxis.isSpectra() or yaxis.isNumeric():
             extract_cuts_matrix(workspace, xmin, xmax, ymin, ymax, xcut_name, ycut_name)
         else:
-            help_msg = 'Unknown Y axis type. Unable to perform cuts'
+            help_msg = "Unknown Y axis type. Unable to perform cuts"
 
         return help_msg
 
-    def export_roi_to_workspace_matrix(self, slicepoint, bin_params, limits: tuple,
-                                       transpose: bool,  dimension_indices: Sequence[int]):
+    def export_roi_to_workspace_matrix(self, slicepoint, bin_params, limits: tuple, transpose: bool, dimension_indices: Sequence[int]):
         """
         Export 2D region as a workspace. Signature matches other export functions
         slicepoint, bin_params are unused
@@ -424,10 +456,9 @@ class SliceViewerModel(SliceViewerBaseModel):
             # swap back to model order
             limits = limits[1], limits[0]
         extract_roi_matrix(self._get_ws(), *limits[0], *limits[1], transpose, self._roi_name)
-        return f'ROI created: {self._roi_name}'
+        return f"ROI created: {self._roi_name}"
 
-    def export_pixel_cut_to_workspace_md(self, slicepoint, bin_params, pos: tuple, transpose: bool,
-                                         axis: str):
+    def export_pixel_cut_to_workspace_md(self, slicepoint, bin_params, pos: tuple, transpose: bool, axis: str):
         """
         Export a single row/column as a workspace. Signature matches other export functions
         slicepoint, bin_params are unused
@@ -438,16 +469,12 @@ class SliceViewerModel(SliceViewerBaseModel):
         # Form single pixel limits for a cut
         xindex, yindex = WorkspaceInfo.display_indices(slicepoint, transpose)
         workspace = self._get_ws()
-        deltax, deltay = workspace.getDimension(xindex).getBinWidth(), \
-            workspace.getDimension(yindex).getBinWidth()
+        deltax, deltay = workspace.getDimension(xindex).getBinWidth(), workspace.getDimension(yindex).getBinWidth()
         xpos, ypos = pos
-        limits = (xpos - 0.5 * deltax, xpos + 0.5 * deltax), (ypos - 0.5 * deltay,
-                                                              ypos + 0.5 * deltay)
-        return self.export_cuts_to_workspace_mdevent(slicepoint, bin_params, limits, transpose,
-                                                     axis)
+        limits = (xpos - 0.5 * deltax, xpos + 0.5 * deltax), (ypos - 0.5 * deltay, ypos + 0.5 * deltay)
+        return self.export_cuts_to_workspace_mdevent(slicepoint, bin_params, limits, transpose, axis)
 
-    def export_pixel_cut_to_workspace_matrix(self, slicepoint, bin_params, pos: tuple,
-                                             transpose: bool, axis: str):
+    def export_pixel_cut_to_workspace_matrix(self, slicepoint, bin_params, pos: tuple, transpose: bool, axis: str):
         """
         Export a single row/column as a workspace. Signature matches other export functions
         slicepoint, bin_params are unused
@@ -477,7 +504,7 @@ class SliceViewerModel(SliceViewerBaseModel):
     def get_proj_matrix(self):
         ws = self._get_ws()
         ws_type = WorkspaceInfo.get_ws_type(ws)
-        if not ws_type == WS_TYPE.MATRIX:
+        if ws_type != WS_TYPE.MATRIX:
             proj_matrix = np.eye(3)  # needs to be 3x3 even if 2D ws as columns passed to recAngle when calc axes angles
             if ws_type == WS_TYPE.MDH:
                 ndims = ws.getNumDims()
@@ -487,7 +514,7 @@ class SliceViewerModel(SliceViewerBaseModel):
                     # copy first irow_end components of basis vec are always Q
                     proj_matrix[0:irow_end, icol] = list(ws.getBasisVector(idim))[0:irow_end]
                 # if determinant is zero, try to get the info from log or revert back to identity matrix
-                if np.isclose(np.linalg.det(proj_matrix),0):
+                if np.isclose(np.linalg.det(proj_matrix), 0):
                     # for histo try to find axes from log
                     try:
                         expt_info = ws.getExperimentInfo(0)
@@ -536,34 +563,35 @@ class SliceViewerModel(SliceViewerBaseModel):
         :raises RuntimeError: if an unkown cut type is requested
         """
         xcut_name, ycut_name = self._xcut_name, self._ycut_name
-        if cut == 'x':
-            ycut_name = ''
-            help_msg = f'Cut along X created: {xcut_name}'
-        elif cut == 'y':
-            xcut_name = ''
-            help_msg = f'Cut along Y created: {ycut_name}'
-        elif cut == 'c':
-            help_msg = f'Cuts along X/Y created: {xcut_name} & {ycut_name}'
+        if cut == "x":
+            ycut_name = ""
+            help_msg = f"Cut along X created: {xcut_name}"
+        elif cut == "y":
+            xcut_name = ""
+            help_msg = f"Cut along Y created: {ycut_name}"
+        elif cut == "c":
+            help_msg = f"Cuts along X/Y created: {xcut_name} & {ycut_name}"
         else:
-            raise RuntimeError(f'Unknown cut requested {cut}')
+            raise RuntimeError(f"Unknown cut requested {cut}")
 
         return xcut_name, ycut_name, help_msg
 
-    def get_hkl_from_xyz(self, xdim, ydim, zdim, xdata, ydata, zdata):
+    def get_hkl_from_full_point(self, full_point: List[float], qdims_i: List[int]):
+        """Gets the values of h, k and l from a full point which can include 3 or more dimensions."""
         basis_transform = self.get_proj_matrix()
-        if basis_transform is not None:
-            hkl = basis_transform[:, xdim] * xdata + basis_transform[:, ydim] * ydata \
-                  + basis_transform[:, zdim] * zdata
-        else:
-            hkl = {0., 0., 0.}
-        return hkl
+        if basis_transform is None:
+            return 0.0, 0.0, 0.0
+
+        # Get the x, y, z values for the q dimensions
+        q_xyz = tuple(full_point[q_i] for q_i in qdims_i)
+
+        return np.matmul(basis_transform, q_xyz)
 
 
 # private functions
-def _roi_binmd_parameters(workspace, slicepoint: Sequence[Optional[float]],
-                          bin_params: Optional[Sequence[float]],
-                          limits: tuple,
-                          dimension_indices: tuple) -> Tuple[dict, int, int]:
+def _roi_binmd_parameters(
+    workspace, slicepoint: Sequence[Optional[float]], bin_params: Optional[Sequence[float]], limits: tuple, dimension_indices: tuple
+) -> Tuple[dict, int, int]:
     """
     Return a sequence of 2-tuples defining the limits for MDEventWorkspace binning
     :param workspace: MDEventWorkspace that is to be binned
@@ -579,9 +607,9 @@ def _roi_binmd_parameters(workspace, slicepoint: Sequence[Optional[float]],
     ndims = workspace.getNumDims()
     ws_basis = np.eye(ndims)
     output_extents, output_bins = [], []
-    params = {'AxisAligned': False}
+    params = {"AxisAligned": False}
     if workspace.getSpecialCoordinateSystem() == SpecialCoordinateSystem.HKL:
-        params['NormalizeBasisVectors'] = False  # Default is True
+        params["NormalizeBasisVectors"] = False  # Default is True
     for n in range(ndims):
         dimension = workspace.getDimension(n)
         basis_vec_n = _to_str(ws_basis[:, n])
@@ -590,21 +618,23 @@ def _roi_binmd_parameters(workspace, slicepoint: Sequence[Optional[float]],
         slice_pt = slicepoint[n]
         if slice_pt is not None:
             nbins = 1
-        params[f'BasisVector{n}'] = f'{dimension.name},{dimension.getUnits()},{basis_vec_n}'
+        params[f"BasisVector{n}"] = f"{dimension.name},{dimension.getUnits()},{basis_vec_n}"
         output_extents.append(dim_min)
         output_extents.append(dim_max)
         output_bins.append(nbins)
-    params['OutputExtents'] = output_extents
-    params['OutputBins'] = output_bins
+    params["OutputExtents"] = output_extents
+    params["OutputBins"] = output_bins
 
     return params, xindex, yindex
 
 
-def _dimension_limits(workspace,
-                      slicepoint: Sequence[Optional[float]],
-                      bin_params: Optional[Sequence[float]],
-                      dimension_indices: Optional[tuple],
-                      limits: Optional[Sequence[tuple]] = None) -> Sequence[tuple]:
+def _dimension_limits(
+    workspace,
+    slicepoint: Sequence[Optional[float]],
+    bin_params: Optional[Sequence[float]],
+    dimension_indices: Optional[tuple],
+    limits: Optional[Sequence[tuple]] = None,
+) -> Sequence[tuple]:
     """
     Return a sequence of 2-tuples defining the limits for MDEventWorkspace binning
     :param workspace: MDEvent of MDHisto workspace that is to be binned
@@ -615,13 +645,12 @@ def _dimension_limits(workspace,
     :param limits: An optional Sequence of length 2 containing limits for plotting dimensions. If
                     not provided the full extent of each dimension is used.
     """
-    dim_limits = [(dim.getMinimum(), dim.getMaximum())
-                  for dim in [workspace.getDimension(i) for i in range(workspace.getNumDims())]]
+    dim_limits = [(dim.getMinimum(), dim.getMaximum()) for dim in [workspace.getDimension(i) for i in range(workspace.getNumDims())]]
     for idim, (dim_min, dim_max) in enumerate(dim_limits):
         slice_pt = slicepoint[idim]
         if slice_pt is not None:
             # replace extents with integration limits (calc from bin width in bin_params)
-            half_bin_width = bin_params[idim]/2
+            half_bin_width = bin_params[idim] / 2
             dim_min, dim_max = (slice_pt - half_bin_width, slice_pt + half_bin_width)
         elif limits is not None and dimension_indices[idim] is not None:
             # replace min/max of non-integrated dims with limits from ROI if specified
@@ -663,6 +692,5 @@ def _inplace_transposemd(workspace, axes):
 
 
 def _to_str(seq: Sequence):
-    """Given a sequence turn it into a comma-separate string of each element
-    """
-    return ','.join(map(str, seq))
+    """Given a sequence turn it into a comma-separate string of each element"""
+    return ",".join(map(str, seq))

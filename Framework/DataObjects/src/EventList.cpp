@@ -3658,17 +3658,8 @@ void EventList::divide(const double value, const double error) {
 template <class T>
 void EventList::filterByPulseTimeHelper(std::vector<T> &events, DateAndTime start, DateAndTime stop,
                                         std::vector<T> &output) {
-  auto itev = events.begin();
-  auto itev_end = events.end();
-  // Find the first event with m_pulsetime >= start
-  while ((itev != itev_end) && (itev->m_pulsetime < start))
-    itev++;
-
-  while ((itev != itev_end) && (itev->m_pulsetime < stop)) {
-    // Add the copy to the output
-    output.emplace_back(*itev);
-    ++itev;
-  }
+  std::copy_if(events.begin(), events.end(), std::back_inserter(output),
+               [start, stop](const T &t) { return (t.m_pulsetime >= start) && (t.m_pulsetime < stop); });
 }
 
 /** Filter a vector of events into another based on time at sample.
@@ -3683,17 +3674,11 @@ void EventList::filterByPulseTimeHelper(std::vector<T> &events, DateAndTime star
 template <class T>
 void EventList::filterByTimeAtSampleHelper(std::vector<T> &events, DateAndTime start, DateAndTime stop,
                                            double tofFactor, double tofOffset, std::vector<T> &output) {
-  auto itev = events.begin();
-  auto itev_end = events.end();
-  // Find the first event with m_pulsetime >= start
-  while ((itev != itev_end) && (calculateCorrectedFullTime(*itev, tofFactor, tofOffset) < start.totalNanoseconds()))
-    itev++;
-
-  while ((itev != itev_end) && (calculateCorrectedFullTime(*itev, tofFactor, tofOffset) < stop.totalNanoseconds())) {
-    // Add the copy to the output
-    output.emplace_back(*itev);
-    ++itev;
-  }
+  std::copy_if(events.begin(), events.end(), std::back_inserter(output),
+               [start, stop, tofFactor, tofOffset](const T &t) {
+                 return (calculateCorrectedFullTime(t, tofFactor, tofOffset) >= start.totalNanoseconds()) &&
+                        (calculateCorrectedFullTime(t, tofFactor, tofOffset) < stop.totalNanoseconds());
+               });
 }
 
 //------------------------------------------------------------------------------------------------
@@ -3769,16 +3754,38 @@ void EventList::filterByTimeAtSample(Types::Core::DateAndTime start, Types::Core
 }
 
 //------------------------------------------------------------------------------------------------
-/** Perform an in-place filtering on a vector of either TofEvent's or
- *WeightedEvent's
+/** @brief Perform an in-place filtering on a vector of either TofEvent's or
+ *WeightedEvent's.
  *
- * @param splitter :: a TimeSplitterType where all the entries (start/end time)
+ * @param splitter :: a SplittingIntervalVec where all the entries (start/end time)
  *indicate events
  *     that will be kept. Any other events will be deleted.
  * @param events :: either this->events or this->weightedEvents.
+ *
+ * This helper function uses a two pointer technique where
+ *  - itOut: the storage pointer
+ *  - itev: the scan pointer
+ *  When itev is traversing through the list of events, it will check against the
+ *  current splitter interval identified by itspl.
+ *
+ *  If itev->m_pulsetime is within the interval, the event, *itev, will be copied
+ *  to the location pointed by itOut, and itOut will be incremented.
+ *  When either splitter intervals or events are exhausted, truncate the events
+ *  list to the current location of itOut.
+ *
+ *  This linear scanning ensures that
+ *  - it will only traverse the events once in the worst case.
+ *  - overlapping splitter intervals will be handled correctly.
+ *  - the memory usage is capped at the size of the events list.
+ *
+ *  The splitter intervals must be sorted by start time, which is not enforced
+ *  in this helper function and is expected to be implicitly followed by the
+ *  caller.
+ *
+ *  Also, a future version using TimeROI will automatically sort the intervals.
  */
 template <class T>
-void EventList::filterInPlaceHelper(Kernel::TimeSplitterType &splitter, typename std::vector<T> &events) {
+void EventList::filterInPlaceHelper(Kernel::SplittingIntervalVec &splitter, typename std::vector<T> &events) {
   // Iterate through the splitter at the same time
   auto itspl = splitter.begin();
   auto itspl_end = splitter.end();
@@ -3843,13 +3850,13 @@ void EventList::filterInPlaceHelper(Kernel::TimeSplitterType &splitter, typename
 }
 
 //------------------------------------------------------------------------------------------------
-/** Use a TimeSplitterType to filter the event list in place.
+/** Use a SplittingIntervalVec to filter the event list in place.
  *
- * @param splitter :: a TimeSplitterType where all the entries (start/end time)
+ * @param splitter :: a SplittingIntervalVec where all the entries (start/end time)
  *indicate events
  *     that will be kept. Any other events will be deleted.
  */
-void EventList::filterInPlace(Kernel::TimeSplitterType &splitter) {
+void EventList::filterInPlace(Kernel::SplittingIntervalVec &splitter) {
   // Start by sorting the event list by pulse time.
   this->sortPulseTime();
 
@@ -3874,14 +3881,14 @@ void EventList::filterInPlace(Kernel::TimeSplitterType &splitter) {
  *  Only event's pulse time is used to compare with splitters.
  *  It is a faster and simple version of splitByFullTimeHelper
  *
- * @param splitter :: a TimeSplitterType giving where to split
+ * @param splitter :: a SplittingIntervalVec giving where to split
  * @param outputs :: a vector of where the split events will end up. The # of
  *entries in there should
  *        be big enough to accommodate the indices.
  * @param events :: either this->events or this->weightedEvents.
  */
 template <class T>
-void EventList::splitByTimeHelper(Kernel::TimeSplitterType &splitter, std::vector<EventList *> outputs,
+void EventList::splitByTimeHelper(Kernel::SplittingIntervalVec &splitter, std::vector<EventList *> outputs,
                                   typename std::vector<T> &events) const {
   size_t numOutputs = outputs.size();
 
@@ -3933,12 +3940,12 @@ void EventList::splitByTimeHelper(Kernel::TimeSplitterType &splitter, std::vecto
 //------------------------------------------------------------------------------------------------
 /** Split the event list into n outputs
  *
- * @param splitter :: a TimeSplitterType giving where to split
+ * @param splitter :: a SplittingIntervalVec giving where to split
  * @param outputs :: a vector of where the split events will end up. The # of
  *entries in there should
  *        be big enough to accommodate the indices.
  */
-void EventList::splitByTime(Kernel::TimeSplitterType &splitter, std::vector<EventList *> outputs) const {
+void EventList::splitByTime(Kernel::SplittingIntervalVec &splitter, std::vector<EventList *> outputs) const {
   if (eventType == WEIGHTED_NOTIME)
     throw std::runtime_error("EventList::splitByTime() called on an EventList "
                              "that no longer has time information.");
@@ -3978,7 +3985,7 @@ void EventList::splitByTime(Kernel::TimeSplitterType &splitter, std::vector<Even
  *  The comparison between neutron event and splitter is based on neutron
  *event's pulse time plus
  *
- * @param splitter :: a TimeSplitterType giving where to split
+ * @param splitter :: a SplittingIntervalVec giving where to split
  * @param outputs :: a vector of where the split events will end up. The # of
  *entries in there should
  *        be big enough to accommodate the indices.
@@ -3989,7 +3996,7 @@ void EventList::splitByTime(Kernel::TimeSplitterType &splitter, std::vector<Even
  *toffactor*tof+tofshift
  */
 template <class T>
-void EventList::splitByFullTimeHelper(Kernel::TimeSplitterType &splitter, std::map<int, EventList *> outputs,
+void EventList::splitByFullTimeHelper(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs,
                                       typename std::vector<T> &events, bool docorrection, double toffactor,
                                       double tofshift) const {
   // 1. Prepare to Iterate through the splitter at the same time
@@ -4058,7 +4065,7 @@ void EventList::splitByFullTimeHelper(Kernel::TimeSplitterType &splitter, std::m
 //------------------------------------------------------------------------------------------------
 /** Split the event list into n outputs by event's full time (tof + pulse time)
  *
- * @param splitter :: a TimeSplitterType giving where to split
+ * @param splitter :: a SplittingIntervalVec giving where to split
  * @param outputs :: a map of where the split events will end up. The # of
  *entries in there should
  *        be big enough to accommodate the indices.
@@ -4067,7 +4074,7 @@ void EventList::splitByFullTimeHelper(Kernel::TimeSplitterType &splitter, std::m
  * @param toffactor:  a correction factor for each TOF to multiply with
  * @param tofshift:  a correction shift for each TOF to add with
  */
-void EventList::splitByFullTime(Kernel::TimeSplitterType &splitter, std::map<int, EventList *> outputs,
+void EventList::splitByFullTime(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs,
                                 bool docorrection, double toffactor, double tofshift) const {
   if (eventType == WEIGHTED_NOTIME)
     throw std::runtime_error("EventList::splitByTime() called on an EventList "
@@ -4357,7 +4364,7 @@ std::string EventList::splitByFullTimeMatrixSplitter(const std::vector<int64_t> 
 /** Split the event list into n outputs by each event's pulse time only
  */
 template <class T>
-void EventList::splitByPulseTimeHelper(Kernel::TimeSplitterType &splitter, std::map<int, EventList *> outputs,
+void EventList::splitByPulseTimeHelper(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs,
                                        typename std::vector<T> &events) const {
   // Prepare to TimeSplitter Iterate through the splitter at the same time
   auto itspl = splitter.begin();
@@ -4417,7 +4424,7 @@ void EventList::splitByPulseTimeHelper(Kernel::TimeSplitterType &splitter, std::
 //----------------------------------------------------------------------------------------------
 /** Split the event list by pulse time
  */
-void EventList::splitByPulseTime(Kernel::TimeSplitterType &splitter, std::map<int, EventList *> outputs) const {
+void EventList::splitByPulseTime(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs) const {
   // Check for supported event type
   if (eventType == WEIGHTED_NOTIME)
     throw std::runtime_error("EventList::splitByTime() called on an EventList "

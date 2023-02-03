@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
-#include "MantidDataHandling/LoadHelper.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
 
@@ -75,7 +75,6 @@ private:
   void moveDetectorDistance(double distance, const std::string &componentName);
   void moveDetectorHorizontal(double, const std::string &);
   void moveDetectorVertical(double, const std::string &);
-  Kernel::V3D getComponentPosition(const std::string &componentName);
   void loadMetaData(const NeXus::NXEntry &, const std::string &);
   std::string getInstrumentFilePath(const std::string &) const;
   void rotateInstrument(double, const std::string &);
@@ -83,7 +82,6 @@ private:
   void adjustTOF();
   void moveSource();
 
-  LoadHelper m_loadHelper;                         ///< Load helper for metadata
   std::string m_instrumentName;                    ///< Name of the instrument
   std::vector<std::string> m_supportedInstruments; ///< List of supported instruments
   API::MatrixWorkspace_sptr m_localWorkspace;      ///< to-be output workspace

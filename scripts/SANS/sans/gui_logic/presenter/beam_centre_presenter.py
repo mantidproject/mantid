@@ -85,8 +85,10 @@ class BeamCentrePresenter(object):
         state = self._parent_presenter.get_state_for_row(0)
 
         if not state:
-            self._logger.information("You can only calculate the beam centre if a user file has been loaded and there"
-                                     "valid sample scatter entry has been provided in the selected row.")
+            self._logger.information(
+                "You can only calculate the beam centre if a user file has been loaded and there"
+                "valid sample scatter entry has been provided in the selected row."
+            )
             return
 
         # Disable the button
@@ -120,23 +122,21 @@ class BeamCentrePresenter(object):
         """
         Copies rear / front positions from an external model
         """
-        rear_pos_1 = getattr(state_model, 'rear_pos_1')
-        rear_pos_2 = getattr(state_model, 'rear_pos_2')
+        rear_pos_1 = getattr(state_model, "rear_pos_1")
+        rear_pos_2 = getattr(state_model, "rear_pos_2")
 
         self._beam_centre_model.rear_pos_1 = rear_pos_1
         self._beam_centre_model.rear_pos_2 = rear_pos_2
 
-        self._beam_centre_model.front_pos_1 = \
-            getattr(state_model, 'front_pos_1') if getattr(state_model, 'front_pos_1') else rear_pos_1
-        self._beam_centre_model.front_pos_2 = \
-            getattr(state_model, 'front_pos_2') if getattr(state_model, 'front_pos_2') else rear_pos_2
+        self._beam_centre_model.front_pos_1 = getattr(state_model, "front_pos_1") if getattr(state_model, "front_pos_1") else rear_pos_1
+        self._beam_centre_model.front_pos_2 = getattr(state_model, "front_pos_2") if getattr(state_model, "front_pos_2") else rear_pos_2
 
     def update_centre_positions(self):
         rear_pos_1 = self._beam_centre_model.rear_pos_1
         rear_pos_2 = self._beam_centre_model.rear_pos_2
 
-        front_pos_1 = self._beam_centre_model.front_pos_1 if self._beam_centre_model.front_pos_1 != '' else rear_pos_1
-        front_pos_2 = self._beam_centre_model.front_pos_2 if self._beam_centre_model.front_pos_2 != '' else rear_pos_2
+        front_pos_1 = self._beam_centre_model.front_pos_1 if self._beam_centre_model.front_pos_1 != "" else rear_pos_1
+        front_pos_2 = self._beam_centre_model.front_pos_2 if self._beam_centre_model.front_pos_2 != "" else rear_pos_2
 
         self._view.rear_pos_1 = self._round(rear_pos_1)
         self._view.rear_pos_2 = self._round(rear_pos_2)
@@ -206,8 +206,7 @@ class BeamCentrePresenter(object):
             if min_value >= max_value:
                 if self._view.run_button.isEnabled():
                     # Only post to logger once per disabling
-                    self._logger.notice("Minimum radius is larger than maximum radius. "
-                                        "Cannot find beam centre with current settings.")
+                    self._logger.notice("Minimum radius is larger than maximum radius. " "Cannot find beam centre with current settings.")
                     self._view.run_button.setEnabled(False)
             else:
                 self._view.run_button.setEnabled(True)

@@ -15,13 +15,11 @@ from mantidqtinterfaces.Muon.GUI.Common.thread_model import ThreadModel
 
 
 class testModelWithoutExecute:
-
     def __init__(self):
         pass
 
 
 class testModelWithoutOutput:
-
     def __init__(self):
         pass
 
@@ -30,7 +28,6 @@ class testModelWithoutOutput:
 
 
 class testModelWithoutLoadData:
-
     def __init__(self):
         pass
 
@@ -39,7 +36,6 @@ class testModelWithoutLoadData:
 
 
 class testModel:
-
     def __init__(self):
         self._data = None
 
@@ -63,7 +59,7 @@ class LoadFileWidgetViewTest(unittest.TestCase):
 
     def setUp(self):
         self._qapp = QApplication.instance()
-        patcher = mock.patch('mantidqtinterfaces.Muon.GUI.Common.thread_model.warning')
+        patcher = mock.patch("mantidqtinterfaces.Muon.GUI.Common.thread_model.warning")
         self.addCleanup(patcher.stop)
         self.warning_box_patcher = patcher.start()
         self.model = testModel()
@@ -160,5 +156,5 @@ class LoadFileWidgetViewTest(unittest.TestCase):
             self.thread.threadWrapperSetUp(1, 2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

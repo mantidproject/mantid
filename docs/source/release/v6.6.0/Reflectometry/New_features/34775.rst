@@ -1,0 +1,1 @@
+- It is now possible to provide a calibration file on the Instrument Settings tab of the ISIS Reflectometry interface. The calibration step will be applied as part of pre-processing when a reduction is run or previewed. See :ref:`ReflectometryISISLoadAndProcess <algm-ReflectometryISISLoadAndProcess>` for more details.

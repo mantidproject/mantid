@@ -49,6 +49,7 @@ set(SRC_FILES
     src/ImageInfoModelMD.cpp
     src/ImageInfoPresenter.cpp
     src/ImageInfoWidget.cpp
+    src/ImageInfoWidgetMini.cpp
     src/InputController.cpp
     src/InstrumentSelector.cpp
     src/InterfaceManager.cpp
@@ -180,8 +181,8 @@ set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/HintingLineEdit.h
     inc/MantidQtWidgets/Common/IFitScriptGeneratorView.h
     inc/MantidQtWidgets/Common/IFunctionView.h
-    inc/MantidQtWidgets/Common/IImageInfoWidget.h
     inc/MantidQtWidgets/Common/ImageInfoWidget.h
+    inc/MantidQtWidgets/Common/ImageInfoWidgetMini.h
     inc/MantidQtWidgets/Common/InputController.h
     inc/MantidQtWidgets/Common/InstrumentSelector.h
     inc/MantidQtWidgets/Common/LineEditWithClear.h
@@ -281,6 +282,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/IFunctionBrowser.h
     inc/MantidQtWidgets/Common/IFunctionView.h
     inc/MantidQtWidgets/Common/ImageInfoModel.h
+    inc/MantidQtWidgets/Common/IImageInfoWidget.h
     inc/MantidQtWidgets/Common/ImageInfoModelMatrixWS.h
     inc/MantidQtWidgets/Common/ImageInfoModelMD.h
     inc/MantidQtWidgets/Common/ImageInfoPresenter.h
@@ -403,7 +405,6 @@ set(MOC_FILES
     inc/MantidQtWidgets/Common/CatalogSearch.h
     inc/MantidQtWidgets/Common/CatalogSelector.h
     inc/MantidQtWidgets/Common/IFitScriptGeneratorView.h
-    inc/MantidQtWidgets/Common/IImageInfoWidget.h
     inc/MantidQtWidgets/Common/ImageInfoWidget.h
     inc/MantidQtWidgets/Common/InstrumentSelector.h
     inc/MantidQtWidgets/Common/InputController.h
@@ -504,7 +505,6 @@ set(INC_FILES
     inc/MantidQtWidgets/Common/QtJSONUtils.h
     inc/MantidQtWidgets/Common/ScriptRepositoryView.h
     inc/MantidQtWidgets/Common/SelectionNotificationService.h
-    inc/MantidQtWidgets/Common/SignalBlocker.h
     inc/MantidQtWidgets/Common/UserSubWindowFactory.h
     inc/MantidQtWidgets/Common/TSVSerialiser.h
     inc/MantidQtWidgets/Common/UserInputValidator.h
@@ -609,16 +609,6 @@ set(UI_FILES
     inc/MantidQtWidgets/Common/pqHelpWindow.ui
 )
 
-# Temporary workaround to remove stale ui_* header files after they were moved to a separate library. They cause build
-# problems if they're not deleted
-set(OLD_UI_HEADERS
-    ${CMAKE_CURRENT_BINARY_DIR}/qt4/ui_ColorBarWidget.h ${CMAKE_CURRENT_BINARY_DIR}/qt4/ui_DisplayCurveFit.h
-    ${CMAKE_CURRENT_BINARY_DIR}/qt4/ui_PreviewPlot.h
-)
-foreach(_header ${OLD_UI_HEADERS})
-  file(REMOVE ${_header})
-endforeach()
-
 set(TARGET_LIBRARIES ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -627,14 +617,14 @@ endif()
 
 # Target Additional components for this module
 find_package(
-  Qt5
+  Qt5 ${QT_MIN_VERSION}
   COMPONENTS Concurrent Help Network PrintSupport
   REQUIRED
 )
 # Prefer WebEngineWidgets over WebkitWidgets
 unset(Qt5_FOUND)
 find_package(
-  Qt5
+  Qt5 ${QT_MIN_VERSION}
   COMPONENTS WebEngineWidgets
   QUIET
 )
@@ -642,7 +632,7 @@ if(Qt5_FOUND)
   set(_webwidgets_tgt Qt5::WebEngineWidgets)
 else()
   find_package(
-    Qt5
+    Qt5 ${QT_MIN_VERSION}
     COMPONENTS WebKitWidgets
     QUIET
   )
@@ -711,7 +701,6 @@ set(TEST_FILES
     test/ProjectSaveModelTest.h
     test/ProjectSavePresenterTest.h
     test/SelectionNotificationServiceTest.h
-    test/SignalBlockerTest.h
     test/TrackedActionTest.h
     test/QtJSONUtilsTest.h
     test/Batch/BuildSubtreeItemsTest.h

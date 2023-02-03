@@ -7,8 +7,8 @@
 import unittest
 
 from unittest import mock
-from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter, masking_information)
-from sans.test_helper.mock_objects import (FakeState, create_mock_masking_table, create_run_tab_presenter_mock)
+from sans.gui_logic.presenter.masking_table_presenter import MaskingTablePresenter, masking_information
+from sans.test_helper.mock_objects import FakeState, create_mock_masking_table, create_run_tab_presenter_mock
 
 
 class MaskingTablePresenterTest(unittest.TestCase):
@@ -32,9 +32,13 @@ class MaskingTablePresenterTest(unittest.TestCase):
 
         self.assertEqual(2, view.set_table.call_count)
         first_call = mock.call([])
-        second_call = mock.call([masking_information(first='Beam stop', second='', third='infinite-cylinder, r = 10.0'),
-                                 masking_information(first='Corners', second='', third='infinite-cylinder, r = 20.0'),
-                                 masking_information(first='Phi', second='', third='L/PHI -90.0 90.0')])  # noqa
+        second_call = mock.call(
+            [
+                masking_information(first="Beam stop", second="", third="infinite-cylinder, r = 10.0"),
+                masking_information(first="Corners", second="", third="infinite-cylinder, r = 20.0"),
+                masking_information(first="Phi", second="", third="L/PHI -90.0 90.0"),
+            ]
+        )  # noqa
         view.set_table.assert_has_calls([first_call, second_call])
 
     def test_that_checks_display_mask_is_reenabled_after_error(self):
@@ -51,10 +55,13 @@ class MaskingTablePresenterTest(unittest.TestCase):
 
         # Confirm that on_processing_error_masking_display was called
         self.assertEqual(
-            presenter.on_processing_error_masking_display.call_count, 1,
+            presenter.on_processing_error_masking_display.call_count,
+            1,
             "Expected on_processing_error_masking_display to have been called. Called {} times.".format(
-                presenter.on_processing_error_masking_display.call_count))
+                presenter.on_processing_error_masking_display.call_count
+            ),
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

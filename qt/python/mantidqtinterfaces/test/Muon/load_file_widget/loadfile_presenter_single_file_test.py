@@ -20,7 +20,6 @@ from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_
 @start_qapplication
 class LoadFileWidgetPresenterTest(unittest.TestCase):
     def run_test_with_and_without_threading(test_function):
-
         def run_twice(self):
             test_function(self)
             self.setUp()
@@ -41,12 +40,11 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.view.on_browse_clicked = mock.Mock()
         self.view.set_file_edit = mock.Mock()
         self.view.reset_edit_to_cached_value = mock.Mock()
-        self.view.show_file_browser_and_return_selection = mock.Mock(
-            return_value=["C:/dir1/file1.nxs", "C:/dir2/file2.nxs"])
+        self.view.show_file_browser_and_return_selection = mock.Mock(return_value=["C:/dir1/file1.nxs", "C:/dir2/file2.nxs"])
 
         setup_context_for_tests(self)
 
-        self.data_context.instrument = 'EMU'
+        self.data_context.instrument = "EMU"
         self.model = BrowseFileWidgetModel(self.loaded_data, self.context)
         self.model.exception_message_for_failed_files = mock.Mock()
 
@@ -56,10 +54,10 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
 
         self.presenter = BrowseFileWidgetPresenter(self.view, self.model)
 
-        patcher = mock.patch('mantidqtinterfaces.Muon.GUI.Common.load_file_widget.model.load_utils.load_workspace_from_filename')
+        patcher = mock.patch("mantidqtinterfaces.Muon.GUI.Common.load_file_widget.model.load_utils.load_workspace_from_filename")
         self.addCleanup(patcher.stop)
         self.load_utils_patcher = patcher.start()
-        self.load_utils_patcher.return_value = (self.create_fake_workspace(1), '22222', 'filename')
+        self.load_utils_patcher.return_value = (self.create_fake_workspace(1), "22222", "filename")
 
     def mock_browse_button_to_return_files(self, files):
         self.view.show_file_browser_and_return_selection = mock.Mock(return_value=files)
@@ -84,10 +82,10 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
     def create_fake_workspace(self, name):
         workspace_mock = mock.MagicMock()
         instrument_mock = mock.MagicMock()
-        instrument_mock.getName.return_value = 'EMU'
+        instrument_mock.getName.return_value = "EMU"
         workspace_mock.workspace.getInstrument.return_value = instrument_mock
 
-        return {'OutputWorkspace': [workspace_mock]}
+        return {"OutputWorkspace": [workspace_mock]}
 
     # ------------------------------------------------------------------------------------------------------------------
     # TESTS
@@ -247,8 +245,8 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.model.get_instrument_from_latest_run = mock.Mock(return_value="MUSR")
         self.presenter._multiple_files = False
         self.presenter.filenames = ["unit test"]
-        self.model._loaded_data_store.get_data = mock.Mock(return_value= True)
-        self.model.get_data = mock.Mock(return_value={'run':1})
+        self.model._loaded_data_store.get_data = mock.Mock(return_value=True)
+        self.model.get_data = mock.Mock(return_value={"run": 1})
         self.presenter.enable_loading = mock.Mock()
         self.presenter.set_file_edit = mock.Mock()
         self.view.notify_loading_finished = mock.Mock()
@@ -264,7 +262,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.model.get_instrument_from_latest_run = mock.Mock(return_value="MUSR")
         self.presenter._multiple_files = False
         self.presenter.filenames = ["unit test"]
-        self.model._loaded_data_store.get_data = mock.Mock(return_value= False)
+        self.model._loaded_data_store.get_data = mock.Mock(return_value=False)
         self.model.get_data = mock.Mock(return_value={})
         self.presenter.enable_loading = mock.Mock()
         self.presenter.set_file_edit = mock.Mock()
@@ -278,5 +276,5 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.view.warning_popup.assert_called_once()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

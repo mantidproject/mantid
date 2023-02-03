@@ -52,11 +52,4 @@ All these tabs can be dragged away from the interface into their own window.
 * :ref:`Results Tab <muon_results_tab-ref>`
 * :ref:`Model Fitting Tab <muon_model_fitting_tab-ref>`
 
-Feedback & Comments
--------------------
-
-If you have any questions or comments about this interface or this help page, please
-contact the `Mantid team <http://www.mantidproject.org/Contact>`__ or the
-`Muon group <http://www.isis.stfc.ac.uk/groups/muons/muons3385.html>`__.
-
 .. categories:: Interfaces Muon

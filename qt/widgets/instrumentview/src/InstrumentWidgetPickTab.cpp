@@ -31,6 +31,7 @@
 #include <QActionGroup>
 #include <QApplication>
 #include <QCheckBox>
+#include <QCoreApplication>
 #include <QGridLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -58,6 +59,9 @@ namespace MantidQt::MantidWidgets {
 using namespace boost::math;
 
 namespace {
+
+int constexpr N_TOOLBAR_COLUMNS(7);
+
 // Get the phi angle between the detector with reference to the origin
 // Makes assumptions about beam direction. Legacy code and not robust.
 double getPhi(const Mantid::Kernel::V3D &pos) { return std::atan2(pos[1], pos[0]); }
@@ -68,14 +72,29 @@ double getPhiOffset(const Mantid::Kernel::V3D &pos, const double offset) {
   double avgPos = getPhi(pos);
   return avgPos < 0 ? -(offset + avgPos) : offset - avgPos;
 }
+
+template <typename T>
+void rebin(const T &inputWorkspace, const std::string &rebinString, const bool preserveEvents,
+           const bool reverseLogarithmic, const std::string &outputWorkspace) {
+  auto rebinAlgorithm = AlgorithmManager::Instance().create("Rebin");
+  rebinAlgorithm->setProperty("InputWorkspace", inputWorkspace);
+  rebinAlgorithm->setProperty("Params", rebinString);
+  rebinAlgorithm->setProperty("PreserveEvents", preserveEvents);
+  rebinAlgorithm->setProperty("UseReverseLogarithmic", reverseLogarithmic);
+  rebinAlgorithm->setProperty("OutputWorkspace", outputWorkspace);
+  rebinAlgorithm->execute();
+}
+
 } // namespace
 
 /**
  * Constructor.
  * @param instrWidget :: Parent InstrumentWidget.
  */
-InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
-    : InstrumentWidgetTab(instrWidget), m_freezePlot(false), m_tubeXUnitsCache(0), m_plotTypeCache(0),
+InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget,
+                                                 std::vector<IWPickToolType> const &tools)
+    : InstrumentWidgetTab(instrWidget), m_freezePlot(false), m_originalWorkspace(nullptr), m_tubeXUnitsCache(0),
+      m_plotTypeCache(0),
       m_addedActions(std::vector<std::pair<QAction *, std::function<bool(std::map<std::string, bool>)>>>{}) {
 
   // connect to InstrumentWindow signals
@@ -104,6 +123,14 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
                                    "approach the upper limit. See Rebin for details.");
   m_rebinSaveToHisto = new QCheckBox("Convert to histogram", m_rebin);
   m_rebinSaveToHisto->setToolTip("Convert the data to histogram, and thus removes the events. CANNOT BE UNDONE.");
+  m_rebinKeepOriginal = new QCheckBox("Keep original workspace", m_rebin);
+  m_rebinKeepOriginal->setToolTip("Keeps the original workspace so it can be used for subsequent rebin operations. "
+                                  "WARNING: This option can cause high-memory usage for large datasets.");
+  m_rebinKeepOriginalWarning = new QLabel("*Warning*");
+  m_rebinKeepOriginalWarning->setStyleSheet("QLabel { color: darkorange; }");
+  m_rebinKeepOriginalWarning->setToolTip("WARNING: This option can cause high-memory usage for large datasets.");
+
+  connect(m_rebinKeepOriginal, SIGNAL(stateChanged(int)), this, SLOT(onKeepOriginalStateChanged(int)));
 
   m_runRebin = new QPushButton("Run", m_rebin);
   connect(m_rebinParams, SIGNAL(textChanged(QString)), this, SLOT(onRebinParamsWritten(QString)));
@@ -114,6 +141,8 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   QGridLayout *rebinCheckBoxesLayout = new QGridLayout();
   rebinCheckBoxesLayout->addWidget(m_rebinUseReverseLog, 0, 0);
   rebinCheckBoxesLayout->addWidget(m_rebinSaveToHisto, 0, 1);
+  rebinCheckBoxesLayout->addWidget(m_rebinKeepOriginal, 1, 0);
+  rebinCheckBoxesLayout->addWidget(m_rebinKeepOriginalWarning, 1, 1);
   rebinLayout->addLayout(rebinCheckBoxesLayout, 1, 0);
 
   rebinLayout->addWidget(m_runRebin, 2, 0);
@@ -283,24 +312,6 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_peakAlign->setIcon(QIcon(":/PickTools/selection-peak-plane.png"));
   m_peakAlign->setToolTip("Crystal peak alignment tool");
 
-  auto *toolBox = new QGridLayout();
-  toolBox->addWidget(m_zoom, 0, 0);
-  toolBox->addWidget(m_edit, 0, 1);
-  toolBox->addWidget(m_ellipse, 0, 2);
-  toolBox->addWidget(m_rectangle, 0, 3);
-  toolBox->addWidget(m_ring_ellipse, 0, 4);
-  toolBox->addWidget(m_ring_rectangle, 0, 5);
-  toolBox->addWidget(m_sector, 0, 6);
-  toolBox->addWidget(m_free_draw, 0, 7);
-  toolBox->addWidget(m_one, 1, 0);
-  toolBox->addWidget(m_whole, 1, 1);
-  toolBox->addWidget(m_tube, 1, 2);
-  toolBox->addWidget(m_peakAdd, 1, 3);
-  toolBox->addWidget(m_peakErase, 1, 4);
-  toolBox->addWidget(m_peakCompare, 1, 5);
-  toolBox->addWidget(m_peakAlign, 1, 6);
-  toolBox->setColumnStretch(8, 1);
-  toolBox->setSpacing(2);
   connect(m_zoom, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_one, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_whole, SIGNAL(clicked()), this, SLOT(setSelectionType()));
@@ -318,9 +329,80 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   connect(m_edit, SIGNAL(clicked()), this, SLOT(setSelectionType()));
 
   // lay out the widgets
+  m_toolBox = new QGridLayout();
+  setAvailableTools(tools);
+  m_toolBox->setColumnStretch(8, 1);
+  m_toolBox->setSpacing(2);
   layout->addWidget(m_activeTool);
-  layout->addLayout(toolBox);
+  layout->addLayout(m_toolBox);
   layout->addWidget(panelStack);
+}
+
+void InstrumentWidgetPickTab::setAvailableTools(std::vector<IWPickToolType> const &toolTypes) {
+  int row(0), column(0);
+  for (const auto &toolType : toolTypes) {
+    addToolbarWidget(toolType, row, column);
+  }
+}
+
+void InstrumentWidgetPickTab::addToolbarWidget(const IWPickToolType toolType, int &row, int &column) {
+  switch (toolType) {
+  case IWPickToolType::Zoom:
+    addToolbarWidget(m_zoom, row, column);
+    break;
+  case IWPickToolType::EditShape:
+    addToolbarWidget(m_edit, row, column);
+    break;
+  case IWPickToolType::DrawEllipse:
+    addToolbarWidget(m_ellipse, row, column);
+    break;
+  case IWPickToolType::DrawRectangle:
+    addToolbarWidget(m_rectangle, row, column);
+    break;
+  case IWPickToolType::DrawRingEllipse:
+    addToolbarWidget(m_ring_ellipse, row, column);
+    break;
+  case IWPickToolType::DrawRingRectangle:
+    addToolbarWidget(m_ring_rectangle, row, column);
+    break;
+  case IWPickToolType::DrawSector:
+    addToolbarWidget(m_sector, row, column);
+    break;
+  case IWPickToolType::DrawFree:
+    addToolbarWidget(m_free_draw, row, column);
+    break;
+  case IWPickToolType::PixelSelect:
+    addToolbarWidget(m_one, row, column);
+    break;
+  case IWPickToolType::WholeInstrumentSelect:
+    addToolbarWidget(m_whole, row, column);
+    break;
+  case IWPickToolType::TubeSelect:
+    addToolbarWidget(m_tube, row, column);
+    break;
+  case IWPickToolType::PeakSelect:
+    addToolbarWidget(m_peakAdd, row, column);
+    break;
+  case IWPickToolType::PeakErase:
+    addToolbarWidget(m_peakErase, row, column);
+    break;
+  case IWPickToolType::PeakCompare:
+    addToolbarWidget(m_peakCompare, row, column);
+    break;
+  case IWPickToolType::PeakAlign:
+    addToolbarWidget(m_peakAlign, row, column);
+    break;
+  }
+}
+
+void InstrumentWidgetPickTab::addToolbarWidget(QPushButton *toolbarButton, int &row, int &column) const {
+  m_toolBox->addWidget(toolbarButton, row, column);
+  if (column == 0 || column % N_TOOLBAR_COLUMNS != 0) {
+    ++column;
+  } else {
+    column = 0;
+    ++row;
+  }
 }
 
 QPushButton *InstrumentWidgetPickTab::getSelectTubeButton() { return m_tube; }
@@ -680,6 +762,7 @@ const InstrumentWidget *InstrumentWidgetPickTab::getInstrumentWidget() const { r
 void InstrumentWidgetPickTab::saveSettings(QSettings &settings) const {
   settings.setValue("TubeXUnits", m_plotController->getTubeXUnits());
   settings.setValue("PlotType", m_plotController->getPlotType());
+  settings.setValue("RebinKeeporiginal", m_rebinKeepOriginal->isChecked());
 }
 
 /**
@@ -691,6 +774,8 @@ void InstrumentWidgetPickTab::loadSettings(const QSettings &settings) {
   // Cache the settings and apply them later
   m_tubeXUnitsCache = settings.value("TubeXUnits", 0).toInt();
   m_plotTypeCache = settings.value("PlotType", IWPickPlotType::SINGLE).toInt();
+
+  m_rebinKeepOriginal->setChecked(settings.value("RebinKeeporiginal", true).toBool());
 }
 void InstrumentWidgetPickTab::addToContextMenu(QAction *action,
                                                std::function<bool(std::map<std::string, bool>)> &actionCondition) {
@@ -728,7 +813,7 @@ bool InstrumentWidgetPickTab::addToDisplayContextMenu(QMenu &context) const {
  * Select a tool on the tab
  * @param tool One of the enumerated tool types, @see ToolType
  */
-void InstrumentWidgetPickTab::selectTool(const ToolType tool) {
+void InstrumentWidgetPickTab::selectTool(const IWPickToolType tool) {
   switch (tool) {
   case Zoom:
     m_zoom->setChecked(true);
@@ -849,18 +934,33 @@ void InstrumentWidgetPickTab::updatePlotMultipleDetectors() {
 }
 
 void InstrumentWidgetPickTab::onRunRebin() {
+  if (m_rebinKeepOriginal->isChecked() && !m_originalWorkspace) {
+    m_originalWorkspace = m_instrWidget->getWorkspaceClone();
+  }
+
   try {
-    auto alg = AlgorithmManager::Instance().create("Rebin");
-    alg->setProperty("InputWorkspace", m_instrWidget->getWorkspaceNameStdString());
-    alg->setProperty("OutputWorkspace", m_instrWidget->getWorkspaceNameStdString());
-    alg->setProperty("Params", m_rebinParams->text().toStdString());
-    alg->setProperty("PreserveEvents", !m_rebinSaveToHisto->isChecked());
-    alg->setProperty("UseReverseLogarithmic", m_rebinUseReverseLog->isChecked());
-    alg->execute();
-  } catch (std::exception &e) {
-    QMessageBox::information(this, "Rebin Error", e.what(), "OK");
+    if (m_originalWorkspace) {
+      rebin<Mantid::API::Workspace_sptr>(m_originalWorkspace, m_rebinParams->text().toStdString(),
+                                         !m_rebinSaveToHisto->isChecked(), m_rebinUseReverseLog->isChecked(),
+                                         m_instrWidget->getWorkspaceNameStdString());
+    } else {
+      rebin<std::string>(m_instrWidget->getWorkspaceNameStdString(), m_rebinParams->text().toStdString(),
+                         !m_rebinSaveToHisto->isChecked(), m_rebinUseReverseLog->isChecked(),
+                         m_instrWidget->getWorkspaceNameStdString());
+    }
+  } catch (const std::exception &ex) {
+    QMessageBox::information(this, "Rebin Error", ex.what(), "OK");
   }
 }
+
+void InstrumentWidgetPickTab::onKeepOriginalStateChanged(int state) {
+  m_rebinKeepOriginalWarning->setVisible(state == Qt::Checked);
+  if (state == Qt::Unchecked) {
+    resetOriginalWorkspace();
+  }
+}
+
+void InstrumentWidgetPickTab::resetOriginalWorkspace() { m_originalWorkspace.reset(); }
 
 /**
  * Clear all the tab's widgets.
@@ -868,7 +968,7 @@ void InstrumentWidgetPickTab::onRunRebin() {
 void InstrumentWidgetPickTab::clearWidgets() {
   m_plotController->clear();
   m_infoController->clear();
-  selectTool(ToolType::PixelSelect);
+  selectTool(IWPickToolType::PixelSelect);
   collapsePlotPanel();
 }
 
@@ -1251,11 +1351,7 @@ void DetectorPlotController::addPeakLabels(const std::vector<size_t> &detIndices
 /**
  * Update the miniplot for a selected detector.
  */
-void DetectorPlotController::updatePlot() {
-  if (!m_instrWidget->isTabFolded()) {
-    m_plot->replot();
-  }
-}
+void DetectorPlotController::updatePlot() { m_plot->replot(); }
 
 /**
  * Clear the plot.
@@ -1547,14 +1643,14 @@ void DetectorPlotController::prepareDataForIntegralsPlot(size_t detindex, std::v
         continue;
       // get the y-value for detector idet
       const auto &Y = ws->y(index);
-      xymap[xvalue] = std::accumulate(Y.begin() + imin, Y.begin() + imax, 0);
+      xymap[xvalue] = std::accumulate(Y.begin() + imin, Y.begin() + imax, 0.0);
       if (err) {
         const auto &E = ws->e(index);
         std::vector<double> tmp(imax - imin);
         // take squares of the errors
         std::transform(E.begin() + imin, E.begin() + imax, E.begin() + imin, tmp.begin(), std::multiplies<double>());
         // sum them
-        const double sum = std::accumulate(tmp.begin(), tmp.end(), 0);
+        const double sum = std::accumulate(tmp.begin(), tmp.end(), 0.0);
         // take sqrt
         errmap[xvalue] = sqrt(sum);
       }
@@ -1642,7 +1738,7 @@ void DetectorPlotController::savePlotToWorkspace() {
     }
     if (!x.empty()) {
       if (nbins > 0 && x.size() != nbins) {
-        QMessageBox::critical(nullptr, "MantidPlot - Error", "Curves have different sizes.");
+        QMessageBox::critical(nullptr, QCoreApplication::applicationName() + " Error", "Curves have different sizes.");
         return;
       } else {
         nbins = x.size();
@@ -1846,7 +1942,7 @@ void DetectorPlotController::addPeak(double x, double y) {
       alg->execute();
     }
   } catch (std::exception &e) {
-    QMessageBox::critical(m_tab, "MantidPlot -Error",
+    QMessageBox::critical(m_tab, QCoreApplication::applicationName() + " Error ",
                           "Cannot create a Peak object because of the error:\n" + QString(e.what()));
   }
 }

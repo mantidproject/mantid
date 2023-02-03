@@ -17,6 +17,7 @@ class RevertibleItem(QStandardItem):
     Define an item that stores the data it is initialized with
     so that any failure in updating
     """
+
     def __init__(self, data: Any):
         super().__init__()
         self.is_v3d = isinstance(data, V3D)

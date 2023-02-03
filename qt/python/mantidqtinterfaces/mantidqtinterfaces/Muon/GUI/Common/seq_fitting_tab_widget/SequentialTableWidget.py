@@ -5,16 +5,20 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableView import QSequentialTableView
-from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableModel import (QSequentialTableModel, GROUP_COLUMN,
-                                                                                             RUN_COLUMN, WORKSPACE_COLUMN)
+from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableModel import (
+    QSequentialTableModel,
+    GROUP_COLUMN,
+    RUN_COLUMN,
+    WORKSPACE_COLUMN,
+)
 from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableDelegates import FIT_STATUSES
 from collections import namedtuple
 
-WorkspaceInfo = namedtuple('Workspace', 'runs groups')
+WorkspaceInfo = namedtuple("Workspace", "runs groups")
 
 
 class SequentialTableWidget(object):
-    """ Sequential table widget implemented using a QTableView and QAbstractTableModel
+    """Sequential table widget implemented using a QTableView and QAbstractTableModel
     Based on the model-view pattern https://doc.qt.io/qt-5/model-view-programming.html"""
 
     def __init__(self, parent, view=None, model=None):

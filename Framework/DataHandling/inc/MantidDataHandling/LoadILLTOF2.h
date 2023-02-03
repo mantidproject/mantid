@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
-#include "MantidDataHandling/LoadHelper.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
@@ -41,24 +41,21 @@ private:
   // Execution code
   void exec() override;
 
-  void loadInstrumentDetails(const NeXus::NXEntry &);
-  std::vector<std::vector<int>> getMonitorInfo(const NeXus::NXEntry &firstEntry);
-  void initWorkSpace(NeXus::NXEntry &entry, const std::vector<std::vector<int>> &);
-  void initInstrumentSpecific();
   void addAllNexusFieldsAsProperties(const std::string &filename);
   void addEnergyToRun();
   void addFacility();
   void addPulseInterval();
 
+  void fillStaticWorkspace(NeXus::NXEntry &entry, const std::vector<std::string> &monitorList, bool convertToTOF);
+  void fillScanWorkspace(NeXus::NXEntry &entry, const std::vector<std::string> &monitorList);
+
+  std::vector<std::string> getMonitorInfo(const NeXus::NXEntry &firstEntry);
+  void initWorkspace(NeXus::NXEntry &entry);
+
+  void loadInstrumentDetails(const NeXus::NXEntry &);
   void loadTimeDetails(const NeXus::NXEntry &entry);
-  void loadDataIntoTheWorkSpace(NeXus::NXEntry &entry, const std::vector<std::vector<int>> &, bool convertToTOF);
-  void loadSpectra(size_t &spec, const size_t numberOfTubes, const std::vector<Mantid::detid_t> &detectorIDs,
-                   const NeXus::NXInt &data, Mantid::API::Progress &progress);
 
-  void runLoadInstrument();
-
-  /// Calculate error for y
-  static double calculateError(double in) { return sqrt(in); }
+  std::vector<double> prepareAxis(NeXus::NXEntry &entry, bool convertToTOF);
 
   API::MatrixWorkspace_sptr m_localWorkspace;
 
@@ -69,15 +66,15 @@ private:
   size_t m_numberOfTubes;         // number of tubes - X
   size_t m_numberOfPixelsPerTube; // number of pixels per tube - Y
   size_t m_numberOfChannels;      // time channels - Z
-  size_t m_numberOfHistograms;
+  size_t m_numberOfHistograms;    // number of histograms (individual detectors)
+  size_t m_numberOfMonitors;      // number of monitors
 
-  /* Values parsed from the nexus file */
+  // Values parsed from the nexus file
   double m_wavelength;
   double m_channelWidth;
   double m_timeOfFlightDelay;
   std::string m_monitorName;
-
-  LoadHelper m_loader;
+  bool m_isScan; // whether the loaded data is a scan measurement
 };
 
 } // namespace DataHandling

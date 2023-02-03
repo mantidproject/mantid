@@ -7,7 +7,6 @@
 
 
 class line(object):
-
     def __init__(self):
         self.label = "test"
 
@@ -25,7 +24,6 @@ class line(object):
 
 
 class label(object):
-
     def __init__(self, name, protected):
         self.text = name
         self.protected = protected

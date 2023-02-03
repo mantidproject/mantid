@@ -23,15 +23,16 @@ class EXPORT_OPT_MANTIDQT_PLOTTING PeakPicker : public QObject {
   Q_OBJECT
 
 public:
-  PeakPicker(PreviewPlot *plot, const QColor &colour = Qt::black);
+  PeakPicker(PreviewPlot *plot);
 
   void redraw();
   void remove();
 
-  void setPeak(const Mantid::API::IPeakFunction_const_sptr &peak);
+  void setPeak(const Mantid::API::IPeakFunction_const_sptr &peak, const double background = 0.0);
   Mantid::API::IPeakFunction_sptr peak() const;
 
   void select(bool select);
+  void setVisible(bool visible);
 
 signals:
   void changed();
@@ -40,6 +41,7 @@ private slots:
   void handleMouseDown(const QPoint &point);
   void handleMouseMove(const QPoint &point);
   void handleMouseUp(const QPoint &point);
+  void handleMouseHovering(const QPoint &point);
 
   void redrawMarker();
 

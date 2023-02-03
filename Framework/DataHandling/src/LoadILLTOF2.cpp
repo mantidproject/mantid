@@ -10,9 +10,10 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/algorithm/string/predicate.hpp>
@@ -42,13 +43,14 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF2)
 int LoadILLTOF2::confidence(Kernel::NexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL
-  if (descriptor.pathExists("/entry0/wavelength") && descriptor.pathExists("/entry0/experiment_identifier") &&
-      descriptor.pathExists("/entry0/mode") && !descriptor.pathExists("/entry0/dataSD") // This one is for
-                                                                                        // LoadILLIndirect
-      && !descriptor.pathExists("/entry0/instrument/VirtualChopper")                    // This one is for
-                                                                                        // LoadILLReflectometry
-      && !descriptor.pathExists("/entry0/data_scan")     // This one is handled by LoadILLDiffraction
-      && !descriptor.pathExists("/entry0/instrument/Tx") // This eliminates SALSA data
+  if ((descriptor.pathExists("/entry0/wavelength") && descriptor.pathExists("/entry0/experiment_identifier") &&
+       descriptor.pathExists("/entry0/mode") && !descriptor.pathExists("/entry0/dataSD") // This one is for
+                                                                                         // LoadILLIndirect
+       && !descriptor.pathExists("/entry0/instrument/VirtualChopper")                    // This one is for
+                                                                                         // LoadILLReflectometry
+       && !descriptor.pathExists("/entry0/instrument/Tx"))                               // This eliminates SALSA data
+      || (descriptor.pathExists("/entry0/data_scan") &&
+          descriptor.pathExists("/entry0/instrument/Detector")) // The last one is scan mode of PANTHER and SHARP
   ) {
     return 80;
   } else {
@@ -81,58 +83,54 @@ void LoadILLTOF2::exec() {
   // open the root node
   NeXus::NXRoot dataRoot(filenameData);
   NXEntry dataFirstEntry = dataRoot.openFirstEntry();
+  m_isScan = dataFirstEntry.containsGroup("data_scan");
 
   loadInstrumentDetails(dataFirstEntry);
   loadTimeDetails(dataFirstEntry);
 
-  const auto monitors = getMonitorInfo(dataFirstEntry);
-
-  initWorkSpace(dataFirstEntry, monitors);
+  const auto monitorList = getMonitorInfo(dataFirstEntry);
+  initWorkspace(dataFirstEntry);
 
   addAllNexusFieldsAsProperties(filenameData);
   addFacility();
+  // load the instrument from the IDF if it exists
+  LoadHelper::loadEmptyInstrument(m_localWorkspace, m_instrumentName);
 
-  runLoadInstrument(); // just to get IDF contents
-
-  loadDataIntoTheWorkSpace(dataFirstEntry, monitors, convertToTOF);
-
+  if (m_isScan) {
+    fillScanWorkspace(dataFirstEntry, monitorList);
+  } else {
+    fillStaticWorkspace(dataFirstEntry, monitorList, convertToTOF);
+  }
   addEnergyToRun();
   addPulseInterval();
-
-  // load the instrument from the IDF if it exists
-  runLoadInstrument();
 
   // Set the output workspace property
   setProperty("OutputWorkspace", m_localWorkspace);
 }
 
 /**
- * Loads Monitor data into an vector of monitor data
+ * Finds monitor data names and stores them in a vector
  *
  * @param firstEntry The NeXus entry
  *
  * @return List of monitor data
  */
-std::vector<std::vector<int>> LoadILLTOF2::getMonitorInfo(const NeXus::NXEntry &firstEntry) {
-
-  std::vector<std::vector<int>> monitorList;
-
-  for (std::vector<NXClassInfo>::const_iterator it = firstEntry.groups().begin(); it != firstEntry.groups().end();
-       ++it) {
-
-    if (it->nxclass == "NXmonitor" || boost::starts_with(it->nxname, "monitor")) {
-
-      g_log.debug() << "Load monitor data from " + it->nxname;
-
-      NXData dataGroup = firstEntry.openNXData(it->nxname + "/data");
-      NXInt data = dataGroup.openIntData();
-      // load the counts from the file into memory
-      data.load();
-
-      std::vector<int> thisMonitor(data(), data() + data.size());
-      monitorList.emplace_back(thisMonitor);
+std::vector<std::string> LoadILLTOF2::getMonitorInfo(const NeXus::NXEntry &firstEntry) {
+  std::vector<std::string> monitorList;
+  if (m_isScan) {
+    // in case of a scan, there is only one monitor and its data are stored per scan step
+    // in "data_scan/scanned_variables/data", if that changes, a search for the "monitor" name
+    // may be required in the "data_scan/scanned_variables/variables_names"
+    monitorList.push_back("data_scan/scanned_variables/data");
+  } else {
+    for (std::vector<NXClassInfo>::const_iterator it = firstEntry.groups().begin(); it != firstEntry.groups().end();
+         ++it) {
+      if (it->nxclass == "NXmonitor" || boost::starts_with(it->nxname, "monitor")) {
+        monitorList.push_back(it->nxname + "/data");
+      }
     }
   }
+  m_numberOfMonitors = monitorList.size();
   return monitorList;
 }
 
@@ -143,13 +141,13 @@ std::vector<std::vector<int>> LoadILLTOF2::getMonitorInfo(const NeXus::NXEntry &
  */
 void LoadILLTOF2::loadInstrumentDetails(const NeXus::NXEntry &firstEntry) {
 
-  m_instrumentPath = m_loader.findInstrumentNexusPath(firstEntry);
+  m_instrumentPath = LoadHelper::findInstrumentNexusPath(firstEntry);
 
   if (m_instrumentPath.empty()) {
     throw std::runtime_error("Cannot set the instrument name from the Nexus file!");
   }
 
-  m_instrumentName = m_loader.getStringFromNexusPath(firstEntry, m_instrumentPath + "/name");
+  m_instrumentName = LoadHelper::getStringFromNexusPath(firstEntry, m_instrumentPath + "/name");
 
   if (std::find(SUPPORTED_INSTRUMENTS.begin(), SUPPORTED_INSTRUMENTS.end(), m_instrumentName) ==
       SUPPORTED_INSTRUMENTS.end()) {
@@ -175,26 +173,24 @@ void LoadILLTOF2::loadInstrumentDetails(const NeXus::NXEntry &firstEntry) {
  * the corresponding values
  *
  * @param entry The NeXus entry
- * @param monitors List of monitor data
  */
-void LoadILLTOF2::initWorkSpace(NeXus::NXEntry &entry, const std::vector<std::vector<int>> &monitors) {
+void LoadILLTOF2::initWorkspace(NeXus::NXEntry &entry) {
 
   // read in the data
-  NXData dataGroup = entry.openNXData("data");
-  NXInt data = dataGroup.openIntData();
+  const std::string dataName = m_isScan ? "data_scan/detector_data/data" : "data";
+  auto data = LoadHelper::getIntDataset(entry, dataName);
 
-  m_numberOfTubes = static_cast<size_t>(data.dim0());
-  m_numberOfPixelsPerTube = static_cast<size_t>(data.dim1());
-  m_numberOfChannels = static_cast<size_t>(data.dim2());
-  const size_t numberOfMonitors = monitors.size();
+  // default order is: tubes - pixels - channels, but for scans it is scans - tubes - pixels
+  m_numberOfTubes = static_cast<size_t>(m_isScan ? data.dim1() : data.dim0());
+  m_numberOfPixelsPerTube = static_cast<size_t>(m_isScan ? data.dim2() : data.dim1());
+  m_numberOfChannels = static_cast<size_t>(m_isScan ? data.dim0() : data.dim2());
 
   /**
    * IN4 : Rosace detector is in a different field.
    */
   size_t numberOfTubesInRosace = 0;
   if (m_instrumentName == "IN4") {
-    NXData dataGroupRosace = entry.openNXData("instrument/Detector_Rosace/data");
-    NXInt dataRosace = dataGroupRosace.openIntData();
+    auto dataRosace = LoadHelper::getIntDataset(entry, "instrument/Detector_Rosace/data");
     numberOfTubesInRosace += static_cast<size_t>(dataRosace.dim0());
   }
 
@@ -207,19 +203,23 @@ void LoadILLTOF2::initWorkSpace(NeXus::NXEntry &entry, const std::vector<std::ve
 
   // Now create the output workspace
   // total number of spectra + number of monitors,
-  // bin boundaries = m_numberOfChannels + 1
+  // bin boundaries = m_numberOfChannels + 1 if diffraction or TOF mode, m_numberOfChannels for scans
   // Z/time dimension
-  m_localWorkspace = WorkspaceFactory::Instance().create("Workspace2D", m_numberOfHistograms + numberOfMonitors,
-                                                         m_numberOfChannels + 1, m_numberOfChannels);
-
-  NXClass monitor = entry.openNXGroup(m_monitorName);
-  if (monitor.containsDataSet("time_of_flight")) {
-    m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+  const auto numberOfChannels = m_isScan ? m_numberOfChannels : m_numberOfChannels + 1;
+  m_localWorkspace = WorkspaceFactory::Instance().create("Workspace2D", m_numberOfHistograms + m_numberOfMonitors,
+                                                         numberOfChannels, m_numberOfChannels);
+  if (m_isScan) {
     m_localWorkspace->setYUnitLabel("Counts");
   } else {
-    g_log.debug("PANTHER diffraction mode");
-    m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
-    m_localWorkspace->setYUnitLabel("Counts");
+    NXClass monitor = entry.openNXGroup(m_monitorName);
+    if (monitor.containsDataSet("time_of_flight")) {
+      m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+      m_localWorkspace->setYUnitLabel("Counts");
+    } else {
+      g_log.debug("PANTHER diffraction mode");
+      m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
+      m_localWorkspace->setYUnitLabel("Counts");
+    }
   }
 }
 
@@ -271,7 +271,7 @@ void LoadILLTOF2::addAllNexusFieldsAsProperties(const std::string &filename) {
     g_log.debug() << "convertNexusToProperties: Error loading " << filename;
     throw Kernel::Exception::FileError("Unable to open File:", filename);
   }
-  m_loader.addNexusFieldsToWsRun(nxfileID, runDetails);
+  LoadHelper::addNexusFieldsToWsRun(nxfileID, runDetails);
   NXclose(&nxfileID);
   runDetails.addProperty("run_list", runDetails.getPropertyValueAsType<int>("run_number"));
   g_log.debug() << "End parsing properties from : " << filename << '\n';
@@ -284,7 +284,7 @@ void LoadILLTOF2::addAllNexusFieldsAsProperties(const std::string &filename) {
 void LoadILLTOF2::addEnergyToRun() {
 
   API::Run &runDetails = m_localWorkspace->mutableRun();
-  const double ei = m_loader.calculateEnergy(m_wavelength);
+  const double ei = LoadHelper::calculateEnergy(m_wavelength);
   runDetails.addProperty<double>("Ei", ei, true); // overwrite
 }
 
@@ -328,120 +328,129 @@ void LoadILLTOF2::addPulseInterval() {
 }
 
 /**
- * Loads all the spectra into the workspace, including that from the monitor
+ * Prepares X axis for the workspace being loaded
+ * @param entry NeXus entry used to get scanned parameter values in the scan case
+ * @param convertToTOF Should the bin edges be converted to time of flight or keep the channel indices
+ * @return Vector of doubles containing bin edges or point centres positions
+ */
+std::vector<double> LoadILLTOF2::prepareAxis(NeXus::NXEntry &entry, bool convertToTOF) {
+
+  std::vector<double> xAxis(m_localWorkspace->readX(0).size());
+  if (m_isScan) {
+    // read which variable is going to be the axis
+    NXInt scannedAxis = entry.openNXInt("data_scan/scanned_variables/variables_names/axis");
+    scannedAxis.load();
+    int scannedVarId = 0;
+    for (int index = 0; index < scannedAxis.dim0(); index++) {
+      if (scannedAxis[index] == 1) {
+        scannedVarId = index;
+        break;
+      }
+    }
+    auto axis = LoadHelper::getDoubleDataset(entry, "data_scan/scanned_variables/data");
+    axis.load();
+    for (int index = 0; index < axis.dim1(); index++) {
+      xAxis[index] = axis(scannedVarId, index);
+    }
+  } else {
+    NXClass moni = entry.openNXGroup(m_monitorName);
+    if (moni.containsDataSet("time_of_flight")) {
+      if (convertToTOF) {
+        for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
+          xAxis[i] = m_timeOfFlightDelay + m_channelWidth * static_cast<double>(i) +
+                     m_channelWidth / 2; // to make sure the bin centre is positive
+        }
+      } else {
+        for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
+          xAxis[i] = static_cast<double>(i); // just take the channel index
+        }
+      }
+    } else {
+      // Diffraction PANTHER
+      xAxis[0] = m_wavelength * 0.9;
+      xAxis[1] = m_wavelength * 1.1;
+    }
+  }
+  return xAxis;
+}
+
+/**
+ * Fills the non-scan measurement data into the workspace, including that from the monitor
  *
  * @param entry The Nexus entry
- * @param monitors List of monitor data
+ * @param monitorList Vector containing paths to monitor data
  * @param convertToTOF Should the bin edges be converted to time of flight or
  * keep the channel indexes
  */
-void LoadILLTOF2::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry, const std::vector<std::vector<int>> &monitors,
-                                           bool convertToTOF) {
+void LoadILLTOF2::fillStaticWorkspace(NeXus::NXEntry &entry, const std::vector<std::string> &monitorList,
+                                      bool convertToTOF) {
 
   g_log.debug() << "Loading data into the workspace...\n";
-  // read in the data
-  NXData dataGroup = entry.openNXData("data");
-  NXInt data = dataGroup.openIntData();
-  // load the counts from the file into memory
+
+  // Prepare X-axis array
+  auto xAxis = prepareAxis(entry, convertToTOF);
+
+  // The binning for monitors is considered the same as for detectors
+  int spec = 0;
+  std::vector<int> detectorIDs = m_localWorkspace->getInstrument()->getDetectorIDs(false);
+
+  auto data = LoadHelper::getIntDataset(entry, "data");
   data.load();
 
-  NXClass moni = entry.openNXGroup(m_monitorName);
+  LoadHelper::fillStaticWorkspace(m_localWorkspace, data, xAxis, spec, false, detectorIDs);
+  spec = static_cast<int>(m_numberOfTubes * m_numberOfPixelsPerTube);
 
-  // Put tof in an array
-  auto &X0 = m_localWorkspace->mutableX(0);
-  if (moni.containsDataSet("time_of_flight")) {
-    if (convertToTOF) {
-      for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
-        X0[i] = m_timeOfFlightDelay + m_channelWidth * static_cast<double>(i) +
-                m_channelWidth / 2; // to make sure the bin centre is positive
-      }
-    } else {
-      for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
-        X0[i] = static_cast<double>(i); // just take the channel index
-      }
-    }
-  } else {
-    // Diffraction PANTHER
-    X0[0] = m_wavelength * 0.9;
-    X0[1] = m_wavelength * 1.1;
-  }
-  // The binning for monitors is considered the same as for detectors
-  size_t spec = 0;
-
-  auto const &instrument = m_localWorkspace->getInstrument();
-
-  const std::vector<detid_t> detectorIDs = instrument->getDetectorIDs(true);
-
-  Progress progress(this, 0.0, 1.0, m_numberOfTubes * m_numberOfPixelsPerTube);
-
-  loadSpectra(spec, m_numberOfTubes, detectorIDs, data, progress);
-
-  g_log.debug() << "Loading detector data into the workspace: DONE!\n";
-
-  /**
-   * IN4 Rosace detectors are in a different NeXus entry
-   */
+  // IN4 Rosace detectors are in a different NeXus entry
   if (m_instrumentName == "IN4") {
     g_log.debug() << "Loading data into the workspace: IN4 Rosace!\n";
     // read in the data
-    NXData dataGroupRosace = entry.openNXData("instrument/Detector_Rosace/data");
-    NXInt dataRosace = dataGroupRosace.openIntData();
-    auto numberOfTubes = static_cast<size_t>(dataRosace.dim0());
     // load the counts from the file into memory
+    auto dataRosace = LoadHelper::getIntDataset(entry, "instrument/Detector_Rosace/data");
     dataRosace.load();
-
-    Progress progressRosace(this, 0.0, 1.0, numberOfTubes * m_numberOfPixelsPerTube);
-
-    loadSpectra(spec, numberOfTubes, detectorIDs, dataRosace, progressRosace);
+    LoadHelper::fillStaticWorkspace(m_localWorkspace, dataRosace, xAxis, spec, false, detectorIDs);
+    spec += dataRosace.dim0();
   }
 
-  const auto monitorIDs = instrument->getMonitors();
-
-  for (size_t i = 0; i < monitors.size(); ++i) {
-    const auto &monitor = monitors[i];
-    m_localWorkspace->setHistogram(spec, m_localWorkspace->binEdges(0), Counts(monitor.begin(), monitor.end()));
-    m_localWorkspace->getSpectrum(spec).setDetectorID(monitorIDs[i]);
+  for (const auto &monitorName : monitorList) {
+    detectorIDs[spec] = static_cast<int>(spec) + 1;
+    auto monitorData = LoadHelper::getIntDataset(entry, monitorName);
+    monitorData.load();
+    LoadHelper::fillStaticWorkspace(m_localWorkspace, monitorData, xAxis, spec, false, detectorIDs);
     spec++;
   }
 }
 
 /**
- * Loops over all the pixels and loads the correct spectra. Called for each set
- * of detector types in the workspace.
- *
- * @param spec The current spectrum id
- * @param numberOfTubes The number of detector tubes in the workspace
- * @param detectorIDs A list of all of the detector IDs
- * @param data The NeXus data to load into the workspace
- * @param progress The progress monitor
+ * Fills scan workspace with data and monitor data counts
+ * @param entry The Nexus entry to load the data from
+ * @param monitorList Vector containing paths to monitor data
  */
-void LoadILLTOF2::loadSpectra(size_t &spec, const size_t numberOfTubes, const std::vector<detid_t> &detectorIDs,
-                              const NXInt &data, Progress &progress) {
-  PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
-  for (int i = 0; i < static_cast<int>(numberOfTubes); ++i) {
-    for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
-      const int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
-      const size_t currentSpectrum = spec + i * m_numberOfPixelsPerTube + j;
-      m_localWorkspace->setHistogram(currentSpectrum, m_localWorkspace->binEdges(0),
-                                     Counts(data_p, data_p + m_numberOfChannels));
-      m_localWorkspace->getSpectrum(currentSpectrum).setDetectorID(detectorIDs[currentSpectrum]);
-      progress.report();
-    }
+void LoadILLTOF2::fillScanWorkspace(NeXus::NXEntry &entry, const std::vector<std::string> &monitorList) {
+  // Prepare X-axis array
+  auto xAxis = prepareAxis(entry, false);
+  auto data = LoadHelper::getIntDataset(entry, "data_scan/detector_data/data");
+  data.load();
+
+  // Load scan data
+  const std::vector<int> detectorIDs = m_localWorkspace->getInstrument()->getDetectorIDs(false);
+  const std::tuple<int, int, int> dimOrder{1, 2, 0};
+  LoadHelper::fillStaticWorkspace(m_localWorkspace, data, xAxis, 0, true, detectorIDs, std::set<int>(), dimOrder);
+
+  // Load monitor data, there is only one monitor
+  const std::vector<int> monitorIDs = m_localWorkspace->getInstrument()->getMonitors();
+  const auto spectrumNo = data.dim1() * data.dim2();
+  auto monitorData = LoadHelper::getDoubleDataset(entry, monitorList[0]);
+  monitorData.load();
+  for (int index = 0; index < monitorData.dim1(); index++) {
+    // monitor is always the 4th row, if that ever changes, a name search for 'monitor1' would be necessary among
+    // scanned_variables
+    const auto counts = monitorData(3, index);
+    m_localWorkspace->mutableY(spectrumNo)[index] = counts;
+    m_localWorkspace->mutableE(spectrumNo)[index] = sqrt(counts);
+    m_localWorkspace->mutableX(spectrumNo)[index] = xAxis[index];
   }
-  spec += numberOfTubes * m_numberOfPixelsPerTube;
-}
-
-/**
- * Runs LoadInstrument to attach the instrument to the workspace
- */
-void LoadILLTOF2::runLoadInstrument() {
-
-  auto loadInst = createChildAlgorithm("LoadInstrument");
-
-  loadInst->setPropertyValue("InstrumentName", m_instrumentName);
-  loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
-  loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
-  loadInst->execute();
+  // finally, we need to set the correct detector ID for the monitor
+  m_localWorkspace->getSpectrum(spectrumNo).setDetectorID(monitorIDs[0]);
 }
 
 } // namespace Mantid::DataHandling

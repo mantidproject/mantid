@@ -6,22 +6,21 @@
 # conda-cppcheck <job-name> <path-to-workspace>
 #
 # Example command to run a PR build on ubuntu:
-# conda-cppcheck pull_requests-cppcheck /jenkins/workspace_dir/
+# conda-cppcheck pull_requests-cppcheck $WORKSPACE
 #
 # Expected args:
 #   1. JOB_NAME: If the name of the job contains 'pull_requests', the script checks for any C++ file changes. If
 #                there are none, then it exits early with code 0.
 #   2. WORKSPACE: path to the workspace/source code that this should run inside, Windows Caveat: Only use / for
 #                 this argument do not use \\ or \ in the path.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source $SCRIPT_DIR/mamba-utils
 
 # Check arguments passed are 2, and aren't optional flags.
 if [[ $# < 2 || $1 == "--"* || $2 == "--"* ]]; then
     echo "Pass 2 arguments: conda-cppcheck <job-name> <path-to-workspace>"
     exit 1
 fi
-
-# SCRIPT_DIR discovery from https://stackoverflow.com/a/9107028 by https://stackoverflow.com/users/1184238/andrew-norrie
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 JOB_NAME=$1
 WORKSPACE=$2
 shift 2
@@ -38,22 +37,9 @@ if [[ $JOB_NAME == *pull_requests* ]]; then
     fi
 fi
 
-EXPECTED_MAMBAFORGE_PATH=$WORKSPACE/mambaforge # Install into the WORKSPACE_DIR
-EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/bin/mamba
+# Mamba
+setup_mamba $WORKSPACE/mambaforge
+create_and_activate_mantid_developer_env
 
-CONDA_ENV_NAME="mantid-developer"
-
-CLEAN_BUILD=false
-
-# Setup Mambaforge
-$SCRIPT_DIR/download-and-install-mambaforge $EXPECTED_MAMBAFORGE_PATH $EXPECTED_CONDA_PATH $CLEAN_BUILD
-
-# Setup Conda environment
-$SCRIPT_DIR/setup-conda-env $WORKSPACE $EXPECTED_CONDA_PATH $CONDA_ENV_NAME
-
-# Activate Conda environment
-. $WORKSPACE/mambaforge/etc/profile.d/conda.sh
-conda activate $CONDA_ENV_NAME
-
-# Run the script that handles the actual building
+# Run
 $SCRIPT_DIR/cppcheck.sh

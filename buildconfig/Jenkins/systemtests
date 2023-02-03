@@ -86,13 +86,6 @@ ${CMAKE_EXE} --build . -- SystemTestData
 userconfig_dir=$HOME/.mantid
 rm -fr $userconfig_dir
 # Remove GUI qsettings files
-if [[ ${ON_MACOS} == true ]] ; then
-  rm -f $HOME/Library/Preferences/com.mantid.MantidPlot.plist
-  rm -f $HOME/Library/Preferences/org.mantidproject.MantidPlot.plist
-  rm -f "$HOME/Library/Saved Application State/org.mantidproject.MantidPlot.savedState/windows.plist"
-else
-  rm -f ~/.config/Mantid/MantidPlot.conf
-fi
 rm -f ~/.config/mantidproject/mantidworkbench.ini
 
 # Turn off any auto updating on startup

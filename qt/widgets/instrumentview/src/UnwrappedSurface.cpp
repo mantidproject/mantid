@@ -21,6 +21,8 @@
 #include <QApplication>
 #include <QMenu>
 #include <QMouseEvent>
+#include <QPoint>
+#include <QSize>
 #include <QTransform>
 
 #include <cfloat>
@@ -322,6 +324,17 @@ void UnwrappedSurface::getMaskedDetectors(std::vector<size_t> &detIndices) const
   }
 }
 
+void UnwrappedSurface::getIntersectingDetectors(std::vector<size_t> &detIndices) const {
+  detIndices.clear();
+  if (m_maskShapes.isEmpty())
+    return;
+  for (const auto &udet : m_unwrappedDetectors) {
+    if (!udet.empty() && m_maskShapes.isIntersecting(udet.toQRectF())) {
+      detIndices.emplace_back(udet.detIndex);
+    }
+  }
+}
+
 void UnwrappedSurface::changeColorMap() {
   for (auto &udet : m_unwrappedDetectors) {
     udet.color = m_instrActor->getColor(udet.detIndex);
@@ -390,6 +403,40 @@ void UnwrappedSurface::setFlippedView(bool on) {
       m_zoomStack[i].xFlip();
     }
   }
+}
+
+/**
+ * Calculate the QRect of a particular detector in units of pixels.
+ * @param detectorIndex :: The index of the detector to calculate the QRect for.
+ * @returns The bounding QRect of a particular detector in units of pixels.
+ */
+QRect UnwrappedSurface::detectorQRectInPixels(const std::size_t detectorIndex) const {
+  const auto detIter =
+      std::find_if(m_unwrappedDetectors.cbegin(), m_unwrappedDetectors.cend(),
+                   [&detectorIndex](const auto &detector) { return detector.detIndex == detectorIndex; });
+
+  if (detIter == m_unwrappedDetectors.cend()) {
+    return QRect();
+  }
+
+  const int vwidth = m_viewImage->width();
+  const int vheight = m_viewImage->height();
+  const double dw = fabs(m_viewRect.width() / vwidth);
+  const double dh = fabs(m_viewRect.height() / vheight);
+
+  const auto detRect = detIter->toQRectF();
+
+  // Calculate the centre position of the QRect. The x position will be different depending on if the view is flipped
+  const auto xCentre =
+      m_flippedView ? (m_viewRect.x0() - detRect.center().x()) / dw : (detRect.center().x() - m_viewRect.x0()) / dw;
+  const auto yCentre = (detRect.center().y() - m_viewRect.y0()) / dh;
+
+  // Calculate the width and height of the QRect
+  const auto size = QSize(static_cast<int>(detRect.width() / dw), static_cast<int>(detRect.height() / dh));
+  // Calculate the position of the top left corner of the QRect
+  const auto position = QPoint(static_cast<int>(xCentre) - static_cast<int>(size.width() / 2.0),
+                               vheight - static_cast<int>(yCentre) - static_cast<int>(size.height() / 2.0));
+  return QRect(position, size);
 }
 
 /**

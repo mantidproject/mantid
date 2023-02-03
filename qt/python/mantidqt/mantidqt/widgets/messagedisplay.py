@@ -16,7 +16,7 @@ SHOW_FRAMEWORK_OUTPUT_KEY = "MessageDisplay/ShowFrameworkOutput"
 SHOW_ALL_SCRIPT_OUTPUT_KEY = "MessageDisplay/ShowAllScriptOutput"
 SHOW_ACTIVE_SCRIPT_OUTPUT_KEY = "MessageDisplay/ShowActiveScriptOutput"
 
-MessageDisplay_cpp = import_qt('.._common', 'mantidqt.widgets', 'MessageDisplay')
+MessageDisplay_cpp = import_qt(".._common", "mantidqt.widgets", "MessageDisplay")
 
 
 class Priority:
@@ -29,7 +29,6 @@ class Priority:
 
 
 class MessageDisplay(MessageDisplay_cpp):
-
     def __init__(self, font=QFont(), parent=None):
         super(MessageDisplay, self).__init__(font, parent)
 
@@ -74,7 +73,7 @@ class MessageDisplay(MessageDisplay_cpp):
         qmenu = super(MessageDisplay, self).generateContextMenu()
         filter_menu = qmenu.addMenu("&View")
 
-        framework_action = QAction('Mantid Log Output', filter_menu)
+        framework_action = QAction("Mantid Log Output", filter_menu)
         framework_action.triggered.connect(self.toggle_filter_framework_output)
         framework_action.setCheckable(True)
         framework_action.setChecked(self.showFrameworkOutput())
@@ -86,7 +85,7 @@ class MessageDisplay(MessageDisplay_cpp):
         active_script_action = QAction("Active Tab Output", filter_menu)
         active_script_action.triggered.connect(self.show_active_script)
         actions_to_group.append(active_script_action)
-        all_script_action = QAction('All Script Output', filter_menu)
+        all_script_action = QAction("All Script Output", filter_menu)
         all_script_action.triggered.connect(self.show_all_scripts)
         actions_to_group.append(all_script_action)
         hide_all_script_action = QAction("Hide All Script Output", filter_menu)

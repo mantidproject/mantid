@@ -81,5 +81,5 @@ class BasicSettingsObjectUsageTest(unittest.TestCase):
         self.assertFalse("a" in c)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

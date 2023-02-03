@@ -12,6 +12,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include <algorithm>
@@ -20,6 +21,8 @@
 using namespace Mantid::API;
 
 namespace {
+
+std::string const WS_EXPORT_NAME("ALFView_exported");
 
 MatrixWorkspace_sptr cropWorkspace(MatrixWorkspace_sptr const &workspace, double const startX, double const endX) {
   auto cropper = AlgorithmManager::Instance().create("CropWorkspace");
@@ -32,18 +35,10 @@ MatrixWorkspace_sptr cropWorkspace(MatrixWorkspace_sptr const &workspace, double
   return cropper->getProperty("OutputWorkspace");
 }
 
-MatrixWorkspace_sptr convertToPointData(MatrixWorkspace_sptr const &workspace) {
-  auto converter = AlgorithmManager::Instance().create("ConvertToPointData");
-  converter->setAlwaysStoreInADS(false);
-  converter->setProperty("InputWorkspace", workspace);
-  converter->setProperty("OutputWorkspace", "__pointData");
-  converter->execute();
-  return converter->getProperty("OutputWorkspace");
-}
-
 IFunction_sptr createFlatBackground(double const height = 0.0) {
   auto flatBackground = FunctionFactory::Instance().createFunction("FlatBackground");
   flatBackground->setParameter("A0", height);
+  flatBackground->addConstraints("A0 > 0");
   return flatBackground;
 }
 
@@ -52,6 +47,7 @@ IFunction_sptr createGaussian(double const height = 0.0, double const peakCentre
   gaussian->setParameter("Height", height);
   gaussian->setParameter("PeakCentre", peakCentre);
   gaussian->setParameter("Sigma", sigma);
+  gaussian->addConstraints("Height > 0");
   return gaussian;
 }
 
@@ -88,39 +84,60 @@ CompositeFunction_sptr createCompositeFunction(IFunction_sptr const &flatBackgro
 namespace MantidQt::CustomInterfaces {
 
 ALFAnalysisModel::ALFAnalysisModel()
-    : m_function(createCompositeFunction(createFlatBackground(), createGaussian())), m_fitStatus("") {}
+    : m_function(createCompositeFunction(createFlatBackground(), createGaussian())), m_fitStatus(""), m_twoThetas(),
+      m_extractedWorkspace(), m_fitWorkspace() {}
 
-void ALFAnalysisModel::doFit(std::string const &wsName, std::pair<double, double> const &range) {
+void ALFAnalysisModel::clear() {
+  m_extractedWorkspace = nullptr;
+  m_fitWorkspace = nullptr;
+  m_fitStatus = "";
+  m_twoThetas.clear();
+}
+
+void ALFAnalysisModel::setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace,
+                                             std::vector<double> const &twoThetas) {
+  m_extractedWorkspace = workspace;
+  m_twoThetas = twoThetas;
+  m_fitStatus = "";
+  m_fitWorkspace = nullptr;
+}
+
+Mantid::API::MatrixWorkspace_sptr ALFAnalysisModel::extractedWorkspace() const { return m_extractedWorkspace; }
+
+bool ALFAnalysisModel::isDataExtracted() const { return m_extractedWorkspace != nullptr; }
+
+MatrixWorkspace_sptr ALFAnalysisModel::doFit(std::pair<double, double> const &range) {
 
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Fit");
   alg->initialize();
+  alg->setAlwaysStoreInADS(false);
   alg->setProperty("Function", m_function);
-  alg->setProperty("InputWorkspace", wsName);
-  alg->setProperty("Output", wsName + "_fits");
+  alg->setProperty("InputWorkspace", m_extractedWorkspace);
+  alg->setProperty("CreateOutput", true);
   alg->setProperty("StartX", range.first);
   alg->setProperty("EndX", range.second);
   alg->execute();
+
   m_function = alg->getProperty("Function");
   m_fitStatus = alg->getPropertyValue("OutputStatus");
+  m_fitWorkspace = alg->getProperty("OutputWorkspace");
+
+  return m_fitWorkspace;
 }
 
-void ALFAnalysisModel::calculateEstimate(std::string const &workspaceName, std::pair<double, double> const &range) {
-  auto &ads = AnalysisDataService::Instance();
-  if (ads.doesExist(workspaceName)) {
-    auto workspace = ads.retrieveWS<MatrixWorkspace>(workspaceName);
-
-    m_function = calculateEstimate(workspace, range);
+void ALFAnalysisModel::calculateEstimate(std::pair<double, double> const &range) {
+  if (m_extractedWorkspace) {
+    m_function = calculateEstimate(m_extractedWorkspace, range);
   } else {
     m_function = createCompositeFunction(createFlatBackground(), createGaussian());
   }
   m_fitStatus = "";
+  m_fitWorkspace = nullptr;
 }
 
 IFunction_sptr ALFAnalysisModel::calculateEstimate(MatrixWorkspace_sptr &workspace,
                                                    std::pair<double, double> const &range) {
   if (auto alteredWorkspace = cropWorkspace(workspace, range.first, range.second)) {
-    alteredWorkspace = convertToPointData(alteredWorkspace);
-
     auto const xData = alteredWorkspace->readX(0);
     auto const yData = alteredWorkspace->readY(0);
 
@@ -131,6 +148,37 @@ IFunction_sptr ALFAnalysisModel::calculateEstimate(MatrixWorkspace_sptr &workspa
   return createCompositeFunction(createFlatBackground(), createGaussian());
 }
 
+void ALFAnalysisModel::exportWorkspaceCopyToADS() const {
+  // The ADS should not be used anywhere else apart from here. Note that a copy is exported.
+  if (auto const workspace = plottedWorkspace()) {
+    AnalysisDataService::Instance().addOrReplace(WS_EXPORT_NAME, workspace->clone());
+  }
+}
+
+MatrixWorkspace_sptr ALFAnalysisModel::plottedWorkspace() const {
+  if (m_fitWorkspace) {
+    return m_fitWorkspace;
+  }
+  if (m_extractedWorkspace) {
+    return m_extractedWorkspace;
+  }
+  return nullptr;
+}
+
+std::vector<int> ALFAnalysisModel::plottedWorkspaceIndices() const {
+  return m_fitWorkspace ? std::vector<int>{0, 1} : std::vector<int>{0};
+}
+
+void ALFAnalysisModel::setPeakParameters(Mantid::API::IPeakFunction_const_sptr const &peak) {
+  auto const centre = peak->getParameter("PeakCentre");
+  auto const height = peak->getParameter("Height");
+  auto const sigma = peak->getParameter("Sigma");
+
+  setPeakCentre(centre);
+  m_function->setParameter("f1.Height", height);
+  m_function->setParameter("f1.Sigma", sigma);
+}
+
 void ALFAnalysisModel::setPeakCentre(double const centre) {
   m_function->setParameter("f1.PeakCentre", centre);
   m_fitStatus = "";
@@ -138,6 +186,33 @@ void ALFAnalysisModel::setPeakCentre(double const centre) {
 
 double ALFAnalysisModel::peakCentre() const { return m_function->getParameter("f1.PeakCentre"); }
 
+double ALFAnalysisModel::background() const { return m_function->getParameter("f0.A0"); }
+
+Mantid::API::IPeakFunction_const_sptr ALFAnalysisModel::getPeakCopy() const {
+  auto const gaussian = m_function->getFunction(1)->clone();
+  return std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(gaussian);
+}
+
 std::string ALFAnalysisModel::fitStatus() const { return m_fitStatus; }
+
+std::size_t ALFAnalysisModel::numberOfTubes() const { return m_twoThetas.size(); }
+
+std::optional<double> ALFAnalysisModel::averageTwoTheta() const {
+  if (m_twoThetas.empty()) {
+    return std::nullopt;
+  }
+  return std::reduce(m_twoThetas.cbegin(), m_twoThetas.cend()) / static_cast<double>(numberOfTubes());
+}
+
+std::optional<double> ALFAnalysisModel::rotationAngle() const {
+  if (m_fitStatus.empty()) {
+    return std::nullopt;
+  }
+  auto const twoTheta = averageTwoTheta();
+  if (!twoTheta) {
+    return std::nullopt;
+  }
+  return peakCentre() / (2 * sin((*twoTheta) * M_PI / 180.0));
+}
 
 } // namespace MantidQt::CustomInterfaces

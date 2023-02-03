@@ -16,12 +16,13 @@ class IndirectInstrument(Instrument, abins.FrequencyPowderGenerator):
     """
     Class for instruments with energy-dependent resolution function
     """
-    def __init__(self, name: str, setting: str = ''):
+
+    def __init__(self, name: str, setting: str = ""):
         self._name = name
         super().__init__(setting=setting)
 
     def get_angles(self):
-        return self.get_parameter('angles')
+        return self.get_parameter("angles")
 
     def calculate_q_powder(self, *, input_data=None, angle=None):
         """Calculates squared Q vectors.
@@ -42,7 +43,7 @@ class IndirectInstrument(Instrument, abins.FrequencyPowderGenerator):
             Q^2 array (in cm-1) corresponding to input frequencies,
             constrained by conservation of mass/momentum and TOSCA geometry
         """
-        final_neutron_energy = self.get_parameter('final_neutron_energy')
+        final_neutron_energy = self.get_parameter("final_neutron_energy")
         cos_scattering_angle = np.cos(angle * np.pi / 180)
 
         k2_i = (input_data + final_neutron_energy) * WAVENUMBER_TO_INVERSE_A
@@ -54,7 +55,7 @@ class IndirectInstrument(Instrument, abins.FrequencyPowderGenerator):
     def get_sigma(cls, frequencies):
         raise NotImplementedError()
 
-    def convolve_with_resolution_function(self, frequencies=None, bins=None, s_dft=None, scheme='auto', prebin='auto'):
+    def convolve_with_resolution_function(self, frequencies=None, bins=None, s_dft=None, scheme="auto", prebin="auto"):
         """
         Convolves discrete DFT spectrum with the  resolution function for the TOSCA instrument (and TOSCA-like).
         :param frequencies:   DFT frequencies for which resolution function should be calculated (frequencies in cm^-1)
@@ -79,15 +80,15 @@ class IndirectInstrument(Instrument, abins.FrequencyPowderGenerator):
             mesh frequencies and corresponding broadened intensity.
         """
 
-        if scheme == 'auto':
+        if scheme == "auto":
             if frequencies.size > 50:
-                selected_scheme = 'interpolate'
+                selected_scheme = "interpolate"
             else:
-                selected_scheme = 'gaussian_truncated'
+                selected_scheme = "gaussian_truncated"
         else:
             selected_scheme = scheme
 
-        if prebin == 'auto':
+        if prebin == "auto":
             if bins.size < frequencies.size:
                 prebin = True
             elif selected_scheme in prebin_required_schemes:
@@ -106,6 +107,5 @@ class IndirectInstrument(Instrument, abins.FrequencyPowderGenerator):
 
         sigma = self.get_sigma(frequencies)
 
-        bin_centres, broadened_spectrum = broaden_spectrum(frequencies, bins, s_dft,
-                                                           sigma, scheme=selected_scheme)
+        bin_centres, broadened_spectrum = broaden_spectrum(frequencies, bins, s_dft, sigma, scheme=selected_scheme)
         return bin_centres, broadened_spectrum

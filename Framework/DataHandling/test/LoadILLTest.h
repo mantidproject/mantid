@@ -62,16 +62,12 @@ public:
 
   void test_LoadDiffraction_D2B() { checkLoader("ILL/D2B/535401", "LoadILLDiffraction"); }
 
+  void test_LoadDiffraction_D4() { checkLoader("ILL/D4/387230", "LoadILLDiffraction"); }
+
   void test_LoadDiffraction_D20() {
     checkLoader("ILL/D20/967076", "LoadILLDiffraction");
     checkLoader("ILL/D20/967087", "LoadILLDiffraction");
   }
-
-  void test_loadDiffraction_IN5() { checkLoader("ILL/IN5/199857", "LoadILLDiffraction"); }
-
-  void test_loadDiffraction_PANTHER() { checkLoader("ILL/PANTHER/010578", "LoadILLDiffraction"); }
-
-  void test_loadDiffraction_SHARP() { checkLoader("ILL/SHARP/000104.nxs", "LoadILLDiffraction"); }
 
   void test_LoadPolarizedDiffraction_D7() { checkLoader("ILL/D7/394458", "LoadILLPolarizedDiffraction"); }
 
@@ -90,6 +86,7 @@ public:
   void test_loadTOF_IN5() {
     checkLoader("ILL/IN5/104007", "LoadILLTOF");
     checkLoader("ILL/IN5/189171", "LoadILLTOF");
+    checkLoader("ILL/IN5/199857", "LoadILLTOF"); // scan IN5
   }
 
   void test_loadTOF_IN6() {
@@ -100,11 +97,13 @@ public:
   void test_loadTOF_PANTHER() {
     checkLoader("ILL/PANTHER/001036", "LoadILLTOF"); // monochromatic PANTHER
     checkLoader("ILL/PANTHER/001723", "LoadILLTOF");
+    checkLoader("ILL/PANTHER/010578", "LoadILLTOF"); // scan PANTHER
   }
 
   void test_loadTOF_SHARP() {
     checkLoader("ILL/SHARP/000102", "LoadILLTOF"); // single-channel
     checkLoader("ILL/SHARP/000103", "LoadILLTOF");
+    checkLoader("ILL/SHARP/000104.nxs", "LoadILLTOF"); // scan SHARP
   }
 
   void test_loadReflectometry_D17() { checkLoader("ILL/D17/317370", "LoadILLReflectometry"); }
@@ -112,7 +111,7 @@ public:
   void test_loadReflectometry_FIGARO() { checkLoader("ILL/Figaro/000002", "LoadILLReflectometry"); }
 
   void test_loadSALSA() {
-    checkLoader("ILL/SALSA/46430", "LoadILLSALSA");
-    checkLoader("ILL/SALSA/46508", "LoadILLSALSA");
+    checkLoader("ILL/SALSA/046430", "LoadILLSALSA");
+    checkLoader("ILL/SALSA/046508", "LoadILLSALSA");
   }
 };

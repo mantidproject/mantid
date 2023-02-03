@@ -17,7 +17,7 @@ from matplotlib.colorbar import Colorbar
 from matplotlib.figure import Figure
 from matplotlib.colors import ListedColormap, Normalize, SymLogNorm, PowerNorm, LogNorm
 from matplotlib.image import AxesImage
-from matplotlib import cm
+from matplotlib import colormaps
 import numpy as np
 from qtpy.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QComboBox, QCheckBox, QLabel
 from qtpy.QtCore import Signal, Qt
@@ -33,12 +33,12 @@ def register_customized_colormaps():
     cmap_files = glob.glob(os.path.join(cmap_path, "*.map"))
     for cmap_file in cmap_files:
         cmap_name = os.path.basename(cmap_file).split(".")[0]
-        cmap_data = np.loadtxt(cmap_file)/255.0
+        cmap_data = np.loadtxt(cmap_file) / 255.0
         cmap = ListedColormap(cmap_data, name=cmap_name)
-        cm.register_cmap(name=cmap_name, cmap=cmap)
+        colormaps.register(name=cmap_name, cmap=cmap)
         cmap_data_r = np.flipud(cmap_data)
         cmap_r = ListedColormap(cmap_data_r, name=f"{cmap_name}_r")
-        cm.register_cmap(name=f"{cmap_name}_r", cmap=cmap_r)
+        colormaps.register(name=f"{cmap_name}_r", cmap=cmap_r)
 
 
 class ColorbarWidget(QWidget):
@@ -47,7 +47,7 @@ class ColorbarWidget(QWidget):
     # register additional color maps from file
     register_customized_colormaps()
     # create the list
-    cmap_list = sorted([cmap for cmap in cm.cmap_d.keys() if not cmap.endswith('_r')])
+    cmap_list = sorted([cmap for cmap in colormaps.keys() if not cmap.endswith("_r")])
 
     def __init__(self, parent=None, default_norm_scale=None):
         """
@@ -62,7 +62,7 @@ class ColorbarWidget(QWidget):
         self.cmap = QComboBox()
         self.cmap.addItems(self.cmap_list)
         self.cmap.currentIndexChanged.connect(self.cmap_index_changed)
-        self.crev = QCheckBox('Reverse')
+        self.crev = QCheckBox("Reverse")
         self.crev.stateChanged.connect(self.crev_checked_changed)
 
         self.cmin = QLineEdit()
@@ -85,13 +85,13 @@ class ColorbarWidget(QWidget):
         self.cmax_layout.addWidget(self.cmax)
         self.cmax_layout.addStretch()
 
-        norm_scale = 'Linear'
+        norm_scale = "Linear"
         powerscale_value = 2
         if default_norm_scale in NORM_OPTS:
             norm_scale = default_norm_scale
         if isinstance(default_norm_scale, tuple) and default_norm_scale[0] in NORM_OPTS:
             norm_scale = default_norm_scale[0]
-            if norm_scale == 'Power':
+            if norm_scale == "Power":
                 powerscale_value = float(default_norm_scale[1])
 
         self.norm_layout = QHBoxLayout()
@@ -108,7 +108,7 @@ class ColorbarWidget(QWidget):
         self.powerscale.setMaximumWidth(50)
         self.powerscale.editingFinished.connect(self.norm_changed)
         self.powerscale_label = QLabel("n=")
-        if norm_scale != 'Power':
+        if norm_scale != "Power":
             self.powerscale.hide()
             self.powerscale_label.hide()
 
@@ -159,11 +159,11 @@ class ColorbarWidget(QWidget):
 
         mappable_cmap = get_current_cmap(mappable)
 
-        if mappable_cmap.name.endswith('_r'):
+        if mappable_cmap.name.endswith("_r"):
             self.crev.setChecked(True)
         else:
             self.crev.setChecked(False)
-        self.cmap.setCurrentIndex(self.cmap_list.index(mappable_cmap.name.replace('_r', '')))
+        self.cmap.setCurrentIndex(self.cmap_list.index(mappable_cmap.name.replace("_r", "")))
 
         self.redraw()
 
@@ -175,7 +175,7 @@ class ColorbarWidget(QWidget):
 
     def cmap_changed(self, name, rev):
         if rev:
-            name += '_r'
+            name += "_r"
         self.colorbar.mappable.set_cmap(name)
         if mpl_version_info() >= (3, 1):
             self.colorbar.update_normal(self.colorbar.mappable)
@@ -193,7 +193,7 @@ class ColorbarWidget(QWidget):
         self.cmin_value = low
         self.cmax_value = high
         self.update_clim_text()
-        self.cmap.setCurrentIndex(sorted(cm.cmap_d.keys()).index(mappable_cmap.name))
+        self.cmap.setCurrentIndex(sorted(colormaps.keys()).index(mappable_cmap.name))
         self.redraw()
 
     def norm_changed(self):
@@ -201,7 +201,7 @@ class ColorbarWidget(QWidget):
         Called when a different normalization is selected
         """
         idx = self.norm.currentIndex()
-        if NORM_OPTS[idx] == 'Power':
+        if NORM_OPTS[idx] == "Power":
             self.powerscale.show()
             self.powerscale_label.show()
         else:
@@ -223,13 +223,12 @@ class ColorbarWidget(QWidget):
         else:
             cmin = self.cmin_value
             cmax = self.cmax_value
-        if NORM_OPTS[idx] == 'Power':
+        if NORM_OPTS[idx] == "Power":
             if self.powerscale.hasAcceptableInput():
                 self.powerscale_value = float(self.powerscale.text())
             return PowerNorm(gamma=self.powerscale_value, vmin=cmin, vmax=cmax)
         elif NORM_OPTS[idx] == "SymmetricLog10":
-            return SymLogNorm(1e-8 if cmin is None else max(1e-8, abs(cmin) * 1e-3),
-                              vmin=cmin, vmax=cmax)
+            return SymLogNorm(1e-8 if cmin is None else max(1e-8, abs(cmin) * 1e-3), vmin=cmin, vmax=cmax)
         elif NORM_OPTS[idx] == "Log":
             cmin = MIN_LOG_VALUE if cmin is not None and cmin <= 0 else cmin
             if cmin is None and cmax is None:
@@ -241,15 +240,15 @@ class ColorbarWidget(QWidget):
 
     def get_colorbar_scale(self):
         norm = self.colorbar.norm
-        scale = 'linear'
+        scale = "linear"
         kwargs = {}
         if isinstance(norm, SymLogNorm):
-            scale = 'symlog'
+            scale = "symlog"
         elif isinstance(norm, LogNorm):
-            scale = 'log'
+            scale = "log"
         elif isinstance(norm, PowerNorm):
-            scale = 'function'
-            kwargs = {'functions': (lambda x: np.power(x, norm.gamma), lambda x: np.power(x, 1 / norm.gamma))}
+            scale = "function"
+            kwargs = {"functions": (lambda x: np.power(x, norm.gamma), lambda x: np.power(x, 1 / norm.gamma))}
         return scale, kwargs
 
     def clim_changed(self):
@@ -285,7 +284,7 @@ class ColorbarWidget(QWidget):
         Redraws the colobar and emits signal to cause the parent to redraw
         """
         self.colorbar.update_ticks()
-        self.colorbar.draw_all()
+        self.canvas.figure.draw_without_rendering()
         self.canvas.draw_idle()
         self.colorbarChanged.emit()
 
@@ -298,7 +297,7 @@ class ColorbarWidget(QWidget):
             self.cmax.setValidator(self.linear_validator)
 
     def _autoscale_clim(self):
-        """Update stored colorbar limits. The new limits are found from the colobar data """
+        """Update stored colorbar limits. The new limits are found from the colobar data"""
         climits = self._calculate_clim()
         if climits is not None:
             self.cmin_value, self.cmax_value = climits
@@ -356,21 +355,19 @@ class ColorbarWidget(QWidget):
         if data_array is not None:
             log_index, symmetric_log_index = NORM_OPTS.index("Log"), NORM_OPTS.index("SymmetricLog10")
             if np.all(data_array <= 0):
-                self._disable_normalisation_option(mappable, log_index, LogNorm,
-                                                   "Log scale is disabled for non-positive data")
+                self._disable_normalisation_option(mappable, log_index, LogNorm, "Log scale is disabled for non-positive data")
             elif data_array.all() is np.ma.masked:
-                self._disable_normalisation_option(mappable, log_index, LogNorm,
-                                                   "Log scale is disabled for masked data")
-                self._disable_normalisation_option(mappable, symmetric_log_index, SymLogNorm,
-                                                   "SymmetricLog10 scale is disabled for masked data")
+                self._disable_normalisation_option(mappable, log_index, LogNorm, "Log scale is disabled for masked data")
+                self._disable_normalisation_option(
+                    mappable, symmetric_log_index, SymLogNorm, "SymmetricLog10 scale is disabled for masked data"
+                )
             else:
                 self._enable_normalisation_option(log_index)
                 self._enable_normalisation_option(symmetric_log_index)
 
         return mappable
 
-    def _disable_normalisation_option(self, mappable: AxesImage, option_index: int, norm_type: Normalize,
-                                      tooltip: str) -> None:
+    def _disable_normalisation_option(self, mappable: AxesImage, option_index: int, norm_type: Normalize, tooltip: str) -> None:
         """Disables a non-linear normalisation option and sets the new normalisation to Linear."""
         if option_index == 0:
             raise ValueError("The Linear normalisation option cannot be disabled.")

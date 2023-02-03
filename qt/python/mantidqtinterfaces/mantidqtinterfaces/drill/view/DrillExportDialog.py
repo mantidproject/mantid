@@ -42,9 +42,7 @@ class DrillExportDialog(QDialog):
         uic.loadUi(os.path.join(self.here, self.UI_FILENAME), self)
         self.okButton.clicked.connect(self.accept)
         self.cancelButton.clicked.connect(self.reject)
-        self.applyButton.clicked.connect(
-                lambda : self.accepted.emit()
-                )
+        self.applyButton.clicked.connect(lambda: self.accepted.emit())
         self._widgets = dict()
 
     def setPresenter(self, presenter):
@@ -74,12 +72,11 @@ class DrillExportDialog(QDialog):
             self._widgets[(name, ext)] = widget
             self.algoList.addWidget(widget, i, 0, Qt.AlignLeft)
             helpButton = QToolButton(self)
-            helpButton.setText('...')
+            helpButton.setText("...")
             helpButton.setIcon(icons.get_icon("mdi.help"))
             helpButton.clicked.connect(
-                    lambda _, a=name: InterfaceManager().showHelpPage(
-                        "qthelp://org.mantidproject/doc/algorithms/{}.html"
-                        .format(a)))
+                lambda _, a=name: InterfaceManager().showHelpPage("qthelp://org.mantidproject/doc/algorithms/{}.html".format(a))
+            )
             self.algoList.addWidget(helpButton, i, 1, Qt.AlignRight)
             i += 1
 
@@ -91,7 +88,7 @@ class DrillExportDialog(QDialog):
             sates (dict((str, str): bool)): activation state for each algorithm
                                             (name, ext) tuple
         """
-        for a,s in states.items():
+        for a, s in states.items():
             if a in self._widgets:
                 self._widgets[a].setChecked(s)
 
@@ -103,4 +100,4 @@ class DrillExportDialog(QDialog):
             dict((str, str): bool): activation state for each algorithm
                                     (name, ext) tuple
         """
-        return {a:w.isChecked() for a,w in self._widgets.items()}
+        return {a: w.isChecked() for a, w in self._widgets.items()}

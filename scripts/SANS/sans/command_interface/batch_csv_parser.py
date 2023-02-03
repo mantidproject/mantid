@@ -30,7 +30,7 @@ class BatchFileKeywords(Enum):
 
 class BatchCsvParser(object):
     IGNORED_KEYWORDS = {"background_sans", "background_trans", "background_direct_beam", ""}
-    COMMENT_KEWORDS = {'#', "MANTID_BATCH_FILE"}
+    COMMENT_KEWORDS = {"#", "MANTID_BATCH_FILE"}
 
     def parse_batch_file(self, batch_file_name):
         """
@@ -41,13 +41,14 @@ class BatchCsvParser(object):
         # Get the full file path
         batch_file_name = find_full_file_path(batch_file_name)
         if not batch_file_name:
-            raise RuntimeError("batch_csv_file_parser: Could not find specified batch file. Make sure it is available"
-                               "in the Mantid path settings.")
+            raise RuntimeError(
+                "batch_csv_file_parser: Could not find specified batch file. Make sure it is available" "in the Mantid path settings."
+            )
 
         parsed_rows = []
 
         try:
-            with open(batch_file_name, 'r') as csvfile:
+            with open(batch_file_name, "r") as csvfile:
                 batch_reader = reader(csvfile, delimiter=",")
                 read_rows = list(batch_reader)
         except (csv.Error, UnicodeDecodeError) as e:
@@ -83,35 +84,40 @@ class BatchCsvParser(object):
         assert isinstance(row, RowEntries)
 
         def pack_val(obj_val):
-            return str(obj_val) if obj_val else ''
+            return str(obj_val) if obj_val else ""
 
         def pack_period(run_val, period_val):
             # Appends the period if it's present, otherwise leaves string untouched
             csv_val = pack_val(run_val)
-            return csv_val + 'P' + str(period_val) if period_val else csv_val
+            return csv_val + "P" + str(period_val) if period_val else csv_val
 
         # Non-optional (i.e. expected) fields
         # Try to keep the order found in the GUI back outwards
-        return [BatchFileKeywords.SAMPLE_SCATTER.value, pack_period(row.sample_scatter, row.sample_scatter_period),
-
-                BatchFileKeywords.SAMPLE_TRANSMISSION.value, pack_period(row.sample_transmission,
-                                                                         row.sample_transmission_period),
-                BatchFileKeywords.SAMPLE_DIRECT.value, pack_period(row.sample_direct, row.sample_direct_period),
-
-                BatchFileKeywords.CAN_SCATTER.value, pack_period(row.can_scatter, row.can_scatter_period),
-
-                BatchFileKeywords.CAN_TRANSMISSION.value, pack_period(row.can_transmission,
-                                                                      row.can_transmission_period),
-                BatchFileKeywords.CAN_DIRECT.value, pack_period(row.can_direct, row.can_direct_period),
-
-                BatchFileKeywords.OUTPUT.value, pack_val(row.output_name),
-                BatchFileKeywords.USER_FILE.value, pack_val(row.user_file),
-                BatchFileKeywords.SAMPLE_THICKNESS.value, pack_val(row.sample_thickness),
-
-                # Optional but pack them anyway for completeness
-                BatchFileKeywords.SAMPLE_HEIGHT.value, pack_val(row.sample_height),
-                BatchFileKeywords.SAMPLE_WIDTH.value, pack_val(row.sample_width)
-                ]
+        return [
+            BatchFileKeywords.SAMPLE_SCATTER.value,
+            pack_period(row.sample_scatter, row.sample_scatter_period),
+            BatchFileKeywords.SAMPLE_TRANSMISSION.value,
+            pack_period(row.sample_transmission, row.sample_transmission_period),
+            BatchFileKeywords.SAMPLE_DIRECT.value,
+            pack_period(row.sample_direct, row.sample_direct_period),
+            BatchFileKeywords.CAN_SCATTER.value,
+            pack_period(row.can_scatter, row.can_scatter_period),
+            BatchFileKeywords.CAN_TRANSMISSION.value,
+            pack_period(row.can_transmission, row.can_transmission_period),
+            BatchFileKeywords.CAN_DIRECT.value,
+            pack_period(row.can_direct, row.can_direct_period),
+            BatchFileKeywords.OUTPUT.value,
+            pack_val(row.output_name),
+            BatchFileKeywords.USER_FILE.value,
+            pack_val(row.user_file),
+            BatchFileKeywords.SAMPLE_THICKNESS.value,
+            pack_val(row.sample_thickness),
+            # Optional but pack them anyway for completeness
+            BatchFileKeywords.SAMPLE_HEIGHT.value,
+            pack_val(row.sample_height),
+            BatchFileKeywords.SAMPLE_WIDTH.value,
+            pack_val(row.sample_width),
+        ]
 
     def _parse_csv_row(self, row, row_number):
         # Clean all elements of the row
@@ -215,11 +221,15 @@ class BatchCsvParser(object):
         if not output.sample_scatter:
             raise ValueError("The sample_scatter entry in row {0} seems to be missing.".format(row_number))
         if bool(output.sample_transmission) != bool(output.sample_direct):
-            raise ValueError("Inconsistent sample transmission settings in row {0}. Either both the transmission "
-                             "and the direct beam run are set or none.".format(row_number))
+            raise ValueError(
+                "Inconsistent sample transmission settings in row {0}. Either both the transmission "
+                "and the direct beam run are set or none.".format(row_number)
+            )
         if bool(output.can_transmission) != bool(output.can_direct):
-            raise ValueError("Inconsistent can transmission settings in row {0}. Either both the transmission "
-                             "and the direct beam run are set or none.".format(row_number))
+            raise ValueError(
+                "Inconsistent can transmission settings in row {0}. Either both the transmission "
+                "and the direct beam run are set or none.".format(row_number)
+            )
 
         # Ensure that can scatter is specified if the transmissions are set
         if bool(output.can_transmission) and not bool(output.can_scatter):

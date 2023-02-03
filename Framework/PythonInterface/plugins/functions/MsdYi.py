@@ -15,15 +15,14 @@ from mantid.api import IFunction1D, FunctionFactory
 
 
 class MsdYi(IFunction1D):
-
     def category(self):
         return "QuasiElastic"
 
     def init(self):
         # Active fitting parameters
-        self.declareParameter("Height", 1.0, 'Height')
-        self.declareParameter("Msd", 0.05, 'Mean square displacement')
-        self.declareParameter("Sigma", 1.0, 'Sigma')
+        self.declareParameter("Height", 1.0, "Height")
+        self.declareParameter("Msd", 0.05, "Mean square displacement")
+        self.declareParameter("Sigma", 1.0, "Sigma")
 
     def function1D(self, xvals):
         height = self.getParameterValue("Height")

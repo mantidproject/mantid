@@ -579,7 +579,7 @@ private:
 
   void expectBatchAdded(MockBatchPresenter *batchPresenter) {
     EXPECT_CALL(*batchPresenter, acceptMainPresenter(_)).Times(1);
-    EXPECT_CALL(*batchPresenter, initInstrumentList()).Times(1);
+    EXPECT_CALL(*batchPresenter, initInstrumentList(_)).Times(1);
     EXPECT_CALL(*batchPresenter, notifyInstrumentChanged(_)).Times(1);
     EXPECT_CALL(*batchPresenter, notifyReductionPaused()).Times(1);
     EXPECT_CALL(*batchPresenter, notifyAnyBatchAutoreductionPaused()).Times(1);

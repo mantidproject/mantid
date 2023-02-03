@@ -20,8 +20,13 @@ import numpy as np
 
 # local imports
 from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
-from mantidqt.widgets.sliceviewer.views.cursor import (CursorTracker, MoveMouseCursorUp, MoveMouseCursorDown, MoveMouseCursorLeft,
-                                                       MoveMouseCursorRight)
+from mantidqt.widgets.sliceviewer.views.cursor import (
+    CursorTracker,
+    MoveMouseCursorUp,
+    MoveMouseCursorDown,
+    MoveMouseCursorLeft,
+    MoveMouseCursorRight,
+)
 
 # Limits for X/Y axes
 Limits = Tuple[Tuple[float, float], Tuple[float, float]]
@@ -32,6 +37,7 @@ class LinePlots:
     Provides facilities to add line cut plots to an existing
     image axes
     """
+
     __slots__ = ("_axx", "_axy", "_canvas", "_colorbar", "_fig", "_im_ax", "_xfig", "_yfig")
 
     def __init__(self, image_axes: Axes, colorbar: ColorbarWidget):
@@ -127,9 +133,9 @@ class LinePlots:
         """
         # ensure plot labels are in sync with main axes
         self._axx.relim()
-        self._axx.autoscale(axis='y')
+        self._axx.autoscale(axis="y")
         self._axy.relim()
-        self._axy.autoscale(axis='x')
+        self._axy.autoscale(axis="x")
 
     def update_line_plot_labels(self):
         """
@@ -205,6 +211,7 @@ class KeyHandler:
       - STATUS_MESSAGE: str - A string defining the information message to display
       - SELECTION_KEYS: tuple(str) - A tuple of strings defining keys to accept
     """
+
     def __init__(self, plotter: LinePlots, exporter: Any):
         """
         :param plotter: A reference to the object holding the line plot axes.
@@ -213,7 +220,7 @@ class KeyHandler:
         self._plotter = plotter
         self.exporter = exporter
         ax = plotter.image_axes
-        self._key_cid = ax.figure.canvas.mpl_connect('key_release_event', self._on_key_released)
+        self._key_cid = ax.figure.canvas.mpl_connect("key_release_event", self._on_key_released)
 
     def disconnect(self):
         """Called to disconnect from the axes events"""
@@ -244,6 +251,7 @@ class KeyHandler:
             self.handle_key(key)
         except Exception:
             import traceback
+
             traceback.print_exc()
 
 
@@ -254,12 +262,12 @@ class PixelLinePlot(CursorTracker, KeyHandler):
     """
 
     STATUS_MESSAGE = "Keys: arrow keys control mouse pointer, workspace cuts: c=both cuts, x=X, y=Y."
-    SELECTION_KEYS = ('c', 'x', 'y', 'up', 'down', 'left', 'right')
+    SELECTION_KEYS = ("c", "x", "y", "up", "down", "left", "right")
     PIXEL_TRANSFORM_CLS = {
-        'up': MoveMouseCursorUp,
-        'down': MoveMouseCursorDown,
-        'left': MoveMouseCursorLeft,
-        'right': MoveMouseCursorRight,
+        "up": MoveMouseCursorUp,
+        "down": MoveMouseCursorDown,
+        "left": MoveMouseCursorLeft,
+        "right": MoveMouseCursorRight,
     }
 
     def __init__(self, plotter: LinePlots, exporter: Any):
@@ -330,7 +338,7 @@ class RectangleSelectionLinePlot(KeyHandler):
     """
 
     STATUS_MESSAGE = "Press key to send roi/cuts to workspaces: r=roi, c=both cuts, x=X, y=Y. Esc clears region"
-    SELECTION_KEYS = ('r', 'c', 'x', 'y')
+    SELECTION_KEYS = ("r", "c", "x", "y")
 
     def __init__(self, plotter: LinePlots, exporter: Any):
         """
@@ -346,8 +354,9 @@ class RectangleSelectionLinePlot(KeyHandler):
             button=[1],
             minspanx=5,
             minspany=5,
-            spancoords='pixels',
-            interactive=True)
+            spancoords="pixels",
+            interactive=True,
+        )
 
     def disconnect(self):
         super().disconnect()
@@ -366,13 +375,13 @@ class RectangleSelectionLinePlot(KeyHandler):
         if not self._selector.artists[0].get_visible():
             return
 
-        rect = self._selector.to_draw
+        rect = self._selector._selection_artist
         ll_x, ll_y = rect.get_xy()
         limits = ((ll_x, ll_x + rect.get_width()), (ll_y, ll_y + rect.get_height()))
 
-        if key == 'r':
+        if key == "r":
             self.exporter.export_roi(limits)
-        if key in ('c', 'x', 'y'):
+        if key in ("c", "x", "y"):
             self.exporter.export_cut(limits, cut_type=key)
 
     # private api
@@ -392,12 +401,8 @@ class RectangleSelectionLinePlot(KeyHandler):
 
         arr, (xmin, xmax, ymin, ymax), (imin, jmin) = cinfo_click
         _, __, (imax, jmax) = cinfo_release
-        plotter.plot_x_line(
-            np.linspace(xmin, xmax, arr.shape[1])[jmin:jmax],
-            np.sum(arr[imin:imax, jmin:jmax], axis=0))
-        plotter.plot_y_line(
-            np.linspace(ymin, ymax, arr.shape[0])[imin:imax],
-            np.sum(arr[imin:imax, jmin:jmax], axis=1))
+        plotter.plot_x_line(np.linspace(xmin, xmax, arr.shape[1])[jmin:jmax], np.sum(arr[imin:imax, jmin:jmax], axis=0))
+        plotter.plot_y_line(np.linspace(ymin, ymax, arr.shape[0])[imin:imax], np.sum(arr[imin:imax, jmin:jmax], axis=1))
         plotter.update_line_plot_limits()
         plotter.redraw()
 
@@ -434,7 +439,7 @@ def cursor_info(image: AxesImage, xdata: float, ydata: float, full_bbox: Bbox = 
         return None
 
     point = point.astype(int)
-    if 0 <= point[0] < arr.shape[0] and 0 <= point[1] < arr.shape[1]:
+    if 0 <= point[0] <= arr.shape[0] and 0 <= point[1] <= arr.shape[1]:
         return CursorInfo(array=arr, extent=extent, point=point)
     else:
         return None

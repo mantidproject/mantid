@@ -10,19 +10,20 @@ from mantid.api import FrameworkManager
 from mantidqt.utils.qt.testing import start_qapplication
 
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_view import BasicFittingView
-from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.fit_function_options_view import (EVALUATE_AS_TABLE_ROW,
-                                                                                                        EXCLUDE_RANGE_TABLE_ROW,
-                                                                                                        EXCLUDE_START_X_TABLE_ROW,
-                                                                                                        EXCLUDE_END_X_TABLE_ROW,
-                                                                                                        RAW_DATA_TABLE_ROW,
-                                                                                                        PLOT_GUESS_POINTS,
-                                                                                                        PLOT_GUESS_START_X,
-                                                                                                        PLOT_GUESS_END_X)
+from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.fit_function_options_view import (
+    EVALUATE_AS_TABLE_ROW,
+    EXCLUDE_RANGE_TABLE_ROW,
+    EXCLUDE_START_X_TABLE_ROW,
+    EXCLUDE_END_X_TABLE_ROW,
+    RAW_DATA_TABLE_ROW,
+    PLOT_GUESS_POINTS,
+    PLOT_GUESS_START_X,
+    PLOT_GUESS_END_X,
+)
 
 
 @start_qapplication
 class BasicFittingViewTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         FrameworkManager.Instance()
@@ -224,5 +225,5 @@ class BasicFittingViewTest(unittest.TestCase):
         self.assertTrue(self.view.fit_function_options.fit_options_table.isRowHidden(PLOT_GUESS_END_X))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

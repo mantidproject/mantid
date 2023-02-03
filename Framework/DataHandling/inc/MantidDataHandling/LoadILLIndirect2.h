@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
-#include "MantidDataHandling/LoadHelper.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
 
@@ -41,13 +41,12 @@ private:
   void setInstrumentName(const NeXus::NXEntry &firstEntry, const std::string &instrumentNamePath);
   std::string getDataPath(const NeXus::NXEntry &entry);
   void loadNexusEntriesIntoProperties(const std::string &nexusfilename);
-  void loadDataIntoTheWorkSpace(NeXus::NXEntry &entry);
+  void loadDataIntoWorkspace(NeXus::NXEntry &entry);
   void loadDiffractionData(NeXus::NXEntry &entry);
-  void runLoadInstrument();
   void moveComponent(const std::string &, double);
   void moveSingleDetectors(const NeXus::NXEntry &entry);
   void rotateTubes();
-  std::string getInstrumentFilePath();
+  std::string getInstrumentFileName();
 
   API::MatrixWorkspace_sptr m_localWorkspace;
 
@@ -65,7 +64,6 @@ private:
   size_t m_firstTubeAngleRounded;   // A flag holding the rounded angle of the first tube
 
   std::vector<std::string> m_supportedInstruments;
-  LoadHelper m_loader;
   std::string m_loadOption;
 };
 

@@ -21,19 +21,15 @@ app = QApplication(sys.argv)
 
 
 class DrillTableWidgetTest(unittest.TestCase):
-
     def setUp(self):
         self.table = DrillTableWidget()
 
     def test_init(self):
         self.assertEqual(self.table._columns, [])
         self.assertFalse(self.table._disabled)
-        self.assertTrue(isinstance(self.table.horizontalHeader(),
-                        DrillHeaderView))
-        self.assertTrue(isinstance(self.table.itemDelegate(),
-                        DrillItemDelegate))
-        self.assertTrue(isinstance(self.table.itemPrototype(),
-                        DrillTableItem))
+        self.assertTrue(isinstance(self.table.horizontalHeader(), DrillHeaderView))
+        self.assertTrue(isinstance(self.table.itemDelegate(), DrillItemDelegate))
+        self.assertTrue(isinstance(self.table.itemPrototype(), DrillTableItem))
         self.assertEqual(self.table._samplePresenters, [])
 
     def test_addSamplePresenter(self):
@@ -245,8 +241,7 @@ class DrillTableWidgetTest(unittest.TestCase):
         self.table._disabled = False
         self.table.setCellContents(0, 0, "test")
         self.table.itemPrototype.assert_called
-        self.table.itemPrototype.return_value.clone.return_value \
-            .setData.assert_called_once_with(2, "test")
+        self.table.itemPrototype.return_value.clone.return_value.setData.assert_called_once_with(2, "test")
         self.table.setItem.assert_called_once()
 
     @mock.patch("mantidqtinterfaces.drill.view.DrillTableWidget.QBrush")
@@ -297,8 +292,7 @@ class DrillTableWidgetTest(unittest.TestCase):
         self.table.verticalHeader = mock.Mock()
         self.table.delRowLabel(0)
         self.table.setVerticalHeaderItem.assert_called_once_with(0, None)
-        self.table.verticalHeader.return_value.headerDataChanged \
-            .assert_called_once()
+        self.table.verticalHeader.return_value.headerDataChanged.assert_called_once()
 
     def test_setFoldedColumns(self):
         self.table.horizontalHeader = mock.Mock()
@@ -374,8 +368,7 @@ class DrillTableWidgetTest(unittest.TestCase):
         self.table.horizontalHeader = mock.Mock()
         mHeader = self.table.horizontalHeader.return_value
         mHeader.visualIndex.side_effect = [2, 1, 0]
-        self.assertEqual(self.table.getColumnsOrder(),
-                         ["test3", "test2", "test1"])
+        self.assertEqual(self.table.getColumnsOrder(), ["test3", "test2", "test1"])
 
 
 if __name__ == "__main__":

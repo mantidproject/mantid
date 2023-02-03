@@ -23,9 +23,11 @@ boost::optional<RangeInLambda> rangeOrNone(const RangeInLambda &range, const boo
 }
 } // namespace
 
-InstrumentPresenter::InstrumentPresenter(IInstrumentView *view, Instrument instrument,
+InstrumentPresenter::InstrumentPresenter(IInstrumentView *view, Instrument instrument, IFileHandler *fileHandler,
+                                         IReflMessageHandler *messageHandler,
                                          std::unique_ptr<IInstrumentOptionDefaults> instrumentDefaults)
-    : m_instrumentDefaults(std::move(instrumentDefaults)), m_view(view), m_model(std::move(instrument)) {
+    : m_instrumentDefaults(std::move(instrumentDefaults)), m_view(view), m_model(std::move(instrument)),
+      m_fileHandler(fileHandler), m_messageHandler(messageHandler) {
   m_view->subscribe(this);
 }
 
@@ -40,6 +42,13 @@ void InstrumentPresenter::notifyRestoreDefaultsRequested() {
   // Trigger a reload of the instrument to get up-to-date settings.
   m_mainPresenter->notifyUpdateInstrumentRequested();
   restoreDefaults();
+}
+
+void InstrumentPresenter::notifyBrowseToCalibrationFileRequested() {
+  auto calibrationFilePath = m_messageHandler->askUserForLoadFileName("Data Files (*.dat)");
+  if (!calibrationFilePath.empty()) {
+    m_view->setCalibrationFilePath(calibrationFilePath);
+  }
 }
 
 Instrument const &InstrumentPresenter::instrument() const { return m_model; }
@@ -84,6 +93,16 @@ void InstrumentPresenter::updateWidgetValidState() {
     m_view->showMonitorIntegralRangeValid();
   else
     m_view->showMonitorIntegralRangeInvalid();
+
+  updateCalibrationFileValidState(m_model.calibrationFilePath());
+}
+
+void InstrumentPresenter::updateCalibrationFileValidState(const std::string &calibrationFilePath) {
+  if (!calibrationFilePath.empty() && !m_fileHandler->fileExists(calibrationFilePath)) {
+    m_view->showCalibrationFilePathInvalid();
+  } else {
+    m_view->showCalibrationFilePathValid();
+  }
 }
 
 void InstrumentPresenter::notifyReductionPaused() { updateWidgetEnabledState(); }
@@ -174,11 +193,18 @@ DetectorCorrections InstrumentPresenter::detectorCorrectionsFromView() {
   return DetectorCorrections(correctPositions, correctionType);
 }
 
+std::string InstrumentPresenter::calibrationFilePathFromView() {
+  auto const calibrationFilePath = m_view->getCalibrationFilePath();
+  updateCalibrationFileValidState(calibrationFilePath);
+  return calibrationFilePath;
+}
+
 void InstrumentPresenter::updateModelFromView() {
   auto const wavelengthRange = wavelengthRangeFromView();
   auto const monitorCorrections = monitorCorrectionsFromView();
   auto const detectorCorrections = detectorCorrectionsFromView();
-  m_model = Instrument(wavelengthRange, monitorCorrections, detectorCorrections);
+  auto const calibrationFilePath = calibrationFilePathFromView();
+  m_model = Instrument(wavelengthRange, monitorCorrections, detectorCorrections, calibrationFilePath);
 }
 
 void InstrumentPresenter::updateViewFromModel() {
@@ -202,6 +228,7 @@ void InstrumentPresenter::updateViewFromModel() {
   }
   m_view->setCorrectDetectors(m_model.correctDetectors());
   m_view->setDetectorCorrectionType(detectorCorrectionTypeToString(m_model.detectorCorrectionType()));
+  m_view->setCalibrationFilePath(m_model.calibrationFilePath());
 
   updateWidgetEnabledState();
   updateWidgetValidState();

@@ -1,0 +1,65 @@
+digraph Sample {
+  $global_style
+
+  subgraph decisions {
+    $decision_style
+    ExportAscii
+    CorrectDeadTime
+    CorrectBankPositions
+    CorrectRelativeEfficiencies
+    Normalise
+  }
+
+  subgraph params {
+    $param_style
+    Runs
+    BankPositionOffsetsFile
+    ZeroPositionAngle
+    EfficiencyCalibrationFile
+    NormalisationStandard
+  }
+
+  subgraph values {
+    $value_style
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    LoadAndMerge
+    LoadILLDiffraction
+    ExtractMonitors
+    DeadTimeCorrection
+    RotateInstrumentComponent
+    Divide
+    Divide2 [label="Normalise"]
+    SaveAscii
+  }
+
+  Runs -> LoadAndMerge
+  LoadAndMerge -> LoadILLDiffraction
+  LoadILLDiffraction -> LoadAndMerge
+  LoadAndMerge -> ExtractMonitors
+  ExtractMonitors -> CorrectDeadTime
+  ExtractMonitors -> Normalise
+  CorrectDeadTime -> DeadTimeCorrection
+  DeadTimeCorrection -> CorrectBankPositions
+  CorrectDeadTime -> CorrectBankPositions
+  CorrectBankPositions -> RotateInstrumentComponent
+  BankPositionOffsetsFile -> RotateInstrumentComponent
+  ZeroPositionAngle -> RotateInstrumentComponent
+  RotateInstrumentComponent -> CorrectRelativeEfficiencies
+  CorrectBankPositions -> CorrectRelativeEfficiencies
+  CorrectRelativeEfficiencies -> Divide
+  EfficiencyCalibrationFile -> Divide
+  Divide -> Normalise
+  Normalise -> Divide2
+  NormalisationStandard -> Divide2
+  Divide2 -> OutputWorkspace
+  Normalise -> OutputWorkspace
+  OutputWorkspace -> ExportAscii
+  ExportAscii -> SaveAscii
+}
+
+
+

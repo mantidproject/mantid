@@ -26,7 +26,6 @@ def raises_exception():
 
 @start_qapplication
 class QAppThreadCallTest(unittest.TestCase):
-
     def test_successive_non_blocking_calls_receive_expected_arguments(self):
         self.do_successive_call_with_expected_args_test(blocking=True)
 
@@ -60,9 +59,9 @@ class QAppThreadCallTest(unittest.TestCase):
         QApplication.sendPostedEvents()
 
         # Assert correct ordering
-        self.assertEqual(len(called_args),
-                         len(input_args),
-                         msg="Number of called arguments does not match the expected number of input arguments")
+        self.assertEqual(
+            len(called_args), len(input_args), msg="Number of called arguments does not match the expected number of input arguments"
+        )
         for input_arg, called_arg in zip(input_args, called_args):
             self.assertEqual(input_arg, called_arg)
 
@@ -92,9 +91,7 @@ class QAppThreadCallTest(unittest.TestCase):
         self.assertTrue(isinstance(self.exc.exc_value, CustomException), msg=f"Expected CustomException, found {self.exc.exc_value}")
 
     def test_force_method_calls_to_qapp_thread(self):
-
         class Impl:
-
             def public(self):
                 pass
 

@@ -10,10 +10,8 @@ from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWith
 from mantid.dataobjects import Workspace2D
 
 
-class BasePanePresenter():
-
-    def __init__(self, view, model, context, figure_presenter, external_plotting_view=None,
-                 external_plotting_model=None):
+class BasePanePresenter:
+    def __init__(self, view, model, context, figure_presenter, external_plotting_view=None, external_plotting_model=None):
 
         self._name = model.name
         self._data_type = [""]
@@ -25,8 +23,7 @@ class BasePanePresenter():
         self._x_data_range = context.plot_panes_context[self._name].default_xlims
         self._external_plotting_view = external_plotting_view if external_plotting_view else ExternalPlottingView()
         self._external_plotting_model = external_plotting_model if external_plotting_model else ExternalPlottingModel()
-        self.add_or_remove_plot_observer = GenericObserverWithArgPassing(
-            self.handle_added_or_removed_plot)
+        self.add_or_remove_plot_observer = GenericObserverWithArgPassing(self.handle_added_or_removed_plot)
         self._view.on_rebin_options_changed(self.handle_use_raw_workspaces_changed)
         self.workspace_replaced_in_ads_observer = GenericObserverWithArgPassing(self.handle_workspace_replaced_in_ads)
         self.workspace_deleted_from_ads_observer = GenericObserverWithArgPassing(self.handle_workspace_deleted_from_ads)

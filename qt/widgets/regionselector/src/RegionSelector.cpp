@@ -8,13 +8,17 @@
 #include "MantidQtWidgets/RegionSelector/RegionSelector.h"
 #include "MantidAPI/RegionSelectorObserver.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidPythonInterface/core/ErrorHandling.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
+#include "MantidQtWidgets/Common/IImageInfoWidget.h"
+#include "MantidQtWidgets/Common/ImageInfoWidgetMini.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/Common/Python/Sip.h"
 
 #include <QLayout>
 #include <QWidget>
 #include <boost/python/extract.hpp>
+#include <iostream>
 #include <vector>
 
 using Mantid::API::Workspace_sptr;
@@ -28,12 +32,16 @@ Python::Object presenterModule() {
   return module;
 }
 
-Python::Object newPresenter(Workspace_sptr workspace) {
+Python::Object newPresenter(Workspace_sptr workspace, MantidQt::MantidWidgets::IImageInfoWidget *imageInfoWidget) {
   GlobalInterpreterLock lock;
 
   boost::python::dict options;
   if (workspace) {
     options["ws"] = workspace;
+  }
+  if (imageInfoWidget) {
+    options["image_info_widget"] = Python::wrap(
+        static_cast<MantidQt::MantidWidgets::ImageInfoWidgetMini *>(imageInfoWidget), "ImageInfoWidgetMini");
   }
   auto constructor = presenterModule().attr("RegionSelector");
   return constructor(*boost::python::tuple(), **options);
@@ -42,8 +50,9 @@ Python::Object newPresenter(Workspace_sptr workspace) {
 
 namespace MantidQt::Widgets {
 
-RegionSelector::RegionSelector(Workspace_sptr const &workspace, QLayout *layout)
-    : Python::InstanceHolder(newPresenter(workspace)), m_layout(layout) {
+RegionSelector::RegionSelector(Workspace_sptr const &workspace, QLayout *layout,
+                               MantidWidgets::IImageInfoWidget *imageInfoWidget)
+    : Python::InstanceHolder(newPresenter(workspace, imageInfoWidget)), m_layout(layout) {
   GlobalInterpreterLock lock;
   auto view = Python::extract<QWidget>(getView());
   constexpr auto MIN_SLICEVIEWER_HEIGHT = 250;
@@ -93,6 +102,11 @@ void RegionSelector::addRectangularRegion(const std::string &regionType, const s
 void RegionSelector::cancelDrawingRegion() {
   GlobalInterpreterLock lock;
   pyobj().attr("cancel_drawing_region")();
+}
+
+void RegionSelector::deselectAllSelectors() {
+  GlobalInterpreterLock lock;
+  pyobj().attr("deselect_all_selectors")();
 }
 
 auto RegionSelector::getRegion(const std::string &regionType) -> Selection {

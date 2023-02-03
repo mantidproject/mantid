@@ -45,33 +45,39 @@ class ISISPowderInstrumentRunDetailsTest(unittest.TestCase):
         run_number_string = "17-18"
         mock_inst = self.setup_mock_inst_settings(yaml_file_path="ISISPowderRunDetailsTest.yaml")
         run_number = common.get_first_run_number(run_number_string=run_number_string)
-        cal_mapping_dict = yaml_parser.get_run_dictionary(run_number_string=run_number,
-                                                          file_path=mock_inst.cal_mapping_path)
+        cal_mapping_dict = yaml_parser.get_run_dictionary(run_number_string=run_number, file_path=mock_inst.cal_mapping_path)
 
         grouping_filename = mock_inst.grouping_file_name
         empty_runs = common.cal_map_dictionary_key_helper(dictionary=cal_mapping_dict, key="empty_run_numbers")
         vanadium_runs = common.cal_map_dictionary_key_helper(dictionary=cal_mapping_dict, key="vanadium_run_numbers")
 
-        output_obj = run_details.create_run_details_object(run_number_string=run_number_string, inst_settings=mock_inst,
-                                                           is_vanadium_run=False, grouping_file_name=grouping_filename,
-                                                           empty_inst_run_number=empty_runs, vanadium_string=vanadium_runs)
+        output_obj = run_details.create_run_details_object(
+            run_number_string=run_number_string,
+            inst_settings=mock_inst,
+            is_vanadium_run=False,
+            grouping_file_name=grouping_filename,
+            empty_inst_run_number=empty_runs,
+            vanadium_string=vanadium_runs,
+        )
 
         self.assertEqual(output_obj.empty_inst_runs, expected_empty_runs)
-        self.assertEqual(output_obj.grouping_file_path,
-                         os.path.join(mock_inst.calibration_dir, mock_inst.grouping_file_name))
+        self.assertEqual(output_obj.grouping_file_path, os.path.join(mock_inst.calibration_dir, mock_inst.grouping_file_name))
         expected_file_ext = mock_inst.file_extension
-        expected_file_ext = expected_file_ext if expected_file_ext.startswith('.') else '.' + expected_file_ext
+        expected_file_ext = expected_file_ext if expected_file_ext.startswith(".") else "." + expected_file_ext
         self.assertEqual(output_obj.file_extension, expected_file_ext)
         self.assertEqual(output_obj.label, expected_label)
-        self.assertEqual(output_obj.offset_file_path,
-                         os.path.join(mock_inst.calibration_dir, expected_label, expected_offset_file_name))
+        self.assertEqual(output_obj.offset_file_path, os.path.join(mock_inst.calibration_dir, expected_label, expected_offset_file_name))
         self.assertEqual(output_obj.output_run_string, run_number_string)
         self.assertEqual(output_obj.run_number, 17)
         self.assertEqual(output_obj.vanadium_run_numbers, expected_vanadium_runs)
-        self.assertEqual(output_obj.summed_empty_inst_file_path,
-                         os.path.join(mock_inst.calibration_dir, expected_label,
-                                      common.generate_summed_empty_name(expected_empty_runs,
-                                                                        expected_offset_file_name)))
+        self.assertEqual(
+            output_obj.summed_empty_inst_file_path,
+            os.path.join(
+                mock_inst.calibration_dir,
+                expected_label,
+                common.generate_summed_empty_name(expected_empty_runs, expected_offset_file_name),
+            ),
+        )
 
     def test_create_run_details_object_when_van_cal(self):
         # When we are running the vanadium calibration we expected the run number to take the vanadium
@@ -80,16 +86,20 @@ class ISISPowderInstrumentRunDetailsTest(unittest.TestCase):
         expected_vanadium_runs = "11-12"
         mock_inst = self.setup_mock_inst_settings(yaml_file_path="ISISPowderRunDetailsTest.yaml")
         run_number = common.get_first_run_number(run_number_string=run_number_string)
-        cal_mapping_dict = yaml_parser.get_run_dictionary(run_number_string=run_number,
-                                                          file_path=mock_inst.cal_mapping_path)
+        cal_mapping_dict = yaml_parser.get_run_dictionary(run_number_string=run_number, file_path=mock_inst.cal_mapping_path)
 
         grouping_filename = mock_inst.grouping_file_name
         empty_runs = common.cal_map_dictionary_key_helper(dictionary=cal_mapping_dict, key="empty_run_numbers")
         vanadium_runs = common.cal_map_dictionary_key_helper(dictionary=cal_mapping_dict, key="vanadium_run_numbers")
 
-        output_obj = run_details.create_run_details_object(run_number_string=run_number_string, inst_settings=mock_inst,
-                                                           is_vanadium_run=True, grouping_file_name=grouping_filename,
-                                                           empty_inst_run_number=empty_runs, vanadium_string=vanadium_runs)
+        output_obj = run_details.create_run_details_object(
+            run_number_string=run_number_string,
+            inst_settings=mock_inst,
+            is_vanadium_run=True,
+            grouping_file_name=grouping_filename,
+            empty_inst_run_number=empty_runs,
+            vanadium_string=vanadium_runs,
+        )
 
         self.assertEqual(expected_vanadium_runs, output_obj.run_number)
         self.assertEqual(output_obj.vanadium_run_numbers, output_obj.run_number)
@@ -101,19 +111,23 @@ class ISISPowderInstrumentRunDetailsTest(unittest.TestCase):
         run_number_string = "10"
         mock_inst = self.setup_mock_inst_settings(yaml_file_path="ISISPowderRunDetailsTest.yaml")
         run_number = common.get_first_run_number(run_number_string=run_number_string)
-        cal_mapping_dict = yaml_parser.get_run_dictionary(run_number_string=run_number,
-                                                          file_path=mock_inst.cal_mapping_path)
+        cal_mapping_dict = yaml_parser.get_run_dictionary(run_number_string=run_number, file_path=mock_inst.cal_mapping_path)
 
         grouping_filename = mock_inst.grouping_file_name
         empty_runs = common.cal_map_dictionary_key_helper(dictionary=cal_mapping_dict, key="empty_run_numbers")
         vanadium_runs = common.cal_map_dictionary_key_helper(dictionary=cal_mapping_dict, key="vanadium_run_numbers")
 
-        output_obj = run_details.create_run_details_object(run_number_string, inst_settings=mock_inst,
-                                                           is_vanadium_run=False, splined_name_list=splined_name_list,
-                                                           grouping_file_name=grouping_filename,
-                                                           empty_inst_run_number=empty_runs, vanadium_string=vanadium_runs)
+        output_obj = run_details.create_run_details_object(
+            run_number_string,
+            inst_settings=mock_inst,
+            is_vanadium_run=False,
+            splined_name_list=splined_name_list,
+            grouping_file_name=grouping_filename,
+            empty_inst_run_number=empty_runs,
+            vanadium_string=vanadium_runs,
+        )
 
-        expected_splined_out_str = ''.join('_' + val for val in splined_name_list)
+        expected_splined_out_str = "".join("_" + val for val in splined_name_list)
         expected_output_name = "VanSplined_" + expected_vanadium_runs + expected_splined_out_str
         expected_output_name += ".nxs"
         expected_path = os.path.join(mock_inst.calibration_dir, output_obj.label, expected_output_name)
@@ -130,7 +144,7 @@ class MockInstSettings(object):
 
     @staticmethod
     def gen_random_string():
-        return ''.join(random.choice(string.ascii_lowercase) for _ in range(10))
+        return "".join(random.choice(string.ascii_lowercase) for _ in range(10))
 
 
 def _get_current_mode_dictionary(run_number_string, inst_settings):

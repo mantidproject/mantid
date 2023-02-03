@@ -21,19 +21,14 @@ class DNSCommonOptionsPresenter(DNSObserver):
         """
         Getting wavelength from selected DNSFiles, checks for deviations.
         """
-        full_data = self.param_dict['file_selector']['full_data']
+        full_data = self.param_dict["file_selector"]["full_data"]
         if not full_data:
-            self.raise_error('No data selected', critical=True)
+            self.raise_error("No data selected", critical=True)
             return None
         warnings = {
-            'wavelength_varies': 'Warning, different wavelengths in'
-            'datafiles',
-            'selector_wavelength_missmatch': 'Warning, selector speeds in'
-            ' datafiles '
-            'differ by more than 10 rpm.',
-            'selector_speed_varies': 'Warning, selector speed differs from'
-            ' wavelength more'
-            ' than 10%, set wavelength manually. ',
+            "wavelength_varies": "Warning, different wavelengths in" "datafiles",
+            "selector_wavelength_missmatch": "Warning, selector speeds in" " datafiles " "differ by more than 10 rpm.",
+            "selector_speed_varies": "Warning, selector speed differs from" " wavelength more" " than 10%, set wavelength manually. ",
         }
         wavelength, errors = self.model.determine_wavelength(full_data)
         for key, value in errors.items():
@@ -42,6 +37,6 @@ class DNSCommonOptionsPresenter(DNSObserver):
             self.view.deactivate_get_wavelength()
         else:
             own_options = self.get_option_dict()
-            own_options['wavelength'] = wavelength
+            own_options["wavelength"] = wavelength
             self.set_view_from_param()
         return wavelength

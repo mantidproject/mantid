@@ -22,15 +22,13 @@ app = QApplication(sys.argv)
 
 
 class SimpleScanViewerViewTest(unittest.TestCase):
-
     def setUp(self) -> None:
-        self.facility = config['default.facility']
-        self.instrument = config['default.instrument']
-        config['default.facility'] = "ILL"
-        config['default.instrument'] = "D16"
+        self.facility = config["default.facility"]
+        self.instrument = config["default.instrument"]
+        config["default.facility"] = "ILL"
+        config["default.instrument"] = "D16"
 
-        patch = mock.patch(
-                'mantidqtinterfaces.simplescanviewer.presenter.SimpleScanViewerPresenter')
+        patch = mock.patch("mantidqtinterfaces.simplescanviewer.presenter.SimpleScanViewerPresenter")
         self.mocked_presenter = patch.start()
         self.addCleanup(patch.stop)
 
@@ -38,8 +36,8 @@ class SimpleScanViewerViewTest(unittest.TestCase):
         self.view.presenter = self.mocked_presenter
 
     def tearDown(self) -> None:
-        config['default.facility'] = self.facility
-        config['default.instrument'] = self.instrument
+        config["default.facility"] = self.facility
+        config["default.instrument"] = self.instrument
 
     def test_browse_button_file_provided(self):
         self.view._open_file_dialog = mock.Mock()  # we don't want a dialog opening during the test
@@ -78,17 +76,19 @@ class SimpleScanViewerViewTest(unittest.TestCase):
         self.view.sig_background_selected.emit.assert_not_called()
 
     def test_initialize_rect_manager(self):
-        self.patcher = mock.patch.multiple("mantidqt.widgets.sliceviewer.views.dataview",
-                                           DimensionWidget=mock.DEFAULT,
-                                           QGridLayout=mock.DEFAULT,
-                                           QHBoxLayout=mock.DEFAULT,
-                                           QVBoxLayout=mock.DEFAULT,
-                                           QWidget=mock.DEFAULT,
-                                           QLabel=mock.DEFAULT,
-                                           QStatusBar=mock.DEFAULT,
-                                           CurveLinearSubPlot=mock.DEFAULT,
-                                           ColorbarWidget=mock.DEFAULT,
-                                           SliceViewerNavigationToolbar=mock.DEFAULT)
+        self.patcher = mock.patch.multiple(
+            "mantidqt.widgets.sliceviewer.views.dataview",
+            DimensionWidget=mock.DEFAULT,
+            QGridLayout=mock.DEFAULT,
+            QHBoxLayout=mock.DEFAULT,
+            QVBoxLayout=mock.DEFAULT,
+            QWidget=mock.DEFAULT,
+            QLabel=mock.DEFAULT,
+            QStatusBar=mock.DEFAULT,
+            CurveLinearSubPlot=mock.DEFAULT,
+            ColorbarWidget=mock.DEFAULT,
+            SliceViewerNavigationToolbar=mock.DEFAULT,
+        )
         self.patched_objs = self.patcher.start()
         self.view._data_view = SliceViewerDataView(self.mocked_presenter, mock.MagicMock(), mock.Mock())
         self.view._data_view.add_line_plots = lambda x, y: 0

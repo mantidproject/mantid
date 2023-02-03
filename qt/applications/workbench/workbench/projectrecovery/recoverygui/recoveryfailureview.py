@@ -52,8 +52,7 @@ class RecoveryFailureView(QDialog):
         self.editor.connect_to_progress_reports(self.update_progress_bar)
 
     def emit_abort_script(self):
-        self.abort_project_recovery_script.connect(
-            self.presenter.project_recovery.loader.multi_file_interpreter.abort_all)
+        self.abort_project_recovery_script.connect(self.presenter.project_recovery.loader.multi_file_interpreter.abort_all)
         logger.error("Project Recovery: Cancelling recovery")
         self.abort_project_recovery_script.emit()
 

@@ -8,8 +8,18 @@
 import sys
 
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QWidget, QGridLayout, QVBoxLayout, QCheckBox, QLabel, QComboBox, QHBoxLayout, QStatusBar, \
-    QToolButton
+from qtpy.QtWidgets import (
+    QWidget,
+    QGridLayout,
+    QVBoxLayout,
+    QCheckBox,
+    QLabel,
+    QComboBox,
+    QHBoxLayout,
+    QStatusBar,
+    QToolButton,
+    QSizePolicy,
+)
 from matplotlib.figure import Figure
 from mpl_toolkits.axisartist import Subplot as CurveLinearSubPlot, GridHelperCurveLinear
 
@@ -37,7 +47,7 @@ class SliceViewerCanvas(ScrollZoomMixin, MantidFigureCanvas):
 class SliceViewerDataView(QWidget):
     """The view for the data portion of the sliceviewer"""
 
-    def __init__(self, presenter: IDataViewSubscriber, dims_info, can_normalise, parent=None, conf=None):
+    def __init__(self, presenter: IDataViewSubscriber, dims_info, can_normalise, parent=None, conf=None, image_info_widget=None):
         super().__init__(parent)
 
         self.presenter = presenter
@@ -57,20 +67,26 @@ class SliceViewerDataView(QWidget):
         self.colorbar_layout.setContentsMargins(0, 0, 0, 0)
         self.colorbar_layout.setSpacing(0)
 
-        self.image_info_widget = ImageInfoWidget(self)
+        if image_info_widget is None:
+            self.image_info_widget = ImageInfoWidget(self)
+            custom_widget = False
+        else:
+            self.image_info_widget = image_info_widget
+            custom_widget = True
         self.image_info_widget.setToolTip("Information about the selected pixel")
         self.track_cursor = QCheckBox("Track Cursor", self)
         self.track_cursor.setToolTip(
             "Update the image readout table when the cursor is over the plot. "
-            "If unticked the table will update only when the plot is clicked")
+            "If unticked the table will update only when the plot is clicked"
+        )
         self.track_cursor.setChecked(True)
         self.track_cursor.stateChanged.connect(self.on_track_cursor_state_change)
 
         # Dimension widget
         self.dimensions_layout = QGridLayout()
         self.dimensions_layout.setHorizontalSpacing(10)
-        if (dims_info):
-            self.create_dimensions(dims_info)
+        if dims_info:
+            self.create_dimensions(dims_info, custom_widget)
         else:
             self.dimensions = None
 
@@ -90,15 +106,17 @@ class SliceViewerDataView(QWidget):
         self._grid_on = False
         self.fig.set_facecolor(self.palette().window().color().getRgbF())
         self.canvas = SliceViewerCanvas(self.fig)
-        self.canvas.mpl_connect('button_release_event', self.mouse_release)
-        self.canvas.mpl_connect('button_press_event', self.presenter.canvas_clicked)
-        self.canvas.mpl_connect('key_press_event', self.presenter.key_pressed)
-        self.canvas.mpl_connect('motion_notify_event', self.presenter.mouse_moved)
+        self.canvas.mpl_connect("button_release_event", self.mouse_release)
+        self.canvas.mpl_connect("button_press_event", self.presenter.canvas_clicked)
+        self.canvas.mpl_connect("key_press_event", self.presenter.key_pressed)
+        self.canvas.mpl_connect("motion_notify_event", self.presenter.mouse_moved)
 
         self.colorbar_label = QLabel("Colormap")
         self.colorbar_layout.addWidget(self.colorbar_label)
         norm_scale = self.get_default_scale_norm()
         self.colorbar = ColorbarWidget(self, norm_scale)
+        # fix colour bar to stop plot and color bar making small size readjustments when the image info table updates
+        self.colorbar.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
         self.colorbar.cmap.setToolTip("Colormap options")
         self.colorbar.crev.setToolTip("Reverse colormap")
         self.colorbar.norm.setToolTip("Colormap normalisation options")
@@ -126,7 +144,7 @@ class SliceViewerDataView(QWidget):
 
         # Status bar
         self.status_bar = QStatusBar(parent=self)
-        self.status_bar.setStyleSheet('QStatusBar::item {border: None;}')  # Hide spacers between button and label
+        self.status_bar.setStyleSheet("QStatusBar::item {border: None;}")  # Hide spacers between button and label
         self.status_bar_label = QLabel()
         self.help_button = QToolButton()
         self.help_button.setText("?")
@@ -143,13 +161,14 @@ class SliceViewerDataView(QWidget):
         layout.addWidget(self.status_bar, 3, 0, 1, 1)
         layout.setRowStretch(2, 1)
 
-    def create_dimensions(self, dims_info):
+    def create_dimensions(self, dims_info, custom_image_info=False):
         self.dimensions = DimensionWidget(dims_info, parent=self)
         self.dimensions.dimensionsChanged.connect(self.presenter.dimensions_changed)
         self.dimensions.valueChanged.connect(self.presenter.slicepoint_changed)
-        self.dimensions_layout.addWidget(self.dimensions, 1, 0, 1, 1)
         self.dimensions_layout.addWidget(self.track_cursor, 0, 1, Qt.AlignRight)
-        self.dimensions_layout.addWidget(self.image_info_widget, 1, 1)
+        if not custom_image_info:
+            self.dimensions_layout.addWidget(self.dimensions, 1, 0, 1, 1)
+            self.dimensions_layout.addWidget(self.image_info_widget, 1, 1)
 
     @property
     def grid_on(self):
@@ -169,7 +188,7 @@ class SliceViewerDataView(QWidget):
         """
         self.clear_figure()
         self.nonortho_transform = None
-        self.ax = self.fig.add_subplot(111, projection='mantid')
+        self.ax = self.fig.add_subplot(111, projection="mantid")
         self.enable_zoom_on_mouse_scroll(redraw_on_zoom)
         if self.grid_on:
             self.ax.grid(self.grid_on)
@@ -183,12 +202,7 @@ class SliceViewerDataView(QWidget):
     def create_axes_nonorthogonal(self, transform):
         self.clear_figure()
         self.set_nonorthogonal_transform(transform)
-        self.ax = CurveLinearSubPlot(self.fig,
-                                     1,
-                                     1,
-                                     1,
-                                     grid_helper=GridHelperCurveLinear(
-                                         (transform.tr, transform.inv_tr)))
+        self.ax = CurveLinearSubPlot(self.fig, 1, 1, 1, grid_helper=GridHelperCurveLinear((transform.tr, transform.inv_tr)))
         # don't redraw on zoom as the data is rebinned and has to be redrawn again anyway
         self.enable_zoom_on_mouse_scroll(redraw=False)
         self.set_grid_on()
@@ -201,10 +215,7 @@ class SliceViewerDataView(QWidget):
         """Enable zoom on scroll the mouse wheel for the created axes
         :param redraw: Pass through to redraw option in enable_zoom_on_scroll
         """
-        self.canvas.enable_zoom_on_scroll(self.ax,
-                                          redraw=redraw,
-                                          toolbar=self.mpl_toolbar,
-                                          callback=self.on_data_limits_changed)
+        self.canvas.enable_zoom_on_scroll(self.ax, redraw=redraw, toolbar=self.mpl_toolbar, callback=self.on_data_limits_changed)
 
     def add_line_plots(self, toolcls, exporter):
         """Assuming line plots are currently disabled, enable them on the current figure
@@ -239,8 +250,7 @@ class SliceViewerDataView(QWidget):
         self.canvas.draw_idle()
 
     def remove_line_plots(self):
-        """Assuming line plots are currently enabled, remove them from the current figure
-        """
+        """Assuming line plots are currently enabled, remove them from the current figure"""
         if not self.line_plots_active:
             return
 
@@ -254,12 +264,9 @@ class SliceViewerDataView(QWidget):
         clears the plot and creates a new one using a MDHistoWorkspace
         """
         self.clear_image()
-        self.image = self.ax.imshow(ws,
-                                    origin='lower',
-                                    aspect='auto',
-                                    transpose=self.dimensions.transpose,
-                                    norm=self.colorbar.get_norm(),
-                                    **kwargs)
+        self.image = self.ax.imshow(
+            ws, origin="lower", aspect="auto", transpose=self.dimensions.transpose, norm=self.colorbar.get_norm(), **kwargs
+        )
         # ensure the axes data limits are updated to match the
         # image. For example if the axes were zoomed and the
         # swap dimensions was clicked we need to restore the
@@ -269,7 +276,7 @@ class SliceViewerDataView(QWidget):
         self.ax.set_ylim(extent[2], extent[3])
         # Set the original data limits which get passed to the ImageInfoWidget so that
         # the mouse projection to data space is correct for MDH workspaces when zoomed/changing slices
-        self._orig_lims = self.get_axes_limits()
+        self._orig_lims = self.get_data_limits_to_fill_current_axes()
 
         self.on_track_cursor_state_change(self.track_cursor_checked())
 
@@ -277,12 +284,9 @@ class SliceViewerDataView(QWidget):
 
     def plot_MDH_nonorthogonal(self, ws, **kwargs):
         self.clear_image()
-        self.image = pcolormesh_nonorthogonal(self.ax,
-                                              ws,
-                                              self.nonortho_transform.tr,
-                                              transpose=self.dimensions.transpose,
-                                              norm=self.colorbar.get_norm(),
-                                              **kwargs)
+        self.image = pcolormesh_nonorthogonal(
+            self.ax, ws, self.nonortho_transform.tr, transpose=self.dimensions.transpose, norm=self.colorbar.get_norm(), **kwargs
+        )
         self.on_track_cursor_state_change(self.track_cursor_checked())
 
         # swapping dimensions in nonorthogonal mode currently resets back to the
@@ -308,14 +312,16 @@ class SliceViewerDataView(QWidget):
                 old_extent = e3, e4, e1, e2
 
         self.clear_image()
-        self.image = self.ax.imshow(ws,
-                                    origin='lower',
-                                    aspect='auto',
-                                    interpolation='none',
-                                    transpose=self.dimensions.transpose,
-                                    norm=self.colorbar.get_norm(),
-                                    extent=old_extent,
-                                    **kwargs)
+        self.image = self.ax.imshow(
+            ws,
+            origin="lower",
+            aspect="auto",
+            interpolation="none",
+            transpose=self.dimensions.transpose,
+            norm=self.colorbar.get_norm(),
+            extent=old_extent,
+            **kwargs
+        )
         self.on_track_cursor_state_change(self.track_cursor_checked())
 
         self.draw_plot()
@@ -343,7 +349,7 @@ class SliceViewerDataView(QWidget):
         self.ax = None
 
     def draw_plot(self):
-        self.ax.set_title('')
+        self.ax.set_title("")
         self.canvas.draw()
         if self.image:
             self.colorbar.set_mappable(self.image)
@@ -384,12 +390,14 @@ class SliceViewerDataView(QWidget):
         if self._line_plots is not None and not self._region_selection_on:
             self._line_plots.disconnect()
 
-        self._image_info_tracker = ImageInfoTracker(image=self.image,
-                                                    transform=self.nonortho_transform,
-                                                    do_transform=self.nonorthogonal_mode,
-                                                    widget=self.image_info_widget,
-                                                    cursor_transform=self._orig_lims,
-                                                    presenter=self.presenter)
+        self._image_info_tracker = ImageInfoTracker(
+            image=self.image,
+            transform=self.nonortho_transform,
+            do_transform=self.nonorthogonal_mode,
+            widget=self.image_info_widget,
+            cursor_transform=self._orig_lims,
+            presenter=self.presenter,
+        )
 
         if state:
             self._image_info_tracker.connect()
@@ -451,9 +459,10 @@ class SliceViewerDataView(QWidget):
         """Set a given tool button disabled so it cannot be interacted with"""
         self.mpl_toolbar.set_action_enabled(tool_text, False)
 
-    def get_axes_limits(self):
+    def get_data_limits_to_fill_current_axes(self):
         """
-        Return the limits on the image axes transformed into the nonorthogonal frame if appropriate
+        Return the data limits required to fill the current image axes
+        transformed into the nonorthogonal frame if appropriate
         """
         if self.image is None:
             return None
@@ -462,8 +471,10 @@ class SliceViewerDataView(QWidget):
             if self.nonorthogonal_mode:
                 inv_tr = self.nonortho_transform.inv_tr
                 # viewing axis y not aligned with plot axis
+                # transform top left and bottom right corner so data fills the initial or zoomed rectangle
                 xmin_p, ymax_p = inv_tr(xlim[0], ylim[1])
                 xmax_p, ymin_p = inv_tr(xlim[1], ylim[0])
+
                 xlim, ylim = (xmin_p, xmax_p), (ymin_p, ymax_p)
             return xlim, ylim
 
@@ -550,18 +561,18 @@ class SliceViewerDataView(QWidget):
             self.norm_opts.setCurrentIndex(0)
 
     def get_default_scale_norm(self):
-        scale = 'Linear'
+        scale = "Linear"
         if self.conf is None:
             return scale
 
         if self.conf.has(SCALENORM):
             scale = self.conf.get(SCALENORM, type=str)
 
-        if scale == 'Power' and self.conf.has(POWERSCALE):
+        if scale == "Power" and self.conf.has(POWERSCALE):
             exponent = self.conf.get(POWERSCALE, type=str)
             scale = (scale, exponent)
 
-        scale = "SymmetricLog10" if scale == 'Log' else scale
+        scale = "SymmetricLog10" if scale == "Log" else scale
         return scale
 
     def scale_norm_changed(self):
@@ -571,7 +582,7 @@ class SliceViewerDataView(QWidget):
         scale = self.colorbar.norm.currentText()
         self.conf.set(SCALENORM, scale)
 
-        if scale == 'Power':
+        if scale == "Power":
             exponent = self.colorbar.powerscale_value
             self.conf.set(POWERSCALE, exponent)
 

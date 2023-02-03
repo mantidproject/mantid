@@ -10,7 +10,6 @@
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
-#include "MantidDataHandling/LoadHelper.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/V3D.h"
@@ -57,8 +56,8 @@ private:
   void calculateRelativeRotations(std::vector<double> &instrumentAngles, const Kernel::V3D &firstTubePosition);
 
   void fillDataScanMetaData(const NeXus::NXDouble &);
-  void fillMovingInstrumentScan(const NeXus::NXUInt &, const NeXus::NXDouble &);
-  void fillStaticInstrumentScan(const NeXus::NXUInt &, const NeXus::NXDouble &, const double &);
+  void fillMovingInstrumentScan(const NeXus::NXInt &, const NeXus::NXDouble &);
+  void fillStaticInstrumentScan(const NeXus::NXInt &, const NeXus::NXDouble &, const double &);
 
   std::vector<Types::Core::DateAndTime> getAbsoluteTimes(const NeXus::NXDouble &) const;
   std::vector<double> getAxis(const NeXus::NXDouble &) const;
@@ -66,19 +65,16 @@ private:
   std::vector<double> getMonitor(const NeXus::NXDouble &) const;
   std::string getInstrumentFilePath(const std::string &) const;
   Kernel::V3D getReferenceComponentPosition(const API::MatrixWorkspace_sptr &instrumentWorkspace);
-  bool containsCalibratedData(const std::string &filename) const;
 
   std::vector<double> getScannedVaribleByPropertyName(const NeXus::NXDouble &scan,
                                                       const std::string &propertyName) const;
 
-  void initStaticWorkspace(const std::string &start_time);
-  void initMovingWorkspace(const NeXus::NXDouble &scan, const std::string &start_time);
+  void initStaticWorkspace();
+  void initMovingWorkspace(const NeXus::NXDouble &scan);
 
   void loadDataScan();
-  API::MatrixWorkspace_sptr loadEmptyInstrument(const std::string &start_time);
   void loadMetaData();
   void loadScanVars();
-  void loadStaticInstrument();
   void moveTwoThetaZero(double);
   void resolveInstrument();
   void resolveScanType();
@@ -105,11 +101,7 @@ private:
   double m_maxHeight{0.};               ///< maximum absolute height of the D2B tubes
 
   std::vector<ScannedVariables> m_scanVar;  ///< holds the scan info
-  LoadHelper m_loadHelper;                  ///< a helper for metadata
   API::MatrixWorkspace_sptr m_outWorkspace; ///< output workspace
-  bool m_useCalibratedData{false};          ///< whether to use the calibrated data in
-                                            ///< the nexus (D2B only)
-  bool m_isSpectrometer{false};
 };
 
 } // namespace DataHandling

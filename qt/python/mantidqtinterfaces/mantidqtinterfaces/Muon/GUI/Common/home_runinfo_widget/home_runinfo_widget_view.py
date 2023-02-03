@@ -33,15 +33,17 @@ class HomeRunInfoWidgetView(QtWidgets.QWidget):
 
         self.group = QtWidgets.QGroupBox("Run Information")
         self.group.setFlat(False)
-        self.setStyleSheet("QGroupBox {border: 1px solid grey;border-radius: 10px;margin-top: 1ex; margin-right: 0ex}"
-                           "QGroupBox:title {"
-                           'subcontrol-origin: margin;'
-                           "padding: 0 3px;"
-                           'subcontrol-position: top center;'
-                           'padding-top: 0px;'
-                           'padding-bottom: 0px;'
-                           "padding-right: 10px;"
-                           ' color: grey; }')
+        self.setStyleSheet(
+            "QGroupBox {border: 1px solid grey;border-radius: 10px;margin-top: 1ex; margin-right: 0ex}"
+            "QGroupBox:title {"
+            "subcontrol-origin: margin;"
+            "padding: 0 3px;"
+            "subcontrol-position: top center;"
+            "padding-top: 0px;"
+            "padding-bottom: 0px;"
+            "padding-right: 10px;"
+            " color: grey; }"
+        )
 
         self.group.setLayout(self.vertical_layout)
 

@@ -36,6 +36,7 @@
 #include <QCheckBox>
 #include <QColorDialog>
 #include <QComboBox>
+#include <QCoreApplication>
 #include <QDoubleValidator>
 #include <QDragEnterEvent>
 #include <QDropEvent>
@@ -115,7 +116,7 @@ public:
  */
 InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGeometry, bool autoscaling,
                                    double scaleMin, double scaleMax, bool setDefaultView, Dependencies deps,
-                                   bool useThread)
+                                   bool useThread, TabCustomizations customizations)
     : QWidget(parent), WorkspaceObserver(), m_instrumentDisplay(std::move(deps.instrumentDisplay)),
       m_workspaceName(std::move(wsName)), m_instrumentActor(nullptr), m_surfaceType(FULL3D),
       m_savedialog_dir(
@@ -151,6 +152,9 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
                        SLOT(enableLighting(bool)));
 
   m_controlPanelLayout->addWidget(aWidget);
+
+  m_controlPanelLayout->setCollapsible(0, false);
+  m_controlPanelLayout->setCollapsible(1, false);
 
   m_mainLayout->addWidget(m_controlPanelLayout);
 
@@ -190,7 +194,7 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
   setBackgroundColor(settings.value("BackgroundColor", QColor(0, 0, 0, 1.0)).value<QColor>());
 
   // Create the b=tabs
-  createTabs(settings);
+  createTabs(settings, customizations);
 
   settings.endGroup();
 
@@ -256,6 +260,10 @@ void InstrumentWidget::hideHelp() { m_help->setVisible(false); }
 QString InstrumentWidget::getWorkspaceName() const { return m_workspaceName; }
 
 std::string InstrumentWidget::getWorkspaceNameStdString() const { return m_workspaceName.toStdString(); }
+
+Mantid::API::Workspace_sptr InstrumentWidget::getWorkspaceClone() {
+  return getWorkspaceFromADS(getWorkspaceNameStdString())->clone();
+}
 
 void InstrumentWidget::renameWorkspace(const std::string &workspace) {
   m_workspaceName = QString::fromStdString(workspace);
@@ -373,6 +381,8 @@ void InstrumentWidget::resetInstrumentActor(bool resetGeometry, bool autoscaling
 
   m_instrumentActor = std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), *m_messageHandler, autoscaling,
                                                         scaleMin, scaleMax);
+  emit instrumentActorReset();
+
   if (m_useThread) {
     m_instrumentActor->moveToThread(&m_thread);
     m_qtConnect->connect(m_instrumentActor.get(), SIGNAL(initWidget(bool, bool)), this, SLOT(initWidget(bool, bool)));
@@ -629,7 +639,7 @@ void InstrumentWidget::setSurfaceType(int type) {
     if (!errorMessage.isNull()) {
       // if exception was thrown roll back to the current surface type.
       QApplication::restoreOverrideCursor();
-      QMessageBox::critical(this, "MantidPlot - Error",
+      QMessageBox::critical(this, QCoreApplication::applicationName() + " Error",
                             "Surface cannot be created because of an exception:\n\n  " + errorMessage +
                                 "\n\nPlease select a different surface type.");
       // if suface change was initialized by the GUI this should ensure its
@@ -835,7 +845,7 @@ QString InstrumentWidget::confirmDetectorOperation(const QString &opName, const 
   QString message("This operation will affect %1 detectors.\nSelect output "
                   "workspace option:");
   QMessageBox prompt(this);
-  prompt.setWindowTitle("MantidPlot");
+  prompt.setWindowTitle(QCoreApplication::applicationName());
   prompt.setText(message.arg(QString::number(ndets)));
   QPushButton *replace = prompt.addButton("Replace", QMessageBox::ActionRole);
   QPushButton *create = prompt.addButton("New", QMessageBox::ActionRole);
@@ -962,7 +972,7 @@ void InstrumentWidget::saveImage(QString filename) {
         msg += itr.next() + ", ";
       }
       msg.chop(2); // Remove last space and comma
-      QMessageBox::warning(this, "MantidPlot", msg);
+      QMessageBox::warning(this, QCoreApplication::applicationName() + " Warning", msg);
       return;
     }
   }
@@ -1436,7 +1446,7 @@ bool InstrumentWidget::isGLEnabled() const { return m_useOpenGL; }
 /**
  * Create and add the tab widgets.
  */
-void InstrumentWidget::createTabs(const QSettings &settings) {
+void InstrumentWidget::createTabs(const QSettings &settings, TabCustomizations customizations) {
   // Render Controls
   m_renderTab = new InstrumentWidgetRenderTab(this);
   m_qtConnect->connect(m_renderTab, SIGNAL(setAutoscaling(bool)), this, SLOT(setColorMapAutoscaling(bool)));
@@ -1444,7 +1454,7 @@ void InstrumentWidget::createTabs(const QSettings &settings) {
   m_renderTab->loadSettings(settings);
 
   // Pick controls
-  m_pickTab = new InstrumentWidgetPickTab(this);
+  m_pickTab = new InstrumentWidgetPickTab(this, customizations.pickTools);
   m_pickTab->loadSettings(settings);
 
   // Mask controls
@@ -1555,7 +1565,7 @@ void InstrumentWidget::handleWorkspaceReplacement(const std::string &wsName,
   auto matrixWS = std::dynamic_pointer_cast<const MatrixWorkspace>(workspace);
   if (!matrixWS || matrixWS->detectorInfo().size() == 0) {
     emit preDeletingHandle();
-    close();
+    handleActiveWorkspaceDeleted();
     return;
   }
   // try to detect if the instrument changes (unlikely if the workspace
@@ -1576,8 +1586,9 @@ void InstrumentWidget::preDeleteHandle(const std::string &ws_name, const std::sh
     m_thread.quit();
   }
   if (hasWorkspace(ws_name)) {
+    m_pickTab->resetOriginalWorkspace();
     emit preDeletingHandle();
-    close();
+    handleActiveWorkspaceDeleted();
     return;
   }
   Mantid::API::IPeaksWorkspace_sptr pws = std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(workspace_ptr);
@@ -1600,8 +1611,14 @@ void InstrumentWidget::renameHandle(const std::string &oldName, const std::strin
 
 void InstrumentWidget::clearADSHandle() {
   emit clearingHandle();
-  close();
+  m_pickTab->resetOriginalWorkspace();
+  handleActiveWorkspaceDeleted();
 }
+
+/**
+ * Handles when the workspace opened in the instrument view is removed from the ADS.
+ */
+void InstrumentWidget::handleActiveWorkspaceDeleted() { close(); }
 
 /**
  * Overlay a peaks workspace on the surface projection

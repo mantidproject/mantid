@@ -23,7 +23,6 @@ class MockFitInfo(object):
 
 @start_qapplication
 class PlotFitPaneModelTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.context = setup_context()
@@ -41,7 +40,7 @@ class PlotFitPaneModelTest(unittest.TestCase):
         ws, indices = self.model.get_fit_workspace_and_indices(fit, False)
 
         self.assertEqual(ws, ["test", "unit"])
-        self.assertEqual(indices, [1,1])
+        self.assertEqual(indices, [1, 1])
 
     def test_get_fit_ws_and_indicies_with_diff(self):
         fit = MockFitInfo(["test", "unit"])
@@ -49,14 +48,16 @@ class PlotFitPaneModelTest(unittest.TestCase):
         ws, indices = self.model.get_fit_workspace_and_indices(fit, True)
 
         self.assertEqual(ws, ["test", "test", "unit", "unit"])
-        self.assertEqual(indices, [1,2,1,2])
+        self.assertEqual(indices, [1, 2, 1, 2])
 
     def test_get_shade_lines(self):
-        ws = CreateWorkspace(OutputWorkspace="test",
-                             DataX=[0,1,2,3,4,5,6,7,8],
-                             DataY=[2,1,0,5,4,3,8,7,6],
-                             DataE=[.1,.2,.3,.4,.5,.6,.7,.8,.9],
-                             NSpec=3)
+        ws = CreateWorkspace(
+            OutputWorkspace="test",
+            DataX=[0, 1, 2, 3, 4, 5, 6, 7, 8],
+            DataY=[2, 1, 0, 5, 4, 3, 8, 7, 6],
+            DataE=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+            NSpec=3,
+        )
 
         x_data, y1, y2 = self.model.get_shade_lines(ws, 1)
         self.assertEqual(x_data.tolist(), [3, 4, 5])
@@ -66,5 +67,5 @@ class PlotFitPaneModelTest(unittest.TestCase):
         self.assertEqual(y2.tolist(), [4.6, 3.5, 2.4])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

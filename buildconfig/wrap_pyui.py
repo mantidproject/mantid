@@ -10,17 +10,17 @@ import sys
 def lines_to_pre_append():
     lines = list()
     # PYLINT ignore flags
-    lines.append(u"#pylint: skip-file\n")
+    lines.append("#pylint: skip-file\n")
     return lines
 
 
 def main(argv):
     """
-        Main entry point
+    Main entry point
 
-        Args:
-        argv (list): List of strings giving command line arguments The full absolute path to the file to wrap is
-        mandatory.
+    Args:
+    argv (list): List of strings giving command line arguments The full absolute path to the file to wrap is
+    mandatory.
     """
     argv.reverse()
     to_wrap = argv[0]
@@ -38,5 +38,5 @@ def main(argv):
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main(sys.argv))

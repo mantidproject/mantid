@@ -10,67 +10,69 @@ from mantid.simpleapi import *
 
 
 class EnggFitTOFFromPeaks(PythonAlgorithm):
-
     def category(self):
         return "Diffraction\\Engineering;Diffraction\\Fitting"
 
     def seeAlso(self):
-        return [ "EnggFitPeaks","GSASIIRefineFitPeaks","Fit" ]
+        return ["EnggFitPeaks", "GSASIIRefineFitPeaks", "Fit"]
 
     def name(self):
         return "EnggFitPeaks"
 
     def summary(self):
-        return ("The algorithm fits an expected diffraction pattern to a workpace spectrum by "
-                "performing single peak fits.")
+        return "The algorithm fits an expected diffraction pattern to a workpace spectrum by " "performing single peak fits."
 
     def PyInit(self):
 
-        self.declareProperty(ITableWorkspaceProperty('FittedPeaks', '', Direction.Input),
-                             doc="Information on fitted peaks, in the format produced by EnggFitPeaks. "
-                             "The table must contain, for every peak fitted the expected peak value "
-                             "(in d-spacing), and the parameters fitted. The expected values are given "
-                             "in the column labelled 'dSpacing'. When using the back-to-back exponential "
-                             "peak function, the 'X0' column must have the fitted peak center.")
+        self.declareProperty(
+            ITableWorkspaceProperty("FittedPeaks", "", Direction.Input),
+            doc="Information on fitted peaks, in the format produced by EnggFitPeaks. "
+            "The table must contain, for every peak fitted the expected peak value "
+            "(in d-spacing), and the parameters fitted. The expected values are given "
+            "in the column labelled 'dSpacing'. When using the back-to-back exponential "
+            "peak function, the 'X0' column must have the fitted peak center.",
+        )
 
-        self.declareProperty('OutParametersTable', '', direction=Direction.Input,
-                             doc='Name for a table workspace with the fitted values calculated by '
-                             'this algorithm (DIFA, DIFC and TZERO calibration parameters) for GSAS. '
-                             'These three parameters are added as three columns in a single row. If not given, '
-                             'the table workspace is not created.')
+        self.declareProperty(
+            "OutParametersTable",
+            "",
+            direction=Direction.Input,
+            doc="Name for a table workspace with the fitted values calculated by "
+            "this algorithm (DIFA, DIFC and TZERO calibration parameters) for GSAS. "
+            "These three parameters are added as three columns in a single row. If not given, "
+            "the table workspace is not created.",
+        )
 
-        self.declareProperty('DIFA', 0.0, direction = Direction.Output,
-                             doc='Fitted DIFA calibration parameter')
+        self.declareProperty("DIFA", 0.0, direction=Direction.Output, doc="Fitted DIFA calibration parameter")
 
-        self.declareProperty('DIFC', 0.0, direction = Direction.Output,
-                             doc="Fitted DIFC calibration parameter")
+        self.declareProperty("DIFC", 0.0, direction=Direction.Output, doc="Fitted DIFC calibration parameter")
 
-        self.declareProperty('TZERO', 0.0, direction = Direction.Output,
-                             doc="Fitted TZERO calibration parameter")
+        self.declareProperty("TZERO", 0.0, direction=Direction.Output, doc="Fitted TZERO calibration parameter")
 
     def validateInputs(self):
         errors = dict()
 
-        peaks = self.getProperty('FittedPeaks').value
+        peaks = self.getProperty("FittedPeaks").value
 
         # Better than failing to fit the linear function
         if peaks.rowCount() < 3:
-            errors['FittedPeaks'] = ('Less than three peaks were given in the input peaks table. This is not enough '
-                                     'to fit the output parameters difa, difc and zero. Please check the list of '
-                                     'expected peaks given and if it is appropriate for the workspace')
+            errors["FittedPeaks"] = (
+                "Less than three peaks were given in the input peaks table. This is not enough "
+                "to fit the output parameters difa, difc and zero. Please check the list of "
+                "expected peaks given and if it is appropriate for the workspace"
+            )
         return errors
 
     def PyExec(self):
 
-        peaks = self.getProperty('FittedPeaks').value
+        peaks = self.getProperty("FittedPeaks").value
 
         difa, difc, tzero = self._fit_dSpacingTOF(peaks)
 
-        out_tbl_name = self.getPropertyValue('OutParametersTable')
+        out_tbl_name = self.getPropertyValue("OutParametersTable")
         self._produce_outputs(difa, difc, tzero, out_tbl_name)
 
-        self.log().information("Fitted {0} peaks in total. DIFA: {1}, DIFC: {2}, TZERO: {3}".
-                               format(peaks.rowCount(), difa, difc, tzero))
+        self.log().information("Fitted {0} peaks in total. DIFA: {1}, DIFC: {2}, TZERO: {3}".format(peaks.rowCount(), difa, difc, tzero))
 
     def _fit_dSpacingTOF(self, fitted_peaks_table):
         """
@@ -90,28 +92,22 @@ class EnggFitTOFFromPeaks(PythonAlgorithm):
 
         num_peaks = fitted_peaks_table.rowCount()
         if num_peaks < 3:
-            raise ValueError('Cannot fit a quadratic function with less than three peaks. Got a table of '
-                             + 'peaks with ' + str(num_peaks) + ' peaks')
+            raise ValueError(
+                "Cannot fit a quadratic function with less than three peaks. Got a table of " + "peaks with " + str(num_peaks) + " peaks"
+            )
 
         d_tof_conversion_ws = ConvertTableToMatrixWorkspace(
-            InputWorkspace=fitted_peaks_table,
-            ColumnX='dSpacing',
-            ColumnY='X0',
-            StoreInADS=False
+            InputWorkspace=fitted_peaks_table, ColumnX="dSpacing", ColumnY="X0", StoreInADS=False
         )
 
         # Fit the curve to get linear coefficients of TOF <-> dSpacing relationship for the detector
         fit_output = Fit(
-            Function='name=Quadratic',
-            InputWorkspace=d_tof_conversion_ws,
-            WorkspaceIndex=0,
-            CreateOutput=True,
-            StoreInADS=False
+            Function="name=Quadratic", InputWorkspace=d_tof_conversion_ws, WorkspaceIndex=0, CreateOutput=True, StoreInADS=False
         )
 
-        tzero = fit_output.OutputParameters.cell('Value', 0)  # A0
-        difc = fit_output.OutputParameters.cell('Value', 1)  # A1
-        difa = fit_output.OutputParameters.cell('Value', 2)  # A2
+        tzero = fit_output.OutputParameters.cell("Value", 0)  # A0
+        difc = fit_output.OutputParameters.cell("Value", 1)  # A1
+        difa = fit_output.OutputParameters.cell("Value", 2)  # A2
 
         return difa, difc, tzero
 
@@ -132,9 +128,9 @@ class EnggFitTOFFromPeaks(PythonAlgorithm):
         import EnggUtils
 
         # mandatory outputs
-        self.setProperty('DIFA', difa)
-        self.setProperty('DIFC', difc)
-        self.setProperty('TZERO', tzero)
+        self.setProperty("DIFA", difa)
+        self.setProperty("DIFC", difc)
+        self.setProperty("TZERO", tzero)
 
         # optional outputs
         if tbl_name:

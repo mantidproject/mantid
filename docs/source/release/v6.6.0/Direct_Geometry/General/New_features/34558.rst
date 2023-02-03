@@ -1,0 +1,14 @@
+- The ability to load an optional vanadium run into ALFView for normalisation is now possible. This vanadium run is saved between sessions.
+- The tools in the PickTab of ALFView which are not useful for the main workflow have been hidden.
+- The 'Select whole tube' tool on the Pick tab can now be used to select individual tubes.
+- The 'Draw a rectangle' tool on the Pick tab can now be used to select one or more neighbouring tubes.
+- The 'Edit a shape' tool on the Pick tab can now be used to select, move, resize and delete highlighted tubes.
+- The 'Update Estimate' button has been removed in ALFView. An estimate value for the peak centre is automatically re-calculated whenever the tube selection changes.
+- An option to export the right hand side plot to a workspace has been added (top right).
+- An option to open the right hand side plot in a new window to allow more plotting customizations has been added (top right).
+- An option to reset the extracted data in the right hand side plot has been added (top right).
+- The average two theta value is now displayed in ALFView when a tube is selected (bottom right).
+- The number of selected tubes is now displayed in ALFView when the tube selection is changed (bottom right).
+- The FunctionBrowser widget has been replaced with a box to specify the peak centre of a Flat Background + Gaussian in ALFView.
+- The 'Fit' button will now trigger the calculation of the Rotation angle, if the Fit is successful.
+- Updated the documentation for the ALFView interface.

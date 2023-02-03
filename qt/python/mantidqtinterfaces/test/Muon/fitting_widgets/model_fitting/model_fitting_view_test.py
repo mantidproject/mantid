@@ -14,7 +14,6 @@ from mantidqtinterfaces.Muon.GUI.Common.results_tab_widget.results_tab_model imp
 
 @start_qapplication
 class ModelFittingViewTest(unittest.TestCase):
-
     def setUp(self):
         self.view = ModelFittingView()
         self.view.show()
@@ -30,8 +29,10 @@ class ModelFittingViewTest(unittest.TestCase):
 
         self.view.update_result_table_names(result_table_names)
 
-        data = [self.view.model_fitting_data_selector.result_table_selector.dataset_name_combo_box.itemText(i)
-                for i in range(self.view.model_fitting_data_selector.result_table_selector.dataset_name_combo_box.count())]
+        data = [
+            self.view.model_fitting_data_selector.result_table_selector.dataset_name_combo_box.itemText(i)
+            for i in range(self.view.model_fitting_data_selector.result_table_selector.dataset_name_combo_box.count())
+        ]
         self.assertTrue(data, result_table_names)
 
     def test_that_update_result_table_names_will_select_the_previously_selected_item_if_it_still_exists(self):
@@ -44,8 +45,7 @@ class ModelFittingViewTest(unittest.TestCase):
         new_dataset_names = ["Name4", selected_dataset, "Name5"]
         self.view.update_result_table_names(new_dataset_names)
 
-        self.assertTrue(self.view.model_fitting_data_selector.result_table_selector.current_dataset_name,
-                        selected_dataset)
+        self.assertTrue(self.view.model_fitting_data_selector.result_table_selector.current_dataset_name, selected_dataset)
 
     def test_that_add_results_table_name_will_add_a_result_table_to_the_workspace_selector(self):
         result_table_names = ["Name1", "Name2", "Name3"]
@@ -65,10 +65,14 @@ class ModelFittingViewTest(unittest.TestCase):
         self.view.update_x_parameters(x_parameters, x_parameter_types)
         self.view.update_y_parameters(y_parameters, y_parameter_types)
 
-        x_data = [self.view.model_fitting_data_selector.x_selector.itemText(i)
-                  for i in range(self.view.model_fitting_data_selector.x_selector.count())]
-        y_data = [self.view.model_fitting_data_selector.y_selector.itemText(i)
-                  for i in range(self.view.model_fitting_data_selector.y_selector.count())]
+        x_data = [
+            self.view.model_fitting_data_selector.x_selector.itemText(i)
+            for i in range(self.view.model_fitting_data_selector.x_selector.count())
+        ]
+        y_data = [
+            self.view.model_fitting_data_selector.y_selector.itemText(i)
+            for i in range(self.view.model_fitting_data_selector.y_selector.count())
+        ]
 
         self.assertTrue(x_data, x_parameters)
         self.assertTrue(y_data, y_parameters)
@@ -106,5 +110,5 @@ class ModelFittingViewTest(unittest.TestCase):
         self.assertTrue(self.view.isEnabled())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

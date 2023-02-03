@@ -7,13 +7,14 @@
 import inspect
 import unittest
 
-from mantid.api import (AlgorithmFactory, IAlgorithm, IEventWorkspace, ITableWorkspace, PythonAlgorithm, MatrixWorkspace, mtd)
+from mantid.api import AlgorithmFactory, IAlgorithm, IEventWorkspace, ITableWorkspace, PythonAlgorithm, MatrixWorkspace, mtd
 import mantid.simpleapi as simpleapi
 import numpy
 
 
 class SimpleAPITest(unittest.TestCase):
     maxDiff = None
+
     def tearDown(self):
         mtd.clear()
 
@@ -22,30 +23,37 @@ class SimpleAPITest(unittest.TestCase):
         Test needs improving when the old API goes to just check that everything loads okay
         """
         all_algs = AlgorithmFactory.getRegisteredAlgorithms(True)
-        self.assertTrue('SNSPowderReduction' in all_algs)
-        self.assertTrue('Squares' in all_algs)
+        self.assertTrue("SNSPowderReduction" in all_algs)
+        self.assertTrue("Squares" in all_algs)
 
     def test_version_number_equals_2(self):
         self.assertEqual(simpleapi.apiVersion(), 2)
 
     def test_simpleapi_does_not_import_qt(self):
         import sys
+
         modules = [mod for mod in sys.modules]
-        qt_import = 'qtpy'
+        qt_import = "qtpy"
         matching_qtpy_imports = [mod for mod in modules if qt_import in mod]
-        self.assertFalse(len(matching_qtpy_imports) > 0, msg="The simpleapi shouldn't import qtpy, one or more of "
-                                                             "imports you've added includes a package which imports "
-                                                             "qtpy, please amend your imports.")
+        self.assertFalse(
+            len(matching_qtpy_imports) > 0,
+            msg="The simpleapi shouldn't import qtpy, one or more of "
+            "imports you've added includes a package which imports "
+            "qtpy, please amend your imports.",
+        )
 
     def test_simpleapi_does_not_import_mantidqt(self):
         import sys
+
         modules = [mod for mod in sys.modules]
-        mantidqt_import = 'mantidqt'
+        mantidqt_import = "mantidqt"
         matching_mantidqt_imports = [mod for mod in modules if mantidqt_import in mod]
-        self.assertFalse(len(matching_mantidqt_imports) > 0,
-                         msg="The simpleapi shouldn't import mantidqt, one or more of "
-                             "imports you've added includes a package which imports "
-                             "mantidqt, please amend your imports.")
+        self.assertFalse(
+            len(matching_mantidqt_imports) > 0,
+            msg="The simpleapi shouldn't import mantidqt, one or more of "
+            "imports you've added includes a package which imports "
+            "mantidqt, please amend your imports.",
+        )
 
     def test_module_dict_seems_to_be_correct_size(self):
         # Check that the module has at least the same number
@@ -56,46 +64,48 @@ class SimpleAPITest(unittest.TestCase):
 
     def test_alg_has_expected_doc_string(self):
         # Test auto generated string, Load is manually written
-        expected_doc = "Rebins data with new X bin boundaries. For EventWorkspaces, you can very quickly rebin in-place by keeping the same output name and PreserveEvents=true.\n\n"\
-                        "Property descriptions: \n\n"\
-                        "InputWorkspace(Input:req) *MatrixWorkspace*       Workspace containing the input data\n\n"\
-                        "OutputWorkspace(Output:req) *MatrixWorkspace*       The name to give the output workspace\n\n"\
-                        "Params(Input:req) *dbl list*       A comma separated list of first bin boundary, width, last bin boundary. Optionally this can be followed by a comma and more widths and last boundary pairs. Optionally this can also be a single number, which is the bin width. In this case, the boundary of binning will be determined by minimum and maximum TOF values among all events, or previous binning boundary, in case of event Workspace, or non-event Workspace, respectively. Negative width values indicate logarithmic binning.\n\n"\
-                        "PreserveEvents(Input) *boolean*       Keep the output workspace as an EventWorkspace, if the input has events. If the input and output EventWorkspace names are the same, only the X bins are set, which is very quick. If false, then the workspace gets converted to a Workspace2D histogram.\n\n"\
-                        "FullBinsOnly(Input) *boolean*       Omit the final bin if its width is smaller than the step size\n\n"\
-                        "IgnoreBinErrors(Input) *boolean*       Ignore errors related to zero/negative bin widths in input/output workspaces. When ignored, the signal and errors are set to zero\n\n"\
-                        "UseReverseLogarithmic(Input) *boolean*       For logarithmic intervals, the splitting starts from the end and goes back to the start, ie the bins are bigger at the start getting exponentially smaller until they reach the end. For these bins, the FullBinsOnly flag is ignored.\n\n" \
-                        "Power(Input) *number*       Splits the interval in bins which actual width is equal to requested width / (i ^ power); default is linear. Power must be between 0 and 1.\n"
+        expected_doc = (
+            "Rebins data with new X bin boundaries. For EventWorkspaces, you can very quickly rebin in-place by keeping the same output name and PreserveEvents=true.\n\n"
+            "Property descriptions: \n\n"
+            "InputWorkspace(Input:req) *MatrixWorkspace*       Workspace containing the input data\n\n"
+            "OutputWorkspace(Output:req) *MatrixWorkspace*       The name to give the output workspace\n\n"
+            "Params(Input:req) *dbl list*       A comma separated list of first bin boundary, width, last bin boundary. Optionally this can be followed by a comma and more widths and last boundary pairs. Optionally this can also be a single number, which is the bin width. In this case, the boundary of binning will be determined by minimum and maximum TOF values among all events, or previous binning boundary, in case of event Workspace, or non-event Workspace, respectively. Negative width values indicate logarithmic binning.\n\n"
+            "PreserveEvents(Input) *boolean*       Keep the output workspace as an EventWorkspace, if the input has events. If the input and output EventWorkspace names are the same, only the X bins are set, which is very quick. If false, then the workspace gets converted to a Workspace2D histogram.\n\n"
+            "FullBinsOnly(Input) *boolean*       Omit the final bin if its width is smaller than the step size\n\n"
+            "IgnoreBinErrors(Input) *boolean*       Ignore errors related to zero/negative bin widths in input/output workspaces. When ignored, the signal and errors are set to zero\n\n"
+            "UseReverseLogarithmic(Input) *boolean*       For logarithmic intervals, the splitting starts from the end and goes back to the start, ie the bins are bigger at the start getting exponentially smaller until they reach the end. For these bins, the FullBinsOnly flag is ignored.\n\n"
+            "Power(Input) *number*       Splits the interval in bins which actual width is equal to requested width / (i ^ power); default is linear. Power must be between 0 and 1.\n"
+        )
         doc = simpleapi.rebin.__doc__
         self.assertGreater(len(doc), 0)
         self.assertEqual(doc, expected_doc)
 
     def test_function_call_executes_correct_algorithm_when_passed_correct_args(self):
-        wsname = 'test_function_call_executes_correct_algorithm_when_passed_correct_args'
+        wsname = "test_function_call_executes_correct_algorithm_when_passed_correct_args"
         data = [1.0, 2.0, 3.0, 4.0, 5.0]
-        simpleapi.CreateWorkspace(data, data, OutputWorkspace=wsname, NSpec=1, UnitX='Wavelength')
+        simpleapi.CreateWorkspace(data, data, OutputWorkspace=wsname, NSpec=1, UnitX="Wavelength")
         self.assertTrue(wsname in mtd)
 
     def test_function_call_executes_with_output_workspace_on_lhs(self):
         data = [1.0, 2.0, 3.0, 4.0, 5.0]
-        wavelength = simpleapi.CreateWorkspace(data, data, NSpec=1, UnitX='Wavelength')  # noqa F841
-        self.assertTrue('wavelength' in mtd)
+        wavelength = simpleapi.CreateWorkspace(data, data, NSpec=1, UnitX="Wavelength")  # noqa F841
+        self.assertTrue("wavelength" in mtd)
 
     def test_function_call_executes_when_algorithm_has_only_inout_workspace_props(self):
         data = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
-        wavelength = simpleapi.CreateWorkspace(data, data, NSpec=3, UnitX='Wavelength')
+        wavelength = simpleapi.CreateWorkspace(data, data, NSpec=3, UnitX="Wavelength")
         simpleapi.MaskDetectors(wavelength, WorkspaceIndexList=[1, 2])
 
     def test_function_accepts_EnableLogging_keyword(self):
         # The test here is that the algorithm runs without falling over about the EnableLogging keyword being a property
-        wsname = 'test_function_call_executes_correct_algorithm_when_passed_correct_args'
+        wsname = "test_function_call_executes_correct_algorithm_when_passed_correct_args"
         data = [1.0, 2.0, 3.0, 4.0, 5.0]
-        simpleapi.CreateWorkspace(data, data, OutputWorkspace=wsname, NSpec=1, UnitX='Wavelength', EnableLogging=False)
+        simpleapi.CreateWorkspace(data, data, OutputWorkspace=wsname, NSpec=1, UnitX="Wavelength", EnableLogging=False)
         self.assertTrue(wsname in mtd)
 
     def test_function_call_raises_ValueError_when_passed_args_with_invalid_values(self):
         for func_call in (simpleapi.LoadNexus, simpleapi.Load):
-            self.assertRaises(ValueError, func_call, 'DoesNotExist')
+            self.assertRaises(ValueError, func_call, "DoesNotExist")
 
     def test_function_call_raises_RuntimeError_when_passed_incorrect_args(self):
         for func_call in (simpleapi.LoadNexus, simpleapi.Load):
@@ -138,7 +148,7 @@ class SimpleAPITest(unittest.TestCase):
         self.assertTrue(ws2_name in mtd)
 
         try:
-            (result, ) = simpleapi.CompareWorkspaces(workspace1_test, workspace2_test)
+            (result,) = simpleapi.CompareWorkspaces(workspace1_test, workspace2_test)
             self.fail("Should not have made it to this point.")
         except (ValueError):
             pass
@@ -148,53 +158,44 @@ class SimpleAPITest(unittest.TestCase):
 
     def test_function_call_raises_ValueError_if_num_of_ret_vals_doesnt_match_num_assigned_vars(self):
         try:
-            ws, ws2 = simpleapi.CreateWorkspace([1.5], [1.5], NSpec=1, UnitX='Wavelength')
+            ws, ws2 = simpleapi.CreateWorkspace([1.5], [1.5], NSpec=1, UnitX="Wavelength")
             self.fail("Should not have made it to this point.")
         except RuntimeError:
             pass
 
     def test_function_returns_correct_args_when_extra_output_props_are_added_at_execute_time(self):
-        ws1 = simpleapi.CreateWorkspace([1.5], [1.5], NSpec=1, UnitX='Wavelength')  # noqa F841
-        ws2 = simpleapi.CreateWorkspace([1.5], [1.5], NSpec=1, UnitX='Wavelength')  # noqa F841
+        ws1 = simpleapi.CreateWorkspace([1.5], [1.5], NSpec=1, UnitX="Wavelength")  # noqa F841
+        ws2 = simpleapi.CreateWorkspace([1.5], [1.5], NSpec=1, UnitX="Wavelength")  # noqa F841
         # RenameWorkspaces defines extra properties for each workspace renamed at runtime
         ws1a, ws2a = simpleapi.RenameWorkspaces(InputWorkspaces="ws1,ws2", WorkspaceNames="ws1a,ws2a")
         self.assertTrue(isinstance(ws1a, MatrixWorkspace))
         self.assertTrue(isinstance(ws2a, MatrixWorkspace))
 
     def test_function_uses_OutputWorkspace_keyword_over_lhs_var_name_if_provided(self):
-        wsname = 'test_function_uses_OutputWorkspace_keyword_over_lhs_var_name_if_provided'
+        wsname = "test_function_uses_OutputWorkspace_keyword_over_lhs_var_name_if_provided"
         data = [1.0, 2.0, 3.0, 4.0, 5.0]
-        wkspace = simpleapi.CreateWorkspace(data, data, OutputWorkspace=wsname, NSpec=1, UnitX='Wavelength')  # noqa F841
+        wkspace = simpleapi.CreateWorkspace(data, data, OutputWorkspace=wsname, NSpec=1, UnitX="Wavelength")  # noqa F841
         self.assertTrue(wsname in mtd)
 
     def test_function_returns_only_mandatory_workspace_when_optional_output_is_not_given(self):
-        _demo = simpleapi.CreateMDHistoWorkspace(SignalInput='1,2,3,4,5',
-                                                 ErrorInput='1,1,1,1,1',
-                                                 Dimensionality='1',
-                                                 Extents='-1,1',
-                                                 NumberOfBins='5',
-                                                 Names='A',
-                                                 Units='U')
-        wsname = 'test_function_returns_only_mandatory_workspace_when_optional_output_is_not_given'
-        query = simpleapi.QueryMDWorkspace(InputWorkspace=_demo, OutputWorkspace=wsname, MaximumRows='500', Normalisation='volume')
+        _demo = simpleapi.CreateMDHistoWorkspace(
+            SignalInput="1,2,3,4,5", ErrorInput="1,1,1,1,1", Dimensionality="1", Extents="-1,1", NumberOfBins="5", Names="A", Units="U"
+        )
+        wsname = "test_function_returns_only_mandatory_workspace_when_optional_output_is_not_given"
+        query = simpleapi.QueryMDWorkspace(InputWorkspace=_demo, OutputWorkspace=wsname, MaximumRows="500", Normalisation="volume")
 
         self.assertTrue(isinstance(query, ITableWorkspace))
         self.assertTrue(wsname in mtd)
 
     def test_function_returns_both_mandatory_and_optional_workspaces_when_optional_output_is_given(self):
-        _demo = simpleapi.CreateMDWorkspace(Dimensions='2',
-                                            EventType='MDEvent',
-                                            Extents='1,10,1,10',
-                                            Names='a,b',
-                                            Units='MomentumTransfer,MomentumTransfer',
-                                            SplitInto='4')
-        wsname = 'test_function_returns_only_mandatory_workspace_when_optional_output_is_not_given'
-        wsname_box = wsname + '_box'
-        query = simpleapi.QueryMDWorkspace(InputWorkspace=_demo,
-                                           OutputWorkspace=wsname,
-                                           MaximumRows='500',
-                                           Normalisation='volume',
-                                           BoxDataTable=wsname_box)
+        _demo = simpleapi.CreateMDWorkspace(
+            Dimensions="2", EventType="MDEvent", Extents="1,10,1,10", Names="a,b", Units="MomentumTransfer,MomentumTransfer", SplitInto="4"
+        )
+        wsname = "test_function_returns_only_mandatory_workspace_when_optional_output_is_not_given"
+        wsname_box = wsname + "_box"
+        query = simpleapi.QueryMDWorkspace(
+            InputWorkspace=_demo, OutputWorkspace=wsname, MaximumRows="500", Normalisation="volume", BoxDataTable=wsname_box
+        )
 
         self.assertTrue(wsname in mtd)
         self.assertTrue(wsname_box in mtd)
@@ -215,19 +216,19 @@ class SimpleAPITest(unittest.TestCase):
         self.assertEqual(MatrixWorkspace.rebin.__doc__, simpleapi.Rebin.__doc__)
 
         # Signature of method will have extra self argument
-        if hasattr(inspect, 'signature'):
+        if hasattr(inspect, "signature"):
             method_parameters = list(MatrixWorkspace.rebin.__signature__.parameters)
             self.assertEqual("self", method_parameters[0])
             self.assertEqual(method_parameters, list(simpleapi.rebin.__call__.__signature__.parameters))
         else:
             freefunction_sig = inspect.getsource(simpleapi.rebin).co_varnames
-            expected_method_sig = ['self']
+            expected_method_sig = ["self"]
             expected_method_sig.extend(freefunction_sig)
             self.assertEqual(inspect.getsource(MatrixWorkspace.rebin).co_varnames, tuple(expected_method_sig))
 
     def test_function_attached_as_workpace_method_does_the_same_as_the_free_function(self):
         # Use Rebin as a test
-        ws1 = simpleapi.CreateWorkspace(DataX=[1.5, 2.0, 2.5, 3.0], DataY=[1, 2, 3], NSpec=1, UnitX='Wavelength')
+        ws1 = simpleapi.CreateWorkspace(DataX=[1.5, 2.0, 2.5, 3.0], DataY=[1, 2, 3], NSpec=1, UnitX="Wavelength")
         self.assertTrue(hasattr(ws1, "rebin"))
 
         ws2 = simpleapi.Rebin(ws1, Params=[1.5, 1.5, 3])
@@ -254,8 +255,8 @@ class SimpleAPITest(unittest.TestCase):
         raw = rebin(raw)
         # If this fails then the function above chose the name of the variable
         # over the actual object name
-        self.assertTrue('workspace' in mtd)
-        self.assertTrue('raw' in mtd)
+        self.assertTrue("workspace" in mtd)
+        self.assertTrue("raw" in mtd)
 
     def test_alg_produces_correct_workspace_in_APS_from_python(self):
         dataX = numpy.linspace(start=1, stop=3, num=11)
@@ -289,6 +290,7 @@ class SimpleAPITest(unittest.TestCase):
 
             def PyExec(self):
                 from mantid.simpleapi import SimpleAPIPythonAlgorithm2
+
                 SimpleAPIPythonAlgorithm2()
 
         class SimpleAPIPythonAlgorithm2(PythonAlgorithm):
@@ -410,15 +412,16 @@ class SimpleAPITest(unittest.TestCase):
 
             def PyExec(self):
                 from mantid.simpleapi import CreateSampleWorkspace
+
                 workspaceNotInADS = CreateSampleWorkspace(StoreInADS=False)
-                assert (workspaceNotInADS)
+                assert workspaceNotInADS
 
         AlgorithmFactory.subscribe(SimpleAPIPythonAlgorithm3)
 
         alg = SimpleAPIPythonAlgorithm3()
         alg.initialize()
         alg.execute()
-        self.assertTrue('workspaceNotInADS' not in mtd)
+        self.assertTrue("workspaceNotInADS" not in mtd)
 
     def test_default_store_in_ADS(self):
         class SimpleAPIPythonAlgorithm4(PythonAlgorithm):
@@ -427,15 +430,16 @@ class SimpleAPITest(unittest.TestCase):
 
             def PyExec(self):
                 from mantid.simpleapi import CreateSampleWorkspace
+
                 workspaceInADS = CreateSampleWorkspace()
-                assert (workspaceInADS)
+                assert workspaceInADS
 
         AlgorithmFactory.subscribe(SimpleAPIPythonAlgorithm4)
 
         alg = SimpleAPIPythonAlgorithm4()
         alg.initialize()
         alg.execute()
-        self.assertTrue('workspaceInADS' in mtd)
+        self.assertTrue("workspaceInADS" in mtd)
 
     def test_explicit_store_in_ADS(self):
         class SimpleAPIPythonAlgorithm5(PythonAlgorithm):
@@ -444,15 +448,16 @@ class SimpleAPITest(unittest.TestCase):
 
             def PyExec(self):
                 from mantid.simpleapi import CreateSampleWorkspace
+
                 workspaceInADS = CreateSampleWorkspace(StoreInADS=True)
-                assert (workspaceInADS)
+                assert workspaceInADS
 
         AlgorithmFactory.subscribe(SimpleAPIPythonAlgorithm5)
 
         alg = SimpleAPIPythonAlgorithm5()
         alg.initialize()
         alg.execute()
-        self.assertTrue('workspaceInADS' in mtd)
+        self.assertTrue("workspaceInADS" in mtd)
 
     def test_later_store_in_ADS(self):
         from mantid.api import MatrixWorkspaceProperty
@@ -464,8 +469,9 @@ class SimpleAPITest(unittest.TestCase):
 
             def PyExec(self):
                 from mantid.simpleapi import CreateSampleWorkspace
+
                 workspaceNotInADS = CreateSampleWorkspace(StoreInADS=False)
-                assert (workspaceNotInADS)
+                assert workspaceNotInADS
                 self.setProperty("OutputWorkspace", workspaceNotInADS)
 
         AlgorithmFactory.subscribe(SimpleAPIPythonAlgorithm6)
@@ -474,36 +480,40 @@ class SimpleAPITest(unittest.TestCase):
         alg.initialize()
         alg.setPropertyValue("OutputWorkspace", "out")
         alg.execute()
-        self.assertTrue('out' in mtd)
-        mtd.remove('out')
+        self.assertTrue("out" in mtd)
+        mtd.remove("out")
 
     def test_vanilla_python_default_in_ADS(self):
         from mantid.simpleapi import CreateSampleWorkspace
+
         out = CreateSampleWorkspace()
         self.assertTrue(out)
-        self.assertTrue('out' in mtd)
-        mtd.remove('out')
+        self.assertTrue("out" in mtd)
+        mtd.remove("out")
 
     def test_vanilla_python_explicit_in_ADS(self):
         from mantid.simpleapi import CreateSampleWorkspace
+
         out = CreateSampleWorkspace(StoreInADS=True)
         self.assertTrue(out)
-        self.assertTrue('out' in mtd)
-        mtd.remove('out')
+        self.assertTrue("out" in mtd)
+        mtd.remove("out")
 
     def test_vanilla_python_not_in_ADS(self):
         from mantid.simpleapi import CreateSampleWorkspace
+
         out = CreateSampleWorkspace(StoreInADS=False)
         self.assertTrue(out)
-        self.assertTrue('out' not in mtd)
+        self.assertTrue("out" not in mtd)
 
     def test_same_var_name_with_and_without_ADS(self):
         from mantid.simpleapi import CreateSampleWorkspace
+
         ws = CreateSampleWorkspace()  # in ADS
         ws = CreateSampleWorkspace(StoreInADS=False)  # not in ADS
-        mtd.remove('ws')
+        mtd.remove("ws")
         self.assertTrue(ws)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

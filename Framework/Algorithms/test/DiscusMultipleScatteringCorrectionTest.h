@@ -25,22 +25,23 @@
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 
+using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
 class DiscusMultipleScatteringCorrectionHelper : public Mantid::Algorithms::DiscusMultipleScatteringCorrection {
 public:
-  double interpolateGaussian(const Mantid::API::ISpectrum &histToInterpolate, double x) {
+  double interpolateGaussian(const DiscusData1D &histToInterpolate, double x) {
     return DiscusMultipleScatteringCorrection::interpolateGaussian(histToInterpolate, x);
   }
-  double interpolateSquareRoot(const Mantid::API::ISpectrum &histToInterpolate, double x) {
+  double interpolateSquareRoot(const DiscusData1D &histToInterpolate, double x) {
     return DiscusMultipleScatteringCorrection::interpolateSquareRoot(histToInterpolate, x);
   }
   void updateTrackDirection(Mantid::Geometry::Track &track, const double cosT, const double phi) {
     DiscusMultipleScatteringCorrection::updateTrackDirection(track, cosT, phi);
   }
-  void integrateCumulative(const Mantid::API::ISpectrum &h, double xmin, double xmax, std::vector<double> &resultX,
+  void integrateCumulative(const DiscusData1D &h, double xmin, double xmax, std::vector<double> &resultX,
                            std::vector<double> &resultY, const bool returnCumulative) {
     DiscusMultipleScatteringCorrection::integrateCumulative(h, xmin, xmax, resultX, resultY, returnCumulative);
   }
@@ -361,11 +362,12 @@ public:
     for (auto i = 0; i < 4; i++) {
       ws2->mutableY(0)[i] = pow(2 * i, 2);
     }
-    auto interpY = alg.interpolateGaussian(ws2->getSpectrum(0), 2.0);
+    DiscusData1D data{ws2->getSpectrum(0).readX(), ws2->getSpectrum(0).readY()};
+    auto interpY = alg.interpolateGaussian(data, 2.0);
     TS_ASSERT_EQUALS(interpY, exp(9.0));
 
     // check point beyond half way point uses same three points
-    interpY = alg.interpolateGaussian(ws2->getSpectrum(0), 2.00000001);
+    interpY = alg.interpolateGaussian(data, 2.00000001);
     TS_ASSERT_DELTA(interpY, exp(9.0), 0.01);
   }
 
@@ -375,7 +377,7 @@ public:
     auto ws = Mantid::DataObjects::create<Workspace2D>(
         1, Mantid::HistogramData::Histogram(Mantid::HistogramData::Points({0., 4., 16.}),
                                             Mantid::HistogramData::Counts({0., 2., 4.})));
-    auto interpY = alg.interpolateSquareRoot(ws->getSpectrum(0), 9.0);
+    auto interpY = alg.interpolateSquareRoot(DiscusData1D{ws->getSpectrum(0).readX(), ws->getSpectrum(0).readY()}, 9.0);
     TS_ASSERT_EQUALS(interpY, 3.0);
   }
 
@@ -404,52 +406,36 @@ public:
         1, Mantid::HistogramData::Histogram(Mantid::HistogramData::Points({0., 1., 2., 3.}),
                                             Mantid::HistogramData::Frequencies({1., 1., 1., 2.})));
     std::vector<double> testResultX, testResultY;
-    alg.integrateCumulative(ws->getSpectrum(0), 0., 2.2, testResultX, testResultY, true);
+    DiscusData1D data{ws->getSpectrum(0).readX(), ws->getSpectrum(0).readY()};
+    alg.integrateCumulative(data, 0., 2.2, testResultX, testResultY, true);
     TS_ASSERT_EQUALS(testResultY[3], 2.22);
     testResultX.clear();
     testResultY.clear();
-    alg.integrateCumulative(ws->getSpectrum(0), 0., 2.2, testResultX, testResultY, false);
+    alg.integrateCumulative(data, 0., 2.2, testResultX, testResultY, false);
     TS_ASSERT_EQUALS(testResultY[0], 2.22);
     testResultX.clear();
     testResultY.clear();
-    TS_ASSERT_THROWS(alg.integrateCumulative(ws->getSpectrum(0), 0., 3.2, testResultX, testResultY, true),
-                     std::runtime_error &);
+    TS_ASSERT_THROWS(alg.integrateCumulative(data, 0., 3.2, testResultX, testResultY, true), std::runtime_error &);
     testResultX.clear();
     testResultY.clear();
-    alg.integrateCumulative(ws->getSpectrum(0), 0., 2.0, testResultX, testResultY, true);
+    alg.integrateCumulative(data, 0., 2.0, testResultX, testResultY, true);
     TS_ASSERT_EQUALS(testResultY[2], 2.0);
     testResultX.clear();
     testResultY.clear();
-    alg.integrateCumulative(ws->getSpectrum(0), 0., 0., testResultX, testResultY, true);
+    alg.integrateCumulative(data, 0., 0., testResultX, testResultY, true);
     TS_ASSERT_EQUALS(testResultY[0], 0.);
     testResultX.clear();
     testResultY.clear();
-    alg.integrateCumulative(ws->getSpectrum(0), 1., 0., testResultX, testResultY, true);
+    alg.integrateCumulative(data, 1., 0., testResultX, testResultY, true);
     TS_ASSERT_EQUALS(testResultY[0], 0.);
     testResultX.clear();
     testResultY.clear();
-    alg.integrateCumulative(ws->getSpectrum(0), 0.5, 1.5, testResultX, testResultY, true);
+    alg.integrateCumulative(data, 0.5, 1.5, testResultX, testResultY, true);
     TS_ASSERT_EQUALS(testResultY[2], 1.0);
     testResultX.clear();
     testResultY.clear();
-    alg.integrateCumulative(ws->getSpectrum(0), 0.5, 0.9, testResultX, testResultY, true);
+    alg.integrateCumulative(data, 0.5, 0.9, testResultX, testResultY, true);
     TS_ASSERT_EQUALS(testResultY[1], 0.4);
-    // bin edges tests
-    testResultX.clear();
-    testResultY.clear();
-    auto ws_edges = Mantid::DataObjects::create<Workspace2D>(
-        1, Mantid::HistogramData::Histogram(Mantid::HistogramData::BinEdges({0., 1., 2., 3.}),
-                                            Mantid::HistogramData::Frequencies({1., 1., 2.})));
-    alg.integrateCumulative(ws_edges->getSpectrum(0), 0., 2.2, testResultX, testResultY, true);
-    TS_ASSERT_DELTA(testResultY[3], 2.4, 1E-10);
-    testResultX.clear();
-    testResultY.clear();
-    alg.integrateCumulative(ws_edges->getSpectrum(0), 0., 2.0, testResultX, testResultY, true);
-    TS_ASSERT_EQUALS(testResultY[2], 2.0);
-    testResultX.clear();
-    testResultY.clear();
-    alg.integrateCumulative(ws_edges->getSpectrum(0), 0., 2.0, testResultX, testResultY, false);
-    TS_ASSERT_EQUALS(testResultY[0], 2.0);
   }
 
   void test_inelastic_with_importance_sampling() {
@@ -786,6 +772,39 @@ public:
     TS_ASSERT_DELTA(doubleScatterResult3->y(0)[0], doubleScatterResult->y(0)[0], 1E-6);
 
     Mantid::API::AnalysisDataService::Instance().deepRemoveGroup("MuscatResults");
+  }
+
+  void test_errors_calculated() {
+    // don't use a flat plate here because weights for the NoAbs workspace are all same for flat plates (so error=0)
+    auto inputWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithGeographicalDetectors(1, 180, 1.0, 1, 0.5, 1.0,
+                                                                                              "testinst", "Momentum");
+
+    auto cylinderShape =
+        ComponentCreationHelper::createCappedCylinder(0.01, 0.04, {0., -0.02, 0.}, {0., 1., 0.}, "test");
+    auto mat = Mantid::Kernel::Material("Ni", Mantid::PhysicalConstants::getNeutronAtom(28, 0), 0.091337537);
+    cylinderShape->setMaterial(mat);
+    inputWorkspace->mutableSample().setShape(cylinderShape);
+    auto alg = createAlgorithm();
+
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWorkspace));
+    const int NSCATTERINGS = 3;
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NumberScatterings", NSCATTERINGS));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NeutronPathsSingle", 10));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NeutronPathsMultiple", 10));
+    TS_ASSERT_THROWS_NOTHING(alg->execute(););
+    TS_ASSERT(alg->isExecuted());
+    if (alg->isExecuted()) {
+      auto output =
+          Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
+
+      Mantid::API::Workspace_sptr wsPtr;
+      for (size_t i = 0; i < output->size(); i++) {
+        TS_ASSERT_THROWS_NOTHING(wsPtr = output->getItem(i));
+        auto matrixWsPtr = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr);
+        auto eData = matrixWsPtr->dataE(0);
+        TS_ASSERT(std::all_of(eData.cbegin(), eData.cend(), [](double i) { return i > 0; }));
+      }
+    }
   }
 
   //---------------------------------------------------------------------------

@@ -27,7 +27,8 @@ class InstrumentViewPresenter(ObservingPresenter):
     """
     @param ws : The workspace object OR workspace name.
     """
-    def __init__(self, ws, parent=None, window_flags=Qt.Window, ads_observer=None, view: InstrumentView=None):
+
+    def __init__(self, ws, parent=None, window_flags=Qt.Window, ads_observer=None, view: InstrumentView = None):
         super(InstrumentViewPresenter, self).__init__()
         self.ws_name = str(ws)
 
@@ -36,8 +37,7 @@ class InstrumentViewPresenter(ObservingPresenter):
             workspace = AnalysisDataService.retrieve(self.ws_name)
             workspace.readLock()
             try:
-                self.container = InstrumentView(parent=parent, presenter=self,
-                                                name=self.ws_name, window_flags=window_flags)
+                self.container = InstrumentView(parent=parent, presenter=self, name=self.ws_name, window_flags=window_flags)
             finally:
                 workspace.unlock()
 
@@ -58,6 +58,7 @@ class InstrumentViewPresenter(ObservingPresenter):
     @param new_workspace_name : the name of the new workspace to set
     @param new_window_name : the new title of the window. Optional, if none provided, uses the name of the workspace.
     """
+
     def replace_workspace(self, new_workspace_name, new_window_name=None):
         self.container.replace_workspace(new_workspace_name, new_window_name)
 
@@ -87,8 +88,7 @@ class InstrumentViewPresenter(ObservingPresenter):
         self.container.select_tab(1)
 
     def set_bin_range(self, min_x: float, max_x: float):
-        """Set the binning range on X-axis
-        """
+        """Set the binning range on X-axis"""
         self.container.set_range(min_x, max_x)
 
     def is_thread_running(self):
@@ -117,6 +117,7 @@ class InstrumentViewManager:
     InstrumentViewManager provide a singleton for client to access "Instrument View"
     in python/iPython console environment
     """
+
     # static instance to the last InstrumentView instance launched
     last_view = None
     # a dictionary to trace all the InstrumentView instances launched
@@ -125,8 +126,7 @@ class InstrumentViewManager:
 
     @staticmethod
     def register(instrument_view_obj, ws_name):
-        """Register an InstrumentViewPresenter instance
-        """
+        """Register an InstrumentViewPresenter instance"""
         InstrumentViewManager.last_view = instrument_view_obj
         if ws_name in InstrumentViewManager.view_dict:
             InstrumentViewManager.view_dict[ws_name].append(instrument_view_obj)
@@ -135,8 +135,7 @@ class InstrumentViewManager:
 
     @staticmethod
     def get_instrument_view(ws_name: str):
-        """Get an InstrumentView widget by the name of the workspace associated with it
-        """
+        """Get an InstrumentView widget by the name of the workspace associated with it"""
         if ws_name not in InstrumentViewManager.view_dict:
             # return None if the workspace does not exist
             return None
@@ -144,8 +143,7 @@ class InstrumentViewManager:
 
     @staticmethod
     def remove(view_obj, ws_name: str):
-        """Remove a registered InstrumentView
-        """
+        """Remove a registered InstrumentView"""
         try:
             # delete the record
             if ws_name in InstrumentViewManager.view_dict:
@@ -157,6 +155,8 @@ class InstrumentViewManager:
                     del InstrumentViewManager.view_dict[ws_name]
         except KeyError as ke:
             # if it does not exist
-            raise RuntimeError(f'workspace {ws_name} does not exist in dictionary. '
-                               f'The available includes {InstrumentViewManager.view_dict.items()},'
-                               f'FYI: {ke}')
+            raise RuntimeError(
+                f"workspace {ws_name} does not exist in dictionary. "
+                f"The available includes {InstrumentViewManager.view_dict.items()},"
+                f"FYI: {ke}"
+            )

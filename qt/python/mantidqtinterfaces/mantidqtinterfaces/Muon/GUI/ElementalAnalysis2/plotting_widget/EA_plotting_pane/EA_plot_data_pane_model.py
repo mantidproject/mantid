@@ -11,7 +11,6 @@ INVERSE_SPECTRA_INDICES = {0: "Delayed", 1: "Prompt", 2: "Total"}
 
 
 class EAPlotDataPaneModel(BasePaneModel):
-
     def __init__(self, context):
         super(EAPlotDataPaneModel, self).__init__(context, name="Plot Data")
         self.context.plot_panes_context[self.name].set_defaults([-10.0, 1000.0], [-100, 2000])
@@ -31,9 +30,7 @@ class EAPlotDataPaneModel(BasePaneModel):
             if is_raw:
                 workspace_list = [self.context.group_context[current_group].get_counts_workspace_for_run(False)]
             else:
-                workspace_list = \
-                    [self.context.group_context[
-                         current_group].get_rebined_or_unbinned_version_of_workspace_if_it_exists()]
+                workspace_list = [self.context.group_context[current_group].get_rebined_or_unbinned_version_of_workspace_if_it_exists()]
 
             return workspace_list
         except AttributeError:
@@ -50,10 +47,10 @@ class EAPlotDataPaneModel(BasePaneModel):
 
     def get_workspace_list(self, group_names, is_raw):
         """
-                :param group_names:
-                :param is_raw: Whether to use raw or rebinned data
-                :return: a list of workspace names
-                """
+        :param group_names:
+        :param is_raw: Whether to use raw or rebinned data
+        :return: a list of workspace names
+        """
         workspace_list = []
         for group in group_names:
             workspace_list += self.get_count_workspaces_to_plot(group, is_raw)
@@ -61,8 +58,8 @@ class EAPlotDataPaneModel(BasePaneModel):
 
     def get_workspace_and_indices_for_group(self, group, is_raw, plot_type):
         """
-         :return: a list of workspace names and corresponding indices to plot
-         """
+        :return: a list of workspace names and corresponding indices to plot
+        """
         workspace_list = self.get_count_workspaces_to_plot(group, is_raw)
         indices = self._generate_run_indices(workspace_list, plot_type)
 
@@ -80,8 +77,8 @@ class EAPlotDataPaneModel(BasePaneModel):
 
     def get_workspace_list_and_indices_to_plot(self, is_raw, plot_type):
         """
-         :return: a list of workspace names to plot
-         """
+        :return: a list of workspace names to plot
+        """
         workspace_list = self.get_workspaces_to_plot(is_raw)
         indices = self._generate_run_indices(workspace_list, plot_type)
 

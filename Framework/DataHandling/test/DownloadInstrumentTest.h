@@ -48,14 +48,14 @@ private:
                      "    \"path\": \"instrument/NewFile.xml\",\n"
                      "    \"sha\": \"Xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\n"
                      "    \"size\": 60,\n"
-                     "    \"url\": \"https://www.mantidproject.org/invalid\",\n"
-                     "    \"html_url\": \"https://www.mantidproject.org/NewFile.xml\",\n"
-                     "    \"git_url\": \"https://www.mantidproject.org/invalid\",\n"
+                     "    \"url\": \"https://fakedomain.org/invalid\",\n"
+                     "    \"html_url\": \"https://fakedomain.org/NewFile.xml\",\n"
+                     "    \"git_url\": \"https://fakedomain.org/invalid\",\n"
                      "    \"type\": \"file\",\n"
                      "    \"_links\": {\n"
-                     "      \"self\": \"https://www.mantidproject.org/invalid\",\n"
-                     "      \"git\": \"https://www.mantidproject.org/invalid\",\n"
-                     "      \"html\": \"https://www.mantidproject.org/invalid\"\n"
+                     "      \"self\": \"https://fakedomain.org/invalid\",\n"
+                     "      \"git\": \"https://fakedomain.org/invalid\",\n"
+                     "      \"html\": \"https://fakedomain.org/invalid\"\n"
                      "    }\n"
                      "  },\n"
                      "  {\n"
@@ -63,21 +63,21 @@ private:
                      "    \"path\": \"instrument/UpdatableFile.xml\",\n"
                      "    \"sha\": \"d66ba0a04290093d83d41901048068d495d41764\",\n"
                      "    \"size\": 106141,\n"
-                     "    \"url\": \"https://www.mantidproject.org/invalid\",\n"
+                     "    \"url\": \"https://fakedomain.org/invalid\",\n"
                      "    \"html_url\": "
-                     "\"https://www.mantidproject.org/UpdatableFile.xml\",\n"
-                     "    \"git_url\": \"https://www.mantidproject.org/invalid\",\n"
+                     "\"https://fakedomain.org/UpdatableFile.xml\",\n"
+                     "    \"git_url\": \"https://fakedomain.org/invalid\",\n"
                      "    \"type\": \"file\",\n"
                      "    \"_links\": {\n"
-                     "      \"self\": \"https://www.mantidproject.org/invalid\",\n"
-                     "      \"git\": \"https://www.mantidproject.org/invalid\",\n"
-                     "      \"html\": \"https://www.mantidproject.org/invalid\"\n"
+                     "      \"self\": \"https://fakedomain.org/invalid\",\n"
+                     "      \"git\": \"https://fakedomain.org/invalid\",\n"
+                     "      \"html\": \"https://fakedomain.org/invalid\"\n"
                      "    }\n"
                      "  }\n"
                      "]";
-    } else if (urlFile.find("https://www.mantidproject.org/NewFile.xml") != std::string::npos) {
+    } else if (urlFile.find("https://fakedomain.org/NewFile.xml") != std::string::npos) {
       outputString = "Here is some sample text for NewFile.xml";
-    } else if (urlFile.find("https://www.mantidproject.org/UpdatableFile.xml") != std::string::npos) {
+    } else if (urlFile.find("https://fakedomain.org/UpdatableFile.xml") != std::string::npos) {
       outputString = "Here is some sample text for WISH_Definition.xml";
     }
 

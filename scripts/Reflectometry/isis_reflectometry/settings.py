@@ -17,10 +17,10 @@ class Settings(object):
     __contents = None
     __filename = None
 
-    def __init__(self, filename = None):
+    def __init__(self, filename=None):
         self.__filename = filename
         if not filename:
-            filename = os.path.join( os.path.dirname(os.path.realpath(__file__)), "settings.xml")
+            filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), "settings.xml")
 
         self.__check_file(filename)
 
@@ -37,13 +37,13 @@ class Settings(object):
         if extension.lower().strip() != ".xml":
             raise ValueError("Wrong file extension. *.xml expected not %s." % extension)
         if not os.path.isfile(filename):
-            ''' Deliberately swallow and re-throw at this point. Consise reinterpreted error, will be much nicer for client code.'''
-            raise MissingSettings("Settings file %s does not exist so no manual settings will be applied."  % filename)
+            """Deliberately swallow and re-throw at this point. Consise reinterpreted error, will be much nicer for client code."""
+            raise MissingSettings("Settings file %s does not exist so no manual settings will be applied." % filename)
 
     def __extract_to_dictionary(self, doc):
         temp = dict()
         for elem in doc:
-            key = elem.attrib.get('name').strip()
+            key = elem.attrib.get("name").strip()
             value = elem.text.strip()
             if not key:
                 raise ValueError("Missing name attribute on Setting element")

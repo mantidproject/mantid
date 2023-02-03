@@ -9,7 +9,7 @@
 #
 from mantidqt.utils.qt import import_qt
 
-Cell = import_qt('..._common', 'mantidqt.widgets.jobtreeview', 'Cell')
-JobTreeView = import_qt('..._common', 'mantidqt.widgets.jobtreeview', 'JobTreeView')
-JobTreeViewSignalAdapter = import_qt('..._common', 'mantidqt.widgets.jobtreeview', 'JobTreeViewSignalAdapter')
-RowLocation = import_qt('..._common', 'mantidqt.widgets.jobtreeview', 'RowLocation')
+Cell = import_qt("..._common", "mantidqt.widgets.jobtreeview", "Cell")
+JobTreeView = import_qt("..._common", "mantidqt.widgets.jobtreeview", "JobTreeView")
+JobTreeViewSignalAdapter = import_qt("..._common", "mantidqt.widgets.jobtreeview", "JobTreeViewSignalAdapter")
+RowLocation = import_qt("..._common", "mantidqt.widgets.jobtreeview", "RowLocation")

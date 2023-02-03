@@ -11,67 +11,74 @@ for which data must be event sliced. These steps are: slicing, adjustment, conve
 
 from SANSReductionCoreBase import SANSReductionCoreBase
 
-from mantid.api import (MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
-                        Progress)
-from mantid.kernel import (Direction, StringListValidator)
-from sans.common.enums import (DetectorType, DataType)
+from mantid.api import MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress
+from mantid.kernel import Direction, StringListValidator
+from sans.common.enums import DetectorType, DataType
 
 
 class SANSReductionCoreEventSlice(SANSReductionCoreBase):
     def category(self):
-        return 'SANS\\Reduction'
+        return "SANS\\Reduction"
 
     def summary(self):
-        return 'Runs the the core reduction elements which need to be carried out ' \
-               'on individual event slices.'
+        return "Runs the the core reduction elements which need to be carried out " "on individual event slices."
 
     def PyInit(self):
         # ----------
         # INPUT
         # ----------
-        self.declareProperty('SANSState', '',
-                             doc='A JSON string which fulfills the SANSState contract.')
+        self.declareProperty("SANSState", "", doc="A JSON string which fulfills the SANSState contract.")
 
         # WORKSPACES
         # Scatter Workspaces
-        self.declareProperty(MatrixWorkspaceProperty('ScatterWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
-                             doc='The scatter workspace. This workspace does not contain monitors.')
-        self.declareProperty(MatrixWorkspaceProperty('DummyMaskWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
-                             doc='The histogram workspace containing mask bins for the event workspace, to be copied '
-                                 'over after event slicing.')
-        self.declareProperty(MatrixWorkspaceProperty('ScatterMonitorWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
-                             doc='The scatter monitor workspace. This workspace only contains monitors.')
+        self.declareProperty(
+            MatrixWorkspaceProperty("ScatterWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Input),
+            doc="The scatter workspace. This workspace does not contain monitors.",
+        )
+        self.declareProperty(
+            MatrixWorkspaceProperty("DummyMaskWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Input),
+            doc="The histogram workspace containing mask bins for the event workspace, to be copied " "over after event slicing.",
+        )
+        self.declareProperty(
+            MatrixWorkspaceProperty("ScatterMonitorWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Input),
+            doc="The scatter monitor workspace. This workspace only contains monitors.",
+        )
         # Direct Workspace
-        self.declareProperty(MatrixWorkspaceProperty('DirectWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
-                             doc='The direct workspace.')
+        self.declareProperty(
+            MatrixWorkspaceProperty("DirectWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Input),
+            doc="The direct workspace.",
+        )
         # Transmission Workspace
-        self.declareProperty(MatrixWorkspaceProperty('TransmissionWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
-                             doc='The transmission workspace')
+        self.declareProperty(
+            MatrixWorkspaceProperty("TransmissionWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Input),
+            doc="The transmission workspace",
+        )
 
-        self.setPropertyGroup("ScatterWorkspace", 'Data')
-        self.setPropertyGroup("ScatterMonitorWorkspace", 'Data')
-        self.setPropertyGroup("DummyMaskWorkspace", 'Data')
-        self.setPropertyGroup("DirectWorkspace", 'Data')
-        self.setPropertyGroup("TransmissionWorkspace", 'Data')
+        self.setPropertyGroup("ScatterWorkspace", "Data")
+        self.setPropertyGroup("ScatterMonitorWorkspace", "Data")
+        self.setPropertyGroup("DummyMaskWorkspace", "Data")
+        self.setPropertyGroup("DirectWorkspace", "Data")
+        self.setPropertyGroup("TransmissionWorkspace", "Data")
 
         # The component
-        allowed_detectors = StringListValidator([DetectorType.LAB.value,
-                                                 DetectorType.HAB.value])
-        self.declareProperty("Component", DetectorType.LAB.value,
-                             validator=allowed_detectors, direction=Direction.Input,
-                             doc="The component of the instrument which is to be reduced.")
+        allowed_detectors = StringListValidator([DetectorType.LAB.value, DetectorType.HAB.value])
+        self.declareProperty(
+            "Component",
+            DetectorType.LAB.value,
+            validator=allowed_detectors,
+            direction=Direction.Input,
+            doc="The component of the instrument which is to be reduced.",
+        )
 
         # The data type
-        allowed_data = StringListValidator([DataType.SAMPLE.value,
-                                            DataType.CAN.value])
-        self.declareProperty("DataType", DataType.SAMPLE.value,
-                             validator=allowed_data, direction=Direction.Input,
-                             doc="The component of the instrument which is to be reduced.")
+        allowed_data = StringListValidator([DataType.SAMPLE.value, DataType.CAN.value])
+        self.declareProperty(
+            "DataType",
+            DataType.SAMPLE.value,
+            validator=allowed_data,
+            direction=Direction.Input,
+            doc="The component of the instrument which is to be reduced.",
+        )
 
         # ----------
         # OUTPUT
@@ -92,8 +99,7 @@ class SANSReductionCoreEventSlice(SANSReductionCoreBase):
         progress.report("Event slicing ...")
         data_type_as_string = self.getProperty("DataType").value
         monitor_workspace = self._get_monitor_workspace()
-        workspace, monitor_workspace, slice_event_factor = self._slice(state, workspace, monitor_workspace,
-                                                                       data_type_as_string)
+        workspace, monitor_workspace, slice_event_factor = self._slice(state, workspace, monitor_workspace, data_type_as_string)
 
         # --------------------------------------------------------------------------------------------------------------
         # 2. Create adjustment workspaces, those are
@@ -104,9 +110,13 @@ class SANSReductionCoreEventSlice(SANSReductionCoreBase):
         component_as_string = self.getProperty("Component").value
         data_type_as_string = self.getProperty("DataType").value
         progress.report("Creating adjustment workspaces ...")
-        wavelength_adjustment_workspace, pixel_adjustment_workspace, wavelength_and_pixel_adjustment_workspace, \
-            calculated_transmission_workspace, unfitted_transmission_workspace = \
-            self._adjustment(state, workspace, monitor_workspace, component_as_string, data_type_as_string)
+        (
+            wavelength_adjustment_workspace,
+            pixel_adjustment_workspace,
+            wavelength_and_pixel_adjustment_workspace,
+            calculated_transmission_workspace,
+            unfitted_transmission_workspace,
+        ) = self._adjustment(state, workspace, monitor_workspace, component_as_string, data_type_as_string)
 
         # ------------------------------------------------------------
         # 3. Convert event workspaces to histogram workspaces
@@ -126,12 +136,13 @@ class SANSReductionCoreEventSlice(SANSReductionCoreBase):
         # 5. Convert to Q
         # -----------------------------------------------------------
         progress.report("Converting to q ...")
-        workspace, sum_of_counts, sum_of_norms = \
-            self._convert_to_q(state=state,
-                               workspace=workspace,
-                               wavelength_adjustment_workspace=wavelength_adjustment_workspace,
-                               pixel_adjustment_workspace=pixel_adjustment_workspace,
-                               wavelength_and_pixel_adjustment_workspace=wavelength_and_pixel_adjustment_workspace)
+        workspace, sum_of_counts, sum_of_norms = self._convert_to_q(
+            state=state,
+            workspace=workspace,
+            wavelength_adjustment_workspace=wavelength_adjustment_workspace,
+            pixel_adjustment_workspace=pixel_adjustment_workspace,
+            wavelength_and_pixel_adjustment_workspace=wavelength_and_pixel_adjustment_workspace,
+        )
 
         progress.report("Completed SANSReductionCoreEventSlice...")
 

@@ -19,14 +19,14 @@ class PlotToolbar(MantidNavigationToolbar):
         MantidStandardNavigationTools.PAN,
         MantidStandardNavigationTools.ZOOM,
         MantidStandardNavigationTools().SEPARATOR,
-        MantidNavigationTool('Show major','Show major gridlines','mdi.grid-large','show_major_gridlines'),
-        MantidNavigationTool('Show minor','Show minor gridlines','mdi.grid','show_minor_gridlines' ),
+        MantidNavigationTool("Show major", "Show major gridlines", "mdi.grid-large", "show_major_gridlines"),
+        MantidNavigationTool("Show minor", "Show minor gridlines", "mdi.grid", "show_minor_gridlines"),
         MantidStandardNavigationTools.SEPARATOR,
         MantidStandardNavigationTools.CONFIGURE,
         MantidStandardNavigationTools.SAVE,
         MantidStandardNavigationTools.SEPARATOR,
-        MantidNavigationTool('Show/hide legend', 'Toggles the legend on/off', None, 'toggle_legend'),
-                 )
+        MantidNavigationTool("Show/hide legend", "Toggles the legend on/off", None, "toggle_legend"),
+    )
 
     def __init__(self, figure_canvas, parent=None):
 
@@ -57,19 +57,19 @@ class PlotToolbar(MantidNavigationToolbar):
             self.is_major_grid_on = False
         else:
             for ax in self.canvas.figure.get_axes():
-                ax.grid(True , color='black')
+                ax.grid(True, color="black")
             self.is_major_grid_on = True
         self.canvas.draw()
 
     def show_minor_gridlines(self):
         if self.is_minor_grid_on:
             for ax in self.canvas.figure.get_axes():
-                ax.grid(which='minor')
+                ax.grid(which="minor")
             self.is_minor_grid_on = False
         else:
             for ax in self.canvas.figure.get_axes():
                 ax.minorticks_on()
-                ax.grid(which='minor')
+                ax.grid(which="minor")
             self.is_minor_grid_on = True
         self.canvas.draw()
 
@@ -80,11 +80,11 @@ class PlotToolbar(MantidNavigationToolbar):
     def _update_buttons_checked(self):
         # sync button checkstates to match active mode
         pan_or_zoom_checked = False
-        if 'pan' in self._actions:
-            self._actions['pan'].setChecked(self._get_mode() == 'PAN' or self._get_mode() == 'pan/zoom'  )
-        if 'zoom' in self._actions:
-            self._actions['zoom'].setChecked(self._get_mode()  == 'ZOOM' or self._get_mode() == 'zoom rect' )
-        pan_or_zoom_checked = self._actions['pan'].isChecked() or self._actions['zoom'].isChecked()
+        if "pan" in self._actions:
+            self._actions["pan"].setChecked(self._get_mode() == "PAN" or self._get_mode() == "pan/zoom")
+        if "zoom" in self._actions:
+            self._actions["zoom"].setChecked(self._get_mode() == "ZOOM" or self._get_mode() == "zoom rect")
+        pan_or_zoom_checked = self._actions["pan"].isChecked() or self._actions["zoom"].isChecked()
         self._send_notifiers(pan_or_zoom_checked)
 
     def _send_notifiers(self, is_checked):

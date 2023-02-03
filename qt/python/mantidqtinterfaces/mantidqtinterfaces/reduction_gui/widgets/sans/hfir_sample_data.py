@@ -4,18 +4,20 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name,protected-access
+# pylint: disable=invalid-name,protected-access
 import os
-from qtpy.QtWidgets import (QFrame, QGroupBox, QMessageBox)  # noqa
-from qtpy.QtGui import (QDoubleValidator)  # noqa
+from qtpy.QtWidgets import QFrame, QGroupBox, QMessageBox  # noqa
+from qtpy.QtGui import QDoubleValidator  # noqa
 import mantidqtinterfaces.reduction_gui.widgets.util as util
 from reduction_gui.reduction.sans.hfir_sample_script import SampleData
 from mantidqtinterfaces.reduction_gui.widgets.base_widget import BaseWidget
+
 try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
     from mantid.kernel import Logger
-    Logger("DirectBeam").information('Using legacy ui importer')
+
+    Logger("DirectBeam").information("Using legacy ui importer")
     from mantidplot import load_ui
 
 unicode = str
@@ -23,7 +25,7 @@ unicode = str
 
 class DirectBeam(BaseWidget):
     """
-        Widget for the direct beam transmission calculation options.
+    Widget for the direct beam transmission calculation options.
     """
 
     def __init__(self, parent=None, state=None, settings=None, data_type=None, data_proxy=None):
@@ -32,7 +34,7 @@ class DirectBeam(BaseWidget):
         class DirectBeamFrame(QGroupBox):
             def __init__(self, parent=None):
                 QGroupBox.__init__(self, parent)
-                self.ui = load_ui(__file__, '../../../ui/sans/trans_direct_beam.ui', baseinstance=self)
+                self.ui = load_ui(__file__, "../../../ui/sans/trans_direct_beam.ui", baseinstance=self)
 
         self._content = DirectBeamFrame(self)
         self._layout.addWidget(self._content)
@@ -45,8 +47,8 @@ class DirectBeam(BaseWidget):
 
     def initialize_content(self):
         """
-            Declare the validators and event connections for the
-            widgets loaded through the .ui file.
+        Declare the validators and event connections for the
+        widgets loaded through the .ui file.
         """
         # Validators
         self._content.beam_radius_edit.setValidator(QDoubleValidator(self._content.beam_radius_edit))
@@ -70,8 +72,8 @@ class DirectBeam(BaseWidget):
 
     def set_state(self, state):
         """
-            Populate the UI elements with the data from the given state.
-            @param state: Transmission object
+        Populate the UI elements with the data from the given state.
+        @param state: Transmission object
         """
         self._content.beam_radius_edit.setText(str(state.beam_radius))
         self._content.sample_edit.setText(state.sample_file)
@@ -79,7 +81,7 @@ class DirectBeam(BaseWidget):
 
     def get_state(self):
         """
-            Returns an object with the state of the interface
+        Returns an object with the state of the interface
         """
         m = SampleData.DirectBeam()
         m.beam_radius = util._check_and_get_float_line_edit(self._content.beam_radius_edit)
@@ -102,7 +104,7 @@ class DirectBeam(BaseWidget):
 
 class BeamSpreader(BaseWidget):
     """
-        Widget for the beam spreader transmission calculation options.
+    Widget for the beam spreader transmission calculation options.
     """
 
     def __init__(self, parent=None, state=None, settings=None, data_type=None, data_proxy=None):
@@ -111,7 +113,7 @@ class BeamSpreader(BaseWidget):
         class SpreaderFrame(QGroupBox):
             def __init__(self, parent=None):
                 QGroupBox.__init__(self, parent)
-                self.ui = load_ui(__file__, '../../../ui/sans/trans_spreader.ui', baseinstance=self)
+                self.ui = load_ui(__file__, "../../../ui/sans/trans_spreader.ui", baseinstance=self)
 
         self._content = SpreaderFrame(self)
         self._layout.addWidget(self._content)
@@ -124,8 +126,8 @@ class BeamSpreader(BaseWidget):
 
     def initialize_content(self):
         """
-            Declare the validators and event connections for the
-            widgets loaded through the .ui file.
+        Declare the validators and event connections for the
+        widgets loaded through the .ui file.
         """
         # Validators
         self._content.spreader_trans_edit.setValidator(QDoubleValidator(self._content.spreader_trans_edit))
@@ -162,8 +164,8 @@ class BeamSpreader(BaseWidget):
 
     def set_state(self, state):
         """
-            Populate the UI elements with the data from the given state.
-            @param state: Transmission object
+        Populate the UI elements with the data from the given state.
+        @param state: Transmission object
         """
         self._content.spreader_trans_edit.setText(str(state.spreader_trans))
         self._content.spreader_trans_spread_edit.setText(str(state.spreader_trans_spread))
@@ -174,7 +176,7 @@ class BeamSpreader(BaseWidget):
 
     def get_state(self):
         """
-            Returns an object with the state of the interface
+        Returns an object with the state of the interface
         """
         m = SampleData.BeamSpreader()
         m.spreader_trans = util._check_and_get_float_line_edit(self._content.spreader_trans_edit)
@@ -211,8 +213,9 @@ class BeamSpreader(BaseWidget):
 
 class SampleDataWidget(BaseWidget):
     """
-        Widget that presents the transmission options to the user
+    Widget that presents the transmission options to the user
     """
+
     _method_box = None
 
     ## Widget name
@@ -224,7 +227,7 @@ class SampleDataWidget(BaseWidget):
         class DataFrame(QFrame):
             def __init__(self, parent=None):
                 QFrame.__init__(self, parent)
-                self.ui = load_ui(__file__, '../../../ui/sans/hfir_sample_data.ui', baseinstance=self)
+                self.ui = load_ui(__file__, "../../../ui/sans/hfir_sample_data.ui", baseinstance=self)
 
         self._content = DataFrame(self)
         self._layout.addWidget(self._content)
@@ -241,8 +244,8 @@ class SampleDataWidget(BaseWidget):
 
     def initialize_content(self):
         """
-            Declare the validators and event connections for the
-            widgets loaded through the .ui file.
+        Declare the validators and event connections for the
+        widgets loaded through the .ui file.
         """
         # Validators
         self._content.transmission_edit.setValidator(QDoubleValidator(self._content.transmission_edit))
@@ -268,8 +271,8 @@ class SampleDataWidget(BaseWidget):
 
     def set_state(self, state):
         """
-            Populate the UI elements with the data from the given state.
-            @param state: Transmission object
+        Populate the UI elements with the data from the given state.
+        @param state: Transmission object
         """
         self._content.transmission_edit.setText(str("%6.4f" % state.transmission))
         self._content.dtransmission_edit.setText(str("%6.4f" % state.transmission_spread))
@@ -290,17 +293,17 @@ class SampleDataWidget(BaseWidget):
         # Data file
         #   Check whether we are updating the data file
         data_files = self._get_data_files()
-        current_file = ''
-        if len(data_files)>0:
+        current_file = ""
+        if len(data_files) > 0:
             current_file = data_files[0].strip()
 
-        self._content.data_file_edit.setText(str(';'.join(state.data_files)))
-        if len(state.data_files)>0:
+        self._content.data_file_edit.setText(str(";".join(state.data_files)))
+        if len(state.data_files) > 0:
             self._settings.last_file = state.data_files[0]
-            self._settings.last_data_ws = ''
+            self._settings.last_data_ws = ""
 
             # Store the location of the loaded file
-            if len(state.data_files[0])>0:
+            if len(state.data_files[0]) > 0:
                 (folder, _) = os.path.split(state.data_files[0])
                 self._settings.data_path = folder
                 if current_file != state.data_files[0].strip():
@@ -310,7 +313,7 @@ class SampleDataWidget(BaseWidget):
 
     def get_state(self):
         """
-            Returns an object with the state of the interface
+        Returns an object with the state of the interface
         """
         m = SampleData()
 
@@ -322,7 +325,7 @@ class SampleDataWidget(BaseWidget):
         m.theta_dependent = self._content.theta_dep_chk.isChecked()
         m.dark_current = self._content.dark_current_edit.text()
 
-        m.calculation_method=self._method_box.get_state()
+        m.calculation_method = self._method_box.get_state()
 
         # Data file
         m.data_files = self._get_data_files()
@@ -332,21 +335,21 @@ class SampleDataWidget(BaseWidget):
     def _data_file_browse(self):
         #   Check whether we are updating the data file
         data_files = self._get_data_files()
-        current_file = ''
-        if len(data_files)>0:
+        current_file = ""
+        if len(data_files) > 0:
             current_file = data_files[0].strip()
 
         fname = self.data_browse_dialog(multi=True)
-        if fname and len(fname)>0:
-            self._content.data_file_edit.setText(';'.join(fname))
+        if fname and len(fname) > 0:
+            self._content.data_file_edit.setText(";".join(fname))
             self._settings.last_file = fname[0]
-            self._settings.last_data_ws = ''
+            self._settings.last_data_ws = ""
             if current_file != str(fname[0]).strip():
                 self.get_data_info()
 
     def _data_file_plot(self):
         data_files = self._get_data_files()
-        if len(data_files)>0:
+        if len(data_files) > 0:
             self.show_instrument(data_files[0])
 
     def _dark_current_browse(self):
@@ -359,16 +362,16 @@ class SampleDataWidget(BaseWidget):
             state = self._last_direct_state
         if isinstance(self._method_box, BeamSpreader):
             self._last_spreader_state = self._method_box.get_state()
-        self._replace_method(DirectBeam(self, state=state, settings=self._settings,
-                                        data_type=self._data_type, data_proxy=self._data_proxy))
+        self._replace_method(DirectBeam(self, state=state, settings=self._settings, data_type=self._data_type, data_proxy=self._data_proxy))
 
     def _beam_spreader(self, state=None):
         if state is None:
             state = self._last_spreader_state
         if isinstance(self._method_box, DirectBeam):
             self._last_direct_state = self._method_box.get_state()
-        self._replace_method(BeamSpreader(self, state=state, settings=self._settings,
-                                          data_type=self._data_type, data_proxy=self._data_proxy))
+        self._replace_method(
+            BeamSpreader(self, state=state, settings=self._settings, data_type=self._data_type, data_proxy=self._data_proxy)
+        )
 
     def _replace_method(self, widget):
         if self._method_box is not None:
@@ -395,23 +398,23 @@ class SampleDataWidget(BaseWidget):
 
     def _get_data_files(self):
         """
-            Utility method to return the list of data files in the sample data file edit box.
+        Utility method to return the list of data files in the sample data file edit box.
         """
         flist_str = str(self._content.data_file_edit.text())
-        flist_str = flist_str.replace(',', ';')
-        return flist_str.split(';')
+        flist_str = flist_str.replace(",", ";")
+        return flist_str.split(";")
 
     def _emit_experiment_parameters(self):
-        '''
+        """
         This will send the pair key,values below to other tabs.
-        '''
+        """
         sdd = util._check_and_get_float_line_edit(self._content.sample_dist_edit, min=0.0)
         self._settings.emit_key_value("sample_detector_distance", str(sdd))
 
-        value  = util._check_and_get_float_line_edit(self._content.sample_dist_offset_edit, min=0.0)
+        value = util._check_and_get_float_line_edit(self._content.sample_dist_offset_edit, min=0.0)
         self._settings.emit_key_value("sample_detector_distance_offset", str(value))
 
-        value  = util._check_and_get_float_line_edit(self._content.sample_si_window_dist_edit, min=0.0)
+        value = util._check_and_get_float_line_edit(self._content.sample_si_window_dist_edit, min=0.0)
         self._settings.emit_key_value("sample_si_window_distance", str(value))
 
         wavelength = util._check_and_get_float_line_edit(self._content.wavelength_edit, min=0.0)
@@ -422,20 +425,20 @@ class SampleDataWidget(BaseWidget):
 
     def get_data_info(self):
         """
-            Retrieve information from the data file and update the display
-            See hfir_data_proxy.py for the attributes parsed from the data file
+        Retrieve information from the data file and update the display
+        See hfir_data_proxy.py for the attributes parsed from the data file
         """
         if self._data_proxy is None:
             return
 
         data_files = self._get_data_files()
-        if len(data_files)<1:
+        if len(data_files) < 1:
             return
         fname = data_files[0]
-        if len(str(fname).strip())>0:
+        if len(str(fname).strip()) > 0:
             dataproxy = self._data_proxy(fname)
-            if len(dataproxy.errors)>0:
-                #QMessageBox.warning(self, "Error", dataproxy.errors[0])
+            if len(dataproxy.errors) > 0:
+                # QMessageBox.warning(self, "Error", dataproxy.errors[0])
                 return
 
             self._settings.last_data_ws = dataproxy.data_ws
@@ -457,7 +460,7 @@ class SampleDataWidget(BaseWidget):
             if dataproxy.wavelength_spread is not None:
                 self._content.wavelength_spread_edit.setText(str(dataproxy.wavelength_spread))
             # This will be enabled once the meta data contains the sample thickness - will be turned into check box
-            #if dataproxy.sample_thickness is not None:
+            # if dataproxy.sample_thickness is not None:
             #    self._content.thickness_edit.setText(str(dataproxy.sample_thickness))
             if dataproxy.beam_diameter is not None:
                 self._settings.emit_key_value("beam_diameter", str(dataproxy.beam_diameter))

@@ -8,7 +8,8 @@
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/TimeSplitter.h"
+#include "MantidKernel/SplittingInterval.h"
+#include "MantidKernel/TimeROI.h"
 
 #include <json/value.h>
 #include <nexus/NeXusFile.hpp>
@@ -389,7 +390,7 @@ void TimeSeriesProperty<TYPE>::filterByTimes(const std::vector<SplittingInterval
  * NOTE: If the input TSP has a single value, it is assumed to be a constant
  *  and so is not split, but simply copied to all output.
  *
- * @param splitter :: a TimeSplitterType object containing the list of intervals
+ * @param splitter :: a SplittingIntervalVec object containing the list of intervals
  *                     and destinations.
  * @param outputs  :: A vector of output TimeSeriesProperty
  * pointers of the same type.
@@ -623,7 +624,7 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(const std::vector<DateAndTime> 
 #endif
 
 /**
- * Fill a TimeSplitterType that will filter the events by matching
+ * Fill a SplittingIntervalVec that will filter the events by matching
  * log values >= min and <= max. Creates SplittingInterval's where
  * times match the log values, and going to index==0.
  * This method is used by the FilterByLogValue algorithm.
@@ -758,7 +759,7 @@ void TimeSeriesProperty<TYPE>::expandFilterToRange(std::vector<SplittingInterval
   // Assume everything before the 1st value is constant
   double val = static_cast<double>(firstValue());
   if ((val >= min) && (val <= max)) {
-    TimeSplitterType extraFilter;
+    SplittingIntervalVec extraFilter;
     extraFilter.emplace_back(range.begin(), firstTime(), 0);
     // Include everything from the start of the run to the first time measured
     // (which may be a null time interval; this'll be ignored)
@@ -768,7 +769,7 @@ void TimeSeriesProperty<TYPE>::expandFilterToRange(std::vector<SplittingInterval
   // Assume everything after the LAST value is constant
   val = static_cast<double>(lastValue());
   if ((val >= min) && (val <= max)) {
-    TimeSplitterType extraFilter;
+    SplittingIntervalVec extraFilter;
     extraFilter.emplace_back(lastTime(), range.end(), 0);
     // Include everything from the start of the run to the first time measured
     // (which may be a null time interval; this'll be ignored)
@@ -794,6 +795,22 @@ template <typename TYPE> double TimeSeriesProperty<TYPE>::timeAverageValue() con
   double retVal = 0.0;
   try {
     const auto &filter = getSplittingIntervals();
+    retVal = this->averageValueInFilter(filter);
+  } catch (std::exception &) {
+    // just return nan
+    retVal = std::numeric_limits<double>::quiet_NaN();
+  }
+  return retVal;
+}
+
+/** Returns the calculated time weighted average value.
+ * @param timeRoi  Object that holds information about when the time measurement was active.
+ * @return The time-weighted average value of the log when the time measurement was active.
+ */
+template <typename TYPE> double TimeSeriesProperty<TYPE>::timeAverageValue(const TimeROI &timeRoi) const {
+  double retVal = 0.0;
+  try {
+    const auto &filter = timeRoi.toSplitters();
     retVal = this->averageValueInFilter(filter);
   } catch (std::exception &) {
     // just return nan
@@ -853,22 +870,11 @@ double TimeSeriesProperty<TYPE>::averageValueInFilter(const std::vector<Splittin
 /** Function specialization for TimeSeriesProperty<std::string>
  *  @throws Kernel::Exception::NotImplementedError always
  */
-template <> double TimeSeriesProperty<std::string>::averageValueInFilter(const TimeSplitterType & /*filter*/) const {
+template <>
+double TimeSeriesProperty<std::string>::averageValueInFilter(const SplittingIntervalVec & /*filter*/) const {
   throw Exception::NotImplementedError("TimeSeriesProperty::"
                                        "averageValueInFilter is not "
                                        "implemented for string properties");
-}
-
-template <typename TYPE> std::pair<double, double> TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev() const {
-  std::pair<double, double> retVal{0., 0.}; // mean and stddev
-  try {
-    const auto &filter = getSplittingIntervals();
-    retVal = this->averageAndStdDevInFilter(filter);
-  } catch (std::exception &) {
-    retVal.first = std::numeric_limits<double>::quiet_NaN();
-    retVal.second = std::numeric_limits<double>::quiet_NaN();
-  }
-  return retVal;
 }
 
 template <typename TYPE>
@@ -913,12 +919,24 @@ TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<SplittingIn
   return std::pair<double, double>{mean, std::sqrt(numerator / totalTime)};
 }
 
+template <typename TYPE> std::pair<double, double> TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev() const {
+  std::pair<double, double> retVal{0., 0.}; // mean and stddev
+  try {
+    const auto &filter = getSplittingIntervals();
+    retVal = this->averageAndStdDevInFilter(filter);
+  } catch (std::exception &) {
+    retVal.first = std::numeric_limits<double>::quiet_NaN();
+    retVal.second = std::numeric_limits<double>::quiet_NaN();
+  }
+  return retVal;
+}
+
 /** Function specialization for TimeSeriesProperty<std::string>
  *  @throws Kernel::Exception::NotImplementedError always
  */
 template <>
 std::pair<double, double>
-TimeSeriesProperty<std::string>::averageAndStdDevInFilter(const TimeSplitterType & /*filter*/) const {
+TimeSeriesProperty<std::string>::averageAndStdDevInFilter(const SplittingIntervalVec & /*filter*/) const {
   throw Exception::NotImplementedError("TimeSeriesProperty::"
                                        "averageAndStdDevInFilter is not "
                                        "implemented for string properties");
@@ -1840,13 +1858,8 @@ template <typename TYPE> bool TimeSeriesProperty<TYPE>::isDefault() const { retu
  * N.B. This method DOES take filtering into account
  */
 template <typename TYPE> TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics() const {
-  TimeSeriesPropertyStatistics out;
-  Mantid::Kernel::Statistics raw_stats = Mantid::Kernel::getStatistics(this->filteredValuesAsVector());
-  out.mean = raw_stats.mean;
-  out.standard_deviation = raw_stats.standard_deviation;
-  out.median = raw_stats.median;
-  out.minimum = raw_stats.minimum;
-  out.maximum = raw_stats.maximum;
+  TimeSeriesPropertyStatistics out(Mantid::Kernel::getStatistics(this->filteredValuesAsVector()));
+
   if (this->size() > 0) {
     const auto &intervals = this->getSplittingIntervals();
     const double duration_sec =
@@ -1901,8 +1914,9 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::eliminateDuplicates() {
   countSize();
 
   // 3. Finish
-  g_log.warning() << "Log " << this->name() << " has " << numremoved << " entries removed due to duplicated time. "
-                  << "\n";
+  if (numremoved > 0)
+    g_log.notice() << "Log " << this->name() << " has " << numremoved << " entries removed due to duplicated time. "
+                   << "\n";
 }
 
 /*
@@ -2099,7 +2113,7 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::applyFilter() const {
         } else {
           // ii.  Register the end of a valid log
           if (ilastlog < 0)
-            throw std::logic_error("LastLog is not expected to be less than 0");
+            throw std::logic_error(" LastLog is not expected to be less than 0");
 
           int delta_numintervals = icurlog - ilastlog;
           if (delta_numintervals < 0)

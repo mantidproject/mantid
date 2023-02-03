@@ -11,14 +11,10 @@ from setuptools import find_packages, setup
 
 # The most basic setup possible to be able to use setup.py develop/install
 setup(
-    name='MantidWorkbench', # probably the wrong name if someone wants to include it
-    version=os.environ['MANTID_VERSION_STR'],
-    install_requires=['mantidqtinterfaces'],
-    packages=find_packages(exclude=['*.test']),
-    package_data={'': ['*.ui']},
-    entry_points={
-      'gui_scripts': [
-          'workbench = workbench.app.main:main'
-      ]
-    },
+    name="MantidWorkbench",  # probably the wrong name if someone wants to include it
+    version=os.environ["MANTID_VERSION_STR"],
+    install_requires=["mantidqtinterfaces"],
+    packages=find_packages(exclude=["*.test"]),
+    package_data={"": ["*.ui"]},
+    entry_points={"gui_scripts": ["workbench = workbench.app.main:main"]},
 )

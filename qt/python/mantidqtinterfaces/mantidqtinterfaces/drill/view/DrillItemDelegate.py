@@ -15,8 +15,9 @@ class DrillItemDelegate(QItemDelegate):
     viewing. It allows the reduction of string length when many numors need to
     be displayed in a table cell.
     """
-    ELEMENT_SEPARATOR = ','
-    NUMORS_SEPARATORS = ['-', '+', ':']
+
+    ELEMENT_SEPARATOR = ","
+    NUMORS_SEPARATORS = ["-", "+", ":"]
 
     def __init__(self, parent):
         super(DrillItemDelegate, self).__init__(parent)
@@ -53,12 +54,12 @@ class DrillItemDelegate(QItemDelegate):
                 if len(numors) > 1:
                     splittedStr[i] = numors[0] + "..."
                     reduced = True
-            i -=1
+            i -= 1
 
         if i < 0:
             reducable = False
 
-        return ','.join(splittedStr), reducable
+        return ",".join(splittedStr), reducable
 
     def drawDisplay(self, painter, option, rect, text):
         """

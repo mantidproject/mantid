@@ -17,7 +17,7 @@ class Predicate(MantidQt.MantidWidgets.Batch.RowPredicate):
         return bool(self.meetsCriteria(location))
 
 
-def make_regex_filter(table, text, col = 0):
+def make_regex_filter(table, text, col=0):
     try:
         regex = re.compile(text)
         return Predicate(lambda location: regex.match(table.cellAt(location, col).contentText()))
@@ -46,12 +46,12 @@ def setup(self):
     self.table = MantidQt.MantidWidgets.Batch.JobTreeView(["Column 1"], empty_cell(), self)
     self.table_signals = MantidQt.MantidWidgets.Batch.JobTreeViewSignalAdapter(self.table, self)
 
-    self.table.appendChildRowOf(row([]),  [cell("DD")]) # DD
-    self.table.appendChildRowOf(row([0]), [cell("DC")]) #   DC
-    self.table.appendChildRowOf(row([0]), [cell("A9")]) #     A9
-    self.table.appendChildRowOf(row([]),  [cell("B0")]) # B0
-    self.table.appendChildRowOf(row([]),  [cell("C0")]) # C0
-    self.table.appendChildRowOf(row([2]), [cell("A1")]) #   A1
+    self.table.appendChildRowOf(row([]), [cell("DD")])  # DD
+    self.table.appendChildRowOf(row([0]), [cell("DC")])  #   DC
+    self.table.appendChildRowOf(row([0]), [cell("A9")])  #     A9
+    self.table.appendChildRowOf(row([]), [cell("B0")])  # B0
+    self.table.appendChildRowOf(row([]), [cell("C0")])  # C0
+    self.table.appendChildRowOf(row([2]), [cell("A1")])  #   A1
 
     self.table.filterRowsBy(make_regex_filter(self.table, "A[0-9]+", col=0))
     # Applying this filter excludes B0 since neither itself not it's decendant's contents

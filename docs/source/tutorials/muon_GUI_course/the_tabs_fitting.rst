@@ -57,8 +57,9 @@ Where:
 * :math:`{\tau}` is in :math:`{\mu s}`.
 * :math:`{\Delta}` is in :math:`{MHz}`.
 
-The compilation of custom functions is possible using C++ or Python, however this is beyond the scope of this tutorial. Detailed instructions for completing this for a 64-bit Windows
-platform can be found at `writing a fit function <https://www.mantidproject.org/Writing_a_Fit_Function>`__ and `introduction to python fit functions  <https://www.mantidproject.org/Introduction_to_Python_Fit_Functions>`__, for fit functions in C++ and Python respectively.
+The compilation of custom functions is possible using Python, however this is beyond the scope of this tutorial.
+Detailed instructions for completing this can be found at
+:ref:`introduction to python fit functions <emwp_py_fit_funcs>`
 
 Using Fit Functions
 -------------------

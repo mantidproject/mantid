@@ -14,7 +14,6 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/Points.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/OptionalBool.h"
 
 #include <iterator>
 #include <sstream>
@@ -67,22 +66,15 @@ void LoadILLSALSA::exec() {
 
   FileType fileType = NONE;
   // guess type of file
-  try {
-    H5::Group detectorDataset = h5file.openGroup("entry0/data");
-    detectorDataset.close();
+  if (!h5file.nameExists("entry0"))
+    throw std::runtime_error(
+        "The Nexus file your are trying to open is incorrectly formatted, 'entry0' group does not exist");
+  H5::Group entryGroup = h5file.openGroup("entry0");
+  if (entryGroup.nameExists("data"))
     fileType = V1;
-  } catch (H5::Exception &) {
-    fileType = NONE;
-  }
-  if (fileType == NONE) {
-    try {
-      H5::Group detectorDataset = h5file.openGroup("entry0/data_scan");
-      detectorDataset.close();
-      fileType = V2;
-    } catch (H5::Exception &) {
-      fileType = NONE;
-    }
-  }
+  else if (entryGroup.nameExists("data_scan"))
+    fileType = V2;
+  entryGroup.close();
 
   switch (fileType) {
   case NONE:
@@ -118,11 +110,7 @@ void LoadILLSALSA::exec() {
  */
 void LoadILLSALSA::setInstrument(double distance, double angle) {
   // load instrument
-  auto loadInst = createChildAlgorithm("LoadInstrument");
-  loadInst->setPropertyValue("InstrumentName", "SALSA");
-  loadInst->setProperty<API::MatrixWorkspace_sptr>("Workspace", m_outputWorkspace);
-  loadInst->setProperty("RewriteSpectraMap", Kernel::OptionalBool(true));
-  loadInst->execute();
+  LoadHelper::loadEmptyInstrument(m_outputWorkspace, "SALSA");
 
   // translation
   double angleRad = angle * M_PI / 180.0;
@@ -260,8 +248,7 @@ void LoadILLSALSA::fillWorkspaceMetadata(const std::string &filename) {
   API::Run &runDetails = m_outputWorkspace->mutableRun();
   NXhandle nxHandle;
   NXopen(filename.c_str(), NXACC_READ, &nxHandle);
-  DataHandling::LoadHelper loadHelper;
-  loadHelper.addNexusFieldsToWsRun(nxHandle, runDetails);
+  LoadHelper::addNexusFieldsToWsRun(nxHandle, runDetails);
   NXclose(&nxHandle);
 }
 } // namespace Mantid::DataHandling

@@ -11,8 +11,12 @@
 #include <QPainter>
 #include <QWheelEvent>
 
+#include <QApplication>
+#include <QFont>
+#include <QFontInfo>
 #include <QLine>
 #include <QMap>
+#include <QRectF>
 #include <QVector2D>
 
 #include <algorithm>
@@ -25,8 +29,6 @@ namespace MantidQt::MantidWidgets {
 
 // number of control points common for all shapes
 const size_t Shape2D::NCommonCP = 4;
-// size (== width/2 == height/2) of each control point
-const double Shape2D::sizeCP = 3;
 
 /**
  * Set default border color to red and fill color to default Qt color
@@ -61,7 +63,7 @@ void Shape2D::draw(QPainter &painter) const {
     if (m_editing) {
       // if editing show all CP, make them bigger and opaque
       np = getNControlPoints();
-      rsize = sizeCP;
+      rsize = static_cast<double>(controlPointSize());
       alpha = 255;
     }
     for (size_t i = 0; i < np; ++i) {
@@ -82,6 +84,11 @@ void Shape2D::draw(QPainter &painter) const {
  * Return total number of control points for this shape.
  */
 size_t Shape2D::getNControlPoints() const { return NCommonCP + this->getShapeNControlPoints(); }
+
+/**
+ * Return the radius to use for the control points.
+ */
+int Shape2D::controlPointSize() const { return QFontInfo(QFont(QApplication::font().family(), 2)).pixelSize(); }
 
 /**
  * Return coordinates of i-th control point.
@@ -166,6 +173,13 @@ bool Shape2D::isMasked(const QPointF &p) const {
   return m_fill_color != QColor() &&
          contains(QTransform().rotate(-m_boundingRotation).map(p - m_boundingRect.center()) + m_boundingRect.center());
 }
+
+/**
+ * Check if the shape is intersecting a QRectF.
+ *
+ * @param rect :: The QRectF to check for intersecting.
+ */
+bool Shape2DRectangle::isIntersecting(const QRectF &rect) const { return rect.intersects(m_boundingRect.toQRectF()); }
 
 /** Load shape 2D state from a Mantid project file
  * @param lines :: lines from the project file to load state from
@@ -1253,7 +1267,8 @@ void Shape2DFree::resetBoundingRect() {
   if (breaks.back() != n) {
     breaks.push_back(n);
   }
-  qSort(breaks);
+  using std::sort;
+  sort(std::begin(breaks), std::end(breaks));
 
   m_outline.moveTo(m_polygon[0]);
   int j1 = 0;

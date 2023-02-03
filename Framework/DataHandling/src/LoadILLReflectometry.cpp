@@ -15,6 +15,7 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataHandling/LoadHelper.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -23,7 +24,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/UnitFactory.h"
@@ -202,12 +202,12 @@ void LoadILLReflectometry::exec() {
   NXEntry firstEntry{root.openFirstEntry()};
   initNames(firstEntry);
   sampleAngle(firstEntry);
-  std::vector<std::vector<int>> monitorsData{loadMonitors(firstEntry)};
+  std::vector<std::string> monitorNames{getMonitorNames()};
   loadDataDetails(firstEntry);
-  initWorkspace(monitorsData);
-  loadInstrument();
+  initWorkspace(monitorNames);
+  LoadHelper::loadEmptyInstrument(m_localWorkspace, m_instrument == Supported::D17 ? "D17" : "FIGARO");
   loadNexusEntriesIntoProperties();
-  loadData(firstEntry, monitorsData, getXValues());
+  loadData(firstEntry, monitorNames, getXValues());
   firstEntry.close();
   root.close();
   initPixelWidth();
@@ -219,16 +219,6 @@ void LoadILLReflectometry::exec() {
   setProperty("OutputWorkspace", m_localWorkspace);
 }
 
-/// Run the Child Algorithm LoadInstrument.
-void LoadILLReflectometry::loadInstrument() {
-  auto loadInst = createChildAlgorithm("LoadInstrument");
-  const std::string instrumentName = m_instrument == Supported::D17 ? "D17" : "FIGARO";
-  loadInst->setPropertyValue("InstrumentName", instrumentName);
-  loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
-  loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
-  loadInst->executeAsChildAlg();
-}
-
 /**
  * Init names of sample logs based on instrument specific NeXus file
  * entries
@@ -236,7 +226,7 @@ void LoadILLReflectometry::loadInstrument() {
  * @param entry :: the NeXus file entry
  */
 void LoadILLReflectometry::initNames(const NeXus::NXEntry &entry) {
-  std::string instrumentNamePath = m_loader.findInstrumentNexusPath(entry);
+  std::string instrumentNamePath = LoadHelper::findInstrumentNexusPath(entry);
   std::string instrumentName = entry.getString(instrumentNamePath.append("/name"));
   if (instrumentName.empty())
     throw std::runtime_error("Cannot set the instrument name from the Nexus file!");
@@ -293,17 +283,17 @@ void LoadILLReflectometry::convertTofToWavelength() {
  * Creates the workspace and initialises member variables with
  * the corresponding values
  *
- * @param monitorsData :: Monitors data already loaded
+ * @param monitorNames :: Monitors data already loaded
  */
-void LoadILLReflectometry::initWorkspace(const std::vector<std::vector<int>> &monitorsData) {
+void LoadILLReflectometry::initWorkspace(const std::vector<std::string> &monitorNames) {
 
-  g_log.debug() << "Number of monitors: " << monitorsData.size() << '\n';
-  for (size_t i = 0; i < monitorsData.size(); ++i) {
-    if (monitorsData[i].size() != m_numberOfChannels)
-      g_log.debug() << "Data size of monitor ID " << i << " is " << monitorsData[i].size() << '\n';
+  g_log.debug() << "Number of monitors: " << monitorNames.size() << '\n';
+  for (size_t i = 0; i < monitorNames.size(); ++i) {
+    if (monitorNames[i].size() != m_numberOfChannels)
+      g_log.debug() << "Data size of monitor ID " << i << " is " << monitorNames[i].size() << '\n';
   }
   // create the workspace
-  m_localWorkspace = DataObjects::create<DataObjects::Workspace2D>(m_numberOfHistograms + monitorsData.size(),
+  m_localWorkspace = DataObjects::create<DataObjects::Workspace2D>(m_numberOfHistograms + monitorNames.size(),
                                                                    HistogramData::BinEdges(m_numberOfChannels + 1));
 
   if (m_acqMode)
@@ -322,7 +312,7 @@ void LoadILLReflectometry::initWorkspace(const std::vector<std::vector<int>> &mo
 void LoadILLReflectometry::loadDataDetails(const NeXus::NXEntry &entry) {
   // PSD data D17 256 x 1 x 1000
   // PSD data FIGARO 1 x 256 x 1000
-  m_startTime = DateAndTime(m_loader.dateTimeInIsoFormat(entry.getString("start_time")));
+  m_startTime = DateAndTime(LoadHelper::dateTimeInIsoFormat(entry.getString("start_time")));
   if (m_acqMode) {
     NXFloat timeOfFlight = entry.openNXFloat("instrument/PSD/time_of_flight");
     timeOfFlight.load();
@@ -353,31 +343,13 @@ double LoadILLReflectometry::doubleFromRun(const std::string &entryName) const {
 }
 
 /**
- * Load single monitor
- *
- * @param entry :: The Nexus entry
- * @param monitor_data :: A std::string containing the Nexus path to the monitor
- *data
- * @return monitor :: A std::vector containing monitor values
- */
-std::vector<int> LoadILLReflectometry::loadSingleMonitor(const NeXus::NXEntry &entry, const std::string &monitor_data) {
-  NXData dataGroup = entry.openNXData(monitor_data);
-  NXInt data = dataGroup.openIntData();
-  data.load();
-  return std::vector<int>(data(), data() + data.size());
-}
-
-/**
  * Load monitor data
  *
- * @param entry :: The Nexus entry
  * @return :: A std::vector of vectors of monitors containing monitor values
  */
-std::vector<std::vector<int>> LoadILLReflectometry::loadMonitors(const NeXus::NXEntry &entry) {
-  g_log.debug("Read monitor data...");
-  // vector of monitors with one entry
-  const std::vector<std::vector<int>> monitors{loadSingleMonitor(entry, "monitor1/data"),
-                                               loadSingleMonitor(entry, "monitor2/data")};
+std::vector<std::string> LoadILLReflectometry::getMonitorNames() {
+  // vector of paths to monitor data
+  const std::vector<std::string> monitors{"monitor1/data", "monitor2/data"};
   return monitors;
 }
 
@@ -497,32 +469,27 @@ std::vector<double> LoadILLReflectometry::getXValues() {
  * Load data from nexus file
  *
  * @param entry :: The Nexus file entry
- * @param monitorsData :: Monitors data already loaded
+ * @param monitorNames :: Monitors data already loaded
  * @param xVals :: X values
  */
-void LoadILLReflectometry::loadData(const NeXus::NXEntry &entry, const std::vector<std::vector<int>> &monitorsData,
+void LoadILLReflectometry::loadData(const NeXus::NXEntry &entry, const std::vector<std::string> &monitorNames,
                                     const std::vector<double> &xVals) {
-  NXData dataGroup = entry.openNXData("data");
-  NXInt data = dataGroup.openIntData();
+  auto data = LoadHelper::getIntDataset(entry, "data");
   data.load();
-  const size_t nb_monitors = monitorsData.size();
+  const int nb_monitors = static_cast<int>(monitorNames.size());
   Progress progress(this, 0, 1, m_numberOfHistograms + nb_monitors);
   if (!xVals.empty()) {
     HistogramData::BinEdges binEdges(xVals);
-    PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
-    for (int j = 0; j < static_cast<int>(m_numberOfHistograms); ++j) {
-      const int *data_p = &data(0, static_cast<int>(j), 0);
-      const HistogramData::Counts counts(data_p, data_p + m_numberOfChannels);
-      m_localWorkspace->setHistogram(j, binEdges, counts);
-      m_localWorkspace->getSpectrum(j).setSpectrumNo(j);
-      progress.report();
-    }
-    for (size_t im = 0; im < nb_monitors; ++im) {
-      const int *monitor_p = monitorsData[im].data();
-      const HistogramData::Counts monitorCounts(monitor_p, monitor_p + m_numberOfChannels);
-      const size_t spectrum = im + m_numberOfHistograms;
-      m_localWorkspace->setHistogram(spectrum, binEdges, monitorCounts);
-      m_localWorkspace->getSpectrum(spectrum).setSpectrumNo(static_cast<specnum_t>(spectrum));
+    // first, load data
+    LoadHelper::fillStaticWorkspace(m_localWorkspace, data, xVals, 0);
+    progress.report();
+    // then, the monitor data
+    for (auto im = 0; im < nb_monitors; ++im) {
+      const std::string monitorDataSetName("monitor" + std::to_string(im + 1) + "/data");
+      auto monitorData = LoadHelper::getIntDataset(entry, monitorDataSetName);
+      monitorData.load();
+      LoadHelper::fillStaticWorkspace(m_localWorkspace, monitorData, xVals,
+                                      static_cast<int>(m_numberOfHistograms) + im);
       progress.report();
     }
   }
@@ -538,7 +505,7 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
   NXstatus stat = NXopen(filename.c_str(), NXACC_READ, &nxfileID);
   if (stat == NX_ERROR)
     throw Kernel::Exception::FileError("Unable to open File:", filename);
-  m_loader.addNexusFieldsToWsRun(nxfileID, m_localWorkspace->mutableRun());
+  LoadHelper::addNexusFieldsToWsRun(nxfileID, m_localWorkspace->mutableRun());
   NXclose(&nxfileID);
   if (m_instrument == Supported::FIGARO) {
     auto const bgs3 = m_localWorkspace->mutableRun().getLogAsSingleValue("BGS3.value");
@@ -666,6 +633,8 @@ double LoadILLReflectometry::detectorRotation() {
  * preprocessing algorithm. However loader should still support loading
  * reflected beams standalone, hence sample angle is the only option if
  * BraggAngle is not manually specified.
+ *
+ * @param entry :: The Nexus file entry
  */
 void LoadILLReflectometry::sampleAngle(const NeXus::NXEntry &entry) {
   std::string entryName;
@@ -710,10 +679,10 @@ void LoadILLReflectometry::placeDetector() {
   const std::string componentName = "detector";
   const RotationPlane rotPlane = m_instrument == Supported::D17 ? RotationPlane::horizontal : RotationPlane::vertical;
   const auto newpos = detectorPosition(rotPlane, m_detectorDistance, detectorRotationAngle);
-  m_loader.moveComponent(m_localWorkspace, componentName, newpos);
+  LoadHelper::moveComponent(m_localWorkspace, componentName, newpos);
   // apply a local rotation to stay perpendicular to the beam
   const auto rotation = detectorFaceRotation(rotPlane, detectorRotationAngle);
-  m_loader.rotateComponent(m_localWorkspace, componentName, rotation);
+  LoadHelper::rotateComponent(m_localWorkspace, componentName, rotation);
 }
 
 /// Update the slit positions.
@@ -753,9 +722,9 @@ void LoadILLReflectometry::placeSlits() {
     }
   }
   V3D pos{0.0, 0.0, -slit1ToSample};
-  m_loader.moveComponent(m_localWorkspace, "slit2", pos);
+  LoadHelper::moveComponent(m_localWorkspace, "slit2", pos);
   pos = {0.0, 0.0, -slit2ToSample};
-  m_loader.moveComponent(m_localWorkspace, "slit3", pos);
+  LoadHelper::moveComponent(m_localWorkspace, "slit3", pos);
 }
 
 /// Update source position.
@@ -763,7 +732,7 @@ void LoadILLReflectometry::placeSource() {
   m_sourceDistance = sourceSampleDistance();
   const std::string source = "chopper1";
   const V3D newPos{0.0, 0.0, -m_sourceDistance};
-  m_loader.moveComponent(m_localWorkspace, source, newPos);
+  LoadHelper::moveComponent(m_localWorkspace, source, newPos);
 }
 
 /// Return the incident neutron deflection angle.

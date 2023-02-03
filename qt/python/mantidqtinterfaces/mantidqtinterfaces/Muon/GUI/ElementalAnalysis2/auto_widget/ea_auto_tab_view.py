@@ -19,7 +19,6 @@ PLOT_PEAKS = True
 
 
 class EAAutoTabView(QtWidgets.QWidget):
-
     def __init__(self, match_table, parent=None):
         super(EAAutoTabView, self).__init__(parent)
 
@@ -190,8 +189,7 @@ class EAAutoTabView(QtWidgets.QWidget):
                 parameters["estimate_width"] = float(self.estimate_width_line_edit.text())
                 if parameters["min_width"] > parameters["max_width"]:
                     raise ValueError("Minimum peak width is greater than maximum peak width")
-                if parameters["min_width"] > parameters["estimate_width"] or \
-                        parameters["estimate_width"] > parameters["max_width"]:
+                if parameters["min_width"] > parameters["estimate_width"] or parameters["estimate_width"] > parameters["max_width"]:
                     raise ValueError("Estimated peak width must be between minimum and maximum peak width")
             if parameters["min_energy"] > parameters["max_energy"]:
                 raise ValueError("Minimum energy is greater than maximum energy")

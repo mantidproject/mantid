@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 import os
 from mantid.kernel import ConfigService, Logger
 from mantid.api import FileFinder
@@ -12,10 +12,10 @@ from mantid.api import FileFinder
 
 def find_file(filename=None, startswith=None, data_dir=None):
     """
-        Returns a list of file paths for the search criteria.
-        @param filename: exact name of a file. The first file found will be returned.
-        @param startswith: string that files should start with.
-        @param data_dir: additional directory to search
+    Returns a list of file paths for the search criteria.
+    @param filename: exact name of a file. The first file found will be returned.
+    @param startswith: string that files should start with.
+    @param data_dir: additional directory to search
     """
     # Files found
     files_found = []
@@ -58,14 +58,14 @@ def find_file(filename=None, startswith=None, data_dir=None):
     return files_found
 
 
-def find_data(file, instrument='', allow_multiple=False):
+def find_data(file, instrument="", allow_multiple=False):
     """
-        Finds a file path for the specified data set, which can either be:
-            - a run number
-            - an absolute path
-            - a file name
-        @param file: file name or part of a file name
-        @param instrument: if supplied, FindNeXus will be tried as a last resort
+    Finds a file path for the specified data set, which can either be:
+        - a run number
+        - an absolute path
+        - a file name
+    @param file: file name or part of a file name
+    @param instrument: if supplied, FindNeXus will be tried as a last resort
     """
     # First, assume a file name
     file = str(file).strip()
@@ -74,8 +74,8 @@ def find_data(file, instrument='', allow_multiple=False):
     # which is incompatible with the FileFinder
     n_files = 1
     if allow_multiple:
-        file=file.replace(';',',')
-        toks = file.split(',')
+        file = file.replace(";", ",")
+        toks = file.split(",")
         n_files = len(toks)
 
     instrument = str(instrument)
@@ -86,12 +86,12 @@ def find_data(file, instrument='', allow_multiple=False):
     # Second, assume a run number and pass the instrument name as a hint
     try:
         # FileFinder doesn't like dashes...
-        instrument=instrument.replace('-','')
-        f = FileFinder.findRuns(instrument+file)
+        instrument = instrument.replace("-", "")
+        f = FileFinder.findRuns(instrument + file)
         if os.path.isfile(f[0]):
             if allow_multiple:
                 # Mantid returns its own list object type, so make a real list out if it
-                if len(f)==n_files:
+                if len(f) == n_files:
                     return [i for i in f]
             else:
                 return f[0]
@@ -105,7 +105,7 @@ def find_data(file, instrument='', allow_multiple=False):
         if os.path.isfile(f[0]):
             if allow_multiple:
                 # Mantid returns its own list object type, so make a real list out if it
-                if len(f)==n_files:
+                if len(f) == n_files:
                     return [i for i in f]
             else:
                 return f[0]
@@ -114,5 +114,5 @@ def find_data(file, instrument='', allow_multiple=False):
         pass
 
     # If we didn't find anything, raise an exception
-    Logger('find_data').error("\n\nCould not find a file for %s: check your reduction parameters\n\n" % str(file))
+    Logger("find_data").error("\n\nCould not find a file for %s: check your reduction parameters\n\n" % str(file))
     raise RuntimeError("Could not find a file for %s" % str(file))
