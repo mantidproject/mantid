@@ -89,14 +89,6 @@ set(CONDA_BUILD
 # Ensure that if we are running any sanitizers the compiler options are known in sub targets
 include(Sanitizers)
 
-# Quick exit if we only want data targets
-if(DATA_TARGETS_ONLY)
-  include(SetupDataTargets)
-  # System test config files
-  add_subdirectory(Testing/SystemTests/scripts)
-  return()
-endif()
-
 # Packaging configuration
 set(CPACK_PACKAGE_SUFFIX
     "unstable"
