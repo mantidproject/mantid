@@ -29,7 +29,7 @@ Bugfixes
 - Settings are no longer cleared on existing batch tabs when adding a new batch for instruments other than INTER.
 - :ref:`ReflectometryILLSumForeground <algm-ReflectometryILLSumForeground>` now properly sums the foreground of the direct beam over the same range as the reflected beam, which fixes observed issues with reflectivity calculation.
 - Live data now only updates with the final IvsQ result, avoiding the axes changing during processing.
-- The live date monitor now continues running when it encounters a transmission run by handling angles of zero.
+- The live data monitor now continues running when it encounters a transmission run by handling angles of zero.
 - Fixed an issue where Mantid could crash when workspaces were cleared from the ADS after deleting a batch from the :ref:`interface-isis-refl`.
 - Stop using the value of the ``ScaleRHSWorkspace`` parameter of :ref:`algm-Stitch1DMany` in favour of the ``IndexOfReference`` parameter.
 
