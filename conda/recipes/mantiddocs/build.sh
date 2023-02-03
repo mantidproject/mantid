@@ -51,7 +51,6 @@ cmake \
   -DCONDA_ENV=True \
   -DUSE_PYTHON_DYNAMIC_LIB=OFF \
   -DQt5_DIR=$BUILD_PREFIX/lib/cmake/qt5 \
-  -DCPACK_PACKAGE_SUFFIX="" \
   -GNinja \
   ../
 
