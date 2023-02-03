@@ -27,6 +27,11 @@ Bugfixes
 ############
 - The algorithm GUI for :ref:`UpdateInstrumentFromFile <algm-UpdateInstrumentFromFile>` now accepts ``.DAT`` files for the Filename property.
 - Fixed an issue where MDE workspaces were taking a long time to load.
+
+.. image:: ../../images/6_6_release/Framework/loadtimes.png
+    :align: center
+    :width: 800
+
 - Fixed a problem with the :ref:`ConvolveWorkspaces <algm-ConvolveWorkspaces>` algorithm when run on input workspaces with different x ranges. The x range of the output workspace was being taken from the resolution workspace instead of the data workspace.
 - Fixed a problem in :ref:`CreateSampleWorkspace <algm-CreateSampleWorkspace>` where functions were evaluated at the left hand bin edge instead of the bin centre. The algorithm :ref:`FindEPP <algm-FindEPP>` has also been updated with a similar change.
 
