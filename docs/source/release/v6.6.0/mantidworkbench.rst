@@ -8,6 +8,11 @@ Mantid Workbench Changes
 New Features
 ------------
 - Added button to the figure tool bar which hides the figure (unhidden using the plots tab).
+
+.. image:: ../../images/6_6_release/Mantidworkbench/hide_plot_button.png
+    :align: center
+    :width: 650
+
 - Subsampling of data on surface plots is now only performed if the number of rows or columns is greater than 100 (instead of 50).
 - Mantid Workbench is now compatible with matplotlib v3.6.
 - Sample shapes can now be plotted by right-clicking the workspace and selecting ``Show Sample Shape``. This will plot all Sample, Container and Component shapes attached to the workspace, add a black arrow for the beam direction and coloured arrows for the lattice vectors. For more details see :ref:`Mesh_Plots`.
@@ -53,6 +58,10 @@ InstrumentViewer
 New features
 ############
 - Added an option to the :ref:`Instrument Viewer <InstrumentViewer>` display settings to highlight detectors with zero counts.
+
+.. image:: ../../images/6_6_release/Mantidworkbench/grey_zero_detectors.png
+    :align: center
+
 - Added the ``Keep original workspace`` rebin option on the :ref:`Pick tab <instrumentviewer_pick_tab>`. When ticked, this will ensure the originally loaded data is rebinned, and not the previously rebinned data.
 - Control points on the shapes drawn using the :ref:`Pick <instrumentviewer_pick_tab>` or :ref:`Draw <instrumentviewer_draw_tab>` tab now give cursor feedback.
 
@@ -70,6 +79,11 @@ New features
 - Added HKL values to the image info table in the slice viewer when viewing a workspace with HKL coordinates.
 - Users can now double click on the :ref:`SliceViewer <sliceviewer>` plot axes to edit their limits more accurately.
 - Added ``Concise View`` check box to the :ref:`SliceViewer Peak View <sliceviewer_peaks_overlay>` to show a reduced number of columns in the peak table view.
+
+.. image:: ../../images/6_6_release/Mantidworkbench/slice_viewer_peak_concise_view_box.png
+    :align: center
+    :width: 800
+
 - Enabled the cut viewer tool in non-orthogonal view.
 
 Bugfixes
