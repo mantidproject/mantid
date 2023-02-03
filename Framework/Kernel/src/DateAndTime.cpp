@@ -35,6 +35,8 @@ bool TimeInterval::overlaps(const TimeInterval *t) const {
          ((this->end() < t->end()) && (this->end() >= t->begin()));
 }
 
+bool TimeInterval::overlaps(const TimeInterval &t) const { return this->overlaps(&t); }
+
 /**  Returns an intersection of this interval with \a ti
      @param ti :: Time interval
      @return A valid time interval if this interval intersects with \a ti or
