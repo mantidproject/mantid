@@ -409,13 +409,14 @@ boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
   auto pos1 = componentInfo.position(componentInfo.children(tubes.front()).back());
 
   info->rotation = calcBankRotation(pos0, normal);
-  auto eulerAngles = info->rotation.getEulerAngles("XYZ");
   pos1 -= pos0;
   info->rotation.rotate(pos1);
   pos1 += pos0;
 
-  QPointF p0(m_xaxis.scalar_prod(pos0), m_yaxis.scalar_prod(pos0));
-  QPointF p1(m_xaxis.scalar_prod(pos1), m_yaxis.scalar_prod(pos1));
+  QPointF p0(m_zaxis.scalar_prod(pos0) > 0 ? -m_xaxis.scalar_prod(pos0) : m_xaxis.scalar_prod(pos0),
+             m_yaxis.scalar_prod(pos0));
+  QPointF p1(m_zaxis.scalar_prod(pos1) > 0 ? -m_xaxis.scalar_prod(pos1) : m_xaxis.scalar_prod(pos1),
+             m_yaxis.scalar_prod(pos1));
   QVector<QPointF> vert;
   vert << p0 << p1;
   info->polygon = QPolygonF(vert);
@@ -435,8 +436,9 @@ boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
     //      assumption is made here that any two adjacent tubes in an assembly's
     //      children's list
     //      are close to each other
-    vert << p0 << p1 << p3 << p2;
-    info->polygon = info->polygon.united(QPolygonF(vert));
+    QVector<QPointF> vertQuad;
+    vertQuad << p0 << p1 << p3 << p2;
+    info->polygon = info->polygon.united(QPolygonF(vertQuad));
     p0 = p2;
     p1 = p3;
   }
@@ -593,11 +595,6 @@ void PanelsSurface::constructFromComponentInfo() {
 Mantid::Kernel::Quat PanelsSurface::calcBankRotation(const Mantid::Kernel::V3D &detPos,
                                                      Mantid::Kernel::V3D normal) const {
 
-  if (m_zaxis == -detPos) {
-    return Mantid::Kernel::Quat(0, 0, 0, 1); // 180 degree rotation about z axis
-  } else if (normal.cross_prod(m_zaxis).nullVector()) {
-    return Mantid::Kernel::Quat();
-  }
   V3D directionToViewer = m_zaxis;
   V3D bankToOrigin = m_pos - detPos;
   // signed shortest distance from the bank's plane to the origin (m_pos)
@@ -613,6 +610,11 @@ Mantid::Kernel::Quat PanelsSurface::calcBankRotation(const Mantid::Kernel::V3D &
   if (b < 0.0) {
     // if the bank is at positive z then we need to rotate the normal to point in negative z direction
     directionToViewer *= -1;
+  }
+  if (directionToViewer == -normal) {
+    return Mantid::Kernel::Quat(0, 0, 0, 1); // 180 degree rotation about z axis
+  } else if (normal.cross_prod(directionToViewer).nullVector()) {
+    return Mantid::Kernel::Quat();
   }
 
   Quat requiredRotation;
@@ -642,7 +644,11 @@ void PanelsSurface::addDetector(size_t detIndex, const Mantid::Kernel::V3D &refP
   pos -= refPos;
   rotation.rotate(pos);
   pos += refPos;
-  udet.u = m_xaxis.scalar_prod(pos);
+  // present banks as if looking away from origin towards the bank
+  if (m_zaxis.scalar_prod(pos) > 0)
+    udet.u = -m_xaxis.scalar_prod(pos);
+  else
+    udet.u = m_xaxis.scalar_prod(pos);
   udet.v = m_yaxis.scalar_prod(pos);
   udet.uscale = udet.vscale = 1.0;
   this->calcSize(udet);
