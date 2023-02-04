@@ -1135,6 +1135,7 @@ void InstrumentDefinitionParser::appendAssembly(Geometry::ICompAssembly *parent,
   // check if any logfiles are referred to through the <parameter> element.
 
   setLocation(ass, pLocElem, m_angleConvertConst, m_deltaOffsets);
+  setSideBySideViewLocation(ass, pCompElem);
   setFacing(ass, pLocElem);
   setLogfile(ass, pCompElem,
              m_instrument->getLogfileCache()); // params specified within <component>

@@ -459,7 +459,9 @@ boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
     p1 = p3;
   }
 
-  auto compID = componentInfo.componentID(rootIndex);
+  // read any bank centre override from the bank - note that due to the logic higher up that sets bankIndex, the
+  // override will only be read from components one or two levels up from a tube
+  auto compID = componentInfo.componentID(bankIndex);
   auto component = m_instrActor->getInstrument()->getComponentByID(compID);
   info->bankCentreOverride = component->getSideBySideViewPos();
 
