@@ -612,7 +612,7 @@ Mantid::Kernel::Quat PanelsSurface::calcBankRotation(const Mantid::Kernel::V3D &
     directionToViewer *= -1;
   }
   if (directionToViewer == -normal) {
-    return Mantid::Kernel::Quat(0, 0, 0, 1); // 180 degree rotation about z axis
+    return Mantid::Kernel::Quat(0, m_yaxis.X(), m_yaxis.Y(), m_yaxis.Z()); // 180 degree rotation about y axis
   } else if (normal.cross_prod(directionToViewer).nullVector()) {
     return Mantid::Kernel::Quat();
   }
