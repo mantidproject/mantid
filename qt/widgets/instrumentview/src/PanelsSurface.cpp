@@ -311,24 +311,6 @@ void PanelsSurface::processStructured(size_t rootIndex) {
   info->startDetectorIndex = firstRow.front();
   info->endDetectorIndex = lastRow.back();
 
-  std::vector<V3D> projCornersInXY;
-  for (auto &corner : corners) {
-    auto pos = corner - ref;
-    info->rotation.rotate(pos);
-    pos += ref;
-    projCornersInXY.push_back(V3D(pos.X(), pos.Y(), 0.));
-  }
-
-  // further rotate in xy plane so all banks parallel
-  auto leftVector = projCornersInXY[3] - projCornersInXY[0];
-  leftVector.normalize();
-  if (abs(leftVector.scalar_prod(m_yaxis)) < 1.0) {
-    // Quat constructor crashes if given opposite vectors??
-    auto xyRotation = Mantid::Kernel::Quat(leftVector, m_yaxis);
-    // order important, apply xy rotation second
-    info->rotation = xyRotation * info->rotation;
-  }
-
   // set the outline
   QVector<QPointF> verts;
   for (auto &corner : corners) {
@@ -602,7 +584,8 @@ void PanelsSurface::constructFromComponentInfo() {
 }
 
 /**
- * Calculate the rotation needed to place a bank on the projection plane.
+ * Calculate the rotation needed around the bank's local x and y axes to place a bank on the projection plane
+ * Perform the rotation in two stages to avoid any twist about the normal
  *
  * @param detPos :: Position of a detector of the bank.
  * @param normal :: Normal to the bank's plane.
@@ -623,7 +606,18 @@ Mantid::Kernel::Quat PanelsSurface::calcBankRotation(const Mantid::Kernel::V3D &
     normal *= -1;
   }
 
-  return Mantid::Kernel::Quat(normal, m_zaxis);
+  Quat requiredRotation;
+  if (normal.cross_prod(m_yaxis).nullVector()) {
+    requiredRotation = Mantid::Kernel::Quat(normal, m_zaxis);
+  } else {
+    Mantid::Kernel::V3D normalInXZPlane = {normal.X(), 0., normal.Z()};
+    normalInXZPlane.normalize();
+    auto rotationLocalX = Mantid::Kernel::Quat(normal, normalInXZPlane);
+    auto rotAboutY180 = Mantid::Kernel::Quat(0, m_yaxis.X(), m_yaxis.Y(), m_yaxis.Z());
+    auto rotationLocalY = normalInXZPlane == -m_zaxis ? rotAboutY180 : Mantid::Kernel::Quat(normalInXZPlane, m_zaxis);
+    requiredRotation = rotationLocalY * rotationLocalX;
+  }
+  return requiredRotation;
 }
 
 void PanelsSurface::addDetector(size_t detIndex, const Mantid::Kernel::V3D &refPos, int bankIndex,
