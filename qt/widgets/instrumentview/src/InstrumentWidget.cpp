@@ -136,7 +136,7 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
   if (!m_messageHandler) {
     m_messageHandler = std::make_unique<MessageHandler>();
   }
-  rip;
+
   setFocusPolicy(Qt::StrongFocus);
   m_mainLayout = new QVBoxLayout(this);
   m_controlPanelLayout = new QSplitter(Qt::Horizontal);
