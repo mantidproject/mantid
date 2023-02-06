@@ -1200,26 +1200,18 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::lastValue() const {
 
 /**
  * Returns duration of the time series, possibly restricted by a TimeROI object.
- * If no TimeROI is provided or the TimeROI is empty, the whole span of the time series plus
- * and additional extra time is returned. This extra time is the time span between the last two log entries.
- * The extra time ensures that the mean and the time-weighted mean are the same for time series
- * containing log entries equally spaced in time.
+ * If no ROI is provided or the ROI is empty, the whole span of the time series is returned.
  * @param roi :: TimeROI object defining the time segments to consider.
  * @return duration, in seconds.
  */
 template <typename TYPE> double TimeSeriesProperty<TYPE>::durationInSeconds(const Kernel::TimeROI *roi) const {
-  if (this->size() == 0)
-    return std::numeric_limits<double>::quiet_NaN();
   if (roi && !roi->empty()) {
     Kernel::TimeROI seriesSpan(this->firstTime(), this->lastTime());
     seriesSpan.update_intersection(*roi);
+    std::string out = seriesSpan.debugStrPrint();
     return seriesSpan.durationInSeconds();
   } else {
-    const auto &intervals = this->getSplittingIntervals();
-    const double duration_sec =
-        std::accumulate(intervals.cbegin(), intervals.cend(), 0.,
-                        [](double sum, const auto &interval) { return sum + interval.duration(); });
-    return duration_sec;
+    return DateAndTime::secondsFromDuration(this->lastTime() - this->firstTime()); // span of the time series
   }
 }
 
@@ -1675,16 +1667,31 @@ template <typename TYPE> bool TimeSeriesProperty<TYPE>::isDefault() const { retu
 template <typename TYPE>
 TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics(const TimeROI *roi) const {
 
-  // Start with statistics that are not weighted by duration
-  TimeSeriesPropertyStatistics out(Mantid::Kernel::getStatistics(this->filteredValuesAsVector()));
-
   // Start with statistics that are not time-weighted
   TimeSeriesPropertyStatistics out(Mantid::Kernel::getStatistics(this->filteredValuesAsVector(roi)));
-  out.duration = this->durationInSeconds(roi);
-  // Follow with time-weighted statistics
-  auto avAndDev = this->timeAverageValueAndStdDev(roi);
-  out.time_mean = avAndDev.first;
-  out.time_standard_deviation = avAndDev.second;
+
+  if (this->size() > 0) {
+    out.duration = this->durationInSeconds(roi);
+    // DEBUG: uncomment following line
+    // auto avAndDev = this->timeAverageValueAndStdDev();  // DEBUG: need to pass ROI
+  } else {
+    out.time_mean = std::numeric_limits<double>::quiet_NaN();
+    out.time_standard_deviation = std::numeric_limits<double>::quiet_NaN();
+    out.duration = std::numeric_limits<double>::quiet_NaN();
+  }
+
+  // OLD CODE
+  if (this->size() > 0) {
+    const auto &intervals = this->getSplittingIntervals();
+    const double duration_sec =
+        std::accumulate(intervals.cbegin(), intervals.cend(), 0.,
+                        [](double sum, const auto &interval) { return sum + interval.duration(); });
+    out.duration = duration_sec;
+    const auto time_weighted = this->timeAverageValueAndStdDev();
+    out.time_mean = time_weighted.first;
+    out.time_standard_deviation = time_weighted.second;
+  }
+
   return out;
 }
 
