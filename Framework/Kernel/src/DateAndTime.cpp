@@ -28,14 +28,17 @@ TimeInterval::TimeInterval(const Types::Core::DateAndTime &from, const Types::Co
     m_end = from;
 }
 
-bool TimeInterval::overlaps(const TimeInterval *t) const {
-  return ((t->begin() < this->end()) && (t->begin() >= this->begin())) ||
-         ((t->end() < this->end()) && (t->end() >= this->begin())) ||
-         ((this->begin() < t->end()) && (this->begin() >= t->begin())) ||
-         ((this->end() < t->end()) && (this->end() >= t->begin()));
+bool TimeInterval::overlaps(const TimeInterval *other) const {
+  const auto thisBegin = this->begin();
+  const auto thisEnd = this->end();
+  const auto otherBegin = other->begin();
+  const auto otherEnd = other->end();
+
+  return ((otherBegin < thisEnd) && (otherBegin >= thisBegin)) || ((otherEnd < thisEnd) && (otherEnd >= thisBegin)) ||
+         ((thisBegin < otherEnd) && (thisBegin >= otherBegin)) || ((thisEnd < otherEnd) && (thisEnd >= otherBegin));
 }
 
-bool TimeInterval::overlaps(const TimeInterval &t) const { return this->overlaps(&t); }
+bool TimeInterval::overlaps(const TimeInterval &other) const { return this->overlaps(&other); }
 
 /**  Returns an intersection of this interval with \a ti
      @param ti :: Time interval
