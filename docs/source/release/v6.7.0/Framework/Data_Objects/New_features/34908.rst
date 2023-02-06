@@ -1,0 +1,1 @@
+- `LoadISISNexus <alg-LoadISISNNexus>` will not load the notes from the nxs file as a comment.
