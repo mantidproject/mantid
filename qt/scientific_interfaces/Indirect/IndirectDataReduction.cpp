@@ -38,22 +38,14 @@ DECLARE_SUBWINDOW(IndirectDataReduction)
 
 IndirectDataReduction::IndirectDataReduction(QWidget *parent)
     : IndirectInterface(parent), m_settingsGroup("CustomInterfaces/IndirectDataReduction"),
-      m_algRunner(new MantidQt::API::AlgorithmRunner(this)),
       m_changeObserver(*this, &IndirectDataReduction::handleConfigChange), m_ipfFilename(""),
       m_idfDirectory(Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory")),
       m_instDetails() {
-  // Signals to report load instrument algo result
-  connect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(instrumentLoadingDone(bool)));
-
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 }
 
 IndirectDataReduction::~IndirectDataReduction() {
   Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
-
-  // Make sure no algos are running after the window has been closed
-  m_algRunner->cancelRunningAlgorithm();
-
   saveSettings();
 }
 
