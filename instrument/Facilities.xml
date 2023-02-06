@@ -769,6 +769,10 @@
     <technique>Strain analyzer</technique>
   </instrument>
 
+  <instrument name="LAGRANGE">
+    <technique>Direct Geometry Spectroscopy</technique>
+  </instrument>
+
 </facility>
 
 <facility name="SINQ" FileExtensions=".hdf">
