@@ -1173,6 +1173,23 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::lastValue() const {
   return m_values.rbegin()->value();
 }
 
+/**
+ * Returns duration of the time series, possibly restricted by a TimeROI object.
+ * If no ROI is provided or the ROI is empty, the whole span of the time series is returned.
+ * @param roi :: TimeROI object defining the time segments to consider.
+ * @return duration, in seconds.
+ */
+template <typename TYPE> double TimeSeriesProperty<TYPE>::durationInSeconds(const Kernel::TimeROI *roi) const {
+  if (roi && !roi->empty()) {
+    Kernel::TimeROI seriesSpan(this->firstTime(), this->lastTime());
+    seriesSpan.update_intersection(*roi);
+    std::string out = seriesSpan.debugStrPrint();
+    return seriesSpan.durationInSeconds();
+  } else {
+    return DateAndTime::secondsFromDuration(this->lastTime() - this->firstTime()); // span of the time series
+  }
+}
+
 template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::minValue() const {
   return std::min_element(m_values.begin(), m_values.end(), TimeValueUnit<TYPE>::valueCmp)->value();
 }
@@ -1625,9 +1642,20 @@ template <typename TYPE> bool TimeSeriesProperty<TYPE>::isDefault() const { retu
 template <typename TYPE>
 TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics(const TimeROI *roi) const {
 
-  // Start with statistics that are not weighted by duration
-  TimeSeriesPropertyStatistics out(Mantid::Kernel::getStatistics(this->filteredValuesAsVector()));
+  // Start with statistics that are not time-weighted
+  TimeSeriesPropertyStatistics out(Mantid::Kernel::getStatistics(this->filteredValuesAsVector(roi)));
 
+  if (this->size() > 0) {
+    out.duration = this->durationInSeconds(roi);
+    // DEBUG: uncomment following line
+    // auto avAndDev = this->timeAverageValueAndStdDev();  // DEBUG: need to pass ROI
+  } else {
+    out.time_mean = std::numeric_limits<double>::quiet_NaN();
+    out.time_standard_deviation = std::numeric_limits<double>::quiet_NaN();
+    out.duration = std::numeric_limits<double>::quiet_NaN();
+  }
+
+  // OLD CODE
   if (this->size() > 0) {
     const auto &intervals = this->getSplittingIntervals();
     const double duration_sec =
@@ -1637,13 +1665,8 @@ TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics(const TimeR
     const auto time_weighted = this->timeAverageValueAndStdDev();
     out.time_mean = time_weighted.first;
     out.time_standard_deviation = time_weighted.second;
-  } else {
-    out.time_mean = std::numeric_limits<double>::quiet_NaN();
-    out.time_standard_deviation = std::numeric_limits<double>::quiet_NaN();
-    out.duration = std::numeric_limits<double>::quiet_NaN();
   }
-  if (roi == nullptr)
-    void(0);
+
   return out;
 }
 

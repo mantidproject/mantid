@@ -1222,6 +1222,15 @@ public:
     return;
   }
 
+  void test_durationInSeconds() {
+    TimeSeriesProperty<double> *log = createDoubleTSP();
+    TS_ASSERT_DELTA(log->durationInSeconds(), 30.0, 0.1);
+    TimeROI *rois = new TimeROI;
+    rois->addROI("2007-11-30T16:17:05", "2007-11-30T16:17:15");
+    rois->addROI("2007-11-30T16:17:25", "2007-11-30T16:17:35");
+    TS_ASSERT_DELTA(log->durationInSeconds(rois), 15.0, 0.1);
+  }
+
   void test_firstLastTimeValue_emptyPropertyThrows() {
     const TimeSeriesProperty<int> empty("Empty");
 

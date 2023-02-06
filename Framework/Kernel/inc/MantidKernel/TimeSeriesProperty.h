@@ -250,6 +250,8 @@ public:
   Types::Core::DateAndTime firstTime() const;
   /// Returns the last value
   TYPE lastValue() const;
+  /// Returns the duration of the time series, possibly restricted by a TimeROI object
+  double durationInSeconds(const Kernel::TimeROI *roi = nullptr) const;
 
   /// Returns the minimum value found in the series
   TYPE minValue() const;
