@@ -332,8 +332,8 @@ void TimeSeriesProperty<TYPE>::filterByTimes(const std::vector<SplittingInterval
 
   // 4. Create new
   for (const auto &splitter : splittervec) {
-    Types::Core::DateAndTime t_start = splitter.start();
-    Types::Core::DateAndTime t_stop = splitter.stop();
+    Types::Core::DateAndTime t_start = splitter.begin();
+    Types::Core::DateAndTime t_stop = splitter.end();
 
     int tstartindex = findIndex(t_start);
     if (tstartindex < 0) {
@@ -442,8 +442,8 @@ void TimeSeriesProperty<TYPE>::splitByTime(std::vector<SplittingInterval> &split
                 << ", Number of splitters = " << splitter.size() << "\n";
   while (itspl != splitter.end() && i_property < m_values.size()) {
     // Get the splitting interval times and destination
-    DateAndTime start = itspl->start();
-    DateAndTime stop = itspl->stop();
+    DateAndTime start = itspl->begin();
+    DateAndTime stop = itspl->end();
 
     int output_index = itspl->index();
     // output workspace index is out of range. go to the next splitter
@@ -849,10 +849,10 @@ double TimeSeriesProperty<TYPE>::averageValueInFilter(const std::vector<Splittin
 
     // Get the log value and index at the start time of the filter
     int index;
-    double value = static_cast<double>(getSingleValue(time.start(), index));
-    DateAndTime startTime = time.start();
+    double value = static_cast<double>(getSingleValue(time.begin(), index));
+    DateAndTime startTime = time.begin();
 
-    while (index < realSize() - 1 && m_values[index + 1].time() < time.stop()) {
+    while (index < realSize() - 1 && m_values[index + 1].time() < time.end()) {
       ++index;
       numerator += DateAndTime::secondsFromDuration(m_values[index].time() - startTime) * value;
       startTime = m_values[index].time();
@@ -860,7 +860,7 @@ double TimeSeriesProperty<TYPE>::averageValueInFilter(const std::vector<Splittin
     }
 
     // Now close off with the end of the current filter range
-    numerator += DateAndTime::secondsFromDuration(time.stop() - startTime) * value;
+    numerator += DateAndTime::secondsFromDuration(time.end() - startTime) * value;
   }
 
   // 'Normalise' by the total time
@@ -898,11 +898,11 @@ TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<SplittingIn
 
     // Get the log value and index at the start time of the filter
     int index;
-    double value = static_cast<double>(getSingleValue(time.start(), index));
+    double value = static_cast<double>(getSingleValue(time.begin(), index));
     double valuestddev = (value - mean) * (value - mean);
-    DateAndTime startTime = time.start();
+    DateAndTime startTime = time.begin();
 
-    while (index < realSize() - 1 && m_values[index + 1].time() < time.stop()) {
+    while (index < realSize() - 1 && m_values[index + 1].time() < time.end()) {
       ++index;
 
       numerator += DateAndTime::secondsFromDuration(m_values[index].time() - startTime) * valuestddev;
@@ -912,7 +912,7 @@ TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<SplittingIn
     }
 
     // Now close off with the end of the current filter range
-    numerator += DateAndTime::secondsFromDuration(time.stop() - startTime) * valuestddev;
+    numerator += DateAndTime::secondsFromDuration(time.end() - startTime) * valuestddev;
   }
 
   // Normalise by the total time

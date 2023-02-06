@@ -3802,8 +3802,8 @@ void EventList::filterInPlaceHelper(Kernel::SplittingIntervalVec &splitter, type
   // This is the time of the first section. Anything before is thrown out.
   while (itspl != itspl_end) {
     // Get the splitting interval times and destination
-    start = itspl->start();
-    stop = itspl->stop();
+    start = itspl->begin();
+    stop = itspl->end();
     const int index = itspl->index();
 
     // Skip the events before the start of the time
@@ -3904,8 +3904,8 @@ void EventList::splitByTimeHelper(Kernel::SplittingIntervalVec &splitter, std::v
   // This is the time of the first section. Anything before is thrown out.
   while (itspl != itspl_end) {
     // Get the splitting interval times and destination
-    start = itspl->start();
-    stop = itspl->stop();
+    start = itspl->begin();
+    stop = itspl->end();
     const size_t index = itspl->index();
 
     // Skip the events before the start of the time
@@ -4010,8 +4010,8 @@ void EventList::splitByFullTimeHelper(Kernel::SplittingIntervalVec &splitter, st
   // 3. This is the time of the first section. Anything before is thrown out.
   while (itspl != itspl_end) {
     // Get the splitting interval times and destination
-    int64_t start = itspl->start().totalNanoseconds();
-    int64_t stop = itspl->stop().totalNanoseconds();
+    int64_t start = itspl->begin().totalNanoseconds();
+    int64_t stop = itspl->end().totalNanoseconds();
     const int index = itspl->index();
 
     // a) Skip the events before the start of the time
@@ -4378,8 +4378,8 @@ void EventList::splitByPulseTimeHelper(Kernel::SplittingIntervalVec &splitter, s
   // Iterate (loop) on all splitters
   while (itspl != itspl_end) {
     // Get the splitting interval times and destination group
-    start = itspl->start().totalNanoseconds();
-    stop = itspl->stop().totalNanoseconds();
+    start = itspl->begin().totalNanoseconds();
+    stop = itspl->end().totalNanoseconds();
     const int index = itspl->index();
 
     // Skip the events before the start of the time and put to 'unfiltered'
