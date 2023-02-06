@@ -233,9 +233,3 @@ endif()
 
 # THIS MUST BE THE LAST SUB_DIRECTORY ADDED. See Framework/PostInstall/CMakeLists for an explanation
 add_subdirectory(Framework/PostInstall)
-
-# Conda
-option(ENABLE_CONDA "Switch to enable conda package generation")
-if(ENABLE_CONDA)
-  include(conda)
-endif(ENABLE_CONDA)
