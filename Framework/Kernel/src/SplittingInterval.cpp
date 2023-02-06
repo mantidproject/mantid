@@ -49,6 +49,14 @@ SplittingInterval SplittingInterval::operator|(const SplittingInterval &b) const
   return SplittingInterval(begin, end, this->index());
 }
 
+bool SplittingInterval::operator==(const SplittingInterval &ti) const {
+  if (TimeInterval::operator==(ti)) {
+    return index() == ti.index();
+  } else {
+    return false;
+  }
+}
+
 //------------------------------------------------------------------------------------------------
 /** Return true if the SplittingIntervalVec provided is a filter,
  * meaning that it only has an output index of 0.

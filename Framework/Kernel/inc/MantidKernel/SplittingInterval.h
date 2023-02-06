@@ -36,6 +36,8 @@ public:
   /// @endcond
   SplittingInterval operator|(const SplittingInterval &b) const;
 
+  bool operator==(const SplittingInterval &ti) const;
+
 private:
   /// Index of the destination
   int m_index;
