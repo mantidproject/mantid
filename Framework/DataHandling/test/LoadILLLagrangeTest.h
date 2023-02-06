@@ -40,6 +40,8 @@ public:
 
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
+  LoadILLLagrangeTest() { ConfigService::Instance().appendDataSearchSubDir("ILL/Lagrange/"); }
+
   void test_Init() {
     LoadILLLagrange alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -63,17 +65,17 @@ public:
     // check if data is loaded as expected:
     TS_ASSERT_EQUALS(outputWS->x(0).size(), 31)
     TS_ASSERT_DELTA(outputWS->x(0)[0], 35, 0.01)
-    TS_ASSERT_DELTA(outputWS->x(0)[31], 50, 0.01)
+    TS_ASSERT_DELTA(outputWS->x(0)[30], 50, 0.01)
     TS_ASSERT_EQUALS(outputWS->y(0)[0], 3)
-    TS_ASSERT_EQUALS(outputWS->y(0)[31], 3)
+    TS_ASSERT_EQUALS(outputWS->y(0)[30], 3)
     TS_ASSERT_DELTA(outputWS->e(0)[0], 1.73, 0.01)
 
     // and for the monitor:
-    TS_ASSERT_DELTA(outputWS->x(0)[0], 35, 0.01)
-    TS_ASSERT_DELTA(outputWS->x(0)[31], 50, 0.01)
-    TS_ASSERT_EQUALS(outputWS->y(0)[0], 1)
-    TS_ASSERT_EQUALS(outputWS->y(0)[31], 1)
-    TS_ASSERT_DELTA(outputWS->e(0)[0], 1.0, 0.01)
+    TS_ASSERT_DELTA(outputWS->x(1)[0], 35, 0.01)
+    TS_ASSERT_DELTA(outputWS->x(1)[30], 50, 0.01)
+    TS_ASSERT_EQUALS(outputWS->y(1)[0], 1)
+    TS_ASSERT_EQUALS(outputWS->y(1)[30], 1)
+    TS_ASSERT_DELTA(outputWS->e(1)[0], 1.0, 0.01)
 
     // and whether the monitor flag is properly set
     TS_ASSERT(outputWS->detectorInfo().isMonitor(1))
