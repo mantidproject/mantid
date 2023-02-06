@@ -1488,7 +1488,6 @@ public:
     MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
     TS_ASSERT_EQUALS(ws->getComment(), "");
   }
-
 };
 
 //------------------------------------------------------------------------------
