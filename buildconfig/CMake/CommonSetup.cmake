@@ -96,6 +96,7 @@ if(BUILD_MANTIDFRAMEWORK)
   find_package(Nexus 4.3.1 REQUIRED)
   find_package(MuParser REQUIRED)
   find_package(JsonCPP 0.7.0 REQUIRED)
+  find_package(Eigen3 3.4 REQUIRED)
 
   if(ENABLE_OPENCASCADE)
     find_package(OpenCascade REQUIRED)

@@ -97,9 +97,6 @@ endif()
 # Cross-platform setup
 include(CommonSetup)
 
-if(BUILD_MANTIDFRAMEWORK)
-  include(Eigen)
-endif()
 include(Span)
 
 # Find OpenGL
