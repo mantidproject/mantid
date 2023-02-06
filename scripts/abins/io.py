@@ -107,14 +107,13 @@ class IO(object):
 
         else:
             from abins.constants import T_THRESHOLD
+
             saved_temperature = self.load(list_of_attributes=["temperature"])
-            if saved_temperature["attributes"]["temperature"] == 'None':
+            if saved_temperature["attributes"]["temperature"] == "None":
                 return False
 
             else:
-                return np.abs(self._temperature
-                              - saved_temperature["attributes"]["temperature"]
-                              ) < T_THRESHOLD
+                return np.abs(self._temperature - saved_temperature["attributes"]["temperature"]) < T_THRESHOLD
 
     @classmethod
     def _close_enough(cls, previous, new):
@@ -247,7 +246,7 @@ class IO(object):
             if isinstance(self._attributes[name], (np.int64, int, np.float64, float, str, bytes, bool)):
                 group.attrs[name] = self._attributes[name]
             elif self._attributes[name] is None:
-                group.attrs[name] = 'None'
+                group.attrs[name] = "None"
             else:
                 raise ValueError(
                     "Invalid value of attribute. String, "

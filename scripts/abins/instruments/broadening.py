@@ -134,7 +134,8 @@ def broaden_spectrum(frequencies, bins, s_dft, sigma, scheme="gaussian_truncated
             center=frequencies[:, np.newaxis],
             limit=abins.parameters.sampling["broadening_range"],
             weights=s_dft[:, np.newaxis],
-            method="auto")
+            method="auto",
+        )
 
     elif scheme == "interpolate":
         return interpolated_broadening(
@@ -146,7 +147,8 @@ def broaden_spectrum(frequencies, bins, s_dft, sigma, scheme="gaussian_truncated
             is_hist=True,
             limit=3,
             function="gaussian",
-            spacing="sqrt2")
+            spacing="sqrt2",
+        )
 
     elif scheme == "interpolate_coarse":
         return interpolated_broadening(
@@ -158,7 +160,8 @@ def broaden_spectrum(frequencies, bins, s_dft, sigma, scheme="gaussian_truncated
             is_hist=True,
             limit=abins.parameters.sampling["broadening_range"],
             function="gaussian",
-            spacing="2")
+            spacing="2",
+        )
 
     else:
         raise ValueError(
