@@ -228,45 +228,29 @@ if(ENABLE_PRECOMMIT)
   find_program(
     PRE_COMMIT_EXE
     NAMES pre-commit
-    HINTS ~/.local/bin/ "${MSVC_PYTHON_EXECUTABLE_DIR}/Scripts/"
+    HINTS ~/.local/bin/
   )
   if(NOT PRE_COMMIT_EXE)
     message(FATAL_ERROR "Failed to find pre-commit see https://developer.mantidproject.org/GettingStarted.html")
   endif()
 
   if(WIN32)
-    if(CONDA_ENV)
-      execute_process(
-        COMMAND "${PRE_COMMIT_EXE}" install --overwrite
-        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-        RESULT_VARIABLE PRE_COMMIT_RESULT
-      )
-    else()
-      execute_process(
-        COMMAND "${PRE_COMMIT_EXE}.cmd" install --overwrite
-        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-        RESULT_VARIABLE PRE_COMMIT_RESULT
-      )
-    endif()
+    execute_process(
+      COMMAND "${PRE_COMMIT_EXE}" install --overwrite
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+      RESULT_VARIABLE PRE_COMMIT_RESULT
+    )
     if(NOT PRE_COMMIT_RESULT EQUAL "0")
       message(FATAL_ERROR "Pre-commit install failed with ${PRE_COMMIT_RESULT}")
     endif()
     # Create pre-commit script wrapper to use mantid third party python for pre-commit
-    if(NOT CONDA_ENV)
-      file(RENAME "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit" "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit-script.py")
-      file(
-        WRITE "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit"
-        "#!/usr/bin/env sh\n${MSVC_PYTHON_EXECUTABLE_DIR}/python.exe ${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit-script.py"
-      )
-    else()
-      file(TO_CMAKE_PATH $ENV{CONDA_PREFIX} CONDA_SHELL_PATH)
-      file(RENAME "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit" "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit-script.py")
-      file(
-        WRITE "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit"
-        "#!/usr/bin/env sh\n${CONDA_SHELL_PATH}/Scripts/wrappers/conda/python.bat ${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit-script.py"
-      )
-    endif()
-  else() # linux as osx
+    file(TO_CMAKE_PATH $ENV{CONDA_PREFIX} CONDA_SHELL_PATH)
+    file(RENAME "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit" "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit-script.py")
+    file(
+      WRITE "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit"
+      "#!/usr/bin/env sh\n${CONDA_SHELL_PATH}/Scripts/wrappers/conda/python.bat ${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit-script.py"
+    )
+  else() # linux and osx
     execute_process(
       COMMAND bash -c "${PRE_COMMIT_EXE} install"
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
