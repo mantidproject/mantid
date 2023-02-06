@@ -67,43 +67,24 @@ const QString DEFAULT_PAGENAME("index");
  * Default constructor shows the base index page.
  */
 MantidHelpWindow::MantidHelpWindow(const Qt::WindowFlags &flags)
-    : MantidHelpInterface(), m_collectionFile(""), m_cacheFile(""), m_firstRun(true) {
+    : MantidHelpInterface(), m_collectionFile(""), m_firstRun(true) {
   // find the collection and delete the cache file if this is the first run
   if (!helpWindowExists()) {
     this->determineFileLocs();
 
     if (!m_collectionFile.empty()) {
-      // see if chache file exists and remove it - shouldn't be necessary, but it
-      // is
-      if (!m_cacheFile.empty()) {
-        if (Poco::File(m_cacheFile).exists()) {
-          g_log.debug() << "Removing help cache file \"" << m_cacheFile << "\"\n";
-          Poco::File(m_cacheFile).remove();
-        } else {
-          Poco::Path direcPath = Poco::Path(m_cacheFile).parent(); // drop off the filename
-          Poco::File direcFile(direcPath.absolute().toString());
-          if (!direcFile.exists()) {
-            direcFile.createDirectories();
-          }
-        }
-      }
-
       // create the help engine with the found location
       g_log.debug() << "Loading " << m_collectionFile << "\n";
       auto helpEngine = new QHelpEngine(QString(m_collectionFile.c_str()));
+      // in qt6 call helpEngine->setReadOnly(true) instead
       helpEngine->setProperty("_q_readonly", QVariant::fromValue<bool>(true));
       QObject::connect(helpEngine, SIGNAL(warning(QString)), this, SLOT(warning(QString)));
-      g_log.debug() << "Making local cache copy for saving information at " << m_cacheFile << "\n";
 
-      /*
-      if (helpEngine->copyCollectionFile(QString(m_cacheFile.c_str()))) {
-        helpEngine->setCollectionFile(QString(m_cacheFile.c_str()));
-      } else {
-        g_log.warning("Failed to copy collection file");
-        g_log.debug(helpEngine->error().toStdString());
-      }
-      */
-      g_log.debug() << "helpengine.setupData() returned " << helpEngine->setupData() << "\n";
+      // finish initializing the database
+      if (helpEngine->setupData())
+        g_log.debug("helpengine.setupData() returned true");
+      else
+        g_log.debug("helpengine.setupData() returned false");
 
       // create a new help window
       g_helpWindow = new pqHelpWindow(helpEngine, this, flags);
@@ -393,27 +374,7 @@ void MantidHelpWindow::determineFileLocs() {
   string binDir = Mantid::Kernel::ConfigService::Instance().getPropertiesDir();
 
   this->findCollectionFile(binDir);
-  if (m_collectionFile.empty()) {
-    // clear out the other filenames
-    m_cacheFile = "";
-    return;
-  }
   g_log.debug() << "Using collection file \"" << m_collectionFile << "\"\n";
-
-  // determine cache file location
-  m_cacheFile = COLLECTION_FILE.toStdString();
-
-  QString dataLoc = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/data";
-
-  if (dataLoc.endsWith("mantidproject")) {
-    Poco::Path path(dataLoc.toStdString(), m_cacheFile);
-    m_cacheFile = path.absolute().toString();
-  } else {
-    g_log.debug() << "Failed to determine help cache file location\n"; // REMOVE
-    Poco::Path path(dataLoc.toStdString(), "mantidproject");
-    path = Poco::Path(path, COLLECTION_FILE.toStdString());
-    m_cacheFile = path.absolute().toString();
-  }
 }
 
 void MantidHelpWindow::warning(const QString &msg) { g_log.warning(msg.toStdString()); }
