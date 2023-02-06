@@ -172,18 +172,11 @@ SplittingIntervalVec removeFilterOverlap(const SplittingIntervalVec &a) {
  * @return the ORed filter
  */
 SplittingIntervalVec operator|(const SplittingIntervalVec &a, const SplittingIntervalVec &b) {
-  SplittingIntervalVec out;
-
-  auto isValid = [](const SplittingInterval &value) { return value.isValid(); };
-
   // Concatenate the two lists
   SplittingIntervalVec temp;
-  for (auto &it : a)
-    if (it.isValid())
-      temp.emplace_back(it);
-  for (auto &it : b)
-    if (it.isValid())
-      temp.emplace_back(it);
+  auto isValid = [](const SplittingInterval &value) { return value.isValid(); };
+  std::copy_if(a.begin(), a.end(), std::back_insert_iterator(temp), isValid);
+  std::copy_if(b.begin(), b.end(), std::back_insert_iterator(temp), isValid);
 
   // Sort by start time rather than the default
   auto compareStart = [](const SplittingInterval &left, const SplittingInterval &right) {
@@ -195,7 +188,7 @@ SplittingIntervalVec operator|(const SplittingIntervalVec &a, const SplittingInt
   };
   std::sort(temp.begin(), temp.end(), compareStart);
 
-  out = removeFilterOverlap(temp);
+  SplittingIntervalVec out = removeFilterOverlap(temp);
 
   return out;
 }
