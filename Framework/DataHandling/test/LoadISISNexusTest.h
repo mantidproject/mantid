@@ -1463,7 +1463,7 @@ public:
 
     LoadISISNexus2 load;
     load.initialize();
-    load.setPropertyValue("Filename", "EMU000102347.nxs_v2");
+    load.setPropertyValue("Filename", "EMU00102347.nxs_v2");
     load.setPropertyValue("OutputWorkspace", "outWS");
     load.setPropertyValue("SpectrumMin", "10");
     load.setPropertyValue("SpectrumMax", "20");
