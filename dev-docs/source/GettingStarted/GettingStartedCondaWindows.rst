@@ -73,7 +73,7 @@ Configure CMake and generate build files
 Compile and Build using MS Visual Studio
 ----------------------------------------
 
-* Open visual studio with ``visual-studio.bat`` then click build.
+* Open visual studio with ``visual-studio.bat``, which is found in the build folder, and then click build.
 * It's not possible to compile in Debug on Windows with conda libraries, however Release, RelWithDebInfo, and DebugWithRelRuntime for Debugging will compile fine.
 * Once in visual studio, the correct target to use as a startup project in visual studio is ``workbench``, not ``MantidWorkbench``. You can then press F5 to start workbench.
 
@@ -85,10 +85,10 @@ Compile and Build using Ninja
     * To build the unit tests use: ``ninja AllTests``
 
 * In Visual Studio:
-    * Open Visual Studio using ``visual-studio_ninja.bat``
+    * Open Visual Studio with ``visual-studio_ninja.bat``, which is found in the build folder
     * Select "win-ninja" from the Configuration dropdown at the top of the screen
-    * Select "Switch between solutions and available views" in the Solution Explorer and click on CMake Targets View
-    * It is recommmended that the option "When cache is out of date" option is set to "Never run configure step automatically" in Tools, Options, CMake
+    * Select "Switch between solutions and available views" in the Solution Explorer and click on "CMake Targets View"
+    * It is recommmended that the "When cache is out of date" option is set to "Never run configure step automatically" in Tools->Options->CMake
 
 Building and debugging with CLion
 ---------------------------------
