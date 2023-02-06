@@ -28,6 +28,17 @@ TimeInterval::TimeInterval(const Types::Core::DateAndTime &from, const Types::Co
     m_end = from;
 }
 
+TimeInterval::TimeInterval(const std::string &from, const std::string &to) {
+  const DateAndTime fromObj(from);
+  const DateAndTime toObj(to);
+
+  m_begin = fromObj;
+  if (toObj > fromObj)
+    m_end = toObj;
+  else
+    m_end = fromObj;
+}
+
 bool TimeInterval::overlaps(const TimeInterval *other) const {
   const auto thisBegin = this->begin();
   const auto thisEnd = this->end();
@@ -64,13 +75,15 @@ bool TimeInterval::operator<(const TimeInterval &ti) const {
     return false;
 }
 bool TimeInterval::operator>(const TimeInterval &ti) const {
-  if (begin() < ti.end())
+  if (begin() > ti.end())
     return true;
   else if (begin() == ti.end())
     return begin() > ti.begin();
   else
     return false;
 }
+
+bool TimeInterval::operator==(const TimeInterval &ti) const { return (begin() == ti.begin()) && (end() == ti.end()); }
 
 /// String representation of the begin time
 std::string TimeInterval::begin_str() const { return boost::posix_time::to_simple_string(this->m_begin.to_ptime()); }

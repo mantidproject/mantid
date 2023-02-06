@@ -28,6 +28,8 @@ public:
   TimeInterval() : m_begin(), m_end() {}
   /// Constructor
   TimeInterval(const Types::Core::DateAndTime &from, const Types::Core::DateAndTime &to);
+  TimeInterval(const std::string &from, const std::string &to);
+
   /// Beginning of the interval
   Types::Core::DateAndTime begin() const { return m_begin; }
   /// End of the interval
@@ -50,6 +52,7 @@ public:
   /// Returns true if this interval ends before \a ti starts
   bool operator<(const TimeInterval &ti) const;
   bool operator>(const TimeInterval &ti) const;
+  bool operator==(const TimeInterval &ti) const;
   /// String representation of the begin time
   std::string begin_str() const;
   /// String representation of the end time

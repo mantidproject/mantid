@@ -429,6 +429,7 @@ set(TEST_FILES
     ThreadPoolTest.h
     ThreadSchedulerMutexesTest.h
     ThreadSchedulerTest.h
+    TimeIntervalTest.h
     TimeROITest.h
     TimeSeriesPropertyTest.h
     TimerTest.h
