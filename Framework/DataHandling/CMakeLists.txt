@@ -494,6 +494,7 @@ set(TEST_FILES
     LoadIDFFromNexusTest.h
     LoadILLDiffractionTest.h
     LoadILLIndirect2Test.h
+    LoadILLLagrangeTest.h
     LoadILLPolarizationFactorsTest.h
     LoadILLPolarizedDiffractionTest.h
     LoadILLReflectometryTest.h
