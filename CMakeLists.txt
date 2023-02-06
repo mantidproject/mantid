@@ -88,10 +88,14 @@ include(Sanitizers)
 # Bootstrap any dependencies
 include(Bootstrap)
 
-if(WIN32)
+if(CMAKE_SYSTEM_NAME MATCHES "Windows")
   include(WindowsSetup)
-elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+elseif(CMAKE_SYSTEM_NAME MATCHES "Darwin")
   include(DarwinSetup)
+elseif(CMAKE_SYSTEM_NAME MATCHES "Linux")
+  include(LinuxSetup)
+else()
+  message(WARNING "Unknown platform detected: ${CMAKE_SYSTEM_NAME}")
 endif()
 
 # Cross-platform setup
