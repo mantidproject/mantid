@@ -103,31 +103,13 @@ if(BUILD_MANTIDFRAMEWORK)
     add_definitions(-DENABLE_OPENCASCADE)
   endif()
 
-  if(CMAKE_HOST_WIN32 AND NOT CONDA_ENV)
-    find_package(ZLIB REQUIRED CONFIGS zlib-config.cmake)
-    set(HDF5_DIR "${THIRD_PARTY_DIR}/cmake/hdf5")
-    find_package(
-      HDF5
-      COMPONENTS C CXX HL
-      REQUIRED CONFIGS hdf5-config.cmake
-    )
-    set(HDF5_LIBRARIES hdf5::hdf5_cpp-shared hdf5::hdf5_hl-shared)
-  elseif(CONDA_ENV)
-    # We'll use the cmake finder
-    find_package(
-      HDF5 MODULE
-      COMPONENTS C CXX HL
-      REQUIRED
-    )
-    set(HDF5_LIBRARIES hdf5::hdf5_cpp hdf5::hdf5)
-    set(HDF5_HL_LIBRARIES hdf5::hdf5_hl)
-  else()
-    find_package(
-      HDF5 MODULE
-      COMPONENTS C CXX HL
-      REQUIRED
-    )
-  endif()
+  find_package(
+    HDF5 MODULE
+    COMPONENTS C CXX HL
+    REQUIRED
+  )
+  set(HDF5_LIBRARIES hdf5::hdf5_cpp hdf5::hdf5)
+  set(HDF5_HL_LIBRARIES hdf5::hdf5_hl)
 endif()
 
 include(Span)
