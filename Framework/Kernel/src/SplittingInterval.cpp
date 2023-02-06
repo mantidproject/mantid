@@ -174,6 +174,8 @@ SplittingIntervalVec removeFilterOverlap(const SplittingIntervalVec &a) {
 SplittingIntervalVec operator|(const SplittingIntervalVec &a, const SplittingIntervalVec &b) {
   SplittingIntervalVec out;
 
+  auto isValid = [](const SplittingInterval &value) { return value.isValid(); };
+
   // Concatenate the two lists
   SplittingIntervalVec temp;
   for (auto &it : a)
@@ -184,8 +186,14 @@ SplittingIntervalVec operator|(const SplittingIntervalVec &a, const SplittingInt
       temp.emplace_back(it);
 
   // Sort by start time rather than the default
-  std::sort(temp.begin(), temp.end(),
-            [](const SplittingInterval &left, const SplittingInterval &right) { return left.begin() < right.begin(); });
+  auto compareStart = [](const SplittingInterval &left, const SplittingInterval &right) {
+    // because of the field names, cppcheck thinks the wrong thing is being compared
+    // let the compiler optimize the memory layout
+    const auto leftStart = left.begin();
+    const auto rightStart = right.begin();
+    return leftStart < rightStart;
+  };
+  std::sort(temp.begin(), temp.end(), compareStart);
 
   out = removeFilterOverlap(temp);
 
