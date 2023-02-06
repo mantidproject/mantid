@@ -609,9 +609,9 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
 
     def _find_peak(self, rect: Rectangle) -> Tuple[float, float, float, float]:
         """
-        Find the peak at the center of mass of the rectangle
+        Find the peak by fitting x and y projections of the rectangle
         @param rect: the relevant rectangle
-        @return the peak position
+        @return the peak x, y position and its x, y widths
         """
         xmin, xmax, ymin, ymax = self.plotter.image.get_extent()
 
