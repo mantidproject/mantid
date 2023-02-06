@@ -130,6 +130,8 @@ if(BUILD_MANTIDFRAMEWORK)
   endif()
 endif()
 
+include(Span)
+
 if(ENABLE_WORKBENCH)
   include(PyUnitTest)
   enable_testing()

@@ -97,8 +97,6 @@ endif()
 # Cross-platform setup
 include(CommonSetup)
 
-include(Span)
-
 # Find OpenGL
 if(ENABLE_OPENGL AND (BUILD_MANTIDFRAMEWORK OR BUILD_MANTIDQT))
   # Use legacy libGL library
