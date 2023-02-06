@@ -130,9 +130,9 @@ set(SRC_FILES
     src/Batch/QtTreeCursorNavigation.cpp
     src/Batch/CellDelegate.cpp
     src/Batch/BuildSubtreeItems.cpp
-    src/JobRunners/AlgorithmRunner.cpp
-    src/JobRunners/BatchAlgorithmRunner.cpp
-    src/JobRunners/QtJobRunner.cpp
+    src/AlgorithmRunners/AlgorithmRunner.cpp
+    src/AlgorithmRunners/BatchAlgorithmRunner.cpp
+    src/AlgorithmRunners/QtJobRunner.cpp
     src/QtPropertyBrowser/DoubleDialogEditor.cpp
     src/QtPropertyBrowser/DoubleEditorFactory.cpp
     src/QtPropertyBrowser/FilenameDialogEditor.cpp
@@ -232,9 +232,9 @@ set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h
     inc/MantidQtWidgets/Common/Batch/JobTreeView.h
     inc/MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h
-    inc/MantidQtWidgets/Common/JobRunners/AlgorithmRunner.h
-    inc/MantidQtWidgets/Common/JobRunners/BatchAlgorithmRunner.h
-    inc/MantidQtWidgets/Common/JobRunners/QtJobRunner.h
+    inc/MantidQtWidgets/Common/AlgorithmRunners/AlgorithmRunner.h
+    inc/MantidQtWidgets/Common/AlgorithmRunners/BatchAlgorithmRunner.h
+    inc/MantidQtWidgets/Common/AlgorithmRunners/QtJobRunner.h
     inc/MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h
     inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h
     inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h
@@ -318,9 +318,9 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/Batch/ExtractSubtrees.h
     inc/MantidQtWidgets/Common/Batch/FindSubtreeRoots.h
     inc/MantidQtWidgets/Common/Batch/BuildSubtreeItems.h
-    inc/MantidQtWidgets/Common/JobRunners/IJobRunner.h
-    inc/MantidQtWidgets/Common/JobRunners/MockAlgorithmRunner.h
-    inc/MantidQtWidgets/Common/JobRunners/MockJobRunner.h
+    inc/MantidQtWidgets/Common/AlgorithmRunners/IJobRunner.h
+    inc/MantidQtWidgets/Common/AlgorithmRunners/MockAlgorithmRunner.h
+    inc/MantidQtWidgets/Common/AlgorithmRunners/MockJobRunner.h
     inc/MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h
     inc/MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h
     inc/MantidQtWidgets/Common/WorkspacePresenter/ViewNotifiable.h

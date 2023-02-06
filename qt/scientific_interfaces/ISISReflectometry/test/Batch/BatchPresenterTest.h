@@ -14,7 +14,7 @@
 #include "../ReflMockObjects.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidQtWidgets/Common/JobRunners/MockJobRunner.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/MockJobRunner.h"
 #include "MockBatchView.h"
 
 #include <cxxtest/TestSuite.h>

@@ -7,9 +7,9 @@
 #pragma once
 
 #include "Common/DllConfig.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/IConfiguredAlgorithm.h"
-#include "MantidQtWidgets/Common/JobRunners/BatchAlgorithmRunner.h"
 
 #include <boost/optional.hpp>
 #include <map>

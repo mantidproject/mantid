@@ -16,7 +16,7 @@
 #include "IBatchPresenter.h"
 #include "IBatchPresenterFactory.h"
 #include "IBatchView.h"
-#include "MantidQtWidgets/Common/JobRunners/QtJobRunner.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/QtJobRunner.h"
 #include "ReflAlgorithmFactory.h"
 #include <memory>
 

@@ -8,8 +8,8 @@
 
 #include "IJobRunner.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/DllOption.h"
-#include "MantidQtWidgets/Common/JobRunners/BatchAlgorithmRunner.h"
 #include <QWidget>
 #include <deque>
 #include <vector>

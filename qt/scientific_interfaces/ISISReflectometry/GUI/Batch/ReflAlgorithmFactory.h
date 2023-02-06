@@ -7,7 +7,7 @@
 #pragma once
 
 #include "IReflAlgorithmFactory.h"
-#include "MantidQtWidgets/Common/JobRunners/BatchAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/BatchAlgorithmRunner.h"
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 

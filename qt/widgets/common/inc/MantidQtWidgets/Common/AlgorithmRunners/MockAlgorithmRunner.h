@@ -8,7 +8,7 @@
 
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidQtWidgets/Common/JobRunners/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/AlgorithmRunner.h"
 
 #include <gmock/gmock.h>
 

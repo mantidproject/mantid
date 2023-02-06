@@ -9,7 +9,7 @@
 #include "Common/DllConfig.h"
 #include "GUI/Batch/IReflAlgorithmFactory.h"
 #include "GUI/Common/IJobManager.h"
-#include "MantidQtWidgets/Common/JobRunners/IJobRunner.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/IJobRunner.h"
 
 #include <memory>
 

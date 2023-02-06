@@ -9,8 +9,8 @@
 #include "GUI/Batch/IBatchJobAlgorithm.h"
 #include "GUI/Batch/IReflAlgorithmFactory.h"
 #include "GUI/Batch/ReflAlgorithmFactory.h"
-#include "MantidQtWidgets/Common/JobRunners/BatchAlgorithmRunner.h"
-#include "MantidQtWidgets/Common/JobRunners/IJobRunner.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/BatchAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/IJobRunner.h"
 #include "Reduction/Item.h"
 
 #include <memory>

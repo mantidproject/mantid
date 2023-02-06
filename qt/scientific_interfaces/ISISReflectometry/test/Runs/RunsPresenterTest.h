@@ -15,9 +15,9 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/MockAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/Batch/MockJobTreeView.h"
-#include "MantidQtWidgets/Common/JobRunners/MockAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/MockProgressableView.h"
 #include "MockRunsView.h"
 #include <cxxtest/TestSuite.h>

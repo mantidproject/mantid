@@ -9,9 +9,9 @@
 #include "Common/DllConfig.h"
 #include "IBatchJobAlgorithm.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/ConfiguredAlgorithm.h"
 #include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
-#include "MantidQtWidgets/Common/JobRunners/BatchAlgorithmRunner.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

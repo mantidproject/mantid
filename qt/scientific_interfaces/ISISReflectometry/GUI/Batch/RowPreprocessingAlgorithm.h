@@ -8,7 +8,7 @@
 
 #include "Common/DllConfig.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
-#include "MantidQtWidgets/Common/JobRunners/BatchAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/BatchAlgorithmRunner.h"
 
 #include <string>
 #include <vector>

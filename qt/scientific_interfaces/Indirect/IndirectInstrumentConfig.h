@@ -9,8 +9,8 @@
 #include "DllConfig.h"
 #include "ui_IndirectInstrumentConfig.h"
 
+#include "MantidQtWidgets/Common/AlgorithmRunners/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/InstrumentSelector.h"
-#include "MantidQtWidgets/Common/JobRunners/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 
 #include <QWidget>

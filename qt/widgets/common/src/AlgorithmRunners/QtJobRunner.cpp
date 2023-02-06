@@ -5,10 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidQtWidgets/Common/JobRunners/QtJobRunner.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/QtJobRunner.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/BatchAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/IJobRunner.h"
 #include "MantidQtWidgets/Common/IConfiguredAlgorithm.h"
-#include "MantidQtWidgets/Common/JobRunners/BatchAlgorithmRunner.h"
-#include "MantidQtWidgets/Common/JobRunners/IJobRunner.h"
 
 namespace MantidQt::API {
 

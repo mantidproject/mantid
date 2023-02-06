@@ -11,7 +11,7 @@
 //----------------------
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidQtWidgets/Common/JobRunners/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_StepScan.h"
 

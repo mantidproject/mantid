@@ -11,8 +11,8 @@
 #include "IReflAlgorithmFactory.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
-#include "MantidQtWidgets/Common/JobRunners/BatchAlgorithmRunner.h"
 #include "Reduction/Batch.h"
 
 #include <boost/optional.hpp>

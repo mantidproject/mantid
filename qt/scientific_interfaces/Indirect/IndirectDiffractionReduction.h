@@ -11,7 +11,7 @@
 
 #include "ui_IndirectDiffractionReduction.h"
 
-#include "MantidQtWidgets/Common/JobRunners/BatchAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/BatchAlgorithmRunner.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
