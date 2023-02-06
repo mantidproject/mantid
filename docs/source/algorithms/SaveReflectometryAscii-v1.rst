@@ -92,8 +92,8 @@ Usage
     SaveReflectometryAscii(InputWorkspace=ws, Filename=file, LogList=['title', 'd'])
 
     if os.path.exists(file + ".mft"):
-      myFile = open((file + ".mft"), 'r')
-      print(myFile.read())
+      with open((file + ".mft"), 'r') as myFile:
+        print(myFile.read())
 
 .. testoutput:: SaveReflectometryAscii_general_usage
    :options: +NORMALIZE_WHITESPACE
