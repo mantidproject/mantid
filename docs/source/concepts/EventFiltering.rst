@@ -129,7 +129,7 @@ Time average mean and stddev of logs
 In general, the simple mathematical mean of a log is not the value of interest.
 It is the mean weighted by time, referred to here as the time-average mean.
 The method for calculating the time-average mean and standard deviation is explained in detail in [1]_.
-Assuming that a log is represented by the function :math:`L(t)` (the ``Kernel::TimeSeriesProperty`` class) and a region of interest in time (the ``Kernel::TimeROI`` class) is represented by the function :math:`M(t)` which is zero when the data should not be included and one when it should be.
+We define that a log is represented by the function :math:`L(t)` (the ``Kernel::TimeSeriesProperty`` class) and a region of interest in time (the ``Kernel::TimeROI`` class) is represented by the function :math:`M(t)` which is zero when the data should not be included and one when it should be.
 The time-average mean, :math:`\mu_T` is given by
 
 .. math::
