@@ -21,13 +21,14 @@ public:
   static LambdaValidatorTest *createSuite() { return new LambdaValidatorTest(); }
   static void destroySuite(LambdaValidatorTest *suite) { delete suite; }
 
-  void testEmptyLambda() {
-    LambdaValidator<int> validator([](int x) {
-      // trivial if to remove unused warning
-      if (x == 0) {
-      }
-      return "";
-    });
+  void testDefaultConstructor() {
+    LambdaValidator<int> validator;
+    validator.isValid(2);
+    TS_ASSERT_DIFFERS("", validator.isValid(2));
+  }
+
+  void testOneParamConstructor() {
+    LambdaValidator<int> validator([](GNU_UNUSED int x) { return ""; });
     TS_ASSERT_EQUALS("", validator.isValid(2));
   }
 
@@ -57,12 +58,7 @@ public:
   }
 
   void testClone() {
-    IValidator_sptr v(new LambdaValidator<int>([](int x) {
-      // trivial if to remove unused warning
-      if (x == 0) {
-      }
-      return "";
-    }));
+    IValidator_sptr v(new LambdaValidator<int>([](GNU_UNUSED int x) { return ""; }));
     IValidator_sptr vv = v->clone();
     TS_ASSERT_DIFFERS(v, vv);
     TS_ASSERT(std::dynamic_pointer_cast<LambdaValidator<int>>(vv));
