@@ -27,8 +27,8 @@ namespace MantidQt::MantidWidgets {
 
 RotationSurface::RotationSurface(const InstrumentActor *rootActor, const Mantid::Kernel::V3D &origin,
                                  const Mantid::Kernel::V3D &axis, const QSize &widgetSize,
-                                 const bool correctAspectRatio)
-    : UnwrappedSurface(rootActor, widgetSize, correctAspectRatio), m_pos(origin), m_zaxis(axis),
+                                 const bool maintainAspectRatio)
+    : UnwrappedSurface(rootActor, widgetSize, maintainAspectRatio), m_pos(origin), m_zaxis(axis),
       m_manual_u_correction(false) {}
 
 void RotationSurface::findAxes() {

@@ -18,7 +18,7 @@ namespace MantidWidgets {
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW UnwrappedSphere : public RotationSurface {
 public:
   UnwrappedSphere(const InstrumentActor *rootActor, const Mantid::Kernel::V3D &origin, const Mantid::Kernel::V3D &axis,
-                  const QSize &widgetSize, const bool correctAspectRatio);
+                  const QSize &widgetSize, const bool maintainAspectRatio);
 
 protected:
   void rotate(const UnwrappedDetector &udet, Mantid::Kernel::Quat &R) const override;

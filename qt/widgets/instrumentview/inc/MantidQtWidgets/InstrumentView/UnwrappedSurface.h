@@ -63,7 +63,7 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW UnwrappedSurface : public ProjectionSur
   Q_OBJECT
 public:
   explicit UnwrappedSurface(const InstrumentActor *rootActor, const QSize &widgetSize,
-                            const bool correctAspectRatio = true);
+                            const bool maintainAspectRatio = true);
 
   /** @name Implemented public virtual methods */
   //@{
@@ -185,7 +185,7 @@ protected:
 
   QSize m_widgetSize;
 
-  bool m_correctAspectRatio; ///< whether to maintain aspect ratio if widget has different aspect ratio to the data
+  bool m_maintainAspectRatio; ///< whether to maintain aspect ratio if widget has different aspect ratio to the data
 };
 
 } // namespace MantidWidgets

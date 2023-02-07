@@ -18,7 +18,7 @@ namespace MantidWidgets {
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW UnwrappedCylinder : public RotationSurface {
 public:
   UnwrappedCylinder(const InstrumentActor *rootActor, const Mantid::Kernel::V3D &origin,
-                    const Mantid::Kernel::V3D &axis, const QSize &widgetSize, const bool correctAspectRatio);
+                    const Mantid::Kernel::V3D &axis, const QSize &widgetSize, const bool maintainAspectRatio);
 
 protected:
   void project(const Mantid::Kernel::V3D &pos, double &u, double &v, double &uscale, double &vscale) const override;

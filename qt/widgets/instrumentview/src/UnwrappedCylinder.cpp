@@ -13,8 +13,8 @@ namespace MantidQt::MantidWidgets {
 
 UnwrappedCylinder::UnwrappedCylinder(const InstrumentActor *rootActor, const Mantid::Kernel::V3D &origin,
                                      const Mantid::Kernel::V3D &axis, const QSize &widgetSize,
-                                     const bool correctAspectRatio)
-    : RotationSurface(rootActor, origin, axis, widgetSize, correctAspectRatio) {
+                                     const bool maintainAspectRatio)
+    : RotationSurface(rootActor, origin, axis, widgetSize, maintainAspectRatio) {
   init();
 }
 

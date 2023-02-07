@@ -50,10 +50,10 @@ QRectF getArea(const UnwrappedDetector &udet, double maxWidth, double maxHeight)
  * @param rootActor :: The instrument actor.
  */
 UnwrappedSurface::UnwrappedSurface(const InstrumentActor *rootActor, const QSize &widgetSize,
-                                   const bool correctAspectRatio)
+                                   const bool maintainAspectRatio)
     : ProjectionSurface(rootActor), m_u_min(DBL_MAX), m_u_max(-DBL_MAX), m_v_min(DBL_MAX), m_v_max(-DBL_MAX),
       m_height_max(0), m_width_max(0), m_flippedView(false), m_startPeakShapes(false), m_widgetSize(widgetSize),
-      m_correctAspectRatio(correctAspectRatio) {
+      m_maintainAspectRatio(maintainAspectRatio) {
   // create and set the move input controller
   InputControllerMoveUnwrapped *moveController = new InputControllerMoveUnwrapped(this);
   setInputController(MoveMode, moveController);
@@ -126,7 +126,7 @@ RectF UnwrappedSurface::correctForAspectRatioAndZoom(const int widget_width, con
     view_bottom -= m_height_max / 2;
   }
 
-  if (m_correctAspectRatio) {
+  if (m_maintainAspectRatio) {
     double xSize = std::abs(view_right - view_left);
     double ySize = std::abs(view_top - view_bottom);
     double r = ySize * widget_width / (xSize * widget_height);

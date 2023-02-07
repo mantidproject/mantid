@@ -221,8 +221,8 @@ void FlatBankInfo::translate(const QPointF &shift) {
 }
 
 PanelsSurface::PanelsSurface(const InstrumentActor *rootActor, const Mantid::Kernel::V3D &origin,
-                             const Mantid::Kernel::V3D &axis, const QSize &widgetSize, const bool correctAspectRatio)
-    : UnwrappedSurface(rootActor, widgetSize, correctAspectRatio), m_pos(origin), m_zaxis(axis) {
+                             const Mantid::Kernel::V3D &axis, const QSize &widgetSize, const bool maintainAspectRatio)
+    : UnwrappedSurface(rootActor, widgetSize, maintainAspectRatio), m_pos(origin), m_zaxis(axis) {
   setupAxes();
   init();
 }
