@@ -103,7 +103,7 @@
 // clang-format on
 
 #if defined(GCC_VERSION) || defined(CLANG_VERSION)
-#define GNU_UNUSED_FUNCTION __attribute__((unused))
+#define GNU_UNUSED __attribute__((unused))
 #else
-#define GNU_UNUSED_FUNCTION
+#define GNU_UNUSED
 #endif
