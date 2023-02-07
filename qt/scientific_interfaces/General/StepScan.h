@@ -11,16 +11,19 @@
 //----------------------
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidQtWidgets/Common/AlgorithmRunners/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/IAsyncAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/IAsyncAlgorithmSubscriber.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_StepScan.h"
 
 #include "boost/optional.hpp"
 
+#include <memory>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class StepScan : public API::UserSubWindow {
+class StepScan : public API::UserSubWindow, public API::IAsyncAlgorithmSubscriber {
   Q_OBJECT
 
 public:
@@ -31,6 +34,8 @@ public:
 
   explicit StepScan(QWidget *parent = nullptr);
   ~StepScan() override;
+
+  void notifyAlgorithmFinished(std::string const &algorithmName, bool const error) override;
 
 signals:
   void logsAvailable(const Mantid::API::MatrixWorkspace_const_sptr & /*_t1*/);
@@ -76,7 +81,7 @@ private:
   QString m_inputFilename;
   const std::string m_instrument; ///< The default instrument (for live data)
 
-  API::AlgorithmRunner *m_algRunner; ///< Object for running algorithms asynchronously
+  std::unique_ptr<API::IAsyncAlgorithmRunner> m_algRunner;
   Poco::NObserver<StepScan, Mantid::API::WorkspaceAddNotification> m_addObserver;
   Poco::NObserver<StepScan, Mantid::API::WorkspaceAfterReplaceNotification> m_replObserver;
   boost::optional<int> m_fignum;

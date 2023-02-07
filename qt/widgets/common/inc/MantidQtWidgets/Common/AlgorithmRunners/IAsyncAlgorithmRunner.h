@@ -18,10 +18,10 @@ class EXPORT_OPT_MANTIDQT_COMMON IAsyncAlgorithmRunner {
 public:
   virtual void subscribe(IAsyncAlgorithmSubscriber *subscriber) = 0;
 
-  // virtual void cancelRunningAlgorithm() = 0;
+  virtual void cancelRunningAlgorithm() = 0;
 
-  // virtual void startAlgorithm(Mantid::API::IAlgorithm_sptr alg) = 0;
-  // virtual Mantid::API::IAlgorithm_sptr getAlgorithm() const = 0;
+  virtual void startAlgorithm(Mantid::API::IAlgorithm_sptr alg) = 0;
+  virtual Mantid::API::IAlgorithm_sptr getAlgorithm() const = 0;
 };
 
 } // namespace MantidQt::API

@@ -26,10 +26,10 @@ public:
 
   void subscribe(IAsyncAlgorithmSubscriber *subscriber) override;
 
-  virtual void cancelRunningAlgorithm();
+  void cancelRunningAlgorithm() override;
 
-  virtual void startAlgorithm(Mantid::API::IAlgorithm_sptr alg);
-  virtual Mantid::API::IAlgorithm_sptr getAlgorithm() const;
+  void startAlgorithm(Mantid::API::IAlgorithm_sptr alg) override;
+  Mantid::API::IAlgorithm_sptr getAlgorithm() const override;
 
 private:
   void onAlgorithmFinished(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification> &pNf);

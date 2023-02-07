@@ -17,6 +17,7 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/AsyncAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/Figure.h"
@@ -46,8 +47,10 @@ using namespace Mantid::API;
 /// Constructor
 StepScan::StepScan(QWidget *parent)
     : UserSubWindow(parent), m_instrument(ConfigService::Instance().getInstrument().name()),
-      m_algRunner(new API::AlgorithmRunner(this)), m_addObserver(*this, &StepScan::handleAddEvent),
-      m_replObserver(*this, &StepScan::handleReplEvent), m_replaceObserverAdded(false) {}
+      m_algRunner(std::make_unique<API::AsyncAlgorithmRunner>()), m_addObserver(*this, &StepScan::handleAddEvent),
+      m_replObserver(*this, &StepScan::handleReplEvent), m_replaceObserverAdded(false) {
+  m_algRunner->subscribe(this);
+}
 
 StepScan::~StepScan() {
   // Stop any async algorithm
@@ -117,6 +120,14 @@ void StepScan::cleanupWorkspaces() {
   m_uiForm.normalization->disconnect(SIGNAL(currentIndexChanged(const QString &)));
 }
 
+void StepScan::notifyAlgorithmFinished(std::string const &algorithmName, bool const error) {
+  if (algorithmName.find("StartLiveData") != std::string::npos) {
+    startLiveListenerComplete(error);
+  } else if (algorithmName.find("Load") != std::string::npos) {
+    loadFileComplete(error);
+  }
+}
+
 /** Slot that is called when the live data button is clicked
  *  @param checked Whether the button is being enabled (true) or disabled
  */
@@ -141,8 +152,6 @@ void StepScan::startLiveListener() {
   // Remove any previously-loaded workspaces
   cleanupWorkspaces();
 
-  connect(m_algRunner, SIGNAL(algorithmComplete(bool)), SLOT(startLiveListenerComplete(bool)));
-
   IAlgorithm_sptr startLiveData = AlgorithmManager::Instance().create("StartLiveData");
   startLiveData->setProperty("UpdateEvery", 5.0);
   startLiveData->setProperty("FromNow", false);
@@ -160,7 +169,6 @@ void StepScan::startLiveListener() {
 }
 
 void StepScan::startLiveListenerComplete(bool error) {
-  disconnect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(startLiveListenerComplete(bool)));
   if (!error) {
     // Keep track of the algorithm that's pulling in the live data
     m_uiForm.mWRunFiles->setLiveAlgorithm(m_algRunner->getAlgorithm()->getProperty("MonitorLiveData"));
@@ -207,7 +215,6 @@ void StepScan::loadFile(bool async) {
     m_uiForm.statusText->setText("<i><font color='darkblue'>Loading data...</font></i>");
 
     if (async) {
-      connect(m_algRunner, SIGNAL(algorithmComplete(bool)), SLOT(loadFileComplete(bool)));
       m_algRunner->startAlgorithm(alg);
     } else {
       alg->execute();
@@ -218,7 +225,6 @@ void StepScan::loadFile(bool async) {
 
 void StepScan::loadFileComplete(bool error) {
   m_uiForm.statusText->clear();
-  disconnect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(loadFileComplete(bool)));
 
   if (m_inputWSName == "__multifiles" && !error)
     error = mergeRuns();

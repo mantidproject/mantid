@@ -13,8 +13,11 @@ namespace MantidQt::API {
 class EXPORT_OPT_MANTIDQT_COMMON IAsyncAlgorithmSubscriber {
 
 public:
-  virtual void notifyAlgorithmFinished(bool success) = 0;
-  virtual void notifyAlgorithmProgress(double const progress, std::string const &message) = 0;
+  virtual void notifyAlgorithmFinished(std::string const &algorithmName, bool const error) = 0;
+  virtual void notifyAlgorithmProgress(double const progress, std::string const &message) {
+    (void)progress;
+    (void)message;
+  };
 };
 
 } // namespace MantidQt::API

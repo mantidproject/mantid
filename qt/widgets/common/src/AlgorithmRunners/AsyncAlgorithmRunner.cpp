@@ -41,10 +41,12 @@ void AsyncAlgorithmRunner::cancelRunningAlgorithm() {
 }
 
 void AsyncAlgorithmRunner::startAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
-  if (!alg)
-    throw std::invalid_argument("AlgorithmRunner::startAlgorithm() given a NULL Algorithm");
-  if (!alg->isInitialized())
-    throw std::invalid_argument("AlgorithmRunner::startAlgorithm() given an uninitialized Algorithm");
+  if (!alg) {
+    throw std::invalid_argument("AsyncAlgorithmRunner: The provided algorithm is null.");
+  }
+  if (!alg->isInitialized()) {
+    throw std::invalid_argument("AsyncAlgorithmRunner: The provided algorithm is uninitialized.");
+  }
 
   cancelRunningAlgorithm();
 
@@ -52,12 +54,13 @@ void AsyncAlgorithmRunner::startAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
   m_algorithm->addObserver(m_finishedObserver);
   m_algorithm->addObserver(m_errorObserver);
   m_algorithm->addObserver(m_progressObserver);
+  m_algorithm->executeAsync();
 }
 
 Mantid::API::IAlgorithm_sptr AsyncAlgorithmRunner::getAlgorithm() const { return m_algorithm; }
 
 void AsyncAlgorithmRunner::onAlgorithmFinished(const Poco::AutoPtr<Algorithm::FinishedNotification> &pNf) {
-  m_subscriber->notifyAlgorithmFinished(false);
+  m_subscriber->notifyAlgorithmFinished(m_algorithm->name(), false);
 }
 
 void AsyncAlgorithmRunner::onAlgorithmProgress(const Poco::AutoPtr<Algorithm::ProgressNotification> &pNf) {
@@ -65,7 +68,7 @@ void AsyncAlgorithmRunner::onAlgorithmProgress(const Poco::AutoPtr<Algorithm::Pr
 }
 
 void AsyncAlgorithmRunner::onAlgorithmError(const Poco::AutoPtr<Algorithm::ErrorNotification> &pNf) {
-  m_subscriber->notifyAlgorithmFinished(true);
+  m_subscriber->notifyAlgorithmFinished(m_algorithm->name(), true);
 }
 
 } // namespace MantidQt::API
