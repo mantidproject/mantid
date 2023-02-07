@@ -7,215 +7,194 @@
   },
   "configurePresets": [
     {
-      "name": "osx",
-      "displayName": "osx",
-      "description": "Default build options for an OSX conda build",
-      "generator": "Ninja",
+      "name": "conda",
+      "description": "Inherited by all Conda-based, non-hidden presets",
+      "hidden": true,
       "binaryDir": "${sourceDir}/build",
+      "generator": "Ninja",
       "cacheVariables": {
-        "CMAKE_FIND_FRAMEWORK": "LAST",
-        "USE_PYTHON_DYNAMIC_LIB": "OFF",
-        "Qt5_DIR": "$env{CONDA_PREFIX}/lib/cmake/qt5",
-        "HDF5_ROOT": "$env{CONDA_PREFIX}",
-        "OpenSSL_ROOT": "$env{CONDA_PREFIX}",
-        "CMAKE_CXX_FLAGS_DEBUG": "-g -O0",
         "CONDA_ENV": true,
+        "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}"
+      }
+    },
+    {
+      "name": "ci-default",
+      "description": "Inherited by all CI configurations",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "ENABLE_PRECOMMIT": "OFF",
+        "DOCS_HTML": "ON",
+        "COLORED_COMPILER_OUTPUT": "OFF"
+      }
+    },
+    {
+      "name": "unix-debug",
+      "description": "Inherited by all Unix-like presets for debugging. Overrides Conda CXX flags for debugging",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_CXX_FLAGS_DEBUG": "-g -O0",
         "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
-      "name": "osx-64-ci",
-      "displayName": "osx-64-ci",
-      "description": "To be used in the CI environment only",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build",
+      "name": "osx-default",
+      "description": "Inherited by all OSX configurations",
+      "hidden": true,
       "cacheVariables": {
         "CMAKE_FIND_FRAMEWORK": "LAST",
-        "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
         "USE_PYTHON_DYNAMIC_LIB": "OFF",
         "Qt5_DIR": "$env{CONDA_PREFIX}/lib/cmake/qt5",
         "HDF5_ROOT": "$env{CONDA_PREFIX}",
-        "OpenSSL_ROOT": "$env{CONDA_PREFIX}",
-        "CONDA_ENV": true,
-        "CMAKE_BUILD_TYPE": "Release"
+        "OpenSSL_ROOT": "$env{CONDA_PREFIX}"
       }
+    },
+    {
+      "name": "osx-64-ci",
+      "description": "Build options for a CI build on OSX",
+      "inherits": [
+        "osx-default",
+        "ci-default",
+        "conda"
+      ]
+    },
+    {
+      "name": "linux-64-ci",
+      "description": "Build options for a CI build on Linux",
+      "inherits": [
+        "ci-default",
+        "conda"
+      ]
+    },
+    {
+      "name": "win-64-ci",
+      "description": "Build options for a CI build on windows",
+      "inherits": [
+        "ci-default",
+        "conda"
+      ],
+      "generator": "Visual Studio 16 2019"
+    },
+    {
+      "name": "cppcheck-ci",
+      "description": "Build options for CppCheck CI build",
+      "inherits": [
+        "ci-default",
+        "conda"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CPPCHECK_GENERATE_XML": "TRUE"
+      }
+    },
+    {
+      "name": "osx",
+      "description": "Default build options for a developer OSX build",
+      "inherits": [
+        "unix-debug",
+        "osx-default",
+        "conda"
+      ]
+    },
+    {
+      "name": "linux",
+      "description": "Default build options for a developer Linux build",
+      "inherits": [
+        "unix-debug",
+        "conda"
+      ]
     },
     {
       "name": "win-vs-2019",
-      "displayName": "win-vs",
-      "description": "Default build options for a windows visual studio conda build",
-      "binaryDir": "${sourceDir}/build",
-      "generator": "Visual Studio 16 2019",
-      "cacheVariables": {
-        "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-        "CONDA_ENV": true
-      }
+      "description": "Default build options for a developer Windows build using Visual Studio 2019",
+      "inherits": [
+        "conda"
+      ],
+      "generator": "Visual Studio 16 2019"
     },
     {
       "name": "win-vs",
-      "displayName": "win-vs",
-      "description": "Default build options for a windows visual studio conda build",
-      "binaryDir": "${sourceDir}/build",
+      "description": "Default build options for a developer Windows build using Visual Studio 2022",
+      "inherits": [
+        "conda"
+      ],
       "generator": "Visual Studio 17 2022",
-      "toolset": "v142",
-      "cacheVariables": {
-        "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-        "CONDA_ENV": true
-      }
+      "toolset": "vc142"
     },
     {
-      "vendor": { "microsoft.com/VisualStudioSettings/CMake/1.0": { "cacheRoot": "${sourceDir}/build" } },
       "name": "win-ninja",
-      "displayName": "win-ninja",
-      "description": "Default build options for a windows conda Ninja DebugWithRelRuntime build",
-      "binaryDir": "${sourceDir}/build",
-      "generator": "Ninja",
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "cacheRoot": "${sourceDir}/build"
+        }
+      },
+      "description": "Default build options for a developer Windows build using Visual Studio",
+      "inherits": [
+        "conda"
+      ],
       "cmakeExecutable": "cmake.exe",
       "cacheVariables": {
-        "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-        "CONDA_ENV": true,
         "CMAKE_BUILD_TYPE": "DebugWithRelRuntime",
         "USE_PRECOMPILED_HEADERS": "OFF",
         "CMAKE_MAKE_PROGRAM": "ninja.exe"
       }
     },
     {
-      "name": "win-64-ci",
-      "displayName": "win",
-      "description": "Default build options for a windows conda build",
-      "binaryDir": "${sourceDir}/build",
-      "generator": "Visual Studio 16 2019",
+      "name": "sanitiser-default",
+      "description": "Default build options for sanitiser builds",
+      "hidden": true,
       "cacheVariables": {
-        "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-        "CONDA_ENV": true
-      }
-    },
-    {
-      "name": "linux",
-      "displayName": "linux",
-      "description": "Default build options for a linux conda build",
-      "binaryDir": "${sourceDir}/build",
-      "generator": "Ninja",
-      "cacheVariables": {
-        "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-        "CONDA_ENV": true,
-        "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
-        "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
-        "CMAKE_BUILD_TYPE": "Debug",
-        "CMAKE_CXX_FLAGS_DEBUG": "-g -O0"
-      }
-    },
-    {
-      "name": "linux-64-ci",
-      "displayName": "linux-64-ci",
-      "description": "To be used in the CI environment only",
-      "binaryDir": "${sourceDir}/build",
-      "generator": "Ninja",
-      "cacheVariables": {
-        "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-        "CONDA_ENV": true,
-        "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
-        "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
-        "CMAKE_BUILD_TYPE": "Release",
-        "ENABLE_PRECOMMIT": "OFF",
-        "ENABLE_CPACK": "ON",
-        "DOCS_HTML": "ON",
-        "ENABLE_CONDA": "ON",
-        "COLORED_COMPILER_OUTPUT": "OFF"
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "DOCS_HTML": "OFF"
       }
     },
     {
       "name": "linux-64-ci-address-sanitiser",
-      "displayName": "linux-64-ci-address-sanitiser",
-      "description": "To be used for the CI environment",
-      "binaryDir": "${sourceDir}/build",
-      "generator": "Ninja",
+      "description": "Build options for address sanitizer build",
+      "inherits": [
+        "sanitiser-default",
+        "ci-default",
+        "conda"
+      ],
       "cacheVariables": {
-        "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-        "CONDA_ENV": true,
-        "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
-        "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
-        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
-        "ENABLE_PRECOMMIT": "OFF",
-        "ENABLE_CPACK": "ON",
-        "DOCS_HTML": "ON",
-        "ENABLE_CONDA": "ON",
-        "COLORED_COMPILER_OUTPUT": "OFF",
         "USE_SANITIZER": "Address"
       }
     },
     {
-      "name": "linux-64-ci-memory-sanitiser",
-      "displayName": "linux-64-ci-memory-sanitiser",
-      "description": "To be used for the CI environment",
-      "binaryDir": "${sourceDir}/build",
-      "generator": "Ninja",
+      "name": "linux-64-ci-ub-sanitiser",
+      "description": "Build options for UB sanitizer build",
+      "inherits": [
+        "sanitiser-default",
+        "ci-default",
+        "conda"
+      ],
       "cacheVariables": {
-        "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-        "CONDA_ENV": true,
-        "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
-        "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
-        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
-        "ENABLE_PRECOMMIT": "OFF",
-        "ENABLE_CPACK": "ON",
-        "DOCS_HTML": "ON",
-        "ENABLE_CONDA": "ON",
-        "COLORED_COMPILER_OUTPUT": "OFF",
-        "USE_SANITIZER": "memory"
+        "USE_SANITIZER": "Undefined"
       }
     },
     {
       "name": "linux-64-ci-thread-sanitiser",
-      "displayName": "linux-64-ci-thread-sanitiser",
-      "description": "To be used for the CI environment",
-      "binaryDir": "${sourceDir}/build",
-      "generator": "Ninja",
+      "description": "Build options for Thread sanitizer build",
+      "inherits": [
+        "sanitiser-default",
+        "ci-default",
+        "conda"
+      ],
       "cacheVariables": {
-        "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-        "CONDA_ENV": true,
-        "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
-        "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
-        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
-        "ENABLE_PRECOMMIT": "OFF",
-        "ENABLE_CPACK": "ON",
-        "DOCS_HTML": "ON",
-        "ENABLE_CONDA": "ON",
-        "COLORED_COMPILER_OUTPUT": "OFF",
-        "USE_SANITIZER": "thread"
+        "USE_SANITIZER": "Thread"
       }
     },
     {
       "name": "linux-64-ci-coverage",
-      "displayName": "linux-64-ci-coverage",
-      "description": "To be used in the CI environment only",
-      "binaryDir": "${sourceDir}/build",
-      "generator": "Ninja",
+      "description": "Build options for generating C++ coverage information",
+      "inherits": [
+        "unix-debug",
+        "ci-default",
+        "conda"
+      ],
       "cacheVariables": {
-        "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-        "CONDA_ENV": true,
-        "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
-        "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
-        "CMAKE_BUILD_TYPE": "Debug",
-        "ENABLE_PRECOMMIT": "OFF",
-        "ENABLE_CPACK": "ON",
-        "DOCS_HTML": "ON",
-        "ENABLE_CONDA": "ON",
-        "COLORED_COMPILER_OUTPUT": "OFF",
         "COVERAGE": "OFF",
-        "TESTING_TIMEOUT": "1200",
-        "CMAKE_CXX_FLAGS_DEBUG": "-g -O0"
-      }
-    },
-    {
-      "name": "cppcheck-ci",
-      "displayName": "cppcheck-ci",
-      "description": "To be used in the cppcheck CI environment only",
-      "binaryDir": "${sourceDir}/build",
-      "generator": "Ninja",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "CPPCHECK_GENERATE_XML": "TRUE",
-        "ENABLE_PRECOMMIT": "OFF"
+        "TESTING_TIMEOUT": "1200"
       }
     }
   ]
