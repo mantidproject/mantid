@@ -84,7 +84,7 @@ Let's build a model consisting of a peak and a background function.
 Note that two fit functions have appeared in the Fit
 Property Browser called ``f0-Gaussian`` and ``f1-FlatBackground``.
 Click on the triangles beside these functions to reveal their fit parameters.
-Just as with the StartX/EndX values, dragging on the plot and changing these values update each other.
+Just as with the StartX/EndX values, dragging the solid and dashed red lines on the plot updates these values, while changing the values will update the positions of the red lines on the plot.
 
 .. figure:: /images/PeakAndBackgroundSetup.png
    :alt: PeakAndBackgroundSetup.png
@@ -163,7 +163,7 @@ The tying expression can be as simple as a parameter name:
 Note that parameter names of a model include prefixes such as ``f0.``
 which indicate the particular function they belong to.
 
-Try **Tying** parameter f1.A0 from our built
+Try using the "Custom Tie" option from the menu to tie parameter f1.A0 from our built
 model to the custom function:
 
 ``2-f0.Height``
