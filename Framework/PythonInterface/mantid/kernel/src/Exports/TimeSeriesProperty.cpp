@@ -75,7 +75,10 @@ template <> std::string dtype(TimeSeriesProperty<std::string> &self) {
   return retVal;
 }
 
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(timeAverageValue_Overloads, timeAverageValue, 0, 1);
+// Ignore -Wconversion warnings coming from boost::python
+// Seen with GCC 7.1.1 and Boost 1.63.0
+GNU_DIAG_OFF("conversion")
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(timeAverageValue_Overloads, timeAverageValue, 0, 1)
 
 // Macro to reduce copy-and-paste
 #define EXPORT_TIMESERIES_PROP(TYPE, Prefix)                                                                           \
@@ -119,6 +122,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(timeAverageValue_Overloads, timeAverageVa
       .def("timeAverageValue", &TimeSeriesProperty<TYPE>::timeAverageValue,                                            \
            timeAverageValue_Overloads((arg("self"), arg("time_roi"))))                                                 \
       .def("dtype", &dtype<TYPE>, arg("self"));
+GNU_DIAG_ON("conversion")
 
 } // namespace
 
