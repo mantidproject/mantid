@@ -33,7 +33,7 @@ New features
 - The number of selected tubes is now displayed in :ref:`ALFView <ALFView-ref>` when the tube selection is changed.
 - The ``Fit`` button will now trigger the calculation of the Rotation angle, if the Fit is successful.
 - Updated the documentation for the :ref:`ALFView <ALFView-ref>` interface.
-- :ref:`LagrangeILLReduction <algm-LagrangeILLReduction>` now allows the user to select normalisation approach, loads time, and temperature metadata from the ASCII files. Additionally, it now properly handles interpolation and energy range of the water correction, depending on the value of ``UseIncidentEnergy``.
+- :ref:`LagrangeILLReduction <algm-LagrangeILLReduction>` now allows the user to select normalisation approach and load time and temperature metadata from the ASCII files. Additionally, it now properly handles interpolation and energy range of the water correction, depending on the value of ``UseIncidentEnergy``.
 
 Bugfixes
 ############
