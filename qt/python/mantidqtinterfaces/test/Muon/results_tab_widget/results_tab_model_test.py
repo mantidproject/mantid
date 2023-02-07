@@ -315,14 +315,14 @@ class ResultsTabModelTest(unittest.TestCase):
             TableColumnType.YErr,
             TableColumnType.Y,
         )
-        avg_log_values = "1970-01-01T00:00:01 to 1970-01-01T00:00:01", 1, 86.0, 2.0
+        avg_log_values = "1970-01-01T00:00:01 to 1970-01-01T00:00:01", 1, 90.057, 2.0
         expected_content = [
             (
                 "ws1_Parameters",
                 avg_log_values[0],
                 avg_log_values[1],
                 avg_log_values[2],
-                17.146,
+                15.848,
                 avg_log_values[3],
                 0.0,
                 self.f0_height[0],

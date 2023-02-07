@@ -17,6 +17,7 @@
 #include <boost/python/implicit.hpp>
 #include <boost/python/init.hpp>
 #include <boost/python/make_function.hpp>
+#include <boost/python/overloads.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/return_value_policy.hpp>
 #include <boost/python/tuple.hpp>
@@ -74,6 +75,11 @@ template <> std::string dtype(TimeSeriesProperty<std::string> &self) {
   return retVal;
 }
 
+// Ignore -Wconversion warnings coming from boost::python
+// Seen with GCC 7.1.1 and Boost 1.63.0
+GNU_DIAG_OFF("conversion")
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(timeAverageValue_Overloads, timeAverageValue, 0, 1)
+
 // Macro to reduce copy-and-paste
 #define EXPORT_TIMESERIES_PROP(TYPE, Prefix)                                                                           \
   register_ptr_to_python<TimeSeriesProperty<TYPE> *>();                                                                \
@@ -113,13 +119,10 @@ template <> std::string dtype(TimeSeriesProperty<std::string> &self) {
       .def("nthTime", &TimeSeriesProperty<TYPE>::nthTime, (arg("self"), arg("index")),                                 \
            "returns :class:`mantid.kernel.DateAndTime`")                                                               \
       .def("getStatistics", &TimeSeriesProperty<TYPE>::getStatistics, getStatistics_overloads())                       \
-      .def("timeAverageValue",                                                                                         \
-           (double (TimeSeriesProperty<TYPE>::*)() const) & TimeSeriesProperty<TYPE>::timeAverageValue, (arg("self"))) \
-      .def("timeAverageValue",                                                                                         \
-           (double (TimeSeriesProperty<TYPE>::*)(const Mantid::Kernel::TimeROI &) const) &                             \
-               TimeSeriesProperty<TYPE>::timeAverageValue,                                                             \
-           (arg("self"), arg("time_roi")))                                                                             \
+      .def("timeAverageValue", &TimeSeriesProperty<TYPE>::timeAverageValue,                                            \
+           timeAverageValue_Overloads((arg("self"), arg("time_roi"))))                                                 \
       .def("dtype", &dtype<TYPE>, arg("self"));
+GNU_DIAG_ON("conversion")
 
 } // namespace
 
