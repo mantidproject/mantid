@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidKernel/TimeSplitter.h"
+#include <set>
 
 namespace Mantid {
 
@@ -104,9 +105,21 @@ int TimeSplitter::valueAtTime(const Types::Core::DateAndTime &time) const {
   }
 }
 
+/**
+ * Return a sorted vector of the output workspace indices
+ */
 std::vector<int> TimeSplitter::outputWorkspaceIndices() const {
-  std::vector<int> output;
-  return output;
+  // sets have unique values and are sorted
+  std::set<int> outputSet;
+
+  // copy all of the (not ignore) output workspace indices
+  for (const auto iter : m_roi_map) {
+    if (iter.second > IGNORE)
+      outputSet.insert(iter.second);
+  }
+
+  // return a vector
+  return std::vector<int>(outputSet.begin(), outputSet.end());
 }
 
 std::size_t TimeSplitter::numRawValues() const { return m_roi_map.size(); }

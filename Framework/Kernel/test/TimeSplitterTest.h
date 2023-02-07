@@ -35,6 +35,7 @@ public:
     TS_ASSERT_EQUALS(splitter.valueAtTime(stop), -1);
     TS_ASSERT_EQUALS(splitter.valueAtTime(after), -1);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 2);
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({0}));
 
     // add ROI for first half to go to 1st output
     splitter.addROI(start, middle, 1);
@@ -44,6 +45,7 @@ public:
     TS_ASSERT_EQUALS(splitter.valueAtTime(stop), -1);
     TS_ASSERT_EQUALS(splitter.valueAtTime(after), -1);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 3);
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({0, 1}));
 
     // add ROI for second half to go to 2nd output
     splitter.addROI(middle, stop, 2);
@@ -53,6 +55,7 @@ public:
     TS_ASSERT_EQUALS(splitter.valueAtTime(stop), -1);
     TS_ASSERT_EQUALS(splitter.valueAtTime(after), -1);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 3);
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({1, 2}));
 
     // have whole thing go to 3rd output
     splitter.addROI(start, stop, 3);
@@ -62,6 +65,7 @@ public:
     TS_ASSERT_EQUALS(splitter.valueAtTime(stop), -1);
     TS_ASSERT_EQUALS(splitter.valueAtTime(after), -1);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 2);
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({3}));
 
     // prepend a section that goes to 1st output
     splitter.addROI(before, start, 1);
@@ -71,6 +75,7 @@ public:
     TS_ASSERT_EQUALS(splitter.valueAtTime(stop), -1);
     TS_ASSERT_EQUALS(splitter.valueAtTime(after), -1);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 3);
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({1, 3}));
 
     // append a section that goes to 2nd output
     splitter.addROI(stop, after, 2);
@@ -80,6 +85,7 @@ public:
     TS_ASSERT_EQUALS(splitter.valueAtTime(stop), 2);
     TS_ASSERT_EQUALS(splitter.valueAtTime(after), -1);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 4);
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({1, 2, 3}));
 
     // set before the beginning to mask
     splitter.addROI(before, start, -1);
@@ -89,6 +95,7 @@ public:
     TS_ASSERT_EQUALS(splitter.valueAtTime(stop), 2);
     TS_ASSERT_EQUALS(splitter.valueAtTime(after), -1);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 3);
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({2, 3}));
 
     // set after the end to mask
     splitter.addROI(stop, after, -1);
@@ -98,6 +105,7 @@ public:
     TS_ASSERT_EQUALS(splitter.valueAtTime(stop), -1);
     TS_ASSERT_EQUALS(splitter.valueAtTime(after), -1);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 2);
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({3}));
   }
 
   void test_emptySplitter() {
