@@ -907,18 +907,6 @@ TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<SplittingIn
   return std::pair<double, double>{mean_current, std::sqrt(variance)};
 }
 
-template <typename TYPE> std::pair<double, double> TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev() const {
-  std::pair<double, double> retVal{0., 0.}; // mean and stddev
-  try {
-    const auto &filter = getSplittingIntervals();
-    retVal = this->averageAndStdDevInFilter(filter);
-  } catch (std::exception &) {
-    retVal.first = std::numeric_limits<double>::quiet_NaN();
-    retVal.second = std::numeric_limits<double>::quiet_NaN();
-  }
-  return retVal;
-}
-
 /** Function specialization for TimeSeriesProperty<std::string>
  *  @throws Kernel::Exception::NotImplementedError always
  */
@@ -928,6 +916,36 @@ TimeSeriesProperty<std::string>::averageAndStdDevInFilter(const SplittingInterva
   throw Exception::NotImplementedError("TimeSeriesProperty::"
                                        "averageAndStdDevInFilter is not "
                                        "implemented for string properties");
+}
+
+template <typename TYPE>
+std::pair<double, double> TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev(const Kernel::TimeROI *roi) const {
+
+  std::pair<double, double> nonSenseValues{std::numeric_limits<double>::quiet_NaN(),
+                                           std::numeric_limits<double>::quiet_NaN()};
+
+  // time series with less than two entries are conner cases
+  if (this->realSize() == 0)
+    return nonSenseValues;
+  else if (this->realSize() == 1)
+    return std::pair<double, double>(static_cast<double>(this->firstValue()), 0.0);
+
+  // Derive splitting intervals from either the roi or from the first/last entries in the time series
+  std::vector<SplittingInterval> filter;
+  if (roi && !roi->empty())
+    filter = roi->toSplitters();
+  else
+    filter = TimeROI(this->firstTime(), this->lastTime()).toSplitters(); // guaranteed to have two different entries
+
+  return this->averageAndStdDevInFilter(filter);
+}
+
+/** Function specialization for timeAverageValueAndStdDev<std::string>
+ *  @return pair (Nan, Nan) always.
+ */
+template <>
+std::pair<double, double> TimeSeriesProperty<std::string>::timeAverageValueAndStdDev(const Kernel::TimeROI *roi) const {
+  return std::pair<double, double>(std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN());
 }
 
 // Re-enable the warnings disabled before makeFilterByValue
@@ -1180,6 +1198,8 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::lastValue() const {
  * @return duration, in seconds.
  */
 template <typename TYPE> double TimeSeriesProperty<TYPE>::durationInSeconds(const Kernel::TimeROI *roi) const {
+  if (this->size() == 0)
+    return std::numeric_limits<double>::quiet_NaN();
   if (roi && !roi->empty()) {
     Kernel::TimeROI seriesSpan(this->firstTime(), this->lastTime());
     seriesSpan.update_intersection(*roi);
@@ -1644,29 +1664,10 @@ TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics(const TimeR
 
   // Start with statistics that are not time-weighted
   TimeSeriesPropertyStatistics out(Mantid::Kernel::getStatistics(this->filteredValuesAsVector(roi)));
-
-  if (this->size() > 0) {
-    out.duration = this->durationInSeconds(roi);
-    // DEBUG: uncomment following line
-    // auto avAndDev = this->timeAverageValueAndStdDev();  // DEBUG: need to pass ROI
-  } else {
-    out.time_mean = std::numeric_limits<double>::quiet_NaN();
-    out.time_standard_deviation = std::numeric_limits<double>::quiet_NaN();
-    out.duration = std::numeric_limits<double>::quiet_NaN();
-  }
-
-  // OLD CODE
-  if (this->size() > 0) {
-    const auto &intervals = this->getSplittingIntervals();
-    const double duration_sec =
-        std::accumulate(intervals.cbegin(), intervals.cend(), 0.,
-                        [](double sum, const auto &interval) { return sum + interval.duration(); });
-    out.duration = duration_sec;
-    const auto time_weighted = this->timeAverageValueAndStdDev();
-    out.time_mean = time_weighted.first;
-    out.time_standard_deviation = time_weighted.second;
-  }
-
+  out.duration = this->durationInSeconds(roi);
+  auto avAndDev = this->timeAverageValueAndStdDev(roi);
+  out.time_mean = avAndDev.first;
+  out.time_standard_deviation = avAndDev.second;
   return out;
 }
 
