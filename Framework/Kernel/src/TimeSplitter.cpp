@@ -9,8 +9,13 @@
 
 namespace Mantid {
 
+using Types::Core::DateAndTime;
+
 namespace {
+// every value less than zero is ignore
 constexpr int IGNORE{-1};
+// default value for the output is zero
+constexpr int DEFAULT_VALUE{0};
 
 void assertIncreasing(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop) {
   if (start > stop)
@@ -21,31 +26,60 @@ void assertIncreasing(const Types::Core::DateAndTime &start, const Types::Core::
 namespace Kernel {
 
 TimeSplitter::TimeSplitter(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop) {
-  assertIncreasing(start, stop);
-  m_roi_map.insert({start, 0});
-  m_roi_map.insert({stop, IGNORE});
+  clearAndReplace(start, stop, DEFAULT_VALUE);
 }
 
 void TimeSplitter::addROI(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop,
                           const int value) {
-  // cache what the final value will be
-  const int endValue = this->valueAtTime(stop);
+  assertIncreasing(start, stop);
+  if (m_roi_map.empty()) {
+    // set the values without checks
+    clearAndReplace(start, stop, value);
+  } else if ((start <= m_roi_map.begin()->first) && (stop >= m_roi_map.rbegin()->first)) {
+    // overwrite existing map
+    clearAndReplace(start, stop, value);
+  } else {
+    // do the interesting version
 
-  // find if there are values to erase
+    // cache what the final value will be
+    const int stopValue = this->valueAtTime(stop);
 
-  // the starting point is greater than or equal to the "start" supplied
-  auto startIterator = m_roi_map.lower_bound(start);
-  if ((startIterator->first != start) && (startIterator != m_roi_map.begin()))
-    startIterator--; // move to the one before
-  // the end is one past the "stop"
-  auto stopIterator = m_roi_map.upper_bound(stop);
+    // find if there are values to erase
 
-  // remove the elements that are being replaced [inclusive, exclusive)
-  m_roi_map.erase(startIterator, stopIterator);
+    // the starting point is greater than or equal to the "start" supplied
+    auto startIterator = m_roi_map.lower_bound(start);
+    if ((startIterator->first != start) && (startIterator != m_roi_map.begin()))
+      startIterator--; // move to the one before
+    // the end is one past the "stop"
+    auto stopIterator = m_roi_map.upper_bound(stop);
+    if ((stopIterator != m_roi_map.end()) && (stopValue == IGNORE))
+      stopIterator++; // move to the one after
 
-  // put in the new elements
-  m_roi_map.insert({start, value});
-  m_roi_map.insert({stop, endValue});
+    const bool atStart = (startIterator == m_roi_map.begin());
+
+    // remove the elements that are being replaced [inclusive, exclusive)
+    m_roi_map.erase(startIterator, stopIterator);
+
+    // put in the new elements
+    if ((value > IGNORE) || (!atStart))
+      m_roi_map.insert({start, value});
+
+    if (value != stopValue)
+      m_roi_map.insert({stop, stopValue});
+
+    // verify this ends with IGNORE
+    if (m_roi_map.rbegin()->second != IGNORE)
+      throw std::runtime_error("Something went wrong in TimeSplitter::addROI");
+  }
+}
+
+void TimeSplitter::clearAndReplace(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop,
+                                   const int value) {
+  m_roi_map.clear();
+  if (value >= 0) {
+    m_roi_map.insert({start, value});
+    m_roi_map.insert({stop, IGNORE});
+  }
 }
 
 int TimeSplitter::valueAtTime(const Types::Core::DateAndTime &time) const {
@@ -69,6 +103,13 @@ int TimeSplitter::valueAtTime(const Types::Core::DateAndTime &time) const {
     return location->second;
   }
 }
+
+std::vector<int> TimeSplitter::outputWorkspaceIndices() const {
+  std::vector<int> output;
+  return output;
+}
+
+std::size_t TimeSplitter::numRawValues() const { return m_roi_map.size(); }
 
 } // namespace Kernel
 } // namespace Mantid

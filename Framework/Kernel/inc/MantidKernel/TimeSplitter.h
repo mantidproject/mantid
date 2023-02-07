@@ -20,8 +20,13 @@ public:
   TimeSplitter(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop);
   int valueAtTime(const Types::Core::DateAndTime &time) const;
   void addROI(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop, const int value);
+  std::vector<int> outputWorkspaceIndices() const;
+
+  /// this is to aid in testing and not intended for use elsewhere
+  std::size_t numRawValues() const;
 
 private:
+  void clearAndReplace(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop, const int value);
   std::map<Types::Core::DateAndTime, int> m_roi_map;
 };
 
