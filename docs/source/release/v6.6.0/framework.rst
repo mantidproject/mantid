@@ -7,7 +7,7 @@ Framework Changes
 
 New Features
 ------------
-- The approach for inverting large tridiagonal matrices has been improved so that the analytical method can still be used even for large matrices, resulting in a performance improvement. This type of matrix inversion is used when calculating the interpolation errors when performing spline interpolation.
+- The approach for inverting large tridiagonal matrices has been improved so that the analytical method can still be used even for large matrices, resulting in a performance improvement. This type of matrix inversion is used when calculating the interpolation errors while performing spline interpolation.
 - HDF5 has been upgraded to v1.12 along with h5py to version 3.
 
 Algorithms
