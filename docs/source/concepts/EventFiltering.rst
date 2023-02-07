@@ -16,7 +16,7 @@ While the full list of algorithms can be found in the event filtering algorithm 
 * :ref:`FilterEvents <algm-FilterEvents>` which allows for a variety of workspaces to specify how an :ref:`EventWorkspace` is split.
 
 
-This document focuses on how the create workspaces for filtering and will largely
+This document focuses on how to create workspaces for filtering and will largely
 ignore :ref:`FilterByTime <algm-FilterByTime>` and
 :ref:`FilterByLogValue <algm-FilterByLogValue>`.
 
@@ -129,26 +129,26 @@ Time average mean and stddev of logs
 In general, the simple mathematical mean of a log is not the value of interest.
 It is the mean weighted by time, referred to here as the time-average mean.
 The method for calculating the time-average mean and standard deviation is explained in detail in [1]_.
-We define that a log is represented by the function :math:`L(t)` (the ``Kernel::TimeSeriesProperty`` class) and a region of interest in time (the ``Kernel::TimeROI`` class) is represented by the function :math:`M(t)` which is zero when the data should not be included and one when it should be.
+We define that a log is represented by the right-continuous `multi-step function <https://en.wikipedia.org/wiki/Step_function>`_ :math:`L(t)` (the ``Kernel::TimeSeriesProperty`` class) and a region of interest in time (the ``Kernel::TimeROI`` class) is represented by the function :math:`M(t)` which is zero when the data should not be included and one when it should be.
 The time-average mean, :math:`\mu_T` is given by
 
 .. math::
 
    \mu_T = \frac{\int_0^T M(t) L(t) dt}{\int_0^T M(t) dt}
 
-The denomenator is correctly observed to be the duration.
+The denominator is correctly observed to be the duration.
 The variance (standard deviation squared) is
 
 .. math::
 
    \sigma_T^2 = \frac{\int_0^T M(t) (L(t) - \mu_T)^2 dt}{\int_0^T M(t) dt}
 
-In the cases of properties (including time series) with only a single value these values become :math:`\mu_T = L(0)` and :math:`\sigma_T^2=0` independent of the time region of interest, as expected.
+In the cases of properties (including time series) with only a single value, :math:`L`, these values become :math:`\mu_T = L` and :math:`\sigma_T^2=0` independent of the time region of interest, as expected.
 When all data is to be used (i.e. :math:`M(t) = 1`), the equations simplify to the values weighted by their observed durations, or
 
 .. math::
 
-   \mu_T = \frac{\int_0^T L(t) dt}{\int_0^T dt}
+   \mu_T = \frac{\int_0^T L(t) dt}{\int_0^T dt} = \frac{1}{T} \int_0^T L(t) dt
 
 
 References
