@@ -1209,7 +1209,6 @@ template <typename TYPE> double TimeSeriesProperty<TYPE>::durationInSeconds(cons
   if (roi && !roi->empty()) {
     Kernel::TimeROI seriesSpan(this->firstTime(), this->lastTime());
     seriesSpan.update_intersection(*roi);
-    std::string out = seriesSpan.debugStrPrint();
     return seriesSpan.durationInSeconds();
   } else {
     return DateAndTime::secondsFromDuration(this->lastTime() - this->firstTime()); // span of the time series
