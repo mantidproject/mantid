@@ -17,7 +17,7 @@ New features
 
    The new ALFView Interface
 
-- The FunctionBrowser in :ref:`ALFView <ALFView-ref>` has been replaced with a box for entering the PeakCentre parameter.
+- The FunctionBrowser widget in :ref:`ALFView <ALFView-ref>` has been replaced with a box to specify the PeakCentre of a Flat Background + Gaussian.
 - By default, the mini plot on the :ref:`ALFView <ALFView-ref>` Pick tab will now select the 'Out of plane angle' axis and 'Integrate' when the ``Select whole tube`` button is pressed.
 - Added :ref:`LagrangeILLReduction <algm-LagrangeILLReduction>`, which handles loading and data reduction from IN1 - Lagrange at ILL.
 - The ability to load an optional vanadium run into :ref:`ALFView <ALFView-ref>` for normalisation is now possible. This vanadium run is saved between sessions.
@@ -31,10 +31,9 @@ New features
 - An option to reset the extracted data in the right hand side plot has been added to :ref:`ALFView <ALFView-ref>`.
 - The average two theta value is now displayed in :ref:`ALFView <ALFView-ref>` when a tube is selected.
 - The number of selected tubes is now displayed in :ref:`ALFView <ALFView-ref>` when the tube selection is changed.
-- The FunctionBrowser widget has been replaced with a box to specify the peak centre of a Flat Background + Gaussian in :ref:`ALFView <ALFView-ref>`.
 - The ``Fit`` button will now trigger the calculation of the Rotation angle, if the Fit is successful.
 - Updated the documentation for the :ref:`ALFView <ALFView-ref>` interface.
-- :ref:`LagrangeILLReduction <algm-LagrangeILLReduction>` now allows the user to select normalisation approach, loads time and temperature metadata from the ASCII files. It also properly handles interpolation and energy range of the water correction depending on the user's choice for the ``UseIncidentEnergy`` property value.
+- :ref:`LagrangeILLReduction <algm-LagrangeILLReduction>` now allows the user to select normalisation approach, loads time, and temperature metadata from the ASCII files. Additionally, it now properly handles interpolation and energy range of the water correction, depending on the value of ``UseIncidentEnergy``.
 
 Bugfixes
 ############
