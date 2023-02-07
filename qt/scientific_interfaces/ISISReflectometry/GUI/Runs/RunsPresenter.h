@@ -16,6 +16,8 @@
 #include "ISearcher.h"
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/IAsyncAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/IAsyncAlgorithmSubscriber.h"
 #include "SearchResult.h"
 #include <memory>
 #include <optional>
@@ -53,7 +55,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL RunsPresenter : public IRunsPresenter,
                                                      public RunsViewSubscriber,
                                                      public RunNotifierSubscriber,
                                                      public SearcherSubscriber,
-                                                     public Mantid::API::AlgorithmObserver {
+                                                     public MantidQt::API::IAsyncAlgorithmSubscriber {
 public:
   RunsPresenter(IRunsView *mainView, ProgressableView *progressView,
                 const RunsTablePresenterFactory &makeRunsTablePresenter, double thetaTolerance,
@@ -124,6 +126,10 @@ public:
   void notifySearchComplete() override;
   void notifySearchFailed() override;
 
+  // IAsyncAlgorithmSubscriber overrides
+  void notifyAlgorithmFinished(std::string const &algorithmName,
+                               std::optional<std::string> const &error = std::nullopt) override;
+
 protected:
   IRunsTablePresenter *tablePresenter() const;
   /// The current transfer method
@@ -134,8 +140,6 @@ protected:
   std::unique_ptr<IRunNotifier> m_runNotifier;
   /// The search implementation
   std::unique_ptr<ISearcher> m_searcher;
-  /// The algorithm used when the live data monitor is running
-  Mantid::API::IAlgorithm_sptr m_monitorAlg;
 
 private:
   /// The main view we're managing
@@ -150,6 +154,8 @@ private:
   IFileHandler *m_fileHandler;
   /// The list of instruments
   std::vector<std::string> m_instruments;
+  /// The runner used to run algorithms asynchronously
+  std::unique_ptr<API::IAsyncAlgorithmRunner> m_algRunner;
   /// The tolerance used when looking up settings by theta
   double m_thetaTolerance;
   /// Flag to indicate we have unsaved changes in the runs table
@@ -186,8 +192,6 @@ private:
   void handleError(const std::string &message, const std::exception &e);
   void handleError(const std::string &message);
 
-  void finishHandle(const Mantid::API::IAlgorithm *alg) override;
-  void errorHandle(const Mantid::API::IAlgorithm *alg, const std::string &what) override;
   void updateViewWhenMonitorStarting();
   void updateViewWhenMonitorStarted();
   void updateViewWhenMonitorStopped();

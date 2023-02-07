@@ -17,11 +17,6 @@
 #include <QBasicTimer>
 
 namespace MantidQt {
-
-namespace API {
-class AlgorithmRunner;
-}
-
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
@@ -91,9 +86,6 @@ private:
   void initLayout();
   /// Implement our own timer event to trigger autoreduction
   void timerEvent(QTimerEvent *event) override;
-
-  std::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
-  std::shared_ptr<MantidQt::API::AlgorithmRunner> m_monitorAlgoRunner;
 
   void setSelected(QComboBox &box, std::string const &str);
 

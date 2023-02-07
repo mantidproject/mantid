@@ -65,7 +65,6 @@ void QtRunsView::initLayout() {
   m_ui.actionExport->setIcon(getIcon("mdi.content-save", "black", 1.3));
 
   m_algoRunner = std::make_shared<MantidQt::API::AlgorithmRunner>(this);
-  m_monitorAlgoRunner = std::make_shared<MantidQt::API::AlgorithmRunner>(this);
 
   // Custom context menu for table
   connect(m_ui.searchPane, SIGNAL(customContextMenuRequested(const QPoint &)), this,
@@ -353,10 +352,6 @@ std::set<int> QtRunsView::getAllSearchRows() const {
 
 std::shared_ptr<MantidQt::API::AlgorithmRunner> QtRunsView::getAlgorithmRunner() const { return m_algoRunner; }
 
-std::shared_ptr<MantidQt::API::AlgorithmRunner> QtRunsView::getMonitorAlgorithmRunner() const {
-  return m_monitorAlgoRunner;
-}
-
 /**
 Get the string the user wants to search for.
 @returns The search string
@@ -389,12 +384,7 @@ void QtRunsView::on_buttonStopMonitor_clicked() {
 
 /** Start live data monitoring
  */
-void QtRunsView::startMonitor() {
-  m_monitorAlgoRunner.get()->disconnect(); // disconnect any other connections
-  m_notifyee->notifyStartMonitor();
-  connect(m_monitorAlgoRunner.get(), SIGNAL(algorithmComplete(bool)), this, SLOT(onStartMonitorComplete()),
-          Qt::UniqueConnection);
-}
+void QtRunsView::startMonitor() { m_notifyee->notifyStartMonitor(); }
 
 /**
 This slot notifies the presenter that the monitoring algorithm finished

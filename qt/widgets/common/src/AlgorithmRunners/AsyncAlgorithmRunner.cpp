@@ -60,7 +60,7 @@ void AsyncAlgorithmRunner::startAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
 Mantid::API::IAlgorithm_sptr AsyncAlgorithmRunner::getAlgorithm() const { return m_algorithm; }
 
 void AsyncAlgorithmRunner::onAlgorithmFinished(const Poco::AutoPtr<Algorithm::FinishedNotification> &pNf) {
-  m_subscriber->notifyAlgorithmFinished(m_algorithm->name(), false);
+  m_subscriber->notifyAlgorithmFinished(m_algorithm->name());
 }
 
 void AsyncAlgorithmRunner::onAlgorithmProgress(const Poco::AutoPtr<Algorithm::ProgressNotification> &pNf) {
@@ -68,7 +68,7 @@ void AsyncAlgorithmRunner::onAlgorithmProgress(const Poco::AutoPtr<Algorithm::Pr
 }
 
 void AsyncAlgorithmRunner::onAlgorithmError(const Poco::AutoPtr<Algorithm::ErrorNotification> &pNf) {
-  m_subscriber->notifyAlgorithmFinished(m_algorithm->name(), true);
+  m_subscriber->notifyAlgorithmFinished(m_algorithm->name(), pNf->what);
 }
 
 } // namespace MantidQt::API

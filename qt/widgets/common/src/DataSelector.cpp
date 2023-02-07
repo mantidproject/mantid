@@ -228,7 +228,7 @@ void DataSelector::autoLoadFile(const QString &filepath) {
  *
  * @param error :: Whether loading completed without error
  */
-void DataSelector::notifyAlgorithmFinished(std::string const &algorithmName, bool const error) {
+void DataSelector::notifyAlgorithmFinished(std::string const &algorithmName, std::optional<std::string> const &error) {
   (void)algorithmName;
 
   if (!error) {

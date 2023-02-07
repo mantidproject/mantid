@@ -120,11 +120,11 @@ void StepScan::cleanupWorkspaces() {
   m_uiForm.normalization->disconnect(SIGNAL(currentIndexChanged(const QString &)));
 }
 
-void StepScan::notifyAlgorithmFinished(std::string const &algorithmName, bool const error) {
+void StepScan::notifyAlgorithmFinished(std::string const &algorithmName, std::optional<std::string> const &error) {
   if (algorithmName.find("StartLiveData") != std::string::npos) {
-    startLiveListenerComplete(error);
+    startLiveListenerComplete(error != std::nullopt);
   } else if (algorithmName.find("Load") != std::string::npos) {
-    loadFileComplete(error);
+    loadFileComplete(error != std::nullopt);
   }
 }
 

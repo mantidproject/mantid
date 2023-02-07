@@ -13,7 +13,7 @@
 #include "IRunsView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/Logger.h"
-#include "MantidQtWidgets/Common/AlgorithmRunners/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/AsyncAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
 #include "QtCatalogSearcher.h"
 
@@ -50,7 +50,8 @@ RunsPresenter::RunsPresenter(IRunsView *mainView, ProgressableView *progressable
     : m_runNotifier(std::make_unique<CatalogRunNotifier>(mainView)),
       m_searcher(std::make_unique<QtCatalogSearcher>(mainView)), m_view(mainView), m_progressView(progressableView),
       m_mainPresenter(nullptr), m_messageHandler(messageHandler), m_fileHandler(fileHandler),
-      m_instruments(std::move(instruments)), m_thetaTolerance(thetaTolerance), m_tableUnsaved{false} {
+      m_instruments(std::move(instruments)), m_algRunner(std::make_unique<MantidQt::API::AsyncAlgorithmRunner>()),
+      m_thetaTolerance(thetaTolerance), m_tableUnsaved{false} {
 
   assert(m_view != nullptr);
   m_view->subscribe(this);
@@ -58,14 +59,12 @@ RunsPresenter::RunsPresenter(IRunsView *mainView, ProgressableView *progressable
   m_tablePresenter->acceptMainPresenter(this);
   m_runNotifier->subscribe(this);
   m_searcher->subscribe(this);
+  m_algRunner->subscribe(this);
 
   updateViewWhenMonitorStopped();
 }
 
-RunsPresenter::~RunsPresenter() {
-  if (m_monitorAlg)
-    stopObserving(m_monitorAlg);
-}
+RunsPresenter::~RunsPresenter() { m_algRunner->cancelRunningAlgorithm(); }
 
 /** Accept a main presenter
  * @param mainPresenter :: [input] A main presenter
@@ -575,8 +574,7 @@ void RunsPresenter::startMonitor() {
     auto alg = setupLiveDataMonitorAlgorithm();
     if (!alg)
       return;
-    auto algRunner = m_view->getMonitorAlgorithmRunner();
-    algRunner->startAlgorithm(alg);
+    m_algRunner->startAlgorithm(alg);
     updateViewWhenMonitorStarting();
   } catch (std::exception &e) {
     handleError("Error starting live data", e);
@@ -588,10 +586,7 @@ void RunsPresenter::startMonitor() {
 /** Callback called when the monitor algorithm has been started
  */
 void RunsPresenter::startMonitorComplete() {
-  auto algRunner = m_view->getMonitorAlgorithmRunner();
-  m_monitorAlg = algRunner->getAlgorithm()->getProperty("MonitorLiveData");
-  if (m_monitorAlg) {
-    observeError(m_monitorAlg);
+  if (m_algRunner->getAlgorithm()->getProperty("MonitorLiveData")) {
     updateViewWhenMonitorStarted();
   } else {
     updateViewWhenMonitorStopped();
@@ -601,37 +596,23 @@ void RunsPresenter::startMonitorComplete() {
 /** Stop live data monitoring
  */
 void RunsPresenter::stopMonitor() {
-  if (!m_monitorAlg)
-    return;
-
-  stopObserving(m_monitorAlg);
-  m_monitorAlg->cancel();
-  m_monitorAlg.reset();
+  m_algRunner->cancelRunningAlgorithm();
   updateViewWhenMonitorStopped();
 }
 
-/** Handler called when the monitor algorithm finishes
+/** Handler called when the monitor algorithm finishes or errors
  */
-void RunsPresenter::finishHandle(const IAlgorithm *alg) {
-  UNUSED_ARG(alg);
-  stopObserving(m_monitorAlg);
-  m_monitorAlg.reset();
+void RunsPresenter::notifyAlgorithmFinished(std::string const &algorithmName, std::optional<std::string> const &error) {
   updateViewWhenMonitorStopped();
-  g_log.warning("Live data monitor stopped; re-starting the monitor.");
-  startMonitor();
-}
-
-/** Handler called when the monitor algorithm errors
- */
-void RunsPresenter::errorHandle(const IAlgorithm *alg, const std::string &what) {
-  UNUSED_ARG(alg);
-  UNUSED_ARG(what);
-  stopObserving(m_monitorAlg);
-  m_monitorAlg.reset();
-  updateViewWhenMonitorStopped();
-  if (what != "Algorithm terminated") {
-    g_log.warning("Live data error: " + what + "; re-starting the monitor.");
+  if (error) {
+    if (*error != "Algorithm terminated") {
+      g_log.warning("Live data error: " + *error + "; re-starting the monitor.");
+      startMonitor();
+    }
+  } else {
+    g_log.warning("Live data monitor stopped; re-starting the monitor.");
     startMonitor();
   }
 }
+
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

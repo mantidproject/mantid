@@ -339,7 +339,8 @@ public:
    * @param algorithmName :: the load algorithm name
    * @param error :: true if there was an error
    */
-  void notifyAlgorithmFinished(std::string const &algorithmName, bool const error) override;
+  void notifyAlgorithmFinished(std::string const &algorithmName,
+                               std::optional<std::string> const &error = std::nullopt) override;
 
 signals:
   /// Signal emitted when files were found but widget isn't autoloading

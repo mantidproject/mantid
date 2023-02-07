@@ -35,7 +35,8 @@ public:
   explicit StepScan(QWidget *parent = nullptr);
   ~StepScan() override;
 
-  void notifyAlgorithmFinished(std::string const &algorithmName, bool const error) override;
+  void notifyAlgorithmFinished(std::string const &algorithmName,
+                               std::optional<std::string> const &error = std::nullopt) override;
 
 signals:
   void logsAvailable(const Mantid::API::MatrixWorkspace_const_sptr & /*_t1*/);
