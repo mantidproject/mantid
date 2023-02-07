@@ -597,9 +597,10 @@ void Run::loadNexus(::NeXus::File *file, const std::string &group, bool keepOpen
 void Run::calculateAverageGoniometerMatrix() {
   for (size_t i = 0; i < m_goniometers[0]->getNumberAxes(); ++i) {
     const std::string axisName = m_goniometers[0]->getAxis(i).name;
-    const double minAngle = getLogAsSingleValue(axisName, Kernel::Math::Minimum);
-    const double maxAngle = getLogAsSingleValue(axisName, Kernel::Math::Maximum);
-    const double angle = getLogAsSingleValue(axisName, Kernel::Math::TimeAveragedMean);
+    auto stats = getStatistics(axisName);
+    const double minAngle = stats.minimum;
+    const double maxAngle = stats.maximum;
+    const double angle = stats.time_mean;
 
     if (minAngle != maxAngle && !(std::isnan(minAngle) && std::isnan(maxAngle))) {
       const double lastAngle = getLogAsSingleValue(axisName, Kernel::Math::LastValue);
