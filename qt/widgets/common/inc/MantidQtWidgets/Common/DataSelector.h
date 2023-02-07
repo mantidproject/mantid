@@ -9,10 +9,13 @@
 #include "DllOption.h"
 #include "ui_DataSelector.h"
 
-#include "MantidQtWidgets/Common/AlgorithmRunners/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/IAsyncAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/IAsyncAlgorithmSubscriber.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 
 #include <QWidget>
+
+#include <memory>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -32,7 +35,8 @@ appropriate input.
 @date 07/08/2013
 */
 
-class EXPORT_OPT_MANTIDQT_COMMON DataSelector : public API::MantidWidget {
+class EXPORT_OPT_MANTIDQT_COMMON DataSelector : public API::MantidWidget,
+                                                public MantidQt::API::IAsyncAlgorithmSubscriber {
   Q_OBJECT
 
   // These are properties of the file browser sub-widget
@@ -329,6 +333,14 @@ public:
    */
   void setValidatingAlgorithm(const QString &algName) { m_uiForm.wsWorkspaceInput->setValidatingAlgorithm(algName); }
 
+  /**
+   * Notifies when the load algorithm has finished
+   *
+   * @param algorithmName :: the load algorithm name
+   * @param error :: true if there was an error
+   */
+  void notifyAlgorithmFinished(std::string const &algorithmName, bool const error) override;
+
 signals:
   /// Signal emitted when files were found but widget isn't autoloading
   void filesFound();
@@ -355,8 +367,6 @@ private slots:
   void handleFileInput();
   /// Slot called when workspace input is available
   void handleWorkspaceInput();
-  /// Slot called if the widget fails to auto load the file.
-  void handleAutoLoadComplete(bool error);
 
 private:
   /// Attempt to automatically load a file
@@ -364,7 +374,7 @@ private:
   /// Member containing the widgets child widgets.
   Ui::DataSelector m_uiForm;
   /// Algorithm Runner used to run the load algorithm
-  MantidQt::API::AlgorithmRunner m_algRunner;
+  std::unique_ptr<MantidQt::API::IAsyncAlgorithmRunner> m_algRunner;
   /// Flag to enable auto loading. By default this is set to true.
   bool m_autoLoad;
   /// Flag to show or hide the load button. By default this is set to true.

@@ -10,6 +10,7 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/Exception.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/AsyncAlgorithmRunner.h"
 
 #include <QFileInfo>
 
@@ -60,8 +61,10 @@ void loadFile(std::string const &filename, std::string const &workspaceName) {
 namespace MantidQt::MantidWidgets {
 
 DataSelector::DataSelector(QWidget *parent)
-    : API::MantidWidget(parent), m_algRunner(), m_autoLoad(true), m_showLoad(true) {
+    : API::MantidWidget(parent), m_algRunner(std::make_unique<MantidQt::API::AsyncAlgorithmRunner>()), m_autoLoad(true),
+      m_showLoad(true) {
   m_uiForm.setupUi(this);
+  m_algRunner->subscribe(this);
   connect(m_uiForm.cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(handleViewChanged(int)));
   connect(m_uiForm.pbLoadFile, SIGNAL(clicked()), this, SIGNAL(loadClicked()));
 
@@ -70,7 +73,6 @@ DataSelector::DataSelector(QWidget *parent)
   connect(m_uiForm.wsWorkspaceInput, SIGNAL(currentIndexChanged(int)), this, SLOT(handleWorkspaceInput()));
   connect(m_uiForm.pbLoadFile, SIGNAL(clicked()), this, SLOT(handleFileInput()));
 
-  connect(&m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(handleAutoLoadComplete(bool)));
   this->setAcceptDrops(true);
   m_uiForm.rfFileInput->setAcceptDrops(false);
 }
@@ -218,7 +220,7 @@ void DataSelector::autoLoadFile(const QString &filepath) {
   loadAlg->setProperty("Filename", filepath.toStdString());
   loadAlg->setProperty("OutputWorkspace", baseName);
 
-  m_algRunner.startAlgorithm(loadAlg);
+  m_algRunner->startAlgorithm(loadAlg);
 }
 
 /**
@@ -226,7 +228,9 @@ void DataSelector::autoLoadFile(const QString &filepath) {
  *
  * @param error :: Whether loading completed without error
  */
-void DataSelector::handleAutoLoadComplete(bool error) {
+void DataSelector::notifyAlgorithmFinished(std::string const &algorithmName, bool const error) {
+  (void)algorithmName;
+
   if (!error) {
 
     // emit that we got a valid workspace/file to work with
