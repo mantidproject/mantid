@@ -881,7 +881,7 @@ std::pair<double, double>
 TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<SplittingInterval> &intervals) const {
   double mean_prev, mean_current(0.0), s(0.0), variance, duration, weighted_sum(0.0);
 
-  // First of all, if the log or the intervals is empty or is a single value,
+  // First of all, if the log or the intervals are empty or is a single value,
   // return NaN for the uncertainty
   if (realSize() <= 1 || intervals.empty()) {
     return std::pair<double, double>{this->averageValueInFilter(intervals), std::numeric_limits<double>::quiet_NaN()};
@@ -951,6 +951,7 @@ std::pair<double, double> TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev(co
  */
 template <>
 std::pair<double, double> TimeSeriesProperty<std::string>::timeAverageValueAndStdDev(const Kernel::TimeROI *roi) const {
+  UNUSED_ARG(roi);
   return std::pair<double, double>(std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN());
 }
 
