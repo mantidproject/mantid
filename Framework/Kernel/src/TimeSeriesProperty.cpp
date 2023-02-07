@@ -921,7 +921,7 @@ TimeSeriesProperty<std::string>::averageAndStdDevInFilter(const SplittingInterva
 }
 
 template <typename TYPE>
-std::pair<double, double> TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev(const Kernel::TimeROI *roi) const {
+std::pair<double, double> TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev(const Kernel::TimeROI *timeRoi) const {
 
   std::pair<double, double> nonSenseValues{std::numeric_limits<double>::quiet_NaN(),
                                            std::numeric_limits<double>::quiet_NaN()};
@@ -934,8 +934,8 @@ std::pair<double, double> TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev(co
 
   // Derive splitting intervals from either the roi or from the first/last entries in the time series
   std::vector<SplittingInterval> filter;
-  if (roi && !roi->empty())
-    filter = roi->toSplitters();
+  if (timeRoi && !timeRoi->empty())
+    filter = timeRoi->toSplitters();
   else
     filter = TimeROI(this->firstTime(), this->lastTime()).toSplitters(); // guaranteed to have two different entries
 
