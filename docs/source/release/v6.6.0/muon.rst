@@ -28,7 +28,7 @@ Muon Analysis and Frequency Domain Analysis
 Bugfixes
 ############
 
-
+- Fixed a bug that prevented non-consecutive co-added runs from being completed.
 
 ALC
 ---
