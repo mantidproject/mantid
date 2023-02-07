@@ -575,10 +575,10 @@ public:
     TS_ASSERT_EQUALS(intervals.size(), 2);
     if (intervals.size() == 2) {
       const auto &firstRange = intervals.front(), &secondRange = intervals.back();
-      TS_ASSERT_EQUALS(firstRange.start(), firstStart);
-      TS_ASSERT_EQUALS(firstRange.stop(), firstEnd);
-      TS_ASSERT_EQUALS(secondRange.start(), secondStart);
-      TS_ASSERT_EQUALS(secondRange.stop(), secondEnd);
+      TS_ASSERT_EQUALS(firstRange.begin(), firstStart);
+      TS_ASSERT_EQUALS(firstRange.end(), firstEnd);
+      TS_ASSERT_EQUALS(secondRange.begin(), secondStart);
+      TS_ASSERT_EQUALS(secondRange.end(), secondEnd);
     }
   }
 
@@ -597,12 +597,12 @@ public:
     const auto &intervals = log->getSplittingIntervals();
     TS_ASSERT_EQUALS(intervals.size(), 3);
     if (intervals.size() == 3) {
-      TS_ASSERT_EQUALS(intervals[0].start(), log->firstTime());
-      TS_ASSERT_EQUALS(intervals[0].stop(), firstEnd);
-      TS_ASSERT_EQUALS(intervals[1].start(), secondStart);
-      TS_ASSERT_EQUALS(intervals[1].stop(), secondEnd);
-      TS_ASSERT_EQUALS(intervals[2].start(), thirdStart);
-      TS_ASSERT(intervals[2].stop() > thirdStart);
+      TS_ASSERT_EQUALS(intervals[0].begin(), log->firstTime());
+      TS_ASSERT_EQUALS(intervals[0].end(), firstEnd);
+      TS_ASSERT_EQUALS(intervals[1].begin(), secondStart);
+      TS_ASSERT_EQUALS(intervals[1].end(), secondEnd);
+      TS_ASSERT_EQUALS(intervals[2].begin(), thirdStart);
+      TS_ASSERT(intervals[2].end() > thirdStart);
     }
   }
 
