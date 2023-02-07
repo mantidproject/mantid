@@ -202,6 +202,10 @@ public:
   /** Returns the calculated time weighted mean and standard deviation values.
    * @param timeRoi  Object that holds information about when the time measurement was active.
    */
+  std::pair<double, double> timeAverageValueAndStdDev(const Kernel::TimeROI *roi = nullptr) const;
+  /** Returns the calculated time weighted average value.
+   * @param timeRoi  Object that holds information about when the time measurement was active.
+   */
   std::pair<double, double> timeAverageValueAndStdDev(const Kernel::TimeROI *timeRoi = nullptr) const;
   /// Returns the calculated time weighted average value.
   double timeAverageValue(const TimeROI *timeRoi = nullptr) const override;

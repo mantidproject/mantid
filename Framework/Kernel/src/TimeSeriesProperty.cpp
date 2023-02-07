@@ -925,7 +925,7 @@ TimeSeriesProperty<std::string>::averageAndStdDevInFilter(const SplittingInterva
 }
 
 template <typename TYPE>
-std::pair<double, double> TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev(const Kernel::TimeROI *timeRoi) const {
+std::pair<double, double> TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev(const Kernel::TimeROI *roi) const {
 
   std::pair<double, double> nonSenseValues{std::numeric_limits<double>::quiet_NaN(),
                                            std::numeric_limits<double>::quiet_NaN()};
@@ -938,10 +938,10 @@ std::pair<double, double> TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev(co
 
   // Derive splitting intervals from either the roi or from the first/last entries in the time series
   std::vector<SplittingInterval> filter;
-  if (timeRoi && !timeRoi->empty())
-    filter = timeRoi->toSplitters();
+  if (roi && !roi->empty())
+    filter = roi->toSplitters();
   else
-    filter = this->getSplittingIntervals();
+    filter = TimeROI(this->firstTime(), this->lastTime()).toSplitters(); // guaranteed to have two different entries
 
   return this->averageAndStdDevInFilter(filter);
 }
@@ -951,7 +951,6 @@ std::pair<double, double> TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev(co
  */
 template <>
 std::pair<double, double> TimeSeriesProperty<std::string>::timeAverageValueAndStdDev(const Kernel::TimeROI *roi) const {
-  UNUSED_ARG(roi);
   return std::pair<double, double>(std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN());
 }
 
@@ -1205,6 +1204,8 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::lastValue() const {
  * @return duration, in seconds.
  */
 template <typename TYPE> double TimeSeriesProperty<TYPE>::durationInSeconds(const Kernel::TimeROI *roi) const {
+  if (this->size() == 0)
+    return std::numeric_limits<double>::quiet_NaN();
   if (roi && !roi->empty()) {
     Kernel::TimeROI seriesSpan(this->firstTime(), this->lastTime());
     seriesSpan.update_intersection(*roi);
@@ -1669,29 +1670,10 @@ TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics(const TimeR
 
   // Start with statistics that are not time-weighted
   TimeSeriesPropertyStatistics out(Mantid::Kernel::getStatistics(this->filteredValuesAsVector(roi)));
-
-  if (this->size() > 0) {
-    out.duration = this->durationInSeconds(roi);
-    // DEBUG: uncomment following line
-    // auto avAndDev = this->timeAverageValueAndStdDev();  // DEBUG: need to pass ROI
-  } else {
-    out.time_mean = std::numeric_limits<double>::quiet_NaN();
-    out.time_standard_deviation = std::numeric_limits<double>::quiet_NaN();
-    out.duration = std::numeric_limits<double>::quiet_NaN();
-  }
-
-  // OLD CODE
-  if (this->size() > 0) {
-    const auto &intervals = this->getSplittingIntervals();
-    const double duration_sec =
-        std::accumulate(intervals.cbegin(), intervals.cend(), 0.,
-                        [](double sum, const auto &interval) { return sum + interval.duration(); });
-    out.duration = duration_sec;
-    const auto time_weighted = this->timeAverageValueAndStdDev();
-    out.time_mean = time_weighted.first;
-    out.time_standard_deviation = time_weighted.second;
-  }
-
+  out.duration = this->durationInSeconds(roi);
+  auto avAndDev = this->timeAverageValueAndStdDev(roi);
+  out.time_mean = avAndDev.first;
+  out.time_standard_deviation = avAndDev.second;
   return out;
 }
 
