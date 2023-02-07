@@ -16,11 +16,6 @@
 #include <vector>
 
 namespace MantidQt {
-
-namespace API {
-class AlgorithmRunner;
-}
-
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
@@ -51,7 +46,6 @@ public:
 class RunsViewSearchSubscriber {
 public:
   virtual ~RunsViewSearchSubscriber() = default;
-  virtual void notifySearchComplete() = 0;
   virtual void notifySearchResultsChanged() = 0;
 };
 
@@ -105,9 +99,6 @@ public:
   virtual std::string getSearchString() const = 0;
   virtual std::string getSearchCycle() const = 0;
   virtual int getLiveDataUpdateInterval() const = 0;
-
-  virtual std::shared_ptr<MantidQt::API::AlgorithmRunner> getAlgorithmRunner() const = 0;
-  virtual std::shared_ptr<MantidQt::API::AlgorithmRunner> getMonitorAlgorithmRunner() const = 0;
 
   // Start live data monitoring
   virtual void startMonitor() = 0;

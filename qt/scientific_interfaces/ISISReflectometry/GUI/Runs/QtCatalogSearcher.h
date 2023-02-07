@@ -12,6 +12,8 @@
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/IAsyncAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/IAsyncAlgorithmSubscriber.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -25,6 +27,7 @@ functionality.
 class MANTIDQT_ISISREFLECTOMETRY_DLL QtCatalogSearcher : public QObject,
                                                          public ISearcher,
                                                          public RunsViewSearchSubscriber,
+                                                         public MantidQt::API::IAsyncAlgorithmSubscriber,
                                                          public Mantid::API::AlgorithmObserver {
   Q_OBJECT
 public:
@@ -44,8 +47,11 @@ public:
   std::string getSearchResultsCSV() const override;
 
   // RunsViewSearchSubscriber overrides
-  void notifySearchComplete() override;
   void notifySearchResultsChanged() override;
+
+  // IAsyncAlgorithmSubscriber overrides
+  void notifyAlgorithmFinished(std::string const &algorithmName,
+                               std::optional<std::string> const &error = std::nullopt) override;
 
 protected:
   void finishHandle(const Mantid::API::IAlgorithm *alg) override;
@@ -64,6 +70,7 @@ private:
   SearcherSubscriber *m_notifyee;
   SearchCriteria m_searchCriteria;
   bool m_searchInProgress;
+  std::unique_ptr<API::IAsyncAlgorithmRunner> m_algRunner;
 
   void execLoginDialog(const Mantid::API::IAlgorithm_sptr &alg);
   std::string activeSessionId() const;

@@ -64,15 +64,11 @@ void QtRunsView::initLayout() {
   m_ui.actionTransfer->setIcon(getIcon("mdi.file-move", "black", 1.3));
   m_ui.actionExport->setIcon(getIcon("mdi.content-save", "black", 1.3));
 
-  m_algoRunner = std::make_shared<MantidQt::API::AlgorithmRunner>(this);
-
   // Custom context menu for table
   connect(m_ui.searchPane, SIGNAL(customContextMenuRequested(const QPoint &)), this,
           SLOT(onShowSearchContextMenuRequested(const QPoint &)));
   // Synchronize the slit calculator
   connect(m_ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)), this, SLOT(onInstrumentChanged(int)));
-  // Connect signal for when search algorithm completes
-  connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this, SLOT(onSearchComplete()), Qt::UniqueConnection);
   // Connect signal for when user edits the search results table
   connect(&m_searchModel, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
           SLOT(onSearchResultsChanged(const QModelIndex &, const QModelIndex &)));
@@ -233,11 +229,6 @@ void QtRunsView::onSearchResultsChanged(const QModelIndex &, const QModelIndex &
 }
 
 /**
-This slot notifies the presenter that the search was completed
-*/
-void QtRunsView::onSearchComplete() { m_searchNotifyee->notifySearchComplete(); }
-
-/**
 This slot notifies the presenter that the "search" button has been pressed
 */
 void QtRunsView::on_actionSearch_triggered() {
@@ -349,8 +340,6 @@ std::set<int> QtRunsView::getAllSearchRows() const {
     rows.insert(row);
   return rows;
 }
-
-std::shared_ptr<MantidQt::API::AlgorithmRunner> QtRunsView::getAlgorithmRunner() const { return m_algoRunner; }
 
 /**
 Get the string the user wants to search for.
