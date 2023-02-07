@@ -52,11 +52,12 @@ bool knownFileType(std::string const &filename) {
 }
 } // unnamed namespace
 
-QtCatalogSearcher::QtCatalogSearcher(IRunsView *view)
+QtCatalogSearcher::QtCatalogSearcher(IRunsView *view,
+                                     std::unique_ptr<MantidQt::API::IAsyncAlgorithmRunner> algorithmRunner)
     : m_view(view), m_notifyee(nullptr), m_searchCriteria(), m_searchInProgress(false),
-      m_algRunner(std::make_unique<MantidQt::API::AsyncAlgorithmRunner>()) {
+      m_algorithmRunner(std::move(algorithmRunner)) {
   m_view->subscribeSearch(this);
-  m_algRunner->subscribe(this);
+  m_algorithmRunner->subscribe(this);
 }
 
 void QtCatalogSearcher::subscribe(SearcherSubscriber *notifyee) { m_notifyee = notifyee; }
@@ -122,7 +123,7 @@ SearchResults QtCatalogSearcher::convertJournalResultsTableToSearchResults(const
 
 void QtCatalogSearcher::searchAsync() {
   auto algSearch = createSearchAlgorithm();
-  m_algRunner->startAlgorithm(algSearch);
+  m_algorithmRunner->startAlgorithm(algSearch);
   m_searchInProgress = true;
 }
 
@@ -164,7 +165,7 @@ void QtCatalogSearcher::notifyAlgorithmFinished(std::string const &algorithmName
   (void)error;
 
   m_searchInProgress = false;
-  IAlgorithm_sptr searchAlg = m_algRunner->getAlgorithm();
+  IAlgorithm_sptr searchAlg = m_algorithmRunner->getAlgorithm();
 
   if (searchAlg->isExecuted()) {
     auto resultsTable = getSearchAlgorithmResultsTable(searchAlg);

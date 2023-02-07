@@ -31,7 +31,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL QtCatalogSearcher : public QObject,
                                                          public Mantid::API::AlgorithmObserver {
   Q_OBJECT
 public:
-  explicit QtCatalogSearcher(IRunsView *view);
+  explicit QtCatalogSearcher(IRunsView *view, std::unique_ptr<MantidQt::API::IAsyncAlgorithmRunner> algorithmRunner);
   virtual ~QtCatalogSearcher() = default;
 
   // ISearcher overrides
@@ -70,7 +70,7 @@ private:
   SearcherSubscriber *m_notifyee;
   SearchCriteria m_searchCriteria;
   bool m_searchInProgress;
-  std::unique_ptr<API::IAsyncAlgorithmRunner> m_algRunner;
+  std::unique_ptr<API::IAsyncAlgorithmRunner> m_algorithmRunner;
 
   void execLoginDialog(const Mantid::API::IAlgorithm_sptr &alg);
   std::string activeSessionId() const;

@@ -11,7 +11,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidQtWidgets/Common/AlgorithmRunners/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/AlgorithmRunners/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtIntPropertyManager"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"

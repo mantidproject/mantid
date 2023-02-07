@@ -59,7 +59,8 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL RunsPresenter : public IRunsPresenter,
 public:
   RunsPresenter(IRunsView *mainView, ProgressableView *progressView,
                 const RunsTablePresenterFactory &makeRunsTablePresenter, double thetaTolerance,
-                std::vector<std::string> instruments, IReflMessageHandler *messageHandler, IFileHandler *fileHandler);
+                std::vector<std::string> instruments, IReflMessageHandler *messageHandler, IFileHandler *fileHandler,
+                std::unique_ptr<MantidQt::API::IAsyncAlgorithmRunner> algorithmRunner);
   RunsPresenter(RunsPresenter const &) = delete;
   ~RunsPresenter() override;
   RunsPresenter const &operator=(RunsPresenter const &) = delete;
@@ -155,7 +156,7 @@ private:
   /// The list of instruments
   std::vector<std::string> m_instruments;
   /// The runner used to run algorithms asynchronously
-  std::unique_ptr<API::IAsyncAlgorithmRunner> m_algRunner;
+  std::unique_ptr<API::IAsyncAlgorithmRunner> m_algorithmRunner;
   /// The tolerance used when looking up settings by theta
   double m_thetaTolerance;
   /// Flag to indicate we have unsaved changes in the runs table

@@ -16,6 +16,8 @@ class IAsyncAlgorithmSubscriber;
 class EXPORT_OPT_MANTIDQT_COMMON IAsyncAlgorithmRunner {
 
 public:
+  virtual ~IAsyncAlgorithmRunner() = default;
+
   virtual void subscribe(IAsyncAlgorithmSubscriber *subscriber) = 0;
 
   virtual void cancelRunningAlgorithm() = 0;

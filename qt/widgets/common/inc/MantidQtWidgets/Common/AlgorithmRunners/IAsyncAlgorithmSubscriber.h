@@ -15,6 +15,8 @@ namespace MantidQt::API {
 class EXPORT_OPT_MANTIDQT_COMMON IAsyncAlgorithmSubscriber {
 
 public:
+  virtual ~IAsyncAlgorithmSubscriber() = default;
+
   virtual void notifyAlgorithmFinished(std::string const &algorithmName,
                                        std::optional<std::string> const &error = std::nullopt) = 0;
   virtual void notifyAlgorithmProgress(double const progress, std::string const &message) {

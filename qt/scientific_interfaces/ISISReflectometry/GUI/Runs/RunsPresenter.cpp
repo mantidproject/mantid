@@ -46,11 +46,13 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 RunsPresenter::RunsPresenter(IRunsView *mainView, ProgressableView *progressableView,
                              const RunsTablePresenterFactory &makeRunsTablePresenter, double thetaTolerance,
                              std::vector<std::string> instruments, IReflMessageHandler *messageHandler,
-                             IFileHandler *fileHandler)
+                             IFileHandler *fileHandler,
+                             std::unique_ptr<MantidQt::API::IAsyncAlgorithmRunner> algorithmRunner)
     : m_runNotifier(std::make_unique<CatalogRunNotifier>(mainView)),
-      m_searcher(std::make_unique<QtCatalogSearcher>(mainView)), m_view(mainView), m_progressView(progressableView),
-      m_mainPresenter(nullptr), m_messageHandler(messageHandler), m_fileHandler(fileHandler),
-      m_instruments(std::move(instruments)), m_algRunner(std::make_unique<MantidQt::API::AsyncAlgorithmRunner>()),
+      m_searcher(
+          std::make_unique<QtCatalogSearcher>(mainView, std::make_unique<MantidQt::API::AsyncAlgorithmRunner>())),
+      m_view(mainView), m_progressView(progressableView), m_mainPresenter(nullptr), m_messageHandler(messageHandler),
+      m_fileHandler(fileHandler), m_instruments(std::move(instruments)), m_algorithmRunner(std::move(algorithmRunner)),
       m_thetaTolerance(thetaTolerance), m_tableUnsaved{false} {
 
   assert(m_view != nullptr);
@@ -59,12 +61,15 @@ RunsPresenter::RunsPresenter(IRunsView *mainView, ProgressableView *progressable
   m_tablePresenter->acceptMainPresenter(this);
   m_runNotifier->subscribe(this);
   m_searcher->subscribe(this);
-  m_algRunner->subscribe(this);
+  m_algorithmRunner->subscribe(this);
 
   updateViewWhenMonitorStopped();
 }
 
-RunsPresenter::~RunsPresenter() { m_algRunner->cancelRunningAlgorithm(); }
+RunsPresenter::~RunsPresenter() {
+  if (m_algorithmRunner)
+    m_algorithmRunner->cancelRunningAlgorithm();
+}
 
 /** Accept a main presenter
  * @param mainPresenter :: [input] A main presenter
@@ -574,7 +579,7 @@ void RunsPresenter::startMonitor() {
     auto alg = setupLiveDataMonitorAlgorithm();
     if (!alg)
       return;
-    m_algRunner->startAlgorithm(alg);
+    m_algorithmRunner->startAlgorithm(alg);
     updateViewWhenMonitorStarting();
   } catch (std::exception &e) {
     handleError("Error starting live data", e);
@@ -586,7 +591,8 @@ void RunsPresenter::startMonitor() {
 /** Callback called when the monitor algorithm has been started
  */
 void RunsPresenter::startMonitorComplete() {
-  if (m_algRunner->getAlgorithm()->getProperty("MonitorLiveData")) {
+  Mantid::API::IAlgorithm_sptr monitorLiveData = m_algorithmRunner->getAlgorithm()->getProperty("MonitorLiveData");
+  if (monitorLiveData) {
     updateViewWhenMonitorStarted();
   } else {
     updateViewWhenMonitorStopped();
@@ -596,7 +602,7 @@ void RunsPresenter::startMonitorComplete() {
 /** Stop live data monitoring
  */
 void RunsPresenter::stopMonitor() {
-  m_algRunner->cancelRunningAlgorithm();
+  m_algorithmRunner->cancelRunningAlgorithm();
   updateViewWhenMonitorStopped();
 }
 

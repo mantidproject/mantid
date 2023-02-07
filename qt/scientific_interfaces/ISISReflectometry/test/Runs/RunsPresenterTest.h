@@ -15,7 +15,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtWidgets/Common/AlgorithmRunners/MockAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/MockAsyncAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/Batch/MockJobTreeView.h"
 #include "MantidQtWidgets/Common/MockProgressableView.h"
@@ -28,7 +28,6 @@
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
-using namespace MantidQt::API;
 using testing::_;
 using testing::AtLeast;
 using testing::ByMove;
@@ -702,8 +701,7 @@ public:
   void testStartMonitorStartsAlgorithmRunner() {
     auto presenter = makePresenter();
     expectStartingLiveDataSucceeds();
-    auto algRunner = expectGetAlgorithmRunner();
-    EXPECT_CALL(*algRunner, startAlgorithmImpl(_)).Times(1);
+    EXPECT_CALL(*m_algRunner, startAlgorithmImpl(_)).Times(1);
     presenter.notifyStartMonitor();
     verifyAndClear();
   }
@@ -721,20 +719,18 @@ public:
     auto instrument = std::string("INTER");
     auto updateInterval = 20;
     expectGetLiveDataOptions(instrument, updateInterval);
-    auto algRunner = expectGetAlgorithmRunner();
     presenter.notifyStartMonitor();
     auto expected = defaultLiveMonitorAlgorithmOptions(instrument, updateInterval);
-    assertAlgorithmPropertiesContainOptions(*expected, algRunner);
+    assertAlgorithmPropertiesContainOptions(*expected, m_algRunner);
     verifyAndClear();
   }
 
   void testStartMonitorSetsDefaultPostProcessingProperties() {
     auto presenter = makePresenter();
     expectGetLiveDataOptions(defaultLiveMonitorReductionOptions());
-    auto algRunner = expectGetAlgorithmRunner();
     presenter.notifyStartMonitor();
     auto expected = defaultLiveMonitorReductionOptions();
-    assertPostProcessingPropertiesContainOptions(*expected, algRunner);
+    assertPostProcessingPropertiesContainOptions(*expected, m_algRunner);
     verifyAndClear();
   }
 
@@ -745,30 +741,26 @@ public:
     options->setPropertyValue("Prop2", "val2");
     expectGetLiveDataOptions(std::make_unique<MantidQt::API::AlgorithmRuntimeProps>(
         dynamic_cast<const MantidQt::API::AlgorithmRuntimeProps &>(*options)));
-    auto algRunner = expectGetAlgorithmRunner();
     presenter.notifyStartMonitor();
-    assertPostProcessingPropertiesContainOptions(*options, algRunner);
+    assertPostProcessingPropertiesContainOptions(*options, m_algRunner);
     verifyAndClear();
   }
 
   void testStopMonitorUpdatesView() {
     auto presenter = makePresenter();
-    presenter.m_monitorAlg = AlgorithmManager::Instance().createUnmanaged("MonitorLiveData");
     expectUpdateViewWhenMonitorStopped();
     presenter.notifyStopMonitor();
-    TS_ASSERT_EQUALS(presenter.m_monitorAlg, nullptr);
     verifyAndClear();
   }
 
   void testMonitorNotRunningAfterStartMonitorFails() {
     auto presenter = makePresenter();
-    auto algRunner = expectGetAlgorithmRunner();
 
     // Ideally we should have a mock algorithm but for now just create the real
     // one but don't run it so that it will fail to find the results
     auto startMonitorAlg = AlgorithmManager::Instance().createUnmanaged("StartLiveData");
     startMonitorAlg->initialize();
-    EXPECT_CALL(*algRunner, getAlgorithm()).Times(1).WillOnce(Return(startMonitorAlg));
+    EXPECT_CALL(*m_algRunner, getAlgorithm()).Times(1).WillOnce(Return(startMonitorAlg));
     expectUpdateViewWhenMonitorStopped();
     presenter.notifyStartMonitorComplete();
     verifyAndClear();
@@ -906,17 +898,21 @@ private:
     RunsPresenterFriend(IRunsView *mainView, ProgressableView *progressView,
                         const RunsTablePresenterFactory &makeRunsTablePresenter, double thetaTolerance,
                         std::vector<std::string> const &instruments, IReflMessageHandler *messageHandler,
-                        IFileHandler *fileHandler)
+                        IFileHandler *fileHandler, std::unique_ptr<MantidQt::API::IAsyncAlgorithmRunner> algRunner)
         : RunsPresenter(mainView, progressView, makeRunsTablePresenter, thetaTolerance, instruments, messageHandler,
-                        fileHandler) {}
+                        fileHandler, std::move(algRunner)) {}
   };
 
   RunsPresenterFriend makePresenter() {
     Plotter plotter;
 
     auto makeRunsTablePresenter = RunsTablePresenterFactory(m_instruments, m_thetaTolerance, std::move(plotter));
+
+    auto algRunner = std::make_unique<NiceMock<MockAsyncAlgorithmRunner>>();
+    m_algRunner = algRunner.get();
+
     auto presenter = RunsPresenterFriend(&m_view, &m_progressView, makeRunsTablePresenter, m_thetaTolerance,
-                                         m_instruments, &m_messageHandler, &m_fileHandler);
+                                         m_instruments, &m_messageHandler, &m_fileHandler, std::move(algRunner));
 
     presenter.acceptMainPresenter(&m_mainPresenter);
     presenter.m_tablePresenter.reset(new NiceMock<MockRunsTablePresenter>());
@@ -934,6 +930,7 @@ private:
 
   void verifyAndClear() {
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_algRunner));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_runsTableView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_runsTablePresenter));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mainPresenter));
@@ -1222,30 +1219,23 @@ private:
     EXPECT_CALL(m_view, getLiveDataUpdateInterval()).Times(AtLeast(1)).WillRepeatedly(Return(updateInterval));
   }
 
-  void
-  expectGetLiveDataOptions(std::unique_ptr<IAlgorithmRuntimeProps> options = std::make_unique<AlgorithmRuntimeProps>(),
-                           std::string const &instrument = std::string("OFFSPEC"), int const &updateInterval = 15) {
+  void expectGetLiveDataOptions(std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> options =
+                                    std::make_unique<MantidQt::API::AlgorithmRuntimeProps>(),
+                                std::string const &instrument = std::string("OFFSPEC"),
+                                int const &updateInterval = 15) {
     expectSearchInstrument(instrument);
     expectGetUpdateInterval(updateInterval);
     EXPECT_CALL(m_mainPresenter, rowProcessingProperties()).Times(1).WillOnce(Return(ByMove(std::move(options))));
   }
 
   void expectGetLiveDataOptions(std::string const &instrument, const int &updateInterval) {
-    expectGetLiveDataOptions(std::make_unique<AlgorithmRuntimeProps>(), instrument, updateInterval);
-  }
-
-  std::shared_ptr<NiceMock<MockAlgorithmRunner>> expectGetAlgorithmRunner() {
-    // Get the algorithm runner
-    auto algRunner = std::make_shared<NiceMock<MockAlgorithmRunner>>();
-    ON_CALL(m_view, getMonitorAlgorithmRunner()).WillByDefault(Return(algRunner));
-    return algRunner;
+    expectGetLiveDataOptions(std::make_unique<MantidQt::API::AlgorithmRuntimeProps>(), instrument, updateInterval);
   }
 
   void expectStartingLiveDataSucceeds() {
     // The view must return valid reduction options and algorithm runner for
     // the presenter to be able to run live data
     expectGetLiveDataOptions();
-    expectGetAlgorithmRunner();
   }
 
   void expectOverwriteSearchResultsPrevented() {
@@ -1253,8 +1243,8 @@ private:
     EXPECT_CALL(m_mainPresenter, discardChanges(_)).Times(AtLeast(1)).WillRepeatedly(Return(false));
   }
 
-  void assertAlgorithmPropertiesContainOptions(IAlgorithmRuntimeProps const &expected,
-                                               std::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
+  void assertAlgorithmPropertiesContainOptions(MantidQt::API::IAlgorithmRuntimeProps const &expected,
+                                               NiceMock<MockAsyncAlgorithmRunner> *algRunner) {
     auto alg = algRunner->algorithm();
     const auto &expectedAlgProps = expected.getProperties();
     const auto &resultAlgProps = alg->getProperties();
@@ -1267,8 +1257,8 @@ private:
     }
   }
 
-  void assertPostProcessingPropertiesContainOptions(IAlgorithmRuntimeProps const &expected,
-                                                    std::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
+  void assertPostProcessingPropertiesContainOptions(MantidQt::API::IAlgorithmRuntimeProps const &expected,
+                                                    NiceMock<MockAsyncAlgorithmRunner> *algRunner) {
     auto alg = algRunner->algorithm();
     TS_ASSERT_EQUALS(convertAlgPropsToString(expected), alg->getPropertyValue("PostProcessingProperties"))
   }
@@ -1288,6 +1278,7 @@ private:
   NiceMock<MockProgressableView> m_progressView;
   NiceMock<MockMessageHandler> m_messageHandler;
   NiceMock<MockFileHandler> m_fileHandler;
+  NiceMock<MockAsyncAlgorithmRunner> *m_algRunner;
   NiceMock<MantidQt::MantidWidgets::Batch::MockJobTreeView> m_jobs;
   NiceMock<MockSearcher> *m_searcher;
   MockPythonRunner *m_pythonRunner;

@@ -130,7 +130,6 @@ set(SRC_FILES
     src/Batch/QtTreeCursorNavigation.cpp
     src/Batch/CellDelegate.cpp
     src/Batch/BuildSubtreeItems.cpp
-    src/AlgorithmRunners/AlgorithmRunner.cpp
     src/AlgorithmRunners/AsyncAlgorithmRunner.cpp
     src/AlgorithmRunners/BatchAlgorithmRunner.cpp
     src/AlgorithmRunners/QtJobRunner.cpp
@@ -233,7 +232,6 @@ set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h
     inc/MantidQtWidgets/Common/Batch/JobTreeView.h
     inc/MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h
-    inc/MantidQtWidgets/Common/AlgorithmRunners/AlgorithmRunner.h
     inc/MantidQtWidgets/Common/AlgorithmRunners/BatchAlgorithmRunner.h
     inc/MantidQtWidgets/Common/AlgorithmRunners/QtJobRunner.h
     inc/MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h
@@ -323,7 +321,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/AlgorithmRunners/IAsyncAlgorithmRunner.h
     inc/MantidQtWidgets/Common/AlgorithmRunners/IAsyncAlgorithmSubscriber.h
     inc/MantidQtWidgets/Common/AlgorithmRunners/IJobRunner.h
-    inc/MantidQtWidgets/Common/AlgorithmRunners/MockAlgorithmRunner.h
+    inc/MantidQtWidgets/Common/AlgorithmRunners/MockAsyncAlgorithmRunner.h
     inc/MantidQtWidgets/Common/AlgorithmRunners/MockJobRunner.h
     inc/MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h
     inc/MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h

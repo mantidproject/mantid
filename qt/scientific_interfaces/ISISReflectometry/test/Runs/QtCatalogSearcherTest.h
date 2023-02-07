@@ -12,7 +12,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidQtWidgets/Common/AlgorithmRunners/MockAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/AlgorithmRunners/MockAsyncAlgorithmRunner.h"
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -23,6 +23,7 @@ using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
 using testing::ReturnRef;
+using namespace MantidQt::API;
 
 namespace {
 static constexpr const char *RUN1_NAME = "run1";
@@ -53,9 +54,10 @@ private:
  */
 class MockQtCatalogSearcher : public QtCatalogSearcher {
 public:
-  MockQtCatalogSearcher(IRunsView *view, IAlgorithm_sptr searchAlg = std::make_shared<MockSearchAlgorithm>(),
+  MockQtCatalogSearcher(IRunsView *view, std::unique_ptr<MockAsyncAlgorithmRunner> algorithmRunner,
+                        IAlgorithm_sptr searchAlg = std::make_shared<MockSearchAlgorithm>(),
                         bool const hasActiveSession = true)
-      : QtCatalogSearcher(view), m_searchAlg(searchAlg),
+      : QtCatalogSearcher(view, std::move(algorithmRunner)), m_searchAlg(searchAlg),
         m_hasActiveCatalogSession(hasActiveSession), m_logInWasCalled{false} {}
 
   bool logInWasCalled() const { return m_logInWasCalled; }
@@ -172,7 +174,6 @@ public:
   void test_async_journal_search_returns_success() {
     auto searcher = makeCatalogSearcher();
     searcher.subscribe(&m_notifyee);
-    expectGetAlgorithmRunner();
     auto success = startAsyncJournalSearch(searcher);
     TS_ASSERT_EQUALS(success, true);
     verifyAndClear();
@@ -181,7 +182,6 @@ public:
   void test_async_catalog_search_returns_success_if_has_active_session() {
     auto searcher = makeCatalogSearcher();
     searcher.subscribe(&m_notifyee);
-    expectGetAlgorithmRunner();
     auto success = startAsyncCatalogSearch(searcher);
     TS_ASSERT_EQUALS(success, true);
     verifyAndClear();
@@ -190,7 +190,6 @@ public:
   void test_async_journal_search_sets_in_progress_flag() {
     auto searcher = makeCatalogSearcher();
     searcher.subscribe(&m_notifyee);
-    expectGetAlgorithmRunner();
     startAsyncJournalSearch(searcher);
     TS_ASSERT_EQUALS(searcher.searchInProgress(), true);
     verifyAndClear();
@@ -199,7 +198,6 @@ public:
   void test_async_catalog_search_sets_in_progress_flag() {
     auto searcher = makeCatalogSearcher();
     searcher.subscribe(&m_notifyee);
-    expectGetAlgorithmRunner();
     startAsyncCatalogSearch(searcher);
     TS_ASSERT_EQUALS(searcher.searchInProgress(), true);
     verifyAndClear();
@@ -208,8 +206,7 @@ public:
   void test_async_journal_search_starts_algorithm_runner() {
     auto searcher = makeCatalogSearcher();
     searcher.subscribe(&m_notifyee);
-    auto algRunner = expectGetAlgorithmRunner();
-    expectAlgorithmStarted(m_searchAlg, algRunner);
+    expectAlgorithmStarted(m_searchAlg, m_algorithmRunner);
     startAsyncJournalSearch(searcher);
     verifyAndClear();
   }
@@ -217,8 +214,7 @@ public:
   void test_async_catalog_search_starts_algorithm_runner() {
     auto searcher = makeCatalogSearcher();
     searcher.subscribe(&m_notifyee);
-    auto algRunner = expectGetAlgorithmRunner();
-    expectAlgorithmStarted(m_searchAlg, algRunner);
+    expectAlgorithmStarted(m_searchAlg, m_algorithmRunner);
     startAsyncCatalogSearch(searcher);
     verifyAndClear();
   }
@@ -240,7 +236,6 @@ public:
   void test_async_catalog_search_does_not_start_search_when_not_logged_in() {
     auto searcher = makeCatalogSearcher(false);
     searcher.subscribe(&m_notifyee);
-    EXPECT_CALL(m_view, getAlgorithmRunner()).Times(0);
     auto success = startAsyncCatalogSearch(searcher);
     TS_ASSERT_EQUALS(success, true);
     verifyAndClear();
@@ -249,8 +244,7 @@ public:
   void test_finish_handle_starts_async_search_if_active_session() {
     auto searcher = makeCatalogSearcher(true);
     searcher.subscribe(&m_notifyee);
-    auto algRunner = expectGetAlgorithmRunner();
-    expectAlgorithmStarted(m_searchAlg, algRunner);
+    expectAlgorithmStarted(m_searchAlg, m_algorithmRunner);
     searcher.finishHandle(m_searchAlg.get());
     verifyAndClear();
   }
@@ -258,7 +252,6 @@ public:
   void test_finish_does_not_notify_failure_if_active_session() {
     auto searcher = makeCatalogSearcher(true);
     searcher.subscribe(&m_notifyee);
-    expectGetAlgorithmRunner();
     expectNotNotifiedSearchFailed();
     searcher.finishHandle(m_searchAlg.get());
     verifyAndClear();
@@ -314,10 +307,15 @@ private:
   NiceMock<MockSearcherSubscriber> m_notifyee;
   IAlgorithm_sptr m_searchAlg;
   NiceMock<MockSearchModel> m_searchResults;
+  NiceMock<MockAsyncAlgorithmRunner> *m_algorithmRunner;
 
   MockQtCatalogSearcher makeCatalogSearcher(bool const hasActiveSession = true) {
     ON_CALL(m_view, mutableSearchResults()).WillByDefault(ReturnRef(m_searchResults));
-    return MockQtCatalogSearcher(&m_view, m_searchAlg, hasActiveSession);
+
+    auto algorithmRunner = std::make_unique<NiceMock<MockAsyncAlgorithmRunner>>();
+    m_algorithmRunner = algorithmRunner.get();
+
+    return MockQtCatalogSearcher(&m_view, std::move(algorithmRunner), m_searchAlg, hasActiveSession);
   }
 
   void checkSearchResults(SearchResults const &actual) {
@@ -334,14 +332,7 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_searchResults));
   }
 
-  std::shared_ptr<NiceMock<MockAlgorithmRunner>> expectGetAlgorithmRunner() {
-    // Get the algorithm runner
-    auto algRunner = std::make_shared<NiceMock<MockAlgorithmRunner>>();
-    EXPECT_CALL(m_view, getAlgorithmRunner()).Times(AtLeast(1)).WillRepeatedly(Return(algRunner));
-    return algRunner;
-  }
-
-  void expectAlgorithmStarted(IAlgorithm_sptr searchAlg, std::shared_ptr<NiceMock<MockAlgorithmRunner>> algRunner) {
+  void expectAlgorithmStarted(IAlgorithm_sptr searchAlg, NiceMock<MockAsyncAlgorithmRunner> *algRunner) {
     EXPECT_CALL(*algRunner, startAlgorithmImpl(searchAlg)).Times(1);
   }
 
