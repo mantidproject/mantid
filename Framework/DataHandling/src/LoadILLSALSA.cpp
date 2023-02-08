@@ -112,6 +112,14 @@ void LoadILLSALSA::setInstrument(double distance, double angle) {
   // load instrument
   LoadHelper::loadEmptyInstrument(m_outputWorkspace, "SALSA");
 
+  // rotation due to the IDF (channels are created along Y)
+  auto rotateInst = createChildAlgorithm("RotateInstrumentComponent");
+  rotateInst->setProperty<API::MatrixWorkspace_sptr>("Workspace", m_outputWorkspace);
+  rotateInst->setPropertyValue("ComponentName", "detector");
+  rotateInst->setPropertyValue("Z", "1");
+  rotateInst->setProperty<double>("Angle", 90);
+  rotateInst->execute();
+
   // translation
   double angleRad = angle * M_PI / 180.0;
   double dx = -distance * sin(angleRad);
@@ -126,10 +134,10 @@ void LoadILLSALSA::setInstrument(double distance, double angle) {
   moveInst->execute();
 
   // rotation
-  auto rotateInst = createChildAlgorithm("RotateInstrumentComponent");
+  rotateInst = createChildAlgorithm("RotateInstrumentComponent");
   rotateInst->setProperty<API::MatrixWorkspace_sptr>("Workspace", m_outputWorkspace);
   rotateInst->setPropertyValue("ComponentName", "detector");
-  rotateInst->setPropertyValue("Y", "1");
+  rotateInst->setPropertyValue("X", "1"); // Y->X with the first rotation
   rotateInst->setProperty<double>("Angle", -angle);
   rotateInst->execute();
 }
