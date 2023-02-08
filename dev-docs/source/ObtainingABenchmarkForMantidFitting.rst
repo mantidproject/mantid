@@ -108,12 +108,18 @@ The process for how to run a benchmark is explained extensively in the `FitBench
   external_output: log_only
 
 
-2. Download the examples folder from the `FitBenchmarking github repo <https://github.com/fitbenchmarking/fitbenchmarking>`_. Alternatively, you can define your own fitting problems.
+2. Download the examples folder from the `FitBenchmarking github repo <https://github.com/fitbenchmarking/fitbenchmarking>`_ by git cloning the repository. Alternatively, you can define your own fitting problems.
 3. From your activated virtual environment, run the following command. This will run the Muon fitting problems assuming you have the same directory structure as seen on the Fitbenchmarking repo.
 
 .. code-block:: sh
 
   fitbenchmarking -o fitting_options.ini -p examples/benchmark_problems/Muon
+
+If benchmarking from source, you must also specify the ``PYTHONPATH``. The ``PYTHONPATH`` needs to point to your build/bin/<config> folder where the ``<config>`` is only required on Windows and should be replaced by the config of your build e.g. build/bin/Release.
+
+.. code-block:: sh
+
+  PYTHONPATH=/path/to/build/bin/<config> fitbenchmarking -o fitting_options.ini -p examples/benchmark_problems/Muon
 
 When the benchmark is complete, it should open a browser which contains the results. You should read the FitBenchmarking documentation if you need help with how to interpret these results. The results will also be stored in your current folder location.
 
