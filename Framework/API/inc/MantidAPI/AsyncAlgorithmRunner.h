@@ -7,18 +7,18 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidQtWidgets/Common/AlgorithmRunners/IAsyncAlgorithmRunner.h"
-#include "MantidQtWidgets/Common/DllOption.h"
+#include "MantidAPI/DllConfig.h"
+#include "MantidAPI/IAsyncAlgorithmRunner.h"
 
 #include <Poco/NObserver.h>
 
 #include <memory>
 
-namespace MantidQt::API {
+namespace Mantid::API {
 
 class IAsyncAlgorithmSubscriber;
 
-class EXPORT_OPT_MANTIDQT_COMMON AsyncAlgorithmRunner final : public IAsyncAlgorithmRunner {
+class MANTID_API_DLL AsyncAlgorithmRunner final : public IAsyncAlgorithmRunner {
 
 public:
   explicit AsyncAlgorithmRunner();
@@ -45,4 +45,4 @@ private:
   IAsyncAlgorithmSubscriber *m_subscriber;
 };
 
-} // namespace MantidQt::API
+} // namespace Mantid::API

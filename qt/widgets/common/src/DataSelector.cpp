@@ -7,10 +7,10 @@
 #include "MantidQtWidgets/Common/DataSelector.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AsyncAlgorithmRunner.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/Exception.h"
-#include "MantidQtWidgets/Common/AlgorithmRunners/AsyncAlgorithmRunner.h"
 
 #include <QFileInfo>
 
@@ -61,7 +61,7 @@ void loadFile(std::string const &filename, std::string const &workspaceName) {
 namespace MantidQt::MantidWidgets {
 
 DataSelector::DataSelector(QWidget *parent)
-    : API::MantidWidget(parent), m_algRunner(std::make_unique<MantidQt::API::AsyncAlgorithmRunner>()), m_autoLoad(true),
+    : API::MantidWidget(parent), m_algRunner(std::make_unique<Mantid::API::AsyncAlgorithmRunner>()), m_autoLoad(true),
       m_showLoad(true) {
   m_uiForm.setupUi(this);
   m_algRunner->subscribe(this);

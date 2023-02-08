@@ -7,13 +7,13 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidQtWidgets/Common/DllOption.h"
+#include "MantidAPI/DllConfig.h"
 
-namespace MantidQt::API {
+namespace Mantid::API {
 
 class IAsyncAlgorithmSubscriber;
 
-class EXPORT_OPT_MANTIDQT_COMMON IAsyncAlgorithmRunner {
+class MANTID_API_DLL IAsyncAlgorithmRunner {
 
 public:
   virtual ~IAsyncAlgorithmRunner() = default;
@@ -26,4 +26,4 @@ public:
   virtual Mantid::API::IAlgorithm_sptr getAlgorithm() const = 0;
 };
 
-} // namespace MantidQt::API
+} // namespace Mantid::API

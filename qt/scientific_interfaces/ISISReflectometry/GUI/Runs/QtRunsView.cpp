@@ -7,7 +7,6 @@
 #include "QtRunsView.h"
 #include "MantidKernel/UsageService.h"
 #include "MantidQtIcons/Icon.h"
-#include "MantidQtWidgets/Common/AlgorithmRunners/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/FileDialogHandler.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"

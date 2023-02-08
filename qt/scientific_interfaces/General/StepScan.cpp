@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "StepScan.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AsyncAlgorithmRunner.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/LiveListenerFactory.h"
@@ -17,7 +18,6 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidQtWidgets/Common/AlgorithmRunners/AsyncAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/Figure.h"
@@ -47,8 +47,9 @@ using namespace Mantid::API;
 /// Constructor
 StepScan::StepScan(QWidget *parent)
     : UserSubWindow(parent), m_instrument(ConfigService::Instance().getInstrument().name()),
-      m_algRunner(std::make_unique<API::AsyncAlgorithmRunner>()), m_addObserver(*this, &StepScan::handleAddEvent),
-      m_replObserver(*this, &StepScan::handleReplEvent), m_replaceObserverAdded(false) {
+      m_algRunner(std::make_unique<Mantid::API::AsyncAlgorithmRunner>()),
+      m_addObserver(*this, &StepScan::handleAddEvent), m_replObserver(*this, &StepScan::handleReplEvent),
+      m_replaceObserverAdded(false) {
   m_algRunner->subscribe(this);
 }
 

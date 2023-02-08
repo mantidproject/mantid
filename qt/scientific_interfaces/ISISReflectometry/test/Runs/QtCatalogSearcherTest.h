@@ -10,9 +10,9 @@
 #include "../ReflMockObjects.h"
 #include "../Runs/MockRunsView.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MockObjects.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidQtWidgets/Common/AlgorithmRunners/MockAsyncAlgorithmRunner.h"
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>

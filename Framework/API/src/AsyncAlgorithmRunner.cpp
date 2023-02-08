@@ -4,14 +4,12 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidQtWidgets/Common/AlgorithmRunners/AsyncAlgorithmRunner.h"
-#include "MantidQtWidgets/Common/AlgorithmRunners/IAsyncAlgorithmSubscriber.h"
+#include "MantidAPI/AsyncAlgorithmRunner.h"
+#include "MantidAPI/IAsyncAlgorithmSubscriber.h"
 
 #include <Poco/ActiveResult.h>
 
-using namespace Mantid::API;
-
-namespace MantidQt::API {
+namespace Mantid::API {
 
 AsyncAlgorithmRunner::AsyncAlgorithmRunner()
     : m_finishedObserver(*this, &AsyncAlgorithmRunner::onAlgorithmFinished),
@@ -60,6 +58,7 @@ void AsyncAlgorithmRunner::startAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
 Mantid::API::IAlgorithm_sptr AsyncAlgorithmRunner::getAlgorithm() const { return m_algorithm; }
 
 void AsyncAlgorithmRunner::onAlgorithmFinished(const Poco::AutoPtr<Algorithm::FinishedNotification> &pNf) {
+  (void)pNf;
   m_subscriber->notifyAlgorithmFinished(m_algorithm->name());
 }
 
@@ -71,4 +70,4 @@ void AsyncAlgorithmRunner::onAlgorithmError(const Poco::AutoPtr<Algorithm::Error
   m_subscriber->notifyAlgorithmFinished(m_algorithm->name(), pNf->what);
 }
 
-} // namespace MantidQt::API
+} // namespace Mantid::API

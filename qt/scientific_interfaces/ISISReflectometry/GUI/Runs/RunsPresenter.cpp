@@ -12,8 +12,8 @@
 #include "GUI/RunsTable/RunsTablePresenter.h"
 #include "IRunsView.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AsyncAlgorithmRunner.h"
 #include "MantidKernel/Logger.h"
-#include "MantidQtWidgets/Common/AlgorithmRunners/AsyncAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
 #include "QtCatalogSearcher.h"
 
@@ -47,10 +47,9 @@ RunsPresenter::RunsPresenter(IRunsView *mainView, ProgressableView *progressable
                              const RunsTablePresenterFactory &makeRunsTablePresenter, double thetaTolerance,
                              std::vector<std::string> instruments, IReflMessageHandler *messageHandler,
                              IFileHandler *fileHandler,
-                             std::unique_ptr<MantidQt::API::IAsyncAlgorithmRunner> algorithmRunner)
+                             std::unique_ptr<Mantid::API::IAsyncAlgorithmRunner> algorithmRunner)
     : m_runNotifier(std::make_unique<CatalogRunNotifier>(mainView)),
-      m_searcher(
-          std::make_unique<QtCatalogSearcher>(mainView, std::make_unique<MantidQt::API::AsyncAlgorithmRunner>())),
+      m_searcher(std::make_unique<QtCatalogSearcher>(mainView, std::make_unique<Mantid::API::AsyncAlgorithmRunner>())),
       m_view(mainView), m_progressView(progressableView), m_mainPresenter(nullptr), m_messageHandler(messageHandler),
       m_fileHandler(fileHandler), m_instruments(std::move(instruments)), m_algorithmRunner(std::move(algorithmRunner)),
       m_thetaTolerance(thetaTolerance), m_tableUnsaved{false} {
@@ -609,6 +608,7 @@ void RunsPresenter::stopMonitor() {
 /** Handler called when the monitor algorithm finishes or errors
  */
 void RunsPresenter::notifyAlgorithmFinished(std::string const &algorithmName, std::optional<std::string> const &error) {
+  (void)algorithmName;
   updateViewWhenMonitorStopped();
   if (error) {
     if (*error != "Algorithm terminated") {

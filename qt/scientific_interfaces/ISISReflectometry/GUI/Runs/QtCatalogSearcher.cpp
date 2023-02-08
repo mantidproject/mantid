@@ -8,10 +8,10 @@
 #include "GUI/Runs/IRunsView.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AsyncAlgorithmRunner.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
-#include "MantidQtWidgets/Common/AlgorithmRunners/AsyncAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 
 #include <boost/regex.hpp>
@@ -53,7 +53,7 @@ bool knownFileType(std::string const &filename) {
 } // unnamed namespace
 
 QtCatalogSearcher::QtCatalogSearcher(IRunsView *view,
-                                     std::unique_ptr<MantidQt::API::IAsyncAlgorithmRunner> algorithmRunner)
+                                     std::unique_ptr<Mantid::API::IAsyncAlgorithmRunner> algorithmRunner)
     : m_view(view), m_notifyee(nullptr), m_searchCriteria(), m_searchInProgress(false),
       m_algorithmRunner(std::move(algorithmRunner)) {
   m_view->subscribeSearch(this);

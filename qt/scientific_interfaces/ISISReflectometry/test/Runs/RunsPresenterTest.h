@@ -14,8 +14,8 @@
 #include "../RunsTable/MockRunsTableView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MockObjects.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtWidgets/Common/AlgorithmRunners/MockAsyncAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/Batch/MockJobTreeView.h"
 #include "MantidQtWidgets/Common/MockProgressableView.h"
@@ -898,7 +898,7 @@ private:
     RunsPresenterFriend(IRunsView *mainView, ProgressableView *progressView,
                         const RunsTablePresenterFactory &makeRunsTablePresenter, double thetaTolerance,
                         std::vector<std::string> const &instruments, IReflMessageHandler *messageHandler,
-                        IFileHandler *fileHandler, std::unique_ptr<MantidQt::API::IAsyncAlgorithmRunner> algRunner)
+                        IFileHandler *fileHandler, std::unique_ptr<Mantid::API::IAsyncAlgorithmRunner> algRunner)
         : RunsPresenter(mainView, progressView, makeRunsTablePresenter, thetaTolerance, instruments, messageHandler,
                         fileHandler, std::move(algRunner)) {}
   };
@@ -908,7 +908,7 @@ private:
 
     auto makeRunsTablePresenter = RunsTablePresenterFactory(m_instruments, m_thetaTolerance, std::move(plotter));
 
-    auto algRunner = std::make_unique<NiceMock<MockAsyncAlgorithmRunner>>();
+    auto algRunner = std::make_unique<NiceMock<Mantid::API::MockAsyncAlgorithmRunner>>();
     m_algRunner = algRunner.get();
 
     auto presenter = RunsPresenterFriend(&m_view, &m_progressView, makeRunsTablePresenter, m_thetaTolerance,
@@ -1278,7 +1278,7 @@ private:
   NiceMock<MockProgressableView> m_progressView;
   NiceMock<MockMessageHandler> m_messageHandler;
   NiceMock<MockFileHandler> m_fileHandler;
-  NiceMock<MockAsyncAlgorithmRunner> *m_algRunner;
+  NiceMock<Mantid::API::MockAsyncAlgorithmRunner> *m_algRunner;
   NiceMock<MantidQt::MantidWidgets::Batch::MockJobTreeView> m_jobs;
   NiceMock<MockSearcher> *m_searcher;
   MockPythonRunner *m_pythonRunner;

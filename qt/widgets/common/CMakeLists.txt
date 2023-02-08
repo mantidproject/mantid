@@ -130,7 +130,6 @@ set(SRC_FILES
     src/Batch/QtTreeCursorNavigation.cpp
     src/Batch/CellDelegate.cpp
     src/Batch/BuildSubtreeItems.cpp
-    src/AlgorithmRunners/AsyncAlgorithmRunner.cpp
     src/AlgorithmRunners/BatchAlgorithmRunner.cpp
     src/AlgorithmRunners/QtJobRunner.cpp
     src/QtPropertyBrowser/DoubleDialogEditor.cpp
@@ -317,11 +316,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/Batch/ExtractSubtrees.h
     inc/MantidQtWidgets/Common/Batch/FindSubtreeRoots.h
     inc/MantidQtWidgets/Common/Batch/BuildSubtreeItems.h
-    inc/MantidQtWidgets/Common/AlgorithmRunners/AsyncAlgorithmRunner.h
-    inc/MantidQtWidgets/Common/AlgorithmRunners/IAsyncAlgorithmRunner.h
-    inc/MantidQtWidgets/Common/AlgorithmRunners/IAsyncAlgorithmSubscriber.h
     inc/MantidQtWidgets/Common/AlgorithmRunners/IJobRunner.h
-    inc/MantidQtWidgets/Common/AlgorithmRunners/MockAsyncAlgorithmRunner.h
     inc/MantidQtWidgets/Common/AlgorithmRunners/MockJobRunner.h
     inc/MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h
     inc/MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h

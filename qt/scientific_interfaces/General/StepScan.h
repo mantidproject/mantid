@@ -10,9 +10,9 @@
 // Includes
 //----------------------
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/IAsyncAlgorithmRunner.h"
+#include "MantidAPI/IAsyncAlgorithmSubscriber.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidQtWidgets/Common/AlgorithmRunners/IAsyncAlgorithmRunner.h"
-#include "MantidQtWidgets/Common/AlgorithmRunners/IAsyncAlgorithmSubscriber.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_StepScan.h"
 
@@ -23,7 +23,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class StepScan : public API::UserSubWindow, public API::IAsyncAlgorithmSubscriber {
+class StepScan : public API::UserSubWindow, public Mantid::API::IAsyncAlgorithmSubscriber {
   Q_OBJECT
 
 public:
@@ -82,7 +82,7 @@ private:
   QString m_inputFilename;
   const std::string m_instrument; ///< The default instrument (for live data)
 
-  std::unique_ptr<API::IAsyncAlgorithmRunner> m_algRunner;
+  std::unique_ptr<Mantid::API::IAsyncAlgorithmRunner> m_algRunner;
   Poco::NObserver<StepScan, Mantid::API::WorkspaceAddNotification> m_addObserver;
   Poco::NObserver<StepScan, Mantid::API::WorkspaceAfterReplaceNotification> m_replObserver;
   boost::optional<int> m_fignum;

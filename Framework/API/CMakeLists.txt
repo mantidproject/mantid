@@ -11,6 +11,7 @@ set(SRC_FILES
     src/AnalysisDataService.cpp
     src/AnalysisDataServiceObserver.cpp
     src/ArchiveSearchFactory.cpp
+    src/AsyncAlgorithmRunner.cpp
     src/Axis.cpp
     src/BinEdgeAxis.cpp
     src/BoostOptionalToAlgorithmProperty.cpp
@@ -181,6 +182,7 @@ set(INC_FILES
     inc/MantidAPI/AnalysisDataService.h
     inc/MantidAPI/AnalysisDataServiceObserver.h
     inc/MantidAPI/ArchiveSearchFactory.h
+    inc/MantidAPI/AsyncAlgorithmRunner.h
     inc/MantidAPI/Axis.h
     inc/MantidAPI/BinEdgeAxis.h
     inc/MantidAPI/BoostOptionalToAlgorithmProperty.h
@@ -236,6 +238,8 @@ set(INC_FILES
     inc/MantidAPI/IAlgorithm.h
     inc/MantidAPI/IAlgorithm_fwd.h
     inc/MantidAPI/IArchiveSearch.h
+    inc/MantidAPI/IAsyncAlgorithmRunner.h
+    inc/MantidAPI/IAsyncAlgorithmSubscriber.h
     inc/MantidAPI/IBackgroundFunction.h
     inc/MantidAPI/IBoxControllerIO.h
     inc/MantidAPI/ICatalog.h
@@ -306,6 +310,7 @@ set(INC_FILES
     inc/MantidAPI/MatrixWorkspaceMDIterator.h
     inc/MantidAPI/MatrixWorkspaceValidator.h
     inc/MantidAPI/MatrixWorkspace_fwd.h
+    inc/MantidAPI/MockObjects.h
     inc/MantidAPI/MuParserUtils.h
     inc/MantidAPI/MultiDomainFunction.h
     inc/MantidAPI/MultiPeriodGroupAlgorithm.h

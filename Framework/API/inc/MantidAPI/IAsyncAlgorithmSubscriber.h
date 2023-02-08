@@ -6,13 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidQtWidgets/Common/DllOption.h"
+#include "MantidAPI/DllConfig.h"
 
 #include <optional>
 
-namespace MantidQt::API {
+namespace Mantid::API {
 
-class EXPORT_OPT_MANTIDQT_COMMON IAsyncAlgorithmSubscriber {
+class MANTID_API_DLL IAsyncAlgorithmSubscriber {
 
 public:
   virtual ~IAsyncAlgorithmSubscriber() = default;
@@ -25,4 +25,4 @@ public:
   };
 };
 
-} // namespace MantidQt::API
+} // namespace Mantid::API

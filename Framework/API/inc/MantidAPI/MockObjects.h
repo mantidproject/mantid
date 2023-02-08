@@ -7,21 +7,20 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IAsyncAlgorithmRunner.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidQtWidgets/Common/AlgorithmRunners/IAsyncAlgorithmRunner.h"
 
 #include <gmock/gmock.h>
 
-namespace MantidQt::API {
+namespace Mantid::API {
 class IAsyncAlgorithmSubscriber;
-}
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
-class MockAsyncAlgorithmRunner : public MantidQt::API::IAsyncAlgorithmRunner {
+class MockAsyncAlgorithmRunner : public Mantid::API::IAsyncAlgorithmRunner {
 
 public:
-  MOCK_METHOD1(subscribe, void(MantidQt::API::IAsyncAlgorithmSubscriber *subscriber));
+  MOCK_METHOD1(subscribe, void(Mantid::API::IAsyncAlgorithmSubscriber *subscriber));
 
   MOCK_METHOD0(cancelRunningAlgorithm, void());
 
@@ -42,3 +41,5 @@ private:
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
+
+} // namespace Mantid::API

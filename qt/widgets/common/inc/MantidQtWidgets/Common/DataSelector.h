@@ -9,8 +9,8 @@
 #include "DllOption.h"
 #include "ui_DataSelector.h"
 
-#include "MantidQtWidgets/Common/AlgorithmRunners/IAsyncAlgorithmRunner.h"
-#include "MantidQtWidgets/Common/AlgorithmRunners/IAsyncAlgorithmSubscriber.h"
+#include "MantidAPI/IAsyncAlgorithmRunner.h"
+#include "MantidAPI/IAsyncAlgorithmSubscriber.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 
 #include <QWidget>
@@ -36,7 +36,7 @@ appropriate input.
 */
 
 class EXPORT_OPT_MANTIDQT_COMMON DataSelector : public API::MantidWidget,
-                                                public MantidQt::API::IAsyncAlgorithmSubscriber {
+                                                public Mantid::API::IAsyncAlgorithmSubscriber {
   Q_OBJECT
 
   // These are properties of the file browser sub-widget
@@ -375,7 +375,7 @@ private:
   /// Member containing the widgets child widgets.
   Ui::DataSelector m_uiForm;
   /// Algorithm Runner used to run the load algorithm
-  std::unique_ptr<MantidQt::API::IAsyncAlgorithmRunner> m_algRunner;
+  std::unique_ptr<Mantid::API::IAsyncAlgorithmRunner> m_algRunner;
   /// Flag to enable auto loading. By default this is set to true.
   bool m_autoLoad;
   /// Flag to show or hide the load button. By default this is set to true.
