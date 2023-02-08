@@ -1,0 +1,1 @@
+- extra validation has been added to the "Path to GSASII" setting so that Workbench no longer crashes if a GSAS refinement is run with an invalid GSASII path in settings
