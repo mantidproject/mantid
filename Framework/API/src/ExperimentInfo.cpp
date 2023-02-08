@@ -256,7 +256,7 @@ struct ParameterValue {
     if (info.m_logfileID.empty())
       return boost::lexical_cast<double>(info.m_value);
     else {
-      const TimeROI *roi = &runData.timeROI();
+      const TimeROI *roi = &runData.getTimeROI();
       return info.createParamValue(runData.getTimeSeriesProperty<double>(info.m_logfileID), roi);
     }
   }
