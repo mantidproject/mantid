@@ -36,7 +36,7 @@ Manage Directories
   Opens the Manage Directories dialog allowing you to change your search directories
   and default save directory and enable/disable data archive search.
 
-.. _indirect-symmetrise:
+.. _inelastic-symmetrise:
 
 Symmetrise
 ----------
@@ -129,7 +129,7 @@ produce this file is IRIS, the analyser is graphite and the reflection is 002. S
 
 Go to the :ref:`sqw-example-workflow`.
 
-.. _indirect-sqw:
+.. _inelastic-sqw:
 
 S(Q, w)
 -------
@@ -219,7 +219,7 @@ produce this file is IRIS, the analyser is graphite and the reflection is 002. S
 7. Choose a default save directory and then click **Save Result** to save the output workspace.
    The _sqw file is used in the :ref:`moments-example-workflow`.
 
-.. _indirect-moments:
+.. _inelastic-moments:
 
 Moments
 -------

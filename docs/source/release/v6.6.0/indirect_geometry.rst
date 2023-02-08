@@ -7,7 +7,7 @@ Indirect Geometry Changes
 
 New Features
 ------------
-- A new interface has been created: the :ref:`Inelastic Data Manipulation Interface <interface-inelastic-data-manipulation>`. The :ref:`Sqw <indirect-sqw>`, :ref:`Moments <indirect-moments>`, and :ref:`Symmetrise <indirect-symmetrise>` tabs have been moved from the Indirect Data Reduction interface into the new interface along with :ref:`Elwin <elwin>` and :ref:`Iqt <iqt>` from the Indirect Data Analysis interface.
+- A new interface has been created: the :ref:`Inelastic Data Manipulation Interface <interface-inelastic-data-manipulation>`. The :ref:`Sqw <inelastic-sqw>`, :ref:`Moments <inelastic-moments>`, and :ref:`Symmetrise <inelastic-symmetrise>` tabs have been moved from the Indirect Data Reduction interface into the new interface along with :ref:`Elwin <elwin>` and :ref:`Iqt <iqt>` from the Indirect Data Analysis interface.
 
 .. image:: ../../images/6_6_release/Indirect/ManipulationTab.png
     :align: center
