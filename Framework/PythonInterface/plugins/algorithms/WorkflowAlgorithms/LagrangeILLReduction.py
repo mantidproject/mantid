@@ -27,6 +27,7 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
     use_incident_energy = False
     convert_to_wavenumber = False
     _empty_cell_nexus = None
+    _sample_nexus = None
 
     # max difference between two identical points, two points closer than that will be merged in the merge algorithm
     EPSILON = 1e-2
@@ -69,12 +70,13 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         self.normalise_by = self.getPropertyValue("NormaliseBy")
 
         self._empty_cell_nexus = ".nxs" in self.getPropertyValue("ContainerRuns")
+        self._sample_nexus = ".nxs" in self.getPropertyValue("SampleRuns")
 
         # the list of all the intermediate workspaces to group at the end
         self.intermediate_workspaces = []
 
     def PyInit(self):
-        self.declareProperty(MultipleFileProperty("SampleRuns", action=FileAction.Load, extensions=[""]), doc="Sample run(s).")
+        self.declareProperty(MultipleFileProperty("SampleRuns", action=FileAction.Load, extensions=["", ".nxs"]), doc="Sample run(s).")
 
         self.declareProperty(
             MultipleFileProperty("ContainerRuns", action=FileAction.OptionalLoad, extensions=["", ".nxs"]),
@@ -118,14 +120,16 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
 
         # sample load and formatting
         sample_files = self.getPropertyValue("SampleRuns").split(",")
-        sample_data = self.load_and_concatenate(sample_files)
-        sample_data = self.merge_adjacent_points(sample_data)
-        energy, detector_counts, errors, time, temperature = self.get_counts_errors_metadata(sample_data)
-
         raw_sample_ws = "__" + self.output_ws_name + "_rawS"
-        CreateWorkspace(outputWorkspace=raw_sample_ws, DataX=energy, DataY=detector_counts, DataE=errors, UnitX="Energy")
+        if self._sample_nexus:
+            self.preprocess_nexus(self.getPropertyValue("SampleRuns"), raw_sample_ws)
+        else:
+            sample_data = self.load_and_concatenate(sample_files)
+            sample_data = self.merge_adjacent_points(sample_data)
+            energy, detector_counts, errors, time, temperature = self.get_counts_errors_metadata(sample_data)
 
-        self.add_metadata(raw_sample_ws, time, temperature)
+            CreateWorkspace(outputWorkspace=raw_sample_ws, DataX=energy, DataY=detector_counts, DataE=errors, UnitX="Energy")
+            self.add_metadata(raw_sample_ws, time, temperature)
 
         self.intermediate_workspaces.append(raw_sample_ws)
 
