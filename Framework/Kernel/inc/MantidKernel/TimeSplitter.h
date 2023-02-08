@@ -8,6 +8,7 @@
 
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/TimeROI.h"
 
 namespace Mantid {
 namespace Kernel {
@@ -21,12 +22,14 @@ public:
   int valueAtTime(const Types::Core::DateAndTime &time) const;
   void addROI(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop, const int value);
   std::vector<int> outputWorkspaceIndices() const;
+  TimeROI getTimeROI(const int workspaceIndex);
 
   /// this is to aid in testing and not intended for use elsewhere
   std::size_t numRawValues() const;
 
 private:
   void clearAndReplace(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop, const int value);
+  void debugPrint() const;
   std::map<Types::Core::DateAndTime, int> m_roi_map;
 };
 
