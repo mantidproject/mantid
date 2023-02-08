@@ -57,6 +57,7 @@
       "description": "Default build options for a windows visual studio conda build",
       "binaryDir": "${sourceDir}/build",
       "generator": "Visual Studio 17 2022",
+      "toolset": "v142",
       "cacheVariables": {
         "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
         "CONDA_ENV": true

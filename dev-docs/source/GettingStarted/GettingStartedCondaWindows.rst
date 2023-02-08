@@ -12,6 +12,7 @@ Install `Visual Studio 2022 Community Edition <https://visualstudio.microsoft.co
 
     * ``Windows Universal CRT SDK``
     * The latest ``Windows 10 SDK``
+    * ``MSVC v142 - VS 2019 C++ x64/x86 build tools``
 
 * If your machine has less than 32GB of memory Mantid may not build. If you have problems change the maximum number of parallel project builds to 1 in Visual Studio in Tools -> Options -> Projects and Solutions -> Build And Run.
 
