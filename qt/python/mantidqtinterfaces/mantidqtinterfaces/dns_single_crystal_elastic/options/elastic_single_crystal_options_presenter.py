@@ -154,9 +154,10 @@ def get_automatic_omega_binning(sample_data):
     '''
     Determines automatic sample rotation binning parameters from selected sample data.
     '''
-    sample_rot = [x['sample_rot'] for x in sample_data]
-    omega_min = min(sample_rot)
-    omega_max = max(sample_rot)
+    # OMEGA OFFSET TO BE TAKEN INTO ACCOUNT
+    omega = [x['sample_rot'] - x['det_rot'] for x in sample_data]
+    omega_min = min(omega)
+    omega_max = max(omega)
     omega_step = 1.0
     number_omega_bins = int(round((omega_max - omega_min) / omega_step) + 1)
     omega_binning_dict = {'omega_min': omega_min,
