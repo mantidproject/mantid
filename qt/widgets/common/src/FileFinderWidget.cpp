@@ -504,7 +504,10 @@ void FileFinderWidget::findFiles(bool isModified) {
   if (m_isForDirectory) {
     m_foundFiles.clear();
     if (searchText.isEmpty()) {
-      setFileProblem("A directory must be provided");
+      if (!m_isOptional)
+        setFileProblem("A directory must be provided");
+      else
+        setFileProblem("");
     } else {
       setFileProblem("");
       m_foundFiles.append(searchText);

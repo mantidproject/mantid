@@ -1024,6 +1024,7 @@ public:
     void setLabelMinWidth(const int);
     void setText(const QString&);
     void setUserInput(const QVariant &);
+    void setFileProblem(const QString &message);
     QVariant getUserInput() const;
     void setReadOnly(bool readOnly);
     void setFileExtensions(const QStringList &extensions);

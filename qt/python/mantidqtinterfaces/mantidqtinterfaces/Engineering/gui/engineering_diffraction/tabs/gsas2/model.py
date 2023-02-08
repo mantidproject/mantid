@@ -174,6 +174,9 @@ class GSAS2Model(object):
         if self.refinement_method == "Pawley" and not self.mantid_pawley_reflections:
             logger.error("No Pawley Reflections were generated for the phases provided. Not calling GSAS-II.")
             return None
+        if not self.path_to_gsas2:
+            logger.error("The Path to GSAS2 setting is empty. " "Please provide a valid path in Engineering Diffraction Settings")
+            return None
         return True
 
     # ===============
@@ -267,6 +270,12 @@ class GSAS2Model(object):
                 f"GSAS-II call did not complete after {self.timeout} seconds, so it was"
                 f" aborted. Check the inputs, such as Refinement Method are correct. The"
                 f" timeout interval can be increased in the Engineering Diffraction Settings."
+            )
+            return None
+        except Exception as exc:
+            logger.error(
+                f"GSAS-II call failed with error: {str(exc)}. "
+                "Please check the Path to GSASII in the Engineering Diffraction Settings is valid"
             )
             return None
 

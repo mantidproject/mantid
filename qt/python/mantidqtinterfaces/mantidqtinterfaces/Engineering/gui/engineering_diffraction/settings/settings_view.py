@@ -29,6 +29,7 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
         self.finder_path_to_gsas2.setLabelText("Path to GSASII")
         self.finder_path_to_gsas2.isForRunFiles(False)
         self.finder_path_to_gsas2.isForDirectory(True)
+        self.finder_path_to_gsas2.isOptional(True)
 
         self.timeout_lineedit.setValidator(QIntValidator(0, 200))
         self.dSpacing_min_lineedit.setValidator(QDoubleValidator(0.0, 200.0, 3))
@@ -62,6 +63,9 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
 
     def set_on_check_descending_changed(self, slot):
         self.check_descending.stateChanged.connect(slot)
+
+    def set_on_gsas2_path_edited(self, slot):
+        self.finder_path_to_gsas2.fileEditingFinished.connect(slot)
 
     # =================
     # Component Getters

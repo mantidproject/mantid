@@ -10,6 +10,7 @@ from mantidqt.utils.observer_pattern import Observable
 from Engineering.EnggUtils import CALIB_DIR
 
 DEFAULT_FULL_INST_CALIB = "ENGINX_full_instrument_calibration_193749.nxs"
+GSAS2_PATH_ON_IDAAAS = "/opt/gsas2"
 SETTINGS_DICT = {
     "save_location": str,
     "full_calibration": str,
@@ -29,7 +30,7 @@ DEFAULT_SETTINGS = {
     "primary_log": "strain",
     "sort_ascending": True,
     "default_peak": "BackToBackExponential",
-    "path_to_gsas2": "/opt/gsas2",  # default on IDAaaS
+    "path_to_gsas2": GSAS2_PATH_ON_IDAAAS if path.exists(GSAS2_PATH_ON_IDAAAS) else "",
     "timeout": "10",  # seconds
     "dSpacing_min": "1.0",  # angstroms
 }
@@ -127,6 +128,7 @@ class SettingsPresenter(object):
         self.view.set_on_log_changed(self.update_logs)
         self.view.set_on_check_ascending_changed(self.ascending_changed)
         self.view.set_on_check_descending_changed(self.descending_changed)
+        self.view.set_on_gsas2_path_edited(self.validate_gsas2_path)
 
     def show(self):
         self._show_settings_in_view()
@@ -147,6 +149,19 @@ class SettingsPresenter(object):
 
     def descending_changed(self, state):
         self.view.set_ascending_checked(not bool(state))
+
+    def validate_gsas2_path(self):
+        # FileFinderWidget doesn't validate that the directory exists if isForDirectory=true (probably to support save
+        # locations where directory gets created on save). So check the GSAS2 path is valid here
+        if not self.validate_path_empty_or_valid(self.view.get_path_to_gsas2()):
+            self.view.finder_path_to_gsas2.setFileProblem("Path does not exist")
+
+    @staticmethod
+    def validate_path_empty_or_valid(path_to_check):
+        if path_to_check:
+            if not path.exists(path_to_check):
+                return False
+        return True
 
     def save_new_settings(self):
         self._collect_new_settings_from_view()
@@ -181,6 +196,7 @@ class SettingsPresenter(object):
         self.view.find_full_calibration()
         self.view.find_save()
         self.view.find_path_to_gsas2()
+        self.validate_gsas2_path()
 
     def _save_settings_to_file(self):
         self._validate_settings()
