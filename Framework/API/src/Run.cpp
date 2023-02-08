@@ -9,6 +9,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VectorHelper.h"
 
@@ -157,6 +158,12 @@ void Run::splitByTime(SplittingIntervalVec &splitter, std::vector<LogManager *> 
   }
 }
 
+// this overrides the one from LogManager so the proton charge can be recalculated
+void Run::setTimeROI(const Kernel::TimeROI &timeroi) {
+  LogManager::setTimeROI(timeroi);
+  this->integrateProtonCharge();
+}
+
 //-----------------------------------------------------------------------------------------------
 /**
  * Set the good proton charge total for this run
@@ -219,8 +226,32 @@ void Run::integrateProtonCharge(const std::string &logname) const {
   }
 
   if (log) {
-    const std::vector<double> logValues = log->valuesAsVector();
-    double total = std::accumulate(logValues.begin(), logValues.end(), 0.0);
+    // start with a clearly nonsense accumulated value
+    double total = std::numeric_limits<double>::quiet_NaN();
+
+    // get a copy of the TimeROI for selecting values
+    const auto timeroi = this->getTimeROI();
+    if (timeroi.empty()) {
+      // simple accumulation
+      const std::vector<double> logValues = log->valuesAsVector();
+      total = std::accumulate(logValues.begin(), logValues.end(), 0.0);
+    } else {
+      // get the raw values
+      const std::map<Types::Core::DateAndTime, double> unfilteredValues = log->valueAsMap();
+
+      using valueType = std::map<Types::Core::DateAndTime, double>::value_type;
+
+      // accumulate the values that are "keep"
+      total = std::accumulate(unfilteredValues.cbegin(), unfilteredValues.cend(), 0.0,
+                              [timeroi](const double &previous, const valueType &value) {
+                                if (timeroi.valueAtTime(value.first)) {
+                                  return std::move(previous) + value.second;
+                                } else {
+                                  return std::move(previous);
+                                }
+                              });
+    }
+
     const std::string &unit = log->units();
     // Do we need to take account of a unit
     if (unit.find("picoCoulomb") != std::string::npos) {
@@ -292,7 +323,7 @@ std::pair<double, double> Run::histogramBinBoundaries(const double value) const 
        << value << ", last boundary=" << m_histoBins.back();
     throw std::out_of_range(os.str());
   }
-  const int index = VectorHelper::getBinIndex(m_histoBins, value);
+  const auto index = static_cast<std::size_t>(VectorHelper::getBinIndex(m_histoBins, value));
   return std::make_pair(m_histoBins[index], m_histoBins[index + 1]);
 }
 
