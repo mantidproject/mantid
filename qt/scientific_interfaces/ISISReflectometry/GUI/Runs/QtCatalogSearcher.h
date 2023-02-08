@@ -50,8 +50,8 @@ public:
   void notifySearchResultsChanged() override;
 
   // IAsyncAlgorithmSubscriber overrides
-  void notifyAlgorithmFinished(std::string const &algorithmName,
-                               std::optional<std::string> const &error = std::nullopt) override;
+  void notifyAlgorithmError(std::string const &algorithmName, std::string const &message) override;
+  void notifyAlgorithmFinished(std::string const &algorithmName) override;
 
 protected:
   void finishHandle(const Mantid::API::IAlgorithm *alg) override;

@@ -334,13 +334,19 @@ public:
   void setValidatingAlgorithm(const QString &algName) { m_uiForm.wsWorkspaceInput->setValidatingAlgorithm(algName); }
 
   /**
+   * Notifies if the load algorithm has errored
+   *
+   * @param algorithmName :: the load algorithm name
+   * @param message :: the error message
+   */
+  void notifyAlgorithmError(std::string const &algorithmName, std::string const &message) override;
+
+  /**
    * Notifies when the load algorithm has finished
    *
    * @param algorithmName :: the load algorithm name
-   * @param error :: true if there was an error
    */
-  void notifyAlgorithmFinished(std::string const &algorithmName,
-                               std::optional<std::string> const &error = std::nullopt) override;
+  void notifyAlgorithmFinished(std::string const &algorithmName) override;
 
 signals:
   /// Signal emitted when files were found but widget isn't autoloading

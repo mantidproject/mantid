@@ -605,20 +605,26 @@ void RunsPresenter::stopMonitor() {
   updateViewWhenMonitorStopped();
 }
 
-/** Handler called when the monitor algorithm finishes or errors
+/** Handler called when the monitor algorithm errors
  */
-void RunsPresenter::notifyAlgorithmFinished(std::string const &algorithmName, std::optional<std::string> const &error) {
+void RunsPresenter::notifyAlgorithmError(std::string const &algorithmName, std::string const &message) {
   (void)algorithmName;
+
   updateViewWhenMonitorStopped();
-  if (error) {
-    if (*error != "Algorithm terminated") {
-      g_log.warning("Live data error: " + *error + "; re-starting the monitor.");
-      startMonitor();
-    }
-  } else {
-    g_log.warning("Live data monitor stopped; re-starting the monitor.");
+  if (message != "Algorithm terminated") {
+    g_log.warning("Live data error: " + message + "; re-starting the monitor.");
     startMonitor();
   }
+}
+
+/** Handler called when the monitor algorithm finishes
+ */
+void RunsPresenter::notifyAlgorithmFinished(std::string const &algorithmName) {
+  (void)algorithmName;
+
+  updateViewWhenMonitorStopped();
+  g_log.warning("Live data monitor stopped; re-starting the monitor.");
+  startMonitor();
 }
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

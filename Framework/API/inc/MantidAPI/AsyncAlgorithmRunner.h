@@ -28,20 +28,19 @@ public:
 
   void cancelRunningAlgorithm() override;
 
-  void startAlgorithm(Mantid::API::IAlgorithm_sptr alg) override;
-  Mantid::API::IAlgorithm_sptr getAlgorithm() const override;
+  void startAlgorithm(IAlgorithm_sptr alg) override;
+  IAlgorithm_sptr getAlgorithm() const override;
 
 private:
-  void onAlgorithmFinished(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification> &pNf);
-  Poco::NObserver<AsyncAlgorithmRunner, Mantid::API::Algorithm::FinishedNotification> m_finishedObserver;
+  void onAlgorithmProgress(const Poco::AutoPtr<Algorithm::ProgressNotification> &pNf);
+  void onAlgorithmError(const Poco::AutoPtr<Algorithm::ErrorNotification> &pNf);
+  void onAlgorithmFinished(const Poco::AutoPtr<Algorithm::FinishedNotification> &pNf);
 
-  void onAlgorithmProgress(const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification> &pNf);
-  Poco::NObserver<AsyncAlgorithmRunner, Mantid::API::Algorithm::ProgressNotification> m_progressObserver;
+  Poco::NObserver<AsyncAlgorithmRunner, Algorithm::ProgressNotification> m_progressObserver;
+  Poco::NObserver<AsyncAlgorithmRunner, Algorithm::ErrorNotification> m_errorObserver;
+  Poco::NObserver<AsyncAlgorithmRunner, Algorithm::FinishedNotification> m_finishedObserver;
 
-  void onAlgorithmError(const Poco::AutoPtr<Mantid::API::Algorithm::ErrorNotification> &pNf);
-  Poco::NObserver<AsyncAlgorithmRunner, Mantid::API::Algorithm::ErrorNotification> m_errorObserver;
-
-  Mantid::API::IAlgorithm_sptr m_algorithm;
+  IAlgorithm_sptr m_algorithm;
   IAsyncAlgorithmSubscriber *m_subscriber;
 };
 

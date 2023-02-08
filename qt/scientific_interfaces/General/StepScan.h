@@ -35,8 +35,8 @@ public:
   explicit StepScan(QWidget *parent = nullptr);
   ~StepScan() override;
 
-  void notifyAlgorithmFinished(std::string const &algorithmName,
-                               std::optional<std::string> const &error = std::nullopt) override;
+  void notifyAlgorithmError(std::string const &algorithmName, std::string const &message) override;
+  void notifyAlgorithmFinished(std::string const &algorithmName) override;
 
 signals:
   void logsAvailable(const Mantid::API::MatrixWorkspace_const_sptr & /*_t1*/);
@@ -70,6 +70,7 @@ private:
   void cleanupWorkspaces();
   void plotCurve();
 
+  void handleAlgorithmFinished(std::string const &algorithmName, bool const error);
   void handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf);
   void handleReplEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
   void addReplaceObserverOnce();

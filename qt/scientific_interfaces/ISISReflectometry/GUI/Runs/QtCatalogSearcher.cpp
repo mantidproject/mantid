@@ -159,10 +159,13 @@ void QtCatalogSearcher::errorHandle(const Mantid::API::IAlgorithm *alg, const st
   }
 }
 
-void QtCatalogSearcher::notifyAlgorithmFinished(std::string const &algorithmName,
-                                                std::optional<std::string> const &error) {
+void QtCatalogSearcher::notifyAlgorithmError(std::string const &algorithmName, std::string const &message) {
   (void)algorithmName;
-  (void)error;
+  (void)message;
+}
+
+void QtCatalogSearcher::notifyAlgorithmFinished(std::string const &algorithmName) {
+  (void)algorithmName;
 
   m_searchInProgress = false;
   IAlgorithm_sptr searchAlg = m_algorithmRunner->getAlgorithm();

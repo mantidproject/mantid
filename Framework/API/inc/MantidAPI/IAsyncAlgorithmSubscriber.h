@@ -8,7 +8,7 @@
 
 #include "MantidAPI/DllConfig.h"
 
-#include <optional>
+#include <string>
 
 namespace Mantid::API {
 
@@ -17,12 +17,13 @@ class MANTID_API_DLL IAsyncAlgorithmSubscriber {
 public:
   virtual ~IAsyncAlgorithmSubscriber() = default;
 
-  virtual void notifyAlgorithmFinished(std::string const &algorithmName,
-                                       std::optional<std::string> const &error = std::nullopt) = 0;
   virtual void notifyAlgorithmProgress(double const progress, std::string const &message) {
     (void)progress;
     (void)message;
   };
+
+  virtual void notifyAlgorithmError(std::string const &algorithmName, std::string const &message) = 0;
+  virtual void notifyAlgorithmFinished(std::string const &algorithmName) = 0;
 };
 
 } // namespace Mantid::API

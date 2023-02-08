@@ -12,9 +12,9 @@
 namespace Mantid::API {
 
 AsyncAlgorithmRunner::AsyncAlgorithmRunner()
-    : m_finishedObserver(*this, &AsyncAlgorithmRunner::onAlgorithmFinished),
-      m_progressObserver(*this, &AsyncAlgorithmRunner::onAlgorithmProgress),
-      m_errorObserver(*this, &AsyncAlgorithmRunner::onAlgorithmError), m_algorithm() {}
+    : m_progressObserver(*this, &AsyncAlgorithmRunner::onAlgorithmProgress),
+      m_errorObserver(*this, &AsyncAlgorithmRunner::onAlgorithmError),
+      m_finishedObserver(*this, &AsyncAlgorithmRunner::onAlgorithmFinished), m_algorithm(), m_subscriber() {}
 
 AsyncAlgorithmRunner::~AsyncAlgorithmRunner() {
   if (m_algorithm) {
@@ -57,17 +57,16 @@ void AsyncAlgorithmRunner::startAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
 
 Mantid::API::IAlgorithm_sptr AsyncAlgorithmRunner::getAlgorithm() const { return m_algorithm; }
 
-void AsyncAlgorithmRunner::onAlgorithmFinished(const Poco::AutoPtr<Algorithm::FinishedNotification> &pNf) {
-  (void)pNf;
-  m_subscriber->notifyAlgorithmFinished(m_algorithm->name());
-}
-
 void AsyncAlgorithmRunner::onAlgorithmProgress(const Poco::AutoPtr<Algorithm::ProgressNotification> &pNf) {
   m_subscriber->notifyAlgorithmProgress(pNf->progress, pNf->message);
 }
 
 void AsyncAlgorithmRunner::onAlgorithmError(const Poco::AutoPtr<Algorithm::ErrorNotification> &pNf) {
-  m_subscriber->notifyAlgorithmFinished(m_algorithm->name(), pNf->what);
+  m_subscriber->notifyAlgorithmError(pNf->algorithm()->name(), pNf->what);
+}
+
+void AsyncAlgorithmRunner::onAlgorithmFinished(const Poco::AutoPtr<Algorithm::FinishedNotification> &pNf) {
+  m_subscriber->notifyAlgorithmFinished(pNf->algorithm()->name());
 }
 
 } // namespace Mantid::API

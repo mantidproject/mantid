@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/IAsyncAlgorithmRunner.h"
 #include "MantidKernel/WarningSuppressions.h"
 
@@ -17,27 +17,27 @@ class IAsyncAlgorithmSubscriber;
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
-class MockAsyncAlgorithmRunner : public Mantid::API::IAsyncAlgorithmRunner {
+class MockAsyncAlgorithmRunner : public IAsyncAlgorithmRunner {
 
 public:
-  MOCK_METHOD1(subscribe, void(Mantid::API::IAsyncAlgorithmSubscriber *subscriber));
+  MOCK_METHOD1(subscribe, void(IAsyncAlgorithmSubscriber *subscriber));
 
   MOCK_METHOD0(cancelRunningAlgorithm, void());
 
-  MOCK_METHOD1(startAlgorithmImpl, void(Mantid::API::IAlgorithm_sptr alg));
-  MOCK_CONST_METHOD0(getAlgorithm, Mantid::API::IAlgorithm_sptr());
+  MOCK_METHOD1(startAlgorithmImpl, void(IAlgorithm_sptr alg));
+  MOCK_CONST_METHOD0(getAlgorithm, IAlgorithm_sptr());
 
   // Wrapper around startAlgorithmImpl to allow us to record
   // which algorithm was started
-  void startAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
+  void startAlgorithm(IAlgorithm_sptr alg) {
     m_algorithm = alg;
     startAlgorithmImpl(alg);
   }
 
-  Mantid::API::IAlgorithm_sptr algorithm() const { return m_algorithm; }
+  IAlgorithm_sptr algorithm() const { return m_algorithm; }
 
 private:
-  Mantid::API::IAlgorithm_sptr m_algorithm;
+  IAlgorithm_sptr m_algorithm;
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

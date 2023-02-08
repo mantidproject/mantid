@@ -224,20 +224,24 @@ void DataSelector::autoLoadFile(const QString &filepath) {
 }
 
 /**
+ * Handles if the load algorithm errors.
+ *
+ * @param algorithmName :: The name of the algorithm which errored
+ * @param message :: The error message
+ */
+void DataSelector::notifyAlgorithmError(std::string const &algorithmName, std::string const &message) {
+  (void)algorithmName;
+  m_uiForm.rfFileInput->setFileProblem("Could not load file. See log for details. " + QString::fromStdString(message));
+}
+
+/**
  * Handles when the load algorithm completes.
  *
- * @param error :: Whether loading completed without error
+ * @param algorithmName :: The name of the algorithm which has completed
  */
-void DataSelector::notifyAlgorithmFinished(std::string const &algorithmName, std::optional<std::string> const &error) {
+void DataSelector::notifyAlgorithmFinished(std::string const &algorithmName) {
   (void)algorithmName;
-
-  if (!error) {
-
-    // emit that we got a valid workspace/file to work with
-    emit dataReady(getWsNameFromFiles());
-  } else {
-    m_uiForm.rfFileInput->setFileProblem("Could not load file. See log for details.");
-  }
+  emit dataReady(getWsNameFromFiles());
 }
 
 /**

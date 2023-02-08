@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DllConfig.h"
+#include "MantidAPI/IAlgorithm_fwd.h"
 
 namespace Mantid::API {
 
@@ -22,8 +22,8 @@ public:
 
   virtual void cancelRunningAlgorithm() = 0;
 
-  virtual void startAlgorithm(Mantid::API::IAlgorithm_sptr alg) = 0;
-  virtual Mantid::API::IAlgorithm_sptr getAlgorithm() const = 0;
+  virtual void startAlgorithm(IAlgorithm_sptr alg) = 0;
+  virtual IAlgorithm_sptr getAlgorithm() const = 0;
 };
 
 } // namespace Mantid::API
