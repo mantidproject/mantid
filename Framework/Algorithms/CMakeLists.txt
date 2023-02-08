@@ -1045,7 +1045,9 @@ endif()
 enable_precompiled_headers(inc/MantidAlgorithms/PrecompiledHeader.h SRC_FILES)
 # Disable optimization for certain Segfault as the key lines that cause the segfault can be optimized away but this
 # algorithm is only ever intended to test the crashing behaviour of the framework
-set_source_files_properties(src/Segfault.cpp PROPERTIES COMPILE_FLAGS -O0)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set_source_files_properties(src/Segfault.cpp PROPERTIES COMPILE_FLAGS -O0)
+endif()
 
 # Add the target for this directory
 add_library(Algorithms ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
