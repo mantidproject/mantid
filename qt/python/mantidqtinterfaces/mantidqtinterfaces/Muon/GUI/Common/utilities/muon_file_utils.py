@@ -10,7 +10,7 @@ from mantidqtinterfaces.Muon.GUI.Common.message_box import warning
 from qtpy import QtWidgets
 
 allowed_instruments = ["EMU", "MUSR", "CHRONUS", "HIFI", "ARGUS", "PSI"]
-allowed_extensions = ["nxs", "nxs_v2", "bin"]
+allowed_extensions = ["nxs", "nxs_v2", "bin", "nxs_v1"]
 FILE_SEP = os.sep
 
 
