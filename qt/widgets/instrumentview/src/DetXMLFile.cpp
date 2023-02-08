@@ -71,7 +71,9 @@ DetXMLFile::DetXMLFile(const std::vector<int> &dets, Option opt, const QString &
 void DetXMLFile::makeListFile(const std::vector<int> &dets) {
   std::ofstream out(m_fileName.toStdString().c_str());
   out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> \n<detector-grouping> \n";
-  foreach (int det, dets) { out << "<group name=\"" << det << "\"> <detids val=\"" << det << "\"/> </group> \n"; }
+  for (int det : dets) {
+    out << "<group name=\"" << det << "\"> <detids val=\"" << det << "\"/> </group> \n";
+  }
   out << "</detector-grouping>\n";
 }
 
@@ -81,7 +83,9 @@ void DetXMLFile::makeSumFile(const std::vector<int> &dets) {
   std::ofstream out(m_fileName.toStdString().c_str());
   out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> \n<detector-grouping> \n";
   out << R"(<group name="sum"> <detids val=")";
-  foreach (int det, dets) { out << det << ','; }
+  for (int det : dets) {
+    out << det << ',';
+  }
   out << "\"/> </group> \n</detector-grouping>\n";
 }
 

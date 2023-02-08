@@ -616,7 +616,7 @@ void InstrumentWidget::setSurfaceType(int type) {
         if (m_instrumentActor->hasGridBank())
           m_maskTab->setDisabled(true);
 
-        surface = new Projection3D(m_instrumentActor.get(), glWidgetDimensions());
+        surface = new Projection3D(m_instrumentActor.get(), m_instrumentDisplay->currentWidget()->size());
       } else if (surfaceType <= CYLINDRICAL_Z) {
         m_renderTab->forceLayers(true);
         surface = new UnwrappedCylinder(m_instrumentActor.get(), sample_pos, axis);
@@ -658,7 +658,9 @@ void InstrumentWidget::setSurfaceType(int type) {
     setSurface(surface);
 
     // init tabs with new surface
-    foreach (InstrumentWidgetTab *tab, m_tabs) { tab->initSurface(); }
+    for (auto tab : std::as_const(m_tabs)) {
+      tab->initSurface();
+    }
 
     m_qtConnect->connect(surface, SIGNAL(executeAlgorithm(Mantid::API::IAlgorithm_sptr)), this,
                          SLOT(executeAlgorithm(Mantid::API::IAlgorithm_sptr)));
@@ -1028,7 +1030,9 @@ void InstrumentWidget::saveSettings() {
     // only save tab states if the instrument actor loading finished and this widget was updated
     // through initWidget
     if (m_finished) {
-      foreach (InstrumentWidgetTab *tab, m_tabs) { tab->saveSettings(settings); }
+      for (auto tab : std::as_const(m_tabs)) {
+        tab->saveSettings(settings);
+      }
     }
   }
   settings.endGroup();
@@ -1185,7 +1189,7 @@ void InstrumentWidget::dropEvent(QDropEvent *e) {
   QString name = e->mimeData()->objectName();
   if (name == "MantidWorkspace") {
     QStringList wsNames = e->mimeData()->text().split("\n");
-    foreach (const auto &wsName, wsNames) {
+    for (const auto &wsName : std::as_const(wsNames)) {
       if (this->overlay(wsName))
         e->accept();
     }
@@ -1371,21 +1375,6 @@ void InstrumentWidget::setSurface(ProjectionSurface *surface) {
   if (unwrappedSurface) {
     m_renderTab->flipUnwrappedView(unwrappedSurface->isFlippedView());
   }
-}
-
-/// Return the size of the OpenGL display widget in logical pixels
-QSize InstrumentWidget::glWidgetDimensions() {
-  auto sizeinLogicalPixels = [](const QWidget *w) -> QSize {
-    const auto devicePixelRatio = w->window()->devicePixelRatio();
-    return QSize(w->width() * devicePixelRatio, w->height() * devicePixelRatio);
-  };
-
-  if (m_instrumentDisplay->getGLDisplay())
-    return sizeinLogicalPixels(m_instrumentDisplay->getGLDisplay());
-  else if (m_instrumentDisplay->getQtDisplay())
-    return sizeinLogicalPixels(m_instrumentDisplay->getQtDisplay());
-  else
-    return QSize(0, 0);
 }
 
 /// Redraw the instrument view

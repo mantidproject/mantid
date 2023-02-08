@@ -19,11 +19,12 @@ namespace MantidQt::MantidWidgets {
 
 /**
  * Initialize with defaults.
- * @param glWidgetDimensions Viewport width/height in device pixels
+ * @param dimensions Viewport width/height
  */
 Viewport::Viewport(QSize dimensions)
-    : m_projectionType(Viewport::ORTHO), m_dimensions(dimensions), m_left(-1), m_right(1), m_bottom(-1), m_top(1),
-      m_near(-1), m_far(1), m_rotationspeed(180.0 / M_PI), m_zoomFactor(1.0), m_xTrans(0.0), m_yTrans(0.0),
+    : m_dimensions(dimensions), m_left(-1), m_right(1), m_bottom(-1), m_top(1), m_near(-1), m_far(1), m_zmin(-1),
+      m_zmax(1), m_leftOrig(m_left), m_rightOrig(m_right), m_bottomOrig(m_bottom), m_topOrig(m_top), m_zminOrig(m_zmin),
+      m_zmaxOrig(m_zmax), m_rotationspeed(180.0 / M_PI), m_zoomFactor(1.0), m_xTrans(0.0), m_yTrans(0.0),
       m_zTrans(0.0) {
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
 }
@@ -48,28 +49,24 @@ QSize Viewport::dimensions() const { return m_dimensions; }
  * ratio of the displaying widget. The actual projection dimensions can be
  * retrieved by calling getInstantProjection() method.
  *
- * @param l :: left side of the scene (xmin)
- * @param r :: right side of the scene (xmax)
- * @param b :: bottom side of the scene (ymin)
- * @param t :: top side of the scene (ymax)
- * @param nearz :: near side of the scene (zmin)
- * @param farz :: far side of the scene (zmax)
- * @param type :: Projection type: ORTHO or PERSPECTIVE. PERSPECTIVE isn't fully
- *implemented
+ * @param xmin :: left side of the scene
+ * @param xmax :: right side of the scene
+ * @param ymin :: bottom side of the scene
+ * @param ymax :: top side of the scene
+ * @param zmin :: near side of the scene
+ * @param zmax :: far side of the scene
  */
-void Viewport::setProjection(double l, double r, double b, double t, double nearz, double farz,
-                             Viewport::ProjectionType type) {
-  m_projectionType = type;
-  m_left = l;
-  m_right = r;
+void Viewport::setProjection(double xmin, double xmax, double ymin, double ymax, double zmin, double zmax) {
+  m_left = xmin;
+  m_right = xmax;
   if (m_left > m_right)
     std::swap(m_left, m_right);
-  m_bottom = b;
-  m_top = t;
+  m_bottom = ymin;
+  m_top = ymax;
   if (m_bottom > m_top)
     std::swap(m_bottom, m_top);
-  m_near = nearz;
-  m_far = farz;
+  m_near = zmin;
+  m_far = zmax;
   // save the current projection bounds to reuse on view changes
   m_leftOrig = m_left;
   m_rightOrig = m_right;
@@ -82,11 +79,8 @@ void Viewport::setProjection(double l, double r, double b, double t, double near
  *
  * @param minBounds :: Near-bottom-left corner of the scene.
  * @param maxBounds :: Far-top-right corner of the scene.
- * @param type :: Projection type: ORTHO or PERSPECTIVE. PERSPECTIVE isn't fully
- *implemented
  */
-void Viewport::setProjection(const Mantid::Kernel::V3D &minBounds, const Mantid::Kernel::V3D &maxBounds,
-                             ProjectionType type) {
+void Viewport::setProjection(const Mantid::Kernel::V3D &minBounds, const Mantid::Kernel::V3D &maxBounds) {
   double radius = minBounds.norm();
   double tmp = maxBounds.norm();
   if (tmp > radius)
@@ -98,7 +92,7 @@ void Viewport::setProjection(const Mantid::Kernel::V3D &minBounds, const Mantid:
   m_zminOrig = m_zmin;
   m_zmaxOrig = m_zmax;
 
-  setProjection(minBounds.X(), maxBounds.X(), minBounds.Y(), maxBounds.Y(), -radius, radius, type);
+  setProjection(minBounds.X(), maxBounds.X(), minBounds.Y(), maxBounds.Y(), -radius, radius);
 }
 
 /**
@@ -146,8 +140,6 @@ void Viewport::correctForAspectRatioAndZoom(double &xmin, double &xmax, double &
   zmax = m_far * m_zoomFactor;
 }
 
-Viewport::ProjectionType Viewport::getProjectionType() const { return m_projectionType; }
-
 /**
  * Get the projection bounds.
  * @param xmin :: left side of the Ortho projection
@@ -171,7 +163,6 @@ void Viewport::setTranslation(double xval, double yval) {
  * Issue the OpenGL commands that define the viewport and projection.
  */
 void Viewport::applyProjection() const {
-  glViewport(0, 0, m_dimensions.width(), m_dimensions.height());
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   OpenGLError::check("GLViewport::issueGL()");
@@ -179,26 +170,10 @@ void Viewport::applyProjection() const {
   double xmin, xmax, ymin, ymax, zmin, zmax;
   correctForAspectRatioAndZoom(xmin, xmax, ymin, ymax, zmin, zmax);
 
-  if (m_projectionType == Viewport::PERSPECTIVE) {
-    double fov = 30.0 * M_PI / 180.0;
-    double znear = fabs(ymax - ymin) / (2 * tan(fov / 2));
-    double zfar = znear + zmax - zmin;
-    m_zTrans = -znear + zmin;
-    glFrustum(xmin, xmax, ymin, ymax, znear, zfar);
-
-    if (OpenGLError::hasError("GLViewport::issueGL()")) {
-      OpenGLError::log() << "Arguments to glFrustum:\n";
-      OpenGLError::log() << xmin << ' ' << xmax << '\n'
-                         << ymin << ' ' << ymax << '\n'
-                         << znear << ' ' << zfar << "\n\n";
-    }
-  } else {
-    glOrtho(xmin, xmax, ymin, ymax, zmin, zmax);
-
-    if (OpenGLError::hasError("GLViewport::issueGL()")) {
-      OpenGLError::log() << "Arguments to glOrtho:\n";
-      OpenGLError::log() << xmin << ' ' << xmax << '\n' << ymin << ' ' << ymax << '\n' << zmin << ' ' << zmax << "\n\n";
-    }
+  glOrtho(xmin, xmax, ymin, ymax, zmin, zmax);
+  if (OpenGLError::hasError("GLViewport::issueGL()")) {
+    OpenGLError::log() << "Arguments to glOrtho:\n";
+    OpenGLError::log() << xmin << ' ' << xmax << '\n' << ymin << ' ' << ymax << '\n' << zmin << ' ' << zmax << "\n\n";
   }
   // Reset the rendering options just in case
   glMatrixMode(GL_MODELVIEW);

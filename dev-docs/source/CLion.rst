@@ -139,3 +139,4 @@ To debug workbench, you'll need to edit the ``workbench`` CMake Application conf
 
 You should now be able to set breakpoints and start debugging by clicking the bug icon.
 
+.. include:: ./macos-opengl-version-warning.txt
