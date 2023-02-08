@@ -222,11 +222,11 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
                      "flipping_ratio_correction(workspace)"]
         return lines
 
-    def get_plot_list(self):
+    def get_plot_list(self, options):
         for plot in self._plot_list:
             self._data_arrays[plot] = {
-                'ttheta': self._sample_data.ttheta.range,
-                'omega': self._sample_data.omega.range,
+                'two_theta_array': self._get_sample_data_two_theta_binning_array(options),
+                'omega_array': self._get_sample_data_omega_binning_array(options),
                 'intensity': mtd[plot].getSignalArray(),
                 'error': np.sqrt(mtd[plot].getErrorSquaredArray())
             }
@@ -284,6 +284,20 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
             else:
                 banks_match = False
             return not banks_match
+
+    def _get_sample_data_omega_binning_array(self, options):
+        min = options['omega_min']
+        max = options['omega_max']
+        bin_size = options['omega_bin_size']
+        binning_array = np.arange(min, max + bin_size, bin_size)
+        return binning_array
+
+    def _get_sample_data_two_theta_binning_array(self, options):
+        min = options['two_theta_min']
+        max = options['two_theta_max']
+        bin_size = options['two_theta_bin_size']
+        binning_array = np.arange(min, max + bin_size, bin_size)
+        return binning_array
 
     def _check_errors_in_selected_files(self):
         '''
