@@ -6,7 +6,8 @@ from mantid.api import FunctionFactory, AnalysisDataService as ADS
 from FindGoniometerFromUB import getSignMaxAbsValInCol
 from mantid.geometry import CrystalStructure, SpaceGroupFactory, ReflectionGenerator, ReflectionConditionFilter
 from os import path
-from abc import ABC, abstractmethod
+
+# from abc import ABC, abstractmethod
 
 
 class PEAK_TYPE(Enum):
@@ -46,7 +47,7 @@ class BaseSX(ABC):
             return None
 
     def get_peaks(self, run, peak_type, integration_type=None):
-        if integration_type is not None:
+        if integration_type is None:
             fieldname = peak_type.value
         else:
             fieldname = "_".join([peak_type.value, integration_type.value])
@@ -62,10 +63,14 @@ class BaseSX(ABC):
     # --- setters ---
 
     def set_van_ws(self, van_ws):
-        self.van_ws = van_ws
+        self.van_ws = BaseSX.retrieve(van_ws).name()
 
-    def set_run_data(self, run, data_dict):
-        self.runs[str(run)] = data_dict
+    def set_peaks(self, run, peaks, peak_type=PEAK_TYPE.FOUND, integration_type=None):
+        if integration_type is None:
+            fieldname = peak_type.value
+        else:
+            fieldname = "_".join([peak_type.value, integration_type.value])
+        self.runs[str(run)][fieldname] = BaseSX.retrieve(peaks).name()
 
     def set_spacegroup(self, hm_symbol):
         self.spgr = SpaceGroupFactory.createSpaceGroup(hm_symbol)
@@ -73,12 +78,12 @@ class BaseSX(ABC):
     def set_sample(self, **kwargs):
         self.sample_dict = kwargs
 
-    def set_goniometer_axes(self, axes):
+    def set_goniometer_axes(self, *args):
         """
         :param axes: collection of axes - e.g. ([x,y,z,hand], [x,y,z,hand]) - in same order to be passed to SetSample
         """
         # convert to strings
-        self.gonio_axes = [",".join([str(elem) for elem in axis]) for axis in axes]
+        self.gonio_axes = [",".join([str(elem) for elem in axis]) for axis in args]
 
     def set_mc_abs_nevents(self, nevents):
         self.n_mcevents = nevents
@@ -103,13 +108,13 @@ class BaseSX(ABC):
             axis_dict = {f"Axis{iax}": ",".join([str(angles[iax]), self.gonio_axes[iax]]) for iax in range(len(angles))}
             mantid.SetGoniometer(Workspace=ws, **axis_dict)
 
-    @abstractmethod()
-    def process_data(
-        self,
-        runs: Sequence[str],
-        gonio_angles=None,
-    ):
-        pass
+    # @abstractmethod()
+    # def process_data(
+    #     self,
+    #     runs: Sequence[str],
+    #     gonio_angles=None,
+    # ):
+    #     pass
 
     @staticmethod
     def convert_ws_to_MD(wsname, md_name=None, frame="Q (lab frame)"):
@@ -150,45 +155,54 @@ class BaseSX(ABC):
 
     def find_ub_using_lattice_params(self, global_B, tol=0.15, **kwargs):
         if global_B:
-            mantid.FindGlobalBMatrix(PeakWorkspaces=[data["found_pks"] for data in self.runs.values()], Tolerance=tol, **kwargs)
+            peaks = [self.get_peaks(run, PEAK_TYPE.FOUND) for run in self.runs.keys()]
+            mantid.FindGlobalBMatrix(PeakWorkspaces=peaks, Tolerance=tol, **kwargs)
         else:
             for run, data in self.runs.items():
-                mantid.FindUBUsingLatticeParameters(PeaksWorkspace=data["found_pks"], Tolerance=tol, **kwargs)
-                mantid.IndexPeaks(PeaksWorkspace=data["found_pks"], Tolerance=tol, RoundHKLs=True)
+                peaks = self.get_peaks(run, PEAK_TYPE.FOUND)
+                mantid.FindUBUsingLatticeParameters(PeaksWorkspace=peaks, Tolerance=tol, **kwargs)
+                mantid.IndexPeaks(PeaksWorkspace=peaks, Tolerance=tol, RoundHKLs=True)
 
     def calc_U_matrix(self, *args, **kwargs):
         for run, data in self.runs.items():
             mantid.CalculateUMatrix(PeaksWorkspace=data["found_pks"], *args, **kwargs)
 
-    def calibrate_sample_pos(self, tol=0.15):
-        for run, data in self.runs.items():
-            mantid.IndexPeaks(PeaksWorkspace=data["found_pks"], Tolerance=tol, RoundHKLs=True)
+    def calibrate_sample_pos(self, tol=0.15, runs=None):
+        if runs is None:
+            runs = self.runs.keys()
+        for run in self.runs:
+            peaks = BaseSX.get_peaks(run, PEAK_TYPE.FOUND)
+            mantid.IndexPeaks(PeaksWorkspace=peaks, Tolerance=tol, RoundHKLs=True)
             mantid.OptimizeCrystalPlacement(
-                PeaksWorkspace=data["found_pks"],
-                ModifiedPeaksWorkspace=data["found_pks"],
+                PeaksWorkspace=peaks,
+                ModifiedPeaksWorkspace=peaks,
                 FitInfoTable=run + "_sample_pos_fit_info",
                 AdjustSampleOffsets=True,
                 OptimizeGoniometerTilt=True,
                 MaxSamplePositionChangeMeters=0.01,
                 MaxIndexingError=tol,
             )
-            mantid.IndexPeaks(PeaksWorkspace=data["found_pks"], Tolerance=tol, RoundHKLs=True)
+            mantid.IndexPeaks(PeaksWorkspace=peaks, Tolerance=tol, RoundHKLs=True)
 
-    def predict_peaks(self, peak_type=PEAK_TYPE.PREDICT, **kwargs):
-        for run, data in self.runs.items():
-            ws = None
-            if data["found"] is not None and BaseSX.retrieve(data["found"]).sample().hasOrientedLattice():
-                ws = data["found"]
-            elif data["ws"] is not None and BaseSX.retrieve(data["ws"]).sample().hasOrientedLattice():
-                ws = data["ws"]
-            if ws is None:
+    def predict_peaks(self, peak_type=PEAK_TYPE.PREDICT, runs=None, **kwargs):
+        if runs is None:
+            runs = self.runs.keys()
+        for run in runs:
+            input_ws = None
+            ws = self.get_ws(run)
+            peaks = self.get_peaks(run, PEAK_TYPE.FOUND)
+            if peaks is not None and BaseSX.retrieve(peaks).sample().hasOrientedLattice():
+                input_ws = peaks
+            elif ws is not None and BaseSX.retrieve(ws).sample().hasOrientedLattice():
+                input_ws = ws
+            if input_ws is None:
                 continue  # skip
-            out_peaks_name = "_".join([BaseSX.retrieve(ws).name(), peak_type.value])
+            out_peaks_name = "_".join([BaseSX.retrieve(input_ws).name(), peak_type.value])
             if peak_type == PEAK_TYPE.PREDICT:
-                mantid.PredictPeaks(InputWorkspace=ws, OutputWorkspace=out_peaks_name, **kwargs)
+                mantid.PredictPeaks(InputWorkspace=input_ws, OutputWorkspace=out_peaks_name, **kwargs)
             else:
-                mantid.PredictFractionalPeaks(InputWorkspace=ws, OutputWorkspace=out_peaks_name, **kwargs)
-            self.runs[run][peak_type.value] = out_peaks_name
+                mantid.PredictFractionalPeaks(InputWorkspace=input_ws, OutputWorkspace=out_peaks_name, **kwargs)
+            self.set_peaks(run, out_peaks_name, peak_type)
 
     @staticmethod
     def get_radius(pk, ws, ispec, scale=5):
@@ -202,9 +216,9 @@ class BaseSX(ABC):
         radius = (modQ / TOF) * dTOF
         return radius
 
-    @abstractmethod
-    def mask_detector_edges(ws):
-        pass  # must be implemented in subclass
+    # @abstractmethod
+    # def mask_detector_edges(ws):
+    #     pass  # must be implemented in subclass
 
     @staticmethod
     def integrate_peaks_MD(wsMD, peaks, out_peaks, **kwargs):
@@ -287,8 +301,7 @@ class BaseSX(ABC):
             else:
                 BaseSX.integrate_peaks_skew(data["ws"], pk_table, peak_int_name, **kwargs)
             # store result
-            fieldname = "_".join([peak_type.value, integration_type.value])
-            self.runs[str(run)][fieldname] = peak_int_name
+            self.set_peaks(run, peak_int_name, peak_type, integration_type)
 
     def save_integrated_peaks(self, integration_type, peak_type, save_dir: str, save_format: str, make_consistent=True):
         fieldname = "_".join([peak_type.value, integration_type.value])
@@ -326,9 +339,9 @@ class BaseSX(ABC):
         else:
             mantid.DeleteWorkspace(all_integrated_peaks)
 
-    @abstractmethod
-    def load_run(runno):
-        pass
+    # @abstractmethod
+    # def load_run(runno):
+    #     pass
 
     def _is_vanadium_processed(self):
         return self.van_ws is not None and ADS.doesExist(self.van_ws)
@@ -372,7 +385,9 @@ class BaseSX(ABC):
         mantid.TransformHKL(PeaksWorkspace=ws, HKLTransform=transform, FindError=False)
 
     @staticmethod
-    def find_sx_peaks(ws, bg=None, nstd=None, out_pk_wsname="peaks", XResolution=200, PhiResolution=2, TwoThetaResolution=2, **kwargs):
+    def find_sx_peaks(ws, bg=None, nstd=None, out_pk_wsname="peaks", **kwargs):
+        default_kwargs = {"XResolution": 200, "PhiResolution": 2, "TwoThetaResolution": 2}
+        kwargs = {**default_kwargs, **kwargs}  # will overwrite default with provided if duplicate keys
         ws = BaseSX.retrieve(ws)
         if bg is None:
             ymaxs = np.max(ws.extractY(), axis=1)  # max in each spectrum
