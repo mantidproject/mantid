@@ -37,7 +37,7 @@ This section will show you how to benchmark Mantid using an installed version. T
 Initial Setup
 -------------
 
-1. Download and install the desired version of Mantid from the `releases page <https://github.com/mantidproject/mantid/releases>`_. Note its installation path, hereby denoted as ``[INSTALL_PATH]``.
+1. Download and install the desired version of MantidWorkbench from the `releases page <https://github.com/mantidproject/mantid/releases>`_. Note its installation path, hereby denoted as ``[INSTALL_PATH]``.
 2. Open a git bash terminal and cd to the desired location.
 3. Pip install the virtual environment package as described in the `'Installing virtualenv' section <https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#installing-virtualenv>`_.
 
