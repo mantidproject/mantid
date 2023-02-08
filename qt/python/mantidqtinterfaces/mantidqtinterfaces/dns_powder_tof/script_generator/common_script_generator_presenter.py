@@ -57,11 +57,11 @@ class DNSScriptGeneratorPresenter(DNSObserver):
                 self.view.show_status_message(error, 30, clear=True)
             else:
                 self._script_number += 1
-            self._finish_script_run()
+            self._finish_script_run(options)
         # activate copy script to clipboard button
         self.view.pB_copy_to_clipboard.setEnabled(True)
 
-    def _finish_script_run(self):
+    def _finish_script_run(self, options):
         pass
 
     def _get_sample_data(self):
