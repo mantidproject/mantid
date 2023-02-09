@@ -455,7 +455,7 @@ This reduction includes the gravity correction, which is set explicitly via `Cor
 .. testsetup:: FIGARODetectorAngleGravityCorrection
 
    config.setFacility('ILL')
-   config['default.instrument'] = 'D17'
+   config['default.instrument'] = 'FIGARO'
    config.appendDataSearchSubDir('../SystemTest/ILL/FIGARO/')
 
 .. testcode:: FIGARODetectorAngleGravityCorrection
