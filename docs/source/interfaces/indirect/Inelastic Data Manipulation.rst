@@ -1,6 +1,6 @@
 .. _interface-inelastic-data-manipulation:
 
-Indirect Data Manipulation
+Inelastic Data Manipulation
 ==========================
 
 .. contents:: Table of Contents
@@ -9,10 +9,10 @@ Indirect Data Manipulation
 Overview
 --------
 
-The Indirect Data Manipulation interface provides Processes for manipulating
-reduced data from :ref:`Indirect Data Reduction <interface-indirect-data-reduction>`
-and converting reduced instrument data to S(Q, w), or moments for analysis in the
-:ref:`Indirect Data Analysis <interface-inelastic-data-analysis>` and
+The Inelastic Data Manipulation interface provides Processes for manipulating
+reduced data from, for example, :ref:`Indirect Data Reduction <interface-indirect-data-reduction>`
+and Direct Reduction routines or S(Q, w). The output data can then be used for analysis by
+processes in, for example, the :ref:`Indirect Data Analysis <interface-inelastic-data-analysis>` and
 :ref:`Indirect Bayes <interface-indirect-bayes>` interfaces.
 
 .. interface:: Data Manipulation
@@ -24,7 +24,7 @@ Action Buttons
 
 Settings
   Opens the :ref:`Settings <interface-indirect-settings>` GUI which allows you to
-  customize the settings for the Indirect interfaces.
+  customize the settings for the Inelastic interfaces.
 
 ?
   Opens this help page.
@@ -134,26 +134,11 @@ Go to the :ref:`sqw-example-workflow`.
 S(Q, w)
 -------
 
-Provides an interface for running the :ref:`SofQW <algm-SofQW>` algorithm.
+Provides an interface for running the :ref:`SofQW <algm-SofQW>` algorithm
+:ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>`.
 
 .. interface:: Data Manipulation
   :widget: tabSQw
-
-Instrument Options
-~~~~~~~~~~~~~~~~~~
-
-Instrument
-  Used to select the instrument on which the data being reduced was created on.
-
-Analyser
-  The analyser bank that was active when the experiment was run, or for which
-  you are interested in seeing the results of.
-
-Reflection
-  The reflection plane of the instrument set up.
-
-.. tip:: If you need clarification as to the instrument setup you should use
-  please speak to the instrument scientist who dealt with your experiment.
 
 S(Q, w) Options
 ~~~~~~~~~~~~~~~
@@ -164,8 +149,9 @@ Input
   plot once a file has finished loading.
 
 Q Low, Q Width & Q High
-  Q binning parameters that are passed to the :ref:`SofQW <algm-SofQW>` algorithm. The low and high
-  values can be determined using the neighbouring contour plot.
+  Q binning parameters that are passed to the :ref:`SofQW3 <algm-SofQWNormalisedPolygon>` algorithm. The low and high
+  values can be determined using the neighbouring contour plot. The default values given show
+  the Q range where there is data in the reduced workspace and these values cannot be changed.
 
 Rebin in Energy
   If enabled the data will first be rebinned in energy before being passed to
