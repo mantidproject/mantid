@@ -1,8 +1,8 @@
 {
-  "version": 1,
+  "version": 2,
   "cmakeMinimumRequired": {
     "major": 3,
-    "minor": 19,
+    "minor": 21,
     "patch": 0
   },
   "configurePresets": [
@@ -41,9 +41,9 @@
       }
     },
     {
-      "name": "win-msvc",
-      "displayName": "win-msvc",
-      "description": "Default build options for a windows conda build",
+      "name": "win-vs-2019",
+      "displayName": "win-vs",
+      "description": "Default build options for a windows visual studio conda build",
       "binaryDir": "${sourceDir}/build",
       "generator": "Visual Studio 16 2019",
       "cacheVariables": {
@@ -52,16 +52,31 @@
       }
     },
     {
+      "name": "win-vs",
+      "displayName": "win-vs",
+      "description": "Default build options for a windows visual studio conda build",
+      "binaryDir": "${sourceDir}/build",
+      "generator": "Visual Studio 17 2022",
+      "toolset": "v142",
+      "cacheVariables": {
+        "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
+        "CONDA_ENV": true
+      }
+    },
+    {
+      "vendor": { "microsoft.com/VisualStudioSettings/CMake/1.0": { "cacheRoot": "${sourceDir}/build" } },
       "name": "win-ninja",
       "displayName": "win-ninja",
       "description": "Default build options for a windows conda Ninja DebugWithRelRuntime build",
       "binaryDir": "${sourceDir}/build",
       "generator": "Ninja",
+      "cmakeExecutable": "cmake.exe",
       "cacheVariables": {
-	"CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-	"CONDA_ENV": true,
-	"CMAKE_BUILD_TYPE": "DebugWithRelRuntime",
-	"USE_PRECOMPILED_HEADERS": "OFF"
+        "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
+        "CONDA_ENV": true,
+        "CMAKE_BUILD_TYPE": "DebugWithRelRuntime",
+        "USE_PRECOMPILED_HEADERS": "OFF",
+        "CMAKE_MAKE_PROGRAM": "ninja.exe"
       }
     },
     {

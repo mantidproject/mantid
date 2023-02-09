@@ -164,6 +164,9 @@ configure_file(${WINDOWS_BUILDCONFIG}/pycharm.env.in ${PROJECT_BINARY_DIR}/pycha
 if(EXISTS ${MSVC_IDE_LOCATION}/devenv.exe)
   if(CONDA_ENV)
     configure_file(${WINDOWS_BUILDCONFIG}/visual-studio_conda.bat.in ${PROJECT_BINARY_DIR}/visual-studio.bat @ONLY)
+    configure_file(
+      ${WINDOWS_BUILDCONFIG}/visual-studio_conda_ninja.bat.in ${PROJECT_BINARY_DIR}/visual-studio_ninja.bat @ONLY
+    )
   else()
     configure_file(${WINDOWS_BUILDCONFIG}/visual-studio.bat.in ${PROJECT_BINARY_DIR}/visual-studio.bat @ONLY)
   endif()
