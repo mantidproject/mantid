@@ -125,6 +125,13 @@ class LagrangeILLReductionTest(unittest.TestCase):
         self.assertAlmostEqual(result.readY(0)[10], 3.0, 3)
         self.assertAlmostEqual(result.readY(0)[29], 3.0, 3)
 
+    def test_nexus_convert_to_wavenumber(self):
+        result = LagrangeILLReduction(SampleRuns="014412.nxs", ConvertToWaveNumber=True)
+        self.check_result(result, "Energy_inWavenumber", 31, 245.9991, 366.9823)
+
+        self.assertAlmostEqual(result.readY(0)[10], 3.0, 4)
+        self.assertAlmostEqual(result.readY(0)[30], 3.0, 4)
+
     def check_result(self, ws, expected_unit, expected_bins, first_bin, last_bin):
         self.assertEqual(ws.getNumberHistograms(), 1)
         self.assertEqual(ws.getNumberBins(), expected_bins)
