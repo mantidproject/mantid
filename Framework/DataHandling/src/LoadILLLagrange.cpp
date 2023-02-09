@@ -65,6 +65,7 @@ void LoadILLLagrange::init() {
                   "File path of the data file to load");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The output workspace.");
+  declareProperty("InitialEnergyOffset", 0.0, "Offset for the initial energy (meV)");
 }
 
 /**
@@ -146,14 +147,15 @@ void LoadILLLagrange::loadData() {
   }
   scanVar.close();
 
+  double energyAxisOffset = getProperty("InitialEnergyOffset");
   // fill the workspace
   for (size_t j = 0; j < m_nScans; j++) {
     double count = dataInt[j];
     double error = sqrt(count);
-    m_outputWorkspace->mutableX(0)[j] = scanVariableData[j];
+    m_outputWorkspace->mutableX(0)[j] = scanVariableData[j] - energyAxisOffset;
     m_outputWorkspace->mutableY(0)[j] = count;
     m_outputWorkspace->mutableE(0)[j] = error;
-    m_outputWorkspace->mutableX(1)[j] = scanVariableData[j];
+    m_outputWorkspace->mutableX(1)[j] = scanVariableData[j] - energyAxisOffset;
     m_outputWorkspace->mutableY(1)[j] = monitorData[j];
     m_outputWorkspace->mutableE(1)[j] = sqrt(monitorData[j]);
   }

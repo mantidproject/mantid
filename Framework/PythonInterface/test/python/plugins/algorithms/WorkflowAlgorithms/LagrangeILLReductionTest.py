@@ -94,30 +94,36 @@ class LagrangeILLReductionTest(unittest.TestCase):
         self.assertAlmostEqual(result.readY(0)[80], 1737, 4)
 
     def test_nexus_sample_reduction(self):
-        result = LagrangeILLReduction(SampleRuns="014412.nxs", NormaliseBy="None")
+        result = LagrangeILLReduction(SampleRuns="014412.nxs", NormaliseBy="None", UseIncidentEnergy=True)
         self.check_result(result, "Energy", 31, 35, 50)
         self.assertAlmostEqual(result.readY(0)[10], 3.0, 3)
         self.assertAlmostEqual(result.readY(0)[30], 3.0, 3)
 
     def test_nexus_sample_reduction_monitor_normalisation(self):
-        result = LagrangeILLReduction(SampleRuns="014412.nxs", NormaliseBy="Monitor")
+        result = LagrangeILLReduction(SampleRuns="014412.nxs", NormaliseBy="Monitor", UseIncidentEnergy=True)
         self.check_result(result, "Energy", 31, 35, 50)
         self.assertAlmostEqual(result.readY(0)[10], 3.0, 3)
         self.assertAlmostEqual(result.readY(0)[30], 3.0, 3)
 
     def test_merging_close_scans_nexus(self):
-        result = LagrangeILLReduction(SampleRuns="014412_close_scans_sample.nxs", NormaliseBy="None")
+        result = LagrangeILLReduction(SampleRuns="014412_close_scans_sample.nxs", NormaliseBy="None", UseIncidentEnergy=True)
         self.check_result(result, "Energy", 30, 35, 50)
         self.assertAlmostEqual(result.readY(0)[10], 120.0, 3)
         self.assertAlmostEqual(result.readY(0)[29], 310.0, 3)
 
     def test_merging_close_scans_nexus_with_container(self):
         result = LagrangeILLReduction(
-            SampleRuns="014412_close_scans_sample.nxs", ContainerRuns="014412_close_scans.nxs", NormaliseBy="None"
+            SampleRuns="014412_close_scans_sample.nxs", ContainerRuns="014412_close_scans.nxs", NormaliseBy="None", UseIncidentEnergy=True
         )
         self.check_result(result, "Energy", 30, 35, 50)
         self.assertAlmostEqual(result.readY(0)[10], (120 - 12), 3)
         self.assertAlmostEqual(result.readY(0)[29], (310 - 31), 3)
+
+    def test_nexus_with_offset(self):
+        result = LagrangeILLReduction(SampleRuns="014412.nxs", NormaliseBy="None", UseIncidentEnergy=False)
+        self.check_result(result, "Energy", 31, (35 - 4.5), (50 - 4.5))  # the offset of 4.5 is applied to data
+        self.assertAlmostEqual(result.readY(0)[10], 3.0, 3)
+        self.assertAlmostEqual(result.readY(0)[29], 3.0, 3)
 
     def check_result(self, ws, expected_unit, expected_bins, first_bin, last_bin):
         self.assertEqual(ws.getNumberHistograms(), 1)

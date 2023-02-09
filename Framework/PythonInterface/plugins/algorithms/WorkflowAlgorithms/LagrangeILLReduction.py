@@ -261,7 +261,11 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
             file_name (str): string containing name(s) of file(s) to be loaded
             output_name (str): name for the output workspace containing detector counts
         """
-        LoadAndMerge(Filename=file_name, LoaderName="LoadILLLagrange", OutputWorkspace=output_name)
+        # if the user wants to see transfer energy, we subtract by the constant offset
+        offset = 0 if self.use_incident_energy else self.INCIDENT_ENERGY_OFFSET
+        LoadAndMerge(
+            Filename=file_name, LoaderName="LoadILLLagrange", LoaderOptions={"InitialEnergyOffset": offset}, OutputWorkspace=output_name
+        )
         self.merge_adjacent_bins(output_name)
         monitor_name = output_name + "_mon"
         ExtractMonitors(InputWorkspace=output_name, DetectorWorkspace=output_name, MonitorWorkspace=monitor_name)

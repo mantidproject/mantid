@@ -119,6 +119,31 @@ public:
     TS_ASSERT(outputWS->detectorInfo().isMonitor(1))
   }
 
+  void test_Lagrange_energy_offset() {
+    // Tests simple data loading for Lagrange
+    LoadILLLagrange alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "014412"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InitialEnergyOffset", "1.0"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+
+    MatrixWorkspace_sptr outputWS = std::shared_ptr<Mantid::API::MatrixWorkspace>(alg.getProperty("OutputWorkspace"));
+    TS_ASSERT(outputWS)
+
+    // check if proper unit is set
+    TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->unitID(), "Energy")
+    TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->caption(), "Energy")
+
+    // check if energy axis is properly shifted by InitialEnergyOffset
+    TS_ASSERT_EQUALS(outputWS->x(0).size(), 31) // size should not change
+    TS_ASSERT_DELTA(outputWS->x(0)[0], 34, 0.01)
+    TS_ASSERT_DELTA(outputWS->x(0)[30], 49, 0.01)
+  }
+
 private:
   std::string m_oldFacility;
   std::string m_oldInstrument;
