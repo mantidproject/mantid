@@ -1712,10 +1712,13 @@ double TimeSeriesProperty<TYPE>::extractStatistic(Math::StatisticType selection,
     break;
   case TimeAveragedMean:
     singleValue = this->getStatistics(roi).time_mean;
+    break;
   case StdDev:
     singleValue = this->getStatistics(roi).standard_deviation;
+    break;
   case TimeAverageStdDev:
     singleValue = this->getStatistics(roi).time_standard_deviation;
+    break;
   default:
     throw std::invalid_argument("extractStatistic - Unknown statistic type: " + boost::lexical_cast<std::string>(this));
   };
