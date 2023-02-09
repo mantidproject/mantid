@@ -382,6 +382,7 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
                 DataE=maskedE.compressed().reshape(np.shape(eAxis)[0], np.shape(eAxis)[1] - n_masked),
                 NSpec=2,
                 ParentWorkspace=ws,
+                UnitX="Energy",
             )
         return ws
 
