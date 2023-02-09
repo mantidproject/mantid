@@ -372,7 +372,7 @@ double LogManager::getPropertyAsSingleValue(const std::string &name, Kernel::Mat
   const auto key = std::make_pair(name, statistic);
   if (!m_singleValueCache->getCache(key, singleValue)) {
     const Property *log = getProperty(name);
-    const TimeROI &filter = this->timeROI();
+    const TimeROI &filter = this->getTimeROI();
     if (!convertPropertyToDouble(log, singleValue, statistic, &filter)) {
       if (const auto stringLog = dynamic_cast<const PropertyWithValue<std::string> *>(log)) {
         // Try to lexically cast string to a double
