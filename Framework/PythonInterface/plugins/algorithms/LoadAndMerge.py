@@ -123,6 +123,7 @@ class LoadAndMerge(PythonAlgorithm):
         self._version = self.getProperty("LoaderVersion").value
         self._loader_options = self.getProperty("LoaderOptions").value
         merge_options = self.getProperty("MergeRunsOptions").value
+        merge_options = dict([(k, merge_options.getProperty(k).value) for k in merge_options.keys()])
         output = self.getPropertyValue("OutputWorkspace")
         if output.startswith("__"):
             self._prefix = "__"

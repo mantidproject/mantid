@@ -5,6 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+from unittest import mock
+
 from mantid.api import MatrixWorkspace, WorkspaceGroup
 from mantid.simpleapi import LoadAndMerge, config, mtd
 
@@ -64,8 +66,39 @@ class LoadAndMergeTest(unittest.TestCase):
             Filename="170300+170301",
             OutputWorkspace="out5",
             LoaderName="LoadILLIndirect",
-            MergeRunsOptions=dict({"FailBehaviour": "Stop"}),
+            MergeRunsOptions={"FailBehaviour": "Stop"},
         )
+
+        out5 = LoadAndMerge(
+            Filename="170300+170301",
+            OutputWorkspace="out5",
+            LoaderName="LoadILLIndirect",
+            MergeRunsOptions={
+                "SampleLogsFail": "Doppler.maximum_delta_energy,Doppler.mirror_sense,acquisition_mode",
+                "SampleLogsFailTolerances": "10.0,10.0,10.0",
+                "SampleLogsList": "Doppler.maximum_delta_energy",
+            },
+        )
+        self.assertEqual(out5.getRun().getLogData("Doppler.maximum_delta_energy").value, "2, 0")
+
+    @mock.patch("mantid.Framework.PythonInterface.plugins.algorithms.LoadAndMerge.MergeRuns")
+    def test_merge_options_2(self, m_merge_runs):
+        out5 = LoadAndMerge(
+            Filename="170300+170301",
+            OutputWorkspace="out5",
+            LoaderName="LoadILLIndirect",
+            MergeRunsOptions={
+                "SampleLogsFail": "Doppler.maximum_delta_energy,Doppler.mirror_sense,acquisition_mode",
+                "SampleLogsFailTolerances": "10.0,10.0,10.0",
+                "SampleLogsWarn": "Doppler.maximum_delta_energy,Doppler.mirror_sense,acquisition_mode",
+                "SampleLogsWarnTolerances": "0.0,0.0,0.0",
+                "SampleLogsList": "Doppler.maximum_delta_energy",
+            },
+        )
+        m_merge_runs.assert_called_with(
+            SampleLogsWarn="Doppler.maximum_delta_energy,Doppler.mirror_sense,acquisition_mode", SampleLogsWarnTolerances="0.0,0.0,0.0"
+        )
+        self.assertEqual(out5.getRun().getLogData("Doppler.maximum_delta_energy").value, "2, 0")
 
     def test_specific_loader(self):
         out5 = LoadAndMerge(
