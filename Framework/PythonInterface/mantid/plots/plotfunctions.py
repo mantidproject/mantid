@@ -312,14 +312,15 @@ def _update_show_figure(fig):
     return fig
 
 
-def create_subplots(nplots, fig=None):
+def create_subplots(nplots, fig=None, add_cbar_axis=False):
     """
     Create a set of subplots suitable for a given number of plots. A stripped down
     version of plt.subplots that can accept an existing figure instance.
 
     :param nplots: The number of plots required
     :param fig: An optional figure. It is cleared before plotting the new contents
-    :return: A 2-tuple of (fig, axes)
+    :param add_cbar_axis: Boolean for whether to add and return an axis for a colour bar on the right of the figure
+    :return: fig, axes, ncrows, ncols, cbar_axis
     """
     import matplotlib.pyplot as plt
 
@@ -338,15 +339,49 @@ def create_subplots(nplots, fig=None):
         fig.clf()
     # annoyling this repl
     nplots = nrows * ncols
-    gs = GridSpec(nrows, ncols)
     axes = np.empty(nplots, dtype=object)
-    ax0 = fig.add_subplot(gs[0, 0], projection=PROJECTION)
-    axes[0] = ax0
-    for i in range(1, nplots):
-        axes[i] = fig.add_subplot(gs[i // ncols, i % ncols], projection=PROJECTION)
+    cbar_axis = None
+
+    if add_cbar_axis:
+        # The right most column of the GridSpec is made a SubGridSpec to facilitate the colour bar
+        # This is done so that the colour bar can have a close spacing to the right most column
+        # Keeping the colour bar in the GridSpec rather than alongside it means it behaves much nicer
+        # when resizing QT windows
+        # The relative width of 11.55 for the right most column ensures that all plots remain an equal size
+        # It comes from ((10+1)/2) * 0.1
+        gs = GridSpec(nrows, ncols, width_ratios=[10.0] * (ncols - 1) + [11.55])
+        gs_and_cbar = gs[:, -1].subgridspec(nrows, 2, width_ratios=[10, 1], wspace=0.1)
+        if ncols > 1:
+            ax0 = fig.add_subplot(gs[0, 0], projection=PROJECTION)
+        else:
+            ax0 = fig.add_subplot(gs_and_cbar[0, 0], projection=PROJECTION)
+        axes[0] = ax0
+        for i in range(1, nplots):
+            if (i + 1) % ncols:
+                axes[i] = fig.add_subplot(gs[i // ncols, i % ncols], projection=PROJECTION)
+            else:  # last column so add to colour bar grid spec
+                axes[i] = fig.add_subplot(gs_and_cbar[i // ncols, 0], projection=PROJECTION)
+        cbar_axis = fig.add_subplot(gs_and_cbar[:, 1])
+    else:
+        gs = GridSpec(nrows, ncols)
+        ax0 = fig.add_subplot(gs[0, 0], projection=PROJECTION)
+        axes[0] = ax0
+        for i in range(1, nplots):
+            axes[i] = fig.add_subplot(gs[i // ncols, i % ncols], projection=PROJECTION)
+
     axes = axes.reshape(nrows, ncols)
 
-    return fig, axes, nrows, ncols
+    fig.set_layout_engine(layout="tight")
+    warnings.filterwarnings(
+        "always",
+        message="Tight layout not applied. The left and right margins cannot be made large enough to accommodate all axes decorations.",
+    )
+    warnings.filterwarnings(
+        "always",
+        message="Tight layout not applied. The bottom and top margins cannot be made large enough to accommodate all axes decorations.",
+    )
+
+    return fig, axes, nrows, ncols, cbar_axis
 
 
 def raise_if_not_sequence(value, seq_name, element_type=None):
@@ -389,7 +424,7 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
     if fig and overplot:
         fig = fig
     elif fig:
-        fig, _, _, _ = create_subplots(axes_num, fig)
+        fig, _, _, _, _ = create_subplots(axes_num, fig)
     elif overplot:
         # The create subplot below assumes no figure was passed in, this is ensured by the elif above
         # but add an assert which prevents a future refactoring from breaking this assumption
@@ -398,9 +433,9 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
         if not fig.axes:
             plt.close(fig)
             # The user is likely trying to overplot on a non-existent plot, create one for them
-            fig, _, _, _ = create_subplots(axes_num)
+            fig, _, _, _, _ = create_subplots(axes_num)
     else:
-        fig, _, _, _ = create_subplots(axes_num)
+        fig, _, _, _, _ = create_subplots(axes_num)
 
     if not ax_properties and not overplot:
         ax_properties = {}

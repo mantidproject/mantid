@@ -168,7 +168,7 @@ class CutViewerView(QWidget):
         self.layout.addWidget(self.table)
 
     def _setup_figure_widget(self):
-        fig, _, _, _ = create_subplots(1)
+        fig, _, _, _, _ = create_subplots(1)
         self.figure = fig
         self.figure.canvas = FigureCanvas(self.figure)
         toolbar = MantidNavigationToolbar(self.figure.canvas, self)

@@ -16,7 +16,7 @@ from distutils.version import LooseVersion
 import warnings
 
 import matplotlib
-from mpl_toolkits.axes_grid1.axes_divider import make_axes_area_auto_adjustable, make_axes_locatable
+from mpl_toolkits.axes_grid1.axes_divider import make_axes_area_auto_adjustable
 import numpy as np
 
 # local imports
@@ -253,17 +253,7 @@ def pcolormesh(workspaces, fig=None, color_norm=None, normalize_by_bin_width=Non
     # create a subplot of the appropriate number of dimensions
     # extend in number of columns if the number of plottables is not a square number
     workspaces_len = len(workspaces)
-    fig, axes, nrows, ncols = create_subplots(workspaces_len, fig=fig)
-
-    fig.set_layout_engine(layout="tight")
-    warnings.filterwarnings(
-        "always",
-        message="Tight layout not applied. The left and right margins cannot be made large enough to accommodate all axes decorations.",
-    )
-    warnings.filterwarnings(
-        "always",
-        message="Tight layout not applied. The bottom and top margins cannot be made large enough to accommodate all axes decorations.",
-    )
+    fig, axes, nrows, ncols, cbar_axis = create_subplots(workspaces_len, fig=fig, add_cbar_axis=True)
 
     plots = []
     row_idx, col_idx = 0, 0
@@ -297,10 +287,7 @@ def pcolormesh(workspaces, fig=None, color_norm=None, normalize_by_bin_width=Non
     fig.subplots_adjust(wspace=SUBPLOT_WSPACE, hspace=SUBPLOT_HSPACE)
 
     axes = axes.ravel()
-    div = make_axes_locatable(fig.gca())
-    cax = div.append_axes("right", size="5%", pad=0.06)
-    # colorbar = fig.colorbar(pcm, ax=axes.tolist(), pad=0.06)
-    colorbar = fig.colorbar(pcm, cax=cax)
+    colorbar = fig.colorbar(pcm, cax=cbar_axis)
     add_colorbar_label(colorbar, axes)
 
     if fig.canvas.manager is not None:
