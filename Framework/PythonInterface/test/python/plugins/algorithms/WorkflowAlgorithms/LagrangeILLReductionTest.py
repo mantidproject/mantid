@@ -93,6 +93,32 @@ class LagrangeILLReductionTest(unittest.TestCase):
         self.assertAlmostEqual(result.readY(0)[10], 1972, 4)
         self.assertAlmostEqual(result.readY(0)[80], 1737, 4)
 
+    def test_nexus_sample_reduction(self):
+        result = LagrangeILLReduction(SampleRuns="014412.nxs", NormaliseBy="None")
+        self.check_result(result, "Energy", 31, 35, 50)
+        self.assertAlmostEqual(result.readY(0)[10], 3.0, 3)
+        self.assertAlmostEqual(result.readY(0)[30], 3.0, 3)
+
+    def test_nexus_sample_reduction_monitor_normalisation(self):
+        result = LagrangeILLReduction(SampleRuns="014412.nxs", NormaliseBy="Monitor")
+        self.check_result(result, "Energy", 31, 35, 50)
+        self.assertAlmostEqual(result.readY(0)[10], 3.0, 3)
+        self.assertAlmostEqual(result.readY(0)[30], 3.0, 3)
+
+    def test_merging_close_scans_nexus(self):
+        result = LagrangeILLReduction(SampleRuns="014412_close_scans_sample.nxs", NormaliseBy="None")
+        self.check_result(result, "Energy", 30, 35, 50)
+        self.assertAlmostEqual(result.readY(0)[10], 120.0, 3)
+        self.assertAlmostEqual(result.readY(0)[29], 310.0, 3)
+
+    def test_merging_close_scans_nexus_with_container(self):
+        result = LagrangeILLReduction(
+            SampleRuns="014412_close_scans_sample.nxs", ContainerRuns="014412_close_scans.nxs", NormaliseBy="None"
+        )
+        self.check_result(result, "Energy", 30, 35, 50)
+        self.assertAlmostEqual(result.readY(0)[10], (120 - 12), 3)
+        self.assertAlmostEqual(result.readY(0)[29], (310 - 31), 3)
+
     def check_result(self, ws, expected_unit, expected_bins, first_bin, last_bin):
         self.assertEqual(ws.getNumberHistograms(), 1)
         self.assertEqual(ws.getNumberBins(), expected_bins)
