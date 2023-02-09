@@ -170,7 +170,7 @@ public:
       auto glMock = makeGL();
       auto displayMock = makeDisplay();
       EXPECT_CALL(*qtMock, updateDetectors()).Times(1);
-      
+
       EXPECT_CALL(*displayMock, currentWidget()).Times(2).WillRepeatedly(Return(qtMock.get()));
       auto widget = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 23, useLoadingThread);
 
