@@ -99,7 +99,7 @@ private:
   /// A new algorithm to find Nth index.  It is simple and leave a lot work to
   /// the callers
   size_t findNthIndexFromQuickRef(int n) const;
-
+  default:
   /// Set a value from another property
   std::string setValueFromProperty(const Property &right) override;
 
