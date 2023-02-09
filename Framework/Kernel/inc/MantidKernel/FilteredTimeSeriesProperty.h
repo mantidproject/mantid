@@ -77,6 +77,9 @@ public:
   /// If filtering by log, get the time intervals for splitting
   std::vector<Mantid::Kernel::SplittingInterval> getSplittingIntervals() const;
 
+  /// Returns the calculated time weighted average value.
+  double timeAverageValue(const TimeROI *timeRoi = nullptr) const override;
+
   /// Return a TimeSeriesPropertyStatistics object
   TimeSeriesPropertyStatistics getStatistics(const Kernel::TimeROI *roi = nullptr) const override;
 

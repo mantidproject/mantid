@@ -694,6 +694,17 @@ std::vector<SplittingInterval> FilteredTimeSeriesProperty<TYPE>::getSplittingInt
   return intervals;
 }
 
+/** Returns the calculated time weighted average value.
+ * @param timeRoi  Object that holds information about when the time measurement was active.
+ * @return The time-weighted average value of the log when the time measurement was active.
+ */
+template <typename TYPE> double FilteredTimeSeriesProperty<TYPE>::timeAverageValue(const TimeROI *timeRoi) const {
+  auto internalRoi = this->filterAsRoi(); // Create an internal TimeROI out of m_filter
+  if (timeRoi && !timeRoi->empty())       // find intersection between the internal ROI and the supplied ROI
+    internalRoi->update_intersection(*timeRoi);
+  return TimeSeriesProperty<TYPE>::timeAverageValue(internalRoi); // call parent method
+}
+
 /**
  * Return a TimeSeriesPropertyStatistics struct containing the
  * statistics of this TimeSeriesProperty object.
