@@ -104,9 +104,7 @@ private:
   std::string setValueFromProperty(const Property &right) override;
 
   /// Cast the internal filter to a TimeROI object
-  TimeROI *filterAsRoi() const;
-  /// Find if time lies in a filtered region
-  bool isTimeFiltered(const Types::Core::DateAndTime &time) const;
+   TimeROI *filterAsRoi() const;
 
   /// The original unfiltered property as an owned pointer
   std::unique_ptr<const TimeSeriesProperty<HeldType>> m_unfiltered;

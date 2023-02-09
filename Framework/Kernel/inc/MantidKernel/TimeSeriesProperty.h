@@ -331,7 +331,8 @@ public:
    */
   double extractStatistic(Math::StatisticType selection, const TimeROI *roi = nullptr) const override;
 
-  /// Detects whether there are duplicated entries (of time) in property and eliminates them.
+  /// Detects whether there are duplicated entries (of time) in property &
+  /// eliminates them
   void eliminateDuplicates();
 
   /// Stringize the property

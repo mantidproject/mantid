@@ -941,7 +941,7 @@ std::pair<double, double> TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev(co
   if (timeRoi && !timeRoi->empty())
     filter = timeRoi->toSplitters();
   else
-    filter = TimeROI(this->firstTime(), this->lastTime()).toSplitters(); // guaranteed to have two different entries
+    filter = this->getSplittingIntervals();
 
   return this->averageAndStdDevInFilter(filter);
 }
@@ -1200,7 +1200,10 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::lastValue() const {
 
 /**
  * Returns duration of the time series, possibly restricted by a TimeROI object.
- * If no ROI is provided or the ROI is empty, the whole span of the time series is returned.
+ * If no TimeROI is provided or the TimeROI is empty, the whole span of the time series plus
+ * and additional extra time is returned. This extra time is the time span between the last two log entries.
+ * The extra time ensures that the mean and the time-weighted mean are the same for time series
+ * containing log entries equally spaced in time.
  * @param roi :: TimeROI object defining the time segments to consider.
  * @return duration, in seconds.
  */
@@ -1212,7 +1215,11 @@ template <typename TYPE> double TimeSeriesProperty<TYPE>::durationInSeconds(cons
     seriesSpan.update_intersection(*roi);
     return seriesSpan.durationInSeconds();
   } else {
-    return DateAndTime::secondsFromDuration(this->lastTime() - this->firstTime()); // span of the time series
+    const auto &intervals = this->getSplittingIntervals();
+    const double duration_sec =
+        std::accumulate(intervals.cbegin(), intervals.cend(), 0.,
+                        [](double sum, const auto &interval) { return sum + interval.duration(); });
+    return duration_sec;
   }
 }
 
@@ -1671,16 +1678,18 @@ TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics(const TimeR
   // Start with statistics that are not time-weighted
   TimeSeriesPropertyStatistics out(Mantid::Kernel::getStatistics(this->filteredValuesAsVector(roi)));
   out.duration = this->durationInSeconds(roi);
+  // Follow with time-weighted statistics
   auto avAndDev = this->timeAverageValueAndStdDev(roi);
   out.time_mean = avAndDev.first;
   out.time_standard_deviation = avAndDev.second;
   return out;
 }
 
-/** Calculate a particular statistical quantity from the values of the time series.
- *  @param selection : Enum indicating the selected statistical quantity.
- *  @param roi : optional pointer to TimeROI object for filtering the time series values.
- *  @return The value of the computed statistical quantity.
+/** Function filtering TimeSeriesProperties according to the requested statistics.
+ *  @param propertyToFilter : Property to filter the statistics on.
+ *  @param statisticType : Enum indicating the type of statistics to use.
+ *  @param roi : optional pointer to TimeROI object for active time.
+ *  @return The TimeSeriesProperty filtered by the requested statistics.
  */
 template <typename TYPE>
 double TimeSeriesProperty<TYPE>::extractStatistic(Math::StatisticType selection, const TimeROI *roi) const {
@@ -2040,7 +2049,7 @@ void TimeSeriesProperty<std::string>::histogramData(const Types::Core::DateAndTi
  * @returns :: Vector of included values only.
  */
 template <typename TYPE> std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredValuesAsVector(const TimeROI *roi) const {
-  if (roi) {
+  if (roi && !roi->empty()) {
     std::vector<TYPE> filteredValues;
     for (const auto &timeAndValue : this->m_values)
       if (roi->valueAtTime(timeAndValue.time()))
@@ -2051,9 +2060,12 @@ template <typename TYPE> std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredVal
 }
 
 /**
- * Get a list of the splitting intervals, if filtering is enabled.
- * Otherwise the interval is just first time - last time.
- * @returns :: Vector of splitting intervals
+ * Splitting interval for the whole time series.
+ * The interval's starting time is that of the first log entry. The interval's ending time is that of the last log
+ * entry plus an additional extra time. This extra time is the time span between the last two log entries.
+ * The extra time ensures that the mean and the time-weighted mean are the same for time series
+ * containing log entries equally spaced in time.
+ * @returns :: Vector containing a single splitting interval.
  */
 template <typename TYPE> std::vector<SplittingInterval> TimeSeriesProperty<TYPE>::getSplittingIntervals() const {
   std::vector<SplittingInterval> intervals;

@@ -83,6 +83,11 @@ FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(const FilteredT
       m_filter(prop.m_filter), m_filterQuickRef(prop.m_filterQuickRef), m_filterApplied(prop.m_filterApplied) {}
 
 /**
+ * Destructor
+ */
+template <typename HeldType> FilteredTimeSeriesProperty<HeldType>::~FilteredTimeSeriesProperty() = default;
+
+/**
  * Get a vector of values taking the filter into account.
  * Values will be excluded if their times lie in a region where the filter is
  * false.
@@ -587,6 +592,20 @@ template <typename TYPE> std::string FilteredTimeSeriesProperty<TYPE>::setValueF
   return "";
 }
 
+/// Cast the internal filter to a TimeROI object
+template <typename TYPE> Kernel::TimeROI *FilteredTimeSeriesProperty<TYPE>::filterAsRoi() const {
+  // Instantiate the TimeROI object using a temporary TimeSeriesProperty<bool> constructed from the filter
+  std::vector<Types::Core::DateAndTime> filterTimes;
+  std::vector<bool> filterValues; // values in the filter
+  for (auto const &pair : m_filter) {
+    filterTimes.push_back(pair.first);
+    filterValues.push_back(pair.second);
+  }
+  auto filterSeries = new TimeSeriesProperty<bool>(this->name(), filterTimes, filterValues);
+  // create the TimeROI object
+  return new TimeROI(filterSeries);
+}
+
 /**
  * Find out if the given time is included in the filtered data
  * i.e. it does not lie in an excluded region. This function assumes
@@ -676,9 +695,33 @@ std::vector<SplittingInterval> FilteredTimeSeriesProperty<TYPE>::getSplittingInt
 }
 
 /**
- * Destructor
+ * Return a TimeSeriesPropertyStatistics struct containing the
+ * statistics of this TimeSeriesProperty object.
+ * @param roi : Optional TimeROI pointer to get statistics for active time.
+ *
+ * N.B. This method DOES take filtering into account
  */
-template <typename HeldType> FilteredTimeSeriesProperty<HeldType>::~FilteredTimeSeriesProperty() = default;
+template <typename TYPE>
+TimeSeriesPropertyStatistics FilteredTimeSeriesProperty<TYPE>::getStatistics(const TimeROI *roi) const {
+  auto internalRoi = this->filterAsRoi(); // Create an internal TimeROI out of m_filter
+  if (roi && !roi->empty())               // find intersection between the internal ROI and the supplied ROI
+    internalRoi->update_intersection(*roi);
+  return TimeSeriesProperty<TYPE>::getStatistics(internalRoi); // call parent method
+}
+
+/** Function filtering TimeSeriesProperties according to the requested statistics.
+ *  @param propertyToFilter : Property to filter the statistics on.
+ *  @param statisticType : Enum indicating the type of statistics to use.
+ *  @param roi : optional pointer to TimeROI object for active time.
+ *  @return The TimeSeriesProperty filtered by the requested statistics.
+ */
+template <typename TYPE>
+double FilteredTimeSeriesProperty<TYPE>::extractStatistic(Math::StatisticType selection, const TimeROI *roi) const {
+  auto internalRoi = this->filterAsRoi(); // Create an internal TimeROI out of m_filter
+  if (roi && !roi->empty())               // find intersection between the internal ROI and the supplied ROI
+    internalRoi->update_intersection(*roi);
+  return TimeSeriesProperty<TYPE>::extractStatistic(selection, internalRoi); // call parent method
+}
 
 /**
  * Get a vector of values taking the filter into account.
