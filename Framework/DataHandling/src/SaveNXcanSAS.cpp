@@ -740,7 +740,7 @@ void SaveNXcanSAS::init() {
                   "information about; \nwhere each name must match a name "
                   "given for a detector in the [[IDF|instrument definition "
                   "file (IDF)]]. \nIDFs are located in the instrument "
-                  "sub-directory of the MantidPlot install directory.");
+                  "sub-directory of the Mantid install directory.");
 
   declareProperty(
       std::make_unique<API::WorkspaceProperty<>>("Transmission", "", Kernel::Direction::Input, PropertyMode::Optional,

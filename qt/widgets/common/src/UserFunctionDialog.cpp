@@ -7,7 +7,7 @@
 #include "MantidQtWidgets/Common/UserFunctionDialog.h"
 #include "MantidAPI/Expression.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtWidgets/Common/MantidDesktopServices.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/RenameParDialog.h"
 
 #include <QComboBox>
@@ -21,8 +21,8 @@
 
 #include <algorithm>
 
-using MantidQt::API::MantidDesktopServices;
 using namespace MantidQt::MantidWidgets;
+using MantidQt::API::HelpWindow;
 
 UserFunctionDialog::UserFunctionDialog(QWidget *parent, const QString &formula) : QDialog(parent) {
   m_uiForm.setupUi(this);
@@ -480,9 +480,7 @@ bool UserFunctionDialog::isBuiltin(const QString &cat) const { return cat == "Ba
 /**
  * Open the help wiki page in the web browser.
  */
-void UserFunctionDialog::helpClicked() {
-  MantidDesktopServices::openUrl(QUrl("http://www.mantidproject.org/MantidPlot:_User_Function_Dialog"));
-}
+void UserFunctionDialog::helpClicked() { HelpWindow::showPage(QUrl("workbench/userfunctiondialog.html")); }
 
 /**
  * Constructor

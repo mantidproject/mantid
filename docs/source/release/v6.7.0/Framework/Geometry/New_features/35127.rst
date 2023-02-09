@@ -1,0 +1,1 @@
+- `XMLInstrumentParameter` now includes TimeROI in the calculation of instrument parameters.

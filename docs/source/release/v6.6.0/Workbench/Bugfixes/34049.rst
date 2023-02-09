@@ -1,1 +1,0 @@
-- Plot axes labels are no longer hidden when resizing the plot window.

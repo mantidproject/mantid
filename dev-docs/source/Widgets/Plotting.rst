@@ -10,7 +10,7 @@ Plotting with errors:
 Overview
 ^^^^^^^^
 
-The plotting submodule of *Elemental Analysis* (``/scripts/Muon/ElementalAnalysis/Plotting``) is a PyQt4/5 compatible interactive interface of up to four subplots, each with separate, changeable axes.
+The plotting submodule of *Elemental Analysis* (``/scripts/Muon/ElementalAnalysis/Plotting``) is a PyQt5 compatible interactive interface of up to four subplots, each with separate, changeable axes.
 
 The x and y limits of each plot (including all plots simultaneously) can be changed using the AxisChanger widgets, and errors can be plotted by using the ``Errors`` checkbox.
 AxisChanger input boxes are automatically updated when the selected plot changes.

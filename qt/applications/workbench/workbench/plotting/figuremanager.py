@@ -9,12 +9,10 @@
 #
 """Provides our custom figure manager to wrap the canvas, window and our custom toolbar"""
 import copy
-from distutils.version import LooseVersion
 import io
 import sys
 import re
 from functools import wraps
-import warnings
 
 import matplotlib
 from matplotlib.axes import Axes
@@ -24,7 +22,6 @@ from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtCore import QObject, Qt
 from qtpy.QtGui import QImage
 from qtpy.QtWidgets import QApplication, QLabel, QFileDialog
-from qtpy import QT_VERSION
 
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver, ITableWorkspace, MatrixWorkspace
 from mantid.kernel import logger
@@ -160,7 +157,9 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
                 ax.make_legend()
             ax.set_title(_replace_workspace_name_in_string(oldName, newName, ax.get_title()))
         if self.canvas.manager is not None:
-            self.canvas.manager.set_window_title(_replace_workspace_name_in_string(oldName, newName, self.canvas.get_window_title()))
+            self.canvas.manager.set_window_title(
+                _replace_workspace_name_in_string(oldName, newName, self.canvas.manager.get_window_title())
+            )
         self.canvas.draw()
 
 
@@ -192,22 +191,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         self.window.setWindowTitle("Figure %d" % num)
         canvas.figure.set_label("Figure %d" % num)
-
-        # Set tight layout so axes labels remain visible
-        canvas.figure.set_layout_engine(layout="tight")
-        # Matplotlib issues a warnings if the window is made too small in the vertical or horizontal direction
-        # Filtering it to only warn once per plot per axis so that it doesn't give a warning everytime the plot window
-        # is resized, filling up the console with warnings
-        warnings.filterwarnings(
-            "once",
-            message="Tight layout not applied. The left and right margins cannot be made "
-            "large enough to accommodate all axes decorations.",
-        )
-        warnings.filterwarnings(
-            "once",
-            message="Tight layout not applied. The bottom and top margins cannot be made "
-            "large enough to accommodate all axes decorations.",
-        )
 
         FigureManagerBase.__init__(self, canvas, num)
         # Give the keyboard focus to the figure instead of the
@@ -266,11 +249,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         self.superplot = None
 
-        # Need this line to stop the bug where the dock window snaps back to its original size after resizing.
-        # 0 argument is arbitrary and has no effect on fit widget size
-        # This is a qt bug reported at (https://bugreports.qt.io/browse/QTBUG-65592)
-        if QT_VERSION >= LooseVersion("5.6"):
-            self.window.resizeDocks([self.fit_browser], [1], Qt.Horizontal)
         self.fit_browser.hide()
 
         if matplotlib.is_interactive():

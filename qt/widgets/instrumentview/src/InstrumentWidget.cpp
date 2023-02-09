@@ -36,6 +36,7 @@
 #include <QCheckBox>
 #include <QColorDialog>
 #include <QComboBox>
+#include <QCoreApplication>
 #include <QDoubleValidator>
 #include <QDragEnterEvent>
 #include <QDropEvent>
@@ -616,7 +617,7 @@ void InstrumentWidget::setSurfaceType(int type) {
         if (m_instrumentActor->hasGridBank())
           m_maskTab->setDisabled(true);
 
-        surface = new Projection3D(m_instrumentActor.get(), glWidgetDimensions());
+        surface = new Projection3D(m_instrumentActor.get(), m_instrumentDisplay->currentWidget()->size());
       } else if (surfaceType <= CYLINDRICAL_Z) {
         m_renderTab->forceLayers(true);
         surface = new UnwrappedCylinder(m_instrumentActor.get(), sample_pos, axis);
@@ -639,7 +640,7 @@ void InstrumentWidget::setSurfaceType(int type) {
     if (!errorMessage.isNull()) {
       // if exception was thrown roll back to the current surface type.
       QApplication::restoreOverrideCursor();
-      QMessageBox::critical(this, "MantidPlot - Error",
+      QMessageBox::critical(this, QCoreApplication::applicationName() + " Error",
                             "Surface cannot be created because of an exception:\n\n  " + errorMessage +
                                 "\n\nPlease select a different surface type.");
       // if suface change was initialized by the GUI this should ensure its
@@ -658,7 +659,9 @@ void InstrumentWidget::setSurfaceType(int type) {
     setSurface(surface);
 
     // init tabs with new surface
-    foreach (InstrumentWidgetTab *tab, m_tabs) { tab->initSurface(); }
+    for (auto tab : std::as_const(m_tabs)) {
+      tab->initSurface();
+    }
 
     m_qtConnect->connect(surface, SIGNAL(executeAlgorithm(Mantid::API::IAlgorithm_sptr)), this,
                          SLOT(executeAlgorithm(Mantid::API::IAlgorithm_sptr)));
@@ -845,7 +848,7 @@ QString InstrumentWidget::confirmDetectorOperation(const QString &opName, const 
   QString message("This operation will affect %1 detectors.\nSelect output "
                   "workspace option:");
   QMessageBox prompt(this);
-  prompt.setWindowTitle("MantidPlot");
+  prompt.setWindowTitle(QCoreApplication::applicationName());
   prompt.setText(message.arg(QString::number(ndets)));
   QPushButton *replace = prompt.addButton("Replace", QMessageBox::ActionRole);
   QPushButton *create = prompt.addButton("New", QMessageBox::ActionRole);
@@ -972,7 +975,7 @@ void InstrumentWidget::saveImage(QString filename) {
         msg += itr.next() + ", ";
       }
       msg.chop(2); // Remove last space and comma
-      QMessageBox::warning(this, "MantidPlot", msg);
+      QMessageBox::warning(this, QCoreApplication::applicationName() + " Warning", msg);
       return;
     }
   }
@@ -1028,7 +1031,9 @@ void InstrumentWidget::saveSettings() {
     // only save tab states if the instrument actor loading finished and this widget was updated
     // through initWidget
     if (m_finished) {
-      foreach (InstrumentWidgetTab *tab, m_tabs) { tab->saveSettings(settings); }
+      for (auto tab : std::as_const(m_tabs)) {
+        tab->saveSettings(settings);
+      }
     }
   }
   settings.endGroup();
@@ -1185,7 +1190,7 @@ void InstrumentWidget::dropEvent(QDropEvent *e) {
   QString name = e->mimeData()->objectName();
   if (name == "MantidWorkspace") {
     QStringList wsNames = e->mimeData()->text().split("\n");
-    foreach (const auto &wsName, wsNames) {
+    for (const auto &wsName : std::as_const(wsNames)) {
       if (this->overlay(wsName))
         e->accept();
     }
@@ -1371,21 +1376,6 @@ void InstrumentWidget::setSurface(ProjectionSurface *surface) {
   if (unwrappedSurface) {
     m_renderTab->flipUnwrappedView(unwrappedSurface->isFlippedView());
   }
-}
-
-/// Return the size of the OpenGL display widget in logical pixels
-QSize InstrumentWidget::glWidgetDimensions() {
-  auto sizeinLogicalPixels = [](const QWidget *w) -> QSize {
-    const auto devicePixelRatio = w->window()->devicePixelRatio();
-    return QSize(w->width() * devicePixelRatio, w->height() * devicePixelRatio);
-  };
-
-  if (m_instrumentDisplay->getGLDisplay())
-    return sizeinLogicalPixels(m_instrumentDisplay->getGLDisplay());
-  else if (m_instrumentDisplay->getQtDisplay())
-    return sizeinLogicalPixels(m_instrumentDisplay->getQtDisplay());
-  else
-    return QSize(0, 0);
 }
 
 /// Redraw the instrument view

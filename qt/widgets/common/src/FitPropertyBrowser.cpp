@@ -1431,13 +1431,7 @@ void FitPropertyBrowser::stringChanged(QtProperty *prop) {
 
     QString parName = h->functionPrefix() + "." + parProp->propertyName();
 
-    // Get the tie expression stored in the function in case the new expression is invalid
-    // and the GUI needs to be reset
-    const auto parIndex = compositeFunction()->parameterIndex(parName.toStdString());
-    const auto oldTie = compositeFunction()->getTie(parIndex);
-    const auto oldTieStr = oldTie->asString();
-    const auto oldExp = QString::fromStdString(oldTieStr.substr(oldTieStr.find("=") + 1));
-
+    const auto oldExp = getOldExpressionAsString(parName);
     const auto exp = m_stringManager->value(prop);
 
     if (oldExp == exp)
@@ -1460,6 +1454,29 @@ void FitPropertyBrowser::stringChanged(QtProperty *prop) {
     emit functionChanged();
     return;
   }
+}
+
+/** Get the tie expression stored in the function in case the new expression is invalid and the GUI needs to be reset
+ * @param parameterName :: A pointer to the parameter name
+ */
+QString FitPropertyBrowser::getOldExpressionAsString(const QString &parameterName) const {
+  // Note this only finds the oldTie if it was a tie to a function (e.g. f0.Height=f1.Height)
+  // but not if it was a custom tie (e.g. f0.Height=2.0)
+  QString oldExp;
+  size_t parIndex;
+  try {
+    parIndex = compositeFunction()->parameterIndex(parameterName.toStdString());
+  } catch (std::exception &) {
+    return "";
+  }
+  const auto oldTie = compositeFunction()->getTie(parIndex);
+  if (oldTie) {
+    const auto oldTieStr = oldTie->asString();
+    oldExp = QString::fromStdString(oldTieStr.substr(oldTieStr.find("=") + 1));
+  } else {
+    oldExp = "";
+  }
+  return oldExp;
 }
 
 /** Called when a filename property changed
@@ -3189,9 +3206,7 @@ void FitPropertyBrowser::functionHelp() {
  * Show online browser help
  */
 void FitPropertyBrowser::browserHelp() {
-  MantidDesktopServices::openUrl(QUrl("http://www.mantidproject.org/"
-                                      "MantidPlot:_Simple_Peak_Fitting_with_the_Fit_"
-                                      "Wizard#Fit_Properties_Browser"));
+  MantidQt::API::HelpWindow::showPage(QStringLiteral("workbench/plotwindow.html"));
 }
 
 /**=================================================================================================

@@ -451,7 +451,7 @@ class MantidConfigDirectInelastic(object):
             "## Valid values are: error, warning, notice, information, debug\n"
             "#logging.loggers.root.level=information\n"
             "\n"
-            "## MantidPlot\n"
+            "## MantidWorkbench\n"
             "##\n"
             "## Show invisible workspaces\n"
             "#MantidOptions.InvisibleWorkspaces=0\n"

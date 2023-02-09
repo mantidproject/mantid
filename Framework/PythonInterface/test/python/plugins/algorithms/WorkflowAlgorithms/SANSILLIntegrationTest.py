@@ -17,7 +17,8 @@ class SANSILLIntegrationTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls._facility = config["default.facility"]
-        cls._data_search_dirs = config.getDataSearchDirs()
+        cls._instrument = config["default.instrument"]
+        cls._data_search_dirs = config["datasearch.directories"]
         config.appendDataSearchSubDir("ILL/D11/")
         config.appendDataSearchSubDir("ILL/D33/")
         config.setFacility("ILL")
@@ -25,8 +26,9 @@ class SANSILLIntegrationTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        config.setFacility(cls._facility)
-        config.setDataSearchDirs(cls._data_search_dirs)
+        config["default.facility"] = cls._facility
+        config["default.instrument"] = cls._instrument
+        config["datasearch.directories"] = cls._data_search_dirs
         mtd.clear()
 
     def test_monochromatic(self):

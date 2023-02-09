@@ -27,21 +27,7 @@
 #include <cstdarg>
 #include <memory>
 
-// The below can be replaced with global_control when all platforms
-// have 2019U4
-#if __has_include("tbb/tbb_stddef.h")
-#include "tbb/tbb_stddef.h"
-#if TBB_INTERFACE_VERSION_MAJOR < 11
-#include "tbb/task_scheduler_init.h"
-#include <thread>
-#else
-#define TBB_HAS_GLOBAL_CONTROL
 #include "tbb/global_control.h"
-#endif
-#else
-#define TBB_HAS_GLOBAL_CONTROL
-#include "tbb/global_control.h"
-#endif
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -57,11 +43,14 @@
 #endif
 
 namespace {
-#ifdef TBB_HAS_GLOBAL_CONTROL
-std::unique_ptr<tbb::global_control> m_globalTbbControl;
-#else
-thread_local std::unique_ptr<tbb::task_scheduler_init> m_globalTbbControl;
-#endif
+// We use a raw pointer over a unique_ptr to avoid problems with static deallocation order of static
+// variables. In certain circumstances, e.g. unit testing, the shutdown method on FrameworkManager is
+// not called. In this situation unique_ptr causes the tbb::global_control object to be destroyed
+// *after* its own internal static data has been destroyed and we see a random segfault.
+// We have technically introduced a leak by not deleting this object in the situation where
+// `FrameworkManager::shutdown` is not called but the memory cannot be used again by the program since
+// it survives for the duration of the program. It will ultimately be reclaimed by the OS.
+tbb::global_control *GLOBAL_TBB_CONTROL = nullptr;
 } // namespace
 
 namespace Mantid {
@@ -187,15 +176,11 @@ void FrameworkManagerImpl::setNumOMPThreadsToConfigValue() {
 void FrameworkManagerImpl::setNumOMPThreads(const int nthreads) {
   g_log.debug() << "Setting maximum number of threads to " << nthreads << "\n";
   PARALLEL_SET_NUM_THREADS(nthreads);
-  if (m_globalTbbControl) {
-    m_globalTbbControl.reset(); // Have to reset to change the number of threads at runtime
+  if (GLOBAL_TBB_CONTROL) {
+    delete GLOBAL_TBB_CONTROL; // Have to reset to change the number of threads at runtime
   }
 
-#ifdef TBB_HAS_GLOBAL_CONTROL
-  m_globalTbbControl = std::make_unique<tbb::global_control>(tbb::global_control::max_allowed_parallelism, nthreads);
-#else
-  m_globalTbbControl = std::make_unique<tbb::task_scheduler_init>(nthreads);
-#endif
+  GLOBAL_TBB_CONTROL = new tbb::global_control(tbb::global_control::max_allowed_parallelism, nthreads);
 }
 
 /**
@@ -219,7 +204,7 @@ void FrameworkManagerImpl::clear() {
 void FrameworkManagerImpl::shutdown() {
   Kernel::UsageService::Instance().shutdown();
   // Ensure we don't run into static init ordering issues with TBB
-  m_globalTbbControl.reset();
+  delete GLOBAL_TBB_CONTROL;
   clear();
 }
 

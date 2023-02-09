@@ -42,6 +42,7 @@ public:
   virtual void setPeakParameters(Mantid::API::IPeakFunction_const_sptr const &peak) = 0;
   virtual void setPeakCentre(double const centre) = 0;
   virtual double peakCentre() const = 0;
+  virtual double background() const = 0;
   virtual Mantid::API::IPeakFunction_const_sptr getPeakCopy() const = 0;
 
   virtual std::string fitStatus() const = 0;
@@ -77,6 +78,7 @@ public:
   void setPeakParameters(Mantid::API::IPeakFunction_const_sptr const &peak) override;
   void setPeakCentre(double const centre) override;
   double peakCentre() const override;
+  double background() const override;
   Mantid::API::IPeakFunction_const_sptr getPeakCopy() const override;
 
   std::string fitStatus() const override;

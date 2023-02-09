@@ -1,1 +1,0 @@
-* Replaced deprecated NumPy `np.int` type in :ref:`ConvertWANDSCDtoQ  <algm-ConvertWANDSCDtoQ >`.

@@ -77,7 +77,7 @@ class LoadAndMergeTest(unittest.TestCase):
         self.assertTrue(isinstance(out5, MatrixWorkspace))
 
     def test_loader_option(self):
-        out6 = LoadAndMerge(Filename="967101", LoaderName="LoadILLDiffraction", LoaderVersion=1, LoaderOptions=dict({"DataType": "Raw"}))
+        out6 = LoadAndMerge(Filename="967101", LoaderName="LoadILLDiffraction", LoaderVersion=1)
         self.assertTrue(out6)
         self.assertEqual(out6.name(), "out6")
         self.assertTrue(isinstance(out6, MatrixWorkspace))

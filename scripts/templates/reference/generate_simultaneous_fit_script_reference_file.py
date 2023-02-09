@@ -2,11 +2,11 @@
 from mantid.simpleapi import *
 import matplotlib.pyplot as plt
 
-# Dictionary { workspace_name: (workspace_index, start_x, end_x) }
-input_data = {
-    "Name1": (0, 0.500000, 1.500000),
-    "Name2": (1, 0.600000, 1.600000)
-}
+# List of tuples [ (workspace_name, workspace_index, start_x, end_x) ]
+input_data = [
+    ("Name1", 0, 0.500000, 1.500000),
+    ("Name2", 1, 0.600000, 1.600000)
+]
 
 # Fit function as a string
 function = \
@@ -22,8 +22,8 @@ evaluation_type = "CentrePoint"
 output_base_name = "Output_Fit"
 
 # Perform a simultaneous fit
-input_workspaces = list(input_data.keys())
-domain_data = list(input_data.values())
+input_workspaces = [domain[0] for domain in input_data]
+domain_data = [domain[1:] for domain in input_data]
 
 fit_output = \
     Fit(Function=function,

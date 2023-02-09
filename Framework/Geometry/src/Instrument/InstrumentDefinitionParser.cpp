@@ -1269,7 +1269,7 @@ void InstrumentDefinitionParser::createDetectorOrMonitor(Geometry::ICompAssembly
     g_log.warning() << "Attribute 'mark-as' is a depricated attribute in "
                        "Instrument Definition File."
                     << " Please see the deprecated section of "
-                       "www.mantidproject.org/IDF for how to remove this "
+                       "docs.mantidproject.org/concepts/InstrumentDefinitionFile for how to remove this "
                        "warning message\n";
   }
 
@@ -2079,7 +2079,7 @@ void InstrumentDefinitionParser::setLogfile(const Geometry::IComponent *comp, co
       g_log.error() << "XML element with name or type = " << comp->getName()
                     << " contains <parameter> element with name=\"" << paramName << "\"."
                     << " This is a reserved Mantid keyword. Please use other name, "
-                    << "and see www.mantidproject.org/IDF for list of reserved "
+                    << "and see docs.mantidproject.org/concepts/InstrumentDefinitionFile for list of reserved "
                        "keywords."
                     << " This parameter is ignored";
       continue;
@@ -2127,14 +2127,14 @@ void InstrumentDefinitionParser::setLogfile(const Geometry::IComponent *comp, co
       g_log.warning() << "XML element with name or type = " << comp->getName()
                       << " contains <parameter> element where the value of the "
                       << "parameter has been specified more than once. See "
-                      << "www.mantidproject.org/IDF for how the value of the "
+                      << "docs.mantidproject.org/concepts/InstrumentDefinitionFile for how the value of the "
                       << "parameter is set in this case.";
     }
 
     if (numberValueEle + numberLogfileEle + numberLookUp + numberFormula == 0) {
       g_log.error() << "XML element with name or type = " << comp->getName()
                     << " contains <parameter> for which no value is specified."
-                    << " See www.mantidproject.org/IDF for how to set the value"
+                    << " See docs.mantidproject.org/concepts/InstrumentDefinitionFile for how to set the value"
                     << " of a parameter. This parameter is ignored.";
       continue;
     }
@@ -2286,7 +2286,7 @@ void InstrumentDefinitionParser::setLogfile(const Geometry::IComponent *comp, co
         if (it == allowedUnits.end()) {
           g_log.warning() << "x-unit used with interpolation table must be "
                              "one of the recognised units "
-                          << " see http://www.mantidproject.org/Unit_Factory";
+                          << " see http://docs.mantidproject.org/concepts/UnitFactory";
         } else
           interpolation->setXUnit(pLookUp->getAttribute("x-unit"));
       }
@@ -2296,7 +2296,7 @@ void InstrumentDefinitionParser::setLogfile(const Geometry::IComponent *comp, co
         if (it == allowedUnits.end()) {
           g_log.warning() << "y-unit used with interpolation table must be "
                              "one of the recognised units "
-                          << " see http://www.mantidproject.org/Unit_Factory";
+                          << " see http://docs.mantidproject.org/concepts/UnitFactory";
         } else
           interpolation->setYUnit(pLookUp->getAttribute("y-unit"));
       }
@@ -2327,7 +2327,7 @@ void InstrumentDefinitionParser::setLogfile(const Geometry::IComponent *comp, co
         if (it == allowedUnits.end()) {
           g_log.warning() << "unit attribute used with formula must be one "
                              "of the recognized units "
-                          << " see http://www.mantidproject.org/Unit_Factory";
+                          << " see http://docs.mantidproject.org/concepts/UnitFactory";
         } else
           formulaUnit = pFormula->getAttribute("unit");
       }
@@ -2637,7 +2637,7 @@ void InstrumentDefinitionParser::adjust(Poco::XML::Element *pElem, std::map<std:
   if (pNLalg->length() == 0) {
     throw Exception::InstrumentDefinitionError(std::string("An <algebra> element must be part of a <type>, which") +
                                                " includes a <combine-components-into-one-shape> element. See "
-                                               "www.mantidproject.org/IDF.");
+                                               "docs.mantidproject.org/concepts/InstrumentDefinitionFile.");
   }
 
   // check that there is a <location> element in type
@@ -2647,7 +2647,7 @@ void InstrumentDefinitionParser::adjust(Poco::XML::Element *pElem, std::map<std:
     throw Exception::InstrumentDefinitionError(std::string("At least one <location> element must be part of a "
                                                            "<type>, which") +
                                                " includes a <combine-components-into-one-shape> element. See "
-                                               "www.mantidproject.org/IDF.");
+                                               "docs.mantidproject.org/concepts/InstrumentDefinitionFile.");
   }
 
   // check if a <translate-rotate-combined-shape-to> is defined
@@ -2677,10 +2677,11 @@ void InstrumentDefinitionParser::adjust(Poco::XML::Element *pElem, std::map<std:
     if (std::find(allLocationName.begin(), allLocationName.end(), locationElementName) == allLocationName.end())
       allLocationName.emplace_back(locationElementName);
     else
-      throw Exception::InstrumentDefinitionError(std::string("Names in a <type> element containing ") +
-                                                 "a <combine-components-into-one-shape> element must be unique. " +
-                                                 "Here error is that " + locationElementName +
-                                                 " appears at least twice. See www.mantidproject.org/IDF.");
+      throw Exception::InstrumentDefinitionError(
+          std::string("Names in a <type> element containing ") +
+          "a <combine-components-into-one-shape> element must be unique. " + "Here error is that " +
+          locationElementName +
+          " appears at least twice. See docs.mantidproject.org/concepts/InstrumentDefinitionFile.");
 
     // create dummy component to hold coord. sys. of cuboid
     auto baseCoor = std::make_unique<CompAssembly>("base"); // dummy assembly used to get to end assembly if nested
@@ -2845,7 +2846,7 @@ InstrumentDefinitionParser::convertLocationsElement(const Poco::XML::Element *pE
     }
   } else {
     throw Exception::InstrumentDefinitionError("When using <locations> n-elements attribute is required. See "
-                                               "www.mantidproject.org/IDF.");
+                                               "docs.mantidproject.org/concepts/InstrumentDefinitionFile.");
   }
 
   std::string name;
@@ -3065,9 +3066,10 @@ std::string InstrumentDefinitionParser::getShapeCoorSysComp(Geometry::ICompAssem
     auto *pElem = static_cast<Element *>(pNL->item(0));
     return getShapeCoorSysComp(ass, pElem, getTypeElement, endAssembly);
   } else {
-    throw Exception::InstrumentDefinitionError(std::string("When using <combine-components-into-one-shape> ") +
-                                               " the containing component elements are not allowed to contain "
-                                               "multiple nested components. See www.mantidproject.org/IDF.");
+    throw Exception::InstrumentDefinitionError(
+        std::string("When using <combine-components-into-one-shape> ") +
+        " the containing component elements are not allowed to contain "
+        "multiple nested components. See docs.mantidproject.org/concepts/InstrumentDefinitionFile.");
   }
 }
 

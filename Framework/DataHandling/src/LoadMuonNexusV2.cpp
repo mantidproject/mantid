@@ -80,7 +80,7 @@ int LoadMuonNexusV2::confidence(NexusHDF5Descriptor &descriptor) const {
 /// Initialization method.
 void LoadMuonNexusV2::init() {
 
-  std::vector<std::string> extensions{".nxs", ".nxs_v2"};
+  std::vector<std::string> extensions{".nxs", ".nxs_v2", ".nxs_v1"};
   declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, extensions),
                   "The name of the Nexus file to load");
 

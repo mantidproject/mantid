@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy import QtWidgets, PYQT4
+from qtpy import QtWidgets
 from mantidqtinterfaces.Muon.GUI.Common.message_box import warning, question
 from mantidqtinterfaces.Muon.GUI.Common.utilities.muon_file_utils import show_file_browser_and_return_selection
 
@@ -135,11 +135,8 @@ class GroupingTabView(QtWidgets.QWidget):
         return show_file_browser_and_return_selection(self, file_filter, search_directories)[0]
 
     def show_file_save_browser_and_return_selection(self):
-        if PYQT4:
-            chosen_file = str(QtWidgets.QFileDialog.getSaveFileName(self, "Select file", "", "XML files (*.xml)"))
-        else:
-            chosen_file, _filter = QtWidgets.QFileDialog.getSaveFileName(self, "Select file", "", "XML files (*.xml)")
-            chosen_file = str(chosen_file)
+        chosen_file, _filter = QtWidgets.QFileDialog.getSaveFileName(self, "Select file", "", "XML files (*.xml)")
+        chosen_file = str(chosen_file)
         if chosen_file == "":
             return chosen_file
 

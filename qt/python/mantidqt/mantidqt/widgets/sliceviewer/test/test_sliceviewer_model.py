@@ -121,6 +121,7 @@ def _create_mock_workspace(ws_type, coords: SpecialCoordinateSystem = None, has_
             ws.hasOriginalWorkspace.return_value = False
             basis_mat = np.eye(ndims)
             ws.getBasisVector.side_effect = lambda idim: basis_mat[:, idim]
+            ws.getDimension().getMDFrame().isQ.return_value = True
         else:
             ws.isMDHistoWorkspace.return_value = False
 
@@ -226,7 +227,15 @@ class SliceViewerModelTest(unittest.TestCase):
             extents=(-3, 3, -4, 4, -5, 5),
             names=("h", "k", "l"),
             units=("rlu", "rlu", "rlu"),
-            isq=(False, False, False),
+            isq=(True, True, True),
+        )
+        self.ws_MDE_4D = _create_mock_mdeventworkspace(
+            ndims=4,
+            coords=SpecialCoordinateSystem.NONE,
+            extents=(-2, 2, -3, 3, -4, 4, -5, 5),
+            names=("e", "h", "k", "l"),
+            units=("meV", "rlu", "rlu", "rlu"),
+            isq=(False, True, True, True),
         )
         self.ws_MDE_3D.name.return_value = "ws_MDE_3D"
 
@@ -539,6 +548,27 @@ class SliceViewerModelTest(unittest.TestCase):
         axes_angles = model.get_axes_angles(force_orthogonal=True)
         self.assertAlmostEqual(axes_angles[1, 2], np.pi / 2, delta=1e-10)
 
+    def test_calc_proj_matrix_4D_workspace_nonQ_dims(self):
+        ws = _create_mock_histoworkspace(
+            ndims=4,
+            coords=SpecialCoordinateSystem.NONE,
+            extents=(-3, 3, -10, 10, -1, 1, -2, 2),
+            signal=np.arange(100.0).reshape(5, 5, 2, 2),
+            error=np.arange(100.0).reshape(5, 5, 2, 2),
+            nbins=(5, 5, 2, 2),
+            names=("00L", "HH0", "-KK0", "E"),
+            units=("rlu", "rlu", "rlu", "EnergyTransfer"),
+            isq=(True, True, True, False),
+        )
+        # basis vectors as if ws was produced from BinMD call on MDEvent with dims E, H, K, L
+        basis_mat = np.array([[0, 0, 0, 1], [0, 1, -1, 0], [0, 1, 1, 0], [1, 0, 0, 0]])
+        ws.getBasisVector.side_effect = lambda idim: basis_mat[:, idim]
+        model = SliceViewerModel(ws)
+
+        proj_mat = model.get_proj_matrix()
+
+        self.assertTrue(np.all(np.isclose(proj_mat, [[0, 1, -1], [0, 1, 1], [1, 0, 0]])))
+
     @patch.multiple("mantidqt.widgets.sliceviewer.models.roi", ExtractSpectra=DEFAULT, Rebin=DEFAULT, SumSpectra=DEFAULT, Transpose=DEFAULT)
     def test_export_roi_for_matrixworkspace(self, ExtractSpectra, **_):
         xmin, xmax, ymin, ymax = -1.0, 3.0, 2.0, 4.0
@@ -824,11 +854,52 @@ class SliceViewerModelTest(unittest.TestCase):
             assert_error_returned_in_help(self.ws_MDE_3D, export_type, mock_binmd, "BinMD failed")
 
     @patch("mantidqt.widgets.sliceviewer.models.model.SliceViewerModel.get_proj_matrix")
-    def test_get_hkl_from_xyz(self, mock_get_proj_matrix):
+    def test_get_hkl_from_full_point_returns_zeros_for_a_none_transform(self, mock_get_proj_matrix):
+        qdims = [0, 1, 2]
+        point_3d = [1.0, 2.0, 3.0]
+
+        model = SliceViewerModel(self.ws_MDE_3D)
+        mock_get_proj_matrix.return_value = None
+
+        hkl = model.get_hkl_from_full_point(point_3d, qdims)
+
+        self.assertEqual((0.0, 0.0, 0.0), hkl)
+
+    @patch("mantidqt.widgets.sliceviewer.models.model.SliceViewerModel.get_proj_matrix")
+    def test_get_hkl_from_full_point_for_3D_point(self, mock_get_proj_matrix):
+        qdims = [0, 1, 2]
+        point_3d = [1.0, 2.0, 3.0]  # [x, y, z] = [h, k, l]
+
         model = SliceViewerModel(self.ws_MDE_3D)
         mock_get_proj_matrix.return_value = np.array([[0, 1, -1], [0, 1, 1], [1, 0, 0]])
-        hkl = model.get_hkl_from_xyz(0, 1, 2, 1.0, 2.0, 3.0)
-        self.assertTrue((hkl == [-1, 5, 1]).all())
+
+        hkl = model.get_hkl_from_full_point(point_3d, qdims)
+
+        self.assertEqual([-1.0, 5.0, 1.0], list(hkl))
+
+    @patch("mantidqt.widgets.sliceviewer.models.model.SliceViewerModel.get_proj_matrix")
+    def test_get_hkl_from_full_point_for_4D_point(self, mock_get_proj_matrix):
+        qdims = [1, 2, 3]
+        point_4d = [1.0, 2.0, 3.0, 4.0]  # [y, x, z, ...] = [e, h, k, l]
+
+        model = SliceViewerModel(self.ws_MDE_4D)
+        mock_get_proj_matrix.return_value = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+
+        hkl = model.get_hkl_from_full_point(point_4d, qdims)
+
+        self.assertEqual([2.0, 3.0, 4.0], list(hkl))
+
+    @patch("mantidqt.widgets.sliceviewer.models.model.SliceViewerModel.get_proj_matrix")
+    def test_get_hkl_from_full_point_for_4D_point_with_transformation(self, mock_get_proj_matrix):
+        qdims = [1, 2, 3]
+        point_4d = [1.0, 2.0, 3.0, 4.0]  # [y, z, ..., x] = [e, h, k, l]
+
+        model = SliceViewerModel(self.ws_MDE_4D)
+        mock_get_proj_matrix.return_value = np.array([[2, 0, 0], [0, -1, 0], [0, 0, 3]])
+
+        hkl = model.get_hkl_from_full_point(point_4d, qdims)
+
+        self.assertEqual([4.0, -3.0, 12.0], list(hkl))
 
     # private
     def _assert_supports_non_orthogonal_axes(self, expectation, ws_type, coords, has_oriented_lattice):

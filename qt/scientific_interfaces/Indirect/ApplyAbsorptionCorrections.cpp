@@ -14,7 +14,6 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
-#include "MantidQtWidgets/Common/SignalBlocker.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QStringList>

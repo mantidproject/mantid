@@ -87,6 +87,7 @@ class MoveMarkersState(object):
         """
         Get the state the machine should return to after the mouse button release: self
         """
+        QApplication.restoreOverrideCursor()
         return self
 
 

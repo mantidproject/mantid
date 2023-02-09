@@ -9,7 +9,6 @@
 #
 import unittest
 
-import qtpy
 from qtpy import QtCore
 from qtpy.QtCore import Qt
 
@@ -213,8 +212,6 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         self.assertEqual(2, index.column.call_count)
 
     def test_data_tooltip_role_masked_row(self):
-        if not qtpy.PYQT5:
-            self.skipTest("QVariant cannot be instantiated in QT4, and the test fails with an error.")
         ws, model, row, index = setup_common_for_test_data()
 
         model.ws_spectrum_info.hasDetectors = Mock(return_value=True)
@@ -241,8 +238,6 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         self.assertEqual(MatrixWorkspaceTableViewModel.MASKED_ROW_TOOLTIP, output)
 
     def test_data_tooltip_role_masked_monitor_row(self):
-        if not qtpy.PYQT5:
-            self.skipTest("QVariant cannot be instantiated in QT4, and the test fails with an error.")
         ws, model, row, index = setup_common_for_test_data()
 
         model.ws_spectrum_info.isMasked = Mock(return_value=True)
@@ -265,8 +260,6 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         self.assertEqual(MatrixWorkspaceTableViewModel.MASKED_MONITOR_ROW_TOOLTIP, output)
 
     def test_data_tooltip_role_monitor_row(self):
-        if not qtpy.PYQT5:
-            self.skipTest("QVariant cannot be instantiated in QT4, and the test fails with an error.")
         ws, model, row, index = setup_common_for_test_data()
 
         # necessary otherwise it is returned that there is a masked bin, and we get the wrong output
@@ -293,9 +286,6 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         self.assertEqual(MatrixWorkspaceTableViewModel.MONITOR_ROW_TOOLTIP, output)
 
     def test_data_tooltip_role_masked_bin_in_monitor_row(self):
-        if not qtpy.PYQT5:
-            self.skipTest("QVariant cannot be instantiated in QT4, and the test fails with an error.")
-
         ws, model, row, index = setup_common_for_test_data()
 
         model.ws_spectrum_info.isMasked = Mock(return_value=False)
@@ -321,9 +311,6 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         self.assertEqual(MatrixWorkspaceTableViewModel.MONITOR_ROW_TOOLTIP + MatrixWorkspaceTableViewModel.MASKED_BIN_TOOLTIP, output)
 
     def test_data_tooltip_role_masked_bin(self):
-        if not qtpy.PYQT5:
-            self.skipTest("QVariant cannot be instantiated in QT4, and the test fails with an error.")
-
         ws, model, row, index = setup_common_for_test_data()
 
         model.ws_spectrum_info.isMasked = Mock(return_value=False)
@@ -351,8 +338,6 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         self.assertEqual(MatrixWorkspaceTableViewModel.MASKED_BIN_TOOLTIP, output)
 
     def test_headerData_not_display_or_tooltip(self):
-        if not qtpy.PYQT5:
-            self.skipTest("QVariant cannot be instantiated in QT4, and the test fails with an error.")
         ws = MockWorkspace()
         model_type = MatrixWorkspaceTableViewModelType.x
         model = MatrixWorkspaceTableViewModel(ws, model_type)

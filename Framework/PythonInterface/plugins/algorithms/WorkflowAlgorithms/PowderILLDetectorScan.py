@@ -67,10 +67,6 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
         )
 
         self.declareProperty(
-            name="UseCalibratedData", defaultValue=True, doc="Whether or not to use the calibrated data in the NeXus files."
-        )
-
-        self.declareProperty(
             name="Output2DTubes", defaultValue=False, doc="Output a 2D workspace of height along tube against tube scattering angle."
         )
 
@@ -122,7 +118,7 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
             doc="Comma separated list of component names to output the reduced data for; for example tube_1",
         )
 
-        self.declareProperty(name="AlignTubes", defaultValue=True, doc="Align the tubes vertically and horizontally according to IPF.")
+        self.declareProperty(name="AlignTubes", defaultValue=False, doc="Align the tubes vertically and horizontally according to IPF.")
 
     def _generate_mask(self, n_pix, instrument):
         """
@@ -206,11 +202,7 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
         return output2D
 
     def PyExec(self):
-        data_type = "Raw"
-        if self.getProperty("UseCalibratedData").value:
-            data_type = "Auto"  # this will use calibrated data, if they exist
         align_tubes = self.getProperty("AlignTubes").value
-
         self._progress = Progress(self, start=0.0, end=1.0, nreports=6)
         self._progress.report("Loading data")
         # Do not merge the runs yet, since it will break the calibration
@@ -219,7 +211,7 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
         input_workspace = LoadAndMerge(
             Filename=self.getPropertyValue("Run").replace("+", ","),
             LoaderName="LoadILLDiffraction",
-            LoaderOptions={"DataType": data_type, "AlignTubes": align_tubes},
+            LoaderOptions={"AlignTubes": align_tubes},
         )
         # We might already have a group, but group just in case
         input_group = GroupWorkspaces(InputWorkspaces=input_workspace)

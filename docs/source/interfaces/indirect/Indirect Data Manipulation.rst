@@ -36,15 +36,24 @@ Manage Directories
   Opens the Manage Directories dialog allowing you to change your search directories
   and default save directory and enable/disable data archive search.
 
+.. _inelastic-symmetrise:
+
 Symmetrise
 ----------
 
 This tab allows you to take an asymmetric reduced file (*_red.nxs*) and symmetrise it about
 the Y axis.
 
-The curve is symmetrised such that the range of positive values between :math:`EMin`
+The curve can be symmetrised using two methods depending on the value of **Reflect Type**:
+
+1. *Positive to Negative* (default): the range of the positive values between :math:`EMin`
 and :math:`EMax` are reflected about the Y axis and replaces the negative values
 in the range :math:`-EMax` to :math:`-EMin`, the curve between :math:`-EMin` and
+:math:`EMin` is not modified.
+
+2. *Negative to Positive*: the range of the negative values between :math:`-EMax`
+and :math:`EMin` are reflected about the Y axis and replaces the positive values
+in the range :math:`EMin` to :math:`-EMax`, the curve between :math:`-EMin` and
 :math:`EMin` is not modified.
 
 .. interface:: Data Manipulation
@@ -59,6 +68,9 @@ Input
 
 EMin & EMax
   Sets the energy range that is to be reflected about :math:`y=0`.
+
+Reflect Type
+  Whether to do *Positive to Negative* or *Negative to Positive* reflection.
 
 Spectrum No
   Changes the spectrum shown in the preview plots.
@@ -119,13 +131,15 @@ produce this file is IRIS, the analyser is graphite and the reflection is 002. S
 
 4. Click **Run** and wait for the interface to finish processing. This will run the
    :ref:`Symmetrise <algm-Symmetrise>` algorithm. The output workspace is called
-   ``iris26176_graphite002_sym_red``.
+   ``iris26176_graphite002_sym_pn_red``.
 
 5. Click **Plot Spectra** to produce a spectra plot of the output workspace. Other indices can be
    plotted by entering indices in the box next to the **Plot Spectra** button. For example,
    entering indices 0-2,4,6-7 will plot the spectra with workspace indices 0, 1, 2, 4, 6 and 7.
 
 Go to the :ref:`sqw-example-workflow`.
+
+.. _inelastic-sqw:
 
 S(Q, w)
 -------
@@ -215,6 +229,8 @@ produce this file is IRIS, the analyser is graphite and the reflection is 002. S
 7. Choose a default save directory and then click **Save Result** to save the output workspace.
    The _sqw file is used in the :ref:`moments-example-workflow`.
 
+.. _inelastic-moments:
+
 Moments
 -------
 
@@ -264,6 +280,8 @@ the :ref:`sqw-example-workflow`.
 3. Click **Run** and wait for the interface to finish processing. This will run the
    :ref:`SofQWMoments <algm-SofQWMoments>` algorithm. The output workspace ends
    with suffix _moments and is called ``iris26176_graphite002_moments``.
+
+.. _elwin:
 
 Elwin
 -----

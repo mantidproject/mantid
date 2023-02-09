@@ -13,7 +13,8 @@ The Avoided Level Crossing (ALC) :math:`\mu SR` technique probes the energy leve
 muoniated radical system, and can be used to elucidate the regiochemistry of
 muonium addition, dynamic processes, and reaction kinetics, through measurement
 of the muon and proton hyperfine coupling interactions. Examples of how the ALC
-technique can be used are presented in this `brochure <http://www.mantidproject.org/images/3/39/Muon_level_crossing_resonance_leaflet.pdf>`__.
+technique can be used are presented in this
+`brochure <http://archive.mantidproject.org/images/3/39/Muon_level_crossing_resonance_leaflet.pdf>`__.
 
 Radical systems are formed during muon thermalisation, during which a portion of
 the implanted muons are able to capture electrons to form muonium (:math:`\mu+e`). Muonium
@@ -293,11 +294,5 @@ Run the ALC interface
 ---------------------
 
 The interface is available from the Interfaces menu: Interfaces -> Muon -> ALC.
-
-Feedback & Comments
--------------------
-
-If you have any questions or comments about this interface or this help page, please
-contact the `Mantid team <http://www.mantidproject.org/Contact>`__ or the `Muon group <http://www.isis.stfc.ac.uk/groups/muons/muons3385.html>`__.
 
 .. categories:: Interfaces Muon

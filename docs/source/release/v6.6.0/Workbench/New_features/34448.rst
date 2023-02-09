@@ -1,1 +1,0 @@
-* Normalisation (by maximum value) is available in Superplot

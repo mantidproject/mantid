@@ -1,0 +1,1 @@
+It is now possible to generate a python script for fitting spectra from the same workspace using the Fit Script Generator interface.

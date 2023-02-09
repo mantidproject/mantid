@@ -5,17 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-// Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
-// Mantid Headers from the same project
-#include "MantidCurveFitting/DllConfig.h"
-#include "MantidCurveFitting/Functions/ElasticIsoRotDiff.h"
-#include "MantidCurveFitting/Functions/InelasticIsoRotDiff.h"
-// Mantid headers from other projects
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ImmutableCompositeFunction.h"
-// third party library headers (N/A)
-// standard library headers (N/A)
+#include "MantidCurveFitting/DllConfig.h"
+#include "MantidCurveFitting/Functions/ElasticIsoRotDiff.h"
+#include "MantidCurveFitting/Functions/InelasticIsoRotDiff.h"
 
 namespace Mantid {
 namespace CurveFitting {
