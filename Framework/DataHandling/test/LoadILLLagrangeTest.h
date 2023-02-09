@@ -41,7 +41,7 @@ public:
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   LoadILLLagrangeTest() {
-    ConfigService::Instance().appendDataSearchSubDir("ILL/Lagrange/");
+    ConfigService::Instance().appendDataSearchSubDir("ILL/LAGRANGE/");
     ConfigService::Instance().setFacility("ILL");
   }
 
