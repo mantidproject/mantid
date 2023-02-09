@@ -322,7 +322,8 @@ public:
 
   /// Return a TimeSeriesPropertyStatistics object
   TimeSeriesPropertyStatistics getStatistics(const Kernel::TimeROI *roi = nullptr) const override;
-
+  /// Filtering the series according to the requested statistics
+  double extractStatistic(Math::StatisticType selection, const TimeROI *roi = nullptr) const override;
   /// Detects whether there are duplicated entries (of time) in property &
   /// eliminates them
   void eliminateDuplicates();
@@ -362,11 +363,6 @@ protected:
   /// Flag to state whether mP is sorted or not
   mutable TimeSeriesSortStatus m_propSortedFlag;
 };
-
-/// Function filtering double TimeSeriesProperties according to the requested
-/// statistics.
-double DLLExport filterByStatistic(TimeSeriesProperty<double> const *const propertyToFilter,
-                                   Kernel::Math::StatisticType statisticType, const Kernel::TimeROI * = nullptr);
 
 } // namespace Kernel
 } // namespace Mantid

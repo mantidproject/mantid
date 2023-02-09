@@ -937,7 +937,7 @@ std::pair<double, double> TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev(co
   if (timeRoi && !timeRoi->empty())
     filter = timeRoi->toSplitters();
   else
-    filter = TimeROI(this->firstTime(), this->lastTime()).toSplitters(); // guaranteed to have two different entries
+    filter = this->getSplittingIntervals();
 
   return this->averageAndStdDevInFilter(filter);
 }
@@ -1196,7 +1196,10 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::lastValue() const {
 
 /**
  * Returns duration of the time series, possibly restricted by a TimeROI object.
- * If no ROI is provided or the ROI is empty, the whole span of the time series is returned.
+ * If no TimeROI is provided or the TimeROI is empty, the whole span of the time series plus
+ * and additional extra time is returned. This extra time is the time span between the last two log entries.
+ * The extra time ensures that the mean and the time-weighted mean are the same for time series
+ * containing log entries equally spaced in time.
  * @param roi :: TimeROI object defining the time segments to consider.
  * @return duration, in seconds.
  */
@@ -1208,7 +1211,11 @@ template <typename TYPE> double TimeSeriesProperty<TYPE>::durationInSeconds(cons
     seriesSpan.update_intersection(*roi);
     return seriesSpan.durationInSeconds();
   } else {
-    return DateAndTime::secondsFromDuration(this->lastTime() - this->firstTime()); // span of the time series
+    const auto &intervals = this->getSplittingIntervals();
+    const double duration_sec =
+        std::accumulate(intervals.cbegin(), intervals.cend(), 0.,
+                        [](double sum, const auto &interval) { return sum + interval.duration(); });
+    return duration_sec;
   }
 }
 
@@ -1667,10 +1674,64 @@ TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics(const TimeR
   // Start with statistics that are not time-weighted
   TimeSeriesPropertyStatistics out(Mantid::Kernel::getStatistics(this->filteredValuesAsVector(roi)));
   out.duration = this->durationInSeconds(roi);
+  // Follow with time-weighted statistics
   auto avAndDev = this->timeAverageValueAndStdDev(roi);
   out.time_mean = avAndDev.first;
   out.time_standard_deviation = avAndDev.second;
   return out;
+}
+
+/** Function filtering TimeSeriesProperties according to the requested statistics.
+ *  @param propertyToFilter : Property to filter the statistics on.
+ *  @param statisticType : Enum indicating the type of statistics to use.
+ *  @param roi : optional pointer to TimeROI object for active time.
+ *  @return The TimeSeriesProperty filtered by the requested statistics.
+ */
+template <typename TYPE>
+double TimeSeriesProperty<TYPE>::extractStatistic(Math::StatisticType selection, const TimeROI *roi) const {
+  using namespace Kernel::Math;
+  double singleValue = 0;
+  switch (selection) {
+  case FirstValue:
+    singleValue = static_cast<double>(this->nthValue(0));
+    break;
+  case LastValue:
+    singleValue = static_cast<double>(this->nthValue(this->size() - 1));
+    break;
+  case Minimum:
+    singleValue = static_cast<double>(this->getStatistics(roi).minimum);
+    break;
+  case Maximum:
+    singleValue = static_cast<double>(this->getStatistics(roi).maximum);
+    break;
+  case Mean:
+    singleValue = this->getStatistics(roi).mean;
+    break;
+  case Median:
+    singleValue = this->getStatistics(roi).median;
+    break;
+  case TimeAveragedMean:
+    singleValue = this->getStatistics(roi).time_mean;
+  case StdDev:
+    singleValue = this->getStatistics(roi).standard_deviation;
+  case TimeAverageStdDev:
+    singleValue = this->getStatistics(roi).time_standard_deviation;
+  default:
+    throw std::invalid_argument("extractStatistic - Unknown statistic type: " + boost::lexical_cast<std::string>(this));
+  };
+  return singleValue;
+}
+
+/** Function specialization for TimeSeriesProperty<std::string>
+ *  @throws Kernel::Exception::NotImplementedError always
+ */
+template <>
+double TimeSeriesProperty<std::string>::extractStatistic(Math::StatisticType selection, const TimeROI *roi) const {
+  UNUSED_ARG(selection);
+  UNUSED_ARG(roi);
+  throw Exception::NotImplementedError("TimeSeriesProperty::"
+                                       "extractStatistic is not "
+                                       "implemented for string properties");
 }
 
 /*
@@ -1981,7 +2042,7 @@ void TimeSeriesProperty<std::string>::histogramData(const Types::Core::DateAndTi
  * @returns :: Vector of included values only.
  */
 template <typename TYPE> std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredValuesAsVector(const TimeROI *roi) const {
-  if (roi) {
+  if (roi && !roi->empty()) {
     std::vector<TYPE> filteredValues;
     for (const auto &timeAndValue : this->m_values)
       if (roi->valueAtTime(timeAndValue.time()))
@@ -1992,14 +2053,17 @@ template <typename TYPE> std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredVal
 }
 
 /**
- * Get a list of the splitting intervals, if filtering is enabled.
- * Otherwise the interval is just first time - last time.
- * @returns :: Vector of splitting intervals
+ * Splitting interval for the whole time series.
+ * The interval's starting time is that of the first log entry. The interval's ending time is that of the last log
+ * entry plus an additional extra time. This extra time is the time span between the last two log entries.
+ * The extra time ensures that the mean and the time-weighted mean are the same for time series
+ * containing log entries equally spaced in time.
+ * @returns :: Vector containing a single splitting interval.
  */
 template <typename TYPE> std::vector<SplittingInterval> TimeSeriesProperty<TYPE>::getSplittingIntervals() const {
   std::vector<SplittingInterval> intervals;
-  // Case where there is no filter
-  intervals.emplace_back(firstTime(), lastTime());
+  auto lastInterval = this->nthInterval(this->size() - 1);
+  intervals.emplace_back(firstTime(), lastInterval.end());
   return intervals;
 }
 
@@ -2023,43 +2087,3 @@ INSTANTIATE(bool)
 
 } // namespace Kernel
 } // namespace Mantid
-
-namespace Mantid::Kernel {
-//================================================================================================
-/** Function filtering double TimeSeriesProperties according to the requested
- * statistics.
- *  @param propertyToFilter : Property to filter the statistics on.
- *  @param statisticType : Enum indicating the type of statistics to use.
- *  @param roi : optional pointer to TimeROI object for active time.
- *  @return The TimeSeriesProperty filtered by the requested statistics.
- */
-double filterByStatistic(TimeSeriesProperty<double> const *const propertyToFilter,
-                         Kernel::Math::StatisticType statisticType, const TimeROI *roi) {
-  using namespace Kernel::Math;
-  double singleValue = 0;
-  switch (statisticType) {
-  case FirstValue:
-    singleValue = propertyToFilter->nthValue(0);
-    break;
-  case LastValue:
-    singleValue = propertyToFilter->nthValue(propertyToFilter->size() - 1);
-    break;
-  case Minimum:
-    singleValue = propertyToFilter->getStatistics(roi).minimum;
-    break;
-  case Maximum:
-    singleValue = propertyToFilter->getStatistics(roi).maximum;
-    break;
-  case Mean:
-    singleValue = propertyToFilter->getStatistics(roi).mean;
-    break;
-  case Median:
-    singleValue = propertyToFilter->getStatistics(roi).median;
-    break;
-  default:
-    throw std::invalid_argument("filterByStatistic - Unknown statistic type: " +
-                                boost::lexical_cast<std::string>(propertyToFilter));
-  };
-  return singleValue;
-}
-} // namespace Mantid::Kernel
