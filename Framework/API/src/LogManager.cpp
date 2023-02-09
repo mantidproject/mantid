@@ -46,37 +46,8 @@ bool convertSingleValueToDouble(const Property *property, double &value) {
 /// Templated method to convert time series property to single double
 template <typename T>
 bool convertTimeSeriesToDouble(const Property *property, double &value, const Math::StatisticType &function) {
-  if (const auto *log = dynamic_cast<const FilteredTimeSeriesProperty<T> *>(property)) {
-    switch (function) {
-    case Math::TimeAveragedMean:
-      value = static_cast<double>(log->timeAverageValue());
-      break;
-    case Math::FirstValue:
-      value = static_cast<double>(log->firstValue());
-      break;
-    case Math::LastValue:
-      value = static_cast<double>(log->lastValue());
-      break;
-    case Math::Maximum:
-      value = static_cast<double>(log->maxValue());
-      break;
-    case Math::Minimum:
-      value = static_cast<double>(log->minValue());
-      break;
-    case Math::Mean:
-      value = static_cast<double>(log->mean());
-      break;
-    case Math::Median:
-      value = log->getStatistics().median;
-      break;
-    case Math::StdDev:
-      value = log->getStatistics().standard_deviation;
-      break;
-    case Math::TimeAverageStdDev:
-      throw std::invalid_argument("Statistic type \"TimeAverageStdDev\" is not currently supported");
-    default: // should not happen
-      throw std::invalid_argument("Statistic type not recognised");
-    }
+  if (const auto *log = dynamic_cast<const ITimeSeriesProperty *>(property)) {
+    value = log->extractStatistic(function);
     return true;
   } else {
     return false;
@@ -326,10 +297,9 @@ size_t LogManager::getMemorySize() const {
  * @param name The name of a time-series property
  * @return A pointer to the time-series property
  */
-template <typename T>
-Kernel::FilteredTimeSeriesProperty<T> *LogManager::getTimeSeriesProperty(const std::string &name) const {
+template <typename T> Kernel::TimeSeriesProperty<T> *LogManager::getTimeSeriesProperty(const std::string &name) const {
   Kernel::Property *prop = getProperty(name);
-  if (auto *tsp = dynamic_cast<Kernel::FilteredTimeSeriesProperty<T> *>(prop)) {
+  if (auto *tsp = dynamic_cast<Kernel::TimeSeriesProperty<T> *>(prop)) {
     return tsp;
   } else {
     throw std::invalid_argument("Run::getTimeSeriesProperty - '" + name + "' is not a TimeSeriesProperty");
@@ -650,12 +620,11 @@ bool LogManager::hasInvalidValuesFilter(const std::string &logName) const {
   return hasProperty(getInvalidValuesFilterLogName(logName));
 }
 
-/// returns the invalid values log if the log has a matching invalid values log
-/// filter
-Kernel::FilteredTimeSeriesProperty<bool> *LogManager::getInvalidValuesFilter(const std::string &logName) const {
+/// returns the invalid values log if the log has a matching invalid values log filter
+Kernel::TimeSeriesProperty<bool> *LogManager::getInvalidValuesFilter(const std::string &logName) const {
   try {
     auto log = getLogData(getInvalidValuesFilterLogName(logName));
-    if (auto tsp = dynamic_cast<FilteredTimeSeriesProperty<bool> *>(log)) {
+    if (auto tsp = dynamic_cast<TimeSeriesProperty<bool> *>(log)) {
       return tsp;
     }
   } catch (Exception::NotFoundError &) {
@@ -675,8 +644,8 @@ bool LogManager::operator!=(const LogManager &other) const { return *m_manager !
 /** @cond */
 /// Macro to instantiate concrete template members
 #define INSTANTIATE(TYPE)                                                                                              \
-  template MANTID_API_DLL Kernel::FilteredTimeSeriesProperty<TYPE> *LogManager::getTimeSeriesProperty(                 \
-      const std::string &) const;                                                                                      \
+  template MANTID_API_DLL Kernel::TimeSeriesProperty<TYPE> *LogManager::getTimeSeriesProperty(const std::string &)     \
+      const;                                                                                                           \
   template MANTID_API_DLL TYPE LogManager::getPropertyValueAsType(const std::string &) const;
 
 INSTANTIATE(double)

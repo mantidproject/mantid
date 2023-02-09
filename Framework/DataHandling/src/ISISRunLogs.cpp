@@ -86,7 +86,9 @@ void ISISRunLogs::applyLogFiltering(Mantid::API::Run &exptRun) {
   bool multiperiod = false;
   try {
     auto period = exptRun.getPropertyAsIntegerValue(LogParser::currentPeriodLogName());
-    currentPeriodLog = exptRun.getTimeSeriesProperty<bool>(LogParser::currentPeriodLogName(period));
+    auto series = exptRun.getTimeSeriesProperty<bool>(LogParser::currentPeriodLogName(period));
+    auto filteredSeries = new FilteredTimeSeriesProperty<bool>(series);
+    currentPeriodLog = filteredSeries;
   } catch (const std::exception &) {
     g_log.warning("Cannot find period log. Logs will be not be filtered by "
                   "current period");
