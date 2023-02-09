@@ -12,7 +12,6 @@ set(SRC_FILES
     src/CollapsiblePanel.cpp
     src/DetXMLFile.cpp
     src/GLColor.cpp
-    src/GLObject.cpp
     src/InstrumentActor.cpp
     src/InstrumentDisplay.cpp
     src/InstrumentTreeModel.cpp
@@ -83,7 +82,6 @@ set(INC_FILES
     inc/MantidQtWidgets/InstrumentView/DllOption.h
     inc/MantidQtWidgets/InstrumentView/GLColor.h
     inc/MantidQtWidgets/InstrumentView/GLDisplay.h
-    inc/MantidQtWidgets/InstrumentView/GLObject.h
     inc/MantidQtWidgets/InstrumentView/GridTextureFace.h
     inc/MantidQtWidgets/InstrumentView/IGLDisplay.h
     inc/MantidQtWidgets/InstrumentView/IStackedLayout.h

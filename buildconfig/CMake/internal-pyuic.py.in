@@ -1,3 +1,0 @@
-import sys
-sys.path.insert(0, "@PRIVATE_PYQT_SITE_PACKAGES@")
-import PyQt4.uic.pyuic

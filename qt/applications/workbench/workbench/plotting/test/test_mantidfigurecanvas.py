@@ -11,12 +11,12 @@ from workbench.plotting.mantidfigurecanvas import MantidFigureCanvas
 
 
 class MantidFigureCanvasTest(unittest.TestCase):
-    def test_dpi_attribute_exists(self):
+    def test_device_pixel_ratio_attribute_exists(self):
         fig = MagicMock()
         fig.bbox.max = [1, 1]
         canvas = MantidFigureCanvas(fig)
 
-        self.assertTrue(hasattr(canvas, "_dpi_ratio"))
+        self.assertTrue(hasattr(canvas, "device_pixel_ratio"))
 
 
 if __name__ == "__main__":

@@ -38,7 +38,7 @@ public:
     fn.function1D(output.data(), input.data(), input.size());
 
     TSM_ASSERT_EQUALS("Input/output data sizes should match", output.size(), input.size());
-    // Values computed independently with UserFunction in MantidPlot
+    // Values computed independently with UserFunction
     decltype(input) expected = {{0.00132130149415442, 0.00127865974554395, 0.0012345081447521, 0.00118898601238179,
                                  0.00114223710903171, 0.00109440900868656, 0.00104565245357959, 0.000996120694139449,
                                  0.000945968817727083, 0.000895353069936715, 0.000844430172276783}};

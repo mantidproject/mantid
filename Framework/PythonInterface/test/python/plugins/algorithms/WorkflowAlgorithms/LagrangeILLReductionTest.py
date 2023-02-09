@@ -93,6 +93,12 @@ class LagrangeILLReductionTest(unittest.TestCase):
         self.assertAlmostEqual(result.readY(0)[10], 1972, 4)
         self.assertAlmostEqual(result.readY(0)[80], 1737, 4)
 
+    def test_one_scan_point(self):
+        result = LagrangeILLReduction(SampleRuns="014220", NormaliseBy="Monitor", UseIncidentEnergy=True)
+        self.check_result(result, "Energy", 1, 4.4998, 4.4998)
+        self.assertAlmostEqual(result.readY(0)[0], 2.096, 3)
+        self.assertEqual(result.getNumberHistograms(), 1)
+
     def test_nexus_sample_reduction(self):
         result = LagrangeILLReduction(SampleRuns="014412.nxs", NormaliseBy="None", UseIncidentEnergy=True)
         self.check_result(result, "Energy", 31, 35, 50)

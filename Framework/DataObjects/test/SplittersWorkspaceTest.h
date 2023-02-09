@@ -75,8 +75,8 @@ public:
 
     for (size_t i = 0; i < 3; i++) {
       Kernel::SplittingInterval splitter = splitterws.getSplitter(i);
-      TS_ASSERT_EQUALS(splitter.start(), splitters[i].start());
-      TS_ASSERT_EQUALS(splitter.stop(), splitters[i].stop());
+      TS_ASSERT_EQUALS(splitter.begin(), splitters[i].begin());
+      TS_ASSERT_EQUALS(splitter.end(), splitters[i].end());
       TS_ASSERT_EQUALS(splitter.index(), splitters[i].index());
     }
   }

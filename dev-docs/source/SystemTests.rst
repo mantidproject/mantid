@@ -212,16 +212,6 @@ fixed when running CMake, e.g.
    cd build
    systemtest
 
-Systems Lacking pyqt4
----------------------
-
-Recent systems using Qt5 as default should set environment variable ``QT_API``
-while invoking the script
-
-.. code-block:: sh
-
-    > QT_API=pyqt5 systemtest
-
 Selecting Tests to Run From IDE
 -------------------------------
 

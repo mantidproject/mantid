@@ -199,15 +199,15 @@ public:
   double averageValueInFilter(const std::vector<SplittingInterval> &filter) const override;
   /// @copydoc Mantid::Kernel::ITimeSeriesProperty::averageAndStdDevInFilter()
   std::pair<double, double> averageAndStdDevInFilter(const std::vector<SplittingInterval> &filter) const override;
-  /// @copydoc Mantid::Kernel::ITimeSeriesProperty::timeAverageValue()
-  /// Time weighted mean and standard deviation
+  /** Returns the calculated time weighted mean and standard deviation values.
+   * @return The time-weighted average value of the log when the time measurement was active.
+   */
   std::pair<double, double> timeAverageValueAndStdDev() const;
-  double timeAverageValue() const override;
   /** Returns the calculated time weighted average value.
    * @param timeRoi  Object that holds information about when the time measurement was active.
    * @return The time-weighted average value of the log when the time measurement was active.
    */
-  double timeAverageValue(const TimeROI &timeRoi) const override;
+  double timeAverageValue(const TimeROI *timeRoi = nullptr) const override;
   /// generate constant time-step histogram from the property values
   void histogramData(const Types::Core::DateAndTime &tMin, const Types::Core::DateAndTime &tMax,
                      std::vector<double> &counts) const;
@@ -325,7 +325,7 @@ public:
   bool isDefault() const override;
 
   /// Return a TimeSeriesPropertyStatistics object
-  TimeSeriesPropertyStatistics getStatistics() const override;
+  TimeSeriesPropertyStatistics getStatistics(const Kernel::TimeROI *roi = nullptr) const override;
 
   /// Detects whether there are duplicated entries (of time) in property &
   /// eliminates them
@@ -383,7 +383,7 @@ private:
 /// Function filtering double TimeSeriesProperties according to the requested
 /// statistics.
 double DLLExport filterByStatistic(TimeSeriesProperty<double> const *const propertyToFilter,
-                                   Kernel::Math::StatisticType statisticType);
+                                   Kernel::Math::StatisticType statisticType, const Kernel::TimeROI * = nullptr);
 
 } // namespace Kernel
 } // namespace Mantid

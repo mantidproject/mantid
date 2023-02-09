@@ -9,7 +9,7 @@ Overview
 
 The workbench is the new PyQt-based GUI that will be the primary interface for
 interacting with the mantid framework. The plotting is provided by
-`matplotlib <https://matplotlib.org/>`_. It will eventually replace MantidPlot.
+`matplotlib <https://matplotlib.org/>`_. It has replaced MantidPlot.
 
 .. toctree::
    :hidden:
@@ -18,7 +18,7 @@ interacting with the mantid framework. The plotting is provided by
    ProjectSaveInterfaces
 
 :doc:`Build Workbench <BuildingWorkbench>`
-   A document detailing how to build and package the workbench alongside MantidPlot.
+   A document detailing how to build and package the workbench.
 
 :doc:`Project Save <ProjectSaveInterfaces>`
    This document details Project Save on workbench and gives details on how to allow the saving and loading of interfaces in workbench.

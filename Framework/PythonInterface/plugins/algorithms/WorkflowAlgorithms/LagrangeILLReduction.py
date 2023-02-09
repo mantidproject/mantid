@@ -248,6 +248,8 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
             loaded_data = np.vstack((loaded_data, data)) if loaded_data is not None else data
         if np.shape(loaded_data)[0] == 0:
             raise RuntimeError("Provided files contain no data in the LAGRANGE format.")
+        if loaded_data.ndim == 1:  # data needs to be reshaped in case there is only one scan point
+            loaded_data = np.reshape(loaded_data, (1, loaded_data.shape[0]))
         return loaded_data
 
     def preprocess_nexus(self, file_name: str, output_name: str):

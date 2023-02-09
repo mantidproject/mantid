@@ -70,9 +70,12 @@ In the ``Runs`` tab:
 User files
 ##########
 
-#. Change some values on the ``Settings`` and ``Beam Centre`` tabs.
+#. Change some values on the ``Settings`` tab and make a note of what you changed.
 #. Re-load the user file and check the values you changed - they should have
    reverted to their original values.
+#. Change some values on the ``Beam Centre`` tab. Re-load the user file. The inputs in the ``Centre Position``
+   section should revert to their original values, apart from the ``Detector`` combobox.
+   The inputs in the ``Options`` section (such as the radius limits) should not revert.
 #. Ensure that you can load the old style ``MaskFile.txt`` user file from the
    sample data.
 #. In the table on the ``Runs`` tab, under the ``User File`` column, enter

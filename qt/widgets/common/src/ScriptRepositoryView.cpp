@@ -229,7 +229,7 @@ ScriptRepositoryView::~ScriptRepositoryView() { delete ui; }
 /** Allows the user to open a file to investigate it.
  *  If the user selects and activate one Row, double-clicking on the first
  *  column, it will try to retrieve the file path (if it is local) and emit
- *  the signal loadScript. MantidPlot will get this signal to load the file and
+ *  the signal loadScript. Mantid will get this signal to load the file and
  *  show its contents to the user.
  */
 void ScriptRepositoryView::cell_activated(const QModelIndex &in) {
