@@ -720,11 +720,11 @@ TimeSeriesPropertyStatistics FilteredTimeSeriesProperty<TYPE>::getStatistics(con
   return TimeSeriesProperty<TYPE>::getStatistics(internalRoi); // call parent method
 }
 
-/** Function filtering TimeSeriesProperties according to the requested statistics.
- *  @param propertyToFilter : Property to filter the statistics on.
- *  @param statisticType : Enum indicating the type of statistics to use.
- *  @param roi : optional pointer to TimeROI object for active time.
- *  @return The TimeSeriesProperty filtered by the requested statistics.
+/** Calculate a particular statistical quantity from the values of the time series.
+ *  @param selection : Property to filter the time series.
+ *  @param statisticType : Enum indicating the selected statistical quantity.
+ *  @param roi : optional pointer to TimeROI object for filtering the time series values.
+ *  @return The value of the computed statistical quantity.
  */
 template <typename TYPE>
 double FilteredTimeSeriesProperty<TYPE>::extractStatistic(Math::StatisticType selection, const TimeROI *roi) const {

@@ -83,7 +83,12 @@ public:
   /// Return a TimeSeriesPropertyStatistics object
   TimeSeriesPropertyStatistics getStatistics(const Kernel::TimeROI *roi = nullptr) const override;
 
-  /// Filtering the series according to the requested statistics
+  /** Calculate a particular statistical quantity from the values of the time series.
+   *  @param selection : Property to filter the time series.
+   *  @param statisticType : Enum indicating the selected statistical quantity.
+   *  @param roi : optional pointer to TimeROI object for filtering the time series values.
+   *  @return The value of the computed statistical quantity.
+   */
   double extractStatistic(Math::StatisticType selection, const TimeROI * = nullptr) const override;
 
   /// Find if time lies in a filtered region

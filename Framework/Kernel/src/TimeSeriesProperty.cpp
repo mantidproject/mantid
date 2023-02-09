@@ -1690,11 +1690,11 @@ TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics(const TimeR
   return out;
 }
 
-/** Function filtering TimeSeriesProperties according to the requested statistics.
- *  @param propertyToFilter : Property to filter the statistics on.
- *  @param statisticType : Enum indicating the type of statistics to use.
- *  @param roi : optional pointer to TimeROI object for active time.
- *  @return The TimeSeriesProperty filtered by the requested statistics.
+/** Calculate a particular statistical quantity from the values of the time series.
+ *  @param selection : Property to filter the time series.
+ *  @param statisticType : Enum indicating the selected statistical quantity.
+ *  @param roi : optional pointer to TimeROI object for filtering the time series values.
+ *  @return The value of the computed statistical quantity.
  */
 template <typename TYPE>
 double TimeSeriesProperty<TYPE>::extractStatistic(Math::StatisticType selection, const TimeROI *roi) const {
@@ -1825,7 +1825,7 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::sortIfNecessary() const 
 
 /** Find the index of the entry of time t in the mP vector (sorted)
  *  Return @ if t is within log.begin and log.end, then the index of the log
- * equal or just smaller than t
+ *  equal or just smaller than t
  *           if t is earlier (less) than the starting time, return -1
  *           if t is later (larger) than the ending time, return m_value.size
  */
