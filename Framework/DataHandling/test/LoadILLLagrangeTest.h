@@ -84,6 +84,41 @@ public:
     TS_ASSERT(outputWS->detectorInfo().isMonitor(1))
   }
 
+  void test_Lagrange_close_scans() {
+    // Tests loading of synthetic Lagrange data, with two scans being only 2 meV apart
+    LoadILLLagrange alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "014412_close_scans_sample.nxs"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+
+    MatrixWorkspace_sptr outputWS = std::shared_ptr<Mantid::API::MatrixWorkspace>(alg.getProperty("OutputWorkspace"));
+    TS_ASSERT(outputWS)
+
+    // check if data is loaded as expected:
+    TS_ASSERT_EQUALS(outputWS->x(0).size(), 31)
+    TS_ASSERT_DELTA(outputWS->x(0)[0], 35, 0.01)
+    TS_ASSERT_DELTA(outputWS->x(0)[0], 35.002, 0.01)
+    TS_ASSERT_DELTA(outputWS->x(0)[30], 50, 0.01)
+    TS_ASSERT_EQUALS(outputWS->y(0)[0], 10)
+    TS_ASSERT_EQUALS(outputWS->y(0)[30], 310)
+    TS_ASSERT_DELTA(outputWS->e(0)[0], sqrt(10), 0.01)
+
+    // and for the monitor:
+    TS_ASSERT_DELTA(outputWS->x(1)[0], 35, 0.01)
+    TS_ASSERT_DELTA(outputWS->x(1)[30], 50, 0.01)
+    TS_ASSERT_EQUALS(outputWS->y(1)[0], 1)
+    TS_ASSERT_EQUALS(outputWS->y(1)[30], 1)
+    TS_ASSERT_DELTA(outputWS->e(1)[0], 1.0, 0.01)
+
+    // and whether the monitor flag is properly set
+    TS_ASSERT(!outputWS->detectorInfo().isMonitor(0))
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(1))
+  }
+
 private:
   std::string m_oldFacility;
   std::string m_oldInstrument;
