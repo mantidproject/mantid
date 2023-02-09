@@ -149,7 +149,7 @@ Input
   plot once a file has finished loading.
 
 Q Low, Q Width & Q High
-  Q binning parameters that are passed to the SofQW3 algorithm. The low and high
+  Q binning parameters that are passed to the :ref:`SofQW3 <algm-SofQWNormalisedPolygon>` algorithm. The low and high
   values can be determined using the neighbouring contour plot. The default values given show
   the Q range where there is data in the reduced workspace and these values cannot be changed.
 
