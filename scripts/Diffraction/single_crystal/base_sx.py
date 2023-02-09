@@ -7,7 +7,7 @@ from FindGoniometerFromUB import getSignMaxAbsValInCol
 from mantid.geometry import CrystalStructure, SpaceGroupFactory, ReflectionGenerator, ReflectionConditionFilter
 from os import path
 
-# from abc import ABC, abstractmethod
+from abc import ABC  # , abstractmethod
 
 
 class PEAK_TYPE(Enum):
@@ -31,6 +31,7 @@ class BaseSX(ABC):
         self.gonio_axes = None
         self.sample_dict = None
         self.n_mcevents = 1200
+        self.b2b_radius_scale = 5
 
     # --- getters ---
 
@@ -88,6 +89,9 @@ class BaseSX(ABC):
     def set_mc_abs_nevents(self, nevents):
         self.n_mcevents = nevents
 
+    def set_b2b_radius_scale(self, scale):
+        self.b2b_radius_scale = scale
+
     # --- methods ---
 
     def delete_run_data(self, run, del_MD=False):
@@ -121,7 +125,7 @@ class BaseSX(ABC):
         if md_name is None:
             md_name = wsname + "_MD"
         xunit = BaseSX.get_xunit(wsname)  # get initial xunit
-        BaseSX._normalise_by_bin_width(wsname)  # normalise by bin-width in K = 2pi/lambda
+        BaseSX._normalise_by_bin_width_in_k(wsname)  # normalise by bin-width in K = 2pi/lambda
         wsMD = mantid.ConvertToDiffractionMDWorkspace(
             InputWorkspace=wsname, OutputWorkspace=md_name, LorentzCorrection=True, OneEventPerBin=False, OutputDimensions=frame
         )
@@ -145,11 +149,13 @@ class BaseSX(ABC):
             isaw_files = len(runs) * isaw_files  # i.e. use same file for all runs
         if len(isaw_files) == len(runs):
             for run, isaw_file in zip(runs, isaw_files):
+                ws = self.get_ws(run)
                 try:
-                    mantid.LoadIsawUB(InputWorkspace=self.runs[run]["ws"], Filename=isaw_file)
-                    if self.runs[run]["found_pks"] is not None:
-                        mantid.LoadIsawUB(InputWorkspace=self.runs[run]["found_pks"], Filename=isaw_file)
-                        mantid.IndexPeaks(PeaksWorkspace=self.runs[run]["found_pks"], Tolerance=tol, RoundHKLs=True)
+                    mantid.LoadIsawUB(InputWorkspace=ws, Filename=isaw_file)
+                    peaks = self.get_peaks(run, PEAK_TYPE.FOUND)
+                    if peaks is not None:
+                        mantid.LoadIsawUB(InputWorkspace=peaks, Filename=isaw_file)
+                        mantid.IndexPeaks(PeaksWorkspace=peaks, Tolerance=tol, RoundHKLs=True)
                 except:
                     print("LoadIsawUB failed for run " + run)
 
@@ -171,7 +177,7 @@ class BaseSX(ABC):
         if runs is None:
             runs = self.runs.keys()
         for run in self.runs:
-            peaks = BaseSX.get_peaks(run, PEAK_TYPE.FOUND)
+            peaks = self.get_peaks(run, PEAK_TYPE.FOUND)
             mantid.IndexPeaks(PeaksWorkspace=peaks, Tolerance=tol, RoundHKLs=True)
             mantid.OptimizeCrystalPlacement(
                 PeaksWorkspace=peaks,
@@ -205,12 +211,16 @@ class BaseSX(ABC):
             self.set_peaks(run, out_peaks_name, peak_type)
 
     @staticmethod
-    def get_radius(pk, ws, ispec, scale=5):
+    def get_radius(pk, ws, ispec, scale, useB=True):
+        print("scale = ", scale, "\tuseB = ", useB)
         TOF = pk.getTOF()
         func = FunctionFactory.Instance().createPeakFunction("BackToBackExponential")
         func.setParameter("X0", TOF)  # set centre
         func.setMatrixWorkspace(ws, ispec, 0.0, 0.0)  # calc A,B,S based on peak cen
-        dTOF = scale / func.getParameterValue("B")
+        if useB:
+            dTOF = scale / func.getParameterValue("B")
+        else:
+            dTOF = scale * func.fwhm()
         # convert dTOF -> dQ
         modQ = 2 * np.pi / pk.getDSpacing()
         radius = (modQ / TOF) * dTOF
@@ -222,8 +232,6 @@ class BaseSX(ABC):
 
     @staticmethod
     def integrate_peaks_MD(wsMD, peaks, out_peaks, **kwargs):
-        BaseSX.remove_peaks_on_edge(peaks)
-        # integrate
         peaks_int = mantid.IntegratePeaksMD(
             InputWorkspace=wsMD,
             PeaksWorkspace=peaks,
@@ -235,7 +243,7 @@ class BaseSX(ABC):
         return peaks_int
 
     @staticmethod
-    def integrate_peaks_MD_optimal_radius(wsMD, peaks, out_peaks, dq=0.01, scale=5, ws=None, **kwargs):
+    def integrate_peaks_MD_optimal_radius(wsMD, peaks, out_peaks, dq=0.01, scale=5, useB=True, ws=None, **kwargs):
         peaks = BaseSX.retrieve(peaks)
         use_empty_inst = ws is None
         if use_empty_inst:
@@ -246,10 +254,11 @@ class BaseSX(ABC):
         ws = BaseSX.retrieve(ws)
         mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target="TOF")  # needs to be in TOF for setting B
         ispecs = ws.getIndicesFromDetectorIDs(peaks.column("DetID"))
-        rads = [BaseSX.get_radius(pk, ws, ispecs[ipk], scale) for ipk, pk in enumerate(peaks)]
+        rads = [BaseSX.get_radius(pk, ws, ispecs[ipk], scale, useB) for ipk, pk in enumerate(peaks)]
         bin_edges = np.arange(min(rads), max(rads) + dq, dq)
         ibins = np.digitize(rads, bin_edges[:-1])
-        peaks_int = mantid.CreatePeaksWorkspace(InstrumentWorkspace=peaks, NumberOfPeaks=0, OutputWorkspace=out_peaks)
+        peaks_int = mantid.CloneWorkspace(InputWorkspace=peaks, OutputWorkspace=out_peaks)
+        mantid.DeleteTableRows(TableWorkspace=peaks_int, Rows=list(range(peaks_int.getNumberPeaks())))
         for ibin in np.unique(ibins):
             rad = bin_edges[ibin]
             ipks = np.where(ibins == ibin)[0]
@@ -385,10 +394,12 @@ class BaseSX(ABC):
         mantid.TransformHKL(PeaksWorkspace=ws, HKLTransform=transform, FindError=False)
 
     @staticmethod
-    def find_sx_peaks(ws, bg=None, nstd=None, out_pk_wsname="peaks", **kwargs):
+    def find_sx_peaks(ws, bg=None, nstd=None, out_peaks=None, **kwargs):
         default_kwargs = {"XResolution": 200, "PhiResolution": 2, "TwoThetaResolution": 2}
         kwargs = {**default_kwargs, **kwargs}  # will overwrite default with provided if duplicate keys
         ws = BaseSX.retrieve(ws)
+        if out_peaks is None:
+            out_peaks = ws.name() + "_peaks"
         if bg is None:
             ymaxs = np.max(ws.extractY(), axis=1)  # max in each spectrum
             avg = np.median(ymaxs)
@@ -406,12 +417,12 @@ class BaseSX(ABC):
             PeakFindingStrategy="AllPeaks",
             AbsoluteBackground=bg,
             ResolutionStrategy="AbsoluteResolution",
-            OutputWorkspace=out_pk_wsname,
+            OutputWorkspace=out_peaks,
             **kwargs,
         )
         if not ws.getXDimension().name == "TOF":
             mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws.name(), Target=xunit)
-        return out_pk_wsname
+        return out_peaks
 
     @staticmethod
     def get_xunit(ws):

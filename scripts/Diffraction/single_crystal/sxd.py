@@ -99,6 +99,7 @@ class SXD(BaseSX):
         mantid.ConvertUnits(InputWorkspace=self.van_ws, OutputWorkspace=self.van_ws, Target="Wavelength")
         vanadium_transmission = mantid.SphericalAbsorption(InputWorkspace=self.van_ws, OutputWorkspace="vanadium_transmission")
         self._divide_workspaces(self.van_ws, vanadium_transmission)
+        mantid.DeleteWorkspace(vanadium_transmission)
         mantid.ConvertUnits(InputWorkspace=self.van_ws, OutputWorkspace=self.van_ws, Target="TOF")
 
     @staticmethod
@@ -234,3 +235,22 @@ class SXD(BaseSX):
             col = np.array(SXD.retrieve(peaks).column(col_name))
             iremove = np.where(np.logical_or(col < nedge, col > 63 - nedge))[0]
             mantid.DeleteTableRows(TableWorkspace=peaks, Rows=iremove)
+
+    @staticmethod
+    def find_sx_peaks(ws, bg=None, nstd=None, lambda_min=0.45, lambda_max=3, nbunch=3, out_peaks=None, **kwargs):
+        ws_rb = SXD.retrieve(ws).name() + "_rb"
+        mantid.Rebunch(InputWorkspace=ws, OutputWorkspace=ws_rb, NBunch=nbunch)
+        # mask detector edges
+        mantid.MaskBTP(Workspace=ws_rb, Tube="Edges")
+        mantid.MaskBTP(Workspace=ws_rb, Pixel="edges")
+        # Crop in wavelength
+        mantid.ConvertUnits(InputWorkspace=ws_rb, OutputWorkspace=ws_rb, Target="Wavelength")
+        mantid.CropWorkspace(InputWorkspace=ws_rb, OutputWorkspace=ws_rb, XMin=lambda_min, XMax=lambda_max)
+        if out_peaks is None:
+            out_peaks = SXD.retrieve(ws).name() + "_peaks"  # need to do this so not "_rb_peaks"
+        BaseSX.find_sx_peaks(ws_rb, bg, nstd, out_peaks, **kwargs)
+        mantid.DeleteWorkspace(ws_rb)
+        return out_peaks
+
+    def get_radius(self, pk, ws, ispec):
+        super().get_radius(pk, ws, ispec, useB=False)
