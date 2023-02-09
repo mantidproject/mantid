@@ -46,6 +46,7 @@ public:
   // log name
   static std::string getInvalidValuesFilterLogName(const std::string &logName);
   static std::string getLogNameFromInvalidValuesFilter(const std::string &logName);
+  /// Determine if the log's name has a substring indicating it should not be filtered
   static bool isAnInvalidValuesFilterLog(const std::string &logName);
 
   PropertyManager();
