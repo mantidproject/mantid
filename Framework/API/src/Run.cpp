@@ -227,7 +227,7 @@ void Run::integrateProtonCharge(const std::string &logname) const {
 
   if (log) {
     // start with a clearly nonsense accumulated value
-    double total = std::numeric_limits<double>::quiet_NaN();
+    double total;
 
     // get a copy of the TimeROI for selecting values
     const auto timeroi = this->getTimeROI();
