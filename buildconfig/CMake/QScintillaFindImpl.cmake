@@ -18,12 +18,6 @@ function(find_qscintilla qt_version)
   )
   set(_qsci_lib_names_debug qscintilla2_qt5d)
   set(_qsci_include_paths ${Qt5Core_INCLUDE_DIRS})
-  if(MSVC)
-    set(_qsci_lib_paths ${THIRD_PARTY_DIR}/lib/qt5/lib)
-  elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    list(APPEND _qsci_include_paths /usr/local/opt/qscintilla2/include)
-    list(APPEND _qsci_lib_paths /usr/local/opt/qscintilla2/lib)
-  endif()
 
   set(_include_var QSCINTILLA_QT${qt_version}_INCLUDE_DIR)
   find_path(
@@ -33,20 +27,9 @@ function(find_qscintilla qt_version)
   )
 
   set(_library_var QSCINTILLA_QT${qt_version}_LIBRARY)
-  if(${CONDA_ENV})
-    set(_opt_outs NO_CMAKE_SYSTEM_PATH)
-  endif()
-  find_library(
-    ${_library_var}
-    NAMES ${_qsci_lib_names}
-    HINTS ${_qsci_lib_paths} ${_opt_outs}
-  )
+  find_library(${_library_var} NAMES ${_qsci_lib_names})
   set(_library_var_debug QSCINTILLA_QT${qt_version}_LIBRARY_DEBUG)
-  find_library(
-    ${_library_var_debug}
-    NAMES ${_qsci_lib_names_debug}
-    HINTS ${_qsci_lib_paths} ${_opt_outs}
-  )
+  find_library(${_library_var_debug} NAMES ${_qsci_lib_names_debug})
 
   if(${_include_var} AND ${_library_var})
     if(NOT QScintillaQt${qt_version}_FIND_QUIETLY)
