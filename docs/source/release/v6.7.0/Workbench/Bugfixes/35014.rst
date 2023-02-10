@@ -1,0 +1,2 @@
+- Fixed a bug where plot axes labels could be cut off by the window boundaries after resizing.
+- Fixed a bug where the colour bar on surface plots could collide with the plot axes.
