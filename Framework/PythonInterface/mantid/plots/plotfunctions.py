@@ -8,7 +8,6 @@
 # std imports
 import math
 from typing import List
-import warnings
 
 import numpy as np
 from collections.abc import Sequence
@@ -17,6 +16,7 @@ from collections.abc import Sequence
 from matplotlib.gridspec import GridSpec
 from matplotlib.legend import Legend
 import matplotlib as mpl
+from mpl_toolkits.axes_grid1.axes_divider import make_axes_area_auto_adjustable
 
 # local imports
 from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup
@@ -205,16 +205,6 @@ def plot(
 
     fig, axes = get_plot_fig(overplot, ax_properties, window_title, num_axes, fig)
 
-    fig.set_layout_engine(layout="tight")
-    warnings.filterwarnings(
-        "always",
-        message="Tight layout not applied. The left and right margins cannot be made large enough to accommodate all axes decorations.",
-    )
-    warnings.filterwarnings(
-        "always",
-        message="Tight layout not applied. The bottom and top margins cannot be made large enough to accommodate all axes decorations.",
-    )
-
     # Convert to a MantidAxes if it isn't already. Ignore legend since
     # a new one will be drawn later
     axes = [MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend]) if not isinstance(ax, MantidAxes) else ax for ax in axes]
@@ -316,6 +306,7 @@ def create_subplots(nplots, fig=None, add_cbar_axis=False):
     """
     Create a set of subplots suitable for a given number of plots. A stripped down
     version of plt.subplots that can accept an existing figure instance.
+    Figure is given a tight layout.
 
     :param nplots: The number of plots required
     :param fig: An optional figure. It is cleared before plotting the new contents
@@ -341,13 +332,14 @@ def create_subplots(nplots, fig=None, add_cbar_axis=False):
     nplots = nrows * ncols
     axes = np.empty(nplots, dtype=object)
     cbar_axis = None
+    fig.set_layout_engine(layout="tight")
 
     if add_cbar_axis:
         # The right most column of the GridSpec is made a SubGridSpec to facilitate the colour bar
         # This is done so that the colour bar can have a close spacing to the right most column
         # Keeping the colour bar in the GridSpec rather than alongside it means it behaves much nicer
         # when resizing QT windows
-        # The relative width of 11.55 for the right most column ensures that all plots remain an equal size
+        # The relative width of 11.55 for the right most column ensures that all plots remain an equal size (**)
         # It comes from ((10+1)/2) * 0.1
         gs = GridSpec(nrows, ncols, width_ratios=[10.0] * (ncols - 1) + [11.55])
         gs_and_cbar = gs[:, -1].subgridspec(nrows, 2, width_ratios=[10, 1], wspace=0.1)
@@ -361,6 +353,9 @@ def create_subplots(nplots, fig=None, add_cbar_axis=False):
                 axes[i] = fig.add_subplot(gs[i // ncols, i % ncols], projection=PROJECTION)
             else:  # last column so add to colour bar grid spec
                 axes[i] = fig.add_subplot(gs_and_cbar[i // ncols, 0], projection=PROJECTION)
+                # avoid possible collision between x axis tick labels and colour bar
+                # ** this may also cause plots in the right most column to be slightly narrower than the others
+                make_axes_area_auto_adjustable(axes[i], pad=0, adjust_dirs=["right"])
         cbar_axis = fig.add_subplot(gs_and_cbar[:, 1])
     else:
         gs = GridSpec(nrows, ncols)
@@ -370,17 +365,6 @@ def create_subplots(nplots, fig=None, add_cbar_axis=False):
             axes[i] = fig.add_subplot(gs[i // ncols, i % ncols], projection=PROJECTION)
 
     axes = axes.reshape(nrows, ncols)
-
-    fig.set_layout_engine(layout="tight")
-    warnings.filterwarnings(
-        "always",
-        message="Tight layout not applied. The left and right margins cannot be made large enough to accommodate all axes decorations.",
-    )
-    warnings.filterwarnings(
-        "always",
-        message="Tight layout not applied. The bottom and top margins cannot be made large enough to accommodate all axes decorations.",
-    )
-
     return fig, axes, nrows, ncols, cbar_axis
 
 

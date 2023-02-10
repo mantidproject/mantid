@@ -13,7 +13,6 @@ our custom window.
 
 # std imports
 from distutils.version import LooseVersion
-import warnings
 
 import matplotlib
 from mpl_toolkits.axes_grid1.axes_divider import make_axes_area_auto_adjustable
@@ -364,6 +363,8 @@ def plot_surface(workspaces, fig=None):
 
         surface = ax.plot_surface(ws, cmap=ConfigService.getString("plots.images.Colormap"))
         ax.set_title(ws.name())
+        # Stops colour bar colliding with the plot. Also prevents the plot being pushed off the windows when resizing.
+        # "Top" direction is excluded since the title provides a buffer
         make_axes_area_auto_adjustable(ax, pad=0, adjust_dirs=["left", "right", "bottom"])
         fig.colorbar(surface, ax=[ax])
         fig.show()
@@ -383,15 +384,6 @@ def plot_wireframe(workspaces, fig=None):
             fig, ax = plt.subplots(subplot_kw={"projection": "mantid3d"})
 
         fig.set_layout_engine(layout="tight")
-        warnings.filterwarnings(
-            "always",
-            message="Tight layout not applied. The left and right margins cannot be made large enough to accommodate all axes decorations.",
-        )
-        warnings.filterwarnings(
-            "always",
-            message="Tight layout not applied. The bottom and top margins cannot be made large enough to accommodate all axes decorations.",
-        )
-
         ax.plot_wireframe(ws)
         ax.set_title(ws.name())
         fig.show()
