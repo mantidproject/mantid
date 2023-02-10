@@ -16,7 +16,7 @@ Set up
 
 - These instructions assume use of MantidWorkbench or MantidPlot 3.7 or higher.
 - Ensure you have the `ISIS Sample Data <http://download.mantidproject.org>`__ in your Mantid user directories.
-- Ensure you have added this path to your Mantid user directories: `[path to your build directory]/ExternalData/Testing/Data/UnitTest`. This is required for testing the Preview tab.
+- Ensure you have added this path to your Mantid user directories: `[path to your build directory]/ExternalData/Testing/Data/UnitTest`. This is required for testing the Preview tab. If this directory is missing on your computer then you may need to build the AllTests target for your local version of Mantid.
 - Ensure you have the ISIS archive enabled.
 - Open the ISIS Reflectometry interface.
 - Go to the menu ``Tools->Options`` and ensure all of the warnings are ticked. On the Rounding tab, set the precision to 2 decimal places.
