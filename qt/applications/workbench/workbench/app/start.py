@@ -239,7 +239,8 @@ def start(options: argparse.ArgumentParser):
     if options.single_process:
         initialise_qapp_and_launch_workbench(options)
     else:
-        workbench_process = multiprocessing.Process(target=initialise_qapp_and_launch_workbench, args=[options])
+        context = multiprocessing.get_context("spawn")
+        workbench_process = context.Process(target=initialise_qapp_and_launch_workbench, args=[options])
         workbench_process.start()
         workbench_process.join()
 

@@ -622,9 +622,6 @@ class MainWindow(QMainWindow):
                 # after a month
                 self.project_recovery.remove_current_pid_folder(ignore_errors=True)
 
-            # Shutdown the FrameworkManager. This is required for the UsageService to shutdown and send a Feature usage report
-            FrameworkManager.Instance().shutdown()
-
             event.accept()
         else:
             # Cancel was pressed when closing an editor
