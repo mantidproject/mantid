@@ -122,7 +122,7 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         sample_files = self.getPropertyValue("SampleRuns").split(",")
         raw_sample_ws = "__" + self.output_ws_name + "_rawS"
         if self._sample_nexus:
-            self.preprocess_nexus(self.getPropertyValue("SampleRuns"), raw_sample_ws)
+            self.preprocess_nexus(sample_files, raw_sample_ws)
         else:
             sample_data = self.load_and_concatenate(sample_files)
             sample_data = self.merge_adjacent_points(sample_data)
@@ -266,8 +266,15 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         # if the user wants to see transfer energy, we subtract by the constant offset
         offset = 0 if self.use_incident_energy else self.INCIDENT_ENERGY_OFFSET
         LoadAndMerge(
-            Filename=file_name, LoaderName="LoadILLLagrange", LoaderOptions={"InitialEnergyOffset": offset}, OutputWorkspace=output_name
+            Filename=",".join(file_name),
+            LoaderName="LoadILLLagrange",
+            LoaderOptions={"InitialEnergyOffset": offset},
+            OutputWorkspace=output_name,
+            OutputBehaviour="Concatenate",
+            SampleLogAsXAxis="Ei",
         )
+        if len(file_name) > 1:  # corrects X axis unit if multiple files were concatenated
+            mtd[output_name].getAxis(0).setUnit("Energy")
         self.merge_adjacent_bins(output_name)
         monitor_name = output_name + "_mon"
         ExtractMonitors(InputWorkspace=output_name, DetectorWorkspace=output_name, MonitorWorkspace=monitor_name)
@@ -357,14 +364,13 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         while index < mtd[ws].blocksize() - 1:
             if abs(xAxis[index + 1] - xAxis[index]) < self.EPSILON:
                 # average counts for both data and monitors using error as weights:
-                # print(yAxis[index][0], yAxis[0][index+1], eAxis[0][index], eAxis[0][index+1])
                 # first data spectrum
                 yAxis[0][index] = (yAxis[0][index] * eAxis[0][index] + yAxis[0][index + 1] * eAxis[0][index + 1]) / (
                     eAxis[0][index] + eAxis[0][index + 1]
                 )
-                eAxis[index][0] = 0.5 * (eAxis[0][index] + eAxis[0][index + 1])
+                eAxis[0][index] = 0.5 * (eAxis[0][index] + eAxis[0][index + 1])
                 # then monitor spectrum
-                yAxis[index][1] = (yAxis[1][index] * eAxis[1][index] + yAxis[1][index + 1] * eAxis[1][index + 1]) / (
+                yAxis[1][index] = (yAxis[1][index] * eAxis[1][index] + yAxis[1][index + 1] * eAxis[1][index + 1]) / (
                     eAxis[1][index] + eAxis[1][index + 1]
                 )
                 eAxis[1][index] = 0.5 * (eAxis[1][index] + eAxis[1][index + 1])
@@ -448,7 +454,7 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         # load and format empty cell
         self.empty_cell_ws = "__" + self.output_ws_name + "_rawEC"
         if self._empty_cell_nexus:
-            self.preprocess_nexus(",".join(empty_cell_files), self.empty_cell_ws)
+            self.preprocess_nexus(empty_cell_files, self.empty_cell_ws)
         else:
             empty_cell_data = self.load_and_concatenate(empty_cell_files)
             empty_cell_data = self.merge_adjacent_points(empty_cell_data)
