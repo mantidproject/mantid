@@ -23,14 +23,6 @@ add_definitions(-D_SILENCE_CXX17_SHARED_PTR_UNIQUE_DEPRECATION_WARNING)
 # ######################################################################################################################
 # Additional compiler flags
 # ######################################################################################################################
-# Replace "/" with "\" for use in command prompt
-if(NOT CONDA_ENV)
-  string(REGEX REPLACE "/" "\\\\" THIRD_PARTY_INCLUDE_DIR "${THIRD_PARTY_DIR}/include/")
-  string(REGEX REPLACE "/" "\\\\" THIRD_PARTY_LIB_DIR "${THIRD_PARTY_DIR}/lib/")
-  set(CMAKE_CXX_FLAGS
-      "${CMAKE_CXX_FLAGS} /external:I ${THIRD_PARTY_INCLUDE_DIR} /external:I ${THIRD_PARTY_LIB_DIR}\\python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}\\ "
-  )
-endif()
 
 # /MP - Compile .cpp files in parallel /W3 - Warning Level 3 (This is also the default) /external:I - Ignore third party
 # library  warnings (similar to "isystem" in GCC) /bigobj Compile large test targets by losing compatibility with MSVC
@@ -123,9 +115,7 @@ else()
 endif()
 
 # Setup debugger environment to launch in VS without setting paths
-if(NOT CONDA_ENV)
-  set(MSVC_PATHS "${THIRD_PARTY_DIR}/bin$<SEMICOLON>${THIRD_PARTY_DIR}/lib/qt5/bin$<SEMICOLON>%PATH%")
-else()
+if(CONDA_ENV)
   set(MSVC_PATHS "$ENV{CONDA_PREFIX}/Library/bin$<SEMICOLON>$ENV{CONDA_PREFIX}/Library/lib$<SEMICOLON>%PATH%")
 endif()
 
