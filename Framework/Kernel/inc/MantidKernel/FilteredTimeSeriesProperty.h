@@ -84,8 +84,7 @@ public:
   TimeSeriesPropertyStatistics getStatistics(const Kernel::TimeROI *roi = nullptr) const override;
 
   /** Calculate a particular statistical quantity from the values of the time series.
-   *  @param selection : Property to filter the time series.
-   *  @param statisticType : Enum indicating the selected statistical quantity.
+   *  @param selection : Enum indicating the selected statistical quantity.
    *  @param roi : optional pointer to TimeROI object for filtering the time series values.
    *  @return The value of the computed statistical quantity.
    */
