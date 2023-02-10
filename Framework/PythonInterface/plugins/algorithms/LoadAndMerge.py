@@ -26,7 +26,6 @@ from mantid.simpleapi import MergeRuns, RenameWorkspace, DeleteWorkspace, GroupW
 
 
 class LoadAndMerge(PythonAlgorithm):
-
     _loader = None
     _version = None
     _loader_options = None
