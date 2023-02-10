@@ -115,5 +115,5 @@ public:
     checkLoader("ILL/SALSA/046508", "LoadILLSALSA");
   }
 
-  void test_loadLagrange() { checkLoader("ILL/Lagrange/014412", "LoadILLLagrange"); }
+  void test_loadLagrange() { checkLoader("ILL/LAGRANGE/014412", "LoadILLLagrange"); }
 };
