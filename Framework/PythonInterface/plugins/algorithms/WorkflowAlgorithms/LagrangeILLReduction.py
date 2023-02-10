@@ -275,6 +275,7 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         )
         if len(file_name) > 1:  # corrects X axis unit if multiple files were concatenated
             mtd[output_name].getAxis(0).setUnit("Energy")
+            SortXAxis(InputWorkspace=output_name, OutputWorkspace=output_name, Ordering="Ascending")
         self.merge_adjacent_bins(output_name)
         monitor_name = output_name + "_mon"
         ExtractMonitors(InputWorkspace=output_name, DetectorWorkspace=output_name, MonitorWorkspace=monitor_name)
