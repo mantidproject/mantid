@@ -138,6 +138,15 @@ class LagrangeILLReductionTest(unittest.TestCase):
         self.assertAlmostEqual(result.readY(0)[10], 3.0, 4)
         self.assertAlmostEqual(result.readY(0)[30], 3.0, 4)
 
+    def test_nexus_multiple_files(self):
+        result = LagrangeILLReduction(SampleRuns="014412.nxs, 014412_scan_continues.nxs")
+        self.check_result(result, "Energy", 62, 30.5, 61.5)
+
+        self.assertAlmostEqual(result.readY(0)[0], 3.0, 4)
+        self.assertAlmostEqual(result.readY(0)[30], 3.0, 4)
+        self.assertAlmostEqual(result.readY(0)[32], 2.0, 4)
+        self.assertAlmostEqual(result.readY(0)[60], 30.0, 4)
+
     def check_result(self, ws, expected_unit, expected_bins, first_bin, last_bin):
         self.assertEqual(ws.getNumberHistograms(), 1)
         self.assertEqual(ws.getNumberBins(), expected_bins)
