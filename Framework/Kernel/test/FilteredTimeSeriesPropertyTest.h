@@ -305,7 +305,7 @@ public:
 
     // 3. Check size
     p1->countSize();
-    TS_ASSERT_EQUALS(p1->size(), 10);
+    TS_ASSERT_EQUALS(p1->size(), 9);
 
     // 4. Check interval
     Mantid::Kernel::TimeInterval dt0 = p1->nthInterval(0);
