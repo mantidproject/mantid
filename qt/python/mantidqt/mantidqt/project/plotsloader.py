@@ -331,7 +331,7 @@ class PlotsLoader(object):
             self.update_axis(ax.yaxis, properties["yAxisProperties"])
 
         if "spineWidths" in properties:
-            for (spine, width) in properties["spineWidths"].items():
+            for spine, width in properties["spineWidths"].items():
                 ax.spines[spine].set_linewidth(width)
 
     def update_axis(self, axis_, properties):
