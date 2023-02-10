@@ -1,9 +1,0 @@
-@echo off
-::
-:: Sets up the environment configured for Mantid by CMake and
-:: starts the appropriate version of Visual Studio
-
-call %~dp0thirdpartypaths.bat
-set MSVC_IDE=@MSVC_IDE_LOCATION@
-:: Start IDE
-start "" "%MSVC_IDE%/devenv.exe" Mantid.sln

@@ -107,9 +107,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 # Configure IDE/commandline startup scripts
 # ######################################################################################################################
 set(WINDOWS_BUILDCONFIG ${PROJECT_SOURCE_DIR}/buildconfig/windows)
-if(NOT CONDA_ENV)
-  configure_file(${WINDOWS_BUILDCONFIG}/thirdpartypaths.bat.in ${PROJECT_BINARY_DIR}/thirdpartypaths.bat @ONLY)
-else()
+if(CONDA_ENV)
   set(CONDA_BASE_DIR $ENV{CONDA_PREFIX})
   configure_file(${WINDOWS_BUILDCONFIG}/thirdpartypaths_conda.bat.in ${PROJECT_BINARY_DIR}/thirdpartypaths.bat @ONLY)
 endif()
@@ -157,14 +155,10 @@ if(EXISTS ${MSVC_IDE_LOCATION}/devenv.exe)
     configure_file(
       ${WINDOWS_BUILDCONFIG}/visual-studio_conda_ninja.bat.in ${PROJECT_BINARY_DIR}/visual-studio_ninja.bat @ONLY
     )
-  else()
-    configure_file(${WINDOWS_BUILDCONFIG}/visual-studio.bat.in ${PROJECT_BINARY_DIR}/visual-studio.bat @ONLY)
   endif()
 endif()
 if(CONDA_ENV)
   configure_file(${WINDOWS_BUILDCONFIG}/pycharm_conda.bat.in ${PROJECT_BINARY_DIR}/pycharm.bat @ONLY)
-else()
-  configure_file(${WINDOWS_BUILDCONFIG}/pycharm.bat.in ${PROJECT_BINARY_DIR}/pycharm.bat @ONLY)
 endif()
 
 # ######################################################################################################################
