@@ -59,17 +59,6 @@ function(add_python_package pkg_name)
     DEPENDS ${_setup_py}
   )
 
-  # Generate a sitecustomize.py file in the egg link directory as setuptools no longer generates site.py for v>=49.0.0
-  if(_parsed_arg_GENERATE_SITECUSTOMIZE AND Python_SETUPTOOLS_VERSION VERSION_GREATER_EQUAL 49.0.0)
-    add_custom_command(
-      OUTPUT ${_egg_link_dir}/sitecustomize.py
-      COMMAND ${CMAKE_COMMAND} -DSITECUSTOMIZE_DIR=${_egg_link_dir} -P ${CMAKE_MODULE_PATH}/WriteSiteCustomize.cmake
-      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-      DEPENDS ${_setup_py} ${CMAKE_MODULE_PATH}/WriteSiteCustomize.cmake
-    )
-    list(APPEND _outputs ${_egg_link_dir}/sitecustomize.py)
-  endif()
-
   add_custom_target(${pkg_name} ALL DEPENDS ${_outputs})
 
   install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E env MANTID_VERSION_STR=${_version_str} \
