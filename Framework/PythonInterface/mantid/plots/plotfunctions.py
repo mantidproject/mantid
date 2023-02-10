@@ -357,6 +357,7 @@ def create_subplots(nplots, fig=None, add_cbar_axis=False):
                 # ** this may also cause plots in the right most column to be slightly narrower than the others
                 make_axes_area_auto_adjustable(axes[i], pad=0, adjust_dirs=["right"])
         cbar_axis = fig.add_subplot(gs_and_cbar[:, 1])
+        fig.sca(axes[-1])
     else:
         gs = GridSpec(nrows, ncols)
         ax0 = fig.add_subplot(gs[0, 0], projection=PROJECTION)
