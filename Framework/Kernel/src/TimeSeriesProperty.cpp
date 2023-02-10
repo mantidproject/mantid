@@ -1594,7 +1594,6 @@ template <typename TYPE> TimeInterval TimeSeriesProperty<TYPE>::nthInterval(int 
  *  @return Value
  */
 template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::nthValue(int n) const {
-  TYPE value;
 
   // 1. Throw error if property is empty
   if (m_values.empty()) {
@@ -1606,12 +1605,14 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::nthValue(int n) const {
   // 2. Sort and apply filter
   sortIfNecessary();
 
+  TYPE value;
+
   // 3. Situation 1:  No filter
   if (static_cast<size_t>(n) < m_values.size()) {
-    TimeValueUnit<TYPE> entry = m_values[static_cast<std::size_t>(n)];
+    const auto entry = m_values[static_cast<std::size_t>(n)];
     value = entry.value();
   } else {
-    TimeValueUnit<TYPE> entry = m_values[static_cast<std::size_t>(m_size) - 1];
+    const auto entry = m_values[static_cast<std::size_t>(m_size) - 1];
     value = entry.value();
   }
 
@@ -1890,16 +1891,15 @@ int TimeSeriesProperty<TYPE>::upperBound(Types::Core::DateAndTime t, int istart,
   sortIfNecessary();
 
   // 3. Construct the pair for comparison and do lower_bound()
-  TimeValueUnit<TYPE> temppair(t, m_values[0].value());
-  typename std::vector<TimeValueUnit<TYPE>>::iterator fid;
-  fid = std::lower_bound((m_values.begin() + istart), (m_values.begin() + iend + 1), temppair);
-  if (fid == m_values.end())
-    throw std::runtime_error("Cannot find data");
+  const TimeValueUnit<TYPE> temppair(t, m_values[0].value());
+  const auto first = m_values.cbegin() + istart;
+  const auto last = m_values.cbegin() + iend + 1;
+  const auto iter = std::lower_bound(first, last, temppair);
 
   // 4. Calculate return value
-  size_t index = size_t(fid - m_values.begin());
-
-  return int(index);
+  if (iter == last)
+    throw std::runtime_error("Cannot find data");
+  return static_cast<int>(std::distance(m_values.cbegin(), iter));
 }
 
 /**
