@@ -82,6 +82,9 @@ public:
 
     // and whether the monitor flag is properly set
     TS_ASSERT(outputWS->detectorInfo().isMonitor(1))
+
+    // check if Ei is in sample logs
+    TS_ASSERT(outputWS->run().hasProperty("Ei"))
   }
 
   void test_Lagrange_close_scans() {
