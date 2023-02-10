@@ -17,7 +17,7 @@ namespace Kernel {
 
 namespace {
 // every value less than zero is ignore
-constexpr int IGNORE{-1};
+constexpr int IGNORE_VALUE{-1};
 // default value for the output is zero
 constexpr int DEFAULT_VALUE{0};
 
@@ -51,9 +51,9 @@ void TimeSplitter::addROI(const Types::Core::DateAndTime &start, const Types::Co
     clearAndReplace(start, stop, value);
   } else if ((stop < m_roi_map.begin()->first) || (start > m_roi_map.rbegin()->first)) {
     // adding to one end or the other
-    if (value > IGNORE) { // only add non-ignore values
+    if (value > IGNORE_VALUE) { // only add non-ignore values
       m_roi_map.insert({start, value});
-      m_roi_map.insert({stop, IGNORE});
+      m_roi_map.insert({stop, IGNORE_VALUE});
     }
   } else {
     // do the interesting version
@@ -71,7 +71,7 @@ void TimeSplitter::addROI(const Types::Core::DateAndTime &start, const Types::Co
 
     // the end is one past the "stop"
     auto stopIterator = m_roi_map.upper_bound(stop);
-    if ((stopIterator != m_roi_map.end()) && (stopValue == IGNORE))
+    if ((stopIterator != m_roi_map.end()) && (stopValue == IGNORE_VALUE))
       stopIterator++; // move to the one after
 
     const bool atStart = (startIterator == m_roi_map.begin());
@@ -80,7 +80,7 @@ void TimeSplitter::addROI(const Types::Core::DateAndTime &start, const Types::Co
     m_roi_map.erase(startIterator, stopIterator);
 
     // put in the new elements
-    if ((value > IGNORE) || (!atStart)) {
+    if ((value > IGNORE_VALUE) || (!atStart)) {
       if (value != this->valueAtTime(start)) {
         m_roi_map.insert({start, value});
       }
@@ -95,8 +95,8 @@ void TimeSplitter::addROI(const Types::Core::DateAndTime &start, const Types::Co
       m_roi_map.insert({stop, stopValue});
     }
 
-    // verify this ends with IGNORE
-    if (m_roi_map.rbegin()->second != IGNORE) {
+    // verify this ends with IGNORE_VALUE
+    if (m_roi_map.rbegin()->second != IGNORE_VALUE) {
       throw std::runtime_error("Something went wrong in TimeSplitter::addROI");
     }
   }
@@ -107,18 +107,18 @@ void TimeSplitter::clearAndReplace(const Types::Core::DateAndTime &start, const 
   m_roi_map.clear();
   if (value >= 0) {
     m_roi_map.insert({start, value});
-    m_roi_map.insert({stop, IGNORE});
+    m_roi_map.insert({stop, IGNORE_VALUE});
   }
 }
 
 int TimeSplitter::valueAtTime(const Types::Core::DateAndTime &time) const {
   if (m_roi_map.empty())
-    return IGNORE;
+    return IGNORE_VALUE;
   if (time < m_roi_map.begin()->first)
-    return IGNORE;
+    return IGNORE_VALUE;
 
   // this method can be used when the object is in an unusual state and doesn't
-  // end with IGNORE
+  // end with IGNORE_VALUE
 
   // find location that is greater than or equal to the requested time and give
   // back previous value
@@ -129,7 +129,7 @@ int TimeSplitter::valueAtTime(const Types::Core::DateAndTime &time) const {
   } else if (location == m_roi_map.begin()) {
     // iterator is greater than the first value in the map b/c equal is already
     // handled asked for a time outside of the map
-    return IGNORE;
+    return IGNORE_VALUE;
   } else {
     // go to the value before
     location--;
@@ -146,7 +146,7 @@ std::vector<int> TimeSplitter::outputWorkspaceIndices() const {
 
   // copy all of the (not ignore) output workspace indices
   for (const auto iter : m_roi_map) {
-    if (iter.second > IGNORE)
+    if (iter.second > IGNORE_VALUE)
       outputSet.insert(iter.second);
   }
 
@@ -161,8 +161,8 @@ std::vector<int> TimeSplitter::outputWorkspaceIndices() const {
  */
 TimeROI TimeSplitter::getTimeROI(const int workspaceIndex) {
   TimeROI output;
-  // only build a result if this is not the IGNORE
-  if (workspaceIndex > IGNORE) {
+  // only build a result if this is not the IGNORE_VALUE
+  if (workspaceIndex > IGNORE_VALUE) {
     using map_value_type = std::map<DateAndTime, int>::value_type;
     auto indexFinder = [workspaceIndex](const map_value_type &value) { return value.second == workspaceIndex; };
     // find the first place this workspace index exists
