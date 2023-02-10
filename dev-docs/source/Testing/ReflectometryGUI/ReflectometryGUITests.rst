@@ -175,25 +175,25 @@ Preview tab
 ---------------
 
 - Go to the Reduction Preview tab.
-- Type `INTER45455` into the `Run` input. Set the `Angle` to `1` and click `Load`. The instrument view plot should display the data. If the plot remains blank then check that you have added the path to your unit test data to your Mantid user directories (see set up instructions).
+- Type ``INTER45455`` into the ``Run`` input. Set the ``Angle`` to ``1`` and click ``Load``. The instrument view plot should display the data. If the plot remains blank then check that you have added the path to your unit test data to your Mantid user directories (see set up instructions).
 - Click the rectangle-select button above the plot and draw a region onto the instrument view. The selected detector segments should be summed and the result plotted on the second (slice viewer) plot.
-- To see the counts on the slice viewer plot more clearly, select `SymmetricLog10` from the drop-down underneath the color scale.
-- Click the rectangle select button above the slice viewer plot and draw a `Signal` region on the plot. A reduction will now be triggered for the selected spectra and the result plotted on the 1D plot.
-- Click the drop-down on the rectangle select button and select `Transmission`. Draw a transmission region onto the slice viewer plot. Then, in the same way, add one or more `Background` regions. The reduction should be re-run each time a region is added:
+- To see the counts on the slice viewer plot more clearly, select ``SymmetricLog10`` from the drop-down underneath the color scale.
+- Click the rectangle select button above the slice viewer plot and draw a ``Signal`` region on the plot. A reduction will now be triggered for the selected spectra and the result plotted on the 1D plot.
+- Click the drop-down on the rectangle select button and select ``Transmission``. Draw a transmission region onto the slice viewer plot. Then, in the same way, add one or more ``Background`` regions. The reduction should be re-run each time a region is added:
 
   - You should see the tab quickly disable and re-enable.
-  - Another run of `ReflectometryReductionOneAuto` will be logged in the Messages bar.
+  - Another run of ``ReflectometryReductionOneAuto`` will be logged in the Messages bar.
   - The 1D plot should update (although this is usually only noticeable when changes are made to the Signal region).
 
 - Check that moving and resizing regions triggers a re-run of the reduction.
 - Check that you can delete one of the Background regions by selecting it and pressing delete on your keyboard.
-- Click the `Apply` button at the bottom right of the tab. The selected regions of interest should be populated in the lookup table on the Experiment Settings tab.
-- Back on the Reduction Preview tab, click the export button above the top left of the 1D plot. This should export a workspace called `preview_reduced_ws` to the ADS.
-- Right-click the workspace and select `Show History`:
+- Click the ``Apply`` button at the bottom right of the tab. The selected regions of interest should be populated in the lookup table on the Experiment Settings tab.
+- Back on the Reduction Preview tab, click the export button above the top left of the 1D plot. This should export a workspace called ``preview_reduced_ws`` to the ADS.
+- Right-click the workspace and select ``Show History``:
 
-  - View the history for `ReflectometryReductionOneAuto` and check that the inputs for `ProcessingInstructions`, `BackgroundProcessingInstructions` and `TransmissionProcessingInstructions` correspond to the ranges of spectra you selected.
-  - View the history for `ReflectometryISISSumBanks` and check that the input for `ROIDetectorIDs` matches the range of detector IDs you selected.
+  - View the history for ``ReflectometryReductionOneAuto`` and check that the inputs for ``ProcessingInstructions``, ``BackgroundProcessingInstructions`` and ``TransmissionProcessingInstructions`` correspond to the ranges of spectra you selected.
+  - View the history for ``ReflectometryISISSumBanks`` and check that the input for ``ROIDetectorIDs`` matches the range of detector IDs you selected.
 
-- Back in the Reflectometry interface, go to the Runs tab. In the Process Runs table on the right-hand panel of the tab, enter Run `INTER45455` and Angle `1` into the first child row. Click Process.
-- Compare plots of the `preview_summed_ws` (from the Preview reduction) with `IvsQ_45455` (from the batch reduction). They should be the same.
+- Back in the Reflectometry interface, go to the Runs tab. In the Process Runs table on the right-hand panel of the tab, enter Run ``INTER45455`` and Angle ``1`` into the first child row. Click Process.
+- Compare plots of the ``preview_summed_ws`` (from the Preview reduction) with ``IvsQ_45455`` (from the batch reduction). They should be the same.
 - The plots on the Reduction Preview tab are located within three dockable widgets. Check that the widgets can be undocked, re-docked, re-sized etc. without error or loss of functionality.
