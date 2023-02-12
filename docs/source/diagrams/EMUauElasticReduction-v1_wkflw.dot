@@ -1,0 +1,67 @@
+digraph ElasticEMUauReduction {
+  label="Elastic EMU Reduction Flowchart"
+  $global_style
+
+  subgraph values {
+    $value_style
+    OutputWorkspace
+  }
+
+  subgraph params {
+  	$param_style
+  	SampleRuns
+    BackgroundRuns
+  	CalibrationRuns
+    BackgroundCalibrationRuns
+  }
+
+  subgraph algorithms {
+  	$algorithm_style
+  	ScaleA [label="Scale"]
+  	ScaleB [label="Scale"]
+  	MinusA [label="Minus"]
+  	MinusB [label="Minus"]
+  	Integration
+  	Divide
+  	MergeRuns
+  	LoadEMU
+  	ConvertScanAxis
+    NormaliseToFlux
+  }
+
+  subgraph cluster {
+
+      label="Reduce"
+      color="orange"
+      LoadEMU -> MergeRuns
+      MergeRuns -> ConvertScanAxis
+      ConvertScanAxis -> NormaliseToFlux
+  }
+
+  subgraph mydefs {
+      node[fillcolor="orange", style = filled]
+      Reduce
+      ScanAndReduceA [label="Reduce"]
+      ScanAndReduceB [label="Reduce"]
+      ScanAndReduceC [label="Reduce"]
+  }
+
+  SampleRuns -> Reduce
+  Reduce -> ScaleA
+  ScaleA -> MinusA
+  BackgroundRuns -> ScanAndReduceA
+  ScanAndReduceA -> MinusA
+
+  CalibrationRuns -> ScanAndReduceB
+  ScanAndReduceB ->  ScaleB
+  ScaleB -> MinusB
+  BackgroundCalibrationRuns -> ScanAndReduceC
+  ScanAndReduceC -> MinusB
+
+  MinusB -> Integration
+
+  MinusA -> Divide
+  Integration -> Divide
+  Divide -> OutputWorkspace
+
+}

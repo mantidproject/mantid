@@ -280,7 +280,6 @@ def find_cycle_folders(cycle_no: int, folder_list: List[str]) -> List[str]:
 
 
 def list_to_seq(nlist: List[int]) -> str:
-
     # converts a list of numbers into an ordered string sequence,
     # for example [1,2,3,10,7,6,8] -> '1-3,6-8,10'
 
@@ -351,7 +350,6 @@ def encode_run_list(file_list: List[str]) -> str:
 
 
 def build_file_list(search_path: List[str], file_prefix: str, file_extn: str, rungrp: RunGroup) -> List[str]:
-
     data_files = []
     for run in seq_to_list(rungrp.runs):
         fname = "{}{:07d}{}".format(file_prefix, run, file_extn)
@@ -422,7 +420,6 @@ def hdf_files_from_runs(all_runs: str, search_dirs: List[str], file_prefix: str,
 
 
 def extract_hdf_params(fpath: str, tags: List[HdfKey]) -> Tuple[Dict[str, Any], Dict[str, Dict[str, str]]]:
-
     # gets the parameters from the base file to be able to complete the setup
     # such as, doppler amplitude and speed
     # if the hdf parameter is mssing and no default is provide an
@@ -525,7 +522,6 @@ class FilterPixelsTubes:
         return tube * self._pixels_per_tube + pixel + self._pixel_offset
 
     def _drop_monitors(self, ws_tag: str):
-
         detector_info = mtd[ws_tag].detectorInfo()
         for i in range(self._nhist):
             if detector_info.isMonitor(i):
@@ -557,7 +553,6 @@ class FilterPixelsTubes:
                 evl.clear(False)
 
     def _finalise_and_mask(self, ws_tag: str, output_ws: str):
-
         # mask the spectra, exlicitly convert numpy.int32 to int as MaskDetectors fails
         mask = np.invert(self._include)
         masked_spectra = [int(x) for x in np.arange(self._nhist)[mask]]
@@ -567,7 +562,6 @@ class FilterPixelsTubes:
             RenameWorkspace(InputWorkspace=ws_tag, OutputWorkspace=output_ws)
 
     def filter_workspace(self, ws_tag: str, output_ws: str):
-
         # first set all pixels on the valid tubes enabled
         # then turn of the pixels outside the valid range
 
@@ -654,14 +648,13 @@ class ScratchFolder:
         return [], empty_ws
 
     def copy_to_scratch_folder(self, output_ws: str, loaded: List[str], lopts: LoaderOptions) -> None:
-
         # add the lopts to the properties
         run = mtd[output_ws].getRun()
         run.addProperty("loader_options", json.dumps(lopts, sort_keys=True), True)
 
         # add the list of merged files that make up the work space
         # to the properties
-        for (ix, name) in enumerate(loaded):
+        for ix, name in enumerate(loaded):
             run.addProperty("merged_" + str(ix), name, True)
 
         fpath = self.build_temp_fpath(loaded[0], 0, output_ws)
@@ -669,7 +662,7 @@ class ScratchFolder:
 
     def check_parameters_match(self, output_ws: str, load_opts: LoaderOptions, params: List[LoadLog]) -> bool:
         mrun = mtd[output_ws].getRun()
-        for (otag, rtag, tol) in params:
+        for otag, rtag, tol in params:
             try:
                 set_pm = load_opts[otag]
                 try:
@@ -696,7 +689,6 @@ class ScratchFolder:
         event_dirs: List[str],
         filter: Union[FilterPixelsTubes, None],
     ) -> bool:
-
         # looks for a nxs file file in the temp folder and either loads the nxs
         # file if it is present or loads the raw file and saves a nxs copy
         fpath = self.build_temp_fpath(run, dataset, "")
@@ -770,8 +762,7 @@ def load_merge(
     if scratch is not None:
         loaded, merged = scratch.restore_runs_from_scratch_folder(output_ws, runs, lopts)
 
-    for (ix, esource) in enumerate(runs):
-
+    for ix, esource in enumerate(runs):
         # esource contains dataset as an suffix fpath:n
         source, ds_index = split_run_index(esource)
 
@@ -1002,7 +993,6 @@ def fractional_map(
     pixel_wgts = {i: [] for i in range(len(bin_edges) - 1)}
 
     for grid, base_pixel in zip(grids, base_pixels):
-
         # Note the mapping from pixel to theta, q, q**2 is a smooth function
         # it is reasonable to use a cubic interpolation of the map.
         # However, the current 2D spline implementaions from scipy only provide
@@ -1043,7 +1033,6 @@ def fractional_map(
 
 
 class FractionalAreaDetectorTubes:
-
     _pixels_per_tube: int
     _2theta_range: str
     _q_range: str
@@ -1144,7 +1133,6 @@ class FractionalAreaDetectorTubes:
         self._fractional_map, self._fractional_wgts = fractional_map(grids, base_pixels, bin_edges)
 
     def apply_fractional_grouping(self, input_ws: str, output_ws: str) -> None:
-
         # get the fractional contributions to Y and E values from the input
         iws = mtd[input_ws]
         inputX = iws.extractX()
@@ -1230,7 +1218,6 @@ class FractionalAreaDetectorTubes:
         self._y_axis = {"values": axis_values, "unitID": unitID}
 
     def _build_tube_map(self) -> None:
-
         # map the detector id a tube and pixel and include
         # if it is in the range selected tubes and pixel range
         anl_tubes = sorted(seq_to_list(self._analyse_tubes))

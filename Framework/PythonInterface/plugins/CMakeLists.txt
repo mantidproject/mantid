@@ -47,6 +47,7 @@ set(PYTHON_PLUGINS
     algorithms/DakotaChiSquared.py
     algorithms/DeltaPDF3D.py
     algorithms/LoadElementalAnalysisData.py
+    algorithms/ElasticEMUauReduction.py
     algorithms/EnggCalibrate.py
     algorithms/EnggCalibrateFull.py
     algorithms/EnggEstimateFocussedBackground.py
@@ -88,6 +89,7 @@ set(PYTHON_PLUGINS
     algorithms/HFIRSANS2Wavelength.py
     algorithms/IndexSatellitePeaks.py
     algorithms/IndirectTransmission.py
+    algorithms/InelasticEMUauReduction.py
     algorithms/IntegratePeaksProfileFitting.py
     algorithms/IntegratePeaksSkew.py
     algorithms/LRAutoReduction.py
@@ -201,6 +203,8 @@ set(PYTHON_PLUGINS
     algorithms/dnsdata.py
     algorithms/fractional_indexing.py
     algorithms/roundinghelper.py
+    algorithms/ANSTO/ansto_common.py
+    algorithms/ANSTO/emu_common.py
     algorithms/WorkflowAlgorithms/AddSampleLogMultiple.py
     algorithms/WorkflowAlgorithms/ApplyPaalmanPingsCorrection.py
     algorithms/WorkflowAlgorithms/BayesQuasi.py
