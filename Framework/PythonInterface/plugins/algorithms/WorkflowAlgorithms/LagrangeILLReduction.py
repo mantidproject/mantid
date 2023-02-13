@@ -102,6 +102,18 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
 
         self.declareProperty(name="ConvertToWaveNumber", defaultValue=False, doc="Convert axis unit to energy in wave number (cm-1)")
 
+        self.declareProperty(name="NexusInput", defaultValue=True, doc="Whether the input data contains NeXus files.")
+
+    def validateInputs(self):
+        issues = dict()
+        if self.getProperty("NexusInput").value:
+            nexus_err_msg = "Data is expected to be NeXus but extension not found in the provided data path."
+            if ".nxs" not in self.getPropertyValue("SampleRuns"):
+                issues["SampleRuns"] = nexus_err_msg
+            if not self.getProperty("ContainerRuns").isDefault and ".nxs" not in self.getPropertyValue("ContainerRuns"):
+                issues["ContainerRuns"] = nexus_err_msg
+        return issues
+
     def PyExec(self):
         self.setup()
 

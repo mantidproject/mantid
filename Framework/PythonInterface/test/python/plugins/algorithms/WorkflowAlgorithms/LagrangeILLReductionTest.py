@@ -28,7 +28,7 @@ class LagrangeILLReductionTest(unittest.TestCase):
         mtd.clear()
 
     def test_only_one_run(self):
-        result = LagrangeILLReduction(SampleRuns="012869")
+        result = LagrangeILLReduction(SampleRuns="012869", NexusInput=False)
         self.check_result(result, "Energy", 150, 21.4992, 96.019)
 
         self.assertEqual(result.getRun().getLogData("run_title").value, "empty-cell-12mm-inner cu220")
@@ -36,7 +36,7 @@ class LagrangeILLReductionTest(unittest.TestCase):
         self.assertAlmostEqual(result.readY(0)[80], 0.010947, 4)
 
     def test_multiple_runs(self):
-        result = LagrangeILLReduction(SampleRuns="012869:012871")
+        result = LagrangeILLReduction(SampleRuns="012869:012871", NexusInput=False)
 
         self.check_result(result, "Energy", 276, 21.4992, 446.5527)
 
@@ -44,14 +44,14 @@ class LagrangeILLReductionTest(unittest.TestCase):
         self.assertAlmostEqual(result.readY(0)[80], 0.010947, 4)
 
     def test_water_correction(self):
-        result = LagrangeILLReduction(SampleRuns="012869:012871", ContainerRuns="012882:012884")
+        result = LagrangeILLReduction(SampleRuns="012869:012871", ContainerRuns="012882:012884", NexusInput=False)
         self.check_result(result, "Energy", 276, 21.4992, 446.5527)
 
         self.assertAlmostEqual(result.readY(0)[10], -0.017195, 4)
         self.assertAlmostEqual(result.readY(0)[80], -0.015001, 4)
 
     def test_calibration_correction(self):
-        result = LagrangeILLReduction(SampleRuns="012869:012871", CorrectionFile="correction-water-cu220-2020.txt")
+        result = LagrangeILLReduction(SampleRuns="012869:012871", CorrectionFile="correction-water-cu220-2020.txt", NexusInput=False)
         self.check_result(result, "Energy", 276, 21.4992, 446.5527)
 
         self.assertAlmostEqual(result.readY(0)[10], 0.01478, 4)
@@ -59,7 +59,7 @@ class LagrangeILLReductionTest(unittest.TestCase):
 
     def test_all_corrections(self):
         result = LagrangeILLReduction(
-            SampleRuns="012869:012871", ContainerRuns="012882:012884", CorrectionFile="correction-water-cu220-2020.txt"
+            SampleRuns="012869:012871", ContainerRuns="012882:012884", CorrectionFile="correction-water-cu220-2020.txt", NexusInput=False
         )
         self.check_result(result, "Energy", 276, 21.4992, 446.5527)
 
@@ -67,33 +67,33 @@ class LagrangeILLReductionTest(unittest.TestCase):
         self.assertAlmostEqual(result.readY(0)[80], -0.01612, 4)
 
     def test_incident_energy(self):
-        result = LagrangeILLReduction(SampleRuns="012869:012871", UseIncidentEnergy=True)
+        result = LagrangeILLReduction(SampleRuns="012869:012871", UseIncidentEnergy=True, NexusInput=False)
         self.check_result(result, "Energy", 276, 25.9992, 451.0527)
 
         self.assertAlmostEqual(result.readY(0)[10], 0.014433, 4)
         self.assertAlmostEqual(result.readY(0)[80], 0.010947, 4)
 
     def test_convert_to_wavenumber(self):
-        result = LagrangeILLReduction(SampleRuns="012869:012871", ConvertToWaveNumber=True)
+        result = LagrangeILLReduction(SampleRuns="012869:012871", ConvertToWaveNumber=True, NexusInput=False)
         self.check_result(result, "Energy_inWavenumber", 276, 173.4028, 3601.6907)
 
         self.assertAlmostEqual(result.readY(0)[10], 0.014433, 4)
         self.assertAlmostEqual(result.readY(0)[80], 0.010947, 4)
 
     def test_no_normalisation(self):
-        result = LagrangeILLReduction(SampleRuns="012869:012871", NormaliseBy="None")
+        result = LagrangeILLReduction(SampleRuns="012869:012871", NormaliseBy="None", NexusInput=False)
         self.check_result(result, "Energy", 276, 21.4992, 446.5527)
         self.assertAlmostEqual(result.readY(0)[10], 2165, 4)
         self.assertAlmostEqual(result.readY(0)[80], 1642, 4)
 
     def test_merging_close_initial_energies(self):
-        result = LagrangeILLReduction(SampleRuns="012869_close_scans", NormaliseBy="None")
+        result = LagrangeILLReduction(SampleRuns="012869_close_scans", NormaliseBy="None", NexusInput=False)
         self.check_result(result, "Energy", 148, 21.4992, 96.019)
         self.assertAlmostEqual(result.readY(0)[10], 1972, 4)
         self.assertAlmostEqual(result.readY(0)[80], 1737, 4)
 
     def test_one_scan_point(self):
-        result = LagrangeILLReduction(SampleRuns="014220", NormaliseBy="Monitor", UseIncidentEnergy=True)
+        result = LagrangeILLReduction(SampleRuns="014220", NormaliseBy="Monitor", UseIncidentEnergy=True, NexusInput=False)
         self.check_result(result, "Energy", 1, 4.4998, 4.4998)
         self.assertAlmostEqual(result.readY(0)[0], 2.096, 3)
         self.assertEqual(result.getNumberHistograms(), 1)
