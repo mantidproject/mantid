@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
+#include "MantidKernel/TimeROI.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 namespace Mantid::Kernel {
 /**
@@ -15,7 +17,7 @@ namespace Mantid::Kernel {
  * @param filter :: A reference to a TimeSeriesProperty<bool> that will act as a
  * filter
  */
-LogFilter::LogFilter(const FilteredTimeSeriesProperty<bool> &filter) : m_prop(), m_filter() { addFilter(filter); }
+LogFilter::LogFilter(const TimeSeriesProperty<bool> &filter) : m_prop(), m_filter() { addFilter(filter); }
 
 /**
  * Constructor
@@ -38,16 +40,17 @@ LogFilter::LogFilter(const FilteredTimeSeriesProperty<double> *timeSeries) : m_p
  * The object is cloned
  * @param filter :: Filtering mask
  */
-void LogFilter::addFilter(const FilteredTimeSeriesProperty<bool> &filter) {
+void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
   if (filter.size() == 0)
-    return;
-  if (!m_filter || m_filter->size() == 0)
-    m_filter.reset(filter.clone());
-  else {
-    auto filterProperty = std::make_unique<FilteredTimeSeriesProperty<bool>>("tmp");
+    return; // nothing to do
 
-    FilteredTimeSeriesProperty<bool> *filter1 = m_filter.get();
-    auto filter2 = std::unique_ptr<FilteredTimeSeriesProperty<bool>>(filter.clone());
+  if (!m_filter || m_filter->size() == 0) {
+    m_filter.reset(filter.clone());
+  } else {
+    auto filterProperty = std::make_unique<TimeSeriesProperty<bool>>("tmp");
+
+    auto filter1 = m_filter.get();
+    auto filter2 = std::unique_ptr<TimeSeriesProperty<bool>>(filter.clone());
 
     TimeInterval time1 = filter1->nthInterval(filter1->size() - 1);
     TimeInterval time2 = filter2->nthInterval(filter2->size() - 1);
@@ -100,9 +103,10 @@ void LogFilter::addFilter(const FilteredTimeSeriesProperty<bool> &filter) {
       time1 = filter1->nthInterval(i);
       time2 = filter2->nthInterval(j);
     }
-    filterProperty->clearFilter();
+
     m_filter = std::move(filterProperty);
   }
+  // apply the filter to the property
   if (m_prop) {
     m_prop->clearFilter();
     m_prop->filterWith(m_filter.get());

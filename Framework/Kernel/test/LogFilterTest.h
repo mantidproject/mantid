@@ -145,7 +145,7 @@ public:
     auto mask2 = createTestFilter(3);
     LogFilter filterer(*mask1);
     filterer.addFilter(*mask2);
-    const FilteredTimeSeriesProperty<bool> *finalFilter = filterer.filter();
+    const TimeSeriesProperty<bool> *finalFilter = filterer.filter();
 
     TSM_ASSERT("Filter is NULL", finalFilter);
     if (!finalFilter)
@@ -298,8 +298,8 @@ public:
 private:
   /// Creates a test boolean filter
   /// @param type :: Which variant to create
-  std::shared_ptr<FilteredTimeSeriesProperty<bool>> createTestFilter(const int type) {
-    std::shared_ptr<FilteredTimeSeriesProperty<bool>> filter(new FilteredTimeSeriesProperty<bool>("filter"));
+  std::shared_ptr<TimeSeriesProperty<bool>> createTestFilter(const int type) {
+    auto filter = std::make_shared<TimeSeriesProperty<bool>>("filter");
     if (type == 1) {
       filter->addValue("2007-11-30T16:16:50", true);
       filter->addValue("2007-11-30T16:17:25", false);

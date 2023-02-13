@@ -71,7 +71,7 @@ void ISISRunLogs::addPeriodLogs(const int period, API::Run &exptRun) {
  * @param exptRun :: The run for this period
  */
 void ISISRunLogs::applyLogFiltering(Mantid::API::Run &exptRun) {
-  const FilteredTimeSeriesProperty<bool> *maskProp{nullptr};
+  const TimeSeriesProperty<bool> *maskProp{nullptr};
   std::unique_ptr<LogFilter> logFilter{nullptr};
   try {
     auto runningLog = exptRun.getTimeSeriesProperty<bool>(LogParser::statusLogName());
