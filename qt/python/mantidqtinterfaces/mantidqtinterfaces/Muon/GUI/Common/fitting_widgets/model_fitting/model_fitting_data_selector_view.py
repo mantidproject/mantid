@@ -47,7 +47,7 @@ class ModelFittingDataSelectorView(ui_form, base_widget):
     def add_results_table_name(self, results_table_name: str) -> None:
         """Add a results table to the results table combo box."""
         self.result_table_selector.add_dataset_name(results_table_name)
-        self.result_table_selector.set_current_dataset_index(self.result_table_selector.number_of_datasets()-1)
+        self.result_table_selector.set_current_dataset_index(self.result_table_selector.number_of_datasets() - 1)
 
     def update_result_table_names(self, table_names: list) -> None:
         """Update the data in the parameter display combo box."""
@@ -107,7 +107,7 @@ class ModelFittingDataSelectorView(ui_form, base_widget):
         elif TableColumnType.X.value in x_parameter_types:
             return x_parameters[x_parameter_types.index(1)]
         else:
-            return ''
+            return ""
 
     def _get_y_parameter_for_update(self, old_y_parameter: str, y_parameters: list, y_parameter_types: list) -> str:
         if self.x_selector.findText(old_y_parameter) != -1:
@@ -115,7 +115,7 @@ class ModelFittingDataSelectorView(ui_form, base_widget):
         elif TableColumnType.Y.value in y_parameter_types:
             return y_parameters[y_parameter_types.index(2)]
         else:
-            return ''
+            return ""
 
     def number_of_result_tables(self) -> int:
         """Returns the number of result tables loaded into the widget."""

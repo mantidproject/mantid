@@ -65,7 +65,7 @@ public:
 class MockBatchPresenter : public IBatchPresenter {
 public:
   MOCK_METHOD1(acceptMainPresenter, void(IMainWindowPresenter *));
-  MOCK_METHOD0(initInstrumentList, void());
+  MOCK_METHOD1(initInstrumentList, void(const std::string &));
   MOCK_METHOD0(notifyResumeReductionRequested, void());
   MOCK_METHOD0(notifyPauseReductionRequested, void());
   MOCK_METHOD0(notifyResumeAutoreductionRequested, void());
@@ -111,7 +111,7 @@ public:
 class MockRunsPresenter : public IRunsPresenter {
 public:
   MOCK_METHOD1(acceptMainPresenter, void(IBatchPresenter *));
-  MOCK_METHOD0(initInstrumentList, void());
+  MOCK_METHOD1(initInstrumentList, void(const std::string &));
   MOCK_CONST_METHOD0(runsTable, RunsTable const &());
   MOCK_METHOD0(mutableRunsTable, RunsTable &());
   MOCK_METHOD1(notifyChangeInstrumentRequested, bool(std::string const &));
@@ -236,6 +236,7 @@ public:
   MOCK_CONST_METHOD0(hasUnsavedChanges, bool());
   MOCK_METHOD0(setSaved, void());
   MOCK_CONST_METHOD0(searchCriteria, SearchCriteria());
+  MOCK_CONST_METHOD0(getSearchResultsCSV, std::string());
 };
 
 class MockSearcherSubscriber : public SearcherSubscriber {
@@ -266,6 +267,7 @@ public:
   MOCK_CONST_METHOD0(hasUnsavedChanges, bool());
   MOCK_METHOD0(setUnsaved, void());
   MOCK_METHOD0(setSaved, void());
+  MOCK_CONST_METHOD0(getSearchResultsCSV, std::string());
 };
 
 class MockMessageHandler : public IReflMessageHandler {
@@ -282,6 +284,8 @@ class MockFileHandler : public IFileHandler {
 public:
   MOCK_METHOD2(saveJSONToFile, void(std::string const &, QMap<QString, QVariant> const &));
   MOCK_METHOD1(loadJSONFromFile, QMap<QString, QVariant>(const std::string &));
+  MOCK_CONST_METHOD2(saveCSVToFile, void(std::string const &, std::string const &));
+  MOCK_CONST_METHOD1(fileExists, bool(std::string const &));
 };
 
 class MockJobRunner : public IJobRunner {
@@ -306,6 +310,7 @@ public:
   MOCK_METHOD0(notifyLoadWorkspaceCompleted, void());
   MOCK_METHOD0(notifySumBanksCompleted, void());
   MOCK_METHOD0(notifyReductionCompleted, void());
+  MOCK_METHOD0(notifyLoadWorkspaceAlgorithmError, void());
   MOCK_METHOD0(notifySumBanksAlgorithmError, void());
   MOCK_METHOD0(notifyReductionAlgorithmError, void());
 };

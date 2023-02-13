@@ -8,26 +8,24 @@
 import unittest
 from unittest import mock
 
-from mantidqtinterfaces.dns_powder_tof.data_structures.dns_widget import \
-    DNSWidget
+from mantidqtinterfaces.dns_powder_tof.data_structures.dns_widget import DNSWidget
 
 
 class DNSWidgetTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.parent = mock.Mock()
-        name = 'test'
+        name = "test"
         cls.widget = DNSWidget(name=name, parent=cls.parent)
 
     def test___init__(self):
         self.assertIsInstance(self.widget, DNSWidget)
         self.assertIsInstance(self.widget, object)
         self.assertEqual(self.widget.parent, self.parent)
-        self.assertTrue(hasattr(self.widget, 'view'))
-        self.assertTrue(hasattr(self.widget, 'presenter'))
-        self.assertTrue(hasattr(self.widget, 'model'))
-        self.assertEqual(self.widget.name, 'test')
+        self.assertTrue(hasattr(self.widget, "view"))
+        self.assertTrue(hasattr(self.widget, "presenter"))
+        self.assertTrue(hasattr(self.widget, "model"))
+        self.assertEqual(self.widget.name, "test")
 
     def test_has_view(self):
         self.widget.view = None
@@ -54,5 +52,5 @@ class DNSWidgetTest(unittest.TestCase):
         self.widget.presenter.update_progress.assert_called_once_with(1, 10)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

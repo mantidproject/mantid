@@ -13,9 +13,6 @@
 #include "ISISCalibration.h"
 #include "ISISDiagnostics.h"
 #include "ISISEnergyTransfer.h"
-#include "IndirectMoments.h"
-#include "IndirectSqw.h"
-#include "IndirectSymmetrise.h"
 #include "IndirectTransmission.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -82,9 +79,6 @@ void IndirectDataReduction::initLayout() {
   addTab<ISISCalibration>("ISIS Calibration");
   addTab<ISISDiagnostics>("ISIS Diagnostics");
   addTab<IndirectTransmission>("Transmission");
-  addTab<IndirectSymmetrise>("Symmetrise");
-  addTab<IndirectSqw>("S(Q, w)");
-  addTab<IndirectMoments>("Moments");
   addTab<ILLEnergyTransfer>("ILL Energy Transfer");
 
   connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
@@ -367,7 +361,7 @@ void IndirectDataReduction::readSettings() {
   m_dataDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories"));
   m_dataDir.replace(" ", "");
   if (m_dataDir.length() > 0)
-    m_dataDir = m_dataDir.split(";", QString::SkipEmptyParts)[0];
+    m_dataDir = m_dataDir.split(";", Qt::SkipEmptyParts)[0];
   m_saveDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
 
   QSettings settings;
@@ -432,10 +426,7 @@ void IndirectDataReduction::filterUiForFacility(const QString &facility) {
   }
 
   // These tabs work at any facility (always at end of tabs)
-  enabledTabs << "Transmission"
-              << "Symmetrise"
-              << "S(Q, w)"
-              << "Moments";
+  enabledTabs << "Transmission";
 
   // First remove all tabs
   while (m_uiForm.twIDRTabs->count() > 0) {

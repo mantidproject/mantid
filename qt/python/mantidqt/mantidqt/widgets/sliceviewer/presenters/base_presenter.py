@@ -18,7 +18,7 @@ from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
 class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
     def __init__(self, ws, data_view: SliceViewerDataView, model: SliceViewerBaseModel = None):
         self.model = model if model else SliceViewerBaseModel(ws)
-        self._data_view : SliceViewerDataView = data_view
+        self._data_view: SliceViewerDataView = data_view
         self.normalization = False
 
     def show_all_data_clicked(self):
@@ -62,8 +62,8 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
         return self.view.data_view.dimensions
 
     def get_slicepoint(self):
-        """Returns the current slicepoint as a list of 3 elements.
-           None indicates that dimension is being displayed"""
+        """Returns the current slicepoint as a list of 3 or more elements.
+        None indicates that dimension is being displayed"""
         return self._data_view.dimensions.get_slicepoint()
 
     def set_slicepoint(self, value):
@@ -117,3 +117,7 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
             data_view.enable_tool_button(ToolItemText.ZOOM)
             data_view.enable_tool_button(ToolItemText.PAN)
             data_view.switch_line_plots_tool(PixelLinePlot, self)
+
+    @abc.abstractmethod
+    def get_extra_image_info_columns(self, xdata, ydata):
+        pass

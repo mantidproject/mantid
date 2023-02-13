@@ -23,10 +23,11 @@ class AboutPresenter(object):
     FACILITY = "default.facility"
     INSTRUMENT = "default.instrument"
 
-    def __init__(self, parent, view=None, usage_reporting_verification_view = None):
+    def __init__(self, parent, view=None, usage_reporting_verification_view=None):
         self.view = view if view else AboutView(parent, self, str(version()), release_date().strip())
-        self.usage_reporting_verification_view = usage_reporting_verification_view \
-            if usage_reporting_verification_view else UsageReportingVerificationView(parent, self)
+        self.usage_reporting_verification_view = (
+            usage_reporting_verification_view if usage_reporting_verification_view else UsageReportingVerificationView(parent, self)
+        )
         self.parent = parent
 
         about_widget = self.view.about_widget
@@ -58,7 +59,7 @@ class AboutPresenter(object):
 
     @staticmethod
     def should_show_on_startup():
-        """ Determines if the first time dialog should be shown
+        """Determines if the first time dialog should be shown
         :return: True if the dialog should be shown
         """
         # first check the facility and instrument
@@ -71,12 +72,13 @@ class AboutPresenter(object):
             try:
                 facilityInfo = ConfigService.getFacility(facility)
                 instrumentInfo = ConfigService.getInstrument(instrument)
-                logger.information("Default facility '{0}', instrument '{1}'\n".format(facilityInfo.name(),
-                                                                                       instrumentInfo.name()))
+                logger.information("Default facility '{0}', instrument '{1}'\n".format(facilityInfo.name(), instrumentInfo.name()))
             except RuntimeError:
                 # failed to find the facility or instrument
-                logger.error("Could not find your default facility '{0}' or instrument '{1}' in facilities.xml, "
-                             + "showing please select again.\n".format(facility, instrument))
+                logger.error(
+                    f"Could not find your default facility '{facility}' or instrument '{instrument}' in facilities.xml, "
+                    + "showing please select again.\n"
+                )
                 return True
 
         settings = QSettings()
@@ -148,19 +150,19 @@ class AboutPresenter(object):
         InterfaceManager().showHelpPage(release_notes_url())
 
     def action_open_download_website(self):
-        InterfaceManager().showWebPage('http://download.mantidproject.org')
+        InterfaceManager().showWebPage("https://www.mantidproject.org/installation/index#sample-data")
 
     def action_open_mantid_introduction(self):
-        InterfaceManager().showWebPage('http://www.mantidproject.org/Mantid_Basic_Course')
+        InterfaceManager().showWebPage("https://docs.mantidproject.org/nightly/tutorials/mantid_basic_course")
 
     def action_open_python_introduction(self):
-        InterfaceManager().showWebPage('http://www.mantidproject.org/Introduction_To_Python')
+        InterfaceManager().showWebPage("https://docs.mantidproject.org/nightly/tutorials/introduction_to_python")
 
     def action_open_python_in_mantid(self):
-        InterfaceManager().showWebPage('http://www.mantidproject.org/Python_In_Mantid')
+        InterfaceManager().showWebPage("https://docs.mantidproject.org/nightly/tutorials/python_in_mantid")
 
     def action_open_extending_mantid(self):
-        InterfaceManager().showWebPage('http://www.mantidproject.org/Extending_Mantid_With_Python')
+        InterfaceManager().showWebPage("https://docs.mantidproject.org/nightly/tutorials/extending_mantid_with_python")
 
     def action_open_external_link(self, url):
         InterfaceManager().showWebPage(url)

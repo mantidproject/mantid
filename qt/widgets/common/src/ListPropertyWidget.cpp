@@ -30,7 +30,7 @@ ListPropertyWidget::ListPropertyWidget(Mantid::Kernel::Property *prop, QWidget *
   // Label at column 0
   m_label = new QLabel(QString::fromStdString(prop->name()), m_parent);
   m_label->setToolTip(m_doc);
-  m_gridLayout->addWidget(m_label, m_row, 0, nullptr);
+  m_gridLayout->addWidget(m_label, m_row, 0);
   m_widgets.push_back(m_label);
 
   // It is a choice of certain allowed values and can use a list box
@@ -53,7 +53,7 @@ ListPropertyWidget::ListPropertyWidget(Mantid::Kernel::Property *prop, QWidget *
   connect(m_list, SIGNAL(itemSelectionChanged()), this, SLOT(userEditedProperty()));
 
   // Put the combo in column 1
-  m_gridLayout->addWidget(m_list, m_row, 1, nullptr);
+  m_gridLayout->addWidget(m_list, m_row, 1);
 }
 
 //----------------------------------------------------------------------------------------------

@@ -101,16 +101,14 @@ class subplot(QtWidgets.QWidget):
 
     # adds plotted line to context and updates GUI
     def _add_plotted_line(self, subplot_name, workspace, spec_num, color=None):
-        """ Appends plotted lines to the related subplot list. """
+        """Appends plotted lines to the related subplot list."""
         self._context.addLine(subplot_name, workspace, spec_num, color=color)
         self.canvas.draw()
 
     def add_subplot(self, subplot_name, number):
         self._context.update_gridspec(number + 1)
         gridspec = self._context.gridspec
-        self.plot_objects[subplot_name] = self.figure.add_subplot(gridspec[number],
-                                                                  label=subplot_name,
-                                                                  projection='mantid')
+        self.plot_objects[subplot_name] = self.figure.add_subplot(gridspec[number], label=subplot_name, projection="mantid")
         self.plot_objects[subplot_name].set_title(subplot_name)
         self._context.addSubplot(subplot_name, self.plot_objects[subplot_name])
         self._update()
@@ -201,10 +199,7 @@ class subplot(QtWidgets.QWidget):
     def _create_rm_window(self, subplot_name):
         line_names = list(self._context.subplots[subplot_name].lines.keys())
         vline_names = self._context.subplots[subplot_name].vlines
-        return RemovePlotWindow(lines=line_names,
-                                vlines=vline_names,
-                                subplot=subplot_name,
-                                parent=self)
+        return RemovePlotWindow(lines=line_names, vlines=vline_names, subplot=subplot_name, parent=self)
 
     def _get_rm_window(self, subplot_name):
         # always close selector after making a selection

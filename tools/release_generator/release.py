@@ -10,7 +10,7 @@ import os
 import pathlib
 
 DOCS = {
-    'index.rst': '''.. _v{version}:
+    "index.rst": """.. _v{version}:
 
 ===========================
 Mantid {version} Release Notes
@@ -95,32 +95,39 @@ For a full list of all issues addressed during this release please see the `GitH
 .. _GitHub milestone: {milestone_link}
 
 .. _GitHub release page: https://github.com/mantidproject/mantid/releases/tag/v{version}
-'''
-    }
+"""
+}
 
 ################################################################################
 
-TECH_DOCS = ['framework.rst', 'mantidworkbench.rst', 'diffraction.rst', 'direct_geometry.rst', 'indirect_geometry.rst',
-             'muon.rst', 'sans.rst', 'reflectometry.rst']
+TECH_DOCS = [
+    "framework.rst",
+    "mantidworkbench.rst",
+    "diffraction.rst",
+    "direct_geometry.rst",
+    "indirect_geometry.rst",
+    "muon.rst",
+    "sans.rst",
+    "reflectometry.rst",
+]
 
-MANTID_DOI = '`doi: 10.5286/SOFTWARE/MANTID{version_maj_min} <https://dx.doi.org/10.5286/SOFTWARE/' \
-             'MANTID{version_maj_min}>`_'
+MANTID_DOI = "`doi: 10.5286/SOFTWARE/MANTID{version_maj_min} <https://dx.doi.org/10.5286/SOFTWARE/" "MANTID{version_maj_min}>`_"
 
 #################################################################################
 # Lists to help create the subfolders
-level1 = ['Diffraction', 'Direct_Geometry', 'Framework', 'Muon']
+level1 = ["Diffraction", "Direct_Geometry", "Framework", "Muon"]
 # For upper level folders that will require Bugfixes, Improvements and New features as sub directories
-level1Upper = ['Workbench', 'Reflectometry', 'SANS', 'Indirect']
+level1Upper = ["Workbench", "Reflectometry", "SANS", "Indirect"]
 
-diffraction = ['Powder', 'Single_Crystal', 'Engineering']
-framework = ['Algorithms', 'Data_Objects', 'Fit_Functions', 'Python']
-workbench = ['InstrumentViewer', 'SliceViewer']
-direct = ['General', 'CrystalField', 'MSlice']
-indirect = ['Algorithms']
-muon = ['FDA', 'Muon_Analysis', 'MA_FDA', 'ALC', 'Elemental_Analysis', 'Algorithms']
+diffraction = ["Powder", "Single_Crystal", "Engineering"]
+framework = ["Algorithms", "Data_Objects", "Fit_Functions", "Python"]
+workbench = ["InstrumentViewer", "SliceViewer"]
+direct = ["General", "CrystalField", "MSlice"]
+indirect = ["Algorithms"]
+muon = ["FDA", "Muon_Analysis", "MA_FDA", "ALC", "Elemental_Analysis", "Algorithms"]
 
-subfolders = ['Bugfixes', 'New_features']
-muon_subfolders = ['Bugfixes']
+subfolders = ["Bugfixes", "New_features"]
+muon_subfolders = ["Bugfixes"]
 #################################################################################
 
 
@@ -134,56 +141,56 @@ def getTemplate(technique):
 
 def getReleaseRoot() -> pathlib.Path:
     program_path = pathlib.Path(__file__).resolve()
-    release_path = program_path / '../../../docs/source/release/'
+    release_path = program_path / "../../../docs/source/release/"
     return release_path.resolve()
 
 
 def getTemplateRoot() -> pathlib.Path:
     program_path = pathlib.Path(__file__).resolve()
-    template_path = program_path / '../../../docs/source/release/templates/'
+    template_path = program_path / "../../../docs/source/release/templates/"
     return template_path.resolve()
 
 
 def fixReleaseName(name):
-    if name.startswith('v'):
+    if name.startswith("v"):
         name = name[1:]
 
     # make sure that all of the parts can be converted to integers
     try:
-        version = [int(i) for i in name.split('.')]
+        version = [int(i) for i in name.split(".")]
     except ValueError as e:
-        raise RuntimeError('expected version number form: major.minor.patch', e)
+        raise RuntimeError("expected version number form: major.minor.patch", e)
     if len(version) == 3:
         pass  # perfect
     elif len(version) == 2:
-        name += '.0'
+        name += ".0"
     elif len(version) == 1:
-        name += '.0.0'
+        name += ".0.0"
     else:
-        raise RuntimeError('expected version number form: major.minor.patch')
+        raise RuntimeError("expected version number form: major.minor.patch")
 
-    return 'v' + name
+    return "v" + name
 
 
 def toMilestoneName(version):
-    version = version[1:].split('.')
-    version = 'Release+{major}.{minor}'.format(major=version[0], minor=version[1])
+    version = version[1:].split(".")
+    version = "Release+{major}.{minor}".format(major=version[0], minor=version[1])
     return version
 
 
 def addToReleaseList(release_root, version):
-    filename = release_root / 'index.rst'
+    filename = release_root / "index.rst"
 
     # read in the entire old version
-    with open(filename, 'r') as handle:
+    with open(filename, "r") as handle:
         oldtext = handle.readlines()
 
     # write out the new version
-    with open(filename, 'w') as handle:
+    with open(filename, "w") as handle:
         search_for_insertion = True
         for i in range(len(oldtext)):
             line = oldtext[i].strip()
-            if search_for_insertion and line.startswith('* :doc:`v') and line.endswith('/index>`'):
+            if search_for_insertion and line.startswith("* :doc:`v") and line.endswith("/index>`"):
                 if version not in line:
                     handle.write(f"* :doc:`{version} <{version}/index>`\n")
                 search_for_insertion = False
@@ -198,12 +205,12 @@ def makeReleaseNoteDirectories(HigherLevel):
         dirName = pathlib.Path.joinpath(HigherLevel, directory)
         dirName.mkdir(parents=True, exist_ok=True)
         makeReleaseNoteSubfolders(directory, HigherLevel)
-    makeSubDirectoriesFromList(diffraction, 'Diffraction', HigherLevel)
-    makeSubDirectoriesFromList(framework, 'Framework', HigherLevel)
-    makeSubDirectoriesFromList(workbench, 'Workbench', HigherLevel)
-    makeSubDirectoriesFromList(direct, 'Direct_Geometry', HigherLevel)
-    makeSubDirectoriesFromList(indirect, 'Indirect', HigherLevel)
-    makeSubDirectoriesFromList(muon, 'Muon', HigherLevel)
+    makeSubDirectoriesFromList(diffraction, "Diffraction", HigherLevel)
+    makeSubDirectoriesFromList(framework, "Framework", HigherLevel)
+    makeSubDirectoriesFromList(workbench, "Workbench", HigherLevel)
+    makeSubDirectoriesFromList(direct, "Direct_Geometry", HigherLevel)
+    makeSubDirectoriesFromList(indirect, "Indirect", HigherLevel)
+    makeSubDirectoriesFromList(muon, "Muon", HigherLevel)
 
 
 def makeSubDirectoriesFromList(directoryList, upperDirectory, HigherLevel):
@@ -216,7 +223,7 @@ def makeSubDirectoriesFromList(directoryList, upperDirectory, HigherLevel):
 def makeReleaseNoteSubfolders(directory, HigherLevel):
     directoryStr = str(directory)
     for folder in subfolders:
-        if 'Muon' in directoryStr:
+        if "Muon" in directoryStr:
             for single_folder in muon_subfolders:
                 subfolderName = HigherLevel / directory / single_folder
                 subfolderName.mkdir(parents=True, exist_ok=True)
@@ -228,49 +235,53 @@ def makeReleaseNoteSubfolders(directory, HigherLevel):
 
 
 def makeGitkeep(subfolderName):
-    filename = '.gitkeep'
+    filename = ".gitkeep"
     gitFile = subfolderName / filename
     if not os.listdir(subfolderName):
-        open(gitFile, 'a').close()
+        open(gitFile, "a").close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from argparse import ArgumentParser
+
     parser = ArgumentParser(description="Generate generic release pages")
-    parser.add_argument('--release', required=True)
-    parser.add_argument('--milestone', required=False, default=None,
-                        help="Formatted with html escapes already")
+    parser.add_argument("--release", required=True)
+    parser.add_argument("--milestone", required=False, default=None, help="Formatted with html escapes already")
     args = parser.parse_args()
 
     # parse, repair, and create missing arguments
     args.release = fixReleaseName(args.release)
-    print('  release:', args.release)
+    print("  release:", args.release)
     if args.milestone is None:
         args.milestone = toMilestoneName(args.release)
-    print('milestone:', args.milestone)
+    print("milestone:", args.milestone)
     release_root = getReleaseRoot()
-    print('     root:', release_root)
+    print("     root:", release_root)
     # Encode the milestone to remove spaces for the GitHub filter URL
-    sanitized_milestone = args.milestone.replace(' ', '+')
-    milestone_link = 'https://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+' \
-        + f'milestone%3A%22{sanitized_milestone}%22+is%3Amerged'
+    sanitized_milestone = args.milestone.replace(" ", "+")
+    milestone_link = (
+        "https://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+" + f"milestone%3A%22{sanitized_milestone}%22+is%3Amerged"
+    )
     # add the new sub-site to the index
     addToReleaseList(release_root, args.release)
 
     # create all of the sub-area pages
     release_root = release_root / args.release
-    print('creating directory', release_root)
+    print("creating directory", release_root)
     release_root.mkdir(parents=True, exist_ok=True)
-    release_link = '\n:ref:`Release {0} <{1}>`'.format(args.release[1:], args.release)
+    release_link = "\n:ref:`Release {0} <{1}>`".format(args.release[1:], args.release)
 
     for filename in DOCS.keys():
         version_maj_min = args.release[1:-2]
-        contents = DOCS[filename].format(milestone_link=milestone_link, version=args.release[1:],
-                                         version_maj_min=version_maj_min,
-                                         mantid_doi=MANTID_DOI.format(version_maj_min=version_maj_min))
+        contents = DOCS[filename].format(
+            milestone_link=milestone_link,
+            version=args.release[1:],
+            version_maj_min=version_maj_min,
+            mantid_doi=MANTID_DOI.format(version_maj_min=version_maj_min),
+        )
         filename = release_root / filename
-        print('making', filename)
-        with open(filename, 'w') as handle:
+        print("making", filename)
+        with open(filename, "w") as handle:
             handle.write(contents)
 
     for filename in TECH_DOCS:
@@ -278,8 +289,8 @@ if __name__ == '__main__':
         contents = getTemplate(name)
         contents = contents.format(sanitized_milestone=sanitized_milestone, version=args.release[1:])
         filename = release_root / filename
-        print('making', filename)
-        with open(filename, 'w') as handle:
+        print("making", filename)
+        with open(filename, "w") as handle:
             handle.write(contents)
             handle.write(release_link)
 

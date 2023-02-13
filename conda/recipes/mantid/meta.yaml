@@ -1,0 +1,77 @@
+{% set version = load_setup_py_data().get('version', '0.0.0') %}
+
+package:
+  name: mantid
+  version: {{ version }}
+
+source:
+  path: ../../../
+
+build:
+  number: 0
+  run_exports:
+    - {{ pin_subpackage('mantid', max_pin='x.x.x') }}
+
+requirements:
+  build:
+    - {{ compiler("c") }}
+    - {{ compiler("cxx") }}
+    - llvm-openmp  # [osx]
+    - libgomp  # [linux]
+    - ninja  # [unix]
+    - cmake
+    - git
+    - {{ cdt('mesa-libgl-devel') }}  # [linux]
+    - {{ cdt('mesa-dri-drivers') }}  # [linux]
+    - {{ cdt('libxxf86vm') }}  # [linux]
+    - {{ cdt('libx11-devel') }}  # [linux]
+    - {{ cdt('xorg-x11-proto-devel') }}  # [linux]
+  host:
+    - boost {{ boost }}
+    - eigen
+    - gsl {{ gsl }}
+    - h5py
+    - hdf5 {{ hdf5 }}
+    - jemalloc  # [unix]
+    - jsoncpp
+    - librdkafka
+    - lib3mf  # [win]
+    - muparser
+    - nexus
+    - numpy {{ numpy }}
+    - occt {{ occt }}
+    - python {{ python }}
+    - poco
+    - setuptools {{ setuptools }}
+    - tbb-devel {{ tbb }}
+    - pip
+    - openssl {{ openssl }}
+    - versioningit
+  run:
+    - {{ pin_compatible("boost", max_pin="x.x") }}
+    - {{ pin_compatible("gsl", max_pin="x.x") }}
+    - h5py
+    - {{ pin_compatible("hdf5", max_pin="x.x") }}
+    - lib3mf  # [win]
+    - nexus
+    - {{ pin_compatible("numpy", upper_bound="1.24") }}
+    - {{ pin_compatible("occt", max_pin="x.x.x") }}
+    - python
+    - python-dateutil
+    - pyyaml
+    - scipy
+    - openssl {{ openssl }}
+    - euphonic=0.6.*
+    - toml
+
+about:
+  home: https://github.com/mantidproject/mantid
+  license: GPL-3.0-or-later
+  summary: Mantid provides a framework that supports high-performance computing and visualisation of materials science data.
+  description: Mantid provides a framework that supports high-performance computing and visualisation of materials science data. To use the optional plotting sub package you must conda install matplotlib 3.5.2 to ensure correct compatibility.
+
+extra:
+  recipe-maintainers:
+    - thomashampson
+    - sf1919
+    - martyngigg

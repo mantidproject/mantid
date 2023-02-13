@@ -5,9 +5,15 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableModel import (QSequentialTableModel, default_table_columns,
-                                                                                             FIT_STATUS_COLUMN, FIT_QUALITY_COLUMN,
-                                                                                             GROUP_COLUMN, RUN_COLUMN, WORKSPACE_COLUMN)
+from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableModel import (
+    QSequentialTableModel,
+    default_table_columns,
+    FIT_STATUS_COLUMN,
+    FIT_QUALITY_COLUMN,
+    GROUP_COLUMN,
+    RUN_COLUMN,
+    WORKSPACE_COLUMN,
+)
 from mantidqt.utils.testing.mocks.mock_sequentialtable import MockSequentialTableModel, MockSequentialTableView
 from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableWidget import SequentialTableWidget
 from mantidqt.utils.testing.mocks.mock_qt import MockQModelIndex
@@ -18,8 +24,12 @@ failed_string = "Failed to converge after 500 iterations"
 changes_too_small_string = "Changes in parameter value are too small"
 success_string = "success"
 no_fit_string = "No fit"
-fit_status_strings = {"failed_string": failed_string, "changes_too_small_string": changes_too_small_string,
-                      "success_string": success_string, "no_fit_string": no_fit_string}
+fit_status_strings = {
+    "failed_string": failed_string,
+    "changes_too_small_string": changes_too_small_string,
+    "success_string": success_string,
+    "no_fit_string": no_fit_string,
+}
 
 
 class SequentialTableWidgetTest(unittest.TestCase):
@@ -29,7 +39,7 @@ class SequentialTableWidgetTest(unittest.TestCase):
         self.table_widget = SequentialTableWidget(parent=None, view=self.view, model=self.model)
 
     def test_set_parameters_and_values_correctly_queries_model(self):
-        parameters = ['A', 'B', 'C']
+        parameters = ["A", "B", "C"]
         values = [[0.2, 0.3, 0.4]]
 
         self.table_widget.set_parameters_and_values(parameters, values)
@@ -37,7 +47,7 @@ class SequentialTableWidgetTest(unittest.TestCase):
         self.model.set_fit_parameters_and_values.assert_called_once_with(parameters, values)
 
     def test_set_parameters_and_values_does_nothing_if_dimensions_do_not_match(self):
-        parameters = ['A', 'B', 'C']
+        parameters = ["A", "B", "C"]
         values = [[0.2, 0.3]]
 
         self.table_widget.set_parameters_and_values(parameters, values)
@@ -92,8 +102,10 @@ class SequentialTableModelTest(unittest.TestCase):
     def setUp(self):
         self.model = QSequentialTableModel()
 
-        self.workspace_data = [["EMU2223; Group; bwd; MA", "2223", "bwd", "No Fit", 0],
-                               ["EMU2223; Group; fwd; MA", "2223", "fwd", "No Fit", 0]]
+        self.workspace_data = [
+            ["EMU2223; Group; bwd; MA", "2223", "bwd", "No Fit", 0],
+            ["EMU2223; Group; fwd; MA", "2223", "fwd", "No Fit", 0],
+        ]
         self.parameter_data = [[0, 1, 2], [3, 4, 5]]
         self.parameters = ["param1", "param2", "param3"]
         self.setup_test_data()
@@ -169,11 +181,11 @@ class SequentialTableModelTest(unittest.TestCase):
 
     def test_reset_fit_data_correctly_resets_to_default(self):
         for row in range(self.model.rowCount()):
-            self.model._defaultData[row][FIT_STATUS_COLUMN] = 'test'
+            self.model._defaultData[row][FIT_STATUS_COLUMN] = "test"
 
         self.model.reset_fit_quality()
 
-        self.assertEqual(self.get_column_data(FIT_STATUS_COLUMN), ['No fit', 'No fit'])
+        self.assertEqual(self.get_column_data(FIT_STATUS_COLUMN), ["No fit", "No fit"])
 
     def test_set_fit_parameters(self):
         parameters = ["new_param1", "new_param2", "new_param3"]
@@ -203,22 +215,21 @@ class SequentialTableModelTest(unittest.TestCase):
 
     def test_set_fit_workspaces(self):
         new_workspaces = ["EMU2224; Group; top; MA", "EMU2224; bottom; bwd; MA"]
-        new_runs = ['2224', '2224']
-        new_groups = ['top', 'bottom']
+        new_runs = ["2224", "2224"]
+        new_groups = ["top", "bottom"]
 
         self.model.set_fit_workspaces(new_workspaces, new_runs, new_groups)
 
         for row in range(len(new_runs)):
-            self.assertEqual(self.model.data(self.model.createIndex(row, WORKSPACE_COLUMN), Qt.DisplayRole),
-                             new_workspaces[row])
+            self.assertEqual(self.model.data(self.model.createIndex(row, WORKSPACE_COLUMN), Qt.DisplayRole), new_workspaces[row])
             self.assertEqual(self.model.data(self.model.createIndex(row, RUN_COLUMN), Qt.DisplayRole), new_runs[row])
             self.assertEqual(self.model.data(self.model.createIndex(row, GROUP_COLUMN), Qt.DisplayRole), new_groups[row])
-            self.assertEqual(self.model.data(self.model.createIndex(row, FIT_STATUS_COLUMN), Qt.DisplayRole), 'No fit')
+            self.assertEqual(self.model.data(self.model.createIndex(row, FIT_STATUS_COLUMN), Qt.DisplayRole), "No fit")
 
     def test_get_workspace_name_information_returns_the_expected_data(self):
         new_workspaces = ["EMU2224; Group; top; MA", "EMU2224; bottom; bwd; MA"]
-        new_runs = ['2224', '2224']
-        new_groups = ['top', 'bottom']
+        new_runs = ["2224", "2224"]
+        new_groups = ["top", "bottom"]
 
         self.model.set_fit_workspaces(new_workspaces, new_runs, new_groups)
 
@@ -226,7 +237,7 @@ class SequentialTableModelTest(unittest.TestCase):
             self.assertEqual(self.model.get_workspace_name_information(i), new_workspaces[i])
 
     def test_set_run_information(self):
-        new_run = '2225'
+        new_run = "2225"
         row = 1
 
         self.model.set_run_information(row, new_run)
@@ -234,7 +245,7 @@ class SequentialTableModelTest(unittest.TestCase):
         self.assertEqual(self.model.data(self.model.createIndex(row, RUN_COLUMN), Qt.DisplayRole), new_run)
 
     def test_set_group_information(self):
-        new_group = 'long'
+        new_group = "long"
         row = 1
 
         self.model.set_group_information(row, new_group)
@@ -242,7 +253,7 @@ class SequentialTableModelTest(unittest.TestCase):
         self.assertEqual(self.model.data(self.model.createIndex(row, GROUP_COLUMN), Qt.DisplayRole), new_group)
 
     def test_set_fit_quality(self):
-        fit_quality = 'success'
+        fit_quality = "success"
         chi_squared = 1.1215
         row = 1
 
@@ -252,5 +263,5 @@ class SequentialTableModelTest(unittest.TestCase):
         self.assertEqual(self.model.data(self.model.createIndex(row, FIT_QUALITY_COLUMN), Qt.DisplayRole), chi_squared)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

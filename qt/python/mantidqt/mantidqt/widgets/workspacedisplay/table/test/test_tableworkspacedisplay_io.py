@@ -14,9 +14,11 @@ from mantidqt.widgets.workspacedisplay.table.io import TableWorkspaceDisplayDeco
 from mantidqt.widgets.workspacedisplay.table import StatusBarView
 
 
-TABLEWORKSPACEDISPLAY_DICT = {"markedColumns": {"as_y": [2], "as_x": [1],
-                                                "as_y_err": [{"column": 3, "relatedY": 2}]},
-                              "workspace": "ws", "windowName": "ws"}
+TABLEWORKSPACEDISPLAY_DICT = {
+    "markedColumns": {"as_y": [2], "as_x": [1], "as_y_err": [{"column": 3, "relatedY": 2}]},
+    "workspace": "ws",
+    "windowName": "ws",
+}
 
 
 @start_qapplication
@@ -45,13 +47,14 @@ class TableWorkspaceDisplayDecoderTest(unittest.TestCase):
         self.assertEqual(TABLEWORKSPACEDISPLAY_DICT["markedColumns"]["as_y"], view.presenter.model.marked_columns.as_y)
         self.assertEqual(TABLEWORKSPACEDISPLAY_DICT["markedColumns"]["as_x"], view.presenter.model.marked_columns.as_x)
         self.assertEqual(
-            TABLEWORKSPACEDISPLAY_DICT["markedColumns"]["as_y_err"][0]["column"],
-            view.presenter.model.marked_columns.as_y_err[0].column)
+            TABLEWORKSPACEDISPLAY_DICT["markedColumns"]["as_y_err"][0]["column"], view.presenter.model.marked_columns.as_y_err[0].column
+        )
         self.assertEqual(
             TABLEWORKSPACEDISPLAY_DICT["markedColumns"]["as_y_err"][0]["relatedY"],
-            view.presenter.model.marked_columns.as_y_err[0].related_y_column)
+            view.presenter.model.marked_columns.as_y_err[0].related_y_column,
+        )
         self.assertEqual(1, len(view.presenter.model.marked_columns.as_y_err))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

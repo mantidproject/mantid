@@ -13,8 +13,7 @@ from mantidqt.widgets.sliceviewer.models.adsobsever import SliceViewerADSObserve
 
 # 3rd party
 from mantid.kernel import logger
-from mantidqt.widgets.workspacedisplay.table.presenter_standard \
-    import TableWorkspaceDataPresenterStandard, create_table_item
+from mantidqt.widgets.workspacedisplay.table.presenter_standard import TableWorkspaceDataPresenterStandard, create_table_item
 
 # standard
 from enum import Enum
@@ -25,14 +24,14 @@ class PeaksWorkspaceDataPresenter(TableWorkspaceDataPresenterStandard):
     """Override create_item method to format table columns more
     appropriately
     """
+
     # Format specifier for floats in the table
-    FLOAT_FORMAT_STR = '{:.5f}'
+    FLOAT_FORMAT_STR = "{:.5f}"
     # Qt model classes can store data against different roles.
     # Defines a custom role to be used for sorting with QSortFilterProxy.
     # See https://doc.qt.io/qt-5/qsortfilterproxymodel.html#sortRole-prop
     DATA_SORT_ROLE = 2001
-    HIDDEN_COLUMNS = ['RunNumber', 'DetID', 'Wavelength', 'Energy', 'TOF', 'DSpacing', 'BinCount', 'Row', 'Col',
-                        'QLab', 'QSample', 'TBar']
+    HIDDEN_COLUMNS = ["RunNumber", "DetID", "Wavelength", "Energy", "TOF", "DSpacing", "BinCount", "Row", "Col", "QLab", "QSample", "TBar"]
 
     def create_item(self, data, _):
         """Create a table item to display the data. The data is always readonly
@@ -51,6 +50,7 @@ class PeaksViewerPresenter:
     """Controls a PeaksViewerView with a given model to display
     the peaks table and interaction controls for single workspace.
     """
+
     class Event(Enum):
         PeaksListChanged = 1
         OverlayPeaks = 2
@@ -58,9 +58,7 @@ class PeaksViewerPresenter:
         ClearPeaks = 4
         PeakSelected = 5
 
-    def __init__(self,
-                 model: PeaksViewerModel,
-                 view: PeaksViewerView):
+    def __init__(self, model: PeaksViewerModel, view: PeaksViewerView):
         """
         Constructs the view for the given PeaksWorkspace
         :param model: A handle to the view-model wrapper for PeaksWorkspace to be displayed
@@ -101,6 +99,7 @@ class PeaksViewerPresenter:
             self._clear_peaks()
         else:
             from mantid.kernel import logger
+
             logger.warning("PeaksViewer: Unknown event detected: {}".format(event))
 
     def add_peak(self, pos):
@@ -168,14 +167,8 @@ class PeaksViewerCollectionPresenter:
 
     # constants
     # colors for each peaks workspace - it is unlikely there will be more than 3 at once
-    FG_COLORS = [
-        '#d62728',  # ~red,
-        '#03ad06',  # ~green
-        '#17becf',  # ~cyan
-        '#e9f02e',  # ~yellow
-        '#e377c2'  # ~pink
-    ]
-    DEFAULT_BG_COLOR = '0.75'
+    FG_COLORS = ["#d62728", "#03ad06", "#17becf", "#e9f02e", "#e377c2"]  # ~red,  # ~green  # ~cyan  # ~yellow  # ~pink
+    DEFAULT_BG_COLOR = "0.75"
 
     def __init__(self, view: PeaksViewerCollectionView):
         """
@@ -190,8 +183,7 @@ class PeaksViewerCollectionPresenter:
 
     def setup_ads_observer(self):
         if self._ads_observer is None:
-            self._ads_observer = SliceViewerADSObserver(self.replace_handle, self.rename_handle, self.clear_handle,
-                                                        self.delete_handle)
+            self._ads_observer = SliceViewerADSObserver(self.replace_handle, self.rename_handle, self.clear_handle, self.delete_handle)
 
     def clear_observer(self):
         self._ads_observer = None
@@ -208,8 +200,7 @@ class PeaksViewerCollectionPresenter:
         :returns: The child presenter
         """
         self.setup_ads_observer()
-        presenter = PeaksViewerPresenter(self._create_peaksviewer_model(name),
-                                         self._view.append_peaksviewer(index))
+        presenter = PeaksViewerPresenter(self._create_peaksviewer_model(name), self._view.append_peaksviewer(index))
         self._child_presenters.append(presenter)
         return presenter
 
@@ -317,7 +308,7 @@ class PeaksViewerCollectionPresenter:
 
         if fg_color is None:
             # use black in this rare case
-            fg_color = '#000000'
+            fg_color = "#000000"
 
         return create_peaksviewermodel(name, fg_color, self.DEFAULT_BG_COLOR)
 

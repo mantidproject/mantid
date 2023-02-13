@@ -96,7 +96,7 @@ void SaveCanSAS1D::init() {
                   "information about; \nwhere each name must match a name "
                   "given for a detector in the [[IDF|instrument definition "
                   "file (IDF)]]. \nIDFs are located in the instrument "
-                  "sub-directory of the MantidPlot install directory.");
+                  "sub-directory of the Mantid install directory.");
 
   // Collimation information
   std::vector<std::string> collimationGeometry{

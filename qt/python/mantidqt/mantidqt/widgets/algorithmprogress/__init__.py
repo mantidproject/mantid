@@ -11,4 +11,4 @@
 # flake8: noqa
 from mantidqt.utils.qt import import_qt
 
-AlgorithmProgressWidget = import_qt('.._common', package='mantidqt.widgets', attr='AlgorithmProgressWidget')
+AlgorithmProgressWidget = import_qt(".._common", package="mantidqt.widgets", attr="AlgorithmProgressWidget")

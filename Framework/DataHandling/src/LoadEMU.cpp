@@ -51,7 +51,13 @@ constexpr size_t HISTO_BINS_X = DETECTOR_TUBES * 2;
 constexpr size_t HISTO_BINS_Y = 1024;
 constexpr size_t HISTO_BINS_Y_DENUMERATOR = 16;
 constexpr size_t PIXELS_PER_TUBE = HISTO_BINS_Y / HISTO_BINS_Y_DENUMERATOR;
-constexpr size_t HISTOGRAMS = HISTO_BINS_X * HISTO_BINS_Y / HISTO_BINS_Y_DENUMERATOR;
+
+constexpr size_t BM_HISTOGRAMS = HISTO_BINS_X * PIXELS_PER_TUBE;
+constexpr size_t HISTOGRAMS = BM_HISTOGRAMS + PIXELS_PER_TUBE;
+constexpr size_t BEAM_MONITOR_BINS = 100;
+constexpr size_t PSEUDO_BM_TUBE = 55;
+// the half window for the running average matches the plateau width for the peak
+constexpr size_t BM_HALF_WINDOW = 5;
 
 // File loading progress boundaries
 constexpr size_t Progress_LoadBinFile = 48;
@@ -68,6 +74,7 @@ constexpr char OverrideDopplerPhaseStr[] = "OverrideDopplerPhase";
 constexpr char FilterByTimeStartStr[] = "FilterByTimeStart";
 constexpr char FilterByTimeStopStr[] = "FilterByTimeStop";
 constexpr char RawDopplerTimeStr[] = "LoadAsRawDopplerTime";
+constexpr char IncludePseudoBMStr[] = "IncludeBeamMonitor";
 constexpr char CalibrateDopplerPhaseStr[] = "CalibrateDopplerPhase";
 constexpr char PathToBinaryStr[] = "BinaryEventPath";
 
@@ -274,7 +281,7 @@ double maskedMean(const std::vector<double> &vec, const std::vector<bool> &mask)
   return sum / static_cast<double>(count);
 }
 
-// calculate stdev fro a subset of the vector
+// calculate stdev for a subset of the vector
 double maskedStdev(const std::vector<double> &vec, const std::vector<bool> &mask) {
 
   auto avg = maskedMean(vec, mask);
@@ -287,6 +294,42 @@ double maskedStdev(const std::vector<double> &vec, const std::vector<bool> &mask
     count++;
   }
   return std::sqrt(sum / static_cast<double>(count));
+}
+
+// Calculates a running average for a given half window size assuming the data is wrapped.
+// As the data are integer values, it is possible to maintain an exact sum without any
+// loss of accuracy where the next filtered value is calculated by adding the leading
+// point and subtracting the trailing point from the sum. As the data is wrapped the edge
+// points are handled by the modulus of the array index.
+//
+//    |...........[.....x.....].............|
+//    0           |totalWindow|             |N
+//
+std::vector<double> runningAverage(const std::vector<size_t> &data, size_t halfWindow) {
+  const auto N = data.size();
+  const size_t totalWindow = 2 * halfWindow + 1;
+
+  // Step 1 is to calculate the sum for the first point where startIndex is the
+  // first point in the total window. The start index wraps from the end of the data.
+  size_t sum{0};
+  size_t startIndex = N - halfWindow;
+  for (size_t i = 0; i < totalWindow; i++) {
+    size_t ix = (startIndex + i) % N;
+    sum += data[ix];
+  }
+
+  // Save the average for the current point, drop the first point from the total window
+  // sum, add the next point to the sum and shift the start index for the window.
+  std::vector<double> filtered(N, 0);
+  for (size_t i = 0; i < N; i++) {
+    // save previous and then move to next
+    filtered[i] = static_cast<double>(sum) / static_cast<double>(totalWindow);
+
+    sum -= data[startIndex];
+    sum += data[(startIndex + totalWindow) % N];
+    startIndex = (startIndex + 1) % N;
+  }
+  return filtered;
 }
 
 // Simple reader that is compatible with the ASNTO event file loader
@@ -347,15 +390,18 @@ protected:
   const TimeLimits m_directTaux;   // microsec
   const TimeLimits m_analysedTaux; // microsec
 
+  const bool m_includeBM;
+
   virtual void addEventImpl(size_t id, size_t x, size_t y, double tof) = 0;
+  virtual void addPseudoBMEventImpl(size_t id, double tobs) = 0;
 
 public:
   EventProcessor(const std::vector<bool> &roi, const std::vector<size_t> &mapIndex, const size_t stride,
                  const double framePeriod, const double gatePeriod, TimeLimits timeBoundary, TimeLimits directLimits,
-                 TimeLimits analysedLimits)
+                 TimeLimits analysedLimits, bool includeBM)
       : m_roi(roi), m_mapIndex(mapIndex), m_stride(stride), m_framePeriod(framePeriod), m_gatePeriod(gatePeriod),
         m_frames(0), m_framesValid(0), m_timeBoundary(std::move(timeBoundary)), m_directTaux(std::move(directLimits)),
-        m_analysedTaux(std::move(analysedLimits)) {}
+        m_analysedTaux(std::move(analysedLimits)), m_includeBM(includeBM) {}
 
   void newFrame() {
     m_frames++;
@@ -369,7 +415,7 @@ public:
   }
 
   double duration() const {
-    // length test in seconds
+    // test length in seconds
     return m_framePeriod * static_cast<double>(m_frames) * 1.0e-6;
   }
 
@@ -388,6 +434,16 @@ public:
     // group pixels
     auto y = static_cast<size_t>(p / HISTO_BINS_Y_DENUMERATOR);
 
+    // check for beam monitor tube
+    if (x == PSEUDO_BM_TUBE && y < m_stride) {
+      size_t id = BM_HISTOGRAMS + y;
+      double ptaux = fmod(taux, m_gatePeriod);
+      if (ptaux < 0)
+        ptaux = ptaux + m_gatePeriod;
+      addPseudoBMEventImpl(id, ptaux);
+      return;
+    }
+
     // determine detector id and check limits
     if (x >= DETECTOR_TUBES || y >= m_stride)
       return;
@@ -395,7 +451,7 @@ public:
     // map the raw detector index to the physical model
     size_t xid = m_mapIndex[x];
 
-    // take the modules of the taux time to account for the
+    // take the modulus of the taux time to account for the
     // longer background chopper rate
     double ptaux = fmod(taux, m_gatePeriod);
     if (ptaux >= m_directTaux.first && ptaux <= m_directTaux.second)
@@ -422,13 +478,20 @@ protected:
   std::vector<size_t> &m_eventCounts;
 
   void addEventImpl(size_t id, size_t /*x*/, size_t /*y*/, double /*tof*/) override { m_eventCounts[id]++; }
+  void addPseudoBMEventImpl(size_t id, double) override {
+    if (m_includeBM) {
+      m_eventCounts[id]++;
+    }
+  }
 
 public:
   // construction
   EventCounter(const std::vector<bool> &roi, const std::vector<size_t> &mapIndex, const size_t stride,
                const double framePeriod, const double gatePeriod, const TimeLimits &timeBoundary,
-               const TimeLimits &directLimits, const TimeLimits &analysedLimits, std::vector<size_t> &eventCounts)
-      : EventProcessor(roi, mapIndex, stride, framePeriod, gatePeriod, timeBoundary, directLimits, analysedLimits),
+               const TimeLimits &directLimits, const TimeLimits &analysedLimits, std::vector<size_t> &eventCounts,
+               bool includeBM)
+      : EventProcessor(roi, mapIndex, stride, framePeriod, gatePeriod, timeBoundary, directLimits, analysedLimits,
+                       includeBM),
         m_eventCounts(eventCounts) {}
 
   size_t numFrames() const { return m_framesValid; }
@@ -443,6 +506,8 @@ protected:
   double m_tofMax;
   int64_t m_startTime;
   bool m_saveAsTOF;
+  const double m_binSize;
+  std::vector<size_t> m_bmCounts;
 
   void addEventImpl(size_t id, size_t x, size_t /*y*/, double tobs) override {
 
@@ -471,17 +536,36 @@ protected:
     m_eventVectors[id]->emplace_back(ev);
   }
 
+  void addPseudoBMEventImpl(size_t id, double tobs) override {
+    // get the absolute time for the start of the frame
+    if (m_includeBM) {
+      auto offset = m_startTime + frameStart();
+      auto ev = Types::Event::TofEvent(tobs, Types::Core::DateAndTime(offset));
+      m_eventVectors[id]->emplace_back(ev);
+    }
+
+    // add to the binned counts
+    auto index = static_cast<size_t>(tobs / m_binSize);
+    m_bmCounts[index] += 1;
+  }
+
 public:
   EventAssigner(const std::vector<bool> &roi, const std::vector<size_t> &mapIndex, const size_t stride,
                 const double framePeriod, const double gatePeriod, const TimeLimits &timeBoundary,
                 const TimeLimits &directLimits, const TimeLimits &analysedLimits, ConvertTOF &convert,
-                std::vector<EventVector_pt> &eventVectors, int64_t startTime, bool saveAsTOF)
-      : EventProcessor(roi, mapIndex, stride, framePeriod, gatePeriod, timeBoundary, directLimits, analysedLimits),
+                std::vector<EventVector_pt> &eventVectors, int64_t startTime, bool saveAsTOF, bool includeBM)
+      : EventProcessor(roi, mapIndex, stride, framePeriod, gatePeriod, timeBoundary, directLimits, analysedLimits,
+                       includeBM),
         m_eventVectors(eventVectors), m_convertTOF(convert), m_tofMin(std::numeric_limits<double>::max()),
-        m_tofMax(std::numeric_limits<double>::min()), m_startTime(startTime), m_saveAsTOF(saveAsTOF) {}
+        m_tofMax(std::numeric_limits<double>::min()), m_startTime(startTime), m_saveAsTOF(saveAsTOF),
+        m_binSize(gatePeriod / BEAM_MONITOR_BINS), m_bmCounts(BEAM_MONITOR_BINS, 0) {}
 
   double tofMin() const { return m_tofMin <= m_tofMax ? m_tofMin : 0.0; }
   double tofMax() const { return m_tofMin <= m_tofMax ? m_tofMax : 0.0; }
+  const std::vector<size_t> &beamMonitorCounts() const { return m_bmCounts; }
+  double binSize() const { return m_binSize; }
+  size_t numBins() const { return BEAM_MONITOR_BINS; }
+  size_t bmCounts() const { return std::accumulate(m_bmCounts.begin(), m_bmCounts.end(), (size_t)0); }
 };
 
 template <typename EP>
@@ -552,6 +636,8 @@ template <typename FD> void LoadEMU<FD>::init(bool hdfLoader) {
   Base::declareProperty(RawDopplerTimeStr, false,
                         "Import file as observed time relative the Doppler\n"
                         "drive, in microsecs.");
+
+  Base::declareProperty(IncludePseudoBMStr, false, "Include the individual beam monitor events as spectra.");
 
   Base::declareProperty(FilterByTimeStartStr, 0.0,
                         "Only include events after the provided start time, in "
@@ -673,8 +759,9 @@ template <typename FD> void LoadEMU<FD>::exec(const std::string &hdfFile, const 
   double gatePeriod = 1.0e6 / fabs(logManager.getTimeSeriesProperty<double>("GraphiteChopperFrequency")->firstValue());
 
   // count total events per pixel and reserve necessary memory
+  bool includeBM = Base::getProperty(IncludePseudoBMStr);
   EMU::EventCounter eventCounter(roi, detMapIndex, PIXELS_PER_TUBE, framePeriod, gatePeriod, timeBoundary, directLimits,
-                                 analysedLimits, eventCounts);
+                                 analysedLimits, eventCounts, includeBM);
   EMU::loadEvents(prog, "loading neutron counts", eventFile, eventCounter);
   ANSTO::ProgressTracker progTracker(prog, "creating neutron event lists", numberHistograms, Progress_ReserveMemory);
   prepareEventStorage(progTracker, eventCounts, eventVectors);
@@ -687,8 +774,20 @@ template <typename FD> void LoadEMU<FD>::exec(const std::string &hdfFile, const 
   bool saveAsTOF = !Base::getProperty(RawDopplerTimeStr);
   bool loadAsTOF = !m_calibrateDoppler && saveAsTOF;
   EMU::EventAssigner eventAssigner(roi, detMapIndex, PIXELS_PER_TUBE, framePeriod, gatePeriod, timeBoundary,
-                                   directLimits, analysedLimits, convertTOF, eventVectors, start_nanosec, loadAsTOF);
+                                   directLimits, analysedLimits, convertTOF, eventVectors, start_nanosec, loadAsTOF,
+                                   includeBM);
   EMU::loadEvents(prog, "loading neutron events (TOF)", eventFile, eventAssigner);
+
+  // determine the minimum and maximum beam rate per sec
+  auto filteredBM = runningAverage(eventAssigner.beamMonitorCounts(), BM_HALF_WINDOW);
+  auto res = std::minmax_element(filteredBM.begin(), filteredBM.end());
+  auto ratePerSec = static_cast<double>(eventAssigner.numBins()) / eventCounter.duration();
+  auto minBM = *res.first * ratePerSec;
+  auto maxBM = *res.second * ratePerSec;
+  AddSinglePointTimeSeriesProperty<double>(logManager, m_startRun, "BeamMonitorBkgRate", minBM);
+  AddSinglePointTimeSeriesProperty<double>(logManager, m_startRun, "BeamMonitorRate", maxBM);
+  AddSinglePointTimeSeriesProperty<int>(logManager, m_startRun, "MonitorCounts",
+                                        static_cast<int>(eventAssigner.bmCounts()));
 
   // perform a calibration and then TOF conversion if necessary
   // and update the tof limits
@@ -707,8 +806,12 @@ template <typename FD> void LoadEMU<FD>::exec(const std::string &hdfFile, const 
   setupDetectorMasks(roi);
 
   // set log values
-  auto frame_count = static_cast<int>(eventCounter.numFrames());
-  AddSinglePointTimeSeriesProperty<int>(logManager, m_startRun, "frame_count", frame_count);
+  auto frame_count = eventCounter.numFrames();
+  AddSinglePointTimeSeriesProperty<int>(logManager, m_startRun, "frame_count", static_cast<int>(frame_count));
+
+  // add the scan period in secs to the log
+  auto scan_period = static_cast<double>(frame_count + 1) / m_dopplerFreq;
+  AddSinglePointTimeSeriesProperty<double>(logManager, m_startRun, "ScanPeriod", scan_period);
 
   std::string filename = Base::getPropertyValue(FilenameStr);
   logManager.addProperty("filename", filename);
@@ -1032,8 +1135,9 @@ template <typename FD> void LoadEMU<FD>::loadParameters(const std::string &hdfFi
                            "GraphiteChopperFrequency", 1.0 / 60, 0);
   // hz tube gap or equivalent to be added later - reverts to default
   MapNeXusToSeries<double>(entry, "instrument/hztubegap", 0.02, logm, m_startRun, "horizontal_tubes_gap", 1.0, 0);
-  MapNeXusToSeries<int32_t>(entry, "monitor/bm1_counts", 0, logm, m_startRun, "MonitorCounts", 1, m_datasetIndex);
-
+  // add the reactor power to the log
+  MapNeXusToSeries<double>(entry, "instrument/source/power", 20.0, logm, m_startRun, "ReactorPower", 1.0,
+                           m_datasetIndex);
   // fix for source position when loading IDF
   MapNeXusToProperty<double>(entry, "instrument/doppler/tosource", 2.035, logm, "SourceSample", 1.0, 0);
 }
@@ -1048,7 +1152,8 @@ template <typename FD> void LoadEMU<FD>::loadEnvironParameters(const std::string
 
   // load the environment variables for the dataset loaded
   std::vector<std::string> tags = {"P01PS03", "P01PSP03", "T01S00", "T01S05", "T01S06",  "T01SP00", "T01SP06",
-                                   "T02S00",  "T02S04",   "T02S05", "T02S06", "T02SP00", "T02SP06"};
+                                   "T02S00",  "T02S04",   "T02S05", "T02S06", "T02SP00", "T02SP06", "T3S1",
+                                   "T3S2",    "T3S3",     "T3S4",   "T3SP1",  "T3SP2",   "T3SP3",   "T3SP4"};
 
   for (const auto &tag : tags) {
     MapNeXusToSeries<double>(entry, "data/" + tag, 0.0, logm, time_str, "env_" + tag, 1.0, m_datasetIndex);

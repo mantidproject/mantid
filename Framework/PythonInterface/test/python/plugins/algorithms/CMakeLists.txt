@@ -8,6 +8,8 @@ set(TEST_PY_FILES
     AlignComponentsTest.py
     AngularAutoCorrelationsSingleAxisTest.py
     AngularAutoCorrelationsTwoAxesTest.py
+    AnstoCommonFractionalTest.py
+    AnstoCommonSearchTest.py
     ApplyDetectorScanEffCorrTest.py
     BinWidthAtXTest.py
     CalculateEfficiencyCorrectionTest.py
@@ -93,7 +95,6 @@ set(TEST_PY_FILES
     MeanTest.py
     MedianBinWidthTest.py
     MergeCalFilesTest.py
-    MuscatSofQWTest.py
     MuonMaxEntTest.py
     NMoldyn4InterpolationTest.py
     NOMADMedianDetectorTestTest.py
@@ -111,6 +112,7 @@ set(TEST_PY_FILES
     SaveNexusPDTest.py
     SaveGSSCWTest.py
     SaveHKLCWTest.py
+    SaveINSTest.py
     SavePlot1DAsJsonTest.py
     SaveReflectionsTest.py
     ExtractMonitorsTest.py

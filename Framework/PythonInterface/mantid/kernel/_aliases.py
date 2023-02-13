@@ -10,7 +10,7 @@
 """
 
 
-from mantid.kernel import (ConfigServiceImpl, Logger, PropertyManagerDataServiceImpl, UnitFactoryImpl, UsageServiceImpl)
+from mantid.kernel import ConfigServiceImpl, Logger, PropertyManagerDataServiceImpl, UnitFactoryImpl, UsageServiceImpl
 
 
 def lazy_instance_access(cls, key_as_str=False):

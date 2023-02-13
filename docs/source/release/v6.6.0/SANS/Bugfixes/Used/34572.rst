@@ -1,0 +1,1 @@
+- The invalid Log binning option for 2D reductions has been removed. Loading a ``TOML`` user file with this value set will now give a warning.

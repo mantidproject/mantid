@@ -8,12 +8,10 @@ from qtpy import QtWidgets, QtCore
 
 
 class PlottingDockWidget(QtWidgets.QDockWidget):
-
     def __init__(self, plotting_widget, parent=None):
         super(PlottingDockWidget, self).__init__("Plotting Window", parent=parent)
 
-        self.setFeatures(
-            QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable)
+        self.setFeatures(QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable)
         self.setAllowedAreas(QtCore.Qt.RightDockWidgetArea | QtCore.Qt.LeftDockWidgetArea)
         # the widget to be stored within
         self.dockable_plot_widget = plotting_widget

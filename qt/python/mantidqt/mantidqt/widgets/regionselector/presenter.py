@@ -21,12 +21,14 @@ from matplotlib.widgets import RectangleSelector
 
 class Selector(RectangleSelector):
     active_handle_alpha = 0.5
-    kwargs = {"useblit": False,  # rectangle persists on button release
-              "button": [1],
-              "minspanx": 5,
-              "minspany": 5,
-              "spancoords": "pixels",
-              "interactive": True}
+    kwargs = {
+        "useblit": False,  # rectangle persists on button release
+        "button": [1],
+        "minspanx": 5,
+        "minspany": 5,
+        "spancoords": "pixels",
+        "interactive": True,
+    }
 
     def __init__(self, region_type: str, color: str, *args):
         if LooseVersion(matplotlib.__version__) >= LooseVersion("3.5.0"):
@@ -49,12 +51,12 @@ class Selector(RectangleSelector):
 
 
 class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
-    def __init__(self, ws=None, parent=None, view=None):
+    def __init__(self, ws=None, parent=None, view=None, image_info_widget=None):
         if ws and WorkspaceInfo.get_ws_type(ws) != WS_TYPE.MATRIX:
             raise NotImplementedError("Only Matrix Workspaces are currently supported by the region selector.")
 
         self.notifyee = None
-        self.view = view if view else RegionSelectorView(self, parent)
+        self.view = view if view else RegionSelectorView(self, parent, image_info_widget=image_info_widget)
         super().__init__(ws, self.view._data_view)
         self._selectors: list[Selector] = []
         self._drawing_region = False
@@ -71,6 +73,10 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
 
     def slicepoint_changed(self) -> None:
         pass
+
+    def deselect_all_selectors(self) -> None:
+        for selector in self._selectors:
+            selector.set_active(False)
 
     def canvas_clicked(self, event) -> None:
         if self._drawing_region:
@@ -94,8 +100,7 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
     def mouse_moved(self, event) -> None:
         """Handles mouse move events on the canvas."""
         # Find selector if it is active and the mouse is hovering over it
-        selector = self._find_selector_if(
-            lambda x: x.active and self._contains_point(x.extents, event.xdata, event.ydata))
+        selector = self._find_selector_if(lambda x: x.active and self._contains_point(x.extents, event.xdata, event.ydata))
 
         # Set an override cursor if a selector is found
         self.view.set_override_cursor(selector is not None)
@@ -139,6 +144,9 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         for selector in self._selectors:
             selector.set_active(False)
 
+        if self._drawing_region:
+            self._selectors.pop()
+
         self._selectors.append(Selector(region_type, color, self.view._data_view.ax, self._on_rectangle_selected))
 
         self._drawing_region = True
@@ -153,8 +161,7 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
 
     def _initialise_dimensions(self, workspace):
         self.view.create_dimensions(dims_info=Dimensions.get_dimensions_info(workspace))
-        self.view.create_axes_orthogonal(
-            redraw_on_zoom=not WorkspaceInfo.can_support_dynamic_rebinning(workspace))
+        self.view.create_axes_orthogonal(redraw_on_zoom=not WorkspaceInfo.can_support_dynamic_rebinning(workspace))
 
     def _set_workspace(self, workspace):
         self.model.ws = workspace
@@ -207,3 +214,6 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         if x is None or y is None:
             return False
         return extents[0] <= x <= extents[1] and extents[2] <= y <= extents[3]
+
+    def get_extra_image_info_columns(self, xdata, ydata):
+        return {}

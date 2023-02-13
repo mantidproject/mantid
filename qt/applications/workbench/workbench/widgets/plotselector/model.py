@@ -34,7 +34,7 @@ class PlotSelectorModel(object):
     def get_plot_name_from_number(self, plot_number):
         figure_manager = self.GlobalFigureManager.figs.get(plot_number)
         if figure_manager is None:
-            return ''
+            return ""
         else:
             return figure_manager.get_window_title()
 
@@ -97,7 +97,7 @@ class PlotSelectorModel(object):
         """
         figure_manager = self.GlobalFigureManager.figs.get(plot_number)
         if figure_manager is None:
-            raise ValueError('Error showing, could not find a plot with the number {}.'.format(plot_number))
+            raise ValueError("Error showing, could not find a plot with the number {}.".format(plot_number))
         figure_manager.show()
 
     # ------------------------ Plot Hiding -------------------------
@@ -109,7 +109,7 @@ class PlotSelectorModel(object):
         """
         figure_manager = self.GlobalFigureManager.figs.get(plot_number)
         if figure_manager is None:
-            raise ValueError('Error in is_visible, could not find a plot with the number {}.'.format(plot_number))
+            raise ValueError("Error in is_visible, could not find a plot with the number {}.".format(plot_number))
 
         return figure_manager.window.isVisible()
 
@@ -120,7 +120,7 @@ class PlotSelectorModel(object):
         """
         figure_manager = self.GlobalFigureManager.figs.get(plot_number)
         if figure_manager is None:
-            raise ValueError('Error hiding, could not find a plot with the number {}.'.format(plot_number))
+            raise ValueError("Error hiding, could not find a plot with the number {}.".format(plot_number))
         figure_manager.window.hide()
 
     # ------------------------ Plot Renaming ------------------------
@@ -133,7 +133,7 @@ class PlotSelectorModel(object):
         """
         figure_manager = self.GlobalFigureManager.figs.get(plot_number)
         if figure_manager is None:
-            raise ValueError('Error renaming, could not find a plot with the number {}.'.format(plot_number))
+            raise ValueError("Error renaming, could not find a plot with the number {}.".format(plot_number))
 
         figure_manager.set_window_title(new_name)
 
@@ -147,7 +147,7 @@ class PlotSelectorModel(object):
         """
         figure_manager = self.GlobalFigureManager.figs.get(plot_number)
         if figure_manager is None:
-            raise ValueError('Error closing, could not find a plot with the number {}.'.format(plot_number))
+            raise ValueError("Error closing, could not find a plot with the number {}.".format(plot_number))
 
         self.GlobalFigureManager.destroy(plot_number)
 
@@ -177,7 +177,7 @@ class PlotSelectorModel(object):
         """
         figure_manager = self.GlobalFigureManager.figs.get(plot_number)
         if figure_manager is None:
-            raise ValueError('Error exporting, could not find a plot with the number {}.'.format(plot_number))
+            raise ValueError("Error exporting, could not find a plot with the number {}.".format(plot_number))
 
         try:
             figure_manager.canvas.figure.savefig(save_absolute_path)

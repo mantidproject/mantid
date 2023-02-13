@@ -13,7 +13,6 @@ from mantidqtinterfaces.Muon.GUI.Common.corrections_tab_widget.dead_time_correct
 
 
 class DeadTimeCorrectionsPresenterTest(unittest.TestCase):
-
     def setUp(self):
         self.dead_time_workspace_name = "HIFI84447 dead time"
         self.dead_time_range = (1.001, 3.003)
@@ -274,5 +273,5 @@ class DeadTimeCorrectionsPresenterTest(unittest.TestCase):
         self.presenter._notify_perform_dead_time_corrections = mock.Mock()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

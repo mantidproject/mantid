@@ -12,7 +12,6 @@ from mantidqtinterfaces.drill.model.DrillSampleGroup import DrillSampleGroup
 
 
 class DrillSampleGroupTest(unittest.TestCase):
-
     def setUp(self):
         self.sampleGroup = DrillSampleGroup()
 

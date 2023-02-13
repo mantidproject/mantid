@@ -68,28 +68,18 @@ qt_tag = match.group(0) if match else None
 uic = __import__(pyqt_name + '.uic', globals(), locals(), ['uic'], 0)
 pyuic_path = os.path.join(os.path.dirname(uic.__file__), 'pyuic.py')
 
+# The order of this list must match the order the variables are extracted below
 lines = [
-'pyqt_version:%06.x' % version_hex,
-'pyqt_version_str:%s' % version_str,
-'pyqt_version_tag:%s' % qt_tag,
-'pyqt_sip_flags:%s' % sip_flags,
-'pyqt_pyuic:%s' % pyuic_path,
- sys.prefix,
+sys.prefix,
+'|'.join(site.getsitepackages()),
+f'{version_hex:06x}' ,
+f'{version_str}',
+f'{qt_tag}',
+f'{sip_flags}',
+f'{pyuic_path}',
 ]
-
-sys.stdout.write('\\n'.join(lines))
-"
-  )
-
-  set(_command_python_paths
-      "
-import site
-import sys
-
-sys.stdout.write(\";\".join((
-  sys.prefix,
-  site.getsitepackages()[0]
-)))
+# The ; is important as cmake will intrepet it as a list
+sys.stdout.write(';'.join(lines))
 "
   )
 
@@ -100,57 +90,44 @@ sys.stdout.write(\";\".join((
     ERROR_VARIABLE _error
   )
 
-  execute_process(
-    COMMAND "${Python_EXECUTABLE}" -c "${_command_python_paths}"
-    OUTPUT_VARIABLE _python_paths
-    RESULT_VARIABLE _result_python_paths
-    ERROR_VARIABLE _error_python_paths
-  )
-
 endif()
 
 if(_pyqt_config)
-  string(REGEX MATCH "^pyqt_version:([^\n]+).*$" _dummy ${_pyqt_config})
+  # Local variables, not cached
+  list(GET _pyqt_config 0 _python_prefix)
+  list(GET _pyqt_config 1 _python_site_packages)
+  # replace | separator with ; to convert to CMake list
+  string(REPLACE "|" ";" _python_site_packages ${_python_site_packages})
+  list(GET _pyqt_config 2 _pyqt5_version)
+  list(GET _pyqt_config 3 _pyqt5_version_str)
+  list(GET _pyqt_config 4 _pyqt5_version_tag)
+  list(GET _pyqt_config 5 _pyqt5_sip_flags)
+  list(GET _pyqt_config 6 _pyqt5_pyuic)
+
+  # Set caches
   set(PYQT5_VERSION
-      "${CMAKE_MATCH_1}"
+      ${_pyqt5_version}
       CACHE STRING "PyQt5's version as a 6-digit hexadecimal number" FORCE
   )
-
-  string(REGEX MATCH ".*\npyqt_version_str:([^\n]+).*$" _dummy ${_pyqt_config})
   set(PYQT5_VERSION_STR
-      "${CMAKE_MATCH_1}"
+      ${_pyqt5_version_str}
       CACHE STRING "PyQt5's version as a human-readable string" FORCE
   )
-
-  string(REGEX MATCH ".*\npyqt_version_tag:([^\n]+).*$" _dummy ${_pyqt_config})
   set(PYQT5_VERSION_TAG
-      "${CMAKE_MATCH_1}"
+      ${_pyqt5_version_tag}
       CACHE STRING "The Qt version tag used by PyQt5's .sip files" FORCE
   )
-
-  string(REGEX MATCH ".*\npyqt_sip_flags:([^\n]+).*$" _dummy ${_pyqt_config})
   set(PYQT5_SIP_FLAGS
-      "${CMAKE_MATCH_1}"
+      ${_pyqt5_sip_flags}
       CACHE STRING "The SIP flags used to build PyQt5" FORCE
   )
-
-  string(REGEX MATCH ".*\npyqt_pyuic:([^\n]+).*$" _dummy ${_pyqt_config})
   set(PYQT5_PYUIC
-      "${CMAKE_MATCH_1}"
+      ${_pyqt5_pyuic}
       CACHE STRING "Location of the pyuic script" FORCE
   )
 
 else()
   message(FATAL_ERROR "Error encountered while determining PyQt confguration:\n${_pyqt_config_err} ${_error}")
-endif()
-
-if(_python_paths)
-  list(GET __python_paths 0 _item)
-  set(PYTHON_PREFIX "${_item}")
-
-  list(GET _python_paths 1 _item)
-  set(PYTHON_SITE_PACKAGES "${_item}")
-
 endif()
 
 # If the user has provided ``PyQt_ROOT_DIR``, use it.  Choose items found at this location over system locations.
@@ -163,28 +140,26 @@ if(EXISTS "$ENV{PyQt5_ROOT_DIR}")
 endif()
 
 # =============================================================================
-# Set SIP_DIR. The find_path calls will prefer custom locations over standard locations (HINTS).
+# Set SIP_DIR. The find_path calls will prefer custom locations over standard locations (HINTS). Common locations
+# followed by OS-dependent versions
+list(APPEND _sip_hints ${_python_site_packages})
+list(APPEND _sip_suffixes "share/sip/PyQt5" "PyQt5/bindings")
 if(WIN32)
-  list(APPEND _sip_hints ${PYTHON_PREFIX})
-  list(APPEND _sip_suffixes "share/sip/PyQt5" "sip/PyQt5")
+  list(APPEND _sip_hints ${_python_prefix})
+  list(APPEND _sip_suffixes "sip/PyQt5")
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  list(
-    APPEND
-    _sip_suffixes
-    "share/sip/PyQt5"
-    "share/PyQt5"
-    "PyQt5/bindings"
-    "pyqt/share/sip/Qt5"
-    "mantid-pyqt5/share/sip/Qt5"
-  )
-  list(APPEND _sip_hints "/usr/local/opt" ${PYTHON_SITE_PACKAGES})
+  list(APPEND _sip_hints "/usr/local/opt")
+  list(APPEND _sip_suffixes "share/PyQt5" "pyqt/share/sip/Qt5" "mantid-pyqt5/share/sip/Qt5")
 else()
-  list(APPEND _sip_hints ${PYTHON_PREFIX}/share)
-  list(APPEND _sip_suffixes "share/sip/PyQt5" "python${Python_MAJOR_VERSION}${Python_MINOR_VERSION}-sip/PyQt5"
+  list(APPEND _sip_hints ${_python_prefix}/share)
+  list(APPEND _sip_suffixes "python${Python_MAJOR_VERSION}${Python_MINOR_VERSION}-sip/PyQt5"
        "python${Python_MAJOR_VERSION}-sip/PyQt5" "sip/PyQt5"
   )
 endif()
 
+if(NOT EXISTS "${PYQT5_SIP_DIR}/QtCore/QtCoremod.sip")
+  unset(PYQT5_SIP_DIR CACHE) # force reset from a previous cache value that has moved
+endif()
 find_path(
   PYQT5_SIP_DIR
   NAMES QtCore/QtCoremod.sip
@@ -198,7 +173,6 @@ set(PYQT5_SIP_ABI_VERSION
     CACHE STRING "The sip ABI used to compile PyQt5" FORCE
 )
 
-message("Found PyQt sip dir ${PYQT5_SIP_DIR}")
 if(NOT EXISTS "${PYQT5_SIP_DIR}/QtCore/QtCoremod.sip")
   message(FATAL_ERROR "Unable to find QtCore/QtCoremod.sip in ${PYQT5_SIP_DIR}. PyQt sip files are missing.")
 endif()

@@ -69,7 +69,9 @@ BatchPresenter::BatchPresenter(IBatchView *view, std::unique_ptr<IBatch> model, 
  */
 void BatchPresenter::acceptMainPresenter(IMainWindowPresenter *mainPresenter) { m_mainPresenter = mainPresenter; }
 
-void BatchPresenter::initInstrumentList() { m_runsPresenter->initInstrumentList(); }
+void BatchPresenter::initInstrumentList(const std::string &selectedInstrument) {
+  m_runsPresenter->initInstrumentList(selectedInstrument);
+}
 
 bool BatchPresenter::requestClose() const { return true; }
 

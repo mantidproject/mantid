@@ -34,9 +34,12 @@ class CutViewerPresenter:
 
     def reset_view_table(self):
         self.view.set_bin_params(
-            *self.model.get_default_bin_params(self._sliceview_presenter.get_dimensions(),
-                                               self._sliceview_presenter.get_axes_limits(),
-                                               self._sliceview_presenter.get_sliceinfo().z_value))
+            *self.model.get_default_bin_params(
+                self._sliceview_presenter.get_dimensions(),
+                self._sliceview_presenter.get_data_limits_to_fill_current_axes(),
+                self._sliceview_presenter.get_sliceinfo().z_value,
+            )
+        )
 
     def validate_bin_params(self, irow, icol):
         iunchanged = int(not bool(irow))  # index of u1 or u2 - which ever not changed (3rd row not editable)
@@ -54,16 +57,17 @@ class CutViewerPresenter:
     def update_cut(self):
         vectors, extents, nbins = self.view.get_bin_params()
         if self.model.valid_bin_params(vectors, extents, nbins):
-            self._sliceview_presenter.perform_non_axis_aligned_cut(vectors, extents.flatten(order='F'), nbins)
+            self._sliceview_presenter.perform_non_axis_aligned_cut(vectors, extents.flatten(order="F"), nbins)
 
     def get_cut_representation_parameters(self):
-        return self.model.calc_cut_representation_parameters(*self.view.get_bin_params(),
-                                                             self._sliceview_presenter.get_dimensions().get_states())
+        cut_rep_params = self.model.calc_cut_representation_parameters(
+            *self.view.get_bin_params(), self._sliceview_presenter.get_dimensions().get_states()
+        )
+        return *cut_rep_params, self._sliceview_presenter.get_sliceinfo().get_northogonal_transform()
 
     def update_bin_params_from_cut_representation(self, xmin, xmax, ymin, ymax, thickness):
         vectors, _, _ = self.view.get_bin_params()
-        self.view.set_bin_params(
-            *self.model.calc_bin_params_from_cut_representation(xmin, xmax, ymin, ymax, thickness, vectors[-1, :]))
+        self.view.set_bin_params(*self.model.calc_bin_params_from_cut_representation(xmin, xmax, ymin, ymax, thickness, vectors[-1, :]))
         self.update_cut()
 
     # signals

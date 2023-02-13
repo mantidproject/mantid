@@ -5,10 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-from typing import Callable, Tuple
+from typing import Callable, List, Tuple
+import sys
 
 from mantid.kernel import Logger, SpecialCoordinateSystem
 from qtpy.QtCore import Qt
+from qtpy.QtGui import QCursor
 
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.widgets.observers.observing_presenter import ObservingPresenter
@@ -22,6 +24,10 @@ from mantidqt.widgets.sliceviewer.peaksviewer import PeaksViewerPresenter, Peaks
 from mantidqt.widgets.sliceviewer.presenters.base_presenter import SliceViewerBasePresenter
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
 from mantidqt.widgets.sliceviewer.views.view import SliceViewerView
+
+from workbench.plotting.propertiesdialog import XAxisEditor, YAxisEditor
+
+DBLMAX = sys.float_info.max
 
 
 class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
@@ -37,10 +43,11 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         :param view: A view to display the operations. If None uses SliceViewerView
         """
         model: SliceViewerModel = model if model else SliceViewerModel(ws)
-        self.view = view if view else SliceViewerView(self,
-                                                      Dimensions.get_dimensions_info(ws),
-                                                      model.can_normalize_workspace(), parent,
-                                                      window_flags, conf)
+        self.view = (
+            view
+            if view
+            else SliceViewerView(self, Dimensions.get_dimensions_info(ws), model.can_normalize_workspace(), parent, window_flags, conf)
+        )
         super().__init__(ws, self.view.data_view, model)
 
         self._logger = Logger("SliceViewer")
@@ -55,8 +62,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         self._new_plot_method, self.update_plot_data = self._decide_plot_update_methods()
 
         self.view.setWindowTitle(self.model.get_title())
-        self.view.data_view.create_axes_orthogonal(
-            redraw_on_zoom=not WorkspaceInfo.can_support_dynamic_rebinning(self.model.ws))
+        self.view.data_view.create_axes_orthogonal(redraw_on_zoom=not WorkspaceInfo.can_support_dynamic_rebinning(self.model.ws))
 
         if self.model.can_normalize_workspace():
             self.view.data_view.set_normalization(ws)
@@ -78,8 +84,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         # Start the GUI with zoom selected.
         self.view.data_view.activate_tool(ToolItemText.ZOOM)
 
-        self.ads_observer = SliceViewerADSObserver(self.replace_workspace, self.rename_workspace,
-                                                   self.ADS_cleared, self.delete_workspace)
+        self.ads_observer = SliceViewerADSObserver(self.replace_workspace, self.rename_workspace, self.ADS_cleared, self.delete_workspace)
 
         # simulate clicking on the home button, which will force all signal and slot connections
         # properly set.
@@ -99,7 +104,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         Tell the view to display a new plot of an MDHistoWorkspace
         """
         data_view = self.view.data_view
-        limits = data_view.get_axes_limits()
+        limits = data_view.get_data_limits_to_fill_current_axes()
 
         if limits is None or not WorkspaceInfo.can_support_dynamic_rebinning(self.model.ws):
             data_view.plot_MDH(self.model.get_ws(), slicepoint=self.get_slicepoint())
@@ -112,7 +117,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         Tell the view to display a new plot of an MDEventWorkspace
         """
         data_view = self.view.data_view
-        limits = data_view.get_axes_limits()
+        limits = data_view.get_data_limits_to_fill_current_axes()
 
         # The value at the i'th index of this tells us that the axis with that value (0 or 1) will display dimension i
         dimension_indices = self.view.dimensions.get_states()
@@ -127,19 +132,20 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             limits = None
 
         data_view.plot_MDH(
-            self.model.get_ws_MDE(slicepoint=self.get_slicepoint(),
-                                  bin_params=data_view.dimensions.get_bin_params(),
-                                  limits=limits,
-                                  dimension_indices=dimension_indices))
+            self.model.get_ws_MDE(
+                slicepoint=self.get_slicepoint(),
+                bin_params=data_view.dimensions.get_bin_params(),
+                limits=limits,
+                dimension_indices=dimension_indices,
+            )
+        )
         self._call_peaks_presenter_if_created("notify", PeaksViewerPresenter.Event.OverlayPeaks)
 
     def update_plot_data_MDH(self):
         """
         Update the view to display an updated MDHistoWorkspace slice/cut
         """
-        self.view.data_view.update_plot_data(
-            self.model.get_data(self.get_slicepoint(),
-                                transpose=self.view.data_view.dimensions.transpose))
+        self.view.data_view.update_plot_data(self.model.get_data(self.get_slicepoint(), transpose=self.view.data_view.dimensions.transpose))
 
     def update_plot_data_MDE(self):
         """
@@ -147,11 +153,14 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         """
         data_view = self.view.data_view
         data_view.update_plot_data(
-            self.model.get_data(self.get_slicepoint(),
-                                bin_params=data_view.dimensions.get_bin_params(),
-                                dimension_indices=data_view.dimensions.get_states(),
-                                limits=data_view.get_axes_limits(),
-                                transpose=self.view.data_view.dimensions.transpose))
+            self.model.get_data(
+                self.get_slicepoint(),
+                bin_params=data_view.dimensions.get_bin_params(),
+                dimension_indices=data_view.dimensions.get_states(),
+                limits=data_view.get_data_limits_to_fill_current_axes(),
+                transpose=self.view.data_view.dimensions.transpose,
+            )
+        )
 
     def update_plot_data_matrix(self):
         # should never be called, since this workspace type is only 2D the plot dimensions never change
@@ -172,17 +181,19 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         dimensions = self.view.data_view.dimensions
         non_ortho_mode = True if force_nonortho_mode else self.view.data_view.nonorthogonal_mode
         axes_angles = self.model.get_axes_angles(force_orthogonal=not non_ortho_mode)  # None if can't support transform
-        return SliceInfo(point=dimensions.get_slicepoint(),
-                         transpose=dimensions.transpose,
-                         range=dimensions.get_slicerange(),
-                         qflags=dimensions.qflags,
-                         axes_angles=axes_angles)
+        return SliceInfo(
+            point=dimensions.get_slicepoint(),
+            transpose=dimensions.transpose,
+            range=dimensions.get_slicerange(),
+            qflags=dimensions.qflags,
+            axes_angles=axes_angles,
+        )
 
     def get_proj_matrix(self):
         return self.model.get_proj_matrix()
 
-    def get_axes_limits(self):
-        return self.view.data_view.get_axes_limits()
+    def get_data_limits_to_fill_current_axes(self):
+        return self.view.data_view.get_data_limits_to_fill_current_axes()
 
     def dimensions_changed(self):
         """Indicates that the dimensions have changed"""
@@ -203,8 +214,10 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
 
         ws_type = WorkspaceInfo.get_ws_type(self.model.ws)
         if ws_type == WS_TYPE.MDH or ws_type == WS_TYPE.MDE:
-            if self.model.get_number_dimensions() > 2 and \
-                    sliceinfo.slicepoint[data_view.dimensions.get_previous_states().index(None)] is None:
+            if (
+                self.model.get_number_dimensions() > 2
+                and sliceinfo.slicepoint[data_view.dimensions.get_previous_states().index(None)] is None
+            ):
                 # The dimension of the slicepoint has changed
                 self.new_plot(dimensions_changing=True)
             else:
@@ -215,8 +228,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
 
     def slicepoint_changed(self):
         """Indicates the slicepoint has been updated"""
-        self._call_peaks_presenter_if_created("notify",
-                                              PeaksViewerPresenter.Event.SlicePointChanged)
+        self._call_peaks_presenter_if_created("notify", PeaksViewerPresenter.Event.SlicePointChanged)
         self._call_cutviewer_presenter_if_created("on_slicepoint_changed")
         self.update_plot_data()
 
@@ -228,11 +240,14 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
 
         try:
             self._show_status_message(
-                self.model.export_roi_to_workspace(self.get_slicepoint(),
-                                                   bin_params=data_view.dimensions.get_bin_params(),
-                                                   limits=limits,
-                                                   transpose=data_view.dimensions.transpose,
-                                                   dimension_indices=data_view.dimensions.get_states()))
+                self.model.export_roi_to_workspace(
+                    self.get_slicepoint(),
+                    bin_params=data_view.dimensions.get_bin_params(),
+                    limits=limits,
+                    transpose=data_view.dimensions.transpose,
+                    dimension_indices=data_view.dimensions.get_states(),
+                )
+            )
         except Exception as exc:
             self._logger.error(str(exc))
             self._show_status_message("Error exporting ROI")
@@ -253,7 +268,9 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
                     limits=limits,
                     transpose=data_view.dimensions.transpose,
                     dimension_indices=data_view.dimensions.get_states(),
-                    cut=cut_type))
+                    cut=cut_type,
+                )
+            )
         except Exception as exc:
             self._logger.error(str(exc))
             self._show_status_message("Error exporting roi cut")
@@ -273,7 +290,9 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
                     bin_params=data_view.dimensions.get_bin_params(),
                     pos=pos,
                     transpose=data_view.dimensions.transpose,
-                    axis=axis))
+                    axis=axis,
+                )
+            )
         except Exception as exc:
             self._logger.error(str(exc))
             self._show_status_message("Error exporting single-pixel cut")
@@ -281,7 +300,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
     def perform_non_axis_aligned_cut(self, vectors, extents, nbins):
         try:
             wscut_name = self.model.perform_non_axis_aligned_cut_to_workspace(vectors, extents, nbins)
-            self._call_cutviewer_presenter_if_created('on_cut_done', wscut_name)
+            self._call_cutviewer_presenter_if_created("on_cut_done", wscut_name)
         except Exception as exc:
             self._logger.error(str(exc))
             self._show_status_message("Error exporting single-pixel cut")
@@ -294,7 +313,6 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         data_view = self.view.data_view
         if state:
             data_view.deactivate_and_disable_tool(ToolItemText.REGIONSELECTION)
-            data_view.disable_tool_button(ToolItemText.NONAXISALIGNEDCUTS)
             data_view.disable_tool_button(ToolItemText.LINEPLOTS)
             # set transform from sliceinfo but ignore view as non-ortho state not set yet
             data_view.create_axes_nonorthogonal(self.get_sliceinfo(force_nonortho_mode=True).get_northogonal_transform())
@@ -303,10 +321,13 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             data_view.create_axes_orthogonal()
             data_view.enable_tool_button(ToolItemText.LINEPLOTS)
             data_view.enable_tool_button(ToolItemText.REGIONSELECTION)
-            if self.model.can_support_non_axis_cuts():
-                data_view.enable_tool_button(ToolItemText.NONAXISALIGNEDCUTS)
 
         self.new_plot()
+
+        # replot the cut if one was displayed before
+        if self._cutviewer_presenter is not None and self._cutviewer_presenter.view.cut_rep is not None:
+            self._cutviewer_presenter.show_view()
+            self._cutviewer_presenter.update_cut()
 
     def normalization_changed(self, norm_type):
         """
@@ -341,7 +362,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
                 self.view.add_widget_to_splitter(self._cutviewer_presenter.get_view())
             self._cutviewer_presenter.show_view()
             data_view.deactivate_tool(ToolItemText.ZOOM)
-            for tool in [ToolItemText.REGIONSELECTION, ToolItemText.LINEPLOTS, ToolItemText.NONORTHOGONAL_AXES]:
+            for tool in [ToolItemText.REGIONSELECTION, ToolItemText.LINEPLOTS]:
                 data_view.deactivate_and_disable_tool(tool)
             # turn off cursor tracking as this causes plot to resize interfering with interactive cutting tool
             data_view.track_cursor.setChecked(False)  # on_track_cursor_state_change(False)
@@ -351,6 +372,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
                 data_view.enable_tool_button(tool)
             if self.get_sliceinfo().can_support_nonorthogonal_axes():
                 data_view.enable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
+            self._cutviewer_presenter = None
 
     def replace_workspace(self, workspace_name, workspace):
         """
@@ -374,8 +396,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             self.new_plot, self.update_plot_data = self._decide_plot_update_methods()
             self.view.delayed_refresh()
         except ValueError as err:
-            self._close_view_with_message(
-                f"Closing Sliceviewer as the underlying workspace was changed: {str(err)}")
+            self._close_view_with_message(f"Closing Sliceviewer as the underlying workspace was changed: {str(err)}")
             return
 
     def refresh_view(self):
@@ -386,7 +407,6 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             return
 
         self.view.refresh_queued = False
-
         # we don't want to use model.get_ws for the image info widget as this needs
         # extra arguments depending on workspace type.
         ws = self.model.ws
@@ -417,6 +437,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             self._peaks_presenter.clear_observer()
 
     def canvas_clicked(self, event):
+        data_view = self.view.data_view
         if self._peaks_presenter is not None and event.inaxes:
             sliceinfo = self.get_sliceinfo()
             if sliceinfo.can_support_peak_overlay():
@@ -425,6 +446,15 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
                 self._logger.debug(f"Coordinates transformed into {self.get_frame()} frame, pos={pos}")
                 self._peaks_presenter.add_delete_peak(pos)
                 self.view.data_view.canvas.draw_idle()
+        elif event.dblclick and event.button == data_view.canvas.buttond.get(Qt.LeftButton) and not data_view.nonorthogonal_mode:
+            if data_view.ax.xaxis.contains(event)[0] or any(tick.contains(event)[0] for tick in data_view.ax.get_xticklabels()):
+                editor = SliceViewXAxisEditor(data_view.canvas, data_view.ax, self.dimensions_changed)
+                editor.move(QCursor.pos())
+                editor.exec_()
+            elif data_view.ax.yaxis.contains(event)[0] or any(tick.contains(event)[0] for tick in data_view.ax.get_yticklabels()):
+                editor = SliceViewYAxisEditor(data_view.canvas, data_view.ax, self.dimensions_changed)
+                editor.move(QCursor.pos())
+                editor.exec_()
 
     def key_pressed(self, event) -> None:
         pass
@@ -504,4 +534,54 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         self.view = None
 
     def action_open_help_window(self):
-        InterfaceManager().showHelpPage('qthelp://org.mantidproject/doc/workbench/sliceviewer.html')
+        InterfaceManager().showHelpPage("qthelp://org.mantidproject/doc/workbench/sliceviewer.html")
+
+    def get_extra_image_info_columns(self, xdata, ydata):
+        qdims = [i for i, v in enumerate(self.view.data_view.dimensions.qflags) if v]
+
+        if len(qdims) != 3 or self.get_frame() != SpecialCoordinateSystem.HKL:
+            return {}
+
+        if xdata == DBLMAX and ydata == DBLMAX:
+            return {"H": "-", "K": "-", "L": "-"}
+
+        slice_point = self.get_slicepoint()
+        xdim, ydim = WorkspaceInfo.display_indices(slice_point, self.view.data_view.dimensions.transpose)
+        full_point = self._get_full_point(slice_point, xdata, ydata, xdim, ydim)
+
+        hkl = self.model.get_hkl_from_full_point(full_point, qdims)
+
+        hkl_as_strings = [f"{element:.4f}" for element in hkl]
+        return {"H": hkl_as_strings[0], "K": hkl_as_strings[1], "L": hkl_as_strings[2]}
+
+    @staticmethod
+    def _get_full_point(slice_point: List[float], xdata: float, ydata: float, xdim: int, ydim: int) -> List[float]:
+        """Construct a list containing the full cursor coordinate i.e. x, y, z, and any other dimensions"""
+        full_point = slice_point.copy()
+        full_point[xdim] = xdata
+        full_point[ydim] = ydata
+        return full_point
+
+
+class SliceViewXAxisEditor(XAxisEditor):
+    def __init__(self, canvas, axes, dimensions_changed):
+        super(SliceViewXAxisEditor, self).__init__(canvas, axes)
+        self.dimensions_changed = dimensions_changed
+        self.ui.logBox.hide()
+        self.ui.gridBox.hide()
+
+    def on_ok(self):
+        super(SliceViewXAxisEditor, self).on_ok()
+        self.dimensions_changed()
+
+
+class SliceViewYAxisEditor(YAxisEditor):
+    def __init__(self, canvas, axes, dimensions_changed):
+        super(SliceViewYAxisEditor, self).__init__(canvas, axes)
+        self.dimensions_changed = dimensions_changed
+        self.ui.logBox.hide()
+        self.ui.gridBox.hide()
+
+    def on_ok(self):
+        super(SliceViewYAxisEditor, self).on_ok()
+        self.dimensions_changed()

@@ -18,12 +18,9 @@ class GSAS2Presenter(object):
         self.instrument = "ENGINX"
         self.current_plot_index = None
         self.latest_load_parameters = None
-        self.focus_run_observer_gsas2 = GenericObserverWithArgPassing(
-            self.view.set_default_gss_files)
-        self.prm_filepath_observer_gsas2 = GenericObserverWithArgPassing(
-            self.view.set_default_prm_files)
-        self.ads_observer = FittingADSObserver(self.remove_workspace, self.clear_workspaces,
-                                               self.replace_workspace, self.rename_workspace)
+        self.focus_run_observer_gsas2 = GenericObserverWithArgPassing(self.view.set_default_gss_files)
+        self.prm_filepath_observer_gsas2 = GenericObserverWithArgPassing(self.view.set_default_prm_files)
+        self.ads_observer = FittingADSObserver(self.remove_workspace, self.clear_workspaces, self.replace_workspace, self.rename_workspace)
         if not test:
             self.connect_view_signals()
 
@@ -36,8 +33,9 @@ class GSAS2Presenter(object):
         load_params = self.view.get_load_parameters()
         project_name = self.view.get_project_name()
         refine_params = self.view.get_refinement_parameters()
-        number_output_histograms = self.model.run_model(load_params, refine_params, project_name,
-                                                        self.rb_num, self.get_limits_if_same_load_parameters())
+        number_output_histograms = self.model.run_model(
+            load_params, refine_params, project_name, self.rb_num, self.get_limits_if_same_load_parameters()
+        )
         if number_output_histograms:
             self.plot_result(1)
             self.view.set_number_histograms(number_output_histograms)
@@ -90,8 +88,8 @@ class GSAS2Presenter(object):
         self.current_plot_index = None
 
     def set_x_limits(self, current_histogram_index):
-        x_minimum = self.model.x_min[int(current_histogram_index)-1]
-        x_maximum = self.model.x_max[int(current_histogram_index)-1]
+        x_minimum = self.model.x_min[int(current_histogram_index) - 1]
+        x_maximum = self.model.x_max[int(current_histogram_index) - 1]
         self.view.set_x_limits(x_minimum, x_maximum)
 
     # ========================

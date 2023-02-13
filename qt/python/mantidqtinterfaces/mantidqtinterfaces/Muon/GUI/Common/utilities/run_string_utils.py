@@ -82,14 +82,14 @@ def run_string_to_list(run_string, max_value=True):
     if not validate_run_string(run_string):
         raise IndexError("{} is not a valid run string".format(run_string))
     run_list = []
-    if run_string.endswith(',') or run_string.endswith('-'):
+    run_string = run_string.replace(" ", "")
+    if run_string.endswith(",") or run_string.endswith("-"):
         run_string = run_string[:-1]
     if run_string == "":
         return run_list
 
     run_string_list = run_string.split(delimiter)
     for runs in run_string_list:
-        runs = runs.replace(" ", "")
         split_runs = runs.split(range_separator)
         if len(runs) == 1:
             run_list += [int(runs)]
@@ -98,11 +98,11 @@ def run_string_to_list(run_string, max_value=True):
             range_min = split_runs[0]
             max_length = len(range_max)
             min_length = len(range_min)
-            if (max_length < min_length):
-                range_max = range_min[:min_length - max_length] + range_max
+            if max_length < min_length:
+                range_max = range_min[: min_length - max_length] + range_max
             range_max = int(range_max)
             range_min = int(range_min)
-            if(range_max < range_min):
+            if range_max < range_min:
                 range_max = range_max + 10
             run_list += [range_min + i for i in range(range_max - range_min + 1)]
     run_list = _remove_duplicates_from_list(run_list)

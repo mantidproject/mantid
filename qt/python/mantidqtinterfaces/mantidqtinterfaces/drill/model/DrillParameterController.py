@@ -85,7 +85,7 @@ class DrillParameterController(threading.Thread):
                     try:
                         self._alg.setProperty(pName, defaultValue)
                     except:
-                        pass # in case of mandatory parameter
+                        pass  # in case of mandatory parameter
                     p.setValidationState(True)
                 except Exception as e:
                     p.setValidationState(False, str(e))

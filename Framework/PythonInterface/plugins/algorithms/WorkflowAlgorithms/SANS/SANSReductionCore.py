@@ -17,10 +17,10 @@ from sans.common.enums import DetectorType
 
 class SANSReductionCore(SANSReductionCoreBase):
     def category(self):
-        return 'SANS\\Reduction'
+        return "SANS\\Reduction"
 
     def summary(self):
-        return ' Runs the the core reduction elements.'
+        return " Runs the the core reduction elements."
 
     def PyInit(self):
         self._pyinit_input()
@@ -54,8 +54,7 @@ class SANSReductionCore(SANSReductionCoreBase):
         progress.report("Event slicing ...")
         data_type_as_string = self.getProperty("DataType").value
         monitor_workspace = self._get_monitor_workspace()
-        workspace, monitor_workspace, slice_event_factor = self._slice(state, workspace, monitor_workspace,
-                                                                       data_type_as_string)
+        workspace, monitor_workspace, slice_event_factor = self._slice(state, workspace, monitor_workspace, data_type_as_string)
 
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # COMPATIBILITY
@@ -66,8 +65,9 @@ class SANSReductionCore(SANSReductionCoreBase):
         # to keep track of the bin masking. These masks are lifted from the dummy workspace to the actual workspace
         # near the end of the reduction.
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        workspace, dummy_mask_workspace, \
-            use_dummy_workspace = self._check_compatibility_mode(workspace, monitor_workspace, state.compatibility)
+        workspace, dummy_mask_workspace, use_dummy_workspace = self._check_compatibility_mode(
+            workspace, monitor_workspace, state.compatibility
+        )
 
         # ------------------------------------------------------------
         # 4. Move the workspace into the correct position
@@ -77,8 +77,7 @@ class SANSReductionCore(SANSReductionCoreBase):
         progress.report("Moving ...")
 
         workspace = self._move(state=state, workspace=workspace, component=component_as_string)
-        monitor_workspace = self._move(state=state, workspace=monitor_workspace,
-                                       component=component_as_string)
+        monitor_workspace = self._move(state=state, workspace=monitor_workspace, component=component_as_string)
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Apply masking (pixel masking and time masking)
@@ -94,10 +93,8 @@ class SANSReductionCore(SANSReductionCoreBase):
         # Convert and rebin the dummy workspace to get correct bin flags
         del workspace
         if use_dummy_workspace:
-            dummy_mask_workspace = mask_bins(state.mask, dummy_mask_workspace,
-                                             DetectorType(component_as_string))
-            dummy_mask_workspaces = self._convert_to_wavelength(wavelength_state=state.wavelength,
-                                                                workspace=dummy_mask_workspace)
+            dummy_mask_workspace = mask_bins(state.mask, dummy_mask_workspace, DetectorType(component_as_string))
+            dummy_mask_workspaces = self._convert_to_wavelength(wavelength_state=state.wavelength, workspace=dummy_mask_workspace)
 
         # --------------------------------------------------------------------------------------------------------------
         # 7. Multiply by volume and absolute scale
@@ -116,8 +113,7 @@ class SANSReductionCore(SANSReductionCoreBase):
         # settings. On the other hand it is not clear that this would be an advantage with the GIL.
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Creating adjustment workspaces ...")
-        adjustment_dict = self._adjustment(state, workspaces, monitor_workspace,
-                                           component_as_string, data_type_as_string)
+        adjustment_dict = self._adjustment(state, workspaces, monitor_workspace, component_as_string, data_type_as_string)
 
         # ----------------------------------------------------------------
         # 9. Convert event workspaces to histogram workspaces, and re-mask

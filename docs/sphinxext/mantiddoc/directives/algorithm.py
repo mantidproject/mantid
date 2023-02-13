@@ -4,9 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantiddoc.directives.base import AlgorithmBaseDirective  #pylint: disable=unused-import
+from mantiddoc.directives.base import AlgorithmBaseDirective  # pylint: disable=unused-import
 import os
 import re
+
 REDIRECT_TEMPLATE = "redirect.html"
 
 DEPRECATE_USE_ALG_RE = re.compile(r"Use\s(([A-Z][a-zA-Z0-9]+)\s(version ([0-9])+)?)\s*instead.")
@@ -16,7 +17,7 @@ DEPRECATE_USE_ALG_RE = re.compile(r"Use\s(([A-Z][a-zA-Z0-9]+)\s(version ([0-9])+
 # and the rest
 SCREENSHOT_MAX_HEIGHT = 250
 
-#--------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 
 
 class AlgorithmDirective(AlgorithmBaseDirective):
@@ -102,15 +103,12 @@ class AlgorithmDirective(AlgorithmBaseDirective):
 
         # Generate image
         from mantiddoc.tools.screenshot import algorithm_screenshot
+
         try:
-            picture = algorithm_screenshot(self.algorithm_name(),
-                                           screenshots_dir,
-                                           version=self.algorithm_version())
+            picture = algorithm_screenshot(self.algorithm_name(), screenshots_dir, version=self.algorithm_version())
         except RuntimeError as exc:
             env = self.state.document.settings.env
-            env.warn(
-                env.docname,
-                "Unable to generate screenshot for '%s' - %s" % (self.algorithm_name(), str(exc)))
+            env.warn(env.docname, "Unable to generate screenshot for '%s' - %s" % (self.algorithm_name(), str(exc)))
             picture = None
 
         return picture
@@ -126,11 +124,7 @@ class AlgorithmDirective(AlgorithmBaseDirective):
           picture (Screenshot): A Screenshot object
         """
         env = self.state.document.settings.env
-        format_str = ".. figure:: %s\n"\
-                     "   :class: screenshot\n"\
-                     "   :width: %dpx\n"\
-                     "   :align: right\n\n"\
-                     "   %s\n\n"
+        format_str = ".. figure:: %s\n" "   :class: screenshot\n" "   :width: %dpx\n" "   :align: right\n\n" "   %s\n\n"
 
         # Sphinx assumes that an absolute path is actually relative to the directory containing the
         # conf.py file and a relative path is relative to the directory where the current rst file
@@ -143,7 +137,7 @@ class AlgorithmDirective(AlgorithmBaseDirective):
             if height > SCREENSHOT_MAX_HEIGHT:
                 aspect_ratio = float(width) / height
                 width = int(SCREENSHOT_MAX_HEIGHT * aspect_ratio)
-            #endif
+            # endif
 
             # relative path to image
             rel_path = os.path.relpath(screenshots_dir, env.srcdir)
@@ -189,7 +183,7 @@ class AlgorithmDirective(AlgorithmBaseDirective):
         self.add_rst(".. warning:: %s" % msg)
 
 
-#------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------
 
 
 def html_collect_pages(dummy_app):
@@ -210,7 +204,7 @@ def html_collect_pages(dummy_app):
         yield (redirect_pagename, context, template)
 
 
-#------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------
 
 
 def setup(app):
@@ -221,7 +215,8 @@ def setup(app):
       app: The main Sphinx application object
     """
     from mantid.api import FrameworkManager
-    app.add_directive('algorithm', AlgorithmDirective)
+
+    app.add_directive("algorithm", AlgorithmDirective)
     # connect event html collection to handler
     app.connect("html-collect-pages", html_collect_pages)
 

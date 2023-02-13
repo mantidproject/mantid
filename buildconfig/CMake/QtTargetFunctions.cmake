@@ -295,10 +295,8 @@ function(mtd_add_qt_test_executable)
     add_dependencies(${_dep} ${_target_name})
   endforeach()
 
-  # set folder
-  if(CMAKE_GENERATOR MATCHES "Visual Studio")
-    set_target_properties(${_target_name} PROPERTIES FOLDER "Qt${PARSED_QT_VERSION}Tests")
-  endif()
+  # set folder for Visual Studio
+  set_target_properties(${_target_name} PROPERTIES FOLDER "Qt${PARSED_QT_VERSION}Tests")
 endfunction()
 
 # Given a list of arguments decide which Qt versions should be built. QT_VERSION can be specified to override this.

@@ -136,7 +136,6 @@ set(PYTHON_PLUGINS
     algorithms/MedianBinWidth.py
     algorithms/MergeCalFiles.py
     algorithms/MuonMaxent.py
-    algorithms/MuscatSofQW.py
     algorithms/NMoldyn4Interpolation.py
     algorithms/NOMADMedianDetectorTest.py
     algorithms/NormaliseSpectra.py
@@ -159,7 +158,6 @@ set(PYTHON_PLUGINS
     algorithms/RefinePowderDiffProfileSeq.py
     algorithms/ReflectometryReductionOneLiveData.py
     algorithms/ReflectometrySliceEventWorkspace.py
-    algorithms/ResNorm.py
     algorithms/RetrieveRunInfo.py
     algorithms/SANSSubtract.py
     algorithms/SANSWideAngleCorrection.py
@@ -168,6 +166,7 @@ set(PYTHON_PLUGINS
     algorithms/SaveGEMMAUDParamFile.py
     algorithms/SaveGSSCW.py
     algorithms/SaveHKLCW.py
+    algorithms/SaveINS.py
     algorithms/SaveNexusPD.py
     algorithms/SaveP2D.py
     algorithms/SavePlot1DAsJson.py
@@ -209,6 +208,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/CalculateMonteCarloAbsorption.py
     algorithms/WorkflowAlgorithms/ConvertMultipleRunsToSingleCrystalMD.py
     algorithms/WorkflowAlgorithms/CorelliPowderCalibrationCreate.py
+    algorithms/WorkflowAlgorithms/D4ILLReduction.py
     algorithms/WorkflowAlgorithms/D7AbsoluteCrossSections.py
     algorithms/WorkflowAlgorithms/D7YIGPositionCalibration.py
     algorithms/WorkflowAlgorithms/DetectorFloodWeighting.py
@@ -253,13 +253,12 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/IndirectTwoPeakFit.py
     algorithms/WorkflowAlgorithms/IqtFitMultiple.py
     algorithms/WorkflowAlgorithms/LoadWAND.py
+    algorithms/WorkflowAlgorithms/LagrangeILLReduction.py
     algorithms/WorkflowAlgorithms/MDNormSCDPreprocessIncoherent.py
     algorithms/WorkflowAlgorithms/MSDFit.py
     algorithms/WorkflowAlgorithms/MatchAndMergeWorkspaces.py
     algorithms/WorkflowAlgorithms/MildnerCarpenter.py
     algorithms/WorkflowAlgorithms/MolDyn.py
-    algorithms/WorkflowAlgorithms/MuscatData.py
-    algorithms/WorkflowAlgorithms/MuscatFunc.py
     algorithms/WorkflowAlgorithms/NormaliseByThickness.py
     algorithms/WorkflowAlgorithms/OSIRISDiffractionReduction.py
     algorithms/WorkflowAlgorithms/PaalmanPingsMonteCarloAbsorption.py
@@ -278,6 +277,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/ReflectometryISISPreprocess.py
     algorithms/WorkflowAlgorithms/ReflectometryISISLoadAndProcess.py
     algorithms/WorkflowAlgorithms/ReflectometryISISSumBanks.py
+    algorithms/WorkflowAlgorithms/ReflectometryISISCalibration.py
     algorithms/WorkflowAlgorithms/ResNorm2.py
     algorithms/WorkflowAlgorithms/SANS/SANSBeamCentreFinder.py
     algorithms/WorkflowAlgorithms/SANS/SANSBeamCentreFinderCore.py

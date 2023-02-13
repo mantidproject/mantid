@@ -10,27 +10,31 @@
 #include "DllOption.h"
 #include "MantidQtWidgets/Common/IImageInfoWidget.h"
 #include "MantidQtWidgets/Common/ImageInfoPresenter.h"
+#include <QMap>
+#include <QTableWidget>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /**
  * A table widget containing information about the pixel the mouse is over in
  * an image
  */
-class EXPORT_OPT_MANTIDQT_COMMON ImageInfoWidget : public IImageInfoWidget {
+class EXPORT_OPT_MANTIDQT_COMMON ImageInfoWidget : public QTableWidget, public IImageInfoWidget {
   Q_OBJECT
 
 public:
   ImageInfoWidget(QWidget *parent = nullptr);
 
-  void cursorAt(const double x, const double y, const double signal) override;
+  // Note: QMap has sip binding via PyQt but only for specific types (both types have to be classes or the first type
+  // has to be int)
+  void cursorAt(const double x, const double y, const double signal,
+                const QMap<QString, QString> &extraValues) override;
   void setWorkspace(const Mantid::API::Workspace_sptr &ws) override;
   void showInfo(const ImageInfoModel::ImageInfo &info) override;
+  void setRowCount(const int count) override;
 
 private:
   std::unique_ptr<ImageInfoPresenter> m_presenter;
 };
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

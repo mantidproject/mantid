@@ -35,7 +35,7 @@ from mantid.simpleapi import (
     Integration,
     GroupWorkspaces,
     RenameWorkspace,
-    GroupDetectors
+    GroupDetectors,
 )
 from mantid.kernel import (
     StringListValidator,
@@ -84,6 +84,12 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 validator=ADSValidator(),
             ),
             doc="The main input workspace[s].",
+        )
+
+        self.declareProperty(
+            "FilteredInput",
+            False,
+            doc="Specifies whether the input workspace was obtained from event filtering.",
         )
 
         self.declareProperty(
@@ -172,17 +178,31 @@ class WANDPowderReduction(DataProcessorAlgorithm):
 
     def PyExec(self):
         data = self._expand_groups()
+
         bkg = self.getProperty("BackgroundWorkspace").valueAsStr  # same background for all
         cal = self.getProperty("CalibrationWorkspace").value  # same calibration for all
         numberBins = self.getProperty("NumberBins").value
         outWS = self.getPropertyValue("OutputWorkspace")
         summing = self.getProperty("Sum").value  # [Yes or No]
+        filtered_eve = self.getProperty("FilteredInput").value  # [Yes or No]
 
         # convert all of the input workspaces into spectrum of "target" units (generally angle)
         data, masks = self._convert_data(data)
 
         # determine x-range
         xMin, xMax = self._locate_global_xlimit(data)
+
+        if filtered_eve:
+            ExtractMask(InputWorkspace=cal, OutputWorkspace="mask_shared", EnableLogging=False)
+            if cal is None:
+                _ws_cal_resampled = None
+            else:
+                _ws_cal_resampled = self._resample_calibration(data[0], "mask_shared", xMin, xMax)
+
+            if bkg is None or bkg.strip() == "":
+                _ws_bkg_resampled = None
+            else:
+                _ws_bkg_resampled = self._resample_background(bkg, data[0], "mask_shared", xMin, xMax, _ws_cal_resampled)
 
         # BEGIN_FOR: prcess_spectra
         for n, (_wsn, _mskn) in enumerate(zip(data, masks)):
@@ -196,17 +216,19 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 EnableLogging=False,
             )
 
-            # calibration
-            if cal is not None:
-                _ws_cal_resampled = self._resample_calibration(_wsn, _mskn, xMin, xMax)
+            if not filtered_eve:
+                if cal is None:
+                    _ws_cal_resampled = None
+                else:
+                    _ws_cal_resampled = self._resample_calibration(_wsn, _mskn, xMin, xMax)
+
+            if _ws_cal_resampled is not None:
                 Divide(
                     LHSWorkspace=_wsn,
                     RHSWorkspace=_ws_cal_resampled,
                     OutputWorkspace=_wsn,
                     EnableLogging=False,
                 )
-            else:
-                _ws_cal_resampled = None
 
             Scale(
                 InputWorkspace=_wsn,
@@ -216,9 +238,13 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             )
 
             # background
-            if bkg:
-                _ws_bkg_resampled = self._resample_background(bkg, _wsn, _mskn, xMin, xMax, _ws_cal_resampled)
+            if not filtered_eve:
+                if bkg is None or bkg.strip() == "":
+                    _ws_bkg_resampled = None
+                else:
+                    _ws_bkg_resampled = self._resample_background(bkg, _wsn, _mskn, xMin, xMax, _ws_cal_resampled)
 
+            if _ws_bkg_resampled is not None:
                 Minus(
                     LHSWorkspace=_wsn,
                     RHSWorkspace=_ws_bkg_resampled,
@@ -306,18 +332,25 @@ class WANDPowderReduction(DataProcessorAlgorithm):
     def _to_spectrum_axis(self, workspace_in, workspace_out, mask, instrument_donor=None):
         target = self.getProperty("Target").value
         wavelength = self.getProperty("Wavelength").value
-        e_fixed = UnitConversion.run('Wavelength', 'Energy', wavelength, 0, 0, 0, Elastic, 0)
+        e_fixed = UnitConversion.run("Wavelength", "Energy", wavelength, 0, 0, 0, Elastic, 0)
+        filtered_eve = self.getProperty("FilteredInput").value
 
-        ExtractUnmaskedSpectra(
-            InputWorkspace=workspace_in,
-            OutputWorkspace=workspace_out,
-            MaskWorkspace=mask,
-            EnableLogging=False,
-        )
+        if instrument_donor or not filtered_eve:
+            ExtractUnmaskedSpectra(
+                InputWorkspace=workspace_in,
+                OutputWorkspace=workspace_out,
+                MaskWorkspace=mask,
+                EnableLogging=False,
+            )
 
-        if isinstance(mtd[workspace_out], IEventWorkspace):
+        if instrument_donor:
+            wksp_tmp = workspace_out
+        else:
+            wksp_tmp = workspace_in
+
+        if isinstance(mtd[wksp_tmp], IEventWorkspace):
             Integration(
-                InputWorkspace=workspace_out,
+                InputWorkspace=wksp_tmp,
                 OutputWorkspace=workspace_out,
                 EnableLogging=False,
             )
@@ -329,27 +362,26 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 EnableLogging=False,
             )
 
-        ConvertSpectrumAxis(
-            InputWorkspace=workspace_out,
-            OutputWorkspace=workspace_out,
-            Target=target,
-            EFixed=e_fixed,
-            EnableLogging=False,
-        )
+        if not filtered_eve:
+            ConvertSpectrumAxis(
+                InputWorkspace=workspace_out,
+                OutputWorkspace=workspace_out,
+                Target=target,
+                EFixed=e_fixed,
+                EnableLogging=False,
+            )
 
         # this checks for any duplicated values in target axis, if
         # so then group them together
         axis_values = mtd[workspace_out].getAxis(1).extractValues()
         equal_values = axis_values == np.roll(axis_values, -1)
         if np.any(equal_values):
-            operator = np.full_like(equal_values, ",", dtype='<U1')
-            operator[equal_values] = '+'
-            grouping_pattern = "".join(str(n)+op for n, op in enumerate(operator))
+            operator = np.full_like(equal_values, ",", dtype="<U1")
+            operator[equal_values] = "+"
+            grouping_pattern = "".join(str(n) + op for n, op in enumerate(operator))
             GroupDetectors(
-                InputWorkspace=workspace_out,
-                OutputWorkspace=workspace_out,
-                GroupingPattern=grouping_pattern,
-                EnableLogging=False)
+                InputWorkspace=workspace_out, OutputWorkspace=workspace_out, GroupingPattern=grouping_pattern, EnableLogging=False
+            )
             ConvertSpectrumAxis(
                 InputWorkspace=workspace_out,
                 OutputWorkspace=workspace_out,
@@ -395,31 +427,35 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         mask_workspaces = []
         for n, (_wksp_in, _wksp_out) in enumerate(zip(input_workspaces, output_workspaces)):
             _wksp_in = str(_wksp_in)
-            _mask_n = f"__mask_{n}"  # mask for n-th
-            self.temp_workspace_list.append(_mask_n)  # cleanup later
+            if mask_angle == Property.EMPTY_DBL:
+                self._to_spectrum_axis(_wksp_in, _wksp_out, mask)
+                mask_workspaces.append(mask)
+            else:
+                _mask_n = f"__mask_{n}"  # mask for n-th
+                self.temp_workspace_list.append(_mask_n)  # cleanup later
 
-            ExtractMask(InputWorkspace=_wksp_in, OutputWorkspace=_mask_n, EnableLogging=False)
-            if mask_angle != Property.EMPTY_DBL:
-                MaskAngle(
-                    Workspace=_mask_n,
-                    MinAngle=mask_angle,
-                    Angle="Phi",
-                    EnableLogging=False,
-                )
-            if mask is not None:
-                # might be a bug if the mask angle isn't set
-                BinaryOperateMasks(
-                    InputWorkspace1=_mask_n,
-                    InputWorkspace2=mask,
-                    OperationType="OR",
-                    OutputWorkspace=_mask_n,
-                    EnableLogging=False,
-                )
+                ExtractMask(InputWorkspace=_wksp_in, OutputWorkspace=_mask_n, EnableLogging=False)
+                if mask_angle != Property.EMPTY_DBL:
+                    MaskAngle(
+                        Workspace=_mask_n,
+                        MinAngle=mask_angle,
+                        Angle="Phi",
+                        EnableLogging=False,
+                    )
+                if mask is not None:
+                    # might be a bug if the mask angle isn't set
+                    BinaryOperateMasks(
+                        InputWorkspace1=_mask_n,
+                        InputWorkspace2=mask,
+                        OperationType="OR",
+                        OutputWorkspace=_mask_n,
+                        EnableLogging=False,
+                    )
 
-            self._to_spectrum_axis(_wksp_in, _wksp_out, _mask_n)
+                self._to_spectrum_axis(_wksp_in, _wksp_out, _mask_n)
 
-            # append to the list of processed workspaces
-            mask_workspaces.append(_mask_n)
+                # append to the list of processed workspaces
+                mask_workspaces.append(_mask_n)
 
         return output_workspaces, mask_workspaces
 

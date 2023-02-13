@@ -78,8 +78,7 @@ class GuiStateDirector(object):
         self._set_data_entry(data_builder.set_sample_scatter, row_entry.sample_scatter)
         self._set_data_period_entry(data_builder.set_sample_scatter_period, row_entry.sample_scatter_period)
         self._set_data_entry(data_builder.set_sample_transmission, row_entry.sample_transmission)
-        self._set_data_period_entry(data_builder.set_sample_transmission_period,
-                                    row_entry.sample_transmission_period)  # noqa
+        self._set_data_period_entry(data_builder.set_sample_transmission_period, row_entry.sample_transmission_period)  # noqa
         self._set_data_entry(data_builder.set_sample_direct, row_entry.sample_direct)
         self._set_data_period_entry(data_builder.set_sample_direct_period, row_entry.sample_direct_period)
         self._set_data_entry(data_builder.set_can_scatter, row_entry.can_scatter)
@@ -94,8 +93,7 @@ class GuiStateDirector(object):
             # Has a custom user file so ignore any settings from GUI
             user_file_path = FileFinder.getFullPath(row_user_file)
             if not os.path.exists(user_file_path):
-                raise ValueError(f"The user file '{row_user_file}'"
-                                 " cannot be found. Make sure a valid user file has been specified.")
+                raise ValueError(f"The user file '{row_user_file}'" " cannot be found. Make sure a valid user file has been specified.")
             state = FileLoading.load_user_file(user_file_path, file_information=file_information)
             gui_state = StateGuiModel(state)
         else:

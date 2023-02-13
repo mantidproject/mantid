@@ -4,14 +4,15 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=C0103
-from qtpy.QtWidgets import (QMainWindow)
+# pylint: disable=C0103
+from qtpy.QtWidgets import QMainWindow
 from qtpy.QtCore import Signal as pyqtSignal
 from mantid.kernel import Logger
+
 try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
-    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    Logger("HFIR_4Circle_Reduction").information("Using legacy ui importer")
     from mantidplot import load_ui
 
 
@@ -36,17 +37,13 @@ class OptimizeLatticeWindow(QMainWindow):
         self.ui = load_ui(__file__, ui_path, baseinstance=self)
 
         # initialize widgets
-        self.ui.comboBox_unitCellTypes.addItems(['Cubic',
-                                                 'Tetragonal',
-                                                 'Orthorhombic',
-                                                 'Hexagonal',
-                                                 'Rhombohedral',
-                                                 'Monoclinic',
-                                                 'Triclinic'])
+        self.ui.comboBox_unitCellTypes.addItems(
+            ["Cubic", "Tetragonal", "Orthorhombic", "Hexagonal", "Rhombohedral", "Monoclinic", "Triclinic"]
+        )
 
-        self.ui.comboBox_ubSource.addItems(['Tab - Calculate UB Matrix', 'Tab - Accepted UB Matrix'])
+        self.ui.comboBox_ubSource.addItems(["Tab - Calculate UB Matrix", "Tab - Accepted UB Matrix"])
 
-        self.ui.lineEdit_tolerance.setText('0.12')
+        self.ui.lineEdit_tolerance.setText("0.12")
 
         # define event handling
         self.ui.pushButton_Ok.clicked.connect(self.do_ok)
@@ -69,7 +66,7 @@ class OptimizeLatticeWindow(QMainWindow):
 
         tolerance = self.get_tolerance()
         if tolerance is None:
-            raise RuntimeError('Tolerance cannot be left blank!')
+            raise RuntimeError("Tolerance cannot be left blank!")
 
         # set up a hand-shaking signal
         signal_value = 1000
@@ -120,7 +117,7 @@ class OptimizeLatticeWindow(QMainWindow):
         """
         source = str(self.ui.comboBox_ubSource.currentText())
 
-        if source == 'Tab - Calculate UB Matrix':
+        if source == "Tab - Calculate UB Matrix":
             tab_index = 3
         else:
             tab_index = 4

@@ -6,17 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-// Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
-// Main Module Header
-#include "MantidCurveFitting/Functions/InelasticIsoRotDiff.h"
-// Mantid Headers from the same project
-#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
-// Mantid headers from other projects
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
+#include "MantidCurveFitting/Functions/InelasticIsoRotDiff.h"
 #include <cxxtest/TestSuite.h>
-// third party library headers (n/a)
-// standard library headers (n/a)
 #include <limits>
 #include <numeric>
 

@@ -15,7 +15,7 @@ import os
 #  be determined at runtime. The two options are:
 #    1. using a qt.conf file: requires it to be next to the application
 #       executable but this would be python.exe and then would not allow
-#       switching between Qt4/Qt5
+#       switching between Qt Major versions
 #    2. add extra paths to the LibraryPath list here
 # As we can dynamically determine the Qt version here we choose option 2.
 
@@ -38,20 +38,22 @@ def setup_library_paths_win():
         return
 
     # package build
-    pkg_qt_plugins = osp.dirname(sys.executable) + f'\\..\\plugins\\qt{QT_VERSION[0]}'
+    pkg_qt_plugins = osp.dirname(sys.executable) + f"\\..\\plugins\\qt{QT_VERSION[0]}"
     if osp.isdir(pkg_qt_plugins):
         QCoreApplication.addLibraryPath(pkg_qt_plugins)
         return
 
     # development build
-    dev_qt_plugins = osp.dirname(sys.executable) + f'\\..\\qt{QT_VERSION[0]}\\plugins'
+    dev_qt_plugins = osp.dirname(sys.executable) + f"\\..\\qt{QT_VERSION[0]}\\plugins"
     if osp.isdir(dev_qt_plugins):
         QCoreApplication.addLibraryPath(dev_qt_plugins)
         return
 
 
 # Set the implementation appropriate for the platform
-if os.name == 'nt':
+if os.name == "nt":
     setup_library_paths = setup_library_paths_win
 else:
-    def setup_library_paths(): None
+
+    def setup_library_paths():
+        None

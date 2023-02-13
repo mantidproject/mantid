@@ -13,7 +13,7 @@ Direct Geometry Changes
 Interfaces
 ##########
 
-- Added the :ref:`ALF View <ALF_View-ref>` GUI for aligning samples on the ALF Instrument.
+- Added the :ref:`ALF View <ALFView-ref>` GUI for aligning samples on the ALF Instrument.
 
 Algorithms
 ##########

@@ -9,7 +9,6 @@ from mantidqtinterfaces.Muon.GUI.Common.contexts.plot_edit_context import PlotEd
 
 
 class MuonPlotEditContextTest(unittest.TestCase):
-
     def setUp(self):
         self.context = PlotEditContext()
 
@@ -56,5 +55,5 @@ class MuonPlotEditContextTest(unittest.TestCase):
         self.assertEqual(4, self.context.axis)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

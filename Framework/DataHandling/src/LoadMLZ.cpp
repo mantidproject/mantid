@@ -145,13 +145,13 @@ void LoadMLZ::maskDetectors(const NeXus::NXEntry &entry) {
  */
 void LoadMLZ::loadInstrumentDetails(const NeXus::NXEntry &firstEntry) {
 
-  m_instrumentPath = m_mlzloader.findInstrumentNexusPath(firstEntry);
+  m_instrumentPath = LoadHelper::findInstrumentNexusPath(firstEntry);
 
   if (m_instrumentPath.empty()) {
     throw std::runtime_error("Cannot set the instrument name from the Nexus file!");
   }
 
-  m_instrumentName = m_mlzloader.getStringFromNexusPath(firstEntry, m_instrumentPath + "/name");
+  m_instrumentName = LoadHelper::getStringFromNexusPath(firstEntry, m_instrumentPath + "/name");
 
   if (std::find(m_supportedInstruments.begin(), m_supportedInstruments.end(), m_instrumentName) ==
       m_supportedInstruments.end()) {
@@ -273,7 +273,7 @@ void LoadMLZ::loadRunDetails(NXEntry &entry) {
 
   runDetails.addProperty("wavelength", m_wavelength, "Angstrom", true);
 
-  double ei = m_mlzloader.calculateEnergy(m_wavelength);
+  double ei = LoadHelper::calculateEnergy(m_wavelength);
   runDetails.addProperty<double>("Ei", ei, "meV", true); // overwrite
 
   int duration = entry.getInt("duration");
@@ -358,7 +358,7 @@ void LoadMLZ::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
   NXInt data = dataGroup.openIntData();
   data.load();
 
-  m_t1 = m_mlzloader.calculateTOF(m_l1, m_wavelength) * 1.0e+6;
+  m_t1 = LoadHelper::calculateTOF(m_l1, m_wavelength) * 1.0e+6;
   g_log.debug() << " t1 (microseconds): " << m_t1 << '\n';
 
   std::vector<double> detectorTofBins(m_numberOfChannels + 1);

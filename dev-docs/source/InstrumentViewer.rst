@@ -23,7 +23,7 @@ The instrument view also allows users to see close-ups of any component.
 Implementation
 --------------
 
-MantidPlot uses :code:`OpenGL` to plot the geometry. :code:`Instrument3DWidget` represents the view window and controls the viewport and the scene.
+Mantid uses :code:`OpenGL` to plot the geometry. :code:`Instrument3DWidget` represents the view window and controls the viewport and the scene.
 The base class for a visual element is :code:`GLObject`. :code:`Actors` and :code:`MantidObject` inherit from it. :code:`Actors` represent the instrument components.
 
 .. figure:: images/InstrumentViewClassDiagram.jpg
@@ -34,7 +34,7 @@ Detector Picking
 ----------------
 
 Detector picking is a process of selecting a detector in the instrument view by clicking on it.
-When the user clicks the mouse inside the viewport in the picking mode, MantidPlot creates a hidden image of the instrument in which detectors are given colours encoding the detector's index in the instrument tree.
+When the user clicks the mouse inside the viewport in the picking mode, Mantid creates a hidden image of the instrument in which detectors are given colours encoding the detector's index in the instrument tree.
 On the mouse click a colour is read in and decoded back into the index.
 
 Geometry Handlers and Renderers

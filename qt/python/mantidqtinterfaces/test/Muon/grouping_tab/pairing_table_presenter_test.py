@@ -20,13 +20,12 @@ from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_
 def pair_name():
     name = []
     for i in range(21):
-        name.append("pair_" + str(i+1))
+        name.append("pair_" + str(i + 1))
     return name
 
 
 @start_qapplication
 class PairingTablePresenterTest(unittest.TestCase):
-
     def setUp(self):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
         self.obj = QWidget()
@@ -97,7 +96,7 @@ class PairingTablePresenterTest(unittest.TestCase):
     def test_that_add_pair_button_adds_pair_to_end_of_table(self):
         self.add_two_pairs_to_table()
 
-        self.presenter.add_pair(MuonPair(pair_name="new", forward_group_name='my_group_0', backward_group_name='my_group_1'))
+        self.presenter.add_pair(MuonPair(pair_name="new", forward_group_name="my_group_0", backward_group_name="my_group_1"))
 
         self.assertEqual(self.view.get_table_item_text(self.view.num_rows() - 1, 0), "new")
 
@@ -259,5 +258,5 @@ class PairingTablePresenterTest(unittest.TestCase):
         self.assertCountEqual(self.model.pair_names, ["pair_1", "pair_2", "pair_3"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

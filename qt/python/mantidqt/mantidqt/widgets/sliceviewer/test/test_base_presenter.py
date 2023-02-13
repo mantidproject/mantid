@@ -37,12 +37,15 @@ class SliceViewerBasePresenterShim(SliceViewerBasePresenter):
     def zoom_pan_clicked(self, active) -> None:
         pass
 
+    def get_extra_image_info_columns(self):
+        return {}
+
 
 class SliceViewerBasePresenterTest(unittest.TestCase):
     def setUp(self):
-        self._ws_info_patcher = mock.patch.multiple("mantidqt.widgets.sliceviewer.presenters.base_presenter",
-                                                    Dimensions=mock.DEFAULT,
-                                                    WorkspaceInfo=mock.DEFAULT)
+        self._ws_info_patcher = mock.patch.multiple(
+            "mantidqt.widgets.sliceviewer.presenters.base_presenter", Dimensions=mock.DEFAULT, WorkspaceInfo=mock.DEFAULT
+        )
         self.patched_deps = self._ws_info_patcher.start()
 
     def tearDown(self) -> None:
@@ -79,8 +82,9 @@ class SliceViewerBasePresenterTest(unittest.TestCase):
 
         presenter.show_all_data_clicked()
 
-        dimensions.get_dim_limits.assert_called_once_with(model_mock.ws, data_view_mock.dimensions.get_slicepoint(),
-                                                          data_view_mock.dimensions.transpose)
+        dimensions.get_dim_limits.assert_called_once_with(
+            model_mock.ws, data_view_mock.dimensions.get_slicepoint(), data_view_mock.dimensions.transpose
+        )
         data_view_mock.get_full_extent.assert_not_called()
         presenter.set_axes_limits.assert_called_once_with((-1, 1), (-2, 2))
 
@@ -99,5 +103,5 @@ class SliceViewerBasePresenterTest(unittest.TestCase):
         presenter.set_axes_limits.assert_called_once_with((-1, 1), (-2, 2))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

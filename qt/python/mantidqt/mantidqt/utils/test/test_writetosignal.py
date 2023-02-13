@@ -25,7 +25,6 @@ class Receiver(QObject):
 
 @start_qapplication
 class WriteToSignalTest(unittest.TestCase):
-
     def test_run_with_output_present(self):
         with patch("sys.stdout") as mock_stdout:
             mock_stdout.fileno.return_value = 10
@@ -53,7 +52,7 @@ class WriteToSignalTest(unittest.TestCase):
             mock_stdout.fileno.assert_called_once_with()
 
     def test_with_fileno_not_defined(self):
-        with patch('sys.stdout') as mock_stdout:
+        with patch("sys.stdout") as mock_stdout:
             del mock_stdout.fileno
             writer = WriteToSignal(mock_stdout)
             self.assertEqual(writer._original_out, None)
@@ -62,7 +61,7 @@ class WriteToSignalTest(unittest.TestCase):
         def raise_UnsupportedOperation():
             raise UnsupportedOperation
 
-        with patch('sys.stdout') as mock_stdout:
+        with patch("sys.stdout") as mock_stdout:
             mock_stdout.fileno.side_effect = raise_UnsupportedOperation
             writer = WriteToSignal(mock_stdout)
             self.assertEqual(writer._original_out, None)

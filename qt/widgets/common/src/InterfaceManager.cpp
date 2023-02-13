@@ -87,7 +87,7 @@ AlgorithmDialog *InterfaceManager::createDialog(const std::shared_ptr<Mantid::AP
   dlg->setAttribute(Qt::WA_DeleteOnClose, true);
 
   // Set the QDialog window flags to ensure the dialog ends up on top
-  Qt::WindowFlags flags = nullptr;
+  Qt::WindowFlags flags = Qt::WindowFlags();
 #ifdef Q_OS_MAC
   // Work around to ensure that floating windows remain on top of the main
   // application window, but below other applications on Mac
@@ -242,11 +242,6 @@ MantidHelpInterface *InterfaceManager::createHelpWindow() const {
 void InterfaceManager::showHelpPage(const QString &url) {
   auto window = createHelpWindow();
   window->showPage(url);
-}
-
-void InterfaceManager::showWikiPage(const QString &page) {
-  auto window = createHelpWindow();
-  window->showWikiPage(page);
 }
 
 void InterfaceManager::showAlgorithmHelp(const QString &name, const int version) {

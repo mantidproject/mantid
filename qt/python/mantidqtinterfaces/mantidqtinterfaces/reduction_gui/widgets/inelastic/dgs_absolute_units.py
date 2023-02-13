@@ -4,24 +4,27 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
-from qtpy.QtWidgets import (QFrame)  # noqa
-from qtpy.QtGui import (QDoubleValidator)  # noqa
+# pylint: disable=invalid-name
+from qtpy.QtWidgets import QFrame  # noqa
+from qtpy.QtGui import QDoubleValidator  # noqa
 from mantidqtinterfaces.reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.inelastic.dgs_absolute_units_script import AbsoluteUnitsScript
 import mantidqtinterfaces.reduction_gui.widgets.util as util
+
 try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
     from mantid.kernel import Logger
-    Logger("SampleSetupWidget").information('Using legacy ui importer')
+
+    Logger("SampleSetupWidget").information("Using legacy ui importer")
     from mantidplot import load_ui
 
 
 class AbsoluteUnitsWidget(BaseWidget):
     """
-        Widget that presents absolute units normalisation options to the user.
+    Widget that presents absolute units normalisation options to the user.
     """
+
     ## Widget name
     name = "Absolute Units"
 
@@ -34,7 +37,7 @@ class AbsoluteUnitsWidget(BaseWidget):
         class AbsUnitsFrame(QFrame):
             def __init__(self, parent=None):
                 QFrame.__init__(self, parent)
-                self.ui = load_ui(__file__, '../../../ui/inelastic/dgs_absolute_units.ui', baseinstance=self)
+                self.ui = load_ui(__file__, "../../../ui/inelastic/dgs_absolute_units.ui", baseinstance=self)
 
         self._content = AbsUnitsFrame(self)
         self._layout.addWidget(self._content)
@@ -49,15 +52,15 @@ class AbsoluteUnitsWidget(BaseWidget):
     def initialize_content(self):
         # Constraints
         for widget in [
-                self._content.ei_edit,
-                self._content.van_mass_edit,
-                self._content.sample_mass_edit,
-                self._content.sample_rmm_edit,
-                self._content.median_test_high_edit,
-                self._content.median_test_low_edit,
-                self._content.median_test_out_high_edit,
-                self._content.median_test_out_low_edit,
-                self._content.errorbar_crit_edit,
+            self._content.ei_edit,
+            self._content.van_mass_edit,
+            self._content.sample_mass_edit,
+            self._content.sample_rmm_edit,
+            self._content.median_test_high_edit,
+            self._content.median_test_low_edit,
+            self._content.median_test_out_high_edit,
+            self._content.median_test_out_low_edit,
+            self._content.errorbar_crit_edit,
         ]:
 
             dvp = QDoubleValidator(widget)
@@ -86,8 +89,8 @@ class AbsoluteUnitsWidget(BaseWidget):
 
     def set_state(self, state):
         """
-            Populate the UI elements with the data from the given state.
-            @param state: AbsoluteUnitsScript object
+        Populate the UI elements with the data from the given state.
+        @param state: AbsoluteUnitsScript object
         """
         self._content.absunits_gb.setChecked(state.do_absolute_units)
         self._content.absunits_van_edit.setText(state.absunits_vanadium)
@@ -107,7 +110,7 @@ class AbsoluteUnitsWidget(BaseWidget):
 
     def get_state(self):
         """
-            Returns an object with the state of the interface
+        Returns an object with the state of the interface
         """
         a = AbsoluteUnitsScript(self._instrument_name)
         a.do_absolute_units = self._content.absunits_gb.isChecked()
@@ -127,7 +130,7 @@ class AbsoluteUnitsWidget(BaseWidget):
         a.absunits_errorbar_criterion = util._check_and_get_float_line_edit(self._content.errorbar_crit_edit)
         return a
 
-    def live_button_toggled_actions(self,checked):
+    def live_button_toggled_actions(self, checked):
         if checked:
             self._old_absunits = self._content.absunits_gb.isChecked()
             self._content.absunits_gb.setChecked(False)

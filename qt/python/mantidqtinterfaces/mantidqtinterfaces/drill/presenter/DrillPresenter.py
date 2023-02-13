@@ -25,6 +25,7 @@ class DrillPresenter:
     """
     Set of custom options. Used to keep an history of the previous values.
     """
+
     _customOptions = set()
 
     """
@@ -52,8 +53,7 @@ class DrillPresenter:
         # view signals connection
         self.view.instrumentChanged.connect(self.instrumentChanged)
         self.view.acquisitionModeChanged.connect(self.acquisitionModeChanged)
-        self.view.cycleAndExperimentChanged.connect(
-                self.model.setCycleAndExperiment)
+        self.view.cycleAndExperimentChanged.connect(self.model.setCycleAndExperiment)
         self.view.rowAdded.connect(self.onRowAdded)
         self.view.rowDeleted.connect(self.model.deleteSample)
         self.view.groupSelectedRows.connect(self.onGroupSelectedRows)
@@ -72,9 +72,7 @@ class DrillPresenter:
         self.view.automaticFilling.connect(self.onAutomaticFilling)
 
         # model signals connection
-        self.model.progressUpdate.connect(
-                lambda progress: self.view.set_progress(progress, 100)
-                )
+        self.model.progressUpdate.connect(lambda progress: self.view.set_progress(progress, 100))
         self.model.processingDone.connect(self.onProcessingDone)
         self.model.newSample.connect(self.onNewSample)
         self.model.newMode.connect(self.onNewMode)
@@ -112,6 +110,7 @@ class DrillPresenter:
         propagated along that row. Otherwise, the increment is propagated along
         columns.
         """
+
         def inc(value, i):
             """
             Increment the value depending on its content. This function can
@@ -134,23 +133,23 @@ class DrillPresenter:
             """
             if i == 0:
                 return value
-            if ',' in value:
-                return ','.join([inc(e, i) for e in value.split(',')])
-            if '+' in value:
-                return '+'.join([inc(e, i) for e in value.split('+')])
-            if ':' in value:
-                l = value.split(':')
+            if "," in value:
+                return ",".join([inc(e, i) for e in value.split(",")])
+            if "+" in value:
+                return "+".join([inc(e, i) for e in value.split("+")])
+            if ":" in value:
+                l = value.split(":")
                 try:
                     l = [int(e) for e in l]
                 except:
                     return value
                 if len(l) == 2:
                     if i > 0:
-                        return str(l[1] + i) + ':' + str(l[1] + (l[1] - l[0]) + i)
+                        return str(l[1] + i) + ":" + str(l[1] + (l[1] - l[0]) + i)
                     else:
-                        return str(l[0] - (l[1] - l[0]) + i) + ':' + str(l[0] + i)
+                        return str(l[0] - (l[1] - l[0]) + i) + ":" + str(l[0] + i)
                 if len(l) == 3:
-                    return inc(str(l[0]) + ':' + str(l[1]), i) + ':' + str(l[2])
+                    return inc(str(l[0]) + ":" + str(l[1]), i) + ":" + str(l[2])
                 else:
                     return value
 
@@ -166,25 +165,23 @@ class DrillPresenter:
                 ni = str(int(n) + i).zfill(len(n))
                 if int(ni) < 0:
                     ni = "0".zfill(len(n))
-                return value[0:-len(n)] + ni
+                return value[0 : -len(n)] + ni
 
             return value
 
         increment = self.view.increment.value()
         cells = self._table.getSelectedCells()
         # check if increment should append along columns
-        columnIncrement = (len(self._table.getRowsFromSelectedCells()) > 1)
+        columnIncrement = len(self._table.getRowsFromSelectedCells()) > 1
         if not cells:
             return
         # increment or copy the content of the previous cell
         for i in range(1, len(cells)):
             # if we increment along columns and this is a new column
-            if columnIncrement and cells[i][1] != cells[i-1][1]:
+            if columnIncrement and cells[i][1] != cells[i - 1][1]:
                 continue
-            contents = self._table.getCellContents(cells[i-1][0],
-                                                   cells[i-1][1])
-            self._table.setCellContents(cells[i][0], cells[i][1],
-                                        inc(contents, increment))
+            contents = self._table.getCellContents(cells[i - 1][0], cells[i - 1][1])
+            self._table.setCellContents(cells[i][0], cells[i][1], inc(contents, increment))
 
     def onGroupSelectedRows(self):
         """
@@ -268,17 +265,16 @@ class DrillPresenter:
         self.view.set_progress(0, 100)
         if group:
             acquisionMode = self.model.getAcquisitionMode()
-            if ((acquisionMode in RundexSettings.PROCESSING_MODE)
-                and (RundexSettings.PROCESSING_MODE[acquisionMode]
-                     == RundexSettings.GROUP_BY_GROUP)):
+            if (acquisionMode in RundexSettings.PROCESSING_MODE) and (
+                RundexSettings.PROCESSING_MODE[acquisionMode] == RundexSettings.GROUP_BY_GROUP
+            ):
                 result = self.model.processGroupByGroup(rows)
             else:
                 result = self.model.processGroup(rows)
         else:
             result = self.model.process(rows)
         if not result:
-            QMessageBox.warning(self.view, "Error", "Please check the "
-                                "parameters value before processing.")
+            QMessageBox.warning(self.view, "Error", "Please check the " "parameters value before processing.")
             self.view.set_disabled(False)
 
     def stopProcessing(self):
@@ -354,9 +350,7 @@ class DrillPresenter:
         defaultSaveDirectory = config["defaultsave.directory"]
         if not defaultSaveDirectory:
             defaultSaveDirectory = "."
-        filename = QFileDialog.getOpenFileName(self.view, 'Load rundex',
-                                               defaultSaveDirectory,
-                                               "Rundex (*.mrd);;All (*)")
+        filename = QFileDialog.getOpenFileName(self.view, "Load rundex", defaultSaveDirectory, "Rundex (*.mrd);;All (*)")
         if not filename[0]:
             return
         self._resetTable()
@@ -388,9 +382,7 @@ class DrillPresenter:
         defaultSaveDirectory = config["defaultsave.directory"]
         if not defaultSaveDirectory:
             defaultSaveDirectory = "."
-        filename = QFileDialog.getSaveFileName(self.view, 'Save rundex',
-                                               defaultSaveDirectory + '/*.mrd',
-                                               "Rundex (*.mrd);;All (*)")
+        filename = QFileDialog.getSaveFileName(self.view, "Save rundex", defaultSaveDirectory + "/*.mrd", "Rundex (*.mrd);;All (*)")
         if not filename[0]:
             return
         self.model.setIOFile(filename[0])
@@ -404,8 +396,7 @@ class DrillPresenter:
         Show the settings dialog.
         """
         settingNames = RundexSettings.SETTINGS[self.model.getAcquisitionMode()]
-        settings = [parameter for parameter in self.model.getParameters()
-                    if parameter.getName() in settingNames]
+        settings = [parameter for parameter in self.model.getParameters() if parameter.getName() in settingNames]
         DrillSettingsPresenter(self.view, settings)
 
     def onShowExportDialog(self, dialog):
@@ -452,11 +443,12 @@ class DrillPresenter:
         """
         if self.view.isHidden():
             return
-        q = QMessageBox.question(self.view, "DrILL: Unsaved data", "You have "
-                                 "unsaved modifications, do you want to save "
-                                 "them before?",
-                                 QMessageBox.Yes | QMessageBox.No
-                                 | QMessageBox.Cancel)
+        q = QMessageBox.question(
+            self.view,
+            "DrILL: Unsaved data",
+            "You have " "unsaved modifications, do you want to save " "them before?",
+            QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
+        )
         if q == QMessageBox.Yes:
             self.onSaveAs()
             return True

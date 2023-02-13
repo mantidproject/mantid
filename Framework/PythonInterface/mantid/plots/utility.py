@@ -14,7 +14,7 @@ from distutils.version import LooseVersion
 # 3rd party imports
 from matplotlib import colors
 from matplotlib.legend import Legend
-from matplotlib import cm, __version__ as mpl_version_str
+from matplotlib import colormaps, __version__ as mpl_version_str
 from matplotlib.container import ErrorbarContainer
 
 # -----------------------------------------------------------------------------
@@ -63,7 +63,7 @@ def artists_hidden(artists):
 
 
 @contextmanager
-def autoscale_on_update(ax, state, axis='both'):
+def autoscale_on_update(ax, state, axis="both"):
     """
     Context manager to temporarily change value of autoscale_on_update
     :param matplotlib.axes.Axes ax: The axes to disable autoscale on
@@ -76,23 +76,23 @@ def autoscale_on_update(ax, state, axis='both'):
         # i.e. ax.lines is empty, axes has default ylim values.
         # Therefore we need to autoscale regardless of state parameter.
         if ax.lines:
-            if axis == 'both':
+            if axis == "both":
                 original_state = ax.get_autoscale_on()
                 ax.set_autoscale_on(state)
-            elif axis == 'x':
+            elif axis == "x":
                 original_state = ax.get_autoscalex_on()
                 ax.set_autoscalex_on(state)
-            elif axis == 'y':
+            elif axis == "y":
                 original_state = ax.get_autoscaley_on()
                 ax.set_autoscaley_on(state)
         yield
     finally:
         if ax.lines:
-            if axis == 'both':
+            if axis == "both":
                 ax.set_autoscale_on(original_state)
-            elif axis == 'x':
+            elif axis == "x":
                 ax.set_autoscalex_on(original_state)
-            elif axis == 'y':
+            elif axis == "y":
                 ax.set_autoscaley_on(original_state)
 
 
@@ -110,12 +110,11 @@ def find_errorbar_container(line, containers):
 
 
 def get_colormap_names():
-    return sorted([cmap for cmap in cm.cmap_d.keys() if not cmap.endswith('_r')])
+    return sorted([cmap for cmap in colormaps.keys() if not cmap.endswith("_r")])
 
 
 def get_errorbar_containers(ax):
-    return [e_cont for e_cont in ax.containers
-            if isinstance(e_cont, ErrorbarContainer)]
+    return [e_cont for e_cont in ax.containers if isinstance(e_cont, ErrorbarContainer)]
 
 
 def get_autoscale_limits(ax, axis):
@@ -125,17 +124,17 @@ def get_autoscale_limits(ax, axis):
     This is a trimmed down  version of the function 'handle_single_axis'
     that is found within 'matplotlib.axes._base._AxesBase.autoscale_view'
     """
-    axis_min, axis_max = getattr(ax.dataLim, 'interval{}'.format(axis))
-    ax_margin = getattr(ax, '_{}margin'.format(axis))
+    axis_min, axis_max = getattr(ax.dataLim, "interval{}".format(axis))
+    ax_margin = getattr(ax, "_{}margin".format(axis))
     if ax_margin > 0:
-        padding = (axis_max - axis_min)*ax_margin
+        padding = (axis_max - axis_min) * ax_margin
         return axis_min - padding, axis_max + padding
     if not ax._tight:
-        locator = getattr(ax, '{}axis'.format(axis)).get_major_locator()
+        locator = getattr(ax, "{}axis".format(axis)).get_major_locator()
         return locator.view_limits(axis_min, axis_max)
 
 
-def legend_set_draggable(legend, state, use_blit=False, update='loc'):
+def legend_set_draggable(legend, state, use_blit=False, update="loc"):
     """Utility function to support varying Legend api around draggable status across
     the versions of matplotlib we support. Function arguments match those from matplotlib.
     See matplotlib documentation for argument descriptions
@@ -165,10 +164,10 @@ def row_num(ax):
     """
     if LooseVersion(mpl_version_str) >= LooseVersion("3.2.0"):
         # An 'inset' axes does not have a subplotspec, so return None
-        return ax.get_subplotspec().rowspan.start if hasattr(ax, 'get_subplotspec') else None
+        return ax.get_subplotspec().rowspan.start if hasattr(ax, "get_subplotspec") else None
     else:
         # An 'inset' axes does not have a rowNum, so return None
-        return ax.rowNum if hasattr(ax, 'rowNum') else None
+        return ax.rowNum if hasattr(ax, "rowNum") else None
 
 
 def col_num(ax):
@@ -178,10 +177,10 @@ def col_num(ax):
     """
     if LooseVersion(mpl_version_str) >= LooseVersion("3.2.0"):
         # An 'inset' axes does not have a subplotspec, so return None
-        return ax.get_subplotspec().colspan.start if hasattr(ax, 'get_subplotspec') else None
+        return ax.get_subplotspec().colspan.start if hasattr(ax, "get_subplotspec") else None
     else:
         # An 'inset' axes does not have a colNum, so return None
-        return ax.colNum if hasattr(ax, 'colNum') else None
+        return ax.colNum if hasattr(ax, "colNum") else None
 
 
 def zoom_axis(ax, coord, x_or_y, factor):
@@ -193,17 +192,16 @@ def zoom_axis(ax, coord, x_or_y, factor):
     :param str x_or_y: The axis to zoom along ('x' or 'y')
     :param float factor: The factor by which to zoom in, a factor less than 1 zooms out
     """
-    if x_or_y.lower() not in ['x', 'y']:
-        raise ValueError("Can only zoom on axis 'x' or 'y'. Found '{}'."
-                         "".format(x_or_y))
+    if x_or_y.lower() not in ["x", "y"]:
+        raise ValueError("Can only zoom on axis 'x' or 'y'. Found '{}'." "".format(x_or_y))
     get_lims = getattr(ax, "get_{}lim".format(x_or_y.lower()))
     set_lims = getattr(ax, "set_{}lim".format(x_or_y.lower()))
 
     ax_min, ax_max = get_lims()
     dist_to_min = coord - ax_min
     dist_to_max = ax_max - coord
-    new_ax_min = coord - dist_to_min/factor
-    new_ax_max = coord + dist_to_max/factor
+    new_ax_min = coord - dist_to_min / factor
+    new_ax_max = coord + dist_to_max / factor
 
     # Don't allow further zooming out if we're beyond the limit. Zooming in is allowed.
     # The abs in the second half of the conditional statements accounts for the case when the min and max axis limits
@@ -235,7 +233,7 @@ def zoom(ax, x, y, factor):
     :param float factor: The factor by which to zoom in, a factor less
         than 1 zooms out
     """
-    return zoom_axis(ax, x, 'x', factor), zoom_axis(ax, y, 'y', factor)
+    return zoom_axis(ax, x, "x", factor), zoom_axis(ax, y, "y", factor)
 
 
 def get_single_workspace_log_value(ws_index, *, log_values=None, matrix_ws=None, log_name=None):
@@ -251,9 +249,9 @@ def get_single_workspace_log_value(ws_index, *, log_values=None, matrix_ws=None,
         return log_values[ws_index]
 
 
-def colormap_as_plot_color(number_colors: int, colormap_name: str = 'viridis', cmap=None):
+def colormap_as_plot_color(number_colors: int, colormap_name: str = "viridis", cmap=None):
     if not cmap:
-        cmap = cm.get_cmap(name=colormap_name)
+        cmap = colormaps[colormap_name]
 
     for i in range(number_colors):
         yield cmap(float(i) / number_colors)

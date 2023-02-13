@@ -46,6 +46,7 @@ void QtRunsView::initLayout() {
   m_ui.setupUi(this);
 
   m_ui.buttonTransfer->setDefaultAction(m_ui.actionTransfer);
+  m_ui.buttonExport->setDefaultAction(m_ui.actionExport);
 
   // Expand the process runs column at the expense of the search column
   m_ui.splitterTables->setStretchFactor(0, 0);
@@ -61,6 +62,7 @@ void QtRunsView::initLayout() {
   m_ui.actionAutoreduce->setIcon(getIcon("mdi.play", "green", 1.3));
   m_ui.actionSearch->setIcon(getIcon("mdi.folder", "black", 1.3));
   m_ui.actionTransfer->setIcon(getIcon("mdi.file-move", "black", 1.3));
+  m_ui.actionExport->setIcon(getIcon("mdi.content-save", "black", 1.3));
 
   m_algoRunner = std::make_shared<MantidQt::API::AlgorithmRunner>(this);
   m_monitorAlgoRunner = std::make_shared<MantidQt::API::AlgorithmRunner>(this);
@@ -156,14 +158,24 @@ void QtRunsView::setUpdateIntervalSpinBoxEnabled(bool enabled) { m_ui.spinBoxUpd
 
 /**
 Set the list of available instruments to search for and updates the list of
-available instruments in the table view
+available instruments in the table view. The selected instrument will be the first item added to the combobox,
+unless a valid value for selectedInstrument is provided.
 @param instruments : The list of instruments available
+@param selectedInstrument : The name of an instrument to select from the dropdown
 default
 */
-void QtRunsView::setInstrumentList(const std::vector<std::string> &instruments) {
+void QtRunsView::setInstrumentList(const std::vector<std::string> &instruments, const std::string &selectedInstrument) {
+  // We block signals while populating the list and setting the selected instrument because adding the first item
+  // will trigger a currentIndexChanged signal. This causes existing batch settings to be overwritten when we're
+  // initialising a new batch for an instrument that isn't the first in the list.
+  m_ui.comboSearchInstrument->blockSignals(true);
   m_ui.comboSearchInstrument->clear();
   for (auto &&instrument : instruments)
     m_ui.comboSearchInstrument->addItem(QString::fromStdString(instrument));
+  setSearchInstrument(selectedInstrument);
+  m_ui.comboSearchInstrument->blockSignals(false);
+  // Manually emit the signal once we've finished setting up the dropdown.
+  emit m_ui.comboSearchInstrument->currentIndexChanged(m_ui.comboSearchInstrument->currentIndex());
 }
 
 /**
@@ -262,6 +274,15 @@ void QtRunsView::on_actionTransfer_triggered() {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(Mantid::Kernel::FeatureType::Feature,
                                                                 {"ISIS Reflectometry", "RunsTab", "Transfer"}, false);
   m_notifyee->notifyTransfer();
+}
+
+/**
+ * This slot notifies the presenter that the "Export" button has been pressed
+ */
+void QtRunsView::on_actionExport_triggered() {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(Mantid::Kernel::FeatureType::Feature,
+                                                                {"ISIS Reflectometry", "RunsTab", "Export"}, false);
+  m_notifyee->notifyExportSearchResults();
 }
 
 /**

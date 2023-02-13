@@ -11,7 +11,6 @@ from mantidqtinterfaces.Muon.GUI.Common import message_box
 
 
 class EAAutoTabPresenter(object):
-
     def __init__(self, context, view, model, match_table):
         self.view = view
         self.model = model
@@ -33,10 +32,8 @@ class EAAutoTabPresenter(object):
 
     def setup_observers(self):
         self.find_peaks_observer = GenericObserver(self.run_find_peak_algorithms)
-        self.show_peaks_table_observer = GenericObserver(
-            lambda: self.show_table(self.view.show_peaks_table_combobox.currentText()))
-        self.show_matches_table_observer = GenericObserver(
-            lambda: self.show_table(self.view.show_matches_table_combobox.currentText()))
+        self.show_peaks_table_observer = GenericObserver(lambda: self.show_table(self.view.show_peaks_table_combobox.currentText()))
+        self.show_matches_table_observer = GenericObserver(lambda: self.show_table(self.view.show_matches_table_combobox.currentText()))
         self.clear_matches_table_observer = GenericObserver(self.clear_match_table)
         self.update_match_table_observer = GenericObserver(self.update_match_table)
         self.update_view_observer = GenericObserver(self.update_view)

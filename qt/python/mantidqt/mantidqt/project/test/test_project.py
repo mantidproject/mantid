@@ -51,8 +51,7 @@ class ProjectTest(unittest.TestCase):
             try:
                 shutil.rmtree(folder)
             except OSError as exc:
-                warnings.warn("Could not remove folder at \"{}\"\n"
-                              "Error message:\n{}".format(folder, exc))
+                warnings.warn('Could not remove folder at "{}"\n' "Error message:\n{}".format(folder, exc))
         self._folders_to_remove.clear()
 
     def test_save_calls_save_as_when_last_location_is_not_none(self):
@@ -191,22 +190,20 @@ class ProjectTest(unittest.TestCase):
 
     def test_large_file_dialog_appears_for_large_file(self):
         CreateSampleWorkspace(OutputWorkspace="ws1")
-        self.project._get_project_size = mock.MagicMock(return_value=
-                                                        int(ConfigService.getString("projectSaving.warningSize")) + 1)
+        self.project._get_project_size = mock.MagicMock(return_value=int(ConfigService.getString("projectSaving.warningSize")) + 1)
         self.project._offer_large_size_confirmation = mock.MagicMock()
         self.project._save()
         self.assertEqual(self.project._offer_large_size_confirmation.call_count, 1)
 
     def test_large_file_dialog_does_not_appear_for_small_file(self):
         CreateSampleWorkspace(OutputWorkspace="ws1")
-        self.project._get_project_size = mock.MagicMock(return_value=
-                                                        int(ConfigService.getString("projectSaving.warningSize")) - 1)
+        self.project._get_project_size = mock.MagicMock(return_value=int(ConfigService.getString("projectSaving.warningSize")) - 1)
         self.project._offer_large_size_confirmation = mock.MagicMock()
         self.project._save()
         self.assertEqual(self.project._offer_large_size_confirmation.call_count, 0)
 
     def test_is_loading_is_False_after_error_thrown_during_load(self):
-        with mock.patch.object(self.project, '_load_file_dialog', lambda: _raise(IOError)):
+        with mock.patch.object(self.project, "_load_file_dialog", lambda: _raise(IOError)):
             try:
                 self.project.load()
             except IOError:
@@ -215,7 +212,7 @@ class ProjectTest(unittest.TestCase):
 
     def test_is_loading_is_False_after_None_returned_from_load_dialog(self):
         # None is returned from the load dialog when a user clicks Cancel
-        with mock.patch.object(self.project, '_load_file_dialog', lambda: None):
+        with mock.patch.object(self.project, "_load_file_dialog", lambda: None):
             try:
                 self.project.load()
             except IOError:
@@ -223,14 +220,14 @@ class ProjectTest(unittest.TestCase):
         self.assertFalse(self.project.is_loading)
 
     def test_is_saving_is_False_if_error_thrown_during_save(self):
-        with mock.patch.object(self.project, '_get_project_size', lambda x: _raise(IOError)):
+        with mock.patch.object(self.project, "_get_project_size", lambda x: _raise(IOError)):
             try:
                 self.project._save()
             except IOError:
                 pass
         self.assertFalse(self.project.is_saving)
 
-    @mock.patch('mantidqt.project.project.ProjectSaver.save_project')
+    @mock.patch("mantidqt.project.project.ProjectSaver.save_project")
     def test_workspace_groups_are_not_duplicated_when_saving(self, saver):
         CreateSampleWorkspace(OutputWorkspace="ws1")
         CreateSampleWorkspace(OutputWorkspace="ws2")
@@ -240,10 +237,12 @@ class ProjectTest(unittest.TestCase):
         self.project.interface_populating_function = mock.MagicMock(return_value="mocked_interfaces")
 
         self.project._save()
-        saver.assert_called_with(file_name=self.project.last_project_location,
-                                 workspace_to_save=['newGroup', 'ws3'],
-                                 plots_to_save="mocked_figs",
-                                 interfaces_to_save="mocked_interfaces")
+        saver.assert_called_with(
+            file_name=self.project.last_project_location,
+            workspace_to_save=["newGroup", "ws3"],
+            plots_to_save="mocked_figs",
+            interfaces_to_save="mocked_interfaces",
+        )
 
     @staticmethod
     def create_altered_and_unaltered_mock_workspaces():
@@ -263,7 +262,7 @@ class ProjectTest(unittest.TestCase):
 
         return [altered_workspace, unaltered_workspace]
 
-    @mock.patch('mantidqt.project.project.AnalysisDataService')
+    @mock.patch("mantidqt.project.project.AnalysisDataService")
     def test_filter_unaltered_workspaces_function_removes_workspaces_that_have_only_been_loaded(self, mock_ads):
         workspaces = self.create_altered_and_unaltered_mock_workspaces()
 
@@ -275,7 +274,7 @@ class ProjectTest(unittest.TestCase):
         self.assertEqual(len(altered_workspaces), 1)
         self.assertEqual(altered_workspaces[0], "altered_workspace")
 
-    @mock.patch('mantidqt.project.project.AnalysisDataService')
+    @mock.patch("mantidqt.project.project.AnalysisDataService")
     def test_filter_plots_removes_plots_that_use_unaltered_workspaces(self, mock_ads):
         workspaces = self.create_altered_and_unaltered_mock_workspaces()
 
@@ -292,8 +291,7 @@ class ProjectTest(unittest.TestCase):
 
             figure_managers[i] = fig_manager
 
-        filtered_figure_managers = self.project._filter_plots_with_unaltered_workspaces(
-            plots=figure_managers, workspaces=[workspaces[0]])
+        filtered_figure_managers = self.project._filter_plots_with_unaltered_workspaces(plots=figure_managers, workspaces=[workspaces[0]])
 
         self.assertEqual(len(filtered_figure_managers), 1)
 

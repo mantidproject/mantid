@@ -4,18 +4,37 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_name, get_group_data_workspace_name,
-                                                                            get_pair_asymmetry_name, get_base_data_directory,
-                                                                            get_group_asymmetry_name,
-                                                                            get_group_asymmetry_unnorm_name,
-                                                                            get_deadtime_data_workspace_name,
-                                                                            get_pair_phasequad_name,
-                                                                            add_phasequad_extensions, get_diff_asymmetry_name)
-from mantidqtinterfaces.Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calculate_pair_data, \
-    estimate_group_asymmetry_data, run_pre_processing
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import (
+    get_raw_data_workspace_name,
+    get_group_data_workspace_name,
+    get_pair_asymmetry_name,
+    get_base_data_directory,
+    get_group_asymmetry_name,
+    get_group_asymmetry_unnorm_name,
+    get_deadtime_data_workspace_name,
+    get_pair_phasequad_name,
+    add_phasequad_extensions,
+    get_diff_asymmetry_name,
+)
+from mantidqtinterfaces.Muon.GUI.Common.calculate_pair_and_group import (
+    calculate_group_data,
+    calculate_pair_data,
+    estimate_group_asymmetry_data,
+    run_pre_processing,
+)
 from mantidqtinterfaces.Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
-from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import run_PhaseQuad, split_phasequad, rebin_ws, apply_deadtime, \
-    run_minus, run_crop_workspace, run_create_workspace, run_convert_to_points, run_convert_to_histogram, run_divide
+from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import (
+    run_PhaseQuad,
+    split_phasequad,
+    rebin_ws,
+    apply_deadtime,
+    run_minus,
+    run_crop_workspace,
+    run_create_workspace,
+    run_convert_to_points,
+    run_convert_to_histogram,
+    run_divide,
+)
 import mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming as wsName
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws, delete_ws
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_group_definition import add_to_group
@@ -31,10 +50,21 @@ from mantid.dataobjects import TableWorkspace
 
 
 class MuonContext(object):
-
-    def __init__(self, muon_data_context=None, muon_gui_context=None, muon_group_context=None, corrections_context=None,
-                 base_directory='Muon Data', muon_phase_context=None, workspace_suffix=' MA', fitting_context=None,
-                 results_context=None, model_fitting_context=None, plot_panes_context=None, frequency_context=None):
+    def __init__(
+        self,
+        muon_data_context=None,
+        muon_gui_context=None,
+        muon_group_context=None,
+        corrections_context=None,
+        base_directory="Muon Data",
+        muon_phase_context=None,
+        workspace_suffix=" MA",
+        fitting_context=None,
+        results_context=None,
+        model_fitting_context=None,
+        plot_panes_context=None,
+        frequency_context=None,
+    ):
         self._data_context = muon_data_context
         self._gui_context = muon_gui_context
         self._group_pair_context = muon_group_context
@@ -46,14 +76,9 @@ class MuonContext(object):
         self.base_directory = base_directory
         self.workspace_suffix = workspace_suffix
         self._plot_panes_context = plot_panes_context
-        self.ads_observer = MuonADSObserver(
-            self.remove_workspace,
-            self.clear_context,
-            self.workspace_replaced)
+        self.ads_observer = MuonADSObserver(self.remove_workspace, self.clear_context, self.workspace_replaced)
 
-        self.gui_context.update(
-            {'LastGoodDataFromFile': True,
-             'selected_group_pair': ''})
+        self.gui_context.update({"LastGoodDataFromFile": True, "selected_group_pair": ""})
 
         self.update_view_from_model_notifier = Observable()
         self.update_plots_notifier = Observable()
@@ -109,10 +134,10 @@ class MuonContext(object):
     def _calculate_asymmetry(self, run, group, periods, run_as_string, periods_as_string, rebin):
         """Calculates the asymmetry workspaces for the given run and group."""
         output_name = get_group_asymmetry_name(self, group.name, run_as_string, periods_as_string, rebin=rebin)
-        output_name_unnormalised = get_group_asymmetry_unnorm_name(self, group.name, run_as_string, periods_as_string,
-                                                                   rebin=rebin)
-        group_asymmetry, group_asymmetry_unnormalised = estimate_group_asymmetry_data(self, group, run, output_name,
-                                                                                      output_name_unnormalised, periods)
+        output_name_unnormalised = get_group_asymmetry_unnorm_name(self, group.name, run_as_string, periods_as_string, rebin=rebin)
+        group_asymmetry, group_asymmetry_unnormalised = estimate_group_asymmetry_data(
+            self, group, run, output_name, output_name_unnormalised, periods
+        )
         return group_asymmetry, group_asymmetry_unnormalised
 
     def _calculate_counts_or_asymmetry(self, calculation_func, run, group, rebin=False):
@@ -129,7 +154,7 @@ class MuonContext(object):
 
         return calculation_func(run, group, periods, run_as_string, periods_as_string, rebin)
 
-    def calculate_diff(self, diff: MuonDiff, run: List[int], rebin: bool=False):
+    def calculate_diff(self, diff: MuonDiff, run: List[int], rebin: bool = False):
         try:
             positive_workspace_name = self._group_pair_context[diff.positive].get_asymmetry_workspace_for_run(run, rebin)
             negative_workspace_name = self._group_pair_context[diff.negative].get_asymmetry_workspace_for_run(run, rebin)
@@ -140,7 +165,7 @@ class MuonContext(object):
         output_workspace_name = get_diff_asymmetry_name(self, diff.name, run_as_string, rebin=rebin)
         return run_minus(positive_workspace_name, negative_workspace_name, output_workspace_name)
 
-    def calculate_pair(self, pair: MuonPair, run: List[int], rebin: bool=False):
+    def calculate_pair(self, pair: MuonPair, run: List[int], rebin: bool = False):
         try:
             forward_group_workspace_name = self._group_pair_context[pair.forward_group].get_counts_workspace_for_run(run, rebin)
             backward_group_workspace_name = self._group_pair_context[pair.backward_group].get_counts_workspace_for_run(run, rebin)
@@ -268,19 +293,18 @@ class MuonContext(object):
 
     def calculate_phasequad(self, phasequad, run, rebin):
         parameters = {}
-        parameters['PhaseTable'] = phasequad.phase_table
+        parameters["PhaseTable"] = phasequad.phase_table
         run_string = run_list_to_string(run)
 
-        ws_name = get_pair_phasequad_name(
-            self, add_phasequad_extensions(
-                phasequad.name), run_string, rebin=rebin)
+        ws_name = get_pair_phasequad_name(self, add_phasequad_extensions(phasequad.name), run_string, rebin=rebin)
 
-        parameters['InputWorkspace'] = self._run_deadtime(run_string, ws_name)
+        parameters["InputWorkspace"] = self._run_deadtime(run_string, ws_name)
         runs = self._data_context.current_runs
 
         if runs:
-            parameters['InputWorkspace'] = run_crop_workspace(parameters['InputWorkspace'], self.first_good_data(runs[0]),
-                                                              self.last_good_data(runs[0]))
+            parameters["InputWorkspace"] = run_crop_workspace(
+                parameters["InputWorkspace"], self.first_good_data(runs[0]), self.last_good_data(runs[0])
+            )
 
         phase_quad = run_PhaseQuad(parameters, ws_name)
         if rebin:
@@ -293,19 +317,19 @@ class MuonContext(object):
 
     def _get_bin_width(self, name):
         tmp = self._get_x_data(name)
-        return tmp[1]-tmp[0]
+        return tmp[1] - tmp[0]
 
     def _get_x_data(self, name):
         tmp = retrieve_ws(name)
         return tmp.readX(0)
 
     def _average_by_bin_widths(self, ws_name, dt):
-        #convert to Histogram to get bin widths and divide by how much bin widths have changed
-        ws_name= run_convert_to_histogram(ws_name)
+        # convert to Histogram to get bin widths and divide by how much bin widths have changed
+        ws_name = run_convert_to_histogram(ws_name)
         ws_x = self._get_x_data(ws_name)
 
         # assume constant binning in raw data
-        dx = [ (ws_x[j+1]-ws_x[j])/(dt) for j in range(len(ws_x)-1)]
+        dx = [(ws_x[j + 1] - ws_x[j]) / (dt) for j in range(len(ws_x) - 1)]
         tmp = run_create_workspace(ws_x, dx, "tmp")
 
         tmp = run_convert_to_points(tmp)
@@ -326,18 +350,15 @@ class MuonContext(object):
                 muon_workspace_wrapper = MuonWorkspaceWrapper(directory + ws)
                 muon_workspace_wrapper.show()
 
-            phasequad_obj.update_asymmetry_workspaces(
-                ws_list,
-                run,
-                rebin=rebin)
+            phasequad_obj.update_asymmetry_workspaces(ws_list, run, rebin=rebin)
 
     def _run_deadtime(self, run_string, output):
-        name = get_raw_data_workspace_name(self.data_context.instrument, run_string, multi_period=False,
-                                           workspace_suffix=self.workspace_suffix)
+        name = get_raw_data_workspace_name(
+            self.data_context.instrument, run_string, multi_period=False, workspace_suffix=self.workspace_suffix
+        )
         if isinstance(run_string, str):
             run = wsName.get_first_run_from_run_string(run_string)
-        dead_time_table = self._corrections_context.current_dead_time_table_name_for_run(self.data_context.instrument,
-                                                                                         [float(run)])
+        dead_time_table = self._corrections_context.current_dead_time_table_name_for_run(self.data_context.instrument, [float(run)])
         if dead_time_table:
             return apply_deadtime(name, output, dead_time_table)
         return name
@@ -345,15 +366,15 @@ class MuonContext(object):
     def _run_rebin(self, name, rebin):
         if rebin:
             params = "1"
-            if self.gui_context['RebinType'] == 'Variable' and self.gui_context["RebinVariable"]:
+            if self.gui_context["RebinType"] == "Variable" and self.gui_context["RebinVariable"]:
                 params = self.gui_context["RebinVariable"]
 
-            if self.gui_context['RebinType'] == 'Fixed' and self.gui_context["RebinFixed"]:
+            if self.gui_context["RebinType"] == "Fixed" and self.gui_context["RebinFixed"]:
                 ws = retrieve_ws(name)
                 x_data = ws.dataX(0)
                 original_step = x_data[1] - x_data[0]
                 params = float(self.gui_context["RebinFixed"]) * original_step
-            return rebin_ws(name,params)
+            return rebin_ws(name, params)
         else:
             return name
 
@@ -369,7 +390,8 @@ class MuonContext(object):
                     self.data_context.current_workspace,
                     self.data_context.instrument,
                     self.data_context.main_field_direction,
-                    maximum_number_of_periods)
+                    maximum_number_of_periods,
+                )
         else:
             self.data_context.clear()
 
@@ -377,50 +399,52 @@ class MuonContext(object):
         self.ads_observer.observeRename(False)
         for run in self.data_context.current_runs:
             run_string = run_list_to_string(run)
-            loaded_workspace = self.data_context._loaded_data.get_data(run=run, instrument=self.data_context.instrument)['workspace'][
-                                   'OutputWorkspace']
+            loaded_workspace = self.data_context._loaded_data.get_data(run=run, instrument=self.data_context.instrument)["workspace"][
+                "OutputWorkspace"
+            ]
             loaded_workspace_deadtime_table = self.corrections_context.get_default_dead_time_table_name_for_run(
-                self.data_context.instrument, run)
-            directory = get_base_data_directory(
-                self,
-                run_string)
+                self.data_context.instrument, run
+            )
+            directory = get_base_data_directory(self, run_string)
 
-            deadtime_name = get_deadtime_data_workspace_name(self.data_context.instrument,
-                                                             str(run[0]), workspace_suffix=self.workspace_suffix)
+            deadtime_name = get_deadtime_data_workspace_name(
+                self.data_context.instrument, str(run[0]), workspace_suffix=self.workspace_suffix
+            )
             MuonWorkspaceWrapper(loaded_workspace_deadtime_table).show(directory + deadtime_name)
-            self.corrections_context.set_default_dead_time_table_name_for_run(self.data_context.instrument, run,
-                                                                              deadtime_name)
+            self.corrections_context.set_default_dead_time_table_name_for_run(self.data_context.instrument, run, deadtime_name)
 
             if len(loaded_workspace) > 1:
                 # Multi-period data
                 for i, single_ws in enumerate(loaded_workspace):
-                    name = directory + get_raw_data_workspace_name(self.data_context.instrument, run_string,
-                                                                   multi_period=True,
-                                                                   period=str(i + 1),
-                                                                   workspace_suffix=self.workspace_suffix)
+                    name = directory + get_raw_data_workspace_name(
+                        self.data_context.instrument,
+                        run_string,
+                        multi_period=True,
+                        period=str(i + 1),
+                        workspace_suffix=self.workspace_suffix,
+                    )
                     single_ws.show(name)
             else:
                 # Single period data
-                name = directory + get_raw_data_workspace_name(self.data_context.instrument, run_string,
-                                                               multi_period=False,
-                                                               workspace_suffix=self.workspace_suffix)
+                name = directory + get_raw_data_workspace_name(
+                    self.data_context.instrument, run_string, multi_period=False, workspace_suffix=self.workspace_suffix
+                )
                 loaded_workspace[0].show(name)
 
         self.ads_observer.observeRename(True)
 
     def _do_rebin(self):
-        return (self.gui_context['RebinType'] == 'Fixed'
-                and 'RebinFixed' in self.gui_context and self.gui_context['RebinFixed']) or \
-               (self.gui_context['RebinType'] == 'Variable'
-                and 'RebinVariable' in self.gui_context and self.gui_context['RebinVariable'])
+        return (self.gui_context["RebinType"] == "Fixed" and "RebinFixed" in self.gui_context and self.gui_context["RebinFixed"]) or (
+            self.gui_context["RebinType"] == "Variable" and "RebinVariable" in self.gui_context and self.gui_context["RebinVariable"]
+        )
 
     def do_double_pulse_fit(self):
         return "DoublePulseEnabled" in self.gui_context and self.gui_context["DoublePulseEnabled"]
 
     def get_detectors_excluded_from_default_grouping_tables(self):
         groups, _, _ = get_default_grouping(
-            self.data_context.current_workspace, self.data_context.instrument,
-            self.data_context.main_field_direction)
+            self.data_context.current_workspace, self.data_context.instrument, self.data_context.main_field_direction
+        )
         detectors_in_group = []
         for group in groups:
             detectors_in_group += group.detectors
@@ -437,79 +461,77 @@ class MuonContext(object):
                 run_list_to_string(run_number),
                 self.data_context.is_multi_period(),
                 period=str(period + 1),
-                workspace_suffix=self.workspace_suffix)
-            for run_number in run_numbers for period in range(self.data_context.num_periods(run_number))]
+                workspace_suffix=self.workspace_suffix,
+            )
+            for run_number in run_numbers
+            for period in range(self.data_context.num_periods(run_number))
+        ]
         return runs
 
     def first_good_data(self, run):
         if not self.data_context.get_loaded_data_for_run(run):
             return 0.0
 
-        if self.gui_context['FirstGoodDataFromFile']:
+        if self.gui_context["FirstGoodDataFromFile"]:
             return self.data_context.get_loaded_data_for_run(run)["FirstGoodData"]
         else:
-            if 'FirstGoodData' in self.gui_context:
-                return self.gui_context['FirstGoodData']
+            if "FirstGoodData" in self.gui_context:
+                return self.gui_context["FirstGoodData"]
             else:
-                self.gui_context['FirstGoodData'] = self.data_context.get_loaded_data_for_run(
-                    run)["FirstGoodData"]
-                return self.gui_context['FirstGoodData']
+                self.gui_context["FirstGoodData"] = self.data_context.get_loaded_data_for_run(run)["FirstGoodData"]
+                return self.gui_context["FirstGoodData"]
 
     def last_good_data(self, run):
         if not self.data_context.get_loaded_data_for_run(run):
             return 0.0
 
-        if self.gui_context['LastGoodDataFromFile']:
-            return round(max(self.data_context.get_loaded_data_for_run(run)["OutputWorkspace"][0].workspace.dataX(0)),
-                         2)
+        if self.gui_context["LastGoodDataFromFile"]:
+            return round(max(self.data_context.get_loaded_data_for_run(run)["OutputWorkspace"][0].workspace.dataX(0)), 2)
         else:
-            if 'LastGoodData' in self.gui_context:
-                return self.gui_context['LastGoodData']
+            if "LastGoodData" in self.gui_context:
+                return self.gui_context["LastGoodData"]
             else:
-                self.gui_context['LastGoodData'] = round(max(self.data_context.get_loaded_data_for_run(run)
-                                                             ["OutputWorkspace"][0].workspace.dataX(0)), 2)
-                return self.gui_context['LastGoodData']
+                self.gui_context["LastGoodData"] = round(
+                    max(self.data_context.get_loaded_data_for_run(run)["OutputWorkspace"][0].workspace.dataX(0)), 2
+                )
+                return self.gui_context["LastGoodData"]
 
     def get_group_and_pair(self, group_and_pair):
-        if group_and_pair == 'All':
+        if group_and_pair == "All":
             group = self.group_pair_context.group_names
             pair = self.group_pair_context.pair_names
             group += self.group_pair_context.get_diffs("group")
             pair += self.group_pair_context.get_diffs("pair")
         else:
-            group_pair_list = group_and_pair.replace(' ', '').split(',')
-            group = [
-                group for group in group_pair_list if group in self.group_pair_context.group_names]
+            group_pair_list = group_and_pair.replace(" ", "").split(",")
+            group = [group for group in group_pair_list if group in self.group_pair_context.group_names]
             # add group diffs
             diffs = [diff.name for diff in self.group_pair_context.get_diffs("group")]
             group += [diff for diff in group_pair_list if diff in diffs]
-            pair = [
-                pair for pair in group_pair_list if pair in self.group_pair_context.pair_names]
+            pair = [pair for pair in group_pair_list if pair in self.group_pair_context.pair_names]
             diffs = [diff.name for diff in self.group_pair_context.get_diffs("pair")]
             pair += [diff for diff in group_pair_list if diff in diffs]
         return group, pair
 
     def get_runs(self, runs):
-        if runs == 'All':
+        if runs == "All":
             run_list = self.data_context.current_runs
         else:
-            run_list = [run_string_to_list(item)
-                        for item in runs.replace(' ', '').split(',')]
+            # runs will always be the current "run"
+            # so either a single run or a co-add list
+            run_list = [run_string_to_list(runs.replace(" ", ""))]
             flat_list = []
             for sublist in run_list:
                 flat_list += [[run] for run in sublist if len(sublist) > 1]
             run_list += flat_list
-            run_list = [
-                run for run in run_list if run in self.data_context.current_runs]
+            run_list = [run for run in run_list if run in self.data_context.current_runs]
         return run_list
 
-    def get_list_of_binned_or_unbinned_workspaces_from_equivalents(
-            self, input_list):
+    def get_list_of_binned_or_unbinned_workspaces_from_equivalents(self, input_list):
         equivalent_list = []
 
         for item in input_list:
-            equivalent_group_pair = self.group_pair_context.get_equivalent_group_pair(
-                item)
+            equivalent_group_pair = self.group_pair_context.get_equivalent_group_pair(item)
             if equivalent_group_pair:
                 equivalent_list.append(equivalent_group_pair)
 

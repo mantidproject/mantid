@@ -39,7 +39,7 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
 
         setup_context_for_tests(self)
 
-        self.data_context.instrument = 'EMU'
+        self.data_context.instrument = "EMU"
 
         self.view = LoadRunWidgetView(self.obj)
         self.model = LoadRunWidgetModel(self.loaded_data, self.context)
@@ -49,17 +49,18 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
 
         self.presenter.set_current_instrument("EMU")
 
-        patcher = mock.patch('mantidqtinterfaces.Muon.GUI.Common.load_run_widget.load_run_model.load_utils')
+        patcher = mock.patch("mantidqtinterfaces.Muon.GUI.Common.load_run_widget.load_run_model.load_utils")
         self.addCleanup(patcher.stop)
         self.load_utils_patcher = patcher.start()
-        self.load_utils_patcher.exception_message_for_failed_files.return_value = ''
+        self.load_utils_patcher.exception_message_for_failed_files.return_value = ""
 
     def tearDown(self):
         self.obj = None
 
     def load_runs(self, runs, filenames, workspaces):
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(
-            side_effect=iter(zip(workspaces, runs, filenames, [False] * len(filenames))))
+            side_effect=iter(zip(workspaces, runs, filenames, [False] * len(filenames)))
+        )
         run_string = ",".join([str(run) for run in runs])
         self.view.set_run_edit_text(run_string)
         self.presenter.handle_run_changed_by_user()
@@ -147,7 +148,7 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
         self.assertCountEqual(self.model.loaded_workspaces, [[2], [3], [4]])
         self.assertCountEqual(self.model.loaded_runs, [[2], [3], [4]])
 
-        self.assertEqual(self.view.get_run_edit_text(), '2-4')
+        self.assertEqual(self.view.get_run_edit_text(), "2-4")
 
     @run_test_with_and_without_threading
     def test_that_if_increment_run_fails_the_data_are_returned_to_previous_state(self):
@@ -162,7 +163,7 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
         self.assertCountEqual(self.model.loaded_workspaces, [[2], [3], [4]])
         self.assertCountEqual(self.model.loaded_runs, [[2], [3], [4]])
 
-        self.assertEqual(self.view.get_run_edit_text(), '2-4')
+        self.assertEqual(self.view.get_run_edit_text(), "2-4")
 
     @run_test_with_and_without_threading
     def test_that_if_increment_run_fails_warning_message_is_displayed(self):
@@ -185,5 +186,5 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
         self.assertEqual(self.view.warning_popup.call_count, 1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

@@ -10,7 +10,7 @@ Extensions and Improvements
 
 -  QResolution calculation for SANS: The q resolution can be calculated
    for for 1D reductions. See here for
-   `details <http://www.mantidproject.org/ISIS_SANS:_Reduction_Settings#QResolution>`_.
+   `details <https://archive.mantidproject.org/ISIS_SANS:_Reduction_Settings#QResolution>`_.
 
 .. figure:: ../../images/Sans_q_resolution_v1.png
    :align: center
@@ -20,7 +20,7 @@ Extensions and Improvements
 -  QResolution calculation user file commands: The q resolution
    calculation can be driven through the user file. For a comprehensive
    list of commands, see
-   `here <http://www.mantidproject.org/SANS_User_File_Commands#QRESOLUTION>`_.
+   `here <https://archive.mantidproject.org/SANS_User_File_Commands#QRESOLUTION>`_.
 
 -  Extended Beam Centre Finder for LARMOR: The beam centre finder takes
    the rotational movement of LARMOR's detector into account.
@@ -40,7 +40,7 @@ Extensions and Improvements
    SANS Beam Centre Finder Selection
 
 -  Expose AddRuns command for Python scripting : See here
-   (`here <http://www.mantidproject.org/Scripting_SANS_Reductions#AddRuns.28runs.2C_instrument_.3D.27sans2d.27.2C_saveAsEvent.3DFalse.2C_binning_.3D_.22Monitors.22.2C_isOverlay_.3D_False.2C_time_shifts_.3D_None.2C_defType.3D.27.nxs.27.2C_rawTypes.3D.28.27.raw.27.2C_.27.s.2A.27.2C_.27add.27.2C.27.RAW.27.29.2C_lowMem.3DFalse.29>`__)
+   (`here <https://archive.mantidproject.org/Scripting_SANS_Reductions#AddRuns.28runs.2C_instrument_.3D.27sans2d.27.2C_saveAsEvent.3DFalse.2C_binning_.3D_.22Monitors.22.2C_isOverlay_.3D_False.2C_time_shifts_.3D_None.2C_defType.3D.27.nxs.27.2C_rawTypes.3D.28.27.raw.27.2C_.27.s.2A.27.2C_.27add.27.2C.27.RAW.27.29.2C_lowMem.3DFalse.29>`__)
    for details
 
 -  Handle cumulative sample logs for SANS: Adding files using the Add
@@ -93,4 +93,3 @@ Bug Fixes
 -  Add system test for merged data in sans
 
 `Full list of changes on github <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.6%22+is%3Amerged+label%3A%22Component%3A+SANS%22>`__
-

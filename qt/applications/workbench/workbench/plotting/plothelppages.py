@@ -7,7 +7,7 @@
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.plotting.figuretype import figure_type, FigureType
 
-BASE_URL = "qthelp://org.mantidproject/doc/plotting/"
+BASE_PATH = "plotting/"
 INDEX_PAGE = "index.html"
 PLOT1D_PAGE = "1DPlotsHelp.html"
 TILED_PAGE = "TiledPlotsHelp.html"
@@ -19,15 +19,17 @@ MESH_PAGE = "MeshPlotHelp.html"
 # Create a plot page for each enumeration in FigureType
 # The values can be edited if there is a more relevant documentation page
 # For example Line and Error bar plots currently point to the same page.
-HELP_PAGES = {FigureType.Other: BASE_URL + INDEX_PAGE,
-              FigureType.Line: BASE_URL + PLOT1D_PAGE,
-              FigureType.Errorbar: BASE_URL + PLOT1D_PAGE,
-              FigureType.Waterfall: BASE_URL + WATERFALL_PAGE,
-              FigureType.Wireframe: BASE_URL + PLOT3D_PAGE,
-              FigureType.Surface: BASE_URL + PLOT3D_PAGE,
-              FigureType.Image: BASE_URL + COLORFILL_PAGE,
-              FigureType.Contour: BASE_URL + COLORFILL_PAGE,
-              FigureType.Mesh: BASE_URL + MESH_PAGE}
+HELP_PAGES = {
+    FigureType.Other: BASE_PATH + INDEX_PAGE,
+    FigureType.Line: BASE_PATH + PLOT1D_PAGE,
+    FigureType.Errorbar: BASE_PATH + PLOT1D_PAGE,
+    FigureType.Waterfall: BASE_PATH + WATERFALL_PAGE,
+    FigureType.Wireframe: BASE_PATH + PLOT3D_PAGE,
+    FigureType.Surface: BASE_PATH + PLOT3D_PAGE,
+    FigureType.Image: BASE_PATH + COLORFILL_PAGE,
+    FigureType.Contour: BASE_PATH + COLORFILL_PAGE,
+    FigureType.Mesh: BASE_PATH + MESH_PAGE,
+}
 
 
 class PlotHelpPages(object):

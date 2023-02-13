@@ -32,22 +32,26 @@ class UsageReportingVerificationView(QDialog):
         textLayout = QVBoxLayout()
         labelQuestion = QLabel(self)
         labelQuestion.setTextFormat(Qt.RichText)
-        labelQuestion.setText("""Are you sure you want to disable reporting of <a
+        labelQuestion.setText(
+            """Are you sure you want to disable reporting of <a
                         href='https://reports.mantidproject.org'>usage data</a>?
                         (full details in our <a
-                        href='https://www.mantidproject.org/MantidProject:Privacy_policy#Usage_Data_recorded_in_Mantid'
-                        >Privacy Policy</a>)""")
+                        href='https://www.mantidproject.org/privacy'
+                        >Privacy Policy</a>)"""
+        )
         textLayout.addWidget(labelQuestion)
         labelQuestion.setOpenExternalLinks(False)
         labelQuestion.linkActivated.connect(presenter.action_open_external_link)
 
         labelInformation = QLabel(self)
-        labelInformation.setText("All usage data is anonymous and untraceable.\n"
-                                 + "We use the usage data to inform the future development of Mantid.\n"
-                                 + "If you click \"Yes\" aspects you need risk being deprecated in \n"
-                                 + "future versions if we think they are not used.\n\n"
-                                 + "Are you sure you still want to disable reporting usage data?\n"
-                                 + "Please click \"No\".")
+        labelInformation.setText(
+            "All usage data is anonymous and untraceable.\n"
+            + "We use the usage data to inform the future development of Mantid.\n"
+            + 'If you click "Yes" aspects you need risk being deprecated in \n'
+            + "future versions if we think they are not used.\n\n"
+            + "Are you sure you still want to disable reporting usage data?\n"
+            + 'Please click "No".'
+        )
         textLayout.addWidget(labelInformation)
 
         buttonLayout = QHBoxLayout()
@@ -69,4 +73,4 @@ class UsageReportingVerificationView(QDialog):
         parentLayout.addLayout(textLayout)
 
         self.setLayout(parentLayout)
-        self.setMinimumSize(498,161)
+        self.setMinimumSize(498, 161)

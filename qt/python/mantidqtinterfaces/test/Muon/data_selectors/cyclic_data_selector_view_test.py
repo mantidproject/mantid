@@ -13,7 +13,6 @@ from mantidqtinterfaces.Muon.GUI.Common.data_selectors.cyclic_data_selector_view
 
 @start_qapplication
 class CyclicDataSelectorViewTest(unittest.TestCase):
-
     def setUp(self):
         self.view = CyclicDataSelectorView()
         self.view.show()
@@ -123,5 +122,5 @@ class CyclicDataSelectorViewTest(unittest.TestCase):
         self.assertEqual(self.view.current_dataset_index, 2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

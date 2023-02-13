@@ -22,42 +22,40 @@
 # Leave both in here in case old Sphinx version is ever used
 html_theme_options = {
     # Navigation bar title.
-    'navbar_title': " ", # deliberate single space so it's not visible
+    "navbar_title": " ",  # deliberate single space so it's not visible
     # Tab name for entire site.
-    'navbar_site_name': "Mantid",
+    "navbar_site_name": "Mantid",
     # Add links to the nav bar. Third param of tuple is true to create absolute url.
-    'navbar_links': [
-    ],
+    "navbar_links": [],
     # Do not show the "Show source" button.
-    'source_link_position': "no",
+    "source_link_position": "no",
     # Remove the local TOC from the nav bar
-    'navbar_pagenav': False,
+    "navbar_pagenav": False,
     # Hide the next/previous in the nav bar.
-    'navbar_sidebarrel': False,
+    "navbar_sidebarrel": False,
     # Use the latest version.
-    'bootstrap_version': "3",
+    "bootstrap_version": "3",
     # Ensure the nav bar always stays on top of page.
-    'navbar_fixed_top': "false",
+    "navbar_fixed_top": "false",
 }
 
 qthelp_theme_options = {
     # Navigation bar title.
-    'navbar_title': " ", # deliberate single space so it's not visible
+    "navbar_title": " ",  # deliberate single space so it's not visible
     # Tab name for entire site.
-    'navbar_site_name': "Mantid",
+    "navbar_site_name": "Mantid",
     # Add links to the nav bar. Third param of tuple is true to create absolute url.
-    'navbar_links': [
-    ],
+    "navbar_links": [],
     # Do not show the "Show source" button.
-    'source_link_position': "no",
+    "source_link_position": "no",
     # Remove the local TOC from the nav bar
-    'navbar_pagenav': False,
+    "navbar_pagenav": False,
     # Hide the next/previous in the nav bar.
-    'navbar_sidebarrel': True,
+    "navbar_sidebarrel": True,
     # Use the latest version.
-    'bootstrap_version': "3",
+    "bootstrap_version": "3",
     # Ensure the nav bar always stays on top of page.
-    'navbar_fixed_top': "false",
+    "navbar_fixed_top": "false",
 }
 
 plot_html_show_formats = False

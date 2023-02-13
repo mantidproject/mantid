@@ -224,8 +224,8 @@ void saveAclimax(std::string const &workspaceName, std::string const &outputName
 } // namespace
 
 std::string UNGROUPED = "Ungrouped";
-std::string GROUP = "Group";
-std::string GROUPBYSAMPLE = "Group by sample";
+std::string GROUP = "Grouped";
+std::string GROUPBYSAMPLE = "Sample changer grouped";
 
 namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
@@ -265,11 +265,6 @@ ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI, QWidget *pa
 
   // Allows empty workspace selector when initially selected
   m_uiForm.dsCalibrationFile->isOptional(true);
-
-  // Add grouping options
-  m_uiForm.cbGroupOutput->addItem(QString::fromStdString(UNGROUPED));
-  m_uiForm.cbGroupOutput->addItem(QString::fromStdString(GROUP));
-  m_uiForm.cbGroupOutput->addItem(QString::fromStdString(GROUPBYSAMPLE));
 
   // Update UI widgets to show default values
   mappingOptionSelected(m_uiForm.cbGroupingOptions->currentText());
@@ -665,7 +660,7 @@ void ISISEnergyTransfer::setInstrumentDefault(QMap<QString, QString> const &inst
     auto const rebinDefault = getInstrumentDetail(instDetails, "rebin-default");
     m_uiForm.leRebinString->setText(rebinDefault);
     m_uiForm.ckDoNotRebin->setChecked(false);
-    auto const rbp = rebinDefault.split(",", QString::SkipEmptyParts);
+    auto const rbp = rebinDefault.split(",", Qt::SkipEmptyParts);
     if (rbp.size() == 3) {
       m_uiForm.spRebinLow->setValue(rbp[0].toDouble());
       m_uiForm.spRebinWidth->setValue(rbp[1].toDouble());
@@ -680,6 +675,14 @@ void ISISEnergyTransfer::setInstrumentDefault(QMap<QString, QString> const &inst
     m_uiForm.spRebinWidth->setValue(0.0);
     m_uiForm.spRebinHigh->setValue(0.0);
     m_uiForm.leRebinString->setText("");
+  }
+
+  // Add grouping options based on the selected instrument
+  m_uiForm.cbGroupOutput->clear();
+  m_uiForm.cbGroupOutput->addItem(QString::fromStdString(UNGROUPED));
+  m_uiForm.cbGroupOutput->addItem(QString::fromStdString(GROUP));
+  if (instrumentName == "IRIS") {
+    m_uiForm.cbGroupOutput->addItem(QString::fromStdString(GROUPBYSAMPLE));
   }
 
   setInstrumentCheckBoxProperty(m_uiForm.ckCm1Units, instDetails, "cm-1-convert-choice");

@@ -35,11 +35,11 @@ class LoadRunWidgetModelEATest(unittest.TestCase):
         self.assertEqual(self.model._loaded_data_store.get_data(), None)
         self.assertEqual(self.model._data_context.run_info, [])
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.load_widget.load_models.LoadElementalAnalysisData')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.load_widget.load_models.LoadElementalAnalysisData")
     def test_execute_successfully_loads_valid_run_single(self, load_ea_data_mock):
         # Mock the load algorithm
         grpws = mock.Mock()
-        grpws.getNames.return_value = ['1234; Detector 1', '1234; Detector 3']
+        grpws.getNames.return_value = ["1234; Detector 1", "1234; Detector 3"]
         mocked_path = mock.NonCallableMock()
         load_return_vals = grpws, mocked_path
 
@@ -55,10 +55,10 @@ class LoadRunWidgetModelEATest(unittest.TestCase):
         self.assertEqual(run_info._groupworkspace, grpws)
         self.assertTrue(len(self.model.loaded_runs) > 0)
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.load_widget.load_models.LoadElementalAnalysisData')
+    @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.load_widget.load_models.LoadElementalAnalysisData")
     def test_model_is_cleared_correctly(self, load_ea_data_mock):
         grpws = mock.Mock()
-        grpws.getNames.return_value = ['1234; Detector 1', '1234; Detector 3']
+        grpws.getNames.return_value = ["1234; Detector 1", "1234; Detector 3"]
         mocked_path = mock.NonCallableMock()
         load_return_vals = grpws, mocked_path
 
@@ -71,5 +71,5 @@ class LoadRunWidgetModelEATest(unittest.TestCase):
         self.assertEqual(self.model.loaded_runs, [])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

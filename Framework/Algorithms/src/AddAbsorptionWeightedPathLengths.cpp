@@ -8,11 +8,10 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAlgorithms/SampleCorrections/CircularBeamProfile.h"
+#include "MantidAlgorithms/BeamProfileFactory.h"
 #include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
 #include "MantidAlgorithms/SampleCorrections/MCInteractionStatistics.h"
 #include "MantidAlgorithms/SampleCorrections/MCInteractionVolume.h"
-#include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -100,7 +99,7 @@ void AddAbsorptionWeightedPathLengths::exec() {
   const int maxScatterPtAttempts = getProperty("MaxScatterPtAttempts");
 
   auto instrument = inputWS->getInstrument();
-  auto beamProfile = createBeamProfile(*instrument, inputWS->sample());
+  auto beamProfile = BeamProfileFactory::createBeamProfile(*instrument, inputWS->sample());
 
   const auto npeaks = inputWS->getNumberPeaks();
 
@@ -160,38 +159,6 @@ void AddAbsorptionWeightedPathLengths::exec() {
     PARALLEL_END_INTERRUPT_REGION
   }
   PARALLEL_CHECK_INTERRUPT_REGION
-}
-
-/**
- * Create the beam profile. Currently only supports Rectangular and Circular.
- * The dimensions are either specified by those provided by `SetBeam` algorithm
- * or default to the width and height of the samples bounding box
- * @param instrument A reference to the instrument object
- * @param sample A reference to the sample object
- * @return A new IBeamProfile object
- */
-std::unique_ptr<IBeamProfile> AddAbsorptionWeightedPathLengths::createBeamProfile(const Instrument &instrument,
-                                                                                  const Sample &sample) const {
-  const auto frame = instrument.getReferenceFrame();
-  const auto source = instrument.getSource();
-
-  std::string beamShapeParam = source->getParameterAsString("beam-shape");
-  if (beamShapeParam.compare("Slit") == 0) {
-    auto beamWidthParam = source->getNumberParameter("beam-width");
-    auto beamHeightParam = source->getNumberParameter("beam-height");
-    if (beamWidthParam.size() == 1 && beamHeightParam.size() == 1) {
-      return std::make_unique<RectangularBeamProfile>(*frame, source->getPos(), beamWidthParam[0], beamHeightParam[0]);
-    }
-  } else if (beamShapeParam.compare("Circle") == 0) {
-    auto beamRadiusParam = source->getNumberParameter("beam-radius");
-    if (beamRadiusParam.size() == 1) {
-      return std::make_unique<CircularBeamProfile>(*frame, source->getPos(), beamRadiusParam[0]);
-    }
-  } // revert to sample dimensions if no return by this point
-  const auto bbox = sample.getShape().getBoundingBox().width();
-  const double beamWidth = bbox[frame->pointingHorizontal()];
-  const double beamHeight = bbox[frame->pointingUp()];
-  return std::make_unique<RectangularBeamProfile>(*frame, source->getPos(), beamWidth, beamHeight);
 }
 
 } // namespace Mantid::Algorithms

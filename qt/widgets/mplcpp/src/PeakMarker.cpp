@@ -18,13 +18,14 @@ using Mantid::PythonInterface::PythonException;
 
 namespace {
 
-Python::Object newMarker(FigureCanvasQt *canvas, int peakID, double x, double yTop, double yBottom, double fwhm,
+Python::Object newMarker(FigureCanvasQt *canvas, int peakID, double x, double height, double fwhm, double background,
                          boost::optional<QHash<QString, QVariant>> const &otherKwargs) {
   GlobalInterpreterLock lock;
 
   Python::Object markersModule{Python::NewRef(PyImport_ImportModule("mantidqt.plotting.markers"))};
 
-  auto const args = Python::NewRef(Py_BuildValue("(Oidddd)", canvas->pyobj().ptr(), peakID, x, yTop, yBottom, fwhm));
+  auto const args =
+      Python::NewRef(Py_BuildValue("(Oidddd)", canvas->pyobj().ptr(), peakID, x, height, fwhm, background));
   Python::Dict kwargs = Python::qHashToDict(otherKwargs.get());
 
   auto const marker = markersModule.attr("PeakMarker")(*args, **kwargs);
@@ -38,9 +39,9 @@ namespace MantidQt::Widgets::MplCpp {
 /**
  * @brief Create a PeakMarker instance
  */
-PeakMarker::PeakMarker(FigureCanvasQt *canvas, int peakID, double x, double yTop, double yBottom, double fwhm,
+PeakMarker::PeakMarker(FigureCanvasQt *canvas, int peakID, double x, double height, double fwhm, double background,
                        QHash<QString, QVariant> const &otherKwargs)
-    : InstanceHolder(newMarker(canvas, peakID, x, yTop, yBottom, fwhm, otherKwargs)) {}
+    : InstanceHolder(newMarker(canvas, peakID, x, height, fwhm, background, otherKwargs)) {}
 
 /**
  * @brief Redraw the PeakMarker
@@ -58,8 +59,8 @@ void PeakMarker::remove() { callMethodNoCheck<void>(pyobj(), "remove"); }
  * @param height The new height.
  * @param fwhm The new height.
  */
-void PeakMarker::updatePeak(double centre, double height, double fwhm) {
-  callMethodNoCheck<void>(pyobj(), "update_peak", centre, height, fwhm);
+void PeakMarker::updatePeak(double centre, double height, double fwhm, double background) {
+  callMethodNoCheck<void>(pyobj(), "update_peak", centre, height, fwhm, background);
 }
 
 /**
@@ -98,6 +99,12 @@ void PeakMarker::select() { callMethodNoCheck<void>(pyobj(), "select"); }
 void PeakMarker::deselect() { callMethodNoCheck<void>(pyobj(), "deselect"); }
 
 /**
+ * @brief Sets the marker as visible or invisible.
+ * @param visible If true the marker is set as visible.
+ */
+void PeakMarker::setVisible(bool visible) { callMethodNoCheck<void>(pyobj(), "set_visible", visible); }
+
+/**
  * @brief Notifies the relevant marker to start moving.
  * @param x The x position of the mouse press in axes coords.
  * @param y The y position of the mouse press in axes coords.
@@ -122,5 +129,12 @@ bool PeakMarker::mouseMove(double x, double y) {
   auto const movedPy = Python::Object(pyobj().attr("mouse_move")(x, y));
   return PyLong_AsLong(movedPy.ptr()) > 0;
 }
+
+/**
+ * @brief Notifies when the mouse is hovering over the plot.
+ * @param x The x position of the mouse press in axes coords.
+ * @param y The y position of the mouse press in axes coords.
+ */
+void PeakMarker::mouseMoveHover(double x, double y) { callMethodNoCheck<void>(pyobj(), "mouse_move_hover", x, y); }
 
 } // namespace MantidQt::Widgets::MplCpp

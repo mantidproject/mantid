@@ -8,13 +8,13 @@
 #
 #
 # std imports
-from unittest import TestCase, main
+from unittest import TestCase, main, mock
 
 # third party imports
 import matplotlib
-from matplotlib import cm
+from matplotlib import colormaps
 
-matplotlib.use('AGG')  # noqa
+matplotlib.use("AGG")  # noqa
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -25,14 +25,25 @@ from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.simpleapi import CreateWorkspace, CreateSampleWorkspace, CreateMDHistoWorkspace
 from mantid.kernel import config
 from mantid.plots import MantidAxes
-from unittest import mock
 from mantidqt.dialogs.spectraselectordialog import SpectraSelection
-from mantidqt.plotting.functions import (can_overplot, current_figure_or_none, figure_title,
-                                         manage_workspace_names, plot, plot_from_names, plot_md_ws_from_names,
-                                         pcolormesh_from_names, plot_surface)
+from mantidqt.plotting.functions import (
+    can_overplot,
+    current_figure_or_none,
+    figure_title,
+    manage_workspace_names,
+    plot,
+    plot_from_names,
+    plot_md_ws_from_names,
+    pcolormesh_from_names,
+    plot_surface,
+)
 
-IMAGE_PLOT_OPTIONS = {"plots.images.Colormap": "spring", "plots.images.ColorBarScale": "Log",
-                      "plots.ShowMinorTicks": "off", "plots.ShowMinorGridlines": "off"}
+IMAGE_PLOT_OPTIONS = {
+    "plots.images.Colormap": "spring",
+    "plots.images.ColorBarScale": "Log",
+    "plots.ShowMinorTicks": "off",
+    "plots.ShowMinorGridlines": "off",
+}
 
 
 class MockConfigService(object):
@@ -60,22 +71,23 @@ class FunctionsTest(TestCase):
 
     def setUp(self):
         if self._test_ws is None:
-            self.__class__._test_ws = WorkspaceFactory.Instance().create(
-                "Workspace2D", NVectors=2, YLength=5, XLength=5)
+            self.__class__._test_ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=2, YLength=5, XLength=5)
 
         if self._test_md_ws is None:
-            self._test_md_ws = CreateMDHistoWorkspace(SignalInput='1,2,3,4,2,1',
-                                                      ErrorInput='1,1,1,1,1,1',
-                                                      Dimensionality=3,
-                                                      Extents='-1,1,-1,1,0.5,6.5',
-                                                      NumberOfBins='1,1,6',
-                                                      Names='x,y,|Q|',
-                                                      Units='mm,km,AA^-1',
-                                                      OutputWorkspace='test_plot_md_from_names_ws')
+            self._test_md_ws = CreateMDHistoWorkspace(
+                SignalInput="1,2,3,4,2,1",
+                ErrorInput="1,1,1,1,1,1",
+                Dimensionality=3,
+                Extents="-1,1,-1,1,0.5,6.5",
+                NumberOfBins="1,1,6",
+                Names="x,y,|Q|",
+                Units="mm,km,AA^-1",
+                OutputWorkspace="test_plot_md_from_names_ws",
+            )
 
     def tearDown(self):
         AnalysisDataService.Instance().clear()
-        plt.close('all')
+        plt.close("all")
 
     def test_can_overplot_returns_false_with_no_active_plots(self):
         self.assertFalse(can_overplot())
@@ -85,7 +97,7 @@ class FunctionsTest(TestCase):
         self.assertTrue(can_overplot())
 
     def test_can_overplot_returns_false_for_active_patch_plot(self):
-        plt.pcolormesh(np.arange(9.).reshape(3, 3))
+        plt.pcolormesh(np.arange(9.0).reshape(3, 3))
         allowed = can_overplot()
         self.assertFalse(allowed)
 
@@ -102,8 +114,7 @@ class FunctionsTest(TestCase):
         self.assertEqual("fake-5", figure_title(FakeWorkspace("fake"), 5))
 
     def test_figure_title_with_workspace_list(self):
-        self.assertEqual("fake-10", figure_title((FakeWorkspace("fake"),
-                                                  FakeWorkspace("nextfake")), 10))
+        self.assertEqual("fake-10", figure_title((FakeWorkspace("fake"), FakeWorkspace("nextfake")), 10))
 
     def test_figure_title_with_empty_list_raises_assertion(self):
         with self.assertRaises(AssertionError):
@@ -122,10 +133,10 @@ class FunctionsTest(TestCase):
             # to a list of workspaces
             self.assertNotEqual(result_workspaces, [ws_name1])
 
-    @mock.patch('mantidqt.plotting.functions.get_spectra_selection')
-    @mock.patch('mantidqt.plotting.functions.plot')
+    @mock.patch("mantidqt.plotting.functions.get_spectra_selection")
+    @mock.patch("mantidqt.plotting.functions.plot")
     def test_plot_from_names_calls_plot(self, get_spectra_selection_mock, plot_mock):
-        ws_name = 'test_plot_from_names_calls_plot-1'
+        ws_name = "test_plot_from_names_calls_plot-1"
         AnalysisDataService.Instance().addOrReplace(ws_name, self._test_ws)
         selection = SpectraSelection([self._test_ws])
         selection.wksp_indices = [0]
@@ -133,45 +144,50 @@ class FunctionsTest(TestCase):
         plot_from_names([ws_name], errors=False, overplot=False)
         self.assertEqual(1, plot_mock.call_count)
 
-    @mock.patch('mantidqt.plotting.functions.get_spectra_selection')
+    @mock.patch("mantidqt.plotting.functions.get_spectra_selection")
     def test_plot_from_names_produces_single_line_plot_for_valid_name(self, get_spectra_selection_mock):
-        self._do_plot_from_names_test(get_spectra_selection_mock, expected_labels=["spec 1"], wksp_indices=[0],
-                                      errors=False, overplot=False)
+        self._do_plot_from_names_test(
+            get_spectra_selection_mock, expected_labels=["spec 1"], wksp_indices=[0], errors=False, overplot=False
+        )
 
-    @mock.patch('mantidqt.plotting.functions.get_spectra_selection')
+    @mock.patch("mantidqt.plotting.functions.get_spectra_selection")
     def test_plot_from_names_produces_single_error_plot_for_valid_name(self, get_spectra_selection_mock):
-        fig = self._do_plot_from_names_test(get_spectra_selection_mock,
-                                            # matplotlib does not set labels on the lines for error plots
-                                            expected_labels=[],
-                                            wksp_indices=[0], errors=True, overplot=False)
+        fig = self._do_plot_from_names_test(
+            get_spectra_selection_mock,
+            # matplotlib does not set labels on the lines for error plots
+            expected_labels=[],
+            wksp_indices=[0],
+            errors=True,
+            overplot=False,
+        )
         self.assertEqual(1, len(fig.gca().containers))
 
-    @mock.patch('mantidqt.plotting.functions.get_spectra_selection')
+    @mock.patch("mantidqt.plotting.functions.get_spectra_selection")
     def test_plot_from_names_produces_overplot_for_valid_name(self, get_spectra_selection_mock):
         # make first plot
         plot([self._test_ws], wksp_indices=[0])
-        self._do_plot_from_names_test(get_spectra_selection_mock, expected_labels=["spec 1", "spec 2"],
-                                      wksp_indices=[1], errors=False, overplot=True)
+        self._do_plot_from_names_test(
+            get_spectra_selection_mock, expected_labels=["spec 1", "spec 2"], wksp_indices=[1], errors=False, overplot=True
+        )
 
-    @mock.patch('mantidqt.plotting.functions.get_spectra_selection')
+    @mock.patch("mantidqt.plotting.functions.get_spectra_selection")
     def test_plot_from_names_within_existing_figure(self, get_spectra_selection_mock):
         # make existing plot
         fig = plot([self._test_ws], wksp_indices=[0])
-        self._do_plot_from_names_test(get_spectra_selection_mock, expected_labels=["spec 1", "spec 2"],
-                                      wksp_indices=[1], errors=False, overplot=True,
-                                      target_fig=fig)
+        self._do_plot_from_names_test(
+            get_spectra_selection_mock, expected_labels=["spec 1", "spec 2"], wksp_indices=[1], errors=False, overplot=True, target_fig=fig
+        )
 
     def test_plot_md_ws_from_names(self):
         """Test 1 workspace
 
         :return:
         """
-        self._do_plot_md_from_names_test(expected_labels=['test_plot_md_from_names_ws'],
-                                         errors=False, overplot=False, target_fig=None)
+        self._do_plot_md_from_names_test(expected_labels=["test_plot_md_from_names_ws"], errors=False, overplot=False, target_fig=None)
 
-    @mock.patch('mantidqt.plotting.functions.pcolormesh')
+    @mock.patch("mantidqt.plotting.functions.pcolormesh")
     def test_pcolormesh_from_names_calls_pcolormesh(self, pcolormesh_mock):
-        ws_name = 'test_pcolormesh_from_names_calls_pcolormesh-1'
+        ws_name = "test_pcolormesh_from_names_calls_pcolormesh-1"
         AnalysisDataService.Instance().addOrReplace(ws_name, self._test_ws)
         pcolormesh_from_names([ws_name])
         self.assertEqual(1, pcolormesh_mock.call_count)
@@ -182,36 +198,36 @@ class FunctionsTest(TestCase):
         self.assertEqual((1.8, 2.2), fig.axes[0].images[0].get_clim())
 
     def test_pcolormesh_from_names(self):
-        ws_name = 'test_pcolormesh_from_names-1'
+        ws_name = "test_pcolormesh_from_names-1"
         AnalysisDataService.Instance().addOrReplace(ws_name, self._test_ws)
         fig = pcolormesh_from_names([ws_name])
         self.assertEqual(1, len(fig.gca().images))
 
     def test_pcolormesh_from_names_using_existing_figure(self):
-        ws_name = 'test_pcolormesh_from_names-1'
+        ws_name = "test_pcolormesh_from_names-1"
         AnalysisDataService.Instance().addOrReplace(ws_name, self._test_ws)
         target_fig = plt.figure()
         fig = pcolormesh_from_names([ws_name], fig=target_fig)
         self.assertEqual(fig, target_fig)
         self.assertEqual(1, len(fig.gca().images))
 
-    @mock.patch('mantidqt.plotting.functions.ConfigService', new_callable=MockConfigService)
+    @mock.patch("mantidqt.plotting.functions.ConfigService", new_callable=MockConfigService)
     def test_pcolor_mesh_from_names_gets_colorbar_scale_from_ConfigService(self, mock_ConfigService):
         ws = CreateSampleWorkspace()
 
         fig = pcolormesh_from_names([ws])
 
-        mock_ConfigService.getString.assert_any_call('plots.images.ColorBarScale')
+        mock_ConfigService.getString.assert_any_call("plots.images.ColorBarScale")
         self.assertTrue(isinstance(fig.gca().images[0].colorbar.norm, matplotlib.colors.LogNorm))
 
-    @mock.patch('mantidqt.plotting.functions.ConfigService', new_callable=MockConfigService)
+    @mock.patch("mantidqt.plotting.functions.ConfigService", new_callable=MockConfigService)
     def test_pcolor_mesh_from_names_gets_colormap_from_ConfigService(self, mock_ConfigService):
         ws = CreateSampleWorkspace()
-        spring_colormap = cm.get_cmap('spring')
+        spring_colormap = colormaps["spring"]
 
         fig = pcolormesh_from_names([ws])
 
-        mock_ConfigService.getString.assert_any_call('plots.images.Colormap')
+        mock_ConfigService.getString.assert_any_call("plots.images.Colormap")
         self.assertEqual(fig.gca().images[0].colorbar.cmap, spring_colormap)
 
     def test_workspace_can_be_plotted_on_top_of_scripted_plots(self):
@@ -258,20 +274,20 @@ class FunctionsTest(TestCase):
         self.assertIsInstance(mantid_ax, MantidAxes)
 
     def test_that_plot_spectrum_has_same_y_label_with_and_without_errorbars(self):
-        auto_dist = config['graph1d.autodistribution']
+        auto_dist = config["graph1d.autodistribution"]
         try:
-            config['graph1d.autodistribution'] = 'Off'
+            config["graph1d.autodistribution"] = "Off"
             self._compare_errorbar_labels_and_title()
         finally:
-            config['graph1d.autodistribution'] = auto_dist
+            config["graph1d.autodistribution"] = auto_dist
 
     def test_that_plot_spectrum_has_same_y_label_with_and_without_errorbars_normalize_by_bin_width(self):
-        auto_dist = config['graph1d.autodistribution']
+        auto_dist = config["graph1d.autodistribution"]
         try:
-            config['graph1d.autodistribution'] = 'On'
+            config["graph1d.autodistribution"] = "On"
             self._compare_errorbar_labels_and_title()
         finally:
-            config['graph1d.autodistribution'] = auto_dist
+            config["graph1d.autodistribution"] = auto_dist
 
     def test_setting_waterfall_to_true_makes_waterfall_plot(self):
         fig = plt.figure()
@@ -309,8 +325,7 @@ class FunctionsTest(TestCase):
         ax.set_waterfall_fill(True)
         plot([ws], wksp_indices=[0], fig=fig, overplot=True)
 
-        fills = [collection for collection in ax.collections
-                 if isinstance(collection, matplotlib.collections.PolyCollection)]
+        fills = [collection for collection in ax.collections if isinstance(collection, matplotlib.collections.PolyCollection)]
 
         self.assertEqual(len(fills), 3)
 
@@ -318,14 +333,14 @@ class FunctionsTest(TestCase):
 
     def test_plot_from_names_with_non_plottable_workspaces_returns_None(self):
         table = WorkspaceFactory.Instance().createTable()
-        table_name = 'test_plot_from_names_with_non_plottable_workspaces_returns_None'
+        table_name = "test_plot_from_names_with_non_plottable_workspaces_returns_None"
         AnalysisDataService.Instance().addOrReplace(table_name, table)
         result = plot_from_names([table_name], errors=False, overplot=False)
         self.assertEqual(result, None)
 
     def test_pcolormesh_from_names_with_non_plottable_workspaces_returns_None(self):
         table = WorkspaceFactory.Instance().createTable()
-        table_name = 'test_pcolormesh_from_names_with_non_plottable_workspaces_returns_None'
+        table_name = "test_pcolormesh_from_names_with_non_plottable_workspaces_returns_None"
         AnalysisDataService.Instance().addOrReplace(table_name, table)
         result = pcolormesh_from_names([table_name])
         self.assertEqual(result, None)
@@ -336,9 +351,8 @@ class FunctionsTest(TestCase):
         self.assertRaises(TypeError, workspace_names_dummy_func(ws))
 
     # ------------- Private -------------------
-    def _do_plot_from_names_test(self, get_spectra_selection_mock, expected_labels,
-                                 wksp_indices, errors, overplot, target_fig=None):
-        ws_name = 'test_plot_from_names-1'
+    def _do_plot_from_names_test(self, get_spectra_selection_mock, expected_labels, wksp_indices, errors, overplot, target_fig=None):
+        ws_name = "test_plot_from_names-1"
         AnalysisDataService.Instance().addOrReplace(ws_name, self._test_ws)
 
         selection = SpectraSelection([self._test_ws])
@@ -352,8 +366,7 @@ class FunctionsTest(TestCase):
         self.assertEqual(len(expected_labels), len(plotted_lines))
         for label_part, line in zip(expected_labels, plotted_lines):
             if label_part is not None:
-                self.assertTrue(label_part in line.get_label(),
-                                msg="Label fragment '{}' not found in line label".format(label_part))
+                self.assertTrue(label_part in line.get_label(), msg="Label fragment '{}' not found in line label".format(label_part))
         return fig
 
     def _do_plot_md_from_names_test(self, expected_labels, errors, overplot, target_fig):
@@ -366,7 +379,7 @@ class FunctionsTest(TestCase):
         :param target_fig:
         :return:
         """
-        ws_name = 'test_plot_md_from_names_ws'
+        ws_name = "test_plot_md_from_names_ws"
         AnalysisDataService.Instance().addOrReplace(ws_name, self._test_md_ws)
 
         # call method to test
@@ -413,5 +426,5 @@ class FunctionsTest(TestCase):
         self.assertNotEqual(cmin, -0.1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

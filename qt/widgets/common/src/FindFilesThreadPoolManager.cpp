@@ -73,7 +73,6 @@ void FindFilesThreadPoolManager::createWorker(const QObject *parent, const FindF
   // pass ownership to the thread pool
   // we do not need to worry about deleting worker
   poolInstance()->start(worker);
-  m_searchIsRunning = true;
 }
 
 /** Connect a new worker to the listening parent
@@ -93,9 +92,6 @@ void FindFilesThreadPoolManager::connectWorker(const QObject *parent, const Find
   parent->connect(worker, SIGNAL(finished(const FindFilesSearchResults &)), parent, SIGNAL(fileFindingFinished()),
                   Qt::QueuedConnection);
 
-  this->connect(worker, SIGNAL(finished(const FindFilesSearchResults &)), this, SLOT(searchFinished()),
-                Qt::QueuedConnection);
-
   this->connect(this, SIGNAL(disconnectWorkers()), worker, SLOT(disconnectWorker()), Qt::QueuedConnection);
 }
 
@@ -111,15 +107,14 @@ void FindFilesThreadPoolManager::cancelWorker() {
   // waiting for it to finish before starting a new thread locks up the GUI
   // event loop.
   emit disconnectWorkers();
-  m_searchIsRunning = false;
   QCoreApplication::sendPostedEvents();
 }
 
 /** Check if a search is currently executing.
  *
- * @returns true if the current worker object is null
+ * @returns true if at least one worker thread is active
  */
-bool FindFilesThreadPoolManager::isSearchRunning() const { return m_searchIsRunning; }
+bool FindFilesThreadPoolManager::isSearchRunning() const { return poolInstance()->activeThreadCount() > 0; }
 
 /** Wait for all threads in the pool to finish running.
  *
@@ -128,7 +123,3 @@ bool FindFilesThreadPoolManager::isSearchRunning() const { return m_searchIsRunn
  * to freeze up.
  */
 void FindFilesThreadPoolManager::waitForDone() { poolInstance()->waitForDone(); }
-
-/** Mark the search as being finished.
- */
-void FindFilesThreadPoolManager::searchFinished() { m_searchIsRunning = false; }

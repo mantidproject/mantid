@@ -26,9 +26,7 @@ set(SRC_FILES
     IndirectCorrections.cpp
     IndirectDataAnalysis.cpp
     IndirectDataAnalysisConvFitTab.cpp
-    IndirectDataAnalysisElwinTab.cpp
     IndirectDataAnalysisFqFitTab.cpp
-    IndirectDataAnalysisIqtTab.cpp
     IndirectDataAnalysisIqtFitTab.cpp
     IndirectDataAnalysisMSDFitTab.cpp
     IndirectDataAnalysisTab.cpp
@@ -65,9 +63,6 @@ set(SRC_FILES
     IndirectInstrumentConfig.cpp
     IndirectInterface.cpp
     IndirectMolDyn.cpp
-    IndirectMoments.cpp
-    IndirectMomentsModel.cpp
-    IndirectMomentsView.cpp
     IndirectPlotOptionsModel.cpp
     IndirectPlotOptionsPresenter.cpp
     IndirectPlotOptionsView.cpp
@@ -79,17 +74,28 @@ set(SRC_FILES
     IndirectSettingsView.cpp
     IndirectSimulation.cpp
     IndirectSimulationTab.cpp
-    IndirectSqw.cpp
-    IndirectSqwModel.cpp
-    IndirectSqwView.cpp
-    IndirectSymmetrise.cpp
-    IndirectSymmetriseView.cpp
-    IndirectSymmetriseModel.cpp
     IndirectTab.cpp
     IndirectTools.cpp
     IndirectToolsTab.cpp
     IndirectTransmission.cpp
     IndirectTransmissionCalc.cpp
+    InelasticDataManipulation.cpp
+    InelasticDataManipulationElwinTab.cpp
+    InelasticDataManipulationElwinTabModel.cpp
+    InelasticDataManipulationElwinTabView.cpp
+    InelasticDataManipulationIqtTab.cpp
+    InelasticDataManipulationIqtTabView.cpp
+    InelasticDataManipulationIqtTabModel.cpp
+    InelasticDataManipulationMomentsTab.cpp
+    InelasticDataManipulationMomentsTabModel.cpp
+    InelasticDataManipulationMomentsTabView.cpp
+    InelasticDataManipulationTab.cpp
+    InelasticDataManipulationSqwTab.cpp
+    InelasticDataManipulationSqwTabModel.cpp
+    InelasticDataManipulationSqwTabView.cpp
+    InelasticDataManipulationSymmetriseTab.cpp
+    InelasticDataManipulationSymmetriseTabView.cpp
+    InelasticDataManipulationSymmetriseTabModel.cpp
     IqtFitModel.cpp
     MSDFitModel.cpp
     Quasi.cpp
@@ -123,10 +129,8 @@ set(MOC_FILES
     IndirectCorrections.h
     IndirectDataAnalysis.h
     IndirectDataAnalysisConvFitTab.h
-    IndirectDataAnalysisElwinTab.h
     IndirectDataAnalysisFqFitTab.h
     IndirectDataAnalysisIqtFitTab.h
-    IndirectDataAnalysisIqtTab.h
     IndirectDataAnalysisMSDFitTab.h
     IndirectDataAnalysisTab.h
     IndirectDataReduction.h
@@ -150,8 +154,6 @@ set(MOC_FILES
     IndirectInstrumentConfig.h
     IndirectInterface.h
     IndirectMolDyn.h
-    IndirectMoments.h
-    IndirectMomentsView.h
     IndirectPlotOptionsPresenter.h
     IndirectPlotOptionsView.h
     IndirectSassena.h
@@ -160,17 +162,24 @@ set(MOC_FILES
     IndirectSettingsView.h
     IndirectSimulation.h
     IndirectSimulationTab.h
-    IndirectSqw.h
-    IndirectSqwView.h
-    IndirectSymmetrise.h
-    IndirectSymmetriseView.h
-    IndirectSymmetriseModel.h
     IndirectTab.h
     IndirectTools.h
     IndirectToolsTab.h
     IndirectTransmissionCalc.h
     IndirectTransmission.h
     IndirectFitPropertyBrowser.h
+    InelasticDataManipulation.h
+    InelasticDataManipulationElwinTab.h
+    InelasticDataManipulationElwinTabView.h
+    InelasticDataManipulationIqtTab.h
+    InelasticDataManipulationIqtTabView.h
+    InelasticDataManipulationMomentsTab.h
+    InelasticDataManipulationMomentsTabView.h
+    InelasticDataManipulationSqwTab.h
+    InelasticDataManipulationSqwTabView.h
+    InelasticDataManipulationSymmetriseTab.h
+    InelasticDataManipulationSymmetriseTabView.h
+    InelasticDataManipulationTab.h
     ISISCalibration.h
     ISISDiagnostics.h
     ISISEnergyTransfer.h
@@ -194,10 +203,13 @@ set(INC_FILES
     IndirectFittingModel.h
     IndirectFitOutput.h
     IndirectFunctionBrowser/ConvFunctionModel.h
-    IndirectMomentsModel.h
     IndirectPlotOptionsModel.h
     IndirectSettingsHelper.h
-    IndirectSqwModel.h
+    InelasticDataManipulationElwinTabModel.h
+    InelasticDataManipulationIqtTabModel.h
+    InelasticDataManipulationMomentsTabModel.h
+    InelasticDataManipulationSqwTabModel.h
+    InelasticDataManipulationSymmetriseTabModel.h
     IqtFitModel.h
     MSDFitModel.h
     Notifier.h
@@ -220,7 +232,6 @@ set(UI_FILES
     IndirectBayes.ui
     IndirectCorrections.ui
     IndirectDataAnalysis.ui
-    IndirectDataAnalysisElwinTab.ui
     IndirectDataReduction.ui
     IndirectDiffractionReduction.ui
     IndirectEditResultsDialog.ui
@@ -231,18 +242,20 @@ set(UI_FILES
     IndirectInstrumentConfig.ui
     IndirectInterfaceSettings.ui
     IndirectMolDyn.ui
-    IndirectMoments.ui
+    InelasticDataManipulation.ui
+    InelasticDataManipulationElwinTab.ui
+    InelasticDataManipulationIqtTab.ui
+    InelasticDataManipulationMomentsTab.ui
+    InelasticDataManipulationSqwTab.ui
+    InelasticDataManipulationSymmetriseTab.ui
     IndirectPlotOptions.ui
     IndirectSassena.ui
     IndirectSettings.ui
     IndirectSimulation.ui
     IndirectSpectrumSelector.ui
-    IndirectSqw.ui
-    IndirectSymmetrise.ui
     IndirectTools.ui
     IndirectTransmission.ui
     IndirectTransmissionCalc.ui
-    IndirectDataAnalysisIqtTab.ui
     Quasi.ui
     ResNorm.ui
     Stretch.ui
@@ -252,7 +265,7 @@ set(RES_FILES IndirectInterfaceResources.qrc)
 
 # XML is required to parse the settings file
 find_package(
-  Qt5
+  Qt5 ${QT_MIN_VERSION}
   COMPONENTS Concurrent Xml
   REQUIRED
 )

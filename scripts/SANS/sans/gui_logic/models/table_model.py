@@ -19,12 +19,27 @@ from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
 
 
 class TableModel(object):
-    column_name_converter = ["sample_scatter", "sample_scatter_period", "sample_transmission",
-                             "sample_transmission_period", "sample_direct", "sample_direct_period",
-                             "can_scatter", "can_scatter_period",
-                             "can_transmission", "can_transmission_period", "can_direct", "can_direct_period",
-                             "output_name", "user_file", "sample_thickness", "sample_height", "sample_width",
-                             "sample_shape", "options_column_model"]
+    column_name_converter = [
+        "sample_scatter",
+        "sample_scatter_period",
+        "sample_transmission",
+        "sample_transmission_period",
+        "sample_direct",
+        "sample_direct_period",
+        "can_scatter",
+        "can_scatter_period",
+        "can_transmission",
+        "can_transmission_period",
+        "can_direct",
+        "can_direct_period",
+        "output_name",
+        "user_file",
+        "sample_thickness",
+        "sample_height",
+        "sample_width",
+        "sample_shape",
+        "options_column_model",
+    ]
     THICKNESS_ROW = 14
 
     logger = Logger("ISIS SANS GUI")
@@ -112,11 +127,9 @@ class TableModel(object):
         self.notify_subscribers()
 
     def _set_single_table_entry(self, row_entry, row_index=None):
-        assert isinstance(row_entry, RowEntries), \
-            "%r is not a RowEntries object" % row_entry
+        assert isinstance(row_entry, RowEntries), "%r is not a RowEntries object" % row_entry
 
-        assert len(self._table_entries) >= 1, \
-            "There must always be 1 element in the model, currently there is 0"
+        assert len(self._table_entries) >= 1, "There must always be 1 element in the model, currently there is 0"
 
         if self._default_entry_added:
             del self._table_entries[0]
@@ -155,25 +168,25 @@ class TableModel(object):
 
     @staticmethod
     def get_options_hint_strategy():
-        return BasicHintStrategy({"WavelengthMin": 'The min value of the wavelength when converting from TOF.',
-                                  "WavelengthMax": 'The max value of the wavelength when converting from TOF.',
-                                  "PhiMin": 'The min angle of the detector to accept.'
-                                            ' Anti-clockwise from horizontal.',
-                                  "PhiMax": 'The max angle of the detector to accept.'
-                                            ' Anti-clockwise from horizontal.',
-                                  "UseMirror": 'True or False. Whether or not to accept phi angle in opposing quadrant',
-                                  "MergeScale": 'The scale applied to the HAB when merging',
-                                  "MergeShift": 'The shift applied to the HAB when merging',
-                                  "EventSlices": 'The event slices to reduce.'
-                                                 ' The format is the same as for the event slices'
-                                                 ' box in settings, however if a comma separated list is given '
-                                                 'it must be enclosed in quotes'})
+        return BasicHintStrategy(
+            {
+                "WavelengthMin": "The min value of the wavelength when converting from TOF.",
+                "WavelengthMax": "The max value of the wavelength when converting from TOF.",
+                "PhiMin": "The min angle of the detector to accept." " Anti-clockwise from horizontal.",
+                "PhiMax": "The max angle of the detector to accept." " Anti-clockwise from horizontal.",
+                "UseMirror": "True or False. Whether or not to accept phi angle in opposing quadrant",
+                "MergeScale": "The scale applied to the HAB when merging",
+                "MergeShift": "The shift applied to the HAB when merging",
+                "EventSlices": "The event slices to reduce."
+                " The format is the same as for the event slices"
+                " box in settings, however if a comma separated list is given "
+                "it must be enclosed in quotes",
+            }
+        )
 
     @staticmethod
     def get_sample_shape_hint_strategy():
-        return BasicHintStrategy({"Cylinder": "",
-                                  "Disc": "",
-                                  "FlatPlate": ""})
+        return BasicHintStrategy({"Cylinder": "", "Disc": "", "FlatPlate": ""})
 
     def set_row_to_processed(self, row, tool_tip):
         self._table_entries[row].state = RowState.PROCESSED
@@ -205,10 +218,10 @@ class TableModel(object):
             subscriber.on_update_rows()
 
     def __eq__(self, other):
-        return self.equal_dicts(self.__dict__, other.__dict__, ['work_handler'])
+        return self.equal_dicts(self.__dict__, other.__dict__, ["work_handler"])
 
     def __ne__(self, other):
-        return not self.equal_dicts(self.__dict__, other.__dict__, ['work_handler'])
+        return not self.equal_dicts(self.__dict__, other.__dict__, ["work_handler"])
 
     @staticmethod
     def equal_dicts(d1, d2, ignore_keys):

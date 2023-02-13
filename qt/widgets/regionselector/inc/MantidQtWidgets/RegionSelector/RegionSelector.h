@@ -8,6 +8,7 @@
 
 #include "MantidAPI/RegionSelectorObserver.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidQtWidgets/Common/IImageInfoWidget.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/RegionSelector/DllConfig.h"
 #include "MantidQtWidgets/RegionSelector/IRegionSelector.h"
@@ -17,7 +18,8 @@ class QLayout;
 namespace MantidQt::Widgets {
 class MANTID_REGIONSELECTOR_DLL RegionSelector : public Common::Python::InstanceHolder, public IRegionSelector {
 public:
-  RegionSelector(Mantid::API::Workspace_sptr const &workspace, QLayout *layout);
+  RegionSelector(Mantid::API::Workspace_sptr const &workspace, QLayout *layout,
+                 MantidWidgets::IImageInfoWidget *imageInfoWidget = nullptr);
   RegionSelector(RegionSelector const &) = delete;
   RegionSelector(RegionSelector &&);
   RegionSelector &operator=(RegionSelector const &) = delete;
@@ -27,6 +29,7 @@ public:
   void clearWorkspace() override;
   void updateWorkspace(Mantid::API::Workspace_sptr const &workspace) override;
   void addRectangularRegion(const std::string &regionType, const std::string &color) override;
+  void deselectAllSelectors() override;
   Selection getRegion(const std::string &regionType) override;
   void cancelDrawingRegion() override;
 

@@ -9,12 +9,13 @@ from mantidqtinterfaces.HFIR_4Circle_Reduction.integratedpeakview import General
 import os
 from qtpy.QtWidgets import QMainWindow, QFileDialog
 from mantid.kernel import Logger
+
 try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
-    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    Logger("HFIR_4Circle_Reduction").information("Using legacy ui importer")
     from mantidplot import load_ui
-from qtpy.QtWidgets import (QVBoxLayout)
+from qtpy.QtWidgets import QVBoxLayout
 
 
 class GeneralPlotWindow(QMainWindow):
@@ -54,9 +55,9 @@ class GeneralPlotWindow(QMainWindow):
         :return:
         """
         # get directory
-        file_name = QFileDialog.getSaveFileName(self, caption='File to save the plot',
-                                                directory=self._work_dir,
-                                                filter='Data File(*.dat);;All Files(*.*')
+        file_name = QFileDialog.getSaveFileName(
+            self, caption="File to save the plot", directory=self._work_dir, filter="Data File(*.dat);;All Files(*.*"
+        )
         if not file_name:
             return
         if isinstance(file_name, tuple):
@@ -88,7 +89,7 @@ class GeneralPlotWindow(QMainWindow):
         :param y_label:
         :return:
         """
-        self.ui.graphicsView_plotView.plot_data(vec_x, vec_y, vec_e, 'No title', x_label, y_label)
+        self.ui.graphicsView_plotView.plot_data(vec_x, vec_y, vec_e, "No title", x_label, y_label)
 
     def set_working_dir(self, work_dir):
         """
@@ -96,11 +97,11 @@ class GeneralPlotWindow(QMainWindow):
         :return:
         """
         # check
-        fourcircle_utility.check_str('Working directory', work_dir)
+        fourcircle_utility.check_str("Working directory", work_dir)
         if os.path.exists(work_dir) and os.access(work_dir, os.W_OK) is False:
-            raise RuntimeError('Directory {0} is not writable.'.format(work_dir))
+            raise RuntimeError("Directory {0} is not writable.".format(work_dir))
         elif not os.path.exists(work_dir):
-            raise RuntimeError('Directory {0} does not exist.'.format(work_dir))
+            raise RuntimeError("Directory {0} does not exist.".format(work_dir))
         else:
             self._work_dir = work_dir
 

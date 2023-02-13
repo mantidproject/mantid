@@ -10,13 +10,12 @@ from mantid.kernel import StringListValidator, StringContainsValidator, FloatArr
 
 
 class SimpleFuncWValidator(IFunction1D):
-
     def category(self):
         pass
 
     def init(self, input_case):
         if input_case == "String List":
-            self.declareAttribute("StringAtt", "filename", StringListValidator(["filename","test"]))
+            self.declareAttribute("StringAtt", "filename", StringListValidator(["filename", "test"]))
         elif input_case == "Float Bounded":
             self.declareAttribute("FloatAtt", 3.0, FloatBoundedValidator(0.0, 5.0))
         elif input_case == "Array Bounded":
@@ -26,7 +25,7 @@ class SimpleFuncWValidator(IFunction1D):
 
     def invalid_init(self, input_case):
         if input_case == "String List":
-            self.declareAttribute("StringAtt", "error", StringListValidator(["filename","test"]))
+            self.declareAttribute("StringAtt", "error", StringListValidator(["filename", "test"]))
         elif input_case == "Float Bounded":
             self.declareAttribute("FloatAtt", 10.0, FloatBoundedValidator(0.0, 5.0))
         elif input_case == "Array Bounded":
@@ -37,8 +36,8 @@ class SimpleFuncWValidator(IFunction1D):
     def function1D(self, xvals):
         pass
 
-class IFunction1DValidatorTest(unittest.TestCase):
 
+class IFunction1DValidatorTest(unittest.TestCase):
     def test_float_bounded_validator(self):
         func = SimpleFuncWValidator()
 
@@ -53,7 +52,7 @@ class IFunction1DValidatorTest(unittest.TestCase):
         self.assertRaises(Exception, func.invalid_init, "String List")
         func.init("String List")
 
-        self.assertRaises(Exception, func.setAttributeValue,"StringAtt", "error")
+        self.assertRaises(Exception, func.setAttributeValue, "StringAtt", "error")
 
     def test_array_bounded_validator(self):
         func = SimpleFuncWValidator()
@@ -63,7 +62,7 @@ class IFunction1DValidatorTest(unittest.TestCase):
 
         invalid_input_vals = [1.0, 2.0, 3.0, 10.0]
 
-        self.assertRaises(Exception, func.setAttributeValue,"ListAtt", invalid_input_vals)
+        self.assertRaises(Exception, func.setAttributeValue, "ListAtt", invalid_input_vals)
 
     def test_string_contains_validator(self):
         func = SimpleFuncWValidator()
@@ -71,8 +70,8 @@ class IFunction1DValidatorTest(unittest.TestCase):
         self.assertRaises(Exception, func.invalid_init, "String Contains")
         func.init("String Contains")
 
-        self.assertRaises(Exception, func.setAttributeValue,"StringContainsAtt", "error")
+        self.assertRaises(Exception, func.setAttributeValue, "StringContainsAtt", "error")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

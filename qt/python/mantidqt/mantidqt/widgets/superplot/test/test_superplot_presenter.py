@@ -15,7 +15,6 @@ from mantid.plots.utility import MantidAxType
 
 
 class SuperplotPresenterTest(unittest.TestCase):
-
     def setUp(self):
         py_module = "mantidqt.widgets.superplot.presenter"
 
@@ -42,11 +41,10 @@ class SuperplotPresenterTest(unittest.TestCase):
         a1 = mock.Mock()
         ws = mock.Mock()
         sp = mock.Mock()
-        self.m_axes.get_artists_workspace_and_workspace_index.return_value = \
-            ws, sp
+        self.m_axes.get_artists_workspace_and_workspace_index.return_value = ws, sp
         self.m_axes.get_tracked_artists.return_value = [a1]
         self.m_view.get_selection.return_value = {}
-        self.m_view.get_hold_button_size.return_value = 0,0
+        self.m_view.get_hold_button_size.return_value = 0, 0
         self.presenter = SuperplotPresenter(self.m_canvas)
         self.m_view.reset_mock()
         self.m_model.reset_mock()
@@ -66,16 +64,14 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.presenter._update_spectrum_slider = mock.Mock()
         self.presenter._update_plot = mock.Mock()
         self.presenter.set_bin_mode(True)
-        self.m_view.set_mode.assert_called_once_with(
-                self.presenter.BIN_MODE_TEXT)
+        self.m_view.set_mode.assert_called_once_with(self.presenter.BIN_MODE_TEXT)
         self.presenter._update_spectrum_slider.assert_called_once()
         self.presenter._update_plot.assert_called_once()
         self.m_view.reset_mock()
         self.presenter._update_spectrum_slider.reset_mock()
         self.presenter._update_plot.reset_mock()
         self.presenter.set_bin_mode(False)
-        self.m_view.set_mode.assert_called_once_with(
-                self.presenter.SPECTRUM_MODE_TEXT)
+        self.m_view.set_mode.assert_called_once_with(self.presenter.SPECTRUM_MODE_TEXT)
         self.presenter._update_spectrum_slider.assert_called_once()
         self.presenter._update_plot.assert_called_once()
 
@@ -111,30 +107,34 @@ class SuperplotPresenterTest(unittest.TestCase):
     @mock.patch("mantidqt.widgets.superplot.presenter.MARKER_MAP")
     def test_get_kwargs_from_settings(self, m_marker_map, m_config_service):
         m_marker_map.__getitem__.return_value = "test"
-        setting_values = {"plots.line.Style": "test",
-                          "plots.line.DrawStyle": "test",
-                          "plots.line.Width": 10.0,
-                          "plots.marker.Style": "test",
-                          "plots.errorbar.Capsize": 10.0,
-                          "plots.errorbar.CapThickness": 10.0,
-                          "plots.errorbar.errorEvery": 10.0,
-                          "plots.errorbar.Width": 10.0}
+        setting_values = {
+            "plots.line.Style": "test",
+            "plots.line.DrawStyle": "test",
+            "plots.line.Width": 10.0,
+            "plots.marker.Style": "test",
+            "plots.errorbar.Capsize": 10.0,
+            "plots.errorbar.CapThickness": 10.0,
+            "plots.errorbar.errorEvery": 10.0,
+            "plots.errorbar.Width": 10.0,
+        }
         m_config_service.getString = setting_values.__getitem__
         kwargs = self.presenter.get_kwargs_from_settings()
-        self.assertDictEqual(kwargs, {"linestyle": "test",
-                                      "drawstyle": "test",
-                                      "linewidth": 10.0,
-                                      "marker": "test"})
+        self.assertDictEqual(kwargs, {"linestyle": "test", "drawstyle": "test", "linewidth": 10.0, "marker": "test"})
         self.presenter._error_bars = True
         kwargs = self.presenter.get_kwargs_from_settings()
-        self.assertDictEqual(kwargs, {"linestyle": "test",
-                                      "drawstyle": "test",
-                                      "linewidth": 10.0,
-                                      "marker": "test",
-                                      "capsize": 10.0,
-                                      "capthick": 10.0,
-                                      "errorevery": 10.0,
-                                      "elinewidth": 10.0})
+        self.assertDictEqual(
+            kwargs,
+            {
+                "linestyle": "test",
+                "drawstyle": "test",
+                "linewidth": 10.0,
+                "marker": "test",
+                "capsize": 10.0,
+                "capthick": 10.0,
+                "errorevery": 10.0,
+                "elinewidth": 10.0,
+            },
+        )
 
     def test_on_visibility_changed(self):
         self.m_canvas.reset_mock()
@@ -204,23 +204,19 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.m_view.get_selection.return_value = {"ws1": []}
         self.m_view.get_spectrum_slider_position.return_value = 10
         self.presenter._update_hold_button()
-        self.m_view.set_hold_button_text.assert_called_once_with(
-                self.presenter.HOLD_BUTTON_TEXT_UNCHECKED)
+        self.m_view.set_hold_button_text.assert_called_once_with(self.presenter.HOLD_BUTTON_TEXT_UNCHECKED)
         self.m_view.reset_mock()
         self.m_view.get_selection.return_value = {"ws2": []}
         self.m_view.get_spectrum_slider_position.return_value = 2
         self.presenter._update_hold_button()
-        self.m_view.set_hold_button_text.assert_called_once_with(
-                self.presenter.HOLD_BUTTON_TEXT_CHECKED)
+        self.m_view.set_hold_button_text.assert_called_once_with(self.presenter.HOLD_BUTTON_TEXT_CHECKED)
 
     def test_update_list(self):
         self.m_model.get_workspaces.return_value = ["ws1", "ws2", "ws5"]
         self.m_model.get_plotted_data.return_value = [("ws5", 5), ("ws2", 1)]
         self.presenter._update_list()
-        self.m_view.set_workspaces_list.assert_called_once_with(["ws1", "ws2",
-                                                                 "ws5"])
-        calls = [mock.call("ws1", []), mock.call("ws2", [1]),
-                 mock.call("ws5", [5])]
+        self.m_view.set_workspaces_list.assert_called_once_with(["ws1", "ws2", "ws5"])
+        calls = [mock.call("ws1", []), mock.call("ws2", [1]), mock.call("ws5", [5])]
         self.m_view.set_spectra_list.assert_has_calls(calls)
 
     def test_update_plot(self):
@@ -274,16 +270,14 @@ class SuperplotPresenterTest(unittest.TestCase):
         ws2.name.return_value = "ws2"
         ws1 = mock.Mock()
         ws1.name.return_value = "ws1"
-        self.m_axes.get_artists_workspace_and_workspace_index.side_effect = \
-            [(ws5, 5), (ws2, 1), (ws1, 1)]
+        self.m_axes.get_artists_workspace_and_workspace_index.side_effect = [(ws5, 5), (ws2, 1), (ws1, 1)]
         self.presenter._fill_plot_kwargs = mock.Mock()
         self.presenter._fill_plot_kwargs.return_value = dict()
         self.presenter._remove_unneeded_curves(False)
         self.m_axes.remove_artists_if.assert_called_once()
         self.presenter._fill_plot_kwargs.assert_not_called()
         self.m_axes.remove_artists_if.reset_mock()
-        self.m_axes.get_artists_workspace_and_workspace_index.side_effect = \
-                [(ws5, 5), (ws2, 1), (ws1, 1)]
+        self.m_axes.get_artists_workspace_and_workspace_index.side_effect = [(ws5, 5), (ws2, 1), (ws1, 1)]
         self.presenter._remove_unneeded_curves(True)
         self.m_axes.remove_artists_if.assert_called()
         self.presenter._fill_plot_kwargs.assert_called()
@@ -313,25 +307,14 @@ class SuperplotPresenterTest(unittest.TestCase):
         color = "color"
         ws = mock.Mock()
         self.m_mtd.__getitem__.return_value = ws
-        kwargs = self.presenter._fill_plot_kwargs(ws_name, spectrum, normalise,
-                                                  mode, color)
-        self.assertDictEqual(kwargs, {"axis": MantidAxType.SPECTRUM,
-                                      "wkspIndex": 0,
-                                      "color": "color"})
+        kwargs = self.presenter._fill_plot_kwargs(ws_name, spectrum, normalise, mode, color)
+        self.assertDictEqual(kwargs, {"axis": MantidAxType.SPECTRUM, "wkspIndex": 0, "color": "color"})
         normalise = True
-        kwargs = self.presenter._fill_plot_kwargs(ws_name, spectrum, normalise,
-                                                  mode, color)
-        self.assertDictEqual(kwargs, {"axis": MantidAxType.SPECTRUM,
-                                      "wkspIndex": 0,
-                                      "color": "color",
-                                      "normalise_spectrum": True})
+        kwargs = self.presenter._fill_plot_kwargs(ws_name, spectrum, normalise, mode, color)
+        self.assertDictEqual(kwargs, {"axis": MantidAxType.SPECTRUM, "wkspIndex": 0, "color": "color", "normalise_spectrum": True})
         mode = self.presenter.BIN_MODE_TEXT
-        kwargs = self.presenter._fill_plot_kwargs(ws_name, spectrum, normalise,
-                                                  mode, color)
-        self.assertDictEqual(kwargs, {"axis": MantidAxType.BIN,
-                                      "wkspIndex": 0,
-                                      "color": "color",
-                                      "normalise_spectrum": True})
+        kwargs = self.presenter._fill_plot_kwargs(ws_name, spectrum, normalise, mode, color)
+        self.assertDictEqual(kwargs, {"axis": MantidAxType.BIN, "wkspIndex": 0, "color": "color", "normalise_spectrum": True})
 
     def test_on_workspace_selection_changed(self):
         self.presenter._update_plot = mock.Mock()
@@ -373,8 +356,7 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.presenter._update_list.assert_called_once()
         self.presenter._update_spectrum_slider.assert_called_once()
         self.presenter._update_plot.assert_called_once()
-        self.m_view.set_selection.assert_called_once_with({"ws1": [1],
-                                                           "ws2": [2]})
+        self.m_view.set_selection.assert_called_once_with({"ws1": [1], "ws2": [2]})
         self.m_view.reset_mock()
         self.presenter.on_del_spectrum_button_clicked("ws1", 1)
         self.m_view.set_selection.assert_called_once_with({"ws2": [2]})
@@ -392,8 +374,7 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.m_model.set_spectrum_mode.assert_called_once()
         self.presenter._update_list.assert_called_once()
         self.presenter._update_plot.assert_called_once()
-        self.m_view.set_selection.assert_called_once_with({"ws1": [10],
-                                                           "ws2": [10]})
+        self.m_view.set_selection.assert_called_once_with({"ws1": [10], "ws2": [10]})
         self.m_view.get_mode.return_value = self.presenter.BIN_MODE_TEXT
         self.presenter._on_hold()
         self.m_model.set_bin_mode.assert_called_once()
@@ -415,12 +396,10 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.presenter._on_hold = mock.Mock()
         self.presenter._on_un_hold = mock.Mock()
         self.m_view.get_hold_button_text = mock.Mock()
-        self.m_view.get_hold_button_text.return_value = \
-            self.presenter.HOLD_BUTTON_TEXT_CHECKED
+        self.m_view.get_hold_button_text.return_value = self.presenter.HOLD_BUTTON_TEXT_CHECKED
         self.presenter.on_hold_button_clicked()
         self.presenter._on_un_hold.assert_called_once()
-        self.m_view.get_hold_button_text.return_value = \
-            self.presenter.HOLD_BUTTON_TEXT_UNCHECKED
+        self.m_view.get_hold_button_text.return_value = self.presenter.HOLD_BUTTON_TEXT_UNCHECKED
         self.presenter.on_hold_button_clicked()
         self.presenter._on_hold.assert_called_once()
 
@@ -446,8 +425,7 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.presenter._update_plot = mock.Mock()
         self.m_view.get_selection.return_value = {"ws1": [1], "ws2": [2]}
         self.presenter.on_workspace_renamed("ws1", "ws3")
-        self.m_view.set_selection.assert_called_once_with({"ws3": [1],
-                                                           "ws2": [2]})
+        self.m_view.set_selection.assert_called_once_with({"ws3": [1], "ws2": [2]})
         self.presenter._update_list.assert_called_once()
         self.presenter._update_plot.assert_called_once()
 

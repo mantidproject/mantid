@@ -9,5 +9,5 @@
 #
 from mantidqt.utils.qt import import_qt
 
-Hint = import_qt('._common', 'mantidqt', 'Hint')
-HintStrategy = import_qt('._common', 'mantidqt', 'HintStrategy')
+Hint = import_qt("._common", "mantidqt", "Hint")
+HintStrategy = import_qt("._common", "mantidqt", "HintStrategy")

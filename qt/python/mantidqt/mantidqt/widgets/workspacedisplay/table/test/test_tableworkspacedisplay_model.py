@@ -94,7 +94,7 @@ class TableWorkspaceDisplayModelTest(unittest.TestCase):
         :type model: TableWorkspaceDisplayModel
         """
         mock_peaksWorkspace = Mock(spec=PeaksWorkspace)
-        mock_peaksWorkspace.getColumnNames.return_value = ['h', 'k', 'l']
+        mock_peaksWorkspace.getColumnNames.return_value = ["h", "k", "l"]
         mock_peak = Mock()
         mock_peaksWorkspace.getPeak.return_value = mock_peak
         model.ws = mock_peaksWorkspace
@@ -113,6 +113,7 @@ class TableWorkspaceDisplayModelTest(unittest.TestCase):
 
     def test_no_raise_with_supported_workspace(self):
         from mantid.simpleapi import CreateEmptyTableWorkspace
+
         ws = MockWorkspace()
         expected_name = "TEST_WORKSPACE"
         ws.name = Mock(return_value=expected_name)
@@ -129,8 +130,11 @@ class TableWorkspaceDisplayModelTest(unittest.TestCase):
         # multiply by 3 to have 1 of each type
         ws.columnCount = StrictMock(return_value=num_of_repeated_columns * 3)
         # make 10 columns of each type
-        mock_column_types = [TableWorkspaceColumnTypeMapping.X, TableWorkspaceColumnTypeMapping.Y,
-                             TableWorkspaceColumnTypeMapping.YERR] * num_of_repeated_columns
+        mock_column_types = [
+            TableWorkspaceColumnTypeMapping.X,
+            TableWorkspaceColumnTypeMapping.Y,
+            TableWorkspaceColumnTypeMapping.YERR,
+        ] * num_of_repeated_columns
         ws.getPlotType = lambda i: mock_column_types[i]
         ws.getLinkedYCol = lambda i: i - 1
         model = TableWorkspaceDisplayModel(ws)
@@ -145,10 +149,16 @@ class TableWorkspaceDisplayModelTest(unittest.TestCase):
     def test_initialise_marked_columns_multiple_y_before_yerr(self):
         ws = MockWorkspace()
         # add 5 columns as that is how many the default mock WS has
-        mock_column_types = [TableWorkspaceColumnTypeMapping.X, TableWorkspaceColumnTypeMapping.Y,
-                             TableWorkspaceColumnTypeMapping.YERR, TableWorkspaceColumnTypeMapping.Y,
-                             TableWorkspaceColumnTypeMapping.Y, TableWorkspaceColumnTypeMapping.YERR,
-                             TableWorkspaceColumnTypeMapping.YERR, TableWorkspaceColumnTypeMapping.X]
+        mock_column_types = [
+            TableWorkspaceColumnTypeMapping.X,
+            TableWorkspaceColumnTypeMapping.Y,
+            TableWorkspaceColumnTypeMapping.YERR,
+            TableWorkspaceColumnTypeMapping.Y,
+            TableWorkspaceColumnTypeMapping.Y,
+            TableWorkspaceColumnTypeMapping.YERR,
+            TableWorkspaceColumnTypeMapping.YERR,
+            TableWorkspaceColumnTypeMapping.X,
+        ]
         ws.columnCount = StrictMock(return_value=len(mock_column_types))
 
         ws.getPlotType = lambda i: mock_column_types[i]
@@ -172,5 +182,5 @@ class TableWorkspaceDisplayModelTest(unittest.TestCase):
         self.assertFalse(model.is_editable_column(0))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

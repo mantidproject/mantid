@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import os.path as osp
 import numpy as np
-from mantid.api import (AlgorithmFactory, FileProperty, FileAction, IPeaksWorkspaceProperty, PythonAlgorithm)
-from mantid.kernel import StringListValidator, Direction
+from mantid.api import AlgorithmFactory, FileProperty, FileAction, IPeaksWorkspaceProperty, PythonAlgorithm
+from mantid.kernel import StringListValidator, Direction, logger
 from enum import Enum
 
 
@@ -39,7 +39,7 @@ def get_two_theta(dspacing, wavelength):
     :param wavelength: Wavelength of a peak
     :returns: the scattering angle for the peak.
     """
-    theta = 2. * np.arcsin(0.5 * (wavelength / dspacing))
+    theta = 2.0 * np.arcsin(0.5 * (wavelength / dspacing))
     return np.rad2deg(theta)
 
 
@@ -85,28 +85,29 @@ class SaveReflections(PythonAlgorithm):
     def PyInit(self):
         """Initilize the algorithms properties"""
 
-        self.declareProperty(IPeaksWorkspaceProperty("InputWorkspace", '', Direction.Input),
-                             doc="The name of the peaks worksapce to save")
+        self.declareProperty(IPeaksWorkspaceProperty("InputWorkspace", "", Direction.Input), doc="The name of the peaks worksapce to save")
 
-        self.declareProperty(FileProperty("Filename",
-                                          "",
-                                          action=FileAction.Save,
-                                          direction=Direction.Input),
-                             doc="File with the data from a phonon calculation.")
+        self.declareProperty(
+            FileProperty("Filename", "", action=FileAction.Save, direction=Direction.Input),
+            doc="File with the data from a phonon calculation.",
+        )
 
-        self.declareProperty(name="Format",
-                             direction=Direction.Input,
-                             defaultValue="Fullprof",
-                             validator=StringListValidator(
-                                 [fmt.name for fmt in ReflectionFormat]),
-                             doc="The output format to export reflections to")
+        self.declareProperty(
+            name="Format",
+            direction=Direction.Input,
+            defaultValue="Fullprof",
+            validator=StringListValidator([fmt.name for fmt in ReflectionFormat]),
+            doc="The output format to export reflections to",
+        )
 
-        self.declareProperty(name="SplitFiles",
-                             defaultValue=False,
-                             direction=Direction.Input,
-                             doc="If True save separate files with only the peaks associated"
-                                 "with a single modulation vector in a single file. Only "
-                                 "applies to JANA format.")
+        self.declareProperty(
+            name="SplitFiles",
+            defaultValue=False,
+            direction=Direction.Input,
+            doc="If True save separate files with only the peaks associated"
+            "with a single modulation vector in a single file. Only "
+            "applies to JANA format.",
+        )
 
     def PyExec(self):
         """Execute the algorithm"""
@@ -115,11 +116,17 @@ class SaveReflections(PythonAlgorithm):
         file_name = self.getPropertyValue("Filename")
         split_files = self.getProperty("SplitFiles").value
         # find the max intensity so fits in column with format 12.2f in Fullprof and Jana, 8.2f in SaveHKL (SHELX, GSAS)
-        max_intens = max(workspace.column('Intens'))
-        max_exponent = 8 if output_format in [ReflectionFormat.Fullprof, ReflectionFormat.Jana] else 4
-        min_exponent = -2  # 2 decimal points in SHELX, FullProf, Jana2006 and GSAS-II
-        # find scale factor to scale intensity to largest value in the available width (e.g. 9999.99 for SHELX)
-        scale = 1 if max_intens < 10 ** max_exponent else ((10 ** max_exponent) - 10 ** min_exponent) / max_intens
+        scale = 1
+        if workspace.getNumberPeaks() > 0:
+            max_intens = max(workspace.column("Intens"))
+            max_exponent = 8 if output_format in [ReflectionFormat.Fullprof, ReflectionFormat.Jana] else 4
+            min_exponent = -2  # 2 decimal points in SHELX, FullProf, Jana2006 and GSAS-II
+            if max_intens >= 10**max_exponent:
+                # find scale factor to scale intensity to largest value in the available width (e.g. 9999.99 for SHELX)
+                scale = ((10**max_exponent) - 10**min_exponent) / max_intens
+        else:
+            logger.warning(f"Peaks workspace {workspace.name()} is empty - an empty file will be produced.")
+
         FORMAT_MAP[output_format]()(file_name, workspace, split_files, scale)
 
 
@@ -141,7 +148,7 @@ class FullprofFormat(object):
         :param workspace: the PeaksWorkspace to write to file.
         :param _: Ignored parameter for compatibility with other savers
         """
-        with open(file_name, 'w') as f_handle:
+        with open(file_name, "w") as f_handle:
             self.write_header(f_handle, workspace)
             self.write_peaks(f_handle, workspace, scale)
 
@@ -153,9 +160,9 @@ class FullprofFormat(object):
         """
         num_hkl = 3 + has_modulated_indexing(workspace)  # add a column if mod vectors
         title = workspace.getTitle() if workspace.getTitle() else workspace.name()
-        f_handle.write(title + '\n')
+        f_handle.write(title + "\n")
         f_handle.write("({}i4,2f12.2,i5,4f10.4)\n".format(num_hkl))
-        wavelength = '0'  # if TOF Laue this is ignored
+        wavelength = "0"  # if TOF Laue this is ignored
         if np.std([pk.getWavelength() for pk in workspace]) < 0.01:
             # check for constant wavelength (same as in SaveHKLCW)
             wavelength = f"{workspace.getPeak(0).getWavelength():.5f}"
@@ -172,8 +179,7 @@ class FullprofFormat(object):
                 x, y, z = vec.X(), vec.Y(), vec.Z()
                 if abs(x) > 0 or abs(y) > 0 or abs(z) > 0:
                     f_handle.write("   {}{: >13.6f}{: >13.6f}{: >13.6f}\n".format(row_num, x, y, z))
-                    f_handle.write("   {}{: >13.6f}{: >13.6f}{: >13.6f}\n".format(
-                        row_num + 1, -x, -y, -z))
+                    f_handle.write("   {}{: >13.6f}{: >13.6f}{: >13.6f}\n".format(row_num + 1, -x, -y, -z))
                     row_num += 2
             mod_colname = "   m"
         f_handle.write("#  h   k   l{}      Fsqr       s(Fsqr)   Cod   Lambda\n".format(mod_colname))
@@ -196,7 +202,7 @@ class FullprofFormat(object):
                 hkl.extend(iq)
             hkls = "".join(["{:>4.0f}".format(item) for item in hkl])
 
-            data = (peak.getIntensity()*scale, peak.getSigmaIntensity()*scale, 1, peak.getWavelength())
+            data = (peak.getIntensity() * scale, peak.getSigmaIntensity() * scale, 1, peak.getWavelength())
             line = "{:>12.2f}{:>12.2f}{:>5.0f}{:>10.4f}\n".format(*data)
             line = "".join([hkls, line])
 
@@ -240,8 +246,7 @@ class JanaFormat(object):
                 vec = lattice.getModVec(index)
                 x, y, z = vec.X(), vec.Y(), vec.Z()
                 if abs(x) > 0 or abs(y) > 0 or abs(z) > 0:
-                    headers.append("       {}{: >13.6f}{: >13.6f}{: >13.6f}\n".format(
-                        col_num, x, y, z))
+                    headers.append("       {}{: >13.6f}{: >13.6f}{: >13.6f}\n".format(col_num, x, y, z))
 
             # propagation vector information if required
             if lattice is not None:
@@ -259,14 +264,7 @@ class JanaFormat(object):
                         for mod_vec_index in range(3):
                             append_mod_vector(mod_vec_index, mod_vec_index + 1)
                 # lattice parameters
-                lattice_params = [
-                    lattice.a(),
-                    lattice.b(),
-                    lattice.c(),
-                    lattice.alpha(),
-                    lattice.beta(),
-                    lattice.gamma()
-                ]
+                lattice_params = [lattice.a(), lattice.b(), lattice.c(), lattice.alpha(), lattice.beta(), lattice.gamma()]
                 lattice_params = "".join(["{: >10.4f}".format(value) for value in lattice_params])
                 headers.append("# Lattice parameters   {}\n".format(lattice_params))
             # column headers and format
@@ -278,8 +276,7 @@ class JanaFormat(object):
                 modulated_cols = ["m{}".format(i + 1) for i in range(self._num_mod_vec)]
                 headers.append("(3i5," + num_modulation_vectors(self._workspace) * "1i5," + "2f12.2,i5,4f10.4)\n")
             column_names.extend(modulated_cols)
-            column_names.extend(
-                ["Fsqr", "s(Fsqr)", "Cod", "Lambda", "Twotheta", "Transm.", "Tbar", "TDS"])
+            column_names.extend(["Fsqr", "s(Fsqr)", "Cod", "Lambda", "Twotheta", "Transm.", "Tbar", "TDS"])
 
             column_format = "#{:>4}{:>4}{:>4}"
             column_format += "".join(["{:>4}" for _ in range(len(modulated_cols))])
@@ -316,11 +313,16 @@ class JanaFormat(object):
                     hkl = peak.getHKL()
                     modulation_indices = []
                 self._peaks.append(
-                    self.create_peak_line(hkl, modulation_indices,
-                                          peak.getIntensity(), peak.getSigmaIntensity(),
-                                          peak.getWavelength(),
-                                          get_two_theta(peak.getDSpacing(), peak.getWavelength()),
-                                          peak.getAbsorptionWeightedPathLength()))
+                    self.create_peak_line(
+                        hkl,
+                        modulation_indices,
+                        peak.getIntensity(),
+                        peak.getSigmaIntensity(),
+                        peak.getWavelength(),
+                        get_two_theta(peak.getDSpacing(), peak.getWavelength()),
+                        peak.getAbsorptionWeightedPathLength(),
+                    )
+                )
 
         def create_peak_line(self, hkl, mnp, intensity, sig_int, wavelength, two_theta, t_bar):
             """
@@ -337,11 +339,23 @@ class JanaFormat(object):
             """
             template = "{: >5.0f}{: >5.0f}{: >5.0f}{}{: >12.2f}{: >12.2f}{: >5.0f}{: >10.4f}{: >10.4f}{: >10.4f}{: >10.4f}{: >10.4f}\n"
             mod_indices = "".join(["{: >5.0f}".format(value) for value in mnp])
-            return template.format(hkl[0], hkl[1], hkl[2], mod_indices, intensity*self._scale, sig_int*self._scale, 1,
-                                   wavelength, two_theta, 1.0, t_bar, 0.0)
+            return template.format(
+                hkl[0],
+                hkl[1],
+                hkl[2],
+                mod_indices,
+                intensity * self._scale,
+                sig_int * self._scale,
+                1,
+                wavelength,
+                two_theta,
+                1.0,
+                t_bar,
+                0.0,
+            )
 
         def write(self):
-            with open(self._filepath, 'w') as handle:
+            with open(self._filepath, "w") as handle:
                 handle.write("".join(self._headers))
                 handle.write("".join(self._peaks))
 
@@ -374,8 +388,7 @@ class JanaFormat(object):
         if split_files and num_mod_vec > 1:
             name, ext = osp.splitext(file_name)
             builders = [
-                JanaFormat.FileBuilder('{}-m{}{}'.format(name, col_num, ext), workspace,
-                                       num_mod_vec, col_num, scale)
+                JanaFormat.FileBuilder("{}-m{}{}".format(name, col_num, ext), workspace, num_mod_vec, col_num, scale)
                 for col_num in range(1, num_mod_vec + 1)
             ]
         else:
@@ -403,10 +416,9 @@ class SHELXFormat(object):
         :param scale: scale peaks to fit in column width
         """
         if has_modulated_indexing(workspace):
-            raise RuntimeError(
-                "Cannot currently save modulated structures to GSAS or SHELX formats")
+            raise RuntimeError("Cannot currently save modulated structures to GSAS or SHELX formats")
 
-        with open(file_name, 'w') as f_handle:
+        with open(file_name, "w") as f_handle:
             self.write_peaks(f_handle, workspace, scale)
 
     def write_peaks(self, f_handle, workspace, scale):
@@ -428,7 +440,7 @@ class SHELXFormat(object):
             line = col_format.format(*data)
             f_handle.write(line)
         # write row of zeros to end file
-        f_handle.write(col_format.format(*len(data)*[0.0]))
+        f_handle.write(col_format.format(*len(data) * [0.0]))
 
 
 # ------------------------------------------------------------------------------------------------------
@@ -450,10 +462,10 @@ class SaveHKLFormat(object):
         :param _: Ignored parameter for compatability with other savers
         """
         if has_modulated_indexing(workspace):
-            raise RuntimeError(
-                "Cannot currently save modulated structures to GSAS or SHELX formats")
+            raise RuntimeError("Cannot currently save modulated structures to GSAS or SHELX formats")
 
         from mantid.simpleapi import SaveHKL
+
         SaveHKL(Filename=file_name, InputWorkspace=workspace, OutputWorkspace=workspace.name(), ScalePeaks=scale)
 
 
@@ -468,7 +480,7 @@ FORMAT_MAP = {
     ReflectionFormat.Fullprof: FullprofFormat,
     ReflectionFormat.GSAS: SaveHKLFormat,
     ReflectionFormat.Jana: JanaFormat,
-    ReflectionFormat.SHELX: SHELXFormat
+    ReflectionFormat.SHELX: SHELXFormat,
 }
 
 AlgorithmFactory.subscribe(SaveReflections)

@@ -20,6 +20,8 @@
 #include <QImage>
 #include <QList>
 #include <QMap>
+#include <QPoint>
+#include <QSize>
 #include <QStack>
 
 #include <memory>
@@ -232,6 +234,11 @@ public:
 
   /// Load masks from a table workspace
   void loadShapesFromTableWorkspace(const Mantid::API::ITableWorkspace_const_sptr &ws);
+
+  /// Draw a 2D shape onto the surface with the given coordinates
+  void drawShape2D(const QString &type, const QColor &borderColor, const QColor &fillColor, const QPoint &topLeftPos,
+                   const QPoint &bottomRightPos, const bool select);
+  void clearMaskedShapes();
 
   //-----------------------------------
   //    Peaks overlay methods

@@ -48,24 +48,25 @@ def create_algorithm(name, **kwargs):
     """
     # Initialize the whole framework
     import mantid.simpleapi  # noqa
-    if 'Version' in kwargs:
-        alg = mantid.api.AlgorithmManager.createUnmanaged(name, kwargs['Version'])
-        del kwargs['Version']
+
+    if "Version" in kwargs:
+        alg = mantid.api.AlgorithmManager.createUnmanaged(name, kwargs["Version"])
+        del kwargs["Version"]
     else:
         alg = mantid.api.AlgorithmManager.createUnmanaged(name)
     alg.initialize()
     # Avoid problem that Load needs to set Filename first if it exists
-    if name == 'Load' and 'Filename' in kwargs:
-        alg.setPropertyValue('Filename', kwargs['Filename'])
-        del kwargs['Filename']
-    if 'child'in kwargs:
+    if name == "Load" and "Filename" in kwargs:
+        alg.setPropertyValue("Filename", kwargs["Filename"])
+        del kwargs["Filename"]
+    if "child" in kwargs:
         alg.setChild(True)
-        del kwargs['child']
-        if 'OutputWorkspace' in alg:
-            alg.setPropertyValue("OutputWorkspace","UNUSED_NAME_FOR_CHILD")
-    if 'rethrow' in kwargs:
+        del kwargs["child"]
+        if "OutputWorkspace" in alg:
+            alg.setPropertyValue("OutputWorkspace", "UNUSED_NAME_FOR_CHILD")
+    if "rethrow" in kwargs:
         alg.setRethrows(True)
-        del kwargs['rethrow']
+        del kwargs["rethrow"]
     alg.setProperties(kwargs)
     return alg
 
@@ -73,20 +74,19 @@ def create_algorithm(name, **kwargs):
 # Case difference is to be consistent with the unittest module
 def assertRaisesNothing(testobj, callable, *args, **kwargs):
     """
-        unittest does not have an assertRaisesNothing. This
-        provides that functionality
+    unittest does not have an assertRaisesNothing. This
+    provides that functionality
 
-        Parameters:
-            testobj  - A unittest object
-            callable - A callable object
-            *args    - Positional arguments passed to the callable as they are
-            **kwargs - Keyword arguments, passed on as they are
+    Parameters:
+        testobj  - A unittest object
+        callable - A callable object
+        *args    - Positional arguments passed to the callable as they are
+        **kwargs - Keyword arguments, passed on as they are
     """
     try:
         return callable(*args, **kwargs)
     except Exception as exc:
-        testobj.fail("Assertion error. An exception was caught where none was expected in %s. Message: %s"
-                     % (callable.__name__, str(exc)))
+        testobj.fail("Assertion error. An exception was caught where none was expected in %s. Message: %s" % (callable.__name__, str(exc)))
 
 
 def assert_called_with_partial(_mock_self, *args, **kwargs):
@@ -97,7 +97,7 @@ def assert_called_with_partial(_mock_self, *args, **kwargs):
     self = _mock_self
     if self.call_args is None:
         expected = self._format_mock_call_signature(args, kwargs)
-        raise AssertionError('Expected call: %s\nNot called' % (expected,))
+        raise AssertionError("Expected call: %s\nNot called" % (expected,))
 
     def _error_message():
         msg = self._format_mock_failure_message(args, kwargs)
@@ -106,7 +106,7 @@ def assert_called_with_partial(_mock_self, *args, **kwargs):
     expected = self._call_matcher((args, kwargs))
     expected_args, expected_kwargs = expected
     actual_args, actual_kwargs = self._call_matcher(self.call_args)
-    if actual_args[:len(expected_args)] != expected_args or not (expected_kwargs.items() <= actual_kwargs.items()):
+    if actual_args[: len(expected_args)] != expected_args or not (expected_kwargs.items() <= actual_kwargs.items()):
         cause = expected if isinstance(expected, Exception) else None
         raise AssertionError(_error_message()) from cause
 
@@ -120,7 +120,7 @@ def assert_any_call_partial(_mock_self, *args, **kwargs):
     self = _mock_self
     if self.call_args is None:
         expected = self._format_mock_call_signature(args, kwargs)
-        raise AssertionError('Expected call: %s\nNot called' % (expected,))
+        raise AssertionError("Expected call: %s\nNot called" % (expected,))
 
     def _error_message():
         msg = self._format_mock_failure_message(args, kwargs)
@@ -130,7 +130,7 @@ def assert_any_call_partial(_mock_self, *args, **kwargs):
     actual = [self._call_matcher(c) for c in self.call_args_list]
     expected_args, expected_kwargs = expected
     for actual_args, actual_kwargs in actual:
-        if actual_args[:len(expected_args)] == expected_args and (expected_kwargs.items() <= actual_kwargs.items()):
+        if actual_args[: len(expected_args)] == expected_args and (expected_kwargs.items() <= actual_kwargs.items()):
             return
     cause = expected if isinstance(expected, Exception) else None
     raise AssertionError(_error_message()) from cause
@@ -158,7 +158,8 @@ def can_be_instantiated(cls):
 if LooseVersion(numpy.__version__) >= LooseVersion("1.9.0"):
     assert_almost_equal = numpy.testing.assert_almost_equal
 else:
-    def assert_almost_equal(actual,desired,decimal=7,err_msg='',verbose=True):
+
+    def assert_almost_equal(actual, desired, decimal=7, err_msg="", verbose=True):
         """
         Raises an AssertionError if two items are not equal up to desired
         precision.
@@ -214,8 +215,7 @@ else:
         __tracebackhide__ = True  # Hide traceback for py.test
         from numpy.core import ndarray
         from numpy.lib import iscomplexobj, real, imag
-        from numpy.testing.utils import (assert_array_almost_equal, build_err_msg,
-                                         gisfinite, gisnan)
+        from numpy.testing.utils import assert_array_almost_equal, build_err_msg, gisfinite, gisnan
 
         # Handle complex numbers: separate into real/imag to handle
         # nan/inf/negative zero correctly
@@ -226,9 +226,8 @@ else:
             usecomplex = False
 
         def _build_err_msg():
-            header = ('Arrays are not almost equal to %d decimals' % decimal)
-            return build_err_msg([actual, desired], err_msg, verbose=verbose,
-                                 header=header)
+            header = "Arrays are not almost equal to %d decimals" % decimal
+            return build_err_msg([actual, desired], err_msg, verbose=verbose, header=header)
 
         if usecomplex:
             if iscomplexobj(actual):
@@ -249,8 +248,7 @@ else:
             except AssertionError:
                 raise AssertionError(_build_err_msg())
 
-        if isinstance(actual, (ndarray, tuple, list)) \
-                or isinstance(desired, (ndarray, tuple, list)):
+        if isinstance(actual, (ndarray, tuple, list)) or isinstance(desired, (ndarray, tuple, list)):
             return assert_array_almost_equal(actual, desired, decimal, err_msg)
         try:
             # If one of desired/actual is not finite, handle it specially here:

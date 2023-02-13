@@ -15,8 +15,7 @@ from numpy import cos, pi, radians
 def lambda_to_energy(wavelength):
     m_neutron = 1.674927471 * 10**-27  # in kg
     h_planck = 6.626070040 * 10**-34  # in J*s
-    energy = h_planck**2 / 2.0 / m_neutron / wavelength**2 * 10**20 \
-             / 1.6021766208 / 10**-22
+    energy = h_planck**2 / 2.0 / m_neutron / wavelength**2 * 10**20 / 1.6021766208 / 10**-22
     return energy
 
 
@@ -31,6 +30,6 @@ def two_theta_to_q(two_theta, wavelength, delta_e):
     k_i = 2.0 * pi / wavelength  # incoming wave vector
     # outgoing wave vector k_i for elastic
     # factor 10**-20 is for converting 1/m^2 to 1/Angstrom^2
-    k_f = (k_i**2 - delta_e*2.0*m_neutron/h_bar**2*10**-20)**0.5
-    q_abs = (k_i**2 + k_f**2 - 2.0*k_i*k_f*cos(two_theta))**0.5  # length of Q in inelastic case
+    k_f = (k_i**2 - delta_e * 2.0 * m_neutron / h_bar**2 * 10**-20) ** 0.5
+    q_abs = (k_i**2 + k_f**2 - 2.0 * k_i * k_f * cos(two_theta)) ** 0.5  # length of Q in inelastic case
     return q_abs

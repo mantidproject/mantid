@@ -51,11 +51,13 @@ class FittingDataPresenterTest(unittest.TestCase):
 
         self.presenter.on_load_clicked()
 
-        mock_worker.assert_called_with("mocked model method",
-                                       ("/a/file/to/load.txt, /another/one.nxs",),
-                                       error_cb=self.presenter._on_worker_error,
-                                       finished_cb=self.presenter._emit_enable_load_button_signal,
-                                       success_cb=self.presenter._on_worker_success)
+        mock_worker.assert_called_with(
+            "mocked model method",
+            ("/a/file/to/load.txt, /another/one.nxs",),
+            error_cb=self.presenter._on_worker_error,
+            finished_cb=self.presenter._emit_enable_load_button_signal,
+            success_cb=self.presenter._on_worker_success,
+        )
 
     @patch(dir_path + ".data_presenter.create_error_message")
     @patch(dir_path + ".data_presenter.AsyncTask")
@@ -178,7 +180,8 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.model.get_all_workspace_names.return_value = ["name1", "name2", "new"]  # just return all so has no effect
         # lambda function to replace dict with new key and same ordering as before
         self.model.update_workspace_name.side_effect = lambda old, new: model_dict.update(
-            {(key if key != old else new): val for key, val in (list(model_dict.items()), model_dict.clear())[0]})
+            {(key if key != old else new): val for key, val in (list(model_dict.items()), model_dict.clear())[0]}
+        )
         self.presenter.row_numbers = {"name1": 0, "name2": 1}
         self.presenter.all_plots_removed_notifier = mock.MagicMock()
 
@@ -196,7 +199,8 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.model.get_loaded_workspaces.return_value = model_dict
         # lambda function to replace dict with new key and same ordering as before
         self.model.update_workspace_name = lambda old, new: model_dict.update(
-            {(key if key != old else new): val for key, val in (list(model_dict.items()), model_dict.clear())[0]})
+            {(key if key != old else new): val for key, val in (list(model_dict.items()), model_dict.clear())[0]}
+        )
         self.presenter.row_numbers = {"name1": 0, "name2": 1}
         self.presenter.all_plots_removed_notifier = mock.MagicMock()
 
@@ -378,5 +382,5 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.model.estimate_background.return_value = self.ws2
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

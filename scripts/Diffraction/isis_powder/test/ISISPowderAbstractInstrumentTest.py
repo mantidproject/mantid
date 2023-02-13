@@ -20,7 +20,7 @@ import warnings
 
 
 def _gen_random_string():
-    return ''.join(random.choice(string.ascii_lowercase) for _ in range(10))
+    return "".join(random.choice(string.ascii_lowercase) for _ in range(10))
 
 
 class _MockInst(AbstractInst):
@@ -50,15 +50,15 @@ class _MockInst(AbstractInst):
     INST_PREFIX = "MOCK"
 
     def __init__(self, cal_file_path, **kwargs):
-        self._inst_settings = InstrumentSettings(param_map=self._param_map,
-                                                 adv_conf_dict=self._advanced_config,
-                                                 kwargs=kwargs)
+        self._inst_settings = InstrumentSettings(param_map=self._param_map, adv_conf_dict=self._advanced_config, kwargs=kwargs)
         self.cal_mapping_path = cal_file_path
 
-        super(_MockInst, self).__init__(user_name=self._inst_settings.user_name,
-                                        calibration_dir=self._inst_settings.calibration_dir,
-                                        output_dir=self._inst_settings.output_dir,
-                                        inst_prefix=self.INST_PREFIX)
+        super(_MockInst, self).__init__(
+            user_name=self._inst_settings.user_name,
+            calibration_dir=self._inst_settings.calibration_dir,
+            output_dir=self._inst_settings.output_dir,
+            inst_prefix=self.INST_PREFIX,
+        )
 
 
 class ISISPowderAbstractInstrumentTest(unittest.TestCase):
@@ -75,71 +75,78 @@ class ISISPowderAbstractInstrumentTest(unittest.TestCase):
     def _find_file_or_die(self, name):
         full_path = mantid.api.FileFinder.getFullPath(name)
         if not full_path:
-            self.fail("Could not find file \"{}\"".format(name))
+            self.fail('Could not find file "{}"'.format(name))
         return full_path
 
-    def _setup_mock_inst(self, yaml_file_path, calibration_dir, output_dir,
-                         suffix=None, nxs_filename=None, tof_xye_filename=None,
-                         file_ext=None, dat_files_directory=""):
+    def _setup_mock_inst(
+        self,
+        yaml_file_path,
+        calibration_dir,
+        output_dir,
+        suffix=None,
+        nxs_filename=None,
+        tof_xye_filename=None,
+        file_ext=None,
+        dat_files_directory="",
+    ):
         calib_file_path = self._find_file_or_die(self.CALIB_FILE_NAME)
         grouping_file_path = self._find_file_or_die(self.GROUPING_FILE_NAME)
         test_configuration_path = mantid.api.FileFinder.getFullPath(yaml_file_path)
         if not test_configuration_path or len(test_configuration_path) <= 0:
             self.fail("Could not find the unit test input file called: " + str(yaml_file_path))
-        return _MockInst(cal_file_path=test_configuration_path,
-                         group_file=grouping_file_path,
-                         cal_dir=calibration_dir,
-                         out_dir=output_dir,
-                         cal_map=calib_file_path,
-                         suffix=suffix, nxs_filename=nxs_filename, tof_xye_filename=tof_xye_filename,
-                         file_ext=file_ext, dat_files_directory=dat_files_directory)
+        return _MockInst(
+            cal_file_path=test_configuration_path,
+            group_file=grouping_file_path,
+            cal_dir=calibration_dir,
+            out_dir=output_dir,
+            cal_map=calib_file_path,
+            suffix=suffix,
+            nxs_filename=nxs_filename,
+            tof_xye_filename=tof_xye_filename,
+            file_ext=file_ext,
+            dat_files_directory=dat_files_directory,
+        )
 
     def tearDown(self):
         for folder in self._folders_to_remove:
             try:
                 os.rmdir(folder)
             except OSError as exc:
-                warnings.warn("Could not remove folder at \"{}\"\n"
-                              "Error message:\n{}".format(folder, exc))
+                warnings.warn('Could not remove folder at "{}"\n' "Error message:\n{}".format(folder, exc))
 
     def test_generate_out_file_paths_standard_inst_prefix(self):
         mock_inst, run_details, out_dir = self._setup_for_generate_out_file_paths(
-            nxs_template="{inst}{runno}{suffix}.nxs", tof_xye_template="",
-            suffix="")
+            nxs_template="{inst}{runno}{suffix}.nxs", tof_xye_template="", suffix=""
+        )
 
         output_paths = mock_inst._generate_out_file_paths(run_details=run_details)
-        expected_nxs_filename = os.path.join(out_dir, "16_4", "ISISPowderAbstractInstrumentTest",
-                                             "MOCK15.nxs")
+        expected_nxs_filename = os.path.join(out_dir, "16_4", "ISISPowderAbstractInstrumentTest", "MOCK15.nxs")
 
         self.assertEqual(output_paths["nxs_filename"], expected_nxs_filename)
 
     def test_generate_out_file_paths_lower_inst_prefix(self):
-        mock_inst, run_details, out_dir = self._setup_for_generate_out_file_paths(
-            nxs_template="{instlow}{runno}{suffix}.nxs", suffix="")
+        mock_inst, run_details, out_dir = self._setup_for_generate_out_file_paths(nxs_template="{instlow}{runno}{suffix}.nxs", suffix="")
 
         output_paths = mock_inst._generate_out_file_paths(run_details=run_details)
-        expected_nxs_filename = os.path.join(out_dir, "16_4", "ISISPowderAbstractInstrumentTest",
-                                             "mock15.nxs")
+        expected_nxs_filename = os.path.join(out_dir, "16_4", "ISISPowderAbstractInstrumentTest", "mock15.nxs")
 
         self.assertEqual(output_paths["nxs_filename"], expected_nxs_filename)
 
     def test_generate_out_file_paths_with_suffix(self):
-        mock_inst, run_details, out_dir = self._setup_for_generate_out_file_paths(
-            nxs_template="{inst}{runno}{suffix}.nxs", suffix="_suf")
+        mock_inst, run_details, out_dir = self._setup_for_generate_out_file_paths(nxs_template="{inst}{runno}{suffix}.nxs", suffix="_suf")
 
         output_paths = mock_inst._generate_out_file_paths(run_details=run_details)
-        expected_nxs_filename = os.path.join(out_dir, "16_4", "ISISPowderAbstractInstrumentTest",
-                                             "MOCK15_suf.nxs")
+        expected_nxs_filename = os.path.join(out_dir, "16_4", "ISISPowderAbstractInstrumentTest", "MOCK15_suf.nxs")
 
         self.assertEqual(output_paths["nxs_filename"], expected_nxs_filename)
 
     def test_generate_out_file_paths_including_fileext(self):
         mock_inst, run_details, out_dir = self._setup_for_generate_out_file_paths(
-            nxs_template="{fileext}{inst}{runno}{suffix}.nxs", suffix="", file_ext='.s01')
+            nxs_template="{fileext}{inst}{runno}{suffix}.nxs", suffix="", file_ext=".s01"
+        )
 
         output_paths = mock_inst._generate_out_file_paths(run_details=run_details)
-        expected_nxs_filename = os.path.join(out_dir, "16_4", "ISISPowderAbstractInstrumentTest",
-                                             "s01MOCK15.nxs")
+        expected_nxs_filename = os.path.join(out_dir, "16_4", "ISISPowderAbstractInstrumentTest", "s01MOCK15.nxs")
 
         self.assertEqual(output_paths["nxs_filename"], expected_nxs_filename)
 
@@ -147,40 +154,40 @@ class ISISPowderAbstractInstrumentTest(unittest.TestCase):
         mock_inst, run_details, out_dir = self._setup_for_generate_out_file_paths(
             nxs_template="{inst}{runno}_{fileext}_1.nxs",
             tof_xye_template="{inst}{runno}_{fileext}{suffix}_b1_TOF.dat",
-            suffix="_suf", file_ext=".s01",
-            dat_files_dir="dat_files")
+            suffix="_suf",
+            file_ext=".s01",
+            dat_files_dir="dat_files",
+        )
 
         output_paths = mock_inst._generate_out_file_paths(run_details=run_details)
-        expected_nxs_filename = os.path.join(out_dir, "16_4", "ISISPowderAbstractInstrumentTest",
-                                             "MOCK15_s01_1.nxs")
-        expected_xye_filename = os.path.join(out_dir, "16_4", "ISISPowderAbstractInstrumentTest", "dat_files",
-                                             "MOCK15_s01_suf_b1_TOF.dat")
+        expected_nxs_filename = os.path.join(out_dir, "16_4", "ISISPowderAbstractInstrumentTest", "MOCK15_s01_1.nxs")
+        expected_xye_filename = os.path.join(out_dir, "16_4", "ISISPowderAbstractInstrumentTest", "dat_files", "MOCK15_s01_suf_b1_TOF.dat")
 
         self.assertEqual(output_paths["nxs_filename"], expected_nxs_filename)
         self.assertEqual(output_paths["tof_xye_filename"], expected_xye_filename)
 
-    def _setup_for_generate_out_file_paths(self, nxs_template="", tof_xye_template="",
-                                           suffix=None, file_ext=None, dat_files_dir=""):
+    def _setup_for_generate_out_file_paths(self, nxs_template="", tof_xye_template="", suffix=None, file_ext=None, dat_files_dir=""):
         cal_dir = self._create_temp_dir()
         out_dir = self._create_temp_dir()
 
-        mock_inst = self._setup_mock_inst(suffix=suffix, file_ext=file_ext,
-                                          yaml_file_path="ISISPowderRunDetailsTest.yaml",
-                                          calibration_dir=cal_dir,
-                                          output_dir=out_dir, nxs_filename=nxs_template,
-                                          tof_xye_filename=tof_xye_template,
-                                          dat_files_directory=dat_files_dir)
+        mock_inst = self._setup_mock_inst(
+            suffix=suffix,
+            file_ext=file_ext,
+            yaml_file_path="ISISPowderRunDetailsTest.yaml",
+            calibration_dir=cal_dir,
+            output_dir=out_dir,
+            nxs_filename=nxs_template,
+            tof_xye_filename=tof_xye_template,
+            dat_files_directory=dat_files_dir,
+        )
 
         run_number = 15
         run_number2 = common.get_first_run_number(run_number_string=run_number)
-        cal_mapping_dict = yaml_parser.get_run_dictionary(run_number_string=run_number2,
-                                                          file_path=mock_inst.cal_mapping_path)
+        cal_mapping_dict = yaml_parser.get_run_dictionary(run_number_string=run_number2, file_path=mock_inst.cal_mapping_path)
 
         grouping_filename = _gen_random_string()
-        empty_runs = common.cal_map_dictionary_key_helper(dictionary=cal_mapping_dict,
-                                                          key="empty_run_numbers")
-        vanadium_runs = common.cal_map_dictionary_key_helper(dictionary=cal_mapping_dict,
-                                                             key="vanadium_run_numbers")
+        empty_runs = common.cal_map_dictionary_key_helper(dictionary=cal_mapping_dict, key="empty_run_numbers")
+        vanadium_runs = common.cal_map_dictionary_key_helper(dictionary=cal_mapping_dict, key="vanadium_run_numbers")
 
         run_details_obj = run_details.create_run_details_object(
             run_number_string=run_number,
@@ -188,7 +195,8 @@ class ISISPowderAbstractInstrumentTest(unittest.TestCase):
             is_vanadium_run=False,
             grouping_file_name=grouping_filename,
             empty_inst_run_number=empty_runs,
-            vanadium_string=vanadium_runs)
+            vanadium_string=vanadium_runs,
+        )
 
         return mock_inst, run_details_obj, out_dir
 
@@ -196,22 +204,18 @@ class ISISPowderAbstractInstrumentTest(unittest.TestCase):
         # Setup basic instrument mock
         cal_dir = self._create_temp_dir()
         out_dir = self._create_temp_dir()
-        mock_inst = self._setup_mock_inst(calibration_dir=cal_dir,
-                                          output_dir=out_dir,
-                                          yaml_file_path="ISISPowderRunDetailsTest.yaml")
+        mock_inst = self._setup_mock_inst(calibration_dir=cal_dir, output_dir=out_dir, yaml_file_path="ISISPowderRunDetailsTest.yaml")
 
         # Test valid parameters are retained
         mock_inst.set_beam_parameters(height=1.234, width=2)
-        self.assertEqual(mock_inst._beam_parameters['height'], 1.234)
-        self.assertEqual(mock_inst._beam_parameters['width'], 2)
+        self.assertEqual(mock_inst._beam_parameters["height"], 1.234)
+        self.assertEqual(mock_inst._beam_parameters["width"], 2)
 
     def test_set_invalid_beam_parameters(self):
         # Setup basic instrument mock
         cal_dir = self._create_temp_dir()
         out_dir = self._create_temp_dir()
-        mock_inst = self._setup_mock_inst(calibration_dir=cal_dir,
-                                          output_dir=out_dir,
-                                          yaml_file_path="ISISPowderRunDetailsTest.yaml")
+        mock_inst = self._setup_mock_inst(calibration_dir=cal_dir, output_dir=out_dir, yaml_file_path="ISISPowderRunDetailsTest.yaml")
 
         # Test combination of positive / negative raise exceptions
         self.assertRaises(ValueError, mock_inst.set_beam_parameters, height=1.234, width=-2)
@@ -219,9 +223,9 @@ class ISISPowderAbstractInstrumentTest(unittest.TestCase):
         self.assertRaises(ValueError, mock_inst.set_beam_parameters, height=-1.234, width=-2)
 
         # Test non-numerical input
-        self.assertRaises(ValueError, mock_inst.set_beam_parameters, height='height', width=-2)
+        self.assertRaises(ValueError, mock_inst.set_beam_parameters, height="height", width=-2)
         self.assertRaises(ValueError, mock_inst.set_beam_parameters, height=-1.234, width=True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -1,16 +1,16 @@
 #!/bin/bash -ex
 # Build the developer site and push to gh-pages
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source $SCRIPT_DIR/mamba-utils
 
 if [ $# != 1 ]; then
   echo "Usage: build-and-publish-devsite.sh mantid_root_dir"
   exit 1
 fi
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Set working area
 WORKSPACE=$1
 BUILD_DIR=$WORKSPACE/build
-MAMBAFORGE_DIR=$WORKSPACE/mambaforge
 
 ###############################################################################
 # Set up the build directory
@@ -26,18 +26,10 @@ else
 fi
 
 ###############################################################################
-# Setup environment for building the docs
+# Mamba
 ###############################################################################
-# false means do not install if it exists already
-"$SCRIPT_DIR/download-and-install-mambaforge" $MAMBAFORGE_DIR $MAMBAFORGE_DIR/bin/mamba false
-condaenv_prefix=$MAMBAFORGE_DIR/envs/dev-site-build
-if [ -d "$condaenv_prefix" ]; then
-  "$MAMBAFORGE_DIR/bin/mamba" update --prefix "$condaenv_prefix" --all
-else
-  "$MAMBAFORGE_DIR/bin/mamba" create --prefix "$condaenv_prefix" --yes sphinx sphinx_bootstrap_theme
-fi
-. $MAMBAFORGE_DIR/etc/profile.d/conda.sh
-conda activate "$condaenv_prefix"
+setup_mamba $WORKSPACE/mambaforge "devsite"
+mamba install --yes sphinx sphinx_bootstrap_theme
 
 ###############################################################################
 # Build the developer site

@@ -791,7 +791,7 @@ void GenerateEventsFilter::processMultipleValueFilters(double minvalue, double v
 
 //-----------------------------------------------------------------------------------------------
 /**
- * Fill a TimeSplitterType that will filter the events by matching
+ * Fill a SplittingIntervalVec that will filter the events by matching
  * SINGLE log values >= min and < max. Creates SplittingInterval's where
  * times match the log values, and going to index==0.
  *
@@ -934,7 +934,7 @@ bool GenerateEventsFilter::identifyLogEntry(const int &index, const Types::Core:
 }
 
 //-----------------------------------------------------------------------------------------------
-/** Fill a TimeSplitterType that will filter the events by matching
+/** Fill a SplittingIntervalVec that will filter the events by matching
  * SINGLE log values >= min and < max. Creates SplittingInterval's where
  * times match the log values, and going to index==0.
  * @param indexwsindexmap :: Index.
@@ -987,7 +987,7 @@ void GenerateEventsFilter::makeMultipleFiltersByValues(map<size_t, int> indexwsi
 }
 
 //-----------------------------------------------------------------------------------------------
-/** Fill a TimeSplitterType that will filter the events by matching
+/** Fill a SplittingIntervalVec that will filter the events by matching
  * SINGLE log values >= min and < max. Creates SplittingInterval's where
  * times match the log values, and going to index==0.
  *

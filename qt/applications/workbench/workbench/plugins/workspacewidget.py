@@ -12,8 +12,16 @@ from qtpy.QtWidgets import QApplication, QVBoxLayout
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.kernel import logger
 from mantidqt.plotting import functions
-from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names, plot_md_ws_from_names, \
-                                        superplot_from_names, superplot_with_errors_from_names
+from mantidqt.plotting.functions import (
+    can_overplot,
+    pcolormesh,
+    plot,
+    plot_from_names,
+    plot_md_ws_from_names,
+    superplot_from_names,
+    superplot_with_errors_from_names,
+)
+from mantidqt.plotting import sample_shape
 from mantid.plots.utility import MantidAxType
 from mantid.simpleapi import CreateDetectorTable
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
@@ -45,26 +53,17 @@ class WorkspaceWidget(PluginWidget):
         self.setLayout(layout)
 
         # behaviour
-        self.workspacewidget.plotSpectrumClicked.connect(
-            partial(self._do_plot_spectrum, errors=False, overplot=False))
+        self.workspacewidget.plotSpectrumClicked.connect(partial(self._do_plot_spectrum, errors=False, overplot=False))
 
-        self.workspacewidget.plotMDHistoClicked.connect(
-            partial(self._do_plot_1d_md, errors=False, overplot=False))
-        self.workspacewidget.overplotMDHistoClicked.connect(
-            partial(self._do_plot_1d_md, errors=False, overplot=True))
-        self.workspacewidget.plotMDHistoWithErrorsClicked.connect(
-            partial(self._do_plot_1d_md, errors=True, overplot=False))
-        self.workspacewidget.overplotMDHistoWithErrorsClicked.connect(
-            partial(self._do_plot_1d_md, errors=True, overplot=True))
+        self.workspacewidget.plotMDHistoClicked.connect(partial(self._do_plot_1d_md, errors=False, overplot=False))
+        self.workspacewidget.overplotMDHistoClicked.connect(partial(self._do_plot_1d_md, errors=False, overplot=True))
+        self.workspacewidget.plotMDHistoWithErrorsClicked.connect(partial(self._do_plot_1d_md, errors=True, overplot=False))
+        self.workspacewidget.overplotMDHistoWithErrorsClicked.connect(partial(self._do_plot_1d_md, errors=True, overplot=True))
 
-        self.workspacewidget.plotBinClicked.connect(
-            partial(self._do_plot_bin, errors=False, overplot=False))
-        self.workspacewidget.overplotSpectrumClicked.connect(
-            partial(self._do_plot_spectrum, errors=False, overplot=True))
-        self.workspacewidget.plotSpectrumWithErrorsClicked.connect(
-            partial(self._do_plot_spectrum, errors=True, overplot=False))
-        self.workspacewidget.overplotSpectrumWithErrorsClicked.connect(
-            partial(self._do_plot_spectrum, errors=True, overplot=True))
+        self.workspacewidget.plotBinClicked.connect(partial(self._do_plot_bin, errors=False, overplot=False))
+        self.workspacewidget.overplotSpectrumClicked.connect(partial(self._do_plot_spectrum, errors=False, overplot=True))
+        self.workspacewidget.plotSpectrumWithErrorsClicked.connect(partial(self._do_plot_spectrum, errors=True, overplot=False))
+        self.workspacewidget.overplotSpectrumWithErrorsClicked.connect(partial(self._do_plot_spectrum, errors=True, overplot=True))
         self.workspacewidget.plotColorfillClicked.connect(self._do_plot_colorfill)
         self.workspacewidget.sampleLogsClicked.connect(self._do_sample_logs)
         self.workspacewidget.sliceViewerClicked.connect(self._do_slice_viewer)
@@ -72,23 +71,17 @@ class WorkspaceWidget(PluginWidget):
         self.workspacewidget.showInstrumentClicked.connect(self._do_show_instrument)
         self.workspacewidget.showAlgorithmHistoryClicked.connect(self._do_show_algorithm_history)
         self.workspacewidget.showDetectorsClicked.connect(self._do_show_detectors)
-        self.workspacewidget.plotAdvancedClicked.connect(
-            partial(self._do_plot_spectrum, errors=False, overplot=False, advanced=True))
-        self.workspacewidget.plotSurfaceClicked.connect(
-            partial(self._do_plot_3D, plot_type='surface'))
-        self.workspacewidget.plotWireframeClicked.connect(
-            partial(self._do_plot_3D, plot_type='wireframe'))
-        self.workspacewidget.plotContourClicked.connect(
-            partial(self._do_plot_3D, plot_type='contour'))
+        self.workspacewidget.plotAdvancedClicked.connect(partial(self._do_plot_spectrum, errors=False, overplot=False, advanced=True))
+        self.workspacewidget.plotSurfaceClicked.connect(partial(self._do_plot_3D, plot_type="surface"))
+        self.workspacewidget.plotWireframeClicked.connect(partial(self._do_plot_3D, plot_type="wireframe"))
+        self.workspacewidget.plotContourClicked.connect(partial(self._do_plot_3D, plot_type="contour"))
         self.workspacewidget.sampleMaterialClicked.connect(self._do_sample_material)
+        self.workspacewidget.sampleShapeClicked.connect(self._show_sample_shape)
         self.workspacewidget.superplotClicked.connect(self._do_superplot)
-        self.workspacewidget.superplotWithErrsClicked.connect(
-                self._do_superplot_with_errors)
+        self.workspacewidget.superplotWithErrsClicked.connect(self._do_superplot_with_errors)
         self.workspacewidget.superplotBinsClicked.connect(self._do_superplot_bins)
-        self.workspacewidget.superplotBinsWithErrsClicked.connect(
-                self._do_superplot_bins_with_errors)
-        self.workspacewidget.contextMenuAboutToShow.connect(
-            self._on_context_menu)
+        self.workspacewidget.superplotBinsWithErrsClicked.connect(self._do_superplot_bins_with_errors)
+        self.workspacewidget.contextMenuAboutToShow.connect(self._on_context_menu)
 
         self.workspacewidget.workspaceDoubleClicked.connect(self._action_double_click_workspace)
 
@@ -193,11 +186,13 @@ class WorkspaceWidget(PluginWidget):
                          exists and it is a compatible figure
         """
         plot_kwargs = {"axis": MantidAxType.BIN}
-        plot(self._ads.retrieveWorkspaces(names, unrollGroups=True),
-             errors=errors,
-             overplot=overplot,
-             wksp_indices=[0],
-             plot_kwargs=plot_kwargs)
+        plot(
+            self._ads.retrieveWorkspaces(names, unrollGroups=True),
+            errors=errors,
+            overplot=overplot,
+            wksp_indices=[0],
+            plot_kwargs=plot_kwargs,
+        )
 
     def _do_plot_colorfill(self, names):
         """
@@ -210,6 +205,7 @@ class WorkspaceWidget(PluginWidget):
             pcolormesh(names)
         except BaseException:
             import traceback
+
             traceback.print_exc()
 
     def _do_plot_3D(self, workspaces, plot_type):
@@ -219,7 +215,7 @@ class WorkspaceWidget(PluginWidget):
         :param workspaces: A list of workspace names.
         :param plot_type: The type of 3D plot, either 'surface', 'wireframe', or 'contour'.
         """
-        plot_function = getattr(functions, f'plot_{plot_type}', None)
+        plot_function = getattr(functions, f"plot_{plot_type}", None)
 
         if plot_function is None:
             return
@@ -240,8 +236,7 @@ class WorkspaceWidget(PluginWidget):
             try:
                 SampleLogs(ws=ws, parent=parent, window_flags=flags)
             except Exception as exception:
-                logger.warning("Could not open sample logs for workspace '{}'."
-                               "".format(ws.name()))
+                logger.warning("Could not open sample logs for workspace '{}'." "".format(ws.name()))
                 logger.warning("{}: {}".format(type(exception).__name__, exception))
 
     def _do_slice_viewer(self, names):
@@ -256,8 +251,7 @@ class WorkspaceWidget(PluginWidget):
                 presenter = SliceViewer(ws=ws, conf=CONF, parent=parent, window_flags=flags)
                 presenter.view.show()
             except Exception as exception:
-                logger.warning("Could not open slice viewer for workspace '{}'."
-                               "".format(ws.name()))
+                logger.warning("Could not open slice viewer for workspace '{}'." "".format(ws.name()))
                 logger.warning("{}: {}".format(type(exception).__name__, exception))
 
     def _do_show_instrument(self, names):
@@ -273,16 +267,14 @@ class WorkspaceWidget(PluginWidget):
                     presenter = InstrumentViewPresenter(ws, parent=parent, window_flags=flags)
                     presenter.show_view()
                 except Exception as exception:
-                    logger.warning("Could not show instrument for workspace "
-                                   "'{}':\n{}\n".format(ws.name(), exception))
+                    logger.warning("Could not show instrument for workspace " "'{}':\n{}\n".format(ws.name(), exception))
             else:
-                logger.warning("Could not show instrument for workspace '{}':"
-                               "\nNo instrument available.\n"
-                               "".format(ws.name()))
+                logger.warning("Could not show instrument for workspace '{}':" "\nNo instrument available.\n" "".format(ws.name()))
 
     def _do_show_data(self, names):
         # local import to allow this module to be imported without pyplot being imported
         import matplotlib.pyplot
+
         parent, flags = get_window_config()
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
             try:
@@ -294,13 +286,14 @@ class WorkspaceWidget(PluginWidget):
             except ValueError:
                 try:
                     TableWorkspaceDisplay.supports(ws)
-                    presenter = TableWorkspaceDisplay(ws, plot=matplotlib.pyplot, parent=parent, window_flags=flags,
-                                                      batch=True)
+                    presenter = TableWorkspaceDisplay(ws, plot=matplotlib.pyplot, parent=parent, window_flags=flags, batch=True)
                     presenter.show_view()
                 except ValueError:
-                    logger.error("Could not open workspace: {0} with neither "
-                                 "MatrixWorkspaceDisplay nor TableWorkspaceDisplay."
-                                 "".format(ws.name()))
+                    logger.error(
+                        "Could not open workspace: {0} with neither "
+                        "MatrixWorkspaceDisplay nor TableWorkspaceDisplay."
+                        "".format(ws.name())
+                    )
 
     def _do_show_algorithm_history(self, names):
         for name in names:
@@ -315,8 +308,7 @@ class WorkspaceWidget(PluginWidget):
         successful_workspaces = []
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
             try:
-                task = BlockingAsyncTaskWithCallback(self._run_create_detector_table, [ws],
-                                                     blocking_cb=QApplication.processEvents)
+                task = BlockingAsyncTaskWithCallback(self._run_create_detector_table, [ws], blocking_cb=QApplication.processEvents)
                 task.start()
             except RuntimeError:
                 continue
@@ -345,10 +337,24 @@ class WorkspaceWidget(PluginWidget):
                 presenter = SampleMaterialDialogPresenter(workspace, parent=self)
                 presenter.show_view()
             except Exception as exception:
-                logger.warning("Could not show sample material for workspace "
-                               "'{}':\n{}\n".format(names[0], exception))
+                logger.warning("Could not show sample material for workspace " "'{}':\n{}\n".format(names[0], exception))
         else:
             logger.warning("Sample material can only be viewed for a single workspace.")
+
+    def _show_sample_shape(self, workspace_names):
+        """
+        Create a 3D Plot of the SampleShape from the selected workspaces
+
+        :param names: A list of workspace names
+        """
+        if len(workspace_names) == 1:
+
+            try:
+                sample_shape.plot_sample_container_and_components(workspace_names[0])
+            except Exception as exception:
+                logger.warning("Could not show sample shape for workspace " "'{}':\n{}\n".format(workspace_names[0], exception))
+        else:
+            logger.warning("Plot Sample Shape can only be viewed for a single workspace.")
 
     def _action_double_click_workspace(self, name):
         ws = self._ads.retrieve(name)
@@ -358,17 +364,13 @@ class WorkspaceWidget(PluginWidget):
             TableWorkspaceDisplay.supports(ws)
             self._do_show_data([name])
         except ValueError:
-            if hasattr(ws, 'getMaxNumberBins') and ws.getMaxNumberBins() == 1:
+            if hasattr(ws, "getMaxNumberBins") and ws.getMaxNumberBins() == 1:
                 # If this is ws is just a single value show the data, else plot the bin
-                if hasattr(ws, 'getNumberHistograms') and ws.getNumberHistograms() == 1:
+                if hasattr(ws, "getNumberHistograms") and ws.getNumberHistograms() == 1:
                     self._do_show_data([name])
                 else:
                     plot_kwargs = {"axis": MantidAxType.BIN}
-                    plot([ws],
-                         errors=False,
-                         overplot=False,
-                         wksp_indices=[0],
-                         plot_kwargs=plot_kwargs)
+                    plot([ws], errors=False, overplot=False, wksp_indices=[0], plot_kwargs=plot_kwargs)
             else:
                 plot_from_names([name], errors=False, overplot=False, show_colorfill_btn=True)
 

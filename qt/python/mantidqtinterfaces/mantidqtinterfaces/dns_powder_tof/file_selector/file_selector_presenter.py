@@ -9,18 +9,11 @@
 DNS file selector tab presenter of DNS Reduction GUI.
 """
 
-from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import \
-    DNSObserver
+from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import DNSObserver
 
 
 class DNSFileSelectorPresenter(DNSObserver):
-
-    def __init__(self,
-                 name=None,
-                 parent=None,
-                 view=None,
-                 model=None,
-                 watcher=None):
+    def __init__(self, name=None, parent=None, view=None, model=None, watcher=None):
         # pylint: disable=too-many-arguments
         super().__init__(parent=parent, name=name, view=view, model=model)
         self.watcher = watcher
@@ -46,10 +39,10 @@ class DNSFileSelectorPresenter(DNSObserver):
         range specified by start and end.
         """
         file_number_range = [start, end]
-        data_path = self.param_dict['paths']['data_dir']
-        number_of_files, loaded, datafiles, file_number_range_filtered = \
-            self.model.set_datafiles_to_load(data_path, file_number_range, filtered,
-                                             watcher)
+        data_path = self.param_dict["paths"]["data_dir"]
+        number_of_files, loaded, datafiles, file_number_range_filtered = self.model.set_datafiles_to_load(
+            data_path, file_number_range, filtered, watcher
+        )
         self.view.open_progress_dialog(number_of_files)
         self.model.read_all(datafiles, data_path, loaded, watcher)
         self.view.set_first_column_spanned(self.model.get_scan_range())
@@ -64,10 +57,10 @@ class DNSFileSelectorPresenter(DNSObserver):
         """
         Reading of standard files.
         """
-        data_path = self.param_dict['paths']['data_dir']
-        standard_path = self.param_dict['paths']['standards_dir']
+        data_path = self.param_dict["paths"]["data_dir"]
+        standard_path = self.param_dict["paths"]["standards_dir"]
         if not standard_path:
-            self.raise_error('No path set for standard data')
+            self.raise_error("No path set for standard data")
         standard_found = self.model.read_standard(standard_path)
         self.view.set_first_column_spanned(self.model.get_scan_range())
         self._filter_standard()
@@ -93,10 +86,10 @@ class DNSFileSelectorPresenter(DNSObserver):
         self._read_all(watcher=True)
 
     def _autoload_new(self, state):
-        data_dir = self.param_dict['paths']['data_dir']
+        data_dir = self.param_dict["paths"]["data_dir"]
 
         if not data_dir:
-            self.raise_error('No data directory selected', critical=True)
+            self.raise_error("No data directory selected", critical=True)
 
         if state == 2 and data_dir:
             self.watcher.start_watcher(data_dir)
@@ -113,19 +106,16 @@ class DNSFileSelectorPresenter(DNSObserver):
     def _automatic_select_all_standard_files(self):
         self._read_standard()
         self._check_all_visible_scans()
-        self.view.show_status_message(
-            'automatically loaded all standard files',
-            30)
+        self.view.show_status_message("automatically loaded all standard files", 30)
 
     def _check_all_visible_scans(self):
         self.model.check_scans_by_rows(self._get_non_hidden_rows())
 
     def _check_last_scans(self, sender_name):
         number_of_scans_to_check = self.view.get_nb_scans_to_check()
-        complete = 'complete' in sender_name
+        complete = "complete" in sender_name
         not_hidden_rows = self._get_non_hidden_rows()
-        self.model.check_last_scans(number_of_scans_to_check, complete,
-                                    not_hidden_rows)
+        self.model.check_last_scans(number_of_scans_to_check, complete, not_hidden_rows)
 
     def _check_selected_scans(self):
         indexes = self.view.get_selected_indexes()
@@ -152,8 +142,7 @@ class DNSFileSelectorPresenter(DNSObserver):
         """
         self._show_all_scans()
         filters = self.view.get_filters().items()
-        hide_scans = self.model.filter_scans_for_boxes(filters,
-                                                       self._is_modus_tof())
+        hide_scans = self.model.filter_scans_for_boxes(filters, self._is_modus_tof())
         for row in hide_scans:
             self.view.hide_scan(row)
 
@@ -163,9 +152,8 @@ class DNSFileSelectorPresenter(DNSObserver):
         """
         self._show_all_scans()
         filters = self.view.get_standard_filters()
-        active = filters['vanadium'] or filters['empty'] or filters['nicr']
-        hide_scans = self.model.filter_standard_types(filters, active,
-                                                      self._is_modus_tof())
+        active = filters["vanadium"] or filters["empty"] or filters["nicr"]
+        hide_scans = self.model.filter_standard_types(filters, active, self._is_modus_tof())
         for row in hide_scans:
             self.view.hide_scan(row)
 
@@ -182,7 +170,7 @@ class DNSFileSelectorPresenter(DNSObserver):
             self.model.set_active_model(standard=True)
             self._changed_to_standard()
             own_options = self.get_option_dict()
-            if own_options['auto_select_standard']:
+            if own_options["auto_select_standard"]:
                 self._check_all_visible_scans()
         else:
             self.view.sig_read_all.disconnect(self._read_standard)
@@ -192,7 +180,7 @@ class DNSFileSelectorPresenter(DNSObserver):
 
     # change of modi
     def _is_modus_tof(self):
-        return '_tof' in self.modus
+        return "_tof" in self.modus
 
     def _modus_changed(self):
         self._filter_scans()
@@ -209,24 +197,22 @@ class DNSFileSelectorPresenter(DNSObserver):
         """
         Open files in the treeview with right click.
         """
-        data_path = self.param_dict['paths']['data_dir']
-        standard_path = self.param_dict['paths']['standards_dir']
+        data_path = self.param_dict["paths"]["data_dir"]
+        standard_path = self.param_dict["paths"]["standards_dir"]
         self.model.open_datafile(index, data_path, standard_path)
 
     # normal observer function
     def get_option_dict(self):
         if self.view is not None:
             self.own_dict.update(self.view.get_state())
-        self.own_dict['full_data'] = self.model.get_data()
-        self.own_dict['standard_data_tree_model'] = self.model.get_data(standard=True)
-        self.own_dict['selected_file_numbers'] = self.model.get_data(
-            full_info=False)
+        self.own_dict["full_data"] = self.model.get_data()
+        self.own_dict["standard_data_tree_model"] = self.model.get_data(standard=True)
+        self.own_dict["selected_file_numbers"] = self.model.get_data(full_info=False)
         return self.own_dict
 
     def process_request(self):
         own_options = self.get_option_dict()
-        if (own_options['auto_select_standard'] and not
-                own_options['standard_data_tree_model']):
+        if own_options["auto_select_standard"] and not own_options["standard_data_tree_model"]:
             self._automatic_select_all_standard_files()
 
     def set_view_from_param(self):
@@ -234,25 +220,22 @@ class DNSFileSelectorPresenter(DNSObserver):
         Setting of the fields defined in mapping from the parameter dictionary
         and checks scans checked in the dict.
         """
-        file_numbers = self.param_dict[self.name].pop('selected_file_numbers',
-                                                      [])
+        file_numbers = self.param_dict[self.name].pop("selected_file_numbers", [])
         self.view.set_state(self.param_dict.get(self.name, {}))
         not_found = self.model.check_by_file_numbers(file_numbers)
         if not_found:
-            print(f'Of {len(file_numbers)} loaded checked '
-                  f'file numbers {not_found} were not found '
-                  'in list of datafiles')
+            print(f"Of {len(file_numbers)} loaded checked " f"file numbers {not_found} were not found " "in list of datafiles")
 
     def tab_got_focus(self):
         if self.model.model_is_standard():
             self._filter_standard()
         else:
             self._filter_scans()
-        self.view.hide_tof(hidden='_tof' not in self.modus)
+        self.view.hide_tof(hidden="_tof" not in self.modus)
 
     def process_commandline_request(self, command_dict):
-        start = int(command_dict['files'][0]['start'])
-        end = int(command_dict['files'][0]['end'])
+        start = int(command_dict["files"][0]["start"])
+        end = int(command_dict["files"][0]["end"])
         self._read_all(filtered=True, start=start, end=end)
         self.model.check_file_number_range(start, end)
 

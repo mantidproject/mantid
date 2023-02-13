@@ -8,11 +8,15 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+permissions:
+  issues: write
+  pull-requests: write
+
 jobs:
   label-conflicts:
     runs-on: ubuntu-latest
     steps:
-      - uses: prince-chrismc/label-merge-conflicts-action@v1
+      - uses: prince-chrismc/label-merge-conflicts-action@v3
         with:
           conflict_label_name: "Has Conflicts"
           github_token: ${{ secrets.GITHUB_TOKEN }}

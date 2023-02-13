@@ -91,5 +91,5 @@ class TableWorkspaceItemTest(unittest.TestCase):
         self.assertEqual(new_data, w.orig_data)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

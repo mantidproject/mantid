@@ -4,8 +4,15 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceUnitValidator, \
-                       InstrumentValidator, FileProperty, FileAction
+from mantid.api import (
+    PythonAlgorithm,
+    AlgorithmFactory,
+    MatrixWorkspaceProperty,
+    WorkspaceUnitValidator,
+    InstrumentValidator,
+    FileProperty,
+    FileAction,
+)
 from mantid.kernel import Direction, CompositeValidator
 from mantid.dataobjects import Workspace2D
 
@@ -18,37 +25,36 @@ import math
 
 
 class SaveYDA(PythonAlgorithm):
-    """ Save data in yaml/frida 2.0 format from a Workspace2D.
-    """
+    """Save data in yaml/frida 2.0 format from a Workspace2D."""
 
     def category(self):
-        """Return category
-        """
+        """Return category"""
         return "DataHandling\\Text"
 
     def name(self):
-        """Return name
-        """
+        """Return name"""
         return "SaveYDA"
 
     def summary(self):
-        """Return summary
-        """
+        """Return summary"""
         return "Save Workspace to a Frida 2.0 yaml format"
 
     def PyInit(self):
-        """Declare properties
-        """
+        """Declare properties"""
         wsValidators = CompositeValidator()
         # X axis must be a NumericAxis in energy transfer units.
         wsValidators.add(WorkspaceUnitValidator("DeltaE"))
         # Workspace must have an Instrument
         wsValidators.add(InstrumentValidator())
 
-        self.declareProperty(MatrixWorkspaceProperty(name="InputWorkspace", defaultValue="", direction=Direction.Input,
-                             validator=wsValidators), doc="Workspace name for input")
-        self.declareProperty(FileProperty(name="Filename", defaultValue="", action=FileAction.Save, extensions=""),
-                             doc="The name to use when writing the file")
+        self.declareProperty(
+            MatrixWorkspaceProperty(name="InputWorkspace", defaultValue="", direction=Direction.Input, validator=wsValidators),
+            doc="Workspace name for input",
+        )
+        self.declareProperty(
+            FileProperty(name="Filename", defaultValue="", action=FileAction.Save, extensions=""),
+            doc="The name to use when writing the file",
+        )
 
     def validateInputs(self):
         """Basic validation for inputs.
@@ -72,8 +78,7 @@ class SaveYDA(PythonAlgorithm):
         return issues
 
     def PyExec(self):
-        """ Main execution body
-        """
+        """Main execution body"""
         # Properties
         ws = self.getProperty("InputWorkspace").value
         filename = self.getProperty("Filename").value
@@ -84,8 +89,7 @@ class SaveYDA(PythonAlgorithm):
 
         # check sample logs exists
         if len(run.getLogData()) == 0:
-            raise NotImplementedError("No sample log data exist in workspace: "
-                                      + self.getPropertyValue("InputWorkspace"))
+            raise NotImplementedError("No sample log data exist in workspace: " + self.getPropertyValue("InputWorkspace"))
 
         # save sample log data in lists, commented sequences an commented maps
         # commented sequences and maps are used to keep Data in the order they get inserted
@@ -189,7 +193,7 @@ class SaveYDA(PythonAlgorithm):
             for i in range(nHist):
                 detector = ws.getDetector(i)
                 # convert radians to degrees
-                twoTheta = detector.getTwoTheta(samplePos, beamPos)*180/math.pi
+                twoTheta = detector.getTwoTheta(samplePos, beamPos) * 180 / math.pi
                 twoTheta = round(twoTheta, 14)
                 bin.append(twoTheta)
         elif ax.length() == nHist:
@@ -247,52 +251,52 @@ class SaveYDA(PythonAlgorithm):
             raise RuntimeError("Can't write in File" + filename)
 
     def _get_bin_centers(self, ax):
-        """ calculates the bin centers from the bin edges
+        """calculates the bin centers from the bin edges
         :param ax: bin center axis
         :return: list of bin centers
         """
         bin = []
 
         for i in range(1, ax.size):
-            axval = round((ax[i]+ax[i-1])/2, 14)
+            axval = round((ax[i] + ax[i - 1]) / 2, 14)
             bin.append(axval)
 
         return bin
 
 
 class MyDumper(Dumper):
-    """ regulates the indent for yaml Dumper
-    """
+    """regulates the indent for yaml Dumper"""
+
     def increase_indent(self, flow=False, indentless=False):
         return super(MyDumper, self).increase_indent(flow, False)
 
 
 class FlowOrderedDict(OrderedDict):
-    """ Helper class to switch between flow style and no flow style
+    """Helper class to switch between flow style and no flow style
 
     Equal to OrderedDict class but other yaml representer
     """
+
     pass
 
 
 class FlowList(list):
-    """ Helper class to switch between flow style and no flow style
+    """Helper class to switch between flow style and no flow style
 
     Equal to list class but other yaml representer
     """
+
     pass
 
 
 def _flow_list_rep(dumper, data):
-    """Yaml representer for list in flow style
-    """
-    return dumper.represent_sequence(u'tag:yaml.org,2002:seq', data, flow_style=True)
+    """Yaml representer for list in flow style"""
+    return dumper.represent_sequence("tag:yaml.org,2002:seq", data, flow_style=True)
 
 
 def _flow_ord_dic_rep(dumper, data):
-    """Yaml representer for OrderedDict in flow style
-    """
-    return dumper.represent_mapping(u'tag:yaml.org,2002:map', data, flow_style=True)
+    """Yaml representer for OrderedDict in flow style"""
+    return dumper.represent_mapping("tag:yaml.org,2002:map", data, flow_style=True)
 
 
 def _represent_ordered_dict(dumper, data):
@@ -308,7 +312,7 @@ def _represent_ordered_dict(dumper, data):
 
         value.append((node_key, node_value))
 
-    return yaml.nodes.MappingNode(u'tag:yaml.org,2002:map', value)
+    return yaml.nodes.MappingNode("tag:yaml.org,2002:map", value)
 
 
 # Adding representers to yaml
@@ -316,6 +320,6 @@ yaml.add_representer(OrderedDict, _represent_ordered_dict)
 yaml.add_representer(FlowList, _flow_list_rep)
 yaml.add_representer(FlowOrderedDict, _flow_ord_dic_rep)
 
-#---------------------------------------------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------------------------------------------#
 
 AlgorithmFactory.subscribe(SaveYDA)

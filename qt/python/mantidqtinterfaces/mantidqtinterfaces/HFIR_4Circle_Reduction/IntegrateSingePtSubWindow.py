@@ -4,28 +4,30 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=C0103
+# pylint: disable=C0103
 from mantidqtinterfaces.HFIR_4Circle_Reduction.hfctables import SinglePtIntegrationTable
 from mantidqtinterfaces.HFIR_4Circle_Reduction.integratedpeakview import SinglePtIntegrationView
 import mantidqtinterfaces.HFIR_4Circle_Reduction.guiutility as guiutility
 import os
-from qtpy.QtWidgets import (QMainWindow, QFileDialog)  # noqa
+from qtpy.QtWidgets import QMainWindow, QFileDialog  # noqa
 from qtpy.QtCore import Signal as pyqtSignal
 from mantid.kernel import Logger
+
 try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
-    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    Logger("HFIR_4Circle_Reduction").information("Using legacy ui importer")
     from mantidplot import load_ui
-from qtpy.QtWidgets import (QVBoxLayout)
+from qtpy.QtWidgets import QVBoxLayout
 
 
 class IntegrateSinglePtIntensityWindow(QMainWindow):
     """
     Main window widget to set up parameters to optimize
     """
+
     # establish signal for communicating from App2 to App1 - must be defined before the constructor
-    scanIntegratedSignal = pyqtSignal(dict, name='SinglePtIntegrated')
+    scanIntegratedSignal = pyqtSignal(dict, name="SinglePtIntegrated")
 
     def __init__(self, parent=None):
         """
@@ -36,7 +38,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         # init
         super(IntegrateSinglePtIntensityWindow, self).__init__(parent)
 
-        assert parent is not None, 'Parent window cannot be None to set'
+        assert parent is not None, "Parent window cannot be None to set"
         self._parent_window = parent
         self._controller = parent.controller
 
@@ -114,19 +116,21 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         pop out a dialog for user to input the 2theta-FWHM formula
         :return:
         """
-        formula = guiutility.get_value_from_dialog(parent=self, title='Input 2theta-FWHM function',
-                                                   details='Example: y = 4.0 * x**2 - 1.2 * x + 1./x]=\n'
-                                                           'where y is FWHM and x is 2theta',
-                                                   label_name='Equation: ')
+        formula = guiutility.get_value_from_dialog(
+            parent=self,
+            title="Input 2theta-FWHM function",
+            details="Example: y = 4.0 * x**2 - 1.2 * x + 1./x]=\n" "where y is FWHM and x is 2theta",
+            label_name="Equation: ",
+        )
 
         if formula is None:
             # return if user cancels operation
             return
 
-        print ('[DB...BAT] User input 2theta formula: {}'.format(formula))
+        print("[DB...BAT] User input 2theta formula: {}".format(formula))
         state, error_message = self._controller.check_2theta_fwhm_formula(formula)
         if not state:
-            guiutility.show_message(self, message=error_message, message_type='error')
+            guiutility.show_message(self, message=error_message, message_type="error")
             return
 
         return
@@ -154,24 +158,23 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         movie_dir = self._controller.get_working_directory()
         roi_name = str(self.ui.comboBox_roiList.currentText())
         direction = str(self.ui.comboBox_integrateDirection.currentText()).lower()
-        movie_dir = os.path.join(movie_dir, '{}_{}'.format(roi_name, direction))
+        movie_dir = os.path.join(movie_dir, "{}_{}".format(roi_name, direction))
         os.mkdir(movie_dir)
 
         # go through each line to plot and save the data
         num_rows = self.ui.tableView_summary.rowCount()
-        file_list_str = ''
+        file_list_str = ""
         for i_row in range(num_rows):
             # get run number and set to plot
             scan_number = self.ui.tableView_summary.get_scan_number(i_row)
-            self.ui.lineEdit_Scan.setText('{}'.format(scan_number))
-            png_file_name = os.path.join(movie_dir,
-                                         'Scan{0:04d}_ROI{1}_{2}.png'.format(scan_number, roi_name, direction))
+            self.ui.lineEdit_Scan.setText("{}".format(scan_number))
+            png_file_name = os.path.join(movie_dir, "Scan{0:04d}_ROI{1}_{2}.png".format(scan_number, roi_name, direction))
             self.do_plot_integrated_pt(show_plot=False, save_plot_to=png_file_name)
-            file_list_str += '{}\n'.format(png_file_name)
+            file_list_str += "{}\n".format(png_file_name)
         # END-IF
 
         # write out
-        png_list_file = open(os.path.join(movie_dir, 'MoviePNGList.txt'), 'w')
+        png_list_file = open(os.path.join(movie_dir, "MoviePNGList.txt"), "w")
         png_list_file.write(file_list_str)
         png_list_file.close()
 
@@ -188,8 +191,8 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         """
         # get ROI
         roi_name = str(self.ui.comboBox_roiList.currentText())
-        if roi_name is None or roi_name == '':
-            guiutility.show_message('A region-of-interest must be chosen in order to integrate detector counts.')
+        if roi_name is None or roi_name == "":
+            guiutility.show_message("A region-of-interest must be chosen in order to integrate detector counts.")
             return
 
         # integration direction and fit
@@ -197,19 +200,18 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         fit_gaussian = self.ui.checkBox_fitPeaks.isChecked()
 
         num_rows = self.ui.tableView_summary.rowCount()
-        print ('[DB...BAT] Number of rows = {}'.format(num_rows))
+        print("[DB...BAT] Number of rows = {}".format(num_rows))
         scan_number_list = list()
         for row_number in range(num_rows):
             # integrate counts on detector
             scan_number = self.ui.tableView_summary.get_scan_number(row_number)
             scan_number_list.append(scan_number)
         # END-FOR
-        print ('[DB...BAT] Scan numbers: {}'.format(scan_number_list))
+        print("[DB...BAT] Scan numbers: {}".format(scan_number_list))
 
-        peak_height_dict = self._controller.integrate_single_pt_scans_detectors_counts(self._exp_number,
-                                                                                       scan_number_list,
-                                                                                       roi_name, direction,
-                                                                                       fit_gaussian)
+        peak_height_dict = self._controller.integrate_single_pt_scans_detectors_counts(
+            self._exp_number, scan_number_list, roi_name, direction, fit_gaussian
+        )
 
         # set the value to the row  to table
         for row_number in range(self.ui.tableView_summary.rowCount()):
@@ -230,8 +232,8 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         """
         # get ROI
         roi_name = str(self.ui.comboBox_roiList.currentText())
-        if roi_name is None or roi_name == '':
-            guiutility.show_message('A region-of-interest must be chosen in order to integrate detector counts.')
+        if roi_name is None or roi_name == "":
+            guiutility.show_message("A region-of-interest must be chosen in order to integrate detector counts.")
             return
 
         for row_number in range(self.ui.tableView_summary.rowCount()):
@@ -242,8 +244,9 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
             # calculate peak intensity
             ref_fwhm = self.ui.tableView_summary.get_fwhm(row_number)
 
-            intensity = self._controller.calculate_intensity_single_pt(self._exp_number, scan_number, pt_number,
-                                                                       roi_name, ref_fwhm=ref_fwhm, is_fwhm=False)
+            intensity = self._controller.calculate_intensity_single_pt(
+                self._exp_number, scan_number, pt_number, roi_name, ref_fwhm=ref_fwhm, is_fwhm=False
+            )
 
             # add to table
             self.ui.tableView_summary.set_intensity(scan_number, pt_number, intensity)
@@ -259,7 +262,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         :return:
         """
         # get table file name
-        table_file = QFileDialog.getOpenFileName(self, 'Peak Integration Table', self._working_dir)
+        table_file = QFileDialog.getOpenFileName(self, "Peak Integration Table", self._working_dir)
         if not table_file:
             return
         if isinstance(table_file, tuple):
@@ -273,7 +276,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
             raise RuntimeError(error_msg)
 
     def do_plot_integrated_pt(self, show_plot=True, save_plot_to=None):
-        """ plot integrated Pt with model and raw data
+        """plot integrated Pt with model and raw data
         1. selection include: 2-theta FWHM Model, Summed Single Pt. Counts (horizontal),
         Summed Single Pt. Counts (vertical) from comboBox_plotType
         :return:
@@ -283,25 +286,24 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         # reset the canvas
         self.ui.graphicsView_integration1DView.clear_all_lines()
 
-        if plot_type == '2-theta FWHM Model':
+        if plot_type == "2-theta FWHM Model":
             self.plot_2theta_fwhm_model()
         else:
             # plot summed single pt scan
-            self.plot_summed_single_pt_scan_counts(is_vertical_summed=plot_type.lower().count('vertical'),
-                                                   figure_file=save_plot_to)
+            self.plot_summed_single_pt_scan_counts(is_vertical_summed=plot_type.lower().count("vertical"), figure_file=save_plot_to)
 
         return
 
     def do_plot_previous_scan(self):
-        """ plot previous scan if not in 2theta FWHM model
+        """plot previous scan if not in 2theta FWHM model
         :return:
         """
         plot_type = str(self.ui.comboBox_plotType.currentText())
-        if plot_type == '2-theta FWHM Model':
+        if plot_type == "2-theta FWHM Model":
             return
 
         scan_number_str = str(self.ui.lineEdit_Scan.text()).strip()
-        if scan_number_str == '':
+        if scan_number_str == "":
             return
 
         scan_number = int(scan_number_str)
@@ -316,15 +318,15 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         return
 
     def do_plot_next_scan(self):
-        """  plot next scan if not in 2theta FWHM model
+        """plot next scan if not in 2theta FWHM model
         :return:
         """
         plot_type = str(self.ui.comboBox_plotType.currentText())
-        if plot_type == '2-theta FWHM Model':
+        if plot_type == "2-theta FWHM Model":
             return
 
         scan_number_str = str(self.ui.lineEdit_Scan.text()).strip()
-        if scan_number_str == '':
+        if scan_number_str == "":
             return
 
         scan_number = int(scan_number_str)
@@ -350,47 +352,45 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         scan_num_str = str(self.ui.lineEdit_Scan.text()).strip()
         if len(scan_num_str) == 0:
             scan_number = self.ui.tableView_summary.get_scan_number(0)
-            self.ui.lineEdit_Scan.setText('{}'.format(scan_number))
+            self.ui.lineEdit_Scan.setText("{}".format(scan_number))
         else:
             scan_number = int(scan_num_str)
         roi_name = str(self.ui.comboBox_roiList.currentText())
         if is_vertical_summed:
-            direction = 'vertical'
+            direction = "vertical"
         else:
-            direction = 'horizontal'
+            direction = "horizontal"
 
         # get data: pt number is always 1 as it is a single Pt. measurement
         model_y = None
         if self.ui.checkBox_fitPeaks.isChecked():
             try:
-                vec_x, model_y = self._controller.get_single_scan_pt_model(self._exp_number, scan_number,
-                                                                           pt_number=1, roi_name=roi_name,
-                                                                           integration_direction=direction)
+                vec_x, model_y = self._controller.get_single_scan_pt_model(
+                    self._exp_number, scan_number, pt_number=1, roi_name=roi_name, integration_direction=direction
+                )
             except RuntimeError as run_err:
-                err_msg = 'Unable to get single-pt scan model for {} {} {} due to {}' \
-                          ''.format(self._exp_number, scan_number, roi_name, run_err)
+                err_msg = "Unable to get single-pt scan model for {} {} {} due to {}" "".format(
+                    self._exp_number, scan_number, roi_name, run_err
+                )
                 if pop_error:
                     raise RuntimeError(err_msg)
                 else:
-                    print (err_msg)
+                    print(err_msg)
             # END-TRY-EXCEPT
         # END-IF
 
         # get original data
-        vec_x, vec_y = self._controller.get_single_scan_pt_summed(self._exp_number, scan_number,
-                                                                  pt_number=1, roi_name=roi_name,
-                                                                  integration_direction=direction)
+        vec_x, vec_y = self._controller.get_single_scan_pt_summed(
+            self._exp_number, scan_number, pt_number=1, roi_name=roi_name, integration_direction=direction
+        )
 
         # plot
-        self.ui.graphicsView_integration1DView.add_observed_data(vec_x, vec_y, label='Summed (raw) counts',
-                                                                 update_plot=False)
+        self.ui.graphicsView_integration1DView.add_observed_data(vec_x, vec_y, label="Summed (raw) counts", update_plot=False)
         if model_y is not None:
-            self.ui.graphicsView_integration1DView.add_fit_data(vec_x, model_y, label='Gaussian model',
-                                                                update_plot=True)
+            self.ui.graphicsView_integration1DView.add_fit_data(vec_x, model_y, label="Gaussian model", update_plot=True)
 
         # title
-        self.ui.graphicsView_integration1DView.set_title('Scan {} Pt {} {} Integration.'
-                                                         ''.format(scan_number, 1, direction))
+        self.ui.graphicsView_integration1DView.set_title("Scan {} Pt {} {} Integration." "".format(scan_number, 1, direction))
 
         # save plot?
         if figure_file is not None:
@@ -399,15 +399,14 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         return
 
     def plot_2theta_fwhm_model(self):
-        """ plot the loaded 2theta-FWHM model
+        """plot the loaded 2theta-FWHM model
         :return:
         """
         # TODO - 20180815 - Need to parse the range from self.ui.lineEdit_Scan
         # default
-        two_theta_range = 10, 2.0, 110   # start, resolution, stop
+        two_theta_range = 10, 2.0, 110  # start, resolution, stop
 
-        vec_2theta, vec_fwhm, vec_model = self._controller.get_2theta_fwhm_data(two_theta_range[0], two_theta_range[1],
-                                                                                two_theta_range[2])
+        vec_2theta, vec_fwhm, vec_model = self._controller.get_2theta_fwhm_data(two_theta_range[0], two_theta_range[1], two_theta_range[2])
 
         self.ui.graphicsView_integration1DView.plot_2theta_model(vec_2theta, vec_fwhm, vec_model)
 
@@ -437,7 +436,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         :return:
         """
         # get output file
-        out_file_name = QFileDialog.getSaveFileName(self, 'File to save integrated intensities', self._working_dir)
+        out_file_name = QFileDialog.getSaveFileName(self, "File to save integrated intensities", self._working_dir)
         if not out_file_name:
             return
         if isinstance(out_file_name, tuple):
@@ -451,11 +450,11 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         :return:
         """
         row_number = self.ui.tableView_summary.rowCount()
-        error_messages = ''
+        error_messages = ""
         for row_index in range(row_number):
             # check whether FWHM value is set up
             fwhm_i = self.ui.tableView_summary.get_fwhm(row_index)
-            if fwhm_i is not None and fwhm_i > 1.E-10:
+            if fwhm_i is not None and fwhm_i > 1.0e-10:
                 continue
 
             # use interpolation to curve
@@ -466,12 +465,13 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
                 pt_number = 1
                 roi_name = self.ui.tableView_summary.get_region_of_interest_name(row_index)
                 self.ui.tableView_summary.set_gaussian_sigma(row_index, gauss_sigma)
-                self._controller.set_single_measure_peak_width(self._exp_number, scan_number, pt_number,
-                                                               roi_name, gauss_sigma, is_fhwm=False)
+                self._controller.set_single_measure_peak_width(
+                    self._exp_number, scan_number, pt_number, roi_name, gauss_sigma, is_fhwm=False
+                )
 
             except RuntimeError as err:
                 # error!
-                error_messages += 'Unable to calculate sigma of row {0} due to {1}\n'.format(row_index, err)
+                error_messages += "Unable to calculate sigma of row {0} due to {1}\n".format(row_index, err)
                 continue
             # END-IF-ELSE
 
@@ -485,10 +485,8 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         :return:
         """
         # get the column ascii file name
-        file_filter = 'Data Files (*.dat);;All Files (*.*)'
-        twotheta_sigma_file_name = QFileDialog.getOpenFileName(self, self._working_dir,
-                                                               '2theta Gaussian-Sigma File',
-                                                               file_filter)
+        file_filter = "Data Files (*.dat);;All Files (*.*)"
+        twotheta_sigma_file_name = QFileDialog.getOpenFileName(self, self._working_dir, "2theta Gaussian-Sigma File", file_filter)
         if not twotheta_sigma_file_name:
             return
         if isinstance(twotheta_sigma_file_name, tuple):
@@ -522,8 +520,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         :return:
         """
         # check input
-        assert isinstance(scan_pt_list, list), 'Scan-Pt-Infos {} must be a list but not a {}.' \
-                                               ''.format(scan_pt_list, type(scan_pt_list))
+        assert isinstance(scan_pt_list, list), "Scan-Pt-Infos {} must be a list but not a {}." "".format(scan_pt_list, type(scan_pt_list))
 
         # sort the scans
         scan_pt_list = sorted(scan_pt_list)
@@ -567,17 +564,18 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         next_scan_index = (next_scan_index + len(run_number_list)) % len(run_number_list)
 
         # set
-        self.ui.lineEdit_Scan.setText('{}'.format(run_number_list[next_scan_index]))
+        self.ui.lineEdit_Scan.setText("{}".format(run_number_list[next_scan_index]))
 
         return
 
     def set_experiment(self, exp_number):
-        """ set experiment number to this window for convenience
+        """set experiment number to this window for convenience
         :param exp_number:
         :return:
         """
-        assert isinstance(exp_number, int) and exp_number > 0, 'Experiment number {} (of type {} now) must be a ' \
-                                                               'positive integer'.format(exp_number, type(exp_number))
+        assert isinstance(exp_number, int) and exp_number > 0, "Experiment number {} (of type {} now) must be a " "positive integer".format(
+            exp_number, type(exp_number)
+        )
         self._exp_number = exp_number
 
         return

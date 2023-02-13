@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 """ Empty class temporary left for compatibility with previous interfaces """
 import Direct.DirectEnergyConversion as DRC
 from mantid.simpleapi import *
@@ -16,7 +16,7 @@ global Reducer
 Reducer = None
 
 # Statement used at debug time to pull changes in DirectEnergyConversion into Mantid
-#DRC=reload(DRC)
+# DRC=reload(DRC)
 
 
 def getReducer():
@@ -25,7 +25,7 @@ def getReducer():
     return Reducer
 
 
-def setup(instname=None,reload=False):
+def setup(instname=None, reload=False):
     """
     setup('mar')
     setup instrument reduction parameters from instname_parameter.xml file
@@ -35,20 +35,20 @@ def setup(instname=None,reload=False):
     """
 
     global Reducer
-    if instname is None :
-        instname = config['default.instrument']
+    if instname is None:
+        instname = config["default.instrument"]
 
     if not (Reducer is None or Reducer.prop_man is None):
-        old_name=Reducer.prop_man.instr_name
-        if  old_name.upper()[0:3] == instname.upper()[0:3] :
-            if not reload :
+        old_name = Reducer.prop_man.instr_name
+        if old_name.upper()[0:3] == instname.upper()[0:3]:
+            if not reload:
                 return  # has been already defined
 
-    Reducer = DRC.setup_reducer(instname,reload)
+    Reducer = DRC.setup_reducer(instname, reload)
 
 
-def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=None,second_wb=None,**kwargs):
-    """ One step conversion of run into workspace containing information about energy transfer
+def arb_units(wb_run, sample_run, ei_guess, rebin, map_file="default", monovan_run=None, second_wb=None, **kwargs):
+    """One step conversion of run into workspace containing information about energy transfer
     Usage:
     >>arb_units(wb_run,sample_run,ei_guess,rebin)
 
@@ -137,40 +137,40 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     global Reducer
     if Reducer is None or Reducer.instrument is None:
         raise ValueError("instrument has not been defined, call setup(instrument_name) first.")
-# --------------------------------------------------------------------------------------------------------
-#    Deal with mandatory parameters for this and may be some top level procedures
-# --------------------------------------------------------------------------------------------------------
+    # --------------------------------------------------------------------------------------------------------
+    #    Deal with mandatory parameters for this and may be some top level procedures
+    # --------------------------------------------------------------------------------------------------------
     if sample_run:
         Reducer.sample_run = sample_run
         sample_run = None
     try:
-        n,r=funcinspect.lhs_info('both')
-        wksp_out=r[0]
+        n, r = funcinspect.lhs_info("both")
+        wksp_out = r[0]
     except:
         wksp_out = "reduced_ws"
     #
-    res = Reducer.convert_to_energy(wb_run,sample_run,ei_guess,rebin,map_file,monovan_run,second_wb,**kwargs)
+    res = Reducer.convert_to_energy(wb_run, sample_run, ei_guess, rebin, map_file, monovan_run, second_wb, **kwargs)
     #
     results_name = res.name()
     if results_name != wksp_out:
-        RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=wksp_out)
+        RenameWorkspace(InputWorkspace=results_name, OutputWorkspace=wksp_out)
 
     return res
 
 
-def runs_are_equal(ws1,ws2):
+def runs_are_equal(ws1, ws2):
     """Compare two run numbers, provided either as run numbers,
-       or as workspaces or as ws names"""
+    or as workspaces or as ws names"""
     if ws1 == ws2:
         return True
-    #-----------------------------------------------
+    # -----------------------------------------------
 
     def get_run_num(name_or_ws):
         err = None
 
-        if isinstance(name_or_ws,api.MatrixWorkspace):
+        if isinstance(name_or_ws, api.MatrixWorkspace):
             run_num = name_or_ws.getRunNumber()
-        elif name_or_ws in mtd: # this is also throw Boost.Python.ArgumentError error if mtd not accepts it
+        elif name_or_ws in mtd:  # this is also throw Boost.Python.ArgumentError error if mtd not accepts it
             ws = mtd[name_or_ws]
             run_num = ws.getRunNumber()
         else:
@@ -178,7 +178,8 @@ def runs_are_equal(ws1,ws2):
         if err is not None:
             raise AttributeError("Input parameter is neither workspace nor ws name")
         return run_num
-    #-----------------------------------------------
+
+    # -----------------------------------------------
     try:
         run_num1 = get_run_num(ws1)
     except AttributeError:
@@ -187,11 +188,22 @@ def runs_are_equal(ws1,ws2):
         run_num2 = get_run_num(ws2)
     except AttributeError:
         return False
-    return run_num1==run_num2
+    return run_num1 == run_num2
 
 
-def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,samp_mass,
-              ei_guess,rebin,map_file='default',monovan_mapfile='default',**kwargs):
+def abs_units(
+    wb_for_run,
+    sample_run,
+    monovan_run,
+    wb_for_monovanadium,
+    samp_rmm,
+    samp_mass,
+    ei_guess,
+    rebin,
+    map_file="default",
+    monovan_mapfile="default",
+    **kwargs
+):
     """
     dgreduce.abs_units(wb_run          Whitebeam run number or file name or workspace
                   sample_run          Sample run run number or file name or workspace
@@ -274,35 +286,35 @@ def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,sam
     mono_correction_factor=float User specified correction factor for absolute units normalization
     """
 
-    kwargs['monovan_mapfile']    = monovan_mapfile
-    kwargs['sample_mass']        = samp_mass
-    kwargs['sample_rmm']         = samp_rmm
+    kwargs["monovan_mapfile"] = monovan_mapfile
+    kwargs["sample_mass"] = samp_mass
+    kwargs["sample_rmm"] = samp_rmm
 
     if sample_run:
         Reducer.sample_run = sample_run
         sample_run = None
 
     try:
-        n,r=funcinspect.lhs_info('both')
-        results_name=r[0]
+        n, r = funcinspect.lhs_info("both")
+        results_name = r[0]
     except:
         results_name = Reducer.prop_man.get_sample_ws_name()
-    if runs_are_equal(wb_for_run,wb_for_monovanadium):# wb_for_monovanadium property does not accept duplicated workspace
-        wb_for_monovanadium = None        # if this value is none, it is constructed to be equal to wb_for_run
+    if runs_are_equal(wb_for_run, wb_for_monovanadium):  # wb_for_monovanadium property does not accept duplicated workspace
+        wb_for_monovanadium = None  # if this value is none, it is constructed to be equal to wb_for_run
 
-    wksp_out = arb_units(wb_for_run,sample_run,ei_guess,rebin,map_file,monovan_run,wb_for_monovanadium,**kwargs)
+    wksp_out = arb_units(wb_for_run, sample_run, ei_guess, rebin, map_file, monovan_run, wb_for_monovanadium, **kwargs)
 
-    if  results_name != wksp_out.name():
-        RenameWorkspace(InputWorkspace=wksp_out,OutputWorkspace=results_name)
+    if results_name != wksp_out.name():
+        RenameWorkspace(InputWorkspace=wksp_out, OutputWorkspace=results_name)
 
     return wksp_out
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     pass
 
-    #help()
-    #help("rubbish")
+    # help()
+    # help("rubbish")
 
-    #for attr in dir(Reducer):
+    # for attr in dir(Reducer):
     #  print "Reduce.%s = %s" % (attr, getattr(Reducer, attr))

@@ -8,15 +8,13 @@ from mantidqtinterfaces.Muon.GUI.Common.plot_widget.fit_pane.plot_fit_pane_prese
 
 
 class PlotModelFitPanePresenter(PlotFitPanePresenter):
-
     def __init__(self, view, model, context, fitting_context, figure_presenter):
         super().__init__(view, model, context, fitting_context, figure_presenter)
         self._data_type = [""]
         self._sort_by = [""]
         self.update_view()
 
-        self.update_override_tick_labels_observer = GenericObserverWithArgPassing(
-            self.update_override_x_and_y_tick_labels)
+        self.update_override_tick_labels_observer = GenericObserverWithArgPassing(self.update_override_x_and_y_tick_labels)
         self.update_x_range_observer = GenericObserverWithArgPassing(self.update_x_plot_range)
 
         self._figure_presenter.set_errors(True)

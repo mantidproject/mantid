@@ -33,10 +33,12 @@ class bounds(object):
 
 
 def data():
-    values = {"one": bounds([5, 20], [5, 10]),
-              "two": bounds([6, 10], [0, 9]),
-              "three": bounds([-1, 11], [7, 8]),
-              "four": bounds([4, 12], [4, 50])}
+    values = {
+        "one": bounds([5, 20], [5, 10]),
+        "two": bounds([6, 10], [0, 9]),
+        "three": bounds([-1, 11], [7, 8]),
+        "four": bounds([4, 12], [4, 50]),
+    }
     return values
 
 
@@ -56,8 +58,8 @@ class MultiPlotWidgetTest(unittest.TestCase):
             ws = mock.MagicMock()
             subplot_name = "test"
             spec_num = 4
-            self.widget.plot(subplot_name, ws, color='C0', spec_num=spec_num)
-            patch.assert_called_with(subplot_name, ws, color='C0', spec_num=spec_num)
+            self.widget.plot(subplot_name, ws, color="C0", spec_num=spec_num)
+            patch.assert_called_with(subplot_name, ws, color="C0", spec_num=spec_num)
             self.assertEqual(patch.call_count, 1)
 
     def test_set_all_values(self):
@@ -219,7 +221,7 @@ class MultiPlotWidgetTest(unittest.TestCase):
 
     def test_that_remove_line_calls_correct_function(self):
         self.widget.plots = mock.Mock()
-        self.widget.remove_line("subplot", 'ws_name')
+        self.widget.remove_line("subplot", "ws_name")
 
         self.widget.plots.remove_lines.assert_called_with("subplot", ["ws_name: spec 1"])
 

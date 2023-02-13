@@ -24,27 +24,27 @@ BASE_SET_FACECOLOR_COMMAND = "set_facecolor('{}')"
 TICK_FORMATTER_CLASSES = {
     "NullFormatter": NullFormatter,
     "ScalarFormatter": ScalarFormatter,
-    "LogFormatterSciNotation": LogFormatterSciNotation
+    "LogFormatterSciNotation": LogFormatterSciNotation,
 }
 
 TICK_FORMATTERS = {
     "NullFormatter": "NullFormatter()",
     "ScalarFormatter": "ScalarFormatter(useOffset=True)",
-    "LogFormatterSciNotation": "LogFormatterSciNotation()"
+    "LogFormatterSciNotation": "LogFormatterSciNotation()",
 }
 
 DEFAULT_TICK_FORMATTERS = {
     "linear": {"major": ScalarFormatter, "minor": NullFormatter},
-    "log": {"major": LogFormatterSciNotation, "minor": LogFormatterSciNotation}
+    "log": {"major": LogFormatterSciNotation, "minor": LogFormatterSciNotation},
 }
 
-DEFAULT_FACECOLOR = rcParams['axes.facecolor']
+DEFAULT_FACECOLOR = rcParams["axes.facecolor"]
 
 
 def generate_axis_limit_commands(ax):
     """Generate commands to set the axes' limits"""
     commands = []
-    for axis in ['x', 'y']:
+    for axis in ["x", "y"]:
         current_lims = getattr(ax, "get_{}lim".format(axis))()
         default_lims = get_autoscale_limits(ax, axis)
         if not isclose(current_lims, default_lims, rtol=0.01).all():
@@ -55,8 +55,8 @@ def generate_axis_limit_commands(ax):
 
 def generate_axis_label_commands(ax):
     commands = []
-    for axis in ['x', 'y']:
-        label = getattr(ax, 'get_{}label'.format(axis))()
+    for axis in ["x", "y"]:
+        label = getattr(ax, "get_{}label".format(axis))()
         if label:
             commands.append(BASE_AXIS_LABEL_COMMAND.format(axis, repr(label)))
     return commands
@@ -68,9 +68,9 @@ def generate_set_title_command(ax):
 
 def generate_axis_scale_commands(ax):
     commands = []
-    for axis in ['x', 'y']:
-        scale = getattr(ax, 'get_{}scale'.format(axis))()
-        if scale != 'linear':
+    for axis in ["x", "y"]:
+        scale = getattr(ax, "get_{}scale".format(axis))()
+        if scale != "linear":
             commands.append(BASE_AXIS_SCALE_COMMAND.format(axis, scale))
     return commands
 
@@ -111,17 +111,16 @@ def generate_tick_commands(ax):
             if tick_type == "minor":
                 commands.append("minorticks_on()")
 
-            if isinstance(getattr(ax.xaxis, f"{tick_type}Ticks"), list) and \
-                    len(getattr(ax.xaxis, f"{tick_type}Ticks")) > 0:
-                commands.append(f"tick_params(axis='x', which='{tick_type}', **"
-                                f"{generate_tick_params_kwargs(ax.xaxis, tick_type)})")
-                commands.append(f"tick_params(axis='y', which='{tick_type}', **"
-                                f"{generate_tick_params_kwargs(ax.yaxis, tick_type)})")
-                #add the custom show_minor_gridlines attribute so that it can be controlled by qt
-                if tick_type == "minor" and \
-                        getattr(ax.xaxis, f"_{tick_type}_tick_kw")['gridOn'] is True and \
-                        getattr(ax.yaxis, f"_{tick_type}_tick_kw")['gridOn'] is True:
-                    commands.append(f"show_minor_gridlines = True")
+            if isinstance(getattr(ax.xaxis, f"{tick_type}Ticks"), list) and len(getattr(ax.xaxis, f"{tick_type}Ticks")) > 0:
+                commands.append(f"tick_params(axis='x', which='{tick_type}', **" f"{generate_tick_params_kwargs(ax.xaxis, tick_type)})")
+                commands.append(f"tick_params(axis='y', which='{tick_type}', **" f"{generate_tick_params_kwargs(ax.yaxis, tick_type)})")
+                # add the custom show_minor_gridlines attribute so that it can be controlled by qt
+                if (
+                    tick_type == "minor"
+                    and getattr(ax.xaxis, f"_{tick_type}_tick_kw")["gridOn"] is True
+                    and getattr(ax.yaxis, f"_{tick_type}_tick_kw")["gridOn"] is True
+                ):
+                    commands.append("show_minor_gridlines = True")
 
     return commands
 

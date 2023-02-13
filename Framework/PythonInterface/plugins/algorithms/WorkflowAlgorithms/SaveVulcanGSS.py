@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
 import mantid.simpleapi as api
 from mantid.api import AnalysisDataService
 from mantid.api import MatrixWorkspaceProperty, PropertyMode, PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty
@@ -13,45 +13,42 @@ from mantid.kernel import Direction
 import mantid.kernel
 import numpy
 import os.path
+from mantid.utils.deprecator import deprecated_algorithm
 
 
+@deprecated_algorithm("SaveGSS", "2022-11-30")
 class SaveVulcanGSS(PythonAlgorithm):
-    """ Save GSS file for VULCAN.  This is a workflow algorithm
-    """
+    """Save GSS file for VULCAN.  This is a workflow algorithm"""
 
     def category(self):
-        """ category
-        """
+        """category"""
         return "Workflow\\Diffraction\\DataHandling"
 
     def seeAlso(self):
-        return [ "SaveGSS" ]
+        return ["SaveGSS"]
 
     def name(self):
-        """ name of algorithm
-        """
+        """name of algorithm"""
         return "SaveVulcanGSS"
 
     def summary(self):
-        """ Return summary
-        """
+        """Return summary"""
         return "Save a focused EventWorkspace to GSAS file that is readable by VDRIVE"
 
     def PyInit(self):
-        """ Declare properties
-        """
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
-                             "Focused diffraction workspace to be exported to GSAS file. ")
+        """Declare properties"""
+        self.declareProperty(
+            MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input), "Focused diffraction workspace to be exported to GSAS file. "
+        )
 
-        self.declareProperty(ITableWorkspaceProperty('BinningTable', '', Direction.Input, PropertyMode.Optional),
-                             'Table workspace containing binning parameters. If not specified, then no re-binning'
-                             'is required')
+        self.declareProperty(
+            ITableWorkspaceProperty("BinningTable", "", Direction.Input, PropertyMode.Optional),
+            "Table workspace containing binning parameters. If not specified, then no re-binning" "is required",
+        )
 
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),
-                             "Name of rebinned matrix workspace. ")
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output), "Name of rebinned matrix workspace. ")
 
-        self.declareProperty(FileProperty("GSSFilename","", FileAction.Save, ['.gda']),
-                             "Name of the output GSAS file. ")
+        self.declareProperty(FileProperty("GSSFilename", "", FileAction.Save, [".gda"]), "Name of the output GSAS file. ")
 
         self.declareProperty("IPTS", mantid.kernel.Property.EMPTY_INT, "IPTS number")
 
@@ -60,8 +57,7 @@ class SaveVulcanGSS(PythonAlgorithm):
         return
 
     def PyExec(self):
-        """ Main Execution Body
-        """
+        """Main Execution Body"""
         # Process input properties
         input_ws, binning_param_list, gsas_file_name, output_ws_name, ipts_number, parm_file = self.process_inputs()
 
@@ -93,7 +89,7 @@ class SaveVulcanGSS(PythonAlgorithm):
             processed_single_spec_ws_list = list()
             for ws_index in range(input_ws.getNumberHistograms()):
                 # rebin on each
-                temp_out_name = output_ws_name + '_' + str(ws_index)
+                temp_out_name = output_ws_name + "_" + str(ws_index)
                 processed_single_spec_ws_list.append(temp_out_name)
                 # extract a spectrum out
                 api.ExtractSpectra(input_ws, WorkspaceIndexList=[ws_index], OutputWorkspace=temp_out_name)
@@ -105,18 +101,18 @@ class SaveVulcanGSS(PythonAlgorithm):
                 # check
                 if len(bin_params) % 2 == 0:
                     # odd number and cannot be binning parameters
-                    raise RuntimeError('Binning parameter {0} cannot be accepted.'.format(bin_params))
+                    raise RuntimeError("Binning parameter {0} cannot be accepted.".format(bin_params))
 
-                api.Rebin(InputWorkspace=temp_out_name, OutputWorkspace=temp_out_name,
-                          Params=bin_params, PreserveEvents=True)
+                api.Rebin(InputWorkspace=temp_out_name, OutputWorkspace=temp_out_name, Params=bin_params, PreserveEvents=True)
                 rebinned_ws = AnalysisDataService.retrieve(temp_out_name)
-                self.log().warning('Rebinnd workspace Size(x) = {0}, Size(y) = {1}'.format(len(rebinned_ws.readX(0)),
-                                                                                           len(rebinned_ws.readY(0))))
+                self.log().warning(
+                    "Rebinnd workspace Size(x) = {0}, Size(y) = {1}".format(len(rebinned_ws.readX(0)), len(rebinned_ws.readY(0)))
+                )
 
                 # Upon this point, the workspace is still HistogramData.
                 # Check whether it is necessary to reset the X-values to reference TOF from VDRIVE
                 temp_out_ws = AnalysisDataService.retrieve(temp_out_name)
-                if len(bin_params) == 2*len(temp_out_ws.readX(0)) - 1:
+                if len(bin_params) == 2 * len(temp_out_ws.readX(0)) - 1:
                     reset_bins = True
                 else:
                     reset_bins = False
@@ -129,17 +125,15 @@ class SaveVulcanGSS(PythonAlgorithm):
                 if reset_bins:
                     # good to align:
                     for tof_i in range(len(temp_out_ws.readX(0))):
-                        temp_out_ws.dataX(0)[tof_i] = int(bin_params[2*tof_i] * 10) / 10.
+                        temp_out_ws.dataX(0)[tof_i] = int(bin_params[2 * tof_i] * 10) / 10.0
                     # END-FOR (tof-i)
                 # END-IF (align)
             # END-FOR
 
             # merge together
-            api.RenameWorkspace(InputWorkspace=processed_single_spec_ws_list[0],
-                                OutputWorkspace=output_ws_name)
+            api.RenameWorkspace(InputWorkspace=processed_single_spec_ws_list[0], OutputWorkspace=output_ws_name)
             for ws_index in range(1, len(processed_single_spec_ws_list)):
-                api.ConjoinWorkspaces(InputWorkspace1=output_ws_name,
-                                      InputWorkspace2=processed_single_spec_ws_list[ws_index])
+                api.ConjoinWorkspaces(InputWorkspace1=output_ws_name, InputWorkspace2=processed_single_spec_ws_list[ws_index])
             # END-FOR
             output_workspace = AnalysisDataService.retrieve(output_ws_name)
         # END-IF-ELSE
@@ -154,7 +148,7 @@ class SaveVulcanGSS(PythonAlgorithm):
         """
         # get input properties
         input_ws_name = self.getPropertyValue("InputWorkspace")
-        bin_par_ws_name = self.getPropertyValue('BinningTable')
+        bin_par_ws_name = self.getPropertyValue("BinningTable")
         if len(bin_par_ws_name) > 0:
             bin_par_ws_exist = AnalysisDataService.doesExist(bin_par_ws_name)
         else:
@@ -162,9 +156,10 @@ class SaveVulcanGSS(PythonAlgorithm):
 
         # event workspace is required for re-binning
         input_workspace = AnalysisDataService.retrieve(input_ws_name)
-        if input_workspace.id() != 'EventWorkspace' and bin_par_ws_exist:
-            self.log().warning('Input workspace {0} must be an EventWorkspace if rebin is required by {1}'
-                               ''.format(input_workspace, bin_par_ws_name))
+        if input_workspace.id() != "EventWorkspace" and bin_par_ws_exist:
+            self.log().warning(
+                "Input workspace {0} must be an EventWorkspace if rebin is required by {1}" "".format(input_workspace, bin_par_ws_name)
+            )
         elif input_workspace.getAxis(0).getUnit().unitID() != "TOF":
             raise NotImplementedError("InputWorkspace must be in unit as TOF.")
 
@@ -184,8 +179,8 @@ class SaveVulcanGSS(PythonAlgorithm):
         ipts_number = self.getProperty("IPTS").value
         if ipts_number == mantid.kernel.Property.EMPTY_INT:
             try:
-                run_number = input_workspace.run().getProperty('run').value
-                ipts_number = api.GetIPTS(Instrument='VULCAN', RunNumber=run_number)
+                run_number = input_workspace.run().getProperty("run").value
+                ipts_number = api.GetIPTS(Instrument="VULCAN", RunNumber=run_number)
             except RuntimeError:
                 ipts_number = 0
 
@@ -201,6 +196,7 @@ class SaveVulcanGSS(PythonAlgorithm):
         :param bin_par_ws_name:
         :return:
         """
+
         def convert_str_to_integers(list_str):
             """
             convert a string to positive integers.  it could be a-b, c, d
@@ -212,18 +208,18 @@ class SaveVulcanGSS(PythonAlgorithm):
             int_list = list(int_array)
 
             return int_list
+
         # END-DEF
 
         bin_par_workspace = AnalysisDataService.retrieve(bin_par_ws_name)
         # check inputs
-        assert isinstance(bin_par_workspace, ITableWorkspace), 'Input binning workspace {0} must be ' \
-                                                               'an ITableWorkspace but not a {1}' \
-                                                               ''.format(bin_par_workspace,
-                                                                         type(bin_par_workspace))
+        assert isinstance(bin_par_workspace, ITableWorkspace), (
+            "Input binning workspace {0} must be " "an ITableWorkspace but not a {1}" "".format(bin_par_workspace, type(bin_par_workspace))
+        )
 
         # check whether it is valid TableWorkspace
         if bin_par_workspace.columnCount() < 2:
-            raise RuntimeError('Binning parameter table must have equal or more than 2 columns')
+            raise RuntimeError("Binning parameter table must have equal or more than 2 columns")
 
         # columns
         if bin_par_workspace.rowCount() == 1:
@@ -253,10 +249,11 @@ class SaveVulcanGSS(PythonAlgorithm):
         # check whether there is any spectrum that does not have been listed
         for index, bin_param in enumerate(binning_parameter_list):
             if bin_param is None:
-                raise RuntimeError('Not all the spectra that have binning parameters set.'
-                                   '{0}-th binning parameter is None.  FYI, there are '
-                                   '{1} parameters as {2}'.format(index, len(binning_parameter_list),
-                                                                  binning_parameter_list))
+                raise RuntimeError(
+                    "Not all the spectra that have binning parameters set."
+                    "{0}-th binning parameter is None.  FYI, there are "
+                    "{1} parameters as {2}".format(index, len(binning_parameter_list), binning_parameter_list)
+                )
 
         return binning_parameter_list
 
@@ -268,31 +265,30 @@ class SaveVulcanGSS(PythonAlgorithm):
         :param bin_par_str:
         :return:
         """
-        if bin_par_str.count(':') == 0:
+        if bin_par_str.count(":") == 0:
             # parse regular binning parameters
-            terms = bin_par_str.split(',')  # in string format
+            terms = bin_par_str.split(",")  # in string format
             try:
                 bin_param = [float(term) for term in terms]
             except ValueError:
-                raise RuntimeError('Binning parameters {0} have non-float terms.'.format(bin_par_str))
+                raise RuntimeError("Binning parameters {0} have non-float terms.".format(bin_par_str))
 
-        elif bin_par_str.count(':') == 1:
+        elif bin_par_str.count(":") == 1:
             # in workspace name : workspace index mode
-            terms = bin_par_str.split(':')
+            terms = bin_par_str.split(":")
             ref_ws_name = terms[0].strip()
             if AnalysisDataService.doesExist(ref_ws_name) is False:
-                raise RuntimeError('Workspace {0} does not exist (FYI {1})'
-                                   ''.format(ref_ws_name, bin_par_str))
+                raise RuntimeError("Workspace {0} does not exist (FYI {1})" "".format(ref_ws_name, bin_par_str))
             try:
                 ws_index = int(terms[1].strip())
             except ValueError:
-                raise RuntimeError('{0} is supposed to be an integer for workspace index but not of type {1}.'
-                                   ''.format(terms[1], type(terms[1])))
+                raise RuntimeError(
+                    "{0} is supposed to be an integer for workspace index but not of type {1}." "".format(terms[1], type(terms[1]))
+                )
 
             ref_tof_ws = AnalysisDataService.retrieve(ref_ws_name)
             if ws_index < 0 or ws_index >= ref_tof_ws.getNumberHistograms():
-                raise RuntimeError('Workspace index {0} must be in range [0, {1})'
-                                   ''.format(ws_index, ref_tof_ws.getNumberHistograms()))
+                raise RuntimeError("Workspace index {0} must be in range [0, {1})" "".format(ws_index, ref_tof_ws.getNumberHistograms()))
 
             ref_tof_vec = ref_tof_ws.readX(ws_index)
             delta_tof_vec = ref_tof_vec[1:] - ref_tof_vec[:-1]
@@ -301,10 +297,10 @@ class SaveVulcanGSS(PythonAlgorithm):
             bin_param[0::2] = ref_tof_vec
             bin_param[1::2] = delta_tof_vec
 
-            self.log().warning('Binning parameters: size = {0}\n{1}'.format(len(bin_param), bin_param))
+            self.log().warning("Binning parameters: size = {0}\n{1}".format(len(bin_param), bin_param))
 
         else:
-            raise RuntimeError('Binning format {0} is not supported.'.format(bin_par_str))
+            raise RuntimeError("Binning format {0} is not supported.".format(bin_par_str))
 
         return bin_param
 
@@ -319,11 +315,10 @@ class SaveVulcanGSS(PythonAlgorithm):
         """
         # check that workspace shall be point data
         if output_workspace.isHistogramData():
-            raise RuntimeError('Output workspace shall be point data at this stage.')
+            raise RuntimeError("Output workspace shall be point data at this stage.")
 
         # construct the headers
-        vulcan_gsas_header = self.create_vulcan_gsas_header(output_workspace, gsas_file_name, ipts_number,
-                                                            parm_file_name)
+        vulcan_gsas_header = self.create_vulcan_gsas_header(output_workspace, gsas_file_name, ipts_number, parm_file_name)
 
         vulcan_bank_headers = list()
         for ws_index in range(output_workspace.getNumberHistograms()):
@@ -334,15 +329,21 @@ class SaveVulcanGSS(PythonAlgorithm):
 
         # Save
         try:
-            api.SaveGSS(InputWorkspace=output_workspace, Filename=gsas_file_name, SplitFiles=False, Append=False,
-                        Format="SLOG", MultiplyByBinWidth=False,
-                        ExtendedHeader=False,
-                        UserSpecifiedGSASHeader=vulcan_gsas_header,
-                        UserSpecifiedBankHeader=vulcan_bank_headers,
-                        UseSpectrumNumberAsBankID=True,
-                        SLOGXYEPrecision=[1, 1, 2])
+            api.SaveGSS(
+                InputWorkspace=output_workspace,
+                Filename=gsas_file_name,
+                SplitFiles=False,
+                Append=False,
+                Format="SLOG",
+                MultiplyByBinWidth=False,
+                ExtendedHeader=False,
+                UserSpecifiedGSASHeader=vulcan_gsas_header,
+                UserSpecifiedBankHeader=vulcan_bank_headers,
+                UseSpectrumNumberAsBankID=True,
+                SLOGXYEPrecision=[1, 1, 2],
+            )
         except RuntimeError as run_err:
-            raise RuntimeError('Failed to call SaveGSS() due to {0}'.format(run_err))
+            raise RuntimeError("Failed to call SaveGSS() due to {0}".format(run_err))
 
         return
 
@@ -370,14 +371,13 @@ class SaveVulcanGSS(PythonAlgorithm):
             # separate second and sub-seconds
             run_start_seconds = run_start.split(".")[0]
             run_start_sub_seconds = run_start.split(".")[1]
-            self.log().warning('Run start {0} is split to {1} and {2}'.format(run_start, run_start_seconds,
-                                                                              run_start_sub_seconds))
+            self.log().warning("Run start {0} is split to {1} and {2}".format(run_start, run_start_seconds, run_start_sub_seconds))
 
             # property run_start and duration exist
-            utctime = numpy.datetime64(run.getProperty('run_start').value)
+            utctime = numpy.datetime64(run.getProperty("run_start").value)
             time0 = numpy.datetime64("1990-01-01T00:00:00")
-            total_nanosecond_start = int((utctime - time0) / numpy.timedelta64(1, 'ns'))
-            total_nanosecond_stop = total_nanosecond_start + int(duration*1.0E9)
+            total_nanosecond_start = int((utctime - time0) / numpy.timedelta64(1, "ns"))
+            total_nanosecond_stop = total_nanosecond_start + int(duration * 1.0e9)
 
         else:
             # not both property is found
@@ -408,7 +408,7 @@ class SaveVulcanGSS(PythonAlgorithm):
 
         vulcan_gsas_header.append("%-80s" % ("#Pulsestop:     %d" % total_nanosecond_stop))
 
-        vulcan_gsas_header.append('{0:80s}'.format('#'))
+        vulcan_gsas_header.append("{0:80s}".format("#"))
 
         return vulcan_gsas_header
 
@@ -426,10 +426,11 @@ class SaveVulcanGSS(PythonAlgorithm):
         delta_tof = (vec_x[1] - tof_min) / tof_min  # deltaT/T
         data_size = len(vec_x)
 
-        bank_header = 'BANK {0} {1} {2} {3} {4} {5:.1f} {6:.7f} 0 FXYE' \
-                      ''.format(bank_id, data_size, data_size, 'SLOG', tof_min, tof_max, delta_tof)
+        bank_header = "BANK {0} {1} {2} {3} {4} {5:.1f} {6:.7f} 0 FXYE" "".format(
+            bank_id, data_size, data_size, "SLOG", tof_min, tof_max, delta_tof
+        )
 
-        bank_header = '{0:80s}'.format(bank_header)
+        bank_header = "{0:80s}".format(bank_header)
 
         return bank_header
 

@@ -8,14 +8,8 @@
 #
 #
 
-VALID_LINE_STYLE = ['solid', 'dashed', 'dotted', 'dashdot', 'None']
+VALID_LINE_STYLE = ["solid", "dashed", "dotted", "dashdot", "None"]
 
-VALID_DRAW_STYLE = ['default', 'steps', 'steps-pre', 'steps-mid', 'steps-post']
+VALID_DRAW_STYLE = ["default", "steps", "steps-pre", "steps-mid", "steps-post"]
 
-VALID_COLORS = {
-    'blue': '#1f77b4',
-    'orange': '#ff7f0e',
-    'green': '#2ca02c',
-    'red': '#d62728',
-    'purple': '#9467bd'
-}
+VALID_COLORS = {"blue": "#1f77b4", "orange": "#ff7f0e", "green": "#2ca02c", "red": "#d62728", "purple": "#9467bd"}

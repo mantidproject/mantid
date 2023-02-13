@@ -49,5 +49,5 @@ class MuonBasePairTest(unittest.TestCase):
         self.assertEqual(pair.workspace, {})
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

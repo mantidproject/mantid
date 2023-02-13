@@ -8,8 +8,11 @@
 #include "PreviewPresenter.h"
 #include "Common/Detector.h"
 #include "GUI/Batch/IBatchPresenter.h"
+#include "GUI/Preview/QtPreviewDockedWidgets.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Strings.h"
+#include "MantidQtWidgets/Common/ImageInfoWidget.h"
+#include "MantidQtWidgets/Common/ImageInfoWidgetMini.h"
 #include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MantidQtWidgets/RegionSelector/IRegionSelector.h"
 #include "MantidQtWidgets/RegionSelector/RegionSelector.h"
@@ -19,6 +22,7 @@
 
 using Mantid::API::MatrixWorkspace_sptr;
 using MantidQt::MantidWidgets::AxisID;
+using MantidQt::MantidWidgets::ImageInfoWidgetMini;
 using MantidQt::MantidWidgets::PlotPresenter;
 using MantidQt::Widgets::IRegionSelector;
 using MantidQt::Widgets::RegionSelector;
@@ -33,14 +37,17 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 PreviewPresenter::PreviewPresenter(Dependencies dependencies)
     : m_view(dependencies.view), m_model(std::move(dependencies.model)),
       m_jobManager(std::move(dependencies.jobManager)), m_instViewModel(std::move(dependencies.instViewModel)),
-      m_regionSelector(std::move(dependencies.regionSelector)),
+      m_dockedWidgets(std::move(dependencies.dockedWidgets)), m_regionSelector(std::move(dependencies.regionSelector)),
       m_plotPresenter(std::move(dependencies.plotPresenter)), m_stubRegionObserver{new StubRegionObserver} {
-
+  if (!m_dockedWidgets) {
+    m_dockedWidgets = std::make_unique<QtPreviewDockedWidgets>(nullptr, m_view->getDockedWidgetsLayout());
+  }
   if (!m_regionSelector) {
-    m_regionSelector = std::make_unique<RegionSelector>(nullptr, m_view->getRegionSelectorLayout());
+    m_regionSelector =
+        std::make_unique<RegionSelector>(nullptr, m_dockedWidgets->getRegionSelectorLayout(), m_view->getImageInfo());
   }
   if (!m_plotPresenter) {
-    m_plotPresenter = std::make_unique<PlotPresenter>(m_view->getLinePlotView());
+    m_plotPresenter = std::make_unique<PlotPresenter>(m_dockedWidgets->getLinePlotView());
   }
   // stub observer subscribes to the region selector
   m_regionSelector->subscribe(m_stubRegionObserver);
@@ -49,9 +56,10 @@ PreviewPresenter::PreviewPresenter(Dependencies dependencies)
 
   m_view->subscribe(this);
   m_jobManager->subscribe(this);
+  m_dockedWidgets->subscribe(this);
 
-  m_view->setInstViewToolbarEnabled(false);
-  m_view->setRegionSelectorEnabled(false);
+  m_dockedWidgets->setInstViewToolbarEnabled(false);
+  m_dockedWidgets->setRegionSelectorEnabled(false);
 
   m_plotPresenter->setScaleLog(AxisID::YLeft);
   m_plotPresenter->setScaleLog(AxisID::XBottom);
@@ -70,9 +78,9 @@ void PreviewPresenter::notifyAutoreductionPaused() { updateWidgetEnabledState();
 
 void PreviewPresenter::updateWidgetEnabledState() {
   if (m_mainPresenter->isProcessing() || m_mainPresenter->isAutoreducing()) {
-    m_view->disableApplyButton();
+    m_view->disableMainWidget();
   } else {
-    m_view->enableApplyButton();
+    m_view->enableMainWidget();
   }
 }
 
@@ -80,6 +88,7 @@ void PreviewPresenter::updateWidgetEnabledState() {
  * then we use that and continue to plot it; otherwise we start an async load.
  */
 void PreviewPresenter::notifyLoadWorkspaceRequested() {
+  m_view->disableMainWidget();
   auto const name = m_view->getWorkspaceName();
   try {
     if (m_model->loadWorkspaceFromAds(name)) {
@@ -89,6 +98,7 @@ void PreviewPresenter::notifyLoadWorkspaceRequested() {
     }
   } catch (std::runtime_error const &ex) {
     g_log.error(ex.what());
+    m_view->enableMainWidget();
   }
 }
 
@@ -107,7 +117,8 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   }
 
   if (hasLinearDetector(ws)) {
-    m_view->resetInstView();
+    m_dockedWidgets->resetInstView();
+    m_dockedWidgets->setInstViewToolbarEnabled(false);
     m_model->setSummedWs(ws);
     notifySumBanksCompleted();
   } else {
@@ -115,7 +126,7 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
     m_instViewModel->updateWorkspace(ws);
     plotInstView();
     // Ensure the toolbar is enabled, and reset the instrument view to zoom mode
-    m_view->setInstViewToolbarEnabled(true);
+    m_dockedWidgets->setInstViewToolbarEnabled(true);
     notifyInstViewZoomRequested();
     // Perform summing banks to update the next plot, if possible
     runSumBanks();
@@ -126,7 +137,7 @@ void PreviewPresenter::notifyUpdateAngle() { runReduction(); }
 
 void PreviewPresenter::notifySumBanksCompleted() {
   plotRegionSelector();
-  m_view->setRegionSelectorEnabled(true);
+  m_dockedWidgets->setRegionSelectorEnabled(true);
   // Perform reduction to update the next plot, if possible
   runReduction();
 }
@@ -134,42 +145,53 @@ void PreviewPresenter::notifySumBanksCompleted() {
 void PreviewPresenter::notifyReductionCompleted() {
   // Update the final plot
   plotLinePlot();
+  m_view->enableMainWidget();
 }
+
+void PreviewPresenter::notifyLoadWorkspaceAlgorithmError() { m_view->enableMainWidget(); }
 
 void PreviewPresenter::notifySumBanksAlgorithmError() {
   clearRegionSelector();
   clearReductionPlot();
+  m_view->enableMainWidget();
 }
 
-void PreviewPresenter::notifyReductionAlgorithmError() { clearReductionPlot(); }
+void PreviewPresenter::notifyReductionAlgorithmError() {
+  clearReductionPlot();
+  m_view->enableMainWidget();
+}
 
 void PreviewPresenter::notifyInstViewSelectRectRequested() {
-  m_view->setInstViewZoomState(false);
-  m_view->setInstViewEditState(false);
-  m_view->setInstViewSelectRectState(true);
-  m_view->setInstViewSelectRectMode();
+  m_dockedWidgets->setInstViewZoomState(false);
+  m_dockedWidgets->setInstViewEditState(false);
+  m_dockedWidgets->setInstViewSelectRectState(true);
+  m_dockedWidgets->setInstViewSelectRectMode();
 }
 
 void PreviewPresenter::notifyInstViewEditRequested() {
-  m_view->setInstViewZoomState(false);
-  m_view->setInstViewEditState(true);
-  m_view->setInstViewSelectRectState(false);
-  m_view->setInstViewEditMode();
+  m_dockedWidgets->setInstViewZoomState(false);
+  m_dockedWidgets->setInstViewEditState(true);
+  m_dockedWidgets->setInstViewSelectRectState(false);
+  m_dockedWidgets->setInstViewEditMode();
 }
 
 void PreviewPresenter::notifyInstViewZoomRequested() {
-  m_view->setInstViewZoomState(true);
-  m_view->setInstViewEditState(false);
-  m_view->setInstViewSelectRectState(false);
-  m_view->setInstViewZoomMode();
+  m_dockedWidgets->setInstViewZoomState(true);
+  m_dockedWidgets->setInstViewEditState(false);
+  m_dockedWidgets->setInstViewSelectRectState(false);
+  m_dockedWidgets->setInstViewZoomMode();
 }
 
 void PreviewPresenter::notifyInstViewShapeChanged() {
   // Change to shape editing after a selection has been done to match instrument viewer default behaviour
   notifyInstViewEditRequested();
   // Get the masked workspace indices
-  auto indices = m_instViewModel->detIndicesToDetIDs(m_view->getSelectedDetectors());
-  auto detIDsStr = Mantid::Kernel::Strings::simpleJoin(indices.cbegin(), indices.cend(), ",");
+  auto indices = m_instViewModel->detIndicesToDetIDs(m_dockedWidgets->getSelectedDetectors());
+  auto detIDsStr = Mantid::Kernel::Strings::joinCompress(indices.cbegin(), indices.cend(), ",");
+
+  if (detIDsStr == m_model->getSelectedBanks()) {
+    return;
+  }
   m_model->setSelectedBanks(ProcessingInstructions{detIDsStr});
   // Execute summing the selected banks
   runSumBanks();
@@ -178,24 +200,38 @@ void PreviewPresenter::notifyInstViewShapeChanged() {
 void PreviewPresenter::notifyRegionSelectorExportAdsRequested() { m_model->exportSummedWsToAds(); }
 
 void PreviewPresenter::notifyEditROIModeRequested() {
-  m_view->setRectangularROIState(false);
-  m_view->setEditROIState(true);
+  m_dockedWidgets->setRectangularROIState(false);
+  m_dockedWidgets->setEditROIState(true);
   m_regionSelector->cancelDrawingRegion();
 }
 
 void PreviewPresenter::notifyRectangularROIModeRequested() {
-  auto const regionType = m_view->getRegionType();
+  auto const regionType = m_dockedWidgets->getRegionType();
   auto const roiType = roiTypeFromString(regionType);
-  m_view->setEditROIState(false);
-  m_view->setRectangularROIState(true);
+  m_dockedWidgets->setEditROIState(false);
+  m_dockedWidgets->setRectangularROIState(true);
   m_regionSelector->addRectangularRegion(regionType, roiTypeToColor(roiType));
 }
 
 void PreviewPresenter::notifyRegionChanged() {
-  m_view->setRectangularROIState(false);
-  m_view->setEditROIState(true);
+  m_dockedWidgets->setRectangularROIState(false);
+  m_dockedWidgets->setEditROIState(true);
 
-  runReduction();
+  if (isRegionSelectionChanged()) {
+    m_regionSelector->deselectAllSelectors();
+    runReduction();
+  }
+}
+
+bool PreviewPresenter::isRegionChanged(ROIType type) {
+  auto modelValue = m_model->getSelectedRegion(type);
+  auto viewValue = m_regionSelector->getRegion(roiTypeToString(type));
+  return (modelValue.has_value() || !viewValue.empty()) && modelValue != viewValue;
+}
+
+bool PreviewPresenter::isRegionSelectionChanged() {
+  return isRegionChanged(ROIType::Signal) || isRegionChanged(ROIType::Background) ||
+         isRegionChanged(ROIType::Transmission);
 }
 
 void PreviewPresenter::notifyLinePlotExportAdsRequested() { m_model->exportReducedWsToAds(); }
@@ -203,6 +239,12 @@ void PreviewPresenter::notifyLinePlotExportAdsRequested() { m_model->exportReduc
 void PreviewPresenter::notifyApplyRequested() {
   try {
     m_mainPresenter->notifyPreviewApplyRequested();
+  } catch (InvalidTableException const &ex) {
+    std::ostringstream msg;
+    msg << "Could not update Experiment Settings: ";
+    msg << ex.what();
+    msg << " Please fix any errors in the Experiment Settings table and try again.";
+    g_log.error(msg.str());
   } catch (RowNotFoundException const &ex) {
     std::ostringstream msg;
     msg << "Could not update Experiment Settings: ";
@@ -219,8 +261,8 @@ void PreviewPresenter::notifyApplyRequested() {
 }
 
 void PreviewPresenter::plotInstView() {
-  m_view->plotInstView(m_instViewModel->getInstrumentViewActor(), m_instViewModel->getSamplePos(),
-                       m_instViewModel->getAxis());
+  m_dockedWidgets->plotInstView(m_instViewModel->getInstrumentViewActor(), m_instViewModel->getSamplePos(),
+                                m_instViewModel->getAxis());
 }
 
 void PreviewPresenter::plotRegionSelector() { m_regionSelector->updateWorkspace(m_model->getSummedWs()); }
@@ -239,6 +281,7 @@ void PreviewPresenter::plotLinePlot() {
 void PreviewPresenter::runSumBanks() { m_model->sumBanksAsync(*m_jobManager); }
 
 void PreviewPresenter::runReduction() {
+  m_view->disableMainWidget();
   m_view->setUpdateAngleButtonEnabled(false);
   // Ensure the angle is up to date
   m_model->setTheta(m_view->getAngle());
@@ -252,7 +295,7 @@ PreviewRow const &PreviewPresenter::getPreviewRow() const { return m_model->getP
 
 void PreviewPresenter::clearRegionSelector() {
   m_regionSelector->clearWorkspace();
-  m_view->setRegionSelectorEnabled(false);
+  m_dockedWidgets->setRegionSelectorEnabled(false);
 }
 
 void PreviewPresenter::clearReductionPlot() {

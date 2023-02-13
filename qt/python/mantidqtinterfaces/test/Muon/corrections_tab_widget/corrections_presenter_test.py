@@ -15,7 +15,6 @@ from mantidqtinterfaces.Muon.GUI.Common.thread_model import ThreadModel
 
 
 class CorrectionsPresenterTest(unittest.TestCase):
-
     def setUp(self):
         self.current_run_string = "84447"
         self.run_strings = ["84447", "84448", "84449"]
@@ -117,8 +116,7 @@ class CorrectionsPresenterTest(unittest.TestCase):
         self.presenter.enable_editing_notifier.notify_subscribers.assert_called_once_with()
         self.presenter.background_presenter.handle_background_corrections_for_all_finished.assert_called_once_with()
         self.mock_presenter_correction_results.assert_called_once_with()
-        self.presenter._perform_asymmetry_pairs_and_diffs_calculation.assert_called_once_with(self.run_strings,
-                                                                                              self.groups)
+        self.presenter._perform_asymmetry_pairs_and_diffs_calculation.assert_called_once_with(self.run_strings, self.groups)
 
     def test_that_handle_asymmetry_pairs_and_diffs_calc_finished_calls_the_expected_notifiers(self):
         self.presenter.handle_asymmetry_pairs_and_diffs_calc_finished()
@@ -183,5 +181,5 @@ class CorrectionsPresenterTest(unittest.TestCase):
         type(self.presenter.thread_model_wrapper).result = self.mock_presenter_correction_results
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

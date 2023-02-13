@@ -14,44 +14,58 @@ class SANSILLParameterScanTest(unittest.TestCase):
 
     _facility = None
 
+    @classmethod
+    def setUpClass(cls):
+        cls._facility = config["default.facility"]
+        cls._instrument = config["default.instrument"]
+        cls._data_search_dirs = config["datasearch.directories"]
+        config.appendDataSearchSubDir("ILL/D16/")
+
     def setUp(self):
-        self._facility = config['default.facility']
-        self._data_search_dirs = config.getDataSearchDirs()
-        config.appendDataSearchSubDir('ILL/D16/')
+        self._facility = config["default.facility"]
         config.setFacility("ILL")
 
-    def tearDown(self):
-        config.setFacility(self._facility)
-        config.setDataSearchDirs(self._data_search_dirs)
+    @classmethod
+    def tearDownClass(cls):
+        config["default.facility"] = cls._facility
+        config["default.instrument"] = cls._instrument
+        config["datasearch.directories"] = cls._data_search_dirs
         mtd.clear()
 
     def test_D16_omega(self):
-        SANSILLParameterScan(SampleRun="066321.nxs",
-                             OutputWorkspace="output2d",
-                             OutputJoinedWorkspace="reduced",
-                             Observable="Omega.value",
-                             PixelYmin=3,
-                             PixelYMax=189)
-        self._check_output(mtd["output2d"], 6)
+        output_name = "output2d"
+        SANSILLParameterScan(
+            SampleRun="066321.nxs",
+            OutputWorkspace=output_name,
+            OutputJoinedWorkspace="reduced",
+            Observable="Omega.value",
+            PixelYmin=3,
+            PixelYMax=189,
+        )
+
+        ws = mtd[output_name]
+        self._check_output(ws, 6, 1152)
+        self.assertAlmostEqual(ws.getAxis(0).getValue(0), -42.9348, delta=4)
+        self.assertAlmostEqual(ws.getAxis(0).getValue(1151), 43.0836, delta=4)
+        self.assertAlmostEqual(ws.getAxis(1).getValue(0), 5.2, delta=3)
+        self.assertAlmostEqual(ws.getAxis(1).getValue(1), 5.4, delta=3)
         self.assertTrue(mtd["reduced"])
 
-    def _check_output(self, ws, spectra=1):
+    def _check_output(self, ws, spectra, blocksize):
         self.assertTrue(ws)
         self.assertTrue(isinstance(ws, MatrixWorkspace))
         self.assertEqual(str(ws.getAxis(0).getUnit().symbol()), "degrees")
         self.assertEqual(ws.getAxis(0).getUnit().caption(), "Scattering angle")
         self.assertEqual(str(ws.getAxis(1).getUnit().symbol()), "degrees")
         self.assertEqual(ws.getAxis(1).getUnit().caption(), "Omega.value")
-        self.assertAlmostEqual(ws.getAxis(1).getValue(0), 5.2, delta=3)
-        self.assertAlmostEqual(ws.getAxis(1).getValue(1), 5.4, delta=3)
         self.assertEqual(ws.getNumberHistograms(), spectra)
         self.assertTrue(ws.getInstrument())
         self.assertTrue(ws.getRun())
         self.assertTrue(ws.getHistory())
-        self.assertTrue(ws.blocksize(), 1152)
+        self.assertTrue(ws.blocksize(), blocksize)
         self.assertTrue(not ws.isHistogramData())
         self.assertTrue(not ws.isDistribution())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

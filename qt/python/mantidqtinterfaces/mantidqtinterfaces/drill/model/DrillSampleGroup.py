@@ -11,6 +11,7 @@ class DrillSampleGroup:
     """
     Name of the group.
     """
+
     _name = None
 
     """
@@ -53,14 +54,13 @@ class DrillSampleGroup:
             sample (DrillSample): sample to be added in the group
         """
         i = 0
-        while ((i < len(self._samples))
-               and (self._samples[i].getIndex() < sample.getIndex())):
+        while (i < len(self._samples)) and (self._samples[i].getIndex() < sample.getIndex()):
             i += 1
         self._samples.insert(i, sample)
         sample.setGroup(self)
         while i < len(self._samples):
             self._samples[i].groupChanged.emit()
-            i +=1
+            i += 1
 
     def delSample(self, sample):
         """

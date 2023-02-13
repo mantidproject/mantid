@@ -100,7 +100,7 @@ select ``Project>Build All``
 
 4.
 navigate to Run>Run Configurations>C/C++ Application then create a new launch configuration. on the Main tab ensure the correct project is selected then under C/C++ Application
-click browse and navigate to /bin/MantidPlot
+click browse and navigate to /bin/MantidWorkbench
 
 
 

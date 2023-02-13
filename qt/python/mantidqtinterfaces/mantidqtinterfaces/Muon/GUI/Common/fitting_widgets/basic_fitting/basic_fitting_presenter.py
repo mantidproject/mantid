@@ -6,19 +6,23 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import IFunction, MultiDomainFunction
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, GenericObservable, GenericObserver
-from mantidqt.widgets.fitscriptgenerator import (FittingMode, FitScriptGeneratorModel, FitScriptGeneratorPresenter,
-                                                 FitScriptGeneratorView)
+from mantidqt.widgets.fitscriptgenerator import FittingMode, FitScriptGeneratorModel, FitScriptGeneratorPresenter, FitScriptGeneratorView
 
-from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import (X_FROM_FIT_RANGE,
-                                                                                                X_FROM_DATA_RANGE,
-                                                                                                X_FROM_CUSTOM)
+from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import (
+    X_FROM_FIT_RANGE,
+    X_FROM_DATA_RANGE,
+    X_FROM_CUSTOM,
+)
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_view import BasicFittingView
 from mantidqtinterfaces.Muon.GUI.Common.thread_model import ThreadModel
 from mantidqtinterfaces.Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
-from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_data_utils import (check_exclude_start_x_is_valid,
-                                                                               check_exclude_end_x_is_valid, check_start_x_is_valid,
-                                                                               check_end_x_is_valid)
+from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_data_utils import (
+    check_exclude_start_x_is_valid,
+    check_exclude_end_x_is_valid,
+    check_start_x_is_valid,
+    check_end_x_is_valid,
+)
 
 from PyQt5.QtCore import Qt
 
@@ -49,8 +53,7 @@ class BasicFittingPresenter:
 
         self.input_workspace_observer = GenericObserver(self.handle_new_data_loaded)
         self.gui_context_observer = GenericObserverWithArgPassing(self.handle_gui_changes_made)
-        self.update_view_from_model_observer = GenericObserverWithArgPassing(
-            self.handle_ads_clear_or_remove_workspace_event)
+        self.update_view_from_model_observer = GenericObserverWithArgPassing(self.handle_ads_clear_or_remove_workspace_event)
         self.instrument_changed_observer = GenericObserver(self.handle_instrument_changed)
         self.selected_group_pair_observer = GenericObserver(self.handle_selected_group_pair_changed)
         self.double_pulse_observer = GenericObserverWithArgPassing(self.handle_pulse_type_changed)
@@ -70,9 +73,9 @@ class BasicFittingPresenter:
         self.view.set_slot_for_covariance_matrix_clicked(self.handle_covariance_matrix_clicked)
         self.view.set_slot_for_function_structure_changed(self.handle_function_structure_changed)
         self.view.set_slot_for_function_parameter_changed(
-            lambda function_index, parameter: self.handle_function_parameter_changed(function_index, parameter))
-        self.view.set_slot_for_function_attribute_changed(
-            lambda attribute: self.handle_function_attribute_changed(attribute))
+            lambda function_index, parameter: self.handle_function_parameter_changed(function_index, parameter)
+        )
+        self.view.set_slot_for_function_attribute_changed(lambda attribute: self.handle_function_attribute_changed(attribute))
         self.view.set_slot_for_start_x_updated(self.handle_start_x_updated)
         self.view.set_slot_for_end_x_updated(self.handle_end_x_updated)
         self.view.set_slot_for_exclude_range_state_changed(self.handle_exclude_range_state_changed)
@@ -207,8 +210,7 @@ class BasicFittingPresenter:
     def handle_fit_generator_clicked(self) -> None:
         """Handle when the Fit Generator button has been clicked."""
         fitting_mode = FittingMode.SIMULTANEOUS if self.model.simultaneous_fitting_mode else FittingMode.SEQUENTIAL
-        self._open_fit_script_generator_interface(self.model.dataset_names, fitting_mode,
-                                                  self._get_fit_browser_options())
+        self._open_fit_script_generator_interface(self.model.dataset_names, fitting_mode, self._get_fit_browser_options())
 
     def handle_dataset_name_changed(self) -> None:
         """Handle when the display workspace combo box is changed."""
@@ -309,14 +311,16 @@ class BasicFittingPresenter:
 
     def handle_start_x_updated(self) -> None:
         """Handle when the start X is changed."""
-        new_start_x, new_end_x = check_start_x_is_valid(self.model.current_dataset_name, self.view.start_x,
-                                                        self.view.end_x, self.model.current_start_x)
+        new_start_x, new_end_x = check_start_x_is_valid(
+            self.model.current_dataset_name, self.view.start_x, self.view.end_x, self.model.current_start_x
+        )
         self.update_start_and_end_x_in_view_and_model(new_start_x, new_end_x)
 
     def handle_end_x_updated(self) -> None:
         """Handle when the end X is changed."""
-        new_start_x, new_end_x = check_end_x_is_valid(self.model.current_dataset_name, self.view.start_x,
-                                                      self.view.end_x, self.model.current_end_x)
+        new_start_x, new_end_x = check_end_x_is_valid(
+            self.model.current_dataset_name, self.view.start_x, self.view.end_x, self.model.current_end_x
+        )
         self.update_start_and_end_x_in_view_and_model(new_start_x, new_end_x)
 
     def handle_exclude_range_state_changed(self) -> None:
@@ -326,18 +330,16 @@ class BasicFittingPresenter:
 
     def handle_exclude_start_x_updated(self) -> None:
         """Handle when the exclude start X is changed."""
-        exclude_start_x, exclude_end_x = check_exclude_start_x_is_valid(self.view.start_x, self.view.end_x,
-                                                                        self.view.exclude_start_x,
-                                                                        self.view.exclude_end_x,
-                                                                        self.model.current_exclude_start_x)
+        exclude_start_x, exclude_end_x = check_exclude_start_x_is_valid(
+            self.view.start_x, self.view.end_x, self.view.exclude_start_x, self.view.exclude_end_x, self.model.current_exclude_start_x
+        )
         self.update_exclude_start_and_end_x_in_view_and_model(exclude_start_x, exclude_end_x)
 
     def handle_exclude_end_x_updated(self) -> None:
         """Handle when the exclude end X is changed."""
-        exclude_start_x, exclude_end_x = check_exclude_end_x_is_valid(self.view.start_x, self.view.end_x,
-                                                                      self.view.exclude_start_x,
-                                                                      self.view.exclude_end_x,
-                                                                      self.model.current_exclude_end_x)
+        exclude_start_x, exclude_end_x = check_exclude_end_x_is_valid(
+            self.view.start_x, self.view.end_x, self.view.exclude_start_x, self.view.exclude_end_x, self.model.current_exclude_end_x
+        )
         self.update_exclude_start_and_end_x_in_view_and_model(exclude_start_x, exclude_end_x)
 
     def handle_use_rebin_changed(self) -> None:
@@ -423,8 +425,7 @@ class BasicFittingPresenter:
 
     def update_fit_statuses_and_chi_squared_in_view_from_model(self) -> None:
         """Updates the local and global fit status and chi squared in the view."""
-        self.view.update_local_fit_status_and_chi_squared(self.model.current_fit_status,
-                                                          self.model.current_chi_squared)
+        self.view.update_local_fit_status_and_chi_squared(self.model.current_fit_status, self.model.current_chi_squared)
         self.view.update_global_fit_status(self.model.fit_statuses, self.model.current_dataset_index)
 
     def update_covariance_matrix_button(self) -> None:
@@ -485,9 +486,7 @@ class BasicFittingPresenter:
         """Perform the fit in a thread."""
         try:
             self.calculation_thread = self._create_fitting_thread(self.model.perform_fit)
-            self.calculation_thread.threadWrapperSetUp(self.handle_started,
-                                                       self.handle_finished,
-                                                       self.handle_error)
+            self.calculation_thread.threadWrapperSetUp(self.handle_started, self.handle_finished, self.handle_error)
             self.calculation_thread.start()
         except ValueError as error:
             self.view.warning_popup(error)
@@ -497,14 +496,12 @@ class BasicFittingPresenter:
         self.fitting_calculation_model = ThreadModelWrapperWithOutput(callback)
         return ThreadModel(self.fitting_calculation_model)
 
-    def _open_fit_script_generator_interface(self, workspaces: list, fitting_mode: FittingMode,
-                                             fit_options: dict) -> None:
+    def _open_fit_script_generator_interface(self, workspaces: list, fitting_mode: FittingMode, fit_options: dict) -> None:
         """Open the Fit Script Generator interface."""
         self.fsg_model = FitScriptGeneratorModel()
         self.fsg_view = FitScriptGeneratorView(self.view, fitting_mode, fit_options)
         self.fsg_view.setWindowFlag(Qt.Window)
-        self.fsg_presenter = FitScriptGeneratorPresenter(self.fsg_view, self.fsg_model, workspaces,
-                                                         self.view.start_x, self.view.end_x)
+        self.fsg_presenter = FitScriptGeneratorPresenter(self.fsg_view, self.fsg_model, workspaces, self.view.start_x, self.view.end_x)
 
         self.fsg_presenter.openFitScriptGenerator()
 

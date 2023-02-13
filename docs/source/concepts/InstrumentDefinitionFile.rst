@@ -206,9 +206,9 @@ which must be included. An example is
 
 .. code-block:: xml
 
-      <instrument xmlns="http://www.mantidproject.org/IDF/1.0"
+      <instrument xmlns="http://schema.mantidproject.org/IDF/1.0"
                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                  xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+                  xsi:schemaLocation="http://schema.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
                   name="ARCS"
                   valid-from="1900-01-31 23:59:59"
                   valid-to="2100-01-31 23:59:59">
@@ -895,8 +895,9 @@ Extra options for indirect geometry instruments
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Optionally, both physical and 'neutronic' detector positions can be
-specified for indirect geometry instrument. This is described
-`here <http://www.mantidproject.org/Indirect_Instrument_Definition_Options>`__.
+specified for indirect geometry instrument.
+For an example of this usage see the
+`IN16B IDF <https://github.com/mantidproject/mantid/blob/main/instrument/IN16B_Definition.xml>`__.
 
 .. _Using locations:
 

@@ -14,14 +14,14 @@ from reduction_gui.reduction.diffraction.diffraction_reduction_script import Dif
 
 class DiffractionInterface(InstrumentInterface):
     """
-        Defines the widgets for direct geometry spectrometer reduction
+    Defines the widgets for direct geometry spectrometer reduction
     """
+
     # Allowed extensions for loading data files
     data_type = "Data files * (*)"
 
     def __init__(self, name, settings):
-        """
-        """
+        """ """
         super(DiffractionInterface, self).__init__(name, settings)
 
         self.ERROR_REPORT_NAME = "diffraction_error_report.xml"
@@ -30,12 +30,12 @@ class DiffractionInterface(InstrumentInterface):
         self.scripter = DiffractionReductionScripter(name=name, facility=settings.facility_name)
 
         # Tab 1: Run number setup (Will be the first one)
-        self.attach(RunSetupWidget(settings = self._settings, data_type = self.data_type))
+        self.attach(RunSetupWidget(settings=self._settings, data_type=self.data_type))
 
         # Tab 2: Advanced and Vanadium number setup
-        self.attach(AdvancedSetupWidget(settings = self._settings, data_type = self.data_type))
+        self.attach(AdvancedSetupWidget(settings=self._settings, data_type=self.data_type))
 
         # Tab 3: Event filters setup
-        self.attach(FilterSetupWidget(settings = self._settings, data_type = self.data_type))
+        self.attach(FilterSetupWidget(settings=self._settings, data_type=self.data_type))
 
         return

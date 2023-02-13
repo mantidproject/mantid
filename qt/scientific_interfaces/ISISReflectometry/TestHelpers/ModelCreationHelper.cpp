@@ -400,6 +400,11 @@ PolarizationCorrections makePolarizationCorrections() {
   return PolarizationCorrections(PolarizationCorrectionType::ParameterFile);
 }
 
+PolarizationCorrections makeWorkspacePolarizationCorrections() {
+  return PolarizationCorrections(PolarizationCorrectionType::Workspace,
+                                 boost::optional<std::string>("test_eff_workspace"));
+}
+
 PolarizationCorrections makeEmptyPolarizationCorrections() {
   return PolarizationCorrections(PolarizationCorrectionType::None);
 }
@@ -418,7 +423,7 @@ TransmissionStitchOptions makeEmptyTransmissionStitchOptions() {
 
 Experiment makeExperiment() {
   return Experiment(AnalysisMode::MultiDetector, ReductionType::NonFlatSample, SummationType::SumInQ, true, true,
-                    makeBackgroundSubtraction(), makePolarizationCorrections(), makeFloodCorrections(),
+                    makeBackgroundSubtraction(), makeWorkspacePolarizationCorrections(), makeFloodCorrections(),
                     makeTransmissionStitchOptions(), makeStitchOptions(), makeLookupTableWithTwoAnglesAndWildcard());
 }
 
@@ -460,13 +465,13 @@ DetectorCorrections makeDetectorCorrections() {
 }
 
 Instrument makeInstrument() {
-  return Instrument(makeWavelengthRange(), makeMonitorCorrections(), makeDetectorCorrections());
+  return Instrument(makeWavelengthRange(), makeMonitorCorrections(), makeDetectorCorrections(), "test/calib_file.dat");
 }
 
 Instrument makeEmptyInstrument() {
   return Instrument(RangeInLambda(0.0, 0.0),
                     MonitorCorrections(0, true, RangeInLambda(0.0, 0.0), RangeInLambda(0.0, 0.0)),
-                    DetectorCorrections(false, DetectorCorrectionType::VerticalShift));
+                    DetectorCorrections(false, DetectorCorrectionType::VerticalShift), "");
 }
 
 /* Preview */

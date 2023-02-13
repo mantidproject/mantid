@@ -11,7 +11,7 @@ from unittest import mock
 from unittest.mock import MagicMock, call, patch
 
 # 3rd party imports
-from mantidqt.widgets.sliceviewer.presenters.lineplots import LinePlots, PixelLinePlot
+from mantidqt.widgets.sliceviewer.presenters.lineplots import LinePlots, PixelLinePlot, cursor_info
 from mantidqt.utils.testing.compare import ArraysEqual
 
 from matplotlib.figure import SubplotParams
@@ -23,7 +23,7 @@ class LinePlotsTest(unittest.TestCase):
         self.image_axes = _create_mock_axes()
         self.axx, self.axy = MagicMock(), MagicMock()
         self.image_axes.figure.add_subplot.side_effect = [self.axx, self.axy]
-        self.mock_colorbar = MagicMock(cmin_value=1.0, cmax_value=50.)
+        self.mock_colorbar = MagicMock(cmin_value=1.0, cmax_value=50.0)
         self.mock_colorbar.get_colorbar_scale = MagicMock()
         self.mock_colorbar.get_colorbar_scale.return_value = [1.0, {}]
 
@@ -40,7 +40,7 @@ class LinePlotsTest(unittest.TestCase):
         self.image_axes.yaxis.get_label().set_visible.assert_called_with(True)
         self.image_axes.tick_params.assert_called_with(labelleft=True, labelbottom=True)
 
-    @patch('mantidqt.widgets.sliceviewer.presenters.lineplots.GridSpec')
+    @patch("mantidqt.widgets.sliceviewer.presenters.lineplots.GridSpec")
     def test_construction_adds_line_plots_to_axes(self, mock_gridspec):
         gs = mock_gridspec()
         mock_gridspec.reset_mock()
@@ -51,8 +51,8 @@ class LinePlotsTest(unittest.TestCase):
         self.assertEqual(1, mock_gridspec.call_count)
         # use spaces at 0, 1 & 3 in grid
         gs.__getitem__.assert_has_calls((call(0), call(1), call(3)), any_order=True)
-        self.assertTrue('sharey' in fig.add_subplot.call_args_list[0][1] or 'sharey' in fig.add_subplot.call_args_list[1][1])
-        self.assertTrue('sharex' in fig.add_subplot.call_args_list[0][1] or 'sharex' in fig.add_subplot.call_args_list[1][1])
+        self.assertTrue("sharey" in fig.add_subplot.call_args_list[0][1] or "sharey" in fig.add_subplot.call_args_list[1][1])
+        self.assertTrue("sharex" in fig.add_subplot.call_args_list[0][1] or "sharex" in fig.add_subplot.call_args_list[1][1])
 
         self.image_axes.xaxis.get_label().set_visible.assert_called_with(False)
         self.image_axes.xaxis.get_label().set_visible.assert_called_with(False)
@@ -68,7 +68,7 @@ class LinePlotsTest(unittest.TestCase):
         xfig, yfig = MagicMock(), MagicMock()
         self.axx.plot.side_effect = [[xfig]]
         self.axy.plot.side_effect = [[yfig]]
-        x, y = np.arange(10.), np.arange(10.)
+        x, y = np.arange(10.0), np.arange(10.0)
         plotter.plot_x_line(x, y)
         plotter.plot_y_line(x, y)
 
@@ -80,7 +80,7 @@ class LinePlotsTest(unittest.TestCase):
     def test_plot_with_no_line_present_creates_line_artist(self):
         plotter = LinePlots(self.image_axes, self.mock_colorbar)
         self.axx.set_xlabel.reset_mock()
-        x, y = np.arange(10.), np.arange(10.) * 2
+        x, y = np.arange(10.0), np.arange(10.0) * 2
 
         plotter.plot_x_line(x, y)
         self.axx.plot.assert_called_once_with(x, y, scalex=False)
@@ -94,7 +94,7 @@ class LinePlotsTest(unittest.TestCase):
 
     def test_plot_axx_lines_are_set_to_width_of_below_default(self):
         plotter = LinePlots(self.image_axes, self.mock_colorbar)
-        x, y = np.arange(10.), np.arange(10.) * 2
+        x, y = np.arange(10.0), np.arange(10.0) * 2
 
         plotter.plot_x_line(x, y)
         self.axx.plot.assert_called_once_with(x, y, scalex=False)
@@ -102,7 +102,7 @@ class LinePlotsTest(unittest.TestCase):
 
     def test_plot_axy_lines_are_set_to_width_of_below_default(self):
         plotter = LinePlots(self.image_axes, self.mock_colorbar)
-        x, y = np.arange(10.), np.arange(10.) * 2
+        x, y = np.arange(10.0), np.arange(10.0) * 2
 
         plotter.plot_y_line(x, y)
         self.axy.plot.assert_called_once_with(y, x, scaley=False)
@@ -117,7 +117,7 @@ class LinePlotsTest(unittest.TestCase):
 
     def test_plot_with_line_present_sets_data(self):
         plotter = LinePlots(self.image_axes, self.mock_colorbar)
-        x, y = np.arange(10.), np.arange(10.) * 2
+        x, y = np.arange(10.0), np.arange(10.0) * 2
         plotter.plot_x_line(x, y)
         plotter.plot_y_line(x, y)
         self.axx.reset_mock()
@@ -135,20 +135,16 @@ class LinePlotsTest(unittest.TestCase):
 class PixelLinePlotTest(unittest.TestCase):
     def test_cursor_at_generates_xy_plots(self):
         image_axes = _create_mock_axes()
-        mock_image = MagicMock()
-        mock_image.get_extent.return_value = (-1, 1, -3, 3)
-        signal = np.arange(25.).reshape(5, 5)
-        mock_image.get_array.return_value = signal
+        signal = np.arange(25.0).reshape(5, 5)
+        mock_image = _create_mock_image(signal)
         image_axes.images = [mock_image]
         plotter = MagicMock(image_axes=image_axes, image=mock_image)
         pixel_plots = PixelLinePlot(plotter, mock.Mock())
 
         pixel_plots.on_cursor_at(0.0, 1.0)
 
-        plotter.plot_x_line.assert_called_once_with(ArraysEqual(np.linspace(-1, 1, 5)),
-                                                    ArraysEqual(signal[3, :]))
-        plotter.plot_y_line.assert_called_once_with(ArraysEqual(np.linspace(-3, 3, 5)),
-                                                    ArraysEqual(signal[:, 2]))
+        plotter.plot_x_line.assert_called_once_with(ArraysEqual(np.linspace(-1, 1, 5)), ArraysEqual(signal[3, :]))
+        plotter.plot_y_line.assert_called_once_with(ArraysEqual(np.linspace(-3, 3, 5)), ArraysEqual(signal[:, 2]))
 
     def test_cursor_outside_axes_deletes_plot_lines(self):
         plotter = MagicMock()
@@ -159,13 +155,21 @@ class PixelLinePlotTest(unittest.TestCase):
         plotter.delete_line_plot_lines.assert_called_once()
 
 
+class CursorInfoTest(unittest.TestCase):
+    def test_cursor_at_max_data_extents_returns_cursor_info(self):
+        # this happens when the cursor is released outside the top and right edges of the colorfill plot in ROI mode
+        mock_image = _create_mock_image()
+        cinfo = cursor_info(mock_image, 1, 3)  # max limt of x and y axes
+        np.testing.assert_array_equal(cinfo.point, [5, 5])  # shape of data array
+
+
 def _create_mock_axes():
     image_axes = MagicMock()
     image_axes.figure.subplotpars = SubplotParams(0.125, 0.11, 0.9, 0.88, 0.2, 0.2)
     image_axes.get_xlim.return_value = (-1, 1)
     image_axes.get_ylim.return_value = (-3, 3)
-    image_axes.get_xlabel.return_value = 'x'
-    image_axes.get_ylabel.return_value = 'y'
+    image_axes.get_xlabel.return_value = "x"
+    image_axes.get_ylabel.return_value = "y"
     image_axes.xaxis.get_label().set_visible.return_value = MagicMock()
     image_axes.yaxis.get_label().set_visible.return_value = MagicMock()
     image_axes.tick_params.return_value = MagicMock()
@@ -173,5 +177,12 @@ def _create_mock_axes():
     return image_axes
 
 
-if __name__ == '__main__':
+def _create_mock_image(signal=np.arange(25.0).reshape(5, 5), extent=(-1, 1, -3, 3)):
+    mock_image = MagicMock()
+    mock_image.get_extent.return_value = extent
+    mock_image.get_array.return_value = signal
+    return mock_image
+
+
+if __name__ == "__main__":
     unittest.main()

@@ -39,6 +39,7 @@ public:
   virtual void notifyStartMonitor() = 0;
   virtual void notifyStopMonitor() = 0;
   virtual void notifyStartMonitorComplete() = 0;
+  virtual void notifyExportSearchResults() const = 0;
 };
 
 class RunsViewTimerSubscriber {
@@ -82,7 +83,8 @@ public:
   virtual ISearchModel &mutableSearchResults() = 0;
 
   // Setter methods
-  virtual void setInstrumentList(const std::vector<std::string> &instruments) = 0;
+  virtual void setInstrumentList(const std::vector<std::string> &instruments,
+                                 const std::string &selectedInstrument = "") = 0;
   virtual void updateMenuEnabledState(bool isProcessing) = 0;
   virtual void setAutoreduceButtonEnabled(bool enabled) = 0;
   virtual void setAutoreducePauseButtonEnabled(bool enabled) = 0;

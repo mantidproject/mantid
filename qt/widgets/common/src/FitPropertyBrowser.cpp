@@ -1431,13 +1431,22 @@ void FitPropertyBrowser::stringChanged(QtProperty *prop) {
 
     QString parName = h->functionPrefix() + "." + parProp->propertyName();
 
-    QString str = m_stringManager->value(prop);
+    const auto oldExp = getOldExpressionAsString(parName);
+    const auto exp = m_stringManager->value(prop);
+
+    if (oldExp == exp)
+      return;
+
     Mantid::API::ParameterTie *tie = new Mantid::API::ParameterTie(compositeFunction().get(), parName.toStdString());
     try {
-      tie->set(str.toStdString());
-      h->addTie(parName + "=" + str);
+      tie->set(exp.toStdString());
+      h->addTie(parName + "=" + exp);
     } catch (...) {
-      g_log.warning() << "Failed to update tie on " << parName.toLatin1().constData() << "\n";
+      const auto msg =
+          "Failed to update tie on " + parName.toStdString() + ". Expression " + exp.toStdString() + " is invalid.";
+      QMessageBox::critical(this, "Mantid - Error", msg.c_str());
+
+      m_stringManager->setValue(prop, oldExp);
     }
     delete tie;
   } else if (getHandler()->setAttribute(prop)) { // setting an attribute may
@@ -1445,6 +1454,29 @@ void FitPropertyBrowser::stringChanged(QtProperty *prop) {
     emit functionChanged();
     return;
   }
+}
+
+/** Get the tie expression stored in the function in case the new expression is invalid and the GUI needs to be reset
+ * @param parameterName :: A pointer to the parameter name
+ */
+QString FitPropertyBrowser::getOldExpressionAsString(const QString &parameterName) const {
+  // Note this only finds the oldTie if it was a tie to a function (e.g. f0.Height=f1.Height)
+  // but not if it was a custom tie (e.g. f0.Height=2.0)
+  QString oldExp;
+  size_t parIndex;
+  try {
+    parIndex = compositeFunction()->parameterIndex(parameterName.toStdString());
+  } catch (std::exception &) {
+    return "";
+  }
+  const auto oldTie = compositeFunction()->getTie(parIndex);
+  if (oldTie) {
+    const auto oldTieStr = oldTie->asString();
+    oldExp = QString::fromStdString(oldTieStr.substr(oldTieStr.find("=") + 1));
+  } else {
+    oldExp = "";
+  }
+  return oldExp;
 }
 
 /** Called when a filename property changed
@@ -1556,6 +1588,7 @@ void FitPropertyBrowser::doFit(int maxIterations) {
   }
 
   try {
+    emit algorithmStarted(QString::fromStdString(wsName));
     m_initialParameters.resize(compositeFunction()->nParams());
     for (size_t i = 0; i < compositeFunction()->nParams(); i++) {
       m_initialParameters[i] = compositeFunction()->getParameter(i);
@@ -3173,9 +3206,7 @@ void FitPropertyBrowser::functionHelp() {
  * Show online browser help
  */
 void FitPropertyBrowser::browserHelp() {
-  MantidDesktopServices::openUrl(QUrl("http://www.mantidproject.org/"
-                                      "MantidPlot:_Simple_Peak_Fitting_with_the_Fit_"
-                                      "Wizard#Fit_Properties_Browser"));
+  MantidQt::API::HelpWindow::showPage(QStringLiteral("workbench/plotwindow.html"));
 }
 
 /**=================================================================================================

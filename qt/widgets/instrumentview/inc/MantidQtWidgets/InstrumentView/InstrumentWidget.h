@@ -24,6 +24,7 @@
 #include "MantidQtWidgets/Common/GraphOptions.h"
 #include "MantidQtWidgets/Common/IMessageHandler.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
 
 #include <memory>
 
@@ -59,7 +60,6 @@ class InstrumentActor;
 class InstrumentWidgetTab;
 class InstrumentWidgetRenderTab;
 class InstrumentWidgetMaskTab;
-class InstrumentWidgetPickTab;
 class InstrumentWidgetTreeTab;
 class CollapsiblePanel;
 class XIntegrationControl;
@@ -74,6 +74,15 @@ struct Dependencies {
   std::unique_ptr<QtConnect> qtConnect = std::make_unique<QtConnect>();
   std::unique_ptr<QtMetaObject> qtMetaObject = std::make_unique<QtMetaObject>();
   std::unique_ptr<IMessageHandler> messageHandler = nullptr;
+};
+
+struct TabCustomizations {
+  std::vector<IWPickToolType> pickTools = std::vector<IWPickToolType>{
+      IWPickToolType::Zoom,          IWPickToolType::PixelSelect,     IWPickToolType::WholeInstrumentSelect,
+      IWPickToolType::TubeSelect,    IWPickToolType::PeakSelect,      IWPickToolType::PeakErase,
+      IWPickToolType::PeakCompare,   IWPickToolType::PeakAlign,       IWPickToolType::DrawEllipse,
+      IWPickToolType::DrawRectangle, IWPickToolType::DrawSector,      IWPickToolType::DrawFree,
+      IWPickToolType::EditShape,     IWPickToolType::DrawRingEllipse, IWPickToolType::DrawRingRectangle};
 };
 
 } // namespace Detail
@@ -102,6 +111,7 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidget : public QWidget,
 
 public:
   using Dependencies = Detail::Dependencies;
+  using TabCustomizations = Detail::TabCustomizations;
   enum SurfaceType {
     FULL3D = 0,
     CYLINDRICAL_X,
@@ -117,10 +127,12 @@ public:
 
   explicit InstrumentWidget(QString wsName, QWidget *parent = nullptr, bool resetGeometry = true,
                             bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0,
-                            bool setDefaultView = true, Dependencies deps = Dependencies(), bool useThread = false);
+                            bool setDefaultView = true, Dependencies deps = Dependencies(), bool useThread = false,
+                            TabCustomizations customizations = TabCustomizations());
   ~InstrumentWidget() override;
   QString getWorkspaceName() const;
   std::string getWorkspaceNameStdString() const;
+  Mantid::API::Workspace_sptr getWorkspaceClone();
   void renameWorkspace(const std::string &workspace);
   SurfaceType getSurfaceType() const { return m_surfaceType; }
   Mantid::Kernel::V3D getSurfaceAxis(const int surfaceType) const;
@@ -197,6 +209,8 @@ public:
   /// Whether the side tab is currently visible or is folded
   bool isTabFolded() const;
 
+  IInstrumentDisplay *getInstrumentDisplay() const { return m_instrumentDisplay.get(); };
+
 signals:
   void enableLighting(bool /*_t1*/);
   void plot1D(const QString & /*_t1*/, const std::set<int> & /*_t2*/, bool /*_t3*/);
@@ -215,6 +229,7 @@ signals:
   void preDeletingHandle();
   void clearingHandle();
   void maskedWorkspaceOverlayed();
+  void instrumentActorReset();
 
 protected:
   /// Implements AlgorithmObserver's finish handler
@@ -277,7 +292,7 @@ protected:
   /// Set newly created projection surface
   void setSurface(ProjectionSurface *surface);
   QWidget *createInstrumentTreeTab(QTabWidget *ControlsTab);
-  void createTabs(const QSettings &settings);
+  void createTabs(const QSettings &settings, TabCustomizations customizations);
   void saveSettings();
 
   QString asString(const std::vector<int> &numbers) const;
@@ -286,8 +301,6 @@ protected:
   void setBackgroundColor(const QColor &color);
   /// Get the surface info string
   QString getSurfaceInfoText() const;
-  /// Return the size of the OpenGL display widget in device pixels
-  QSize glWidgetDimensions();
   /// Select the OpenGL or simple widget for instrument display
   void selectOpenGLDisplay(bool yes);
   /// Set the surface type.
@@ -357,6 +370,8 @@ private:
                           const std::shared_ptr<Mantid::API::Workspace> &workspace_ptr) override;
   void renameHandle(const std::string &oldName, const std::string &newName) override;
   void clearADSHandle() override;
+  /// close the widget after an ADS event removes the workspace
+  virtual void handleActiveWorkspaceDeleted();
   /// overlay a peaks workspace on the projection surface
   void overlayPeaksWorkspace(const Mantid::API::IPeaksWorkspace_sptr &ws);
   /// overlay a masked workspace on the projection surface

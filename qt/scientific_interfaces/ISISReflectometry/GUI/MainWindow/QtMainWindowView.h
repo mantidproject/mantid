@@ -73,6 +73,8 @@ public:
   // QtJSONUtils if possible
   void saveJSONToFile(std::string const &filename, QMap<QString, QVariant> const &map) override;
   QMap<QString, QVariant> loadJSONFromFile(std::string const &filename) override;
+  void saveCSVToFile(std::string const &filename, std::string const &content) const override;
+  bool fileExists(std::string const &filepath) const override;
 
 public slots:
   void helpPressed();

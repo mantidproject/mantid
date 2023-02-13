@@ -6,10 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from sans.common.enums import (ReductionDimensionality)
+from sans.common.enums import ReductionDimensionality
 from sans.state.StateObjects.StateData import StateData
-from sans.state.state_functions import (is_pure_none_or_not_none, one_is_none,
-                                        validation_message, is_not_none_and_first_larger_than_second)
+from sans.state.state_functions import is_pure_none_or_not_none, one_is_none, validation_message, is_not_none_and_first_larger_than_second
 from sans.test_helper.test_director import TestDirector
 
 
@@ -54,17 +53,14 @@ class StateFunctionsTest(unittest.TestCase):
         # Arrange
         error_message = "test message."
         instruction = "do this."
-        variables = {"var1": 12,
-                     "var2": "test"}
+        variables = {"var1": 12, "var2": "test"}
         # Act
         val_message = validation_message(error_message, instruction, variables)
         # Assert
-        expected_text = "var1: 12\n" \
-                        "var2: test\n" \
-                        "" + instruction
+        expected_text = "var1: 12\n" "var2: test\n" "" + instruction
         self.assertEqual(list(val_message.keys())[0], error_message)
         self.assertEqual(val_message[error_message], expected_text)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

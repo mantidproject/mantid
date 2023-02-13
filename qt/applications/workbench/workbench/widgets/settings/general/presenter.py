@@ -27,10 +27,10 @@ class GeneralProperties(Enum):
     PR_NUMBER_OF_CHECKPOINTS = "projectRecovery.numberOfCheckpoints"
     PR_TIME_BETWEEN_RECOVERY = "projectRecovery.secondsBetween"
     PR_RECOVERY_ENABLED = "projectRecovery.enabled"
-    PROMPT_ON_DELETING_WORKSPACE = 'project/prompt_on_deleting_workspace'
-    PROMPT_SAVE_EDITOR_MODIFIED = 'project/prompt_save_editor_modified'
-    PROMPT_SAVE_ON_CLOSE = 'project/prompt_save_on_close'
-    USE_NOTIFICATIONS = 'Notifications.Enabled'
+    PROMPT_ON_DELETING_WORKSPACE = "project/prompt_on_deleting_workspace"
+    PROMPT_SAVE_EDITOR_MODIFIED = "project/prompt_save_editor_modified"
+    PROMPT_SAVE_ON_CLOSE = "project/prompt_save_on_close"
+    USE_NOTIFICATIONS = "Notifications.Enabled"
     USER_LAYOUT = "MainWindow/user_layouts"
     WINDOW_BEHAVIOUR = "AdditionalWindows/behaviour"
     COMPLETION_ENABLED = "Editors/completion_enabled"
@@ -104,7 +104,7 @@ class GeneralSettings(object):
     def action_main_font_button_clicked(self):
         font = None
         if CONF.has(GeneralProperties.FONT.value):
-            font_string = CONF.get(GeneralProperties.FONT.value, type=str).split(',')
+            font_string = CONF.get(GeneralProperties.FONT.value, type=str).split(",")
             if len(font_string) > 2:
                 font = QFontDatabase().font(font_string[0], font_string[-1], int(font_string[1]))
         font_dialog = self.view.create_font_dialog(self.parent, font)
@@ -168,20 +168,18 @@ class GeneralSettings(object):
 
     def load_current_setting_values(self):
         self.view.prompt_save_on_close.setChecked(CONF.get(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value, type=bool))
-        self.view.prompt_save_editor_modified.setChecked(CONF.get(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value,
-                                                                  type=bool))
-        self.view.prompt_deleting_workspaces.setChecked(CONF.get(GeneralProperties.PROMPT_ON_DELETING_WORKSPACE.value,
-                                                                 type=bool))
+        self.view.prompt_save_editor_modified.setChecked(CONF.get(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value, type=bool))
+        self.view.prompt_deleting_workspaces.setChecked(CONF.get(GeneralProperties.PROMPT_ON_DELETING_WORKSPACE.value, type=bool))
 
         # compare lower-case, because MantidPlot will save it as lower case,
         # but Python will have the bool's first letter capitalised
-        pr_enabled = ("true" == ConfigService.getString(GeneralProperties.PR_RECOVERY_ENABLED.value).lower())
+        pr_enabled = "true" == ConfigService.getString(GeneralProperties.PR_RECOVERY_ENABLED.value).lower()
         pr_time_between_recovery = int(ConfigService.getString(GeneralProperties.PR_TIME_BETWEEN_RECOVERY.value))
         pr_number_checkpoints = int(ConfigService.getString(GeneralProperties.PR_NUMBER_OF_CHECKPOINTS.value))
-        use_notifications_setting = ("on" == ConfigService.getString(GeneralProperties.USE_NOTIFICATIONS.value).lower())
-        crystallography_convention = ("Crystallography" == ConfigService.getString(GeneralProperties.CRYSTALLOGRAPY_CONV.value))
-        use_open_gl = ("on" == ConfigService.getString(GeneralProperties.OPENGL.value).lower())
-        invisible_workspaces = ("true" == ConfigService.getString(GeneralProperties.SHOW_INVISIBLE_WORKSPACES.value).lower())
+        use_notifications_setting = "on" == ConfigService.getString(GeneralProperties.USE_NOTIFICATIONS.value).lower()
+        crystallography_convention = "Crystallography" == ConfigService.getString(GeneralProperties.CRYSTALLOGRAPY_CONV.value)
+        use_open_gl = "on" == ConfigService.getString(GeneralProperties.OPENGL.value).lower()
+        invisible_workspaces = "true" == ConfigService.getString(GeneralProperties.SHOW_INVISIBLE_WORKSPACES.value).lower()
         completion_enabled = CONF.get(GeneralProperties.COMPLETION_ENABLED.value, type=bool)
 
         self.view.project_recovery_enabled.setChecked(pr_enabled)

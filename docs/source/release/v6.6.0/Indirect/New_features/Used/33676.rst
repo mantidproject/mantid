@@ -1,0 +1,1 @@
+- A new interface has been created: the Indirect Data Manipulation Interface, from the Indirect Data Analysis interface the Sqw, Moments, and Symmetrise tabs have been moved into the new interface along with Elwin and Iqt from the Indirect Data Analysis interface.

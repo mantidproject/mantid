@@ -78,10 +78,12 @@ class CalibrationPresenter(object):
         """
         Calibrate the data in a separate thread so as to not freeze the GUI.
         """
-        self.worker = AsyncTask(self.model.create_new_calibration,
-                                (self.current_calibration, self.rb_num, plot_output),
-                                error_cb=self._on_error,
-                                success_cb=self._on_success)
+        self.worker = AsyncTask(
+            self.model.create_new_calibration,
+            (self.current_calibration, self.rb_num, plot_output),
+            error_cb=self._on_error,
+            success_cb=self._on_success,
+        )
         self.set_calibrate_controls_enabled(False)
         self.worker.start()
 
@@ -95,8 +97,12 @@ class CalibrationPresenter(object):
 
     def _notify_updated_calibration(self):
         self.calibration_notifier.notify_subscribers(self.current_calibration)
-        set_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
-                    "last_calibration_path", self.current_calibration.get_prm_filepath())
+        set_setting(
+            output_settings.INTERFACES_SETTINGS_GROUP,
+            output_settings.ENGINEERING_PREFIX,
+            "last_calibration_path",
+            self.current_calibration.get_prm_filepath(),
+        )
         self.prm_filepath_notifier_gsas2.notify_subscribers(self.model.get_last_prm_files_gsas2())
 
     def set_field_value(self):
@@ -107,8 +113,7 @@ class CalibrationPresenter(object):
         Loads the most recently created or loaded calibration into the interface instance. To be used on interface
         startup.
         """
-        last_cal_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
-                                    "last_calibration_path")
+        last_cal_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "last_calibration_path")
         if last_cal_path:
             self.view.set_load_checked(True)
             self.view.set_file_text_with_search(last_cal_path)

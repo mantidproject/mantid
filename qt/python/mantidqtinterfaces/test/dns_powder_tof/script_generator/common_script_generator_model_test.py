@@ -8,11 +8,8 @@
 import unittest
 from unittest import mock
 
-from mantidqtinterfaces.dns_powder_tof.data_structures.dns_obs_model import \
-    DNSObsModel
-from mantidqtinterfaces.dns_powder_tof.script_generator. \
-    common_script_generator_model import \
-    DNSScriptGeneratorModel
+from mantidqtinterfaces.dns_powder_tof.data_structures.dns_obs_model import DNSObsModel
+from mantidqtinterfaces.dns_powder_tof.script_generator.common_script_generator_model import DNSScriptGeneratorModel
 
 
 class DNSScriptGeneratorModelTest(unittest.TestCase):
@@ -31,29 +28,25 @@ class DNSScriptGeneratorModelTest(unittest.TestCase):
 
     def test_run_script(self):
         testv = self.model.run_script([])
-        self.assertEqual(testv, '')
+        self.assertEqual(testv, "")
         with self.assertRaises(NameError):
-            self.model.run_script(['x=y'])
-        testv = self.model.run_script([
-            ('from mantidqtinterfaces.dns_powder_tof.'
-             'data_structures.dns_error '
-             'import DNSError'), 'raise(DNSError("test"))'
-        ])
-        self.assertEqual(testv, 'test')
+            self.model.run_script(["x=y"])
+        testv = self.model.run_script(
+            [("from mantidqtinterfaces.dns_powder_tof." "data_structures.dns_error " "import DNSError"), 'raise(DNSError("test"))']
+        )
+        self.assertEqual(testv, "test")
 
     def test_script_maker(self):
         testv = self.model.script_maker(None, None, None)
-        self.assertEqual(testv, ([''], ''))
+        self.assertEqual(testv, ([""], ""))
 
     def test_get_filename(self):
-        self.assertEqual(self.model.get_filename('', []), 'script.py')
-        self.assertEqual(self.model.get_filename('txt', []), 'txt.py')
-        self.assertEqual(self.model.get_filename('a.py', []), 'a.py')
-        full_data_test = [{'sample_name': '_abc', 'file_number': 4},
-                          {'sample_name': '_abc', 'file_number': 5}]
-        self.assertEqual(self.model.get_filename(
-            'a.py', full_data_test, auto=True), 'script_abc_from_4_to_5.py')
+        self.assertEqual(self.model.get_filename("", []), "script.py")
+        self.assertEqual(self.model.get_filename("txt", []), "txt.py")
+        self.assertEqual(self.model.get_filename("a.py", []), "a.py")
+        full_data_test = [{"sample_name": "_abc", "file_number": 4}, {"sample_name": "_abc", "file_number": 5}]
+        self.assertEqual(self.model.get_filename("a.py", full_data_test, auto=True), "script_abc_from_4_to_5.py")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

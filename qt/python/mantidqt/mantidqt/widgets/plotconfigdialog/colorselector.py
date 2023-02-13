@@ -10,15 +10,13 @@ from mantid.plots.utility import convert_color_to_hex
 from matplotlib import rcParams
 from qtpy.QtCore import QRegExp
 from qtpy.QtGui import QColor, QRegExpValidator
-from qtpy.QtWidgets import (QWidget, QLineEdit, QPushButton, QHBoxLayout,
-                            QColorDialog)
+from qtpy.QtWidgets import QWidget, QLineEdit, QPushButton, QHBoxLayout, QColorDialog
 
 
-MPL_DEFAULT = convert_color_to_hex(rcParams['lines.color'])
+MPL_DEFAULT = convert_color_to_hex(rcParams["lines.color"])
 
 
 class ColorSelector(QWidget):
-
     def __init__(self, initial_color=MPL_DEFAULT, parent=None):
         super(ColorSelector, self).__init__(parent=parent)
 
@@ -36,7 +34,7 @@ class ColorSelector(QWidget):
         self.prev_color = self.initial_color.name()
 
         # Color input only allows valid hex codes.
-        re = QRegExp('^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$')
+        re = QRegExp("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$")
         validator = ColorValidator(re, self.line_edit, self)
         self.line_edit.setValidator(validator)
 
@@ -55,12 +53,8 @@ class ColorSelector(QWidget):
     def launch_qcolor_dialog(self):
         color_dialog = QColorDialog(self)
         color_dialog.setCurrentColor(QColor(self.get_color()))
-        color_dialog.colorSelected.connect(
-            lambda: self.set_line_edit(color_dialog.selectedColor().name())
-        )
-        color_dialog.accepted.connect(
-            lambda: self.set_prev_color(color_dialog.selectedColor().name())
-        )
+        color_dialog.colorSelected.connect(lambda: self.set_line_edit(color_dialog.selectedColor().name()))
+        color_dialog.accepted.connect(lambda: self.set_prev_color(color_dialog.selectedColor().name()))
         color_dialog.setModal(True)
         color_dialog.show()
 
@@ -75,8 +69,7 @@ class ColorSelector(QWidget):
 
     def update_color_button(self):
         color = self.get_color()
-        self.button.setStyleSheet("border:1px solid #000000;"
-                                  f"background-color: {color}")
+        self.button.setStyleSheet("border:1px solid #000000;" f"background-color: {color}")
         self.button.update()
 
     def convert_three_digit_hex_to_six(self):
@@ -85,7 +78,7 @@ class ColorSelector(QWidget):
         # If a 3-digit hex code is inputted, it is converted to 6 digits
         # by duplicating each digit.
         if len(color) == 4:
-            new = '#{}'.format(''.join(2 * c for c in color.lstrip('#')))
+            new = "#{}".format("".join(2 * c for c in color.lstrip("#")))
             self.set_color(new)
             color = new
 

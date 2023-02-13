@@ -29,6 +29,7 @@ namespace Kernel {
 //-------------------------------------------------------------------------
 // Forward declarations
 //-------------------------------------------------------------------------
+class TimeROI;
 class Property;
 template <typename T> class TimeSeriesProperty;
 
@@ -110,7 +111,7 @@ private:
 };
 
 /// Returns the mean value if the property is TimeSeriesProperty<double>
-MANTID_KERNEL_DLL double timeMean(const Kernel::Property *p);
+MANTID_KERNEL_DLL double timeMean(const Kernel::Property *p, const TimeROI *roi = nullptr);
 
 } // namespace Kernel
 } // namespace Mantid

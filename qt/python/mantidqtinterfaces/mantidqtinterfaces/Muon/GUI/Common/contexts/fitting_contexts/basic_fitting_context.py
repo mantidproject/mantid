@@ -8,13 +8,12 @@ from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import check_if_wor
 from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FittingContext
 
 SINGLE_FITS_KEY = "SingleFits"
-X_FROM_FIT_RANGE = 'x from fit range'
-X_FROM_DATA_RANGE = 'Uniform points across data range'
-X_FROM_CUSTOM = 'Custom x range'
+X_FROM_FIT_RANGE = "x from fit range"
+X_FROM_DATA_RANGE = "Uniform points across data range"
+X_FROM_CUSTOM = "Custom x range"
 
 
 class BasicFittingContext(FittingContext):
-
     def __init__(self, allow_double_pulse_fitting: bool = False):
         super(BasicFittingContext, self).__init__()
 
@@ -143,7 +142,7 @@ class BasicFittingContext(FittingContext):
     def single_fit_functions(self, fit_functions: list) -> None:
         """Sets all of the single fit functions stored in the model."""
         if len(fit_functions) != self.number_of_datasets:
-            raise RuntimeError(f"The provided number of functions is not equal to the number of datasets.")
+            raise RuntimeError("The provided number of functions is not equal to the number of datasets.")
 
         self._single_fit_functions = fit_functions
 
@@ -166,7 +165,7 @@ class BasicFittingContext(FittingContext):
     def fit_statuses(self, fit_statuses: list) -> None:
         """Sets the value of all fit statuses."""
         if len(fit_statuses) != self.number_of_datasets:
-            raise RuntimeError(f"The provided number of fit statuses is not equal to the number of datasets.")
+            raise RuntimeError("The provided number of fit statuses is not equal to the number of datasets.")
 
         self._fit_statuses = fit_statuses
 
@@ -189,7 +188,7 @@ class BasicFittingContext(FittingContext):
     def chi_squared(self, chi_squared: list) -> None:
         """Sets all of the chi squared values."""
         if len(chi_squared) != self.number_of_datasets:
-            raise RuntimeError(f"The provided number of chi squared is not equal to the number of datasets.")
+            raise RuntimeError("The provided number of chi squared is not equal to the number of datasets.")
 
         self._chi_squared = chi_squared
 
@@ -297,7 +296,7 @@ class BasicFittingContext(FittingContext):
     def start_xs(self, start_xs: list) -> None:
         """Sets all of the start Xs in the model."""
         if len(start_xs) != self.number_of_datasets:
-            raise RuntimeError(f"The provided number of start Xs is not equal to the number of datasets.")
+            raise RuntimeError("The provided number of start Xs is not equal to the number of datasets.")
 
         self._start_xs = start_xs
 
@@ -310,7 +309,7 @@ class BasicFittingContext(FittingContext):
     def end_xs(self, end_xs: list) -> None:
         """Sets all of the end Xs in the model."""
         if len(end_xs) != self.number_of_datasets:
-            raise RuntimeError(f"The provided number of end Xs is not equal to the number of datasets.")
+            raise RuntimeError("The provided number of end Xs is not equal to the number of datasets.")
 
         self._end_xs = end_xs
 
@@ -333,7 +332,7 @@ class BasicFittingContext(FittingContext):
     def exclude_start_xs(self, start_xs: list) -> None:
         """Sets the exclude start Xs stored by the context."""
         if len(start_xs) != self.number_of_datasets:
-            raise RuntimeError(f"The provided number of exclude start Xs is not equal to the number of datasets.")
+            raise RuntimeError("The provided number of exclude start Xs is not equal to the number of datasets.")
 
         self._exclude_start_xs = start_xs
 
@@ -346,7 +345,7 @@ class BasicFittingContext(FittingContext):
     def exclude_end_xs(self, end_xs: list) -> None:
         """Sets the exclude end Xs stored by the context."""
         if len(end_xs) != self.number_of_datasets:
-            raise RuntimeError(f"The provided number of exclude end Xs is not equal to the number of datasets.")
+            raise RuntimeError("The provided number of exclude end Xs is not equal to the number of datasets.")
 
         self._exclude_end_xs = end_xs
 

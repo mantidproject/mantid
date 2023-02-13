@@ -11,7 +11,6 @@ SIMULTANEOUS_FITS_KEY = "SimultaneousFits"
 
 
 class GeneralFittingContext(BasicFittingContext):
-
     def __init__(self, allow_double_pulse_fitting: bool = False):
         super(GeneralFittingContext, self).__init__(allow_double_pulse_fitting)
 
@@ -86,7 +85,7 @@ class GeneralFittingContext(BasicFittingContext):
     def simultaneous_fit_function(self, fit_function: IFunction) -> None:
         """Sets the simultaneous fit function stored in the model."""
         if fit_function is not None and self.number_of_datasets == 0:
-            raise RuntimeError(f"Cannot set a simultaneous fit function when there are no datasets in the model.")
+            raise RuntimeError("Cannot set a simultaneous fit function when there are no datasets in the model.")
 
         self._simultaneous_fit_function = fit_function
 

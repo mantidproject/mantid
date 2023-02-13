@@ -8,31 +8,23 @@
 // _common library.
 %Module(name=_commonqt5)
 
-%UnitCode
-#if defined(_MSC_VER)
-  # pragma warning( disable: 4290 )
-#elif defined(__GNUC__) && !defined(__clang__)
-  // We need default visibility for this module so that
-  // python can see the init function.
-  #pragma GCC visibility push(default)
-  #pragma GCC diagnostic push
-  #pragma GCC diagnostic ignored "-Wpedantic"
-  #if __GNUC__ >= 5
-    #pragma GCC diagnostic ignored "-Wsuggest-override"
-  #endif
-#endif
-%End
-
-// PyQt5 widgets
-%Import QtGui/QtGuimod.sip
-%Import QtWidgets/QtWidgetsmod.sip
-
 %ModuleCode
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/Message.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "MantidPythonInterface/core/VersionCompat.h"
 #include "frameobject.h"
+
+#if defined(__GNUC__) && !defined(__clang__)
+  // We need default visibility for this module so that
+  // python can see the init function.
+  #pragma GCC visibility push(default)
+#endif
+MSVC_DIAG_OFF(4290)
+GNU_DIAG_OFF("pedantic")
+GNU_DIAG_OFF("suggest-override")
+GNU_DIAG_OFF("missing-field-initializers")
 
 // Allows suppression of namespaces within the module
 using namespace MantidQt::MantidWidgets;
@@ -44,6 +36,10 @@ using namespace MantidQt::MantidWidgets::Batch;
 %HideNamespace(name=MantidQt)
 %HideNamespace(name=MantidQt::MantidWidgets)
 %HideNamespace(name=MantidQt::MantidWidgets::Batch)
+
+// PyQt5 widgets
+%Import QtGui/QtGuimod.sip
+%Import QtWidgets/QtWidgetsmod.sip
 
 %Include ../sip/exceptions.sip
 %Include ../sip/string.sip
@@ -358,7 +354,6 @@ public:
   QStringList getUserSubWindowKeys() const;
 
   void showHelpPage(const QString &url=QString());
-  void showWikiPage(const QString &page=QString());
   void showAlgorithmHelp(const QString &name, const int version=-1);
   void showConceptHelp(const QString &name);
   void showFitFunctionHelp(const QString &name=QString());
@@ -425,6 +420,7 @@ signals:
   void plotMDHistoWithErrorsClicked(const QStringList &workspaceNames);
   void overplotMDHistoWithErrorsClicked(const QStringList &workspaceNames);
   void sampleMaterialClicked(const QStringList &workspaceNames);
+  void sampleShapeClicked(const QStringList &workspaceNames);
 };
 
 class AlgorithmHistoryWindow : public QDialog {
@@ -1060,10 +1056,10 @@ class ImageInfoWidget : public QTableWidget {
 %End
 public:
     ImageInfoWidget(QWidget *parent = nullptr);
-    void cursorAt(const double x, const double y, const double signal);
+    void cursorAt(const double x, const double y, const double signal, const QMap<QString, QString>& extraValues);
     %MethodCode
     try {
-      sipCpp->cursorAt(a0, a1, a2);
+      sipCpp->cursorAt(a0, a1, a2, *a3);
     } catch(const std::exception & exc) {
       SIP_BLOCK_THREADS
       PyErr_SetString(PyExc_RuntimeError, exc.what());
@@ -1091,6 +1087,48 @@ public:
     }
     %End
 };
+
+class ImageInfoWidgetMini : public QLabel {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/ImageInfoWidgetMini.h"
+#include "MantidPythonInterface/core/ExtractSharedPtr.h"
+#include <boost/python/object.hpp>
+#include <boost/python/handle.hpp>
+%End
+public:
+    ImageInfoWidgetMini(QWidget *parent = nullptr);
+    void cursorAt(const double x, const double y, const double signal, const QMap<QString, QString>& extraValues);
+    %MethodCode
+    try {
+      sipCpp->cursorAt(a0, a1, a2, *a3);
+    } catch(const std::exception & exc) {
+      SIP_BLOCK_THREADS
+      PyErr_SetString(PyExc_RuntimeError, exc.what());
+      SIP_UNBLOCK_THREADS
+      return NULL;
+    } catch(...) {
+      sipRaiseUnknownException();
+      return NULL;
+    }
+    %End
+    void setWorkspace(SIP_PYOBJECT);
+    %MethodCode
+    try {
+      using boost::python::extract;
+      using Mantid::PythonInterface::ExtractSharedPtr;
+      sipCpp->setWorkspace(ExtractSharedPtr<Mantid::API::Workspace>(a0)());
+    } catch(const std::exception & exc) {
+      SIP_BLOCK_THREADS
+      PyErr_SetString(PyExc_RuntimeError, exc.what());
+      SIP_UNBLOCK_THREADS
+      return NULL;
+    } catch(...) {
+      sipRaiseUnknownException();
+      return NULL;
+    }
+    %End
+};
+
 
 // ---------------------------------
 // DataSelector

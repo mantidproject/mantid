@@ -12,8 +12,8 @@ from mantid.simpleapi import DeleteWorkspace
 class Cleanup:
     """A class to manage intermediate workspace cleanup."""
 
-    OFF = 'Cleanup OFF'
-    ON = 'Cleanup ON'
+    OFF = "Cleanup OFF"
+    ON = "Cleanup ON"
 
     def __init__(self, cleanupMode, deleteAlgorithmLogging):
         """Initialize an instance of the class."""
@@ -62,11 +62,11 @@ class NameSource:
     def __init__(self, prefix, cleanupMode):
         """Initialize an instance of the class."""
         self._names = set()
-        self._prefix = '__' + prefix if cleanupMode == Cleanup.ON else prefix
+        self._prefix = "__" + prefix if cleanupMode == Cleanup.ON else prefix
 
     def withSuffix(self, suffix):
         """Returns a workspace name with given suffix applied."""
-        return self._prefix + '_' + suffix + '_'
+        return self._prefix + "_" + suffix + "_"
 
 
 class Report:

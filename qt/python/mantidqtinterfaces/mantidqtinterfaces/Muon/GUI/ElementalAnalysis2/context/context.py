@@ -17,19 +17,27 @@ REBINNED_VARIABLE_WS_SUFFIX = "_EA_Rebinned_Variable"
 
 
 class ElementalAnalysisContext(object):
-
-    def __init__(self, data_context, ea_group_context=None, muon_gui_context=None, plot_panes_context=None,
-                 error_notifier=None, workspace_suffix=' EA'):
+    def __init__(
+        self,
+        data_context,
+        ea_group_context=None,
+        muon_gui_context=None,
+        plot_panes_context=None,
+        error_notifier=None,
+        workspace_suffix=" EA",
+    ):
         self._window_title = "Elemental Analysis 2"
         self.data_context = data_context
         self._gui_context = muon_gui_context
         self._group_context = ea_group_context
         self._plot_panes_context = plot_panes_context
         self.workspace_suffix = workspace_suffix
-        self.ads_observer = MuonADSObserver(delete_callback=self.remove_workspace,
-                                                   clear_callback=self.clear_context,
-                                                   replace_callback=self.workspace_replaced,
-                                                   delete_group_callback=self.remove_workspace)
+        self.ads_observer = MuonADSObserver(
+            delete_callback=self.remove_workspace,
+            clear_callback=self.clear_context,
+            replace_callback=self.workspace_replaced,
+            delete_group_callback=self.remove_workspace,
+        )
 
         self.update_view_from_model_notifier = GenericObservable()
         self.update_plots_notifier = GenericObservable()
@@ -97,7 +105,7 @@ class ElementalAnalysisContext(object):
     def handle_calculation_error(self, error):
         self.calculation_finished_notifier.notify_subscribers()
         if self.error_notifier:
-            error_message = f"Unexpected error occurred during Rebin: " + str(error)
+            error_message = "Unexpected error occurred during Rebin: " + str(error)
             self.error_notifier.notify_subscribers(error_message)
 
     def _run_rebin(self, name, rebin_type, params):
@@ -121,16 +129,17 @@ class ElementalAnalysisContext(object):
         group_workspace = retrieve_ws(self.group_context[name].run_number)
         group_workspace.addWorkspace(workspace)
         group = self.group_context[name]
-        group.update_workspaces(str(workspace), rebin=True, rebin_index=rebin_index,
-                                rebin_option=rebin_option)
+        group.update_workspaces(str(workspace), rebin=True, rebin_index=rebin_index, rebin_option=rebin_option)
         self.update_plots_notifier.notify_subscribers(workspace)
 
     def handle_rebin(self, name, rebin_type, rebin_param):
         self.rebin_model = ThreadModelWrapper(lambda: self._run_rebin(name, rebin_type, rebin_param))
         self.rebin_thread = thread_model.ThreadModel(self.rebin_model)
-        self.rebin_thread.threadWrapperSetUp(on_thread_start_callback=self.handle_calculation_started,
-                                             on_thread_end_callback=self.calculation_success,
-                                             on_thread_exception_callback=self.handle_calculation_error)
+        self.rebin_thread.threadWrapperSetUp(
+            on_thread_start_callback=self.handle_calculation_started,
+            on_thread_end_callback=self.calculation_success,
+            on_thread_exception_callback=self.handle_calculation_error,
+        )
         self.rebin_thread.start()
 
     def show_all_groups(self):

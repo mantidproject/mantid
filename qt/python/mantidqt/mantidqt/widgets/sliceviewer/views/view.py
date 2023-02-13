@@ -11,13 +11,15 @@
 
 import mantid.api
 from qtpy.QtCore import Qt, QTimer, Signal
-from qtpy.QtWidgets import (QHBoxLayout, QSplitter, QWidget)
+from qtpy.QtWidgets import QHBoxLayout, QSplitter, QWidget
 
 # local imports
 from mantidqt.widgets.sliceviewer.views.dataview import SliceViewerDataView
-from mantidqt.widgets.sliceviewer.peaksviewer.workspaceselection import \
-    (PeaksWorkspaceSelectorModel, PeaksWorkspaceSelectorPresenter,
-     PeaksWorkspaceSelectorView)
+from mantidqt.widgets.sliceviewer.peaksviewer.workspaceselection import (
+    PeaksWorkspaceSelectorModel,
+    PeaksWorkspaceSelectorPresenter,
+    PeaksWorkspaceSelectorView,
+)
 from mantidqt.widgets.sliceviewer.peaksviewer.view import PeaksViewerCollectionView
 from mantidqt.widgets.sliceviewer.peaksviewer.representation.painter import MplPainter
 
@@ -27,6 +29,7 @@ from mantidqt.widgets.observers.observing_view import ObservingView
 
 class SliceViewerView(QWidget, ObservingView):
     """Combines the data view for the slice viewer with the optional peaks viewer."""
+
     close_signal = Signal()
     rename_signal = Signal(str)
 
@@ -41,6 +44,7 @@ class SliceViewerView(QWidget, ObservingView):
         self._splitter = QSplitter(self)
         self._data_view = SliceViewerDataView(presenter, dims_info, can_normalise, self, conf)
         self._splitter.addWidget(self._data_view)
+        self._splitter.setCollapsible(0, False)
         self._splitter.splitterMoved.connect(self._data_view.on_resize)
         #  peaks viewer off by default
         self._peaks_view = None
@@ -83,11 +87,12 @@ class SliceViewerView(QWidget, ObservingView):
 
     def add_widget_to_splitter(self, widget):
         self._splitter.addWidget(widget)
+        widget_index = self._splitter.indexOf(widget)
+        self._splitter.setCollapsible(widget_index, False)
         self._data_view.on_resize()
 
     def peaks_overlay_clicked(self):
-        """Peaks overlay button has been toggled
-        """
+        """Peaks overlay button has been toggled"""
         self.presenter.overlay_peaks_workspaces()
 
     def non_axis_aligned_cuts_clicked(self, state):
@@ -98,8 +103,7 @@ class SliceViewerView(QWidget, ObservingView):
         :param current_overlayed_names: A list of names that are currently overlayed
         :returns: A list of workspace names to overlay on the display
         """
-        model = PeaksWorkspaceSelectorModel(mantid.api.AnalysisDataService.Instance(),
-                                            checked_names=current_overlayed_names)
+        model = PeaksWorkspaceSelectorModel(mantid.api.AnalysisDataService.Instance(), checked_names=current_overlayed_names)
         view = PeaksWorkspaceSelectorView(self)
         presenter = PeaksWorkspaceSelectorPresenter(view, model)
         return presenter.select_peaks_workspaces()

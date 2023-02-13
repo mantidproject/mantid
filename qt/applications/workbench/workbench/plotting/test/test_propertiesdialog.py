@@ -16,7 +16,7 @@ from unittest.mock import MagicMock
 # third-party library imports
 import matplotlib
 
-matplotlib.use('AGG')  # noqa
+matplotlib.use("AGG")  # noqa
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from matplotlib.ticker import LogFormatterSciNotation, ScalarFormatter
@@ -25,8 +25,15 @@ import numpy as np
 from mantid.api import WorkspaceFactory
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.plotting.functions import pcolormesh
-from workbench.plotting.propertiesdialog import (XAxisEditor, YAxisEditor, ZAxisEditor, ColorbarAxisEditor,
-                                                 LegendEditor, DECIMAL_FORMAT, SCIENTIFIC_FORMAT)
+from workbench.plotting.propertiesdialog import (
+    XAxisEditor,
+    YAxisEditor,
+    ZAxisEditor,
+    ColorbarAxisEditor,
+    LegendEditor,
+    DECIMAL_FORMAT,
+    SCIENTIFIC_FORMAT,
+)
 
 
 @start_qapplication
@@ -36,31 +43,31 @@ class PropertiesDialogTest(unittest.TestCase):
     def test_axis_editor_initialised_with_correct_values(self):
         # make figure
         fig, ax = plt.subplots(1, 1)
-        ax.plot([1, 2, 3], [1, 10, 100], 'o')
+        ax.plot([1, 2, 3], [1, 10, 100], "o")
         # set properties that can be accessed via the axes menu
         ax.xaxis.grid(True)
-        ax.set(xlim=[0, 4], ylim=[1e-3, 1e3], yscale='log')
+        ax.set(xlim=[0, 4], ylim=[1e-3, 1e3], yscale="log")
         # get an AxisEditor object for x/y axes
         xEditor = XAxisEditor(fig.canvas, ax)
         yEditor = YAxisEditor(fig.canvas, ax)
         # test grid visibility
-        self.assertEqual(xEditor._memento.grid, ax.xaxis._major_tick_kw['gridOn'])
-        self.assertEqual(yEditor._memento.grid, ax.yaxis._major_tick_kw['gridOn'])
+        self.assertEqual(xEditor._memento.grid, ax.xaxis._major_tick_kw["gridOn"])
+        self.assertEqual(yEditor._memento.grid, ax.yaxis._major_tick_kw["gridOn"])
         # test limits
         self.assertEqual(xEditor._memento.min, ax.get_xlim()[0])
         self.assertEqual(xEditor._memento.max, ax.get_xlim()[1])
         self.assertEqual(yEditor._memento.min, ax.get_ylim()[0])
         self.assertEqual(yEditor._memento.max, ax.get_ylim()[1])
         # test format
-        self.assertEqual(xEditor._memento.formatter, 'Decimal Format')
-        self.assertEqual(yEditor._memento.formatter, 'Scientific Format')
+        self.assertEqual(xEditor._memento.formatter, "Decimal Format")
+        self.assertEqual(yEditor._memento.formatter, "Scientific Format")
         # test scale
         self.assertEqual(xEditor._memento.log, False)
         self.assertEqual(yEditor._memento.log, True)
 
     def test_axis_editor_initialised_with_correct_values_3d(self):
         a = np.array([[1]])
-        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
+        fig, ax = plt.subplots(subplot_kw={"projection": "mantid3d"})
         ax.plot_surface(a, a, a)
         # Set properties that can be accessed via the axes menu
         ax.set_xlim(1, 2)
@@ -113,7 +120,7 @@ class PropertiesDialogTest(unittest.TestCase):
     def test_legend_editor_correctly_updates_axis_legend(self):
         # make figure
         fig, ax = plt.subplots(1, 1)
-        lines = ax.plot([1, 2, 3], [1, 10, 100], 'o', label="Old label")
+        lines = ax.plot([1, 2, 3], [1, 10, 100], "o", label="Old label")
         ax.legend()
         legend_text = ax.get_legend().get_texts()[0]
         # Make the legend editor
@@ -132,14 +139,36 @@ class PropertiesDialogTest(unittest.TestCase):
         """
         # make figure
         fig, ax = plt.subplots(1, 1)
-        ax.plot([1, 2, 3], [1, 10, 100], 'o')
+        ax.plot([1, 2, 3], [1, 10, 100], "o")
         # set properties that can be accessed via the axes menu
-        ax.tick_params(axis='x', which='major',
-                       **{'gridOn': True, 'tick1On': True, 'tick2On': False, 'label1On': True, 'label2On': False,
-                          'size': 6, 'tickdir': 'out', 'width': 1})
-        ax.tick_params(axis='y', which='major',
-                       **{'gridOn': True, 'tick1On': True, 'tick2On': False, 'label1On': True, 'label2On': False,
-                          'size': 6, 'tickdir': 'out', 'width': 1})
+        ax.tick_params(
+            axis="x",
+            which="major",
+            **{
+                "gridOn": True,
+                "tick1On": True,
+                "tick2On": False,
+                "label1On": True,
+                "label2On": False,
+                "size": 6,
+                "tickdir": "out",
+                "width": 1,
+            }
+        )
+        ax.tick_params(
+            axis="y",
+            which="major",
+            **{
+                "gridOn": True,
+                "tick1On": True,
+                "tick2On": False,
+                "label1On": True,
+                "label2On": False,
+                "size": 6,
+                "tickdir": "out",
+                "width": 1,
+            }
+        )
 
         # get an AxisEditor object for x/y axes
         x_editor = XAxisEditor(fig.canvas, ax)
@@ -149,5 +178,5 @@ class PropertiesDialogTest(unittest.TestCase):
         self.assertTrue(y_editor._memento.grid)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

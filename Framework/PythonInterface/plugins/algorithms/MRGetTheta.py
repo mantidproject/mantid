@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty
 from mantid.kernel import Direction, FloatBoundedValidator, Property
 import mantid.simpleapi
@@ -12,34 +12,34 @@ import math
 
 
 class MRGetTheta(PythonAlgorithm):
-    """ Get the theta scattering angle for the Magnetism Reflectometer """
+    """Get the theta scattering angle for the Magnetism Reflectometer"""
 
     def category(self):
-        """ Return category """
+        """Return category"""
         return "Reflectometry\\SNS"
 
     def name(self):
-        """ Return name """
+        """Return name"""
         return "MRGetTheta"
 
     def summary(self):
-        """ Return summary """
+        """Return summary"""
         return "Get the theta scattering angle for the Magnetism Reflectometer (radians)."
 
     def PyInit(self):
-        """ Declare properties """
+        """Declare properties"""
         self.declareProperty(WorkspaceProperty("Workspace", "", Direction.Input), "Workspace containing MR data")
-        self.declareProperty("AngleOffset", 0.,FloatBoundedValidator(lower=0.), "Angle offset (rad)")
+        self.declareProperty("AngleOffset", 0.0, FloatBoundedValidator(lower=0.0), "Angle offset (rad)")
         self.declareProperty("UseSANGLE", False, doc="If True, use SANGLE as the scattering angle. If False, use DANGLE.")
-        self.declareProperty("SpecularPixel", 0., doc="Pixel position of the specular reflectivity [optional]")
+        self.declareProperty("SpecularPixel", 0.0, doc="Pixel position of the specular reflectivity [optional]")
         self.declareProperty("DirectPixelOverwrite", Property.EMPTY_DBL, doc="DIRPIX overwrite value")
         self.declareProperty("DAngle0Overwrite", Property.EMPTY_DBL, doc="DANGLE0 overwrite value (degrees)")
-        self.declareProperty("Theta", 0., direction=Direction.Output, doc="Scattering angle theta (rad)")
+        self.declareProperty("Theta", 0.0, direction=Direction.Output, doc="Scattering angle theta (rad)")
         return
 
     def PyExec(self):
-        """ Main execution body """
-        _w=self.getProperty("Workspace").value
+        """Main execution body"""
+        _w = self.getProperty("Workspace").value
 
         angle_offset = self.getProperty("AngleOffset").value
         dirpix_overwrite = self.getProperty("DirectPixelOverwrite").value
@@ -47,20 +47,20 @@ class MRGetTheta(PythonAlgorithm):
         use_sangle = self.getProperty("UseSANGLE").value
 
         if use_sangle:
-            theta = self.read_log(_w, 'SANGLE', target_units='rad', assumed_units='deg')
+            theta = self.read_log(_w, "SANGLE", target_units="rad", assumed_units="deg")
         else:
-            dangle = self.read_log(_w, 'DANGLE', target_units='rad', assumed_units='deg')
+            dangle = self.read_log(_w, "DANGLE", target_units="rad", assumed_units="deg")
             if dangle0_overwrite == Property.EMPTY_DBL:
-                dangle0 = self.read_log(_w, 'DANGLE0', target_units='rad', assumed_units='deg')
+                dangle0 = self.read_log(_w, "DANGLE0", target_units="rad", assumed_units="deg")
             else:
                 dangle0 = dangle0_overwrite * math.pi / 180.0
-            det_distance = self.read_log(_w, 'SampleDetDis', target_units='m', assumed_units='mm')
+            det_distance = self.read_log(_w, "SampleDetDis", target_units="m", assumed_units="mm")
             if dirpix_overwrite == Property.EMPTY_DBL:
-                direct_beam_pix = _w.getRun()['DIRPIX'].getStatistics().mean
+                direct_beam_pix = _w.getRun()["DIRPIX"].getStatistics().mean
             else:
                 direct_beam_pix = dirpix_overwrite
             ref_pix = self.getProperty("SpecularPixel").value
-            if ref_pix == 0.:
+            if ref_pix == 0.0:
                 ref_pix = direct_beam_pix
 
             # Get pixel size from instrument properties
@@ -75,20 +75,29 @@ class MRGetTheta(PythonAlgorithm):
         self.setProperty("Theta", abs(theta) + angle_offset)
         return
 
-    def read_log(self, ws, name, target_units='', assumed_units=''):
+    def read_log(self, ws, name, target_units="", assumed_units=""):
         """
-            Read a log value, taking care of units.
-            If the log entry has no units, the target units are assumed.
-            :param ws: workspace
-            :param str name: name of the property to read
-            :param str target_units: units to convert to
-            :param str assumed_units: units of origin, if not specified in the log itself
+        Read a log value, taking care of units.
+        If the log entry has no units, the target units are assumed.
+        :param ws: workspace
+        :param str name: name of the property to read
+        :param str target_units: units to convert to
+        :param str assumed_units: units of origin, if not specified in the log itself
         """
-        _units = {'m': {'mm': 1000.0,},
-                  'mm': {'m': 0.001,},
-                  'deg': {'rad': math.pi/180.,},
-                  'rad': {'deg': 180./math.pi,},
-                  }
+        _units = {
+            "m": {
+                "mm": 1000.0,
+            },
+            "mm": {
+                "m": 0.001,
+            },
+            "deg": {
+                "rad": math.pi / 180.0,
+            },
+            "rad": {
+                "deg": 180.0 / math.pi,
+            },
+        }
         prop = ws.getRun().getProperty(name)
         value = prop.getStatistics().mean
 

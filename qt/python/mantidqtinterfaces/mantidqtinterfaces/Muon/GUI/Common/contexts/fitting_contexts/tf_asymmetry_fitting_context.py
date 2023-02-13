@@ -6,15 +6,16 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import IFunction
 from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import SINGLE_FITS_KEY
-from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.general_fitting_context import (GeneralFittingContext,
-                                                                                                  SIMULTANEOUS_FITS_KEY)
+from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.general_fitting_context import (
+    GeneralFittingContext,
+    SIMULTANEOUS_FITS_KEY,
+)
 
 TF_SINGLE_FITS_KEY = "TFSingleFits"
 TF_SIMULTANEOUS_FITS_KEY = "TFSimultaneousFits"
 
 
 class TFAsymmetryFittingContext(GeneralFittingContext):
-
     def __init__(self, allow_double_pulse_fitting: bool = False):
         super(TFAsymmetryFittingContext, self).__init__(allow_double_pulse_fitting)
 

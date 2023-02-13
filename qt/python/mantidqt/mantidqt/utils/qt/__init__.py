@@ -16,18 +16,16 @@ from contextlib import contextmanager
 from importlib import import_module
 import warnings
 
-warnings.filterwarnings(action='ignore',
-                        category=DeprecationWarning,
-                        module='.*uic.*')
+warnings.filterwarnings(action="ignore", category=DeprecationWarning, module=".*uic.*")
 
 # 3rd-party modules
-from qtpy import QT_VERSION # noqa
-from qtpy.QtCore import QPoint # noqa
-from qtpy.QtGui import QKeySequence # noqa
+from qtpy import QT_VERSION  # noqa
+from qtpy.QtCore import QPoint  # noqa
+from qtpy.QtGui import QKeySequence  # noqa
 from qtpy.QtWidgets import QAction, QMenu, QDesktopWidget  # noqa
-from qtpy.uic import loadUi, loadUiType # noqa
+from qtpy.uic import loadUi, loadUiType  # noqa
 
-LIB_SUFFIX = 'qt' + QT_VERSION[0]
+LIB_SUFFIX = "qt" + QT_VERSION[0]
 
 
 def import_qt(modulename, package, attr=None):
@@ -50,16 +48,15 @@ def import_qt(modulename, package, attr=None):
     :param attr: Optional attribute to retrieve from the module
     :return: Either the module object if no attribute is specified of the requested attribute
     """
-    if modulename.startswith('.'):
+    if modulename.startswith("."):
         try:
             lib = import_module(modulename + LIB_SUFFIX, package)
         except ImportError as e1:
             try:
-                lib = import_module(modulename.lstrip('.') + LIB_SUFFIX)
+                lib = import_module(modulename.lstrip(".") + LIB_SUFFIX)
             except ImportError as e2:
                 msg = 'import of "{}" failed with "{}"'
-                msg = 'First ' + msg.format(modulename + LIB_SUFFIX, e1) \
-                      + '. Second ' + msg.format(modulename.lstrip('.') + LIB_SUFFIX, e2)
+                msg = "First " + msg.format(modulename + LIB_SUFFIX, e1) + ". Second " + msg.format(modulename.lstrip(".") + LIB_SUFFIX, e2)
                 raise ImportError(msg)
     else:
         lib = import_module(modulename + LIB_SUFFIX)
@@ -123,8 +120,9 @@ def widget_updates_disabled(widget):
     widget.setUpdatesEnabled(True)
 
 
-def create_action(parent, text, on_triggered=None, shortcut=None,
-                  shortcut_context=None, icon_name=None, shortcut_visible_in_context_menu=None):
+def create_action(
+    parent, text, on_triggered=None, shortcut=None, shortcut_context=None, icon_name=None, shortcut_visible_in_context_menu=None
+):
     """Create a QAction based on the give properties
 
     :param parent: The parent object
@@ -140,6 +138,7 @@ def create_action(parent, text, on_triggered=None, shortcut=None,
     :return: A new QAction object
     """
     from ...icons import get_icon  # noqa
+
     action = QAction(text, parent)
     if on_triggered is not None:
         action.triggered.connect(on_triggered)
@@ -156,7 +155,7 @@ def create_action(parent, text, on_triggered=None, shortcut=None,
         action.setIcon(get_icon(icon_name))
 
     # shortcuts in context menus option is only available after Qt 5.10
-    if hasattr(action, 'setShortcutVisibleInContextMenu') and shortcut_visible_in_context_menu:
+    if hasattr(action, "setShortcutVisibleInContextMenu") and shortcut_visible_in_context_menu:
         action.setShortcutVisibleInContextMenu(shortcut_visible_in_context_menu)
 
     return action
@@ -177,14 +176,12 @@ def add_actions(target, actions):
         elif isinstance(action, QAction):
             target.addAction(action)
         else:
-            raise ValueError("Unexpected action type. "
-                             "Expected one of (QAction,QMenu) but found '{}'".format(type(action)))
+            raise ValueError("Unexpected action type. " "Expected one of (QAction,QMenu) but found '{}'".format(type(action)))
 
 
 def toQSettings(settings):
-    '''Utility function to convert supplied settings object to a qtpy.QtCore.QSettings
-    '''
-    if hasattr(settings, 'qsettings'):  # workbench.config.user
+    """Utility function to convert supplied settings object to a qtpy.QtCore.QSettings"""
+    if hasattr(settings, "qsettings"):  # workbench.config.user
         return settings.qsettings
     else:  # must be a QSettings already
         return settings
@@ -192,7 +189,7 @@ def toQSettings(settings):
 
 def ensure_widget_is_on_screen(widget):
     """If the supplied widget is off the screen it will be moved so it is on the screen.
-    The widget must already be 'shown' """
+    The widget must already be 'shown'"""
     # this gives the maximum screen number if the position is off screen
     desktop = QDesktopWidget()
     screen = desktop.screenNumber(widget.pos())
@@ -222,6 +219,7 @@ def force_layer_backing_BigSur():
     #   https://eclecticlight.co/2020/08/13/macos-version-numbering-isnt-so-simple/
     from distutils.version import LooseVersion
     import platform
+
     mac_vers = LooseVersion(platform.mac_ver()[0])
-    if mac_vers >= '11' or mac_vers == '10.16':
-        os.environ['QT_MAC_WANTS_LAYER'] = '1'
+    if mac_vers >= "11" or mac_vers == "10.16":
+        os.environ["QT_MAC_WANTS_LAYER"] = "1"

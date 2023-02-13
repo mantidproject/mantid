@@ -10,7 +10,7 @@ import json
 import copy
 
 from sans.state.JsonSerializable import JsonSerializable
-from sans.common.enums import (RangeStepType, SANSFacility)
+from sans.common.enums import RangeStepType, SANSFacility
 from sans.state.StateObjects.wavelength_interval import WavelengthInterval
 from sans.state.automatic_setters import automatic_setters
 from sans.state.state_functions import one_is_none, validation_message
@@ -28,9 +28,13 @@ class StateWavelength(metaclass=JsonSerializable):
         # LIN/LOG. This is not ideal but is required for workflow algorithms
         # which only accept a subset of the values in the enum
         value = self.wavelength_step_type
-        result = RangeStepType.LIN if value in [RangeStepType.LIN, RangeStepType.RANGE_LIN] else \
-            RangeStepType.LOG if value in [RangeStepType.LOG, RangeStepType.RANGE_LOG] else \
-            RangeStepType.NOT_SET
+        result = (
+            RangeStepType.LIN
+            if value in [RangeStepType.LIN, RangeStepType.RANGE_LIN]
+            else RangeStepType.LOG
+            if value in [RangeStepType.LOG, RangeStepType.RANGE_LOG]
+            else RangeStepType.NOT_SET
+        )
         return result
 
     @property
@@ -38,22 +42,29 @@ class StateWavelength(metaclass=JsonSerializable):
         # Return the wavelength step type, converting LIN/LOG to
         # RANGE_LIN/RANGE_LOG.
         value = self.wavelength_step_type
-        result = RangeStepType.RANGE_LIN if value in [RangeStepType.LIN, RangeStepType.RANGE_LIN] else \
-            RangeStepType.RANGE_LOG if value in [RangeStepType.LOG, RangeStepType.RANGE_LOG] else \
-            RangeStepType.NOT_SET
+        result = (
+            RangeStepType.RANGE_LIN
+            if value in [RangeStepType.LIN, RangeStepType.RANGE_LIN]
+            else RangeStepType.RANGE_LOG
+            if value in [RangeStepType.LOG, RangeStepType.RANGE_LOG]
+            else RangeStepType.NOT_SET
+        )
         return result
 
     def validate(self):
         is_invalid = dict()
         if one_is_none([self.wavelength_interval]):
-            entry = validation_message("A wavelength entry has not been set.",
-                                       "Make sure that all entries for the wavelength are set.",
-                                       {"wavelength_binning": self.wavelength_interval})
+            entry = validation_message(
+                "A wavelength entry has not been set.",
+                "Make sure that all entries for the wavelength are set.",
+                {"wavelength_binning": self.wavelength_interval},
+            )
             is_invalid.update(entry)
 
         if is_invalid:
-            raise ValueError("StateWavelength: The provided inputs are illegal. "
-                             "Please see: {0}".format(json.dumps(is_invalid, indent=4)))
+            raise ValueError(
+                "StateWavelength: The provided inputs are illegal. " "Please see: {0}".format(json.dumps(is_invalid, indent=4))
+            )
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -79,5 +90,7 @@ def get_wavelength_builder(data_info):
     if facility is SANSFacility.ISIS:
         return StateWavelengthBuilder()
     else:
-        raise NotImplementedError("StateWavelengthBuilder: Could not find any valid wavelength builder for the "
-                                  "specified StateData object {0}".format(str(data_info)))
+        raise NotImplementedError(
+            "StateWavelengthBuilder: Could not find any valid wavelength builder for the "
+            "specified StateData object {0}".format(str(data_info))
+        )

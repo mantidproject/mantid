@@ -25,6 +25,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL InstrumentViewSubscriber {
 public:
   virtual void notifySettingsChanged() = 0;
   virtual void notifyRestoreDefaultsRequested() = 0;
+  virtual void notifyBrowseToCalibrationFileRequested() = 0;
 };
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL IInstrumentView {
@@ -60,11 +61,16 @@ public:
   virtual void setMonitorIntegralMax(double value) = 0;
   virtual void showMonitorIntegralRangeInvalid() = 0;
   virtual void showMonitorIntegralRangeValid() = 0;
+  virtual void showCalibrationFilePathInvalid() = 0;
+  virtual void showCalibrationFilePathValid() = 0;
 
   virtual bool getCorrectDetectors() const = 0;
   virtual void setCorrectDetectors(bool value) = 0;
   virtual std::string getDetectorCorrectionType() const = 0;
   virtual void setDetectorCorrectionType(std::string const &value) = 0;
+
+  virtual std::string getCalibrationFilePath() const = 0;
+  virtual void setCalibrationFilePath(std::string const &value) = 0;
 
   virtual void disableAll() = 0;
   virtual void enableAll() = 0;

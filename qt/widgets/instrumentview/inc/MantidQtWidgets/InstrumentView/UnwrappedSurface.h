@@ -19,6 +19,7 @@
 #include <QList>
 #include <QMap>
 #include <QPainter>
+#include <QRect>
 #include <QSet>
 #include <QStack>
 
@@ -68,6 +69,7 @@ public:
   void componentSelected(size_t componentIndex) override;
   void getSelectedDetectors(std::vector<size_t> &detIndices) override;
   void getMaskedDetectors(std::vector<size_t> &detIndices) const override;
+  void getIntersectingDetectors(std::vector<size_t> &detIndices) const;
   void setPeaksWorkspace(const std::shared_ptr<Mantid::API::IPeaksWorkspace> &pws);
   QString getInfoText() const override;
   RectF getSurfaceBounds() const override;
@@ -108,6 +110,9 @@ public:
   virtual std::string saveToProject() const override;
   /// Get a handle to a peaks workspace from a name
   std::shared_ptr<Mantid::API::IPeaksWorkspace> retrievePeaksWorkspace(const std::string &name) const;
+
+  /// Get the QRect of the top left corner of a detector, and its size, in terms of pixels.
+  QRect detectorQRectInPixels(const std::size_t detectorIndex) const;
 
 protected slots:
 
@@ -150,7 +155,7 @@ protected:
   /** @name Protected methods */
   //@{
   void setColor(size_t index, bool picking) const;
-  void createPeakShapes(const QRect &viewport) const;
+  void createPeakShapes() const;
   //@}
 
   double m_u_min;      ///< Minimum u

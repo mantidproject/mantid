@@ -39,7 +39,7 @@ class MultiPlotWidget(QtWidgets.QWidget):
         self._context = context
         layout = QtWidgets.QVBoxLayout()
         splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
-        self.quickEdit = QuickEditWidget(self, auto_btn = True)
+        self.quickEdit = QuickEditWidget(self, auto_btn=True)
         self.quickEdit.connect_x_range_changed(self._x_range_changed)
         self.quickEdit.connect_y_range_changed(self._y_range_changed)
         self.quickEdit.connect_errors_changed(self._errors_changed)
@@ -93,7 +93,7 @@ class MultiPlotWidget(QtWidgets.QWidget):
         self.plots.rm_vline(subplotName, name)
 
     def remove_line(self, subplot_name, ws_name, spec=1):
-        name = '{}: spec {}'.format(ws_name, spec)
+        name = "{}: spec {}".format(ws_name, spec)
         self.plots.remove_lines(subplot_name, [name])
 
     # gets initial values for quickEdit

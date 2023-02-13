@@ -17,15 +17,15 @@ import mantid.simpleapi as mantid
 
 
 def CalibrateWish(RunNumber, PanelNumber):
-    '''
+    """
     :param RunNumber: is the run number of the calibration.
     :param PanelNumber: is a string of two-digit number of the panel being calibrated
-    '''
+    """
     # == Set parameters for calibration ==
-    previousDefaultInstrument = mantid.config['default.instrument']
-    mantid.config['default.instrument'] = "WISH"
+    previousDefaultInstrument = mantid.config["default.instrument"]
+    mantid.config["default.instrument"] = "WISH"
     filename = str(RunNumber)
-    CalibratedComponent = 'WISH/panel' + PanelNumber
+    CalibratedComponent = "WISH/panel" + PanelNumber
 
     # Get calibration raw file and integrate it
     print("Loading", filename)
@@ -46,16 +46,21 @@ def CalibrateWish(RunNumber, PanelNumber):
     # Get the calibration and put it into the calibration table
 
     # calibrate the lower tubes
-    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, lower_tube, funcForm,
-                                                 rangeList=list(range(0, 76)), outputPeak=True)
+    calibrationTable, peakTable = tube.calibrate(
+        CalibInstWS, CalibratedComponent, lower_tube, funcForm, rangeList=list(range(0, 76)), outputPeak=True
+    )
 
     # calibrate the upper tubes
-    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, upper_tube, funcForm,
-                                                 rangeList=list(range(76, 152)),
-                                                 calibTable=calibrationTable,
-                                                 # give the calibration table to append data
-                                                 outputPeak=peakTable  # give peak table to append data
-                                                 )
+    calibrationTable, peakTable = tube.calibrate(
+        CalibInstWS,
+        CalibratedComponent,
+        upper_tube,
+        funcForm,
+        rangeList=list(range(76, 152)),
+        calibTable=calibrationTable,
+        # give the calibration table to append data
+        outputPeak=peakTable,  # give peak table to append data
+    )
 
     print("Got calibration (new positions of detectors)")
 
@@ -70,7 +75,7 @@ def CalibrateWish(RunNumber, PanelNumber):
     # print("saved calibrated workspace (CalibInstWS) into Nexus file", nexusName)
 
     # == Reset default instrument ==
-    mantid.config['default.instrument'] = previousDefaultInstrument
+    mantid.config["default.instrument"] = previousDefaultInstrument
 
     # ==== End of CalibrateWish() ====
 
@@ -78,5 +83,5 @@ def CalibrateWish(RunNumber, PanelNumber):
 if __name__ == "__main__":
     # this file is found on cycle_11_1
     RunNumber = 17701
-    PanelNumber = '03'
+    PanelNumber = "03"
     CalibrateWish(RunNumber, PanelNumber)

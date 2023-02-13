@@ -311,7 +311,7 @@ void ScriptEditor::setFileName(const QString &filename) {
  */
 void ScriptEditor::wheelEvent(QWheelEvent *e) {
   if (e->modifiers() == Qt::ControlModifier) {
-    if (e->delta() > 0) {
+    if (e->angleDelta().y() > 0) {
       zoomIn();
       emit textZoomedIn(); // allows tracking
     } else {
@@ -511,19 +511,6 @@ void ScriptEditor::print() {
  * Raises the find replace dialog
  */
 void ScriptEditor::showFindReplaceDialog() { m_findDialog->show(); }
-
-/**
- * Override the zoomTo slot to make the font size larger on Mac as the
- * defaults are tiny
- * @param level Set the font size to this level of zoom
- */
-void ScriptEditor::zoomTo(int level) {
-#ifdef __APPLE__
-  // Make all fonts 4 points bigger on the Mac because otherwise they're tiny!
-  level += 4;
-#endif
-  QsciScintilla::zoomTo(level);
-}
 
 /**
  * Write to the given device

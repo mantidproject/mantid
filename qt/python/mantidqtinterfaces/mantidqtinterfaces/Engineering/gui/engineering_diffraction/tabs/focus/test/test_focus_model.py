@@ -14,8 +14,7 @@ from unittest.mock import patch, MagicMock, call, create_autospec
 from Engineering.EnggUtils import GROUP
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focus import model
 from Engineering.common.calibration_info import CalibrationInfo
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings import settings_model, \
-    settings_view, settings_presenter
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings import settings_model, settings_view, settings_presenter
 from qtpy.QtCore import QCoreApplication
 from workbench.config import APPNAME
 
@@ -36,18 +35,27 @@ class FocusModelTest(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.test_dir)
 
-    @patch(enggutils_path + '.mantid.DeleteWorkspace')
-    @patch(enggutils_path + '.mantid.ConvertUnits')
-    @patch(enggutils_path + '._save_output_files')
-    @patch(enggutils_path + '._apply_vanadium_norm')
-    @patch(enggutils_path + '._focus_run_and_apply_roi_calibration')
-    @patch(enggutils_path + '._load_run_and_convert_to_dSpacing')
-    @patch(enggutils_path + '._plot_focused_workspaces')
-    @patch(enggutils_path + '.process_vanadium')
-    @patch(file_path + '.load_full_instrument_calibration')
-    def test_focus_run_valid_calibration_plotting(self, mock_load_inst_cal, mock_proc_van, mock_plot, mock_load_run,
-                                                  mock_foc_run, mock_apply_van, mock_save_out, mock_conv_units,
-                                                  mock_del_ws):
+    @patch(enggutils_path + ".mantid.DeleteWorkspace")
+    @patch(enggutils_path + ".mantid.ConvertUnits")
+    @patch(enggutils_path + "._save_output_files")
+    @patch(enggutils_path + "._apply_vanadium_norm")
+    @patch(enggutils_path + "._focus_run_and_apply_roi_calibration")
+    @patch(enggutils_path + "._load_run_and_convert_to_dSpacing")
+    @patch(enggutils_path + "._plot_focused_workspaces")
+    @patch(enggutils_path + ".process_vanadium")
+    @patch(file_path + ".load_full_instrument_calibration")
+    def test_focus_run_valid_calibration_plotting(
+        self,
+        mock_load_inst_cal,
+        mock_proc_van,
+        mock_plot,
+        mock_load_run,
+        mock_foc_run,
+        mock_apply_van,
+        mock_save_out,
+        mock_conv_units,
+        mock_del_ws,
+    ):
         mock_proc_van.return_value = ("van_ws_foc", "123456")
         mock_load_run.return_value = MagicMock()
         sample_foc_ws = MagicMock()
@@ -76,25 +84,25 @@ class FocusModelTest(unittest.TestCase):
 
         mock_plot.assert_not_called()
 
-    @patch(file_path + '.output_settings.get_output_path')
-    @patch(enggutils_path + '.focus_run')
+    @patch(file_path + ".output_settings.get_output_path")
+    @patch(enggutils_path + ".focus_run")
     @patch(file_path + ".load_full_instrument_calibration")
-    def test_first_time_focus_uses_correct_default_save_directory(self, mock_load_cal,
-                                                                  mock_enggutils_focus_run, mock_get_output_path):
+    def test_first_time_focus_uses_correct_default_save_directory(self, mock_load_cal, mock_enggutils_focus_run, mock_get_output_path):
 
         default_save_location = path.join(path.expanduser("~"), "Engineering_Mantid")
         QCoreApplication.setApplicationName("Engineering_Diffraction_test_calib_model")
-        presenter = settings_presenter.SettingsPresenter(mock.create_autospec(settings_model.SettingsModel),
-                                                         mock.create_autospec(settings_view.SettingsView))
+        presenter = settings_presenter.SettingsPresenter(
+            mock.create_autospec(settings_model.SettingsModel), mock.create_autospec(settings_view.SettingsView)
+        )
         presenter.settings = {  # "save_location" is not defined
-                              "full_calibration": "cal",
-                              "logs": "some,logs",
-                              "primary_log": "some",
-                              "sort_ascending": True,
-                              "default_peak": "BackToBackExponential"
-                              }
+            "full_calibration": "cal",
+            "logs": "some,logs",
+            "primary_log": "some",
+            "sort_ascending": True,
+            "default_peak": "BackToBackExponential",
+        }
         presenter._validate_settings()  # save_location now set to the default value at runtime
-        self.assertEqual(presenter.settings['save_location'], default_save_location)
+        self.assertEqual(presenter.settings["save_location"], default_save_location)
 
         # this is the runtime return from output_settings.get_output_path()
         # if called at define time in a default parameter value then this value is not used
@@ -104,25 +112,27 @@ class FocusModelTest(unittest.TestCase):
         self.calibration.group = GROUP.BOTH
         mock_enggutils_focus_run.return_value = ["Nexus files"], ["GSS files"]
 
-        self.model.focus_run(["305761"], "fake/van/path", plot_output=False, rb_num=None,
-                             calibration=self.calibration)  # save_dir not given
+        self.model.focus_run(
+            ["305761"], "fake/van/path", plot_output=False, rb_num=None, calibration=self.calibration
+        )  # save_dir not given
 
-        mock_enggutils_focus_run.assert_called_once_with(["305761"], "fake/van/path", False, None, self.calibration,
-                                                         default_save_location, "full_calibration")
+        mock_enggutils_focus_run.assert_called_once_with(
+            ["305761"], "fake/van/path", False, None, self.calibration, default_save_location, "full_calibration"
+        )
         # sample_paths, vanadium_path, plot_output, rb_num, calibration, save_dir, full_calib
         QCoreApplication.setApplicationName(APPNAME)  # reset to 'mantidworkbench' in case required by other tests
 
-    @patch(enggutils_path + '.mantid.DeleteWorkspace')
-    @patch(enggutils_path + '.mantid.ConvertUnits')
-    @patch(enggutils_path + '._save_output_files')
-    @patch(enggutils_path + '._apply_vanadium_norm')
-    @patch(enggutils_path + '._focus_run_and_apply_roi_calibration')
-    @patch(enggutils_path + '._load_run_and_convert_to_dSpacing')
-    @patch(enggutils_path + '.process_vanadium')
-    @patch(file_path + '.load_full_instrument_calibration')
-    def test_save_directories_both_banks_with_RBnum(self, mock_load_inst_cal, mock_proc_van, mock_load_run,
-                                                    mock_foc_run, mock_apply_van, mock_save_out, mock_conv_units,
-                                                    mock_del_ws):
+    @patch(enggutils_path + ".mantid.DeleteWorkspace")
+    @patch(enggutils_path + ".mantid.ConvertUnits")
+    @patch(enggutils_path + "._save_output_files")
+    @patch(enggutils_path + "._apply_vanadium_norm")
+    @patch(enggutils_path + "._focus_run_and_apply_roi_calibration")
+    @patch(enggutils_path + "._load_run_and_convert_to_dSpacing")
+    @patch(enggutils_path + ".process_vanadium")
+    @patch(file_path + ".load_full_instrument_calibration")
+    def test_save_directories_both_banks_with_RBnum(
+        self, mock_load_inst_cal, mock_proc_van, mock_load_run, mock_foc_run, mock_apply_van, mock_save_out, mock_conv_units, mock_del_ws
+    ):
         rb_num = "1"
         van_run = "123456"
         mock_proc_van.return_value = ("van_ws_foc", van_run)
@@ -135,26 +145,25 @@ class FocusModelTest(unittest.TestCase):
         mock_save_out.return_value = ["Nexus files"], ["GSS files"]
 
         # plotting focused runs
-        self.model.focus_run(["305761"], "fake/van/path", plot_output=False, rb_num=rb_num,
-                             calibration=self.calibration, save_dir='dir')
+        self.model.focus_run(["305761"], "fake/van/path", plot_output=False, rb_num=rb_num, calibration=self.calibration, save_dir="dir")
 
         self.assertEqual(mock_save_out.call_count, 2)  # once for dSpacing and once for TOF
-        save_calls = 2 * [call([path.join('dir', 'Focus'),
-                                path.join('dir', 'User', rb_num, 'Focus')], sample_foc_ws,
-                               self.calibration, van_run, rb_num)]
+        save_calls = 2 * [
+            call([path.join("dir", "Focus"), path.join("dir", "User", rb_num, "Focus")], sample_foc_ws, self.calibration, van_run, rb_num)
+        ]
         mock_save_out.assert_has_calls(save_calls)
 
-    @patch(enggutils_path + '.mantid.DeleteWorkspace')
-    @patch(enggutils_path + '.mantid.ConvertUnits')
-    @patch(enggutils_path + '._save_output_files')
-    @patch(enggutils_path + '._apply_vanadium_norm')
-    @patch(enggutils_path + '._focus_run_and_apply_roi_calibration')
-    @patch(enggutils_path + '._load_run_and_convert_to_dSpacing')
-    @patch(enggutils_path + '.process_vanadium')
-    @patch(file_path + '.load_full_instrument_calibration')
-    def test_save_directories_texture_with_RBnum(self, mock_load_inst_cal, mock_proc_van, mock_load_run,
-                                                 mock_foc_run, mock_apply_van, mock_save_out, mock_conv_units,
-                                                 mock_del_ws):
+    @patch(enggutils_path + ".mantid.DeleteWorkspace")
+    @patch(enggutils_path + ".mantid.ConvertUnits")
+    @patch(enggutils_path + "._save_output_files")
+    @patch(enggutils_path + "._apply_vanadium_norm")
+    @patch(enggutils_path + "._focus_run_and_apply_roi_calibration")
+    @patch(enggutils_path + "._load_run_and_convert_to_dSpacing")
+    @patch(enggutils_path + ".process_vanadium")
+    @patch(file_path + ".load_full_instrument_calibration")
+    def test_save_directories_texture_with_RBnum(
+        self, mock_load_inst_cal, mock_proc_van, mock_load_run, mock_foc_run, mock_apply_van, mock_save_out, mock_conv_units, mock_del_ws
+    ):
         rb_num = "1"
         van_run = "123456"
         mock_proc_van.return_value = ("van_ws_foc", van_run)
@@ -167,25 +176,23 @@ class FocusModelTest(unittest.TestCase):
         mock_save_out.return_value = ["Nexus files"], ["GSS files"]
 
         # plotting focused runs
-        self.model.focus_run(["305761"], "fake/van/path", plot_output=False, rb_num=rb_num,
-                             calibration=self.calibration, save_dir='dir')
+        self.model.focus_run(["305761"], "fake/van/path", plot_output=False, rb_num=rb_num, calibration=self.calibration, save_dir="dir")
 
         self.assertEqual(mock_save_out.call_count, 2)  # once for dSpacing and once for TOF
-        save_calls = 2 * [call([path.join('dir', 'User', rb_num, 'Focus')],
-                               sample_foc_ws, self.calibration, van_run, rb_num)]
+        save_calls = 2 * [call([path.join("dir", "User", rb_num, "Focus")], sample_foc_ws, self.calibration, van_run, rb_num)]
         mock_save_out.assert_has_calls(save_calls)
 
-    @patch(enggutils_path + '.mantid.DeleteWorkspace')
-    @patch(enggutils_path + '.mantid.ConvertUnits')
-    @patch(enggutils_path + '._save_output_files')
-    @patch(enggutils_path + '._apply_vanadium_norm')
-    @patch(enggutils_path + '._focus_run_and_apply_roi_calibration')
-    @patch(enggutils_path + '._load_run_and_convert_to_dSpacing')
-    @patch(enggutils_path + '.process_vanadium')
-    @patch(file_path + '.load_full_instrument_calibration')
-    def test_save_directories_texture30_with_RBnum(self, mock_load_inst_cal, mock_proc_van, mock_load_run,
-                                                   mock_foc_run, mock_apply_van, mock_save_out, mock_conv_units,
-                                                   mock_del_ws):
+    @patch(enggutils_path + ".mantid.DeleteWorkspace")
+    @patch(enggutils_path + ".mantid.ConvertUnits")
+    @patch(enggutils_path + "._save_output_files")
+    @patch(enggutils_path + "._apply_vanadium_norm")
+    @patch(enggutils_path + "._focus_run_and_apply_roi_calibration")
+    @patch(enggutils_path + "._load_run_and_convert_to_dSpacing")
+    @patch(enggutils_path + ".process_vanadium")
+    @patch(file_path + ".load_full_instrument_calibration")
+    def test_save_directories_texture30_with_RBnum(
+        self, mock_load_inst_cal, mock_proc_van, mock_load_run, mock_foc_run, mock_apply_van, mock_save_out, mock_conv_units, mock_del_ws
+    ):
         rb_num = "1"
         van_run = "123456"
         mock_proc_van.return_value = ("van_ws_foc", van_run)
@@ -198,32 +205,30 @@ class FocusModelTest(unittest.TestCase):
         mock_save_out.return_value = ["Nexus files"], ["GSS files"]
 
         # plotting focused runs
-        self.model.focus_run(["305761"], "fake/van/path", plot_output=False, rb_num=rb_num,
-                             calibration=self.calibration, save_dir='dir')
+        self.model.focus_run(["305761"], "fake/van/path", plot_output=False, rb_num=rb_num, calibration=self.calibration, save_dir="dir")
 
         self.assertEqual(mock_save_out.call_count, 2)  # once for dSpacing and once for TOF
-        save_calls = 2 * [call([path.join('dir', 'User', rb_num, 'Focus')],
-                               sample_foc_ws, self.calibration, van_run, rb_num)]
+        save_calls = 2 * [call([path.join("dir", "User", rb_num, "Focus")], sample_foc_ws, self.calibration, van_run, rb_num)]
         mock_save_out.assert_has_calls(save_calls)
 
-    @patch(enggutils_path + '.mantid.DeleteWorkspace')
-    @patch(enggutils_path + '._save_output_files')
-    @patch(enggutils_path + '._load_run_and_convert_to_dSpacing')
-    @patch(enggutils_path + '._plot_focused_workspaces')
-    @patch(enggutils_path + '.process_vanadium')
-    @patch(file_path + '.load_full_instrument_calibration')
-    def test_focus_run_when_zero_proton_charge(self, mock_load_inst_cal, mock_proc_van, mock_plot, mock_load_run,
-                                               mock_save_out, mock_del_ws):
+    @patch(enggutils_path + ".mantid.DeleteWorkspace")
+    @patch(enggutils_path + "._save_output_files")
+    @patch(enggutils_path + "._load_run_and_convert_to_dSpacing")
+    @patch(enggutils_path + "._plot_focused_workspaces")
+    @patch(enggutils_path + ".process_vanadium")
+    @patch(file_path + ".load_full_instrument_calibration")
+    def test_focus_run_when_zero_proton_charge(
+        self, mock_load_inst_cal, mock_proc_van, mock_plot, mock_load_run, mock_save_out, mock_del_ws
+    ):
         mock_proc_van.return_value = ("van_ws_foc", "123456")
         mock_load_run.return_value = None  # expected return when no proton charge
 
-        self.model.focus_run(["305761"], "fake/van/path", plot_output=True, rb_num=None, calibration=self.calibration,
-                             save_dir='dir')
+        self.model.focus_run(["305761"], "fake/van/path", plot_output=True, rb_num=None, calibration=self.calibration, save_dir="dir")
 
         mock_plot.assert_not_called()
         mock_save_out.assert_not_called()
         mock_del_ws.assert_not_called()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -5,22 +5,26 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid import AnalysisDataService
-from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter_interface import \
-    PlottingCanvasPresenterInterface
-from mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.\
-    plot_widget.dual_plot_maxent_pane.dual_plot_maxent_pane_presenter import DualPlotMaxentPanePresenter, \
-    FREQ_X_LABEL, FIELD_X_LABEL
-from mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis. \
-    plot_widget.dual_plot_maxent_pane.dual_plot_maxent_pane_model import DualPlotMaxentPaneModel
-from mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis. \
-    plot_widget.dual_plot_maxent_pane.dual_plot_maxent_pane_view import DualPlotMaxentPaneView
+from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter_interface import (
+    PlottingCanvasPresenterInterface,
+)
+from mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.plot_widget.dual_plot_maxent_pane.dual_plot_maxent_pane_presenter import (
+    DualPlotMaxentPanePresenter,
+    FREQ_X_LABEL,
+    FIELD_X_LABEL,
+)
+from mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.plot_widget.dual_plot_maxent_pane.dual_plot_maxent_pane_model import (
+    DualPlotMaxentPaneModel,
+)
+from mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.plot_widget.dual_plot_maxent_pane.dual_plot_maxent_pane_view import (
+    DualPlotMaxentPaneView,
+)
 
 import unittest
 from unittest import mock
 
 
 class DualPlotMaxentPanePresenterTest(unittest.TestCase):
-
     def setUp(self):
         self.context = mock.MagicMock()
         self.model = mock.Mock(spec=DualPlotMaxentPaneModel)
@@ -29,11 +33,12 @@ class DualPlotMaxentPanePresenterTest(unittest.TestCase):
         self.view.warning_popup = mock.MagicMock()
         self.figure_presenter = mock.Mock(spec=PlottingCanvasPresenterInterface)
 
-        self.context.group_pair_context.selected_groups = ['bottom']
+        self.context.group_pair_context.selected_groups = ["bottom"]
         self.context.group_pair_context.selected_pairs = []
 
-        self.presenter = DualPlotMaxentPanePresenter(view=self.view, model=self.model, context=self.context,
-                                                     figure_presenter=self.figure_presenter)
+        self.presenter = DualPlotMaxentPanePresenter(
+            view=self.view, model=self.model, context=self.context, figure_presenter=self.figure_presenter
+        )
 
     def tearDown(self):
         AnalysisDataService.Instance().clear()
@@ -72,8 +77,8 @@ class DualPlotMaxentPanePresenterTest(unittest.TestCase):
 
     def test_add_data_to_plots(self):
         ws = ["unit", "test"]
-        indices = [1,3]
-        self.presenter.handle_time_data_updated = mock.Mock(return_value=(["a"],[0]))
+        indices = [1, 3]
+        self.presenter.handle_time_data_updated = mock.Mock(return_value=(["a"], [0]))
         self.model.add_reconstructed_data.return_value = (ws, indices)
         self.presenter.add_list_to_plot = mock.Mock()
         self.figure_presenter._options_presenter = mock.Mock()
@@ -81,7 +86,7 @@ class DualPlotMaxentPanePresenterTest(unittest.TestCase):
 
         self.presenter.add_data_to_plots()
         self.presenter.handle_time_data_updated.assert_called_once_with()
-        self.model.add_reconstructed_data.assert_called_once_with(["a"],[0])
+        self.model.add_reconstructed_data.assert_called_once_with(["a"], [0])
         self.presenter.add_list_to_plot.assert_called_once_with(ws, indices, hold=False, autoscale=True)
         self.figure_presenter._options_presenter.set_selection_by_index.assert_called_once_with(1)
         self.figure_presenter.set_plot_range.assert_called_once_with(self.context._frequency_context.range())
@@ -89,25 +94,25 @@ class DualPlotMaxentPanePresenterTest(unittest.TestCase):
     def test_add_data_to_plots_with_maxent(self):
         ws = ["unit", "test"]
         self.presenter._maxent_ws_name = "maxent"
-        indices = [1,3]
-        self.presenter.handle_time_data_updated = mock.Mock(return_value=(["a"],[0]))
+        indices = [1, 3]
+        self.presenter.handle_time_data_updated = mock.Mock(return_value=(["a"], [0]))
         # cant pass values as they are changed in the function being tested
-        self.model.add_reconstructed_data.return_value = (["unit", "test"], [1,3])
+        self.model.add_reconstructed_data.return_value = (["unit", "test"], [1, 3])
         self.presenter.add_list_to_plot = mock.Mock()
         self.figure_presenter._options_presenter = mock.Mock()
         self.figure_presenter._options_presenter.set_selection_by_index = mock.Mock()
 
         self.presenter.add_data_to_plots()
         self.presenter.handle_time_data_updated.assert_called_once_with()
-        self.model.add_reconstructed_data.assert_called_once_with(["a"],[0])
-        self.presenter.add_list_to_plot.assert_called_once_with(ws+["maxent"], indices+[0], hold=False, autoscale=True)
+        self.model.add_reconstructed_data.assert_called_once_with(["a"], [0])
+        self.presenter.add_list_to_plot.assert_called_once_with(ws + ["maxent"], indices + [0], hold=False, autoscale=True)
         self.figure_presenter._options_presenter.set_selection_by_index.assert_called_once_with(1)
         self.figure_presenter.set_plot_range.assert_called_once_with(self.context._frequency_context.range())
 
     def test_handle_reconstructed_data_updated(self):
         data_dict = {"table": "unit", "ws": "test"}
         self.presenter.update_selection = mock.Mock()
-        self.model.create_options.return_value = ["fwd","bwd"]
+        self.model.create_options.return_value = ["fwd", "bwd"]
 
         self.presenter.handle_reconstructed_data_updated(data_dict)
         self.model.set_reconstructed_data.assert_called_once_with("test", "unit")
@@ -117,7 +122,7 @@ class DualPlotMaxentPanePresenterTest(unittest.TestCase):
     def test_handle_reconstructed_data_updated_no_table(self):
         data_dict = {"ws": "test"}
         self.presenter.update_selection = mock.Mock()
-        self.model.create_options.return_value = ["fwd","bwd"]
+        self.model.create_options.return_value = ["fwd", "bwd"]
 
         self.presenter.handle_reconstructed_data_updated(data_dict)
         self.model.set_reconstructed_data.assert_not_called()
@@ -127,7 +132,7 @@ class DualPlotMaxentPanePresenterTest(unittest.TestCase):
     def test_handle_reconstructed_data_updated_no_ws(self):
         data_dict = {"table": "unit"}
         self.presenter.update_selection = mock.Mock()
-        self.model.create_options.return_value = ["fwd","bwd"]
+        self.model.create_options.return_value = ["fwd", "bwd"]
 
         self.presenter.handle_reconstructed_data_updated(data_dict)
         self.model.set_reconstructed_data.assert_not_called()
@@ -178,7 +183,7 @@ class DualPlotMaxentPanePresenterTest(unittest.TestCase):
 
     def test_update_pane_freq(self):
         self.context.frequency_context.unit = mock.Mock(return_value="MHz")
-        self.context.frequency_context.range = mock.MagicMock(return_value=[1,3])
+        self.context.frequency_context.range = mock.MagicMock(return_value=[1, 3])
         self.context._frequency_context.switch_units_in_name = mock.Mock(return_value="unit test")
         self.presenter._maxent_ws_name = "maxent"
         self.presenter.handle_maxent_data_updated = mock.Mock()
@@ -192,7 +197,7 @@ class DualPlotMaxentPanePresenterTest(unittest.TestCase):
 
     def test_update_pane_field(self):
         self.context.frequency_context.unit = mock.Mock(return_value="Gauss")
-        self.context.frequency_context.range = mock.MagicMock(return_value=[1,3])
+        self.context.frequency_context.range = mock.MagicMock(return_value=[1, 3])
         self.context._frequency_context.switch_units_in_name = mock.Mock(return_value="unit test")
         self.presenter._maxent_ws_name = "maxent"
         self.presenter.handle_maxent_data_updated = mock.Mock()
@@ -206,7 +211,7 @@ class DualPlotMaxentPanePresenterTest(unittest.TestCase):
 
     def test_update_pane_none(self):
         self.context.frequency_context.unit = mock.Mock(return_value="Gauss")
-        self.context.frequency_context.range = mock.MagicMock(return_value=[1,3])
+        self.context.frequency_context.range = mock.MagicMock(return_value=[1, 3])
         self.context._frequency_context.switch_units_in_name = mock.Mock(return_value="unit test")
         self.presenter._maxent_ws_name = None
         self.presenter.handle_maxent_data_updated = mock.Mock()
@@ -219,5 +224,5 @@ class DualPlotMaxentPanePresenterTest(unittest.TestCase):
         self.presenter.handle_maxent_data_updated.assert_not_called()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

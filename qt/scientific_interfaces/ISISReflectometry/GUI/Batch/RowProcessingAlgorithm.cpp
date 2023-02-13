@@ -100,6 +100,9 @@ void updatePolarizationCorrectionProperties(AlgorithmRuntimeProps &properties,
     return;
 
   AlgorithmProperties::update("PolarizationAnalysis", true, properties);
+  if (corrections.correctionType() == PolarizationCorrectionType::Workspace) {
+    AlgorithmProperties::update("PolarizationEfficiencies", corrections.workspace(), properties);
+  }
 }
 
 void updateFloodCorrectionProperties(AlgorithmRuntimeProps &properties, FloodCorrections const &corrections) {
@@ -134,7 +137,6 @@ void updateLookupRowProperties(AlgorithmRuntimeProps &properties, LookupRow cons
   AlgorithmProperties::update("ProcessingInstructions", lookupRow.processingInstructions(), properties);
   AlgorithmProperties::update("BackgroundProcessingInstructions", lookupRow.backgroundProcessingInstructions(),
                               properties);
-  AlgorithmProperties::update("ROIDetectorIDs", lookupRow.roiDetectorIDs(), properties);
 }
 
 void updateWavelengthRangeProperties(AlgorithmRuntimeProps &properties,
@@ -166,10 +168,15 @@ void updateDetectorCorrectionProperties(AlgorithmRuntimeProps &properties, Detec
                                 properties);
 }
 
-void updateInstrumentProperties(AlgorithmRuntimeProps &properties, Instrument const &instrument) {
+void updatePreviewInstrumentProperties(AlgorithmRuntimeProps &properties, Instrument const &instrument) {
   updateWavelengthRangeProperties(properties, instrument.wavelengthRange());
   updateMonitorCorrectionProperties(properties, instrument.monitorCorrections());
   updateDetectorCorrectionProperties(properties, instrument.detectorCorrections());
+}
+
+void updateInstrumentProperties(AlgorithmRuntimeProps &properties, Instrument const &instrument) {
+  updatePreviewInstrumentProperties(properties, instrument);
+  AlgorithmProperties::update("CalibrationFile", instrument.calibrationFilePath(), properties);
 }
 
 class UpdateEventPropertiesVisitor : public boost::static_visitor<> {
@@ -270,6 +277,13 @@ void updatePropertiesFromBatchModel(AlgorithmRuntimeProps &properties, IBatch co
   updateExperimentProperties(properties, model.experiment());
   updateInstrumentProperties(properties, model.instrument());
 }
+
+void updatePreviewPropertiesFromBatchModel(AlgorithmRuntimeProps &properties, IBatch const &model) {
+  // Update properties for running a preview reduction from settings in the event, experiment and instrument tabs
+  updateEventProperties(properties, model.slicing());
+  updateExperimentProperties(properties, model.experiment());
+  updatePreviewInstrumentProperties(properties, model.instrument());
+}
 } // unnamed namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry::Reduction {
@@ -310,8 +324,8 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Preview
 std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(IBatch const &model,
                                                                                    PreviewRow const &previewRow) {
   auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
-  updatePropertiesFromBatchModel(*properties, model);
-  // Look up properties for this run on the lookup table (or use wildcard defaults if no run is given)
+  updatePreviewPropertiesFromBatchModel(*properties, model);
+  // Look up properties for this run on the lookup table
   auto lookupRow = model.findLookupRow(previewRow);
   if (lookupRow) {
     updateLookupRowProperties(*properties, *lookupRow);
@@ -369,6 +383,7 @@ std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimePro
   auto lookupRow = row ? findLookupRow(*row, model) : findWildcardLookupRow(model);
   if (lookupRow) {
     updateLookupRowProperties(*properties, *lookupRow);
+    AlgorithmProperties::update("ROIDetectorIDs", lookupRow->roiDetectorIDs(), *properties);
   }
   // Update properties the user has specifically set for this run
   if (row) {

@@ -44,7 +44,8 @@ We use ``DebugWithRelRuntime`` for Conda specific builds to allow debugging due 
     - ``{SOURCE}/Framework/PythonInterface``
     - ``{SOURCE}/qt/applications/workbench``
     - ``{SOURCE}/qt/widgets``
-    - ``{SOURCE}/qt/Python``
+    - ``{SOURCE}/qt/python/mantidqt``
+    - ``{SOURCE}/qt/python/mantidqtinterfaces``
 
 - In the file tree select your build directory and mark as Excluded by clicking the ``Excluded`` button whilst it's selected.
 - On Windows, select the ``{BUILD}/bin/DebugWithRelRuntime`` file and mark as Source by clicking the ``Sources`` button whilst it's selected.
@@ -69,6 +70,8 @@ Now that your Python development environment has been setup we can setup the deb
 - Click Ok and exit out the window.
 - You can now click the green play button in the top right of the window to create a Workbench instance from pycharm.
 - Alternatively you can click the green bug next to the green play button to start a debug session.
+
+.. include:: ./macos-opengl-version-warning.txt
 
 Debug Python in unit tests
 ##########################

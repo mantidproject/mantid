@@ -24,13 +24,13 @@ def _catch_exceptions(func):
         except Exception:
             sys.stderr.write("Error occurred in handler:\n")
             import traceback
+
             traceback.print_exc()
 
     return wrapper
 
 
 class WorkspaceDisplayADSObserver(AnalysisDataServiceObserver):
-
     def __init__(self, presenter, observe_replace=True):
         super(WorkspaceDisplayADSObserver, self).__init__()
         self.presenter = presenter

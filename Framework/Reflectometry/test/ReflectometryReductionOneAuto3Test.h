@@ -15,11 +15,14 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidFrameworkTestHelpers/ReflectometryHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/Counts.h"
+#include "MantidHistogramData/Points.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
@@ -1126,6 +1129,275 @@ public:
     ADS.clear();
   }
 
+  void test_polarization_correction_with_efficiency_workspace() {
+
+    std::string const name = "input";
+    prepareInputGroup(name, "Fredrikze");
+    auto efficiencies = createPolarizationEfficienciesWorkspace("Fredrikze");
+
+    ReflectometryReductionOneAuto3 alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", name);
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ProcessingInstructions", "2");
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setProperty("PolarizationAnalysis", true);
+    alg.setProperty("PolarizationEfficiencies", efficiencies);
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    alg.execute();
+
+    auto outQGroup = retrieveOutWS("IvsQ");
+    auto outLamGroup = retrieveOutWS("IvsLam");
+
+    TS_ASSERT_EQUALS(outQGroup.size(), 4);
+    TS_ASSERT_EQUALS(outLamGroup.size(), 4);
+
+    TS_ASSERT_EQUALS(outLamGroup[0]->blocksize(), 9);
+    // X range in outLam
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0).front(), 2.0729661466, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0).back(), 14.2963182408, 0.0001);
+
+    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 1.9267, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[1]->y(0)[0], 1.7838, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[2]->y(0)[0], -0.3231, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[3]->y(0)[0], -0.4659, 0.0001);
+
+    TS_ASSERT_EQUALS(outQGroup[0]->blocksize(), 9);
+
+    TS_ASSERT_DELTA(outQGroup[0]->y(0)[0], 1.9267, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[1]->y(0)[0], 1.7838, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[2]->y(0)[0], -0.3231, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[3]->y(0)[0], -0.4659, 0.0001);
+
+    ADS.clear();
+  }
+
+  void test_polarization_correction_with_efficiency_workspace_Fredrikze_PNR() {
+
+    std::string const name = "input";
+    prepareInputGroup(name, "Fredrikze", 2);
+    auto efficiencies = createPolarizationEfficienciesWorkspace("Fredrikze");
+
+    ReflectometryReductionOneAuto3 alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", name);
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ProcessingInstructions", "2");
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setProperty("PolarizationAnalysis", true);
+    alg.setProperty("PolarizationEfficiencies", efficiencies);
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    alg.execute();
+
+    auto outQGroup = retrieveOutWS("IvsQ");
+    auto outLamGroup = retrieveOutWS("IvsLam");
+
+    TS_ASSERT_EQUALS(outQGroup.size(), 2);
+    TS_ASSERT_EQUALS(outLamGroup.size(), 2);
+
+    TS_ASSERT_EQUALS(outLamGroup[0]->blocksize(), 9);
+    // X range in outLam
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0).front(), 2.0729661466, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0).back(), 14.2963182408, 0.0001);
+
+    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 1.4062, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[1]->y(0)[0], 0.2813, 0.0001);
+
+    TS_ASSERT_EQUALS(outQGroup[0]->blocksize(), 9);
+
+    TS_ASSERT_DELTA(outQGroup[0]->y(0)[0], 1.4062, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[1]->y(0)[0], 0.2813, 0.0001);
+
+    ADS.clear();
+  }
+
+  void test_polarization_correction_with_efficiency_workspace_Wildes() {
+
+    std::string const name = "input";
+    prepareInputGroup(name, "Wildes");
+    auto efficiencies = createPolarizationEfficienciesWorkspace("Wildes");
+
+    ReflectometryReductionOneAuto3 alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", name);
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ProcessingInstructions", "2");
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setProperty("PolarizationAnalysis", true);
+    alg.setProperty("PolarizationEfficiencies", efficiencies);
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    alg.execute();
+
+    auto outQGroup = retrieveOutWS("IvsQ");
+    auto outLamGroup = retrieveOutWS("IvsLam");
+
+    TS_ASSERT_EQUALS(outQGroup.size(), 4);
+    TS_ASSERT_EQUALS(outLamGroup.size(), 4);
+
+    TS_ASSERT_EQUALS(outLamGroup[0]->blocksize(), 9);
+    // X range in outLam
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0).front(), 2.0729661466, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0).back(), 14.2963182408, 0.0001);
+
+    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 0.6552, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[1]->y(0)[0], 0.4330, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[2]->y(0)[0], 0.9766, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[3]->y(0)[0], 0.7544, 0.0001);
+
+    TS_ASSERT_EQUALS(outQGroup[0]->blocksize(), 9);
+
+    TS_ASSERT_DELTA(outQGroup[0]->y(0)[0], 0.6552, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[1]->y(0)[0], 0.4330, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[2]->y(0)[0], 0.9766, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[3]->y(0)[0], 0.7544, 0.0001);
+
+    ADS.clear();
+  }
+
+  void test_polarization_correction_with_efficiency_workspace_Wildes_no_analyser() {
+
+    std::string const name = "input";
+    prepareInputGroup(name, "Wildes", 2);
+    auto efficiencies = createPolarizationEfficienciesWorkspace("Wildes");
+
+    ReflectometryReductionOneAuto3 alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", name);
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ProcessingInstructions", "2");
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setProperty("PolarizationAnalysis", true);
+    alg.setProperty("PolarizationEfficiencies", efficiencies);
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    alg.execute();
+
+    auto outQGroup = retrieveOutWS("IvsQ");
+    auto outLamGroup = retrieveOutWS("IvsLam");
+
+    TS_ASSERT_EQUALS(outQGroup.size(), 2);
+    TS_ASSERT_EQUALS(outLamGroup.size(), 2);
+
+    TS_ASSERT_EQUALS(outLamGroup[0]->blocksize(), 9);
+    // X range in outLam
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0).front(), 2.0729661466, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0).back(), 14.2963182408, 0.0001);
+
+    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 0.7554, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[1]->y(0)[0], 0.9161, 0.0001);
+
+    TS_ASSERT_EQUALS(outQGroup[0]->blocksize(), 9);
+
+    TS_ASSERT_DELTA(outQGroup[0]->y(0)[0], 0.7554, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[1]->y(0)[0], 0.9161, 0.0001);
+
+    ADS.clear();
+  }
+
+  void test_polarization_correction_with_invalid_efficiencies_workspace_labels() {
+
+    std::string const name = "input";
+    prepareInputGroup(name, "Wildes");
+    auto efficiencies = createPolarizationEfficienciesWorkspace("Wildes");
+
+    // Set some invalid labels on the efficiencies workspace
+    auto &axis = dynamic_cast<TextAxis &>(*efficiencies->getAxis(1));
+    for (size_t i = 0; i < axis.length(); ++i) {
+      axis.setLabel(i, "test" + std::to_string(i));
+    }
+
+    ReflectometryReductionOneAuto3 alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", name);
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ProcessingInstructions", "2");
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setProperty("PolarizationAnalysis", true);
+    alg.setProperty("PolarizationEfficiencies", efficiencies);
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+
+    TS_ASSERT_THROWS_EQUALS(
+        alg.execute(), std::runtime_error & e, std::string(e.what()),
+        "Axes labels for efficiencies workspace do not match any supported polarization correction method");
+
+    ADS.clear();
+  }
+
+  void test_polarization_correction_with_invalid_efficiencies_workspace_format() {
+
+    std::string const name = "input";
+    prepareInputGroup(name, "Wildes");
+    auto const inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name + "_1");
+    auto invalid_format = createFloodWorkspace(inputWS->getInstrument());
+
+    ReflectometryReductionOneAuto3 alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", name);
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ProcessingInstructions", "2");
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setProperty("PolarizationAnalysis", true);
+    alg.setProperty("PolarizationEfficiencies", invalid_format);
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e, std::string(e.what()),
+                            "Efficiencies workspace is not in a supported format");
+
+    ADS.clear();
+  }
+
+  void test_polarization_correction_with_efficiencies_workspace_and_invalid_num_input_workspaces() {
+
+    std::string const name = "input";
+    prepareInputGroup(name, "Wildes", 3);
+    auto efficiencies = createPolarizationEfficienciesWorkspace("Wildes");
+
+    ReflectometryReductionOneAuto3 alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", name);
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ProcessingInstructions", "2");
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setProperty("PolarizationAnalysis", true);
+    alg.setProperty("PolarizationEfficiencies", efficiencies);
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e, std::string(e.what()),
+                            "Only input workspace groups with two or four periods are supported");
+
+    ADS.clear();
+  }
+
   void test_monitor_index_in_group() {
     std::string const name = "input";
     prepareInputGroup(name);
@@ -1577,6 +1849,43 @@ private:
     }
     flood->getAxis(0)->setUnit("TOF");
     return flood;
+  }
+
+  MatrixWorkspace_sptr createPolarizationEfficienciesWorkspace(const std::string &correctionMethod) {
+    // The workspace created here takes most of its values from the test parameter files, however the P1/Pp
+    // efficiency factor has been changed so that we can distinguish between tests that use a workspace vs those
+    // that use the test parameter file
+    std::vector<std::string> axisLabels;
+    if (correctionMethod == "Wildes") {
+      axisLabels = {"P1", "P2", "F1", "F2"};
+    } else {
+      axisLabels = {"Pp", "Ap", "Rho", "Alpha"};
+    }
+
+    std::vector<double> lambda{0, 3, 6, 10, 15, 20};
+
+    std::map<std::string, std::vector<double>> efficiencyFactors;
+    efficiencyFactors[axisLabels[0]] = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
+    efficiencyFactors[axisLabels[1]] = {0.8, 0.8, 0.8, 0.8, 0.8, 0.8};
+    efficiencyFactors[axisLabels[2]] = {0.778, 0.778, 0.778, 0.778, 0.778, 0.778};
+    efficiencyFactors[axisLabels[3]] = {0.75, 0.75, 0.75, 0.75, 0.75, 0.75};
+
+    auto join_alg = AlgorithmManager::Instance().create("JoinISISPolarizationEfficiencies");
+    join_alg->setChild(true);
+    join_alg->initialize();
+
+    for (auto const &label : axisLabels) {
+      Points xVals(lambda);
+      Counts yVals(efficiencyFactors[label]);
+      CountStandardDeviations eVals(std::vector<double>(efficiencyFactors[label].size()));
+      auto factorWs = std::make_shared<Workspace2D>();
+      factorWs->initialize(1, Histogram(xVals, yVals, eVals));
+
+      join_alg->setProperty(label, factorWs);
+    }
+    join_alg->setPropertyValue("OutputWorkspace", "efficiencies");
+    join_alg->execute();
+    return join_alg->getProperty("OutputWorkspace");
   }
 
   void setup_alg_on_input_workspace_group_with_run_number(ReflectometryReductionOneAuto3 &alg) {

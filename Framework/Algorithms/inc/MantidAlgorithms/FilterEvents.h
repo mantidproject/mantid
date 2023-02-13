@@ -13,8 +13,8 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/SplittingInterval.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/TimeSplitter.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -153,7 +153,7 @@ private:
 
   std::set<int> m_targetWorkspaceIndexSet;
   int m_maxTargetIndex;
-  Kernel::TimeSplitterType m_splitters;
+  Kernel::SplittingIntervalVec m_splitters;
   std::map<int, DataObjects::EventWorkspace_sptr> m_outputWorkspacesMap;
   std::vector<std::string> m_wsNames;
 

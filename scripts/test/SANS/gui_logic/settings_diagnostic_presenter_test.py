@@ -11,8 +11,7 @@ from unittest import mock
 
 from sans.gui_logic.presenter.settings_diagnostic_presenter import SettingsDiagnosticPresenter
 from sans.state.Serializer import Serializer
-from sans.test_helper.mock_objects import (create_run_tab_presenter_mock, FakeState,
-                                           create_mock_settings_diagnostic_tab)
+from sans.test_helper.mock_objects import create_run_tab_presenter_mock, FakeState, create_mock_settings_diagnostic_tab
 
 
 class SettingsDiagnosticPresenterTest(unittest.TestCase):
@@ -69,12 +68,12 @@ class SettingsDiagnosticPresenterTest(unittest.TestCase):
         view.get_current_row.result = 1
         presenter.set_view(view)
         parent_presenter.get_state_for_row = mock.MagicMock()
-        parent_presenter.get_state_for_row.side_effect = RuntimeError('Test Error')
+        parent_presenter.get_state_for_row.side_effect = RuntimeError("Test Error")
 
         presenter.on_row_changed()
 
-        parent_presenter.display_warning_box.assert_called_once_with('Warning', 'Unable to find files.', 'Test Error')
+        parent_presenter.display_warning_box.assert_called_once_with("Warning", "Unable to find files.", "Test Error")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

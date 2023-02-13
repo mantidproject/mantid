@@ -19,7 +19,8 @@ default_chi_squared = 0.0
 
 class QSequentialTableModel(QAbstractTableModel):
     """Implements a QAbstractTableModel which holds the data for the Sequential table view.
-     See the Qt documentation for further details https://doc.qt.io/qt-5/qabstracttablemodel.html"""
+    See the Qt documentation for further details https://doc.qt.io/qt-5/qabstracttablemodel.html"""
+
     parameterChanged = Signal(object)
 
     def __init__(self):
@@ -84,7 +85,7 @@ class QSequentialTableModel(QAbstractTableModel):
     def insertRows(self, position, rows, parent=None):
         self.beginInsertRows(parent or QModelIndex(), position, position + rows - 1)
         for i in range(rows):
-            default_row = [''] * len(default_table_columns)
+            default_row = [""] * len(default_table_columns)
             default_parameter_entries = [0] * len(self._parameterHeaders)
             self._defaultData.insert(position + i, default_row)
             self._parameterData.insert(position + i, default_parameter_entries)
@@ -145,8 +146,7 @@ class QSequentialTableModel(QAbstractTableModel):
             return
         self.beginInsertRows(QModelIndex(), 0, len(runs) - 1)
         for i in range(len(runs)):
-            self._defaultData.insert(i, [workspace_names[i], runs[i], group_and_pairs[i], default_fit_status,
-                                         default_chi_squared])
+            self._defaultData.insert(i, [workspace_names[i], runs[i], group_and_pairs[i], default_fit_status, default_chi_squared])
         self.endInsertRows()
 
     def set_run_information(self, row, run):

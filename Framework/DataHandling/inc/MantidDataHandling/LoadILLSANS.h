@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
-#include "MantidDataHandling/LoadHelper.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
 
@@ -66,8 +66,8 @@ private:
                          int &numberOfPixelsPerTube);
   size_t loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firstIndex = 0,
                               const MultichannelType type = MultichannelType::TOF);
-  size_t loadDataFromD16BMonitor(const NeXus::NXEntry &firstEntry, size_t firstIndex,
-                                 const std::vector<double> &binning);
+  size_t loadDataFromD16ScanMonitors(const NeXus::NXEntry &firstEntry, size_t firstIndex,
+                                     const std::vector<double> &binning);
   size_t loadDataFromTubes(NeXus::NXInt &, const std::vector<double> &, size_t,
                            const MultichannelType type = MultichannelType::TOF);
   void runLoadInstrument();
@@ -75,7 +75,6 @@ private:
   void moveDetectorDistance(double distance, const std::string &componentName);
   void moveDetectorHorizontal(double, const std::string &);
   void moveDetectorVertical(double, const std::string &);
-  Kernel::V3D getComponentPosition(const std::string &componentName);
   void loadMetaData(const NeXus::NXEntry &, const std::string &);
   std::string getInstrumentFilePath(const std::string &) const;
   void rotateInstrument(double, const std::string &);
@@ -83,7 +82,6 @@ private:
   void adjustTOF();
   void moveSource();
 
-  LoadHelper m_loadHelper;                         ///< Load helper for metadata
   std::string m_instrumentName;                    ///< Name of the instrument
   std::vector<std::string> m_supportedInstruments; ///< List of supported instruments
   API::MatrixWorkspace_sptr m_localWorkspace;      ///< to-be output workspace
@@ -91,7 +89,7 @@ private:
   std::string m_resMode;                           ///< Resolution mode for D11 and D22
   bool m_isTOF;                                    ///< TOF or monochromatic flag
   double m_sourcePos;                              ///< Source Z (for D33 TOF)
-  bool m_isD16Omega;                               ///< Data come from a D16 omega scan flag
+  bool m_isD16Omega;                               ///< Data comes from a D16 omega scan flag
   size_t m_numberOfMonitors;                       ///< Number of monitors in this instrument
 
   void setFinalProperties(const std::string &filename);

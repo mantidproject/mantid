@@ -16,6 +16,7 @@ def find_file(filename=None):
     :returns: full path for the file with the testing data
     """
     from mantid.api import FileFinder
+
     return FileFinder.Instance().getFullPath(filename)
 
 

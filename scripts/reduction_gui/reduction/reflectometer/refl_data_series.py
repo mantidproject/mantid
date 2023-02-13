@@ -25,22 +25,22 @@ class DataSeries(BaseScriptElement):
 
     def to_script(self):
         """
-            Generate reduction script
-            @param execute: if true, the script will be executed
+        Generate reduction script
+        @param execute: if true, the script will be executed
         """
         raise RuntimeError("refl_data_series.DataSeries.to_script is deprecated")
 
     def update(self):
         """
-            Update transmission from reduction output
+        Update transmission from reduction output
         """
         pass
 
     def to_xml(self):
         """
-            Create XML from the current data.
+        Create XML from the current data.
         """
-        _xml  = "<DataSeries>\n"
+        _xml = "<DataSeries>\n"
         for item in self.data_sets:
             _xml += item.to_xml()
         _xml += "</DataSeries>\n"
@@ -49,33 +49,33 @@ class DataSeries(BaseScriptElement):
 
     def from_xml(self, xml_str):
         """
-            Read in data from XML
-            @param xml_str: text to read the data from
+        Read in data from XML
+        @param xml_str: text to read the data from
         """
         self.reset()
         self.data_sets = []
         dom = xml.dom.minidom.parseString(xml_str)
 
-#        # Get Mantid version
-#        mtd_version = BaseScriptElement.getMantidBuildVersion(dom)
+        #        # Get Mantid version
+        #        mtd_version = BaseScriptElement.getMantidBuildVersion(dom)
 
         self._data_class = REFLDataSets
         element_list = dom.getElementsByTagName("Data")
-        if len(element_list)==0:
+        if len(element_list) == 0:
             element_list = dom.getElementsByTagName("RefLData")
 
-        if len(element_list)>0:
+        if len(element_list) > 0:
             for item in element_list:
                 if item is not None:
                     data_set = self._data_class()
                     data_set.from_xml_element(item)
                     self.data_sets.append(data_set)
 
-        if len(self.data_sets)==0:
+        if len(self.data_sets) == 0:
             self.data_sets = [self._data_class()]
 
     def reset(self):
         """
-            Reset state
+        Reset state
         """
         self.data_sets = [self._data_class()]

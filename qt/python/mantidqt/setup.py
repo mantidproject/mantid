@@ -9,11 +9,12 @@ import os
 from setuptools import find_packages, setup
 
 setup(
-    name='mantidqt',  # must match what is required by workbench setup.py
-    install_requires=['mantid'],
-    version=os.environ['MANTID_VERSION_STR'],
-    packages=find_packages(exclude=['*.test']),
+    name="mantidqt",  # must match what is required by workbench setup.py
+    install_requires=["mantid"],
+    version=os.environ["MANTID_VERSION_STR"],
+    packages=find_packages(exclude=["*.test"]),
     package_data={
-        '': ['*.ui'],
-        'widgets': ['*.map'],
-        },)
+        "": ["*.ui"],
+        "widgets": ["*.map"],
+    },
+)

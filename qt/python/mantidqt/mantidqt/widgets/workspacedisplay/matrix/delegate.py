@@ -8,7 +8,7 @@ from typing import Optional
 
 from qtpy.QtCore import Qt, QObject, QModelIndex
 from qtpy.QtGui import QPainter, QColor
-from qtpy.QtWidgets import (QStyledItemDelegate, QStyleOptionViewItem, QStyle)
+from qtpy.QtWidgets import QStyledItemDelegate, QStyleOptionViewItem, QStyle
 
 
 class CustomTextElidingDelegate(QStyledItemDelegate):
@@ -56,7 +56,8 @@ class CustomTextElidingDelegate(QStyledItemDelegate):
 
             padding = self._padding
             opt.rect = option.rect.adjusted(padding, padding, -padding, -padding)
-            painter.drawText(opt.rect, int(Qt.AlignLeft | Qt.AlignVCenter),
-                             opt.fontMetrics.elidedText(opt.text, Qt.ElideRight, opt.rect.width()))
+            painter.drawText(
+                opt.rect, int(Qt.AlignLeft | Qt.AlignVCenter), opt.fontMetrics.elidedText(opt.text, Qt.ElideRight, opt.rect.width())
+            )
         finally:
             painter.restore()

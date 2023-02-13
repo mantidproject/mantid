@@ -50,9 +50,9 @@ class PresenterCommonTest(unittest.TestCase):
         mocked_presenter = self._get_mocked_presenter()
         custom_model = mock.Mock()
 
-        attr_to_set = 'test_attr'
-        original_val = 'not_changed'
-        new_val = 'views val'
+        attr_to_set = "test_attr"
+        original_val = "not_changed"
+        new_val = "views val"
 
         setattr(self.presenter_model, attr_to_set, original_val)
         setattr(custom_model, attr_to_set, original_val)
@@ -67,5 +67,5 @@ class PresenterCommonTest(unittest.TestCase):
         self.assertEqual(original_val, getattr(self.presenter_model, attr_to_set))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

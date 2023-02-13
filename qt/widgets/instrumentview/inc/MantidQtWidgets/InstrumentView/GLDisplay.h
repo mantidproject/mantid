@@ -9,7 +9,6 @@
 #include "IGLDisplay.h"
 #include "MantidGeometry/IComponent.h"
 
-#include <QGLWidget>
 #include <QString>
 
 #include <memory>
@@ -34,7 +33,6 @@ public:
   void setBackgroundColor(const QColor & /*input*/) override;
   QColor currentBackgroundColor() const override;
   void saveToFile(const QString &filename) override;
-  // int getLightingState() const {return m_lightingState;}
 
 public slots:
   void enableLighting(bool /*on*/) override;
@@ -44,11 +42,8 @@ public slots:
 
 protected:
   void initializeGL() override;
-  void resetWidget();
-  void MakeObject();
-  void paintEvent(QPaintEvent *event) override;
   void paintGL() override;
-  void resizeGL(int /*w*/, int /*h*/) override;
+  void resizeGL(int width, int height) override;
   void contextMenuEvent(QContextMenuEvent * /*unused*/) override;
   void mousePressEvent(QMouseEvent * /*unused*/) override;
   void mouseMoveEvent(QMouseEvent * /*unused*/) override;
@@ -59,15 +54,12 @@ protected:
   void enterEvent(QEvent * /*unused*/) override;
   void leaveEvent(QEvent * /*unused*/) override;
   void draw();
-  void checkGLError(const QString &funName);
 
 private:
   void setRenderingOptions();
   void resetBackgroundColor();
 
-  // int m_lightingState;           ///< 0 = light off; 2 = light on
   bool m_isKeyPressed;
-  bool m_firstFrame;
 
   /// Surface
   std::shared_ptr<ProjectionSurface> m_surface;

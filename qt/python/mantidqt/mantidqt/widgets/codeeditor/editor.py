@@ -12,4 +12,4 @@
 # local imports
 from mantidqt.utils.qt import import_qt
 
-CodeEditor = import_qt('..._common', 'mantidqt.widgets.codeeditor', 'ScriptEditor')
+CodeEditor = import_qt("..._common", "mantidqt.widgets.codeeditor", "ScriptEditor")

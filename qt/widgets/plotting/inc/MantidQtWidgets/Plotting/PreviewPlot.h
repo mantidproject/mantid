@@ -98,6 +98,7 @@ signals:
   void mouseDown(const QPoint &point);
   void mouseUp(const QPoint &point);
   void mouseMove(const QPoint &point);
+  void mouseHovering(const QPoint &point);
 
   void redraw();
   void resetSelectorBounds();
@@ -185,6 +186,9 @@ private:
   // Axis scales
   std::string m_xAxisScale;
   std::string m_yAxisScale;
+
+  // Whether to redraw markers when a paint event occurs
+  bool m_redrawOnPaint;
 
   // Context menu actions
   QActionGroup *m_contextPlotTools;

@@ -22,13 +22,13 @@ namespace MplCpp {
  */
 class MANTID_MPLCPP_DLL PeakMarker : public Common::Python::InstanceHolder {
 public:
-  explicit PeakMarker(FigureCanvasQt *canvas, int peakID, double x, double yTop, double yBottom, double fwhm,
+  explicit PeakMarker(FigureCanvasQt *canvas, int peakID, double x, double height, double fwhm, double background,
                       QHash<QString, QVariant> const &otherKwargs = QHash<QString, QVariant>());
 
   void redraw();
   void remove();
 
-  void updatePeak(double centre, double height, double fwhm);
+  void updatePeak(double centre, double height, double fwhm, double background);
   std::tuple<double, double, double> peakProperties() const;
 
   bool isMoving() const;
@@ -36,9 +36,12 @@ public:
   void select();
   void deselect();
 
+  void setVisible(bool visible);
+
   void mouseMoveStart(double x, double y);
   void mouseMoveStop();
   bool mouseMove(double x, double y);
+  void mouseMoveHover(double x, double y);
 };
 
 } // namespace MplCpp

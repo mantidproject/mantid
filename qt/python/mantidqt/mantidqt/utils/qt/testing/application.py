@@ -9,7 +9,6 @@ import atexit
 import sys
 import traceback
 
-from qtpy import PYQT4
 from qtpy.QtWidgets import QApplication
 import sip
 
@@ -30,7 +29,7 @@ def cleanup_qapp_ref():
     del _QAPP
 
 
-def get_application(name=''):
+def get_application(name=""):
     """
     Initialise and return the global application object
     :param name: Optional application name
@@ -45,11 +44,6 @@ def get_application(name=''):
     if _QAPP is None:
         setup_library_paths()
         _QAPP = QApplication([name])
-        if PYQT4:
-            # Do not destroy C++ Qtcore objects on exit
-            # Matches PyQt5 behaviour to avoid random segfaults
-            # https://www.riverbankcomputing.com/static/Docs/PyQt5/pyqt4_differences.html#object-destruction-on-exit
-            sip.setdestroyonexit(False)
         sys.excepthook = exception_handler
 
     return _QAPP
