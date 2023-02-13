@@ -55,6 +55,8 @@ public:
   /// Split the logs based on the given intervals
   void splitByTime(Kernel::SplittingIntervalVec &splitter, std::vector<LogManager *> outputs) const override;
 
+  void setTimeROI(const Kernel::TimeROI &timeroi) override;
+
   /// Return an approximate memory size for the object in bytes
   size_t getMemorySize() const override;
 
