@@ -298,42 +298,30 @@ class BaseSX(ABC):
         # store result
         self.set_peaks(run, peak_int_name, peak_type, integration_type)
 
-    def save_integrated_peaks(self, integration_type, peak_type, save_dir: str, save_format: str, make_consistent=True):
-        fieldname = "_".join([peak_type.value, integration_type.value])
-        all_integrated_peaks = mantid.CreatePeaksWorkspace(InstrumentWorkspace=self.van_ws, NumberOfPeaks=0)
-        # get first run - use as reference UB and copy sample
-        ws_ref = next(iter(self.runs.keys()))
-        for run, data in self.runs.items():
-            if make_consistent:
-                # ensure indexing is consistent
-                self.make_UB_consistent(self.runs[ws_ref][fieldname], data[fieldname])
-            # save reflections
-            filepath = path.join(save_dir, "_".join([data[fieldname], save_format])) + ".int"
-            mantid.SaveReflections(InputWorkspace=data[fieldname], Filename=filepath, Format=save_format, SplitFiles=False)
-            mantid.SaveNexus(InputWorkspace=data[fieldname], Filename=filepath[:-3] + "nxs")
-            # append to combined table
-            all_integrated_peaks = mantid.CombinePeaksWorkspaces(LHSWorkspace=all_integrated_peaks, RHSWorkspace=data[fieldname])
-        if len(self.runs) > 1:
-            # copy lattice and UB from last run
-            mantid.CopySample(
-                InputWorkspace=data[fieldname],
-                OutputWorkspace=all_integrated_peaks,
-                CopyName=False,
-                CopyMaterial=False,
-                CopyEnvironment=False,
-                CopyShape=False,
-            )
-            # save with run range in filename
-            min_ws = min(self.runs.keys(), key=lambda k: int("".join(filter(str.isdigit, k))))
-            max_ws = max(self.runs.keys(), key=lambda k: int("".join(filter(str.isdigit, k))))
-            filename = "WISH000" + "-".join([min_ws, max_ws]) + data[fieldname][len(min_ws) + 7 :]
-            filepath = path.join(save_dir, "_".join([filename, save_format]) + ".int")
-            mantid.SaveReflections(InputWorkspace=all_integrated_peaks, Filename=filepath, Format=save_format, SplitFiles=False)
-            mantid.SaveNexus(InputWorkspace=all_integrated_peaks, Filename=filepath[:-3] + "nxs")
-            mantid.RenameWorkspace(InputWorkspace=all_integrated_peaks, OutputWorkspace=filename)
-        else:
-            mantid.DeleteWorkspace(all_integrated_peaks)
-            mantid.DeleteWorkspace(all_integrated_peaks)
+    def save_peak_table(self, run, peak_type, integration_type, save_dir, save_format, run_ref=None):
+        peaks = self.get_peaks(run, peak_type, integration_type)
+        if run_ref is not None and run_ref != run:
+            self.make_UB_consistent(self.get_peaks(run_ref, peak_type, integration_type), peaks)
+        filepath = path.join(save_dir, "_".join([BaseSX.retrieve(peaks).name(), save_format])) + ".int"
+        mantid.SaveReflections(InputWorkspace=peaks, Filename=filepath, Format=save_format, SplitFiles=False)
+        mantid.SaveNexus(InputWorkspace=peaks, Filename=filepath[:-3] + "nxs")
+
+    def save_all_peaks(self, peak_type, integration_type, save_dir, save_format, run_ref=None):
+        runs = self.runs.keys()
+        if len(runs) > 1:
+            # get name for peak table from range of runs integrated
+            min_ws = min(runs, key=lambda k: int("".join(filter(str.isdigit, k))))
+            max_ws = max(runs, key=lambda k: int("".join(filter(str.isdigit, k))))
+            all_peaks = f'{"-".join([min_ws, max_ws])}_{peak_type.value}_{integration_type.value}'
+            mantid.CreatePeaksWorkspace(InstrumentWorkspace=self.van_ws, NumberOfPeaks=0, OutputWorkspace=all_peaks)
+            for run in self.runs.keys():
+                peaks = self.get_peaks(run, peak_type, integration_type)
+                if run_ref is not None and run_ref != run:
+                    self.make_UB_consistent(self.get_peaks(run_ref, peak_type, integration_type), peaks)
+                mantid.CombinePeaksWorkspaces(LHSWorkspace=all_peaks, RHSWorkspace=peaks, OutputWorkspace=all_peaks)
+        filepath = path.join(save_dir, "_".join([all_peaks, save_format])) + ".int"
+        mantid.SaveReflections(InputWorkspace=all_peaks, Filename=filepath, Format=save_format, SplitFiles=False)
+        mantid.SaveNexus(InputWorkspace=all_peaks, Filename=filepath[:-3] + "nxs")
 
     def _is_vanadium_processed(self):
         return self.van_ws is not None and ADS.doesExist(self.van_ws)
