@@ -137,5 +137,7 @@ To debug workbench, you'll need to edit the ``workbench`` CMake Application conf
 
 #. Set the working directory to be the full path to your ``build/bin`` directory
 
+The ``--single-process`` flag is necessary for debugging. See the :ref:`Running Workbench <RunningWorkbench>` documentation for more information.
+
 You should now be able to set breakpoints and start debugging by clicking the bug icon.
 

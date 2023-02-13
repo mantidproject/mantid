@@ -239,8 +239,12 @@ def start(options: argparse.ArgumentParser):
     if options.single_process:
         initialise_qapp_and_launch_workbench(options)
     else:
-        # We require the start method to be 'spawn' so that we do not inherit resources such as 'std::once_flag' from
-        # the parent process. This will mean the relevant 'atexit' code will execute in the child process, and therefore the
+        # Mantid's FrameworkManagerImpl::Instance Python export uses a process-wide static flag to ensure code
+        # only runs once (see Instance function in Framework/PythonInterface/mantid/api/src/Exports/FrameworkManager.cpp).
+        # The default start method on Unix ('fork') inherits resources such as these flags from the parent.
+        # We require the start method to be 'spawn' so that we do not inherit these resources from the parent process,
+        # this is already the default on Windows/macOS.
+        # This will mean the relevant 'atexit' code will execute in the child process, and therefore the
         # FrameworkManager and UsageService will be shutdown as expected.
         context = multiprocessing.get_context("spawn")
         workbench_process = context.Process(target=initialise_qapp_and_launch_workbench, args=[options])

@@ -20,13 +20,13 @@ an ErrorReporter window needs to be opened depending on the exit code of the Wor
 A note on debugging
 ###################
 
-Debuggers can sometimes attach to the parent process, causing your breakpoints not to be hit. To avoid this, we can run the Workbench using the ``--single-process`` flag which will ensure only one process is used to run the Workbench.
+The default behaviour of Workbench is to start as a parent and child process as described above. For debugging, we want to attach to the main process that users see (i.e. the child process). If we attach to the parent process, your breakpoints will not be hit. To ensure we attach to the correct process, we can run the Workbench with the ``--single-process`` flag.
 
 .. code-block:: sh
 
   workbench --single-process
 
-For a development environment you might also want to specify the ``PYTHONPATH`` where ``<config>`` is only required when using the VS generator on Windows.
+For a developer environment you might also want to specify the ``PYTHONPATH`` where ``<config>`` is only required when using the VS generator on Windows.
 
 .. code-block:: sh
 

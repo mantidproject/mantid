@@ -165,7 +165,7 @@ To debug C++ and start directly into the Workbench, add this to the configuratio
       "type": "cppdbg",
       "request": "launch",
       "program": "/usr/bin/python3", // Path to your used Python interpreter, here and below
-      "args": ["Path/To/Build/Directory/bin/workbench", "&&","gdb","/usr/bin/python3","$!"], // $! gets the process ID
+      "args": ["Path/To/Build/Directory/bin/workbench", "--single-process", "&&","gdb","/usr/bin/python3","$!"], // $! gets the process ID
       "stopAtEntry": false,
       "cwd": "Path/To/Build/Directory/bin", // this should point to bin inside the build directory
       "environment": [],
@@ -180,6 +180,8 @@ To debug C++ and start directly into the Workbench, add this to the configuratio
         }
       ]
     }
+
+The ``--single-process`` flag is necessary for debugging. See the :ref:`Running Workbench <RunningWorkbench>` documentation for more information.
 
 If this fails, try adding the following environment variables:
 
