@@ -9,7 +9,7 @@ import math
 import numpy as np
 
 
-from ansto_common import (
+from plugins.algorithms.ANSTO.ansto_common import (
     Point,
     triangle_base_area,
     fractional_facet_area,
@@ -35,7 +35,6 @@ class FractionalMapTests(unittest.TestCase):
         return
 
     def test_find_intercept(self):
-
         data = [
             (Point(0, 0, 0), Point(0, 0, 10), 0, Point(0, 0, 0)),
             (Point(0, 0, 0), Point(0, 0, 10), 5, Point(0, 0, 5)),
@@ -139,7 +138,6 @@ class FractionalMapTests(unittest.TestCase):
         self.assertAlmostEqual(egrid[2, 2], grid_[2, 2], 7)
 
     def test_fractional_map(self):
-
         rows, cols = 11, 11
         N = rows * cols
         xv = np.linspace(0, 10, cols)

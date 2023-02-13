@@ -1,0 +1,1 @@
+- Added algorithms for the ANSTO EMU instrument to support (:ref:`elastic <algm-ElasticEMUauReduction>`) and (:ref:`inelastic <algm-InelasticEMUauReduction>`) reduction processing.
