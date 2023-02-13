@@ -11,7 +11,6 @@ import unittest
 
 
 class LagrangeILLReductionTest(unittest.TestCase):
-
     _facility = None
     _data_search_dirs = None
 

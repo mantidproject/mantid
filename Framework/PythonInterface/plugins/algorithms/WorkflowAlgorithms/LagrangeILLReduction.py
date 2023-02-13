@@ -14,7 +14,6 @@ from typing import List, Tuple
 
 
 class LagrangeILLReduction(DataProcessorAlgorithm):
-
     progress = None
     output_ws_name = None
     empty_cell_ws = None
