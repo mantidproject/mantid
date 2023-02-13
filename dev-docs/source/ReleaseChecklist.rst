@@ -390,7 +390,9 @@ Code Freeze
   * Create or update the ``release-next`` branch.
   * Enable the job to periodically merge ``release-next`` into ``main``.
   * Enable the ``release-next_nightly_deployment`` pipeline.
-  * Disable the ``main_nightly_deployment_prototype`` pipeline.
+  * Set the value of the Jenkins global property ``BRANCH_TO_PUBLISH`` to ``release-next``.
+    This will turn off publishing for the ``main`` branch pipeline and switch it on for the
+    ``release-next`` pipeline.
 
 * Check the state of all open pull requests for this milestone and decide which
   should be kept for the release, liaise with the Release Manager on this. Move any
@@ -445,7 +447,8 @@ have been fixed. Then:
 
   * Disable the job that periodically merges ``release-next`` into ``main``.
   * Disable the ``release-next_nightly_deployment`` pipeline.
-  * Enable the ``main_nightly_deployment_prototype`` pipeline.
+  * Set the value of the Jenkins global property ``BRANCH_TO_PUBLISH`` to ``main``. This will re-enable
+    package publishing for the ``main`` nightly pipeline.
 
 **Create the Release Candidates**
 
