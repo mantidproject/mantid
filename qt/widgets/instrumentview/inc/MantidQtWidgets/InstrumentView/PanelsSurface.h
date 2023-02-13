@@ -48,7 +48,8 @@ private:
  */
 class PanelsSurface : public UnwrappedSurface {
 public:
-  PanelsSurface(const InstrumentActor *rootActor, const Mantid::Kernel::V3D &origin, const Mantid::Kernel::V3D &axis);
+  PanelsSurface(const InstrumentActor *rootActor, const Mantid::Kernel::V3D &origin, const Mantid::Kernel::V3D &axis,
+                const QSize &widgetSize, const bool maintainAspectRatio);
   ~PanelsSurface() override;
   void init() override;
   void project(const Mantid::Kernel::V3D & /*pos*/, double & /*u*/, double & /*v*/, double & /*uscale*/,

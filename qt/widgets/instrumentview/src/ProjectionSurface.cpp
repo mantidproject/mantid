@@ -356,36 +356,6 @@ QRect ProjectionSurface::selectionRect() const {
   return QRect(x_min, y_min, x_size, y_size);
 }
 
-RectF ProjectionSurface::selectionRectUV() const {
-  auto left = static_cast<double>(m_selectRect.left());
-  auto right = static_cast<double>(m_selectRect.right());
-  auto top = static_cast<double>(m_selectRect.top());
-  auto bottom = static_cast<double>(m_selectRect.bottom());
-
-  if (left > right) {
-    std::swap(left, right);
-  }
-
-  if (top > bottom) {
-    std::swap(top, bottom);
-  }
-
-  if (abs(m_selectRect.width()) <= 1 || abs(m_selectRect.height()) <= 1)
-    return RectF();
-
-  const QSizeF viewSizeLogical(m_viewImage->width() / m_viewImage->devicePixelRatio(),
-                               m_viewImage->height() / m_viewImage->devicePixelRatio());
-  double sx = m_viewRect.xSpan() / viewSizeLogical.width();
-  double sy = m_viewRect.ySpan() / viewSizeLogical.height();
-
-  double x_min = left * sx + m_viewRect.x0();
-  double x_max = right * sx + m_viewRect.x0();
-  double y_min = (viewSizeLogical.height() - bottom) * sy + m_viewRect.y0();
-  double y_max = (viewSizeLogical.height() - top) * sy + m_viewRect.y0();
-
-  return RectF(QPointF(x_min, y_min), QPointF(x_max, y_max));
-}
-
 bool ProjectionSurface::hasSelection() const { return !m_selectRect.isNull() && m_selectRect.width() > 0; }
 
 void ProjectionSurface::colorMapChanged() {

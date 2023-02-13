@@ -87,7 +87,9 @@ public:
       setGl(false);
       auto qtMock = makeQtDisplay();
       auto glMock = makeGL();
-      auto instance = construct("test_ws", makeDisplay(), qtMock.get(), glMock.get(), 24, useLoadingThread);
+      auto displayMock = makeDisplay();
+      EXPECT_CALL(*displayMock, currentWidget()).Times(1).WillOnce(Return(qtMock.get()));
+      auto instance = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 24, useLoadingThread);
 
       if (useLoadingThread) {
         InstrumentActor &actor = instance.getInstrumentActor();
@@ -130,8 +132,10 @@ public:
       auto qtMock = makeQtDisplay();
       auto glMock = makeGL();
       EXPECT_CALL(*qtMock, saveToFile(expectedName)).Times(1);
+      auto displayMock = makeDisplay();
+      EXPECT_CALL(*displayMock, currentWidget()).Times(1).WillOnce(Return(qtMock.get()));
 
-      auto widget = construct("test_ws", makeDisplay(), qtMock.get(), glMock.get(), 24, useLoadingThread);
+      auto widget = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 24, useLoadingThread);
 
       if (useLoadingThread) {
         InstrumentActor &actor = widget.getInstrumentActor();
@@ -193,7 +197,7 @@ public:
       auto glMock = makeGL();
       auto displayMock = makeDisplay();
       EXPECT_CALL(*glMock, updateDetectors()).Times(1);
-      EXPECT_CALL(*displayMock, currentWidget()).Times(1).WillOnce(Return(glMock.get()));
+      EXPECT_CALL(*displayMock, currentWidget()).Times(2).WillRepeatedly(Return(glMock.get()));
 
       auto widget = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 24, useLoadingThread);
 
@@ -215,7 +219,7 @@ public:
       auto glMock = makeGL();
       auto displayMock = makeDisplay();
       EXPECT_CALL(*qtMock, updateDetectors()).Times(1);
-      EXPECT_CALL(*displayMock, currentWidget()).Times(1).WillOnce(Return(qtMock.get()));
+      EXPECT_CALL(*displayMock, currentWidget()).Times(2).WillRepeatedly(Return(qtMock.get()));
 
       auto widget = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 24, useLoadingThread);
 

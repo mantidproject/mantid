@@ -72,4 +72,5 @@ void InstrumentDisplay::updateView(bool picking) {
     m_qtDisplay->updateView(picking);
   }
 }
+
 } // namespace MantidQt::MantidWidgets

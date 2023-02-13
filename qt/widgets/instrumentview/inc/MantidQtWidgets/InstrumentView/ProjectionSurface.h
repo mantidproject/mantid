@@ -324,7 +324,6 @@ protected:
   void draw(GLDisplay *widget, bool picking) const;
   void clear();
   QRect selectionRect() const;
-  RectF selectionRectUV() const;
   size_t getPickID(int x, int y) const;
   void setInputController(int mode, MantidQt::MantidWidgets::InputController *controller);
   void setPeakVisibility() const;

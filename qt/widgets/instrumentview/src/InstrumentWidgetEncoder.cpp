@@ -105,6 +105,7 @@ QMap<QString, QVariant> InstrumentWidgetEncoder::encodeRenderTab(const Instrumen
   map.insert(QString("displayLighting"), QVariant(tab->m_lighting->isChecked()));
   map.insert(QString("useOpenGL"), QVariant(tab->m_GLView->isChecked()));
   map.insert(QString("useUCorrection"), QVariant(tab->m_UCorrection->isChecked()));
+  map.insert(QString("maintainAspectRatio"), QVariant(tab->m_maintainAspectRatio->isChecked()));
 
   const auto surface = tab->getSurface();
   map.insert(QString("showLabels"), QVariant(surface->getShowPeakRowsFlag()));

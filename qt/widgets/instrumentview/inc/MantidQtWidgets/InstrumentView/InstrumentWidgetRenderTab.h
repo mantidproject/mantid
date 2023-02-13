@@ -135,6 +135,7 @@ private: // members
   QAction *m_GLView; ///< toggle between OpenGL and simple view
   QAction *m_UCorrection;
   QAction *m_tooltipInfo;
+  QAction *m_maintainAspectRatio;
   QActionGroup *m_precisionActionGroup;
   QList<QAction *> m_precisionActions;
 
