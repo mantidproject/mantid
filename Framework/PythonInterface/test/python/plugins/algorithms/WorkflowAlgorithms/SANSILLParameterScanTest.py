@@ -42,7 +42,42 @@ class SANSILLParameterScanTest(unittest.TestCase):
         self.assertAlmostEqual(ws.getAxis(0).getValue(1151), 43.0836, delta=4)
         self.assertAlmostEqual(ws.getAxis(1).getValue(0), 5.2, delta=3)
         self.assertAlmostEqual(ws.getAxis(1).getValue(1), 5.4, delta=3)
-        self.assertTrue(mtd["reduced"])
+        self.assertTrue("reduced" in mtd)
+
+    def test_D16_omega_container(self):
+        output_name = "output2d"
+        SANSILLParameterScan(
+            SampleRun="213_exp_9-13-1035_25786-26046.nxs",
+            ContainerRun="003674.nxs",
+            OutputWorkspace=output_name,
+            Observable="Omega.value",
+            PixelYmin=120,
+            PixelYMax=160,
+        )
+        ws = mtd[output_name]
+        self._check_output(ws, 261, 260)
+        self.assertAlmostEqual(ws.getAxis(0).getValue(0), 3.1672, delta=4)
+        self.assertAlmostEqual(ws.getAxis(0).getValue(260), 22.2328, delta=4)
+        self.assertAlmostEqual(ws.getAxis(1).getValue(0), -1.0, delta=3)
+        self.assertAlmostEqual(ws.getAxis(1).getValue(1), -0.95, delta=3)
+
+    def test_D16_omega_scanning_container(self):
+        output_name = "output2d"
+        SANSILLParameterScan(
+            SampleRun="212_8-02-927_023094-23354_sample.nxs",
+            ContainerRun="212_8-02-927_046364-046624_container.nxs",
+            OutputWorkspace=output_name,
+            Observable="Omega.value",
+            PixelYmin=120,
+            PixelYMax=160,
+        )
+        ws = mtd[output_name]
+        self._check_output(ws, 261, 319)
+        self.assertAlmostEqual(ws.getAxis(0).getValue(0), 2.7702, delta=4)
+        self.assertAlmostEqual(ws.getAxis(0).getValue(319), 21.8357, delta=4)
+        self.assertAlmostEqual(ws.getAxis(1).getValue(0), -1.0, delta=3)
+        self.assertAlmostEqual(ws.getAxis(1).getValue(1), -0.95, delta=3)
+        self.assertAlmostEqual(ws.getAxis(1).getValue(260), 12.0, delta=3)
 
     def _check_output(self, ws, spectra, blocksize):
         self.assertTrue(ws)
