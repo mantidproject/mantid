@@ -311,7 +311,9 @@ class SANSILLReduction(PythonAlgorithm):
         AddSampleLog(Workspace=ws, LogName="AcqMode", LogType="Number", NumberType="Int", LogText=str(int(self.mode)))
         self.log().notice(f"Set the acquisition mode to {self.mode}")
         if self.mode == AcqMode.KINETIC:
-            if self.process != "Sample" and self.process != "Transmission":
+            if self.process == "EmptyContainer":
+                SortXAxis(InputWorkspace=ws, OutputWorkspace=ws)
+            elif self.process != "Sample" and self.process != "Transmission":
                 raise RuntimeError("Only the sample and transmission can be kinetic measurements, the calibration measurements cannot.")
 
     def check_zero_monitor(self, mon_ws):
@@ -491,6 +493,19 @@ class SANSILLReduction(PythonAlgorithm):
                 DeleteWorkspace(can_ws_rebin)
             else:
                 check_wavelengths_match(mtd[can_ws], mtd[ws])
+                if mtd[can_ws].blocksize() > 1:  # kinetic/scan mode
+                    # if axes are widely inconsistent, then a warning is raised:
+                    check_axis_match(mtd[can_ws], mtd[ws])
+                    # whether they match or not, the X axis of the empty container is replaced by sample's one
+                    CreateWorkspace(
+                        DataX=mtd[ws].extractX(),
+                        DataY=mtd[can_ws].extractY(),
+                        DataE=mtd[can_ws].extractE(),
+                        ParentWorkspace=can_ws,
+                        OutputWorkspace=can_ws,
+                        NSpec=mtd[can_ws].getNumberHistograms(),
+                        UnitX=mtd[can_ws].getAxis(0).getUnit().unitID(),
+                    )
                 Minus(LHSWorkspace=ws, RHSWorkspace=can_ws, OutputWorkspace=ws)
 
     def apply_water(self, ws):
