@@ -186,7 +186,7 @@ void LoadILLLagrange::loadMetaData() {
 
 /**
  * Initializes the output workspace for LAGRANGE
- * @param entry : entry linked with the returned workspace
+ * @param dataset : dataset to be loaded into the returned workspace
  * @return : workspace with the correct data dimensions
  */
 void LoadILLLagrange::initWorkspace(const H5::DataSet &dataset) {
