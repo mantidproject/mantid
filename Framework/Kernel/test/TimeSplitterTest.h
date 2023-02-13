@@ -170,7 +170,9 @@ public:
 
     // add the same output index, but with a gap from the previous
     splitter.addROI(FOUR, FIVE, 1);
-    TS_ASSERT(splitter.getTimeROI(-1).empty());
+    roi = splitter.getTimeROI(-2); // intentionally trying a "big" negative for ignore filter
+    TS_ASSERT(!roi.empty());
+    TS_ASSERT_EQUALS(roi.numBoundaries(), 2);
     TS_ASSERT(splitter.getTimeROI(0).empty());
     TS_ASSERT(splitter.getTimeROI(0).empty());
     roi = splitter.getTimeROI(1);

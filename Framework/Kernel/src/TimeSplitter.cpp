@@ -35,9 +35,11 @@ TimeSplitter::TimeSplitter(const Types::Core::DateAndTime &start, const Types::C
   clearAndReplace(start, stop, DEFAULT_VALUE);
 }
 
-void TimeSplitter::debugPrint() const {
+std::string TimeSplitter::debugPrint() const {
+  std::stringstream msg;
   for (const auto iter : m_roi_map)
-    std::cout << iter.second << "|" << iter.first << "\n";
+    msg << iter.second << "|" << iter.first << "\n";
+  return msg.str();
 }
 
 void TimeSplitter::addROI(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop,
@@ -156,28 +158,37 @@ std::vector<int> TimeSplitter::outputWorkspaceIndices() const {
 
 /**
  * Returns a Mantid::Kernel::TimeROI for the requested workspace index.
- * This will return an empty TimeROI if the workspace index is <0 (ignore value)
- * or does not exist in the TimeSplitter.
+ * This will raise an exception if the workspace index does not exist in the TimeSplitter.
  */
 TimeROI TimeSplitter::getTimeROI(const int workspaceIndex) {
+  // convert things less than -1 to -1
+  const int effectiveIndex = std::max<int>(workspaceIndex, -1);
+
   TimeROI output;
-  // only build a result if this is not the IGNORE_VALUE
-  if (workspaceIndex > IGNORE_VALUE) {
-    using map_value_type = std::map<DateAndTime, int>::value_type;
-    auto indexFinder = [workspaceIndex](const map_value_type &value) { return value.second == workspaceIndex; };
-    // find the first place this workspace index exists
-    auto iter = std::find_if(m_roi_map.begin(), m_roi_map.end(), indexFinder);
-    // add the ROI found then loop until we reach the end
-    while (iter != m_roi_map.end()) {
-      // add the ROI
-      const auto startTime = iter->first;
-      iter++;
+  using map_value_type = std::map<DateAndTime, int>::value_type;
+  auto indexFinder = [effectiveIndex](const map_value_type &value) { return value.second == effectiveIndex; };
+  // find the first place this workspace index exists
+  auto iter = std::find_if(m_roi_map.begin(), m_roi_map.end(), indexFinder);
+  // add the ROI found then loop until we reach the end
+  while (iter != m_roi_map.end()) {
+    // add the ROI
+    const auto startTime = iter->first;
+    iter++;
+    // if the next iterator is the end there is nothing to add
+    if (iter != m_roi_map.end()) {
       const auto stopTime = iter->first;
       output.addROI(startTime, stopTime);
-
-      // look for the next place the workspace index occurs
-      iter = std::find_if(iter, m_roi_map.end(), indexFinder);
     }
+
+    // look for the next place the workspace index occurs
+    iter = std::find_if(iter, m_roi_map.end(), indexFinder);
+  }
+
+  // error check that something is there
+  // ignore index being empty is ok
+  if ((workspaceIndex >= 0) && (output.empty())) {
+    std::stringstream msg;
+    msg << "No regions exist for workspace index " << workspaceIndex;
   }
 
   return output;

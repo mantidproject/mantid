@@ -13,7 +13,11 @@
 namespace Mantid {
 namespace Kernel {
 
-/** TimeSplitter : TODO: DESCRIPTION
+/**
+ * TimeSplitter is an object that contains a mapping of time regions [inclusive, exclusive) that map to output workspace
+ * indices. No time can be mapped to two output workspace indices and all time from the beginning to the end is
+ * accounted for. A negative workspace index indicates that the data in that region should be ignored. This object
+ * converts all negative indices to -1.
  */
 class MANTID_KERNEL_DLL TimeSplitter {
 public:
@@ -29,7 +33,7 @@ public:
 
 private:
   void clearAndReplace(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop, const int value);
-  void debugPrint() const;
+  std::string debugPrint() const;
   std::map<Types::Core::DateAndTime, int> m_roi_map;
 };
 
