@@ -26,7 +26,6 @@ public:
   explicit FilteredTimeSeriesProperty(const std::string &name);
   /// Construct with a source time series & a filter property
   FilteredTimeSeriesProperty(TimeSeriesProperty<HeldType> *seriesProp, const TimeSeriesProperty<bool> &filterProp);
-
   FilteredTimeSeriesProperty(const std::string &name, const std::vector<Types::Core::DateAndTime> &times,
                              const std::vector<HeldType> &values);
 
@@ -96,23 +95,16 @@ public:
 private:
   /// Apply a filter
   void applyFilter() const;
-  /// A new algorithm to find Nth index.  It is simple and leave a lot work to
-  /// the callers
-  size_t findNthIndexFromQuickRef(int n) const;
-  default:
+
   /// Set a value from another property
   std::string setValueFromProperty(const Property &right) override;
 
-  /// Cast the internal filter to a TimeROI object
-   TimeROI *filterAsRoi() const;
-
-  /// The original unfiltered property as an owned pointer
-  std::unique_ptr<const TimeSeriesProperty<HeldType>> m_unfiltered;
+  TimeROI *unionFilterWithOther(const TimeROI *other) const;
 
   /// The filter
-  mutable std::vector<std::pair<Types::Core::DateAndTime, bool>> m_filter;
-  /// Quick reference regions for filter
-  mutable std::vector<std::pair<size_t, size_t>> m_filterQuickRef;
+  mutable std::unique_ptr<TimeROI> m_filter;
+  /// Maps the index supplied to nthValue and nthInterval to values in m_value.
+  mutable std::vector<size_t> m_filterMap;
   /// True if a filter has been applied
   mutable bool m_filterApplied;
 };

@@ -623,12 +623,7 @@ private:
       source = std::move(copy);
     } else {
       TS_ASSERT_THROWS_NOTHING(filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(source.get(), filter));
-      TS_ASSERT_DIFFERS(source.get(), filtered->unfiltered());
     }
-
-    // Object equality
-    TS_ASSERT_EQUALS(*source,
-                     *(filtered->unfiltered())); // Objects are considered equal
   }
 
   /// Create the test source property
