@@ -251,7 +251,7 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
             loaded_data = np.reshape(loaded_data, (1, loaded_data.shape[0]))
         return loaded_data
 
-    def preprocess_nexus(self, file_name: str, output_name: str):
+    def preprocess_nexus(self, file_name: List[str], output_name: str):
         """
         Loads, merges adjacent bins and puts the detector counts workspace in the ADS. The method interfaces to the LoadAndMerge
          algorithm to load NeXus Lagrange data, then processes the loaded workspace to remove all bins that have a smaller
@@ -259,7 +259,7 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
           if requested, normalizes detector counts to monitor.
 
         Args:
-            file_name (str): string containing name(s) of file(s) to be loaded
+            file_name (list(str)): string containing name(s) of file(s) to be loaded
             output_name (str): name for the output workspace containing detector counts
         """
         # if the user wants to see transfer energy, we subtract by the constant offset
