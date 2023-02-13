@@ -119,7 +119,10 @@ class IO(object):
     def _close_enough(cls, previous, new):
         if isinstance(new, dict):
             for key, new_value in new.items():
-                if not cls._close_enough(new_value, previous[key]):
+                if key not in previous:
+                    logger.warning(f"New key in advanced parameters: {key}")
+                    return False
+                elif not cls._close_enough(new_value, previous[key]):
                     logger.warning("Mismatched items from Abins advanced parameters:")
                     logger.warning(str((key, new_value, previous[key])))
                     return False
