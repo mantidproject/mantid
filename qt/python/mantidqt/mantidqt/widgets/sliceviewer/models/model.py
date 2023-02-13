@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-from typing import Sequence, Tuple, Optional
+from typing import List, Sequence, Tuple, Optional
 
 from mantid.api import MatrixWorkspace, MultipleExperimentInfos
 from mantid.kernel import SpecialCoordinateSystem
@@ -504,15 +504,21 @@ class SliceViewerModel(SliceViewerBaseModel):
     def get_proj_matrix(self):
         ws = self._get_ws()
         ws_type = WorkspaceInfo.get_ws_type(ws)
-        if not ws_type == WS_TYPE.MATRIX:
+        if ws_type != WS_TYPE.MATRIX:
             proj_matrix = np.eye(3)  # needs to be 3x3 even if 2D ws as columns passed to recAngle when calc axes angles
             if ws_type == WS_TYPE.MDH:
+                # get basis vectors from workspace
                 ndims = ws.getNumDims()
-                i_qdims = [idim for idim in range(ndims) if ws.getDimension(idim).getMDFrame().isQ()]
-                irow_end = min(3, len(i_qdims))  # note for 2D the last col/row of proj_matrix is 0,0,1 - i.e. L
-                for icol, idim in enumerate(i_qdims):
-                    # copy first irow_end components of basis vec are always Q
-                    proj_matrix[0:irow_end, icol] = list(ws.getBasisVector(idim))[0:irow_end]
+                basis_matrix = np.zeros((ndims, ndims))
+                for idim in range(ndims):
+                    basis_matrix[:, idim] = list(ws.getBasisVector(idim))
+                # exclude non-Q dim elements from basis vectors
+                qflags = [ws.getDimension(idim).getMDFrame().isQ() for idim in range(ndims)]
+                i_nonq = np.flatnonzero(np.invert(qflags))
+                qmask = np.invert(basis_matrix[i_nonq, :].astype(bool).sum(axis=0).astype(bool))
+                # extract proj matrix from basis vectors of q dimension
+                # note for 2D the last col/row of proj_matrix is 0,0,1 - i.e. L
+                proj_matrix[: qmask.sum(), : qmask.sum()] = basis_matrix[qmask, :][:, qflags]
                 # if determinant is zero, try to get the info from log or revert back to identity matrix
                 if np.isclose(np.linalg.det(proj_matrix), 0):
                     # for histo try to find axes from log
@@ -576,13 +582,16 @@ class SliceViewerModel(SliceViewerBaseModel):
 
         return xcut_name, ycut_name, help_msg
 
-    def get_hkl_from_xyz(self, xdim, ydim, zdim, xdata, ydata, zdata):
+    def get_hkl_from_full_point(self, full_point: List[float], qdims_i: List[int]):
+        """Gets the values of h, k and l from a full point which can include 3 or more dimensions."""
         basis_transform = self.get_proj_matrix()
-        if basis_transform is not None:
-            hkl = basis_transform[:, xdim] * xdata + basis_transform[:, ydim] * ydata + basis_transform[:, zdim] * zdata
-        else:
-            hkl = {0.0, 0.0, 0.0}
-        return hkl
+        if basis_transform is None:
+            return 0.0, 0.0, 0.0
+
+        # Get the x, y, z values for the q dimensions
+        q_xyz = tuple(full_point[q_i] for q_i in qdims_i)
+
+        return np.matmul(basis_transform, q_xyz)
 
 
 # private functions

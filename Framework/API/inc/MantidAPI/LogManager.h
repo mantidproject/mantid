@@ -31,6 +31,7 @@ class SplittingInterval;
 using SplittingIntervalVec = std::vector<SplittingInterval>;
 class PropertyManager;
 class TimeROI;
+struct TimeSeriesPropertyStatistics;
 } // namespace Kernel
 
 namespace API {
@@ -155,13 +156,16 @@ public:
   /// Get the time averaged standard deviation for a log
   double getTimeAveragedStd(const std::string &name) const;
 
+  /// Returns various statistics computations for a given property.
+  Kernel::TimeSeriesPropertyStatistics getStatistics(const std::string &name) const;
+
   /// Empty the values out of all TimeSeriesProperty logs
   void clearTimeSeriesLogs();
   /// Empty all but the last value out of all TimeSeriesProperty logs
   void clearOutdatedTimeSeriesLogValues();
 
-  const Kernel::TimeROI &timeROI() const;
-  void timeROI(const Kernel::TimeROI &);
+  const Kernel::TimeROI &getTimeROI() const;
+  virtual void setTimeROI(const Kernel::TimeROI &timeroi);
 
   /// Save the run to a NeXus file with a given group name
   virtual void saveNexus(::NeXus::File *file, const std::string &group, bool keepOpen = false) const;

@@ -21,10 +21,6 @@ void MantidHelpInterface::showPage(const QString &url) { UNUSED_ARG(url); }
 
 void MantidHelpInterface::showPage(const QUrl &url) { UNUSED_ARG(url); }
 
-void MantidHelpInterface::showWikiPage(const std::string &page) { UNUSED_ARG(page); }
-
-void MantidHelpInterface::showWikiPage(const QString &page) { UNUSED_ARG(page); }
-
 void MantidHelpInterface::showConcept(const std::string &page) { UNUSED_ARG(page); }
 
 void MantidHelpInterface::showConcept(const QString &page) { UNUSED_ARG(page); }

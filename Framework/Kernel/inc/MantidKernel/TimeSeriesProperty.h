@@ -34,7 +34,7 @@ enum TimeSeriesSortStatus { TSUNKNOWN, TSUNSORTED, TSSORTED };
 /** Struct holding some useful statistics for a TimeSeriesProperty
  *
  */
-struct TimeSeriesPropertyStatistics {
+struct MANTID_KERNEL_DLL TimeSeriesPropertyStatistics {
   /// Minimum value
   double minimum;
   /// Maximum value
@@ -51,6 +51,49 @@ struct TimeSeriesPropertyStatistics {
   double time_standard_deviation;
   /// Duration in seconds
   double duration;
+
+  TimeSeriesPropertyStatistics() = default;
+
+  /**
+   * Initialize only the statistics that are time-weighted independent.
+   * Quantities are minimum, maximum, median, mean, and standard-deviation.
+   * @param stats :: a reference to a Statistics object.
+   */
+  TimeSeriesPropertyStatistics(const Statistics &stats) {
+    minimum = stats.minimum;
+    maximum = stats.maximum;
+    median = stats.median;
+    mean = stats.mean;
+    standard_deviation = stats.standard_deviation;
+  }
+
+  /**
+   * Statistics of a value that is constant throughout time.
+   * "duration" is assigned the value of NaN.
+   * @param value :: the value constant in time.
+   */
+  TimeSeriesPropertyStatistics(double value) {
+    minimum = value;
+    maximum = value;
+    mean = value;
+    median = value;
+    standard_deviation = 0.0;
+    time_mean = value;
+    time_standard_deviation = 0.0;
+    duration = std::numeric_limits<double>::quiet_NaN();
+  }
+
+  void setAllToNan() {
+    double nan = std::numeric_limits<double>::quiet_NaN();
+    minimum = nan;
+    maximum = nan;
+    mean = nan;
+    median = nan;
+    standard_deviation = nan;
+    time_mean = nan;
+    time_standard_deviation = nan;
+    duration = nan;
+  }
 };
 
 //================================================================================================
@@ -156,13 +199,15 @@ public:
   double averageValueInFilter(const std::vector<SplittingInterval> &filter) const override;
   /// @copydoc Mantid::Kernel::ITimeSeriesProperty::averageAndStdDevInFilter()
   std::pair<double, double> averageAndStdDevInFilter(const std::vector<SplittingInterval> &filter) const override;
-  /// @copydoc Mantid::Kernel::ITimeSeriesProperty::timeAverageValue()
-  double timeAverageValue() const override;
+  /** Returns the calculated time weighted mean and standard deviation values.
+   * @return The time-weighted average value of the log when the time measurement was active.
+   */
+  std::pair<double, double> timeAverageValueAndStdDev() const;
   /** Returns the calculated time weighted average value.
    * @param timeRoi  Object that holds information about when the time measurement was active.
    * @return The time-weighted average value of the log when the time measurement was active.
    */
-  double timeAverageValue(const TimeROI &timeRoi) const override;
+  double timeAverageValue(const TimeROI *timeRoi = nullptr) const override;
   /// generate constant time-step histogram from the property values
   void histogramData(const Types::Core::DateAndTime &tMin, const Types::Core::DateAndTime &tMax,
                      std::vector<double> &counts) const;
@@ -280,7 +325,7 @@ public:
   bool isDefault() const override;
 
   /// Return a TimeSeriesPropertyStatistics object
-  TimeSeriesPropertyStatistics getStatistics() const;
+  TimeSeriesPropertyStatistics getStatistics(const Kernel::TimeROI *roi = nullptr) const override;
 
   /// Detects whether there are duplicated entries (of time) in property &
   /// eliminates them
@@ -316,8 +361,6 @@ private:
   std::string setValueFromProperty(const Property &right) override;
   /// Find if time lies in a filtered region
   bool isTimeFiltered(const Types::Core::DateAndTime &time) const;
-  /// Time weighted mean and standard deviation
-  std::pair<double, double> timeAverageValueAndStdDev() const;
 
   /// Holds the time series data
   mutable std::vector<TimeValueUnit<TYPE>> m_values;
@@ -340,7 +383,7 @@ private:
 /// Function filtering double TimeSeriesProperties according to the requested
 /// statistics.
 double DLLExport filterByStatistic(TimeSeriesProperty<double> const *const propertyToFilter,
-                                   Kernel::Math::StatisticType statisticType);
+                                   Kernel::Math::StatisticType statisticType, const Kernel::TimeROI * = nullptr);
 
 } // namespace Kernel
 } // namespace Mantid

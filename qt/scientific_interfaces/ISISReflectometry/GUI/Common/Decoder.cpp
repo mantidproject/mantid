@@ -22,9 +22,9 @@
 #include "../Save/QtSaveView.h"
 #include "Encoder.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
-#include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <QApplication>
+#include <QSignalBlocker>
 #include <utility>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -156,7 +156,7 @@ void Decoder::decodeLegacyPerAngleDefaultsRow(QTableWidget *tab, int rowIndex, i
 }
 
 void Decoder::decodePerAngleDefaultsRow(QTableWidget *tab, int rowIndex, int columnsNum, const QList<QVariant> &list) {
-  MantidQt::API::SignalBlocker blocker(tab);
+  QSignalBlocker blocker(tab);
   for (auto columnIndex = 0; columnIndex < tab->columnCount(); ++columnIndex) {
     auto const columnValue = columnIndex < columnsNum ? list[columnIndex].toString() : QString();
     auto tableWidgetItem = new QTableWidgetItem(columnValue);
@@ -259,7 +259,7 @@ void Decoder::updateRunsTableViewFromModel(QtRunsTableView *view, const Reductio
 
 void Decoder::decodeRunsTable(QtRunsTableView *gui, ReductionJobs *redJobs, RunsTablePresenter *presenter,
                               const QMap<QString, QVariant> &map, boost::optional<int> precision) {
-  MantidQt::API::SignalBlocker signalBlockerView(gui);
+  QSignalBlocker signalBlockerView(gui);
 
   m_projectSave = map[QString("projectSave")].toBool();
   auto runsTable = map[QString("runsTableModel")].toList();

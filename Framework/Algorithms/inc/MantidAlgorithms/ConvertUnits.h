@@ -13,49 +13,18 @@
 
 namespace Mantid {
 namespace Algorithms {
+
 /** Converts the units in which a workspace is represented.
-    Only implemented for histogram data, so far.
     Note that if you are converting to or from units which are not meaningful
-   for monitor detectors,
+    for monitor detectors,
     then you should not expect the resulting spectrum to hold meaningful values.
-
-    Required Properties:
-    <UL>
-    <LI> InputWorkspace  - The name of the input workspace. </LI>
-    <LI> OutputWorkspace - The name of the output workspace. Can be the same as
-   the input one. </LI>
-    <LI> Target          - The units to which the workspace should be converted.
-   </LI>
-    </UL>
-
-    Optional properties required for certain units (DeltaE,
-   DeltaE_inWavenumber, DeltaE_inFrequency):
-    <UL>
-    <LI> Emode  - The energy mode (0=elastic, 1=direct geometry, 2=indirect
-   geometry) </LI>
-    <LI> Efixed - Value of fixed energy: EI (emode=1) or EF (emode=2) (meV)
-   </LI>
-    </UL>
-
-    Optional, deprecated property (see http://www.mantidproject.org/ConvertUnits
-   for details):
-    <UL>
-    <LI> AlignBins - If true (default is false), rebins if necessary to ensure
-   that all spectra in
-                     the output workspace have identical bins (with linear
-   binning) </LI>
-    </UL>
-
-    @author Russell Taylor, Tessella Support Services plc
-    @date 06/03/2008
-*/
+ */
 class MANTID_ALGORITHMS_DLL ConvertUnits : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "ConvertUnits"; }
   /// Summary of algorithms purpose
   const std::string summary() const override { return "Performs a unit change on the X values of a workspace"; }
-
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {

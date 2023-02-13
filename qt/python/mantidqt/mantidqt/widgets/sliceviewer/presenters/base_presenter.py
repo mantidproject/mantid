@@ -62,7 +62,7 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
         return self.view.data_view.dimensions
 
     def get_slicepoint(self):
-        """Returns the current slicepoint as a list of 3 elements.
+        """Returns the current slicepoint as a list of 3 or more elements.
         None indicates that dimension is being displayed"""
         return self._data_view.dimensions.get_slicepoint()
 

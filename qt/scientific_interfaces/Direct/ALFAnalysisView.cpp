@@ -269,11 +269,11 @@ void ALFAnalysisView::setAverageTwoTheta(std::optional<double> average, std::vec
   m_numberOfTubes->setToolTip(constructNumberOfTubesTooltip(all));
 }
 
-void ALFAnalysisView::setPeak(Mantid::API::IPeakFunction_const_sptr const &peak) {
+void ALFAnalysisView::setPeak(Mantid::API::IPeakFunction_const_sptr const &peak, double const background) {
   setPeakCentre(peak->getParameter("PeakCentre"));
 
-  m_peakPicker->setPeak(peak);
-  m_peakPicker->select(false);
+  m_peakPicker->setPeak(peak, background);
+  m_peakPicker->select(true);
 }
 
 Mantid::API::IPeakFunction_const_sptr ALFAnalysisView::getPeak() const { return m_peakPicker->peak(); }

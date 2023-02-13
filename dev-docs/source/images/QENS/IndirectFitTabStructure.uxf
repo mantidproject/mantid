@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.3.0">
+  <zoom_level>10</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>440</x>
+      <y>110</y>
+      <w>440</w>
+      <h>690</h>
+    </coordinates>
+    <panel_attributes>Fit Tab
+bg=white
+layer=-1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>450</x>
+      <y>500</y>
+      <w>420</w>
+      <h>240</h>
+    </coordinates>
+    <panel_attributes>FitPlot
+bg=yellow</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>450</x>
+      <y>250</y>
+      <w>420</w>
+      <h>240</h>
+    </coordinates>
+    <panel_attributes>FitPropertyBrowser
+bg=yellow</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>470</x>
+      <y>330</y>
+      <w>380</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>FunctionTemplateBrowser
+layer=2
+bg=cyan</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>470</x>
+      <y>380</y>
+      <w>380</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>FunctionBrowser
+layer=2
+bg=cyan</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>460</x>
+      <y>440</y>
+      <w>400</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>FitOptionsBrowser
+layer=1
+bg=red</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>450</x>
+      <y>750</y>
+      <w>420</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>OutputOptions
+bg=yellow</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>450</x>
+      <y>150</y>
+      <w>420</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>FitData
+layer=1
+bg=yellow</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>460</x>
+      <y>690</y>
+      <w>400</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>SpectrumSelection
+bg=red
+layer=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>460</x>
+      <y>290</y>
+      <w>400</w>
+      <h>140</h>
+    </coordinates>
+    <panel_attributes>QStackedWidget
+layer=1
+bg=red</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>460</x>
+      <y>540</y>
+      <w>400</w>
+      <h>140</h>
+    </coordinates>
+    <panel_attributes>IndirectFitPreviewPlot
+layer=1
+bg=red</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>470</x>
+      <y>580</y>
+      <w>380</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>PreviewPlot top
+layer=2
+bg=cyan</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>470</x>
+      <y>630</y>
+      <w>380</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>PreviewPlot bottom
+layer=2
+bg=cyan</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>460</x>
+      <y>190</y>
+      <w>400</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>AddWorkspaceDialog
+bg=red
+layer=2</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>

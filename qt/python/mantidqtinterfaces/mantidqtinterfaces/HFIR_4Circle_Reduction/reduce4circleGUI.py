@@ -47,7 +47,6 @@ from mantidqtinterfaces.HFIR_4Circle_Reduction.hfctables import MatrixTable
 from mantid.kernel import Logger
 from qtpy.QtWidgets import QButtonGroup, QFileDialog, QMessageBox, QMainWindow, QInputDialog  # noqa
 from qtpy.QtCore import QSettings  # noqa
-from qtpy import PYQT4  # noqa
 
 try:
     from mantidqt.utils.qt import load_ui
@@ -57,13 +56,7 @@ except ImportError:
 from qtpy.QtWidgets import QVBoxLayout
 
 SCROLL_AVAILABLE = False
-if PYQT4:
-    try:
-        from mantidqtpython import MantidQt
 
-        SCROLL_AVAILABLE = True
-    except ImportError:
-        SCROLL_AVAILABLE = False
 unicode = str
 
 # define constants

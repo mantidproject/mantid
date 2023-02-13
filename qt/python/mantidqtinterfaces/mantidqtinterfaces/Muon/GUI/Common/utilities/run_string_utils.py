@@ -82,6 +82,7 @@ def run_string_to_list(run_string, max_value=True):
     if not validate_run_string(run_string):
         raise IndexError("{} is not a valid run string".format(run_string))
     run_list = []
+    run_string = run_string.replace(" ", "")
     if run_string.endswith(",") or run_string.endswith("-"):
         run_string = run_string[:-1]
     if run_string == "":
@@ -89,7 +90,6 @@ def run_string_to_list(run_string, max_value=True):
 
     run_string_list = run_string.split(delimiter)
     for runs in run_string_list:
-        runs = runs.replace(" ", "")
         split_runs = runs.split(range_separator)
         if len(runs) == 1:
             run_list += [int(runs)]

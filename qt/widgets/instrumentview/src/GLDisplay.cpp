@@ -26,27 +26,10 @@
 #include <utility>
 
 namespace MantidQt::MantidWidgets {
-//#ifndef GL_MULTISAMPLE
-//#define GL_MULTISAMPLE  0x809D
-//#endif
 
-// NOTES:
-// 1) if the sample buffers are not available then the paint of image on the mdi
-// windows
-//   seems to not work on intel chipset
+constexpr Qt::CursorShape GLCursor = Qt::ArrowCursor;
 
-const Qt::CursorShape cursorShape = Qt::ArrowCursor;
-
-GLDisplay::GLDisplay(QWidget *parent)
-    : IGLDisplay(QGLFormat(QGL::DepthBuffer | QGL::NoAlphaChannel), parent),
-      // m_polygonMode(SOLID),
-      // m_lightingState(0),
-      m_isKeyPressed(false), m_firstFrame(true) {
-
-  if (!this->format().depth()) {
-    std::cout << "Warning! OpenGL Depth buffer could not be initialized.\n";
-  }
-
+GLDisplay::GLDisplay(QWidget *parent) : IGLDisplay(parent), m_isKeyPressed(false) {
   setFocusPolicy(Qt::StrongFocus);
   setAutoFillBackground(false);
   // Enable right-click in pick mode
@@ -59,7 +42,6 @@ GLDisplay::~GLDisplay() = default;
 void GLDisplay::setSurface(std::shared_ptr<ProjectionSurface> surface) {
   m_surface = std::move(surface);
   connect(m_surface.get(), SIGNAL(redrawRequired()), this, SLOT(repaint()), Qt::QueuedConnection);
-  m_firstFrame = true;
 }
 
 /**
@@ -68,10 +50,7 @@ void GLDisplay::setSurface(std::shared_ptr<ProjectionSurface> surface) {
  * is initialized.
  */
 void GLDisplay::initializeGL() {
-  setCursor(cursorShape); // This is to set the initial window mouse cursor to
-                          // Hand icon
-
-  // Set the relevant OpenGL rendering options
+  setCursor(GLCursor);
   setRenderingOptions();
   glViewport(0, 0, width(), height());
 }
@@ -86,7 +65,7 @@ void GLDisplay::resetBackgroundColor() {
                1.0);
   // Since we're manually manipulating the current GL buffer (as we're double buffered)
   // we need to ask Qt to redraw, else we get a corrupted display with an empty surface
-  updateGL();
+  update();
 }
 
 void GLDisplay::setRenderingOptions() {
@@ -106,30 +85,12 @@ void GLDisplay::setRenderingOptions() {
   // enablewriting into the depth buffer
   glDepthMask(GL_TRUE);
 
-  OpenGLError::check("setRenderingOptions");
+  OpenGLError::check("GLDisplay::setRenderingOptions()");
 }
 
 void GLDisplay::paintGL() {
-  // Ask openGL to repaint the background color
-  glClear(GL_COLOR_BUFFER_BIT);
-}
-
-/**
- * This is overridden function which is called by Qt when the widget needs to be
- * repainted.
- */
-void GLDisplay::paintEvent(QPaintEvent *event) {
-  UNUSED_ARG(event)
-  makeCurrent();
-  if (!m_surface) {
-    resetBackgroundColor();
-    return;
-  }
-  m_surface->draw(this);
-  OpenGLError::check("paintEvent");
-
-  if (m_firstFrame) {
-    m_firstFrame = false;
+  if (m_surface) {
+    m_surface->draw(this);
   }
 }
 
@@ -139,6 +100,7 @@ void GLDisplay::paintEvent(QPaintEvent *event) {
  * This method resizes the viewport according to the new widget width and height
  */
 void GLDisplay::resizeGL(int width, int height) {
+  glViewport(0, 0, width, height);
   if (m_surface) {
     m_surface->resize(width, height);
   }
@@ -228,7 +190,7 @@ void GLDisplay::keyPressEvent(QKeyEvent *event) {
  */
 void GLDisplay::keyReleaseEvent(QKeyEvent *event) {
   releaseKeyboard();
-  setCursor(cursorShape);
+  setCursor(GLCursor);
   m_isKeyPressed = false;
   if (!event->isAutoRepeat()) {
     update();
@@ -261,20 +223,9 @@ QColor GLDisplay::currentBackgroundColor() const {
 void GLDisplay::saveToFile(const QString &filename) {
   if (filename.isEmpty())
     return;
-  // It seems QGLWidget grabs the back buffer
-  this->swapBuffers(); // temporarily swap the buffers
-  QImage image = this->grabFrameBuffer();
-  this->swapBuffers(); // swap them back
+  QImage image = this->grabFramebuffer();
   OpenGLError::check("GLDisplay::saveToFile");
   image.save(filename);
-}
-
-/**
- * Resets the widget for new instrument definition
- */
-void GLDisplay::resetWidget() {
-  // setActorCollection(std::shared_ptr<GLActorCollection>(new
-  // GLActorCollection()));
 }
 
 /**

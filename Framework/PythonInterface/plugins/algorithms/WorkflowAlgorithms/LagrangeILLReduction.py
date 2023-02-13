@@ -67,6 +67,9 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         self.convert_to_wavenumber = self.getProperty("ConvertToWaveNumber").value
         self.normalise_by = self.getPropertyValue("NormaliseBy")
 
+        # the list of all the intermediate workspaces to group at the end
+        self.intermediate_workspaces = []
+
     def PyInit(self):
         self.declareProperty(MultipleFileProperty("SampleRuns", action=FileAction.Load, extensions=[""]), doc="Sample run(s).")
 
@@ -93,9 +96,6 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         self.declareProperty(name="UseIncidentEnergy", defaultValue=False, doc="Show the energies as incident energies, not transfer ones.")
 
         self.declareProperty(name="ConvertToWaveNumber", defaultValue=False, doc="Convert axis unit to energy in wave number (cm-1)")
-
-        # the list of all the intermediate workspaces to group at the end
-        self.intermediate_workspaces = []
 
     def PyExec(self):
         self.setup()
@@ -243,6 +243,8 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
             loaded_data = np.vstack((loaded_data, data)) if loaded_data is not None else data
         if np.shape(loaded_data)[0] == 0:
             raise RuntimeError("Provided files contain no data in the LAGRANGE format.")
+        if loaded_data.ndim == 1:  # data needs to be reshaped in case there is only one scan point
+            loaded_data = np.reshape(loaded_data, (1, loaded_data.shape[0]))
         return loaded_data
 
     def get_counts_errors_metadata(self, data: np.ndarray) -> Tuple[List[float], List[int], List[float], List[float], List[float]]:

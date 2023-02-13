@@ -5,11 +5,11 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InelasticDataManipulationElwinTabView.h"
-#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
-#include "MantidQtWidgets/Common/UserInputValidator.h"
-
 #include "MantidGeometry/Instrument.h"
-#include "MantidQtWidgets/Common/SignalBlocker.h"
+
+#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
 
 #include <QFileInfo>

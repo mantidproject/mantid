@@ -132,7 +132,14 @@ SparseWorkspace::SparseWorkspace(const API::MatrixWorkspace &modelWS, const size
   if (eMode == Kernel::DeltaEMode::Direct) {
     mutableRun().addProperty("Ei", modelWS.getEFixed());
   } else if (eMode == Kernel::DeltaEMode::Indirect) {
-    const auto &detIDs = modelWS.detectorInfo().detectorIDs();
+    std::vector<detid_t> detIDs;
+    auto modelInstrument = modelWS.getInstrument();
+    for (size_t i = 0; i < modelWS.getNumberHistograms(); i++) {
+      const auto &spec = modelWS.getSpectrum(i);
+      const auto &specDetIDs = spec.getDetectorIDs();
+      if (!modelInstrument->isMonitor(specDetIDs))
+        detIDs.insert(detIDs.end(), specDetIDs.begin(), specDetIDs.end());
+    }
     if (!constantIndirectEFixed(modelWS, detIDs)) {
       throw std::runtime_error("Sparse instrument with variable EFixed not supported.");
     }

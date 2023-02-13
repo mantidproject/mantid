@@ -60,12 +60,15 @@ class ExportSampleLogsToHDF5Test(unittest.TestCase):
 
     def test_timeSeriesAreTimeAveraged(self):
         input_ws = self._create_sample_workspace()
-        self._add_log_to_workspace(input_ws, "TestLog", [1.0, 2.0, 3.0])
+        VALUES = [1.0, 2.0, 3.0]
+        self._add_log_to_workspace(input_ws, "TestLog", VALUES)
         run_algorithm(self.ALG_NAME, InputWorkspace=input_ws, Filename=self.TEMP_FILE_NAME)
 
+        # time average mean is equal to simple mean
+        # because the values are equally spaced
         with h5py.File(self.TEMP_FILE_NAME, "r") as output_file:
             logs_group = output_file["Sample Logs"]
-            self.assertEqual(logs_group["TestLog"][()], 1.5)
+            self.assertEqual(logs_group["TestLog"][()], np.mean(VALUES))
 
     def test_unitAreAddedIfPresent(self):
         input_ws = self._create_sample_workspace()

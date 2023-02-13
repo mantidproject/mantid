@@ -12,12 +12,10 @@ Introduction
 Mantid's :ref:`plugin <Plugin>` architecture has been engineered so that it is easy for a user
 to write their own algorithm. This page is a primer for the user about to write their first algorithm and assumes no
 great knowledge of C++.
-It covers the basics, with links to more advanced options where appropriate. Note if you are looking to add a
-:ref:`plugin <Plugin>` fit function rather than an algorithm then see
-`Writing a Fit Function <https://www.mantidproject.org/Writing_a_Fit_Function>`__.
+It covers the basics, with links to more advanced options where appropriate.
 There is special description for the case when you are looking to add a custom :ref:`MD conversion plugin <WritingCustomConvertToMDTransformation>`.
 
-Alternatively, you can implement your algorithm in :ref:`Python <emwp_py_fit_funcs>`.
+Alternatively, you can implement your algorithm in :ref:`Python <emwp_intro>`.
 See :ref:`Python Vs C++ Algorithms <PythonVSCppAlgorithms>` for a comparison of Mantid's
 two programming languages.
 
@@ -85,7 +83,7 @@ boilerplate C++ code (changing each occurrence of 'MyAlg' to your chosen algorit
 
 At this point you will already have something that will compile and run. To do so (on Windows), copy the files
 ``build.bat`` & ``SConstruct`` from ``UserAlgorithms`` into the directory containing your code and execute ``build.bat``.
-If you then start MantidPlot your algorithm will appear in the list of available algorithms and could be run.
+If you then start MantidWorkbench your algorithm will appear in the list of available algorithms and could be run.
 But, of course, it won't do anything of interest until you have written some algorithm code...
 
 Coding the Algorithm
@@ -119,8 +117,7 @@ For the simple types (integer, double or string), the basic syntax is::
 An optional :ref:`validator <Properties Validators>` or
 :ref:`directional argument <Properties Directions>` (input, output or both)
 can also be appended. The syntax for other property types (``WorkspaceProperty`` & ``ArrayProperty``) is more
-complex - see the :ref:`properties <Properties>` page or the
-example algorithms in `UserAlgorithms <https://www.mantidproject.org/UserAlgorithms>`__ for further details.
+complex - see the :ref:`properties <Properties>` page.
 
 Execution
 #########
@@ -207,7 +204,7 @@ tool in understanding the running of your algorithms.
 Enhancing asynchronous running
 ------------------------------
 
-Any algorithm can be run asynchronously (e.g. by MantidPlot) without modification. However, some features
+Any algorithm can be run asynchronously without modification. However, some features
 are only enabled if code is added within the ``exec()`` method. ``Algorithm::interruption_point()`` should
 be called at appropriate intervals so that the algorithm's execution can be interrupted.
 ``Algorithm::progress(double p)`` reports the progress of the algorithm. ``p`` must be between
@@ -240,7 +237,7 @@ signifying no errors.
 It will be called in dialogs **after** parsing all inputs and setting the properties, but **before** executing.
 It is also called again in the ``execute()`` call, which will throw if this returns something.
 
-In the MantidPlot GUI, this will set a "star" ``*`` label next to each property that is reporting an error.
+This will set a "star" ``*`` label next to each property that is reporting an error.
 This makes it easier for users to find where they went wrong.
 
 If your ``validateInputs()`` method validates an input workspace property, bear in mind that the user

@@ -33,6 +33,15 @@ template <typename T> bool convertSingleValue(const Property *property, double &
   }
 }
 
+bool convertSingleValueToDouble(const Property *property, double &value) {
+  // Order these with double and int first, and less likely options later.
+  // The first one to succeed short-circuits and the value is returned.
+  // If all fail, returns false.
+  return convertSingleValue<double>(property, value) || convertSingleValue<int32_t>(property, value) ||
+         convertSingleValue<int64_t>(property, value) || convertSingleValue<uint32_t>(property, value) ||
+         convertSingleValue<uint64_t>(property, value) || convertSingleValue<float>(property, value);
+}
+
 /// Templated method to convert time series property to single double
 template <typename T>
 bool convertTimeSeriesToDouble(const Property *property, double &value, const Math::StatisticType &function) {
@@ -335,6 +344,32 @@ double LogManager::getTimeAveragedStd(const std::string &name) const {
 }
 
 /**
+ * Returns various statistics computations for a given property. The time filter, if not-empty, is applied when
+ * computing.
+ * The returned statistics will all be NAN when statistics cannot be computed, such as for a string property.
+ * @param name :: The name of the property.
+ * @return A TimeSeriesPropertyStatistics object containing values for Minimum, Maximum, Mean, Median,
+ * standard deviation, time weighted average, and time weighted standard deviation.
+ */
+Kernel::TimeSeriesPropertyStatistics LogManager::getStatistics(const std::string &name) const {
+  const Kernel::Property *prop = getProperty(name);
+
+  // statistics from a TimeSeriesProperty object
+  if (auto *timeSeriesProp = dynamic_cast<const Kernel::ITimeSeriesProperty *>(prop))
+    return timeSeriesProp->getStatistics();
+
+  // statistics from a PropertyWithValue object
+  double value;
+  if (Mantid::API::convertSingleValueToDouble(prop, value))
+    return TimeSeriesPropertyStatistics(value);
+
+  // return values set to NAN, signaling no statistics can be obtained
+  TimeSeriesPropertyStatistics invalid;
+  invalid.setAllToNan();
+  return invalid;
+}
+
+/**
  * Get the value of a property as the requested type. Throws if the type is not
  * correct
  * @param name :: The name of the property
@@ -446,9 +481,12 @@ void LogManager::clearOutdatedTimeSeriesLogValues() {
   }
 }
 
-const Kernel::TimeROI &LogManager::timeROI() const { return *(m_timeroi.get()); }
+const Kernel::TimeROI &LogManager::getTimeROI() const { return *(m_timeroi.get()); }
 
-void LogManager::timeROI(const Kernel::TimeROI &timeroi) { m_timeroi->replaceROI(timeroi); }
+void LogManager::setTimeROI(const Kernel::TimeROI &timeroi) {
+  m_timeroi->replaceROI(timeroi);
+  clearSingleValueCache();
+}
 
 //--------------------------------------------------------------------------------------------
 /** Save the object to an open NeXus file.

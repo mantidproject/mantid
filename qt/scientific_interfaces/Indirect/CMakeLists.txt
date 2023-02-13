@@ -84,6 +84,8 @@ set(SRC_FILES
     InelasticDataManipulationElwinTabModel.cpp
     InelasticDataManipulationElwinTabView.cpp
     InelasticDataManipulationIqtTab.cpp
+    InelasticDataManipulationIqtTabView.cpp
+    InelasticDataManipulationIqtTabModel.cpp
     InelasticDataManipulationMomentsTab.cpp
     InelasticDataManipulationMomentsTabModel.cpp
     InelasticDataManipulationMomentsTabView.cpp
@@ -168,9 +170,9 @@ set(MOC_FILES
     IndirectFitPropertyBrowser.h
     InelasticDataManipulation.h
     InelasticDataManipulationElwinTab.h
-    InelasticDataManipulationElwinTabModel.h
     InelasticDataManipulationElwinTabView.h
     InelasticDataManipulationIqtTab.h
+    InelasticDataManipulationIqtTabView.h
     InelasticDataManipulationMomentsTab.h
     InelasticDataManipulationMomentsTabView.h
     InelasticDataManipulationSqwTab.h
@@ -203,6 +205,8 @@ set(INC_FILES
     IndirectFunctionBrowser/ConvFunctionModel.h
     IndirectPlotOptionsModel.h
     IndirectSettingsHelper.h
+    InelasticDataManipulationElwinTabModel.h
+    InelasticDataManipulationIqtTabModel.h
     InelasticDataManipulationMomentsTabModel.h
     InelasticDataManipulationSqwTabModel.h
     InelasticDataManipulationSymmetriseTabModel.h
@@ -261,7 +265,7 @@ set(RES_FILES IndirectInterfaceResources.qrc)
 
 # XML is required to parse the settings file
 find_package(
-  Qt5
+  Qt5 ${QT_MIN_VERSION}
   COMPONENTS Concurrent Xml
   REQUIRED
 )

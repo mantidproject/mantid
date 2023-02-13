@@ -206,6 +206,7 @@ set(INC_FILES
     inc/MantidKernel/InternetHelper.h
     inc/MantidKernel/Interpolation.h
     inc/MantidKernel/InvisibleProperty.h
+    inc/MantidKernel/LambdaValidator.h
     inc/MantidKernel/LibraryManager.h
     inc/MantidKernel/LibraryWrapper.h
     inc/MantidKernel/ListValidator.h
@@ -366,6 +367,7 @@ set(TEST_FILES
     InternetHelperTest.h
     InterpolationTest.h
     InvisiblePropertyTest.h
+    LambdaValidatorTest.h
     ListValidatorTest.h
     LiveListenerInfoTest.h
     LogFilterTest.h
@@ -429,6 +431,7 @@ set(TEST_FILES
     ThreadPoolTest.h
     ThreadSchedulerMutexesTest.h
     ThreadSchedulerTest.h
+    TimeIntervalTest.h
     TimeROITest.h
     TimeSeriesPropertyTest.h
     TimerTest.h

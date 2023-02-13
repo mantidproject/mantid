@@ -38,21 +38,21 @@ template <typename T> std::string joinVector(std::vector<T> const &vec, std::str
   return str.substr(0, str.size() - delimiter.size());
 }
 
-std::string constructInputDictionaryEntry(std::string const &workspaceName, std::size_t const &workspaceIndex,
-                                          double const startX, double const endX) {
-  return "\"" + workspaceName + "\": (" + std::to_string(workspaceIndex) + ", " + std::to_string(startX) + ", " +
+std::string constructInputListEntry(std::string const &workspaceName, std::size_t const &workspaceIndex,
+                                    double const startX, double const endX) {
+  return "(\"" + workspaceName + "\", " + std::to_string(workspaceIndex) + ", " + std::to_string(startX) + ", " +
          std::to_string(endX) + ")";
 }
 
-std::string constructInputDictionary(std::vector<std::string> const &inputWorkspaces,
-                                     std::vector<std::size_t> const &workspaceIndices,
-                                     std::vector<double> const &startXs, std::vector<double> const &endXs) {
+std::string constructInputList(std::vector<std::string> const &inputWorkspaces,
+                               std::vector<std::size_t> const &workspaceIndices, std::vector<double> const &startXs,
+                               std::vector<double> const &endXs) {
   std::vector<std::string> entries;
   entries.reserve(inputWorkspaces.size());
   for (auto i = 0u; i < inputWorkspaces.size(); ++i)
-    entries.emplace_back(constructInputDictionaryEntry(inputWorkspaces[i], workspaceIndices[i], startXs[i], endXs[i]));
+    entries.emplace_back(constructInputListEntry(inputWorkspaces[i], workspaceIndices[i], startXs[i], endXs[i]));
 
-  return "{\n    " + joinVector(entries, ",\n    ") + "\n}";
+  return "[\n    " + joinVector(entries, ",\n    ") + "\n]";
 }
 
 std::vector<std::string> splitStringBy(std::string const &str, std::string const &delimiter) {
@@ -253,7 +253,7 @@ std::string GeneratePythonFitScript::generateVariableSetupCode() const {
   std::string const evaluationType = getProperty("EvaluationType");
   std::string const outputBaseName = getProperty("OutputBaseName");
 
-  replaceAll(code, "{{input_dictionary}}", constructInputDictionary(inputWorkspaces, workspaceIndices, startXs, endXs));
+  replaceAll(code, "{{input_list}}", constructInputList(inputWorkspaces, workspaceIndices, startXs, endXs));
   replaceAll(code, "{{function_string}}", generateFunctionString());
   replaceAll(code, "{{max_iterations}}", std::to_string(maxIterations));
   replaceAll(code, "{{minimizer}}", minimizer);

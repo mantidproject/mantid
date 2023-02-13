@@ -34,8 +34,10 @@ InelasticDataManipulationSymmetriseTab::InelasticDataManipulationSymmetriseTab(Q
 
   // SIGNAL/SLOT CONNECTIONS
   // Preview symmetrise
-  connect(m_view.get(), SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(handleValueChanged(QtProperty *, double)));
+  connect(m_view.get(), SIGNAL(doubleValueChanged(QtProperty *, double)), this,
+          SLOT(handleDoubleValueChanged(QtProperty *, double)));
+  connect(m_view.get(), SIGNAL(enumValueChanged(QtProperty *, int)), this,
+          SLOT(handleEnumValueChanged(QtProperty *, int)));
   connect(m_view.get(), SIGNAL(dataReady(QString const &)), this, SLOT(handleDataReady(QString const &)));
   connect(m_view.get(), SIGNAL(previewClicked()), this, SLOT(preview()));
   // Handle running, plotting and saving
@@ -148,7 +150,13 @@ void InelasticDataManipulationSymmetriseTab::setFileExtensionsByName(bool filter
   m_view->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
-void InelasticDataManipulationSymmetriseTab::handleValueChanged(QtProperty *prop, double value) {
+void InelasticDataManipulationSymmetriseTab::handleEnumValueChanged(QtProperty *prop, int value) {
+  if (prop->propertyName() == "Reflect Type") {
+    m_model->setIsPositiveReflect(value == 0);
+  }
+}
+
+void InelasticDataManipulationSymmetriseTab::handleDoubleValueChanged(QtProperty *prop, double value) {
   if (prop->propertyName() == "Spectrum No") {
     m_view->replotNewSpectrum(value);
   } else if (prop->propertyName() == "EMin") {

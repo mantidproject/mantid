@@ -7,11 +7,11 @@
 #include "IndirectPlotOptionsView.h"
 
 #include "MantidQtIcons/Icon.h"
-#include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <QMenu>
 #include <QMessageBox>
 #include <QSettings>
+#include <QSignalBlocker>
 
 #include <stdexcept>
 
@@ -166,12 +166,12 @@ void IndirectPlotOptionsView::setPlotType(PlotWidget const &plotType,
 }
 
 void IndirectPlotOptionsView::setWorkspaceComboBoxEnabled(bool enable) {
-  API::SignalBlocker blocker(m_plotOptions->cbWorkspace);
+  QSignalBlocker blocker(m_plotOptions->cbWorkspace);
   m_plotOptions->cbWorkspace->setEnabled(enable);
 }
 
 void IndirectPlotOptionsView::setIndicesLineEditEnabled(bool enable) {
-  API::SignalBlocker blocker(m_plotOptions->leIndices);
+  QSignalBlocker blocker(m_plotOptions->leIndices);
   m_plotOptions->leIndices->setEnabled(enable);
 }
 
@@ -214,7 +214,7 @@ void IndirectPlotOptionsView::removeWorkspace(QString const &workspaceName) {
 QString IndirectPlotOptionsView::selectedIndices() const { return m_plotOptions->leIndices->text(); }
 
 void IndirectPlotOptionsView::setIndices(QString const &indices) {
-  API::SignalBlocker blocker(m_plotOptions->leIndices);
+  QSignalBlocker blocker(m_plotOptions->leIndices);
   m_plotOptions->leIndices->setText(indices);
 }
 

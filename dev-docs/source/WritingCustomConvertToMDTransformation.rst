@@ -12,9 +12,7 @@ Introduction
 This information is intended for a developer who needs to write a customized
 :ref:`ConvertToMD class <algm-ConvertToMD-v1>` (plugin). The
 plugin then becomes automatically available to use in the
-:ref:`ConvertToMD <algm-ConvertToMD-v1>` algorithm and via the
-`Create MD workspaces <http://www.mantidproject.org/Create_MD_Workspace_GUI>`__
-interface to produce multidimensional workspace for further visualization and analysis.
+:ref:`ConvertToMD <algm-ConvertToMD-v1>` algorithm.
 
 As the MD transformation factory is similar to the :ref:`Dynamic Factory <Dynamic Factory>`
 used for converting :ref:`units <Unit Factory>`, the

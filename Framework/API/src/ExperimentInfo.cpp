@@ -255,8 +255,10 @@ struct ParameterValue {
   operator double() {
     if (info.m_logfileID.empty())
       return boost::lexical_cast<double>(info.m_value);
-    else
-      return info.createParamValue(runData.getTimeSeriesProperty<double>(info.m_logfileID));
+    else {
+      const TimeROI *roi = &runData.getTimeROI();
+      return info.createParamValue(runData.getTimeSeriesProperty<double>(info.m_logfileID), roi);
+    }
   }
   operator int() { return boost::lexical_cast<int>(info.m_value); }
   operator bool() {

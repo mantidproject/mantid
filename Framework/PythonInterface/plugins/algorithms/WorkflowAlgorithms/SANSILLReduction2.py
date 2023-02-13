@@ -7,15 +7,15 @@
 from SANSILLCommon import *
 import SANSILLCommon as common
 from mantid.api import (
-    PythonAlgorithm,
+    DataProcessorAlgorithm,
+    FileAction,
     MatrixWorkspace,
     MatrixWorkspaceProperty,
-    WorkspaceProperty,
     MultipleFileProperty,
-    PropertyMode,
     Progress,
+    PropertyMode,
     WorkspaceGroup,
-    FileAction,
+    WorkspaceProperty,
 )
 from mantid.dataobjects import SpecialWorkspace2D
 from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, LogicOperator, PropertyCriterion, StringListValidator
@@ -23,7 +23,7 @@ from mantid.simpleapi import *
 import numpy as np
 
 
-class SANSILLReduction(PythonAlgorithm):
+class SANSILLReduction(DataProcessorAlgorithm):
     """
     Performs unit data reduction of the given process type.
     Supports D11, D16, D22, and D33 instruments at the ILL.
@@ -260,6 +260,13 @@ class SANSILLReduction(PythonAlgorithm):
         )
 
         self.setPropertySettings("OutputFluxWorkspace", beam)
+
+        self.copyProperties("CalculateEfficiency", ["MinThreshold", "MaxThreshold"])
+        # override default documentation of copied parameters to make them understandable by user
+        threshold_property = self.getProperty("MinThreshold")
+        threshold_property.setDocumentation("Minimum threshold for calculated efficiency.")
+        threshold_property = self.getProperty("MaxThreshold")
+        threshold_property.setDocumentation("Maximum threshold for calculated efficiency.")
 
     def _add_correction_information(self, ws):
         """Adds information regarding corrections and inputs to the provided workspace.
@@ -876,7 +883,12 @@ class SANSILLReduction(PythonAlgorithm):
         """Creates relative inter-pixel efficiency map"""
         sens = self.getPropertyValue("OutputSensitivityWorkspace")
         if sens:
-            CalculateEfficiency(InputWorkspace=ws, OutputWorkspace=sens)
+            CalculateEfficiency(
+                InputWorkspace=ws,
+                OutputWorkspace=sens,
+                MinThreshold=self.getProperty("MinThreshold").value,
+                MaxThreshold=self.getProperty("MaxThreshold").value,
+            )
             self.setProperty("OutputSensitivityWorkspace", mtd[sens])
 
     # ===============================CORE LOGIC OF LOAD AND REDUCE===============================#
