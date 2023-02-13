@@ -32,7 +32,6 @@ public:
   MOCK_METHOD(ProjectionSurface_sptr, getSurface, (), (const, override));
   MOCK_METHOD(void, setSurfaceProxy, (ProjectionSurface_sptr));
   MOCK_METHOD(void, updateView, (bool), (override));
-  MOCK_METHOD(QSize, widgetDimensions, (), (const, override));
 
   void setSurface(ProjectionSurface_sptr surface) override {
     setSurfaceProxy(surface);

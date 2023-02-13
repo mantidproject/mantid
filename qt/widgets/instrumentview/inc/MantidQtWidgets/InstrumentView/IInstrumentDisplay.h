@@ -35,8 +35,5 @@ public:
   virtual void setSurface(ProjectionSurface_sptr surface) = 0;
 
   virtual void updateView(bool picking) = 0;
-
-  /// Return the size of the display widget in device pixels
-  virtual QSize widgetDimensions() const = 0;
 };
 } // namespace MantidQt::MantidWidgets

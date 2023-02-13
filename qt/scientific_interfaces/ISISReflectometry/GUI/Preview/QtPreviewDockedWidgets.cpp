@@ -118,7 +118,7 @@ void QtPreviewDockedWidgets::plotInstView(MantidWidgets::InstrumentActor *instAc
     disconnect(m_instDisplay->getSurface().get(), SIGNAL(shapesRemoved()));
     disconnect(m_instDisplay->getSurface().get(), SIGNAL(shapesCleared()));
   }
-  auto widgetSize = m_instDisplay->widgetDimensions();
+  auto widgetSize = m_instDisplay->currentWidget()->size();
   m_instDisplay->setSurface(
       std::make_shared<MantidWidgets::UnwrappedCylinder>(instActor, samplePos, axis, widgetSize, false));
   connect(m_instDisplay->getSurface().get(), SIGNAL(shapeChangeFinished()), this, SLOT(onInstViewShapeChanged()));
