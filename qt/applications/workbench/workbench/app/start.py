@@ -239,6 +239,9 @@ def start(options: argparse.ArgumentParser):
     if options.single_process:
         initialise_qapp_and_launch_workbench(options)
     else:
+        # We require the start method to be 'spawn' so that we do not inherit resources such as 'std::once_flag' from
+        # the parent process. This will mean the relevant 'atexit' code will execute in the child process, and therefore the
+        # FrameworkManager and UsageService will be shutdown as expected.
         context = multiprocessing.get_context("spawn")
         workbench_process = context.Process(target=initialise_qapp_and_launch_workbench, args=[options])
         workbench_process.start()
