@@ -138,7 +138,7 @@ class CalibrationModelTest(unittest.TestCase):
         self.assertEqual(path, self.model.get_last_prm_file_gsas2())
 
     def test_get_last_prm_file_gsas2_returns_none_initially(self):
-        self.assertEqual(None, self.model.get_last_prm_file_gsas2())
+        self.assertEqual("", self.model.get_last_prm_file_gsas2())
 
 
 if __name__ == "__main__":
