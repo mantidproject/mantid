@@ -31,7 +31,17 @@ class BaseSX(ABC):
         self.gonio_axes = None
         self.sample_dict = None
         self.n_mcevents = 1200
-        self.b2b_radius_scale = 5
+
+    # --- decorator to apply to all runs is run=None ---
+    def default_apply_to_all_runs(func):
+        def apply(self, *args, **kwargs):
+            if "run" in kwargs and kwargs["run"] is not None:
+                func(self, *args, **kwargs)
+            else:
+                for run in self.runs.keys():
+                    func(self, *args, **kwargs, run=run)
+
+        return apply
 
     # --- getters ---
 
@@ -73,6 +83,9 @@ class BaseSX(ABC):
             fieldname = "_".join([peak_type.value, integration_type.value])
         self.runs[str(run)][fieldname] = BaseSX.retrieve(peaks).name()
 
+    def set_md(self, run, ws_md):
+        self.runs[str(run)]["MD"] = BaseSX.retrieve(ws_md).name()
+
     def set_spacegroup(self, hm_symbol):
         self.spgr = SpaceGroupFactory.createSpaceGroup(hm_symbol)
 
@@ -112,14 +125,6 @@ class BaseSX(ABC):
             axis_dict = {f"Axis{iax}": ",".join([str(angles[iax]), self.gonio_axes[iax]]) for iax in range(len(angles))}
             mantid.SetGoniometer(Workspace=ws, **axis_dict)
 
-    # @abstractmethod()
-    # def process_data(
-    #     self,
-    #     runs: Sequence[str],
-    #     gonio_angles=None,
-    # ):
-    #     pass
-
     @staticmethod
     def convert_ws_to_MD(wsname, md_name=None, frame="Q (lab frame)"):
         if md_name is None:
@@ -133,31 +138,24 @@ class BaseSX(ABC):
         mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target=xunit)
         return wsMD
 
-    def convert_to_MD(self, runs=None, frame="Q (lab frame)"):
-        if runs is None:
-            runs = self.runs.keys()
-        for run in runs:
-            wsname = self.runs[str(run)]["ws"]
-            md_name = wsname + "_MD"
-            BaseSX.convert_ws_to_MD(wsname, md_name, frame)
-            self.runs[str(run)]["MD"] = md_name
+    @default_apply_to_all_runs
+    def convert_to_MD(self, run=None, frame="Q (lab frame)"):
+        wsname = BaseSX.retrieve(BaseSX.get_ws(run)).name()
+        md_name = wsname + "_MD"
+        BaseSX.convert_ws_to_MD(wsname, md_name, frame)
+        self.set_md(run, md_name)
 
-    def load_isaw_ub(self, isaw_files: Sequence[str], runs: Optional[Sequence[str]] = None, tol=0.15):
-        if runs is None:
-            runs = self.runs.keys()
-        if len(isaw_files) == 1 and runs is None:
-            isaw_files = len(runs) * isaw_files  # i.e. use same file for all runs
-        if len(isaw_files) == len(runs):
-            for run, isaw_file in zip(runs, isaw_files):
-                ws = self.get_ws(run)
-                try:
-                    mantid.LoadIsawUB(InputWorkspace=ws, Filename=isaw_file)
-                    peaks = self.get_peaks(run, PEAK_TYPE.FOUND)
-                    if peaks is not None:
-                        mantid.LoadIsawUB(InputWorkspace=peaks, Filename=isaw_file)
-                        mantid.IndexPeaks(PeaksWorkspace=peaks, Tolerance=tol, RoundHKLs=True)
-                except:
-                    print("LoadIsawUB failed for run " + run)
+    @default_apply_to_all_runs
+    def load_isaw_ub(self, isaw_file: str, run: Optional[Sequence[str]] = None, tol=0.15):
+
+        try:
+            mantid.LoadIsawUB(InputWorkspace=ws, Filename=isaw_file)
+            peaks = self.get_peaks(run, PEAK_TYPE.FOUND)
+            if peaks is not None:
+                mantid.LoadIsawUB(InputWorkspace=peaks, Filename=isaw_file)
+                mantid.IndexPeaks(PeaksWorkspace=peaks, Tolerance=tol, RoundHKLs=True)
+        except:
+            print("LoadIsawUB failed for run " + run)
 
     def find_ub_using_lattice_params(self, global_B, tol=0.15, **kwargs):
         if global_B:
@@ -190,19 +188,16 @@ class BaseSX(ABC):
             )
             mantid.IndexPeaks(PeaksWorkspace=peaks, Tolerance=tol, RoundHKLs=True)
 
-    def predict_peaks(self, peak_type=PEAK_TYPE.PREDICT, runs=None, **kwargs):
-        if runs is None:
-            runs = self.runs.keys()
-        for run in runs:
-            input_ws = None
-            ws = self.get_ws(run)
-            peaks = self.get_peaks(run, PEAK_TYPE.FOUND)
-            if peaks is not None and BaseSX.retrieve(peaks).sample().hasOrientedLattice():
-                input_ws = peaks
-            elif ws is not None and BaseSX.retrieve(ws).sample().hasOrientedLattice():
-                input_ws = ws
-            if input_ws is None:
-                continue  # skip
+    @default_apply_to_all_runs
+    def predict_peaks(self, peak_type=PEAK_TYPE.PREDICT, run=None, **kwargs):
+        input_ws = None
+        ws = self.get_ws(run)
+        peaks = self.get_peaks(run, PEAK_TYPE.FOUND)
+        if peaks is not None and BaseSX.retrieve(peaks).sample().hasOrientedLattice():
+            input_ws = peaks
+        elif ws is not None and BaseSX.retrieve(ws).sample().hasOrientedLattice():
+            input_ws = ws
+        if input_ws is not None:
             out_peaks_name = "_".join([BaseSX.retrieve(input_ws).name(), peak_type.value])
             if peak_type == PEAK_TYPE.PREDICT:
                 mantid.PredictPeaks(InputWorkspace=input_ws, OutputWorkspace=out_peaks_name, **kwargs)
@@ -226,18 +221,14 @@ class BaseSX(ABC):
         radius = (modQ / TOF) * dTOF
         return radius
 
-    # @abstractmethod
-    # def mask_detector_edges(ws):
-    #     pass  # must be implemented in subclass
-
     @staticmethod
     def integrate_peaks_MD(wsMD, peaks, out_peaks, **kwargs):
+        default_kwargs = {"IntegrateIfOnEdge": False, "UseOnePercentBackgroundCorrection": False}
+        kwargs = {**default_kwargs, **kwargs}
         peaks_int = mantid.IntegratePeaksMD(
             InputWorkspace=wsMD,
             PeaksWorkspace=peaks,
             OutputWorkspace=out_peaks,
-            IntegrateIfOnEdge=False,
-            UseOnePercentBackgroundCorrection=False,
             **kwargs,
         )
         return peaks_int
@@ -286,31 +277,26 @@ class BaseSX(ABC):
         peaks_int = mantid.IntegratePeaksSkew(InputWorkspace=ws, PeaksWorkspace=peaks, OutputWorkspace=out_peaks, **kwargs)
         return peaks_int
 
-    def integrate_data(self, integration_type, peak_type, tol=0, runs=None, **kwargs):
-        if runs is None:
-            runs = self.runs.keys()
-        for run in runs:
-            data = self.runs[str(run)]
-            pk_table = data[peak_type.value]
-            if peak_type == PEAK_TYPE.FOUND and tol > 0:
-                mantid.IndexPeaks(PeaksWorkspace=pk_table, Tolerance=tol, RoundHKLs=True)
-                mantid.FilterPeaks(
-                    InputWorkspace=pk_table, OutputWorkspace=pk_table, FilterVariable="h^2+k^2+l^2", FilterValue=0, Operator=">"
-                )
-            # integrate
-            peak_int_name = "_".join([BaseSX.retrieve(pk_table).name(), integration_type.value])
-            if integration_type == INTEGRATION_TYPE.MD and data["MD"] is not None:
-                BaseSX.integrate_peaks_MD(data["MD"], pk_table, peak_int_name, **kwargs)
-            elif integration_type == INTEGRATION_TYPE.MD_OPTIMAL_RADIUS and data["MD"] is not None:
-                # if possible get original workspace
-                if data["ws"] is not None and ADS.doesExist(data["ws"]):
-                    BaseSX.integrate_peaks_MD_optimal_radius(data["MD"], pk_table, peak_int_name, ws=data["ws"], **kwargs)
-                else:
-                    BaseSX.integrate_peaks_MD_optimal_radius(data["MD"], pk_table, peak_int_name, **kwargs)
-            else:
-                BaseSX.integrate_peaks_skew(data["ws"], pk_table, peak_int_name, **kwargs)
-            # store result
-            self.set_peaks(run, peak_int_name, peak_type, integration_type)
+    @default_apply_to_all_runs
+    def integrate_data(self, integration_type, peak_type, tol=0, run=None, **kwargs):
+        pk_table = self.get_peaks(run, peak_type)
+        if peak_type == PEAK_TYPE.FOUND and tol > 0:
+            mantid.IndexPeaks(PeaksWorkspace=pk_table, Tolerance=tol, RoundHKLs=True)
+            mantid.FilterPeaks(InputWorkspace=pk_table, OutputWorkspace=pk_table, FilterVariable="h^2+k^2+l^2", FilterValue=0, Operator=">")
+        # integrate
+        peak_int_name = "_".join([BaseSX.retrieve(pk_table).name(), integration_type.value])
+        ws = self.get_ws(run)
+        ws_md = self.get_md(run)
+        if integration_type == INTEGRATION_TYPE.MD and ws_md is not None:
+            BaseSX.integrate_peaks_MD(ws_md, pk_table, peak_int_name, **kwargs)
+        elif integration_type == INTEGRATION_TYPE.MD_OPTIMAL_RADIUS and ws_md is not None:
+            if ws is not None:
+                kwargs["ws"] = ws  # use this workspace to avoid loading in empty
+            BaseSX.integrate_peaks_MD_optimal_radius(ws_md, pk_table, peak_int_name, **kwargs)
+        else:
+            BaseSX.integrate_peaks_skew(ws, pk_table, peak_int_name, **kwargs)
+        # store result
+        self.set_peaks(run, peak_int_name, peak_type, integration_type)
 
     def save_integrated_peaks(self, integration_type, peak_type, save_dir: str, save_format: str, make_consistent=True):
         fieldname = "_".join([peak_type.value, integration_type.value])
@@ -347,10 +333,7 @@ class BaseSX(ABC):
             mantid.RenameWorkspace(InputWorkspace=all_integrated_peaks, OutputWorkspace=filename)
         else:
             mantid.DeleteWorkspace(all_integrated_peaks)
-
-    # @abstractmethod
-    # def load_run(runno):
-    #     pass
+            mantid.DeleteWorkspace(all_integrated_peaks)
 
     def _is_vanadium_processed(self):
         return self.van_ws is not None and ADS.doesExist(self.van_ws)

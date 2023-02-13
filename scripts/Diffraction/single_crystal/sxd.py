@@ -200,31 +200,31 @@ class SXD(BaseSX):
 
         return xml_path
 
-    def apply_calibration_xml(self, xml_path):
+    @default_apply_to_all_runs
+    def apply_calibration_xml(self, xml_path, run=None):
         """
         Apply .xml calibration file to workspaces loaded (and peak workspaces if present) - subsequent runs loaded
         will automatically have the new calibration
         :param xml_path: path to xml cal file
         """
         use_empty = False
-        for run in self.runs.keys():
-            ws = self.get_ws(run)
-            if ws is None:
-                # need instrument ws to apply to peaks
-                ws = "empty"
-                mantid.LoadEmptyInstrument(InstrumentName="SXD", OutputWorkspace=ws)
-                use_empty = True
-            else:
-                mantid.LoadInstrument(Workspace=ws, InstrumentName="SXD", RewriteSpectraMap=False)  # reset instrument if already calibrated
-            mantid.LoadParameterFile(Workspace=ws, Filename=xml_path)
-            for pk_type in PEAK_TYPE:
-                pks = self.get_peaks(run, peak_type=pk_type, integration_type=None)
-                if pks is not None:
-                    mantid.ApplyInstrumentToPeaks(InputWorkspace=pks, InstrumentWorkspace=ws, OutputWorkspace=pks)
-                    for int_type in INTEGRATION_TYPE:
-                        pks_int = self.get_peaks(run, peak_type=pk_type, integration_type=int_type)
-                        if pks_int is not None:
-                            mantid.ApplyInstrumentToPeaks(InputWorkspace=pks_int, InstrumentWorkspace=ws, OutputWorkspace=pks_int)
+        ws = self.get_ws(run)
+        if ws is None:
+            # need instrument ws to apply to peaks
+            ws = "empty"
+            mantid.LoadEmptyInstrument(InstrumentName="SXD", OutputWorkspace=ws)
+            use_empty = True
+        else:
+            mantid.LoadInstrument(Workspace=ws, InstrumentName="SXD", RewriteSpectraMap=False)  # reset instrument if already calibrated
+        mantid.LoadParameterFile(Workspace=ws, Filename=xml_path)
+        for pk_type in PEAK_TYPE:
+            pks = self.get_peaks(run, peak_type=pk_type, integration_type=None)
+            if pks is not None:
+                mantid.ApplyInstrumentToPeaks(InputWorkspace=pks, InstrumentWorkspace=ws, OutputWorkspace=pks)
+                for int_type in INTEGRATION_TYPE:
+                    pks_int = self.get_peaks(run, peak_type=pk_type, integration_type=int_type)
+                    if pks_int is not None:
+                        mantid.ApplyInstrumentToPeaks(InputWorkspace=pks_int, InstrumentWorkspace=ws, OutputWorkspace=pks_int)
         if use_empty:
             mantid.DeleteWorkspace(ws)
 
