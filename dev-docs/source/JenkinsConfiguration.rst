@@ -224,6 +224,35 @@ Pull Requests
       }
     }
 
+Remove directories from single node
+----------------------------------------
+
+It is advised to take the target node offline.
+
+.. code-block:: groovy
+
+    import hudson.model.*
+
+    // Example: "isis-ndw1597"
+    String agentName = <agent/node name>
+
+    // Example: "pull_requests-conda-windows" , "build_packages_from_branch"
+    jobs = [<job 1 string> , <job 2 string>, ...]
+
+    nodes = Jenkins.instance.slaves
+    for (node in nodes) {
+      if(node.toString() == "hudson.slaves.DumbSlave[$agentName]") {
+        for (job in jobs) {
+          FilePath fp = node.createPath(node.getRootPath().toString() + File.separator + "workspace" + File.separator + job)
+          if(fp!=null && fp.exists()) {
+            println(node.toString())
+            println(fp.toString())
+            fp.deleteRecursive()
+          }
+        }
+      }
+    }
+
 Update Branches For Jobs
 ------------------------
 
