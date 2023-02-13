@@ -55,7 +55,6 @@ private:
   void applySensitivityMap();
   void setInstrumentName(const NeXus::NXEntry &, const std::string &);
   DetectorPosition getDetectorPositionD33(const NeXus::NXEntry &, const std::string &);
-  void setNumberOfMonitors();
 
   void initWorkSpace(NeXus::NXEntry &, const std::string &);
   void initWorkSpaceD11B(NeXus::NXEntry &, const std::string &);

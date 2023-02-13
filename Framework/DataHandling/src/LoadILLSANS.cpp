@@ -43,7 +43,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLSANS)
  */
 LoadILLSANS::LoadILLSANS()
     : m_supportedInstruments{"D11", "D22", "D33", "D16"}, m_defaultBinning{0, 0}, m_resMode("nominal"), m_isTOF(false),
-      m_sourcePos(0.) {}
+      m_sourcePos(0.), m_numberOfMonitors(2) {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -108,7 +108,6 @@ void LoadILLSANS::exec() {
   NXEntry firstEntry = root.openFirstEntry();
   const std::string instrumentPath = LoadHelper::findInstrumentNexusPath(firstEntry);
   setInstrumentName(firstEntry, instrumentPath);
-  setNumberOfMonitors();
   Progress progress(this, 0.0, 1.0, 4);
   progress.report("Initializing the workspace for " + m_instrumentName);
   if (m_instrumentName == "D33") {
@@ -267,12 +266,6 @@ LoadILLSANS::DetectorPosition LoadILLSANS::getDetectorPositionD33(const NeXus::N
 }
 
 /**
- * @brief LoadILLSANS::setNumberOfMonitors
- * Set the number of monitor attribute depending on the instrument loaded.
- */
-void LoadILLSANS::setNumberOfMonitors() { m_numberOfMonitors = this->m_instrumentName == "D16B" ? 1 : 2; }
-
-/**
  * @brief LoadILLSANS::getDataDimensions
  * Retrieves physical dimensions of the data from the dataset dimensions.
  * @param data the data set to take the dimensions from
@@ -324,7 +317,6 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &i
     if (data.dim1() == numberOfWiresInD16B && data.dim2() == numberOfPixelsPerWireInD16B) {
       m_instrumentName = "D16B";
       m_isD16Omega = true;
-      setNumberOfMonitors(); // update the number of monitors now that the instrument changed.
     }
   }
 
@@ -622,7 +614,7 @@ size_t LoadILLSANS::loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firs
  * @brief Load data from D16B's monitor. These data are not stored in the usual NXmonitor field, but rather in the
  * scanned variables, so it uses a completely different logic.
  * @param firstEntry: already opened first entry in nexus
- * @param firstIndex: the workspace index to load the first monitor to
+ * @param firstIndex: the workspace index to start loading the monitor in
  * @param binning: the binning to assign the monitor values
  * @return the new workspace index on which to load next
  */
@@ -630,55 +622,43 @@ size_t LoadILLSANS::loadDataFromD16ScanMonitors(const NeXus::NXEntry &firstEntry
                                                 const std::vector<double> &binning) {
   std::string path = "/data_scan/scanned_variables/data";
 
-  // the monitor is the fourth scanned variable
+  // the monitors are the fourth and fith scanned variable, if one can depend on the ordering being constant
   // we could verify that by reading the /data_scan/scanned_variables/variable_names/name entry, if only nexus knew how
   // to read string arrays.
-  uint32_t monitorIndex = 3;
-
+  std::vector<int> monitorIndices = {3, 4};
   auto scannedVariables = LoadHelper::getDoubleDataset(firstEntry, path);
   scannedVariables.load();
+  auto monitorNumber = 1; // for the naming of sample log variable
+  for (auto monitorIndex : monitorIndices) {
 
-  auto firstMonitorValuePos = scannedVariables() + monitorIndex * scannedVariables.dim1();
+    auto firstMonitorValuePos = scannedVariables() + monitorIndex * scannedVariables.dim1();
+    const HistogramData::Counts counts(firstMonitorValuePos, firstMonitorValuePos + scannedVariables.dim1());
+    m_localWorkspace->setCounts(firstIndex, counts);
 
-  const HistogramData::Counts counts(firstMonitorValuePos, firstMonitorValuePos + scannedVariables.dim1());
-  m_localWorkspace->setCounts(firstIndex, counts);
-
-  if ((m_instrumentName == "D16" || m_instrumentName == "D16B") && scannedVariables.dim1() == 1) {
-    // This is the old D16 data scan format, which also covers single-scan D16B data. It is pain.
-    // Due to the fact it was verified with a data structure using binedges rather than points for the wavelength,
-    // we have to keep that and not make it an histogram, because some algorithms later in the reduction process
-    // handle errors completely differently in this case.
-    // We distinguish it from D16 data in the new format but checking there is only one slice of the omega scan
-    const HistogramData::BinEdges binEdges(binning);
-    m_localWorkspace->setBinEdges(firstIndex, binEdges);
-  } else {
-    HistogramData::Points points = HistogramData::Points(binning);
-    m_localWorkspace->setPoints(firstIndex, points);
-  }
-
-  // Add average monitor counts to a property:
-  double averageMonitorCounts =
-      std::accumulate(firstMonitorValuePos, firstMonitorValuePos + scannedVariables.dim1(), double(0)) /
-      static_cast<double>(scannedVariables.dim1());
-
-  // make sure the monitor has values!
-  if (averageMonitorCounts > 0) {
-    API::Run &runDetails = m_localWorkspace->mutableRun();
-    runDetails.addProperty("monitor", averageMonitorCounts, true);
-  }
-
-  firstIndex++;
-
-  if (m_instrumentName == "D16") {
-    // the old D16 has 2 monitors, the second being empty but still needing a binning
-
-    if (scannedVariables.dim1() == 1) {
+    if ((m_instrumentName == "D16" || m_instrumentName == "D16B") && scannedVariables.dim1() == 1) {
+      // This is the old D16 data scan format, which also covers single-scan D16B data. It is pain.
+      // Due to the fact it was verified with a data structure using binedges rather than points for the wavelength,
+      // we have to keep that and not make it an histogram, because some algorithms later in the reduction process
+      // handle errors completely differently in this case.
+      // We distinguish it from D16 data in the new format but checking there is only one slice of the omega scan
       const HistogramData::BinEdges binEdges(binning);
       m_localWorkspace->setBinEdges(firstIndex, binEdges);
     } else {
       HistogramData::Points points = HistogramData::Points(binning);
       m_localWorkspace->setPoints(firstIndex, points);
     }
+
+    // Add average monitor counts to a property:
+    const auto averageMonitorCounts =
+        std::accumulate(firstMonitorValuePos, firstMonitorValuePos + scannedVariables.dim1(), double(0)) /
+        static_cast<double>(scannedVariables.dim1());
+
+    // make sure the monitor has values!
+    if (averageMonitorCounts > 0) {
+      API::Run &runDetails = m_localWorkspace->mutableRun();
+      runDetails.addProperty("monitor" + std::to_string(monitorNumber), averageMonitorCounts, true);
+    }
+    monitorNumber++;
     firstIndex++;
   }
   return firstIndex;

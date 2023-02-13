@@ -610,8 +610,9 @@ public:
     TS_ASSERT(!outputWS->isHistogramData())
     TS_ASSERT(!outputWS->detectorInfo().isMonitor(0));
     TS_ASSERT(outputWS->detectorInfo().isMonitor(192 * 1152));
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(192 * 1152 + 1));
     TS_ASSERT_EQUALS(outputWS->blocksize(), 6)
-    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 192 * 1152 + 1);
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 192 * 1152 + 2);
     // check loaded data contains expected values
     TS_ASSERT_DELTA(outputWS->x(0)[0], 5.0, 1E-3)
     TS_ASSERT_DELTA(outputWS->x(0)[5], 6.0, 1E-3)
@@ -650,8 +651,9 @@ public:
     TS_ASSERT(outputWS->isHistogramData())
     TS_ASSERT(!outputWS->detectorInfo().isMonitor(0));
     TS_ASSERT(outputWS->detectorInfo().isMonitor(192 * 1152));
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(192 * 1152 + 1));
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
-    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 192 * 1152 + 1);
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 192 * 1152 + 2);
     // check loaded data contains expected values
     TS_ASSERT_DELTA(outputWS->x(2 + 2 * 192)[0], 4.45 * 0.95, 1E-3) // +/- 5 % wavelength resolution
     TS_ASSERT_DELTA(outputWS->x(2 + 2 * 192)[1], 4.45 * 1.05, 1E-3)
