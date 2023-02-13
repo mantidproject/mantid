@@ -7,7 +7,6 @@
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/TimeROI.h"

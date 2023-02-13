@@ -79,6 +79,7 @@ void FilterBadPulses::exec() {
     throw std::logic_error("Failed to find \"" + LOG_CHARGE_NAME + "\" in sample logs");
   }
   Kernel::TimeSeriesPropertyStatistics stats = pcharge_log->getStatistics();
+  double timeTolerance = 0.5 * stats.duration / pcharge_log->realSize(); // average half-time in between measurements
 
   // check that the maximum value is greater than zero
   if (stats.maximum <= 0.) {
@@ -103,6 +104,7 @@ void FilterBadPulses::exec() {
   filterAlgo->setProperty("LogName", "proton_charge");
   filterAlgo->setProperty("MinimumValue", min_pcharge);
   filterAlgo->setProperty("MaximumValue", max_pcharge);
+  filterAlgo->setProperty("TimeTolerance", timeTolerance);
   filterAlgo->execute();
 
   // just grab the child's output workspace

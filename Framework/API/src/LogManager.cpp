@@ -210,6 +210,17 @@ void LogManager::splitByTime(SplittingIntervalVec &splitter, std::vector<LogMana
 
   // Now that will do the split down here.
   m_manager->splitByTime(splitter, output_managers);
+
+  // endow each LogManager with the TimeROI constructed from the corresponding splitter
+  // it is implicit that the running index of vector outputs is the destination index in the splitter
+  const std::map<int, Kernel::TimeROI> roiMap = timeROIsFromSplitters(splitter);
+  for (size_t i = 0; i < n; i++) {
+    if (outputs[i]) {
+      int destinationIndex = static_cast<int>(i);
+      const Kernel::TimeROI &roi = roiMap.at(destinationIndex);
+      outputs[i]->setTimeROI(roi);
+    }
+  }
 }
 
 //-----------------------------------------------------------------------------------------------
