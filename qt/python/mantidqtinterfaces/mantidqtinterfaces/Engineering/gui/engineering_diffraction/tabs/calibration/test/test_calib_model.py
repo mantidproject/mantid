@@ -37,6 +37,7 @@ class CalibrationModelTest(unittest.TestCase):
         mock_load_full_calib.assert_called_once()
         mock_write_diff_consts.assert_called_once_with(self.calibration_info.prm_filepath)
         self.calibration_info.load_relevant_calibration_files.assert_called_once()
+        self.assertEqual(self.calibration_info.prm_filepath, self.model._saved_prm_file)
 
     @patch(file_path + ".output_settings.get_output_path")
     @patch(enggutils_path + ".create_new_calibration")
@@ -129,6 +130,15 @@ class CalibrationModelTest(unittest.TestCase):
         self.model.create_new_calibration(self.calibration_info, rb_num, plot_output=False, save_dir="dir")
 
         mock_create_out.assert_called_once_with(path.join("dir", "User", "1", "Calibration", ""), self.calibration_info, "foc_ceria_ws")
+
+    def test_get_last_prm_file_gsas2(self):
+        path = "fake/path/to/calib/prm"
+        self.model._saved_prm_file = path
+
+        self.assertEqual(path, self.model.get_last_prm_file_gsas2())
+
+    def test_get_last_prm_file_gsas2_returns_none_initially(self):
+        self.assertEqual(None, self.model.get_last_prm_file_gsas2())
 
 
 if __name__ == "__main__":

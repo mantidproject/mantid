@@ -99,8 +99,8 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
     def set_default_gss_files(self, filepaths):
         self.set_default_files(filepaths, self.focused_data_file_finder)
 
-    def set_default_prm_files(self, filepaths):
-        self.set_default_files(filepaths, self.instrument_group_file_finder)
+    def set_default_prm_files(self, filepath):
+        self.set_default_files([filepath], self.instrument_group_file_finder)
 
     def set_default_files(self, filepaths, file_finder):
         if not filepaths:
