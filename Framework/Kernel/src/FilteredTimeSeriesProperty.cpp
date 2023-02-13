@@ -27,9 +27,7 @@ Logger g_log("FilteredTimeSeriesProperty");
  */
 template <typename TYPE>
 FilteredTimeSeriesProperty<TYPE>::FilteredTimeSeriesProperty(const std::string &name)
-    : TimeSeriesProperty<TYPE>(name), m_filterMap(), m_filterApplied(false) {
-  m_filter = std::make_unique<TimeROI>();
-}
+    : TimeSeriesProperty<TYPE>(name), m_filter(std::make_unique<TimeROI>()), m_filterMap(), m_filterApplied(false) {}
 
 /**
  * Construct with a source time series & a filter property
@@ -39,9 +37,7 @@ FilteredTimeSeriesProperty<TYPE>::FilteredTimeSeriesProperty(const std::string &
 template <typename HeldType>
 FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(TimeSeriesProperty<HeldType> *seriesProp,
                                                                  const TimeSeriesProperty<bool> &filterProp)
-    : TimeSeriesProperty<HeldType>(*seriesProp), m_filterApplied(false) {
-  m_filter = std::make_unique<TimeROI>();
-
+    : TimeSeriesProperty<HeldType>(*seriesProp), m_filter(std::make_unique<TimeROI>()), m_filterApplied(false) {
   // Now filter us with the filter
   this->filterWith(&filterProp);
 }
@@ -50,15 +46,13 @@ template <typename HeldType>
 FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(const std::string &name,
                                                                  const std::vector<Types::Core::DateAndTime> &times,
                                                                  const std::vector<HeldType> &values)
-    : TimeSeriesProperty<HeldType>(name, times, values), m_filterMap(), m_filterApplied(false) {
-  m_filter = std::make_unique<TimeROI>();
-}
+    : TimeSeriesProperty<HeldType>(name, times, values), m_filter(std::make_unique<TimeROI>()), m_filterMap(),
+      m_filterApplied(false) {}
 
 template <typename HeldType>
 FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(TimeSeriesProperty<HeldType> *seriesProp)
-    : TimeSeriesProperty<HeldType>(*seriesProp), m_filterMap(), m_filterApplied(false) {
-  m_filter = std::make_unique<TimeROI>();
-}
+    : TimeSeriesProperty<HeldType>(*seriesProp), m_filter(std::make_unique<TimeROI>()), m_filterMap(),
+      m_filterApplied(false) {}
 
 /**
  * Construct with a source time series & a filter property
@@ -69,8 +63,8 @@ FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(TimeSeriesPrope
 template <typename HeldType>
 FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(
     std::unique_ptr<const TimeSeriesProperty<HeldType>> seriesProp, const TimeSeriesProperty<bool> &filterProp)
-    : TimeSeriesProperty<HeldType>(*seriesProp.get()), m_filterMap(), m_filterApplied(false) {
-  m_filter = std::make_unique<TimeROI>();
+    : TimeSeriesProperty<HeldType>(*seriesProp.get()), m_filter(std::make_unique<TimeROI>()), m_filterMap(),
+      m_filterApplied(false) {
   // Now filter us with the filter
   this->filterWith(&filterProp);
 }
@@ -85,9 +79,8 @@ template <typename HeldType> FilteredTimeSeriesProperty<HeldType> *FilteredTimeS
 template <typename HeldType>
 FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(const FilteredTimeSeriesProperty &prop)
     : TimeSeriesProperty<HeldType>(prop.name(), prop.timesAsVector(), prop.valuesAsVector()),
-      m_filterMap(prop.m_filterMap), m_filterApplied(prop.m_filterApplied) {
-  m_filter = std::make_unique<TimeROI>(*prop.m_filter.get());
-}
+      m_filter(std::make_unique<TimeROI>(*prop.m_filter.get())), m_filterMap(prop.m_filterMap),
+      m_filterApplied(prop.m_filterApplied) {}
 
 /**
  * Destructor
@@ -362,9 +355,10 @@ template <typename TYPE> void FilteredTimeSeriesProperty<TYPE>::applyFilter() co
       m_filterMap.pop_back();
 
     // add everything up to the end time
-    while ((this->m_values[index_current_log].time() < endTime) && (index_current_log < this->m_values.size())) {
+    for (; index_current_log < this->m_values.size(); ++index_current_log) {
+      if (this->m_values[index_current_log].time() >= endTime)
+        break;
       m_filterMap.emplace_back(index_current_log);
-      index_current_log++;
     }
   }
 
