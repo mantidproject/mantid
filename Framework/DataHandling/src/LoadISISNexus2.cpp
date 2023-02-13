@@ -758,6 +758,14 @@ void LoadISISNexus2::loadPeriodData(int64_t period, NXEntry &entry, DataObjects:
   } catch (std::runtime_error &) {
     g_log.debug() << "No title was found in the input file, " << getPropertyValue("Filename") << '\n';
   }
+
+  std::string notes = "";
+  try {
+    notes = entry.getString("notes");
+  } catch (std::runtime_error &) {
+    // if no notes, add empty string
+  }
+  local_workspace->setComment(notes);
 }
 
 /**
