@@ -284,18 +284,7 @@ template <typename TYPE> void FilteredTimeSeriesProperty<TYPE>::filterWith(const
     // if filter is empty, clear the current
     m_filter->clear();
   } else {
-    // when filter log ends with USE so need to add another value off the end
-    if (filter->lastValue()) {
-      // make a copy of the filter so it can be altered
-      TimeSeriesProperty<bool> filterCopy(*filter);
-      // calculate the full duration of the filter
-      const auto duration = filter->lastTime() - filter->firstTime();
-      // add an ignore that is the full duration past the end
-      filterCopy.addValue(filter->lastTime() + duration, false);
-      m_filter->replaceROI(&filterCopy);
-    } else {
-      m_filter->replaceROI(filter);
-    }
+    m_filter->replaceROI(filter);
 
     applyFilter();
   }
