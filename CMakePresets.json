@@ -119,7 +119,7 @@
         "conda"
       ],
       "generator": "Visual Studio 17 2022",
-      "toolset": "vc142"
+      "toolset": "v142"
     },
     {
       "name": "win-ninja",
