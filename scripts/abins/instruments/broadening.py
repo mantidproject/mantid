@@ -145,7 +145,7 @@ def broaden_spectrum(frequencies, bins, s_dft, sigma, scheme="gaussian_truncated
             center=frequencies,
             weights=s_dft,
             is_hist=True,
-            limit=3,
+            limit=abins.parameters.sampling["broadening_range"],
             function="gaussian",
             spacing="sqrt2",
         )
