@@ -201,7 +201,6 @@ class RectangleController:
     NUMBER_OF_ROWS = 5
 
     def __init__(self, x0: float = 0, y0: float = 0, x1: float = 0, y1: float = 0):
-
         self.header = None
         self.set_header_items()
 

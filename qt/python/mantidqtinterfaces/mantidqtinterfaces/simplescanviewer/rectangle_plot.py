@@ -31,7 +31,6 @@ class UserInteraction(Enum):
 
 
 class MultipleRectangleSelectionLinePlot(KeyHandler):
-
     STATUS_MESSAGE = "Press key to export: c=both cuts, x=X, y=Y, p=peaks. 'Del' deletes a ROI. " "'f' interpolates rectangles."
     SELECTION_KEYS = ("c", "x", "y", "f", "delete", "p")
     EPSILON = 1e-3
@@ -427,7 +426,6 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
             )
 
         if len(rectangles) == 1 or two_same_rectangles(rectangles):
-
             if len(rectangles) != 1:
                 logger.notice("The 2 regions of interest are superposed. Proceeding as if there was only one.")
 
@@ -503,7 +501,6 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
 
         # as long as we can add more ROis on either side of the first ROI, we do
         while xmin < v < xmax or xmin < -v < xmax:
-
             # since the x axis is 2*theta, omega = theta means y = x/2
             if self.rectangle_fit_on_image((v, v / 2), width, height):
                 self._draw_rectangle((v - width / 2, v / 2 - height / 2), width, height)

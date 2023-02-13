@@ -13,7 +13,6 @@ import numpy as np
 
 
 class SANSILLReductionTest(unittest.TestCase):
-
     _facility = None
     _instrument = None
 

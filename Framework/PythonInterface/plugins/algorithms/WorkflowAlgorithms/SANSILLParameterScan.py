@@ -75,7 +75,6 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
             logger.warning("PixelYMax value is too high. Reduced to {0}.".format(self.pixel_y_max))
 
     def PyInit(self):
-
         self.declareProperty(
             WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output, optional=PropertyMode.Optional),
             doc="The output workspace containing the 2D reduced data.",
@@ -142,7 +141,6 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         self.setPropertyGroup("MaxThreshold", "Options")
 
     def PyExec(self):
-
         self.setUp()
 
         _, load_ws_name = needs_loading(self.sample, "Load")

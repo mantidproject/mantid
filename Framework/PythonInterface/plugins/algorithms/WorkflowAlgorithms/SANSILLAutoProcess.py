@@ -243,7 +243,6 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.stitch_reference_index = self.getProperty("StitchReferenceIndex").value
 
     def PyInit(self):
-
         self.declareProperty(
             WorkspaceGroupProperty("OutputWorkspace", "", direction=Direction.Output),
             doc="The output workspace group containing reduced data.",

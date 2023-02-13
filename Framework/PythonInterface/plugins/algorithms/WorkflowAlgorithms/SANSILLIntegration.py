@@ -33,7 +33,6 @@ import numpy as np
 
 
 class SANSILLIntegration(PythonAlgorithm):
-
     _input_ws = ""
     _output_ws = ""
     _output_type = ""

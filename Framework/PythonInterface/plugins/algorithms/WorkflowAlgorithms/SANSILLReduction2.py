@@ -78,7 +78,6 @@ class SANSILLReduction(DataProcessorAlgorithm):
         return issues
 
     def PyInit(self):
-
         # ================================MAIN PARAMETERS================================#
         can_runs = EnabledWhenProperty("SampleWorkspace", PropertyCriterion.IsEqualTo, "")
 

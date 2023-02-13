@@ -11,7 +11,6 @@ from mantid.simpleapi import SANSILLParameterScan, config, mtd
 
 
 class SANSILLParameterScanTest(unittest.TestCase):
-
     _facility = None
 
     @classmethod

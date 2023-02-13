@@ -23,7 +23,6 @@ import os
 
 
 class SANSILLReduction(DataProcessorAlgorithm):
-
     _mode = "Monochromatic"
     _instrument = None
 
@@ -105,7 +104,6 @@ class SANSILLReduction(DataProcessorAlgorithm):
             MaskDetectors(Workspace=ws, MaskedWorkspace=masked_ws)
 
     def PyInit(self):
-
         self.declareProperty(
             MultipleFileProperty("Run", action=FileAction.OptionalLoad, extensions=["nxs"], allow_empty=True), doc="File path of run(s)."
         )
