@@ -198,7 +198,7 @@ public:
   /// Calculate the time-weighted average of a property in a filtered range
   double averageValueInFilter(const std::vector<SplittingInterval> &filter) const override;
   /// @copydoc Mantid::Kernel::ITimeSeriesProperty::averageAndStdDevInFilter()
-  std::pair<double, double> averageAndStdDevInFilter(const std::vector<SplittingInterval> &filter) const override;
+  std::pair<double, double> averageAndStdDevInFilter(const std::vector<SplittingInterval> &intervals) const override;
   /** Returns the calculated time weighted mean and standard deviation values.
    * @return The time-weighted average value of the log when the time measurement was active.
    */
