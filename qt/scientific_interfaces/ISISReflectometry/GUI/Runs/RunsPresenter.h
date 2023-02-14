@@ -128,8 +128,8 @@ public:
   void notifySearchFailed() override;
 
   // IAsyncAlgorithmSubscriber overrides
-  void notifyAlgorithmError(std::string const &algorithmName, std::string const &message) override;
-  void notifyAlgorithmFinished(std::string const &algorithmName) override;
+  void notifyAlgorithmError(Mantid::API::IAlgorithm const *alg, std::string const &message) override;
+  void notifyAlgorithmFinished(Mantid::API::IAlgorithm const *alg) override;
 
 protected:
   IRunsTablePresenter *tablePresenter() const;

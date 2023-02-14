@@ -229,8 +229,8 @@ void DataSelector::autoLoadFile(const QString &filepath) {
  * @param algorithmName :: The name of the algorithm which errored
  * @param message :: The error message
  */
-void DataSelector::notifyAlgorithmError(std::string const &algorithmName, std::string const &message) {
-  (void)algorithmName;
+void DataSelector::notifyAlgorithmError(Mantid::API::IAlgorithm const *alg, std::string const &message) {
+  (void)alg;
   m_uiForm.rfFileInput->setFileProblem("Could not load file. See log for details. " + QString::fromStdString(message));
 }
 
@@ -239,8 +239,8 @@ void DataSelector::notifyAlgorithmError(std::string const &algorithmName, std::s
  *
  * @param algorithmName :: The name of the algorithm which has completed
  */
-void DataSelector::notifyAlgorithmFinished(std::string const &algorithmName) {
-  (void)algorithmName;
+void DataSelector::notifyAlgorithmFinished(Mantid::API::IAlgorithm const *alg) {
+  (void)alg;
   emit dataReady(getWsNameFromFiles());
 }
 

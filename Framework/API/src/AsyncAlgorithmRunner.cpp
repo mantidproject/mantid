@@ -62,11 +62,11 @@ void AsyncAlgorithmRunner::onAlgorithmProgress(const Poco::AutoPtr<Algorithm::Pr
 }
 
 void AsyncAlgorithmRunner::onAlgorithmError(const Poco::AutoPtr<Algorithm::ErrorNotification> &pNf) {
-  m_subscriber->notifyAlgorithmError(pNf->algorithm()->name(), pNf->what);
+  m_subscriber->notifyAlgorithmError(pNf->algorithm(), pNf->what);
 }
 
 void AsyncAlgorithmRunner::onAlgorithmFinished(const Poco::AutoPtr<Algorithm::FinishedNotification> &pNf) {
-  m_subscriber->notifyAlgorithmFinished(pNf->algorithm()->name());
+  m_subscriber->notifyAlgorithmFinished(pNf->algorithm());
 }
 
 } // namespace Mantid::API

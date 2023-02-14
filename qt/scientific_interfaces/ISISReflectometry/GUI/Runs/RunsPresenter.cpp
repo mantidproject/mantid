@@ -607,8 +607,8 @@ void RunsPresenter::stopMonitor() {
 
 /** Handler called when the monitor algorithm errors
  */
-void RunsPresenter::notifyAlgorithmError(std::string const &algorithmName, std::string const &message) {
-  (void)algorithmName;
+void RunsPresenter::notifyAlgorithmError(Mantid::API::IAlgorithm const *alg, std::string const &message) {
+  (void)alg;
 
   updateViewWhenMonitorStopped();
   if (message != "Algorithm terminated") {
@@ -619,8 +619,8 @@ void RunsPresenter::notifyAlgorithmError(std::string const &algorithmName, std::
 
 /** Handler called when the monitor algorithm finishes
  */
-void RunsPresenter::notifyAlgorithmFinished(std::string const &algorithmName) {
-  (void)algorithmName;
+void RunsPresenter::notifyAlgorithmFinished(Mantid::API::IAlgorithm const *alg) {
+  (void)alg;
 
   updateViewWhenMonitorStopped();
   g_log.warning("Live data monitor stopped; re-starting the monitor.");

@@ -50,15 +50,15 @@ public:
   void notifySearchResultsChanged() override;
 
   // IAsyncAlgorithmSubscriber overrides
-  void notifyAlgorithmError(std::string const &algorithmName, std::string const &message) override;
-  void notifyAlgorithmFinished(std::string const &algorithmName) override;
+  void notifyAlgorithmError(Mantid::API::IAlgorithm const *alg, std::string const &message) override;
+  void notifyAlgorithmFinished(Mantid::API::IAlgorithm const *alg) override;
 
 protected:
   void finishHandle(const Mantid::API::IAlgorithm *alg) override;
   void errorHandle(const Mantid::API::IAlgorithm *alg, const std::string &what) override;
   virtual bool hasActiveCatalogSession() const;
   virtual Mantid::API::IAlgorithm_sptr createSearchAlgorithm();
-  virtual Mantid::API::ITableWorkspace_sptr getSearchAlgorithmResultsTable(Mantid::API::IAlgorithm_sptr searchAlg);
+  virtual Mantid::API::ITableWorkspace_sptr getSearchAlgorithmResultsTable(Mantid::API::IAlgorithm const *alg);
   bool requiresICat() const;
   virtual void logInToCatalog();
 

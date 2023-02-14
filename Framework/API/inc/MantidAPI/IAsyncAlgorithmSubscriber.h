@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/DllConfig.h"
+#include "MantidAPI/IAlgorithm_fwd.h"
 
 #include <string>
 
@@ -22,8 +23,8 @@ public:
     (void)message;
   };
 
-  virtual void notifyAlgorithmError(std::string const &algorithmName, std::string const &message) = 0;
-  virtual void notifyAlgorithmFinished(std::string const &algorithmName) = 0;
+  virtual void notifyAlgorithmError(IAlgorithm const *alg, std::string const &message) = 0;
+  virtual void notifyAlgorithmFinished(IAlgorithm const *alg) = 0;
 };
 
 } // namespace Mantid::API

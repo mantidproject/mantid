@@ -84,8 +84,8 @@ private:
 
   // Override the method that gets the algorithm results so
   // we don't need a real algorithm
-  ITableWorkspace_sptr getSearchAlgorithmResultsTable(Mantid::API::IAlgorithm_sptr searchAlg) override {
-    UNUSED_ARG(searchAlg);
+  ITableWorkspace_sptr getSearchAlgorithmResultsTable(Mantid::API::IAlgorithm const *alg) override {
+    UNUSED_ARG(alg);
     // Return a results table of a suitable format for the algorithm used
     if (requiresICat())
       return getSampleCatalogResults();

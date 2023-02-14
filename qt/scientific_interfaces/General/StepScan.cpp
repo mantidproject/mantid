@@ -121,13 +121,13 @@ void StepScan::cleanupWorkspaces() {
   m_uiForm.normalization->disconnect(SIGNAL(currentIndexChanged(const QString &)));
 }
 
-void StepScan::notifyAlgorithmError(std::string const &algorithmName, std::string const &message) {
+void StepScan::notifyAlgorithmError(Mantid::API::IAlgorithm const *alg, std::string const &message) {
   (void)message;
-  handleAlgorithmFinished(algorithmName, true);
+  handleAlgorithmFinished(alg->name(), true);
 }
 
-void StepScan::notifyAlgorithmFinished(std::string const &algorithmName) {
-  handleAlgorithmFinished(algorithmName, false);
+void StepScan::notifyAlgorithmFinished(Mantid::API::IAlgorithm const *alg) {
+  handleAlgorithmFinished(alg->name(), false);
 }
 
 void StepScan::handleAlgorithmFinished(std::string const &algorithmName, bool const error) {

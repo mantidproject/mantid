@@ -66,13 +66,13 @@ SearchResults QtCatalogSearcher::search(SearchCriteria searchCriteria) {
   m_searchCriteria = std::move(searchCriteria);
   auto algSearch = createSearchAlgorithm();
   algSearch->execute();
-  auto resultsTable = getSearchAlgorithmResultsTable(algSearch);
+  auto resultsTable = getSearchAlgorithmResultsTable(algSearch.get());
   auto searchResults = convertResultsTableToSearchResults(resultsTable);
   return searchResults;
 }
 
-ITableWorkspace_sptr QtCatalogSearcher::getSearchAlgorithmResultsTable(IAlgorithm_sptr algSearch) {
-  ITableWorkspace_sptr resultsTable = algSearch->getProperty("OutputWorkspace");
+ITableWorkspace_sptr QtCatalogSearcher::getSearchAlgorithmResultsTable(Mantid::API::IAlgorithm const *alg) {
+  ITableWorkspace_sptr resultsTable = alg->getProperty("OutputWorkspace");
   return resultsTable;
 }
 
@@ -159,19 +159,16 @@ void QtCatalogSearcher::errorHandle(const Mantid::API::IAlgorithm *alg, const st
   }
 }
 
-void QtCatalogSearcher::notifyAlgorithmError(std::string const &algorithmName, std::string const &message) {
-  (void)algorithmName;
+void QtCatalogSearcher::notifyAlgorithmError(Mantid::API::IAlgorithm const *alg, std::string const &message) {
+  (void)alg;
   (void)message;
 }
 
-void QtCatalogSearcher::notifyAlgorithmFinished(std::string const &algorithmName) {
-  (void)algorithmName;
-
+void QtCatalogSearcher::notifyAlgorithmFinished(Mantid::API::IAlgorithm const *alg) {
   m_searchInProgress = false;
-  IAlgorithm_sptr searchAlg = m_algorithmRunner->getAlgorithm();
 
-  if (searchAlg->isExecuted()) {
-    auto resultsTable = getSearchAlgorithmResultsTable(searchAlg);
+  if (alg->isExecuted()) {
+    auto resultsTable = getSearchAlgorithmResultsTable(alg);
     auto searchResults = convertResultsTableToSearchResults(resultsTable);
     results().mergeNewResults(searchResults);
   }

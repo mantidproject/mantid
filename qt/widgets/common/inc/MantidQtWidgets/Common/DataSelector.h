@@ -339,14 +339,14 @@ public:
    * @param algorithmName :: the load algorithm name
    * @param message :: the error message
    */
-  void notifyAlgorithmError(std::string const &algorithmName, std::string const &message) override;
+  void notifyAlgorithmError(Mantid::API::IAlgorithm const *alg, std::string const &message) override;
 
   /**
    * Notifies when the load algorithm has finished
    *
    * @param algorithmName :: the load algorithm name
    */
-  void notifyAlgorithmFinished(std::string const &algorithmName) override;
+  void notifyAlgorithmFinished(Mantid::API::IAlgorithm const *alg) override;
 
 signals:
   /// Signal emitted when files were found but widget isn't autoloading
