@@ -110,7 +110,10 @@ cd $RECIPES_DIR
 EXTRA_BUILD_OPTIONS="--debug "
 
 if [[ $OSTYPE == "msys" ]]; then
-    EXTRA_BUILD_OPTIONS+="--no-build-id" # Do not use build id as it makes the path too long (>260 chars) for CMake (Legacy Windows API issue)
+    # Do not use build id as it makes the path too long (>260 chars) for CMake (Legacy Windows API issue)
+    EXTRA_BUILD_OPTIONS+="--no-build-id"
+elif [[ $OSTYPE == 'darwin'* ]]; then
+    EXTRA_BUILD_OPTIONS+="-m ./osx_64.yaml"
 fi
 
 if [[ $ENABLE_BUILD_MANTID == true ]]; then

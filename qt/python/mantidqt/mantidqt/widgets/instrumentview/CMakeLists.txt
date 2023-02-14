@@ -18,7 +18,7 @@ mtd_add_sip_module(
             Qt5::Gui
             Qt5::OpenGL
             Qt5::Widgets
-  INSTALL_DIR ${WORKBENCH_SITE_PACKAGES}/mantidqt/widgets/instrumentview
+  INSTALL_DIR ${Python_SITELIB_RELPATH}/mantidqt/widgets/instrumentview
   LINUX_INSTALL_RPATH "\$ORIGIN/../../.."
   OSX_INSTALL_RPATH "@loader_path/../../.."
   FOLDER Qt5

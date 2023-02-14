@@ -49,7 +49,4 @@ set_target_properties(
   PROPERTIES INSTALL_RPATH
              "${EXT_INSTALL_RPATH};${DL_ORIGIN_TAG}/../kernel/;${DL_ORIGIN_TAG}/../geometry/;${DL_ORIGIN_TAG}/../api/"
 )
-mtd_install_targets(
-  TARGETS PythonCurveFittingModule INSTALL_DIRS ${SITE_PACKAGES}/mantid/_plugins
-  ${WORKBENCH_SITE_PACKAGES}/mantid/_plugins
-)
+mtd_install_shared_library(TARGETS PythonCurveFittingModule DESTINATION ${Python_SITELIB_RELPATH}/mantid/_plugins)
