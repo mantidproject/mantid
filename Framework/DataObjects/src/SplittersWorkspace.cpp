@@ -64,6 +64,16 @@ bool SplittersWorkspace::removeSplitter(size_t index) {
   return removed;
 }
 
+Kernel::TimeSplitter SplittersWorkspace::convertToTimeSplitter() {
+  Kernel::TimeSplitter splitter;
+  for (int i = 0; i < this->rowCount(); i++) {
+    Kernel::SplittingInterval interval = this->getSplitter(i);
+    splitter.addROI(interval.begin(), interval.end(), interval.index());
+  }
+
+  return splitter;
+}
+
 } // namespace Mantid::DataObjects
 
 ///\cond TEMPLATE
