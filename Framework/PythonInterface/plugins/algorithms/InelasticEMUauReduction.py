@@ -36,7 +36,7 @@ from ANSTO.emu_common import FilterEmuPixelsTubes, EmuParameters, DopplerSupport
 
 class InelasticEMUauReduction(PythonAlgorithm):
     def category(self):
-        return "Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction;ANSTO\\Indirect"
+        return "Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction"
 
     def summary(self):
         return "Performs an inelastic energy transfer reduction for ANSTO EMU indirect geometry data."

@@ -81,7 +81,7 @@ def remove_hist_edges(ws_tag: str) -> None:
 
 class ElasticEMUauReduction(PythonAlgorithm):
     def category(self) -> str:
-        return "Workflow\\Elastic;Elastic\\Indirect;Elastic\\Reduction;ANSTO\\Indirect"
+        return "Workflow\\Elastic;Workflow\\Indirect"
 
     def summary(self) -> str:
         return "Performs an elastic reduction for ANSTO EMU indirect geometry data."
