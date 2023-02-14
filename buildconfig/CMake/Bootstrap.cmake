@@ -114,8 +114,6 @@ elseif(MSVC AND CONDA_ENV)
   set(ENV{PATH} "${THIRD_PARTY_BIN};$ENV{PATH}")
   # Set PATH for custom command or target build steps. Avoids the need to make external PATH updates
   set(CMAKE_MSVCIDE_RUN_PATH ${THIRD_PARTY_BIN})
-  # reset python executable - required if changed CONDA_ENV from false to true
-  set(Python_EXECUTABLE "$ENV{CONDA_PREFIX}/python.exe")
 endif()
 
 # Clean out python variables set from a previous build so they can be rediscovered again
