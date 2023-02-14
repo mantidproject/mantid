@@ -336,8 +336,7 @@ public:
     p1->filterWith(filter);
 
     // 3. Check size
-    p1->countSize();
-    TS_ASSERT_EQUALS(p1->size(), 9);
+    TS_ASSERT_EQUALS(p1->size(), 10);
 
     // 4. Check interval
     Mantid::Kernel::TimeInterval dt0 = p1->nthInterval(0);

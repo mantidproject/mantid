@@ -302,12 +302,20 @@ template <typename TYPE> void FilteredTimeSeriesProperty<TYPE>::applyFilter() co
     const auto beginTime = splitter.begin();
 
     // find the first log that should be added
-    while (this->m_values[index_current_log].time() <= beginTime) {
-      index_current_log++;
+    if (this->m_values.back().time() < beginTime) {
+      // skip directly to the end if the filter starts after the last log
+      index_current_log = this->m_values.size() - 1;
+    } else {
+      // search for the right starting point
+      while ((this->m_values[index_current_log].time() <= beginTime)) {
+        if (index_current_log + 1 > this->m_values.size())
+          break;
+        index_current_log++;
+      }
+      // need to back up by one
+      if (index_current_log > 0)
+        index_current_log--;
     }
-    // need to back up by one
-    if (index_current_log > 0)
-      index_current_log--;
 
     // add everything up to the end time
     for (; index_current_log < this->m_values.size(); ++index_current_log) {
