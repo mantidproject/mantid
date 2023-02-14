@@ -104,6 +104,7 @@ void LoadILLSANS::init() {
 void LoadILLSANS::exec() {
   const std::string filename = getPropertyValue("Filename");
   m_isD16Omega = false;
+  getMonitorIndices(filename);
   NXRoot root(filename);
   NXEntry firstEntry = root.openFirstEntry();
   const std::string instrumentPath = LoadHelper::findInstrumentNexusPath(firstEntry);
@@ -287,6 +288,43 @@ void LoadILLSANS::getDataDimensions(const NeXus::NXInt &data, int &numberOfChann
   g_log.debug() << "Dimensions found:\n- Number of tubes: " << numberOfTubes
                 << "\n- Number of pixels per tube: " << numberOfPixelsPerTube
                 << "\n- Number of channels: " << numberOfChannels << "\n";
+}
+
+/** Gets monitor indices from the scanned variables names and sets them in a vector of indices to be used later
+ *
+ * @param filename Name of the NeXus file
+ */
+void LoadILLSANS::getMonitorIndices(const std::string &filename) {
+  /*
+   * The below tries to access names of scanned variables. These should exist only for omega scans of D16B,
+   * and will not be there for other instruments and modes of measurement (D16B gamma scan for example).
+   * Therefore, any issue from accessing this data is wrapped in try-catch clause. Assumed is proper order
+   * of monitors: Monitor1 should preceed Monitor2 in the scanned variables. The order of these indices
+   * in the variables_names will be used to load the monitor data.
+   *
+   * This method needs to be run before NeXus file is opened with NX library, otherwise it is not possible
+   * to open the same file with these two libraries (H5 and NX) simultaneously.
+   */
+  try {
+    H5::H5File h5file(filename, H5F_ACC_RDONLY);
+    H5::DataSet scanVarNames = h5file.openDataSet("entry0/data_scan/scanned_variables/variables_names/name");
+    H5::DataSpace scanVarNamesSpace = scanVarNames.getSpace();
+    const auto nDims = scanVarNamesSpace.getSimpleExtentNdims();
+    auto dimsSize = std::vector<hsize_t>(nDims);
+    scanVarNamesSpace.getSimpleExtentDims(dimsSize.data(), nullptr);
+    std::vector<char *> rdata(dimsSize[0]);
+    scanVarNames.read(rdata.data(), scanVarNames.getDataType());
+    size_t monitorIndex = 0;
+    while (monitorIndex < rdata.size()) {
+      const auto varName = std::string(rdata[monitorIndex]);
+      if (varName.find("Monitor") != std::string::npos)
+        m_monitorIndices.push_back(monitorIndex);
+      monitorIndex++;
+    }
+    h5file.close();
+  } catch (...) { // silence all issues accessing the data
+    return;
+  }
 }
 
 /**
@@ -621,16 +659,12 @@ size_t LoadILLSANS::loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firs
 size_t LoadILLSANS::loadDataFromD16ScanMonitors(const NeXus::NXEntry &firstEntry, size_t firstIndex,
                                                 const std::vector<double> &binning) {
   std::string path = "/data_scan/scanned_variables/data";
-
-  // the monitors are the fourth and fith scanned variable, if one can depend on the ordering being constant
-  // we could verify that by reading the /data_scan/scanned_variables/variable_names/name entry, if only nexus knew how
-  // to read string arrays.
-  std::vector<int> monitorIndices = {3, 4};
+  // It is not possible to ensure that monitors are in the same position in the scanned_variables data table.
+  // Therefore, the order is obtained by getting monitor indices explicitly via getMonitorIndices method.
   auto scannedVariables = LoadHelper::getDoubleDataset(firstEntry, path);
   scannedVariables.load();
   auto monitorNumber = 1; // for the naming of sample log variable
-  for (auto monitorIndex : monitorIndices) {
-
+  for (auto monitorIndex : m_monitorIndices) {
     auto firstMonitorValuePos = scannedVariables() + monitorIndex * scannedVariables.dim1();
     const HistogramData::Counts counts(firstMonitorValuePos, firstMonitorValuePos + scannedVariables.dim1());
     m_localWorkspace->setCounts(firstIndex, counts);
@@ -660,6 +694,18 @@ size_t LoadILLSANS::loadDataFromD16ScanMonitors(const NeXus::NXEntry &firstEntry
     }
     monitorNumber++;
     firstIndex++;
+    if (m_instrumentName == "D16") {
+      // the old D16 has 2 monitors, the second being empty but still needing a binning
+
+      if (scannedVariables.dim1() == 1) {
+        const HistogramData::BinEdges binEdges(binning);
+        m_localWorkspace->setBinEdges(firstIndex, binEdges);
+      } else {
+        HistogramData::Points points = HistogramData::Points(binning);
+        m_localWorkspace->setPoints(firstIndex, points);
+      }
+      firstIndex++;
+    }
   }
   return firstIndex;
 }

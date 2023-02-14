@@ -11,6 +11,8 @@
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
 
+#include <H5Cpp.h>
+
 namespace Mantid {
 namespace DataHandling {
 
@@ -81,6 +83,7 @@ private:
   void placeD16(double, double, const std::string &);
   void adjustTOF();
   void moveSource();
+  void getMonitorIndices(const std::string &);
 
   std::string m_instrumentName;                    ///< Name of the instrument
   std::vector<std::string> m_supportedInstruments; ///< List of supported instruments
@@ -91,6 +94,7 @@ private:
   double m_sourcePos;                              ///< Source Z (for D33 TOF)
   bool m_isD16Omega;                               ///< Data comes from a D16 omega scan flag
   size_t m_numberOfMonitors;                       ///< Number of monitors in this instrument
+  std::vector<size_t> m_monitorIndices;            ///< Indices for monitor data in scanned variables table
 
   void setFinalProperties(const std::string &filename);
   std::vector<double> getVariableTimeBinning(const NeXus::NXEntry &, const std::string &, const NeXus::NXInt &,
