@@ -876,7 +876,7 @@ double TimeSeriesProperty<std::string>::averageValueInFilter(const SplittingInte
 template <typename TYPE>
 std::pair<double, double>
 TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<SplittingInterval> &intervals) const {
-  double mean_prev(0.0), mean_current(0.0), s(0.0), variance(0.0), duration(0.0), weighted_sum(0.0);
+  double mean_prev, mean_current(0.0), s(0.0), variance, duration, weighted_sum(0.0);
 
   if (realSize() <= 1 || intervals.empty()) {
     return std::pair<double, double>{this->averageValueInFilter(intervals), std::numeric_limits<double>::quiet_NaN()};
