@@ -68,3 +68,5 @@ function(add_python_package pkg_name)
   install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E env MANTID_VERSION_STR=${_version_str}
   python -m pip install ${CMAKE_CURRENT_SOURCE_DIR} --disable-pip-version-check --upgrade --no-deps --ignore-installed --no-cache-dir -vvv)"
   COMPONENT Runtime)
+
+endfunction()

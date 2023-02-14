@@ -75,6 +75,21 @@ function(mtd_install_framework_lib)
   endif()
 endfunction()
 
+# Install just the shared library artifact or a shared library target
+function(mtd_install_shared_library)
+  set(options)
+  set(oneValueArgs DESTINATION)
+  set(multiValueArgs TARGETS)
+  cmake_parse_arguments(PARSED "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+  # By definition an extension is just the shared library output artifact of a target (RUNTIME=.dll,LIBRARY=.so)
+  install(
+    TARGETS ${PARSED_TARGETS}
+    RUNTIME DESTINATION ${PARSED_DESTINATION}
+    LIBRARY DESTINATION ${PARSED_DESTINATION}
+  )
+endfunction()
+
 # Install files into multiple directories This respects ENABLE_WORKBENCH flags for macOS
 function(mtd_install_files)
   set(options)
