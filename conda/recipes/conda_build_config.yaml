@@ -67,10 +67,3 @@ ipykernel:
 pin_run_as_build:
     boost:
       max_pin: x.x
-
-# Otherwise it will find the wrong sdk, currently working on 10.10 as that is what Anaconda/conda-build does.
-CONDA_BUILD_SYSROOT:
-  - /opt/MacOSX10.10.sdk     # [osx]
-
-MACOSX_DEPLOYMENT_TARGET:      # [osx]
-  - 10.10                      # [osx and x86_64]
