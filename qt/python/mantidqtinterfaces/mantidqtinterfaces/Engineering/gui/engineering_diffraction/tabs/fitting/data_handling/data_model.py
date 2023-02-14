@@ -43,6 +43,10 @@ class FittingDataModel(object):
         self._data_workspaces = FittingWorkspaceRecordContainer()
         self._sample_logs_workspace_group = SampleLogsGroupWorkspace()
 
+    # =================
+    # Loaded Data Table
+    # =================
+
     def restore_files(self, ws_names):
         self._data_workspaces.add_from_names_dict(ws_names)
         for ws_name in ws_names:
@@ -83,8 +87,8 @@ class FittingDataModel(object):
                 logger.warning(f"File {ws_name} has already been loaded")
         self.update_sample_log_workspace_group()
 
-    def update_sample_log_workspace_group(self):
-        self._sample_logs_workspace_group.update_log_workspace_group(self._data_workspaces)
+    def get_last_added(self):
+        return self._last_added
 
     def get_loaded_ws_list(self):
         return list(self._data_workspaces.get_loaded_ws_dict().keys())
@@ -97,104 +101,6 @@ class FittingDataModel(object):
 
     def get_active_ws_name(self, loaded_ws_name):
         return self._data_workspaces.get_active_ws_name(loaded_ws_name)
-
-    def get_active_ws_sorted_by_primary_log(self):
-        active_ws_dict = self._data_workspaces.get_active_ws_dict()
-        tof_ws_inds = [ind for ind, ws in enumerate(active_ws_dict.values()) if ws.getAxis(0).getUnit().caption() == "Time-of-flight"]
-        primary_log = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "primary_log")
-        sort_ascending = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "sort_ascending")
-        ws_name_list = list(active_ws_dict.keys())
-        if primary_log:
-            log_table = ADS.retrieve(primary_log)
-            isort = argsort(array(log_table.column("avg")))
-            ws_list_tof = [ws_name_list[iws] for iws in isort if iws in tof_ws_inds]
-        else:
-            ws_list_tof = ws_name_list
-        if sort_ascending == "false":
-            # settings can only be saved as text
-            ws_list_tof = ws_list_tof[::-1]
-        return ws_list_tof
-
-    def update_fit(self, fit_props):
-        for fit_prop in fit_props:
-            wsname = fit_prop["properties"]["InputWorkspace"]
-            self._fit_results[wsname] = {"model": fit_prop["properties"]["Function"], "status": fit_prop["status"]}
-            self._fit_results[wsname]["results"] = defaultdict(list)  # {function_param: [[Y1, E1], [Y2,E2],...] }
-            fnames = [x.split("=")[-1] for x in findall("name=[^,]*", fit_prop["properties"]["Function"])]
-            # get num params for each function (first elem empty as str begins with 'name=')
-            # need to remove ties and constraints which are enclosed in ()
-            nparams = [s.count("=") for s in sub(r"=\([^)]*\)", "", fit_prop["properties"]["Function"]).split("name=")[1:]]
-            params_dict = ADS.retrieve(fit_prop["properties"]["Output"] + "_Parameters").toDict()
-            # loop over rows in output workspace to get value and error for each parameter
-            istart = 0
-            for ifunc, fname in enumerate(fnames):
-                for iparam in range(0, nparams[ifunc]):
-                    irow = istart + iparam
-                    key = "_".join([fname, params_dict["Name"][irow].split(".")[-1]])  # funcname_param
-                    self._fit_results[wsname]["results"][key].append([params_dict["Value"][irow], params_dict["Error"][irow]])
-                    if key in fit_prop["peak_centre_params"]:
-                        # param corresponds to a peak centre in TOF which we also need in dspacing
-                        # add another entry into the results dictionary
-                        key_d = key + "_dSpacing"
-                        try:
-                            dcen = self._convert_TOF_to_d(params_dict["Value"][irow], wsname)
-                            dcen_er = self._convert_TOFerror_to_derror(params_dict["Error"][irow], dcen, wsname)
-                            self._fit_results[wsname]["results"][key_d].append([dcen, dcen_er])
-                        except (ValueError, RuntimeError) as e:
-                            logger.warning(f"Unable to output {key_d} parameters for TOF={params_dict['Value'][irow]}: " + str(e))
-                istart += nparams[ifunc]
-            # append the cost function value (in this case always chisq/DOF) as don't let user change cost func
-            # always last row in parameters table
-            self._fit_results[wsname]["costFunction"] = params_dict["Value"][-1]
-        self.create_fit_tables()
-
-    def create_fit_tables(self):
-        wslist = []  # ws to be grouped
-        # extract fit parameters and errors
-        nruns = len(self.get_loaded_ws_list())  # num of rows of output workspace
-        # get unique set of function parameters across all workspaces
-        func_params = set(chain(*[list(d["results"].keys()) for d in self._fit_results.values()]))
-        for param in func_params:
-            # get max number of repeated func in a model (num columns of output workspace)
-            nfuncs = max([len(d["results"][param]) for d in self._fit_results.values() if param in d["results"]])
-            # make output workspace
-            ipeak = list(range(1, nfuncs + 1)) * nruns
-            ws = CreateWorkspace(OutputWorkspace=param, DataX=ipeak, DataY=ipeak, NSpec=nruns)
-            # axis for labels in workspace
-            axis = TextAxis.create(nruns)
-            for iws, wsname in enumerate(self.get_active_ws_name_list()):
-                if wsname in self._fit_results and param in self._fit_results[wsname]["results"]:
-                    fitvals = array(self._fit_results[wsname]["results"][param])
-                    data = vstack((fitvals, full((nfuncs - fitvals.shape[0], 2), nan)))
-                else:
-                    data = full((nfuncs, 2), nan)
-                ws.setY(iws, data[:, 0])
-                ws.setE(iws, data[:, 1])
-                # label row
-                axis.setLabel(iws, wsname)
-            ws.replaceAxis(1, axis)
-            wslist += [ws]
-        # table for model summary/info
-        model = CreateEmptyTableWorkspace(OutputWorkspace="model")
-        model.addColumn(type="str", name="Workspace")
-        model.addColumn(type="float", name="chisq/DOF")  # always is for LM minimiser (users can't change)
-        model.addColumn(type="str", name="status")
-        model.addColumn(type="str", name="Model")
-        for iws, wsname in enumerate(self.get_active_ws_name_list()):
-            if wsname in self._fit_results:
-                row = [
-                    wsname,
-                    self._fit_results[wsname]["costFunction"],
-                    self._fit_results[wsname]["status"],
-                    self._fit_results[wsname]["model"],
-                ]
-                write_table_row(model, row, iws)
-            else:
-                write_table_row(model, ["", nan, ""], iws)
-        wslist += [model]
-        current_log_workspaces = self._sample_logs_workspace_group.get_log_workspaces()
-        group_name = current_log_workspaces.name().split("_log")[0] + "_fits"
-        self._fit_workspaces = GroupWorkspaces(wslist, OutputWorkspace=group_name)
 
     # handle ADS remove. name workspace has already been deleted
     def remove_workspace(self, name):
@@ -262,10 +168,6 @@ class FittingDataModel(object):
     def get_all_workspace_names(self):
         return self._data_workspaces.get_loaded_workpace_names() + self._data_workspaces.get_bgsub_workpace_names()
 
-    def get_log_workspaces_name(self):
-        current_log_workspaces = self._sample_logs_workspace_group.get_log_workspaces()
-        return [ws.name() for ws in current_log_workspaces] if current_log_workspaces else ""
-
     def get_bgsub_workspaces(self):
         return self._data_workspaces.get_bgsub_ws_dict()
 
@@ -275,8 +177,117 @@ class FittingDataModel(object):
     def get_bg_params(self):
         return self._data_workspaces.get_bg_params_dict()
 
+    # =======
+    # Fitting
+    # =======
+
     def get_fit_results(self):
         return self._fit_results
+
+    def update_fit(self, fit_props):
+        for fit_prop in fit_props:
+            wsname = fit_prop["properties"]["InputWorkspace"]
+            self._fit_results[wsname] = {"model": fit_prop["properties"]["Function"], "status": fit_prop["status"]}
+            self._fit_results[wsname]["results"] = defaultdict(list)  # {function_param: [[Y1, E1], [Y2,E2],...] }
+            fnames = [x.split("=")[-1] for x in findall("name=[^,]*", fit_prop["properties"]["Function"])]
+            # get num params for each function (first elem empty as str begins with 'name=')
+            # need to remove ties and constraints which are enclosed in ()
+            nparams = [s.count("=") for s in sub(r"=\([^)]*\)", "", fit_prop["properties"]["Function"]).split("name=")[1:]]
+            params_dict = ADS.retrieve(fit_prop["properties"]["Output"] + "_Parameters").toDict()
+            # loop over rows in output workspace to get value and error for each parameter
+            istart = 0
+            for ifunc, fname in enumerate(fnames):
+                for iparam in range(0, nparams[ifunc]):
+                    irow = istart + iparam
+                    key = "_".join([fname, params_dict["Name"][irow].split(".")[-1]])  # funcname_param
+                    self._fit_results[wsname]["results"][key].append([params_dict["Value"][irow], params_dict["Error"][irow]])
+                    if key in fit_prop["peak_centre_params"]:
+                        # param corresponds to a peak centre in TOF which we also need in dspacing
+                        # add another entry into the results dictionary
+                        key_d = key + "_dSpacing"
+                        try:
+                            dcen = self._convert_TOF_to_d(params_dict["Value"][irow], wsname)
+                            dcen_er = self._convert_TOFerror_to_derror(params_dict["Error"][irow], dcen, wsname)
+                            self._fit_results[wsname]["results"][key_d].append([dcen, dcen_er])
+                        except (ValueError, RuntimeError) as e:
+                            logger.warning(f"Unable to output {key_d} parameters for TOF={params_dict['Value'][irow]}: " + str(e))
+                istart += nparams[ifunc]
+            # append the cost function value (in this case always chisq/DOF) as don't let user change cost func
+            # always last row in parameters table
+            self._fit_results[wsname]["costFunction"] = params_dict["Value"][-1]
+        self.create_fit_tables()
+
+    def _convert_TOF_to_d(self, tof, ws_name):
+        diff_consts = self._get_diff_constants(ws_name)
+        return UnitConversion.run("TOF", "dSpacing", tof, 0, DeltaEModeType.Elastic, diff_consts)  # L1=0 (ignored)
+
+    def _convert_TOFerror_to_derror(self, tof_error, d, ws_name):
+        diff_consts = self._get_diff_constants(ws_name)
+        difc = diff_consts[UnitParams.difc]
+        difa = diff_consts[UnitParams.difa] if UnitParams.difa in diff_consts else 0
+        return tof_error / (2 * difa * d + difc)
+
+    def _get_diff_constants(self, ws_name):
+        """
+        Get diffractometer constants from workspace
+        TOF = difc*d + difa*(d^2) + tzero
+        """
+        ws = ADS.retrieve(ws_name)
+        si = ws.spectrumInfo()
+        diff_consts = si.diffractometerConstants(0)  # output is a UnitParametersMap
+        return diff_consts
+
+    def create_fit_tables(self):
+        wslist = []  # ws to be grouped
+        # extract fit parameters and errors
+        nruns = len(self.get_loaded_ws_list())  # num of rows of output workspace
+        # get unique set of function parameters across all workspaces
+        func_params = set(chain(*[list(d["results"].keys()) for d in self._fit_results.values()]))
+        for param in func_params:
+            # get max number of repeated func in a model (num columns of output workspace)
+            nfuncs = max([len(d["results"][param]) for d in self._fit_results.values() if param in d["results"]])
+            # make output workspace
+            ipeak = list(range(1, nfuncs + 1)) * nruns
+            ws = CreateWorkspace(OutputWorkspace=param, DataX=ipeak, DataY=ipeak, NSpec=nruns)
+            # axis for labels in workspace
+            axis = TextAxis.create(nruns)
+            for iws, wsname in enumerate(self.get_active_ws_name_list()):
+                if wsname in self._fit_results and param in self._fit_results[wsname]["results"]:
+                    fitvals = array(self._fit_results[wsname]["results"][param])
+                    data = vstack((fitvals, full((nfuncs - fitvals.shape[0], 2), nan)))
+                else:
+                    data = full((nfuncs, 2), nan)
+                ws.setY(iws, data[:, 0])
+                ws.setE(iws, data[:, 1])
+                # label row
+                axis.setLabel(iws, wsname)
+            ws.replaceAxis(1, axis)
+            wslist += [ws]
+        # table for model summary/info
+        model = CreateEmptyTableWorkspace(OutputWorkspace="model")
+        model.addColumn(type="str", name="Workspace")
+        model.addColumn(type="float", name="chisq/DOF")  # always is for LM minimiser (users can't change)
+        model.addColumn(type="str", name="status")
+        model.addColumn(type="str", name="Model")
+        for iws, wsname in enumerate(self.get_active_ws_name_list()):
+            if wsname in self._fit_results:
+                row = [
+                    wsname,
+                    self._fit_results[wsname]["costFunction"],
+                    self._fit_results[wsname]["status"],
+                    self._fit_results[wsname]["model"],
+                ]
+                write_table_row(model, row, iws)
+            else:
+                write_table_row(model, ["", nan, ""], iws)
+        wslist += [model]
+        current_log_workspaces = self._sample_logs_workspace_group.get_log_workspaces()
+        group_name = current_log_workspaces.name().split("_log")[0] + "_fits"
+        self._fit_workspaces = GroupWorkspaces(wslist, OutputWorkspace=group_name)
+
+    # ======================
+    # Background Subtraction
+    # ======================
 
     def create_or_update_bgsub_ws(self, ws_name, bg_params):
         ws = self._data_workspaces[ws_name].loaded_ws
@@ -345,32 +356,37 @@ class FittingDataModel(object):
             fig.canvas.mpl_connect("draw_event", on_draw)
             fig.show()
 
-    def get_last_added(self):
-        return self._last_added
+    # =================
+    # Sample Log access
+    # =================
 
     def get_sample_log_from_ws(self, ws_name, log_name):
         return self._data_workspaces[ws_name].loaded_ws.getSampleDetails().getLogData(log_name).value
+
+    def get_log_workspaces_name(self):
+        current_log_workspaces = self._sample_logs_workspace_group.get_log_workspaces()
+        return [ws.name() for ws in current_log_workspaces] if current_log_workspaces else ""
 
     def set_log_workspaces_none(self):
         # to be used in the event of Ads clear, as trying to reference the deleted grp ws results in an error
         self._sample_logs_workspace_group.clear_log_workspaces()
 
-    def _convert_TOF_to_d(self, tof, ws_name):
-        diff_consts = self._get_diff_constants(ws_name)
-        return UnitConversion.run("TOF", "dSpacing", tof, 0, DeltaEModeType.Elastic, diff_consts)  # L1=0 (ignored)
+    def update_sample_log_workspace_group(self):
+        self._sample_logs_workspace_group.update_log_workspace_group(self._data_workspaces)
 
-    def _convert_TOFerror_to_derror(self, tof_error, d, ws_name):
-        diff_consts = self._get_diff_constants(ws_name)
-        difc = diff_consts[UnitParams.difc]
-        difa = diff_consts[UnitParams.difa] if UnitParams.difa in diff_consts else 0
-        return tof_error / (2 * difa * d + difc)
-
-    def _get_diff_constants(self, ws_name):
-        """
-        Get diffractometer constants from workspace
-        TOF = difc*d + difa*(d^2) + tzero
-        """
-        ws = ADS.retrieve(ws_name)
-        si = ws.spectrumInfo()
-        diff_consts = si.diffractometerConstants(0)  # output is a UnitParametersMap
-        return diff_consts
+    def get_active_ws_sorted_by_primary_log(self):
+        active_ws_dict = self._data_workspaces.get_active_ws_dict()
+        tof_ws_inds = [ind for ind, ws in enumerate(active_ws_dict.values()) if ws.getAxis(0).getUnit().caption() == "Time-of-flight"]
+        primary_log = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "primary_log")
+        sort_ascending = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "sort_ascending")
+        ws_name_list = list(active_ws_dict.keys())
+        if primary_log:
+            log_table = ADS.retrieve(primary_log)
+            isort = argsort(array(log_table.column("avg")))
+            ws_list_tof = [ws_name_list[iws] for iws in isort if iws in tof_ws_inds]
+        else:
+            ws_list_tof = ws_name_list
+        if sort_ascending == "false":
+            # settings can only be saved as text
+            ws_list_tof = ws_list_tof[::-1]
+        return ws_list_tof
