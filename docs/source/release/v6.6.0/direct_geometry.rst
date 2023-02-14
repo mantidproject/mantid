@@ -64,6 +64,7 @@ New features
 
 Bugfixes
 ############
+- Fixed bug that prevented cuts along 2Theta.
 
 
 
