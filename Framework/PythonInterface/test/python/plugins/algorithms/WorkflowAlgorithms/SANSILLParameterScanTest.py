@@ -34,7 +34,7 @@ class SANSILLParameterScanTest(unittest.TestCase):
     def test_D16_omega(self):
         output_name = "output2d"
         SANSILLParameterScan(
-            SampleRun="066321.nxs",
+            SampleRun="066416.nxs",
             OutputWorkspace=output_name,
             OutputJoinedWorkspace="reduced",
             Observable="Omega.value",
@@ -43,11 +43,10 @@ class SANSILLParameterScanTest(unittest.TestCase):
         )
 
         ws = mtd[output_name]
-        self._check_output(ws, 6, 1152)
-        self.assertAlmostEqual(ws.getAxis(0).getValue(0), -42.9348, delta=4)
-        self.assertAlmostEqual(ws.getAxis(0).getValue(1151), 43.0836, delta=4)
-        self.assertAlmostEqual(ws.getAxis(1).getValue(0), 5.2, delta=3)
-        self.assertAlmostEqual(ws.getAxis(1).getValue(1), 5.4, delta=3)
+        self._check_output(ws, 1, 1152)
+        self.assertAlmostEqual(ws.getAxis(0).getValue(0), -9.8136, delta=4)
+        self.assertAlmostEqual(ws.getAxis(0).getValue(1151), 76.2048, delta=4)
+        self.assertAlmostEqual(ws.getAxis(1).getValue(0), 0.0, delta=3)
         self.assertTrue("reduced" in mtd)
 
     def test_D16_omega_container(self):
