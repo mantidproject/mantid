@@ -228,14 +228,11 @@ template <typename TYPE> TYPE FilteredTimeSeriesProperty<TYPE>::nthValue(int n) 
    @param filter :: The filter mask to apply
  */
 template <typename TYPE> void FilteredTimeSeriesProperty<TYPE>::filterWith(const TimeSeriesProperty<bool> *filter) {
-  // reset the flag that this is filtered
-  m_filterApplied = false;
-  m_filterMap.clear();
-
   if ((!filter) || (filter->size() == 0)) {
     // if filter is empty, clear the current
-    m_filter->clear();
+    this->clearFilter();
   } else {
+    this->clearFilterCache();
     m_filter->replaceROI(filter);
 
     applyFilter();
@@ -245,9 +242,15 @@ template <typename TYPE> void FilteredTimeSeriesProperty<TYPE>::filterWith(const
 /**
  * Restores the property to the unsorted & unfiltered state
  */
-template <typename TYPE> void FilteredTimeSeriesProperty<TYPE>::clearFilter() {
+template <typename TYPE> void FilteredTimeSeriesProperty<TYPE>::clearFilter() const {
   m_filter->clear();
+  this->clearFilterCache();
+}
+
+template <typename TYPE> void FilteredTimeSeriesProperty<TYPE>::clearFilterCache() const {
+  m_filterApplied = false;
   m_filterMap.clear();
+  m_filterIntervals.clear();
 }
 
 /**
@@ -278,8 +281,7 @@ template <typename TYPE> void FilteredTimeSeriesProperty<TYPE>::applyFilter() co
     return;
 
   // clear out the previous version
-  m_filterMap.clear();
-  m_filterIntervals.clear();
+  this->clearFilterCache();
 
   if (m_filter->empty())
     return;

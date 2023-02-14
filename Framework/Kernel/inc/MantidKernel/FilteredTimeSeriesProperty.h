@@ -63,7 +63,7 @@ public:
   /// to \a filter.
   void filterWith(const TimeSeriesProperty<bool> *filter);
   /// Restores the property to the unsorted state
-  void clearFilter();
+  void clearFilter() const;
   // Returns whether the time series has been filtered
   bool isFiltered() const override { return m_filterApplied; }
 
@@ -95,6 +95,8 @@ public:
 private:
   /// Apply a filter
   void applyFilter() const;
+  /// Clear out the applied filter
+  void clearFilterCache() const;
 
   /// Set a value from another property
   std::string setValueFromProperty(const Property &right) override;
