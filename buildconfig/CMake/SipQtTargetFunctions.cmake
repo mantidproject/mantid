@@ -1,5 +1,5 @@
 # Defines utility functions to help with generating targets that produce a Python module from a set of .sip definitions
-include(QtTargetFunctions)
+include(TargetFunctions)
 
 # ~~~
 # brief: Add a module target to generate Python bindings for a set of sip
@@ -94,8 +94,8 @@ function(mtd_add_sip_module)
     endif()
   endif()
 
-  if(PARSED_INSTALL_DIR AND (ENABLE_WORKBENCH OR BUILD_MANTIDQT))
-    mtd_install_qt_library(${PARSED_PYQT_VERSION} ${PARSED_TARGET_NAME} ${PARSED_INSTALL_DIR})
+  if(PARSED_INSTALL_DIR)
+    mtd_install_shared_library(TARGETS ${PARSED_TARGET_NAME} DESTINATION ${PARSED_INSTALL_DIR})
   endif()
 
   if(WIN32)

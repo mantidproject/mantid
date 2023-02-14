@@ -95,18 +95,9 @@ add_subdirectory(mantid)
 
 include(PythonPackageTargetFunctions)
 
-# Adds `mantid` as a target in the `MantidFramework/Python` folder
-if(APPLE)
-  set(_install_lib_dirs)
-  list(APPEND _install_lib_dirs ${WORKBENCH_SITE_PACKAGES})
-else()
-  set(_install_lib_dirs "${SITE_PACKAGES}")
-endif()
-
 add_python_package(
   PythonInterface
   EGGLINKNAME mantid
-  INSTALL_LIB_DIRS ${_install_lib_dirs}
   GENERATE_SITECUSTOMIZE
 )
 

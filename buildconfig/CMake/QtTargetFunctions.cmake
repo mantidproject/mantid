@@ -1,5 +1,6 @@
 # Utility functions to add libraries/executables parametrized by the required version of Qt
-#
+include(TargetFunctions)
+
 # name: mtd_add_qt_library brief: create a library target for linked against Qt The global ENABLE_WORKBENCH option
 # controls if a Qt5 target is created. To limit the Qt version for a specific library use QT_VERSION, e.g.
 #
@@ -212,7 +213,7 @@ function(mtd_add_qt_target)
     endif()
 
     foreach(_dir ${_install_dirs})
-      mtd_install_qt_library(${PARSED_QT_VERSION} ${_target} ${_dir})
+      mtd_install_shared_library(TARGETS ${_target} DESTINATION ${_dir})
     endforeach()
   endif()
 
@@ -226,27 +227,6 @@ function(mtd_add_qt_target)
     add_custom_target(${_alltarget} DEPENDS ${_target})
   endif()
 
-endfunction()
-
-# Create an install rule for a Qt target - qt_version The version of Qt targeted - target The name of the target -
-# install_target_type The type of target that should be installed. See
-# https://cmake.org/cmake/help/latest/command/install.html?highlight=install - install_dir A relative directory to
-# install_prefix
-function(mtd_install_qt_library qt_version target install_dir)
-  get_target_property(target_type ${target} TYPE)
-  set(install_target_type "")
-  if(WIN32 AND NOT target_type STREQUAL "MODULE_LIBRARY")
-    # Install only DLLs on Windows
-    set(install_target_type RUNTIME)
-  endif()
-
-  if(qt_version EQUAL 5 AND (ENABLE_WORKBENCH OR BUILD_MANTIDQT))
-    install(
-      TARGETS ${target} ${install_target_type}
-      DESTINATION ${install_dir}
-      COMPONENT Runtime
-    )
-  endif()
 endfunction()
 
 function(mtd_add_qt_tests)

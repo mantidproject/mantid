@@ -154,6 +154,4 @@ set_target_properties(
   PythonAPIModule PROPERTIES INSTALL_RPATH
                              "${EXT_INSTALL_RPATH};${DL_ORIGIN_TAG}/../kernel/;${DL_ORIGIN_TAG}/../geometry/"
 )
-mtd_install_targets(
-  TARGETS PythonAPIModule INSTALL_DIRS ${SITE_PACKAGES}/mantid/api ${WORKBENCH_SITE_PACKAGES}/mantid/api
-)
+mtd_install_shared_library(TARGETS PythonAPIModule DESTINATION ${Python_SITELIB_RELPATH}/mantid/api)

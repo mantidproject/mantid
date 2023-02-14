@@ -6,11 +6,7 @@ if(APPLE OR WIN32)
     # handled separately below
     set(_exclude_on_install "resources\.pyc?")
   endif()
-  add_python_package(
-    workbench EXECUTABLE
-    EGGLINKNAME MantidWorkbench EXCLUDE_FROM_INSTALL ${_exclude_on_install}
-    INSTALL_LIB_DIRS "${WORKBENCH_SITE_PACKAGES}"
-  )
+  add_python_package(workbench EXECUTABLE EGGLINKNAME MantidWorkbench EXCLUDE_FROM_INSTALL ${_exclude_on_install})
   # Allow VS to start workbench for debugging
   set(_vs_debugger_args "${MSVC_BIN_DIR}/workbench-script.pyw --single-process")
   # cmake-format: off
