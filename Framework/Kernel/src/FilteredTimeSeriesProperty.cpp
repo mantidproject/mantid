@@ -37,7 +37,8 @@ FilteredTimeSeriesProperty<TYPE>::FilteredTimeSeriesProperty(const std::string &
 template <typename HeldType>
 FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(TimeSeriesProperty<HeldType> *seriesProp,
                                                                  const TimeSeriesProperty<bool> &filterProp)
-    : TimeSeriesProperty<HeldType>(*seriesProp), m_filter(std::make_unique<TimeROI>()), m_filterApplied(false) {
+    : TimeSeriesProperty<HeldType>(*seriesProp), m_filter(std::make_unique<TimeROI>()), m_filterMap(),
+      m_filterIntervals(), m_filterApplied(false) {
   // Now filter us with the filter
   this->filterWith(&filterProp);
 }
@@ -47,12 +48,12 @@ FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(const std::stri
                                                                  const std::vector<Types::Core::DateAndTime> &times,
                                                                  const std::vector<HeldType> &values)
     : TimeSeriesProperty<HeldType>(name, times, values), m_filter(std::make_unique<TimeROI>()), m_filterMap(),
-      m_filterApplied(false) {}
+      m_filterIntervals(), m_filterApplied(false) {}
 
 template <typename HeldType>
 FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(TimeSeriesProperty<HeldType> *seriesProp)
     : TimeSeriesProperty<HeldType>(*seriesProp), m_filter(std::make_unique<TimeROI>()), m_filterMap(),
-      m_filterApplied(false) {}
+      m_filterIntervals(), m_filterApplied(false) {}
 
 /**
  * Construct with a source time series & a filter property
@@ -64,7 +65,7 @@ template <typename HeldType>
 FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(
     std::unique_ptr<const TimeSeriesProperty<HeldType>> seriesProp, const TimeSeriesProperty<bool> &filterProp)
     : TimeSeriesProperty<HeldType>(*seriesProp.get()), m_filter(std::make_unique<TimeROI>()), m_filterMap(),
-      m_filterApplied(false) {
+      m_filterIntervals(), m_filterApplied(false) {
   // Now filter us with the filter
   this->filterWith(&filterProp);
 }
@@ -80,7 +81,7 @@ template <typename HeldType>
 FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(const FilteredTimeSeriesProperty &prop)
     : TimeSeriesProperty<HeldType>(prop.name(), prop.timesAsVector(), prop.valuesAsVector()),
       m_filter(std::make_unique<TimeROI>(*prop.m_filter.get())), m_filterMap(prop.m_filterMap),
-      m_filterApplied(prop.m_filterApplied) {}
+      m_filterIntervals(prop.m_filterIntervals), m_filterApplied(prop.m_filterApplied) {}
 
 /**
  * Destructor
@@ -168,49 +169,7 @@ template <typename TYPE> TimeInterval FilteredTimeSeriesProperty<TYPE>::nthInter
     deltaT = TimeSeriesProperty<TYPE>::nthInterval(n);
   } else {
     this->applyFilter();
-
-    // II. Filter
-    // this intentionally ignores requests past the end because default deltaT value
-    // has it covered
-    if (static_cast<size_t>(n) < m_filterMap.size()) {
-      // convert to a size_t to make life easier
-      const size_t n_index = static_cast<size_t>(n);
-      // create value for start time
-      DateAndTime startTime = m_filter->getEffectiveTime(this->m_values[m_filterMap[n_index]].time());
-      // create value for stop time
-      DateAndTime stopTime;
-      if (n_index + 1 < m_filterMap.size()) {
-        // start with the "natural" stop time
-        stopTime = this->m_values[m_filterMap[n_index + 1]].time();
-      } else if (m_filter->empty()) {
-        // this is a modified copy from TimeSeriesProperty
-
-        // the last time is the last thing known
-        const auto ultimate = this->m_values[m_filterMap.back()].time();
-        // go backwards from the time before it that is different
-        int counter = 0;
-        while (DateAndTime::secondsFromDuration(ultimate -
-                                                (this->m_values[*(m_filterMap.rbegin() + counter)].time())) == 0.) {
-          counter += 1;
-        }
-        // get the last time that is different
-        const auto penultimate = this->m_values[*(m_filterMap.rbegin() + counter)].time();
-        auto lastDuration = ultimate - penultimate;
-        // the last duration is equal to the previous, non-zero, duration
-        stopTime = ultimate + lastDuration;
-      } else {
-        // TimeROI exists, just give the end of it
-        stopTime = m_filter->lastTime();
-      }
-
-      // adjust the stop time according to the duration from the filter
-      auto duration = m_filter->durationInSeconds(startTime, stopTime);
-      // create a fake stop time using the duration
-      stopTime = startTime + duration;
-
-      // set the output value
-      deltaT = TimeInterval(startTime, stopTime);
-    }
+    deltaT = this->m_filterIntervals[std::size_t(n)];
   }
 
   return deltaT;
@@ -320,6 +279,7 @@ template <typename TYPE> void FilteredTimeSeriesProperty<TYPE>::applyFilter() co
 
   // clear out the previous version
   m_filterMap.clear();
+  m_filterIntervals.clear();
 
   if (m_filter->empty())
     return;
@@ -349,17 +309,25 @@ template <typename TYPE> void FilteredTimeSeriesProperty<TYPE>::applyFilter() co
     if (index_current_log > 0)
       index_current_log--;
 
-    // if the first value to be added is already in the filter-map, remove it now
-    // to make the logic in the loop simpler
-    if ((!m_filterMap.empty()) && (index_current_log == m_filterMap.back()))
-      m_filterMap.pop_back();
-
     // add everything up to the end time
     for (; index_current_log < this->m_values.size(); ++index_current_log) {
       if (this->m_values[index_current_log].time() >= endTime)
         break;
+
+      // the current value goes into the filter
       m_filterMap.emplace_back(index_current_log);
+
+      // end time is the end of the filter or when the next value starts
+      DateAndTime myEndTime(endTime);
+      if (index_current_log + 1 < this->m_values.size())
+        myEndTime = std::min(endTime, this->m_values[index_current_log + 1].time());
+      // start time is when this value was created or when the filter started
+      m_filterIntervals.emplace_back(
+          TimeInterval(std::max(beginTime, this->m_values[index_current_log].time()), myEndTime));
     }
+    // go back one so the next splitter can add a value
+    if (index_current_log > 0)
+      index_current_log--;
   }
 
   // Change flag

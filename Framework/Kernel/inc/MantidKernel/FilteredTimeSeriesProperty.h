@@ -105,6 +105,8 @@ private:
   mutable std::unique_ptr<TimeROI> m_filter;
   /// Maps the index supplied to nthValue and nthInterval to values in m_value.
   mutable std::vector<size_t> m_filterMap;
+  /// Cached values for the time intervals inside the filter
+  mutable std::vector<TimeInterval> m_filterIntervals;
   /// True if a filter has been applied
   mutable bool m_filterApplied;
 };
