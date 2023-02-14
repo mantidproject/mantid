@@ -1,0 +1,1 @@
+- :ref:`SimpleScanViewer` now fits Gaussian peaks to data in each new ROI to estimate peak centre positions, instead of calculating a centre-of-mass.
