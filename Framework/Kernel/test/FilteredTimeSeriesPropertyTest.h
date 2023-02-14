@@ -40,6 +40,38 @@ public:
     doOwnershipTest(transferOwnership);
   }
 
+  void test_nthValue() {
+    // start with standard values
+    auto source = createTestSeries("name");
+    auto filter = createTestFilter();
+    // add extra bit for multiple single seconds inside first interval
+    filter.addValue("2007-11-30T16:17:00", true);
+    filter.addValue("2007-11-30T16:17:01", false);
+    filter.addValue("2007-11-30T16:17:03", true);
+    filter.addValue("2007-11-30T16:17:04", false);
+
+    auto filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(std::move(source), filter);
+
+    TS_ASSERT_EQUALS(filtered->size(), 4);
+    TS_ASSERT_EQUALS(filtered->nthValue(0), 1);
+    TS_ASSERT_EQUALS(filtered->nthValue(1), 1);
+    TS_ASSERT_EQUALS(filtered->nthValue(2), 3);
+    TS_ASSERT_EQUALS(filtered->nthValue(3), 4);
+
+    auto interval = filtered->nthInterval(0);
+    TS_ASSERT_EQUALS(interval.begin(), DateAndTime("2007-11-30T16:17:00"));
+    TS_ASSERT_EQUALS(interval.end(), DateAndTime("2007-11-30T16:17:01"));
+    interval = filtered->nthInterval(1);
+    TS_ASSERT_EQUALS(interval.begin(), DateAndTime("2007-11-30T16:17:03"));
+    TS_ASSERT_EQUALS(interval.end(), DateAndTime("2007-11-30T16:17:04"));
+    interval = filtered->nthInterval(2);
+    TS_ASSERT_EQUALS(interval.begin(), DateAndTime("2007-11-30T16:17:25"));
+    TS_ASSERT_EQUALS(interval.end(), DateAndTime("2007-11-30T16:17:30"));
+    interval = filtered->nthInterval(3);
+    TS_ASSERT_EQUALS(interval.begin(), DateAndTime("2007-11-30T16:17:30"));
+    TS_ASSERT_EQUALS(interval.end(), DateAndTime("2007-11-30T16:17:39"));
+  }
+
   void test_Construction_Yields_A_Filtered_Property_When_Accessing_Through_The_Filtered_Object() {
     auto source = createTestSeries("name");
     auto filter = createTestFilter();
