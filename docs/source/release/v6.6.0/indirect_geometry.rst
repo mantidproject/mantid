@@ -15,6 +15,7 @@ New Features
 
 - :ref:`LoadEMU <algm-LoadEMU>` now loads data from the beam monitor and adds missing environment parameters, reactor power, and scan period to the log when loading EMU event files.
 - Added support for sparse workspace features in the :ref:`Indirect Correction Interface <interface-indirect-corrections>`.
+- Changed the ``Group by sample`` option to ``Sample changer grouped`` in the :ref:`ISIS Energy Transfer interface <ISISEnergyTransfer>`. It is only shown when an IRIS instrument is selected.
 
 
 Bugfixes
