@@ -282,7 +282,9 @@ QMap<QString, QVariant> Encoder::encodeExperiment(const QtExperimentView *gui) {
                        QVariant(gui->m_ui.backgroundMethodComboBox->currentIndex()));
   experimentMap.insert(QString("polynomialDegreeSpinBox"), QVariant(gui->m_ui.polynomialDegreeSpinBox->value()));
   experimentMap.insert(QString("costFunctionComboBox"), QVariant(gui->m_ui.costFunctionComboBox->currentIndex()));
-  experimentMap.insert(QString("polCorrCheckBox"), QVariant(gui->m_ui.polCorrCheckBox->isChecked()));
+  experimentMap.insert(QString("polCorComboBox"), QVariant(gui->m_ui.polCorrComboBox->currentText()));
+  experimentMap.insert(QString("polCorrEfficienciesWsSelector"),
+                       QVariant(gui->m_ui.polCorrEfficienciesWsSelector->currentText()));
   experimentMap.insert(QString("floodCorComboBox"), QVariant(gui->m_ui.floodCorComboBox->currentIndex()));
   experimentMap.insert(QString("floodWorkspaceWsSelector"),
                        QVariant(gui->m_ui.floodWorkspaceWsSelector->currentIndex()));

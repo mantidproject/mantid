@@ -275,7 +275,7 @@ void QtExperimentView::setEnabledStateForAllWidgets(bool enabled) {
   m_ui.endOverlapEdit->setEnabled(enabled);
   m_ui.transStitchParamsEdit->setEnabled(enabled);
   m_ui.transScaleRHSCheckBox->setEnabled(enabled);
-  m_ui.polCorrCheckBox->setEnabled(enabled);
+  m_ui.polCorrComboBox->setEnabled(enabled);
   m_ui.polCorrEfficienciesWsSelector->setEnabled(enabled);
   stitchOptionsLineEdit().setEnabled(enabled);
   m_ui.reductionTypeComboBox->setEnabled(enabled);
@@ -306,7 +306,7 @@ void QtExperimentView::registerExperimentSettingsWidgets(const Mantid::API::IAlg
   registerSettingWidget(*m_ui.endOverlapEdit, "EndOverlap", alg);
   registerSettingWidget(*m_ui.transStitchParamsEdit, "Params", alg);
   registerSettingWidget(*m_ui.transScaleRHSCheckBox, "ScaleRHSWorkspace", alg);
-  registerSettingWidget(*m_ui.polCorrCheckBox, "PolarizationAnalysis", alg);
+  registerSettingWidget(*m_ui.polCorrComboBox, "PolarizationAnalysis", alg);
   registerSettingWidget(*m_ui.polCorrEfficienciesWsSelector, "PolarizationEfficiencies", alg);
   registerSettingWidget(*m_ui.reductionTypeComboBox, "ReductionType", alg);
   registerSettingWidget(*m_ui.summationTypeComboBox, "SummationType", alg);
@@ -333,7 +333,7 @@ void QtExperimentView::connectExperimentSettingsWidgets() {
   connectSettingsChange(*m_ui.endOverlapEdit);
   connectSettingsChange(*m_ui.transStitchParamsEdit);
   connectSettingsChange(*m_ui.transScaleRHSCheckBox);
-  connectSettingsChange(*m_ui.polCorrCheckBox);
+  connectSettingsChange(*m_ui.polCorrComboBox);
   connectSettingsChange(*m_ui.polCorrEfficienciesWsSelector);
   connectSettingsChange(stitchOptionsLineEdit());
   connectSettingsChange(*m_ui.reductionTypeComboBox);
@@ -355,7 +355,7 @@ void QtExperimentView::disconnectExperimentSettingsWidgets() {
   disconnectSettingsChange(*m_ui.endOverlapEdit);
   disconnectSettingsChange(*m_ui.transStitchParamsEdit);
   disconnectSettingsChange(*m_ui.transScaleRHSCheckBox);
-  disconnectSettingsChange(*m_ui.polCorrCheckBox);
+  disconnectSettingsChange(*m_ui.polCorrComboBox);
   disconnectSettingsChange(*m_ui.polCorrEfficienciesWsSelector);
   disconnectSettingsChange(stitchOptionsLineEdit());
   disconnectSettingsChange(*m_ui.reductionTypeComboBox);
@@ -530,13 +530,13 @@ void QtExperimentView::enableCostFunction() { m_ui.costFunctionComboBox->setEnab
 void QtExperimentView::disableCostFunction() { m_ui.costFunctionComboBox->setEnabled(false); }
 
 void QtExperimentView::enablePolarizationCorrections() {
-  m_ui.polCorrCheckBox->setEnabled(true);
-  m_ui.polCorrCheckLabel->setEnabled(true);
+  m_ui.polCorrComboBox->setEnabled(true);
+  m_ui.polCorrComboLabel->setEnabled(true);
 }
 
 void QtExperimentView::disablePolarizationCorrections() {
-  m_ui.polCorrCheckBox->setEnabled(false);
-  m_ui.polCorrCheckLabel->setEnabled(false);
+  m_ui.polCorrComboBox->setEnabled(false);
+  m_ui.polCorrComboLabel->setEnabled(false);
 }
 
 void QtExperimentView::enablePolarizationEfficiencies() {
@@ -743,9 +743,11 @@ void QtExperimentView::showTransmissionStitchParamsValid() { showAsValid(*m_ui.t
 
 void QtExperimentView::showTransmissionStitchParamsInvalid() { showAsInvalid(*m_ui.transStitchParamsEdit); }
 
-void QtExperimentView::setPolarizationCorrectionOption(bool enable) { setChecked(*m_ui.polCorrCheckBox, enable); }
+void QtExperimentView::setPolarizationCorrectionOption(std::string const &option) {
+  setSelected(*m_ui.polCorrComboBox, option);
+}
 
-bool QtExperimentView::getPolarizationCorrectionOption() const { return m_ui.polCorrCheckBox->isChecked(); }
+std::string QtExperimentView::getPolarizationCorrectionOption() const { return getText(*m_ui.polCorrComboBox); }
 
 std::string QtExperimentView::getPolarizationEfficienciesWorkspace() const {
   return getText(*m_ui.polCorrEfficienciesWsSelector);

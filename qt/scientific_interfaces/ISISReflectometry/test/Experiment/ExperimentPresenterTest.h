@@ -663,7 +663,7 @@ public:
                                  FloodCorrections(FloodCorrectionType::ParameterFile), makeBackgroundSubtraction());
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
-    EXPECT_CALL(m_view, setPolarizationCorrectionOption(true)).Times(1);
+    EXPECT_CALL(m_view, setPolarizationCorrectionOption("Workspace")).Times(1);
     EXPECT_CALL(m_view, setFloodCorrectionType("ParameterFile")).Times(1);
     EXPECT_CALL(m_view, setSubtractBackground(true));
     EXPECT_CALL(m_view, setBackgroundSubtractionMethod("Polynomial"));
@@ -869,7 +869,7 @@ private:
   }
 
   void expectPolarizationAnalysisOn() {
-    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(AtLeast(1)).WillRepeatedly(Return(true));
+    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(AtLeast(1)).WillRepeatedly(Return("Workspace"));
   }
 
   void assertPolarizationAnalysisNone(ExperimentPresenter const &presenter) {
@@ -913,7 +913,7 @@ private:
     auto presenter = makePresenter();
 
     EXPECT_CALL(m_mainPresenter, instrumentName()).Times(1).WillOnce(Return(instrument));
-    EXPECT_CALL(m_view, setPolarizationCorrectionOption(false)).Times(1);
+    EXPECT_CALL(m_view, setPolarizationCorrectionOption("None")).Times(1);
     EXPECT_CALL(m_view, disablePolarizationCorrections()).Times(1);
     presenter.notifySettingsChanged();
 
@@ -924,7 +924,7 @@ private:
     auto presenter = makePresenter();
 
     // Called twice, once for getting it for the model, once for checking if the efficiencies selector needs disabling.
-    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return(false));
+    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return("None"));
     EXPECT_CALL(m_view, getPolarizationEfficienciesWorkspace()).Times(0);
     EXPECT_CALL(m_view, disablePolarizationEfficiencies()).Times(1);
 
@@ -937,7 +937,7 @@ private:
   void runTestThatPolarizationCorrectionsUsesParameterFile() {
     auto presenter = makePresenter();
 
-    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return(true));
+    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return("Workspace"));
     EXPECT_CALL(m_view, getPolarizationEfficienciesWorkspace()).Times(1).WillOnce(Return(""));
     EXPECT_CALL(m_view, enablePolarizationEfficiencies()).Times(1);
 
@@ -950,7 +950,7 @@ private:
   void runTestThatPolarizationCorrectionsUsesWorkspace() {
     auto presenter = makePresenter();
 
-    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return(true));
+    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return("Workspace"));
     EXPECT_CALL(m_view, getPolarizationEfficienciesWorkspace()).Times(1).WillOnce(Return("test_ws"));
     EXPECT_CALL(m_view, enablePolarizationEfficiencies()).Times(1);
 

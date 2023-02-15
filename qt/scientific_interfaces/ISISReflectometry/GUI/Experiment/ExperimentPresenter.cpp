@@ -154,9 +154,9 @@ BackgroundSubtraction ExperimentPresenter::backgroundSubtractionFromView() {
 }
 
 PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
-  auto const correctionsChecked = m_view->getPolarizationCorrectionOption();
+  auto const polCorrOption = m_view->getPolarizationCorrectionOption();
 
-  if (!correctionsChecked) {
+  if (polarizationCorrectionTypeFromString(polCorrOption) == PolarizationCorrectionType::None) {
     return PolarizationCorrections(PolarizationCorrectionType::None);
   }
   auto const correctionsWorkspace = m_view->getPolarizationEfficienciesWorkspace();
@@ -199,13 +199,13 @@ void ExperimentPresenter::updatePolarizationCorrectionEnabledState() {
   // instrument names.
   auto const instrumentName = m_mainPresenter->instrumentName();
   if (instrumentName == "INTER" || instrumentName == "SURF") {
-    m_view->setPolarizationCorrectionOption(false);
+    m_view->setPolarizationCorrectionOption("None");
     m_view->disablePolarizationCorrections();
     m_view->disablePolarizationEfficiencies();
     return;
   }
   m_view->enablePolarizationCorrections();
-  if (m_view->getPolarizationCorrectionOption()) {
+  if (m_view->getPolarizationCorrectionOption() == "Workspace") {
     m_view->enablePolarizationEfficiencies();
     return;
   }
@@ -364,8 +364,8 @@ void ExperimentPresenter::updateViewFromModel() {
   m_view->setPolynomialDegree(m_model.backgroundSubtraction().degreeOfPolynomial());
   m_view->setCostFunction(costFunctionTypeToString(m_model.backgroundSubtraction().costFunction()));
   // Corrections
-  m_view->setPolarizationCorrectionOption(m_model.polarizationCorrections().correctionType() !=
-                                          PolarizationCorrectionType::None);
+  m_view->setPolarizationCorrectionOption(
+      polarizationCorrectionTypeToString(m_model.polarizationCorrections().correctionType()));
   m_view->setFloodCorrectionType(floodCorrectionTypeToString(m_model.floodCorrections().correctionType()));
   if (m_model.floodCorrections().workspace())
     m_view->setFloodWorkspace(m_model.floodCorrections().workspace().get());

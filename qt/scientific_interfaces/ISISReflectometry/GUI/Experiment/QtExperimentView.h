@@ -70,8 +70,8 @@ public:
   void showTransmissionStitchParamsInvalid() override;
   void showTransmissionStitchParamsValid() override;
 
-  bool getPolarizationCorrectionOption() const override;
-  void setPolarizationCorrectionOption(bool enable) override;
+  std::string getPolarizationCorrectionOption() const override;
+  void setPolarizationCorrectionOption(std::string const &option) override;
   std::string getPolarizationEfficienciesWorkspace() const override;
   void setPolarizationEfficienciesWorkspace(std::string const &workspace) override;
 

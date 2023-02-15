@@ -22,7 +22,7 @@ public:
     ON_CALL(*this, getAnalysisMode()).WillByDefault(testing::Return("PointDetectorAnalysis"));
     ON_CALL(*this, getSummationType()).WillByDefault(testing::Return("SumInLambda"));
     ON_CALL(*this, getReductionType()).WillByDefault(testing::Return("Normal"));
-    ON_CALL(*this, getPolarizationCorrectionOption()).WillByDefault(testing::Return(false));
+    ON_CALL(*this, getPolarizationCorrectionOption()).WillByDefault(testing::Return("None"));
     ON_CALL(*this, getFloodCorrectionType()).WillByDefault(testing::Return("Workspace"));
     ON_CALL(*this, getDebugOption()).WillByDefault(testing::Return(false));
     ON_CALL(*this, getIncludePartialBins()).WillByDefault(testing::Return(false));
@@ -86,8 +86,8 @@ public:
   MOCK_METHOD0(showTransmissionRangeInvalid, void(void));
   MOCK_METHOD0(showTransmissionStitchParamsValid, void(void));
   MOCK_METHOD0(showTransmissionStitchParamsInvalid, void(void));
-  MOCK_CONST_METHOD0(getPolarizationCorrectionOption, bool());
-  MOCK_METHOD1(setPolarizationCorrectionOption, void(bool));
+  MOCK_CONST_METHOD0(getPolarizationCorrectionOption, std::string());
+  MOCK_METHOD1(setPolarizationCorrectionOption, void(std::string const &));
   MOCK_CONST_METHOD0(getPolarizationEfficienciesWorkspace, std::string());
   MOCK_METHOD1(setPolarizationEfficienciesWorkspace, void(std::string const &));
   MOCK_CONST_METHOD0(getFloodCorrectionType, std::string());

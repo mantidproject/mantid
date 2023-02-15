@@ -163,13 +163,6 @@
        </item>
       </widget>
      </item>
-     <item row="12" column="1">
-      <widget class="QCheckBox" name="polCorrCheckBox">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
      <item row="11" column="1">
       <widget class="QSpinBox" name="polynomialDegreeSpinBox"/>
      </item>
@@ -181,7 +174,7 @@
       </widget>
      </item>
      <item row="12" column="0">
-      <widget class="QLabel" name="polCorrCheckLabel">
+      <widget class="QLabel" name="polCorrComboLabel">
        <property name="minimumSize">
         <size>
          <width>117</width>
@@ -189,7 +182,7 @@
         </size>
        </property>
        <property name="text">
-        <string>Polarisation Corrections</string>
+        <string>Polarization Corrections</string>
        </property>
       </widget>
      </item>
@@ -681,6 +674,25 @@
        <property name="text">
         <string>Polarization Efficiencies</string>
        </property>
+      </widget>
+     </item>
+     <item row="12" column="1">
+      <widget class="QComboBox" name="polCorrComboBox">
+       <item>
+        <property name="text">
+         <string>None</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Workspace</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>FilePath</string>
+        </property>
+       </item>
       </widget>
      </item>
     </layout>

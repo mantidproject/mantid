@@ -78,7 +78,9 @@ private:
                      map[QString("backgroundMethodComboBox")].toInt())
     TS_ASSERT_EQUALS(gui->m_ui.polynomialDegreeSpinBox->value(), map[QString("polynomialDegreeSpinBox")].toInt())
     TS_ASSERT_EQUALS(gui->m_ui.costFunctionComboBox->currentIndex(), map[QString("costFunctionComboBox")].toInt())
-    TS_ASSERT_EQUALS(gui->m_ui.polCorrCheckBox->isChecked(), map[QString("polCorrCheckBox")].toBool())
+    TS_ASSERT_EQUALS(gui->m_ui.polCorrComboBox->currentText(), map[QString("polCorrComboBox")].toString())
+    TS_ASSERT_EQUALS(gui->m_ui.polCorrEfficienciesWsSelector->currentText(),
+                     map[QString("polCorrEfficienciesWsSelector")].toString())
     TS_ASSERT_EQUALS(gui->m_ui.floodCorComboBox->currentIndex(), map[QString("floodCorComboBox")].toInt())
     TS_ASSERT_EQUALS(gui->m_ui.floodWorkspaceWsSelector->currentIndex(),
                      map[QString("floodWorkspaceWsSelector")].toInt())
