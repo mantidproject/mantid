@@ -13,6 +13,7 @@ from mantid.geometry import CrystalStructure, Goniometer
 # The reference data for these tests were created with PredictPeaks in the state at Release 3.5,
 # if PredictPeaks changes significantly, both reference data and test may need to be adjusted.
 
+
 # The WISH test has a data mismatch which might be caused by the 'old' code having a bug (issue #14105).
 # The difference is that peaks may have different d-values because they are assigned to a different detector.
 # Instead of using the CompareWorkspaces, only H, K and L are compared.
@@ -81,6 +82,20 @@ class PredictPeaksTestTOPAZ(systemtesting.MantidSystemTest):
         self.assertDelta(peak102.getQSampleFrame()[0], leanelasticpeak102.getQSampleFrame()[0], 1e-9)
         self.assertDelta(peak102.getQSampleFrame()[1], leanelasticpeak102.getQSampleFrame()[1], 1e-9)
         self.assertDelta(peak102.getQSampleFrame()[2], leanelasticpeak102.getQSampleFrame()[2], 1e-9)
+
+
+class PredictPeaksTestCORELLI(systemtesting.MantidSystemTest):
+    def runTest(self):
+        simulationWorkspace = CreateSimulationWorkspace(Instrument="CORELLI", BinParams="0,1,2", UnitX="TOF")
+
+        SetUB(simulationWorkspace, a=10.9955, b=10.9955, c=14.31126, u="8.03319,7.49244,-0.625936", v="-0.23105,-0.457266,-14.2957")
+        SetGoniometer(simulationWorkspace, Axis0="4.5,0,1,0,1")
+        peaks = PredictPeaks(simulationWorkspace, WavelengthMin=0.9, WavelengthMax=1.1, MinDSpacing=13.5, MaxDSpacing=14.5)
+
+        peak = peaks.getPeak(0)
+        self.assertEqual(peak.getH(), 0)
+        self.assertEqual(peak.getK(), 0)
+        self.assertEqual(peak.getL(), 1)
 
 
 class PredictPeaksCalculateStructureFactorsTest(systemtesting.MantidSystemTest):
