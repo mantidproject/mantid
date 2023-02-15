@@ -151,31 +151,27 @@ public:
     if (!finalFilter)
       return;
 
-    TS_ASSERT_EQUALS(6, finalFilter->size());
+    TS_ASSERT_EQUALS(5, finalFilter->size());
 
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(0).begin_str(), "2007-Nov-30 16:16:50");
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(0).end_str(), "2007-Nov-30 16:17:00");
-    TS_ASSERT_EQUALS(finalFilter->nthValue(0), false);
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(0).begin_str(), "2007-Nov-30 16:17:00");
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(0).end_str(), "2007-Nov-30 16:17:05");
+    TS_ASSERT_EQUALS(finalFilter->nthValue(0), true);
 
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(1).begin_str(), "2007-Nov-30 16:17:00");
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(1).end_str(), "2007-Nov-30 16:17:05");
-    TS_ASSERT_EQUALS(finalFilter->nthValue(1), true);
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(1).begin_str(), "2007-Nov-30 16:17:05");
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(1).end_str(), "2007-Nov-30 16:17:12");
+    TS_ASSERT_EQUALS(finalFilter->nthValue(1), false);
 
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(2).begin_str(), "2007-Nov-30 16:17:05");
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(2).end_str(), "2007-Nov-30 16:17:12");
-    TS_ASSERT_EQUALS(finalFilter->nthValue(2), false);
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(2).begin_str(), "2007-Nov-30 16:17:12");
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(2).end_str(), "2007-Nov-30 16:17:25");
+    TS_ASSERT_EQUALS(finalFilter->nthValue(2), true);
 
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(3).begin_str(), "2007-Nov-30 16:17:12");
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(3).end_str(), "2007-Nov-30 16:17:25");
-    TS_ASSERT_EQUALS(finalFilter->nthValue(3), true);
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(3).begin_str(), "2007-Nov-30 16:17:25");
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(3).end_str(), "2007-Nov-30 16:17:39");
+    TS_ASSERT_EQUALS(finalFilter->nthValue(3), false);
 
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(4).begin_str(), "2007-Nov-30 16:17:25");
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(4).end_str(), "2007-Nov-30 16:17:39");
-    TS_ASSERT_EQUALS(finalFilter->nthValue(4), false);
-
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(5).begin_str(), "2007-Nov-30 16:17:39");
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(5).end_str(), "2007-Nov-30 16:17:53");
-    TS_ASSERT_EQUALS(finalFilter->nthValue(5), true);
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(4).begin_str(), "2007-Nov-30 16:17:39");
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(4).end_str(), "2007-Nov-30 16:17:53");
+    TS_ASSERT_EQUALS(finalFilter->nthValue(4), true);
   }
 
   void test_filtered_size_when_combined_filter_is_invalid() {
@@ -208,8 +204,6 @@ public:
     flt.addFilter(*testFilter);
 
     TS_ASSERT_EQUALS(flt.data()->size(), 2);
-
-    return;
 
     TS_ASSERT_EQUALS(flt.data()->nthInterval(0).begin_str(), "2007-Nov-30 16:17:40");
     TS_ASSERT_EQUALS(flt.data()->nthInterval(0).end_str(), "2007-Nov-30 16:17:45");
@@ -261,7 +255,7 @@ public:
     period_log.addValue("2008-Jun-17 11:11:52", false);
     period_log.addValue("2008-Jun-17 11:12:01", false);
     period_log.addValue("2008-Jun-17 11:12:11", false);
-    period_log.addValue("2008-Jun-17 11:12:21", true);
+    period_log.addValue("2008-Jun-17 11:12:21", true); //
     period_log.addValue("2008-Jun-17 11:12:32", false);
     period_log.addValue("2008-Jun-17 11:12:42", false);
     period_log.addValue("2008-Jun-17 11:12:52", false);
@@ -273,7 +267,7 @@ public:
     period_log.addValue("2008-Jun-17 11:17:37", false);
     period_log.addValue("2008-Jun-17 11:17:48", false);
     period_log.addValue("2008-Jun-17 11:17:57", false);
-    period_log.addValue("2008-Jun-17 11:18:07", true);
+    period_log.addValue("2008-Jun-17 11:18:07", true); //
     period_log.addValue("2008-Jun-17 11:18:18", false);
     period_log.addValue("2008-Jun-17 11:18:28", false);
     period_log.addValue("2008-Jun-17 11:18:38", false);
@@ -285,7 +279,7 @@ public:
     period_log.addValue("2008-Jun-17 11:20:46", false);
     period_log.addValue("2008-Jun-17 11:20:58", false);
     period_log.addValue("2008-Jun-17 11:21:08", false);
-    period_log.addValue("2008-Jun-17 11:21:19", true);
+    period_log.addValue("2008-Jun-17 11:21:19", true); //
 
     TS_ASSERT_EQUALS(height_log.size(), 26);
 

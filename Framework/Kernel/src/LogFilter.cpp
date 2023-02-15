@@ -44,11 +44,22 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
   if (filter.size() == 0)
     return; // nothing to do
 
+  // clear the filter first
+  if (m_prop) {
+    m_prop->clearFilter();
+  }
+
   if (!m_filter || m_filter->size() == 0) {
     m_filter.reset(filter.clone());
   } else {
-    auto filterProperty = std::make_unique<TimeSeriesProperty<bool>>("tmp");
+    // determine if the current version of things are open-ended
+    const bool isOpen(m_filter->lastValue() && filter.lastValue());
+    DateAndTime firstTime = std::min(m_filter->firstTime(), filter.firstTime());
+    if (m_prop && (m_prop->size() > 0)) {
+      firstTime = std::min(firstTime, m_prop->firstTime());
+    }
 
+    // create a local copy of both filters to add extra values to
     auto filter1 = m_filter.get();
     auto filter2 = std::unique_ptr<TimeSeriesProperty<bool>>(filter.clone());
 
@@ -63,52 +74,31 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
       filter2->addValue(time1.start(), true);
     }
 
-    int i = 0;
-    int j = 0;
+    // temporary objects to handle the intersection calculation
+    TimeROI mine(filter1);
+    TimeROI theirs(filter2.get());
+    mine.update_intersection(theirs);
 
-    time1 = filter1->nthInterval(i);
-    time2 = filter2->nthInterval(j);
-
-    // Make the two filters start at the same time. An entry is added at the
-    // beginning
-    // of the filter that starts later to equalise their staring times. The new
-    // interval will have
-    // value opposite to the one it started with originally.
-    if (time1.start() > time2.start()) {
-      filter1->addValue(time2.start(), !filter1->nthValue(i));
-      time1 = filter1->nthInterval(i);
-    } else if (time2.start() > time1.start()) {
-      filter2->addValue(time1.start(), !filter2->nthValue(j));
-      time2 = filter2->nthInterval(j);
+    // put the results into the TimeSeriesProperty
+    std::vector<bool> values;
+    std::vector<DateAndTime> times;
+    for (const auto splitter : mine.toSplitters()) {
+      values.emplace_back(true);
+      values.emplace_back(false);
+      times.emplace_back(splitter.start());
+      times.emplace_back(splitter.stop());
+    }
+    // if both are open ended, remove the ending
+    if (isOpen) {
+      times.pop_back();
+      values.pop_back();
     }
 
-    for (;;) {
-      TimeInterval time3;
-      time3 = time1.intersection(time2);
-      if (time3.isValid()) {
-        filterProperty->addValue(time3.start(), (filter1->nthValue(i) && filter2->nthValue(j)));
-      }
-
-      if (time1.stop() < time2.stop()) {
-        i++;
-      } else if (time2.stop() < time1.stop()) {
-        j++;
-      } else {
-        i++;
-        j++;
-      }
-
-      if (i == filter1->size() || j == filter2->size())
-        break;
-      time1 = filter1->nthInterval(i);
-      time2 = filter2->nthInterval(j);
-    }
-
-    m_filter = std::move(filterProperty);
+    // set as the filter
+    m_filter->replaceValues(times, values);
   }
   // apply the filter to the property
   if (m_prop) {
-    m_prop->clearFilter();
     m_prop->filterWith(m_filter.get());
   }
 }
