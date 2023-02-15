@@ -151,8 +151,8 @@ const char *AbsObjMethod::what() const noexcept { return outMessage.c_str(); }
 */
 InstrumentDefinitionError::InstrumentDefinitionError(const std::string &Desc, std::string ObjectName)
     : std::runtime_error(Desc), objectName(std::move(ObjectName)) {
-  outMessage = std::string(std::runtime_error::what()) + " search object " + objectName +
-               ". See http://www.mantidproject.org/IDF for IDF syntax.";
+  outMessage = std::string(std::runtime_error::what()) + " while searching for " + objectName +
+               ". See http://docs.mantidproject.org/concepts/InstrumentDefinitionFile for IDF syntax.";
 }
 
 /** Constructor

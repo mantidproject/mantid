@@ -37,6 +37,7 @@ INSTRUMENT_VIEW_DICT = {
             "displayLighting": False,
             "labelPrecision": 1,
             "useUCorrection": False,
+            "maintainAspectRatio": True,
             "autoScaling": False,
             "colorBar": {"max": "40", "scaleType": 0, "power": "2", "min": "40"},
             "showLabels": True,

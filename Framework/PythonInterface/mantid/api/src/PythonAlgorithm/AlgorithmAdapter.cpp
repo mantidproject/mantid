@@ -19,6 +19,11 @@
 #include <boost/python/class.hpp>
 #include <boost/python/dict.hpp>
 
+namespace {
+auto PYALG_STRUCTURE_DOCS = "https://docs.mantidproject.org/tutorials/extending_mantid_with_python/"
+                            "python_algorithms/01_basic_algorithm_structure.html#basic-algorithm-structure";
+}
+
 //-----------------------------------------------------------------------------
 // AlgorithmAdapter definition
 //-----------------------------------------------------------------------------
@@ -85,8 +90,7 @@ template <typename BaseAlgorithm> const std::string AlgorithmAdapter<BaseAlgorit
   if (category == defaultCategory) {
     // output a warning
     this->getLogger().warning() << "Python Algorithm " << this->name() << " v" << this->version()
-                                << " does not have a category defined. See "
-                                   "http://www.mantidproject.org/Basic_PythonAlgorithm_Structure\n";
+                                << " does not have a category defined. See " << PYALG_STRUCTURE_DOCS << "\n";
   }
   return category;
 }

@@ -110,7 +110,7 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
 
         if input_string == "":
             with open(destination, "w") as outfile:
-                # Add in an extra line to import the previously implicit imports from MantidPlot
+                # Add in an extra line to import the previously implicit imports from Mantid
                 outfile.write("from mantid.simpleapi import *\n\n")
                 outfile.write(script)
         else:

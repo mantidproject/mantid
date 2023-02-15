@@ -10,9 +10,9 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Unit.h"
-#include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <QRegExpValidator>
+#include <QSignalBlocker>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -660,12 +660,12 @@ void AbsorptionCorrections::setCanDensityUnit(QString const &text) {
 }
 
 void AbsorptionCorrections::setSampleDensityValue(QString const &text) {
-  MantidQt::API::SignalBlocker blocker(m_uiForm.spSampleDensity);
+  QSignalBlocker blocker(m_uiForm.spSampleDensity);
   m_uiForm.spSampleDensity->setValue(getSampleDensityValue(text));
 }
 
 void AbsorptionCorrections::setCanDensityValue(QString const &text) {
-  MantidQt::API::SignalBlocker blocker(m_uiForm.spCanDensity);
+  QSignalBlocker blocker(m_uiForm.spCanDensity);
   m_uiForm.spCanDensity->setValue(getCanDensityValue(text));
 }
 

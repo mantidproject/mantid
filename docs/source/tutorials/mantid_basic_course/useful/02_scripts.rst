@@ -5,7 +5,7 @@ Working with Python
 ===================
 
 This is a quick summary of how to use python scripts in MantidWorkbench. To learn more about this, see the further tutorials
-on the `home page <https://www.mantidproject.org/Main_Page>`_.
+on the `home page <https://www.mantidproject.org>`__.
 Even if you are a novice at Python, it is useful to know how to run a script as you can produce one within Mantid:
 from the "Generate a script" button on a plot toolbar, or from project recovery when you reopen MantidWorkbench after a crash.
 

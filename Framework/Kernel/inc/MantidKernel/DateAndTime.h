@@ -28,6 +28,8 @@ public:
   TimeInterval() : m_begin(), m_end() {}
   /// Constructor
   TimeInterval(const Types::Core::DateAndTime &from, const Types::Core::DateAndTime &to);
+  TimeInterval(const std::string &from, const std::string &to);
+
   /// Beginning of the interval
   Types::Core::DateAndTime begin() const { return m_begin; }
   /// End of the interval
@@ -40,10 +42,17 @@ public:
 
   /// True if the interval contains \a t.
   bool contains(const Types::Core::DateAndTime &t) const { return t >= begin() && t < end(); }
+  /// Return true if the SplittingInterval overlaps with this one.
+  bool overlaps(const TimeInterval *other) const;
+  /// Return true if the SplittingInterval overlaps with this one.
+  bool overlaps(const TimeInterval &other) const;
+
   /// Returns an intersection of two intervals
   TimeInterval intersection(const TimeInterval &ti) const;
   /// Returns true if this interval ends before \a ti starts
-  bool operator<(const TimeInterval &ti) const { return end() < ti.begin(); }
+  bool operator<(const TimeInterval &ti) const;
+  bool operator>(const TimeInterval &ti) const;
+  bool operator==(const TimeInterval &ti) const;
   /// String representation of the begin time
   std::string begin_str() const;
   /// String representation of the end time

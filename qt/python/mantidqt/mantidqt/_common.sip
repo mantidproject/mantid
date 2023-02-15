@@ -354,7 +354,6 @@ public:
   QStringList getUserSubWindowKeys() const;
 
   void showHelpPage(const QString &url=QString());
-  void showWikiPage(const QString &page=QString());
   void showAlgorithmHelp(const QString &name, const int version=-1);
   void showConceptHelp(const QString &name);
   void showFitFunctionHelp(const QString &name=QString());

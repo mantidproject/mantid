@@ -8,8 +8,6 @@
 
 #include "IAddWorkspaceDialog.h"
 #include "IndirectFitDataModel.h"
-#include "InelasticDataManipulation.h"
-#include "InelasticDataManipulationElwinTabView.h"
 #include "InelasticDataManipulationTab.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"

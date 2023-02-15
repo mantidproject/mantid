@@ -32,8 +32,6 @@ public:
   void showPage(const std::string &url = std::string()) override;
   void showPage(const QString &url) override;
   void showPage(const QUrl &url) override;
-  void showWikiPage(const std::string &page = std::string()) override;
-  void showWikiPage(const QString &page) override;
   void showAlgorithm(const std::string &name = std::string(), const int version = -1) override;
   void showAlgorithm(const QString &name, const int version = -1) override;
   void showConcept(const std::string &name) override;
@@ -51,9 +49,6 @@ private:
 
   /// The full path of the collection file.
   std::string m_collectionFile;
-  /** The full path of the cache file. If it is not
-      determined this is an empty string. */
-  std::string m_cacheFile;
   /// The window that renders the help information
   static QPointer<pqHelpWindow> g_helpWindow;
 

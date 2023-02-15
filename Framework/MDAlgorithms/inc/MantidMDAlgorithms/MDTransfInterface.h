@@ -21,9 +21,8 @@ namespace MDAlgorithms {
 responsible for conversion of input workspace
   * data into MD events.
   *
-  * See http://www.mantidproject.org/Writing_custom_ConvertTo_MD_transformation
-for detailed description of this
-  * class place in the algorithms hierarchy.
+  * The detailed description of the algorithm is provided at
+  * dev-docs/source/WritingCustomConvertToMDTransformation.rst.
   *
 * The interface provide information for two tasks.
 * 1) Definition of target MD workspace properties and
@@ -49,9 +48,6 @@ dependent on detectors id only
   * 4) calculation of the multidimensional variables which depend on the data
 along x-axis of the workspace
   *    and possibly on detectors parameters (values along y-axis)
-  *
-  *
-  * @date 16-05-2012
 */
 
 class MDTransfInterface {

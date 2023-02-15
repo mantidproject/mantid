@@ -24,7 +24,7 @@ MatrixWorkspace
 Do the following tests with an EventWorkspace (e.g. ``CNCS_7860_event.nxs``) and a Workspace2D (e.g. ``MAR11060.raw``) from the `TrainingCourseData <https://download.mantidproject.org/>`_.
 
 1. Load the workspace and open in sliceviewer (right-click on the workspace in the ADS > Show Slice Viewer).
-2. Confirm that for MatrixWorkspaces the :ref:`Peak overlay<mantid:sliceviewer_roi>` and :ref:`Nonorthogonal view<mantid:sliceviewer_nonortho>` buttons should be disabled (greyed out).
+2. Confirm that for MatrixWorkspaces the :ref:`Peak overlay<mantid:sliceviewer_roi>`, :ref:`Nonorthogonal view<mantid:sliceviewer_nonortho>` and :ref:`Non-axis aligned cutting tool <mantid:sliceviewer_nonaxiscuts>` buttons should be disabled (greyed out).
 3. Check the other toolbar buttons.
 
     a. Pan and Zoom (use mouse scroll and magnifying glass tool) and Home
@@ -73,21 +73,19 @@ Do the following tests with an EventWorkspace (e.g. ``CNCS_7860_event.nxs``) and
     b. Change the scale type to e.g. Log
 
         * In Log scale bins with 0 counts should appear white
-        * When you zoom in to a region comprising only of bins with 0 counts it will set the color axis limits to (0,0) and force the scale to be linear
+        * When you zoom in to a region comprising only of bins with 0 counts it will set the color axis limits to (0.1,1) and force the scale to be linear
         * Zoom in to a region outside the extent of the data, check the Log colorscale option is disabled.
 
     c. Change colormap
     d. Reverse colormap
 
-6. Test the :ref:`Cursor Information Widget<mantid:sliceviewer_cursor>` (table at top of sliceviewer window with TOF, spectrum, DetID etc.)
+6. Test transposing axes: click the Y button to the right of the Time-of-flight label (top left corner) - the image should be transposed and the axes labels updated.
 
-    a. Confirm it tracks with the cursor when Track Cursor is unchecked
+7. Test the :ref:`Cursor Information Widget<mantid:sliceviewer_cursor>` (table at top of sliceviewer window with TOF, spectrum, DetID etc.)
+
+    a. Confirm it tracks with the cursor when Track Cursor is checked
     b. Uncheck the track cursor and confirm it updates when the cursor is clicked.
-
-7. Test transposing axes
-
-    a. Click the Y button to the right of the Time-of-flight label (top left corner) - the image should be transposed and the axes labels updated.
-    b. Repeat the test for the cursor info table.
+    c. Transpose the axes (as in step 6) and confirm the cursor position displayed is still correct.
 
 8. Resize the sliceviewer window, check the widgets, buttons etc. are still visible and clear for reasonable aspect ratios.
 
@@ -100,7 +98,7 @@ In terms of sliceviewer functionality, the key difference is that MDHistoWorkspa
 
 MDWorkspace (with events)
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-1. Create a 3D and 4D MDWorkspaces with some data - repeat the following tests with both ``md_4D`` and ``md_3D``
+1. Create a 3D and 4D MDWorkspaces with some data - repeat the following tests with both ``md_4D`` and ``md_3D``. Note this will throw a warning relating to the ``SlicingAlgorithm``.
 
 .. code-block:: python
 
@@ -108,10 +106,7 @@ MDWorkspace (with events)
 
     md_4D = CreateMDWorkspace(Dimensions=4, Extents=[0,2,-1,1,-1.5,1.5,-0.25,0.25], Names="H,K,L,E", Frames='HKL,HKL,HKL,General Frame',Units='r.l.u.,r.l.u.,r.l.u.,meV')
     FakeMDEventData(InputWorkspace=md_4D, UniformParams='5e5') # 4D data
-    tmp = CreateMDWorkspace(Dimensions=4, Extents=[0.25,0.75,-1,-0.5,-1.5,-1, -0.25,0], Names="H,K,L,E", Frames='HKL,HKL,HKL,General Frame',Units='r.l.u.,r.l.u.,r.l.u.,meV')
-    FakeMDEventData(InputWorkspace=tmp, UniformParams='1e5') # 4D data
-    md_4D += tmp
-    DeleteWorkspace(tmp)
+    FakeMDEventData(InputWorkspace=md_4D, UniformParams='1e5,0.5,1.5,-0.5,0.5,-0.75,0.75,-0.1,0.1') # 4D data
 
     # Add a non-orthogonal UB
     expt_info = CreateSampleWorkspace()
@@ -130,6 +125,7 @@ MDWorkspace (with events)
 2. Test the toolbar buttons pan, zoom, line plots, ROI as in step 3 of the :ref:`toolbar-checklist` instructions.
 
     - This workspace should be dynamically rebinned - i.e. the number of bins within the view limits along each axis should be preserved when zooming.
+    - The cursor info table should also display the HKL of the cursor
 
 3. Change the number of bins along one of the viewing axes (easier to pick a small number e.g. 2)
 4. Change the integration-width/slice-thickness (spinbox to the left of the word `thick`) along the non-viewed axes.
@@ -140,6 +136,7 @@ MDWorkspace (with events)
 
     a. Confirm the slider moves when the spinbox value is updated.
     b. Confirm moving the slider updates the spinbox.
+    c. Check the slicepoint is updated in the cursor info table.
 
 Test the :ref:`Nonorthogonal view<mantid:sliceviewer_nonortho>`
 
@@ -201,6 +198,8 @@ Test the :ref:`Peak Overlay<mantid:sliceviewer_peaks_overlay>`
 
 8. Repeat the above steps 1-7 in non-orthogonal view.
 
+9. Check the ``Concise View`` checkbox above one of the peak tables on the right hand side - this should hide some columns.
+
 MDHistoWorkspace
 ~~~~~~~~~~~~~~~~
 
@@ -230,7 +229,7 @@ MDHistoWorkspace
 CutViewer Tool
 --------------
 
-1. Check the cutting tool button is only enabled for 3D MD workspaces where all dimensions are Q by opening the following workspaces in sliceviewer.
+1. Check the :ref:`Non-axis aligned cutting tool <mantid:sliceviewer_nonaxiscuts>` button is only enabled for 3D MD workspaces where all dimensions are Q by opening the following workspaces in sliceviewer.
 It should only be enabled for the `ws_3D` and `ws_3D_QLab` workspaces (see comment for details) - the first 3 column headers for the vectors should be a*,b*,c* and Qx,Qy,Qz for the two workspaces respectively.
 
 .. code-block:: python
@@ -272,12 +271,12 @@ It should only be enabled for the `ws_3D` and `ws_3D_QLab` workspaces (see comme
     # make some fake data
     FakeMDEventData(ws, UniformParams='1e5', PeakParams='1e+05,0,0,1,0.3', RandomSeed='3873875')
 
-4. Click on non-ortho view of H and K axes - this should disable the cutting tool button
-5. Turn off non-ortho view and check that opening the cut tool:
 
-    - Disables non-ortho view
-    - Disables ROI tool
-    - Disables line plots
+4. Open the cut tool and check that:
+
+    - Disabled non-ortho view
+    - Disabled ROI tool
+    - Disabled line plots
     - Sliceviewer should look like
 
 .. figure:: ../../images/SliceViewer/CutViewer_HKplane.png
@@ -312,10 +311,10 @@ It should only be enabled for the `ws_3D` and `ws_3D_QLab` workspaces (see comme
 17. Set the step of u2 = 2 in the table, check that it sets (start,stop) = (-1,1)
 18. Drag the top white marker of the cut representation up to L~2
 
-    - u1 ~ [0,0,-1]  and u2 ~ [0,-1,0]
-    - There should be a peak in the 1D plot at x~-1
+    - u1 ~ [0,0,1]  and u2 ~ [0,1,0]
+    - There should be a peak in the 1D plot at x~1
 
-19. For u1 change c* = -1 and b* = 0 - check that u2 = [0,-1,0]
+19. For u1 change c* = -1 and b* = 0 - check that u2 = [0,-1,0] and there is a peak at x~-1
 20. To change the centre of the cut move the central white marker of the cut representation to (K,L) ~ (2,0),
 
     - The entire cut representation should move
@@ -331,6 +330,11 @@ It should only be enabled for the `ws_3D` and `ws_3D_QLab` workspaces (see comme
     - The peak in the 1D plot should move from x= 1 -> -1
     - Check u2 = [0,-1,0]
 
+26. Turn on non-orthogonal view and play around with the cut tool representation
+
+    - Check that the table values are updated correctly (use the HKL in the cursor info table to help determine this)
+
+27. Produce a non-axis aligned cut where the peak is not in the center of the x-range. Take the x-value at the peak maximum and plug it into the axis label - it should produce the HKL of the peak (0,0,1).
 
 Specific Tests
 --------------

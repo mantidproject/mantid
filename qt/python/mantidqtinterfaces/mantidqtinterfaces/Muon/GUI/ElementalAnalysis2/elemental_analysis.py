@@ -4,8 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy import QtWidgets, QtCore, QT_VERSION
-from distutils.version import LooseVersion
+from qtpy import QtWidgets, QtCore
 
 from mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.context.ea_group_context import EAGroupContext
 from mantidqtinterfaces.Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
@@ -59,11 +58,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
         # Add dock widget to main Elemental analysis window
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockable_plot_widget_window)
-        # Need this line to stop the bug where the dock window snaps back to its original size after resizing.
-        # 0 argument is arbitrary and has no effect on fit widget size
-        # This is a qt bug reported at (https://bugreports.qt.io/browse/QTBUG-65592)
-        if QT_VERSION >= LooseVersion("5.6"):
-            self.resizeDocks({self.dockable_plot_widget_window}, {1}, QtCore.Qt.Horizontal)
+
         # disable and enable notifiers
         self.disable_notifier = GenericObservable()
         self.enable_notifier = GenericObservable()

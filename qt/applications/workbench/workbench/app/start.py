@@ -23,7 +23,7 @@ import mantidqt.utils.qt as qtutils
 # Find Qt plugins for development builds on some platforms
 plugins.setup_library_paths()
 
-from qtpy.QtGui import QIcon  # noqa
+from qtpy.QtGui import QIcon, QSurfaceFormat  # noqa
 from qtpy.QtWidgets import QApplication  # noqa
 from qtpy.QtCore import QCoreApplication, Qt  # noqa
 
@@ -49,8 +49,16 @@ def qapplication():
     """
     app = QApplication.instance()
     if app is None:
-        # attributes that must be set before creating QApplication
+        # share OpenGL contexts across the application
         QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
+
+        # set global compatability profile for OpenGL
+        # We use deprecated OpenGL calls so anything with a profile version >= 3
+        # causes widgets like the instrument view to fail to render
+        gl_surface_format = QSurfaceFormat.defaultFormat()
+        gl_surface_format.setProfile(QSurfaceFormat.CompatibilityProfile)
+        gl_surface_format.setSwapBehavior(QSurfaceFormat.DoubleBuffer)
+        QSurfaceFormat.setDefaultFormat(gl_surface_format)
 
         argv = sys.argv[:]
         argv[0] = APPNAME  # replace application name

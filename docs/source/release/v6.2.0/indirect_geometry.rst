@@ -7,7 +7,7 @@ Indirect Geometry Changes
 
 New Features
 ------------
-- **The** :ref:`Elwin <Elwin-iqt-ref>` **tab in** :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` **has a new loader which now allows users to add workspaces.**
+- **The** :ref:`Elwin <elwin>` **tab in** :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` **has a new loader which now allows users to add workspaces.**
 
 .. figure:: ../../images/ElwinLoad.gif
    :width: 800px
@@ -19,14 +19,14 @@ Improvements
 ------------
 - Single input has been removed from the :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` Fit tabs. All data input is now done via the multiple input dialog.
 - The data input widgets in the :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` Fit tabs has been made dockable and can be resized once undocked.
-- Updated :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` and :ref:`Elwin and I(Q,t) <Elwin-iqt-ref>` documentation with new screenshots and details of the new :ref:`Elwin <Elwin-iqt-ref>` loader.
+- Updated :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` and :ref:`Elwin<elwin>` and :ref:`I(Q,t) <iqt>` documentation with new screenshots and details of the new :ref:`Elwin <elwin>` loader.
 
 Bugfixes
 --------
 - A bug has been fixed in :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` on the :ref:`F(Q)Fit <fqfit>` Multiple Input tab that allowed duplicate spectra to be added.
 - A bug has been fixed that stopped additional spectra being added to :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` if spectra from that workspace had already been added.
 - A bug has been fixed in :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` that limited the integration range on the tabs to between -1 and 1.
-- A bug has been fixed in :ref:`Elwin <Elwin-iqt-ref>` tab that caused Mantid to crash if a file of the wrong format was loaded.
+- A bug has been fixed in :ref:`Elwin <elwin>` tab that caused Mantid to crash if a file of the wrong format was loaded.
 
 Algorithms
 ----------

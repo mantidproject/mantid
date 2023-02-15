@@ -10,6 +10,7 @@
 #include <gmock/gmock.h>
 
 #include "ALFInstrumentModel.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -51,6 +52,18 @@ std::vector<DetectorTube> findWholeTubes(Mantid::Geometry::ComponentInfo const &
   return tubes;
 }
 
+MatrixWorkspace_sptr changeBinOffset(MatrixWorkspace_sptr const &inputWorkspace) {
+  auto alg = AlgorithmManager::Instance().create("ChangeBinOffset");
+  alg->initialize();
+  alg->setAlwaysStoreInADS(false);
+  alg->setProperty("InputWorkspace", inputWorkspace);
+  alg->setProperty("Offset", 0.1);
+  alg->setProperty("OutputWorkspace", "__not_in_ads");
+  alg->execute();
+  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
+  return outputWorkspace;
+}
+
 } // namespace
 
 class ALFInstrumentModelTest : public CxxTest::TestSuite {
@@ -85,9 +98,9 @@ public:
     TS_ASSERT(m_model->loadAndNormalise(m_ALFData));
   }
 
-  void test_loadAndNormalise_transforms_the_data_to_dSpacing_if_not_already() {
+  void test_loadAndNormalise_does_not_transform_to_dSpacing() {
     auto const workspace = m_model->loadAndNormalise(m_ALFData);
-    TS_ASSERT_EQUALS("dSpacing", workspace->getAxis(0)->unit()->unitID());
+    TS_ASSERT_DIFFERS("dSpacing", workspace->getAxis(0)->unit()->unitID());
   }
 
   void test_sampleRun_and_vanadiumRun_returns_zero_when_no_data_is_loaded() {
@@ -193,6 +206,7 @@ public:
     TS_ASSERT(ADS.doesExist("ALFData"));
 
     auto const workspace = ADS.retrieveWS<MatrixWorkspace>("ALFData");
+    TS_ASSERT_EQUALS("dSpacing", workspace->getAxis(0)->unit()->unitID());
     TS_ASSERT_EQUALS(sample->y(0), workspace->y(0));
   }
 
@@ -206,6 +220,22 @@ public:
     TS_ASSERT(ADS.doesExist("ALFData"));
 
     auto const workspace = ADS.retrieveWS<MatrixWorkspace>("ALFData");
+    TS_ASSERT_EQUALS("dSpacing", workspace->getAxis(0)->unit()->unitID());
+    TS_ASSERT_EQUALS(1.0, workspace->y(0)[0]);
+    TS_ASSERT_EQUALS(1.0, workspace->y(0)[1]);
+  }
+
+  void test_generateLoadedWorkspace_handles_vanadium_with_different_binning() {
+    auto const dataWs = m_model->loadAndNormalise(m_ALFData);
+    m_model->setSample(dataWs);
+    m_model->setVanadium(changeBinOffset(dataWs));
+
+    m_model->generateLoadedWorkspace();
+
+    TS_ASSERT(ADS.doesExist("ALFData"));
+
+    auto const workspace = ADS.retrieveWS<MatrixWorkspace>("ALFData");
+    TS_ASSERT_EQUALS("dSpacing", workspace->getAxis(0)->unit()->unitID());
     TS_ASSERT_EQUALS(1.0, workspace->y(0)[0]);
     TS_ASSERT_EQUALS(1.0, workspace->y(0)[1]);
   }

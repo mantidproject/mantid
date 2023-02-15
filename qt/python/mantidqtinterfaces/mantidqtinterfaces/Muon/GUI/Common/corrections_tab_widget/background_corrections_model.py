@@ -125,7 +125,7 @@ class BackgroundCorrectionData:
         """Gets the parameters to use for the background Fit."""
         input_name = self.uncorrected_workspace_name if self._use_raw_data() else self.uncorrected_rebin_workspace_name
         return {
-            "Function": fit_function,
+            "Function": str(fit_function),
             "InputWorkspace": input_name,
             "StartX": self.start_x,
             "EndX": self.end_x,

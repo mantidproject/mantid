@@ -1,0 +1,1 @@
+- The Muon Analysis and Frequency Domain Analysis GUI's can now accept the `.nxs_v1` extension.

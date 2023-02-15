@@ -2,8 +2,8 @@
 from mantid.simpleapi import *
 import matplotlib.pyplot as plt
 
-# Dictionary { workspace_name: (workspace_index, start_x, end_x) }
-input_data = {{input_dictionary}}
+# List of tuples [ (workspace_name, workspace_index, start_x, end_x) ]
+input_data = {{input_list}}
 
 # Fit function as a string
 function = {{function_string}}

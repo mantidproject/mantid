@@ -74,6 +74,25 @@ class MuonFileUtilsTest(unittest.TestCase):
         parsed_file = utils.parse_user_input_to_files(user_input, ["nxs"])
         self.assertEqual(parsed_file, files)
 
+    def test_parse_user_input_to_files_filters_files_with_other_valid_extension(self):
+        user_input = (
+            "C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "EMU0001234.nxs;"
+            "C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "EMU0001244.nxs_v1;"
+            "C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "EMU0001245.nxs_v2;"
+            "C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "PSI0001245.bin"
+        )
+        files = [
+            "C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "EMU0001234.nxs",
+            "C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "EMU0001244.nxs_v1",
+            "C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "EMU0001245.nxs_v2",
+            "C:" + os.sep + "dir1" + os.sep + "dir2" + os.sep + "PSI0001245.bin",
+        ]
+
+        parsed_file = utils.parse_user_input_to_files(
+            user_input,
+        )
+        self.assertEqual(parsed_file, files)
+
     def test_duplicates_removed_from_list_of_filenames_and_ordering_maintained(self):
         file_list = [
             os.sep + "dir1" + os.sep + "dir2" + os.sep + "file1.nxs",

@@ -1458,6 +1458,36 @@ public:
                       "select monitors, but to also exclude them",
                       ld.execute(), const std::invalid_argument &);
   }
+
+  void testReadNotes() {
+
+    LoadISISNexus2 load;
+    load.initialize();
+    load.setPropertyValue("Filename", "EMU00102347.nxs_v2");
+    load.setPropertyValue("OutputWorkspace", "outWS");
+    load.setPropertyValue("SpectrumMin", "10");
+    load.setPropertyValue("SpectrumMax", "20");
+    TS_ASSERT_THROWS_NOTHING(load.execute());
+    TS_ASSERT(load.isExecuted());
+
+    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    TS_ASSERT_EQUALS(ws->getComment(), "TF20 as insert cools");
+  }
+
+  void testDoesNotFailWhenNoNotes() {
+
+    LoadISISNexus2 load;
+    load.initialize();
+    load.setPropertyValue("Filename", "LOQ49886.nxs");
+    load.setPropertyValue("OutputWorkspace", "outWS");
+    load.setPropertyValue("SpectrumMin", "10");
+    load.setPropertyValue("SpectrumMax", "20");
+    TS_ASSERT_THROWS_NOTHING(load.execute());
+    TS_ASSERT(load.isExecuted());
+
+    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    TS_ASSERT_EQUALS(ws->getComment(), "");
+  }
 };
 
 //------------------------------------------------------------------------------

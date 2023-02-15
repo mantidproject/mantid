@@ -14,15 +14,22 @@ class SANSILLParameterScanTest(unittest.TestCase):
 
     _facility = None
 
+    @classmethod
+    def setUpClass(cls):
+        cls._facility = config["default.facility"]
+        cls._instrument = config["default.instrument"]
+        cls._data_search_dirs = config["datasearch.directories"]
+        config.appendDataSearchSubDir("ILL/D16/")
+
     def setUp(self):
         self._facility = config["default.facility"]
-        self._data_search_dirs = config.getDataSearchDirs()
-        config.appendDataSearchSubDir("ILL/D16/")
         config.setFacility("ILL")
 
-    def tearDown(self):
-        config.setFacility(self._facility)
-        config.setDataSearchDirs(self._data_search_dirs)
+    @classmethod
+    def tearDownClass(cls):
+        config["default.facility"] = cls._facility
+        config["default.instrument"] = cls._instrument
+        config["datasearch.directories"] = cls._data_search_dirs
         mtd.clear()
 
     def test_D16_omega(self):

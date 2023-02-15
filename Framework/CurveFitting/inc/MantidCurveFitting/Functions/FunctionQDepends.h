@@ -6,19 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-// Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
-
-// Mantid Headers from the same project
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidCurveFitting/DllConfig.h"
-// Mantid headers from other projects
-// N/A
-// 3rd party library headers
-// N/A
-// Standard library
-// N/A
 
 namespace Mantid {
 namespace CurveFitting {

@@ -1,69 +1,41 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2023 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/DllConfig.h"
+#include "MantidKernel/TimeROI.h"
 
 namespace Mantid {
 namespace Kernel {
 
 /**
- * Class holding a start/end time and a destination for splitting
- * event lists and logs.
- *
- * The start/stop times are saved internally as DateAndTime, for
- * fastest event list splitting.
- *
- * Author: Janik Zikovsky, SNS
+ * TimeSplitter is an object that contains a mapping of time regions [inclusive, exclusive) that map to output workspace
+ * indices. No time can be mapped to two output workspace indices and all time from the beginning to the end is
+ * accounted for. A negative workspace index indicates that the data in that region should be ignored. This object
+ * converts all negative indices to -1.
  */
-class MANTID_KERNEL_DLL SplittingInterval {
+class MANTID_KERNEL_DLL TimeSplitter {
 public:
-  /// Default constructor
-  SplittingInterval();
+  TimeSplitter() = default;
+  TimeSplitter(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop);
+  int valueAtTime(const Types::Core::DateAndTime &time) const;
+  void addROI(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop, const int value);
+  std::vector<int> outputWorkspaceIndices() const;
+  TimeROI getTimeROI(const int workspaceIndex);
 
-  SplittingInterval(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop, const int index = 0);
-
-  Types::Core::DateAndTime start() const;
-  Types::Core::DateAndTime stop() const;
-
-  double duration() const;
-
-  int index() const;
-
-  bool overlaps(const SplittingInterval &b) const;
-  /// @cond
-  SplittingInterval operator&(const SplittingInterval &b) const;
-  /// @endcond
-  SplittingInterval operator|(const SplittingInterval &b) const;
-
-  bool operator<(const SplittingInterval &b) const;
-  bool operator>(const SplittingInterval &b) const;
+  /// this is to aid in testing and not intended for use elsewhere
+  std::size_t numRawValues() const;
 
 private:
-  /// begin
-  Types::Core::DateAndTime m_start;
-  /// end
-  Types::Core::DateAndTime m_stop;
-  /// Index of the destination
-  int m_index;
+  void clearAndReplace(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop, const int value);
+  std::string debugPrint() const;
+  std::map<Types::Core::DateAndTime, int> m_roi_map;
 };
 
-/**
- * A typedef for splitting events according their pulse time.
- * It is a vector of SplittingInterval classes.
- *
- */
-using TimeSplitterType = std::vector<SplittingInterval>;
-
-// -------------- Operators ---------------------
-MANTID_KERNEL_DLL TimeSplitterType operator+(const TimeSplitterType &a, const TimeSplitterType &b);
-MANTID_KERNEL_DLL TimeSplitterType operator&(const TimeSplitterType &a, const TimeSplitterType &b);
-MANTID_KERNEL_DLL TimeSplitterType operator|(const TimeSplitterType &a, const TimeSplitterType &b);
-MANTID_KERNEL_DLL TimeSplitterType operator~(const TimeSplitterType &a);
-
-} // Namespace Kernel
-} // Namespace Mantid
+} // namespace Kernel
+} // namespace Mantid

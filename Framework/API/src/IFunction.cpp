@@ -1179,7 +1179,7 @@ void IFunction::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> w
               // have
               // a unit of its own. If set convert param value
               // See section 'Using fitting parameters in
-              // www.mantidproject.org/IDF
+              // docs/source/concepts/InstrumentDefinitionFile.rst
               if (fitParam.getFormula().empty()) {
                 // so from look up table
                 Kernel::Unit_sptr resultUnit = fitParam.getLookUpTable().getYUnit(); // from table

@@ -337,6 +337,32 @@ public:
     verifyAndClear();
   }
 
+  void testSetStitchOptionsTrueTextReplacedWithValue() {
+    auto presenter = makePresenter();
+    auto const optionsString = "TestParam=True";
+    std::map<std::string, std::string> optionsMap = {{"TestParam", "1"}};
+
+    EXPECT_CALL(m_view, getStitchOptions()).WillOnce(Return(optionsString));
+    EXPECT_CALL(m_view, showStitchParametersValid());
+    presenter.notifySettingsChanged();
+
+    TS_ASSERT_EQUALS(presenter.experiment().stitchParameters(), optionsMap);
+    verifyAndClear();
+  }
+
+  void testSetStitchOptionsFalseTextReplacedWithValue() {
+    auto presenter = makePresenter();
+    auto const optionsString = "TestParam=False";
+    std::map<std::string, std::string> optionsMap = {{"TestParam", "0"}};
+
+    EXPECT_CALL(m_view, getStitchOptions()).WillOnce(Return(optionsString));
+    EXPECT_CALL(m_view, showStitchParametersValid());
+    presenter.notifySettingsChanged();
+
+    TS_ASSERT_EQUALS(presenter.experiment().stitchParameters(), optionsMap);
+    verifyAndClear();
+  }
+
   void testNewLookupRowRequested() {
     auto presenter = makePresenter();
 

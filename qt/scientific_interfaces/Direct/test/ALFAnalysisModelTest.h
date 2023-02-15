@@ -168,7 +168,7 @@ public:
     m_model->setPeakCentre(0.1);
     m_model->doFit(m_range);
 
-    TS_ASSERT_DELTA(0.0991, *m_model->rotationAngle(), 0.0001);
+    TS_ASSERT_DELTA(0.1913, *m_model->rotationAngle(), 0.0001);
   }
 
   void test_plottedWorkspace_returns_nullptr_data_is_not_extracted() {

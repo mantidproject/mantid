@@ -151,7 +151,7 @@ If this fails
 
 **Linux/OSX**
 
-For this section the guide will show you how to use GDB debugging. Inside the launch.json
+For this section the guide will show you how to use GDB/LLDB debugging. Inside the launch.json
 you will want to make your file look something a little like this:
 
 *Workbench*
@@ -192,6 +192,7 @@ If this fails, try adding the following environment variables:
 
 where the correct value for the ``LD_PRELOAD`` environment variable can be found in Path/To/Build/Directory/bin/launch_mantidworkbench.sh.
 
+.. include:: ./macos-opengl-version-warning.txt
 
 **Windows:**
 

@@ -129,7 +129,7 @@ void ALFAnalysisPresenter::updateTwoThetaInViewFromModel() {
 }
 
 void ALFAnalysisPresenter::updatePeakCentreInViewFromModel() {
-  m_view->setPeak(m_model->getPeakCopy());
+  m_view->setPeak(m_model->getPeakCopy(), m_model->background());
 
   auto const fitStatus = m_model->fitStatus();
   m_view->setPeakCentreStatus(fitStatus);

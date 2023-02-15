@@ -11,7 +11,7 @@
 #endif
 #include "MantidAPI/MatrixWorkspace_fwd.h" // get MantidVec declaration
 #include "MantidDataObjects/DllConfig.h"
-#include "MantidKernel/TimeSplitter.h"
+#include "MantidKernel/SplittingInterval.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidTypes/Event/TofEvent.h"
 #include <cstddef>

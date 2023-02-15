@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "InelasticDataManipulationIqtTabModel.h"
+#include "InelasticDataManipulationIqtTabView.h"
 #include "InelasticDataManipulationTab.h"
 #include "ui_InelasticDataManipulationIqtTab.h"
 namespace MantidQt {
@@ -23,7 +25,6 @@ private:
   void run() override;
   void setup() override;
   bool validate() override;
-  void loadTabSettings(const QSettings &settings);
   void setFileExtensionsByName(bool filter) override;
 
   /// Retrieve the selected spectrum
@@ -40,32 +41,25 @@ private:
   /// Set input workspace
   void setInputWorkspace(Mantid::API::MatrixWorkspace_sptr inputWorkspace);
 
-  bool isErrorsEnabled();
-
-  void setRunEnabled(bool enabled);
-  void setSaveResultEnabled(bool enabled);
   void setButtonsEnabled(bool enabled);
   void setRunIsRunning(bool running);
-  void setPreviewSpectrumMaximum(int value);
 
-  Ui::InelasticDataManipulationIqtTab m_uiForm;
-  QtTreePropertyBrowser *m_iqtTree;
+  std::unique_ptr<InelasticDataManipulationIqtTabView> m_view;
+  std::unique_ptr<InelasticDataManipulationIqtTabModel> m_model;
   bool m_iqtResFileType;
   int m_selectedSpectrum;
   Mantid::API::MatrixWorkspace_sptr m_inputWorkspace;
 
 private slots:
   void algorithmComplete(bool error);
+  void handleResDataReady(const QString &resWorkspace);
+  void handleIterationsChanged(int iterations);
+  void handleErrorsClicked(int state);
+  void handleValueChanged(QtProperty *, double);
   void handlePreviewSpectrumChanged(int spectra);
   void plotInput(const QString &wsname);
-  void plotInput(MantidQt::MantidWidgets::PreviewPlot *previewPlot);
-  void rangeChanged(double min, double max);
-  void updateRangeSelector(QtProperty *prop, double val);
-  void updateDisplayedBinParameters();
   void runClicked();
   void saveClicked();
-  void errorsClicked();
-  void updateEnergyRange(int state);
   void plotCurrentPreview();
 };
 } // namespace IDA

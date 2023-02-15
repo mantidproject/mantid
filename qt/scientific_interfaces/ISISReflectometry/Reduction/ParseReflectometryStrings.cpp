@@ -75,9 +75,25 @@ boost::optional<boost::regex> parseTitleMatcher(std::string const &titleMatcher)
   }
 }
 
+namespace {
+std::map<std::string, std::string> replaceBoolTextWithBoolValue(std::map<std::string, std::string> stitchParams) {
+  for (auto &paramPair : stitchParams) {
+    auto lower_value = boost::algorithm::to_lower_copy(paramPair.second); // Avoid changing the original value.
+    if (lower_value == "true") {
+      paramPair.second = "1";
+      continue;
+    }
+    if (lower_value == "false") {
+      paramPair.second = "0";
+    }
+  }
+  return stitchParams;
+}
+} // namespace
+
 boost::optional<std::map<std::string, std::string>> parseOptions(std::string const &options) {
   try {
-    return MantidQt::MantidWidgets::parseKeyValueString(options);
+    return replaceBoolTextWithBoolValue(MantidQt::MantidWidgets::parseKeyValueString(options));
   } catch (std::runtime_error &) {
     return boost::none;
   }

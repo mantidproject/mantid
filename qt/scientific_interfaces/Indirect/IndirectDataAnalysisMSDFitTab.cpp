@@ -16,7 +16,6 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
-#include "MantidQtWidgets/Common/SignalBlocker.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
 
 #include <QFileInfo>

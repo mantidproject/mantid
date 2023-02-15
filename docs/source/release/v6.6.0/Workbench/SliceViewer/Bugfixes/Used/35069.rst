@@ -1,0 +1,1 @@
+* Fix bug causing cut representation to be re-drawn on the sliceviewer colorfill plot on changing viewing axes when non-axis aligned cutting tool was not enabled.

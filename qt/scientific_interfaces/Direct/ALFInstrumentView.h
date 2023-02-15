@@ -99,6 +99,7 @@ public:
 
 private slots:
   void reconnectInstrumentActor();
+  void reconnectSurface();
   void sampleLoaded();
   void vanadiumLoaded();
   void notifyInstrumentActorReset();

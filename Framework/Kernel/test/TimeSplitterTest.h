@@ -1,545 +1,182 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2023 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-/*
- * TimeSplitterTest.h
- *
- *  Created on: Sep 24, 2010
- *      Author: janik
- */
-
 #pragma once
 
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/TimeSplitter.h"
-#include <ctime>
 #include <cxxtest/TestSuite.h>
 
-using namespace Mantid::Kernel;
+#include "MantidKernel/TimeSplitter.h"
+
+using Mantid::Kernel::TimeROI;
+using Mantid::Kernel::TimeSplitter;
 using Mantid::Types::Core::DateAndTime;
+
+namespace {
+const DateAndTime ONE("2023-01-01T11:00:00");
+const DateAndTime TWO("2023-01-01T12:00:00");
+const DateAndTime THREE("2023-01-01T13:00:00");
+const DateAndTime FOUR("2023-01-01T14:00:00");
+const DateAndTime FIVE("2023-01-01T15:00:00");
+} // namespace
 
 class TimeSplitterTest : public CxxTest::TestSuite {
 public:
-  //----------------------------------------------------------------------------
-  /** Tests the AND operator checking for overlap between two
-   * SplittingIntervals.
-   */
-  void test_SplittingInterval_AND() {
-    DateAndTime start_a, stop_a, start_b, stop_b;
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static TimeSplitterTest *createSuite() { return new TimeSplitterTest(); }
+  static void destroySuite(TimeSplitterTest *suite) { delete suite; }
 
-    start_a = DateAndTime("2007-11-30T16:17:10");
-    stop_a = DateAndTime("2007-11-30T16:17:20");
-    SplittingInterval a(start_a, stop_a, 0);
+  void test_valueAtTime() {
+    // to start everything is either in 0th output or masked
+    TimeSplitter splitter(TWO, FOUR);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(ONE), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(TWO), 0);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(THREE), 0);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), -1);
+    TS_ASSERT_EQUALS(splitter.numRawValues(), 2);
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({0}));
 
-    SplittingInterval b, c;
-    // b is all inside a
-    start_b = DateAndTime("2007-11-30T16:17:12");
-    stop_b = DateAndTime("2007-11-30T16:17:18");
-    b = SplittingInterval(start_b, stop_b, 0);
-    c = a & b;
-    TS_ASSERT(a.overlaps(b));
-    TS_ASSERT_EQUALS(c.start(), start_b);
-    TS_ASSERT_EQUALS(c.stop(), stop_b);
+    // add ROI for first half to go to 1st output
+    splitter.addROI(TWO, THREE, 1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(ONE), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(TWO), 1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(THREE), 0);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), -1);
+    TS_ASSERT_EQUALS(splitter.numRawValues(), 3);
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({0, 1}));
 
-    // a is all inside b
-    start_b = DateAndTime("2007-11-30T16:17:05");
-    stop_b = DateAndTime("2007-11-30T16:17:23");
-    b = SplittingInterval(start_b, stop_b, 0);
-    c = a & b;
-    TS_ASSERT(a.overlaps(b));
-    TS_ASSERT_EQUALS(c.start(), start_a);
-    TS_ASSERT_EQUALS(c.stop(), stop_a);
+    // add ROI for second half to go to 2nd output
+    splitter.addROI(THREE, FOUR, 2);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(ONE), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(TWO), 1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(THREE), 2);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), -1);
+    TS_ASSERT_EQUALS(splitter.numRawValues(), 3);
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({1, 2}));
 
-    // b goes past the end of a
-    start_b = DateAndTime("2007-11-30T16:17:12");
-    stop_b = DateAndTime("2007-11-30T16:17:25");
-    b = SplittingInterval(start_b, stop_b, 0);
-    c = a & b;
-    TS_ASSERT(a.overlaps(b));
-    TS_ASSERT_EQUALS(c.start(), start_b);
-    TS_ASSERT_EQUALS(c.stop(), stop_a);
+    // have whole thing go to 3rd output
+    splitter.addROI(TWO, FOUR, 3);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(ONE), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(TWO), 3);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(THREE), 3);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), -1);
+    TS_ASSERT_EQUALS(splitter.numRawValues(), 2);
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({3}));
 
-    // b starts before a and ends before
-    start_b = DateAndTime("2007-11-30T16:17:05");
-    stop_b = DateAndTime("2007-11-30T16:17:15");
-    b = SplittingInterval(start_b, stop_b, 0);
-    c = a & b;
-    TS_ASSERT(a.overlaps(b));
-    TS_ASSERT_EQUALS(c.start(), start_a);
-    TS_ASSERT_EQUALS(c.stop(), stop_b);
+    // prepend a section that goes to 1st output
+    splitter.addROI(ONE, TWO, 1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(ONE), 1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(TWO), 3);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(THREE), 3);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), -1);
+    TS_ASSERT_EQUALS(splitter.numRawValues(), 3);
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({1, 3}));
 
-    // No overlap (b < a)
-    start_b = DateAndTime("2007-11-30T16:17:01");
-    stop_b = DateAndTime("2007-11-30T16:17:02");
-    b = SplittingInterval(start_b, stop_b, 0);
-    c = a & b;
-    TS_ASSERT(!a.overlaps(b));
-    TS_ASSERT_LESS_THAN_EQUALS(c.duration(), 0.0);
+    // append a section that goes to 2nd output
+    splitter.addROI(FOUR, FIVE, 2);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(ONE), 1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(TWO), 3);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(THREE), 3);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), 2);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), -1);
+    TS_ASSERT_EQUALS(splitter.numRawValues(), 4);
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({1, 2, 3}));
 
-    // No overlap (a < b)
-    start_b = DateAndTime("2007-11-30T16:17:30");
-    stop_b = DateAndTime("2007-11-30T16:17:42");
-    b = SplittingInterval(start_b, stop_b, 0);
-    c = a & b;
-    TS_ASSERT(!a.overlaps(b));
-    TS_ASSERT_LESS_THAN_EQUALS(c.duration(), 0.0);
+    // set before the beginning to mask
+    splitter.addROI(ONE, TWO, -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(ONE), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(TWO), 3);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(THREE), 3);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), 2);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), -1);
+    TS_ASSERT_EQUALS(splitter.numRawValues(), 3);
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({2, 3}));
+
+    // set after the end to mask
+    splitter.addROI(FOUR, FIVE, -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(ONE), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(TWO), 3);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(THREE), 3);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), -1);
+    TS_ASSERT_EQUALS(splitter.numRawValues(), 2);
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({3}));
   }
 
-  //----------------------------------------------------------------------------
-  /** Tests the AND operator checking for overlap between two
-   * SplittingIntervals.
-   */
-  void test_SplittingInterval_OR() {
-    DateAndTime start_a, stop_a, start_b, stop_b;
-
-    start_a = DateAndTime("2007-11-30T16:17:10");
-    stop_a = DateAndTime("2007-11-30T16:17:20");
-    SplittingInterval a(start_a, stop_a, 0);
-
-    SplittingInterval b, c;
-    // b is all inside a
-    start_b = DateAndTime("2007-11-30T16:17:12");
-    stop_b = DateAndTime("2007-11-30T16:17:18");
-    b = SplittingInterval(start_b, stop_b, 0);
-    c = a | b;
-    TS_ASSERT(a.overlaps(b));
-    TS_ASSERT_EQUALS(c.start(), start_a);
-    TS_ASSERT_EQUALS(c.stop(), stop_a);
-
-    // a is all inside b
-    start_b = DateAndTime("2007-11-30T16:17:05");
-    stop_b = DateAndTime("2007-11-30T16:17:23");
-    b = SplittingInterval(start_b, stop_b, 0);
-    c = a | b;
-    TS_ASSERT(a.overlaps(b));
-    TS_ASSERT_EQUALS(c.start(), start_b);
-    TS_ASSERT_EQUALS(c.stop(), stop_b);
-
-    // b goes past the end of a
-    start_b = DateAndTime("2007-11-30T16:17:12");
-    stop_b = DateAndTime("2007-11-30T16:17:25");
-    b = SplittingInterval(start_b, stop_b, 0);
-    c = a | b;
-    TS_ASSERT(a.overlaps(b));
-    TS_ASSERT_EQUALS(c.start(), start_a);
-    TS_ASSERT_EQUALS(c.stop(), stop_b);
-
-    // b starts before a and ends before
-    start_b = DateAndTime("2007-11-30T16:17:05");
-    stop_b = DateAndTime("2007-11-30T16:17:15");
-    b = SplittingInterval(start_b, stop_b, 0);
-    c = a | b;
-    TS_ASSERT(a.overlaps(b));
-    TS_ASSERT_EQUALS(c.start(), start_b);
-    TS_ASSERT_EQUALS(c.stop(), stop_a);
-
-    // No overlap (b < a) - This throws an exception because you need two
-    // outputs!
-    start_b = DateAndTime("2007-11-30T16:17:01");
-    stop_b = DateAndTime("2007-11-30T16:17:02");
-    b = SplittingInterval(start_b, stop_b, 0);
-    TS_ASSERT(!a.overlaps(b));
-    TS_ASSERT_THROWS(c = a | b;, const std::invalid_argument &);
-
-    // No overlap (a < b)
-    start_b = DateAndTime("2007-11-30T16:17:30");
-    stop_b = DateAndTime("2007-11-30T16:17:42");
-    b = SplittingInterval(start_b, stop_b, 0);
-    TS_ASSERT(!a.overlaps(b));
-    TS_ASSERT_THROWS(c = a | b;, const std::invalid_argument &);
+  void test_emptySplitter() {
+    TimeSplitter splitter;
+    TS_ASSERT_EQUALS(splitter.valueAtTime(DateAndTime("2023-01-01T11:00:00")), -1);
+    TS_ASSERT_EQUALS(splitter.numRawValues(), 0);
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({}));
   }
 
-  //----------------------------------------------------------------------------
-  void test_AND() {
-    // Make a splitter
-    DateAndTime start, stop;
-    TimeSplitterType a, b;
-    start = DateAndTime("2007-11-30T16:17:00");
-    stop = DateAndTime("2007-11-30T16:17:10");
-    a.emplace_back(SplittingInterval(start, stop, 0));
+  void test_gap() {
+    TimeSplitter splitter;
+    // create a splitter with a gap
+    splitter.addROI(ONE, TWO, 0);
+    splitter.addROI(THREE, FOUR, 0);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(ONE), 0);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(TWO), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(THREE), 0);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), -1);
+    TS_ASSERT_EQUALS(splitter.numRawValues(), 4);
 
-    start = DateAndTime("2007-11-30T16:17:20");
-    stop = DateAndTime("2007-11-30T16:17:30");
-    a.emplace_back(SplittingInterval(start, stop, 0));
+    // fill in the gap with a different value
+    splitter.addROI(TWO, THREE, 1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(ONE), 0);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(TWO), 1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(THREE), 0);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), -1);
+    TS_ASSERT_EQUALS(splitter.numRawValues(), 4);
 
-    start = DateAndTime("2007-11-30T16:17:40");
-    stop = DateAndTime("2007-11-30T16:17:50");
-    a.emplace_back(SplittingInterval(start, stop, 0));
-
-    start = DateAndTime("2007-11-30T16:18:00");
-    stop = DateAndTime("2007-11-30T16:18:10");
-    a.emplace_back(SplittingInterval(start, stop, 0));
-
-    start = DateAndTime("2007-11-30T16:18:20");
-    stop = DateAndTime("2007-11-30T16:18:30");
-    a.emplace_back(SplittingInterval(start, stop, 0));
-
-    // Smaller than the first one
-    start = DateAndTime("2007-11-30T16:17:01");
-    stop = DateAndTime("2007-11-30T16:17:25");
-    b.emplace_back(SplittingInterval(start, stop, 0));
-
-    start = DateAndTime("2007-11-30T16:17:26");
-    stop = DateAndTime("2007-11-30T16:17:27");
-    b.emplace_back(SplittingInterval(start, stop, 0));
-
-    start = DateAndTime("2007-11-30T16:17:45");
-    stop = DateAndTime("2007-11-30T16:18:15");
-    b.emplace_back(SplittingInterval(start, stop, 0));
-
-    // Now AND the splitters (filters) together
-    TimeSplitterType c;
-    c = a & b;
-
-    TS_ASSERT_EQUALS(c.size(), 5);
-    if (c.size() < 5)
-      return; // avoid segfaults if this part of the test fails
-
-    SplittingInterval i;
-    i = c[0];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:01"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:10"));
-    i = c[1];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:20"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:25"));
-    i = c[2];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:26"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:27"));
-    i = c[3];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:45"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:50"));
-    i = c[4];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:18:00"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:18:10"));
+    // fill in the gap with the same value as before and after
+    splitter.addROI(TWO, THREE, 0);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(ONE), 0);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(TWO), 0);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(THREE), 0);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), -1);
+    TS_ASSERT_EQUALS(splitter.numRawValues(), 2);
   }
 
-  //----------------------------------------------------------------------------
-  void test_OR() {
-    // Make a splitter
-    DateAndTime start, stop;
-    TimeSplitterType a, b;
-    start = DateAndTime("2007-11-30T16:17:00");
-    stop = DateAndTime("2007-11-30T16:17:10");
-    a.emplace_back(SplittingInterval(start, stop, 0));
-
-    start = DateAndTime("2007-11-30T16:17:20");
-    stop = DateAndTime("2007-11-30T16:17:30");
-    a.emplace_back(SplittingInterval(start, stop, 0));
-
-    start = DateAndTime("2007-11-30T16:17:40");
-    stop = DateAndTime("2007-11-30T16:17:50");
-    a.emplace_back(SplittingInterval(start, stop, 0));
-
-    start = DateAndTime("2007-11-30T16:18:00");
-    stop = DateAndTime("2007-11-30T16:18:10");
-    a.emplace_back(SplittingInterval(start, stop, 0));
-
-    start = DateAndTime("2007-11-30T16:18:20");
-    stop = DateAndTime("2007-11-30T16:18:30");
-    a.emplace_back(SplittingInterval(start, stop, 0));
-
-    // Smaller than the first one
-    start = DateAndTime("2007-11-30T16:17:01");
-    stop = DateAndTime("2007-11-30T16:17:25");
-    b.emplace_back(SplittingInterval(start, stop, 0));
-
-    start = DateAndTime("2007-11-30T16:17:26");
-    stop = DateAndTime("2007-11-30T16:17:27");
-    b.emplace_back(SplittingInterval(start, stop, 0));
-
-    start = DateAndTime("2007-11-30T16:17:45");
-    stop = DateAndTime("2007-11-30T16:18:15");
-    b.emplace_back(SplittingInterval(start, stop, 0));
-
-    start = DateAndTime("2007-11-30T16:18:50");
-    stop = DateAndTime("2007-11-30T16:18:55");
-    b.emplace_back(SplittingInterval(start, stop, 0));
-
-    // Now AND the splitters (filters) together
-    TimeSplitterType c;
-    c = a | b;
-
-    TS_ASSERT_EQUALS(c.size(), 4);
-    if (c.size() < 4)
-      return; // avoid segfaults if this part of the test fails
-
-    SplittingInterval i;
-    i = c[0];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:00"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:30"));
-    i = c[1];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:40"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:18:15"));
-    i = c[2];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:18:20"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:18:30"));
-    i = c[3];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:18:50"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:18:55"));
-  }
-
-  //----------------------------------------------------------------------------
-  void test_OR_with_a_bad_input() {
-    // Make a splitter
-    DateAndTime start, stop;
-    TimeSplitterType a, b;
-
-    start = DateAndTime("2007-11-30T16:17:20");
-    stop = DateAndTime("2007-11-30T16:17:30");
-    a.emplace_back(SplittingInterval(start, stop, 0));
-
-    // A bad (reversed) interval
-    start = DateAndTime("2007-11-30T16:17:32");
-    stop = DateAndTime("2007-11-30T16:17:31");
-    a.emplace_back(SplittingInterval(start, stop, 0));
-
-    // REVERSED interval that is before the first one
-    start = DateAndTime("2007-11-30T16:17:15");
-    stop = DateAndTime("2007-11-30T16:17:00");
-    b.emplace_back(SplittingInterval(start, stop, 0));
-
-    // Another bad interval
-    start = DateAndTime("2007-11-30T16:17:45");
-    stop = DateAndTime("2007-11-30T16:17:35");
-    b.emplace_back(SplittingInterval(start, stop, 0));
-
-    // Now AND the splitters (filters) together
-    TimeSplitterType c;
-    c = a | b;
-
-    TS_ASSERT_EQUALS(c.size(), 1);
-    if (c.size() < 1)
-      return; // avoid segfaults if this part of the test fails
-
-    SplittingInterval i;
-    i = c[0];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:20"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:30"));
-  }
-
-  //----------------------------------------------------------------------------
-  void test_NOT_Normal() {
-    DateAndTime start, stop;
-    TimeSplitterType a, b, c;
-    SplittingInterval i;
-
-    //---- Normal Case ------
-    start = DateAndTime("2007-11-30T16:17:00");
-    stop = DateAndTime("2007-11-30T16:17:10");
-    a.emplace_back(SplittingInterval(start, stop, 0));
-
-    start = DateAndTime("2007-11-30T16:17:20");
-    stop = DateAndTime("2007-11-30T16:17:30");
-    a.emplace_back(SplittingInterval(start, stop, 0));
-
-    // Perform the NOT operation
-    c = ~a;
-
-    TS_ASSERT_EQUALS(c.size(), 3);
-    if (c.size() < 3)
-      return; // avoid segfaults if this part of the test fails
-
-    i = c[0];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime::minimum());
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:00"));
-    i = c[1];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:10"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:20"));
-    i = c[2];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:30"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime::maximum());
-  }
-
-  //----------------------------------------------------------------------------
-  void test_NOT_empty() {
-    DateAndTime start, stop;
-    TimeSplitterType a, b, c;
-    SplittingInterval i;
-
-    //---- Empty case ----------
-    c = ~b;
-    TS_ASSERT_EQUALS(c.size(), 1);
-    if (c.size() < 1)
-      return; // avoid segfaults if this part of the test fails
-    i = c[0];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime::minimum());
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime::maximum());
-  }
-
-  //----------------------------------------------------------------------------
-  void test_NOT_overlap() {
-    DateAndTime start, stop;
-    TimeSplitterType a, b, c;
-    SplittingInterval i;
-    // Overlapping case ------
-    start = DateAndTime("2007-11-30T16:17:00");
-    stop = DateAndTime("2007-11-30T16:17:15");
-    a.emplace_back(SplittingInterval(start, stop, 0));
-
-    start = DateAndTime("2007-11-30T16:17:10");
-    stop = DateAndTime("2007-11-30T16:17:30");
-    a.emplace_back(SplittingInterval(start, stop, 0));
-
-    c = ~a;
-    TS_ASSERT_EQUALS(c.size(), 2);
-    if (c.size() < 3)
-      return; // avoid segfaults if this part of the test fails
-
-    i = c[0];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime::minimum());
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:00"));
-    i = c[1];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:30"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime::maximum());
-  }
-
-  //----------------------------------------------------------------------------
-  void test_PLUS() {
-    DateAndTime start, stop;
-    TimeSplitterType a, b, c;
-    SplittingInterval i;
-
-    //  the splitter ------
-    start = DateAndTime("2007-11-30T16:15:00");
-    stop = DateAndTime("2007-11-30T16:16:00");
-    b.emplace_back(SplittingInterval(start, stop, 0));
-
-    start = DateAndTime("2007-11-30T16:17:00");
-    stop = DateAndTime("2007-11-30T16:18:00");
-    b.emplace_back(SplittingInterval(start, stop, 1));
-
-    start = DateAndTime("2007-11-30T16:18:00");
-    stop = DateAndTime("2007-11-30T16:19:00");
-    b.emplace_back(SplittingInterval(start, stop, 2));
-
-    start = DateAndTime("2007-11-30T16:19:00");
-    stop = DateAndTime("2007-11-30T16:20:00");
-    b.emplace_back(SplittingInterval(start, stop, 3));
-
-    // the filter ------
-    start = DateAndTime("2007-11-30T16:16:50");
-    stop = DateAndTime("2007-11-30T16:17:10");
-    a.emplace_back(SplittingInterval(start, stop, 0));
-
-    start = DateAndTime("2007-11-30T16:17:20");
-    stop = DateAndTime("2007-11-30T16:17:30");
-    a.emplace_back(SplittingInterval(start, stop, 0));
-
-    start = DateAndTime("2007-11-30T16:17:40");
-    stop = DateAndTime("2007-11-30T16:18:10");
-    a.emplace_back(SplittingInterval(start, stop, 0));
-
-    start = DateAndTime("2007-11-30T16:18:50");
-    stop = DateAndTime("2007-11-30T16:18:55");
-    a.emplace_back(SplittingInterval(start, stop, 0));
-
-    start = DateAndTime("2007-11-30T16:22:20");
-    stop = DateAndTime("2007-11-30T16:22:30");
-    a.emplace_back(SplittingInterval(start, stop, 0));
-
-    // Do the PLUS operation
-    c = a + b;
-
-    TS_ASSERT_EQUALS(c.size(), 5);
-    if (c.size() < 5)
-      return; // avoid segfaults if this part of the test fails
-
-    i = c[0];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:00"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:10"));
-    TS_ASSERT_EQUALS(i.index(), 1);
-
-    i = c[1];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:20"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:30"));
-    TS_ASSERT_EQUALS(i.index(), 1);
-
-    i = c[2];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:40"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:18:00"));
-    TS_ASSERT_EQUALS(i.index(), 1);
-
-    i = c[3];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:18:00"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:18:10"));
-    TS_ASSERT_EQUALS(i.index(), 2);
-
-    i = c[4];
-    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:18:50"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:18:55"));
-    TS_ASSERT_EQUALS(i.index(), 2);
-
-    // This fails since you can't add splitters together
-    TS_ASSERT_THROWS(b + b, const std::invalid_argument &);
-  }
-
-  //----------------------------------------------------------------------------
-  void test_sort() {
-    DateAndTime start, stop;
-    TimeSplitterType b;
-
-    //  the splitter ------
-    start = DateAndTime("2007-11-30T16:15:00");
-    stop = DateAndTime("2007-11-30T16:16:00");
-    b.emplace_back(SplittingInterval(start, stop, 0));
-
-    start = DateAndTime("2007-11-30T16:19:00");
-    stop = DateAndTime("2007-11-30T16:20:00");
-    b.emplace_back(SplittingInterval(start, stop, 3));
-
-    start = DateAndTime("2007-11-30T16:18:00");
-    stop = DateAndTime("2007-11-30T16:19:00");
-    b.emplace_back(SplittingInterval(start, stop, 2));
-
-    start = DateAndTime("2007-11-30T16:17:00");
-    stop = DateAndTime("2007-11-30T16:18:00");
-    b.emplace_back(SplittingInterval(start, stop, 1));
-
-    std::sort(b.begin(), b.end());
-
-    TS_ASSERT_EQUALS(b[0].start(), DateAndTime("2007-11-30T16:15:00"));
-    TS_ASSERT_EQUALS(b[1].start(), DateAndTime("2007-11-30T16:17:00"));
-    TS_ASSERT_EQUALS(b[2].start(), DateAndTime("2007-11-30T16:18:00"));
-    TS_ASSERT_EQUALS(b[3].start(), DateAndTime("2007-11-30T16:19:00"));
-  }
-
-  //----------------------------------------------------------------------------
-  void test_find() {
-    DateAndTime start, stop;
-    TimeSplitterType b;
-
-    //  the splitter ------
-    start = DateAndTime("2007-11-30T16:15:00");
-    stop = DateAndTime("2007-11-30T16:16:00");
-    b.emplace_back(SplittingInterval(start, stop, 0));
-
-    start = DateAndTime("2007-11-30T16:19:00");
-    stop = DateAndTime("2007-11-30T16:20:00");
-    b.emplace_back(SplittingInterval(start, stop, 3));
-
-    start = DateAndTime("2007-11-30T16:18:00");
-    stop = DateAndTime("2007-11-30T16:19:00");
-    b.emplace_back(SplittingInterval(start, stop, 2));
-
-    start = DateAndTime("2007-11-30T16:17:00");
-    stop = DateAndTime("2007-11-30T16:18:00");
-    b.emplace_back(SplittingInterval(start, stop, 1));
-
-    std::sort(b.begin(), b.end());
-
-    TimeSplitterType::iterator sit;
-
-    SplittingInterval temp1(DateAndTime("2007-11-30T16:17:00"), DateAndTime("2007-11-30T16:17:00"), -1);
-    sit = std::lower_bound(b.begin(), b.end(), temp1);
-    int index1 = int(sit - b.begin());
-    TS_ASSERT_EQUALS(index1, 1);
-
-    SplittingInterval temp2(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:00"), -1);
-    sit = std::lower_bound(b.begin(), b.end(), temp2);
-    int index2 = int(sit - b.begin());
-    TS_ASSERT_EQUALS(index2, 2);
+  void test_getTimeROI() {
+
+    // start with empty TimeSplitter
+    TimeSplitter splitter;
+    TS_ASSERT(splitter.getTimeROI(-1).empty());
+    TS_ASSERT(splitter.getTimeROI(0).empty());
+
+    // place to put the output
+    TimeROI roi;
+
+    // add a single TimeROI
+    splitter.addROI(ONE, THREE, 1);
+    TS_ASSERT(splitter.getTimeROI(-1).empty());
+    TS_ASSERT(splitter.getTimeROI(0).empty());
+    TS_ASSERT(splitter.getTimeROI(0).empty());
+    roi = splitter.getTimeROI(1);
+    TS_ASSERT(!roi.empty());
+    TS_ASSERT_EQUALS(roi.numBoundaries(), 2);
+
+    // add the same output index, but with a gap from the previous
+    splitter.addROI(FOUR, FIVE, 1);
+    roi = splitter.getTimeROI(-2); // intentionally trying a "big" negative for ignore filter
+    TS_ASSERT(!roi.empty());
+    TS_ASSERT_EQUALS(roi.numBoundaries(), 2);
+    TS_ASSERT(splitter.getTimeROI(0).empty());
+    TS_ASSERT(splitter.getTimeROI(0).empty());
+    roi = splitter.getTimeROI(1);
+    TS_ASSERT(!roi.empty());
+    TS_ASSERT_EQUALS(roi.numBoundaries(), 4);
   }
 };

@@ -19,7 +19,6 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid;
@@ -134,8 +133,8 @@ public:
     TS_ASSERT_EQUALS(splittersws->getNumberSplitters(), 1);
     Kernel::SplittingInterval splitter0 = splittersws->getSplitter(0);
     Types::Core::DateAndTime runstart(3000000000);
-    TS_ASSERT_EQUALS(splitter0.start().totalNanoseconds(), runstart.totalNanoseconds() + 100);
-    TS_ASSERT_EQUALS(splitter0.stop().totalNanoseconds(), runstart.totalNanoseconds() + 1000000);
+    TS_ASSERT_EQUALS(splitter0.begin().totalNanoseconds(), runstart.totalNanoseconds() + 100);
+    TS_ASSERT_EQUALS(splitter0.end().totalNanoseconds(), runstart.totalNanoseconds() + 1000000);
     TS_ASSERT_EQUALS(splitter0.index(), 0);
 
     TS_ASSERT_EQUALS(splittersws->rowCount(), 1);
@@ -196,19 +195,19 @@ public:
 
     // b) First interval
     Kernel::SplittingInterval splitter0 = splittersws->getSplitter(0);
-    TS_ASSERT_EQUALS(splitter0.start().totalNanoseconds(), 0 + runstarttime_ns);
-    TS_ASSERT_EQUALS(splitter0.stop().totalNanoseconds(), timeinterval_ns + runstarttime_ns);
+    TS_ASSERT_EQUALS(splitter0.begin().totalNanoseconds(), 0 + runstarttime_ns);
+    TS_ASSERT_EQUALS(splitter0.end().totalNanoseconds(), timeinterval_ns + runstarttime_ns);
     TS_ASSERT_EQUALS(splitter0.index(), 0);
 
     // c) Last interval
     Kernel::SplittingInterval splitterf = splittersws->getSplitter(numintervals - 1);
-    TS_ASSERT_EQUALS(splitterf.stop(), runstoptime);
+    TS_ASSERT_EQUALS(splitterf.end(), runstoptime);
     TS_ASSERT_EQUALS(splitterf.index(), numintervals - 1);
 
     // d) Randomly
     Kernel::SplittingInterval splitterR = splittersws->getSplitter(40);
-    Types::Core::DateAndTime t0 = splitterR.start();
-    Types::Core::DateAndTime tf = splitterR.stop();
+    Types::Core::DateAndTime t0 = splitterR.begin();
+    Types::Core::DateAndTime tf = splitterR.end();
     int64_t dt_ns = tf.totalNanoseconds() - t0.totalNanoseconds();
     TS_ASSERT_EQUALS(dt_ns, timeinterval_ns);
     int64_t dt_runtimestart = t0.totalNanoseconds() - runstarttime_ns;
@@ -263,19 +262,19 @@ public:
 
     // b) First interval
     Kernel::SplittingInterval splitter0 = splittersws->getSplitter(0);
-    TS_ASSERT_EQUALS(splitter0.start().totalNanoseconds(), basetimeinterval_ns + runstarttime_ns);
-    TS_ASSERT_EQUALS(splitter0.stop().totalNanoseconds(), basetimeinterval_ns * 2 + runstarttime_ns);
+    TS_ASSERT_EQUALS(splitter0.begin().totalNanoseconds(), basetimeinterval_ns + runstarttime_ns);
+    TS_ASSERT_EQUALS(splitter0.end().totalNanoseconds(), basetimeinterval_ns * 2 + runstarttime_ns);
     TS_ASSERT_EQUALS(splitter0.index(), 0);
 
     // c) Last interval
     Kernel::SplittingInterval splitterf = splittersws->getSplitter(numintervals - 1);
-    TS_ASSERT_EQUALS(splitterf.stop().totalNanoseconds(), runstarttime.totalNanoseconds() + 1000);
+    TS_ASSERT_EQUALS(splitterf.end().totalNanoseconds(), runstarttime.totalNanoseconds() + 1000);
     TS_ASSERT_EQUALS(splitterf.index(), numintervals - 1);
 
     // d) Randomly
     Kernel::SplittingInterval splitterR = splittersws->getSplitter(5);
-    Types::Core::DateAndTime t0 = splitterR.start();
-    Types::Core::DateAndTime tf = splitterR.stop();
+    Types::Core::DateAndTime t0 = splitterR.begin();
+    Types::Core::DateAndTime tf = splitterR.end();
     int64_t dt_ns = tf.totalNanoseconds() - t0.totalNanoseconds();
     TS_ASSERT_EQUALS(dt_ns, basetimeinterval_ns * static_cast<int64_t>(std::pow(2, 5)));
     int64_t dt_runtimestart = t0.totalNanoseconds() - runstarttime_ns;
@@ -332,8 +331,8 @@ public:
     // b) First interval - which is actually the last one because we are generating them from the end, ie the closest
     // to endTime
     Kernel::SplittingInterval splitter0 = splittersws->getSplitter(0);
-    TS_ASSERT_EQUALS(splitter0.start().totalNanoseconds(), runstarttime_ns + stopTime - startTime);
-    TS_ASSERT_EQUALS(splitter0.stop().totalNanoseconds(), runstarttime_ns + stopTime);
+    TS_ASSERT_EQUALS(splitter0.begin().totalNanoseconds(), runstarttime_ns + stopTime - startTime);
+    TS_ASSERT_EQUALS(splitter0.end().totalNanoseconds(), runstarttime_ns + stopTime);
 
     TS_ASSERT_EQUALS(splitter0.index(), numintervals - 1);
 
@@ -341,15 +340,15 @@ public:
 
     // c) Last interval - ie the closest to startTime
     Kernel::SplittingInterval splitterf = splittersws->getSplitter(numintervals - 1);
-    TS_ASSERT_EQUALS(splitterf.start().totalNanoseconds(), runstarttime_ns + startTime);
-    TS_ASSERT_EQUALS(splitterf.stop().totalNanoseconds(),
+    TS_ASSERT_EQUALS(splitterf.begin().totalNanoseconds(), runstarttime_ns + startTime);
+    TS_ASSERT_EQUALS(splitterf.end().totalNanoseconds(),
                      runstarttime_ns + stopTime - static_cast<int>(std::pow(2, 12)) + 1);
     TS_ASSERT_EQUALS(splitterf.index(), 0);
 
     // d) Randomly
     Kernel::SplittingInterval splitterR = splittersws->getSplitter(4);
-    Types::Core::DateAndTime t0 = splitterR.start();
-    Types::Core::DateAndTime tf = splitterR.stop();
+    Types::Core::DateAndTime t0 = splitterR.begin();
+    Types::Core::DateAndTime tf = splitterR.end();
     int64_t dt_ns = tf.totalNanoseconds() - t0.totalNanoseconds();
     TS_ASSERT_EQUALS(dt_ns, static_cast<int64_t>(std::pow(2, 4)));
     TS_ASSERT_EQUALS(t0.totalNanoseconds(), runstarttime_ns + stopTime - static_cast<int>(std::pow(2, 5)) + 1);
@@ -406,8 +405,8 @@ public:
     // b) First interval - which is actually the last one because we are generating them from the end, ie the closest
     // to endTime.
     Kernel::SplittingInterval splitter0 = splittersws->getSplitter(0);
-    TS_ASSERT_EQUALS(splitter0.start().totalNanoseconds(), runstarttime_ns + stopTime - startTime);
-    TS_ASSERT_EQUALS(splitter0.stop().totalNanoseconds(), runstarttime_ns + stopTime);
+    TS_ASSERT_EQUALS(splitter0.begin().totalNanoseconds(), runstarttime_ns + stopTime - startTime);
+    TS_ASSERT_EQUALS(splitter0.end().totalNanoseconds(), runstarttime_ns + stopTime);
 
     TS_ASSERT_EQUALS(splitter0.index(), numintervals - 1);
 
@@ -415,15 +414,15 @@ public:
 
     // c) Last interval - ie the closest to startTime
     Kernel::SplittingInterval splitterf = splittersws->getSplitter(numintervals - 1);
-    TS_ASSERT_EQUALS(splitterf.start().totalNanoseconds(), runstarttime_ns + startTime);
-    TS_ASSERT_EQUALS(splitterf.stop().totalNanoseconds(),
+    TS_ASSERT_EQUALS(splitterf.begin().totalNanoseconds(), runstarttime_ns + startTime);
+    TS_ASSERT_EQUALS(splitterf.end().totalNanoseconds(),
                      runstarttime_ns + stopTime - static_cast<int>(std::pow(2, 13)) + 1);
     TS_ASSERT_EQUALS(splitterf.index(), 0);
 
     // d) Randomly
     Kernel::SplittingInterval splitterR = splittersws->getSplitter(4);
-    Types::Core::DateAndTime t0 = splitterR.start();
-    Types::Core::DateAndTime tf = splitterR.stop();
+    Types::Core::DateAndTime t0 = splitterR.begin();
+    Types::Core::DateAndTime tf = splitterR.end();
     int64_t dt_ns = tf.totalNanoseconds() - t0.totalNanoseconds();
     TS_ASSERT_EQUALS(dt_ns, static_cast<int64_t>(std::pow(2, 4)));
     TS_ASSERT_EQUALS(t0.totalNanoseconds(), runstarttime_ns + stopTime - static_cast<int>(std::pow(2, 5)) + 1);
@@ -476,12 +475,12 @@ public:
     TS_ASSERT_EQUALS(splittersws->getNumberSplitters(), numsplitters);
 
     Kernel::SplittingInterval s0 = splittersws->getSplitter(0);
-    TS_ASSERT_EQUALS(s0.start().totalNanoseconds(), 3000000000 - static_cast<int64_t>(1.0E-8 * 1.0E9));
-    TS_ASSERT_EQUALS(s0.stop().totalNanoseconds(), 3000050000 - static_cast<int64_t>(1.0E-8 * 1.0E9));
+    TS_ASSERT_EQUALS(s0.begin().totalNanoseconds(), 3000000000 - static_cast<int64_t>(1.0E-8 * 1.0E9));
+    TS_ASSERT_EQUALS(s0.end().totalNanoseconds(), 3000050000 - static_cast<int64_t>(1.0E-8 * 1.0E9));
 
     Kernel::SplittingInterval s1 = splittersws->getSplitter(1);
-    TS_ASSERT_EQUALS(s1.start().totalNanoseconds(), 3000775000 - static_cast<int64_t>(1.0E-8 * 1.0E9));
-    TS_ASSERT_EQUALS(s1.stop().totalNanoseconds(), 3000850000 - static_cast<int64_t>(1.0E-8 * 1.0E9));
+    TS_ASSERT_EQUALS(s1.begin().totalNanoseconds(), 3000775000 - static_cast<int64_t>(1.0E-8 * 1.0E9));
+    TS_ASSERT_EQUALS(s1.end().totalNanoseconds(), 3000850000 - static_cast<int64_t>(1.0E-8 * 1.0E9));
 
     TS_ASSERT_EQUALS(infows->rowCount(), 1);
 
@@ -537,12 +536,12 @@ public:
     TS_ASSERT_EQUALS(infows->rowCount(), numoutputs);
 
     Kernel::SplittingInterval s0 = splittersws->getSplitter(0);
-    TS_ASSERT_EQUALS(s0.start(), 3000000000 - static_cast<int>(1.0E-8 * 1.0E9));
+    TS_ASSERT_EQUALS(s0.begin(), 3000000000 - static_cast<int>(1.0E-8 * 1.0E9));
     TS_ASSERT_EQUALS(s0.index(), 5);
 
     Kernel::SplittingInterval s15 = splittersws->getSplitter(15);
-    TS_ASSERT_EQUALS(s15.start(), 3000924990);
-    TS_ASSERT_EQUALS(s15.stop(), 3000974990);
+    TS_ASSERT_EQUALS(s15.begin(), 3000924990);
+    TS_ASSERT_EQUALS(s15.end(), 3000974990);
     TS_ASSERT_EQUALS(s15.index(), 9);
   }
 
@@ -592,7 +591,7 @@ public:
     int64_t factor = static_cast<int64_t>(1.0E9 + 0.5);
 
     Kernel::SplittingInterval s0 = splittersws->getSplitter(0);
-    TS_ASSERT_EQUALS(s0.start().totalNanoseconds(), 11 * factor - 5 * factor / 100);
+    TS_ASSERT_EQUALS(s0.begin().totalNanoseconds(), 11 * factor - 5 * factor / 100);
     TS_ASSERT_EQUALS(s0.index(), 0);
 
     Kernel::SplittingInterval s9 = splittersws->getSplitter(9);
@@ -652,7 +651,7 @@ public:
     int64_t factor = static_cast<int64_t>(1.0E9 + 0.5);
 
     Kernel::SplittingInterval s0 = splittersws->getSplitter(0);
-    TS_ASSERT_EQUALS(s0.start().totalNanoseconds(), 11 * factor - 5 * factor / 100);
+    TS_ASSERT_EQUALS(s0.begin().totalNanoseconds(), 11 * factor - 5 * factor / 100);
     TS_ASSERT_EQUALS(s0.index(), 0);
 
     // Clean
@@ -919,8 +918,8 @@ public:
       for (size_t i = 0; i < numsplitters; ++i) {
         Kernel::SplittingInterval s2 = splittersws2->getSplitter(i);
         Kernel::SplittingInterval s1 = splitters[i];
-        TS_ASSERT_EQUALS(s1.start(), s2.start());
-        TS_ASSERT_EQUALS(s1.stop(), s2.stop());
+        TS_ASSERT_EQUALS(s1.begin(), s2.begin());
+        TS_ASSERT_EQUALS(s1.end(), s2.end());
         TS_ASSERT_EQUALS(s1.index(), s2.index());
       }
     }
@@ -1008,8 +1007,8 @@ public:
       for (size_t i = 0; i < numsplitters; ++i) {
         Kernel::SplittingInterval s2 = splittersws2->getSplitter(i);
         Kernel::SplittingInterval s1 = splitters[i];
-        TS_ASSERT_EQUALS(s1.start(), s2.start());
-        TS_ASSERT_EQUALS(s1.stop(), s2.stop());
+        TS_ASSERT_EQUALS(s1.begin(), s2.begin());
+        TS_ASSERT_EQUALS(s1.end(), s2.end());
         TS_ASSERT_EQUALS(s1.index(), s2.index());
       }
     }

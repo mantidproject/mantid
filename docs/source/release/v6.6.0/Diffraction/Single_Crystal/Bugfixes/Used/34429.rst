@@ -1,0 +1,3 @@
+- Ensuring colorscale max > min (found for weak peaks with pixels having 0 intensity) in :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>`.
+- :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>` will now close a generated figure if an error occured while trying to write to file (e.g. file of same name was already open)
+- Fix bug that didn't set HKL of peak if ``UpdatePeakPosition = True`` in :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>`

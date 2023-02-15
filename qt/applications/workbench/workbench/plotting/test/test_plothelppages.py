@@ -37,13 +37,13 @@ class PlotHelpPagesTest(unittest.TestCase):
 
         PlotHelpPages.show_help_page_for_figure(fig)
 
-        mock_show_page.assert_any_call(BASE_URL + PLOT1D_PAGE)
+        mock_show_page.assert_any_call(BASE_PATH + PLOT1D_PAGE)
 
         ax.set_waterfall(True)
 
         PlotHelpPages.show_help_page_for_figure(fig)
 
-        mock_show_page.assert_any_call(BASE_URL + WATERFALL_PAGE)
+        mock_show_page.assert_any_call(BASE_PATH + WATERFALL_PAGE)
 
     @patch("workbench.plotting.plothelppages.InterfaceManager.showHelpPage")
     def test_show_help_page_returns_plotting_index_if_plot_type_unrecongised(self, mock_show_page):
@@ -53,7 +53,7 @@ class PlotHelpPagesTest(unittest.TestCase):
 
         PlotHelpPages.show_help_page_for_figure(fig)
 
-        mock_show_page.assert_called_once_with(BASE_URL + INDEX_PAGE)
+        mock_show_page.assert_called_once_with(BASE_PATH + INDEX_PAGE)
 
     @patch("workbench.plotting.plothelppages.InterfaceManager.showHelpPage")
     def test_show_help_page_correctly_returns_3D_plot_page(self, mock_show_page):
@@ -64,7 +64,7 @@ class PlotHelpPagesTest(unittest.TestCase):
 
         PlotHelpPages.show_help_page_for_figure(fig)
 
-        mock_show_page.assert_called_once_with(BASE_URL + PLOT3D_PAGE)
+        mock_show_page.assert_called_once_with(BASE_PATH + PLOT3D_PAGE)
 
     @patch("workbench.plotting.plothelppages.InterfaceManager.showHelpPage")
     def test_show_help_page_correctly_returns_colorfill_plot_page(self, mock_show_page):
@@ -75,7 +75,7 @@ class PlotHelpPagesTest(unittest.TestCase):
 
         PlotHelpPages.show_help_page_for_figure(fig)
 
-        mock_show_page.assert_called_once_with(BASE_URL + COLORFILL_PAGE)
+        mock_show_page.assert_called_once_with(BASE_PATH + COLORFILL_PAGE)
 
 
 if __name__ == "__main__":

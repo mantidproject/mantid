@@ -114,10 +114,4 @@ further. The resulting fit is added to the preview plot.
 
 The Rotation angle, :code:`R`, will also be calculated automatically in units of degrees.
 
-Feedback & Comments
--------------------
-
-If you have any questions or comments about this interface or this help page, please
-contact the `Mantid team <https://www.mantidproject.org/Contact>`__ .
-
 .. categories:: Interfaces Direct

@@ -8,16 +8,18 @@
 ANACONDA_CHANNEL_DEFAULT = 'mantid'
 GITHUB_RELEASES_REPO_DEFAULT = 'mantidproject/mantid'
 GIT_BRANCH = git_branch_name()
+// Only Publish one of the nightly builds by default. BRANCH_TO_PUBLISH is a global
+// environment variable set in the Jenkins system configuration global properties.
+PUBLISH_PACKAGES_DEFAULT = (GIT_BRANCH == "${BRANCH_TO_PUBLISH}")
+
 switch(GIT_BRANCH) {
   case ['main', 'release-next']:
-    PUBLISH_PACKAGES_DEFAULT = true
     PACKAGE_SUFFIX_DEFAULT = 'Nightly'
     ANACONDA_CHANNEL_LABEL_DEFAULT = 'nightly'
     GITHUB_RELEASES_TAG_DEFAULT = ''
     PLATFORM_CHOICES = ['all']
     break
   default:
-    PUBLISH_PACKAGES_DEFAULT = false
     PACKAGE_SUFFIX_DEFAULT = 'Unstable'
     ANACONDA_CHANNEL_LABEL_DEFAULT = 'unstable'
     GITHUB_RELEASES_TAG_DEFAULT = ''
@@ -199,7 +201,7 @@ pipeline {
       }
     }
 
-    stage ('Publishing') {
+    stage ('Publishing to Anaconda') {
       when {
         beforeAgent true
         beforeOptions true
@@ -212,7 +214,6 @@ pipeline {
        }
       environment {
         ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}")
-        GITHUB_TOKEN = credentials("${GITHUB_TOKEN_CREDENTIAL_ID}")
       }
       steps {
         checkoutSource("${GIT_SHA}")
@@ -227,6 +228,28 @@ pipeline {
         // Single quotes are required for token variables to avoid them leaking
         sh "${CISCRIPT_DIR}/publish-to-anaconda ${WORKSPACE}" + ' ${ANACONDA_TOKEN} ' +\
           "${ANACONDA_CHANNEL} ${ANACONDA_CHANNEL_LABEL} ${WORKSPACE}/conda-packages/*.tar.bz2"
+      }
+    }
+
+    stage ('Publishing to Github') {
+      when {
+        beforeAgent true
+        beforeOptions true
+        allOf {
+          expression { env.PUBLISH_PACKAGES == 'true' }
+          expression { env.GITHUB_RELEASES_REPO.trim() != '' }
+        }
+      }
+      agent { label 'linux-64' } // Use linux for simplicity with shell scripts
+      options {
+        timestamps ()
+        retry(3)
+       }
+      environment {
+        GITHUB_TOKEN = credentials("${GITHUB_TOKEN_CREDENTIAL_ID}")
+      }
+      steps {
+        checkoutSource("${GIT_SHA}")
         // Standalone packages next
         sh 'rm -fr ${WORKSPACE}/standalone-packages'
         copyArtifacts filter: '*.exe, *.dmg, *.tar.xz',
@@ -235,10 +258,12 @@ pipeline {
           selector: specific('${BUILD_NUMBER}'),
           target: 'standalone-packages',
           flatten: true
+        // Single quotes are required for token variables to avoid them leaking
         sh "${CISCRIPT_DIR}/publish-to-github ${WORKSPACE}" + ' ${GITHUB_TOKEN} ' +\
           "${GITHUB_RELEASES_REPO} ${generate_git_tag()} ${GIT_SHA} ${prerelease_option()} ${WORKSPACE}/standalone-packages/*"
-      }
+        }
     }
+
     stage ('Delete old non-main packages from Anaconda') {
       when {
         beforeAgent true

@@ -1,1 +1,0 @@
-The FunctionBrowser in ALFView has been replaced with a box for entering the PeakCentre parameter.

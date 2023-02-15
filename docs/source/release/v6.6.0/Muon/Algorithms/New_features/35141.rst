@@ -1,0 +1,1 @@
+- :ref:`LoadMuonNexusV2 <algm-LoadMuonNexusV2>` can now accept the `.nxs_v1` extension.

@@ -469,4 +469,32 @@ public:
     TS_ASSERT_EQUALS(weights[2], 1 / 0.1 / 0.1)
     TS_ASSERT_EQUALS(weights[3], 1 / 0.4 / 0.4)
   }
+
+  void test_efixed_extraction_direct() {
+    using namespace WorkspaceCreationHelper;
+    auto ws = create2DWorkspaceWithRectangularInstrument(1, 2, 1);
+    auto inst = ws->getInstrument();
+    auto &pmap = ws->instrumentParameters();
+    pmap.addString(inst.get(), "deltaE-mode", "Direct");
+    ws->mutableRun().addProperty<double>("Ei", 1.845);
+    constexpr size_t gridRows = 3;
+    constexpr size_t gridCols = 4;
+    auto sparseWS = std::make_unique<SparseWorkspace>(*ws, 1, gridRows, gridCols);
+    TS_ASSERT_EQUALS(sparseWS->getEFixed(4), 1.845);
+  }
+
+  void test_efixed_extraction_indirect_efixed_on_compassembly() {
+    // IRIS stores the efixed on the analyser CompAssembly
+    using namespace WorkspaceCreationHelper;
+    auto ws = createGroupedWorkspace2D(1, 10, 1.0);
+    auto inst = ws->getInstrument();
+    auto &pmap = ws->instrumentParameters();
+    pmap.addString(inst.get(), "deltaE-mode", "Indirect");
+    auto bankComp = inst->getComponentByName("bank1");
+    pmap.addDouble(bankComp.get(), "Efixed", 1.845);
+    constexpr size_t gridRows = 3;
+    constexpr size_t gridCols = 4;
+    auto sparseWS = std::make_unique<SparseWorkspace>(*ws, 1, gridRows, gridCols);
+    TS_ASSERT_EQUALS(sparseWS->getEFixed(1), 1.845);
+  }
 };

@@ -193,7 +193,7 @@ PeakOverlay::PeakOverlay(UnwrappedSurface *surface, const std::shared_ptr<Mantid
 void PeakOverlay::removeShapes(const QList<Shape2D *> &shapeList) {
   // vectors of rows to delete from the peaks workspace.
   std::vector<size_t> rows;
-  foreach (Shape2D *shape, shapeList) {
+  for (auto shape : shapeList) {
     PeakMarker2D *marker = dynamic_cast<PeakMarker2D *>(shape);
     if (!marker)
       throw std::logic_error("Wrong shape type found.");
@@ -280,7 +280,7 @@ void PeakOverlay::draw(QPainter &painter) const {
   }
   QRectF clipRect(painter.viewport());
   m_labels.clear();
-  foreach (Shape2D *shape, m_shapes) {
+  for (auto shape : std::as_const(m_shapes)) {
     if (!shape->isVisible())
       continue;
     if (!clipRect.contains(m_transform.map(shape->origin())))
@@ -419,7 +419,7 @@ void PeakOverlay::setPeakVisibility(double xmin, double xmax, const QString &uni
     xUnits = dSpacing;
   else if (units == "Wavelength")
     xUnits = Wavelength;
-  foreach (Shape2D *shape, m_shapes) {
+  for (auto shape : std::as_const(m_shapes)) {
     PeakMarker2D *marker = dynamic_cast<PeakMarker2D *>(shape);
     if (!marker)
       continue;

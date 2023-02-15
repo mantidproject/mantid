@@ -137,6 +137,11 @@ class RunStringUtilsStringToListTest(unittest.TestCase):
         expected_list = [1, 2, 3] + list(range(10, 10011))
         self.assertEqual(utils.run_string_to_list(run_string), expected_list)
 
+    def test_run_string_to_list_allows_trailing_dash_and_space_in_long_string(self):
+        run_string = "1,2,3,10-10010- "
+        expected_list = [1, 2, 3] + list(range(10, 10011))
+        self.assertEqual(utils.run_string_to_list(run_string), expected_list)
+
     def test_run_string_allows_incomplete_upper_range(self):
         run_string = "62260-66"
         run_list = [62260, 62261, 62262, 62263, 62264, 62265, 62266]
@@ -144,6 +149,11 @@ class RunStringUtilsStringToListTest(unittest.TestCase):
 
     def test_run_string_allows_trailing_comma(self):
         run_string = "5,4,3,2,1,"
+        run_list = utils.run_string_to_list(run_string)
+        self.assertEqual(run_list, [1, 2, 3, 4, 5])
+
+    def test_run_string_allows_trailing_comma_and_space(self):
+        run_string = "5,4,3,2,1, "
         run_list = utils.run_string_to_list(run_string)
         self.assertEqual(run_list, [1, 2, 3, 4, 5])
 

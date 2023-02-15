@@ -6,46 +6,26 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-// The following stuff is for the doxygen title page
+/** The following documentation is included on the doxygen landing page */
+
 /**  \mainpage Mantid - Manipulation and Analysis Toolkit for Instrument Data -
-API documentation
+C++ API documentation
   \image html "Mantid_Logo_Transparent.png"
   \section description Program description:
-The Mantid application framework will provide a platform to supports
-high-performance computing on neutron data. The framework will provide a set of
-common services, algorithms and data objects that can be extended further by
-specialised applications or directly by users if required. The main aims of the
-project are as follows
+<p>The Mantid project provides tools to support the processing of materials-science
+data. This data can be gathered from Neutron scattering or Muon spectroscopy
+experiments or as the result of simulation.</p>
+<p>Mantid is:</p>
 <ul>
-<li>To provide a framework for Data Analysis that is not instrument or
-technique/dependent. </li>
-<li>To support multiple target platforms (Windows, Linux, Mac OS X).  </li>
-<li>The framework must be easily extensible by Instruments Scientists/Users.
-</li>
-<li>The framework must be freely redistributable to visiting scientists.  </li>
-<li>The framework should provide low-level functionalities for Scripting,
-Visualization, Data transformation, Implementing Algorithms, Virtual Instrument
-Geometry.  </li>
-<li>This will be bound to Data reduction and analysis, not Instrument Control.
-</li>
+<li><p><a href="https://github.com/mantidproject/mantid">open source</a></p></li>
+<li><p>64-bit, cross platform: Linux, Windows, macOS</p></li>
+<li><p>built using <a href="https://github.com/mantidproject/mantid/blob/main/DEPENDENCY_LICENSES.md">many other open
+source projects</a>.</p></li>
 </ul>
+
 <br>
 
  The Mantid web page can be found at<br>
- <a href="http://www.mantidproject.org">http://www.mantidproject.org</a><br>
+ <a href="https://www.mantidproject.org">https://www.mantidproject.org</a><br>
 
-  \section libs Mantid uses the following libraries:
-  <a href="http://www.boost.org">Boost</a>,
-  <a href="http://pocoproject.org/">POCO</a>,
-  <a href="http://www.gnu.org/software/gsl/">GSL</a>,
-  <a href="http://www.opencascade.org/">OpenCascade</a>,
-  <a href="http://muparser.sourceforge.net/">muParser</a>,
-  <a href="http://www.zlib.net/">zlib (1.2.3)</a>,
-  and <a href="http://www.nexusformat.org/Main_Page">libNexus</a>.
-  <br>
-
-  \page style Coding Style
-
-  Refer to the conding standards page on the project wiki <a
-href="http://www.mantidproject.org/Coding_Standards">here</a>.
 */

@@ -1801,7 +1801,7 @@ public:
     outputs.emplace(-1, new EventList());
 
     // Generate time splitters
-    TimeSplitterType split;
+    SplittingIntervalVec split;
 
     // Start only at 100
     for (int i = 1; i < 10; i++) {
@@ -1894,7 +1894,7 @@ public:
       for (size_t i = 0; i < 10; i++)
         outputs.emplace_back(new EventList());
 
-      TimeSplitterType split;
+      SplittingIntervalVec split;
       // Slices of 100
       for (int i = 0; i < 10; i++)
         split.emplace_back(SplittingInterval(i * 100, (i + 1) * 100, i));
@@ -1931,7 +1931,7 @@ public:
 
     std::vector<EventList *> outputs(1, new EventList());
 
-    TimeSplitterType split;
+    SplittingIntervalVec split;
     split.emplace_back(SplittingInterval(100, 200, 0));
     split.emplace_back(SplittingInterval(150, 250, 0));
 
@@ -1949,7 +1949,7 @@ public:
     if (weighted)
       el *= 3.0;
 
-    TimeSplitterType split;
+    SplittingIntervalVec split;
     split.emplace_back(SplittingInterval(100, 200, 0));
     split.emplace_back(SplittingInterval(150, 250, 0));
     split.emplace_back(SplittingInterval(300, 350, 0));
@@ -1981,7 +1981,7 @@ public:
     if (weighted)
       el.switchTo(WEIGHTED);
 
-    TimeSplitterType split;
+    SplittingIntervalVec split;
     split.emplace_back(SplittingInterval(1500, 1700, 0));
 
     // Do the splitting
@@ -1997,7 +1997,7 @@ public:
     if (weighted)
       el *= 3.0;
 
-    TimeSplitterType split;
+    SplittingIntervalVec split;
     split.emplace_back(SplittingInterval(-10, 1700, 0));
 
     // Do the splitting
@@ -2022,7 +2022,7 @@ public:
   void test_filterInPlace_notime_throws() {
     this->fake_uniform_time_data();
     el.switchTo(WEIGHTED_NOTIME);
-    TimeSplitterType split;
+    SplittingIntervalVec split;
     TS_ASSERT_THROWS(el.filterInPlace(split), const std::runtime_error &)
   }
 

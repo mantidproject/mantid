@@ -399,6 +399,16 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         self.copyProperties("SANSILLReduction", "Wavelength", 1)
 
+        self.copyProperties("CalculateEfficiency", ["MinThreshold", "MaxThreshold"])
+        # override default documentation of copied parameters to make them understandable by user
+        threshold_property = self.getProperty("MinThreshold")
+        threshold_property.setDocumentation("Minimum threshold for calculated efficiency.")
+        threshold_property = self.getProperty("MaxThreshold")
+        threshold_property.setDocumentation("Maximum threshold for calculated efficiency.")
+
+        self.setPropertyGroup("MinThreshold", "Efficiency Options")
+        self.setPropertyGroup("MaxThreshold", "Efficiency Options")
+
     def PyExec(self):
         self.setUp()
         outputSamples = []
@@ -532,7 +542,13 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         if self.getProperty("SensitivityWithOffsets").value:
             tmp_group_name = self.output_sens + "_group"
             RenameWorkspace(InputWorkspace=self.output_sens, OutputWorkspace=tmp_group_name)
-            CalculateEfficiency(InputWorkspace=tmp_group_name, MergeGroup=True, OutputWorkspace=self.output_sens)
+            CalculateEfficiency(
+                InputWorkspace=tmp_group_name,
+                MergeGroup=True,
+                MinThreshold=self.getProperty("MinThreshold").value,
+                MaxThreshold=self.getProperty("MaxThreshold").value,
+                OutputWorkspace=self.output_sens,
+            )
             DeleteWorkspace(Workspace=tmp_group_name)
         self.setProperty("SensitivityOutputWorkspace", mtd[self.output_sens])
 
@@ -874,6 +890,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             SampleThickness=self.getProperty("SampleThickness").value,
             WaterCrossSection=self.getProperty("WaterCrossSection").value,
             Wavelength=self.getProperty("Wavelength").value,
+            MinThreshold=self.getProperty("MinThreshold").value,
+            MaxThreshold=self.getProperty("MaxThreshold").value,
             Version=1,
         )
 

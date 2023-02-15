@@ -505,7 +505,6 @@ set(INC_FILES
     inc/MantidQtWidgets/Common/QtJSONUtils.h
     inc/MantidQtWidgets/Common/ScriptRepositoryView.h
     inc/MantidQtWidgets/Common/SelectionNotificationService.h
-    inc/MantidQtWidgets/Common/SignalBlocker.h
     inc/MantidQtWidgets/Common/UserSubWindowFactory.h
     inc/MantidQtWidgets/Common/TSVSerialiser.h
     inc/MantidQtWidgets/Common/UserInputValidator.h
@@ -610,16 +609,6 @@ set(UI_FILES
     inc/MantidQtWidgets/Common/pqHelpWindow.ui
 )
 
-# Temporary workaround to remove stale ui_* header files after they were moved to a separate library. They cause build
-# problems if they're not deleted
-set(OLD_UI_HEADERS
-    ${CMAKE_CURRENT_BINARY_DIR}/qt4/ui_ColorBarWidget.h ${CMAKE_CURRENT_BINARY_DIR}/qt4/ui_DisplayCurveFit.h
-    ${CMAKE_CURRENT_BINARY_DIR}/qt4/ui_PreviewPlot.h
-)
-foreach(_header ${OLD_UI_HEADERS})
-  file(REMOVE ${_header})
-endforeach()
-
 set(TARGET_LIBRARIES ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -628,14 +617,14 @@ endif()
 
 # Target Additional components for this module
 find_package(
-  Qt5
+  Qt5 ${QT_MIN_VERSION}
   COMPONENTS Concurrent Help Network PrintSupport
   REQUIRED
 )
 # Prefer WebEngineWidgets over WebkitWidgets
 unset(Qt5_FOUND)
 find_package(
-  Qt5
+  Qt5 ${QT_MIN_VERSION}
   COMPONENTS WebEngineWidgets
   QUIET
 )
@@ -643,7 +632,7 @@ if(Qt5_FOUND)
   set(_webwidgets_tgt Qt5::WebEngineWidgets)
 else()
   find_package(
-    Qt5
+    Qt5 ${QT_MIN_VERSION}
     COMPONENTS WebKitWidgets
     QUIET
   )
@@ -712,7 +701,6 @@ set(TEST_FILES
     test/ProjectSaveModelTest.h
     test/ProjectSavePresenterTest.h
     test/SelectionNotificationServiceTest.h
-    test/SignalBlockerTest.h
     test/TrackedActionTest.h
     test/QtJSONUtilsTest.h
     test/Batch/BuildSubtreeItemsTest.h

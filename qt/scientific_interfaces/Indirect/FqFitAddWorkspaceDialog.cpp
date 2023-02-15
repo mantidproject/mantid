@@ -8,7 +8,7 @@
 
 #include <boost/optional.hpp>
 
-#include "MantidQtWidgets/Common/SignalBlocker.h"
+#include <QSignalBlocker>
 
 namespace MantidQt::CustomInterfaces::IDA {
 
@@ -33,7 +33,7 @@ std::string FqFitAddWorkspaceDialog::parameterType() const {
 int FqFitAddWorkspaceDialog::parameterNameIndex() const { return m_uiForm.cbParameterName->currentIndex(); }
 
 void FqFitAddWorkspaceDialog::setParameterTypes(const std::vector<std::string> &types) {
-  MantidQt::API::SignalBlocker blocker(m_uiForm.cbParameterType);
+  QSignalBlocker blocker(m_uiForm.cbParameterType);
   m_uiForm.cbParameterType->clear();
   for (auto &&type : types)
     m_uiForm.cbParameterType->addItem(QString::fromStdString(type));

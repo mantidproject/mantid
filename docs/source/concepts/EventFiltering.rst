@@ -7,16 +7,19 @@ Event Filtering
 .. contents::
    :local:
 
-In mantid, there are a variety of ways to filter events that are in an
-:ref:`EventWorkspace`. They are :ref:`FilterByTime
-<algm-FilterByTime>` and :ref:`FilterByLogValue
-<algm-FilterByLogValue>` which will create a filter and apply it in a
-single step. The other way to filter events is to use
-:ref:`FilterEvents <algm-FilterEvents>` which allows for a variety of
-workspaces to specify how an :ref:`EventWorkspace` is split. This
-document focuses on how the create these workspaces and will largely
+Given an :class:`EventWorkspace <<mantid.api.IEventWorkspace>` (:ref:`additional docs <EventWorkspace>`)
+one will generally want to either remove events (commonly called filtering) or divide them into separate output workspaces (splitting).
+While the full list of algorithms can be found in the event filtering algorithm category, a high level summary of them is included here:
+
+* :ref:`FilterByTime <algm-FilterByTime>` and :ref:`FilterByLogValue <algm-FilterByLogValue>` which will create a filter and apply it in a single step
+* :ref:`GenerateEventsFilter <algm-GenerateEventsFilter>` which can create an event filter to be used by :ref:`FilterEvents <algm-FilterEvents>`
+* :ref:`FilterEvents <algm-FilterEvents>` which allows for a variety of workspaces to specify how an :ref:`EventWorkspace` is split.
+
+
+This document focuses on how to create workspaces for filtering and will largely
 ignore :ref:`FilterByTime <algm-FilterByTime>` and
 :ref:`FilterByLogValue <algm-FilterByLogValue>`.
+
 
 How to generate event filters
 =============================
@@ -119,5 +122,39 @@ time must be processed somewhat to go into the table workspace. Much of the
 Be warned that specifying ``RelativeTime=True`` with a table full of
 absolute times will almost certainly generate output workspaces
 without any events in them.
+
+Time average mean and stddev of logs
+====================================
+
+In general, the simple mathematical mean of a log is not the value of interest.
+It is the mean weighted by time, referred to here as the time-average mean.
+The method for calculating the time-average mean and standard deviation is explained in detail in [1]_.
+We define that a log is represented by the right-continuous `multi-step function <https://en.wikipedia.org/wiki/Step_function>`_ :math:`L(t)` (the ``Kernel::TimeSeriesProperty`` class) and a region of interest in time (the ``Kernel::TimeROI`` class) is represented by the function :math:`M(t)` which is zero when the data should not be included and one when it should be.
+The time-average mean, :math:`\mu_T` is given by
+
+.. math::
+
+   \mu_T = \frac{\int_0^T M(t) L(t) dt}{\int_0^T M(t) dt}
+
+The denominator is correctly observed to be the duration.
+The variance (standard deviation squared) is
+
+.. math::
+
+   \sigma_T^2 = \frac{\int_0^T M(t) (L(t) - \mu_T)^2 dt}{\int_0^T M(t) dt}
+
+In the cases of properties (including time series) with only a single value, :math:`L`, these values become :math:`\mu_T = L` and :math:`\sigma_T^2=0` independent of the time region of interest, as expected.
+When all data is to be used (i.e. :math:`M(t) = 1`), the equations simplify to the values weighted by their observed durations, or
+
+.. math::
+
+   \mu_T = \frac{\int_0^T L(t) dt}{\int_0^T dt} = \frac{1}{T} \int_0^T L(t) dt
+
+
+References
+----------
+
+.. [1] P.F. Peterson, D. Olds, A.T. Savici, and W. Zhou *Advances in utilizing event based data structures for neutron scattering experiments* Review of Scientific Instruments **89** (2018) 093001. doi: `10.1063/1.5034782 <https://doi.org/10.1063/1.5034782>`_
+
 
 .. categories:: Concepts

@@ -89,9 +89,7 @@ if(MSVC AND NOT CONDA_ENV)
       CACHE FILEPATH "The location of the pythonw executable. This suppresses the new terminal window on startup" FORCE
   )
 
-  set(THIRD_PARTY_BIN
-      "${THIRD_PARTY_DIR}/bin;${THIRD_PARTY_DIR}/lib/qt4/bin;${THIRD_PARTY_DIR}/lib/qt5/bin;${MSVC_PYTHON_EXECUTABLE_DIR}"
-  )
+  set(THIRD_PARTY_BIN "${THIRD_PARTY_DIR}/bin;${THIRD_PARTY_DIR}/lib/qt5/bin;${MSVC_PYTHON_EXECUTABLE_DIR}")
   message(STATUS "Third party dependencies are in ${THIRD_PARTY_DIR}")
   # Add to the path so that cmake can configure correctly without the user having to do it
   set(ENV{PATH} "${THIRD_PARTY_BIN};$ENV{PATH}")
@@ -102,7 +100,7 @@ if(MSVC AND NOT CONDA_ENV)
   set(CMAKE_INCLUDE_PATH "${THIRD_PARTY_DIR}/include")
   include_directories(${THIRD_PARTY_DIR}/include)
   set(CMAKE_LIBRARY_PATH "${THIRD_PARTY_DIR}/lib")
-  set(CMAKE_PREFIX_PATH "${THIRD_PARTY_DIR};${THIRD_PARTY_DIR}/lib/qt4")
+  set(CMAKE_PREFIX_PATH "${THIRD_PARTY_DIR}")
   set(BOOST_INCLUDEDIR "${CMAKE_INCLUDE_PATH}")
   set(BOOST_LIBRARYDIR "${CMAKE_LIBRARY_PATH}")
   set(Boost_NO_SYSTEM_PATHS TRUE)
@@ -116,11 +114,6 @@ elseif(MSVC AND CONDA_ENV)
   set(ENV{PATH} "${THIRD_PARTY_BIN};$ENV{PATH}")
   # Set PATH for custom command or target build steps. Avoids the need to make external PATH updates
   set(CMAKE_MSVCIDE_RUN_PATH ${THIRD_PARTY_BIN})
-else()
-  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    # Homebrew adds qt4 here and we require it to be unlinked from /usr/local to avoid qt4/qt5 cross talk
-    list(APPEND CMAKE_PREFIX_PATH /usr/local/opt/qt@4)
-  endif()
 endif()
 
 # Clean out python variables set from a previous build so they can be rediscovered again
@@ -131,12 +124,6 @@ function(unset_cached_Python_variables)
     Python_LIBRARY
     Python_NUMPY_INCLUDE_DIR
     SIP_INCLUDE_DIR
-    PYQT4_PYUIC
-    PYQT4_SIP_DIR
-    PYQT4_SIP_FLAGS
-    PYQT4_VERSION
-    PYQT4_VERSION_STR
-    PYQT4_VERSION_TAG
     PYQT5_PYUIC
     PYQT5_SIP_DIR
     PYQT5_SIP_FLAGS

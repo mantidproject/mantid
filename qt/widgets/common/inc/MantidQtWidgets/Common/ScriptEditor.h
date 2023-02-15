@@ -130,9 +130,6 @@ public slots:
   /// Raise find replace dialog
   virtual void showFindReplaceDialog();
 
-  /// Override zoomTo slot
-  void zoomTo(int level) override;
-
 signals:
   /// Inform observers that undo information is available
   void undoAvailable(bool /*_t1*/);

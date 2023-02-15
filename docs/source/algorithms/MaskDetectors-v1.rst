@@ -110,16 +110,17 @@ If the numbers of spectra in *Workspace* and *MaskedWorkspace* are different,
 the algorithm extracts list of detector IDS from source workspace and uses them
 to mask the corresponding spectra of the target workspace.
 
+
+.. _maskdetectors_def_of_mask:
+
 Definition of Mask
 ##################
 
 -  If a pixel is masked, it means that the data from this pixel won't be
-   used. In the masking workspace (i.e.,
-   `SpecialWorkspace2D <http://www.mantidproject.org/SpecialWorkspace2D>`__), the corresponding value
+   used. In the masking workspace the corresponding value
    is 1.
 -  If a pixel is NOT masked, it means that the data from this pixel will
-   be used. In the masking workspace (i.e.,
-   `SpecialWorkspace2D <http://www.mantidproject.org/SpecialWorkspace2D>`__), the corresponding value
+   be used. In the masking workspace the corresponding value
    is 0.
 -  If masked workspace with a masked spectrum is applied to a target workspace with grouped detectors,
    and only one detector in the group of target workspace is masked, all target spectra,

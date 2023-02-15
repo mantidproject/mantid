@@ -69,7 +69,7 @@ void CalMuonDeadTime::exec() {
   const double firstgooddata = getProperty("FirstGoodData");
   const double lastgooddata = getProperty("LastGoodData");
 
-  // Seem to have to do this to avoid MantidPlot to crash when
+  // Seem to have to do this to avoid a crash when
   // running this algorithm where the "DataFitted" WS already exists
 
   std::string dataFittedName = getPropertyValue("DataFitted");

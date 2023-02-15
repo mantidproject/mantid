@@ -15,7 +15,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/Unit.h"
-#include "MantidQtWidgets/Common/SignalBlocker.h"
 
 using namespace Mantid::API;
 

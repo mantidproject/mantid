@@ -18,7 +18,6 @@
 #include "MantidQtWidgets/Common/FitOptionsBrowser.h"
 #include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/FunctionBrowser.h"
-#include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <QAction>
 #include <QCheckBox>

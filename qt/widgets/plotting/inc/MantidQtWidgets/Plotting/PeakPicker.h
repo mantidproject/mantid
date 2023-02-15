@@ -28,7 +28,7 @@ public:
   void redraw();
   void remove();
 
-  void setPeak(const Mantid::API::IPeakFunction_const_sptr &peak);
+  void setPeak(const Mantid::API::IPeakFunction_const_sptr &peak, const double background = 0.0);
   Mantid::API::IPeakFunction_sptr peak() const;
 
   void select(bool select);

@@ -1,268 +1,200 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2023 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+
 #include "MantidKernel/TimeSplitter.h"
+#include "MantidKernel/Logger.h"
+#include <set>
 
 namespace Mantid {
 
-using namespace Types::Core;
+using Types::Core::DateAndTime;
+
 namespace Kernel {
 
-/// Default constructor
-SplittingInterval::SplittingInterval() : m_start(), m_stop(), m_index(-1) {}
+namespace {
+// every value less than zero is ignore
+constexpr int IGNORE_VALUE{-1};
+// default value for the output is zero
+constexpr int DEFAULT_VALUE{0};
 
-/// Constructor using DateAndTime
-SplittingInterval::SplittingInterval(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop,
-                                     const int index)
-    : m_start(start), m_stop(stop), m_index(index) {}
-
-/// Return the start time
-DateAndTime SplittingInterval::start() const { return m_start; }
-
-/// Return the stop time
-DateAndTime SplittingInterval::stop() const { return m_stop; }
-
-/// Returns the duration in seconds
-double SplittingInterval::duration() const { return DateAndTime::secondsFromDuration(m_stop - m_start); }
-
-/// Return the index (destination of this split time block)
-int SplittingInterval::index() const { return m_index; }
-
-/// Return true if the b SplittingInterval overlaps with this one.
-bool SplittingInterval::overlaps(const SplittingInterval &b) const {
-  return ((b.m_start < this->m_stop) && (b.m_start >= this->m_start)) ||
-         ((b.m_stop < this->m_stop) && (b.m_stop >= this->m_start)) ||
-         ((this->m_start < b.m_stop) && (this->m_start >= b.m_start)) ||
-         ((this->m_stop < b.m_stop) && (this->m_stop >= b.m_start));
+void assertIncreasing(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop) {
+  if (start > stop)
+    throw std::runtime_error("TODO message");
 }
 
-/// @cond DOXYGEN_BUG
-/// And operator. Return the smallest time interval where both intervals are
-/// TRUE.
-SplittingInterval SplittingInterval::operator&(const SplittingInterval &b) const {
-  SplittingInterval out(*this);
-  if (b.m_start > this->m_start)
-    out.m_start = b.m_start;
-  if (b.m_stop < this->m_stop)
-    out.m_stop = b.m_stop;
-  return out;
-}
-/// @endcond DOXYGEN_BUG
+/// static Logger definition
+Logger g_log("TimeSplitter");
 
-/// Or operator. Return the largest time interval.
-SplittingInterval SplittingInterval::operator|(const SplittingInterval &b) const {
-  SplittingInterval out(*this);
-  if (!this->overlaps(b))
-    throw std::invalid_argument("SplittingInterval: cannot apply the OR (|) "
-                                "operator to non-overlapping "
-                                "SplittingInterval's.");
+} // namespace
 
-  if (b.m_start < this->m_start)
-    out.m_start = b.m_start;
-  if (b.m_stop > this->m_stop)
-    out.m_stop = b.m_stop;
-  return out;
+TimeSplitter::TimeSplitter(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop) {
+  clearAndReplace(start, stop, DEFAULT_VALUE);
 }
 
-/// Compare two splitter by the begin time
-bool SplittingInterval::operator<(const SplittingInterval &b) const { return (this->m_start < b.m_start); }
-
-/// Compare two splitter by the begin time
-bool SplittingInterval::operator>(const SplittingInterval &b) const { return (this->m_start > b.m_start); }
-
-/** Comparator for sorting lists of SplittingInterval */
-bool compareSplittingInterval(const SplittingInterval &si1, const SplittingInterval &si2) {
-  return (si1.start() < si2.start());
+std::string TimeSplitter::debugPrint() const {
+  std::stringstream msg;
+  for (const auto iter : m_roi_map)
+    msg << iter.second << "|" << iter.first << "\n";
+  return msg.str();
 }
 
-//------------------------------------------------------------------------------------------------
-/** Return true if the TimeSplitterType provided is a filter,
- * meaning that it only has an output index of 0.
- */
-bool isFilter(const TimeSplitterType &a) {
-  int max = -1;
-  TimeSplitterType::const_iterator it;
-  for (it = a.begin(); it != a.end(); ++it)
-    if (it->index() > max)
-      max = it->index();
-  return (max <= 0);
-}
+void TimeSplitter::addROI(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop,
+                          const int value) {
+  assertIncreasing(start, stop);
+  if (m_roi_map.empty()) {
+    // set the values without checks
+    clearAndReplace(start, stop, value);
+  } else if ((start <= m_roi_map.begin()->first) && (stop >= m_roi_map.rbegin()->first)) {
+    // overwrite existing map
+    clearAndReplace(start, stop, value);
+  } else if ((stop < m_roi_map.begin()->first) || (start > m_roi_map.rbegin()->first)) {
+    // adding to one end or the other
+    if (value > IGNORE_VALUE) { // only add non-ignore values
+      m_roi_map.insert({start, value});
+      m_roi_map.insert({stop, IGNORE_VALUE});
+    }
+  } else {
+    // do the interesting version
+    g_log.debug() << "addROI(" << start << ", " << stop << ", " << value << ")\n";
 
-//------------------------------------------------------------------------------------------------
-/** Plus operator for TimeSplitterType.
- * Combines a filter and a splitter by removing entries that are filtered out
- *from the splitter.
- * Also, will combine two filters together by "and"ing them
- *
- * @param a :: TimeSplitterType splitter OR filter
- * @param b :: TimeSplitterType splitter OR filter.
- * @throw std::invalid_argument if two splitters are given.
- */
-TimeSplitterType operator+(const TimeSplitterType &a, const TimeSplitterType &b) {
-  bool a_filter, b_filter;
-  a_filter = isFilter(a);
-  b_filter = isFilter(b);
+    // cache what the final value will be
+    const int stopValue = this->valueAtTime(stop);
 
-  if (a_filter && b_filter) {
-    return a & b;
-  } else if (a_filter && !b_filter) {
-    return b & a;
-  } else if (!a_filter && b_filter) {
-    return a & b;
-  } else // (!a_filter && !b_filter)
-  {
-    // Both are splitters.
-    throw std::invalid_argument("Cannot combine two splitters together, as the "
-                                "output is undefined. Try splitting each "
-                                "output workspace by b after the a split has "
-                                "been done.");
-  }
-}
+    // find if there are values to erase
 
-//------------------------------------------------------------------------------------------------
-/** AND operator for TimeSplitterType
- * Works on Filters - combines them to only keep times where both Filters are
- *TRUE.
- * Works on splitter + filter if (a) is a splitter and b is a filter.
- *  In general, use the + operator since it will resolve the order for you.
- *
- * @param a :: TimeSplitterType filter or Splitter.
- * @param b :: TimeSplitterType filter.
- * @return the ANDed filter
- */
-TimeSplitterType operator&(const TimeSplitterType &a, const TimeSplitterType &b) {
-  TimeSplitterType out;
-  // If either is empty, then no entries in the filter (aka everything is
-  // removed)
-  if ((a.empty()) || (b.empty()))
-    return out;
+    // the starting point is greater than or equal to the "start" supplied
+    auto startIterator = m_roi_map.lower_bound(start);
+    if ((startIterator->first != start) && (startIterator != m_roi_map.begin()))
+      startIterator--; // move to the one before
 
-  TimeSplitterType::const_iterator ait;
-  TimeSplitterType::const_iterator bit;
+    // the end is one past the "stop"
+    auto stopIterator = m_roi_map.upper_bound(stop);
+    if ((stopIterator != m_roi_map.end()) && (stopValue == IGNORE_VALUE))
+      stopIterator++; // move to the one after
 
-  // For now, a simple double iteration. Can be made smarter if a and b are
-  // sorted.
-  for (ait = a.begin(); ait != a.end(); ++ait) {
-    for (bit = b.begin(); bit != b.end(); ++bit) {
-      if (ait->overlaps(*bit)) {
-        // The & operator for SplittingInterval keeps the index of the
-        // left-hand-side (ait in this case)
-        //  meaning that a has to be the splitter because the b index is
-        //  ignored.
-        out.emplace_back(*ait & *bit);
+    const bool atStart = (startIterator == m_roi_map.begin());
+
+    // remove the elements that are being replaced [inclusive, exclusive)
+    m_roi_map.erase(startIterator, stopIterator);
+
+    // put in the new elements
+    if ((value > IGNORE_VALUE) || (!atStart)) {
+      if (value != this->valueAtTime(start)) {
+        m_roi_map.insert({start, value});
       }
     }
-  }
-  return out;
-}
 
-//------------------------------------------------------------------------------------------------
-/** Remove any overlap in a filter (will not work properly on a splitter)
- *
- * @param a :: TimeSplitterType filter.
- */
-TimeSplitterType removeFilterOverlap(const TimeSplitterType &a) {
-  TimeSplitterType out;
-  out.reserve(a.size());
-
-  // Now we have to merge duplicate/overlapping intervals together
-  auto it = a.cbegin();
-  while (it != a.cend()) {
-    // All following intervals will start at or after this one
-    DateAndTime start = it->start();
-    DateAndTime stop = it->stop();
-
-    // Keep looking for the next interval where there is a gap (start > old
-    // stop);
-    while ((it != a.cend()) && (it->start() <= stop)) {
-      // Extend the stop point (the start cannot be extended since the list is
-      // sorted)
-      if (it->stop() > stop)
-        stop = it->stop();
-      ++it;
+    // find the new iterator for where this goes to see if it the same value
+    stopIterator = m_roi_map.lower_bound(stop);
+    if ((stopIterator != m_roi_map.end()) && (value == stopIterator->second)) {
+      m_roi_map.erase(stopIterator);
     }
-    // We've reached a gap point. Output this merged interval and move on.
-    out.emplace_back(start, stop, 0);
-  }
+    if (value != stopValue) {
+      m_roi_map.insert({stop, stopValue});
+    }
 
-  return out;
-}
-
-//------------------------------------------------------------------------------------------------
-/** OR operator for TimeSplitterType
- * Only works on Filters, not splitters. Combines the splitters
- * to only keep times where EITHER Filter is TRUE.
- *
- * @param a :: TimeSplitterType filter.
- * @param b :: TimeSplitterType filter.
- * @return the ORed filter
- */
-TimeSplitterType operator|(const TimeSplitterType &a, const TimeSplitterType &b) {
-  TimeSplitterType out;
-
-  // Concatenate the two lists
-  TimeSplitterType temp;
-  // temp.insert(temp.end(), b.begin(), b.end());
-
-  // Add the intervals, but don't add any invalid (empty) ranges
-  TimeSplitterType::const_iterator it;
-  ;
-  for (it = a.begin(); it != a.end(); ++it)
-    if (it->stop() > it->start())
-      temp.emplace_back(*it);
-  for (it = b.begin(); it != b.end(); ++it)
-    if (it->stop() > it->start())
-      temp.emplace_back(*it);
-
-  // Sort by start time
-  std::sort(temp.begin(), temp.end(), compareSplittingInterval);
-
-  out = removeFilterOverlap(temp);
-
-  return out;
-}
-
-//------------------------------------------------------------------------------------------------
-/** NOT operator for TimeSplitterType
- * Only works on Filters. Returns a filter with the reversed
- * time intervals as the incoming filter.
- *
- * @param a :: TimeSplitterType filter.
- */
-TimeSplitterType operator~(const TimeSplitterType &a) {
-  TimeSplitterType out, temp;
-  // First, you must remove any overlapping intervals, otherwise the output is
-  // stupid.
-  temp = removeFilterOverlap(a);
-
-  // No entries: then make a "filter" that keeps everything
-  if ((temp.empty())) {
-    out.emplace_back(DateAndTime::minimum(), DateAndTime::maximum(), 0);
-    return out;
-  }
-
-  TimeSplitterType::const_iterator ait;
-  ait = temp.begin();
-  if (ait != temp.end()) {
-    // First entry; start at -infinite time
-    out.emplace_back(DateAndTime::minimum(), ait->start(), 0);
-    // Now start at the second entry
-    while (ait != temp.end()) {
-      DateAndTime start, stop;
-      start = ait->stop();
-      ++ait;
-      if (ait == temp.end()) { // Reached the end - go to inf
-        stop = DateAndTime::maximum();
-      } else { // Stop at the start of the next entry
-        stop = ait->start();
-      }
-      out.emplace_back(start, stop, 0);
+    // verify this ends with IGNORE_VALUE
+    if (m_roi_map.rbegin()->second != IGNORE_VALUE) {
+      throw std::runtime_error("Something went wrong in TimeSplitter::addROI");
     }
   }
-  return out;
 }
+
+void TimeSplitter::clearAndReplace(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop,
+                                   const int value) {
+  m_roi_map.clear();
+  if (value >= 0) {
+    m_roi_map.insert({start, value});
+    m_roi_map.insert({stop, IGNORE_VALUE});
+  }
+}
+
+int TimeSplitter::valueAtTime(const Types::Core::DateAndTime &time) const {
+  if (m_roi_map.empty())
+    return IGNORE_VALUE;
+  if (time < m_roi_map.begin()->first)
+    return IGNORE_VALUE;
+
+  // this method can be used when the object is in an unusual state and doesn't
+  // end with IGNORE_VALUE
+
+  // find location that is greater than or equal to the requested time and give
+  // back previous value
+  auto location = m_roi_map.lower_bound(time);
+  if (location->first == time) {
+    // found the time in the map
+    return location->second;
+  } else if (location == m_roi_map.begin()) {
+    // iterator is greater than the first value in the map b/c equal is already
+    // handled asked for a time outside of the map
+    return IGNORE_VALUE;
+  } else {
+    // go to the value before
+    location--;
+    return location->second;
+  }
+}
+
+/**
+ * Return a sorted vector of the output workspace indices
+ */
+std::vector<int> TimeSplitter::outputWorkspaceIndices() const {
+  // sets have unique values and are sorted
+  std::set<int> outputSet;
+
+  // copy all of the (not ignore) output workspace indices
+  for (const auto iter : m_roi_map) {
+    if (iter.second > IGNORE_VALUE)
+      outputSet.insert(iter.second);
+  }
+
+  // return a vector
+  return std::vector<int>(outputSet.begin(), outputSet.end());
+}
+
+/**
+ * Returns a Mantid::Kernel::TimeROI for the requested workspace index.
+ * This will raise an exception if the workspace index does not exist in the TimeSplitter.
+ */
+TimeROI TimeSplitter::getTimeROI(const int workspaceIndex) {
+  // convert things less than -1 to -1
+  const int effectiveIndex = std::max<int>(workspaceIndex, -1);
+
+  TimeROI output;
+  using map_value_type = std::map<DateAndTime, int>::value_type;
+  auto indexFinder = [effectiveIndex](const map_value_type &value) { return value.second == effectiveIndex; };
+  // find the first place this workspace index exists
+  auto iter = std::find_if(m_roi_map.begin(), m_roi_map.end(), indexFinder);
+  // add the ROI found then loop until we reach the end
+  while (iter != m_roi_map.end()) {
+    // add the ROI
+    const auto startTime = iter->first;
+    iter++;
+    // if the next iterator is the end there is nothing to add
+    if (iter != m_roi_map.end()) {
+      const auto stopTime = iter->first;
+      output.addROI(startTime, stopTime);
+    }
+
+    // look for the next place the workspace index occurs
+    iter = std::find_if(iter, m_roi_map.end(), indexFinder);
+  }
+
+  // error check that something is there
+  // ignore index being empty is ok
+  if ((workspaceIndex >= 0) && (output.empty())) {
+    std::stringstream msg;
+    msg << "No regions exist for workspace index " << workspaceIndex;
+  }
+
+  return output;
+}
+
+std::size_t TimeSplitter::numRawValues() const { return m_roi_map.size(); }
+
 } // namespace Kernel
 } // namespace Mantid

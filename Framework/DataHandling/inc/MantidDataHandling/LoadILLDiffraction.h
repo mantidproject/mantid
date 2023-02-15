@@ -65,7 +65,6 @@ private:
   std::vector<double> getMonitor(const NeXus::NXDouble &) const;
   std::string getInstrumentFilePath(const std::string &) const;
   Kernel::V3D getReferenceComponentPosition(const API::MatrixWorkspace_sptr &instrumentWorkspace);
-  bool containsCalibratedData(const std::string &filename) const;
 
   std::vector<double> getScannedVaribleByPropertyName(const NeXus::NXDouble &scan,
                                                       const std::string &propertyName) const;
@@ -103,8 +102,6 @@ private:
 
   std::vector<ScannedVariables> m_scanVar;  ///< holds the scan info
   API::MatrixWorkspace_sptr m_outWorkspace; ///< output workspace
-  bool m_useCalibratedData{false};          ///< whether to use the calibrated data in
-                                            ///< the nexus (D2B only)
 };
 
 } // namespace DataHandling

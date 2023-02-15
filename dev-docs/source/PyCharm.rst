@@ -71,6 +71,8 @@ Now that your Python development environment has been setup we can setup the deb
 - You can now click the green play button in the top right of the window to create a Workbench instance from pycharm.
 - Alternatively you can click the green bug next to the green play button to start a debug session.
 
+.. include:: ./macos-opengl-version-warning.txt
+
 Debug Python in unit tests
 ##########################
 

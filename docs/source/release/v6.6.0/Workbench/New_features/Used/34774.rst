@@ -1,0 +1,1 @@
+- Mantid Workbench is now compatible with matplotlib v3.6
