@@ -47,6 +47,7 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
             "frequencies_threshold": 0.0,
             "s_relative_threshold": 0.001,
             "s_absolute_threshold": 1e-7,
+            "broadening_range": 3.0,
         }
         abins.parameters.performance = {"optimal_size": int(5e6), "threads": 1}
 
