@@ -374,7 +374,8 @@ template <typename TYPE> std::string FilteredTimeSeriesProperty<TYPE>::setValueF
 template <typename TYPE>
 Kernel::TimeROI *FilteredTimeSeriesProperty<TYPE>::intersectFilterWithOther(const TimeROI *other) const {
   auto roi = new TimeROI(*m_filter.get());
-  roi->update_or_replace_intersection(*other);
+  if (other && (!other->empty()))
+    roi->update_or_replace_intersection(*other);
   return roi;
 }
 
