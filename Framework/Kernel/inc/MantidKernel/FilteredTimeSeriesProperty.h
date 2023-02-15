@@ -60,8 +60,11 @@ public:
   HeldType nthValue(int n) const;
 
   /// Divide the property into  allowed and disallowed time intervals according
-  /// to \a filter.
+  /// to a filter.
   void filterWith(const TimeSeriesProperty<bool> *filter);
+  /// Divide the property into  allowed and disallowed time intervals according
+  /// to a filter.
+  void filterWith(const TimeROI &filter);
   /// Restores the property to the unsorted state
   void clearFilter() const;
   // Returns whether the time series has been filtered

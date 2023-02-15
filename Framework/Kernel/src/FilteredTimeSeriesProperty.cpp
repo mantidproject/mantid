@@ -239,6 +239,18 @@ template <typename TYPE> void FilteredTimeSeriesProperty<TYPE>::filterWith(const
   }
 }
 
+template <typename TYPE> void FilteredTimeSeriesProperty<TYPE>::filterWith(const TimeROI &filter) {
+  if (filter.empty()) {
+    // if filter is empty, clear the current
+    this->clearFilter();
+  } else {
+    this->clearFilterCache();
+    m_filter->replaceROI(filter);
+
+    applyFilter();
+  }
+}
+
 /**
  * Restores the property to the unsorted & unfiltered state
  */
