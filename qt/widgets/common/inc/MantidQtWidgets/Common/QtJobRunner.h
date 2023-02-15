@@ -10,14 +10,16 @@
 #include "IJobRunner.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
-#include <QWidget>
+
+#include <QObject>
+
 #include <deque>
 #include <vector>
 
 namespace MantidQt::API {
 class JobRunnerSubscriber;
 
-class EXPORT_OPT_MANTIDQT_COMMON QtJobRunner : public QWidget, public IJobRunner {
+class EXPORT_OPT_MANTIDQT_COMMON QtJobRunner : public QObject, public IJobRunner {
   Q_OBJECT
 public:
   QtJobRunner();
