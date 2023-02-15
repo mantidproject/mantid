@@ -293,6 +293,22 @@ public:
 
   void test_intersection_no_overlap() { runIntersectionTest(CHRISTMAS, TimeROI{NEW_YEARS_START, NEW_YEARS_STOP}, 0.); }
 
+  void test_intersection_one_empty() { runIntersectionTest(CHRISTMAS, TimeROI(), 0.); }
+
+  /*
+   * This test is similar to test_intersection_one_empty, except the function that is called will replace the TimeROI
+   * with the non-empty one.
+   */
+  void test_replace_intersection() {
+    TimeROI one(CHRISTMAS);
+    one.update_or_replace_intersection(TimeROI());
+    TS_ASSERT_EQUALS(one.durationInSeconds() / ONE_DAY_DURATION, CHRISTMAS.durationInSeconds() / ONE_DAY_DURATION);
+
+    TimeROI two;
+    two.update_or_replace_intersection(CHRISTMAS);
+    TS_ASSERT_EQUALS(two.durationInSeconds() / ONE_DAY_DURATION, CHRISTMAS.durationInSeconds() / ONE_DAY_DURATION);
+  }
+
   void runUnionTest(const TimeROI &left, const TimeROI &right, const double exp_duration) {
     // left union with right
     TimeROI one(left);
@@ -321,4 +337,6 @@ public:
   void test_union_no_overlap() {
     runUnionTest(CHRISTMAS, TimeROI{NEW_YEARS_START, NEW_YEARS_STOP}, 2. * ONE_DAY_DURATION);
   }
+
+  void test_union_one_empty() { runUnionTest(CHRISTMAS, TimeROI(), CHRISTMAS.durationInSeconds()); }
 };

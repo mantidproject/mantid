@@ -301,7 +301,7 @@ void TimeROI::replaceROI(const TimeROI &other) {
  * Updates the TimeROI values with the union with another TimeROI.
  * See https://en.wikipedia.org/wiki/Union_(set_theory) for more details
  *
- * This will remove redundant entries as a side-effect.
+ * Union with an empty TimeROI will do nothing.
  */
 void TimeROI::update_union(const TimeROI &other) {
   // exit early if the two TimeROI are identical
@@ -318,27 +318,44 @@ void TimeROI::update_union(const TimeROI &other) {
  * Updates the TimeROI values with the intersection with another TimeROI.
  * See https://en.wikipedia.org/wiki/Intersection for more details
  *
- * This will remove redundant entries as a side-effect.
+ * Intersection with an empty TimeROI will clear out this one.
  */
 void TimeROI::update_intersection(const TimeROI &other) {
   // exit early if the two TimeROI are identical
   if (*this == other)
     return;
 
-  // remove everything before the other starts
-  if (m_roi.front() < other.m_roi.front()) {
-    this->addMask(m_roi.front(), other.m_roi.front());
-  }
+  if (other.empty() || this->empty()) {
+    // empty out this environment
+    m_roi.clear();
+  } else {
+    // remove everything before the other starts
+    if (m_roi.front() < other.m_roi.front()) {
+      this->addMask(m_roi.front(), other.m_roi.front());
+    }
 
-  // add the spaces between the other's splitting intervals
-  const std::size_t LOOP_MAX = std::size_t(other.m_roi.size() - 1);
-  for (std::size_t i = 1; i < LOOP_MAX; i += 2) {
-    this->addMask(other.m_roi[i], other.m_roi[i + 1]);
-  }
+    // add the spaces between the other's splitting intervals
+    const std::size_t LOOP_MAX = std::size_t(other.m_roi.size() - 1);
+    for (std::size_t i = 1; i < LOOP_MAX; i += 2) {
+      this->addMask(other.m_roi[i], other.m_roi[i + 1]);
+    }
 
-  // remove everything after other finishes
-  if (m_roi.back() > other.m_roi.back()) {
-    this->addMask(other.m_roi.back(), m_roi.back());
+    // remove everything after other finishes
+    if (m_roi.back() > other.m_roi.back()) {
+      this->addMask(other.m_roi.back(), m_roi.back());
+    }
+  }
+}
+
+/**
+ * If this is empty, replace it with the supplied TimeROI, otherwise calculate the intersection.
+ * Supplying an empty TimeROI will have no effect.
+ */
+void TimeROI::update_or_replace_intersection(const TimeROI &other) {
+  if (this->empty()) {
+    this->replaceROI(other);
+  } else if (!other.empty()) {
+    this->update_intersection(other);
   }
 }
 
