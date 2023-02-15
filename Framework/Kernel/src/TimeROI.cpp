@@ -461,26 +461,6 @@ void TimeROI::update_or_replace_intersection(const TimeROI &other) {
 }
 
 /**
- * Updates the TimeROI with another TimeROI according to following replacement or intersect rules.
- *
- * 1. If the TimeROI is empty, replace with the other TimeROI.
- * 2. If the other TimeROI is empty, do nothing.
- * 3. If both TimeROI's are not empty, replace with the intersection.
- *
- * Thinking of the TimeROI as filters, the goal is to filter with the intersection or
- * with either of the filters if one of them is empty.
- *
- * @param other :: the replacing or intersecting TimeROI.
- */
-void TimeROI::update_replace_intersect(const TimeROI &other) {
-  if (this->empty())
-    this->replaceROI(other);
-  else if (other.empty())
-    return;
-  else
-    this->update_intersection(other);
-}
-/**
  * This method is to lend itself to be compatible with existing implementation
  */
 const std::vector<SplittingInterval> TimeROI::toSplitters() const {

@@ -235,7 +235,7 @@ void Run::integrateProtonCharge(const std::string &logname) const {
     // If the proton charge series is filtered, fetch its TimeROI and use it to update `timeRoi`
     auto filteredLog = dynamic_cast<Kernel::FilteredTimeSeriesProperty<double> *>(this->getProperty(logname));
     if (filteredLog)
-      timeroi.update_replace_intersect(filteredLog->getTimeROI());
+      timeroi.update_or_replace_intersection(filteredLog->getTimeROI());
 
     if (timeroi.empty()) {
       // simple accumulation
