@@ -70,7 +70,7 @@ public:
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
     const bool bFastMultiPeriod = alg.getProperty("FastMultiPeriod");
-    TSM_ASSERT("Should defalt to offering fast multiperiod loading", bFastMultiPeriod);
+    TSM_ASSERT("Should default to offering fast multiperiod loading", bFastMultiPeriod);
   }
 
   void testProcessedFile() {

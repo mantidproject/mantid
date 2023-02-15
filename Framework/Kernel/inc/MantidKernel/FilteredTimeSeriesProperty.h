@@ -92,6 +92,8 @@ public:
   /// Find if time lies in a filtered region
   bool isTimeFiltered(const Types::Core::DateAndTime &time) const;
 
+  const Kernel::TimeROI &getTimeROI() const;
+
 private:
   /// Apply a filter
   void applyFilter() const;

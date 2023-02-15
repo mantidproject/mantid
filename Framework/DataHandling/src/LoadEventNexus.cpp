@@ -29,6 +29,7 @@
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
@@ -415,8 +416,15 @@ void LoadEventNexus::execLoader() {
   // Load the detector events
   m_ws = std::make_shared<EventWorkspaceCollection>(); // Algorithm currently
                                                        // relies on an
+
   // object-level workspace ptr
   loadEvents(&prog, false); // Do not load monitor blocks
+
+  // DEBUG: remove these lines
+  auto l0 = m_ws->run().getProperty("proton_charge");
+  std::string s0 = l0->units();
+  auto l2 = m_ws->mutableRun().getProperty("proton_charge");
+  std::string s2 = l2->units();
 
   if (discarded_events > 0) {
     g_log.information() << discarded_events
@@ -428,6 +436,12 @@ void LoadEventNexus::execLoader() {
   // If the run was paused at any point, filter out those events (SNS only, I
   // think)
   filterDuringPause(m_ws->getSingleHeldWorkspace());
+
+  // DEBUG: remove these lines
+  l0 = m_ws->run().getProperty("proton_charge");
+  s0 = l0->units();
+  l2 = m_ws->mutableRun().getProperty("proton_charge");
+  s2 = l2->units();
 
   // add filename
   m_ws->mutableRun().addProperty("Filename", m_filename);
@@ -548,7 +562,7 @@ template <typename T>
 std::shared_ptr<BankPulseTimes>
 LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, T localWorkspace, API::Algorithm &alg,
                                  bool returnpulsetimes, int &nPeriods,
-                                 std::unique_ptr<const FilteredTimeSeriesProperty<int>> &periodLog) {
+                                 std::unique_ptr<const TimeSeriesProperty<int>> &periodLog) {
   // --------------------- Load DAS Logs -----------------
   // The pulse times will be empty if not specified in the DAS logs.
   // BankPulseTimes * out = NULL;
@@ -577,16 +591,15 @@ LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, T localWorksp
     if (run.hasProperty("period_log")) {
       auto *temp = run.getProperty("period_log");
       // Check for corrupted period logs
-      std::unique_ptr<FilteredTimeSeriesProperty<int>> tempPeriodLog(
-          dynamic_cast<FilteredTimeSeriesProperty<int> *>(temp->clone()));
+      std::unique_ptr<TimeSeriesProperty<int>> tempPeriodLog(dynamic_cast<TimeSeriesProperty<int> *>(temp->clone()));
       checkForCorruptedPeriods(std::move(tempPeriodLog), periodLog, nPeriods, nexusfilename);
     }
 
     // If successful, we can try to load the pulse times
     std::vector<Types::Core::DateAndTime> temp;
     if (localWorkspace->run().hasProperty("proton_charge")) {
-      auto *log = dynamic_cast<Kernel::FilteredTimeSeriesProperty<double> *>(
-          localWorkspace->mutableRun().getProperty("proton_charge"));
+      auto *log =
+          dynamic_cast<Kernel::TimeSeriesProperty<double> *>(localWorkspace->mutableRun().getProperty("proton_charge"));
       if (log)
         temp = log->timesAsVector();
     }
@@ -649,7 +662,7 @@ LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, T localWorksp
 template <typename T>
 std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
     const std::string &nexusfilename, T localWorkspace, API::Algorithm &alg, bool returnpulsetimes, int &nPeriods,
-    std::unique_ptr<const FilteredTimeSeriesProperty<int>> &periodLog, const std::vector<std::string> &allow_list,
+    std::unique_ptr<const TimeSeriesProperty<int>> &periodLog, const std::vector<std::string> &allow_list,
     const std::vector<std::string> &block_list) {
   // --------------------- Load DAS Logs -----------------
   // The pulse times will be empty if not specified in the DAS logs.
@@ -682,16 +695,15 @@ std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
     if (run.hasProperty("period_log")) {
       auto *temp = run.getProperty("period_log");
       // Check for corrupted period logs
-      std::unique_ptr<FilteredTimeSeriesProperty<int>> tempPeriodLog(
-          dynamic_cast<FilteredTimeSeriesProperty<int> *>(temp->clone()));
+      std::unique_ptr<TimeSeriesProperty<int>> tempPeriodLog(dynamic_cast<TimeSeriesProperty<int> *>(temp->clone()));
       checkForCorruptedPeriods(std::move(tempPeriodLog), periodLog, nPeriods, nexusfilename);
     }
 
     // If successful, we can try to load the pulse times
     std::vector<Types::Core::DateAndTime> temp;
     if (localWorkspace->run().hasProperty("proton_charge")) {
-      auto *log = dynamic_cast<Kernel::FilteredTimeSeriesProperty<double> *>(
-          localWorkspace->mutableRun().getProperty("proton_charge"));
+      auto *log =
+          dynamic_cast<Kernel::TimeSeriesProperty<double> *>(localWorkspace->mutableRun().getProperty("proton_charge"));
       if (log)
         temp = log->timesAsVector();
     }
@@ -746,8 +758,8 @@ std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
  * expected periods
  * @param nexusfilename :: the filename of the run to load
  */
-void LoadEventNexus::checkForCorruptedPeriods(std::unique_ptr<FilteredTimeSeriesProperty<int>> tempPeriodLog,
-                                              std::unique_ptr<const FilteredTimeSeriesProperty<int>> &periodLog,
+void LoadEventNexus::checkForCorruptedPeriods(std::unique_ptr<TimeSeriesProperty<int>> tempPeriodLog,
+                                              std::unique_ptr<const TimeSeriesProperty<int>> &periodLog,
                                               const int &nPeriods, const std::string &nexusfilename) {
   const auto valuesAsVector = tempPeriodLog->valuesAsVector();
   const auto nPeriodsInLog = *std::max_element(valuesAsVector.begin(), valuesAsVector.end());
@@ -758,7 +770,7 @@ void LoadEventNexus::checkForCorruptedPeriods(std::unique_ptr<FilteredTimeSeries
     // a vector of 1s
     const std::vector<int> newValues(tempPeriodLog->realSize(), 1);
     const auto times = tempPeriodLog->timesAsVector();
-    periodLog.reset(new const FilteredTimeSeriesProperty<int>("period_log", times, newValues));
+    periodLog.reset(new const TimeSeriesProperty<int>("period_log", times, newValues));
   } else if (nPeriodsInLog != nPeriods) {
     // Sanity check here that period_log only contains period numbers up to
     // nperiods. These values can be different due to instrument noise, and
@@ -773,7 +785,7 @@ void LoadEventNexus::checkForCorruptedPeriods(std::unique_ptr<FilteredTimeSeries
     throw InvalidLogPeriods(msg);
   } else {
     // periodLog should point to a copy of the period logs
-    periodLog = std::make_unique<const FilteredTimeSeriesProperty<int>>(*tempPeriodLog);
+    periodLog = std::make_unique<const TimeSeriesProperty<int>>(*tempPeriodLog);
     tempPeriodLog.reset();
   }
 }
@@ -795,7 +807,7 @@ void LoadEventNexus::checkForCorruptedPeriods(std::unique_ptr<FilteredTimeSeries
 template <>
 std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs<EventWorkspaceCollection_sptr>(
     const std::string &nexusfilename, EventWorkspaceCollection_sptr localWorkspace, API::Algorithm &alg,
-    bool returnpulsetimes, int &nPeriods, std::unique_ptr<const FilteredTimeSeriesProperty<int>> &periodLog) {
+    bool returnpulsetimes, int &nPeriods, std::unique_ptr<const TimeSeriesProperty<int>> &periodLog) {
   auto ws = localWorkspace->getSingleHeldWorkspace();
   auto ret = runLoadNexusLogs<MatrixWorkspace_sptr>(nexusfilename, ws, alg, returnpulsetimes, nPeriods, periodLog);
   return ret;
@@ -820,7 +832,7 @@ std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs<EventWorkspaceC
 template <>
 std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs<EventWorkspaceCollection_sptr>(
     const std::string &nexusfilename, EventWorkspaceCollection_sptr localWorkspace, API::Algorithm &alg,
-    bool returnpulsetimes, int &nPeriods, std::unique_ptr<const FilteredTimeSeriesProperty<int>> &periodLog,
+    bool returnpulsetimes, int &nPeriods, std::unique_ptr<const TimeSeriesProperty<int>> &periodLog,
     const std::vector<std::string> &allow_list, const std::vector<std::string> &block_list) {
   auto ws = localWorkspace->getSingleHeldWorkspace();
   auto ret = runLoadNexusLogs<MatrixWorkspace_sptr>(nexusfilename, ws, alg, returnpulsetimes, nPeriods, periodLog,
@@ -848,8 +860,8 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   setTimeFilters(monitors);
 
   // Get the log filter if provided
-  std::vector<std::string> allow_list = getProperty("AllowList");
-  std::vector<std::string> block_list = getProperty("BlockList");
+  std::vector<std::string> allow_list = getProperty("AllowList"); // if not empty, only these logs will be loaded
+  std::vector<std::string> block_list = getProperty("BlockList"); // if not empty, these logs won't be loaded
 
   // The run_start will be loaded from the pulse times.
   DateAndTime run_start(0, 0);
@@ -857,9 +869,9 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   // Initialize the counter of bad TOFs
   bad_tofs = 0;
   int nPeriods = 1;
-  auto periodLog = std::make_unique<const FilteredTimeSeriesProperty<int>>("period_log");
+  auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log");
 
-  bool loadAllLogs = getProperty("LoadAllLogs");
+  bool loadAllLogs = getProperty("LoadAllLogs"); // load all logs, not just DAS logs.
 
   if (loadlogs) {
     if (!loadAllLogs) {

@@ -99,16 +99,16 @@ public:
   template <typename T>
   static std::shared_ptr<BankPulseTimes>
   runLoadNexusLogs(const std::string &nexusfilename, T localWorkspace, Algorithm &alg, bool returnpulsetimes,
-                   int &nPeriods, std::unique_ptr<const Kernel::FilteredTimeSeriesProperty<int>> &periodLog);
+                   int &nPeriods, std::unique_ptr<const Kernel::TimeSeriesProperty<int>> &periodLog);
 
   template <typename T>
   static std::shared_ptr<BankPulseTimes>
   runLoadNexusLogs(const std::string &nexusfilename, T localWorkspace, Algorithm &alg, bool returnpulsetimes,
-                   int &nPeriods, std::unique_ptr<const Kernel::FilteredTimeSeriesProperty<int>> &periodLog,
+                   int &nPeriods, std::unique_ptr<const Kernel::TimeSeriesProperty<int>> &periodLog,
                    const std::vector<std::string> &allow_list, const std::vector<std::string> &block_list);
 
-  static void checkForCorruptedPeriods(std::unique_ptr<Kernel::FilteredTimeSeriesProperty<int>> tempPeriodLog,
-                                       std::unique_ptr<const Kernel::FilteredTimeSeriesProperty<int>> &periodLog,
+  static void checkForCorruptedPeriods(std::unique_ptr<Kernel::TimeSeriesProperty<int>> tempPeriodLog,
+                                       std::unique_ptr<const Kernel::TimeSeriesProperty<int>> &periodLog,
                                        const int &nPeriods, const std::string &nexusfilename);
 
   template <typename T>

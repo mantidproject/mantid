@@ -72,8 +72,7 @@ EventWorkspace_sptr EventWorkspaceCollection::createEmptyEventWorkspace() const 
   return eventWS;
 }
 
-void EventWorkspaceCollection::setNPeriods(size_t nPeriods,
-                                           std::unique_ptr<const FilteredTimeSeriesProperty<int>> &periodLog) {
+void EventWorkspaceCollection::setNPeriods(size_t nPeriods, std::unique_ptr<const TimeSeriesProperty<int>> &periodLog) {
 
   // Create vector where size is the number of periods and initialize workspaces
   // in each.

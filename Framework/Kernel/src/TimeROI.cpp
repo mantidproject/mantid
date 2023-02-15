@@ -69,6 +69,8 @@ TimeROI::TimeROI(const Types::Core::DateAndTime &startTime, const Types::Core::D
 
 TimeROI::TimeROI(const Kernel::TimeSeriesProperty<bool> *filter) { this->replaceROI(filter); }
 
+// TimeROI::TimeROI(const TimeROI &other){ this->replaceROI(other);}
+
 void TimeROI::addROI(const std::string &startTime, const std::string &stopTime) {
   this->addROI(DateAndTime(startTime), DateAndTime(stopTime));
 }
@@ -458,6 +460,26 @@ void TimeROI::update_or_replace_intersection(const TimeROI &other) {
   }
 }
 
+/**
+ * Updates the TimeROI with another TimeROI according to following replacement or intersect rules.
+ *
+ * 1. If the TimeROI is empty, replace with the other TimeROI.
+ * 2. If the other TimeROI is empty, do nothing.
+ * 3. If both TimeROI's are not empty, replace with the intersection.
+ *
+ * Thinking of the TimeROI as filters, the goal is to filter with the intersection or
+ * with either of the filters if one of them is empty.
+ *
+ * @param other :: the replacing or intersecting TimeROI.
+ */
+void TimeROI::update_replace_intersect(const TimeROI &other) {
+  if (this->empty())
+    this->replaceROI(other);
+  else if (other.empty())
+    return;
+  else
+    return this->update_intersection(other);
+}
 /**
  * This method is to lend itself to be compatible with existing implementation
  */

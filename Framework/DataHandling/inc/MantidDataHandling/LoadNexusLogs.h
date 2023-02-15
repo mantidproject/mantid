@@ -90,6 +90,7 @@ private:
   void loadSELog(::NeXus::File &file, const std::string &absolute_entry_name,
                  const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
   void loadVetoPulses(::NeXus::File &file, const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
+  /// For ISIS logs containing periods, retrieve the total proton charge for each period if stored in the logs.
   void loadNPeriods(::NeXus::File &file, const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
 
   /// Progress reporting object
