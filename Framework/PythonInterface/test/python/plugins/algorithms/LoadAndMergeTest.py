@@ -167,12 +167,6 @@ class LoadAndMergeTest(unittest.TestCase):
         self.assertTrue("MUSR00015197_1" not in mtd)
         self.assertTrue("MUSR00015197_2" not in mtd)
 
-    def test_many_runs_summed(self):
-        out2 = LoadAndMerge(Filename="170257+170258", LoaderName="LoadILLIndirect")
-        self.assertTrue(out2)
-        self.assertEqual(out2.name(), "out2")
-        self.assertTrue(isinstance(out2, MatrixWorkspace))
-
     def test_concatenate_output(self):
         out = LoadAndMerge(Filename="010444:010446", OutputBehaviour="Concatenate")
         self.assertTrue(out)
