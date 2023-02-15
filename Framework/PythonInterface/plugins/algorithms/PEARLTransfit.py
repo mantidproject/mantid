@@ -41,7 +41,6 @@ import numpy as np
 
 
 class PEARLTransfit(PythonAlgorithm):
-
     # Resonance constants broadly consistent with those reported from
     # 'Neutron cross sections Vol 1, Resonance Parameters'
     # S.F. Mughabghab and D.I. Garber
@@ -370,7 +369,7 @@ class PEARLTransfit(PythonAlgorithm):
         startEp = 0.99 * startE
         endEp = 1.01 * endE
         CropWorkspace(InputWorkspace=ws2D, OutputWorkspace=ws2D, XMin=1000 * startEp, XMax=1000 * endEp)
-        numPts = np.int(((endEp - startEp) / divE) + 1)
+        numPts = int(((endEp - startEp) / divE) + 1)
         xData_out = []
         xData_in = ws2D.readX(0)
         yData_in = ws2D.readY(0)
@@ -388,7 +387,7 @@ class PEARLTransfit(PythonAlgorithm):
         # Normalise output ydata accordingly based on surrounding values
         yNorm = [0] * (len(xData_out))
         for j in range(0, len(yData_in)):
-            currentBin = np.int((xActual[j] - startEp * 1000) / (divE * 1000))
+            currentBin = int((xActual[j] - startEp * 1000) / (divE * 1000))
             scale1 = 1 - ((xActual[j] - xData_out[currentBin]) / (divE * 1000))
             yData_out[currentBin] += yData_in[j] * scale1
             yNorm[currentBin] += scale1
