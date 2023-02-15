@@ -96,7 +96,7 @@ def load_all(data_dict, binning, normalize_to='monitor'):
         path = data_dict[sample_name]['path']
         for field_name, file_numbers in fields.items():
             if field_name != 'path':
-                workspace_name = "_".join((sample_name, field_name))
+                workspace_name = '_'.join((sample_name, field_name))
                 workspace_names[sample_name].append(workspace_name)
                 load_binned(workspace_name, binning, path, file_numbers,
                             normalize_to)
@@ -107,34 +107,32 @@ def load_binned(workspace_name, binning, path, file_numbers, normalize_to):
     """
     Loading of multiple DNS datafiles into a single workspace.
     """
-    filepaths_l = []
+    two_theta_limits = f'{binning[0]},{binning[1]}'
     ad0 = f'Theta,{binning[0] / 2.0},{binning[1] / 2.0},{binning[2]}'
-    two_theta_limits = f"{binning[0]},{binning[1]}"
     ad1 = 'Omega,0.0,359.0,1'
     ad2 = 'TOF,424.0,2000.0,1'
-    binning = [ad0, ad1, ad2]
-    filepaths_l.append(
-        [f"{path}_{number:06d}.d_dat" for number in file_numbers])
-    filepaths = ', '.join(filepaths_l[0])
-    norm_name = "_".join((workspace_name, 'norm'))
+    dimension_binning = [ad0, ad1, ad2]
+    filepaths = [f'{path}_{number:06d}.d_dat' for number in list(file_numbers)]
+    filepaths = ', '.join(filepaths)
+    norm_name = '_'.join((workspace_name, 'norm'))
     LoadDNSSCD(filepaths,
                OutputWorkspace=workspace_name,
                NormalizationWorkspace=norm_name,
                Normalization=normalize_to,
-               LoadAs="raw",
+               LoadAs='raw',
                TwoThetaLimits=two_theta_limits)
     BinMD(InputWorkspace=workspace_name,
           OutputWorkspace=workspace_name,
           AxisAligned=True,
-          AlignedDim0=binning[0],
-          AlignedDim1=binning[1],
-          AlignedDim2=binning[2])
+          AlignedDim0=dimension_binning[0],
+          AlignedDim1=dimension_binning[1],
+          AlignedDim2=dimension_binning[2])
     BinMD(InputWorkspace=norm_name,
           OutputWorkspace=norm_name,
           AxisAligned=True,
-          AlignedDim0=binning[0],
-          AlignedDim1=binning[1],
-          AlignedDim2=binning[2])
+          AlignedDim0=dimension_binning[0],
+          AlignedDim1=dimension_binning[1],
+          AlignedDim2=dimension_binning[2])
     return mtd[workspace_name]
 
 
