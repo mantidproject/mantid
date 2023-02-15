@@ -176,6 +176,10 @@ class LoadAndMergeTest(unittest.TestCase):
         self.assertEqual(out.readX(0)[0], 0)
         self.assertEqual(out.readX(0)[1], 1)
         self.assertEqual(out.readX(0)[2], 2)
+        # check if LoadAndMerge does not abandon intermediate workspaces in ADS:
+        self.assertTrue("010444" not in mtd)
+        self.assertTrue("010445" not in mtd)
+        self.assertTrue("010446" not in mtd)
 
     def test_concatenate_output_with_log(self):
         out = LoadAndMerge(Filename="010444:010446", OutputBehaviour="Concatenate", SampleLogAsXAxis="sample.temperature")
@@ -186,6 +190,10 @@ class LoadAndMergeTest(unittest.TestCase):
         self.assertAlmostEqual(out.readX(0)[0], 297.6, 1)
         self.assertAlmostEqual(out.readX(0)[1], 297.7, 1)
         self.assertAlmostEqual(out.readX(0)[2], 297.7, 1)
+        # check if LoadAndMerge does not abandon intermediate workspaces in ADS:
+        self.assertTrue("010444" not in mtd)
+        self.assertTrue("010445" not in mtd)
+        self.assertTrue("010446" not in mtd)
 
 
 if __name__ == "__main__":
