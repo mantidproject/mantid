@@ -176,7 +176,6 @@ class SPowderSemiEmpiricalCalculator:
                 "than in the previous calculations. S cannot be loaded from the hdf file."
             )
         if self._quantum_order_num < data["attributes"]["order_of_quantum_events"]:
-
             self._report_progress(
                 """
                          User requested a smaller number of quantum events than in the previous calculations.
@@ -191,7 +190,6 @@ class SPowderSemiEmpiricalCalculator:
             for i in range(n_atom):
                 atoms_s[f"atom_{i}"] = {"s": dict()}
                 for j in range(1, self._quantum_order_num + 1):
-
                     temp_val = data["datasets"]["data"][f"atom_{i}"]["s"][f"order_{j}"]
                     atoms_s[f"atom_{i}"]["s"].update({f"order_{j}": temp_val})
 

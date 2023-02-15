@@ -29,7 +29,6 @@ class IO(object):
         self._temperature = temperature
 
         if isinstance(input_filename, str):
-
             self._input_filename = input_filename
             try:
                 self._hash_input_filename = self.calculate_ab_initio_file_hash()
@@ -480,7 +479,6 @@ class IO(object):
 
         results = {}
         with h5py.File(self._hdf_filename, "r") as hdf_file:
-
             if self._group_name not in hdf_file:
                 raise ValueError("No group %s in hdf file." % self._group_name)
 

@@ -42,7 +42,6 @@ class Tester(object):
         atoms = len(correct_data["datasets"]["atoms_data"])
         array = {}
         for k in range(num_k):
-
             temp = (
                 np.loadtxt(abins.test_helpers.find_file("{seedname}_atomic_displacements_data_{k}.txt".format(seedname=seedname, k=k)))
                 .view(complex)
@@ -103,7 +102,6 @@ class Tester(object):
         assert_allclose(correct_data["datasets"]["unit_cell"], data["datasets"]["unit_cell"])
 
     def _check_loader_data(self, correct_data=None, input_ab_initio_filename=None, extension=None, loader=None):
-
         try:
             read_filename = abins.test_helpers.find_file(input_ab_initio_filename + "." + extension)
             ab_initio_loader = loader(input_ab_initio_filename=read_filename)

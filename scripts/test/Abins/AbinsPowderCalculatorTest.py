@@ -26,7 +26,6 @@ class PowderCalculatorTest(unittest.TestCase):
         abins.test_helpers.remove_output_files(list_of_names=["CalculatePowder"])
 
     def test_wrong_input(self):
-
         full_path_filename = abins.test_helpers.find_file(filename=self._si2 + ".phonon")
 
         castep_reader = abins.input.CASTEPLoader(input_ab_initio_filename=full_path_filename)
@@ -49,7 +48,6 @@ class PowderCalculatorTest(unittest.TestCase):
 
     #       helper functions
     def _good_case(self, name=None):
-
         # calculation of powder data
         good_data = self._get_good_data(filename=name)
         good_tester = abins.PowderCalculator(
@@ -76,7 +74,6 @@ class PowderCalculatorTest(unittest.TestCase):
                 self.assertEqual(True, np.allclose(calculated_data[key][i], loaded_data[key][i]))
 
     def _get_good_data(self, filename=None):
-
         castep_reader = abins.input.CASTEPLoader(input_ab_initio_filename=abins.test_helpers.find_file(filename + ".phonon"))
         powder = self._prepare_data(filename=abins.test_helpers.find_file(filename + "_powder.txt"))
 

@@ -38,7 +38,6 @@ class PowderData:
         num_atoms: Optional[int] = None,
         n_plus_1: Dict[int, np.ndarray],
     ):
-
         self._data = {"a_tensors": a_tensors, "b_tensors": b_tensors, "frequencies": frequencies, "n_plus_1": n_plus_1}  # type: PowderDict
 
         self._num_atoms = num_atoms
