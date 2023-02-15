@@ -473,9 +473,10 @@ void TimeROI::update_or_replace_intersection(const TimeROI &other) {
  * @param other :: the replacing or intersecting TimeROI.
  */
 void TimeROI::update_replace_intersect(const TimeROI &other) {
-  if (this->empty())
+  if (this->empty()) {
     this->replaceROI(other);
-  else if (other.empty())
+    return;
+  } else if (other.empty())
     return;
   else
     return this->update_intersection(other);
