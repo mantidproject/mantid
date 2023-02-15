@@ -38,6 +38,7 @@ public:
   void replaceROI(const TimeROI &other);
   void update_union(const TimeROI &other);
   void update_intersection(const TimeROI &other);
+  void update_or_replace_intersection(const TimeROI &other);
   const Kernel::SplittingIntervalVec toSplitters() const;
   bool operator==(const TimeROI &other) const;
   void debugPrint(const std::size_t type = 0) const;
