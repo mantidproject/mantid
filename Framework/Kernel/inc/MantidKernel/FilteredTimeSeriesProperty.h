@@ -103,7 +103,7 @@ private:
   /// Set a value from another property
   std::string setValueFromProperty(const Property &right) override;
 
-  TimeROI *unionFilterWithOther(const TimeROI *other) const;
+  TimeROI *intersectFilterWithOther(const TimeROI *other) const;
 
   /// The filter
   mutable std::unique_ptr<TimeROI> m_filter;

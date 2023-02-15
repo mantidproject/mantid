@@ -372,13 +372,9 @@ template <typename TYPE> std::string FilteredTimeSeriesProperty<TYPE>::setValueF
  * Combines the currently held filter with the supplied one as an intersection.
  */
 template <typename TYPE>
-Kernel::TimeROI *FilteredTimeSeriesProperty<TYPE>::unionFilterWithOther(const TimeROI *other) const {
+Kernel::TimeROI *FilteredTimeSeriesProperty<TYPE>::intersectFilterWithOther(const TimeROI *other) const {
   auto roi = new TimeROI(*m_filter.get());
-  // QUESTION: replace below lines with:
-  // return roi->update_replace_intersect(*other);
-  if (other && !other->empty()) // find intersection between the internal ROI and
-                                // the supplied ROI
-    roi->update_intersection(*other);
+  roi->update_replace_intersect(*other);
   return roi;
 }
 
@@ -441,7 +437,7 @@ std::vector<SplittingInterval> FilteredTimeSeriesProperty<TYPE>::getSplittingInt
  */
 template <typename TYPE> double FilteredTimeSeriesProperty<TYPE>::timeAverageValue(const TimeROI *timeRoi) const {
   // make a copy of the filter
-  auto internalRoi = this->unionFilterWithOther(timeRoi);
+  auto internalRoi = this->intersectFilterWithOther(timeRoi);
   // call parent method
   return TimeSeriesProperty<TYPE>::timeAverageValue(internalRoi);
 }
@@ -456,7 +452,7 @@ template <typename TYPE> double FilteredTimeSeriesProperty<TYPE>::timeAverageVal
 template <typename TYPE>
 TimeSeriesPropertyStatistics FilteredTimeSeriesProperty<TYPE>::getStatistics(const TimeROI *roi) const {
   // make a copy of the filter
-  auto internalRoi = this->unionFilterWithOther(roi);
+  auto internalRoi = this->intersectFilterWithOther(roi);
   // call parent method
   return TimeSeriesProperty<TYPE>::getStatistics(internalRoi);
 }
@@ -469,7 +465,7 @@ TimeSeriesPropertyStatistics FilteredTimeSeriesProperty<TYPE>::getStatistics(con
 template <typename TYPE>
 double FilteredTimeSeriesProperty<TYPE>::extractStatistic(Math::StatisticType selection, const TimeROI *roi) const {
   // make a copy of the filter
-  auto internalRoi = this->unionFilterWithOther(roi);
+  auto internalRoi = this->intersectFilterWithOther(roi);
   // call parent method
   return TimeSeriesProperty<TYPE>::extractStatistic(selection, internalRoi); // call parent method
 }
