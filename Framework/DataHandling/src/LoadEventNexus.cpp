@@ -420,12 +420,6 @@ void LoadEventNexus::execLoader() {
   // object-level workspace ptr
   loadEvents(&prog, false); // Do not load monitor blocks
 
-  // DEBUG: remove these lines
-  auto l0 = m_ws->run().getProperty("proton_charge");
-  std::string s0 = l0->units();
-  auto l2 = m_ws->mutableRun().getProperty("proton_charge");
-  std::string s2 = l2->units();
-
   if (discarded_events > 0) {
     g_log.information() << discarded_events
                         << " events were encountered coming from pixels which "
