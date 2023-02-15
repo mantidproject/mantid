@@ -437,12 +437,6 @@ void LoadEventNexus::execLoader() {
   // think)
   filterDuringPause(m_ws->getSingleHeldWorkspace());
 
-  // DEBUG: remove these lines
-  l0 = m_ws->run().getProperty("proton_charge");
-  s0 = l0->units();
-  l2 = m_ws->mutableRun().getProperty("proton_charge");
-  s2 = l2->units();
-
   // add filename
   m_ws->mutableRun().addProperty("Filename", m_filename);
   // Save output
