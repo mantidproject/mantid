@@ -990,19 +990,31 @@ std::vector<std::string> supported_peak_profiles{"Gaussian", "Lorentzian", "Pseu
  * @return :: noise estimate
  */
 double estimateBackgroundNoise(const std::vector<double> &vec_y) {
-  // Just like in the estimateBackgroundParameters() method, we need to have at least
-  // 10 (a magic number) data points on both ends of the peak window to estimate the background noise
-  size_t half_number_of_bkg_datapoints{10};
-  if (vec_y.size() < 2 * half_number_of_bkg_datapoints)
-    return DBL_MIN; // this will let the peak pass the signal-to-noise check by default
+  // the peak window must have a certain minimum number of data points necessary to do the statistics
+  size_t half_number_of_bkg_datapoints{5};
+  if (vec_y.size() < 2 * half_number_of_bkg_datapoints + 3 /*a magic number*/)
+    return DBL_MIN; // can't estimate the noise, so the peak will pass the check
 
+  // combine the left and right background data points
   std::vector<double> vec_bkg;
   vec_bkg.resize(2 * half_number_of_bkg_datapoints);
   std::copy(vec_y.begin(), vec_y.begin() + half_number_of_bkg_datapoints, vec_bkg.begin());
-  std::copy(vec_y.end() - half_number_of_bkg_datapoints, vec_y.end(), back_inserter(vec_bkg));
+  std::copy(vec_y.end() - half_number_of_bkg_datapoints, vec_y.end(), vec_bkg.begin() + half_number_of_bkg_datapoints);
 
-  // estimate the noise as the standard deviation of that combined data vector
-  auto intensityStatistics = Kernel::getStatistics(vec_bkg, StatOptions::CorrectedStdDev);
+  // estimate the noise as the standard deviation of the combined vector, but without outliers
+  std::vector<double> zscore_vec = Kernel::getZscore(vec_bkg);
+  std::vector<double> vec_bkg_no_outliers;
+  vec_bkg_no_outliers.resize(vec_bkg.size());
+  double zscore_crit = 3.; // 3-sigma rule
+  for (size_t ii = 0; ii < vec_bkg.size(); ii++) {
+    if (zscore_vec[ii] <= zscore_crit)
+      vec_bkg_no_outliers.push_back(vec_bkg[ii]);
+  }
+
+  if (vec_bkg_no_outliers.size() < half_number_of_bkg_datapoints)
+    return DBL_MIN; // can't estimate the noise, so the peak will pass the check
+
+  auto intensityStatistics = Kernel::getStatistics(vec_bkg_no_outliers, StatOptions::CorrectedStdDev);
   return intensityStatistics.standard_deviation;
 }
 

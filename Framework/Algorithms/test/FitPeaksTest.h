@@ -992,7 +992,7 @@ public:
     for (size_t i = 0; i < 1; ++i)
       WS->mutableX(i) *= 0.05 /*res*/;
 
-    // generate 2 gaussian peaks: a weak peak at X=5 and a strong peak at X=10, with some noise
+    // generate 2 gaussian peaks: a weaker peak at X=5 and a stronger peak at X=10, with some random noise
     std::random_device rd;
     std::mt19937 gen(rd());
     std::normal_distribution<> noise(0, 0.2);
@@ -1034,7 +1034,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCentersWorkspace", peak_center_ws_name));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitPeakWindowWorkspace", fit_window_ws_name));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("MinimumSignalToNoiseRatio", 20.));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("MinimumSignalToNoiseRatio", 50.));
 
     fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS3");
     fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS3");
