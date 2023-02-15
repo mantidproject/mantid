@@ -8,9 +8,11 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidKernel/V2D.h"
 #include "MantidKernel/V3D.h"
 
 #include <map>
+#include <optional>
 #include <set>
 #include <string>
 #include <vector>
@@ -83,6 +85,7 @@ public:
    *  The position is with respect to the parent component
    */
   virtual void setPos(const Kernel::V3D &) = 0;
+  virtual void setSideBySideViewPos(const Kernel::V2D &) = 0;
   //! Set the orientation Kernel::Quaternion relative to parent (if present)
   // otherwise absolute
   virtual void setRot(const Kernel::Quat &) = 0;
@@ -103,6 +106,9 @@ public:
   //! Get the position of the IComponent. Tree structure is traverse through the
   // parent chain
   virtual Kernel::V3D getPos() const = 0;
+  //! Get the position of the IComponent for display on the side by side instrument
+  //! view
+  virtual std::optional<Kernel::V2D> getSideBySideViewPos() const = 0;
   //! Get the relative Orientation
   virtual Kernel::Quat getRelativeRot() const = 0;
   //! Get the absolute orientation of the IComponent

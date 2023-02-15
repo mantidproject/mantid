@@ -1,0 +1,5 @@
+- the display position of detector banks in the instrument viewer side by side view can now be specified in the instrument definition file. Positions have been set up for the SXD instrument using the new feature
+- prevent a "yaw" rotation being applied to a bank during side by side view generation eg if the top edge of the bank is horizontal it will still be horizontal in the side by side view. This applies to all instruments
+  regardless of whether they use the new bank centre override feature in their instrument definition file. For instruments where this has an effect, it could also result in the bank positions in the side by side view
+  changing. This is because the algorithm used to project the banks onto the XY plane cares about which is the largest bank. With the yaw rotation removed, the bounding rectangle (which is the measure used for the bank size)
+  could be smaller for some banks.

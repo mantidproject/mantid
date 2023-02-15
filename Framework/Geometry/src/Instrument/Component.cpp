@@ -22,6 +22,7 @@
 namespace Mantid::Geometry {
 
 using Kernel::Quat;
+using Kernel::V2D;
 using Kernel::V3D;
 
 /** Constructor for a parametrized Component.
@@ -219,6 +220,8 @@ void Component::setPos(const V3D &v) {
     throw Kernel::Exception::NotImplementedError("Component::setPos (for Parametrized Component)");
 }
 
+void Component::setSideBySideViewPos(const Kernel::V2D &pos) { m_sidebysideviewpos = pos; }
+
 /** Set the orientation of the Component
  *  The position is with respect to the parent Component
  *  @param q :: rotation quaternion
@@ -363,6 +366,23 @@ Kernel::V3D Component::getPos() const {
       V3D absPos(m_pos);
       m_parent->getRotation().rotate(absPos);
       return absPos + m_parent->getPos();
+    }
+  }
+}
+
+/// Return the position of the component required on the instrument side by side view
+std::optional<Kernel::V2D> Component::getSideBySideViewPos() const {
+  if (m_map) {
+    return m_base->getSideBySideViewPos();
+  } else if (!m_parent) {
+    return m_sidebysideviewpos;
+  } else {
+    if ((!m_sidebysideviewpos) && (!m_parent->getSideBySideViewPos()))
+      return std::nullopt;
+    else {
+      V2D absPos = m_sidebysideviewpos ? *m_sidebysideviewpos : V2D{0., 0.};
+      V2D parentPos = m_parent->getSideBySideViewPos() ? *m_parent->getSideBySideViewPos() : V2D{0., 0.};
+      return absPos + parentPos;
     }
   }
 }
