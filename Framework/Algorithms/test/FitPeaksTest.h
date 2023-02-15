@@ -5,8 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-
 #include <cxxtest/TestSuite.h>
+#include <random>
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -915,25 +915,25 @@ public:
    * @brief test_notEnoughPeakDataPoints
    */
   void test_notEnoughPeakDataPoints() {
-    // Generate an input workspace
+    // generate an input workspace
     const std::string data_ws_name("data_nepdp");
-    generateTestDataGaussian(data_ws_name, 1 /*spectra*/, 20 /*data points*/, 1 /*peaks*/, 0.75 /*resolution*/);
+    generateTestDataGaussian(data_ws_name, 1 /*spectra*/, 20 /*data points*/, 1 /*peaks*/, 0.5 /*resolution*/);
 
-    // Generate peak and background parameters
+    // generate peak and background parameters
     std::vector<string> par_names;
     std::vector<double> par_values;
     createGaussParameters(par_names, par_values);
 
-    // Create a single value peak-index vector for peak (0) at X=5
+    // create a single value peak-index vector for peak (0) at X=5
     std::vector<int> peak_index_vec;
     peak_index_vec.emplace_back(0);
 
-    // Create peak-center and fit-window workspaces
+    // create peak-center and fit-window workspaces
     const std::string peak_center_ws_name = genPeakCenterWorkspace(peak_index_vec, "peakcenter_nepdp", 1 /*spectra*/);
     const std::string fit_window_ws_name =
         genFitWindowWorkspace(peak_index_vec, "peakwindow_nepdp", 1 /*spectra*/, 1.0 /*fit window halfwidth*/);
 
-    // Initialize FitPeaks
+    // initialize FitPeaks
     FitPeaks fitpeaks;
     fitpeaks.initialize();
     TS_ASSERT(fitpeaks.isInitialized());
@@ -958,7 +958,7 @@ public:
       TS_ASSERT(API::AnalysisDataService::Instance().doesExist("PeakParametersWS3"));
       TS_ASSERT(API::AnalysisDataService::Instance().doesExist("FittedPeaksWS3"));
 
-      // about the parameters
+      // retrieve fitted parameters
       API::MatrixWorkspace_sptr peak_params_ws =
           std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("PeakPositionsWS3"));
       TS_ASSERT(peak_params_ws);
@@ -976,8 +976,104 @@ public:
     // clean
     API::AnalysisDataService::Instance().remove(peak_center_ws_name);
     API::AnalysisDataService::Instance().remove(fit_window_ws_name);
+  }
 
-    return;
+  //----------------------------------------------------------------------------------------------
+  /** Test that FitPeaks rejects a peak which has a signal-to-noise ratio below threshold
+   * @brief test_signalToNoiseRatio
+   */
+  void test_signalToNoiseRatio() {
+    // create a simple workspace
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        static_cast<int>(1 /*num_specs*/), static_cast<int>(400 /*num_data_points*/));
+    WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+
+    // change the resolution of the binning
+    for (size_t i = 0; i < 1; ++i)
+      WS->mutableX(i) *= 0.05 /*res*/;
+
+    // generate 2 gaussian peaks: a weak peak at X=5 and a strong peak at X=10, with some noise
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::normal_distribution<> noise(0, 0.2);
+    const auto &xvals = WS->points(0);
+    std::transform(xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(), [gen, noise](const double x) mutable {
+      return 20 * exp(-0.5 * pow((x - 10) / 0.1, 2)) + exp(-0.5 * pow((x - 5) / 0.15, 2)) + 1 + noise(gen);
+    });
+
+    // set error values; the exact values don't matter for this test.
+    const auto &yvals = WS->histogram(0).y();
+    std::transform(yvals.cbegin(), yvals.cend(), WS->mutableE(0).begin(), [](const double y) { return 0.2 * sqrt(y); });
+
+    // set workspace name
+    const std::string data_ws_name("data_s2nr");
+    AnalysisDataService::Instance().addOrReplace(data_ws_name, WS);
+
+    // generate peak and background parameters
+    std::vector<string> par_names;
+    std::vector<double> par_values;
+    createGaussParameters(par_names, par_values);
+
+    // create a peak-index vector for 2 peaks (at X=5 and X=10)
+    std::vector<int> peak_index_vec{0, 1};
+
+    // create peak-center and fit-window workspaces
+    const std::string peak_center_ws_name = genPeakCenterWorkspace(peak_index_vec, "peakcenter_s2nr", 1 /*spectra*/);
+    const std::string fit_window_ws_name =
+        genFitWindowWorkspace(peak_index_vec, "peakwindow_s2nr", 1 /*spectra*/, 1.0 /*fit window halfwidth*/);
+
+    // initialize FitPeaks
+    FitPeaks fitpeaks;
+    fitpeaks.initialize();
+    TS_ASSERT(fitpeaks.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", data_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 1));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakFunction", "Gaussian"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCentersWorkspace", peak_center_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitPeakWindowWorkspace", fit_window_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("MinimumSignalToNoiseRatio", 20.));
+
+    fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS3");
+    fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS3");
+    fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS3");
+    fitpeaks.setProperty("MaxFitIterations", 200);
+
+    fitpeaks.execute();
+    TS_ASSERT(fitpeaks.isExecuted());
+    if (fitpeaks.isExecuted()) {
+      // check output workspaces
+      TS_ASSERT(API::AnalysisDataService::Instance().doesExist("PeakPositionsWS3"));
+      TS_ASSERT(API::AnalysisDataService::Instance().doesExist("PeakParametersWS3"));
+      TS_ASSERT(API::AnalysisDataService::Instance().doesExist("FittedPeaksWS3"));
+
+      // retrieve fitted parameters
+      API::MatrixWorkspace_sptr peak_params_ws =
+          std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("PeakPositionsWS3"));
+      TS_ASSERT(peak_params_ws);
+      // 1 spectrum
+      TS_ASSERT_EQUALS(peak_params_ws->getNumberHistograms(), 1);
+      // 2 peaks
+      TS_ASSERT_EQUALS(peak_params_ws->histogram(0).x().size(), 2);
+
+      const auto &fitted_positions_0 = peak_params_ws->histogram(0).y();
+      TS_ASSERT_EQUALS(fitted_positions_0.size(), 2); // with 2 peaks to fit
+
+      // If a check, such as signal-to-noise, fails, FitPeaks sets the peak position to -4.
+      TS_ASSERT_DELTA(fitted_positions_0[0], -4, 0);
+      TS_ASSERT_DELTA(fitted_positions_0[1], 10.0, 1.E-2);
+
+      // clean algorithm-generated workspaces
+      API::AnalysisDataService::Instance().remove("PeakPositionsWS3");
+      API::AnalysisDataService::Instance().remove("PeakParametersWS3");
+      API::AnalysisDataService::Instance().remove("FittedPeaksWS3");
+    }
+
+    // clean
+    API::AnalysisDataService::Instance().remove(peak_center_ws_name);
+    API::AnalysisDataService::Instance().remove(fit_window_ws_name);
   }
 
   //--------------------------------------------------------------------------------------------------------------

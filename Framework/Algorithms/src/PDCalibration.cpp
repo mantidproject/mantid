@@ -237,10 +237,6 @@ void PDCalibration::init() {
                   "for pre-checking peaks before fitting, such that all the peaks with the total Y-count "
                   "under this value will be excluded.");
 
-  declareProperty("MinimumSignalToNoiseRatio", 0.,
-                  "Minimum signal-to-noise ratio such that all the peaks with "
-                  "signal-to-noise ratio under this value will be excluded.");
-
   declareProperty("MaxChiSq", 100., "Maximum chisq value for individual peak fit allowed. (Default: 100)");
 
   declareProperty("ConstrainPeakPositions", false,
@@ -272,6 +268,11 @@ void PDCalibration::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<API::WorkspaceGroup>>("DiagnosticWorkspaces", "", Direction::Output),
       "Workspaces to promote understanding of calibration results");
+
+  declareProperty("MinimumSignalToNoiseRatio", 0.,
+                  "Minimum signal-to-noise ratio such that all the peaks with "
+                  "signal-to-noise ratio under this value will be excluded."
+                  "NOTE: The algorithm will not exclude a peak for which the noise cannot be estimated.");
 
   // make group for Input properties
   std::string inputGroup("Input Options");

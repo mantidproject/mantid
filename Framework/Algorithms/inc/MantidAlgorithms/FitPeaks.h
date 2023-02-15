@@ -76,7 +76,8 @@ public:
   void setNumberOfIndividualPeaksWithLowCount(const size_t n);
   void setNumberOfPeaksWithNotEnoughDataPoints(const size_t n);
   void setNumberOfPeaksWithLowSignalToNoise(const size_t n);
-  void report(Kernel::Logger &logger);
+  bool isIndividualPeakRejected() const;
+  std::string getReport() const;
 
 private:
   // number of peaks submitted for spectrum fitting
@@ -184,6 +185,23 @@ private:
   void setupParameterTableWorkspace(const API::ITableWorkspace_sptr &table_ws,
                                     const std::vector<std::string> &param_names, bool with_chi2);
 
+  /// convert a histogram range to index boundaries
+  void histRangeToIndexBounds(size_t iws, const std::pair<double, double> &range, size_t &left_index,
+                              size_t &right_index); /// convert a histogram range to index boundaries
+
+  /// calculate how many data points are in a histogram range
+  size_t histRangeToDataPointCount(size_t iws, const std::pair<double, double> &range);
+
+  /// get vector X, Y and E in a given range
+  void getRangeData(size_t iws, const std::pair<double, double> &range, std::vector<double> &vec_x,
+                    std::vector<double> &vec_y, std::vector<double> &vec_e);
+
+  double numberCounts(size_t iws);
+  double numberCounts(size_t iws, const std::pair<double, double> &range);
+
+  double calculateSignalToNoiseRatio(size_t iws, const std::pair<double, double> &range,
+                                     const API::IBackgroundFunction_sptr &bkgd_function);
+
   API::MatrixWorkspace_sptr createMatrixWorkspace(const std::vector<double> &vec_x, const std::vector<double> &vec_y,
                                                   const std::vector<double> &vec_e);
 
@@ -212,7 +230,8 @@ private:
   /// parameters (width!)
   bool isObservablePeakProfile(const std::string &peakprofile);
 
-  void reportPreCheckResults(FitPeaksAlgorithm::PeakFitPreCheckResult &result);
+  // log a message disregarding the current logging offset
+  void logNoOffset(const size_t &priority, const std::string &msg);
 
   //------- Workspaces-------------------------------------
   /// mandatory input and output workspaces
@@ -307,7 +326,6 @@ private:
 
   /// flag for high background
   bool m_highBackground;
-  double m_bkgdSimga; // TODO - add to properties
 
   //----- Result criterias ---------------
   /// peak positon tolerance case b, c and d
