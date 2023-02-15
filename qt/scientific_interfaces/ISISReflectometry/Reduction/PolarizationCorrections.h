@@ -12,7 +12,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
-enum class PolarizationCorrectionType { None, ParameterFile, Workspace };
+enum class PolarizationCorrectionType { None, ParameterFile, Workspace, FilePath };
 
 inline PolarizationCorrectionType polarizationCorrectionTypeFromString(std::string const &correctionType) {
   if (correctionType == "None")
@@ -21,6 +21,8 @@ inline PolarizationCorrectionType polarizationCorrectionTypeFromString(std::stri
     return PolarizationCorrectionType::ParameterFile;
   if (correctionType == "Workspace")
     return PolarizationCorrectionType::Workspace;
+  if (correctionType == "FilePath")
+    return PolarizationCorrectionType::FilePath;
 
   throw std::invalid_argument("Unexpected polarization correction type.");
 }
@@ -33,6 +35,8 @@ inline std::string polarizationCorrectionTypeToString(PolarizationCorrectionType
     return "ParameterFile";
   case PolarizationCorrectionType::Workspace:
     return "Workspace";
+  case PolarizationCorrectionType::FilePath:
+    return "FilePath";
   }
   throw std::invalid_argument("Unexpected polarization correction type.");
 }
