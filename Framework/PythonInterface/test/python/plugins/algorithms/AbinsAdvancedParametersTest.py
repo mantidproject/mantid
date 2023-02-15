@@ -69,7 +69,7 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
     # Tests for TOSCA parameters
     def test_wrong_tosca_final_energy(self):
         bad_final_neutron_energy_values = (
-            0,  # final energy should be a float not str
+            "0",  # final energy should be a float not str
             1,  # final energy should be of float type not integer
             -1.0,  # final energy should be positive
         )
