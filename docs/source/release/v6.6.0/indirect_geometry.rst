@@ -18,17 +18,8 @@ New Features
 - Changed the ``Group by sample`` option to ``Sample changer grouped`` in the :ref:`ISIS Energy Transfer interface <ISISEnergyTransfer>`. It is only shown when an IRIS instrument is selected.
 
 
-Bugfixes
---------
-
-
-
 Algorithms
 ----------
-
-New features
-############
-
 
 Bugfixes
 ############
