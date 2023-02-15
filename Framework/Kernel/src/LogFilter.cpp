@@ -67,11 +67,11 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
     TimeInterval time2 = filter2->nthInterval(filter2->size() - 1);
 
     if (time1.start() < time2.start()) {
-      filter1->addValue(time2.start(),
+      filter1->addValue(time2Begin,
                         true); // should be f1->lastValue, but it doesnt
                                // matter for boolean AND
     } else if (time2.start() < time1.start()) {
-      filter2->addValue(time1.start(), true);
+      filter2->addValue(time1Begin, true);
     }
 
     // temporary objects to handle the intersection calculation
