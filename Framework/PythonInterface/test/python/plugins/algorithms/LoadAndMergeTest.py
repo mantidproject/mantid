@@ -12,18 +12,26 @@ from mantid.simpleapi import LoadAndMerge, config, mtd
 
 
 class LoadAndMergeTest(unittest.TestCase):
+    _facility = None
+    _data_search_dirs = None
+
     @classmethod
     def setUpClass(cls):
+        cls._facility = config["default.facility"]
+        cls._data_search_dirs = config["datasearch.directories"]
         config.appendDataSearchSubDir("ILL/IN16B/")
         config.appendDataSearchSubDir("ILL/D20/")
         config.appendDataSearchSubDir("ILL/D11/")
-
-    def setUp(self):
         config["default.facility"] = "ILL"
         config["default.instrument"] = "IN16B"
 
     def turnDown(self):
         mtd.clear()
+
+    @classmethod
+    def tearDownClass(cls):
+        config["default.facility"] = cls._facility
+        config["datasearch.directories"] = cls._data_search_dirs
 
     def test_single_run_load(self):
         out1 = LoadAndMerge(Filename="170257")
