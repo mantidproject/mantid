@@ -17,20 +17,25 @@ namespace Mantid::Kernel {
  * @param filter :: A reference to a TimeSeriesProperty<bool> that will act as a
  * filter
  */
-LogFilter::LogFilter(const TimeSeriesProperty<bool> &filter) : m_prop(), m_filter() { addFilter(filter); }
+LogFilter::LogFilter(const TimeSeriesProperty<bool> &filter) : m_prop(), m_filter(), m_filterOpenEnded(false) {
+  addFilter(filter);
+}
 
 /**
  * Constructor
  * @param prop :: Pointer to property to be filtered. Its actual type must be
  * TimeSeriesProperty<double>
  */
-LogFilter::LogFilter(const Property *prop) : m_prop(), m_filter() { m_prop.reset(convertToTimeSeriesOfDouble(prop)); }
+LogFilter::LogFilter(const Property *prop) : m_prop(), m_filter(), m_filterOpenEnded(false) {
+  m_prop.reset(convertToTimeSeriesOfDouble(prop));
+}
 
 /**
  * / Constructor from a TimeSeriesProperty<double> object to avoid overhead of
  * casts
  */
-LogFilter::LogFilter(const FilteredTimeSeriesProperty<double> *timeSeries) : m_prop(), m_filter() {
+LogFilter::LogFilter(const FilteredTimeSeriesProperty<double> *timeSeries)
+    : m_prop(), m_filter(), m_filterOpenEnded(false) {
   m_prop.reset(timeSeries->clone());
 }
 
@@ -50,10 +55,11 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
   }
 
   if (!m_filter || m_filter->size() == 0) {
+    m_filterOpenEnded = filter.lastValue();
     m_filter.reset(filter.clone());
   } else {
     // determine if the current version of things are open-ended
-    const bool isOpen(m_filter->lastValue() && filter.lastValue());
+    m_filterOpenEnded = (m_filter->lastValue() && filter.lastValue());
     DateAndTime firstTime = std::min(m_filter->firstTime(), filter.firstTime());
     if (m_prop && (m_prop->size() > 0)) {
       firstTime = std::min(firstTime, m_prop->firstTime());
@@ -89,7 +95,7 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
       times.emplace_back(splitter.stop());
     }
     // if both are open ended, remove the ending
-    if (isOpen) {
+    if (m_filterOpenEnded) {
       times.pop_back();
       values.pop_back();
     }
@@ -97,9 +103,31 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
     // set as the filter
     m_filter->replaceValues(times, values);
   }
+
   // apply the filter to the property
   if (m_prop) {
-    m_prop->filterWith(m_filter.get());
+    // create a TimeROI to apply
+    TimeROI timeroi(m_filter.get());
+
+    // if the end point is a open, then the last point in the TimeROI needs to be modified to make things work out
+    if (m_filterOpenEnded) {
+      // do a test filtering so the second to last interval can be inspected
+      m_prop->filterWith(timeroi);
+      // determine how far out to adjust the last ROI
+      const auto mysize = m_prop->size();
+      const auto penultimate_interval = m_prop->nthInterval(mysize - 2);
+      const auto ultimate_interval = m_prop->nthInterval(mysize - 1);
+      const auto oldEnd = ultimate_interval.end();
+      const auto newEnd = ultimate_interval.begin() + penultimate_interval.length();
+      // extend or shrink the last ROI depending on which value is bigger
+      if (oldEnd > newEnd)
+        timeroi.addMask(newEnd, ultimate_interval.end());
+      else if (newEnd > oldEnd)
+        timeroi.addROI(oldEnd, newEnd);
+      // both ends match (lucky guess earlier) so there is nothing to adjust
+    }
+
+    m_prop->filterWith(timeroi);
   }
 }
 
@@ -109,6 +137,7 @@ void LogFilter::clear() {
   if (m_prop)
     m_prop->clearFilter();
   m_filter.reset();
+  m_filterOpenEnded = false;
 }
 
 //--------------------------------------------------------------------------------------------------
