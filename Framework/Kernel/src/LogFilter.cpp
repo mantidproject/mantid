@@ -34,9 +34,8 @@ LogFilter::LogFilter(const Property *prop) : m_prop(), m_filter(), m_filterOpenE
  * / Constructor from a TimeSeriesProperty<double> object to avoid overhead of
  * casts
  */
-LogFilter::LogFilter(const FilteredTimeSeriesProperty<double> *timeSeries)
-    : m_prop(), m_filter(), m_filterOpenEnded(false) {
-  m_prop.reset(timeSeries->clone());
+LogFilter::LogFilter(const TimeSeriesProperty<double> *timeSeries) : m_prop(), m_filter(), m_filterOpenEnded(false) {
+  m_prop.reset(convertToTimeSeriesOfDouble(timeSeries));
 }
 
 /**
@@ -46,8 +45,15 @@ LogFilter::LogFilter(const FilteredTimeSeriesProperty<double> *timeSeries)
  * @param filter :: Filtering mask
  */
 void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
+  // do nothing with empty filter
   if (filter.size() == 0)
-    return; // nothing to do
+    return;
+
+  // do nothing if the filter is all ignore
+  const auto values = filter.valuesAsVector();
+  if (std::find(values.cbegin(), values.cend(), true) == values.cend()) {
+    return;
+  }
 
   // clear the filter first
   if (m_prop) {

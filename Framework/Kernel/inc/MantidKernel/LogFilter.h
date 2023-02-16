@@ -43,7 +43,7 @@ public:
   LogFilter(const Property *prop);
   /// Constructor from a TimeSeriesProperty<double> object to avoid overhead of
   /// casts
-  LogFilter(const FilteredTimeSeriesProperty<double> *timeSeries);
+  LogFilter(const TimeSeriesProperty<double> *timeSeries);
 
   /// Adds a filter using boolean AND
   void addFilter(const TimeSeriesProperty<bool> &filter);
