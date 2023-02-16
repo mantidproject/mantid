@@ -251,6 +251,11 @@ template <typename TYPE> void FilteredTimeSeriesProperty<TYPE>::filterWith(const
   }
 }
 
+template <typename TYPE> const TimeSeriesProperty<TYPE> *FilteredTimeSeriesProperty<TYPE>::unfiltered() const {
+  // copy the values and ignore the filter
+  return std::move(new TimeSeriesProperty<TYPE>(this->name(), this->timesAsVector(), this->valuesAsVector()));
+}
+
 /**
  * Restores the property to the unsorted & unfiltered state
  */
