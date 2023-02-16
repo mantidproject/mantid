@@ -875,44 +875,37 @@ double TimeSeriesProperty<std::string>::averageValueInFilter(const SplittingInte
 
 template <typename TYPE>
 std::pair<double, double>
-TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<SplittingInterval> &filter) const {
-  // the mean to calculate the standard deviation about
-  // this will sort the log as necessary as well
-  const double mean = this->averageValueInFilter(filter);
+TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<SplittingInterval> &intervals) const {
+  double mean_prev, mean_current(0.0), s(0.0), variance, duration, weighted_sum(0.0);
 
-  // First of all, if the log or the filter is empty or is a single value,
-  // return NaN for the uncertainty
-  if (realSize() <= 1 || filter.empty()) {
-    return std::pair<double, double>{mean, std::numeric_limits<double>::quiet_NaN()};
+  if (realSize() <= 1 || intervals.empty()) {
+    return std::pair<double, double>{this->averageValueInFilter(intervals), std::numeric_limits<double>::quiet_NaN()};
   }
-
-  double numerator(0.0), totalTime(0.0);
-  // Loop through the filter ranges
-  for (const auto &time : filter) {
-    // Calculate the total time duration (in seconds) within by the filter
-    totalTime += time.duration();
-
-    // Get the log value and index at the start time of the filter
+  auto real_size = realSize();
+  for (const auto &time : intervals) {
     int index;
-    double value = static_cast<double>(getSingleValue(time.begin(), index));
-    double valuestddev = (value - mean) * (value - mean);
+    auto value = static_cast<double>(getSingleValue(time.begin(), index));
     DateAndTime startTime = time.begin();
+    while (index < real_size) {
+      index++;
+      if (index == real_size)
+        duration = DateAndTime::secondsFromDuration(time.end() - startTime);
+      else {
+        duration = DateAndTime::secondsFromDuration(m_values[index].time() - startTime);
+        startTime = m_values[index].time();
+      }
+      weighted_sum += duration;
+      mean_prev = mean_current;
 
-    while (index < realSize() - 1 && m_values[index + 1].time() < time.end()) {
-      ++index;
-
-      numerator += DateAndTime::secondsFromDuration(m_values[index].time() - startTime) * valuestddev;
-      startTime = m_values[index].time();
-      value = static_cast<double>(m_values[index].value());
-      valuestddev = (value - mean) * (value - mean);
+      mean_current = mean_prev + (duration / weighted_sum) * (value - mean_prev);
+      s += duration * (value - mean_prev) * (value - mean_current);
+      if (index < real_size)
+        value = static_cast<double>(m_values[index].value());
     }
-
-    // Now close off with the end of the current filter range
-    numerator += DateAndTime::secondsFromDuration(time.end() - startTime) * valuestddev;
   }
-
+  variance = s / weighted_sum;
   // Normalise by the total time
-  return std::pair<double, double>{mean, std::sqrt(numerator / totalTime)};
+  return std::pair<double, double>{mean_current, std::sqrt(variance)};
 }
 
 template <typename TYPE> std::pair<double, double> TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev() const {
