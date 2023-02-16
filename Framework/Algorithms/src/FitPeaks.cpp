@@ -427,7 +427,7 @@ void FitPeaks::init() {
   declareProperty(PropertyNames::PEAK_MIN_SIGNAL_TO_NOISE_RATIO, 0.,
                   "Minimum signal-to-noise ratio such that all the peaks with "
                   "signal-to-noise ratio under this value will be excluded."
-                  "NOTE: The algorithm will not exclude a peak for which the noise cannot be estimated.");
+                  "Note, the algorithm will not exclude a peak for which the noise cannot be estimated.");
 
   const std::string addoutgrp("Analysis");
   setPropertyGroup(PropertyNames::OUTPUT_WKSP_PARAMS, addoutgrp);
@@ -985,34 +985,35 @@ std::vector<std::string> supported_peak_profiles{"Gaussian", "Lorentzian", "Pseu
                                                  "BackToBackExponential"};
 
 //----------------------------------------------------------------------------------------------
-/** Estimate background noise given a peak-window Y-vector
- * @param vec_y :: a peak window of Y-values
+/** Estimate background noise from peak-window Y-values.
+ * @param vec_y :: vector of peak-window Y-values
  * @return :: noise estimate
  */
 double estimateBackgroundNoise(const std::vector<double> &vec_y) {
-  // the peak window must have a certain minimum number of data points necessary to do the statistics
+  // peak window must have a certain minimum number of data points necessary to do the statistics
   size_t half_number_of_bkg_datapoints{5};
   if (vec_y.size() < 2 * half_number_of_bkg_datapoints + 3 /*a magic number*/)
-    return DBL_MIN; // can't estimate the noise, so the peak will pass the check
+    return DBL_MIN; // can't estimate the noise
 
-  // combine the left and right background data points
+  // the specified number of left-most and right-most data points in the peak window are assumed to represent
+  // background. Combine these data points into a single vector
   std::vector<double> vec_bkg;
   vec_bkg.resize(2 * half_number_of_bkg_datapoints);
   std::copy(vec_y.begin(), vec_y.begin() + half_number_of_bkg_datapoints, vec_bkg.begin());
   std::copy(vec_y.end() - half_number_of_bkg_datapoints, vec_y.end(), vec_bkg.begin() + half_number_of_bkg_datapoints);
 
-  // estimate the noise as the standard deviation of the combined vector, but without outliers
+  // estimate the noise as the standard deviation of the combined background vector, but without outliers
   std::vector<double> zscore_vec = Kernel::getZscore(vec_bkg);
   std::vector<double> vec_bkg_no_outliers;
   vec_bkg_no_outliers.resize(vec_bkg.size());
-  double zscore_crit = 3.; // 3-sigma rule
+  double zscore_crit = 3.; // using three-sigma rule
   for (size_t ii = 0; ii < vec_bkg.size(); ii++) {
     if (zscore_vec[ii] <= zscore_crit)
       vec_bkg_no_outliers.push_back(vec_bkg[ii]);
   }
 
   if (vec_bkg_no_outliers.size() < half_number_of_bkg_datapoints)
-    return DBL_MIN; // can't estimate the noise, so the peak will pass the check
+    return DBL_MIN; // can't estimate the noise
 
   auto intensityStatistics = Kernel::getStatistics(vec_bkg_no_outliers, StatOptions::CorrectedStdDev);
   return intensityStatistics.standard_deviation;
@@ -1038,10 +1039,10 @@ void rangeToIndexBounds(const vector_like &elems, const double range_left, const
 }
 
 //----------------------------------------------------------------------------------------------
-/** Reduce Y value with given background function
+/** Subtract background from Y-values with given background function
  * @param bkgd_func :: background function pointer
- * @param vec_x :: vector of X valye
- * @param vec_y :: (input/output) vector Y to be reduced by background function
+ * @param vec_x :: vector of X-values
+ * @param vec_y :: (input/output) vector of Y-values to be reduced by background function
  */
 void reduceByBackground(const API::IBackgroundFunction_sptr &bkgd_func, const std::vector<double> &vec_x,
                         std::vector<double> &vec_y) {
@@ -1053,7 +1054,7 @@ void reduceByBackground(const API::IBackgroundFunction_sptr &bkgd_func, const st
   // subtract the background from the supplied data
   for (size_t i = 0; i < vec_y.size(); ++i) {
     (vec_y)[i] -= vector_bkgd[i];
-    // it is better not to mess up with E here
+    // Note, E is not changed here
   }
 }
 
@@ -1995,21 +1996,20 @@ void FitPeaks::processOutputs(std::vector<std::shared_ptr<FitPeaksAlgorithm::Pea
 
 //----------------------------------------------------------------------------------------------
 /** Sum up all counts in a histogram
- * @param histogram :: histogram instance
- * @return :: total number of counts
+ * @param iws ::  histogram index in workspace
+ * @return :: total number of counts in the histogram
  */
 double FitPeaks::numberCounts(size_t iws) {
-
   const std::vector<double> &vec_y = m_inputMatrixWS->histogram(iws).y().rawData();
   double total = std::accumulate(vec_y.begin(), vec_y.end(), 0.);
   return total;
 }
 
 //----------------------------------------------------------------------------------------------
-/** Sum up all counts in a specified range of a histogram
- * @param histogram :: histogram instance
+/** Sum up all counts in a histogram range
+ * @param iws :: histogram index in workspace
  * @param range :: histogram range
- * @return :: total number of counts
+ * @return :: total number of counts in the range
  */
 double FitPeaks::numberCounts(size_t iws, const std::pair<double, double> &range) {
   // get data range
@@ -2037,7 +2037,7 @@ size_t FitPeaks::histRangeToDataPointCount(size_t iws, const std::pair<double, d
 }
 
 //----------------------------------------------------------------------------------------------
-/** Convert histogram range to index boundaries
+/** Convert a histogram range to vector index boundaries
  * @param iws :: histogram index in workspace
  * @param range :: histogram range
  * @param left_index :: (output) left index boundary
@@ -2048,7 +2048,8 @@ void FitPeaks::histRangeToIndexBounds(size_t iws, const std::pair<double, double
   const auto &orig_x = m_inputMatrixWS->histogram(iws).x();
   rangeToIndexBounds(orig_x, range.first, range.second, left_index, right_index);
 
-  // handle an invalid range case. For the histogram data, make sure the number of data points is non-zero as well.
+  // handle an invalid range case. For the histogram point data, make sure the number of data points is non-zero as
+  // well.
   if (left_index >= right_index || (m_inputMatrixWS->isHistogramData() && left_index == right_index - 1)) {
     std::stringstream err_ss;
     err_ss << "Unable to get a valid subset of histogram from given fit window. "
@@ -2060,10 +2061,14 @@ void FitPeaks::histRangeToIndexBounds(size_t iws, const std::pair<double, double
 
 //----------------------------------------------------------------------------------------------
 /** get vector X, Y and E in a given range
+ * @param iws :: histogram index in workspace
+ * @param range :: histogram range
+ * @param vec_x :: (output) vector of X-values
+ * @param vec_y :: (output) vector of Y-values
+ * @param vec_e :: (output) vector of E-values
  */
 void FitPeaks::getRangeData(size_t iws, const std::pair<double, double> &range, std::vector<double> &vec_x,
                             std::vector<double> &vec_y, std::vector<double> &vec_e) {
-
   // convert range to index boundaries
   size_t left_index, right_index;
   histRangeToIndexBounds(iws, range, left_index, right_index);
@@ -2086,9 +2091,10 @@ void FitPeaks::getRangeData(size_t iws, const std::pair<double, double> &range, 
 }
 
 //----------------------------------------------------------------------------------------------
-/** Calculate signal-to-noise ratio for a histogram range
- * @param histogram :: histogram instance
+/** Calculate signal-to-noise ratio in a histogram range
+ * @param iws :: histogram index in workspace
  * @param range :: histogram range
+ * @param bkgd_function :: background function pointer
  * @return :: signal-to-noise ratio
  */
 double FitPeaks::calculateSignalToNoiseRatio(size_t iws, const std::pair<double, double> &range,
@@ -2104,12 +2110,11 @@ double FitPeaks::calculateSignalToNoiseRatio(size_t iws, const std::pair<double,
 
   // get X,Y,and E for the data range
   std::vector<double> vec_x, vec_y, vec_e;
-  // getRangeData(histogram, range, vec_x, vec_y, vec_e);
   getRangeData(iws, range, vec_x, vec_y, vec_e);
   if (vec_x.empty())
     return 0.0;
 
-  // reduce all Y-values in the data range by the background
+  // subtract background from Y-values
   reduceByBackground(bkgd_function, vec_x, vec_y);
 
   // estimate the signal as the highest Y-value in the data range
@@ -2119,7 +2124,7 @@ double FitPeaks::calculateSignalToNoiseRatio(size_t iws, const std::pair<double,
     return 0.0;
 
   // estimate noise from background. If noise is zero, or impossible to estimate, return DBL_MAX so that the peak
-  // wouldn't be rejected.
+  // won't be rejected.
   double noise = estimateBackgroundNoise(vec_y);
   if (noise <= DBL_MIN)
     return DBL_MAX;

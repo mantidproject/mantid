@@ -272,7 +272,7 @@ void PDCalibration::init() {
   declareProperty("MinimumSignalToNoiseRatio", 0.,
                   "Minimum signal-to-noise ratio such that all the peaks with "
                   "signal-to-noise ratio under this value will be excluded."
-                  "NOTE: The algorithm will not exclude a peak for which the noise cannot be estimated.");
+                  "Note, the algorithm will not exclude a peak for which the noise cannot be estimated.");
 
   // make group for Input properties
   std::string inputGroup("Input Options");

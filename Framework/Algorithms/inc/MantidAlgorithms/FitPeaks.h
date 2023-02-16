@@ -196,9 +196,13 @@ private:
   void getRangeData(size_t iws, const std::pair<double, double> &range, std::vector<double> &vec_x,
                     std::vector<double> &vec_y, std::vector<double> &vec_e);
 
+  /// sum up all counts in histogram
   double numberCounts(size_t iws);
+
+  /// sum up all counts in histogram range
   double numberCounts(size_t iws, const std::pair<double, double> &range);
 
+  /// calculate signal-to-noise ratio in histogram range
   double calculateSignalToNoiseRatio(size_t iws, const std::pair<double, double> &range,
                                      const API::IBackgroundFunction_sptr &bkgd_function);
 
