@@ -214,10 +214,10 @@ void PropertyManager::filterByProperty(const Kernel::TimeSeriesProperty<bool> &f
 
       if (this->existsProperty(companionPropName)) {
         Property *companionPropProp = getPointerToProperty(companionPropName);
-        auto tspCompanionProp = dynamic_cast<FilteredTimeSeriesProperty<bool> *>(companionPropProp);
+        auto tspCompanionProp = dynamic_cast<TimeSeriesProperty<bool> *>(companionPropProp);
         if (!tspCompanionProp) // the companion property
           break;
-        auto logFilter = std::make_unique<LogFilter>(tspCompanionProp);
+        auto logFilter = std::make_unique<LogFilter>(currentProp);
         logFilter->addFilter(*tspCompanionProp);
         filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(doubleSeries, *logFilter->filter());
       } else { // attach the filter to the TimeSeriesProperty, thus creating  the FilteredTimeSeriesProperty
