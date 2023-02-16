@@ -110,6 +110,7 @@ set(SRC_FILES
     src/ThreadSafeLogStream.cpp
     src/TimeROI.cpp
     src/TimeSeriesProperty.cpp
+    src/TimeSplitter.cpp
     src/Timer.cpp
     src/TopicInfo.cpp
     src/Unit.cpp
@@ -287,6 +288,7 @@ set(INC_FILES
     inc/MantidKernel/ThreadSchedulerMutexes.h
     inc/MantidKernel/TimeROI.h
     inc/MantidKernel/TimeSeriesProperty.h
+    inc/MantidKernel/TimeSplitter.h
     inc/MantidKernel/Timer.h
     inc/MantidKernel/Tolerance.h
     inc/MantidKernel/TopicInfo.h
@@ -434,6 +436,7 @@ set(TEST_FILES
     TimeIntervalTest.h
     TimeROITest.h
     TimeSeriesPropertyTest.h
+    TimeSplitterTest.h
     TimerTest.h
     TopicInfoTest.h
     TypedValidatorTest.h

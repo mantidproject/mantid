@@ -23,7 +23,6 @@
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 
 #include "MantidBeamline/ComponentInfo.h"
@@ -256,7 +255,7 @@ struct ParameterValue {
     if (info.m_logfileID.empty())
       return boost::lexical_cast<double>(info.m_value);
     else {
-      const TimeROI *roi = &runData.timeROI();
+      const TimeROI *roi = &runData.getTimeROI();
       return info.createParamValue(runData.getTimeSeriesProperty<double>(info.m_logfileID), roi);
     }
   }

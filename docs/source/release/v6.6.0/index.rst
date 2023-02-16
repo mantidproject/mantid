@@ -12,8 +12,6 @@ Mantid 6.6.0 Release Notes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
-
 We are proud to announce version 6.6.0 of Mantid.
 
 This release includes a wide array of updates, bugfixes, and new features, which build on the functionality of Mantid, including an upgrade to version 3.6 of matplotlib.

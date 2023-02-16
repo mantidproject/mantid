@@ -62,6 +62,7 @@ if(CONDA_ENV)
   # switch off all optimzations
   set(_conda_debug_cfg_name DebugWithRelRuntime)
   string(TOUPPER ${_conda_debug_cfg_name} _conda_debug_cfg_name_upper)
+  include(CCacheSetup)
   if(USE_CCACHE AND CCACHE_FOUND)
     # For a single-config generator like Ninja, aim to use CCache to speed up builds. The Zi flag is not supported by
     # CCache so we need to use Z7 to allow debugging.
@@ -164,6 +165,9 @@ configure_file(${WINDOWS_BUILDCONFIG}/pycharm.env.in ${PROJECT_BINARY_DIR}/pycha
 if(EXISTS ${MSVC_IDE_LOCATION}/devenv.exe)
   if(CONDA_ENV)
     configure_file(${WINDOWS_BUILDCONFIG}/visual-studio_conda.bat.in ${PROJECT_BINARY_DIR}/visual-studio.bat @ONLY)
+    configure_file(
+      ${WINDOWS_BUILDCONFIG}/visual-studio_conda_ninja.bat.in ${PROJECT_BINARY_DIR}/visual-studio_ninja.bat @ONLY
+    )
   else()
     configure_file(${WINDOWS_BUILDCONFIG}/visual-studio.bat.in ${PROJECT_BINARY_DIR}/visual-studio.bat @ONLY)
   endif()

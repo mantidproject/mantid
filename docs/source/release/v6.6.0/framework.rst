@@ -35,24 +35,9 @@ Bugfixes
 - Fixed a problem with the :ref:`ConvolveWorkspaces <algm-ConvolveWorkspaces>` algorithm when run on input workspaces with different x ranges. The x range of the output workspace was being taken from the resolution workspace instead of the data workspace.
 - Fixed a problem in :ref:`CreateSampleWorkspace <algm-CreateSampleWorkspace>` where functions were evaluated at the left hand bin edge instead of the bin centre. The algorithm :ref:`FindEPP <algm-FindEPP>` has also been updated with a similar change.
 
-Fit Functions
--------------
-
-New features
-############
-
-
-Bugfixes
-############
-
-
 
 Data Objects
 ------------
-
-New features
-############
-
 
 Bugfixes
 ############
@@ -67,13 +52,10 @@ New features
 - MantidPython and MantidNotebook have been removed. For help accessing the mantid algorithms and methods
   in python and jupyter notebooks, check out the instructions in :ref:`PythonNotebook`.
 
-Bugfixes
-############
-
-
 
 MantidWorkbench
 ---------------
 
 See :doc:`mantidworkbench`.
+
 :ref:`Release 6.6.0 <v6.6.0>`

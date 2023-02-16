@@ -967,6 +967,19 @@ name-count-increment="2" would have named the 10 <location> elements dat1, det3,
 When one <locations> tag was used in ISIS LET_Definition.xml the number of
 lines of this file reduced from 1590 to 567.
 
+.. _Side by side view location:
+
+Using <side-by-side-view-location>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The arrangement of detector banks in the side by side view of the instrument viewer can be overridden using the <side-by-side-view-location> tag.
+This takes an x and a y coordinate which specifies the location of the centre of the component containing the tag in the view.
+The tag is optional and if not present the components will be arranged using the default method as described in the :ref:`Instrument Viewer <instrumentviewer_render_tab>` documentation.
+
+.. code-block:: xml
+
+      <side-by-side-view-location x="0.1" y="0.7"/>
+
 .. _Using parameter:
 
 Using <parameter>

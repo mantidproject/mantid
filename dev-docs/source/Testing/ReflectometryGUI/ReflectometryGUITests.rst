@@ -16,6 +16,7 @@ Set up
 
 - These instructions assume use of MantidWorkbench or MantidPlot 3.7 or higher.
 - Ensure you have the `ISIS Sample Data <http://download.mantidproject.org>`__ in your Mantid user directories.
+- Ensure you have added this path to your Mantid user directories: ``[path to your build directory]/ExternalData/Testing/Data/UnitTest``. This is required for testing the Preview tab. If this directory is missing on your computer then you may need to build the ``AllTests`` target for your local version of Mantid.
 - Ensure you have the ISIS archive enabled.
 - Open the ISIS Reflectometry interface.
 - Go to the menu ``Tools->Options`` and ensure all of the warnings are ticked. On the Rounding tab, set the precision to 2 decimal places.
@@ -169,3 +170,32 @@ Export as ASCII
 - Change the dropdown to ``ILL Cosmos (*.mft)``. The settings remain greyed out apart from the parameters which should now be enabled. Click save and you should get 3 columns of numbers padded by spaces (including leading spaces). There should be a header starting ``MFT`` which includes any parameters you selected, the same as the Custom format.
 
 - Try entering a non-existent or invalid save path and then try to Save. You should get an error saying that the path is invalid.
+
+Preview tab
+---------------
+
+- Go to the Reduction Preview tab.
+- Type ``INTER45455`` into the ``Run`` input. Set the ``Angle`` to ``1`` and click ``Load``. The instrument view plot should display the data. If the plot remains blank then check that you have added the path to your unit test data to your Mantid user directories (see set up instructions).
+- Click the rectangle-select button above the plot and draw a region onto the instrument view. The selected detector segments should be summed and the result plotted on the second (slice viewer) plot.
+- Check that multiple regions can be added to the instrument view, and that moving and resizing them updates the slice viewer plot.
+- Check that you can delete regions from the instrument view by selecting them and pressing the delete key on your keyboard.
+- Make sure you have at least one region selected on the instrument view. Then go to the drop-down underneath the color scale (next to the slice viewer plot) and select ``SymmetricLog10``. This should allow you to see the counts on the plot more clearly.
+- Click the rectangle select button above the slice viewer plot and draw a ``Signal`` region on the plot. A reduction will now be triggered for the selected spectra and the result plotted on the 1D plot.
+- Click the drop-down on the rectangle select button and select ``Transmission``. Draw a transmission region onto the slice viewer plot. Then, in the same way, add one or more ``Background`` regions. The reduction should be re-run each time a region is added:
+
+  - You should see the tab quickly disable and re-enable.
+  - Another run of ``ReflectometryReductionOneAuto`` will be logged in the Messages bar.
+  - The 1D plot should update (although this is usually only noticeable when changes are made to the Signal region).
+
+- Check that moving and resizing regions triggers a re-run of the reduction.
+- Check that you can delete one of the Background regions by selecting it and pressing delete on your keyboard.
+- Click the ``Apply`` button at the bottom right of the tab. The selected regions of interest should be populated in the lookup table on the Experiment Settings tab.
+- Back on the Reduction Preview tab, click the export button above the top left of the 1D plot. This should export a workspace called ``preview_reduced_ws`` to the ADS.
+- Right-click the workspace and select ``Show History``:
+
+  - View the history for ``ReflectometryReductionOneAuto`` and check that the inputs for ``ProcessingInstructions``, ``BackgroundProcessingInstructions`` and ``TransmissionProcessingInstructions`` correspond to the ranges of spectra you selected.
+  - View the history for ``ReflectometryISISSumBanks`` and check that the input for ``ROIDetectorIDs`` matches the range of detector IDs you selected.
+
+- Back in the Reflectometry interface, go to the Runs tab. In the Process Runs table on the right-hand panel of the tab, enter Run ``INTER45455`` and Angle ``1`` into the first child row. Click Process.
+- Compare plots of the ``preview_summed_ws`` (from the Preview reduction) with ``IvsQ_45455`` (from the batch reduction). They should be the same.
+- The plots on the Reduction Preview tab are located within three dockable widgets. Check that the widgets can be undocked, re-docked, re-sized etc. without error or loss of functionality.

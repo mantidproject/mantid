@@ -9,6 +9,7 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/Quat.h"
+#include "MantidKernel/V2D.h"
 #include "MantidKernel/V3D.h"
 
 #include <string>
@@ -90,6 +91,9 @@ public:
   void setPos(double, double, double) override;
   void setPos(const Kernel::V3D &) override;
 
+  //! Set the IComponent position in the side by side instrument view
+  void setSideBySideViewPos(const Kernel::V2D &) override;
+
   //! Set the orientation Kernel::Quaternion relative to parent (if present)
   // otherwise absolute
   void setRot(const Kernel::Quat &) override;
@@ -114,6 +118,8 @@ public:
   //! Get the position of the IComponent. Tree structure is traverse through the
   // parent chain
   Kernel::V3D getPos() const override;
+
+  std::optional<Kernel::V2D> getSideBySideViewPos() const override;
 
   //! Get the relative Orientation
   Kernel::Quat getRelativeRot() const override;
@@ -312,6 +318,8 @@ protected:
   Kernel::V3D m_pos;
   //! Orientation
   Kernel::Quat m_rot;
+  //! Position of component in instrument viewer side by side view
+  std::optional<Kernel::V2D> m_sidebysideviewpos;
 
   /**
    *  Get a parameter from the parameter map

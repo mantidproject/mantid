@@ -1,1 +1,0 @@
-- Change "Group by sample" option to "Sample changer grouped" in ISIS Energy Transfer interface and only show it when IRIS instrument is selected
