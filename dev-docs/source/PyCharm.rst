@@ -65,7 +65,7 @@ Now that your Python development environment has been setup we can setup the deb
 - Name it something to do with ``Workbench``
 - In the ``Script Path:`` box, on Linux/MacOS enter the ``{BUILD}/bin/workbench`` Python script, on Windows enter ``{BUILD}/bin/DebugWithRelRuntime/workbench-script.pyw``, ``.pyw`` files will not appear in the search window as it only shows ``.py`` files, so you cannot search for it with the GUI.
 - In the ``Working directory:`` box, on Linux/MacOS enter the ``{BUILD}/bin`` directory, on Windows enter ``{BUILD}/bin/DebugWithRelRuntime`` directory.
-- In the ``Parameters`` box add ``--single-process`` so that the multiprocess startup is disabled and breakpoints can be attached to the primary process.
+- In the ``Parameters`` box add ``--single-process`` so that the multiprocess startup is disabled and breakpoints can be attached to the primary process. See the :ref:`Running Workbench <RunningWorkbench>` documentation for more information.
 - Ensure the ``Python Interpreter:`` box is your Python version following by ``(mantid-developer)``, this ensures it runs using your Conda environment.
 - Click Ok and exit out the window.
 - You can now click the green play button in the top right of the window to create a Workbench instance from pycharm.
