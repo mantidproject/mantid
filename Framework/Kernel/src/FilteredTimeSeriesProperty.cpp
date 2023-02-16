@@ -94,54 +94,21 @@ template <typename HeldType> FilteredTimeSeriesProperty<HeldType>::~FilteredTime
  * false.
  * @returns :: Vector of included values only
  */
-template <typename TYPE> std::vector<TYPE> FilteredTimeSeriesProperty<TYPE>::filteredValuesAsVector() const {
+template <typename TYPE>
+std::vector<TYPE> FilteredTimeSeriesProperty<TYPE>::filteredValuesAsVector(const Kernel::TimeROI *roi) const {
+  // if this is not filtered just return the parent version
   if (this->m_filter->empty()) {
-    return this->valuesAsVector(); // no filtering to do
+    return TimeSeriesProperty<TYPE>::filteredValuesAsVector(roi); // no filtering to do
   }
-  if (!this->m_filterApplied) {
-    applyFilter();
-  }
-  this->sortIfNecessary();
-
-  std::vector<TYPE> filteredValues;
-  for (const auto &value : this->m_values) {
-    if (isTimeFiltered(value.time())) {
-      filteredValues.emplace_back(value.value());
-    }
+  // if the supplied roi is empty use just this one
+  if ((!roi) || (roi->empty())) {
+    return TimeSeriesProperty<TYPE>::filteredValuesAsVector(this->m_filter.get());
   }
 
-  return filteredValues;
-}
-
-/**
- * Return the time series's filtered times as a vector<DateAndTime>
- * @return A vector of DateAndTime objects
- */
-template <typename HeldType>
-std::vector<DateAndTime> FilteredTimeSeriesProperty<HeldType>::filteredTimesAsVector() const {
-  if (m_filter->empty()) {
-    return this->timesAsVector(); // no filtering to do
-  }
-  if (!m_filterApplied) {
-    applyFilter();
-  }
-  this->sortIfNecessary();
-
-  std::vector<DateAndTime> out;
-
-  for (const auto &value : this->m_values) {
-    if (isTimeFiltered(value.time())) {
-      out.emplace_back(value.time());
-    }
-  }
-
-  return out;
-}
-
-template <typename TYPE> double FilteredTimeSeriesProperty<TYPE>::mean() const {
-  Mantid::Kernel::Statistics raw_stats =
-      Mantid::Kernel::getStatistics(this->filteredValuesAsVector(), StatOptions::Mean);
-  return raw_stats.mean;
+  // create a union of the two
+  TimeROI roi_copy(*this->m_filter.get());
+  roi_copy.update_intersection(*roi);
+  return TimeSeriesProperty<TYPE>::filteredValuesAsVector(&roi_copy);
 }
 
 /** Returns n-th valid time interval, in a very inefficient way.
