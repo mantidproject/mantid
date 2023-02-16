@@ -18,6 +18,8 @@ from mantid.simpleapi import (
     ConvertUnits,
     MergeRuns,
     GroupWorkspaces,
+    ApplyDiffCal,
+    ReplaceSpecialValues,
 )
 from mantid.api import AnalysisDataService
 
@@ -95,19 +97,18 @@ class DrangeData(object):
         return
 
     def calibrate_vanadium(self, calibration_file=""):
-        return self.calibrate_workspace(self._vanadium, calibration_file)
+        return self.calibrate_and_focus_workspace(self._vanadium, calibration_file)
 
-    def calibrate_workspace(self, ws, calibration_file=""):
-        calibrate_ws = NormaliseByCurrent(InputWorkspace=ws, OutputWorkspace="normalised", StoreInADS=False)
+    def calibrate_and_focus_workspace(self, ws, calibration_file=""):
+        calibrate_ws = NormaliseByCurrent(InputWorkspace=ws, OutputWorkspace="__normalised")
+        ApplyDiffCal(InstrumentWorkspace=calibrate_ws, CalibrationFile=calibration_file)
+        calibrate_ws = ConvertUnits(
+            InputWorkspace=calibrate_ws, Target="dSpacing", Emode="Elastic", AlignBins=False, OutputWorkspace="aligned", StoreInADS=False
+        )
         if calibration_file:
             calibrate_ws = DiffractionFocussing(
                 InputWorkspace=calibrate_ws, GroupingFileName=calibration_file, OutputWorkspace="focused", StoreInADS=False
             )
-
-        calibrate_ws = ConvertUnits(
-            InputWorkspace=calibrate_ws, Target="dSpacing", Emode="Indirect", AlignBins=True, OutputWorkspace="aligned", StoreInADS=False
-        )
-
         calibrate_ws = CropWorkspace(
             InputWorkspace=calibrate_ws,
             XMin=d_range_alice[self._drange][0],
@@ -117,17 +118,24 @@ class DrangeData(object):
         )
         return calibrate_ws
 
-    def process_workspace(self, subtract_empty=False, vanadium_correct=False, focus_calibration_file=""):
+    def process_workspaces(self, subtract_empty=False, vanadium_correct=False, focus_calibration_file=""):
         processed = []
         for sample in self._sample:
             outputname = sample + WORKSPACE_SUFFIX.FOCUSED
             if subtract_empty:
                 sample = self.subtract_container_from_sample(sample)
-            sample = self.calibrate_workspace(sample, focus_calibration_file)
+            sample = self.calibrate_and_focus_workspace(sample, focus_calibration_file)
             if vanadium_correct:
                 van = self.calibrate_vanadium(focus_calibration_file)
                 calib_van = RebinToWorkspace(WorkspaceToRebin=van, WorkspaceToMatch=sample, OutputWorkspace="van_rb", StoreInADS=False)
                 sample = Divide(LHSWorkspace=sample, RHSWorkspace=calib_van, OutputWorkspace=outputname)
+                sample = ReplaceSpecialValues(
+                    InputWorkspace=sample,
+                    NaNValue=0.0,
+                    InfinityValue=0.0,
+                    StoreInADS=False,
+                    EnableLogging=False,
+                )
             AnalysisDataService.addOrReplace(outputname, sample)
             processed.append(sample)
         return processed
@@ -160,7 +168,7 @@ def load_raw(run_number_string, drange_sets, group, inst, file_ext):
 def run_diffraction_focussing(run_number, drange_sets, calfile, van_norm=False, subtract_empty=False):
     focused = []
     for drange in drange_sets:
-        processed = drange_sets[drange].process_workspace(
+        processed = drange_sets[drange].process_workspaces(
             subtract_empty=subtract_empty, vanadium_correct=van_norm, focus_calibration_file=calfile
         )
         focused.extend(processed)
