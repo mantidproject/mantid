@@ -284,8 +284,9 @@ public:
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 3073 * nScans)
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
     TS_ASSERT(outputWS->detectorInfo().isMonitor(0))
-    TS_ASSERT(!outputWS->detectorInfo().isMonitor(nScans + 1))
-    TS_ASSERT(!outputWS->detectorInfo().isMonitor(3073))
+    for (int i = 1; i < 3072; i++) {
+      TS_ASSERT(!outputWS->detectorInfo().isMonitor(i))
+    }
     TS_ASSERT(!outputWS->isHistogramData())
     TS_ASSERT(!outputWS->isDistribution())
 
@@ -355,7 +356,9 @@ public:
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 16385 * 25) // 25 step scan
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
     TS_ASSERT(outputWS->detectorInfo().isMonitor(0))
-    TS_ASSERT(!outputWS->detectorInfo().isMonitor(16385 * 25))
+    for (int i = 1; i < 16385; i++) {
+      TS_ASSERT(!outputWS->detectorInfo().isMonitor(i))
+    }
     TS_ASSERT(!outputWS->isHistogramData())
     TS_ASSERT(!outputWS->isDistribution())
     const auto &run = outputWS->run();
@@ -512,7 +515,9 @@ public:
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 16385)
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
     TS_ASSERT(outputWS->detectorInfo().isMonitor(0))
-    TS_ASSERT(!outputWS->detectorInfo().isMonitor(16385))
+    for (int i = 1; i < 16385; i++) {
+      TS_ASSERT(!outputWS->detectorInfo().isMonitor(i))
+    }
     TS_ASSERT(!outputWS->isHistogramData())
     TS_ASSERT(!outputWS->isDistribution())
     const auto run = outputWS->run();
@@ -560,7 +565,9 @@ public:
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), NUMBER_OF_TUBES + NUMBER_OF_MONITORS)
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
     TS_ASSERT(outputWS->detectorInfo().isMonitor(0))
-    TS_ASSERT(!outputWS->detectorInfo().isMonitor(NUMBER_OF_TUBES + NUMBER_OF_MONITORS))
+    for (int i = 1; i < 1280; i++) {
+      TS_ASSERT(!outputWS->detectorInfo().isMonitor(i))
+    }
     TS_ASSERT(!outputWS->isHistogramData())
     TS_ASSERT(!outputWS->isDistribution())
 
