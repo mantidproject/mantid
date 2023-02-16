@@ -82,7 +82,7 @@ class WISHSingleCrystalPeakPredictionTest(MantidSystemTest):
         SaveIsawPeaks(self._peaks, Filename="WISHSXReductionPeaksTest.peaks")
 
     def validate(self):
-        self.assertEqual(self._peaks.rowCount(), 527)
+        self.assertEqual(self._peaks.rowCount(), 536)
         self.assertEqual(self._filtered.rowCount(), 7)
 
         # The peak at [-5 -1 -7] is known to fall between the gaps of WISH's tubes
