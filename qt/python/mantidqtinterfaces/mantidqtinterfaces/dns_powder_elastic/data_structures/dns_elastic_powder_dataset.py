@@ -29,16 +29,18 @@ class DNSElasticDataset(ObjectDict):
     This is a dictionary but can also be accessed like attributes.
     """
 
-    def __init__(self, data, path, is_sample=True, banks=None):
+    def __init__(self, data, path, is_sample=True, banks=None, fields=None, ignore_van=False):
         super().__init__()
         if data:
             self['is_sample'] = is_sample
-            if not is_sample and banks is not None:
-                data = remove_unnecessary_standard_banks(data, banks)
-            self['banks'] = get_bank_positions(data)
-            self['fields'] = get_sample_fields(data)
             if is_sample:
                 self['angle_fields_data'] = get_sample_fields_each_bank(data)
+            if not is_sample and banks is not None:
+                data = remove_unnecessary_standard_banks(data, banks)
+            if not is_sample and fields is not None:
+                data = remove_unnecessary_standard_fields(data, fields, ignore_van)
+            self['banks'] = get_bank_positions(data)
+            self['fields'] = get_sample_fields(data)
             self['omega'] = automatic_omega_binning(data)
             self['data_dic'] = create_dataset(data, path)
 
@@ -178,6 +180,23 @@ def remove_unnecessary_standard_banks(standard_data, sample_banks, rounding_limi
         for sample_bank in sample_banks:
             if np.isclose(file_dict['det_rot'], sample_bank, atol=rounding_limit):
                 standard_data_clean.append(file_dict)
+    return standard_data_clean
+
+
+def remove_unnecessary_standard_fields(standard_data, sample_fields, ignore_van):
+    if ignore_van:
+        vana_data_list = [
+            entry for entry in standard_data if entry['sample_type']=='vana'
+        ]
+        vana_fields = [field_dict.get(entry['field'], entry['field']) for entry in vana_data_list]
+        vana_and_sample_fields = set(vana_fields + list(sample_fields))
+        standard_data_clean = [
+            entry for entry in standard_data if field_dict.get(entry['field'], entry['field']) in vana_and_sample_fields
+         ]
+    else:
+        standard_data_clean = [
+            entry for entry in standard_data if field_dict.get(entry['field'], entry['field']) in sample_fields
+        ]
     return standard_data_clean
 
 
