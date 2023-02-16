@@ -102,7 +102,7 @@ class TestFittingDataModel(unittest.TestCase):
         log_workspaces = self.model._sample_logs_workspace_group.get_log_workspaces()
         self.assertEqual(1 + len(log_names), len(self.model._sample_logs_workspace_group._log_workspaces))
         for ilog in range(0, len(log_names)):
-            self.assertEqual(log_names[ilog], log_workspaces[ilog + 1].name())
+            self.assertEqual(log_names[ilog] + "_Fitting", log_workspaces[ilog + 1].name())
             self.assertEqual(1, log_workspaces[ilog + 1].rowCount())
 
     @patch(data_model_path + ".logger")
@@ -223,7 +223,7 @@ class TestFittingDataModel(unittest.TestCase):
         self.model._sample_logs_workspace_group.remove_log_rows([0])
 
         mock_delrows.assert_called_once()
-        new_name = f"{mock_table.row()['Instrument']}_{min(mock_table.column())}-{max(mock_table.column())}_logs"
+        new_name = f"{mock_table.row()['Instrument']}_{min(mock_table.column())}-{max(mock_table.column())}_logs_Fitting"
         mock_rename.assert_called_with(
             InputWorkspace=self.model._sample_logs_workspace_group.get_log_workspaces().name(), OutputWorkspace=new_name
         )
@@ -282,14 +282,15 @@ class TestFittingDataModel(unittest.TestCase):
         self.model._sample_logs_workspace_group._log_workspaces = mock.MagicMock()
         self.model._sample_logs_workspace_group._log_names = ["LogName1", "LogName2"]
         # simulate LogName2 and run_info tables being deleted
-        mock_ads.doesExist = lambda ws_name: ws_name == "LogName1"
+        mock_ads.doesExist = lambda ws_name: ws_name == "LogName1_Fitting"
+        mock_make_log_table.return_value.name.return_value = "LogName2_Fitting"
 
         self.model._sample_logs_workspace_group.update_log_workspace_group(self.model._data_workspaces)
         mock_create_log_group.assert_not_called()
         mock_make_runinfo.assert_called_once()
         mock_make_log_table.assert_called_once_with("LogName2")
-        self.model._sample_logs_workspace_group._log_workspaces.add.assert_any_call("run_info")
-        self.model._sample_logs_workspace_group._log_workspaces.add.assert_any_call("LogName2")
+        self.model._sample_logs_workspace_group._log_workspaces.add.assert_any_call("run_info_Fitting")
+        self.model._sample_logs_workspace_group._log_workspaces.add.assert_any_call("LogName2_Fitting")
         mock_add_log.assert_called_with("name1", self.mock_ws, 0)
 
     @patch(output_sample_log_path + ".SampleLogsGroupWorkspace.make_log_table")
@@ -302,11 +303,18 @@ class TestFittingDataModel(unittest.TestCase):
         mock_group_ws = mock.MagicMock()
         mock_group.return_value = mock_group_ws
 
+        mock_log_table_1 = mock.MagicMock()
+        mock_log_table_1.name.return_value = log_names[0] + "_Fitting"
+        mock_log_table_2 = mock.MagicMock()
+        mock_log_table_2.name.return_value = log_names[1] + "_Fitting"
+
+        mock_make_log_table.side_effect = [mock_log_table_1, mock_log_table_2]
+
         self.model._sample_logs_workspace_group.create_log_workspace_group()
 
         mock_group.assert_called_once()
         for log in log_names:
-            mock_group_ws.add.assert_any_call(log)
+            mock_group_ws.add.assert_any_call(log + "_Fitting")
         self.assertEqual(log_names, self.model._sample_logs_workspace_group._log_names)
         mock_make_runinfo.assert_called_once()
         self.assertEqual(len(log_names), mock_make_log_table.call_count)
@@ -600,8 +608,8 @@ class TestFittingDataModel(unittest.TestCase):
     def _setup_model_log_workspaces(self):
         # grouped ws acts like a container/list of ws here
         self.model._sample_logs_workspace_group._log_workspaces = [mock.MagicMock(), mock.MagicMock()]
-        self.model._sample_logs_workspace_group._log_workspaces[0].name.return_value = "run_info"
-        self.model._sample_logs_workspace_group._log_workspaces[1].name.return_value = "LogName"
+        self.model._sample_logs_workspace_group._log_workspaces[0].name.return_value = "run_info_Fitting"
+        self.model._sample_logs_workspace_group._log_workspaces[1].name.return_value = "LogName_Fitting"
 
 
 if __name__ == "__main__":

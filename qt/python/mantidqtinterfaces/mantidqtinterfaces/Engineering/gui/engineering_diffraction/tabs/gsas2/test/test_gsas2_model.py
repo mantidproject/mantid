@@ -44,8 +44,8 @@ class TestGSAS2Model(unittest.TestCase):
         mock_prop = MagicMock()
         mock_prop.value = "bank 1"  # bank-id
         mock_log_data = [MagicMock(), MagicMock()]
-        mock_log_data[0].name = "LogName"
-        mock_log_data[1].name = "proton_charge"
+        mock_log_data[0].name = "LogName_GSASII"
+        mock_log_data[1].name = "proton_charge_GSASII"
         self.mock_run = MagicMock()
         self.mock_run.getProtonCharge.return_value = 1.0
         self.mock_run.getProperty.return_value = mock_prop
