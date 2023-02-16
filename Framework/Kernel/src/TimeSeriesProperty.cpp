@@ -881,14 +881,14 @@ TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<SplittingIn
   if (realSize() <= 1 || intervals.empty()) {
     return std::pair<double, double>{this->averageValueInFilter(intervals), std::numeric_limits<double>::quiet_NaN()};
   }
-
+  auto real_size = realSize();
   for (const auto &time : intervals) {
     int index;
     auto value = static_cast<double>(getSingleValue(time.begin(), index));
     DateAndTime startTime = time.begin();
-    while (index < realSize()) {
+    while (index < real_size) {
       index++;
-      if (index == realSize())
+      if (index == real_size)
         duration = DateAndTime::secondsFromDuration(time.end() - startTime);
       else {
         duration = DateAndTime::secondsFromDuration(m_values[index].time() - startTime);
@@ -899,7 +899,7 @@ TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<SplittingIn
 
       mean_current = mean_prev + (duration / weighted_sum) * (value - mean_prev);
       s += duration * (value - mean_prev) * (value - mean_current);
-      if (index < realSize())
+      if (index < real_size)
         value = static_cast<double>(m_values[index].value());
     }
   }
