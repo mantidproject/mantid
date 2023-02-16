@@ -59,7 +59,7 @@ class GSAS2Model(object):
         self.out_call_gsas2 = None
         self.err_call_gsas2 = None
         self._data_workspaces = FittingWorkspaceRecordContainer()
-        self._sample_logs_workspace_group = SampleLogsGroupWorkspace()
+        self._sample_logs_workspace_group = SampleLogsGroupWorkspace("GSASII")
         self.phase_names_list = None
 
     def clear_input_components(self):

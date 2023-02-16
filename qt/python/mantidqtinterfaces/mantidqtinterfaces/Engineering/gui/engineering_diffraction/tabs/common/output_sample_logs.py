@@ -6,8 +6,15 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-from mantid.simpleapi import logger, AverageLogData, \
-    CreateEmptyTableWorkspace, GroupWorkspaces, DeleteWorkspace, DeleteTableRows, RenameWorkspace
+from mantid.simpleapi import (
+    logger,
+    AverageLogData,
+    CreateEmptyTableWorkspace,
+    GroupWorkspaces,
+    DeleteWorkspace,
+    DeleteTableRows,
+    RenameWorkspace,
+)
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from mantid.api import AnalysisDataService as ADS
@@ -28,32 +35,33 @@ def _generate_workspace_name(filepath):
 
 
 class SampleLogsGroupWorkspace(object):
-
-    def __init__(self):
+    def __init__(self, tab_name: str):
         self._log_names = []
         self._log_workspaces = None  # GroupWorkspace
         self._log_values = dict()  # {ws_name: {log_name: [avg, er]} }
+        self._suffix = "_" + tab_name
+        self._run_info_name = "run_info" + self._suffix
 
     def create_log_workspace_group(self):
         # run information table
         run_info = self.make_runinfo_table()
-        self._log_workspaces = GroupWorkspaces([run_info], OutputWorkspace='logs')
+        self._log_workspaces = GroupWorkspaces([run_info], OutputWorkspace="logs" + self._suffix)
         # a table per logs
         logs = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "logs")
         if logs:
-            self._log_names = logs.split(',')
+            self._log_names = logs.split(",")
             for log in self._log_names:
-                self.make_log_table(log)
-                self._log_workspaces.add(log)
+                log_table_ws = self.make_log_table(log)
+                self._log_workspaces.add(log_table_ws.name())
 
     def make_log_table(self, log):
-        ws_log = CreateEmptyTableWorkspace(OutputWorkspace=log)
+        ws_log = CreateEmptyTableWorkspace(OutputWorkspace=log + self._suffix)
         ws_log.addColumn(type="float", name="avg")
         ws_log.addColumn(type="float", name="stdev")
         return ws_log
 
     def make_runinfo_table(self):
-        run_info = CreateEmptyTableWorkspace()
+        run_info = CreateEmptyTableWorkspace(OutputWorkspace=self._run_info_name)
         run_info.addColumn(type="str", name="Instrument")
         run_info.addColumn(type="int", name="Run")
         run_info.addColumn(type="str", name="Bank")
@@ -72,12 +80,12 @@ class SampleLogsGroupWorkspace(object):
             self.create_log_workspace_group()
         else:
             for log in self._log_names:
-                if not ADS.doesExist(log):
-                    self.make_log_table(log)
-                    self._log_workspaces.add(log)
-            if not ADS.doesExist("run_info"):
+                if not ADS.doesExist(log + self._suffix):
+                    log_table_ws = self.make_log_table(log)
+                    self._log_workspaces.add(log_table_ws.name())
+            if not ADS.doesExist(self._run_info_name):
                 self.make_runinfo_table()
-                self._log_workspaces.add("run_info")
+                self._log_workspaces.add(self._run_info_name)
         # update log tables
         self.remove_all_log_rows()
         for irow, (ws_name, ws) in enumerate(data_workspaces.get_loaded_ws_dict().items()):
@@ -93,9 +101,14 @@ class SampleLogsGroupWorkspace(object):
             self._log_values[ws_name] = dict()
         # add run info
         run = ws.getRun()
-        row = [ws.getInstrument().getFullName(), ws.getRunNumber(), str(run.getProperty('bankid').value),
-               run.getProtonCharge(), ws.getTitle()]
-        write_table_row(ADS.retrieve("run_info"), row, irow)
+        row = [
+            ws.getInstrument().getFullName(),
+            ws.getRunNumber(),
+            str(run.getProperty("bankid").value),
+            run.getProtonCharge(),
+            ws.getTitle(),
+        ]
+        write_table_row(ADS.retrieve(self._run_info_name), row, irow)
         # add log data - loop over existing log workspaces not logs in settings as these might have changed
         currentRunLogs = [l.name for l in run.getLogData()]
         nullLogValue = full(2, nan)  # default nan if can't read/average log data
@@ -114,7 +127,7 @@ class SampleLogsGroupWorkspace(object):
 
         # write log values to table (nan if log could not be averaged)
         for log, avg_and_stdev in self._log_values[ws_name].items():
-            write_table_row(ADS.retrieve(log), avg_and_stdev, irow)
+            write_table_row(ADS.retrieve(log + self._suffix), avg_and_stdev, irow)
         self.update_log_group_name()
 
     def remove_log_rows(self, row_numbers):
@@ -132,14 +145,19 @@ class SampleLogsGroupWorkspace(object):
             DeleteWorkspace(ws_name)
 
     def update_log_group_name(self):
-        run_info = ADS.retrieve('run_info')
-        if run_info.rowCount() > 0:
-            runs = run_info.column('Run')
-            name = f"{run_info.row(0)['Instrument']}_{min(runs)}-{max(runs)}_logs"
-            if not name == self._log_workspaces.name():
-                RenameWorkspace(InputWorkspace=self._log_workspaces.name(), OutputWorkspace=name)
-        else:
+        name = self._generate_log_group_name()
+        if not name:
             self.delete_logs()
+            return
+        RenameWorkspace(InputWorkspace=self._log_workspaces.name(), OutputWorkspace=name)
+
+    def _generate_log_group_name(self) -> str:
+        run_info = ADS.retrieve(self._run_info_name)
+        if run_info.rowCount() > 0:
+            runs = run_info.column("Run")
+            name = f"{run_info.row(0)['Instrument']}_{min(runs)}-{max(runs)}_logs"
+            return name + self._suffix
+        return ""
 
     def get_log_values(self):
         return self._log_values

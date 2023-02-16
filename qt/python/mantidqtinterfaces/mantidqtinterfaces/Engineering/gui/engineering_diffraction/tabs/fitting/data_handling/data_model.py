@@ -41,7 +41,7 @@ class FittingDataModel(object):
         self._fit_workspaces = None
         self._last_added = []  # List of workspace names loaded in the last load action.
         self._data_workspaces = FittingWorkspaceRecordContainer()
-        self._sample_logs_workspace_group = SampleLogsGroupWorkspace()
+        self._sample_logs_workspace_group = SampleLogsGroupWorkspace("Fitting")
 
     # =================
     # Loaded Data Table
