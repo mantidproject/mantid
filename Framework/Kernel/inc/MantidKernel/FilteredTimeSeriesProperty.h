@@ -55,9 +55,9 @@ public:
   double mean() const;
 
   /// Returns n-th valid time interval, in a very inefficient way.
-  TimeInterval nthInterval(int n) const;
+  TimeInterval nthInterval(int n) const override;
   /// Returns n-th value of n-th interval in an incredibly inefficient way.
-  HeldType nthValue(int n) const;
+  HeldType nthValue(int n) const override;
 
   /// Divide the property into  allowed and disallowed time intervals according
   /// to a filter.

@@ -185,13 +185,15 @@ public:
     running->addValue("2009-Apr-28 09:20:30", true);
     running->addValue("2009-Apr-28 09:20:51", false);
 
+    // goes from before the previous one through all time
+    // the intersection of the two is "simply" the previous filter
     FilteredTimeSeriesProperty<bool> *period = new FilteredTimeSeriesProperty<bool>("period 1");
-    running->addValue("2009-Apr-28 09:20:29", true);
+    period->addValue("2009-Apr-28 09:20:29", true);
 
     LogFilter filter(p);
     filter.addFilter(*running);
     filter.addFilter(*period);
-    TS_ASSERT_EQUALS(filter.data()->size(), 4);
+    TS_ASSERT_EQUALS(filter.data()->size(), 1);
     delete p;
     delete period;
     delete running;

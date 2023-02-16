@@ -17,6 +17,8 @@
 namespace Mantid {
 namespace Kernel {
 
+class TimeROI;
+
 //----------------------------------------------------------------------
 // Forward declarations
 //----------------------------------------------------------------------
@@ -58,13 +60,12 @@ private:
   /// Converts the given property to a TimeSeriesProperty<double>, throws if
   /// invalid.
   FilteredTimeSeriesProperty<double> *convertToTimeSeriesOfDouble(const Property *prop);
+  void setFilter(const TimeROI &roi, const bool filterOpenEnded);
 
   /// Owned pointer to the filtered property
   std::unique_ptr<FilteredTimeSeriesProperty<double>> m_prop;
   /// Owned pointer to the filter mask
   std::unique_ptr<TimeSeriesProperty<bool>> m_filter;
-  /// If the filter ends in USE
-  bool m_filterOpenEnded;
 };
 
 } // namespace Kernel

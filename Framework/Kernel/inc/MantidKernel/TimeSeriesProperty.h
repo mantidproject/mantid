@@ -295,9 +295,9 @@ public:
   TYPE getSingleValue(const Types::Core::DateAndTime &t, int &index) const;
 
   /// Returns n-th valid time interval, in a very inefficient way.
-  TimeInterval nthInterval(int n) const;
+  virtual TimeInterval nthInterval(int n) const;
   /// Returns n-th value of n-th interval in an incredibly inefficient way.
-  TYPE nthValue(int n) const;
+  virtual TYPE nthValue(int n) const;
   /// Returns n-th time. NOTE: Complexity is order(n)! regardless of filter
   Types::Core::DateAndTime nthTime(int n) const;
 

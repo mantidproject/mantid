@@ -17,7 +17,8 @@ namespace Mantid::Kernel {
  * @param filter :: A reference to a TimeSeriesProperty<bool> that will act as a
  * filter
  */
-LogFilter::LogFilter(const TimeSeriesProperty<bool> &filter) : m_prop(), m_filter(), m_filterOpenEnded(false) {
+LogFilter::LogFilter(const TimeSeriesProperty<bool> &filter)
+    : m_prop(), m_filter(std::make_unique<TimeSeriesProperty<bool>>("filter")) {
   addFilter(filter);
 }
 
@@ -26,7 +27,7 @@ LogFilter::LogFilter(const TimeSeriesProperty<bool> &filter) : m_prop(), m_filte
  * @param prop :: Pointer to property to be filtered. Its actual type must be
  * TimeSeriesProperty<double>
  */
-LogFilter::LogFilter(const Property *prop) : m_prop(), m_filter(), m_filterOpenEnded(false) {
+LogFilter::LogFilter(const Property *prop) : m_filter(std::make_unique<TimeSeriesProperty<bool>>("filter")) {
   m_prop.reset(convertToTimeSeriesOfDouble(prop));
 }
 
@@ -34,7 +35,8 @@ LogFilter::LogFilter(const Property *prop) : m_prop(), m_filter(), m_filterOpenE
  * / Constructor from a TimeSeriesProperty<double> object to avoid overhead of
  * casts
  */
-LogFilter::LogFilter(const TimeSeriesProperty<double> *timeSeries) : m_prop(), m_filter(), m_filterOpenEnded(false) {
+LogFilter::LogFilter(const TimeSeriesProperty<double> *timeSeries)
+    : m_filter(std::make_unique<TimeSeriesProperty<bool>>("filter")) {
   m_prop.reset(convertToTimeSeriesOfDouble(timeSeries));
 }
 
@@ -60,12 +62,21 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
     m_prop->clearFilter();
   }
 
+  /// If the filter ends in USE
+  bool filterOpenEnded;
+
   if (!m_filter || m_filter->size() == 0) {
-    m_filterOpenEnded = filter.lastValue();
-    m_filter.reset(filter.clone());
+    // clean-up and replace current filter
+    filterOpenEnded = filter.lastValue();
+
+    // TimeROI constructor does a ton of cleanup
+    TimeROI mine(&filter);
+
+    // put the results back into the TimeSeriesProperty
+    this->setFilter(mine, filterOpenEnded);
   } else {
     // determine if the current version of things are open-ended
-    m_filterOpenEnded = (m_filter->lastValue() && filter.lastValue());
+    filterOpenEnded = (m_filter->lastValue() && filter.lastValue());
     DateAndTime firstTime = std::min(m_filter->firstTime(), filter.firstTime());
     if (m_prop && (m_prop->size() > 0)) {
       firstTime = std::min(firstTime, m_prop->firstTime());
@@ -92,22 +103,7 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
     mine.update_intersection(theirs);
 
     // put the results into the TimeSeriesProperty
-    std::vector<bool> values;
-    std::vector<DateAndTime> times;
-    for (const auto splitter : mine.toSplitters()) {
-      values.emplace_back(true);
-      values.emplace_back(false);
-      times.emplace_back(splitter.start());
-      times.emplace_back(splitter.stop());
-    }
-    // if both are open ended, remove the ending
-    if (m_filterOpenEnded) {
-      times.pop_back();
-      values.pop_back();
-    }
-
-    // set as the filter
-    m_filter->replaceValues(times, values);
+    this->setFilter(mine, filterOpenEnded);
   }
 
   // apply the filter to the property
@@ -116,7 +112,7 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
     TimeROI timeroi(m_filter.get());
 
     // if the end point is a open, then the last point in the TimeROI needs to be modified to make things work out
-    if (m_filterOpenEnded) {
+    if (filterOpenEnded) {
       // do a test filtering so the second to last interval can be inspected
       m_prop->filterWith(timeroi);
       // determine how far out to adjust the last ROI
@@ -133,6 +129,7 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
       // both ends match (lucky guess earlier) so there is nothing to adjust
     }
 
+    // apply the filter
     m_prop->filterWith(timeroi);
   }
 }
@@ -143,7 +140,6 @@ void LogFilter::clear() {
   if (m_prop)
     m_prop->clearFilter();
   m_filter.reset();
-  m_filterOpenEnded = false;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -183,6 +179,26 @@ FilteredTimeSeriesProperty<double> *LogFilter::convertToTimeSeriesOfDouble(const
     throw std::invalid_argument("LogFilter::convertToTimeSeriesOfDouble - Cannot convert property, \"" + prop->name() +
                                 "\", to double series.");
   }
+}
+
+void LogFilter::setFilter(const TimeROI &roi, const bool filterOpenEnded) {
+  // put the results into the TimeSeriesProperty
+  std::vector<bool> values;
+  std::vector<DateAndTime> times;
+  for (const auto splitter : roi.toSplitters()) {
+    values.emplace_back(true);
+    values.emplace_back(false);
+    times.emplace_back(splitter.begin());
+    times.emplace_back(splitter.end());
+  }
+  // if both are open ended, remove the ending
+  if (filterOpenEnded) {
+    times.pop_back();
+    values.pop_back();
+  }
+
+  // set as the filter
+  m_filter->replaceValues(times, values);
 }
 
 } // namespace Mantid::Kernel
