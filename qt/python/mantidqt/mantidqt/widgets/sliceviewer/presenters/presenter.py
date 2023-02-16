@@ -387,7 +387,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         try:
             candidate_model = SliceViewerModel(workspace)
             candidate_model_properties = candidate_model.get_properties()
-            for (property, value) in candidate_model_properties.items():
+            for property, value in candidate_model_properties.items():
                 if self.initial_model_properties[property] != value:
                     raise ValueError(f"The property {property} is different on the new workspace.")
 

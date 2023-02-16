@@ -269,7 +269,6 @@ class RawDataExplorerView(QWidget):
         selection = set()
 
         for index in selected_indices:
-
             file_path = self.get_path(index)
             if file_model.isDir(index):
                 # we don't select directories

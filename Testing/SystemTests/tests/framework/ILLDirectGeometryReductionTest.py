@@ -196,7 +196,6 @@ class IN5_Mask_Non_Overlapping_Bins(systemtesting.MantidSystemTest):
             ws.setY(i, y_prime[i])
 
     def runTest(self):
-
         run = "ILL/IN5/176053.nxs"
 
         DirectILLCollectData(
