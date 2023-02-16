@@ -87,6 +87,7 @@
         "ci-default",
         "conda"
       ],
+      "cmakeExecutable": "cmake.exe",
       "cacheVariables": {
         "USE_PRECOMPILED_HEADERS": "OFF",
         "CMAKE_MAKE_PROGRAM": "ninja.exe"
