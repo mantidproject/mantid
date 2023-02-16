@@ -1,1 +1,0 @@
-- Replaced deprecated Matplotlib `bivariate_normal` function in `BVGFitTools.py`
