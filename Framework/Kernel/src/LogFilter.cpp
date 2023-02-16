@@ -146,7 +146,7 @@ void LogFilter::clear() {
 namespace {
 template <typename SrcType> struct ConvertToTimeSeriesDouble {
   static FilteredTimeSeriesProperty<double> *apply(const Property *prop) {
-    auto srcTypeSeries = dynamic_cast<const FilteredTimeSeriesProperty<SrcType> *>(prop);
+    auto srcTypeSeries = dynamic_cast<const TimeSeriesProperty<SrcType> *>(prop);
     if (!srcTypeSeries)
       return nullptr;
     auto converted = new FilteredTimeSeriesProperty<double>(prop->name());
@@ -155,16 +155,6 @@ template <typename SrcType> struct ConvertToTimeSeriesDouble {
       converted->addValue(it->first, double(it->second));
     }
     return converted;
-  }
-};
-
-/// Specialization for a double so that it just clones the input
-template <> struct ConvertToTimeSeriesDouble<double> {
-  static FilteredTimeSeriesProperty<double> *apply(const Property *prop) {
-    auto doubleSeries = dynamic_cast<const FilteredTimeSeriesProperty<double> *>(prop);
-    if (!doubleSeries)
-      return nullptr;
-    return doubleSeries->clone();
   }
 };
 } // namespace
