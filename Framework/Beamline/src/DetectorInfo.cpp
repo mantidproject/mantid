@@ -10,7 +10,6 @@
 
 #include <algorithm>
 #include <exception>
-#include <iostream>
 
 namespace Mantid::Beamline {
 
@@ -91,6 +90,7 @@ bool DetectorInfo::isMonitor(const size_t index) const {
   if (index >= m_isMonitor->size()) {
     throw std::runtime_error("Invalid monitor index");
   }
+  // No check for time dependence since monitor flags are not time dependent.
   return (*m_isMonitor)[index];
 }
 
