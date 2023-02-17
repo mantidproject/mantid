@@ -185,18 +185,18 @@ def remove_unnecessary_standard_banks(standard_data, sample_banks, rounding_limi
 
 def remove_unnecessary_standard_fields(standard_data, sample_fields, ignore_van):
     if ignore_van:
-        vana_data_list = [
-            entry for entry in standard_data if entry['sample_type']=='vana'
-        ]
+        vana_data_list = [entry for entry in standard_data if entry['sample_type'] == 'vana']
         vana_fields = [field_dict.get(entry['field'], entry['field']) for entry in vana_data_list]
-        vana_and_sample_fields = set(vana_fields + list(sample_fields))
-        standard_data_clean = [
-            entry for entry in standard_data if field_dict.get(entry['field'], entry['field']) in vana_and_sample_fields
-         ]
+        nicr_fields =  list(sample_fields)
+        empty_fields = set(vana_fields + list(sample_fields))
+        nicr_data_list= [entry for entry in standard_data if entry['sample_type']=='nicr'
+                         and field_dict.get(entry['field'], entry['field']) in nicr_fields]
+        empty_data_list = [entry for entry in standard_data if entry['sample_type']=='empty'
+                           and field_dict.get(entry['field'], entry['field']) in empty_fields]
+        standard_data_clean = vana_data_list + nicr_data_list + empty_data_list
     else:
-        standard_data_clean = [
-            entry for entry in standard_data if field_dict.get(entry['field'], entry['field']) in sample_fields
-        ]
+        standard_data_clean = [entry for entry in standard_data if
+                               field_dict.get(entry['field'], entry['field']) in sample_fields]
     return standard_data_clean
 
 
