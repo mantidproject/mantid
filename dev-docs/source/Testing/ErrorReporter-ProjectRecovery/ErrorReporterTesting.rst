@@ -35,6 +35,9 @@ Error Reporter test
   The python stacktrace should be empty as the Workbench unhandled exception occurred in C++. Close this dialog.
 - Enter some text in the `Name` box; make sure the `Share non-identifiable information` button gets greyed out
 - In the `Name` box enter `Private` and in the `Email` box enter `private`
+- Input some additional information into the main textbox. Check that the character count label updates as you type, copy paste etc.
+- Check that the character count label changes to red and the buttons to send the report are disabled if you exceed the character limit.
+- Check that these changes revert when brining the number of characters back within the limit.
 - Input some additional information into the main textbox. Try to include characters that need to be escaped such as ``"``
 - Tick the `Remember Me` checkbox
 - Click the `Don't share any information` button
