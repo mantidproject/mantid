@@ -170,11 +170,11 @@ public:
     std::vector<double> values = p1->valuesAsVector();
 
     // b) Copy size and interval information in order to verify clearFilter()
-    size_t origsize = p1->size();
+    int origsize = p1->size();
     std::vector<Mantid::Kernel::TimeInterval> dts;
 
-    for (size_t i = 0; i < origsize; i++) {
-      dts.emplace_back(p1->nthInterval(static_cast<int>(i)));
+    for (int i = 0; i < origsize; i++) {
+      dts.emplace_back(p1->nthInterval(i));
     }
 
     // 2. Create a filter
@@ -202,11 +202,11 @@ public:
     p1->clearFilter();
     p1->countSize();
 
-    size_t finalsize = p1->size();
+    int finalsize = p1->size();
     TS_ASSERT_EQUALS(finalsize, origsize);
 
     if (finalsize == origsize) {
-      for (size_t i = 0; i < finalsize; i++) {
+      for (std::size_t i = 0; i < std::size_t(finalsize); i++) {
         Mantid::Kernel::TimeInterval dt = p1->nthInterval(static_cast<int>(i));
         TS_ASSERT_EQUALS(dt.start(), dts[i].start());
         TS_ASSERT_EQUALS(dt.stop(), dts[i].stop());
@@ -544,7 +544,7 @@ public:
   void test_filterByTime_out_of_range_filters_nothing() {
     FilteredTimeSeriesProperty<int> *log = createIntegerTSP(6);
 
-    size_t original_size = log->realSize();
+    auto original_size = log->realSize();
 
     TS_ASSERT_EQUALS(original_size, 6);
 
