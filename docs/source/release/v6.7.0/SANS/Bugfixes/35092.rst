@@ -1,0 +1,2 @@
+- :ref:`SANSILLParameterScan <algm-SANSILLParameterScan>` now allows to perform container
+  and absorber corrections and communicates correctly with the underlying :ref:`SANSILLReduction <algm-SANSILLReduction>` algorithm
