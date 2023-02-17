@@ -101,14 +101,8 @@ std::vector<TYPE> FilteredTimeSeriesProperty<TYPE>::filteredValuesAsVector(const
     return TimeSeriesProperty<TYPE>::filteredValuesAsVector(roi); // no filtering to do
   }
   // if the supplied roi is empty use just this one
-  if ((!roi) || (roi->empty())) {
-    return TimeSeriesProperty<TYPE>::filteredValuesAsVector(this->m_filter.get());
-  }
-
-  // create a union of the two
-  TimeROI roi_copy(*this->m_filter.get());
-  roi_copy.update_intersection(*roi);
-  return TimeSeriesProperty<TYPE>::filteredValuesAsVector(&roi_copy);
+  const auto internalRoi = this->intersectFilterWithOther(roi);
+  return TimeSeriesProperty<TYPE>::filteredValuesAsVector(internalRoi);
 }
 
 /** Returns n-th valid time interval, in a very inefficient way.
@@ -363,32 +357,6 @@ Kernel::TimeROI *FilteredTimeSeriesProperty<TYPE>::intersectFilterWithOther(cons
   return roi;
 }
 
-/**
- * Find out if the given time is included in the filtered data
- * i.e. it does not lie in an excluded region. This function assumes
- * the filter is not empty, it has been applied and the values are
- * sorted by time.
- * @param time :: [input] Time to check
- * @returns :: True if time is in an included region, false if the filter
- * excludes it.
- */
-template <typename TYPE>
-bool FilteredTimeSeriesProperty<TYPE>::isTimeFiltered(const Types::Core::DateAndTime &time) const {
-  // Each time/value pair in the filter defines a point where the region defined
-  // after that time is either included/excluded depending on the boolean value.
-  // By definition of the filter construction the region before a given filter
-  // time must have the opposite value. For times outside the filter region:
-  //   1. time < first filter time: inverse of the first filter value
-  //   2. time > last filter time: value of the last filter value
-  // If time == a filter time then the value is taken to belong to that filter
-  // region and not the previous
-  if (m_filter->empty()) {
-    return true;
-  } else {
-    return m_filter->valueAtTime(time);
-  }
-}
-
 template <typename TYPE> const Kernel::TimeROI &FilteredTimeSeriesProperty<TYPE>::getTimeROI() const {
   return *(this->m_filter.get());
 }
@@ -401,10 +369,8 @@ template <typename TYPE> const Kernel::TimeROI &FilteredTimeSeriesProperty<TYPE>
 template <typename TYPE>
 std::vector<SplittingInterval> FilteredTimeSeriesProperty<TYPE>::getSplittingIntervals() const {
   if (m_filter->empty()) {
-    // Case where there is no filter
-    std::vector<SplittingInterval> intervals;
-    intervals.emplace_back(this->firstTime(), this->lastTime());
-    return intervals;
+    // Case where there is no filter just use the parent implementation
+    return TimeSeriesProperty<TYPE>::getSplittingIntervals();
   } else {
     if (!m_filterApplied) {
       applyFilter();
@@ -412,47 +378,6 @@ std::vector<SplittingInterval> FilteredTimeSeriesProperty<TYPE>::getSplittingInt
 
     return m_filter->toSplitters();
   }
-}
-
-/** Returns the calculated time weighted average value.
- * @param timeRoi  Object that holds information about when the time measurement
- * was active.
- * @return The time-weighted average value of the log when the time measurement
- * was active.
- */
-template <typename TYPE> double FilteredTimeSeriesProperty<TYPE>::timeAverageValue(const TimeROI *timeRoi) const {
-  // make a copy of the filter
-  auto internalRoi = this->intersectFilterWithOther(timeRoi);
-  // call parent method
-  return TimeSeriesProperty<TYPE>::timeAverageValue(internalRoi);
-}
-
-/**
- * Return a TimeSeriesPropertyStatistics struct containing the
- * statistics of this TimeSeriesProperty object.
- * @param roi : Optional TimeROI pointer to get statistics for active time.
- *
- * N.B. This method DOES take filtering into account
- */
-template <typename TYPE>
-TimeSeriesPropertyStatistics FilteredTimeSeriesProperty<TYPE>::getStatistics(const TimeROI *roi) const {
-  // make a copy of the filter
-  auto internalRoi = this->intersectFilterWithOther(roi);
-  // call parent method
-  return TimeSeriesProperty<TYPE>::getStatistics(internalRoi);
-}
-
-/** Calculate a particular statistical quantity from the values of the time series.
- *  @param selection : Enum indicating the selected statistical quantity.
- *  @param roi : optional pointer to TimeROI object for filtering the time series values.
- *  @return The value of the computed statistical quantity.
- */
-template <typename TYPE>
-double FilteredTimeSeriesProperty<TYPE>::extractStatistic(Math::StatisticType selection, const TimeROI *roi) const {
-  // make a copy of the filter
-  auto internalRoi = this->intersectFilterWithOther(roi);
-  // call parent method
-  return TimeSeriesProperty<TYPE>::extractStatistic(selection, internalRoi); // call parent method
 }
 
 /// @cond

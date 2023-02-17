@@ -72,23 +72,7 @@ public:
   const TimeSeriesProperty<HeldType> *unfiltered() const;
 
   /// If filtering by log, get the time intervals for splitting
-  std::vector<Mantid::Kernel::SplittingInterval> getSplittingIntervals() const;
-
-  /// Returns the calculated time weighted average value.
-  double timeAverageValue(const TimeROI *timeRoi = nullptr) const override;
-
-  /// Return a TimeSeriesPropertyStatistics object
-  TimeSeriesPropertyStatistics getStatistics(const Kernel::TimeROI *roi = nullptr) const override;
-
-  /** Calculate a particular statistical quantity from the values of the time series.
-   *  @param selection : Enum indicating the selected statistical quantity.
-   *  @param roi : optional pointer to TimeROI object for filtering the time series values.
-   *  @return The value of the computed statistical quantity.
-   */
-  double extractStatistic(Math::StatisticType selection, const TimeROI * = nullptr) const override;
-
-  /// Find if time lies in a filtered region
-  bool isTimeFiltered(const Types::Core::DateAndTime &time) const;
+  std::vector<Mantid::Kernel::SplittingInterval> getSplittingIntervals() const override;
 
   const Kernel::TimeROI &getTimeROI() const;
 

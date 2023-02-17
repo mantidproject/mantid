@@ -8,6 +8,7 @@
 
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/SplittingInterval.h"
+#include "MantidKernel/TimeROI.h"
 #include <cxxtest/TestSuite.h>
 
 using Mantid::Kernel::FilteredTimeSeriesProperty;
@@ -86,25 +87,6 @@ public:
     TS_ASSERT_EQUALS(filtered->nthInterval(1).begin_str(), "2007-Nov-30 16:17:30");
     TS_ASSERT_EQUALS(filtered->nthInterval(1).end_str(), "2007-Nov-30 16:17:39");
     TS_ASSERT_EQUALS(filtered->nthValue(1), 4);
-  }
-
-  //-------------------------------------------------------------------------------
-  void test_isTimeFiltered() {
-    auto source = createTestSeries("seriesName");
-    auto filter = createTestFilter();
-    auto filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(std::move(source), filter);
-    Mantid::Types::Core::DateAndTime aTime("2007-11-30T16:16:45");
-    TS_ASSERT_EQUALS(filtered->isTimeFiltered(aTime), false);
-    aTime.setFromISO8601("2007-11-30T16:16:55");
-    TS_ASSERT_EQUALS(filtered->isTimeFiltered(aTime), false);
-    aTime.setFromISO8601("2007-11-30T16:17:25");
-    TS_ASSERT_EQUALS(filtered->isTimeFiltered(aTime), true);
-    aTime.setFromISO8601("2007-11-30T16:17:35");
-    TS_ASSERT_EQUALS(filtered->isTimeFiltered(aTime), true);
-    aTime.setFromISO8601("2007-11-30T16:17:39");
-    TS_ASSERT_EQUALS(filtered->isTimeFiltered(aTime), false);
-    aTime.setFromISO8601("2007-11-30T16:17:40");
-    TS_ASSERT_EQUALS(filtered->isTimeFiltered(aTime), false);
   }
 
   // Create a small TSP<int>. Callee owns the returned object.
@@ -562,16 +544,59 @@ public:
   void test_getStatistics_filtered() {
     const auto &log = getFilteredTestLog();
 
+    // calculate expected values
+    const std::vector<double> durations{10, 5, 5, 10, 10, 10, 10, 10, 10, 5};
+    const std::vector<double> values{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+    /* this commented out code contains the values we want eventually,
+       but it would change the existing behavior and is being
+       left alone for now
+    double exp_mean = 0.;
+    for (const auto value: values)
+        exp_mean += value;
+    exp_mean /= double(values.size()); // 5.5
+
+    double exp_stddev = 0.;
+    for (const auto value: values)
+        exp_stddev += (value - exp_mean) * (value - exp_mean);
+    exp_stddev = std::sqrt(exp_stddev / double(values.size())); // 2.872
+
+    // median is halfway between because it is even number of values
+    const double exp_median = 0.5 * (values[5] + values[6]);
+    */
+    const double exp_mean = 5.7777777719;
+    const double exp_stddev = 2.8974232916;
+    const double exp_median = 6.;
+
+    // calculate from values above
+    double exp_duration = 0.;
+    for (const auto value : durations)
+      exp_duration += value;
+
+    double exp_time_mean = 0.;
+    for (size_t i = 0; i < durations.size(); ++i)
+      exp_time_mean += (durations[i] * values[i]);
+    exp_time_mean /= exp_duration;
+
+    double exp_time_stddev = 0;
+    for (size_t i = 0; i < durations.size(); ++i)
+      exp_time_stddev += (durations[i] * (values[i] - exp_time_mean) * (values[i] - exp_time_mean));
+    exp_time_stddev = std::sqrt(exp_time_stddev / exp_duration);
+
     // Get the stats and compare to expected values
     const auto &stats = log->getStatistics();
-    TS_ASSERT_DELTA(stats.minimum, 1.0, 1e-6);
-    TS_ASSERT_DELTA(stats.maximum, 10.0, 1e-6);
-    TS_ASSERT_DELTA(stats.median, 6.0, 1e-6);
-    TS_ASSERT_DELTA(stats.mean, 5.7778, 1e-3);
-    TS_ASSERT_DELTA(stats.duration, 85.0, 1e-6);
-    TS_ASSERT_DELTA(stats.standard_deviation, 2.89742, 1e-4);
-    TS_ASSERT_DELTA(stats.time_mean, 5.5882, 1.e-3);
-    TS_ASSERT_DELTA(stats.time_standard_deviation, 2.7237, 1.e-3);
+    TS_ASSERT_DELTA(stats.minimum, values.front(), 1e-6);
+    TS_ASSERT_DELTA(stats.maximum, values.back(), 1e-6);
+    TS_ASSERT_DELTA(stats.median, exp_median, 1e-6);
+    TS_ASSERT_DELTA(stats.mean, exp_mean, 1e-3);
+    TS_ASSERT_DELTA(stats.duration, exp_duration, 1e-4);
+    TS_ASSERT_DELTA(stats.standard_deviation, exp_stddev, 1e-4);
+    TS_ASSERT_DELTA(stats.time_mean, exp_time_mean, 1.e-3);
+    TS_ASSERT_DELTA(stats.time_standard_deviation, exp_time_stddev, 1.e-3);
+
+    // Test that the other time-average mean code is correct
+    const auto roi = log->getTimeROI();
+    TS_ASSERT_DELTA(log->averageValueInFilter(roi.toSplitters()), exp_time_mean, 1.e-3);
   }
 
   /// Test that timeAverageValue respects the filter
@@ -589,6 +614,13 @@ public:
     TS_ASSERT_DIFFERS(unfilteredValues.size(), filteredValues.size());
     TS_ASSERT_EQUALS(unfilteredValues.size(), 11);
     TS_ASSERT_EQUALS(filteredValues.size(), 9);
+
+    // the filter should return these values, but that is a change in behavior
+    // from what is currently expected
+    //    const std::vector<double> EXP_FILTERED_VALUES{1,2,3,4,5,6,7,8,9,10};
+    //    TS_ASSERT_EQUALS(filteredValues.size(), EXP_FILTERED_VALUES.size());
+    //    for (std::size_t i = 0; i < EXP_FILTERED_VALUES.size(); ++i)
+    //        TS_ASSERT_EQUALS(filteredValues[i], EXP_FILTERED_VALUES[i]);
   }
 
   void test_getSplittingIntervals_repeatedEntries() {
