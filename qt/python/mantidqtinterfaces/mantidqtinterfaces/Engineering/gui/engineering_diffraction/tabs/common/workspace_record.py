@@ -9,12 +9,13 @@ from collections import OrderedDict
 
 
 class FittingWorkspaceRecord:
-    """ Record that maps the workspace the user has loaded to the derived background-subtracted workspace"""
+    """Record that maps the workspace the user has loaded to the derived background-subtracted workspace"""
+
     def __init__(self, **kwargs):
-        self.loaded_ws = kwargs.get('loaded_ws', None)
-        self.bgsub_ws_name = kwargs.get('bgsub_ws_name', None)
-        self.bgsub_ws = kwargs.get('bgsub_ws', None)
-        self.bg_params = kwargs.get('bg_params', [])
+        self.loaded_ws = kwargs.get("loaded_ws", None)
+        self.bgsub_ws_name = kwargs.get("bgsub_ws_name", None)
+        self.bgsub_ws = kwargs.get("bgsub_ws", None)
+        self.bg_params = kwargs.get("bg_params", [])
 
     def get_bg_active(self):
         if self.bgsub_ws and self.bg_params[0]:
@@ -30,7 +31,7 @@ class FittingWorkspaceRecord:
             return self.loaded_ws
 
     def __setattr__(self, key, value):
-        if key == 'bg_params':
+        if key == "bg_params":
             if not isinstance(value, list):
                 raise AttributeError("bg_params must be a list")
 
@@ -48,7 +49,7 @@ class FittingWorkspaceRecordContainer:
         return len(self.dict)
 
     def __bool__(self):
-        return len(self.dict)>0
+        return len(self.dict) > 0
 
     def get(self, key, default_value):
         return self.dict.get(key, default_value)
