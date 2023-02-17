@@ -96,7 +96,7 @@ class DrangeData(object):
         self._empty = ws_name
         return
 
-    def calibrate_vanadium(self, calibration_file=""):
+    def calibrate_and_focus_vanadium(self, calibration_file=""):
         return self.calibrate_and_focus_workspace(self._vanadium, calibration_file)
 
     def calibrate_and_focus_workspace(self, ws, calibration_file=""):
@@ -126,7 +126,7 @@ class DrangeData(object):
                 sample = self.subtract_container_from_sample(sample)
             sample = self.calibrate_and_focus_workspace(sample, focus_calibration_file)
             if vanadium_correct:
-                van = self.calibrate_vanadium(focus_calibration_file)
+                van = self.calibrate_and_focus_vanadium(focus_calibration_file)
                 calib_van = RebinToWorkspace(WorkspaceToRebin=van, WorkspaceToMatch=sample, OutputWorkspace="van_rb", StoreInADS=False)
                 sample = Divide(LHSWorkspace=sample, RHSWorkspace=calib_van, OutputWorkspace=outputname)
                 sample = ReplaceSpecialValues(
