@@ -32,6 +32,7 @@ def _try_delete(path):
 
 class TestGSAS2Model(unittest.TestCase):
     def setUp(self):
+        self._suffix = "_GSASII"
         self.model = GSAS2Model()
         self.phase_file_path = FileFinder.getFullPath(os.path.join("EngDiff_gsas2_tab", "gsas2_FE_GAMMA.cif"))
         self.lst_result_filepath = FileFinder.getFullPath(os.path.join("EngDiff_gsas2_tab", "gsas2_output.lst"))
@@ -44,8 +45,8 @@ class TestGSAS2Model(unittest.TestCase):
         mock_prop = MagicMock()
         mock_prop.value = "bank 1"  # bank-id
         mock_log_data = [MagicMock(), MagicMock()]
-        mock_log_data[0].name = "LogName_GSASII"
-        mock_log_data[1].name = "proton_charge_GSASII"
+        mock_log_data[0].name = "LogName"
+        mock_log_data[1].name = "proton_charge"
         self.mock_run = MagicMock()
         self.mock_run.getProtonCharge.return_value = 1.0
         self.mock_run.getProperty.return_value = mock_prop
@@ -418,14 +419,15 @@ class TestGSAS2Model(unittest.TestCase):
         self.model._sample_logs_workspace_group._log_workspaces = MagicMock()
         self.model._sample_logs_workspace_group._log_names = ["LogName1", "LogName2"]
         # simulate LogName2 and run_info tables being deleted
-        mock_ads.doesExist = lambda ws_name: ws_name == "LogName1"
+        mock_ads.doesExist = lambda ws_name: ws_name == f"LogName1{self._suffix}"
+        mock_make_log_table.return_value.name.return_value = f"LogName2{self._suffix}"
 
         self.model._sample_logs_workspace_group.update_log_workspace_group(self.model._data_workspaces)
         mock_create_log_group.assert_not_called()
         mock_make_runinfo.assert_called_once()
         mock_make_log_table.assert_called_once_with("LogName2")
-        self.model._sample_logs_workspace_group._log_workspaces.add.assert_any_call("run_info")
-        self.model._sample_logs_workspace_group._log_workspaces.add.assert_any_call("LogName2")
+        self.model._sample_logs_workspace_group._log_workspaces.add.assert_any_call(f"run_info{self._suffix}")
+        self.model._sample_logs_workspace_group._log_workspaces.add.assert_any_call(f"LogName2{self._suffix}")
         mock_add_log.assert_called_with("name1", self.mock_ws, 0)
 
     @patch(output_sample_log_path + ".SampleLogsGroupWorkspace.make_log_table")
@@ -438,11 +440,18 @@ class TestGSAS2Model(unittest.TestCase):
         mock_group_ws = MagicMock()
         mock_group.return_value = mock_group_ws
 
+        mock_log_table_1 = MagicMock()
+        mock_log_table_1.name.return_value = f"{log_names[0]}{self._suffix}"
+        mock_log_table_2 = MagicMock()
+        mock_log_table_2.name.return_value = f"{log_names[1]}{self._suffix}"
+
+        mock_make_log_table.side_effect = [mock_log_table_1, mock_log_table_2]
+
         self.model._sample_logs_workspace_group.create_log_workspace_group()
 
         mock_group.assert_called_once()
         for log in log_names:
-            mock_group_ws.add.assert_any_call(log)
+            mock_group_ws.add.assert_any_call(f"{log}{self._suffix}")
         self.assertEqual(log_names, self.model._sample_logs_workspace_group._log_names)
         mock_make_runinfo.assert_called_once()
         self.assertEqual(len(log_names), mock_make_log_table.call_count)
@@ -453,9 +462,9 @@ class TestGSAS2Model(unittest.TestCase):
     @patch(output_sample_log_path + ".AverageLogData")
     def test_add_log_to_table_already_averaged(self, mock_avglogs, mock_update_logname, mock_ads, mock_writerow):
         self._setup_model_log_workspaces()
-        mock_ads.retrieve = lambda ws_name: [ws for ws in self.model._sample_logs_workspace_group._log_workspaces if ws.name() == ws_name][
-            0
-        ]
+        mock_ads.retrieve = lambda ws_name: [
+            ws for ws in self.model._sample_logs_workspace_group._log_workspaces if ws.name() == ws_name[: -len(self._suffix)]
+        ][0]
         self.model._sample_logs_workspace_group._log_values = {"name1": {"LogName": [2, 1]}}
         self.model._sample_logs_workspace_group._log_names = ["LogName"]
 
@@ -472,9 +481,9 @@ class TestGSAS2Model(unittest.TestCase):
     @patch(output_sample_log_path + ".AverageLogData")
     def test_add_log_to_table_not_already_averaged(self, mock_avglogs, mock_update_logname, mock_ads, mock_writerow):
         self._setup_model_log_workspaces()
-        mock_ads.retrieve = lambda ws_name: [ws for ws in self.model._sample_logs_workspace_group._log_workspaces if ws.name() == ws_name][
-            0
-        ]
+        mock_ads.retrieve = lambda ws_name: [
+            ws for ws in self.model._sample_logs_workspace_group._log_workspaces if ws.name() == ws_name[: -len(self._suffix)]
+        ][0]
         self.model._sample_logs_workspace_group._log_values = {"name1": {}}
         self.model._sample_logs_workspace_group._log_names = ["LogName"]
         mock_avglogs.return_value = [1.0, 1.0]
@@ -492,9 +501,9 @@ class TestGSAS2Model(unittest.TestCase):
     @patch(output_sample_log_path + ".AverageLogData")
     def test_add_log_to_table_not_existing_in_ws(self, mock_avglogs, mock_update_logname, mock_ads, mock_writerow):
         self._setup_model_log_workspaces()
-        mock_ads.retrieve = lambda ws_name: [ws for ws in self.model._sample_logs_workspace_group._log_workspaces if ws.name() == ws_name][
-            0
-        ]
+        mock_ads.retrieve = lambda ws_name: [
+            ws for ws in self.model._sample_logs_workspace_group._log_workspaces if ws.name() == ws_name[: -len(self._suffix)]
+        ][0]
         self.model._sample_logs_workspace_group._log_values = {"name1": {}}
         self.model._sample_logs_workspace_group._log_names = ["LogName"]
         self.mock_run.getLogData.return_value = [self.mock_run.getLogData()[1]]  # only proton_charge
