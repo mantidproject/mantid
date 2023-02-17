@@ -88,6 +88,8 @@ public:
   MOCK_METHOD0(showTransmissionStitchParamsInvalid, void(void));
   MOCK_CONST_METHOD0(getPolarizationCorrectionOption, std::string());
   MOCK_METHOD1(setPolarizationCorrectionOption, void(std::string const &));
+  MOCK_METHOD0(setPolarizationEfficienciesWorkspaceMode, void());
+  MOCK_METHOD0(setPolarizationEfficienciesFilePathMode, void());
   MOCK_CONST_METHOD0(getPolarizationEfficienciesWorkspace, std::string());
   MOCK_METHOD1(setPolarizationEfficienciesWorkspace, void(std::string const &));
   MOCK_CONST_METHOD0(getFloodCorrectionType, std::string());

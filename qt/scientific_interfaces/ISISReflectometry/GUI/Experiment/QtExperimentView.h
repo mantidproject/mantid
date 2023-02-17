@@ -72,6 +72,8 @@ public:
 
   std::string getPolarizationCorrectionOption() const override;
   void setPolarizationCorrectionOption(std::string const &option) override;
+  void setPolarizationEfficienciesWorkspaceMode() override;
+  void setPolarizationEfficienciesFilePathMode() override;
   std::string getPolarizationEfficienciesWorkspace() const override;
   void setPolarizationEfficienciesWorkspace(std::string const &workspace) override;
 

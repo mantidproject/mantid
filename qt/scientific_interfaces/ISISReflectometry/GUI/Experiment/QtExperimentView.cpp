@@ -749,6 +749,16 @@ void QtExperimentView::setPolarizationCorrectionOption(std::string const &option
 
 std::string QtExperimentView::getPolarizationCorrectionOption() const { return getText(*m_ui.polCorrComboBox); }
 
+void QtExperimentView::setPolarizationEfficienciesWorkspaceMode() {
+  auto *selector = new MantidWidgets::WorkspaceSelector;
+  m_ui.expSettingsGrid->replaceWidget(m_ui.polCorrEfficienciesWsSelector, selector);
+}
+
+void QtExperimentView::setPolarizationEfficienciesFilePathMode() {
+  auto *selector = new QLineEdit;
+  m_ui.expSettingsGrid->replaceWidget(m_ui.polCorrEfficienciesWsSelector, selector);
+}
+
 std::string QtExperimentView::getPolarizationEfficienciesWorkspace() const {
   return getText(*m_ui.polCorrEfficienciesWsSelector);
 }

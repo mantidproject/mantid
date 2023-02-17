@@ -107,6 +107,8 @@ public:
 
   virtual std::string getPolarizationCorrectionOption() const = 0;
   virtual void setPolarizationCorrectionOption(std::string const &enable) = 0;
+  virtual void setPolarizationEfficienciesWorkspaceMode() = 0;
+  virtual void setPolarizationEfficienciesFilePathMode() = 0;
   virtual std::string getPolarizationEfficienciesWorkspace() const = 0;
   virtual void setPolarizationEfficienciesWorkspace(std::string const &workspace) = 0;
 
