@@ -162,8 +162,8 @@ class DNSScMap(ObjectDict):
                        header=header[0:-16])
 
     def _get_z_mesh_interpolation(self):
-        f = scipy.interpolate.interp2d(self.omega, self.two_theta, self.z_mesh)
-        return f(self.omega_interpolated, self.two_theta_interpolated)
+        f = scipy.interpolate.RectBivariateSpline( self.two_theta, self.omega, self.z_mesh, kx=2, ky=2)
+        return f(self.two_theta_interpolated, self.omega_interpolated)
 
     def interpolate_quad_mesh(self, interpolation=3):
         if not self.rectangular_grid or interpolation <= 0:
