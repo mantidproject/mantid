@@ -340,7 +340,7 @@ public:
   void reserve(size_t size) { m_values.reserve(size); };
 
   /// If filtering by log, get the time intervals for splitting
-  std::vector<Mantid::Kernel::SplittingInterval> getSplittingIntervals() const;
+  virtual std::vector<Mantid::Kernel::SplittingInterval> getSplittingIntervals() const;
 
 protected:
   //----------------------------------------------------------------------------------------------

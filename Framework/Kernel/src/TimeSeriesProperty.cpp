@@ -891,11 +891,11 @@ TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<SplittingIn
     int index;
     auto value = static_cast<double>(getSingleValue(time.start(), index));
     DateAndTime startTime = time.start();
-    while (index < real_size) {
+    while (index < realSize() - 1 && m_values[index + 1].time() < time.stop()) {
       index++;
-      if (index == real_size)
+      if (index == real_size) {
         duration = DateAndTime::secondsFromDuration(time.stop() - startTime);
-      else {
+      } else {
         duration = DateAndTime::secondsFromDuration(m_values[index].time() - startTime);
         startTime = m_values[index].time();
       }
@@ -904,9 +904,17 @@ TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<SplittingIn
 
       mean_current = mean_prev + (duration / weighted_sum) * (value - mean_prev);
       s += duration * (value - mean_prev) * (value - mean_current);
-      if (index < real_size)
-        value = static_cast<double>(m_values[index].value());
+
+      value = static_cast<double>(m_values[index].value());
     }
+
+    // Now close off with the end of the current filter range
+    duration = DateAndTime::secondsFromDuration(time.end() - startTime);
+    weighted_sum += duration;
+    mean_prev = mean_current;
+
+    mean_current = mean_prev + (duration / weighted_sum) * (value - mean_prev);
+    s += duration * (value - mean_prev) * (value - mean_current);
   }
   variance = s / weighted_sum;
   // Normalise by the total time
@@ -927,21 +935,20 @@ TimeSeriesProperty<std::string>::averageAndStdDevInFilter(const SplittingInterva
 template <typename TYPE>
 std::pair<double, double> TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev(const Kernel::TimeROI *timeRoi) const {
 
-  std::pair<double, double> nonSenseValues{std::numeric_limits<double>::quiet_NaN(),
-                                           std::numeric_limits<double>::quiet_NaN()};
-
   // time series with less than two entries are conner cases
   if (this->realSize() == 0)
-    return nonSenseValues;
+    return std::pair<double, double>{std::numeric_limits<double>::quiet_NaN(),
+                                     std::numeric_limits<double>::quiet_NaN()};
   else if (this->realSize() == 1)
     return std::pair<double, double>(static_cast<double>(this->firstValue()), 0.0);
 
   // Derive splitting intervals from either the roi or from the first/last entries in the time series
   std::vector<SplittingInterval> filter;
-  if (timeRoi && !timeRoi->empty())
+  if (timeRoi && !timeRoi->empty()) {
     filter = timeRoi->toSplitters();
-  else
+  } else {
     filter = this->getSplittingIntervals();
+  }
 
   return this->averageAndStdDevInFilter(filter);
 }
@@ -1684,7 +1691,6 @@ template <typename TYPE> bool TimeSeriesProperty<TYPE>::isDefault() const { retu
  */
 template <typename TYPE>
 TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics(const TimeROI *roi) const {
-
   // Start with statistics that are not time-weighted
   TimeSeriesPropertyStatistics out(Mantid::Kernel::getStatistics(this->filteredValuesAsVector(roi)));
   out.duration = this->durationInSeconds(roi);
@@ -2063,8 +2069,9 @@ template <typename TYPE> std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredVal
       if (roi->valueAtTime(timeAndValue.time()))
         filteredValues.emplace_back(timeAndValue.value());
     return filteredValues;
-  } else
+  } else {
     return this->valuesAsVector();
+  }
 }
 
 /**
