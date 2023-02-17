@@ -84,6 +84,7 @@ public:
     TS_ASSERT_EQUALS(detectorInfo.isMonitor(2), false);
     TS_ASSERT_EQUALS(detectorInfo.isMonitor(3), true);
     TS_ASSERT_EQUALS(detectorInfo.isMonitor(4), true);
+    TS_ASSERT_THROWS(detectorInfo.isMonitor(5), const std::runtime_error &);
   }
 
   void test_isMasked() {
