@@ -21,9 +21,9 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/NexusHDF5Descriptor.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <Poco/Path.h>
 #include <boost/lexical_cast.hpp>

@@ -26,11 +26,11 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/FileValidator.h"
-#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/Glob.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
@@ -632,7 +632,7 @@ void FilterEventsByLogValuePreNexus::processEventLogs() {
  */
 void FilterEventsByLogValuePreNexus::addToWorkspaceLog(const std::string &logtitle, size_t mindex) {
   // Create TimeSeriesProperty
-  auto property = new FilteredTimeSeriesProperty<double>(logtitle);
+  auto property = new TimeSeriesProperty<double>(logtitle);
 
   // Add entries
   size_t nbins = this->wrongdetid_pulsetimes[mindex].size();
@@ -647,11 +647,11 @@ void FilterEventsByLogValuePreNexus::addToWorkspaceLog(const std::string &logtit
     property->addValue(abstime, value);
   } // ENDFOR
 
-  // Add property to workspace
-  m_localWorkspace->mutableRun().addProperty(property, false);
-
   g_log.information() << "Size of Property " << property->name() << " = " << property->size()
                       << " vs Original Log Size = " << nbins << "\n";
+
+  // Add property to workspace
+  m_localWorkspace->mutableRun().addProperty(std::move(property), false);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -2084,14 +2084,14 @@ void FilterEventsByLogValuePreNexus::setProtonCharge(DataObjects::EventWorkspace
   Run &run = workspace->mutableRun();
 
   // Add the proton charge entries.
-  FilteredTimeSeriesProperty<double> *log = new FilteredTimeSeriesProperty<double>("proton_charge");
+  auto *log = new TimeSeriesProperty<double>("proton_charge");
   log->setUnits("picoCoulombs");
 
   // Add the time and associated charge to the log
   log->addValues(this->pulsetimes, this->m_protonCharge);
 
   // TODO set the units for the log
-  run.addLogData(log);
+  run.addLogData(std::move(log));
   // Force re-integration
   run.integrateProtonCharge();
   double integ = run.getProtonCharge();

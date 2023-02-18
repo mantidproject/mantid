@@ -9,7 +9,6 @@
 #include "MantidAPI/LogManager.h"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <locale>
 #include <nexus/NeXusException.hpp>

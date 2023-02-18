@@ -10,7 +10,6 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <boost/function.hpp>
 #include <memory>

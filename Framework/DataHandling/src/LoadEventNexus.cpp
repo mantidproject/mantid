@@ -26,7 +26,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
-#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/TimeSeriesProperty.h"
