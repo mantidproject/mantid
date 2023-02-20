@@ -77,20 +77,13 @@
     },
     {
       "name": "win-64-ci-ninja",
-      "vendor": {
-        "microsoft.com/VisualStudioSettings/CMake/1.0": {
-          "cacheRoot": "${sourceDir}/build"
-        }
-      },
       "description": "Build options for a CI build on windows with Ninja",
       "inherits": [
         "ci-default",
         "conda"
       ],
-      "cmakeExecutable": "cmake.exe",
       "cacheVariables": {
         "USE_PRECOMPILED_HEADERS": "OFF",
-        "CMAKE_MAKE_PROGRAM": "ninja.exe"
       }
     },
     {
