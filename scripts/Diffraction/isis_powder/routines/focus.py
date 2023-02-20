@@ -290,6 +290,7 @@ def _apply_placzek_corrections(
         SampleGeometry=sample_geometry,
         SampleMaterial=sample_material,
         CrystalDensity=sample_details.material_object.number_density_effective,
+        ApplyPerDetector=True,
     )
 
     input_workspace = mantid.ConvertUnits(InputWorkspace=input_workspace, Target="MomentumTransfer", EMode="Elastic")
