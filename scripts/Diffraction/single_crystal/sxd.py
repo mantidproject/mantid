@@ -200,7 +200,7 @@ class SXD(BaseSX):
 
         return xml_path
 
-    @default_apply_to_all_runs
+    @BaseSX.default_apply_to_all_runs
     def apply_calibration_xml(self, xml_path, run=None):
         """
         Apply .xml calibration file to workspaces loaded (and peak workspaces if present) - subsequent runs loaded

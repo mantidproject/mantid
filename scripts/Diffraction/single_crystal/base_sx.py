@@ -140,7 +140,7 @@ class BaseSX(ABC):
 
     @default_apply_to_all_runs
     def convert_to_MD(self, run=None, frame="Q (lab frame)"):
-        wsname = BaseSX.retrieve(BaseSX.get_ws(run)).name()
+        wsname = BaseSX.retrieve(self.get_ws(run)).name()
         md_name = wsname + "_MD"
         BaseSX.convert_ws_to_MD(wsname, md_name, frame)
         self.set_md(run, md_name)
@@ -171,22 +171,20 @@ class BaseSX(ABC):
         for run, data in self.runs.items():
             mantid.CalculateUMatrix(PeaksWorkspace=data["found_pks"], *args, **kwargs)
 
-    def calibrate_sample_pos(self, tol=0.15, runs=None):
-        if runs is None:
-            runs = self.runs.keys()
-        for run in self.runs:
-            peaks = self.get_peaks(run, PEAK_TYPE.FOUND)
-            mantid.IndexPeaks(PeaksWorkspace=peaks, Tolerance=tol, RoundHKLs=True)
-            mantid.OptimizeCrystalPlacement(
-                PeaksWorkspace=peaks,
-                ModifiedPeaksWorkspace=peaks,
-                FitInfoTable=run + "_sample_pos_fit_info",
-                AdjustSampleOffsets=True,
-                OptimizeGoniometerTilt=True,
-                MaxSamplePositionChangeMeters=0.01,
-                MaxIndexingError=tol,
-            )
-            mantid.IndexPeaks(PeaksWorkspace=peaks, Tolerance=tol, RoundHKLs=True)
+    @default_apply_to_all_runs
+    def calibrate_sample_pos(self, tol=0.15, run=None):
+        peaks = self.get_peaks(run, PEAK_TYPE.FOUND)
+        mantid.IndexPeaks(PeaksWorkspace=peaks, Tolerance=tol, RoundHKLs=True)
+        mantid.OptimizeCrystalPlacement(
+            PeaksWorkspace=peaks,
+            ModifiedPeaksWorkspace=peaks,
+            FitInfoTable=run + "_sample_pos_fit_info",
+            AdjustSampleOffsets=True,
+            OptimizeGoniometerTilt=True,
+            MaxSamplePositionChangeMeters=0.01,
+            MaxIndexingError=tol,
+        )
+        mantid.IndexPeaks(PeaksWorkspace=peaks, Tolerance=tol, RoundHKLs=True)
 
     @default_apply_to_all_runs
     def predict_peaks(self, peak_type=PEAK_TYPE.PREDICT, run=None, **kwargs):
@@ -314,7 +312,7 @@ class BaseSX(ABC):
             max_ws = max(runs, key=lambda k: int("".join(filter(str.isdigit, k))))
             all_peaks = f'{"-".join([min_ws, max_ws])}_{peak_type.value}_{integration_type.value}'
             mantid.CreatePeaksWorkspace(InstrumentWorkspace=self.van_ws, NumberOfPeaks=0, OutputWorkspace=all_peaks)
-            for run in self.runs.keys():
+            for run in runs:
                 peaks = self.get_peaks(run, peak_type, integration_type)
                 if run_ref is not None and run_ref != run:
                     self.make_UB_consistent(self.get_peaks(run_ref, peak_type, integration_type), peaks)
