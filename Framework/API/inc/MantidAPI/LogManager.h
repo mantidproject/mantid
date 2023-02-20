@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/NexusHDF5Descriptor.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Statistics.h"

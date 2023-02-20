@@ -26,6 +26,7 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
