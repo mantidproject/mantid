@@ -83,7 +83,7 @@
         "conda"
       ],
       "cacheVariables": {
-        "USE_PRECOMPILED_HEADERS": "OFF",
+        "USE_PRECOMPILED_HEADERS": "OFF"
       }
     },
     {
