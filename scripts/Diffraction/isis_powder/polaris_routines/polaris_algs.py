@@ -120,6 +120,7 @@ def generate_ts_pdf(
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode="Elastic")
 
     if not per_detector:
+        # per bank routine
         # in the per_detector routine, the placzek (and vanadium) corrections were applied before focussing
         focused_ws = apply_placzek_correction_per_bank(focused_ws, run_number, sample_details, cal_file_name, placzek_order, sample_temp)
     if debug:
@@ -161,7 +162,7 @@ def generate_ts_pdf(
             rho0=sample_details.material_object.number_density,
         )
         pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output, WorkspaceToMatch=pdf_output[4], PreserveEvents=True)
-    if not debug:
+    if not per_detector and not debug:
         common.remove_intermediate_workspace("self_scattering_correction")
     # Rename output ws
     if "merged_ws" in locals():

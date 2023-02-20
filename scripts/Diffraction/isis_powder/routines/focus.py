@@ -102,7 +102,7 @@ def _focus_one_ws(
 
     if instrument._inst_settings.per_detector:
         # per detector routine
-        input_workspace = apply_per_detector_placzek(
+        input_workspace = apply_per_detector_vanadium_and_placzek(
             input_workspace,
             instrument,
             perform_vanadium_norm,
@@ -200,7 +200,7 @@ def _absorb_and_empty_corrections(
     return input_workspace
 
 
-def apply_per_detector_placzek(  # todo: RENAME THIS FUNCITON
+def apply_per_detector_vanadium_and_placzek(
     input_workspace, instrument, perform_vanadium_norm, vanadium_path, placzek_run_number, sample_details, run_details
 ):
     mantid.CloneWorkspace(InputWorkspace=input_workspace, OutputWorkspace="DataBeforeCorrections")
@@ -213,9 +213,9 @@ def apply_per_detector_placzek(  # todo: RENAME THIS FUNCITON
         run_details=run_details,
     )
     # Currently, only supported for POLARIS instrument
-    # input_workspace = _apply_placzek_corrections(
-    #     input_workspace, instrument, perform_vanadium_norm, vanadium_path, placzek_run_number, sample_details, run_details
-    # )
+    input_workspace = _apply_placzek_corrections(
+        input_workspace, instrument, perform_vanadium_norm, vanadium_path, placzek_run_number, sample_details, run_details
+    )
     # must convert to point data before focussing
     if input_workspace.isDistribution():
         mantid.ConvertFromDistribution(input_workspace)
