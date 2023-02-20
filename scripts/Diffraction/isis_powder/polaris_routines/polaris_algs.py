@@ -121,7 +121,7 @@ def generate_ts_pdf(
 
     if not per_detector:
         # in the per_detector routine, the placzek (and vanadium) corrections were applied before focussing
-        apply_placzek_correction_per_bank(focused_ws, run_number, sample_details, cal_file_name, placzek_order, sample_temp)
+        focused_ws = apply_placzek_correction_per_bank(focused_ws, run_number, sample_details, cal_file_name, placzek_order, sample_temp)
     if debug:
         dcs_corrected = mantid.CloneWorkspace(InputWorkspace=focused_ws)
 
@@ -227,6 +227,7 @@ def apply_placzek_correction_per_bank(
         SampleMaterial=sample_material_json,
         PlaczekOrder=placzek_order,
         SampleTemp=sample_temp,
+        ApplyPerDetector=False,
     )
 
     ws_group_list = []

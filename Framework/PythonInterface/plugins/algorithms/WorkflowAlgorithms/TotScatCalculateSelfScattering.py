@@ -56,14 +56,15 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
             defaultValue="",
             doc="Sample Temperature in Kelvin. Required for 2nd order Placzek correction if not " "using Sample Logs.",
         )
-        self.declareProperty(name="ApplyPerDetector", defaultValue=1, doc="Apply the correction to unfocussed data.")
+        self.declareProperty(name="ApplyPerDetector", defaultValue=False, doc="Apply the correction to unfocussed data.")
 
     def PyExec(self):
         raw_ws = self.getProperty("InputWorkspace").value
         sample_geometry = self.getPropertyValue("SampleGeometry")
         sample_material = self.getPropertyValue("SampleMaterial")
         cal_file_name = self.getPropertyValue("CalFileName")
-        apply_per_detector = self.getPropertyValue("ApplyPerDetector")
+        apply_per_detector = bool(int(self.getPropertyValue("ApplyPerDetector")))  # False is passed as "0"
+
         SetSample(InputWorkspace=raw_ws, Geometry=sample_geometry, Material=sample_material)
         # find the closest monitor to the sample for incident spectrum
         raw_spec_info = raw_ws.spectrumInfo()
