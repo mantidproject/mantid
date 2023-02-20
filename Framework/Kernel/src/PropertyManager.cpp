@@ -203,29 +203,26 @@ void PropertyManager::filterByProperty(const Kernel::TimeSeriesProperty<bool> &f
 
     Property *currentProp = orderedProperty;
     if (auto doubleSeries = dynamic_cast<TimeSeriesProperty<double> *>(currentProp)) {
-      std::unique_ptr<Property> filtered(nullptr); // will point to the new FilteredTimeSeriesProperty
-
-      // does the property name ends with substring "_invalid_values" ?
+      // don't filter the invalid values filters
       if (PropertyManager::isAnInvalidValuesFilterLog(currentProp->name()))
         break;
-
-      // companionPropName == currentProp->name() + "_invalid_values"
-      std::string companionPropName = PropertyManager::getInvalidValuesFilterLogName(currentProp->name());
-
-      if (this->existsProperty(companionPropName)) {
-        Property *companionPropProp = getPointerToProperty(companionPropName);
-        auto tspCompanionProp = dynamic_cast<TimeSeriesProperty<bool> *>(companionPropProp);
-        if (!tspCompanionProp) // the companion property
+      std::unique_ptr<Property> filtered(nullptr);
+      if (this->existsProperty(PropertyManager::getInvalidValuesFilterLogName(currentProp->name()))) {
+        // add the filter to the passed in filters
+        auto logFilter = std::make_unique<LogFilter>(filter);
+        auto filterProp = getPointerToProperty(PropertyManager::getInvalidValuesFilterLogName(currentProp->name()));
+        auto tspFilterProp = dynamic_cast<TimeSeriesProperty<bool> *>(filterProp);
+        if (!tspFilterProp)
           break;
-        auto logFilter = std::make_unique<LogFilter>(currentProp);
-        logFilter->addFilter(*tspCompanionProp);
+        logFilter->addFilter(*tspFilterProp);
+
         filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(doubleSeries, *logFilter->filter());
-      } else { // attach the filter to the TimeSeriesProperty, thus creating  the FilteredTimeSeriesProperty
+      } else { // attach the filter to the TimeSeriesProperty, thus creating  the FilteredTimeSeriesProperty<double>
         filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(doubleSeries, filter);
       }
-
       orderedProperty = filtered.get();
-      this->m_properties[createKey(currentProp->name())] = std::move(filtered); // Now replace in the map
+      // Now replace in the map
+      this->m_properties[createKey(currentProp->name())] = std::move(filtered);
     }
   }
 }

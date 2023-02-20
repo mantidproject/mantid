@@ -9,6 +9,7 @@
 
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/LogFilter.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 namespace Mantid::DataHandling {
 namespace {
@@ -16,7 +17,6 @@ namespace {
 Kernel::Logger g_log("ISISRunLogs");
 } // namespace
 
-using Kernel::FilteredTimeSeriesProperty;
 using Kernel::LogFilter;
 using Kernel::LogParser;
 using Kernel::TimeSeriesProperty;
@@ -75,20 +75,16 @@ void ISISRunLogs::applyLogFiltering(Mantid::API::Run &exptRun) {
   std::unique_ptr<LogFilter> logFilter{nullptr};
   try {
     auto runningLog = exptRun.getTimeSeriesProperty<bool>(LogParser::statusLogName());
-    auto runningLog_filtered = dynamic_cast<FilteredTimeSeriesProperty<bool> *>(runningLog);
-    if (runningLog_filtered)
-      logFilter = std::make_unique<LogFilter>(*runningLog_filtered);
+    logFilter = std::make_unique<LogFilter>(*runningLog);
   } catch (std::exception &) {
     g_log.warning("Cannot find status log. Logs will be not be filtered by run status");
   }
 
-  FilteredTimeSeriesProperty<bool> *currentPeriodLog = nullptr;
+  TimeSeriesProperty<bool> *currentPeriodLog = nullptr;
   bool multiperiod = false;
   try {
     auto period = exptRun.getPropertyAsIntegerValue(LogParser::currentPeriodLogName());
-    auto series = exptRun.getTimeSeriesProperty<bool>(LogParser::currentPeriodLogName(period));
-    auto filteredSeries = new FilteredTimeSeriesProperty<bool>(series);
-    currentPeriodLog = filteredSeries;
+    currentPeriodLog = exptRun.getTimeSeriesProperty<bool>(LogParser::currentPeriodLogName(period));
   } catch (const std::exception &) {
     g_log.warning("Cannot find period log. Logs will be not be filtered by "
                   "current period");
@@ -115,8 +111,9 @@ void ISISRunLogs::applyLogFiltering(Mantid::API::Run &exptRun) {
   }
 
   // Filter logs if we have anything to filter on
-  if (maskProp)
+  if (maskProp) {
     exptRun.filterByLog(*maskProp, ISISRunLogs::getLogNamesExcludedFromFiltering(exptRun));
+  }
 }
 
 /**

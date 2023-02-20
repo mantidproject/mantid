@@ -56,7 +56,7 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
   if (filter.size() == 0)
     return;
   // a single value of one at default GPS epoch is also ignorable
-  if (filter.size() == 1 && filter.firstValue() == true && filter.firstTime() == UNSET_TIME)
+  if (filter.size() == 1 && filter.firstTime() == UNSET_TIME)
     return;
 
   // do nothing if the filter is all ignore
