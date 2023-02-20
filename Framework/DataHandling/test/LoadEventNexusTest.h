@@ -1122,6 +1122,24 @@ public:
     AnalysisDataService::Instance().remove("dummy");
   }
 
+  void test_load_event_nexus_ISIS_exc_inst() {
+    // Test new format ISIS event data files which have some instrument information
+    // but does not follow Mantid's NexusGeometry specifications
+    const std::string file = "MAR28482.nxs";
+    LoadEventNexus alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("Filename", file);
+    alg.setProperty("OutputWorkspace", "dummy_for_child");
+    alg.execute();
+    Workspace_sptr ws = alg.getProperty("OutputWorkspace");
+    auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws);
+    TS_ASSERT(eventWS);
+    TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 203);
+    TS_ASSERT_EQUALS(eventWS->detectorInfo().size(), 921)
+  }
+
 private:
   std::string wsSpecFilterAndEventMonitors;
 };
