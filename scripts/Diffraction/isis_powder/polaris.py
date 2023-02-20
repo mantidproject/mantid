@@ -42,7 +42,7 @@ class Polaris(AbstractInst):
                            empty_can_subtraction_method=self._inst_settings.empty_can_subtraction_method,
                            paalman_pings_events_per_point=self._inst_settings.paalman_pings_events_per_point,)
 
-    def create_vanadium(self, test=False, **kwargs):
+    def create_vanadium(self, **kwargs):
         self._switch_mode_specific_inst_settings(kwargs.get("mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
 
@@ -50,9 +50,11 @@ class Polaris(AbstractInst):
         if self._inst_settings.per_detector:
             per_detector = bool(self._inst_settings.per_detector)
 
-        vanadium_d = self._create_vanadium(run_number_string=self._inst_settings.run_in_range,
-                                           do_absorb_corrections=self._inst_settings.do_absorb_corrections,
-                                           per_detector=per_detector, test=test)
+        vanadium_d = self._create_vanadium(
+            run_number_string=self._inst_settings.run_in_range,
+            do_absorb_corrections=self._inst_settings.do_absorb_corrections,
+            per_detector=per_detector,
+        )
         self.ensure_per_detector_and_vanadium_output_are_in_sync(vanadium_d, per_detector)
 
         run_details = self._get_run_details(run_number_string=self._inst_settings.run_in_range)

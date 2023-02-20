@@ -280,7 +280,7 @@ def _apply_placzek_corrections(
     input_workspace, instrument, perform_vanadium_norm, vanadium_path, placzek_run_number, sample_details, run_details
 ):
     # this correction should only be applied before focussing in the per_detector case
-    raw_ws = mantid.Load(Filename=instrument.name() + str(placzek_run_number) + ".nxs")
+    raw_ws = mantid.Load(Filename="POLARIS" + str(placzek_run_number) + ".nxs")
     sample_geometry = sample_details.generate_sample_geometry()
     sample_material = sample_details.generate_sample_material()
     self_scattering_correction = mantid.TotScatCalculateSelfScattering(
