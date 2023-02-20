@@ -178,6 +178,7 @@ public:
     TS_ASSERT(info.isMonitor(0));
     TS_ASSERT(!info.isMonitor(1));
     TS_ASSERT(info.isMonitor(2));
+    TS_ASSERT_THROWS(info.isMonitor(3), const std::runtime_error &)
   }
 
   void test_duplicate_monitors_ignored() {
