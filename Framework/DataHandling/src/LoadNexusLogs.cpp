@@ -225,7 +225,7 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file, const st
     const int64_t item_length = info.dims[1];
     try {
       const int64_t nitems = info.dims[0];
-      const int64_t total_length = nitems * item_length;
+      const std::size_t total_length = std::size_t(nitems * item_length);
       boost::scoped_array<char> val_array(new char[total_length]);
       file.getData(val_array.get());
       file.closeData();
