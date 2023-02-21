@@ -76,6 +76,13 @@ class BaseSX(ABC):
     def set_van_ws(self, van_ws):
         self.van_ws = BaseSX.retrieve(van_ws).name()
 
+    def set_ws(self, run, ws):
+        run_str = str(run)
+        if run_str not in self.runs:
+            self.runs[run_str] = {"ws": BaseSX.retrieve(ws).name()}
+        else:
+            self.runs[run_str]["ws"] = BaseSX.retrieve(ws).name()
+
     def set_peaks(self, run, peaks, peak_type=PEAK_TYPE.FOUND, integration_type=None):
         if integration_type is None:
             fieldname = peak_type.value

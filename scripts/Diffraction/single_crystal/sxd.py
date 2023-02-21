@@ -48,7 +48,8 @@ class SXD(BaseSX):
                 self._divide_workspaces(wsname, transmission)
                 mantid.DeleteWorkspace(transmission)
             # save results in dictionary
-            self.runs[str(run)] = {"ws": wsname}
+            self.set_ws(run, wsname)
+        return wsname
 
     def load_run(self, runno):
         wsname = "SXD" + str(runno)
