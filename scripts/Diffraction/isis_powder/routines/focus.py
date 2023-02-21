@@ -122,6 +122,9 @@ def _focus_one_ws(
         aligned_ws = mantid.Divide(LHSWorkspace=aligned_ws, RHSWorkspace=solid_angle)
         mantid.DeleteWorkspace(solid_angle)
 
+    # must convert to point data before focussing
+    if aligned_ws.isDistribution():
+        mantid.ConvertFromDistribution(aligned_ws)
     # Focus the spectra into banks
     focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
                                              GroupingFileName=run_details.grouping_file_path)
@@ -215,10 +218,6 @@ def apply_per_detector_vanadium_and_placzek(
     input_workspace = _apply_placzek_corrections(
         input_workspace, instrument, perform_vanadium_norm, vanadium_path, placzek_run_number, sample_details, run_details
     )
-    # must convert to point data before focussing
-    if input_workspace.isDistribution():
-        mantid.ConvertFromDistribution(input_workspace)
-
     return input_workspace
 
 
