@@ -196,5 +196,33 @@ TimeROI TimeSplitter::getTimeROI(const int workspaceIndex) {
 
 std::size_t TimeSplitter::numRawValues() const { return m_roi_map.size(); }
 
+// ------------------------------------------------------------------------
+// SPLITTING EVENTS METHODS
+// ------------------------------------------------------------------------
+
+/**
+ * Split a list of events according to Pulse time.
+ *
+ * Events with masked times are allocated to destination index -1.
+ * @param events : list of input events
+ * @param partials : resulting partial lists of events
+ *
+ * @raises RunTimeError : the event list is of type Mantid::API::EventType::WEIGHTED_NOTIME
+ */
+void TimeSplitter::splitEvents(const DataObjects::EventList &events,
+                               std::map<int, DataObjects::EventList *> partials) const {
+  UNUSED_ARG(events);
+  UNUSED_ARG(partials);
+}
+
+void TimeSplitter::splitEvents(const DataObjects::EventList &events, std::map<int, DataObjects::EventList *> partials,
+                               bool tofCorrect, double factor, double shift) const {
+  UNUSED_ARG(events);
+  UNUSED_ARG(partials);
+  UNUSED_ARG(tofCorrect);
+  UNUSED_ARG(factor);
+  UNUSED_ARG(shift);
+}
+
 } // namespace Kernel
 } // namespace Mantid
