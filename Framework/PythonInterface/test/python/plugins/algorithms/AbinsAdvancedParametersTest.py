@@ -258,26 +258,56 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
     def test_wrong_min_wavenumber(self):
         # minimum wavenumber cannot be negative
         abins.parameters.sampling["min_wavenumber"] = -0.001
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Invalid value of min_wavenumber",
+            Abins,
+            VibrationalOrPhononFile=self._Si2 + ".phonon",
+            OutputWorkspace=self._wrk_name,
+        )
 
         # minimum wavenumber cannot be int
         abins.parameters.sampling["min_wavenumber"] = 1
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Invalid value of min_wavenumber",
+            Abins,
+            VibrationalOrPhononFile=self._Si2 + ".phonon",
+            OutputWorkspace=self._wrk_name,
+        )
 
     def test_wrong_max_wavenumber(self):
         # maximum wavenumber cannot be negative
         abins.parameters.sampling["max_wavenumber"] = -0.01
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Invalid value of max_wavenumber",
+            Abins,
+            VibrationalOrPhononFile=self._Si2 + ".phonon",
+            OutputWorkspace=self._wrk_name,
+        )
 
         # maximum wavenumber cannot be integer
         abins.parameters.sampling["max_wavenumber"] = 10
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Invalid value of max_wavenumber",
+            Abins,
+            VibrationalOrPhononFile=self._Si2 + ".phonon",
+            OutputWorkspace=self._wrk_name,
+        )
 
     def test_wrong_energy_window(self):
         # min_wavenumber must be smaller than max_wavenumber
         abins.parameters.sampling["min_wavenumber"] = 1000.0
         abins.parameters.sampling["max_wavenumber"] = 10.0
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Invalid energy window for rebinning.",
+            Abins,
+            VibrationalOrPhononFile=self._Si2 + ".phonon",
+            OutputWorkspace=self._wrk_name,
+        )
 
     def test_wrong_s_absolute_threshold(self):
         abins.parameters.sampling["s_absolute_threshold"] = 1

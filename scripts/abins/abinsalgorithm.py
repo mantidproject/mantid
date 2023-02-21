@@ -903,7 +903,7 @@ class AbinsAlgorithm:
 
         max_wavenumber = abins.parameters.sampling["max_wavenumber"]
         if not (isinstance(max_wavenumber, float) and max_wavenumber > 0.0):
-            raise RuntimeError("Invalid number of max_wavenumber" + message_end)
+            raise RuntimeError("Invalid value of max_wavenumber" + message_end)
 
         if min_wavenumber > max_wavenumber:
             raise RuntimeError("Invalid energy window for rebinning.")
