@@ -124,7 +124,7 @@ def _focus_one_ws(
 
     # must convert to point data before focussing
     if aligned_ws.isDistribution():
-        mantid.ConvertFromDistribution(aligned_ws)
+        aligned_ws = convert_between_distribution(aligned_ws, "From")
     # Focus the spectra into banks
     focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
                                              GroupingFileName=run_details.grouping_file_path)
@@ -249,7 +249,7 @@ def _apply_vanadium_corrections_per_detector(
 
 def _restructure_data_in_per_detector_routine(focused_workspace, cal_filepath, instrument_name):
     focused_workspace = divide_by_number_of_detectors_in_bank(focused_workspace, cal_filepath, instrument_name)
-    mantid.ConvertToDistribution(focused_workspace)
+    focused_workspace = convert_between_distribution(focused_workspace, "To")
     calibrated_spectra = common.extract_ws_spectra(focused_workspace)
     return calibrated_spectra
 
@@ -521,3 +521,25 @@ def _crop_spline_to_percent_of_max(spline, input_ws, output_workspace, min_value
     x_min = x_list[small_spline_indecies[0]]
     output = mantid.CropWorkspace(inputWorkspace=input_ws, XMin=x_min, XMax=x_max, OutputWorkspace=output_workspace)
     return output
+
+
+def convert_between_distribution(workspace, direction):
+    if direction != "To" and direction != "From":
+        return workspace
+    original_unit = workspace.getAxis(0).getUnit().caption()
+    target_unit = None
+    if original_unit == "Time-of-flight":
+        target_unit = "TOF"
+    if original_unit == "d-Spacing":
+        target_unit = "dSpacing"
+    if original_unit == "q":
+        target_unit = "MoemntumTransfer"
+    if not target_unit:
+        return workspace
+    workspace = mantid.ConvertUnits(InputWorkspace=workspace, Target="dSpacing", EMode="Elastic")
+    if direction == "To":
+        mantid.ConvertToDistribution(workspace)
+    if direction == "From":
+        mantid.ConvertFromDistribution(workspace)
+    workspace = mantid.ConvertUnits(InputWorkspace=workspace, Target=target_unit, EMode="Elastic")
+    return workspace
