@@ -162,44 +162,98 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
     def test_wrong_dft_group(self):
         # name should be of type str
         abins.parameters.hdf_groups["ab_initio_data"] = 2
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Invalid name for folder in which the ab initio data should be stored.",
+            Abins,
+            VibrationalOrPhononFile=self._Si2 + ".phonon",
+            OutputWorkspace=self._wrk_name,
+        )
 
         # name of group cannot be an empty string
         abins.parameters.hdf_groups["ab_initio_data"] = ""
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Invalid name for folder in which the ab initio data should be stored.",
+            Abins,
+            VibrationalOrPhononFile=self._Si2 + ".phonon",
+            OutputWorkspace=self._wrk_name,
+        )
 
     def test_wrong_powder_data_group(self):
         # name should be of type str
         abins.parameters.hdf_groups["powder_data"] = 2
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Invalid value of powder_data_group",
+            Abins,
+            VibrationalOrPhononFile=self._Si2 + ".phonon",
+            OutputWorkspace=self._wrk_name,
+        )
 
         # name of group cannot be an empty string
         abins.parameters.hdf_groups["powder_data"] = ""
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Invalid value of powder_data_group",
+            Abins,
+            VibrationalOrPhononFile=self._Si2 + ".phonon",
+            OutputWorkspace=self._wrk_name,
+        )
 
     def test_wrong_crystal_data_group(self):
         # name should be of type str
         abins.parameters.hdf_groups["crystal_data"] = 2
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Invalid value of crystal_data_group",
+            Abins,
+            VibrationalOrPhononFile=self._Si2 + ".phonon",
+            OutputWorkspace=self._wrk_name,
+        )
 
         # name of group cannot be an empty string
         abins.parameters.hdf_groups["crystal_data"] = ""
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Invalid value of crystal_data_group",
+            Abins,
+            VibrationalOrPhononFile=self._Si2 + ".phonon",
+            OutputWorkspace=self._wrk_name,
+        )
 
     def test_wrong_powder_s_data_group(self):
         # name should be of type str
         abins.parameters.hdf_groups["s_data"] = 2
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Invalid value of s_data_group",
+            Abins,
+            VibrationalOrPhononFile=self._Si2 + ".phonon",
+            OutputWorkspace=self._wrk_name,
+        )
 
         # name of group cannot be an empty string
         abins.parameters.hdf_groups["s_data"] = ""
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Invalid value of s_data_group",
+            Abins,
+            VibrationalOrPhononFile=self._Si2 + ".phonon",
+            OutputWorkspace=self._wrk_name,
+        )
 
     def test_doubled_name(self):
         # Wrong scenario: two groups with the same name
         abins.parameters.hdf_groups["ab_initio_data"] = "NiceName"
         abins.parameters.hdf_groups["powder_data"] = "NiceName"
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Name for powder_data_group already used by as name of another folder.",
+            Abins,
+            VibrationalOrPhononFile=self._Si2 + ".phonon",
+            OutputWorkspace=self._wrk_name,
+        )
 
     def test_wrong_min_wavenumber(self):
         # minimum wavenumber cannot be negative

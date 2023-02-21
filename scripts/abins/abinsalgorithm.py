@@ -876,7 +876,7 @@ class AbinsAlgorithm:
         if not isinstance(powder_data_group, str) or powder_data_group == "":
             raise RuntimeError("Invalid value of powder_data_group" + message_end)
         elif powder_data_group in folder_names:
-            raise RuntimeError("Name for powder_data_group  already used by as name of another folder.")
+            raise RuntimeError("Name for powder_data_group already used by as name of another folder.")
         folder_names.append(powder_data_group)
 
         crystal_data_group = abins.parameters.hdf_groups["crystal_data"]
