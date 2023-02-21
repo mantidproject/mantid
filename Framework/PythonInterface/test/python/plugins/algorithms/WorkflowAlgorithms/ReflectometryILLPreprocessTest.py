@@ -118,6 +118,41 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         self.assertEqual(outWS.getAxis(0).getUnit().caption(), "Wavelength")
         self.assertEqual(mtd.getObjectNames(), [])
 
+    def test_no_normalisation(self):
+        outWSName = "outWS"
+        args = {
+            "Run": "ILL/D17/317370.nxs",
+            "OutputWorkspace": outWSName,
+            "FluxNormalisation": "Normalisation OFF",
+            "rethrow": True,
+            "child": True,
+        }
+        alg = create_algorithm("ReflectometryILLPreprocess", **args)
+        assertRaisesNothing(self, alg.execute)
+        outWS = alg.getProperty("OutputWorkspace").value
+        self.assertEqual(outWS.getAxis(0).getUnit().caption(), "Wavelength")
+        self.assertEqual(mtd.getObjectNames(), [])
+        self.assertAlmostEqual(outWS.readY(69)[307], 5.240, 3)
+        self.assertAlmostEqual(outWS.readE(69)[307], 6.550, 3)
+
+    def test_time_normalisation(self):
+        outWSName = "outWS"
+        args = {
+            "Run": "ILL/D17/317370.nxs",
+            "OutputWorkspace": outWSName,
+            "FluxNormalisation": "Normalise To Time",
+            "rethrow": True,
+            "child": True,
+        }
+        alg = create_algorithm("ReflectometryILLPreprocess", **args)
+        assertRaisesNothing(self, alg.execute)
+        outWS = alg.getProperty("OutputWorkspace").value
+        self.assertEqual(outWS.getAxis(0).getUnit().caption(), "Wavelength")
+        self.assertEqual(mtd.getObjectNames(), [])
+        duration = outWS.getRun().getLogData("duration").value
+        self.assertAlmostEqual(outWS.readY(69)[307], 5.240 / duration, 3)
+        self.assertAlmostEqual(outWS.readE(69)[307], 6.550 / duration, 3)
+
 
 if __name__ == "__main__":
     unittest.main()
