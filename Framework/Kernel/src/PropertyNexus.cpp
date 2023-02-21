@@ -15,7 +15,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/FilteredTimeSeriesProperty.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 // PropertyWithValue implementation
 #include "MantidKernel/PropertyWithValue.tcc"
@@ -55,7 +55,7 @@ std::unique_ptr<Property> makeProperty(::NeXus::File *file, const std::string &n
       return std::make_unique<ArrayProperty<NumT>>(name, std::move(values));
     }
   } else {
-    auto prop = std::make_unique<FilteredTimeSeriesProperty<NumT>>(name);
+    auto prop = std::make_unique<TimeSeriesProperty<NumT>>(name);
     prop->addValues(times, values);
     return std::unique_ptr<Property>(std::move(prop));
   }
@@ -77,7 +77,7 @@ std::unique_ptr<Property> makeTimeSeriesBoolProperty(::NeXus::File *file, const 
   for (size_t i = 0; i < nvals; ++i) {
     realValues[i] = (savedValues[i] != 0);
   }
-  auto prop = std::make_unique<FilteredTimeSeriesProperty<bool>>(name);
+  auto prop = std::make_unique<TimeSeriesProperty<bool>>(name);
   prop->addValues(times, realValues);
   return std::unique_ptr<Property>(std::move(prop));
 }
@@ -100,7 +100,7 @@ std::unique_ptr<Property> makeStringProperty(::NeXus::File *file, const std::str
     for (int64_t i = 0; i < numStrings; i++)
       values.emplace_back(data.get() + i * span);
 
-    auto prop = std::make_unique<FilteredTimeSeriesProperty<std::string>>(name);
+    auto prop = std::make_unique<TimeSeriesProperty<std::string>>(name);
     prop->addValues(times, values);
     return std::unique_ptr<Property>(std::move(prop));
   }

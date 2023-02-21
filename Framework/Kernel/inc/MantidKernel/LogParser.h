@@ -32,7 +32,6 @@ namespace Kernel {
 class TimeROI;
 class Property;
 template <typename T> class TimeSeriesProperty;
-template <typename T> class FilteredTimeSeriesProperty;
 
 /**
 LogParser parses the instrument log files to select records corresponding

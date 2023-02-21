@@ -8,7 +8,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/LogParser.h"
-#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Strings.h"
@@ -100,7 +99,7 @@ Kernel::Property *LogParser::createLogProperty(const std::string &logFName, cons
     return nullptr;
 
   if (isNumeric) {
-    auto logv = new Kernel::FilteredTimeSeriesProperty<double>(name);
+    auto logv = new Kernel::TimeSeriesProperty<double>(name);
     auto it = change_times.begin();
     for (; it != change_times.end(); ++it) {
       std::istringstream istr(it->second);
@@ -110,7 +109,7 @@ Kernel::Property *LogParser::createLogProperty(const std::string &logFName, cons
     }
     return logv;
   } else {
-    auto logv = new Kernel::FilteredTimeSeriesProperty<std::string>(name);
+    auto logv = new Kernel::TimeSeriesProperty<std::string>(name);
     auto it = change_times.begin();
     for (; it != change_times.end(); ++it) {
       logv->addValue(it->first, it->second);
@@ -316,7 +315,7 @@ double timeMean(const Kernel::Property *p, const Kernel::TimeROI *roi) {
   const auto *dp = dynamic_cast<const Kernel::TimeSeriesProperty<double> *>(p);
   if (!dp) {
     throw std::runtime_error("Property of a wrong type. Cannot be cast to a "
-                             "FilteredTimeSeriesProperty<double>.");
+                             "TimeSeriesProperty<double>.");
   }
 
   return dp->timeAverageValue(roi);

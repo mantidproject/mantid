@@ -7,7 +7,6 @@
 // Includes
 #include "MantidDataHandling/ISISRunLogs.h"
 
-#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
