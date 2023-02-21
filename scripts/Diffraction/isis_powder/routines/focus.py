@@ -299,6 +299,7 @@ def _apply_placzek_corrections(
     input_workspace = mantid.Subtract(
         LHSWorkspace=input_workspace, RHSWorkspace=self_scattering_correction, AllowDifferentNumberSpectra=True
     )
+    input_workspace = mantid.ConvertUnits(InputWorkspace=input_workspace, Target="TOF", EMode="Elastic")
     return input_workspace
 
 
