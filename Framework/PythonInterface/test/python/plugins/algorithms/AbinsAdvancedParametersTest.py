@@ -368,16 +368,34 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
     def test_wrong_optimal_size(self):
         # optimal size cannot be negative
         abins.parameters.performance["optimal_size"] = -10000
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Invalid value of optimal_size",
+            Abins,
+            VibrationalOrPhononFile=self._Si2 + ".phonon",
+            OutputWorkspace=self._wrk_name,
+        )
 
         # optimal size must be of type int
         abins.parameters.performance["optimal_size"] = 50.0
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Invalid value of optimal_size",
+            Abins,
+            VibrationalOrPhononFile=self._Si2 + ".phonon",
+            OutputWorkspace=self._wrk_name,
+        )
 
     def test_wrong_threads(self):
         if PATHOS_FOUND:
             abins.parameters.performance["threads"] = -1
-            self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+            self.assertRaisesRegex(
+                RuntimeError,
+                "Invalid number of threads for parallelisation over atoms",
+                Abins,
+                VibrationalOrPhononFile=self._Si2 + ".phonon",
+                OutputWorkspace=self._wrk_name,
+            )
 
     def test_good_case(self):
         good_names = [self._wrk_name, self._wrk_name + "_Si", self._wrk_name + "_Si_total"]
