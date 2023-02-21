@@ -291,7 +291,7 @@ class BaseSX(ABC):
         pk_table = self.get_peaks(run, peak_type)
         if peak_type == PEAK_TYPE.FOUND and tol > 0:
             mantid.IndexPeaks(PeaksWorkspace=pk_table, Tolerance=tol, RoundHKLs=True)
-            mantid.FilterPeaks(InputWorkspace=pk_table, OutputWorkspace=pk_table, FilterVariable="h^2+k^2+l^2", FilterValue=0, Operator=">")
+            BaseSX.remove_unindexed_peaks(pk_table)
         # integrate
         peak_int_name = "_".join([BaseSX.retrieve(pk_table).name(), integration_type.value])
         ws = self.get_ws(run)
@@ -488,6 +488,21 @@ class BaseSX(ABC):
                     irows_to_del.append(ipk + istep)
                 istep += 1
         mantid.DeleteTableRows(TableWorkspace=peaks, Rows=irows_to_del)
+
+    @staticmethod
+    def remove_unindexed_peaks(peaks):
+        """
+        Will keep lowest dSpacing peak (often best approx. to peak centre)
+        """
+        mantid.FilterPeaks(
+            InputWorkspace=peaks, OutputWorkspace=BaseSX.retrieve(peaks).name(), FilterVariable="h^2+k^2+l^2", FilterValue=0, Operator=">"
+        )
+
+    @staticmethod
+    def remove_non_integrated_peaks(peaks):
+        mantid.FilterPeaks(
+            InputWorkspace=peaks, OutputWorkspace=BaseSX.retrieve(peaks).name(), FilterVariable="Intens/SigInt", FilterValue=0, Operator=">"
+        )
 
     @staticmethod
     def retrieve(ws):
