@@ -115,7 +115,6 @@ def normalisation_monitor_workspace_index(ws: MatrixWorkspace) -> int:
 
 
 class ReflectometryILLPreprocess(DataProcessorAlgorithm):
-
     _bragg_angle = None
     _theta_zero = None
     _instrument_name = None
@@ -744,7 +743,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             scaled_ws = Scale(InputWorkspace=det_ws, OutputWorkspace=normalised_ws_name, Factor=1.0 / t, EnableLogging=self._subalgLogging)
             self._cleanup.cleanup(det_ws)
             return scaled_ws
-        return detWS
+        return det_ws
 
     def _normalise_to_slits(self, ws: MatrixWorkspace) -> MatrixWorkspace:
         """Normalize workspace to slit opening and update slit widths.
