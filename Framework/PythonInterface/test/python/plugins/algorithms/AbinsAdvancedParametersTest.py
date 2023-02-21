@@ -130,15 +130,33 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
     def test_wrong_tosca_resolution_constant_A(self):
         # TOSCA constant should be float
         abins.parameters.instruments["TOSCA"]["a"] = "wrong"
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Invalid value of constant A for TOSCA",
+            Abins,
+            VibrationalOrPhononFile=self._Si2 + ".phonon",
+            OutputWorkspace=self._wrk_name,
+        )
 
     def test_wrong_tosca_resolution_constant_B(self):
         abins.parameters.instruments["TOSCA"]["b"] = "wrong"
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Invalid value of constant B for TOSCA",
+            Abins,
+            VibrationalOrPhononFile=self._Si2 + ".phonon",
+            OutputWorkspace=self._wrk_name,
+        )
 
     def test_wrong_tosca_resolution_constant_C(self):
         abins.parameters.instruments["TOSCA"]["c"] = "wrong"
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Invalid value of constant C for TOSCA",
+            Abins,
+            VibrationalOrPhononFile=self._Si2 + ".phonon",
+            OutputWorkspace=self._wrk_name,
+        )
 
     # tests for folders
     def test_wrong_dft_group(self):
