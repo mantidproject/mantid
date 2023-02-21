@@ -194,6 +194,8 @@ private:
 
   std::unique_ptr<QShortcut> m_deleteShortcut;
   Ui::ExperimentWidget m_ui;
+  std::unique_ptr<QLineEdit> m_polCorrEfficienciesLineEdit;
+  std::unique_ptr<MantidWidgets::WorkspaceSelector> m_polCorrEfficienciesWsSelector;
   ExperimentViewSubscriber *m_notifyee;
   std::array<QString, LookupRow::OPTIONS_TABLE_COLUMN_COUNT> m_columnToolTips;
 
