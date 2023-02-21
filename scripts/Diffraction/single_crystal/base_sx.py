@@ -204,20 +204,24 @@ class BaseSX(ABC):
             self.set_peaks(run, out_peaks_name, peak_type)
 
     @staticmethod
-    def get_radius(pk, ws, ispec, scale, useB=True):
-        print("scale = ", scale, "\tuseB = ", useB)
-        TOF = pk.getTOF()
+    def get_back_to_back_exponential_func(pk, ws, ispec):
+        tof = pk.getTOF()
         func = FunctionFactory.Instance().createPeakFunction("BackToBackExponential")
-        func.setParameter("X0", TOF)  # set centre
+        func.setParameter("X0", tof)  # set centre
         func.setMatrixWorkspace(ws, ispec, 0.0, 0.0)  # calc A,B,S based on peak cen
-        if useB:
-            dTOF = scale / func.getParameterValue("B")
-        else:
-            dTOF = scale * func.fwhm()
-        # convert dTOF -> dQ
+        return func
+
+    @staticmethod
+    def convert_dTOF_to_dQ_for_peak(dtof, pk):
+        tof = pk.getTOF()
         modQ = 2 * np.pi / pk.getDSpacing()
-        radius = (modQ / TOF) * dTOF
-        return radius
+        return (modQ / tof) * dtof
+
+    @staticmethod
+    def get_radius(pk, ws, ispec, scale):
+        func = BaseSX.get_back_to_back_exponential_func(pk, ws, ispec)
+        dtof = scale / func.getParameterValue("B")
+        return BaseSX.convert_dTOF_to_dQ_for_peak(dtof, pk)
 
     @staticmethod
     def integrate_peaks_MD(wsMD, peaks, out_peaks, **kwargs):
@@ -231,8 +235,8 @@ class BaseSX(ABC):
         )
         return peaks_int
 
-    @staticmethod
-    def integrate_peaks_MD_optimal_radius(wsMD, peaks, out_peaks, dq=0.01, scale=5, useB=True, ws=None, **kwargs):
+    def integrate_peaks_MD_optimal_radius(self, wsMD, peaks, out_peaks, dq=0.01, scale=5, ws=None, **kwargs):
+        # note this is not a static method so that the static `get_radius` can be overridden
         peaks = BaseSX.retrieve(peaks)
         use_empty_inst = ws is None
         if use_empty_inst:
@@ -243,7 +247,7 @@ class BaseSX(ABC):
         ws = BaseSX.retrieve(ws)
         mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target="TOF")  # needs to be in TOF for setting B
         ispecs = ws.getIndicesFromDetectorIDs(peaks.column("DetID"))
-        rads = [BaseSX.get_radius(pk, ws, ispecs[ipk], scale, useB) for ipk, pk in enumerate(peaks)]
+        rads = [self.get_radius(pk, ws, ispecs[ipk], scale) for ipk, pk in enumerate(peaks)]
         bin_edges = np.arange(min(rads), max(rads) + dq, dq)
         ibins = np.digitize(rads, bin_edges[:-1])
         peaks_int = mantid.CloneWorkspace(InputWorkspace=peaks, OutputWorkspace=out_peaks)
@@ -290,7 +294,7 @@ class BaseSX(ABC):
         elif integration_type == INTEGRATION_TYPE.MD_OPTIMAL_RADIUS and ws_md is not None:
             if ws is not None:
                 kwargs["ws"] = ws  # use this workspace to avoid loading in empty
-            BaseSX.integrate_peaks_MD_optimal_radius(ws_md, pk_table, peak_int_name, **kwargs)
+            self.integrate_peaks_MD_optimal_radius(ws_md, pk_table, peak_int_name, **kwargs)
         else:
             BaseSX.integrate_peaks_skew(ws, pk_table, peak_int_name, **kwargs)
         # store result

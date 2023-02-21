@@ -252,5 +252,8 @@ class SXD(BaseSX):
         mantid.DeleteWorkspace(ws_rb)
         return out_peaks
 
-    def get_radius(self, pk, ws, ispec):
-        super().get_radius(pk, ws, ispec, useB=False)
+    @staticmethod
+    def get_radius(pk, ws, ispec, scale=12):
+        func = BaseSX.get_back_to_back_exponential_func(pk, ws, ispec)
+        dtof = scale * func.fwhm()
+        return BaseSX.convert_dTOF_to_dQ_for_peak(dtof, pk)
