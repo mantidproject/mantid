@@ -37,13 +37,13 @@ class SXD(BaseSX):
             self._divide_workspaces(wsname, self.van_ws)
             # set sample (must be done after gonio to rotate shape) and correct for attenuation
             if self.sample_dict is not None:
-                mantid.SetSample(wsname, **self.sample_dict)
-                mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target="Wavelength")
+                mantid.SetSample(wsname, EnableLogging=False, **self.sample_dict)
+                mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target="Wavelength", EnableLogging=False)
                 if "<sphere" in ADS.retrieve(wsname).sample().getShape().getShapeXML():
-                    transmission = mantid.SphericalAbsorption(InputWorkspace=wsname, OutputWorkspace="transmission")
+                    transmission = mantid.SphericalAbsorption(InputWorkspace=wsname, OutputWorkspace="transmission", EnableLogging=False)
                 else:
                     transmission = mantid.MonteCarloAbsorption(
-                        InputWorkspace=wsname, OutputWorkspace="transmission", EventsPerPoint=self.n_mcevents
+                        InputWorkspace=wsname, OutputWorkspace="transmission", EventsPerPoint=self.n_mcevents, EnableLogging=False
                     )
                 self._divide_workspaces(wsname, transmission)
                 mantid.DeleteWorkspace(transmission)
@@ -53,11 +53,11 @@ class SXD(BaseSX):
 
     def load_run(self, runno):
         wsname = "SXD" + str(runno)
-        mantid.Load(Filename=wsname + ".raw", OutputWorkspace=wsname)
+        mantid.Load(Filename=wsname + ".raw", OutputWorkspace=wsname, EnableLogging=False)
         if self.detcal_path is not None:
-            mantid.LoadParameterFile(Workspace=wsname, Filename=self.detcal_path)
-        mantid.CropWorkspace(InputWorkspace=wsname, OutputWorkspace=wsname, XMin=700, XMax=18800)
-        mantid.NormaliseByCurrent(InputWorkspace=wsname, OutputWorkspace=wsname)
+            mantid.LoadParameterFile(Workspace=wsname, Filename=self.detcal_path, EnableLogging=False)
+        mantid.CropWorkspace(InputWorkspace=wsname, OutputWorkspace=wsname, XMin=700, XMax=18800, EnableLogging=False)
+        mantid.NormaliseByCurrent(InputWorkspace=wsname, OutputWorkspace=wsname, EnableLogging=False)
         return wsname
 
     def process_vanadium(self):
@@ -66,14 +66,18 @@ class SXD(BaseSX):
         self.van_ws = self.load_run(self.van_runno)
         # create grouping file per bank
         self.grp_ws, _, self.ngrp = mantid.CreateGroupingWorkspace(
-            InputWorkspace=self.van_ws, GroupDetectorsBy="bank", OutputWorkspace="bank_groups"
+            InputWorkspace=self.van_ws, GroupDetectorsBy="bank", OutputWorkspace="bank_groups", EnableLogging=False
         )
         for wsname in [self.empty_ws, self.van_ws]:
             # important to focus in TOF not d-spacing!
             banks_foc = mantid.GroupDetectors(
-                InputWorkspace=wsname, OutputWorkspace="grouped", IgnoreGroupNumber=False, CopyGroupingFromWorkspace=self.grp_ws
+                InputWorkspace=wsname,
+                OutputWorkspace="grouped",
+                IgnoreGroupNumber=False,
+                CopyGroupingFromWorkspace=self.grp_ws,
+                EnableLogging=False,
             )
-            mantid.SmoothData(InputWorkspace=wsname, OutputWorkspace=wsname, NPoints=15)
+            mantid.SmoothData(InputWorkspace=wsname, OutputWorkspace=wsname, NPoints=15, EnableLogging=False)
             ws = SXD.retrieve(wsname)
             for igrp in range(self.ngrp):
                 ybank = banks_foc.readY(igrp)
@@ -96,21 +100,28 @@ class SXD(BaseSX):
             self.van_ws,
             Geometry={"Shape": "CSG", "Value": self.sphere_shape},
             Material={"ChemicalFormula": "V0.95-Nb0.05", "SampleNumberDensity": 0.0722},
+            EnableLogging=False,
         )
-        mantid.ConvertUnits(InputWorkspace=self.van_ws, OutputWorkspace=self.van_ws, Target="Wavelength")
-        vanadium_transmission = mantid.SphericalAbsorption(InputWorkspace=self.van_ws, OutputWorkspace="vanadium_transmission")
+        mantid.ConvertUnits(InputWorkspace=self.van_ws, OutputWorkspace=self.van_ws, Target="Wavelength", EnableLogging=False)
+        vanadium_transmission = mantid.SphericalAbsorption(
+            InputWorkspace=self.van_ws, OutputWorkspace="vanadium_transmission", EnableLogging=False
+        )
         self._divide_workspaces(self.van_ws, vanadium_transmission)
-        mantid.DeleteWorkspace(vanadium_transmission)
-        mantid.ConvertUnits(InputWorkspace=self.van_ws, OutputWorkspace=self.van_ws, Target="TOF")
+        mantid.DeleteWorkspace(vanadium_transmission, EnableLogging=False)
+        mantid.ConvertUnits(InputWorkspace=self.van_ws, OutputWorkspace=self.van_ws, Target="TOF", EnableLogging=False)
 
     @staticmethod
     def flip_bank_1(ws):
         wsname = SXD.retrieve(ws).name()
-        mantid.MoveInstrumentComponent(Workspace=wsname, ComponentName="bank1", RelativePosition=False)  # move to origin
-        mantid.RotateInstrumentComponent(Workspace=wsname, ComponentName="bank1", Y=1, Angle=37.5)
-        mantid.RotateInstrumentComponent(Workspace=wsname, ComponentName="bank1", X=1, Y=1, Angle=180)
-        mantid.RotateInstrumentComponent(Workspace=wsname, ComponentName="bank1", X=1, Angle=-37.5)
-        mantid.MoveInstrumentComponent(Workspace=wsname, ComponentName="bank1", X=0.136971, Z=-0.178505, RelativePosition=False)
+        mantid.MoveInstrumentComponent(
+            Workspace=wsname, ComponentName="bank1", RelativePosition=False, EnableLogging=False
+        )  # move to origin
+        mantid.RotateInstrumentComponent(Workspace=wsname, ComponentName="bank1", Y=1, Angle=37.5, EnableLogging=False)
+        mantid.RotateInstrumentComponent(Workspace=wsname, ComponentName="bank1", X=1, Y=1, Angle=180, EnableLogging=False)
+        mantid.RotateInstrumentComponent(Workspace=wsname, ComponentName="bank1", X=1, Angle=-37.5, EnableLogging=False)
+        mantid.MoveInstrumentComponent(
+            Workspace=wsname, ComponentName="bank1", X=0.136971, Z=-0.178505, RelativePosition=False, EnableLogging=False
+        )
 
     @staticmethod
     def calibrate_sxd_panels(ws, peaks, save_dir, tol=0.15, maxShiftInMeters=0.025):
@@ -127,7 +138,7 @@ class SXD(BaseSX):
             wsname = SXD.retrieve(ws).name()
         else:
             wsname = "empty"
-            mantid.LoadEmptyInstrument(InstrumentName="SXD", OutputWorkspace=wsname)
+            mantid.LoadEmptyInstrument(InstrumentName="SXD", OutputWorkspace=wsname, EnableLogging=False)
         peaks_name = SXD.retrieve(peaks).name()
         mantid.IndexPeaks(PeaksWorkspace=peaks_name, Tolerance=tol)
         initialUB = np.copy(SXD.retrieve(peaks_name).sample().getOrientedLattice().getUB())
@@ -147,14 +158,20 @@ class SXD(BaseSX):
             mantid.MoveInstrumentComponent(
                 Workspace=wsname, ComponentName="bank" + str(ibank), RelativePosition=True, X=-x, Y=-y, Z=-z, EnableLogging=False
             )
-            mantid.ApplyInstrumentToPeaks(InputWorkspace=peaks_name, InstrumentWorkspace=wsname, OutputWorkspace=peaks_name)
+            mantid.ApplyInstrumentToPeaks(
+                InputWorkspace=peaks_name, InstrumentWorkspace=wsname, OutputWorkspace=peaks_name, EnableLogging=False
+            )
         newUB = getR(rotx, [1, 0, 0]) @ getR(roty, [0, 1, 0]) @ getR(rotz, [0, 0, 1]) @ initialUB
         mantid.SetUB(peaks_name, UB=newUB)
         mantid.IndexPeaks(PeaksWorkspace=peaks_name, Tolerance=tol)
         # optimize position of each bank independently
         for ibank in range(1, 12):
             mantid.FilterPeaks(
-                InputWorkspace=peaks_name, OutputWorkspace=peaks + "_bank", FilterVariable="RunNumber", BankName="bank" + str(ibank)
+                InputWorkspace=peaks_name,
+                OutputWorkspace=peaks + "_bank",
+                FilterVariable="RunNumber",
+                BankName="bank" + str(ibank),
+                EnableLogging=False,
             )
             _, pos_table, *_ = mantid.OptimizeCrystalPlacement(
                 PeaksWorkspace=peaks_name,
@@ -213,19 +230,23 @@ class SXD(BaseSX):
         if ws is None:
             # need instrument ws to apply to peaks
             ws = "empty"
-            mantid.LoadEmptyInstrument(InstrumentName="SXD", OutputWorkspace=ws)
+            mantid.LoadEmptyInstrument(InstrumentName="SXD", OutputWorkspace=ws, EnableLogging=False)
             use_empty = True
         else:
-            mantid.LoadInstrument(Workspace=ws, InstrumentName="SXD", RewriteSpectraMap=False)  # reset instrument if already calibrated
-        mantid.LoadParameterFile(Workspace=ws, Filename=xml_path)
+            mantid.LoadInstrument(
+                Workspace=ws, InstrumentName="SXD", RewriteSpectraMap=False, EnableLogging=False
+            )  # reset instrument if already calibrated
+        mantid.LoadParameterFile(Workspace=ws, Filename=xml_path, EnableLogging=False)
         for pk_type in PEAK_TYPE:
             pks = self.get_peaks(run, peak_type=pk_type, integration_type=None)
             if pks is not None:
-                mantid.ApplyInstrumentToPeaks(InputWorkspace=pks, InstrumentWorkspace=ws, OutputWorkspace=pks)
+                mantid.ApplyInstrumentToPeaks(InputWorkspace=pks, InstrumentWorkspace=ws, OutputWorkspace=pks, EnableLogging=False)
                 for int_type in INTEGRATION_TYPE:
                     pks_int = self.get_peaks(run, peak_type=pk_type, integration_type=int_type)
                     if pks_int is not None:
-                        mantid.ApplyInstrumentToPeaks(InputWorkspace=pks_int, InstrumentWorkspace=ws, OutputWorkspace=pks_int)
+                        mantid.ApplyInstrumentToPeaks(
+                            InputWorkspace=pks_int, InstrumentWorkspace=ws, OutputWorkspace=pks_int, EnableLogging=False
+                        )
         if use_empty:
             mantid.DeleteWorkspace(ws)
 
@@ -235,22 +256,22 @@ class SXD(BaseSX):
         for col_name in ["Row", "Col"]:
             col = np.array(SXD.retrieve(peaks).column(col_name))
             iremove = np.where(np.logical_or(col < nedge, col > 63 - nedge))[0]
-            mantid.DeleteTableRows(TableWorkspace=peaks, Rows=iremove)
+            mantid.DeleteTableRows(TableWorkspace=peaks, Rows=iremove, EnableLogging=False)
 
     @staticmethod
     def find_sx_peaks(ws, bg=None, nstd=None, lambda_min=0.45, lambda_max=3, nbunch=3, out_peaks=None, **kwargs):
         ws_rb = SXD.retrieve(ws).name() + "_rb"
-        mantid.Rebunch(InputWorkspace=ws, OutputWorkspace=ws_rb, NBunch=nbunch)
+        mantid.Rebunch(InputWorkspace=ws, OutputWorkspace=ws_rb, NBunch=nbunch, EnableLogging=False)
         # mask detector edges
-        mantid.MaskBTP(Workspace=ws_rb, Tube="Edges")
-        mantid.MaskBTP(Workspace=ws_rb, Pixel="edges")
+        mantid.MaskBTP(Workspace=ws_rb, Tube="Edges", EnableLogging=False)
+        mantid.MaskBTP(Workspace=ws_rb, Pixel="edges", EnableLogging=False)
         # Crop in wavelength
-        mantid.ConvertUnits(InputWorkspace=ws_rb, OutputWorkspace=ws_rb, Target="Wavelength")
-        mantid.CropWorkspace(InputWorkspace=ws_rb, OutputWorkspace=ws_rb, XMin=lambda_min, XMax=lambda_max)
+        mantid.ConvertUnits(InputWorkspace=ws_rb, OutputWorkspace=ws_rb, Target="Wavelength", EnableLogging=False)
+        mantid.CropWorkspace(InputWorkspace=ws_rb, OutputWorkspace=ws_rb, XMin=lambda_min, XMax=lambda_max, EnableLogging=False)
         if out_peaks is None:
             out_peaks = SXD.retrieve(ws).name() + "_peaks"  # need to do this so not "_rb_peaks"
         BaseSX.find_sx_peaks(ws_rb, bg, nstd, out_peaks, **kwargs)
-        mantid.DeleteWorkspace(ws_rb)
+        mantid.DeleteWorkspace(ws_rb, EnableLogging=False)
         return out_peaks
 
     @staticmethod

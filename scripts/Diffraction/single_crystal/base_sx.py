@@ -130,7 +130,7 @@ class BaseSX(ABC):
         """
         if self.gonio_axes is not None:
             axis_dict = {f"Axis{iax}": ",".join([str(angles[iax]), self.gonio_axes[iax]]) for iax in range(len(angles))}
-            mantid.SetGoniometer(Workspace=ws, **axis_dict)
+            mantid.SetGoniometer(Workspace=ws, EnableLogging=False, **axis_dict)
 
     @staticmethod
     def convert_ws_to_MD(wsname, md_name=None, frame="Q (lab frame)"):
@@ -139,10 +139,15 @@ class BaseSX(ABC):
         xunit = BaseSX.get_xunit(wsname)  # get initial xunit
         BaseSX._normalise_by_bin_width_in_k(wsname)  # normalise by bin-width in K = 2pi/lambda
         wsMD = mantid.ConvertToDiffractionMDWorkspace(
-            InputWorkspace=wsname, OutputWorkspace=md_name, LorentzCorrection=True, OneEventPerBin=False, OutputDimensions=frame
+            InputWorkspace=wsname,
+            OutputWorkspace=md_name,
+            LorentzCorrection=True,
+            OneEventPerBin=False,
+            OutputDimensions=frame,
+            EnableLogging=False,
         )
         BaseSX._normalise_by_bin_width_in_k(wsname, undo=True)  # normalise by bin-width in K = 2pi/lambda
-        mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target=xunit)
+        mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target=xunit, EnableLogging=False)
         return wsMD
 
     @default_apply_to_all_runs
@@ -154,7 +159,7 @@ class BaseSX(ABC):
 
     @default_apply_to_all_runs
     def load_isaw_ub(self, isaw_file: str, run: Optional[Sequence[str]] = None, tol=0.15):
-
+        ws = self.get_ws(run)
         try:
             mantid.LoadIsawUB(InputWorkspace=ws, Filename=isaw_file)
             peaks = self.get_peaks(run, PEAK_TYPE.FOUND)
@@ -205,9 +210,9 @@ class BaseSX(ABC):
         if input_ws is not None:
             out_peaks_name = "_".join([BaseSX.retrieve(input_ws).name(), peak_type.value])
             if peak_type == PEAK_TYPE.PREDICT:
-                mantid.PredictPeaks(InputWorkspace=input_ws, OutputWorkspace=out_peaks_name, **kwargs)
+                mantid.PredictPeaks(InputWorkspace=input_ws, OutputWorkspace=out_peaks_name, EnableLogging=False, **kwargs)
             else:
-                mantid.PredictFractionalPeaks(InputWorkspace=input_ws, OutputWorkspace=out_peaks_name, **kwargs)
+                mantid.PredictFractionalPeaks(InputWorkspace=input_ws, OutputWorkspace=out_peaks_name, EnableLogging=False, **kwargs)
             self.set_peaks(run, out_peaks_name, peak_type)
 
     @staticmethod
@@ -247,24 +252,28 @@ class BaseSX(ABC):
         peaks = BaseSX.retrieve(peaks)
         use_empty_inst = ws is None
         if use_empty_inst:
-            ws = mantid.LoadEmptyInstrument(InstrumentName=peaks.getInstrument().getFullName(), OutputWorkspace="empty")
+            ws = mantid.LoadEmptyInstrument(
+                InstrumentName=peaks.getInstrument().getFullName(), OutputWorkspace="empty", EnableLogging=False
+            )
         else:
             ws = BaseSX.retrieve(ws)
-            mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target="TOF")  # needs to be in TOF for setting B
+            mantid.ConvertUnits(
+                InputWorkspace=ws, OutputWorkspace=ws, Target="TOF", EnableLogging=False
+            )  # needs to be in TOF for setting B
         ws = BaseSX.retrieve(ws)
-        mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target="TOF")  # needs to be in TOF for setting B
+        mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target="TOF", EnableLogging=False)  # needs to be in TOF for setting B
         ispecs = ws.getIndicesFromDetectorIDs(peaks.column("DetID"))
         rads = [self.get_radius(pk, ws, ispecs[ipk], scale) for ipk, pk in enumerate(peaks)]
         bin_edges = np.arange(min(rads), max(rads) + dq, dq)
         ibins = np.digitize(rads, bin_edges[:-1])
-        peaks_int = mantid.CloneWorkspace(InputWorkspace=peaks, OutputWorkspace=out_peaks)
-        mantid.DeleteTableRows(TableWorkspace=peaks_int, Rows=list(range(peaks_int.getNumberPeaks())))
+        peaks_int = mantid.CloneWorkspace(InputWorkspace=peaks, OutputWorkspace=out_peaks, EnableLogging=False)
+        mantid.DeleteTableRows(TableWorkspace=peaks_int, Rows=list(range(peaks_int.getNumberPeaks())), EnableLogging=False)
         for ibin in np.unique(ibins):
             rad = bin_edges[ibin]
             ipks = np.where(ibins == ibin)[0]
             irows_to_del = set(range(peaks.getNumberPeaks())) - set(ipks)
-            peaks_subset = mantid.CloneWorkspace(InputWorkspace=peaks, OutputWorkspace=peaks.name() + "_rad")
-            mantid.DeleteTableRows(TableWorkspace=peaks_subset, Rows=list(irows_to_del))
+            peaks_subset = mantid.CloneWorkspace(InputWorkspace=peaks, OutputWorkspace=peaks.name() + "_rad", EnableLogging=False)
+            mantid.DeleteTableRows(TableWorkspace=peaks_subset, Rows=list(irows_to_del), EnableLogging=False)
             # integrate
             peaks_subset = BaseSX.integrate_peaks_MD(
                 wsMD,
@@ -275,10 +284,12 @@ class BaseSX(ABC):
                 BackgroundOuterRadius=rad * (2 ** (1 / 3)),
                 **kwargs,
             )
-            peaks_int = mantid.CombinePeaksWorkspaces(LHSWorkspace=peaks_int, RHSWorkspace=peaks_subset, OutputWorkspace=peaks_int.name())
-            mantid.DeleteWorkspace(peaks_subset)
+            peaks_int = mantid.CombinePeaksWorkspaces(
+                LHSWorkspace=peaks_int, RHSWorkspace=peaks_subset, OutputWorkspace=peaks_int.name(), EnableLogging=False
+            )
+            mantid.DeleteWorkspace(peaks_subset, EnableLogging=False)
             if use_empty_inst:
-                mantid.DeleteWorkspace(ws)
+                mantid.DeleteWorkspace(ws, EnableLogging=False)
         return peaks_int
 
     @staticmethod
@@ -337,7 +348,7 @@ class BaseSX(ABC):
 
     @staticmethod
     def _normalise_by_bin_width_in_k(wsname, undo=False):
-        ws = mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target="Momentum")
+        ws = mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target="Momentum", EnableLogging=False)
         si = ws.spectrumInfo()
         for ispec in range(ws.getNumberHistograms()):
             if si.hasDetectors(ispec) and not si.isMonitor(ispec):
@@ -350,18 +361,34 @@ class BaseSX(ABC):
 
     @staticmethod
     def _minus_workspaces(ws_lhs, ws_rhs):
-        mantid.RebinToWorkspace(WorkspaceToRebin=ws_rhs, WorkspaceToMatch=ws_lhs, OutputWorkspace=ws_rhs, PreserveEvents=False)
-        mantid.Minus(LHSWorkspace=ws_lhs, RHSWorkspace=ws_rhs, OutputWorkspace=ws_lhs)
+        mantid.RebinToWorkspace(
+            WorkspaceToRebin=ws_rhs, WorkspaceToMatch=ws_lhs, OutputWorkspace=ws_rhs, PreserveEvents=False, EnableLogging=False
+        )
+        mantid.Minus(LHSWorkspace=ws_lhs, RHSWorkspace=ws_rhs, OutputWorkspace=ws_lhs, EnableLogging=False)
         mantid.ReplaceSpecialValues(
-            InputWorkspace=ws_lhs, OutputWorkspace=ws_lhs, NaNValue=0, InfinityValue=0, BigNumberThreshold=1e15, SmallNumberThreshold=1e-15
+            InputWorkspace=ws_lhs,
+            OutputWorkspace=ws_lhs,
+            NaNValue=0,
+            InfinityValue=0,
+            BigNumberThreshold=1e15,
+            SmallNumberThreshold=1e-15,
+            EnableLogging=False,
         )
 
     @staticmethod
     def _divide_workspaces(ws_lhs, ws_rhs):
-        mantid.RebinToWorkspace(WorkspaceToRebin=ws_rhs, WorkspaceToMatch=ws_lhs, OutputWorkspace=ws_rhs, PreserveEvents=False)
-        mantid.Divide(LHSWorkspace=ws_lhs, RHSWorkspace=ws_rhs, OutputWorkspace=ws_lhs)
+        mantid.RebinToWorkspace(
+            WorkspaceToRebin=ws_rhs, WorkspaceToMatch=ws_lhs, OutputWorkspace=ws_rhs, PreserveEvents=False, EnableLogging=False
+        )
+        mantid.Divide(LHSWorkspace=ws_lhs, RHSWorkspace=ws_rhs, OutputWorkspace=ws_lhs, EnableLogging=False)
         mantid.ReplaceSpecialValues(
-            InputWorkspace=ws_lhs, OutputWorkspace=ws_lhs, NaNValue=0, InfinityValue=0, BigNumberThreshold=1e15, SmallNumberThreshold=1e-15
+            InputWorkspace=ws_lhs,
+            OutputWorkspace=ws_lhs,
+            NaNValue=0,
+            InfinityValue=0,
+            BigNumberThreshold=1e15,
+            SmallNumberThreshold=1e-15,
+            EnableLogging=False,
         )
 
     @staticmethod
@@ -371,7 +398,7 @@ class BaseSX(ABC):
         U = BaseSX.retrieve(ws).sample().getOrientedLattice().getU()
         # find transform required  ( U_ref = U T^-1) - see TransformHKL docs for details
         transform = np.linalg.inv(getSignMaxAbsValInCol(np.matmul(np.linalg.inv(U), U_ref)))
-        mantid.TransformHKL(PeaksWorkspace=ws, HKLTransform=transform, FindError=False)
+        mantid.TransformHKL(PeaksWorkspace=ws, HKLTransform=transform, FindError=False, EnableLogging=False)
 
     @staticmethod
     def find_sx_peaks(ws, bg=None, nstd=None, out_peaks=None, **kwargs):
@@ -390,7 +417,9 @@ class BaseSX(ABC):
         # get unit to convert back to after peaks found
         xunit = BaseSX.get_xunit(ws)
         if not ws.getXDimension().name == "TOF":
-            ws = mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws.name(), Target="TOF")  # FindSXPeaks requires TOF
+            ws = mantid.ConvertUnits(
+                InputWorkspace=ws, OutputWorkspace=ws.name(), Target="TOF", EnableLogging=False
+            )  # FindSXPeaks requires TOF
         # extract y data (to use to determine to determine threshold)
         mantid.FindSXPeaks(
             InputWorkspace=ws,
@@ -398,10 +427,11 @@ class BaseSX(ABC):
             AbsoluteBackground=bg,
             ResolutionStrategy="AbsoluteResolution",
             OutputWorkspace=out_peaks,
+            EnableLogging=False,
             **kwargs,
         )
         if not ws.getXDimension().name == "TOF":
-            mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws.name(), Target=xunit)
+            mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws.name(), Target=xunit, EnableLogging=False)
         return out_peaks
 
     @staticmethod
@@ -420,7 +450,7 @@ class BaseSX(ABC):
         for ipk, pk in enumerate(BaseSX.retrieve(peaks)):
             if not self.spgr.isAllowedReflection(pk.getIntHKL()):
                 iremove.append(ipk)
-        mantid.DeleteTableRows(TableWorkspace=peaks, Rows=iremove)
+        mantid.DeleteTableRows(TableWorkspace=peaks, Rows=iremove, EnableLogging=False)
 
     @staticmethod
     def remove_peaks_near_powder_line(peaks, resolution=0.05, dmin=0.5, dmax=10, phase="Al", dlist=None, structure=None):
@@ -449,13 +479,13 @@ class BaseSX(ABC):
             ipks = np.where(abs(dspacings - dpk) < resolution * dpk)[0]
             if ipks.size > 0:
                 iremove.extend(ipks)
-        mantid.DeleteTableRows(TableWorkspace=peaks, Rows=iremove)
+        mantid.DeleteTableRows(TableWorkspace=peaks, Rows=iremove, EnableLogging=False)
         return dlist  # list of dspacing of powder peaks
 
     @staticmethod
     def remove_duplicate_peaks_by_hkl(peaks, hkl_tol=0.05):
         peaks = BaseSX.retrieve(peaks)
-        mantid.IndexPeaks(peaks, Tolerance=hkl_tol, RoundHKLs=False)
+        mantid.IndexPeaks(peaks, Tolerance=hkl_tol, RoundHKLs=False, EnableLogging=False)
         hkl = np.array([peaks.column("h"), peaks.column("k"), peaks.column("l")])
         hkl_int = np.round(hkl)
         hkl_unq, idx, ncnts = np.unique(hkl_int, axis=1, return_inverse=True, return_counts=True)
@@ -467,7 +497,7 @@ class BaseSX(ABC):
                 dhkl_sq = np.sum((hkl[:, iduplicates] - hkl_int[:, iduplicates]) ** 2, axis=0)
                 iduplicates.pop(np.argmin(dhkl_sq))
                 irows_to_del.extend(iduplicates)
-        mantid.DeleteTableRows(TableWorkspace=peaks, Rows=irows_to_del)
+        mantid.DeleteTableRows(TableWorkspace=peaks, Rows=irows_to_del, EnableLogging=False)
 
     @staticmethod
     def remove_duplicate_peaks_by_qlab(peaks, q_tol=0.05):
@@ -475,7 +505,9 @@ class BaseSX(ABC):
         Will keep lowest dSpacing peak (often best approx. to peak centre)
         """
         peaks = BaseSX.retrieve(peaks)
-        peaks = mantid.SortPeaksWorkspace(InputWorkspace=peaks, OutputWorkspace=peaks.name(), ColumnNameToSortBy="DSpacing")
+        peaks = mantid.SortPeaksWorkspace(
+            InputWorkspace=peaks, OutputWorkspace=peaks.name(), ColumnNameToSortBy="DSpacing", EnableLogging=False
+        )
         irows_to_del = []
         for ipk in range(peaks.getNumberPeaks() - 1):
             pk = peaks.getPeak(ipk)
@@ -487,7 +519,7 @@ class BaseSX(ABC):
                 if dQ.norm() <= q_tol:
                     irows_to_del.append(ipk + istep)
                 istep += 1
-        mantid.DeleteTableRows(TableWorkspace=peaks, Rows=irows_to_del)
+        mantid.DeleteTableRows(TableWorkspace=peaks, Rows=irows_to_del, EnableLogging=False)
 
     @staticmethod
     def remove_unindexed_peaks(peaks):
@@ -495,13 +527,23 @@ class BaseSX(ABC):
         Will keep lowest dSpacing peak (often best approx. to peak centre)
         """
         mantid.FilterPeaks(
-            InputWorkspace=peaks, OutputWorkspace=BaseSX.retrieve(peaks).name(), FilterVariable="h^2+k^2+l^2", FilterValue=0, Operator=">"
+            InputWorkspace=peaks,
+            OutputWorkspace=BaseSX.retrieve(peaks).name(),
+            FilterVariable="h^2+k^2+l^2",
+            FilterValue=0,
+            Operator=">",
+            EnableLogging=False,
         )
 
     @staticmethod
     def remove_non_integrated_peaks(peaks):
         mantid.FilterPeaks(
-            InputWorkspace=peaks, OutputWorkspace=BaseSX.retrieve(peaks).name(), FilterVariable="Intens/SigInt", FilterValue=0, Operator=">"
+            InputWorkspace=peaks,
+            OutputWorkspace=BaseSX.retrieve(peaks).name(),
+            FilterVariable="Intens/SigInt",
+            FilterValue=0,
+            Operator=">",
+            EnableLogging=False,
         )
 
     @staticmethod
