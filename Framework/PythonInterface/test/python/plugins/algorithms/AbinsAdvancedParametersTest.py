@@ -109,11 +109,23 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
     def test_wrong_tosca_cos_scattering_angle(self):
         # cosines of scattering angle is float
         abins.parameters.instruments["TOSCA"]["cos_scattering_angle"] = "0.0334"
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Invalid value of cosines scattering angle for TOSCA",
+            Abins,
+            VibrationalOrPhononFile=self._Si2 + ".phonon",
+            OutputWorkspace=self._wrk_name,
+        )
 
         # TOSCA_cos_scattering_angle cannot be integer
         abins.parameters.instruments["TOSCA"]["cos_scattering_angle"] = 1
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Invalid value of cosines scattering angle for TOSCA",
+            Abins,
+            VibrationalOrPhononFile=self._Si2 + ".phonon",
+            OutputWorkspace=self._wrk_name,
+        )
 
     def test_wrong_tosca_resolution_constant_A(self):
         # TOSCA constant should be float
