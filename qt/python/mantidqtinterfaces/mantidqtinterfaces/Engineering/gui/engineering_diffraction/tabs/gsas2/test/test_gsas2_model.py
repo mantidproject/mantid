@@ -135,6 +135,18 @@ class TestGSAS2Model(unittest.TestCase):
         self.model.override_cell_length_string = None
         self.assertEqual(self.model.choose_cell_lengths("invalid_phase_file"), None)
 
+    @patch(output_sample_log_path + ".SampleLogsGroupWorkspace.update_log_workspace_group")
+    @patch(model_path + ".Load")
+    def test_loading_single_file(self, mock_load, mock_update_logws_group):
+        mock_load.return_value = self.mock_ws
+
+        self.model.load_focused_nxs_for_logs(["/dir/file1.txt"])
+
+        self.assertEqual(1, len(self.model._data_workspaces))
+        self.assertEqual(self.mock_ws, self.model._data_workspaces["file1_GSASII"].loaded_ws)
+        mock_load.assert_any_call("/dir/file1.txt", OutputWorkspace="file1_GSASII")
+        mock_update_logws_group.assert_called_once()
+
     def test_generate_reflections_from_space_group(self):
         self.model.dSpacing_min = 1.0
         mantid_reflections = self.model.generate_reflections_from_space_group(self.phase_file_path, "3.65 3.65 3.65")

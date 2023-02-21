@@ -29,8 +29,8 @@ def write_table_row(ws_table, row, irow):
     [ws_table.setCell(irow, icol, row[icol]) for icol in range(0, len(row))]
 
 
-def _generate_workspace_name(filepath):
-    wsname = path.splitext(path.split(filepath)[1])[0]
+def _generate_workspace_name(filepath: str, suffix: str) -> str:
+    wsname = path.splitext(path.split(filepath)[1])[0] + suffix
     return wsname
 
 

@@ -56,8 +56,8 @@ class TestFittingDataModel(unittest.TestCase):
         self.model.load_files("/ar/a_filename.whatever")
 
         self.assertEqual(1, len(self.model._data_workspaces))
-        self.assertEqual(self.mock_ws, self.model._data_workspaces["a_filename"].loaded_ws)
-        mock_load.assert_called_with("/ar/a_filename.whatever", OutputWorkspace="a_filename")
+        self.assertEqual(self.mock_ws, self.model._data_workspaces["a_filename_Fitting"].loaded_ws)
+        mock_load.assert_called_with("/ar/a_filename.whatever", OutputWorkspace="a_filename_Fitting")
         mock_update_logws_group.assert_called_once()
 
     @patch(output_sample_log_path + ".SampleLogsGroupWorkspace.update_log_workspace_group")
@@ -77,7 +77,7 @@ class TestFittingDataModel(unittest.TestCase):
     @patch(data_model_path + ".Load")
     def test_loading_single_file_already_loaded_tracked(self, mock_load, mock_update_logws_group):
         fpath = "/ar/a_filename.whatever"
-        self.model._data_workspaces.add(_generate_workspace_name(fpath), loaded_ws=self.mock_ws)
+        self.model._data_workspaces.add(_generate_workspace_name(fpath, self.model._suffix), loaded_ws=self.mock_ws)
 
         self.model.load_files(fpath)
 
@@ -97,8 +97,8 @@ class TestFittingDataModel(unittest.TestCase):
         self.model.load_files("/ar/a_filename.whatever")
 
         self.assertEqual(1, len(self.model._data_workspaces))
-        self.assertEqual(self.mock_ws, self.model._data_workspaces["a_filename"].loaded_ws)
-        mock_load.assert_called_with("/ar/a_filename.whatever", OutputWorkspace="a_filename")
+        self.assertEqual(self.mock_ws, self.model._data_workspaces["a_filename_Fitting"].loaded_ws)
+        mock_load.assert_called_with("/ar/a_filename.whatever", OutputWorkspace="a_filename_Fitting")
         log_workspaces = self.model._sample_logs_workspace_group.get_log_workspaces()
         self.assertEqual(1 + len(log_names), len(self.model._sample_logs_workspace_group._log_workspaces))
         for ilog in range(0, len(log_names)):
@@ -112,7 +112,7 @@ class TestFittingDataModel(unittest.TestCase):
 
         self.model.load_files("/ar/a_filename.whatever")
         self.assertEqual(0, len(self.model._data_workspaces))
-        mock_load.assert_called_with("/ar/a_filename.whatever", OutputWorkspace="a_filename")
+        mock_load.assert_called_with("/ar/a_filename.whatever", OutputWorkspace="a_filename_Fitting")
         self.assertEqual(1, mock_logger.error.call_count)
 
     @patch(output_sample_log_path + ".SampleLogsGroupWorkspace.update_log_workspace_group")
@@ -123,10 +123,10 @@ class TestFittingDataModel(unittest.TestCase):
         self.model.load_files("/dir/file1.txt, /dir/file2.nxs")
 
         self.assertEqual(2, len(self.model._data_workspaces))
-        self.assertEqual(self.mock_ws, self.model._data_workspaces["file1"].loaded_ws)
-        self.assertEqual(self.mock_ws, self.model._data_workspaces["file2"].loaded_ws)
-        mock_load.assert_any_call("/dir/file1.txt", OutputWorkspace="file1")
-        mock_load.assert_any_call("/dir/file2.nxs", OutputWorkspace="file2")
+        self.assertEqual(self.mock_ws, self.model._data_workspaces["file1_Fitting"].loaded_ws)
+        self.assertEqual(self.mock_ws, self.model._data_workspaces["file2_Fitting"].loaded_ws)
+        mock_load.assert_any_call("/dir/file1.txt", OutputWorkspace="file1_Fitting")
+        mock_load.assert_any_call("/dir/file2.nxs", OutputWorkspace="file2_Fitting")
         mock_update_logws_group.assert_called_once()
 
     @patch(data_model_path + ".logger")
@@ -138,8 +138,8 @@ class TestFittingDataModel(unittest.TestCase):
         self.model.load_files("/dir/file1.txt, /dir/file2.nxs")
 
         self.assertEqual(0, len(self.model._data_workspaces))
-        mock_load.assert_any_call("/dir/file1.txt", OutputWorkspace="file1")
-        mock_load.assert_any_call("/dir/file2.nxs", OutputWorkspace="file2")
+        mock_load.assert_any_call("/dir/file1.txt", OutputWorkspace="file1_Fitting")
+        mock_load.assert_any_call("/dir/file2.nxs", OutputWorkspace="file2_Fitting")
         self.assertEqual(2, mock_logger.warning.call_count)
 
     @patch(data_model_path + ".logger")
@@ -150,8 +150,8 @@ class TestFittingDataModel(unittest.TestCase):
         self.model.load_files("/dir/file1.txt, /dir/file2.nxs")
 
         self.assertEqual(0, len(self.model._data_workspaces))
-        mock_load.assert_any_call("/dir/file1.txt", OutputWorkspace="file1")
-        mock_load.assert_any_call("/dir/file2.nxs", OutputWorkspace="file2")
+        mock_load.assert_any_call("/dir/file1.txt", OutputWorkspace="file1_Fitting")
+        mock_load.assert_any_call("/dir/file2.nxs", OutputWorkspace="file2_Fitting")
         self.assertEqual(2, mock_logger.error.call_count)
 
     @patch(data_model_path + ".DeleteWorkspace")

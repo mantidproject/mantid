@@ -816,7 +816,7 @@ class GSAS2Model(object):
             filenames = [filenames[0].replace("all_banks", "bank_1"), filenames[0].replace("all_banks", "bank_2")]
         for filename in filenames:
             filename = filename.replace(".gss", ".nxs")
-            ws_name = _generate_workspace_name(filename)
+            ws_name = _generate_workspace_name(filename, self._suffix)
             if ws_name not in self._data_workspaces.get_loaded_workpace_names():
                 try:
                     ws = Load(filename, OutputWorkspace=ws_name)
