@@ -279,9 +279,19 @@ void PanelsSurface::init() {
   m_v_max = m_viewRect.y1();
 }
 
-void PanelsSurface::project(const Mantid::Kernel::V3D & /*pos*/, double & /*u*/, double & /*v*/, double & /*uscale*/,
-                            double & /*vscale*/) const {
-  throw std::runtime_error("Cannot project an arbitrary point to this surface.");
+void PanelsSurface::project(const Mantid::Kernel::V3D & /*pos*/, double &u, double &v, double &uscale,
+                            double &vscale) const {
+  /* const auto &detectorInfo = m_instrActor->detectorInfo();
+  auto pos = detectorInfo.position(detIndex);
+  const FlatBankInfo &info = *m_flatBanks[bankIndex];
+  auto refPos = info.refPos;
+  auto rotation = info.rotation;
+  pos -= refPos;
+  rotation.rotate(pos);
+  pos += refPos;
+  u = m_xaxis.scalar_prod(pos);
+  v = m_yaxis.scalar_prod(pos);
+  uscale = vscale = 1.0;*/
 }
 
 void PanelsSurface::rotate(const UnwrappedDetector &udet, Mantid::Kernel::Quat &R) const {
@@ -311,6 +321,7 @@ void PanelsSurface::processStructured(size_t rootIndex) {
   auto *info = new FlatBankInfo(this);
   m_flatBanks << info;
   auto ref = corners[0];
+  info->refPos = ref;
   // find the rotation to put the bank on the plane
   info->rotation = calcBankRotation(ref, normal);
   const auto &columns = componentInfo.children(rootIndex);
@@ -333,7 +344,7 @@ void PanelsSurface::processStructured(size_t rootIndex) {
   for (auto column : columns) {
     const auto &row = componentInfo.children(column);
     for (auto j : row) {
-      addDetector(j, ref, index, info->rotation);
+      addDetector(j, index);
     }
   }
 
@@ -419,6 +430,7 @@ boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
   auto pos0 = componentInfo.position(componentInfo.children(tubes.front()).front());
   auto pos1 = componentInfo.position(componentInfo.children(tubes.front()).back());
 
+  info->refPos = pos0;
   info->rotation = calcBankRotation(pos0, normal);
   pos1 -= pos0;
   info->rotation.rotate(pos1);
@@ -436,7 +448,7 @@ boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
     const auto &children = componentInfo.children(tube);
 #pragma omp parallel for
     for (int j = 0; j < static_cast<int>(children.size()); ++j) { // NOLINT
-      addDetector(children[j], pos0, index, info->rotation);
+      addDetector(children[j], index);
     }
 
     auto &udet0 = m_unwrappedDetectors[children.front()];
@@ -510,6 +522,7 @@ void PanelsSurface::processUnstructured(size_t rootIndex, std::vector<bool> &vis
     // save bank info
     auto *info = new FlatBankInfo(this);
     m_flatBanks << info;
+    info->refPos = pos0;
     // record the first detector index of the bank
     info->startDetectorIndex = detectors.front();
     info->endDetectorIndex = detectors.back();
@@ -533,7 +546,7 @@ void PanelsSurface::processUnstructured(size_t rootIndex, std::vector<bool> &vis
 #pragma omp parallel for ordered
     for (int i = 0; i < static_cast<int>(detectors.size()); ++i) { // NOLINT
       auto detector = detectors[i];
-      addDetector(detector, pos0, index, info->rotation);
+      addDetector(detector, index);
       UnwrappedDetector &udet = m_unwrappedDetectors[detector];
 #pragma omp ordered
       info->polygon << QPointF(udet.u, udet.v);
@@ -643,8 +656,7 @@ Mantid::Kernel::Quat PanelsSurface::calcBankRotation(const Mantid::Kernel::V3D &
   return requiredRotation;
 }
 
-void PanelsSurface::addDetector(size_t detIndex, const Mantid::Kernel::V3D &refPos, int bankIndex,
-                                const Mantid::Kernel::Quat &rotation) {
+void PanelsSurface::addDetector(size_t detIndex, int bankIndex) {
   const auto &detectorInfo = m_instrActor->detectorInfo();
 
   auto pos = detectorInfo.position(detIndex);
@@ -652,6 +664,9 @@ void PanelsSurface::addDetector(size_t detIndex, const Mantid::Kernel::V3D &refP
   // get the colour
   UnwrappedDetector udet(m_instrActor->getColor(detIndex), detIndex);
   // apply bank's rotation
+  const FlatBankInfo &info = *m_flatBanks[bankIndex];
+  auto refPos = info.refPos;
+  auto rotation = info.rotation;
   pos -= refPos;
   rotation.rotate(pos);
   pos += refPos;

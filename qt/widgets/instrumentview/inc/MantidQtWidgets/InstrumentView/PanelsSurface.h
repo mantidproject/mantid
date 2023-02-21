@@ -28,6 +28,7 @@ struct EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW FlatBankInfo {
   QPolygonF polygon;
   /// optional override u, v for the bank
   std::optional<Mantid::Kernel::V2D> bankCentreOverride;
+  Mantid::Kernel::V3D refPos;
   // translate the bank by a vector
   void translate(const QPointF &shift);
 
@@ -77,8 +78,7 @@ protected:
   void constructFromComponentInfo();
   Mantid::Kernel::Quat calcBankRotation(const Mantid::Kernel::V3D &detPos, Mantid::Kernel::V3D normal) const;
   // Add a detector from an assembly
-  void addDetector(size_t detIndex, const Mantid::Kernel::V3D &refPos, int bankIndex,
-                   const Mantid::Kernel::Quat &rotation);
+  void addDetector(size_t detIndex, int bankIndex);
   // Arrange the banks on the projection plane
   void arrangeBanks();
   // Spread the banks over the projection plane
