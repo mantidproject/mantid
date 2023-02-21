@@ -78,15 +78,33 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
     def test_wrong_tosca_final_energy(self):
         # final energy should be a float not str
         abins.parameters.instruments["TOSCA"]["final_neutron_energy"] = "0"
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Invalid value of final_neutron_energy for TOSCA",
+            Abins,
+            VibrationalOrPhononFile=self._Si2 + ".phonon",
+            OutputWorkspace=self._wrk_name,
+        )
 
         # final energy should be of float type not integer
         abins.parameters.instruments["TOSCA"]["final_neutron_energy"] = 1
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Invalid value of final_neutron_energy for TOSCA",
+            Abins,
+            VibrationalOrPhononFile=self._Si2 + ".phonon",
+            OutputWorkspace=self._wrk_name,
+        )
 
         # final energy should be positive
         abins.parameters.instruments["TOSCA"]["final_neutron_energy"] = -1.0
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Invalid value of final_neutron_energy for TOSCA",
+            Abins,
+            VibrationalOrPhononFile=self._Si2 + ".phonon",
+            OutputWorkspace=self._wrk_name,
+        )
 
     def test_wrong_tosca_cos_scattering_angle(self):
         # cosines of scattering angle is float
