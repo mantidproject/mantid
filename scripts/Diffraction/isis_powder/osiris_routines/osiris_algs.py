@@ -8,6 +8,7 @@
 import isis_powder.routines.common as common
 from isis_powder.routines.run_details import create_run_details_object, get_cal_mapping_dict
 import numpy as np
+from mantid.kernel import logger
 from mantid.simpleapi import (
     NormaliseByCurrent,
     CropWorkspace,
@@ -245,9 +246,27 @@ def _correct_drange_overlap(merged_ws, drange_sets):
     return merged_ws
 
 
-def _merge_dspacing_runs(run_number, drange_sets, ws_group):
-    merged = MergeRuns(InputWorkspaces=ws_group, OutputWorkspace="OSIRIS" + run_number + WORKSPACE_SUFFIX.MERGED)
-    return _correct_drange_overlap(merged, drange_sets)
+def merge_dspacing_runs(focussed_runs, drange_sets, run_number):
+    if len(focussed_runs) == 1:
+        return [focussed_runs[0]]
+
+    extracted_spectras = [common.extract_ws_spectra(ws) for ws in focussed_runs]
+
+    have_same_spectras_count = len({len(spectras) for spectras in extracted_spectras}) == 1
+    if not have_same_spectras_count:
+        logger.warning("Cannot merge focussed workspaces with different number of spectras")
+        return [ws for ws in focussed_runs]
+
+    # Group workspaces located at the same index
+    transposed_spectras = list(map(list, zip(*extracted_spectras)))
+    # Merge workspaces located at the same index
+    merged_spectras = [
+        MergeRuns(InputWorkspaces=spectras, OutputWorkspace="OSIRIS" + run_number + WORKSPACE_SUFFIX.MERGED)
+        for spectras in transposed_spectras
+    ]
+    grouped_spectras = GroupWorkspaces(InputWorkspaces=merged_spectras)
+
+    return [_correct_drange_overlap(grouped_spectras, drange_sets)]
 
 
 def _group_workspaces(ws_list, output):
