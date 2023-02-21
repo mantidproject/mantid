@@ -505,7 +505,6 @@ class AbinsAlgorithm:
 
         for atom_index in range(num_atoms):
             if atoms_data[atom_index]["symbol"] == element_symbol and abs(atoms_data[atom_index]["mass"] - mass) < MASS_EPS:
-
                 temp_s_atom_data.fill(0.0)
 
                 for order in range(1, self._max_event_order + 1):
@@ -520,7 +519,6 @@ class AbinsAlgorithm:
         nucleons_number = int(round(mass))
 
         if substitution:
-
             atom_workspaces.append(
                 self._create_workspace(
                     atom_name=str(nucleons_number) + element_symbol,
@@ -575,7 +573,6 @@ class AbinsAlgorithm:
             local_partial_workspaces = partial_workspaces
 
         if len(local_partial_workspaces) > 1:
-
             # get frequencies
             ws = mtd[local_partial_workspaces[0]]
 
@@ -853,7 +850,7 @@ class AbinsAlgorithm:
         cls._check_chunk_size(message)
         cls._check_threads(message)
 
-    def _check_general_resolution(self, message_end=None):
+    def _check_general_resolution(self, message_end=""):
         """
         Checks general parameters used in construction resolution functions.
         :param message_end: closing part of the error message.
@@ -864,7 +861,7 @@ class AbinsAlgorithm:
             raise RuntimeError("Invalid value of fwhm" + message_end)
 
     @staticmethod
-    def _check_folder_names(message_end=None):
+    def _check_folder_names(message_end=""):
         """
         Checks folders names.
         :param message_end: closing part of the error message.
@@ -895,7 +892,7 @@ class AbinsAlgorithm:
             raise RuntimeError("Name for s_data_group already used as a name of another folder.")
 
     @staticmethod
-    def _check_rebinning(message_end=None):
+    def _check_rebinning(message_end=""):
         """
         Checks rebinning parameters.
         :param message_end: closing part of the error message.
@@ -912,7 +909,7 @@ class AbinsAlgorithm:
             raise RuntimeError("Invalid energy window for rebinning.")
 
     @staticmethod
-    def _check_threshold(message_end=None):
+    def _check_threshold(message_end=""):
         """
         Checks threshold for frequencies.
         :param message_end: closing part of the error message.
@@ -933,7 +930,7 @@ class AbinsAlgorithm:
             raise RuntimeError("Invalid value of s_relative_threshold" + message_end)
 
     @staticmethod
-    def _check_chunk_size(message_end=None):
+    def _check_chunk_size(message_end=""):
         """
         Check optimal size of chunk
         :param message_end: closing part of the error message.
@@ -943,7 +940,7 @@ class AbinsAlgorithm:
             raise RuntimeError("Invalid value of optimal_size" + message_end)
 
     @staticmethod
-    def _check_threads(message_end=None):
+    def _check_threads(message_end=""):
         """
         Checks number of threads
         :param message_end: closing part of the error message.
