@@ -38,6 +38,7 @@ from mantid.simpleapi import (
     Minus,
     MoveInstrumentComponent,
     mtd,
+    NormaliseToMonitor,
     Scale,
     SpecularReflectionPositionCorrect,
     RebinToWorkspace,
