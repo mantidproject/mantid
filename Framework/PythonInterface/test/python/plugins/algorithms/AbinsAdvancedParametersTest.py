@@ -58,15 +58,21 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
     def test_wrong_fwhm(self):
         # fwhm should be positive
         abins.parameters.instruments["fwhm"] = -1.0
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        self.assertRaisesRegex(
+            RuntimeError, "Invalid value of fwhm", Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name
+        )
 
         # fwhm should be larger than 0
         abins.parameters.instruments["fwhm"] = 0.0
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        self.assertRaisesRegex(
+            RuntimeError, "Invalid value of fwhm", Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name
+        )
 
         # fwhm should be smaller than 10
         abins.parameters.instruments["fwhm"] = 10.0
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        self.assertRaisesRegex(
+            RuntimeError, "Invalid value of fwhm", Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name
+        )
 
     # Tests for TOSCA parameters
     def test_wrong_tosca_final_energy(self):
