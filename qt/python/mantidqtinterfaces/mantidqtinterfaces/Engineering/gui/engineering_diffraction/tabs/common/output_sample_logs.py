@@ -35,11 +35,11 @@ def _generate_workspace_name(filepath):
 
 
 class SampleLogsGroupWorkspace(object):
-    def __init__(self, tab_name: str):
+    def __init__(self, suffix: str):
         self._log_names = []
         self._log_workspaces = None  # GroupWorkspace
         self._log_values = dict()  # {ws_name: {log_name: [avg, er]} }
-        self._suffix = "_" + tab_name
+        self._suffix = suffix
         self._run_info_name = "run_info" + self._suffix
 
     def create_log_workspace_group(self):
