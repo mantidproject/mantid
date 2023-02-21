@@ -688,7 +688,7 @@ class AbinsAlgorithm:
         # check  extension of a file
         found_filename_ext = os.path.splitext(filename_full_path)[1]
         if found_filename_ext.lower() != expected_file_extension:
-            comment = "{}Output from ab initio program {} is expected." " The expected extension of file is .{}. Found: {}.{}".format(
+            comment = "{}Output from ab initio program {} is expected." " The expected extension of file is {}. Found: {}. {}".format(
                 msg_err, ab_initio_program, expected_file_extension, found_filename_ext, msg_rename
             )
             return dict(Invalid=True, Comment=comment)

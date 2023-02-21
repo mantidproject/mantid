@@ -15,7 +15,6 @@ from abins.constants import ATOM_PREFIX, FUNDAMENTALS
 
 
 class AbinsBasicTest(unittest.TestCase):
-
     _si2 = "Si2-sc_Abins"
     _squaricn = "squaricn_sum_Abins"
     _ab_initio_program = "CASTEP"
@@ -53,23 +52,30 @@ class AbinsBasicTest(unittest.TestCase):
         """Test if the correct behaviour of algorithm in case input is not valid"""
 
         #  invalid CASTEP file missing:  Number of branches     6 in the header file
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile="Si2-sc_wrong.phonon", OutputWorkspace=self._workspace_name)
-
-        # wrong extension of phonon file in case of CASTEP
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile="Si2-sc.wrong_phonon", OutputWorkspace=self._workspace_name)
-
-        # wrong extension of phonon file in case of CRYSTAL
-        self.assertRaises(
-            RuntimeError, Abins, AbInitioProgram="CRYSTAL", VibrationalOrPhononFile="MgO.wrong_out", OutputWorkspace=self._workspace_name
+        self.assertRaisesRegex(
+            RuntimeError,
+            "The third line should include 'Number of branches'.",
+            Abins,
+            VibrationalOrPhononFile="Si2-sc_wrong.phonon",
+            OutputWorkspace=self._workspace_name,
         )
 
-        # in case of molecular calculations AllKpointsGiven cannot be False
-        self.assertRaises(
+        # wrong extension of phonon file in case of CASTEP
+        self.assertRaisesRegex(
             RuntimeError,
+            "The expected extension of file is .phonon.",
+            Abins,
+            VibrationalOrPhononFile="Si2-sc.wrong_phonon",
+            OutputWorkspace=self._workspace_name,
+        )
+
+        # wrong extension of phonon file in case of CRYSTAL
+        self.assertRaisesRegex(
+            RuntimeError,
+            "The expected extension of file is .out.",
             Abins,
             AbInitioProgram="CRYSTAL",
-            VibrationalOrPhononFile="toluene_molecule_BasicAbins.out",
-            AllKpointsGiven=False,
+            VibrationalOrPhononFile="MgO.wrong_out",
             OutputWorkspace=self._workspace_name,
         )
 
@@ -77,8 +83,9 @@ class AbinsBasicTest(unittest.TestCase):
         self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._si2 + ".phonon", TemperatureInKelvin=self._temperature)
 
         # keyword total in the name of the workspace
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Keyword: total cannot be used in the name of workspace.",
             Abins,
             VibrationalOrPhononFile=self._si2 + ".phonon",
             TemperatureInKelvin=self._temperature,
@@ -86,8 +93,9 @@ class AbinsBasicTest(unittest.TestCase):
         )
 
         # negative temperature in K
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Temperature must be positive.",
             Abins,
             VibrationalOrPhononFile=self._si2 + ".phonon",
             TemperatureInKelvin=-1.0,
@@ -95,13 +103,19 @@ class AbinsBasicTest(unittest.TestCase):
         )
 
         # negative scale
-        self.assertRaises(
-            RuntimeError, Abins, VibrationalOrPhononFile=self._si2 + ".phonon", Scale=-0.2, OutputWorkspace=self._workspace_name
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Scale must be positive.",
+            Abins,
+            VibrationalOrPhononFile=self._si2 + ".phonon",
+            Scale=-0.2,
+            OutputWorkspace=self._workspace_name,
         )
 
         # unknown instrument
-        self.assertRaises(
+        self.assertRaisesRegex(
             ValueError,
+            'The value "UnknownInstrument" is not in the list of allowed values',
             Abins,
             VibrationalOrPhononFile=self._si2 + ".phonon",
             Instrument="UnknownInstrument",
