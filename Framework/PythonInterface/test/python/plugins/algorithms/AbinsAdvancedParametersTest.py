@@ -55,7 +55,9 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
         mtd.clear()
 
     def test_wrong_fwhm(self):
-        bad_fwhm_values = (-1.0, 0.0, 10.0)  # fwhm should be positive  # fwhm should be positive  # fwhm should be smaller than 10
+        # fwhm should be positive
+        # fwhm should be smaller than 10
+        bad_fwhm_values = (-1.0, 0.0, 10.0)
 
         for fwhm in bad_fwhm_values:
             abins.parameters.instruments["fwhm"] = fwhm
@@ -130,7 +132,9 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
 
     # tests for folders
     def test_wrong_dft_group(self):
-        bad_ab_initio_data_values = (2, "")  # name should be of type str  # name of group cannot be an empty string
+        # name should be of type str
+        # name of group cannot be an empty string
+        bad_ab_initio_data_values = (2, "")
 
         for ab_initio_data in bad_ab_initio_data_values:
             abins.parameters.hdf_groups["ab_initio_data"] = ab_initio_data
@@ -143,7 +147,9 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
             )
 
     def test_wrong_powder_data_group(self):
-        bad_powder_data_values = (2, "")  # name should be of type str  # name of group cannot be an empty string
+        # name should be of type str
+        # name of group cannot be an empty string
+        bad_powder_data_values = (2, "")
 
         for powder_data in bad_powder_data_values:
             abins.parameters.hdf_groups["powder_data"] = powder_data
@@ -156,7 +162,9 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
             )
 
     def test_wrong_crystal_data_group(self):
-        bad_crystal_data_values = (2, "")  # name should be of type str  # name of group cannot be an empty string
+        # name should be of type str
+        # name of group cannot be an empty string
+        bad_crystal_data_values = (2, "")
 
         for crystal_data in bad_crystal_data_values:
             abins.parameters.hdf_groups["crystal_data"] = crystal_data
@@ -169,7 +177,9 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
             )
 
     def test_wrong_powder_s_data_group(self):
-        bad_s_data_values = (2, "")  # name should be of type str  # name of group cannot be an empty string
+        # name should be of type str
+        # name of group cannot be an empty string
+        bad_s_data_values = (2, "")
 
         for s_data in bad_s_data_values:
             abins.parameters.hdf_groups["s_data"] = s_data
@@ -194,7 +204,9 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
         )
 
     def test_wrong_min_wavenumber(self):
-        bad_min_wavenumber_values = (-0.001, 1)  # minimum wavenumber cannot be negative  # minimum wavenumber cannot be int
+        # minimum wavenumber cannot be negative
+        # minimum wavenumber cannot be int
+        bad_min_wavenumber_values = (-0.001, 1)
 
         for min_wavenumber in bad_min_wavenumber_values:
             abins.parameters.sampling["min_wavenumber"] = min_wavenumber
@@ -207,7 +219,9 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
             )
 
     def test_wrong_max_wavenumber(self):
-        bad_max_wavenumber_values = (-0.01, 10)  # maximum wavenumber cannot be negative  # maximum wavenumber cannot be integer
+        # maximum wavenumber cannot be negative
+        # maximum wavenumber cannot be integer
+        bad_max_wavenumber_values = (-0.01, 10)
 
         for max_wavenumber in bad_max_wavenumber_values:
             abins.parameters.sampling["max_wavenumber"] = max_wavenumber
@@ -258,7 +272,9 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
             )
 
     def test_wrong_optimal_size(self):
-        bad_optimal_size_values = (-10000, 50.0)  # optimal size cannot be negative  # optimal size must be of type int
+        # optimal size cannot be negative
+        # optimal size must be of type int
+        bad_optimal_size_values = (-10000, 50.0)
 
         for optimal_size in bad_optimal_size_values:
             abins.parameters.performance["optimal_size"] = optimal_size
