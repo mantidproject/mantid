@@ -11,7 +11,6 @@ from mantid.simpleapi import *
 # A dummy test class to subclass from.
 # Sets up the facility and data search directories.
 class _DiffReductionTest(systemtesting.MantidSystemTest):
-
     _facility = ""
     _directories = ""
     _instrument = ""
