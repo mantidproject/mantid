@@ -58,8 +58,9 @@ class DNSComputeDetEffCorrCoefsTest(unittest.TestCase):
         outputWorkspaceName = "DNSComputeDetCorrCoefsTest_Test2"
         vanalist = [self.sfvanaws.name(), self.nsfvanaws.name()]
         bglist = [self.sfbkgrws.name(), self.nsfbkgrws.name()]
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Background sfvanaws is higher than Vanadium sfbkgrws signal!",
             DNSComputeDetEffCorrCoefs,
             VanadiumWorkspaces=bglist,
             BackgroundWorkspaces=vanalist,
