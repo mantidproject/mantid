@@ -30,9 +30,6 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
             config["default.instrument"] = self._instrument
         mtd.clear()
 
-    def tearDown(self):
-        mtd.clear()
-
     def testDirectBeamD17(self):
         args = {"Run": "ILL/D17/317369.nxs", "Measurement": "DirectBeam", "OutputWorkspace": "outWS", "rethrow": True, "child": True}
         alg = create_algorithm("ReflectometryILLPreprocess", **args)
