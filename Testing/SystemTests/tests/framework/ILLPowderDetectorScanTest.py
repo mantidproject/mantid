@@ -135,7 +135,11 @@ class D2B_HeightRange_ReductionTest(_DiffReductionTest):
             HeightRange="-0.05,0.05",
         )
         ExtractSpectra(InputWorkspace="out_2D", StartWorkspaceIndex=43, EndWorkspaceIndex=84, OutputWorkspace="cropped")
-        match = CompareWorkspaces(Workspace1="cropped", Workspace2="out_height_2D", CheckSpectraMap=False, Tolerance=self._tolerance)
+        match = CompareWorkspaces(
+            Workspace1="cropped", Workspace2="out_height_2D_-0.05, 0.05", CheckSpectraMap=False, Tolerance=self._tolerance
+        )
+        self.assertTrue(match[0])
+        match = CompareWorkspaces(Workspace1="out_2D", Workspace2="out_height_2D", CheckSpectraMap=False, Tolerance=self._tolerance)
         self.assertTrue(match[0])
 
 
