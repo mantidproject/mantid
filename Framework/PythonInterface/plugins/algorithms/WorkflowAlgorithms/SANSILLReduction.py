@@ -572,7 +572,7 @@ class SANSILLReduction(DataProcessorAlgorithm):
                 return
             # Otherwise do the rescaling
             else:
-                self.do_rescale_flux(ws, flat_ws)
+                self.do_rescale_flux(ws, ref_ws)
         # Case where the "NormalisedByFlux" property has not been set to both flat field and data
         # Do nothing
         else:
