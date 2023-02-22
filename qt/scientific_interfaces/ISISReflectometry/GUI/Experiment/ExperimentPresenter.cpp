@@ -207,6 +207,12 @@ void ExperimentPresenter::updatePolarizationCorrectionEnabledState() {
   m_view->enablePolarizationCorrections();
   if (m_view->getPolarizationCorrectionOption() == "Workspace") {
     m_view->enablePolarizationEfficiencies();
+    m_view->setPolarizationEfficienciesWorkspaceMode();
+    return;
+  }
+  if (m_view->getPolarizationCorrectionOption() == "FilePath") {
+    m_view->enablePolarizationEfficiencies();
+    m_view->setPolarizationEfficienciesFilePathMode();
     return;
   }
   m_view->disablePolarizationEfficiencies();

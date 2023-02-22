@@ -226,6 +226,8 @@ public:
 
   void testSettingPolarizationCorrectionWorkspaceUpdatesModel() { runTestThatPolarizationCorrectionsUsesWorkspace(); }
 
+  void testSettingPolarizationCorrectionFilePathUpdatesModel() { runTestThatPolarizationCorrectionsUsesFilePath(); }
+
   void testSetFloodCorrectionsUpdatesModel() {
     auto presenter = makePresenter();
     FloodCorrections floodCorr(FloodCorrectionType::Workspace, std::string{"testWS"});
@@ -663,7 +665,7 @@ public:
                                  FloodCorrections(FloodCorrectionType::ParameterFile), makeBackgroundSubtraction());
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
-    EXPECT_CALL(m_view, setPolarizationCorrectionOption("Workspace")).Times(1);
+    EXPECT_CALL(m_view, setPolarizationCorrectionOption("ParameterFile")).Times(1);
     EXPECT_CALL(m_view, setFloodCorrectionType("ParameterFile")).Times(1);
     EXPECT_CALL(m_view, setSubtractBackground(true));
     EXPECT_CALL(m_view, setBackgroundSubtractionMethod("Polynomial"));
@@ -923,8 +925,8 @@ private:
   void runTestThatPolarizationCorrectionsDisabled() {
     auto presenter = makePresenter();
 
-    // Called twice, once for getting it for the model, once for checking if the efficiencies selector needs disabling.
-    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return("None"));
+    // Called thrice, once for getting it for the model, twice for choosing the efficiencies selector.
+    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(3).WillRepeatedly(Return("None"));
     EXPECT_CALL(m_view, getPolarizationEfficienciesWorkspace()).Times(0);
     EXPECT_CALL(m_view, disablePolarizationEfficiencies()).Times(1);
 
@@ -952,6 +954,21 @@ private:
 
     EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return("Workspace"));
     EXPECT_CALL(m_view, getPolarizationEfficienciesWorkspace()).Times(1).WillOnce(Return("test_ws"));
+    EXPECT_CALL(m_view, setPolarizationEfficienciesWorkspaceMode()).Times(1);
+    EXPECT_CALL(m_view, enablePolarizationEfficiencies()).Times(1);
+
+    presenter.notifySettingsChanged();
+
+    assertPolarizationAnalysisWorkspace(presenter);
+    verifyAndClear();
+  }
+
+  void runTestThatPolarizationCorrectionsUsesFilePath() {
+    auto presenter = makePresenter();
+
+    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(3).WillRepeatedly(Return("FilePath"));
+    EXPECT_CALL(m_view, getPolarizationEfficienciesWorkspace()).Times(1).WillOnce(Return("path/to/test_ws.nxs"));
+    EXPECT_CALL(m_view, setPolarizationEfficienciesFilePathMode()).Times(1);
     EXPECT_CALL(m_view, enablePolarizationEfficiencies()).Times(1);
 
     presenter.notifySettingsChanged();
