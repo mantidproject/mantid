@@ -110,8 +110,9 @@ class IndirectTransmissionTest(unittest.TestCase):
         # Using water sample
         formula = "H2-O"
 
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Analyser silicon not valid for instrument IRIS",
             IndirectTransmission,
             Instrument=instrument,
             Analyser=analyser,
@@ -132,8 +133,9 @@ class IndirectTransmissionTest(unittest.TestCase):
         # Using water sample
         formula = "H2-O"
 
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Reflection 111 not valid for analyser graphite on instrument IRIS",
             IndirectTransmission,
             Instrument=instrument,
             Analyser=analyser,
