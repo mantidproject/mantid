@@ -8,9 +8,12 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/TimeSplitter.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/TimeROI.h"
 
+using Mantid::API::MatrixWorkspace;
 using Mantid::DataObjects::TimeSplitter;
 using Mantid::Kernel::TimeROI;
 using Mantid::Types::Core::DateAndTime;
@@ -179,5 +182,34 @@ public:
     roi = splitter.getTimeROI(1);
     TS_ASSERT(!roi.empty());
     TS_ASSERT_EQUALS(roi.numBoundaries(), 4);
+  }
+
+  void testConvertMatrixWorkspaceToTimeSplitter() {
+    TimeSplitter splitter;
+    splitter.addROI(DateAndTime(0), DateAndTime(10), 1);
+    splitter.addROI(DateAndTime(10), DateAndTime(15), 3);
+    splitter.addROI(DateAndTime(15), DateAndTime(20), 2);
+
+    Mantid::API::MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 3);
+
+    auto &X = ws->dataX(0);
+    auto &Y = ws->dataY(0);
+    // X[0] is 0 by default
+    X[1] = 10.0;
+    X[2] = 15.0;
+    X[3] = 20.0;
+
+    Y[0] = 1.0;
+    Y[1] = 3.0;
+    Y[2] = 2.0;
+    auto convertedSplitter = new TimeSplitter(ws);
+
+    TS_ASSERT(splitter.numRawValues() == convertedSplitter->numRawValues() && convertedSplitter->numRawValues() == 4);
+    TS_ASSERT(splitter.valueAtTime(DateAndTime(0)) == convertedSplitter->valueAtTime(DateAndTime(0)) &&
+              convertedSplitter->valueAtTime(DateAndTime(0)) == 1);
+    TS_ASSERT(splitter.valueAtTime(DateAndTime(12)) == convertedSplitter->valueAtTime(DateAndTime(12)) &&
+              convertedSplitter->valueAtTime(DateAndTime(12)) == 3);
+    TS_ASSERT(splitter.valueAtTime(DateAndTime(20)) == convertedSplitter->valueAtTime(DateAndTime(20)) &&
+              convertedSplitter->valueAtTime(DateAndTime(20)) == -1);
   }
 };

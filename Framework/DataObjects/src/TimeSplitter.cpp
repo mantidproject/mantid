@@ -37,6 +37,28 @@ TimeSplitter::TimeSplitter(const DateAndTime &start, const DateAndTime &stop) {
   clearAndReplace(start, stop, DEFAULT_VALUE);
 }
 
+/**
+ * Note: The amount of X values in input MatrixWorkspace must be 1 larger than the amount of Y values.
+ * There are NO undefined split regions here.
+ **/
+TimeSplitter::TimeSplitter(const Mantid::API::MatrixWorkspace_sptr &ws) {
+  if (ws->getNumberHistograms() != 1) {
+    throw std::runtime_error("MatrixWorkspace can only have 1 histogram when constructing TimeSplitter.");
+  }
+
+  const auto X = ws->binEdges(0);
+  const auto &Y = ws->y(0);
+  if (X.size() != Y.size() + 1) {
+    throw std::runtime_error(
+        "Size of x values must be one more than size of y values to construct TimeSplitter from MatrixWorkspace.");
+  }
+
+  for (size_t i = 1; i < X.size(); i++) {
+    this->addROI(Types::Core::DateAndTime(static_cast<int>(X[i - 1])), Types::Core::DateAndTime(static_cast<int>(X[i])),
+                 static_cast<int>(Y[i - 1]));
+  }
+}
+
 std::string TimeSplitter::debugPrint() const {
   std::stringstream msg;
   for (const auto iter : m_roi_map)
