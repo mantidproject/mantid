@@ -56,7 +56,6 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
         return issues
 
     def PyInit(self):
-
         self.declareProperty(MultipleFileProperty("Run", extensions=["nxs"]), doc="File path of run(s).")
 
         self.declareProperty(
@@ -135,7 +134,6 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
         return mask[:-1]
 
     def _validate_instrument(self, instrument_name):
-
         supported_instruments = ["D2B", "D20"]
         if instrument_name not in supported_instruments:
             self.log.warning(
