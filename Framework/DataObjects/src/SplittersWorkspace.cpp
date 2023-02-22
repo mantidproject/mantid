@@ -68,8 +68,8 @@ bool SplittersWorkspace::removeSplitter(size_t index) {
  * Converts a SplitterWorkSpace to a TimeSplitter. Note: if any rows overlap, then
  * later rows will overwrite earlier rows.
  */
-Kernel::TimeSplitter SplittersWorkspace::convertToTimeSplitter() {
-  Kernel::TimeSplitter splitter;
+DataObjects::TimeSplitter SplittersWorkspace::convertToTimeSplitter() {
+  DataObjects::TimeSplitter splitter;
   for (size_t i = 0; i < this->rowCount(); i++) {
     Kernel::SplittingInterval interval = this->getSplitter(i);
     if (splitter.valueAtTime(interval.begin()) > 0 || splitter.valueAtTime(interval.end()) > 0) {

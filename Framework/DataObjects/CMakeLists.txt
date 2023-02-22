@@ -47,6 +47,7 @@ set(SRC_FILES
     src/SplittersWorkspace.cpp
     src/TableColumn.cpp
     src/TableWorkspace.cpp
+    src/TimeSplitter.cpp
     src/VectorColumn.cpp
     src/Workspace2D.cpp
     src/WorkspaceCreation.cpp
@@ -130,6 +131,7 @@ set(INC_FILES
     inc/MantidDataObjects/TableColumn.h
     inc/MantidDataObjects/TableWorkspace.h
     inc/MantidDataObjects/TableWorkspace_fwd.h
+    inc/MantidDataObjects/TimeSplitter.h
     inc/MantidDataObjects/VectorColumn.h
     inc/MantidDataObjects/Workspace2D.h
     inc/MantidDataObjects/Workspace2D_fwd.h
@@ -193,6 +195,7 @@ set(TEST_FILES
     TableColumnTest.h
     TableWorkspacePropertyTest.h
     TableWorkspaceTest.h
+    TimeSplitterTest.h
     VectorColumnTest.h
     WeightedEventNoTimeTest.h
     WeightedEventTest.h

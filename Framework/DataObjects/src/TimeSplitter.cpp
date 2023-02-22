@@ -1,19 +1,21 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2023 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidKernel/TimeSplitter.h"
+#include "MantidDataObjects/TimeSplitter.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/TimeROI.h"
+
 #include <set>
 
 namespace Mantid {
-
+using Kernel::TimeROI;
 using Types::Core::DateAndTime;
 
-namespace Kernel {
+namespace DataObjects {
 
 namespace {
 // every value less than zero is ignore
@@ -21,17 +23,17 @@ constexpr int IGNORE_VALUE{-1};
 // default value for the output is zero
 constexpr int DEFAULT_VALUE{0};
 
-void assertIncreasing(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop) {
+void assertIncreasing(const DateAndTime &start, const DateAndTime &stop) {
   if (start > stop)
     throw std::runtime_error("TODO message");
 }
 
 /// static Logger definition
-Logger g_log("TimeSplitter");
+Kernel::Logger g_log("TimeSplitter");
 
 } // namespace
 
-TimeSplitter::TimeSplitter(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop) {
+TimeSplitter::TimeSplitter(const DateAndTime &start, const DateAndTime &stop) {
   clearAndReplace(start, stop, DEFAULT_VALUE);
 }
 
@@ -42,8 +44,7 @@ std::string TimeSplitter::debugPrint() const {
   return msg.str();
 }
 
-void TimeSplitter::addROI(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop,
-                          const int value) {
+void TimeSplitter::addROI(const DateAndTime &start, const DateAndTime &stop, const int value) {
   assertIncreasing(start, stop);
   if (m_roi_map.empty()) {
     // set the values without checks
@@ -104,8 +105,7 @@ void TimeSplitter::addROI(const Types::Core::DateAndTime &start, const Types::Co
   }
 }
 
-void TimeSplitter::clearAndReplace(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop,
-                                   const int value) {
+void TimeSplitter::clearAndReplace(const DateAndTime &start, const DateAndTime &stop, const int value) {
   m_roi_map.clear();
   if (value >= 0) {
     m_roi_map.insert({start, value});
@@ -113,7 +113,7 @@ void TimeSplitter::clearAndReplace(const Types::Core::DateAndTime &start, const 
   }
 }
 
-int TimeSplitter::valueAtTime(const Types::Core::DateAndTime &time) const {
+int TimeSplitter::valueAtTime(const DateAndTime &time) const {
   if (m_roi_map.empty())
     return IGNORE_VALUE;
   if (time < m_roi_map.begin()->first)
@@ -196,5 +196,5 @@ TimeROI TimeSplitter::getTimeROI(const int workspaceIndex) {
 
 std::size_t TimeSplitter::numRawValues() const { return m_roi_map.size(); }
 
-} // namespace Kernel
+} // namespace DataObjects
 } // namespace Mantid
