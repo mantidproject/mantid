@@ -63,6 +63,11 @@ void TimeROI::addROI(const Types::Core::DateAndTime &startTime, const Types::Cor
     m_roi.push_back(stopTime);
   } else if (this->isCompletelyInROI(startTime, stopTime)) {
     g_log.debug("TimeROI::addROI to use region");
+  } else if ((startTime <= m_roi.front()) && stopTime >= m_roi.back()) {
+    // overwrite everything
+    m_roi.clear();
+    m_roi.push_back(startTime);
+    m_roi.push_back(stopTime);
   } else if (stopTime < m_roi.front() || startTime > m_roi.back()) {
     m_roi.insert(m_roi.begin(), stopTime);
     m_roi.insert(m_roi.begin(), startTime);
@@ -101,10 +106,19 @@ void TimeROI::addROI(const Types::Core::DateAndTime &startTime, const Types::Cor
       }
     } else {
       const bool addTwo = bool(std::distance(startIter, stopIter) % 2 == 0);
+      const bool eraseEnd = bool(stopIter == m_roi.end());
+
       auto insertPos = m_roi.erase(startIter, stopIter);
+      // if (eraseEnd) {
+      // m_roi.push_back(stopTime);
+      //} else
       if (addTwo) {
-        m_roi.insert(insertPos, stopTime);
-        m_roi.insert(insertPos, startTime);
+        if (eraseEnd) {
+          *insertPos = stopTime;
+        } else {
+          m_roi.insert(insertPos, stopTime);
+          m_roi.insert(insertPos, startTime);
+        }
       } else {
         if (startValueOld == ROI_IGNORE)
           m_roi.insert(insertPos, startTime);

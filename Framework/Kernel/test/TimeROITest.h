@@ -152,9 +152,11 @@ public:
     TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 2.);
     value.addROI(THREE, FOUR);
     TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 3.);
+    value.addROI(TWO, FIVE);
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 4.);
   }
 
-  void test_Mask() {
+  void test_addMask() {
     TimeROI value{ONE, TWO}; // 1-2
     TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 1.);
     value.addROI(THREE, FIVE); // 1-2,3-5
