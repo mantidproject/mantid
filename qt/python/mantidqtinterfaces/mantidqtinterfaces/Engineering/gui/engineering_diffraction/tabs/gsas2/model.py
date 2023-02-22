@@ -928,17 +928,19 @@ class GSAS2Model(object):
         axis.plot(gsas_histogram, color="#09acb8", label="difference", wkspIndex=2)
         axis.plot(gsas_histogram, color="#ff0000", label="background", wkspIndex=3)
         _, y_max = axis.get_ylim()
-        if reflection_positions:
-            axis.plot(
-                reflection_positions,
-                [-0.10 * y_max] * len(reflection_positions),
-                color="#1105f0",
-                label="reflections",
-                linestyle="None",
-                marker="|",
-                mew=1.5,
-                ms=8,
-            )
+
+        for i_phase, positions in enumerate(reflection_positions):
+            if len(positions) > 0:
+                y_offset_positions = [(i_phase + 1) * -0.05 * y_max] * len(positions)
+                axis.plot(
+                    positions,
+                    y_offset_positions,
+                    label=f"reflections_{i_phase}",
+                    linestyle="None",
+                    marker="|",
+                    mew=1.5,
+                    ms=8,
+                )
         axis.set_xlabel("Time-of-flight ($\\mu s$)")
         axis.set_ylabel("Normalized Intensity")
         plt.show()
