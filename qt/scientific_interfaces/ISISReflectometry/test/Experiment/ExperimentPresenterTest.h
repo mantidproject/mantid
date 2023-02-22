@@ -214,7 +214,7 @@ public:
     auto presenter = makePresenter();
     expectPolarizationAnalysisOn();
     presenter.notifySettingsChanged();
-    assertPolarizationAnalysisParameterFile(presenter);
+    assertPolarizationAnalysisWorkspace(presenter);
     verifyAndClear();
   }
 
@@ -926,7 +926,7 @@ private:
     auto presenter = makePresenter();
 
     // Called thrice, once for getting it for the model, twice for choosing the efficiencies selector.
-    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(3).WillRepeatedly(Return("None"));
+    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return("None"));
     EXPECT_CALL(m_view, getPolarizationEfficienciesWorkspace()).Times(0);
     EXPECT_CALL(m_view, disablePolarizationEfficiencies()).Times(1);
 
@@ -939,9 +939,9 @@ private:
   void runTestThatPolarizationCorrectionsUsesParameterFile() {
     auto presenter = makePresenter();
 
-    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return("Workspace"));
-    EXPECT_CALL(m_view, getPolarizationEfficienciesWorkspace()).Times(1).WillOnce(Return(""));
-    EXPECT_CALL(m_view, enablePolarizationEfficiencies()).Times(1);
+    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return("ParameterFile"));
+    EXPECT_CALL(m_view, getPolarizationEfficienciesWorkspace()).Times(0);
+    EXPECT_CALL(m_view, disablePolarizationEfficiencies()).Times(1);
 
     presenter.notifySettingsChanged();
 
@@ -966,8 +966,8 @@ private:
   void runTestThatPolarizationCorrectionsUsesFilePath() {
     auto presenter = makePresenter();
 
-    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(3).WillRepeatedly(Return("FilePath"));
-    EXPECT_CALL(m_view, getPolarizationEfficienciesWorkspace()).Times(1).WillOnce(Return("path/to/test_ws.nxs"));
+    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return("FilePath"));
+    EXPECT_CALL(m_view, getPolarizationEfficienciesFilePath()).Times(1).WillOnce(Return("path/to/test_ws.nxs"));
     EXPECT_CALL(m_view, setPolarizationEfficienciesFilePathMode()).Times(1);
     EXPECT_CALL(m_view, enablePolarizationEfficiencies()).Times(1);
 

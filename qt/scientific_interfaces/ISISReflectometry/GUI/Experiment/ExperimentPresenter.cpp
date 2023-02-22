@@ -159,11 +159,14 @@ PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
   if (polarizationCorrectionTypeFromString(polCorrOption) == PolarizationCorrectionType::None) {
     return PolarizationCorrections(PolarizationCorrectionType::None);
   }
-  auto const correctionsWorkspace = m_view->getPolarizationEfficienciesWorkspace();
-  if (correctionsWorkspace.empty()) {
+  if (polarizationCorrectionTypeFromString(polCorrOption) == PolarizationCorrectionType::ParameterFile) {
     return PolarizationCorrections(PolarizationCorrectionType::ParameterFile);
   }
-  return PolarizationCorrections(PolarizationCorrectionType::Workspace, correctionsWorkspace);
+  if (polCorrOption == "FilePath") {
+    return PolarizationCorrections(PolarizationCorrectionType::Workspace,
+                                   m_view->getPolarizationEfficienciesFilePath());
+  }
+  return PolarizationCorrections(PolarizationCorrectionType::Workspace, m_view->getPolarizationEfficienciesWorkspace());
 }
 
 FloodCorrections ExperimentPresenter::floodCorrectionsFromView() {
@@ -204,13 +207,18 @@ void ExperimentPresenter::updatePolarizationCorrectionEnabledState() {
     m_view->disablePolarizationEfficiencies();
     return;
   }
+  auto const polCorrOption = m_view->getPolarizationCorrectionOption();
   m_view->enablePolarizationCorrections();
-  if (m_view->getPolarizationCorrectionOption() == "Workspace") {
+  if (polCorrOption == "ParameterFile") {
+    m_view->disablePolarizationEfficiencies();
+    return;
+  }
+  if (polCorrOption == "Workspace") {
     m_view->enablePolarizationEfficiencies();
     m_view->setPolarizationEfficienciesWorkspaceMode();
     return;
   }
-  if (m_view->getPolarizationCorrectionOption() == "FilePath") {
+  if (polCorrOption == "FilePath") {
     m_view->enablePolarizationEfficiencies();
     m_view->setPolarizationEfficienciesFilePathMode();
     return;
