@@ -3775,8 +3775,7 @@ void EventList::filterByTimeAtSample(Types::Core::DateAndTime start, Types::Core
  * keeping only events within the >= start and < end pulse times.
  * Detector IDs and the X axis are copied as well.
  *
- * @param start :: start time (absolute)
- * @param stop :: end time (absolute)
+ * @param timeRoi :: reference to TimeROI to be used for filtering
  * @param output :: reference to an event list that will be output.
  * @throws std::invalid_argument If output is a reference to this EventList
  */
