@@ -19,7 +19,10 @@ class SXD(BaseSX):
                                <radius val="0.003"/>
                                </sphere>"""  # sphere radius 3mm  - used for vanadium and NaCl
 
-    def process_data(self, runs: Sequence[str], gonio_angles=None):
+    def process_data(self, runs: Sequence[str], *args):
+        gonio_angles = args
+        if len(gonio_angles) != len(self.gonio_axes):
+            return
         for irun, run in enumerate(runs):
             wsname = self.load_run(run)
             self._minus_workspaces(wsname, self.empty_ws)
