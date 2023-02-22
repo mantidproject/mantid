@@ -1,0 +1,1 @@
+- Fixed and refactored the rescale_flux method in both versions of SANSILLReduction algorithms
