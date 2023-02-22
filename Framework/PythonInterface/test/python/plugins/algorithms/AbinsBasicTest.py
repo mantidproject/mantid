@@ -127,16 +127,22 @@ class AbinsBasicTest(unittest.TestCase):
         """Test scenario in which a user specifies non-unique elements (for example in squaricn that would be "C,C,H").
         In that case Abins should terminate and print a meaningful message.
         """
-        self.assertRaises(
-            RuntimeError, Abins, VibrationalOrPhononFile=self._squaricn + ".phonon", Atoms="C,C,H", OutputWorkspace=self._workspace_name
+        self.assertRaisesRegex(
+            RuntimeError,
+            r"User atom selection \(by symbol\) contains repeated species.",
+            Abins,
+            VibrationalOrPhononFile=self._squaricn + ".phonon",
+            Atoms="C,C,H",
+            OutputWorkspace=self._workspace_name,
         )
 
     def test_non_unique_atoms(self):
         """Test scenario in which a user specifies non-unique atoms (for example "atom_1,atom_2,atom1").
         In that case Abins should terminate and print a meaningful message.
         """
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            r"User atom selection \(by number\) contains repeated atom.",
             Abins,
             VibrationalOrPhononFile=self._squaricn + ".phonon",
             Atoms="atom_1,atom_2,atom1",
@@ -148,23 +154,30 @@ class AbinsBasicTest(unittest.TestCase):
         In that case Abins should terminate and give a user a meaningful message about wrong atoms to analyse.
         """
         # In _squaricn there are no N atoms
-        self.assertRaises(
-            RuntimeError, Abins, VibrationalOrPhononFile=self._squaricn + ".phonon", Atoms="N", OutputWorkspace=self._workspace_name
+        self.assertRaisesRegex(
+            RuntimeError,
+            r"User defined atom selection \(by element\) 'N': not present in the system.",
+            Abins,
+            VibrationalOrPhononFile=self._squaricn + ".phonon",
+            Atoms="N",
+            OutputWorkspace=self._workspace_name,
         )
 
     def test_atom_index_limits(self):
         """Individual atoms may be indexed (counting from 1); if the index falls outside number of atoms, Abins should
         terminate with a useful error message.
         """
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            r"Invalid user atom selection \(by number\)" + f" '{ATOM_PREFIX}0'",
             Abins,
             VibrationalOrPhononFile=self._squaricn + ".phonon",
             Atoms=ATOM_PREFIX + "0",
             OutputWorkspace=self._workspace_name,
         )
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            r"Invalid user atom selection \(by number\)" + f" '{ATOM_PREFIX}61'",
             Abins,
             VibrationalOrPhononFile=self._squaricn + ".phonon",
             Atoms=ATOM_PREFIX + "61",
@@ -175,15 +188,17 @@ class AbinsBasicTest(unittest.TestCase):
         """If the atoms field includes an unmatched entry (i.e. containing the prefix but not matching the '\d+' regex,
         Abins should terminate with a useful error message.
         """
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            r"Not all user atom selections \('atoms' option\) were understood.",
             Abins,
             VibrationalOrPhononFile=self._squaricn + ".phonon",
             Atoms=ATOM_PREFIX + "-3",
             OutputWorkspace=self._workspace_name,
         )
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            r"Not all user atom selections \('atoms' option\) were understood.",
             Abins,
             VibrationalOrPhononFile=self._squaricn + ".phonon",
             Atoms=ATOM_PREFIX + "_#4",
