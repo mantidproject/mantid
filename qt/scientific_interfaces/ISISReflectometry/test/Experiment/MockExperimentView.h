@@ -91,7 +91,9 @@ public:
   MOCK_METHOD0(setPolarizationEfficienciesWorkspaceMode, void());
   MOCK_METHOD0(setPolarizationEfficienciesFilePathMode, void());
   MOCK_CONST_METHOD0(getPolarizationEfficienciesWorkspace, std::string());
+  MOCK_CONST_METHOD0(getPolarizationEfficienciesFilePath, std::string());
   MOCK_METHOD1(setPolarizationEfficienciesWorkspace, void(std::string const &));
+  MOCK_METHOD1(setPolarizationEfficienciesFilePath, void(std::string const &));
   MOCK_CONST_METHOD0(getFloodCorrectionType, std::string());
   MOCK_METHOD1(setFloodCorrectionType, void(std::string const &));
   MOCK_CONST_METHOD0(getFloodWorkspace, std::string());

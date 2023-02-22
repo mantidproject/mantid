@@ -110,7 +110,9 @@ public:
   virtual void setPolarizationEfficienciesWorkspaceMode() = 0;
   virtual void setPolarizationEfficienciesFilePathMode() = 0;
   virtual std::string getPolarizationEfficienciesWorkspace() const = 0;
+  virtual std::string getPolarizationEfficienciesFilePath() const = 0;
   virtual void setPolarizationEfficienciesWorkspace(std::string const &workspace) = 0;
+  virtual void setPolarizationEfficienciesFilePath(std::string const &filePath) = 0;
 
   virtual std::string getFloodCorrectionType() const = 0;
   virtual void setFloodCorrectionType(std::string const &correction) = 0;

@@ -75,7 +75,9 @@ public:
   void setPolarizationEfficienciesWorkspaceMode() override;
   void setPolarizationEfficienciesFilePathMode() override;
   std::string getPolarizationEfficienciesWorkspace() const override;
+  std::string getPolarizationEfficienciesFilePath() const override;
   void setPolarizationEfficienciesWorkspace(std::string const &workspace) override;
+  void setPolarizationEfficienciesFilePath(std::string const &filePath) override;
 
   std::string getFloodCorrectionType() const override;
   void setFloodCorrectionType(std::string const &correction) override;

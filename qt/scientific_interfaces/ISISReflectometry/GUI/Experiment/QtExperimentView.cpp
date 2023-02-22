@@ -776,8 +776,16 @@ std::string QtExperimentView::getPolarizationEfficienciesWorkspace() const {
   return getText(*m_polCorrEfficienciesWsSelector);
 }
 
+std::string QtExperimentView::getPolarizationEfficienciesFilePath() const {
+  return getText(*m_polCorrEfficienciesLineEdit);
+}
+
 void QtExperimentView::setPolarizationEfficienciesWorkspace(std::string const &workspace) {
   setSelected(*m_polCorrEfficienciesWsSelector, workspace);
+}
+
+void QtExperimentView::setPolarizationEfficienciesFilePath(std::string const &filePath) {
+  setText(*m_polCorrEfficienciesLineEdit, filePath);
 }
 
 std::string QtExperimentView::getStitchOptions() const { return getText(stitchOptionsLineEdit()); }
