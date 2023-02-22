@@ -87,10 +87,17 @@ void TimeROI::addROI(const Types::Core::DateAndTime &startTime, const Types::Cor
 
     if (startIter == stopIter) {
       if (startValueOld == ROI_USE) {
+        // should never get here
         g_log.debug("TimeROI::addROI is already accounted for. Addition is being ignored");
       } else {
-        // move the start time
-        *startIter = startTime;
+        if (startIter == m_roi.end()) {
+          // move back one and replace the value
+          startIter--;
+          *startIter = stopTime;
+        } else {
+          // move the start time
+          *startIter = startTime;
+        }
       }
     } else {
       const bool addTwo = bool(std::distance(startIter, stopIter) % 2 == 0);
@@ -196,7 +203,7 @@ void TimeROI::addMask(const std::time_t &startTime, const std::time_t &stopTime)
 bool TimeROI::isCompletelyInROI(const Types::Core::DateAndTime &startTime,
                                 const Types::Core::DateAndTime &stopTime) const {
   // check if the region is in the overall window at all
-  if ((startTime > m_roi.back()) || (stopTime < m_roi.front()))
+  if ((startTime > m_roi.back()) || (stopTime <= m_roi.front()))
     return false;
 
   // since the ROI should be alternating "use" and "ignore", see if the start and stop are within a single region
