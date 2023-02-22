@@ -218,7 +218,7 @@ bool TimeROI::isCompletelyInMask(const Types::Core::DateAndTime &startTime,
                                  const Types::Core::DateAndTime &stopTime) const {
   if (this->empty())
     return true;
-  if (startTime > m_roi.back())
+  if (startTime >= m_roi.back())
     return true;
   if (stopTime < m_roi.front())
     return true;
@@ -297,7 +297,7 @@ Types::Core::DateAndTime TimeROI::getEffectiveTime(const Types::Core::DateAndTim
   }
 }
 
-// returns the last value in the
+// returns the last time in the TimeROI
 Types::Core::DateAndTime TimeROI::lastTime() const {
   if (m_roi.empty())
     throw std::runtime_error("cannot return time from empty TimeROI");
