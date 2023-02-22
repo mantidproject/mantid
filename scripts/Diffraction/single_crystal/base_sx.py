@@ -7,7 +7,7 @@ from FindGoniometerFromUB import getSignMaxAbsValInCol
 from mantid.geometry import CrystalStructure, SpaceGroupFactory, ReflectionGenerator, ReflectionConditionFilter
 from os import path
 
-from abc import ABC  # , abstractmethod
+from abc import ABC, abstractmethod
 
 
 class PEAK_TYPE(Enum):
@@ -111,6 +111,20 @@ class BaseSX(ABC):
 
     def set_b2b_radius_scale(self, scale):
         self.b2b_radius_scale = scale
+
+    # --- abstract methods ---
+
+    @abstractmethod
+    def process_data(self, runs: Sequence[str], *args):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def load_run(self, runno):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def process_vanadium(self):
+        raise NotImplementedError()
 
     # --- methods ---
 
