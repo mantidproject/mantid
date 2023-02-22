@@ -115,6 +115,16 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         self.assertEqual(outWS.getAxis(0).getUnit().caption(), "Wavelength")
         self.assertEqual(mtd.getObjectNames(), [])
 
+    def testReplaceSampleLogs(self):
+        outWSName = "outWS"
+        logsToReplace = {"ChopperSetting.firstChopper": 2, "ChopperSetting.secondChopper": 1}
+        args = {"Run": "ILL/D17/317369", "OutputWorkspace": outWSName, "LogsToReplace": logsToReplace, "rethrow": True, "child": True}
+        alg = create_algorithm("ReflectometryILLPreprocess", **args)
+        assertRaisesNothing(self, alg.execute)
+        outWS = alg.getProperty("OutputWorkspace").value
+        self.assertEqual(outWS.getRun().getLogData("ChopperSetting.firstChopper").value, 2.0)
+        self.assertEqual(outWS.getRun().getLogData("ChopperSetting.secondChopper").value, 1.0)
+
 
 if __name__ == "__main__":
     unittest.main()
