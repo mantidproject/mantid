@@ -35,6 +35,28 @@ void assert_increasing(const DateAndTime &startTime, const DateAndTime &stopTime
   }
 }
 
+/*
+ * This method assumes that there is an overlap between the two intervals
+ */
+TimeInterval calculate_union(const TimeInterval &left, const TimeInterval &right) {
+  return TimeInterval(std::min(left.begin(), right.begin()), std::max(left.end(), right.end()));
+}
+
+/*
+ * This is slightly different than overlaps in TimeInterval because
+ * two timeROI that touch on the boundary are considered overlapping
+ */
+bool overlaps(const TimeInterval &left, const TimeInterval &right) {
+  if (left.overlaps(right))
+    return true;
+  else if (left.begin() == right.end())
+    return true;
+  else if (left.end() == right.begin())
+    return true;
+  else
+    return false;
+}
+
 } // namespace
 
 const std::string TimeROI::NAME = "Kernel_TimeROI";
@@ -72,59 +94,32 @@ void TimeROI::addROI(const Types::Core::DateAndTime &startTime, const Types::Cor
     m_roi.insert(m_roi.begin(), stopTime);
     m_roi.insert(m_roi.begin(), startTime);
   } else {
-    const bool startValueOld = valueAtTime(startTime);
-    const bool stopValueOld = valueAtTime(stopTime);
-
-    DateAndTimeIter startIter;
-    if (startValueOld == ROI_IGNORE) {
-      // expanding into unused region
-      startIter = std::upper_bound(m_roi.begin(), m_roi.end(), startTime);
-    } else {
-      startIter = std::lower_bound(m_roi.begin(), m_roi.end(), startTime);
-    }
-
-    DateAndTimeIter stopIter;
-    if (stopValueOld == ROI_USE) {
-      stopIter = std::lower_bound(startIter, m_roi.end(), stopTime);
-    } else {
-      stopIter = std::upper_bound(startIter, m_roi.end(), stopTime);
-    }
-
-    if (startIter == stopIter) {
-      if (startValueOld == ROI_USE) {
-        // should never get here
-        g_log.debug("TimeROI::addROI is already accounted for. Addition is being ignored");
-      } else {
-        if (startIter == m_roi.end()) {
-          // move back one and replace the value
-          startIter--;
-          *startIter = stopTime;
-        } else {
-          // move the start time
-          *startIter = startTime;
+    TimeInterval roi_to_add(startTime, stopTime);
+    std::vector<TimeInterval> output;
+    bool union_added = false;
+    for (const auto interval : this->toSplitters()) {
+      if (overlaps(roi_to_add, interval)) {
+        // the roi absorbs this interval
+        // this check must be first
+        roi_to_add = calculate_union(roi_to_add, interval);
+      } else if (interval < roi_to_add) {
+        output.push_back(interval);
+      } else if (interval > roi_to_add) {
+        if (!union_added) {
+          output.push_back(roi_to_add);
+          union_added = true;
         }
-      }
-    } else {
-      const bool addTwo = bool(std::distance(startIter, stopIter) % 2 == 0);
-      const bool eraseEnd = bool(stopIter == m_roi.end());
-
-      auto insertPos = m_roi.erase(startIter, stopIter);
-      // if (eraseEnd) {
-      // m_roi.push_back(stopTime);
-      //} else
-      if (addTwo) {
-        if (eraseEnd) {
-          *insertPos = stopTime;
-        } else {
-          m_roi.insert(insertPos, stopTime);
-          m_roi.insert(insertPos, startTime);
-        }
+        output.push_back(interval);
       } else {
-        if (startValueOld == ROI_IGNORE)
-          m_roi.insert(insertPos, startTime);
-        else
-          m_roi.insert(insertPos, stopTime);
+        throw std::runtime_error("encountered supposedly imposible place in TimeROI::addROI");
       }
+    }
+    if (!union_added)
+      output.push_back(roi_to_add);
+    this->clear();
+    for (const auto interval : output) {
+      m_roi.push_back(interval.begin());
+      m_roi.push_back(interval.end());
     }
   }
 

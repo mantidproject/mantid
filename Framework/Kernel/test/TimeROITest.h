@@ -168,6 +168,15 @@ public:
     TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 3.);
     value.addMask(FOUR, SIX); // 1-2,3-4
     TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 2.);
+
+    value.addROI(TWO, FIVE); // 1-5
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 4.);
+    value.addMask(ONE, TWO); // 2-5
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 3.);
+    value.addMask(THREE, FOUR); // 1-3,4-5
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 2.);
+    value.addMask(THREE, FOUR); // 1-3,4-5 still
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 2.);
   }
 
   void test_addOverlapping() {
