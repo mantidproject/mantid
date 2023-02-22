@@ -205,7 +205,7 @@ def _get_instrument_structure(ws):
     instrument."""
     instrument = ws.getInstrument().getName()
     if instrument in ["IN4", "IN6"]:
-        self.log.warning("Grouping pattern cannot be provided for IN4 and IN6.")
+        self.log().warning("Grouping pattern cannot be provided for IN4 and IN6.")
         return ""
     tmp_inst = "{}_tmp".format(instrument)
     LoadEmptyInstrument(InstrumentName=instrument, OutputWorkspace=tmp_inst)
