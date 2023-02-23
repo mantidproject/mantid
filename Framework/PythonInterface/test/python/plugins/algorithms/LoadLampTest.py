@@ -47,7 +47,9 @@ class LoadLampTest(unittest.TestCase):
         self.assertAlmostEqual(ws.getAxis(1).extractValues()[11], 95.3, 1)
 
     def test_3D_fail(self):
-        self.assertRaises(RuntimeError, LoadLamp, Filename="530333_LAMP.hdf", OutputWorkspace="ws")
+        self.assertRaisesRegex(
+            RuntimeError, "Data with more than 2 dimensions are not supported.", LoadLamp, InputFile="530333_LAMP.hdf", OutputWorkspace="ws"
+        )
 
     def test_no_param(self):
         ws = LoadLamp("no_parameters.hdf")
