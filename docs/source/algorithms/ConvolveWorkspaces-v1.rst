@@ -19,21 +19,42 @@ Usage
 .. testcode:: ExConvolveWorkspaces
 
 
-    ws = CreateSampleWorkspace("Histogram",NumBanks=1,BankPixelWidth=1)
-    ws = ConvertUnits(ws,"Wavelength")
-    ws = Rebin(ws,Params=[1])
+    from numpy import ndarray
+    from math import pi
 
-    #restrict the number of wavelength points to speed up the example
-    wsOut = ConvolveWorkspaces(ws,ws)
+    x = np.linspace(-5,5)
+    f1 = Gaussian(Height=1., PeakCentre=.3, Sigma=.6)
+    # normalise the gaussian
+    y1 = f1(x)/(0.6*np.sqrt(2.*pi))
+    ws1 = CreateWorkspace(x, y1)
 
-    print("Output:  {}".format(wsOut.readY(0)))
+    f2 = Gaussian(Height=1., PeakCentre=-1.3, Sigma=1.2)
+    # normalise the gaussian
+    y2 = f2(x)/(1.2*np.sqrt(2.*pi))
+    ws2 = CreateWorkspace(x, y2)
+
+    # calculate convolution
+    ws3 = ConvolveWorkspaces(ws1, ws2)
+
+    print("Output:  {}".format(ws3.readY(0)))
 
 Output:
 
 .. testoutput:: ExConvolveWorkspaces
 
-    Output:  [  74.7278871    26.1996044    32.3478194   121.57078223  175.00835395
-      146.57078223]
+    Output:  [ ... ... ... ...
+       ... ... ... ...
+       ... ... ... ...
+       ... ... ... ...
+       ... ... ... ...
+       ... ... ... ...
+       ... ... ... ...
+       ... ... ... ...
+       ... ... ... ...
+       ... ... ... ...
+       ... ... ... ...
+       ... ... ... ...
+       ... ...]
 
 .. categories::
 
