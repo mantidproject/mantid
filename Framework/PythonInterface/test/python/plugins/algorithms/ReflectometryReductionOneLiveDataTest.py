@@ -255,8 +255,9 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         self.assertEqual(sorted(matched_names), sorted(expected_names))
 
     def test_algorithm_fails_for_invalid_block_names(self):
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Unknown algorithm 'GetFakeLiveInstrumentValueInvalidNames'",
             ReflectometryReductionOneLiveData,
             InputWorkspace=self.__class__._input_ws,
             OutputWorkspace="output",
