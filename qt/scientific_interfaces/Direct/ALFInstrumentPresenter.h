@@ -64,15 +64,15 @@ public:
   void loadSample() override;
   void loadVanadium() override;
 
-  void notifySampleLoaded(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
-  void notifySampleNormalised(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
+  void notifyAlgorithmError(std::string const &message) override;
+  void notifyLoadAndNormaliseComplete(ALFDataType const &dataType,
+                                      Mantid::API::MatrixWorkspace_sptr const &workspace) override;
 
   void notifyInstrumentActorReset() override;
   void notifyShapeChanged() override;
   void notifyTubesSelected(std::vector<DetectorTube> const &tubes) override;
 
 private:
-  Mantid::API::MatrixWorkspace_sptr loadAndNormalise(const std::string &pathToRun);
   void generateLoadedWorkspace();
 
   void updateInstrumentViewFromModel();

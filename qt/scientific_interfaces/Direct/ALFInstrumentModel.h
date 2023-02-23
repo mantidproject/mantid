@@ -35,7 +35,6 @@ class MANTIDQT_DIRECT_DLL IALFInstrumentModel {
 public:
   virtual ~IALFInstrumentModel() = default;
 
-  virtual Mantid::API::MatrixWorkspace_sptr loadAndNormalise(std::string const &filename) = 0;
   virtual void generateLoadedWorkspace() = 0;
 
   virtual void setSample(Mantid::API::MatrixWorkspace_sptr const &sample) = 0;
@@ -59,7 +58,6 @@ class MANTIDQT_DIRECT_DLL ALFInstrumentModel final : public IALFInstrumentModel 
 public:
   ALFInstrumentModel();
 
-  Mantid::API::MatrixWorkspace_sptr loadAndNormalise(std::string const &filename) override;
   void generateLoadedWorkspace() override;
 
   void setSample(Mantid::API::MatrixWorkspace_sptr const &sample) override;

@@ -30,8 +30,6 @@ auto &ADS = AnalysisDataService::Instance();
 
 std::string const NOT_IN_ADS = "not_stored_in_ads";
 
-bool isALFData(MatrixWorkspace_const_sptr const &workspace) { return workspace->getInstrument()->getName() == "ALF"; }
-
 bool isAxisDSpacing(MatrixWorkspace_const_sptr const &workspace) {
   return workspace->getAxis(0)->unit()->unitID() == "dSpacing";
 }
@@ -90,17 +88,6 @@ void loadEmptyInstrument(std::string const &instrumentName, std::string const &o
   alg->execute();
 }
 
-MatrixWorkspace_sptr load(std::string const &filename) {
-  auto alg = AlgorithmManager::Instance().create("Load");
-  alg->initialize();
-  alg->setAlwaysStoreInADS(false);
-  alg->setProperty("Filename", filename);
-  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
-  alg->execute();
-  Workspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
-  return std::dynamic_pointer_cast<MatrixWorkspace>(outputWorkspace);
-}
-
 MatrixWorkspace_sptr createWorkspace(std::string const &parentName, std::vector<double> const &x,
                                      std::vector<double> const &y, std::vector<double> const &e,
                                      std::size_t const numberOfSpectra, std::string const &unitX) {
@@ -125,17 +112,6 @@ MatrixWorkspace_sptr rebunch(MatrixWorkspace_sptr const &inputWorkspace, std::si
   alg->setAlwaysStoreInADS(false);
   alg->setProperty("InputWorkspace", inputWorkspace);
   alg->setProperty("NBunch", static_cast<int>(nBunch));
-  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
-  alg->execute();
-  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
-  return outputWorkspace;
-}
-
-MatrixWorkspace_sptr normaliseByCurrent(MatrixWorkspace_sptr const &inputWorkspace) {
-  auto alg = AlgorithmManager::Instance().create("NormaliseByCurrent");
-  alg->initialize();
-  alg->setAlwaysStoreInADS(false);
-  alg->setProperty("InputWorkspace", inputWorkspace);
   alg->setProperty("OutputWorkspace", NOT_IN_ADS);
   alg->execute();
   MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
@@ -199,21 +175,6 @@ namespace MantidQt::CustomInterfaces {
 
 ALFInstrumentModel::ALFInstrumentModel() : m_sample(), m_vanadium(), m_tubes() {
   loadEmptyInstrument("ALF", loadedWsName());
-}
-
-/*
- * Loads the provided ALF file and normalises it by current.
- * @param filename:: The filepath to the ALF data
- * @return The loaded and normalised workspace
- */
-MatrixWorkspace_sptr ALFInstrumentModel::loadAndNormalise(std::string const &filename) {
-  auto loadedWorkspace = load(filename);
-
-  if (!isALFData(loadedWorkspace)) {
-    throw std::invalid_argument("The loaded data is not from the ALF instrument");
-  }
-
-  return normaliseByCurrent(loadedWorkspace);
 }
 
 /*

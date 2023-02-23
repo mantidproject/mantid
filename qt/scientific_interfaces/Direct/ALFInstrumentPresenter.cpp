@@ -37,46 +37,42 @@ void ALFInstrumentPresenter::loadSettings() { m_view->loadSettings(); }
 
 void ALFInstrumentPresenter::saveSettings() { m_view->saveSettings(); }
 
+void ALFInstrumentPresenter::notifyAlgorithmError(std::string const &message) { m_view->warningBox(message); }
+
 void ALFInstrumentPresenter::loadSample() {
   m_analysisPresenter->clear();
   if (auto const filepath = m_view->getSampleFile()) {
-    m_algorithmManager->load(ALFTask::SAMPLE_LOAD, *filepath);
+    m_algorithmManager->loadAndNormalise(ALFDataType::SAMPLE, *filepath);
   } else {
     m_model->setSample(nullptr);
     generateLoadedWorkspace();
   }
 }
 
-void ALFInstrumentPresenter::notifySampleLoaded(Mantid::API::MatrixWorkspace_sptr const &workspace) {
-  m_algorithmManager->normaliseByCurrent(ALFTask::SAMPLE_NORMALISE, workspace);
-}
-
-void ALFInstrumentPresenter::notifySampleNormalised(Mantid::API::MatrixWorkspace_sptr const &workspace) {
-  m_model->setSample(workspace);
-  m_view->setSampleRun(std::to_string(m_model->sampleRun()));
-  generateLoadedWorkspace();
-}
-
 void ALFInstrumentPresenter::loadVanadium() {
   m_analysisPresenter->clear();
 
   if (auto const filepath = m_view->getVanadiumFile()) {
-    m_model->setVanadium(loadAndNormalise(*filepath));
-    m_view->setVanadiumRun(std::to_string(m_model->vanadiumRun()));
+    m_algorithmManager->loadAndNormalise(ALFDataType::VANADIUM, *filepath);
   } else {
     m_model->setVanadium(nullptr);
+    generateLoadedWorkspace();
   }
-
-  generateLoadedWorkspace();
 }
 
-Mantid::API::MatrixWorkspace_sptr ALFInstrumentPresenter::loadAndNormalise(const std::string &pathToRun) {
-  try {
-    return m_model->loadAndNormalise(pathToRun);
-  } catch (std::exception const &ex) {
-    m_view->warningBox(ex.what());
-    return nullptr;
+void ALFInstrumentPresenter::notifyLoadAndNormaliseComplete(ALFDataType const &dataType,
+                                                            Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  switch (dataType) {
+  case ALFDataType::SAMPLE:
+    m_model->setSample(workspace);
+    m_view->setSampleRun(std::to_string(m_model->sampleRun()));
+    break;
+  case ALFDataType::VANADIUM:
+    m_model->setVanadium(workspace);
+    m_view->setVanadiumRun(std::to_string(m_model->vanadiumRun()));
+    break;
   }
+  generateLoadedWorkspace();
 }
 
 void ALFInstrumentPresenter::generateLoadedWorkspace() {
