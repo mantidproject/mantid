@@ -1,0 +1,1 @@
+- Fixed bug when passing merge run options to LoadAndMerge algorithm

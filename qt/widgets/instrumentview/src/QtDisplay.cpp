@@ -66,7 +66,7 @@ void QtDisplay::paintEvent(QPaintEvent * /*unused*/) {
 
 void QtDisplay::resizeEvent(QResizeEvent * /*unused*/) {
   if (m_surface) {
-    m_surface->updateView();
+    m_surface->resize(size().width(), size().height());
   }
 }
 

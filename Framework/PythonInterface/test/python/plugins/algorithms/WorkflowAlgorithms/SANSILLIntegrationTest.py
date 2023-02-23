@@ -11,7 +11,6 @@ from mantid.simpleapi import *
 
 
 class SANSILLIntegrationTest(unittest.TestCase):
-
     _facility = None
 
     @classmethod

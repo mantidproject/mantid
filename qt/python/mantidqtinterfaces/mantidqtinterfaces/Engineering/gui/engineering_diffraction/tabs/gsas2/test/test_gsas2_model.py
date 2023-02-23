@@ -39,6 +39,7 @@ class TestGSAS2Model(unittest.TestCase):
         self.maxDiff = None
         self.model.user_save_directory = os.path.dirname(self.lst_result_filepath)
         self.model.project_name = "gsas2_output"
+        self.model.path_to_gsas2 = "/opt/gsas2"
         # setup a mock workspace
         self.mock_inst = MagicMock()
         self.mock_inst.getFullName.return_value = "instrument"

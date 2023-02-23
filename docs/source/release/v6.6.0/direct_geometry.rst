@@ -46,10 +46,6 @@ Bugfixes
 CrystalField
 -------------
 
-New features
-############
-
-
 Bugfixes
 ############
 - Fixed transcription error in Table 3 of :ref:`Crystal Field Theory` documentation.
@@ -58,12 +54,9 @@ Bugfixes
 MSlice
 ------
 
-New features
-############
-
-
 Bugfixes
 ############
+- Fixed bug that prevented cuts along 2Theta.
 
 
 

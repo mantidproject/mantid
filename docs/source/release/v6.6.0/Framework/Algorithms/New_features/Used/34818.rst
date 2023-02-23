@@ -1,1 +1,0 @@
-- Added support for removal of instrument information from workspace - see :ref:`RemoveInstrumentGeometry <algm-RemoveInstrumentGeometry>`. This will allow saving smaller nexus files.

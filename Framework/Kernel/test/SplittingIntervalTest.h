@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
- * TimeSplitterTest.h
  *
  *  Created on: Sep 24, 2010
  *      Author: janik

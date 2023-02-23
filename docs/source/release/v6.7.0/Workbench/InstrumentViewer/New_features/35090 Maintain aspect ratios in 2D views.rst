@@ -1,0 +1,2 @@
+- A new option has been added to the Display Settings drop-down on the Render tab of the instrument viewer to control whether the aspect ratio of detector banks
+  are now maintained in the 2D views (cylindrical, spherical, side by side) regardless of the dimensions of the plot area

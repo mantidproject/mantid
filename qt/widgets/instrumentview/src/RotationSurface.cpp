@@ -26,8 +26,10 @@ Mantid::Kernel::Logger g_log("RotationSurface");
 namespace MantidQt::MantidWidgets {
 
 RotationSurface::RotationSurface(const InstrumentActor *rootActor, const Mantid::Kernel::V3D &origin,
-                                 const Mantid::Kernel::V3D &axis)
-    : UnwrappedSurface(rootActor), m_pos(origin), m_zaxis(axis), m_manual_u_correction(false) {}
+                                 const Mantid::Kernel::V3D &axis, const QSize &widgetSize,
+                                 const bool maintainAspectRatio)
+    : UnwrappedSurface(rootActor, widgetSize, maintainAspectRatio), m_pos(origin), m_zaxis(axis),
+      m_manual_u_correction(false) {}
 
 void RotationSurface::findAxes() {
   // First detector defines the surface's x axis

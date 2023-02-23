@@ -126,7 +126,7 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
       m_qtConnect(std::move(deps.qtConnect)), m_qtMetaObject(std::move(deps.qtMetaObject)),
       m_messageHandler(std::move(deps.messageHandler)), m_finished(false), m_autoscaling(autoscaling),
       m_scaleMin(scaleMin), m_scaleMax(scaleMax), m_setDefaultView(setDefaultView), m_resetGeometry(resetGeometry),
-      m_useThread(useThread) {
+      m_useThread(useThread), m_maintainAspectRatio(true) {
   QWidget *aWidget = new QWidget(this);
   if (!m_instrumentDisplay) {
     m_instrumentDisplay =
@@ -189,9 +189,6 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
     m_qtMetaObject->invokeMethod(m_instrumentActor.get(), "initialize", Qt::DirectConnection,
                                  Q_ARG(bool, resetGeometry), Q_ARG(bool, setDefaultView));
   }
-
-  // Background colour
-  setBackgroundColor(settings.value("BackgroundColor", QColor(0, 0, 0, 1.0)).value<QColor>());
 
   // Create the b=tabs
   createTabs(settings, customizations);
@@ -580,19 +577,21 @@ void InstrumentWidget::setSurfaceType(int type) {
     bool showPeakRow = true;
     bool showPeakLabels = true;
     bool showPeakRelativeIntensity = true;
+    QColor backgroundColor;
     if (surface) {
       peakLabelPrecision = surface->getPeakLabelPrecision();
       showPeakRow = surface->getShowPeakRowsFlag();
       showPeakLabels = surface->getShowPeakLabelsFlag();
+      backgroundColor = surface->getBackgroundColor();
     } else {
       QSettings settings;
       settings.beginGroup(InstrumentWidgetSettingsGroup);
       peakLabelPrecision = settings.value("PeakLabelPrecision", 2).toInt();
       showPeakRow = settings.value("ShowPeakRows", true).toBool();
       showPeakLabels = settings.value("ShowPeakLabels", true).toBool();
-
       // By default this is should be off for now.
       showPeakRelativeIntensity = settings.value("ShowPeakRelativeIntensities", false).toBool();
+      backgroundColor = settings.value("BackgroundColor", QColor(0, 0, 0, 1.0)).value<QColor>();
       settings.endGroup();
     }
 
@@ -609,24 +608,24 @@ void InstrumentWidget::setSurfaceType(int type) {
 
       m_maskTab->setDisabled(false);
 
+      auto widgetDims = m_instrumentDisplay->currentWidget()->size();
       // create the surface
       if (surfaceType == FULL3D) {
         m_renderTab->forceLayers(false);
 
         if (m_instrumentActor->hasGridBank())
           m_maskTab->setDisabled(true);
-
-        surface = new Projection3D(m_instrumentActor.get(), m_instrumentDisplay->currentWidget()->size());
+        surface = new Projection3D(m_instrumentActor.get(), widgetDims);
       } else if (surfaceType <= CYLINDRICAL_Z) {
         m_renderTab->forceLayers(true);
-        surface = new UnwrappedCylinder(m_instrumentActor.get(), sample_pos, axis);
+        surface = new UnwrappedCylinder(m_instrumentActor.get(), sample_pos, axis, widgetDims, m_maintainAspectRatio);
       } else if (surfaceType <= SPHERICAL_Z) {
         m_renderTab->forceLayers(true);
-        surface = new UnwrappedSphere(m_instrumentActor.get(), sample_pos, axis);
+        surface = new UnwrappedSphere(m_instrumentActor.get(), sample_pos, axis, widgetDims, m_maintainAspectRatio);
       } else // SIDE_BY_SIDE
       {
         m_renderTab->forceLayers(true);
-        surface = new PanelsSurface(m_instrumentActor.get(), sample_pos, axis);
+        surface = new PanelsSurface(m_instrumentActor.get(), sample_pos, axis, widgetDims, m_maintainAspectRatio);
       }
     } catch (InstrumentHasNoSampleError &) {
       QApplication::restoreOverrideCursor();
@@ -654,6 +653,7 @@ void InstrumentWidget::setSurfaceType(int type) {
     surface->setShowPeakRowsFlag(showPeakRow);
     surface->setShowPeakLabelsFlag(showPeakLabels);
     surface->setShowPeakRelativeIntensityFlag(showPeakRelativeIntensity);
+    surface->setBackgroundColor(backgroundColor);
     // set new surface
     setSurface(surface);
 
@@ -1093,6 +1093,12 @@ void InstrumentWidget::setWireframe(bool on) {
   if (p3d) {
     p3d->setWireframe(on);
   }
+  updateInstrumentView();
+}
+
+void InstrumentWidget::setMaintainAspectRatio(bool on) {
+  m_maintainAspectRatio = on;
+  setSurfaceType(m_surfaceType);
   updateInstrumentView();
 }
 

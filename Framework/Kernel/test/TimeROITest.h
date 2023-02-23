@@ -145,6 +145,40 @@ public:
     TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 0.);
   }
 
+  void test_addROI2() {
+    TimeROI value{TWO, THREE};
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 1.);
+    value.addROI(ONE, TWO);
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 2.);
+    value.addROI(THREE, FOUR);
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 3.);
+    value.addROI(TWO, FIVE);
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 4.);
+  }
+
+  void test_addMask() {
+    TimeROI value{ONE, TWO}; // 1-2
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 1.);
+    value.addROI(THREE, FIVE); // 1-2,3-5
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 3.);
+    value.addMask(THREE, FOUR); // 1-2,4-5
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 2.);
+
+    value.addROI(THREE, FIVE); // 1-2,3-5
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 3.);
+    value.addMask(FOUR, SIX); // 1-2,3-4
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 2.);
+
+    value.addROI(TWO, FIVE); // 1-5
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 4.);
+    value.addMask(ONE, TWO); // 2-5
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 3.);
+    value.addMask(THREE, FOUR); // 1-3,4-5
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 2.);
+    value.addMask(THREE, FOUR); // 1-3,4-5 still
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 2.);
+  }
+
   void test_addOverlapping() {
     TimeROI value{ONE, FOUR}; // 1-4
     TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 3.);
@@ -293,6 +327,22 @@ public:
 
   void test_intersection_no_overlap() { runIntersectionTest(CHRISTMAS, TimeROI{NEW_YEARS_START, NEW_YEARS_STOP}, 0.); }
 
+  void test_intersection_one_empty() { runIntersectionTest(CHRISTMAS, TimeROI(), 0.); }
+
+  /*
+   * This test is similar to test_intersection_one_empty, except the function that is called will replace the TimeROI
+   * with the non-empty one.
+   */
+  void test_replace_intersection() {
+    TimeROI one(CHRISTMAS);
+    one.update_or_replace_intersection(TimeROI());
+    TS_ASSERT_EQUALS(one.durationInSeconds() / ONE_DAY_DURATION, CHRISTMAS.durationInSeconds() / ONE_DAY_DURATION);
+
+    TimeROI two;
+    two.update_or_replace_intersection(CHRISTMAS);
+    TS_ASSERT_EQUALS(two.durationInSeconds() / ONE_DAY_DURATION, CHRISTMAS.durationInSeconds() / ONE_DAY_DURATION);
+  }
+
   void runUnionTest(const TimeROI &left, const TimeROI &right, const double exp_duration) {
     // left union with right
     TimeROI one(left);
@@ -320,5 +370,51 @@ public:
 
   void test_union_no_overlap() {
     runUnionTest(CHRISTMAS, TimeROI{NEW_YEARS_START, NEW_YEARS_STOP}, 2. * ONE_DAY_DURATION);
+  }
+
+  void test_union_one_empty() { runUnionTest(CHRISTMAS, TimeROI(), CHRISTMAS.durationInSeconds()); }
+
+  /**
+   * This copies the TimeSeriesProperty<bool> used in Kernel::LogFilterTest which ends in "use"
+   */
+  void test_badTimeSeriesPropertyTest() {
+    DateAndTime one("2007-11-30T16:16:50");
+    DateAndTime two("2007-11-30T16:17:25");
+    DateAndTime three("2007-11-30T16:17:39");
+
+    TimeSeriesProperty<bool> tsp("filter");
+    tsp.addValue(one, true);
+    tsp.addValue(two, false);
+    tsp.addValue(three, true);
+
+    TimeROI roi(&tsp);
+    // should be two roi with the specified values being consistent
+    TS_ASSERT_EQUALS(roi.numBoundaries(), 4);
+    TS_ASSERT_EQUALS(roi.valueAtTime(one), true);
+    TS_ASSERT_EQUALS(roi.valueAtTime(two), false);
+    TS_ASSERT_EQUALS(roi.valueAtTime(three), true);
+
+    // a full duration past the end is false
+    const auto duration = three - one;
+    DateAndTime four = three + duration;
+    TS_ASSERT_EQUALS(roi.valueAtTime(four), false);
+  }
+
+  void test_getEffectiveTime() {
+    TimeROI roi{HANUKKAH_START, HANUKKAH_STOP};
+    TS_ASSERT_EQUALS(roi.getEffectiveTime(DECEMBER_START), HANUKKAH_START);
+    TS_ASSERT_EQUALS(roi.getEffectiveTime(HANUKKAH_START), HANUKKAH_START);
+    TS_ASSERT_EQUALS(roi.getEffectiveTime(CHRISTMAS_START), CHRISTMAS_START);
+    TS_ASSERT_THROWS(roi.getEffectiveTime(DECEMBER_STOP), const std::runtime_error &);
+  }
+
+  void test_debugStrPrint() {
+    TimeROI roi{HANUKKAH_START, HANUKKAH_STOP};
+    roi.addROI(NEW_YEARS_START, NEW_YEARS_STOP);
+    TS_ASSERT_EQUALS(
+        roi.debugStrPrint(0),
+        "0: 2022-Dec-19 00:01:00 to 2022-Dec-26 00:01:00\n1: 2022-Dec-31 00:01:00 to 2023-Jan-01 00:01:00\n");
+    TS_ASSERT_EQUALS(roi.debugStrPrint(1),
+                     "2022-Dec-19 00:01:00 2022-Dec-26 00:01:00 2022-Dec-31 00:01:00 2023-Jan-01 00:01:00 \n");
   }
 };

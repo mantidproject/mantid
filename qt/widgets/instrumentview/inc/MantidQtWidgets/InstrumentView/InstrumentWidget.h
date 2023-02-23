@@ -266,6 +266,7 @@ public slots:
   void set3DAxesState(bool /*on*/);
   void setSurfaceType(int /*type*/);
   void setWireframe(bool /*on*/);
+  void setMaintainAspectRatio(bool /*on*/);
 
   /// Overlay a workspace with the given name
   bool overlay(const QString &wsName);
@@ -408,6 +409,7 @@ private:
   bool m_setDefaultView;
   bool m_resetGeometry;
   bool m_useThread;
+  bool m_maintainAspectRatio;
 
   QSplitter *m_controlPanelLayout;
 };

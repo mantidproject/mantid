@@ -37,6 +37,7 @@ public:
   detid_t getID() const override;
   std::size_t nDets() const override;
   Kernel::V3D getPos() const override;
+  std::optional<Kernel::V2D> getSideBySideViewPos() const override;
   double getDistance(const IComponent &comp) const override;
   double getTwoTheta(const Kernel::V3D &observer, const Kernel::V3D &axis) const override;
   double getSignedTwoTheta(const Kernel::V3D &observer, const Kernel::V3D &axis,
@@ -190,6 +191,7 @@ protected:
 
   void setPos(double, double, double) override {}
   void setPos(const Kernel::V3D &) override {}
+  void setSideBySideViewPos(const Kernel::V2D &) override {}
   void setRot(const Kernel::Quat &) override {}
   void copyRot(const IComponent &) {}
   int interceptSurface(Track &) const override { return -10; }

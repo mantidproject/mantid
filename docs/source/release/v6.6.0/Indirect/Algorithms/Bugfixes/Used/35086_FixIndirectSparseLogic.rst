@@ -1,1 +1,0 @@
-- a problem has been fixed running :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption-v1>` on an indirect instrument using the Sparse Instrument feature. Detectors that are associated with an inactive analyser in the instrument definition no longer cause an error about retrieving the efixed value

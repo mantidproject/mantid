@@ -88,6 +88,13 @@ public:
     Y() *= factor;
     return *this;
   }
+  ///  Divide by d
+  inline V2D operator/(const double d) const noexcept { return V2D(X() / d, Y() / d); }
+  V2D &operator/=(const double d) {
+    X() /= d;
+    Y() /= d;
+    return *this;
+  }
   /// Negate
   inline V2D operator-() const noexcept { return V2D{-X(), -Y()}; }
 

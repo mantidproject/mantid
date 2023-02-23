@@ -21,6 +21,7 @@
 #   --enable-docs: Runs the docs from being built
 #   --enable-dev-docs: Runs the developer docs from being built
 #   --enable-doctests: Runs the documentation tests
+#   --enable-coverity: Runs coverity and submits results, ignore all other options and does not run unit tests
 #   --clean-build: Clears the build folder and builds from scratch
 #   --clean-external-projects: Clear the external projects from the build folder
 #   --use-core-dumps: Activate core dumps (Linux only)
@@ -60,6 +61,7 @@ ENABLE_PACKAGE=false
 ENABLE_DOCS=false
 ENABLE_DOC_TESTS=false
 ENABLE_DEV_DOCS=false
+ENABLE_COVERITY=false
 CLEAN_BUILD=false
 CLEAN_EXTERNAL_PROJECTS=false
 USE_CORE_DUMPS=false
@@ -74,6 +76,10 @@ do
         --enable-docs) ENABLE_DOCS=true ;;
         --enable-doctests) ENABLE_DOC_TESTS=true ;;
         --enable-dev-docs) ENABLE_DEV_DOCS=true ;;
+        --enable-coverity)
+	    ENABLE_COVERITY=true
+	    ENABLE_UNIT_TESTS=false
+	    ;;
         --clean-build) CLEAN_BUILD=true ;;
         --clean-external-projects) CLEAN_EXTERNAL_PROJECTS=true ;;
         --use-core-dumps) USE_CORE_DUMPS=true ;;
@@ -133,7 +139,7 @@ rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz *.exe
 rm -rf  $BUILD_DIR/ctest_log
 
 # Run the script that handles the build
-$SCRIPT_DIR/build $WORKSPACE $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS "$EXTRA_CMAKE_FLAGS" $BUILD_THREADS
+$SCRIPT_DIR/build $WORKSPACE $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_COVERITY "$EXTRA_CMAKE_FLAGS" $BUILD_THREADS
 
 # Run unit and system tests
 $SCRIPT_DIR/run-tests $WORKSPACE $ENABLE_SYSTEM_TESTS $ENABLE_UNIT_TESTS $ENABLE_DOCS $ENABLE_DOC_TESTS $BUILD_THREADS $USE_CORE_DUMPS
