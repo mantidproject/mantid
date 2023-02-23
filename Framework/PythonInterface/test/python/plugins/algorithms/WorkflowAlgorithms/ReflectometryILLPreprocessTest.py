@@ -122,8 +122,10 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         alg = create_algorithm("ReflectometryILLPreprocess", **args)
         assertRaisesNothing(self, alg.execute)
         outWS = alg.getProperty("OutputWorkspace").value
-        self.assertEqual(outWS.getRun().getLogData("ChopperSetting.firstChopper").value, 2.0)
-        self.assertEqual(outWS.getRun().getLogData("ChopperSetting.secondChopper").value, 1.0)
+        self.assertEqual(
+            float(outWS.getRun().getLogData("ChopperSetting.firstChopper").value), 2.0
+        )  # explicit cast to float for OSX and Windows which implicitly cast it to int
+        self.assertEqual(float(outWS.getRun().getLogData("ChopperSetting.secondChopper").value), 1.0)
 
 
 if __name__ == "__main__":
