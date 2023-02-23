@@ -12,7 +12,6 @@ from mantid.api import MatrixWorkspace, WorkspaceGroup
 
 
 class NormaliseSpectraTest(unittest.TestCase):
-
     _positive = "1,2,3,4,5"
     _negative = "-5,-4,-3,-2,-1"
     _zeros = "0,0,0,0,0"
@@ -27,11 +26,23 @@ class NormaliseSpectraTest(unittest.TestCase):
 
     def test_one_hist_negative(self):
         in_ws = self._create_workspace(1, "test", self._negative)
-        self.assertRaises(RuntimeError, NormaliseSpectra, InputWorkspace=in_ws, OutputWorkspace="out_ws")
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Spectrum number 1: has a maximum y value of 0 or less. All spectra must have a maximum y value more than 0",
+            NormaliseSpectra,
+            InputWorkspace=in_ws,
+            OutputWorkspace="out_ws",
+        )
 
     def test_one_hist_zeros(self):
         in_ws = self._create_workspace(1, "test", self._zeros)
-        self.assertRaises(RuntimeError, NormaliseSpectra, InputWorkspace=in_ws, OutputWorkspace="out_ws")
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Spectrum number 1: has a maximum y value of 0 or less. All spectra must have a maximum y value more than 0",
+            NormaliseSpectra,
+            InputWorkspace=in_ws,
+            OutputWorkspace="out_ws",
+        )
 
     def test_one_hist_mixed(self):
         in_ws = self._create_workspace(1, "test", self._mixed)
