@@ -647,6 +647,18 @@ std::string QtExperimentView::getFloodCorrectionType() const { return getText(*m
 
 void QtExperimentView::setFloodCorrectionType(std::string const &type) { setSelected(*m_ui.floodCorComboBox, type); }
 
+void QtExperimentView::setFloodCorrectionWorkspaceMode() {
+  m_floodCorrWsSelector->show();
+  m_floodCorrLineEdit->hide();
+  m_ui.expSettingsGrid->replaceWidget(m_floodCorrLineEdit.get(), m_floodCorrWsSelector.get());
+}
+
+void QtExperimentView::setFloodCorrectionFilePathMode() {
+  m_floodCorrLineEdit->show();
+  m_floodCorrLineEdit->hide();
+  m_ui.expSettingsGrid->replaceWidget(m_floodCorrWsSelector.get(), m_floodCorrLineEdit.get());
+}
+
 std::string QtExperimentView::getFloodWorkspace() const { return getText(*m_floodCorrWsSelector); }
 
 std::string QtExperimentView::getFloodFilePath() const { return getText(*m_floodCorrLineEdit); }

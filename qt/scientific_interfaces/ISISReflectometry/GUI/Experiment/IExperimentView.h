@@ -116,6 +116,8 @@ public:
 
   virtual std::string getFloodCorrectionType() const = 0;
   virtual void setFloodCorrectionType(std::string const &correction) = 0;
+  virtual void setFloodCorrectionWorkspaceMode() = 0;
+  virtual void setFloodCorrectionFilePathMode() = 0;
   virtual std::string getFloodWorkspace() const = 0;
   virtual std::string getFloodFilePath() const = 0;
   virtual void setFloodWorkspace(std::string const &workspace) = 0;

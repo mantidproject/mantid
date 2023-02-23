@@ -81,6 +81,8 @@ public:
 
   std::string getFloodCorrectionType() const override;
   void setFloodCorrectionType(std::string const &correction) override;
+  void setFloodCorrectionWorkspaceMode() override;
+  void setFloodCorrectionFilePathMode() override;
   std::string getFloodWorkspace() const override;
   std::string getFloodFilePath() const override;
   void setFloodWorkspace(std::string const &workspace) override;
