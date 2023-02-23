@@ -224,7 +224,7 @@ void QtExperimentView::initPolCorrEfficienciesControls() {
 void QtExperimentView::initFloodControls() {
   m_floodCorrWsSelector = std::make_unique<MantidWidgets::WorkspaceSelector>(new MantidWidgets::WorkspaceSelector);
   m_floodCorrLineEdit = std::make_unique<QLineEdit>(new QLineEdit());
-  constexpr auto SELECTOR_ROW = 13;
+  constexpr auto SELECTOR_ROW = 14;
   constexpr auto SELECTOR_COL = 3;
   m_ui.expSettingsGrid->addWidget(m_floodCorrWsSelector.get(), SELECTOR_ROW, SELECTOR_COL);
   m_floodCorrWsSelector->setOptional(true);
