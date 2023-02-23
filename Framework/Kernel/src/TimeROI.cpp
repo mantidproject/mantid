@@ -49,12 +49,19 @@ TimeInterval calculate_union(const TimeInterval &left, const TimeInterval &right
 bool overlaps(const TimeInterval &left, const TimeInterval &right) {
   if (left.overlaps(right))
     return true;
-  else if (left.begin() == right.end())
+  // the following make cppcheck happy
+  const auto leftBegin = left.begin();
+  const auto rightEnd = right.end();
+  if (leftBegin == rightEnd)
     return true;
-  else if (left.end() == right.begin())
+  // these temp variables are for cppcheck
+  const auto leftEnd = left.end();
+  const auto rightBegin = right.begin();
+  if (leftEnd == rightBegin)
     return true;
-  else
-    return false;
+
+  // they don't overlap
+  return false;
 }
 
 } // namespace
