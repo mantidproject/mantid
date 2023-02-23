@@ -232,17 +232,49 @@ public:
     auto presenter = makePresenter();
     FloodCorrections floodCorr(FloodCorrectionType::Workspace, std::string{"testWS"});
 
-    EXPECT_CALL(m_view, getFloodCorrectionType()).WillOnce(Return("Workspace"));
+    EXPECT_CALL(m_view, getFloodCorrectionType()).Times(2).WillRepeatedly(Return("Workspace"));
     EXPECT_CALL(m_view, getFloodWorkspace()).WillOnce(Return(floodCorr.workspace().get()));
+    EXPECT_CALL(m_view, setFloodCorrectionWorkspaceMode()).Times(1);
     presenter.notifySettingsChanged();
 
     TS_ASSERT_EQUALS(presenter.experiment().floodCorrections(), floodCorr);
     verifyAndClear();
   }
 
-  void testSetFloodCorrectionsToWorkspaceEnablesInputs() { runWithFloodCorrectionInputsEnabled("Workspace"); }
+  void testSetFloodCorrectionsUpdatesModelForFilePath() {
+    auto presenter = makePresenter();
+    FloodCorrections floodCorr(FloodCorrectionType::Workspace, std::string{"path/to/testWS"});
 
-  void testSetFloodCorrectionsToFilePathEnablesInputs() { runWithFloodCorrectionInputsEnabled("FilePath"); }
+    EXPECT_CALL(m_view, getFloodCorrectionType()).Times(2).WillRepeatedly(Return("FilePath"));
+    EXPECT_CALL(m_view, getFloodFilePath()).WillOnce(Return(floodCorr.workspace().get()));
+    EXPECT_CALL(m_view, setFloodCorrectionFilePathMode()).Times(1);
+    presenter.notifySettingsChanged();
+
+    TS_ASSERT_EQUALS(presenter.experiment().floodCorrections(), floodCorr);
+    verifyAndClear();
+  }
+
+  void testSetFloodCorrectionsUpdatesModelForNoCorrections() {
+    auto presenter = makePresenter();
+    FloodCorrections floodCorr(FloodCorrectionType::None);
+
+    EXPECT_CALL(m_view, getFloodCorrectionType()).Times(2).WillRepeatedly(Return("None"));
+    EXPECT_CALL(m_view, getFloodWorkspace()).Times(0);
+    presenter.notifySettingsChanged();
+
+    TS_ASSERT_EQUALS(presenter.experiment().floodCorrections(), floodCorr);
+    verifyAndClear();
+  }
+
+  void testSetFloodCorrectionsToWorkspaceEnablesInputs() {
+    EXPECT_CALL(m_view, getFloodWorkspace()).Times(1);
+    runWithFloodCorrectionInputsEnabled("Workspace");
+  }
+
+  void testSetFloodCorrectionsToFilePathEnablesInputs() {
+    EXPECT_CALL(m_view, getFloodFilePath()).Times(1);
+    runWithFloodCorrectionInputsEnabled("FilePath");
+  }
 
   void testSetFloodCorrectionsToParameterFileDisablesInputs() { runWithFloodCorrectionInputsDisabled("ParameterFile"); }
 
@@ -984,7 +1016,7 @@ private:
   void runWithFloodCorrectionInputsDisabled(std::string const &type) {
     auto presenter = makePresenter();
 
-    EXPECT_CALL(m_view, getFloodCorrectionType()).WillOnce(Return(type));
+    EXPECT_CALL(m_view, getFloodCorrectionType()).Times(2).WillRepeatedly(Return(type));
     EXPECT_CALL(m_view, disableFloodCorrectionInputs()).Times(1);
     EXPECT_CALL(m_view, getFloodWorkspace()).Times(0);
     presenter.notifySettingsChanged();
@@ -995,9 +1027,8 @@ private:
   void runWithFloodCorrectionInputsEnabled(std::string const &type) {
     auto presenter = makePresenter();
 
-    EXPECT_CALL(m_view, getFloodCorrectionType()).WillOnce(Return(type));
+    EXPECT_CALL(m_view, getFloodCorrectionType()).Times(2).WillRepeatedly(Return(type));
     EXPECT_CALL(m_view, enableFloodCorrectionInputs()).Times(1);
-    EXPECT_CALL(m_view, getFloodWorkspace()).Times(1);
     presenter.notifySettingsChanged();
 
     verifyAndClear();

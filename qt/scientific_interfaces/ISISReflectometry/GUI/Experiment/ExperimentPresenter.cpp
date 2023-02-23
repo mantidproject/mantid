@@ -170,10 +170,16 @@ PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
 }
 
 FloodCorrections ExperimentPresenter::floodCorrectionsFromView() {
-  auto const correctionType = floodCorrectionTypeFromString(m_view->getFloodCorrectionType());
+  auto const correctionTypeString = m_view->getFloodCorrectionType();
+  auto const correctionType = floodCorrectionTypeFromString(correctionTypeString);
 
   if (floodCorrectionRequiresInputs(correctionType)) {
-    return FloodCorrections(correctionType, m_view->getFloodWorkspace());
+    if (correctionTypeString == "Workspace") {
+      return FloodCorrections(correctionType, m_view->getFloodWorkspace());
+    }
+    if (correctionTypeString == "FilePath") {
+      return FloodCorrections(correctionType, m_view->getFloodFilePath());
+    }
   }
 
   return FloodCorrections(correctionType);
@@ -227,10 +233,22 @@ void ExperimentPresenter::updatePolarizationCorrectionEnabledState() {
 }
 
 void ExperimentPresenter::updateFloodCorrectionEnabledState() {
-  if (floodCorrectionRequiresInputs(m_model.floodCorrections().correctionType()))
-    m_view->enableFloodCorrectionInputs();
-  else
+  auto const floodCorrOption = m_view->getFloodCorrectionType();
+
+  if (floodCorrOption == "None" || floodCorrOption == "ParameterFile") {
     m_view->disableFloodCorrectionInputs();
+    return;
+  }
+  if (floodCorrOption == "Workspace") {
+    m_view->enableFloodCorrectionInputs();
+    m_view->setFloodCorrectionWorkspaceMode();
+    return;
+  }
+  if (floodCorrOption == "FilePath") {
+    m_view->enableFloodCorrectionInputs();
+    m_view->setFloodCorrectionFilePathMode();
+    return;
+  }
 }
 
 boost::optional<RangeInLambda> ExperimentPresenter::transmissionRunRangeFromView() {

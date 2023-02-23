@@ -655,7 +655,7 @@ void QtExperimentView::setFloodCorrectionWorkspaceMode() {
 
 void QtExperimentView::setFloodCorrectionFilePathMode() {
   m_floodCorrLineEdit->show();
-  m_floodCorrLineEdit->hide();
+  m_floodCorrWsSelector->hide();
   m_ui.expSettingsGrid->replaceWidget(m_floodCorrWsSelector.get(), m_floodCorrLineEdit.get());
 }
 
