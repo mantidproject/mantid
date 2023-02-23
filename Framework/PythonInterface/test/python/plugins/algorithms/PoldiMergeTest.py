@@ -83,19 +83,29 @@ class PoldiMergeTest(unittest.TestCase):
         DeleteWorkspace("PoldiMergeOutput")
 
     def test_timingDelta(self):
-        self.assertRaises(RuntimeError, lambda: self.__runMerge__("Base,BadTimingDelta"))
+        self.assertRaisesRegex(
+            RuntimeError, "Workspaces can not be merged. Timings don't match. Aborting.", lambda: self.__runMerge__("Base,BadTimingDelta")
+        )
         self.assertFalse(AnalysisDataService.doesExist("PoldiMergeOutput"))
 
     def test_timingOffset(self):
-        self.assertRaises(RuntimeError, lambda: self.__runMerge__("Base,BadTimingOffset"))
+        self.assertRaisesRegex(
+            RuntimeError, "Workspaces can not be merged. Timings don't match. Aborting.", lambda: self.__runMerge__("Base,BadTimingOffset")
+        )
         self.assertFalse(AnalysisDataService.doesExist("PoldiMergeOutput"))
 
     def test_badProperties(self):
-        self.assertRaises(RuntimeError, lambda: self.__runMerge__("Base,GoodTimingBadProperties", True))
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Workspaces can not be merged. Property 'TablePositionX' does not match. Aborting.",
+            lambda: self.__runMerge__("Base,GoodTimingBadProperties", True),
+        )
         self.assertFalse(AnalysisDataService.doesExist("PoldiMergeOutput"))
 
     def test_badName(self):
-        self.assertRaises(RuntimeError, lambda: self.__runMerge__("Base,NotExisting"))
+        self.assertRaisesRegex(
+            RuntimeError, "Not all strings in the input list are valid workspace names.", lambda: self.__runMerge__("Base,NotExisting")
+        )
         self.assertFalse(AnalysisDataService.doesExist("PoldiMergeOutput"))
 
 
