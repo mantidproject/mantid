@@ -402,7 +402,9 @@ class UBMatrixBuilderTest(unittest.TestCase):
             tmp = self.valid_matrix.copy()
             del tmp[key]
 
-            self.assertRaises(RuntimeError, self.builder._getUBMatrix, cifData=tmp)
+            self.assertRaisesRegex(
+                RuntimeError, "Can not load UB matrix from CIF, values are missing.", self.builder._getUBMatrix, cifData=tmp
+            )
 
     def test_getUBMatrix_correct(self):
         self.assertEqual(self.builder._getUBMatrix(self.valid_matrix), "-0.03,0.13,0.31,0.01,-0.31,0.14,0.34,0.02,0.02")
