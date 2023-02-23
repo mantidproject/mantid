@@ -655,8 +655,8 @@ class SANSILLReduction(DataProcessorAlgorithm):
         # Check now the actual value of the property to decide whether or not to perform the rescaling
         elif has_log and has_log_ref:
             # Fetch the values of "NormalisedByFlux" property for both the data and flat field
-            log_val = bool(run["NormalisedByFlux"].value)
-            log_val_ref = bool(run_ref["NormalisedByFlux"].value)
+            log_val = run["NormalisedByFlux"].value == "True"
+            log_val_ref = run_ref["NormalisedByFlux"].value == "True"
             # If those values are different raise an error
             if log_val ^ log_val_ref:
                 raise RuntimeError(message)
@@ -667,9 +667,9 @@ class SANSILLReduction(DataProcessorAlgorithm):
             else:
                 self.do_rescale_flux(ws, flat_ws)
         # Case where the "NormalisedByFlux" property has not been set to both flat field and data
-        # Do nothing
+        # Do the rescaling
         else:
-            return
+            self.do_rescale_flux(ws, flat_ws)
 
     def do_rescale_flux(self, ws, flat_ws):
         """
@@ -1104,6 +1104,7 @@ class SANSILLReduction(DataProcessorAlgorithm):
                         if self.process == "Water":
                             self.generate_sensitivity(ws)
                         else:
+                            self.generate_sensitivity(ws)
                             self.apply_water(ws)
                             self.apply_sensitivity(ws)
                             self.progress.report()
