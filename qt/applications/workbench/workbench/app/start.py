@@ -23,7 +23,7 @@ import mantidqt.utils.qt as qtutils
 # Find Qt plugins for development builds on some platforms
 plugins.setup_library_paths()
 
-from qtpy.QtGui import QIcon  # noqa
+from qtpy.QtGui import QIcon, QSurfaceFormat  # noqa
 from qtpy.QtWidgets import QApplication  # noqa
 from qtpy.QtCore import QCoreApplication, Qt  # noqa
 
@@ -49,8 +49,16 @@ def qapplication():
     """
     app = QApplication.instance()
     if app is None:
-        # attributes that must be set before creating QApplication
+        # share OpenGL contexts across the application
         QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
+
+        # set global compatability profile for OpenGL
+        # We use deprecated OpenGL calls so anything with a profile version >= 3
+        # causes widgets like the instrument view to fail to render
+        gl_surface_format = QSurfaceFormat.defaultFormat()
+        gl_surface_format.setProfile(QSurfaceFormat.CompatibilityProfile)
+        gl_surface_format.setSwapBehavior(QSurfaceFormat.DoubleBuffer)
+        QSurfaceFormat.setDefaultFormat(gl_surface_format)
 
         argv = sys.argv[:]
         argv[0] = APPNAME  # replace application name
@@ -239,7 +247,15 @@ def start(options: argparse.ArgumentParser):
     if options.single_process:
         initialise_qapp_and_launch_workbench(options)
     else:
-        workbench_process = multiprocessing.Process(target=initialise_qapp_and_launch_workbench, args=[options])
+        # Mantid's FrameworkManagerImpl::Instance Python export uses a process-wide static flag to ensure code
+        # only runs once (see Instance function in Framework/PythonInterface/mantid/api/src/Exports/FrameworkManager.cpp).
+        # The default start method on Unix ('fork') inherits resources such as these flags from the parent.
+        # We require the start method to be 'spawn' so that we do not inherit these resources from the parent process,
+        # this is already the default on Windows/macOS.
+        # This will mean the relevant 'atexit' code will execute in the child process, and therefore the
+        # FrameworkManager and UsageService will be shutdown as expected.
+        context = multiprocessing.get_context("spawn")
+        workbench_process = context.Process(target=initialise_qapp_and_launch_workbench, args=[options])
         workbench_process.start()
         workbench_process.join()
 

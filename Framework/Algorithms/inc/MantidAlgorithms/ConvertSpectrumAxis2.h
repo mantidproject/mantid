@@ -19,7 +19,7 @@ class MatrixWorkspace;
 }
 namespace Algorithms {
 /** Converts the representation of the vertical axis (the one up the side of
-    a matrix in MantidPlot) of a Workspace2D from its default of holding the
+    a matrix) of a Workspace2D from its default of holding the
     spectrum number to the target unit given - theta, elastic Q and elastic Q^2.
 
     The spectra will be reordered by increasing theta and duplicates will not be

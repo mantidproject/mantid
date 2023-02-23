@@ -21,7 +21,7 @@ class DateAndTime;
 } // namespace Types
 namespace Kernel {
 class SplittingInterval;
-using TimeSplitterType = std::vector<SplittingInterval>;
+using SplittingIntervalVec = std::vector<SplittingInterval>;
 class Unit;
 } // namespace Kernel
 namespace DataObjects {
@@ -262,11 +262,11 @@ public:
   void filterByTimeAtSample(Types::Core::DateAndTime start, Types::Core::DateAndTime stop, double tofFactor,
                             double tofOffset, EventList &output) const;
 
-  void filterInPlace(Kernel::TimeSplitterType &splitter);
+  void filterInPlace(Kernel::SplittingIntervalVec &splitter);
 
-  void splitByTime(Kernel::TimeSplitterType &splitter, std::vector<EventList *> outputs) const;
+  void splitByTime(Kernel::SplittingIntervalVec &splitter, std::vector<EventList *> outputs) const;
 
-  void splitByFullTime(Kernel::TimeSplitterType &splitter, std::map<int, EventList *> outputs, bool docorrection,
+  void splitByFullTime(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs, bool docorrection,
                        double toffactor, double tofshift) const;
 
   /// Split ...
@@ -276,7 +276,7 @@ public:
                                             double toffactor, double tofshift) const;
 
   /// Split events by pulse time
-  void splitByPulseTime(Kernel::TimeSplitterType &splitter, std::map<int, EventList *> outputs) const;
+  void splitByPulseTime(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs) const;
 
   /// Split events by pulse time with Matrix splitters
   void splitByPulseTimeWithMatrix(const std::vector<int64_t> &vec_times, const std::vector<int> &vec_target,
@@ -414,17 +414,17 @@ private:
   static void filterByTimeAtSampleHelper(std::vector<T> &events, Types::Core::DateAndTime start,
                                          Types::Core::DateAndTime stop, double tofFactor, double tofOffset,
                                          std::vector<T> &output);
-  template <class T> void filterInPlaceHelper(Kernel::TimeSplitterType &splitter, typename std::vector<T> &events);
+  template <class T> void filterInPlaceHelper(Kernel::SplittingIntervalVec &splitter, typename std::vector<T> &events);
   template <class T>
-  void splitByTimeHelper(Kernel::TimeSplitterType &splitter, std::vector<EventList *> outputs,
+  void splitByTimeHelper(Kernel::SplittingIntervalVec &splitter, std::vector<EventList *> outputs,
                          typename std::vector<T> &events) const;
   template <class T>
-  void splitByFullTimeHelper(Kernel::TimeSplitterType &splitter, std::map<int, EventList *> outputs,
+  void splitByFullTimeHelper(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs,
                              typename std::vector<T> &events, bool docorrection, double toffactor,
                              double tofshift) const;
   /// Split events by pulse time
   template <class T>
-  void splitByPulseTimeHelper(Kernel::TimeSplitterType &splitter, std::map<int, EventList *> outputs,
+  void splitByPulseTimeHelper(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs,
                               typename std::vector<T> &events) const;
 
   /// Split events (template) by pulse time with matrix splitters

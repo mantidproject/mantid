@@ -564,9 +564,9 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
     filestr << "## Valid values are: error, warning, notice, information, debug\n";
     filestr << "#logging.loggers.root.level=information\n\n";
     filestr << "##\n";
-    filestr << "## MantidPlot\n";
+    filestr << "## MantidWorkbench\n";
     filestr << "##\n\n";
-    filestr << "## Hides categories from the algorithm list in MantidPlot\n";
+    filestr << "## Hides categories from the algorithm list in MantidWorkbench\n";
     filestr << "#algorithms.catagories.hidden=Muons,Inelastic\n\n";
     filestr << "## Show invisible workspaces\n";
     filestr << "#MantidOptions.InvisibleWorkspaces=0\n";

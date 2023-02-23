@@ -105,8 +105,7 @@ public:
     This unit test is designed to flag up changes here. If property values and
     names here do need to be changed,
     1) They must also be updated in SlicingAlgorithmDialog.cpp.
-    2) It should then be confirmed that that the SliceMD dialog still works in
-    MantidPlot (run SliceMD)!
+    2) It should then be confirmed that that the SliceMD dialog still works (run SliceMD)!
     3) Finally this unit test should be updated so that the tests pass.
     */
     doTestPropertyExistance("InputWorkspace");

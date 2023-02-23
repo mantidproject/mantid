@@ -9,6 +9,7 @@
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
@@ -50,17 +51,19 @@ private:
 
 public:
   void test_throws_with_unknown_flag() {
+    Kernel::TimeROI *roi = nullptr;
     TimeSeriesProperty<double> series("doubleProperty");
     series.addValue("2000-11-30T01:01:01", 1);
 
     const std::string made_up_flag = "mode"; // We do not support mode statistics filtering.
     XMLInstrumentParameter_sptr logFile = make_logfile_object(made_up_flag);
 
-    TSM_ASSERT_THROWS("Unknown flag should cause failure", logFile->createParamValue(&series),
+    TSM_ASSERT_THROWS("Unknown flag should cause failure", logFile->createParamValue(&series, roi),
                       const Kernel::Exception::InstrumentDefinitionError &)
   }
 
   void test_filter_by_first_value() {
+    Kernel::TimeROI *roi = nullptr;
     TimeSeriesProperty<double> series("doubleProperty");
 
     const double expectedFilteredValue = 1;
@@ -68,12 +71,13 @@ public:
     series.addValue("2000-11-30T01:01:02", 2);
 
     XMLInstrumentParameter_sptr logFile = make_logfile_object("first_value");
-    const double actualFilteredValue = logFile->createParamValue(&series);
+    const double actualFilteredValue = logFile->createParamValue(&series, roi);
     TSM_ASSERT_EQUALS("Filtering by First Value is not performed correctly", expectedFilteredValue,
                       actualFilteredValue);
   }
 
   void test_filter_by_last_value() {
+    Kernel::TimeROI *roi = nullptr;
     TimeSeriesProperty<double> series("doubleProperty");
 
     const double expectedFilteredValue = 1;
@@ -81,36 +85,54 @@ public:
     series.addValue("2000-11-30T01:01:02", expectedFilteredValue);
 
     XMLInstrumentParameter_sptr logFile = make_logfile_object("last_value");
-    const double actualFilteredValue = logFile->createParamValue(&series);
+    const double actualFilteredValue = logFile->createParamValue(&series, roi);
     TSM_ASSERT_EQUALS("Filtering by Last Value is not performed correctly", expectedFilteredValue, actualFilteredValue);
   }
 
   void test_filter_by_maximum_value() {
     TimeSeriesProperty<double> series("doubleProperty");
 
-    const double expectedFilteredValue = 1;
+    const double firstExpectedValue = 0.42;
+    // const double secondExpectedValue = 0.24;
     series.addValue("2000-11-30T01:01:01", 0.1);
-    series.addValue("2000-11-30T01:01:02",
-                    expectedFilteredValue); // maximum. 1 > 0.9 > 0.1
-    series.addValue("2000-11-30T01:01:03", 0.9);
+    series.addValue("2000-11-30T01:01:03", 0.42);
+    series.addValue("2000-11-30T01:01:05", 0.24);
+    series.addValue("2000-11-30T01:01:07", 0.1);
 
     XMLInstrumentParameter_sptr logFile = make_logfile_object("maximum");
-    const double actualFilteredValue = logFile->createParamValue(&series);
-    TSM_ASSERT_EQUALS("Filtering by Maximum is not performed correctly", expectedFilteredValue, actualFilteredValue);
+
+    Kernel::TimeROI *roi = new Kernel::TimeROI;
+    roi->addROI("2000-11-30T01:01:00", "2000-11-30T01:01:08");
+    const double firstFilteredValue = logFile->createParamValue(&series, roi);
+    TSM_ASSERT_EQUALS("Filtering by Maximum is not performed correctly", firstExpectedValue, firstFilteredValue);
+
+    // Kernel::TimeROI *secondRoi = new Kernel::TimeROI;
+    // roi->addROI("2000-11-30T01:01:04", "2000-11-30T01:01:08");
+    // const double secondFilteredValue = logFile->createParamValue(&series, secondRoi);
+    // TSM_ASSERT_EQUALS("Filtering by Maximum is not performed correctly", secondExpectedValue, secondFilteredValue);
   }
 
   void test_filter_by_minimum_value() {
     TimeSeriesProperty<double> series("doubleProperty");
 
-    const double expectedFilteredValue = 1;
-    series.addValue("2000-11-30T01:01:01", 3);
-    series.addValue("2000-11-30T01:01:02",
-                    expectedFilteredValue); // minimum. 1 < 3 < 4
-    series.addValue("2000-11-30T01:01:03", 4);
+    const double firstExpectedValue = 0.1;
+    // const double secondExpectedValue = 0.24;
+    series.addValue("2000-11-30T01:01:01", 0.1);
+    series.addValue("2000-11-30T01:01:03", 0.42);
+    series.addValue("2000-11-30T01:01:05", 0.24);
+    series.addValue("2000-11-30T01:01:07", 0.76);
 
     XMLInstrumentParameter_sptr logFile = make_logfile_object("minimum");
-    const double actualFilteredValue = logFile->createParamValue(&series);
-    TSM_ASSERT_EQUALS("Filtering by Minimum is not performed correctly", expectedFilteredValue, actualFilteredValue);
+
+    Kernel::TimeROI *roi = new Kernel::TimeROI;
+    roi->addROI("2000-11-30T01:01:00", "2000-11-30T01:01:08");
+    const double firstFilteredValue = logFile->createParamValue(&series, roi);
+    TSM_ASSERT_EQUALS("Filtering by Minimum is not performed correctly", firstExpectedValue, firstFilteredValue);
+
+    // Kernel::TimeROI *secondRoi = new Kernel::TimeROI;
+    // roi->addROI("2000-11-30T01:01:02", "2000-11-30T01:01:08");
+    // const double secondFilteredValue = logFile->createParamValue(&series, secondRoi);
+    // TSM_ASSERT_EQUALS("Filtering by Minimum is not performed correctly", secondExpectedValue, secondFilteredValue);
   }
 
   void test_filter_by_mean_value() {
@@ -124,29 +146,40 @@ public:
     series.addValue("2000-11-30T01:01:03", 2);
 
     XMLInstrumentParameter_sptr logFile = make_logfile_object("mean");
-    const double actualFilteredValue = logFile->createParamValue(&series);
+
+    Kernel::TimeROI *roi = nullptr;
+    const double actualFilteredValue = logFile->createParamValue(&series, roi);
     TSM_ASSERT_EQUALS("Filtering by Mean is not performed correctly", expectedFilteredValue, actualFilteredValue);
   }
 
   void test_filter_by_median_value() {
     TimeSeriesProperty<double> series("doubleProperty");
 
-    const double expectedFilteredValue = 2;
+    const double firstExpectedValue = 2;
+    // const double secondExpectedValue = 4;
     series.addValue("2000-11-30T01:01:01", 0);
     series.addValue("2000-11-30T01:01:02", 1);
-    series.addValue("2000-11-30T01:01:03",
-                    expectedFilteredValue); // Median time.
+    series.addValue("2000-11-30T01:01:03", 2);
     series.addValue("2000-11-30T01:01:04", 4);
     series.addValue("2000-11-30T01:02:00", 5);
 
     XMLInstrumentParameter_sptr logFile = make_logfile_object("median");
-    const double actualFilteredValue = logFile->createParamValue(&series);
-    TSM_ASSERT_EQUALS("Filtering by Median is not performed correctly", expectedFilteredValue, actualFilteredValue);
+
+    Kernel::TimeROI *roi = new Kernel::TimeROI;
+    roi->addROI("2000-11-30T01:01:01", "2000-11-30T01:02:00");
+    const double firstActualValue = logFile->createParamValue(&series, roi);
+    TSM_ASSERT_EQUALS("Filtering by Median is not performed correctly", firstExpectedValue, firstActualValue);
+
+    // Kernel::TimeROI *secondRoi = new Kernel::TimeROI;
+    // roi->addROI("2000-11-30T01:01:03", "2000-11-30T01:02:00");
+    // const double secondActualValue = logFile->createParamValue(&series, secondRoi);
+    // TSM_ASSERT_EQUALS("Filtering by Median is not performed correctly", secondExpectedValue, secondActualValue);
   }
 
   // This functionality will soon be legacy, since filtering by nth-position is
   // not a good idea.
   void test_filter_by_nth_position() {
+    Kernel::TimeROI *roi = nullptr;
     TimeSeriesProperty<double> series("doubleProperty");
 
     const double expectedFilteredValue = 1;
@@ -156,7 +189,7 @@ public:
     series.addValue("2000-11-30T01:01:04", 3);
 
     XMLInstrumentParameter_sptr logFile = make_logfile_object("position 2");
-    const double actualFilteredValue = logFile->createParamValue(&series);
+    const double actualFilteredValue = logFile->createParamValue(&series, roi);
     TSM_ASSERT_EQUALS("Filtering by Nth position is not performed correctly", expectedFilteredValue,
                       actualFilteredValue);
   }

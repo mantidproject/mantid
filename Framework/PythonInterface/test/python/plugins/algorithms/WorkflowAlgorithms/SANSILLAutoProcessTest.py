@@ -15,20 +15,20 @@ class SANSILLAutoProcessTest(unittest.TestCase):
     def setUpClass(cls):
         cls._facility = config["default.facility"]
         cls._instrument = config["default.instrument"]
-        cls._dirs = config["datasearch.directories"]
+        cls._data_search_dirs = config["datasearch.directories"]
         config.appendDataSearchSubDir("ILL/D11/")
         config.appendDataSearchSubDir("ILL/D16/")
         config["default.facility"] = "ILL"
         config["default.instrument"] = "D11"
 
+    def tearDown(self):
+        mtd.clear()
+
     @classmethod
     def tearDownClass(cls):
         config["default.facility"] = cls._facility
         config["default.instrument"] = cls._instrument
-        config["datasearch.directories"] = cls._dirs
-
-    def tearDown(self):
-        mtd.clear()
+        config["datasearch.directories"] = cls._data_search_dirs
 
     def test_noSampleRun(self):
         self.assertRaises(RuntimeError, SANSILLAutoProcess)

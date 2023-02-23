@@ -34,7 +34,7 @@ dependencies:
   - python=3.8.*
   - pyyaml>=5.4.1
   - qscintilla2
-  - qt>=5.15,<6
+  - qt=5.15.4  # 5.15.6 causing issues with rendering of tabs on GUIs using the instrument viewer.
   - qtconsole>=5.0.3,<6
   - qtpy>=1.9.0
   - requests>=2.25.1
@@ -45,7 +45,7 @@ dependencies:
   - tbb-devel=2021.*
   - texlive-core>=20180414
   - toml>=0.10.2
-  - zlib>=1.2.11
+  - versioningit>=2.1
 
   # Not Windows, OpenGL implementation:
   - mesalib>=18.0.0

@@ -15,8 +15,8 @@
 
 #include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/PropertyHandler.h"
-#include "MantidQtWidgets/Common/SignalBlocker.h"
 
+#include <QSignalBlocker>
 #include <QString>
 #include <QtCore>
 
@@ -332,7 +332,7 @@ void IndirectFitAnalysisTab::updateFitBrowserParameterValuesFromAlg() {
   try {
     updateFitBrowserParameterValues();
     if (m_fittingAlgorithm) {
-      MantidQt::API::SignalBlocker blocker(m_fitPropertyBrowser);
+      QSignalBlocker blocker(m_fitPropertyBrowser);
       if (m_fittingModel->getFittingMode() == FittingMode::SEQUENTIAL) {
         auto const paramWsName = m_fittingAlgorithm->getPropertyValue("OutputParameterWorkspace");
         auto paramWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(paramWsName);

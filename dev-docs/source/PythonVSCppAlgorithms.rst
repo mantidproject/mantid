@@ -70,7 +70,7 @@ Python algorithms are generally easier to put together than those assembled in C
 
 It's more natural to convert a python script into a python Algorithm than directly into a C++ algorithm. In many cases, the algorithm functionality is best assembled by procedural execution of existing algorithms. For this, the python API provides the best means of executing an algorithm in a single line, using well defined, named variables. An algorithm of this nature will take up only a few lines in Python and therefore be very easy to read and maintain.
 
-Python algorithms also benefit from automatic GUI creation when they are registered with Mantid, so they can be used equally well through the command line, or through MantidPlot graphically.
+Python algorithms also benefit from automatic GUI creation when they are registered with Mantid, so they can be used equally well through the command line, or through a GUI.
 
 Python algorithms are great for editing and re-registering. Users can tweak existing Python algorithms or generate their own, without the complication of setting up a build environment. They can also more easily be re-issued to fix particular issues than C++ algorithms.
 

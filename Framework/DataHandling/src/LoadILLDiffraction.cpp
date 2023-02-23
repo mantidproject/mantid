@@ -98,13 +98,8 @@ void LoadILLDiffraction::init() {
                   "File path of the data file to load");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The output workspace.");
-  std::vector<std::string> calibrationOptions{"Auto", "Raw", "Calibrated"};
-  declareProperty("DataType", "Auto", std::make_shared<StringListValidator>(calibrationOptions),
-                  "Select the type of data, with or without calibration "
-                  "already applied. If Auto then the calibrated data is "
-                  "loaded if available, otherwise the raw data is loaded.");
   declareProperty("TwoThetaOffset", 0.0, "2 theta offset for D1B data, in degrees.");
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("AlignTubes", true, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("AlignTubes", false, Direction::Input),
                   "Apply vertical and horizontal alignment of tubes as defined in IPF");
   declareProperty("ConvertAxisAndTranspose", false,
                   "Whether to convert the spectrum axis to 2theta and "
@@ -113,10 +108,6 @@ void LoadILLDiffraction::init() {
 
 std::map<std::string, std::string> LoadILLDiffraction::validateInputs() {
   std::map<std::string, std::string> issues;
-  if (getPropertyValue("DataType") == "Calibrated" && !containsCalibratedData(getPropertyValue("Filename"))) {
-    issues["DataType"] = "Calibrated data requested, but only raw data exists "
-                         "in this NeXus file.";
-  }
   return issues;
 }
 
@@ -158,17 +149,8 @@ void LoadILLDiffraction::loadDataScan() {
   NXEntry firstEntry = dataRoot.openFirstEntry();
   m_instName = firstEntry.getString("instrument/name");
   m_startTime = DateAndTime(LoadHelper::dateTimeInIsoFormat(firstEntry.getString("start_time")));
-  const std::string dataType = getPropertyValue("DataType");
-  const bool hasCalibratedData = containsCalibratedData(m_filename);
-  if (dataType != "Raw" && hasCalibratedData) {
-    m_useCalibratedData = true;
-  }
   // Load the data
-  std::string dataName;
-  if (dataType == "Raw" && hasCalibratedData)
-    dataName = "data_scan/detector_data/raw_data";
-  else
-    dataName = "data_scan/detector_data/data";
+  std::string dataName = "data_scan/detector_data/data";
   g_log.notice() << "Loading data from " + dataName;
   auto data = firstEntry.openNXDataSet<int>(dataName);
   data.load();
@@ -250,10 +232,7 @@ void LoadILLDiffraction::loadMetaData() {
   }
   mutableRun.addProperty("run_list", mutableRun.getPropertyValueAsType<int>("run_number"));
 
-  if (mutableRun.hasProperty("Detector.calibration_file")) {
-    if (getPropertyValue("DataType") == "Raw")
-      mutableRun.getProperty("Detector.calibration_file")->setValue("none");
-  } else
+  if (!mutableRun.hasProperty("Detector.calibration_file"))
     mutableRun.addProperty("Detector.calibration_file", std::string("none"));
 }
 
@@ -474,21 +453,6 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXInt &data, const NXDou
       acceptedIDs.insert(index);
   }
   std::vector<int> customDetectorIDs;
-  if (m_instName == "D2B" && !m_useCalibratedData) {
-    // this is the "Raw" case of D2B where data in NXS is filled in a 'snake' way: odd tubes are filled with
-    // data from the start, and the even ones from the end.
-    const auto pixelPerTube = data.dim2();
-    customDetectorIDs.resize(data.dim1() * pixelPerTube);
-    for (auto tubeNo = 0; tubeNo < data.dim1(); tubeNo++) {
-      for (auto pixelNo = 0; pixelNo < pixelPerTube; pixelNo++) {
-        const auto defaultSpectrumNo = tubeNo * pixelPerTube + pixelNo; // based-zero count of detectors
-        int index = defaultSpectrumNo + NUMBER_MONITORS; // direct filling order, shift by number of monitors
-        if (tubeNo % 2 != 0)
-          index += (pixelPerTube - 1) - 2 * pixelNo; // inverted order of pixels in odd numbered tubes
-        customDetectorIDs[defaultSpectrumNo] = index;
-      }
-    }
-  }
   // Assign detector counts
   LoadHelper::fillMovingWorkspace(m_outWorkspace, data, axis, NUMBER_MONITORS, acceptedIDs, customDetectorIDs,
                                   dimOrder);
@@ -814,20 +778,6 @@ void LoadILLDiffraction::setSampleLogs() {
   if (m_maxHeight != 0.) {
     run.addLogData(new PropertyWithValue<double>("MaxHeight", m_maxHeight));
   }
-}
-
-/**
- * Returns true if the file contains calibrated data
- *
- * @param filename The filename to check
- * @return True if the file contains calibrated data, false otherwise
- */
-bool LoadILLDiffraction::containsCalibratedData(const std::string &filename) const {
-  NexusDescriptor descriptor(filename);
-  // This is unintuitive, but if the file has calibrated data there are entries
-  // for 'data' and 'raw_data'. If there is no calibrated data only 'data' is
-  // present.
-  return descriptor.pathExists("/entry0/data_scan/detector_data/raw_data");
 }
 
 /**

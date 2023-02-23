@@ -9,10 +9,9 @@
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "IndirectSettingsHelper.h"
+#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidQtWidgets/Common/SignalBlocker.h"
-#include "MantidQtWidgets/Plotting/RangeSelector.h"
 
 #include <QFileInfo>
 
@@ -107,6 +106,7 @@ InelasticDataManipulationElwinTab::InelasticDataManipulationElwinTab(QWidget *pa
 
   setOutputPlotOptionsPresenter(
       std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra));
+  connect(m_view.get(), SIGNAL(showMessageBox(const QString &)), this, SIGNAL(showMessageBox(const QString &)));
   connect(m_view.get(), SIGNAL(addDataClicked()), this, SLOT(showAddWorkspaceDialog()));
   connect(m_view.get(), SIGNAL(removeDataClicked()), this, SLOT(removeSelectedData()));
 
@@ -201,19 +201,25 @@ void InelasticDataManipulationElwinTab::runWorkspaceInput() {
   std::string inputGroupWsName = "IDA_Elwin_Input";
 
   // Load input files
-  std::string inputWorkspacesString = m_view->getCurrentPreview().toStdString();
+  std::string inputWorkspacesString;
+  for (WorkspaceID i = 0; i < m_dataModel->getNumberOfWorkspaces(); ++i) {
 
+    auto workspace = m_dataModel->getWorkspace(i);
+    auto spectra = m_dataModel->getSpectra(i);
+    auto spectraWS = m_model->createGroupedWorkspaces(workspace, spectra);
+    inputWorkspacesString += spectraWS + ",";
+  }
   // Group input workspaces
   m_model->setupGroupAlgorithm(m_batchAlgoRunner, inputWorkspacesString, inputGroupWsName);
 
-  m_model->setupElasticWindowMultiple(m_batchAlgoRunner, m_view->getCurrentPreview(), inputGroupWsName,
+  m_model->setupElasticWindowMultiple(m_batchAlgoRunner, "ELWIN_workspace_output", inputGroupWsName,
                                       m_view->getLogName(), m_view->getLogValue());
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(unGroupInput(bool)));
   m_batchAlgoRunner->executeBatchAsync();
 
   // Set the result workspace for Python script export
-  m_pythonExportWsName = (m_view->getCurrentPreview() + "_elwin_eq2").toStdString();
+  m_pythonExportWsName = "ELWIN_workspace_output_elwin_eq2";
 }
 
 /**

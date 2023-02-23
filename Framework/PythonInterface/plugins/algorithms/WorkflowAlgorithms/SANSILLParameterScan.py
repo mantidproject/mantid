@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import *
+from mantid.api import DataProcessorAlgorithm, FileAction, FileProperty, Progress, PropertyMode, WorkspaceProperty
 from mantid.kernel import IntBoundedValidator, Direction
 from mantid.simpleapi import *
 from SANSILLAutoProcess import needs_loading, needs_processing
@@ -75,7 +75,6 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
             logger.warning("PixelYMax value is too high. Reduced to {0}.".format(self.pixel_y_max))
 
     def PyInit(self):
-
         self.declareProperty(
             WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output, optional=PropertyMode.Optional),
             doc="The output workspace containing the 2D reduced data.",
@@ -125,15 +124,23 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
             doc="Maximal y-index taken in the integration. Default is based on D16B geometry.",
         )
 
+        self.copyProperties("CalculateEfficiency", ["MinThreshold", "MaxThreshold"])
+        # override default documentation of copied parameters to make them understandable by user
+        threshold_property = self.getProperty("MinThreshold")
+        threshold_property.setDocumentation("Minimum threshold for calculated efficiency.")
+        threshold_property = self.getProperty("MaxThreshold")
+        threshold_property.setDocumentation("Maximum threshold for calculated efficiency.")
+
         self.setPropertyGroup("SensitivityMap", "Options")
         self.setPropertyGroup("DefaultMaskFile", "Options")
         self.setPropertyGroup("NormaliseBy", "Options")
         self.setPropertyGroup("Observable", "Options")
         self.setPropertyGroup("PixelYMin", "Options")
         self.setPropertyGroup("PixelYMax", "Options")
+        self.setPropertyGroup("MinThreshold", "Options")
+        self.setPropertyGroup("MaxThreshold", "Options")
 
     def PyExec(self):
-
         self.setUp()
 
         _, load_ws_name = needs_loading(self.sample, "Load")
@@ -190,18 +197,18 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
             self.progress.report(0, "Loading default mask")
             LoadNexusProcessed(Filename=self.default_mask, OutputWorkspace=self.default_mask_ws)
 
-    def reduce(self, sorted_ws):
+    def reduce(self, sorted_ws: str):
         """
         Do the standard data reduction using SANSILLReduction
 
-        @param sorted_ws: the name of the sample workspace with X axis holding the sorted scanned parameter
+        Keyword arguments:
+        sorted_ws: the name of the sample workspace with X axis holding the sorted scanned parameter
         """
-
         process_absorber, absorber_name = needs_processing(self.absorber, "DarkCurrent")
         if process_absorber:
             self.progress.report(0, "Processing dark current")
             SANSILLReduction(
-                Run=self.absorber, ProcessAs="DarkCurrent", NormaliseBy=self.normalise, OutputWorkspace=absorber_name, Version=2
+                Runs=self.absorber, ProcessAs="DarkCurrent", NormaliseBy=self.normalise, OutputWorkspace=absorber_name, Version=2
             )
 
         process_container, container_name = needs_processing(self.container, "Container")
@@ -209,12 +216,11 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         if process_container:
             self.progress.report(0, "Processing container")
             SANSILLReduction(
-                Run=self.container,
+                Runs=self.container,
                 ProcessAs="EmptyContainer",
                 OutputWorkspace=container_name,
-                AbsorberInputWorkspace=absorber_name,
-                CacheSolidAngle=True,
-                DefaultMaskWorkspace=self.default_mask,
+                DarkCurrentWorkspace=absorber_name,
+                DefaultMaskWorkspace=self.default_mask_ws,
                 NormaliseBy=self.normalise,
                 Version=2,
             )
@@ -231,14 +237,17 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
             OutputWorkspace=sorted_ws,
             startProgress=0.8,
             endProgress=0.95,
+            MinThreshold=self.getProperty("MinThreshold").value,
+            MaxThreshold=self.getProperty("MaxThreshold").value,
             Version=2,
         )
 
-    def group_detectors(self, ws):
+    def group_detectors(self, ws: str):
         """
         Average each tube / wire value of the detector.
 
-        @param ws: the name of the ws to group
+        Keyword arguments:
+        ws: the name of the ws to group
         """
         instrument = mtd[ws].getInstrument()
         detector = instrument.getComponentByName("detector")
@@ -254,14 +263,16 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         GroupDetectors(InputWorkspace=ws, OutputWorkspace=self.output2D, GroupingPattern=grouping, Behaviour="Average")
 
 
-def create_detector_grouping(y_min, y_max, detector_width, detector_height):
+def create_detector_grouping(y_min: int, y_max: int, detector_width: int, detector_height: int) -> str:
     """
     Create the pixel grouping for the detector. Shape is assumed to be D16's.
     The pixel grouping consists of the vertical columns of pixels of the detector.
-    :param y_min: index of the first line to take on each column.
-    :param y_max: index of the last line to take on each column.
-    :param detector_width: the total number of column of pixel on the detector.
-    :param detector_height: the total number of lines of pixel on the detector.
+
+    Keyword arguments:
+    y_min: index of the first line to take on each column.
+    y_max: index of the last line to take on each column.
+    detector_width: the total number of column of pixel on the detector.
+    detector_height: the total number of lines of pixel on the detector.
     """
     grouping = []
     for i in range(detector_width):

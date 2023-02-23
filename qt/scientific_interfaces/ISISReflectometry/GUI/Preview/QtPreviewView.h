@@ -40,8 +40,8 @@ public:
   QLayout *getDockedWidgetsLayout() noexcept override;
   MantidWidgets::IImageInfoWidget *getImageInfo() noexcept override;
 
-  void enableApplyButton() override;
-  void disableApplyButton() override;
+  void enableMainWidget() override;
+  void disableMainWidget() override;
 
   std::string getWorkspaceName() const override;
   double getAngle() const override;

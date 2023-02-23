@@ -4,22 +4,13 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-// Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 
-// Main Module Header
 #include "MantidCurveFitting/Functions/FunctionQDepends.h"
-// Mantid Headers from the same project
-// N/A
-// Mantid headers from other projects
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/UnitConversion.h"
-// third party libraries
-// N/A
-// standard library
-// N/A
 
 using Attr = Mantid::API::IFunction::Attribute;
 

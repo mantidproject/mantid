@@ -45,6 +45,7 @@
 #include <QAction>
 #include <QApplication>
 #include <QCheckBox>
+#include <QCoreApplication>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
@@ -632,8 +633,8 @@ void InstrumentWidgetMaskTab::setProperties() {
   }
 
   // point properties
-  QStringList pointProperties = m_instrWidget->getSurface()->getCurrentPointNames();
-  foreach (QString name, pointProperties) {
+  const QStringList pointProperties = m_instrWidget->getSurface()->getCurrentPointNames();
+  for (const auto &name : pointProperties) {
     QtProperty *point = m_groupManager->addProperty(name);
     QtProperty *prop_x = addDoubleProperty("x");
     QtProperty *prop_y = addDoubleProperty("y");
@@ -646,8 +647,8 @@ void InstrumentWidgetMaskTab::setProperties() {
   }
 
   // double properties
-  QStringList doubleProperties = m_instrWidget->getSurface()->getCurrentDoubleNames();
-  foreach (QString name, doubleProperties) {
+  const QStringList doubleProperties = m_instrWidget->getSurface()->getCurrentDoubleNames();
+  for (const auto &name : doubleProperties) {
     QtProperty *prop = addDoubleProperty(name);
     m_browser->addProperty(prop);
     m_doublePropertyMap[prop] = name;
@@ -1048,7 +1049,8 @@ void InstrumentWidgetMaskTab::saveMaskingToTableWorkspace(bool invertMask) {
 
     outputWS->setTitle("MaskBinTable");
   } else {
-    QMessageBox::critical(this, "MantidPlot - Error", "Algorithm ExtractMaskToTable fails to execute. ");
+    QMessageBox::critical(this, QCoreApplication::applicationName() + " Error",
+                          "Algorithm ExtractMaskToTable fails to execute. ");
   }
 }
 

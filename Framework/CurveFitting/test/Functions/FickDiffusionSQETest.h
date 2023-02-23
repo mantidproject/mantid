@@ -6,16 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-// Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
-// Main Module Header
-#include "MantidCurveFitting/Functions/FickDiffusionSQE.h"
-// Mantid Headers from the same project (n/a)
-// Mantid headers from other projects
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidCurveFitting/Functions/FickDiffusionSQE.h"
 #include <cxxtest/TestSuite.h>
-// third party library headers (n/a)
-// standard library headers (n/a)
 #include <numeric>
 #include <random>
 

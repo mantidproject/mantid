@@ -49,11 +49,8 @@ namespace MDAlgorithms {
 
 /** Creates instances of concrete transformations into multidimensional (MD)
   coordinates.
-  *
-  * See http://www.mantidproject.org/Writing_custom_ConvertTo_MD_transformation
-  for detailed description of this
-  * class place in the algorithms hierarchy.
-  *
+  See dev-docs/source/WritingCustomConvertToMDTransformation.rst for detailed description of this
+  class place in the algorithms hierarchy.
 
     The factory is a singleton that hands out shared pointers to the base
   MDTransfornation class.
@@ -62,9 +59,6 @@ namespace MDAlgorithms {
     instance of a given transformation is ever created, and a pointer to that
   same instance
     is passed out each time the transformation is requested.
-
-
-    @date 17/05/2012
 */
 class MANTID_MDALGORITHMS_DLL MDTransfFactoryImpl : public Kernel::DynamicFactory<MDTransfInterface> {
 public:

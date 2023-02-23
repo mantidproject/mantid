@@ -5,13 +5,13 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import (
-    PythonAlgorithm,
+    DataProcessorAlgorithm,
     MatrixWorkspaceProperty,
-    WorkspaceProperty,
     MultipleFileProperty,
     PropertyMode,
     Progress,
     WorkspaceGroup,
+    WorkspaceProperty,
     FileAction,
 )
 from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, LogicOperator, PropertyCriterion, StringListValidator
@@ -22,8 +22,7 @@ import numpy as np
 import os
 
 
-class SANSILLReduction(PythonAlgorithm):
-
+class SANSILLReduction(DataProcessorAlgorithm):
     _mode = "Monochromatic"
     _instrument = None
 
@@ -105,7 +104,6 @@ class SANSILLReduction(PythonAlgorithm):
             MaskDetectors(Workspace=ws, MaskedWorkspace=masked_ws)
 
     def PyInit(self):
-
         self.declareProperty(
             MultipleFileProperty("Run", action=FileAction.OptionalLoad, extensions=["nxs"], allow_empty=True), doc="File path of run(s)."
         )
@@ -273,6 +271,13 @@ class SANSILLReduction(PythonAlgorithm):
             validator=FloatBoundedValidator(lower=0.0),
             doc="Wavelength set for the data, will override nexus, intended for D16 reduction.",
         )
+
+        self.copyProperties("CalculateEfficiency", ["MinThreshold", "MaxThreshold"])
+        # override default documentation of copied parameters to make them understandable by user
+        threshold_property = self.getProperty("MinThreshold")
+        threshold_property.setDocumentation("Minimum threshold for calculated efficiency.")
+        threshold_property = self.getProperty("MaxThreshold")
+        threshold_property.setDocumentation("Maximum threshold for calculated efficiency.")
 
     def _normalise(self, ws, monID=None):
         """
@@ -485,7 +490,12 @@ class SANSILLReduction(PythonAlgorithm):
         @param ws: input workspace
         @param sensitivity_out: sensitivity output map
         """
-        CalculateEfficiency(InputWorkspace=ws, OutputWorkspace=sensitivity_out)
+        CalculateEfficiency(
+            InputWorkspace=ws,
+            OutputWorkspace=sensitivity_out,
+            MinThreshold=self.getProperty("MinThreshold").value,
+            MaxThreshold=self.getProperty("MaxThreshold").value,
+        )
         mtd[sensitivity_out].getRun().addProperty("ProcessedAs", "Sensitivity", True)
         self.setProperty("SensitivityOutputWorkspace", mtd[sensitivity_out])
 

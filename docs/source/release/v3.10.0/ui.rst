@@ -60,7 +60,7 @@ Plotting Improvements
 
 +----------------------------------------------+-------------------------------------------------+
 |Plots of a temperature ramp on WISH using "Temp" selected as the log:                           |
-|More details `here <https://www.mantidproject.org/MBC_Displaying_data_in_multiple_workspaces>`_ |
+|More details :ref:`here <05_plotting_advanced>`_                                                |
 +----------------------------------------------+-------------------------------------------------+
 | .. image:: ../../images/ArtWaterfallT1.png   |   .. image:: ../../images/ArtSurfacePlotT1.png  |
 +----------------------------------------------+-------------------------------------------------+

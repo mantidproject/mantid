@@ -1,1 +1,0 @@
-* Fix issue where :ref:`LoadIsawPeaks <algm-LoadIsawPeaks>` fails when loading peaks with modulation vectors that cannot recover modulated UB matrix.

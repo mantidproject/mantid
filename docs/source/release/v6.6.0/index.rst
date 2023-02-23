@@ -4,19 +4,26 @@
 Mantid 6.6.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
-   :class: screenshot
-   :width: 385px
+.. figure:: ../../images/6_6_release/MajorChanges.png
+   :class: image
+   :width: 600px
    :align: right
 
 .. contents:: Table of Contents
    :local:
 
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
-
 We are proud to announce version 6.6.0 of Mantid.
 
-**TODO: Add paragraph summarizing big changes**
+This release includes a wide array of updates, bugfixes, and new features, which build on the functionality of Mantid, including an upgrade to version 3.6 of matplotlib.
+
+In addition to many improvements we are delighted to announce some new features including:
+
+
+- A significant :ref:`ALFView-ref` upgrade, which enhances usability, streamlines the workflow, and delivers a more intuitive user experience.
+- The addition of a :ref:`Reduction Preview <refl_preview>` tab to the ISIS Reflectometry interface.
+- The new :ref:`interface-inelastic-data-manipulation` interface, which has been created from the old Data Reduction interface and two of the tabs from the Analysis interface.
+- New :ref:`plots using matplotlib 3D<Mesh_Plots>` for viewing the Sample Shape of a workspace.
+
 
 These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the

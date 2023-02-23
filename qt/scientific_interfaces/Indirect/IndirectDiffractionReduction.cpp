@@ -13,7 +13,8 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiFileNameParser.h"
 #include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
-#include "MantidQtWidgets/Common/SignalBlocker.h"
+
+#include <QSignalBlocker>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -616,7 +617,7 @@ void IndirectDiffractionReduction::instrumentSelected(const QString &instrumentN
 }
 
 void IndirectDiffractionReduction::validateSpectrumMin(int value) {
-  MantidQt::API::SignalBlocker blocker(m_uiForm.spSpecMin);
+  QSignalBlocker blocker(m_uiForm.spSpecMin);
 
   auto const spectraMax = m_uiForm.spSpecMax->value();
   if (value > spectraMax)
@@ -624,7 +625,7 @@ void IndirectDiffractionReduction::validateSpectrumMin(int value) {
 }
 
 void IndirectDiffractionReduction::validateSpectrumMax(int value) {
-  MantidQt::API::SignalBlocker blocker(m_uiForm.spSpecMax);
+  QSignalBlocker blocker(m_uiForm.spSpecMax);
 
   auto const spectraMin = m_uiForm.spSpecMin->value();
   if (value < spectraMin)

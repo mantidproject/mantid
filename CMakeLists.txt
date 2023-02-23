@@ -150,9 +150,11 @@ if(COVERAGE)
   coverage_turn_on()
 endif()
 
+set(QT_MIN_VERSION 5.15)
+
 if(ENABLE_WORKBENCH OR BUILD_MANTIDQT)
   find_package(
-    Qt5
+    Qt5 ${QT_MIN_VERSION}
     COMPONENTS Core Gui Widgets OpenGL Test
     REQUIRED
   )

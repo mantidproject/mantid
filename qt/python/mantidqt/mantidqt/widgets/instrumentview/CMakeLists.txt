@@ -3,7 +3,7 @@
 set(INSTRUMENTVIEW_INC_DIR ../../widgets/instrumentview/inc)
 set(_header_depends ${INSTRUMENTVIEW_INC_DIR}/InstrumentWidget.h)
 
-# The wrapper is only defined for Qt5 and does not support legacy Qt4 mode
+# The wrapper is only defined for Qt5
 mtd_add_sip_module(
   MODULE_NAME _instrumentviewqt5
   TARGET_NAME mantidqt_instrumentviewqt5

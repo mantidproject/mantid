@@ -13,6 +13,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -153,6 +154,19 @@ MatrixWorkspace_sptr convertUnits(MatrixWorkspace_sptr const &inputWorkspace, st
   return outputWorkspace;
 }
 
+MatrixWorkspace_sptr rebinToWorkspace(MatrixWorkspace_sptr const &workspaceToRebin,
+                                      MatrixWorkspace_sptr const &workspaceToMatch) {
+  auto alg = AlgorithmManager::Instance().create("RebinToWorkspace");
+  alg->initialize();
+  alg->setAlwaysStoreInADS(false);
+  alg->setProperty("WorkspaceToRebin", workspaceToRebin);
+  alg->setProperty("WorkspaceToMatch", workspaceToMatch);
+  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
+  alg->execute();
+  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
+  return outputWorkspace;
+}
+
 MatrixWorkspace_sptr scaleX(MatrixWorkspace_sptr const &inputWorkspace, double const factor) {
   auto alg = AlgorithmManager::Instance().create("ScaleX");
   alg->initialize();
@@ -165,49 +179,87 @@ MatrixWorkspace_sptr scaleX(MatrixWorkspace_sptr const &inputWorkspace, double c
   return outputWorkspace;
 }
 
+MatrixWorkspace_sptr replaceSpecialValues(MatrixWorkspace_sptr const &inputWorkspace) {
+  auto alg = AlgorithmManager::Instance().create("ReplaceSpecialValues");
+  alg->initialize();
+  alg->setAlwaysStoreInADS(false);
+  alg->setProperty("InputWorkspace", inputWorkspace);
+  alg->setProperty("InfinityValue", 0.0);
+  alg->setProperty("NaNValue", 1.0);
+  alg->setProperty("CheckErrorAxis", true);
+  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
+  alg->execute();
+  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
+  return outputWorkspace;
+}
+
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
 
-ALFInstrumentModel::ALFInstrumentModel() : m_tubes() { loadEmptyInstrument("ALF", loadedWsName()); }
+ALFInstrumentModel::ALFInstrumentModel() : m_sample(), m_vanadium(), m_tubes() {
+  loadEmptyInstrument("ALF", loadedWsName());
+}
 
 /*
- * Loads data into the ALFView. Normalises and converts to DSpacing if necessary.
- * @param filename:: The filepath to the ALFData
- * @return An optional error message
+ * Loads the provided ALF file and normalises it by current.
+ * @param filename:: The filepath to the ALF data
+ * @return The loaded and normalised workspace
  */
-std::optional<std::string> ALFInstrumentModel::loadAndTransform(std::string const &filename) {
+MatrixWorkspace_sptr ALFInstrumentModel::loadAndNormalise(std::string const &filename) {
   auto loadedWorkspace = load(filename);
 
   if (!isALFData(loadedWorkspace)) {
-    return "The loaded data is not from the ALF instrument";
+    throw std::invalid_argument("The loaded data is not from the ALF instrument");
   }
 
-  if (!isAxisDSpacing(loadedWorkspace)) {
-    loadedWorkspace = convertUnits(normaliseByCurrent(loadedWorkspace), "dSpacing");
-  }
-
-  ADS.addOrReplace(loadedWsName(), loadedWorkspace);
-  return std::nullopt;
+  return normaliseByCurrent(loadedWorkspace);
 }
 
 /*
- * Retrieves the run number from the currently loaded workspace.
+ * Normalises the sample by the vanadium if a vanadium has been loaded. Converts the result to dSpacing if it is not
+ * already in these units. Adds the resulting workspace to the ADS.
  */
-std::size_t ALFInstrumentModel::runNumber() const {
-  auto const loadedName = loadedWsName();
-  if (!ADS.doesExist(loadedName)) {
-    return 0u;
+void ALFInstrumentModel::generateLoadedWorkspace() {
+  if (!m_sample) {
+    return;
   }
 
-  if (auto workspace = ADS.retrieveWS<MatrixWorkspace>(loadedName)) {
-    return static_cast<std::size_t>(workspace->getRunNumber());
+  // Rebin the vanadium to match the sample binning if the bins do not match
+  if (m_vanadium && !WorkspaceHelpers::matchingBins(*m_sample, *m_vanadium)) {
+    m_vanadium = rebinToWorkspace(m_vanadium, m_sample);
   }
-  return 0u;
+
+  // Normalise the sample using the vanadium if it is provided
+  auto const normalised = m_vanadium ? replaceSpecialValues(m_sample / m_vanadium) : m_sample;
+  // Convert the normalisation result to dSpacing, and add it to the ADS
+  auto const normalisedDSpacing = !isAxisDSpacing(normalised) ? convertUnits(normalised, "dSpacing") : normalised;
+  ADS.addOrReplace(loadedWsName(), normalisedDSpacing);
+}
+
+void ALFInstrumentModel::setSample(MatrixWorkspace_sptr const &sample) { m_sample = sample; }
+
+void ALFInstrumentModel::setVanadium(MatrixWorkspace_sptr const &vanadium) { m_vanadium = vanadium; }
+
+/*
+ * Retrieves the sample run number from the currently loaded sample workspace.
+ */
+std::size_t ALFInstrumentModel::sampleRun() const { return runNumber(m_sample); }
+
+/*
+ * Retrieves the vanadium run number from the currently loaded vanadium workspace.
+ */
+std::size_t ALFInstrumentModel::vanadiumRun() const { return runNumber(m_vanadium); }
+
+std::size_t ALFInstrumentModel::runNumber(Mantid::API::MatrixWorkspace_sptr const &workspace) const {
+  if (!workspace) {
+    return 0u;
+  }
+  return static_cast<std::size_t>(workspace->getRunNumber());
 }
 
 bool ALFInstrumentModel::setSelectedTubes(std::vector<DetectorTube> tubes) {
-  // If the number of tubes is different then we need definitely need to update the stored tubes
+  // If the number of tubes is different then we definitely need to update the stored tubes
   if (tubes.size() != m_tubes.size()) {
     m_tubes = std::move(tubes);
     return true;

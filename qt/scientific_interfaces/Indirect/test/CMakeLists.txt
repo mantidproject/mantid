@@ -23,6 +23,7 @@ set(TEST_FILES
     IndirectSettingsModelTest.h
     IndirectSettingsPresenterTest.h
     InelasticDataManipulationElwinTabModelTest.h
+    InelasticDataManipulationIqtTabModelTest.h
     InelasticDataManipulationMomentsTabModelTest.h
     InelasticDataManipulationSqwTabModelTest.h
     InelasticDataManipulationSymmetriseTabModelTest.h

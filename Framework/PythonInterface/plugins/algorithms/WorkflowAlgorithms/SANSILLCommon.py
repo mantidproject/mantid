@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import CropToComponent, logger, mtd
-from mantid.api import WorkspaceGroup
+from mantid.api import WorkspaceGroup, MatrixWorkspace
 from enum import IntEnum
 from math import fabs
 from os import path
@@ -184,6 +184,24 @@ def create_name(ws):
     elif WAVELENGTH_LOG2 in logs:
         wavelength = logs[WAVELENGTH_LOG2].value
     return "d{:.1f}m_c{:.1f}m_w{:.1f}A".format(distance, collimation, wavelength)
+
+
+def check_axis_match(ws1: MatrixWorkspace, ws2: MatrixWorkspace) -> bool:
+    """
+    Checks if the axis binning between the two workspaces are close enough
+
+    Args:
+        ws1 (MatrixWorkspace): left-hand side of the comparison
+        ws2 (MatrixWorkspace): right-hand side of the comparison
+    Return:
+        Whether the workspace axes are close enough to each other
+    """
+    ax1 = ws1.readX(0)
+    ax2 = ws2.readX(0)
+    tolerance = 0.01  # no unit
+    diff = abs(ax2 - ax1)
+    if any(diff > tolerance):
+        logger.warning(f"Binning inconsistent out of tolerance between: {ws1.name()} and {ws2.name()}.")
 
 
 def check_distances_match(ws1, ws2):

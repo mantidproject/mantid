@@ -6,14 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-// Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
-// Mantid Headers from the same project
-#include "MantidCurveFitting/Functions/ElasticDiffRotDiscreteCircle.h"
-#include "MantidCurveFitting/Functions/InelasticDiffRotDiscreteCircle.h"
-// Mantid headers from other projects
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ImmutableCompositeFunction.h"
-// 3rd party library headers (N/A)
+#include "MantidCurveFitting/Functions/ElasticDiffRotDiscreteCircle.h"
+#include "MantidCurveFitting/Functions/InelasticDiffRotDiscreteCircle.h"
 // standard library (N/A)
 
 namespace Mantid {

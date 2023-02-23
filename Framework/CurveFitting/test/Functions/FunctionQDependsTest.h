@@ -6,23 +6,16 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-// Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
-
-// Mantid Headers from the same project
-#include "MantidCurveFitting/Functions/FunctionQDepends.h"
-// Mantid headers from other projects
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidCurveFitting/Functions/FunctionQDepends.h"
 #include "MantidDataHandling/LoadNexus.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/EmptyValues.h"
-// 3rd party library headers
 #include <cxxtest/TestSuite.h>
-// Standard library
-// N/A
 
 using Attr = Mantid::API::IFunction::Attribute;
 

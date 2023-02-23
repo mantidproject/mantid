@@ -11,7 +11,7 @@ Summary
 #######
 
 This page describes guidelines that should be followed when
-implementing an interface in MantidPlot. The aim is to encourage a
+implementing an interface in MantidWorkbench. The aim is to encourage a
 consistent approach to developing interfaces.
 
 .. _MVPDesignIntro:
@@ -284,7 +284,7 @@ structured to avoid placing all of the code in a single file,
 i.e. separate files for different classes etc. Sub packages are
 recommended for grouping together logical sets of files.
 
-For the interface to appear from within MantidPlot create a startup
+For the interface to appear from within MantidWorkbench, create a startup
 python file under the ``Code/Mantid/scripts`` directory. Assuming the code
 for the interface is in a directory called foo_app then the startup
 file would look like:
@@ -307,7 +307,7 @@ Designer
 As with the C++ GUI the Qt Designer should be used for layouts of all
 widgets and the main interface. It is recommended that the ``.ui``
 files be placed in a ``ui`` subdirectory of the interface package. To
-generate PyQt code from the UI xml you will need to run the ``pyuic4``
-program that ships with PyQt4. It is also recommended that the output
+generate PyQt code from the UI xml you will need to run the ``pyuic5``
+program that ships with PyQt5. It is also recommended that the output
 file is named, using the ``-o`` argument, ``ui_[widgetname].py`` and
 placed in the ``ui`` subdirectory.

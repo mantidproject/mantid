@@ -331,7 +331,7 @@ Below there is a number of full reduction examples utilizing :ref:`Reflectometry
 
 
 D17 sample angle, incoherent summation
--------------------------------------
+--------------------------------------
 
 The example below shows a silicon oxide reduction with coherent summation at two different angular positions (detector-defined) of a quartz sample measured by D17 instrument in the cycle 192.
 

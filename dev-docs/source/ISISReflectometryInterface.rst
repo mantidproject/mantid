@@ -72,11 +72,11 @@ The following design principles should be adhered to when developing the GUI. If
 Adhere to MVP
 #############
 
-To ensure the GUI can be easily tested we follow the MVP design pattern. There is general guidance on this `here <https://developer.mantidproject.org/MVPDesign.html>`_.
+To ensure the GUI can be easily tested we follow the MVP design pattern. There is general guidance on this :ref:`here <MVPDesign>`.
 
 The view cannot easily be tested, so the aim of MVP is to keep the view as simple as possible so that testing it is not necessary. Typically any user action on the view results in a notification to the presenter and is handled from there (even if that is just an update back to the view). Even simple things like which buttons are enabled on startup are controlled via the presenter rather than setting defaults in the view itself.
 
-It can be tempting to add one line to toggle or update something in the view without wiring up the presenter. But these quick fixes can quickly introduce bugs as they accumulate. The first question to ask yourself before making any change is: how will I unit test it? In fact, we recommend you follow `test driven development <https://www.mantidproject.org/TDD>`_ and write the unit tests first.
+It can be tempting to add one line to toggle or update something in the view without wiring up the presenter. But these quick fixes can quickly introduce bugs as they accumulate. The first question to ask yourself before making any change is: how will I unit test it? In fact, we recommend you follow `test driven development <https://en.wikipedia.org/wiki/Test-driven_development>`_ and write the unit tests first.
 
 Note that the views should not have a direct pointer to their presenters, so the notification is done via a subscriber interface (see `Subscriber pattern`_ for an example). The only exception is the :code:`QtMainWindowView` (see `Dependency inversion`_), but notifications should still be done via the subscriber interface. This helps to avoid accidentally introducing logic into the view about what should happen on an event and instead just notify that an event happened. It could also be easily extended to support multiple notifyees of different types, such as different subscribed presenters.
 

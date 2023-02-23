@@ -54,7 +54,7 @@ void NexusTester::init() {
   declareProperty("HDFCacheSize", 2000000, "HDF cache size, in bytes");
   declareProperty("ClearDiskCache", false,
                   "Clear the linux disk cache before loading.\n"
-                  "Only works on linux AND you need to run MantidPlot in sudo mode (!).");
+                  "Only works on linux AND you need to run Mantid in sudo mode (!).");
 
   std::vector<std::string> types{"Zeros", "Incrementing Numbers", "Random Numbers"};
   declareProperty("FakeData", "Incrementing Numbers", std::make_shared<StringListValidator>(types),

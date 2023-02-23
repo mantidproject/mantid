@@ -86,13 +86,12 @@ void ScopedWorkspace::set(const Workspace_sptr &newWS) {
 }
 
 /**
- * Generates a tricky name which is unique within ADS.
+ * Generates a unique workspace name. The double underscore causes it to be hidden in ADS.
  */
 std::string ScopedWorkspace::generateUniqueName() {
   std::string newName;
 
   do {
-    // __ makes it hidden in the MantidPlot
     newName = "__ScopedWorkspace_" + randomString(NAME_LENGTH);
   } while (AnalysisDataService::Instance().doesExist(newName));
 

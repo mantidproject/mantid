@@ -149,7 +149,7 @@ class RectanglesManager(QWidget):
         else:
             # set the table to the width of the columns + the width of the separation between them
             # + some offset which I think comes from the row numbers
-            self.table.setFixedWidth(sum(self.table.columnWidth(i) for i in range(self.table.columnCount())) + 2 + 11)
+            self.table.setFixedWidth(sum(self.table.columnWidth(i) for i in range(self.table.columnCount())) + 2 + 34)
 
     def get_current_rectangle(self) -> patches.Rectangle:
         """
@@ -201,7 +201,6 @@ class RectangleController:
     NUMBER_OF_ROWS = 5
 
     def __init__(self, x0: float = 0, y0: float = 0, x1: float = 0, y1: float = 0):
-
         self.header = None
         self.set_header_items()
 

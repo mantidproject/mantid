@@ -443,6 +443,11 @@ private slots:
   /// Clear the Fit status display
   void clearFitResultStatus();
 
+public: // functions declared public for testing
+  QString getOldExpressionAsString(const QString &parameterName) const;
+  /// Create CompositeFunction from string
+  void createCompositeFunction(const QString &str = "");
+
 protected:
   void modifyFitMenu(QAction *fitAction, bool enabled);
   virtual void populateFitMenuButton(QSignalMapper *fitMapper, QMenu *fitMenu);
@@ -475,8 +480,6 @@ protected:
   void minimizerChanged();
   /// Do the fitting
   void doFit(int maxIterations);
-  /// Create CompositeFunction from string
-  void createCompositeFunction(const QString &str = "");
   /// Catches unexpected not found exceptions
   Mantid::API::IFunction_sptr tryCreateFitFunction(const QString &str);
   /// Create CompositeFunction from pointer

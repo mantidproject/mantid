@@ -4,18 +4,10 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-// Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
-// Main Module Header
 #include "MantidCurveFitting/Functions/TeixeiraWaterSQE.h"
-// Mantid Headers from the same project
-// N/A
-// Mantid headers from other projects
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/Jacobian.h"
-// third party library headers
-// N/A
-// standard library headers
 #include <cmath>
 #include <limits>
 

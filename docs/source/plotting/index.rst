@@ -504,9 +504,9 @@ The following methods show how to Load, Convert from MantidPlot format, Create f
   Listed_CustomCmap_r = ListedColormap(Reverse, name=(Cmap_Name + '_r') )
   plt.register_cmap(name=(Cmap_Name + '_r'), cmap= Listed_CustomCmap_r)
 
-- If you have a Colormap file in a MantidPlot format (N by 3) with all values between 0 and 255, firstly **rename the file extension from .map to .txt**, then use:
+- If you have a Colormap file in a Mantid format (N by 3) with all values between 0 and 255, firstly **rename the file extension from .map to .txt**, then use:
 
-*1b. Convert MantidPlot Colormap and Register*
+*1b. Convert Mantid Colormap and Register*
 
 .. code-block:: python
 

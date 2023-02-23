@@ -151,7 +151,7 @@ std::ostream &operator<<(std::ostream &os, const FitParameter &f) {
      11th onwards (10-) : read lookup table values
 
   Information about fitting \<parameter\> can be found on
-  www.mantidproject.org/IDF.
+  docs/source/concepts/InstrumentDefinitionFile.rst
   Note also printSelf() does the reverse of the this method, i.e. print of the
   information
   of a parameter as listed above.

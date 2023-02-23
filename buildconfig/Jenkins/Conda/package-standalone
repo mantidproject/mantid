@@ -41,7 +41,6 @@ if [[ $OSTYPE == "msys"* ]]; then
         exit 1
     fi
 fi
-EXPECTED_MAMBAFORGE_PATH=$WORKSPACE/mambaforge # Install into the WORKSPACE_DIR
 
 # Parse options
 STANDALONE_PACKAGE_SUFFIX=
@@ -71,7 +70,7 @@ conda index $LOCAL_CHANNEL_PATH
 
 # Jenkins Pipeline expects packages in the root workspace directory
 cd $WORKSPACE
-PACKAGING_SCRIPTS_DIR=$WORKSPACE/installers/conda
+PACKAGING_SCRIPTS_DIR=$SCRIPT_DIR/../../../installers/conda
 LOCAL_CHANNEL=file://$LOCAL_CHANNEL_PATH
 PACKAGING_ARGS="-c ${LOCAL_CHANNEL}"
 if [ -n "${STANDALONE_PACKAGE_SUFFIX}" ]; then

@@ -29,7 +29,7 @@ mantidqt.python_interfaces_io_registry = Engineering_Diffraction_register.py
 framework.plugins.directory = @FRAMEWORK_PLUGINS_DIR@
 
 # Libraries to skip. The strings are searched for when loading libraries so they don't need to be exact
-framework.plugins.exclude = Qt4;Qt5
+framework.plugins.exclude = Qt5
 
 # Where to find Mantid Qt plugin libraries
 mantidqt.plugins.directory = @QT_PLUGINS_DIR@

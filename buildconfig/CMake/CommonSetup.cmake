@@ -30,6 +30,11 @@ set(TESTING_TIMEOUT
     CACHE STRING "Timeout in seconds for each test (default 1200=20minutes)"
 )
 
+# ######################################################################################################################
+# Calculate version number
+# ######################################################################################################################
+include(VersionNumber)
+
 # if we are building the framework or mantidqt we need these
 if(BUILD_MANTIDFRAMEWORK OR BUILD_MANTIDQT)
   find_package(CxxTest)
@@ -108,7 +113,6 @@ if(BUILD_MANTIDFRAMEWORK)
     set(HDF5_LIBRARIES hdf5::hdf5_cpp-shared hdf5::hdf5_hl-shared)
   elseif(CONDA_ENV)
     # We'll use the cmake finder
-    find_package(ZLIB REQUIRED)
     find_package(
       HDF5 MODULE
       COMPONENTS C CXX HL
@@ -117,7 +121,6 @@ if(BUILD_MANTIDFRAMEWORK)
     set(HDF5_LIBRARIES hdf5::hdf5_cpp hdf5::hdf5)
     set(HDF5_HL_LIBRARIES hdf5::hdf5_hl)
   else()
-    find_package(ZLIB REQUIRED)
     find_package(
       HDF5 MODULE
       COMPONENTS C CXX HL
@@ -132,150 +135,6 @@ if(ENABLE_WORKBENCH)
 endif()
 
 find_package(Doxygen) # optional
-
-# ######################################################################################################################
-# Look for Git. Used for version headers - faked if not found. Also makes sure our commit hooks are linked in the right
-# place.
-# ######################################################################################################################
-
-set(MtdVersion_WC_LAST_CHANGED_DATE Unknown)
-set(MtdVersion_WC_LAST_CHANGED_DATETIME 0)
-set(MtdVersion_WC_LAST_CHANGED_SHA Unknown)
-set(MtdVersion_WC_LAST_CHANGED_BRANCHNAME Unknown)
-set(NOT_GIT_REPO "Not")
-
-if(GIT_FOUND)
-  # Get the last revision
-  execute_process(
-    COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
-    OUTPUT_VARIABLE GIT_SHA_HEAD
-    ERROR_VARIABLE NOT_GIT_REPO
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-  )
-  if(NOT NOT_GIT_REPO) # i.e This is a git repository! "git describe" was originally used to produce this variable and
-                       # this prefixes the short SHA1 with a 'g'. We keep the same format here now that we use rev-parse
-    set(MtdVersion_WC_LAST_CHANGED_SHA "g${GIT_SHA_HEAD}")
-    # Get the date of the last commit
-    execute_process(
-      COMMAND ${GIT_EXECUTABLE} log -1 --format=format:%cD
-      OUTPUT_VARIABLE MtdVersion_WC_LAST_CHANGED_DATE
-      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    )
-    string(SUBSTRING ${MtdVersion_WC_LAST_CHANGED_DATE} 0 16 MtdVersion_WC_LAST_CHANGED_DATE)
-
-    execute_process(
-      COMMAND ${GIT_EXECUTABLE} log -1 --format=format:%H
-      OUTPUT_VARIABLE MtdVersion_WC_LAST_CHANGED_SHA_LONG
-      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    )
-
-    # getting the datetime (as iso8601 string) to turn into the patch string
-    execute_process(
-      COMMAND ${GIT_EXECUTABLE} log -1 --format=format:%ci
-      OUTPUT_VARIABLE MtdVersion_WC_LAST_CHANGED_DATETIME
-      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    )
-    if(MtdVersion_WC_LAST_CHANGED_DATETIME)
-      # split into "date time timezone"
-      string(REPLACE " " ";" LISTVERS ${MtdVersion_WC_LAST_CHANGED_DATETIME})
-      list(GET LISTVERS 0 ISODATE)
-      list(GET LISTVERS 1 ISOTIME)
-      list(GET LISTVERS 2 ISOTIMEZONE)
-
-      # turn the date into a number
-      string(REPLACE "-" "" ISODATE ${ISODATE})
-
-      # prepare the time
-      string(REGEX REPLACE "^([0-9]+:[0-9]+).*" "\\1" ISOTIME ${ISOTIME})
-      string(REPLACE ":" "" ISOTIME ${ISOTIME})
-
-      # convert the timezone into something that can be evaluated for math
-      if(ISOTIMEZONE STREQUAL "+0000")
-        set(ISOTIMEZONE "") # GMT do nothing
-      else()
-        string(SUBSTRING ${ISOTIMEZONE} 0 1 ISOTIMEZONESIGN)
-        if(ISOTIMEZONESIGN STREQUAL "+")
-          string(REPLACE "+" "-" ISOTIMEZONE ${ISOTIMEZONE})
-        else()
-          string(REPLACE "-" "+" ISOTIMEZONE ${ISOTIMEZONE})
-        endif()
-      endif()
-
-      # remove the timezone from the time to convert to GMT
-      math(EXPR ISOTIME "${ISOTIME}${ISOTIMEZONE}")
-
-      # deal with times crossing midnight this does not get the number of days in a month right or jan 1st/dec 31st
-      if(ISOTIME GREATER 2400)
-        math(EXPR ISOTIME "${ISOTIME}-2400")
-        math(EXPR ISODATE "${ISODATE}+1")
-      elseif(ISOTIME LESS 0)
-        math(EXPR ISOTIME "2400${ISOTIME}")
-        math(EXPR ISODATE "${ISODATE}-1")
-      endif()
-
-      set(MtdVersion_WC_LAST_CHANGED_DATETIME "${ISODATE}.${ISOTIME}")
-    endif()
-
-    # conda builds want to know about the branch being used otherwise the variable is "Unknown"
-    if(ENABLE_CONDA)
-      execute_process(
-        COMMAND ${GIT_EXECUTABLE} name-rev --name-only HEAD
-        OUTPUT_VARIABLE MtdVersion_WC_LAST_CHANGED_BRANCHNAME
-        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-      )
-    endif()
-
-    # ##################################################################################################################
-    # This part puts our hooks (in .githooks) into .git/hooks
-    # ##################################################################################################################
-    # First need to find the top-level directory of the git repository
-    execute_process(
-      COMMAND ${GIT_EXECUTABLE} rev-parse --show-toplevel
-      OUTPUT_VARIABLE GIT_TOP_LEVEL
-      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    )
-    # N.B. The variable comes back from 'git describe' with a line feed on the end, so we need to lose that
-    string(REGEX MATCH "(.*)[^\n]" GIT_TOP_LEVEL ${GIT_TOP_LEVEL})
-    # Prefer symlinks on platforms that support it so we don't rely on cmake running to be up-to-date On Windows, we
-    # have to copy the file
-    if(WIN32)
-      execute_process(
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GIT_TOP_LEVEL}/.githooks/commit-msg ${GIT_TOP_LEVEL}/.git/hooks
-      )
-    else()
-      execute_process(
-        COMMAND ${CMAKE_COMMAND} -E create_symlink ${GIT_TOP_LEVEL}/.githooks/commit-msg
-                ${GIT_TOP_LEVEL}/.git/hooks/commit-msg
-      )
-    endif()
-
-  endif()
-
-else()
-  # Just use a dummy version number and print a warning
-  message(STATUS "Git not found - using dummy revision number and date")
-endif()
-
-mark_as_advanced(MtdVersion_WC_LAST_CHANGED_DATE MtdVersion_WC_LAST_CHANGED_DATETIME)
-
-if(NOT NOT_GIT_REPO AND NOT CONDA_BUILD) # i.e This is a git repository!
-  # ####################################################################################################################
-  # Create the file containing the patch version number for use by cpack The patch number make have been overridden by
-  # VersionNumber so create the file used by cpack here
-  # ####################################################################################################################
-  configure_file(
-    ${GIT_TOP_LEVEL}/buildconfig/CMake/PatchVersionNumber.cmake.in
-    ${GIT_TOP_LEVEL}/buildconfig/CMake/PatchVersionNumber.cmake
-  )
-  include(PatchVersionNumber)
-endif()
-
-# ######################################################################################################################
-# Include the file that contains the version number This must come after the git business above because it can be used
-# to override the patch version number
-# ######################################################################################################################
-include(VersionNumber)
 
 # ######################################################################################################################
 # Look for OpenMP
@@ -301,10 +160,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # ######################################################################################################################
 # Setup ccache
 # ######################################################################################################################
-get_property(_is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
-if(NOT _is_multi_config)
-  include(CCacheSetup)
-endif()
+include(CCacheSetup)
 
 # ######################################################################################################################
 # Add compiler options if using gcc

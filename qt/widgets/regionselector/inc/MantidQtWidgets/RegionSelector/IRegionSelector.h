@@ -23,6 +23,7 @@ public:
   virtual void clearWorkspace() = 0;
   virtual void updateWorkspace(Mantid::API::Workspace_sptr const &workspace) = 0;
   virtual void addRectangularRegion(const std::string &regionType, const std::string &color) = 0;
+  virtual void deselectAllSelectors() = 0;
   virtual Selection getRegion(const std::string &regionType) = 0;
   virtual void cancelDrawingRegion() = 0;
 };

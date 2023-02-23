@@ -156,7 +156,7 @@ void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int
   auto counts = outputWorkspace->addColumn("int", "Counts");
   auto errors = outputWorkspace->addColumn("double", "Error");
   outputWorkspace->setRowCount(xLength); // One row per log value across the full range
-  // Set type for benefit of MantidPlot
+  // Set plot type
   logValues->setPlotType(1); // X
   counts->setPlotType(2);    // Y
   errors->setPlotType(5);    // E
@@ -193,8 +193,7 @@ void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int
   // Add a column for each of these 'other' logs
   for (auto &otherLog : otherLogs) {
     auto newColumn = outputWorkspace->addColumn("double", otherLog.first);
-    // For the benefit of MantidPlot, set these columns to be containing X
-    // values
+    // Set these columns to be containing X values
     newColumn->setPlotType(1);
   }
 
@@ -203,7 +202,7 @@ void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int
   for (int value = minVal; value <= maxVal; ++value) {
     const int row = value - minVal;
     // Create a filter giving the times when this log has the current value
-    TimeSplitterType filter;
+    SplittingIntervalVec filter;
     log->makeFilterByValue(filter, value,
                            value); // min & max are the same of course
 
@@ -355,7 +354,7 @@ std::vector<std::pair<std::string, const Kernel::ITimeSeriesProperty *>> SumEven
  *  @returns The summed proton charge
  */
 double SumEventsByLogValue::sumProtonCharge(const Kernel::TimeSeriesProperty<double> *protonChargeLog,
-                                            const Kernel::TimeSplitterType &filter) {
+                                            const Kernel::SplittingIntervalVec &filter) {
   // Clone the proton charge log and filter the clone on this log value
   std::unique_ptr<Kernel::TimeSeriesProperty<double>> protonChargeLogClone(protonChargeLog->clone());
   protonChargeLogClone->filterByTimes(filter);

@@ -8,7 +8,9 @@
 
 #include "MantidAPI/ISplittersWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidKernel/TimeSplitter.h"
+#include "MantidDataObjects/TimeSplitter.h"
+
+#include "MantidKernel/SplittingInterval.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4250) // Disable warning regarding inheritance via dominance
@@ -45,6 +47,8 @@ public:
   size_t getNumberSplitters() const override;
 
   bool removeSplitter(size_t) override;
+
+  DataObjects::TimeSplitter convertToTimeSplitter();
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.

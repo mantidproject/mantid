@@ -9,6 +9,7 @@
 #include "ALFInstrumentModel.h"
 #include "DetectorTube.h"
 #include "DllConfig.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <optional>
 #include <string>
@@ -25,12 +26,17 @@ class IALFAnalysisPresenter;
 class MANTIDQT_DIRECT_DLL IALFInstrumentPresenter {
 
 public:
-  virtual QWidget *getLoadWidget() = 0;
+  virtual QWidget *getSampleLoadWidget() = 0;
+  virtual QWidget *getVanadiumLoadWidget() = 0;
   virtual ALFInstrumentWidget *getInstrumentView() = 0;
 
   virtual void subscribeAnalysisPresenter(IALFAnalysisPresenter *presenter) = 0;
 
-  virtual void loadRunNumber() = 0;
+  virtual void loadSettings() = 0;
+  virtual void saveSettings() = 0;
+
+  virtual void loadSample() = 0;
+  virtual void loadVanadium() = 0;
 
   virtual void notifyInstrumentActorReset() = 0;
   virtual void notifyShapeChanged() = 0;
@@ -42,19 +48,26 @@ class MANTIDQT_DIRECT_DLL ALFInstrumentPresenter final : public IALFInstrumentPr
 public:
   ALFInstrumentPresenter(IALFInstrumentView *view, std::unique_ptr<IALFInstrumentModel> model);
 
-  QWidget *getLoadWidget() override;
+  QWidget *getSampleLoadWidget() override;
+  QWidget *getVanadiumLoadWidget() override;
   ALFInstrumentWidget *getInstrumentView() override;
 
   void subscribeAnalysisPresenter(IALFAnalysisPresenter *presenter) override;
 
-  void loadRunNumber() override;
+  void loadSettings() override;
+  void saveSettings() override;
+
+  void loadSample() override;
+  void loadVanadium() override;
 
   void notifyInstrumentActorReset() override;
   void notifyShapeChanged() override;
   void notifyTubesSelected(std::vector<DetectorTube> const &tubes) override;
 
 private:
-  std::optional<std::string> loadAndTransform(const std::string &run);
+  Mantid::API::MatrixWorkspace_sptr loadAndNormalise(const std::string &pathToRun);
+  void generateLoadedWorkspace();
+
   void updateInstrumentViewFromModel();
   void updateAnalysisViewFromModel();
 

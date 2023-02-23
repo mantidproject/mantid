@@ -35,15 +35,6 @@ MatrixWorkspace_sptr cropWorkspace(MatrixWorkspace_sptr const &workspace, double
   return cropper->getProperty("OutputWorkspace");
 }
 
-MatrixWorkspace_sptr convertToPointData(MatrixWorkspace_sptr const &workspace) {
-  auto converter = AlgorithmManager::Instance().create("ConvertToPointData");
-  converter->setAlwaysStoreInADS(false);
-  converter->setProperty("InputWorkspace", workspace);
-  converter->setProperty("OutputWorkspace", "__pointData");
-  converter->execute();
-  return converter->getProperty("OutputWorkspace");
-}
-
 IFunction_sptr createFlatBackground(double const height = 0.0) {
   auto flatBackground = FunctionFactory::Instance().createFunction("FlatBackground");
   flatBackground->setParameter("A0", height);
@@ -147,8 +138,6 @@ void ALFAnalysisModel::calculateEstimate(std::pair<double, double> const &range)
 IFunction_sptr ALFAnalysisModel::calculateEstimate(MatrixWorkspace_sptr &workspace,
                                                    std::pair<double, double> const &range) {
   if (auto alteredWorkspace = cropWorkspace(workspace, range.first, range.second)) {
-    alteredWorkspace = convertToPointData(alteredWorkspace);
-
     auto const xData = alteredWorkspace->readX(0);
     auto const yData = alteredWorkspace->readY(0);
 
@@ -197,6 +186,8 @@ void ALFAnalysisModel::setPeakCentre(double const centre) {
 
 double ALFAnalysisModel::peakCentre() const { return m_function->getParameter("f1.PeakCentre"); }
 
+double ALFAnalysisModel::background() const { return m_function->getParameter("f0.A0"); }
+
 Mantid::API::IPeakFunction_const_sptr ALFAnalysisModel::getPeakCopy() const {
   auto const gaussian = m_function->getFunction(1)->clone();
   return std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(gaussian);
@@ -221,7 +212,7 @@ std::optional<double> ALFAnalysisModel::rotationAngle() const {
   if (!twoTheta) {
     return std::nullopt;
   }
-  return peakCentre() / (2 * sin((*twoTheta) * M_PI / 180.0));
+  return peakCentre() / (2 * sin((*twoTheta / 2.0) * M_PI / 180.0));
 }
 
 } // namespace MantidQt::CustomInterfaces

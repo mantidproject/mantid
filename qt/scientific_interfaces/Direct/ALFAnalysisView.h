@@ -53,7 +53,7 @@ public:
 
   virtual void setAverageTwoTheta(std::optional<double> average, std::vector<double> const &all) = 0;
 
-  virtual void setPeak(Mantid::API::IPeakFunction_const_sptr const &peak) = 0;
+  virtual void setPeak(Mantid::API::IPeakFunction_const_sptr const &peak, double const background) = 0;
   virtual Mantid::API::IPeakFunction_const_sptr getPeak() const = 0;
 
   virtual void setPeakCentre(double const centre) = 0;
@@ -88,7 +88,7 @@ public:
 
   void setAverageTwoTheta(std::optional<double> average, std::vector<double> const &all) override;
 
-  void setPeak(Mantid::API::IPeakFunction_const_sptr const &peak) override;
+  void setPeak(Mantid::API::IPeakFunction_const_sptr const &peak, double const background) override;
   Mantid::API::IPeakFunction_const_sptr getPeak() const override;
 
   void setPeakCentre(double const centre) override;

@@ -103,101 +103,104 @@ simultaneous fitting.
 A global parameter is a type of global tie. This is where each domain contains the same parameter, and it is 'shared' by
 each domain during a simultaneous fit.
 
+Usage Example setup
+-------------------
+
+The following usage examples require some initial setup:
+
+1. Download the ISIS Sample data set, `available here <http://download.mantidproject.org/>`_.
+
+2. Open the Manage User Directories dialog. Add the location of the ISIS Sample data set to the search path.
+
 Usage Example for Sequential Fitting
 ------------------------------------
 
-To carry out the following usage example you will first need to load some data into Mantid. Run the following script, and
-make sure you have access to the data archive.
+1. Run the following script to load some Indirect Inelastic reduced data
 
 .. code-block:: python
 
     from mantid.simpleapi import *
 
-    LoadMuonNexus(Filename=r'\\isis.cclrc.ac.uk\inst$\ndxmusr\instrument\data\cycle_16_5\MUSR00062260.nxs', OutputWorkspace='MUSR00062260.nxs', DeadTimeTable='MUSR00062260.nxs_deadtime_table', DetectorGroupingTable='__notUsed')
-    RenameWorkspace(InputWorkspace='MUSR00062260.nxs_deadtime_table', OutputWorkspace='MUSR62260_deadtime MA')
-    RenameWorkspace(InputWorkspace='MUSR00062260.nxs', OutputWorkspace='MUSR62260_raw_data MA')
-    GroupWorkspaces(InputWorkspaces='MUSR62260_raw_data MA,MUSR62260_deadtime MA', OutputWorkspace='MUSR62260 MA')
-    MuonPreProcess(InputWorkspace='MUSR62260_raw_data MA', OutputWorkspace='__MUSR62260_pre_processed_data', TimeMin=0.10199999999999999, TimeOffset=0, DeadTimeTable='MUSR62260_deadtime MA')
-    MuonGroupingAsymmetry(InputWorkspace='__MUSR62260_pre_processed_data', OutputWorkspace='MUSR62260; Group; top; Asymmetry; MA', OutputUnNormWorkspace='__MUSR62260; Group; top; Asymmetry; MA_unnorm', GroupName='top', Grouping='17-24,49-56', AsymmetryTimeMin=0.10199999999999999, AsymmetryTimeMax=32.293998718261719)
-    MuonGroupingAsymmetry(InputWorkspace='__MUSR62260_pre_processed_data', OutputWorkspace='MUSR62260; Group; bkwd; Asymmetry; MA', OutputUnNormWorkspace='__MUSR62260; Group; bkwd; Asymmetry; MA_unnorm', GroupName='bkwd', Grouping='25-32,41-48', AsymmetryTimeMin=0.10199999999999999, AsymmetryTimeMax=32.293998718261719)
-    MuonGroupingAsymmetry(InputWorkspace='__MUSR62260_pre_processed_data', OutputWorkspace='MUSR62260; Group; bottom; Asymmetry; MA', OutputUnNormWorkspace='__MUSR62260; Group; bottom; Asymmetry; MA_unnorm', GroupName='bottom', Grouping='1-8,33-40', AsymmetryTimeMin=0.10199999999999999, AsymmetryTimeMax=32.293998718261719)
-    MuonGroupingAsymmetry(InputWorkspace='__MUSR62260_pre_processed_data', OutputWorkspace='MUSR62260; Group; fwd; Asymmetry; MA', OutputUnNormWorkspace='__MUSR62260; Group; fwd; Asymmetry; MA_unnorm', GroupName='fwd', Grouping='9-16,57-64', AsymmetryTimeMin=0.10199999999999999, AsymmetryTimeMax=32.293998718261719)
+    Load(Filename=r'irs26176_graphite002_red.nxs', OutputWorkspace='irs26176_red')
 
-1. Open the Fit Script Generator interface.
+2. Open the Fit Script Generator interface.
 
-2. Click ``Add Domains`` and select each of the loaded Asymmetry workspaces in turn.
+3. Click ``Add Domains`` and select the 'irs26176_red' workspace.
 
-3. Double click the ``EndX`` cells and change each of them to 15.0.
+4. In the ``Workspace Indices`` field enter '0-3'.
 
-4. Right click on the ``Function Browser`` and add a ``GausOsc`` function.
+5. Untick ``Keep Open`` and click ``Ok``.
 
-5. Change the ``Frequency`` parameter value to 1.4
+6. Right click on the ``Function Browser`` and add a ``Lorentzian`` function.
 
-6. Make sure the ``Fitting Mode`` is Sequential
+7. Add a second ``Lorentzian`` function in the same way.
 
-7. Click ``Generate Script to Clipboard``, and then paste into an empty python script window.
+8. Change the ``Amplitude`` parameter values to 1.5
 
-8. Run the script and you will see the results of a sequential fit.
+9. Make sure the ``Fitting Mode`` is Sequential
 
-.. image::  ../../images/FitScriptGenerator_SequentialFit.PNG
+10. Click ``Generate Script to Clipboard``, and then paste into an empty python script window.
+
+11. Run the script and you will see the results of a sequential fit.
+
+.. image::  ../../images/FitScriptGenerator_SequentialFit.png
    :align: center
    :height: 300px
 
 Usage Example for Simultaneous Fitting
 --------------------------------------
 
-To carry out the following usage example you will first need to load some data into Mantid. Run the following script, and
-make sure you have access to the data archive. This will add a background to the 'bkwd' workspace only.
+1. Run the following script to load some Indirect Inelastic reduced data. This will add a background to the first spectrum.
 
 .. code-block:: python
 
-    from mantid.api import AnalysisDataService
+    import numpy as np
     from mantid.simpleapi import *
 
-    LoadMuonNexus(Filename=r'\\isis.cclrc.ac.uk\inst$\ndxmusr\instrument\data\cycle_16_5\MUSR00062260.nxs', OutputWorkspace='MUSR00062260.nxs', DeadTimeTable='MUSR00062260.nxs_deadtime_table', DetectorGroupingTable='__notUsed')
-    RenameWorkspace(InputWorkspace='MUSR00062260.nxs_deadtime_table', OutputWorkspace='MUSR62260_deadtime MA')
-    RenameWorkspace(InputWorkspace='MUSR00062260.nxs', OutputWorkspace='MUSR62260_raw_data MA')
-    GroupWorkspaces(InputWorkspaces='MUSR62260_raw_data MA,MUSR62260_deadtime MA', OutputWorkspace='MUSR62260 MA')
-    MuonPreProcess(InputWorkspace='MUSR62260_raw_data MA', OutputWorkspace='__MUSR62260_pre_processed_data', TimeMin=0.10199999999999999, TimeOffset=0, DeadTimeTable='MUSR62260_deadtime MA')
-    MuonGroupingAsymmetry(InputWorkspace='__MUSR62260_pre_processed_data', OutputWorkspace='MUSR62260; Group; top; Asymmetry; MA', OutputUnNormWorkspace='__MUSR62260; Group; top; Asymmetry; MA_unnorm', GroupName='top', Grouping='17-24,49-56', AsymmetryTimeMin=0.10199999999999999, AsymmetryTimeMax=32.293998718261719)
-    MuonGroupingAsymmetry(InputWorkspace='__MUSR62260_pre_processed_data', OutputWorkspace='MUSR62260; Group; bkwd; Asymmetry; MA', OutputUnNormWorkspace='__MUSR62260; Group; bkwd; Asymmetry; MA_unnorm', GroupName='bkwd', Grouping='25-32,41-48', AsymmetryTimeMin=0.10199999999999999, AsymmetryTimeMax=32.293998718261719)
-    MuonGroupingAsymmetry(InputWorkspace='__MUSR62260_pre_processed_data', OutputWorkspace='MUSR62260; Group; bottom; Asymmetry; MA', OutputUnNormWorkspace='__MUSR62260; Group; bottom; Asymmetry; MA_unnorm', GroupName='bottom', Grouping='1-8,33-40', AsymmetryTimeMin=0.10199999999999999, AsymmetryTimeMax=32.293998718261719)
-    MuonGroupingAsymmetry(InputWorkspace='__MUSR62260_pre_processed_data', OutputWorkspace='MUSR62260; Group; fwd; Asymmetry; MA', OutputUnNormWorkspace='__MUSR62260; Group; fwd; Asymmetry; MA_unnorm', GroupName='fwd', Grouping='9-16,57-64', AsymmetryTimeMin=0.10199999999999999, AsymmetryTimeMax=32.293998718261719)
+    irs26176_red = Load(Filename=r'irs26176_graphite002_red.nxs')
 
-    ws = AnalysisDataService.retrieve('MUSR62260; Group; bkwd; Asymmetry; MA')
-    background = CreateWorkspace(DataX=ws.dataX(0), DataY=[1.0] * len(ws.dataY(0)), ParentWorkspace='MUSR62260; Group; bkwd; Asymmetry; MA')
-    Plus(LHSWorkspace='MUSR62260; Group; bkwd; Asymmetry; MA', RHSWorkspace='background', OutputWorkspace='MUSR62260; Group; bkwd; Asymmetry; MA')
+    # Create a background workspace
+    y_values = np.zeros(len(irs26176_red.dataY(0)) * irs26176_red.getNumberHistograms())
+    y_values[:len(irs26176_red.dataY(0))] = 1.0
+    background = CreateWorkspace(DataX=irs26176_red.dataX(0), DataY=y_values, NSpec=irs26176_red.getNumberHistograms(), UnitX='DeltaE', Distribution=True, ParentWorkspace='irs26176_red')
+
+    # Add the background
+    Plus(LHSWorkspace=irs26176_red, RHSWorkspace='background', OutputWorkspace='irs26176_red')
 
 1. Open the Fit Script Generator interface.
 
-2. Click ``Add Domains`` and select each of the loaded Asymmetry workspaces in turn. For this example, add the 'MUSR62260; Group; bkwd; Asymmetry; MA' domain first.
+2. Click ``Add Domains`` and select the 'irs26176_red' workspace.
 
-3. Double click the ``EndX`` cells and change each of them to 15.0.
+3. In the ``Workspace Indices`` field enter '0-3'.
 
-4. Change the ``Fitting Mode`` to Simultaneous.
+4. Untick ``Keep Open`` and click ``Ok``.
 
-5. Change ``All Domains`` to ``Selected Domains``, and then select the 'MUSR62260; Group; bkwd; Asymmetry; MA' domain table row.
+5. Change the ``Fitting Mode`` to Simultaneous.
 
-6. Right click on the Function Browser and add a ``FlatBackground``. This will only add this function to the selected domain.
+6. Change ``All Domains`` to ``Selected Domains``, and then select the top domain in the table.
+
+7. Right click on the Function Browser and add a ``FlatBackground``. This will only add this function to the selected domain.
    Selecting the other table rows will show they do not have any fit functions yet.
 
-7. Change the 'A0' parameter in the ``FlatBackground`` to a value of 1.0, and 'Fix' it by right clicking on the parameter.
+8. Change the 'A0' parameter in the ``FlatBackground`` to a value of 1.0, and 'Fix' it by right clicking on the parameter.
 
-8. Change ``Selected Domains`` back to ``All Domains``.
+9. Change ``Selected Domains`` back to ``All Domains``.
 
-9. Right click on the Function Browser and add a ``GausOsc``. This will add the ``GausOsc`` function to all of the domains.
+10. Right click on the Function Browser and add a ``Lorentzian``. This will add the ``Lorentzian`` function to all of the domains.
 
-10. Change the ``Frequency`` parameter value in each of the domains to 1.3.
+11. Add another ``Lorentzian`` so there are two in each of the domains.
 
-11. Select any table row that isn't the first domain table row.
+12. Change the ``Amplitude`` parameter values in each of the domains to 1.5.
 
-12. Select the Frequency parameter, right click and add a tie to ``f0.f1.Frequency``. This is a global tie.
+13. Select any table row that isn't the first domain table row.
 
-13. Click ``Generate Script to Clipboard``, and then paste into an empty python script window.
+14. Select the first Peak Centre parameter, right click and add a tie to ``f0.f1.PeakCentre``. This is a global tie.
 
-14. Run the script and you will see the results of a simultaneous fit. Notice the 'MUSR62260; Group; bkwd; Asymmetry; MA' background has been accounted for.
+15. Click ``Generate Script to Clipboard``, and then paste into an empty python script window.
 
-.. image::  ../../images/FitScriptGenerator_SimultaneousFit.PNG
+16. Run the script and you will see the results of a simultaneous fit. Notice the background in the first spectrum has been accounted for.
+
+.. image::  ../../images/FitScriptGenerator_SimultaneousFit.png
    :align: center
    :height: 300px
 

@@ -15,8 +15,7 @@ namespace MantidQt::MantidWidgets {
 
 PeakPicker::PeakPicker(PreviewPlot *plot)
     : QObject(), m_plot(plot), m_peak(nullptr),
-      m_peakMarker(std::make_unique<PeakMarker>(m_plot->canvas(), 1, std::get<0>(m_plot->getAxisRange()),
-                                                std::get<1>(m_plot->getAxisRange(AxisID::YLeft)), 0.0, 0.0)) {
+      m_peakMarker(std::make_unique<PeakMarker>(m_plot->canvas(), 1, 1.0, 0.0, 0.0, 0.0)) {
   m_plot->canvas()->draw();
 
   connect(m_plot, SIGNAL(mouseDown(QPoint)), this, SLOT(handleMouseDown(QPoint)));
@@ -31,10 +30,10 @@ void PeakPicker::redraw() { m_peakMarker->redraw(); }
 
 void PeakPicker::remove() { m_peakMarker->remove(); }
 
-void PeakPicker::setPeak(const Mantid::API::IPeakFunction_const_sptr &peak) {
+void PeakPicker::setPeak(const Mantid::API::IPeakFunction_const_sptr &peak, const double background) {
   if (peak) {
     m_peak = std::dynamic_pointer_cast<IPeakFunction>(peak->clone());
-    m_peakMarker->updatePeak(peak->centre(), peak->height(), peak->fwhm());
+    m_peakMarker->updatePeak(peak->centre(), peak->height(), peak->fwhm(), background);
   }
 }
 

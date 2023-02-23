@@ -10,6 +10,7 @@
 #include <QButtonGroup>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QCoreApplication>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QLabel>
@@ -109,7 +110,7 @@ void FindReplaceDialog::initLayout() {
 
 /// Add replace box
 void FindReplaceDialog::addReplaceBox() {
-  setWindowTitle(tr("MantidPlot") + " - " + tr("Find and Replace"));
+  setWindowTitle(QCoreApplication::applicationName() + " - Find and Replace");
   m_topLayout->addWidget(new QLabel(tr("Replace with")), 1, 0);
   boxReplace = new QComboBox();
   boxReplace->setEditable(true);

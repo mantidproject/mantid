@@ -61,7 +61,6 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         return "SANSILLMultiProcess"
 
     def PyInit(self):
-
         # ================================INPUT RUNS================================#
 
         for d in range(N_DISTANCES):
@@ -228,6 +227,13 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             doc="Whether the sensitivity data has been measured with different horizontal offsets (D22 only).",
         )
         self.setPropertyGroup("SensitivityWithOffsets", "Parameters")
+
+        self.copyProperties("CalculateEfficiency", ["MinThreshold", "MaxThreshold"])
+        # override default documentation of copied parameters to make them understandable by user
+        threshold_property = self.getProperty("MinThreshold")
+        threshold_property.setDocumentation("Minimum threshold for calculated sensitivity.")
+        threshold_property = self.getProperty("MaxThreshold")
+        threshold_property.setDocumentation("Maximum threshold for calculated sensitivity.")
 
         self.declareProperty(
             IntArrayProperty(name="DistancesAtWavelength2", values=[]),
@@ -885,6 +891,8 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                 OutputSensitivityWorkspace=sens_out,
                 startProgress=(self.lambda_rank + d) * self.n_samples / self.n_reports,
                 endProgress=(self.lambda_rank + d + 1) * self.n_samples / self.n_reports,
+                MinThreshold=self.getProperty("MinThreshold").value,
+                MaxThreshold=self.getProperty("MaxThreshold").value,
             )
             add_correction_numors(
                 ws=sample_ws,
@@ -1009,7 +1017,13 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             tmp_group = "__combined_sens_grp_" + out_ws
             comb_sens = out_ws + "_sensitivity_combined"
             GroupWorkspaces(InputWorkspaces=real_space_ws_list, OutputWorkspace=tmp_group)
-            CalculateEfficiency(InputWorkspace=tmp_group, MergeGroup=True, OutputWorkspace=comb_sens)
+            CalculateEfficiency(
+                InputWorkspace=tmp_group,
+                MergeGroup=True,
+                MinThreshold=self.getProperty("MinThreshold").value,
+                MaxThreshold=self.getProperty("MaxThreshold").value,
+                OutputWorkspace=comb_sens,
+            )
             UnGroupWorkspace(tmp_group)
             return {"CombinedSens": comb_sens}
         else:

@@ -66,7 +66,7 @@ class DNSView(QWidget):
         elif isinstance(target_object, QRadioButton):
             target_object.setChecked(value)
         elif isinstance(target_object, QComboBox):
-            index = target_object.findText(str(value), Qt.MatchFixedString)  # crapy workaround for Qt4 compatibility
+            index = target_object.findText(str(value), Qt.MatchFixedString)
             if index >= 0:
                 target_object.setCurrentIndex(index)
         elif isinstance(target_object, QSlider):

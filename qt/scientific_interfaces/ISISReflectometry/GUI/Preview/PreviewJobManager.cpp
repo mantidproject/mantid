@@ -65,7 +65,7 @@ void PreviewJobManager::notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr &
   try {
     jobAlgorithm->updateItem();
   } catch (std::runtime_error const &ex) {
-    g_log.error(ex.what());
+    notifyAlgorithmError(algorithm, ex.what());
     return;
   }
 
@@ -93,6 +93,7 @@ void PreviewJobManager::notifyAlgorithmError(API::IConfiguredAlgorithm_sptr algo
   switch (algorithmType(algorithm)) {
   case AlgorithmType::PREPROCESS:
     g_log.error(std::string("Error loading workspace: ") + message);
+    m_notifyee->notifyLoadWorkspaceAlgorithmError();
     break;
   case AlgorithmType::SUM_BANKS:
     g_log.error(std::string("Error summing banks: ") + message);

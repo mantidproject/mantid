@@ -1,0 +1,2 @@
+- The peak picker tool is now offset on the y axis by the background amount.
+- The peak picker tool is now set as activate by default.

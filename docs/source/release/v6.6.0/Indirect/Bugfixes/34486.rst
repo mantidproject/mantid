@@ -1,0 +1,1 @@
+- A bug has been fixed that caused the Elwin tab to not run specific spectra when using the workspace input method

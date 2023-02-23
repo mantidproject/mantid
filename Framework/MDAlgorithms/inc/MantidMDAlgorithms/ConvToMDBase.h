@@ -23,12 +23,8 @@ namespace MDAlgorithms {
 /** Class describes the interface to the methods, which perform conversion from
     usual workspaces to MDEventWorkspace
 
-    See http://www.mantidproject.org/Writing_custom_ConvertTo_MD_transformation
-    for detailed description of this
-    class place in the algorithms hierarchy.
-
-
-    @date 07-01-2012
+  See dev-docs/source/WritingCustomConvertToMDTransformation.rst for detailed description of this
+  class place in the algorithms hierarchy.
 */
 
 class MANTID_MDALGORITHMS_DLL ConvToMDBase {

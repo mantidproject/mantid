@@ -24,15 +24,77 @@
 
 namespace MantidQt::CustomInterfaces {
 
-ALFInstrumentView::ALFInstrumentView(QWidget *parent) : QWidget(parent), m_files(), m_instrumentWidget() {}
+ALFInstrumentView::ALFInstrumentView(QWidget *parent)
+    : QWidget(parent), m_settingsGroup("CustomInterfaces/ALFView"), m_sample(), m_vanadium(), m_instrumentWidget(),
+      m_presenter() {}
 
 void ALFInstrumentView::setUpInstrument(std::string const &fileName) {
   m_instrumentWidget = new ALFInstrumentWidget(QString::fromStdString(fileName));
 
   connect(m_instrumentWidget, SIGNAL(instrumentActorReset()), this, SLOT(reconnectInstrumentActor()));
+  connect(m_instrumentWidget, SIGNAL(surfaceTypeChanged(int)), this, SLOT(reconnectSurface()));
+  connect(m_instrumentWidget, SIGNAL(surfaceTypeChanged(int)), this, SLOT(notifyShapeChanged()));
   reconnectInstrumentActor();
+  reconnectSurface();
 
+  auto pickTab = m_instrumentWidget->getPickTab();
+  connect(pickTab->getSelectTubeButton(), SIGNAL(clicked()), this, SLOT(selectWholeTube()));
+}
+
+QWidget *ALFInstrumentView::generateSampleLoadWidget() {
+  m_sample = new API::FileFinderWidget(this);
+  m_sample->setLabelText("Sample");
+  m_sample->setLabelMinWidth(150);
+  m_sample->allowMultipleFiles(false);
+  m_sample->setInstrumentOverride("ALF");
+  m_sample->isForRunFiles(true);
+
+  connect(m_sample, SIGNAL(fileFindingFinished()), this, SLOT(sampleLoaded()));
+
+  return m_sample;
+}
+
+QWidget *ALFInstrumentView::generateVanadiumLoadWidget() {
+  m_vanadium = new API::FileFinderWidget(this);
+  m_vanadium->isOptional(true);
+  m_vanadium->setLabelText("Vanadium");
+  m_vanadium->setLabelMinWidth(150);
+  m_vanadium->allowMultipleFiles(false);
+  m_vanadium->setInstrumentOverride("ALF");
+  m_vanadium->isForRunFiles(true);
+
+  connect(m_vanadium, SIGNAL(fileFindingFinished()), this, SLOT(vanadiumLoaded()));
+
+  return m_vanadium;
+}
+
+void ALFInstrumentView::loadSettings() {
+  QSettings settings;
+
+  // Load the last used vanadium run
+  settings.beginGroup(m_settingsGroup);
+  auto const vanadiumRun = settings.value("vanadium-run", "");
+  settings.endGroup();
+
+  if (!vanadiumRun.toString().isEmpty()) {
+    m_vanadium->setUserInput(vanadiumRun);
+  }
+}
+
+void ALFInstrumentView::saveSettings() {
+  QSettings settings;
+  settings.beginGroup(m_settingsGroup);
+  settings.setValue("vanadium-run", m_vanadium->getText());
+  settings.endGroup();
+}
+
+void ALFInstrumentView::reconnectInstrumentActor() {
+  connect(&m_instrumentWidget->getInstrumentActor(), SIGNAL(refreshView()), this, SLOT(notifyInstrumentActorReset()));
+}
+
+void ALFInstrumentView::reconnectSurface() {
   auto surface = m_instrumentWidget->getInstrumentDisplay()->getSurface().get();
+
   // This signal has been disconnected as we do not want a copy and paste event to update the analysis plot, unless
   // the pasted shape is subsequently moved
   // connect(surface, SIGNAL(shapeCreated()), this, SLOT(notifyShapeChanged()));
@@ -40,55 +102,50 @@ void ALFInstrumentView::setUpInstrument(std::string const &fileName) {
   connect(surface, SIGNAL(shapesRemoved()), this, SLOT(notifyShapeChanged()));
   connect(surface, SIGNAL(shapesCleared()), this, SLOT(notifyShapeChanged()));
   connect(surface, SIGNAL(singleComponentPicked(size_t)), this, SLOT(notifyWholeTubeSelected(size_t)));
-
-  auto pickTab = m_instrumentWidget->getPickTab();
-  connect(pickTab->getSelectTubeButton(), SIGNAL(clicked()), this, SLOT(selectWholeTube()));
-}
-
-QWidget *ALFInstrumentView::generateLoadWidget() {
-  m_files = new API::FileFinderWidget(this);
-  m_files->setLabelText("ALF");
-  m_files->allowMultipleFiles(false);
-  m_files->setInstrumentOverride("ALF");
-  m_files->isForRunFiles(true);
-  connect(m_files, SIGNAL(fileFindingFinished()), this, SLOT(fileLoaded()));
-
-  auto loadWidget = new QWidget();
-  auto loadLayout = new QHBoxLayout(loadWidget);
-
-  loadLayout->addItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
-  loadLayout->addWidget(m_files);
-  loadLayout->addItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
-
-  return loadWidget;
-}
-
-void ALFInstrumentView::reconnectInstrumentActor() {
-  connect(&m_instrumentWidget->getInstrumentActor(), SIGNAL(refreshView()), this, SLOT(notifyInstrumentActorReset()));
 }
 
 void ALFInstrumentView::subscribePresenter(IALFInstrumentPresenter *presenter) { m_presenter = presenter; }
 
-std::optional<std::string> ALFInstrumentView::getFile() {
-  auto name = m_files->getFilenames();
+std::optional<std::string> ALFInstrumentView::getSampleFile() const {
+  auto name = m_sample->getFilenames();
   if (name.size() > 0)
     return name[0].toStdString();
   return std::nullopt;
 }
 
-void ALFInstrumentView::setRunQuietly(std::string const &runNumber) {
-  m_files->setText(QString::fromStdString(runNumber));
+std::optional<std::string> ALFInstrumentView::getVanadiumFile() const {
+  auto name = m_vanadium->getFilenames();
+  if (name.size() > 0)
+    return name[0].toStdString();
+  return std::nullopt;
 }
 
-void ALFInstrumentView::fileLoaded() {
-  if (m_files->getText().isEmpty())
-    return;
+void ALFInstrumentView::setSampleRun(std::string const &runNumber) {
+  m_sample->setText(QString::fromStdString(runNumber));
+}
 
-  if (!m_files->isValid()) {
-    warningBox(m_files->getFileProblem().toStdString());
+void ALFInstrumentView::setVanadiumRun(std::string const &runNumber) {
+  m_vanadium->setText(QString::fromStdString(runNumber));
+}
+
+void ALFInstrumentView::sampleLoaded() {
+  if (m_sample->getText().isEmpty()) {
     return;
   }
-  m_presenter->loadRunNumber();
+
+  if (!m_sample->isValid()) {
+    warningBox(m_sample->getFileProblem().toStdString());
+    return;
+  }
+  m_presenter->loadSample();
+}
+
+void ALFInstrumentView::vanadiumLoaded() {
+  if (!m_vanadium->isValid()) {
+    warningBox(m_vanadium->getFileProblem().toStdString());
+    return;
+  }
+  m_presenter->loadVanadium();
 }
 
 void ALFInstrumentView::notifyInstrumentActorReset() { m_presenter->notifyInstrumentActorReset(); }

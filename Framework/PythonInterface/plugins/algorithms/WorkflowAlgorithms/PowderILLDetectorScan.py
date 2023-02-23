@@ -51,7 +51,6 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
         return issues
 
     def PyInit(self):
-
         self.declareProperty(MultipleFileProperty("Run", extensions=["nxs"]), doc="File path of run(s).")
 
         self.declareProperty(
@@ -64,10 +63,6 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
         self.declareProperty(
             FileProperty("CalibrationFile", "", action=FileAction.OptionalLoad, extensions=["nxs"]),
             doc="File containing the detector efficiencies.",
-        )
-
-        self.declareProperty(
-            name="UseCalibratedData", defaultValue=True, doc="Whether or not to use the calibrated data in the NeXus files."
         )
 
         self.declareProperty(
@@ -122,7 +117,7 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
             doc="Comma separated list of component names to output the reduced data for; for example tube_1",
         )
 
-        self.declareProperty(name="AlignTubes", defaultValue=True, doc="Align the tubes vertically and horizontally according to IPF.")
+        self.declareProperty(name="AlignTubes", defaultValue=False, doc="Align the tubes vertically and horizontally according to IPF.")
 
     def _generate_mask(self, n_pix, instrument):
         """
@@ -148,10 +143,9 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
         return mask[:-1]
 
     def _validate_instrument(self, instrument_name):
-
         supported_instruments = ["D2B", "D20"]
         if instrument_name not in supported_instruments:
-            self.log.warning(
+            self.log().warning(
                 "Running for unsupported instrument, use with caution. Supported instruments are: " + str(supported_instruments)
             )
         if instrument_name == "D20":
@@ -206,11 +200,7 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
         return output2D
 
     def PyExec(self):
-        data_type = "Raw"
-        if self.getProperty("UseCalibratedData").value:
-            data_type = "Auto"  # this will use calibrated data, if they exist
         align_tubes = self.getProperty("AlignTubes").value
-
         self._progress = Progress(self, start=0.0, end=1.0, nreports=6)
         self._progress.report("Loading data")
         # Do not merge the runs yet, since it will break the calibration
@@ -219,7 +209,7 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
         input_workspace = LoadAndMerge(
             Filename=self.getPropertyValue("Run").replace("+", ","),
             LoaderName="LoadILLDiffraction",
-            LoaderOptions={"DataType": data_type, "AlignTubes": align_tubes},
+            LoaderOptions={"AlignTubes": align_tubes},
         )
         # We might already have a group, but group just in case
         input_group = GroupWorkspaces(InputWorkspaces=input_workspace)

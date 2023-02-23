@@ -78,7 +78,7 @@ class GetLiveInstrumentValue(DataProcessorAlgorithm):
             from CaChannel import CaChannel, CaChannelException, ca
         except ImportError:
             raise RuntimeError(
-                "CaChannel must be installed to use this algorithm. " "For details, see https://www.mantidproject.org/CaChannel_In_Mantid"
+                "CaChannel must be installed to use this algorithm. Please consult the algorithm documentation for more details."
             )
         if as_string:
             dbr_type = ca.DBR_STRING

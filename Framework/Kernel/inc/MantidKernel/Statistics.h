@@ -15,14 +15,24 @@ namespace Math {
 /**
  * Maps a "statistic" to a number
  */
-enum StatisticType { FirstValue, LastValue, Minimum, Maximum, Mean, TimeAveragedMean, Median };
+enum StatisticType {
+  FirstValue,
+  LastValue,
+  Minimum,
+  Maximum,
+  Mean,
+  TimeAveragedMean,
+  Median,
+  StdDev,
+  TimeAverageStdDev
+};
 } // namespace Math
 
 /**
    Simple struct to store statistics.
 
  */
-struct Statistics {
+struct MANTID_KERNEL_DLL Statistics {
   /// Minimum value
   double minimum;
   /// Maximum value
@@ -33,6 +43,9 @@ struct Statistics {
   double median;
   /// standard_deviation of the values
   double standard_deviation;
+
+  /// Default value for everything is nan
+  Statistics();
 };
 
 /// Controls the computation of statisical data

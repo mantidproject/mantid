@@ -16,25 +16,6 @@ import os
 import sys
 import unittest
 
-# If any tests happen to hit a PyQt4 import make sure item uses version 2 of the api
-# Remove this when everything is switched to qtpy
-try:
-    import sip
-
-    sip.setapi("QString", 2)
-    sip.setapi("QVariant", 2)
-    sip.setapi("QDate", 2)
-    sip.setapi("QDateTime", 2)
-    sip.setapi("QTextStream", 2)
-    sip.setapi("QTime", 2)
-    sip.setapi("QUrl", 2)
-except AttributeError:
-    # PyQt < v4.6
-    pass
-except ImportError:
-    # sip is not available in Framework only builds
-    pass
-
 
 def main(argv):
     """

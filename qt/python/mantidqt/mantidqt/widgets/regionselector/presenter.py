@@ -74,6 +74,10 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
     def slicepoint_changed(self) -> None:
         pass
 
+    def deselect_all_selectors(self) -> None:
+        for selector in self._selectors:
+            selector.set_active(False)
+
     def canvas_clicked(self, event) -> None:
         if self._drawing_region:
             return

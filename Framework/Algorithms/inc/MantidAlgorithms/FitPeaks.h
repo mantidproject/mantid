@@ -60,6 +60,42 @@ private:
   /// fitted peak and background parameters' fitting error
   std::vector<std::vector<double>> m_function_errors_vector;
 };
+
+class PeakFitPreCheckResult {
+public:
+  PeakFitPreCheckResult()
+      : m_submitted_spectrum_peaks{0}, m_submitted_individual_peaks{0}, m_low_count_spectrum{0}, m_out_of_range{0},
+        m_low_count_individual{0}, m_not_enough_datapoints{0}, m_low_snr{0} {}
+  PeakFitPreCheckResult &operator+=(const PeakFitPreCheckResult &another);
+
+public:
+  void setNumberOfSubmittedSpectrumPeaks(const size_t n);
+  void setNumberOfSubmittedIndividualPeaks(const size_t n);
+  void setNumberOfSpectrumPeaksWithLowCount(const size_t n);
+  void setNumberOfOutOfRangePeaks(const size_t n);
+  void setNumberOfIndividualPeaksWithLowCount(const size_t n);
+  void setNumberOfPeaksWithNotEnoughDataPoints(const size_t n);
+  void setNumberOfPeaksWithLowSignalToNoise(const size_t n);
+  bool isIndividualPeakRejected() const;
+  std::string getReport() const;
+
+private:
+  // number of peaks submitted for spectrum fitting
+  size_t m_submitted_spectrum_peaks;
+  // number of peaks submitted for individual fitting. Since some spectra might fail a pre-check, not all peaks might
+  // make it to the individual fitting
+  size_t m_submitted_individual_peaks;
+  // number of peaks rejected as a whole spectrum due to its low signal count
+  size_t m_low_count_spectrum;
+  // number of peaks rejected individually because their predicted position is out of range
+  size_t m_out_of_range;
+  // number of peaks rejected individually due to low signal count
+  size_t m_low_count_individual;
+  // number of peask rejected due to not enough data points
+  size_t m_not_enough_datapoints;
+  // number of peaks rejected due to low signal-to-noise ratio
+  size_t m_low_snr;
+};
 } // namespace FitPeaksAlgorithm
 
 class MANTID_ALGORITHMS_DLL FitPeaks final : public API::Algorithm {
@@ -118,7 +154,8 @@ private:
   /// fit peaks in a same spectrum
   void fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_peak_centers,
                         const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result,
-                        std::vector<std::vector<double>> &lastGoodPeakParameters);
+                        std::vector<std::vector<double>> &lastGoodPeakParameters,
+                        const std::shared_ptr<FitPeaksAlgorithm::PeakFitPreCheckResult> &pre_check_result);
 
   /// fit background
   bool fitBackground(const size_t &ws_index, const std::pair<double, double> &fit_window,
@@ -127,7 +164,8 @@ private:
   // Peak fitting suite
   double fitIndividualPeak(size_t wi, const API::IAlgorithm_sptr &fitter, const double expected_peak_center,
                            const std::pair<double, double> &fitwindow, const bool estimate_peak_width,
-                           const API::IPeakFunction_sptr &peakfunction, const API::IBackgroundFunction_sptr &bkgdfunc);
+                           const API::IPeakFunction_sptr &peakfunction, const API::IBackgroundFunction_sptr &bkgdfunc,
+                           const std::shared_ptr<FitPeaksAlgorithm::PeakFitPreCheckResult> &pre_check_result);
 
   /// Methods to fit functions (general)
   double fitFunctionSD(const API::IAlgorithm_sptr &fit, const API::IPeakFunction_sptr &peak_function,
@@ -147,13 +185,26 @@ private:
   void setupParameterTableWorkspace(const API::ITableWorkspace_sptr &table_ws,
                                     const std::vector<std::string> &param_names, bool with_chi2);
 
+  /// convert a histogram range to index boundaries
+  void histRangeToIndexBounds(size_t iws, const std::pair<double, double> &range, size_t &left_index,
+                              size_t &right_index); /// convert a histogram range to index boundaries
+
+  /// calculate how many data points are in a histogram range
+  size_t histRangeToDataPointCount(size_t iws, const std::pair<double, double> &range);
+
   /// get vector X, Y and E in a given range
-  void getRangeData(size_t iws, const std::pair<double, double> &fit_window, std::vector<double> &vec_x,
+  void getRangeData(size_t iws, const std::pair<double, double> &range, std::vector<double> &vec_x,
                     std::vector<double> &vec_y, std::vector<double> &vec_e);
 
-  /// Reduce background
-  void reduceByBackground(const API::IBackgroundFunction_sptr &bkgd_func, const std::vector<double> &vec_x,
-                          std::vector<double> &vec_y);
+  /// sum up all counts in histogram
+  double numberCounts(size_t iws);
+
+  /// sum up all counts in histogram range
+  double numberCounts(size_t iws, const std::pair<double, double> &range);
+
+  /// calculate signal-to-noise ratio in histogram range
+  double calculateSignalToNoiseRatio(size_t iws, const std::pair<double, double> &range,
+                                     const API::IBackgroundFunction_sptr &bkgd_function);
 
   API::MatrixWorkspace_sptr createMatrixWorkspace(const std::vector<double> &vec_x, const std::vector<double> &vec_y,
                                                   const std::vector<double> &vec_e);
@@ -182,6 +233,9 @@ private:
   /// check whether FitPeaks supports observation on a certain peak profile's
   /// parameters (width!)
   bool isObservablePeakProfile(const std::string &peakprofile);
+
+  // log a message disregarding the current logging offset
+  void logNoOffset(const size_t &priority, const std::string &msg);
 
   //------- Workspaces-------------------------------------
   /// mandatory input and output workspaces
@@ -271,9 +325,11 @@ private:
   /// for observed peak parameter
   double m_minPeakHeight;
 
+  // Criteria for rejecting non-peaks or weak peaks from fitting
+  double m_minSignalToNoiseRatio;
+
   /// flag for high background
   bool m_highBackground;
-  double m_bkgdSimga; // TODO - add to properties
 
   //----- Result criterias ---------------
   /// peak positon tolerance case b, c and d

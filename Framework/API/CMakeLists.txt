@@ -96,7 +96,6 @@ set(SRC_FILES
     src/LinearScale.cpp
     src/LiveListener.cpp
     src/LiveListenerFactory.cpp
-    src/LogFilterGenerator.cpp
     src/LogManager.cpp
     src/LogarithmScale.cpp
     src/MDFrameValidator.cpp
@@ -299,7 +298,6 @@ set(INC_FILES
     inc/MantidAPI/LinearScale.h
     inc/MantidAPI/LiveListener.h
     inc/MantidAPI/LiveListenerFactory.h
-    inc/MantidAPI/LogFilterGenerator.h
     inc/MantidAPI/LogManager.h
     inc/MantidAPI/LogarithmScale.h
     inc/MantidAPI/MDFrameValidator.h
@@ -445,7 +443,6 @@ set(TEST_FILES
     LatticeDomainTest.h
     LiveListenerFactoryTest.h
     LiveListenerTest.h
-    LogFilterGeneratorTest.h
     LogManagerTest.h
     MDFrameValidatorTest.h
     MDGeometryTest.h

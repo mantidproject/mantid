@@ -16,16 +16,13 @@ namespace MDAlgorithms {
 /** Class responsible for conversion of input workspace
   * data into proper number of output dimensions for Q3D case
   *
-  * See http://www.mantidproject.org/Writing_custom_ConvertTo_MD_transformation
-  for detailed description of this
-  * class place in the algorithms hierarchy.
+  * The detailed description of the algorithm is provided at
+  * dev-docs/source/WritingCustomConvertToMDTransformation.rst.
   *
   * Currently contains Elastic and Inelastic transformations
   *
   * Some methods here are the same as in ModQ case, so the class difectly
   inherigs from ModQ to utilize this.
-  *
-  * @date 31-05-2012
 */
 
 class MANTID_MDALGORITHMS_DLL MDTransfQ3D : public MDTransfModQ {

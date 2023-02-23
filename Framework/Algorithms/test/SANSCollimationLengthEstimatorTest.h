@@ -17,7 +17,6 @@
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/LogFilter.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 using namespace Mantid::Algorithms;

@@ -11,6 +11,18 @@
 #include "ALFInstrumentView.h"
 
 #include "MantidAPI/FileFinder.h"
+#include "MantidAPI/MatrixWorkspace.h"
+
+#include <map>
+
+namespace {
+
+// A map of the message to display for a returned exception.
+static std::map<std::string, std::string> const EXCEPTION_MAP{
+    {"X arrays must match when dividing 2D workspaces.",
+     "Vanadium normalisation failed:\nX arrays must match when dividing two workspaces."}};
+
+} // namespace
 
 namespace MantidQt::CustomInterfaces {
 
@@ -20,7 +32,9 @@ ALFInstrumentPresenter::ALFInstrumentPresenter(IALFInstrumentView *view, std::un
   m_view->setUpInstrument(m_model->loadedWsName());
 }
 
-QWidget *ALFInstrumentPresenter::getLoadWidget() { return m_view->generateLoadWidget(); }
+QWidget *ALFInstrumentPresenter::getSampleLoadWidget() { return m_view->generateSampleLoadWidget(); }
+
+QWidget *ALFInstrumentPresenter::getVanadiumLoadWidget() { return m_view->generateVanadiumLoadWidget(); }
 
 ALFInstrumentWidget *ALFInstrumentPresenter::getInstrumentView() { return m_view->getInstrumentView(); }
 
@@ -28,24 +42,52 @@ void ALFInstrumentPresenter::subscribeAnalysisPresenter(IALFAnalysisPresenter *p
   m_analysisPresenter = presenter;
 }
 
-void ALFInstrumentPresenter::loadRunNumber() {
-  auto const filepath = m_view->getFile();
+void ALFInstrumentPresenter::loadSettings() { m_view->loadSettings(); }
+
+void ALFInstrumentPresenter::saveSettings() { m_view->saveSettings(); }
+
+void ALFInstrumentPresenter::loadSample() {
+  auto const filepath = m_view->getSampleFile();
   if (!filepath) {
     return;
   }
 
   m_analysisPresenter->clear();
-  if (auto const message = loadAndTransform(*filepath)) {
-    m_view->warningBox(*message);
-  }
-  m_view->setRunQuietly(std::to_string(m_model->runNumber()));
+
+  m_model->setSample(loadAndNormalise(*filepath));
+  m_view->setSampleRun(std::to_string(m_model->sampleRun()));
+
+  generateLoadedWorkspace();
 }
 
-std::optional<std::string> ALFInstrumentPresenter::loadAndTransform(const std::string &pathToRun) {
+void ALFInstrumentPresenter::loadVanadium() {
+  m_analysisPresenter->clear();
+
+  if (auto const filepath = m_view->getVanadiumFile()) {
+    m_model->setVanadium(loadAndNormalise(*filepath));
+    m_view->setVanadiumRun(std::to_string(m_model->vanadiumRun()));
+  } else {
+    m_model->setVanadium(nullptr);
+  }
+
+  generateLoadedWorkspace();
+}
+
+Mantid::API::MatrixWorkspace_sptr ALFInstrumentPresenter::loadAndNormalise(const std::string &pathToRun) {
   try {
-    return m_model->loadAndTransform(pathToRun);
+    return m_model->loadAndNormalise(pathToRun);
   } catch (std::exception const &ex) {
-    return ex.what();
+    m_view->warningBox(ex.what());
+    return nullptr;
+  }
+}
+
+void ALFInstrumentPresenter::generateLoadedWorkspace() {
+  try {
+    m_model->generateLoadedWorkspace();
+  } catch (std::exception const &ex) {
+    auto const iter = EXCEPTION_MAP.find(ex.what());
+    m_view->warningBox(iter != EXCEPTION_MAP.cend() ? iter->second : ex.what());
   }
 }
 

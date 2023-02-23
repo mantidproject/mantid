@@ -10,9 +10,8 @@ import ICCFitTools as ICCFT
 from mantid.simpleapi import *
 from scipy.interpolate import interp1d
 from scipy.ndimage.filters import convolve
-from matplotlib.mlab import bivariate_normal
 import ICConvoluted as ICC
-import BivariateGaussian as BivariateGaussian
+from mantid.simpleapi import BivariateGaussian
 
 plt.ion()
 
@@ -744,7 +743,9 @@ def bvg(A, mu, sigma, x, y, bg):
     """
 
     if is_pos_def(sigma):
-        f = bivariate_normal(x, y, sigmax=np.sqrt(sigma[0, 0]), sigmay=np.sqrt(sigma[1, 1]), sigmaxy=sigma[1, 0], mux=mu[0], muy=mu[1])
+        f = BivariateGaussian.bivariate_normal(
+            x, y, sigmax=np.sqrt(sigma[0, 0]), sigmay=np.sqrt(sigma[1, 1]), sigmaxy=sigma[1, 0], mux=mu[0], muy=mu[1]
+        )
         return A * f + bg
     else:
         system.information("   BVGFT:bvg:not PSD Matrix")

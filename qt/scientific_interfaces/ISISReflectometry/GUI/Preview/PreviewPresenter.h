@@ -87,6 +87,7 @@ public:
   void notifySumBanksCompleted() override;
   void notifyReductionCompleted() override;
 
+  void notifyLoadWorkspaceAlgorithmError() override;
   void notifySumBanksAlgorithmError() override;
   void notifyReductionAlgorithmError() override;
 
@@ -117,5 +118,7 @@ private:
   void runReduction();
   void clearRegionSelector();
   void clearReductionPlot();
+  bool isRegionSelectionChanged();
+  bool isRegionChanged(ROIType type);
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
