@@ -15,10 +15,12 @@
 
 namespace MantidQt::CustomInterfaces {
 
-ALFInstrumentPresenter::ALFInstrumentPresenter(IALFInstrumentView *view, std::unique_ptr<IALFInstrumentModel> model)
-    : m_view(view), m_model(std::move(model)) {
+ALFInstrumentPresenter::ALFInstrumentPresenter(IALFInstrumentView *view, std::unique_ptr<IALFInstrumentModel> model,
+                                               std::unique_ptr<IALFAlgorithmManager> algorithmManager)
+    : m_view(view), m_model(std::move(model)), m_algorithmManager(std::move(algorithmManager)) {
   m_view->subscribePresenter(this);
   m_view->setUpInstrument(m_model->loadedWsName());
+  m_algorithmManager->subscribe(this);
 }
 
 QWidget *ALFInstrumentPresenter::getSampleLoadWidget() { return m_view->generateSampleLoadWidget(); }
@@ -37,14 +39,21 @@ void ALFInstrumentPresenter::saveSettings() { m_view->saveSettings(); }
 
 void ALFInstrumentPresenter::loadSample() {
   m_analysisPresenter->clear();
-
   if (auto const filepath = m_view->getSampleFile()) {
-    m_model->setSample(loadAndNormalise(*filepath));
-    m_view->setSampleRun(std::to_string(m_model->sampleRun()));
+    m_algorithmManager->load(ALFTask::SAMPLE_LOAD, *filepath);
   } else {
     m_model->setSample(nullptr);
+    generateLoadedWorkspace();
   }
+}
 
+void ALFInstrumentPresenter::notifySampleLoaded(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  m_algorithmManager->normaliseByCurrent(ALFTask::SAMPLE_NORMALISE, workspace);
+}
+
+void ALFInstrumentPresenter::notifySampleNormalised(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  m_model->setSample(workspace);
+  m_view->setSampleRun(std::to_string(m_model->sampleRun()));
   generateLoadedWorkspace();
 }
 

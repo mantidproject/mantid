@@ -6,9 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "ALFAlgorithmManager.h"
 #include "ALFInstrumentModel.h"
 #include "DetectorTube.h"
 #include "DllConfig.h"
+#include "IALFAlgorithmManagerSubscriber.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <optional>
@@ -43,10 +45,12 @@ public:
   virtual void notifyTubesSelected(std::vector<DetectorTube> const &tubes) = 0;
 };
 
-class MANTIDQT_DIRECT_DLL ALFInstrumentPresenter final : public IALFInstrumentPresenter {
+class MANTIDQT_DIRECT_DLL ALFInstrumentPresenter final : public IALFInstrumentPresenter,
+                                                         public IALFAlgorithmManagerSubscriber {
 
 public:
-  ALFInstrumentPresenter(IALFInstrumentView *view, std::unique_ptr<IALFInstrumentModel> model);
+  ALFInstrumentPresenter(IALFInstrumentView *view, std::unique_ptr<IALFInstrumentModel> model,
+                         std::unique_ptr<IALFAlgorithmManager> algorithmManager);
 
   QWidget *getSampleLoadWidget() override;
   QWidget *getVanadiumLoadWidget() override;
@@ -59,6 +63,9 @@ public:
 
   void loadSample() override;
   void loadVanadium() override;
+
+  void notifySampleLoaded(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
+  void notifySampleNormalised(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
 
   void notifyInstrumentActorReset() override;
   void notifyShapeChanged() override;
@@ -75,6 +82,7 @@ private:
 
   IALFInstrumentView *m_view;
   std::unique_ptr<IALFInstrumentModel> m_model;
+  std::unique_ptr<IALFAlgorithmManager> m_algorithmManager;
 };
 
 } // namespace MantidQt::CustomInterfaces
