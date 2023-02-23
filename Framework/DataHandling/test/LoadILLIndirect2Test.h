@@ -28,6 +28,8 @@ public:
   static LoadILLIndirect2Test *createSuite() { return new LoadILLIndirect2Test(); }
   static void destroySuite(LoadILLIndirect2Test *suite) { delete suite; }
 
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
+
   void test_Init() {
     LoadILLIndirect2 loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize())
@@ -127,8 +129,6 @@ public:
     TS_ASSERT_EQUALS(output2D->dataY(871)[1157], 17)
     TS_ASSERT_EQUALS(output2D->dataY(746)[1157], 18)
     checkTimeFormat(output2D);
-
-    AnalysisDataService::Instance().clear();
   }
   void test_diffraction_doppler() {
     // checks loading IN16B diffration data acquired in Doppler mode with the
@@ -151,8 +151,6 @@ public:
     TS_ASSERT_EQUALS(output2D->dataY(873)[557], 2)
     TS_ASSERT_EQUALS(output2D->dataY(724)[561], 3)
     checkTimeFormat(output2D);
-
-    AnalysisDataService::Instance().clear();
   }
 
   void doExecTest(const std::string &file, int numHist = 2051, int numChannels = 2048) {
