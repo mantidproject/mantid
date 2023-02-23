@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <limits>
+#include <sstream>
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeROI.h"
@@ -33,6 +34,36 @@ void assert_increasing(const DateAndTime &startTime, const DateAndTime &stopTime
     throw std::runtime_error(msg.str());
   }
 }
+
+/*
+ * This method assumes that there is an overlap between the two intervals
+ */
+TimeInterval calculate_union(const TimeInterval &left, const TimeInterval &right) {
+  return TimeInterval(std::min(left.begin(), right.begin()), std::max(left.end(), right.end()));
+}
+
+/*
+ * This is slightly different than overlaps in TimeInterval because
+ * two timeROI that touch on the boundary are considered overlapping
+ */
+bool overlaps(const TimeInterval &left, const TimeInterval &right) {
+  if (left.overlaps(right))
+    return true;
+  // the following make cppcheck happy
+  const auto leftBegin = left.begin();
+  const auto rightEnd = right.end();
+  if (leftBegin == rightEnd)
+    return true;
+  // these temp variables are for cppcheck
+  const auto leftEnd = left.end();
+  const auto rightBegin = right.begin();
+  if (leftEnd == rightBegin)
+    return true;
+
+  // they don't overlap
+  return false;
+}
+
 } // namespace
 
 const std::string TimeROI::NAME = "Kernel_TimeROI";
@@ -59,47 +90,43 @@ void TimeROI::addROI(const Types::Core::DateAndTime &startTime, const Types::Cor
     // add in the new region
     m_roi.push_back(startTime);
     m_roi.push_back(stopTime);
-  } else if (stopTime < m_roi.front()) {
+  } else if (this->isCompletelyInROI(startTime, stopTime)) {
+    g_log.debug("TimeROI::addROI to use region");
+  } else if ((startTime <= m_roi.front()) && stopTime >= m_roi.back()) {
+    // overwrite everything
+    m_roi.clear();
+    m_roi.push_back(startTime);
+    m_roi.push_back(stopTime);
+  } else if (stopTime < m_roi.front() || startTime > m_roi.back()) {
     m_roi.insert(m_roi.begin(), stopTime);
     m_roi.insert(m_roi.begin(), startTime);
   } else {
-    const bool startValueOld = valueAtTime(startTime);
-    const bool stopValueOld = valueAtTime(stopTime);
-
-    DateAndTimeIter startIter;
-    if (startValueOld == ROI_IGNORE) {
-      // expanding into unused region
-      startIter = std::upper_bound(m_roi.begin(), m_roi.end(), startTime);
-    } else {
-      startIter = std::lower_bound(m_roi.begin(), m_roi.end(), startTime);
-    }
-
-    DateAndTimeIter stopIter;
-    if (stopValueOld == ROI_USE) {
-      stopIter = std::lower_bound(startIter, m_roi.end(), stopTime);
-    } else {
-      stopIter = std::upper_bound(startIter, m_roi.end(), stopTime);
-    }
-
-    if (startIter == stopIter) {
-      if (startValueOld == ROI_USE) {
-        g_log.debug("TimeROI::addROI is already accounted for. Addition is being ignored");
+    TimeInterval roi_to_add(startTime, stopTime);
+    std::vector<TimeInterval> output;
+    bool union_added = false;
+    for (const auto interval : this->toSplitters()) {
+      if (overlaps(roi_to_add, interval)) {
+        // the roi absorbs this interval
+        // this check must be first
+        roi_to_add = calculate_union(roi_to_add, interval);
+      } else if (interval < roi_to_add) {
+        output.push_back(interval);
+      } else if (interval > roi_to_add) {
+        if (!union_added) {
+          output.push_back(roi_to_add);
+          union_added = true;
+        }
+        output.push_back(interval);
       } else {
-        // move the start time
-        *startIter = startTime;
+        throw std::runtime_error("encountered supposedly imposible place in TimeROI::addROI");
       }
-    } else {
-      const bool addTwo = bool(std::distance(startIter, stopIter) % 2 == 0);
-      auto insertPos = m_roi.erase(startIter, stopIter);
-      if (addTwo) {
-        m_roi.insert(insertPos, stopTime);
-        m_roi.insert(insertPos, startTime);
-      } else {
-        if (startValueOld == ROI_IGNORE)
-          m_roi.insert(insertPos, startTime);
-        else
-          m_roi.insert(insertPos, stopTime);
-      }
+    }
+    if (!union_added)
+      output.push_back(roi_to_add);
+    this->clear();
+    for (const auto interval : output) {
+      m_roi.push_back(interval.begin());
+      m_roi.push_back(interval.end());
     }
   }
 
@@ -126,7 +153,7 @@ void TimeROI::addMask(const Types::Core::DateAndTime &startTime, const Types::Co
 
   if (this->empty()) {
     g_log.debug("TimeROI::addMask to an empty object is ignored");
-  } else if ((startTime > m_roi.back()) || (stopTime < m_roi.front())) {
+  } else if (this->isCompletelyInMask(startTime, stopTime)) {
     g_log.debug("TimeROI::addMask to ignored region");
   } else if ((startTime <= m_roi.front()) && (stopTime >= m_roi.back())) {
     // the mask includes everything so remove all current values
@@ -153,34 +180,30 @@ void TimeROI::addMask(const Types::Core::DateAndTime &startTime, const Types::Co
       m_roi.push_back(newValue);
   } else {
     g_log.debug("TimeROI::addMask cutting notch in existing ROI");
-    // cutting a notch in an existing ROI
-    auto firstIter = std::lower_bound(m_roi.begin(), m_roi.end(), startTime);
-    auto lastIter = std::lower_bound(m_roi.begin(), m_roi.end(), stopTime);
-    if (firstIter == lastIter) {
-      if (std::distance(m_roi.begin(), firstIter) % 2 == 1) {
-        // completely in a USE region add the stop time first
-        auto newPos = m_roi.insert(firstIter, stopTime);
-        m_roi.insert(newPos, startTime);
-      } else {
-        g_log.debug("TimeROI::addMask cutting notch in existing ignore region doing nothing");
+    // create rois for before and after the mask
+    TimeInterval use_before(m_roi.front(), startTime);
+    TimeInterval use_after(stopTime, m_roi.back());
+
+    // loop through all current splitters and get new intersections
+    std::vector<TimeInterval> output;
+    TimeInterval intersection;
+    for (const auto interval : this->toSplitters()) {
+      intersection = use_before.intersection(interval);
+      if (intersection.isValid()) {
+        output.push_back(intersection);
       }
-    } else {
-      // all other cases are a bit more involved
-      if (std::distance(m_roi.begin(), firstIter) % 2 == 0) {
-        // moving the starting point because it is in an ignore region
-        firstIter = std::upper_bound(m_roi.begin(), lastIter, startTime);
+      intersection = use_after.intersection(interval);
+      if (intersection.isValid()) {
+        output.push_back(intersection);
       }
-      if (std::distance(m_roi.begin(), lastIter) % 2 == 0) {
-        // moving the ending point because it is in a use region
-        firstIter = std::upper_bound(firstIter, m_roi.end(), stopTime);
-      }
-      // remove values
-      firstIter = m_roi.erase(firstIter, lastIter);
-      // add in new part - stop first so the insertion iterator can be reused
-      m_roi.insert(firstIter, stopTime);
-      m_roi.insert(firstIter, startTime);
+    }
+    this->clear();
+    for (const auto interval : output) {
+      m_roi.push_back(interval.begin());
+      m_roi.push_back(interval.end());
     }
   }
+
   // verify "this" is in a good state
   this->validateValues("TimeROI::addMask");
 }
@@ -190,13 +213,13 @@ void TimeROI::addMask(const std::time_t &startTime, const std::time_t &stopTime)
 }
 
 /**
- * This method returns true if the entire region between startTime and stopTime is inside an existing interval.
+ * This method returns true if the entire region between startTime and stopTime is inside an existing use interval.
  * If part of the supplied region is not covered this returns false.
  */
 bool TimeROI::isCompletelyInROI(const Types::Core::DateAndTime &startTime,
                                 const Types::Core::DateAndTime &stopTime) const {
   // check if the region is in the overall window at all
-  if ((startTime > m_roi.back()) || (stopTime < m_roi.front()))
+  if ((startTime > m_roi.back()) || (stopTime <= m_roi.front()))
     return false;
 
   // since the ROI should be alternating "use" and "ignore", see if the start and stop are within a single region
@@ -207,7 +230,30 @@ bool TimeROI::isCompletelyInROI(const Types::Core::DateAndTime &startTime,
     return false;
 
   // the value at the start time should be "use"
-  return this->valueAtTime(startTime);
+  return this->valueAtTime(startTime) == ROI_USE;
+}
+
+/**
+ * This method returns true if the entire region between startTime and stopTime is inside an existing ignore interval.
+ * If part of the supplied region is not covered this returns false.
+ */
+bool TimeROI::isCompletelyInMask(const Types::Core::DateAndTime &startTime,
+                                 const Types::Core::DateAndTime &stopTime) const {
+  if (this->empty())
+    return true;
+  if (startTime >= m_roi.back())
+    return true;
+  if (stopTime < m_roi.front())
+    return true;
+
+  const auto iterStart = std::lower_bound(m_roi.cbegin(), m_roi.cend(), startTime);
+  const auto iterStop = std::lower_bound(iterStart, m_roi.cend(), stopTime);
+  // too far apart
+  if (std::distance(iterStart, iterStop) > 0)
+    return false;
+
+  // give the answer
+  return this->valueAtTime(startTime) == ROI_IGNORE;
 }
 
 /**
@@ -216,7 +262,7 @@ bool TimeROI::isCompletelyInROI(const Types::Core::DateAndTime &startTime,
  *
  * The value is, essentially, whatever it was at the last recorded time before or equal to the one requested.
  */
-bool TimeROI::valueAtTime(const DateAndTime &time) const {
+bool TimeROI::valueAtTime(const Types::Core::DateAndTime &time) const {
   if (this->empty() || time < m_roi.front() || time >= m_roi.back()) {
     // ignore everything outside of range
     return ROI_IGNORE;
@@ -243,6 +289,44 @@ bool TimeROI::valueAtTime(const DateAndTime &time) const {
   }
 }
 
+bool TimeROI::valueAtTime(const std::vector<Types::Core::DateAndTime>::iterator &time) {
+  if (std::distance(m_roi.begin(), time) % 2 == 0)
+    return ROI_USE;
+  else
+    return ROI_IGNORE;
+}
+
+/**
+ * Returns the time supplied if it is in a "use" region, or the minimum of the next higher use region.
+ * If the ROI is empty, the time is returned.
+ * If the Time is after the ROI, an exception is thrown
+ * This is intended to be used with logs.
+ */
+Types::Core::DateAndTime TimeROI::getEffectiveTime(const Types::Core::DateAndTime &time) const {
+  if (m_roi.empty()) {
+    return time;
+  } else if (time > m_roi.back()) {
+    throw std::runtime_error("Requesting effective time after the end of the TimeROI");
+  } else if (valueAtTime(time) == ROI_USE) {
+    return time;
+  } else {
+    // need to find the start time the first USE region after the time
+    auto iter = std::lower_bound(m_roi.begin(), m_roi.end(), time);
+    if (valueAtTime(*iter) == ROI_IGNORE) {
+      // move to the next value
+      iter++;
+    }
+    return *iter;
+  }
+}
+
+// returns the last time in the TimeROI
+Types::Core::DateAndTime TimeROI::lastTime() const {
+  if (m_roi.empty())
+    throw std::runtime_error("cannot return time from empty TimeROI");
+  return m_roi.back();
+}
+
 /// get a list of all unique times. order is not guaranteed
 std::vector<DateAndTime> TimeROI::getAllTimes(const TimeROI &other) {
 
@@ -261,7 +345,7 @@ void TimeROI::replaceROI(const TimeSeriesProperty<bool> *roi) {
   // this is used by LogManager::loadNexus
   m_roi.clear();
 
-  if (roi->size() > 0) {
+  if (roi != nullptr && roi->size() > 0) {
     // make a copy with unique values
     TimeSeriesProperty<bool> roi_copy(*roi);
     roi_copy.eliminateDuplicates(); // takes last value
@@ -271,6 +355,8 @@ void TimeROI::replaceROI(const TimeSeriesProperty<bool> *roi) {
 
     // find the first USE value and start there
     const auto iter = std::find(values.cbegin(), values.cend(), ROI_USE);
+    if (iter == values.cend())
+      throw std::runtime_error("TimeROI cannot be created. All values are ignore.");
     std::size_t start = std::size_t(std::distance(values.cbegin(), iter));
 
     const auto times = roi_copy.timesAsVector();
@@ -287,6 +373,12 @@ void TimeROI::replaceROI(const TimeSeriesProperty<bool> *roi) {
       // add the value to the end
       m_roi.push_back(times[i]);
     }
+
+    // if last value was use, add a new value at the end that is the full duration of the log out
+    if (roi->lastValue() == ROI_USE) {
+      const auto duration = roi->lastTime() - roi->firstTime();
+      m_roi.push_back(roi->lastTime() + duration);
+    }
   }
 
   this->validateValues("TimeROI::replaceROI");
@@ -294,7 +386,8 @@ void TimeROI::replaceROI(const TimeSeriesProperty<bool> *roi) {
 
 void TimeROI::replaceROI(const TimeROI &other) {
   m_roi.clear();
-  m_roi.assign(other.m_roi.cbegin(), other.m_roi.cend());
+  if (!other.empty())
+    m_roi.assign(other.m_roi.cbegin(), other.m_roi.cend());
 }
 
 /**
@@ -350,6 +443,10 @@ void TimeROI::update_intersection(const TimeROI &other) {
 /**
  * If this is empty, replace it with the supplied TimeROI, otherwise calculate the intersection.
  * Supplying an empty TimeROI will have no effect.
+ * Thinking of the TimeROI as filters, the goal is to filter with the intersection or
+ * with either of the filters if one of them is empty.
+ *
+ * @param other :: the replacing or intersecting TimeROI.
  */
 void TimeROI::update_or_replace_intersection(const TimeROI &other) {
   if (this->empty()) {
@@ -375,19 +472,29 @@ const std::vector<SplittingInterval> TimeROI::toSplitters() const {
 
 bool TimeROI::operator==(const TimeROI &other) const { return this->m_roi == other.m_roi; }
 
-void TimeROI::debugPrint(const std::size_t type) const {
+/**
+ * Returns the ROI boundaries to a string.
+ * Example:
+ *   debugStrPrint(0) returns "0: 2022-Dec-19 00:01:00 to 2022-Dec-26 00:01:00\n" for a single ROI
+ *   debugStrPrint(1) returns "2022-Dec-19 00:01:00 2022-Dec-26 00:01:00\n" for a single ROI
+ * @param type :: either "0" or "1", for different representation
+ * @return ROI boundaries
+ */
+std::string TimeROI::debugStrPrint(const std::size_t type) const {
+  std::stringstream ss;
   if (type == 0) {
     const auto NUM_VALUES{m_roi.size()};
     for (std::size_t i = 0; i < NUM_VALUES; i += 2) {
-      std::cout << (i / 2) << ": " << m_roi[i] << " to " << m_roi[i + 1] << std::endl;
+      ss << (i / 2) << ": " << m_roi[i] << " to " << m_roi[i + 1] << "\n";
     }
   } else if (type == 1) {
     for (const auto val : m_roi)
-      std::cout << val << " ";
-    std::cout << std::endl;
+      ss << val << " ";
+    ss << "\n";
   } else {
     throw std::runtime_error("Invalid type parameter");
   }
+  return ss.str();
 }
 
 size_t TimeROI::getMemorySize() const { return this->numBoundaries() * sizeof(DateAndTime); }
@@ -450,13 +557,18 @@ void TimeROI::validateValues(const std::string &label) {
   // verify the values are unique
   const std::size_t NUM_UNIQUE = std::size_t(std::distance(m_roi.begin(), std::unique(m_roi.begin(), m_roi.end())));
   if (NUM_UNIQUE != m_roi.size()) {
-    throw std::runtime_error("Values are not unique");
+    std::stringstream msg;
+    msg << "In " << label << ": Values are not unique";
+    throw std::runtime_error(msg.str());
   }
 }
 
 std::size_t TimeROI::numBoundaries() const { return static_cast<std::size_t>(m_roi.size()); }
 
 bool TimeROI::empty() const { return bool(this->numBoundaries() == 0); }
+
+/// Removes all ROI's, leaving an empty object
+void TimeROI::clear() { m_roi.clear(); }
 
 // serialization / deserialization items
 void TimeROI::saveNexus(::NeXus::File *file) const {
