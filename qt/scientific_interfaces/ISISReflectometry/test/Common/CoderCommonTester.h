@@ -81,6 +81,9 @@ private:
     TS_ASSERT_EQUALS(gui->m_ui.polCorrComboBox->currentText(), map[QString("polCorrComboBox")].toString())
     TS_ASSERT_EQUALS(gui->m_ui.polCorrEfficienciesWsSelector->currentText(),
                      map[QString("polCorrEfficienciesWsSelector")].toString())
+    TS_ASSERT_EQUALS(gui->m_polCorrEfficienciesWsSelector->currentText(),
+                     map[QString("polCorrEfficienciesWsSelector")].toString())
+    TS_ASSERT_EQUALS(gui->m_polCorrEfficienciesLineEdit->text(), map[QString("polCorrEfficienciesLineEdit")].toString())
     TS_ASSERT_EQUALS(gui->m_ui.floodCorComboBox->currentIndex(), map[QString("floodCorComboBox")].toInt())
     TS_ASSERT_EQUALS(gui->m_ui.floodWorkspaceWsSelector->currentIndex(),
                      map[QString("floodWorkspaceWsSelector")].toInt())

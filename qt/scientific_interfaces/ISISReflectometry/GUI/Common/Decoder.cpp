@@ -102,7 +102,8 @@ void Decoder::decodeExperiment(QtExperimentView *gui, const QMap<QString, QVaria
   gui->m_ui.polynomialDegreeSpinBox->setValue(map[QString("polynomialDegreeSpinBox")].toInt());
   gui->m_ui.costFunctionComboBox->setCurrentIndex(map[QString("costFunctionComboBox")].toInt());
   gui->m_ui.polCorrComboBox->setCurrentText(map[QString("polCorrComboBox")].toString());
-  gui->m_ui.polCorrEfficienciesWsSelector->setCurrentText(map[QString("polCorrEfficienciesWsSelector")].toString());
+  gui->m_polCorrEfficienciesWsSelector->setCurrentText(map[QString("polCorrEfficienciesWsSelector")].toString());
+  gui->m_polCorrEfficienciesLineEdit->setText(map[QString("polCorrEfficienciesLineEdit")].toString());
   gui->m_ui.floodCorComboBox->setCurrentIndex(map[QString("floodCorComboBox")].toInt());
   gui->m_ui.floodWorkspaceWsSelector->setCurrentIndex(map[QString("floodWorkspaceWsSelector")].toInt());
   gui->m_stitchEdit->setText(map[QString("stitchEdit")].toString());

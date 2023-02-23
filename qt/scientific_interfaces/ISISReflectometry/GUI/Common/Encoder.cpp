@@ -284,7 +284,8 @@ QMap<QString, QVariant> Encoder::encodeExperiment(const QtExperimentView *gui) {
   experimentMap.insert(QString("costFunctionComboBox"), QVariant(gui->m_ui.costFunctionComboBox->currentIndex()));
   experimentMap.insert(QString("polCorComboBox"), QVariant(gui->m_ui.polCorrComboBox->currentText()));
   experimentMap.insert(QString("polCorrEfficienciesWsSelector"),
-                       QVariant(gui->m_ui.polCorrEfficienciesWsSelector->currentText()));
+                       QVariant(gui->m_polCorrEfficienciesWsSelector->currentText()));
+  experimentMap.insert(QString("polCorrEfficienciesLineEdit"), QVariant(gui->m_polCorrEfficienciesLineEdit->text()));
   experimentMap.insert(QString("floodCorComboBox"), QVariant(gui->m_ui.floodCorComboBox->currentIndex()));
   experimentMap.insert(QString("floodWorkspaceWsSelector"),
                        QVariant(gui->m_ui.floodWorkspaceWsSelector->currentIndex()));
