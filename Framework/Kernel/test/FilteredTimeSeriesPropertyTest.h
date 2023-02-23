@@ -60,17 +60,17 @@ public:
     TS_ASSERT_EQUALS(filtered->nthValue(3), 4);
 
     auto interval = filtered->nthInterval(0);
-    TS_ASSERT_EQUALS(interval.begin(), DateAndTime("2007-11-30T16:17:00"));
-    TS_ASSERT_EQUALS(interval.end(), DateAndTime("2007-11-30T16:17:01"));
+    TS_ASSERT_EQUALS(interval.start(), DateAndTime("2007-11-30T16:17:00"));
+    TS_ASSERT_EQUALS(interval.stop(), DateAndTime("2007-11-30T16:17:01"));
     interval = filtered->nthInterval(1);
-    TS_ASSERT_EQUALS(interval.begin(), DateAndTime("2007-11-30T16:17:03"));
-    TS_ASSERT_EQUALS(interval.end(), DateAndTime("2007-11-30T16:17:04"));
+    TS_ASSERT_EQUALS(interval.start(), DateAndTime("2007-11-30T16:17:03"));
+    TS_ASSERT_EQUALS(interval.stop(), DateAndTime("2007-11-30T16:17:04"));
     interval = filtered->nthInterval(2);
-    TS_ASSERT_EQUALS(interval.begin(), DateAndTime("2007-11-30T16:17:25"));
-    TS_ASSERT_EQUALS(interval.end(), DateAndTime("2007-11-30T16:17:30"));
+    TS_ASSERT_EQUALS(interval.start(), DateAndTime("2007-11-30T16:17:25"));
+    TS_ASSERT_EQUALS(interval.stop(), DateAndTime("2007-11-30T16:17:30"));
     interval = filtered->nthInterval(3);
-    TS_ASSERT_EQUALS(interval.begin(), DateAndTime("2007-11-30T16:17:30"));
-    TS_ASSERT_EQUALS(interval.end(), DateAndTime("2007-11-30T16:17:39"));
+    TS_ASSERT_EQUALS(interval.start(), DateAndTime("2007-11-30T16:17:30"));
+    TS_ASSERT_EQUALS(interval.stop(), DateAndTime("2007-11-30T16:17:39"));
   }
 
   void test_Construction_Yields_A_Filtered_Property_When_Accessing_Through_The_Filtered_Object() {
@@ -640,10 +640,10 @@ public:
     TS_ASSERT_EQUALS(intervals.size(), 2);
     if (intervals.size() == 2) {
       const auto &firstRange = intervals.front(), &secondRange = intervals.back();
-      TS_ASSERT_EQUALS(firstRange.begin(), firstStart);
-      TS_ASSERT_EQUALS(firstRange.end(), firstEnd);
-      TS_ASSERT_EQUALS(secondRange.begin(), secondStart);
-      TS_ASSERT_EQUALS(secondRange.end(), secondEnd);
+      TS_ASSERT_EQUALS(firstRange.start(), firstStart);
+      TS_ASSERT_EQUALS(firstRange.stop(), firstEnd);
+      TS_ASSERT_EQUALS(secondRange.start(), secondStart);
+      TS_ASSERT_EQUALS(secondRange.stop(), secondEnd);
     }
   }
 
@@ -662,12 +662,12 @@ public:
     const auto &intervals = log->getSplittingIntervals();
     TS_ASSERT_EQUALS(intervals.size(), 3);
     if (intervals.size() == 3) {
-      TS_ASSERT_EQUALS(intervals[0].begin(), log->firstTime());
-      TS_ASSERT_EQUALS(intervals[0].end(), firstEnd);
-      TS_ASSERT_EQUALS(intervals[1].begin(), secondStart);
-      TS_ASSERT_EQUALS(intervals[1].end(), secondEnd);
-      TS_ASSERT_EQUALS(intervals[2].begin(), thirdStart);
-      TS_ASSERT(intervals[2].end() > thirdStart);
+      TS_ASSERT_EQUALS(intervals[0].start(), log->firstTime());
+      TS_ASSERT_EQUALS(intervals[0].stop(), firstEnd);
+      TS_ASSERT_EQUALS(intervals[1].start(), secondStart);
+      TS_ASSERT_EQUALS(intervals[1].stop(), secondEnd);
+      TS_ASSERT_EQUALS(intervals[2].start(), thirdStart);
+      TS_ASSERT(intervals[2].stop() > thirdStart);
     }
   }
 

@@ -276,7 +276,7 @@ template <typename TYPE> void FilteredTimeSeriesProperty<TYPE>::applyFilter() co
   std::size_t index_current_log{0};
 
   for (const auto splitter : m_filter->toSplitters()) {
-    const auto endTime = splitter.end();
+    const auto endTime = splitter.stop();
 
     // check if the splitter starts too early
     if (endTime < this->m_values[index_current_log].time()) {
@@ -284,7 +284,7 @@ template <typename TYPE> void FilteredTimeSeriesProperty<TYPE>::applyFilter() co
     }
 
     // cache values to reduce number of method calls
-    const auto beginTime = splitter.begin();
+    const auto beginTime = splitter.start();
 
     // find the first log that should be added
     if (this->m_values.back().time() < beginTime) {

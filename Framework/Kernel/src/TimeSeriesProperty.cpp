@@ -909,7 +909,7 @@ TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<SplittingIn
     }
 
     // Now close off with the end of the current filter range
-    duration = DateAndTime::secondsFromDuration(time.end() - startTime);
+    duration = DateAndTime::secondsFromDuration(time.stop() - startTime);
     weighted_sum += duration;
     mean_prev = mean_current;
 

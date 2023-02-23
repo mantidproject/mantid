@@ -98,11 +98,11 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
     TimeInterval time2 = filter2->nthInterval(filter2->size() - 1);
 
     if (time1.start() < time2.start()) {
-      filter1->addValue(time2Begin,
+      filter1->addValue(time2.start(),
                         true); // should be f1->lastValue, but it doesnt
                                // matter for boolean AND
     } else if (time2.start() < time1.start()) {
-      filter2->addValue(time1Begin, true);
+      filter2->addValue(time1.start(), true);
     }
 
     // temporary objects to handle the intersection calculation
@@ -127,11 +127,11 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
       const auto mysize = m_prop->size();
       const auto penultimate_interval = m_prop->nthInterval(mysize - 2);
       const auto ultimate_interval = m_prop->nthInterval(mysize - 1);
-      const auto oldEnd = ultimate_interval.end();
-      const auto newEnd = ultimate_interval.begin() + penultimate_interval.length();
+      const auto oldEnd = ultimate_interval.stop();
+      const auto newEnd = ultimate_interval.start() + penultimate_interval.length();
       // extend or shrink the last ROI depending on which value is bigger
       if (oldEnd > newEnd)
-        timeroi.addMask(newEnd, ultimate_interval.end());
+        timeroi.addMask(newEnd, ultimate_interval.stop());
       else if (newEnd > oldEnd)
         timeroi.addROI(oldEnd, newEnd);
       // both ends match (lucky guess earlier) so there is nothing to adjust
@@ -196,8 +196,8 @@ void LogFilter::setFilter(const TimeROI &roi, const bool filterOpenEnded) {
   for (const auto splitter : roi.toSplitters()) {
     values.emplace_back(true);
     values.emplace_back(false);
-    times.emplace_back(splitter.begin());
-    times.emplace_back(splitter.end());
+    times.emplace_back(splitter.start());
+    times.emplace_back(splitter.stop());
   }
   // if both are open ended, remove the ending
   if (filterOpenEnded) {
