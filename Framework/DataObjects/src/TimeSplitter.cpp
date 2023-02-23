@@ -48,7 +48,7 @@ TimeSplitter::TimeSplitter(const Mantid::API::MatrixWorkspace_sptr &ws) {
 
   const auto X = ws->binEdges(0);
   const auto &Y = ws->y(0);
-  if (std::any_of(X.begin(), X.end(), [](int i) { return i < 0; })) {
+  if (std::any_of(X.begin(), X.end(), [](int i) { return static_cast<int>(i) < 0; })) {
     throw std::runtime_error("All X values in MatrixWorkspace must be >= 0 to construct TimeSplitter.");
   }
   if (X.size() != Y.size() + 1) {
