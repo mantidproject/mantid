@@ -178,9 +178,26 @@ public:
     TS_ASSERT(runlogs.hasProperty("Facility"));
     TS_ASSERT_EQUALS(runlogs.getProperty("Facility")->value(), "ILL");
     checkTimeFormat(output);
+  }
 
-    // Remove workspace from the data service.
-    AnalysisDataService::Instance().clear();
+  void test_spectrometer_noSDdetectors() {
+    // checks loading IN16B spectrometer data when no SD detectors were enabled
+    LoadILLIndirect2 loader;
+    loader.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(loader.initialize())
+    TS_ASSERT(loader.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "ILL/IN16B/353970.nxs"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", "__unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("LoadDetectors", "Spectrometer"));
+    TS_ASSERT_THROWS_NOTHING(loader.execute(););
+    TS_ASSERT(loader.isExecuted());
+    MatrixWorkspace_sptr outputWS =
+        std::shared_ptr<Mantid::API::MatrixWorkspace>(loader.getProperty("OutputWorkspace"));
+    TS_ASSERT(outputWS)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 2049)
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 2048)
+
+    TS_ASSERT_EQUALS(outputWS->dataY(58)[3], 1.0)
   }
 
   void checkTimeFormat(MatrixWorkspace_const_sptr outputWS) {
