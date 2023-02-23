@@ -110,7 +110,7 @@ def superplot_from_names(names, plot_kwargs):
 
     :param names: A list of workspace names
     """
-    return plot(names, plot_kwargs=plot_kwargs, wksp_indices=[], superplot=True)
+    plot(names, plot_kwargs=plot_kwargs, wksp_indices=[], superplot=True)
 
 
 def superplot_with_errors_from_names(names, plot_kwargs):
@@ -120,7 +120,7 @@ def superplot_with_errors_from_names(names, plot_kwargs):
 
     :param names: A list of workspace names
     """
-    return plot(names, errors=True, plot_kwargs=plot_kwargs, wksp_indices=[], superplot=True)
+    plot(names, errors=True, plot_kwargs=plot_kwargs, wksp_indices=[], superplot=True)
 
 
 def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False, advanced=False, superplot=False):
