@@ -142,7 +142,7 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.presenter.on_visibility_changed(True)
         self.presenter.on_visibility_changed(False)
         self.m_figure.tight_layout.assert_called_once()
-        self.m_canvas.draw_idle.assert_called_once()
+        self.m_canvas.draw.assert_called_once()
 
     def test_on_add_button_clicked(self):
         self.presenter._update_list = mock.Mock()
@@ -250,7 +250,7 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.m_canvas.reset_mock()
         self.presenter._redraw(True)
         self.m_figure.set_visible.assert_called_once_with(False)
-        self.m_canvas.draw_idle.assert_called_once()
+        self.m_canvas.draw.assert_called_once()
         # non empty plot
         self.m_figure.reset_mock()
         self.m_axes.reset_mock()
@@ -266,7 +266,7 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.m_figure.tight_layout.assert_called_once()
         m_legend.set_visible.assert_called_once_with(True)
         m_legend_set_draggable.assert_called_once()
-        self.m_canvas.draw_idle.assert_called_once()
+        self.m_canvas.draw.assert_called_once()
 
     def test_remove_unneeded_curves(self):
         self.m_mtd.__contains__.return_value = True
