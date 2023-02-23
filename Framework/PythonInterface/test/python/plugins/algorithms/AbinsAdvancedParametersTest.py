@@ -52,7 +52,7 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
         abins.parameters.performance = {"optimal_size": int(5e6), "threads": 1}
 
     def tearDown(self):
-        test_helpers.remove_output_files(list_of_names=["AbinsAdvanced"])
+        test_helpers.remove_output_files(list_of_names=["_AbinsAdvanced"])
         mtd.clear()
 
     def test_wrong_fwhm(self):
@@ -70,7 +70,6 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
 
     # Tests for TOSCA parameters
     def test_wrong_tosca_final_energy(self):
-
         # final energy should be a float not str
         abins.parameters.instruments["TOSCA"]["final_neutron_energy"] = "0"
         self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
@@ -84,7 +83,6 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
         self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 
     def test_wrong_tosca_cos_scattering_angle(self):
-
         # cosines of scattering angle is float
         abins.parameters.instruments["TOSCA"]["cos_scattering_angle"] = "0.0334"
         self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
