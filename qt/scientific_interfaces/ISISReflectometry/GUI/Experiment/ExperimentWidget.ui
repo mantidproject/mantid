@@ -584,12 +584,22 @@
        </property>
        <item>
         <property name="text">
-         <string>Workspace</string>
+         <string>None</string>
         </property>
        </item>
        <item>
         <property name="text">
          <string>ParameterFile</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Workspace</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>FilePath</string>
         </property>
        </item>
       </widget>
