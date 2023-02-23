@@ -198,6 +198,18 @@ void ALFInstrumentModel::generateLoadedWorkspace() {
   ADS.addOrReplace(loadedWsName(), normalisedDSpacing);
 }
 
+void ALFInstrumentModel::setWorkspace(ALFDataSwitch const &dataSwitch, MatrixWorkspace_sptr const &workspace) {
+  switch (dataSwitch) {
+  case ALFDataSwitch::SAMPLE:
+    setSample(workspace);
+    return;
+  case ALFDataSwitch::VANADIUM:
+    setVanadium(workspace);
+    return;
+  }
+  throw std::invalid_argument("ALFDataSwitch must be one of { SAMPLE, VANADIUM }");
+}
+
 void ALFInstrumentModel::setSample(MatrixWorkspace_sptr const &sample) {
   auto const sampleRemoved = m_sample && !sample;
   m_sample = sample;
@@ -208,15 +220,15 @@ void ALFInstrumentModel::setSample(MatrixWorkspace_sptr const &sample) {
 
 void ALFInstrumentModel::setVanadium(MatrixWorkspace_sptr const &vanadium) { m_vanadium = vanadium; }
 
-/*
- * Retrieves the sample run number from the currently loaded sample workspace.
- */
-std::size_t ALFInstrumentModel::sampleRun() const { return runNumber(m_sample); }
-
-/*
- * Retrieves the vanadium run number from the currently loaded vanadium workspace.
- */
-std::size_t ALFInstrumentModel::vanadiumRun() const { return runNumber(m_vanadium); }
+std::size_t ALFInstrumentModel::run(ALFDataSwitch const &dataSwitch) const {
+  switch (dataSwitch) {
+  case ALFDataSwitch::SAMPLE:
+    return runNumber(m_sample);
+  case ALFDataSwitch::VANADIUM:
+    return runNumber(m_vanadium);
+  }
+  throw std::invalid_argument("ALFDataSwitch must be one of { SAMPLE, VANADIUM }");
+}
 
 std::size_t ALFInstrumentModel::runNumber(Mantid::API::MatrixWorkspace_sptr const &workspace) const {
   if (!workspace) {

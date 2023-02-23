@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidQtWidgets/Common/QtJobRunner.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/ConfiguredAlgorithm.h"
 #include "MantidQtWidgets/Common/IConfiguredAlgorithm.h"
@@ -18,7 +18,7 @@ using namespace MantidQt::API;
 namespace {
 
 MantidQt::API::IConfiguredAlgorithm_sptr toConfiguredAlgorithm(Mantid::API::IAlgorithm_sptr const &algorithm) {
-  auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   return std::make_shared<MantidQt::API::ConfiguredAlgorithm>(std::move(algorithm), std::move(properties));
 }
 

@@ -59,14 +59,13 @@ IAlgorithm_sptr normaliseByCurrentAlgorithm(MatrixWorkspace_sptr const &inputWor
 namespace MantidQt::CustomInterfaces {
 
 ALFAlgorithmManager::ALFAlgorithmManager(std::unique_ptr<API::IJobRunner> jobRunner)
-    : m_currentType(), m_jobRunner(std::move(jobRunner)), m_subscriber() {
+    : m_jobRunner(std::move(jobRunner)), m_subscriber() {
   m_jobRunner->subscribe(this);
 }
 
 void ALFAlgorithmManager::subscribe(IALFAlgorithmManagerSubscriber *subscriber) { m_subscriber = subscriber; }
 
-void ALFAlgorithmManager::loadAndNormalise(ALFDataType const &dataType, std::string const &filename) {
-  m_currentType = dataType;
+void ALFAlgorithmManager::loadAndNormalise(std::string const &filename) {
   m_jobRunner->executeAlgorithm(loadAlgorithm(filename));
 }
 
@@ -101,7 +100,7 @@ void ALFAlgorithmManager::notifyLoadComplete(IAlgorithm_sptr const &algorithm) {
 void ALFAlgorithmManager::notifyNormaliseComplete(Mantid::API::IAlgorithm_sptr const &algorithm) {
   // Explicitly provide return type. Return type must be the same as the input property type to allow type casting
   MatrixWorkspace_sptr outputWorkspace = algorithm->getProperty("OutputWorkspace");
-  m_subscriber->notifyLoadAndNormaliseComplete(m_currentType, outputWorkspace);
+  m_subscriber->notifyLoadAndNormaliseComplete(outputWorkspace);
 }
 
 } // namespace MantidQt::CustomInterfaces

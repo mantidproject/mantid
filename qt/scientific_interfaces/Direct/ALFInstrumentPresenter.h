@@ -7,6 +7,7 @@
 #pragma once
 
 #include "ALFAlgorithmManager.h"
+#include "ALFDataSwitch.h"
 #include "ALFInstrumentModel.h"
 #include "DetectorTube.h"
 #include "DllConfig.h"
@@ -65,8 +66,7 @@ public:
   void loadVanadium() override;
 
   void notifyAlgorithmError(std::string const &message) override;
-  void notifyLoadAndNormaliseComplete(ALFDataType const &dataType,
-                                      Mantid::API::MatrixWorkspace_sptr const &workspace) override;
+  void notifyLoadAndNormaliseComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
 
   void notifyInstrumentActorReset() override;
   void notifyShapeChanged() override;
@@ -75,8 +75,16 @@ public:
 private:
   void generateLoadedWorkspace();
 
+  std::optional<std::string> getFileFromView() const;
+
+  void loadAndNormalise();
+
+  void updateRunInViewFromModel();
+
   void updateInstrumentViewFromModel();
   void updateAnalysisViewFromModel();
+
+  ALFDataSwitch m_dataSwitch;
 
   IALFAnalysisPresenter *m_analysisPresenter;
 

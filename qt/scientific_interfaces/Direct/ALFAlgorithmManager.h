@@ -7,7 +7,6 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "IALFAlgorithmManagerSubscriber.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/IJobRunner.h"
@@ -25,7 +24,7 @@ public:
 
   virtual void subscribe(IALFAlgorithmManagerSubscriber *subscriber) = 0;
 
-  virtual void loadAndNormalise(ALFDataType const &dataType, std::string const &filename) = 0;
+  virtual void loadAndNormalise(std::string const &filename) = 0;
 };
 
 class MANTIDQT_DIRECT_DLL ALFAlgorithmManager final : public IALFAlgorithmManager, public API::JobRunnerSubscriber {
@@ -35,7 +34,7 @@ public:
 
   void subscribe(IALFAlgorithmManagerSubscriber *subscriber) override;
 
-  void loadAndNormalise(ALFDataType const &dataType, std::string const &filename) override;
+  void loadAndNormalise(std::string const &filename) override;
 
   void notifyBatchComplete(bool error) override{};
   void notifyBatchCancelled() override{};
@@ -47,7 +46,6 @@ private:
   void notifyLoadComplete(Mantid::API::IAlgorithm_sptr const &algorithm);
   void notifyNormaliseComplete(Mantid::API::IAlgorithm_sptr const &algorithm);
 
-  ALFDataType m_currentType;
   std::unique_ptr<API::IJobRunner> m_jobRunner;
   IALFAlgorithmManagerSubscriber *m_subscriber;
 };

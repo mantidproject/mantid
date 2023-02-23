@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "ALFDataSwitch.h"
 #include "DetectorTube.h"
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -37,13 +38,11 @@ public:
 
   virtual void generateLoadedWorkspace() = 0;
 
-  virtual void setSample(Mantid::API::MatrixWorkspace_sptr const &sample) = 0;
-  virtual void setVanadium(Mantid::API::MatrixWorkspace_sptr const &vanadium) = 0;
+  virtual void setWorkspace(ALFDataSwitch const &dataSwitch, Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
 
   virtual std::string loadedWsName() const = 0;
 
-  virtual std::size_t sampleRun() const = 0;
-  virtual std::size_t vanadiumRun() const = 0;
+  virtual std::size_t run(ALFDataSwitch const &dataSwitch) const = 0;
 
   virtual bool setSelectedTubes(std::vector<DetectorTube> tubes) = 0;
   virtual bool addSelectedTube(DetectorTube const &tube) = 0;
@@ -60,13 +59,11 @@ public:
 
   void generateLoadedWorkspace() override;
 
-  void setSample(Mantid::API::MatrixWorkspace_sptr const &sample) override;
-  void setVanadium(Mantid::API::MatrixWorkspace_sptr const &vanadium) override;
+  void setWorkspace(ALFDataSwitch const &dataSwitch, Mantid::API::MatrixWorkspace_sptr const &workspace) override;
 
   inline std::string loadedWsName() const noexcept override { return "ALFData"; };
 
-  std::size_t sampleRun() const override;
-  std::size_t vanadiumRun() const override;
+  std::size_t run(ALFDataSwitch const &dataSwitch) const override;
 
   bool setSelectedTubes(std::vector<DetectorTube> tubes) override;
   bool addSelectedTube(DetectorTube const &tube) override;
@@ -76,6 +73,9 @@ public:
   generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::IInstrumentActor const &actor) const override;
 
 private:
+  void setSample(Mantid::API::MatrixWorkspace_sptr const &sample);
+  void setVanadium(Mantid::API::MatrixWorkspace_sptr const &vanadium);
+
   std::size_t runNumber(Mantid::API::MatrixWorkspace_sptr const &workspace) const;
 
   bool tubeExists(DetectorTube const &tube) const;

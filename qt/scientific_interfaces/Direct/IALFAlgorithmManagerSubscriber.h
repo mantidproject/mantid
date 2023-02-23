@@ -11,8 +11,6 @@
 
 namespace MantidQt::CustomInterfaces {
 
-enum class ALFDataType { SAMPLE, VANADIUM };
-
 class MANTIDQT_DIRECT_DLL IALFAlgorithmManagerSubscriber {
 
 public:
@@ -20,8 +18,7 @@ public:
 
   virtual void notifyAlgorithmError(std::string const &message) = 0;
 
-  virtual void notifyLoadAndNormaliseComplete(ALFDataType const &dataType,
-                                              Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
+  virtual void notifyLoadAndNormaliseComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
 };
 
 } // namespace MantidQt::CustomInterfaces
