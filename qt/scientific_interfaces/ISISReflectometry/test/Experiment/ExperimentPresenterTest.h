@@ -242,7 +242,11 @@ public:
 
   void testSetFloodCorrectionsToWorkspaceEnablesInputs() { runWithFloodCorrectionInputsEnabled("Workspace"); }
 
+  void testSetFloodCorrectionsToFilePathEnablesInputs() { runWithFloodCorrectionInputsEnabled("FilePath"); }
+
   void testSetFloodCorrectionsToParameterFileDisablesInputs() { runWithFloodCorrectionInputsDisabled("ParameterFile"); }
+
+  void testSetFloodCorrectionsToNoneDisablesInputs() { runWithFloodCorrectionInputsDisabled("None"); }
 
   void testSetValidTransmissionRunRange() {
     RangeInLambda range(7.2, 10);
