@@ -76,7 +76,7 @@ class MatchSpectraTest(unittest.TestCase):
         for histogram in (True, False):
             self.__createWorkspace(inwsname, histogram, False)
 
-            with self.assertRaises(RuntimeError):
+            with self.assertRaisesRegex(RuntimeError, "None of the uncertainties in the reference spectrum is greater than zero."):
                 results = MatchSpectra(
                     InputWorkspace=inwsname, OutputWorkspace=outwsname, ReferenceSpectrum=1, CalculateOffset=True, CalculateScale=True
                 )
