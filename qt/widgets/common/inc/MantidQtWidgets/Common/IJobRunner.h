@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/DllConfig.h"
+#include "DllOption.h"
 
 #include <deque>
 #include <memory>
@@ -15,15 +15,12 @@
 namespace MantidQt::API {
 class IConfiguredAlgorithm;
 using IConfiguredAlgorithm_sptr = std::shared_ptr<IConfiguredAlgorithm>;
-} // namespace MantidQt::API
-
-namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 /** @class JobRunnerSubscriber
  *
  * JobRunnerSubscriber is an interface to a class that subscribes to notifications from an IJobRunner
  */
-class MANTIDQT_ISISREFLECTOMETRY_DLL JobRunnerSubscriber {
+class EXPORT_OPT_MANTIDQT_COMMON JobRunnerSubscriber {
 public:
   virtual ~JobRunnerSubscriber() = default;
 
@@ -38,7 +35,7 @@ public:
  *
  * IJobRunner is an interface to a class that provides functionality to run a batch algorithm queue
  */
-class MANTIDQT_ISISREFLECTOMETRY_DLL IJobRunner {
+class EXPORT_OPT_MANTIDQT_COMMON IJobRunner {
 public:
   virtual ~IJobRunner() = default;
   virtual void subscribe(JobRunnerSubscriber *notifyee) = 0;
@@ -47,4 +44,4 @@ public:
   virtual void executeAlgorithmQueue() = 0;
   virtual void cancelAlgorithmQueue() = 0;
 };
-} // namespace MantidQt::CustomInterfaces::ISISReflectometry
+} // namespace MantidQt::API
