@@ -117,7 +117,9 @@ public:
   virtual std::string getFloodCorrectionType() const = 0;
   virtual void setFloodCorrectionType(std::string const &correction) = 0;
   virtual std::string getFloodWorkspace() const = 0;
+  virtual std::string getFloodFilePath() const = 0;
   virtual void setFloodWorkspace(std::string const &workspace) = 0;
+  virtual void setFloodFilePath(std::string const &filePath) = 0;
 
   virtual std::string getStitchOptions() const = 0;
   virtual void setStitchOptions(std::string const &stitchOptions) = 0;

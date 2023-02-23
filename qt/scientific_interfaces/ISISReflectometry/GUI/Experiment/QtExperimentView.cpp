@@ -649,9 +649,13 @@ void QtExperimentView::setFloodCorrectionType(std::string const &type) { setSele
 
 std::string QtExperimentView::getFloodWorkspace() const { return getText(*m_floodCorrWsSelector); }
 
+std::string QtExperimentView::getFloodFilePath() const { return getText(*m_floodCorrLineEdit); }
+
 void QtExperimentView::setFloodWorkspace(std::string const &workspace) {
   setSelected(*m_floodCorrWsSelector, workspace);
 }
+
+void QtExperimentView::setFloodFilePath(std::string const &filePath) { setText(*m_floodCorrLineEdit, filePath); }
 
 std::string QtExperimentView::getAnalysisMode() const { return getText(*m_ui.analysisModeComboBox); }
 
