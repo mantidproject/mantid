@@ -53,10 +53,19 @@ class SpaceGroupBuilderTest(unittest.TestCase):
         invalid_new = {"_space_group_name_h-m_alt": "invalid"}
         invalid_old = {"_symmetry_space_group_name_h-m": "invalid"}
 
-        self.assertRaises(RuntimeError, self.builder._getSpaceGroupFromString, cifData={})
-        self.assertRaises(ValueError, self.builder._getSpaceGroupFromString, cifData=invalid_new)
-        self.assertRaises(ValueError, self.builder._getSpaceGroupFromString, cifData=invalid_old)
-        self.assertRaises(ValueError, self.builder._getSpaceGroupFromString, cifData=merge_dicts(invalid_new, valid_old))
+        self.assertRaisesRegex(RuntimeError, "No space group symbol in CIF.", self.builder._getSpaceGroupFromString, cifData={})
+        self.assertRaisesRegex(
+            ValueError, "Space group with symbol 'invalid' is not registered.", self.builder._getSpaceGroupFromString, cifData=invalid_new
+        )
+        self.assertRaisesRegex(
+            ValueError, "Space group with symbol 'invalid' is not registered.", self.builder._getSpaceGroupFromString, cifData=invalid_old
+        )
+        self.assertRaisesRegex(
+            ValueError,
+            "Space group with symbol 'invalid' is not registered.",
+            self.builder._getSpaceGroupFromString,
+            cifData=merge_dicts(invalid_new, valid_old),
+        )
 
     def test_getCleanSpaceGroupSymbol(self):
         fn = self.builder._getCleanSpaceGroupSymbol
@@ -72,9 +81,19 @@ class SpaceGroupBuilderTest(unittest.TestCase):
         invalid_old = {"_symmetry_int_tables_number": "400"}
         invalid_new = {"_space_group_it_number": "400"}
 
-        self.assertRaises(RuntimeError, self.builder._getSpaceGroupFromNumber, cifData={})
-        self.assertRaises(RuntimeError, self.builder._getSpaceGroupFromNumber, cifData=invalid_old)
-        self.assertRaises(RuntimeError, self.builder._getSpaceGroupFromNumber, cifData=invalid_new)
+        self.assertRaisesRegex(RuntimeError, "No space group symbol in CIF.", self.builder._getSpaceGroupFromNumber, cifData={})
+        self.assertRaisesRegex(
+            RuntimeError,
+            r"Can not use space group number to determine space group for no. \[400\]",
+            self.builder._getSpaceGroupFromNumber,
+            cifData=invalid_old,
+        )
+        self.assertRaisesRegex(
+            RuntimeError,
+            r"Can not use space group number to determine space group for no. \[400\]",
+            self.builder._getSpaceGroupFromNumber,
+            cifData=invalid_new,
+        )
 
 
 class UnitCellBuilderTest(unittest.TestCase):
