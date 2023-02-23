@@ -12,35 +12,31 @@ from mantid.api import *
 class MeanTest(unittest.TestCase):
     def test_throws_if_non_existing_names(self):
         a = CreateWorkspace(DataX=[1, 2, 3], DataY=[1, 2, 3], DataE=[1, 1, 1], UnitX="TOF")
-        with self.assertRaises(RuntimeError) as contextManager:
+        with self.assertRaisesRegex(RuntimeError, "Workspace 'b' does not exist"):
             c = Mean(Workspaces="a,b")  # 'b' does not exist.
-        self.assertIn("Workspace 'b' does not exist", str(contextManager.exception))
         DeleteWorkspace(a)
 
     def test_throws_if_workspace_axis0_unequal(self):
         a = CreateWorkspace(DataX=[1, 2, 3], DataY=[1, 2, 3], DataE=[1, 1, 1], UnitX="TOF")
         b = CreateWorkspace(DataX=[1, 2, 3, 4], DataY=[1, 2, 3, 4], DataE=[1, 1, 1, 1], UnitX="TOF")
-        with self.assertRaises(RuntimeError) as contextManager:
+        with self.assertRaisesRegex(RuntimeError, "Input Workspaces are not the same shape."):
             c = Mean(Workspaces="a,b")  # 'a' and 'b' are different sizes.
-        self.assertIn("Input Workspaces are not the same shape.", str(contextManager.exception))
         DeleteWorkspace(a)
         DeleteWorkspace(b)
 
     def test_throws_if_workspace_axis1_unequal(self):
         a = CreateWorkspace(DataX=[1, 2, 3, 4], DataY=[1, 2, 3, 4], DataE=[1, 1, 1, 1], UnitX="TOF", NSpec=1)
         b = CreateWorkspace(DataX=[1, 2, 3, 4], DataY=[1, 2, 3, 4], DataE=[1, 1, 1, 1], UnitX="TOF", NSpec=2)
-        with self.assertRaises(RuntimeError) as contextManager:
+        with self.assertRaisesRegex(RuntimeError, "Input Workspaces are not the same shape."):
             c = Mean(Workspaces="a,b")  # 'a' and 'b' are different sizes.
-        self.assertIn("Input Workspaces are not the same shape.", str(contextManager.exception))
         DeleteWorkspace(a)
         DeleteWorkspace(b)
 
     def test_throws_if_workspace_unorded(self):
         a = CreateWorkspace(DataX=[1, 2, 1, 2], DataY=[1, 2, 3, 4], DataE=[1, 1, 1, 1], UnitX="TOF", NSpec=2)
         b = CreateWorkspace(DataX=[1, 2, 2, 1], DataY=[1, 2, 3, 4], DataE=[1, 1, 1, 1], UnitX="TOF", NSpec=2)
-        with self.assertRaises(RuntimeError) as contextManager:
+        with self.assertRaisesRegex(RuntimeError, "The data should have the same order for x values. Sort your data first"):
             c = Mean(Workspaces="a,b")  # 'a' and 'b' have different x data.
-        self.assertIn("The data should have the same order for x values. Sort your data first", str(contextManager.exception))
         DeleteWorkspace(a)
         DeleteWorkspace(b)
 
