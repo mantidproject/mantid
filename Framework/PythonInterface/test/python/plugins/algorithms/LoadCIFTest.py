@@ -102,8 +102,15 @@ class UnitCellBuilderTest(unittest.TestCase):
 
     def test_getUnitCell_invalid(self):
         invalid_no_a = {"_cell_length_b": "5.6"}
-        self.assertRaises(RuntimeError, self.builder._getUnitCell, cifData={})
-        self.assertRaises(RuntimeError, self.builder._getUnitCell, cifData=invalid_no_a)
+        self.assertRaisesRegex(
+            RuntimeError, "The a-parameter of the unit cell is not specified in the supplied CIF.", self.builder._getUnitCell, cifData={}
+        )
+        self.assertRaisesRegex(
+            RuntimeError,
+            "The a-parameter of the unit cell is not specified in the supplied CIF.",
+            self.builder._getUnitCell,
+            cifData=invalid_no_a,
+        )
 
     def test_getUnitCell_cubic(self):
         cell = {"_cell_length_a": "5.6"}
