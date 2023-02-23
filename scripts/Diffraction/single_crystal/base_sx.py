@@ -415,6 +415,16 @@ class BaseSX(ABC):
         mantid.TransformHKL(PeaksWorkspace=ws, HKLTransform=transform, FindError=False, EnableLogging=False)
 
     @staticmethod
+    def crop_ws(ws, xmin, xmax, xunit="Wavelength"):
+        wsname = BaseSX.retrieve(ws).name()
+        ws_xunit = BaseSX.get_xunit(ws)
+        if not ws_xunit == xunit:
+            mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target=xunit, EnableLogging=False)
+        mantid.CropWorkspace(InputWorkspace=wsname, OutputWorkspace=wsname, XMin=xmin, XMax=xmax, EnableLogging=False)
+        if not ws_xunit == xunit:
+            mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target=ws_xunit, EnableLogging=False)
+
+    @staticmethod
     def find_sx_peaks(ws, bg=None, nstd=None, out_peaks=None, **kwargs):
         default_kwargs = {"XResolution": 200, "PhiResolution": 2, "TwoThetaResolution": 2}
         kwargs = {**default_kwargs, **kwargs}  # will overwrite default with provided if duplicate keys
@@ -430,7 +440,7 @@ class BaseSX(ABC):
             return
         # get unit to convert back to after peaks found
         xunit = BaseSX.get_xunit(ws)
-        if not ws.getXDimension().name == "TOF":
+        if not xunit == "TOF":
             ws = mantid.ConvertUnits(
                 InputWorkspace=ws, OutputWorkspace=ws.name(), Target="TOF", EnableLogging=False
             )  # FindSXPeaks requires TOF
@@ -444,7 +454,7 @@ class BaseSX(ABC):
             EnableLogging=False,
             **kwargs,
         )
-        if not ws.getXDimension().name == "TOF":
+        if not xunit == "TOF":
             mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws.name(), Target=xunit, EnableLogging=False)
         return out_peaks
 

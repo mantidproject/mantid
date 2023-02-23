@@ -263,16 +263,13 @@ class SXD(BaseSX):
 
     @staticmethod
     def find_sx_peaks(ws, bg=None, nstd=None, lambda_min=0.45, lambda_max=3, nbunch=3, out_peaks=None, **kwargs):
-        ws_rb = SXD.retrieve(ws).name() + "_rb"
+        wsname = SXD.retrieve(ws).name()
+        ws_rb = wsname + "_rb"
         mantid.Rebunch(InputWorkspace=ws, OutputWorkspace=ws_rb, NBunch=nbunch, EnableLogging=False)
-        # mask detector edges
-        mantid.MaskBTP(Workspace=ws_rb, Tube="Edges", EnableLogging=False)
-        mantid.MaskBTP(Workspace=ws_rb, Pixel="edges", EnableLogging=False)
-        # Crop in wavelength
-        mantid.ConvertUnits(InputWorkspace=ws_rb, OutputWorkspace=ws_rb, Target="Wavelength", EnableLogging=False)
-        mantid.CropWorkspace(InputWorkspace=ws_rb, OutputWorkspace=ws_rb, XMin=lambda_min, XMax=lambda_max, EnableLogging=False)
+        SXD.mask_detector_edges(ws_rb)
+        SXD.crop_ws(ws_rb, lambda_min, lambda_max, xunit="Wavelength")
         if out_peaks is None:
-            out_peaks = SXD.retrieve(ws).name() + "_peaks"  # need to do this so not "_rb_peaks"
+            out_peaks = wsname + "_peaks"  # need to do this so not "_rb_peaks"
         BaseSX.find_sx_peaks(ws_rb, bg, nstd, out_peaks, **kwargs)
         mantid.DeleteWorkspace(ws_rb, EnableLogging=False)
         return out_peaks
@@ -282,3 +279,8 @@ class SXD(BaseSX):
         func = BaseSX.get_back_to_back_exponential_func(pk, ws, ispec)
         dtof = scale * func.fwhm()
         return BaseSX.convert_dTOF_to_dQ_for_peak(dtof, pk)
+
+    @staticmethod
+    def mask_detector_edges(ws):
+        mantid.MaskBTP(Workspace=ws, Tube="Edges", EnableLogging=False)
+        mantid.MaskBTP(Workspace=ws, Pixel="edges", EnableLogging=False)

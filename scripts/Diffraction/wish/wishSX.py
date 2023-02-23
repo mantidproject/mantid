@@ -51,20 +51,20 @@ class WishSX(BaseSX):
         return wsname
 
     @staticmethod
-    def mask_detector_edges(ws):
+    def mask_detector_edges(ws, nedge=16):
         # mask pixels on ends of tubes
-        mantid.MaskBTP(Workspace=ws, Pixel="1-16,496-512")
+        mantid.MaskBTP(Workspace=ws, Pixel=f"1-{nedge},{512-nedge}-512")
         # only mask tubes on panels with edge facing beam in/out
-        mantid.MaskBTP(Workspace=ws, Bank="5-6", Tube="152")
-        mantid.MaskBTP(Workspace=ws, Bank="1,10", Tube="1")
+        mantid.MaskBTP(Workspace=ws, Bank="5-6", Tube="151-152")
+        mantid.MaskBTP(Workspace=ws, Bank="1,10", Tube="1-2")
 
-    def process_vanadium(self, npoints=301):
+    def process_vanadium(self):
         # vanadium
         self.van_ws = self.load_run(self.van_runno)
-        mantid.ConvertUnits(InputWorkspace=self.van_ws, OutputWorkspace=self.van_ws, Target="Wavelength")
         mantid.SmoothNeighbours(InputWorkspace=self.van_ws, OutputWorkspace=self.van_ws, Radius=3)
-        mantid.SmoothData(InputWorkspace=self.van_ws, OutputWorkspace=self.van_ws, NPoints=npoints)
+        mantid.SmoothData(InputWorkspace=self.van_ws, OutputWorkspace=self.van_ws, NPoints=301)
         # correct vanadium for absorption
+        mantid.ConvertUnits(InputWorkspace=self.van_ws, OutputWorkspace=self.van_ws, Target="Wavelength", EnableLogging=False)
         mantid.SetSample(
             self.van_ws,
             Geometry={"Shape": "CSG", "Value": self.sphere_shape},
@@ -80,83 +80,34 @@ class WishSX(BaseSX):
         ws, mon = mantid.LoadRaw(Filename=wsname + ".raw", OutputWorkspace=wsname, LoadMonitors="Separate")
         mon_name = mon.name()
         mantid.CropWorkspace(InputWorkspace=wsname, OutputWorkspace=wsname, XMin=6000, XMax=99000)
+        mantid.CropWorkspace(InputWorkspace=mon_name, OutputWorkspace=mon_name, XMin=6000, XMax=99000)
         # replace empty bin errors with 1 count
-        mantid.SetUncertainties(InputWorkspace=wsname, OutputWorkspace=wsname, SetError="oneIfZero")
         mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target="Wavelength")
         mantid.ConvertUnits(InputWorkspace=mon_name, OutputWorkspace=mon_name, Target="Wavelength")
         mantid.NormaliseToMonitor(InputWorkspace=wsname, OutputWorkspace=wsname, MonitorWorkspaceIndex=3, MonitorWorkspace=mon_name)
         mantid.ReplaceSpecialValues(InputWorkspace=wsname, OutputWorkspace=wsname, NaNValue=0, InfinityValue=0)
         mantid.CropWorkspace(InputWorkspace=wsname, OutputWorkspace=wsname, XMin=0.8)
         mantid.NormaliseByCurrent(InputWorkspace=wsname, OutputWorkspace=wsname)
+        mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target="TOF")
         return wsname
 
     @staticmethod
-    def find_sx_peaks(ws, bg, out_pk_wsname="peaks"):
-        ws = WishSX.retrieve(ws)
-        # get unit to convert back to after peaks found
-        xunit = WishSX.get_xunit(ws)
-        if not ws.getXDimension().name == "TOF":
-            ws = mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws.name(), Target="TOF")  # FindSXPeaks requires TOF
-        # extract y data (to use to determine to detemrine threshold)
-        mantid.FindSXPeaks(
-            InputWorkspace=ws,
-            PeakFindingStrategy="AllPeaks",
-            AbsoluteBackground=bg,
-            ResolutionStrategy="AbsoluteResolution",
-            XResolution=500,
-            PhiResolution=3,
-            TwoThetaResolution=2,
-            OutputWorkspace=out_pk_wsname,
-        )
-        WishSX.remove_peaks_on_edge(out_pk_wsname)
-        if not ws.getXDimension().name == "TOF":
-            mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws.name(), Target=xunit)
-        return out_pk_wsname
-
-    @staticmethod
-    def find_sx_peaks_bankwise(wsname, out_pk_wsname=None, nstd=8, nbunch=3, lambda_min=1.25, lambda_max=7):
-        ws = mantid.Rebunch(InputWorkspace=wsname, OutputWorkspace=wsname + "_rb", NBunch=nbunch)
-        WishSX.mask_detector_edges(ws)
-        # mask additional tubes at detector edge
-        mantid.MaskBTP(Workspace=ws, Bank="5-6", Tube="76,151-152")
-        mantid.MaskBTP(Workspace=ws, Bank="1,10", Tube="1-2,77")
-        # Crop in wavelength
-        mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target="Wavelength")
-        mantid.CropWorkspace(InputWorkspace=ws, OutputWorkspace=ws, XMin=lambda_min, XMax=lambda_max)
-        mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target="TOF")  # FindSXPeaks requries TOF
-        # extract y data (to use to determine to determine threshold)
-        if out_pk_wsname is None:
-            out_pk_wsname = wsname + "_peaks"
-        peaks = mantid.CreatePeaksWorkspace(InstrumentWorkspace=ws, NumberOfPeaks=0, OutputWorkspace=out_pk_wsname)
-        for bank in range(1, 11):
-            ispec_min, ispec_max = 19456 * np.array([bank - 1, bank])
-            y = np.max(ws.extractY()[ispec_min:ispec_max, :], axis=1)
-            avg = np.median(y)
-            std = (np.percentile(y, 90) - avg) / 1.2815
-            cutoff = avg + nstd * std
-            # Run FindSXPeaks
-            pks_bank = mantid.FindSXPeaks(
-                InputWorkspace=ws,
-                PeakFindingStrategy="AllPeaks",
-                AbsoluteBackground=cutoff,
-                ResolutionStrategy="AbsoluteResolution",
-                XResolution=500,
-                PhiResolution=3,
-                TwoThetaResolution=2,
-                StartWorkspaceIndex=int(ispec_min),
-                EndWorkspaceIndex=int(ispec_max) - 1,
-            )
-            peaks = mantid.CombinePeaksWorkspaces(
-                LHSWorkspace=pks_bank, RHSWorkspace=peaks, OutputWorkspace=out_pk_wsname, CombineMatchingPeaks=True, Tolerance=0.05
-            )
-        mantid.DeleteWorkspace(pks_bank)
-        mantid.DeleteWorkspace(ws)
-        return out_pk_wsname
+    def find_sx_peaks(ws, bg=None, nstd=None, lambda_min=1.25, lambda_max=7.0, nbunch=3, out_peaks=None, **kwargs):
+        wsname = WishSX.retrieve(ws).name()
+        ws_rb = wsname + "_rb"
+        mantid.Rebunch(InputWorkspace=ws, OutputWorkspace=ws_rb, NBunch=nbunch, EnableLogging=False)
+        WishSX.mask_detector_edges(ws_rb)
+        WishSX.crop_ws(ws_rb, lambda_min, lambda_max, xunit="Wavelength")
+        if out_peaks is None:
+            out_peaks = wsname + "_peaks"  # need to do this so not "_rb_peaks"
+        BaseSX.find_sx_peaks(ws_rb, bg, nstd, out_peaks, **kwargs)
+        mantid.DeleteWorkspace(ws_rb, EnableLogging=False)
+        return out_peaks
 
     @staticmethod
     def remove_peaks_on_edge(peaks, nedge_tube=2, nedge_pix=16):
         peaks = WishSX.retrieve(peaks)
-        # filter peaks on edge of 0tubes
+        # filter peaks on edge of tubes
         row = np.array(peaks.column("Row"))
         iremove = np.where(np.logical_or(row < nedge_pix, row > 512 - nedge_pix))[0]
         mantid.DeleteTableRows(TableWorkspace=peaks, Rows=iremove)
