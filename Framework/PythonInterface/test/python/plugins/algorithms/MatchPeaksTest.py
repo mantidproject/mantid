@@ -13,11 +13,9 @@ from testhelpers import run_algorithm
 
 
 class MatchPeaksTest(unittest.TestCase):
-
     _args = {}
 
     def setUp(self):
-
         func0 = "name=Gaussian, PeakCentre=3.2, Height=10, Sigma=0.3"
         func1 = "name=Gaussian, PeakCentre=6, Height=10, Sigma=0.3"
         func2 = "name=Gaussian, PeakCentre=4, Height=10000, Sigma=0.01"
@@ -163,41 +161,33 @@ class MatchPeaksTest(unittest.TestCase):
 
     def testValidateInputWorkspace(self):
         self._args["OutputWorkspace"] = "output"
-        with self.assertRaises(RuntimeError) as contextManager:
+        with self.assertRaisesRegex(RuntimeError, "Incompatible number of spectra"):
             self._args["InputWorkspace"] = self._in1
             run1 = run_algorithm("MatchPeaks", **self._args)
             self.assertTrue(run1.isExecuted())
-        # InputWorkspace2
-        self.assertTrue(str(contextManager.exception).startswith("Some invalid Properties found: "))
-        with self.assertRaises(RuntimeError) as contextManager:
+
+        with self.assertRaisesRegex(RuntimeError, "Incompatible number of bins"):
             self._args["InputWorkspace"] = self._in2
             run2 = run_algorithm("MatchPeaks", **self._args)
             self.assertTrue(run2.isExecuted())
-        # InputWorkspace2
-        self.assertTrue(str(contextManager.exception).startswith("Some invalid Properties found: "))
 
     def testValidateInputWorkspace2(self):
         self._args["InputWorkspace"] = self._ws_shift
         self._args["OutputWorkspace"] = "output"
-        with self.assertRaises(RuntimeError) as contextManager:
+        with self.assertRaisesRegex(RuntimeError, "Incompatible number of spectra"):
             self._args["InputWorkspace2"] = self._in1
             run_algorithm("MatchPeaks", **self._args)
-        # InputWorkspace2 InputWorkspace3
-        self.assertTrue(str(contextManager.exception).startswith("Some invalid Properties found: "))
-        with self.assertRaises(RuntimeError) as contextManager:
+
+        with self.assertRaisesRegex(RuntimeError, "Incompatible number of bins"):
             self._args["InputWorkspace2"] = self._in2
             run_algorithm("MatchPeaks", **self._args)
-        # InputWorkspace2 InputWorkspace3
-        self.assertTrue(str(contextManager.exception).startswith("Some invalid Properties found: "))
 
     def testValidateInputWorkspace3(self):
         self._args["InputWorkspace"] = self._ws_shift
         self._args["InputWorkspace3"] = self._ws_in_3
         self._args["OutputWorkspace"] = "output"
-        with self.assertRaises(RuntimeError) as contextManager:
+        with self.assertRaisesRegex(RuntimeError, "Incompatible number of bins"):
             run_algorithm("MatchPeaks", **self._args)
-        # InputWorkspace2 InputWorkspace3
-        self.assertTrue(str(contextManager.exception).startswith("Some invalid Properties found: "))
 
     def testMatchCenter(self):
         # Input workspace should match its center
