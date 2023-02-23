@@ -133,101 +133,100 @@ class D11_AbsoluteScaleFlux_Test(systemtesting.MantidSystemTest):
         mtd.clear()
 
     def runTest(self):
-        pass
-        # # Load the mask
-        # LoadNexusProcessed(Filename="D11_mask.nxs", OutputWorkspace="mask")
+        # Load the mask
+        LoadNexusProcessed(Filename="D11_mask.nxs", OutputWorkspace="mask")
 
-        # # Calculate flux for water
-        # SANSILLReduction(Runs="010414", ProcessAs="EmptyBeam", OutputWorkspace="Dbw", OutputFluxWorkspace="flw", Version=2)
+        # Calculate flux for water
+        SANSILLReduction(Runs="010414", ProcessAs="EmptyBeam", OutputWorkspace="Dbw", OutputFluxWorkspace="flw", Version=2)
 
-        # # Reduce water with flux normalisation
-        # SANSILLReduction(
-        #     Runs="010453",
-        #     ProcessAs="Sample",
-        #     MaskWorkspace="mask",
-        #     OutputWorkspace="water_with_flux",
-        #     FluxWorkspace="flw",
-        #     Version=2,
-        # )
+        # Reduce water with flux normalisation
+        SANSILLReduction(
+            Runs="010453",
+            ProcessAs="Sample",
+            MaskWorkspace="mask",
+            OutputWorkspace="water_with_flux",
+            FluxWorkspace="flw",
+            Version=2,
+        )
 
-        # # Reduce water without flux normalisation
-        # SANSILLReduction(Runs="010453", ProcessAs="Sample", MaskWorkspace="mask", OutputWorkspace="water_wo_flux", Version=2)
+        # Reduce water without flux normalisation
+        SANSILLReduction(Runs="010453", ProcessAs="Sample", MaskWorkspace="mask", OutputWorkspace="water_wo_flux", Version=2)
 
-        # # Calculate flux for sample
-        # SANSILLReduction(Runs="010413", ProcessAs="EmptyBeam", OutputWorkspace="Db", OutputFluxWorkspace="fl", Version=2)
+        # Calculate flux for sample
+        SANSILLReduction(Runs="010413", ProcessAs="EmptyBeam", OutputWorkspace="Db", OutputFluxWorkspace="fl", Version=2)
 
-        # # Reduce sample with flux normalisation and flux normalised water reference
-        # SANSILLReduction(
-        #     Runs="010569",
-        #     ProcessAs="Sample",
-        #     MaskWorkspace="mask",
-        #     OutputWorkspace="sample_with_flux",
-        #     FluxWorkspace="fl",
-        #     FlatFieldWorkspace="water_with_flux",
-        #     Version=2,
-        # )
+        # Reduce sample with flux normalisation and flux normalised water reference
+        SANSILLReduction(
+            Runs="010569",
+            ProcessAs="Sample",
+            MaskWorkspace="mask",
+            OutputWorkspace="sample_with_flux",
+            FluxWorkspace="fl",
+            FlatFieldWorkspace="water_with_flux",
+            Version=2,
+        )
 
-        # # Reduce sample without flux normalisation and not flux normalised water reference
-        # SANSILLReduction(
-        #     Runs="010569",
-        #     ProcessAs="Sample",
-        #     MaskWorkspace="mask",
-        #     OutputWorkspace="sample_wo_flux",
-        #     FlatFieldWorkspace="water_wo_flux",
-        #     Version=2,
-        # )
+        # Reduce sample without flux normalisation and not flux normalised water reference
+        SANSILLReduction(
+            Runs="010569",
+            ProcessAs="Sample",
+            MaskWorkspace="mask",
+            OutputWorkspace="sample_wo_flux",
+            FlatFieldWorkspace="water_wo_flux",
+            Version=2,
+        )
 
-        # # Now the sample_with_flux and sample_wo_flux should be approximately at the same scale
-        # result1, _ = CompareWorkspaces(Workspace1="sample_with_flux", Workspace2="sample_wo_flux", Tolerance=0.1)
-        # self.assertTrue(result1)
+        # Now the sample_with_flux and sample_wo_flux should be approximately at the same scale
+        result1, _ = CompareWorkspaces(Workspace1="sample_with_flux", Workspace2="sample_wo_flux", Tolerance=0.1)
+        self.assertTrue(result1)
 
-        # # Then we want to simulate the situation where water has no flux measurement
-        # # Reduce water, but normalise it to the sample flux
-        # # Commit f25a6cd5 removed the rescaling by the distance ratio squared in the algorithm
-        # SANSILLReduction(
-        #     Runs="010453",
-        #     ProcessAs="Sample",
-        #     MaskWorkspace="mask",
-        #     OutputWorkspace="water_with_sample_flux",
-        #     FluxWorkspace="fl",
-        #     Version=2,
-        # )
+        # Then we want to simulate the situation where water has no flux measurement
+        # Reduce water, but normalise it to the sample flux
+        # Commit f25a6cd5 removed the rescaling by the distance ratio squared in the algorithm
+        SANSILLReduction(
+            Runs="010453",
+            ProcessAs="Sample",
+            MaskWorkspace="mask",
+            OutputWorkspace="water_with_sample_flux",
+            FluxWorkspace="fl",
+            Version=2,
+        )
 
-        # # Reduce sample with flux normalisation and sample flux normalised water reference
-        # # Here there is no additional scaling, since both are already normalised
-        # SANSILLReduction(
-        #     Runs="010569",
-        #     ProcessAs="Sample",
-        #     MaskWorkspace="mask",
-        #     OutputWorkspace="sample_with_flux_water_with_sample_flux",
-        #     FluxWorkspace="fl",
-        #     FlatFieldWorkspace="water_with_sample_flux",
-        #     Version=2,
-        # )
+        # Reduce sample with flux normalisation and sample flux normalised water reference
+        # Here there is no additional scaling, since both are already normalised
+        SANSILLReduction(
+            Runs="010569",
+            ProcessAs="Sample",
+            MaskWorkspace="mask",
+            OutputWorkspace="sample_with_flux_water_with_sample_flux",
+            FluxWorkspace="fl",
+            FlatFieldWorkspace="water_with_sample_flux",
+            Version=2,
+        )
 
-        # # Before f25a6cd5 this output should still be at the same scale as the two above
-        # # (basically it is the same scaling, just happening in different place)
-        # # After f25a6cd5, since the scaling is removed, we need to scale by that factor before comparing
-        # Scale(
-        #     InputWorkspace="sample_with_flux_water_with_sample_flux",
-        #     OutputWorkspace="sample_with_flux_water_with_sample_flux",
-        #     Factor=(20.007 / 8) ** 2,
-        # )
-        # result2, _ = CompareWorkspaces(Workspace1="sample_with_flux_water_with_sample_flux", Workspace2="sample_wo_flux", Tolerance=0.1)
-        # self.assertTrue(result2)
+        # Before f25a6cd5 this output should still be at the same scale as the two above
+        # (basically it is the same scaling, just happening in different place)
+        # After f25a6cd5, since the scaling is removed, we need to scale by that factor before comparing
+        Scale(
+            InputWorkspace="sample_with_flux_water_with_sample_flux",
+            OutputWorkspace="sample_with_flux_water_with_sample_flux",
+            Factor=(20.007 / 8) ** 2,
+        )
+        result2, _ = CompareWorkspaces(Workspace1="sample_with_flux_water_with_sample_flux", Workspace2="sample_wo_flux", Tolerance=0.1)
+        self.assertTrue(result2)
 
-        # result3, _ = CompareWorkspaces(Workspace1="sample_with_flux_water_with_sample_flux", Workspace2="sample_with_flux", Tolerance=0.1)
-        # self.assertTrue(result3)
+        result3, _ = CompareWorkspaces(Workspace1="sample_with_flux_water_with_sample_flux", Workspace2="sample_with_flux", Tolerance=0.1)
+        self.assertTrue(result3)
 
-        # # Finally we want to make sure that trying to divide flux normalised sample by
-        # # non flux normalised water raises an error
-        # kwargs = {
-        #     "Runs": "010569",
-        #     "ProcessAs": "Sample",
-        #     "MaskWorkspace": "mask",
-        #     "OutputWorkspace": "sample_with_flux_water_wo_flux",
-        #     "FluxWorkspace": "fl",
-        #     "FlatFieldWorkspace": "water_wo_flux",
-        #     "Version": 2,
-        # }
-        # self.assertRaises(RuntimeError, SANSILLReduction, **kwargs)
+        # Finally we want to make sure that trying to divide flux normalised sample by
+        # non flux normalised water raises an error
+        kwargs = {
+            "Runs": "010569",
+            "ProcessAs": "Sample",
+            "MaskWorkspace": "mask",
+            "OutputWorkspace": "sample_with_flux_water_wo_flux",
+            "FluxWorkspace": "fl",
+            "FlatFieldWorkspace": "water_wo_flux",
+            "Version": 2,
+        }
+        self.assertRaises(RuntimeError, SANSILLReduction, **kwargs)
