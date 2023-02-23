@@ -483,7 +483,7 @@
       </widget>
      </item>
      <item row="14" column="3">
-      <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="floodWorkspaceWsSelector">
+      <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="floodWorkspaceWsSelectorPlaceholder">
        <property name="sizePolicy">
         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
          <horstretch>0</horstretch>

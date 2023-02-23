@@ -222,8 +222,13 @@ void QtExperimentView::initPolCorrEfficienciesControls() {
 }
 
 void QtExperimentView::initFloodControls() {
-  m_ui.floodWorkspaceWsSelector->setOptional(true);
-  m_ui.floodWorkspaceWsSelector->setWorkspaceTypes({"Workspace2D"});
+  m_floodCorrWsSelector = std::make_unique<MantidWidgets::WorkspaceSelector>(new MantidWidgets::WorkspaceSelector);
+  m_floodCorrLineEdit = std::make_unique<QLineEdit>(new QLineEdit());
+  constexpr auto SELECTOR_ROW = 13;
+  constexpr auto SELECTOR_COL = 3;
+  m_ui.expSettingsGrid->addWidget(m_floodCorrWsSelector.get(), SELECTOR_ROW, SELECTOR_COL);
+  m_floodCorrWsSelector->setOptional(true);
+  m_floodCorrWsSelector->setWorkspaceTypes({"Workspace2D"});
 }
 
 void QtExperimentView::connectSettingsChange(QLineEdit &edit) {
@@ -288,7 +293,8 @@ void QtExperimentView::setEnabledStateForAllWidgets(bool enabled) {
   m_ui.summationTypeComboBox->setEnabled(enabled);
   m_ui.includePartialBinsCheckBox->setEnabled(enabled);
   m_ui.floodCorComboBox->setEnabled(enabled);
-  m_ui.floodWorkspaceWsSelector->setEnabled(enabled);
+  m_floodCorrWsSelector->setEnabled(enabled);
+  m_floodCorrLineEdit->setEnabled(enabled);
   m_ui.debugCheckBox->setEnabled(enabled);
   m_ui.subtractBackgroundCheckBox->setEnabled(enabled);
   m_ui.backgroundMethodComboBox->setEnabled(enabled);
@@ -319,7 +325,8 @@ void QtExperimentView::registerExperimentSettingsWidgets(const Mantid::API::IAlg
   registerSettingWidget(*m_ui.summationTypeComboBox, "SummationType", alg);
   registerSettingWidget(*m_ui.includePartialBinsCheckBox, "IncludePartialBins", alg);
   registerSettingWidget(*m_ui.floodCorComboBox, "FloodCorrection", alg);
-  registerSettingWidget(*m_ui.floodWorkspaceWsSelector, "FloodWorkspace", alg);
+  registerSettingWidget(*m_floodCorrWsSelector, "FloodWorkspace", alg);
+  registerSettingWidget(*m_floodCorrLineEdit, "FloodWorkspace", alg);
   registerSettingWidget(*m_ui.debugCheckBox, "Debug", alg);
   registerSettingWidget(*m_ui.subtractBackgroundCheckBox, "SubtractBackground", alg);
   registerSettingWidget(*m_ui.backgroundMethodComboBox, "BackgroundCalculationMethod", alg);
@@ -347,7 +354,8 @@ void QtExperimentView::connectExperimentSettingsWidgets() {
   connectSettingsChange(*m_ui.reductionTypeComboBox);
   connectSettingsChange(*m_ui.includePartialBinsCheckBox);
   connectSettingsChange(*m_ui.floodCorComboBox);
-  connectSettingsChange(*m_ui.floodWorkspaceWsSelector);
+  connectSettingsChange(*m_floodCorrWsSelector);
+  connectSettingsChange(*m_floodCorrLineEdit);
   connectSettingsChange(*m_ui.debugCheckBox);
   connectSettingsChange(*m_ui.subtractBackgroundCheckBox);
   connectSettingsChange(*m_ui.backgroundMethodComboBox);
@@ -370,7 +378,8 @@ void QtExperimentView::disconnectExperimentSettingsWidgets() {
   disconnectSettingsChange(*m_ui.reductionTypeComboBox);
   disconnectSettingsChange(*m_ui.includePartialBinsCheckBox);
   disconnectSettingsChange(*m_ui.floodCorComboBox);
-  disconnectSettingsChange(*m_ui.floodWorkspaceWsSelector);
+  disconnectSettingsChange(*m_floodCorrWsSelector);
+  disconnectSettingsChange(*m_floodCorrLineEdit);
   disconnectSettingsChange(*m_ui.debugCheckBox);
   disconnectSettingsChange(*m_ui.subtractBackgroundCheckBox);
   disconnectSettingsChange(*m_ui.backgroundMethodComboBox);
@@ -561,12 +570,14 @@ void QtExperimentView::disablePolarizationEfficiencies() {
 }
 
 void QtExperimentView::disableFloodCorrectionInputs() {
-  m_ui.floodWorkspaceWsSelector->setEnabled(false);
+  m_floodCorrWsSelector->setEnabled(false);
+  m_floodCorrLineEdit->setEnabled(false);
   m_ui.floodWorkspaceWsSelectorLabel->setEnabled(false);
 }
 
 void QtExperimentView::enableFloodCorrectionInputs() {
-  m_ui.floodWorkspaceWsSelector->setEnabled(true);
+  m_floodCorrWsSelector->setEnabled(true);
+  m_floodCorrLineEdit->setEnabled(true);
   m_ui.floodWorkspaceWsSelectorLabel->setEnabled(true);
 }
 
@@ -636,10 +647,10 @@ std::string QtExperimentView::getFloodCorrectionType() const { return getText(*m
 
 void QtExperimentView::setFloodCorrectionType(std::string const &type) { setSelected(*m_ui.floodCorComboBox, type); }
 
-std::string QtExperimentView::getFloodWorkspace() const { return getText(*m_ui.floodWorkspaceWsSelector); }
+std::string QtExperimentView::getFloodWorkspace() const { return getText(*m_floodCorrWsSelector); }
 
 void QtExperimentView::setFloodWorkspace(std::string const &workspace) {
-  setSelected(*m_ui.floodWorkspaceWsSelector, workspace);
+  setSelected(*m_floodCorrWsSelector, workspace);
 }
 
 std::string QtExperimentView::getAnalysisMode() const { return getText(*m_ui.analysisModeComboBox); }
