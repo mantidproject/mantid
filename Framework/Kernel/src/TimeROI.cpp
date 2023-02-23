@@ -39,7 +39,7 @@ void assert_increasing(const DateAndTime &startTime, const DateAndTime &stopTime
  * This method assumes that there is an overlap between the two intervals
  */
 TimeInterval calculate_union(const TimeInterval &left, const TimeInterval &right) {
-  return TimeInterval(std::min(left.begin(), right.begin()), std::max(left.end(), right.end()));
+  return TimeInterval(std::min(left.start(), right.start()), std::max(left.stop(), right.stop()));
 }
 
 /*
@@ -49,19 +49,12 @@ TimeInterval calculate_union(const TimeInterval &left, const TimeInterval &right
 bool overlaps(const TimeInterval &left, const TimeInterval &right) {
   if (left.overlaps(right))
     return true;
-  // the following make cppcheck happy
-  const auto leftBegin = left.begin();
-  const auto rightEnd = right.end();
-  if (leftBegin == rightEnd)
+  else if (left.start() == right.stop())
     return true;
-  // these temp variables are for cppcheck
-  const auto leftEnd = left.end();
-  const auto rightBegin = right.begin();
-  if (leftEnd == rightBegin)
+  else if (left.stop() == right.start())
     return true;
-
-  // they don't overlap
-  return false;
+  else
+    return false; // they don't overlap
 }
 
 } // namespace
@@ -125,8 +118,8 @@ void TimeROI::addROI(const Types::Core::DateAndTime &startTime, const Types::Cor
       output.push_back(roi_to_add);
     this->clear();
     for (const auto interval : output) {
-      m_roi.push_back(interval.begin());
-      m_roi.push_back(interval.end());
+      m_roi.push_back(interval.start());
+      m_roi.push_back(interval.stop());
     }
   }
 
@@ -199,8 +192,8 @@ void TimeROI::addMask(const Types::Core::DateAndTime &startTime, const Types::Co
     }
     this->clear();
     for (const auto interval : output) {
-      m_roi.push_back(interval.begin());
-      m_roi.push_back(interval.end());
+      m_roi.push_back(interval.start());
+      m_roi.push_back(interval.stop());
     }
   }
 
@@ -403,7 +396,7 @@ void TimeROI::update_union(const TimeROI &other) {
 
   // add all the intervals from the other
   for (const auto interval : other.toSplitters()) {
-    this->addROI(interval.begin(), interval.end());
+    this->addROI(interval.start(), interval.stop());
   }
 }
 
@@ -575,8 +568,8 @@ void TimeROI::saveNexus(::NeXus::File *file) const {
   // create a local TimeSeriesProperty which will do the actual work
   TimeSeriesProperty<bool> tsp(NAME);
   for (const auto interval : this->toSplitters()) {
-    tsp.addValue(interval.begin(), ROI_USE);
-    tsp.addValue(interval.end(), ROI_IGNORE);
+    tsp.addValue(interval.start(), ROI_USE);
+    tsp.addValue(interval.stop(), ROI_IGNORE);
   }
 
   // save things to to disk
