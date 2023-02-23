@@ -51,12 +51,20 @@ class WishSX(BaseSX):
         return wsname
 
     @staticmethod
-    def mask_detector_edges(ws, nedge=16):
+    def mask_detector_edges(ws, nedge=16, ntubes=2):
         # mask pixels on ends of tubes
         mantid.MaskBTP(Workspace=ws, Pixel=f"1-{nedge},{512-nedge}-512")
         # only mask tubes on panels with edge facing beam in/out
-        mantid.MaskBTP(Workspace=ws, Bank="5-6", Tube="151-152")
-        mantid.MaskBTP(Workspace=ws, Bank="1,10", Tube="1-2")
+        tubes = np.r_[152 - (ntubes - 1) // 2 : 153, 76 - ntubes // 2 + 1 : 77]
+        mantid.MaskBTP(Workspace=ws, Bank="5-6", Tube=",".join(str(tube) for tube in tubes))
+        tubes = np.r_[1 : (ntubes + 1) // 2 + 1, 77 : 77 + ntubes // 2]
+        mantid.MaskBTP(Workspace=ws, Bank="1,10", Tube=",".join(str(tube) for tube in tubes))
+
+    @BaseSX.default_apply_to_all_runs
+    def convert_to_MD(self, run=None, frame="Q (lab frame)"):
+        wsname = WishSX.retrieve(self.get_ws(run)).name()
+        WishSX.mask_detector_edges(wsname, nedge=16, ntubes=2)
+        super().convert_to_MD(run, frame)
 
     def process_vanadium(self):
         # vanadium
@@ -96,7 +104,7 @@ class WishSX(BaseSX):
         wsname = WishSX.retrieve(ws).name()
         ws_rb = wsname + "_rb"
         mantid.Rebunch(InputWorkspace=ws, OutputWorkspace=ws_rb, NBunch=nbunch, EnableLogging=False)
-        WishSX.mask_detector_edges(ws_rb)
+        WishSX.mask_detector_edges(ws_rb, nedge=16, ntube=3)
         WishSX.crop_ws(ws_rb, lambda_min, lambda_max, xunit="Wavelength")
         if out_peaks is None:
             out_peaks = wsname + "_peaks"  # need to do this so not "_rb_peaks"
