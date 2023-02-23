@@ -110,8 +110,9 @@ class LoadNMoldyn4Ascii1DTest(unittest.TestCase):
     # ============================= Test failure cases =========================================#
 
     def test_load_all_functions_skipped(self):
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Failed to load any functions for data",
             LoadNMoldyn4Ascii1D,
             Directory=self._data_directory,
             Functions="something, somethingelse",
@@ -119,7 +120,13 @@ class LoadNMoldyn4Ascii1DTest(unittest.TestCase):
         )
 
     def test_fail_on_no_functions(self):
-        self.assertRaises(RuntimeError, LoadNMoldyn4Ascii1D, Directory=self._data_directory, OutputWorkspace="__LoadNMoldyn4Ascii1D_test")
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Must specify at least one function to load",
+            LoadNMoldyn4Ascii1D,
+            Directory=self._data_directory,
+            OutputWorkspace="__LoadNMoldyn4Ascii1D_test",
+        )
 
 
 if __name__ == "__main__":
