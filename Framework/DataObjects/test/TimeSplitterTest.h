@@ -184,7 +184,7 @@ public:
     TS_ASSERT_EQUALS(roi.numBoundaries(), 4);
   }
 
-  void testTimeSplitterFromMatrixWorkspace() {
+  void test_timeSplitterFromMatrixWorkspace() {
     TimeSplitter splitter;
     splitter.addROI(DateAndTime(0), DateAndTime(10), 1);
     splitter.addROI(DateAndTime(10), DateAndTime(15), 3);
@@ -213,7 +213,7 @@ public:
               convertedSplitter->valueAtTime(DateAndTime(20)) == -1);
   }
 
-  void testTimeSplitterFromMatrixWorkspaceError() {
+  void test_timeSplitterFromMatrixWorkspaceError() {
     // Testing the case where an X value in the MatrixWorkspace is negative.
 
     Mantid::API::MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 3);
