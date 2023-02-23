@@ -69,6 +69,39 @@ TimeSplitter::TimeSplitter(const Mantid::API::MatrixWorkspace_sptr &ws, const Da
   }
 }
 
+TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &offset) {
+  if (tws->columnCount() != 3) {
+    throw std::runtime_error("Table workspace used for event filtering must have 3 columns.");
+  }
+
+  // by design, there should be 3 columns, e.g. "start", "stop", "target", although the exact names are not enforced
+  API::Column_sptr col_start = tws->getColumn(0);
+  API::Column_sptr col_stop = tws->getColumn(1);
+  API::Column_sptr col_target = tws->getColumn(2);
+
+  for (size_t ii = 0; ii < tws->rowCount(); ii++) {
+    // by design, the times in the table must be in seconds
+    Types::Core::DateAndTime timeStart(col_start->cell<double>(ii) /*s*/, 0.0 /*ns*/);
+    Types::Core::DateAndTime timeStop(col_stop->cell<double>(ii) /*s*/, 0.0 /*ns*/);
+
+    // make the times absolute
+    int64_t offset_ns{offset.totalNanoseconds()};
+    timeStart += offset_ns;
+    timeStop += offset_ns;
+
+    // get the target workspace index
+    int target_ws_index = std::stoi(col_target->cell<std::string>(ii));
+
+    // if this row's time interval intersects an ROI already in the splitter, no separate ROI will be created in the
+    // splitter, hence the warning.
+    if (valueAtTime(timeStart) != IGNORE_VALUE || valueAtTime(timeStop) != IGNORE_VALUE) {
+      g_log.warning() << "TableWorkspace row may be overwritten in conversion to TimeSplitter: " << ii << '\n';
+    }
+
+    addROI(timeStart, timeStop, target_ws_index);
+  }
+}
+
 std::string TimeSplitter::debugPrint() const {
   std::stringstream msg;
   for (const auto &iter : m_roi_map)

@@ -8,6 +8,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/DllConfig.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/DateAndTime.h"
 
 namespace Mantid {
@@ -27,6 +28,9 @@ public:
   TimeSplitter() = default;
   TimeSplitter(const DateAndTime &start, const DateAndTime &stop);
   TimeSplitter(const Mantid::API::MatrixWorkspace_sptr &ws, const DateAndTime &offset = DateAndTime(0, 0));
+  TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &offset = DateAndTime(0, 0));
+
+public:
   int valueAtTime(const DateAndTime &time) const;
   void addROI(const DateAndTime &start, const DateAndTime &stop, const int value);
   std::vector<int> outputWorkspaceIndices() const;
