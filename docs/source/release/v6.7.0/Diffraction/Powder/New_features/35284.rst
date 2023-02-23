@@ -1,1 +1,2 @@
 - It is now possible to provide more than one detector height range in :ref:`ILLPowderDetectorScan`
+- InitialMask and FinalMask properties of :ref:`ILLPowderDetectorScan` have been removed
