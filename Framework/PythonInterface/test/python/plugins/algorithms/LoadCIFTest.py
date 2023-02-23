@@ -161,11 +161,17 @@ class AtomListBuilderTest(unittest.TestCase):
                 ("_atom_site_fract_z", ["1/8"]),
             ]
         )
+        expected_error_messages = {
+            "_atom_site_label": "Cannot determine atom types",
+            "_atom_site_fract_x": "Mandatory field _atom_site_fract_x not found in CIF-file.",
+            "_atom_site_fract_y": "Mandatory field _atom_site_fract_y not found in CIF-file.",
+            "_atom_site_fract_z": "Mandatory field _atom_site_fract_z not found in CIF-file.",
+        }
 
         for key in mandatoryKeys:
             tmp = mandatoryKeys.copy()
             del tmp[key]
-            self.assertRaises(RuntimeError, self.builder._getAtoms, cifData=tmp)
+            self.assertRaisesRegex(RuntimeError, expected_error_messages[key], self.builder._getAtoms, cifData=tmp)
 
     def test_getAtoms_correct(self):
         data = self._getData(
