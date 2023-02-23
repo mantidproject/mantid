@@ -16,7 +16,6 @@ from mantid.plots import MantidAxes
 
 
 class SuperplotPresenter:
-
     BIN_MODE_TEXT = "Column (bin)"
     SPECTRUM_MODE_TEXT = "Row (spectrum)"
     HOLD_BUTTON_TEXT_CHECKED = "Remove"
@@ -404,7 +403,11 @@ class SuperplotPresenter:
             legend = axes.legend()
             legend.set_visible(hasLegend)
             legend_set_draggable(legend, True)
-        self._canvas.draw_idle()
+        try:
+            self._canvas.draw()
+        except:
+            # exception are thown by the mantid plot layer
+            pass
 
     def _remove_unneeded_curves(self, replot: bool):
         """
