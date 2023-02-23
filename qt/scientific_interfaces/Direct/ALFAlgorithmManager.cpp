@@ -10,7 +10,6 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/ConfiguredAlgorithm.h"
 
 using namespace Mantid::API;
@@ -49,26 +48,12 @@ void ALFAlgorithmManager::subscribe(IALFAlgorithmManagerSubscriber *subscriber) 
 
 void ALFAlgorithmManager::load(ALFTask const &task, std::string const &filename) {
   m_currentTask = task;
-  auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
-
-  auto llll = loadAlgorithm(filename);
-  std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> alg = {
-      std::make_shared<MantidQt::API::ConfiguredAlgorithm>(std::move(llll), std::move(properties))};
-
-  m_jobRunner->setAlgorithmQueue(alg);
-  m_jobRunner->executeAlgorithmQueue();
+  m_jobRunner->executeAlgorithm(loadAlgorithm(filename));
 }
 
 void ALFAlgorithmManager::normaliseByCurrent(ALFTask const &task, MatrixWorkspace_sptr const &workspace) {
   m_currentTask = task;
-  auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
-
-  auto llll = normaliseByCurrentAlgorithm(workspace);
-  std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> alg = {
-      std::make_shared<MantidQt::API::ConfiguredAlgorithm>(std::move(llll), std::move(properties))};
-
-  m_jobRunner->setAlgorithmQueue(alg);
-  m_jobRunner->executeAlgorithmQueue();
+  m_jobRunner->executeAlgorithm(normaliseByCurrentAlgorithm(workspace));
 }
 
 void ALFAlgorithmManager::notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr &algorithm) {

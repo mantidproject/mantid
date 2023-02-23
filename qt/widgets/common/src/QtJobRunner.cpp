@@ -6,11 +6,23 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidQtWidgets/Common/QtJobRunner.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/ConfiguredAlgorithm.h"
 #include "MantidQtWidgets/Common/IConfiguredAlgorithm.h"
 #include "MantidQtWidgets/Common/IJobRunner.h"
 
 using namespace MantidQt::API;
+
+namespace {
+
+MantidQt::API::IConfiguredAlgorithm_sptr toConfiguredAlgorithm(Mantid::API::IAlgorithm_sptr const &algorithm) {
+  auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  return std::make_shared<MantidQt::API::ConfiguredAlgorithm>(std::move(algorithm), std::move(properties));
+}
+
+} // namespace
 
 namespace MantidQt::API {
 
@@ -29,6 +41,14 @@ void QtJobRunner::setAlgorithmQueue(std::deque<IConfiguredAlgorithm_sptr> algori
 }
 
 void QtJobRunner::executeAlgorithmQueue() { m_batchAlgoRunner.executeBatchAsync(); }
+
+void QtJobRunner::executeAlgorithm(Mantid::API::IAlgorithm_sptr algorithm) {
+  m_batchAlgoRunner.executeAlgorithmAsync(toConfiguredAlgorithm(algorithm));
+}
+
+void QtJobRunner::executeAlgorithm(IConfiguredAlgorithm_sptr algorithm) {
+  m_batchAlgoRunner.executeAlgorithmAsync(algorithm);
+}
 
 void QtJobRunner::cancelAlgorithmQueue() { m_batchAlgoRunner.cancelBatch(); }
 
