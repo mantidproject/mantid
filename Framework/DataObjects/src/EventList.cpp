@@ -3709,7 +3709,8 @@ void EventList::filterByTimeROIHelper(std::vector<T> &events, const Kernel::Spli
  * @param output :: reference to an event list that will be output.
  * @throws std::invalid_argument If output is a reference to this EventList
  */
-void EventList::filterByPulseTime(DateAndTime start, DateAndTime stop, EventList &output) const {
+void EventList::filterByPulseTime(Types::Core::DateAndTime start, Types::Core::DateAndTime stop,
+                                  EventList &output) const {
   if (this == &output) {
     throw std::invalid_argument("In-place filtering is not allowed");
   }
