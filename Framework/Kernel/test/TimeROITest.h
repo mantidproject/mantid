@@ -329,6 +329,33 @@ public:
 
   void test_intersection_one_empty() { runIntersectionTest(CHRISTMAS, TimeROI(), 0.); }
 
+  // this is a test lifted from a situation that arrises in DataHandlingTest and FilterLog
+  void test_intersection_ISISRunLogs() {
+    TimeROI left;
+    left.addROI("2008-Jun-17 11:20:09", "2008-Jun-17 11:20:11");
+    left.addROI("2008-Jun-17 11:20:21", "2008-Jun-17 11:20:23");
+    left.addROI("2008-Jun-17 11:20:32", "2008-Jun-17 11:20:33");
+    left.addROI("2008-Jun-17 11:20:41", "2008-Jun-17 11:20:45");
+    left.addROI("2008-Jun-17 11:20:53", "2008-Jun-17 11:20:57");
+    left.addROI("2008-Jun-17 11:21:06", "2008-Jun-17 11:21:07");
+    left.addROI("2008-Jun-17 11:21:16", "2008-Jun-17 11:21:18");
+    left.addROI("2008-Jun-17 11:21:19", "2008-Jun-17 11:22:29");
+
+    TimeROI right;
+    right.addROI("2008-Jun-17 11:12:11", "2008-Jun-17 11:12:21");
+    right.addROI("2008-Jun-17 11:17:57", "2008-Jun-17 11:18:07");
+    right.addROI("2008-Jun-17 11:21:08", "2008-Jun-17 11:21:19");
+
+    // this is the hand calculated answer
+    TimeROI intersection;
+    intersection.addROI("2008-Jun-17 11:21:16", "2008-Jun-17 11:21:18");
+
+    // intersection with the right answer should yeild the right answer
+    runIntersectionTest(left, intersection, intersection.durationInSeconds());
+    runIntersectionTest(right, intersection, intersection.durationInSeconds());
+    runIntersectionTest(left, right, intersection.durationInSeconds());
+  }
+
   /*
    * This test is similar to test_intersection_one_empty, except the function that is called will replace the TimeROI
    * with the non-empty one.
