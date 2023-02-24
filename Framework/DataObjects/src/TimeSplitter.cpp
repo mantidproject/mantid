@@ -41,14 +41,14 @@ TimeSplitter::TimeSplitter(const DateAndTime &start, const DateAndTime &stop) {
  * Note: The amount of X values in input MatrixWorkspace must be 1 larger than the amount of Y values.
  * There are NO undefined split regions here.
  **/
-TimeSplitter::TimeSplitter(const Mantid::API::MatrixWorkspace_sptr &ws) {
+TimeSplitter::TimeSplitter(const Mantid::API::MatrixWorkspace_sptr &ws, const DateAndTime &offset) {
   if (ws->getNumberHistograms() != 1) {
     throw std::runtime_error("MatrixWorkspace can only have 1 histogram when constructing TimeSplitter.");
   }
 
   const auto X = ws->binEdges(0);
   const auto &Y = ws->y(0);
-  if (std::any_of(X.begin(), X.end(), [](int i) { return static_cast<int>(i) < 0; })) {
+  if (std::any_of(X.begin(), X.end(), [](double i) { return static_cast<int>(i) < 0; })) {
     throw std::runtime_error("All X values in MatrixWorkspace must be >= 0 to construct TimeSplitter.");
   }
   if (X.size() != Y.size() + 1) {
@@ -56,9 +56,12 @@ TimeSplitter::TimeSplitter(const Mantid::API::MatrixWorkspace_sptr &ws) {
         "Size of x values must be one more than size of y values to construct TimeSplitter from MatrixWorkspace.");
   }
 
+  int64_t offset_ns{offset.totalNanoseconds()};
   for (size_t i = 1; i < X.size(); i++) {
-    this->addROI(Types::Core::DateAndTime(static_cast<int>(X[i - 1])), Types::Core::DateAndTime(static_cast<int>(X[i])),
-                 static_cast<int>(Y[i - 1]));
+    auto timeStart = Types::Core::DateAndTime((X[i - 1]), 0.0) += offset_ns;
+    auto timeEnd = Types::Core::DateAndTime((X[i]), 0.0) += offset_ns;
+    auto index = static_cast<int>(Y[i - 1]);
+    this->addROI(timeStart, timeEnd, index);
   }
 }
 

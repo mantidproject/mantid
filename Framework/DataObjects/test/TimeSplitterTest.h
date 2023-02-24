@@ -186,15 +186,15 @@ public:
 
   void test_timeSplitterFromMatrixWorkspace() {
     TimeSplitter splitter;
-    splitter.addROI(DateAndTime(0), DateAndTime(10), 1);
-    splitter.addROI(DateAndTime(10), DateAndTime(15), 3);
-    splitter.addROI(DateAndTime(15), DateAndTime(20), 2);
+    splitter.addROI(DateAndTime(0, 0), DateAndTime(10, 0), 1);
+    splitter.addROI(DateAndTime(10, 0), DateAndTime(15, 0), 3);
+    splitter.addROI(DateAndTime(15, 0), DateAndTime(20, 0), 2);
 
     Mantid::API::MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 3);
 
     auto &X = ws->dataX(0);
     auto &Y = ws->dataY(0);
-    // X[0] is 0 by default
+    // X[0] is 0 by default, unit is seconds.
     X[1] = 10.0;
     X[2] = 15.0;
     X[3] = 20.0;
@@ -205,12 +205,29 @@ public:
     auto convertedSplitter = new TimeSplitter(ws);
 
     TS_ASSERT(splitter.numRawValues() == convertedSplitter->numRawValues() && convertedSplitter->numRawValues() == 4);
+    TS_ASSERT(splitter.valueAtTime(DateAndTime(0, 0)) == convertedSplitter->valueAtTime(DateAndTime(0, 0)) &&
+              convertedSplitter->valueAtTime(DateAndTime(0, 0)) == 1);
+    TS_ASSERT(splitter.valueAtTime(DateAndTime(12, 0)) == convertedSplitter->valueAtTime(DateAndTime(12, 0)) &&
+              convertedSplitter->valueAtTime(DateAndTime(12, 0)) == 3);
+    TS_ASSERT(splitter.valueAtTime(DateAndTime(20, 0)) == convertedSplitter->valueAtTime(DateAndTime(20, 0)) &&
+              convertedSplitter->valueAtTime(DateAndTime(20, 0)) == -1);
+  }
+
+  void test_timeSplitterFromMatrixWorkspaceOffset() {
+    TimeSplitter splitter;
+    splitter.addROI(DateAndTime(0, 5), DateAndTime(10, 5), 1);
+    Mantid::API::MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+
+    auto &X = ws->dataX(0);
+    auto &Y = ws->dataY(0);
+    // X[0] is 0 by default, unit is seconds.
+    X[1] = 10.0;
+    Y[0] = 1.0;
+    auto convertedSplitter = new TimeSplitter(ws, DateAndTime(5));
     TS_ASSERT(splitter.valueAtTime(DateAndTime(0)) == convertedSplitter->valueAtTime(DateAndTime(0)) &&
-              convertedSplitter->valueAtTime(DateAndTime(0)) == 1);
-    TS_ASSERT(splitter.valueAtTime(DateAndTime(12)) == convertedSplitter->valueAtTime(DateAndTime(12)) &&
-              convertedSplitter->valueAtTime(DateAndTime(12)) == 3);
-    TS_ASSERT(splitter.valueAtTime(DateAndTime(20)) == convertedSplitter->valueAtTime(DateAndTime(20)) &&
-              convertedSplitter->valueAtTime(DateAndTime(20)) == -1);
+              convertedSplitter->valueAtTime(DateAndTime(0)) == -1);
+    TS_ASSERT(splitter.valueAtTime(DateAndTime(0, 5)) == convertedSplitter->valueAtTime(DateAndTime(0, 5)) &&
+              convertedSplitter->valueAtTime(DateAndTime(0, 5)) == 1);
   }
 
   void test_timeSplitterFromMatrixWorkspaceError() {
