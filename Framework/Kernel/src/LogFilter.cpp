@@ -52,12 +52,12 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
     TimeInterval time1 = filter1->nthInterval(filter1->size() - 1);
     TimeInterval time2 = filter2->nthInterval(filter2->size() - 1);
 
-    if (time1.begin() < time2.begin()) {
-      filter1->addValue(time2.begin(),
+    if (time1.start() < time2.start()) {
+      filter1->addValue(time2.start(),
                         true); // should be f1->lastValue, but it doesnt
                                // matter for boolean AND
-    } else if (time2.begin() < time1.begin()) {
-      filter2->addValue(time1.begin(), true);
+    } else if (time2.start() < time1.start()) {
+      filter2->addValue(time1.start(), true);
     }
 
     int i = 0;
@@ -71,11 +71,11 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
     // of the filter that starts later to equalise their staring times. The new
     // interval will have
     // value opposite to the one it started with originally.
-    if (time1.begin() > time2.begin()) {
-      filter1->addValue(time2.begin(), !filter1->nthValue(i));
+    if (time1.start() > time2.start()) {
+      filter1->addValue(time2.start(), !filter1->nthValue(i));
       time1 = filter1->nthInterval(i);
-    } else if (time2.begin() > time1.begin()) {
-      filter2->addValue(time1.begin(), !filter2->nthValue(j));
+    } else if (time2.start() > time1.start()) {
+      filter2->addValue(time1.start(), !filter2->nthValue(j));
       time2 = filter2->nthInterval(j);
     }
 
@@ -83,12 +83,12 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
       TimeInterval time3;
       time3 = time1.intersection(time2);
       if (time3.isValid()) {
-        filterProperty->addValue(time3.begin(), (filter1->nthValue(i) && filter2->nthValue(j)));
+        filterProperty->addValue(time3.start(), (filter1->nthValue(i) && filter2->nthValue(j)));
       }
 
-      if (time1.end() < time2.end()) {
+      if (time1.stop() < time2.stop()) {
         i++;
-      } else if (time2.end() < time1.end()) {
+      } else if (time2.stop() < time1.stop()) {
         j++;
       } else {
         i++;
