@@ -130,32 +130,51 @@ class SymmetriseTest(unittest.TestCase):
         """
         Tests validation on entering an XMin value lower than the smallest value in the X range.
         """
-        self.assertRaises(
-            RuntimeError, Symmetrise, InputWorkspace=self._sample_ws, OutputWOrkspace="__Symmetrise_TestWS", XMin=-5, XMax=0.2
+        self.assertRaisesRegex(
+            RuntimeError,
+            "XMin must be greater than or equal to zero",
+            Symmetrise,
+            InputWorkspace=self._sample_ws,
+            OutputWOrkspace="__Symmetrise_TestWS",
+            XMin=-5,
+            XMax=0.2,
         )
 
     def test_failure_xmax_out_of_range(self):
         """
         Tests validation on entering an XMax value greater than the largest value in the X range.
         """
-        self.assertRaises(
-            RuntimeError, Symmetrise, InputWorkspace=self._sample_ws, OutputWOrkspace="__Symmetrise_TestWS", XMin=0.05, XMax=15
+        self.assertRaisesRegex(
+            RuntimeError,
+            r"XMax value .* is greater than largest X value",
+            Symmetrise,
+            InputWorkspace=self._sample_ws,
+            OutputWOrkspace="__Symmetrise_TestWS",
+            XMin=0.05,
+            XMax=15,
         )
 
     def test_failure_invalid_x_range(self):
         """
         Tests validation on entering an XMax value lower then XMin.
         """
-        self.assertRaises(
-            RuntimeError, Symmetrise, InputWorkspace=self._sample_ws, OutputWOrkspace="__Symmetrise_TestWS", XMin=0.2, XMax=0.1
+        self.assertRaisesRegex(
+            RuntimeError,
+            "XMax must be greater than XMin",
+            Symmetrise,
+            InputWorkspace=self._sample_ws,
+            OutputWOrkspace="__Symmetrise_TestWS",
+            XMin=0.2,
+            XMax=0.1,
         )
 
     def test_failure_spectra_range_lower(self):
         """
         Tests validation on entering a minimum spectra number lower then that of the workspace.
         """
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Minimum spectra must be greater than or equal to",
             Symmetrise,
             InputWorkspace=self._sample_ws,
             OutputWOrkspace="__Symmetrise_TestWS",
@@ -168,8 +187,9 @@ class SymmetriseTest(unittest.TestCase):
         """
         Tests validation on entering a maximum spectra number higher then that of the workspace.
         """
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Maximum spectra must be less than or equal to",
             Symmetrise,
             InputWorkspace=self._sample_ws,
             OutputWOrkspace="__Symmetrise_TestWS",
