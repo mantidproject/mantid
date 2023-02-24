@@ -8,6 +8,6 @@
 
 namespace MantidQt::CustomInterfaces {
 
-enum class ALFDataSwitch { SAMPLE, VANADIUM };
+enum class ALFData { SAMPLE, VANADIUM };
 
 }

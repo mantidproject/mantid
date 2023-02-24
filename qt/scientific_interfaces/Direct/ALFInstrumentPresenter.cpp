@@ -40,12 +40,12 @@ void ALFInstrumentPresenter::saveSettings() { m_view->saveSettings(); }
 void ALFInstrumentPresenter::notifyAlgorithmError(std::string const &message) { m_view->warningBox(message); }
 
 void ALFInstrumentPresenter::loadSample() {
-  m_dataSwitch = ALFDataSwitch::SAMPLE;
+  m_dataSwitch = ALFData::SAMPLE;
   loadAndNormalise();
 }
 
 void ALFInstrumentPresenter::loadVanadium() {
-  m_dataSwitch = ALFDataSwitch::VANADIUM;
+  m_dataSwitch = ALFData::VANADIUM;
   loadAndNormalise();
 }
 
@@ -67,7 +67,7 @@ void ALFInstrumentPresenter::notifyLoadAndNormaliseComplete(Mantid::API::MatrixW
 }
 
 void ALFInstrumentPresenter::generateLoadedWorkspace() {
-  if (!m_model->hasData(ALFDataSwitch::SAMPLE)) {
+  if (!m_model->hasData(ALFData::SAMPLE)) {
     return;
   }
 
@@ -80,16 +80,16 @@ void ALFInstrumentPresenter::generateLoadedWorkspace() {
 }
 
 void ALFInstrumentPresenter::notifyRebinToWorkspaceComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) {
-  m_model->setData(ALFDataSwitch::VANADIUM, workspace);
+  m_model->setData(ALFData::VANADIUM, workspace);
   normaliseSampleByVanadium();
 }
 
 void ALFInstrumentPresenter::normaliseSampleByVanadium() {
   // Normalise the sample by the vanadium and replace any special values if a vanadium exists
-  if (m_model->hasData(ALFDataSwitch::VANADIUM)) {
+  if (m_model->hasData(ALFData::VANADIUM)) {
     m_algorithmManager->replaceSpecialValues(m_model->replaceSpecialValuesProperties());
   } else {
-    convertSampleToDSpacing(m_model->data(ALFDataSwitch::SAMPLE));
+    convertSampleToDSpacing(m_model->data(ALFData::SAMPLE));
   }
 }
 
@@ -128,25 +128,25 @@ void ALFInstrumentPresenter::notifyTubesSelected(std::vector<DetectorTube> const
 
 std::optional<std::string> ALFInstrumentPresenter::getFileFromView() const {
   switch (m_dataSwitch) {
-  case ALFDataSwitch::SAMPLE:
+  case ALFData::SAMPLE:
     return m_view->getSampleFile();
-  case ALFDataSwitch::VANADIUM:
+  case ALFData::VANADIUM:
     return m_view->getVanadiumFile();
   }
-  throw std::invalid_argument("ALFDataSwitch must be one of { SAMPLE, VANADIUM }");
+  throw std::invalid_argument("ALFData must be one of { SAMPLE, VANADIUM }");
 }
 
 void ALFInstrumentPresenter::updateRunInViewFromModel() {
   auto const runAsString = std::to_string(m_model->run(m_dataSwitch));
   switch (m_dataSwitch) {
-  case ALFDataSwitch::SAMPLE:
+  case ALFData::SAMPLE:
     m_view->setSampleRun(runAsString);
     return;
-  case ALFDataSwitch::VANADIUM:
+  case ALFData::VANADIUM:
     m_view->setVanadiumRun(runAsString);
     return;
   }
-  throw std::invalid_argument("ALFDataSwitch must be one of { SAMPLE, VANADIUM }");
+  throw std::invalid_argument("ALFData must be one of { SAMPLE, VANADIUM }");
 }
 
 void ALFInstrumentPresenter::updateInstrumentViewFromModel() {

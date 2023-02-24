@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "ALFDataSwitch.h"
+#include "ALFData.h"
 #include "DetectorTube.h"
 #include "DllConfig.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
@@ -40,13 +40,13 @@ public:
 
   virtual std::string loadedWsName() const = 0;
 
-  virtual void setData(ALFDataSwitch const &dataSwitch, Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
-  virtual bool hasData(ALFDataSwitch const &dataSwitch) const = 0;
-  virtual Mantid::API::MatrixWorkspace_sptr data(ALFDataSwitch const &dataSwitch) const = 0;
+  virtual void setData(ALFData const &dataType, Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
+  virtual bool hasData(ALFData const &dataType) const = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr data(ALFData const &dataType) const = 0;
 
   virtual void replaceSampleWorkspaceInADS(Mantid::API::MatrixWorkspace_sptr const &workspace) const = 0;
 
-  virtual std::size_t run(ALFDataSwitch const &dataSwitch) const = 0;
+  virtual std::size_t run(ALFData const &dataType) const = 0;
 
   virtual bool binningMismatch() const = 0;
   virtual bool axisIsDSpacing() const = 0;
@@ -74,13 +74,13 @@ public:
 
   inline std::string loadedWsName() const noexcept override { return "ALFData"; };
 
-  void setData(ALFDataSwitch const &dataSwitch, Mantid::API::MatrixWorkspace_sptr const &workspace) override;
-  bool hasData(ALFDataSwitch const &dataSwitch) const override;
-  Mantid::API::MatrixWorkspace_sptr data(ALFDataSwitch const &dataSwitch) const override;
+  void setData(ALFData const &dataType, Mantid::API::MatrixWorkspace_sptr const &workspace) override;
+  bool hasData(ALFData const &dataType) const override;
+  Mantid::API::MatrixWorkspace_sptr data(ALFData const &dataType) const override;
 
   void replaceSampleWorkspaceInADS(Mantid::API::MatrixWorkspace_sptr const &workspace) const override;
 
-  std::size_t run(ALFDataSwitch const &dataSwitch) const override;
+  std::size_t run(ALFData const &dataType) const override;
 
   bool binningMismatch() const override;
   bool axisIsDSpacing() const override;

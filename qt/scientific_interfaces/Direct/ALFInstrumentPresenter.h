@@ -7,7 +7,7 @@
 #pragma once
 
 #include "ALFAlgorithmManager.h"
-#include "ALFDataSwitch.h"
+#include "ALFData.h"
 #include "ALFInstrumentModel.h"
 #include "DetectorTube.h"
 #include "DllConfig.h"
@@ -89,7 +89,7 @@ private:
   void updateInstrumentViewFromModel();
   void updateAnalysisViewFromModel();
 
-  ALFDataSwitch m_dataSwitch;
+  ALFData m_dataSwitch;
 
   IALFAnalysisPresenter *m_analysisPresenter;
 

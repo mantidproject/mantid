@@ -16,7 +16,7 @@ set(INC_FILES
     ALFAlgorithmManager.h
     ALFAnalysisModel.h
     ALFAnalysisPresenter.h
-    ALFDataSwitch.h
+    ALFData.h
     ALFInstrumentModel.h
     ALFInstrumentPresenter.h
     DetectorTube.h

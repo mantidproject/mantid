@@ -167,16 +167,16 @@ void ALFInstrumentModel::replaceSampleWorkspaceInADS(Mantid::API::MatrixWorkspac
   ADS.addOrReplace(loadedWsName(), workspace);
 }
 
-void ALFInstrumentModel::setData(ALFDataSwitch const &dataSwitch, MatrixWorkspace_sptr const &workspace) {
-  switch (dataSwitch) {
-  case ALFDataSwitch::SAMPLE:
+void ALFInstrumentModel::setData(ALFData const &dataType, MatrixWorkspace_sptr const &workspace) {
+  switch (dataType) {
+  case ALFData::SAMPLE:
     setSample(workspace);
     return;
-  case ALFDataSwitch::VANADIUM:
+  case ALFData::VANADIUM:
     setVanadium(workspace);
     return;
   }
-  throw std::invalid_argument("ALFDataSwitch must be one of { SAMPLE, VANADIUM }");
+  throw std::invalid_argument("ALFData must be one of { SAMPLE, VANADIUM }");
 }
 
 void ALFInstrumentModel::setSample(MatrixWorkspace_sptr const &sample) {
@@ -189,26 +189,26 @@ void ALFInstrumentModel::setSample(MatrixWorkspace_sptr const &sample) {
 
 void ALFInstrumentModel::setVanadium(MatrixWorkspace_sptr const &vanadium) { m_vanadium = vanadium; }
 
-bool ALFInstrumentModel::hasData(ALFDataSwitch const &dataSwitch) const { return bool(data(dataSwitch)); }
+bool ALFInstrumentModel::hasData(ALFData const &dataType) const { return bool(data(dataType)); }
 
-Mantid::API::MatrixWorkspace_sptr ALFInstrumentModel::data(ALFDataSwitch const &dataSwitch) const {
-  switch (dataSwitch) {
-  case ALFDataSwitch::SAMPLE:
+Mantid::API::MatrixWorkspace_sptr ALFInstrumentModel::data(ALFData const &dataType) const {
+  switch (dataType) {
+  case ALFData::SAMPLE:
     return m_sample;
-  case ALFDataSwitch::VANADIUM:
+  case ALFData::VANADIUM:
     return m_vanadium;
   }
-  throw std::invalid_argument("ALFDataSwitch must be one of { SAMPLE, VANADIUM }");
+  throw std::invalid_argument("ALFData must be one of { SAMPLE, VANADIUM }");
 }
 
-std::size_t ALFInstrumentModel::run(ALFDataSwitch const &dataSwitch) const {
-  switch (dataSwitch) {
-  case ALFDataSwitch::SAMPLE:
+std::size_t ALFInstrumentModel::run(ALFData const &dataType) const {
+  switch (dataType) {
+  case ALFData::SAMPLE:
     return runNumber(m_sample);
-  case ALFDataSwitch::VANADIUM:
+  case ALFData::VANADIUM:
     return runNumber(m_vanadium);
   }
-  throw std::invalid_argument("ALFDataSwitch must be one of { SAMPLE, VANADIUM }");
+  throw std::invalid_argument("ALFData must be one of { SAMPLE, VANADIUM }");
 }
 
 std::size_t ALFInstrumentModel::runNumber(Mantid::API::MatrixWorkspace_sptr const &workspace) const {
