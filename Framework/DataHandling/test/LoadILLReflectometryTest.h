@@ -36,6 +36,7 @@ private:
   const std::string m_figaroDirectBeamFile{"ILL/Figaro/709922.nxs"};
   const std::string m_figaroDirectBeamFileCycle213{"ILL/Figaro/750662.nxs"};
   const std::string m_figaroReflectedBeamFile{"ILL/Figaro/709886.nxs"};
+  const std::string m_figaroFileCycle231{"ILL/Figaro/750662.nxs"};
   // Name of the default output workspace
   const std::string m_outWSName{"LoadILLReflectometryTest_OutputWS"};
 
@@ -632,6 +633,25 @@ public:
     TS_ASSERT_EQUALS(run.getProperty("chopper4.phase")->units(), "deg")
     TS_ASSERT_EQUALS(run.getProperty("CollAngle.poff")->units(), "deg")
     TS_ASSERT_EQUALS(run.getProperty("CollAngle.open_offset")->units(), "deg")
+  }
+
+  void testTOFFigaroCycle231() {
+    MatrixWorkspace_sptr output;
+    auto prop = emptyProperties();
+    prop.emplace_back("XUnit", "TimeOfFlight");
+    getWorkspaceFor(output, m_figaroFileCycle231, m_outWSName, prop);
+    TS_ASSERT(output)
+    TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "TOF")
+    const auto &run = output->run();
+    TS_ASSERT_EQUALS(output->blocksize(), 1000)
+    TS_ASSERT_EQUALS(output->getNumberHistograms(), 256 + 2)
+    TS_ASSERT_EQUALS(run.getProperty("MainParameters.edelay_delay")->units(), "usec")
+    TS_ASSERT_EQUALS(run.getProperty("chopper1.rotation_speed")->units(), "rpm")
+    TS_ASSERT_EQUALS(run.getProperty("chopper4.phase")->units(), "deg")
+    TS_ASSERT_EQUALS(run.getProperty("CollAngle.poff")->units(), "deg")
+    TS_ASSERT_EQUALS(run.getProperty("CollAngle.open_offset")->units(), "deg")
+    TS_ASSERT(run.hasProperty("Distance.MidChopper_Sample"))
+    TS_ASSERT_DELTA(run.getPropertyValueAsType<double>("Distance.MidChopper_Sample"), 5497, 1e-3)
   }
 };
 
