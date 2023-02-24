@@ -65,8 +65,7 @@ public:
   // Returns whether the time series has been filtered
   bool isFiltered() const override { return m_filterApplied; }
 
-  /// Updates size()
-  void countSize() const;
+  int size() const override;
 
   /// Access the unfiltered log
   const TimeSeriesProperty<HeldType> *unfiltered() const;
@@ -79,6 +78,8 @@ public:
 private:
   /// Apply a filter
   void applyFilter() const;
+  /// Updates size()
+  void countSize() const;
   /// Clear out the applied filter
   void clearFilterCache() const;
 

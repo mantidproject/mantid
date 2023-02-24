@@ -245,6 +245,11 @@ template <typename TYPE> void FilteredTimeSeriesProperty<TYPE>::countSize() cons
   }
 }
 
+template <typename TYPE> int FilteredTimeSeriesProperty<TYPE>::size() const {
+  this->applyFilter();
+  return this->m_size;
+}
+
 /*
  * Apply filter
  * Requirement: There is no 2 consecutive 'second' values that are same in

@@ -169,7 +169,6 @@ public:
     p1->filterWith(filter);
 
     // 4. Formal check (1) Size  (2) Number of Interval
-    p1->countSize();
     TS_ASSERT_EQUALS(p1->size(), 7);
 
     Mantid::Kernel::TimeInterval dt1 = p1->nthInterval(1);
@@ -182,17 +181,12 @@ public:
 
     // 4. Clear filter
     p1->clearFilter();
-    p1->countSize();
 
     int finalsize = p1->size();
-    TS_ASSERT_EQUALS(finalsize, origsize);
-
-    if (finalsize == origsize) {
-      for (std::size_t i = 0; i < std::size_t(finalsize); i++) {
-        Mantid::Kernel::TimeInterval dt = p1->nthInterval(static_cast<int>(i));
-        TS_ASSERT_EQUALS(dt.start(), dts[i].start());
-        TS_ASSERT_EQUALS(dt.stop(), dts[i].stop());
-      }
+    for (std::size_t i = 0; i < std::size_t(finalsize); i++) {
+      Mantid::Kernel::TimeInterval dt = p1->nthInterval(static_cast<int>(i));
+      TS_ASSERT_EQUALS(dt.start(), dts[i].start());
+      TS_ASSERT_EQUALS(dt.stop(), dts[i].stop());
     }
 
     // -1. Clean
@@ -251,7 +245,6 @@ public:
     p1->filterWith(filter);
 
     // 3. Check size
-    p1->countSize();
     TS_ASSERT_EQUALS(p1->size(), 12);
 
     // 4. Check interval & Value
@@ -366,7 +359,6 @@ public:
     p1->filterWith(filter);
 
     // 3. Check size
-    p1->countSize();
     TS_ASSERT_EQUALS(p1->size(), 7);
 
     // 4. Check interval
@@ -422,7 +414,6 @@ public:
     p1->filterWith(filter);
 
     // 3. Check size
-    p1->countSize();
     TS_ASSERT_EQUALS(p1->size(), 14);
 
     // 4. Check interval
