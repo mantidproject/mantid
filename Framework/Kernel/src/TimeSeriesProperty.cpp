@@ -755,24 +755,28 @@ void TimeSeriesProperty<TYPE>::expandFilterToRange(std::vector<SplittingInterval
   if (emptyMax)
     max = static_cast<double>(maxValue());
 
-  // Assume everything before the 1st value is constant
-  double val = static_cast<double>(firstValue());
-  if ((val >= min) && (val <= max)) {
-    SplittingIntervalVec extraFilter;
-    extraFilter.emplace_back(range.start(), firstTime(), 0);
-    // Include everything from the start of the run to the first time measured
-    // (which may be a null time interval; this'll be ignored)
-    split = split | extraFilter;
+  if (range.start() < firstTime()) {
+    // Assume everything before the 1st value is constant
+    double val = static_cast<double>(firstValue());
+    if ((val >= min) && (val <= max)) {
+      SplittingIntervalVec extraFilter;
+      extraFilter.emplace_back(range.start(), firstTime(), 0);
+      // Include everything from the start of the run to the first time measured
+      // (which may be a null time interval; this'll be ignored)
+      split = split | extraFilter;
+    }
   }
 
-  // Assume everything after the LAST value is constant
-  val = static_cast<double>(lastValue());
-  if ((val >= min) && (val <= max)) {
-    SplittingIntervalVec extraFilter;
-    extraFilter.emplace_back(lastTime(), range.stop(), 0);
-    // Include everything from the start of the run to the first time measured
-    // (which may be a null time interval; this'll be ignored)
-    split = split | extraFilter;
+  if (lastTime() < range.stop()) {
+    // Assume everything after the LAST value is constant
+    double val = static_cast<double>(lastValue());
+    if ((val >= min) && (val <= max)) {
+      SplittingIntervalVec extraFilter;
+      extraFilter.emplace_back(lastTime(), range.stop(), 0);
+      // Include everything from the start of the run to the first time measured
+      // (which may be a null time interval; this'll be ignored)
+      split = split | extraFilter;
+    }
   }
 }
 
@@ -2074,7 +2078,7 @@ template <typename TYPE> std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredVal
 template <typename TYPE> std::vector<SplittingInterval> TimeSeriesProperty<TYPE>::getSplittingIntervals() const {
   std::vector<SplittingInterval> intervals;
   auto lastInterval = this->nthInterval(this->size() - 1);
-  intervals.emplace_back(firstTime(), lastInterval.end());
+  intervals.emplace_back(firstTime(), lastInterval.stop());
   return intervals;
 }
 
