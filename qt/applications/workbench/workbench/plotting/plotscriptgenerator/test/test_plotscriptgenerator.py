@@ -7,7 +7,6 @@
 #  This file is part of the mantid workbench.
 
 import unittest
-from distutils.version import LooseVersion
 
 import matplotlib
 
@@ -149,16 +148,11 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         mock_ax = MagicMock(spec=MantidAxes, **mock_kwargs)
         num_rows = kwargs.get("numRows", 1)
         num_cols = kwargs.get("numCols", 1)
-        if LooseVersion("3.1.3") < LooseVersion(matplotlib.__version__):
-            setattr(mock_ax, "get_gridspec", MagicMock())
-            mock_ax.get_gridspec.return_value.nrows = num_rows
-            mock_ax.get_gridspec.return_value.ncols = num_cols
-            setattr(mock_ax, "get_subplotspec", MagicMock())
-            mock_ax.get_subplotspec.return_value.colspan.start = colNum
-        else:
-            mock_kwargs["numRows"] = num_rows
-            mock_kwargs["numCols"] = num_cols
-            mock_ax.colNum = colNum
+        setattr(mock_ax, "get_gridspec", MagicMock())
+        mock_ax.get_gridspec.return_value.nrows = num_rows
+        mock_ax.get_gridspec.return_value.ncols = num_cols
+        setattr(mock_ax, "get_subplotspec", MagicMock())
+        mock_ax.get_subplotspec.return_value.colspan.start = colNum
 
         mock_ax.xaxis.minor.locator = Mock(spec=NullLocator)
         mock_ax.xaxis._major_tick_kw = {"gridOn": False}
@@ -249,7 +243,6 @@ class PlotScriptGeneratorTest(unittest.TestCase):
     def test_generate_script_compiles_script_correctly_with_fit(
         self, mock_subplots_cmd, mock_plot_cmd, mock_retrieval_cmd, mock_axis_lim_cmd, mock_autoscale_lims, mock_fit_cmds
     ):
-
         mock_retrieval_cmd.return_value = self.retrieval_cmds
         mock_subplots_cmd.return_value = self.subplots_cmd
         mock_plot_cmd.return_value = self.plot_cmd
