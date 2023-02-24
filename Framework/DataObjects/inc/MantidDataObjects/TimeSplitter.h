@@ -8,6 +8,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/DllConfig.h"
+#include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/DateAndTime.h"
 
@@ -29,6 +30,7 @@ public:
   TimeSplitter(const DateAndTime &start, const DateAndTime &stop);
   TimeSplitter(const Mantid::API::MatrixWorkspace_sptr &ws, const DateAndTime &offset = DateAndTime(0, 0));
   TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &offset = DateAndTime(0, 0));
+  TimeSplitter(const SplittersWorkspace_sptr &sws);
 
 public:
   int valueAtTime(const DateAndTime &time) const;
