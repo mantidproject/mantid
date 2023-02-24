@@ -62,7 +62,8 @@ TimeSplitter::TimeSplitter(const Mantid::API::MatrixWorkspace_sptr &ws, const Da
     auto timeEnd = Types::Core::DateAndTime(X[i], 0.0) + offset_ns;
     auto index = static_cast<int>(Y[i - 1]);
     if ((index != IGNORE_VALUE) && (valueAtTime(timeStart) != IGNORE_VALUE || valueAtTime(timeEnd) != IGNORE_VALUE)) {
-      g_log.warning() << "Workspace row " << i - 1 << " may be overwritten in conversion to TimeSplitter" << '\n';
+      g_log.warning() << "Values between " << timeStart.second() << "(s) and " << timeEnd.second()
+                      << "(s) may be overwritten in conversion to TimeSplitter" << '\n';
     }
     this->addROI(timeStart, timeEnd, index);
   }
