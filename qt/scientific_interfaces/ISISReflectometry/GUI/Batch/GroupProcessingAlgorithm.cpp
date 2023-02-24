@@ -11,9 +11,9 @@
 #include "../../Reduction/Batch.h"
 #include "../../Reduction/Group.h"
 #include "../../Reduction/IBatch.h"
-#include "AlgorithmProperties.h"
 #include "BatchJobAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmProperties.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IAlgorithmRuntimeProps.h"
@@ -24,6 +24,7 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry::GroupProcessing {
 using API::IConfiguredAlgorithm_sptr;
 using Mantid::API::IAlgorithm_sptr;
 namespace { // unnamed namespace
+using namespace Mantid::API;
 
 std::string removePrefix(std::string const &value, std::string const &prefix) {
   // Just return the original value if it doesn't contain the prefix

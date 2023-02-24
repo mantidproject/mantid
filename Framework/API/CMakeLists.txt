@@ -7,6 +7,7 @@ set(SRC_FILES
     src/AlgorithmHistory.cpp
     src/AlgorithmManager.cpp
     src/AlgorithmObserver.cpp
+    src/AlgorithmProperties.cpp
     src/AlgorithmProperty.cpp
     src/AlgorithmRuntimeProps.cpp
     src/AnalysisDataService.cpp
@@ -178,6 +179,7 @@ set(INC_FILES
     inc/MantidAPI/AlgorithmHistory.h
     inc/MantidAPI/AlgorithmManager.h
     inc/MantidAPI/AlgorithmObserver.h
+    inc/MantidAPI/AlgorithmProperties.h
     inc/MantidAPI/AlgorithmProperty.h
     inc/MantidAPI/AlgorithmRuntimeProps.h
     inc/MantidAPI/AnalysisDataService.h

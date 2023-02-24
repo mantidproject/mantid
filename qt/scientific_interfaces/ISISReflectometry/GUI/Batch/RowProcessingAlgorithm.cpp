@@ -8,9 +8,9 @@
 #include "../../GUI/Preview/ROIType.h"
 #include "../../Reduction/Batch.h"
 #include "../../Reduction/PreviewRow.h"
-#include "AlgorithmProperties.h"
 #include "BatchJobAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmProperties.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -27,6 +27,8 @@ Mantid::Kernel::Logger g_log("Reflectometry RowProcessingAlgorithm");
 } // namespace
 
 namespace { // unnamed namespace
+using namespace Mantid::API;
+
 // These functions update properties in an AlgorithmRuntimeProps for specific
 // properties for the row reduction algorithm
 void updateInputWorkspacesProperties(AlgorithmRuntimeProps &properties,
