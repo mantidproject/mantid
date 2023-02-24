@@ -11,9 +11,9 @@
 #include "AlgorithmProperties.h"
 #include "BatchJobAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "Reduction/Item.h"
 #include "Reduction/PreviewRow.h"
@@ -27,18 +27,16 @@ using MantidQt::API::IConfiguredAlgorithm;
 using MantidQt::API::IConfiguredAlgorithm_sptr;
 
 namespace {
-void updateInputWorkspacesProperties(MantidQt::API::IAlgorithmRuntimeProps &properties,
+void updateInputWorkspacesProperties(Mantid::API::IAlgorithmRuntimeProps &properties,
                                      std::vector<std::string> const &inputRunNumbers) {
   AlgorithmProperties::update("InputRunList", inputRunNumbers, properties);
 }
 
-void updateInstrumentSettingsProperties(MantidQt::API::IAlgorithmRuntimeProps &properties,
-                                        Instrument const &instrument) {
+void updateInstrumentSettingsProperties(Mantid::API::IAlgorithmRuntimeProps &properties, Instrument const &instrument) {
   AlgorithmProperties::update("CalibrationFile", instrument.calibrationFilePath(), properties);
 }
 
-void updateExperimentSettingsProperties(MantidQt::API::IAlgorithmRuntimeProps &properties,
-                                        Experiment const &experiment) {
+void updateExperimentSettingsProperties(Mantid::API::IAlgorithmRuntimeProps &properties, Experiment const &experiment) {
   AlgorithmProperties::update("Debug", experiment.debug(), properties);
 }
 
@@ -62,7 +60,7 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Preview
   alg->getPointerToProperty("OutputWorkspace")->createTemporaryValue();
 
   // Set the algorithm properties from the model
-  auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   updateInputWorkspacesProperties(*properties, row.runNumbers());
   updateInstrumentSettingsProperties(*properties, model.instrument());
   updateExperimentSettingsProperties(*properties, model.experiment());

@@ -7,8 +7,8 @@
 #pragma once
 
 #include "Common/DllConfig.h"
+#include "MantidAPI/IAlgorithmRuntimeProps.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
-#include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/IConfiguredAlgorithm.h"
 #include "Reduction/Item.h"
 #include <boost/optional.hpp>
@@ -29,7 +29,7 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry::Reduction {
 // just the reduction step on its own when performing on-the-fly reduction on the Preview tab
 MANTIDQT_ISISREFLECTOMETRY_DLL MantidQt::API::IConfiguredAlgorithm_sptr
 createConfiguredAlgorithm(IBatch const &model, PreviewRow &row, Mantid::API::IAlgorithm_sptr alg = nullptr);
-MANTIDQT_ISISREFLECTOMETRY_DLL std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps>
+MANTIDQT_ISISREFLECTOMETRY_DLL std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps>
 createAlgorithmRuntimeProps(IBatch const &model, PreviewRow const &row);
 MANTIDQT_ISISREFLECTOMETRY_DLL void updateRowOnAlgorithmComplete(const Mantid::API::IAlgorithm_sptr &algorithm,
                                                                  Item &item);
@@ -41,6 +41,6 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry::RowProcessing {
 // This is included in the same file as the reduction algorithm because it shares mostly the same properties.
 MANTIDQT_ISISREFLECTOMETRY_DLL MantidQt::API::IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model,
                                                                                                   Row &row);
-MANTIDQT_ISISREFLECTOMETRY_DLL std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps>
+MANTIDQT_ISISREFLECTOMETRY_DLL std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps>
 createAlgorithmRuntimeProps(IBatch const &model, boost::optional<Row const &> row = boost::none);
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry::RowProcessing

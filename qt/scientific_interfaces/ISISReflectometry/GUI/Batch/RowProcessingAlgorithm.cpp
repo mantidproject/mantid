@@ -11,15 +11,15 @@
 #include "AlgorithmProperties.h"
 #include "BatchJobAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
-#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
+using Mantid::API::AlgorithmRuntimeProps;
 using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
-using MantidQt::API::AlgorithmRuntimeProps;
 using MantidQt::API::IConfiguredAlgorithm_sptr;
 
 namespace {
@@ -321,9 +321,9 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Preview
  * @param row : optional run details from the Runs table
  * @returns : a custom PropertyManager class with all of the algorithm properties set
  */
-std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(IBatch const &model,
-                                                                                   PreviewRow const &previewRow) {
-  auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(IBatch const &model,
+                                                                                 PreviewRow const &previewRow) {
+  auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   updatePreviewPropertiesFromBatchModel(*properties, model);
   // Look up properties for this run on the lookup table
   auto lookupRow = model.findLookupRow(previewRow);
@@ -374,9 +374,9 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Row &ro
  * @param row : optional run details from the Runs table
  * @returns : a custom PropertyManager class with all of the algorithm properties set
  */
-std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(IBatch const &model,
-                                                                                   boost::optional<Row const &> row) {
-  auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(IBatch const &model,
+                                                                                 boost::optional<Row const &> row) {
+  auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   // Update properties from settings in the event, experiment and instrument tabs
   updatePropertiesFromBatchModel(*properties, model);
   // Look up properties for this run on the lookup table (or use wildcard defaults if no run is given)

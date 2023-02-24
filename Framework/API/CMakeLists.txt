@@ -8,6 +8,7 @@ set(SRC_FILES
     src/AlgorithmManager.cpp
     src/AlgorithmObserver.cpp
     src/AlgorithmProperty.cpp
+    src/AlgorithmRuntimeProps.cpp
     src/AnalysisDataService.cpp
     src/AnalysisDataServiceObserver.cpp
     src/ArchiveSearchFactory.cpp
@@ -178,6 +179,7 @@ set(INC_FILES
     inc/MantidAPI/AlgorithmManager.h
     inc/MantidAPI/AlgorithmObserver.h
     inc/MantidAPI/AlgorithmProperty.h
+    inc/MantidAPI/AlgorithmRuntimeProps.h
     inc/MantidAPI/AnalysisDataService.h
     inc/MantidAPI/AnalysisDataServiceObserver.h
     inc/MantidAPI/ArchiveSearchFactory.h
@@ -235,6 +237,7 @@ set(INC_FILES
     inc/MantidAPI/HistoryView.h
     inc/MantidAPI/IAlgorithm.h
     inc/MantidAPI/IAlgorithm_fwd.h
+    inc/MantidAPI/IAlgorithmRuntimeProps.h
     inc/MantidAPI/IArchiveSearch.h
     inc/MantidAPI/IBackgroundFunction.h
     inc/MantidAPI/IBoxControllerIO.h
@@ -386,6 +389,7 @@ set(TEST_FILES
     AlgorithmMPITest.h
     AlgorithmManagerTest.h
     AlgorithmPropertyTest.h
+    AlgorithmRuntimePropsTest.h
     AlgorithmTest.h
     AnalysisDataServiceObserverTest.h
     AnalysisDataServiceTest.h

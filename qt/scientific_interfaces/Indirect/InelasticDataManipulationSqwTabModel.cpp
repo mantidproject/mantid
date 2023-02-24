@@ -8,11 +8,11 @@
 #include "IndirectDataValidationHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QDoubleValidator>
@@ -77,7 +77,7 @@ void InelasticDataManipulationSqwTabModel::setupSofQWAlgorithm(MantidQt::API::Ba
   sqwAlg->setProperty("Method", "NormalisedPolygon");
   sqwAlg->setProperty("ReplaceNaNs", true);
 
-  auto sqwInputProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  auto sqwInputProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   sqwInputProps->setPropertyValue("InputWorkspace", m_rebinInEnergy ? eRebinWsName : m_inputWorkspace);
 
   batchAlgoRunner->addAlgorithm(sqwAlg, std::move(sqwInputProps));
@@ -93,7 +93,7 @@ void InelasticDataManipulationSqwTabModel::setupAddSampleLogAlgorithm(
   sampleLogAlg->setProperty("LogType", "String");
   sampleLogAlg->setProperty("LogText", "NormalisedPolygon");
 
-  auto inputToAddSampleLogProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  auto inputToAddSampleLogProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   inputToAddSampleLogProps->setPropertyValue("Workspace", sqwWsName);
 
   batchAlgoRunner->addAlgorithm(sampleLogAlg, std::move(inputToAddSampleLogProps));

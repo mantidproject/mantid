@@ -7,8 +7,8 @@
 #pragma once
 
 #include "Common/DllConfig.h"
+#include "MantidAPI/IAlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
-#include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/IConfiguredAlgorithm.h"
 
 #include <boost/optional.hpp>
@@ -25,10 +25,10 @@ class IConfiguredAlgorithm;
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry::GroupProcessing {
 
-using AlgorithmRuntimeProps = MantidQt::API::IAlgorithmRuntimeProps;
+using AlgorithmRuntimeProps = Mantid::API::IAlgorithmRuntimeProps;
 
 MANTIDQT_ISISREFLECTOMETRY_DLL MantidQt::API::IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model,
                                                                                                   Group &group);
-MANTIDQT_ISISREFLECTOMETRY_DLL std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps>
+MANTIDQT_ISISREFLECTOMETRY_DLL std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps>
 createAlgorithmRuntimeProps(IBatch const &model, Group const &group);
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry::GroupProcessing

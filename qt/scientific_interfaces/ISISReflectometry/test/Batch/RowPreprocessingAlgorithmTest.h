@@ -11,8 +11,8 @@
 #include "../../../ISISReflectometry/Reduction/Instrument.h"
 #include "../../../ISISReflectometry/Reduction/PreviewRow.h"
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MockBatch.h"
 
@@ -62,7 +62,7 @@ public:
 
     auto configuredAlg = createConfiguredAlgorithm(batch, row, mockAlg);
     TS_ASSERT_EQUALS(configuredAlg->algorithm(), mockAlg);
-    MantidQt::API::AlgorithmRuntimeProps expectedProps;
+    Mantid::API::AlgorithmRuntimeProps expectedProps;
     expectedProps.setPropertyValue("InputRunList", inputRuns[0]);
     const auto &setProps = configuredAlg->getAlgorithmRuntimeProps();
     const auto &propNames = expectedProps.getDeclaredPropertyNames();

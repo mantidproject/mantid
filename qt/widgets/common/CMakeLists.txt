@@ -5,7 +5,6 @@ set(SRC_FILES
     src/AlgorithmInputHistory.cpp
     src/AlgorithmPropertiesWidget.cpp
     src/AlgorithmRunner.cpp
-    src/AlgorithmRuntimeProps.cpp
     src/AlgorithmSelectorWidget.cpp
     src/AlternateCSPythonLexer.cpp
     src/BatchAlgorithmRunner.cpp
@@ -277,7 +276,6 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
     inc/MantidQtWidgets/Common/HelpWindow.h
     inc/MantidQtWidgets/Common/Hint.h
-    inc/MantidQtWidgets/Common/IAlgorithmRuntimeProps.h
     inc/MantidQtWidgets/Common/IConfiguredAlgorithm.h
     inc/MantidQtWidgets/Common/IFitScriptGeneratorModel.h
     inc/MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h
@@ -720,7 +718,6 @@ set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/test/WidgetsCommonTes
 
 set(QT5_TEST_FILES
     test/AddWorkspaceDialogTest.h
-    test/AlgorithmRuntimePropsTest.h
     test/BatchAlgorithmRunnerTest.h
     test/FileDialogHandlerTest.h
     test/FindFilesThreadPoolManagerTest.h

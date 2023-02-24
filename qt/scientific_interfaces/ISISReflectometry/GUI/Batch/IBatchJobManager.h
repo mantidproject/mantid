@@ -8,8 +8,8 @@
 
 #include "Common/DllConfig.h"
 #include "GUI/Batch/RowProcessingAlgorithm.h"
+#include "MantidAPI/IAlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
-#include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
 #include "Reduction/Batch.h"
 
 #include <boost/optional.hpp>
@@ -44,7 +44,7 @@ public:
                                                                std::string const &newName) = 0;
   virtual void notifyAllWorkspacesDeleted() = 0;
   virtual std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> getAlgorithms() = 0;
-  virtual std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> rowProcessingProperties() const = 0;
+  virtual std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> rowProcessingProperties() const = 0;
   virtual bool getProcessPartial() const = 0;
   virtual bool getProcessAll() const = 0;
 };

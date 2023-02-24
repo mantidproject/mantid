@@ -14,10 +14,10 @@
 #include "AlgorithmProperties.h"
 #include "BatchJobAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
+#include "MantidAPI/IAlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
-#include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry::GroupProcessing {
 
@@ -126,9 +126,9 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Group &
   return jobAlgorithm;
 }
 
-std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(IBatch const &model,
-                                                                                   Group const &group) {
-  auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(IBatch const &model,
+                                                                                 Group const &group) {
+  auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   updateWorkspaceProperties(*properties, group);
   // Set the rebin Params from the lookup row resolution, if given
   updateLookupRowProperties(*properties, model.findWildcardLookupRow());

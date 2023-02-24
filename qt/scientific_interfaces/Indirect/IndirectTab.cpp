@@ -7,6 +7,7 @@
 #include "IndirectTab.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
@@ -15,7 +16,6 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Unit.h"
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
-#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
 
@@ -292,7 +292,7 @@ void IndirectTab::addSaveWorkspaceToQueue(const QString &wsName, const QString &
 
 void IndirectTab::addSaveWorkspaceToQueue(const std::string &wsName, const std::string &filename) {
   // Setup the input workspace property
-  auto saveProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  auto saveProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   saveProps->setPropertyValue("InputWorkspace", wsName);
 
   // Setup the algorithm
