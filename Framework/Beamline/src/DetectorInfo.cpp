@@ -9,6 +9,7 @@
 #include "MantidKernel/make_cow.h"
 
 #include <algorithm>
+#include <exception>
 
 namespace Mantid::Beamline {
 
@@ -86,6 +87,9 @@ bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
 
 /// Returns true if the detector with given detector index is a monitor.
 bool DetectorInfo::isMonitor(const size_t index) const {
+  if (index >= m_isMonitor->size()) {
+    throw std::runtime_error("Invalid monitor index");
+  }
   // No check for time dependence since monitor flags are not time dependent.
   return (*m_isMonitor)[index];
 }
@@ -95,6 +99,9 @@ bool DetectorInfo::isMonitor(const size_t index) const {
  * The time component of the index is ignored since a detector is a monitor
  * either for *all* times or for *none*. */
 bool DetectorInfo::isMonitor(const std::pair<size_t, size_t> &index) const {
+  if (index.first >= m_isMonitor->size()) {
+    throw std::runtime_error("Invalid monitor index");
+  }
   // Monitors are not time dependent, ignore time component of index.
   return (*m_isMonitor)[index.first];
 }

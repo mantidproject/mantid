@@ -129,11 +129,7 @@ void ALFInstrumentView::setVanadiumRun(std::string const &runNumber) {
 }
 
 void ALFInstrumentView::sampleLoaded() {
-  if (m_sample->getText().isEmpty()) {
-    return;
-  }
-
-  if (!m_sample->isValid()) {
+  if (!m_sample->getText().isEmpty() && !m_sample->isValid()) {
     warningBox(m_sample->getFileProblem().toStdString());
     return;
   }
@@ -174,7 +170,10 @@ void ALFInstrumentView::selectWholeTube() {
 }
 
 void ALFInstrumentView::notifyWholeTubeSelected(std::size_t pickID) {
-  m_presenter->notifyTubesSelected(m_instrumentWidget->findWholeTubeDetectorIndices({pickID}));
+  auto const pickTab = m_instrumentWidget->getPickTab();
+  if (pickTab->getSelectTubeButton()->isChecked()) {
+    m_presenter->notifyTubesSelected(m_instrumentWidget->findWholeTubeDetectorIndices({pickID}));
+  }
 }
 
 void ALFInstrumentView::clearShapes() {

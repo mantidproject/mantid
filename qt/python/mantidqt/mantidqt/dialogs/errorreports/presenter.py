@@ -94,7 +94,7 @@ class ErrorReporterPresenter(object):
             self._handle_exit(continue_working)
             status = -2
 
-        return status
+        self._view.close_reporter(status)
 
     def _handle_exit(self, continue_working):
         if not continue_working:

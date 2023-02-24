@@ -237,7 +237,13 @@ void ALFInstrumentModel::generateLoadedWorkspace() {
   ADS.addOrReplace(loadedWsName(), normalisedDSpacing);
 }
 
-void ALFInstrumentModel::setSample(MatrixWorkspace_sptr const &sample) { m_sample = sample; }
+void ALFInstrumentModel::setSample(MatrixWorkspace_sptr const &sample) {
+  auto const sampleRemoved = m_sample && !sample;
+  m_sample = sample;
+  if (sampleRemoved) {
+    loadEmptyInstrument("ALF", loadedWsName());
+  }
+}
 
 void ALFInstrumentModel::setVanadium(MatrixWorkspace_sptr const &vanadium) { m_vanadium = vanadium; }
 

@@ -151,8 +151,8 @@ DetectorSearcher::DetectorSearchResult DetectorSearcher::searchUsingInstrumentRa
 DetectorSearcher::DetectorSearchResult DetectorSearcher::searchUsingNearestNeighbours(const V3D &q) {
   const auto detectorDir = convertQtoDirection(q);
   // find where this Q vector should intersect with "extended" space
-  // NOTE: increase the Nneighbors from 5 to 11 to cover a wide extended space
-  const auto neighbours = m_detectorCacheSearch->findNearest(Eigen::Vector3d(q[0], q[1], q[2]), 11);
+  // NOTE: increase the Neighbors from 11 to 21 to cover a wide extended space
+  const auto neighbours = m_detectorCacheSearch->findNearest(Eigen::Vector3d(q[0], q[1], q[2]), 21);
 
   // check if neighboring is empty
   if (neighbours.empty()) {

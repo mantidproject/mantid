@@ -1,1 +1,0 @@
-- Enable the cut viewer tool in non-orthogonal view

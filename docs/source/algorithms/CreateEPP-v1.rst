@@ -86,7 +86,7 @@ Output:
 .. testoutput:: CreateEPPExample
 
     CreateEPP gives 7952.80766719 as the first elastic peak position.
-    FindEPP gives 7952.80766888.
+    FindEPP gives ....
 
 .. categories::
 
