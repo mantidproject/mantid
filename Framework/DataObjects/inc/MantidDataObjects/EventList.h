@@ -260,7 +260,7 @@ public:
 
   void filterByPulseTime(Types::Core::DateAndTime start, Types::Core::DateAndTime stop, EventList &output) const;
 
-  void filterByTimeROI(Kernel::TimeROI *timeRoi, EventList &output) const;
+  void filterByPulseTime(Kernel::TimeROI *timeRoi, EventList &output) const;
 
   void filterByTimeAtSample(Types::Core::DateAndTime start, Types::Core::DateAndTime stop, double tofFactor,
                             double tofOffset, EventList &output) const;

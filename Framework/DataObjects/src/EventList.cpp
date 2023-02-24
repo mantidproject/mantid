@@ -3773,18 +3773,21 @@ void EventList::filterByTimeAtSample(Types::Core::DateAndTime start, Types::Core
 
 /** Filter this EventList into an output EventList, using TimeROI
  * keeping only events within the >= start and < end pulse times.
+ * Since a TimeROI object may contain more than one time interval,
+ * the function is keeping events with pulse times within any of
+ * the ROI time intervals and discarding events within any of the
+ * masked time intervals.
  * Detector IDs and the X axis are copied as well.
  *
  * @param timeRoi :: reference to TimeROI to be used for filtering
  * @param output :: reference to an event list that will be output.
  * @throws std::invalid_argument If output is a reference to this EventList
  */
-void EventList::filterByTimeROI(Kernel::TimeROI *timeRoi, EventList &output) const {
+void EventList::filterByPulseTime(Kernel::TimeROI *timeRoi, EventList &output) const {
   if (this == &output) {
     throw std::invalid_argument("In-place filtering is not allowed");
   }
 
-  sort(this->order);
   // Clear the output
   output.clear();
   // Has to match the given type
