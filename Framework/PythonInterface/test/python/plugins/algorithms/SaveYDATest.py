@@ -14,7 +14,6 @@ import unittest
 
 class SaveYDATest(unittest.TestCase):
     def setUp(self):
-
         self.prop_num = 3
         self.prop_title = "PropTitle"
         self.exp_team = "Experiment Team"
@@ -28,7 +27,6 @@ class SaveYDATest(unittest.TestCase):
         self._no_sample_file = self._file(ws, "noSampleFile")
 
     def cleanup(self, ws_name, filename):
-
         if os.path.exists(filename):
             os.remove(filename)
         if mantid.mtd.doesExist(ws_name):
@@ -154,7 +152,7 @@ class SaveYDATest(unittest.TestCase):
     def test_event_ws(self):
         """Test algorithm is not running with EventWorkspace"""
         ws = self._create_workspace(False)
-        self.assertRaises(RuntimeError, SaveYDA, InputWorkspace=ws, Filename="File")
+        self.assertRaisesRegex(RuntimeError, "Input Workspace is not a Workspace2D", SaveYDA, InputWorkspace=ws, Filename="File")
 
     def test_x_not_detaE(self):
         """Test algorithm is not running if X axis is not DeltaE"""
@@ -169,7 +167,9 @@ class SaveYDATest(unittest.TestCase):
     def test_y_not_mt_or_spec(self):
         """Test algorithm is not running if Y axis is not SpectrumAxis or MomentumTransfer"""
         ws = self._create_workspace(yAxMt=False, yAxSpec=False)
-        self.assertRaises(RuntimeError, SaveYDA, InputWorkspace=ws, Filename="File")
+        self.assertRaisesRegex(
+            RuntimeError, "Y axis is not 'Spectrum Axis' or 'Momentum Transfer'", SaveYDA, InputWorkspace=ws, Filename="File"
+        )
 
     def _init_ws_normal(self):
         """init normal workspace, normal workspace is workspace with all sample logs and save file from workspace"""
@@ -218,8 +218,9 @@ class SaveYDATest(unittest.TestCase):
         if not yAxMt and not yAxSpec:
             ws = CreateWorkspace(DataX=self.data_x, DataY=self.data_y, DataE=np.sqrt(self.data_y), NSpec=1, UnitX="DeltaE")
             LoadInstrument(ws, True, InstrumentName="TOFTOF")
-            ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target="theta", EMode="Direct")
-            return ws
+            ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace="ws2", Target="theta", EMode="Direct")
+            ws2 = mtd["ws2"]
+            return ws2
         if not yAxSpec and yAxMt:
             ws = CreateWorkspace(DataX=self.data_x, DataY=self.data_y, DataE=np.sqrt(self.data_y), NSpec=1, UnitX="DeltaE")
             LoadInstrument(ws, True, InstrumentName="TOFTOF")
