@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmProperties.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -177,6 +178,33 @@ ALFInstrumentModel::ALFInstrumentModel() : m_sample(), m_vanadium(), m_tubes() {
   loadEmptyInstrument("ALF", loadedWsName());
 }
 
+std::unique_ptr<AlgorithmRuntimeProps> ALFInstrumentModel::rebinToWorkspaceProperties() const {
+  auto properties = std::make_unique<AlgorithmRuntimeProps>();
+  AlgorithmProperties::update("WorkspaceToRebin", m_vanadium, *properties);
+  AlgorithmProperties::update("WorkspaceToMatch", m_sample, *properties);
+  AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
+  return std::move(properties);
+}
+
+std::unique_ptr<AlgorithmRuntimeProps> ALFInstrumentModel::replaceSpecialValuesProperties() const {
+  auto properties = std::make_unique<AlgorithmRuntimeProps>();
+  AlgorithmProperties::update("InputWorkspace", m_sample / m_vanadium, *properties);
+  AlgorithmProperties::update("InfinityValue", 0.0, *properties);
+  AlgorithmProperties::update("NaNValue", 1.0, *properties);
+  AlgorithmProperties::update("CheckErrorAxis", true, *properties);
+  AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
+  return std::move(properties);
+}
+
+std::unique_ptr<AlgorithmRuntimeProps>
+ALFInstrumentModel::convertUnitsProperties(MatrixWorkspace_sptr const &inputWorkspace) const {
+  auto properties = std::make_unique<AlgorithmRuntimeProps>();
+  AlgorithmProperties::update("InputWorkspace", inputWorkspace, *properties);
+  AlgorithmProperties::update("Target", "dSpacing", *properties);
+  AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
+  return std::move(properties);
+}
+
 /*
  * Normalises the sample by the vanadium if a vanadium has been loaded. Converts the result to dSpacing if it is not
  * already in these units. Adds the resulting workspace to the ADS.
@@ -264,6 +292,22 @@ bool ALFInstrumentModel::addSelectedTube(DetectorTube const &tube) {
 
 bool ALFInstrumentModel::tubeExists(DetectorTube const &tube) const {
   return std::find(m_tubes.cbegin(), m_tubes.cend(), tube) != m_tubes.cend();
+}
+
+std::unique_ptr<AlgorithmRuntimeProps>
+ALFInstrumentModel::createWorkspaceAlgorithmProperties(MantidQt::MantidWidgets::IInstrumentActor const &actor) const {
+  std::vector<double> x, y, e;
+  // collectXAndYData(actor, x, y, e, twoThetas);
+
+  auto properties = std::make_unique<AlgorithmRuntimeProps>();
+  AlgorithmProperties::update("ParentWorkspace", actor.getWorkspace()->getName(), *properties);
+  AlgorithmProperties::update("DataX", x, *properties);
+  AlgorithmProperties::update("DataY", y, *properties);
+  AlgorithmProperties::update("DataE", e, *properties);
+  AlgorithmProperties::update("NSpec", 1, *properties);
+  AlgorithmProperties::update("UnitX", "Out of plane angle", *properties);
+  AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
+  return std::move(properties);
 }
 
 std::tuple<MatrixWorkspace_sptr, std::vector<double>>

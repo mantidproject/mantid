@@ -8,24 +8,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IAlgorithm.h"
 
-<<<<<<< HEAD
-=======
-namespace {
-
-template <typename VALUE_TYPE>
-void updateVectorImpl(std::string const &property, std::vector<VALUE_TYPE> const &values,
-                      Mantid::API::IAlgorithmRuntimeProps &properties) {
-  if (values.size() < 1)
-    return;
-
-  auto value = Mantid::Kernel::Strings::simpleJoin(values.cbegin(), values.cend(), ", ");
-  if (!value.empty())
-    properties.setPropertyValue(property, value);
-}
-
-} // namespace
-
->>>>>>> 87cbcf85a16 (Move AlgorithmProperties to Mantid API)
 namespace Mantid::API::AlgorithmProperties {
 
 using Mantid::API::IAlgorithm_sptr;
@@ -63,6 +45,12 @@ void update(std::string const &property, double value, IAlgorithmRuntimeProps &p
 void update(std::string const &property, boost::optional<double> const &value, IAlgorithmRuntimeProps &properties) {
   if (value)
     update(property, value.get(), properties);
+}
+
+void update(std::string const &property, MatrixWorkspace_sptr const &workspace, IAlgorithmRuntimeProps &properties) {
+  if (workspace) {
+    properties.setProperty(property, workspace);
+  }
 }
 
 void updateFromMap(IAlgorithmRuntimeProps &properties, std::map<std::string, std::string> const &parameterMap) {

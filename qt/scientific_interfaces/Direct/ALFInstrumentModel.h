@@ -9,10 +9,12 @@
 #include "ALFDataSwitch.h"
 #include "DetectorTube.h"
 #include "DllConfig.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDetector.h"
 
 #include <map>
+#include <memory>
 #include <optional>
 #include <string>
 #include <tuple>
@@ -48,6 +50,14 @@ public:
   virtual bool addSelectedTube(DetectorTube const &tube) = 0;
   virtual std::vector<DetectorTube> selectedTubes() const = 0;
 
+  virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> rebinToWorkspaceProperties() const = 0;
+  virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> replaceSpecialValuesProperties() const = 0;
+  virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+  convertUnitsProperties(Mantid::API::MatrixWorkspace_sptr const &inputWorkspace) const = 0;
+
+  virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+  createWorkspaceAlgorithmProperties(MantidQt::MantidWidgets::IInstrumentActor const &actor) const = 0;
+
   virtual std::tuple<Mantid::API::MatrixWorkspace_sptr, std::vector<double>>
   generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::IInstrumentActor const &actor) const = 0;
 };
@@ -68,6 +78,14 @@ public:
   bool setSelectedTubes(std::vector<DetectorTube> tubes) override;
   bool addSelectedTube(DetectorTube const &tube) override;
   inline std::vector<DetectorTube> selectedTubes() const noexcept override { return m_tubes; };
+
+  std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> rebinToWorkspaceProperties() const override;
+  std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> replaceSpecialValuesProperties() const override;
+  std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+  convertUnitsProperties(Mantid::API::MatrixWorkspace_sptr const &inputWorkspace) const override;
+
+  std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+  createWorkspaceAlgorithmProperties(MantidQt::MantidWidgets::IInstrumentActor const &actor) const override;
 
   std::tuple<Mantid::API::MatrixWorkspace_sptr, std::vector<double>>
   generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::IInstrumentActor const &actor) const override;
