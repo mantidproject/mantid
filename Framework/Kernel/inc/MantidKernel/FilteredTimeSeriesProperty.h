@@ -30,7 +30,6 @@ public:
                              const std::vector<HeldType> &values);
 
   FilteredTimeSeriesProperty(TimeSeriesProperty<HeldType> *seriesProp);
-  FilteredTimeSeriesProperty(FilteredTimeSeriesProperty<HeldType> *seriesProp);
 
   /// Construct with a source time series to take ownership of & a filter
   /// property

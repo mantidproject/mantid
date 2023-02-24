@@ -55,11 +55,6 @@ FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(TimeSeriesPrope
     : TimeSeriesProperty<HeldType>(*seriesProp), m_filter(std::make_unique<TimeROI>()), m_filterMap(),
       m_filterIntervals(), m_filterApplied(false) {}
 
-template <typename HeldType>
-FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(FilteredTimeSeriesProperty<HeldType> *seriesProp)
-    : TimeSeriesProperty<HeldType>(*seriesProp), m_filter(std::make_unique<TimeROI>(seriesProp->getTimeROI())),
-      m_filterMap(), m_filterIntervals(), m_filterApplied(false) {}
-
 /**
  * Construct with a source time series & a filter property
  * @param seriesProp :: A smart pointer to take ownership of pointer to a
