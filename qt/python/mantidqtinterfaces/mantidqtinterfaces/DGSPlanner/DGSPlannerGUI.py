@@ -8,9 +8,7 @@
 import copy
 import os
 import sys
-from distutils.version import LooseVersion
 
-import matplotlib
 import numpy
 from mantidqt.MPLwidgets import *
 from mantidqt.gui_helper import show_interface_help
@@ -105,8 +103,6 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         self.canvas = FigureCanvas(self.figure)
         self.grid_helper = GridHelperCurveLinear((self.tr, self.inv_tr))
         self.trajfig = Subplot(self.figure, 1, 1, 1, grid_helper=self.grid_helper)
-        if LooseVersion("2.1.0") > LooseVersion(matplotlib.__version__):
-            self.trajfig.hold(True)  # hold is deprecated since 2.1.0, true by default
         self.figure.add_subplot(self.trajfig)
         self.toolbar = MantidNavigationToolbar(self.canvas, self)
         figureLayout = QtWidgets.QVBoxLayout()

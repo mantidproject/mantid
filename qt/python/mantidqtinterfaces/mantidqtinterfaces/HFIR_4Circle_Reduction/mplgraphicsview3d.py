@@ -5,9 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=R0901,R0902,R0904
-from distutils.version import LooseVersion
 
-import matplotlib
 import numpy as np
 import os
 
@@ -39,11 +37,8 @@ class MplPlot3dCanvas(FigureCanvas):
         FigureCanvas.updateGeometry(self)
 
         # Axes
-        if LooseVersion("3.4.0") <= LooseVersion(matplotlib.__version__):
-            self._myAxes = Axes3D(self._myFigure, auto_add_to_figure=False)  # Canvas figure must be created for mouse rotation
-            self._myFigure.add_axes(self._myAxes)
-        else:
-            self._myAxes = Axes3D(self._myFigure)
+        self._myAxes = Axes3D(self._myFigure, auto_add_to_figure=False)  # Canvas figure must be created for mouse rotation
+        self._myFigure.add_axes(self._myAxes)
         self.format_coord_org = self._myAxes.format_coord
         self._myAxes.format_coord = self.report_pixel
 

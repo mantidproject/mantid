@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,no-name-in-module,too-many-instance-attributes,too-many-public-methods
-from distutils.version import LooseVersion
 
 from qtpy import QtGui, QtCore, QtWidgets
 import sys
@@ -307,13 +306,8 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         # plot directions
         if self.gonfig is not None:
             self.gonfig.clear()
-        if LooseVersion("3.4.0") <= LooseVersion(matplotlib.__version__):
-            self.gonfig = Axes3D(self.figure, auto_add_to_figure=False)
-            self.figure.add_axes(self.gonfig)
-        else:
-            self.gonfig = Axes3D(self.figure)
-        if LooseVersion("2.1.0") > LooseVersion(matplotlib.__version__):
-            self.gonfig.hold(True)  # hold is deprecated since 2.1.0, true by default
+        self.gonfig = Axes3D(self.figure, auto_add_to_figure=False)
+        self.figure.add_axes(self.gonfig)
         self.gonfig.set_frame_on(False)
         self.gonfig.set_xlim3d(-0.6, 0.6)
         self.gonfig.set_ylim3d(-0.6, 0.6)
