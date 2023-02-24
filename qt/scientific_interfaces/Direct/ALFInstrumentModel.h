@@ -56,7 +56,9 @@ public:
   virtual std::vector<DetectorTube> selectedTubes() const = 0;
 
   virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> rebinToWorkspaceProperties() const = 0;
-  virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> replaceSpecialValuesProperties() const = 0;
+  virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> divideProperties() const = 0;
+  virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+  replaceSpecialValuesProperties(Mantid::API::MatrixWorkspace_sptr const &inputWorkspace) const = 0;
   virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
   convertUnitsProperties(Mantid::API::MatrixWorkspace_sptr const &inputWorkspace) const = 0;
 
@@ -90,7 +92,9 @@ public:
   inline std::vector<DetectorTube> selectedTubes() const noexcept override { return m_tubes; };
 
   std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> rebinToWorkspaceProperties() const override;
-  std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> replaceSpecialValuesProperties() const override;
+  std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> divideProperties() const override;
+  std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+  replaceSpecialValuesProperties(Mantid::API::MatrixWorkspace_sptr const &inputWorkspace) const override;
   std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
   convertUnitsProperties(Mantid::API::MatrixWorkspace_sptr const &inputWorkspace) const override;
 

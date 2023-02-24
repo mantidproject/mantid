@@ -19,12 +19,13 @@ namespace {
 auto constexpr NOT_IN_ADS = "not_stored_in_ads";
 
 auto constexpr CONVERT_UNITS_ALG_NAME = "ConvertUnits";
+auto constexpr DIVIDE_ALG_NAME = "Divide";
 auto constexpr LOAD_ALG_NAME = "Load";
 auto constexpr NORMALISE_CURRENT_ALG_NAME = "NormaliseByCurrent";
 auto constexpr REBIN_TO_WORKSPACE_ALG_NAME = "RebinToWorkspace";
 auto constexpr REPLACE_SPECIAL_VALUES_ALG_NAME = "ReplaceSpecialValues";
 
-enum class AlgorithmType { LOAD, NORMALISE, REBIN, REPLACE_SPECIAL, CONVERT_UNITS };
+enum class AlgorithmType { LOAD, NORMALISE, REBIN, DIVIDE, REPLACE_SPECIAL, CONVERT_UNITS };
 
 bool isALFData(MatrixWorkspace_const_sptr const &workspace) { return workspace->getInstrument()->getName() == "ALF"; }
 
@@ -36,6 +37,8 @@ AlgorithmType algorithmType(MantidQt::API::IConfiguredAlgorithm_sptr &configured
     return AlgorithmType::NORMALISE;
   } else if (name == REBIN_TO_WORKSPACE_ALG_NAME) {
     return AlgorithmType::REBIN;
+  } else if (name == DIVIDE_ALG_NAME) {
+    return AlgorithmType::DIVIDE;
   } else if (name == REPLACE_SPECIAL_VALUES_ALG_NAME) {
     return AlgorithmType::REPLACE_SPECIAL;
   } else if (name == CONVERT_UNITS_ALG_NAME) {
@@ -89,6 +92,10 @@ void ALFAlgorithmManager::rebinToWorkspace(std::unique_ptr<Mantid::API::Algorith
   executeAlgorithm(createAlgorithm(REBIN_TO_WORKSPACE_ALG_NAME), std::move(properties));
 }
 
+void ALFAlgorithmManager::divide(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) {
+  executeAlgorithm(createAlgorithm(DIVIDE_ALG_NAME), std::move(properties));
+}
+
 void ALFAlgorithmManager::replaceSpecialValues(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) {
   executeAlgorithm(createAlgorithm(REPLACE_SPECIAL_VALUES_ALG_NAME), std::move(properties));
 }
@@ -107,6 +114,9 @@ void ALFAlgorithmManager::notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr
     return;
   case AlgorithmType::REBIN:
     notifyRebinToWorkspaceComplete(algorithm->algorithm());
+    return;
+  case AlgorithmType::DIVIDE:
+    notifyDivideComplete(algorithm->algorithm());
     return;
   case AlgorithmType::REPLACE_SPECIAL:
     notifyReplaceSpecialValuesComplete(algorithm->algorithm());
@@ -150,6 +160,12 @@ void ALFAlgorithmManager::notifyRebinToWorkspaceComplete(Mantid::API::IAlgorithm
   // Explicitly provide return type. Return type must be the same as the input property type to allow type casting
   MatrixWorkspace_sptr outputWorkspace = algorithm->getProperty("OutputWorkspace");
   m_subscriber->notifyRebinToWorkspaceComplete(outputWorkspace);
+}
+
+void ALFAlgorithmManager::notifyDivideComplete(Mantid::API::IAlgorithm_sptr const &algorithm) {
+  // Explicitly provide return type. Return type must be the same as the input property type to allow type casting
+  MatrixWorkspace_sptr outputWorkspace = algorithm->getProperty("OutputWorkspace");
+  m_subscriber->notifyDivideComplete(outputWorkspace);
 }
 
 void ALFAlgorithmManager::notifyReplaceSpecialValuesComplete(Mantid::API::IAlgorithm_sptr const &algorithm) {

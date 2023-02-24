@@ -87,10 +87,14 @@ void ALFInstrumentPresenter::notifyRebinToWorkspaceComplete(Mantid::API::MatrixW
 void ALFInstrumentPresenter::normaliseSampleByVanadium() {
   // Normalise the sample by the vanadium and replace any special values if a vanadium exists
   if (m_model->hasData(ALFData::VANADIUM)) {
-    m_algorithmManager->replaceSpecialValues(m_model->replaceSpecialValuesProperties());
+    m_algorithmManager->divide(m_model->divideProperties());
   } else {
     convertSampleToDSpacing(m_model->data(ALFData::SAMPLE));
   }
+}
+
+void ALFInstrumentPresenter::notifyDivideComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  m_algorithmManager->replaceSpecialValues(m_model->replaceSpecialValuesProperties(workspace));
 }
 
 void ALFInstrumentPresenter::notifyReplaceSpecialValuesComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) {

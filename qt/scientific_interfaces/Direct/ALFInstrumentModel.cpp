@@ -144,9 +144,19 @@ std::unique_ptr<AlgorithmRuntimeProps> ALFInstrumentModel::rebinToWorkspacePrope
   return std::move(properties);
 }
 
-std::unique_ptr<AlgorithmRuntimeProps> ALFInstrumentModel::replaceSpecialValuesProperties() const {
+std::unique_ptr<AlgorithmRuntimeProps> ALFInstrumentModel::divideProperties() const {
   auto properties = std::make_unique<AlgorithmRuntimeProps>();
-  AlgorithmProperties::update("InputWorkspace", m_sample / m_vanadium, *properties);
+  AlgorithmProperties::update("LHSWorkspace", m_sample, *properties);
+  AlgorithmProperties::update("RHSWorkspace", m_vanadium, *properties);
+  AlgorithmProperties::update("AllowDifferentNumberSpectra", true, *properties);
+  AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
+  return std::move(properties);
+}
+
+std::unique_ptr<AlgorithmRuntimeProps>
+ALFInstrumentModel::replaceSpecialValuesProperties(Mantid::API::MatrixWorkspace_sptr const &inputWorkspace) const {
+  auto properties = std::make_unique<AlgorithmRuntimeProps>();
+  AlgorithmProperties::update("InputWorkspace", inputWorkspace, *properties);
   AlgorithmProperties::update("InfinityValue", 0.0, *properties);
   AlgorithmProperties::update("NaNValue", 1.0, *properties);
   AlgorithmProperties::update("CheckErrorAxis", true, *properties);

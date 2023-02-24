@@ -27,6 +27,7 @@ public:
 
   virtual void loadAndNormalise(std::string const &filename) = 0;
   virtual void rebinToWorkspace(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) = 0;
+  virtual void divide(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) = 0;
   virtual void replaceSpecialValues(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) = 0;
   virtual void convertUnits(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) = 0;
 };
@@ -40,6 +41,7 @@ public:
 
   void loadAndNormalise(std::string const &filename) override;
   void rebinToWorkspace(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) override;
+  void divide(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) override;
   void replaceSpecialValues(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) override;
   void convertUnits(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) override;
 
@@ -56,6 +58,7 @@ private:
   void notifyLoadComplete(Mantid::API::IAlgorithm_sptr const &algorithm);
   void notifyNormaliseComplete(Mantid::API::IAlgorithm_sptr const &algorithm);
   void notifyRebinToWorkspaceComplete(Mantid::API::IAlgorithm_sptr const &algorithm);
+  void notifyDivideComplete(Mantid::API::IAlgorithm_sptr const &algorithm);
   void notifyReplaceSpecialValuesComplete(Mantid::API::IAlgorithm_sptr const &algorithm);
   void notifyConvertUnitsComplete(Mantid::API::IAlgorithm_sptr const &algorithm);
 
