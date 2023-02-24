@@ -1742,7 +1742,7 @@ public:
     }
   }
 
-  void test_filterByTimeROI() {
+  void test_filterByPulseTime_withTimeROI() {
     // Go through each possible EventType (except the no-time one) as the input
     for (int this_type = 0; this_type < 3; this_type++) {
       EventType curType = static_cast<EventType>(this_type);
@@ -1754,14 +1754,14 @@ public:
       // Manually set a sort mode to verify that is it is switched afterward
       out.setSortOrder(Mantid::DataObjects::TOF_SORT);
       Kernel::TimeROI *timeRoi = nullptr;
-      TS_ASSERT_THROWS(el.filterByTimeROI(timeRoi, out), const std::invalid_argument &);
+      TS_ASSERT_THROWS(el.filterByPulseTime(timeRoi, out), const std::invalid_argument &);
       timeRoi = new Kernel::TimeROI();
       timeRoi->addROI(100, 200);
       timeRoi->addROI(250, 300);
       if (curType == WEIGHTED_NOTIME) {
-        TS_ASSERT_THROWS(el.filterByTimeROI(timeRoi, out), const std::runtime_error &);
+        TS_ASSERT_THROWS(el.filterByPulseTime(timeRoi, out), const std::runtime_error &);
       } else {
-        TS_ASSERT_THROWS_NOTHING(el.filterByTimeROI(timeRoi, out));
+        TS_ASSERT_THROWS_NOTHING(el.filterByPulseTime(timeRoi, out));
 
         int numGood = 0;
         for (std::size_t i = 0; i < el.getNumberEvents(); i++)
