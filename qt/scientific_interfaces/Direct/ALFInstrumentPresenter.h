@@ -67,6 +67,9 @@ public:
 
   void notifyAlgorithmError(std::string const &message) override;
   void notifyLoadAndNormaliseComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
+  void notifyRebinToWorkspaceComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
+  void notifyReplaceSpecialValuesComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
+  void notifyConvertUnitsComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
 
   void notifyInstrumentActorReset() override;
   void notifyShapeChanged() override;
@@ -74,6 +77,8 @@ public:
 
 private:
   void generateLoadedWorkspace();
+  void normaliseSampleByVanadium();
+  void convertSampleToDSpacing(Mantid::API::MatrixWorkspace_sptr const &workspace);
 
   std::optional<std::string> getFileFromView() const;
 

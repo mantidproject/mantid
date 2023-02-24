@@ -7,6 +7,7 @@
 #pragma once
 
 #include "DllConfig.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/IJobRunner.h"
@@ -25,6 +26,9 @@ public:
   virtual void subscribe(IALFAlgorithmManagerSubscriber *subscriber) = 0;
 
   virtual void loadAndNormalise(std::string const &filename) = 0;
+  virtual void rebinToWorkspace(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) = 0;
+  virtual void replaceSpecialValues(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) = 0;
+  virtual void convertUnits(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) = 0;
 };
 
 class MANTIDQT_DIRECT_DLL ALFAlgorithmManager final : public IALFAlgorithmManager, public API::JobRunnerSubscriber {
@@ -35,6 +39,9 @@ public:
   void subscribe(IALFAlgorithmManagerSubscriber *subscriber) override;
 
   void loadAndNormalise(std::string const &filename) override;
+  void rebinToWorkspace(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) override;
+  void replaceSpecialValues(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) override;
+  void convertUnits(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) override;
 
   void notifyBatchComplete(bool error) override{};
   void notifyBatchCancelled() override{};
@@ -43,8 +50,14 @@ public:
   void notifyAlgorithmError(API::IConfiguredAlgorithm_sptr algorithm, std::string const &message) override;
 
 private:
+  void executeAlgorithm(Mantid::API::IAlgorithm_sptr const &algorithm,
+                        std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties);
+
   void notifyLoadComplete(Mantid::API::IAlgorithm_sptr const &algorithm);
   void notifyNormaliseComplete(Mantid::API::IAlgorithm_sptr const &algorithm);
+  void notifyRebinToWorkspaceComplete(Mantid::API::IAlgorithm_sptr const &algorithm);
+  void notifyReplaceSpecialValuesComplete(Mantid::API::IAlgorithm_sptr const &algorithm);
+  void notifyConvertUnitsComplete(Mantid::API::IAlgorithm_sptr const &algorithm);
 
   std::unique_ptr<API::IJobRunner> m_jobRunner;
   IALFAlgorithmManagerSubscriber *m_subscriber;

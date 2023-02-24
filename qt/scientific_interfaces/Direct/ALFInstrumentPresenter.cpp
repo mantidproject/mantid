@@ -55,23 +55,59 @@ void ALFInstrumentPresenter::loadAndNormalise() {
   if (auto const filepath = getFileFromView()) {
     m_algorithmManager->loadAndNormalise(*filepath);
   } else {
-    m_model->setWorkspace(m_dataSwitch, nullptr);
+    m_model->setData(m_dataSwitch, nullptr);
     generateLoadedWorkspace();
   }
 }
 
 void ALFInstrumentPresenter::notifyLoadAndNormaliseComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) {
-  m_model->setWorkspace(m_dataSwitch, workspace);
+  m_model->setData(m_dataSwitch, workspace);
   updateRunInViewFromModel();
   generateLoadedWorkspace();
 }
 
 void ALFInstrumentPresenter::generateLoadedWorkspace() {
-  try {
-    m_model->generateLoadedWorkspace();
-  } catch (std::exception const &ex) {
-    m_view->warningBox(std::string("Vanadium normalisation failed: ") + ex.what());
+  if (!m_model->hasData(ALFDataSwitch::SAMPLE)) {
+    return;
   }
+
+  // Rebin the vanadium to match the sample binning if the bins do not match
+  if (m_model->binningMismatch()) {
+    m_algorithmManager->rebinToWorkspace(m_model->rebinToWorkspaceProperties());
+  } else {
+    normaliseSampleByVanadium();
+  }
+}
+
+void ALFInstrumentPresenter::notifyRebinToWorkspaceComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  m_model->setData(ALFDataSwitch::VANADIUM, workspace);
+  normaliseSampleByVanadium();
+}
+
+void ALFInstrumentPresenter::normaliseSampleByVanadium() {
+  // Normalise the sample by the vanadium and replace any special values if a vanadium exists
+  if (m_model->hasData(ALFDataSwitch::VANADIUM)) {
+    m_algorithmManager->replaceSpecialValues(m_model->replaceSpecialValuesProperties());
+  } else {
+    convertSampleToDSpacing(m_model->data(ALFDataSwitch::SAMPLE));
+  }
+}
+
+void ALFInstrumentPresenter::notifyReplaceSpecialValuesComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  convertSampleToDSpacing(workspace);
+}
+
+void ALFInstrumentPresenter::convertSampleToDSpacing(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  // Convert the sample to DSpacing if not already in dspacing
+  if (!m_model->axisIsDSpacing()) {
+    m_algorithmManager->convertUnits(m_model->convertUnitsProperties(workspace));
+  } else {
+    notifyConvertUnitsComplete(workspace);
+  }
+}
+
+void ALFInstrumentPresenter::notifyConvertUnitsComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  m_model->replaceSampleWorkspaceInADS(workspace);
 }
 
 void ALFInstrumentPresenter::notifyInstrumentActorReset() { updateAnalysisViewFromModel(); }

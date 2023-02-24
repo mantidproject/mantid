@@ -19,6 +19,9 @@ public:
   virtual void notifyAlgorithmError(std::string const &message) = 0;
 
   virtual void notifyLoadAndNormaliseComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
+  virtual void notifyRebinToWorkspaceComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
+  virtual void notifyReplaceSpecialValuesComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
+  virtual void notifyConvertUnitsComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
 };
 
 } // namespace MantidQt::CustomInterfaces

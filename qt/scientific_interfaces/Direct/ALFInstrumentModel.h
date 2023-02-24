@@ -38,13 +38,18 @@ class MANTIDQT_DIRECT_DLL IALFInstrumentModel {
 public:
   virtual ~IALFInstrumentModel() = default;
 
-  virtual void generateLoadedWorkspace() = 0;
-
-  virtual void setWorkspace(ALFDataSwitch const &dataSwitch, Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
-
   virtual std::string loadedWsName() const = 0;
 
+  virtual void setData(ALFDataSwitch const &dataSwitch, Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
+  virtual bool hasData(ALFDataSwitch const &dataSwitch) const = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr data(ALFDataSwitch const &dataSwitch) const = 0;
+
+  virtual void replaceSampleWorkspaceInADS(Mantid::API::MatrixWorkspace_sptr const &workspace) const = 0;
+
   virtual std::size_t run(ALFDataSwitch const &dataSwitch) const = 0;
+
+  virtual bool binningMismatch() const = 0;
+  virtual bool axisIsDSpacing() const = 0;
 
   virtual bool setSelectedTubes(std::vector<DetectorTube> tubes) = 0;
   virtual bool addSelectedTube(DetectorTube const &tube) = 0;
@@ -67,13 +72,18 @@ class MANTIDQT_DIRECT_DLL ALFInstrumentModel final : public IALFInstrumentModel 
 public:
   ALFInstrumentModel();
 
-  void generateLoadedWorkspace() override;
-
-  void setWorkspace(ALFDataSwitch const &dataSwitch, Mantid::API::MatrixWorkspace_sptr const &workspace) override;
-
   inline std::string loadedWsName() const noexcept override { return "ALFData"; };
 
+  void setData(ALFDataSwitch const &dataSwitch, Mantid::API::MatrixWorkspace_sptr const &workspace) override;
+  bool hasData(ALFDataSwitch const &dataSwitch) const override;
+  Mantid::API::MatrixWorkspace_sptr data(ALFDataSwitch const &dataSwitch) const override;
+
+  void replaceSampleWorkspaceInADS(Mantid::API::MatrixWorkspace_sptr const &workspace) const override;
+
   std::size_t run(ALFDataSwitch const &dataSwitch) const override;
+
+  bool binningMismatch() const override;
+  bool axisIsDSpacing() const override;
 
   bool setSelectedTubes(std::vector<DetectorTube> tubes) override;
   bool addSelectedTube(DetectorTube const &tube) override;

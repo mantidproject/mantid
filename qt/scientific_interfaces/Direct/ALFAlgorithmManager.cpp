@@ -18,10 +18,13 @@ using namespace Mantid::API;
 namespace {
 auto constexpr NOT_IN_ADS = "not_stored_in_ads";
 
+auto constexpr CONVERT_UNITS_ALG_NAME = "ConvertUnits";
 auto constexpr LOAD_ALG_NAME = "Load";
 auto constexpr NORMALISE_CURRENT_ALG_NAME = "NormaliseByCurrent";
+auto constexpr REBIN_TO_WORKSPACE_ALG_NAME = "RebinToWorkspace";
+auto constexpr REPLACE_SPECIAL_VALUES_ALG_NAME = "ReplaceSpecialValues";
 
-enum class AlgorithmType { LOAD, NORMALISE };
+enum class AlgorithmType { LOAD, NORMALISE, REBIN, REPLACE_SPECIAL, CONVERT_UNITS };
 
 bool isALFData(MatrixWorkspace_const_sptr const &workspace) { return workspace->getInstrument()->getName() == "ALF"; }
 
@@ -31,9 +34,22 @@ AlgorithmType algorithmType(MantidQt::API::IConfiguredAlgorithm_sptr &configured
     return AlgorithmType::LOAD;
   } else if (name == NORMALISE_CURRENT_ALG_NAME) {
     return AlgorithmType::NORMALISE;
+  } else if (name == REBIN_TO_WORKSPACE_ALG_NAME) {
+    return AlgorithmType::REBIN;
+  } else if (name == REPLACE_SPECIAL_VALUES_ALG_NAME) {
+    return AlgorithmType::REPLACE_SPECIAL;
+  } else if (name == CONVERT_UNITS_ALG_NAME) {
+    return AlgorithmType::CONVERT_UNITS;
   } else {
     throw std::logic_error(std::string("ALFView error: callback from invalid algorithm ") + name);
   }
+}
+
+IAlgorithm_sptr createAlgorithm(std::string const &algorithmName) {
+  auto alg = Mantid::API::AlgorithmManager::Instance().create(algorithmName);
+  alg->initialize();
+  alg->setAlwaysStoreInADS(false);
+  return alg;
 }
 
 IAlgorithm_sptr loadAlgorithm(std::string const &filename) {
@@ -69,6 +85,18 @@ void ALFAlgorithmManager::loadAndNormalise(std::string const &filename) {
   m_jobRunner->executeAlgorithm(loadAlgorithm(filename));
 }
 
+void ALFAlgorithmManager::rebinToWorkspace(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) {
+  executeAlgorithm(createAlgorithm(REBIN_TO_WORKSPACE_ALG_NAME), std::move(properties));
+}
+
+void ALFAlgorithmManager::replaceSpecialValues(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) {
+  executeAlgorithm(createAlgorithm(REPLACE_SPECIAL_VALUES_ALG_NAME), std::move(properties));
+}
+
+void ALFAlgorithmManager::convertUnits(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) {
+  executeAlgorithm(createAlgorithm(CONVERT_UNITS_ALG_NAME), std::move(properties));
+}
+
 void ALFAlgorithmManager::notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr &algorithm) {
   switch (algorithmType(algorithm)) {
   case AlgorithmType::LOAD:
@@ -77,12 +105,27 @@ void ALFAlgorithmManager::notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr
   case AlgorithmType::NORMALISE:
     notifyNormaliseComplete(algorithm->algorithm());
     return;
+  case AlgorithmType::REBIN:
+    notifyRebinToWorkspaceComplete(algorithm->algorithm());
+    return;
+  case AlgorithmType::REPLACE_SPECIAL:
+    notifyReplaceSpecialValuesComplete(algorithm->algorithm());
+    return;
+  case AlgorithmType::CONVERT_UNITS:
+    notifyConvertUnitsComplete(algorithm->algorithm());
+    return;
   }
 }
 
 void ALFAlgorithmManager::notifyAlgorithmError(API::IConfiguredAlgorithm_sptr algorithm, std::string const &message) {
   (void)algorithm;
   m_subscriber->notifyAlgorithmError(message);
+}
+
+void ALFAlgorithmManager::executeAlgorithm(Mantid::API::IAlgorithm_sptr const &algorithm,
+                                           std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) {
+  auto configuredAlg = std::make_shared<API::ConfiguredAlgorithm>(std::move(algorithm), std::move(properties));
+  m_jobRunner->executeAlgorithm(configuredAlg);
 }
 
 void ALFAlgorithmManager::notifyLoadComplete(IAlgorithm_sptr const &algorithm) {
@@ -101,6 +144,24 @@ void ALFAlgorithmManager::notifyNormaliseComplete(Mantid::API::IAlgorithm_sptr c
   // Explicitly provide return type. Return type must be the same as the input property type to allow type casting
   MatrixWorkspace_sptr outputWorkspace = algorithm->getProperty("OutputWorkspace");
   m_subscriber->notifyLoadAndNormaliseComplete(outputWorkspace);
+}
+
+void ALFAlgorithmManager::notifyRebinToWorkspaceComplete(Mantid::API::IAlgorithm_sptr const &algorithm) {
+  // Explicitly provide return type. Return type must be the same as the input property type to allow type casting
+  MatrixWorkspace_sptr outputWorkspace = algorithm->getProperty("OutputWorkspace");
+  m_subscriber->notifyRebinToWorkspaceComplete(outputWorkspace);
+}
+
+void ALFAlgorithmManager::notifyReplaceSpecialValuesComplete(Mantid::API::IAlgorithm_sptr const &algorithm) {
+  // Explicitly provide return type. Return type must be the same as the input property type to allow type casting
+  MatrixWorkspace_sptr outputWorkspace = algorithm->getProperty("OutputWorkspace");
+  m_subscriber->notifyReplaceSpecialValuesComplete(outputWorkspace);
+}
+
+void ALFAlgorithmManager::notifyConvertUnitsComplete(Mantid::API::IAlgorithm_sptr const &algorithm) {
+  // Explicitly provide return type. Return type must be the same as the input property type to allow type casting
+  MatrixWorkspace_sptr outputWorkspace = algorithm->getProperty("OutputWorkspace");
+  m_subscriber->notifyConvertUnitsComplete(outputWorkspace);
 }
 
 } // namespace MantidQt::CustomInterfaces
