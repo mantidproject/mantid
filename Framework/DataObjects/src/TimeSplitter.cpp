@@ -56,10 +56,9 @@ TimeSplitter::TimeSplitter(const Mantid::API::MatrixWorkspace_sptr &ws, const Da
         "Size of x values must be one more than size of y values to construct TimeSplitter from MatrixWorkspace.");
   }
 
-  int64_t offset_ns{offset.totalNanoseconds()};
   for (size_t i = 1; i < X.size(); i++) {
-    auto timeStart = Types::Core::DateAndTime((X[i - 1]), 0.0) += offset_ns;
-    auto timeEnd = Types::Core::DateAndTime((X[i]), 0.0) += offset_ns;
+    auto timeStart = Types::Core::DateAndTime(static_cast<int64_t>((X[i - 1])), offset.totalNanoseconds());
+    auto timeEnd = Types::Core::DateAndTime(static_cast<int64_t>(X[i]), offset.totalNanoseconds());
     auto index = static_cast<int>(Y[i - 1]);
     this->addROI(timeStart, timeEnd, index);
   }
