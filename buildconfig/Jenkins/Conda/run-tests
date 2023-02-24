@@ -58,7 +58,12 @@ function onexit {
 # Prevent race conditions when creating the user config directory
 if [[ $OSTYPE == "msys"* ]]; then
     userconfig_dir=$APPDATA/mantidproject/mantid
-    userprops=$WORKSPACE/build/bin/Release/Mantid.user.properties
+    if [ -d "$WORKSPACE/build/bin/Release" ]; then
+        binary_dir=$WORKSPACE/build/bin/Release
+    else
+        binary_dir=$WORKSPACE/build/bin
+    fi
+    userprops=$binary_dir/Mantid.user.properties
     workbench_ini=$APPDATA/mantidproject/mantidworkbench.ini
 else
     userconfig_dir=$HOME/.mantid

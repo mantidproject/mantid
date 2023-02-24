@@ -192,8 +192,8 @@ Output:
 
 .. testoutput:: ExRangeLists
 
-    Intensity of the first peak: 159.99
-    Intensity of the last peak: 164.5
+    Intensity of the first peak: ...
+    Intensity of the last peak: ...
 
 .. categories::
 

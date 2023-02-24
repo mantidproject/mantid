@@ -76,6 +76,17 @@
       "generator": "Visual Studio 16 2019"
     },
     {
+      "name": "win-64-ci-ninja",
+      "description": "Build options for a CI build on windows with Ninja",
+      "inherits": [
+        "ci-default",
+        "conda"
+      ],
+      "cacheVariables": {
+        "USE_PRECOMPILED_HEADERS": "OFF"
+      }
+    },
+    {
       "name": "cppcheck-ci",
       "description": "Build options for CppCheck CI build",
       "inherits": [

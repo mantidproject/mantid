@@ -1,1 +1,0 @@
-- Control points on the shapes drawn using the Pick or Draw tab now give cursor feedback.

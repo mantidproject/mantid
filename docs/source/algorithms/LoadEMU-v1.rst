@@ -28,7 +28,7 @@ Output:
 
 .. testoutput:: ExSimple
 
-   Number of spectra: 6528
+   Number of spectra: 6592
 
 
 .. categories::

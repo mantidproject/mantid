@@ -61,7 +61,6 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         return "SANSILLMultiProcess"
 
     def PyInit(self):
-
         # ================================INPUT RUNS================================#
 
         for d in range(N_DISTANCES):

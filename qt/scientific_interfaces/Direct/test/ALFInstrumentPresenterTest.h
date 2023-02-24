@@ -109,10 +109,12 @@ public:
   }
 
   void test_loadSample_will_not_attempt_a_load_when_an_empty_filepath_is_provided() {
+    EXPECT_CALL(*m_analysisPresenter, clear()).Times(1);
+
     EXPECT_CALL(*m_view, getSampleFile()).Times(1).WillOnce(Return(std::nullopt));
+    EXPECT_CALL(*m_model, setSample(Eq(nullptr))).Times(1);
 
     // Expect no calls to these methods
-    EXPECT_CALL(*m_analysisPresenter, clear()).Times(0);
     EXPECT_CALL(*m_model, loadAndNormalise(_)).Times(0);
 
     m_presenter->loadSample();
