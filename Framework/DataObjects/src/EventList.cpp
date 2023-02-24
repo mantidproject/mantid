@@ -3692,8 +3692,8 @@ template <class T>
 void EventList::filterByTimeROIHelper(std::vector<T> &events, const Kernel::SplittingIntervalVec &intervals,
                                       std::vector<T> &output) {
   for (const auto &time : intervals) {
-    const DateAndTime start = time.begin();
-    const DateAndTime stop = time.end();
+    const DateAndTime start = time.start();
+    const DateAndTime stop = time.stop();
     std::copy_if(events.begin(), events.end(), std::back_inserter(output),
                  [start, stop](const T &t) { return (t.m_pulsetime >= start) && (t.m_pulsetime < stop); });
   }
