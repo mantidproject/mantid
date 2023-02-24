@@ -187,10 +187,67 @@ public:
   }
 
   /** Test that a TimeSplitter object constructed from a TableWorkspace object
-   * is equivalent to a TimeSplitter object built by successively adding time ROIs.
-   * @brief test_createFromTableWorkspace
+   * containing absolute times is equivalent to a TimeSplitter object built by
+   * successively adding time ROIs.
+   * @brief test_timeSplitterFromTableWorkspaceWithAbsoluteTimes
    */
-  void test_timeSplitterFromTableWorkspace() {
+  void test_timeSplitterFromTableWorkspaceWithAbsoluteTimes() {
+    auto tws = std::make_shared<Mantid::DataObjects::TableWorkspace>(3 /*rows*/);
+
+    // by design, a table workspace used for event filtering must have 3 columns
+    tws->addColumn("double", "start");
+    tws->addColumn("double", "stop");
+    tws->addColumn("str", "target"); // index of a workspace where the filtered time events will be output
+
+    // by design, all times in the table must be in seconds
+    const double time1_s{1.0e-5};
+    const double time2_s{1.5e-5};
+    const double time3_s{2.0e-5};
+    const double time4_s{3.0e-5};
+    const double time5_s{4.0e-5};
+    const double time6_s{5.0e-5};
+
+    TableRow row = tws->getFirstRow();
+    row << time1_s << time2_s << "1";
+    row.next();
+    row << time3_s << time4_s << "3";
+    row.next();
+    row << time5_s << time6_s << "-1"; // -1 means: ignore this time interval
+
+    // create a TimeSplitter object from the table
+    TimeSplitter workspaceDerivedSplitter(tws, DateAndTime(0, 0));
+
+    // build a reference time splitter
+
+    // create all time objects
+    DateAndTime time1_abs(time1_s, 0.0);
+    DateAndTime time2_abs(time2_s, 0.0);
+    DateAndTime time3_abs(time3_s, 0.0);
+    DateAndTime time4_abs(time4_s, 0.0);
+    DateAndTime time5_abs(time5_s, 0.0);
+    DateAndTime time6_abs(time6_s, 0.0);
+
+    // build the reference splitter by adding ROIs
+    TimeSplitter referenceSplitter;
+    referenceSplitter.addROI(time1_abs, time2_abs, 1);
+    referenceSplitter.addROI(time3_abs, time4_abs, 3);
+    referenceSplitter.addROI(time5_abs, time6_abs, -1); // -1 means: ignore this time interval
+
+    TS_ASSERT_EQUALS(referenceSplitter.numRawValues(), workspaceDerivedSplitter.numRawValues());
+    TS_ASSERT(referenceSplitter.valueAtTime(time1_abs) == workspaceDerivedSplitter.valueAtTime(time1_abs));
+    TS_ASSERT(referenceSplitter.valueAtTime(time2_abs) == workspaceDerivedSplitter.valueAtTime(time2_abs));
+    TS_ASSERT(referenceSplitter.valueAtTime(time3_abs) == workspaceDerivedSplitter.valueAtTime(time3_abs));
+    TS_ASSERT(referenceSplitter.valueAtTime(time4_abs) == workspaceDerivedSplitter.valueAtTime(time4_abs));
+    TS_ASSERT(referenceSplitter.valueAtTime(time5_abs) == workspaceDerivedSplitter.valueAtTime(time5_abs));
+    TS_ASSERT(referenceSplitter.valueAtTime(time6_abs) == workspaceDerivedSplitter.valueAtTime(time6_abs));
+  }
+
+  /** Test that a TimeSplitter object constructed from a TableWorkspace object
+   * containing relative times is equivalent to a TimeSplitter object built by
+   * successively adding time ROIs.
+   * @brief test_timeSplitterFromTableWorkspaceWithRelativeTimes
+   */
+  void test_timeSplitterFromTableWorkspaceWithRelativeTimes() {
     auto tws = std::make_shared<Mantid::DataObjects::TableWorkspace>(3 /*rows*/);
 
     // by design, a table workspace used for event filtering must have 3 columns
@@ -254,7 +311,7 @@ public:
 
   /** Test that a TimeSplitter object constructed from a SplittersWorkspace object
    * is equivalent to a TimeSplitter object built by successively adding time ROIs.
-   * @brief test_createFromTableWorkspace
+   * @brief test_timeSplitterFromSplittersWorkspace
    */
   void test_timeSplitterFromSplittersWorkspace() {
     // create time objects for testing. All input times are in nanoseconds.
