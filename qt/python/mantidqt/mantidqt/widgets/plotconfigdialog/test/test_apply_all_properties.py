@@ -7,7 +7,6 @@
 #  This file is part of the mantid workbench.
 
 import unittest
-from distutils.version import LooseVersion
 
 import matplotlib
 from matplotlib import use as mpl_use
@@ -180,14 +179,7 @@ class ApplyAllPropertiesTest(unittest.TestCase):
         cls.new_curve = cls.ax.containers[0]
 
         # Mock images tab view
-        if LooseVersion(matplotlib.__version__) > LooseVersion("3.1.3"):
-            cls.img_view_mock = Mock(
-                get_selected_image_name=lambda: "(0, 0) - child0", get_properties=lambda: ImageProperties(new_image_props)
-            )
-        else:
-            cls.img_view_mock = Mock(
-                get_selected_image_name=lambda: "(0, 0) - image0", get_properties=lambda: ImageProperties(new_image_props)
-            )
+        cls.img_view_mock = Mock(get_selected_image_name=lambda: "(0, 0) - child0", get_properties=lambda: ImageProperties(new_image_props))
         cls.img_view_patch = patch(IMAGE_VIEW, lambda x: cls.img_view_mock)
         cls.img_view_patch.start()
 
