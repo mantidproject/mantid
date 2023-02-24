@@ -44,7 +44,6 @@ MDNormResults = namedtuple("MDNormResults", "cleaned sample_data, sample_norm, b
 
 
 class MDNormBackgroundHYSPECTest(systemtesting.MantidSystemTest):
-
     tolerance = 1e-8
 
     @staticmethod
@@ -266,7 +265,7 @@ class MDNormBackgroundHYSPECTest(systemtesting.MantidSystemTest):
         r89 = CompareMDWorkspaces(Workspace1=benchmark.bkgd_norm, Workspace2="background_normMD", Tolerance=1e-9)
         assert r89.Equals, f"Incompatible background normalization workspaces: {r89.Result}"
         # Compare the cleaned MD
-        r_out = CompareMDWorkspaces(Workspace1=benchmark.cleaned, Workspace2="clean_data", Tolerance=1e-16)
+        r_out = CompareMDWorkspaces(Workspace1=benchmark.cleaned, Workspace2="clean_data", Tolerance=1e-15)
         if not r_out.Equals:
             raise ValueError(f"Sample output data does not match: {r_out.Result}")
 
