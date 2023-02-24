@@ -1,1 +1,0 @@
-- Add support for a beam profile (specified in :ref:`SetBeam <algm-SetBeam>`) to :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>`

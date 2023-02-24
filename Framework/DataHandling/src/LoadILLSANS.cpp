@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadILLSANS.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -15,6 +16,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadHelper.h"
+#include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidHistogramData/LinearGenerator.h"
@@ -40,7 +42,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLSANS)
  */
 LoadILLSANS::LoadILLSANS()
     : m_supportedInstruments{"D11", "D22", "D33", "D16"}, m_defaultBinning{0, 0}, m_resMode("nominal"), m_isTOF(false),
-      m_sourcePos(0.) {}
+      m_sourcePos(0.), m_numberOfMonitors(2) {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -91,6 +93,8 @@ void LoadILLSANS::init() {
   declareProperty("Wavelength", 0.0, mustBePositive,
                   "The wavelength of the experiment, in angstroms. Used only for D16. Will "
                   "override the nexus' value if there is one.");
+  declareProperty(std::make_unique<FileProperty>("SensitivityMap", "", FileProperty::OptionalLoad, ".nxs"),
+                  "Name of the file containing sensitivity map.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -99,11 +103,11 @@ void LoadILLSANS::init() {
 void LoadILLSANS::exec() {
   const std::string filename = getPropertyValue("Filename");
   m_isD16Omega = false;
+  getMonitorIndices(filename);
   NXRoot root(filename);
   NXEntry firstEntry = root.openFirstEntry();
   const std::string instrumentPath = LoadHelper::findInstrumentNexusPath(firstEntry);
   setInstrumentName(firstEntry, instrumentPath);
-  setNumberOfMonitors();
   Progress progress(this, 0.0, 1.0, 4);
   progress.report("Initializing the workspace for " + m_instrumentName);
   if (m_instrumentName == "D33") {
@@ -187,7 +191,9 @@ void LoadILLSANS::exec() {
       moveDetectorHorizontal(-offset / 1000, "detector"); // mm to meter
     }
   }
-
+  if (m_instrumentName.find("D16") != std::string::npos && !isDefault("SensitivityMap")) {
+    applySensitivityMap();
+  }
   progress.report("Setting sample logs");
   setFinalProperties(filename);
   setProperty("OutputWorkspace", m_localWorkspace);
@@ -218,6 +224,26 @@ void LoadILLSANS::setInstrumentName(const NeXus::NXEntry &firstEntry, const std:
 }
 
 /**
+ * Applies sensitivity map correction to the loaded D16B data.
+ *
+ */
+void LoadILLSANS::applySensitivityMap() {
+  // loading nexus processed returns Workspace type, so cannot be used as a child algorithm
+  LoadNexusProcessed loader;
+  loader.initialize();
+  loader.setPropertyValue("Filename", getPropertyValue("SensitivityMap"));
+  loader.setPropertyValue("OutputWorkspace", "sensitivity_map");
+  loader.execute();
+  auto divide = createChildAlgorithm("Divide");
+  divide->setProperty("LHSWorkspace", m_localWorkspace);
+  divide->setPropertyValue("RHSWorkspace", "sensitivity_map");
+  divide->setProperty("AllowDifferentNumberSpectra",
+                      true); // in case the localWorkspace contains monitors but sensitivityMap does not
+  divide->executeAsChildAlg();
+  m_localWorkspace = divide->getProperty("OutputWorkspace");
+}
+
+/**
  * Get detector panel distances from the nexus file
  * @param firstEntry : already opened first entry in nexus
  * @param instrumentNamePath : the path inside nexus where the instrument name is written
@@ -238,12 +264,6 @@ LoadILLSANS::DetectorPosition LoadILLSANS::getDetectorPositionD33(const NeXus::N
   pos >> g_log.debug();
   return pos;
 }
-
-/**
- * @brief LoadILLSANS::setNumberOfMonitors
- * Set the number of monitor attribute depending on the instrument loaded.
- */
-void LoadILLSANS::setNumberOfMonitors() { m_numberOfMonitors = this->m_instrumentName == "D16B" ? 1 : 2; }
 
 /**
  * @brief LoadILLSANS::getDataDimensions
@@ -267,6 +287,43 @@ void LoadILLSANS::getDataDimensions(const NeXus::NXInt &data, int &numberOfChann
   g_log.debug() << "Dimensions found:\n- Number of tubes: " << numberOfTubes
                 << "\n- Number of pixels per tube: " << numberOfPixelsPerTube
                 << "\n- Number of channels: " << numberOfChannels << "\n";
+}
+
+/** Gets monitor indices from the scanned variables names and sets them in a vector of indices to be used later
+ *
+ * @param filename Name of the NeXus file
+ */
+void LoadILLSANS::getMonitorIndices(const std::string &filename) {
+  /*
+   * The below tries to access names of scanned variables. These should exist only for omega scans of D16B,
+   * and will not be there for other instruments and modes of measurement (D16B gamma scan for example).
+   * Therefore, any issue from accessing this data is wrapped in try-catch clause. Assumed is proper order
+   * of monitors: Monitor1 should preceed Monitor2 in the scanned variables. The order of these indices
+   * in the variables_names will be used to load the monitor data.
+   *
+   * This method needs to be run before NeXus file is opened with NX library, otherwise it is not possible
+   * to open the same file with these two libraries (H5 and NX) simultaneously.
+   */
+  try {
+    H5::H5File h5file(filename, H5F_ACC_RDONLY);
+    H5::DataSet scanVarNames = h5file.openDataSet("entry0/data_scan/scanned_variables/variables_names/name");
+    H5::DataSpace scanVarNamesSpace = scanVarNames.getSpace();
+    const auto nDims = scanVarNamesSpace.getSimpleExtentNdims();
+    auto dimsSize = std::vector<hsize_t>(nDims);
+    scanVarNamesSpace.getSimpleExtentDims(dimsSize.data(), nullptr);
+    std::vector<char *> rdata(dimsSize[0]);
+    scanVarNames.read(rdata.data(), scanVarNames.getDataType());
+    size_t monitorIndex = 0;
+    while (monitorIndex < rdata.size()) {
+      const auto varName = std::string(rdata[monitorIndex]);
+      if (varName.find("Monitor") != std::string::npos)
+        m_monitorIndices.push_back(monitorIndex);
+      monitorIndex++;
+    }
+    h5file.close();
+  } catch (...) { // silence all issues accessing the data
+    return;
+  }
 }
 
 /**
@@ -297,7 +354,6 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &i
     if (data.dim1() == numberOfWiresInD16B && data.dim2() == numberOfPixelsPerWireInD16B) {
       m_instrumentName = "D16B";
       m_isD16Omega = true;
-      setNumberOfMonitors(); // update the number of monitors now that the instrument changed.
     }
   }
 
@@ -595,64 +651,60 @@ size_t LoadILLSANS::loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firs
  * @brief Load data from D16B's monitor. These data are not stored in the usual NXmonitor field, but rather in the
  * scanned variables, so it uses a completely different logic.
  * @param firstEntry: already opened first entry in nexus
- * @param firstIndex: the workspace index to load the first monitor to
+ * @param firstIndex: the workspace index to start loading the monitor in
  * @param binning: the binning to assign the monitor values
  * @return the new workspace index on which to load next
  */
 size_t LoadILLSANS::loadDataFromD16ScanMonitors(const NeXus::NXEntry &firstEntry, size_t firstIndex,
                                                 const std::vector<double> &binning) {
   std::string path = "/data_scan/scanned_variables/data";
-
-  // the monitor is the fourth scanned variable
-  // we could verify that by reading the /data_scan/scanned_variables/variable_names/name entry, if only nexus knew how
-  // to read string arrays.
-  uint32_t monitorIndex = 3;
-
+  // It is not possible to ensure that monitors are in the same position in the scanned_variables data table.
+  // Therefore, the order is obtained by getting monitor indices explicitly via getMonitorIndices method.
   auto scannedVariables = LoadHelper::getDoubleDataset(firstEntry, path);
   scannedVariables.load();
+  auto monitorNumber = 1; // for the naming of sample log variable
+  for (auto monitorIndex : m_monitorIndices) {
+    auto firstMonitorValuePos = scannedVariables() + monitorIndex * scannedVariables.dim1();
+    const HistogramData::Counts counts(firstMonitorValuePos, firstMonitorValuePos + scannedVariables.dim1());
+    m_localWorkspace->setCounts(firstIndex, counts);
 
-  auto firstMonitorValuePos = scannedVariables() + monitorIndex * scannedVariables.dim1();
-
-  const HistogramData::Counts counts(firstMonitorValuePos, firstMonitorValuePos + scannedVariables.dim1());
-  m_localWorkspace->setCounts(firstIndex, counts);
-
-  if ((m_instrumentName == "D16" || m_instrumentName == "D16B") && scannedVariables.dim1() == 1) {
-    // This is the old D16 data scan format, which also covers single-scan D16B data. It is pain.
-    // Due to the fact it was verified with a data structure using binedges rather than points for the wavelength,
-    // we have to keep that and not make it an histogram, because some algorithms later in the reduction process
-    // handle errors completely differently in this case.
-    // We distinguish it from D16 data in the new format but checking there is only one slice of the omega scan
-    const HistogramData::BinEdges binEdges(binning);
-    m_localWorkspace->setBinEdges(firstIndex, binEdges);
-  } else {
-    HistogramData::Points points = HistogramData::Points(binning);
-    m_localWorkspace->setPoints(firstIndex, points);
-  }
-
-  // Add average monitor counts to a property:
-  double averageMonitorCounts =
-      std::accumulate(firstMonitorValuePos, firstMonitorValuePos + scannedVariables.dim1(), double(0)) /
-      static_cast<double>(scannedVariables.dim1());
-
-  // make sure the monitor has values!
-  if (averageMonitorCounts > 0) {
-    API::Run &runDetails = m_localWorkspace->mutableRun();
-    runDetails.addProperty("monitor", averageMonitorCounts, true);
-  }
-
-  firstIndex++;
-
-  if (m_instrumentName == "D16") {
-    // the old D16 has 2 monitors, the second being empty but still needing a binning
-
-    if (scannedVariables.dim1() == 1) {
+    if ((m_instrumentName == "D16" || m_instrumentName == "D16B") && scannedVariables.dim1() == 1) {
+      // This is the old D16 data scan format, which also covers single-scan D16B data. It is pain.
+      // Due to the fact it was verified with a data structure using binedges rather than points for the wavelength,
+      // we have to keep that and not make it an histogram, because some algorithms later in the reduction process
+      // handle errors completely differently in this case.
+      // We distinguish it from D16 data in the new format but checking there is only one slice of the omega scan
       const HistogramData::BinEdges binEdges(binning);
       m_localWorkspace->setBinEdges(firstIndex, binEdges);
     } else {
       HistogramData::Points points = HistogramData::Points(binning);
       m_localWorkspace->setPoints(firstIndex, points);
     }
+
+    // Add average monitor counts to a property:
+    const auto averageMonitorCounts =
+        std::accumulate(firstMonitorValuePos, firstMonitorValuePos + scannedVariables.dim1(), double(0)) /
+        static_cast<double>(scannedVariables.dim1());
+
+    // make sure the monitor has values!
+    if (averageMonitorCounts > 0) {
+      API::Run &runDetails = m_localWorkspace->mutableRun();
+      runDetails.addProperty("monitor" + std::to_string(monitorNumber), averageMonitorCounts, true);
+    }
+    monitorNumber++;
     firstIndex++;
+    if (m_instrumentName == "D16") {
+      // the old D16 has 2 monitors, the second being empty but still needing a binning
+
+      if (scannedVariables.dim1() == 1) {
+        const HistogramData::BinEdges binEdges(binning);
+        m_localWorkspace->setBinEdges(firstIndex, binEdges);
+      } else {
+        HistogramData::Points points = HistogramData::Points(binning);
+        m_localWorkspace->setPoints(firstIndex, points);
+      }
+      firstIndex++;
+    }
   }
   return firstIndex;
 }

@@ -156,7 +156,7 @@ class LoadFullprofFile(PythonAlgorithm):
             if fwhm < 1.0e-5:
                 # Peak width is too small/annihilated peak
                 if _OUTPUTLEVEL == "INFORMATION":
-                    self.log.information("Peak (%d, %d, %d) has an unreasonable small FWHM.  Peak does not exist. " % (h, k, l))
+                    self.log().information("Peak (%d, %d, %d) has an unreasonable small FWHM.  Peak does not exist. " % (h, k, l))
                 continue
 
             hkldict[dkey] = {}

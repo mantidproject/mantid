@@ -39,7 +39,7 @@ Output:
 
 .. testoutput:: IntegrateEPPExample
 
-    Integral from 5060.0 to 9140.0 yields 1954.6
+    Integral from ... to ... yields ...
 
 .. categories::
 

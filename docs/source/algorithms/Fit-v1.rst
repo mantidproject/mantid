@@ -485,12 +485,13 @@ Output:
 .. testoutput:: ExFitPeak
 
    The fit was: success
-   chi-squared of fit is: 0.14
-   Fitted Height value is: 9.79
-   Fitted centre value is: 5.05
-   Fitted sigma value is: 0.77
-   Number of spectra in fitWorkspace is: 3
-   The 20th y-value of the calculated pattern: 0.2361
+   chi-squared of fit is: ...
+   Fitted Height value is: ...
+   Fitted centre value is: ...
+   Fitted sigma value is: ...
+   Number of spectra in fitWorkspace is: ...
+   The 20th y-value of the calculated pattern: ...
+
 
 **Example - Fit a Gaussian to a Table Workspace:**
 

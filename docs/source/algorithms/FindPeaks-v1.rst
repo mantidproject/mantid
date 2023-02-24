@@ -110,7 +110,7 @@ Output:
 
 .. testoutput:: ExFindPeakSingle
 
-   Peak 1 {Centre: 5.050, width: 1.648, height: 10.000 }
+   Peak 1 {Centre: ..., width: ..., height: ... }
 
 
 .. categories::

@@ -1,1 +1,0 @@
-- the approach for inverting large tridiagonal matrices has been improved so that the analytical method can still be used even for large matrices, resulting in a performance improvement. This type of matrix inversion is used when calculating the interpolation errors when performing spline interpolation

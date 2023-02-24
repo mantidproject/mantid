@@ -8,8 +8,8 @@
 
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
+#include "MantidDataObjects/TimeSplitter.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/Timer.h"
 #include "PropertyManagerHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -76,8 +76,8 @@ public:
 
     for (size_t i = 0; i < 3; i++) {
       Kernel::SplittingInterval splitter = splitterws.getSplitter(i);
-      TS_ASSERT_EQUALS(splitter.begin(), splitters[i].begin());
-      TS_ASSERT_EQUALS(splitter.end(), splitters[i].end());
+      TS_ASSERT_EQUALS(splitter.start(), splitters[i].start());
+      TS_ASSERT_EQUALS(splitter.stop(), splitters[i].stop());
       TS_ASSERT_EQUALS(splitter.index(), splitters[i].index());
     }
   }
@@ -120,7 +120,7 @@ public:
 
   void testConvertToTimeSplitter() {
     DataObjects::SplittersWorkspace splitterws;
-    Kernel::TimeSplitter splitter;
+    DataObjects::TimeSplitter splitter;
 
     Kernel::SplittingInterval s1(Types::Core::DateAndTime(10000), Types::Core::DateAndTime(15000), 1);
     Kernel::SplittingInterval s2(Types::Core::DateAndTime(20000), Types::Core::DateAndTime(30000), 3);
@@ -133,7 +133,7 @@ public:
     splitter.addROI(Types::Core::DateAndTime(20000), Types::Core::DateAndTime(30000), 3);
     splitter.addROI(Types::Core::DateAndTime(40000), Types::Core::DateAndTime(50000), 2);
 
-    Kernel::TimeSplitter convertedSplitter = splitterws.convertToTimeSplitter();
+    DataObjects::TimeSplitter convertedSplitter = splitterws.convertToTimeSplitter();
     TS_ASSERT_EQUALS(splitter.numRawValues(), convertedSplitter.numRawValues());
     TS_ASSERT(splitter.valueAtTime(Types::Core::DateAndTime(10000)) ==
               convertedSplitter.valueAtTime(Types::Core::DateAndTime(10000)));
