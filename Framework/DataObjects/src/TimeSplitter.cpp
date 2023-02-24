@@ -110,11 +110,11 @@ TimeSplitter::TimeSplitter(const SplittersWorkspace_sptr &sws) {
     // if this row's time interval intersects an ROI already in the splitter, no separate ROI will be created in the
     // splitter, hence the warning.
     if (interval.index() != IGNORE_VALUE &&
-        (valueAtTime(interval.begin()) != IGNORE_VALUE || valueAtTime(interval.end()) != IGNORE_VALUE)) {
+        (valueAtTime(interval.start()) != IGNORE_VALUE || valueAtTime(interval.stop()) != IGNORE_VALUE)) {
       g_log.warning() << "Workspace row " << ii << " may be overwritten in conversion to TimeSplitter" << '\n';
     }
 
-    addROI(interval.begin(), interval.end(), interval.index());
+    addROI(interval.start(), interval.stop(), interval.index());
   }
 }
 
