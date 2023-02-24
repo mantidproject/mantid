@@ -214,8 +214,6 @@ public:
   }
 
   void test_timeSplitterFromMatrixWorkspaceOffset() {
-    TimeSplitter splitter;
-    splitter.addROI(DateAndTime(0, 5), DateAndTime(10, 5), 1);
     Mantid::API::MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
 
     auto &X = ws->dataX(0);
@@ -223,11 +221,10 @@ public:
     // X[0] is 0 by default, unit is seconds.
     X[1] = 10.0;
     Y[0] = 1.0;
-    auto convertedSplitter = new TimeSplitter(ws, DateAndTime(5));
-    TS_ASSERT(splitter.valueAtTime(DateAndTime(0)) == convertedSplitter->valueAtTime(DateAndTime(0)) &&
-              convertedSplitter->valueAtTime(DateAndTime(0)) == -1);
-    TS_ASSERT(splitter.valueAtTime(DateAndTime(0, 5)) == convertedSplitter->valueAtTime(DateAndTime(0, 5)) &&
-              convertedSplitter->valueAtTime(DateAndTime(0, 5)) == 1);
+    auto convertedSplitter = new TimeSplitter(ws, TWO);
+    // New starting point of converted splitter is TWO
+    TS_ASSERT(convertedSplitter->valueAtTime(DateAndTime(0)) == -1);
+    TS_ASSERT(convertedSplitter->valueAtTime(TWO) == 1);
   }
 
   void test_timeSplitterFromMatrixWorkspaceError() {

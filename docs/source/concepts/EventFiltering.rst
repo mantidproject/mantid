@@ -39,7 +39,8 @@ Explicit filters
 <mantid.api.ISplittersWorkspace>`, :ref:`TableWorkspace <Table
 Workspaces>`, or :ref:`MatrixWorkspace <MatrixWorkspace>` as the
 ``SplittersWorkspace``. The events are split into output workspaces
-according to the times that they arrive detectors.
+according to the times that they arrive at detectors. Note, times in
+MatrixWorkspace and TableWorkspace are in seconds.
 
 :ref:`GenerateEventsFilter <algm-GenerateEventsFilter>` will create a
 :class:`SplittersWorkspace <mantid.api.ISplittersWorkspace>` based on
