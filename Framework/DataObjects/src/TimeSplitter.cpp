@@ -62,11 +62,27 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
 
     // if this row's time interval intersects an ROI already in the splitter, no separate ROI will be created in the
     // splitter, hence the warning.
-    if (valueAtTime(timeStart) != IGNORE_VALUE || valueAtTime(timeStop) != IGNORE_VALUE) {
-      g_log.warning() << "TableWorkspace row may be overwritten in conversion to TimeSplitter: " << ii << '\n';
+    if ((target_ws_index != IGNORE_VALUE) &&
+        (valueAtTime(timeStart) != IGNORE_VALUE || valueAtTime(timeStop) != IGNORE_VALUE)) {
+      g_log.warning() << "Workspace row " << ii << " may be overwritten in conversion to TimeSplitter" << '\n';
     }
 
     addROI(timeStart, timeStop, target_ws_index);
+  }
+}
+
+TimeSplitter::TimeSplitter(const SplittersWorkspace_sptr &sws) {
+  for (size_t ii = 0; ii < sws->rowCount(); ii++) {
+    Kernel::SplittingInterval interval = sws->getSplitter(ii);
+
+    // if this row's time interval intersects an ROI already in the splitter, no separate ROI will be created in the
+    // splitter, hence the warning.
+    if (interval.index() != IGNORE_VALUE &&
+        (valueAtTime(interval.begin()) != IGNORE_VALUE || valueAtTime(interval.end()) != IGNORE_VALUE)) {
+      g_log.warning() << "Workspace row " << ii << " may be overwritten in conversion to TimeSplitter" << '\n';
+    }
+
+    addROI(interval.begin(), interval.end(), interval.index());
   }
 }
 

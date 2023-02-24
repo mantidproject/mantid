@@ -9,12 +9,14 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/TableRow.h"
+#include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/TimeSplitter.h"
 #include "MantidKernel/TimeROI.h"
 
 using Mantid::API::TableRow;
 using Mantid::DataObjects::TimeSplitter;
+using Mantid::Kernel::SplittingInterval;
 using Mantid::Kernel::TimeROI;
 using Mantid::Types::Core::DateAndTime;
 
@@ -185,16 +187,16 @@ public:
   }
 
   /** Test that a TimeSplitter object constructed from a TableWorkspace object
-   * is equivalent to a TimeSplitter object built by successively adding the corresponding time ROIs.
+   * is equivalent to a TimeSplitter object built by successively adding time ROIs.
    * @brief test_createFromTableWorkspace
    */
-  void test_createFromTableWorkspace() {
+  void test_timeSplitterFromTableWorkspace() {
     auto tws = std::make_shared<Mantid::DataObjects::TableWorkspace>(3 /*rows*/);
 
     // by design, a table workspace used for event filtering must have 3 columns
     tws->addColumn("double", "start");
     tws->addColumn("double", "stop");
-    tws->addColumn("str", "target"); // index of a target workspace where the filtered time events will be output
+    tws->addColumn("str", "target"); // index of a workspace where the filtered time events will be output
 
     // by design, all times in the table must be in seconds
     const double time1_s{1.0e-5};
@@ -209,10 +211,10 @@ public:
     row.next();
     row << time3_s << time4_s << "3";
     row.next();
-    row << time5_s << time6_s << "2";
+    row << time5_s << time6_s << "-1"; // -1 means: ignore this time interval
 
-    // create a TimeSplitter object from the table. By design, the table creator must know whether
-    // the table holds absolute or relative times. In the latter case the creator must have
+    // create a TimeSplitter object from the table. By design, the table user must know whether
+    // the table holds absolute or relative times. In the latter case the user must have
     // a time offset to be used with the table.
     DateAndTime offset(THREE);
     TimeSplitter workspaceDerivedSplitter(tws, offset);
@@ -239,7 +241,7 @@ public:
     TimeSplitter referenceSplitter;
     referenceSplitter.addROI(time1_abs, time2_abs, 1);
     referenceSplitter.addROI(time3_abs, time4_abs, 3);
-    referenceSplitter.addROI(time5_abs, time6_abs, 2);
+    referenceSplitter.addROI(time5_abs, time6_abs, -1); // -1 means: ignore this time interval
 
     TS_ASSERT_EQUALS(referenceSplitter.numRawValues(), workspaceDerivedSplitter.numRawValues());
     TS_ASSERT(referenceSplitter.valueAtTime(time1_abs) == workspaceDerivedSplitter.valueAtTime(time1_abs));
@@ -248,5 +250,45 @@ public:
     TS_ASSERT(referenceSplitter.valueAtTime(time4_abs) == workspaceDerivedSplitter.valueAtTime(time4_abs));
     TS_ASSERT(referenceSplitter.valueAtTime(time5_abs) == workspaceDerivedSplitter.valueAtTime(time5_abs));
     TS_ASSERT(referenceSplitter.valueAtTime(time6_abs) == workspaceDerivedSplitter.valueAtTime(time6_abs));
+  }
+
+  /** Test that a TimeSplitter object constructed from a SplittersWorkspace object
+   * is equivalent to a TimeSplitter object built by successively adding time ROIs.
+   * @brief test_createFromTableWorkspace
+   */
+  void test_timeSplitterFromSplittersWorkspace() {
+    // create time objects for testing. All input times are in nanoseconds.
+    DateAndTime time1(10000);
+    DateAndTime time2(15000);
+    DateAndTime time3(20000);
+    DateAndTime time4(30000);
+    DateAndTime time5(40000);
+    DateAndTime time6(50000);
+
+    SplittingInterval s1(time1, time2, 1);
+    SplittingInterval s2(time3, time4, 3);
+    SplittingInterval s3(time5, time6, -1); // -1 means: ignore this time interval
+
+    auto sws = std::make_shared<Mantid::DataObjects::SplittersWorkspace>();
+    sws->addSplitter(s1);
+    sws->addSplitter(s2);
+    sws->addSplitter(s3);
+
+    // create a TimeSplitter object from the workspace
+    TimeSplitter workspaceDerivedSplitter(sws);
+
+    // build a reference TimeSplitter by adding ROIs
+    TimeSplitter referenceSplitter;
+    referenceSplitter.addROI(time1, time2, 1);
+    referenceSplitter.addROI(time3, time4, 3);
+    referenceSplitter.addROI(time5, time6, -1); // -1 means: ignore this time interval
+
+    TS_ASSERT_EQUALS(referenceSplitter.numRawValues(), workspaceDerivedSplitter.numRawValues());
+    TS_ASSERT(referenceSplitter.valueAtTime(time1) == workspaceDerivedSplitter.valueAtTime(time1));
+    TS_ASSERT(referenceSplitter.valueAtTime(time2) == workspaceDerivedSplitter.valueAtTime(time2));
+    TS_ASSERT(referenceSplitter.valueAtTime(time3) == workspaceDerivedSplitter.valueAtTime(time3));
+    TS_ASSERT(referenceSplitter.valueAtTime(time4) == workspaceDerivedSplitter.valueAtTime(time4));
+    TS_ASSERT(referenceSplitter.valueAtTime(time5) == workspaceDerivedSplitter.valueAtTime(time5));
+    TS_ASSERT(referenceSplitter.valueAtTime(time6) == workspaceDerivedSplitter.valueAtTime(time6));
   }
 };
