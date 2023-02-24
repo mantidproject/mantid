@@ -68,7 +68,7 @@ This can be performed directly with :ref:`algm-FilterByTime` or indirectly with 
    :alt: FilterByLogValue High
    :align: center
 
-- Look at the effect this filter has on the Temperature Sample Log and in particular on the data in
+- Look at the effect this filter has on the SampleTemp log and in particular on the data in
   spectrum number 1000.
   Note that the time for the high temperature sample log data has reset its minimum value to 0 as it doesn't have the start
   time value needed to calculate the relative time (the start of the logs here is where we made the cut).

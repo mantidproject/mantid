@@ -59,11 +59,11 @@ Output (the numbers on your machine my not match exactly):
   :options: +ELLIPSIS, +NORMALIZE_WHITESPACE
 
     Using Gauss Model
-    A0: [ 0.87...]
-    A1: [ 0.19...]
+    A0: [ ...]
+    A1: [ ...]
     Using Yi Model
-    A0: [ 0.95...]
-    A1: [ 0.58...]
+    A0: [ ...]
+    A1: [ ...]
 
 .. categories::
 

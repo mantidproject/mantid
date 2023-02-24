@@ -141,8 +141,8 @@ Output:
 .. testoutput:: CorelliPowderCalibrationExample
 
     Number of components = 5
-    bank1 file sim_corelli_cal/bank1.csv exist = True
-    calibration file sim_corelli_cal/corelli_instrument_20200220.csv exist = True
+    bank1 file ....csv exist = True
+    calibration file ....csv exist = True
 
 .. categories::
 

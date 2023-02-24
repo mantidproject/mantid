@@ -29,8 +29,8 @@ int SplittingInterval::index() const { return m_index; }
 /// And operator. Return the smallest time interval where both intervals are
 /// TRUE.
 SplittingInterval SplittingInterval::operator&(const SplittingInterval &b) const {
-  const auto begin = std::max(this->begin(), b.begin());
-  const auto end = std::min(this->end(), b.end());
+  const auto begin = std::max(this->start(), b.start());
+  const auto end = std::min(this->stop(), b.stop());
 
   return SplittingInterval(begin, end, this->index());
 }
@@ -43,8 +43,8 @@ SplittingInterval SplittingInterval::operator|(const SplittingInterval &b) const
                                 "operator to non-overlapping "
                                 "SplittingInterval's.");
 
-  const auto begin = std::min(this->begin(), b.begin());
-  const auto end = std::max(this->end(), b.end());
+  const auto begin = std::min(this->start(), b.start());
+  const auto end = std::max(this->stop(), b.stop());
 
   return SplittingInterval(begin, end, this->index());
 }
@@ -151,16 +151,16 @@ SplittingIntervalVec removeFilterOverlap(const SplittingIntervalVec &a) {
   auto it = a.cbegin();
   while (it != a.cend()) {
     // All following intervals will start at or after this one
-    DateAndTime start = it->begin();
-    DateAndTime stop = it->end();
+    DateAndTime start = it->start();
+    DateAndTime stop = it->stop();
 
     // Keep looking for the next interval where there is a gap (start > old
     // stop);
-    while ((it != a.cend()) && (it->begin() <= stop)) {
+    while ((it != a.cend()) && (it->start() <= stop)) {
       // Extend the stop point (the start cannot be extended since the list is
       // sorted)
-      if (it->end() > stop)
-        stop = it->end();
+      if (it->stop() > stop)
+        stop = it->stop();
       ++it;
     }
     // We've reached a gap point. Output this merged interval and move on.
@@ -188,11 +188,7 @@ SplittingIntervalVec operator|(const SplittingIntervalVec &a, const SplittingInt
 
   // Sort by start time rather than the default
   auto compareStart = [](const SplittingInterval &left, const SplittingInterval &right) {
-    // because of the field names, cppcheck thinks the wrong thing is being compared
-    // let the compiler optimize the memory layout
-    const auto leftStart = left.begin();
-    const auto rightStart = right.begin();
-    return leftStart < rightStart;
+    return left.start() < right.start();
   };
   std::sort(temp.begin(), temp.end(), compareStart);
 
@@ -224,16 +220,16 @@ SplittingIntervalVec operator~(const SplittingIntervalVec &a) {
   ait = temp.begin();
   if (ait != temp.end()) {
     // First entry; start at -infinite time
-    out.emplace_back(DateAndTime::minimum(), ait->begin(), 0);
+    out.emplace_back(DateAndTime::minimum(), ait->start(), 0);
     // Now start at the second entry
     while (ait != temp.end()) {
       DateAndTime start, stop;
-      start = ait->end();
+      start = ait->stop();
       ++ait;
       if (ait == temp.end()) { // Reached the end - go to inf
         stop = DateAndTime::maximum();
       } else { // Stop at the start of the next entry
-        stop = ait->begin();
+        stop = ait->start();
       }
       out.emplace_back(start, stop, 0);
     }
