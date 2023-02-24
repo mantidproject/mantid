@@ -68,8 +68,7 @@ The displacement tensors can be obtained from the calculated phonon eigenvectors
 
 :math:`A_i = \sum_i \mathbf{B}_{\omega,i} \left<2n + 1\right>`
 
-where :math:`\mathbf{c}_{i, \nu}`  -- normalised eigenvector for atom :math:`i` in mode :math:`\nu` and :math:`M_i` is the mass of atom :math:`i`.
-
+where :math:`\mathbf{c}_{i, \nu}`  -- normalised eigenvector for atom :math:`i` in mode :math:`\nu` and :math:`M_i` is the mass of atom :math:`i`. For the rest of this document, we define :math:`\mathbf{B}` to include the Bose factor :math:`\left<n+1\right>`.
 
 In DFT studies of solid materials, the simulation region is generally a finite unit cell with periodic boundary conditions.
 This models an infinite perfect crystal; in order to compare such calculations with powder experiments, orientational averaging should be considered.
@@ -91,72 +90,59 @@ The :math:`1 \rightarrow 0` events (i.e. energy *to* the scattered neutron) are 
 The powder-averaging derivations are more complex for higher-order quantum events.
 At second order some exponential terms are neglected, and isotropic Debye-Waller factor is used without any mode-dependence [#Mitchell]_.
 
-:math:`S_i(Q, \omega_\nu + \omega_{\nu^{\prime}}) = \frac{Q^4}{15  C}\left( \mathrm{Tr}\mathbf{B}_{i,\nu}\mathrm{Tr}\mathbf{B}_{i,\nu^\prime} + \mathbf{B}_{i,\nu}:\mathbf{B}_{i,\nu^\prime} + \mathbf{B}_{i,\nu^\prime}:\mathbf{B}_{i,\nu} \right) \exp\left(-Q^2 \mathbf{A}_i / 3 \right)\sigma_i`
+:math:`S_i^{n=2}(Q, \omega_\nu + \omega_{\nu^{\prime}}) = \frac{Q^4}{15  C}\left( \mathrm{Tr}\mathbf{B}_{i,\nu}\mathrm{Tr}\mathbf{B}_{i,\nu^\prime} + \mathbf{B}_{i,\nu}:\mathbf{B}_{i,\nu^\prime} + \mathbf{B}_{i,\nu^\prime}:\mathbf{B}_{i,\nu} \right) \exp\left(-Q^2 \mathbf{A}_i / 3 \right)\sigma_i`
 
 where :math:`C = \begin{cases} 2  & \textrm{if $\nu=\nu^\prime$} \\ 1 & \textrm{otherwise} \end{cases}`
 
 For higher-order events we can further simplify with a fully isotropic approximation :math:`\mathbf{Q Q}:\mathbf{B} \approx Q^2 \mathrm{Tr}\mathbf{B} / 3`:
 
-:math:`S_i(Q, \omega_\nu + \omega_{\nu^{\prime}} + \cdots) = \frac{Q^{2n}}{n!} \left[\prod_\nu \frac{\mathrm{Tr}\mathbf{B}_{i,\nu}}{3} \right] \exp\left(-Q^2 \frac{\mathrm{Tr}\mathbf{A}_i}{3} \right) \sigma_i`
+:math:`S_i^n(Q, \omega_\nu + \omega_{\nu^{\prime}} + \cdots) = \frac{Q^{2n}}{n!} \left[\prod_\nu^n \frac{\mathrm{Tr}\mathbf{B}_{i,\nu}}{3} \right] \exp\left(-Q^2 \frac{\mathrm{Tr}\mathbf{A}_i}{3} \right) \sigma_i`
 
-While a significant simplification, this allows the "combinatorial explosion" of phonon-mode combinations to be replaced by a recursive series of convolution operations:
+While a significant simplification, this allows the "combinatorial explosion" of phonon-mode combinations to be avoided. The mode-by-mode terms are combined into an energy spectrum
 
-:math:`S_i^n(Q, \omega, n) =  \frac{\sigma_i}{n!}s_i^n(Q, \omega, n) \exp\left(-Q^2 \mathbf{A}_i / 3 \right)`
+:math:`S_i^n(Q, \omega) = \sum_{(\nu, \nu^\prime, \cdots)\in \mathrm{fundamentals}} S_i(Q, \omega_\nu + \omega_{\nu^\prime} + \cdots) \delta(\omega - [\omega_\nu + \omega_{\nu^\prime} + \cdots])`
 
-:math:`s_i^n(Q, \omega) = \frac{Q^2 \mathrm{Tr}\mathbf{B}_{i,\omega}}{3} * s_i^{n-1}(Q, \omega)`
+in which we identify a recursive term :math:`s_i`
 
-Note that the mode-by-mode calculation is replaced by convolution of frequency-dependent spectra. NEED TO USE DELTA FUNCTION OR SOMETHING TO SHOW HOW THIS WORKS.
+:math:`S_i^n(Q, \omega) =  \frac{\sigma_i}{n!}s_i^n(Q, \omega) \exp\left(-Q^2 \mathbf{A}_i / 3 \right)`
+
+:math:`s_i^n(Q, \omega) = Q^{2n} \sum_{(\nu, \nu^\prime, \cdots)\in \mathrm{fundamentals}} \left[\prod_{\nu = \nu, \nu^\prime, \cdots} \frac{\mathrm{Tr}\mathbf{B}_{i,\nu}}{3} \right] \delta(\omega - [\omega_\nu + \omega_{\nu^\prime} + \cdots])`
+
+:math:`s_i^n(Q, \omega) = \sum_{\nu\in \mathrm{fundamentals}} \frac{Q^2\mathrm{Tr}\mathbf{B}_{i,\nu}}{3} \delta(\omega - \omega_\nu) * s_i^{n-1}(Q, \omega)`
+
+By performing the convolution (:math:`*`) operations on a numerical grid it is possible to reach :math:`n=10` without computing an infeasible :math:`(3N_\mathrm{atoms} N_\mathbf{k})^{10}` intensity values.
+
+Resolution
+----------
 
 After evaluating the above equations one obtains the discrete :math:`S` for each quantum order and for each atom: :math:`S_\mathrm{discrete}`.
-In order to compare these functions with an experimental spectrum one has to convolve them with experimental resolution
+In order to compare these functions with an experimental spectrum one has to convolve them with experimental resolution :math:`f(\omega)`
 
-:math:`S_\mathrm{theory}^{nj}(Q, \omega) = S_\mathrm{discrete}^{nj}(Q, \omega) * f(\omega)`
+:math:`S_{i,\mathrm{theory}}^{n}(Q, \omega) = S_{i,\mathrm{discrete}}^{n}(Q, \omega) * f(\omega)`
 
-where:
+For `TOSCA <http://www.isis.stfc.ac.uk/instruments/tosca/tosca4715.html>`_  and TOSCA-like instruments :math:`f(\omega)` is treated as a Gaussian function with energy-dependent width :math:`\sigma(\omega)`:
 
-:math:`j` -- indicates :math:`j`-th atoms
+:math:`f(\omega)=\frac{\exp(-(\omega)^2  / \sigma(\omega))}{\sqrt{\sigma(\omega)  \pi}}`
 
-:math:`n` -- indicates :math:`n`-order event
+The application of an energy-dependent resolution function is not trivial. For efficiency Abins uses an approximate scheme :ref:`documented here <AbinsInterpolatedBroadening>`.
 
-:math:`f(\omega)` -- is a resolution function
+Energy-Q relations
+------------------
 
-:math:`S_\mathrm{theory}` -- is *theoretical* :math:`S` to be compared with experimental results.
-
-For `TOSCA <http://www.isis.stfc.ac.uk/instruments/tosca/tosca4715.html>`_  and TOSCA-like instruments :math:`f(\omega)` has the following form:
-
-:math:`f(\omega)=1.0 / \sqrt{\sigma(\omega)  \pi}  \exp(-(\omega)^2  / \sigma(\omega))`
-
-where:
-
-:math:`\sigma(\omega) = A  \omega^2  + B  \omega + C`
-
-with :math:`A`, :math:`B`, :math:`C` as constants.
-
-Moreover, in case of TOSCA and TOSCA-like instruments, the length of momentum transfer depends on frequency (*indirect geometry spectrometer*).
-The formula for :math:`Q^2` is as follows:
-
-:math:`Q^2(\omega)=k^2_i(\omega) + k^2_f - 2  \sqrt{k^2_i(\omega)  k^2_f} cos(\theta)`
-
-where:
-
-:math:`k^2_i(\omega)=(\omega + E_{final})  \hbar/ (4  \pi)` expressed in the spectroscopic units
-
-:math:`k^2_f=E_{final}  \hbar/(4 \pi)`
-
-with
-
-:math:`E_{final}` -- being the final energy on the crystal analyser in :math:`cm^{-1}` and
-
-:math:`\theta` -- is the crystal analyser angle in radians. (TOSCA has two angles to consider, corresponding to the forward- and back-scattering detectors).
+Although we are nominally measuring the property :math:`S(\mathbf{Q}, \omega)` or :math:`S(Q, \omega)`, in time-of-flight neutron spectrometers, :math:`\mathbf{Q}` and :math:`\omega` are not independent. :ref:`Abins <algm-Abins>` calculates 1-D :math:`S(\omega)` spectra in which the corresponding value(s) of :math:`Q` are implicitly determined by the instrument design and settings. :ref:`Abins2D <algm-Abins2D>` models multi-detector instruments that generate a more complete 2-D map but there are still kinematic constraints on the measurement region. The :ref:`QE Coverage` interface can be used to explore and plot these :math:`\omega`--:math:`Q` relations.
 
 Current implementation
 ----------------------
 
-Calculation of theoretical :math:`S` from *ab initio* results is implemented in :ref:`Abins <algm-Abins>`. At the moment Abins supports phonon outputs from the
-`CASTEP <http://www.castep.org/>`_, `CRYSTAL <http://www.crystal.unito.it/index.php>`_, Gaussian and DMOL3 *ab initio* codes.
-The Gamma-point frequencies are used and phonon bands are assumed to be flat throughout the Brillouin zone; this assumption is primarily applicable for incoherent scattering in molecular crystals.
-Instrument parameters are included for
-`TOSCA <http://www.isis.stfc.ac.uk/instruments/tosca/tosca4715.html>`_ and should be useful for TOSCA-like instruments.
+Calculation of theoretical :math:`S` from *ab initio* results is implemented in :ref:`Abins <algm-Abins>` and :ref:`Abins <algm-Abins2D>`. At the moment Abins supports phonon outputs from the *ab initio* codes
+`CASTEP <http://www.castep.org/>`_, `CRYSTAL <http://www.crystal.unito.it/index.php>`_, Gaussian, DMOL3 and VASP, as well as force constants computed with `Phonopy <https://phonopy.github.io/phonopy/index.html>`_.
+
+Due to the "DOS-like approximation" bands are assumed to be flat throughout the Brillouin zone.
+While only the incoherent scattering spectrum is calculated, coherent weights may be included to make an "incoherent approximation" to the full spectrum.
+The method implemented in Abins is primarily applicable for incoherent scattering in molecular crystals.
+
+Instrument models are included for `TOSCA <http://www.isis.stfc.ac.uk/instruments/tosca/tosca4715.html>`_, `LAGRANGE <https://www.ill.eu/users/instruments/instruments-list/in1-taslagrange/description/instrument-layout>`_ and `PANTHER <https://www.ill.eu/users/instruments/instruments-list/panther/description/instrument-layout>`_ using parameterised fits for the resolution function :math:`\sigma(\omega)`.
+Instruments `MAPS <https://www.isis.stfc.ac.uk/Pages/maps.aspx>`_, `MARI <https://www.isis.stfc.ac.uk/Pages/mari.aspx>`_ and `MERLIN <https://www.isis.stfc.ac.uk/Pages/merlin.aspx>`_ use :ref:`PyChop` to obtain values for a polynomial fit.
 
 Citing Abins
 ------------
