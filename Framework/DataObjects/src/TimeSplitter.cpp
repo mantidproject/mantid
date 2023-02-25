@@ -49,8 +49,13 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
 
   for (size_t ii = 0; ii < tws->rowCount(); ii++) {
     // by design, the times in the table must be in seconds
-    Types::Core::DateAndTime timeStart(col_start->cell<double>(ii) /*s*/, 0.0 /*ns*/);
-    Types::Core::DateAndTime timeStop(col_stop->cell<double>(ii) /*s*/, 0.0 /*ns*/);
+    double timeStart_s{col_start->cell<double>(ii)};
+    double timeStop_s{col_stop->cell<double>(ii)};
+    if (timeStart_s < 0 || timeStop_s < 0) {
+      throw std::runtime_error("All times in TableWorkspace must be >= 0 to construct TimeSplitter.");
+    }
+    Types::Core::DateAndTime timeStart(timeStart_s, 0.0 /*ns*/);
+    Types::Core::DateAndTime timeStop(timeStop_s, 0.0 /*ns*/);
 
     // make the times absolute
     int64_t offset_ns{offset.totalNanoseconds()};
@@ -60,8 +65,7 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
     // get the target workspace index
     int target_ws_index = std::stoi(col_target->cell<std::string>(ii));
 
-    // if this row's time interval intersects an ROI already in the splitter, no separate ROI will be created in the
-    // splitter, hence the warning.
+    // if this row's time interval intersects an interval already in the splitter, no separate ROI will be created
     if ((target_ws_index != IGNORE_VALUE) &&
         (valueAtTime(timeStart) != IGNORE_VALUE || valueAtTime(timeStop) != IGNORE_VALUE)) {
       g_log.warning() << "Workspace row " << ii << " may be overwritten in conversion to TimeSplitter" << '\n';
@@ -75,8 +79,7 @@ TimeSplitter::TimeSplitter(const SplittersWorkspace_sptr &sws) {
   for (size_t ii = 0; ii < sws->rowCount(); ii++) {
     Kernel::SplittingInterval interval = sws->getSplitter(ii);
 
-    // if this row's time interval intersects an ROI already in the splitter, no separate ROI will be created in the
-    // splitter, hence the warning.
+    // if this row's time interval intersects an interval already in the splitter, no separate ROI will be created
     if (interval.index() != IGNORE_VALUE &&
         (valueAtTime(interval.start()) != IGNORE_VALUE || valueAtTime(interval.stop()) != IGNORE_VALUE)) {
       g_log.warning() << "Workspace row " << ii << " may be overwritten in conversion to TimeSplitter" << '\n';
