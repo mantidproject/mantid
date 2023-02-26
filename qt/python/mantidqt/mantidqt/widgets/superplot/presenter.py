@@ -16,7 +16,6 @@ from mantid.plots import MantidAxes
 
 
 class SuperplotPresenter:
-
     BIN_MODE_TEXT = "Column (bin)"
     SPECTRUM_MODE_TEXT = "Row (spectrum)"
     HOLD_BUTTON_TEXT_CHECKED = "Remove"
@@ -138,11 +137,7 @@ class SuperplotPresenter:
         """
         Triggered when the window/dockwidgets is(are) resized.
         """
-        try:
-            self._canvas.figure.tight_layout()
-        except ValueError:
-            pass
-        self._canvas.draw_idle()
+        self._redraw()
 
     def _sync_with_current_plot(self):
         """
@@ -223,11 +218,7 @@ class SuperplotPresenter:
             visible (bool): True if the widget is now visible
         """
         if visible:
-            try:
-                self._canvas.figure.tight_layout()
-            except ValueError:
-                pass
-            self._canvas.draw_idle()
+            self._redraw()
 
     def on_normalise_checked(self, checked: bool):
         """
@@ -379,27 +370,44 @@ class SuperplotPresenter:
         plotted_data = self._model.get_plotted_data()
 
         figure = self._canvas.figure
-        axes = figure.gca()
+        figure.set_visible(True)
 
         self._remove_unneeded_curves(replot)
         self._plot_selection()
 
-        legend = axes.get_legend()
-        if legend:
-            legend.remove()
-        if selection or plotted_data:
-            axes.set_axis_on()
+        self._redraw(not selection and not plotted_data)
+
+    def _redraw(self, empty=False):
+        """
+        Redraw the matplotlib canvas using a tight layout. The function takes
+        care of the legend and avoid that it interfere with the layout.
+
+        Args:
+            empty (bool): True if the plot is empty. In this case, the figure is
+                          not drawn
+        """
+        figure = self._canvas.figure
+        if empty:
+            figure.set_visible(False)
+        else:
+            axes = figure.gca()
+            hasLegend = False
+            legend = axes.get_legend()
+            if legend:
+                hasLegend = legend.get_visible()
+                legend.remove()
             try:
                 figure.tight_layout()
             except ValueError:
                 pass
             legend = axes.legend()
-            if legend:
-                legend_set_draggable(legend, True)
-        else:
-            axes.set_axis_off()
-            axes.set_title("")
-        self._canvas.draw_idle()
+            legend.set_visible(hasLegend)
+            legend_set_draggable(legend, True)
+        try:
+            self._canvas.draw()
+        except:
+            # exception are thown by the mantid plot layer
+            pass
 
     def _remove_unneeded_curves(self, replot: bool):
         """

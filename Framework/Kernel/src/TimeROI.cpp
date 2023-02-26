@@ -157,20 +157,29 @@ void TimeROI::addMask(const Types::Core::DateAndTime &startTime, const Types::Co
     const auto newValue = std::max(m_roi.front(), stopTime);
     m_roi.erase(m_roi.begin(), iter);
     // decide how to put in the new start time based on whether this has an even number of values
-    if (m_roi.size() % 2 == 0)
-      *(m_roi.begin()) = newValue;
-    else
+    if (m_roi.size() % 2 == 0) {
+      if (newValue > m_roi.front())
+        *(m_roi.begin()) = newValue;
+    } else {
       m_roi.insert(m_roi.begin(), newValue);
+    }
   } else if ((startTime > m_roi.front()) && (stopTime >= m_roi.back())) {
     // trim the end off
     auto iter = std::upper_bound(m_roi.begin(), m_roi.end(), startTime);
     const auto newValue = std::min(*iter, startTime);
     iter = m_roi.erase(iter, m_roi.end());
     // decide how to put in the new start time based on whether this has an even number of values
-    if (m_roi.size() % 2 == 0)
+    if (m_roi.size() % 2 == 0) {
       *iter = newValue;
-    else
-      m_roi.push_back(newValue);
+    } else {
+      if (newValue == m_roi.back()) {
+        // currently ends in use and needs to be removed
+        m_roi.pop_back();
+      } else {
+        // need to close the end
+        m_roi.push_back(newValue);
+      }
+    }
   } else {
     g_log.debug("TimeROI::addMask cutting notch in existing ROI");
     // create rois for before and after the mask
