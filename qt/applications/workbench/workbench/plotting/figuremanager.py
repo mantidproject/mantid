@@ -506,14 +506,12 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         for cap in errorbar_cap_lines:
             ax.add_line(cap)
-        if LooseVersion("3.7") > LooseVersion(matplotlib.__version__) >= LooseVersion("3.2"):
-            for line_fill in fills:
-                if line_fill not in ax.collections:
-                    ax.add_collection(line_fill)
-        else:
-            raise NotImplementedError(
-                "ArtistList will become an immutable tuple in matplotlib 3.7 and thus, " "this code doesn't work anymore."
-            )
+
+        """ArtistList will become an immutable tuple in matplotlib 3.7 which will prevent iterating through line_fill"""
+        for line_fill in fills:
+            if line_fill not in ax.collections:
+                ax.add_collection(line_fill)
+
         ax.collections.reverse()
         ax.update_waterfall(x, y)
 
