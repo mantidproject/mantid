@@ -19,16 +19,12 @@ def setup(app):
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    # we use pngmath over mathjax so that the the offline help isn't reliant on
-    # anything external and we don't need to include the large mathjax package
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",
+    # use mathjax as we currently only publish the developer docs online
+    # for viewing through a web browser.
+    "sphinx.ext.mathjax",
 ]
-
-if LooseVersion(sphinx_version) > LooseVersion("1.8"):
-    extensions.append("sphinx.ext.imgmath")
-else:
-    extensions.append("sphinx.ext.pngmath")
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
