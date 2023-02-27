@@ -11,7 +11,6 @@ import importlib
 
 
 class SavePlot1D(mantid.api.PythonAlgorithm):
-
     _wksp = None
 
     def category(self):
@@ -194,19 +193,6 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         return (data, xlabel, ylabel)
 
     def saveImage(self):
-        """Save image"""
-        ok2run = ""
-        try:
-            import matplotlib
-            from distutils.version import LooseVersion
-
-            if LooseVersion(matplotlib.__version__) < LooseVersion("1.2.0"):
-                ok2run = "Wrong version of matplotlib. Required >= 1.2.0"
-        except ImportError:
-            ok2run = "Problem importing matplotlib"
-        if len(ok2run) > 0:
-            raise RuntimeError(ok2run)
-
         import matplotlib.pyplot as plt
 
         if isinstance(self._wksp, mantid.api.WorkspaceGroup):
