@@ -217,9 +217,8 @@ public:
     TimeSplitter splitter;
     int64_t offset_ns{TWO.totalNanoseconds()};
     splitter.addROI(DateAndTime(0) + offset_ns, DateAndTime(10, 0) + offset_ns, 1);
-    // splitter.addROI(TWO, DateAndTime(10, TWO.nanoseconds()), 1);
-    Mantid::API::MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
 
+    Mantid::API::MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
     auto &X = ws->dataX(0);
     auto &Y = ws->dataY(0);
     // X[0] is 0 by default, unit is seconds.
