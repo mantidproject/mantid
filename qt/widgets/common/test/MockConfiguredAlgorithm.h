@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IAlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
-#include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
 
 #include <gmock/gmock.h>
 
@@ -16,16 +16,15 @@
 
 class MockConfiguredAlgorithm : public MantidQt::API::IConfiguredAlgorithm {
 public:
-  MockConfiguredAlgorithm(std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> runtimeProps)
+  MockConfiguredAlgorithm(std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> runtimeProps)
       : m_runtimeProps(std::move(runtimeProps)) {
     // Explicitly hold a reference to the props we return by reference, so the tests don't get this wrong
     ON_CALL(*this, getAlgorithmRuntimeProps).WillByDefault(::testing::ReturnRef(*m_runtimeProps));
   }
 
   MOCK_METHOD(Mantid::API::IAlgorithm_sptr, algorithm, (), (const, override));
-  MOCK_METHOD((const MantidQt::API::IAlgorithmRuntimeProps &), getAlgorithmRuntimeProps, (),
-              (const, noexcept, override));
+  MOCK_METHOD((const Mantid::API::IAlgorithmRuntimeProps &), getAlgorithmRuntimeProps, (), (const, noexcept, override));
 
 private:
-  std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> m_runtimeProps;
+  std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> m_runtimeProps;
 };
