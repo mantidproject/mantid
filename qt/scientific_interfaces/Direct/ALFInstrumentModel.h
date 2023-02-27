@@ -53,8 +53,10 @@ public:
 
   virtual bool setSelectedTubes(std::vector<DetectorTube> tubes) = 0;
   virtual bool addSelectedTube(DetectorTube const &tube) = 0;
+  virtual bool hasSelectedTubes() const = 0;
   virtual std::vector<DetectorTube> selectedTubes() const = 0;
 
+  // The algorithms used to load and normalise the Sample
   virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> rebinToWorkspaceProperties() const = 0;
   virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> divideProperties() const = 0;
   virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
@@ -62,11 +64,15 @@ public:
   virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
   convertUnitsProperties(Mantid::API::MatrixWorkspace_sptr const &inputWorkspace) const = 0;
 
+  // The algorithms used to produce an Out of plane angle workspace
   virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
-  createWorkspaceAlgorithmProperties(MantidQt::MantidWidgets::IInstrumentActor const &actor) const = 0;
+  createWorkspaceAlgorithmProperties(MantidQt::MantidWidgets::IInstrumentActor const &actor) = 0;
+  virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+  scaleXProperties(Mantid::API::MatrixWorkspace_sptr const &inputWorkspace) const = 0;
+  virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+  rebunchProperties(Mantid::API::MatrixWorkspace_sptr const &inputWorkspace) const = 0;
 
-  virtual std::tuple<Mantid::API::MatrixWorkspace_sptr, std::vector<double>>
-  generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::IInstrumentActor const &actor) const = 0;
+  virtual std::vector<double> twoThetasClosestToZero() const = 0;
 };
 
 class MANTIDQT_DIRECT_DLL ALFInstrumentModel final : public IALFInstrumentModel {
@@ -89,8 +95,10 @@ public:
 
   bool setSelectedTubes(std::vector<DetectorTube> tubes) override;
   bool addSelectedTube(DetectorTube const &tube) override;
+  bool hasSelectedTubes() const override;
   inline std::vector<DetectorTube> selectedTubes() const noexcept override { return m_tubes; };
 
+  // The algorithms used to load and normalise the Sample
   std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> rebinToWorkspaceProperties() const override;
   std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> divideProperties() const override;
   std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
@@ -98,11 +106,15 @@ public:
   std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
   convertUnitsProperties(Mantid::API::MatrixWorkspace_sptr const &inputWorkspace) const override;
 
+  // The algorithms used to produce an Out of plane angle workspace
   std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
-  createWorkspaceAlgorithmProperties(MantidQt::MantidWidgets::IInstrumentActor const &actor) const override;
+  createWorkspaceAlgorithmProperties(MantidQt::MantidWidgets::IInstrumentActor const &actor) override;
+  std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+  scaleXProperties(Mantid::API::MatrixWorkspace_sptr const &inputWorkspace) const override;
+  std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+  rebunchProperties(Mantid::API::MatrixWorkspace_sptr const &inputWorkspace) const override;
 
-  std::tuple<Mantid::API::MatrixWorkspace_sptr, std::vector<double>>
-  generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::IInstrumentActor const &actor) const override;
+  inline std::vector<double> twoThetasClosestToZero() const noexcept override { return m_twoThetasClosestToZero; };
 
 private:
   void setSample(Mantid::API::MatrixWorkspace_sptr const &sample);
@@ -113,18 +125,19 @@ private:
   bool tubeExists(DetectorTube const &tube) const;
 
   void collectXAndYData(MantidQt::MantidWidgets::IInstrumentActor const &actor, std::vector<double> &x,
-                        std::vector<double> &y, std::vector<double> &e, std::vector<double> &twoThetas) const;
-  void collectAndSortYByX(std::map<double, double> &xy, std::map<double, double> &xe, std::vector<double> &twoThetas,
+                        std::vector<double> &y, std::vector<double> &e);
+  void collectAndSortYByX(std::map<double, double> &xy, std::map<double, double> &xe,
                           MantidQt::MantidWidgets::IInstrumentActor const &actor,
                           Mantid::API::MatrixWorkspace_const_sptr const &workspace,
                           Mantid::Geometry::ComponentInfo const &componentInfo,
-                          Mantid::Geometry::DetectorInfo const &detectorInfo) const;
+                          Mantid::Geometry::DetectorInfo const &detectorInfo);
 
   inline std::size_t numberOfTubes() const noexcept { return m_tubes.size(); }
 
   Mantid::API::MatrixWorkspace_sptr m_sample;
   Mantid::API::MatrixWorkspace_sptr m_vanadium;
   std::vector<DetectorTube> m_tubes;
+  std::vector<double> m_twoThetasClosestToZero;
 };
 
 } // namespace CustomInterfaces

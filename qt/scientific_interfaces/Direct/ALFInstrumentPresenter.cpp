@@ -159,8 +159,23 @@ void ALFInstrumentPresenter::updateInstrumentViewFromModel() {
 }
 
 void ALFInstrumentPresenter::updateAnalysisViewFromModel() {
-  auto const [workspace, twoThetas] = m_model->generateOutOfPlaneAngleWorkspace(m_view->getInstrumentActor());
-  m_analysisPresenter->setExtractedWorkspace(workspace, twoThetas);
+  if (m_model->hasSelectedTubes()) {
+    m_algorithmManager->createWorkspace(m_model->createWorkspaceAlgorithmProperties(m_view->getInstrumentActor()));
+  } else {
+    m_analysisPresenter->setExtractedWorkspace(nullptr, {});
+  }
+}
+
+void ALFInstrumentPresenter::notifyCreateWorkspaceComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  m_algorithmManager->scaleX(m_model->scaleXProperties(workspace));
+}
+
+void ALFInstrumentPresenter::notifyScaleXComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  m_algorithmManager->rebunch(m_model->rebunchProperties(workspace));
+}
+
+void ALFInstrumentPresenter::notifyRebunchComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  m_analysisPresenter->setExtractedWorkspace(workspace, m_model->twoThetasClosestToZero());
 }
 
 } // namespace MantidQt::CustomInterfaces

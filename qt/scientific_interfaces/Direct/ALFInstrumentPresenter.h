@@ -72,6 +72,10 @@ public:
   void notifyReplaceSpecialValuesComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
   void notifyConvertUnitsComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
 
+  void notifyCreateWorkspaceComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
+  void notifyScaleXComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
+  void notifyRebunchComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
+
   void notifyInstrumentActorReset() override;
   void notifyShapeChanged() override;
   void notifyTubesSelected(std::vector<DetectorTube> const &tubes) override;

@@ -18,11 +18,17 @@ public:
 
   virtual void notifyAlgorithmError(std::string const &message) = 0;
 
+  // Algorithm notifiers used when loading and normalising the Sample
   virtual void notifyLoadAndNormaliseComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
   virtual void notifyRebinToWorkspaceComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
   virtual void notifyDivideComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
   virtual void notifyReplaceSpecialValuesComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
   virtual void notifyConvertUnitsComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
+
+  // Algorithm notifiers used when producing an Out of plane angle workspace
+  virtual void notifyCreateWorkspaceComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
+  virtual void notifyScaleXComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
+  virtual void notifyRebunchComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
 };
 
 } // namespace MantidQt::CustomInterfaces

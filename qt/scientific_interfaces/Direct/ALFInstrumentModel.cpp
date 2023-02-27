@@ -86,53 +86,11 @@ void loadEmptyInstrument(std::string const &instrumentName, std::string const &o
   alg->execute();
 }
 
-MatrixWorkspace_sptr createWorkspace(std::string const &parentName, std::vector<double> const &x,
-                                     std::vector<double> const &y, std::vector<double> const &e,
-                                     std::size_t const numberOfSpectra, std::string const &unitX) {
-  auto alg = AlgorithmManager::Instance().create("CreateWorkspace");
-  alg->initialize();
-  alg->setAlwaysStoreInADS(false);
-  alg->setProperty("ParentWorkspace", parentName);
-  alg->setProperty("DataX", x);
-  alg->setProperty("DataY", y);
-  alg->setProperty("DataE", e);
-  alg->setProperty("NSpec", static_cast<int>(numberOfSpectra));
-  alg->setProperty("UnitX", unitX);
-  alg->setPropertyValue("OutputWorkspace", NOT_IN_ADS);
-  alg->execute();
-  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
-  return outputWorkspace;
-}
-
-MatrixWorkspace_sptr rebunch(MatrixWorkspace_sptr const &inputWorkspace, std::size_t const nBunch) {
-  auto alg = Mantid::API::AlgorithmManager::Instance().create("Rebunch");
-  alg->initialize();
-  alg->setAlwaysStoreInADS(false);
-  alg->setProperty("InputWorkspace", inputWorkspace);
-  alg->setProperty("NBunch", static_cast<int>(nBunch));
-  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
-  alg->execute();
-  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
-  return outputWorkspace;
-}
-
-MatrixWorkspace_sptr scaleX(MatrixWorkspace_sptr const &inputWorkspace, double const factor) {
-  auto alg = AlgorithmManager::Instance().create("ScaleX");
-  alg->initialize();
-  alg->setAlwaysStoreInADS(false);
-  alg->setProperty("InputWorkspace", inputWorkspace);
-  alg->setProperty("Factor", factor);
-  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
-  alg->execute();
-  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
-  return outputWorkspace;
-}
-
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
 
-ALFInstrumentModel::ALFInstrumentModel() : m_sample(), m_vanadium(), m_tubes() {
+ALFInstrumentModel::ALFInstrumentModel() : m_sample(), m_vanadium(), m_tubes(), m_twoThetasClosestToZero() {
   loadEmptyInstrument("ALF", loadedWsName());
 }
 
@@ -259,14 +217,16 @@ bool ALFInstrumentModel::addSelectedTube(DetectorTube const &tube) {
   return isNewTube;
 }
 
+bool ALFInstrumentModel::hasSelectedTubes() const { return !m_tubes.empty(); }
+
 bool ALFInstrumentModel::tubeExists(DetectorTube const &tube) const {
   return std::find(m_tubes.cbegin(), m_tubes.cend(), tube) != m_tubes.cend();
 }
 
 std::unique_ptr<AlgorithmRuntimeProps>
-ALFInstrumentModel::createWorkspaceAlgorithmProperties(MantidQt::MantidWidgets::IInstrumentActor const &actor) const {
+ALFInstrumentModel::createWorkspaceAlgorithmProperties(MantidQt::MantidWidgets::IInstrumentActor const &actor) {
   std::vector<double> x, y, e;
-  // collectXAndYData(actor, x, y, e, twoThetas);
+  collectXAndYData(actor, x, y, e);
 
   auto properties = std::make_unique<AlgorithmRuntimeProps>();
   AlgorithmProperties::update("ParentWorkspace", actor.getWorkspace()->getName(), *properties);
@@ -274,33 +234,31 @@ ALFInstrumentModel::createWorkspaceAlgorithmProperties(MantidQt::MantidWidgets::
   AlgorithmProperties::update("DataY", y, *properties);
   AlgorithmProperties::update("DataE", e, *properties);
   AlgorithmProperties::update("NSpec", 1, *properties);
-  AlgorithmProperties::update("UnitX", "Out of plane angle", *properties);
+  AlgorithmProperties::update("UnitX", std::string("Out of plane angle"), *properties);
   AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
   return std::move(properties);
 }
 
-std::tuple<MatrixWorkspace_sptr, std::vector<double>>
-ALFInstrumentModel::generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::IInstrumentActor const &actor) const {
-  std::vector<double> twoThetas;
-  if (m_tubes.empty()) {
-    return {nullptr, twoThetas};
-  }
+std::unique_ptr<AlgorithmRuntimeProps>
+ALFInstrumentModel::scaleXProperties(MatrixWorkspace_sptr const &inputWorkspace) const {
+  auto properties = std::make_unique<AlgorithmRuntimeProps>();
+  AlgorithmProperties::update("InputWorkspace", inputWorkspace, *properties);
+  AlgorithmProperties::update("Factor", 180.0 / M_PI, *properties);
+  AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
+  return std::move(properties);
+}
 
-  std::vector<double> x, y, e;
-  collectXAndYData(actor, x, y, e, twoThetas);
-
-  // Create workspace containing the out of plane angle data in one spectrum
-  auto workspace = createWorkspace(actor.getWorkspace()->getName(), x, y, e, 1u, "Out of plane angle");
-  // Convert x axis from radians to degrees
-  workspace = scaleX(workspace, 180.0 / M_PI);
-  // Rebin and average the workspace based on the number of tubes that are selected
-  workspace = rebunch(workspace, numberOfTubes());
-  return {workspace, twoThetas};
+std::unique_ptr<AlgorithmRuntimeProps>
+ALFInstrumentModel::rebunchProperties(MatrixWorkspace_sptr const &inputWorkspace) const {
+  auto properties = std::make_unique<AlgorithmRuntimeProps>();
+  AlgorithmProperties::update("InputWorkspace", inputWorkspace, *properties);
+  AlgorithmProperties::update("NBunch", static_cast<int>(numberOfTubes()), *properties);
+  AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
+  return std::move(properties);
 }
 
 void ALFInstrumentModel::collectXAndYData(MantidQt::MantidWidgets::IInstrumentActor const &actor,
-                                          std::vector<double> &x, std::vector<double> &y, std::vector<double> &e,
-                                          std::vector<double> &twoThetas) const {
+                                          std::vector<double> &x, std::vector<double> &y, std::vector<double> &e) {
   auto const &componentInfo = actor.componentInfo();
   auto const &detectorInfo = actor.detectorInfo();
 
@@ -308,7 +266,7 @@ void ALFInstrumentModel::collectXAndYData(MantidQt::MantidWidgets::IInstrumentAc
 
   // Collect and sort Y and E values by X
   std::map<double, double> xymap, xemap;
-  collectAndSortYByX(xymap, xemap, twoThetas, actor, workspace, componentInfo, detectorInfo);
+  collectAndSortYByX(xymap, xemap, actor, workspace, componentInfo, detectorInfo);
 
   x.reserve(xymap.size());
   y.reserve(xymap.size());
@@ -319,11 +277,12 @@ void ALFInstrumentModel::collectXAndYData(MantidQt::MantidWidgets::IInstrumentAc
 }
 
 void ALFInstrumentModel::collectAndSortYByX(std::map<double, double> &xy, std::map<double, double> &xe,
-                                            std::vector<double> &twoThetas,
                                             MantidQt::MantidWidgets::IInstrumentActor const &actor,
                                             MatrixWorkspace_const_sptr const &workspace,
                                             Mantid::Geometry::ComponentInfo const &componentInfo,
-                                            Mantid::Geometry::DetectorInfo const &detectorInfo) const {
+                                            Mantid::Geometry::DetectorInfo const &detectorInfo) {
+  m_twoThetasClosestToZero.clear();
+
   auto const nDetectorsPerTube = m_tubes.front().size();
   auto const samplePosition = componentInfo.samplePosition();
   auto const instrument = actor.getInstrument();
@@ -339,7 +298,7 @@ void ALFInstrumentModel::collectAndSortYByX(std::map<double, double> &xy, std::m
       if (i % nDetectorsPerTube == 0) {
         normal = normalize(componentInfo.position(tubeDetectorIndices[i + 1]) - componentInfo.position(detectorIndex));
         actor.getBinMinMaxIndex(workspaceIndex, imin, imax);
-        appendTwoThetaClosestToZero(twoThetas, workspaceIndexClosestToZeroX, workspace, instrument);
+        appendTwoThetaClosestToZero(m_twoThetasClosestToZero, workspaceIndexClosestToZeroX, workspace, instrument);
       }
 
       if (workspaceIndex != MantidQt::MantidWidgets::InstrumentActor::INVALID_INDEX &&
@@ -356,7 +315,7 @@ void ALFInstrumentModel::collectAndSortYByX(std::map<double, double> &xy, std::m
       }
     }
   }
-  appendTwoThetaClosestToZero(twoThetas, workspaceIndexClosestToZeroX, workspace, instrument);
+  appendTwoThetaClosestToZero(m_twoThetasClosestToZero, workspaceIndexClosestToZeroX, workspace, instrument);
 }
 
 } // namespace MantidQt::CustomInterfaces

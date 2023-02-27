@@ -25,11 +25,17 @@ public:
 
   virtual void subscribe(IALFAlgorithmManagerSubscriber *subscriber) = 0;
 
+  // The algorithms used to load and normalise the Sample
   virtual void loadAndNormalise(std::string const &filename) = 0;
   virtual void rebinToWorkspace(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) = 0;
   virtual void divide(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) = 0;
   virtual void replaceSpecialValues(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) = 0;
   virtual void convertUnits(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) = 0;
+
+  // The algorithms used to produce an Out of plane angle workspace
+  virtual void createWorkspace(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) = 0;
+  virtual void scaleX(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) = 0;
+  virtual void rebunch(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) = 0;
 };
 
 class MANTIDQT_DIRECT_DLL ALFAlgorithmManager final : public IALFAlgorithmManager, public API::JobRunnerSubscriber {
@@ -39,11 +45,17 @@ public:
 
   void subscribe(IALFAlgorithmManagerSubscriber *subscriber) override;
 
+  // The algorithms used to load and normalise the Sample
   void loadAndNormalise(std::string const &filename) override;
   void rebinToWorkspace(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) override;
   void divide(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) override;
   void replaceSpecialValues(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) override;
   void convertUnits(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) override;
+
+  // The algorithms used to produce an Out of plane angle workspace
+  void createWorkspace(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) override;
+  void scaleX(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) override;
+  void rebunch(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) override;
 
   void notifyBatchComplete(bool error) override{};
   void notifyBatchCancelled() override{};
@@ -61,6 +73,10 @@ private:
   void notifyDivideComplete(Mantid::API::IAlgorithm_sptr const &algorithm);
   void notifyReplaceSpecialValuesComplete(Mantid::API::IAlgorithm_sptr const &algorithm);
   void notifyConvertUnitsComplete(Mantid::API::IAlgorithm_sptr const &algorithm);
+
+  void notifyCreateWorkspaceComplete(Mantid::API::IAlgorithm_sptr const &algorithm);
+  void notifyScaleXComplete(Mantid::API::IAlgorithm_sptr const &algorithm);
+  void notifyRebunchComplete(Mantid::API::IAlgorithm_sptr const &algorithm);
 
   std::unique_ptr<API::IJobRunner> m_jobRunner;
   IALFAlgorithmManagerSubscriber *m_subscriber;
