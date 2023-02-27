@@ -227,7 +227,6 @@ public:
     Y[0] = 1.0;
     auto convertedSplitter = new TimeSplitter(ws, TWO);
     // New starting point of converted splitter is TWO
-    std::cout << "\nhello " << splitter.valueAtTime(0) << "\n";
     TS_ASSERT(splitter.valueAtTime(DateAndTime(0)) == convertedSplitter->valueAtTime(DateAndTime(0)) &&
               convertedSplitter->valueAtTime(DateAndTime(0)) == -1);
     TS_ASSERT(splitter.valueAtTime(TWO) == convertedSplitter->valueAtTime(TWO) &&
