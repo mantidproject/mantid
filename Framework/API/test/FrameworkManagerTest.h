@@ -20,21 +20,9 @@ public:
   static FrameworkManagerTest *createSuite() { return new FrameworkManagerTest(); }
   static void destroySuite(FrameworkManagerTest *suite) { delete suite; }
 
-#ifdef MPI_EXPERIMENTAL
-  // Make sure FrameworkManager is always instantiated. This is needed to
-  // initialize the MPI environment.
-  FrameworkManagerTest() { FrameworkManager::Instance(); }
-#endif
-
   void testConstructor() {
     // Not really much to test
     TS_ASSERT_THROWS_NOTHING(FrameworkManager::Instance());
-
-#ifdef MPI_BUILD
-    // If this is 'MPI Mantid' then test that the mpi environment has been
-    // initialized
-    TS_ASSERT(boost::mpi::environment::initialized());
-#endif
   }
 
   void testGetWorkspace() {

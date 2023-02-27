@@ -448,7 +448,7 @@ protected:
   /// Protected copy constructor. May be used by childs for cloning.
   MatrixWorkspace(const MatrixWorkspace &other);
 
-  MatrixWorkspace(const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
+  MatrixWorkspace();
 
   /// Initialises the workspace. Sets the size and lengths of the arrays. Must
   /// be overloaded.

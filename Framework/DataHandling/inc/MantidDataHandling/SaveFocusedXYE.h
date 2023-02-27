@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/SerialAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
@@ -40,7 +40,7 @@ namespace DataHandling {
      @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
      @date 04/03/2009
   */
-class MANTID_DATAHANDLING_DLL SaveFocusedXYE : public API::SerialAlgorithm {
+class MANTID_DATAHANDLING_DLL SaveFocusedXYE : public API::Algorithm {
 public:
   enum HeaderType { XYE, MAUD, TOPAS };
   /// Algorithm's name

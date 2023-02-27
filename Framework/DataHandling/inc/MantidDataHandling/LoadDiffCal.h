@@ -28,10 +28,6 @@ public:
   const std::string category() const override;
   const std::string summary() const override;
 
-protected:
-  Parallel::ExecutionMode
-  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override;
-
 private:
   void init() override;
   void exec() override;

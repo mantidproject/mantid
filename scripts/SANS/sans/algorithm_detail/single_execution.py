@@ -5,11 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
-import sys
 from collections import OrderedDict
 from typing import List, Tuple
 
-from mantid.kernel import mpisetup, logger
+from mantid.kernel import logger
 from mantid.dataobjects import Workspace2D
 from sans.algorithm_detail.bundles import (
     EventSliceSettingBundle,
@@ -398,11 +397,6 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle, event_slice_o
         return slice.output_bundle.output_workspace is None or partial_output_require_reload or is_invalid_transmission_workspaces
 
     must_reload = any(needs_reload(i) for i in reduced_slices)  # If any slice requires a reload
-
-    if "boost.mpi" in sys.modules:
-        # In MPI runs the result is only present on rank 0 (result of Q1D2 integration),
-        # so the reload flag must be broadcasted from rank 0.
-        must_reload = mpisetup.boost.mpi.broadcast(mpisetup.boost.mpi.world, must_reload, 0)
 
     if not must_reload:
         # Return the cached can without doing anything else

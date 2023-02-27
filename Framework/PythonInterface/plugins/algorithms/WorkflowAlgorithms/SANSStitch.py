@@ -7,7 +7,7 @@
 # pylint: disable=no-init,invalid-name,too-many-arguments,too-few-public-methods
 
 from mantid.simpleapi import *
-from mantid.api import ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode
+from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode
 from mantid.kernel import Direction, Property, StringListValidator, UnitFactory, EnabledWhenProperty, PropertyCriterion, Logger
 import numpy as np
 from sans.common.general_functions import create_unmanaged_algorithm
@@ -28,7 +28,7 @@ class Mode(object):
         pass
 
 
-class SANSStitch(ParallelDataProcessorAlgorithm):
+class SANSStitch(DataProcessorAlgorithm):
     def _make_mode_map(self):
         return {"ShiftOnly": Mode.ShiftOnly, "ScaleOnly": Mode.ScaleOnly, "Both": Mode.BothFit, "None": Mode.NoneFit}
 

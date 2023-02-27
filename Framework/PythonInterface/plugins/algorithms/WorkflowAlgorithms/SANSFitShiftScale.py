@@ -7,7 +7,7 @@
 # pylint: disable=no-init,invalid-name,too-many-arguments,too-few-public-methods
 
 from mantid.simpleapi import *
-from mantid.api import ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, AnalysisDataService
+from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, AnalysisDataService
 from mantid.kernel import Direction, Property, StringListValidator, UnitFactory
 import numpy as np
 
@@ -26,7 +26,7 @@ class Mode(object):
         pass
 
 
-class SANSFitShiftScale(ParallelDataProcessorAlgorithm):
+class SANSFitShiftScale(DataProcessorAlgorithm):
     def _make_mode_map(self):
         return {"ShiftOnly": Mode.ShiftOnly, "ScaleOnly": Mode.ScaleOnly, "Both": Mode.BothFit, "None": Mode.NoneFit}
 
@@ -140,7 +140,6 @@ class SANSFitShiftScale(ParallelDataProcessorAlgorithm):
         return ws.getNumberHistograms() == 1
 
     def _determine_factors(self, q_high_angle, q_low_angle, mode, scale, shift, fit_min, fit_max):
-
         # We need to make suret that the fitting only occurs in the y direction
         constant_x_shift_and_scale = ", f0.Shift=0.0, f0.XScaling=1.0"
 
@@ -210,7 +209,6 @@ class SANSFitShiftScale(ParallelDataProcessorAlgorithm):
         return (shift, scale)
 
     def _get_start_q_and_end_q_values(self, rear_data, front_data, fit_min, fit_max):
-
         min_q = None
         max_q = None
 

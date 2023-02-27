@@ -10,8 +10,6 @@ if(CMAKE_COMPILER_IS_GNUCXX
   add_definitions(-DBOOST_PYTHON_USE_GCC_SYMBOL_VISIBILITY)
 endif()
 
-set(PYTHON_DEPS ${MPI_CXX_LIBRARIES})
-
 # Keep boost python separate from other boost
 set(_boost_libs_orig ${Boost_LIBRARIES})
 set(Boost_LIBRARIES)

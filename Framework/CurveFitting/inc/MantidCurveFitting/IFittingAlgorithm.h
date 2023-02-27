@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IDomainCreator.h"
-#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/System.h"
 
@@ -36,7 +36,7 @@ class CostFuncFitting;
     - exec()
     - initConcrete() to declare more properties
 */
-class MANTID_CURVEFITTING_DLL IFittingAlgorithm : public API::ParallelAlgorithm {
+class MANTID_CURVEFITTING_DLL IFittingAlgorithm : public API::Algorithm {
 public:
   const std::string category() const override;
 

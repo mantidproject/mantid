@@ -339,15 +339,4 @@ bool LoadCalFile::idIsMonitor(const Instrument_const_sptr &inst, int detID) {
   auto it = std::find(monitorList.begin(), monitorList.end(), detID);
   return (it != monitorList.end());
 }
-
-Parallel::ExecutionMode
-LoadCalFile::getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const {
-  // There is an optional input workspace which may have
-  // StorageMode::Distributed but it is merely used for passing an instrument.
-  // Output should always have StorageMode::Cloned, so we run with
-  // ExecutionMode::Identical.
-  static_cast<void>(storageModes);
-  return Parallel::ExecutionMode::Identical;
-}
-
 } // namespace Mantid::DataHandling

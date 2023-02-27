@@ -12,7 +12,7 @@ import os
 from typing import Tuple, Dict
 
 from mantid.api import (
-    DistributedDataProcessorAlgorithm,
+    DataProcessorAlgorithm,
     MatrixWorkspace,
     MatrixWorkspaceProperty,
     PropertyMode,
@@ -53,7 +53,7 @@ class SumsStruct:
     norm: int
 
 
-class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
+class SANSReductionCoreBase(DataProcessorAlgorithm):
     def _pyinit_input(self):
         # ----------
         # INPUT

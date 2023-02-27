@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
@@ -24,7 +23,7 @@ namespace Algorithms {
     <LI> OutputWorkspace - The name of the to rename the workspace to </LI>
     </UL>
  */
-class MANTID_ALGORITHMS_DLL RenameWorkspace : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL RenameWorkspace : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "RenameWorkspace"; }

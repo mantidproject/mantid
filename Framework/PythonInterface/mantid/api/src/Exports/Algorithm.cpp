@@ -9,9 +9,6 @@
                                 // dominance, we have no way around it with the
                                 // design
 #endif
-#include "MantidAPI/DistributedAlgorithm.h"
-#include "MantidAPI/ParallelAlgorithm.h"
-#include "MantidAPI/SerialAlgorithm.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmAdapter.h"
 #ifdef _MSC_VER
@@ -48,23 +45,14 @@
 #include <vector>
 
 using Mantid::API::Algorithm;
-using Mantid::API::DistributedAlgorithm;
-using Mantid::API::ParallelAlgorithm;
-using Mantid::API::SerialAlgorithm;
 using Mantid::Kernel::Direction;
 using Mantid::PythonInterface::AlgorithmAdapter;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(Algorithm)
-GET_POINTER_SPECIALIZATION(SerialAlgorithm)
-GET_POINTER_SPECIALIZATION(ParallelAlgorithm)
-GET_POINTER_SPECIALIZATION(DistributedAlgorithm)
 
 namespace {
 using PythonAlgorithm = AlgorithmAdapter<Algorithm>;
-using PythonSerialAlgorithm = AlgorithmAdapter<SerialAlgorithm>;
-using PythonParallelAlgorithm = AlgorithmAdapter<ParallelAlgorithm>;
-using PythonDistributedAlgorithm = AlgorithmAdapter<DistributedAlgorithm>;
 
 // declarePyAlgProperty(property*,doc)
 using declarePropertyType1 = void (*)(boost::python::object &, Mantid::Kernel::Property *, const std::string &);
@@ -240,28 +228,4 @@ void export_leaf_classes() {
   // client code relies on the "PythonAlgorithm" name in
   // Python so we simply add an alias of the Algorithm name to PythonAlgorithm
   scope().attr("PythonAlgorithm") = scope().attr("Algorithm");
-}
-
-void export_SerialAlgorithm() {
-  register_ptr_to_python<std::shared_ptr<SerialAlgorithm>>();
-  register_exception_translator<SerialAlgorithm::CancelException>(&translateCancel);
-  class_<SerialAlgorithm, bases<Mantid::API::Algorithm>, std::shared_ptr<PythonSerialAlgorithm>, boost::noncopyable>(
-      "SerialAlgorithm", "Base class for simple serial algorithms");
-  scope().attr("PythonSerialAlgorithm") = scope().attr("SerialAlgorithm");
-}
-
-void export_ParallelAlgorithm() {
-  register_ptr_to_python<std::shared_ptr<ParallelAlgorithm>>();
-  register_exception_translator<ParallelAlgorithm::CancelException>(&translateCancel);
-  class_<ParallelAlgorithm, bases<Mantid::API::Algorithm>, std::shared_ptr<PythonParallelAlgorithm>,
-         boost::noncopyable>("ParallelAlgorithm", "Base class for simple parallel algorithms");
-  scope().attr("PythonParallelAlgorithm") = scope().attr("ParallelAlgorithm");
-}
-
-void export_DistributedAlgorithm() {
-  register_ptr_to_python<std::shared_ptr<DistributedAlgorithm>>();
-  register_exception_translator<DistributedAlgorithm::CancelException>(&translateCancel);
-  class_<DistributedAlgorithm, bases<Mantid::API::Algorithm>, std::shared_ptr<PythonDistributedAlgorithm>,
-         boost::noncopyable>("DistributedAlgorithm", "Base class for simple distributed algorithms");
-  scope().attr("PythonDistributedAlgorithm") = scope().attr("DistributedAlgorithm");
 }

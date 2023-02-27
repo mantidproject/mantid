@@ -15,10 +15,33 @@
 #include <unordered_map>
 #include <vector>
 
+#include "MantidTypes/Event/TofEvent.h"
+
 #include "MantidParallel/IO/EventLoaderHelpers.h"
 #include "MantidParallel/IO/EventsListsShmemStorage.h"
 
 #include "MantidParallel/DllConfig.h"
+
+using Mantid::Types::Event::TofEvent;
+
+namespace {
+
+/** Transform event IDs to global spectrum numbers using the bankOffsets stored
+ * at object creation.
+ *
+ * The transformation is in-place to save memory bandwidth and modifies the
+ * range pointed to by `event_id_start`.
+ * @param event_id_start Starting position of chunk of data containing event
+ * IDs.
+ * @param count Number of items in data chunk
+ * @param bankOffset Offset to subtract from the array `event_id_start`.
+ */
+void eventIdToGlobalSpectrumIndex(int32_t *event_id_start, size_t count, const int32_t bankOffset) {
+  for (size_t i = 0; i < count; ++i)
+    event_id_start[i] -= bankOffset;
+}
+
+} // namespace
 
 namespace Mantid {
 namespace Parallel {
@@ -151,7 +174,7 @@ void MultiProcessEventLoader::GroupLoader<MultiProcessEventLoader::LoadType::pre
       eventId.resize(cnt);
       loader.readEventID(eventId.data(), start, cnt);
 
-      detail::eventIdToGlobalSpectrumIndex(eventId.data(), cnt, bankOffsets[bankIdx]);
+      eventIdToGlobalSpectrumIndex(eventId.data(), cnt, bankOffsets[bankIdx]);
 
       std::unordered_map<int32_t, std::size_t> eventsPerPixel;
       for (auto &pixId : eventId) {
@@ -259,7 +282,7 @@ void MultiProcessEventLoader::GroupLoader<MultiProcessEventLoader::LoadType::pro
         task.partitioner = task.loader.setBankIndex(task.bankIdx);
         task.loader.readEventTimeOffset(task.eventTimeOffset.data(), task.from, task.eventTimeOffset.size());
         task.loader.readEventID(task.eventId.data(), task.from, task.eventId.size());
-        detail::eventIdToGlobalSpectrumIndex(task.eventId.data(), task.eventId.size(), bankOffsets[task.bankIdx]);
+        eventIdToGlobalSpectrumIndex(task.eventId.data(), task.eventId.size(), bankOffsets[task.bankIdx]);
         ++taskCount;
       }
       ++finished;

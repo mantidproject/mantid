@@ -18,7 +18,6 @@ set(SRC_FILES
     src/NexusGeometryTestHelpers.cpp
     src/NexusTestHelper.cpp
     src/ONCatHelper.cpp
-    src/ParallelRunner.cpp
     src/ReflectometryHelper.cpp
     src/SANSInstrumentCreationHelper.cpp
     src/ScopedFileHelper.cpp
@@ -49,8 +48,6 @@ set(INC_FILES
     inc/MantidFrameworkTestHelpers/NexusGeometryTestHelpers.h
     inc/MantidFrameworkTestHelpers/NexusTestHelper.h
     inc/MantidFrameworkTestHelpers/ONCatHelper.h
-    inc/MantidFrameworkTestHelpers/ParallelAlgorithmCreation.h
-    inc/MantidFrameworkTestHelpers/ParallelRunner.h
     inc/MantidFrameworkTestHelpers/ReflectometryHelper.h
     inc/MantidFrameworkTestHelpers/SANSInstrumentCreationHelper.h
     inc/MantidFrameworkTestHelpers/ScopedFileHelper.h

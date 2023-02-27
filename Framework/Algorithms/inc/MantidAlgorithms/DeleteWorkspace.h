@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
@@ -19,7 +18,7 @@ namespace Algorithms {
   @author Martyn Gigg, Tessella plc
   @date 2011-01-24
 */
-class MANTID_ALGORITHMS_DLL DeleteWorkspace : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL DeleteWorkspace : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "DeleteWorkspace"; }

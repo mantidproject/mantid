@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator, EnabledWhenProperty, PropertyCriterion
-from mantid.api import AlgorithmFactory, DistributedDataProcessorAlgorithm, FileProperty, FileAction
+from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileProperty, FileAction
 from mantid.simpleapi import (
     Load,
     FindDetectorsPar,
@@ -30,7 +30,7 @@ from mantid import mtd
 import numpy as np
 
 
-class PowderReduceP2D(DistributedDataProcessorAlgorithm):
+class PowderReduceP2D(DataProcessorAlgorithm):
     def category(self):
         return "Diffraction\\Reduction"
 

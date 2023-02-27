@@ -7,7 +7,7 @@
 from mantid.api import (
     mtd,
     AlgorithmFactory,
-    DistributedDataProcessorAlgorithm,
+    DataProcessorAlgorithm,
     ITableWorkspaceProperty,
     MatrixWorkspaceProperty,
     MultipleFileProperty,
@@ -126,7 +126,7 @@ def uniqueDescription(name, wksp):
     return "{}={}".format(name, value)
 
 
-class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
+class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
     def category(self):
         return "Diffraction\\Reduction"
 
@@ -377,7 +377,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
 
         # inner loop is over chunks
         haveAccumulationForFile = False
-        for (j, chunk) in enumerate(chunks):
+        for j, chunk in enumerate(chunks):
             prog_start = file_prog_start + float(j) * float(numSteps - 1) * prog_per_chunk_step
 
             # if reading all at once, put the data into the final name directly
@@ -752,7 +752,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             grain_size = int(math.sqrt(numberFilesToProcess))  # grain size
         else:
             grain_size = numberFilesToProcess
-        for (i, filename) in enumerate(files):
+        for i, filename in enumerate(files):
             self.__loaderName = "Load"  # reset to generic load with each file
             wkspname, unfocusname = self.__processFile(filename, self.prog_per_file * float(i), not self.useCaching, bool(finalunfocusname))
             # accumulate into partial sum

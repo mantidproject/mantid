@@ -6,9 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmAdapter.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
-#include "MantidAPI/DistributedAlgorithm.h"
-#include "MantidAPI/ParallelAlgorithm.h"
-#include "MantidAPI/SerialAlgorithm.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/CallMethod.h"
 #include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
@@ -342,12 +339,6 @@ template <typename BaseAlgorithm> void AlgorithmAdapter<BaseAlgorithm>::exec() {
 //-----------------------------------------------------------------------------------------------------------------------------
 /// API::Algorithm as base
 template class AlgorithmAdapter<API::Algorithm>;
-template class AlgorithmAdapter<API::SerialAlgorithm>;
-template class AlgorithmAdapter<API::ParallelAlgorithm>;
-template class AlgorithmAdapter<API::DistributedAlgorithm>;
 /// API::DataProcesstor as base
 template class AlgorithmAdapter<API::DataProcessorAlgorithm>;
-template class AlgorithmAdapter<API::SerialDataProcessorAlgorithm>;
-template class AlgorithmAdapter<API::ParallelDataProcessorAlgorithm>;
-template class AlgorithmAdapter<API::DistributedDataProcessorAlgorithm>;
 } // namespace Mantid::PythonInterface

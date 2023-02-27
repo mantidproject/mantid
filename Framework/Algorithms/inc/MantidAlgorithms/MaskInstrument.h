@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
-#include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
@@ -18,7 +18,7 @@ namespace Algorithms {
   @author Simon Heybrock
   @date 2017
 */
-class MANTID_ALGORITHMS_DLL MaskInstrument : public API::DistributedAlgorithm, public API::DeprecatedAlgorithm {
+class MANTID_ALGORITHMS_DLL MaskInstrument : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   MaskInstrument();
 

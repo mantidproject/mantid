@@ -44,8 +44,7 @@ using Kernel::Exception::NotImplementedError;
 using std::size_t;
 using namespace Mantid::Kernel;
 
-EventWorkspace::EventWorkspace(const Parallel::StorageMode storageMode)
-    : IEventWorkspace(storageMode), mru(std::make_unique<EventWorkspaceMRU>()) {}
+EventWorkspace::EventWorkspace() : IEventWorkspace(), mru(std::make_unique<EventWorkspaceMRU>()) {}
 
 EventWorkspace::EventWorkspace(const EventWorkspace &other)
     : IEventWorkspace(other), mru(std::make_unique<EventWorkspaceMRU>()) {

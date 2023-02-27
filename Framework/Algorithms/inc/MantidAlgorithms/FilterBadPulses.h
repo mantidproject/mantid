@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
@@ -30,7 +29,7 @@ namespace Algorithms {
     @author Peter Peterson, ORNL
     @date 21/12/10
 */
-class MANTID_ALGORITHMS_DLL FilterBadPulses : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL FilterBadPulses : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

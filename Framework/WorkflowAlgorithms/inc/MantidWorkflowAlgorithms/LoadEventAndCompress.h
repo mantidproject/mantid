@@ -28,9 +28,6 @@ protected:
   API::MatrixWorkspace_sptr loadChunk(const size_t rowIndex) override;
   API::MatrixWorkspace_sptr processChunk(API::MatrixWorkspace_sptr &wksp);
 
-  Parallel::ExecutionMode
-  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override;
-
 private:
   void init() override;
   void exec() override;

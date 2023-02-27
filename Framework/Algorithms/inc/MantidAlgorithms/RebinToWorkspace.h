@@ -45,10 +45,6 @@ public:
   /// Algorithm's seeAlso
   const std::vector<std::string> seeAlso() const override { return {"Rebin"}; }
 
-protected:
-  Parallel::ExecutionMode
-  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override;
-
 private:
   bool m_preserveEvents{true};
   bool m_isEvents{true};

@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidAPI/Run.h"
 #include "MantidAlgorithms/DllConfig.h"
 
@@ -18,7 +17,7 @@ namespace Algorithms {
   @author
   @date 2011-07-18
 */
-class MANTID_ALGORITHMS_DLL RemovePromptPulse : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL RemovePromptPulse : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override;

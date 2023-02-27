@@ -6,14 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 namespace Mantid {
 namespace Algorithms {
 
 /** Comment : Adds a note into the history record of a workspace
  */
-class MANTID_ALGORITHMS_DLL Comment : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL Comment : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

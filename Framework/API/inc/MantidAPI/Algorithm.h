@@ -24,9 +24,6 @@
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/MultiThreaded.h"
 
-#include "MantidParallel/ExecutionMode.h"
-#include "MantidParallel/StorageMode.h"
-
 namespace Poco {
 template <class R, class A, class O, class S> class ActiveMethod;
 template <class O> class ActiveStarter;
@@ -46,9 +43,6 @@ using time_point_ns = std::chrono::time_point<std::chrono::high_resolution_clock
 } // namespace Kernel
 namespace Indexing {
 class SpectrumIndexSet;
-}
-namespace Parallel {
-class Communicator;
 }
 namespace API {
 //----------------------------------------------------------------------
@@ -299,9 +293,6 @@ public:
 
   void copyNonWorkspaceProperties(IAlgorithm *alg, int periodNum);
 
-  const Parallel::Communicator &communicator() const;
-  void setCommunicator(const Parallel::Communicator &communicator);
-
   // Function to declare properties (i.e. store them)
   void declareProperty(std::unique_ptr<Kernel::Property> p, const std::string &doc = "") override;
 
@@ -374,13 +365,6 @@ protected:
   virtual void init() = 0;
   /// Virtual method - must be overridden by concrete algorithm
   virtual void exec() = 0;
-
-  void exec(Parallel::ExecutionMode executionMode);
-  virtual void execDistributed();
-  virtual void execMasterOnly();
-
-  virtual Parallel::ExecutionMode
-  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const;
 
   /// Returns a semi-colon separated list of workspace types to attach this
   /// algorithm
@@ -486,10 +470,6 @@ private:
 
   void registerFeatureUsage() const;
 
-  Parallel::ExecutionMode getExecutionMode() const;
-  std::map<std::string, Parallel::StorageMode> getInputWorkspaceStorageModes() const;
-  void setupSkipValidationMasterOnly();
-
   bool isCompoundProperty(const std::string &name) const;
 
   // --------------------- Private Members -----------------------------------
@@ -547,9 +527,6 @@ private:
 
   /// Reserved property names
   std::vector<std::string> m_reservedList;
-
-  /// (MPI) communicator used when executing the algorithm.
-  std::unique_ptr<Parallel::Communicator> m_communicator;
 
   /// The earliest this class should be considered for garbage collection
   Mantid::Types::Core::DateAndTime m_gcTime;

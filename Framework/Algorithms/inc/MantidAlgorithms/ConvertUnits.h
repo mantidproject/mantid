@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/Unit.h"
@@ -19,7 +18,7 @@ namespace Algorithms {
     for monitor detectors,
     then you should not expect the resulting spectrum to hold meaningful values.
  */
-class MANTID_ALGORITHMS_DLL ConvertUnits : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL ConvertUnits : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "ConvertUnits"; }

@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -38,7 +37,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella plc
     @date 29/04/2009
  */
-class MANTID_ALGORITHMS_DLL MaskBins : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL MaskBins : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "MaskBins"; }

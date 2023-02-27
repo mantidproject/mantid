@@ -24,11 +24,6 @@
 #include <nexus/NeXusException.hpp>
 // clang-format on
 
-#ifdef MPI_BUILD
-#include <boost/mpi.hpp>
-namespace mpi = boost::mpi;
-#endif
-
 #include <Poco/File.h>
 #include <exception>
 #include <fstream>
@@ -125,23 +120,8 @@ void DetermineChunking::exec() {
   }
   this->setProperty("OutputWorkspace", strategy);
 
-#ifndef MPI_BUILD
-  // mpi needs work for every core, so don't do this
-  if (maxChunk == 0 || isEmpty(maxChunk)) {
-    return;
-  }
-#endif
-
   Poco::File fileinfo(filename);
   const double fileSizeGiB = static_cast<double>(fileinfo.getSize()) * BYTES_TO_GiB;
-
-#ifndef MPI_BUILD
-  // don't bother opening the file if its size is "small"
-  // note that prenexus "_runinfo.xml" files don't represent what
-  // is actually loaded
-  if (fileType != PRENEXUS_FILE && 6. * fileSizeGiB < maxChunk)
-    return;
-#endif
 
   // --------------------- DETERMINE NUMBER OF CHUNKS
   double wkspSizeGiB = 0;
@@ -245,31 +225,11 @@ void DetermineChunking::exec() {
 
   numChunks++; // So maxChunkSize is not exceeded
   if (numChunks <= 1 || isEmpty(maxChunk)) {
-#ifdef MPI_BUILD
-    numChunks = 1;
-#else
     g_log.information() << "Everything can be done in a single chunk returning empty table\n";
     return;
-#endif
   }
-
-// --------------------- FILL IN THE CHUNKING TABLE
-#ifdef MPI_BUILD
-  // use all cores so number of chunks should be a multiple of cores
-  if (mpi::communicator().size() > 1) {
-    int imult = numChunks / mpi::communicator().size() + 1;
-    numChunks = imult * mpi::communicator().size();
-  }
-#endif
 
   for (int i = 1; i <= numChunks; i++) {
-#ifdef MPI_BUILD
-    if (mpi::communicator().size() > 1) {
-      // chunk 1 should go to rank=0, chunk 2 to rank=1, etc.
-      if ((i - 1) % mpi::communicator().size() != mpi::communicator().rank())
-        continue;
-    }
-#endif
     Mantid::API::TableRow row = strategy->appendRow();
     if (fileType == PRENEXUS_FILE || fileType == EVENT_NEXUS_FILE) {
       row << i << numChunks;

@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
@@ -16,7 +15,7 @@ namespace Algorithms {
 /** Extracts specified spectra from a workspace and places them in a new
   workspace.
 */
-class MANTID_ALGORITHMS_DLL ExtractSpectra : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL ExtractSpectra : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

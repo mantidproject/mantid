@@ -56,9 +56,6 @@ public:
                                                              const API::MatrixWorkspace_const_sptr &rhs);
 
 protected:
-  Parallel::ExecutionMode
-  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override;
-
   ~BinaryOperation() = default;
 
   // Overridden Algorithm methods
