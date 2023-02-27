@@ -12,18 +12,26 @@ from mantid.simpleapi import LoadAndMerge, config, mtd
 
 
 class LoadAndMergeTest(unittest.TestCase):
+    _facility = None
+    _data_search_dirs = None
+
     @classmethod
     def setUpClass(cls):
+        cls._facility = config["default.facility"]
+        cls._data_search_dirs = config["datasearch.directories"]
         config.appendDataSearchSubDir("ILL/IN16B/")
         config.appendDataSearchSubDir("ILL/D20/")
         config.appendDataSearchSubDir("ILL/D11/")
-
-    def setUp(self):
         config["default.facility"] = "ILL"
         config["default.instrument"] = "IN16B"
 
     def turnDown(self):
         mtd.clear()
+
+    @classmethod
+    def tearDownClass(cls):
+        config["default.facility"] = cls._facility
+        config["datasearch.directories"] = cls._data_search_dirs
 
     def test_single_run_load(self):
         out1 = LoadAndMerge(Filename="170257")
@@ -167,12 +175,6 @@ class LoadAndMergeTest(unittest.TestCase):
         self.assertTrue("MUSR00015197_1" not in mtd)
         self.assertTrue("MUSR00015197_2" not in mtd)
 
-    def test_many_runs_summed(self):
-        out2 = LoadAndMerge(Filename="170257+170258", LoaderName="LoadILLIndirect")
-        self.assertTrue(out2)
-        self.assertEqual(out2.name(), "out2")
-        self.assertTrue(isinstance(out2, MatrixWorkspace))
-
     def test_concatenate_output(self):
         out = LoadAndMerge(Filename="010444:010446", OutputBehaviour="Concatenate")
         self.assertTrue(out)
@@ -182,6 +184,10 @@ class LoadAndMergeTest(unittest.TestCase):
         self.assertEqual(out.readX(0)[0], 0)
         self.assertEqual(out.readX(0)[1], 1)
         self.assertEqual(out.readX(0)[2], 2)
+        # check if LoadAndMerge does not abandon intermediate workspaces in ADS:
+        self.assertTrue("010444" not in mtd)
+        self.assertTrue("010445" not in mtd)
+        self.assertTrue("010446" not in mtd)
 
     def test_concatenate_output_with_log(self):
         out = LoadAndMerge(Filename="010444:010446", OutputBehaviour="Concatenate", SampleLogAsXAxis="sample.temperature")
@@ -192,6 +198,10 @@ class LoadAndMergeTest(unittest.TestCase):
         self.assertAlmostEqual(out.readX(0)[0], 297.6, 1)
         self.assertAlmostEqual(out.readX(0)[1], 297.7, 1)
         self.assertAlmostEqual(out.readX(0)[2], 297.7, 1)
+        # check if LoadAndMerge does not abandon intermediate workspaces in ADS:
+        self.assertTrue("010444" not in mtd)
+        self.assertTrue("010445" not in mtd)
+        self.assertTrue("010446" not in mtd)
 
 
 if __name__ == "__main__":
