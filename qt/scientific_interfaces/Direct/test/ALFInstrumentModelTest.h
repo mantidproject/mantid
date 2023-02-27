@@ -34,6 +34,8 @@ using namespace testing;
 namespace {
 auto &ADS = AnalysisDataService::Instance();
 
+std::string const NOT_IN_ADS = "not_stored_in_ads";
+
 std::vector<DetectorTube> findWholeTubes(Mantid::Geometry::ComponentInfo const &componentInfo,
                                          std::vector<std::size_t> const &partTubeDetectorIndices) {
   std::vector<DetectorTube> tubes;
@@ -50,6 +52,17 @@ std::vector<DetectorTube> findWholeTubes(Mantid::Geometry::ComponentInfo const &
     }
   }
   return tubes;
+}
+
+MatrixWorkspace_sptr loadFile(std::string const &filename) {
+  auto alg = AlgorithmManager::Instance().create("Load");
+  alg->initialize();
+  alg->setAlwaysStoreInADS(false);
+  alg->setProperty("Filename", filename);
+  alg->setProperty("OutputWorkspace", "__not_in_ads");
+  alg->execute();
+  Workspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
+  return std::dynamic_pointer_cast<MatrixWorkspace>(outputWorkspace);
 }
 
 MatrixWorkspace_sptr changeBinOffset(MatrixWorkspace_sptr const &inputWorkspace) {
@@ -80,7 +93,7 @@ public:
 
     m_model = std::make_unique<ALFInstrumentModel>();
 
-    m_loadedWs = m_model->loadAndNormalise(m_ALFData);
+    m_loadedWs = loadFile(m_ALFData);
   }
 
   static ALFInstrumentModelTest *createSuite() { return new ALFInstrumentModelTest(); }
@@ -126,6 +139,27 @@ public:
     TS_ASSERT(ADS.doesExist("ALFData"));
   }
 
+  void test_hasData_returns_false_when_a_sample_or_vanadium_is_not_loaded() {
+    TS_ASSERT(!m_model->hasData(ALFData::SAMPLE));
+    TS_ASSERT(!m_model->hasData(ALFData::VANADIUM));
+  }
+
+  void test_hasData_returns_true_when_a_sample_or_vanadium_is_loaded() {
+    m_model->setData(ALFData::SAMPLE, m_loadedWs);
+    m_model->setData(ALFData::VANADIUM, m_loadedWs);
+
+    TS_ASSERT(m_model->hasData(ALFData::SAMPLE));
+    TS_ASSERT(m_model->hasData(ALFData::VANADIUM));
+  }
+
+  void test_replaceSampleWorkspaceInADS_will_add_a_workspace_to_the_ADS() {
+    ADS.clear();
+
+    m_model->replaceSampleWorkspaceInADS(m_loadedWs);
+
+    TS_ASSERT(ADS.doesExist("ALFData"));
+  }
+
   void test_sampleRun_and_vanadiumRun_returns_zero_when_no_data_is_loaded() {
     TS_ASSERT_EQUALS(0u, m_model->run(ALFData::SAMPLE));
     TS_ASSERT_EQUALS(0u, m_model->run(ALFData::VANADIUM));
@@ -139,6 +173,41 @@ public:
   void test_vanadiumRun_returns_the_run_number_of_the_loaded_data() {
     m_model->setData(ALFData::VANADIUM, m_loadedWs);
     TS_ASSERT_EQUALS(82301u, m_model->run(ALFData::SAMPLE));
+  }
+
+  void test_isALFData_returns_false_when_the_workspace_is_ALF_data() {
+    TS_ASSERT(!m_model->isALFData(loadFile(m_nonALFData)));
+  }
+
+  void test_isALFData_returns_true_when_the_workspace_is_ALF_data() { TS_ASSERT(m_model->isALFData(m_loadedWs)); }
+
+  void test_binningMismatch_returns_false_if_there_is_no_vanadium() {
+    m_model->setData(ALFData::SAMPLE, m_loadedWs);
+    TS_ASSERT(!m_model->binningMismatch());
+  }
+
+  void test_binningMismatch_returns_false_if_the_sample_and_vanadium_have_the_same_binning() {
+    m_model->setData(ALFData::SAMPLE, m_loadedWs);
+    m_model->setData(ALFData::VANADIUM, m_loadedWs);
+
+    TS_ASSERT(!m_model->binningMismatch());
+  }
+
+  void test_binningMismatch_returns_true_if_the_sample_and_vanadium_have_different_binning() {
+    m_model->setData(ALFData::SAMPLE, m_loadedWs);
+    m_model->setData(ALFData::VANADIUM, loadFile(m_nonALFData));
+
+    TS_ASSERT(!m_model->binningMismatch());
+  }
+
+  void test_axisIsDSpacing_returns_false_if_the_axis_is_not_dSpacing() {
+    m_model->setData(ALFData::SAMPLE, loadFile(m_nonALFData));
+    TS_ASSERT(!m_model->axisIsDSpacing());
+  }
+
+  void test_axisIsDSpacing_returns_true_if_the_axis_is_dSpacing() {
+    m_model->setData(ALFData::SAMPLE, m_loadedWs);
+    TS_ASSERT(m_model->axisIsDSpacing());
   }
 
   void test_setSelectedTubes_will_set_an_empty_vector_of_tubes_when_provided_an_empty_vector() {
@@ -183,6 +252,75 @@ public:
     TS_ASSERT(!m_model->addSelectedTube({{0u, 1u}}));
 
     TS_ASSERT_EQUALS(1u, m_model->selectedTubes().size());
+  }
+
+  void test_loadProperties_returns_the_expected_properties() {
+    auto const properties = m_model->loadProperties(m_ALFData);
+    TS_ASSERT_EQUALS(m_ALFData, properties->getProperty("Filename"));
+    TS_ASSERT_EQUALS(NOT_IN_ADS, properties->getProperty("OutputWorkspace"));
+  }
+
+  void test_normaliseByCurrentProperties_returns_the_expected_properties() {
+    auto const properties = m_model->normaliseByCurrentProperties(m_loadedWs);
+    TS_ASSERT_EQUALS(m_loadedWs, properties->getProperty("InputWorkspace"));
+    TS_ASSERT_EQUALS(NOT_IN_ADS, properties->getProperty("OutputWorkspace"));
+  }
+
+  void test_rebinToWorkspaceProperties_returns_the_expected_properties() {
+    m_model->setData(ALFData::SAMPLE, m_loadedWs);
+    m_model->setData(ALFData::VANADIUM, m_loadedWs);
+
+    auto const properties = m_model->rebinToWorkspaceProperties();
+
+    TS_ASSERT_EQUALS(m_loadedWs, properties->getProperty("WorkspaceToRebin"));
+    TS_ASSERT_EQUALS(m_loadedWs, properties->getProperty("WorkspaceToMatch"));
+    TS_ASSERT_EQUALS(NOT_IN_ADS, properties->getProperty("OutputWorkspace"));
+  }
+
+  void test_divideProperties_returns_the_expected_properties() {
+    m_model->setData(ALFData::SAMPLE, m_loadedWs);
+    m_model->setData(ALFData::VANADIUM, m_loadedWs);
+
+    auto const properties = m_model->divideProperties();
+
+    TS_ASSERT_EQUALS(m_loadedWs, properties->getProperty("LHSWorkspace"));
+    TS_ASSERT_EQUALS(m_loadedWs, properties->getProperty("RHSWorkspace"));
+    TS_ASSERT(properties->getProperty("AllowDifferentNumberSpectra"));
+    TS_ASSERT_EQUALS(NOT_IN_ADS, properties->getProperty("OutputWorkspace"));
+  }
+
+  void test_replaceSpecialValuesProperties_returns_the_expected_properties() {
+    auto const properties = m_model->replaceSpecialValuesProperties(m_loadedWs);
+
+    TS_ASSERT_EQUALS(m_loadedWs, properties->getProperty("InputWorkspace"));
+    TS_ASSERT_EQUALS(0.0, properties->getProperty("InfinityValue"));
+    TS_ASSERT_EQUALS(1.0, properties->getProperty("NaNValue"));
+    TS_ASSERT(properties->getProperty("CheckErrorAxis"));
+    TS_ASSERT_EQUALS(NOT_IN_ADS, properties->getProperty("OutputWorkspace"));
+  }
+
+  void test_convertUnitsProperties_returns_the_expected_properties() {
+    auto const properties = m_model->convertUnitsProperties(m_loadedWs);
+
+    TS_ASSERT_EQUALS(m_loadedWs, properties->getProperty("InputWorkspace"));
+    TS_ASSERT_EQUALS("dSpacing", properties->getProperty("Target"));
+    TS_ASSERT_EQUALS(NOT_IN_ADS, properties->getProperty("OutputWorkspace"));
+  }
+
+  void test_scaleXProperties_returns_the_expected_properties() {
+    auto const properties = m_model->scaleXProperties(m_loadedWs);
+
+    TS_ASSERT_EQUALS(m_loadedWs, properties->getProperty("InputWorkspace"));
+    TS_ASSERT_EQUALS(180.0 / M_PI, properties->getProperty("Factor"));
+    TS_ASSERT_EQUALS(NOT_IN_ADS, properties->getProperty("OutputWorkspace"));
+  }
+
+  void test_rebunchProperties_returns_the_expected_properties() {
+    auto const properties = m_model->rebunchProperties(m_loadedWs);
+
+    TS_ASSERT_EQUALS(m_loadedWs, properties->getProperty("InputWorkspace"));
+    TS_ASSERT_EQUALS(2, properties->getProperty("NBunch"));
+    TS_ASSERT_EQUALS(NOT_IN_ADS, properties->getProperty("OutputWorkspace"));
   }
 
   void test_generateOutOfPlaneAngleWorkspace_returns_nullptr_when_no_selected_detectors() {
