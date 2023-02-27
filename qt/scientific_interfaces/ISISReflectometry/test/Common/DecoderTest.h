@@ -26,6 +26,7 @@ auto &fileFinder = FileFinder::Instance();
 const auto MAINWINDOW_FILE = fileFinder.getFullPath(DIR_PATH + "mainwindow.json");
 const auto BATCH_FILE_PREVIOUS = fileFinder.getFullPath(DIR_PATH + "batch.json");
 const auto BATCH_FILE_CURRENT = fileFinder.getFullPath(DIR_PATH + "batch_with_save_rows_box.json");
+const auto BATCH_FILE_POLREF = fileFinder.getFullPath(DIR_PATH + "batch_with_save_rows_box_POLREF.json");
 const auto EMPTY_BATCH_FILE = fileFinder.getFullPath(DIR_PATH + "empty_batch.json");
 const auto TWO_ROW_EXP_BATCH_FILE = fileFinder.getFullPath(DIR_PATH + "batch_2_exp_rows.json");
 const auto EIGHT_COL_BATCH_FILE = fileFinder.getFullPath(DIR_PATH + "8_col_batch.json");
@@ -72,6 +73,18 @@ public:
   void test_decodePopulatedBatch() {
     CoderCommonTester tester;
     auto map = MantidQt::API::loadJSONFromFile(QString::fromStdString(BATCH_FILE_CURRENT));
+    QtMainWindowView mwv;
+    mwv.initLayout();
+    auto gui = dynamic_cast<QtBatchView *>(mwv.batches()[0]);
+    Decoder decoder;
+    decoder.decodeBatch(&mwv, 0, map);
+
+    tester.testBatch(gui, &mwv, map);
+  }
+
+  void test_decodePopulatedPOLREFBatch() {
+    CoderCommonTester tester;
+    auto map = MantidQt::API::loadJSONFromFile(QString::fromStdString(BATCH_FILE_POLREF));
     QtMainWindowView mwv;
     mwv.initLayout();
     auto gui = dynamic_cast<QtBatchView *>(mwv.batches()[0]);

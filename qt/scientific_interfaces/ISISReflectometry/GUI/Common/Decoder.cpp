@@ -101,7 +101,7 @@ void Decoder::decodeExperiment(QtExperimentView *gui, const QMap<QString, QVaria
   gui->m_ui.backgroundMethodComboBox->setCurrentIndex(map[QString("backgroundMethodComboBox")].toInt());
   gui->m_ui.polynomialDegreeSpinBox->setValue(map[QString("polynomialDegreeSpinBox")].toInt());
   gui->m_ui.costFunctionComboBox->setCurrentIndex(map[QString("costFunctionComboBox")].toInt());
-  gui->m_ui.polCorrComboBox->setCurrentText(map[QString("polCorrComboBox")].toString());
+  decodePolarizationCorrectionsComboBox(gui->m_ui.polCorrComboBox, map);
   gui->m_polCorrEfficienciesWsSelector->setCurrentText(map[QString("polCorrEfficienciesWsSelector")].toString());
   gui->m_polCorrEfficienciesLineEdit->setText(map[QString("polCorrEfficienciesLineEdit")].toString());
   gui->m_ui.floodCorComboBox->setCurrentIndex(map[QString("floodCorComboBox")].toInt());
@@ -109,6 +109,19 @@ void Decoder::decodeExperiment(QtExperimentView *gui, const QMap<QString, QVaria
   gui->m_floodCorrLineEdit->setText(map[QString("floodWorkspaceLineEdit")].toString());
   gui->m_stitchEdit->setText(map[QString("stitchEdit")].toString());
   gui->onSettingsChanged();
+}
+
+void Decoder::decodePolarizationCorrectionsComboBox(QComboBox *polCorrComboBox,
+                                                    const QMap<QString, QVariant> &map) const {
+  if (m_currentBatchVersion >= 2) {
+    polCorrComboBox->setCurrentText(map[QString("polCorrComboBox")].toString());
+    return;
+  }
+  if (map[QString("polCorrCheckBox")].toBool()) {
+    polCorrComboBox->setCurrentText("ParameterFile");
+  } else {
+    polCorrComboBox->setCurrentText("None");
+  }
 }
 
 void Decoder::decodePerAngleDefaults(QTableWidget *tab, const QMap<QString, QVariant> &map) {

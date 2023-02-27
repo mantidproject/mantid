@@ -22,7 +22,7 @@
 #include "../Save/QtSaveView.h"
 
 namespace {
-auto constexpr BATCH_VERSION = 1;
+auto constexpr BATCH_VERSION = 2;
 }
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
