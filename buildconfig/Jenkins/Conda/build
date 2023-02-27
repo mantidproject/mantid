@@ -21,8 +21,9 @@ ENABLE_DEV_DOCS=$4
 ENABLE_BUILD_CODE=$5
 ENABLE_UNIT_TESTS=$6
 ENABLE_SYSTEM_TESTS=$7
-EXTRA_CMAKE_FLAGS=$8
-BUILD_THREADS=$9
+ENABLE_COVERITY=$8
+EXTRA_CMAKE_FLAGS=$9
+BUILD_THREADS=${10}
 
 # Only pass MANTID_DATA_STORE to CMake if present in the environment otherwise rely on CMake default
 if [[ -n "${MANTID_DATA_STORE}" ]]; then
@@ -39,6 +40,22 @@ cmake --preset=${CMAKE_PRESET} ${MANTID_DATA_STORE_CMAKE} ${EXTRA_CMAKE_FLAGS} $
 
 # Run the actual builds for the code, unit tests, and system tests.
 cd $WORKSPACE/build
+
+if [[ $ENABLE_COVERITY == true ]]; then
+    ${COVERITY_DIR}/cov-build --dir cov-int cmake --build . $BUILD_OPTIONS
+    tar czvf mantid.tgz cov-int
+    status=$(curl --form token=$COVERITY_TOKEN --form email=mantidproject@gmail.com \
+		  --form file=@mantid.tgz --form version=$GIT_COMMIT \
+		  https://scan.coverity.com/builds?project=mantidproject%2Fmantid)
+    status=$(echo ${status} | sed -e 's/^ *//' -e 's/ *$//')
+    if [[ -z $status ]] || [[ ${status} == "Build successfully submitted." ]]; then
+        exit 0
+    else
+        echo "$status"
+        exit 1
+    fi
+fi
+
 if [[ $ENABLE_BUILD_CODE == true ]]; then
     cmake --build . $BUILD_OPTIONS
 fi

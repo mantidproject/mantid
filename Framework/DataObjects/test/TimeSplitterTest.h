@@ -8,10 +8,11 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/TimeSplitter.h"
+#include "MantidDataObjects/TimeSplitter.h"
+#include "MantidKernel/TimeROI.h"
 
+using Mantid::DataObjects::TimeSplitter;
 using Mantid::Kernel::TimeROI;
-using Mantid::Kernel::TimeSplitter;
 using Mantid::Types::Core::DateAndTime;
 
 namespace {

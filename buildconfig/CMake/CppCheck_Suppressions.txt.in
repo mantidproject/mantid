@@ -35,12 +35,6 @@ unusedPrivateFunction
 // ----------- New list of supressions after updating to cppcheck 2.5 -------------
 // - If the line number changes then update it here, or resolve the defect and remove from list
 
-mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogFilter.cpp:55
-mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogFilter.cpp:59
-mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogFilter.cpp:74
-mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogFilter.cpp:77
-mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogFilter.cpp:89
-mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogFilter.cpp:91
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Memory.cpp:284
 unassignedVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Quat.cpp:687
 unassignedVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Quat.cpp:687

@@ -86,6 +86,7 @@ set(SRC_FILES
     src/PropertyWidget.cpp
     src/PropertyWidgetFactory.cpp
     src/PythonRunner.cpp
+    src/QtJobRunner.cpp
     src/QtSignalChannel.cpp
     src/QtJSONUtils.cpp
     src/RenameParDialog.cpp
@@ -209,6 +210,7 @@ set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/PropertyHandler.h
     inc/MantidQtWidgets/Common/PropertyWidget.h
     inc/MantidQtWidgets/Common/PythonRunner.h
+    inc/MantidQtWidgets/Common/QtJobRunner.h
     inc/MantidQtWidgets/Common/QtSignalChannel.h
     inc/MantidQtWidgets/Common/RenameParDialog.h
     inc/MantidQtWidgets/Common/RepoModel.h
@@ -281,6 +283,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h
     inc/MantidQtWidgets/Common/IFunctionBrowser.h
     inc/MantidQtWidgets/Common/IFunctionView.h
+    inc/MantidQtWidgets/Common/IJobRunner.h
     inc/MantidQtWidgets/Common/ImageInfoModel.h
     inc/MantidQtWidgets/Common/IImageInfoWidget.h
     inc/MantidQtWidgets/Common/ImageInfoModelMatrixWS.h
@@ -291,6 +294,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/LogValueFinder.h
     inc/MantidQtWidgets/Common/MantidDesktopServices.h
     inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
+    inc/MantidQtWidgets/Common/MockJobRunner.h
     inc/MantidQtWidgets/Common/MultifitSetupDialog.h
     inc/MantidQtWidgets/Common/MuonPeriodInfo.h
     inc/MantidQtWidgets/Common/ParseKeyValueString.h

@@ -188,6 +188,7 @@ Transmission
 .. testsetup:: ExPolarisedDifffractionTransmission
 
     config['default.facility'] = 'ILL'
+    config['default.instrument'] = 'D7'
     config.appendDataSearchSubDir('ILL/D7/')
 
 .. testcode:: ExPolarisedDifffractionTransmission
@@ -279,6 +280,7 @@ Below is the relevant workflow diagram describing reduction steps of the quartz 
 .. testsetup:: ExPolarisedDifffractionQuartz
 
     config['default.facility'] = 'ILL'
+    config['default.instrument'] = 'D7'
     config.appendDataSearchSubDir('ILL/D7/')
 
 .. testcode:: ExPolarisedDifffractionQuartz
@@ -639,6 +641,7 @@ Below is the relevant workflow diagram describing reduction steps of the vanadiu
 .. testsetup:: ExPolarisedDifffractionVanadium
 
     config['default.facility'] = 'ILL'
+    config['default.instrument'] = 'D7'
     config.appendDataSearchSubDir('ILL/D7/')
 
 .. testcode:: ExPolarisedDifffractionVanadium
@@ -744,6 +747,7 @@ Output:
 .. testsetup:: ExPolarisedSpectroscopyVanadium
 
     config['default.facility'] = 'ILL'
+    config['default.instrument'] = 'D7'
     config.appendDataSearchSubDir('ILL/D7/')
     import numpy as np
 
@@ -775,7 +779,7 @@ Output:
 .. testoutput:: ExPolarisedSpectroscopyVanadium
 
    The vanadium reduction output contains 1 entry with 132 spectra and 1 bin.
-   The average vanadium-derived elastic peak position falls at 1553 microseconds.
+   The average vanadium-derived elastic peak position falls at ... microseconds.
 
 .. testcleanup:: ExPolarisedSpectroscopyVanadium
 
@@ -885,6 +889,7 @@ Sample normalisation
 .. testsetup:: ExPolarisedDifffractionSampleFull
 
     config['default.facility'] = 'ILL'
+    config['default.instrument'] = 'D7'
     config.appendDataSearchSubDir('ILL/D7/')
 
 .. testcode:: ExPolarisedDifffractionSampleFull

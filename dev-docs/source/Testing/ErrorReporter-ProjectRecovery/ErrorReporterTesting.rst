@@ -130,6 +130,20 @@ Error Reporter test
 - Run the `NormaliseToMonitor` algorithm
 - This should cause an error reporter dialog saying Mantid has thrown an unexpected exception
 - The `Public3` contact details from Test 6 should be displayed and the `Remember Me` checkbox ticked
+- Close the error reporter and MantidWorkbench
+
+--------------
+
+8. Open your ``Mantid.user.properties`` file
+
+- Add the incorrect rooturl ``errorreports.rooturl = https://error.mantidproject.org`` anywhere in the file (correct url is ``https://errorreports.mantidproject.org``)
+- This will cause the error reporter to fail to send the report
+- Open MantidWorkbench
+- Cause a crash using either of the previous methods
+- Click the ``Yes, share information`` button to send the report
+- A message box should appear informing you that the error report has failed to send
+- Close the message box and the error reporter should stay open
+- Check you can still access the additional information
 
 Test the error reporter with any weird and wonderful ideas.
 Note any problems with Workbench or these testing instructions.

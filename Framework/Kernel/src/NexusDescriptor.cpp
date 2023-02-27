@@ -177,6 +177,21 @@ std::string NexusDescriptor::pathOfType(const std::string &type) const {
 }
 
 /**
+ * @param type A string specifying the required type
+ * @return path A vector of strings giving paths using UNIX-style path
+ * separators (/), e.g. /raw_data_1, /entry/bank1
+ */
+std::vector<std::string> NexusDescriptor::allPathsOfType(const std::string &type) const {
+  auto iend = m_pathsToTypes.end();
+  std::vector<std::string> retval;
+  for (auto it = m_pathsToTypes.begin(); it != iend; ++it) {
+    if (type == it->second)
+      retval.push_back(it->first);
+  }
+  return retval;
+}
+
+/**
  * @param classType A string name giving a class type
  * @return True if the type exists in the file, false otherwise
  */
