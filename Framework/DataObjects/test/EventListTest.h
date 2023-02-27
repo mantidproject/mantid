@@ -1742,6 +1742,46 @@ public:
     }
   }
 
+  void test_filterByPulseTime_withTimeROI() {
+    // Go through each possible EventType (except the no-time one) as the input
+    for (int this_type = 0; this_type < 3; this_type++) {
+      EventType curType = static_cast<EventType>(this_type);
+      this->fake_data();
+      el.switchTo(curType);
+
+      // Filter into this
+      EventList out;
+      // Manually set a sort mode to verify that is it is switched afterward
+      out.setSortOrder(Mantid::DataObjects::TOF_SORT);
+      Kernel::TimeROI *timeRoi = nullptr;
+      TS_ASSERT_THROWS(el.filterByPulseTime(timeRoi, out), const std::invalid_argument &);
+      timeRoi = new Kernel::TimeROI();
+      timeRoi->addROI(100, 200);
+      timeRoi->addROI(250, 300);
+      if (curType == WEIGHTED_NOTIME) {
+        TS_ASSERT_THROWS(el.filterByPulseTime(timeRoi, out), const std::runtime_error &);
+      } else {
+        TS_ASSERT_THROWS_NOTHING(el.filterByPulseTime(timeRoi, out));
+
+        int numGood = 0;
+        for (std::size_t i = 0; i < el.getNumberEvents(); i++)
+          if (((el.getEvent(i).pulseTime() >= 100) && (el.getEvent(i).pulseTime() < 200)) ||
+              ((el.getEvent(i).pulseTime() >= 250) && (el.getEvent(i).pulseTime() < 300)))
+            numGood++;
+
+        // Good # of events.
+        TS_ASSERT_EQUALS(numGood, out.getNumberEvents());
+        TS_ASSERT_EQUALS(curType, out.getEventType());
+
+        for (std::size_t i = 0; i < out.getNumberEvents(); i++) {
+          // Check that the times are within the given limits.
+          TSM_ASSERT_LESS_THAN_EQUALS(this_type, DateAndTime(100), out.getEvent(i).pulseTime());
+          TS_ASSERT_LESS_THAN(out.getEvent(i).pulseTime(), DateAndTime(300));
+        }
+      }
+    }
+  }
+
   /**
    * Helper method to calculate the epoch time in nanoseconds of the event at
    * the sample. Assuming elastic scattering.

@@ -9,6 +9,7 @@
 #include "MantidAPI/IEventList.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/TimeROI.h"
 #include "MantidKernel/cow_ptr.h"
 #include <iosfwd>
 #include <vector>
@@ -259,6 +260,8 @@ public:
 
   void filterByPulseTime(Types::Core::DateAndTime start, Types::Core::DateAndTime stop, EventList &output) const;
 
+  void filterByPulseTime(Kernel::TimeROI *timeRoi, EventList &output) const;
+
   void filterByTimeAtSample(Types::Core::DateAndTime start, Types::Core::DateAndTime stop, double tofFactor,
                             double tofOffset, EventList &output) const;
 
@@ -414,6 +417,9 @@ private:
   static void filterByTimeAtSampleHelper(std::vector<T> &events, Types::Core::DateAndTime start,
                                          Types::Core::DateAndTime stop, double tofFactor, double tofOffset,
                                          std::vector<T> &output);
+  template <class T>
+  static void filterByTimeROIHelper(std::vector<T> &events, const Kernel::SplittingIntervalVec &intervals,
+                                    std::vector<T> &output);
   template <class T> void filterInPlaceHelper(Kernel::SplittingIntervalVec &splitter, typename std::vector<T> &events);
   template <class T>
   void splitByTimeHelper(Kernel::SplittingIntervalVec &splitter, std::vector<EventList *> outputs,
