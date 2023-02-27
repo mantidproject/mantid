@@ -39,7 +39,7 @@ TimeSplitter::TimeSplitter(const DateAndTime &start, const DateAndTime &stop) {
 
 std::string TimeSplitter::debugPrint() const {
   std::stringstream msg;
-  for (const auto iter : m_roi_map)
+  for (const auto &iter : m_roi_map)
     msg << iter.second << "|" << iter.first << "\n";
   return msg.str();
 }
@@ -147,7 +147,7 @@ std::vector<int> TimeSplitter::outputWorkspaceIndices() const {
   std::set<int> outputSet;
 
   // copy all of the (not ignore) output workspace indices
-  for (const auto iter : m_roi_map) {
+  for (const auto &iter : m_roi_map) {
     if (iter.second > IGNORE_VALUE)
       outputSet.insert(iter.second);
   }
