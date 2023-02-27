@@ -495,19 +495,21 @@ QRect UnwrappedSurface::detectorQRectInPixels(const std::size_t detectorIndex) c
     return QRect();
   }
 
+  const auto expandedViewRect = correctForAspectRatioAndZoom(m_viewImage->width(), m_viewImage->height());
+
   const QSizeF viewSizeLogical(m_viewImage->width() / m_viewImage->devicePixelRatio(),
                                m_viewImage->height() / m_viewImage->devicePixelRatio());
   const double vwidth = viewSizeLogical.width();
   const double vheight = viewSizeLogical.height();
-  const double dw = fabs(m_viewRect.width() / vwidth);
-  const double dh = fabs(m_viewRect.height() / vheight);
+  const double dw = fabs(expandedViewRect.width() / vwidth);
+  const double dh = fabs(expandedViewRect.height() / vheight);
 
   const auto detRect = detIter->toQRectF();
 
   // Calculate the centre position of the QRect. The x position will be different depending on if the view is flipped
-  const auto xCentre =
-      m_flippedView ? (m_viewRect.x0() - detRect.center().x()) / dw : (detRect.center().x() - m_viewRect.x0()) / dw;
-  const auto yCentre = (detRect.center().y() - m_viewRect.y0()) / dh;
+  const auto xCentre = m_flippedView ? (expandedViewRect.x0() - detRect.center().x()) / dw
+                                     : (detRect.center().x() - expandedViewRect.x0()) / dw;
+  const auto yCentre = (detRect.center().y() - expandedViewRect.y0()) / dh;
 
   // Calculate the width and height of the QRect
   const auto size = QSize(static_cast<int>(detRect.width() / dw), static_cast<int>(detRect.height() / dh));
