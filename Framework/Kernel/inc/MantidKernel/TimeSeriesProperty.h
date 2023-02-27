@@ -218,7 +218,9 @@ public:
   ///  values
   std::multimap<Types::Core::DateAndTime, TYPE> valueAsMultiMap() const;
   /// Get filtered values as a vector
-  virtual std::vector<TYPE> filteredValuesAsVector(const Kernel::TimeROI *roi = nullptr) const;
+  virtual std::vector<TYPE> filteredValuesAsVector(const Kernel::TimeROI *roi) const;
+  // overload method rather than default value so python bindings work
+  virtual std::vector<TYPE> filteredValuesAsVector() const;
 
   /// Return the time series's times as a vector<DateAndTime>
   std::vector<Types::Core::DateAndTime> timesAsVector() const override;
@@ -227,7 +229,9 @@ public:
   /// seconds since the start.
   std::vector<double> timesAsVectorSeconds() const;
   /// Get filtered times as a vector
-  virtual std::vector<Types::Core::DateAndTime> filteredTimesAsVector(const Kernel::TimeROI *roi = nullptr) const;
+  virtual std::vector<Types::Core::DateAndTime> filteredTimesAsVector(const Kernel::TimeROI *roi) const;
+  // overload method rather than default value so python bindings work
+  virtual std::vector<Types::Core::DateAndTime> filteredTimesAsVector() const;
   /// Add a value to the map using a DateAndTime object
   void addValue(const Types::Core::DateAndTime &time, const TYPE &value);
   /// Add a value to the map using a string time

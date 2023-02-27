@@ -55,7 +55,7 @@ template <> std::string dtype(TimeSeriesProperty<std::string> &self) {
   std::vector<size_t> stringSizes;
 
   // Block allocate memory
-  stringSizes.reserve(self.size());
+  stringSizes.reserve(std::size_t(self.size()));
 
   // Loop for the number of strings in self
   for (int i = 0; i < self.size(); i++) {
@@ -90,10 +90,14 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(timeAverageValue_Overloads, timeAverageVa
                                            return_value_policy<VectorToNumpy>()))                                      \
       .add_property("times", make_function(&Mantid::Kernel::TimeSeriesProperty<TYPE>::timesAsVector,                   \
                                            return_value_policy<VectorToNumpy>()))                                      \
-      .add_property("filtered_value", make_function(&Mantid::Kernel::TimeSeriesProperty<TYPE>::filteredValuesAsVector, \
-                                                    return_value_policy<VectorToNumpy>()))                             \
-      .add_property("filtered_times", make_function(&Mantid::Kernel::TimeSeriesProperty<TYPE>::filteredTimesAsVector,  \
-                                                    return_value_policy<VectorToNumpy>()))                             \
+      .add_property("filtered_value",                                                                                  \
+                    make_function((std::vector<TYPE>(TimeSeriesProperty<TYPE>::*)() const) &                           \
+                                      Mantid::Kernel::TimeSeriesProperty<TYPE>::filteredValuesAsVector,                \
+                                  return_value_policy<VectorToNumpy>()))                                               \
+      .add_property("filtered_times",                                                                                  \
+                    make_function((std::vector<DateAndTime>(TimeSeriesProperty<TYPE>::*)() const) &                    \
+                                      Mantid::Kernel::TimeSeriesProperty<TYPE>::filteredTimesAsVector,                 \
+                                  return_value_policy<VectorToNumpy>()))                                               \
       .def("addValue",                                                                                                 \
            (void (TimeSeriesProperty<TYPE>::*)(const DateAndTime &, const TYPE &)) &                                   \
                TimeSeriesProperty<TYPE>::addValue,                                                                     \

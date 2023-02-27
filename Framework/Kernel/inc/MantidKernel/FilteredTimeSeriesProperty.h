@@ -47,8 +47,13 @@ public:
   FilteredTimeSeriesProperty() = delete;
 
   /// Get filtered values as a vector
-  std::vector<HeldType> filteredValuesAsVector(const Kernel::TimeROI *roi = nullptr) const override;
-  std::vector<Types::Core::DateAndTime> filteredTimesAsVector(const Kernel::TimeROI *roi = nullptr) const override;
+  std::vector<HeldType> filteredValuesAsVector(const Kernel::TimeROI *roi) const override;
+  // overload method rather than default value so python bindings work
+  std::vector<HeldType> filteredValuesAsVector() const override;
+  /// Get filtered times as a vector
+  std::vector<Types::Core::DateAndTime> filteredTimesAsVector(const Kernel::TimeROI *roi) const override;
+  // overload method rather than default value so python bindings work
+  std::vector<Types::Core::DateAndTime> filteredTimesAsVector() const override;
 
   /// Returns n-th valid time interval, in a very inefficient way.
   TimeInterval nthInterval(int n) const override;

@@ -269,8 +269,8 @@ void TimeSeriesProperty<TYPE>::filterByTime(const Types::Core::DateAndTime &star
   typename std::vector<TimeValueUnit<TYPE>>::iterator iterhead, iterend;
 
   // 2. Determine index for start and remove  Note erase is [...)
-  int istart = this->findIndex(start);
-  if (istart >= 0 && static_cast<size_t>(istart) < m_values.size()) {
+  std::size_t istart = std::size_t(this->findIndex(start));
+  if (istart > 0 && static_cast<size_t>(istart) < m_values.size()) {
     // "start time" is behind time-series's starting time
     iterhead = m_values.begin() + istart;
 
@@ -292,14 +292,14 @@ void TimeSeriesProperty<TYPE>::filterByTime(const Types::Core::DateAndTime &star
   }
 
   // 3. Determine index for end and remove  Note erase is [...)
-  int iend = this->findIndex(stop);
+  std::size_t iend = std::size_t(this->findIndex(stop));
   if (static_cast<size_t>(iend) < m_values.size()) {
     if (m_values[iend].time() == stop) {
       // Filter stop is on a log.  Delete that log
       iterend = m_values.begin() + iend;
     } else {
       // Filter stop is behind iend. Keep iend
-      iterend = m_values.begin() + iend + 1;
+      iterend = m_values.begin() + (iend + 1);
     }
     // Delete from [iend to mp.end)
     m_values.erase(iterend, m_values.end());
@@ -1059,6 +1059,10 @@ std::vector<DateAndTime> TimeSeriesProperty<TYPE>::filteredTimesAsVector(const K
 
     return out;
   }
+}
+
+template <typename TYPE> std::vector<DateAndTime> TimeSeriesProperty<TYPE>::filteredTimesAsVector() const {
+  return this->timesAsVector();
 }
 
 /**
@@ -2092,6 +2096,10 @@ template <typename TYPE> std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredVal
   } else {
     return this->valuesAsVector();
   }
+}
+
+template <typename TYPE> std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredValuesAsVector() const {
+  return this->valuesAsVector();
 }
 
 /**
