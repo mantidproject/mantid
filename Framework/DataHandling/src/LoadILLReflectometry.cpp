@@ -828,9 +828,7 @@ double LoadILLReflectometry::sourceSampleDistance() const {
     m_localWorkspace->mutableRun().addProperty("Distance.ChopperGap", pairSeparation, "meter", true);
     return pairCentre;
   } else {
-    if (run.hasProperty("Distance.MidChopper_Sample")) { // since cycle 231
-      return mmToMeter(doubleFromRun("Distance.MidChopper_Sample"));
-    } else if (run.hasProperty("ChopperSetting.chopperpair_sample_distance")) { // until cycle 231
+    if (run.hasProperty("ChopperSetting.chopperpair_sample_distance")) { // until cycle 231
       const double chopperDist = mmToMeter(doubleFromRun("ChopperSetting.chopperpair_sample_distance"));
       std::string entryName = "correct_chopper_sample_distance";
       bool correctChopperSampleDistance = m_localWorkspace->getInstrument()->getBoolParameter(entryName)[0];
@@ -840,6 +838,8 @@ double LoadILLReflectometry::sourceSampleDistance() const {
         offset = m_sampleZOffset / std::cos(degToRad(deflectionAngle));
       }
       return chopperDist + offset;
+    } else if (run.hasProperty("Distance.MidChopper_Sample")) { // since cycle 231
+      return mmToMeter(doubleFromRun("Distance.MidChopper_Sample"));
     } else {
       throw std::runtime_error("Unable to extract chopper to sample distance");
     }
