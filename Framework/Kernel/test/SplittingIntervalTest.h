@@ -14,6 +14,7 @@
 
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/SplittingInterval.h"
+#include "MantidKernel/TimeROI.h"
 #include <ctime>
 #include <cxxtest/TestSuite.h>
 
@@ -541,5 +542,62 @@ public:
     sit = std::lower_bound(b.begin(), b.end(), temp2);
     int index2 = int(sit - b.begin());
     TS_ASSERT_EQUALS(index2, 1);
+  }
+
+  //----------------------------------------------------------------------------
+  void test_timeROIsFromSplitters() {
+    DateAndTime start, stop;
+    SplittingIntervalVec splitters;
+
+    // splitter assigned to destination index 1
+    start = DateAndTime("2007-11-30T16:15:00");
+    stop = DateAndTime("2007-11-30T16:16:00");
+    splitters.emplace_back(SplittingInterval(start, stop, 1));
+
+    // splitter  assigned to nonsense destination index -1
+    start = DateAndTime("2007-11-30T16:16:00");
+    stop = DateAndTime("2007-11-30T16:17:00");
+    splitters.emplace_back(SplittingInterval(start, stop, -1));
+
+    // splitter assigned to destination index 1. It overlaps with the first splitter!
+    start = DateAndTime("2007-11-30T16:14:00");
+    stop = DateAndTime("2007-11-30T16:15:30");
+    splitters.emplace_back(SplittingInterval(start, stop, 1));
+
+    // splitter assigned to destination index 2
+    start = DateAndTime("2007-11-30T16:17:00");
+    stop = DateAndTime("2007-11-30T16:18:00");
+    splitters.emplace_back(SplittingInterval(start, stop, 2));
+
+    // splitter assigned to destination index 1. It doesn't overlap
+    start = DateAndTime("2007-11-30T16:18:00");
+    stop = DateAndTime("2007-11-30T16:19:00");
+    splitters.emplace_back(SplittingInterval(start, stop, 1));
+
+    // this splitter has same start and stop time. It will not be turned into a TIMEROI objed
+    // splitter assigned to destination index 3
+    start = DateAndTime("2007-11-30T16:20:00");
+    stop = DateAndTime("2007-11-30T16:20:00");
+    splitters.emplace_back(SplittingInterval(start, stop, 3));
+
+    // map each workspace index to a splitter
+    const std::map<int, Mantid::Kernel::TimeROI> &rois = timeROIsFromSplitters(splitters);
+
+    // Assertions
+    TS_ASSERT_EQUALS(rois.size(), 3); // workspace indexes -1, 1, and 3
+    // assert the destination indexes
+    std::vector<int> destinationIndexes;
+    for (auto const &element : rois)
+      destinationIndexes.push_back(element.first);
+    std::sort(destinationIndexes.begin(), destinationIndexes.end());
+    std::vector<int> expected{-1, 1, 2};
+    for (size_t i = 0; i < destinationIndexes.size(); i++)
+      TS_ASSERT_EQUALS(destinationIndexes[i], expected[i]);
+    // assert the TimeROI's
+    TS_ASSERT_EQUALS(rois.at(-1).debugStrPrint(), "0: 2007-Nov-30 16:16:00 to 2007-Nov-30 16:17:00\n");
+    TS_ASSERT_EQUALS(
+        rois.at(1).debugStrPrint(),
+        "0: 2007-Nov-30 16:14:00 to 2007-Nov-30 16:16:00\n1: 2007-Nov-30 16:18:00 to 2007-Nov-30 16:19:00\n");
+    TS_ASSERT_EQUALS(rois.at(2).debugStrPrint(), "0: 2007-Nov-30 16:17:00 to 2007-Nov-30 16:18:00\n");
   }
 };
