@@ -226,7 +226,8 @@ public:
   /// Return the series as list of times, where the time is the number of
   /// seconds since the start.
   std::vector<double> timesAsVectorSeconds() const;
-
+  /// Get filtered times as a vector
+  virtual std::vector<Types::Core::DateAndTime> filteredTimesAsVector(const Kernel::TimeROI *roi = nullptr) const;
   /// Add a value to the map using a DateAndTime object
   void addValue(const Types::Core::DateAndTime &time, const TYPE &value);
   /// Add a value to the map using a string time

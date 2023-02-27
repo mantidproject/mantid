@@ -105,6 +105,19 @@ std::vector<TYPE> FilteredTimeSeriesProperty<TYPE>::filteredValuesAsVector(const
   return TimeSeriesProperty<TYPE>::filteredValuesAsVector(internalRoi);
 }
 
+/**
+ * Return the time series's filtered times as a vector<DateAndTime>
+ * @return A vector of DateAndTime objects
+ */
+template <typename TYPE>
+std::vector<DateAndTime> FilteredTimeSeriesProperty<TYPE>::filteredTimesAsVector(const Kernel::TimeROI *roi) const {
+  if (m_filter->empty()) {
+    return TimeSeriesProperty<TYPE>::filteredTimesAsVector(roi); // no filtering to do
+  }
+  const auto internalRoi = this->intersectFilterWithOther(roi);
+  return TimeSeriesProperty<TYPE>::filteredTimesAsVector(internalRoi);
+}
+
 /** Returns n-th valid time interval, in a very inefficient way.
  *
  * Here are some special cases

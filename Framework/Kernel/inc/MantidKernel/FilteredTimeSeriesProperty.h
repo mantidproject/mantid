@@ -48,6 +48,7 @@ public:
 
   /// Get filtered values as a vector
   std::vector<HeldType> filteredValuesAsVector(const Kernel::TimeROI *roi = nullptr) const override;
+  std::vector<Types::Core::DateAndTime> filteredTimesAsVector(const Kernel::TimeROI *roi = nullptr) const override;
 
   /// Returns n-th valid time interval, in a very inefficient way.
   TimeInterval nthInterval(int n) const override;

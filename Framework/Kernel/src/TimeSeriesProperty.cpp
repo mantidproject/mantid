@@ -1042,6 +1042,26 @@ template <typename TYPE> std::vector<DateAndTime> TimeSeriesProperty<TYPE>::time
 }
 
 /**
+ * Return the time series's filtered times as a vector<DateAndTime>
+ * @return A vector of DateAndTime objects
+ */
+template <typename TYPE>
+std::vector<DateAndTime> TimeSeriesProperty<TYPE>::filteredTimesAsVector(const Kernel::TimeROI *roi) const {
+  if (!roi || roi->empty()) {
+    return this->timesAsVector();
+  } else {
+    std::vector<DateAndTime> out;
+    for (const auto &timeAndValue : this->m_values) {
+      if (roi->valueAtTime(timeAndValue.time())) {
+        out.emplace_back(timeAndValue.time());
+      }
+    }
+
+    return out;
+  }
+}
+
+/**
  * @return Return the series as list of times, where the time is the number of
  * seconds since the start.
  */
