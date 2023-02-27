@@ -48,6 +48,7 @@ public:
 
   virtual std::size_t run(ALFData const &dataType) const = 0;
 
+  virtual bool isALFData(Mantid::API::MatrixWorkspace_const_sptr const &workspace) const = 0;
   virtual bool binningMismatch() const = 0;
   virtual bool axisIsDSpacing() const = 0;
 
@@ -57,6 +58,9 @@ public:
   virtual std::vector<DetectorTube> selectedTubes() const = 0;
 
   // The algorithms used to load and normalise the Sample
+  virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> loadProperties(std::string const &filename) const = 0;
+  virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+  normaliseByCurrentProperties(Mantid::API::MatrixWorkspace_sptr const &inputWorkspace) const = 0;
   virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> rebinToWorkspaceProperties() const = 0;
   virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> divideProperties() const = 0;
   virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
@@ -90,6 +94,7 @@ public:
 
   std::size_t run(ALFData const &dataType) const override;
 
+  bool isALFData(Mantid::API::MatrixWorkspace_const_sptr const &workspace) const override;
   bool binningMismatch() const override;
   bool axisIsDSpacing() const override;
 
@@ -99,6 +104,9 @@ public:
   inline std::vector<DetectorTube> selectedTubes() const noexcept override { return m_tubes; };
 
   // The algorithms used to load and normalise the Sample
+  std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> loadProperties(std::string const &filename) const override;
+  std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+  normaliseByCurrentProperties(Mantid::API::MatrixWorkspace_sptr const &inputWorkspace) const override;
   std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> rebinToWorkspaceProperties() const override;
   std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> divideProperties() const override;
   std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>

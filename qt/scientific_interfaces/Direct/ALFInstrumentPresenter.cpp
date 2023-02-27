@@ -53,14 +53,22 @@ void ALFInstrumentPresenter::loadAndNormalise() {
   m_analysisPresenter->clear();
 
   if (auto const filepath = getFileFromView()) {
-    m_algorithmManager->loadAndNormalise(*filepath);
+    m_algorithmManager->load(m_model->loadProperties(*filepath));
   } else {
     m_model->setData(m_dataSwitch, nullptr);
     generateLoadedWorkspace();
   }
 }
 
-void ALFInstrumentPresenter::notifyLoadAndNormaliseComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+void ALFInstrumentPresenter::notifyLoadComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  if (m_model->isALFData(workspace)) {
+    m_algorithmManager->normaliseByCurrent(m_model->normaliseByCurrentProperties(workspace));
+  } else {
+    m_view->warningBox("The loaded data is not from the ALF instrument");
+  }
+}
+
+void ALFInstrumentPresenter::notifyNormaliseByCurrentComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) {
   m_model->setData(m_dataSwitch, workspace);
   updateRunInViewFromModel();
   generateLoadedWorkspace();

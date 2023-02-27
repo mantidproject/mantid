@@ -26,7 +26,8 @@ public:
   virtual void subscribe(IALFAlgorithmManagerSubscriber *subscriber) = 0;
 
   // The algorithms used to load and normalise the Sample
-  virtual void loadAndNormalise(std::string const &filename) = 0;
+  virtual void load(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) = 0;
+  virtual void normaliseByCurrent(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) = 0;
   virtual void rebinToWorkspace(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) = 0;
   virtual void divide(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) = 0;
   virtual void replaceSpecialValues(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) = 0;
@@ -46,7 +47,8 @@ public:
   void subscribe(IALFAlgorithmManagerSubscriber *subscriber) override;
 
   // The algorithms used to load and normalise the Sample
-  void loadAndNormalise(std::string const &filename) override;
+  void load(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) override;
+  void normaliseByCurrent(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) override;
   void rebinToWorkspace(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) override;
   void divide(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) override;
   void replaceSpecialValues(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) override;

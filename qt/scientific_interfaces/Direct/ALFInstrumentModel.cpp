@@ -29,8 +29,9 @@ using namespace Mantid::API;
 namespace {
 auto &ADS = AnalysisDataService::Instance();
 
-std::string const NOT_IN_ADS = "not_stored_in_ads";
 std::string const D_SPACING_UNIT = "dSpacing";
+std::string const INSTRUMENT_NAME = "ALF";
+std::string const NOT_IN_ADS = "not_stored_in_ads";
 
 std::optional<double> getTwoTheta(Mantid::Geometry::Instrument_const_sptr instrument,
                                   Mantid::Geometry::IDetector_const_sptr detector) {
@@ -78,10 +79,10 @@ double calculateOutOfPlaneAngle(Mantid::Kernel::V3D const &pos, Mantid::Kernel::
   return asin(vec.scalar_prod(normal));
 }
 
-void loadEmptyInstrument(std::string const &instrumentName, std::string const &outputName) {
+void loadEmptyInstrument(std::string const &outputName) {
   auto alg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
   alg->initialize();
-  alg->setProperty("InstrumentName", instrumentName);
+  alg->setProperty("InstrumentName", INSTRUMENT_NAME);
   alg->setProperty("OutputWorkspace", outputName);
   alg->execute();
 }
@@ -91,7 +92,23 @@ void loadEmptyInstrument(std::string const &instrumentName, std::string const &o
 namespace MantidQt::CustomInterfaces {
 
 ALFInstrumentModel::ALFInstrumentModel() : m_sample(), m_vanadium(), m_tubes(), m_twoThetasClosestToZero() {
-  loadEmptyInstrument("ALF", loadedWsName());
+  loadEmptyInstrument(loadedWsName());
+}
+
+std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+ALFInstrumentModel::loadProperties(std::string const &filename) const {
+  auto properties = std::make_unique<AlgorithmRuntimeProps>();
+  AlgorithmProperties::update("Filename", filename, *properties);
+  AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
+  return std::move(properties);
+}
+
+std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+ALFInstrumentModel::normaliseByCurrentProperties(Mantid::API::MatrixWorkspace_sptr const &inputWorkspace) const {
+  auto properties = std::make_unique<AlgorithmRuntimeProps>();
+  AlgorithmProperties::update("InputWorkspace", inputWorkspace, *properties);
+  AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
+  return std::move(properties);
 }
 
 std::unique_ptr<AlgorithmRuntimeProps> ALFInstrumentModel::rebinToWorkspaceProperties() const {
@@ -151,7 +168,7 @@ void ALFInstrumentModel::setSample(MatrixWorkspace_sptr const &sample) {
   auto const sampleRemoved = m_sample && !sample;
   m_sample = sample;
   if (sampleRemoved) {
-    loadEmptyInstrument("ALF", loadedWsName());
+    loadEmptyInstrument(loadedWsName());
   }
 }
 
@@ -184,6 +201,10 @@ std::size_t ALFInstrumentModel::runNumber(Mantid::API::MatrixWorkspace_sptr cons
     return 0u;
   }
   return static_cast<std::size_t>(workspace->getRunNumber());
+}
+
+bool ALFInstrumentModel::isALFData(MatrixWorkspace_const_sptr const &workspace) const {
+  return workspace->getInstrument()->getName() == INSTRUMENT_NAME;
 }
 
 bool ALFInstrumentModel::binningMismatch() const {

@@ -66,7 +66,8 @@ public:
   void loadVanadium() override;
 
   void notifyAlgorithmError(std::string const &message) override;
-  void notifyLoadAndNormaliseComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
+  void notifyLoadComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
+  void notifyNormaliseByCurrentComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
   void notifyRebinToWorkspaceComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
   void notifyDivideComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
   void notifyReplaceSpecialValuesComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
