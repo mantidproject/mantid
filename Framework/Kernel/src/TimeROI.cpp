@@ -189,7 +189,7 @@ void TimeROI::addMask(const Types::Core::DateAndTime &startTime, const Types::Co
     // loop through all current splitters and get new intersections
     std::vector<TimeInterval> output;
     TimeInterval intersection;
-    for (const auto interval : this->toSplitters()) {
+    for (const auto &interval : this->toSplitters()) {
       intersection = use_before.intersection(interval);
       if (intersection.isValid()) {
         output.push_back(intersection);
@@ -200,7 +200,7 @@ void TimeROI::addMask(const Types::Core::DateAndTime &startTime, const Types::Co
       }
     }
     this->clear();
-    for (const auto interval : output) {
+    for (const auto &interval : output) {
       m_roi.push_back(interval.start());
       m_roi.push_back(interval.stop());
     }
@@ -404,7 +404,7 @@ void TimeROI::update_union(const TimeROI &other) {
     return;
 
   // add all the intervals from the other
-  for (const auto interval : other.toSplitters()) {
+  for (const auto &interval : other.toSplitters()) {
     this->addROI(interval.start(), interval.stop());
   }
 }
@@ -490,7 +490,7 @@ std::string TimeROI::debugStrPrint(const std::size_t type) const {
       ss << (i / 2) << ": " << m_roi[i] << " to " << m_roi[i + 1] << "\n";
     }
   } else if (type == 1) {
-    for (const auto val : m_roi)
+    for (const auto &val : m_roi)
       ss << val << " ";
     ss << "\n";
   } else {
@@ -576,7 +576,7 @@ void TimeROI::clear() { m_roi.clear(); }
 void TimeROI::saveNexus(::NeXus::File *file) const {
   // create a local TimeSeriesProperty which will do the actual work
   TimeSeriesProperty<bool> tsp(NAME);
-  for (const auto interval : this->toSplitters()) {
+  for (const auto &interval : this->toSplitters()) {
     tsp.addValue(interval.start(), ROI_USE);
     tsp.addValue(interval.stop(), ROI_IGNORE);
   }
