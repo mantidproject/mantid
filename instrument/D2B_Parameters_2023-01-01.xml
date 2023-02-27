@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="D2B" valid-from="2023-01-01 00:00:00">
+    <component-link name="D2B">
+
+        <!-- The detector name for the height axis used in SumOverlappingTubes -->
+        <parameter name="detector_for_height_axis" type="string" visible="false">
+            <value val="tube_1" />
+        </parameter>
+
+        <!-- The flag for mirroring the angles in SumOverlappingTubes -->
+        <parameter name="mirror_scattering_angles" type="bool" visible="false">
+            <value val="True" />
+        </parameter>
+
+        <!-- Number of pixels to trim from the top and the bottom of the tubes when
+        calculating the chiˆ2 in the detector efficiencies in case of autoiterations -->
+        <parameter name="pixels_to_trim" type="int">
+            <value val="28" />
+        </parameter>
+
+        <!-- The chiˆ2/NdoF threshold for termination of autoiterations
+        in detector efficiency calculation -->
+        <parameter name="chi2_ndof" type="float">
+            <value val="0.01" />
+        </parameter>
+
+        <!-- The central pixel indices of the tubes; these must be rounded!-->
+        <parameter name="tube_centers" type="string" visible="false">
+            <value val="64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,
+                        64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,
+                        64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,
+                        64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,
+                        64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,
+                        64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,
+                        64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,
+                        64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64"/>
+        </parameter>
+
+        <!-- Relative 2theta positions of the tubes wrt the last tube -->
+        <parameter name="tube_angles" type="string" visible="false">
+            <value val="-158.750,-157.500,-156.250,-155.000,-153.750,-152.500,
+                        -151.250,-150.000,-148.750,-147.500,-146.250,-145.000,
+                        -143.750,-142.500,-141.250,-140.000,-138.750,-137.500,
+                        -136.250,-135.000,-133.750,-132.500,-131.250,-130.000,
+                        -128.750,-127.500,-126.250,-125.000,-123.750,-122.500,
+                        -121.250,-120.000,-118.750,-117.500,-116.250,-115.000,
+                        -113.750,-112.500,-111.250,-110.000,-108.750,-107.500,
+                        -106.250,-105.000,-103.750,-102.500,-101.250,-100.000,
+                         -98.750, -97.500, -96.250, -95.000, -93.750, -92.500,
+                         -91.250, -90.000, -88.750, -87.500, -86.250, -85.000,
+                         -83.750, -82.500, -81.250, -80.000, -78.750, -77.500,
+                         -76.250, -75.000, -73.750, -72.500, -71.250, -70.000,
+                         -68.750, -67.500, -66.250, -65.000, -63.750, -62.500,
+                         -61.250, -60.000, -58.750, -57.500, -56.250, -55.000,
+                         -53.750, -52.500, -51.250, -50.000, -48.750, -47.500,
+                         -46.250, -45.000, -43.750, -42.500, -41.250, -40.000,
+                         -38.750, -37.500, -36.250, -35.000, -33.750, -32.500,
+                         -31.250, -30.000, -28.750, -27.500, -26.250, -25.000,
+                         -23.750, -22.500, -21.250, -20.000, -18.750, -17.500,
+                         -16.250, -15.000, -13.750, -12.500, -11.250, -10.000,
+                          -8.750,  -7.500,  -6.250,  -5.000,  -3.750,  -2.500,
+                          -1.250,   0.000"/>
+        </parameter>
+    </component-link>
+</parameter-file>
