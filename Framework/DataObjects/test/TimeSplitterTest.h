@@ -184,7 +184,7 @@ public:
     TS_ASSERT_EQUALS(roi.numBoundaries(), 4);
   }
 
-  void test_timeSplitterFromMatrixWorkspace() {
+  void test_timeSplitterFromMatrixWorkspaceAbsoluteTimes() {
     TimeSplitter splitter;
     splitter.addROI(DateAndTime(0, 0), DateAndTime(10, 0), 1);
     splitter.addROI(DateAndTime(10, 0), DateAndTime(15, 0), 3);
@@ -213,7 +213,11 @@ public:
               convertedSplitter->valueAtTime(DateAndTime(20, 0)) == -1);
   }
 
-  void test_timeSplitterFromMatrixWorkspaceOffset() {
+  void test_timeSplitterFromMatrixWorkspaceRelativeTimes() {
+    TimeSplitter splitter;
+    int64_t offset_ns{TWO.totalNanoseconds()};
+    splitter.addROI(DateAndTime(0) + offset_ns, DateAndTime(10, 0) + offset_ns, 1);
+    // splitter.addROI(TWO, DateAndTime(10, TWO.nanoseconds()), 1);
     Mantid::API::MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
 
     auto &X = ws->dataX(0);
@@ -223,8 +227,13 @@ public:
     Y[0] = 1.0;
     auto convertedSplitter = new TimeSplitter(ws, TWO);
     // New starting point of converted splitter is TWO
-    TS_ASSERT(convertedSplitter->valueAtTime(DateAndTime(0)) == -1);
-    TS_ASSERT(convertedSplitter->valueAtTime(TWO) == 1);
+    std::cout << "\nhello " << splitter.valueAtTime(0) << "\n";
+    TS_ASSERT(splitter.valueAtTime(DateAndTime(0)) == convertedSplitter->valueAtTime(DateAndTime(0)) &&
+              convertedSplitter->valueAtTime(DateAndTime(0)) == -1);
+    TS_ASSERT(splitter.valueAtTime(TWO) == convertedSplitter->valueAtTime(TWO) &&
+              convertedSplitter->valueAtTime(TWO) == 1);
+    TS_ASSERT(splitter.valueAtTime(TWO + offset_ns) == convertedSplitter->valueAtTime(TWO + offset_ns) &&
+              convertedSplitter->valueAtTime(TWO + offset_ns) == -1);
   }
 
   void test_timeSplitterFromMatrixWorkspaceError() {
