@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/SplittingInterval.h"
+#include "MantidKernel/TimeROI.h"
 
 namespace Mantid {
 
@@ -236,5 +237,26 @@ SplittingIntervalVec operator~(const SplittingIntervalVec &a) {
   }
   return out;
 }
+
+//------------------------------------------------------------------------------------------------
+/** For every workspace index, create a TimeROI out of its associated splitting intervals
+ * @param splitters :: vector of splitting intervals, each interval has an associated workspace index
+ * @return map from workspace index to TimeROI object
+ */
+std::map<int, Kernel::TimeROI> timeROIsFromSplitters(const SplittingIntervalVec &splitters) {
+  std::map<int, Kernel::TimeROI> roisMap;
+  for (auto const &splitter : splitters) {
+    // some input SplittingInterval can have same `begin` and `end` time, which is disallowed for a TimeROI object
+    if (splitter.start() >= splitter.stop())
+      continue;
+    int destinationIndex = splitter.index();             // if existing, nonsense index -1 will also have its TimeROI
+    if (roisMap.find(destinationIndex) == roisMap.end()) // first time we encounter destinationIndex
+      roisMap.insert({destinationIndex, TimeROI(splitter.start(), splitter.stop())});
+    else
+      roisMap[destinationIndex].addROI(splitter.start(), splitter.stop());
+  }
+  return roisMap;
+}
+
 } // namespace Kernel
 } // namespace Mantid
