@@ -11,6 +11,7 @@
 
 #include "ALFInstrumentModel.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmProperties.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -18,6 +19,7 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MockInstrumentActor.h"
@@ -65,13 +67,24 @@ MatrixWorkspace_sptr loadFile(std::string const &filename) {
   return std::dynamic_pointer_cast<MatrixWorkspace>(outputWorkspace);
 }
 
-MatrixWorkspace_sptr changeBinOffset(MatrixWorkspace_sptr const &inputWorkspace) {
-  auto alg = AlgorithmManager::Instance().create("ChangeBinOffset");
+MatrixWorkspace_sptr normaliseByCurrent(MatrixWorkspace_sptr const &inputWorkspace) {
+  auto alg = AlgorithmManager::Instance().create("NormaliseByCurrent");
   alg->initialize();
   alg->setAlwaysStoreInADS(false);
   alg->setProperty("InputWorkspace", inputWorkspace);
-  alg->setProperty("Offset", 0.1);
-  alg->setProperty("OutputWorkspace", "__not_in_ads");
+  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
+  alg->execute();
+  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
+  return outputWorkspace;
+}
+
+MatrixWorkspace_sptr convertUnits(MatrixWorkspace_sptr const &inputWorkspace, std::string const &target) {
+  auto alg = AlgorithmManager::Instance().create("ConvertUnits");
+  alg->initialize();
+  alg->setAlwaysStoreInADS(false);
+  alg->setProperty("InputWorkspace", inputWorkspace);
+  alg->setProperty("Target", target);
+  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
   alg->execute();
   MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
   return outputWorkspace;
@@ -93,7 +106,7 @@ public:
 
     m_model = std::make_unique<ALFInstrumentModel>();
 
-    m_loadedWs = loadFile(m_ALFData);
+    m_loadedWs = convertUnits(normaliseByCurrent(loadFile(m_ALFData)), "dSpacing");
   }
 
   static ALFInstrumentModelTest *createSuite() { return new ALFInstrumentModelTest(); }
@@ -172,7 +185,7 @@ public:
 
   void test_vanadiumRun_returns_the_run_number_of_the_loaded_data() {
     m_model->setData(ALFData::VANADIUM, m_loadedWs);
-    TS_ASSERT_EQUALS(82301u, m_model->run(ALFData::SAMPLE));
+    TS_ASSERT_EQUALS(82301u, m_model->run(ALFData::VANADIUM));
   }
 
   void test_isALFData_returns_false_when_the_workspace_is_ALF_data() {
@@ -197,7 +210,7 @@ public:
     m_model->setData(ALFData::SAMPLE, m_loadedWs);
     m_model->setData(ALFData::VANADIUM, loadFile(m_nonALFData));
 
-    TS_ASSERT(!m_model->binningMismatch());
+    TS_ASSERT(m_model->binningMismatch());
   }
 
   void test_axisIsDSpacing_returns_false_if_the_axis_is_not_dSpacing() {
@@ -256,14 +269,22 @@ public:
 
   void test_loadProperties_returns_the_expected_properties() {
     auto const properties = m_model->loadProperties(m_ALFData);
-    TS_ASSERT_EQUALS(m_ALFData, properties->getProperty("Filename"));
-    TS_ASSERT_EQUALS(NOT_IN_ADS, properties->getProperty("OutputWorkspace"));
+
+    std::string filename = properties->getProperty("Filename");
+    std::string output = properties->getProperty("OutputWorkspace");
+
+    TS_ASSERT_EQUALS(m_ALFData, filename);
+    TS_ASSERT_EQUALS(NOT_IN_ADS, output);
   }
 
   void test_normaliseByCurrentProperties_returns_the_expected_properties() {
     auto const properties = m_model->normaliseByCurrentProperties(m_loadedWs);
-    TS_ASSERT_EQUALS(m_loadedWs, properties->getProperty("InputWorkspace"));
-    TS_ASSERT_EQUALS(NOT_IN_ADS, properties->getProperty("OutputWorkspace"));
+
+    MatrixWorkspace_sptr input = properties->getProperty("InputWorkspace");
+    std::string output = properties->getProperty("OutputWorkspace");
+
+    TS_ASSERT_EQUALS(m_loadedWs, input);
+    TS_ASSERT_EQUALS(NOT_IN_ADS, output);
   }
 
   void test_rebinToWorkspaceProperties_returns_the_expected_properties() {
@@ -272,9 +293,13 @@ public:
 
     auto const properties = m_model->rebinToWorkspaceProperties();
 
-    TS_ASSERT_EQUALS(m_loadedWs, properties->getProperty("WorkspaceToRebin"));
-    TS_ASSERT_EQUALS(m_loadedWs, properties->getProperty("WorkspaceToMatch"));
-    TS_ASSERT_EQUALS(NOT_IN_ADS, properties->getProperty("OutputWorkspace"));
+    MatrixWorkspace_sptr toRebin = properties->getProperty("WorkspaceToRebin");
+    MatrixWorkspace_sptr toMatch = properties->getProperty("WorkspaceToMatch");
+    std::string output = properties->getProperty("OutputWorkspace");
+
+    TS_ASSERT_EQUALS(m_loadedWs, toRebin);
+    TS_ASSERT_EQUALS(m_loadedWs, toMatch);
+    TS_ASSERT_EQUALS(NOT_IN_ADS, output);
   }
 
   void test_divideProperties_returns_the_expected_properties() {
@@ -283,164 +308,155 @@ public:
 
     auto const properties = m_model->divideProperties();
 
-    TS_ASSERT_EQUALS(m_loadedWs, properties->getProperty("LHSWorkspace"));
-    TS_ASSERT_EQUALS(m_loadedWs, properties->getProperty("RHSWorkspace"));
-    TS_ASSERT(properties->getProperty("AllowDifferentNumberSpectra"));
-    TS_ASSERT_EQUALS(NOT_IN_ADS, properties->getProperty("OutputWorkspace"));
+    MatrixWorkspace_sptr lhs = properties->getProperty("LHSWorkspace");
+    MatrixWorkspace_sptr rhs = properties->getProperty("RHSWorkspace");
+    bool allowDiffNumSpectra = properties->getProperty("AllowDifferentNumberSpectra");
+
+    std::string output = properties->getProperty("OutputWorkspace");
+
+    TS_ASSERT_EQUALS(m_loadedWs, lhs);
+    TS_ASSERT_EQUALS(m_loadedWs, rhs);
+    TS_ASSERT(allowDiffNumSpectra);
+    TS_ASSERT_EQUALS(NOT_IN_ADS, output);
   }
 
   void test_replaceSpecialValuesProperties_returns_the_expected_properties() {
     auto const properties = m_model->replaceSpecialValuesProperties(m_loadedWs);
 
-    TS_ASSERT_EQUALS(m_loadedWs, properties->getProperty("InputWorkspace"));
-    TS_ASSERT_EQUALS(0.0, properties->getProperty("InfinityValue"));
-    TS_ASSERT_EQUALS(1.0, properties->getProperty("NaNValue"));
-    TS_ASSERT(properties->getProperty("CheckErrorAxis"));
-    TS_ASSERT_EQUALS(NOT_IN_ADS, properties->getProperty("OutputWorkspace"));
+    MatrixWorkspace_sptr input = properties->getProperty("InputWorkspace");
+    double infinityValue = properties->getProperty("InfinityValue");
+    double nanValue = properties->getProperty("NaNValue");
+    bool checkErrorAxis = properties->getProperty("CheckErrorAxis");
+    std::string output = properties->getProperty("OutputWorkspace");
+
+    TS_ASSERT_EQUALS(m_loadedWs, input);
+    TS_ASSERT_EQUALS(0.0, infinityValue);
+    TS_ASSERT_EQUALS(1.0, nanValue);
+    TS_ASSERT(checkErrorAxis);
+    TS_ASSERT_EQUALS(NOT_IN_ADS, output);
   }
 
   void test_convertUnitsProperties_returns_the_expected_properties() {
     auto const properties = m_model->convertUnitsProperties(m_loadedWs);
 
-    TS_ASSERT_EQUALS(m_loadedWs, properties->getProperty("InputWorkspace"));
-    TS_ASSERT_EQUALS("dSpacing", properties->getProperty("Target"));
-    TS_ASSERT_EQUALS(NOT_IN_ADS, properties->getProperty("OutputWorkspace"));
+    MatrixWorkspace_sptr input = properties->getProperty("InputWorkspace");
+    std::string target = properties->getProperty("Target");
+    std::string output = properties->getProperty("OutputWorkspace");
+
+    TS_ASSERT_EQUALS(m_loadedWs, input);
+    TS_ASSERT_EQUALS("dSpacing", target);
+    TS_ASSERT_EQUALS(NOT_IN_ADS, output);
   }
 
   void test_scaleXProperties_returns_the_expected_properties() {
     auto const properties = m_model->scaleXProperties(m_loadedWs);
 
-    TS_ASSERT_EQUALS(m_loadedWs, properties->getProperty("InputWorkspace"));
-    TS_ASSERT_EQUALS(180.0 / M_PI, properties->getProperty("Factor"));
-    TS_ASSERT_EQUALS(NOT_IN_ADS, properties->getProperty("OutputWorkspace"));
+    MatrixWorkspace_sptr input = properties->getProperty("InputWorkspace");
+    double factor = properties->getProperty("Factor");
+    std::string output = properties->getProperty("OutputWorkspace");
+
+    TS_ASSERT_EQUALS(m_loadedWs, input);
+    TS_ASSERT_EQUALS(180.0 / M_PI, factor);
+    TS_ASSERT_EQUALS(NOT_IN_ADS, output);
   }
 
   void test_rebunchProperties_returns_the_expected_properties() {
+    setSingleTubeSelected();
+
     auto const properties = m_model->rebunchProperties(m_loadedWs);
 
-    TS_ASSERT_EQUALS(m_loadedWs, properties->getProperty("InputWorkspace"));
-    TS_ASSERT_EQUALS(2, properties->getProperty("NBunch"));
-    TS_ASSERT_EQUALS(NOT_IN_ADS, properties->getProperty("OutputWorkspace"));
+    MatrixWorkspace_sptr input = properties->getProperty("InputWorkspace");
+    int nBunch = properties->getProperty("NBunch");
+    std::string output = properties->getProperty("OutputWorkspace");
+
+    TS_ASSERT_EQUALS(m_loadedWs, input);
+    TS_ASSERT_EQUALS(1, nBunch);
+    TS_ASSERT_EQUALS(NOT_IN_ADS, output);
   }
 
-  void test_generateOutOfPlaneAngleWorkspace_returns_nullptr_when_no_selected_detectors() {
-    auto [workspace, twoThetas] = m_model->generateOutOfPlaneAngleWorkspace(*m_instrumentActor);
-
-    TS_ASSERT_EQUALS(nullptr, workspace);
-    TS_ASSERT(twoThetas.empty());
-  }
-
-  void test_generateOutOfPlaneAngleWorkspace_does_not_return_a_nullptr_when_single_tube_selected() {
+  void test_createWorkspaceAlgorithmProperties_returns_the_expected_properties() {
     setSingleTubeSelected();
     expectInstrumentActorCalls();
 
-    auto [workspace, twoThetas] = m_model->generateOutOfPlaneAngleWorkspace(*m_instrumentActor);
+    auto const properties = m_model->createWorkspaceAlgorithmProperties(*m_instrumentActor);
 
-    TS_ASSERT(workspace);
-    TS_ASSERT_EQUALS(1u, twoThetas.size());
-    TS_ASSERT_DELTA(39.879471, twoThetas[0], 0.00001);
+    std::string parentName = properties->getProperty("ParentWorkspace");
+    int nSpec = properties->getProperty("NSpec");
+    std::string unitX = properties->getProperty("UnitX");
+    std::string output = properties->getProperty("OutputWorkspace");
+
+    TS_ASSERT_EQUALS("ALFData", parentName);
+    TS_ASSERT_EQUALS(1, nSpec);
+    TS_ASSERT_EQUALS("Out of plane angle", unitX);
+    TS_ASSERT_EQUALS(NOT_IN_ADS, output);
+
+    std::vector<double> dataX = properties->getProperty("DataX");
+    std::vector<double> dataY = properties->getProperty("DataY");
+
+    TS_ASSERT_DELTA(dataX[1], -0.358565, 0.000001);
+    TS_ASSERT_DELTA(dataX[2], -0.357311, 0.000001);
+    TS_ASSERT_DELTA(dataY[1], 0.0, 0.000001);
+    TS_ASSERT_DELTA(dataY[2], 0.0, 0.000001);
   }
 
-  void test_generateOutOfPlaneAngleWorkspace_does_not_return_a_nullptr_when_multiple_tubes_selected() {
+  void test_twoThetasClosestToZero_will_initially_return_an_empty_vector() {
+    TS_ASSERT(m_model->twoThetasClosestToZero().empty());
+  }
+
+  void test_twoThetasClosestToZero_returns_the_expected_two_theta_values() {
+    setSingleTubeSelected();
+    expectInstrumentActorCalls();
+
+    (void)m_model->createWorkspaceAlgorithmProperties(*m_instrumentActor);
+
+    auto const twoThetas = m_model->twoThetasClosestToZero();
+
+    TS_ASSERT_EQUALS(1, twoThetas.size());
+    TS_ASSERT_DELTA(twoThetas[0], 39.879471, 0.000001);
+  }
+
+  void test_createWorkspaceAlgorithmProperties_returns_the_expected_properties_for_multiple_tubes() {
     setMultipleTubesSelected();
     expectInstrumentActorCalls();
 
-    auto [workspace, twoThetas] = m_model->generateOutOfPlaneAngleWorkspace(*m_instrumentActor);
+    auto const properties = m_model->createWorkspaceAlgorithmProperties(*m_instrumentActor);
 
-    TS_ASSERT(workspace);
-    TS_ASSERT_EQUALS(2u, twoThetas.size());
-    // The two thetas are the same because we use the same workspace index in the expectations
-    TS_ASSERT_DELTA(39.879471, twoThetas[0], 0.00001);
-    TS_ASSERT_DELTA(39.879471, twoThetas[1], 0.00001);
+    std::string parentName = properties->getProperty("ParentWorkspace");
+    int nSpec = properties->getProperty("NSpec");
+    std::string unitX = properties->getProperty("UnitX");
+    std::string output = properties->getProperty("OutputWorkspace");
+
+    TS_ASSERT_EQUALS("ALFData", parentName);
+    TS_ASSERT_EQUALS(1, nSpec);
+    TS_ASSERT_EQUALS("Out of plane angle", unitX);
+    TS_ASSERT_EQUALS(NOT_IN_ADS, output);
+
+    std::vector<double> dataX = properties->getProperty("DataX");
+    std::vector<double> dataY = properties->getProperty("DataY");
+
+    TS_ASSERT_DELTA(dataX[1], -0.358650, 0.000001);
+    TS_ASSERT_DELTA(dataX[2], -0.358565, 0.000001);
+    TS_ASSERT_DELTA(dataY[1], 0.0, 0.000001);
+    TS_ASSERT_DELTA(dataY[2], 0.0, 0.000001);
   }
 
-  void test_generateLoadedWorkspace_does_not_throw_when_no_sample_is_set() {
-    TS_ASSERT_THROWS_NOTHING(m_model->generateLoadedWorkspace());
-  }
-
-  void test_generateLoadedWorkspace_outputs_the_sample_workspace_when_no_vanadium_is_set() {
-    m_model->setData(ALFData::SAMPLE, m_loadedWs);
-
-    m_model->generateLoadedWorkspace();
-
-    TS_ASSERT(ADS.doesExist("ALFData"));
-
-    auto const workspace = ADS.retrieveWS<MatrixWorkspace>("ALFData");
-
-    TS_ASSERT_EQUALS("dSpacing", workspace->getAxis(0)->unit()->unitID());
-    TS_ASSERT_EQUALS(m_loadedWs->y(0), workspace->y(0));
-  }
-
-  void test_generateLoadedWorkspace_outputs_a_normalised_workspace_when_the_vanadium_is_set() {
-    m_model->setData(ALFData::SAMPLE, m_loadedWs);
-    m_model->setData(ALFData::VANADIUM, m_loadedWs);
-
-    m_model->generateLoadedWorkspace();
-
-    TS_ASSERT(ADS.doesExist("ALFData"));
-
-    auto const workspace = ADS.retrieveWS<MatrixWorkspace>("ALFData");
-    TS_ASSERT_EQUALS("dSpacing", workspace->getAxis(0)->unit()->unitID());
-    TS_ASSERT_EQUALS(1.0, workspace->y(0)[0]);
-    TS_ASSERT_EQUALS(1.0, workspace->y(0)[1]);
-  }
-
-  void test_generateLoadedWorkspace_handles_vanadium_with_different_binning() {
-    auto const dataWs = m_model->loadAndNormalise(m_ALFData);
-    m_model->setData(ALFData::SAMPLE, dataWs);
-    m_model->setData(ALFData::VANADIUM, changeBinOffset(dataWs));
-
-    m_model->generateLoadedWorkspace();
-
-    TS_ASSERT(ADS.doesExist("ALFData"));
-
-    auto const workspace = ADS.retrieveWS<MatrixWorkspace>("ALFData");
-    TS_ASSERT_EQUALS("dSpacing", workspace->getAxis(0)->unit()->unitID());
-    TS_ASSERT_EQUALS(1.0, workspace->y(0)[0]);
-    TS_ASSERT_EQUALS(1.0, workspace->y(0)[1]);
-  }
-
-  void
-  test_generateOutOfPlaneAngleWorkspace_will_create_a_workspace_with_the_expected_out_of_plane_angle_label_and_y_values() {
-    setSingleTubeSelected();
+  void test_twoThetasClosestToZero_returns_the_expected_two_theta_values_for_multiple_tubes() {
+    setMultipleTubesSelected();
     expectInstrumentActorCalls();
 
-    auto [workspace, _] = m_model->generateOutOfPlaneAngleWorkspace(*m_instrumentActor);
+    (void)m_model->createWorkspaceAlgorithmProperties(*m_instrumentActor);
 
-    TS_ASSERT_EQUALS("Label", workspace->getAxis(0)->unit()->unitID());
-    TS_ASSERT_EQUALS("Out of plane angle", std::string(workspace->getAxis(0)->unit()->label()));
+    auto const twoThetas = m_model->twoThetasClosestToZero();
 
-    TS_ASSERT_DELTA(workspace->readX(0)[1], -20.544269, 0.000001);
-    TS_ASSERT_DELTA(workspace->readX(0)[2], -20.472433, 0.000001);
-    TS_ASSERT_DELTA(workspace->readY(0)[1], 0.0, 0.000001);
-    TS_ASSERT_DELTA(workspace->readY(0)[2], 0.0, 0.000001);
-  }
-
-  void test_generateOutOfPlaneAngleWorkspace_will_create_a_workspace_with_the_expected_data_for_an_edge_case_dataset() {
-    auto const sample = m_model->loadAndNormalise(m_ALFEdgeCaseData);
-    m_model->setData(ALFData::SAMPLE, sample);
-    m_model->generateLoadedWorkspace();
-
-    m_singleTubeDetectorIDs = findWholeTubes(sample->componentInfo(), {2500u, 2501u, 2502u});
-    TS_ASSERT(m_model->setSelectedTubes(m_singleTubeDetectorIDs));
-
-    expectInstrumentActorCalls(12288u);
-
-    auto [workspace, _] = m_model->generateOutOfPlaneAngleWorkspace(*m_instrumentActor);
-
-    TS_ASSERT_EQUALS("Label", workspace->getAxis(0)->unit()->unitID());
-    TS_ASSERT_EQUALS("Out of plane angle", std::string(workspace->getAxis(0)->unit()->label()));
-
-    TS_ASSERT_DELTA(workspace->readX(0)[1], -20.318228, 0.000001);
-    TS_ASSERT_DELTA(workspace->readX(0)[2], -20.242194, 0.000001);
-    TS_ASSERT_DELTA(workspace->readY(0)[1], 0.001780, 0.000001);
-    TS_ASSERT_DELTA(workspace->readY(0)[2], 0.001780, 0.000001);
+    TS_ASSERT_EQUALS(2, twoThetas.size());
+    TS_ASSERT_DELTA(twoThetas[0], 39.879471, 0.000001);
+    TS_ASSERT_DELTA(twoThetas[1], 39.879471, 0.000001);
   }
 
 private:
   void setSingleTubeSelected() {
     m_model->setData(ALFData::SAMPLE, m_loadedWs);
-    m_model->generateLoadedWorkspace();
+    m_model->replaceSampleWorkspaceInADS(m_loadedWs);
 
     m_singleTubeDetectorIDs = findWholeTubes(m_loadedWs->componentInfo(), {2500u, 2501u, 2502u});
 
@@ -449,7 +465,7 @@ private:
 
   void setMultipleTubesSelected() {
     m_model->setData(ALFData::SAMPLE, m_loadedWs);
-    m_model->generateLoadedWorkspace();
+    m_model->replaceSampleWorkspaceInADS(m_loadedWs);
 
     m_multiTubeDetectorIDs = findWholeTubes(m_loadedWs->componentInfo(), {2500u, 2501u, 2502u, 3500u, 3501u, 3502u});
 
@@ -457,12 +473,10 @@ private:
   }
 
   void expectInstrumentActorCalls(std::size_t const workspaceIndex = 0u) {
-    auto const loadedWorkspace = ADS.retrieveWS<MatrixWorkspace>(m_model->loadedWsName());
-
-    EXPECT_CALL(*m_instrumentActor, getWorkspace()).WillRepeatedly(Return(loadedWorkspace));
-    EXPECT_CALL(*m_instrumentActor, componentInfo()).WillRepeatedly(ReturnRef(loadedWorkspace->componentInfo()));
-    EXPECT_CALL(*m_instrumentActor, detectorInfo()).WillOnce(ReturnRef(loadedWorkspace->detectorInfo()));
-    EXPECT_CALL(*m_instrumentActor, getInstrument()).WillOnce(Return(loadedWorkspace->getInstrument()));
+    EXPECT_CALL(*m_instrumentActor, getWorkspace()).WillRepeatedly(Return(m_loadedWs));
+    EXPECT_CALL(*m_instrumentActor, componentInfo()).WillRepeatedly(ReturnRef(m_loadedWs->componentInfo()));
+    EXPECT_CALL(*m_instrumentActor, detectorInfo()).WillOnce(ReturnRef(m_loadedWs->detectorInfo()));
+    EXPECT_CALL(*m_instrumentActor, getInstrument()).WillOnce(Return(m_loadedWs->getInstrument()));
     EXPECT_CALL(*m_instrumentActor, getWorkspaceIndex(_)).WillRepeatedly(Return(workspaceIndex));
     EXPECT_CALL(*m_instrumentActor, getBinMinMaxIndex(workspaceIndex, _, _))
         .WillRepeatedly(DoAll(SetArgReferee<1>(0u), SetArgReferee<2>(50u)));

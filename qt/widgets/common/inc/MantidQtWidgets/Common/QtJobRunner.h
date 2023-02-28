@@ -27,7 +27,6 @@ public:
   void clearAlgorithmQueue() override;
   void setAlgorithmQueue(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithms) override;
   void executeAlgorithmQueue() override;
-  void executeAlgorithm(Mantid::API::IAlgorithm_sptr algorithm) override;
   void executeAlgorithm(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
   void cancelAlgorithmQueue() override;
 

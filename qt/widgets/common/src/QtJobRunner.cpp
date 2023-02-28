@@ -15,15 +15,6 @@
 
 using namespace MantidQt::API;
 
-namespace {
-
-MantidQt::API::IConfiguredAlgorithm_sptr toConfiguredAlgorithm(Mantid::API::IAlgorithm_sptr const &algorithm) {
-  auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
-  return std::make_shared<MantidQt::API::ConfiguredAlgorithm>(std::move(algorithm), std::move(properties));
-}
-
-} // namespace
-
 namespace MantidQt::API {
 
 QtJobRunner::QtJobRunner() : QObject(), m_batchAlgoRunner(this) {
@@ -41,10 +32,6 @@ void QtJobRunner::setAlgorithmQueue(std::deque<IConfiguredAlgorithm_sptr> algori
 }
 
 void QtJobRunner::executeAlgorithmQueue() { m_batchAlgoRunner.executeBatchAsync(); }
-
-void QtJobRunner::executeAlgorithm(Mantid::API::IAlgorithm_sptr algorithm) {
-  m_batchAlgoRunner.executeAlgorithmAsync(toConfiguredAlgorithm(algorithm));
-}
 
 void QtJobRunner::executeAlgorithm(IConfiguredAlgorithm_sptr algorithm) {
   m_batchAlgoRunner.executeAlgorithmAsync(algorithm);

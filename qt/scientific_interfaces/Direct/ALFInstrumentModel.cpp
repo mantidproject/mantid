@@ -108,6 +108,8 @@ void ALFInstrumentModel::setData(ALFData const &dataType, MatrixWorkspace_sptr c
 }
 
 void ALFInstrumentModel::setSample(MatrixWorkspace_sptr const &sample) {
+  m_twoThetasClosestToZero.clear();
+
   auto const sampleRemoved = m_sample && !sample;
   m_sample = sample;
   if (sampleRemoved) {
@@ -115,7 +117,10 @@ void ALFInstrumentModel::setSample(MatrixWorkspace_sptr const &sample) {
   }
 }
 
-void ALFInstrumentModel::setVanadium(MatrixWorkspace_sptr const &vanadium) { m_vanadium = vanadium; }
+void ALFInstrumentModel::setVanadium(MatrixWorkspace_sptr const &vanadium) {
+  m_twoThetasClosestToZero.clear();
+  m_vanadium = vanadium;
+}
 
 bool ALFInstrumentModel::hasData(ALFData const &dataType) const { return bool(data(dataType)); }
 
@@ -196,7 +201,7 @@ ALFInstrumentModel::loadProperties(std::string const &filename) const {
   auto properties = std::make_unique<AlgorithmRuntimeProps>();
   AlgorithmProperties::update("Filename", filename, *properties);
   AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
-  return std::move(properties);
+  return properties;
 }
 
 std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
@@ -204,7 +209,7 @@ ALFInstrumentModel::normaliseByCurrentProperties(Mantid::API::MatrixWorkspace_sp
   auto properties = std::make_unique<AlgorithmRuntimeProps>();
   AlgorithmProperties::update("InputWorkspace", inputWorkspace, *properties);
   AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
-  return std::move(properties);
+  return properties;
 }
 
 std::unique_ptr<AlgorithmRuntimeProps> ALFInstrumentModel::rebinToWorkspaceProperties() const {
@@ -212,7 +217,7 @@ std::unique_ptr<AlgorithmRuntimeProps> ALFInstrumentModel::rebinToWorkspacePrope
   AlgorithmProperties::update("WorkspaceToRebin", m_vanadium, *properties);
   AlgorithmProperties::update("WorkspaceToMatch", m_sample, *properties);
   AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
-  return std::move(properties);
+  return properties;
 }
 
 std::unique_ptr<AlgorithmRuntimeProps> ALFInstrumentModel::divideProperties() const {
@@ -221,7 +226,7 @@ std::unique_ptr<AlgorithmRuntimeProps> ALFInstrumentModel::divideProperties() co
   AlgorithmProperties::update("RHSWorkspace", m_vanadium, *properties);
   AlgorithmProperties::update("AllowDifferentNumberSpectra", true, *properties);
   AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
-  return std::move(properties);
+  return properties;
 }
 
 std::unique_ptr<AlgorithmRuntimeProps>
@@ -232,7 +237,7 @@ ALFInstrumentModel::replaceSpecialValuesProperties(Mantid::API::MatrixWorkspace_
   AlgorithmProperties::update("NaNValue", 1.0, *properties);
   AlgorithmProperties::update("CheckErrorAxis", true, *properties);
   AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
-  return std::move(properties);
+  return properties;
 }
 
 std::unique_ptr<AlgorithmRuntimeProps>
@@ -241,7 +246,7 @@ ALFInstrumentModel::convertUnitsProperties(MatrixWorkspace_sptr const &inputWork
   AlgorithmProperties::update("InputWorkspace", inputWorkspace, *properties);
   AlgorithmProperties::update("Target", D_SPACING_UNIT, *properties);
   AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
-  return std::move(properties);
+  return properties;
 }
 
 std::unique_ptr<AlgorithmRuntimeProps>
@@ -251,13 +256,13 @@ ALFInstrumentModel::createWorkspaceAlgorithmProperties(MantidQt::MantidWidgets::
 
   auto properties = std::make_unique<AlgorithmRuntimeProps>();
   AlgorithmProperties::update("ParentWorkspace", actor.getWorkspace()->getName(), *properties);
-  AlgorithmProperties::update("DataX", x, *properties);
-  AlgorithmProperties::update("DataY", y, *properties);
-  AlgorithmProperties::update("DataE", e, *properties);
+  AlgorithmProperties::update("DataX", x, *properties, false);
+  AlgorithmProperties::update("DataY", y, *properties, false);
+  AlgorithmProperties::update("DataE", e, *properties, false);
   AlgorithmProperties::update("NSpec", 1, *properties);
   AlgorithmProperties::update("UnitX", std::string("Out of plane angle"), *properties);
   AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
-  return std::move(properties);
+  return properties;
 }
 
 std::unique_ptr<AlgorithmRuntimeProps>
@@ -266,7 +271,7 @@ ALFInstrumentModel::scaleXProperties(MatrixWorkspace_sptr const &inputWorkspace)
   AlgorithmProperties::update("InputWorkspace", inputWorkspace, *properties);
   AlgorithmProperties::update("Factor", 180.0 / M_PI, *properties);
   AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
-  return std::move(properties);
+  return properties;
 }
 
 std::unique_ptr<AlgorithmRuntimeProps>
@@ -275,7 +280,7 @@ ALFInstrumentModel::rebunchProperties(MatrixWorkspace_sptr const &inputWorkspace
   AlgorithmProperties::update("InputWorkspace", inputWorkspace, *properties);
   AlgorithmProperties::update("NBunch", static_cast<int>(numberOfTubes()), *properties);
   AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
-  return std::move(properties);
+  return properties;
 }
 
 void ALFInstrumentModel::collectXAndYData(MantidQt::MantidWidgets::IInstrumentActor const &actor,

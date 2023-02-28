@@ -10,8 +10,7 @@
 #include <string>
 
 namespace Mantid::API {
-Mantid::Kernel::IPropertyManager::TypedValue
-AlgorithmRuntimeProps::getProperty(const std::string &name) const noexcept {
+Mantid::Kernel::IPropertyManager::TypedValue AlgorithmRuntimeProps::getProperty(const std::string &name) const {
   return Mantid::Kernel::PropertyManager::getProperty(name);
 }
 void AlgorithmRuntimeProps::setPropertyValue(const std::string &name, const std::string &value) {

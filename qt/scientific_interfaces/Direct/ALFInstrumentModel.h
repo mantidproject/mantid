@@ -57,6 +57,8 @@ public:
   virtual bool hasSelectedTubes() const = 0;
   virtual std::vector<DetectorTube> selectedTubes() const = 0;
 
+  virtual std::vector<double> twoThetasClosestToZero() const = 0;
+
   // The algorithms used to load and normalise the Sample
   virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> loadProperties(std::string const &filename) const = 0;
   virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
@@ -75,8 +77,6 @@ public:
   scaleXProperties(Mantid::API::MatrixWorkspace_sptr const &inputWorkspace) const = 0;
   virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
   rebunchProperties(Mantid::API::MatrixWorkspace_sptr const &inputWorkspace) const = 0;
-
-  virtual std::vector<double> twoThetasClosestToZero() const = 0;
 };
 
 class MANTIDQT_DIRECT_DLL ALFInstrumentModel final : public IALFInstrumentModel {
@@ -103,6 +103,8 @@ public:
   bool hasSelectedTubes() const override;
   inline std::vector<DetectorTube> selectedTubes() const noexcept override { return m_tubes; };
 
+  inline std::vector<double> twoThetasClosestToZero() const noexcept override { return m_twoThetasClosestToZero; };
+
   // The algorithms used to load and normalise the Sample
   std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> loadProperties(std::string const &filename) const override;
   std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
@@ -121,8 +123,6 @@ public:
   scaleXProperties(Mantid::API::MatrixWorkspace_sptr const &inputWorkspace) const override;
   std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
   rebunchProperties(Mantid::API::MatrixWorkspace_sptr const &inputWorkspace) const override;
-
-  inline std::vector<double> twoThetasClosestToZero() const noexcept override { return m_twoThetasClosestToZero; };
 
 private:
   void setSample(Mantid::API::MatrixWorkspace_sptr const &sample);
