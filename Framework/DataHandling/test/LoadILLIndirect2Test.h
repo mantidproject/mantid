@@ -28,6 +28,8 @@ public:
   static LoadILLIndirect2Test *createSuite() { return new LoadILLIndirect2Test(); }
   static void destroySuite(LoadILLIndirect2Test *suite) { delete suite; }
 
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
+
   void test_Init() {
     LoadILLIndirect2 loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize())
@@ -127,8 +129,6 @@ public:
     TS_ASSERT_EQUALS(output2D->dataY(871)[1157], 17)
     TS_ASSERT_EQUALS(output2D->dataY(746)[1157], 18)
     checkTimeFormat(output2D);
-
-    AnalysisDataService::Instance().clear();
   }
   void test_diffraction_doppler() {
     // checks loading IN16B diffration data acquired in Doppler mode with the
@@ -151,8 +151,6 @@ public:
     TS_ASSERT_EQUALS(output2D->dataY(873)[557], 2)
     TS_ASSERT_EQUALS(output2D->dataY(724)[561], 3)
     checkTimeFormat(output2D);
-
-    AnalysisDataService::Instance().clear();
   }
 
   void doExecTest(const std::string &file, int numHist = 2051, int numChannels = 2048) {
@@ -178,9 +176,26 @@ public:
     TS_ASSERT(runlogs.hasProperty("Facility"));
     TS_ASSERT_EQUALS(runlogs.getProperty("Facility")->value(), "ILL");
     checkTimeFormat(output);
+  }
 
-    // Remove workspace from the data service.
-    AnalysisDataService::Instance().clear();
+  void test_spectrometer_noSDdetectors() {
+    // checks loading IN16B spectrometer data when no SD detectors were enabled
+    LoadILLIndirect2 loader;
+    loader.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(loader.initialize())
+    TS_ASSERT(loader.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "ILL/IN16B/353970.nxs"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", "__unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("LoadDetectors", "Spectrometer"));
+    TS_ASSERT_THROWS_NOTHING(loader.execute(););
+    TS_ASSERT(loader.isExecuted());
+    MatrixWorkspace_sptr outputWS =
+        std::shared_ptr<Mantid::API::MatrixWorkspace>(loader.getProperty("OutputWorkspace"));
+    TS_ASSERT(outputWS)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 2049)
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 2048)
+
+    TS_ASSERT_EQUALS(outputWS->dataY(58)[3], 1.0)
   }
 
   void checkTimeFormat(MatrixWorkspace_const_sptr outputWS) {
