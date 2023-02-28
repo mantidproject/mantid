@@ -255,7 +255,7 @@ public:
     Y[2] = 2.0;
     TS_ASSERT_THROWS(new TimeSplitter(ws), std::runtime_error &);
   }
-  
+
   /** Test that a TimeSplitter object constructed from a TableWorkspace object
    * containing absolute times is equivalent to a TimeSplitter object built by
    * successively adding time ROIs.
