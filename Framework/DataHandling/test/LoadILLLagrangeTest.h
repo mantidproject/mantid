@@ -152,12 +152,12 @@ private:
   std::string m_oldInstrument;
 };
 
-class LoadILLagrangeTestPerformance : public CxxTest::TestSuite {
+class LoadILLLagrangeTestPerformance : public CxxTest::TestSuite {
 public:
-  static LoadILLagrangeTestPerformance *createSuite() { return new LoadILLagrangeTestPerformance(); }
-  static void destroySuite(LoadILLagrangeTestPerformance *suite) { delete suite; }
+  static LoadILLLagrangeTestPerformance *createSuite() { return new LoadILLLagrangeTestPerformance(); }
+  static void destroySuite(LoadILLLagrangeTestPerformance *suite) { delete suite; }
 
-  LoadILLagrangeTestPerformance() {}
+  LoadILLLagrangeTestPerformance() {}
 
   void setUp() override {
     m_alg.initialize();
