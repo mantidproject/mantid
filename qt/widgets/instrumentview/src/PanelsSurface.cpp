@@ -220,7 +220,7 @@ void FlatBankInfo::translate(const QPointF &shift) {
   }
 }
 
-PanelsSurface::PanelsSurface(const InstrumentActor *rootActor, const Mantid::Kernel::V3D &origin,
+PanelsSurface::PanelsSurface(const IInstrumentActor *rootActor, const Mantid::Kernel::V3D &origin,
                              const Mantid::Kernel::V3D &axis, const QSize &widgetSize, const bool maintainAspectRatio)
     : UnwrappedSurface(rootActor, widgetSize, maintainAspectRatio), m_pos(origin), m_zaxis(axis) {
   setupAxes();
@@ -228,6 +228,15 @@ PanelsSurface::PanelsSurface(const InstrumentActor *rootActor, const Mantid::Ker
 }
 
 PanelsSurface::~PanelsSurface() { clearBanks(); }
+
+void PanelsSurface::resetInstrumentActor(const IInstrumentActor *rootActor) {
+  UnwrappedSurface::resetInstrumentActor(rootActor);
+  m_unwrappedDetectors.clear();
+  m_detector2bankMap.clear();
+  size_t ndet = m_instrActor->ndetectors();
+  m_unwrappedDetectors.resize(ndet);
+  m_detector2bankMap.resize(ndet);
+}
 
 /**
  * Initialize the surface.
@@ -359,7 +368,9 @@ boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
     const auto &children = componentInfo.children(parentIndex);
     for (auto child : children) {
       if (componentInfo.componentType(child) == ComponentType::OutlineComposite)
-        tubes.emplace_back(child);
+        // tube must have more than one detector to enable normal to be calculated
+        if (componentInfo.children(child).size() > 1)
+          tubes.emplace_back(child);
     }
   };
 

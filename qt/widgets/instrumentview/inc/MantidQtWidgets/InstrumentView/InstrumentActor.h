@@ -45,15 +45,35 @@ namespace MantidWidgets {
 
 class InstrumentRenderer;
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IInstrumentActor {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IInstrumentActor : public QObject {
+  Q_OBJECT
 public:
+  virtual void draw(bool picking = false) const = 0;
+  virtual void getBoundingBox(Mantid::Kernel::V3D &minBound, Mantid::Kernel::V3D &maxBound,
+                              const bool excludeMonitors) const = 0;
   virtual std::shared_ptr<const Mantid::Geometry::Instrument> getInstrument() const = 0;
   virtual std::shared_ptr<const Mantid::API::MatrixWorkspace> getWorkspace() const = 0;
   virtual const Mantid::Geometry::ComponentInfo &componentInfo() const = 0;
   virtual const Mantid::Geometry::DetectorInfo &detectorInfo() const = 0;
 
+  virtual GLColor getColor(size_t index) const = 0;
+  virtual double minBinValue() const = 0;
+  virtual double maxBinValue() const = 0;
+
+  virtual size_t ndetectors() const = 0;
+  virtual Mantid::detid_t getDetID(size_t pickID) const = 0;
+  virtual const Mantid::Kernel::V3D getDetPos(size_t pickID) const = 0;
+  virtual double getIntegratedCounts(size_t index) const = 0;
+
   virtual size_t getWorkspaceIndex(size_t index) const = 0;
   virtual void getBinMinMaxIndex(size_t wi, size_t &imin, size_t &imax) const = 0;
+
+  virtual const std::vector<size_t> &components() const = 0;
+  virtual const InstrumentRenderer &getInstrumentRenderer() const = 0;
+signals:
+  void colorMapChanged() const;
+  void refreshView() const;
+  void initWidget(bool resetGeometry, bool setDefaultView) const;
 };
 
 /**
@@ -68,7 +88,7 @@ interface for picked ObjComponent and other
 operation for selective rendering of the instrument
 
 */
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentActor : public QObject, public IInstrumentActor {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentActor : public IInstrumentActor {
   Q_OBJECT
 public:
   /// Invalid workspace index in detector index to workspace index lookup
@@ -85,9 +105,10 @@ public:
   ~InstrumentActor();
 
   /// Draw the instrument in 3D
-  void draw(bool picking = false) const;
+  void draw(bool picking = false) const override;
   /// Return the bounding box in 3D
-  void getBoundingBox(Mantid::Kernel::V3D &minBound, Mantid::Kernel::V3D &maxBound, const bool excludeMonitors) const;
+  void getBoundingBox(Mantid::Kernel::V3D &minBound, Mantid::Kernel::V3D &maxBound,
+                      const bool excludeMonitors) const override;
   /// Set a component (and all its children) visible.
   void setComponentVisible(size_t componentIndex);
   /// Set visibilit of all components.
@@ -152,9 +173,9 @@ public:
   /// Get the smallest positive data value in the data. Used by the log20 scale.
   double minPositiveValue() const { return m_DataPositiveMinValue; }
   /// Get the lower bound of the integration range.
-  double minBinValue() const { return m_BinMinValue; }
+  double minBinValue() const override { return m_BinMinValue; }
   /// Get the upper bound of the integration range.
-  double maxBinValue() const { return m_BinMaxValue; }
+  double maxBinValue() const override { return m_BinMaxValue; }
   /// Get the workspace min bin
   double minWkspBinValue() const { return m_WkspBinMinValue; }
   /// Get the workspace max bin
@@ -164,27 +185,27 @@ public:
   bool wholeRange() const;
 
   /// Get the number of detectors in the instrument.
-  size_t ndetectors() const;
+  size_t ndetectors() const override;
   /// Get a detector index by a detector ID.
   size_t getDetectorByDetID(Mantid::detid_t detID) const;
   /// Get a detector ID by a pick ID converted form a color in the pick image.
-  Mantid::detid_t getDetID(size_t pickID) const;
+  Mantid::detid_t getDetID(size_t pickID) const override;
   std::vector<Mantid::detid_t> getDetIDs(const std::vector<size_t> &dets) const;
   /// Get a component ID for a non-detector.
   Mantid::Geometry::ComponentID getComponentID(size_t pickID) const;
   /// Get position of a detector by a pick ID converted form a color in the pick
   /// image.
-  const Mantid::Kernel::V3D getDetPos(size_t pickID) const;
+  const Mantid::Kernel::V3D getDetPos(size_t pickID) const override;
   /// Get a vector of IDs of all detectors in the instrument.
   const std::vector<Mantid::detid_t> &getAllDetIDs() const;
   /// Get displayed color of a detector by its index.
-  GLColor getColor(size_t index) const;
+  GLColor getColor(size_t index) const override;
   /// Get the workspace index of a detector by its detector Index.
   size_t getWorkspaceIndex(size_t index) const override;
   /// Get the workspace indices of a list of detectors by their detector Index
   std::vector<size_t> getWorkspaceIndices(const std::vector<size_t> &dets) const;
   /// Get the integrated counts of a detector by its detector Index.
-  double getIntegratedCounts(size_t index) const;
+  double getIntegratedCounts(size_t index) const override;
   /// Sum the counts in detectors
   void sumDetectors(const std::vector<size_t> &dets, std::vector<double> &x, std::vector<double> &y, size_t size) const;
   /// Sum the counts in detectors.
@@ -222,17 +243,12 @@ public:
   /// Save the state of the actor to a Mantid project file.
   std::string saveToProject() const;
   /// Returns indices of all non-detector components in Instrument.
-  const std::vector<size_t> &components() const { return m_components; }
+  const std::vector<size_t> &components() const override { return m_components; }
 
   bool hasGridBank() const;
   size_t getNumberOfGridLayers() const;
   void setGridLayer(bool isUsingLayer, int layer) const;
-  const InstrumentRenderer &getInstrumentRenderer() const;
-
-signals:
-  void colorMapChanged() const;
-  void refreshView() const;
-  void initWidget(bool resetGeometry, bool setDefaultView) const;
+  const InstrumentRenderer &getInstrumentRenderer() const override;
 
 public slots:
   void initialize(bool resetGeometry, bool setDefaultView);

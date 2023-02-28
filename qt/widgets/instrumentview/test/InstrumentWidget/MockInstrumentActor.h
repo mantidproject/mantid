@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2023 ISIS Rutherford Appleton Laboratory UKRI,
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -42,8 +42,8 @@ public:
   MOCK_CONST_METHOD1(getDetID, Mantid::detid_t(std::size_t pickID));
   MOCK_CONST_METHOD1(getDetPos, const Mantid::Kernel::V3D(std::size_t pickID));
   MOCK_CONST_METHOD1(getWorkspaceIndex, std::size_t(std::size_t index));
-  MOCK_CONST_METHOD3(getBinMinMaxIndex, void(std::size_t wi, std::size_t &imin, std::size_t &imax));
   MOCK_CONST_METHOD1(getIntegratedCounts, double(std::size_t index));
+  MOCK_CONST_METHOD3(getBinMinMaxIndex, void(std::size_t wi, std::size_t &imin, std::size_t &imax));
   MOCK_CONST_METHOD0(components, const std::vector<size_t> &());
   MOCK_CONST_METHOD0(getInstrumentRenderer, const InstrumentRenderer &());
 };

@@ -33,7 +33,7 @@ namespace MantidWidgets {
 This class keeps information used to draw a detector on an unwrapped surface.
 
 */
-class UnwrappedDetector {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW UnwrappedDetector {
 public:
   UnwrappedDetector();
   UnwrappedDetector(const GLColor &color, size_t detIndex);
