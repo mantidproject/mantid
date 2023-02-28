@@ -7,7 +7,6 @@
 #  This file is part of the mantid workbench.
 
 import unittest
-from distutils.version import LooseVersion
 
 import matplotlib
 from matplotlib import use as mpl_use
@@ -191,10 +190,7 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
     def test_apply_properties_applies_to_all_images_if_multiple_colorfill_plots_and_one_colorbar(self):
         fig = pcolormesh([self.ws, self.ws])
         props = {"label": "New Label", "colormap": "jet", "vmin": 0, "vmax": 2, "scale": "Linear", "interpolation": "None"}
-        if LooseVersion(matplotlib.__version__) > LooseVersion("3.1.3"):
-            mock_view = Mock(get_selected_image_name=lambda: "ws: (0, 0) - child0", get_properties=lambda: ImageProperties(props))
-        else:
-            mock_view = Mock(get_selected_image_name=lambda: "ws: (0, 0) - image0", get_properties=lambda: ImageProperties(props))
+        mock_view = Mock(get_selected_image_name=lambda: "ws: (0, 0) - child0", get_properties=lambda: ImageProperties(props))
         presenter = self._generate_presenter(fig=fig, view=mock_view)
         presenter.apply_properties()
 
@@ -224,10 +220,7 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
         self.assertTrue(isinstance(fig.axes[0].images[0], matplotlib.image.AxesImage))
         self.assertTrue(isinstance(fig.axes[1].collections[0], matplotlib.collections.QuadMesh))
         props = {"label": "New Label", "colormap": "jet", "vmin": 0, "vmax": 2, "scale": "Linear", "interpolation": "None"}
-        if LooseVersion(matplotlib.__version__) > LooseVersion("3.1.3"):
-            mock_view = Mock(get_selected_image_name=lambda: "ws: (0, 0) - child0", get_properties=lambda: ImageProperties(props))
-        else:
-            mock_view = Mock(get_selected_image_name=lambda: "ws: (0, 0) - image0", get_properties=lambda: ImageProperties(props))
+        mock_view = Mock(get_selected_image_name=lambda: "ws: (0, 0) - child0", get_properties=lambda: ImageProperties(props))
         presenter = self._generate_presenter(fig=fig, view=mock_view)
         presenter.apply_properties()
 

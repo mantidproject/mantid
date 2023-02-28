@@ -35,17 +35,8 @@ class StringToPng(mantid.api.PythonAlgorithm):
         )
 
     def PyExec(self):
-        ok2run = ""
-        try:
-            import matplotlib
-        except ImportError:
-            ok2run = "Problem importing matplotlib"
-            from distutils.version import LooseVersion
+        import matplotlib
 
-            if LooseVersion(matplotlib.__version__) < LooseVersion("1.2.0"):
-                ok2run = "Wrong version of matplotlib. Required >= 1.2.0"
-        if ok2run != "":
-            raise RuntimeError(ok2run)
         matplotlib.use("agg")
         import matplotlib.pyplot as plt
 
