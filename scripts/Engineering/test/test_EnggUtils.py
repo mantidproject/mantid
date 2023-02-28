@@ -188,8 +188,8 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         ]
         mock_add_log.assert_has_calls(add_log_calls)
         save_nxs_calls = [
-            call(InputWorkspace=ws_foc, Filename=focused_files[0], WorkspaceIndexList=[0]),
-            call(InputWorkspace=ws_foc, Filename=focused_files[1], WorkspaceIndexList=[1]),
+            call(InputWorkspace=ws_foc, Filename=focused_files[0][0], WorkspaceIndexList=[0]),
+            call(InputWorkspace=ws_foc, Filename=focused_files[0][1], WorkspaceIndexList=[1]),
         ]
         mock_save_nxs.assert_has_calls(save_nxs_calls)
 
@@ -225,7 +225,7 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
             call(Workspace=ws_foc, LogName="bankid", LogText="bank 1"),
         ]
         mock_add_log.assert_has_calls(add_log_calls)
-        mock_save_nxs.assert_called_once_with(InputWorkspace=ws_foc, Filename=focused_files[0], WorkspaceIndexList=[0])
+        mock_save_nxs.assert_called_once_with(InputWorkspace=ws_foc, Filename=focused_files[0][0], WorkspaceIndexList=[0])
 
 
 if __name__ == "__main__":

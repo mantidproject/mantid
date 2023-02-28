@@ -219,7 +219,7 @@ def create_new_calibration(calibration, rb_num, plot_output, save_dir, full_cali
 
     mantid.DeleteWorkspace(ceria_workspace)
 
-    return [prm_filepath]  # only from last calib_dir
+    return prm_filepath  # only from last calib_dir
 
 
 def write_prm_file(ws_foc, prm_savepath, spec_nums=None):
@@ -280,7 +280,7 @@ def load_existing_calibration_files(calibration):
         logger.error(f"Invalid file selected: {prm_filepath}")
         return None
     calibration.load_relevant_calibration_files()
-    return [prm_filepath]
+    return prm_filepath
 
 
 def write_diff_consts_to_table_from_prm(prm_filepath):

@@ -1,0 +1,1 @@
+- Loading or creating a calibration now fills the GSAS II tab with the currently loaded calibration's ``.prm`` file.
