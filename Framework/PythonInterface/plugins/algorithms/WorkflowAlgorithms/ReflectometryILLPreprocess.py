@@ -14,6 +14,7 @@ from mantid.kernel import (
     IntBoundedValidator,
     StringListValidator,
     PropertyCriterion,
+    PropertyManagerProperty,
 )
 from mantid.api import (
     AlgorithmFactory,
@@ -405,6 +406,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
         self.declareProperty(name="CorrectGravity", defaultValue=False, doc="Whether to correct for gravity effects (FIGARO only).")
 
+        self.declareProperty(PropertyManagerProperty("LogsToReplace", dict()), doc="Sample logs to be overwritten.")
+
     def PyExec(self):
         """Execute the algorithm."""
         self._subalgLogging = self.getProperty(Prop.SUBALG_LOGGING).value == SubalgLogging.ON
@@ -696,6 +699,15 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             elif angle_option == "UserAngle":
                 self._bragg_angle = self.getProperty("BraggAngle").value
             load_options["BraggAngle"] = self._bragg_angle
+
+        # The loop below handles translation of PropertyManagerProperty to dictionary of str: value (str, int, float...)
+        # so it can be interfaced with PropertyManagerProperty via LoadOptions of LoadAndMerge.
+        # Direct forwarding was not possible due to internal casting of this property to TypedValue
+        logs_to_replace = dict()
+        tmp_dict = dict(self.getProperty("LogsToReplace").value)
+        for key in tmp_dict:
+            logs_to_replace[key] = tmp_dict[key].value
+        load_options["LogsToReplace"] = logs_to_replace
 
         # perform data consistency check
         if len(input_files.split("+")) > 1:

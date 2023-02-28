@@ -30,9 +30,6 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
             config["default.instrument"] = self._instrument
         mtd.clear()
 
-    def tearDown(self):
-        mtd.clear()
-
     def testDirectBeamD17(self):
         args = {"Run": "ILL/D17/317369.nxs", "Measurement": "DirectBeam", "OutputWorkspace": "outWS", "rethrow": True, "child": True}
         alg = create_algorithm("ReflectometryILLPreprocess", **args)
@@ -169,6 +166,18 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         self.assertEqual(mtd.getObjectNames(), [])
         self.assertAlmostEqual(outWS.readY(69)[307], 9.080e-07, 3)
         self.assertAlmostEqual(outWS.readE(69)[307], 1.135e-06, 3)
+
+    def testReplaceSampleLogs(self):
+        outWSName = "outWS"
+        logsToReplace = {"ChopperSetting.firstChopper": 2, "ChopperSetting.secondChopper": 1}
+        args = {"Run": "ILL/D17/317369", "OutputWorkspace": outWSName, "LogsToReplace": logsToReplace, "rethrow": True, "child": True}
+        alg = create_algorithm("ReflectometryILLPreprocess", **args)
+        assertRaisesNothing(self, alg.execute)
+        outWS = alg.getProperty("OutputWorkspace").value
+        self.assertEqual(
+            float(outWS.getRun().getLogData("ChopperSetting.firstChopper").value), 2.0
+        )  # explicit cast to float for OSX and Windows which implicitly cast it to int
+        self.assertEqual(float(outWS.getRun().getLogData("ChopperSetting.secondChopper").value), 1.0)
 
 
 if __name__ == "__main__":

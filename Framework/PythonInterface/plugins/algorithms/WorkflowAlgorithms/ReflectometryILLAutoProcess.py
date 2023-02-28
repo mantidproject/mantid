@@ -486,6 +486,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
 
         self.declareProperty(name="CorrectGravity", defaultValue=False, doc="Whether to correct for gravity effects (FIGARO only).")
 
+        self.copyProperties("ReflectometryILLPreprocess", ["LogsToReplace"])
+
     def PyExec(self):
         """Execute the algorithm."""
         self.log().purge()
@@ -525,7 +527,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             else:
                 foreground_names = []
                 run_inputs, run_names = self.compose_polarized_runs_list(angle_index)
-                for (run, name) in zip(run_inputs, run_names):
+                for run, name in zip(run_inputs, run_names):
                     reflected_pol_foreground_ws_name, direct_foreground_name, corrected_theta_ws = self.process_reflected_beam(
                         run, name, direct_beam_name, angle_index
                     )
@@ -743,6 +745,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             FitRangeLower=self.getProperty(PropertyNames.XMIN_DIRECT).value,
             FitRangeUpper=self.getProperty(PropertyNames.XMAX_DIRECT).value,
             CorrectGravity=self.getProperty("CorrectGravity").value,
+            LogsToReplace=self.getProperty("LogsToReplace").value,
         )
 
     def preprocess_reflected_beam(self, run: str, output_ws_name: str, direct_beam_name: str, angle_index: int) -> None:
@@ -778,6 +781,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             "FitRangeLower": self.get_value(PropertyNames.XMIN, angle_index),
             "FitRangeUpper": self.get_value(PropertyNames.XMAX, angle_index),
             "CorrectGravity": self.getProperty("CorrectGravity").value,
+            "LogsToReplace": self.getProperty("LogsToReplace").value,
         }
         if angle_option == PropertyNames.UAN:
             preprocess_args["BraggAngle"] = self.get_value(PropertyNames.THETA, angle_index)
