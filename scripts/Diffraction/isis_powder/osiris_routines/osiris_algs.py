@@ -229,44 +229,45 @@ def get_empty_runs(inst_settings):
     return [_assign_drange_empty("drange" + str(i + 1), all_run_numbers) for i in range(12)]
 
 
-def _correct_drange_overlap(merged_ws, drange_sets):
-    # Create scalar data to cope with where merge has combined overlapping data.
-    data_x = (merged_ws.dataX(0)[1:] + merged_ws.dataX(0)[:-1]) / 2.0
-    data_y = np.zeros(data_x.size)
-    for drange in drange_sets:
-        if drange_sets[drange].has_sample():
-            for i in range(data_x.size):
-                if d_range_alice[drange][0] <= data_x[i] <= d_range_alice[drange][1]:
-                    data_y[i] += len(drange_sets[drange].get_samples())
+def _correct_drange_overlap(merged_group_ws, drange_sets):
+    for merged_ws in merged_group_ws:
+        # Create scalar data to cope with where merge has combined overlapping data.
+        data_x = (merged_ws.dataX(0)[1:] + merged_ws.dataX(0)[:-1]) / 2.0
+        data_y = np.zeros(data_x.size)
+        for drange in drange_sets:
+            if drange_sets[drange].has_sample():
+                for i in range(data_x.size):
+                    if d_range_alice[drange][0] <= data_x[i] <= d_range_alice[drange][1]:
+                        data_y[i] += len(drange_sets[drange].get_samples())
 
-    # apply scalar data to result workspace
-    for i in range(0, merged_ws.getNumberHistograms()):
-        merged_ws.setY(i, merged_ws.dataY(i) / data_y)
-        merged_ws.setE(i, merged_ws.dataE(i) / data_y)
-    return merged_ws
+        # apply scalar data to result workspace
+        for i in range(0, merged_ws.getNumberHistograms()):
+            merged_ws.setY(i, merged_ws.dataY(i) / data_y)
+            merged_ws.setE(i, merged_ws.dataE(i) / data_y)
+    return merged_group_ws
 
 
 def merge_dspacing_runs(focussed_runs, drange_sets, run_number):
     if len(focussed_runs) == 1:
         return [focussed_runs[0]]
 
-    extracted_spectras = [common.extract_ws_spectra(ws) for ws in focussed_runs]
+    extracted_spectra = [common.extract_ws_spectra(ws) for ws in focussed_runs]
 
-    have_same_spectras_count = len({len(spectras) for spectras in extracted_spectras}) == 1
-    if not have_same_spectras_count:
-        logger.warning("Cannot merge focussed workspaces with different number of spectras")
+    have_same_spectra_count = len({len(spectra) for spectra in extracted_spectra}) == 1
+    if not have_same_spectra_count:
+        logger.warning("Cannot merge focussed workspaces with different number of spectra")
         return [ws for ws in focussed_runs]
 
     # Group workspaces located at the same index
-    transposed_spectras = list(map(list, zip(*extracted_spectras)))
+    matched_spectra = [list(spectra) for spectra in zip(*extracted_spectra)]
     # Merge workspaces located at the same index
-    merged_spectras = [
-        MergeRuns(InputWorkspaces=spectras, OutputWorkspace="OSIRIS" + run_number + WORKSPACE_SUFFIX.MERGED)
-        for spectras in transposed_spectras
+    merged_spectra = [
+        MergeRuns(InputWorkspaces=spectras, OutputWorkspace="OSIRIS" + run_number + WORKSPACE_SUFFIX.MERGED + f"_{idx}")
+        for idx, spectras in enumerate(matched_spectra)
     ]
-    grouped_spectras = GroupWorkspaces(InputWorkspaces=merged_spectras)
+    grouped_spectra = GroupWorkspaces(InputWorkspaces=merged_spectra, OutputWorkspace="OSIRIS" + run_number + WORKSPACE_SUFFIX.MERGED)
 
-    return [_correct_drange_overlap(grouped_spectras, drange_sets)]
+    return [_correct_drange_overlap(grouped_spectra, drange_sets)]
 
 
 def _group_workspaces(ws_list, output):
