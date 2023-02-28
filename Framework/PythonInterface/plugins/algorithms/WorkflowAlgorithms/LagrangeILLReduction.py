@@ -169,9 +169,9 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         Adds metadata from provided loaded lists of values.
 
         Args:
-        ws: workspace name where the metadata is to be added
-        time: list of time values to be added
-        temperature: list of temperature values to be added
+            ws (str): workspace name where the metadata is to be added
+            time (list(float)): list of time values to be added
+            temperature (list(float)): list of temperature values to be added
         """
         run = mtd[ws].getRun()
         run.addProperty("time", time, True)
@@ -181,9 +181,12 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
     def load_and_concatenate(self, files: List[str]) -> np.ndarray:
         """
         Loads ASCII Lagrange data files as input, loads the interesting data from it and concatenates them into one numpy array
-        @param files the ascii data files to load and concatenate together
-        @return the values concatenated, as a (nb of points, 3)-shaped numpy array,
-        with values (incident energy, monitor counts, detector counts)
+
+        Args:
+            files (list(str)): the ascii data files to load and concatenate together
+        Return:
+            Loaded values concatenated, as a (nb of points, 3)-shaped numpy array, with values (incident energy, monitor counts,
+        detector counts)
         """
         loaded_data = None
         for file in files:
@@ -266,9 +269,9 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
     def preprocess_nexus(self, file_name: List[str], output_name: str):
         """
         Loads, merges adjacent bins and puts the detector counts workspace in the ADS. The method interfaces to the LoadAndMerge
-         algorithm to load NeXus Lagrange data, then processes the loaded workspace to remove all bins that have a smaller
-          bin width than EPSILON, uses the ExtractMonitors to separate detector counts from monitors, and finally,
-          if requested, normalizes detector counts to monitor.
+        algorithm to load NeXus Lagrange data, then processes the loaded workspace to remove all bins that have a smaller
+        bin width than EPSILON, uses the ExtractMonitors to separate detector counts from monitors, and finally,
+        if requested, normalizes detector counts to monitor.
 
         Args:
             file_name (list(str)): string containing name(s) of file(s) to be loaded
@@ -300,8 +303,9 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         and errors.
 
         Args:
-        @param data: the data to format
-        @return 5 arrays, with the values being incident energy, normalized detector counts, errors, times, and temperatures
+            data (ndarray): the data to format
+        Return:
+             5 arrays, with the values being incident energy, normalized detector counts, errors, times, and temperatures
         """
 
         energy = [0] * len(data)
@@ -334,8 +338,9 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         Loads the provided water correction and passes these values.
 
         Args:
-        @param correction_file: path to the file with water correction
-        @return Numpy array with loaded correction data
+            correction_file (str): path to the file with water correction
+        Return:
+            Numpy array with loaded correction data
         """
         try:
             correction = np.loadtxt(correction_file)
@@ -415,8 +420,9 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         Merge points that are close to one another together, summing their values
 
         Args:
-        @param data: a (nb of points, 3)-shaped numpy array, with values (incident energy, monitor counts, detector counts)
-        @return a (nb of points, 3)-shaped numpy array, with data sorted and merged by their incident energy.
+            data (ndarray): a (nb of points, 3)-shaped numpy array, with values (incident energy, monitor counts, detector counts)
+        Return:
+             A (nb of points, 3)-shaped numpy array, with data sorted and merged by their incident energy.
         """
         # create masked array sorted by incident energy
         data_mask = np.ma.masked_array(data[data[:, 0].argsort()], mask=False)
@@ -440,8 +446,10 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
     def correct_data(self, ws_to_correct: str, corrected_ws: str):
         """
         Apply water correction to the provided data
-        @param ws_to_correct the name of the workspace holding the data to be corrected
-        @param corrected_ws the name of the workspace that should hold the corrected value. It will be created.
+
+        Args:
+            ws_to_correct (str): the name of the workspace holding the data to be corrected
+            corrected_ws (str): the name of the workspace that should hold the corrected value. It will be created.
         """
 
         # we need to get the data and interpolate it with numpy because Mantid only have spline interpolation and the
@@ -460,8 +468,11 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
 
     def process_empty_cell(self, empty_cell_files: List[str]):
         """
-        Process empty cell files
-        @param empty_cell_files list with paths to empty cell data
+        Process empty cell files by loading the raw data, adding metadata, normalising to monitor (if requested) and
+        performing water correction.
+
+        Args:
+            empty_cell_files (list(str)): list with paths to empty cell data
         """
         # load and format empty cell
         self.empty_cell_ws = "__" + self.output_ws_name + "_rawEC"
