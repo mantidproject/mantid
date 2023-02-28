@@ -12,11 +12,11 @@ Error Reporter test
 *Preparation*
 
 - Ensure that `Report usage data` is checked in the First Time Setup screen
-- Below you will be asked to produce a hard crash (by running the `Segfault`
+- Below you will be asked to produce a hard crash (by running the ``Segfault``
   Algorithm) or a soft crash (bring up an error report pop-up without also
   closing Mantid, by Loading ``Training_Exercise3a_SNS.nxs`` available from
   the `Training Course Data <https://sourceforge.net/projects/mantid/files/Sample%20Data/TrainingCourseData.zip/download>`__
-  and running the `NormaliseToMonitor` Algorithm. If one or both of these
+  and running the ``NormaliseToMonitor`` Algorithm. If one or both of these
   methods to crash Mantid no longer works, then ask other developers for a
   suitable method and update these instructions.
 - Make sure the location of this file is included in your search directories. Full instructions :ref:`are available online <mantid:getting started>`.
@@ -28,13 +28,16 @@ Error Reporter test
 
 1. Open MantidWorkbench
 
-- Cause a crash by running the `Segfault` algorithm, Workbench should close
+- Cause a crash by running the ``Segfault`` algorithm, Workbench should close
 - This should cause an error reporter dialog saying Mantid has thrown an unexpected exception
 - Make sure the hyperlink to the privacy policy works
 - Click the `Show More Details` button to open the Show More Details dialog. This should show user details such as OS.
   The python stacktrace should be empty as the Workbench unhandled exception occurred in C++. Close this dialog.
 - Enter some text in the `Name` box; make sure the `Share non-identifiable information` button gets greyed out
 - In the `Name` box enter `Private` and in the `Email` box enter `private`
+- Input some additional information into the main textbox. Check that the character count label updates as you type, copy paste etc.
+- Check that the character count label changes to red and the buttons to send the report are disabled if you exceed the character limit.
+- Check that these changes revert when brining the number of characters back within the limit.
 - Input some additional information into the main textbox. Try to include characters that need to be escaped such as ``"``
 - Tick the `Remember Me` checkbox
 - Click the `Don't share any information` button
@@ -44,7 +47,7 @@ Error Reporter test
 
 2. Open MantidWorkbench
 
-- Cause a crash by running the `Segfault` algorithm, Workbench should close
+- Cause a crash by running the ``Segfault`` algorithm, Workbench should close
 - This should cause an error reporter dialog saying Mantid has thrown an unexpected exception
 - The `Private` contact details from Test 1 should **NOT** be displayed and the `Remember Me` checkbox should **NOT** be ticked
 - In the `Name` box enter `Public` and in the `Email` box enter `public`
@@ -57,8 +60,8 @@ Error Reporter test
 
 3. Open MantidWorkbench
 
-- Load the file `Training_Exercise3a_SNS.nxs`
-- Run the `NormaliseToMonitor` algorithm
+- Load the file ``Training_Exercise3a_SNS.nxs``
+- Run the ``NormaliseToMonitor`` algorithm
 - This should cause an error reporter dialog saying Mantid has thrown an unexpected exception
 - The `Public` contact details from Test 2 should be displayed and the `Remember Me` checkbox ticked
 - Make sure the hyperlink to the privacy policy works
@@ -74,8 +77,8 @@ Error Reporter test
 
 4. MantidWorkbench is still open
 
-- Load the file `Training_Exercise3a_SNS.nxs`
-- Run the `NormaliseToMonitor` algorithm
+- Load the file ``Training_Exercise3a_SNS.nxs``
+- Run the ``NormaliseToMonitor`` algorithm
 - This should cause an error reporter dialog saying Mantid has thrown an unexpected exception
 - The `Public` contact details from Test 2 should be displayed and the `Remember Me` checkbox ticked
 - Click the `Show More Details` button to open the Show More Details dialog. This should show user details such as OS.
@@ -91,8 +94,8 @@ Error Reporter test
 
 5. MantidWorkbench is still open
 
-- Load the file `Training_Exercise3a_SNS.nxs`
-- Run the `NormaliseToMonitor` algorithm
+- Load the file ``Training_Exercise3a_SNS.nxs``
+- Run the ``NormaliseToMonitor`` algorithm
 - This should cause an error reporter dialog saying Mantid has thrown an unexpected exception
 - Contact details from before should **NOT** be displayed and the `Remember Me` checkbox should **NOT** be ticked
 - Enter some text in the `Name` box; make sure the `Share non-identifiable information` button gets greyed out
@@ -108,8 +111,8 @@ Error Reporter test
 
 6. MantidWorkbench is still open
 
-- Load the file `Training_Exercise3a_SNS.nxs`
-- Run the `NormaliseToMonitor` algorithm
+- Load the file ``Training_Exercise3a_SNS.nxs``
+- Run the ``NormaliseToMonitor`` algorithm
 - This should cause an error reporter dialog saying Mantid has thrown an unexpected exception
 - Only the `public2` email from Test 5 should be displayed in the email box and the `Remember Me` checkbox ticked.
   Make sure the `Share non-identifiable information` button is currently enabled (not greyed out)
@@ -126,8 +129,8 @@ Error Reporter test
 
 7. Open MantidWorkbench
 
-- Load the file `Training_Exercise3a_SNS.nxs`
-- Run the `NormaliseToMonitor` algorithm
+- Load the file ``Training_Exercise3a_SNS.nxs``
+- Run the ``NormaliseToMonitor`` algorithm
 - This should cause an error reporter dialog saying Mantid has thrown an unexpected exception
 - The `Public3` contact details from Test 6 should be displayed and the `Remember Me` checkbox ticked
 - Close the error reporter and MantidWorkbench
