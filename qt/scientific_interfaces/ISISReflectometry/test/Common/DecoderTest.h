@@ -25,7 +25,7 @@ const std::string DIR_PATH = "ISISReflectometry/";
 auto &fileFinder = FileFinder::Instance();
 const auto MAINWINDOW_FILE = fileFinder.getFullPath(DIR_PATH + "mainwindow.json");
 const auto BATCH_FILE_PREVIOUS = fileFinder.getFullPath(DIR_PATH + "batch.json");
-const auto BATCH_FILE_CURRENT = fileFinder.getFullPath(DIR_PATH + "batch_with_save_rows_box.json");
+const auto BATCH_FILE_V1 = fileFinder.getFullPath(DIR_PATH + "batch_with_save_rows_box.json");
 const auto BATCH_FILE_POLREF = fileFinder.getFullPath(DIR_PATH + "batch_with_save_rows_box_POLREF.json");
 const auto EMPTY_BATCH_FILE = fileFinder.getFullPath(DIR_PATH + "empty_batch.json");
 const auto TWO_ROW_EXP_BATCH_FILE = fileFinder.getFullPath(DIR_PATH + "batch_2_exp_rows.json");
@@ -72,7 +72,7 @@ public:
 
   void test_decodePopulatedBatch() {
     CoderCommonTester tester;
-    auto map = MantidQt::API::loadJSONFromFile(QString::fromStdString(BATCH_FILE_CURRENT));
+    auto map = MantidQt::API::loadJSONFromFile(QString::fromStdString(BATCH_FILE_V1));
     QtMainWindowView mwv;
     mwv.initLayout();
     auto gui = dynamic_cast<QtBatchView *>(mwv.batches()[0]);
@@ -122,7 +122,7 @@ public:
 
   void test_decodeBatchWhenInstrumentChanged() {
     CoderCommonTester tester;
-    auto map = MantidQt::API::loadJSONFromFile(QString::fromStdString(BATCH_FILE_CURRENT));
+    auto map = MantidQt::API::loadJSONFromFile(QString::fromStdString(BATCH_FILE_V1));
     QtMainWindowView mwv;
     mwv.initLayout();
     auto gui = dynamic_cast<QtBatchView *>(mwv.batches()[0]);
@@ -193,8 +193,8 @@ public:
     TS_ASSERT_THROWS(decoder.decodeBatch(&mwv, 0, oldMap), std::out_of_range const &);
   }
 
-  void test_decodeVersionOneFiles() {
-    auto map = MantidQt::API::loadJSONFromFile(QString::fromStdString(BATCH_FILE_CURRENT));
+  void test_decodeCurrentVersionFiles() {
+    auto map = MantidQt::API::loadJSONFromFile(QString::fromStdString(BATCH_FILE_V1));
     Decoder decoder;
     auto constexpr expectedVersion = 1;
     TS_ASSERT_EQUALS(expectedVersion, decoder.decodeVersion(map));

@@ -89,11 +89,15 @@ private:
   }
 
   void testPolarizationCorrectionsComboBox(const QComboBox *comboBox, const QMap<QString, QVariant> &map) {
-    if (map[QString("polCorrCheckBox")].toBool()) {
-      TS_ASSERT_EQUALS(comboBox->currentText(), "ParameterFile");
-    } else {
-      TS_ASSERT_EQUALS(comboBox->currentText(), "None");
+    if (map.contains("polCorrComboBox")) {
+      TS_ASSERT_EQUALS(comboBox->currentText(), map[QString("polCorrComboBox")].toString())
+      return;
     }
+    if (map[QString("polCorrCheckBox")].toBool()) {
+      TS_ASSERT_EQUALS(comboBox->currentText(), "ParameterFile")
+      return;
+    }
+    TS_ASSERT_EQUALS(comboBox->currentText(), "None")
   }
 
   void testPerAngleDefaults(const QTableWidget *tab, const QMap<QString, QVariant> &map) {

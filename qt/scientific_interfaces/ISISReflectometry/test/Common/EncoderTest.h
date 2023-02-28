@@ -54,7 +54,7 @@ public:
     tester.testBatch(gui, &mwv, map);
 
     TS_ASSERT(map.contains(QString("version")))
-    auto constexpr expectedVersion = "1";
+    auto constexpr expectedVersion = "2";
     TS_ASSERT_EQUALS(expectedVersion, map[QString("version")].toString().toStdString())
   }
 };
