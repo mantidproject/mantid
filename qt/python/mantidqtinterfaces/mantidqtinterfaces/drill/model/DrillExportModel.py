@@ -55,7 +55,7 @@ class DrillExportModel:
         """
         self._exportAlgorithms = {k: v for k, v in RundexSettings.EXPORT_ALGORITHMS[acquisitionMode].items()}
         self._exportDocs = dict()
-        for (a, _) in self._exportAlgorithms.keys():
+        for a, _ in self._exportAlgorithms.keys():
             try:
                 alg = AlgorithmManager.createUnmanaged(a)
                 self._exportDocs[a] = alg.summary()
@@ -100,8 +100,9 @@ class DrillExportModel:
         Activate a spefific algorithm.
 
         Args:
-            algorithm (str, str)): name of the algo and output file extension
+            algorithm list(str, str): name of the algo and output file extension
         """
+        algorithm = tuple(algorithm)  # tuples are hashable and can be a key in a dictionary _exportAlgorithms
         if algorithm in self._exportAlgorithms:
             self._exportAlgorithms[algorithm] = True
 
