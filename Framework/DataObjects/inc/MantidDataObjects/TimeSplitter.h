@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/DllConfig.h"
 #include "MantidKernel/DateAndTime.h"
 
@@ -25,6 +26,7 @@ class MANTID_DATAOBJECTS_DLL TimeSplitter {
 public:
   TimeSplitter() = default;
   TimeSplitter(const DateAndTime &start, const DateAndTime &stop);
+  TimeSplitter(const Mantid::API::MatrixWorkspace_sptr &ws, const DateAndTime &offset = DateAndTime(0, 0));
   int valueAtTime(const DateAndTime &time) const;
   void addROI(const DateAndTime &start, const DateAndTime &stop, const int value);
   std::vector<int> outputWorkspaceIndices() const;
