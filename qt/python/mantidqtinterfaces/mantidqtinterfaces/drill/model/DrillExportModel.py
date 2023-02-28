@@ -20,14 +20,14 @@ import os
 class DrillExportModel:
 
     """
-    Dictionnary containing algorithm (name, extension) tuples and activation
+    Dictionary containing algorithm (name, extension) tuples and activation
     state.
     """
 
     _exportAlgorithms = None
 
     """
-    Dictionnary of export algorithm short doc.
+    Dictionary of export algorithm short doc.
     """
     _exportDocs = None
 
@@ -37,12 +37,12 @@ class DrillExportModel:
     _pool = None
 
     """
-    Dictionnary of all the exports (dict(str:set(str))).
+    Dictionary of all the exports (dict(str:set(str))).
     """
     _exports = None
 
     """
-    Dictionnary of the successful exports (dict(str:set(str))).
+    Dictionary of the successful exports (dict(str:set(str))).
     """
     _successExport = None
 
@@ -79,7 +79,7 @@ class DrillExportModel:
         Get the short documentation of each export algorithm.
 
         Return:
-            dict(str:str): dictionnary algo:doc
+            dict(str:str): dictionary algo:doc
         """
         return {k: v for k, v in self._exportDocs.items()}
 
@@ -97,7 +97,7 @@ class DrillExportModel:
 
     def activateAlgorithm(self, algorithm):
         """
-        Activate a spefific algorithm.
+        Activate a specific algorithm.
 
         Args:
             algorithm list(str, str): name of the algo and output file extension
