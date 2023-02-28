@@ -19,7 +19,7 @@ class ILL_Lagrange_ASCII_Test(systemtesting.MantidSystemTest):
 
     def setUp(self):
         self._facility = config["default.facility"]
-
+        self._instrument = config["default.instrument"]
         self._data_search_dirs = config.getDataSearchDirs()
         config["default.facility"] = "ILL"
         config["default.instrument"] = "Lagrange"
