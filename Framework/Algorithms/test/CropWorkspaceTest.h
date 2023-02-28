@@ -59,19 +59,26 @@ public:
     return name;
   }
 
-  void testName() { TS_ASSERT_EQUALS(crop.name(), "CropWorkspace"); }
+  void testName() {
+    CropWorkspace crop;
+    TS_ASSERT_EQUALS(crop.name(), "CropWorkspace");
+  }
 
-  void testVersion() { TS_ASSERT_EQUALS(crop.version(), 1); }
+  void testVersion() {
+    CropWorkspace crop;
+    TS_ASSERT_EQUALS(crop.version(), 1);
+  }
 
   void testInit() {
+    CropWorkspace crop;
     TS_ASSERT_THROWS_NOTHING(crop.initialize());
     TS_ASSERT(crop.isInitialized());
   }
 
   void testInvalidInputs() {
     std::string inputName = createInputWorkspace();
-    if (!crop.isInitialized())
-      crop.initialize();
+    CropWorkspace crop;
+    crop.initialize();
 
     TS_ASSERT_THROWS(crop.execute(), const std::runtime_error &);
     TS_ASSERT(!crop.isExecuted());
@@ -104,7 +111,7 @@ public:
     AnalysisDataService::Instance().add(wsName, test_in);
   }
 
-  void test_CropWorkspaceEventsInplace() {
+  void testCropWorkspaceEventsInplace() {
     // setup
     std::string eventname("TestEvents");
     this->makeFakeEventWorkspace(eventname);
@@ -139,6 +146,7 @@ public:
 
   void testExec() {
     std::string inputName = createInputWorkspace();
+    CropWorkspace crop;
     if (!crop.isInitialized())
       crop.initialize();
 
@@ -383,9 +391,6 @@ public:
     AnalysisDataService::Instance().remove(wsName);
     delete alg;
   }
-
-private:
-  CropWorkspace crop;
 };
 
 class CropWorkspaceTestPerformance : public CxxTest::TestSuite {
