@@ -259,7 +259,7 @@ public:
   /** Test that a TimeSplitter object constructed from a TableWorkspace object
    * containing absolute times is equivalent to a TimeSplitter object built by
    * successively adding time ROIs.
-   * @brief test_timeSplitterFromTableWorkspaceWithAbsoluteTimes
+   * @brief test_timeSplitterFromTableWorkspaceAbsoluteTimes
    */
   void test_timeSplitterFromTableWorkspaceAbsoluteTimes() {
     auto tws = std::make_shared<Mantid::DataObjects::TableWorkspace>(3 /*rows*/);
@@ -315,7 +315,7 @@ public:
   /** Test that a TimeSplitter object constructed from a TableWorkspace object
    * containing relative times is equivalent to a TimeSplitter object built by
    * successively adding time ROIs.
-   * @brief test_timeSplitterFromTableWorkspaceWithRelativeTimes
+   * @brief test_timeSplitterFromTableWorkspaceRelativeTimes
    */
   void test_timeSplitterFromTableWorkspaceRelativeTimes() {
     auto tws = std::make_shared<Mantid::DataObjects::TableWorkspace>(3 /*rows*/);
