@@ -598,6 +598,62 @@ public:
     TS_ASSERT_EQUALS(partials[1]->getNumberEvents(), 200);
     TS_ASSERT_EQUALS(partials[2]->getNumberEvents(), 200);
     TS_ASSERT_EQUALS(partials[3]->getNumberEvents(), 600);
+
+    // compare by Pulse + TOF. Events are already ordered so this should not affect results
+    bool pulseTof{true};
+    for (auto it = partials.begin(); it != partials.end(); it++)
+      it->second->clearData();
+    splitter.splitEventList(events, partials, pulseTof);
+    TS_ASSERT_EQUALS(partials[TimeSplitter::NO_TARGET]->getNumberEvents(), 0);
+    TS_ASSERT_EQUALS(partials[0]->getNumberEvents(), 0);
+    TS_ASSERT_EQUALS(partials[1]->getNumberEvents(), 200);
+    TS_ASSERT_EQUALS(partials[2]->getNumberEvents(), 200);
+    TS_ASSERT_EQUALS(partials[3]->getNumberEvents(), 600);
+
+    // compare by Pulse + TOF after decreasing 0.1 seconds on each TOF.
+    // Effectively, we discard the first 10 events since they have now a Pulse+TOF
+    // smaller than the beginning of the first splitter boundary
+    for (auto it = partials.begin(); it != partials.end(); it++)
+      it->second->clearData();
+    bool tofCorrect{true};
+    double factor{1.0};
+    double shift{-100000.0}; // -0.1 seconds in microseconds
+    splitter.splitEventList(events, partials, pulseTof, tofCorrect, factor, shift);
+    TS_ASSERT_EQUALS(partials[TimeSplitter::NO_TARGET]->getNumberEvents(), 10);
+    TS_ASSERT_EQUALS(partials[0]->getNumberEvents(), 0);
+    TS_ASSERT_EQUALS(partials[1]->getNumberEvents(), 200);
+    TS_ASSERT_EQUALS(partials[2]->getNumberEvents(), 190);
+    TS_ASSERT_EQUALS(partials[3]->getNumberEvents(), 600);
+
+    // compare by Pulse + TOF after compressing each TOF to 90% of its original value.
+    // Since the splitter boundaries coincide with the pulse times, this compression
+    // does not change the assignment one would have with no compression because a
+    // compression of TOF values does not cause frame overlap
+    for (auto it = partials.begin(); it != partials.end(); it++)
+      it->second->clearData();
+    factor = 0.9;
+    shift = 0.0;
+    splitter.splitEventList(events, partials, pulseTof, tofCorrect, factor, shift);
+    TS_ASSERT_EQUALS(partials[TimeSplitter::NO_TARGET]->getNumberEvents(), 0);
+    TS_ASSERT_EQUALS(partials[0]->getNumberEvents(), 0);
+    TS_ASSERT_EQUALS(partials[1]->getNumberEvents(), 200);
+    TS_ASSERT_EQUALS(partials[2]->getNumberEvents(), 200);
+    TS_ASSERT_EQUALS(partials[3]->getNumberEvents(), 600);
+
+    // Compare by Pulse+TOF after compressing each TOF by half (50%), then decreasing each TOF by 0.5 seconds.
+    // Before compression, TOF's within each pulse are equally spaced in the 1 second pulse period.
+    // After 50% compression, the TOFs are equally spaced in a time interval of 0.5 seconds within each pulse.
+    // After decreasing each TOF by -0.5 seconds, we effectively move all events from pulse `i` to pulse `i-1`
+    for (auto it = partials.begin(); it != partials.end(); it++)
+      it->second->clearData();
+    factor = 0.5;
+    shift = -500000.0; // shift by -0.5 seconds, in microseconds.
+    splitter.splitEventList(events, partials, pulseTof, tofCorrect, factor, shift);
+    TS_ASSERT_EQUALS(partials[TimeSplitter::NO_TARGET]->getNumberEvents(), 100);
+    TS_ASSERT_EQUALS(partials[0]->getNumberEvents(), 0);
+    TS_ASSERT_EQUALS(partials[1]->getNumberEvents(), 200);
+    TS_ASSERT_EQUALS(partials[2]->getNumberEvents(), 100);
+    TS_ASSERT_EQUALS(partials[3]->getNumberEvents(), 600);
   }
 
 };

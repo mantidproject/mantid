@@ -120,6 +120,7 @@ TimeSplitter::TimeSplitter(const SplittersWorkspace_sptr &sws) {
   }
 }
 
+/// Print the (destination index | DateAndTime boundary) pairs of this splitter.
 std::string TimeSplitter::debugPrint() const {
   std::stringstream msg;
   for (const auto &iter : m_roi_map)
@@ -294,14 +295,15 @@ std::size_t TimeSplitter::numRawValues() const { return m_roi_map.size(); }
 // ------------------------------------------------------------------------
 
 /**
- * Split a list of events according to Pulse time.
+ * Split a list of events according to Pulse time of Pulse + TOF time
  *
  * Events with masked times are allocated to destination index -1.
  * @param events : list of input events
  * @param partials : resulting partial lists of events
+ * @param pulseTof : if True, split according to Pulse + TOF time, otherwise split by Pulse time
  * @param tofCorrect : rescale and shift the TOF values (factor*TOF + shift)
- * @param factor : rescale the TOF values
- * @param shift : shift the TOF values after rescaling
+ * @param factor : rescale the TOF values by a dimensionless factor.
+ * @param shift : shift the TOF values after rescaling, in units of microseconds.
  * @raises RunTimeError : the event list is of type Mantid::API::EventType::WEIGHTED_NOTIME
  */
 void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventList *> partials, bool pulseTof,
@@ -332,9 +334,9 @@ void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventLi
 }
 
 /**
- *
- * @param events
- * @param partials
+ * Initialize the detector ID's and event type of the destination event lists.
+ * @param events : list of input events
+ * @param partials : resulting partial lists of events
  */
 void TimeSplitter::initializePartials(const EventList &events, std::map<int, EventList *> partials) const {
   // collect the state from events which is to be transferred to the partials
@@ -355,11 +357,26 @@ void TimeSplitter::initializePartials(const EventList &events, std::map<int, Eve
     initPartial(iter->second);
 }
 
+/**
+ * In-place sort a list of input events either by Pulse time or by Pulse+TOF time.
+ *
+ * The returned sorted vector of times will contain one of the following list of times:
+ * - Pulse time for each event, when pulseTof==false
+ * - Pulse + TOF time for each event, when pulseTof==true && tofCorrect==false
+ * - Pulse + (factor * TOF + shift) for each event, when pulseTof==true && tofCorrect==true
+ *
+ * @param events : list of input events
+ * @param pulseTof : if True, split according to Pulse + TOF time, otherwise split by Pulse time
+ * @param tofCorrect : rescale and shift the TOF values (factor*TOF + shift)
+ * @param factor : rescale the TOF values by a dimensionless factor.
+ * @param shift : shift the TOF values after rescaling, in units of microseconds.
+ * @return : times that will be compared again the splitter boundaries, in units of nanoseconds.
+ */
 std::vector<int64_t> TimeSplitter::sortEventList(const EventList &events, bool pulseTof, bool tofCorrect, double factor,
                                                  double shift) const {
   // sort the list in-place
   if (pulseTof)
-    // this sorting is preserved under transformation tof-->factor*tof+shift with factor>0
+    // this sorting is preserved under linear transformation tof --> factor*tof+shift with factor>0
     events.sortPulseTimeTOF();
   else
     events.sortPulseTime();
@@ -373,13 +390,27 @@ std::vector<int64_t> TimeSplitter::sortEventList(const EventList &events, bool p
     auto tofs = events.getTofs(); // units of microseconds
     if (tofCorrect)               // modify tofs in-place
       std::for_each(tofs.begin(), tofs.end(), [&](double &tof) { tof = factor * tof + shift; });
+    constexpr double micro2nanosec{1000}; // from microsecond to nanosecond
     for (size_t i = 0; i < sortedTimes.size(); i++)
-      sortedTimes[i] += static_cast<int64_t>(tofs[i] * 1.e6); // add TOF to pulse time
+      sortedTimes[i] += static_cast<int64_t>(tofs[i] * micro2nanosec); // add TOF to pulse time
   }
 
   return sortedTimes;
 }
 
+/**
+ * Distribute a list of events by comparing a vector of times against the splitter boundaries.
+ *
+ * Each event in `events` has a corresponding time in `times`, which we use to find a destination index
+ * in the TimeSplitter object. The destination index is the key to find the target event list
+ * in the partials map.
+ *
+ * @tparam EVENTTYPE : one of EventType::TOF or EventType::WEIGHTED
+ * @param times : times associated to the events, used to find the destination index
+ * @param events : list of input times
+ * @param partials : target list of partial event lists, associated to the different destination indexes
+ * @throws : if the size of times and events are different
+ */
 template <typename EVENTTYPE>
 void TimeSplitter::splitEventVec(const std::vector<int64_t> &times, const std::vector<EVENTTYPE> &events,
                                  std::map<int, EventList *> partials) const {
