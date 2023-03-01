@@ -10,7 +10,6 @@ from mantid.api import MatrixWorkspace, WorkspaceGroup, ITableWorkspace
 
 
 class IqtFitSequentialTest(unittest.TestCase):
-
     _iqt_ws = None
     _function = r"name=LinearBackground,A0=0,A1=0,ties=(A1=0);name=ExpDecay,Height=1,Lifetime=0.0247558;ties=(f1.Height=1-f0.A0)"
 
@@ -185,8 +184,9 @@ class IqtFitSequentialTest(unittest.TestCase):
         )
 
     def test_minimum_spectra_more_than_maximum_spectra(self):
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "SpecMin must be less than or equal to SpecMax.",
             IqtFitSequential,
             InputWorkspace=self._iqt_ws,
             Function=self._function,
@@ -200,8 +200,9 @@ class IqtFitSequentialTest(unittest.TestCase):
         )
 
     def test_minimum_x_less_than_0(self):
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "StartX must be greater than or equal to 0.",
             IqtFitSequential,
             InputWorkspace=self._iqt_ws,
             Function=self._function,
