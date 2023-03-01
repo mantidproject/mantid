@@ -44,18 +44,18 @@ public:
   TimeROI getTimeROI(const int workspaceIndex);
   /// this is to aid in testing and not intended for use elsewhere
   std::size_t numRawValues() const;
-  // Split a list of events according to Pulse time
-  void splitEventList(const EventList &events, std::map<int, EventList *> partials) const;
-  // Split a list of events according to Pulse+TOF time
-  void splitEventList(const EventList &events, std::map<int, EventList *> partials, bool tofCorrect,
-                      double factor = 1.0, double shift = 0.0) const;
+  // Split a list of events according to Pulse time of Pulse + TOF time
+  void splitEventList(const EventList &events, std::map<int, EventList *> partials, bool pulseTof = false,
+                      bool tofCorrect = false, double factor = 1.0, double shift = 0.0) const;
 
 private:
   void clearAndReplace(const DateAndTime &start, const DateAndTime &stop, const int value);
   void initializePartials(const EventList &events, std::map<int, EventList *> partials) const;
+  std::vector<int64_t> sortEventList(const EventList &events, bool pulseTof = false, bool tofCorrect = false,
+                                     double factor = 1.0, double shift = 0.0) const;
   template <typename EVENTTYPE>
-  void splitEventVec(const std::vector<EVENTTYPE> &events, std::map<int, EventList *> partials, bool tofCorrect = false,
-                     double factor = 1.0, double shift = 0.0) const;
+  void splitEventVec(const std::vector<int64_t> &times, const std::vector<EVENTTYPE> &events,
+                     std::map<int, EventList *> partials) const;
   std::string debugPrint() const;
   std::map<DateAndTime, int> m_roi_map;
 };

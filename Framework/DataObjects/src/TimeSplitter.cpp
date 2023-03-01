@@ -299,10 +299,14 @@ std::size_t TimeSplitter::numRawValues() const { return m_roi_map.size(); }
  * Events with masked times are allocated to destination index -1.
  * @param events : list of input events
  * @param partials : resulting partial lists of events
- *
+ * @param tofCorrect : rescale and shift the TOF values (factor*TOF + shift)
+ * @param factor : rescale the TOF values
+ * @param shift : shift the TOF values after rescaling
  * @raises RunTimeError : the event list is of type Mantid::API::EventType::WEIGHTED_NOTIME
  */
-void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventList *> partials) const {
+void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventList *> partials, bool pulseTof,
+                                  bool tofCorrect, double factor, double shift) const {
+
   if (events.getEventType() == EventType::WEIGHTED_NOTIME)
     throw std::runtime_error("EventList::splitByTime() called on an EventList "
                              "that no longer has time information.");
@@ -312,87 +316,19 @@ void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventLi
   if (this->empty())
     return;
 
-  events.sortPulseTime();
+  // sort the list of events and return their times, in nanoseconds
+  std::vector<int64_t> times = this->sortEventList(events, pulseTof, tofCorrect, factor, shift);
+
   switch (events.getEventType()) {
   case EventType::TOF:
-    this->splitEventVec(events.getEvents(), partials);
+    this->splitEventVec(times, events.getEvents(), partials);
     break;
   case EventType::WEIGHTED:
-    this->splitEventVec(events.getWeightedEvents(), partials);
+    this->splitEventVec(times, events.getWeightedEvents(), partials);
     break;
   default:
     throw std::runtime_error("Unhandled event type");
   }
-}
-
-/**
- * Split a list of events according to Pulse+TOF time.
- *
- * Events with masked times are allocated to destination index -1.
- * @param events : list of input events
- * @param partials : resulting partial lists of events
- * @param tofCorrect : rescale and shift the TOF values (factor*TOF + shift)
- * @param factor : rescale the TOF values
- * @param shift : shift the TOF values after rescaling
- * @raises RunTimeError : the event list is of type Mantid::API::EventType::WEIGHTED_NOTIME
- */
-void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventList *> partials, bool tofCorrect,
-                                  double factor, double shift) const {
-  UNUSED_ARG(partials);
-  UNUSED_ARG(tofCorrect);
-  UNUSED_ARG(factor);
-  UNUSED_ARG(shift);
-  if (events.getEventType() == EventType::WEIGHTED_NOTIME)
-    throw std::runtime_error("EventList::splitByTime() called on an EventList "
-                             "that no longer has time information.");
-  this->initializePartials(events, partials);
-
-  if (this->empty() || events.empty())
-    return;
-
-  events.sortPulseTime();
-
-  /** pseudocode
-
-
-
-  auto itEv = 0; //iterator over the events
-  while(itEv != end()){
-
-    itEv++; // advance to next splitter boundary
-  }
-  events.sortPulseTime();
-  auto iterMap = m_roi_map.cbegin();
-  */
-
-  /** pseudocode
-   * std::vector<DateAndTime> pulseTimes = events.getPulseTimes()
-   * auto iterMap = m_roi_map.cbegin()
-   * DateAndTime start = iterMap->first;
-   * int destination = iterMap->second;
-   * // find first pulse time `t` such that t >= start (use lower_bound())
-   * auto iterUse = std::lower_bound (pulseTimes.begin(), pulseTimes.end(), start);
-   * indexUse = iterUse - pulseTimes.begin()
-   * // all events under indexUse are masked
-   * partial = partials[-1];  // destination index -1 for masked events. Do we have -1 as key?
-   * for(size_t i=0; i < indexUse; i++)
-   *   partial.addEventQuickly
-   *
-   * while(iterMap != m_roi_map.cend()){
-   *   iterMap++;
-   *   DateAndTime stop = iterMap->first;
-   *
-   *
-   *   // advance
-   *   start = stop
-   *   destination = iterMap->second();
-   * }
-   */
-  //
-  // iterate over the DateAndTime entries in map
-  // time_start and time_stop signal the current ROI.
-  // find first event with pulse time >= time_start --> index start in eventsVect
-  // find last event with pulse time < time_stop --> index end in evectsVect
 }
 
 /**
@@ -419,17 +355,39 @@ void TimeSplitter::initializePartials(const EventList &events, std::map<int, Eve
     initPartial(iter->second);
 }
 
-template <typename EVENTTYPE>
-void TimeSplitter::splitEventVec(const std::vector<EVENTTYPE> &events, std::map<int, EventList *> partials,
-                                 bool tofCorrect, double factor, double shift) const {
-  UNUSED_ARG(tofCorrect);
-  UNUSED_ARG(factor);
-  UNUSED_ARG(shift);
+std::vector<int64_t> TimeSplitter::sortEventList(const EventList &events, bool pulseTof, bool tofCorrect, double factor,
+                                                 double shift) const {
+  // sort the list in-place
+  if (pulseTof)
+    // this sorting is preserved under transformation tof-->factor*tof+shift with factor>0
+    events.sortPulseTimeTOF();
+  else
+    events.sortPulseTime();
 
+  // extract the times we'll be comparing against the splitter times
+  std::vector<int64_t> sortedTimes;
+  auto pulseTimes = events.getPulseTimes();
+  for (auto pulseTime : pulseTimes)
+    sortedTimes.emplace_back(pulseTime.totalNanoseconds());
+  if (pulseTof) {
+    auto tofs = events.getTofs(); // units of microseconds
+    if (tofCorrect)               // modify tofs in-place
+      std::for_each(tofs.begin(), tofs.end(), [&](double &tof) { tof = factor * tof + shift; });
+    for (size_t i = 0; i < sortedTimes.size(); i++)
+      sortedTimes[i] += static_cast<int64_t>(tofs[i] * 1.e6); // add TOF to pulse time
+  }
+
+  return sortedTimes;
+}
+
+template <typename EVENTTYPE>
+void TimeSplitter::splitEventVec(const std::vector<int64_t> &times, const std::vector<EVENTTYPE> &events,
+                                 std::map<int, EventList *> partials) const {
+  assert(times.size() == events.size());
   // initialize the iterator over the splitter
   // it assumes the splitter keys (DateAndTime objects) are sorted by increasing time.
-  auto itSpl = m_roi_map.cbegin(); // iterator over the splitter
-  DateAndTime stop = itSpl->first; // first splitter boundary. Events with times < stop should be discarded
+  auto itSpl = m_roi_map.cbegin();                // iterator over the splitter
+  int64_t stop = itSpl->first.totalNanoseconds(); // first splitter boundary. Discard events with times < stop
   int destination = TimeSplitter::NO_TARGET;
 
   // is there an EventList mapped to the destination index?
@@ -437,12 +395,13 @@ void TimeSplitter::splitEventVec(const std::vector<EVENTTYPE> &events, std::map<
   if (partials.find(destination) != partials.cend())
     partial = partials[destination];
 
+  auto itTim = times.cbegin();  // initialize iterator over times
   auto itVec = events.cbegin(); // initialize iterator over the events
 
   // iterate over all events. It is assumed events are sorted by either pulse time or tof
   while (itVec != events.cend()) {
     // Check if we need to advance the splitter and therefore select a different partial event list
-    if (itVec->pulseTime() >= stop) {
+    if (*itTim >= stop) {
       // update the partial event list with the destination index of the stopping boundary
       destination = itSpl->second;
       if (partials.find(destination) == partials.cend())
@@ -452,14 +411,16 @@ void TimeSplitter::splitEventVec(const std::vector<EVENTTYPE> &events, std::map<
       // update the stopping boundary
       itSpl++;
       if (itSpl == m_roi_map.cend())
-        stop.setToMaximum(); // a.k.a stopping boundary at an "infinite" time
+        stop = DateAndTime::maximum().totalNanoseconds(); // a.k.a stopping boundary at an "infinite" time
       else
-        stop = itSpl->first;
+        stop = itSpl->first.totalNanoseconds();
     }
     if (partial) {
       const EVENTTYPE eventCopy(*itVec);
       partial->addEventQuickly(eventCopy);
     }
+    // advance both the iterator over events and times
+    itTim++;
     itVec++;
   }
 }
