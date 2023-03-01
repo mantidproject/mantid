@@ -384,8 +384,8 @@ std::vector<int64_t> TimeSplitter::sortEventList(const EventList &events, bool p
   // extract the times we'll be comparing against the splitter times
   std::vector<int64_t> sortedTimes;
   auto pulseTimes = events.getPulseTimes();
-  for (auto pulseTime : pulseTimes)
-    sortedTimes.emplace_back(pulseTime.totalNanoseconds());
+  std::transform(pulseTimes.cbegin(), pulseTimes.cend(), std::back_inserter(sortedTimes),
+                 [](const DateAndTime &time) { return time.totalNanoseconds(); });
   if (pulseTof) {
     auto tofs = events.getTofs(); // units of microseconds
     if (tofCorrect)               // modify tofs in-place
