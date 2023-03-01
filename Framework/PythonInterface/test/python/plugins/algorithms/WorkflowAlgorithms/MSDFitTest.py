@@ -73,36 +73,76 @@ class MSDFitTest(unittest.TestCase):
         Tests validation for SpecMin >= 0.
         """
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaisesRegex(RuntimeError, "Minimum spectrum number must be greater than or equal to 0"):
             msd, param, fit = MSDFit(InputWorkspace=self._ws, XStart=0.0, XEnd=5.0, SpecMin=-1, SpecMax=0)
 
-    def test_fail_spec_min(self):
+    def test_fail_spec_max(self):
         """
-        Tests validation for SpecMin >= num histograms.
+        Tests validation for SpecMax >= num histograms.
         """
 
-        self.assertRaises(RuntimeError, MSDFit, InputWorkspace=self._ws, XStart=0.0, XEnd=5.0, SpecMin=0, SpecMax=20, OutputWorkspace="msd")
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Maximum spectrum number must be less than number of spectra in workspace",
+            MSDFit,
+            InputWorkspace=self._ws,
+            XStart=0.0,
+            XEnd=5.0,
+            SpecMin=0,
+            SpecMax=20,
+            OutputWorkspace="msd",
+        )
 
     def test_fail_spec_range(self):
         """
-        Tests validation for SpecMax >= SpecMin.
+        Tests validation for SpecMin >= SpecMax.
         """
 
-        self.assertRaises(RuntimeError, MSDFit, InputWorkspace=self._ws, XStart=0.0, XEnd=5.0, SpecMin=1, SpecMax=0, OutputWorkspace="msd")
+        self.assertRaisesRegex(
+            RuntimeError,
+            "SpecMin must be less then SpecMax",
+            MSDFit,
+            InputWorkspace=self._ws,
+            XStart=0.0,
+            XEnd=5.0,
+            SpecMin=1,
+            SpecMax=0,
+            OutputWorkspace="msd",
+        )
 
     def test_fail_x_range(self):
         """
-        Tests validation for XStart < XEnd.
+        Tests validation for XStart > XEnd.
         """
 
-        self.assertRaises(RuntimeError, MSDFit, InputWorkspace=self._ws, XStart=10.0, XEnd=5.0, SpecMin=0, SpecMax=0, OutputWorkspace="msd")
+        self.assertRaisesRegex(
+            RuntimeError,
+            "XStart must be less then XEnd",
+            MSDFit,
+            InputWorkspace=self._ws,
+            XStart=10.0,
+            XEnd=5.0,
+            SpecMin=0,
+            SpecMax=0,
+            OutputWorkspace="msd",
+        )
 
     def test_fail_x_range_ws(self):
         """
         Tests validation for X range in workspace range
         """
 
-        self.assertRaises(RuntimeError, MSDFit, InputWorkspace=self._ws, XStart=0.0, XEnd=20.0, SpecMin=0, SpecMax=0, OutputWorkspace="msd")
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Must be less than maximum X value in workspace",
+            MSDFit,
+            InputWorkspace=self._ws,
+            XStart=0.0,
+            XEnd=20.0,
+            SpecMin=0,
+            SpecMax=0,
+            OutputWorkspace="msd",
+        )
 
 
 if __name__ == "__main__":
