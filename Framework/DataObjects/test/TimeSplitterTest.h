@@ -6,20 +6,20 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/TimeSplitter.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/TimeROI.h"
+#include <cxxtest/TestSuite.h>
 
-using Mantid::API::MatrixWorkspace;
-using Mantid::API::TableRow;
 using Mantid::API::EventType;
 using Mantid::API::IEventList;
+using Mantid::API::MatrixWorkspace;
+using Mantid::API::TableRow;
 using Mantid::DataObjects::EventList;
 using Mantid::DataObjects::TimeSplitter;
 using Mantid::Kernel::SplittingInterval;
@@ -521,139 +521,138 @@ public:
     TS_ASSERT(referenceSplitter.valueAtTime(time5) == workspaceDerivedSplitter.valueAtTime(time5));
     TS_ASSERT(referenceSplitter.valueAtTime(time6) == workspaceDerivedSplitter.valueAtTime(time6));
 
-  // Verify keys in TimeSplitter::m_roi_map are sorted
-  void test_keysSorted() {
-    TimeSplitter splitter;
-    splitter.addROI(FIVE, SIX, 0);
-    splitter.addROI(THREE, FOUR, 0);
-    splitter.addROI(ONE, TWO, 0);
-    auto iter = splitter.getSplittersMap().begin();
-    TS_ASSERT_EQUALS(iter->first, ONE);
-    TS_ASSERT_EQUALS(iter->second, 0);
-    iter++;
-    TS_ASSERT_EQUALS(iter->first, TWO);
-    TS_ASSERT_EQUALS(iter->second, TimeSplitter::NO_TARGET);
-    iter++;
-    TS_ASSERT_EQUALS(iter->first, THREE);
-    TS_ASSERT_EQUALS(iter->second, 0);
-    iter++;
-    TS_ASSERT_EQUALS(iter->first, FOUR);
-    TS_ASSERT_EQUALS(iter->second, TimeSplitter::NO_TARGET);
-    iter++;
-    TS_ASSERT_EQUALS(iter->first, FIVE);
-    TS_ASSERT_EQUALS(iter->second, 0);
-    iter++;
-    TS_ASSERT_EQUALS(iter->first, SIX);
-    TS_ASSERT_EQUALS(iter->second, TimeSplitter::NO_TARGET);
-    iter++;
-  }
+    // Verify keys in TimeSplitter::m_roi_map are sorted
+    void test_keysSorted() {
+      TimeSplitter splitter;
+      splitter.addROI(FIVE, SIX, 0);
+      splitter.addROI(THREE, FOUR, 0);
+      splitter.addROI(ONE, TWO, 0);
+      auto iter = splitter.getSplittersMap().begin();
+      TS_ASSERT_EQUALS(iter->first, ONE);
+      TS_ASSERT_EQUALS(iter->second, 0);
+      iter++;
+      TS_ASSERT_EQUALS(iter->first, TWO);
+      TS_ASSERT_EQUALS(iter->second, TimeSplitter::NO_TARGET);
+      iter++;
+      TS_ASSERT_EQUALS(iter->first, THREE);
+      TS_ASSERT_EQUALS(iter->second, 0);
+      iter++;
+      TS_ASSERT_EQUALS(iter->first, FOUR);
+      TS_ASSERT_EQUALS(iter->second, TimeSplitter::NO_TARGET);
+      iter++;
+      TS_ASSERT_EQUALS(iter->first, FIVE);
+      TS_ASSERT_EQUALS(iter->second, 0);
+      iter++;
+      TS_ASSERT_EQUALS(iter->first, SIX);
+      TS_ASSERT_EQUALS(iter->second, TimeSplitter::NO_TARGET);
+      iter++;
+    }
 
-  // ------------------------------------------------------------------------
-  // TESTING SPLITTING EVENTS METHODS
-  // ------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
+    // TESTING SPLITTING EVENTS METHODS
+    // ------------------------------------------------------------------------
 
-  void test_splitEvents() {
-    const DateAndTime &startTime = TWO; // beginning time of the fake run
-    double pulsePeriod{1.0};            // time between consecutive pulses, in seconds
-    size_t nPulses{10};                 // the run will last 10 seconds total
-    size_t eventsPerPulse{100};         // a total of 1000 events in the run
+    void test_splitEvents() {
+      const DateAndTime &startTime = TWO; // beginning time of the fake run
+      double pulsePeriod{1.0};            // time between consecutive pulses, in seconds
+      size_t nPulses{10};                 // the run will last 10 seconds total
+      size_t eventsPerPulse{100};         // a total of 1000 events in the run
 
-    // beginning at startTime, copy events during the first 5 seconds of the run to destination 0,
-    // implicitly discarding everything else
-    std::vector<double> durations{5.0}; // duration of each time interval, in seconds
-    std::vector<int> destinations{0};   // workspace destination indexes
-    auto splitter = this->generateSplitter(startTime, durations, destinations);
+      // beginning at startTime, copy events during the first 5 seconds of the run to destination 0,
+      // implicitly discarding everything else
+      std::vector<double> durations{5.0}; // duration of each time interval, in seconds
+      std::vector<int> destinations{0};   // workspace destination indexes
+      auto splitter = this->generateSplitter(startTime, durations, destinations);
 
-    // DEBUG: remove this for loop
-    std::string junk;
-    for (auto i : splitter.outputWorkspaceIndices())
-      junk = splitter.getTimeROI(i).debugStrPrint();
+      // DEBUG: remove this for loop
+      std::string junk;
+      for (auto i : splitter.outputWorkspaceIndices())
+        junk = splitter.getTimeROI(i).debugStrPrint();
 
-    // allocate two event lists, one for discarded events and another for destination 0
-    auto partials = this->instantiatePartials({TimeSplitter::NO_TARGET, 0});
+      // allocate two event lists, one for discarded events and another for destination 0
+      auto partials = this->instantiatePartials({TimeSplitter::NO_TARGET, 0});
 
-    // verify we don't split events of type EventType::WEIGHTED_NOTIME
-    EventList events =
-        this->generateEvents(startTime, pulsePeriod, nPulses, eventsPerPulse, EventType::WEIGHTED_NOTIME);
-    TS_ASSERT_THROWS(splitter.splitEventList(events, partials), std::runtime_error &);
+      // verify we don't split events of type EventType::WEIGHTED_NOTIME
+      EventList events =
+          this->generateEvents(startTime, pulsePeriod, nPulses, eventsPerPulse, EventType::WEIGHTED_NOTIME);
+      TS_ASSERT_THROWS(splitter.splitEventList(events, partials), std::runtime_error &);
 
-    // typical case with events of type EventType::TOF
-    events = this->generateEvents(startTime, pulsePeriod, nPulses, eventsPerPulse, EventType::TOF);
-    splitter.splitEventList(events, partials);
-    // assert total number of events in each partial is 500
-    TS_ASSERT_EQUALS(partials[TimeSplitter::NO_TARGET]->getNumberEvents(), 500);
-    TS_ASSERT_EQUALS(partials[0]->getNumberEvents(), 500);
+      // typical case with events of type EventType::TOF
+      events = this->generateEvents(startTime, pulsePeriod, nPulses, eventsPerPulse, EventType::TOF);
+      splitter.splitEventList(events, partials);
+      // assert total number of events in each partial is 500
+      TS_ASSERT_EQUALS(partials[TimeSplitter::NO_TARGET]->getNumberEvents(), 500);
+      TS_ASSERT_EQUALS(partials[0]->getNumberEvents(), 500);
 
-    // no events should be discarded in this case since splitter discard events only after 10 seconds, which
-    // is the whole duration of the run
-    durations = {2.0, 6.0, 2.0, 2.0};
-    destinations = {1, 3, 2, TimeSplitter::NO_TARGET};
-    splitter = this->generateSplitter(startTime, durations, destinations);
-    // splitter does not allocate any time interval to destination 0, thus the corresponding list should be empty
-    partials = this->instantiatePartials({TimeSplitter::NO_TARGET, 0, 1, 2, 3});
-    events = this->generateEvents(startTime, pulsePeriod, nPulses, eventsPerPulse, EventType::WEIGHTED);
-    splitter.splitEventList(events, partials);
-    TS_ASSERT_EQUALS(partials[TimeSplitter::NO_TARGET]->getNumberEvents(), 0);
-    TS_ASSERT_EQUALS(partials[0]->getNumberEvents(), 0);
-    TS_ASSERT_EQUALS(partials[1]->getNumberEvents(), 200);
-    TS_ASSERT_EQUALS(partials[2]->getNumberEvents(), 200);
-    TS_ASSERT_EQUALS(partials[3]->getNumberEvents(), 600);
+      // no events should be discarded in this case since splitter discard events only after 10 seconds, which
+      // is the whole duration of the run
+      durations = {2.0, 6.0, 2.0, 2.0};
+      destinations = {1, 3, 2, TimeSplitter::NO_TARGET};
+      splitter = this->generateSplitter(startTime, durations, destinations);
+      // splitter does not allocate any time interval to destination 0, thus the corresponding list should be empty
+      partials = this->instantiatePartials({TimeSplitter::NO_TARGET, 0, 1, 2, 3});
+      events = this->generateEvents(startTime, pulsePeriod, nPulses, eventsPerPulse, EventType::WEIGHTED);
+      splitter.splitEventList(events, partials);
+      TS_ASSERT_EQUALS(partials[TimeSplitter::NO_TARGET]->getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(partials[0]->getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(partials[1]->getNumberEvents(), 200);
+      TS_ASSERT_EQUALS(partials[2]->getNumberEvents(), 200);
+      TS_ASSERT_EQUALS(partials[3]->getNumberEvents(), 600);
 
-    // compare by Pulse + TOF. Events are already ordered so this should not affect results
-    bool pulseTof{true};
-    for (auto it = partials.begin(); it != partials.end(); it++)
-      it->second->clearData();
-    splitter.splitEventList(events, partials, pulseTof);
-    TS_ASSERT_EQUALS(partials[TimeSplitter::NO_TARGET]->getNumberEvents(), 0);
-    TS_ASSERT_EQUALS(partials[0]->getNumberEvents(), 0);
-    TS_ASSERT_EQUALS(partials[1]->getNumberEvents(), 200);
-    TS_ASSERT_EQUALS(partials[2]->getNumberEvents(), 200);
-    TS_ASSERT_EQUALS(partials[3]->getNumberEvents(), 600);
+      // compare by Pulse + TOF. Events are already ordered so this should not affect results
+      bool pulseTof{true};
+      for (auto it = partials.begin(); it != partials.end(); it++)
+        it->second->clearData();
+      splitter.splitEventList(events, partials, pulseTof);
+      TS_ASSERT_EQUALS(partials[TimeSplitter::NO_TARGET]->getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(partials[0]->getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(partials[1]->getNumberEvents(), 200);
+      TS_ASSERT_EQUALS(partials[2]->getNumberEvents(), 200);
+      TS_ASSERT_EQUALS(partials[3]->getNumberEvents(), 600);
 
-    // compare by Pulse + TOF after decreasing 0.1 seconds on each TOF.
-    // Effectively, we discard the first 10 events since they have now a Pulse+TOF
-    // smaller than the beginning of the first splitter boundary
-    for (auto it = partials.begin(); it != partials.end(); it++)
-      it->second->clearData();
-    bool tofCorrect{true};
-    double factor{1.0};
-    double shift{-100000.0}; // -0.1 seconds in microseconds
-    splitter.splitEventList(events, partials, pulseTof, tofCorrect, factor, shift);
-    TS_ASSERT_EQUALS(partials[TimeSplitter::NO_TARGET]->getNumberEvents(), 10);
-    TS_ASSERT_EQUALS(partials[0]->getNumberEvents(), 0);
-    TS_ASSERT_EQUALS(partials[1]->getNumberEvents(), 200);
-    TS_ASSERT_EQUALS(partials[2]->getNumberEvents(), 190);
-    TS_ASSERT_EQUALS(partials[3]->getNumberEvents(), 600);
+      // compare by Pulse + TOF after decreasing 0.1 seconds on each TOF.
+      // Effectively, we discard the first 10 events since they have now a Pulse+TOF
+      // smaller than the beginning of the first splitter boundary
+      for (auto it = partials.begin(); it != partials.end(); it++)
+        it->second->clearData();
+      bool tofCorrect{true};
+      double factor{1.0};
+      double shift{-100000.0}; // -0.1 seconds in microseconds
+      splitter.splitEventList(events, partials, pulseTof, tofCorrect, factor, shift);
+      TS_ASSERT_EQUALS(partials[TimeSplitter::NO_TARGET]->getNumberEvents(), 10);
+      TS_ASSERT_EQUALS(partials[0]->getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(partials[1]->getNumberEvents(), 200);
+      TS_ASSERT_EQUALS(partials[2]->getNumberEvents(), 190);
+      TS_ASSERT_EQUALS(partials[3]->getNumberEvents(), 600);
 
-    // compare by Pulse + TOF after compressing each TOF to 90% of its original value.
-    // Since the splitter boundaries coincide with the pulse times, this compression
-    // does not change the assignment one would have with no compression because a
-    // compression of TOF values does not cause frame overlap
-    for (auto it = partials.begin(); it != partials.end(); it++)
-      it->second->clearData();
-    factor = 0.9;
-    shift = 0.0;
-    splitter.splitEventList(events, partials, pulseTof, tofCorrect, factor, shift);
-    TS_ASSERT_EQUALS(partials[TimeSplitter::NO_TARGET]->getNumberEvents(), 0);
-    TS_ASSERT_EQUALS(partials[0]->getNumberEvents(), 0);
-    TS_ASSERT_EQUALS(partials[1]->getNumberEvents(), 200);
-    TS_ASSERT_EQUALS(partials[2]->getNumberEvents(), 200);
-    TS_ASSERT_EQUALS(partials[3]->getNumberEvents(), 600);
+      // compare by Pulse + TOF after compressing each TOF to 90% of its original value.
+      // Since the splitter boundaries coincide with the pulse times, this compression
+      // does not change the assignment one would have with no compression because a
+      // compression of TOF values does not cause frame overlap
+      for (auto it = partials.begin(); it != partials.end(); it++)
+        it->second->clearData();
+      factor = 0.9;
+      shift = 0.0;
+      splitter.splitEventList(events, partials, pulseTof, tofCorrect, factor, shift);
+      TS_ASSERT_EQUALS(partials[TimeSplitter::NO_TARGET]->getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(partials[0]->getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(partials[1]->getNumberEvents(), 200);
+      TS_ASSERT_EQUALS(partials[2]->getNumberEvents(), 200);
+      TS_ASSERT_EQUALS(partials[3]->getNumberEvents(), 600);
 
-    // Compare by Pulse+TOF after compressing each TOF by half (50%), then decreasing each TOF by 0.5 seconds.
-    // Before compression, TOF's within each pulse are equally spaced in the 1 second pulse period.
-    // After 50% compression, the TOFs are equally spaced in a time interval of 0.5 seconds within each pulse.
-    // After decreasing each TOF by -0.5 seconds, we effectively move all events from pulse `i` to pulse `i-1`
-    for (auto it = partials.begin(); it != partials.end(); it++)
-      it->second->clearData();
-    factor = 0.5;
-    shift = -500000.0; // shift by -0.5 seconds, in microseconds.
-    splitter.splitEventList(events, partials, pulseTof, tofCorrect, factor, shift);
-    TS_ASSERT_EQUALS(partials[TimeSplitter::NO_TARGET]->getNumberEvents(), 100);
-    TS_ASSERT_EQUALS(partials[0]->getNumberEvents(), 0);
-    TS_ASSERT_EQUALS(partials[1]->getNumberEvents(), 200);
-    TS_ASSERT_EQUALS(partials[2]->getNumberEvents(), 100);
-    TS_ASSERT_EQUALS(partials[3]->getNumberEvents(), 600);
-  }
-
-};
+      // Compare by Pulse+TOF after compressing each TOF by half (50%), then decreasing each TOF by 0.5 seconds.
+      // Before compression, TOF's within each pulse are equally spaced in the 1 second pulse period.
+      // After 50% compression, the TOFs are equally spaced in a time interval of 0.5 seconds within each pulse.
+      // After decreasing each TOF by -0.5 seconds, we effectively move all events from pulse `i` to pulse `i-1`
+      for (auto it = partials.begin(); it != partials.end(); it++)
+        it->second->clearData();
+      factor = 0.5;
+      shift = -500000.0; // shift by -0.5 seconds, in microseconds.
+      splitter.splitEventList(events, partials, pulseTof, tofCorrect, factor, shift);
+      TS_ASSERT_EQUALS(partials[TimeSplitter::NO_TARGET]->getNumberEvents(), 100);
+      TS_ASSERT_EQUALS(partials[0]->getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(partials[1]->getNumberEvents(), 200);
+      TS_ASSERT_EQUALS(partials[2]->getNumberEvents(), 100);
+      TS_ASSERT_EQUALS(partials[3]->getNumberEvents(), 600);
+    }
+  };
