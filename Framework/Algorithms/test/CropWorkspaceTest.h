@@ -391,6 +391,32 @@ public:
     AnalysisDataService::Instance().remove(wsName);
     delete alg;
   }
+  // Test that a non-ragged 2DWorkspace will keep the property where all XHistograms share a pointer
+  // after CropWorkspace
+  void testCropDoesNotCopyXData() {
+    Workspace2D_sptr inputWS = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+
+    const auto &in_x1 = inputWS->x(0);
+    const auto &in_x2 = inputWS->x(2);
+
+    TS_ASSERT_EQUALS(in_x1, in_x2);
+
+    CropWorkspace crop;
+    TS_ASSERT_THROWS_NOTHING(crop.initialize());
+    TS_ASSERT_THROWS_NOTHING(crop.setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS));
+    TS_ASSERT_THROWS_NOTHING(crop.setPropertyValue("OutputWorkspace", "outputWS"));
+    TS_ASSERT_THROWS_NOTHING(crop.setPropertyValue("XMin", "2"));
+    TS_ASSERT_THROWS_NOTHING(crop.setPropertyValue("XMax", "6"));
+    TS_ASSERT(crop.execute());
+
+    MatrixWorkspace_sptr outputWS;
+    TS_ASSERT_THROWS_NOTHING(outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outputWS"));
+
+    const auto &out_x1 = outputWS->x(0);
+    const auto &out_x2 = outputWS->x(2);
+
+    TS_ASSERT_EQUALS(out_x1, out_x2);
+  }
 };
 
 class CropWorkspaceTestPerformance : public CxxTest::TestSuite {
