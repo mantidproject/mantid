@@ -27,7 +27,6 @@ class BaseSX(ABC):
         self.runs = dict()
         self.van_runno = vanadium_runno
         self.van_ws = None
-        self.spgr = None
         self.gonio_axes = None
         self.sample_dict = None
         self.n_mcevents = 1200
@@ -69,7 +68,7 @@ class BaseSX(ABC):
 
     @staticmethod
     def has_sample(ws):
-        return BaseSX.retrieve(ws).sample().getMaterial().numberDensity < 1e-15
+        return BaseSX.retrieve(ws).sample().getMaterial().numberDensity > 1e-15
 
     # --- setters ---
 
@@ -93,9 +92,6 @@ class BaseSX(ABC):
     def set_md(self, run, ws_md):
         self.runs[str(run)]["MD"] = BaseSX.retrieve(ws_md).name()
 
-    def set_spacegroup(self, hm_symbol):
-        self.spgr = SpaceGroupFactory.createSpaceGroup(hm_symbol)
-
     def set_sample(self, **kwargs):
         self.sample_dict = kwargs
 
@@ -108,9 +104,6 @@ class BaseSX(ABC):
 
     def set_mc_abs_nevents(self, nevents):
         self.n_mcevents = nevents
-
-    def set_b2b_radius_scale(self, scale):
-        self.b2b_radius_scale = scale
 
     # --- abstract methods ---
 
@@ -412,7 +405,11 @@ class BaseSX(ABC):
         U = BaseSX.retrieve(ws).sample().getOrientedLattice().getU()
         # find transform required  ( U_ref = U T^-1) - see TransformHKL docs for details
         transform = np.linalg.inv(getSignMaxAbsValInCol(np.matmul(np.linalg.inv(U), U_ref)))
-        mantid.TransformHKL(PeaksWorkspace=ws, HKLTransform=transform, FindError=False, EnableLogging=False)
+        try:
+            mantid.TransformHKL(PeaksWorkspace=ws, HKLTransform=transform, FindError=True, EnableLogging=False)
+        except ValueError:
+            # probably not enough peaks to optimize UB to find error on lattice parameters (will be set to 0)
+            mantid.TransformHKL(PeaksWorkspace=ws, HKLTransform=transform, FindError=False, EnableLogging=False)
 
     @staticmethod
     def crop_ws(ws, xmin, xmax, xunit="Wavelength"):
@@ -467,12 +464,12 @@ class BaseSX(ABC):
         else:
             return xname.replace("-", "")
 
-    def remove_forbidden_peaks(self, peaks):
-        if self.spgr is None:
-            return
+    @staticmethod
+    def remove_forbidden_peaks(peaks, hm_symbol):
+        spgr = SpaceGroupFactory.createSpaceGroup(hm_symbol)
         iremove = []
         for ipk, pk in enumerate(BaseSX.retrieve(peaks)):
-            if not self.spgr.isAllowedReflection(pk.getIntHKL()):
+            if not spgr.isAllowedReflection(pk.getIntHKL()):
                 iremove.append(ipk)
         mantid.DeleteTableRows(TableWorkspace=peaks, Rows=iremove, EnableLogging=False)
 
@@ -503,13 +500,12 @@ class BaseSX(ABC):
             ipks = np.where(abs(dspacings - dpk) < resolution * dpk)[0]
             if ipks.size > 0:
                 iremove.extend(ipks)
-        mantid.DeleteTableRows(TableWorkspace=peaks, Rows=iremove, EnableLogging=False)
+        mantid.DeleteTableRows(TableWorkspace=peaks, Rows=[int(irow) for irow in iremove], EnableLogging=False)
         return dlist  # list of dspacing of powder peaks
 
     @staticmethod
-    def remove_duplicate_peaks_by_hkl(peaks, hkl_tol=0.05):
+    def remove_duplicate_peaks_by_hkl(peaks):
         peaks = BaseSX.retrieve(peaks)
-        mantid.IndexPeaks(peaks, Tolerance=hkl_tol, RoundHKLs=False, EnableLogging=False)
         hkl = np.array([peaks.column("h"), peaks.column("k"), peaks.column("l")])
         hkl_int = np.round(hkl)
         hkl_unq, idx, ncnts = np.unique(hkl_int, axis=1, return_inverse=True, return_counts=True)
@@ -550,7 +546,7 @@ class BaseSX(ABC):
         """
         Will keep lowest dSpacing peak (often best approx. to peak centre)
         """
-        mantid.FilterPeaks(
+        return mantid.FilterPeaks(
             InputWorkspace=peaks,
             OutputWorkspace=BaseSX.retrieve(peaks).name(),
             FilterVariable="h^2+k^2+l^2",
@@ -561,10 +557,10 @@ class BaseSX(ABC):
 
     @staticmethod
     def remove_non_integrated_peaks(peaks):
-        mantid.FilterPeaks(
+        return mantid.FilterPeaks(
             InputWorkspace=peaks,
             OutputWorkspace=BaseSX.retrieve(peaks).name(),
-            FilterVariable="Intens/SigInt",
+            FilterVariable="Signal/Noise",
             FilterValue=0,
             Operator=">",
             EnableLogging=False,
