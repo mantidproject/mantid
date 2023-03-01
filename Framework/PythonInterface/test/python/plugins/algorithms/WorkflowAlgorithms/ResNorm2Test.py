@@ -10,7 +10,6 @@ from mantid.api import MatrixWorkspace, WorkspaceGroup
 
 
 class ResNorm2Test(unittest.TestCase):
-
     _res_ws = None
     _van_ws = None
 
@@ -56,14 +55,16 @@ class ResNorm2Test(unittest.TestCase):
         """
         Tests validation for energy range.
         """
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Must be greater than EnergyMin",
             ResNorm,
             ResolutionWorkspace=self._res_ws,
             VanadiumWorkspace=self._van_ws,
             EnergyMin=0.1,
             EnergyMax=-0.1,
             Version=2,
+            OutputWorkspace="wks",
         )
 
 
