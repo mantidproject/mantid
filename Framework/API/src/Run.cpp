@@ -243,7 +243,7 @@ void Run::integrateProtonCharge(const std::string &logname) const {
       total = std::accumulate(logValues.begin(), logValues.end(), 0.0);
     } else {
       // get the raw values
-      const std::map<Types::Core::DateAndTime, double> unfilteredValues = log->valueAsMap();
+      const std::map<Types::Core::DateAndTime, double> unfilteredValues = log->valueAsCorrectMap();
 
       using valueType = std::map<Types::Core::DateAndTime, double>::value_type;
 
