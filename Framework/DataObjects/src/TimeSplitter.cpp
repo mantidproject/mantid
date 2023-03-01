@@ -69,6 +69,58 @@ TimeSplitter::TimeSplitter(const Mantid::API::MatrixWorkspace_sptr &ws, const Da
   }
 }
 
+TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &offset) {
+  if (tws->columnCount() != 3) {
+    throw std::runtime_error("Table workspace used for event filtering must have 3 columns.");
+  }
+
+  // by design, there should be 3 columns, e.g. "start", "stop", "target", although the exact names are not enforced
+  API::Column_sptr col_start = tws->getColumn(0);
+  API::Column_sptr col_stop = tws->getColumn(1);
+  API::Column_sptr col_target = tws->getColumn(2);
+
+  for (size_t ii = 0; ii < tws->rowCount(); ii++) {
+    // by design, the times in the table must be in seconds
+    double timeStart_s{col_start->cell<double>(ii)};
+    double timeStop_s{col_stop->cell<double>(ii)};
+    if (timeStart_s < 0 || timeStop_s < 0) {
+      throw std::runtime_error("All times in TableWorkspace must be >= 0 to construct TimeSplitter.");
+    }
+    Types::Core::DateAndTime timeStart(timeStart_s, 0.0 /*ns*/);
+    Types::Core::DateAndTime timeStop(timeStop_s, 0.0 /*ns*/);
+
+    // make the times absolute
+    int64_t offset_ns{offset.totalNanoseconds()};
+    timeStart += offset_ns;
+    timeStop += offset_ns;
+
+    // get the target workspace index
+    int target_ws_index = std::stoi(col_target->cell<std::string>(ii));
+
+    // if this row's time interval intersects an interval already in the splitter, no separate ROI will be created
+    if ((target_ws_index != IGNORE_VALUE) &&
+        (valueAtTime(timeStart) != IGNORE_VALUE || valueAtTime(timeStop) != IGNORE_VALUE)) {
+      g_log.warning() << "Workspace row " << ii << " may be overwritten in conversion to TimeSplitter" << '\n';
+    }
+
+    addROI(timeStart, timeStop, target_ws_index);
+  }
+}
+
+TimeSplitter::TimeSplitter(const SplittersWorkspace_sptr &sws) {
+  for (size_t ii = 0; ii < sws->rowCount(); ii++) {
+    Kernel::SplittingInterval interval = sws->getSplitter(ii);
+
+    // if this row's time interval intersects an interval already in the splitter, no separate ROI will be created
+    if (interval.index() != IGNORE_VALUE &&
+        (valueAtTime(interval.start()) != IGNORE_VALUE || valueAtTime(interval.stop()) != IGNORE_VALUE)) {
+      g_log.warning() << "Workspace row " << ii << " may be overwritten in conversion to TimeSplitter" << '\n';
+    }
+
+    addROI(interval.start(), interval.stop(), interval.index());
+  }
+}
+
 std::string TimeSplitter::debugPrint() const {
   std::stringstream msg;
   for (const auto &iter : m_roi_map)
