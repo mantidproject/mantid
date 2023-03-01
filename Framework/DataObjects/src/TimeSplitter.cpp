@@ -18,10 +18,8 @@ using Types::Core::DateAndTime;
 namespace DataObjects {
 
 namespace {
-// every value less than zero is ignore
-constexpr int IGNORE_VALUE{-1};
 // default value for the output is zero
-constexpr int DEFAULT_VALUE{0};
+constexpr int DEFAULT_TARGET{0};
 
 void assertIncreasing(const DateAndTime &start, const DateAndTime &stop) {
   if (start > stop)
@@ -34,7 +32,7 @@ Kernel::Logger g_log("TimeSplitter");
 } // namespace
 
 TimeSplitter::TimeSplitter(const DateAndTime &start, const DateAndTime &stop) {
-  clearAndReplace(start, stop, DEFAULT_VALUE);
+  clearAndReplace(start, stop, DEFAULT_TARGET);
 }
 
 /**
@@ -61,7 +59,7 @@ TimeSplitter::TimeSplitter(const Mantid::API::MatrixWorkspace_sptr &ws, const Da
     auto timeStart = Types::Core::DateAndTime(X[i - 1], 0.0) + offset_ns;
     auto timeEnd = Types::Core::DateAndTime(X[i], 0.0) + offset_ns;
     auto index = static_cast<int>(Y[i - 1]);
-    if ((index != IGNORE_VALUE) && (valueAtTime(timeStart) != IGNORE_VALUE || valueAtTime(timeEnd) != IGNORE_VALUE)) {
+    if ((index != NO_TARGET) && (valueAtTime(timeStart) != NO_TARGET || valueAtTime(timeEnd) != NO_TARGET)) {
       g_log.warning() << "Values between " << timeStart.second() << "(s) and " << timeEnd.second()
                       << "(s) may be overwritten in conversion to TimeSplitter" << '\n';
     }
@@ -98,8 +96,7 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
     int target_ws_index = std::stoi(col_target->cell<std::string>(ii));
 
     // if this row's time interval intersects an interval already in the splitter, no separate ROI will be created
-    if ((target_ws_index != IGNORE_VALUE) &&
-        (valueAtTime(timeStart) != IGNORE_VALUE || valueAtTime(timeStop) != IGNORE_VALUE)) {
+    if ((target_ws_index != NO_TARGET) && (valueAtTime(timeStart) != NO_TARGET || valueAtTime(timeStop) != NO_TARGET)) {
       g_log.warning() << "Workspace row " << ii << " may be overwritten in conversion to TimeSplitter" << '\n';
     }
 
@@ -112,8 +109,8 @@ TimeSplitter::TimeSplitter(const SplittersWorkspace_sptr &sws) {
     Kernel::SplittingInterval interval = sws->getSplitter(ii);
 
     // if this row's time interval intersects an interval already in the splitter, no separate ROI will be created
-    if (interval.index() != IGNORE_VALUE &&
-        (valueAtTime(interval.start()) != IGNORE_VALUE || valueAtTime(interval.stop()) != IGNORE_VALUE)) {
+    if (interval.index() != NO_TARGET &&
+        (valueAtTime(interval.start()) != NO_TARGET || valueAtTime(interval.stop()) != NO_TARGET)) {
       g_log.warning() << "Workspace row " << ii << " may be overwritten in conversion to TimeSplitter" << '\n';
     }
 
@@ -138,9 +135,9 @@ void TimeSplitter::addROI(const DateAndTime &start, const DateAndTime &stop, con
     clearAndReplace(start, stop, value);
   } else if ((stop < m_roi_map.begin()->first) || (start > m_roi_map.rbegin()->first)) {
     // adding to one end or the other
-    if (value > IGNORE_VALUE) { // only add non-ignore values
+    if (value > NO_TARGET) { // only add non-ignore values
       m_roi_map.insert({start, value});
-      m_roi_map.insert({stop, IGNORE_VALUE});
+      m_roi_map.insert({stop, NO_TARGET});
     }
   } else {
     // do the interesting version
@@ -158,7 +155,7 @@ void TimeSplitter::addROI(const DateAndTime &start, const DateAndTime &stop, con
 
     // the end is one past the "stop"
     auto stopIterator = m_roi_map.upper_bound(stop);
-    if ((stopIterator != m_roi_map.end()) && (stopValue == IGNORE_VALUE))
+    if ((stopIterator != m_roi_map.end()) && (stopValue == NO_TARGET))
       stopIterator++; // move to the one after
 
     const bool atStart = (startIterator == m_roi_map.begin());
@@ -167,7 +164,7 @@ void TimeSplitter::addROI(const DateAndTime &start, const DateAndTime &stop, con
     m_roi_map.erase(startIterator, stopIterator);
 
     // put in the new elements
-    if ((value > IGNORE_VALUE) || (!atStart)) {
+    if ((value > NO_TARGET) || (!atStart)) {
       if (value != this->valueAtTime(start)) {
         m_roi_map.insert({start, value});
       }
@@ -182,8 +179,8 @@ void TimeSplitter::addROI(const DateAndTime &start, const DateAndTime &stop, con
       m_roi_map.insert({stop, stopValue});
     }
 
-    // verify this ends with IGNORE_VALUE
-    if (m_roi_map.rbegin()->second != IGNORE_VALUE) {
+    // verify this ends with NO_TARGET
+    if (m_roi_map.rbegin()->second != NO_TARGET) {
       throw std::runtime_error("Something went wrong in TimeSplitter::addROI");
     }
   }
@@ -193,18 +190,18 @@ void TimeSplitter::clearAndReplace(const DateAndTime &start, const DateAndTime &
   m_roi_map.clear();
   if (value >= 0) {
     m_roi_map.insert({start, value});
-    m_roi_map.insert({stop, IGNORE_VALUE});
+    m_roi_map.insert({stop, NO_TARGET});
   }
 }
 
 int TimeSplitter::valueAtTime(const DateAndTime &time) const {
   if (m_roi_map.empty())
-    return IGNORE_VALUE;
+    return NO_TARGET;
   if (time < m_roi_map.begin()->first)
-    return IGNORE_VALUE;
+    return NO_TARGET;
 
   // this method can be used when the object is in an unusual state and doesn't
-  // end with IGNORE_VALUE
+  // end with NO_TARGET
 
   // find location that is greater than or equal to the requested time and give
   // back previous value
@@ -215,7 +212,7 @@ int TimeSplitter::valueAtTime(const DateAndTime &time) const {
   } else if (location == m_roi_map.begin()) {
     // iterator is greater than the first value in the map b/c equal is already
     // handled asked for a time outside of the map
-    return IGNORE_VALUE;
+    return NO_TARGET;
   } else {
     // go to the value before
     location--;
@@ -232,7 +229,7 @@ std::vector<int> TimeSplitter::outputWorkspaceIndices() const {
 
   // copy all of the (not ignore) output workspace indices
   for (const auto &iter : m_roi_map) {
-    if (iter.second > IGNORE_VALUE)
+    if (iter.second > NO_TARGET)
       outputSet.insert(iter.second);
   }
 
@@ -245,8 +242,8 @@ std::vector<int> TimeSplitter::outputWorkspaceIndices() const {
  * This will raise an exception if the workspace index does not exist in the TimeSplitter.
  */
 TimeROI TimeSplitter::getTimeROI(const int workspaceIndex) {
-  // convert things less than -1 to -1
-  const int effectiveIndex = std::max<int>(workspaceIndex, -1);
+  // convert indexes less than NO_TARGET to NO_TARGET
+  const int effectiveIndex = std::max<int>(workspaceIndex, NO_TARGET);
 
   TimeROI output;
   using map_value_type = std::map<DateAndTime, int>::value_type;
