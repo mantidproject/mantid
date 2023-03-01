@@ -44,7 +44,7 @@ public:
   TimeROI getTimeROI(const int workspaceIndex);
   /// this is to aid in testing and not intended for use elsewhere
   std::size_t numRawValues() const;
-  /// Split a list of events according to Pulse time of Pulse + TOF time
+  /// Split a list of events according to Pulse time or Pulse + TOF time
   void splitEventList(const EventList &events, std::map<int, EventList *> partials, bool pulseTof = false,
                       bool tofCorrect = false, double factor = 1.0, double shift = 0.0) const;
 

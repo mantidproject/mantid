@@ -295,7 +295,7 @@ std::size_t TimeSplitter::numRawValues() const { return m_roi_map.size(); }
 // ------------------------------------------------------------------------
 
 /**
- * Split a list of events according to Pulse time of Pulse + TOF time
+ * Split a list of events according to Pulse time or Pulse + TOF time
  *
  * Events with masked times are allocated to destination index -1.
  * @param events : list of input events
