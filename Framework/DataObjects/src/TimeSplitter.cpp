@@ -342,7 +342,7 @@ void TimeSplitter::initializePartials(const EventList &events, std::map<int, Eve
   // collect the state from events which is to be transferred to the partials
 
   bool removeDetIDs{true};
-  auto detIDs = events.getDetectorIDs();
+  const auto &detIDs = events.getDetectorIDs();
   auto histogram = events.getHistogram();
   auto eventType = events.getEventType();
   // lambda expression initializing one partial
@@ -353,8 +353,8 @@ void TimeSplitter::initializePartials(const EventList &events, std::map<int, Eve
     partial->switchTo(eventType);
   };
   // iterate over the partials
-  for (auto iter = cbegin(partials); iter != cend(partials); ++iter)
-    initPartial(iter->second);
+  std::for_each(partials.cbegin(), partials.cend(),
+                [&](const std::pair<int, EventList *> &pair) { initPartial(pair.second); });
 }
 
 /**

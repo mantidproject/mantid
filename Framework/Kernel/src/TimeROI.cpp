@@ -499,15 +499,6 @@ std::string TimeROI::debugStrPrint(const std::size_t type) const {
   return ss.str();
 }
 
-std::string TimeROI::debugStrPrint() const {
-  std::string out;
-  for (auto timePoint : m_roi) {
-    out.append(timePoint.toSimpleString());
-    out.append(" - ");
-  }
-  return out;
-}
-
 size_t TimeROI::getMemorySize() const { return this->numBoundaries() * sizeof(DateAndTime); }
 
 /**
