@@ -272,8 +272,9 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         """
         Test to ensure cal file can not be used in diffonly mode
         """
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Cal Files are currently only available for use in OSIRIS diffspec mode",
             ISISIndirectDiffractionReduction,
             InputFiles=["osi89813.raw"],
             Instrument="OSIRIS",
@@ -287,8 +288,9 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         """
         Test to ensure cal file can not be used on a different instrument other than OSIRIS
         """
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Cal Files are currently only available for use in OSIRIS diffspec mode",
             ISISIndirectDiffractionReduction,
             InputFiles=["IRS26176.RAW"],
             Instrument="IRIS",
@@ -299,15 +301,23 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         )
 
     def test_that_reduction_fails_if_provided_a_range_of_run_numbers_which_goes_from_high_to_low(self):
-        with self.assertRaises(RuntimeError):
+        with self.assertRaisesRegex(RuntimeError, "Run number ranges must go from low to high"):
             ISISIndirectDiffractionReduction(
-                InputFiles=["137793-137796", "137813-814"], Instrument="OSIRIS", Mode="diffspec", SpectraRange=[105, 112]
+                InputFiles=["137793-137796", "137813-814"],
+                Instrument="OSIRIS",
+                Mode="diffspec",
+                OutputWorkspace="wks",
+                SpectraRange=[105, 112],
             )
 
     def test_that_reduction_fails_if_provided_a_range_of_run_numbers_which_is_not_a_range(self):
-        with self.assertRaises(RuntimeError):
+        with self.assertRaisesRegex(RuntimeError, "Run number ranges must go from low to high"):
             ISISIndirectDiffractionReduction(
-                InputFiles=["137793-137796", "137813-137813"], Instrument="OSIRIS", Mode="diffspec", SpectraRange=[105, 112]
+                InputFiles=["137793-137796", "137813-137813"],
+                Instrument="OSIRIS",
+                Mode="diffspec",
+                OutputWorkspace="wks",
+                SpectraRange=[105, 112],
             )
 
 
