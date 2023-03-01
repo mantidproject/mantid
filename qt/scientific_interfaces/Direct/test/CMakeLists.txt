@@ -1,7 +1,11 @@
 # Testing
-set(TEST_FILES ALFAnalysisModelTest.h ALFAnalysisPresenterTest.h ALFInstrumentModelTest.h ALFInstrumentPresenterTest.h)
+set(TEST_FILES ALFAlgorithmManagerTest.h ALFAnalysisModelTest.h ALFAnalysisPresenterTest.h ALFInstrumentModelTest.h
+               ALFInstrumentPresenterTest.h
+)
 
-set(TEST_HELPERS ALFAnalysisMocks.h ALFInstrumentMocks.h MockALFAlgorithmManager.h MockInstrumentActor.h)
+set(TEST_HELPERS ALFAnalysisMocks.h ALFInstrumentMocks.h MockALFAlgorithmManager.h MockALFAlgorithmManagerSubscriber.h
+                 MockInstrumentActor.h
+)
 
 mtd_add_qt_tests(
   TARGET_NAME MantidQtInterfacesDirectTest
