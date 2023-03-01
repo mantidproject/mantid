@@ -1269,6 +1269,12 @@ MantidVec *EventList::makeDataE() const {
   return E;
 }
 
+/// Returns a copy of the Histogram associated with this spectrum.
+HistogramData::Histogram EventList::getHistogram() const {
+  HistogramData::Histogram ret(m_histogram);
+  return ret;
+}
+
 HistogramData::Histogram EventList::histogram() const {
   HistogramData::Histogram ret(m_histogram);
   ret.setSharedY(sharedY());

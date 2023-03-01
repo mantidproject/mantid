@@ -157,7 +157,7 @@ public:
 
   void sortTof() const;
 
-  void sortPulseTime() const;
+  void sortPulseTime() const override;
   void sortPulseTimeTOF() const;
   void sortTimeAtSample(const double &tofFactor, const double &tofShift, bool forceResort = false) const;
 
@@ -195,7 +195,7 @@ public:
   MantidVec *makeDataE() const;
 
   std::size_t getNumberEvents() const override;
-  bool empty() const;
+  bool empty() const override;
 
   size_t getMemorySize() const override;
 
@@ -298,6 +298,8 @@ public:
   void convertUnitsViaTof(Mantid::Kernel::Unit *fromUnit, Mantid::Kernel::Unit *toUnit);
   void convertUnitsQuickly(const double &factor, const double &power);
 
+  /// Returns a copy of the Histogram associated with this spectrum.
+  HistogramData::Histogram getHistogram() const override;
   /// Returns the Histogram associated with this spectrum. Y and E data is
   /// computed from the event list.
   HistogramData::Histogram histogram() const override;

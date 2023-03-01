@@ -7,21 +7,25 @@
 #pragma once
 
 #include <cxxtest/TestSuite.h>
-
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/TimeSplitter.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/TimeROI.h"
 
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::TableRow;
+using Mantid::API::EventType;
+using Mantid::API::IEventList;
+using Mantid::DataObjects::EventList;
 using Mantid::DataObjects::TimeSplitter;
 using Mantid::Kernel::SplittingInterval;
 using Mantid::Kernel::TimeROI;
 using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 namespace {
 const DateAndTime ONE("2023-01-01T11:00:00");
@@ -29,9 +33,108 @@ const DateAndTime TWO("2023-01-01T12:00:00");
 const DateAndTime THREE("2023-01-01T13:00:00");
 const DateAndTime FOUR("2023-01-01T14:00:00");
 const DateAndTime FIVE("2023-01-01T15:00:00");
+const DateAndTime SIX("2023-01-01T16:00:00");
+
 } // namespace
 
 class TimeSplitterTest : public CxxTest::TestSuite {
+private:
+  /**
+   * Helper function to generate a list of events.
+   *
+   * `eventsPerPulse` are spaced equally throughout `pulsePeriod`.
+   *
+   * The starting time is const DateAndTime TWO("2023-01-01T12:00:00")
+   *
+   * @param pulsePeriod : time span of a pulse, in seconds
+   * @param nPulses : number of consecutive pulses
+   * @param eventsPerPulse : number of events
+   * @param eventType : one of enum EventType {TOF, WEIGHTED, WEIGHTED_NOTIME}
+   */
+  EventList generateEvents(const DateAndTime &startTime, double pulsePeriod, size_t nPulses, size_t eventsPerPulse,
+                           EventType eventType = EventType::TOF) {
+    UNUSED_ARG(eventsPerPulse);
+    static constexpr int64_t nanosecInsec{1000000000};
+    static constexpr double microsecInsec{1000000.0};
+    int64_t pulsePeriodInNanosec = static_cast<int64_t>(pulsePeriod * nanosecInsec);
+    // time between consecutive events, in microseconds.
+    double eventPeriod = (pulsePeriod * microsecInsec) / static_cast<double>(eventsPerPulse);
+    // loop over each pulse
+    auto events = EventList();
+    DateAndTime currentPulseTime{startTime};
+    for (size_t iPulse = 0; iPulse < nPulses; iPulse++) {
+      // instantiate each event in the current pulse
+      double tof{0.0};
+      for (size_t iEvent = 0; iEvent < eventsPerPulse; iEvent++) {
+        auto event = TofEvent(tof, currentPulseTime);
+        events.addEventQuickly(event);
+        tof += eventPeriod;
+      }
+      currentPulseTime += pulsePeriodInNanosec;
+    }
+    events.switchTo(eventType);
+    return events;
+  }
+
+  /// Instantiate an EventList for every input destination index
+  std::map<int, EventList *> instantiatePartials(const std::vector<int> &destinations) {
+    std::map<int, EventList *> partials;
+    for (int destination : destinations) {
+      if (partials.find(destination) != partials.cend())
+        throw std::runtime_error("cannot have duplicate destinations");
+      partials[destination] = new EventList();
+    }
+    return partials;
+  }
+
+  /**
+   * Helper function to generate a TimeSplitter object from a vector of times and
+   * destination indexes.
+   *
+   * The size of vector `times` must be one plus the size of vector `indexes`. Thus,
+   * any time `t` such that times[i] <= t < times[i+1] will be associated to
+   * destination index `indexes[i]`
+   *
+   * Destination index '-1` is allowed.
+   *
+   * @param times : vector of times
+   * @param indexes : vector of destination indexes
+   */
+  TimeSplitter generateSplitter(std::vector<DateAndTime> &times, std::vector<int> &indexes) {
+    assert(times.size() == 1 + indexes.size());
+    auto splitter = TimeSplitter();
+    for (size_t i = 0; i < indexes.size(); i++)
+      splitter.addROI(times[i], times[i + 1], indexes[i]);
+    return splitter;
+  }
+
+  /**
+   * Helper function to generate a TimeSplitter object from a vector of interval times,
+   * destination indexes, and a starting DateAndTime.
+   *
+   * The size of vector `intervals` must be the same as `destinations`.
+   *
+   * Destination index '-1` is allowed.
+   *
+   * @param intervals : time intervals between consecutive DateAndTime boundaries
+   * @param destinations : vector of destination indexes
+   * @para startTime: first DateAndTime boundary
+   */
+  TimeSplitter generateSplitter(const DateAndTime &startTime, const std::vector<double> &intervals,
+                                const std::vector<int> &destinations) {
+    TimeSplitter splitter;
+    assert(destinations.size() == intervals.size());
+    DateAndTime start(startTime);
+    DateAndTime stop(startTime);
+    ;
+    for (size_t i = 0; i < intervals.size(); i++) {
+      stop += intervals[i]; // invokes DateAndTime &operator+=(const double sec);
+      splitter.addROI(start, stop, destinations[i]);
+      start = stop;
+    }
+    return splitter;
+  }
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -417,5 +520,84 @@ public:
     TS_ASSERT(referenceSplitter.valueAtTime(time4) == workspaceDerivedSplitter.valueAtTime(time4));
     TS_ASSERT(referenceSplitter.valueAtTime(time5) == workspaceDerivedSplitter.valueAtTime(time5));
     TS_ASSERT(referenceSplitter.valueAtTime(time6) == workspaceDerivedSplitter.valueAtTime(time6));
+
+  // Verify keys in TimeSplitter::m_roi_map are sorted
+  void test_keysSorted() {
+    TimeSplitter splitter;
+    splitter.addROI(FIVE, SIX, 0);
+    splitter.addROI(THREE, FOUR, 0);
+    splitter.addROI(ONE, TWO, 0);
+    auto iter = splitter.getSplittersMap().begin();
+    TS_ASSERT_EQUALS(iter->first, ONE);
+    TS_ASSERT_EQUALS(iter->second, 0);
+    iter++;
+    TS_ASSERT_EQUALS(iter->first, TWO);
+    TS_ASSERT_EQUALS(iter->second, TimeSplitter::NO_TARGET);
+    iter++;
+    TS_ASSERT_EQUALS(iter->first, THREE);
+    TS_ASSERT_EQUALS(iter->second, 0);
+    iter++;
+    TS_ASSERT_EQUALS(iter->first, FOUR);
+    TS_ASSERT_EQUALS(iter->second, TimeSplitter::NO_TARGET);
+    iter++;
+    TS_ASSERT_EQUALS(iter->first, FIVE);
+    TS_ASSERT_EQUALS(iter->second, 0);
+    iter++;
+    TS_ASSERT_EQUALS(iter->first, SIX);
+    TS_ASSERT_EQUALS(iter->second, TimeSplitter::NO_TARGET);
+    iter++;
   }
+
+  // ------------------------------------------------------------------------
+  // TESTING SPLITTING EVENTS METHODS
+  // ------------------------------------------------------------------------
+
+  void test_splitEvents() {
+    const DateAndTime &startTime = TWO; // beginning time of the fake run
+    double pulsePeriod{1.0};            // time between consecutive pulses, in seconds
+    size_t nPulses{10};                 // the run will last 10 seconds total
+    size_t eventsPerPulse{100};         // a total of 1000 events in the run
+
+    // beginning at startTime, copy events during the first 5 seconds of the run to destination 0,
+    // implicitly discarding everything else
+    std::vector<double> durations{5.0}; // duration of each time interval, in seconds
+    std::vector<int> destinations{0};   // workspace destination indexes
+    auto splitter = this->generateSplitter(startTime, durations, destinations);
+
+    // DEBUG: remove this for loop
+    std::string junk;
+    for (auto i : splitter.outputWorkspaceIndices())
+      junk = splitter.getTimeROI(i).debugStrPrint();
+
+    // allocate two event lists, one for discarded events and another for destination 0
+    auto partials = this->instantiatePartials({TimeSplitter::NO_TARGET, 0});
+
+    // verify we don't split events of type EventType::WEIGHTED_NOTIME
+    EventList events =
+        this->generateEvents(startTime, pulsePeriod, nPulses, eventsPerPulse, EventType::WEIGHTED_NOTIME);
+    TS_ASSERT_THROWS(splitter.splitEventList(events, partials), std::runtime_error &);
+
+    // typical case with events of type EventType::TOF
+    events = this->generateEvents(startTime, pulsePeriod, nPulses, eventsPerPulse, EventType::TOF);
+    splitter.splitEventList(events, partials);
+    // assert total number of events in each partial is 500
+    TS_ASSERT_EQUALS(partials[TimeSplitter::NO_TARGET]->getNumberEvents(), 500);
+    TS_ASSERT_EQUALS(partials[0]->getNumberEvents(), 500);
+
+    // no events should be discarded in this case since splitter discard events only after 10 seconds, which
+    // is the whole duration of the run
+    durations = {2.0, 6.0, 2.0, 2.0};
+    destinations = {1, 3, 2, TimeSplitter::NO_TARGET};
+    splitter = this->generateSplitter(startTime, durations, destinations);
+    // splitter does not allocate any time interval to destination 0, thus the corresponding list should be empty
+    partials = this->instantiatePartials({TimeSplitter::NO_TARGET, 0, 1, 2, 3});
+    events = this->generateEvents(startTime, pulsePeriod, nPulses, eventsPerPulse, EventType::WEIGHTED);
+    splitter.splitEventList(events, partials);
+    TS_ASSERT_EQUALS(partials[TimeSplitter::NO_TARGET]->getNumberEvents(), 0);
+    TS_ASSERT_EQUALS(partials[0]->getNumberEvents(), 0);
+    TS_ASSERT_EQUALS(partials[1]->getNumberEvents(), 200);
+    TS_ASSERT_EQUALS(partials[2]->getNumberEvents(), 200);
+    TS_ASSERT_EQUALS(partials[3]->getNumberEvents(), 600);
+  }
+
 };
