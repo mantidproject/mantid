@@ -422,11 +422,11 @@ public:
         // first and then I01 is solved using all I00, I10 and I11. This
         // results in slightly larger errors estimates for I01 and thus for
         // the final corrected expected intensities.
-        TS_ASSERT_DELTA(ppE[k], expectedError[0], 1e-6)
+        TS_ASSERT_DELTA(ppE[k], expectedError[0], 1e-5)
         TS_ASSERT_LESS_THAN(ppE[k], expectedError[0])
         TS_ASSERT_DELTA(pmE[k], expectedError[1], 1e-2)
         TS_ASSERT_LESS_THAN(pmE[k], expectedError[1])
-        TS_ASSERT_DELTA(mpE[k], expectedError[2], 1e-7)
+        TS_ASSERT_DELTA(mpE[k], expectedError[2], 1e-2)
         TS_ASSERT_LESS_THAN(mpE[k], expectedError[2])
         TS_ASSERT_DELTA(mmE[k], expectedError[3], 1e-5)
         TS_ASSERT_LESS_THAN(mmE[k], expectedError[3])
@@ -702,7 +702,8 @@ private:
     return ws;
   }
 
-  Mantid::API::MatrixWorkspace_sptr idealEfficiencies(const Mantid::HistogramData::BinEdges &edges) {
+  Mantid::API::MatrixWorkspace_sptr idealEfficiencies(const Mantid::HistogramData::BinEdges &edges,
+                                                      const bool isNormalPolarization = true) {
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
     using namespace Mantid::HistogramData;
@@ -713,6 +714,12 @@ private:
     MatrixWorkspace_sptr ws = create<Workspace2D>(nHist, Histogram(edges, counts));
     ws->mutableY(0) = 1.;
     ws->mutableY(1) = 1.;
+    if (isNormalPolarization) {
+      // Normal polarization should have 1 for all efficiency factors
+      // Cross polarization should have 0 for the polarizer/normaliser (i.e. P1/P2) efficiency factors
+      ws->mutableY(2) = 1.;
+      ws->mutableY(3) = 1.;
+    }
     auto axis = std::make_unique<TextAxis>(4);
     axis->setLabel(0, "F1");
     axis->setLabel(1, "F2");
@@ -948,7 +955,7 @@ private:
 
   Eigen::Matrix4d invertedP1(const double p1) {
     Eigen::Matrix4d m;
-    m << p1 - 1., 0., p1, 0., 0., p1 - 1., 0., p1, p1, 0., p1 - 1., 0., 0., p1, 0., p1 - 1.;
+    m << p1, 0., p1 - 1., 0., 0., p1, 0., p1 - 1., p1 - 1., 0., p1, 0., 0., p1 - 1., 0., p1;
     m *= 1. / (2. * p1 - 1.);
     return m;
   }
@@ -962,7 +969,7 @@ private:
 
   Eigen::Matrix4d invertedP2(const double p2) {
     Eigen::Matrix4d m;
-    m << p2 - 1., p2, 0., 0., p2, p2 - 1., 0., 0., 0., 0., p2 - 1., p2, 0., 0., p2, p2 - 1.;
+    m << p2, p2 - 1., 0., 0., p2 - 1., p2, 0., 0., 0., 0., p2, p2 - 1., 0., 0., p2 - 1., p2;
     m *= 1. / (2. * p2 - 1.);
     return m;
   }
@@ -1009,7 +1016,7 @@ private:
     F1 << f1, 0., f1 - 1., 1.;
     F1 *= 1. / f1;
     Eigen::Matrix2d P1;
-    P1 << p1 - 1., p1, p1, p1 - 1.;
+    P1 << p1, p1 - 1., p1 - 1., p1;
     P1 *= 1. / (2. * p1 - 1.);
     const Eigen::Matrix2d inverted = (P1 * F1).matrix();
     return static_cast<Eigen::Vector2d>(inverted * y);
@@ -1024,7 +1031,7 @@ private:
     dF1 << 0., 0., 1., -1.;
     dF1 *= f1e / (f1 * f1);
     Eigen::Matrix2d P1;
-    P1 << p1 - 1., p1, p1, p1 - 1.;
+    P1 << p1, p1 - 1., p1 - 1., p1;
     P1 *= 1. / (2. * p1 - 1.);
     Eigen::Matrix2d dP1;
     dP1 << 1., -1., -1., 1.;

@@ -99,12 +99,12 @@ void fourInputsCorrectedAndErrors(Eigen::Vector4d &corrected, Eigen::Vector4d &e
   const auto off2 = (f2 - 1.) / f2;
   Eigen::Matrix4d F2m;
   F2m << 1., 0., 0., 0., off2, diag2, 0., 0., 0., 0., 1., 0., 0., 0., off2, diag2;
-  const auto diag3 = (p1 - 1.) / (2. * p1 - 1.);
-  const auto off3 = p1 / (2. * p1 - 1);
+  const auto diag3 = p1 / (2. * p1 - 1);
+  const auto off3 = (p1 - 1.) / (2. * p1 - 1.);
   Eigen::Matrix4d P1m;
   P1m << diag3, 0, off3, 0, 0, diag3, 0, off3, off3, 0, diag3, 0, 0, off3, 0, diag3;
-  const auto diag4 = (p2 - 1.) / (2. * p2 - 1.);
-  const auto off4 = p2 / (2. * p2 - 1.);
+  const auto diag4 = p2 / (2. * p2 - 1.);
+  const auto off4 = (p2 - 1.) / (2. * p2 - 1.);
   Eigen::Matrix4d P2m;
   P2m << diag4, off4, 0., 0., off4, diag4, 0., 0., 0., 0., diag4, off4, 0., 0., off4, diag4;
   const Eigen::Vector4d intensities(ppy, pmy, mpy, mmy);
@@ -633,8 +633,8 @@ PolarizationCorrectionWildes::analyzerlessCorrections(const WorkspaceMap &inputs
       Eigen::Matrix2d F1m;
       F1m << 1., 0., (F1 - 1.) / F1, 1. / F1;
       const double divisor = (2. * P1 - 1.);
-      const double diag = (P1 - 1.) / divisor;
-      const double off = P1 / divisor;
+      const double off = (P1 - 1.) / divisor;
+      const double diag = P1 / divisor;
       Eigen::Matrix2d P1m;
       P1m << diag, off, off, diag;
       const Eigen::Vector2d intensities(ppY[binIndex], mmY[binIndex]);
