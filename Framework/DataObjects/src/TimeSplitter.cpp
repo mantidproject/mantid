@@ -37,9 +37,93 @@ TimeSplitter::TimeSplitter(const DateAndTime &start, const DateAndTime &stop) {
   clearAndReplace(start, stop, DEFAULT_VALUE);
 }
 
+/**
+ * Note: The amount of X values in input MatrixWorkspace must be 1 larger than the amount of Y values.
+ * There are NO undefined split regions here.
+ **/
+TimeSplitter::TimeSplitter(const Mantid::API::MatrixWorkspace_sptr &ws, const DateAndTime &offset) {
+  if (ws->getNumberHistograms() != 1) {
+    throw std::runtime_error("MatrixWorkspace can only have 1 histogram when constructing TimeSplitter.");
+  }
+
+  const auto X = ws->binEdges(0);
+  const auto &Y = ws->y(0);
+  if (std::any_of(X.begin(), X.end(), [](double i) { return static_cast<int>(i) < 0; })) {
+    throw std::runtime_error("All X values in MatrixWorkspace must be >= 0 to construct TimeSplitter.");
+  }
+  if (X.size() != Y.size() + 1) {
+    throw std::runtime_error(
+        "Size of x values must be one more than size of y values to construct TimeSplitter from MatrixWorkspace.");
+  }
+
+  int64_t offset_ns{offset.totalNanoseconds()};
+  for (size_t i = 1; i < X.size(); i++) {
+    auto timeStart = Types::Core::DateAndTime(X[i - 1], 0.0) + offset_ns;
+    auto timeEnd = Types::Core::DateAndTime(X[i], 0.0) + offset_ns;
+    auto index = static_cast<int>(Y[i - 1]);
+    if ((index != IGNORE_VALUE) && (valueAtTime(timeStart) != IGNORE_VALUE || valueAtTime(timeEnd) != IGNORE_VALUE)) {
+      g_log.warning() << "Values between " << timeStart.second() << "(s) and " << timeEnd.second()
+                      << "(s) may be overwritten in conversion to TimeSplitter" << '\n';
+    }
+    this->addROI(timeStart, timeEnd, index);
+  }
+}
+
+TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &offset) {
+  if (tws->columnCount() != 3) {
+    throw std::runtime_error("Table workspace used for event filtering must have 3 columns.");
+  }
+
+  // by design, there should be 3 columns, e.g. "start", "stop", "target", although the exact names are not enforced
+  API::Column_sptr col_start = tws->getColumn(0);
+  API::Column_sptr col_stop = tws->getColumn(1);
+  API::Column_sptr col_target = tws->getColumn(2);
+
+  for (size_t ii = 0; ii < tws->rowCount(); ii++) {
+    // by design, the times in the table must be in seconds
+    double timeStart_s{col_start->cell<double>(ii)};
+    double timeStop_s{col_stop->cell<double>(ii)};
+    if (timeStart_s < 0 || timeStop_s < 0) {
+      throw std::runtime_error("All times in TableWorkspace must be >= 0 to construct TimeSplitter.");
+    }
+    Types::Core::DateAndTime timeStart(timeStart_s, 0.0 /*ns*/);
+    Types::Core::DateAndTime timeStop(timeStop_s, 0.0 /*ns*/);
+
+    // make the times absolute
+    int64_t offset_ns{offset.totalNanoseconds()};
+    timeStart += offset_ns;
+    timeStop += offset_ns;
+
+    // get the target workspace index
+    int target_ws_index = std::stoi(col_target->cell<std::string>(ii));
+
+    // if this row's time interval intersects an interval already in the splitter, no separate ROI will be created
+    if ((target_ws_index != IGNORE_VALUE) &&
+        (valueAtTime(timeStart) != IGNORE_VALUE || valueAtTime(timeStop) != IGNORE_VALUE)) {
+      g_log.warning() << "Workspace row " << ii << " may be overwritten in conversion to TimeSplitter" << '\n';
+    }
+
+    addROI(timeStart, timeStop, target_ws_index);
+  }
+}
+
+TimeSplitter::TimeSplitter(const SplittersWorkspace_sptr &sws) {
+  for (size_t ii = 0; ii < sws->rowCount(); ii++) {
+    Kernel::SplittingInterval interval = sws->getSplitter(ii);
+
+    // if this row's time interval intersects an interval already in the splitter, no separate ROI will be created
+    if (interval.index() != IGNORE_VALUE &&
+        (valueAtTime(interval.start()) != IGNORE_VALUE || valueAtTime(interval.stop()) != IGNORE_VALUE)) {
+      g_log.warning() << "Workspace row " << ii << " may be overwritten in conversion to TimeSplitter" << '\n';
+    }
+
+    addROI(interval.start(), interval.stop(), interval.index());
+  }
+}
+
 std::string TimeSplitter::debugPrint() const {
   std::stringstream msg;
-  for (const auto iter : m_roi_map)
+  for (const auto &iter : m_roi_map)
     msg << iter.second << "|" << iter.first << "\n";
   return msg.str();
 }
@@ -147,7 +231,7 @@ std::vector<int> TimeSplitter::outputWorkspaceIndices() const {
   std::set<int> outputSet;
 
   // copy all of the (not ignore) output workspace indices
-  for (const auto iter : m_roi_map) {
+  for (const auto &iter : m_roi_map) {
     if (iter.second > IGNORE_VALUE)
       outputSet.insert(iter.second);
   }

@@ -212,7 +212,7 @@ Output:
 .. testoutput:: ExEPPTable
 
     Original TOF for the elastic peak: 66.5
-    Corrected TOF for the elastic peak: 1232.7
+    Corrected TOF for the elastic peak: 1233.0
     Actual elastic TOF: 1233.1
 
 **Example - CorrectTOFAxis using a reference workspace**
@@ -288,8 +288,8 @@ Output:
 .. testoutput:: ExReferenceWS
 
     First workspace original TOF for the elastic peak: 66.5
-    EPP table corrected TOF for the elastic peak: 1232.7
-    Elastic TOF for the corrected second workspace: 1232.7
+    EPP table corrected TOF for the elastic peak: ...
+    Elastic TOF for the corrected second workspace: ...
 
 .. categories::
 

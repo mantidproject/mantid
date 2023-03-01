@@ -17,10 +17,7 @@ except ImportError:
 matplotlibissue = None  # indicates there are no issues
 try:
     import matplotlib
-    from distutils.version import LooseVersion
 
-    if LooseVersion(matplotlib.__version__) < LooseVersion("1.2.0"):
-        matplotlibissue = "Wrong version of matplotlib. Required >= 1.2.0"
     matplotlib.use("agg")
     import matplotlib.pyplot as plt
 except:

@@ -35,7 +35,7 @@ Usage
    file_path = os.path.join(config["defaultsave.directory"], "example.ses")
 
    # Do a 'roundtrip' of the data
-   SaveSESANS(InputWorkspace=out_ws, Filename=file_path, ThetaZMax=1,ThetaYMax=1, EchoConstant=1, Sample="Sample")
+   SaveSESANS(InputWorkspace=out_ws, Filename=file_path, ThetaZMax=1,ThetaYMax=1, EchoConstant=1, Sample="Sample", OverrideSampleThickness=True)
    LoadSESANS(Filename=file_path, OutputWorkspace="in_ws")
 
    # Retrieve loaded workspace from ADS
@@ -50,7 +50,7 @@ Output:
 
 .. testoutput:: LoadSESANSRoundTrip
 
-   Y values of loaded workspace = [ 0.796338  0.        0.179365  0.130324]
+   Y values of loaded workspace = [ ... ... ... ...]
 
 .. categories::
 

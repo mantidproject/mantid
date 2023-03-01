@@ -12,6 +12,7 @@
 #include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/TimeROI.h"
 #include "MantidKernel/Unit.h"
 
 #ifdef _MSC_VER
@@ -3681,6 +3682,23 @@ void EventList::filterByTimeAtSampleHelper(std::vector<T> &events, DateAndTime s
                });
 }
 
+/** Filter a vector of events into another based on TimeROI.
+ * TODO: Make this more efficient using STL-fu.
+ * @param events :: input events
+ * @param intervals :: Interval vec of start and stop times
+ * @param output :: reference to an event list that will be output.
+ */
+template <class T>
+void EventList::filterByTimeROIHelper(std::vector<T> &events, const Kernel::SplittingIntervalVec &intervals,
+                                      std::vector<T> &output) {
+  for (const auto &time : intervals) {
+    const DateAndTime start = time.start();
+    const DateAndTime stop = time.stop();
+    std::copy_if(events.begin(), events.end(), std::back_inserter(output),
+                 [start, stop](const T &t) { return (t.m_pulsetime >= start) && (t.m_pulsetime < stop); });
+  }
+}
+
 //------------------------------------------------------------------------------------------------
 /** Filter this EventList into an output EventList, using
  * keeping only events within the >= start and < end pulse times.
@@ -3691,7 +3709,8 @@ void EventList::filterByTimeAtSampleHelper(std::vector<T> &events, DateAndTime s
  * @param output :: reference to an event list that will be output.
  * @throws std::invalid_argument If output is a reference to this EventList
  */
-void EventList::filterByPulseTime(DateAndTime start, DateAndTime stop, EventList &output) const {
+void EventList::filterByPulseTime(Types::Core::DateAndTime start, Types::Core::DateAndTime stop,
+                                  EventList &output) const {
   if (this == &output) {
     throw std::invalid_argument("In-place filtering is not allowed");
   }
@@ -3753,6 +3772,49 @@ void EventList::filterByTimeAtSample(Types::Core::DateAndTime start, Types::Core
   }
 }
 
+/** Filter this EventList into an output EventList, using TimeROI
+ * keeping only events within the >= start and < end pulse times.
+ * Since a TimeROI object may contain more than one time interval,
+ * the function is keeping events with pulse times within any of
+ * the ROI time intervals and discarding events within any of the
+ * masked time intervals.
+ * Detector IDs and the X axis are copied as well.
+ *
+ * @param timeRoi :: reference to TimeROI to be used for filtering
+ * @param output :: reference to an event list that will be output.
+ * @throws std::invalid_argument If output is a reference to this EventList
+ */
+void EventList::filterByPulseTime(Kernel::TimeROI *timeRoi, EventList &output) const {
+  if (this == &output) {
+    throw std::invalid_argument("In-place filtering is not allowed");
+  }
+
+  // Clear the output
+  output.clear();
+  // Has to match the given type
+  output.switchTo(eventType);
+  output.setDetectorIDs(this->getDetectorIDs());
+  output.setHistogram(m_histogram);
+  output.setSortOrder(this->order);
+
+  if ((timeRoi == nullptr) || (timeRoi->empty())) {
+    throw std::invalid_argument("TimeROI can not be empty");
+  }
+  const auto &intervals = timeRoi->toSplitters();
+
+  switch (eventType) {
+  case TOF:
+    filterByTimeROIHelper(this->events, intervals, output.events);
+    break;
+  case WEIGHTED:
+    filterByTimeROIHelper(this->weightedEvents, intervals, output.weightedEvents);
+    break;
+  case WEIGHTED_NOTIME:
+    throw std::runtime_error("EventList::filterByTimeROI() called on an "
+                             "EventList that no longer has time information.");
+    break;
+  }
+}
 //------------------------------------------------------------------------------------------------
 /** @brief Perform an in-place filtering on a vector of either TofEvent's or
  *WeightedEvent's.
@@ -3802,8 +3864,8 @@ void EventList::filterInPlaceHelper(Kernel::SplittingIntervalVec &splitter, type
   // This is the time of the first section. Anything before is thrown out.
   while (itspl != itspl_end) {
     // Get the splitting interval times and destination
-    start = itspl->begin();
-    stop = itspl->end();
+    start = itspl->start();
+    stop = itspl->stop();
     const int index = itspl->index();
 
     // Skip the events before the start of the time
@@ -3904,8 +3966,8 @@ void EventList::splitByTimeHelper(Kernel::SplittingIntervalVec &splitter, std::v
   // This is the time of the first section. Anything before is thrown out.
   while (itspl != itspl_end) {
     // Get the splitting interval times and destination
-    start = itspl->begin();
-    stop = itspl->end();
+    start = itspl->start();
+    stop = itspl->stop();
     const size_t index = itspl->index();
 
     // Skip the events before the start of the time
@@ -4010,8 +4072,8 @@ void EventList::splitByFullTimeHelper(Kernel::SplittingIntervalVec &splitter, st
   // 3. This is the time of the first section. Anything before is thrown out.
   while (itspl != itspl_end) {
     // Get the splitting interval times and destination
-    int64_t start = itspl->begin().totalNanoseconds();
-    int64_t stop = itspl->end().totalNanoseconds();
+    int64_t start = itspl->start().totalNanoseconds();
+    int64_t stop = itspl->stop().totalNanoseconds();
     const int index = itspl->index();
 
     // a) Skip the events before the start of the time
@@ -4378,8 +4440,8 @@ void EventList::splitByPulseTimeHelper(Kernel::SplittingIntervalVec &splitter, s
   // Iterate (loop) on all splitters
   while (itspl != itspl_end) {
     // Get the splitting interval times and destination group
-    start = itspl->begin().totalNanoseconds();
-    stop = itspl->end().totalNanoseconds();
+    start = itspl->start().totalNanoseconds();
+    stop = itspl->stop().totalNanoseconds();
     const int index = itspl->index();
 
     // Skip the events before the start of the time and put to 'unfiltered'

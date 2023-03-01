@@ -7,7 +7,6 @@
 #  This file is part of the mantid workbench.
 
 import unittest
-from distutils.version import LooseVersion
 
 import matplotlib
 from matplotlib import use as mpl_use
@@ -180,14 +179,7 @@ class ApplyAllPropertiesTest(unittest.TestCase):
         cls.new_curve = cls.ax.containers[0]
 
         # Mock images tab view
-        if LooseVersion(matplotlib.__version__) > LooseVersion("3.1.3"):
-            cls.img_view_mock = Mock(
-                get_selected_image_name=lambda: "(0, 0) - child0", get_properties=lambda: ImageProperties(new_image_props)
-            )
-        else:
-            cls.img_view_mock = Mock(
-                get_selected_image_name=lambda: "(0, 0) - image0", get_properties=lambda: ImageProperties(new_image_props)
-            )
+        cls.img_view_mock = Mock(get_selected_image_name=lambda: "(0, 0) - child0", get_properties=lambda: ImageProperties(new_image_props))
         cls.img_view_patch = patch(IMAGE_VIEW, lambda x: cls.img_view_mock)
         cls.img_view_patch.start()
 
@@ -355,10 +347,7 @@ class ApplyAllPropertiesTest(unittest.TestCase):
         self.assertEqual(new_legend_props["round_edges"], isinstance(self.new_legend.legendPatch.get_boxstyle(), BoxStyle.Round))
 
     def test_apply_properties_on_figure_with_legend_sets_number_of_columns(self):
-        if LooseVersion(matplotlib.__version__) >= LooseVersion("3.6.0"):
-            self.assertEqual(new_legend_props["columns"], self.new_legend._ncols)
-        else:
-            self.assertEqual(new_legend_props["columns"], self.new_legend._ncol)
+        self.assertEqual(new_legend_props["columns"], self.new_legend._ncols)
 
     def test_apply_properties_on_figure_with_legend_sets_column_spacing(self):
         self.assertEqual(new_legend_props["column_spacing"], self.new_legend.columnspacing)

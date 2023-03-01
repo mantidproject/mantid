@@ -12,7 +12,6 @@ our custom window.
 """
 
 # std imports
-from distutils.version import LooseVersion
 
 import matplotlib
 import numpy as np
@@ -110,7 +109,7 @@ def superplot_from_names(names, plot_kwargs):
 
     :param names: A list of workspace names
     """
-    return plot(names, plot_kwargs=plot_kwargs, wksp_indices=[], superplot=True)
+    plot(names, plot_kwargs=plot_kwargs, wksp_indices=[], superplot=True)
 
 
 def superplot_with_errors_from_names(names, plot_kwargs):
@@ -120,7 +119,7 @@ def superplot_with_errors_from_names(names, plot_kwargs):
 
     :param names: A list of workspace names
     """
-    return plot(names, errors=True, plot_kwargs=plot_kwargs, wksp_indices=[], superplot=True)
+    plot(names, errors=True, plot_kwargs=plot_kwargs, wksp_indices=[], superplot=True)
 
 
 def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False, advanced=False, superplot=False):
@@ -354,11 +353,8 @@ def plot_surface(workspaces, fig=None):
             fig.clf()
             ax = fig.add_subplot(111, projection="mantid3d")
         else:
-            if LooseVersion("3.4.0") <= LooseVersion(matplotlib.__version__):
-                fig, ax = plt.subplots(subplot_kw={"projection": "mantid3d", "auto_add_to_figure": False})
-                fig.add_axes(ax)
-            else:
-                fig, ax = plt.subplots(subplot_kw={"projection": "mantid3d"})
+            fig, ax = plt.subplots(subplot_kw={"projection": "mantid3d", "auto_add_to_figure": False})
+            fig.add_axes(ax)
 
         surface = ax.plot_surface(ws, cmap=ConfigService.getString("plots.images.Colormap"))
         ax.set_title(ws.name())

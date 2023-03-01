@@ -103,7 +103,7 @@ class CalibrationPresenter(object):
             "last_calibration_path",
             self.current_calibration.get_prm_filepath(),
         )
-        self.prm_filepath_notifier_gsas2.notify_subscribers(self.model.get_last_prm_files_gsas2())
+        self.prm_filepath_notifier_gsas2.notify_subscribers(self.model.get_last_prm_file_gsas2())
 
     def set_field_value(self):
         self.view.set_sample_text(self.current_calibration.get_sample())

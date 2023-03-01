@@ -268,6 +268,8 @@ void LoadILLIndirect2::loadDataIntoWorkspace(NeXus::NXEntry &entry) {
   LoadHelper::fillStaticWorkspace(m_localWorkspace, data, xAxis, 1);
 
   // And finally Simple Detectors (SD)
+  if (m_activeSDIndices.size() == 0) // there is no point to try to load from empty list of active indices
+    return;
   int offset = static_cast<int>(m_numberOfTubes * m_numberOfPixelsPerTube + m_numberOfMonitors);
   auto dataSD = LoadHelper::getIntDataset(entry, "dataSD");
   dataSD.load();

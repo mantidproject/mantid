@@ -16,7 +16,6 @@ This module contains a class to create a graphical user interface for PyChop.
 
 import sys
 import re
-from distutils.version import LooseVersion
 
 import numpy as np
 import os
@@ -45,7 +44,6 @@ from qtpy.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )  # noqa
-import matplotlib
 from matplotlib.figure import Figure
 from matplotlib.widgets import Slider
 
@@ -335,10 +333,7 @@ class PyChopGui(QMainWindow):
 
     def _set_overplot(self, overplot, axisname):
         axis = getattr(self, axisname)
-        if overplot:
-            if LooseVersion("2.1.0") > LooseVersion(matplotlib.__version__):
-                axis.hold(True)
-        else:
+        if not overplot:
             setattr(self, axisname + "_xlim", 0)
             axis.clear()
             axis.axhline(color="k")
@@ -356,8 +351,6 @@ class PyChopGui(QMainWindow):
         if hasattr(freq, "__len__"):
             freq = freq[0]
         if multiplot:
-            if LooseVersion("2.1.0") > LooseVersion(matplotlib.__version__):
-                self.resaxes.hold(True)
             for ie, Ei in enumerate(self.eis):
                 en = np.linspace(0, 0.95 * Ei, 200)
                 if any(self.res[ie]):
@@ -369,8 +362,6 @@ class PyChopGui(QMainWindow):
                     if self.tabs.isTabEnabled(self.qetabID):
                         self.plot_qe(Ei, label_text, hold=True)
                     self.resaxes_xlim = max(Ei, self.resaxes_xlim)
-            if LooseVersion("2.1.0") > LooseVersion(matplotlib.__version__):
-                self.resaxes.hold(False)
         else:
             ei = self.engine.getEi()
             en = np.linspace(0, 0.95 * ei, 200)
@@ -445,9 +436,6 @@ class PyChopGui(QMainWindow):
         if update:
             self.flxaxes1.clear()
             self.flxaxes2.clear()
-            if LooseVersion("2.1.0") > LooseVersion(matplotlib.__version__):
-                self.flxaxes1.hold(True)
-                self.flxaxes2.hold(True)
             for ii, instrument in enumerate(tmpinst):
                 for ie, ei in enumerate(eis):
                     with warnings.catch_warnings(record=True):
@@ -463,11 +451,7 @@ class PyChopGui(QMainWindow):
                     warnings.simplefilter("always", UserWarning)
                     flux[ie] = self.engine.getFlux(ei)
                     elres[ie] = self.engine.getResolution(0.0, ei)[0]
-            if overplot:
-                if LooseVersion("2.1.0") > LooseVersion(matplotlib.__version__):
-                    self.flxaxes1.hold(True)
-                    self.flxaxes2.hold(True)
-            else:
+            if not overplot:
                 self.flxaxes1.clear()
                 self.flxaxes2.clear()
             self.flxaxes1.plot(eis, flux)
@@ -530,11 +514,7 @@ class PyChopGui(QMainWindow):
                 warnings.simplefilter("always", UserWarning)
                 flux[ie] = self.engine.getFlux(ei)
                 elres[ie] = self.engine.getResolution(0.0, ei)[0]
-        if overplot:
-            if LooseVersion("2.1.0") > LooseVersion(matplotlib.__version__):
-                self.frqaxes1.hold(True)
-                self.frqaxes2.hold(True)
-        else:
+        if not overplot:
             self.frqaxes1.clear()
             self.frqaxes2.clear()
         self.setFreq(manual_freq=freq0)

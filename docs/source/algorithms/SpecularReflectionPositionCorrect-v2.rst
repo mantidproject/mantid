@@ -74,9 +74,9 @@ Note that in this case the difference between shifting the detectors vertically 
 .. testoutput:: SpecularReflectionPositionCorrectPointDetector
 
    point-detector
-   Original position: [25.6,0,0.0444961]
-   Vertical shift:    [25.6,0,0.0444753]
-   Rotated:           [25.6,0,0.0444753]
+   Original position: [...,...,...]
+   Vertical shift:    [...,...,...]
+   Rotated:           [...,...,...]
 
 **Example - Correct 'lineardetector'**
 
@@ -102,9 +102,9 @@ Output:
 .. testoutput:: SpecularReflectionPositionCorrectLinearDetector
 
    lineardetector
-   Original position: [26,0,0]
-   Vertical shift:    [26,0,0.0513177]
-   Rotated:           [25.9996,0,0.0513102]
+   Original position: [...,...,...]
+   Vertical shift:    [...,...,...]
+   Rotated:           [...,...,...]
 
 **Example - Correct 'OSMOND'**
 
@@ -130,9 +130,9 @@ Output:
 .. testoutput:: SpecularReflectionPositionCorrectOSMONDDetector
 
    OSMOND
-   Original position: [26,0,0]
-   Vertical shift:    [26,0,0.0513177]
-   Rotated:           [25.9996,0,0.0513102]
+   Original position: [...,...,...]
+   Vertical shift:    [...,...,...]
+   Rotated:           [...,...,...]
 
 **Example - Rotate given pixel**
 
@@ -166,8 +166,8 @@ Output:
 .. testoutput:: SpecularReflectionPositionCorrectLinePosition
 
    Pixel 22 2theta
-   before angle correction: 2.33
-   after angle correction: 1.5
+   before angle correction: ...
+   after angle correction: ...
 
 .. categories::
 

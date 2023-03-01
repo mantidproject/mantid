@@ -6,18 +6,20 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/DllConfig.h"
+#include "DllOption.h"
 #include "IJobRunner.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
-#include <QWidget>
+
+#include <QObject>
+
 #include <deque>
 #include <vector>
 
-namespace MantidQt::CustomInterfaces::ISISReflectometry {
+namespace MantidQt::API {
 class JobRunnerSubscriber;
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL QtJobRunner : public QWidget, public IJobRunner {
+class EXPORT_OPT_MANTIDQT_COMMON QtJobRunner : public QObject, public IJobRunner {
   Q_OBJECT
 public:
   QtJobRunner();
@@ -39,4 +41,4 @@ private:
   JobRunnerSubscriber *m_notifyee;
   void connectBatchAlgoRunnerSlots();
 };
-} // namespace MantidQt::CustomInterfaces::ISISReflectometry
+} // namespace MantidQt::API

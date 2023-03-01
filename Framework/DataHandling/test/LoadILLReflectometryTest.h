@@ -653,6 +653,16 @@ public:
     TS_ASSERT(run.hasProperty("Distance.MidChopper_Sample"))
     TS_ASSERT_DELTA(run.getPropertyValueAsType<double>("Distance.MidChopper_Sample"), 5497, 1e-3)
   }
+
+  void testReplaceSampleLogs() {
+    MatrixWorkspace_sptr output;
+    auto prop = emptyProperties();
+    prop.emplace_back("LogsToReplace", "{\"ChopperSetting.firstChopper\": 2, \"ChopperSetting.secondChopper\": 1}");
+    getWorkspaceFor(output, m_figaroDirectBeamFileCycle213, m_outWSName, prop);
+    const auto &run = output->run();
+    TS_ASSERT_EQUALS(run.getPropertyAsSingleValue("ChopperSetting.firstChopper"), 2.0)
+    TS_ASSERT_EQUALS(run.getPropertyAsSingleValue("ChopperSetting.secondChopper"), 1.0)
+  }
 };
 
 class LoadILLReflectometryTestPerformance : public CxxTest::TestSuite {

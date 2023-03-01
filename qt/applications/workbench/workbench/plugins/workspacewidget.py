@@ -115,7 +115,10 @@ class WorkspaceWidget(PluginWidget):
 
         :param names: A list of workspace names
         """
-        superplot_from_names(names, plot_kwargs=None)
+        try:
+            superplot_from_names(names, plot_kwargs=None)
+        except RuntimeError as re:
+            logger.error(str(re))
 
     def _do_superplot_with_errors(self, names):
         """
@@ -124,7 +127,10 @@ class WorkspaceWidget(PluginWidget):
 
         :param names: A list of workspace names
         """
-        superplot_with_errors_from_names(names, plot_kwargs=None)
+        try:
+            superplot_with_errors_from_names(names, plot_kwargs=None)
+        except RuntimeError as re:
+            logger.error(str(re))
 
     def _do_superplot_bins(self, names):
         """
@@ -132,8 +138,11 @@ class WorkspaceWidget(PluginWidget):
 
         :param names: A list of workspace names
         """
-        plot_kwargs = {"axis": MantidAxType.BIN}
-        superplot_from_names(names, plot_kwargs=plot_kwargs)
+        try:
+            plot_kwargs = {"axis": MantidAxType.BIN}
+            superplot_from_names(names, plot_kwargs=plot_kwargs)
+        except RuntimeError as re:
+            logger.error(str(re))
 
     def _do_superplot_bins_with_errors(self, names):
         """
@@ -142,8 +151,11 @@ class WorkspaceWidget(PluginWidget):
 
         :param names: A list of workspace names
         """
-        plot_kwargs = {"axis": MantidAxType.BIN}
-        superplot_with_errors_from_names(names, plot_kwargs=plot_kwargs)
+        try:
+            plot_kwargs = {"axis": MantidAxType.BIN}
+            superplot_with_errors_from_names(names, plot_kwargs=plot_kwargs)
+        except RuntimeError as re:
+            logger.error(str(re))
 
     def _do_plot_spectrum(self, names, errors, overplot, advanced=False):
         """
@@ -348,7 +360,6 @@ class WorkspaceWidget(PluginWidget):
         :param names: A list of workspace names
         """
         if len(workspace_names) == 1:
-
             try:
                 sample_shape.plot_sample_container_and_components(workspace_names[0])
             except Exception as exception:

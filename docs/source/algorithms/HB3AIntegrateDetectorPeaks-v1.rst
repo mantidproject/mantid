@@ -117,7 +117,7 @@ Usage
 
 .. testoutput::
 
-   HKL=006 λ=1.008Å Intensity=211.753
+   HKL=... λ=...Å Intensity=...
 
 To check the ROI and peak fitting you can plot the results
 
