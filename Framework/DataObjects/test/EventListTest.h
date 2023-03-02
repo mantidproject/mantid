@@ -1400,6 +1400,14 @@ public:
     TS_ASSERT_EQUALS(dates[5], "2023-Jan-01 12:01:40");
   }
 
+  void test_getPulseTOFTimesAtSample() {
+    const DateAndTime startTime{"2023-01-01T12:00:00"};
+    const double pulsePeriod{60.0}; // in seconds
+    const size_t nPulses{2};
+    const size_t eventsPerPulse{3};
+    // event list with two pulses, each pulse containing three equally spaced events.
+    EventList el = this->generateEvents(startTime, pulsePeriod, nPulses, eventsPerPulse);
+  }
   //-----------------------------------------------------------------------------------------------
   void test_convertTof_allTypes() {
     // Go through each possible EventType as the input

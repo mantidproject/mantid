@@ -2872,6 +2872,16 @@ void EventList::getPulseTimesHelper(const std::vector<T> &events,
                  [](const auto &event) { return event.pulseTime(); });
 }
 
+/// Compute the Pulse-time + TOF for a vector of events
+template <typename EVENTTYPE>
+void EventList::getPulseTOFTimesHelper(const std::vector<EVENTTYPE> &events, std::vector<DateAndTime> &times) {
+  times.clear();
+  times.reserve(events.size());
+  // TOFS are in microseconds, thus multiply by 1000 to change units to nanoseconds
+  std::transform(events.cbegin(), events.cend(), std::back_inserter(times),
+                 [](const EVENTTYPE &event) { return event.pulseTime() + static_cast<int64_t>(event.tof() * 1000.0); });
+}
+
 /** Get the pulse times of each event in this EventList.
  *
  * @return by copy a vector of DateAndTime times
@@ -2896,14 +2906,28 @@ std::vector<Mantid::Types::Core::DateAndTime> EventList::getPulseTimes() const {
   return times;
 }
 
-/// Get the Pulse+TOF pulse times of each event in this EventList
+/// Get the Pulse-time + TOF for each event in this EventList
 std::vector<DateAndTime> EventList::getPulseTOFTimes() const {
-  std::vector<DateAndTime> times = this->getPulseTimes();
-  std::vector<double> tofs = this->getTofs();
-  // TOFS are in microseconds, thus multiply by 1000 to change units to nanoseconds
-  std::transform(
-      times.cbegin(), times.cend(), tofs.cbegin(), times.begin(),
-      [](const DateAndTime &pulse, const double &tof) { return pulse + static_cast<int64_t>(tof * 1000.0); });
+  std::vector<DateAndTime> times;
+  switch (eventType) {
+  case TOF:
+    this->getPulseTOFTimesHelper(this->events, times);
+    break;
+  case WEIGHTED:
+    this->getPulseTOFTimesHelper(this->weightedEvents, times);
+    break;
+  case WEIGHTED_NOTIME:
+    this->getPulseTOFTimesHelper(this->weightedEventsNoTime, times);
+    break;
+  }
+  return times;
+}
+
+/// Get the Pulse-time + time-of-flight of the neutron up to the sample, for each event in this EventList
+std::vector<DateAndTime> EventList::getPulseTOFTimesAtSample(const double &factor, const double &shift) const {
+  UNUSED_ARG(factor);
+  UNUSED_ARG(shift);
+  std::vector<DateAndTime> times;
   return times;
 }
 
