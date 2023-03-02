@@ -805,10 +805,10 @@ void LoadILLReflectometry::sampleHorizontalOffset() {
  *  @return the source to sample distance in meters
  */
 double LoadILLReflectometry::sourceSampleDistance() const {
+  const auto &run = m_localWorkspace->run();
   if (m_instrument == Supported::D17) {
     const std::string chopperGapUnit = m_localWorkspace->getInstrument()->getStringParameter("chopper_gap_unit")[0];
     const double scale = (chopperGapUnit == "cm") ? 0.01 : (chopperGapUnit == "mm") ? 0.001 : 1.;
-    const auto &run = m_localWorkspace->run();
     double pairCentre;
     double pairSeparation;
     if (run.hasProperty("VirtualChopper.dist_chop_samp")) {
@@ -841,15 +841,21 @@ double LoadILLReflectometry::sourceSampleDistance() const {
     m_localWorkspace->mutableRun().addProperty("Distance.ChopperGap", pairSeparation, "meter", true);
     return pairCentre;
   } else {
-    const double chopperDist = mmToMeter(doubleFromRun("ChopperSetting.chopperpair_sample_distance"));
-    std::string entryName = "correct_chopper_sample_distance";
-    bool correctChopperSampleDistance = m_localWorkspace->getInstrument()->getBoolParameter(entryName)[0];
-    auto offset = 0.0;
-    if (correctChopperSampleDistance) {
-      const double deflectionAngle = doubleFromRun(m_sampleAngleName);
-      offset = m_sampleZOffset / std::cos(degToRad(deflectionAngle));
+    if (run.hasProperty("ChopperSetting.chopperpair_sample_distance")) { // until cycle 231
+      const double chopperDist = mmToMeter(doubleFromRun("ChopperSetting.chopperpair_sample_distance"));
+      std::string entryName = "correct_chopper_sample_distance";
+      bool correctChopperSampleDistance = m_localWorkspace->getInstrument()->getBoolParameter(entryName)[0];
+      auto offset = 0.0;
+      if (correctChopperSampleDistance) {
+        const double deflectionAngle = doubleFromRun(m_sampleAngleName);
+        offset = m_sampleZOffset / std::cos(degToRad(deflectionAngle));
+      }
+      return chopperDist + offset;
+    } else if (run.hasProperty("Distance.MidChopper_Sample")) { // since cycle 231
+      return mmToMeter(doubleFromRun("Distance.MidChopper_Sample"));
+    } else {
+      throw std::runtime_error("Unable to extract chopper to sample distance");
     }
-    return chopperDist + offset;
   }
 }
 
