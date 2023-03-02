@@ -417,8 +417,8 @@ void TimeSplitter::splitEventVec(const std::vector<int64_t> &times, const std::v
   assert(times.size() == events.size());
   // initialize the iterator over the splitter
   // it assumes the splitter keys (DateAndTime objects) are sorted by increasing time.
-  auto itSpl = m_roi_map.cbegin();                // iterator over the splitter
-  int64_t stop = itSpl->first.totalNanoseconds(); // first splitter boundary. Discard events with times < stop
+  auto itSplitter = m_roi_map.cbegin();                // iterator over the splitter
+  int64_t stop = itSplitter->first.totalNanoseconds(); // first splitter boundary. Discard events with times < stop
   int destination = TimeSplitter::NO_TARGET;
 
   // is there an EventList mapped to the destination index?
@@ -426,33 +426,33 @@ void TimeSplitter::splitEventVec(const std::vector<int64_t> &times, const std::v
   if (partials.find(destination) != partials.cend())
     partial = partials[destination];
 
-  auto itTim = times.cbegin();  // initialize iterator over times
-  auto itVec = events.cbegin(); // initialize iterator over the events
+  auto itTime = times.cbegin();   // initialize iterator over times
+  auto itEvent = events.cbegin(); // initialize iterator over the events
 
   // iterate over all events. It is assumed events are sorted by either pulse time or tof
-  while (itVec != events.cend()) {
+  while (itEvent != events.cend()) {
     // Check if we need to advance the splitter and therefore select a different partial event list
-    if (*itTim >= stop) {
+    if (*itTime >= stop) {
       // update the partial event list with the destination index of the stopping boundary
-      destination = itSpl->second;
+      destination = itSplitter->second;
       if (partials.find(destination) == partials.cend())
         partial = nullptr;
       else
         partial = partials[destination];
       // update the stopping boundary
-      itSpl++;
-      if (itSpl == m_roi_map.cend())
+      itSplitter++;
+      if (itSplitter == m_roi_map.cend())
         stop = DateAndTime::maximum().totalNanoseconds(); // a.k.a stopping boundary at an "infinite" time
       else
-        stop = itSpl->first.totalNanoseconds();
+        stop = itSplitter->first.totalNanoseconds();
     }
     if (partial) {
-      const EVENTTYPE eventCopy(*itVec);
+      const EVENTTYPE eventCopy(*itEvent);
       partial->addEventQuickly(eventCopy);
     }
     // advance both the iterator over events and times
-    itTim++;
-    itVec++;
+    itTime++;
+    itEvent++;
   }
 }
 
