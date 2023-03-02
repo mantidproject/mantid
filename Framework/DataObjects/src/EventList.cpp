@@ -2882,6 +2882,18 @@ void EventList::getPulseTOFTimesHelper(const std::vector<EVENTTYPE> &events, std
                  [](const EVENTTYPE &event) { return event.pulseTime() + static_cast<int64_t>(event.tof() * 1000.0); });
 }
 
+/// Compute the Pulse-time + time-of-flight of the neutron up to the sample, for each event in this EventList
+template <typename EVENTTYPE>
+void EventList::getPulseTOFTimesAtSampleHelper(const std::vector<EVENTTYPE> &events, const double &factor,
+                                               const double &shift, std::vector<DateAndTime> &times) {
+  times.clear();
+  times.reserve(events.size());
+  // TOFS and shift are in microseconds, thus multiply by 1000 to change units to nanoseconds
+  std::transform(events.cbegin(), events.cend(), std::back_inserter(times), [&](const EVENTTYPE &event) {
+    return event.pulseTime() + static_cast<int64_t>((factor * event.tof() + shift) * 1000.0);
+  });
+}
+
 /** Get the pulse times of each event in this EventList.
  *
  * @return by copy a vector of DateAndTime times
@@ -2923,11 +2935,23 @@ std::vector<DateAndTime> EventList::getPulseTOFTimes() const {
   return times;
 }
 
-/// Get the Pulse-time + time-of-flight of the neutron up to the sample, for each event in this EventList
+/** Get the Pulse-time + time-of-flight of the neutron up to the sample, for each event in this EventList.
+ * @param factor : rescale the TOF by this dimensionless quantity
+ * @param shift : shift the TOF (after rescaling) by this time, in microseconds
+ */
 std::vector<DateAndTime> EventList::getPulseTOFTimesAtSample(const double &factor, const double &shift) const {
-  UNUSED_ARG(factor);
-  UNUSED_ARG(shift);
   std::vector<DateAndTime> times;
+  switch (eventType) {
+  case TOF:
+    this->getPulseTOFTimesAtSampleHelper(this->events, factor, shift, times);
+    break;
+  case WEIGHTED:
+    this->getPulseTOFTimesAtSampleHelper(this->weightedEvents, factor, shift, times);
+    break;
+  case WEIGHTED_NOTIME:
+    this->getPulseTOFTimesAtSampleHelper(this->weightedEventsNoTime, factor, shift, times);
+    break;
+  }
   return times;
 }
 

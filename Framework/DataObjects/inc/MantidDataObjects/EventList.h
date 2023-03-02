@@ -420,6 +420,9 @@ private:
   static void getPulseTimesHelper(const std::vector<T> &events, std::vector<Mantid::Types::Core::DateAndTime> &times);
   template <typename EVENTTYPE>
   static void getPulseTOFTimesHelper(const std::vector<EVENTTYPE> &events, std::vector<DateAndTime> &times);
+  template <typename EVENTTYPE>
+  static void getPulseTOFTimesAtSampleHelper(const std::vector<EVENTTYPE> &events, const double &factor,
+                                             const double &shift, std::vector<DateAndTime> &times);
   template <class T> static void setTofsHelper(std::vector<T> &events, const std::vector<double> &tofs);
   template <class T>
   static void filterByPulseTimeHelper(std::vector<T> &events, Types::Core::DateAndTime start,
