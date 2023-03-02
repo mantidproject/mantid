@@ -78,8 +78,9 @@ def create_van_per_detector(instrument, run_details, absorb):
     """
     van = run_details.vanadium_run_numbers
     # Always sum a range of inputs as its a vanadium run over multiple captures
-    input_van_ws_list = common.load_current_normalised_ws_list(run_number_string=van, instrument=instrument,
-                                                               input_batching=INPUT_BATCHING.Summed)
+    input_van_ws_list = common.load_current_normalised_ws_list(
+        run_number_string=van, instrument=instrument, input_batching=INPUT_BATCHING.Summed
+    )
     input_van_ws = input_van_ws_list[0]  # As we asked for a summed ws there should only be one returned
     instrument.create_solid_angle_corrections(input_van_ws, run_details)
 
@@ -91,14 +92,12 @@ def create_van_per_detector(instrument, run_details, absorb):
     corrected_van_ws = instrument._crop_raw_to_expected_tof_range(ws_to_crop=corrected_van_ws)
 
     if absorb:
-        corrected_van_ws = instrument._apply_absorb_corrections(run_details=run_details,
-                                                                ws_to_correct=corrected_van_ws)
+        corrected_van_ws = instrument._apply_absorb_corrections(run_details=run_details, ws_to_correct=corrected_van_ws)
     else:
         # Assume that create_van only uses Vanadium runs
-        mantid.SetSampleMaterial(InputWorkspace=corrected_van_ws, ChemicalFormula='V')
+        mantid.SetSampleMaterial(InputWorkspace=corrected_van_ws, ChemicalFormula="V")
 
-    mantid.ApplyDiffCal(InstrumentWorkspace=corrected_van_ws,
-                        CalibrationFile=run_details.offset_file_path)
+    mantid.ApplyDiffCal(InstrumentWorkspace=corrected_van_ws, CalibrationFile=run_details.offset_file_path)
     aligned_ws = mantid.ConvertUnits(InputWorkspace=corrected_van_ws, Target="dSpacing")
     solid_angle = instrument.get_solid_angle_corrections(run_details.run_number, run_details)
     if solid_angle:
@@ -144,10 +143,11 @@ def _create_vanadium_splines_one_ws(vanadium_splines, instrument, run_details):
     mantid.ExtractMonitors(InputWorkspace=vanadium_splines, DetectorWorkspace="vanadium_splines", MonitorWorkspace="vanadium_monitors")
 
     from mantid.api import AnalysisDataService as ADS
+
     if instrument._inst_settings.masking_file_name is not None:
         import os
-        masking_file_path = os.path.join(instrument.calibration_dir,
-                                         instrument._inst_settings.masking_file_name)
+
+        masking_file_path = os.path.join(instrument.calibration_dir, instrument._inst_settings.masking_file_name)
         bragg_mask_list = common.read_masking_file(masking_file_path)
         vanadium_splines = ADS.retrieve("vanadium_splines")
         for bank_number, peaks_on_bank in enumerate(bragg_mask_list):
@@ -159,9 +159,12 @@ def _create_vanadium_splines_one_ws(vanadium_splines, instrument, run_details):
                 if bank_name_containing_detector == f"bank{bank_number+1}":
                     ws_indices_on_bank_to_mask.append(workspace_index)
             for mask_params in peaks_on_bank:
-                vanadium_splines = mantid.MaskBins(InputWorkspace="vanadium_splines",
-                                                   XMin=mask_params[0], XMax=mask_params[1],
-                                                   InputWorkspaceIndexSet=ws_indices_on_bank_to_mask)
+                vanadium_splines = mantid.MaskBins(
+                    InputWorkspace="vanadium_splines",
+                    XMin=mask_params[0],
+                    XMax=mask_params[1],
+                    InputWorkspaceIndexSet=ws_indices_on_bank_to_mask,
+                )
 
     vanadium_splines.clearMonitorWorkspace()
     vanadium_splines = mantid.RemoveMaskedSpectra(InputWorkspace=vanadium_splines)

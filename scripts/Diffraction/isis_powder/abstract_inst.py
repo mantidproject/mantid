@@ -61,9 +61,7 @@ class AbstractInst(object):
         if per_detector:
             return calibrate.create_van_per_detector(instrument=self, run_details=run_details, absorb=do_absorb_corrections)
 
-        return calibrate.create_van(instrument=self,
-                                    run_details=run_details,
-                                    absorb=do_absorb_corrections)
+        return calibrate.create_van(instrument=self, run_details=run_details, absorb=do_absorb_corrections)
 
     def _focus(
         self,

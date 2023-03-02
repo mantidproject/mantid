@@ -35,12 +35,14 @@ class Polaris(AbstractInst):
     def focus(self, **kwargs):
         self._switch_mode_specific_inst_settings(kwargs.get("mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
-        return self._focus(run_number_string=self._inst_settings.run_number,
-                           do_van_normalisation=self._inst_settings.do_van_normalisation,
-                           do_absorb_corrections=self._inst_settings.do_absorb_corrections,
-                           sample_details=self._sample_details,
-                           empty_can_subtraction_method=self._inst_settings.empty_can_subtraction_method,
-                           paalman_pings_events_per_point=self._inst_settings.paalman_pings_events_per_point,)
+        return self._focus(
+            run_number_string=self._inst_settings.run_number,
+            do_van_normalisation=self._inst_settings.do_van_normalisation,
+            do_absorb_corrections=self._inst_settings.do_absorb_corrections,
+            sample_details=self._sample_details,
+            empty_can_subtraction_method=self._inst_settings.empty_can_subtraction_method,
+            paalman_pings_events_per_point=self._inst_settings.paalman_pings_events_per_point,
+        )
 
     def create_vanadium(self, **kwargs):
         self._switch_mode_specific_inst_settings(kwargs.get("mode"))
@@ -62,13 +64,15 @@ class Polaris(AbstractInst):
         return vanadium_d
 
     def ensure_per_detector_and_vanadium_output_are_in_sync(self, vanadium_d, per_detector):
-        correct_per_detector_condition = (isinstance(vanadium_d, MatrixWorkspace) and per_detector)
-        correct_per_bank_condition = (isinstance(vanadium_d, WorkspaceGroup) and not per_detector)
+        correct_per_detector_condition = isinstance(vanadium_d, MatrixWorkspace) and per_detector
+        correct_per_bank_condition = isinstance(vanadium_d, WorkspaceGroup) and not per_detector
         if not correct_per_detector_condition and not correct_per_bank_condition:
-            raise ValueError(f"The output from polaris._create_vanadium must be a WorkspaceGroup in the per_bank "
-                             f"routine (default) and must be MatrixWorkspace in the per_detector routine. In this case,"
-                             f"the output was type {type(vanadium_d)} and in the "
-                             f"{'per_detector' if per_detector else 'per_bank'} routine")
+            raise ValueError(
+                f"The output from polaris._create_vanadium must be a WorkspaceGroup in the per_bank "
+                f"routine (default) and must be MatrixWorkspace in the per_detector routine. In this case,"
+                f"the output was type {type(vanadium_d)} and in the "
+                f"{'per_detector' if per_detector else 'per_bank'} routine"
+            )
 
     def create_total_scattering_pdf(self, **kwargs):
         if "pdf_type" not in kwargs or kwargs["pdf_type"] not in ["G(r)", "g(r)", "RDF(r)", "G_k(r)"]:

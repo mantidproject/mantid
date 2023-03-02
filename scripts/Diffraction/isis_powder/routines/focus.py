@@ -14,7 +14,6 @@ from isis_powder.routines.common_enums import INPUT_BATCHING
 import math
 import numpy
 import os
-# from typing import Union
 
 
 def focus(
@@ -126,8 +125,7 @@ def _focus_one_ws(
     if aligned_ws.isDistribution():
         aligned_ws = convert_between_distribution(aligned_ws, "From")
     # Focus the spectra into banks
-    focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
-                                             GroupingFileName=run_details.grouping_file_path)
+    focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws, GroupingFileName=run_details.grouping_file_path)
     instrument.apply_calibration_to_focused_data(focused_ws)
 
     if not instrument._inst_settings.per_detector:
@@ -177,17 +175,18 @@ def _absorb_and_empty_corrections(
     if absorb and empty_can_subtraction_method == "PaalmanPings":
         if run_details.sample_empty:  # need summed_empty including container
             input_workspace = instrument._apply_paalmanpings_absorb_and_subtract_empty(
-                input_workspace=input_workspace,
+                workspace=input_workspace,
                 summed_empty=summed_empty,
                 sample_details=sample_details,
-                paalman_pings_events_per_point=paalman_pings_events_per_point)
+                paalman_pings_events_per_point=paalman_pings_events_per_point,
+            )
             # Crop to largest acceptable TOF range
             input_workspace = instrument._crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)
         else:
             raise TypeError("The PaalmanPings absorption method requires 'sample_empty' to be supplied.")
     else:
         if summed_empty:
-            input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace, empty_sample=summed_empty)
+            input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace, empty_ws=summed_empty)
         # Crop to largest acceptable TOF range
         input_workspace = instrument._crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)
 
@@ -196,9 +195,11 @@ def _absorb_and_empty_corrections(
         else:
             # Set sample material if specified by the user
             if sample_details is not None:
-                mantid.SetSample(InputWorkspace=input_workspace,
-                                 Geometry=sample_details.generate_sample_geometry(),
-                                 Material=sample_details.generate_sample_material())
+                mantid.SetSample(
+                    InputWorkspace=input_workspace,
+                    Geometry=sample_details.generate_sample_geometry(),
+                    Material=sample_details.generate_sample_material(),
+                )
     return input_workspace
 
 
@@ -346,10 +347,16 @@ def _prepare_for_correction(data_workspace: Workspace2D, correction_workspace: W
     return data_workspace, correction_workspace
 
 
-def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, absorb, sample_details,
-                          empty_can_subtraction_method, paalman_pings_events_per_point=None):
-    read_ws_list = common.load_current_normalised_ws_list(run_number_string=run_number_string,
-                                                          instrument=instrument)
+def _batched_run_focusing(
+    instrument,
+    perform_vanadium_norm,
+    run_number_string,
+    absorb,
+    sample_details,
+    empty_can_subtraction_method,
+    paalman_pings_events_per_point=None,
+):
+    read_ws_list = common.load_current_normalised_ws_list(run_number_string=run_number_string, instrument=instrument)
     run_details = instrument._get_run_details(run_number_string=run_number_string)
     vanadium_splines = None
     van = "van_{}".format(run_details.vanadium_run_numbers)
