@@ -153,12 +153,16 @@ MantidWidgets::IInstrumentActor const &ALFInstrumentView::getInstrumentActor() c
 }
 
 std::vector<DetectorTube> ALFInstrumentView::getSelectedDetectors() const {
-  auto const surface = std::dynamic_pointer_cast<MantidQt::MantidWidgets::UnwrappedSurface>(
-      m_instrumentWidget->getInstrumentDisplay()->getSurface());
+  auto const surface = m_instrumentWidget->getInstrumentDisplay()->getSurface();
+  auto const unwrappedSurface = std::dynamic_pointer_cast<MantidQt::MantidWidgets::UnwrappedSurface>(surface);
+
+  if (!unwrappedSurface) {
+    return {};
+  }
 
   std::vector<size_t> detectorIndices;
   // Find the detectors which are being intersected by the "masked" shapes.
-  surface->getIntersectingDetectors(detectorIndices);
+  unwrappedSurface->getIntersectingDetectors(detectorIndices);
   // Find all the detector indices in the entirety of the selected tubes
   return m_instrumentWidget->findWholeTubeDetectorIndices(detectorIndices);
 }
