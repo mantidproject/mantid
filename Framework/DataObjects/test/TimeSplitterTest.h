@@ -41,41 +41,41 @@ public:
   void test_valueAtTime() {
     // to start everything is either in 0th output or masked
     TimeSplitter splitter(TWO, FOUR);
-    TS_ASSERT_EQUALS(splitter.valueAtTime(ONE), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(ONE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.valueAtTime(TWO), 0);
     TS_ASSERT_EQUALS(splitter.valueAtTime(THREE), 0);
-    TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), -1);
-    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), TimeSplitter::NO_TARGET);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 2);
     TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({0}));
 
     // add ROI for first half to go to 1st output
     splitter.addROI(TWO, THREE, 1);
-    TS_ASSERT_EQUALS(splitter.valueAtTime(ONE), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(ONE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.valueAtTime(TWO), 1);
     TS_ASSERT_EQUALS(splitter.valueAtTime(THREE), 0);
-    TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), -1);
-    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), TimeSplitter::NO_TARGET);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 3);
     TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({0, 1}));
 
     // add ROI for second half to go to 2nd output
     splitter.addROI(THREE, FOUR, 2);
-    TS_ASSERT_EQUALS(splitter.valueAtTime(ONE), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(ONE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.valueAtTime(TWO), 1);
     TS_ASSERT_EQUALS(splitter.valueAtTime(THREE), 2);
-    TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), -1);
-    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), TimeSplitter::NO_TARGET);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 3);
     TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({1, 2}));
 
     // have whole thing go to 3rd output
     splitter.addROI(TWO, FOUR, 3);
-    TS_ASSERT_EQUALS(splitter.valueAtTime(ONE), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(ONE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.valueAtTime(TWO), 3);
     TS_ASSERT_EQUALS(splitter.valueAtTime(THREE), 3);
-    TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), -1);
-    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), TimeSplitter::NO_TARGET);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 2);
     TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({3}));
 
@@ -84,8 +84,8 @@ public:
     TS_ASSERT_EQUALS(splitter.valueAtTime(ONE), 1);
     TS_ASSERT_EQUALS(splitter.valueAtTime(TWO), 3);
     TS_ASSERT_EQUALS(splitter.valueAtTime(THREE), 3);
-    TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), -1);
-    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), TimeSplitter::NO_TARGET);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 3);
     TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({1, 3}));
 
@@ -95,34 +95,34 @@ public:
     TS_ASSERT_EQUALS(splitter.valueAtTime(TWO), 3);
     TS_ASSERT_EQUALS(splitter.valueAtTime(THREE), 3);
     TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), 2);
-    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 4);
     TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({1, 2, 3}));
 
     // set before the beginning to mask
-    splitter.addROI(ONE, TWO, -1);
-    TS_ASSERT_EQUALS(splitter.valueAtTime(ONE), -1);
+    splitter.addROI(ONE, TWO, TimeSplitter::NO_TARGET);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(ONE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.valueAtTime(TWO), 3);
     TS_ASSERT_EQUALS(splitter.valueAtTime(THREE), 3);
     TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), 2);
-    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 3);
     TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({2, 3}));
 
     // set after the end to mask
-    splitter.addROI(FOUR, FIVE, -1);
-    TS_ASSERT_EQUALS(splitter.valueAtTime(ONE), -1);
+    splitter.addROI(FOUR, FIVE, TimeSplitter::NO_TARGET);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(ONE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.valueAtTime(TWO), 3);
     TS_ASSERT_EQUALS(splitter.valueAtTime(THREE), 3);
-    TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), -1);
-    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), TimeSplitter::NO_TARGET);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 2);
     TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({3}));
   }
 
   void test_emptySplitter() {
     TimeSplitter splitter;
-    TS_ASSERT_EQUALS(splitter.valueAtTime(DateAndTime("2023-01-01T11:00:00")), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(DateAndTime("2023-01-01T11:00:00")), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 0);
     TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({}));
   }
@@ -133,10 +133,10 @@ public:
     splitter.addROI(ONE, TWO, 0);
     splitter.addROI(THREE, FOUR, 0);
     TS_ASSERT_EQUALS(splitter.valueAtTime(ONE), 0);
-    TS_ASSERT_EQUALS(splitter.valueAtTime(TWO), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(TWO), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.valueAtTime(THREE), 0);
-    TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), -1);
-    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), TimeSplitter::NO_TARGET);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 4);
 
     // fill in the gap with a different value
@@ -144,8 +144,8 @@ public:
     TS_ASSERT_EQUALS(splitter.valueAtTime(ONE), 0);
     TS_ASSERT_EQUALS(splitter.valueAtTime(TWO), 1);
     TS_ASSERT_EQUALS(splitter.valueAtTime(THREE), 0);
-    TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), -1);
-    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), TimeSplitter::NO_TARGET);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 4);
 
     // fill in the gap with the same value as before and after
@@ -153,8 +153,8 @@ public:
     TS_ASSERT_EQUALS(splitter.valueAtTime(ONE), 0);
     TS_ASSERT_EQUALS(splitter.valueAtTime(TWO), 0);
     TS_ASSERT_EQUALS(splitter.valueAtTime(THREE), 0);
-    TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), -1);
-    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), -1);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), TimeSplitter::NO_TARGET);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 2);
   }
 
@@ -162,7 +162,7 @@ public:
 
     // start with empty TimeSplitter
     TimeSplitter splitter;
-    TS_ASSERT(splitter.getTimeROI(-1).empty());
+    TS_ASSERT(splitter.getTimeROI(TimeSplitter::NO_TARGET).empty());
     TS_ASSERT(splitter.getTimeROI(0).empty());
 
     // place to put the output
@@ -170,7 +170,7 @@ public:
 
     // add a single TimeROI
     splitter.addROI(ONE, THREE, 1);
-    TS_ASSERT(splitter.getTimeROI(-1).empty());
+    TS_ASSERT(splitter.getTimeROI(TimeSplitter::NO_TARGET).empty());
     TS_ASSERT(splitter.getTimeROI(0).empty());
     TS_ASSERT(splitter.getTimeROI(0).empty());
     roi = splitter.getTimeROI(1);
@@ -179,7 +179,7 @@ public:
 
     // add the same output index, but with a gap from the previous
     splitter.addROI(FOUR, FIVE, 1);
-    roi = splitter.getTimeROI(-2); // intentionally trying a "big" negative for ignore filter
+    roi = splitter.getTimeROI(TimeSplitter::NO_TARGET - 1); // intentionally trying a "big" negative for ignore filter
     TS_ASSERT(!roi.empty());
     TS_ASSERT_EQUALS(roi.numBoundaries(), 2);
     TS_ASSERT(splitter.getTimeROI(0).empty());
@@ -215,7 +215,7 @@ public:
     TS_ASSERT(splitter.valueAtTime(DateAndTime(12, 0)) == convertedSplitter->valueAtTime(DateAndTime(12, 0)) &&
               convertedSplitter->valueAtTime(DateAndTime(12, 0)) == 3);
     TS_ASSERT(splitter.valueAtTime(DateAndTime(20, 0)) == convertedSplitter->valueAtTime(DateAndTime(20, 0)) &&
-              convertedSplitter->valueAtTime(DateAndTime(20, 0)) == -1);
+              convertedSplitter->valueAtTime(DateAndTime(20, 0)) == TimeSplitter::NO_TARGET);
   }
 
   void test_timeSplitterFromMatrixWorkspaceRelativeTimes() {
@@ -232,11 +232,11 @@ public:
     auto convertedSplitter = new TimeSplitter(ws, TWO);
     // New starting point of converted splitter is TWO
     TS_ASSERT(splitter.valueAtTime(DateAndTime(0)) == convertedSplitter->valueAtTime(DateAndTime(0)) &&
-              convertedSplitter->valueAtTime(DateAndTime(0)) == -1);
+              convertedSplitter->valueAtTime(DateAndTime(0)) == TimeSplitter::NO_TARGET);
     TS_ASSERT(splitter.valueAtTime(TWO) == convertedSplitter->valueAtTime(TWO) &&
               convertedSplitter->valueAtTime(TWO) == 1);
     TS_ASSERT(splitter.valueAtTime(TWO + offset_ns) == convertedSplitter->valueAtTime(TWO + offset_ns) &&
-              convertedSplitter->valueAtTime(TWO + offset_ns) == -1);
+              convertedSplitter->valueAtTime(TWO + offset_ns) == TimeSplitter::NO_TARGET);
   }
 
   void test_timeSplitterFromMatrixWorkspaceError() {
@@ -282,7 +282,7 @@ public:
     row.next();
     row << time3_s << time4_s << "3";
     row.next();
-    row << time5_s << time6_s << "-1"; // -1 means: ignore this time interval
+    row << time5_s << time6_s << std::to_string(TimeSplitter::NO_TARGET);
 
     // create a TimeSplitter object from the table
     TimeSplitter workspaceDerivedSplitter(tws, DateAndTime(0, 0));
@@ -301,7 +301,7 @@ public:
     TimeSplitter referenceSplitter;
     referenceSplitter.addROI(time1_abs, time2_abs, 1);
     referenceSplitter.addROI(time3_abs, time4_abs, 3);
-    referenceSplitter.addROI(time5_abs, time6_abs, -1); // -1 means: ignore this time interval
+    referenceSplitter.addROI(time5_abs, time6_abs, TimeSplitter::NO_TARGET);
 
     TS_ASSERT_EQUALS(referenceSplitter.numRawValues(), workspaceDerivedSplitter.numRawValues());
     TS_ASSERT(referenceSplitter.valueAtTime(time1_abs) == workspaceDerivedSplitter.valueAtTime(time1_abs));
@@ -338,7 +338,7 @@ public:
     row.next();
     row << time3_s << time4_s << "3";
     row.next();
-    row << time5_s << time6_s << "-1"; // -1 means: ignore this time interval
+    row << time5_s << time6_s << std::to_string(TimeSplitter::NO_TARGET);
 
     // create a TimeSplitter object from the table. By design, the table user must know whether
     // the table holds absolute or relative times. In the latter case the user must have
@@ -368,7 +368,7 @@ public:
     TimeSplitter referenceSplitter;
     referenceSplitter.addROI(time1_abs, time2_abs, 1);
     referenceSplitter.addROI(time3_abs, time4_abs, 3);
-    referenceSplitter.addROI(time5_abs, time6_abs, -1); // -1 means: ignore this time interval
+    referenceSplitter.addROI(time5_abs, time6_abs, TimeSplitter::NO_TARGET);
 
     TS_ASSERT_EQUALS(referenceSplitter.numRawValues(), workspaceDerivedSplitter.numRawValues());
     TS_ASSERT(referenceSplitter.valueAtTime(time1_abs) == workspaceDerivedSplitter.valueAtTime(time1_abs));
@@ -394,7 +394,7 @@ public:
 
     SplittingInterval s1(time1, time2, 1);
     SplittingInterval s2(time3, time4, 3);
-    SplittingInterval s3(time5, time6, -1); // -1 means: ignore this time interval
+    SplittingInterval s3(time5, time6, TimeSplitter::NO_TARGET);
 
     auto sws = std::make_shared<Mantid::DataObjects::SplittersWorkspace>();
     sws->addSplitter(s1);
@@ -408,7 +408,7 @@ public:
     TimeSplitter referenceSplitter;
     referenceSplitter.addROI(time1, time2, 1);
     referenceSplitter.addROI(time3, time4, 3);
-    referenceSplitter.addROI(time5, time6, -1); // -1 means: ignore this time interval
+    referenceSplitter.addROI(time5, time6, TimeSplitter::NO_TARGET);
 
     TS_ASSERT_EQUALS(referenceSplitter.numRawValues(), workspaceDerivedSplitter.numRawValues());
     TS_ASSERT(referenceSplitter.valueAtTime(time1) == workspaceDerivedSplitter.valueAtTime(time1));

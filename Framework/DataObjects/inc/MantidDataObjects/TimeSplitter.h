@@ -33,6 +33,7 @@ public:
   TimeSplitter(const SplittersWorkspace_sptr &sws);
 
 public:
+  static constexpr int NO_TARGET{-1}; // no target (a.k.a. destination) workspace for filtered out events
   int valueAtTime(const DateAndTime &time) const;
   void addROI(const DateAndTime &start, const DateAndTime &stop, const int value);
   std::vector<int> outputWorkspaceIndices() const;
