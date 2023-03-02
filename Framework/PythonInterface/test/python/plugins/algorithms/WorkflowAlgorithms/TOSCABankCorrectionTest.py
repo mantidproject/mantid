@@ -68,8 +68,9 @@ class TOSCABankCorrectionTest(unittest.TestCase):
         Tests error handling when a peak cannot be found using a manual peak position.
         """
 
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Could not find any peaks. Try increasing width of SearchRange and/or ClosePeakTolerance",
             TOSCABankCorrection,
             InputWorkspace=self._original,
             OutputWorkspace="__TOSCABankCorrectionTest_output",
@@ -81,8 +82,9 @@ class TOSCABankCorrectionTest(unittest.TestCase):
         Tests validation to ensure low and high values are entered in correct order.
         """
 
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            'Search range must be in format "low,high"',
             TOSCABankCorrection,
             InputWorkspace=self._original,
             OutputWorkspace="__TOSCABankCorrectionTest_output",
@@ -94,8 +96,9 @@ class TOSCABankCorrectionTest(unittest.TestCase):
         Tests validation to ensure two values exist values are entered in correct order.
         """
 
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Search range must have two values",
             TOSCABankCorrection,
             InputWorkspace=self._original,
             OutputWorkspace="__TOSCABankCorrectionTest_output",
@@ -107,8 +110,9 @@ class TOSCABankCorrectionTest(unittest.TestCase):
         Tests validation to ensure that the PeakPosition falls inside SearchRange.
         """
 
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Peak position must be inside SearchRange",
             TOSCABankCorrection,
             InputWorkspace=self._original,
             OutputWorkspace="__TOSCABankCorrectionTest_output",
