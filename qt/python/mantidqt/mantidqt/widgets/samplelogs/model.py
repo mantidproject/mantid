@@ -194,7 +194,9 @@ class SampleLogsModel:
         if isinstance(log, TimeSeriesProperties):
             if (not filtered) and isinstance(log, FilteredTimeSeriesProperties):
                 log = log.unfiltered()
-            return log.getStatistics()
+                return log.getStatistics()
+            else:
+                return self.run.getStatistics(LogName)
 
     def isMD(self):
         """Checks if workspace is a MD Workspace"""
