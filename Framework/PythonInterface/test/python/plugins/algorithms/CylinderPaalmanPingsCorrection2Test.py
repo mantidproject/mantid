@@ -272,8 +272,9 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
         Tests validation for no chemical formula for can when a can WS is provided.
         """
 
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Please specify one of chemical formula or atomic number or all cross sections and a number density.",
             CylinderPaalmanPingsCorrection,
             OutputWorkspace=self._corrections_ws_name,
             SampleWorkspace=self._sample_ws,

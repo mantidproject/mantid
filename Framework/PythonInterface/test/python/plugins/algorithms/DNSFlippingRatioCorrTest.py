@@ -150,8 +150,9 @@ class DNSFlippingRatioCorrTest(unittest.TestCase):
 
     def test_DNSFlipperValid(self):
         outputWorkspaceName = "DNSFlippingRatioCorrTest_Test2"
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Workspace __nsf_nicrws must have flipper ON, but it is OFF",
             DNSFlippingRatioCorr,
             SFDataWorkspace=self.__nsf_nicrws.name(),
             NSFDataWorkspace=self.__nsf_nicrws.name(),
@@ -167,8 +168,9 @@ class DNSFlippingRatioCorrTest(unittest.TestCase):
     def test_DNSPolarisationValid(self):
         outputWorkspaceName = "DNSFlippingRatioCorrTest_Test3"
         api.AddSampleLog(Workspace=self.__nsf_nicrws, LogName="polarisation", LogText="y", LogType="String")
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Cannot apply correction to workspaces with different polarisation",
             DNSFlippingRatioCorr,
             SFDataWorkspace=self.__sf_nicrws.name(),
             NSFDataWorkspace=self.__nsf_nicrws.name(),

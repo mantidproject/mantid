@@ -505,7 +505,6 @@ class AbinsAlgorithm:
 
         for atom_index in range(num_atoms):
             if atoms_data[atom_index]["symbol"] == element_symbol and abs(atoms_data[atom_index]["mass"] - mass) < MASS_EPS:
-
                 temp_s_atom_data.fill(0.0)
 
                 for order in range(1, self._max_event_order + 1):
@@ -520,7 +519,6 @@ class AbinsAlgorithm:
         nucleons_number = int(round(mass))
 
         if substitution:
-
             atom_workspaces.append(
                 self._create_workspace(
                     atom_name=str(nucleons_number) + element_symbol,
@@ -575,7 +573,6 @@ class AbinsAlgorithm:
             local_partial_workspaces = partial_workspaces
 
         if len(local_partial_workspaces) > 1:
-
             # get frequencies
             ws = mtd[local_partial_workspaces[0]]
 
@@ -691,7 +688,7 @@ class AbinsAlgorithm:
         # check  extension of a file
         found_filename_ext = os.path.splitext(filename_full_path)[1]
         if found_filename_ext.lower() != expected_file_extension:
-            comment = "{}Output from ab initio program {} is expected." " The expected extension of file is .{}. Found: {}.{}".format(
+            comment = "{}Output from ab initio program {} is expected." " The expected extension of file is {}. Found: {}. {}".format(
                 msg_err, ab_initio_program, expected_file_extension, found_filename_ext, msg_rename
             )
             return dict(Invalid=True, Comment=comment)
@@ -853,7 +850,7 @@ class AbinsAlgorithm:
         cls._check_chunk_size(message)
         cls._check_threads(message)
 
-    def _check_general_resolution(self, message_end=None):
+    def _check_general_resolution(self, message_end=""):
         """
         Checks general parameters used in construction resolution functions.
         :param message_end: closing part of the error message.
@@ -864,7 +861,7 @@ class AbinsAlgorithm:
             raise RuntimeError("Invalid value of fwhm" + message_end)
 
     @staticmethod
-    def _check_folder_names(message_end=None):
+    def _check_folder_names(message_end=""):
         """
         Checks folders names.
         :param message_end: closing part of the error message.
@@ -879,7 +876,7 @@ class AbinsAlgorithm:
         if not isinstance(powder_data_group, str) or powder_data_group == "":
             raise RuntimeError("Invalid value of powder_data_group" + message_end)
         elif powder_data_group in folder_names:
-            raise RuntimeError("Name for powder_data_group  already used by as name of another folder.")
+            raise RuntimeError("Name for powder_data_group already used by as name of another folder.")
         folder_names.append(powder_data_group)
 
         crystal_data_group = abins.parameters.hdf_groups["crystal_data"]
@@ -895,7 +892,7 @@ class AbinsAlgorithm:
             raise RuntimeError("Name for s_data_group already used as a name of another folder.")
 
     @staticmethod
-    def _check_rebinning(message_end=None):
+    def _check_rebinning(message_end=""):
         """
         Checks rebinning parameters.
         :param message_end: closing part of the error message.
@@ -906,13 +903,13 @@ class AbinsAlgorithm:
 
         max_wavenumber = abins.parameters.sampling["max_wavenumber"]
         if not (isinstance(max_wavenumber, float) and max_wavenumber > 0.0):
-            raise RuntimeError("Invalid number of max_wavenumber" + message_end)
+            raise RuntimeError("Invalid value of max_wavenumber" + message_end)
 
         if min_wavenumber > max_wavenumber:
             raise RuntimeError("Invalid energy window for rebinning.")
 
     @staticmethod
-    def _check_threshold(message_end=None):
+    def _check_threshold(message_end=""):
         """
         Checks threshold for frequencies.
         :param message_end: closing part of the error message.
@@ -933,7 +930,7 @@ class AbinsAlgorithm:
             raise RuntimeError("Invalid value of s_relative_threshold" + message_end)
 
     @staticmethod
-    def _check_chunk_size(message_end=None):
+    def _check_chunk_size(message_end=""):
         """
         Check optimal size of chunk
         :param message_end: closing part of the error message.
@@ -943,7 +940,7 @@ class AbinsAlgorithm:
             raise RuntimeError("Invalid value of optimal_size" + message_end)
 
     @staticmethod
-    def _check_threads(message_end=None):
+    def _check_threads(message_end=""):
         """
         Checks number of threads
         :param message_end: closing part of the error message.

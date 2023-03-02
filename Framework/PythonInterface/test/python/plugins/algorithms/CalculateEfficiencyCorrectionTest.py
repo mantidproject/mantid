@@ -20,7 +20,6 @@ from mantid.api import AnalysisDataService
 
 
 class CalculateEfficiencyCorrectionTest(unittest.TestCase):
-
     _input_wksp = "input_wksp"
     _correction_wksp = "correction_wksp"
     _output_wksp = "output_wksp"
@@ -430,13 +429,19 @@ class CalculateEfficiencyCorrectionTest(unittest.TestCase):
         )
 
     def testCalculateEfficiencyCorretionMassDensityWithoutChemicalFormula(self):
-        self.assertRaises(
-            RuntimeError, CalculateEfficiencyCorrection, InputWorkspace=self._input_wksp, Density=1.0, OutputWorkspace=self._output_wksp
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Must specify the ChemicalFormula with Density",
+            CalculateEfficiencyCorrection,
+            InputWorkspace=self._input_wksp,
+            Density=1.0,
+            OutputWorkspace=self._output_wksp,
         )
 
     def testCalculateEfficiencyCorretionNumberDensityWithoutChemicalFormula(self):
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Must specify the ChemicalFormula with Density",
             CalculateEfficiencyCorrection,
             InputWorkspace=self._input_wksp,
             DensityType="Number Density",
@@ -445,8 +450,9 @@ class CalculateEfficiencyCorrectionTest(unittest.TestCase):
         )
 
     def testCalculateEfficiencyCorretionEfficiencyWithoutChemicalFormula(self):
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Must specify the ChemicalFormula with MeasuredEfficiency",
             CalculateEfficiencyCorrection,
             InputWorkspace=self._input_wksp,
             MeasuredEfficiency=1.0,
@@ -454,8 +460,9 @@ class CalculateEfficiencyCorrectionTest(unittest.TestCase):
         )
 
     def testCalculateEfficiencyCorretionEfficiencyAndDensity(self):
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Cannot select both MeasuredEfficiency and Density as input",
             CalculateEfficiencyCorrection,
             InputWorkspace=self._input_wksp,
             Density=1.0,
@@ -464,8 +471,9 @@ class CalculateEfficiencyCorrectionTest(unittest.TestCase):
         )
 
     def testCalculateEfficiencyCorretionAlphaAndDensity(self):
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Cannot select both Alpha and Density as input",
             CalculateEfficiencyCorrection,
             InputWorkspace=self._input_wksp,
             Density=1.0,
@@ -474,8 +482,9 @@ class CalculateEfficiencyCorrectionTest(unittest.TestCase):
         )
 
     def testCalculateEfficiencyCorretionEfficiencyAndAlpha(self):
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Cannot select both MeasuredEfficiency and Alpha as input",
             CalculateEfficiencyCorrection,
             InputWorkspace=self._input_wksp,
             Alpha=1.0,

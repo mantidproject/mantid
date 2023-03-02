@@ -261,7 +261,7 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
 
         self._check_tosca_parameters(message)
 
-    def _check_tosca_parameters(self, message_end=None):
+    def _check_tosca_parameters(self, message_end=""):
         """
         Checks TOSCA parameters.
         :param message_end: closing part of the error message.

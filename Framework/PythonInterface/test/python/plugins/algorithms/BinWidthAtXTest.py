@@ -71,10 +71,10 @@ class BinWidthAtXTest(unittest.TestCase):
 
     def test_failure_X_out_of_bounds(self):
         ws, unused, unused = self._make_single_histogram_ws()
-        X = sys.float_info.max
+        X = 10000.0
         params = self._make_algorithm_params(ws, X)
         algorithm = testhelpers.create_algorithm("BinWidthAtX", **params)
-        self.assertRaises(RuntimeError, algorithm.execute)
+        self.assertRaisesRegex(RuntimeError, f"X = {X} out of range for workspace index 0", algorithm.execute)
         self.assertFalse(algorithm.isExecuted())
         DeleteWorkspace(ws)
 
@@ -84,7 +84,9 @@ class BinWidthAtXTest(unittest.TestCase):
         ws = CreateWorkspace(DataX=xs, DataY=ys)
         X = -0.3
         params = self._make_algorithm_params(ws, X)
-        self.assertRaises(ValueError, testhelpers.create_algorithm, "BinWidthAtX", **params)
+        self.assertRaisesRegex(
+            ValueError, "The workspace must contain histogram data", testhelpers.create_algorithm, "BinWidthAtX", **params
+        )
         DeleteWorkspace(ws)
 
     def test_positive_output_even_if_descending_x(self):
