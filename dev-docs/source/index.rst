@@ -16,6 +16,7 @@ Guides
 
    DeveloperAccounts
    GettingStarted/GettingStarted
+   Packaging
    Architecture
    BuildingOnOSX
    BuildingWithCMake
@@ -31,6 +32,9 @@ Guides
 
 :doc:`GettingStarted <GettingStarted/GettingStarted>`
    Describes the process of obtaining and building the mantid code base.
+
+:doc:`Packaging`
+   Describes the process building the user packages.
 
 :doc:`Architecture`
    Describes the architecture of the mantid libraries and applications.

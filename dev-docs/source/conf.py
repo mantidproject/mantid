@@ -7,33 +7,24 @@ import os
 
 from sphinx import __version__ as sphinx_version
 import sphinx_bootstrap_theme
-from distutils.version import LooseVersion
+
 
 # -- General configuration ------------------------------------------------
-if LooseVersion(sphinx_version) > LooseVersion("1.6"):
-
-    def setup(app):
-        """Called automatically by Sphinx when starting the build process"""
-        if hasattr(app, "add_css_file"):  # >=v1.8
-            app.add_css_file("custom.css")
-        else:
-            app.add_stylesheet("custom.css")  # v1.6-1.8
+def setup(app):
+    """Called automatically by Sphinx when starting the build process"""
+    app.add_css_file("custom.css")
 
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    # we use pngmath over mathjax so that the the offline help isn't reliant on
-    # anything external and we don't need to include the large mathjax package
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",
+    # use mathjax as we currently only publish the developer docs online
+    # for viewing through a web browser.
+    "sphinx.ext.mathjax",
 ]
-
-if LooseVersion(sphinx_version) > LooseVersion("1.8"):
-    extensions.append("sphinx.ext.imgmath")
-else:
-    extensions.append("sphinx.ext.pngmath")
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
