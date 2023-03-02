@@ -5,12 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 
 #include <cxxtest/TestSuite.h>
 
-using AlgorithmRuntimeProps = MantidQt::API::AlgorithmRuntimeProps;
+using AlgorithmRuntimeProps = Mantid::API::AlgorithmRuntimeProps;
 
 class AlgorithmRuntimePropsTest : public CxxTest::TestSuite {
 public:

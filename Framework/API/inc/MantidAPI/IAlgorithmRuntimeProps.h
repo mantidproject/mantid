@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllOption.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/IPropertyManager.h"
 
-namespace MantidQt::API {
-class EXPORT_OPT_MANTIDQT_COMMON IAlgorithmRuntimeProps : public virtual Mantid::Kernel::IPropertyManager {
+namespace Mantid::API {
+class MANTID_API_DLL IAlgorithmRuntimeProps : public virtual Mantid::Kernel::IPropertyManager {
 public:
   IAlgorithmRuntimeProps() = default;
   virtual ~IAlgorithmRuntimeProps() = default;
@@ -33,4 +33,4 @@ public:
   virtual TypedValue getProperty(const std::string &name) const noexcept override = 0;
 };
 
-} // namespace MantidQt::API
+} // namespace Mantid::API

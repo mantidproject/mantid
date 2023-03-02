@@ -15,8 +15,10 @@
 #include "GUI/Save/ISavePresenter.h"
 #include "IBatchJobManager.h"
 #include "IBatchPresenter.h"
+#include "MantidAPI/IAlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/IJobRunner.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
+
 #include <memory>
 
 namespace MantidQt::MantidWidgets {
@@ -91,7 +93,7 @@ public:
   Mantid::Geometry::Instrument_const_sptr instrument() const override;
   std::string instrumentName() const override;
   int percentComplete() const override;
-  std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> rowProcessingProperties() const override;
+  std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> rowProcessingProperties() const override;
   void notifyPreviewApplyRequested() override;
 
   // WorkspaceObserver overrides

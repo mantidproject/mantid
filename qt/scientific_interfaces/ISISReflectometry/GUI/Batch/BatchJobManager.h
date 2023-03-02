@@ -9,10 +9,10 @@
 #include "Common/DllConfig.h"
 #include "IBatchJobManager.h"
 #include "IReflAlgorithmFactory.h"
+#include "MantidAPI/IAlgorithmRuntimeProps.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
-#include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
 #include "Reduction/Batch.h"
 
 #include <boost/optional.hpp>
@@ -57,7 +57,7 @@ public:
   void notifyAllWorkspacesDeleted() override;
 
   std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> getAlgorithms() override;
-  std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> rowProcessingProperties() const override;
+  std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> rowProcessingProperties() const override;
 
   bool getProcessPartial() const override;
   bool getProcessAll() const override;
