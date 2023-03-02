@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmProperties.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -22,6 +23,7 @@ using namespace Mantid::API;
 
 namespace {
 
+std::string const NOT_IN_ADS = "not_stored_in_ads";
 std::string const WS_EXPORT_NAME("ALFView_exported");
 
 MatrixWorkspace_sptr cropWorkspace(MatrixWorkspace_sptr const &workspace, double const startX, double const endX) {
@@ -191,6 +193,27 @@ double ALFAnalysisModel::background() const { return m_function->getParameter("f
 Mantid::API::IPeakFunction_const_sptr ALFAnalysisModel::getPeakCopy() const {
   auto const gaussian = m_function->getFunction(1)->clone();
   return std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(gaussian);
+}
+
+std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+ALFAnalysisModel::cropWorkspaceProperties(std::pair<double, double> const &range) const {
+  auto properties = std::make_unique<AlgorithmRuntimeProps>();
+  AlgorithmProperties::update("InputWorkspace", m_extractedWorkspace, *properties);
+  AlgorithmProperties::update("XMin", range.first, *properties);
+  AlgorithmProperties::update("XMax", range.second, *properties);
+  AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
+  return properties;
+}
+
+std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+ALFAnalysisModel::fitProperties(std::pair<double, double> const &range) const {
+  auto properties = std::make_unique<AlgorithmRuntimeProps>();
+  AlgorithmProperties::update("Function", m_function, *properties);
+  AlgorithmProperties::update("InputWorkspace", m_extractedWorkspace, *properties);
+  AlgorithmProperties::update("CreateOutput", true, *properties);
+  AlgorithmProperties::update("StartX", range.first, *properties);
+  AlgorithmProperties::update("EndX", range.second, *properties);
+  return properties;
 }
 
 std::string ALFAnalysisModel::fitStatus() const { return m_fitStatus; }

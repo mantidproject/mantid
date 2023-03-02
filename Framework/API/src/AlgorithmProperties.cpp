@@ -51,6 +51,10 @@ void update(std::string const &property, MatrixWorkspace_sptr const &workspace, 
   properties.setProperty(property, workspace);
 }
 
+void update(std::string const &property, IFunction_sptr const &function, IAlgorithmRuntimeProps &properties) {
+  properties.setProperty(property, function);
+}
+
 void updateFromMap(IAlgorithmRuntimeProps &properties, std::map<std::string, std::string> const &parameterMap) {
   for (auto kvp : parameterMap) {
     update(kvp.first, kvp.second, properties);

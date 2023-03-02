@@ -23,6 +23,12 @@
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 
+namespace {
+
+std::string const NOT_IN_ADS = "not_stored_in_ads";
+
+}
+
 class ALFAnalysisModelTest : public CxxTest::TestSuite {
 public:
   ALFAnalysisModelTest() { FrameworkManager::Instance(); }
@@ -221,6 +227,46 @@ public:
 
     auto const workspace = ads.retrieveWS<MatrixWorkspace>(m_exportWorkspaceName);
     TS_ASSERT_EQUALS(1u, workspace->getNumberHistograms());
+  }
+
+  void test_cropWorkspaceProperties_returns_the_expected_properties() {
+    m_model->setExtractedWorkspace(m_workspace, m_twoThetas);
+
+    auto const range = std::make_pair<double, double>(-12.2, 14.4);
+    auto const properties = m_model->cropWorkspaceProperties(range);
+
+    MatrixWorkspace_sptr input = properties->getProperty("InputWorkspace");
+    double xMin = properties->getProperty("XMin");
+    double xMax = properties->getProperty("XMax");
+    std::string output = properties->getProperty("OutputWorkspace");
+
+    TS_ASSERT_EQUALS(m_workspace, input);
+    TS_ASSERT_DELTA(xMin, range.first, 0.000001);
+    TS_ASSERT_DELTA(xMax, range.second, 0.000001);
+    TS_ASSERT_EQUALS(NOT_IN_ADS, output);
+  }
+
+  void test_fitProperties_returns_the_expected_properties() {
+    m_model->setExtractedWorkspace(m_workspace, m_twoThetas);
+
+    auto const range = std::make_pair<double, double>(-15.2, 15.4);
+
+    // Populate the function member variable with an estimate
+    m_model->calculateEstimate(range);
+
+    auto const properties = m_model->fitProperties(range);
+
+    IFunction_sptr function = properties->getProperty("Function");
+    MatrixWorkspace_sptr input = properties->getProperty("InputWorkspace");
+    bool createOutput = properties->getProperty("CreateOutput");
+    double startX = properties->getProperty("StartX");
+    double endX = properties->getProperty("EndX");
+
+    TS_ASSERT_EQUALS(m_model->getPeakCopy()->asString(), function->getFunction(1)->asString());
+    TS_ASSERT_EQUALS(m_workspace, input);
+    TS_ASSERT(createOutput);
+    TS_ASSERT_DELTA(startX, range.first, 0.000001);
+    TS_ASSERT_DELTA(endX, range.second, 0.000001);
   }
 
 private:

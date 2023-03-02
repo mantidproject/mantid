@@ -14,7 +14,6 @@
 #include "ALFAnalysisView.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-
 #include "MantidKernel/WarningSuppressions.h"
 
 #include <optional>
@@ -99,6 +98,11 @@ public:
   MOCK_CONST_METHOD0(peakCentre, double());
   MOCK_CONST_METHOD0(background, double());
   MOCK_CONST_METHOD0(getPeakCopy, Mantid::API::IPeakFunction_const_sptr());
+
+  MOCK_CONST_METHOD1(cropWorkspaceProperties,
+                     std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>(std::pair<double, double> const &range));
+  MOCK_CONST_METHOD1(fitProperties,
+                     std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>(std::pair<double, double> const &range));
 
   MOCK_CONST_METHOD0(fitStatus, std::string());
 

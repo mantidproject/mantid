@@ -7,6 +7,7 @@
 #pragma once
 
 #include "DllConfig.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -45,6 +46,11 @@ public:
   virtual double background() const = 0;
   virtual Mantid::API::IPeakFunction_const_sptr getPeakCopy() const = 0;
 
+  virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+  cropWorkspaceProperties(std::pair<double, double> const &range) const = 0;
+  virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+  fitProperties(std::pair<double, double> const &range) const = 0;
+
   virtual std::string fitStatus() const = 0;
 
   virtual std::size_t numberOfTubes() const = 0;
@@ -80,6 +86,11 @@ public:
   double peakCentre() const override;
   double background() const override;
   Mantid::API::IPeakFunction_const_sptr getPeakCopy() const override;
+
+  std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+  cropWorkspaceProperties(std::pair<double, double> const &range) const override;
+  std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+  fitProperties(std::pair<double, double> const &range) const override;
 
   std::string fitStatus() const override;
 
