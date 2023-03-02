@@ -641,6 +641,48 @@ public:
     idealCaseFullCorrectionsTest(edges, crossPolarizationEffWS, POL_DIRS);
   }
 
+  void test_SpinStateOrderInOutputWorkspacegroup() {
+    using namespace Mantid::API;
+    using namespace Mantid::DataObjects;
+    using namespace Mantid::HistogramData;
+
+    BinEdges edges{0.3, 0.6, 0.9, 1.2};
+    auto effWS = idealEfficiencies(edges);
+    constexpr size_t nHist{2};
+    Counts counts{2.3, 9.6, 2.3};
+    MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
+    MatrixWorkspace_sptr ws01 = ws00->clone();
+    MatrixWorkspace_sptr ws10 = ws00->clone();
+    MatrixWorkspace_sptr ws11 = ws00->clone();
+    const std::vector<std::string> wsNames{{"ws00", "ws01", "ws10", "ws11"}};
+    const std::array<MatrixWorkspace_sptr, 4> wsList{{ws00, ws01, ws10, ws11}};
+    for (size_t i = 0; i != 4; ++i) {
+      AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
+    }
+
+    PolarizationCorrectionWildes alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", wsNames))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+
+    WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 4)
+    const std::array<std::string, 4> OUTPUT_ORDER{{"++", "+-", "-+", "--"}};
+    for (size_t i = 0; i != 4; ++i) {
+      auto ws = outputWS->getItem(i);
+      TS_ASSERT(ws)
+      const std::string expectedName = m_outputWSName + std::string("_") + OUTPUT_ORDER[i];
+      TS_ASSERT_EQUALS(ws->getName(), expectedName)
+    }
+  }
+
 private:
   const std::string m_outputWSName{"output"};
 

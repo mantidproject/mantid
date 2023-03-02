@@ -516,21 +516,21 @@ void PolarizationCorrectionWildes::checkConsistentX(const WorkspaceMap &inputs, 
 API::WorkspaceGroup_sptr PolarizationCorrectionWildes::groupOutput(const WorkspaceMap &outputs) {
   const std::string outWSName = getProperty(Prop::OUTPUT_WS);
   std::vector<std::string> names;
-  if (outputs.mmWS) {
-    names.emplace_back(outWSName + "_--");
-    API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.mmWS);
-  }
-  if (outputs.mpWS) {
-    names.emplace_back(outWSName + "_-+");
-    API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.mpWS);
+  if (outputs.ppWS) {
+    names.emplace_back(outWSName + "_++");
+    API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.ppWS);
   }
   if (outputs.pmWS) {
     names.emplace_back(outWSName + "_+-");
     API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.pmWS);
   }
-  if (outputs.ppWS) {
-    names.emplace_back(outWSName + "_++");
-    API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.ppWS);
+  if (outputs.mpWS) {
+    names.emplace_back(outWSName + "_-+");
+    API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.mpWS);
+  }
+  if (outputs.mmWS) {
+    names.emplace_back(outWSName + "_--");
+    API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.mmWS);
   }
   auto group = createChildAlgorithm("GroupWorkspaces");
   group->initialize();
