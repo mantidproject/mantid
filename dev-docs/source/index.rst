@@ -268,6 +268,7 @@ Component Overviews
    MultiThreadingInMantid
    PythonVSCppAlgorithms
    SampleLogsDev
+   ScriptRepository
    Widgets/Plotting
    WritingAnAlgorithm
    WritingCustomConvertToMDTransformation
