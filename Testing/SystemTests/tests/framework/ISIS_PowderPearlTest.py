@@ -51,7 +51,6 @@ summed_empty_path = os.path.join(calibration_dir, summed_empty_rel_path)
 
 
 class _CreateVanadiumTest(systemtesting.MantidSystemTest):
-
     existing_config = config["datasearch.directories"]
     focus_mode = None
 
@@ -118,7 +117,6 @@ class CreateVanadiumModsTest(_CreateVanadiumTest):
 
 
 class FocusTest(systemtesting.MantidSystemTest):
-
     focus_results = None
     existing_config = config["datasearch.directories"]
 
@@ -160,7 +158,6 @@ class FocusTest(systemtesting.MantidSystemTest):
 
 
 class FocusLongThenShortTest(systemtesting.MantidSystemTest):
-
     focus_results = None
     existing_config = config["datasearch.directories"]
 
@@ -220,7 +217,6 @@ class FocusLongThenShortTest(systemtesting.MantidSystemTest):
 
 
 class FocusWithAbsorbCorrectionsTest(systemtesting.MantidSystemTest):
-
     focus_results = None
     existing_config = config["datasearch.directories"]
 
@@ -243,7 +239,6 @@ class FocusWithAbsorbCorrectionsTest(systemtesting.MantidSystemTest):
 
 
 class FocusWithoutEmptySubtractionTest(systemtesting.MantidSystemTest):
-
     focus_results = None
     existing_config = config["datasearch.directories"]
 
@@ -268,7 +263,6 @@ class FocusWithoutEmptySubtractionTest(systemtesting.MantidSystemTest):
 
 
 class CreateCalTest(systemtesting.MantidSystemTest):
-
     calibration_results = None
     existing_config = config["datasearch.directories"]
     run_number = 98494
@@ -300,7 +294,6 @@ class CreateCalTest(systemtesting.MantidSystemTest):
 
 
 class CreateVanadiumAndFocusCustomMode(systemtesting.MantidSystemTest):
-
     existing_config = config["datasearch.directories"]
 
     def runTest(self):
