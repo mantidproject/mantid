@@ -739,9 +739,9 @@ private:
     return ws;
   }
 
-  void idealCaseFullCorrectionsTest(const Mantid::HistogramData::BinEdges edges,
-                                    const Mantid::API::MatrixWorkspace_sptr effWS,
-                                    const std::array<std::string, 4> outputSpinStates) {
+  void idealCaseFullCorrectionsTest(const Mantid::HistogramData::BinEdges &edges,
+                                    const Mantid::API::MatrixWorkspace_sptr &effWS,
+                                    const std::array<std::string, 4> &outputSpinStates) {
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
     using namespace Mantid::HistogramData;
