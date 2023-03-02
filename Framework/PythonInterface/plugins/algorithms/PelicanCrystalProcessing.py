@@ -13,7 +13,7 @@ from mantid.kernel import Direction, StringArrayMandatoryValidator, StringArrayP
 from mantid.api import DataProcessorAlgorithm, FileProperty, FileAction, Progress
 from mantid.simpleapi import PelicanReduction, DeleteWorkspace, AlgorithmFactory
 
-from ansto_common import expanded_runs
+from ANSTO.ansto_common import expanded_runs
 
 
 def copy_datset_nodes(src_hdf: str, dst_hdf: str, tags: Sequence[str]) -> None:
@@ -40,7 +40,6 @@ class PelicanCrystalProcessing(DataProcessorAlgorithm):
         return "PelicanCrystalProcessing"
 
     def PyInit(self):
-
         mandatoryInputRuns = CompositeValidator()
         mandatoryInputRuns.add(StringArrayMandatoryValidator())
         self.declareProperty(
@@ -118,7 +117,6 @@ class PelicanCrystalProcessing(DataProcessorAlgorithm):
         self.declareProperty(name="KeepReducedWorkspace", defaultValue=False, doc="Keep the last reduced workspace.")
 
     def PyExec(self):
-
         self._first_run = None
 
         # Get the list of data files from the runs
@@ -135,7 +133,6 @@ class PelicanCrystalProcessing(DataProcessorAlgorithm):
 
         saveFolder = scratch_folder if scratch_folder else config["defaultsave.directory"]
         for srun in single_runs:
-
             self._progress.report("Processing run {}, ".format(srun.run))
 
             PelicanReduction(
