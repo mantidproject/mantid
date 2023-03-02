@@ -47,8 +47,9 @@ class TimeSliceTest(unittest.TestCase):
         Tests validation of the PeakRange property.
         """
 
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            'Range must be in format "low,high"',
             TimeSlice,
             InputFiles=["IRS26173.raw"],
             SpectraRange=[3, 53],
@@ -63,8 +64,9 @@ class TimeSliceTest(unittest.TestCase):
         Tests validation of the PeakRange property.
         """
 
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Range must have two values",
             TimeSlice,
             InputFiles=["IRS26173.raw"],
             SpectraRange=[3, 53],
@@ -79,8 +81,9 @@ class TimeSliceTest(unittest.TestCase):
         Tests validation of the BackgroundRange property.
         """
 
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            'Range must be in format "low,high"',
             TimeSlice,
             InputFiles=["IRS26173.raw"],
             SpectraRange=[3, 53],
@@ -95,8 +98,9 @@ class TimeSliceTest(unittest.TestCase):
         Tests validation of the BackgroundRange property.
         """
 
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Range must have two values",
             TimeSlice,
             InputFiles=["IRS26173.raw"],
             SpectraRange=[3, 53],
