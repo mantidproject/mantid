@@ -99,7 +99,6 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
         self_scattering_correction = CalculatePlaczek(**placzek_kwargs)
         # Convert to Q
         self_scattering_correction = ConvertUnits(InputWorkspace=self_scattering_correction, Target="MomentumTransfer", EMode="Elastic")
-
         if not apply_per_detector:
             self_scattering_correction = self.reformat_and_group_detectors(self_scattering_correction, cal_file_name)
 
@@ -135,8 +134,8 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
         self_scattering_correction = GroupDetectors(
             InputWorkspace=self_scattering_correction, CopyGroupingFromWorkspace="cal_workspace_group"
         )
-        DeleteWorkspace("cal_workspace_group")
         self.divide_by_number_of_detectors_in_bank(self_scattering_correction, cal_workspace)
+        DeleteWorkspace("cal_workspace_group")
         return self_scattering_correction
 
     def divide_by_number_of_detectors_in_bank(self, self_scattering_correction, cal_workspace):
