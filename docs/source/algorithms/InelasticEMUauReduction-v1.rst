@@ -14,7 +14,7 @@ Together with knowledge of instrument configuration (distances, angles, and back
 times of arrival at the detectors allow assigning momentum and energy transfers to the scattered neutrons, within the
 instrumental resolution. Normalisation to the incident neutron velocity spectrum is further required to obtain a probability.
 
-The Reduce routine thus performs the above necessary algebra on the specified run numbers. At a minimum runs from a sample
+The Reduce routine thus performs the above necessary algebra on the specified run numbers.  At a minimum, the sample runs
 are needed. Additional runs for background subtraction and joint detector efficiency / solid angle correction are normally
 provided as well, with Reduce applied to each group separately, and the groups combined as shown in the diagram.
 

@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import systemtesting
-from mantid.simpleapi import *
+from mantid.simpleapi import mtd
 from InelasticEMUauReduction import InelasticEMUauReduction
 
 
@@ -49,9 +49,6 @@ class InelasticEMUauReductionAxisTest(systemtesting.MantidSystemTest):
         yv = ws.getAxis(1).extractValues()
         self.assertDelta(yv[0], 16.0, 0.01, "Unexpected minimum tube number value")
         self.assertDelta(yv[-1], 43.0, 0.01, "Unexpected minimum tube number value")
-
-    def validate(self):
-        return True
 
 
 class InelasticEMUauReductionWSTest(systemtesting.MantidSystemTest):

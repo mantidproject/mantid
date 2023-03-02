@@ -1247,32 +1247,18 @@ void LoadEMUHdf::exec() {
     auto eventDir = GetNeXusValue<std::string>(entry, "instrument/detector/daq_dirname", "./", 0);
     auto dataset = GetNeXusValue<int32_t>(entry, "instrument/detector/dataset_number", 0, m_datasetIndex);
     if (dataset < 0) {
-      std::string message("Negative dataset index recorded in HDF, reset to zero!");
-      g_log.error(message);
+      g_log.warning("Negative dataset index recorded in HDF, reset to zero!");
       dataset = 0;
     }
 
     // build the path to the event file using the standard storage convention at ansto:
     //   'relpath/[daq_dirname]/DATASET_[n]/EOS.bin'
     // but if the file is missing, try relpath/{source}.bin
-    std::stringstream buffer;
-    buffer << eventDir.c_str() << "/DATASET_" << dataset << "/EOS.bin";
-    fs::path filePath = evtPath;
-    filePath /= buffer.str();
-    filePath = fs::absolute(filePath);
-    std::string nomPath = filePath.generic_string();
-    if (fs::is_regular_file(nomPath)) {
-      evtPath = nomPath;
-    } else {
-      fs::path hp = hdfFile;
-      buffer.str("");
-      buffer.clear();
-      buffer << hp.stem().generic_string().c_str() << ".bin";
-      fs::path path = evtPath;
-      path /= buffer.str();
-      path = fs::absolute(path);
-      evtPath = path.generic_string();
+    fs::path filePath = fs::absolute(fs::path(evtPath) / eventDir / ("DATASET_" + std::to_string(dataset)) / "EOS.bin");
+    if (!fs::is_regular_file(filePath)) {
+      filePath = fs::absolute(fs::path(hdfFile).replace_extension(".bin"));
     }
+    evtPath = filePath.generic_string();
   }
 
   // finally check that the event file exists

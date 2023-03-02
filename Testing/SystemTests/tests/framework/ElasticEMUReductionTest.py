@@ -9,7 +9,7 @@ import os
 import zipfile
 import tempfile
 import systemtesting
-from mantid.simpleapi import *
+from mantid.simpleapi import mtd
 from mantid.api import FileFinder
 from ElasticEMUauReduction import ElasticEMUauReduction
 
@@ -42,9 +42,6 @@ class ElasticEMUauReductionAxisTest(systemtesting.MantidSystemTest):
         yv = ws.getAxis(1).extractValues()
         self.assertDelta(yv[0], 0.0, 0.01, "Unexpected minimum Q value")
         self.assertDelta(yv[-1], 182, 0.01, "Unexpected minimum Q value")
-
-    def validate(self):
-        return True
 
 
 class ElasticEMUauReductionWSTest(systemtesting.MantidSystemTest):

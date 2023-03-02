@@ -22,6 +22,10 @@ from ansto_common import (
     RangeOption,
 )
 
+# some constants
+DOPPLER_AMPLITUDE_TOL = 0.001
+DOPPLER_SPEED_TOL = 0.1
+
 
 # the following components are shared by the inelastic and elastic EMU reduction algorithms
 class DopplerSupport:
@@ -70,7 +74,7 @@ class DopplerSupport:
         mrun = mtd[ws_tag].getRun()
         amp = mrun.getProperty("DopplerAmplitude").value[0]
         spd = mrun.getProperty("DopplerVelocity").value[0]
-        if math.fabs(self._amplitude - amp) > 0.001 or math.fabs(self._speed - spd) > 0.1:
+        if math.fabs(self._amplitude - amp) > DOPPLER_AMPLITUDE_TOL or math.fabs(self._speed - spd) > DOPPLER_SPEED_TOL:
             raise ValueError("Doppler parameter")
 
     def _complete_doppler_params(self) -> None:
@@ -84,7 +88,7 @@ class DopplerSupport:
         except ValueError:
             raise RuntimeError("Invalid Doppler table entries in file.")
 
-        # the fitting works by finding the the closest entry in the table
+        # the fitting works by finding the closest entry in the table
         # that matches the (speed, amp) if either phase or frequency is 'fixed'
         # if the match is not close raise an exception
         # note amp is in mm in table
@@ -144,9 +148,9 @@ class FilterEmuPixelsTubes(FilterPixelsTubes):
         # for each spectrum get the event list
         #   - convert the pulse time to doppler time
         #   - set the mask by the sign of the doppler posn
-        # the include is merged with this code to avoid a repitive
+        # the include is merged with this code to avoid a repetitive
         # scan over the histograms
-        # TODO get the start time, frequency and doppler pahse for the run
+        # TODO get the start time, frequency and doppler phase for the run
         event_ws = mtd[ws_tag]
         if self._doppler_window:
             pve_drive = self._doppler_window == "pos"

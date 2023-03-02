@@ -18,7 +18,26 @@ from mantid.kernel import (
     CompositeValidator,
 )
 from mantid.api import PythonAlgorithm, FileProperty, WorkspaceProperty, FileAction, Progress
-from mantid.simpleapi import *  # noqa
+from mantid.simpleapi import (
+    Scale,
+    Minus,
+    Divide,
+    Rebin,
+    ResetNegatives,
+    DeleteWorkspace,
+    ReplaceSpecialValues,
+    GroupWorkspaces,
+    Integration,
+    LoadEMU,
+    LoadEMUHdf,
+    SumSpectra,
+    AlgorithmFactory,
+    LoadEmptyInstrument,
+    LoadParameterFile,
+    NormaliseSpectra,
+    ConvertUnits,
+    ChangeBinOffset,
+)
 
 from ANSTO.ansto_common import (
     ScratchFolder,
@@ -354,7 +373,6 @@ class InelasticEMUauReduction(PythonAlgorithm):
             ("SelectDataset", "SelectDataset", 0.1),
         ]
 
-        # self._load_merge(runs, basename, lopts)
         emu_loader = LoadEMU if self._cfg._file_extn == ".tar" else LoadEMUHdf
         load_merge(
             emu_loader,
