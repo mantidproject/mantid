@@ -96,10 +96,15 @@ void updateBackgroundSubtractionProperties(AlgorithmRuntimeProps &properties,
 
 void updatePolarizationCorrectionProperties(AlgorithmRuntimeProps &properties,
                                             PolarizationCorrections const &corrections) {
-  if (corrections.correctionType() == PolarizationCorrectionType::None)
+  // None or set to workspace or filepath with no workspace or path given.
+  if (corrections.correctionType() == PolarizationCorrectionType::None ||
+      (corrections.correctionType() == PolarizationCorrectionType::Workspace && corrections.workspace()->empty()))
     return;
 
+  // Use the parameter file.
   AlgorithmProperties::update("PolarizationAnalysis", true, properties);
+
+  // Use the supplied workspace.
   if (corrections.correctionType() == PolarizationCorrectionType::Workspace) {
     AlgorithmProperties::update("PolarizationEfficiencies", corrections.workspace(), properties);
   }
