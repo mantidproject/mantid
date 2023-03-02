@@ -29,9 +29,7 @@ def create_van(instrument, run_details, absorb):
     instrument.create_solid_angle_corrections(corrected_van_ws, run_details)
 
     if not (run_details.empty_inst_runs is None):
-        summed_empty_inst = common.generate_summed_runs(
-            empty_ws_string=run_details.empty_inst_runs, instrument=instrument
-        )
+        summed_empty_inst = common.generate_summed_runs(empty_ws_string=run_details.empty_inst_runs, instrument=instrument)
         mantid.SaveNexus(Filename=run_details.summed_empty_inst_file_path, InputWorkspace=summed_empty_inst)
         corrected_van_ws = common.subtract_summed_runs(ws_to_correct=corrected_van_ws, empty_ws=summed_empty_inst)
 
@@ -50,22 +48,16 @@ def create_van(instrument, run_details, absorb):
     if solid_angle:
         aligned_ws = mantid.Divide(LHSWorkspace=aligned_ws, RHSWorkspace=solid_angle)
         mantid.DeleteWorkspace(solid_angle)
-    focused_vanadium = mantid.DiffractionFocussing(
-        InputWorkspace=aligned_ws, GroupingFileName=run_details.grouping_file_path
-    )
+    focused_vanadium = mantid.DiffractionFocussing(InputWorkspace=aligned_ws, GroupingFileName=run_details.grouping_file_path)
     # convert back to TOF based on engineered detector positions
     mantid.ApplyDiffCal(InstrumentWorkspace=focused_vanadium, ClearCalibration=True)
     focused_spectra = common.extract_ws_spectra(focused_vanadium)
     focused_spectra = instrument._crop_van_to_expected_tof_range(focused_spectra)
 
-    d_spacing_group, tof_group = instrument._output_focused_ws(
-        processed_spectra=focused_spectra, run_details=run_details
-    )
+    d_spacing_group, tof_group = instrument._output_focused_ws(processed_spectra=focused_spectra, run_details=run_details)
     _create_vanadium_splines(focused_spectra, instrument, run_details)
 
-    common.keep_single_ws_unit(
-        d_spacing_group=d_spacing_group, tof_group=tof_group, unit_to_keep=instrument._get_unit_to_keep()
-    )
+    common.keep_single_ws_unit(d_spacing_group=d_spacing_group, tof_group=tof_group, unit_to_keep=instrument._get_unit_to_keep())
 
     common.remove_intermediate_workspace(corrected_van_ws)
     common.remove_intermediate_workspace(aligned_ws)
@@ -122,15 +114,11 @@ def create_van_per_detector(instrument, run_details, absorb):
     d_spacing_out_name = run_number + ext + "-ResultD"
     tof_out_name = run_number + ext + "-ResultTOF"
 
-    d_spacing_group = mantid.ConvertUnits(
-        InputWorkspace=aligned_ws, OutputWorkspace=d_spacing_out_name, Target="dSpacing"
-    )
+    d_spacing_group = mantid.ConvertUnits(InputWorkspace=aligned_ws, OutputWorkspace=d_spacing_out_name, Target="dSpacing")
     tof_group = mantid.ConvertUnits(InputWorkspace=aligned_ws, OutputWorkspace=tof_out_name, Target="TOF")
     _create_vanadium_splines_one_ws(aligned_ws, instrument, run_details)
 
-    common.keep_single_ws_unit(
-        d_spacing_group=d_spacing_group, tof_group=tof_group, unit_to_keep=instrument._get_unit_to_keep()
-    )
+    common.keep_single_ws_unit(d_spacing_group=d_spacing_group, tof_group=tof_group, unit_to_keep=instrument._get_unit_to_keep())
     common.remove_intermediate_workspace(corrected_van_ws)
 
     return d_spacing_group
@@ -153,9 +141,7 @@ def _create_vanadium_splines(focused_spectra, instrument, run_details):
 
 
 def _create_vanadium_splines_one_ws(vanadium_splines, instrument, run_details):
-    mantid.ExtractMonitors(
-        InputWorkspace=vanadium_splines, DetectorWorkspace="vanadium_splines", MonitorWorkspace="vanadium_monitors"
-    )
+    mantid.ExtractMonitors(InputWorkspace=vanadium_splines, DetectorWorkspace="vanadium_splines", MonitorWorkspace="vanadium_monitors")
 
     from mantid.api import AnalysisDataService as ADS
     if instrument._inst_settings.masking_file_name is not None:
@@ -168,9 +154,7 @@ def _create_vanadium_splines_one_ws(vanadium_splines, instrument, run_details):
             ws_indices_on_bank_to_mask = []
             for workspace_index in range(vanadium_splines.getNumberHistograms()):
                 # assuming that each spectrum only has one detector ID
-                detector = vanadium_splines.getInstrument().getDetector(
-                    vanadium_splines.getSpectrum(workspace_index).getDetectorIDs()[0]
-                )
+                detector = vanadium_splines.getInstrument().getDetector(vanadium_splines.getSpectrum(workspace_index).getDetectorIDs()[0])
                 bank_name_containing_detector = detector.getFullName().split("/")[1]
                 if bank_name_containing_detector == f"bank{bank_number+1}":
                     ws_indices_on_bank_to_mask.append(workspace_index)

@@ -303,7 +303,6 @@ def _apply_placzek_corrections(
 
 
 def _prepare_for_correction(data_workspace: Workspace2D, correction_workspace: Workspace2D, run_details):
-
     cal_workspace = mantid.LoadCalFile(
         InputWorkspace=data_workspace,
         CalFileName=run_details.grouping_file_path,
