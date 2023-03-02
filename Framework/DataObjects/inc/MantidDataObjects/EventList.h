@@ -253,6 +253,7 @@ public:
   void getWeightErrors(std::vector<double> &weightErrors) const override;
 
   std::vector<Mantid::Types::Core::DateAndTime> getPulseTimes() const override;
+  std::vector<Mantid::Types::Core::DateAndTime> getPulseTOFTimes() const;
 
   void setTofs(const MantidVec &tofs) override;
 

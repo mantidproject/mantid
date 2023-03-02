@@ -2896,6 +2896,17 @@ std::vector<Mantid::Types::Core::DateAndTime> EventList::getPulseTimes() const {
   return times;
 }
 
+/// Get the Pulse+TOF pulse times of each event in this EventList
+std::vector<DateAndTime> EventList::getPulseTOFTimes() const {
+  std::vector<DateAndTime> times = this->getPulseTimes();
+  std::vector<double> tofs = this->getTofs();
+  // TOFS are in microseconds, thus multiply by 1000 to change units to nanoseconds
+  std::transform(
+      times.cbegin(), times.cend(), tofs.cbegin(), times.begin(),
+      [](const DateAndTime &pulse, const double &tof) { return pulse + static_cast<int64_t>(tof * 1000.0); });
+  return times;
+}
+
 // --------------------------------------------------------------------------
 /**
  * @return The minimum tof value for the list of the events.
