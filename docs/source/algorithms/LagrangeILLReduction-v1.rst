@@ -18,15 +18,18 @@ the empty cell from the raw data.
 The X-axis of the result data can be offset by the incident energy using `UseIncidentEnergy`, and be converted to wave
 number instead of the default energy using `ConvertToWaveNumber`.
 
-All the files in each field are merged together in a single curve, with very close points being removed to avoid
-interpolation artifacts.
+All the files in each field are merged together in a single curve, with very close points (less than 10 umeV apart)
+being removed to avoid interpolation artifacts.
 
 Since the binning can be different between the raw data, the empty cell and the correction file, values are interpolated
 through numpy to provide matching values.
 
 Note that for simplicity reasons, this algorithm is taking care of the loading and formatting of the ASCII data itself,
-and no separate loader exists for Lagrange data. Raw data can be checked by not filling any reduction parameter in this
-algorithm.
+and no separate loader exists for ASCII Lagrange data. Raw data can be checked by not filling any reduction parameter in this
+algorithm. There exist a loader for NeXus Lagrange data: :ref:`LoadILLLagrange`, which allows to inspect the raw data.
+
+The reduction can be performed when the input contains only ASCII or only NeXus files, mixing is not supported. The workflow
+will automatically choose which way to load the input data. The reduction with either type of input gives the same result.
 
 
 Usage
