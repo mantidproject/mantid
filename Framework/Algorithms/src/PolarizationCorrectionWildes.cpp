@@ -447,16 +447,16 @@ void PolarizationCorrectionWildes::checkConsistentNumberHistograms(const Workspa
     }
   };
   if (inputs.mmWS) {
-    checkNHist(inputs.mmWS, Flippers::OffOff);
+    checkNHist(inputs.mmWS, Flippers::OnOn);
   }
   if (inputs.mpWS) {
-    checkNHist(inputs.mpWS, Flippers::OffOn);
+    checkNHist(inputs.mpWS, Flippers::OnOff);
   }
   if (inputs.pmWS) {
-    checkNHist(inputs.pmWS, Flippers::OnOff);
+    checkNHist(inputs.pmWS, Flippers::OffOn);
   }
   if (inputs.ppWS) {
-    checkNHist(inputs.ppWS, Flippers::OnOn);
+    checkNHist(inputs.ppWS, Flippers::OffOff);
   }
 }
 
@@ -493,16 +493,16 @@ void PolarizationCorrectionWildes::checkConsistentX(const WorkspaceMap &inputs, 
     }
   };
   if (inputs.mmWS) {
-    checkWS(inputs.mmWS, Flippers::OffOff);
+    checkWS(inputs.mmWS, Flippers::OnOn);
   }
   if (inputs.mpWS) {
-    checkWS(inputs.mpWS, Flippers::OffOn);
+    checkWS(inputs.mpWS, Flippers::OnOff);
   }
   if (inputs.pmWS) {
-    checkWS(inputs.pmWS, Flippers::OnOff);
+    checkWS(inputs.pmWS, Flippers::OffOn);
   }
   if (inputs.ppWS) {
-    checkWS(inputs.ppWS, Flippers::OnOn);
+    checkWS(inputs.ppWS, Flippers::OffOff);
   }
 }
 
