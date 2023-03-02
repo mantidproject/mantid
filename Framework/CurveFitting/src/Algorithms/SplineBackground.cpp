@@ -245,9 +245,9 @@ void SplineBackground::freeBSplinePointers() {
  * the Output Workspace with these values
  *
  * @param inputWS:: The input workspace
- * @param outputWs:: The output workspace to update
+ * @param outputWS:: The output workspace to update
  * @param startWSIndex:: The first user specified workspace index of inputWS
- * @param currentWSIndex:: The current workspace index in the user specified range of inputWS
+ * @param currentIndexOfInputWS:: The current workspace index in the user specified range of inputWS
  */
 void SplineBackground::updateSplineOutput(const API::MatrixWorkspace_sptr &inputWS, API::MatrixWorkspace_sptr &outputWS,
                                           const size_t startWSIndex, const size_t currentIndexOfInputWS) {
