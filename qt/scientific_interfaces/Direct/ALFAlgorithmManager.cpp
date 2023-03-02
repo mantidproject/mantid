@@ -18,7 +18,9 @@ using namespace Mantid::API;
 namespace {
 auto constexpr CONVERT_UNITS_ALG_NAME = "ConvertUnits";
 auto constexpr CREATE_WORKSPACE_ALG_NAME = "CreateWorkspace";
+auto constexpr CROP_WORKSPACE_ALG_NAME = "CropWorkspace";
 auto constexpr DIVIDE_ALG_NAME = "Divide";
+auto constexpr FIT_ALG_NAME = "Fit";
 auto constexpr LOAD_ALG_NAME = "Load";
 auto constexpr NORMALISE_CURRENT_ALG_NAME = "NormaliseByCurrent";
 auto constexpr REBIN_TO_WORKSPACE_ALG_NAME = "RebinToWorkspace";
@@ -35,7 +37,9 @@ enum class AlgorithmType {
   CONVERT_UNITS,
   CREATE_WORKSPACE,
   SCALE_X,
-  REBUNCH
+  REBUNCH,
+  CROP_WORKSPACE,
+  FIT
 };
 
 AlgorithmType algorithmType(MantidQt::API::IConfiguredAlgorithm_sptr &configuredAlg) {
@@ -58,6 +62,10 @@ AlgorithmType algorithmType(MantidQt::API::IConfiguredAlgorithm_sptr &configured
     return AlgorithmType::SCALE_X;
   } else if (name == REBUNCH_ALG_NAME) {
     return AlgorithmType::REBUNCH;
+  } else if (name == CROP_WORKSPACE_ALG_NAME) {
+    return AlgorithmType::CROP_WORKSPACE;
+  } else if (name == FIT_ALG_NAME) {
+    return AlgorithmType::FIT;
   } else {
     throw std::logic_error(std::string("ALFView error: callback from invalid algorithm ") + name);
   }
@@ -117,6 +125,14 @@ void ALFAlgorithmManager::rebunch(std::unique_ptr<Mantid::API::AlgorithmRuntimeP
   executeAlgorithm(createAlgorithm(REBUNCH_ALG_NAME), std::move(properties));
 }
 
+void ALFAlgorithmManager::cropWorkspace(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) {
+  executeAlgorithm(createAlgorithm(CROP_WORKSPACE_ALG_NAME), std::move(properties));
+}
+
+void ALFAlgorithmManager::fit(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) {
+  executeAlgorithm(createAlgorithm(FIT_ALG_NAME), std::move(properties));
+}
+
 void ALFAlgorithmManager::notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr &algorithm) {
   switch (algorithmType(algorithm)) {
   case AlgorithmType::LOAD:
@@ -145,6 +161,12 @@ void ALFAlgorithmManager::notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr
     return;
   case AlgorithmType::REBUNCH:
     notifyRebunchComplete(algorithm->algorithm());
+    return;
+  case AlgorithmType::CROP_WORKSPACE:
+    notifyCropWorkspaceComplete(algorithm->algorithm());
+    return;
+  case AlgorithmType::FIT:
+    notifyFitComplete(algorithm->algorithm());
     return;
   }
 }
@@ -213,6 +235,18 @@ void ALFAlgorithmManager::notifyRebunchComplete(Mantid::API::IAlgorithm_sptr con
   // Explicitly provide return type. Return type must be the same as the input property type to allow type casting
   MatrixWorkspace_sptr outputWorkspace = algorithm->getProperty("OutputWorkspace");
   m_subscriber->notifyRebunchComplete(outputWorkspace);
+}
+
+void ALFAlgorithmManager::notifyCropWorkspaceComplete(Mantid::API::IAlgorithm_sptr const &algorithm) {
+  // Explicitly provide return type. Return type must be the same as the input property type to allow type casting
+  // MatrixWorkspace_sptr outputWorkspace = algorithm->getProperty("OutputWorkspace");
+  // m_subscriber->notifyCropWorkspaceComplete(outputWorkspace);
+}
+
+void ALFAlgorithmManager::notifyFitComplete(Mantid::API::IAlgorithm_sptr const &algorithm) {
+  // Explicitly provide return type. Return type must be the same as the input property type to allow type casting
+  // MatrixWorkspace_sptr outputWorkspace = algorithm->getProperty("OutputWorkspace");
+  // m_subscriber->notifyFitComplete(outputWorkspace);
 }
 
 } // namespace MantidQt::CustomInterfaces

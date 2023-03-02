@@ -98,6 +98,16 @@ public:
     m_algorithmManager->rebunch(std::move(m_algProperties));
   }
 
+  void test_cropWorkspace_will_execute_the_crop_workspace_algorithm() {
+    expectExecuteAlgorithm("CropWorkspace");
+    m_algorithmManager->cropWorkspace(std::move(m_algProperties));
+  }
+
+  void test_fit_will_execute_the_fit_algorithm() {
+    expectExecuteAlgorithm("Fit");
+    m_algorithmManager->fit(std::move(m_algProperties));
+  }
+
   void test_notifyAlgorithmError_will_notify_the_subscriber() {
     std::string const errorMessage("Error message");
 
