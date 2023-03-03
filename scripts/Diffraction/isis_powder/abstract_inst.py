@@ -48,12 +48,13 @@ class AbstractInst(object):
     def user_name(self):
         return self._user_name
 
-    def _create_vanadium(self, run_number_string, do_absorb_corrections, per_detector):
+    def _create_vanadium(self, run_number_string, do_absorb_corrections, per_detector=False):
         """
         Creates a vanadium calibration - should be called by the concrete instrument
         :param run_number_string : The user input string for any run within the cycle
         to help us determine the correct vanadium to create later
         :param do_absorb_corrections: Set to true if absorption corrections should be applied
+        :param per_detector: Whether the Vanadium correction will be done per detector or per bank
         :return: d_spacing focused vanadium group
         """
         self._is_vanadium = True
