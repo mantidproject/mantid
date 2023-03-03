@@ -75,11 +75,10 @@ void ALFAnalysisPresenter::notifyCropWorkspaceComplete(Mantid::API::MatrixWorksp
   updateViewFromModel();
 }
 
-void ALFAnalysisPresenter::notifyFitComplete(Mantid::API::MatrixWorkspace_sptr const &workspace,
-                                             Mantid::API::IFunction_sptr const &function,
-                                             std::string const &fitStatus) {
-  m_model->setFitResult(workspace, function, fitStatus);
-  m_view->addFitSpectrum(workspace);
+void ALFAnalysisPresenter::notifyFitComplete(Mantid::API::MatrixWorkspace_sptr workspace,
+                                             Mantid::API::IFunction_sptr function, std::string fitStatus) {
+  m_model->setFitResult(std::move(workspace), std::move(function), std::move(fitStatus));
+  m_view->addFitSpectrum(m_model->fitWorkspace());
 
   updatePeakCentreInViewFromModel();
   updateRotationAngleInViewFromModel();

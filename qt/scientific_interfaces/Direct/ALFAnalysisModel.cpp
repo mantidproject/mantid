@@ -216,11 +216,11 @@ ALFAnalysisModel::fitProperties(std::pair<double, double> const &range) const {
   return properties;
 }
 
-void ALFAnalysisModel::setFitResult(Mantid::API::MatrixWorkspace_sptr const &workspace,
-                                    Mantid::API::IFunction_sptr const &function, std::string const &fitStatus) {
-  m_fitWorkspace = workspace;
-  m_function = function;
-  m_fitStatus = fitStatus;
+void ALFAnalysisModel::setFitResult(Mantid::API::MatrixWorkspace_sptr workspace, Mantid::API::IFunction_sptr function,
+                                    std::string fitStatus) {
+  m_fitWorkspace = std::move(workspace);
+  m_function = std::move(function);
+  m_fitStatus = std::move(fitStatus);
 }
 
 std::string ALFAnalysisModel::fitStatus() const { return m_fitStatus; }

@@ -104,8 +104,9 @@ public:
   MOCK_CONST_METHOD1(fitProperties,
                      std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>(std::pair<double, double> const &range));
 
-  MOCK_METHOD3(setFitResult, void(Mantid::API::MatrixWorkspace_sptr const &workspace,
-                                  Mantid::API::IFunction_sptr const &function, std::string const &fitStatus));
+  MOCK_METHOD3(setFitResult, void(Mantid::API::MatrixWorkspace_sptr workspace, Mantid::API::IFunction_sptr function,
+                                  std::string fitStatus));
+  MOCK_CONST_METHOD0(fitWorkspace, Mantid::API::MatrixWorkspace_sptr());
 
   MOCK_CONST_METHOD0(fitStatus, std::string());
 

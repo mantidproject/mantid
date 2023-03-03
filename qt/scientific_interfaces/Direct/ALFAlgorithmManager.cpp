@@ -267,7 +267,7 @@ void ALFAlgorithmManager::notifyFitComplete(Mantid::API::IAlgorithm_sptr const &
   IFunction_sptr function = algorithm->getProperty("Function");
   std::string fitStatus = algorithm->getPropertyValue("OutputStatus");
 
-  m_subscriber->notifyFitComplete(outputWorkspace, function, fitStatus);
+  m_subscriber->notifyFitComplete(std::move(outputWorkspace), std::move(function), std::move(fitStatus));
 }
 
 } // namespace MantidQt::CustomInterfaces

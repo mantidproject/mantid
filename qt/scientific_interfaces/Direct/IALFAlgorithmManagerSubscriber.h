@@ -38,8 +38,8 @@ public:
 
   // Algorithm notifiers used when fitting the extracted Out of plane angle workspace
   virtual void notifyCropWorkspaceComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) { (void)workspace; };
-  virtual void notifyFitComplete(Mantid::API::MatrixWorkspace_sptr const &workspace,
-                                 Mantid::API::IFunction_sptr const &function, std::string const &fitStatus) {
+  virtual void notifyFitComplete(Mantid::API::MatrixWorkspace_sptr workspace, Mantid::API::IFunction_sptr function,
+                                 std::string fitStatus) {
     (void)workspace;
     (void)function;
     (void)fitStatus;

@@ -38,8 +38,8 @@ public:
 
   // Algorithm notifiers used when fitting the extracted Out of plane angle workspace
   MOCK_METHOD1(notifyCropWorkspaceComplete, void(Mantid::API::MatrixWorkspace_sptr const &workspace));
-  MOCK_METHOD3(notifyFitComplete, void(Mantid::API::MatrixWorkspace_sptr const &workspace,
-                                       Mantid::API::IFunction_sptr const &function, std::string const &fitStatus));
+  MOCK_METHOD3(notifyFitComplete, void(Mantid::API::MatrixWorkspace_sptr workspace,
+                                       Mantid::API::IFunction_sptr function, std::string fitStatus));
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

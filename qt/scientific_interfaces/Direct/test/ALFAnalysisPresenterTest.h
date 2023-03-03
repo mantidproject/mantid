@@ -33,7 +33,11 @@ using namespace MantidQt::MantidWidgets;
 
 class ALFAnalysisPresenterTest : public CxxTest::TestSuite {
 public:
-  ALFAnalysisPresenterTest() { FrameworkManager::Instance(); }
+  ALFAnalysisPresenterTest() {
+    FrameworkManager::Instance();
+    m_workspace = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    m_function = Mantid::API::FunctionFactory::Instance().createFunction("Gaussian");
+  }
 
   static ALFAnalysisPresenterTest *createSuite() { return new ALFAnalysisPresenterTest(); }
 
@@ -262,12 +266,13 @@ public:
   void test_notifyFitComplete_will_update_the_model_and_then_the_view() {
     std::string const fitStatus("Fit success");
 
-    EXPECT_CALL(*m_model, setFitResult(_, _, fitStatus)).Times(1);
-    EXPECT_CALL(*m_view, addFitSpectrum(_)).Times(1);
+    EXPECT_CALL(*m_model, setFitResult(Eq(m_workspace), Eq(m_function), fitStatus)).Times(1);
+    EXPECT_CALL(*m_model, fitWorkspace()).Times(1).WillOnce(Return(m_workspace));
+    EXPECT_CALL(*m_view, addFitSpectrum(Eq(m_workspace))).Times(1);
     expectUpdatePeakCentreInViewFromModel();
     expectUpdateRotationAngleCalled();
 
-    m_presenter->notifyFitComplete(nullptr, nullptr, fitStatus);
+    m_presenter->notifyFitComplete(m_workspace, m_function, fitStatus);
   }
 
   void test_notifyAlgorithmError_will_display_a_message_in_the_view() {
@@ -315,6 +320,8 @@ private:
 
   std::unique_ptr<AlgorithmRuntimeProps> m_algProperties;
 
+  Mantid::API::MatrixWorkspace_sptr m_workspace;
+  Mantid::API::IFunction_sptr m_function;
   std::pair<double, double> m_range;
   double m_peakCentre;
   double m_background;

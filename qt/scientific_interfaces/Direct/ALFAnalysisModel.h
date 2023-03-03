@@ -51,8 +51,9 @@ public:
   virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
   fitProperties(std::pair<double, double> const &range) const = 0;
 
-  virtual void setFitResult(Mantid::API::MatrixWorkspace_sptr const &workspace,
-                            Mantid::API::IFunction_sptr const &function, std::string const &fitStatus) = 0;
+  virtual void setFitResult(Mantid::API::MatrixWorkspace_sptr workspace, Mantid::API::IFunction_sptr function,
+                            std::string fitStatus) = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr fitWorkspace() const = 0;
 
   virtual std::string fitStatus() const = 0;
 
@@ -95,8 +96,9 @@ public:
   std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
   fitProperties(std::pair<double, double> const &range) const override;
 
-  void setFitResult(Mantid::API::MatrixWorkspace_sptr const &workspace, Mantid::API::IFunction_sptr const &function,
-                    std::string const &fitStatus) override;
+  void setFitResult(Mantid::API::MatrixWorkspace_sptr workspace, Mantid::API::IFunction_sptr function,
+                    std::string fitStatus) override;
+  inline Mantid::API::MatrixWorkspace_sptr fitWorkspace() const noexcept override { return m_fitWorkspace; }
 
   std::string fitStatus() const override;
 

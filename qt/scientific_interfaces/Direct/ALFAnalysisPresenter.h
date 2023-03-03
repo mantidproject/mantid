@@ -66,8 +66,8 @@ public:
 
   void notifyAlgorithmError(std::string const &message) override;
   void notifyCropWorkspaceComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
-  void notifyFitComplete(Mantid::API::MatrixWorkspace_sptr const &workspace,
-                         Mantid::API::IFunction_sptr const &function, std::string const &fitStatus) override;
+  void notifyFitComplete(Mantid::API::MatrixWorkspace_sptr workspace, Mantid::API::IFunction_sptr function,
+                         std::string fitStatus) override;
 
   std::size_t numberOfTubes() const override;
 
