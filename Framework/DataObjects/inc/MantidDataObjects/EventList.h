@@ -416,13 +416,11 @@ private:
   template <class T> static void getTofsHelper(const std::vector<T> &events, std::vector<double> &tofs);
   template <class T> static void getWeightsHelper(const std::vector<T> &events, std::vector<double> &weights);
   template <class T> static void getWeightErrorsHelper(const std::vector<T> &events, std::vector<double> &weightErrors);
-  template <class T>
-  static void getPulseTimesHelper(const std::vector<T> &events, std::vector<Mantid::Types::Core::DateAndTime> &times);
-  template <typename EVENTTYPE>
-  static void getPulseTOFTimesHelper(const std::vector<EVENTTYPE> &events, std::vector<DateAndTime> &times);
-  template <typename EVENTTYPE>
-  static void getPulseTOFTimesAtSampleHelper(const std::vector<EVENTTYPE> &events, const double &factor,
-                                             const double &shift, std::vector<DateAndTime> &times);
+
+  /// Compute a time (for instance, pulse-time plus TOF) associated to each event in the list
+  template <typename UnaryOperation>
+  std::vector<DateAndTime> eventTimesCalculator(const UnaryOperation &timesCalc) const;
+
   template <class T> static void setTofsHelper(std::vector<T> &events, const std::vector<double> &tofs);
   template <class T>
   static void filterByPulseTimeHelper(std::vector<T> &events, Types::Core::DateAndTime start,

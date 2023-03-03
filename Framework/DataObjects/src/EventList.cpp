@@ -2857,41 +2857,29 @@ std::vector<double> EventList::getWeightErrors() const {
   return weightErrors;
 }
 
-// --------------------------------------------------------------------------
-/** Get the pulsetimes of all events in a list
- *
- * @param events :: source vector of events
- * @param times :: vector to fill
+/**
+ * Compute a time (for instance, pulse-time plus TOF) associated to each event in the list.
+ * @param timesCalc : anonymous function that computes a time from an input event
+ * @return : vector of times for all events in the list
  */
-template <class T>
-void EventList::getPulseTimesHelper(const std::vector<T> &events,
-                                    std::vector<Mantid::Types::Core::DateAndTime> &times) {
-  times.clear();
-  times.reserve(events.size());
-  std::transform(events.cbegin(), events.cend(), std::back_inserter(times),
-                 [](const auto &event) { return event.pulseTime(); });
-}
-
-/// Compute the Pulse-time + TOF for a vector of events
-template <typename EVENTTYPE>
-void EventList::getPulseTOFTimesHelper(const std::vector<EVENTTYPE> &events, std::vector<DateAndTime> &times) {
-  times.clear();
-  times.reserve(events.size());
-  // TOFS are in microseconds, thus multiply by 1000 to change units to nanoseconds
-  std::transform(events.cbegin(), events.cend(), std::back_inserter(times),
-                 [](const EVENTTYPE &event) { return event.pulseTime() + static_cast<int64_t>(event.tof() * 1000.0); });
-}
-
-/// Compute the Pulse-time + time-of-flight of the neutron up to the sample, for each event in this EventList
-template <typename EVENTTYPE>
-void EventList::getPulseTOFTimesAtSampleHelper(const std::vector<EVENTTYPE> &events, const double &factor,
-                                               const double &shift, std::vector<DateAndTime> &times) {
-  times.clear();
-  times.reserve(events.size());
-  // TOFS and shift are in microseconds, thus multiply by 1000 to change units to nanoseconds
-  std::transform(events.cbegin(), events.cend(), std::back_inserter(times), [&](const EVENTTYPE &event) {
-    return event.pulseTime() + static_cast<int64_t>((factor * event.tof() + shift) * 1000.0);
-  });
+template <typename UnaryOperation>
+std::vector<DateAndTime> EventList::eventTimesCalculator(const UnaryOperation &timesCalc) const {
+  std::vector<DateAndTime> times;
+  switch (eventType) {
+  case TOF:
+    times.reserve(events.size());
+    std::transform(events.cbegin(), events.cend(), std::back_inserter(times), timesCalc);
+    break;
+  case WEIGHTED:
+    times.reserve(weightedEvents.size());
+    std::transform(weightedEvents.cbegin(), weightedEvents.cend(), std::back_inserter(times), timesCalc);
+    break;
+  case WEIGHTED_NOTIME:
+    times.reserve(weightedEventsNoTime.size());
+    std::transform(weightedEventsNoTime.cbegin(), weightedEventsNoTime.cend(), std::back_inserter(times), timesCalc);
+    break;
+  }
+  return times;
 }
 
 /** Get the pulse times of each event in this EventList.
@@ -2899,40 +2887,14 @@ void EventList::getPulseTOFTimesAtSampleHelper(const std::vector<EVENTTYPE> &eve
  * @return by copy a vector of DateAndTime times
  */
 std::vector<Mantid::Types::Core::DateAndTime> EventList::getPulseTimes() const {
-  std::vector<Mantid::Types::Core::DateAndTime> times;
-  // Set the capacity of the vector to avoid multiple resizes
-  times.reserve(this->getNumberEvents());
-
-  // Convert the list
-  switch (eventType) {
-  case TOF:
-    this->getPulseTimesHelper(this->events, times);
-    break;
-  case WEIGHTED:
-    this->getPulseTimesHelper(this->weightedEvents, times);
-    break;
-  case WEIGHTED_NOTIME:
-    this->getPulseTimesHelper(this->weightedEventsNoTime, times);
-    break;
-  }
-  return times;
+  auto timeCalc = [](const auto &event) { return event.pulseTime(); };
+  return eventTimesCalculator(timeCalc);
 }
 
 /// Get the Pulse-time + TOF for each event in this EventList
 std::vector<DateAndTime> EventList::getPulseTOFTimes() const {
-  std::vector<DateAndTime> times;
-  switch (eventType) {
-  case TOF:
-    this->getPulseTOFTimesHelper(this->events, times);
-    break;
-  case WEIGHTED:
-    this->getPulseTOFTimesHelper(this->weightedEvents, times);
-    break;
-  case WEIGHTED_NOTIME:
-    this->getPulseTOFTimesHelper(this->weightedEventsNoTime, times);
-    break;
-  }
-  return times;
+  auto timeCalc = [](const auto &event) { return event.pulseTime() + static_cast<int64_t>(event.tof() * 1000.0); };
+  return eventTimesCalculator(timeCalc);
 }
 
 /** Get the Pulse-time + time-of-flight of the neutron up to the sample, for each event in this EventList.
@@ -2940,19 +2902,10 @@ std::vector<DateAndTime> EventList::getPulseTOFTimes() const {
  * @param shift : shift the TOF (after rescaling) by this time, in microseconds
  */
 std::vector<DateAndTime> EventList::getPulseTOFTimesAtSample(const double &factor, const double &shift) const {
-  std::vector<DateAndTime> times;
-  switch (eventType) {
-  case TOF:
-    this->getPulseTOFTimesAtSampleHelper(this->events, factor, shift, times);
-    break;
-  case WEIGHTED:
-    this->getPulseTOFTimesAtSampleHelper(this->weightedEvents, factor, shift, times);
-    break;
-  case WEIGHTED_NOTIME:
-    this->getPulseTOFTimesAtSampleHelper(this->weightedEventsNoTime, factor, shift, times);
-    break;
-  }
-  return times;
+  auto timeCalc = [&](const auto &event) {
+    return event.pulseTime() + static_cast<int64_t>((factor * event.tof() + shift) * 1000.0);
+  };
+  return eventTimesCalculator(timeCalc);
 }
 
 // --------------------------------------------------------------------------
