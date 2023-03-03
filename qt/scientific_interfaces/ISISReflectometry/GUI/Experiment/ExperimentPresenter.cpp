@@ -172,9 +172,9 @@ PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
 void ExperimentPresenter::showPolCorrFilePathValidity(std::string const &filePath) {
   if (m_fileHandler->fileExists(filePath)) {
     m_view->showPolCorrFilePathValid();
-  } else {
-    m_view->showPolCorrFilePathInvalid();
+    return;
   }
+  m_view->showPolCorrFilePathInvalid();
 }
 
 FloodCorrections ExperimentPresenter::floodCorrectionsFromView() {
@@ -186,11 +186,20 @@ FloodCorrections ExperimentPresenter::floodCorrectionsFromView() {
       return FloodCorrections(correctionType, m_view->getFloodWorkspace());
     }
     if (correctionTypeString == "FilePath") {
-      return FloodCorrections(correctionType, m_view->getFloodFilePath());
+      auto const floodFilePath = m_view->getFloodFilePath();
+      showFloodFilePathValidity(floodFilePath);
+      return FloodCorrections(correctionType, floodFilePath);
     }
   }
-
   return FloodCorrections(correctionType);
+}
+
+void ExperimentPresenter::showFloodFilePathValidity(const std::string &filePath) {
+  if (m_fileHandler->fileExists(filePath)) {
+    m_view->showFloodCorrFilePathValid();
+    return;
+  }
+  m_view->showFloodCorrFilePathInvalid();
 }
 
 void ExperimentPresenter::updateBackgroundSubtractionEnabledState() {
