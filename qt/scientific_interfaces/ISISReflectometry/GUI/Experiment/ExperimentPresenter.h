@@ -101,7 +101,9 @@ private:
   void updateSummationTypeEnabledState();
   void updateBackgroundSubtractionEnabledState();
   void updatePolarizationCorrectionEnabledState();
+  void disablePolarizationEfficiencies();
   void updateFloodCorrectionEnabledState();
+  void disableFloodCorrectionInputs();
 
   void updateLookupRowProcessingInstructions(PreviewRow const &previewRow, LookupRow &lookupRow, ROIType regionType);
 

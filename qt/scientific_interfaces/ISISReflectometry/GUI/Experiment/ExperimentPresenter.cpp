@@ -227,13 +227,13 @@ void ExperimentPresenter::updatePolarizationCorrectionEnabledState() {
   if (instrumentName == "INTER" || instrumentName == "SURF") {
     m_view->setPolarizationCorrectionOption("None");
     m_view->disablePolarizationCorrections();
-    m_view->disablePolarizationEfficiencies();
+    disablePolarizationEfficiencies();
     return;
   }
   auto const polCorrOption = m_view->getPolarizationCorrectionOption();
   m_view->enablePolarizationCorrections();
-  if (polCorrOption == "ParameterFile") {
-    m_view->disablePolarizationEfficiencies();
+  if (polCorrOption == "ParameterFile" || polCorrOption == "None") {
+    disablePolarizationEfficiencies();
     return;
   }
   if (polCorrOption == "Workspace") {
@@ -246,6 +246,10 @@ void ExperimentPresenter::updatePolarizationCorrectionEnabledState() {
     m_view->setPolarizationEfficienciesFilePathMode();
     return;
   }
+}
+
+void ExperimentPresenter::disablePolarizationEfficiencies() {
+  m_view->setPolarizationEfficienciesWorkspaceMode();
   m_view->disablePolarizationEfficiencies();
 }
 
@@ -253,7 +257,7 @@ void ExperimentPresenter::updateFloodCorrectionEnabledState() {
   auto const floodCorrOption = m_view->getFloodCorrectionType();
 
   if (floodCorrOption == "None" || floodCorrOption == "ParameterFile") {
-    m_view->disableFloodCorrectionInputs();
+    disableFloodCorrectionInputs();
     return;
   }
   if (floodCorrOption == "Workspace") {
@@ -266,6 +270,11 @@ void ExperimentPresenter::updateFloodCorrectionEnabledState() {
     m_view->setFloodCorrectionFilePathMode();
     return;
   }
+}
+
+void ExperimentPresenter::disableFloodCorrectionInputs() {
+  m_view->setFloodCorrectionWorkspaceMode();
+  m_view->disableFloodCorrectionInputs();
 }
 
 boost::optional<RangeInLambda> ExperimentPresenter::transmissionRunRangeFromView() {
@@ -415,11 +424,15 @@ void ExperimentPresenter::updateViewFromModel() {
   // Corrections
   m_view->setPolarizationCorrectionOption(
       polarizationCorrectionTypeToString(m_model.polarizationCorrections().correctionType()));
+  m_view->setPolarizationEfficienciesFilePath("");
+  if (m_model.polarizationCorrections().workspace())
+    m_view->setPolarizationEfficienciesWorkspace(m_model.polarizationCorrections().workspace().get());
   m_view->setFloodCorrectionType(floodCorrectionTypeToString(m_model.floodCorrections().correctionType()));
   if (m_model.floodCorrections().workspace())
     m_view->setFloodWorkspace(m_model.floodCorrections().workspace().get());
   else
     m_view->setFloodWorkspace("");
+  m_view->setFloodFilePath("");
   m_view->setStitchOptions(m_model.stitchParametersString());
 
   // We don't allow invalid config so reset all state to valid
