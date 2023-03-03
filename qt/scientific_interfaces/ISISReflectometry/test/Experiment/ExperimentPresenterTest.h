@@ -228,6 +228,28 @@ public:
 
   void testSettingPolarizationCorrectionFilePathUpdatesModel() { runTestThatPolarizationCorrectionsUsesFilePath(); }
 
+  void testValidPolarizationPathShowsAsValid() {
+    auto const testPath = "test/path.nxs";
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return("FilePath"));
+    EXPECT_CALL(m_view, getPolarizationEfficienciesFilePath()).WillRepeatedly(Return(testPath));
+    EXPECT_CALL(m_fileHandler, fileExists(testPath)).WillRepeatedly(Return(true));
+    EXPECT_CALL(m_view, showPolCorrFilePathValid()).Times(1);
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void testInvalidPolarizationPathShowsAsInvalid() {
+    auto const testPath = "test/path.nxs";
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return("FilePath"));
+    EXPECT_CALL(m_view, getPolarizationEfficienciesFilePath()).WillRepeatedly(Return(testPath));
+    EXPECT_CALL(m_fileHandler, fileExists(testPath)).WillRepeatedly(Return(false));
+    EXPECT_CALL(m_view, showPolCorrFilePathInvalid()).Times(1);
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
   void testSetFloodCorrectionsUpdatesModel() {
     auto presenter = makePresenter();
     FloodCorrections floodCorr(FloodCorrectionType::Workspace, std::string{"testWS"});

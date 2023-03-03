@@ -155,19 +155,26 @@ BackgroundSubtraction ExperimentPresenter::backgroundSubtractionFromView() {
 }
 
 PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
-  auto const polCorrOption = m_view->getPolarizationCorrectionOption();
+  auto const polCorrOptionString = m_view->getPolarizationCorrectionOption();
+  auto const polCorrType = polarizationCorrectionTypeFromString(polCorrOptionString);
 
-  if (polarizationCorrectionTypeFromString(polCorrOption) == PolarizationCorrectionType::None) {
-    return PolarizationCorrections(PolarizationCorrectionType::None);
+  if (polCorrType == PolarizationCorrectionType::None || polCorrType == PolarizationCorrectionType::ParameterFile) {
+    return PolarizationCorrections(polCorrType);
   }
-  if (polarizationCorrectionTypeFromString(polCorrOption) == PolarizationCorrectionType::ParameterFile) {
-    return PolarizationCorrections(PolarizationCorrectionType::ParameterFile);
+  if (polCorrOptionString == "FilePath") {
+    auto const polCorrFilePath = m_view->getPolarizationEfficienciesFilePath();
+    showPolCorrFilePathValidity(polCorrFilePath);
+    return PolarizationCorrections(polCorrType, polCorrFilePath);
   }
-  if (polCorrOption == "FilePath") {
-    return PolarizationCorrections(PolarizationCorrectionType::Workspace,
-                                   m_view->getPolarizationEfficienciesFilePath());
+  return PolarizationCorrections(polCorrType, m_view->getPolarizationEfficienciesWorkspace());
+}
+
+void ExperimentPresenter::showPolCorrFilePathValidity(std::string const &filePath) {
+  if (m_fileHandler->fileExists(filePath)) {
+    m_view->showPolCorrFilePathValid();
+  } else {
+    m_view->showPolCorrFilePathInvalid();
   }
-  return PolarizationCorrections(PolarizationCorrectionType::Workspace, m_view->getPolarizationEfficienciesWorkspace());
 }
 
 FloodCorrections ExperimentPresenter::floodCorrectionsFromView() {

@@ -87,6 +87,8 @@ private:
 
   std::map<std::string, std::string> stitchParametersFromView();
 
+  void showPolCorrFilePathValidity(std::string const &filePath);
+
   void updateModelFromView();
   void updateViewFromModel();
 
