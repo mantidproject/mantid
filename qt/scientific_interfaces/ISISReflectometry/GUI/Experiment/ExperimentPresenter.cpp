@@ -21,9 +21,10 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
 }
 
 ExperimentPresenter::ExperimentPresenter(IExperimentView *view, Experiment experiment, double defaultsThetaTolerance,
+                                         IFileHandler *fileHandler,
                                          std::unique_ptr<IExperimentOptionDefaults> experimentDefaults)
-    : m_experimentDefaults(std::move(experimentDefaults)), m_view(view), m_model(std::move(experiment)),
-      m_thetaTolerance(defaultsThetaTolerance), m_validationResult(m_model) {
+    : m_experimentDefaults(std::move(experimentDefaults)), m_view(view), m_fileHandler(fileHandler),
+      m_model(std::move(experiment)), m_thetaTolerance(defaultsThetaTolerance), m_validationResult(m_model) {
   m_view->subscribe(this);
 }
 

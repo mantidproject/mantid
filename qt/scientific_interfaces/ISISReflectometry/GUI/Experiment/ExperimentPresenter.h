@@ -9,6 +9,7 @@
 #include "Common/DllConfig.h"
 #include "Common/ValidationResult.h"
 #include "ExperimentOptionDefaults.h"
+#include "GUI/Common/IFileHandler.h"
 #include "GUI/Preview/ROIType.h"
 #include "IExperimentPresenter.h"
 #include "IExperimentView.h"
@@ -47,7 +48,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentPresenter : public ExperimentView
                                                            public IExperimentPresenter {
 public:
   ExperimentPresenter(
-      IExperimentView *view, Experiment experiment, double defaultsThetaTolerance,
+      IExperimentView *view, Experiment experiment, double defaultsThetaTolerance, IFileHandler *fileHandler,
       std::unique_ptr<IExperimentOptionDefaults> experimentDefaults = std::make_unique<ExperimentOptionDefaults>());
 
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
@@ -105,6 +106,7 @@ private:
   bool isAutoreducing() const;
 
   IExperimentView *m_view = nullptr;
+  IFileHandler *m_fileHandler;
   Experiment m_model;
   double m_thetaTolerance = 0;
   ExperimentValidationResult m_validationResult;

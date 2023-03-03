@@ -814,6 +814,7 @@ public:
 private:
   NiceMock<MockExperimentView> m_view;
   NiceMock<MockBatchPresenter> m_mainPresenter;
+  NiceMock<MockFileHandler> m_fileHandler;
   double m_thetaTolerance{0.01};
 
   Experiment makeModelWithAnalysisMode(AnalysisMode analysisMode) {
@@ -862,7 +863,8 @@ private:
       Experiment experiment = makeEmptyExperiment()) {
     // The presenter gets values from the view on construction so the view must
     // return something sensible
-    auto presenter = ExperimentPresenter(&m_view, std::move(experiment), m_thetaTolerance, std::move(defaultOptions));
+    auto presenter = ExperimentPresenter(&m_view, std::move(experiment), m_thetaTolerance, &m_fileHandler,
+                                         std::move(defaultOptions));
     presenter.acceptMainPresenter(&m_mainPresenter);
     return presenter;
   }

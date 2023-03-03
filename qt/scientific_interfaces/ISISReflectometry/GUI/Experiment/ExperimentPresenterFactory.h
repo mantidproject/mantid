@@ -18,13 +18,15 @@ namespace ISISReflectometry {
 
 class ExperimentPresenterFactory {
 public:
-  explicit ExperimentPresenterFactory(double thetaTolerance) : m_thetaTolerance(thetaTolerance) {}
+  explicit ExperimentPresenterFactory(IFileHandler *fileHandler, double thetaTolerance)
+      : m_fileHandler(fileHandler), m_thetaTolerance(thetaTolerance) {}
 
   std::unique_ptr<IExperimentPresenter> make(IExperimentView *view) {
-    return std::make_unique<ExperimentPresenter>(view, Experiment(), m_thetaTolerance);
+    return std::make_unique<ExperimentPresenter>(view, Experiment(), m_thetaTolerance, m_fileHandler);
   }
 
 private:
+  IFileHandler *m_fileHandler;
   double m_thetaTolerance;
 };
 } // namespace ISISReflectometry
