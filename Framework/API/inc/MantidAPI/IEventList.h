@@ -13,10 +13,6 @@
 
 namespace Mantid {
 
-namespace HistogramData {
-class Histogram;
-}
-
 namespace API {
 
 /// What kind of event list is being stored
@@ -44,17 +40,11 @@ public:
   virtual void clear(const bool removeDetIDs) = 0;
   /// Reserve a fixed size for the list
   virtual void reserve(size_t num) = 0;
-  /// Check if the list of events is empty
-  virtual bool empty() const = 0;
-  /// IS the list sorted by TOF?
-  virtual void sortPulseTime() const = 0;
   virtual bool isSortedByTof() const = 0;
   /// Get the number of events from the list
   virtual std::size_t getNumberEvents() const = 0;
   /// Get memory size of event list
   size_t getMemorySize() const override = 0;
-  /// Get a copy of the underlying Histogram
-  virtual HistogramData::Histogram getHistogram() const = 0;
   /// Get copy of counts and errors, rebinned using on the given X values
   virtual void generateHistogram(const MantidVec &X, MantidVec &Y, MantidVec &E, bool skipError = false) const = 0;
   /// Get copy of counts and errors rebinned using the given X values w.r.t
