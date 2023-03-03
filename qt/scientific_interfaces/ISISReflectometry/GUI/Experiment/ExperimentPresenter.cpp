@@ -155,14 +155,14 @@ BackgroundSubtraction ExperimentPresenter::backgroundSubtractionFromView() {
 }
 
 PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
-  auto const polCorrOptionString = m_view->getPolarizationCorrectionOption();
-  auto const polCorrType = polarizationCorrectionTypeFromString(polCorrOptionString);
+  auto const &polCorrOptionString = m_view->getPolarizationCorrectionOption();
+  auto const &polCorrType = polarizationCorrectionTypeFromString(polCorrOptionString);
 
   if (polCorrType == PolarizationCorrectionType::None || polCorrType == PolarizationCorrectionType::ParameterFile) {
     return PolarizationCorrections(polCorrType);
   }
   if (polCorrOptionString == "FilePath") {
-    auto const polCorrFilePath = m_view->getPolarizationEfficienciesFilePath();
+    auto const &polCorrFilePath = m_view->getPolarizationEfficienciesFilePath();
     showPolCorrFilePathValidity(polCorrFilePath);
     return PolarizationCorrections(polCorrType, polCorrFilePath);
   }
@@ -178,15 +178,15 @@ void ExperimentPresenter::showPolCorrFilePathValidity(std::string const &filePat
 }
 
 FloodCorrections ExperimentPresenter::floodCorrectionsFromView() {
-  auto const correctionTypeString = m_view->getFloodCorrectionType();
-  auto const correctionType = floodCorrectionTypeFromString(correctionTypeString);
+  auto const &correctionTypeString = m_view->getFloodCorrectionType();
+  auto const &correctionType = floodCorrectionTypeFromString(correctionTypeString);
 
   if (floodCorrectionRequiresInputs(correctionType)) {
     if (correctionTypeString == "Workspace") {
       return FloodCorrections(correctionType, m_view->getFloodWorkspace());
     }
     if (correctionTypeString == "FilePath") {
-      auto const floodFilePath = m_view->getFloodFilePath();
+      auto const &floodFilePath = m_view->getFloodFilePath();
       showFloodFilePathValidity(floodFilePath);
       return FloodCorrections(correctionType, floodFilePath);
     }
@@ -223,14 +223,14 @@ void ExperimentPresenter::updatePolarizationCorrectionEnabledState() {
   // We could generalise which instruments polarization corrections are
   // applicable for but for now it's not worth it, so just hard code the
   // instrument names.
-  auto const instrumentName = m_mainPresenter->instrumentName();
+  auto const &instrumentName = m_mainPresenter->instrumentName();
   if (instrumentName == "INTER" || instrumentName == "SURF") {
     m_view->setPolarizationCorrectionOption("None");
     m_view->disablePolarizationCorrections();
     disablePolarizationEfficiencies();
     return;
   }
-  auto const polCorrOption = m_view->getPolarizationCorrectionOption();
+  auto const &polCorrOption = m_view->getPolarizationCorrectionOption();
   m_view->enablePolarizationCorrections();
   if (polCorrOption == "ParameterFile" || polCorrOption == "None") {
     disablePolarizationEfficiencies();
@@ -254,7 +254,7 @@ void ExperimentPresenter::disablePolarizationEfficiencies() {
 }
 
 void ExperimentPresenter::updateFloodCorrectionEnabledState() {
-  auto const floodCorrOption = m_view->getFloodCorrectionType();
+  auto const &floodCorrOption = m_view->getFloodCorrectionType();
 
   if (floodCorrOption == "None" || floodCorrOption == "ParameterFile") {
     disableFloodCorrectionInputs();
