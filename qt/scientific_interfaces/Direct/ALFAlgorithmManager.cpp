@@ -9,6 +9,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/ConfiguredAlgorithm.h"
@@ -130,7 +131,24 @@ void ALFAlgorithmManager::cropWorkspace(std::unique_ptr<Mantid::API::AlgorithmRu
 }
 
 void ALFAlgorithmManager::fit(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) {
-  executeAlgorithm(createAlgorithm(FIT_ALG_NAME), std::move(properties));
+  auto fitAlgorithm = createAlgorithm(FIT_ALG_NAME);
+
+  // A quirk of the Fit algorithm means we need to set the properties now.
+  // The Fit algorithm is different to most other algorithms due to having additional
+  // properties which only exist depending on the number of domains the provided function has
+  Mantid::API::IFunction_sptr function = properties->getProperty("Function");
+  Mantid::API::Workspace_sptr input = properties->getProperty("InputWorkspace");
+  bool createOutput = properties->getProperty("CreateOutput");
+  double startX = properties->getProperty("StartX");
+  double endX = properties->getProperty("EndX");
+
+  fitAlgorithm->setProperty("Function", function);
+  fitAlgorithm->setProperty("InputWorkspace", input);
+  fitAlgorithm->setProperty("CreateOutput", createOutput);
+  fitAlgorithm->setProperty("StartX", startX);
+  fitAlgorithm->setProperty("EndX", endX);
+
+  executeAlgorithm(fitAlgorithm, std::make_unique<AlgorithmRuntimeProps>());
 }
 
 void ALFAlgorithmManager::notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr &algorithm) {
@@ -239,14 +257,17 @@ void ALFAlgorithmManager::notifyRebunchComplete(Mantid::API::IAlgorithm_sptr con
 
 void ALFAlgorithmManager::notifyCropWorkspaceComplete(Mantid::API::IAlgorithm_sptr const &algorithm) {
   // Explicitly provide return type. Return type must be the same as the input property type to allow type casting
-  // MatrixWorkspace_sptr outputWorkspace = algorithm->getProperty("OutputWorkspace");
-  // m_subscriber->notifyCropWorkspaceComplete(outputWorkspace);
+  MatrixWorkspace_sptr outputWorkspace = algorithm->getProperty("OutputWorkspace");
+  m_subscriber->notifyCropWorkspaceComplete(outputWorkspace);
 }
 
 void ALFAlgorithmManager::notifyFitComplete(Mantid::API::IAlgorithm_sptr const &algorithm) {
   // Explicitly provide return type. Return type must be the same as the input property type to allow type casting
-  // MatrixWorkspace_sptr outputWorkspace = algorithm->getProperty("OutputWorkspace");
-  // m_subscriber->notifyFitComplete(outputWorkspace);
+  MatrixWorkspace_sptr outputWorkspace = algorithm->getProperty("OutputWorkspace");
+  IFunction_sptr function = algorithm->getProperty("Function");
+  std::string fitStatus = algorithm->getPropertyValue("OutputStatus");
+
+  m_subscriber->notifyFitComplete(outputWorkspace, function, fitStatus);
 }
 
 } // namespace MantidQt::CustomInterfaces

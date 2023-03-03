@@ -33,7 +33,7 @@ public:
   virtual bool isDataExtracted() const = 0;
 
   virtual Mantid::API::MatrixWorkspace_sptr doFit(std::pair<double, double> const &range) = 0;
-  virtual void calculateEstimate(std::pair<double, double> const &range) = 0;
+  virtual void calculateEstimate(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
 
   virtual void exportWorkspaceCopyToADS() const = 0;
 
@@ -50,6 +50,9 @@ public:
   cropWorkspaceProperties(std::pair<double, double> const &range) const = 0;
   virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
   fitProperties(std::pair<double, double> const &range) const = 0;
+
+  virtual void setFitResult(Mantid::API::MatrixWorkspace_sptr const &workspace,
+                            Mantid::API::IFunction_sptr const &function, std::string const &fitStatus) = 0;
 
   virtual std::string fitStatus() const = 0;
 
@@ -74,7 +77,7 @@ public:
   bool isDataExtracted() const override;
 
   Mantid::API::MatrixWorkspace_sptr doFit(std::pair<double, double> const &range) override;
-  void calculateEstimate(std::pair<double, double> const &range) override;
+  void calculateEstimate(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
 
   void exportWorkspaceCopyToADS() const override;
 
@@ -92,6 +95,9 @@ public:
   std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
   fitProperties(std::pair<double, double> const &range) const override;
 
+  void setFitResult(Mantid::API::MatrixWorkspace_sptr const &workspace, Mantid::API::IFunction_sptr const &function,
+                    std::string const &fitStatus) override;
+
   std::string fitStatus() const override;
 
   std::size_t numberOfTubes() const override;
@@ -102,8 +108,7 @@ public:
   std::optional<double> rotationAngle() const override;
 
 private:
-  Mantid::API::IFunction_sptr calculateEstimate(Mantid::API::MatrixWorkspace_sptr &workspace,
-                                                std::pair<double, double> const &range);
+  Mantid::API::IFunction_sptr calculateEstimateImpl(Mantid::API::MatrixWorkspace_sptr const &workspace);
 
   Mantid::API::IFunction_sptr m_function;
   std::string m_fitStatus;

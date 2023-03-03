@@ -70,34 +70,22 @@ public:
     TS_ASSERT_EQUALS("success", m_model->fitStatus());
   }
 
-  void test_that_calculateEstimate_returns_zero_peak_centre_if_the_extracted_workspace_is_not_set() {
+  void test_that_calculateEstimate_returns_zero_peak_centre_if_the_workspace_is_nullptr() {
     AnalysisDataService::Instance().clear();
 
-    m_model->calculateEstimate(m_range);
+    m_model->calculateEstimate(nullptr);
 
     TS_ASSERT_EQUALS(0.0, m_model->peakCentre());
     TS_ASSERT_EQUALS("", m_model->fitStatus());
   }
 
-  void test_that_calculateEstimate_returns_an_estimate_if_the_extracted_workspace_is_set() {
+  void test_that_calculateEstimate_returns_an_estimate_if_a_valid_workspace_is_provided() {
     // Set a maximum y value at x = 5.0
     m_workspace->mutableY(0)[5] = 3.0;
 
-    m_model->setExtractedWorkspace(m_workspace, m_twoThetas);
-
-    m_model->calculateEstimate(m_range);
+    m_model->calculateEstimate(m_workspace);
 
     TS_ASSERT_DELTA(5.0, m_model->peakCentre(), 0.00001);
-    TS_ASSERT_EQUALS("", m_model->fitStatus());
-  }
-
-  void test_that_calculateEstimate_returns_zero_peak_centre_if_the_crop_range_is_invalid() {
-    m_workspace = WorkspaceCreationHelper::create2DWorkspacePoints(1, 100, 300.0);
-    m_model->setExtractedWorkspace(m_workspace, m_twoThetas);
-
-    m_model->calculateEstimate(m_range);
-
-    TS_ASSERT_EQUALS(0.0, m_model->peakCentre());
     TS_ASSERT_EQUALS("", m_model->fitStatus());
   }
 
@@ -252,12 +240,12 @@ public:
     auto const range = std::make_pair<double, double>(-15.2, 15.4);
 
     // Populate the function member variable with an estimate
-    m_model->calculateEstimate(range);
+    m_model->calculateEstimate(m_workspace);
 
     auto const properties = m_model->fitProperties(range);
 
     IFunction_sptr function = properties->getProperty("Function");
-    MatrixWorkspace_sptr input = properties->getProperty("InputWorkspace");
+    Workspace_sptr input = properties->getProperty("InputWorkspace");
     bool createOutput = properties->getProperty("CreateOutput");
     double startX = properties->getProperty("StartX");
     double endX = properties->getProperty("EndX");
@@ -267,6 +255,15 @@ public:
     TS_ASSERT(createOutput);
     TS_ASSERT_DELTA(startX, range.first, 0.000001);
     TS_ASSERT_DELTA(endX, range.second, 0.000001);
+  }
+
+  void test_setFitResult_will_set_the_fit_workspace_in_the_model() {
+    std::string const fitStatus("Fit success");
+
+    m_model->setFitResult(m_workspace, nullptr, fitStatus);
+
+    TS_ASSERT_EQUALS(m_workspace, m_model->plottedWorkspace());
+    TS_ASSERT_EQUALS(fitStatus, m_model->fitStatus());
   }
 
 private:

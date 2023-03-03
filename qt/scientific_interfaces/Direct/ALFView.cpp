@@ -26,14 +26,20 @@ DECLARE_SUBWINDOW(ALFView)
 ALFView::ALFView(QWidget *parent) : UserSubWindow(parent), m_instrumentPresenter(), m_analysisPresenter() {
   this->setWindowTitle("ALFView");
 
-  auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>();
-  auto algorithmManager = std::make_unique<ALFAlgorithmManager>(std::move(jobRunner));
+  // Algorithm manager for the instrument presenter
+  auto jobRunnerInst = std::make_unique<MantidQt::API::QtJobRunner>();
+  auto algorithmManagerInst = std::make_unique<ALFAlgorithmManager>(std::move(jobRunnerInst));
 
   m_instrumentPresenter = std::make_unique<ALFInstrumentPresenter>(
-      new ALFInstrumentView(this), std::make_unique<ALFInstrumentModel>(), std::move(algorithmManager));
+      new ALFInstrumentView(this), std::make_unique<ALFInstrumentModel>(), std::move(algorithmManagerInst));
 
-  m_analysisPresenter = std::make_unique<ALFAnalysisPresenter>(new ALFAnalysisView(-15.0, 15.0, this),
-                                                               std::make_unique<ALFAnalysisModel>());
+  // Algorithm manager for the analysis presenter
+  auto jobRunnerAnalysis = std::make_unique<MantidQt::API::QtJobRunner>();
+  auto algorithmManagerAnalysis = std::make_unique<ALFAlgorithmManager>(std::move(jobRunnerAnalysis));
+
+  m_analysisPresenter =
+      std::make_unique<ALFAnalysisPresenter>(new ALFAnalysisView(-15.0, 15.0, this),
+                                             std::make_unique<ALFAnalysisModel>(), std::move(algorithmManagerAnalysis));
 
   m_instrumentPresenter->subscribeAnalysisPresenter(m_analysisPresenter.get());
 }

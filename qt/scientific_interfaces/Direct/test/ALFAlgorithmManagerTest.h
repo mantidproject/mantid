@@ -12,8 +12,11 @@
 #include "ALFAlgorithmManager.h"
 #include "MockALFAlgorithmManagerSubscriber.h"
 
+#include "MantidAPI/AlgorithmProperties.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidQtWidgets/Common/ConfiguredAlgorithm.h"
 #include "MantidQtWidgets/Common/MockJobRunner.h"
 
@@ -105,6 +108,16 @@ public:
 
   void test_fit_will_execute_the_fit_algorithm() {
     expectExecuteAlgorithm("Fit");
+
+    Mantid::API::IFunction_sptr function = Mantid::API::FunctionFactory::Instance().createFunction("Gaussian");
+    Mantid::API::Workspace_sptr workspace = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+
+    Mantid::API::AlgorithmProperties::update("Function", function, *m_algProperties);
+    Mantid::API::AlgorithmProperties::update("InputWorkspace", workspace, *m_algProperties);
+    Mantid::API::AlgorithmProperties::update("CreateOutput", true, *m_algProperties);
+    Mantid::API::AlgorithmProperties::update("StartX", -15.0, *m_algProperties);
+    Mantid::API::AlgorithmProperties::update("EndX", 15.0, *m_algProperties);
+
     m_algorithmManager->fit(std::move(m_algProperties));
   }
 

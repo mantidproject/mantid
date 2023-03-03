@@ -47,6 +47,10 @@ void update(std::string const &property, boost::optional<double> const &value, I
     update(property, value.get(), properties);
 }
 
+void update(std::string const &property, Workspace_sptr const &workspace, IAlgorithmRuntimeProps &properties) {
+  properties.setProperty(property, workspace);
+}
+
 void update(std::string const &property, MatrixWorkspace_sptr const &workspace, IAlgorithmRuntimeProps &properties) {
   properties.setProperty(property, workspace);
 }

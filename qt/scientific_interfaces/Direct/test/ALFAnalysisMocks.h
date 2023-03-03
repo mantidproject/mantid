@@ -86,7 +86,7 @@ public:
   MOCK_CONST_METHOD0(isDataExtracted, bool());
 
   MOCK_METHOD1(doFit, Mantid::API::MatrixWorkspace_sptr(std::pair<double, double> const &range));
-  MOCK_METHOD1(calculateEstimate, void(std::pair<double, double> const &range));
+  MOCK_METHOD1(calculateEstimate, void(Mantid::API::MatrixWorkspace_sptr const &workspace));
 
   MOCK_CONST_METHOD0(exportWorkspaceCopyToADS, void());
 
@@ -103,6 +103,9 @@ public:
                      std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>(std::pair<double, double> const &range));
   MOCK_CONST_METHOD1(fitProperties,
                      std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>(std::pair<double, double> const &range));
+
+  MOCK_METHOD3(setFitResult, void(Mantid::API::MatrixWorkspace_sptr const &workspace,
+                                  Mantid::API::IFunction_sptr const &function, std::string const &fitStatus));
 
   MOCK_CONST_METHOD0(fitStatus, std::string());
 

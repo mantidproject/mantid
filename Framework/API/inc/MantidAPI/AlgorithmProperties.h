@@ -11,6 +11,7 @@
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidKernel/Strings.h"
 
 #include <boost/optional.hpp>
@@ -35,6 +36,9 @@ void MANTID_API_DLL update(std::string const &property, size_t value, IAlgorithm
 void MANTID_API_DLL update(std::string const &property, double value, IAlgorithmRuntimeProps &properties);
 
 void MANTID_API_DLL update(std::string const &property, boost::optional<double> const &value,
+                           IAlgorithmRuntimeProps &properties);
+
+void MANTID_API_DLL update(std::string const &property, Workspace_sptr const &workspace,
                            IAlgorithmRuntimeProps &properties);
 
 void MANTID_API_DLL update(std::string const &property, MatrixWorkspace_sptr const &workspace,
