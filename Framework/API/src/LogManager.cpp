@@ -328,7 +328,7 @@ template <typename T> Kernel::TimeSeriesProperty<T> *LogManager::getTimeSeriesPr
  * @return A single double value
  */
 double LogManager::getTimeAveragedStd(const std::string &name) const {
-  return getTimeSeriesProperty<double>(name)->getStatistics().time_standard_deviation;
+  return getStatistics(name).time_standard_deviation;
 }
 
 /**
@@ -344,7 +344,7 @@ Kernel::TimeSeriesPropertyStatistics LogManager::getStatistics(const std::string
 
   // statistics from a TimeSeriesProperty object
   if (auto *timeSeriesProp = dynamic_cast<const Kernel::ITimeSeriesProperty *>(prop))
-    return timeSeriesProp->getStatistics();
+    return timeSeriesProp->getStatistics(m_timeroi.get());
 
   // statistics from a PropertyWithValue object
   double value;
