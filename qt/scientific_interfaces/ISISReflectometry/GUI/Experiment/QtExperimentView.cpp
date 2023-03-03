@@ -55,6 +55,11 @@ void showAsValid(QLineEdit &lineEdit) {
   palette.setColor(QPalette::Base, Qt::transparent);
   lineEdit.setPalette(palette);
 }
+constexpr auto POL_CORR_SELECTOR_ROW = 12;
+constexpr auto POL_CORR_SELECTOR_COL = 3;
+
+constexpr auto FLOOD_SELECTOR_ROW = 14;
+constexpr auto FLOOD_SELECTOR_COL = 3;
 } // namespace
 
 /** Constructor
@@ -222,9 +227,7 @@ void QtExperimentView::initPolCorrEfficienciesControls() {
   m_polCorrEfficienciesWsSelector =
       std::make_unique<MantidWidgets::WorkspaceSelector>(new MantidWidgets::WorkspaceSelector);
   m_polCorrEfficienciesLineEdit = std::make_unique<QLineEdit>(new QLineEdit());
-  constexpr auto SELECTOR_ROW = 12;
-  constexpr auto SELECTOR_COL = 3;
-  m_ui.expSettingsGrid->addWidget(m_polCorrEfficienciesWsSelector.get(), SELECTOR_ROW, SELECTOR_COL);
+  m_ui.expSettingsGrid->addWidget(m_polCorrEfficienciesWsSelector.get(), POL_CORR_SELECTOR_ROW, POL_CORR_SELECTOR_COL);
   m_polCorrEfficienciesWsSelector->setOptional(true);
   m_polCorrEfficienciesWsSelector->setWorkspaceTypes({"Workspace2D"});
 }
@@ -232,9 +235,7 @@ void QtExperimentView::initPolCorrEfficienciesControls() {
 void QtExperimentView::initFloodControls() {
   m_floodCorrWsSelector = std::make_unique<MantidWidgets::WorkspaceSelector>(new MantidWidgets::WorkspaceSelector);
   m_floodCorrLineEdit = std::make_unique<QLineEdit>(new QLineEdit());
-  constexpr auto SELECTOR_ROW = 14;
-  constexpr auto SELECTOR_COL = 3;
-  m_ui.expSettingsGrid->addWidget(m_floodCorrWsSelector.get(), SELECTOR_ROW, SELECTOR_COL);
+  m_ui.expSettingsGrid->addWidget(m_floodCorrWsSelector.get(), FLOOD_SELECTOR_ROW, FLOOD_SELECTOR_COL);
   m_floodCorrWsSelector->setOptional(true);
   m_floodCorrWsSelector->setWorkspaceTypes({"Workspace2D"});
 }
@@ -656,17 +657,18 @@ std::string QtExperimentView::getFloodCorrectionType() const { return getText(*m
 void QtExperimentView::setFloodCorrectionType(std::string const &type) { setSelected(*m_ui.floodCorComboBox, type); }
 
 void QtExperimentView::setFloodCorrectionWorkspaceMode() {
+  m_ui.expSettingsGrid->removeItem(m_ui.expSettingsGrid->itemAtPosition(FLOOD_SELECTOR_ROW, FLOOD_SELECTOR_COL));
   m_floodCorrWsSelector->show();
   m_floodCorrLineEdit->hide();
-  m_ui.expSettingsGrid->replaceWidget(m_floodCorrLineEdit.get(), m_floodCorrWsSelector.get());
+  m_ui.expSettingsGrid->addWidget(m_floodCorrWsSelector.get(), FLOOD_SELECTOR_ROW, FLOOD_SELECTOR_COL);
 }
 
 void QtExperimentView::setFloodCorrectionFilePathMode() {
-  m_floodCorrLineEdit->show();
+  m_ui.expSettingsGrid->removeItem(m_ui.expSettingsGrid->itemAtPosition(FLOOD_SELECTOR_ROW, FLOOD_SELECTOR_COL));
   m_floodCorrWsSelector->hide();
-  m_ui.expSettingsGrid->replaceWidget(m_floodCorrWsSelector.get(), m_floodCorrLineEdit.get());
+  m_floodCorrLineEdit->show();
+  m_ui.expSettingsGrid->addWidget(m_floodCorrLineEdit.get(), FLOOD_SELECTOR_ROW, FLOOD_SELECTOR_COL);
 }
-
 std::string QtExperimentView::getFloodWorkspace() const { return getText(*m_floodCorrWsSelector); }
 
 std::string QtExperimentView::getFloodFilePath() const { return getText(*m_floodCorrLineEdit); }
@@ -796,15 +798,17 @@ void QtExperimentView::setPolarizationCorrectionOption(std::string const &option
 std::string QtExperimentView::getPolarizationCorrectionOption() const { return getText(*m_ui.polCorrComboBox); }
 
 void QtExperimentView::setPolarizationEfficienciesWorkspaceMode() {
+  m_ui.expSettingsGrid->removeItem(m_ui.expSettingsGrid->itemAtPosition(POL_CORR_SELECTOR_ROW, POL_CORR_SELECTOR_COL));
   m_polCorrEfficienciesWsSelector->show();
   m_polCorrEfficienciesLineEdit->hide();
-  m_ui.expSettingsGrid->replaceWidget(m_polCorrEfficienciesLineEdit.get(), m_polCorrEfficienciesWsSelector.get());
+  m_ui.expSettingsGrid->addWidget(m_polCorrEfficienciesWsSelector.get(), POL_CORR_SELECTOR_ROW, POL_CORR_SELECTOR_COL);
 }
 
 void QtExperimentView::setPolarizationEfficienciesFilePathMode() {
-  m_polCorrEfficienciesLineEdit->show();
+  m_ui.expSettingsGrid->removeItem(m_ui.expSettingsGrid->itemAtPosition(POL_CORR_SELECTOR_ROW, POL_CORR_SELECTOR_COL));
   m_polCorrEfficienciesWsSelector->hide();
-  m_ui.expSettingsGrid->replaceWidget(m_polCorrEfficienciesWsSelector.get(), m_polCorrEfficienciesLineEdit.get());
+  m_polCorrEfficienciesLineEdit->show();
+  m_ui.expSettingsGrid->addWidget(m_polCorrEfficienciesLineEdit.get(), POL_CORR_SELECTOR_ROW, POL_CORR_SELECTOR_COL);
 }
 
 std::string QtExperimentView::getPolarizationEfficienciesWorkspace() const {

@@ -9,6 +9,7 @@
 #include "Common/DllConfig.h"
 #include "IExperimentView.h"
 #include "MantidQtWidgets/Common/HintingLineEdit.h"
+#include "MantidQtWidgets/Common/WorkspaceSelector.h"
 #include "ui_ExperimentWidget.h"
 #include <QCheckBox>
 #include <QShortcut>

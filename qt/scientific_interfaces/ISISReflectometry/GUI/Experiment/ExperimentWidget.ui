@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>952</width>
+    <width>949</width>
     <height>524</height>
    </rect>
   </property>
@@ -616,6 +616,12 @@
      </item>
      <item row="11" column="3">
       <widget class="QComboBox" name="costFunctionComboBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <item>
         <property name="text">
          <string>Least squares</string>
@@ -691,36 +697,10 @@
        </item>
       </widget>
      </item>
-     <item row="14" column="3">
-      <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="floodWorkspaceWsSelectorPlaceholder">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>50</width>
-         <height>0</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item row="12" column="3">
-      <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="polCorrEfficienciesWsSelectorPlaceholder"/>
-     </item>
     </layout>
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>MantidQt::MantidWidgets::WorkspaceSelector</class>
-   <extends>QComboBox</extends>
-   <header>MantidQtWidgets/Common/WorkspaceSelector.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>
