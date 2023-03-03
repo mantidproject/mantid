@@ -104,7 +104,6 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
 
         DeleteWorkspace(fit_spectra)
         DeleteWorkspace(monitor)
-        DeleteWorkspace(raw_ws)
         self.setProperty("OutputWorkspace", self_scattering_correction)
 
     def reformat_and_group_detectors(self, self_scattering_correction, cal_file_name):

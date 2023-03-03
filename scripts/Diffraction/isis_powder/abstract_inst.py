@@ -366,3 +366,6 @@ class AbstractInst(object):
         :return: format_options as it is passed in
         """
         return format_options
+
+    def apply_additional_per_detector_corrections(self, input_workspace, sample_details, run_details):
+        return input_workspace

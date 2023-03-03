@@ -205,3 +205,6 @@ class Polaris(AbstractInst):
 
     def perform_abs_vanadium_norm(self):
         return self._inst_settings.van_normalisation_method == "Absolute"
+
+    def apply_additional_per_detector_corrections(self, input_workspace, sample_details, run_details):
+        return polaris_algs.apply_placzek_correction_per_detector(input_workspace, sample_details, run_details)

@@ -11,6 +11,7 @@ import warnings
 import mantid.kernel as kernel
 import mantid.simpleapi as mantid
 from mantid.api import AnalysisDataService
+from mantid.dataobjects import Workspace2D
 from isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS
 from isis_powder.routines.param_map_entry import ParamMapEntry
 
@@ -707,3 +708,42 @@ def workspace_has_current(ws):
     """
     charge = ws.run().getProtonCharge()
     return charge is not None and charge > 0
+
+
+def _remove_masked_and_monitor_spectra(data_workspace: Workspace2D, correction_workspace: Workspace2D, run_details):
+    cal_workspace = mantid.LoadCalFile(
+        InputWorkspace=data_workspace,
+        CalFileName=run_details.grouping_file_path,
+        WorkspaceName="cal_workspace",
+        MakeOffsetsWorkspace=False,
+        MakeMaskWorkspace=False,
+        MakeGroupingWorkspace=True,
+    )
+
+    detectors_to_mask = []
+    for wsIndex in range(0, cal_workspace.getNumberHistograms()):
+        if cal_workspace.dataY(wsIndex) == 0:
+            detectors_to_mask.append(cal_workspace.getDetectorIDs(wsIndex)[0])
+
+    # Remove Masked and Monitor spectra
+    mantid.ExtractMonitors(
+        InputWorkspace=correction_workspace,
+        DetectorWorkspace="correction_workspace",
+        EnableLogging=False,
+    )
+    mantid.MaskDetectors("correction_workspace", DetectorList=detectors_to_mask)
+    correction_workspace = mantid.RemoveMaskedSpectra(InputWorkspace="correction_workspace")
+    correction_workspace = mantid.RemoveSpectra(InputWorkspace=correction_workspace, RemoveSpectraWithNoDetector=True)
+    correction_workspace.clearMonitorWorkspace()
+
+    mantid.ExtractMonitors(
+        InputWorkspace=data_workspace,
+        DetectorWorkspace="data_workspace",
+        EnableLogging=False,
+    )
+    mantid.MaskDetectors("data_workspace", DetectorList=detectors_to_mask)
+    data_workspace = mantid.RemoveMaskedSpectra(InputWorkspace="data_workspace")
+    data_workspace = mantid.RemoveSpectra(InputWorkspace=data_workspace, RemoveSpectraWithNoDetector=True)
+    data_workspace.clearMonitorWorkspace()
+
+    return data_workspace, correction_workspace

@@ -244,6 +244,35 @@ def apply_placzek_correction_per_bank(
     return focused_ws
 
 
+def apply_placzek_correction_per_detector(input_workspace, sample_details, run_details):
+    # this correction should only be applied before focussing in the per_detector case
+    raw_ws = mantid.Load(Filename="POLARIS" + str(run_details.run_number) + ".nxs")
+    sample_geometry = sample_details.generate_sample_geometry()
+    sample_material = sample_details.generate_sample_material()
+    self_scattering_correction = mantid.TotScatCalculateSelfScattering(
+        InputWorkspace=raw_ws,
+        CalFileName=run_details.grouping_file_path,
+        SampleGeometry=sample_geometry,
+        SampleMaterial=sample_material,
+        CrystalDensity=sample_details.material_object.number_density_effective,
+        ApplyPerDetector=True,
+    )
+
+    input_workspace = mantid.ConvertUnits(
+        InputWorkspace=input_workspace, Target="MomentumTransfer", EMode="Elastic", OutputWorkspace=input_workspace
+    )
+    input_workspace, self_scattering_correction = common._remove_masked_and_monitor_spectra(
+        data_workspace=input_workspace, correction_workspace=self_scattering_correction, run_details=run_details
+    )
+    # Match workspaces
+    self_scattering_correction = mantid.RebinToWorkspace(WorkspaceToRebin=self_scattering_correction, WorkspaceToMatch=input_workspace)
+    input_workspace = mantid.Subtract(
+        LHSWorkspace=input_workspace, RHSWorkspace=self_scattering_correction, AllowDifferentNumberSpectra=True
+    )
+    input_workspace = mantid.ConvertUnits(InputWorkspace=input_workspace, Target="TOF", EMode="Elastic")
+    return input_workspace
+
+
 def _load_qlims(q_lims):
     if isinstance(q_lims, str):
         q_min = []

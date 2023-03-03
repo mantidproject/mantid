@@ -61,11 +61,6 @@ def _focus_one_ws(
     empty_can_subtraction_method,
     paalman_pings_events_per_point=None,
 ):
-    # per_detector routine validation
-    if instrument._inst_settings.per_detector:
-        if not instrument._inst_settings.placzek_run_number:
-            raise ValueError("When running a per detector routine a 'placzek_run_number' must be supplied")
-
     run_details = instrument._get_run_details(run_number_string=run_number)
     if perform_vanadium_norm:
         _test_splined_vanadium_exists(instrument, run_details)
@@ -88,7 +83,6 @@ def _focus_one_ws(
         summed_empty = common.generate_summed_runs(
             empty_ws_string=run_details.sample_empty, instrument=instrument, scale_factor=scale_factor
         )
-
     input_workspace = _absorb_and_empty_corrections(
         input_workspace,
         instrument,
@@ -99,15 +93,13 @@ def _focus_one_ws(
         empty_can_subtraction_method,
         paalman_pings_events_per_point,
     )
-
     if instrument._inst_settings.per_detector:
         # per detector routine
-        input_workspace = apply_per_detector_vanadium_and_placzek(
+        input_workspace = apply_per_detector_corrections(
             input_workspace,
             instrument,
             perform_vanadium_norm,
             vanadium_path,
-            instrument._inst_settings.placzek_run_number,
             sample_details,
             run_details,
         )
@@ -128,20 +120,18 @@ def _focus_one_ws(
     focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws, GroupingFileName=run_details.grouping_file_path)
     instrument.apply_calibration_to_focused_data(focused_ws)
 
-    if not instrument._inst_settings.per_detector:
+    focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, OutputWorkspace=focused_ws, Target="TOF")
+    if not instrument._inst_settings.per_detector and perform_vanadium_norm:
         # per bank routine
-        calibrated_spectra = _apply_vanadium_corrections(
-            instrument=instrument, input_workspace=focused_ws, perform_vanadium_norm=perform_vanadium_norm, vanadium_splines=vanadium_path
+        calibrated_spectra_list = _apply_vanadium_corrections(
+            instrument=instrument, input_workspace=focused_ws, vanadium_splines=vanadium_path
         )
     else:
-        # per detector routine
-        calibrated_spectra = _restructure_data_in_per_detector_routine(
-            focused_ws,
-            cal_filepath=run_details.grouping_file_path,
-            instrument_name=instrument.get_instrument_prefix(),
-        )
+        focused_workspace = divide_by_number_of_detectors_in_bank(focused_ws, run_details.grouping_file_path)
+        focused_workspace = convert_between_distribution(focused_workspace, "To")
+        calibrated_spectra_list = common.extract_ws_spectra(focused_workspace)
 
-    output_spectra = instrument._crop_banks_to_user_tof(calibrated_spectra)
+    output_spectra = instrument._crop_banks_to_user_tof(calibrated_spectra_list)
 
     bin_widths = instrument._get_instrument_bin_widths()
     if bin_widths:
@@ -189,7 +179,6 @@ def _absorb_and_empty_corrections(
             input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace, empty_ws=summed_empty)
         # Crop to largest acceptable TOF range
         input_workspace = instrument._crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)
-
         if absorb:
             input_workspace = instrument._apply_absorb_corrections(run_details=run_details, ws_to_correct=input_workspace)
         else:
@@ -203,33 +192,24 @@ def _absorb_and_empty_corrections(
     return input_workspace
 
 
-def apply_per_detector_vanadium_and_placzek(
-    input_workspace, instrument, perform_vanadium_norm, vanadium_path, placzek_run_number, sample_details, run_details
-):
+def apply_per_detector_corrections(input_workspace, instrument, perform_vanadium_norm, vanadium_ws, sample_details, run_details):
     mantid.CloneWorkspace(InputWorkspace=input_workspace, OutputWorkspace="DataBeforeCorrections")
     # apply per detector vanadium correction on uncalibrated data
     input_workspace = _apply_vanadium_corrections_per_detector(
         instrument=instrument,
         input_workspace=input_workspace,
         perform_vanadium_norm=perform_vanadium_norm,
-        vanadium_splines=vanadium_path,
+        vanadium_splines=vanadium_ws,
         run_details=run_details,
     )
-    # Currently, only supported for POLARIS instrument
-    input_workspace = _apply_placzek_corrections(
-        input_workspace, instrument, perform_vanadium_norm, vanadium_path, placzek_run_number, sample_details, run_details
-    )
+    input_workspace = instrument.apply_additional_per_detector_corrections(input_workspace, sample_details, run_details)
     return input_workspace
 
 
-def _apply_vanadium_corrections(instrument, input_workspace, perform_vanadium_norm, vanadium_splines):
-    input_workspace = mantid.ConvertUnits(InputWorkspace=input_workspace, OutputWorkspace=input_workspace, Target="TOF")
+def _apply_vanadium_corrections(instrument, input_workspace, vanadium_splines):
     split_data_spectra = common.extract_ws_spectra(input_workspace)
 
-    if perform_vanadium_norm:
-        processed_spectra = _normalize_spectra(spectra_list=split_data_spectra, vanadium_splines=vanadium_splines, instrument=instrument)
-    else:
-        processed_spectra = split_data_spectra
+    processed_spectra = _normalize_spectra(spectra_list=split_data_spectra, vanadium_splines=vanadium_splines, instrument=instrument)
 
     return processed_spectra
 
@@ -237,25 +217,21 @@ def _apply_vanadium_corrections(instrument, input_workspace, perform_vanadium_no
 def _apply_vanadium_corrections_per_detector(
     instrument, input_workspace: Workspace2D, perform_vanadium_norm, vanadium_splines: Workspace2D, run_details
 ):
-    # if perform_vanadium_norm:
     input_workspace = mantid.ConvertUnits(InputWorkspace=input_workspace, OutputWorkspace=input_workspace, Target="TOF")
-    # Remove Masked and Monitor spectra
-    input_workspace, vanadium_splines = _prepare_for_correction(
-        data_workspace=input_workspace, correction_workspace=vanadium_splines, run_details=run_details
-    )
-    processed_workspace = _normalize_per_detector_workspace(input_workspace, vanadium_splines, instrument)
-    processed_workspace = mantid.ReplaceSpecialValues(InputWorkspace=processed_workspace, NaNValue=0, InfinityValue=0)
+    if perform_vanadium_norm:
+        input_workspace, vanadium_splines = common._remove_masked_and_monitor_spectra(
+            data_workspace=input_workspace, correction_workspace=vanadium_splines, run_details=run_details
+        )
+        processed_workspace = _normalize_per_detector_workspace(input_workspace, vanadium_splines, instrument)
+        processed_workspace = mantid.ReplaceSpecialValues(
+            InputWorkspace=processed_workspace, OutputWorkspace=processed_workspace, NaNValue=0, InfinityValue=0
+        )
+    else:
+        processed_workspace = input_workspace
     return processed_workspace
 
 
-def _restructure_data_in_per_detector_routine(focused_workspace, cal_filepath, instrument_name):
-    focused_workspace = divide_by_number_of_detectors_in_bank(focused_workspace, cal_filepath, instrument_name)
-    focused_workspace = convert_between_distribution(focused_workspace, "To")
-    calibrated_spectra = common.extract_ws_spectra(focused_workspace)
-    return calibrated_spectra
-
-
-def divide_by_number_of_detectors_in_bank(focussed_data, cal_filepath, instrument_name):
+def divide_by_number_of_detectors_in_bank(focussed_data, cal_filepath):
     # Divide each spectrum by number of detectors in their bank
     cal_workspace = mantid.LoadCalFile(
         InputWorkspace=focussed_data,
@@ -273,78 +249,8 @@ def divide_by_number_of_detectors_in_bank(focussed_data, cal_filepath, instrumen
     number_detectors_in_bank_ws = mantid.CreateWorkspace(DataY=n_pixel, DataX=[0, 1], NSpec=focussed_data.getNumberHistograms())
     focussed_data = mantid.Divide(LHSWorkspace=focussed_data, RHSWorkspace=number_detectors_in_bank_ws)
     common.remove_intermediate_workspace(number_detectors_in_bank_ws)
+    common.remove_intermediate_workspace(cal_workspace)
     return focussed_data
-
-
-def _apply_placzek_corrections(
-    input_workspace, instrument, perform_vanadium_norm, vanadium_path, placzek_run_number, sample_details, run_details
-):
-    # this correction should only be applied before focussing in the per_detector case
-    raw_ws = mantid.Load(Filename="POLARIS" + str(placzek_run_number) + ".nxs")
-    sample_geometry = sample_details.generate_sample_geometry()
-    sample_material = sample_details.generate_sample_material()
-    self_scattering_correction = mantid.TotScatCalculateSelfScattering(
-        InputWorkspace=raw_ws,
-        CalFileName=run_details.grouping_file_path,
-        SampleGeometry=sample_geometry,
-        SampleMaterial=sample_material,
-        CrystalDensity=sample_details.material_object.number_density_effective,
-        ApplyPerDetector=True,
-    )
-
-    input_workspace = mantid.ConvertUnits(InputWorkspace=input_workspace, Target="MomentumTransfer", EMode="Elastic")
-    input_workspace, self_scattering_correction = _prepare_for_correction(
-        data_workspace=input_workspace, correction_workspace=self_scattering_correction, run_details=run_details
-    )
-    input_workspace = mantid.Subtract(
-        LHSWorkspace=input_workspace, RHSWorkspace=self_scattering_correction, AllowDifferentNumberSpectra=True
-    )
-    input_workspace = mantid.ConvertUnits(InputWorkspace=input_workspace, Target="TOF", EMode="Elastic")
-    return input_workspace
-
-
-def _prepare_for_correction(data_workspace: Workspace2D, correction_workspace: Workspace2D, run_details):
-    cal_workspace = mantid.LoadCalFile(
-        InputWorkspace=data_workspace,
-        CalFileName=run_details.grouping_file_path,
-        WorkspaceName="cal_workspace",
-        MakeOffsetsWorkspace=False,
-        MakeMaskWorkspace=False,
-        MakeGroupingWorkspace=True,
-    )
-
-    detectors_to_mask = []
-    for wsIndex in range(0, cal_workspace.getNumberHistograms()):
-        if cal_workspace.dataY(wsIndex) == 0:
-            detectors_to_mask.append(cal_workspace.getDetectorIDs(wsIndex)[0])
-
-    # Remove Masked and Monitor spectra
-    mantid.ExtractMonitors(
-        InputWorkspace=correction_workspace,
-        DetectorWorkspace="correction_workspace",
-        MonitorWorkspace="correction_workspace_monitors",
-        EnableLogging=False,
-    )
-    mantid.MaskDetectors("correction_workspace", DetectorList=detectors_to_mask)
-    correction_workspace = mantid.RemoveMaskedSpectra(InputWorkspace="correction_workspace")
-    correction_workspace = mantid.RemoveSpectra(InputWorkspace=correction_workspace, RemoveSpectraWithNoDetector=True)
-    correction_workspace.clearMonitorWorkspace()
-
-    mantid.ExtractMonitors(
-        InputWorkspace=data_workspace,
-        DetectorWorkspace="data_workspace",
-        MonitorWorkspace="data_workspace_monitors",
-        EnableLogging=False,
-    )
-    mantid.MaskDetectors("data_workspace", DetectorList=detectors_to_mask)
-    data_workspace = mantid.RemoveMaskedSpectra(InputWorkspace="data_workspace")
-    data_workspace = mantid.RemoveSpectra(InputWorkspace=data_workspace, RemoveSpectraWithNoDetector=True)
-    data_workspace.clearMonitorWorkspace()
-
-    # Match workspaces
-    correction_workspace = mantid.RebinToWorkspace(WorkspaceToRebin=correction_workspace, WorkspaceToMatch=data_workspace)
-
-    return data_workspace, correction_workspace
 
 
 def _batched_run_focusing(
@@ -385,8 +291,28 @@ def _batched_run_focusing(
     return output
 
 
-def _normalize_one_spectrum(single_spectrum_ws, spline, instrument):
-    rebinned_spline = mantid.RebinToWorkspace(WorkspaceToRebin=spline, WorkspaceToMatch=single_spectrum_ws, StoreInADS=False)
+def _perform_absolute_normalization(spline, ws):
+    vanadium_material = spline.sample().getMaterial()
+    v_number_density = vanadium_material.numberDensityEffective
+    v_cross_section = vanadium_material.totalScatterXSection()
+    vanadium_shape = spline.sample().getShape()
+    # number density in Angstroms-3, volume in m3. Don't bother with 1E30 factor because will cancel
+    num_v_atoms = vanadium_shape.volume() * v_number_density
+
+    sample_material = ws.sample().getMaterial()
+    sample_number_density = sample_material.numberDensityEffective
+    sample_shape = spline.sample().getShape()
+    num_sample_atoms = sample_shape.volume() * sample_number_density
+
+    abs_norm_factor = v_cross_section * num_v_atoms / (num_sample_atoms * 4 * math.pi)
+    logger.notice("Performing absolute normalisation, multiplying by factor=" + str(abs_norm_factor))
+    abs_norm_factor_ws = mantid.CreateSingleValuedWorkspace(DataValue=abs_norm_factor, OutputWorkspace="__abs_norm_factor_ws")
+    ws = mantid.Multiply(LHSWorkspace=ws, RHSWorkspace=abs_norm_factor_ws, OutputWorkspace=ws)
+    return ws
+
+
+def _normalize_one_spectrum(single_spectrum_ws, spline_ws, instrument):
+    rebinned_spline = mantid.RebinToWorkspace(WorkspaceToRebin=spline_ws, WorkspaceToMatch=single_spectrum_ws, StoreInADS=False)
     divided = mantid.Divide(LHSWorkspace=single_spectrum_ws, RHSWorkspace=rebinned_spline, StoreInADS=False)
     if instrument.get_instrument_prefix() == "GEM":
         values_replaced = mantid.ReplaceSpecialValues(InputWorkspace=divided, NaNValue=0, StoreInADS=False)
@@ -396,24 +322,7 @@ def _normalize_one_spectrum(single_spectrum_ws, spline, instrument):
         complete = mantid.ReplaceSpecialValues(InputWorkspace=divided, NaNValue=0, OutputWorkspace=single_spectrum_ws)
 
     if instrument.perform_abs_vanadium_norm():
-        vanadium_material = spline.sample().getMaterial()
-        v_number_density = vanadium_material.numberDensityEffective
-        v_cross_section = vanadium_material.totalScatterXSection()
-        vanadium_shape = spline.sample().getShape()
-        # number density in Angstroms-3, volume in m3. Don't bother with 1E30 factor because will cancel
-        num_v_atoms = vanadium_shape.volume() * v_number_density
-
-        sample_material = single_spectrum_ws.sample().getMaterial()
-        sample_number_density = sample_material.numberDensityEffective
-        sample_shape = spline.sample().getShape()
-        num_sample_atoms = sample_shape.volume() * sample_number_density
-
-        abs_norm_factor = v_cross_section * num_v_atoms / (num_sample_atoms * 4 * math.pi)
-        logger.notice("Performing absolute normalisation, multiplying by factor=" + str(abs_norm_factor))
-        # avoid "Variable invalidated, data has been deleted" error when debugging
-        output_ws_name = single_spectrum_ws.name()
-        abs_norm_factor_ws = mantid.CreateSingleValuedWorkspace(DataValue=abs_norm_factor, OutputWorkspace="__abs_norm_factor_ws")
-        complete = mantid.Multiply(LHSWorkspace=complete, RHSWorkspace=abs_norm_factor_ws, OutputWorkspace=output_ws_name)
+        complete = _perform_absolute_normalization(spline_ws, complete)
 
     return complete
 
@@ -435,31 +344,14 @@ def _normalize_spectra(spectra_list, vanadium_splines, instrument):
     return output_list
 
 
-def _normalize_per_detector_workspace(multi_spectrum_ws, spline, instrument):
-    rebinned_spline = mantid.RebinToWorkspace(WorkspaceToRebin=spline, WorkspaceToMatch=multi_spectrum_ws, StoreInADS=False)
+def _normalize_per_detector_workspace(multi_spectrum_ws, spline_ws, instrument):
+    rebinned_spline = mantid.RebinToWorkspace(WorkspaceToRebin=spline_ws, WorkspaceToMatch=multi_spectrum_ws, StoreInADS=False)
     complete = mantid.Divide(
-        LHSWorkspace=multi_spectrum_ws, RHSWorkspace=rebinned_spline, AllowDifferentNumberSpectra=True, StoreInADS=False
+        LHSWorkspace=multi_spectrum_ws, RHSWorkspace=rebinned_spline, AllowDifferentNumberSpectra=True, OutputWorkspace=multi_spectrum_ws
     )
 
     if instrument.perform_abs_vanadium_norm():
-        vanadium_material = spline.sample().getMaterial()
-        v_number_density = vanadium_material.numberDensityEffective
-        v_cross_section = vanadium_material.totalScatterXSection()
-        vanadium_shape = spline.sample().getShape()
-        # number density in Angstroms-3, volume in m3. Don't bother with 1E30 factor because will cancel
-        num_v_atoms = vanadium_shape.volume() * v_number_density
-
-        sample_material = multi_spectrum_ws.sample().getMaterial()
-        sample_number_density = sample_material.numberDensityEffective
-        sample_shape = spline.sample().getShape()
-        num_sample_atoms = sample_shape.volume() * sample_number_density
-
-        abs_norm_factor = v_cross_section * num_v_atoms / (num_sample_atoms * 4 * math.pi)
-        logger.notice("Performing absolute normalisation, multiplying by factor=" + str(abs_norm_factor))
-        # avoid "Variable invalidated, data has been deleted" error when debugging
-        output_ws_name = multi_spectrum_ws.name()
-        abs_norm_factor_ws = mantid.CreateSingleValuedWorkspace(DataValue=abs_norm_factor, OutputWorkspace="__abs_norm_factor_ws")
-        complete = mantid.Multiply(LHSWorkspace=complete, RHSWorkspace=abs_norm_factor_ws, OutputWorkspace=output_ws_name)
+        complete = _perform_absolute_normalization(spline_ws, complete)
 
     return complete
 
@@ -542,10 +434,10 @@ def convert_between_distribution(workspace, direction):
         target_unit = "MoemntumTransfer"
     if not target_unit:
         return workspace
-    workspace = mantid.ConvertUnits(InputWorkspace=workspace, Target="dSpacing", EMode="Elastic")
+    workspace = mantid.ConvertUnits(InputWorkspace=workspace, OutputWorkspace=workspace, Target="dSpacing", EMode="Elastic")
     if direction == "To":
         mantid.ConvertToDistribution(workspace)
     if direction == "From":
         mantid.ConvertFromDistribution(workspace)
-    workspace = mantid.ConvertUnits(InputWorkspace=workspace, Target=target_unit, EMode="Elastic")
+    workspace = mantid.ConvertUnits(InputWorkspace=workspace, OutputWorkspace=workspace, Target=target_unit, EMode="Elastic")
     return workspace

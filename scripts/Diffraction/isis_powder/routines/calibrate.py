@@ -140,7 +140,7 @@ def _create_vanadium_splines(focused_spectra, instrument, run_details):
 
 
 def _create_vanadium_splines_one_ws(vanadium_splines, instrument, run_details):
-    mantid.ExtractMonitors(InputWorkspace=vanadium_splines, DetectorWorkspace="vanadium_splines", MonitorWorkspace="vanadium_monitors")
+    mantid.ExtractMonitors(InputWorkspace=vanadium_splines, DetectorWorkspace="vanadium_splines")
 
     from mantid.api import AnalysisDataService as ADS
 
