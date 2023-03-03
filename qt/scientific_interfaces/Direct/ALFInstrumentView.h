@@ -62,7 +62,7 @@ public:
   virtual void clearShapes() = 0;
   virtual void drawRectanglesAbove(std::vector<DetectorTube> const &tubes) = 0;
 
-  virtual void warningBox(std::string const &message) = 0;
+  virtual void displayWarning(std::string const &message) = 0;
 };
 
 class MANTIDQT_DIRECT_DLL ALFInstrumentView final : public QWidget, public IALFInstrumentView {
@@ -95,7 +95,7 @@ public:
   void clearShapes() override;
   void drawRectanglesAbove(std::vector<DetectorTube> const &tubes) override;
 
-  void warningBox(std::string const &message) override;
+  void displayWarning(std::string const &message) override;
 
 private slots:
   void reconnectInstrumentActor();
