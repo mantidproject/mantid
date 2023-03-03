@@ -41,12 +41,8 @@ public:
   }
 
   void test_IdealCaseFullCorrections() {
-    using namespace Mantid::API;
-    using namespace Mantid::DataObjects;
     using namespace Mantid::HistogramData;
-    using namespace Mantid::Kernel;
-    constexpr size_t nBins{3};
-    constexpr size_t nHist{2};
+
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
     auto effWS = idealEfficiencies(edges);
     const std::array<std::string, 4> POL_DIRS{{"++", "+-", "-+", "--"}};
@@ -629,10 +625,8 @@ public:
   }
 
   void test_IdealCrossPolarizationCaseFullCorrections() {
-    using namespace Mantid::API;
-    using namespace Mantid::DataObjects;
     using namespace Mantid::HistogramData;
-    using namespace Mantid::Kernel;
+
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
     auto crossPolarizationEffWS = idealEfficiencies(edges, false);
     // Cross polarized ideal efficiencies should give us the same ouput as for ideal efficiencies but in the reverse
@@ -745,7 +739,6 @@ private:
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
     using namespace Mantid::HistogramData;
-    using namespace Mantid::Kernel;
     constexpr size_t nBins{3};
     constexpr size_t nHist{2};
     const double yVal = 2.3;
