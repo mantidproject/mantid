@@ -52,6 +52,10 @@ public:
   MOCK_METHOD0(showAllLookupRowsAsValid, void());
   MOCK_METHOD0(showStitchParametersValid, void());
   MOCK_METHOD0(showStitchParametersInvalid, void());
+  MOCK_METHOD0(showPolCorrFilePathValid, void());
+  MOCK_METHOD0(showPolCorrFilePathInvalid, void());
+  MOCK_METHOD0(showFloodCorrFilePathValid, void());
+  MOCK_METHOD0(showFloodCorrFilePathInvalid, void());
 
   MOCK_CONST_METHOD0(getSubtractBackground, bool());
   MOCK_METHOD1(setSubtractBackground, void(bool));

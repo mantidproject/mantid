@@ -69,6 +69,10 @@ public:
   void showTransmissionRangeValid() override;
   void showTransmissionStitchParamsInvalid() override;
   void showTransmissionStitchParamsValid() override;
+  void showPolCorrFilePathValid() override;
+  void showPolCorrFilePathInvalid() override;
+  void showFloodCorrFilePathValid() override;
+  void showFloodCorrFilePathInvalid() override;
 
   std::string getPolarizationCorrectionOption() const override;
   void setPolarizationCorrectionOption(std::string const &option) override;

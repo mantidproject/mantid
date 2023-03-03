@@ -70,6 +70,10 @@ public:
   virtual void showAllLookupRowsAsValid() = 0;
   virtual void showStitchParametersValid() = 0;
   virtual void showStitchParametersInvalid() = 0;
+  virtual void showPolCorrFilePathValid() = 0;
+  virtual void showPolCorrFilePathInvalid() = 0;
+  virtual void showFloodCorrFilePathValid() = 0;
+  virtual void showFloodCorrFilePathInvalid() = 0;
 
   virtual bool getSubtractBackground() const = 0;
   virtual void setSubtractBackground(bool enable) = 0;

@@ -87,6 +87,14 @@ void QtExperimentView::showStitchParametersValid() { showAsValid(stitchOptionsLi
 
 void QtExperimentView::showStitchParametersInvalid() { showAsInvalid(stitchOptionsLineEdit()); }
 
+void QtExperimentView::showPolCorrFilePathValid() { showAsValid(*m_polCorrEfficienciesLineEdit); }
+
+void QtExperimentView::showPolCorrFilePathInvalid() { showAsInvalid(*m_polCorrEfficienciesLineEdit); }
+
+void QtExperimentView::showFloodCorrFilePathValid() { showAsValid(*m_floodCorrLineEdit); }
+
+void QtExperimentView::showFloodCorrFilePathInvalid() { showAsInvalid(*m_floodCorrLineEdit); }
+
 void QtExperimentView::subscribe(ExperimentViewSubscriber *notifyee) { m_notifyee = notifyee; }
 
 /**
