@@ -57,18 +57,12 @@ class HomeRunInfoWidgetModel(object):
             return "Good frames not defined"
 
     def get_average_temperature(self):
-        # TODO : This implementation does not match the one in the C++ code
-        # as the C++ filters the time series logs based on the start and end times.
-        # TimeSeriesProperty.cpp line 934
-        temps = self._data.get_sample_log("Temp_Sample")
         try:
-            temps = self._data.current_workspace.getRun().getProperty("Temp_Sample")
+            average_temp = self._data.current_workspace.getRun().getPropertyAsSingleValueWithTimeAveragedMean("Temp_Sample")
         except Exception:
-            return "Log not found"
-        if temps:
-            return round_to_min_whole_number_or_sf(temps.timeAverageValue(), ROUNDING_PRECISION)
-        else:
-            return "Log not found"
+            return 'Failed to get average temperature from "Temp_Sample" log.'
+
+        return round_to_min_whole_number_or_sf(average_temp, ROUNDING_PRECISION)
 
     def get_workspace_comment(self):
         ws = self._data.current_workspace
