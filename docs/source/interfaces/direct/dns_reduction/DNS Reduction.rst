@@ -32,7 +32,7 @@ Interface Usage and Description
 -------------------------------
 
 * :ref:`DNS Powder TOF <dns_powder_tof-ref>`
-* :ref:`DNS Powder Elastic <dns_powder_elastic-ref>`
+* DNS Powder Elastic
 * DNS Single Crystal Elastic
 * DNS Simulation
 
