@@ -118,6 +118,8 @@ bool ALFAnalysisPresenter::checkPeakCentreIsWithinFitRange() const {
 void ALFAnalysisPresenter::calculateEstimate() {
   if (m_model->isDataExtracted()) {
     m_algorithmManager->cropWorkspace(m_model->cropWorkspaceProperties(m_view->getRange()));
+  } else {
+    updatePlotInViewFromModel();
   }
 }
 

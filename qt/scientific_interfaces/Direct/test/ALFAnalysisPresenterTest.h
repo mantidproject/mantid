@@ -76,11 +76,22 @@ public:
   void test_setExtractedWorkspace_will_set_the_workspace_and_thetas_in_the_model_and_update_the_view() {
     auto const twoThetas = std::vector<double>{1.1, 2.2};
 
-    EXPECT_CALL(*m_model, setExtractedWorkspace(_, twoThetas)).Times(1);
+    EXPECT_CALL(*m_model, setExtractedWorkspace(Eq(m_workspace), twoThetas)).Times(1);
 
-    expectCalculateEstimate();
+    expectCalculateEstimate(m_workspace);
 
-    m_presenter->setExtractedWorkspace(nullptr, twoThetas);
+    m_presenter->setExtractedWorkspace(m_workspace, twoThetas);
+  }
+
+  void test_setExtractedWorkspace_will_update_the_view_if_no_data_is_extracted() {
+    auto workspace = nullptr;
+    auto const twoThetas = std::vector<double>{1.1, 2.2};
+
+    EXPECT_CALL(*m_model, setExtractedWorkspace(Eq(workspace), twoThetas)).Times(1);
+
+    expectCalculateEstimate(workspace);
+
+    m_presenter->setExtractedWorkspace(workspace, twoThetas);
   }
 
   void test_notifyPeakPickerChanged_will_removeFitSpectrum_if_fit_status_is_empty() {
@@ -234,7 +245,7 @@ public:
   }
 
   void test_that_calculateEstimate_is_called_as_expected() {
-    expectCalculateEstimate();
+    expectCalculateEstimate(m_workspace);
     m_presenter->notifyResetClicked();
   }
 
@@ -284,14 +295,23 @@ public:
   }
 
 private:
-  void expectCalculateEstimate() {
-    EXPECT_CALL(*m_model, isDataExtracted()).Times(1).WillOnce(Return(true));
-    EXPECT_CALL(*m_view, getRange()).Times(1).WillRepeatedly(Return(m_range));
+  void expectCalculateEstimate(MatrixWorkspace_sptr const &workspace) {
+    EXPECT_CALL(*m_model, isDataExtracted()).Times(1).WillOnce(Return(workspace != nullptr));
+    if (workspace) {
+      EXPECT_CALL(*m_view, getRange()).Times(1).WillRepeatedly(Return(m_range));
 
-    EXPECT_CALL(*m_model, cropWorkspaceProperties(m_range))
-        .Times(1)
-        .WillOnce(Return(ByMove(std::move(m_algProperties))));
-    EXPECT_CALL(*m_algorithmManager, cropWorkspace(NotNull())).Times(1);
+      EXPECT_CALL(*m_model, cropWorkspaceProperties(m_range))
+          .Times(1)
+          .WillOnce(Return(ByMove(std::move(m_algProperties))));
+      EXPECT_CALL(*m_algorithmManager, cropWorkspace(NotNull())).Times(1);
+    } else {
+      expectUpdatePlotInViewFromModel();
+    }
+  }
+
+  void expectUpdatePlotInViewFromModel() {
+    EXPECT_CALL(*m_model, extractedWorkspace()).Times(1).WillOnce(Return(m_workspace));
+    EXPECT_CALL(*m_view, addSpectrum(Eq(m_workspace))).Times(1);
   }
 
   void expectUpdatePeakCentreInViewFromModel() {
