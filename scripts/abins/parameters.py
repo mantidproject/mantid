@@ -8,7 +8,7 @@
 Parameters for instruments and Abins
 
 These values are somewhat 'global' across Abins. In previous versions it was
-recommended that they could be changed by editing the AbinsParameters.py file.
+recommended that they could be changed by editing this source file.
 This is still possible, but in general it is recommended to edit the
 value dictionaries through the Python API if possible. e.g.::
 
