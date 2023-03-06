@@ -77,13 +77,20 @@ function(add_python_package pkg_name)
   # is specified here and then --install-scripts=bin --install-lib=lib removes any of the platform/distribution specific
   # install directories so we can have a flat structure
   if(CONDA_BUILD)
-    install(
-      CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E env MANTID_VERSION_STR=${_version_str}
-         python  -m pip install ${CMAKE_CURRENT_SOURCE_DIR}
-         --disable-pip-version-check --upgrade --no-deps --ignore-installed
-         --no-cache-dir -vvv)"
-      COMPONENT Runtime
-    )
+    if(WIN32)
+      install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E env MANTID_VERSION_STR=${_version_str} \
+      ${Python_EXECUTABLE} -m pip install ${CMAKE_CURRENT_SOURCE_DIR} --no-deps --ignore-installed --no-cache-dir -vvv)"
+              COMPONENT Runtime
+      )
+    else()
+      install(
+        CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E env MANTID_VERSION_STR=${_version_str}
+          python  -m pip install ${CMAKE_CURRENT_SOURCE_DIR}
+          --disable-pip-version-check --upgrade --no-deps --ignore-installed
+          --no-cache-dir -vvv)"
+        COMPONENT Runtime
+      )
+    endif()
   else()
     install(
       CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E env MANTID_VERSION_STR=${_version_str} \
