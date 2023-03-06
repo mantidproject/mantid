@@ -22,4 +22,5 @@ class DNSFileSelectorWidget(DNSWidget):
         self.view = DNSFileSelectorView(parent=parent.view)
         self.model = DNSFileSelectorModel(parent=self)
         self.watcher = DNSFileSelectorWatcher(parent=self.view)
+        self.watcher.lower()
         self.presenter = DNSFileSelectorPresenter(parent=self, view=self.view, model=self.model, name=name, watcher=self.watcher)
