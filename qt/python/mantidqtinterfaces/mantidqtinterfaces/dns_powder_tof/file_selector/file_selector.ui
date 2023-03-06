@@ -68,6 +68,9 @@
          <property name="checked">
           <bool>true</bool>
          </property>
+         <property name="visible">
+          <bool>false</bool>
+         </property>
         </widget>
        </item>
        <item>
@@ -245,6 +248,9 @@
       <widget class="QGroupBox" name="groupBox_filter_standard">
        <property name="title">
         <string>Filter by Standard Data Type:</string>
+       </property>
+       <property name="visible">
+        <bool>false</bool>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
