@@ -81,8 +81,11 @@ execute_process(
   ERROR_VARIABLE _error
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
+
+include(CMakePrintHelpers)
 if(_result EQUAL 0)
   set(Python_SITELIB_RELPATH ${_output})
+  cmake_print_variables(Python_SITELIB_RELPATH)
 else()
   message(FATAL_ERROR "Error determining Python site packages location: ${_error}")
 endif()
