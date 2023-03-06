@@ -50,6 +50,9 @@ public:
   MOCK_METHOD0(loadSettings, void());
   MOCK_METHOD0(saveSettings, void());
 
+  MOCK_METHOD1(disable, void(std::string const &reason));
+  MOCK_METHOD0(enable, void());
+
   MOCK_CONST_METHOD0(getSampleFile, std::optional<std::string>());
   MOCK_CONST_METHOD0(getVanadiumFile, std::optional<std::string>());
 

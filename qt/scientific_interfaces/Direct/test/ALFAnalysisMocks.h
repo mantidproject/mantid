@@ -51,6 +51,9 @@ public:
 
   MOCK_METHOD1(subscribePresenter, void(IALFAnalysisPresenter *presenter));
 
+  MOCK_METHOD1(disable, void(std::string const &reason));
+  MOCK_METHOD0(enable, void());
+
   MOCK_METHOD0(replot, void());
 
   MOCK_CONST_METHOD2(openExternalPlot,

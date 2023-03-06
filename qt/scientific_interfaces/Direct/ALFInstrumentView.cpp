@@ -8,6 +8,7 @@
 
 #include "ALFInstrumentPresenter.h"
 #include "ALFInstrumentWidget.h"
+#include "ALFView.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/Common/InputController.h"
@@ -86,6 +87,18 @@ void ALFInstrumentView::saveSettings() {
   settings.beginGroup(m_settingsGroup);
   settings.setValue("vanadium-run", m_vanadium->getText());
   settings.endGroup();
+}
+
+void ALFInstrumentView::disable(std::string const &reason) {
+  if (auto parent = static_cast<ALFView *>(parentWidget())) {
+    parent->disable(reason);
+  }
+}
+
+void ALFInstrumentView::enable() {
+  if (auto parent = static_cast<ALFView *>(parentWidget())) {
+    parent->enable();
+  }
 }
 
 void ALFInstrumentView::reconnectInstrumentActor() {

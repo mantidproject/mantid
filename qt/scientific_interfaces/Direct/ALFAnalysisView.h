@@ -40,6 +40,9 @@ public:
 
   virtual void subscribePresenter(IALFAnalysisPresenter *presenter) = 0;
 
+  virtual void disable(std::string const &reason) = 0;
+  virtual void enable() = 0;
+
   virtual void replot() = 0;
 
   virtual void openExternalPlot(Mantid::API::MatrixWorkspace_sptr const &workspace,
@@ -74,6 +77,9 @@ public:
   QWidget *getView() override;
 
   void subscribePresenter(IALFAnalysisPresenter *presenter) override;
+
+  void disable(std::string const &reason) override;
+  void enable() override;
 
   void replot() override;
 
