@@ -289,13 +289,16 @@ pipeline {
 
 def git_branch_name() {
   name = scm.branches[0].name
-  if (name.contains("*/")) {
+  if(name.contains("*/")) {
     name = name.split("\\*/")[1]
   }
   return name
 }
 
 def toUnixStylePath(path) {
+  if(!path.startsWith("C:")) {
+    path = "C:" + path
+  }
   return path.replaceAll("\\\\", "/")
 }
 
