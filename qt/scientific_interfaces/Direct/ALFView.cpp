@@ -48,7 +48,7 @@ ALFView::~ALFView() { m_instrumentPresenter->saveSettings(); }
 
 void ALFView::disable(std::string const &reason) {
   this->setEnabled(false);
-  this->setWindowTitle("ALFView - " + QString::fromStdString(reason));
+  this->setWindowTitle("ALFView - " + QString::fromStdString(reason) + "...");
 }
 
 void ALFView::enable() {
