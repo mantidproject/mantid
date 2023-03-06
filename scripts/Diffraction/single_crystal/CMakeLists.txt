@@ -1,6 +1,7 @@
 # Tests for common single crystal reduction
 
 set(TEST_PY_FILES test/test_base_sx.py)
+set(TEST_PY_FILES test/test_sxd.py)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 

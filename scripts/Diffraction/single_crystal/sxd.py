@@ -254,7 +254,7 @@ class SXD(BaseSX):
             mantid.DeleteWorkspace(ws)
 
     @staticmethod
-    def filter_peaks_on_detector_edge(peaks, nedge):
+    def remove_peaks_on_detector_edge(peaks, nedge):
         # filter peaks on bank edge
         for col_name in ["Row", "Col"]:
             col = np.array(SXD.retrieve(peaks).column(col_name))
@@ -283,4 +283,4 @@ class SXD(BaseSX):
     @staticmethod
     def mask_detector_edges(ws):
         mantid.MaskBTP(Workspace=ws, Tube="Edges", EnableLogging=False)
-        mantid.MaskBTP(Workspace=ws, Pixel="edges", EnableLogging=False)
+        mantid.MaskBTP(Workspace=ws, Pixel="Edges", EnableLogging=False)

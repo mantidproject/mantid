@@ -262,13 +262,13 @@ class BaseSX(ABC):
             ws = mantid.LoadEmptyInstrument(
                 InstrumentName=peaks.getInstrument().getFullName(), OutputWorkspace="empty", EnableLogging=False
             )
+            axis = ws.getAxis(0)
+            axis.setUnit("TOF")
         else:
             ws = BaseSX.retrieve(ws)
             mantid.ConvertUnits(
                 InputWorkspace=ws, OutputWorkspace=ws, Target="TOF", EnableLogging=False
             )  # needs to be in TOF for setting B
-        ws = BaseSX.retrieve(ws)
-        mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target="TOF", EnableLogging=False)  # needs to be in TOF for setting B
         ispecs = ws.getIndicesFromDetectorIDs(peaks.column("DetID"))
         rads = [self.get_radius(pk, ws, ispecs[ipk], scale) for ipk, pk in enumerate(peaks)]
         bin_edges = np.arange(min(rads), max(rads) + dq, dq)
@@ -295,8 +295,8 @@ class BaseSX(ABC):
                 LHSWorkspace=peaks_int, RHSWorkspace=peaks_subset, OutputWorkspace=peaks_int.name(), EnableLogging=False
             )
             mantid.DeleteWorkspace(peaks_subset, EnableLogging=False)
-            if use_empty_inst:
-                mantid.DeleteWorkspace(ws, EnableLogging=False)
+        if use_empty_inst:
+            mantid.DeleteWorkspace(ws, EnableLogging=False)
         return peaks_int
 
     @staticmethod
