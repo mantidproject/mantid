@@ -65,8 +65,14 @@ function(add_python_package pkg_name)
   # the `${CMAKE_CURRENT_SOURCE_DIR}`, the directory where `add_python_package` was called from, contains either a
   # `setup.py or `pyproject.toml` (there might be both) and avoids us having to add cmake install rules to install every
   # single .py file within the package.
-  install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E env MANTID_VERSION_STR=${_version_str}
-  python -m pip install ${CMAKE_CURRENT_SOURCE_DIR} --disable-pip-version-check --upgrade --no-deps --ignore-installed --no-cache-dir -vvv)"
-  COMPONENT Runtime)
+  if(WIN32)
+    install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E env MANTID_VERSION_STR=${_version_str} \
+    ${Python_EXECUTABLE} -m pip install ${CMAKE_CURRENT_SOURCE_DIR} --no-deps --ignore-installed --no-cache-dir -vvv)"
+    COMPONENT Runtime)
+  else()
+    install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E env MANTID_VERSION_STR=${_version_str} \
+    python -m pip install ${CMAKE_CURRENT_SOURCE_DIR} --no-deps --ignore-installed --no-cache-dir -vvv)"
+    COMPONENT Runtime)
+  endif()
 
 endfunction()
