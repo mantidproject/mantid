@@ -99,12 +99,13 @@ void ALFInstrumentModel::setData(ALFData const &dataType, MatrixWorkspace_sptr c
   switch (dataType) {
   case ALFData::SAMPLE:
     setSample(workspace);
-    return;
+    break;
   case ALFData::VANADIUM:
     setVanadium(workspace);
-    return;
+    break;
+  default:
+    throw std::invalid_argument("ALFData must be one of { SAMPLE, VANADIUM }");
   }
-  throw std::invalid_argument("ALFData must be one of { SAMPLE, VANADIUM }");
 }
 
 void ALFInstrumentModel::setSample(MatrixWorkspace_sptr const &sample) {

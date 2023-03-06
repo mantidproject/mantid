@@ -6,8 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidQtWidgets/Common/QtJobRunner.h"
-#include "MantidAPI/AlgorithmRuntimeProps.h"
-#include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/ConfiguredAlgorithm.h"
 #include "MantidQtWidgets/Common/IConfiguredAlgorithm.h"
