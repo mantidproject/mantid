@@ -230,6 +230,7 @@ def apply_placzek_correction_per_bank(
         SampleTemp=sample_temp,
         ApplyPerDetector=False,
     )
+    common.remove_intermediate_workspace(raw_ws)
 
     ws_group_list = []
     for i in range(self_scattering_correction.getNumberHistograms()):
@@ -257,6 +258,7 @@ def apply_placzek_correction_per_detector(input_workspace, sample_details, run_d
         CrystalDensity=sample_details.material_object.number_density_effective,
         ApplyPerDetector=True,
     )
+    common.remove_intermediate_workspace(raw_ws)
 
     input_workspace = mantid.ConvertUnits(
         InputWorkspace=input_workspace, Target="MomentumTransfer", EMode="Elastic", OutputWorkspace=input_workspace
@@ -267,9 +269,12 @@ def apply_placzek_correction_per_detector(input_workspace, sample_details, run_d
     # Match workspaces
     self_scattering_correction = mantid.RebinToWorkspace(WorkspaceToRebin=self_scattering_correction, WorkspaceToMatch=input_workspace)
     input_workspace = mantid.Subtract(
-        LHSWorkspace=input_workspace, RHSWorkspace=self_scattering_correction, AllowDifferentNumberSpectra=True
+        LHSWorkspace=input_workspace,
+        RHSWorkspace=self_scattering_correction,
+        OutputWorkspace=input_workspace,
+        AllowDifferentNumberSpectra=True,
     )
-    input_workspace = mantid.ConvertUnits(InputWorkspace=input_workspace, Target="TOF", EMode="Elastic")
+    input_workspace = mantid.ConvertUnits(InputWorkspace=input_workspace, OutputWorkspace=input_workspace, Target="TOF", EMode="Elastic")
     return input_workspace
 
 

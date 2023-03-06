@@ -83,6 +83,7 @@ def _focus_one_ws(
         summed_empty = common.generate_summed_runs(
             empty_ws_string=run_details.sample_empty, instrument=instrument, scale_factor=scale_factor
         )
+
     input_workspace = _absorb_and_empty_corrections(
         input_workspace,
         instrument,
@@ -193,7 +194,6 @@ def _absorb_and_empty_corrections(
 
 
 def apply_per_detector_corrections(input_workspace, instrument, perform_vanadium_norm, vanadium_ws, sample_details, run_details):
-    mantid.CloneWorkspace(InputWorkspace=input_workspace, OutputWorkspace="DataBeforeCorrections")
     # apply per detector vanadium correction on uncalibrated data
     input_workspace = _apply_vanadium_corrections_per_detector(
         instrument=instrument,
@@ -247,7 +247,7 @@ def divide_by_number_of_detectors_in_bank(focussed_data, cal_filepath):
         if grouping[0] > 0:
             n_pixel[int(grouping[0] - 1)] += 1
     number_detectors_in_bank_ws = mantid.CreateWorkspace(DataY=n_pixel, DataX=[0, 1], NSpec=focussed_data.getNumberHistograms())
-    focussed_data = mantid.Divide(LHSWorkspace=focussed_data, RHSWorkspace=number_detectors_in_bank_ws)
+    focussed_data = mantid.Divide(LHSWorkspace=focussed_data, RHSWorkspace=number_detectors_in_bank_ws, OutputWorkspace=focussed_data)
     common.remove_intermediate_workspace(number_detectors_in_bank_ws)
     common.remove_intermediate_workspace(cal_workspace)
     return focussed_data
