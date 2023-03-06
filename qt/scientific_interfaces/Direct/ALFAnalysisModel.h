@@ -32,7 +32,6 @@ public:
   virtual Mantid::API::MatrixWorkspace_sptr extractedWorkspace() const = 0;
   virtual bool isDataExtracted() const = 0;
 
-  virtual Mantid::API::MatrixWorkspace_sptr doFit(std::pair<double, double> const &range) = 0;
   virtual void calculateEstimate(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
 
   virtual void exportWorkspaceCopyToADS() const = 0;
@@ -77,7 +76,6 @@ public:
   Mantid::API::MatrixWorkspace_sptr extractedWorkspace() const override;
   bool isDataExtracted() const override;
 
-  Mantid::API::MatrixWorkspace_sptr doFit(std::pair<double, double> const &range) override;
   void calculateEstimate(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
 
   void exportWorkspaceCopyToADS() const override;

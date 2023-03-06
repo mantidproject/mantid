@@ -6,8 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALFAnalysisModel.h"
 
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProperties.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CompositeFunction.h"
@@ -26,17 +24,6 @@ namespace {
 
 std::string const NOT_IN_ADS = "not_stored_in_ads";
 std::string const WS_EXPORT_NAME("ALFView_exported");
-
-MatrixWorkspace_sptr cropWorkspace(MatrixWorkspace_sptr const &workspace, double const startX, double const endX) {
-  auto cropper = AlgorithmManager::Instance().create("CropWorkspace");
-  cropper->setAlwaysStoreInADS(false);
-  cropper->setProperty("InputWorkspace", workspace);
-  cropper->setProperty("OutputWorkspace", "__cropped");
-  cropper->setProperty("XMin", startX);
-  cropper->setProperty("XMax", endX);
-  cropper->execute();
-  return cropper->getProperty("OutputWorkspace");
-}
 
 IFunction_sptr createFlatBackground(double const height = 0.0) {
   auto flatBackground = FunctionFactory::Instance().createFunction("FlatBackground");
@@ -108,25 +95,6 @@ void ALFAnalysisModel::setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr c
 Mantid::API::MatrixWorkspace_sptr ALFAnalysisModel::extractedWorkspace() const { return m_extractedWorkspace; }
 
 bool ALFAnalysisModel::isDataExtracted() const { return m_extractedWorkspace != nullptr; }
-
-MatrixWorkspace_sptr ALFAnalysisModel::doFit(std::pair<double, double> const &range) {
-
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Fit");
-  alg->initialize();
-  alg->setAlwaysStoreInADS(false);
-  alg->setProperty("Function", m_function);
-  alg->setProperty("InputWorkspace", m_extractedWorkspace);
-  alg->setProperty("CreateOutput", true);
-  alg->setProperty("StartX", range.first);
-  alg->setProperty("EndX", range.second);
-  alg->execute();
-
-  m_function = alg->getProperty("Function");
-  m_fitStatus = alg->getPropertyValue("OutputStatus");
-  m_fitWorkspace = alg->getProperty("OutputWorkspace");
-
-  return m_fitWorkspace;
-}
 
 void ALFAnalysisModel::calculateEstimate(MatrixWorkspace_sptr const &workspace) {
   if (workspace) {

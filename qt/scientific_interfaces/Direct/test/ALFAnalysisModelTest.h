@@ -11,6 +11,7 @@
 #include "ALFAnalysisModel.h"
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -31,14 +32,20 @@ std::string const NOT_IN_ADS = "not_stored_in_ads";
 
 class ALFAnalysisModelTest : public CxxTest::TestSuite {
 public:
-  ALFAnalysisModelTest() { FrameworkManager::Instance(); }
+  ALFAnalysisModelTest() {
+    FrameworkManager::Instance();
+    m_workspace = WorkspaceCreationHelper::create2DWorkspacePoints(1, 100);
+  }
 
   static ALFAnalysisModelTest *createSuite() { return new ALFAnalysisModelTest(); }
 
   static void destroySuite(ALFAnalysisModelTest *suite) { delete suite; }
 
   void setUp() override {
-    m_workspace = WorkspaceCreationHelper::create2DWorkspacePoints(1, 100);
+    m_function = std::make_shared<CompositeFunction>();
+    m_function->addFunction(FunctionFactory::Instance().createFunction("FlatBackground"));
+    m_function->addFunction(FunctionFactory::Instance().createFunction("Gaussian"));
+
     m_exportWorkspaceName = "ALFView_exported";
     m_range = std::make_pair<double, double>(0.0, 100.0);
     m_twoThetas = std::vector<double>{29.5, 30.4, 31.0};
@@ -58,13 +65,9 @@ public:
     TS_ASSERT(m_model->allTwoThetas().empty());
   }
 
-  void test_that_doFit_sets_a_successful_fit_status_for_a_good_fit() {
+  void test_that_setFitResult_sets_a_successful_fit_status_for_a_good_fit() {
     m_model->setExtractedWorkspace(m_workspace, m_twoThetas);
-    m_model->doFit(m_range);
-
-    TS_ASSERT(!AnalysisDataService::Instance().doesExist("__fit_Workspace"));
-    TS_ASSERT(!AnalysisDataService::Instance().doesExist("__fit_Parameters"));
-    TS_ASSERT(!AnalysisDataService::Instance().doesExist("__fit_NormalisedCovarianceWorkspace"));
+    m_model->setFitResult(m_workspace, m_function, "success");
 
     TS_ASSERT_EQUALS(0.0, m_model->getPeakCopy()->getParameter("PeakCentre"));
     TS_ASSERT_EQUALS("success", m_model->fitStatus());
@@ -92,7 +95,7 @@ public:
   void test_that_setPeakCentre_will_remove_the_fit_status_and_set_the_peak_centre() {
     m_model->setExtractedWorkspace(m_workspace, m_twoThetas);
 
-    m_model->doFit(m_range);
+    m_model->setFitResult(m_workspace, m_function, "success");
 
     m_model->setPeakCentre(1.1);
 
@@ -137,7 +140,7 @@ public:
   void test_that_clear_will_clear_the_two_thetas_and_extracted_workspace_from_the_model() {
     m_model->setExtractedWorkspace(m_workspace, m_twoThetas);
 
-    m_model->doFit(m_range);
+    m_model->setFitResult(m_workspace, m_function, "success");
 
     m_model->clear();
 
@@ -159,8 +162,9 @@ public:
 
   void test_rotationAngle_returns_the_correct_value_with_valid_data() {
     m_model->setExtractedWorkspace(m_workspace, m_twoThetas);
-    m_model->setPeakCentre(0.1);
-    m_model->doFit(m_range);
+
+    m_function->setParameter("f1.PeakCentre", 0.1);
+    m_model->setFitResult(m_workspace, m_function, "success");
 
     TS_ASSERT_DELTA(0.1913, *m_model->rotationAngle(), 0.0001);
   }
@@ -181,7 +185,7 @@ public:
 
   void test_plottedWorkspaceIndices_returns_zero_and_one_if_there_is_a_fitted_workspace() {
     m_model->setExtractedWorkspace(m_workspace, m_twoThetas);
-    m_model->doFit(m_range);
+    m_model->setFitResult(m_workspace, m_function, "success");
 
     auto const expectedIndices = std::vector<int>{0, 1};
     TS_ASSERT_EQUALS(expectedIndices, m_model->plottedWorkspaceIndices());
@@ -192,17 +196,14 @@ public:
     TS_ASSERT(!AnalysisDataService::Instance().doesExist(m_exportWorkspaceName));
   }
 
-  void test_exportWorkspaceCopyToADS_exports_a_workspace_with_three_spectra_when_fit_workspace_exists() {
+  void test_exportWorkspaceCopyToADS_exports_a_workspace_to_the_ADS_when_the_fit_workspace_exists() {
     m_model->setExtractedWorkspace(m_workspace, m_twoThetas);
-    m_model->doFit(m_range);
+    m_model->setFitResult(m_workspace, m_function, "success");
 
     m_model->exportWorkspaceCopyToADS();
 
     auto &ads = AnalysisDataService::Instance();
     TS_ASSERT(ads.doesExist(m_exportWorkspaceName));
-
-    auto const workspace = ads.retrieveWS<MatrixWorkspace>(m_exportWorkspaceName);
-    TS_ASSERT_EQUALS(3u, workspace->getNumberHistograms());
   }
 
   void test_exportWorkspaceCopyToADS_exports_a_workspace_with_one_spectra_when_fit_workspace_does_not_exist() {
@@ -258,7 +259,7 @@ public:
   }
 
   void test_setFitResult_will_set_the_fit_workspace_in_the_model() {
-    std::string const fitStatus("Fit success");
+    std::string const fitStatus("success");
 
     m_model->setFitResult(m_workspace, nullptr, fitStatus);
 
@@ -268,6 +269,7 @@ public:
 
 private:
   MatrixWorkspace_sptr m_workspace;
+  CompositeFunction_sptr m_function;
   std::string m_exportWorkspaceName;
   std::pair<double, double> m_range;
   std::vector<double> m_twoThetas;
