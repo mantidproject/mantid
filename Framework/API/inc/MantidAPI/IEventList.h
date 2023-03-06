@@ -12,7 +12,6 @@
 #include <functional>
 
 namespace Mantid {
-
 namespace API {
 
 /// What kind of event list is being stored
@@ -40,6 +39,7 @@ public:
   virtual void clear(const bool removeDetIDs) = 0;
   /// Reserve a fixed size for the list
   virtual void reserve(size_t num) = 0;
+  /// IS the list sorted by TOF?
   virtual bool isSortedByTof() const = 0;
   /// Get the number of events from the list
   virtual std::size_t getNumberEvents() const = 0;
