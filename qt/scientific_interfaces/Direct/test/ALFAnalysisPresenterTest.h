@@ -202,6 +202,7 @@ public:
     EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(m_peakCentre));
     EXPECT_CALL(*m_view, getRange()).Times(2).WillRepeatedly(Return(m_range));
 
+    EXPECT_CALL(*m_view, disable("Fitting")).Times(1);
     EXPECT_CALL(*m_model, fitProperties(m_range)).Times(1).WillOnce(Return(ByMove(std::move(m_algProperties))));
     EXPECT_CALL(*m_algorithmManager, fit(NotNull())).Times(1);
 
@@ -282,6 +283,7 @@ public:
     EXPECT_CALL(*m_view, addFitSpectrum(Eq(m_workspace))).Times(1);
     expectUpdatePeakCentreInViewFromModel();
     expectUpdateRotationAngleCalled();
+    EXPECT_CALL(*m_view, enable()).Times(1);
 
     m_presenter->notifyFitComplete(m_workspace, m_function, fitStatus);
   }
@@ -289,6 +291,7 @@ public:
   void test_notifyAlgorithmError_will_display_a_message_in_the_view() {
     std::string const message("This is a warning message");
 
+    EXPECT_CALL(*m_view, enable()).Times(1);
     EXPECT_CALL(*m_view, displayWarning(message)).Times(1);
 
     m_presenter->notifyAlgorithmError(message);
