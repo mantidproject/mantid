@@ -368,8 +368,8 @@ void TimeSplitter::splitEventVec(const std::vector<DateAndTime> &times, const st
   assert(times.size() == events.size());
   // initialize the iterator over the splitter
   // it assumes the splitter keys (DateAndTime objects) are sorted by increasing time.
-  auto itSplitter = m_roi_map.cbegin();                // iterator over the splitter
-  int64_t stop = itSplitter->first.totalNanoseconds(); // first splitter boundary. Discard events with times < stop
+  auto itSplitter = m_roi_map.cbegin(); // iterator over the splitter
+  DateAndTime stop = itSplitter->first; // first splitter boundary. Discard events with times < stop
   int destination = TimeSplitter::NO_TARGET;
 
   // is there an EventList mapped to the destination index?
@@ -393,9 +393,9 @@ void TimeSplitter::splitEventVec(const std::vector<DateAndTime> &times, const st
       // update the stopping boundary
       itSplitter++;
       if (itSplitter == m_roi_map.cend())
-        stop = DateAndTime::maximum().totalNanoseconds(); // a.k.a stopping boundary at an "infinite" time
+        stop = DateAndTime::maximum(); // a.k.a stopping boundary at an "infinite" time
       else
-        stop = itSplitter->first.totalNanoseconds();
+        stop = itSplitter->first;
     }
     if (partial) {
       const EVENTTYPE eventCopy(*itEvent);
