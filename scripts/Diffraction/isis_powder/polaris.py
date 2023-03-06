@@ -49,8 +49,8 @@ class Polaris(AbstractInst):
         self._inst_settings.update_attributes(kwargs=kwargs)
 
         per_detector = False
-        if self._inst_settings.per_detector:
-            per_detector = bool(self._inst_settings.per_detector)
+        if self._inst_settings.per_detector_vanadium:
+            per_detector = bool(self._inst_settings.per_detector_vanadium)
 
         vanadium_d = self._create_vanadium(
             run_number_string=self._inst_settings.run_in_range,
@@ -104,7 +104,7 @@ class Polaris(AbstractInst):
             pdf_type=self._inst_settings.pdf_type,
             lorch_filter=self._inst_settings.lorch_filter,
             freq_params=self._inst_settings.freq_params,
-            per_detector=self._inst_settings.per_detector,
+            per_detector=self._inst_settings.per_detector_vanadium,
             debug=self._inst_settings.debug,
         )
         return pdf_output

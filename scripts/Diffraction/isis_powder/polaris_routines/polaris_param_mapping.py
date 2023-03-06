@@ -44,7 +44,7 @@ attr_mapping = [
     ParamMapEntry(ext_name="multiple_scattering", int_name="multiple_scattering", optional=True),
     ParamMapEntry(ext_name="paalman_pings_events_per_point", int_name="paalman_pings_events_per_point", optional=True),
     ParamMapEntry(ext_name="pdf_type", int_name="pdf_type"),
-    ParamMapEntry(ext_name="per_detector", int_name="per_detector", optional=True),
+    ParamMapEntry(ext_name="per_detector_vanadium", int_name="per_detector_vanadium", optional=True),
     ParamMapEntry(ext_name="placzek_order", int_name="placzek_order", optional=True),
     ParamMapEntry(ext_name="q_lims", int_name="q_lims", optional=True),
     ParamMapEntry(ext_name="raw_data_cropping_values", int_name="raw_data_crop_values"),

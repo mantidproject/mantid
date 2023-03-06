@@ -93,7 +93,7 @@ def _focus_one_ws(
         empty_can_subtraction_method,
         paalman_pings_events_per_point,
     )
-    if instrument._inst_settings.per_detector:
+    if instrument._inst_settings.per_detector_vanadium:
         # per detector routine
         input_workspace = apply_per_detector_corrections(
             input_workspace,
@@ -121,7 +121,7 @@ def _focus_one_ws(
     instrument.apply_calibration_to_focused_data(focused_ws)
 
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, OutputWorkspace=focused_ws, Target="TOF")
-    if not instrument._inst_settings.per_detector and perform_vanadium_norm:
+    if not instrument._inst_settings.per_detector_vanadium and perform_vanadium_norm:
         # per bank routine
         calibrated_spectra_list = _apply_vanadium_corrections(
             instrument=instrument, input_workspace=focused_ws, vanadium_splines=vanadium_path
