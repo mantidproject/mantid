@@ -174,10 +174,12 @@ void ALFInstrumentPresenter::updateInstrumentViewFromModel() {
 }
 
 void ALFInstrumentPresenter::updateAnalysisViewFromModel() {
+  m_view->disable("Processing selection");
   if (m_model->hasSelectedTubes()) {
     m_algorithmManager->createWorkspace(m_model->createWorkspaceAlgorithmProperties(m_view->getInstrumentActor()));
   } else {
     m_analysisPresenter->setExtractedWorkspace(nullptr, {});
+    m_view->enable();
   }
 }
 
@@ -191,6 +193,7 @@ void ALFInstrumentPresenter::notifyScaleXComplete(Mantid::API::MatrixWorkspace_s
 
 void ALFInstrumentPresenter::notifyRebunchComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) {
   m_analysisPresenter->setExtractedWorkspace(workspace, m_model->twoThetasClosestToZero());
+  m_view->enable();
 }
 
 } // namespace MantidQt::CustomInterfaces

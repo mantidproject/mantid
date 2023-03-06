@@ -273,6 +273,7 @@ public:
     std::vector<double> twoThetas{1.0, 2.0};
     EXPECT_CALL(*m_model, twoThetasClosestToZero()).Times(1).WillOnce(Return(twoThetas));
     EXPECT_CALL(*m_analysisPresenter, setExtractedWorkspace(_, twoThetas)).Times(1);
+    EXPECT_CALL(*m_view, enable()).Times(1);
 
     m_presenter->notifyRebunchComplete(nullptr);
   }
@@ -320,6 +321,7 @@ private:
   }
 
   void expectUpdateAnalysisViewFromModel(bool hasTubes = true) {
+    EXPECT_CALL(*m_view, disable("Processing selection")).Times(1);
     EXPECT_CALL(*m_model, hasSelectedTubes()).Times(1).WillOnce(Return(hasTubes));
 
     if (hasTubes) {
@@ -328,6 +330,7 @@ private:
       EXPECT_CALL(*m_algorithmManager, createWorkspace(NotNull())).Times(1);
     } else {
       EXPECT_CALL(*m_analysisPresenter, setExtractedWorkspace(IsNull(), std::vector<double>{})).Times(1);
+      EXPECT_CALL(*m_view, enable()).Times(1);
     }
   }
 
