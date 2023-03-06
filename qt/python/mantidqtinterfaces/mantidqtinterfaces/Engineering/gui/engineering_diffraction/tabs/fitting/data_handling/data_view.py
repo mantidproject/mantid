@@ -88,12 +88,6 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     def set_on_plotBG_clicked(self, slot):
         self.button_plotBG.clicked.connect(slot)
 
-    def set_on_seq_fit_clicked(self, slot):
-        self.button_SeqFit.clicked.connect(slot)
-
-    def set_on_serial_fit_clicked(self, slot):
-        self.button_SerialFit.clicked.connect(slot)
-
     def set_on_table_cell_changed(self, slot):
         # this signal gets triggered from a separate thread sometimes (eg load). So to make the handler
         # more simple, always issue as a queued signal
@@ -122,10 +116,6 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
 
     def set_inspect_bg_button_enabled(self, enabled):
         self.button_plotBG.setEnabled(enabled)
-
-    def set_fit_buttons_enabled(self, enabled):
-        self.button_SeqFit.setEnabled(enabled)
-        self.button_SerialFit.setEnabled(enabled)
 
     def add_table_row(self, run_no, bank, plotted, bgsub, niter, xwindow, SG):
         row_no = self.table_selection.rowCount()
@@ -214,7 +204,7 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         self.proxy_model.text_filter += "*"  # Allows browse for '(No Unit Filter)' with a specified region
 
         # Keep "No Region/Unit Filter" text grey and other text black
-        for (combo_box, current_text) in ((self.combo_region, region), (self.combo_xunit, xunit)):
+        for combo_box, current_text in ((self.combo_region, region), (self.combo_xunit, xunit)):
             if current_text[0:2] == "No":  # No Unit or Region Filter
                 combo_box.setStyleSheet("color: grey")
                 for index in range(1, combo_box.count()):

@@ -27,8 +27,6 @@ class FittingDataPresenter(object):
         self.view.set_on_remove_selected_clicked(self._remove_selected_tracked_workspaces)
         self.view.set_on_remove_all_clicked(self._remove_all_tracked_workspaces)
         self.view.set_on_plotBG_clicked(self._plotBG)
-        self.view.set_on_seq_fit_clicked(self._start_seq_fit)
-        self.view.set_on_serial_fit_clicked(self._start_serial_fit)
         self.view.set_on_table_cell_changed(self._handle_table_cell_changed)
         self.view.set_on_region_changed(self._update_file_filter)
         self.view.set_on_xunit_changed(self._update_file_filter)
@@ -38,25 +36,18 @@ class FittingDataPresenter(object):
         self.plot_added_notifier = GenericObservable()
         self.plot_removed_notifier = GenericObservable()
         self.all_plots_removed_notifier = GenericObservable()
-        self.fit_all_started_notifier = GenericObservable()
         # Observers
-        self.fit_enabled_observer = GenericObserverWithArgPassing(self.set_fit_enabled)
         self.focus_run_observer = GenericObserverWithArgPassing(self.view.set_default_files)
-
-    def set_fit_enabled(self, fit_enabled):
-        self.view.set_fit_buttons_enabled(fit_enabled)
 
     def fit_completed(self, fit_props):
         if fit_props:
             self.model.update_fit(fit_props)
 
-    def _start_seq_fit(self):
-        ws_name_list = self.model.get_active_ws_sorted_by_primary_log()
-        self.fit_all_started_notifier.notify_subscribers((ws_name_list, True))
+    def get_sorted_active_ws_list(self):
+        return self.model.get_active_ws_sorted_by_primary_log()
 
-    def _start_serial_fit(self):
-        ws_name_list = self.model.get_active_ws_name_list()
-        self.fit_all_started_notifier.notify_subscribers((ws_name_list, False))
+    def get_active_ws_list(self):
+        return self.model.get_active_ws_name_list()
 
     def _update_file_filter(self, region, xunit):
         self.view.update_file_filter(region, xunit)

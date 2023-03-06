@@ -34,6 +34,7 @@ class FittingPlotPresenter(object):
         self.workspace_added_observer = GenericObserverWithArgPassing(self.add_workspace_to_plot)
         self.workspace_removed_observer = GenericObserverWithArgPassing(self.remove_workspace_from_plot)
         self.all_workspaces_removed_observer = GenericObserver(self.clear_plot)
+        self.fit_all_started_notifier = GenericObservable()
         self.fit_all_done_notifier = GenericObservable()
 
         self.setup_toolbar()
@@ -96,10 +97,10 @@ class FittingPlotPresenter(object):
         self.view.update_browser(status=status, func_str=function_string, setup_name=ws_name)
 
     def do_serial_fit(self):
-        pass
+        self.fit_all_started_notifier.notify_subscribers(False)
 
     def do_seq_fit(self):
-        pass
+        self.fit_all_started_notifier.notify_subscribers(True)
 
     def do_fit_all_async(self, ws_names_list, do_sequential=True):
         previous_fit_browser = self.view.read_fitprop_from_browser()
