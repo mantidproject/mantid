@@ -122,15 +122,18 @@ def _focus_one_ws(
     instrument.apply_calibration_to_focused_data(focused_ws)
 
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, OutputWorkspace=focused_ws, Target="TOF")
-    if not instrument._inst_settings.per_detector_vanadium and perform_vanadium_norm:
-        # per bank routine
-        calibrated_spectra_list = _apply_vanadium_corrections(
-            instrument=instrument, input_workspace=focused_ws, vanadium_splines=vanadium_path
-        )
+    if perform_vanadium_norm:
+        if instrument._inst_settings.per_detector_vanadium:
+            focused_workspace = divide_by_number_of_detectors_in_bank(focused_ws, run_details.grouping_file_path)
+            focused_workspace = convert_between_distribution(focused_workspace, "To")
+            calibrated_spectra_list = common.extract_ws_spectra(focused_workspace)
+        else:
+            # per bank routine
+            calibrated_spectra_list = _apply_vanadium_corrections(
+                instrument=instrument, input_workspace=focused_ws, vanadium_splines=vanadium_path
+            )
     else:
-        focused_workspace = divide_by_number_of_detectors_in_bank(focused_ws, run_details.grouping_file_path)
-        focused_workspace = convert_between_distribution(focused_workspace, "To")
-        calibrated_spectra_list = common.extract_ws_spectra(focused_workspace)
+        calibrated_spectra_list = common.extract_ws_spectra(focused_ws)
 
     output_spectra = instrument._crop_banks_to_user_tof(calibrated_spectra_list)
 
