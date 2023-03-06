@@ -43,6 +43,8 @@ class FittingPlotPresenter(object):
     def setup_toolbar(self):
         self.view.set_slot_for_display_all()
         self.view.set_slot_for_fit_toggled(self.fit_toggle)
+        self.view.set_slot_for_serial_fit(self.do_serial_fit)
+        self.view.set_slot_for_seq_fit(self.do_seq_fit)
 
     def add_workspace_to_plot(self, ws):
         axes = self.view.get_axes()
@@ -92,6 +94,12 @@ class FittingPlotPresenter(object):
             status = fitprop["status"]
             ws_name = fitprop["properties"]["InputWorkspace"]
         self.view.update_browser(status=status, func_str=function_string, setup_name=ws_name)
+
+    def do_serial_fit(self):
+        pass
+
+    def do_seq_fit(self):
+        pass
 
     def do_fit_all_async(self, ws_names_list, do_sequential=True):
         previous_fit_browser = self.view.read_fitprop_from_browser()
