@@ -272,6 +272,8 @@ public:
 
   void test_notifyCropWorkspaceComplete_triggers_the_model_to_calculate_an_estimate_peak() {
     EXPECT_CALL(*m_model, calculateEstimate(_)).Times(1);
+    EXPECT_CALL(*m_view, enable()).Times(1);
+
     m_presenter->notifyCropWorkspaceComplete(nullptr);
   }
 
@@ -301,6 +303,7 @@ private:
   void expectCalculateEstimate(MatrixWorkspace_sptr const &workspace) {
     EXPECT_CALL(*m_model, isDataExtracted()).Times(1).WillOnce(Return(workspace != nullptr));
     if (workspace) {
+      EXPECT_CALL(*m_view, disable("Calculating estimate parameters")).Times(1);
       EXPECT_CALL(*m_view, getRange()).Times(1).WillRepeatedly(Return(m_range));
 
       EXPECT_CALL(*m_model, cropWorkspaceProperties(m_range))
