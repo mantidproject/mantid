@@ -335,12 +335,13 @@ def create_subplots(nplots, fig=None, add_cbar_axis=False):
     fig.set_layout_engine(layout="tight")
 
     if add_cbar_axis:
-        # The right most column of the GridSpec is made a SubGridSpec to facilitate the colour bar
-        # This is done so that the colour bar can have a close spacing to the right most column
+        # The right most column of the GridSpec is made a SubGridSpec to facilitate both the colour bar
+        # and the plots in the rightmost column.
+        # This is done (instead of adding another column for the colour bar) so that the colour bar can have a narrow
+        # spacing to the right most plots, without effecting the other column spacings.
         # Keeping the colour bar in the GridSpec rather than alongside it means it behaves much nicer
-        # when resizing QT windows
+        # when within a resizing QT window
         # The relative width of 11.55 for the right most column ensures that all plots remain an equal size (**)
-        # It comes from ((10+1)/2) * 0.1
         gs = GridSpec(nrows, ncols, width_ratios=[10.0] * (ncols - 1) + [11.55])
         gs_and_cbar = gs[:, -1].subgridspec(nrows, 2, width_ratios=[10, 1], wspace=0.1)
         if ncols > 1:
@@ -354,7 +355,7 @@ def create_subplots(nplots, fig=None, add_cbar_axis=False):
             else:  # last column so add to colour bar grid spec
                 axes[i] = fig.add_subplot(gs_and_cbar[i // ncols, 0], projection=PROJECTION)
                 # avoid possible collision between x axis tick labels and colour bar
-                # ** this may also cause plots in the right most column to be slightly narrower than the others
+                # (**) this may also cause plots in the right most column to be slightly narrower than the others
                 make_axes_area_auto_adjustable(axes[i], pad=0, adjust_dirs=["right"])
         cbar_axis = fig.add_subplot(gs_and_cbar[:, 1])
         fig.sca(axes[-1])
