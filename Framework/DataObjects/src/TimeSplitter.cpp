@@ -304,7 +304,7 @@ std::size_t TimeSplitter::numRawValues() const { return m_roi_map.size(); }
  * @param tofCorrect : rescale and shift the TOF values (factor*TOF + shift)
  * @param factor : rescale the TOF values by a dimensionless factor.
  * @param shift : shift the TOF values after rescaling, in units of microseconds.
- * @raises RunTimeError : the event list is of type Mantid::API::EventType::WEIGHTED_NOTIME
+ * @throws RunTimeError : the event list is of type Mantid::API::EventType::WEIGHTED_NOTIME
  */
 void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventList *> partials, bool pulseTof,
                                   bool tofCorrect, double factor, double shift) const {
