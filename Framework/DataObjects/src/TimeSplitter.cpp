@@ -313,14 +313,30 @@ void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventLi
     throw std::runtime_error("EventList::splitByTime() called on an EventList "
                              "that no longer has time information.");
 
+  // Initialize the detector ID's and event type of the destination event lists
   events.initializePartials(partials);
 
   if (this->empty())
     return;
 
-  // sort the list of events and return their times, in nanoseconds
-  std::vector<int64_t> times = this->sortEventList(events, pulseTof, tofCorrect, factor, shift);
+  // sort the list in-place
+  if (pulseTof)
+    // this sorting is preserved under linear transformation tof --> factor*tof+shift with factor>0
+    events.sortPulseTimeTOF();
+  else
+    events.sortPulseTime();
 
+  // fetch the times associated to each event
+  std::vector<DateAndTime> times;
+  if (pulseTof)
+    if (tofCorrect)
+      times = events.getPulseTOFTimesAtSample(factor, shift);
+    else
+      times = events.getPulseTOFTimes();
+  else
+    times = events.getPulseTimes();
+
+  // split the events
   switch (events.getEventType()) {
   case EventType::TOF:
     this->splitEventVec(times, events.getEvents(), partials);
@@ -331,47 +347,6 @@ void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventLi
   default:
     throw std::runtime_error("Unhandled event type");
   }
-}
-
-/**
- * In-place sort a list of input events either by Pulse time or by Pulse+TOF time.
- *
- * The returned sorted vector of times will contain one of the following list of times:
- * - Pulse time for each event, when pulseTof==false
- * - Pulse + TOF time for each event, when pulseTof==true && tofCorrect==false
- * - Pulse + (factor * TOF + shift) for each event, when pulseTof==true && tofCorrect==true
- *
- * @param events : list of input events
- * @param pulseTof : if True, split according to Pulse + TOF time, otherwise split by Pulse time
- * @param tofCorrect : rescale and shift the TOF values (factor*TOF + shift)
- * @param factor : rescale the TOF values by a dimensionless factor.
- * @param shift : shift the TOF values after rescaling, in units of microseconds.
- * @return : times that will be compared again the splitter boundaries, in units of nanoseconds.
- */
-std::vector<int64_t> TimeSplitter::sortEventList(const EventList &events, bool pulseTof, bool tofCorrect, double factor,
-                                                 double shift) const {
-  // sort the list in-place
-  if (pulseTof)
-    // this sorting is preserved under linear transformation tof --> factor*tof+shift with factor>0
-    events.sortPulseTimeTOF();
-  else
-    events.sortPulseTime();
-
-  // extract the times we'll be comparing against the splitter times
-  std::vector<int64_t> sortedTimes;
-  auto pulseTimes = events.getPulseTimes();
-  std::transform(pulseTimes.cbegin(), pulseTimes.cend(), std::back_inserter(sortedTimes),
-                 [](const DateAndTime &time) { return time.totalNanoseconds(); });
-  if (pulseTof) {
-    auto tofs = events.getTofs(); // units of microseconds
-    if (tofCorrect)               // modify tofs in-place
-      std::for_each(tofs.begin(), tofs.end(), [&](double &tof) { tof = factor * tof + shift; });
-    constexpr double micro2nanosec{1000}; // from microsecond to nanosecond
-    for (size_t i = 0; i < sortedTimes.size(); i++)
-      sortedTimes[i] += static_cast<int64_t>(tofs[i] * micro2nanosec); // add TOF to pulse time
-  }
-
-  return sortedTimes;
 }
 
 /**
@@ -388,7 +363,7 @@ std::vector<int64_t> TimeSplitter::sortEventList(const EventList &events, bool p
  * @throws : if the size of times and events are different
  */
 template <typename EVENTTYPE>
-void TimeSplitter::splitEventVec(const std::vector<int64_t> &times, const std::vector<EVENTTYPE> &events,
+void TimeSplitter::splitEventVec(const std::vector<DateAndTime> &times, const std::vector<EVENTTYPE> &events,
                                  std::map<int, EventList *> partials) const {
   assert(times.size() == events.size());
   // initialize the iterator over the splitter

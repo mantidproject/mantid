@@ -50,12 +50,9 @@ public:
 
 private:
   void clearAndReplace(const DateAndTime &start, const DateAndTime &stop, const int value);
-  /// In-place sort a list of input events either by Pulse time or by Pulse+TOF time
-  std::vector<int64_t> sortEventList(const EventList &events, bool pulseTof = false, bool tofCorrect = false,
-                                     double factor = 1.0, double shift = 0.0) const;
   /// Distribute a list of events by comparing a vector of times against the splitter boundaries.
   template <typename EVENTTYPE>
-  void splitEventVec(const std::vector<int64_t> &times, const std::vector<EVENTTYPE> &events,
+  void splitEventVec(const std::vector<DateAndTime> &times, const std::vector<EVENTTYPE> &events,
                      std::map<int, EventList *> partials) const;
   /// Print the (destination index | DateAndTime boundary) pairs of this splitter.
   std::string debugPrint() const;
