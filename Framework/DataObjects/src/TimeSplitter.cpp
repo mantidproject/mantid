@@ -313,7 +313,7 @@ void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventLi
     throw std::runtime_error("EventList::splitByTime() called on an EventList "
                              "that no longer has time information.");
 
-  this->initializePartials(events, partials);
+  events.initializePartials(partials);
 
   if (this->empty())
     return;
@@ -331,30 +331,6 @@ void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventLi
   default:
     throw std::runtime_error("Unhandled event type");
   }
-}
-
-/**
- * Initialize the detector ID's and event type of the destination event lists.
- * @param events : list of input events
- * @param partials : resulting partial lists of events
- */
-void TimeSplitter::initializePartials(const EventList &events, std::map<int, EventList *> partials) const {
-  // collect the state from events which is to be transferred to the partials
-
-  bool removeDetIDs{true};
-  const auto &detIDs = events.getDetectorIDs();
-  auto histogram = events.getHistogram();
-  auto eventType = events.getEventType();
-  // lambda expression initializing one partial
-  auto initPartial = [&](EventList *partial) {
-    partial->clear(removeDetIDs);
-    partial->setDetectorIDs(detIDs);
-    partial->setHistogram(histogram); // problem here!
-    partial->switchTo(eventType);
-  };
-  // iterate over the partials
-  std::for_each(partials.cbegin(), partials.cend(),
-                [&](const std::pair<int, EventList *> &pair) { initPartial(pair.second); });
 }
 
 /**

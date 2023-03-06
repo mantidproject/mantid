@@ -50,8 +50,6 @@ public:
 
 private:
   void clearAndReplace(const DateAndTime &start, const DateAndTime &stop, const int value);
-  /// Initialize the detector ID's and event type of the destination event lists
-  void initializePartials(const EventList &events, std::map<int, EventList *> partials) const;
   /// In-place sort a list of input events either by Pulse time or by Pulse+TOF time
   std::vector<int64_t> sortEventList(const EventList &events, bool pulseTof = false, bool tofCorrect = false,
                                      double factor = 1.0, double shift = 0.0) const;

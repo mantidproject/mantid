@@ -3833,6 +3833,7 @@ void EventList::filterByPulseTime(Kernel::TimeROI *timeRoi, EventList &output) c
     break;
   }
 }
+
 //------------------------------------------------------------------------------------------------
 /** @brief Perform an in-place filtering on a vector of either TofEvent's or
  *WeightedEvent's.
@@ -3953,6 +3954,31 @@ void EventList::filterInPlace(Kernel::SplittingIntervalVec &splitter) {
                              "EventList that no longer has time information.");
     break;
   }
+}
+
+/**
+ * Initialize the detector ID's and event type of the destination event lists when splitting this list.
+ * @param partials : resulting partial lists of events after splitting's done
+ */
+void EventList::initializePartials(std::map<int, EventList *> partials) const {
+
+  // collect the state from events which is to be transferred to the partials
+  bool removeDetIDs{true};
+  const auto &detIDs = this->getDetectorIDs();
+  auto histogram = this->getHistogram();
+  auto eventType = this->getEventType();
+
+  // lambda expression initializing one partial
+  auto initPartial = [&](EventList *partial) {
+    partial->clear(removeDetIDs);
+    partial->setDetectorIDs(detIDs);
+    partial->setHistogram(histogram); // problem here!
+    partial->switchTo(eventType);
+  };
+
+  // iterate over the partials
+  std::for_each(partials.cbegin(), partials.cend(),
+                [&](const std::pair<int, EventList *> &pair) { initPartial(pair.second); });
 }
 
 //------------------------------------------------------------------------------------------------

@@ -274,6 +274,9 @@ public:
 
   void filterInPlace(Kernel::SplittingIntervalVec &splitter);
 
+  /// Initialize the detector ID's and event type of the destination event lists when splitting this list
+  void initializePartials(std::map<int, EventList *> partials) const;
+
   void splitByTime(Kernel::SplittingIntervalVec &splitter, std::vector<EventList *> outputs) const;
 
   void splitByFullTime(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs, bool docorrection,
@@ -432,6 +435,7 @@ private:
   template <class T>
   static void filterByTimeROIHelper(std::vector<T> &events, const Kernel::SplittingIntervalVec &intervals,
                                     std::vector<T> &output);
+
   template <class T> void filterInPlaceHelper(Kernel::SplittingIntervalVec &splitter, typename std::vector<T> &events);
   template <class T>
   void splitByTimeHelper(Kernel::SplittingIntervalVec &splitter, std::vector<EventList *> outputs,
