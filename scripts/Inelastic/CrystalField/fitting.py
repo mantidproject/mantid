@@ -1038,9 +1038,9 @@ class CrystalField(object):
         is_integral = J2 % 2 == 0
         if index is None:
             index = range(ev.shape[0])
-        elif index >= ev.shape[0]:
-            raise Exception("IndexError: Index %s out of range" % index)
         elif not hasattr(index, "__iter__"):
+            if index >= ev.shape[0]:
+                raise Exception("IndexError: Index %s out of range" % index)
             index = [index]
         for lv in index:
             print(("Ground" if lv == 0 else f"{lv}. excited") + " state wavefunctions are:")
