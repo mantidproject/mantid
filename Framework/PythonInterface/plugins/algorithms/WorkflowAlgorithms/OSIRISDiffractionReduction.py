@@ -692,6 +692,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             output_ws.setY(i, result_y)
             output_ws.setE(i, result_e)
 
+        self.setProperty("OutputWorkspace", output_ws)
+
     def _extract_ws_spectra(self, ws_to_split, drange):
         """
         Extracts individual spectra from the workspace into a list of workspaces. Each workspace will contain
