@@ -185,7 +185,7 @@ class AbstractInst(object):
         if self._inst_settings.masking_file_name is not None:
             masking_file_path = os.path.join(self.calibration_dir, self._inst_settings.masking_file_name)
             bragg_mask_list = common.read_masking_file(masking_file_path)
-            focused_vanadium_banks = common.apply_bragg_peaks_masking(focused_vanadium_banks, mask_list=bragg_mask_list)
+            focused_vanadium_banks = common.apply_bragg_peaks_masking(focused_vanadium_banks, x_values_to_mask_list=bragg_mask_list)
         output = common.spline_workspaces(focused_vanadium_spectra=focused_vanadium_banks, num_splines=self._inst_settings.spline_coeff)
         return output
 

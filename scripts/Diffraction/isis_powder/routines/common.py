@@ -38,7 +38,7 @@ def apply_bragg_peaks_masking(workspaces_to_mask, x_values_to_mask_list, ws_indi
     """
     Mask a series of peaks defined by the lower/upper bounds
     :param workspaces_to_mask: Mask these workspaces
-    :param mask_list: A list of lists. For each ws index, a list of pairs of peak X min/max for masking
+    :param x_values_to_mask_list: A list of lists. For each ws index, a list of pairs of peak X min/max for masking
     :param ws_indices_to_mask: A list of ws indices to mask in each workspace
     :return: A list of masked workspaces
     """
