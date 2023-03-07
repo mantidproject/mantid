@@ -25,7 +25,7 @@ constexpr int DEFAULT_TARGET{0};
 
 void assertIncreasing(const DateAndTime &start, const DateAndTime &stop) {
   if (start > stop)
-    throw std::runtime_error("TODO message");
+    throw std::runtime_error("start time found at a later time than stop time");
 }
 
 /// static Logger definition
@@ -241,7 +241,7 @@ std::vector<int> TimeSplitter::outputWorkspaceIndices() const {
   std::set<int> outputSet;
 
   // copy all the non-negative output destination indices
-  for (const auto iter : m_roi_map) {
+  for (const auto &iter : m_roi_map) {
     if (iter.second > NO_TARGET)
       outputSet.insert(iter.second);
   }
@@ -304,14 +304,14 @@ std::size_t TimeSplitter::numRawValues() const { return m_roi_map.size(); }
  * @param tofCorrect : rescale and shift the TOF values (factor*TOF + shift)
  * @param factor : rescale the TOF values by a dimensionless factor.
  * @param shift : shift the TOF values after rescaling, in units of microseconds.
- * @throws RunTimeError : the event list is of type Mantid::API::EventType::WEIGHTED_NOTIME
+ * @throws invalid_argument : the event list is of type Mantid::API::EventType::WEIGHTED_NOTIME
  */
 void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventList *> partials, bool pulseTof,
                                   bool tofCorrect, double factor, double shift) const {
 
   if (events.getEventType() == EventType::WEIGHTED_NOTIME)
-    throw std::runtime_error("EventList::splitByTime() called on an EventList "
-                             "that no longer has time information.");
+    throw std::invalid_argument("EventList::splitByTime() called on an EventList "
+                                "that no longer has time information.");
 
   // Initialize the detector ID's and event type of the destination event lists
   events.initializePartials(partials);
@@ -365,7 +365,8 @@ void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventLi
 template <typename EVENTTYPE>
 void TimeSplitter::splitEventVec(const std::vector<DateAndTime> &times, const std::vector<EVENTTYPE> &events,
                                  std::map<int, EventList *> partials) const {
-  assert(times.size() == events.size());
+  if (times.size() != events.size())
+    throw std::invalid_argument("Vector of event times and vector of events have different size");
   // initialize the iterator over the splitter
   // it assumes the splitter keys (DateAndTime objects) are sorted by increasing time.
   auto itSplitter = m_roi_map.cbegin(); // iterator over the splitter
@@ -398,8 +399,7 @@ void TimeSplitter::splitEventVec(const std::vector<DateAndTime> &times, const st
         stop = itSplitter->first;
     }
     if (partial) {
-      const EVENTTYPE eventCopy(*itEvent);
-      partial->addEventQuickly(eventCopy);
+      partial->addEventQuickly(*itEvent); // emplaces a copy of *itEvent in partial
     }
     // advance both the iterator over events and times
     itTime++;

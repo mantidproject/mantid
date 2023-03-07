@@ -20,7 +20,6 @@ namespace Core {
 class DateAndTime;
 }
 } // namespace Types
-using Types::Core::DateAndTime;
 namespace Kernel {
 class SplittingInterval;
 using SplittingIntervalVec = std::vector<SplittingInterval>;
@@ -253,13 +252,13 @@ public:
   /// Return the list of event weight error values
   void getWeightErrors(std::vector<double> &weightErrors) const override;
 
-  std::vector<DateAndTime> getPulseTimes() const override;
+  std::vector<Types::Core::DateAndTime> getPulseTimes() const override;
 
   /// Get the Pulse-time + TOF for each event in this EventList
-  std::vector<DateAndTime> getPulseTOFTimes() const;
+  std::vector<Types::Core::DateAndTime> getPulseTOFTimes() const;
 
   /// Get the Pulse-time + time-of-flight of the neutron up to the sample, for each event in this EventList
-  std::vector<DateAndTime> getPulseTOFTimesAtSample(const double &factor, const double &shift) const;
+  std::vector<Types::Core::DateAndTime> getPulseTOFTimesAtSample(const double &factor, const double &shift) const;
 
   void setTofs(const MantidVec &tofs) override;
 
@@ -422,7 +421,7 @@ private:
 
   /// Compute a time (for instance, pulse-time plus TOF) associated to each event in the list
   template <typename UnaryOperation>
-  std::vector<DateAndTime> eventTimesCalculator(const UnaryOperation &timesCalc) const;
+  std::vector<Types::Core::DateAndTime> eventTimesCalculator(const UnaryOperation &timesCalc) const;
 
   template <class T> static void setTofsHelper(std::vector<T> &events, const std::vector<double> &tofs);
   template <class T>

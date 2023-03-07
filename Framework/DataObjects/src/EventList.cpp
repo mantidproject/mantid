@@ -1270,10 +1270,7 @@ MantidVec *EventList::makeDataE() const {
 }
 
 /// Returns a copy of the Histogram associated with this spectrum.
-HistogramData::Histogram EventList::getHistogram() const {
-  HistogramData::Histogram ret(m_histogram);
-  return ret;
-}
+HistogramData::Histogram EventList::getHistogram() const { return m_histogram; }
 
 HistogramData::Histogram EventList::histogram() const {
   HistogramData::Histogram ret(m_histogram);
@@ -3971,7 +3968,7 @@ void EventList::initializePartials(std::map<int, EventList *> partials) const {
   // lambda expression initializing one partial
   auto initPartial = [&](EventList *partial) {
     partial->clear(removeDetIDs);
-    partial->setDetectorIDs(detIDs);
+    partial->copyInfoFrom(*this);
     partial->setHistogram(histogram); // problem here!
     partial->switchTo(eventType);
   };
