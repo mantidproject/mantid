@@ -189,6 +189,54 @@ class AbstractInst(object):
         output = common.spline_workspaces(focused_vanadium_spectra=focused_vanadium_banks, num_splines=self._inst_settings.spline_coeff)
         return output
 
+    def _spline_vanadium_ws_per_detector(self, vanadium_ws, grouping_file_path):
+        """
+        Fits a spline to each of the spectra in the supplied vanadium workspace. Used for per detector V corrections
+        :param vanadium_ws: workspace that splines will be fitted to
+        :param grouping_file_path: path to the grouping file
+        :return: The splined vanadium workspace
+        """
+        if self._inst_settings.masking_file_name is not None:
+            masking_file_path = os.path.join(self.calibration_dir, self._inst_settings.masking_file_name)
+            cal_workspace = mantid.LoadCalFile(
+                InputWorkspace=vanadium_ws,
+                CalFileName=grouping_file_path,
+                Workspacename="cal_workspace",
+                MakeOffsetsWorkspace=False,
+                MakeMaskWorkspace=False,
+                MakeGroupingWorkspace=True,
+            )
+            det_ids_on_bank_to_mask = {}
+            for ws_index in range(cal_workspace.getNumberHistograms()):
+                grouping = cal_workspace.dataY(ws_index)[0]
+                if grouping > 0:
+                    det_id = cal_workspace.getDetectorIDs(ws_index)[0]
+                    if grouping in det_ids_on_bank_to_mask:
+                        det_ids_on_bank_to_mask[grouping].append(det_id)
+                    else:
+                        det_ids_on_bank_to_mask[grouping] = [det_id]
+            bragg_mask_list = common.read_masking_file(masking_file_path)
+            for bank_number, peaks_on_bank in enumerate(bragg_mask_list, 1):
+                ws_indices_on_bank_to_mask = []
+                for workspace_index in range(vanadium_ws.getNumberHistograms()):
+                    det_id = vanadium_ws.getSpectrum(workspace_index).getDetectorIDs()[0]
+                    if bank_number in det_ids_on_bank_to_mask:
+                        if det_id in det_ids_on_bank_to_mask[bank_number]:
+                            ws_indices_on_bank_to_mask.append(workspace_index)
+                common.apply_bragg_peaks_masking([vanadium_ws], [peaks_on_bank], ws_indices_on_bank_to_mask)
+            common.remove_intermediate_workspace(cal_workspace)
+
+        vanadium_ws = mantid.ConvertUnits(InputWorkspace=vanadium_ws, Target="TOF", OutputWorkspace=vanadium_ws)
+        vanadium_ws = mantid.SplineBackground(
+            InputWorkspace=vanadium_ws,
+            WorkspaceIndex=0,
+            EndWorkspaceIndex=vanadium_ws.getNumberHistograms() - 1,
+            NCoeff=self._inst_settings.spline_coeff_per_detector,
+            OutputWorkspace=vanadium_ws,
+            EnableLogging=False,
+        )
+        return vanadium_ws
+
     def _crop_banks_to_user_tof(self, focused_banks):
         """
         Crops to a user specified TOF range on a bank-by-bank basis. This is called after focusing a sample and

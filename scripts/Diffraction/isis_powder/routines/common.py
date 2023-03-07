@@ -34,20 +34,24 @@ ADVANCED_CONFIG = {
 }
 
 
-def apply_bragg_peaks_masking(workspaces_to_mask, mask_list):
+def apply_bragg_peaks_masking(workspaces_to_mask, x_values_to_mask_list, ws_indices_to_mask=[0]):
     """
     Mask a series of peaks defined by the lower/upper bounds
     :param workspaces_to_mask: Mask these workspaces
-    :param mask_list: A list of pairs of peak X min/max for masking
+    :param mask_list: A list of lists. For each ws index, a list of pairs of peak X min/max for masking
+    :param ws_indices_to_mask: A list of ws indices to mask in each workspace
     :return: A list of masked workspaces
     """
     output_workspaces = list(workspaces_to_mask)
 
-    for ws_index, (bank_mask_list, workspace) in enumerate(zip(mask_list, output_workspaces)):
-        output_name = "masked_vanadium-" + str(ws_index + 1)
-        for mask_params in bank_mask_list:
+    for ws_index, (ws_index_mask_list, workspace) in enumerate(zip(x_values_to_mask_list, output_workspaces)):
+        for mask_params in ws_index_mask_list:
             output_workspaces[ws_index] = mantid.MaskBins(
-                InputWorkspace=output_workspaces[ws_index], OutputWorkspace=output_name, XMin=mask_params[0], XMax=mask_params[1]
+                InputWorkspace=output_workspaces[ws_index],
+                OutputWorkspace=output_workspaces[ws_index],
+                XMin=mask_params[0],
+                XMax=mask_params[1],
+                InputWorkspaceIndexSet=ws_indices_to_mask,
             )
     return output_workspaces
 
