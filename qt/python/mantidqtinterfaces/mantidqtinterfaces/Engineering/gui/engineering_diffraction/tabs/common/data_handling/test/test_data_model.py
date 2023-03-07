@@ -10,6 +10,7 @@ from unittest import mock
 from unittest.mock import patch
 from numpy import isnan, nan
 from mantid.kernel import UnitParams, UnitParametersMap
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.data_handling.data_model import FittingDataModel
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.output_sample_logs import (
     write_table_row,
     _generate_workspace_name,
@@ -17,7 +18,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.outp
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.data_handling.data_model import FittingDataModel
 from testhelpers import assertRaisesNothing
 
-data_model_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.data_handling.data_model"
+data_model_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.data_handling.data_model"
 output_sample_log_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.output_sample_logs"
 
 

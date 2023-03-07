@@ -4,9 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.data_handling.data_model import FittingDataModel
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.data_handling.data_view import FittingDataView
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.data_handling.data_presenter import FittingDataPresenter
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.data_handling.data_model import FittingDataModel
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.data_handling.data_view import FittingDataView
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.data_handling.data_presenter import FittingDataPresenter
 
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.fitting_ads_observer import FittingADSObserver
 

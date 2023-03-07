@@ -8,9 +8,9 @@ import unittest
 
 from unittest import mock
 from unittest.mock import patch
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.data_handling import data_model, data_presenter, data_view
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.data_handling import data_model, data_presenter, data_view
 
-dir_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.data_handling"
+dir_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.data_handling"
 
 
 def _get_item_checked_mock(_, arg):
