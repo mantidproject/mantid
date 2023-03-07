@@ -25,8 +25,6 @@ class SXD(BaseSX):
             return
         for irun, run in enumerate(runs):
             wsname = self.load_run(run)
-            self._minus_workspaces(wsname, self.empty_ws)
-            self._divide_workspaces(wsname, self.van_ws)
             # set goniometer
             if self.gonio_axes is not None:
                 # gonio_angles are a list of motor strings (same for all runs)
@@ -35,8 +33,7 @@ class SXD(BaseSX):
                 else:
                     # gonio_angles is a list of individual or tuple motor angles for each run
                     self._set_goniometer_on_ws(wsname, gonio_angles[irun])
-            # correct for empty counts and normalise by vanadium
-            self._minus_workspaces(wsname, self.empty_ws)
+            # normalise by vanadium
             self._divide_workspaces(wsname, self.van_ws)
             # set sample (must be done after gonio to rotate shape) and correct for attenuation
             if self.sample_dict is not None:
@@ -63,41 +60,41 @@ class SXD(BaseSX):
         mantid.NormaliseByCurrent(InputWorkspace=wsname, OutputWorkspace=wsname, EnableLogging=False)
         return wsname
 
+    def _replace_spectra_with_focussed_bank(self, wsname):
+        # important to focus in TOF not d-spacing (lambda would be better but not compatible with Diffractionfocussing)!
+        ws = SXD.retrieve(wsname)
+        banks_foc = mantid.GroupDetectors(
+            InputWorkspace=ws,
+            OutputWorkspace="grouped",
+            IgnoreGroupNumber=False,
+            CopyGroupingFromWorkspace=self.grp_ws,
+            EnableLogging=False,
+        )
+        for igrp in range(self.ngrp):
+            ybank = banks_foc.readY(igrp)
+            ebank = banks_foc.readE(igrp)
+            ybank_sum = ybank.sum()
+            # get detector IDs in raw ws that contribute to focused spectrum
+            foc_spec = banks_foc.getSpectrum(igrp)
+            ispecs = ws.getIndicesFromDetectorIDs(list(foc_spec.getDetectorIDs()))
+            for ispec in ispecs:
+                # assume lambda dep. efficiency differs only by const scale factor between detectors on same bank
+                # also assume that bg counts are subject to same efficiency
+                scale = ws.readY(int(ispec)).sum() / ybank_sum
+                ws.setY(int(ispec), scale * ybank)
+                ws.setE(int(ispec), scale * ebank)
+        mantid.DeleteWorkspace("grouped")
+
     def process_vanadium(self):
         # load empty and vanadium
-        self.empty_ws = self.load_run(self.empty_runno)
+        empty_ws = self.load_run(self.empty_runno)
         self.van_ws = self.load_run(self.van_runno)
         # create grouping file per bank
         self.grp_ws, _, self.ngrp = mantid.CreateGroupingWorkspace(
             InputWorkspace=self.van_ws, GroupDetectorsBy="bank", OutputWorkspace="bank_groups", EnableLogging=False
         )
-        for wsname in [self.empty_ws, self.van_ws]:
-            # important to focus in TOF not d-spacing!
-            banks_foc = mantid.GroupDetectors(
-                InputWorkspace=wsname,
-                OutputWorkspace="grouped",
-                IgnoreGroupNumber=False,
-                CopyGroupingFromWorkspace=self.grp_ws,
-                EnableLogging=False,
-            )
-            mantid.SmoothData(InputWorkspace=wsname, OutputWorkspace=wsname, NPoints=15, EnableLogging=False)
-            ws = SXD.retrieve(wsname)
-            for igrp in range(self.ngrp):
-                ybank = banks_foc.readY(igrp)
-                ebank = banks_foc.readE(igrp)
-                ybank_sum = ybank.sum()
-                # get detector IDs in raw ws that contribute to focused spectrum
-                foc_spec = banks_foc.getSpectrum(igrp)
-                ispecs = ws.getIndicesFromDetectorIDs(list(foc_spec.getDetectorIDs()))
-                for ispec in ispecs:
-                    # assume lambda dep. efficiency differs only by const scale factor between detectors on same bank
-                    # also assume that bg counts are subject to same efficiency
-                    scale = ws.readY(int(ispec)).sum() / ybank_sum
-                    ws.setY(int(ispec), scale * ybank)
-                    ws.setE(int(ispec), scale * ebank)
-        mantid.DeleteWorkspace("grouped")
-        # subtract empty from vanadium
-        self._minus_workspaces(self.van_ws, self.empty_ws)
+        self._minus_workspaces(self.van_ws, empty_ws)
+        self._replace_spectra_with_focussed_bank(self.van_ws)
         # correct vanadium for absorption
         mantid.SetSample(
             self.van_ws,

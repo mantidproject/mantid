@@ -21,8 +21,6 @@ class WishSX(BaseSX):
             return
         for irun, run in enumerate(runs):
             wsname = self.load_run(run)
-            self._minus_workspaces(wsname, self.empty_ws)
-            self._divide_workspaces(wsname, self.van_ws)
             # set goniometer
             if self.gonio_axes is not None:
                 # gonio_angles are a list of motor strings (same for all runs)
@@ -32,7 +30,6 @@ class WishSX(BaseSX):
                     # gonio_angles is a list of individual or tuple motor angles for each run
                     self._set_goniometer_on_ws(wsname, gonio_angles[irun])
             # correct for empty counts and normalise by vanadium
-            self._minus_workspaces(wsname, self.empty_ws)
             self._divide_workspaces(wsname, self.van_ws)
             # set sample (must be done after gonio to rotate shape) and correct for attenuation
             if self.sample_dict is not None:
