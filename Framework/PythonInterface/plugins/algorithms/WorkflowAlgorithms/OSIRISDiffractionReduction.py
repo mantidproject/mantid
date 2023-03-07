@@ -642,6 +642,9 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 ConjoinSpectra(InputWorkspaces=input_workspaces_str, OutputWorkspace=self._output_ws_name)
                 output_ws = mtd[self._output_ws_name]
 
+                delete_workspaces([ws.name() for group in matched_spectra for ws in group])
+                delete_workspaces([ws.name() for ws in merged_spectra])
+
         elif len(result_map) == 1:
             output_ws = list(result_map.values())[0]
         else:
