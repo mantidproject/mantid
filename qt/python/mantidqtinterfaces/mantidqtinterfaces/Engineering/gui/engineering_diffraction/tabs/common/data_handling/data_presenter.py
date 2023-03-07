@@ -39,15 +39,17 @@ class FittingDataPresenter(object):
         # Observers
         self.focus_run_observer = GenericObserverWithArgPassing(self.view.set_default_files)
 
-    def fit_completed(self, fit_props):
-        if fit_props:
-            self.model.update_fit(fit_props)
-
     def get_sorted_active_ws_list(self):
         return self.model.get_active_ws_sorted_by_primary_log()
 
     def get_active_ws_list(self):
         return self.model.get_active_ws_name_list()
+
+    def get_loaded_ws_list(self):
+        return self.model.get_loaded_ws_list()
+
+    def get_log_ws_name(self):
+        return self.model.get_log_workspaces_name()
 
     def _update_file_filter(self, region, xunit):
         self.view.update_file_filter(region, xunit)

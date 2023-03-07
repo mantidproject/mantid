@@ -110,10 +110,12 @@ class FittingPresenterTest(unittest.TestCase):
         self.assertEqual(1, self.presenter.plot_widget.fit_all_done_notifier.notify_subscribers.call_count)
 
     def test_fit_all_done(self):
+        log_ws_name = "bleh"
         self.presenter.plot_widget.update_browser = mock.MagicMock()
         self.presenter.plot_widget.set_final_state_progress_bar = mock.MagicMock()
         self.presenter.enable_view = mock.MagicMock()
-        self.presenter.data_widget.presenter.fit_completed = mock.MagicMock()
+        self.presenter.data_widget.presenter.model.get_log_workspaces_name = mock.MagicMock(return_value=log_ws_name)
+        self.presenter.plot_widget.fit_completed = mock.MagicMock()
 
         self.presenter.plot_widget.fitprop_list = fitprop_list
         self.presenter.plot_widget._finished()
@@ -121,14 +123,15 @@ class FittingPresenterTest(unittest.TestCase):
         self.presenter.plot_widget.update_browser.assert_called_once()
         self.presenter.plot_widget.set_final_state_progress_bar.assert_called_once_with(output_list=fitprop_list)
         self.presenter.enable_view.assert_called_once_with(fit_all=True)
-        self.presenter.data_widget.presenter.fit_completed.assert_called_once_with(fit_props=fitprop_list)
+        self.presenter.plot_widget.fit_completed.assert_called_once_with(fitprop_list, [], [], log_ws_name)
 
     def test_fit_all_done_calls_set_final_state_indirectly(self):
+        self.presenter.data_widget.presenter.model.get_log_workspaces_name = mock.MagicMock(return_value="")
         self.presenter.plot_widget.update_browser = mock.MagicMock()
         self.presenter.plot_widget.update_progress_bar = mock.MagicMock()
         self.presenter.plot_widget.set_final_state_progress_bar = mock.MagicMock()
         self.presenter.enable_view = mock.MagicMock()
-        self.presenter.data_widget.presenter.fit_completed = mock.MagicMock()
+        self.presenter.plot_widget.fit_completed = mock.MagicMock()
 
         self.presenter.plot_widget.fitprop_list = fitprop_list
         self.presenter.plot_widget._finished()
@@ -187,19 +190,20 @@ class FittingPresenterTest(unittest.TestCase):
         mock_manager.assert_has_calls([mock.call.progress_bar(), mock.call.disable()])
 
     def test_fit_done_call_order(self):
+        self.presenter.data_widget.presenter.model.get_log_workspaces_name = mock.MagicMock(return_value="")
         mock_manager = mock.Mock()
         self.presenter.enable_view = mock.MagicMock()
         self.presenter.plot_widget.set_final_state_progress_bar = mock.MagicMock()
-        self.presenter.data_widget.presenter.fit_completed = mock.MagicMock()
+        self.presenter.plot_widget.fit_completed = mock.MagicMock()
         mock_manager.enable, mock_manager.progress_bar, mock_manager.fit_completed = (
             self.presenter.enable_view,
             self.presenter.plot_widget.set_final_state_progress_bar,
-            self.presenter.data_widget.presenter.fit_completed,
+            self.presenter.plot_widget.fit_completed,
         )
 
         self.presenter.fit_done(fitprop_list)
         mock_manager.assert_has_calls(
-            [mock.call.enable(), mock.call.progress_bar(fitprop_list), mock.call.fit_completed(fit_props=fitprop_list)]
+            [mock.call.enable(), mock.call.progress_bar(fitprop_list), mock.call.fit_completed(fitprop_list, [], [], "")]
         )
 
     def test_enable_view_not_fit_all(self):

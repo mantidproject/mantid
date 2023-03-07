@@ -113,6 +113,10 @@ class FittingPlotPresenter(object):
         )
         self.worker.start()
 
+    def fit_completed(self, fit_props, loaded_ws_list, active_ws_list, log_workspace_name):
+        if fit_props:
+            self.model.update_fit(fit_props, loaded_ws_list, active_ws_list, log_workspace_name)
+
     # =======================
     # Fit Asynchronous Thread
     # =======================
