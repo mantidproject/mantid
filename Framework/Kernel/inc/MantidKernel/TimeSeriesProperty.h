@@ -357,6 +357,11 @@ protected:
   int findIndex(Types::Core::DateAndTime t) const;
   ///  Find the upper_bound of time t in container.
   int upperBound(Types::Core::DateAndTime t, int istart, int iend) const;
+  /**
+   * Returns an end time that will have the same spacing to the right of the last value
+   * as the last non-zero time does to the left
+   */
+  Types::Core::DateAndTime getFakeEndTime() const;
 
   /// Set a value from another property
   std::string setValueFromProperty(const Property &right) override;

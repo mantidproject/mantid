@@ -1588,27 +1588,17 @@ template <typename TYPE> TimeInterval TimeSeriesProperty<TYPE>::nthInterval(int 
 
   Kernel::TimeInterval deltaT;
 
-  // I. No filter
+  // No filter
   if (n >= static_cast<int>(m_values.size()) || (n == static_cast<int>(m_values.size()) - 1 && m_values.size() == 1)) {
-    // 1. Out of bound
+    // Out of bound
     ;
   } else if (n == static_cast<int>(m_values.size()) - 1) {
-    // 2. Last one by making up an end time.
-    // the last time is the last thing known
-    const auto ultimate = m_values.rbegin()->time();
-    // go backwards from the time before it that is different
-    int counter = 0;
-    while (DateAndTime::secondsFromDuration(ultimate - (m_values.rbegin() + counter)->time()) == 0.) {
-      counter += 1;
-    }
-    // get the last time that is different
-    time_duration lastDuration = m_values.rbegin()->time() - (m_values.rbegin() + counter)->time();
-    // the last duration is equal to the previous, non-zero, duration
-    DateAndTime endTime = m_values.rbegin()->time() + lastDuration;
+    // Last one by making up an end time.
+    DateAndTime endTime = getFakeEndTime();
 
     deltaT = Kernel::TimeInterval(m_values.rbegin()->time(), endTime);
   } else {
-    // 3. Regular
+    // Regular
     DateAndTime startT = m_values[static_cast<std::size_t>(n)].time();
     DateAndTime endT = m_values[static_cast<std::size_t>(n) + 1].time();
     TimeInterval dt(startT, endT);
@@ -1616,6 +1606,25 @@ template <typename TYPE> TimeInterval TimeSeriesProperty<TYPE>::nthInterval(int 
   }
 
   return deltaT;
+}
+
+template <typename TYPE> Types::Core::DateAndTime TimeSeriesProperty<TYPE>::getFakeEndTime() const {
+  sortIfNecessary();
+
+  // the last time is the last thing known
+  const auto ultimate = m_values.rbegin()->time();
+
+  // go backwards from the time before it that is different
+  int counter = 0;
+  while (DateAndTime::secondsFromDuration(ultimate - (m_values.rbegin() + counter)->time()) == 0.) {
+    counter += 1;
+  }
+
+  // get the last time that is different
+  time_duration lastDuration = m_values.rbegin()->time() - (m_values.rbegin() + counter)->time();
+
+  // the last duration is equal to the previous, non-zero, duration
+  return m_values.rbegin()->time() + lastDuration;
 }
 
 //-----------------------------------------------------------------------------------------------

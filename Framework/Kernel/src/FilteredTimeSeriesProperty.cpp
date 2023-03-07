@@ -215,7 +215,18 @@ template <typename TYPE> void FilteredTimeSeriesProperty<TYPE>::filterWith(const
     this->clearFilter();
   } else {
     this->clearFilterCache();
-    m_filter->replaceROI(filter);
+    if (filter->lastValue() == true) {
+      // get the invented end time that has the same duration as the last known duration
+      DateAndTime endTime = this->getFakeEndTime();
+
+      // create temporary filter to add this end time to
+      TimeSeriesProperty<bool> *filterModified = filter->clone();
+      filterModified->addValue(endTime, false);
+
+      m_filter->replaceROI(filterModified);
+    } else {
+      m_filter->replaceROI(filter);
+    }
 
     applyFilter();
   }
