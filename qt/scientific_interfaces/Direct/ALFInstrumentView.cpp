@@ -78,6 +78,7 @@ void ALFInstrumentView::loadSettings() {
   settings.endGroup();
 
   if (!vanadiumRun.toString().isEmpty()) {
+    disable("Loading vanadium");
     m_vanadium->setUserInput(vanadiumRun);
   }
 }
