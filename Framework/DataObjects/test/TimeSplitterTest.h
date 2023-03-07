@@ -21,6 +21,7 @@ using Mantid::API::IEventList;
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::TableRow;
 using Mantid::DataObjects::EventList;
+using Mantid::DataObjects::EventSortType;
 using Mantid::DataObjects::TimeSplitter;
 using Mantid::Kernel::SplittingInterval;
 using Mantid::Kernel::TimeROI;
@@ -116,7 +117,7 @@ private:
    *
    * Destination index '-1` is allowed.
    *
-   * @param intervals : time intervals between consecutive DateAndTime boundaries
+   * @param intervals : time intervals (in seconds) between consecutive DateAndTime boundaries
    * @param destinations : vector of destination indexes
    * @para startTime: first DateAndTime boundary
    */
@@ -546,5 +547,97 @@ public:
     TS_ASSERT_EQUALS(iter->first, SIX);
     TS_ASSERT_EQUALS(iter->second, TimeSplitter::NO_TARGET);
     iter++;
+  }
+
+  void test_splitEventList() {
+    DateAndTime startTime{TWO};
+    // return the times associated to each event in the list as a string
+    // factor is a dimensionless quantity, and shift is a time in micro-seconds
+    auto timesToStr = [](const EventList *partial, const EventSortType &timeType, const double &factor = 0.0,
+                         const double &shift = 0.0) {
+      std::vector<DateAndTime> dates;
+      switch (timeType) {
+      case (EventSortType::PULSETIME_SORT):
+        dates = partial->getPulseTimes();
+        break;
+      case (EventSortType::PULSETIMETOF_SORT):
+        dates = partial->getPulseTOFTimes();
+        break;
+      case (EventSortType::TIMEATSAMPLE_SORT):
+        // method getPulseTOFTimesAtSample requires argument `shift` in micro-seconds
+        dates = partial->getPulseTOFTimesAtSample(factor, shift);
+        break;
+      default:
+        throw std::runtime_error("timesToStr: Unhandled event sorting type");
+      }
+      std::vector<std::string> obtained;
+      std::transform(dates.cbegin(), dates.cend(), std::back_inserter(obtained),
+                     [](const DateAndTime &date) { return date.toSimpleString(); });
+      return obtained;
+    };
+    // Generate the events. Six events, the first at "2023-Jan-01 12:00:00" and then every 30 seconds. The last
+    // event happening at "2023-Jan-01 12:02:30".
+    double pulsePeriod{60.}; // time between consecutive pulses, in seconds
+    size_t nPulses{3};
+    size_t eventsPerPulse{2};
+    EventType eventType = EventType::TOF;
+    EventList events = this->generateEvents(startTime, pulsePeriod, nPulses, eventsPerPulse, eventType);
+    // Generate a splitter with three intervals:
+    // interval ["2023-Jan-01 12:00:00", "2023-Jan-01 12:02:00") with destination 0
+    // interval ["2023-Jan-01 12:02:00", "2023-Jan-01 12:03:00") with destination 1
+    // interval ["2023-Jan-01 12:03:00", "2023-Jan-01 12:04:00") with destination NO_TARGET
+    std::vector<double> intervals{120.0, 60.0, 60.0};
+    const std::vector<int> destinations{0, 1, TimeSplitter::NO_TARGET};
+    TimeSplitter splitter = this->generateSplitter(startTime, intervals, destinations);
+    // Generate the output partial event lists
+    std::map<int, EventList *> partials = this->instantiatePartials(destinations);
+    //
+    /// Split events according to pulse time
+    splitter.splitEventList(events, partials);
+    // Check the pulse times of the events landing in the partials
+    std::vector<std::string> expected{"2023-Jan-01 12:00:00", "2023-Jan-01 12:00:00", "2023-Jan-01 12:01:00",
+                                      "2023-Jan-01 12:01:00"};
+    TS_ASSERT(timesToStr(partials[0], EventSortType::PULSETIME_SORT) == expected);
+    expected = {"2023-Jan-01 12:02:00", "2023-Jan-01 12:02:00"};
+    TS_ASSERT(timesToStr(partials[1], EventSortType::PULSETIME_SORT) == expected);
+    expected = {};
+    TS_ASSERT(timesToStr(partials[TimeSplitter::NO_TARGET], EventSortType::PULSETIME_SORT) == expected);
+    //
+    /// Split events according to pulse time + TOF
+    bool pulseTof{true};
+    intervals = {90.0, 90.0, 60.0};
+    splitter = this->generateSplitter(startTime, intervals, destinations);
+    splitter.splitEventList(events, partials, pulseTof);
+    expected = {"2023-Jan-01 12:00:00", "2023-Jan-01 12:00:30", "2023-Jan-01 12:01:00"};
+    TS_ASSERT(timesToStr(partials[0], EventSortType::PULSETIMETOF_SORT) == expected);
+    expected = {"2023-Jan-01 12:01:30", "2023-Jan-01 12:02:00", "2023-Jan-01 12:02:30"};
+    TS_ASSERT(timesToStr(partials[1], EventSortType::PULSETIMETOF_SORT) == expected);
+    expected = {};
+    TS_ASSERT(timesToStr(partials[TimeSplitter::NO_TARGET], EventSortType::PULSETIMETOF_SORT) == expected);
+    //
+    /// Split events according to pulse time + shifted TOF
+    bool tofCorrect{true};
+    double factor{1.0};
+    double shift{30.0 * 1.0E6}; // add 30 seconds to each TOF, in units of micro-seconds
+    splitter.splitEventList(events, partials, pulseTof, tofCorrect, factor, shift);
+    expected = {"2023-Jan-01 12:00:30", "2023-Jan-01 12:01:00"};
+    TS_ASSERT(timesToStr(partials[0], EventSortType::TIMEATSAMPLE_SORT, factor, shift) == expected);
+    expected = {"2023-Jan-01 12:01:30", "2023-Jan-01 12:02:00", "2023-Jan-01 12:02:30"};
+    TS_ASSERT(timesToStr(partials[1], EventSortType::TIMEATSAMPLE_SORT, factor, shift) == expected);
+    expected = {"2023-Jan-01 12:03:00"};
+    TS_ASSERT(timesToStr(partials[TimeSplitter::NO_TARGET], EventSortType::TIMEATSAMPLE_SORT, factor, shift) ==
+              expected);
+    //
+    /// Split events according to pulse time + contracted TOF
+    factor = 0.5; // shrink TOF by half
+    shift = 0.0;
+    splitter.splitEventList(events, partials, pulseTof, tofCorrect, factor, shift);
+    expected = {"2023-Jan-01 12:00:00", "2023-Jan-01 12:00:15", "2023-Jan-01 12:01:00", "2023-Jan-01 12:01:15"};
+    TS_ASSERT(timesToStr(partials[0], EventSortType::TIMEATSAMPLE_SORT, factor, shift) == expected);
+    expected = {"2023-Jan-01 12:02:00", "2023-Jan-01 12:02:15"};
+    TS_ASSERT(timesToStr(partials[1], EventSortType::TIMEATSAMPLE_SORT, factor, shift) == expected);
+    expected = {};
+    TS_ASSERT(timesToStr(partials[TimeSplitter::NO_TARGET], EventSortType::TIMEATSAMPLE_SORT, factor, shift) ==
+              expected);
   }
 };
