@@ -2890,7 +2890,10 @@ std::vector<Mantid::Types::Core::DateAndTime> EventList::getPulseTimes() const {
 
 /// Get the Pulse-time + TOF for each event in this EventList
 std::vector<DateAndTime> EventList::getPulseTOFTimes() const {
-  auto timeCalc = [](const auto &event) { return event.pulseTime() + static_cast<int64_t>(event.tof() * 1000.0); };
+  auto timeCalc = [](const auto &event) {
+    constexpr double microToNano{1000.0}; // time unit conversion
+    return event.pulseTime() + static_cast<int64_t>(event.tof() * microToNano);
+  };
   return eventTimesCalculator(timeCalc);
 }
 
@@ -2900,7 +2903,8 @@ std::vector<DateAndTime> EventList::getPulseTOFTimes() const {
  */
 std::vector<DateAndTime> EventList::getPulseTOFTimesAtSample(const double &factor, const double &shift) const {
   auto timeCalc = [&](const auto &event) {
-    return event.pulseTime() + static_cast<int64_t>((factor * event.tof() + shift) * 1000.0);
+    constexpr double microToNano{1000.0}; // time unit conversion
+    return event.pulseTime() + static_cast<int64_t>((factor * event.tof() + shift) * microToNano);
   };
   return eventTimesCalculator(timeCalc);
 }
@@ -3962,14 +3966,14 @@ void EventList::initializePartials(std::map<int, EventList *> partials) const {
   // collect the state from events which is to be transferred to the partials
   bool removeDetIDs{true};
   const auto &detIDs = this->getDetectorIDs();
-  auto histogram = this->getHistogram();
-  auto eventType = this->getEventType();
+  const auto histogram = this->getHistogram();
+  const auto eventType = this->getEventType();
 
   // lambda expression initializing one partial
   auto initPartial = [&](EventList *partial) {
     partial->clear(removeDetIDs);
     partial->copyInfoFrom(*this);
-    partial->setHistogram(histogram); // problem here!
+    partial->setHistogram(histogram);
     partial->switchTo(eventType);
   };
 
