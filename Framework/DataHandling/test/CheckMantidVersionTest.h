@@ -129,4 +129,6 @@ public:
   void test_execRemoteNewerMinor() { runTest("3.3.7", "v3.4.1", true); }
   void test_execLocalNewerMajor() { runTest("2.0.2", "v1.11.7", false); }
   void test_execRemoteNewerMajor() { runTest("2.3.7", "v3.0.0", true); }
+  void test_tweakLocalNewer() { runTest("1.2.4+tweak.morestuff", "v1.2.3", false); }
+  void test_tweakRemoteNewer() { runTest("1.2.3+tweak.morestuff", "v3.0.0", true); }
 };

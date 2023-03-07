@@ -145,28 +145,33 @@ std::string CheckMantidVersion::cleanVersionTag(const std::string &versionTag) c
   return retVal;
 }
 
-/** splits a . separated version string into a vector of integers
+/** splits a . separated version string into a vector of integers.
+ * It will discard anything after (and including) a "+", which denotes a "local version":
+ * https://peps.python.org/pep-0440/#local-version-identifiers
+ *
  * @param versionString Something like "2.3.4"
  * @returns a vector of [2,3,4]
  */
 std::vector<int> CheckMantidVersion::splitVersionString(const std::string &versionString) const {
-  std::vector<int> retVal;
-  Mantid::Kernel::StringTokenizer tokenizer(versionString, ".",
+  std::vector<int> versionNumbers;
+  // Discard "+" and anything after for local versions.
+  std::string versionStringBeforePlus = versionString.substr(0, versionString.find("+"));
+
+  Mantid::Kernel::StringTokenizer tokenizer(versionStringBeforePlus, ".",
                                             Mantid::Kernel::StringTokenizer::TOK_TRIM |
                                                 Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
-  auto h = tokenizer.begin();
 
-  for (; h != tokenizer.end(); ++h) {
+  for (auto h = tokenizer.begin(); h != tokenizer.end(); ++h) {
     try {
       auto part = boost::lexical_cast<int>(*h);
-      retVal.emplace_back(part);
+      versionNumbers.emplace_back(part);
     } catch (const boost::bad_lexical_cast &) {
       g_log.error("Failed to convert the following string to an integer '" + *h +
                   "' as part of CheckMantidVersion::splitVersionString");
-      retVal.emplace_back(0);
+      versionNumbers.emplace_back(0);
     }
   }
-  return retVal;
+  return versionNumbers;
 }
 
 /** Compare two version strings, tests if the gitHubVersion is more recent
