@@ -22,6 +22,8 @@ from mantid.simpleapi import (
     NormaliseByCurrent,
     RebinToWorkspace,
     ReplaceSpecialValues,
+    ConjoinSpectra,
+    GroupWorkspaces,
 )
 
 
@@ -327,7 +329,6 @@ def rebin_to_smallest(*workspaces):
 
     rebinned_workspaces = []
     for idx, workspace in enumerate(workspaces):
-
         # Check whether this is the workspace with the smallest x-range.
         # No reason to rebin workspace to match itself.
         # NOTE: In the future this may append workspace.clone() - this will
@@ -402,7 +403,6 @@ def delete_workspaces(workspace_names):
     :param delete_exec:         The execute method of the delete algorithm.
     """
     for workspace_name in workspace_names:
-
         if mtd.doesExist(workspace_name):
             DeleteWorkspace(workspace_name)
 
@@ -624,19 +624,27 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         result_map = result_map.combine(self._van_ws_map, divide_workspace)
 
         if len(result_map) > 1:
-            # Workspaces must be added to the ADS, as there does not yet exist
-            # a workspace list property (must be passed to merge runs by name).
-            temp_ws_names = ["__run_" + str(idx) for idx in range(len(result_map))]
-            for temp_ws_name, sample_ws in zip(temp_ws_names, result_map.values()):
-                mtd.addOrReplace(temp_ws_name, sample_ws)
+            extracted_spectra = [self._extract_ws_spectra(ws, str(drange)) for drange, ws in result_map.items()]
 
-            # Merge the sample files into one.
-            output_ws = MergeRuns(
-                InputWorkspaces=temp_ws_names, OutputWorkspace="merged_sample_runs", StoreInADS=False, EnableLogging=False
-            )
-            delete_workspaces(temp_ws_names)
+            have_same_spectra_count = len({len(spectra) for spectra in extracted_spectra}) == 1
+            if not have_same_spectra_count:
+                logger.warning("Cannot merge focussed workspaces with different number of spectra")
+                output_ws = [ws for ws in result_map.values()][0]
+            else:
+                # Group workspaces located at the same index
+                matched_spectra = [list(spectra) for spectra in zip(*extracted_spectra)]
+                # Merge workspaces located at the same index
+                merged_spectra = [
+                    MergeRuns(InputWorkspaces=spectra, OutputWorkspace="OSIRIS" + self._output_ws_name + f"_merged_{idx}")
+                    for idx, spectra in enumerate(matched_spectra)
+                ]
+
+                input_workspaces_str = ",".join([ws.name() for ws in merged_spectra])
+                ConjoinSpectra(InputWorkspaces=input_workspaces_str, OutputWorkspace=self._output_ws_name)
+                output_ws = mtd[self._output_ws_name]
+
         elif len(result_map) == 1:
-            output_ws = list(result_map.values())[0]
+            output_ws = GroupWorkspaces(InputWorkspaces=list(result_map.values())[0])
         else:
             error_msg = (
                 "D-Ranges found in runs have no overlap:\n"
@@ -660,21 +668,21 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         # Create scalar data to cope with where merge has combined overlapping data.
         intersections = get_intersection_of_ranges(d_ranges)
 
-        data_x = output_ws.dataX(0)
-        data_y = []
-        data_e = []
-        for i in range(0, len(data_x) - 1):
-            x_val = (data_x[i] + data_x[i + 1]) / 2.0
-
-            if is_in_ranges(intersections, x_val):
-                data_y.append(2)
-                data_e.append(2)
-            else:
-                data_y.append(1)
-                data_e.append(1)
-
         # apply scalar data to result workspace
         for i in range(0, output_ws.getNumberHistograms()):
+            data_x = output_ws.dataX(i)
+            data_y = []
+            data_e = []
+            for j in range(0, len(data_x) - 1):
+                x_val = (data_x[j] + data_x[j + 1]) / 2.0
+
+                if is_in_ranges(intersections, x_val):
+                    data_y.append(2)
+                    data_e.append(2)
+                else:
+                    data_y.append(1)
+                    data_e.append(1)
+
             result_y = output_ws.dataY(i)
             result_e = output_ws.dataE(i)
 
@@ -684,7 +692,23 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             output_ws.setY(i, result_y)
             output_ws.setE(i, result_e)
 
-        self.setProperty("OutputWorkspace", output_ws)
+    def _extract_ws_spectra(self, ws_to_split, drange):
+        """
+        Extracts individual spectra from the workspace into a list of workspaces. Each workspace will contain
+        one of the spectra from the workspace and will have the form of "<ws_name>_<spectrum number>".
+        :param ws_to_split: The workspace to split into individual workspaces
+        :return: A list of extracted workspaces - one per spectra in the original workspace
+        """
+
+        num_spectra = ws_to_split.getNumberHistograms()
+        spectra_bank_list = []
+        for i in range(0, num_spectra):
+            output_name = drange + f"_{i + 1}"
+            # Have to use crop workspace as extract single spectrum struggles with the variable bin widths
+            spectra_bank_list.append(
+                CropWorkspace(InputWorkspace=ws_to_split, OutputWorkspace=output_name, StartWorkspaceIndex=i, EndWorkspaceIndex=i)
+            )
+        return spectra_bank_list
 
     def _parse_string_array(self, string):
         """
@@ -734,3 +758,10 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
 
 AlgorithmFactory.subscribe(OSIRISDiffractionReduction)
+
+"""
+Test:
+1- complete induction issues
+2- complete HR induction training
+3-
+"""
