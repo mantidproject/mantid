@@ -1028,6 +1028,34 @@ class CrystalField(object):
         )
         return trans
 
+    def printWavefunction(self, index=None):
+        # Pretty prints the eigenvector(s) of a crystal field Hamiltonian matrix
+        # cf.printWavefunction() - prints all wavefucntions
+        # cf.printWavefunction(index) - prints the wavefunctions for a (list) of indices.
+        self._calcEigensystem()
+        ev = self._eigenvectors
+        J2 = ev.shape[0] - 1  # twice the total angular momentum quantum number J
+        is_integral = J2 % 2 == 0
+        if index is None:
+            index = range(ev.shape[0])
+        elif index >= ev.shape[0]:
+            raise Exception("IndexError: Index %s out of range" % index)
+        elif not hasattr(index, "__iter__"):
+            index = [index]
+        for lv in index:
+            print(("Ground" if lv == 0 else f"{lv}. excited") + " state wavefunctions are:")
+            lvstr = ""
+            for ii, jz2 in enumerate(range(-J2, J2 + 1, 2)):
+                if np.abs(ev[ii, lv]) < 1e-5:
+                    continue
+                val = ev[ii, lv] if np.abs(ev[ii, lv].imag) > 1e-3 else ev[ii, lv].real
+                jzstr = f"{int(jz2/2)}" if is_integral else f"{int(jz2)}/2"
+                # The Hamiltonian is expressed in the basis of the azimuthal quantum number |Jz>
+                # which goes from |Jz=-J> to |Jz=+J> in steps of 1. The values of the eigenvectors
+                # are coefficients corresponding to each of these quantum numbers
+                lvstr += ("+" if (ii > 0 and ev[ii, lv].real > 0) else "") + f"{val:.3f}|{jzstr}> "
+            print(lvstr + "\n")
+
     def plot(self, i=0, workspace=None, ws_index=0, name=None):
         """Plot a spectrum. Parameters are the same as in getSpectrum(...)"""
         createWS = AlgorithmManager.createUnmanaged("CreateWorkspace")
@@ -1770,7 +1798,7 @@ class CrystalFieldFit(object):
         opt = {"disp": False}
         if Options is not None:
             opt = Options
-        for (x, pos) in zip(x0, self._free_cef_parameters):
+        for x, pos in zip(x0, self._free_cef_parameters):
             fun.removeTie(pos)
             res = sp.minimize(self._evaluate_cf, [x], args=(fun, pos), method=Solver, options=opt)
             fun.fixParameter(pos)

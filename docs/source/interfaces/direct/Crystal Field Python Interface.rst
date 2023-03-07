@@ -75,6 +75,16 @@ The `CrystalField` class has methods to calculate the Hamiltonian and its eigens
 It is efficient to call the above methods multiple times as all the outputs are cached and the calculations are repeated
 only after a parameter changes.
 
+Eigenvectors can also be printed in a more human readable form::
+
+  # Calculate and return the eigenvectors of the Hamiltonian as a formatted string.
+  w = cf.printWavefunction()
+
+  # Calculate and return a specific eigenvector as a formatted string.
+  w = cf.printWavefunction(1)
+
+  # Calculate and return a list of eigenvectors as a formatted string.
+  w = cf.printWavefunction([0,2,3])
 
 Calculating a Spectrum
 ----------------------
