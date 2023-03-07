@@ -12,6 +12,7 @@
 #include <cxxtest/TestSuite.h>
 
 using Mantid::Kernel::FilteredTimeSeriesProperty;
+using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Types::Core::DateAndTime;
 
 class FilteredTimeSeriesPropertyTest : public CxxTest::TestSuite {
@@ -660,6 +661,48 @@ public:
       TS_ASSERT_EQUALS(intervals[2].start(), thirdStart);
       TS_ASSERT(intervals[2].stop() > thirdStart);
     }
+  }
+
+  // this is a troublesome "w" log from LoadISISNexus v2
+  void test_ENGINX00228061_w_log() {
+    constexpr double FORTYSEVEN{0.00472713};
+    constexpr double FORTYNINE{0.00491808};
+
+    TimeSeriesProperty<double> tsp("w");
+    tsp.addValue("2015-Mar-17 12:55:12", FORTYSEVEN); // outside of ROI
+    tsp.addValue("2015-Mar-17 12:55:17", FORTYNINE);  // masked by next value at same time
+    tsp.addValue("2015-Mar-17 12:55:17", FORTYNINE);
+    tsp.addValue("2015-Mar-17 12:55:23", FORTYSEVEN);
+    tsp.addValue("2015-Mar-17 12:55:28", FORTYNINE);
+    tsp.addValue("2015-Mar-17 12:55:32", FORTYSEVEN);
+
+    TimeSeriesProperty<bool> filter("filter");
+    filter.addValue("2015-Mar-17 12:55:17", true);
+
+    FilteredTimeSeriesProperty<double> filtered(&tsp, filter);
+    TS_ASSERT_EQUALS(filtered.valuesAsVector(), tsp.valuesAsVector());
+    // filtered values
+    const auto values = filtered.filteredValuesAsVector();
+    TS_ASSERT_EQUALS(values.size(), 5);
+    TS_ASSERT_EQUALS(values[0], FORTYNINE);
+    TS_ASSERT_EQUALS(values[1], FORTYNINE);
+    TS_ASSERT_EQUALS(values[2], FORTYSEVEN);
+    TS_ASSERT_EQUALS(values[3], FORTYNINE);
+    TS_ASSERT_EQUALS(values[4], FORTYSEVEN);
+    // nthValue
+    TS_ASSERT_EQUALS(filtered.size(), 5); // used for nthValue
+    TS_ASSERT_EQUALS(filtered.nthValue(0), FORTYNINE);
+    TS_ASSERT_EQUALS(filtered.nthValue(1), FORTYNINE);
+    TS_ASSERT_EQUALS(filtered.nthValue(2), FORTYSEVEN);
+    TS_ASSERT_EQUALS(filtered.nthValue(3), FORTYNINE);
+    TS_ASSERT_EQUALS(filtered.nthValue(4), FORTYSEVEN);
+    // nthInterval
+    TS_ASSERT_EQUALS(DateAndTime::secondsFromDuration(filtered.nthInterval(0).length()), 0.); // same as next time
+    TS_ASSERT_EQUALS(DateAndTime::secondsFromDuration(filtered.nthInterval(1).length()), 6.);
+    TS_ASSERT_EQUALS(DateAndTime::secondsFromDuration(filtered.nthInterval(2).length()), 5.);
+    TS_ASSERT_EQUALS(DateAndTime::secondsFromDuration(filtered.nthInterval(3).length()), 4.);
+    TS_ASSERT_EQUALS(DateAndTime::secondsFromDuration(filtered.nthInterval(4).length()),
+                     4.); // same time as penultimate
   }
 
 private:
