@@ -218,9 +218,8 @@ class SaveYDATest(unittest.TestCase):
         if not yAxMt and not yAxSpec:
             ws = CreateWorkspace(DataX=self.data_x, DataY=self.data_y, DataE=np.sqrt(self.data_y), NSpec=1, UnitX="DeltaE")
             LoadInstrument(ws, True, InstrumentName="TOFTOF")
-            ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace="ws2", Target="theta", EMode="Direct")
-            ws2 = mtd["ws2"]
-            return ws2
+            ouput_ws = ConvertSpectrumAxis(InputWorkspace=ws, Target="theta", EMode="Direct")
+            return ouput_ws 
         if not yAxSpec and yAxMt:
             ws = CreateWorkspace(DataX=self.data_x, DataY=self.data_y, DataE=np.sqrt(self.data_y), NSpec=1, UnitX="DeltaE")
             LoadInstrument(ws, True, InstrumentName="TOFTOF")
