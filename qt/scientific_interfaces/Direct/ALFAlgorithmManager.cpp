@@ -151,7 +151,8 @@ void ALFAlgorithmManager::notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr
 
 void ALFAlgorithmManager::executeAlgorithm(Mantid::API::IAlgorithm_sptr const &algorithm,
                                            std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) {
-  auto configuredAlg = std::make_shared<API::ConfiguredAlgorithm>(std::move(algorithm), std::move(properties));
+  API::IConfiguredAlgorithm_sptr configuredAlg =
+      std::make_shared<API::ConfiguredAlgorithm>(std::move(algorithm), std::move(properties));
   m_jobRunner->executeAlgorithm(configuredAlg);
 }
 

@@ -48,9 +48,7 @@ void update(std::string const &property, boost::optional<double> const &value, I
 }
 
 void update(std::string const &property, MatrixWorkspace_sptr const &workspace, IAlgorithmRuntimeProps &properties) {
-  if (workspace) {
-    properties.setProperty(property, workspace);
-  }
+  properties.setProperty(property, workspace);
 }
 
 void updateFromMap(IAlgorithmRuntimeProps &properties, std::map<std::string, std::string> const &parameterMap) {
