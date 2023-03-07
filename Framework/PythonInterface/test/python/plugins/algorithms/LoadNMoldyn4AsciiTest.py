@@ -137,8 +137,9 @@ class LoadNMoldyn4AsciiTest(unittest.TestCase):
         """
         Tests error handling when all functions could not be loaded.
         """
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Failed to load any functions for data",
             LoadNMoldyn4Ascii,
             Directory=self._data_directory,
             Functions=["sqw_total", "sqw_H"],
@@ -149,7 +150,13 @@ class LoadNMoldyn4AsciiTest(unittest.TestCase):
         """
         Tests error handling when no functions are specified.
         """
-        self.assertRaises(RuntimeError, LoadNMoldyn4Ascii, Directory=self._data_directory, OutputWorkspace="__LoadNMoldyn4Ascii_test")
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Must specify at least one function to load",
+            LoadNMoldyn4Ascii,
+            Directory=self._data_directory,
+            OutputWorkspace="__LoadNMoldyn4Ascii_test",
+        )
 
 
 if __name__ == "__main__":

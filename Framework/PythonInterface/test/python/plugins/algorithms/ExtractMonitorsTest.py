@@ -46,12 +46,21 @@ class ExtractMonitorsTest(unittest.TestCase):
         CreateSampleWorkspace(OutputWorkspace="testWS", NumMonitors=3)
         ExtractMonitors(InputWorkspace="testWS", DetectorWorkspace="det", MonitorWorkspace="mon")
 
-        self.assertRaises(RuntimeError, ExtractMonitors, InputWorkspace="det", DetectorWorkspace="det2", MonitorWorkspace="mon2")
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Monitor workspace already exists",
+            ExtractMonitors,
+            InputWorkspace="det",
+            DetectorWorkspace="det2",
+            MonitorWorkspace="mon2",
+        )
 
     def test_workspace_with_no_detector_or_monitor_output_throws_error(self):
         CreateSampleWorkspace(OutputWorkspace="testWS", NumMonitors=3)
 
-        self.assertRaises(RuntimeError, ExtractMonitors, InputWorkspace="testWS")
+        self.assertRaisesRegex(
+            RuntimeError, "Must specify one of DetectorsWorkspace or MonitorsWorkspace", ExtractMonitors, InputWorkspace="testWS"
+        )
 
     def test_workspace_with_no_detectors_gives_no_detector_workspace(self):
         CreateSampleWorkspace(OutputWorkspace="testWS", NumBanks=0, NumMonitors=3)

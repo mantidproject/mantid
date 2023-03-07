@@ -47,7 +47,6 @@ class EnggEstimateFocussedBackground_Test(unittest.TestCase):
             DeleteWorkspace(self.ws)
 
     def test_subtraction(self):
-
         # get bg and subtract
         ws_bg = EnggEstimateFocussedBackground(InputWorkspace="ws", NIterations=20, XWindow=3)
         ws_diff = self.ws - ws_bg
@@ -58,10 +57,10 @@ class EnggEstimateFocussedBackground_Test(unittest.TestCase):
 
     def test_window_validation(self):
         # test too small a window
-        with self.assertRaises(RuntimeError):
+        with self.assertRaisesRegex(RuntimeError, "Convolution window must have at least three points"):
             EnggEstimateFocussedBackground(InputWorkspace="ws", OutputWorkspace="ws_bg", NIterations=20, XWindow=0.1)
         # test too large a window
-        with self.assertRaises(RuntimeError):
+        with self.assertRaisesRegex(RuntimeError, "Data has must have at least the number of points as the convolution window"):
             EnggEstimateFocussedBackground(InputWorkspace="ws", OutputWorkspace="ws_bg", NIterations=20, XWindow=200)
 
 

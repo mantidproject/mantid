@@ -68,7 +68,7 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
         )
 
         # A MDHisto WS with no experiment info should fail
-        with self.assertRaises(RuntimeError):
+        with self.assertRaisesRegex(RuntimeError, "No experiment info was found in 'samplews'"):
             HB3AAdjustSampleNorm(
                 InputWorkspaces=samplews, DetectorHeightOffset=0.0, DetectorDistanceOffset=0.0, OutputWorkspace="__tmpout", Wavelength=2.0
             )
