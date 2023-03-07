@@ -1225,7 +1225,7 @@ private:
     auto prop = run.getLogData(logName);
     TSM_ASSERT(logName + " Log was not found", prop);
     if (prop) {
-      auto log = dynamic_cast<TimeSeriesProperty<TYPE> *>(run.getLogData(logName));
+      auto log = dynamic_cast<TimeSeriesProperty<TYPE> *>(prop);
       TSM_ASSERT(logName + " Log was not the expected type", log);
       if (log) {
         // middle value is invalid and is filtered out

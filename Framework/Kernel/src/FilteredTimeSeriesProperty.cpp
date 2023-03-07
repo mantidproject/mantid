@@ -267,7 +267,7 @@ template <typename TYPE> void FilteredTimeSeriesProperty<TYPE>::countSize() cons
 }
 
 template <typename TYPE> int FilteredTimeSeriesProperty<TYPE>::size() const {
-  this->applyFilter();
+  countSize();
   return this->m_size;
 }
 
