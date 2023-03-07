@@ -156,12 +156,11 @@ The three peaks now have all different widths. The first peak (index 0) keeps th
    :height: 300
 
 If called without arguments `getSpectrum()` determines automatically the range and number of the `x`-points. To have more control
-of how the spectrum is calculated a list (or numpy array) of x-values can be provided as a first argument to `getSpectrum`.
+of how the spectrum is calculated a tuple with the range for the x values can be provided as an argument to `getSpectrum`.
 Alternatively, the x-values can be taken from a workspace::
 
-  # Use a list for x-values
-  x = [0, 1, 2, 3, ...]
-  sp = cf.getSpectrum(x)
+  # Use a tuple for x range
+  sp = cf.getSpectrum(x_range=(0,30))
 
   # Use the first spectrum of a workspace
   sp = cf.getSpectrum(ws)
