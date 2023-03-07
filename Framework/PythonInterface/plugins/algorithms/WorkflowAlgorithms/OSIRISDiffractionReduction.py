@@ -23,7 +23,6 @@ from mantid.simpleapi import (
     RebinToWorkspace,
     ReplaceSpecialValues,
     ConjoinSpectra,
-    GroupWorkspaces,
 )
 
 
@@ -644,7 +643,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 output_ws = mtd[self._output_ws_name]
 
         elif len(result_map) == 1:
-            output_ws = GroupWorkspaces(InputWorkspaces=list(result_map.values())[0])
+            output_ws = list(result_map.values())[0]
         else:
             error_msg = (
                 "D-Ranges found in runs have no overlap:\n"
@@ -760,10 +759,3 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
 
 AlgorithmFactory.subscribe(OSIRISDiffractionReduction)
-
-"""
-Test:
-1- complete induction issues
-2- complete HR induction training
-3-
-"""
