@@ -332,6 +332,11 @@ template <typename TYPE> void FilteredTimeSeriesProperty<TYPE>::applyFilter() co
       // need to back up by one
       if (index_current_log > 0)
         index_current_log--;
+      // go backwards more while times are equal to the one being started at
+      while (index_current_log > 0 &&
+             this->m_values[index_current_log].time() == this->m_values[index_current_log - 1].time()) {
+        index_current_log--;
+      }
     }
 
     // add everything up to the end time
