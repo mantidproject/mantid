@@ -10,7 +10,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.engineering_diff
 
 import sys
 
-IO_VERSION = 1
+IO_VERSION = 2
 
 SETTINGS_KEYS_TYPES = {
     "save_location": str,
@@ -32,7 +32,7 @@ class EngineeringDiffractionEncoder(EngineeringDiffractionUIAttributes):
     def __init__(self):
         super(EngineeringDiffractionEncoder, self).__init__()
 
-    def encode(self, obj, _=None):  # what obj = EngineeringDiffractionGui
+    def encode(self, obj: EngineeringDiffractionGui, _=None):
         presenter = obj.presenter
         data_widget = presenter.fitting_presenter.data_widget  # data widget
         plot_widget = presenter.fitting_presenter.plot_widget  # plot presenter
@@ -45,7 +45,7 @@ class EngineeringDiffractionEncoder(EngineeringDiffractionUIAttributes):
             obj_dic["settings_dict"] = presenter.settings_presenter.model.get_settings_dict(SETTINGS_KEYS_TYPES)
         if data_widget.model._data_workspaces.get_ws_names_dict():
             obj_dic["data_workspaces"] = data_widget.model._data_workspaces.get_ws_names_dict()
-            obj_dic["fit_results"] = data_widget.model.get_fit_results()
+            obj_dic["fit_results"] = plot_widget.model.get_fit_results()
             obj_dic["plotted_workspaces"] = [*data_widget.presenter.plotted]
             if plot_widget.view.fit_browser.read_current_fitprop():
                 obj_dic["fit_properties"] = plot_widget.view.fit_browser.read_current_fitprop()
@@ -86,16 +86,21 @@ class EngineeringDiffractionDecoder(EngineeringDiffractionUIAttributes):
             fit_data_widget.presenter.plotted = set(obj_dic["plotted_workspaces"])
             fit_data_widget.presenter.restore_table()
 
+            fit_plot_widget = presenter.fitting_presenter.plot_widget
             fit_results = obj_dic.get("fit_results", None)
             if fit_results is not None:
-                fit_data_widget.model._fit_results = fit_results
-                fit_data_widget.model.create_fit_tables()
+                fit_plot_widget.model._fit_results = fit_results
+                fit_plot_widget.model.create_fit_tables(
+                    fit_data_widget.presenter.get_loaded_ws_list(),
+                    fit_data_widget.presenter.get_active_ws_list(),
+                    fit_data_widget.presenter.get_log_ws_name(),
+                )
 
             fit_properties = obj_dic.get("fit_properties", None)
             if fit_properties is not None:
-                fit_browser = presenter.fitting_presenter.plot_widget.view.fit_browser
+                fit_browser = fit_plot_widget.view.fit_browser
                 fit_browser.show()  # show the fit browser, default is off
-                presenter.fitting_presenter.plot_widget.fit_toggle()  # show the fit browser, default is off
+                fit_plot_widget.fit_toggle()  # show the fit browser, default is off
                 fit_props = fit_properties["properties"]
                 fit_function = fit_props["Function"]
                 output_name = fit_props["Output"]

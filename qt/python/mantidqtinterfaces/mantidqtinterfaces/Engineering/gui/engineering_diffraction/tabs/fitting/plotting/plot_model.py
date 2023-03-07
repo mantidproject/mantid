@@ -21,6 +21,7 @@ class FittingPlotModel(object):
     def __init__(self):
         self.plotted_workspaces = set()
         self._fit_results = {}  # {WorkspaceName: fit_result_dict}
+        self._fit_workspaces = None
 
     # ===============
     # Plotting
