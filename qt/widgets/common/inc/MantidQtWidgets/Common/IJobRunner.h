@@ -7,6 +7,7 @@
 #pragma once
 
 #include "DllOption.h"
+#include "MantidAPI/IAlgorithm_fwd.h"
 
 #include <deque>
 #include <memory>
@@ -42,6 +43,7 @@ public:
   virtual void clearAlgorithmQueue() = 0;
   virtual void setAlgorithmQueue(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithms) = 0;
   virtual void executeAlgorithmQueue() = 0;
+  virtual void executeAlgorithm(MantidQt::API::IConfiguredAlgorithm_sptr &algorithm) = 0;
   virtual void cancelAlgorithmQueue() = 0;
 };
 } // namespace MantidQt::API

@@ -148,6 +148,16 @@ void BatchAlgorithmRunner::executeBatchAsync() {
 }
 
 /**
+ * Starts the execution of a single algorithm on a separate thread.
+ *
+ * @param algorithm The algorithm to execute asynchronously
+ */
+void BatchAlgorithmRunner::executeAlgorithmAsync(const IConfiguredAlgorithm_sptr &algorithm) {
+  setQueue({algorithm});
+  executeBatchAsync();
+}
+
+/**
  * Cancel execution of remaining queued items
  */
 void BatchAlgorithmRunner::cancelBatch() {

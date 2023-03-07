@@ -7,6 +7,7 @@
 
 #include "MantidQtWidgets/Common/QtJobRunner.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/ConfiguredAlgorithm.h"
 #include "MantidQtWidgets/Common/IConfiguredAlgorithm.h"
 #include "MantidQtWidgets/Common/IJobRunner.h"
 
@@ -29,6 +30,10 @@ void QtJobRunner::setAlgorithmQueue(std::deque<IConfiguredAlgorithm_sptr> algori
 }
 
 void QtJobRunner::executeAlgorithmQueue() { m_batchAlgoRunner.executeBatchAsync(); }
+
+void QtJobRunner::executeAlgorithm(IConfiguredAlgorithm_sptr &algorithm) {
+  m_batchAlgoRunner.executeAlgorithmAsync(algorithm);
+}
 
 void QtJobRunner::cancelAlgorithmQueue() { m_batchAlgoRunner.cancelBatch(); }
 

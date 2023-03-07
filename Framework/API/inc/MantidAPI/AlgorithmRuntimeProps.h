@@ -24,7 +24,7 @@ public:
   using Mantid::Kernel::PropertyManager::getDeclaredPropertyNames;
   using Mantid::Kernel::PropertyManager::getPropertyValue;
 
-  TypedValue getProperty(const std::string &name) const noexcept override;
+  TypedValue getProperty(const std::string &name) const override;
   void setPropertyValue(const std::string &name, const std::string &value) override;
 };
 

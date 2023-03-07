@@ -30,7 +30,7 @@ public:
   }
 
   virtual void setPropertyValue(const std::string &, const std::string &) override = 0;
-  virtual TypedValue getProperty(const std::string &name) const noexcept override = 0;
+  virtual TypedValue getProperty(const std::string &name) const override = 0;
 };
 
 } // namespace Mantid::API

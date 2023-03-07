@@ -6,12 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALFView.h"
 
+#include "ALFAlgorithmManager.h"
 #include "ALFAnalysisModel.h"
 #include "ALFAnalysisView.h"
 #include "ALFInstrumentModel.h"
 #include "ALFInstrumentView.h"
 #include "ALFInstrumentWidget.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/QtJobRunner.h"
 
 #include <QSplitter>
 #include <QString>
@@ -24,8 +26,11 @@ DECLARE_SUBWINDOW(ALFView)
 ALFView::ALFView(QWidget *parent) : UserSubWindow(parent), m_instrumentPresenter(), m_analysisPresenter() {
   this->setWindowTitle("ALFView");
 
-  m_instrumentPresenter =
-      std::make_unique<ALFInstrumentPresenter>(new ALFInstrumentView(this), std::make_unique<ALFInstrumentModel>());
+  auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>();
+  auto algorithmManager = std::make_unique<ALFAlgorithmManager>(std::move(jobRunner));
+
+  m_instrumentPresenter = std::make_unique<ALFInstrumentPresenter>(
+      new ALFInstrumentView(this), std::make_unique<ALFInstrumentModel>(), std::move(algorithmManager));
 
   m_analysisPresenter = std::make_unique<ALFAnalysisPresenter>(new ALFAnalysisView(-15.0, 15.0, this),
                                                                std::make_unique<ALFAnalysisModel>());

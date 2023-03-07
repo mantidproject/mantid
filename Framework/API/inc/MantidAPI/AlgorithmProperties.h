@@ -9,6 +9,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IAlgorithmRuntimeProps.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Strings.h"
 
 #include <boost/optional.hpp>
@@ -35,6 +36,9 @@ void MANTID_API_DLL update(std::string const &property, double value, IAlgorithm
 void MANTID_API_DLL update(std::string const &property, boost::optional<double> const &value,
                            IAlgorithmRuntimeProps &properties);
 
+void MANTID_API_DLL update(std::string const &property, MatrixWorkspace_sptr const &workspace,
+                           IAlgorithmRuntimeProps &properties);
+
 void MANTID_API_DLL updateFromMap(IAlgorithmRuntimeProps &properties,
                                   std::map<std::string, std::string> const &parameterMap);
 
@@ -43,12 +47,16 @@ std::string MANTID_API_DLL getOutputWorkspace(const Mantid::API::IAlgorithm_sptr
 
 template <typename VALUE_TYPE>
 void update(std::string const &property, std::vector<VALUE_TYPE> const &values,
-            Mantid::API::IAlgorithmRuntimeProps &properties) {
+            Mantid::API::IAlgorithmRuntimeProps &properties, bool const convertToString = true) {
   if (values.size() < 1)
     return;
 
-  auto value = Mantid::Kernel::Strings::simpleJoin(values.cbegin(), values.cend(), ", ");
-  update(property, value, properties);
+  if (convertToString) {
+    auto value = Mantid::Kernel::Strings::simpleJoin(values.cbegin(), values.cend(), ", ");
+    update(property, value, properties);
+  } else {
+    properties.setProperty(property, values);
+  }
 }
 
 } // namespace Mantid::API::AlgorithmProperties

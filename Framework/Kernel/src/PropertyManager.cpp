@@ -690,7 +690,7 @@ std::vector<std::string> PropertyManager::getDeclaredPropertyNames() const noexc
  *different type
  *  @throw Exception::NotFoundError If the property requested does not exist
  */
-PropertyManager::TypedValue PropertyManager::getProperty(const std::string &name) const {
+IPropertyManager::TypedValue PropertyManager::getProperty(const std::string &name) const {
   return TypedValue(*this, name);
 }
 
