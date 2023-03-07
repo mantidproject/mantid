@@ -205,13 +205,13 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
 
         x, y = cfms.getSpectrum(x_range=(0, 3))
         y = y / c_mbsr
-        self.assertAlmostEqual(y[0], 6.389155669562915, 6)
-        self.assertAlmostEqual(y[1], 5.857124191993273, 6)
-        self.assertAlmostEqual(y[2], 4.686601510335353, 6)
-        self.assertAlmostEqual(y[3], 3.516068536602892, 6)
-        self.assertAlmostEqual(y[4], 2.605655839607991, 6)
-        self.assertAlmostEqual(y[15], 0.30241905775681543, 6)
-        self.assertAlmostEqual(y[16], 0.2679124634961843, 6)
+        self.assertAlmostEqual(y[0], 12.474954833572541, 6)
+        self.assertAlmostEqual(y[1], 11.435723018801308, 6)
+        self.assertAlmostEqual(y[2], 9.14934495705407, 6)
+        self.assertAlmostEqual(y[3], 6.862946934125062, 6)
+        self.assertAlmostEqual(y[4], 5.0846344775777395, 6)
+        self.assertAlmostEqual(y[15], 0.5854829967281244, 6)
+        self.assertAlmostEqual(y[16], 0.5180575611727711, 6)
 
     def test_get_spectrum_from_list_multi_spectra(self):
         cfms = CrystalField.CrystalFieldMultiSite(
