@@ -245,8 +245,8 @@ def divide_by_number_of_detectors_in_bank(focussed_data, cal_filepath):
         MakeGroupingWorkspace=True,
     )
     n_pixel = numpy.zeros(focussed_data.getNumberHistograms())
-    for bank_index in range(cal_workspace.getNumberHistograms()):
-        grouping = cal_workspace.dataY(bank_index)
+    for ws_index in range(cal_workspace.getNumberHistograms()):
+        grouping = cal_workspace.dataY(ws_index)
         if grouping[0] > 0:
             n_pixel[int(grouping[0] - 1)] += 1
     number_detectors_in_bank_ws = mantid.CreateWorkspace(DataY=n_pixel, DataX=[0, 1], NSpec=focussed_data.getNumberHistograms())
@@ -425,22 +425,14 @@ def _crop_spline_to_percent_of_max(spline, input_ws, output_workspace, min_value
 
 
 def convert_between_distribution(workspace, direction):
+    # ensure conversion from and to distribution is always done in the same unit - arbitrarily use dSpacing here
     if direction != "To" and direction != "From":
         return workspace
-    original_unit = workspace.getAxis(0).getUnit().caption()
-    target_unit = None
-    if original_unit == "Time-of-flight":
-        target_unit = "TOF"
-    if original_unit == "d-Spacing":
-        target_unit = "dSpacing"
-    if original_unit == "q":
-        target_unit = "MoemntumTransfer"
-    if not target_unit:
-        return workspace
+    original_unit = workspace.getAxis(0).getUnit().unitID()
     workspace = mantid.ConvertUnits(InputWorkspace=workspace, OutputWorkspace=workspace, Target="dSpacing", EMode="Elastic")
     if direction == "To":
         mantid.ConvertToDistribution(workspace)
     if direction == "From":
         mantid.ConvertFromDistribution(workspace)
-    workspace = mantid.ConvertUnits(InputWorkspace=workspace, OutputWorkspace=workspace, Target=target_unit, EMode="Elastic")
+    workspace = mantid.ConvertUnits(InputWorkspace=workspace, OutputWorkspace=workspace, Target=original_unit, EMode="Elastic")
     return workspace
