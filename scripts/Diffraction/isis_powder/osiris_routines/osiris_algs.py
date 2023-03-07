@@ -125,26 +125,31 @@ class DrangeData(object):
             return []
 
         processed = []
-        workspaces = rebin_and_average(self._sample)
+        sample_workspace = rebin_and_average(self._sample)
 
         run_numbers = "OSIRIS" + ",".join([str(ws)[6:-4] for ws in self._sample])
         outputname = run_numbers + WORKSPACE_SUFFIX.FOCUSED
+        AnalysisDataService.addOrReplace(outputname, sample_workspace)
+
         if subtract_empty:
-            workspaces = self.subtract_container_from_sample(workspaces)
-        workspaces = self.calibrate_and_focus_workspace(workspaces, focus_calibration_file)
+            sample_workspace = self.subtract_container_from_sample(outputname)
+        sample_workspace = self.calibrate_and_focus_workspace(sample_workspace, focus_calibration_file)
         if vanadium_correct:
             van = self.calibrate_and_focus_vanadium(focus_calibration_file)
-            calib_van = RebinToWorkspace(WorkspaceToRebin=van, WorkspaceToMatch=workspaces, OutputWorkspace="van_rb", StoreInADS=False)
-            workspaces = Divide(LHSWorkspace=workspaces, RHSWorkspace=calib_van, OutputWorkspace=outputname)
-            workspaces = ReplaceSpecialValues(
-                InputWorkspace=workspaces,
+            calib_van = RebinToWorkspace(
+                WorkspaceToRebin=van, WorkspaceToMatch=sample_workspace, OutputWorkspace="van_rb", StoreInADS=False
+            )
+            sample_workspace = Divide(LHSWorkspace=sample_workspace, RHSWorkspace=calib_van, OutputWorkspace=outputname)
+            sample_workspace = ReplaceSpecialValues(
+                InputWorkspace=sample_workspace,
                 NaNValue=0.0,
                 InfinityValue=0.0,
                 StoreInADS=False,
                 EnableLogging=False,
             )
-        AnalysisDataService.addOrReplace(outputname, workspaces)
-        processed.append(workspaces)
+
+        AnalysisDataService.addOrReplace(outputname, sample_workspace)
+        processed.append(sample_workspace)
 
         return processed
 
