@@ -21,6 +21,7 @@ from mantid.simpleapi import (
     GroupWorkspaces,
     ApplyDiffCal,
     ReplaceSpecialValues,
+    CloneWorkspace,
 )
 from mantid.api import AnalysisDataService
 
@@ -120,25 +121,31 @@ class DrangeData(object):
         return calibrate_ws
 
     def process_workspaces(self, subtract_empty=False, vanadium_correct=False, focus_calibration_file=""):
+        if len(self._sample) == 0:
+            return []
+
         processed = []
-        for sample in self._sample:
-            outputname = sample + WORKSPACE_SUFFIX.FOCUSED
-            if subtract_empty:
-                sample = self.subtract_container_from_sample(sample)
-            sample = self.calibrate_and_focus_workspace(sample, focus_calibration_file)
-            if vanadium_correct:
-                van = self.calibrate_and_focus_vanadium(focus_calibration_file)
-                calib_van = RebinToWorkspace(WorkspaceToRebin=van, WorkspaceToMatch=sample, OutputWorkspace="van_rb", StoreInADS=False)
-                sample = Divide(LHSWorkspace=sample, RHSWorkspace=calib_van, OutputWorkspace=outputname)
-                sample = ReplaceSpecialValues(
-                    InputWorkspace=sample,
-                    NaNValue=0.0,
-                    InfinityValue=0.0,
-                    StoreInADS=False,
-                    EnableLogging=False,
-                )
-            AnalysisDataService.addOrReplace(outputname, sample)
-            processed.append(sample)
+        workspaces = rebin_and_average(self._sample)
+
+        run_numbers = "OSIRIS" + ",".join([str(ws)[6:-4] for ws in self._sample])
+        outputname = run_numbers + WORKSPACE_SUFFIX.FOCUSED
+        if subtract_empty:
+            workspaces = self.subtract_container_from_sample(workspaces)
+        workspaces = self.calibrate_and_focus_workspace(workspaces, focus_calibration_file)
+        if vanadium_correct:
+            van = self.calibrate_and_focus_vanadium(focus_calibration_file)
+            calib_van = RebinToWorkspace(WorkspaceToRebin=van, WorkspaceToMatch=workspaces, OutputWorkspace="van_rb", StoreInADS=False)
+            workspaces = Divide(LHSWorkspace=workspaces, RHSWorkspace=calib_van, OutputWorkspace=outputname)
+            workspaces = ReplaceSpecialValues(
+                InputWorkspace=workspaces,
+                NaNValue=0.0,
+                InfinityValue=0.0,
+                StoreInADS=False,
+                EnableLogging=False,
+            )
+        AnalysisDataService.addOrReplace(outputname, workspaces)
+        processed.append(workspaces)
+
         return processed
 
     def subtract_container_from_sample(self, sample):
@@ -157,13 +164,78 @@ def load_raw(run_number_string, drange_sets, group, inst, file_ext):
     for ws in input_ws_list:
         drange = get_osiris_d_range(ws)
         if group == "sample":
-            drange_sets[drange].add_sample(ws.name())
+            drange_sets[drange].add_sample(ws)
         elif group == "vanadium":
-            drange_sets[drange].set_vanadium(ws.name())
+            drange_sets[drange].set_vanadium(ws)
         elif group == "empty":
-            drange_sets[drange].set_empty(ws.name())
+            drange_sets[drange].set_empty(ws)
     _group_workspaces(input_ws_list, "OSIRIS" + run_number_string + WORKSPACE_SUFFIX.GROUPED)
     return input_ws_list
+
+
+def rebin_and_average(ws_list):
+    """
+    Rebins the specified list of workspaces to the smallest and then averages.
+
+    :param ws_list: The workspace list to rebin and average.
+    """
+    return average_ws_list(rebin_to_smallest(*ws_list))
+
+
+def average_ws_list(ws_list):
+    """
+    Calculates the average of a list of workspaces (not workspace names)
+    - stores the result in a new workspace.
+
+    :param ws_list: The list of workspaces to average.
+    :return:        The name of the workspace containing the average.
+    """
+    # Assert we have some ws in the list, and if there is only one then return it.
+    num_workspaces = len(ws_list)
+
+    if num_workspaces == 0:
+        raise RuntimeError("getAverageWs: Trying to take an average of nothing")
+
+    if num_workspaces == 1:
+        return CloneWorkspace(InputWorkspace=ws_list[0], OutputWorkspace="cloned", StoreInADS=False)
+
+    return sum(ws_list) / num_workspaces
+
+
+def rebin_to_smallest(*workspaces):
+    """
+    Rebins the specified list to the workspace with the smallest
+    x-range in the list.
+
+    :param workspaces: The list of workspaces to rebin to the smallest.
+    :return:           The rebinned list of workspaces.
+    """
+    if len(workspaces) == 1:
+        return workspaces
+
+    smallest_idx, smallest_ws = min(enumerate(workspaces), key=lambda x: x[1].blocksize())
+
+    rebinned_workspaces = []
+    for idx, workspace in enumerate(workspaces):
+        # Check whether this is the workspace with the smallest x-range.
+        # No reason to rebin workspace to match itself.
+        # NOTE: In the future this may append workspace.clone() - this will
+        # occur in the circumstance that the input files do not want to be
+        # removed from the ADS.
+        if idx == smallest_idx:
+            rebinned_workspaces.append(workspace)
+        else:
+            rebinned_workspaces.append(
+                RebinToWorkspace(
+                    WorkspaceToRebin=workspace,
+                    WorkspaceToMatch=smallest_ws,
+                    OutputWorkspace="rebinned",
+                    StoreInADS=False,
+                    EnableLogging=False,
+                )
+            )
+
+    return rebinned_workspaces
 
 
 def run_diffraction_focussing(run_number, drange_sets, calfile, van_norm=False, subtract_empty=False):
@@ -173,7 +245,8 @@ def run_diffraction_focussing(run_number, drange_sets, calfile, van_norm=False, 
             subtract_empty=subtract_empty, vanadium_correct=van_norm, focus_calibration_file=calfile
         )
         focused.extend(processed)
-    _group_workspaces(focused, "OSIRIS" + run_number + WORKSPACE_SUFFIX.FOCUSED)
+    if len(focused) > 1:
+        _group_workspaces(focused, "OSIRIS" + run_number + WORKSPACE_SUFFIX.FOCUSED)
     return focused
 
 
@@ -262,10 +335,12 @@ def merge_dspacing_runs(focussed_runs, drange_sets, run_number):
     matched_spectra = [list(spectra) for spectra in zip(*extracted_spectra)]
     # Merge workspaces located at the same index
     merged_spectra = [
-        MergeRuns(InputWorkspaces=spectras, OutputWorkspace="OSIRIS" + run_number + WORKSPACE_SUFFIX.MERGED + f"_{idx}")
-        for idx, spectras in enumerate(matched_spectra)
+        MergeRuns(InputWorkspaces=spectra, OutputWorkspace="OSIRIS" + run_number + WORKSPACE_SUFFIX.MERGED + f"_{idx}")
+        for idx, spectra in enumerate(matched_spectra)
     ]
     grouped_spectra = GroupWorkspaces(InputWorkspaces=merged_spectra, OutputWorkspace="OSIRIS" + run_number + WORKSPACE_SUFFIX.MERGED)
+
+    common.remove_intermediate_workspace([ws for group in matched_spectra for ws in group])
 
     return [_correct_drange_overlap(grouped_spectra, drange_sets)]
 
