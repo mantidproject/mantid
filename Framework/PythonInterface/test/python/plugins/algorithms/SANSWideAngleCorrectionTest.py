@@ -61,16 +61,37 @@ class SANSWideAngleCorrectionTest(unittest.TestCase):
 
     def test_negative_trans_data(self):
         trans_invalid = self._trans * -1
-        self.assertRaises(RuntimeError, SANSWideAngleCorrection, self._sample, trans_invalid, OutputWorkspace="out")
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Invalid workspace for transmission, it does not accept negative values.",
+            SANSWideAngleCorrection,
+            self._sample,
+            trans_invalid,
+            OutputWorkspace="out",
+        )
 
     def test_shorter_trans_data(self):
         Trans = CreateWorkspace([0.3, 1, 2], [1, 2])
-        self.assertRaises(RuntimeError, SANSWideAngleCorrection, self._sample, self._trans, OutputWorkspace="out")
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Uncompatible sizes. Transmission must have the same bins of sample values",
+            SANSWideAngleCorrection,
+            self._sample,
+            Trans,
+            OutputWorkspace="out",
+        )
 
     def test_no_instrument_associated(self):
         Sample = CreateWorkspace([1, 2, 3], [1, 2])
         Trans = CreateWorkspace([1, 2, 3], [1, 2])
-        self.assertRaises(RuntimeError, SANSWideAngleCorrection, Sample, Trans, OutputWorkspace="out")
+        self.assertRaisesRegex(
+            RuntimeError,
+            "You can not apply this correction for workspace not associated to instrument",
+            SANSWideAngleCorrection,
+            Sample,
+            Trans,
+            OutputWorkspace="out",
+        )
 
 
 if __name__ == "__main__":

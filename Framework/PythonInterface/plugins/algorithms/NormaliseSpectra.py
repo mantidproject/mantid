@@ -13,7 +13,6 @@ import numpy as np
 
 
 class NormaliseSpectra(DataProcessorAlgorithm):
-
     _input_ws_name = None
     _input_ws = None
     _output_ws_name = None
@@ -46,7 +45,7 @@ class NormaliseSpectra(DataProcessorAlgorithm):
                 DeleteWorkspace("single_spectrum")
                 raise RuntimeError(
                     "Spectrum number %d:" % (spectrum_no)
-                    + "has a maximum y value of 0 or less. "
+                    + " has a maximum y value of 0 or less. "
                     + "All spectra must have a maximum y value more than 0"
                 )
             Scale(InputWorkspace=single_spectrum, Operation="Multiply", Factor=(1 / ymax), OutputWorkspace=single_spectrum)

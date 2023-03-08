@@ -258,7 +258,14 @@ class SaveReflectionsTest(unittest.TestCase):
         output_format = "SHELX"
 
         # Act
-        self.assertRaises(RuntimeError, SaveReflections, InputWorkspace=workspace, Filename=file_name, Format=output_format)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Cannot currently save modulated structures to GSAS or SHELX formats",
+            SaveReflections,
+            InputWorkspace=workspace,
+            Filename=file_name,
+            Format=output_format,
+        )
 
     def test_save_invalid_format(self):
         # Arrange
@@ -266,7 +273,14 @@ class SaveReflectionsTest(unittest.TestCase):
         output_format = "InvalidFormatName"
 
         # Act
-        self.assertRaises(ValueError, SaveReflections, InputWorkspace=self._workspace, Filename=file_name, Format=output_format)
+        self.assertRaisesRegex(
+            ValueError,
+            'The value "InvalidFormatName" is not in the list of allowed values',
+            SaveReflections,
+            InputWorkspace=self._workspace,
+            Filename=file_name,
+            Format=output_format,
+        )
 
     @patch("mantid.kernel.logger.warning")
     def test_save_empty_peak_table(self, mock_log):

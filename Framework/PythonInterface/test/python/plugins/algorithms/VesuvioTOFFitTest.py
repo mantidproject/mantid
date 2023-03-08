@@ -19,7 +19,6 @@ import vesuvio.commands as vesuvio
 
 
 class VesuvioTOFFitTest(unittest.TestCase):
-
     _test_ws = None
 
     def setUp(self):
@@ -188,7 +187,7 @@ class VesuvioTOFFitTest(unittest.TestCase):
     def test_number_functions_in_list_not_matching_length_masses_throws_error(self):
         alg = self._create_algorithm(InputWorkspace=self._test_ws, Masses=[1.0079, 33], MassProfiles="function=Gaussian,width=5;")
 
-        self.assertRaises(RuntimeError, alg.execute)
+        self.assertRaisesRegex(RuntimeError, "Found 2 masses but 1 function definition", alg.execute)
 
     # -------------- Helpers --------------------
 
