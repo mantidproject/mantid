@@ -634,7 +634,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 matched_spectra = [list(spectra) for spectra in zip(*extracted_spectra)]
                 # Merge workspaces located at the same index
                 merged_spectra = [
-                    MergeRuns(InputWorkspaces=spectra, OutputWorkspace="OSIRIS" + self._output_ws_name + f"_merged_{idx}")
+                    MergeRuns(InputWorkspaces=spectra, OutputWorkspace=self._output_ws_name + f"_merged_{idx}")
                     for idx, spectra in enumerate(matched_spectra)
                 ]
 
