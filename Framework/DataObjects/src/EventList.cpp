@@ -1269,6 +1269,9 @@ MantidVec *EventList::makeDataE() const {
   return E;
 }
 
+/// Returns a copy of the Histogram associated with this spectrum.
+HistogramData::Histogram EventList::getHistogram() const { return m_histogram; }
+
 HistogramData::Histogram EventList::histogram() const {
   HistogramData::Histogram ret(m_histogram);
   ret.setSharedY(sharedY());
@@ -2851,19 +2854,29 @@ std::vector<double> EventList::getWeightErrors() const {
   return weightErrors;
 }
 
-// --------------------------------------------------------------------------
-/** Get the pulsetimes of all events in a list
- *
- * @param events :: source vector of events
- * @param times :: vector to fill
+/**
+ * Compute a time (for instance, pulse-time plus TOF) associated to each event in the list.
+ * @param timesCalc : anonymous function that computes a time from an input event
+ * @return : vector of times for all events in the list
  */
-template <class T>
-void EventList::getPulseTimesHelper(const std::vector<T> &events,
-                                    std::vector<Mantid::Types::Core::DateAndTime> &times) {
-  times.clear();
-  times.reserve(events.size());
-  std::transform(events.cbegin(), events.cend(), std::back_inserter(times),
-                 [](const auto &event) { return event.pulseTime(); });
+template <typename UnaryOperation>
+std::vector<DateAndTime> EventList::eventTimesCalculator(const UnaryOperation &timesCalc) const {
+  std::vector<DateAndTime> times;
+  switch (eventType) {
+  case TOF:
+    times.reserve(events.size());
+    std::transform(events.cbegin(), events.cend(), std::back_inserter(times), timesCalc);
+    break;
+  case WEIGHTED:
+    times.reserve(weightedEvents.size());
+    std::transform(weightedEvents.cbegin(), weightedEvents.cend(), std::back_inserter(times), timesCalc);
+    break;
+  case WEIGHTED_NOTIME:
+    times.reserve(weightedEventsNoTime.size());
+    std::transform(weightedEventsNoTime.cbegin(), weightedEventsNoTime.cend(), std::back_inserter(times), timesCalc);
+    break;
+  }
+  return times;
 }
 
 /** Get the pulse times of each event in this EventList.
@@ -2871,23 +2884,29 @@ void EventList::getPulseTimesHelper(const std::vector<T> &events,
  * @return by copy a vector of DateAndTime times
  */
 std::vector<Mantid::Types::Core::DateAndTime> EventList::getPulseTimes() const {
-  std::vector<Mantid::Types::Core::DateAndTime> times;
-  // Set the capacity of the vector to avoid multiple resizes
-  times.reserve(this->getNumberEvents());
+  auto timeCalc = [](const auto &event) { return event.pulseTime(); };
+  return eventTimesCalculator(timeCalc);
+}
 
-  // Convert the list
-  switch (eventType) {
-  case TOF:
-    this->getPulseTimesHelper(this->events, times);
-    break;
-  case WEIGHTED:
-    this->getPulseTimesHelper(this->weightedEvents, times);
-    break;
-  case WEIGHTED_NOTIME:
-    this->getPulseTimesHelper(this->weightedEventsNoTime, times);
-    break;
-  }
-  return times;
+/// Get the Pulse-time + TOF for each event in this EventList
+std::vector<DateAndTime> EventList::getPulseTOFTimes() const {
+  auto timeCalc = [](const auto &event) {
+    constexpr double microToNano{1000.0}; // time unit conversion
+    return event.pulseTime() + static_cast<int64_t>(event.tof() * microToNano);
+  };
+  return eventTimesCalculator(timeCalc);
+}
+
+/** Get the Pulse-time + time-of-flight of the neutron up to the sample, for each event in this EventList.
+ * @param factor : rescale the TOF by this dimensionless quantity
+ * @param shift : shift the TOF (after rescaling) by this time, in microseconds
+ */
+std::vector<DateAndTime> EventList::getPulseTOFTimesAtSample(const double &factor, const double &shift) const {
+  auto timeCalc = [&](const auto &event) {
+    constexpr double microToNano{1000.0}; // time unit conversion
+    return event.pulseTime() + static_cast<int64_t>((factor * event.tof() + shift) * microToNano);
+  };
+  return eventTimesCalculator(timeCalc);
 }
 
 // --------------------------------------------------------------------------
@@ -3815,6 +3834,7 @@ void EventList::filterByPulseTime(Kernel::TimeROI *timeRoi, EventList &output) c
     break;
   }
 }
+
 //------------------------------------------------------------------------------------------------
 /** @brief Perform an in-place filtering on a vector of either TofEvent's or
  *WeightedEvent's.
@@ -3935,6 +3955,30 @@ void EventList::filterInPlace(Kernel::SplittingIntervalVec &splitter) {
                              "EventList that no longer has time information.");
     break;
   }
+}
+
+/**
+ * Initialize the detector ID's and event type of the destination event lists when splitting this list.
+ * @param partials : resulting partial lists of events after splitting's done
+ */
+void EventList::initializePartials(std::map<int, EventList *> partials) const {
+
+  // collect the state from events which is to be transferred to the partials
+  bool removeDetIDs{true};
+  const auto histogram = this->getHistogram();
+  const auto eventType = this->getEventType();
+
+  // lambda expression initializing one partial
+  auto initPartial = [&](EventList *partial) {
+    partial->clear(removeDetIDs);
+    partial->copyInfoFrom(*this);
+    partial->setHistogram(histogram);
+    partial->switchTo(eventType);
+  };
+
+  // iterate over the partials
+  std::for_each(partials.cbegin(), partials.cend(),
+                [&](const std::pair<int, EventList *> &pair) { initPartial(pair.second); });
 }
 
 //------------------------------------------------------------------------------------------------

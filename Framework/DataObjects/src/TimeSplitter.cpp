@@ -6,12 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidDataObjects/TimeSplitter.h"
+#include "MantidDataObjects/EventList.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeROI.h"
 
 #include <set>
 
 namespace Mantid {
+using API::EventType;
 using Kernel::TimeROI;
 using Types::Core::DateAndTime;
 
@@ -23,7 +25,7 @@ constexpr int DEFAULT_TARGET{0};
 
 void assertIncreasing(const DateAndTime &start, const DateAndTime &stop) {
   if (start > stop)
-    throw std::runtime_error("TODO message");
+    throw std::runtime_error("start time found at a later time than stop time");
 }
 
 /// static Logger definition
@@ -118,12 +120,15 @@ TimeSplitter::TimeSplitter(const SplittersWorkspace_sptr &sws) {
   }
 }
 
+/// Print the (destination index | DateAndTime boundary) pairs of this splitter.
 std::string TimeSplitter::debugPrint() const {
   std::stringstream msg;
   for (const auto &iter : m_roi_map)
     msg << iter.second << "|" << iter.first << "\n";
   return msg.str();
 }
+
+const std::map<DateAndTime, int> &TimeSplitter::getSplittersMap() const { return m_roi_map; }
 
 void TimeSplitter::addROI(const DateAndTime &start, const DateAndTime &stop, const int value) {
   assertIncreasing(start, stop);
@@ -170,7 +175,7 @@ void TimeSplitter::addROI(const DateAndTime &start, const DateAndTime &stop, con
       }
     }
 
-    // find the new iterator for where this goes to see if it the same value
+    // find the new iterator for where this goes to see if it's the same value
     stopIterator = m_roi_map.lower_bound(stop);
     if ((stopIterator != m_roi_map.end()) && (value == stopIterator->second)) {
       m_roi_map.erase(stopIterator);
@@ -186,6 +191,9 @@ void TimeSplitter::addROI(const DateAndTime &start, const DateAndTime &stop, con
   }
 }
 
+/// Check if the TimeSplitter is empty
+bool TimeSplitter::empty() const { return m_roi_map.empty(); }
+
 void TimeSplitter::clearAndReplace(const DateAndTime &start, const DateAndTime &stop, const int value) {
   m_roi_map.clear();
   if (value >= 0) {
@@ -194,6 +202,11 @@ void TimeSplitter::clearAndReplace(const DateAndTime &start, const DateAndTime &
   }
 }
 
+/**
+ * Find the destination index for an event with a given time.
+ * @param time : the time of the event
+ * @return : the destination index associated to a
+ */
 int TimeSplitter::valueAtTime(const DateAndTime &time) const {
   if (m_roi_map.empty())
     return NO_TARGET;
@@ -227,7 +240,7 @@ std::vector<int> TimeSplitter::outputWorkspaceIndices() const {
   // sets have unique values and are sorted
   std::set<int> outputSet;
 
-  // copy all of the (not ignore) output workspace indices
+  // copy all the non-negative output destination indices
   for (const auto &iter : m_roi_map) {
     if (iter.second > NO_TARGET)
       outputSet.insert(iter.second);
@@ -276,6 +289,123 @@ TimeROI TimeSplitter::getTimeROI(const int workspaceIndex) {
 }
 
 std::size_t TimeSplitter::numRawValues() const { return m_roi_map.size(); }
+
+// ------------------------------------------------------------------------
+// SPLITTING EVENTS METHODS
+// ------------------------------------------------------------------------
+
+/**
+ * Split a list of events according to Pulse time or Pulse + TOF time
+ *
+ * Events with masked times are allocated to destination index -1.
+ * @param events : list of input events
+ * @param partials : resulting partial lists of events
+ * @param pulseTof : if True, split according to Pulse + TOF time, otherwise split by Pulse time
+ * @param tofCorrect : rescale and shift the TOF values (factor*TOF + shift)
+ * @param factor : rescale the TOF values by a dimensionless factor.
+ * @param shift : shift the TOF values after rescaling, in units of microseconds.
+ * @throws invalid_argument : the event list is of type Mantid::API::EventType::WEIGHTED_NOTIME
+ */
+void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventList *> partials, bool pulseTof,
+                                  bool tofCorrect, double factor, double shift) const {
+
+  if (events.getEventType() == EventType::WEIGHTED_NOTIME)
+    throw std::invalid_argument("EventList::splitByTime() called on an EventList "
+                                "that no longer has time information.");
+
+  // Initialize the detector ID's and event type of the destination event lists
+  events.initializePartials(partials);
+
+  if (this->empty())
+    return;
+
+  // sort the list in-place
+  if (pulseTof)
+    // this sorting is preserved under linear transformation tof --> factor*tof+shift with factor>0
+    events.sortPulseTimeTOF();
+  else
+    events.sortPulseTime();
+
+  // fetch the times associated to each event
+  std::vector<DateAndTime> times;
+  if (pulseTof)
+    if (tofCorrect)
+      times = events.getPulseTOFTimesAtSample(factor, shift);
+    else
+      times = events.getPulseTOFTimes();
+  else
+    times = events.getPulseTimes();
+
+  // split the events
+  switch (events.getEventType()) {
+  case EventType::TOF:
+    this->splitEventVec(times, events.getEvents(), partials);
+    break;
+  case EventType::WEIGHTED:
+    this->splitEventVec(times, events.getWeightedEvents(), partials);
+    break;
+  default:
+    throw std::runtime_error("Unhandled event type");
+  }
+}
+
+/**
+ * Distribute a list of events by comparing a vector of times against the splitter boundaries.
+ *
+ * Each event in `events` has a corresponding time in `times`, which we use to find a destination index
+ * in the TimeSplitter object. The destination index is the key to find the target event list
+ * in the partials map.
+ *
+ * @tparam EVENTTYPE : one of EventType::TOF or EventType::WEIGHTED
+ * @param times : times associated to the events, used to find the destination index
+ * @param events : list of input times
+ * @param partials : target list of partial event lists, associated to the different destination indexes
+ * @throws : if the size of times and events are different
+ */
+template <typename EVENTTYPE>
+void TimeSplitter::splitEventVec(const std::vector<DateAndTime> &times, const std::vector<EVENTTYPE> &events,
+                                 std::map<int, EventList *> partials) const {
+  if (times.size() != events.size())
+    throw std::invalid_argument("Vector of event times and vector of events have different size");
+  // initialize the iterator over the splitter
+  // it assumes the splitter keys (DateAndTime objects) are sorted by increasing time.
+  auto itSplitter = m_roi_map.cbegin(); // iterator over the splitter
+  DateAndTime stop = itSplitter->first; // first splitter boundary. Discard events with times < stop
+  int destination = TimeSplitter::NO_TARGET;
+
+  // is there an EventList mapped to the destination index?
+  EventList *partial = nullptr;
+  if (partials.find(destination) != partials.cend())
+    partial = partials[destination];
+
+  auto itTime = times.cbegin();   // initialize iterator over times
+  auto itEvent = events.cbegin(); // initialize iterator over the events
+
+  // iterate over all events. It is assumed events are sorted by either pulse time or tof
+  while (itEvent != events.cend()) {
+    // Check if we need to advance the splitter and therefore select a different partial event list
+    if (*itTime >= stop) {
+      // update the partial event list with the destination index of the stopping boundary
+      destination = itSplitter->second;
+      if (partials.find(destination) == partials.cend())
+        partial = nullptr;
+      else
+        partial = partials[destination];
+      // update the stopping boundary
+      itSplitter++;
+      if (itSplitter == m_roi_map.cend())
+        stop = DateAndTime::maximum(); // a.k.a stopping boundary at an "infinite" time
+      else
+        stop = itSplitter->first;
+    }
+    if (partial) {
+      partial->addEventQuickly(*itEvent); // emplaces a copy of *itEvent in partial
+    }
+    // advance both the iterator over events and times
+    itTime++;
+    itEvent++;
+  }
+}
 
 } // namespace DataObjects
 } // namespace Mantid
