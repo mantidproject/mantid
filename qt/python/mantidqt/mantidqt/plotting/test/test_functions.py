@@ -36,6 +36,7 @@ from mantidqt.plotting.functions import (
     plot_md_ws_from_names,
     pcolormesh_from_names,
     plot_surface,
+    plot_wireframe,
 )
 
 IMAGE_PLOT_OPTIONS = {
@@ -328,6 +329,15 @@ class FunctionsTest(TestCase):
         fills = [collection for collection in ax.collections if isinstance(collection, matplotlib.collections.PolyCollection)]
 
         self.assertEqual(len(fills), 3)
+
+    def test_plot_wireframe_creates_a_tight_figure(self):
+        from matplotlib.layout_engine import TightLayoutEngine
+
+        ws = self._test_ws
+        fig = plot_wireframe([ws])
+
+        layout_engine = fig.get_layout_engine()
+        self.assertIsInstance(layout_engine, TightLayoutEngine)
 
     # ------------- Failure tests -------------
 
