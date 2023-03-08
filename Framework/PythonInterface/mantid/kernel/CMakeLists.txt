@@ -55,6 +55,7 @@ set(EXPORT_FILES
     src/Exports/Material.cpp
     src/Exports/MaterialBuilder.cpp
     src/Exports/Statistics.cpp
+    src/Exports/TimeROI.cpp
     src/Exports/OptionalBool.cpp
     src/Exports/UsageService.cpp
     src/Exports/Atom.cpp

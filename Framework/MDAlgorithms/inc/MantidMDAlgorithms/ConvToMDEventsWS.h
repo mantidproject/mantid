@@ -25,12 +25,8 @@ namespace MDAlgorithms {
 /** The class specializes ConvToDataObjectsBase for the case when the conversion
   occurs from Events WS to the MD events WS
   *
-  *
-  * See http://www.mantidproject.org/Writing_custom_ConvertTo_MD_transformation
-  for detailed description of this
-  * class place in the algorithms hierarchy.
-  *
-  * @date 11-10-2011
+  * The detailed description of the algorithm is provided at
+  * dev-docs/source/WritingCustomConvertToMDTransformation.rst.
 */
 
 // Class to process event workspace by direct conversion:

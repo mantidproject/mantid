@@ -70,9 +70,12 @@ In the ``Runs`` tab:
 User files
 ##########
 
-#. Change some values on the ``Settings`` and ``Beam Centre`` tabs.
+#. Change some values on the ``Settings`` tab and make a note of what you changed.
 #. Re-load the user file and check the values you changed - they should have
    reverted to their original values.
+#. Change some values on the ``Beam Centre`` tab. Re-load the user file. The inputs in the ``Centre Position``
+   section should revert to their original values, apart from the ``Detector`` combobox.
+   The inputs in the ``Options`` section (such as the radius limits) should not revert.
 #. Ensure that you can load the old style ``MaskFile.txt`` user file from the
    sample data.
 #. In the table on the ``Runs`` tab, under the ``User File`` column, enter
@@ -89,8 +92,8 @@ In the ``Settings`` tab:
 #. Go to ``Mask``.
 #. Click ``Display Mask``.
 #. This should give an instrument view with a circle at the centre.
-#. Go to ``Q, Wavelength, Detector Limits`` sub-tab.
 #. Close the Instrument View window
+#. Go to ``Q, Wavelength, Detector Limits`` sub-tab.
 #. Change the ``Phi Limit`` to read 0 to 45 and uncheck ``use mirror sector``.
 #. Go to ``Mask`` sub-tab.
 #. Click ``Display Mask``.
@@ -112,8 +115,8 @@ Processing
    group workspaces and four 1D workspaces.
 #. Check your default save directory. For each reduction two banks (HAB/main) should
    be saved. In total there should be 8 workspaces (4 .xml and 4 .nxs) saved.
-#. Clear the newly created files and workspaces to make the next test easier
 #. Double-click the 1D workspaces and you should get a single line plot.
+#. Clear the newly created files and workspaces to make the next test easier
 #. Change the contents of the first cell in the first row to ``74045`` and click
    ``Process Selected``.
 #. The row should turn blue; hovering over the row should give an error message.
@@ -177,8 +180,8 @@ In the ``Sum Runs`` tab:
 
 #. Enter ``74044, 74019`` in the top line.
 #. Click ``Add`` at the side.
-#. Enter ``LOQ74044-add`` as Output file.
-#. In the top-right, click ``Select Save Directory`` and select a directory in your managed paths.
+#. Check that ``LOQ74044-add`` is automatically entered as the Save File at the bottom of the tab.
+#. At the top-right of the tab, click the ``Select Save Directory`` button and select a directory in your managed paths.
 #. Click ``Sum`` at the bottom.
 #. Go back to the ``Runs`` tab.
 #. Remove all rows.

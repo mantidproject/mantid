@@ -393,7 +393,7 @@ void LoadMD::loadDimensions2() {
     Geometry::MDFrame_const_uptr mdFrame = Geometry::makeMDFrameFactoryChain()->create(MDFrameArgument(frame, units));
     m_file->getData(axis);
     m_file->closeData();
-    m_dims.emplace_back(std::make_shared<MDHistoDimension>(long_name, splitAxes[d - 1], *mdFrame,
+    m_dims.emplace_back(std::make_shared<MDHistoDimension>(long_name, long_name, *mdFrame,
                                                            static_cast<coord_t>(axis.front()),
                                                            static_cast<coord_t>(axis.back()), axis.size() - 1));
   }

@@ -2,11 +2,11 @@
 from mantid.simpleapi import *
 import matplotlib.pyplot as plt
 
-# Dictionary { workspace_name: (workspace_index, start_x, end_x) }
-input_data = {
-    "Name1": (0, 0.500000, 1.500000),
-    "Name2": (1, 0.600000, 1.600000)
-}
+# List of tuples [ (workspace_name, workspace_index, start_x, end_x) ]
+input_data = [
+    ("Name1", 0, 0.500000, 1.500000),
+    ("Name2", 1, 0.600000, 1.600000)
+]
 
 # Fit function as a string
 function = \
@@ -21,15 +21,17 @@ output_base_name = "Output_Fit"
 
 # Perform a sequential fit
 output_workspaces, parameter_tables, normalised_matrices = [], [], []
-for input_workspace, domain_data in input_data.items():
-    fit_output = Fit(Function=function, InputWorkspace=input_workspace, WorkspaceIndex=domain_data[0],
-                     StartX=domain_data[1], EndX=domain_data[2], MaxIterations=max_iterations,
-                     Minimizer=minimizer, CostFunction=cost_function, EvaluationType=evaluation_type,
-                     Output=output_base_name + input_workspace)
+for domain_data in input_data:
+    output_name = output_base_name + domain_data[0] + str(domain_data[1])
 
-    output_workspaces.append(output_base_name + input_workspace + "_Workspace")
-    parameter_tables.append(output_base_name + input_workspace + "_Parameters")
-    normalised_matrices.append(output_base_name + input_workspace + "_NormalisedCovarianceMatrix")
+    fit_output = Fit(Function=function, InputWorkspace=domain_data[0], WorkspaceIndex=domain_data[1],
+                     StartX=domain_data[2], EndX=domain_data[3], MaxIterations=max_iterations,
+                     Minimizer=minimizer, CostFunction=cost_function, EvaluationType=evaluation_type,
+                     Output=output_name)
+
+    output_workspaces.append(output_name + "_Workspace")
+    parameter_tables.append(output_name + "_Parameters")
+    normalised_matrices.append(output_name + "_NormalisedCovarianceMatrix")
 
     # Use the parameters in the previous function as the start parameters of the next fit
     function = fit_output.Function

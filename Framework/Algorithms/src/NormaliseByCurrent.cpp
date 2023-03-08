@@ -8,7 +8,6 @@
 #include "MantidAPI/Run.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/LogFilter.h"
 
 namespace Mantid::Algorithms {
 

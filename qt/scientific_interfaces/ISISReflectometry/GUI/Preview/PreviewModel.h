@@ -42,6 +42,7 @@ public:
   Mantid::API::MatrixWorkspace_sptr getReducedWs() const override;
   std::optional<double> getDefaultTheta() const override;
   PreviewRow const &getPreviewRow() const override;
+  std::optional<Selection> const getSelectedRegion(ROIType regionType) override;
 
   void setLoadedWs(Mantid::API::MatrixWorkspace_sptr workspace);
   void setSummedWs(Mantid::API::MatrixWorkspace_sptr workspace) override;
@@ -63,5 +64,10 @@ private:
   std::optional<double> getThetaFromLogs(std::string const &logName) const;
 
   void setProcessingInstructions(ROIType regionType, ProcessingInstructions processingInstructions);
+  void setSelectedRegionMembers(ROIType regionType, Selection const &selection);
+
+  std::optional<Selection> m_selectedSignalRegion;
+  std::optional<Selection> m_selectedBackgroundRegion;
+  std::optional<Selection> m_selectedTransmissionRegion;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

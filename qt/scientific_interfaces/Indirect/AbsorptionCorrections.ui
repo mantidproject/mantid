@@ -158,6 +158,62 @@
             </property>
            </widget>
           </item>
+          <item row="3" column="0">
+           <widget class="QCheckBox" name="cbSparseInstrument">
+            <property name="text">
+             <string>Sparse Instrument</string>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="lbNumberOfDetectorRows">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Number Of Detector Rows:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QSpinBox" name="spNumberDetectorRows">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="minimum">
+             <number>3</number>
+            </property>
+            <property name="value">
+             <number>3</number>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="2">
+           <widget class="QLabel" name="lbNumberDetectorColumns">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Number Of Detector Columns:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="4">
+           <widget class="QSpinBox" name="spNumberDetectorColumns">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="minimum">
+             <number>2</number>
+            </property>
+            <property name="value">
+             <number>2</number>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -1356,8 +1412,8 @@
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>783</x>
-     <y>324</y>
+     <x>943</x>
+     <y>306</y>
     </hint>
     <hint type="destinationlabel">
      <x>315</x>
@@ -1372,12 +1428,12 @@
    <slot>setValue(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>402</x>
-     <y>424</y>
+     <x>483</x>
+     <y>406</y>
     </hint>
     <hint type="destinationlabel">
-     <x>784</x>
-     <y>424</y>
+     <x>944</x>
+     <y>406</y>
     </hint>
    </hints>
   </connection>
@@ -1388,12 +1444,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>256</x>
-     <y>69</y>
+     <x>275</x>
+     <y>314</y>
     </hint>
     <hint type="destinationlabel">
-     <x>832</x>
-     <y>350</y>
+     <x>944</x>
+     <y>406</y>
     </hint>
    </hints>
   </connection>
@@ -1404,12 +1460,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>256</x>
-     <y>69</y>
+     <x>275</x>
+     <y>314</y>
     </hint>
     <hint type="destinationlabel">
-     <x>371</x>
-     <y>350</y>
+     <x>483</x>
+     <y>406</y>
     </hint>
    </hints>
   </connection>
@@ -1420,12 +1476,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>256</x>
-     <y>69</y>
+     <x>275</x>
+     <y>314</y>
     </hint>
     <hint type="destinationlabel">
-     <x>371</x>
-     <y>350</y>
+     <x>75</x>
+     <y>367</y>
     </hint>
    </hints>
   </connection>
@@ -1436,12 +1492,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>256</x>
-     <y>69</y>
+     <x>275</x>
+     <y>314</y>
     </hint>
     <hint type="destinationlabel">
-     <x>832</x>
-     <y>350</y>
+     <x>128</x>
+     <y>367</y>
     </hint>
    </hints>
   </connection>
@@ -1452,12 +1508,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>256</x>
-     <y>69</y>
+     <x>275</x>
+     <y>314</y>
     </hint>
     <hint type="destinationlabel">
-     <x>832</x>
-     <y>340</y>
+     <x>128</x>
+     <y>367</y>
     </hint>
    </hints>
   </connection>
@@ -1468,8 +1524,8 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>256</x>
-     <y>69</y>
+     <x>275</x>
+     <y>314</y>
     </hint>
     <hint type="destinationlabel">
      <x>486</x>
@@ -1484,12 +1540,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>256</x>
-     <y>69</y>
+     <x>275</x>
+     <y>314</y>
     </hint>
     <hint type="destinationlabel">
-     <x>602</x>
-     <y>350</y>
+     <x>714</x>
+     <y>406</y>
     </hint>
    </hints>
   </connection>
@@ -1500,12 +1556,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>256</x>
-     <y>69</y>
+     <x>275</x>
+     <y>314</y>
     </hint>
     <hint type="destinationlabel">
-     <x>141</x>
-     <y>350</y>
+     <x>160</x>
+     <y>406</y>
     </hint>
    </hints>
   </connection>
@@ -1516,12 +1572,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>256</x>
-     <y>69</y>
+     <x>275</x>
+     <y>314</y>
     </hint>
     <hint type="destinationlabel">
-     <x>141</x>
-     <y>350</y>
+     <x>49</x>
+     <y>367</y>
     </hint>
    </hints>
   </connection>
@@ -1532,12 +1588,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>256</x>
-     <y>69</y>
+     <x>275</x>
+     <y>314</y>
     </hint>
     <hint type="destinationlabel">
-     <x>602</x>
-     <y>350</y>
+     <x>102</x>
+     <y>367</y>
     </hint>
    </hints>
   </connection>
@@ -1548,12 +1604,76 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>256</x>
-     <y>69</y>
+     <x>275</x>
+     <y>314</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>102</x>
+     <y>367</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbSparseInstrument</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbNumberOfDetectorRows</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>141</x>
+     <y>154</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>141</x>
+     <y>179</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbSparseInstrument</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbNumberDetectorColumns</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>141</x>
+     <y>154</y>
     </hint>
     <hint type="destinationlabel">
      <x>602</x>
-     <y>340</y>
+     <y>179</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbSparseInstrument</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spNumberDetectorColumns</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>141</x>
+     <y>154</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>832</x>
+     <y>179</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbSparseInstrument</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spNumberDetectorRows</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>141</x>
+     <y>154</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>371</x>
+     <y>179</y>
     </hint>
    </hints>
   </connection>

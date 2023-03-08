@@ -1,0 +1,1 @@
+- Fixed bug with instrument view on retina screens where the image would only fill a quarter of the available space.

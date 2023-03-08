@@ -16,6 +16,9 @@ The units used for saving will match those of the input workspace, such that if 
 Format of .SPE files
 ####################
 
+See the `Horace user manual <https://pace-neutrons.github.io/Horace/3.6.0/Input_file_formats.html#spe-file-format>`__
+for the definition of this format.
+
 ::
 
     ndet ne ! number of workspaces and number of energy bins

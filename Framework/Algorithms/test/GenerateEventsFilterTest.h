@@ -19,7 +19,6 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid;

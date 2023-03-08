@@ -46,7 +46,7 @@ void UnwrapSNS::init() {
       "Contains numbers counts against time of flight (TOF).");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "This workspace will be in the units of time of flight. (See "
-                  "http://www.mantidproject.org/Units)");
+                  "http://docs.mantidproject.org/concepts/UnitFactory)");
 
   auto validator = std::make_shared<BoundedValidator<double>>();
   validator->setLower(0.01);

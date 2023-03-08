@@ -46,69 +46,61 @@ Mantid::Kernel::Logger g_log("MantidHelpWindow");
 // initialise the help window
 QPointer<pqHelpWindow> MantidHelpWindow::g_helpWindow;
 
-/// Base url for all of the files in the project.
-const QString BASE_URL("qthelp://org.mantidproject/doc/");
-/// Url to display if nothing else is suggested.
-const QString DEFAULT_URL(BASE_URL + "index.html");
-
-/// Base url for all of the wiki links
-const QString WIKI_BASE_URL("https://www.mantidproject.org/");
-/// Url to display if nothing else is suggested.
-const QString WIKI_DEFAULT_URL(WIKI_BASE_URL + "MantidPlot");
-
 /// name of the collection file itself
 const QString COLLECTION_FILE("MantidProject.qhc");
+/// QtHelp scheme
+const QString QTHELP_SCHEME("qthelp");
+/// Base url for all of the files in the QtHelp project.
+const QString QTHELP_HOST("org.mantidproject");
+/// Base path for all files in collection
+const QString QTHELP_BASE_PATH("/doc/");
+/// HTML scheme
+const QString HTML_SCHEME("https");
+/// Base url for all of the files in the online html
+const QString HTML_HOST("docs.mantidproject.org");
+/// Base path for all files in collection
+const QString HTML_BASE_PATH("/");
+/// Page to display if nothing provided
+const QString DEFAULT_PAGENAME("index");
 
 /**
- * Default constructor shows the @link DEFAULT_URL @endlink.
+ * Default constructor shows the base index page.
  */
 MantidHelpWindow::MantidHelpWindow(const Qt::WindowFlags &flags)
-    : MantidHelpInterface(), m_collectionFile(""), m_cacheFile(""), m_firstRun(true) {
+    : MantidHelpInterface(), m_collectionFile(""), m_firstRun(true) {
   // find the collection and delete the cache file if this is the first run
   if (!helpWindowExists()) {
     this->determineFileLocs();
 
-    // see if chache file exists and remove it - shouldn't be necessary, but it
-    // is
-    if (!m_cacheFile.empty()) {
-      if (Poco::File(m_cacheFile).exists()) {
-        g_log.debug() << "Removing help cache file \"" << m_cacheFile << "\"\n";
-        Poco::File(m_cacheFile).remove();
-      } else {
-        Poco::Path direcPath = Poco::Path(m_cacheFile).parent(); // drop off the filename
-        Poco::File direcFile(direcPath.absolute().toString());
-        if (!direcFile.exists()) {
-          direcFile.createDirectories();
-        }
+    if (!m_collectionFile.empty()) {
+      // create the help engine with the found location
+      g_log.debug() << "Loading " << m_collectionFile << "\n";
+      auto helpEngine = new QHelpEngine(QString(m_collectionFile.c_str()));
+      // in qt6 call helpEngine->setReadOnly(true) instead
+      helpEngine->setProperty("_q_readonly", QVariant::fromValue<bool>(true));
+      QObject::connect(helpEngine, SIGNAL(warning(QString)), this, SLOT(warning(QString)));
+
+      // finish initializing the database
+      if (helpEngine->setupData())
+        g_log.debug("helpengine.setupData() returned true");
+      else
+        g_log.debug("helpengine.setupData() returned false");
+
+      // create a new help window
+      g_helpWindow = new pqHelpWindow(helpEngine, this, flags);
+      g_helpWindow->setWindowTitle(QString("Mantid - Help"));
+      g_helpWindow->setWindowIcon(QIcon(":/images/MantidIcon.ico"));
+
+      // show the home page on startup
+      auto registeredDocs = helpEngine->registeredDocumentations();
+      if (registeredDocs.size() > 0) {
+        g_helpWindow->showHomePage(registeredDocs[0]);
       }
-    }
-
-    // create the help engine with the found location
-    g_log.debug() << "Loading " << m_collectionFile << "\n";
-    auto helpEngine = new QHelpEngine(QString(m_collectionFile.c_str()));
-    QObject::connect(helpEngine, SIGNAL(warning(QString)), this, SLOT(warning(QString)));
-    g_log.debug() << "Making local cache copy for saving information at " << m_cacheFile << "\n";
-
-    if (helpEngine->copyCollectionFile(QString(m_cacheFile.c_str()))) {
-      helpEngine->setCollectionFile(QString(m_cacheFile.c_str()));
+      g_helpWindow->show();
+      g_helpWindow->raise();
     } else {
-      g_log.warning("Failed to copy collection file");
-      g_log.debug(helpEngine->error().toStdString());
+      g_log.information("Without collection file redirecting help to default web browser");
     }
-    g_log.debug() << "helpengine.setupData() returned " << helpEngine->setupData() << "\n";
-
-    // create a new help window
-    g_helpWindow = new pqHelpWindow(helpEngine, this, flags);
-    g_helpWindow->setWindowTitle(QString("Mantid - Help"));
-    g_helpWindow->setWindowIcon(QIcon(":/images/MantidIcon.ico"));
-
-    // show the home page on startup
-    auto registeredDocs = helpEngine->registeredDocumentations();
-    if (registeredDocs.size() > 0) {
-      g_helpWindow->showHomePage(registeredDocs[0]);
-    }
-    g_helpWindow->show();
-    g_helpWindow->raise();
   }
 }
 
@@ -130,17 +122,33 @@ void MantidHelpWindow::openWebpage(const QUrl &url) {
 void MantidHelpWindow::showPage(const QString &url) { this->showPage(QUrl(url)); }
 
 void MantidHelpWindow::showPage(const QUrl &url) {
+  // Compute Url from input.
+  // An absolute Url is used as is. For relative urls
+  // it is assumed the path of the URL is relative to
+  // the base directory of that scheme where the data
+  // is hosted.
+
+  QUrl targetUrl;
+  if (url.isRelative()) {
+    const QString pagePath = url.isEmpty() ? DEFAULT_PAGENAME + ".html" : url.path();
+    if (helpWindowExists()) {
+      targetUrl.setScheme(QTHELP_SCHEME);
+      targetUrl.setHost(QTHELP_HOST);
+      targetUrl.setPath(QTHELP_BASE_PATH + pagePath);
+    } else {
+      targetUrl.setScheme(HTML_SCHEME);
+      targetUrl.setHost(HTML_HOST);
+      targetUrl.setPath(HTML_BASE_PATH + pagePath);
+    }
+  } else {
+    targetUrl = url;
+  }
+
   if (helpWindowExists()) {
-    if (url.isEmpty())
-      this->showHelp(DEFAULT_URL);
-    else
-      this->showHelp(url.toString());
+    this->showHelp(targetUrl.toString());
   } else // qt-assistant disabled
   {
-    if (url.isEmpty())
-      this->openWebpage(WIKI_DEFAULT_URL);
-    else
-      this->openWebpage(url);
+    this->openWebpage(targetUrl.toString());
   }
 }
 
@@ -148,25 +156,11 @@ void MantidHelpWindow::showPage(const QUrl &url) {
  * Have the help window show a specific url. If the url doesn't exist
  * this just pops up the default view for the help.
  *
- * @param url The url to open. This should start with @link BASE_URL @endlink.
- * If it is empty show the default page.
+ * @param url The url to open. A relative path is assumed to be relative
+ *            to the base url. An absolute path is used as given.
+ *            If it is empty show the default page.
  */
 void MantidHelpWindow::showPage(const string &url) { this->showPage(QUrl(QString(url.c_str()))); }
-
-void MantidHelpWindow::showWikiPage(const string &page) {
-  if (page.empty())
-    this->openWebpage(WIKI_DEFAULT_URL);
-  else
-    this->openWebpage(WIKI_BASE_URL + page.c_str());
-}
-
-/**
- * Convenience method for HelpWindowImpl::showWikiPage(const string &).
- *
- * @param page The name of the wiki page to show. If this is empty show
- * the wiki homepage.
- */
-void MantidHelpWindow::showWikiPage(const QString &page) { this->showWikiPage(page.toStdString()); }
 
 /**
  * Show the help page for a particular algorithm. The page is picked
@@ -178,40 +172,7 @@ void MantidHelpWindow::showWikiPage(const QString &page) { this->showWikiPage(pa
  * value (-1) will show the top of the page.
  */
 void MantidHelpWindow::showAlgorithm(const string &name, const int version) {
-  auto versionStr("-v" + boost::lexical_cast<string>(version));
-  if (version <= 0) {
-    versionStr = ""; // let the redirect do its thing
-  }
-
-  QString help_url("");
-  if (!name.empty()) {
-    auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(name);
-    help_url = QString::fromStdString(alg->helpURL());
-  }
-  if (helpWindowExists()) {
-    if (help_url.isEmpty()) {
-      QString url(BASE_URL);
-      url += "algorithms/";
-      if (name.empty()) {
-        url += "index.html";
-      } else {
-        url += QString(name.c_str()) + QString(versionStr.c_str()) + ".html";
-      }
-      this->showHelp(url);
-    } else {
-      this->showHelp(help_url);
-    }
-  } else { // qt-assistant disabled
-    if (help_url.isEmpty()) {
-      if (name.empty()) {
-        this->showWikiPage(std::string("Category:Algorithms"));
-      } else {
-        this->showWikiPage(name);
-      }
-    } else {
-      this->openWebpage(help_url);
-    }
-  }
+  this->showAlgorithm(QString::fromStdString(name), version);
 }
 
 /**
@@ -224,30 +185,23 @@ void MantidHelpWindow::showAlgorithm(const string &name, const int version) {
  * value (-1) will show the top of the page.
  */
 void MantidHelpWindow::showAlgorithm(const QString &name, const int version) {
-  this->showAlgorithm(name.toStdString(), version);
-}
+  auto versionStr("-v" + QString::number(version));
+  if (version <= 0) {
+    versionStr = ""; // let the redirect do its thing
+  }
 
-/**
- * Show the help page for a particular concept.
- *
- * @param name The name of the concept to show. If this is empty show
- * the concept index.
- */
-void MantidHelpWindow::showConcept(const string &name) {
-  if (helpWindowExists()) {
-    QString url(BASE_URL);
-    url += "concepts/";
-    if (name.empty())
-      url += "index.html";
-    else
-      url += QString(name.c_str()) + ".html";
-    this->showHelp(url);
-  } else // qt-assistant disabled
-  {
-    if (name.empty())
-      this->showWikiPage(std::string("Category:Concepts"));
-    else
-      this->showWikiPage(name);
+  // do we have an override of the URL?
+  QString helpUrl;
+  if (!name.isEmpty()) {
+    const auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(name.toStdString());
+    helpUrl = QString::fromStdString(alg->helpURL());
+  }
+  if (helpUrl.isEmpty()) {
+    const QString pageName = name.isEmpty() ? DEFAULT_PAGENAME : name;
+    const QString pagePath = QString("algorithms/%1%2.html").arg(pageName, versionStr);
+    this->showPage(pagePath);
+  } else {
+    this->showPage(helpUrl);
   }
 }
 
@@ -257,33 +211,18 @@ void MantidHelpWindow::showConcept(const string &name) {
  * @param name The name of the concept to show. If this is empty show
  * the concept index.
  */
-void MantidHelpWindow::showConcept(const QString &name) { this->showConcept(name.toStdString()); }
+void MantidHelpWindow::showConcept(const string &name) { this->showConcept(QString::fromStdString(name)); }
 
 /**
- * Show the help page for a particular fit function. The page is
- * picked using matching naming conventions.
+ * Show the help page for a particular concept.
  *
- * @param name The name of the fit function to show. If it is empty show
- * the fit function index.
+ * @param name The name of the concept to show. If this is empty show
+ * the concept index.
  */
-void MantidHelpWindow::showFitFunction(const std::string &name) {
-  if (helpWindowExists()) {
-    QString url(BASE_URL);
-    url += "fitting/fitfunctions/";
-    auto functionUrl = url + QString(name.c_str()) + ".html";
-    if (name.empty() || !g_helpWindow->isExistingPage(functionUrl))
-      url += "index.html";
-    else
-      url = functionUrl;
-
-    this->showHelp(url);
-  } else // qt-assistant disabled
-  {
-    if (name.empty())
-      this->showWikiPage(std::string("Category:Fit_functions"));
-    else
-      this->showWikiPage(name);
-  }
+void MantidHelpWindow::showConcept(const QString &name) {
+  const QString pageName = name.isEmpty() ? DEFAULT_PAGENAME : name;
+  const QString pagePath = QString("concepts/%1.html").arg(pageName);
+  this->showPage(pagePath);
 }
 
 /**
@@ -293,7 +232,20 @@ void MantidHelpWindow::showFitFunction(const std::string &name) {
  * @param name The name of the fit function to show. If it is empty show
  * the fit function index.
  */
-void MantidHelpWindow::showFitFunction(const QString &name) { this->showFitFunction(name.toStdString()); }
+void MantidHelpWindow::showFitFunction(const std::string &name) { this->showFitFunction(QString::fromStdString(name)); }
+
+/**
+ * Show the help page for a particular fit function. The page is
+ * picked using matching naming conventions.
+ *
+ * @param name The name of the fit function to show. If it is empty show
+ * the fit function index.
+ */
+void MantidHelpWindow::showFitFunction(const QString &name) {
+  const QString pageName = name.isEmpty() ? DEFAULT_PAGENAME : name;
+  const QString pagePath = QString("fitting/fitfunctions/%1.html").arg(pageName);
+  this->showPage(pagePath);
+}
 
 /**
  * Show the help page for a given custom interface.
@@ -303,7 +255,10 @@ void MantidHelpWindow::showFitFunction(const QString &name) { this->showFitFunct
  * @param section :: the section of the interface to show
  */
 void MantidHelpWindow::showCustomInterface(const QString &name, const QString &area, const QString &section) {
-  this->showCustomInterface(name.toStdString(), area.toStdString(), section.toStdString());
+  const QString areaPath = area.isEmpty() ? "" : QString("%1/").arg(area);
+  const QString pagePath = QString("%1.html").arg(name.isEmpty() ? DEFAULT_PAGENAME : name);
+  const QString sectionAnchor = section.isEmpty() ? "" : QString("#%1").arg(section);
+  this->showPage("interfaces/" + areaPath + pagePath + sectionAnchor);
 }
 
 /**
@@ -315,22 +270,8 @@ void MantidHelpWindow::showCustomInterface(const QString &name, const QString &a
  */
 void MantidHelpWindow::showCustomInterface(const std::string &name, const std::string &area,
                                            const std::string &section) {
-  if (helpWindowExists()) {
-    QString url(BASE_URL);
-    url += "interfaces/";
-    if (!area.empty()) {
-      url += QString::fromStdString(area) + "/";
-    }
-    if (name.empty()) {
-      url += "index.html";
-    } else {
-      url += QString::fromStdString(name) + ".html";
-      if (!section.empty()) {
-        url += "#" + QString::fromStdString(section);
-      }
-    }
-    this->showHelp(url);
-  }
+  this->showCustomInterface(QString::fromStdString(name), QString::fromStdString(area),
+                            QString::fromStdString(section));
 }
 
 /**
@@ -341,8 +282,12 @@ void MantidHelpWindow::shutdown() {
   // close the window and delete the object
   // Deleting the object ensures the help engine's destructor is called and
   // avoids a segfault when workbench is closed
-  g_helpWindow->setAttribute(Qt::WA_DeleteOnClose);
-  g_helpWindow->close();
+  if (helpWindowExists()) {
+    g_helpWindow->setAttribute(Qt::WA_DeleteOnClose);
+    g_helpWindow->close();
+  } else {
+    g_log.warning("Something really wrong in MantidHelpWindow::shutdown()");
+  }
 }
 
 /**
@@ -429,35 +374,7 @@ void MantidHelpWindow::determineFileLocs() {
   string binDir = Mantid::Kernel::ConfigService::Instance().getPropertiesDir();
 
   this->findCollectionFile(binDir);
-  if (m_collectionFile.empty()) {
-    // clear out the other filenames
-    m_cacheFile = "";
-    return;
-  }
   g_log.debug() << "Using collection file \"" << m_collectionFile << "\"\n";
-
-  // determine cache file location
-  m_cacheFile = COLLECTION_FILE.toStdString();
-
-  QString dataLoc = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/data";
-
-  if (dataLoc.endsWith("mantidproject")) {
-    Poco::Path path(dataLoc.toStdString(), m_cacheFile);
-    m_cacheFile = path.absolute().toString();
-  } else if (dataLoc.endsWith("MantidPlot")) // understood to end in "Mantid/MantidPlot"
-  {
-    Poco::Path path(dataLoc.toStdString());
-    path = path.parent(); // drop off "MantidPlot"
-    path = path.parent(); // drop off "Mantid"
-    path = Poco::Path(path, "mantidproject");
-    path = Poco::Path(path, m_cacheFile);
-    m_cacheFile = path.absolute().toString();
-  } else {
-    g_log.debug() << "Failed to determine help cache file location\n"; // REMOVE
-    Poco::Path path(dataLoc.toStdString(), "mantidproject");
-    path = Poco::Path(path, COLLECTION_FILE.toStdString());
-    m_cacheFile = path.absolute().toString();
-  }
 }
 
 void MantidHelpWindow::warning(const QString &msg) { g_log.warning(msg.toStdString()); }

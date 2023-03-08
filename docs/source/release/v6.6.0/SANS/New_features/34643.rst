@@ -1,1 +1,0 @@
-- Support loading D16 old scan data in their new format with the entire scan in one file.

@@ -11,7 +11,6 @@ from mantid.api import *
 
 
 class LoadNMoldyn3AsciiTest(unittest.TestCase):
-
     _cdl_filename = "NaF_DISF.cdl"
     _dat_filename = "WSH_test.dat"
 
@@ -83,15 +82,22 @@ class LoadNMoldyn3AsciiTest(unittest.TestCase):
         Tests that the algorithm cannot be run when no functions are specified
         when loading a .cdl file.
         """
-        self.assertRaises(RuntimeError, LoadNMoldyn3Ascii, Filename=self._cdl_filename, OutputWorkspace="__LoadNMoldyn3Ascii_test")
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Must specify at least one function when loading a CDL file",
+            LoadNMoldyn3Ascii,
+            Filename=self._cdl_filename,
+            OutputWorkspace="__LoadNMoldyn3Ascii_test",
+        )
 
     def test_function_validation_dat(self):
         """
         Tests that the algorithm cannot be run when functions are specified
         when loading a .dat file.
         """
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Cannot specify functions when loading an ASCII file",
             LoadNMoldyn3Ascii,
             Filename=self._dat_filename,
             Functions=["Sqw-total"],

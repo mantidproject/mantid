@@ -270,7 +270,7 @@ void MainWindowPresenter::addNewBatch(IBatchView *batchView) {
 void MainWindowPresenter::initNewBatch(IBatchPresenter *batchPresenter, std::string const &instrument,
                                        boost::optional<int> precision) {
 
-  batchPresenter->initInstrumentList();
+  batchPresenter->initInstrumentList(instrument);
   batchPresenter->notifyInstrumentChanged(instrument);
   if (precision.is_initialized())
     batchPresenter->notifySetRoundPrecision(precision.get());

@@ -74,12 +74,4 @@ To avoid this :
 
 Updating the facility, instrument or user directories will not remove the ``muon.GUI=<options>`` line. It only seems to occur when setting these options for the first time.
 
-
-Feedback & Comments
--------------------
-
-If you have any questions or comments about feature flags or this help page, please
-contact the `Mantid team <http://www.mantidproject.org/Contact>`__ or the
-`Muon group <http://www.isis.stfc.ac.uk/groups/muons/muons3385.html>`__.
-
 .. categories:: Interfaces Muon

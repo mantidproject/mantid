@@ -15,7 +15,11 @@ set(PYTHON_DEPS ${MPI_CXX_LIBRARIES})
 # Keep boost python separate from other boost
 set(_boost_libs_orig ${Boost_LIBRARIES})
 set(Boost_LIBRARIES)
-find_package(BoostPython REQUIRED)
+find_package(
+  Boost ${BOOST_VERSION_REQUIRED}
+  COMPONENTS python${Python_VERSION_MAJOR}${Python_VERSION_MINOR}
+  REQUIRED
+)
 set(BoostPython_LIBRARIES ${Boost_LIBRARIES})
 set(Boost_LIBRARIES ${_boost_libs_orig})
 unset(_boost_libs_orig)

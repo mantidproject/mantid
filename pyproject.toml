@@ -1,2 +1,15 @@
 [tool.black]
 line-length = 140
+
+[tool.versioningit.vcs]
+method = "git"
+default-tag = "0.0.0"
+exclude = ["nightly"]
+
+[tool.versioningit.next-version]
+method = "minor"
+
+[tool.versioningit.format]
+distance = "{base_version}.dev{distance}"
+dirty = "{base_version}+uncommitted"
+distance-dirty = "{base_version}.dev{distance}+uncommitted"

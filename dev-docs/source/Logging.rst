@@ -167,5 +167,5 @@ Tips
 
 - Note, that logging can slow down code significantly, so avoid overusing it, especially in large and nested loops.
 - In workflow algorithms consider setting an offset to the child algorithm log levels, or disable them completely, otherwise the log output can be too verbose with the low priority levels, such as debug or information.
-- Note, that the *Results Log* widget in MantidPlot offers only five options to show the logs (from debug to error).
-- Note, that too verbose logs when shown in the *Results Log* can slow down and even freeze the MantidPlot GUI for some time. So choose wisely what log level to show.
+- Note, that the *Results Log* widget in Mantid offers only five options to show the logs (from debug to error).
+- Note, that too verbose logs when shown in the *Results Log* can slow down and even freeze the Mantid GUI for some time. So choose wisely what log level to show.

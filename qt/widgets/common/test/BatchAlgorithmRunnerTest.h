@@ -9,11 +9,11 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
-#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MockConfiguredAlgorithm.h"
 
@@ -21,6 +21,7 @@
 
 using namespace Mantid::API;
 using namespace MantidQt::API;
+using Mantid::API::AlgorithmRuntimeProps;
 using MantidQt::API::BatchAlgorithmRunner;
 using testing::NiceMock;
 using testing::Return;

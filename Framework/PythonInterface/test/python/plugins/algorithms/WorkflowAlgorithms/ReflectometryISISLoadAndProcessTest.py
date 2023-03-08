@@ -661,7 +661,17 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         del args["ProcessingInstructions"]
         args["CalibrationFile"] = self._CALIBRATION_TEST_DATA
         args["AnalysisMode"] = "MultiDetectorAnalysis"
-        outputs = ["IvsQ_45455", "IvsQ_binned_45455", "TOF", "TOF_45455", "Calib_Table_45455", "TOF_45455_summed_segment"]
+        outputs = ["IvsQ_45455", "IvsQ_binned_45455", "TOF", "TOF_45455", "TOF_45455_summed_segment"]
+        self._assert_run_algorithm_succeeds(args, outputs)
+
+    def test_algorithm_passes_calibration_filepath_to_preprocessing_step_in_debug_mode(self):
+        args = self._default_options
+        args["InputRunList"] = "INTER45455"
+        del args["ProcessingInstructions"]
+        args["CalibrationFile"] = self._CALIBRATION_TEST_DATA
+        args["Debug"] = True
+        args["AnalysisMode"] = "MultiDetectorAnalysis"
+        outputs = ["IvsQ_45455", "IvsQ_binned_45455", "TOF", "TOF_45455", "Calib_Table_45455", "TOF_45455_summed_segment", "IvsLam_45455"]
         self._assert_run_algorithm_succeeds(args, outputs)
 
     def test_invalid_polarization_efficiency_file_name_raises_error(self):

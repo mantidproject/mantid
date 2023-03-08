@@ -95,8 +95,7 @@ void FindDeadDetectors::exec() {
       for (const auto &id : spec.getDetectorIDs()) {
         // Write the detector ID to file, log & the FoundDead output property
         file << " " << id;
-        // we could write dead detectors to the log but if they are viewing the
-        // log in the MantidPlot viewer it will crash MantidPlot
+        // we could write dead detectors to the log, but this will cause a crash if they are viewing the log viewer
         deadDets.emplace_back(id);
         ++countDets;
       }

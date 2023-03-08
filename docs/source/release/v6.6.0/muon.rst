@@ -6,51 +6,25 @@ Muon Changes
    :local:
 
 
-Frequency Domain Analysis
--------------------------
-
-Bugfixes
-############
-.. amalgamate:: Muon/FDA/Bugfixes
-
-
-Muon Analysis
--------------
-
-Bugfixes
-############
-.. amalgamate:: Muon/Muon_Analysis/Bugfixes
-
-
 Muon Analysis and Frequency Domain Analysis
 -------------------------------------------
 
-Bugfixes
+New Features
 ############
-.. amalgamate:: Muon/MA_FDA/Bugfixes
-
-
-ALC
----
+- The :ref:`Muon Analysis <Muon_Analysis-ref>` and :ref:`Frequency Domain Analysis <Frequency_Domain_Analysis-ref>` GUI's can now accept the ``.nxs_v1`` extension.
 
 Bugfixes
 ############
-.. amalgamate:: Muon/ALC/Bugfixes
-
-
-Elemental Analysis
-------------------
-
-Bugfixes
-############
-.. amalgamate:: Muon/Elemental_Analysis/Bugfixes
+- Fixed a bug that prevented non-consecutive co-added runs from being completed.
+- Fixed a bug that caused a crash when using a trailing ``,`` or ``-`` and then a space.
 
 
 Algorithms
 ----------
 
-Bugfixes
+New Features
 ############
-.. amalgamate:: Muon/Algorithms/Bugfixes
+- :ref:`LoadMuonNexusV2 <algm-LoadMuonNexusV2>` can now accept the ``.nxs_v1`` extension.
+
 
 :ref:`Release 6.6.0 <v6.6.0>`

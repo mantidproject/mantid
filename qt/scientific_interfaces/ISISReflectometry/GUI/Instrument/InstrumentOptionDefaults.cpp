@@ -49,7 +49,10 @@ Instrument getInstrumentDefaults(Mantid::Geometry::Instrument_const_sptr instrum
   auto detectorCorrections = DetectorCorrections(defaults.getBoolOrTrue("CorrectDetectors", "CorrectDetectors"),
                                                  detectorCorrectionTypeFromString(detectorCorrectionString));
 
-  return Instrument(wavelengthRange, std::move(monitorCorrections), detectorCorrections);
+  // For now, we're not providing a default for the CalibrationFilePath in the parameter file, so use an empty string
+  auto calibrationFilePath = "";
+
+  return Instrument(wavelengthRange, std::move(monitorCorrections), detectorCorrections, calibrationFilePath);
 }
 } // unnamed namespace
 

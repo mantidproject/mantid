@@ -14,7 +14,6 @@
 #include "GUI/Common/IEncoder.h"
 #include "GUI/Common/IFileHandler.h"
 #include "GUI/Common/IJobManager.h"
-#include "GUI/Common/IJobRunner.h"
 #include "GUI/Common/IPlotter.h"
 #include "GUI/Common/IPythonRunner.h"
 #include "GUI/Common/IReflMessageHandler.h"
@@ -65,7 +64,7 @@ public:
 class MockBatchPresenter : public IBatchPresenter {
 public:
   MOCK_METHOD1(acceptMainPresenter, void(IMainWindowPresenter *));
-  MOCK_METHOD0(initInstrumentList, void());
+  MOCK_METHOD1(initInstrumentList, void(const std::string &));
   MOCK_METHOD0(notifyResumeReductionRequested, void());
   MOCK_METHOD0(notifyPauseReductionRequested, void());
   MOCK_METHOD0(notifyResumeAutoreductionRequested, void());
@@ -98,7 +97,7 @@ public:
   MOCK_CONST_METHOD0(getUnsavedBatchFlag, bool());
   MOCK_METHOD1(setUnsavedBatchFlag, void(bool));
   MOCK_CONST_METHOD0(percentComplete, int());
-  MOCK_CONST_METHOD0(rowProcessingProperties, std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps>());
+  MOCK_CONST_METHOD0(rowProcessingProperties, std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps>());
   MOCK_CONST_METHOD0(requestClose, bool());
   MOCK_CONST_METHOD0(instrument, Mantid::Geometry::Instrument_const_sptr());
   MOCK_CONST_METHOD0(instrumentName, std::string());
@@ -111,7 +110,7 @@ public:
 class MockRunsPresenter : public IRunsPresenter {
 public:
   MOCK_METHOD1(acceptMainPresenter, void(IBatchPresenter *));
-  MOCK_METHOD0(initInstrumentList, void());
+  MOCK_METHOD1(initInstrumentList, void(const std::string &));
   MOCK_CONST_METHOD0(runsTable, RunsTable const &());
   MOCK_METHOD0(mutableRunsTable, RunsTable &());
   MOCK_METHOD1(notifyChangeInstrumentRequested, bool(std::string const &));
@@ -285,15 +284,7 @@ public:
   MOCK_METHOD2(saveJSONToFile, void(std::string const &, QMap<QString, QVariant> const &));
   MOCK_METHOD1(loadJSONFromFile, QMap<QString, QVariant>(const std::string &));
   MOCK_CONST_METHOD2(saveCSVToFile, void(std::string const &, std::string const &));
-};
-
-class MockJobRunner : public IJobRunner {
-public:
-  MOCK_METHOD1(subscribe, void(JobRunnerSubscriber *));
-  MOCK_METHOD0(clearAlgorithmQueue, void());
-  MOCK_METHOD1(setAlgorithmQueue, void(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>));
-  MOCK_METHOD0(executeAlgorithmQueue, void());
-  MOCK_METHOD0(cancelAlgorithmQueue, void());
+  MOCK_CONST_METHOD1(fileExists, bool(std::string const &));
 };
 
 class MockJobManager : public IJobManager {
@@ -309,6 +300,7 @@ public:
   MOCK_METHOD0(notifyLoadWorkspaceCompleted, void());
   MOCK_METHOD0(notifySumBanksCompleted, void());
   MOCK_METHOD0(notifyReductionCompleted, void());
+  MOCK_METHOD0(notifyLoadWorkspaceAlgorithmError, void());
   MOCK_METHOD0(notifySumBanksAlgorithmError, void());
   MOCK_METHOD0(notifyReductionAlgorithmError, void());
 };
@@ -366,7 +358,7 @@ public:
   MOCK_METHOD2(notifyWorkspaceRenamed, boost::optional<Item const &>(std::string const &, std::string const &));
   MOCK_METHOD0(notifyAllWorkspacesDeleted, void());
   MOCK_METHOD0(getAlgorithms, std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>());
-  MOCK_CONST_METHOD0(rowProcessingProperties, std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps>());
+  MOCK_CONST_METHOD0(rowProcessingProperties, std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps>());
   MOCK_CONST_METHOD0(getProcessPartial, bool());
   MOCK_CONST_METHOD0(getProcessAll, bool());
 };
@@ -375,8 +367,7 @@ class MockBatchJobAlgorithm : public IBatchJobAlgorithm, public MantidQt::API::I
 public:
   MockBatchJobAlgorithm() {}
   MOCK_CONST_METHOD0(algorithm, Mantid::API::IAlgorithm_sptr());
-  MOCK_METHOD((const MantidQt::API::IAlgorithmRuntimeProps &), getAlgorithmRuntimeProps, (),
-              (const, override, noexcept));
+  MOCK_METHOD((const Mantid::API::IAlgorithmRuntimeProps &), getAlgorithmRuntimeProps, (), (const, override, noexcept));
   MOCK_METHOD0(item, Item *());
   MOCK_METHOD0(updateItem, void());
   MOCK_CONST_METHOD0(outputWorkspaceNames, std::vector<std::string>());

@@ -1,0 +1,1 @@
+* Fix bug when calculating projection matrix for 4D MDHisto workspaces with non-Q dimensions (e.g. energy transfer): now the non-orthogonal view and the HKL in the cursor info table will be correct for such workspaces.

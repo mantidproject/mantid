@@ -131,10 +131,12 @@ void SaveMD2::doSaveHisto(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws) 
   for (size_t d = 0; d < numDims; d++) {
     std::vector<double> axis;
     IMDDimension_const_sptr dim = ws->getDimension(d);
+    // NeXus field names must be alphanumeric only
+    std::string axis_title("D" + std::to_string(d));
     auto nbounds = dim->getNBoundaries();
     for (size_t n = 0; n < nbounds; n++)
       axis.emplace_back(dim->getX(n));
-    file->makeData(dim->getDimensionId(), ::NeXus::FLOAT64, static_cast<int>(dim->getNBoundaries()), true);
+    file->makeData(axis_title, ::NeXus::FLOAT64, static_cast<int>(dim->getNBoundaries()), true);
     file->putData(&axis[0]);
     file->putAttr("units", std::string(dim->getUnits()));
     file->putAttr("long_name", std::string(dim->getName()));
@@ -142,7 +144,7 @@ void SaveMD2::doSaveHisto(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws) 
     file->closeData();
     if (d != 0)
       axes_label.insert(0, ":");
-    axes_label.insert(0, dim->getDimensionId());
+    axes_label.insert(0, axis_title);
   }
 
   // Number of data points

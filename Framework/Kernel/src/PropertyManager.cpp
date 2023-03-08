@@ -152,7 +152,7 @@ void PropertyManager::filterByTime(const Types::Core::DateAndTime &start, const 
  *
  * Total proton charge will get re-integrated after filtering.
  *
- * @param splitter :: TimeSplitterType with the intervals and destinations.
+ * @param splitter :: SplittingIntervalVec with the intervals and destinations.
  * @param outputs :: Vector of output runs.
  */
 void PropertyManager::splitByTime(std::vector<SplittingInterval> &splitter,
@@ -690,7 +690,7 @@ std::vector<std::string> PropertyManager::getDeclaredPropertyNames() const noexc
  *different type
  *  @throw Exception::NotFoundError If the property requested does not exist
  */
-PropertyManager::TypedValue PropertyManager::getProperty(const std::string &name) const {
+IPropertyManager::TypedValue PropertyManager::getProperty(const std::string &name) const {
   return TypedValue(*this, name);
 }
 

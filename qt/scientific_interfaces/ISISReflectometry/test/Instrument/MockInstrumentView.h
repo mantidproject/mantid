@@ -47,6 +47,10 @@ public:
   MOCK_METHOD1(setCorrectDetectors, void(bool));
   MOCK_CONST_METHOD0(getDetectorCorrectionType, std::string());
   MOCK_METHOD1(setDetectorCorrectionType, void(std::string const &));
+  MOCK_CONST_METHOD0(getCalibrationFilePath, std::string());
+  MOCK_METHOD1(setCalibrationFilePath, void(std::string const &));
+  MOCK_METHOD0(showCalibrationFilePathInvalid, void());
+  MOCK_METHOD0(showCalibrationFilePathValid, void());
   MOCK_METHOD0(disableAll, void());
   MOCK_METHOD0(enableAll, void());
   MOCK_METHOD0(enableDetectorCorrectionType, void());

@@ -1064,8 +1064,7 @@ private:
 
   void writeFileList() {
     std::ofstream file(inputFile.c_str());
-    file << " 2		#file format is in "
-            "http://www.mantidproject.org/GroupDetectors \n"
+    file << " 2		# this is a comment to be ignored \n"
          << "1 \n"    // group id
          << "2\n"     // number of spectra
          << "1   3\n" // the list of spectra
@@ -1077,8 +1076,7 @@ private:
   }
   void writeFileRanges() {
     std::ofstream file(inputFile.c_str());
-    file << "3		#file format is in "
-            "http://www.mantidproject.org/GroupDetectors, using ranges \n"
+    file << "3		# this is a comment to be ignored\n"
          << "1 \n"
          << "3\n"
          << "  1-  3\n"

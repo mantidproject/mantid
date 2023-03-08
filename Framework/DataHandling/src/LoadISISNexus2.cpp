@@ -23,7 +23,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/LogFilter.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -759,6 +758,14 @@ void LoadISISNexus2::loadPeriodData(int64_t period, NXEntry &entry, DataObjects:
   } catch (std::runtime_error &) {
     g_log.debug() << "No title was found in the input file, " << getPropertyValue("Filename") << '\n';
   }
+
+  std::string notes = "";
+  try {
+    notes = entry.getString("notes");
+  } catch (std::runtime_error &) {
+    // if no notes, add empty string
+  }
+  local_workspace->setComment(notes);
 }
 
 /**

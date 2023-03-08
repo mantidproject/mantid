@@ -7,8 +7,8 @@
 #pragma once
 
 #include "GUI/Batch/RowProcessingAlgorithm.h"
+#include "MantidAPI/IAlgorithmRuntimeProps.h"
 #include "MantidGeometry/Instrument_fwd.h"
-#include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
 #include "Reduction/Group.h"
 
 #include <memory>
@@ -32,7 +32,7 @@ public:
   virtual ~IBatchPresenter() = default;
 
   virtual void acceptMainPresenter(IMainWindowPresenter *mainPresenter) = 0;
-  virtual void initInstrumentList() = 0;
+  virtual void initInstrumentList(const std::string &selectedInstrument = "") = 0;
 
   virtual void notifyPauseReductionRequested() = 0;
   virtual void notifyResumeReductionRequested() = 0;
@@ -65,7 +65,7 @@ public:
   virtual bool discardChanges(std::string const &message) const = 0;
   virtual bool requestClose() const = 0;
   virtual int percentComplete() const = 0;
-  virtual std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> rowProcessingProperties() const = 0;
+  virtual std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> rowProcessingProperties() const = 0;
 
   virtual bool isBatchUnsaved() const = 0;
   virtual void setBatchUnsaved() = 0;

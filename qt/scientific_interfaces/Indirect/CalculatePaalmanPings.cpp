@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "CalculatePaalmanPings.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -12,12 +13,11 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Unit.h"
-#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
-#include "MantidQtWidgets/Common/SignalBlocker.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Common/WorkspaceSelector.h"
 
 #include <QLineEdit>
+#include <QSignalBlocker>
 #include <QValidator>
 
 using namespace Mantid::API;
@@ -98,7 +98,7 @@ void CalculatePaalmanPings::run() {
   auto algorithmName = sampleShape.replace(" ", "") + "PaalmanPingsCorrection";
   algorithmName = algorithmName.replace("Annulus", "Cylinder"); // Use the cylinder algorithm for annulus
 
-  auto absCorProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  auto absCorProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   auto absCorAlgo = AlgorithmManager::Instance().create(algorithmName.toStdString());
   absCorAlgo->initialize();
 
@@ -598,12 +598,12 @@ void CalculatePaalmanPings::setCanDensityUnit(QString const &text) {
 }
 
 void CalculatePaalmanPings::setSampleDensityValue(QString const &text) {
-  MantidQt::API::SignalBlocker blocker(m_uiForm.spSampleDensity);
+  QSignalBlocker blocker(m_uiForm.spSampleDensity);
   m_uiForm.spSampleDensity->setValue(getSampleDensityValue(text));
 }
 
 void CalculatePaalmanPings::setCanDensityValue(QString const &text) {
-  MantidQt::API::SignalBlocker blocker(m_uiForm.spCanDensity);
+  QSignalBlocker blocker(m_uiForm.spCanDensity);
   m_uiForm.spCanDensity->setValue(getCanDensityValue(text));
 }
 

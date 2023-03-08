@@ -42,6 +42,7 @@ public:
     m_workspaceName = "test";
     m_range = std::make_pair(0.0, 1.0);
     m_peakCentre = 0.5;
+    m_background = 1.0;
     m_allTwoTheta = std::vector<double>{1.0, 2.3, 3.3};
     m_averageTwoTheta = 2.2;
 
@@ -116,8 +117,9 @@ public:
     EXPECT_CALL(*m_model, peakCentre()).Times(1).WillOnce(Return(0.0));
     EXPECT_CALL(*m_model, setPeakCentre(m_peakCentre)).Times(1);
 
+    EXPECT_CALL(*m_model, background()).Times(1).WillOnce(Return(m_background));
     EXPECT_CALL(*m_model, getPeakCopy()).Times(1).WillOnce(Return(nullptr));
-    EXPECT_CALL(*m_view, setPeak(_)).Times(1);
+    EXPECT_CALL(*m_view, setPeak(_, m_background)).Times(1);
 
     EXPECT_CALL(*m_model, fitStatus()).Times(1).WillOnce(Return(""));
     EXPECT_CALL(*m_view, setPeakCentreStatus("")).Times(1);
@@ -136,8 +138,9 @@ public:
 
     // Assert not called as the peak centre remains the same
     EXPECT_CALL(*m_model, setPeakCentre(m_peakCentre)).Times(0);
+    EXPECT_CALL(*m_model, background()).Times(0);
     EXPECT_CALL(*m_model, getPeakCopy()).Times(0);
-    EXPECT_CALL(*m_view, setPeak(_)).Times(0);
+    EXPECT_CALL(*m_view, setPeak(_, _)).Times(0);
     EXPECT_CALL(*m_model, fitStatus()).Times(0);
     EXPECT_CALL(*m_view, setPeakCentreStatus("")).Times(0);
     EXPECT_CALL(*m_view, removeFitSpectrum()).Times(0);
@@ -152,8 +155,9 @@ public:
     EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(m_peakCentre));
     EXPECT_CALL(*m_model, setPeakCentre(m_peakCentre)).Times(1);
 
+    EXPECT_CALL(*m_model, background()).Times(1).WillOnce(Return(m_background));
     EXPECT_CALL(*m_model, getPeakCopy()).Times(1).WillOnce(Return(nullptr));
-    EXPECT_CALL(*m_view, setPeak(_)).Times(1);
+    EXPECT_CALL(*m_view, setPeak(_, m_background)).Times(1);
 
     EXPECT_CALL(*m_model, fitStatus()).Times(1).WillOnce(Return("Success"));
     EXPECT_CALL(*m_view, setPeakCentreStatus("Success")).Times(1);
@@ -198,6 +202,33 @@ public:
     expectUpdateRotationAngleCalled();
 
     m_presenter->notifyFitClicked();
+  }
+
+  void test_that_notifyExportWorkspaceToADSClicked_calls_the_expected_model_function() {
+    EXPECT_CALL(*m_model, exportWorkspaceCopyToADS()).Times(1);
+    m_presenter->notifyExportWorkspaceToADSClicked();
+  }
+
+  void test_that_notifyExternalPlotClicked_will_open_an_external_plot_from_view() {
+    auto const workspace = WorkspaceCreationHelper::create2DWorkspace(1, 100);
+    std::vector<int> const workspaceIndices{0, 1};
+
+    EXPECT_CALL(*m_model, plottedWorkspace()).Times(1).WillOnce(Return(workspace));
+
+    EXPECT_CALL(*m_model, plottedWorkspaceIndices()).Times(1).WillOnce(Return(workspaceIndices));
+    EXPECT_CALL(*m_view, openExternalPlot(Eq(workspace), workspaceIndices)).Times(1);
+
+    m_presenter->notifyExternalPlotClicked();
+  }
+
+  void test_that_notifyExternalPlotClicked_will_not_open_external_plot_if_workspace_is_null() {
+    EXPECT_CALL(*m_model, plottedWorkspace()).Times(1).WillOnce(Return(nullptr));
+
+    // Assert not called
+    EXPECT_CALL(*m_model, plottedWorkspaceIndices()).Times(0);
+    EXPECT_CALL(*m_view, openExternalPlot(_, _)).Times(0);
+
+    m_presenter->notifyExternalPlotClicked();
   }
 
   void test_that_calculateEstimate_is_not_called_when_data_is_not_extracted() {
@@ -261,6 +292,7 @@ private:
   std::string m_workspaceName;
   std::pair<double, double> m_range;
   double m_peakCentre;
+  double m_background;
   std::vector<double> m_allTwoTheta;
   std::optional<double> m_averageTwoTheta;
 

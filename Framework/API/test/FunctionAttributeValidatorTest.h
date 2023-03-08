@@ -10,10 +10,12 @@
 #include "MantidAPI/IFunction1D.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/LambdaValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StringContainsValidator.h"
 
 #include <cxxtest/TestSuite.h>
+#include <functional>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -38,6 +40,9 @@ public:
   }
   void declareVecArrayBoundedAttr(std::string attrName, std::vector<double> inputVec, double minVal, double maxVal) {
     declareAttribute(attrName, Attribute(inputVec), Mantid::Kernel::ArrayBoundedValidator<double>(minVal, maxVal));
+  }
+  template <typename T> void declareLambdaAttr(std::string attrName, T inputVal, std::function<std::string(T)> lambda) {
+    declareAttribute(attrName, Attribute(inputVal), Mantid::Kernel::LambdaValidator<T>(lambda));
   }
 };
 
@@ -152,6 +157,22 @@ public:
 
     v2[2] = 50;
     TS_ASSERT_THROWS(att.setVector(v2), const IFunction::ValidationException &);
+  }
+
+  void test_lambda_attribute_validator() {
+    detail::FAVT_Funct f;
+    int a = 4;
+    std::function<std::string(int)> l = [](int a) { return a % 2 == 0 ? "" : "Value should be even"; };
+
+    f.declareLambdaAttr("LAttr", a, l);
+    IFunction::Attribute att = f.getAttribute("LAttr");
+
+    a = 4;
+    att.setInt(a);
+    TS_ASSERT(att.asInt() == a);
+
+    a = 5;
+    TS_ASSERT_THROWS(att.setInt(a), const IFunction::ValidationException &);
   }
 
   void test_double_attribute_visitor() {

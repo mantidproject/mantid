@@ -103,14 +103,24 @@ used for all members of the input workspace group.
 Polarization Analysis
 ~~~~~~~~~~~~~~~~~~~~~
 
-If :literal:`PolarizationAnalysis` is set to false the reduction stops. If it
-is set to true, the reduction continues and polarization corrections will be
-applied to the workspace that was output in wavelength. This uses the method
-and values specified in the parameters file to run
-:ref:`algm-PolarizationCorrectionFredrikze` or
-:ref:`algm-PolarizationCorrectionWildes` as appropriate.
+If :literal:`PolarizationAnalysis` is set to false the reduction stops. This is
+regardless of whether or not a value has been provided for the :literal:`PolarizationEfficiencies`
+parameter. If :literal:`PolarizationAnalysis` is set to true, the reduction continues
+and polarization corrections will be applied to the workspace that was output in wavelength.
 
-The result will be a new workspace in wavelength, which will override the
+If a :literal:`PolarizationEfficiencies` workspace is provided then the values from this workspace
+are used to run either the :ref:`algm-PolarizationCorrectionFredrikze` or :ref:`algm-PolarizationCorrectionWildes`
+methods. The method to run is determined from the efficiency factor axes labels specified in
+the workspace. Providing an efficiencies workspace is only supported where the input workspace
+is a group of size 2 or 4. For the Fredrikze algorithm, the polarization mode will be PNR if the
+input workspace group has a size of 2 and PA if the size is 4. For Wildes, a workspace group of
+size 2 will use flipper configuration :literal:`'0, 1'`, while a group of size 4 will use configuration
+:literal:`'00, 01, 10, 11'`.
+
+If a workspace is not provided for the :literal:`PolarizationEfficiencies` parameter then the
+method and values specified in the parameters file are used instead.
+
+The result of polarization analysis is a new workspace in wavelength, which will override the
 previous one. This will then be used as an input to re-run
 :ref:`algm-ReflectometryReductionOne` to calculate the new output workspaces in
 Q, which in turn will override the existing workspaces in Q. Note that when run

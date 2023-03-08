@@ -8,7 +8,7 @@
 
 #include "MantidAPI/ISplittersWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidKernel/TimeSplitter.h"
+#include "MantidKernel/SplittingInterval.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4250) // Disable warning regarding inheritance via dominance

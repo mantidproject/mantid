@@ -4,7 +4,7 @@
 Develop with Conda on Windows
 =============================
 
-Install `Visual Studio 2019 Community Edition <https://visualstudio.microsoft.com/downloads/>`_
+Install `Visual Studio 2022 Community Edition <https://visualstudio.microsoft.com/downloads/>`_
 -----------------------------------------------------------------------------------------------
 
 * When asked about installation workloads choose ``Desktop development with C++``
@@ -12,6 +12,7 @@ Install `Visual Studio 2019 Community Edition <https://visualstudio.microsoft.co
 
     * ``Windows Universal CRT SDK``
     * The latest ``Windows 10 SDK``
+    * ``MSVC v142 - VS 2019 C++ x64/x86 build tools``
 
 * If your machine has less than 32GB of memory Mantid may not build. If you have problems change the maximum number of parallel project builds to 1 in Visual Studio in Tools -> Options -> Projects and Solutions -> Build And Run.
 
@@ -53,34 +54,42 @@ Setup the mantid conda environment
 Configure CMake and generate build files
 ----------------------------------------
 
-* You can configure CMake using an MSVC or Ninja generator. Choose one of the following:
-    * For MSVC, use the terminal or powershell prompt from the last step.
-    * For Ninja, open the ``x64 Native Tools Command Prompt for VS 2019`` from your search bar.
+* You can configure CMake using an MS Visual Studio or Ninja generator. Choose one of the following:
+    * For MS Visual Studio, use the terminal or powershell prompt from the last step.
+    * For Ninja, open the ``x64 Native Tools Command Prompt for VS 2019`` or ``x64 Native Tools Command Prompt for VS 2022`` from your search bar.
 
 * Navigate to your mantid source directory.
 * Run ``conda activate mantid-developer`` to activate your conda environment.
 * If you want your build directory inside your source directory, run either:
 
-    * ``cmake --preset=win-msvc`` for configuring with MSVC, or
+    * ``cmake --preset=win-vs`` for configuring with Visual Studio 2022, or
+    * ``cmake --preset=win-vs-2019`` for configuring with Visual Studio 2019, or
     * ``cmake --preset=win-ninja`` for configuring with Ninja.
 
 * Alternatively, if you want to specify a different build directory, run either:
-    * ``cmake --preset=win-msvc -B {BUILD_DIR}``, or
+    * ``cmake --preset=win-vs -B {BUILD_DIR}``, or
+    * ``cmake --preset=win-vs-2019  -B {BUILD_DIR}``, or
     * ``cmake --preset=win-ninja -B {BUILD_DIR}``
 
-Compile and Build using MSVC
-----------------------------
+Compile and Build using MS Visual Studio
+----------------------------------------
 
-* Open visual studio with ``visualstudio.bat`` then click build.
+* Open visual studio with ``visual-studio.bat``, which is found in the build folder, and then click build.
 * It's not possible to compile in Debug on Windows with conda libraries, however Release, RelWithDebInfo, and DebugWithRelRuntime for Debugging will compile fine.
 * Once in visual studio, the correct target to use as a startup project in visual studio is ``workbench``, not ``MantidWorkbench``. You can then press F5 to start workbench.
 
 Compile and Build using Ninja
 -----------------------------
+* From the command line:
+    * Navigate to the build directory using the ``x64 Native Tools Command Prompt for VS 2019`` or ``x64 Native Tools Command Prompt for VS 2022`` from the previous step.
+    * To build Mantid Workbench use: ``ninja``
+    * To build the unit tests use: ``ninja AllTests``
 
-* Navigate to the build directory using the ``x64 Native Tools Command Prompt for VS 2019`` from the previous step.
-* To build Mantid Workbench use: ``ninja``
-* To build the unit tests use: ``ninja AllTests``
+* In Visual Studio:
+    * Open Visual Studio with ``visual-studio_ninja.bat``, which is found in the build folder
+    * Select "win-ninja" from the Configuration dropdown at the top of the screen
+    * Select "Switch between solutions and available views" in the Solution Explorer and click on "CMake Targets View"
+    * It is recommmended that the "When cache is out of date" option is set to "Never run configure step automatically" in Tools->Options->CMake
 
 Building and debugging with CLion
 ---------------------------------

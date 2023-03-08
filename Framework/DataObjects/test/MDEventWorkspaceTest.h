@@ -254,7 +254,7 @@ public:
   }
 
   //-------------------------------------------------------------------------------------
-  /** Method that makes a table workspace for use in MantidPlot */
+  /** Method that makes a table workspace */
   void test_makeBoxTable() {
     MDEventWorkspace3Lean::sptr ew = MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
     ITableWorkspace_sptr itab = ew->makeBoxTable(0, 0);

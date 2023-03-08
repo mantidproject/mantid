@@ -15,19 +15,20 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
-#include "MantidQtWidgets/Common/MantidDesktopServices.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/PropertyHandler.h"
 #include "MantidQtWidgets/Common/SelectWorkspacesDialog.h"
 
 #include <Poco/ActiveResult.h>
 
+#include <QCoreApplication>
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QUrl>
 
 namespace MantidQt {
-using API::MantidDesktopServices;
+using API::HelpWindow;
 
 namespace {
 Mantid::Kernel::Logger g_log("SequentialFitDialog");
@@ -213,7 +214,7 @@ bool SequentialFitDialog::validateLogs(const QString &wsName) {
         }
       }
       if (ui.cbLogValue->count() == 0) {
-        QMessageBox::warning(m_fitBrowser, "MantidPlot - Warning",
+        QMessageBox::warning(m_fitBrowser, QCoreApplication::applicationName() + " Warning",
                              "The list of the log names is empty:\n"
                              "The selected workspaces do not have common logs");
         return false;
@@ -410,9 +411,7 @@ void SequentialFitDialog::getFitResults() {
   m_fitBrowser->getHandler()->updateErrors();
 }
 
-void SequentialFitDialog::helpClicked() {
-  MantidDesktopServices::openUrl(QUrl("http://www.mantidproject.org/PlotPeakByLogValue"));
-}
+void SequentialFitDialog::helpClicked() { HelpWindow::showAlgorithm(QStringLiteral("PlotPeakByLogValue")); }
 
 /**
  * Slot. Called in response to QTableWidget's cellChanged signal.

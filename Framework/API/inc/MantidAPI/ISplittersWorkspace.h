@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/TimeSplitter.h"
+#include "MantidKernel/SplittingInterval.h"
 
 namespace Mantid {
 namespace API {

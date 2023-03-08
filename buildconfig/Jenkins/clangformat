@@ -52,7 +52,7 @@ else
 fi
 
 # format
-find Framework MantidPlot qt \( -name '*.cpp' -o -name '*.h' -o -name '*.tcc' \) | ${runner}
+find Framework qt \( -name '*.cpp' -o -name '*.h' -o -name '*.tcc' \) | ${runner}
 
 git add -A
 echo

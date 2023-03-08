@@ -198,8 +198,6 @@ void LoadSPE::readHistogram(FILE *speFile, const API::MatrixWorkspace_sptr &work
       ss << "Reading data value" << i << " of histogram " << index;
       reportFormatError(ss.str());
     }
-    // -10^30 is the flag for not a number used in SPE files (from
-    // www.mantidproject.org/images/3/3d/Spe_file_format.pdf)
     if (Y[i] == SaveSPE::MASK_FLAG) {
       Y[i] = std::numeric_limits<double>::quiet_NaN();
     }

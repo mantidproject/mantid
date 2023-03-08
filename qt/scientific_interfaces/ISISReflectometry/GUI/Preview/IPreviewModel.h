@@ -39,6 +39,7 @@ public:
   virtual boost::optional<ProcessingInstructions> getProcessingInstructions(ROIType regionType) const = 0;
   virtual std::optional<double> getDefaultTheta() const = 0;
   virtual PreviewRow const &getPreviewRow() const = 0;
+  virtual std::optional<Selection> const getSelectedRegion(ROIType regionType) = 0;
 
   virtual void setSummedWs(Mantid::API::MatrixWorkspace_sptr workspace) = 0;
 

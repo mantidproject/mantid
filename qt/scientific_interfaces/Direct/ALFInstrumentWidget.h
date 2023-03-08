@@ -8,7 +8,12 @@
 
 #include "DllConfig.h"
 
+#include "DetectorTube.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
+#include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
+
+#include <memory>
+#include <vector>
 
 namespace MantidQt::CustomInterfaces {
 
@@ -20,8 +25,14 @@ public:
 
   void handleActiveWorkspaceDeleted() override;
 
+  std::vector<DetectorTube> findWholeTubeDetectorIndices(std::vector<std::size_t> const &partTubeDetectorIndices);
+
+  void drawRectanglesAbove(std::vector<DetectorTube> const &tubes);
+
 private:
   MantidWidgets::InstrumentWidget::TabCustomizations getTabCustomizations() const;
+
+  void drawRectangleAbove(std::shared_ptr<MantidWidgets::UnwrappedSurface> surface, DetectorTube const &tube);
 };
 
 } // namespace MantidQt::CustomInterfaces

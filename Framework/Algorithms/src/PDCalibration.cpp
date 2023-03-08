@@ -233,7 +233,9 @@ void PDCalibration::init() {
 
   declareProperty("MinimumPeakHeight", 2.,
                   "Minimum peak height such that all the fitted peaks with "
-                  "height under this value will be excluded.");
+                  "height under this value will be excluded. The same property is used "
+                  "for pre-checking peaks before fitting, such that all the peaks with the total Y-count "
+                  "under this value will be excluded.");
 
   declareProperty("MaxChiSq", 100., "Maximum chisq value for individual peak fit allowed. (Default: 100)");
 
@@ -267,6 +269,11 @@ void PDCalibration::init() {
       std::make_unique<WorkspaceProperty<API::WorkspaceGroup>>("DiagnosticWorkspaces", "", Direction::Output),
       "Workspaces to promote understanding of calibration results");
 
+  declareProperty("MinimumSignalToNoiseRatio", 0.,
+                  "Minimum signal-to-noise ratio such that all the peaks with "
+                  "signal-to-noise ratio under this value will be excluded."
+                  "Note, the algorithm will not exclude a peak for which the noise cannot be estimated.");
+
   // make group for Input properties
   std::string inputGroup("Input Options");
   setPropertyGroup("InputWorkspace", inputGroup);
@@ -284,6 +291,7 @@ void PDCalibration::init() {
   setPropertyGroup("PeakWindow", fitPeaksGroup);
   setPropertyGroup("PeakWidthPercent", fitPeaksGroup);
   setPropertyGroup("MinimumPeakHeight", fitPeaksGroup);
+  setPropertyGroup("MinimumSignalToNoiseRatio", fitPeaksGroup);
   setPropertyGroup("MaxChiSq", fitPeaksGroup);
   setPropertyGroup("ConstrainPeakPositions", fitPeaksGroup);
 
@@ -402,6 +410,7 @@ void PDCalibration::exec() {
 
   const std::vector<double> peakWindow = getProperty("PeakWindow");
   const double minPeakHeight = getProperty("MinimumPeakHeight");
+  const double minSignalToNoiseRatio = getProperty("MinimumSignalToNoiseRatio");
   const double maxChiSquared = getProperty("MaxChiSq");
 
   const std::string calParams = getPropertyValue("CalibrationParameters");
@@ -476,6 +485,7 @@ void PDCalibration::exec() {
   algFitPeaks->setProperty("FitPeakWindowWorkspace", tof_peak_window_ws);
   algFitPeaks->setProperty("PeakWidthPercent", peak_width_percent);
   algFitPeaks->setProperty("MinimumPeakHeight", minPeakHeight);
+  algFitPeaks->setProperty("MinimumSignalToNoiseRatio", minSignalToNoiseRatio);
   // some fitting strategy
   algFitPeaks->setProperty("FitFromRight", true);
   algFitPeaks->setProperty("HighBackground", false);

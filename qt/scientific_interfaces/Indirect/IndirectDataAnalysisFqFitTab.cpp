@@ -20,8 +20,6 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
-#include "MantidQtWidgets/Common/SignalBlocker.h"
-
 #include <boost/algorithm/string/join.hpp>
 
 #include <string>

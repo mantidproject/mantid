@@ -51,7 +51,8 @@ public:
   bool validate() override;
 
 private slots:
-  void handleValueChanged(QtProperty *, double);
+  void handleEnumValueChanged(QtProperty *, int);
+  void handleDoubleValueChanged(QtProperty *, double);
   void handleDataReady(QString const &dataName) override;
   void algorithmComplete(bool error);
   void preview();

@@ -29,11 +29,4 @@ File Documentation
 * :ref:`ISIS_SANS_Batch_File-ref`
 
 
-Feedback & Comments
--------------------
-
-If you have any questions or comments about this interface or this help page,
-please contact the `Mantid team <http://www.mantidproject.org/Contact>`__.
-
-
 .. categories:: Interfaces SANS

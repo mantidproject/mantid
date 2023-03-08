@@ -22,11 +22,19 @@ from mantid.api import (
     FileLoaderRegistry,
     Progress,
 )
-from mantid.simpleapi import MergeRuns, RenameWorkspace, DeleteWorkspace, GroupWorkspaces, ConjoinXRuns, ConvertToPointData, mtd
+from mantid.simpleapi import (
+    MergeRuns,
+    RenameWorkspace,
+    DeleteWorkspace,
+    DeleteWorkspaces,
+    GroupWorkspaces,
+    ConjoinXRuns,
+    ConvertToPointData,
+    mtd,
+)
 
 
 class LoadAndMerge(PythonAlgorithm):
-
     _loader = None
     _version = None
     _loader_options = None
@@ -123,6 +131,7 @@ class LoadAndMerge(PythonAlgorithm):
         self._version = self.getProperty("LoaderVersion").value
         self._loader_options = self.getProperty("LoaderOptions").value
         merge_options = self.getProperty("MergeRunsOptions").value
+        merge_options = dict([(k, merge_options.getProperty(k).value) for k in merge_options.keys()])
         output = self.getPropertyValue("OutputWorkspace")
         if output.startswith("__"):
             self._prefix = "__"
@@ -183,6 +192,8 @@ class LoadAndMerge(PythonAlgorithm):
                     ConjoinXRuns(InputWorkspaces=to_group, OutputWorkspace=output, SampleLogAsXAxis=log_as_x)
                 else:
                     ConjoinXRuns(InputWorkspaces=to_group, OutputWorkspace=output, LinearizeAxis=True)
+                # clean up intermediate workspaces
+                DeleteWorkspaces(WorkspaceList=to_group)
         else:
             RenameWorkspace(InputWorkspace=to_group[0], OutputWorkspace=output)
 

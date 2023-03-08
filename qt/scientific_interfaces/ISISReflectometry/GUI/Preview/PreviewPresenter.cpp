@@ -78,9 +78,9 @@ void PreviewPresenter::notifyAutoreductionPaused() { updateWidgetEnabledState();
 
 void PreviewPresenter::updateWidgetEnabledState() {
   if (m_mainPresenter->isProcessing() || m_mainPresenter->isAutoreducing()) {
-    m_view->disableApplyButton();
+    m_view->disableMainWidget();
   } else {
-    m_view->enableApplyButton();
+    m_view->enableMainWidget();
   }
 }
 
@@ -88,6 +88,7 @@ void PreviewPresenter::updateWidgetEnabledState() {
  * then we use that and continue to plot it; otherwise we start an async load.
  */
 void PreviewPresenter::notifyLoadWorkspaceRequested() {
+  m_view->disableMainWidget();
   auto const name = m_view->getWorkspaceName();
   try {
     if (m_model->loadWorkspaceFromAds(name)) {
@@ -97,6 +98,7 @@ void PreviewPresenter::notifyLoadWorkspaceRequested() {
     }
   } catch (std::runtime_error const &ex) {
     g_log.error(ex.what());
+    m_view->enableMainWidget();
   }
 }
 
@@ -143,14 +145,21 @@ void PreviewPresenter::notifySumBanksCompleted() {
 void PreviewPresenter::notifyReductionCompleted() {
   // Update the final plot
   plotLinePlot();
+  m_view->enableMainWidget();
 }
+
+void PreviewPresenter::notifyLoadWorkspaceAlgorithmError() { m_view->enableMainWidget(); }
 
 void PreviewPresenter::notifySumBanksAlgorithmError() {
   clearRegionSelector();
   clearReductionPlot();
+  m_view->enableMainWidget();
 }
 
-void PreviewPresenter::notifyReductionAlgorithmError() { clearReductionPlot(); }
+void PreviewPresenter::notifyReductionAlgorithmError() {
+  clearReductionPlot();
+  m_view->enableMainWidget();
+}
 
 void PreviewPresenter::notifyInstViewSelectRectRequested() {
   m_dockedWidgets->setInstViewZoomState(false);
@@ -179,6 +188,10 @@ void PreviewPresenter::notifyInstViewShapeChanged() {
   // Get the masked workspace indices
   auto indices = m_instViewModel->detIndicesToDetIDs(m_dockedWidgets->getSelectedDetectors());
   auto detIDsStr = Mantid::Kernel::Strings::joinCompress(indices.cbegin(), indices.cend(), ",");
+
+  if (detIDsStr == m_model->getSelectedBanks()) {
+    return;
+  }
   m_model->setSelectedBanks(ProcessingInstructions{detIDsStr});
   // Execute summing the selected banks
   runSumBanks();
@@ -204,7 +217,21 @@ void PreviewPresenter::notifyRegionChanged() {
   m_dockedWidgets->setRectangularROIState(false);
   m_dockedWidgets->setEditROIState(true);
 
-  runReduction();
+  if (isRegionSelectionChanged()) {
+    m_regionSelector->deselectAllSelectors();
+    runReduction();
+  }
+}
+
+bool PreviewPresenter::isRegionChanged(ROIType type) {
+  auto modelValue = m_model->getSelectedRegion(type);
+  auto viewValue = m_regionSelector->getRegion(roiTypeToString(type));
+  return (modelValue.has_value() || !viewValue.empty()) && modelValue != viewValue;
+}
+
+bool PreviewPresenter::isRegionSelectionChanged() {
+  return isRegionChanged(ROIType::Signal) || isRegionChanged(ROIType::Background) ||
+         isRegionChanged(ROIType::Transmission);
 }
 
 void PreviewPresenter::notifyLinePlotExportAdsRequested() { m_model->exportReducedWsToAds(); }
@@ -254,6 +281,7 @@ void PreviewPresenter::plotLinePlot() {
 void PreviewPresenter::runSumBanks() { m_model->sumBanksAsync(*m_jobManager); }
 
 void PreviewPresenter::runReduction() {
+  m_view->disableMainWidget();
   m_view->setUpdateAngleButtonEnabled(false);
   // Ensure the angle is up to date
   m_model->setTheta(m_view->getAngle());

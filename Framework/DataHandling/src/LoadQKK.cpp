@@ -143,8 +143,7 @@ void LoadQKK::exec() {
   // Create a RectangularDetector which represents a rectangular array of pixels
   Geometry::RectangularDetector *bank = new Geometry::RectangularDetector("bank", instrument.get());
   // Define shape of a pixel as an XML string. See
-  // http://www.mantidproject.org/HowToDefineGeometricShape for details
-  // on shapes in Mantid.
+  // docs/source/concepts/HowToDefineGeometricShape.rst for details
   std::string detXML = "<cuboid id=\"pixel\">"
                        "<left-front-bottom-point   x= \"" +
                        pixel_width_str + "\" y=\"-" + pixel_height_str +

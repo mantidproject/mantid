@@ -5,7 +5,6 @@ set(SRC_FILES
     src/AlgorithmInputHistory.cpp
     src/AlgorithmPropertiesWidget.cpp
     src/AlgorithmRunner.cpp
-    src/AlgorithmRuntimeProps.cpp
     src/AlgorithmSelectorWidget.cpp
     src/AlternateCSPythonLexer.cpp
     src/BatchAlgorithmRunner.cpp
@@ -86,6 +85,7 @@ set(SRC_FILES
     src/PropertyWidget.cpp
     src/PropertyWidgetFactory.cpp
     src/PythonRunner.cpp
+    src/QtJobRunner.cpp
     src/QtSignalChannel.cpp
     src/QtJSONUtils.cpp
     src/RenameParDialog.cpp
@@ -209,6 +209,7 @@ set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/PropertyHandler.h
     inc/MantidQtWidgets/Common/PropertyWidget.h
     inc/MantidQtWidgets/Common/PythonRunner.h
+    inc/MantidQtWidgets/Common/QtJobRunner.h
     inc/MantidQtWidgets/Common/QtSignalChannel.h
     inc/MantidQtWidgets/Common/RenameParDialog.h
     inc/MantidQtWidgets/Common/RepoModel.h
@@ -275,12 +276,12 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
     inc/MantidQtWidgets/Common/HelpWindow.h
     inc/MantidQtWidgets/Common/Hint.h
-    inc/MantidQtWidgets/Common/IAlgorithmRuntimeProps.h
     inc/MantidQtWidgets/Common/IConfiguredAlgorithm.h
     inc/MantidQtWidgets/Common/IFitScriptGeneratorModel.h
     inc/MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h
     inc/MantidQtWidgets/Common/IFunctionBrowser.h
     inc/MantidQtWidgets/Common/IFunctionView.h
+    inc/MantidQtWidgets/Common/IJobRunner.h
     inc/MantidQtWidgets/Common/ImageInfoModel.h
     inc/MantidQtWidgets/Common/IImageInfoWidget.h
     inc/MantidQtWidgets/Common/ImageInfoModelMatrixWS.h
@@ -291,6 +292,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/LogValueFinder.h
     inc/MantidQtWidgets/Common/MantidDesktopServices.h
     inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
+    inc/MantidQtWidgets/Common/MockJobRunner.h
     inc/MantidQtWidgets/Common/MultifitSetupDialog.h
     inc/MantidQtWidgets/Common/MuonPeriodInfo.h
     inc/MantidQtWidgets/Common/ParseKeyValueString.h
@@ -505,7 +507,6 @@ set(INC_FILES
     inc/MantidQtWidgets/Common/QtJSONUtils.h
     inc/MantidQtWidgets/Common/ScriptRepositoryView.h
     inc/MantidQtWidgets/Common/SelectionNotificationService.h
-    inc/MantidQtWidgets/Common/SignalBlocker.h
     inc/MantidQtWidgets/Common/UserSubWindowFactory.h
     inc/MantidQtWidgets/Common/TSVSerialiser.h
     inc/MantidQtWidgets/Common/UserInputValidator.h
@@ -610,16 +611,6 @@ set(UI_FILES
     inc/MantidQtWidgets/Common/pqHelpWindow.ui
 )
 
-# Temporary workaround to remove stale ui_* header files after they were moved to a separate library. They cause build
-# problems if they're not deleted
-set(OLD_UI_HEADERS
-    ${CMAKE_CURRENT_BINARY_DIR}/qt4/ui_ColorBarWidget.h ${CMAKE_CURRENT_BINARY_DIR}/qt4/ui_DisplayCurveFit.h
-    ${CMAKE_CURRENT_BINARY_DIR}/qt4/ui_PreviewPlot.h
-)
-foreach(_header ${OLD_UI_HEADERS})
-  file(REMOVE ${_header})
-endforeach()
-
 set(TARGET_LIBRARIES ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -628,14 +619,14 @@ endif()
 
 # Target Additional components for this module
 find_package(
-  Qt5
+  Qt5 ${QT_MIN_VERSION}
   COMPONENTS Concurrent Help Network PrintSupport
   REQUIRED
 )
 # Prefer WebEngineWidgets over WebkitWidgets
 unset(Qt5_FOUND)
 find_package(
-  Qt5
+  Qt5 ${QT_MIN_VERSION}
   COMPONENTS WebEngineWidgets
   QUIET
 )
@@ -643,7 +634,7 @@ if(Qt5_FOUND)
   set(_webwidgets_tgt Qt5::WebEngineWidgets)
 else()
   find_package(
-    Qt5
+    Qt5 ${QT_MIN_VERSION}
     COMPONENTS WebKitWidgets
     QUIET
   )
@@ -712,7 +703,6 @@ set(TEST_FILES
     test/ProjectSaveModelTest.h
     test/ProjectSavePresenterTest.h
     test/SelectionNotificationServiceTest.h
-    test/SignalBlockerTest.h
     test/TrackedActionTest.h
     test/QtJSONUtilsTest.h
     test/Batch/BuildSubtreeItemsTest.h
@@ -728,7 +718,6 @@ set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/test/WidgetsCommonTes
 
 set(QT5_TEST_FILES
     test/AddWorkspaceDialogTest.h
-    test/AlgorithmRuntimePropsTest.h
     test/BatchAlgorithmRunnerTest.h
     test/FileDialogHandlerTest.h
     test/FindFilesThreadPoolManagerTest.h

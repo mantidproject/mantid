@@ -34,9 +34,15 @@ public:
   virtual Mantid::API::MatrixWorkspace_sptr doFit(std::pair<double, double> const &range) = 0;
   virtual void calculateEstimate(std::pair<double, double> const &range) = 0;
 
+  virtual void exportWorkspaceCopyToADS() const = 0;
+
+  virtual Mantid::API::MatrixWorkspace_sptr plottedWorkspace() const = 0;
+  virtual std::vector<int> plottedWorkspaceIndices() const = 0;
+
   virtual void setPeakParameters(Mantid::API::IPeakFunction_const_sptr const &peak) = 0;
   virtual void setPeakCentre(double const centre) = 0;
   virtual double peakCentre() const = 0;
+  virtual double background() const = 0;
   virtual Mantid::API::IPeakFunction_const_sptr getPeakCopy() const = 0;
 
   virtual std::string fitStatus() const = 0;
@@ -64,9 +70,15 @@ public:
   Mantid::API::MatrixWorkspace_sptr doFit(std::pair<double, double> const &range) override;
   void calculateEstimate(std::pair<double, double> const &range) override;
 
+  void exportWorkspaceCopyToADS() const override;
+
+  Mantid::API::MatrixWorkspace_sptr plottedWorkspace() const override;
+  std::vector<int> plottedWorkspaceIndices() const override;
+
   void setPeakParameters(Mantid::API::IPeakFunction_const_sptr const &peak) override;
   void setPeakCentre(double const centre) override;
   double peakCentre() const override;
+  double background() const override;
   Mantid::API::IPeakFunction_const_sptr getPeakCopy() const override;
 
   std::string fitStatus() const override;
@@ -79,7 +91,6 @@ public:
   std::optional<double> rotationAngle() const override;
 
 private:
-  std::string extractedWsName(std::size_t const runNumber) const;
   Mantid::API::IFunction_sptr calculateEstimate(Mantid::API::MatrixWorkspace_sptr &workspace,
                                                 std::pair<double, double> const &range);
 
@@ -87,6 +98,7 @@ private:
   std::string m_fitStatus;
   std::vector<double> m_twoThetas;
   Mantid::API::MatrixWorkspace_sptr m_extractedWorkspace;
+  Mantid::API::MatrixWorkspace_sptr m_fitWorkspace;
 };
 
 } // namespace CustomInterfaces

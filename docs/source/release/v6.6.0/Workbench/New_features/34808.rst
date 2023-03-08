@@ -1,1 +1,0 @@
-- Qt has been upgraded to version 5.15.

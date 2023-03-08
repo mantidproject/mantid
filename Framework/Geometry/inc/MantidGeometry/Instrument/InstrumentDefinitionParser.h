@@ -87,6 +87,8 @@ private:
   /// Set location (position) of comp as specified in XML location element
   void setLocation(Geometry::IComponent *comp, const Poco::XML::Element *pElem, const double angleConvertConst,
                    const bool deltaOffsets = false);
+  /// Set location (position) of comp as specified in XML side-by-side-view-location element
+  void setSideBySideViewLocation(Geometry::IComponent *comp, const Poco::XML::Element *pCompElem);
 
   /// Calculate the position of comp relative to its parent from info provided
   /// by \<location\> element

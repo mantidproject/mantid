@@ -12,6 +12,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -524,6 +525,32 @@ public:
     DblMatrix r = runInfo.getGoniometerMatrix();
     V3D rot = r * V3D(-1, 0, 0);
     TS_ASSERT_EQUALS(rot, V3D(0, -sqrt(0.5), sqrt(0.5)));
+  }
+
+  void test_integratePCharge() {
+    // create a p-charge log
+    TimeSeriesProperty<double> *pcharge = new TimeSeriesProperty<double>("proton_charge");
+    pcharge->setUnits("uAh"); // use native units
+    pcharge->addValue("2011-05-24T00:00:00", 1);
+    pcharge->addValue("2011-05-24T01:00:00", 2);
+    pcharge->addValue("2011-05-24T02:00:00", 3);
+    pcharge->addValue("2011-05-24T03:00:00", 4);
+    pcharge->addValue("2011-05-24T04:00:00", 5);
+
+    // attach it to a run object
+    Run run;
+    run.addProperty(pcharge);
+
+    // check the unfiltered value
+    TS_ASSERT_EQUALS(run.getProtonCharge(), 15.);
+
+    // create roi that excludes the last value
+    TimeROI roi;
+    roi.addROI("2011-05-24T00:00:00", "2011-05-24T04:00:00");
+    run.setTimeROI(roi);
+
+    // check the unfiltered value
+    TS_ASSERT_EQUALS(run.getProtonCharge(), 10.);
   }
 
   /** Save and load to NXS file */

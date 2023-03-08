@@ -9,7 +9,6 @@
 #include "MantidAPI/TextAxis.h"
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidQtWidgets/Common/SignalBlocker.h"
 
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;

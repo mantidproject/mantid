@@ -9,7 +9,10 @@
 Description
 -----------
 
-Loads data of a Nexus file obtained from an ILL reflectometry instrument `D17 <https://www.ill.eu/instruments-support/instruments-groups/instruments/d17/description/instrument-layout/>`_ or `FIGARO <https://www.ill.eu/instruments-support/instruments-groups/instruments/figaro/description/instrument-layout/>`_ into a `Workspace2D <http://www.mantidproject.org/Workspace2D>`_.
+Loads data of a Nexus file obtained from an ILL reflectometry instrument
+`D17 <https://www.ill.eu/instruments-support/instruments-groups/instruments/d17/description/instrument-layout/>`_
+or `FIGARO <https://www.ill.eu/instruments-support/instruments-groups/instruments/figaro/description/instrument-layout/>`_
+into a :ref:`Workspace2D`.
 Both time-of-flight and monochromatic instrument configurations are supported.
 In general, this loader reads detector and monitor counts and adds x-axis and error values.
 The output workspace contains histogram data.
@@ -33,6 +36,12 @@ The loader can load both types of data: direct and reflected beam.
 In both cases the foreground centre will be fitted.
 In case of direct beam, the detector will be rotated around the sample such that the fractional workspace index of the foreground centre will appear at 0 scattering angle.
 In case of reflected beam, **BraggAngle** is mandatory, and the detector will be driven such that the foreground centre will appear at **2*BraggAngle**.
+
+Replacing sample logs
+---------------------
+
+It is possible to replace any sample log of the loaded data, or add a new log, using the `LogsToReplace` property. The key-value pairs must be provided as JSON-compatible strings or Python
+dictionaries. For an example, see the Usage section.
 
 Usage
 -----
@@ -81,6 +90,25 @@ Output:
    Pixel at detector ID 202 was rotated to 0.0 degrees.
 
 .. testcleanup:: LoadDirectBeam
+
+   AnalysisDataService.Instance().clear()
+
+**Example - Replace sample log**
+
+.. testcode:: ReplaceSampleLog
+
+   logs_to_replace = {"ChopperSetting.firstChopper": 2, "ChopperSetting.secondChopper": 1}
+   ws = LoadILLReflectometry('ILL/D17/317369.nxs', LogsToReplace=logs_to_replace)
+
+   print("The first chopper ID is: {}.".format(ws.getRun().getLogData("ChopperSetting.firstChopper").value)
+
+Output:
+
+.. testoutput:: ReplaceSampleLog
+
+   The first chopper ID is: 2.0.
+
+.. testcleanup:: ReplaceSampleLog
 
    AnalysisDataService.Instance().clear()
 

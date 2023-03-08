@@ -9,7 +9,6 @@
 Modification of Chris Beaumont's mpl-modest-image package to allow the use of
 set_extent.
 """
-from distutils.version import LooseVersion
 
 import matplotlib
 
@@ -110,9 +109,7 @@ class ModestImage(MantidImage):
 
     @property
     def _pixel2world(self):
-
         if self._pixel2world_cache is None:
-
             # Pre-compute affine transforms to convert between the 'world'
             # coordinates of the axes (what is shown by the axis labels) to
             # 'pixel' coordinates in the underlying array.
@@ -300,11 +297,7 @@ def imshow(
     # to tightly fit the image, regardless of dataLim.
     im.set_extent(im.get_extent())
 
-    if LooseVersion(matplotlib.__version__) <= LooseVersion("3.1.3"):
-        axes.images.append(im)
-        im._remove_method = lambda h: axes.images.remove(h)
-    else:
-        axes.add_image(im)
+    axes.add_image(im)
 
     return im
 

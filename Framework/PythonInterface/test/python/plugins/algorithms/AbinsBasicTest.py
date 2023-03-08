@@ -15,7 +15,6 @@ from abins.constants import ATOM_PREFIX, FUNDAMENTALS
 
 
 class AbinsBasicTest(unittest.TestCase):
-
     _si2 = "Si2-sc_Abins"
     _squaricn = "squaricn_sum_Abins"
     _ab_initio_program = "CASTEP"
@@ -53,23 +52,30 @@ class AbinsBasicTest(unittest.TestCase):
         """Test if the correct behaviour of algorithm in case input is not valid"""
 
         #  invalid CASTEP file missing:  Number of branches     6 in the header file
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile="Si2-sc_wrong.phonon", OutputWorkspace=self._workspace_name)
-
-        # wrong extension of phonon file in case of CASTEP
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile="Si2-sc.wrong_phonon", OutputWorkspace=self._workspace_name)
-
-        # wrong extension of phonon file in case of CRYSTAL
-        self.assertRaises(
-            RuntimeError, Abins, AbInitioProgram="CRYSTAL", VibrationalOrPhononFile="MgO.wrong_out", OutputWorkspace=self._workspace_name
+        self.assertRaisesRegex(
+            RuntimeError,
+            "The third line should include 'Number of branches'.",
+            Abins,
+            VibrationalOrPhononFile="Si2-sc_wrong.phonon",
+            OutputWorkspace=self._workspace_name,
         )
 
-        # in case of molecular calculations AllKpointsGiven cannot be False
-        self.assertRaises(
+        # wrong extension of phonon file in case of CASTEP
+        self.assertRaisesRegex(
             RuntimeError,
+            "The expected extension of file is .phonon.",
+            Abins,
+            VibrationalOrPhononFile="Si2-sc.wrong_phonon",
+            OutputWorkspace=self._workspace_name,
+        )
+
+        # wrong extension of phonon file in case of CRYSTAL
+        self.assertRaisesRegex(
+            RuntimeError,
+            "The expected extension of file is .out.",
             Abins,
             AbInitioProgram="CRYSTAL",
-            VibrationalOrPhononFile="toluene_molecule_BasicAbins.out",
-            AllKpointsGiven=False,
+            VibrationalOrPhononFile="MgO.wrong_out",
             OutputWorkspace=self._workspace_name,
         )
 
@@ -77,8 +83,9 @@ class AbinsBasicTest(unittest.TestCase):
         self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._si2 + ".phonon", TemperatureInKelvin=self._temperature)
 
         # keyword total in the name of the workspace
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Keyword: total cannot be used in the name of workspace.",
             Abins,
             VibrationalOrPhononFile=self._si2 + ".phonon",
             TemperatureInKelvin=self._temperature,
@@ -86,8 +93,9 @@ class AbinsBasicTest(unittest.TestCase):
         )
 
         # negative temperature in K
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Temperature must be positive.",
             Abins,
             VibrationalOrPhononFile=self._si2 + ".phonon",
             TemperatureInKelvin=-1.0,
@@ -95,13 +103,19 @@ class AbinsBasicTest(unittest.TestCase):
         )
 
         # negative scale
-        self.assertRaises(
-            RuntimeError, Abins, VibrationalOrPhononFile=self._si2 + ".phonon", Scale=-0.2, OutputWorkspace=self._workspace_name
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Scale must be positive.",
+            Abins,
+            VibrationalOrPhononFile=self._si2 + ".phonon",
+            Scale=-0.2,
+            OutputWorkspace=self._workspace_name,
         )
 
         # unknown instrument
-        self.assertRaises(
+        self.assertRaisesRegex(
             ValueError,
+            'The value "UnknownInstrument" is not in the list of allowed values',
             Abins,
             VibrationalOrPhononFile=self._si2 + ".phonon",
             Instrument="UnknownInstrument",
@@ -113,16 +127,22 @@ class AbinsBasicTest(unittest.TestCase):
         """Test scenario in which a user specifies non-unique elements (for example in squaricn that would be "C,C,H").
         In that case Abins should terminate and print a meaningful message.
         """
-        self.assertRaises(
-            RuntimeError, Abins, VibrationalOrPhononFile=self._squaricn + ".phonon", Atoms="C,C,H", OutputWorkspace=self._workspace_name
+        self.assertRaisesRegex(
+            RuntimeError,
+            r"User atom selection \(by symbol\) contains repeated species.",
+            Abins,
+            VibrationalOrPhononFile=self._squaricn + ".phonon",
+            Atoms="C,C,H",
+            OutputWorkspace=self._workspace_name,
         )
 
     def test_non_unique_atoms(self):
         """Test scenario in which a user specifies non-unique atoms (for example "atom_1,atom_2,atom1").
         In that case Abins should terminate and print a meaningful message.
         """
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            r"User atom selection \(by number\) contains repeated atom.",
             Abins,
             VibrationalOrPhononFile=self._squaricn + ".phonon",
             Atoms="atom_1,atom_2,atom1",
@@ -134,23 +154,30 @@ class AbinsBasicTest(unittest.TestCase):
         In that case Abins should terminate and give a user a meaningful message about wrong atoms to analyse.
         """
         # In _squaricn there are no N atoms
-        self.assertRaises(
-            RuntimeError, Abins, VibrationalOrPhononFile=self._squaricn + ".phonon", Atoms="N", OutputWorkspace=self._workspace_name
+        self.assertRaisesRegex(
+            RuntimeError,
+            r"User defined atom selection \(by element\) 'N': not present in the system.",
+            Abins,
+            VibrationalOrPhononFile=self._squaricn + ".phonon",
+            Atoms="N",
+            OutputWorkspace=self._workspace_name,
         )
 
     def test_atom_index_limits(self):
         """Individual atoms may be indexed (counting from 1); if the index falls outside number of atoms, Abins should
         terminate with a useful error message.
         """
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            r"Invalid user atom selection \(by number\)" + f" '{ATOM_PREFIX}0'",
             Abins,
             VibrationalOrPhononFile=self._squaricn + ".phonon",
             Atoms=ATOM_PREFIX + "0",
             OutputWorkspace=self._workspace_name,
         )
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            r"Invalid user atom selection \(by number\)" + f" '{ATOM_PREFIX}61'",
             Abins,
             VibrationalOrPhononFile=self._squaricn + ".phonon",
             Atoms=ATOM_PREFIX + "61",
@@ -161,15 +188,17 @@ class AbinsBasicTest(unittest.TestCase):
         """If the atoms field includes an unmatched entry (i.e. containing the prefix but not matching the '\d+' regex,
         Abins should terminate with a useful error message.
         """
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            r"Not all user atom selections \('atoms' option\) were understood.",
             Abins,
             VibrationalOrPhononFile=self._squaricn + ".phonon",
             Atoms=ATOM_PREFIX + "-3",
             OutputWorkspace=self._workspace_name,
         )
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            r"Not all user atom selections \('atoms' option\) were understood.",
             Abins,
             VibrationalOrPhononFile=self._squaricn + ".phonon",
             Atoms=ATOM_PREFIX + "_#4",

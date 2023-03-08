@@ -111,6 +111,19 @@ Output:
    19 omega = 4.8
    20 omega = 5.0
 
+**Example: WISH goniometer**
+
+The WISH instrument at ISIS has a goniometer arm at 45 degrees to vertical (phi axis) that is closest to the sample, and
+a vertical rotation axis furthest from the sample (omega axis). The rotation angles about these axes are stored in the
+``ewald_pos`` and ``ccr_pos`` logs of the workspace. The initial orientation of the phi-axis (at omega=0) is typically
+in the plane normal to the incident beam (i.e. the XY-plane). In this case the goniometer can be set as so
+
+.. code-block:: python
+
+    ws = LoadEmptyInstrument(InstrumentName='WISH')
+    SetGoniometer(ws, Axis0="ccr_pos,0,1,0,1",Axis1="ewald_pos,1,1,0,1")
+
+
 .. categories::
 
 .. sourcelink::

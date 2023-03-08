@@ -1335,19 +1335,12 @@ void ScriptRepositoryImpl::doDownloadFile(const std::string &url_file, const std
     int timeout = timeoutConfigVal.get_value_or(DEFAULT_TIMEOUT_SEC);
     inetHelper.setTimeout(timeout);
 
-    // std::stringstream ss;
     const auto status = inetHelper.downloadFile(url_file, local_file_path);
-
-    g_log.debug() << "Answer from mantid web: " << static_cast<int>(status) << '\n';
+    g_log.debug() << "Answer from server: " << static_cast<int>(status) << '\n';
   } catch (Kernel::Exception::InternetError &ie) {
     std::stringstream info;
-    info << "Failed to download " << given_path << " because it failed to find this file at the link "
-         << "<a href=\"" << url_file << "\">" << url_file << "</a>.\n"
-         << "Hint. Check that link is correct and points to the correct "
-            "server "
-         << "which you can find at <a "
-            "href=\"http://www.mantidproject.org/ScriptRepository\">"
-         << "Script Repository Help Page</a>";
+    info << "Failed to download " << given_path << " from "
+         << "<a href=\"" << url_file << "\">" << url_file << "</a>.\n";
     throw ScriptRepoException(info.str(), ie.what());
   }
 }

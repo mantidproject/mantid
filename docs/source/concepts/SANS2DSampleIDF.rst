@@ -35,9 +35,9 @@ A detailed annotated version of the full ISIS SANS2D IDF
 .. code-block:: xml
 
   <!-- Specify name of instrument and date from when this IDF is valid -->
-  <instrument xmlns="http://www.mantidproject.org/IDF/1.0"
+  <instrument xmlns="http://schema.mantidproject.org/IDF/1.0"
               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-              xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd"
+              xsi:schemaLocation="http://schema.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd"
               name="SANS2D"
               valid-from="1900-01-31 23:59:59">
 

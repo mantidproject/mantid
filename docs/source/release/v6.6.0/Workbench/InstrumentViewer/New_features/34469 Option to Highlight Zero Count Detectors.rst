@@ -1,1 +1,0 @@
-- Add option to Instrument Viewer display settings to highlight detectors with zero counts

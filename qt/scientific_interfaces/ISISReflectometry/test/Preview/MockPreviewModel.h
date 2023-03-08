@@ -33,6 +33,7 @@ public:
   MOCK_METHOD(boost::optional<ProcessingInstructions>, getProcessingInstructions, (ROIType), (const, override));
   MOCK_METHOD(std::optional<double>, getDefaultTheta, (), (const, override));
   MOCK_METHOD(PreviewRow const &, getPreviewRow, (), (const, override));
+  MOCK_METHOD(std::optional<Selection> const, getSelectedRegion, (ROIType), (override));
 
   MOCK_METHOD(void, setSummedWs, (MatrixWorkspace_sptr), (override));
   MOCK_METHOD(void, setTheta, (double), (override));

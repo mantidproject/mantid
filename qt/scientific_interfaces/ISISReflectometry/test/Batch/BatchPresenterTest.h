@@ -14,6 +14,7 @@
 #include "../ReflMockObjects.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidQtWidgets/Common/MockJobRunner.h"
 #include "MockBatchView.h"
 
 #include <cxxtest/TestSuite.h>
@@ -54,7 +55,7 @@ public:
 
   void testInitInstrumentListUpdatesRunsPresenter() {
     auto presenter = makePresenter(makeModel());
-    EXPECT_CALL(*m_runsPresenter, initInstrumentList()).Times(1);
+    EXPECT_CALL(*m_runsPresenter, initInstrumentList(_)).Times(1);
     presenter->initInstrumentList();
     verifyAndClear();
   }
@@ -592,7 +593,8 @@ private:
     friend class BatchPresenterTest;
 
   public:
-    BatchPresenterFriend(IBatchView *view, std::unique_ptr<IBatch> model, std::unique_ptr<IJobRunner> jobRunner,
+    BatchPresenterFriend(IBatchView *view, std::unique_ptr<IBatch> model,
+                         std::unique_ptr<MantidQt::API::IJobRunner> jobRunner,
                          std::unique_ptr<IRunsPresenter> runsPresenter, std::unique_ptr<IEventPresenter> eventPresenter,
                          std::unique_ptr<IExperimentPresenter> experimentPresenter,
                          std::unique_ptr<IInstrumentPresenter> instrumentPresenter,

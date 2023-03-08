@@ -41,14 +41,26 @@ class DNSMergeRunsTest(unittest.TestCase):
         outputWorkspaceName = "DNSMergeRunsTest_Test1"
         ws = api.AnalysisDataService.retrieve(self.workspaces[0])
         api.AddSampleLog(ws, LogName="wavelength", LogText=str(5.0), LogType="Number", LogUnit="Angstrom")
-        self.assertRaises(RuntimeError, DNSMergeRuns, WorkspaceNames=self.workspaces, OutputWorkspace=outputWorkspaceName)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Cannot merge workspaces with different wavelength",
+            DNSMergeRuns,
+            WorkspaceNames=self.workspaces,
+            OutputWorkspace=outputWorkspaceName,
+        )
         return
 
     def test_DNSSameNormalization(self):
         outputWorkspaceName = "DNSMergeRunsTest_Test2"
         ws = api.AnalysisDataService.retrieve(self.workspaces[0])
         api.AddSampleLog(ws, LogName="normalized", LogText="no", LogType="String")
-        self.assertRaises(RuntimeError, DNSMergeRuns, WorkspaceNames=self.workspaces, OutputWorkspace=outputWorkspaceName)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Cannot merge workspaces with different normalized",
+            DNSMergeRuns,
+            WorkspaceNames=self.workspaces,
+            OutputWorkspace=outputWorkspaceName,
+        )
         return
 
     def test_DNSTwoTheta(self):

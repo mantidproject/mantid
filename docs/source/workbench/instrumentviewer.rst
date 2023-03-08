@@ -28,6 +28,7 @@ There are other mouse and key board controls, which are listed at the bottom of 
 
 The control panel of the instrument view has four tabs: ``Render``, ``Pick``, ``Mask``, and ``Instrument``.
 
+.. _instrumentviewer_render_tab:
 
 Render Tab
 ----------
@@ -35,7 +36,19 @@ The Render tab contains controls for managing the on-screen appearance of the in
 The top-most combo-box control allows the user to select the way the instrument is projected onto the screen.
 The default setting is ``Full 3D`` which gives a 3D view of the instrument in an orthogonal projection.
 The other options are unwrapped views, which project the instrument onto a curved surface and unwrap it onto the view.
-There is a choice between cylinders and spheres.
+There is a choice between cylinders and spheres or a side by side view.
+
+The side by side view identifies flat banks of detectors in the instrument definition by looking for the following component types:
+
+- ``RectangularDetector``
+- ``StructuredDetector``
+- any component with a set of children or grandchildren having the ``outline`` attribute set to ``yes``. This is interpreted as a bank of tubes
+- any component with detector children arranged in a flat surface
+Each flat bank is then rotated about one of its corners until the bank surface is parallel to the xy plane and a parallel projection is then made of all the banks onto the xy plane. Finally the banks are spread out to remove any overlap between their projected positions.
+The spread is applied by fixing the largest bank and moving all other banks away from it until there are no overlaps.
+The bank centres in the side by side view can be overridden using the <side-by-side-view-location> tag in the :ref:`instrument definition file <Side by side view location>`.
+
+
 The unwrapped (or flat) views allow zooming by selecting a rectangular region with the mouse (left click and drag).
 Right-clicking resets the zoom, which shows the entire instrument.
 

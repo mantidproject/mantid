@@ -53,10 +53,19 @@ class SpaceGroupBuilderTest(unittest.TestCase):
         invalid_new = {"_space_group_name_h-m_alt": "invalid"}
         invalid_old = {"_symmetry_space_group_name_h-m": "invalid"}
 
-        self.assertRaises(RuntimeError, self.builder._getSpaceGroupFromString, cifData={})
-        self.assertRaises(ValueError, self.builder._getSpaceGroupFromString, cifData=invalid_new)
-        self.assertRaises(ValueError, self.builder._getSpaceGroupFromString, cifData=invalid_old)
-        self.assertRaises(ValueError, self.builder._getSpaceGroupFromString, cifData=merge_dicts(invalid_new, valid_old))
+        self.assertRaisesRegex(RuntimeError, "No space group symbol in CIF.", self.builder._getSpaceGroupFromString, cifData={})
+        self.assertRaisesRegex(
+            ValueError, "Space group with symbol 'invalid' is not registered.", self.builder._getSpaceGroupFromString, cifData=invalid_new
+        )
+        self.assertRaisesRegex(
+            ValueError, "Space group with symbol 'invalid' is not registered.", self.builder._getSpaceGroupFromString, cifData=invalid_old
+        )
+        self.assertRaisesRegex(
+            ValueError,
+            "Space group with symbol 'invalid' is not registered.",
+            self.builder._getSpaceGroupFromString,
+            cifData=merge_dicts(invalid_new, valid_old),
+        )
 
     def test_getCleanSpaceGroupSymbol(self):
         fn = self.builder._getCleanSpaceGroupSymbol
@@ -72,9 +81,19 @@ class SpaceGroupBuilderTest(unittest.TestCase):
         invalid_old = {"_symmetry_int_tables_number": "400"}
         invalid_new = {"_space_group_it_number": "400"}
 
-        self.assertRaises(RuntimeError, self.builder._getSpaceGroupFromNumber, cifData={})
-        self.assertRaises(RuntimeError, self.builder._getSpaceGroupFromNumber, cifData=invalid_old)
-        self.assertRaises(RuntimeError, self.builder._getSpaceGroupFromNumber, cifData=invalid_new)
+        self.assertRaisesRegex(RuntimeError, "No space group symbol in CIF.", self.builder._getSpaceGroupFromNumber, cifData={})
+        self.assertRaisesRegex(
+            RuntimeError,
+            r"Can not use space group number to determine space group for no. \[400\]",
+            self.builder._getSpaceGroupFromNumber,
+            cifData=invalid_old,
+        )
+        self.assertRaisesRegex(
+            RuntimeError,
+            r"Can not use space group number to determine space group for no. \[400\]",
+            self.builder._getSpaceGroupFromNumber,
+            cifData=invalid_new,
+        )
 
 
 class UnitCellBuilderTest(unittest.TestCase):
@@ -83,8 +102,15 @@ class UnitCellBuilderTest(unittest.TestCase):
 
     def test_getUnitCell_invalid(self):
         invalid_no_a = {"_cell_length_b": "5.6"}
-        self.assertRaises(RuntimeError, self.builder._getUnitCell, cifData={})
-        self.assertRaises(RuntimeError, self.builder._getUnitCell, cifData=invalid_no_a)
+        self.assertRaisesRegex(
+            RuntimeError, "The a-parameter of the unit cell is not specified in the supplied CIF.", self.builder._getUnitCell, cifData={}
+        )
+        self.assertRaisesRegex(
+            RuntimeError,
+            "The a-parameter of the unit cell is not specified in the supplied CIF.",
+            self.builder._getUnitCell,
+            cifData=invalid_no_a,
+        )
 
     def test_getUnitCell_cubic(self):
         cell = {"_cell_length_a": "5.6"}
@@ -135,11 +161,17 @@ class AtomListBuilderTest(unittest.TestCase):
                 ("_atom_site_fract_z", ["1/8"]),
             ]
         )
+        expected_error_messages = {
+            "_atom_site_label": "Cannot determine atom types",
+            "_atom_site_fract_x": "Mandatory field _atom_site_fract_x not found in CIF-file.",
+            "_atom_site_fract_y": "Mandatory field _atom_site_fract_y not found in CIF-file.",
+            "_atom_site_fract_z": "Mandatory field _atom_site_fract_z not found in CIF-file.",
+        }
 
         for key in mandatoryKeys:
             tmp = mandatoryKeys.copy()
             del tmp[key]
-            self.assertRaises(RuntimeError, self.builder._getAtoms, cifData=tmp)
+            self.assertRaisesRegex(RuntimeError, expected_error_messages[key], self.builder._getAtoms, cifData=tmp)
 
     def test_getAtoms_correct(self):
         data = self._getData(
@@ -370,7 +402,9 @@ class UBMatrixBuilderTest(unittest.TestCase):
             tmp = self.valid_matrix.copy()
             del tmp[key]
 
-            self.assertRaises(RuntimeError, self.builder._getUBMatrix, cifData=tmp)
+            self.assertRaisesRegex(
+                RuntimeError, "Can not load UB matrix from CIF, values are missing.", self.builder._getUBMatrix, cifData=tmp
+            )
 
     def test_getUBMatrix_correct(self):
         self.assertEqual(self.builder._getUBMatrix(self.valid_matrix), "-0.03,0.13,0.31,0.01,-0.31,0.14,0.34,0.02,0.02")

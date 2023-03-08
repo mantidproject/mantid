@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
-#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
+#include "MantidAPI/IAlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/ConfiguredAlgorithm.h"
-#include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/Exception.h"
@@ -23,7 +23,7 @@ namespace {
 Mantid::Kernel::Logger g_log("BatchAlgorithmRunner");
 
 // Throw if any of the given properties do not exist in the algorithm's declared property names
-void throwIfAnyPropertiesInvalid(IAlgorithm_sptr alg, MantidQt::API::IAlgorithmRuntimeProps const &props) {
+void throwIfAnyPropertiesInvalid(IAlgorithm_sptr alg, Mantid::API::IAlgorithmRuntimeProps const &props) {
   auto allowedPropNames = alg->getDeclaredPropertyNames();
   auto propNamesToUpdate = props.getDeclaredPropertyNames();
 
@@ -145,6 +145,16 @@ bool BatchAlgorithmRunner::executeBatch() {
 void BatchAlgorithmRunner::executeBatchAsync() {
   addAllObservers();
   m_executeAsync(Poco::Void());
+}
+
+/**
+ * Starts the execution of a single algorithm on a separate thread.
+ *
+ * @param algorithm The algorithm to execute asynchronously
+ */
+void BatchAlgorithmRunner::executeAlgorithmAsync(const IConfiguredAlgorithm_sptr &algorithm) {
+  setQueue({algorithm});
+  executeBatchAsync();
 }
 
 /**

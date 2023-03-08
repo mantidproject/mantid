@@ -8,10 +8,11 @@
 
 #include "../../../ISISReflectometry/GUI/Batch/RowPreprocessingAlgorithm.h"
 #include "../../../ISISReflectometry/Reduction/IBatch.h"
+#include "../../../ISISReflectometry/Reduction/Instrument.h"
 #include "../../../ISISReflectometry/Reduction/PreviewRow.h"
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MockBatch.h"
 
@@ -54,9 +55,14 @@ public:
     auto row = PreviewRow(inputRuns);
     auto mockAlg = std::make_shared<StubbedPreProcess>();
 
+    auto instrument = makeEmptyInstrument();
+    auto experiment = makeEmptyExperiment();
+    EXPECT_CALL(batch, instrument()).WillOnce(ReturnRef(instrument));
+    EXPECT_CALL(batch, experiment()).WillOnce(ReturnRef(experiment));
+
     auto configuredAlg = createConfiguredAlgorithm(batch, row, mockAlg);
     TS_ASSERT_EQUALS(configuredAlg->algorithm(), mockAlg);
-    MantidQt::API::AlgorithmRuntimeProps expectedProps;
+    Mantid::API::AlgorithmRuntimeProps expectedProps;
     expectedProps.setPropertyValue("InputRunList", inputRuns[0]);
     const auto &setProps = configuredAlg->getAlgorithmRuntimeProps();
     const auto &propNames = expectedProps.getDeclaredPropertyNames();
@@ -65,6 +71,30 @@ public:
       return setProps.existsProperty(name) &&
              expectedProps.getPropertyValue(name) == expectedProps.getPropertyValue(name);
     }))
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&batch));
+  }
+
+  void test_calibration_properties_forwarded() {
+    auto batch = MockBatch();
+    auto row = PreviewRow(std::vector<std::string>{"12345"});
+    auto mockAlg = std::make_shared<StubbedPreProcess>();
+
+    auto instrument = makeInstrument();
+    auto experiment = makeExperiment();
+    EXPECT_CALL(batch, instrument()).WillOnce(ReturnRef(instrument));
+    EXPECT_CALL(batch, experiment()).WillOnce(ReturnRef(experiment));
+
+    auto configuredAlg = createConfiguredAlgorithm(batch, row, mockAlg);
+    TS_ASSERT_EQUALS(configuredAlg->algorithm(), mockAlg);
+
+    const auto &setProps = configuredAlg->getAlgorithmRuntimeProps();
+    TS_ASSERT(setProps.existsProperty("CalibrationFile"));
+    TS_ASSERT_EQUALS(setProps.getPropertyValue("CalibrationFile"), instrument.calibrationFilePath());
+    TS_ASSERT(setProps.existsProperty("Debug"));
+    TS_ASSERT_EQUALS(setProps.getPropertyValue("Debug"), "1");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&batch));
   }
 
   void test_row_is_updated_on_algorithm_complete() {

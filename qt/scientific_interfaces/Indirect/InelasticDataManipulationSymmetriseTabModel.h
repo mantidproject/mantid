@@ -24,15 +24,20 @@ public:
   ~InelasticDataManipulationSymmetriseTabModel() = default;
   void setupPreviewAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, std::vector<long> spectraRange);
   std::string setupSymmetriseAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner);
+  void reflectNegativeToPositive();
   void setWorkspaceName(QString workspaceName);
   void setEMin(double value);
   void setEMax(double value);
+  void setIsPositiveReflect(bool value);
 
 private:
   std::string m_inputWorkspace;
-  std::string m_outputWorkspace;
+  std::string m_reflctedInputWorkspace;
+  std::string m_negativeOutputWorkspace;
+  std::string m_positiveOutputWorkspace;
   double m_eMin;
   double m_eMax;
+  bool m_isPositiveReflect;
   std::vector<long> m_spectraRange;
 };
 

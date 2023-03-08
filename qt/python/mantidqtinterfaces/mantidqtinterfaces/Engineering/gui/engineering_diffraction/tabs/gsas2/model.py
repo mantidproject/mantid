@@ -88,7 +88,6 @@ class GSAS2Model(object):
         self.phase_names_list = None
 
     def run_model(self, load_parameters, refinement_parameters, project_name, rb_num, user_limits):
-
         self.clear_input_components()
         if not self.initial_validation(project_name, load_parameters):
             return None
@@ -175,6 +174,9 @@ class GSAS2Model(object):
         if self.refinement_method == "Pawley" and not self.mantid_pawley_reflections:
             logger.error("No Pawley Reflections were generated for the phases provided. Not calling GSAS-II.")
             return None
+        if not self.path_to_gsas2:
+            logger.error("The Path to GSAS2 setting is empty. " "Please provide a valid path in Engineering Diffraction Settings")
+            return None
         return True
 
     # ===============
@@ -227,6 +229,20 @@ class GSAS2Model(object):
         try:
             env = os.environ.copy()
             env["PYTHONHOME"] = self.path_to_gsas2
+            # Search for binaries in GSASII directory before Mantid Conda environment
+            # Need to activate GSASII conda environment by calling "activate" script for proper solution
+            if platform.system() == "Windows":
+                extra_paths = [
+                    self.path_to_gsas2,
+                    os.path.join(self.path_to_gsas2, "bin"),
+                    os.path.join(self.path_to_gsas2, "Library", "bin"),
+                    os.path.join(self.path_to_gsas2, "Library", "usr", "bin"),
+                    os.path.join(self.path_to_gsas2, "Library", "mingw-w64", "bin"),
+                    os.path.join(self.path_to_gsas2, "Scripts"),
+                ]
+            else:
+                extra_paths = [os.path.join(self.path_to_gsas2, "bin")]
+            env["PATH"] = ";".join(extra_paths + [env["PATH"]])
             # The PyCharm debugger attempts to debug into any python subprocesses spawned by Workbench
             # On Windows (see pydev_monkey.py) this results in the command line arguments being manipulated and
             # the GSASII json parameter string gets corrupted
@@ -254,6 +270,12 @@ class GSAS2Model(object):
                 f"GSAS-II call did not complete after {self.timeout} seconds, so it was"
                 f" aborted. Check the inputs, such as Refinement Method are correct. The"
                 f" timeout interval can be increased in the Engineering Diffraction Settings."
+            )
+            return None
+        except Exception as exc:
+            logger.error(
+                f"GSAS-II call failed with error: {str(exc)}. "
+                "Please check the Path to GSASII in the Engineering Diffraction Settings is valid"
             )
             return None
 
@@ -439,7 +461,6 @@ class GSAS2Model(object):
         return generated_reflections
 
     def generate_reflections_from_space_group(self, phase_filepath, cell_lengths):
-
         space_group = self.read_space_group(phase_filepath)
         found_basis = self.read_basis(phase_filepath)
         if not found_basis:
@@ -595,7 +616,6 @@ class GSAS2Model(object):
         return gsas_result_filepath
 
     def check_for_output_file(self, file_extension, file_descriptor, test=False):
-
         gsas_output_filename = self.project_name + file_extension
         if gsas_output_filename not in os.listdir(self.temporary_save_directory):
             logged_failure = (
@@ -731,7 +751,7 @@ class GSAS2Model(object):
 
     def get_txt_files_that_include(self, sub_string):
         output_files = []
-        for (_, _, filenames) in os.walk(self.user_save_directory):
+        for _, _, filenames in os.walk(self.user_save_directory):
             for loop_filename in filenames:
                 if sub_string in loop_filename and loop_filename[-4:] == ".txt":
                     output_files.append(os.path.join(self.user_save_directory, loop_filename))

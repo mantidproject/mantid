@@ -14,6 +14,7 @@ from mantid.kernel import (
     IntBoundedValidator,
     StringListValidator,
     PropertyCriterion,
+    PropertyManagerProperty,
 )
 from mantid.api import (
     AlgorithmFactory,
@@ -38,6 +39,7 @@ from mantid.simpleapi import (
     Minus,
     MoveInstrumentComponent,
     mtd,
+    NormaliseToMonitor,
     Scale,
     SpecularReflectionPositionCorrect,
     RebinToWorkspace,
@@ -115,7 +117,6 @@ def normalisation_monitor_workspace_index(ws: MatrixWorkspace) -> int:
 
 
 class ReflectometryILLPreprocess(DataProcessorAlgorithm):
-
     _bragg_angle = None
     _theta_zero = None
     _instrument_name = None
@@ -404,6 +405,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         self.declareProperty(Prop.XMAX, defaultValue=-1.0, doc="Maximum wavelength [Angstrom] used for peak fitting.")
 
         self.declareProperty(name="CorrectGravity", defaultValue=False, doc="Whether to correct for gravity effects (FIGARO only).")
+
+        self.declareProperty(PropertyManagerProperty("LogsToReplace", dict()), doc="Sample logs to be overwritten.")
 
     def PyExec(self):
         """Execute the algorithm."""
@@ -697,6 +700,15 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                 self._bragg_angle = self.getProperty("BraggAngle").value
             load_options["BraggAngle"] = self._bragg_angle
 
+        # The loop below handles translation of PropertyManagerProperty to dictionary of str: value (str, int, float...)
+        # so it can be interfaced with PropertyManagerProperty via LoadOptions of LoadAndMerge.
+        # Direct forwarding was not possible due to internal casting of this property to TypedValue
+        logs_to_replace = dict()
+        tmp_dict = dict(self.getProperty("LogsToReplace").value)
+        for key in tmp_dict:
+            logs_to_replace[key] = tmp_dict[key].value
+        load_options["LogsToReplace"] = logs_to_replace
+
         # perform data consistency check
         if len(input_files.split("+")) > 1:
             self._check_angles_match(input_files)
@@ -744,7 +756,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             scaled_ws = Scale(InputWorkspace=det_ws, OutputWorkspace=normalised_ws_name, Factor=1.0 / t, EnableLogging=self._subalgLogging)
             self._cleanup.cleanup(det_ws)
             return scaled_ws
-        return detWS
+        return det_ws
 
     def _normalise_to_slits(self, ws: MatrixWorkspace) -> MatrixWorkspace:
         """Normalize workspace to slit opening and update slit widths.

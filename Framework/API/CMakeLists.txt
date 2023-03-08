@@ -7,7 +7,9 @@ set(SRC_FILES
     src/AlgorithmHistory.cpp
     src/AlgorithmManager.cpp
     src/AlgorithmObserver.cpp
+    src/AlgorithmProperties.cpp
     src/AlgorithmProperty.cpp
+    src/AlgorithmRuntimeProps.cpp
     src/AnalysisDataService.cpp
     src/AnalysisDataServiceObserver.cpp
     src/ArchiveSearchFactory.cpp
@@ -96,7 +98,6 @@ set(SRC_FILES
     src/LinearScale.cpp
     src/LiveListener.cpp
     src/LiveListenerFactory.cpp
-    src/LogFilterGenerator.cpp
     src/LogManager.cpp
     src/LogarithmScale.cpp
     src/MDFrameValidator.cpp
@@ -178,7 +179,9 @@ set(INC_FILES
     inc/MantidAPI/AlgorithmHistory.h
     inc/MantidAPI/AlgorithmManager.h
     inc/MantidAPI/AlgorithmObserver.h
+    inc/MantidAPI/AlgorithmProperties.h
     inc/MantidAPI/AlgorithmProperty.h
+    inc/MantidAPI/AlgorithmRuntimeProps.h
     inc/MantidAPI/AnalysisDataService.h
     inc/MantidAPI/AnalysisDataServiceObserver.h
     inc/MantidAPI/ArchiveSearchFactory.h
@@ -236,6 +239,7 @@ set(INC_FILES
     inc/MantidAPI/HistoryView.h
     inc/MantidAPI/IAlgorithm.h
     inc/MantidAPI/IAlgorithm_fwd.h
+    inc/MantidAPI/IAlgorithmRuntimeProps.h
     inc/MantidAPI/IArchiveSearch.h
     inc/MantidAPI/IBackgroundFunction.h
     inc/MantidAPI/IBoxControllerIO.h
@@ -299,7 +303,6 @@ set(INC_FILES
     inc/MantidAPI/LinearScale.h
     inc/MantidAPI/LiveListener.h
     inc/MantidAPI/LiveListenerFactory.h
-    inc/MantidAPI/LogFilterGenerator.h
     inc/MantidAPI/LogManager.h
     inc/MantidAPI/LogarithmScale.h
     inc/MantidAPI/MDFrameValidator.h
@@ -388,6 +391,7 @@ set(TEST_FILES
     AlgorithmMPITest.h
     AlgorithmManagerTest.h
     AlgorithmPropertyTest.h
+    AlgorithmRuntimePropsTest.h
     AlgorithmTest.h
     AnalysisDataServiceObserverTest.h
     AnalysisDataServiceTest.h
@@ -445,7 +449,6 @@ set(TEST_FILES
     LatticeDomainTest.h
     LiveListenerFactoryTest.h
     LiveListenerTest.h
-    LogFilterGeneratorTest.h
     LogManagerTest.h
     MDFrameValidatorTest.h
     MDGeometryTest.h

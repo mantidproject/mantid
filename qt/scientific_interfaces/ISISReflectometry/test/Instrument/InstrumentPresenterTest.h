@@ -195,6 +195,17 @@ public:
     verifyAndClear();
   }
 
+  void testSetCalibrationFileUpdatesModel() {
+    auto calibrationFilePath = "/path/to/calibration_file.dat";
+    auto presenter = makePresenter();
+
+    EXPECT_CALL(m_view, getCalibrationFilePath()).WillOnce(Return(calibrationFilePath));
+    presenter.notifySettingsChanged();
+
+    TS_ASSERT_EQUALS(presenter.instrument().calibrationFilePath(), calibrationFilePath);
+    verifyAndClear();
+  }
+
   void testAllWidgetsAreEnabledWhenReductionPaused() {
     auto presenter = makePresenter();
 
@@ -320,32 +331,70 @@ public:
     verifyAndClear();
   }
 
+  void testInstrumentChangedUpdatesCalibrationFilePathInView() {
+    auto defaultFilepath = "default/path.dat";
+    auto model = makeModelWithCalibrationFilePath(defaultFilepath);
+    auto defaultOptions = expectDefaults(model);
+    auto presenter = makePresenter(std::move(defaultOptions));
+    EXPECT_CALL(m_view, setCalibrationFilePath(defaultFilepath)).Times(1);
+    presenter.notifyInstrumentChanged("POLREF");
+    verifyAndClear();
+  }
+
+  void testEnteringInvalidCalibrationFilePathTriggersError() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_view, getCalibrationFilePath()).WillOnce(Return("test"));
+    EXPECT_CALL(m_fileHandler, fileExists("test")).WillOnce(Return(false));
+    EXPECT_CALL(m_view, showCalibrationFilePathInvalid()).Times(1);
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void testEnteringEmptyCalibrationFilePathDoesNotTriggerError() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_view, getCalibrationFilePath()).WillOnce(Return(""));
+    EXPECT_CALL(m_fileHandler, fileExists("")).Times(0);
+    EXPECT_CALL(m_view, showCalibrationFilePathValid()).Times(1);
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
 private:
   NiceMock<MockInstrumentView> m_view;
   NiceMock<MockBatchPresenter> m_mainPresenter;
+  NiceMock<MockFileHandler> m_fileHandler;
+  NiceMock<MockMessageHandler> m_messageHandler;
 
   Instrument makeModelWithMonitorOptions(MonitorCorrections monitorCorrections) {
     auto wavelengthRange = RangeInLambda(0.0, 0.0);
     auto detectorCorrections = DetectorCorrections(false, DetectorCorrectionType::VerticalShift);
-    return Instrument(std::move(wavelengthRange), std::move(monitorCorrections), std::move(detectorCorrections));
+    return Instrument(std::move(wavelengthRange), std::move(monitorCorrections), std::move(detectorCorrections), "");
   }
 
   Instrument makeModelWithWavelengthRange(RangeInLambda wavelengthRange) {
     auto monitorCorrections = MonitorCorrections(0, false, RangeInLambda(0.0, 0.0), RangeInLambda(0.0, 0.0));
     auto detectorCorrections = DetectorCorrections(false, DetectorCorrectionType::VerticalShift);
-    return Instrument(std::move(wavelengthRange), std::move(monitorCorrections), std::move(detectorCorrections));
+    return Instrument(std::move(wavelengthRange), std::move(monitorCorrections), std::move(detectorCorrections), "");
   }
 
   Instrument makeModelWithDetectorCorrections(DetectorCorrections detectorCorrections) {
     auto wavelengthRange = RangeInLambda(0.0, 0.0);
     auto monitorCorrections = MonitorCorrections(0, false, RangeInLambda(0.0, 0.0), RangeInLambda(0.0, 0.0));
-    return Instrument(std::move(wavelengthRange), std::move(monitorCorrections), std::move(detectorCorrections));
+    return Instrument(std::move(wavelengthRange), std::move(monitorCorrections), std::move(detectorCorrections), "");
+  }
+
+  Instrument makeModelWithCalibrationFilePath(const std::string &filepath) {
+    auto wavelengthRange = RangeInLambda(0.0, 0.0);
+    auto monitorCorrections = MonitorCorrections(0, false, RangeInLambda(0.0, 0.0), RangeInLambda(0.0, 0.0));
+    auto detectorCorrections = DetectorCorrections(false, DetectorCorrectionType::VerticalShift);
+    return Instrument(std::move(wavelengthRange), std::move(monitorCorrections), std::move(detectorCorrections),
+                      filepath);
   }
 
   InstrumentPresenter makePresenter(
       std::unique_ptr<IInstrumentOptionDefaults> defaultOptions = std::make_unique<MockInstrumentOptionDefaults>()) {
-    auto presenter =
-        InstrumentPresenter(&m_view, ModelCreationHelper::makeEmptyInstrument(), std::move(defaultOptions));
+    auto presenter = InstrumentPresenter(&m_view, ModelCreationHelper::makeEmptyInstrument(), &m_fileHandler,
+                                         &m_messageHandler, std::move(defaultOptions));
     presenter.acceptMainPresenter(&m_mainPresenter);
     return presenter;
   }

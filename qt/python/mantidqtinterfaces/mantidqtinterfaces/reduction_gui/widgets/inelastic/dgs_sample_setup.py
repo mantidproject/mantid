@@ -10,7 +10,6 @@ from qtpy.QtGui import QDoubleValidator, QIntValidator  # noqa
 from functools import partial
 from mantidqtinterfaces.reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.inelastic.dgs_sample_data_setup_script import SampleSetupScript
-from qtpy import PYQT4  # noqa
 import mantidqtinterfaces.reduction_gui.widgets.util as util
 import os
 
@@ -21,17 +20,6 @@ except ImportError:
 
     Logger("SampleSetupWidget").information("Using legacy ui importer")
     from mantidplot import load_ui
-
-IS_IN_MANTIDPLOT = False
-
-if PYQT4:
-    try:
-        import mantidqtpython
-        from mantid.kernel import config
-
-        IS_IN_MANTIDPLOT = True
-    except:
-        pass
 
 
 class SampleSetupWidget(BaseWidget):
@@ -54,8 +42,6 @@ class SampleSetupWidget(BaseWidget):
         self._instrument_name = settings.instrument_name
         self._facility_name = settings.facility_name
         self._livebuttonwidget = None
-        if IS_IN_MANTIDPLOT:
-            self._swap_in_mwrunfiles_widget()
         self._layout.addWidget(self._content)
         self.initialize_content()
 
@@ -94,28 +80,6 @@ class SampleSetupWidget(BaseWidget):
         self._connect_validated_lineedit(self._content.ei_guess_edit)
         self._connect_validated_lineedit(self._content.savedir_edit)
 
-    def _swap_in_mwrunfiles_widget(self):
-        labeltext = self._content.sample_label.text()
-        self._content.sample_label.hide()
-        self._content.sample_edit.hide()
-        self._content.sample_browse.hide()
-        self._content.horizontalLayout.removeWidget(self._content.sample_label)
-        self._content.horizontalLayout.removeWidget(self._content.sample_edit)
-        self._content.horizontalLayout.removeWidget(self._content.sample_browse)
-        spacer = self._content.horizontalLayout.takeAt(0)
-        self._content.sample_edit = mantidqtpython.MantidQt.API.FileFinderWidget()
-        # Unfortunately, can only use live if default instrument = gui-set instrument
-        if self._instrument_name == config.getInstrument().name():
-            self._content.sample_edit.setProperty("liveButton", "Show")
-        self._content.sample_edit.setProperty("multipleFiles", True)
-        self._content.sample_edit.setProperty("algorithmAndProperty", "Load|Filename")
-        self._content.sample_edit.setProperty("label", labeltext)
-        self._content.sample_edit.setLabelMinWidth(self._content.sample_label.minimumWidth())
-        self._content.horizontalLayout.addWidget(self._content.sample_edit)
-        self._content.horizontalLayout.addItem(spacer)
-        self._content.sample_edit.fileFindingFinished.connect(lambda: self._validate_edit(self._content.sample_edit))
-        self._livebuttonwidget = self._content.sample_edit
-
     def _handle_tzero_guess(self, is_enabled):
         self._content.tzero_guess_label.setEnabled(is_enabled)
         self._content.tzero_guess_edit.setEnabled(is_enabled)
@@ -127,13 +91,9 @@ class SampleSetupWidget(BaseWidget):
 
     def _connect_validated_lineedit(self, ui_ctrl):
         call_back = partial(self._validate_edit, ctrl=ui_ctrl)
-        if IS_IN_MANTIDPLOT and isinstance(ui_ctrl, mantidqtpython.MantidQt.API.FileFinderWidget):
-            ui_ctrl.fileEditingFinished.connect(call_back)
-            ui_ctrl.fileFindingFinished.connect(call_back)
-        else:  # assume QLineEdit
-            ui_ctrl.editingFinished.connect(call_back)
-            ui_ctrl.textEdited.connect(call_back)
-            ui_ctrl.textChanged.connect(call_back)
+        ui_ctrl.editingFinished.connect(call_back)
+        ui_ctrl.textEdited.connect(call_back)
+        ui_ctrl.textChanged.connect(call_back)
 
     def _validate_edit(self, ctrl=None):
         is_valid = True
@@ -183,11 +143,7 @@ class SampleSetupWidget(BaseWidget):
         Populate the UI elements with the data from the given state.
         @param state: SampleSetupScript object
         """
-        if IS_IN_MANTIDPLOT:
-            self._content.sample_edit.setUserInput(state.sample_file)
-            self._content.sample_edit.liveButtonSetChecked(state.live_button)
-        else:
-            self._check_and_set_lineedit_content(self._content.sample_edit, state.sample_file)
+        self._check_and_set_lineedit_content(self._content.sample_edit, state.sample_file)
         self._content.output_ws_edit.setText(state.output_wsname)
         self._content.detcal_edit.setText(state.detcal_file)
         if "SNS" != self._facility_name:
@@ -212,8 +168,6 @@ class SampleSetupWidget(BaseWidget):
         """
         s = SampleSetupScript(self._instrument_name)
         s.sample_file = self._content.sample_edit.text()
-        if IS_IN_MANTIDPLOT:
-            s.live_button = self._content.sample_edit.liveButtonIsChecked()
         s.output_wsname = self._content.output_ws_edit.text()
         s.detcal_file = self._content.detcal_edit.text()
         s.incident_energy_guess = self._content.ei_guess_edit.text()

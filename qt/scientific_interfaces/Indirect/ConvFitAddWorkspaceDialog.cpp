@@ -8,7 +8,6 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <boost/optional.hpp>
 #include <utility>

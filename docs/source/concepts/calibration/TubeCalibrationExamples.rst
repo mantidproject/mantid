@@ -5,7 +5,7 @@ Introduction
 
 You will find lots of examples to run the calibration tool inside the
 **MANTIDINSTALL**/scripts/Calibration/Examples folder (`github
-link <https://github.com/mantidproject/mantid/tree/master/scripts/Calibration/Examples>`__).
+link <https://github.com/mantidproject/mantid/tree/main/scripts/Calibration/Examples>`__).
 Where **MANTIDINSTALL** usually points to C:/MandtidInstall on Windows
 machines and to /opt/Mantid on linux machines.
 
@@ -16,7 +16,7 @@ used to calibrate three different real instruments inside ISIS facility
 `WISH <http://www.isis.stfc.ac.uk/instruments/wish/>`__). There is also
 a presentation about the tube calibration where you may also find
 interesting examples on how to use the calibration tools
-(`Tube_Calibration.pdf <http://www.mantidproject.org/images/b/bc/Tube_Calibration.pdf>`__).
+(`Tube_Calibration.pdf <http://archive.mantidproject.org/images/b/bc/Tube_Calibration.pdf>`__).
 
 In what follows, it will be shown how you can use some of these
 examples. Mantid needs to know where the files are in order to execute

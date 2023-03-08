@@ -35,12 +35,6 @@ unusedPrivateFunction
 // ----------- New list of supressions after updating to cppcheck 2.5 -------------
 // - If the line number changes then update it here, or resolve the defect and remove from list
 
-mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogFilter.cpp:55
-mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogFilter.cpp:59
-mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogFilter.cpp:74
-mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogFilter.cpp:77
-mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogFilter.cpp:89
-mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogFilter.cpp:91
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Memory.cpp:284
 unassignedVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Quat.cpp:687
 unassignedVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Quat.cpp:687
@@ -134,10 +128,10 @@ funcArgOrderDifferent:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataOb
 funcArgOrderDifferent:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/WideIntImpl.h:1209
 funcArgOrderDifferent:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/WideIntImpl.h:1218
 funcArgOrderDifferent:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/WideIntImpl.h:1227
-operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:309
-identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:955
-identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1021
-identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1051
+operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:310
+identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:956
+identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1022
+identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1052
 redundantPointerOp:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MDGridBox.tcc:755
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp:670
 invalidContainer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Math/Acomp.cpp:495
@@ -176,5 +170,4 @@ unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtprope
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qteditorfactory.cpp:1546
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertymanager.cpp:277
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:114
-unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/General/StepScan.cpp:601
 returnTempReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectFitData.cpp:127

@@ -16,6 +16,7 @@ Guides
 
    DeveloperAccounts
    GettingStarted/GettingStarted
+   Packaging
    Architecture
    BuildingOnOSX
    BuildingWithCMake
@@ -31,6 +32,9 @@ Guides
 
 :doc:`GettingStarted <GettingStarted/GettingStarted>`
    Describes the process of obtaining and building the mantid code base.
+
+:doc:`Packaging`
+   Describes the process building the user packages.
 
 :doc:`Architecture`
    Describes the architecture of the mantid libraries and applications.
@@ -236,7 +240,7 @@ Workbench
 
 The workbench is the new PyQt-based GUI that will be the primary interface for
 interacting with the mantid framework. The plotting is provided by
-`matplotlib <https://matplotlib.org/>`_. It will eventually replace MantidPlot.
+`matplotlib <https://matplotlib.org/>`_. It has replaced MantidPlot.
 
 .. toctree::
    :hidden:
@@ -268,6 +272,7 @@ Component Overviews
    MultiThreadingInMantid
    PythonVSCppAlgorithms
    SampleLogsDev
+   ScriptRepository
    Widgets/Plotting
    WritingAnAlgorithm
    WritingCustomConvertToMDTransformation

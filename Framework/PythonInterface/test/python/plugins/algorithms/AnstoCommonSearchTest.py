@@ -13,7 +13,7 @@ import tempfile
 
 from mantid.simpleapi import LoadPLN
 
-from ansto_common import (
+from plugins.algorithms.ANSTO.ansto_common import (
     seq_to_list,
     list_to_seq,
     hdf_files_from_runs,
@@ -35,7 +35,6 @@ class AnstoCommonSearchTests(unittest.TestCase):
         return
 
     def test_seq_to_list(self):
-
         iseqn = "2-7,8,1,9-10"
         elist = [2, 3, 4, 5, 6, 7, 8, 1, 9, 10]
         flist = seq_to_list(iseqn)
@@ -97,7 +96,6 @@ class AnstoCommonSearchTests(unittest.TestCase):
         self.assertCountEqual(ret_paths, exp_paths)
 
     def test_find_hdf_files(self):
-
         ret_values = hdf_files_from_runs("44464", [], "PLN", ".hdf")
         self.assertEqual(len(ret_values), 1)
         filename = os.path.basename(ret_values[0])

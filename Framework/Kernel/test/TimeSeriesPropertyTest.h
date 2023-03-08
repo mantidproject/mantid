@@ -8,8 +8,10 @@
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/SplittingInterval.h"
+#include "MantidKernel/Statistics.h"
+#include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/TimeSplitter.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -21,6 +23,39 @@
 
 using namespace Mantid::Kernel;
 using Mantid::Types::Core::DateAndTime;
+
+class TimeSeriesPropertyStatisticsTest : public CxxTest::TestSuite {
+
+public:
+  // Instantiate from a Kernel::Statistics object
+  void test_fromKernelStatistics() {
+    Statistics raw_stats;
+    raw_stats.minimum = 1.0;
+    raw_stats.maximum = 2.0;
+    raw_stats.mean = 3.0;
+    raw_stats.median = 4.0;
+    raw_stats.standard_deviation = 5.0;
+    auto stats = TimeSeriesPropertyStatistics(raw_stats);
+    TS_ASSERT_DELTA(stats.minimum, 1.0, 0.1);
+    TS_ASSERT_DELTA(stats.maximum, 2.0, 0.1);
+    TS_ASSERT_DELTA(stats.mean, 3.0, 0.1);
+    TS_ASSERT_DELTA(stats.median, 4.0, 0.1);
+    TS_ASSERT_DELTA(stats.standard_deviation, 5.0, 0.1);
+  }
+
+  // Instantiate from a single value, constant in time
+  void test_fromSingleValue() {
+    auto stats = TimeSeriesPropertyStatistics(42.0);
+    TS_ASSERT_DELTA(stats.minimum, 42.0, 1.0);
+    TS_ASSERT_DELTA(stats.maximum, 42.0, 1.0);
+    TS_ASSERT_DELTA(stats.mean, 42.0, 1.0);
+    TS_ASSERT_DELTA(stats.median, 42.0, 1.0);
+    TS_ASSERT_DELTA(stats.standard_deviation, 0.0, 0.001);
+    TS_ASSERT_DELTA(stats.time_mean, 42.0, 1.0);
+    TS_ASSERT_DELTA(stats.time_standard_deviation, 0.0, 0.001);
+    TS_ASSERT(std::isnan(stats.duration));
+  }
+};
 
 class TimeSeriesPropertyTest : public CxxTest::TestSuite {
   // Create a small TSP<double>. Callee owns the returned object.
@@ -42,6 +77,15 @@ class TimeSeriesPropertyTest : public CxxTest::TestSuite {
       TS_ASSERT_THROWS_NOTHING(log->addValue(time, value + 1));
     }
     return log;
+  }
+
+  // create a TimeROI object with two ROIS. Overlaps with the TimeSeriesProperty
+  // returned by createDoubleTSP()
+  TimeROI *createTimeRoi() {
+    TimeROI *rois = new TimeROI;
+    rois->addROI("2007-11-30T16:17:05", "2007-11-30T16:17:15");
+    rois->addROI("2007-11-30T16:17:25", "2007-11-30T16:17:35");
+    return rois;
   }
 
 public:
@@ -380,7 +424,7 @@ public:
     Mantid::Kernel::SplittingInterval interval0(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:40"),
                                                 0);
 
-    Mantid::Kernel::TimeSplitterType splitters;
+    Mantid::Kernel::SplittingIntervalVec splitters;
     splitters.emplace_back(interval0);
 
     // Since the filter is < stop, the last one is not counted, so there are  3
@@ -403,7 +447,7 @@ public:
     Mantid::Kernel::SplittingInterval interval1(DateAndTime("2007-11-30T16:18:05"), DateAndTime("2007-11-30T16:18:25"),
                                                 0);
 
-    Mantid::Kernel::TimeSplitterType splitters;
+    Mantid::Kernel::SplittingIntervalVec splitters;
     splitters.emplace_back(interval0);
     splitters.emplace_back(interval1);
 
@@ -463,7 +507,7 @@ public:
     TS_ASSERT_EQUALS(log->realSize(), 6);
 
     // Test centred log value boundaries
-    TimeSplitterType splitter;
+    SplittingIntervalVec splitter;
     log->makeFilterByValue(splitter, 1.8, 2.2, 1.0, true);
 
     TS_ASSERT_EQUALS(splitter.size(), 2);
@@ -507,7 +551,7 @@ public:
 
   void test_makeFilterByValue_throws_for_string_property() {
     TimeSeriesProperty<std::string> log("StringTSP");
-    TimeSplitterType splitter;
+    SplittingIntervalVec splitter;
     TS_ASSERT_THROWS(log.makeFilterByValue(splitter, 0.0, 0.0, 0.0, true), const Exception::NotImplementedError &);
   }
 
@@ -523,7 +567,7 @@ public:
     // Create a TimeInterval that's wider than this log
     TimeInterval interval(DateAndTime("2007-11-30T16:16:00"), DateAndTime("2007-11-30T16:18:50"));
 
-    TimeSplitterType splitter;
+    SplittingIntervalVec splitter;
     // Test good at both ends
     log.makeFilterByValue(splitter, 1.0, 2.2, 1.0, false);
     log.expandFilterToRange(splitter, 1.0, 2.2, interval);
@@ -570,7 +614,7 @@ public:
 
   void test_expandFilterToRange_throws_for_string_property() {
     TimeSeriesProperty<std::string> log("StringTSP");
-    TimeSplitterType splitter;
+    SplittingIntervalVec splitter;
     TS_ASSERT_THROWS(log.expandFilterToRange(splitter, 0.0, 0.0, TimeInterval()),
                      const Exception::NotImplementedError &);
   }
@@ -580,7 +624,7 @@ public:
     auto intLog = createIntegerTSP(5);
 
     // Test a filter that's fully within the range of both properties
-    TimeSplitterType filter;
+    SplittingIntervalVec filter;
     filter.emplace_back(SplittingInterval(DateAndTime("2007-11-30T16:17:05"), DateAndTime("2007-11-30T16:17:29")));
     TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 7.308, 0.001);
     TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 2.167, 0.001);
@@ -628,22 +672,31 @@ public:
   }
 
   void test_timeAverageValue() {
+    // values are equally spaced
     auto dblLog = createDoubleTSP();
     auto intLog = createIntegerTSP(5);
 
     // average values
-    const double dblMean = dblLog->timeAverageValue();
-    TS_ASSERT_DELTA(dblMean, 7.6966, .0001);
-    const double intMean = intLog->timeAverageValue();
-    TS_ASSERT_DELTA(intMean, 2.5, .0001);
+    TS_ASSERT_DELTA(dblLog->timeAverageValue(), dblLog->mean(), .0001);
+    TS_ASSERT_DELTA(intLog->timeAverageValue(), intLog->mean(), .0001);
 
     // Clean up
     delete dblLog;
     delete intLog;
   }
 
+  void test_timeAverageValueWithROI() {
+    auto dblLog = createDoubleTSP();
+    TimeROI *rois = createTimeRoi();
+    const double dblMean = dblLog->timeAverageValue(rois);
+    delete dblLog; // clean up
+    delete rois;
+    const double expected = (5.0 * 9.99 + 5.0 * 7.55 + 5.0 * 5.55 + 5.0 * 10.55) / (5.0 + 5.0 + 5.0 + 5.0);
+    TS_ASSERT_DELTA(dblMean, expected, .0001);
+  }
+
   void test_averageValueInFilter_throws_for_string_property() {
-    TimeSplitterType splitter;
+    SplittingIntervalVec splitter;
     TS_ASSERT_THROWS(sProp->averageValueInFilter(splitter), const Exception::NotImplementedError &);
     TS_ASSERT_THROWS(sProp->averageAndStdDevInFilter(splitter), const Exception::NotImplementedError &);
   }
@@ -660,7 +713,7 @@ public:
 
     // Make a splitter
     DateAndTime start, stop;
-    TimeSplitterType splitter;
+    SplittingIntervalVec splitter;
     start = DateAndTime("2007-11-30T16:17:10");
     stop = DateAndTime("2007-11-30T16:17:40");
     splitter.emplace_back(SplittingInterval(start, stop, 0));
@@ -710,7 +763,7 @@ public:
 
     // Make a splitter
     DateAndTime start, stop;
-    TimeSplitterType splitter;
+    SplittingIntervalVec splitter;
     start = DateAndTime("2007-11-30T16:17:10");
     stop = DateAndTime("2007-11-30T16:17:40");
     splitter.emplace_back(SplittingInterval(start, stop, 0));
@@ -1042,11 +1095,11 @@ public:
     TS_ASSERT_DELTA(stats.maximum, 11.0, 1e-3);
     TS_ASSERT_DELTA(stats.median, 6.0, 1e-3);
     TS_ASSERT_DELTA(stats.mean, 6.0, 1e-3);
-    TS_ASSERT_DELTA(stats.duration, 100.0, 1e-3);
+    TS_ASSERT_DELTA(stats.duration, 110.0, 1e-3);
     TS_ASSERT_DELTA(stats.standard_deviation, 3.1622, 1e-3);
-    TS_ASSERT_DELTA(log->timeAverageValue(), 5.5, 1e-3);
-    TS_ASSERT_DELTA(stats.time_mean, 5.5, 1e-3);
-    TS_ASSERT_DELTA(stats.time_standard_deviation, 2.872, 1e-3);
+    TS_ASSERT_DELTA(log->timeAverageValue(), stats.mean, 1e-3);
+    TS_ASSERT_DELTA(stats.time_mean, stats.mean, 1e-3);
+    TS_ASSERT_DELTA(stats.time_standard_deviation, stats.standard_deviation, 1e-3);
 
     delete log;
   }
@@ -1767,16 +1820,16 @@ public:
 
     // 3. Test
     Mantid::Kernel::TimeInterval dt0 = p->nthInterval(0);
-    TS_ASSERT_EQUALS(dt0.begin(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
-    TS_ASSERT_EQUALS(dt0.end(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:05"));
+    TS_ASSERT_EQUALS(dt0.start(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
+    TS_ASSERT_EQUALS(dt0.stop(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:05"));
 
     Mantid::Kernel::TimeInterval dt1 = p->nthInterval(1);
-    TS_ASSERT_EQUALS(dt1.begin(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:05"));
-    TS_ASSERT_EQUALS(dt1.end(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:15"));
+    TS_ASSERT_EQUALS(dt1.start(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:05"));
+    TS_ASSERT_EQUALS(dt1.stop(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:15"));
 
     Mantid::Kernel::TimeInterval dt2 = p->nthInterval(2);
-    TS_ASSERT_EQUALS(dt2.begin(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:15"));
-    TS_ASSERT_EQUALS(dt2.end(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:35"));
+    TS_ASSERT_EQUALS(dt2.start(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:15"));
+    TS_ASSERT_EQUALS(dt2.stop(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:35"));
 
     // -1 Clean
     delete p;
@@ -1824,12 +1877,12 @@ public:
     TS_ASSERT_EQUALS(p1->size(), 7);
 
     Mantid::Kernel::TimeInterval dt1 = p1->nthInterval(1);
-    TS_ASSERT_EQUALS(dt1.begin(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
-    TS_ASSERT_EQUALS(dt1.end(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
+    TS_ASSERT_EQUALS(dt1.start(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
+    TS_ASSERT_EQUALS(dt1.stop(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
 
     Mantid::Kernel::TimeInterval dt2 = p1->nthInterval(2);
-    TS_ASSERT_EQUALS(dt2.begin(), Mantid::Types::Core::DateAndTime("2007-11-30T16:18:40"));
-    TS_ASSERT_EQUALS(dt2.end(), Mantid::Types::Core::DateAndTime("2007-11-30T16:18:50"));
+    TS_ASSERT_EQUALS(dt2.start(), Mantid::Types::Core::DateAndTime("2007-11-30T16:18:40"));
+    TS_ASSERT_EQUALS(dt2.stop(), Mantid::Types::Core::DateAndTime("2007-11-30T16:18:50"));
 
     // 4. Clear filter
     p1->clearFilter();
@@ -1841,8 +1894,8 @@ public:
     if (finalsize == origsize) {
       for (size_t i = 0; i < finalsize; i++) {
         Mantid::Kernel::TimeInterval dt = p1->nthInterval(static_cast<int>(i));
-        TS_ASSERT_EQUALS(dt.begin(), dts[i].begin());
-        TS_ASSERT_EQUALS(dt.end(), dts[i].end());
+        TS_ASSERT_EQUALS(dt.start(), dts[i].start());
+        TS_ASSERT_EQUALS(dt.stop(), dts[i].stop());
       }
     }
 
@@ -1906,26 +1959,26 @@ public:
 
     // 4. Check interval & Value
     Mantid::Kernel::TimeInterval dt0 = p1->nthInterval(0);
-    TS_ASSERT_EQUALS(dt0.begin(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
-    TS_ASSERT_EQUALS(dt0.end(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
+    TS_ASSERT_EQUALS(dt0.start(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
+    TS_ASSERT_EQUALS(dt0.stop(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
     double v0 = p1->nthValue(0);
     TS_ASSERT_DELTA(v0, 1, 0.00000001);
 
     Mantid::Kernel::TimeInterval dt1 = p1->nthInterval(1);
-    TS_ASSERT_EQUALS(dt1.begin(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
-    TS_ASSERT_EQUALS(dt1.end(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
+    TS_ASSERT_EQUALS(dt1.start(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
+    TS_ASSERT_EQUALS(dt1.stop(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
     double v1 = p1->nthValue(1);
     TS_ASSERT_DELTA(v1, 2, 0.00000001);
 
     Mantid::Kernel::TimeInterval dt2 = p1->nthInterval(2);
-    TS_ASSERT_EQUALS(dt2.begin(), Mantid::Types::Core::DateAndTime("2007-11-30T16:18:40"));
-    TS_ASSERT_EQUALS(dt2.end(), Mantid::Types::Core::DateAndTime("2007-11-30T16:18:50"));
+    TS_ASSERT_EQUALS(dt2.start(), Mantid::Types::Core::DateAndTime("2007-11-30T16:18:40"));
+    TS_ASSERT_EQUALS(dt2.stop(), Mantid::Types::Core::DateAndTime("2007-11-30T16:18:50"));
     double v2 = p1->nthValue(2);
     TS_ASSERT_DELTA(v2, 11, 0.00000001);
 
     Mantid::Kernel::TimeInterval dt12 = p1->nthInterval(11);
-    TS_ASSERT_EQUALS(dt12.begin(), Mantid::Types::Core::DateAndTime("2007-11-30T16:20:10"));
-    TS_ASSERT_EQUALS(dt12.end(), Mantid::Types::Core::DateAndTime("2007-11-30T17:19:30"));
+    TS_ASSERT_EQUALS(dt12.start(), Mantid::Types::Core::DateAndTime("2007-11-30T16:20:10"));
+    TS_ASSERT_EQUALS(dt12.stop(), Mantid::Types::Core::DateAndTime("2007-11-30T17:19:30"));
     double v12 = p1->nthValue(11);
     TS_ASSERT_DELTA(v12, 20, 1.0E-8);
 
@@ -1973,8 +2026,8 @@ public:
 
     // 4. Check interval
     Mantid::Kernel::TimeInterval dt0 = p1->nthInterval(0);
-    TS_ASSERT_EQUALS(dt0.begin(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
-    TS_ASSERT_EQUALS(dt0.end(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
+    TS_ASSERT_EQUALS(dt0.start(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
+    TS_ASSERT_EQUALS(dt0.stop(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
     double v0 = p1->nthValue(0);
     TS_ASSERT_DELTA(v0, 2, 1.0E-8);
 
@@ -2022,14 +2075,14 @@ public:
 
     // 4. Check interval
     Mantid::Kernel::TimeInterval dt1 = p1->nthInterval(1);
-    TS_ASSERT_EQUALS(dt1.begin(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
-    TS_ASSERT_EQUALS(dt1.end(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
+    TS_ASSERT_EQUALS(dt1.start(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
+    TS_ASSERT_EQUALS(dt1.stop(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
     double v1 = p1->nthValue(1);
     TS_ASSERT_DELTA(v1, 2, 1.0E-8);
 
     Mantid::Kernel::TimeInterval dt2 = p1->nthInterval(2);
-    TS_ASSERT_EQUALS(dt2.begin(), Mantid::Types::Core::DateAndTime("2007-11-30T16:18:40"));
-    TS_ASSERT_EQUALS(dt2.end(), Mantid::Types::Core::DateAndTime("2007-11-30T16:18:50"));
+    TS_ASSERT_EQUALS(dt2.start(), Mantid::Types::Core::DateAndTime("2007-11-30T16:18:40"));
+    TS_ASSERT_EQUALS(dt2.stop(), Mantid::Types::Core::DateAndTime("2007-11-30T16:18:50"));
     double v2 = p1->nthValue(2);
     TS_ASSERT_DELTA(v2, 11, 1.0E-8);
 
@@ -2078,8 +2131,8 @@ public:
 
     // 4. Check interval
     Mantid::Kernel::TimeInterval dt0 = p1->nthInterval(0);
-    TS_ASSERT_EQUALS(dt0.begin(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
-    TS_ASSERT_EQUALS(dt0.end(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
+    TS_ASSERT_EQUALS(dt0.start(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
+    TS_ASSERT_EQUALS(dt0.stop(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
     double v0 = p1->nthValue(0);
     TS_ASSERT_DELTA(v0, 2, 1.0E-8);
 
@@ -2208,7 +2261,7 @@ public:
   void test_filterByTime_out_of_range_filters_nothing() {
     TimeSeriesProperty<int> *log = createIntegerTSP(6);
 
-    size_t original_size = log->realSize();
+    size_t original_size = std::size_t(log->realSize());
 
     TS_ASSERT_EQUALS(original_size, 6);
 
@@ -2259,7 +2312,12 @@ public:
     TS_ASSERT_EQUALS(intervals.size(), 1);
     const auto &range = intervals.front();
     TS_ASSERT_EQUALS(range.start(), log->firstTime());
-    TS_ASSERT_EQUALS(range.stop(), log->lastTime());
+
+    // the range is extended by the last difference in times
+    // this is to make the last value count as much as the penultimate
+    const auto lastDuration = log->nthInterval(log->size() - 1).length();
+    const auto stop = log->lastTime() + lastDuration;
+    TS_ASSERT_EQUALS(range.stop(), stop);
   }
 
   void test_getSplittingIntervals_repeatedEntries() {

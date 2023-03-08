@@ -39,14 +39,19 @@ class ApplyDetectorScanEffCorrTest(unittest.TestCase):
             self.assertEqual(calibrated_ws.readE(i), input_ws.readE(i) * expected[i])
 
     def test_mismatched_workspace_size(self):
-        input_ws = CreateSampleWorkspace(NumMonitors=0, NumBanks=6, BankPixelWidth=1, XMin=0, XMax=1, BinWidth=1)
+        input_ws = CreateSampleWorkspace(NumMonitors=0, NumBanks=7, BankPixelWidth=1, XMin=0, XMax=1, BinWidth=1)
 
         calibration_x = np.array([0, 0, 0, 0, 0, 0])
         calibration_y = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
         calibration_ws = CreateWorkspace(DataX=calibration_x, DataY=calibration_y, Nspec=calibration_y.size)
 
-        self.assertRaises(
-            ValueError, ApplyDetectorScanEffCorr, InputWorkspace=input_ws, DetectorEfficiencyWorkspace=calibration_ws, OutputWorkspace=""
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Number of histograms in input workspace is not a multiple of number of entries in detector efficiency workspace.",
+            ApplyDetectorScanEffCorr,
+            InputWorkspace=input_ws,
+            DetectorEfficiencyWorkspace=calibration_ws,
+            OutputWorkspace="test",
         )
 
     def test_2d_scanning_workspace(self):

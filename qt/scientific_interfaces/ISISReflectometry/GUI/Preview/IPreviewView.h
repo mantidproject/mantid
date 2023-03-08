@@ -38,8 +38,8 @@ public:
   virtual void subscribe(PreviewViewSubscriber *notifyee) noexcept = 0;
   virtual QLayout *getDockedWidgetsLayout() noexcept = 0;
   virtual MantidWidgets::IImageInfoWidget *getImageInfo() noexcept = 0;
-  virtual void enableApplyButton() = 0;
-  virtual void disableApplyButton() = 0;
+  virtual void enableMainWidget() = 0;
+  virtual void disableMainWidget() = 0;
 
   virtual std::string getWorkspaceName() const = 0;
   virtual double getAngle() const = 0;

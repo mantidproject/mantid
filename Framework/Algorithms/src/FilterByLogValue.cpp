@@ -124,7 +124,7 @@ void FilterByLogValue::exec() {
   }
 
   // Now make the splitter vector
-  TimeSplitterType splitter;
+  SplittingIntervalVec splitter;
   // This'll throw an exception if the log doesn't exist. That is good.
   auto *log = dynamic_cast<ITimeSeriesProperty *>(inputWS->run().getLogData(logname));
   if (log) {

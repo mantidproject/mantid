@@ -44,9 +44,25 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         ws = self._create_sample_workspace(input_ws_name, spec_det_idx)
         expected_final_xyz, expected_final_dimensions = self._calculate_expected_final_detector_values(ws, spec_det_idx)
 
-        calibration_ws_name = self._calibration_ws_name(ws)
         output_ws_name = "test_calibrated"
         args = {"InputWorkspace": ws, "CalibrationFile": self._CALIBRATION_TEST_DATA, "OutputWorkspace": output_ws_name}
+        outputs = [input_ws_name, output_ws_name]
+        self._assert_run_algorithm_succeeds(args, outputs)
+
+        # Check the final output workspace
+        retrieved_ws = AnalysisDataService.retrieve(output_ws_name)
+        self._check_detector_positions(retrieved_ws, expected_final_xyz)
+
+    def test_calibration_successful_in_debug_mode(self):
+        input_ws_name = "test_1234"
+        # We use workspace ID 4 (or detector ID 13) as the specular detector
+        spec_det_idx = 4
+        ws = self._create_sample_workspace(input_ws_name, spec_det_idx)
+        expected_final_xyz, expected_final_dimensions = self._calculate_expected_final_detector_values(ws, spec_det_idx)
+
+        calibration_ws_name = self._calibration_ws_name(ws)
+        output_ws_name = "test_calibrated"
+        args = {"InputWorkspace": ws, "Debug": True, "CalibrationFile": self._CALIBRATION_TEST_DATA, "OutputWorkspace": output_ws_name}
         outputs = [input_ws_name, calibration_ws_name, output_ws_name]
         self._assert_run_algorithm_succeeds(args, outputs)
 
@@ -57,6 +73,39 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         self._check_detector_positions(retrieved_ws, expected_final_xyz)
 
     def test_calibration_successful_for_workspace_group(self):
+        grp_name = "test"
+        output_grp_name = "test_calibrated"
+        # Create a group of two workspaces. The first workspace uses workspace index 4 as the specular detector.
+        # The second workspace uses workspace index 2 as the specular detector.
+        spec_det_idx_list = [4, 2]
+        input_ws_grp_size = len(spec_det_idx_list)
+        ws_grp = self._create_workspace_group(grp_name, spec_det_idx_list, input_ws_grp_size)
+
+        expected_final_xyz = []
+        expected_final_dimensions = []
+        input_ws_names = []
+        output_ws_names = []
+
+        for i in range(ws_grp.getNumberOfEntries()):
+            ws = ws_grp[i]
+            input_ws_names.append(ws.name())
+            output_ws_names.append(f"{output_grp_name}_{i + 1}")
+            pos_xyz, dimensions = self._calculate_expected_final_detector_values(ws, spec_det_idx_list[i])
+            expected_final_xyz.append(pos_xyz)
+            expected_final_dimensions.append(dimensions)
+
+        args = {"InputWorkspace": ws_grp, "CalibrationFile": self._CALIBRATION_TEST_DATA, "OutputWorkspace": output_grp_name}
+        outputs = input_ws_names + [grp_name, output_grp_name] + output_ws_names
+        self._assert_run_algorithm_succeeds(args, outputs)
+
+        # Check the final output workspace and calibration table
+        retrieved_grp = AnalysisDataService.retrieve(output_grp_name)
+        self.assertIsInstance(retrieved_grp, WorkspaceGroup)
+        self.assertEqual(retrieved_grp.getNumberOfEntries(), input_ws_grp_size)
+        for i in range(retrieved_grp.getNumberOfEntries()):
+            self._check_detector_positions(retrieved_grp[i], expected_final_xyz[i])
+
+    def test_calibration_successful_for_workspace_group_in_debug_mode(self):
         grp_name = "test"
         output_grp_name = "test_calibrated"
         # Create a group of two workspaces. The first workspace uses workspace index 4 as the specular detector.
@@ -80,7 +129,7 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
             expected_final_dimensions.append(dimensions)
             calibration_ws_names.append(self._calibration_ws_name(ws))
 
-        args = {"InputWorkspace": ws_grp, "CalibrationFile": self._CALIBRATION_TEST_DATA, "OutputWorkspace": output_grp_name}
+        args = {"InputWorkspace": ws_grp, "Debug": True, "CalibrationFile": self._CALIBRATION_TEST_DATA, "OutputWorkspace": output_grp_name}
         outputs = input_ws_names + [grp_name, output_grp_name] + calibration_ws_names + output_ws_names
         self._assert_run_algorithm_succeeds(args, outputs)
 
@@ -122,6 +171,12 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         ws = self._create_sample_workspace(input_ws_name, 4)
         args = {"InputWorkspace": ws, "OutputWorkspace": "test_calibrated"}
         self._assert_run_algorithm_raises_exception(args, "Calibration file path must be provided")
+
+    def test_exception_raised_if_invalid_calibration_filepath_supplied(self):
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name, 4)
+        args = {"InputWorkspace": ws, "CalibrationFile": "invalid/file_path.dat", "OutputWorkspace": "test_calibrated"}
+        self._assert_run_algorithm_raises_exception(args, "Calibration file path cannot be found")
 
     def _check_detector_positions(self, workspace, expected_positions, pos_type="final"):
         for i in range(0, workspace.getNumberHistograms()):

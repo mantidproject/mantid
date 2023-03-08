@@ -9,11 +9,11 @@
 #include "IndirectSettingsHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
-#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
@@ -224,8 +224,8 @@ void saveAclimax(std::string const &workspaceName, std::string const &outputName
 } // namespace
 
 std::string UNGROUPED = "Ungrouped";
-std::string GROUP = "Group";
-std::string GROUPBYSAMPLE = "Group by sample";
+std::string GROUP = "Grouped";
+std::string GROUPBYSAMPLE = "Sample changer grouped";
 
 namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
@@ -265,11 +265,6 @@ ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI, QWidget *pa
 
   // Allows empty workspace selector when initially selected
   m_uiForm.dsCalibrationFile->isOptional(true);
-
-  // Add grouping options
-  m_uiForm.cbGroupOutput->addItem(QString::fromStdString(UNGROUPED));
-  m_uiForm.cbGroupOutput->addItem(QString::fromStdString(GROUP));
-  m_uiForm.cbGroupOutput->addItem(QString::fromStdString(GROUPBYSAMPLE));
 
   // Update UI widgets to show default values
   mappingOptionSelected(m_uiForm.cbGroupingOptions->currentText());
@@ -515,7 +510,7 @@ void ISISEnergyTransfer::run() {
                       getAnalyserName().toStdString() + getReflectionName().toStdString() + "_Reduced";
   reductionAlg->setProperty("OutputWorkspace", m_outputGroupName);
 
-  m_batchAlgoRunner->addAlgorithm(reductionAlg, std::make_unique<MantidQt::API::AlgorithmRuntimeProps>());
+  m_batchAlgoRunner->addAlgorithm(reductionAlg, std::make_unique<Mantid::API::AlgorithmRuntimeProps>());
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotRawComplete(bool)));
@@ -682,6 +677,14 @@ void ISISEnergyTransfer::setInstrumentDefault(QMap<QString, QString> const &inst
     m_uiForm.leRebinString->setText("");
   }
 
+  // Add grouping options based on the selected instrument
+  m_uiForm.cbGroupOutput->clear();
+  m_uiForm.cbGroupOutput->addItem(QString::fromStdString(UNGROUPED));
+  m_uiForm.cbGroupOutput->addItem(QString::fromStdString(GROUP));
+  if (instrumentName == "IRIS") {
+    m_uiForm.cbGroupOutput->addItem(QString::fromStdString(GROUPBYSAMPLE));
+  }
+
   setInstrumentCheckBoxProperty(m_uiForm.ckCm1Units, instDetails, "cm-1-convert-choice");
   setInstrumentCheckBoxProperty(m_uiForm.ckSaveNexus, instDetails, "save-nexus-choice");
   setInstrumentCheckBoxProperty(m_uiForm.ckSaveASCII, instDetails, "save-ascii-choice");
@@ -814,7 +817,7 @@ void ISISEnergyTransfer::plotRaw() {
   }
 
   // Rebin the workspace to its self to ensure constant binning
-  auto inputToRebin = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  auto inputToRebin = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   inputToRebin->setPropertyValue("WorkspaceToMatch", name);
   inputToRebin->setPropertyValue("WorkspaceToRebin", name);
   inputToRebin->setPropertyValue("OutputWorkspace", name);
@@ -823,7 +826,7 @@ void ISISEnergyTransfer::plotRaw() {
   rebinAlg->initialize();
   m_batchAlgoRunner->addAlgorithm(rebinAlg, std::move(inputToRebin));
 
-  auto inputFromRebin = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  auto inputFromRebin = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   inputFromRebin->setPropertyValue("InputWorkspace", name);
 
   std::vector<specnum_t> detectorList;
@@ -841,10 +844,9 @@ void ISISEnergyTransfer::plotRaw() {
     calcBackAlg->setProperty("Mode", "Mean");
     calcBackAlg->setProperty("StartX", range[0]);
     calcBackAlg->setProperty("EndX", range[1]);
-    m_batchAlgoRunner->addAlgorithm(calcBackAlg,
-                                    std::make_unique<MantidQt::API::AlgorithmRuntimeProps>(*inputFromRebin));
+    m_batchAlgoRunner->addAlgorithm(calcBackAlg, std::make_unique<Mantid::API::AlgorithmRuntimeProps>(*inputFromRebin));
 
-    auto inputFromCalcBG = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+    auto inputFromCalcBG = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
     inputFromCalcBG->setPropertyValue("InputWorkspace", name + "_bg");
 
     IAlgorithm_sptr groupAlg = AlgorithmManager::Instance().create("GroupDetectors");

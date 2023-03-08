@@ -1,12 +1,5 @@
 # ######################################################################################################################
-# Define scripts for the Linux packages
-#
-# It provides: - launch_mantidworkbench.sh - mantid.sh <- for stable releases - mantid.csh <- for stable releases
-#
-# ######################################################################################################################
-
-# ######################################################################################################################
-# Set installation variables
+# Installation variables that control the destination subdirectories for install() commands
 # ######################################################################################################################
 set(BIN_DIR bin)
 set(ETC_DIR etc)
@@ -22,87 +15,12 @@ set(WORKBENCH_SITE_PACKAGES
 )
 set(WORKBENCH_PLUGINS_DIR ${PLUGINS_DIR})
 
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  set(CMAKE_INSTALL_PREFIX
-      /opt/mantid${CPACK_PACKAGE_SUFFIX}
-      CACHE PATH "Install path" FORCE
-  )
-endif()
-
 # ######################################################################################################################
-# Environment scripts (profile.d)
-# ######################################################################################################################
-# default shell (bash-like)
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh "#!/bin/sh\n" "PATH=$PATH:${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\n"
-                                                 "export PATH\n"
-)
-
-# c-shell
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh "#!/bin/csh\n"
-                                                  "setenv PATH \"\${PATH}:${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\"\n"
-)
-
-install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh DESTINATION ${ETC_DIR})
-
-# ######################################################################################################################
-# Find python site-packages dir and create mantid.pth
-# ######################################################################################################################
-execute_process(
-  COMMAND "${Python_EXECUTABLE}" -c "from distutils import sysconfig as sc
-print(sc.get_python_lib(plat_specific=True))"
-  OUTPUT_VARIABLE PYTHON_SITE
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.pth.install "${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\n"
-                                                          "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}\n"
-)
-
-install(
-  FILES ${CMAKE_CURRENT_BINARY_DIR}/mantid.pth.install
-  DESTINATION ${ETC_DIR}
-  RENAME mantid.pth
-)
-
-# ######################################################################################################################
-# Setup file variables for pre/post installation These are very different depending on the distribution so are contained
-# in the Packaging/*/scripts directory as CMake templates
-# ######################################################################################################################
-# We only manipulate the environment for  nprefixed non-MPI package builds for shell maintainer scripts as
-# ENVVARS_ON_INSTALL could have ON, OFF, True, False etc
-if(MPI_BUILD OR CPACK_PACKAGE_SUFFIX)
-  set(ENVVARS_ON_INSTALL_INT 0)
-else()
-  set(ENVVARS_ON_INSTALL_INT 1)
-endif()
-
-# Common filenames to hold maintainer scripts
-set(PRE_INSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/preinst)
-set(POST_INSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/postinst)
-set(PRE_UNINSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/prerm)
-set(POST_UNINSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/postrm)
-
-if("${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "^Fedora") # RHEL/Fedora these are used if we
-                                                                                  # need to scl enable at runtime
-  set(WRAPPER_PREFIX "")
-  set(WRAPPER_POSTFIX "")
-
-  if("${UNIX_DIST}" MATCHES "^Fedora")
-    # The instrument view doesn't work with the wayland compositor Override it to use X11
-    # https://doc.qt.io/qt-5/embedded-linux.html#xcb
-    set(QT_QPA "QT_QPA_PLATFORM=xcb ")
-  else()
-    set(QT_QPA "")
-  endif()
-
-elseif("${UNIX_DIST}" MATCHES "Ubuntu")
-  set(WRAPPER_PREFIX "")
-  set(WRAPPER_POSTFIX "")
-
-endif()
-
-# ######################################################################################################################
-# Launcher scripts
+# Launcher scripts. We provide a wrapper script to launch workbench to:
+#
+# * enable a custom memory allocator (jemalloc)
+# * enable VirtualGL configuration if required for remote access
+# * adds debug flags to start gdb for developers
 # ######################################################################################################################
 set(CONDA_PREAMBLE_TEXT
     "# Verify that conda is setup

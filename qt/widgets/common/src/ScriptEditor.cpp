@@ -513,19 +513,6 @@ void ScriptEditor::print() {
 void ScriptEditor::showFindReplaceDialog() { m_findDialog->show(); }
 
 /**
- * Override the zoomTo slot to make the font size larger on Mac as the
- * defaults are tiny
- * @param level Set the font size to this level of zoom
- */
-void ScriptEditor::zoomTo(int level) {
-#ifdef __APPLE__
-  // Make all fonts 4 points bigger on the Mac because otherwise they're tiny!
-  level += 4;
-#endif
-  QsciScintilla::zoomTo(level);
-}
-
-/**
  * Write to the given device
  */
 void ScriptEditor::writeToDevice(QIODevice &device) const { this->write(&device); }

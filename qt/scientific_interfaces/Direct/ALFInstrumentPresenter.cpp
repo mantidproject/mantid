@@ -11,16 +11,21 @@
 #include "ALFInstrumentView.h"
 
 #include "MantidAPI/FileFinder.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace MantidQt::CustomInterfaces {
 
-ALFInstrumentPresenter::ALFInstrumentPresenter(IALFInstrumentView *view, std::unique_ptr<IALFInstrumentModel> model)
-    : m_view(view), m_model(std::move(model)) {
+ALFInstrumentPresenter::ALFInstrumentPresenter(IALFInstrumentView *view, std::unique_ptr<IALFInstrumentModel> model,
+                                               std::unique_ptr<IALFAlgorithmManager> algorithmManager)
+    : m_dataSwitch(), m_view(view), m_model(std::move(model)), m_algorithmManager(std::move(algorithmManager)) {
   m_view->subscribePresenter(this);
   m_view->setUpInstrument(m_model->loadedWsName());
+  m_algorithmManager->subscribe(this);
 }
 
-QWidget *ALFInstrumentPresenter::getLoadWidget() { return m_view->generateLoadWidget(); }
+QWidget *ALFInstrumentPresenter::getSampleLoadWidget() { return m_view->generateSampleLoadWidget(); }
+
+QWidget *ALFInstrumentPresenter::getVanadiumLoadWidget() { return m_view->generateVanadiumLoadWidget(); }
 
 ALFInstrumentWidget *ALFInstrumentPresenter::getInstrumentView() { return m_view->getInstrumentView(); }
 
@@ -28,32 +33,157 @@ void ALFInstrumentPresenter::subscribeAnalysisPresenter(IALFAnalysisPresenter *p
   m_analysisPresenter = presenter;
 }
 
-void ALFInstrumentPresenter::loadRunNumber() {
-  auto const filepath = m_view->getFile();
-  if (!filepath) {
+void ALFInstrumentPresenter::loadSettings() { m_view->loadSettings(); }
+
+void ALFInstrumentPresenter::saveSettings() { m_view->saveSettings(); }
+
+void ALFInstrumentPresenter::notifyAlgorithmError(std::string const &message) { m_view->warningBox(message); }
+
+void ALFInstrumentPresenter::loadSample() {
+  m_dataSwitch = ALFData::SAMPLE;
+  loadAndNormalise();
+}
+
+void ALFInstrumentPresenter::loadVanadium() {
+  m_dataSwitch = ALFData::VANADIUM;
+  loadAndNormalise();
+}
+
+void ALFInstrumentPresenter::loadAndNormalise() {
+  m_analysisPresenter->clear();
+
+  if (auto const filepath = getFileFromView()) {
+    m_algorithmManager->load(m_model->loadProperties(*filepath));
+  } else {
+    m_model->setData(m_dataSwitch, nullptr);
+    generateLoadedWorkspace();
+  }
+}
+
+void ALFInstrumentPresenter::notifyLoadComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  if (m_model->isALFData(workspace)) {
+    m_algorithmManager->normaliseByCurrent(m_model->normaliseByCurrentProperties(workspace));
+  } else {
+    m_view->warningBox("The loaded data is not from the ALF instrument");
+  }
+}
+
+void ALFInstrumentPresenter::notifyNormaliseByCurrentComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  m_model->setData(m_dataSwitch, workspace);
+  updateRunInViewFromModel();
+  generateLoadedWorkspace();
+}
+
+void ALFInstrumentPresenter::generateLoadedWorkspace() {
+  if (!m_model->hasData(ALFData::SAMPLE)) {
     return;
   }
 
-  m_analysisPresenter->clear();
-  if (auto const message = loadAndTransform(*filepath)) {
-    m_view->warningBox(*message);
+  // Rebin the vanadium to match the sample binning if the bins do not match
+  if (m_model->binningMismatch()) {
+    m_algorithmManager->rebinToWorkspace(m_model->rebinToWorkspaceProperties());
+  } else {
+    normaliseSampleByVanadium();
   }
-  m_view->setRunQuietly(std::to_string(m_model->runNumber()));
 }
 
-std::optional<std::string> ALFInstrumentPresenter::loadAndTransform(const std::string &pathToRun) {
-  try {
-    return m_model->loadAndTransform(pathToRun);
-  } catch (std::exception const &ex) {
-    return ex.what();
+void ALFInstrumentPresenter::notifyRebinToWorkspaceComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  m_model->setData(ALFData::VANADIUM, workspace);
+  normaliseSampleByVanadium();
+}
+
+void ALFInstrumentPresenter::normaliseSampleByVanadium() {
+  // Normalise the sample by the vanadium and replace any special values if a vanadium exists
+  if (m_model->hasData(ALFData::VANADIUM)) {
+    m_algorithmManager->divide(m_model->divideProperties());
+  } else {
+    convertSampleToDSpacing(m_model->data(ALFData::SAMPLE));
   }
 }
+
+void ALFInstrumentPresenter::notifyDivideComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  m_algorithmManager->replaceSpecialValues(m_model->replaceSpecialValuesProperties(workspace));
+}
+
+void ALFInstrumentPresenter::notifyReplaceSpecialValuesComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  convertSampleToDSpacing(workspace);
+}
+
+void ALFInstrumentPresenter::convertSampleToDSpacing(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  // Convert the sample to DSpacing if not already in dspacing
+  if (!m_model->axisIsDSpacing()) {
+    m_algorithmManager->convertUnits(m_model->convertUnitsProperties(workspace));
+  } else {
+    notifyConvertUnitsComplete(workspace);
+  }
+}
+
+void ALFInstrumentPresenter::notifyConvertUnitsComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  m_model->replaceSampleWorkspaceInADS(workspace);
+}
+
+void ALFInstrumentPresenter::notifyInstrumentActorReset() { updateAnalysisViewFromModel(); }
 
 void ALFInstrumentPresenter::notifyShapeChanged() {
-  m_model->setSelectedDetectors(m_view->componentInfo(), m_view->getSelectedDetectors());
+  if (m_model->setSelectedTubes(m_view->getSelectedDetectors())) {
+    updateInstrumentViewFromModel();
+    updateAnalysisViewFromModel();
+  }
+}
 
-  auto const [workspace, twoThetas] = m_model->generateOutOfPlaneAngleWorkspace(m_view->getInstrumentActor());
-  m_analysisPresenter->setExtractedWorkspace(workspace, twoThetas);
+void ALFInstrumentPresenter::notifyTubesSelected(std::vector<DetectorTube> const &tubes) {
+  if (!tubes.empty() && m_model->addSelectedTube(tubes.front())) {
+    updateInstrumentViewFromModel();
+    updateAnalysisViewFromModel();
+  }
+}
+
+std::optional<std::string> ALFInstrumentPresenter::getFileFromView() const {
+  switch (m_dataSwitch) {
+  case ALFData::SAMPLE:
+    return m_view->getSampleFile();
+  case ALFData::VANADIUM:
+    return m_view->getVanadiumFile();
+  }
+  throw std::invalid_argument("ALFData must be one of { SAMPLE, VANADIUM }");
+}
+
+void ALFInstrumentPresenter::updateRunInViewFromModel() {
+  auto const runAsString = std::to_string(m_model->run(m_dataSwitch));
+  switch (m_dataSwitch) {
+  case ALFData::SAMPLE:
+    m_view->setSampleRun(runAsString);
+    return;
+  case ALFData::VANADIUM:
+    m_view->setVanadiumRun(runAsString);
+    return;
+  }
+  throw std::invalid_argument("ALFData must be one of { SAMPLE, VANADIUM }");
+}
+
+void ALFInstrumentPresenter::updateInstrumentViewFromModel() {
+  m_view->clearShapes();
+  m_view->drawRectanglesAbove(m_model->selectedTubes());
+}
+
+void ALFInstrumentPresenter::updateAnalysisViewFromModel() {
+  if (m_model->hasSelectedTubes()) {
+    m_algorithmManager->createWorkspace(m_model->createWorkspaceAlgorithmProperties(m_view->getInstrumentActor()));
+  } else {
+    m_analysisPresenter->setExtractedWorkspace(nullptr, {});
+  }
+}
+
+void ALFInstrumentPresenter::notifyCreateWorkspaceComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  m_algorithmManager->scaleX(m_model->scaleXProperties(workspace));
+}
+
+void ALFInstrumentPresenter::notifyScaleXComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  m_algorithmManager->rebunch(m_model->rebunchProperties(workspace));
+}
+
+void ALFInstrumentPresenter::notifyRebunchComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  m_analysisPresenter->setExtractedWorkspace(workspace, m_model->twoThetasClosestToZero());
 }
 
 } // namespace MantidQt::CustomInterfaces

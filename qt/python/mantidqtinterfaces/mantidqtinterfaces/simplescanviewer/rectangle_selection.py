@@ -24,7 +24,7 @@ class RectangleSelection(RectangleSelector):
         """
 
         if not self._interactive:
-            self.to_draw.set_visible(False)
+            self._selection_artist.set_visible(False)
 
         # update the eventpress and eventrelease with the resulting extents
         x1, x2, y1, y2 = self.extents

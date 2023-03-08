@@ -3,6 +3,30 @@
 
   <component-link name="D1B">
 
+    <parameter name="sample_logs_sum" type="string" visible="false">
+      <value val="duration, time, acquisitionspy.time, monitor.monsum, Detector.detsum, multi.totalcount"/>
+    </parameter>
+
+    <parameter name="sample_logs_time_series" type="string" visible="false">
+      <value val="sample.temperature, preset, monitor.preset, monitor.monrate, Detector.detrate, run_list, run_number"/>
+    </parameter>
+
+    <parameter name="sample_logs_warn" type="string" visible="false">
+      <value val="monitor.monrate"/>
+    </parameter>
+
+    <parameter name="sample_logs_warn_tolerances" type="string" visible="false">
+      <value val="100.0"/>
+    </parameter>
+
+    <parameter name="sample_logs_fail" type="string" visible="false">
+      <value val="monitor.monrate"/>
+    </parameter>
+
+    <parameter name="sample_logs_fail_tolerances" type="string" visible="false">
+      <value val="1000.0"/>
+    </parameter>
+
     <parameter name="log_list_to_save" type="string">
       <value val="facility,instrument.name,experiment_identifier,
 		  title,start_time,end_time,numor_list,

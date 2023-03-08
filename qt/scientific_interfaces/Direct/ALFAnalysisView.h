@@ -42,6 +42,9 @@ public:
 
   virtual void replot() = 0;
 
+  virtual void openExternalPlot(Mantid::API::MatrixWorkspace_sptr const &workspace,
+                                std::vector<int> const &workspaceIndices) const = 0;
+
   virtual std::pair<double, double> getRange() const = 0;
 
   virtual void addSpectrum(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
@@ -50,7 +53,7 @@ public:
 
   virtual void setAverageTwoTheta(std::optional<double> average, std::vector<double> const &all) = 0;
 
-  virtual void setPeak(Mantid::API::IPeakFunction_const_sptr const &peak) = 0;
+  virtual void setPeak(Mantid::API::IPeakFunction_const_sptr const &peak, double const background) = 0;
   virtual Mantid::API::IPeakFunction_const_sptr getPeak() const = 0;
 
   virtual void setPeakCentre(double const centre) = 0;
@@ -74,6 +77,9 @@ public:
 
   void replot() override;
 
+  void openExternalPlot(Mantid::API::MatrixWorkspace_sptr const &workspace,
+                        std::vector<int> const &workspaceIndices) const override;
+
   std::pair<double, double> getRange() const override;
 
   void addSpectrum(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
@@ -82,7 +88,7 @@ public:
 
   void setAverageTwoTheta(std::optional<double> average, std::vector<double> const &all) override;
 
-  void setPeak(Mantid::API::IPeakFunction_const_sptr const &peak) override;
+  void setPeak(Mantid::API::IPeakFunction_const_sptr const &peak, double const background) override;
   Mantid::API::IPeakFunction_const_sptr getPeak() const override;
 
   void setPeakCentre(double const centre) override;
@@ -97,6 +103,8 @@ private slots:
   void notifyPeakPickerChanged();
   void notifyPeakCentreEditingFinished();
   void notifyFitClicked();
+  void notifyExportWorkspaceToADSClicked();
+  void notifyExternalPlotClicked();
   void notifyResetClicked();
 
 private:
@@ -113,6 +121,8 @@ private:
   MantidWidgets::PeakPicker *m_peakPicker;
   QLineEdit *m_start, *m_end;
   QPushButton *m_fitButton;
+  QPushButton *m_externalPlot;
+  QPushButton *m_exportToADS;
   QPushButton *m_resetButton;
   QLineEdit *m_peakCentre;
   QLabel *m_fitStatus;

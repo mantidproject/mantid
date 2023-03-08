@@ -12,6 +12,8 @@
 #include "ALFAnalysisMocks.h"
 #include "ALFInstrumentMocks.h"
 #include "ALFInstrumentPresenter.h"
+#include "DetectorTube.h"
+#include "MockALFAlgorithmManager.h"
 #include "MockInstrumentActor.h"
 
 #include "MantidAPI/FrameworkManager.h"
@@ -48,10 +50,15 @@ public:
   static void destroySuite(ALFInstrumentPresenterTest *suite) { delete suite; }
 
   void setUp() override {
+    m_algProperties = std::make_unique<AlgorithmRuntimeProps>();
+
+    auto algorithmManager = std::make_unique<NiceMock<MockALFAlgorithmManager>>();
     auto model = std::make_unique<NiceMock<MockALFInstrumentModel>>();
+
+    m_algorithmManager = algorithmManager.get();
     m_model = model.get();
     m_view = std::make_unique<NiceMock<MockALFInstrumentView>>();
-    m_presenter = std::make_unique<ALFInstrumentPresenter>(m_view.get(), std::move(model));
+    m_presenter = std::make_unique<ALFInstrumentPresenter>(m_view.get(), std::move(model), std::move(algorithmManager));
 
     m_instrumentActor = std::make_unique<NiceMock<MockInstrumentActor>>();
 
@@ -69,22 +76,33 @@ public:
   }
 
   void test_instantiating_the_presenter_will_set_up_the_instrument() {
+    auto algorithmManager = std::make_unique<NiceMock<MockALFAlgorithmManager>>();
     auto model = std::make_unique<NiceMock<MockALFInstrumentModel>>();
     auto view = std::make_unique<NiceMock<MockALFInstrumentView>>();
 
+    EXPECT_CALL(*view, subscribePresenter(_)).Times(1);
     EXPECT_CALL(*model, loadedWsName()).Times(1).WillOnce(Return("ALFData"));
     EXPECT_CALL(*view, setUpInstrument("ALFData")).Times(1);
+    EXPECT_CALL(*algorithmManager, subscribe(_)).Times(1);
 
+    auto algorithmManagerRaw = algorithmManager.get();
     auto modelRaw = model.get();
-    auto presenter = std::make_unique<ALFInstrumentPresenter>(view.get(), std::move(model));
+    auto presenter =
+        std::make_unique<ALFInstrumentPresenter>(view.get(), std::move(model), std::move(algorithmManager));
 
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&algorithmManagerRaw));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&modelRaw));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
   }
 
-  void test_getLoadWidget_gets_the_load_widget_from_the_view() {
-    EXPECT_CALL(*m_view, generateLoadWidget()).Times(1);
-    m_presenter->getLoadWidget();
+  void test_getSampleLoadWidget_gets_the_sample_load_widget_from_the_view() {
+    EXPECT_CALL(*m_view, generateSampleLoadWidget()).Times(1);
+    m_presenter->getSampleLoadWidget();
+  }
+
+  void test_getVanadiumLoadWidget_gets_the_vanadium_load_widget_from_the_view() {
+    EXPECT_CALL(*m_view, generateVanadiumLoadWidget()).Times(1);
+    m_presenter->getVanadiumLoadWidget();
   }
 
   void test_getInstrumentView_gets_the_instrument_view_widget_from_the_view() {
@@ -92,81 +110,223 @@ public:
     m_presenter->getInstrumentView();
   }
 
-  void test_loadRunNumber_will_not_attempt_a_load_when_an_empty_filepath_is_provided() {
-    EXPECT_CALL(*m_view, getFile()).Times(1).WillOnce(Return(std::nullopt));
+  void test_loadSettings_will_load_the_settings_in_the_view() {
+    EXPECT_CALL(*m_view, loadSettings()).Times(1);
+    m_presenter->loadSettings();
+  }
+
+  void test_saveSettings_will_save_the_settings_in_the_view() {
+    EXPECT_CALL(*m_view, saveSettings()).Times(1);
+    m_presenter->saveSettings();
+  }
+
+  void test_loadSample_will_not_attempt_a_load_when_an_empty_filepath_is_provided() {
+    EXPECT_CALL(*m_analysisPresenter, clear()).Times(1);
+
+    EXPECT_CALL(*m_view, getSampleFile()).Times(1).WillOnce(Return(std::nullopt));
+    EXPECT_CALL(*m_model, setData(ALFData::SAMPLE, Eq(nullptr))).Times(1);
+    expectGenerateLoadedWorkspace();
 
     // Expect no calls to these methods
-    EXPECT_CALL(*m_analysisPresenter, clear()).Times(0);
-    EXPECT_CALL(*m_model, loadAndTransform(_)).Times(0);
+    EXPECT_CALL(*m_model, loadProperties(_)).Times(0);
+    EXPECT_CALL(*m_algorithmManager, load(_)).Times(0);
 
-    m_presenter->loadRunNumber();
+    m_presenter->loadSample();
   }
 
-  void test_loadRunNumber_will_show_a_warning_message_when_there_is_a_loading_error() {
-    std::size_t const run(82301u);
+  void test_loadSample_will_not_show_a_warning_when_loading_is_successful() {
     std::string const filename("ALF82301");
-    std::string const errorMessage("Loading of the data failed");
 
-    EXPECT_CALL(*m_view, getFile()).Times(1).WillOnce(Return(filename));
+    EXPECT_CALL(*m_view, getSampleFile()).Times(1).WillOnce(Return(filename));
     EXPECT_CALL(*m_analysisPresenter, clear()).Times(1);
-    EXPECT_CALL(*m_model, loadAndTransform(filename)).Times(1).WillOnce(Return(errorMessage));
-    EXPECT_CALL(*m_view, warningBox(errorMessage)).Times(1);
+    EXPECT_CALL(*m_model, loadProperties(filename)).Times(1).WillOnce(Return(ByMove(std::move(m_algProperties))));
+    EXPECT_CALL(*m_algorithmManager, load(_)).Times(1);
 
-    EXPECT_CALL(*m_model, runNumber()).Times(1).WillOnce(Return(run));
-    EXPECT_CALL(*m_view, setRunQuietly(std::to_string(run))).Times(1);
-
-    m_presenter->loadRunNumber();
+    m_presenter->loadSample();
   }
 
-  void test_loadRunNumber_will_not_show_a_warning_when_loading_is_successful() {
-    std::size_t const run(82301u);
-    std::string const filename("ALF82301");
+  void test_notifyLoadComplete_opens_a_warning_if_the_data_is_not_ALF_data() {
+    EXPECT_CALL(*m_model, isALFData(_)).Times(1).WillOnce(Return(false));
+    EXPECT_CALL(*m_view, warningBox("The loaded data is not from the ALF instrument")).Times(1);
 
-    EXPECT_CALL(*m_view, getFile()).Times(1).WillOnce(Return(filename));
-    EXPECT_CALL(*m_analysisPresenter, clear()).Times(1);
-    EXPECT_CALL(*m_model, loadAndTransform(filename)).Times(1).WillOnce(Return(std::nullopt));
+    m_presenter->notifyLoadComplete(nullptr);
+  }
+
+  void test_notifyLoadComplete_normalises_the_data_if_its_ALF_data() {
+    EXPECT_CALL(*m_model, isALFData(_)).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*m_model, normaliseByCurrentProperties(_))
+        .Times(1)
+        .WillOnce(Return(ByMove(std::move(m_algProperties))));
+    EXPECT_CALL(*m_algorithmManager, normaliseByCurrent(NotNull())).Times(1);
 
     // Expect no call to warningBox
     EXPECT_CALL(*m_view, warningBox(_)).Times(0);
 
-    EXPECT_CALL(*m_model, runNumber()).Times(1).WillOnce(Return(run));
-    EXPECT_CALL(*m_view, setRunQuietly(std::to_string(run))).Times(1);
+    m_presenter->notifyLoadComplete(nullptr);
+  }
 
-    m_presenter->loadRunNumber();
+  void test_notifyNormaliseByCurrentComplete_will_update_the_run_in_the_view() {
+    EXPECT_CALL(*m_model, setData(ALFData::SAMPLE, _)).Times(1);
+    EXPECT_CALL(*m_model, run(ALFData::SAMPLE)).Times(1).WillOnce(Return(35321u));
+    EXPECT_CALL(*m_view, setSampleRun("35321")).Times(1);
+    expectGenerateLoadedWorkspace();
+
+    m_presenter->notifyNormaliseByCurrentComplete(nullptr);
+  }
+
+  void test_notifyInstrumentActorReset_generates_an_angle_workspace_and_notifies_the_analysis_presenter() {
+    expectUpdateAnalysisViewFromModel();
+    m_presenter->notifyInstrumentActorReset();
   }
 
   void test_notifyShapeChanged_generates_an_angle_workspace_and_notifies_the_analysis_presenter() {
-    auto const componentInfo = createComponentInfoObject();
-    auto const detectors = std::vector<std::size_t>{2500u, 2501u, 2502u};
+    auto const detectors = std::vector<DetectorTube>{{2500u, 2501u, 2502u}};
 
-    EXPECT_CALL(*m_view, componentInfo()).Times(1).WillOnce(ReturnRef(*componentInfo));
     EXPECT_CALL(*m_view, getSelectedDetectors()).Times(1).WillOnce(Return(detectors));
-    EXPECT_CALL(*m_model, setSelectedDetectors(_, detectors)).Times(1);
+    EXPECT_CALL(*m_model, setSelectedTubes(detectors)).Times(1).WillOnce(Return(true));
 
-    MatrixWorkspace_sptr const expectedExtractedWorkspace = nullptr;
-    auto const expectedTwoTheta = std::vector<double>{1.1, 2.2};
-    std::tuple<MatrixWorkspace_sptr, std::vector<double>> const expectedReturn = {expectedExtractedWorkspace,
-                                                                                  expectedTwoTheta};
-
-    EXPECT_CALL(*m_view, getInstrumentActor()).Times(1).WillOnce(ReturnRef(*m_instrumentActor));
-    EXPECT_CALL(*m_model, generateOutOfPlaneAngleWorkspace(_)).Times(1).WillOnce(Return(expectedReturn));
-
-    EXPECT_CALL(*m_analysisPresenter, setExtractedWorkspace(expectedExtractedWorkspace, expectedTwoTheta)).Times(1);
+    expectUpdateInstrumentViewFromModel(detectors);
+    expectUpdateAnalysisViewFromModel();
 
     m_presenter->notifyShapeChanged();
   }
 
-private:
-  std::unique_ptr<Mantid::Geometry::ComponentInfo> createComponentInfoObject() {
-    auto visitee = ComponentCreationHelper::createMinimalInstrument(V3D(0, 0, 0),   // Source position
-                                                                    V3D(10, 0, 0),  // Sample position
-                                                                    V3D(11, 0, 0)); // Detector position
-    InstrumentVisitor visitor(visitee);
+  void test_notifyShapeChanged_does_not_update_views_if_detectors_are_not_set() {
+    auto const detectors = std::vector<DetectorTube>{{2500u, 2501u, 2502u}};
 
-    // Return the ComponentInfo object
-    return InstrumentVisitor::makeWrappers(*visitee, nullptr).first;
+    EXPECT_CALL(*m_view, getSelectedDetectors()).Times(1).WillOnce(Return(detectors));
+    EXPECT_CALL(*m_model, setSelectedTubes(detectors)).Times(1).WillOnce(Return(false));
+
+    expectUpdateInstrumentViewFromModelNotCalled();
+    expectUpdateAnalysisViewFromModelNotCalled();
+
+    m_presenter->notifyShapeChanged();
   }
 
+  void test_notifyTubesSelected_generates_an_angle_workspace_and_notifies_the_analysis_presenter() {
+    auto const detectors = std::vector<DetectorTube>{{2500u, 2501u, 2502u}};
+
+    EXPECT_CALL(*m_model, addSelectedTube(detectors.front())).Times(1).WillOnce(Return(true));
+
+    expectUpdateInstrumentViewFromModel(detectors);
+    expectUpdateAnalysisViewFromModel();
+
+    m_presenter->notifyTubesSelected(detectors);
+  }
+
+  void test_notifyTubesSelected_does_not_update_views_if_tube_is_not_added() {
+    auto const detectors = std::vector<DetectorTube>{{2500u, 2501u, 2502u}};
+
+    EXPECT_CALL(*m_model, addSelectedTube(detectors.front())).Times(1).WillOnce(Return(false));
+
+    expectUpdateInstrumentViewFromModelNotCalled();
+    expectUpdateAnalysisViewFromModelNotCalled();
+
+    m_presenter->notifyTubesSelected(detectors);
+  }
+
+  void test_notifyRebinToWorkspaceComplete_will_normalise_the_sample_by_the_vanadium() {
+    EXPECT_CALL(*m_model, setData(ALFData::VANADIUM, _)).Times(1);
+    expectNormaliseSampleByVanadium();
+
+    m_presenter->notifyRebinToWorkspaceComplete(nullptr);
+  }
+
+  void test_notifyDivideComplete_will_replace_special_values() {
+    EXPECT_CALL(*m_model, replaceSpecialValuesProperties(_))
+        .Times(1)
+        .WillOnce(Return(ByMove(std::move(m_algProperties))));
+    EXPECT_CALL(*m_algorithmManager, replaceSpecialValues(NotNull())).Times(1);
+
+    m_presenter->notifyDivideComplete(nullptr);
+  }
+
+  void test_notifyReplaceSpecialValuesComplete_converts_the_sample_to_dSpacing() {
+    expectConvertSampleToDSpacing();
+    m_presenter->notifyReplaceSpecialValuesComplete(nullptr);
+  }
+
+  void test_notifyConvertUnitsComplete_adds_the_workspace_to_the_ADS() {
+    EXPECT_CALL(*m_model, replaceSampleWorkspaceInADS(_)).Times(1);
+    m_presenter->notifyConvertUnitsComplete(nullptr);
+  }
+
+  void test_notifyCreateWorkspaceComplete_calls_the_rebunch_algorithm() {
+    EXPECT_CALL(*m_model, scaleXProperties(_)).Times(1).WillOnce(Return(ByMove(std::move(m_algProperties))));
+    EXPECT_CALL(*m_algorithmManager, scaleX(NotNull())).Times(1);
+
+    m_presenter->notifyCreateWorkspaceComplete(nullptr);
+  }
+
+  void test_notifyScaleXComplete_calls_the_rebunch_algorithm() {
+    EXPECT_CALL(*m_model, rebunchProperties(_)).Times(1).WillOnce(Return(ByMove(std::move(m_algProperties))));
+    EXPECT_CALL(*m_algorithmManager, rebunch(NotNull())).Times(1);
+
+    m_presenter->notifyScaleXComplete(nullptr);
+  }
+
+  void test_notifyRebunchComplete_will_set_the_two_thetas_in_the_analysis_presenter() {
+    std::vector<double> twoThetas{1.0, 2.0};
+    EXPECT_CALL(*m_model, twoThetasClosestToZero()).Times(1).WillOnce(Return(twoThetas));
+    EXPECT_CALL(*m_analysisPresenter, setExtractedWorkspace(_, twoThetas)).Times(1);
+
+    m_presenter->notifyRebunchComplete(nullptr);
+  }
+
+private:
+  void expectUpdateInstrumentViewFromModel(std::vector<DetectorTube> const &tubes) {
+    EXPECT_CALL(*m_view, clearShapes()).Times(1);
+    EXPECT_CALL(*m_model, selectedTubes()).Times(1).WillOnce(Return(tubes));
+    EXPECT_CALL(*m_view, drawRectanglesAbove(tubes)).Times(1);
+  }
+
+  void expectUpdateInstrumentViewFromModelNotCalled() {
+    EXPECT_CALL(*m_view, clearShapes()).Times(0);
+    EXPECT_CALL(*m_model, selectedTubes()).Times(0);
+    EXPECT_CALL(*m_view, drawRectanglesAbove(_)).Times(0);
+  }
+
+  void expectGenerateLoadedWorkspace() {
+    EXPECT_CALL(*m_model, hasData(_)).Times(1).WillOnce(Return(true));
+
+    EXPECT_CALL(*m_model, binningMismatch()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*m_model, rebinToWorkspaceProperties()).Times(1).WillOnce(Return(ByMove(std::move(m_algProperties))));
+    EXPECT_CALL(*m_algorithmManager, rebinToWorkspace(_)).Times(1);
+  }
+
+  void expectConvertSampleToDSpacing() {
+    EXPECT_CALL(*m_model, axisIsDSpacing()).Times(1).WillOnce(Return(false));
+    EXPECT_CALL(*m_model, convertUnitsProperties(_)).Times(1).WillOnce(Return(ByMove(std::move(m_algProperties))));
+    EXPECT_CALL(*m_algorithmManager, convertUnits(_)).Times(1);
+  }
+
+  void expectNormaliseSampleByVanadium() {
+    EXPECT_CALL(*m_model, hasData(ALFData::VANADIUM)).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*m_model, divideProperties()).Times(1).WillOnce(Return(ByMove(std::move(m_algProperties))));
+    EXPECT_CALL(*m_algorithmManager, divide(_)).Times(1);
+  }
+
+  void expectUpdateAnalysisViewFromModel(bool hasTubes = true) {
+    EXPECT_CALL(*m_model, hasSelectedTubes()).Times(1).WillOnce(Return(hasTubes));
+
+    if (hasTubes) {
+      EXPECT_CALL(*m_view, getInstrumentActor()).Times(1).WillOnce(ReturnRef(*m_instrumentActor));
+      EXPECT_CALL(*m_model, createWorkspaceAlgorithmProperties(_)).WillOnce(Return(ByMove(std::move(m_algProperties))));
+      EXPECT_CALL(*m_algorithmManager, createWorkspace(NotNull())).Times(1);
+    } else {
+      EXPECT_CALL(*m_analysisPresenter, setExtractedWorkspace(IsNull(), std::vector<double>{})).Times(1);
+    }
+  }
+
+  void expectUpdateAnalysisViewFromModelNotCalled() {
+    EXPECT_CALL(*m_view, getInstrumentActor()).Times(0);
+    EXPECT_CALL(*m_model, createWorkspaceAlgorithmProperties(_)).Times(0);
+    EXPECT_CALL(*m_algorithmManager, createWorkspace(_)).Times(0);
+  }
+
+  std::unique_ptr<AlgorithmRuntimeProps> m_algProperties;
+
+  NiceMock<MockALFAlgorithmManager> *m_algorithmManager;
   NiceMock<MockALFInstrumentModel> *m_model;
   std::unique_ptr<NiceMock<MockALFInstrumentView>> m_view;
   std::unique_ptr<ALFInstrumentPresenter> m_presenter;

@@ -6,12 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALFView.h"
 
+#include "ALFAlgorithmManager.h"
 #include "ALFAnalysisModel.h"
 #include "ALFAnalysisView.h"
 #include "ALFInstrumentModel.h"
 #include "ALFInstrumentView.h"
 #include "ALFInstrumentWidget.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/QtJobRunner.h"
 
 #include <QSplitter>
 #include <QString>
@@ -22,16 +24,21 @@ namespace MantidQt::CustomInterfaces {
 DECLARE_SUBWINDOW(ALFView)
 
 ALFView::ALFView(QWidget *parent) : UserSubWindow(parent), m_instrumentPresenter(), m_analysisPresenter() {
-  this->setWindowTitle("ALF View");
+  this->setWindowTitle("ALFView");
 
-  m_instrumentPresenter =
-      std::make_unique<ALFInstrumentPresenter>(new ALFInstrumentView(this), std::make_unique<ALFInstrumentModel>());
+  auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>();
+  auto algorithmManager = std::make_unique<ALFAlgorithmManager>(std::move(jobRunner));
+
+  m_instrumentPresenter = std::make_unique<ALFInstrumentPresenter>(
+      new ALFInstrumentView(this), std::make_unique<ALFInstrumentModel>(), std::move(algorithmManager));
 
   m_analysisPresenter = std::make_unique<ALFAnalysisPresenter>(new ALFAnalysisView(-15.0, 15.0, this),
                                                                std::make_unique<ALFAnalysisModel>());
 
   m_instrumentPresenter->subscribeAnalysisPresenter(m_analysisPresenter.get());
 }
+
+ALFView::~ALFView() { m_instrumentPresenter->saveSettings(); }
 
 void ALFView::initLayout() {
   auto *splitter = new QSplitter(Qt::Horizontal);
@@ -42,7 +49,13 @@ void ALFView::initLayout() {
   splitter->setCollapsible(1, false);
 
   auto mainWidget = new QSplitter(Qt::Vertical);
-  mainWidget->addWidget(m_instrumentPresenter->getLoadWidget());
+
+  auto loadWidget = new QWidget();
+  auto loadLayout = new QVBoxLayout(loadWidget);
+  loadLayout->addWidget(m_instrumentPresenter->getSampleLoadWidget());
+  loadLayout->addWidget(m_instrumentPresenter->getVanadiumLoadWidget());
+
+  mainWidget->addWidget(loadWidget);
   mainWidget->addWidget(splitter);
 
   mainWidget->setCollapsible(0, false);
@@ -54,6 +67,8 @@ void ALFView::initLayout() {
   verticalLayout->addWidget(createHelpWidget());
 
   this->setCentralWidget(centralWidget);
+
+  m_instrumentPresenter->loadSettings();
 }
 
 QWidget *ALFView::createHelpWidget() {
@@ -68,6 +83,6 @@ QWidget *ALFView::createHelpWidget() {
   return helpWidget;
 }
 
-void ALFView::openHelp() { MantidQt::API::HelpWindow::showCustomInterface(QString("direct/ALF View")); }
+void ALFView::openHelp() { MantidQt::API::HelpWindow::showCustomInterface(QString("direct/ALFView")); }
 
 } // namespace MantidQt::CustomInterfaces

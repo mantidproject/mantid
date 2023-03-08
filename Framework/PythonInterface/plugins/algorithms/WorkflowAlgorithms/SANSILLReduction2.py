@@ -7,15 +7,15 @@
 from SANSILLCommon import *
 import SANSILLCommon as common
 from mantid.api import (
-    PythonAlgorithm,
+    DataProcessorAlgorithm,
+    FileAction,
     MatrixWorkspace,
     MatrixWorkspaceProperty,
-    WorkspaceProperty,
     MultipleFileProperty,
-    PropertyMode,
     Progress,
+    PropertyMode,
     WorkspaceGroup,
-    FileAction,
+    WorkspaceProperty,
 )
 from mantid.dataobjects import SpecialWorkspace2D
 from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, LogicOperator, PropertyCriterion, StringListValidator
@@ -23,7 +23,7 @@ from mantid.simpleapi import *
 import numpy as np
 
 
-class SANSILLReduction(PythonAlgorithm):
+class SANSILLReduction(DataProcessorAlgorithm):
     """
     Performs unit data reduction of the given process type.
     Supports D11, D16, D22, and D33 instruments at the ILL.
@@ -78,7 +78,6 @@ class SANSILLReduction(PythonAlgorithm):
         return issues
 
     def PyInit(self):
-
         # ================================MAIN PARAMETERS================================#
         can_runs = EnabledWhenProperty("SampleWorkspace", PropertyCriterion.IsEqualTo, "")
 
@@ -261,6 +260,13 @@ class SANSILLReduction(PythonAlgorithm):
 
         self.setPropertySettings("OutputFluxWorkspace", beam)
 
+        self.copyProperties("CalculateEfficiency", ["MinThreshold", "MaxThreshold"])
+        # override default documentation of copied parameters to make them understandable by user
+        threshold_property = self.getProperty("MinThreshold")
+        threshold_property.setDocumentation("Minimum threshold for calculated efficiency.")
+        threshold_property = self.getProperty("MaxThreshold")
+        threshold_property.setDocumentation("Maximum threshold for calculated efficiency.")
+
     def _add_correction_information(self, ws):
         """Adds information regarding corrections and inputs to the provided workspace.
 
@@ -311,7 +317,9 @@ class SANSILLReduction(PythonAlgorithm):
         AddSampleLog(Workspace=ws, LogName="AcqMode", LogType="Number", NumberType="Int", LogText=str(int(self.mode)))
         self.log().notice(f"Set the acquisition mode to {self.mode}")
         if self.mode == AcqMode.KINETIC:
-            if self.process != "Sample" and self.process != "Transmission":
+            if self.process == "EmptyContainer":
+                SortXAxis(InputWorkspace=ws, OutputWorkspace=ws)
+            elif self.process != "Sample" and self.process != "Transmission":
                 raise RuntimeError("Only the sample and transmission can be kinetic measurements, the calibration measurements cannot.")
 
     def check_zero_monitor(self, mon_ws):
@@ -321,13 +329,11 @@ class SANSILLReduction(PythonAlgorithm):
         """
         if np.sum(mtd[mon_ws].readY(0)) <= 0:
             raise RuntimeError(
-                "Normalise by monitor requested, \
-                                but the monitor spectrum has no positive counts, please switch to time normalization."
+                "Normalise by monitor requested, but the monitor spectrum has no positive counts, please switch to time normalization."
             )
         if np.any(mtd[mon_ws].readY(0) <= 0):
             self.log().error(
-                "Some bins in the monitor spectra have no positive counts, \
-                              please check the monitor data, or switch to time normalization."
+                "Some bins in the monitor spectra have no positive counts, please check the monitor data, or switch to time normalization."
             )
 
     # ==============================METHODS TO APPLY CORRECTIONS==============================#
@@ -493,6 +499,19 @@ class SANSILLReduction(PythonAlgorithm):
                 DeleteWorkspace(can_ws_rebin)
             else:
                 check_wavelengths_match(mtd[can_ws], mtd[ws])
+                if mtd[can_ws].blocksize() > 1:  # kinetic/scan mode
+                    # if axes are widely inconsistent, then a warning is raised:
+                    check_axis_match(mtd[can_ws], mtd[ws])
+                    # whether they match or not, the X axis of the empty container is replaced by sample's one
+                    CreateWorkspace(
+                        DataX=mtd[ws].extractX(),
+                        DataY=mtd[can_ws].extractY(),
+                        DataE=mtd[can_ws].extractE(),
+                        ParentWorkspace=can_ws,
+                        OutputWorkspace=can_ws,
+                        NSpec=mtd[can_ws].getNumberHistograms(),
+                        UnitX=mtd[can_ws].getAxis(0).getUnit().unitID(),
+                    )
                 Minus(LHSWorkspace=ws, RHSWorkspace=can_ws, OutputWorkspace=ws)
 
     def apply_water(self, ws):
@@ -863,7 +882,12 @@ class SANSILLReduction(PythonAlgorithm):
         """Creates relative inter-pixel efficiency map"""
         sens = self.getPropertyValue("OutputSensitivityWorkspace")
         if sens:
-            CalculateEfficiency(InputWorkspace=ws, OutputWorkspace=sens)
+            CalculateEfficiency(
+                InputWorkspace=ws,
+                OutputWorkspace=sens,
+                MinThreshold=self.getProperty("MinThreshold").value,
+                MaxThreshold=self.getProperty("MaxThreshold").value,
+            )
             self.setProperty("OutputSensitivityWorkspace", mtd[sens])
 
     # ===============================CORE LOGIC OF LOAD AND REDUCE===============================#

@@ -31,6 +31,7 @@
 #include <QActionGroup>
 #include <QApplication>
 #include <QCheckBox>
+#include <QCoreApplication>
 #include <QGridLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -472,8 +473,8 @@ void InstrumentWidgetPickTab::plotContextMenu() {
     // the remove menu
     QMenu *removeCurves = new QMenu("Remove", this);
     QSignalMapper *signalMapper = new QSignalMapper(this);
-    QStringList labels = m_plot->getLabels();
-    foreach (QString label, labels) {
+    const QStringList labels = m_plot->getLabels();
+    for (const auto &label : labels) {
       QColor c = m_plot->getCurveColor(label);
       QPixmap pixmap(16, 2);
       pixmap.fill(c);
@@ -1381,8 +1382,10 @@ void DetectorPlotController::plotSingle(size_t detindex) {
   // find any markers
   auto surface = m_tab->getSurface();
   if (surface) {
-    QList<PeakMarker2D *> markers = surface->getMarkersWithID(detid);
-    foreach (PeakMarker2D *marker, markers) { m_plot->addPeakLabel(marker); }
+    const QList<PeakMarker2D *> markers = surface->getMarkersWithID(detid);
+    for (auto marker : markers) {
+      m_plot->addPeakLabel(marker);
+    }
   }
 }
 
@@ -1737,7 +1740,7 @@ void DetectorPlotController::savePlotToWorkspace() {
     }
     if (!x.empty()) {
       if (nbins > 0 && x.size() != nbins) {
-        QMessageBox::critical(nullptr, "MantidPlot - Error", "Curves have different sizes.");
+        QMessageBox::critical(nullptr, QCoreApplication::applicationName() + " Error", "Curves have different sizes.");
         return;
       } else {
         nbins = x.size();
@@ -1941,7 +1944,7 @@ void DetectorPlotController::addPeak(double x, double y) {
       alg->execute();
     }
   } catch (std::exception &e) {
-    QMessageBox::critical(m_tab, "MantidPlot -Error",
+    QMessageBox::critical(m_tab, QCoreApplication::applicationName() + " Error ",
                           "Cannot create a Peak object because of the error:\n" + QString(e.what()));
   }
 }

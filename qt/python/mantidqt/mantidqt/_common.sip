@@ -354,7 +354,6 @@ public:
   QStringList getUserSubWindowKeys() const;
 
   void showHelpPage(const QString &url=QString());
-  void showWikiPage(const QString &page=QString());
   void showAlgorithmHelp(const QString &name, const int version=-1);
   void showConceptHelp(const QString &name);
   void showFitFunctionHelp(const QString &name=QString());
@@ -1025,6 +1024,7 @@ public:
     void setLabelMinWidth(const int);
     void setText(const QString&);
     void setUserInput(const QVariant &);
+    void setFileProblem(const QString &message);
     QVariant getUserInput() const;
     void setReadOnly(bool readOnly);
     void setFileExtensions(const QStringList &extensions);

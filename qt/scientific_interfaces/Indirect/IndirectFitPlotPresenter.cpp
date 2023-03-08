@@ -7,9 +7,9 @@
 #include "IndirectFitPlotPresenter.h"
 #include "IndirectSettingsHelper.h"
 
-#include "MantidQtWidgets/Common/SignalBlocker.h"
-
+#include <QSignalBlocker>
 #include <QTimer>
+
 #include <utility>
 
 using namespace MantidQt::Widgets::MplCpp;
@@ -146,7 +146,7 @@ void IndirectFitPlotPresenter::appendLastDataToSelection(std::vector<std::string
 }
 
 void IndirectFitPlotPresenter::updateDataSelection(std::vector<std::string> displayNames) {
-  MantidQt::API::SignalBlocker blocker(m_view);
+  QSignalBlocker blocker(m_view);
   m_view->clearDataSelection();
   const auto workspaceCount = displayNames.size();
   for (size_t i = 0; i < workspaceCount; ++i) {
@@ -244,7 +244,7 @@ void IndirectFitPlotPresenter::plotDifference(MatrixWorkspace_sptr workspace, Wo
 }
 
 void IndirectFitPlotPresenter::updatePlotRange(const std::pair<double, double> &range) {
-  MantidQt::API::SignalBlocker blocker(m_view);
+  QSignalBlocker blocker(m_view);
   m_view->setFitRange(range.first, range.second);
   m_view->setHWHMRange(range.first, range.second);
 }

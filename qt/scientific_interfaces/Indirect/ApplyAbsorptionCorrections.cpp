@@ -8,13 +8,12 @@
 #include "IndirectDataValidationHelper.h"
 #include "IndirectSettingsHelper.h"
 
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
-#include "MantidQtWidgets/Common/SignalBlocker.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QStringList>
@@ -181,7 +180,7 @@ void ApplyAbsorptionCorrections::run() {
   setRunIsRunning(true);
 
   // Create / Initialize algorithm
-  auto absCorProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  auto absCorProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   IAlgorithm_sptr applyCorrAlg = AlgorithmManager::Instance().create("ApplyPaalmanPingsCorrection");
   applyCorrAlg->initialize();
 
@@ -342,7 +341,7 @@ void ApplyAbsorptionCorrections::run() {
  * @param toMatch Name of the workspace to match
  */
 void ApplyAbsorptionCorrections::addInterpolationStep(const MatrixWorkspace_sptr &toInterpolate, std::string toMatch) {
-  auto interpolationProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  auto interpolationProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   interpolationProps->setPropertyValue("WorkspaceToMatch", std::move(toMatch));
 
   IAlgorithm_sptr interpolationAlg = AlgorithmManager::Instance().create("SplineInterpolation");

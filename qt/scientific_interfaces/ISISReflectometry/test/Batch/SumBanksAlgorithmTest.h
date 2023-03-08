@@ -10,8 +10,8 @@
 #include "../../../ISISReflectometry/Reduction/IBatch.h"
 #include "../../../ISISReflectometry/Reduction/PreviewRow.h"
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MockBatch.h"
 
@@ -23,7 +23,7 @@ using namespace ::testing;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::SumBanks;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
-using MantidQt::API::AlgorithmRuntimeProps;
+using Mantid::API::AlgorithmRuntimeProps;
 using MantidQt::API::IConfiguredAlgorithm;
 
 class SumBanksAlgorithmTest : public CxxTest::TestSuite {

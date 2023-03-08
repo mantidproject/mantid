@@ -8,18 +8,18 @@
 #include "../../GUI/Preview/ROIType.h"
 #include "../../Reduction/Batch.h"
 #include "../../Reduction/PreviewRow.h"
-#include "AlgorithmProperties.h"
 #include "BatchJobAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmProperties.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
-#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
+using Mantid::API::AlgorithmRuntimeProps;
 using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
-using MantidQt::API::AlgorithmRuntimeProps;
 using MantidQt::API::IConfiguredAlgorithm_sptr;
 
 namespace {
@@ -27,6 +27,8 @@ Mantid::Kernel::Logger g_log("Reflectometry RowProcessingAlgorithm");
 } // namespace
 
 namespace { // unnamed namespace
+using namespace Mantid::API;
+
 // These functions update properties in an AlgorithmRuntimeProps for specific
 // properties for the row reduction algorithm
 void updateInputWorkspacesProperties(AlgorithmRuntimeProps &properties,
@@ -168,10 +170,15 @@ void updateDetectorCorrectionProperties(AlgorithmRuntimeProps &properties, Detec
                                 properties);
 }
 
-void updateInstrumentProperties(AlgorithmRuntimeProps &properties, Instrument const &instrument) {
+void updatePreviewInstrumentProperties(AlgorithmRuntimeProps &properties, Instrument const &instrument) {
   updateWavelengthRangeProperties(properties, instrument.wavelengthRange());
   updateMonitorCorrectionProperties(properties, instrument.monitorCorrections());
   updateDetectorCorrectionProperties(properties, instrument.detectorCorrections());
+}
+
+void updateInstrumentProperties(AlgorithmRuntimeProps &properties, Instrument const &instrument) {
+  updatePreviewInstrumentProperties(properties, instrument);
+  AlgorithmProperties::update("CalibrationFile", instrument.calibrationFilePath(), properties);
 }
 
 class UpdateEventPropertiesVisitor : public boost::static_visitor<> {
@@ -272,6 +279,13 @@ void updatePropertiesFromBatchModel(AlgorithmRuntimeProps &properties, IBatch co
   updateExperimentProperties(properties, model.experiment());
   updateInstrumentProperties(properties, model.instrument());
 }
+
+void updatePreviewPropertiesFromBatchModel(AlgorithmRuntimeProps &properties, IBatch const &model) {
+  // Update properties for running a preview reduction from settings in the event, experiment and instrument tabs
+  updateEventProperties(properties, model.slicing());
+  updateExperimentProperties(properties, model.experiment());
+  updatePreviewInstrumentProperties(properties, model.instrument());
+}
 } // unnamed namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry::Reduction {
@@ -309,10 +323,10 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Preview
  * @param row : optional run details from the Runs table
  * @returns : a custom PropertyManager class with all of the algorithm properties set
  */
-std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(IBatch const &model,
-                                                                                   PreviewRow const &previewRow) {
-  auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
-  updatePropertiesFromBatchModel(*properties, model);
+std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(IBatch const &model,
+                                                                                 PreviewRow const &previewRow) {
+  auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
+  updatePreviewPropertiesFromBatchModel(*properties, model);
   // Look up properties for this run on the lookup table
   auto lookupRow = model.findLookupRow(previewRow);
   if (lookupRow) {
@@ -362,9 +376,9 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Row &ro
  * @param row : optional run details from the Runs table
  * @returns : a custom PropertyManager class with all of the algorithm properties set
  */
-std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(IBatch const &model,
-                                                                                   boost::optional<Row const &> row) {
-  auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(IBatch const &model,
+                                                                                 boost::optional<Row const &> row) {
+  auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   // Update properties from settings in the event, experiment and instrument tabs
   updatePropertiesFromBatchModel(*properties, model);
   // Look up properties for this run on the lookup table (or use wildcard defaults if no run is given)

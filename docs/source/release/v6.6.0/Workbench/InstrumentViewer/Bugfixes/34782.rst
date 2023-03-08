@@ -1,1 +1,0 @@
-The sensitivity of resizing a masked shape using its corners has been increased for screens with larger resolutions.

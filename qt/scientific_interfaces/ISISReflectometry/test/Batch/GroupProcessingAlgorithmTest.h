@@ -14,7 +14,7 @@
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::GroupProcessing;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
-using MantidQt::API::IAlgorithmRuntimeProps;
+using Mantid::API::IAlgorithmRuntimeProps;
 
 namespace {
 void assertProperty(IAlgorithmRuntimeProps const &props, std::string const &name, double expected) {

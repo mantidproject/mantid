@@ -14,18 +14,14 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $SCRIPT_DIR/mamba-utils
 
+# Parse arguments
 WORKSPACE=$1
-shift
-TOKEN=$1
-shift
-CHANNEL=$1
-shift
-LABEL=$1
-shift
-RECIPES_DIR=$WORKSPACE/conda-recipes
-SCRIPT_DIR=$WORKSPACE/buildconfig/Jenkins/Conda/
+TOKEN=$2
+CHANNEL=$3
+LABEL=$4
+shift 4
 
-# Mamba
+# Setup Mamba
 setup_mamba $WORKSPACE/mambaforge "publish-anaconda"
 mamba install --yes anaconda-client
 

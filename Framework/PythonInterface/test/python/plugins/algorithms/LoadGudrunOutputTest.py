@@ -4,6 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import os
+
 from mantid.simpleapi import LoadGudrunOutput, Workspace
 
 import unittest
@@ -13,6 +15,11 @@ import tempfile
 class LoadGudrunOutputTest(unittest.TestCase):
     def setUp(self):
         self.file_name = "POLARIS00097947-min{}01"
+        self.tmp_dcs01_file = tempfile.NamedTemporaryFile(mode="w+", suffix=".dcs01", delete=False)
+
+    def tearDown(self):
+        self.tmp_dcs01_file.close()
+        os.remove(self.tmp_dcs01_file.name)
 
     def test_valid_extensions(self):
         self.assertIsNotNone(LoadGudrunOutput(InputFile=self.file_name.format(".dcs"), OutputWorkspace="out_ws"))
@@ -58,16 +65,12 @@ class LoadGudrunOutputTest(unittest.TestCase):
         self.assertEqual(actual.getNumberHistograms(), 1)
 
     def test_one_column_data_file(self):
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".dcs01") as tmp:
-            tmp.write("1234\n2345\n3456\n4567")
-            tmp.close()
-            self.assertRaises(ValueError, LoadGudrunOutput, tmp.name, "out_ws")
+        self.tmp_dcs01_file.write("1234\n2345\n3456\n4567")
+        self.assertRaisesRegex(RuntimeError, "Incorrect data format:", LoadGudrunOutput, self.tmp_dcs01_file.name, "out_ws")
 
     def test_even_column_data_file(self):
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".dcs01") as tmp:
-            tmp.write("1234 2345 3456 4567\n1234 2345 3456 4567")
-            tmp.close()
-            self.assertRaises(ValueError, LoadGudrunOutput, tmp.name, "out_ws")
+        self.tmp_dcs01_file.write("1234 2345 3456 4567\n1234 2345 3456 4567")
+        self.assertRaisesRegex(RuntimeError, "Incorrect data format:", LoadGudrunOutput, self.tmp_dcs01_file.name, "out_ws")
 
     def test_rename_with_default_output(self):
         actual = LoadGudrunOutput(InputFile=self.file_name.format(".dcs"), OutputWorkspace="")

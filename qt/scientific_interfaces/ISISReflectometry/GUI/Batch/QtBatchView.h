@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "GUI/Common/IJobRunner.h"
 #include "GUI/Event/QtEventView.h"
 #include "GUI/Experiment/QtExperimentView.h"
 #include "GUI/Instrument/QtInstrumentView.h"

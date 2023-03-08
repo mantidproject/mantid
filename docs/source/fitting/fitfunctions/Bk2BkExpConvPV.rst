@@ -53,8 +53,6 @@ rising to exponentially decaying. :math:`I` is the integrated intensity.
 For information about how to convert Fullprof back-to-back exponential
 parameters into those used for this function see
 :ref:`CreateBackToBackParameters <CreateBackToBackParameters>`.
-For information about how to create parameters from a GSAS parameter file see
-`CreateBackToBackParametersGSAS <http://www.mantidproject.org/CreateBackToBackParametersGSAS>`_.
 
 .. attributes::
 

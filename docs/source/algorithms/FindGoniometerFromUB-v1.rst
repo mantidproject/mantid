@@ -28,14 +28,11 @@ Useage
 
 .. code-block:: python
 
-    # WISH single crystal
-    # demonstration of linkedUBs algorithm on D10 Ruby (cyle 18/1)
-
     from mantid.simpleapi import *
 
     ubList = ['WISH00043350', 'WISH00043351', 'WISH00043352','WISH00043353','WISH00043354']
-    tab = FindGonioFromUB(UBfiles=",".join(ubList), chi=45, chiTol=5, phiTol=10,
-        phiHand=-1, dOmega=0, omegaHand=1)
+    tab = FindGoniometerFromUB(UBfiles=",".join(ubList), chi=45, chiTol=5, phiTol=10,
+                               phiHand=-1, dOmega=0, omegaHand=1)
 
 .. categories::
 

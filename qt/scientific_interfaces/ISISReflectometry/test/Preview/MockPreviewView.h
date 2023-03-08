@@ -21,8 +21,8 @@ public:
   MOCK_METHOD(void, subscribe, (PreviewViewSubscriber *), (noexcept, override));
   MOCK_METHOD(QLayout *, getDockedWidgetsLayout, (), (noexcept, override));
   MOCK_METHOD(MantidWidgets::IImageInfoWidget *, getImageInfo, (), (noexcept, override));
-  MOCK_METHOD(void, enableApplyButton, (), (override));
-  MOCK_METHOD(void, disableApplyButton, (), (override));
+  MOCK_METHOD(void, enableMainWidget, (), (override));
+  MOCK_METHOD(void, disableMainWidget, (), (override));
   MOCK_METHOD(std::string, getWorkspaceName, (), (const, override));
   MOCK_METHOD(double, getAngle, (), (const, override));
   MOCK_METHOD(void, setAngle, (double), (override));

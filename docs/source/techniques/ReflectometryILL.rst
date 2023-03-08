@@ -69,6 +69,7 @@ via `BraggAngle` property. This rotation takes place in either in horizontal or 
 .. testsetup:: LoadingD17DirectBeam
 
     config['default.facility'] = 'ILL'
+    config['default.instrument'] = 'D17'
     config.appendDataSearchSubDir('ILL/D17/')
 
 .. testcode:: LoadingD17DirectBeam
@@ -191,6 +192,7 @@ Below is the relevant workflow diagram describing polarization correction workfl
 .. testsetup:: AnalyzerlessEx
 
     config['default.facility'] = 'ILL'
+    config['default.instrument'] = 'D17'
     config.appendDataSearchSubDir('/ILL/D17/')
 
 .. testcode:: AnalyzerlessEx
@@ -331,13 +333,14 @@ Below there is a number of full reduction examples utilizing :ref:`Reflectometry
 
 
 D17 sample angle, incoherent summation
--------------------------------------
+--------------------------------------
 
 The example below shows a silicon oxide reduction with coherent summation at two different angular positions (detector-defined) of a quartz sample measured by D17 instrument in the cycle 192.
 
 .. testsetup:: D17DetectorAngleCoherent
 
    config.setFacility('ILL')
+   config['default.instrument'] = 'D17'
    config.appendDataSearchSubDir('ILL/D17/')
 
 .. testcode:: D17DetectorAngleCoherent
@@ -394,6 +397,7 @@ The example below shows a quartz reduction with incoherent summation at four dif
 .. testsetup:: D17UserAngleQuartz
 
    config.setFacility('ILL')
+   config['default.instrument'] = 'D17'
    config.appendDataSearchSubDir('../SystemTest/ILL/D17/')
 
 .. testcode:: D17UserAngleQuartz
@@ -451,6 +455,7 @@ This reduction includes the gravity correction, which is set explicitly via `Cor
 .. testsetup:: FIGARODetectorAngleGravityCorrection
 
    config.setFacility('ILL')
+   config['default.instrument'] = 'FIGARO'
    config.appendDataSearchSubDir('../SystemTest/ILL/FIGARO/')
 
 .. testcode:: FIGARODetectorAngleGravityCorrection

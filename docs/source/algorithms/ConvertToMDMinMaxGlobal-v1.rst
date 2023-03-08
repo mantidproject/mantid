@@ -43,9 +43,7 @@ uses the following procedure:
 
 .. rubric:: Notes
 
-.. [#f1] The algorithm does not use `MD Transformation factory <http://www.mantidproject.org/MD_Transformation_factory>`_ so can be used as
-         independent verification of `MD Transformation factory <http://www.mantidproject.org/MD_Transformation_factory>`_ work on a spherical instrument.
-.. [#f2] for HKL mode one needs to have an OrientedLattice attached to the sample.
+.. [#f1] for HKL mode one needs to have an OrientedLattice attached to the sample.
 
 Usage
 -----

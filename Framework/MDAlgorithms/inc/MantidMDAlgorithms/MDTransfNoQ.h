@@ -14,15 +14,11 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 /** Class responsible for conversion of input workspace
-  * data into proper number of output dimensions in NoQ case, when the data from
+  data into proper number of output dimensions in NoQ case, when the data from
   a ws are just copied to MD WS.
-  *
-  * See http://www.mantidproject.org/Writing_custom_ConvertTo_MD_transformation
-  for detailed description of this
-  * class place in the algorithms hierarchy.
 
-  *
-  * @date 16-05-2012
+   See dev-docs/source/WritingCustomConvertToMDTransformation.rst for detailed description of this
+   class place in the algorithms hierarchy.
 */
 
 class MANTID_MDALGORITHMS_DLL MDTransfNoQ : public MDTransfInterface {

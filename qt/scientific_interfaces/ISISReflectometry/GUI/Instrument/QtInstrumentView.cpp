@@ -22,6 +22,10 @@ namespace {
 void showAsInvalid(QDoubleSpinBox &spinBox) { spinBox.setStyleSheet("QDoubleSpinBox { background-color: #ffb8ad; }"); }
 
 void showAsValid(QDoubleSpinBox &spinBox) { spinBox.setStyleSheet(""); }
+
+void showAsInvalid(QLineEdit &lineEdit) { lineEdit.setStyleSheet("QLineEdit { background-color: #ffb8ad; }"); }
+
+void showAsValid(QLineEdit &lineEdit) { lineEdit.setStyleSheet(""); }
 } // namespace
 
 /** Constructor
@@ -49,6 +53,7 @@ void QtInstrumentView::initLayout() {
   m_ui.lamMinEdit->setSpecialValueText("Unset");
   m_ui.lamMaxEdit->setSpecialValueText("Unset");
   connect(m_ui.getInstDefaultsButton, SIGNAL(clicked()), this, SLOT(onRestoreDefaultsRequested()));
+  connect(m_ui.calibrationPathButton, SIGNAL(clicked()), this, SLOT(browseToCalibrationFile()));
 }
 
 void QtInstrumentView::connectSettingsChange(QLineEdit &edit) {
@@ -93,6 +98,8 @@ void QtInstrumentView::disconnectSettingsChange(QCheckBox &edit) {
 
 void QtInstrumentView::onSettingsChanged() { m_notifyee->notifySettingsChanged(); }
 
+void QtInstrumentView::browseToCalibrationFile() { m_notifyee->notifyBrowseToCalibrationFileRequested(); }
+
 void QtInstrumentView::onRestoreDefaultsRequested() {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
       Mantid::Kernel::FeatureType::Feature, {"ISIS Reflectometry", "InstrumentTab", "RestoreDefaults"}, false);
@@ -122,6 +129,7 @@ void QtInstrumentView::registerInstrumentSettingsWidgets(const Mantid::API::IAlg
   registerSettingWidget(*m_ui.I0MonitorIndex, "I0MonitorIndex", alg);
   registerSettingWidget(*m_ui.detectorCorrectionTypeComboBox, "DetectorCorrectionType", alg);
   registerSettingWidget(*m_ui.correctDetectorsCheckBox, "CorrectDetectors", alg);
+  registerSettingWidget(*m_ui.calibrationPathEdit, "CalibrationFile", alg);
 }
 
 void QtInstrumentView::connectInstrumentSettingsWidgets() {
@@ -135,6 +143,7 @@ void QtInstrumentView::connectInstrumentSettingsWidgets() {
   connectSettingsChange(*m_ui.I0MonitorIndex);
   connectSettingsChange(*m_ui.detectorCorrectionTypeComboBox);
   connectSettingsChange(*m_ui.correctDetectorsCheckBox);
+  connectSettingsChange(*m_ui.calibrationPathEdit);
 }
 
 void QtInstrumentView::disconnectInstrumentSettingsWidgets() {
@@ -148,6 +157,7 @@ void QtInstrumentView::disconnectInstrumentSettingsWidgets() {
   disconnectSettingsChange(*m_ui.I0MonitorIndex);
   disconnectSettingsChange(*m_ui.detectorCorrectionTypeComboBox);
   disconnectSettingsChange(*m_ui.correctDetectorsCheckBox);
+  disconnectSettingsChange(*m_ui.calibrationPathEdit);
 }
 
 template <typename Widget>
@@ -280,4 +290,14 @@ std::string QtInstrumentView::getDetectorCorrectionType() const {
 void QtInstrumentView::setDetectorCorrectionType(std::string const &value) {
   setSelected(*m_ui.detectorCorrectionTypeComboBox, value);
 }
+
+std::string QtInstrumentView::getCalibrationFilePath() const { return m_ui.calibrationPathEdit->text().toStdString(); }
+
+void QtInstrumentView::setCalibrationFilePath(std::string const &value) {
+  m_ui.calibrationPathEdit->setText(QString::fromStdString(value));
+}
+
+void QtInstrumentView::showCalibrationFilePathInvalid() { showAsInvalid(*m_ui.calibrationPathEdit); }
+
+void QtInstrumentView::showCalibrationFilePathValid() { showAsValid(*m_ui.calibrationPathEdit); }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

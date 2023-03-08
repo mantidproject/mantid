@@ -15,4 +15,4 @@ For Windows the executable will appear in the configuration subdirectory of ``bi
 Packaging
 #########
 
-Packaging is currently supported on all platforms that MantidPlot works with (Windows, RHEL7, Ubuntu 16.04, macOS).
+Packaging is currently supported on all platforms that Mantid works with (Windows, RHEL7, Ubuntu 20.04, macOS).

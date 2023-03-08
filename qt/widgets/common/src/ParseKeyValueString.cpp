@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
-#include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
+#include "MantidAPI/IAlgorithmRuntimeProps.h"
 
 #include <QStringList>
 #include <boost/algorithm/string.hpp>
@@ -261,7 +261,7 @@ std::string optionsToString(std::map<std::string, std::string> const &options, c
   }
 }
 
-std::string convertAlgPropsToString(MantidQt::API::IAlgorithmRuntimeProps const &options) {
+std::string convertAlgPropsToString(Mantid::API::IAlgorithmRuntimeProps const &options) {
   auto props = options.getDeclaredPropertyNames();
   if (props.empty()) {
     return std::string();

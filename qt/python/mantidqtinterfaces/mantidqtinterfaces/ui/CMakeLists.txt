@@ -3,7 +3,7 @@ add_subdirectory(batchwidget)
 
 set(UI_FILES)
 
-uitopy(UI_FILES CompileUIUIBase)
+uitopy5(UI_FILES CompileUIUIBase)
 
 add_custom_target(CompileUIUI DEPENDS CompileUIUIBase CompileUIBatchWidgetInterface)
 

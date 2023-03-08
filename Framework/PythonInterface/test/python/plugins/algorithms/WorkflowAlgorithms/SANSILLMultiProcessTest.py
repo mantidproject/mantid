@@ -21,21 +21,21 @@ class SANSILLMultiProcessTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls._datadirs = config["datasearch.directories"]
+        cls._data_search_dirs = config["datasearch.directories"]
         cls._facility = config["default.facility"]
         cls._instrument = config["default.instrument"]
         config.appendDataSearchSubDir("ILL/D11/")
         config["default.facility"] = "ILL"
         config["default.instrument"] = "D11"
 
+    def tearDown(self):
+        mtd.clear()
+
     @classmethod
     def tearDownClass(cls):
         config["default.facility"] = cls._facility
         config["default.instrument"] = cls._instrument
-        config["datasearch.directories"] = cls._datadirs
-
-    def tearDown(self):
-        mtd.clear()
+        config["datasearch.directories"] = cls._data_search_dirs
 
     def test_minimal(self):
         ws = SANSILLMultiProcess(SampleRunsD1="010569")
