@@ -223,8 +223,8 @@ This tests the sequential fitting capability of the UI (where the result of a fi
 
 6. Plot just one run, click ``Fit`` to open the fit property browser and input a valid fit function including a peak and a background.
 
-7. The `Sequential Fit` button at the bottom of the ``Run Selection`` table should now be enabled.
-   Click this button and a group of fit workspaces should appear in the Workspaces Toolbox (ADS), each with a row for each of the runs in the table. All the runs should have been fitted.
+7. Click the ``Sequential Fit`` button in the plot toolbar. A group of fit workspaces should appear in the Workspaces Toolbox (ADS),
+   each with a row for each of the runs in the table. All the runs should have been fitted.
 
 8. The order of the runs in the sequential fit should be obtainable from the log at notice level -
    check that this corresponds to the order of the average value of the primary log - ``ADC1_0``
@@ -244,9 +244,11 @@ This tests the serial fitting capability of the UI (where all loaded workspaces 
 
 1. Repeat steps 1-2 in the previous test (Test 8).
 
-2. The `Serial Fit` button should now be enabled. Click it and the group of fit workspaces should appear in the ADS, each with a row for each of the runs in the table. All the runs should have been fitted.
+2. Now click the ``Serial Fit`` button in the plot toolbar and the group of fit workspaces should appear in the ADS,
+   each with a row for each of the runs in the table. All the runs should have been fitted.
 
-3. The order of the runs in the serial fit should be obtainable from the log at notice level - check that this corresponds to the order of the runs in the table.
+3. The order of the runs in the serial fit should be obtainable from the log at notice level - check that this
+   corresponds to the order of the runs in the table.
 
 Test 10
 ^^^^^^^
