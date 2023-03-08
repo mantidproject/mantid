@@ -27,8 +27,9 @@ UnwrappedCylinder::UnwrappedCylinder(const InstrumentActor *rootActor, const Man
  * @param uscale :: scaling for u direction
  * @param vscale :: scaling for v direction
  */
-void UnwrappedCylinder::project(const Mantid::Kernel::V3D &pos, double &u, double &v, double &uscale,
-                                double &vscale) const {
+void UnwrappedCylinder::project(const size_t detIndex, double &u, double &v, double &uscale, double &vscale) const {
+  const auto &componentInfo = m_instrActor->componentInfo();
+  auto pos = componentInfo.position(detIndex) - m_pos;
   double z = pos.scalar_prod(m_zaxis);
   double x = pos.scalar_prod(m_xaxis);
   double y = pos.scalar_prod(m_yaxis);

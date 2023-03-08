@@ -27,8 +27,9 @@ UnwrappedSphere::UnwrappedSphere(const InstrumentActor *rootActor, const Mantid:
  * @param uscale :: scaling for u direction
  * @param vscale :: scaling for v direction
  */
-void UnwrappedSphere::project(const Mantid::Kernel::V3D &pos, double &u, double &v, double &uscale,
-                              double &vscale) const {
+void UnwrappedSphere::project(const size_t detIndex, double &u, double &v, double &uscale, double &vscale) const {
+  const auto &componentInfo = m_instrActor->componentInfo();
+  auto pos = componentInfo.position(detIndex) - m_pos;
   // projection to cylinder axis
   v = pos.scalar_prod(m_zaxis);
   double x = pos.scalar_prod(m_xaxis);

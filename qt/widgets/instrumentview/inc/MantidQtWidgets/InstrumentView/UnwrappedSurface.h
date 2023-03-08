@@ -89,13 +89,13 @@ public:
    *object onto the tagent plane to the
    * surface at point (uv) and scaled along u and v by the corresponding factor.
    *
-   * @param pos :: A position of a 3D point.
+   * @param detIndex :: The index of a detector in detectorInfo\componentInfo
    * @param u (output) :: u-coordinate of the projection.
    * @param v (output) :: v-coordinate of the projection.
    * @param uscale (output) :: The scaling factor along the u-coordinate.
    * @param vscale (output) :: The scaling factor along the v-coordinate.
    */
-  virtual void project(const Mantid::Kernel::V3D &pos, double &u, double &v, double &uscale, double &vscale) const = 0;
+  virtual void project(const size_t detIndex, double &u, double &v, double &uscale, double &vscale) const = 0;
   //@}
 
   /** @name Public methods */
@@ -148,7 +148,7 @@ protected:
    * @param R :: The result rotaion.
    */
   virtual void rotate(const UnwrappedDetector &udet, Mantid::Kernel::Quat &R) const = 0;
-  virtual void calcUV(UnwrappedDetector &udet, Mantid::Kernel::V3D &pos);
+  virtual void calcUV(UnwrappedDetector &udet);
   virtual void calcSize(UnwrappedDetector &udet);
   virtual QString getDimInfo() const;
   /// Called in non-picking drawSimpleToImage to draw something other than

@@ -279,10 +279,10 @@ void PanelsSurface::init() {
   m_v_max = m_viewRect.y1();
 }
 
-void PanelsSurface::project(const Mantid::Kernel::V3D & /*pos*/, double &u, double &v, double &uscale,
-                            double &vscale) const {
-  /* const auto &detectorInfo = m_instrActor->detectorInfo();
-  auto pos = detectorInfo.position(detIndex);
+void PanelsSurface::project(const size_t detIndex, double &u, double &v, double &uscale, double &vscale) const {
+  const auto &detectorInfo = m_instrActor->detectorInfo();
+  auto pos = detectorInfo.position(detIndex) - m_pos;
+  const int bankIndex = m_detector2bankMap[detIndex];
   const FlatBankInfo &info = *m_flatBanks[bankIndex];
   auto refPos = info.refPos;
   auto rotation = info.rotation;
@@ -291,7 +291,9 @@ void PanelsSurface::project(const Mantid::Kernel::V3D & /*pos*/, double &u, doub
   pos += refPos;
   u = m_xaxis.scalar_prod(pos);
   v = m_yaxis.scalar_prod(pos);
-  uscale = vscale = 1.0;*/
+  u += info.bankCentreOffset->X();
+  v += info.bankCentreOffset->Y();
+  uscale = vscale = 1.0;
 }
 
 void PanelsSurface::rotate(const UnwrappedDetector &udet, Mantid::Kernel::Quat &R) const {
@@ -715,6 +717,7 @@ void PanelsSurface::ApplyBankCentreOverrides() {
     if (info->bankCentreOverride) {
       auto overrideBankCentre = *info->bankCentreOverride;
       auto offset = overrideBankCentre - currentBankCentre;
+      info->bankCentreOffset = offset;
       info->polygon.translate(offset.X(), offset.Y());
       for (size_t iDet = info->startDetectorIndex; iDet <= info->endDetectorIndex; ++iDet) {
         UnwrappedDetector &udet = m_unwrappedDetectors[iDet];

@@ -28,6 +28,7 @@ struct EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW FlatBankInfo {
   QPolygonF polygon;
   /// optional override u, v for the bank
   std::optional<Mantid::Kernel::V2D> bankCentreOverride;
+  std::optional<Mantid::Kernel::V2D> bankCentreOffset;
   Mantid::Kernel::V3D refPos;
   // translate the bank by a vector
   void translate(const QPointF &shift);
@@ -56,8 +57,7 @@ public:
   PanelsSurface() : m_zaxis({0., 0., 1.0}){};
   ~PanelsSurface() override;
   void init() override;
-  void project(const Mantid::Kernel::V3D & /*pos*/, double & /*u*/, double & /*v*/, double & /*uscale*/,
-               double & /*vscale*/) const override;
+  void project(const size_t detIndex, double &u, double &v, double &uscale, double &vscale) const override;
   void resetInstrumentActor(const IInstrumentActor *rootActor) override;
 
 protected:
