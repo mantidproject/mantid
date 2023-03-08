@@ -32,7 +32,6 @@ class IPeaksWorkspace;
 }
 } // namespace Mantid
 
-class GLColor;
 class QGLWidget;
 class GL3DWidget;
 
@@ -62,8 +61,11 @@ namespace MantidWidgets {
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW UnwrappedSurface : public ProjectionSurface {
   Q_OBJECT
 public:
-  explicit UnwrappedSurface(const InstrumentActor *rootActor, const QSize &widgetSize,
+  explicit UnwrappedSurface(const IInstrumentActor *rootActor, const QSize &widgetSize,
                             const bool maintainAspectRatio = true);
+  UnwrappedSurface()
+      : m_u_min(DBL_MAX), m_u_max(-DBL_MAX), m_v_min(DBL_MAX), m_v_max(-DBL_MAX), m_height_max(0), m_width_max(0),
+        m_flippedView(false), m_startPeakShapes(false), m_maintainAspectRatio(true){};
 
   /** @name Implemented public virtual methods */
   //@{

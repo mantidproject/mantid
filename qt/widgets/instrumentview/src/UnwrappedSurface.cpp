@@ -49,7 +49,7 @@ QRectF getArea(const UnwrappedDetector &udet, double maxWidth, double maxHeight)
  * Constructor.
  * @param rootActor :: The instrument actor.
  */
-UnwrappedSurface::UnwrappedSurface(const InstrumentActor *rootActor, const QSize &widgetSize,
+UnwrappedSurface::UnwrappedSurface(const IInstrumentActor *rootActor, const QSize &widgetSize,
                                    const bool maintainAspectRatio)
     : ProjectionSurface(rootActor), m_u_min(DBL_MAX), m_u_max(-DBL_MAX), m_v_min(DBL_MAX), m_v_max(-DBL_MAX),
       m_height_max(0), m_width_max(0), m_flippedView(false), m_startPeakShapes(false), m_widgetSize(widgetSize),

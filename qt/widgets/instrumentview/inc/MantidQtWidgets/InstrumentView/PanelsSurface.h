@@ -15,7 +15,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 class PanelsSurface;
 
-struct FlatBankInfo {
+struct EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW FlatBankInfo {
   explicit FlatBankInfo(PanelsSurface *s);
   /// Bank's rotation
   Mantid::Kernel::Quat rotation;
@@ -48,14 +48,16 @@ private:
  *       cannot lie on the same line (being parallel is alright)
  *  - CompAssembly with detectors lying in the same plane
  */
-class PanelsSurface : public UnwrappedSurface {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW PanelsSurface : public UnwrappedSurface {
 public:
-  PanelsSurface(const InstrumentActor *rootActor, const Mantid::Kernel::V3D &origin, const Mantid::Kernel::V3D &axis,
+  PanelsSurface(const IInstrumentActor *rootActor, const Mantid::Kernel::V3D &origin, const Mantid::Kernel::V3D &axis,
                 const QSize &widgetSize, const bool maintainAspectRatio);
+  PanelsSurface() : m_zaxis({0., 0., 1.0}){};
   ~PanelsSurface() override;
   void init() override;
   void project(const Mantid::Kernel::V3D & /*pos*/, double & /*u*/, double & /*v*/, double & /*uscale*/,
                double & /*vscale*/) const override;
+  void resetInstrumentActor(const IInstrumentActor *rootActor) override;
 
 protected:
   void findFlatPanels(size_t rootIndex, std::vector<bool> &visited);
