@@ -21,7 +21,6 @@ from mantid.simpleapi import (
     GroupWorkspaces,
     ApplyDiffCal,
     ReplaceSpecialValues,
-    CloneWorkspace,
 )
 from mantid.api import AnalysisDataService
 
@@ -125,7 +124,7 @@ class DrangeData(object):
             return []
 
         processed = []
-        sample_workspace = rebin_and_average(self._sample)
+        sample_workspace = rebin_and_sum(self._sample)
 
         run_numbers = "OSIRIS" + ",".join([str(ws)[6:-4] for ws in self._sample])
         outputname = run_numbers + WORKSPACE_SUFFIX.FOCUSED
@@ -178,42 +177,13 @@ def load_raw(run_number_string, drange_sets, group, inst, file_ext):
     return input_ws_list
 
 
-def rebin_and_average(ws_list):
-    """
-    Rebins the specified list of workspaces to the smallest and then averages.
-
-    :param ws_list: The workspace list to rebin and average.
-    """
-    return average_ws_list(rebin_to_smallest(*ws_list))
-
-
-def average_ws_list(ws_list):
-    """
-    Calculates the average of a list of workspaces (not workspace names)
-    - stores the result in a new workspace.
-
-    :param ws_list: The list of workspaces to average.
-    :return:        The name of the workspace containing the average.
-    """
-    # Assert we have some ws in the list, and if there is only one then return it.
-    num_workspaces = len(ws_list)
-
-    if num_workspaces == 0:
-        raise RuntimeError("getAverageWs: Trying to take an average of nothing")
-
-    if num_workspaces == 1:
-        return CloneWorkspace(InputWorkspace=ws_list[0], OutputWorkspace="cloned", StoreInADS=False)
-
-    return sum(ws_list) / num_workspaces
-
-
-def rebin_to_smallest(*workspaces):
+def rebin_and_sum(workspaces):
     """
     Rebins the specified list to the workspace with the smallest
-    x-range in the list.
+    x-range in the list then sums all the workspaces together.
 
     :param workspaces: The list of workspaces to rebin to the smallest.
-    :return:           The rebinned list of workspaces.
+    :return:           The summed and rebinned workspace
     """
     if len(workspaces) == 1:
         return workspaces
@@ -240,7 +210,9 @@ def rebin_to_smallest(*workspaces):
                 )
             )
 
-    return rebinned_workspaces
+    # sum will add together the proton charge in the sample logs
+    # so when the NormalizeByCurrent is called we get an average of the workspaces
+    return sum(rebinned_workspaces)
 
 
 def run_diffraction_focussing(run_number, drange_sets, calfile, van_norm=False, subtract_empty=False):

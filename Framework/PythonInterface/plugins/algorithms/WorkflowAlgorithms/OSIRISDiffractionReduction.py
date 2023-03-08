@@ -118,12 +118,7 @@ class DRangeToWorkspaceMap(object):
         if d_range not in self._map:
             self._map[d_range] = [workspace]
         else:
-
-            def x_range_differs(x):
-                return x.readX(0)[-1] != workspace.readX(0)[-1]
-
-            if all(map(x_range_differs, self._map[d_range])):
-                self._map[d_range].append(workspace)
+            self._map[d_range].append(workspace)
 
     def transform(self, morphism):
         """
@@ -225,26 +220,6 @@ class DRangeToWorkspaceMap(object):
                 if time_regimes[idx] < time_regime < time_regimes[idx + 1]:
                     return time_regimes[idx]
         return time_regime
-
-
-def average_ws_list(ws_list):
-    """
-    Calculates the average of a list of workspaces (not workspace names)
-    - stores the result in a new workspace.
-
-    :param ws_list: The list of workspaces to average.
-    :return:        The name of the workspace containing the average.
-    """
-    # Assert we have some ws in the list, and if there is only one then return it.
-    num_workspaces = len(ws_list)
-
-    if num_workspaces == 0:
-        raise RuntimeError("getAverageWs: Trying to take an average of nothing")
-
-    if num_workspaces == 1:
-        return CloneWorkspace(InputWorkspace=ws_list[0], OutputWorkspace="cloned", StoreInADS=False)
-
-    return sum(ws_list) / num_workspaces
 
 
 def find_intersection_of_ranges(range_a, range_b):
@@ -383,13 +358,17 @@ def divide_workspace(dividend_workspace, divisor_workspace):
     )
 
 
-def rebin_and_average(ws_list):
+def rebin_and_sum(workspaces):
     """
-    Rebins the specified list of workspaces to the smallest and then averages.
+    Rebins the specified list to the workspace with the smallest
+    x-range in the list then sums all the workspaces together.
 
-    @param ws_list The workspace list to rebin and average.
+    :param workspaces: The list of workspaces to rebin to the smallest.
+    :return:           The summed and rebinned workspace
     """
-    return average_ws_list(rebin_to_smallest(*ws_list))
+    # sum will add together the proton charge in the sample logs
+    # so when the NormalizeByCurrent is called we get an average of the workspaces
+    return sum(rebin_to_smallest(*workspaces))
 
 
 def delete_workspaces(workspace_names):
@@ -591,7 +570,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         ipf_file_name = "OSIRIS_diffraction_diffonly_Parameters.xml"
         load_opts = {"DeleteMonitors": True}
         load_runs = create_loader(ipf_file_name, self._spec_min, self._spec_max, self._load_logs, load_opts)
-        drange_map_generator = create_drange_map_generator(load_runs, rebin_and_average)
+        drange_map_generator = create_drange_map_generator(load_runs, rebin_and_sum)
 
         # Create a sample drange map from the sample runs
         self._sam_ws_map = drange_map_generator(self._sample_runs, lambda name: mtd[name])
