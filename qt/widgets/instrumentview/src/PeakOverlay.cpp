@@ -237,7 +237,6 @@ void PeakOverlay::createMarkers(const PeakMarker2D::Style &style) {
   this->clear();
   for (int i = 0; i < nPeaks; ++i) {
     Mantid::Geometry::IPeak &peak = getPeak(i);
-    Mantid::Kernel::V3D pos;
     int detID;
     try {
       auto peakFull = dynamic_cast<Mantid::DataObjects::Peak &>(peak);
