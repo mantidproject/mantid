@@ -24,17 +24,18 @@ public:
       : PanelsSurface(rootActor, origin, axis, widgetSize, maintainAspectRatio) {}
   PanelsSurfaceHelper() : PanelsSurface() {}
   void setupAxes() { PanelsSurface::setupAxes(); };
-  void addDetector(size_t detIndex, const Mantid::Kernel::V3D &refPos, int bankIndex,
-                   const Mantid::Kernel::Quat &rotation) {
-    return PanelsSurface::addDetector(detIndex, refPos, bankIndex, rotation);
+  void project(const size_t detIndex, double &u, double &v, double &uscale, double &vscale) {
+    PanelsSurface::project(detIndex, u, v, uscale, vscale);
   }
   Mantid::Kernel::Quat calcBankRotation(const Mantid::Kernel::V3D &detPos, Mantid::Kernel::V3D normal) {
     return PanelsSurface::calcBankRotation(detPos, normal);
   }
   boost::optional<size_t> processTubes(size_t rootIndex) { return PanelsSurface::processTubes(rootIndex); }
   std::vector<UnwrappedDetector> getUnwrappedDetectors() { return m_unwrappedDetectors; };
-  void addFlatBank() {
+  void addFlatBank(const Mantid::Kernel::Quat &rotation, const Mantid::Kernel::V3D &refPos) {
     auto *info = new FlatBankInfo(this);
+    info->rotation = rotation;
+    info->refPos = refPos;
     m_flatBanks << info;
   }
 };
@@ -56,7 +57,7 @@ public:
     return instrumentActor;
   }
 
-  void test_addDetector() {
+  void test_project() {
     const int NDETECTORS = 2;
     auto ws = WorkspaceCreationHelper::create2DWorkspace(NDETECTORS, 1);
     Mantid::Kernel::V3D samplePosition{0., 0., 0.};
@@ -68,15 +69,14 @@ public:
     surface.setupAxes();
     surface.resetInstrumentActor(instrumentActor.get());
     Mantid::Kernel::Quat q(90, {0., 0., 1.});
-    surface.addFlatBank();
-    surface.addDetector(0, {0., 0., 0.}, 0, q);
-    surface.addDetector(1, {0., 0., 0.}, 0, q);
-    auto unwrapppedDet = surface.getUnwrappedDetectors();
-    TS_ASSERT(unwrapppedDet.size() == 2);
-    TS_ASSERT_EQUALS(unwrapppedDet[0].u, -0.1);
-    TS_ASSERT_DELTA(unwrapppedDet[0].v, 0., 1E-08);
-    TS_ASSERT_EQUALS(unwrapppedDet[1].u, 0.1);
-    TS_ASSERT_DELTA(unwrapppedDet[1].v, 0., 1E-08);
+    surface.addFlatBank(q, {0., 0., 0.});
+    double u, v, uscale, vscale;
+    surface.project(0, u, v, uscale, vscale);
+    TS_ASSERT_EQUALS(u, -0.1);
+    TS_ASSERT_DELTA(v, 0., 1E-08);
+    surface.project(1, u, v, uscale, vscale);
+    TS_ASSERT_EQUALS(u, 0.1);
+    TS_ASSERT_DELTA(v, 0., 1E-08);
   }
 
   void test_calcBankRotation() {
