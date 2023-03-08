@@ -1,0 +1,4 @@
+- Two separate "Sample Data" and "Standard Data" buttons are added to the Powder TOF mode.
+- Standard data are now loaded by default.
+- "Read All" button is removed.
+- Functionality of the red asterisk next to "Data Directory" edit boxis improved.
