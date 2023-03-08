@@ -75,6 +75,7 @@ public:
   QMap<QString, QVariant> loadJSONFromFile(std::string const &filename) override;
   void saveCSVToFile(std::string const &filename, std::string const &content) const override;
   bool fileExists(std::string const &filepath) const override;
+  std::string getFullFilePath(std::string const &filename) const override;
 
 public slots:
   void helpPressed();

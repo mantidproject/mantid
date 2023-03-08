@@ -170,7 +170,7 @@ PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
 }
 
 void ExperimentPresenter::showPolCorrFilePathValidity(std::string const &filePath) {
-  if (m_fileHandler->fileExists(filePath)) {
+  if (m_fileHandler->fileExists(m_fileHandler->getFullFilePath(filePath))) {
     m_view->showPolCorrFilePathValid();
     return;
   }
@@ -195,7 +195,7 @@ FloodCorrections ExperimentPresenter::floodCorrectionsFromView() {
 }
 
 void ExperimentPresenter::showFloodFilePathValidity(const std::string &filePath) {
-  if (m_fileHandler->fileExists(filePath)) {
+  if (m_fileHandler->fileExists(m_fileHandler->getFullFilePath(filePath))) {
     m_view->showFloodCorrFilePathValid();
     return;
   }

@@ -229,11 +229,13 @@ public:
   void testSettingPolarizationCorrectionFilePathUpdatesModel() { runTestThatPolarizationCorrectionsUsesFilePath(); }
 
   void testValidPolarizationPathShowsAsValid() {
-    auto const testPath = "test/path.nxs";
+    auto const &testPath = "test/path.nxs";
+    auto const &fullTestPath = "/full/pol/test/path.nxs";
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return("FilePath"));
     EXPECT_CALL(m_view, getPolarizationEfficienciesFilePath()).WillRepeatedly(Return(testPath));
-    EXPECT_CALL(m_fileHandler, fileExists(testPath)).WillOnce(Return(true));
+    EXPECT_CALL(m_fileHandler, getFullFilePath(testPath)).WillOnce(Return(fullTestPath));
+    EXPECT_CALL(m_fileHandler, fileExists(fullTestPath)).WillOnce(Return(true));
     EXPECT_CALL(m_view, showPolCorrFilePathValid()).Times(1);
     presenter.notifySettingsChanged();
     verifyAndClear();
@@ -241,10 +243,12 @@ public:
 
   void testInvalidPolarizationPathShowsAsInvalid() {
     auto const testPath = "test/path.nxs";
+    auto const &fullTestPath = "/full/test/path.nxs";
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return("FilePath"));
     EXPECT_CALL(m_view, getPolarizationEfficienciesFilePath()).WillRepeatedly(Return(testPath));
-    EXPECT_CALL(m_fileHandler, fileExists(testPath)).WillOnce(Return(false));
+    EXPECT_CALL(m_fileHandler, getFullFilePath(testPath)).WillOnce(Return(fullTestPath));
+    EXPECT_CALL(m_fileHandler, fileExists(fullTestPath)).WillOnce(Return(false));
     EXPECT_CALL(m_view, showPolCorrFilePathInvalid()).Times(1);
     presenter.notifySettingsChanged();
     verifyAndClear();
@@ -253,7 +257,6 @@ public:
   void testSetFloodCorrectionsUpdatesModel() {
     auto presenter = makePresenter();
     FloodCorrections floodCorr(FloodCorrectionType::Workspace, std::string{"testWS"});
-
     EXPECT_CALL(m_view, getFloodCorrectionType()).Times(2).WillRepeatedly(Return("Workspace"));
     EXPECT_CALL(m_view, getFloodWorkspace()).WillOnce(Return(floodCorr.workspace().get()));
     EXPECT_CALL(m_view, setFloodCorrectionWorkspaceMode()).Times(1);
@@ -268,6 +271,8 @@ public:
     FloodCorrections floodCorr(FloodCorrectionType::Workspace, std::string{"path/to/testWS"});
 
     EXPECT_CALL(m_view, getFloodCorrectionType()).Times(2).WillRepeatedly(Return("FilePath"));
+    EXPECT_CALL(m_fileHandler, getFullFilePath(floodCorr.workspace().get()))
+        .WillOnce(Return(floodCorr.workspace().get()));
     EXPECT_CALL(m_fileHandler, fileExists(floodCorr.workspace().get())).WillOnce(Return(true));
     EXPECT_CALL(m_view, getFloodFilePath()).WillOnce(Return(floodCorr.workspace().get()));
     EXPECT_CALL(m_view, setFloodCorrectionFilePathMode()).Times(1);
@@ -296,6 +301,7 @@ public:
 
   void testSetFloodCorrectionsToFilePathEnablesInputs() {
     EXPECT_CALL(m_view, getFloodFilePath()).WillOnce(Return(""));
+    EXPECT_CALL(m_fileHandler, getFullFilePath("")).WillOnce(Return(""));
     EXPECT_CALL(m_fileHandler, fileExists("")).Times(1);
     runWithFloodCorrectionInputsEnabled("FilePath");
   }
@@ -305,22 +311,27 @@ public:
   void testSetFloodCorrectionsToNoneDisablesInputs() { runWithFloodCorrectionInputsDisabled("None"); }
 
   void testValidFloodPathShowsAsValid() {
-    auto const testPath = "test/flood/path.nxs";
+    auto const &testPath = "test/flood/path.nxs";
+    auto const &fullTestPath = "/full/test/flood/path.nxs";
+
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getFloodCorrectionType()).Times(2).WillRepeatedly(Return("FilePath"));
     EXPECT_CALL(m_view, getFloodFilePath()).WillRepeatedly(Return(testPath));
-    EXPECT_CALL(m_fileHandler, fileExists(testPath)).WillOnce(Return(true));
+    EXPECT_CALL(m_fileHandler, getFullFilePath(testPath)).WillOnce(Return(fullTestPath));
+    EXPECT_CALL(m_fileHandler, fileExists(fullTestPath)).WillOnce(Return(true));
     EXPECT_CALL(m_view, showFloodCorrFilePathValid()).Times(1);
     presenter.notifySettingsChanged();
     verifyAndClear();
   }
 
   void testInvalidFloodPathShowsAsInvalid() {
-    auto const testPath = "test/flood/path.nxs";
+    auto const &testPath = "test/flood/path.nxs";
+    auto const &fullTestPath = "/full/test/flood/path.nxs";
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getFloodCorrectionType()).Times(2).WillRepeatedly(Return("FilePath"));
     EXPECT_CALL(m_view, getFloodFilePath()).WillRepeatedly(Return(testPath));
-    EXPECT_CALL(m_fileHandler, fileExists(testPath)).WillOnce(Return(false));
+    EXPECT_CALL(m_fileHandler, getFullFilePath(testPath)).WillOnce(Return(fullTestPath));
+    EXPECT_CALL(m_fileHandler, fileExists(fullTestPath)).WillOnce(Return(false));
     EXPECT_CALL(m_view, showFloodCorrFilePathInvalid()).Times(1);
     presenter.notifySettingsChanged();
     verifyAndClear();
