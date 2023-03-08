@@ -674,7 +674,6 @@ Mantid::Kernel::Quat PanelsSurface::calcBankRotation(const Mantid::Kernel::V3D &
 }
 
 void PanelsSurface::addDetector(size_t detIndex, int bankIndex) {
-  const auto &detectorInfo = m_instrActor->detectorInfo();
   m_detector2bankMap[detIndex] = bankIndex;
   // get the colour
   UnwrappedDetector udet(m_instrActor->getColor(detIndex), detIndex);
