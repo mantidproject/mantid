@@ -241,7 +241,7 @@ function(mtd_install_qt_library qt_version target install_dir)
     set(install_target_type RUNTIME)
   endif()
 
-  mtd_install_shared_library(TARGETS ${_target} DESTINATION ${_dir})
+  mtd_install_shared_library(TARGETS ${target} ${install_target_type} DESTINATION ${install_dir})
 endfunction()
 
 function(mtd_add_qt_tests)
