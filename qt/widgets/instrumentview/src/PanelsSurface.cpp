@@ -279,9 +279,18 @@ void PanelsSurface::init() {
   m_v_max = m_viewRect.y1();
 }
 
+//------------------------------------------------------------------------------
+/** Convert detector (physical position) to UV projection
+ *
+ * @param detIndex :: detector index in DetectorInfo or ComponentInfo
+ * @param u :: set to U
+ * @param v :: set to V
+ * @param uscale :: scaling for u direction
+ * @param vscale :: scaling for v direction
+ */
 void PanelsSurface::project(const size_t detIndex, double &u, double &v, double &uscale, double &vscale) const {
   const auto &detectorInfo = m_instrActor->detectorInfo();
-  auto pos = detectorInfo.position(detIndex) - m_pos;
+  auto pos = detectorInfo.position(detIndex);
   const int bankIndex = m_detector2bankMap[detIndex];
   const FlatBankInfo &info = *m_flatBanks[bankIndex];
   auto refPos = info.refPos;
@@ -289,10 +298,16 @@ void PanelsSurface::project(const size_t detIndex, double &u, double &v, double 
   pos -= refPos;
   rotation.rotate(pos);
   pos += refPos;
-  u = m_xaxis.scalar_prod(pos);
+  // present banks as if looking away from origin towards the bank
+  if (m_zaxis.scalar_prod(pos) > 0)
+    u = -m_xaxis.scalar_prod(pos);
+  else
+    u = m_xaxis.scalar_prod(pos);
   v = m_yaxis.scalar_prod(pos);
-  u += info.bankCentreOffset->X();
-  v += info.bankCentreOffset->Y();
+  if (info.bankCentreOffset) {
+    u += info.bankCentreOffset->X();
+    v += info.bankCentreOffset->Y();
+  }
   uscale = vscale = 1.0;
 }
 
@@ -660,26 +675,11 @@ Mantid::Kernel::Quat PanelsSurface::calcBankRotation(const Mantid::Kernel::V3D &
 
 void PanelsSurface::addDetector(size_t detIndex, int bankIndex) {
   const auto &detectorInfo = m_instrActor->detectorInfo();
-
   auto pos = detectorInfo.position(detIndex);
   m_detector2bankMap[detIndex] = bankIndex;
   // get the colour
   UnwrappedDetector udet(m_instrActor->getColor(detIndex), detIndex);
-  // apply bank's rotation
-  const FlatBankInfo &info = *m_flatBanks[bankIndex];
-  auto refPos = info.refPos;
-  auto rotation = info.rotation;
-  pos -= refPos;
-  rotation.rotate(pos);
-  pos += refPos;
-  // present banks as if looking away from origin towards the bank
-  if (m_zaxis.scalar_prod(pos) > 0)
-    udet.u = -m_xaxis.scalar_prod(pos);
-  else
-    udet.u = m_xaxis.scalar_prod(pos);
-  udet.v = m_yaxis.scalar_prod(pos);
-  udet.uscale = udet.vscale = 1.0;
-  this->calcSize(udet);
+  calcUV(udet);
   m_unwrappedDetectors[detIndex] = udet;
 }
 
@@ -760,7 +760,9 @@ void PanelsSurface::spreadBanks() {
       poly.translate(dir);
     }
     // move all detectors of the bank
-    info->translate(poly.boundingRect().center() - centre);
+    auto offset = poly.boundingRect().center() - centre;
+    info->translate(offset);
+    info->bankCentreOffset = Mantid::Kernel::V2D{offset.x(), offset.y()};
   }
 }
 

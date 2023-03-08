@@ -28,7 +28,10 @@ struct EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW FlatBankInfo {
   QPolygonF polygon;
   /// optional override u, v for the bank
   std::optional<Mantid::Kernel::V2D> bankCentreOverride;
+  /// further offset that is applied to bank following projection calculation as
+  /// a result of bank arrangement logic
   std::optional<Mantid::Kernel::V2D> bankCentreOffset;
+  /// the point on the bank about which rotation occurs during projection
   Mantid::Kernel::V3D refPos;
   // translate the bank by a vector
   void translate(const QPointF &shift);

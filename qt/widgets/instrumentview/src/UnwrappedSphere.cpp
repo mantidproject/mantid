@@ -19,9 +19,9 @@ UnwrappedSphere::UnwrappedSphere(const InstrumentActor *rootActor, const Mantid:
 }
 
 //------------------------------------------------------------------------------
-/** Convert physical position to UV projection
+/** Convert detector (physical position) to UV projection
  *
- * @param pos :: position in 3D
+ * @param detIndex :: detector index in DetectorInfo or ComponentInfo
  * @param u :: set to U
  * @param v :: set to V
  * @param uscale :: scaling for u direction
