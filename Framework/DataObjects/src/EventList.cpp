@@ -3965,7 +3965,6 @@ void EventList::initializePartials(std::map<int, EventList *> partials) const {
 
   // collect the state from events which is to be transferred to the partials
   bool removeDetIDs{true};
-  const auto &detIDs = this->getDetectorIDs();
   const auto histogram = this->getHistogram();
   const auto eventType = this->getEventType();
 
