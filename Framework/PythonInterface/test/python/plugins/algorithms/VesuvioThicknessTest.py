@@ -12,7 +12,6 @@ from mantid.api import ITableWorkspace
 
 
 class VesuvioThicknessTest(unittest.TestCase):
-
     # ----------------------------------Algorithm tests----------------------------------------
 
     def test_basic_input(self):
@@ -50,8 +49,9 @@ class VesuvioThicknessTest(unittest.TestCase):
     def test_mismatch_mass_amplitude_inputs(self):
         masses = [1.0, 2.0, 3.0, 4.0]
         amplitudes = [1.0, 2.0]
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "The number of masses: 4, is not equal to the number of amplitudes: 2",
             VesuvioThickness,
             Masses=masses,
             Amplitudes=amplitudes,
@@ -62,8 +62,9 @@ class VesuvioThicknessTest(unittest.TestCase):
     def test_no_masses_input(self):
         masses = []
         amplitudes = [1.0, 2.0]
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Must have 1 or more Masses defined",
             VesuvioThickness,
             Masses=masses,
             Amplitudes=amplitudes,
@@ -74,8 +75,9 @@ class VesuvioThicknessTest(unittest.TestCase):
     def test_no_amplitudes_input(self):
         masses = [1.0, 2.0]
         amplitudes = []
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Must have 1 or more Amplitudes defined",
             VesuvioThickness,
             Masses=masses,
             Amplitudes=amplitudes,

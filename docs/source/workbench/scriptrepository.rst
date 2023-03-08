@@ -20,7 +20,7 @@ Installing the Script Repository is simple:
 Features
 --------
 
-.. image:: /images/Workbench/ScriptRepository/ScriptRepository_main.png
+.. image:: /images/Workbench/ScriptRepository/scriptrepository_main.png
    :scale: 50%
    :align: center
 

@@ -809,7 +809,7 @@ class CrystalField(object):
         peaks = np.array([self._peakList.column(0), self._peakList.column(1)])
         return peaks
 
-    def getSpectrum(self, i=0, workspace=None, ws_index=0):
+    def getSpectrum(self, i=0, workspace=None, ws_index=0, x_range: Tuple[int, int] = None):
         """
         Get the i-th spectrum calculated with the current field and peak parameters.
 
@@ -824,11 +824,14 @@ class CrystalField(object):
                                # in workspace ws.
             cf.getSpectrum(ws, 3) # Calculate the first spectrum using the x-values from the 4th spectrum
                                   # in workspace ws.
+            cf.getSpectrum(x_range=(-2,4)) # Return the first spectrum calculated from -2 to 4.
 
         @param i: Index of a spectrum to get.
         @param workspace: A workspace to base on. If not given the x-values of the output spectrum will be
-                          generated.
+                          generated if not specified with x_range.
         @param ws_index:  An index of a spectrum from workspace to use.
+        @param x_range: Return the first spectrum calculated on the specified set of x-values. This setting is
+                        ignored when a workspace to base on was provided.
         @return: A tuple of (x, y) arrays
         """
         wksp = workspace
@@ -853,7 +856,10 @@ class CrystalField(object):
             return self._calcSpectrum(i, wksp, ws_index)
 
         if xArray is None:
-            x_min, x_max = self.calc_xmin_xmax(i)
+            if x_range is None:
+                x_min, x_max = self.calc_xmin_xmax(i)
+            else:
+                x_min, x_max = x_range
             xArray = np.linspace(x_min, x_max, self.default_spectrum_size)
 
         yArray = np.zeros_like(xArray)
@@ -1056,12 +1062,12 @@ class CrystalField(object):
                 lvstr += ("+" if (ii > 0 and ev[ii, lv].real > 0) else "") + f"{val:.3f}|{jzstr}> "
             print(lvstr + "\n")
 
-    def plot(self, i=0, workspace=None, ws_index=0, name=None):
+    def plot(self, i=0, workspace=None, ws_index=0, x_range: Tuple[int, int] = None, name=None):
         """Plot a spectrum. Parameters are the same as in getSpectrum(...)"""
         createWS = AlgorithmManager.createUnmanaged("CreateWorkspace")
         createWS.initialize()
 
-        xArray, yArray = self.getSpectrum(i, workspace, ws_index)
+        xArray, yArray = self.getSpectrum(i, workspace, ws_index, x_range)
         ws_name = name if name is not None else "CrystalField_%s" % self.Ion
 
         if isinstance(i, int):

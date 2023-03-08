@@ -174,7 +174,7 @@ class CrystalFieldMultiSite(object):
             peaks = np.append(peaks, _cft.getPeakList()[0])
         return np.min(peaks), np.max(peaks)
 
-    def getSpectrum(self, *args):
+    def getSpectrum(self, *args, **kwargs):
         """
         Get a specified spectrum calculated with the current field and peak parameters.
 
@@ -191,26 +191,32 @@ class CrystalFieldMultiSite(object):
                                      # in workspace ws.
             cf.getSpectrum(2, ws)    # Calculate the third spectrum using the x-values from the 1st spectrum
                                      # in workspace ws.
+            cf.getSpectrum(x_range=(-2,4)) # Return the first spectrum calculated from -2 to 4.
 
         @return: A tuple of (x, y) arrays
         """
-        if len(args) == 3:
-            if self.Temperatures[args[0]] < 0:
-                raise RuntimeError("You must first define a temperature for the spectrum")
-            return self._calcSpectrum(args[0], args[1], args[2])
-        elif len(args) == 1:
-            if isinstance(args[0], int):
-                x_min, x_max = self.calc_xmin_xmax(args[0])
-                xArray = np.linspace(x_min, x_max, self.default_spectrum_size)
-                return self._calcSpectrum(args[0], xArray, 0)
-            else:
-                return self._calcSpectrum(0, args[0], 0)
-        elif len(args) == 2:
-            return self._getSpectrumTwoArgs(*args)
+        i = 0
+        xrange = kwargs.get("x_range")
+        if xrange is not None:
+            x_min, x_max = xrange
         else:
-            x_min, x_max = self.calc_xmin_xmax()
-            xArray = np.linspace(x_min, x_max, self.default_spectrum_size)
-            return self._calcSpectrum(0, xArray, 0)
+            if len(args) == 3:
+                if self.Temperatures[args[0]] < 0:
+                    raise RuntimeError("You must first define a temperature for the spectrum")
+                return self._calcSpectrum(args[0], args[1], args[2])
+            elif len(args) == 1:
+                if isinstance(args[0], int):
+                    x_min, x_max = self.calc_xmin_xmax(args[0])
+                    i = args[0]
+                else:
+                    return self._calcSpectrum(0, args[0], 0)
+            elif len(args) == 2:
+                return self._getSpectrumTwoArgs(*args)
+            else:
+                x_min, x_max = self.calc_xmin_xmax()
+
+        xArray = np.linspace(x_min, x_max, self.default_spectrum_size)
+        return self._calcSpectrum(i, xArray, 0)
 
     def _convertToWS(self, wksp_list):
         """

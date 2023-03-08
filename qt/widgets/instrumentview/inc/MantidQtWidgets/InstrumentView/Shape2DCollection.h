@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "DllOption.h"
 #include "MantidAPI/ITableWorkspace.h"
 
 #include "RectF.h"
@@ -44,7 +45,7 @@ namespace MantidWidgets {
  * must be called again. Changing the logical drawing bounds translates and
  *zooms the picture. The transformation is done by Qt's QTransform object.
  */
-class Shape2DCollection : public QObject, public Shape2D {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW Shape2DCollection : public QObject, public Shape2D {
   Q_OBJECT
 public:
   Shape2DCollection();

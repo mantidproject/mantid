@@ -87,6 +87,7 @@
         <logfile id="D_curtainl_value" eq="1*value + 0.004"/>
         <!-- from beam center to the edge of the tube-->
       </parameter>
+      <side-by-side-view-location x="-0.6" y="0.0"/>
     </component>
   </type>
 
@@ -111,6 +112,7 @@
         <logfile id="D_curtainu_value" eq="value + 0.004"/>
         <!-- from beam center to the edge of the tube-->
       </parameter>
+      <side-by-side-view-location x="0.0" y="0.6"/>
     </component>
   </type>
 
@@ -134,6 +136,7 @@
         <logfile id="D_curtainr_value" eq="-1 * value - 0.004"/>
         <!-- from beam center -->
       </parameter>
+      <side-by-side-view-location x="0.6" y="0.0"/>
     </component>
   </type>
 
@@ -157,6 +160,7 @@
         <logfile id="D_curtaind_value" eq="-1 * value - 0.004"/>
         <!-- from beam center -->
       </parameter>
+      <side-by-side-view-location x="0.0" y="-0.6"/>
     </component>
   </type>
 
@@ -172,6 +176,7 @@
         <!-- Distance from sample to the Left (West) rear detector panel-->
         <logfile id="L2_det_value"/>
       </parameter>
+      <side-by-side-view-location x="-0.17" y="0.0"/>
     </component>
   </type>
 
@@ -188,6 +193,7 @@
         <!-- Distance from sample to the Right (East) rear detector panel-->
         <logfile id="L2_det_value"/>
       </parameter>
+      <side-by-side-view-location x="0.17" y="0.0"/>
     </component>
   </type>
 

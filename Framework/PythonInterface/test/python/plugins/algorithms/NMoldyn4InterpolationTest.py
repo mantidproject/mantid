@@ -53,8 +53,9 @@ class NMoldyn4InterpolationTest(unittest.TestCase):
         y_data = y_data.flatten()
         x_data = np.tile(x_data, len(q_data))
         sim = CreateWorkspace(DataX=x_data, DataY=y_data, NSpec=len(q_data), VerticalAxisUnit="MomentumTransfer", VerticalAxisValues=q_data)
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Minimum simulated X value is higher than minimum reference X value",
             NMoldyn4Interpolation,
             InputWorkspace=sim,
             ReferenceWorkspace=self.osiris,
@@ -68,8 +69,25 @@ class NMoldyn4InterpolationTest(unittest.TestCase):
         y_data = y_data.flatten()
         x_data = np.tile(x_data, len(q_data))
         sim = CreateWorkspace(DataX=x_data, DataY=y_data, NSpec=len(q_data), VerticalAxisUnit="MomentumTransfer", VerticalAxisValues=q_data)
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Maximum simulated X value is lower than maximum reference X value",
+            NMoldyn4Interpolation,
+            InputWorkspace=sim,
+            ReferenceWorkspace=self.osiris,
+            OutputWorkspace="__NMoldyn4Interpolation_test",
+        )
+
+    def test_Q_min_too_big(self):
+        x_data = np.arange(-2, 2, 0.05)
+        q_data = np.arange(0.8, 1.3, 0.1)
+        y_data = np.asarray([val * (np.cos(5 * x_data) + 1) for val in q_data])
+        y_data = y_data.flatten()
+        x_data = np.tile(x_data, len(q_data))
+        sim = CreateWorkspace(DataX=x_data, DataY=y_data, NSpec=len(q_data), VerticalAxisUnit="MomentumTransfer", VerticalAxisValues=q_data)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Minimum simulated Q value is higher than minimum reference Q value",
             NMoldyn4Interpolation,
             InputWorkspace=sim,
             ReferenceWorkspace=self.osiris,
@@ -78,28 +96,14 @@ class NMoldyn4InterpolationTest(unittest.TestCase):
 
     def test_Q_max_too_small(self):
         x_data = np.arange(-2, 2, 0.05)
-        q_data = np.arange(0.8, 1.3, 0.1)
-        y_data = np.asarray([val * (np.cos(5 * x_data) + 1) for val in q_data])
-        y_data = y_data.flatten()
-        x_data = np.tile(x_data, len(q_data))
-        sim = CreateWorkspace(DataX=x_data, DataY=y_data, NSpec=len(q_data), VerticalAxisUnit="MomentumTransfer", VerticalAxisValues=q_data)
-        self.assertRaises(
-            RuntimeError,
-            NMoldyn4Interpolation,
-            InputWorkspace=sim,
-            ReferenceWorkspace=self.osiris,
-            OutputWorkspace="__NMoldyn4Interpolation_test",
-        )
-
-    def test_Q_min_too_large(self):
-        x_data = np.arange(-2, 2, 0.05)
         q_data = np.arange(0.5, 1.0, 0.1)
         y_data = np.asarray([val * (np.cos(5 * x_data) + 1) for val in q_data])
         y_data = y_data.flatten()
         x_data = np.tile(x_data, len(q_data))
         sim = CreateWorkspace(DataX=x_data, DataY=y_data, NSpec=len(q_data), VerticalAxisUnit="MomentumTransfer", VerticalAxisValues=q_data)
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Maximum simulated Q value is lower than maximum reference Q value",
             NMoldyn4Interpolation,
             InputWorkspace=sim,
             ReferenceWorkspace=self.osiris,

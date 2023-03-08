@@ -40,8 +40,6 @@ class InputController;
 }
 } // namespace MantidQt
 
-class GLColor;
-
 class QMouseEvent;
 class QWheelEvent;
 
@@ -80,11 +78,15 @@ public:
     InteractionModeSize
   };
   /// Constructor
-  explicit ProjectionSurface(const InstrumentActor *rootActor);
+  explicit ProjectionSurface(const IInstrumentActor *rootActor);
+  ProjectionSurface()
+      : m_viewImage(nullptr), m_pickImage(nullptr), m_isLightingOn(false), m_peakLabelPrecision(2),
+        m_showPeakRows(false), m_showPeakLabels(false), m_showPeakRelativeIntensity(false), m_peakShapesStyle(0),
+        m_viewChanged(true), m_redrawPicking(true){};
   /// Destructor
   ~ProjectionSurface() override;
   /// Resets the instrument actor.
-  void resetInstrumentActor(const InstrumentActor *rootActor);
+  virtual void resetInstrumentActor(const IInstrumentActor *rootActor);
 
   //-----------------------------------
   //     Public virtual methods
@@ -332,7 +334,7 @@ protected:
   //     Protected data
   //-----------------------------------
 
-  const InstrumentActor *m_instrActor;
+  const IInstrumentActor *m_instrActor;
   mutable QImage *m_viewImage; ///< storage for view image
   mutable QImage *m_pickImage; ///< storage for picking image
   QColor m_backgroundColor;    ///< The background colour

@@ -44,7 +44,7 @@ namespace MantidQt::MantidWidgets {
  * @param rootActor :: The instrument actor containing all info about the
  * instrument
  */
-ProjectionSurface::ProjectionSurface(const InstrumentActor *rootActor)
+ProjectionSurface::ProjectionSurface(const IInstrumentActor *rootActor)
     : m_instrActor(rootActor), m_viewImage(nullptr), m_pickImage(nullptr), m_viewRect(), m_selectRect(),
       m_interactionMode(MoveMode), m_isLightingOn(false), m_peakLabelPrecision(2), m_showPeakRows(false),
       m_showPeakLabels(false), m_showPeakRelativeIntensity(false), m_peakShapesStyle(0), m_viewChanged(true),
@@ -146,7 +146,7 @@ void ProjectionSurface::toggleToolTip(bool activateToolTip) {
  * Resets the instrument actor. The caller must ensure that the instrument
  * stays the same and workspace dimensions also don't change.
  */
-void ProjectionSurface::resetInstrumentActor(const InstrumentActor *rootActor) {
+void ProjectionSurface::resetInstrumentActor(const IInstrumentActor *rootActor) {
   m_instrActor = rootActor;
   connect(rootActor, SIGNAL(colorMapChanged()), this, SLOT(colorMapChanged()));
 }

@@ -74,8 +74,9 @@ class TOFTOFMergeRunsTest(unittest.TestCase):
         """
         OutputWorkspaceName = "output_ws"
         Inputws_badvalue = "%s, %s" % (self._input_ws_base.name(), self._input_bad_value.name())
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Sample logs wavelength do not match!",
             run_algorithm,
             "TOFTOFMergeRuns",
             InputWorkspaces=Inputws_badvalue,
@@ -84,8 +85,9 @@ class TOFTOFMergeRunsTest(unittest.TestCase):
         )
 
         Inputws_badentry = "%s, %s" % (self._input_ws_base.name(), self._input_bad_entry.name())
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            r"Workspace .* does not have property duration. Cannot merge.",
             run_algorithm,
             "TOFTOFMergeRuns",
             InputWorkspaces=Inputws_badentry,
