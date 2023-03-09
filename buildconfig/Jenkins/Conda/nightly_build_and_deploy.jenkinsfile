@@ -142,7 +142,7 @@ pipeline {
                 // Linux but this is needed to package up mantidworkbench version so
                 // we pick the simple option of always building the linux one
                 anyOf {
-                  expression { env.PLATFORM.startsWith('linux') }
+                  expression { env.PLATFORM.startsWith('linux') }package_conda
                   expression { env.BUILD_PACKAGE == "${PLATFORM}" }
                   expression { env.BUILD_PACKAGE == 'all' }
                 }
@@ -151,7 +151,6 @@ pipeline {
             agent { label "${PLATFORM}" }
             options {
                 timestamps ()
-                retry(3)
             }
             steps {
               // Clean up conda-bld before we start to avoid any
@@ -192,7 +191,6 @@ pipeline {
             agent { label "${PLATFORM}" }
             options {
                 timestamps()
-                retry(3)
             }
             steps {
               // Clean up conda-bld before we start to avoid any
@@ -228,7 +226,6 @@ pipeline {
       agent { label 'linux-64' } // Use linux for simplicity with shell scripts
       options {
         timestamps ()
-        retry(3)
        }
       environment {
         ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}")
@@ -280,7 +277,6 @@ pipeline {
       agent { label 'linux-64' } // Use linux for simplicity with shell scripts
       options {
         timestamps ()
-        retry(3)
        }
       environment {
         GITHUB_TOKEN = credentials("${GITHUB_TOKEN_CREDENTIAL_ID}")
