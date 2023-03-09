@@ -186,7 +186,7 @@ def rebin_and_sum(workspaces):
     :return:           The summed and rebinned workspace
     """
     if len(workspaces) == 1:
-        return workspaces
+        return workspaces[0]
 
     smallest_idx, smallest_ws = min(enumerate(workspaces), key=lambda x: x[1].blocksize())
 
