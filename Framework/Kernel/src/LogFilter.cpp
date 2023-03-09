@@ -60,18 +60,15 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
   if (filter.size() == 1 && filter.firstTime() == UNSET_TIME)
     return;
 
-  // do nothing if the filter is all ignore
-  const auto values = filter.valuesAsVector();
-  if (std::find(values.cbegin(), values.cend(), true) == values.cend()) {
-    return;
-  }
-
   // clear the filter first
   if (m_prop) {
     m_prop->clearFilter();
   }
 
-  /// If the filter ends in USE
+  // get a local copy of the values for a check further down
+  const auto values = filter.valuesAsVector();
+
+  // If the filter ends in USE
   bool filterOpenEnded;
 
   if (!m_filter || m_filter->size() == 0) {
@@ -83,6 +80,9 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
 
     // put the results back into the TimeSeriesProperty
     this->setFilter(mine, filterOpenEnded);
+  } else if (std::find(values.cbegin(), values.cend(), true) == values.cend()) {
+    // reset the filter to empty if the new one is all ignore
+    this->setFilter(TimeROI(), false);
   } else {
     // determine if the current version of things are open-ended
     filterOpenEnded = (m_filter->lastValue() && filter.lastValue());
