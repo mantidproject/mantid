@@ -24,6 +24,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/PropertyManagerProperty.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/UnitFactory.h"
@@ -194,6 +195,8 @@ void LoadILLReflectometry::init() {
   const std::vector<std::string> availableUnits{"Wavelength", "TimeOfFlight"};
   declareProperty("XUnit", "Wavelength", std::make_shared<StringListValidator>(availableUnits),
                   "X unit of the OutputWorkspace");
+  declareProperty(std::make_unique<PropertyManagerProperty>("LogsToReplace", Direction::Input),
+                  "A dictionary of key-pair values for logs to be replaced.");
 }
 
 /// Execute the algorithm.
@@ -505,7 +508,8 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
   NXstatus stat = NXopen(filename.c_str(), NXACC_READ, &nxfileID);
   if (stat == NX_ERROR)
     throw Kernel::Exception::FileError("Unable to open File:", filename);
-  LoadHelper::addNexusFieldsToWsRun(nxfileID, m_localWorkspace->mutableRun());
+  API::Run &runDetails = m_localWorkspace->mutableRun();
+  LoadHelper::addNexusFieldsToWsRun(nxfileID, runDetails);
   NXclose(&nxfileID);
   if (m_instrument == Supported::FIGARO) {
     auto const bgs3 = m_localWorkspace->mutableRun().getLogAsSingleValue("BGS3.value");
@@ -513,6 +517,15 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
     // when exporting data.
     m_localWorkspace->mutableRun().addLogData(
         new Kernel::PropertyWithValue<int>("refdown", static_cast<int>(bgs3 > 45)));
+  }
+  const PropertyManager_const_sptr logsToReplace = getProperty("LogsToReplace");
+  if (logsToReplace != nullptr && logsToReplace->propertyCount() > 0) {
+    for (auto *prop : logsToReplace->getProperties()) {
+      if (prop->type() == "number") { // logs are either treated as numbers and cast to double or are saved as strings
+        runDetails.addProperty(prop->name(), std::stod(prop->value()), true);
+      } else
+        runDetails.addProperty(prop->name(), prop->value(), true);
+    }
   }
 }
 
@@ -792,10 +805,10 @@ void LoadILLReflectometry::sampleHorizontalOffset() {
  *  @return the source to sample distance in meters
  */
 double LoadILLReflectometry::sourceSampleDistance() const {
+  const auto &run = m_localWorkspace->run();
   if (m_instrument == Supported::D17) {
     const std::string chopperGapUnit = m_localWorkspace->getInstrument()->getStringParameter("chopper_gap_unit")[0];
     const double scale = (chopperGapUnit == "cm") ? 0.01 : (chopperGapUnit == "mm") ? 0.001 : 1.;
-    const auto &run = m_localWorkspace->run();
     double pairCentre;
     double pairSeparation;
     if (run.hasProperty("VirtualChopper.dist_chop_samp")) {
@@ -828,15 +841,21 @@ double LoadILLReflectometry::sourceSampleDistance() const {
     m_localWorkspace->mutableRun().addProperty("Distance.ChopperGap", pairSeparation, "meter", true);
     return pairCentre;
   } else {
-    const double chopperDist = mmToMeter(doubleFromRun("ChopperSetting.chopperpair_sample_distance"));
-    std::string entryName = "correct_chopper_sample_distance";
-    bool correctChopperSampleDistance = m_localWorkspace->getInstrument()->getBoolParameter(entryName)[0];
-    auto offset = 0.0;
-    if (correctChopperSampleDistance) {
-      const double deflectionAngle = doubleFromRun(m_sampleAngleName);
-      offset = m_sampleZOffset / std::cos(degToRad(deflectionAngle));
+    if (run.hasProperty("ChopperSetting.chopperpair_sample_distance")) { // until cycle 231
+      const double chopperDist = mmToMeter(doubleFromRun("ChopperSetting.chopperpair_sample_distance"));
+      std::string entryName = "correct_chopper_sample_distance";
+      bool correctChopperSampleDistance = m_localWorkspace->getInstrument()->getBoolParameter(entryName)[0];
+      auto offset = 0.0;
+      if (correctChopperSampleDistance) {
+        const double deflectionAngle = doubleFromRun(m_sampleAngleName);
+        offset = m_sampleZOffset / std::cos(degToRad(deflectionAngle));
+      }
+      return chopperDist + offset;
+    } else if (run.hasProperty("Distance.MidChopper_Sample")) { // since cycle 231
+      return mmToMeter(doubleFromRun("Distance.MidChopper_Sample"));
+    } else {
+      throw std::runtime_error("Unable to extract chopper to sample distance");
     }
-    return chopperDist + offset;
   }
 }
 

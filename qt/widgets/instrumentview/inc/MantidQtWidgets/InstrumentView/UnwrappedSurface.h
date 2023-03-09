@@ -32,7 +32,6 @@ class IPeaksWorkspace;
 }
 } // namespace Mantid
 
-class GLColor;
 class QGLWidget;
 class GL3DWidget;
 
@@ -62,7 +61,11 @@ namespace MantidWidgets {
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW UnwrappedSurface : public ProjectionSurface {
   Q_OBJECT
 public:
-  explicit UnwrappedSurface(const InstrumentActor *rootActor);
+  explicit UnwrappedSurface(const IInstrumentActor *rootActor, const QSize &widgetSize,
+                            const bool maintainAspectRatio = true);
+  UnwrappedSurface()
+      : m_u_min(DBL_MAX), m_u_max(-DBL_MAX), m_v_min(DBL_MAX), m_v_max(-DBL_MAX), m_height_max(0), m_width_max(0),
+        m_flippedView(false), m_startPeakShapes(false), m_maintainAspectRatio(true){};
 
   /** @name Implemented public virtual methods */
   //@{
@@ -114,6 +117,8 @@ public:
   /// Get the QRect of the top left corner of a detector, and its size, in terms of pixels.
   QRect detectorQRectInPixels(const std::size_t detectorIndex) const;
 
+  void resize(int /*unused*/, int /*unused*/) override;
+
 protected slots:
 
   /// Zoom into the area returned by selectionRectUV()
@@ -155,8 +160,11 @@ protected:
   /** @name Protected methods */
   //@{
   void setColor(size_t index, bool picking) const;
-  void createPeakShapes(const QRect &viewport) const;
+  void createPeakShapes() const;
   //@}
+
+  RectF selectionRectUV() const;
+  RectF correctForAspectRatioAndZoom(const int widget_width, const int widget_height) const;
 
   double m_u_min;      ///< Minimum u
   double m_u_max;      ///< Maximum u
@@ -176,6 +184,10 @@ protected:
 
   /// Zoom stack
   QStack<RectF> m_zoomStack;
+
+  QSize m_widgetSize;
+
+  bool m_maintainAspectRatio; ///< whether to maintain aspect ratio if widget has different aspect ratio to the data
 };
 
 } // namespace MantidWidgets

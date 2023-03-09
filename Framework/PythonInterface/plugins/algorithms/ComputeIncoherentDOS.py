@@ -14,7 +14,7 @@ from mantid.simpleapi import *
 class UnitError(ValueError):
     def __init__(self):
         super(ValueError, self).__init__(
-            "Input workspace must be in (Q,E) [momentum and energy transfer]" + " or (2theta, E) [scattering angle and energy transfer.]"
+            "Input workspace must be in (Q,E) [momentum and energy transfer] or (2theta, E) [scattering angle and energy transfer.]"
         )
 
 

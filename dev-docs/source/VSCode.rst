@@ -151,7 +151,7 @@ If this fails
 
 **Linux/OSX**
 
-For this section the guide will show you how to use GDB debugging. Inside the launch.json
+For this section the guide will show you how to use GDB/LLDB debugging. Inside the launch.json
 you will want to make your file look something a little like this:
 
 *Workbench*
@@ -165,7 +165,7 @@ To debug C++ and start directly into the Workbench, add this to the configuratio
       "type": "cppdbg",
       "request": "launch",
       "program": "/usr/bin/python3", // Path to your used Python interpreter, here and below
-      "args": ["Path/To/Build/Directory/bin/workbench", "&&","gdb","/usr/bin/python3","$!"], // $! gets the process ID
+      "args": ["Path/To/Build/Directory/bin/workbench", "--single-process", "&&","gdb","/usr/bin/python3","$!"], // $! gets the process ID
       "stopAtEntry": false,
       "cwd": "Path/To/Build/Directory/bin", // this should point to bin inside the build directory
       "environment": [],
@@ -181,6 +181,8 @@ To debug C++ and start directly into the Workbench, add this to the configuratio
       ]
     }
 
+The ``--single-process`` flag is necessary for debugging. See the :ref:`Running Workbench <RunningWorkbench>` documentation for more information.
+
 If this fails, try adding the following environment variables:
 
 .. code-block:: javascript
@@ -192,6 +194,7 @@ If this fails, try adding the following environment variables:
 
 where the correct value for the ``LD_PRELOAD`` environment variable can be found in Path/To/Build/Directory/bin/launch_mantidworkbench.sh.
 
+.. include:: ./macos-opengl-version-warning.txt
 
 **Windows:**
 

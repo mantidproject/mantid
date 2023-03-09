@@ -99,12 +99,12 @@ void fourInputsCorrectedAndErrors(Eigen::Vector4d &corrected, Eigen::Vector4d &e
   const auto off2 = (f2 - 1.) / f2;
   Eigen::Matrix4d F2m;
   F2m << 1., 0., 0., 0., off2, diag2, 0., 0., 0., 0., 1., 0., 0., 0., off2, diag2;
-  const auto diag3 = (p1 - 1.) / (2. * p1 - 1.);
-  const auto off3 = p1 / (2. * p1 - 1);
+  const auto diag3 = p1 / (2. * p1 - 1);
+  const auto off3 = (p1 - 1.) / (2. * p1 - 1.);
   Eigen::Matrix4d P1m;
   P1m << diag3, 0, off3, 0, 0, diag3, 0, off3, off3, 0, diag3, 0, 0, off3, 0, diag3;
-  const auto diag4 = (p2 - 1.) / (2. * p2 - 1.);
-  const auto off4 = p2 / (2. * p2 - 1.);
+  const auto diag4 = p2 / (2. * p2 - 1.);
+  const auto off4 = (p2 - 1.) / (2. * p2 - 1.);
   Eigen::Matrix4d P2m;
   P2m << diag4, off4, 0., 0., off4, diag4, 0., 0., 0., 0., diag4, off4, 0., 0., off4, diag4;
   const Eigen::Vector4d intensities(ppy, pmy, mpy, mmy);
@@ -447,16 +447,16 @@ void PolarizationCorrectionWildes::checkConsistentNumberHistograms(const Workspa
     }
   };
   if (inputs.mmWS) {
-    checkNHist(inputs.mmWS, Flippers::OffOff);
+    checkNHist(inputs.mmWS, Flippers::OnOn);
   }
   if (inputs.mpWS) {
-    checkNHist(inputs.mpWS, Flippers::OffOn);
+    checkNHist(inputs.mpWS, Flippers::OnOff);
   }
   if (inputs.pmWS) {
-    checkNHist(inputs.pmWS, Flippers::OnOff);
+    checkNHist(inputs.pmWS, Flippers::OffOn);
   }
   if (inputs.ppWS) {
-    checkNHist(inputs.ppWS, Flippers::OnOn);
+    checkNHist(inputs.ppWS, Flippers::OffOff);
   }
 }
 
@@ -493,16 +493,16 @@ void PolarizationCorrectionWildes::checkConsistentX(const WorkspaceMap &inputs, 
     }
   };
   if (inputs.mmWS) {
-    checkWS(inputs.mmWS, Flippers::OffOff);
+    checkWS(inputs.mmWS, Flippers::OnOn);
   }
   if (inputs.mpWS) {
-    checkWS(inputs.mpWS, Flippers::OffOn);
+    checkWS(inputs.mpWS, Flippers::OnOff);
   }
   if (inputs.pmWS) {
-    checkWS(inputs.pmWS, Flippers::OnOff);
+    checkWS(inputs.pmWS, Flippers::OffOn);
   }
   if (inputs.ppWS) {
-    checkWS(inputs.ppWS, Flippers::OnOn);
+    checkWS(inputs.ppWS, Flippers::OffOff);
   }
 }
 
@@ -516,21 +516,21 @@ void PolarizationCorrectionWildes::checkConsistentX(const WorkspaceMap &inputs, 
 API::WorkspaceGroup_sptr PolarizationCorrectionWildes::groupOutput(const WorkspaceMap &outputs) {
   const std::string outWSName = getProperty(Prop::OUTPUT_WS);
   std::vector<std::string> names;
-  if (outputs.mmWS) {
-    names.emplace_back(outWSName + "_--");
-    API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.mmWS);
-  }
-  if (outputs.mpWS) {
-    names.emplace_back(outWSName + "_-+");
-    API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.mpWS);
+  if (outputs.ppWS) {
+    names.emplace_back(outWSName + "_++");
+    API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.ppWS);
   }
   if (outputs.pmWS) {
     names.emplace_back(outWSName + "_+-");
     API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.pmWS);
   }
-  if (outputs.ppWS) {
-    names.emplace_back(outWSName + "_++");
-    API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.ppWS);
+  if (outputs.mpWS) {
+    names.emplace_back(outWSName + "_-+");
+    API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.mpWS);
+  }
+  if (outputs.mmWS) {
+    names.emplace_back(outWSName + "_--");
+    API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.mmWS);
   }
   auto group = createChildAlgorithm("GroupWorkspaces");
   group->initialize();
@@ -633,8 +633,8 @@ PolarizationCorrectionWildes::analyzerlessCorrections(const WorkspaceMap &inputs
       Eigen::Matrix2d F1m;
       F1m << 1., 0., (F1 - 1.) / F1, 1. / F1;
       const double divisor = (2. * P1 - 1.);
-      const double diag = (P1 - 1.) / divisor;
-      const double off = P1 / divisor;
+      const double off = (P1 - 1.) / divisor;
+      const double diag = P1 / divisor;
       Eigen::Matrix2d P1m;
       P1m << diag, off, off, diag;
       const Eigen::Vector2d intensities(ppY[binIndex], mmY[binIndex]);

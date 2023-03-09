@@ -359,7 +359,7 @@ public:
     // all values were calculated using a independent implementation in python
     const double FIRST_VALUE{2.}; // also the min
     const double LAST_VALUE{24.}; // also the max
-    const double TIME_AVG_MEAN{15.357142857142858};
+    const double TIME_AVG_MEAN{18.2380952348};
     // const double TIME_AVG_STDDEV {8.523975789812294};
 
     TS_ASSERT_EQUALS(runInfo.getProperty(name)->size(), 10);
@@ -371,7 +371,7 @@ public:
     TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::LastValue), LAST_VALUE, 1e-12);
     TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Median), 13.0, 1e-12);
     TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::StdDev), 9.1104335791443, 1e-12);
-    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::TimeAveragedMean), TIME_AVG_MEAN, 1e-12);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::TimeAveragedMean), TIME_AVG_MEAN, 1e-8);
     // TODO not ready
     // TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::TimeAverageStdDev), TIME_AVG_STDDEV, 1e-12);
 
@@ -389,7 +389,7 @@ public:
     TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::LastValue), LAST_VALUE, 1e-12);     // TODO
     TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Median), 6.0, 1e-12);               // TODO
     TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::StdDev), 8.937367800973425, 1e-12); // TODO
-    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::TimeAveragedMean), TIME_AVG_MEAN, 1e-12);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::TimeAveragedMean), TIME_AVG_MEAN, 1e-8);
     // TODO not ready
     // TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::TimeAverageStdDev), TIME_AVG_STDDEV, 1e-12);
   }
@@ -425,7 +425,7 @@ public:
     const std::string name = "series";
     addTestTimeSeries<double>(run, name);
 
-    TS_ASSERT_DELTA(run.getTimeAveragedStd(name), 8.5239, 0.001);
+    TS_ASSERT_DELTA(run.getTimeAveragedStd(name), 8.0646, 0.001);
   }
 
   void test_getStatistics() {
@@ -441,7 +441,7 @@ public:
       TS_ASSERT_DELTA(stats.standard_deviation, 0.0, 0.001);
       TS_ASSERT_DELTA(stats.time_mean, value, 0.001);
       TS_ASSERT_DELTA(stats.time_standard_deviation, 0.0, 0.001);
-      TS_ASSERT(isnan(stats.duration));
+      TS_ASSERT(std::isnan(stats.duration));
     };
 
     // test valid single value property
@@ -458,13 +458,13 @@ public:
     {
       addTestPropertyWithValue<std::string>(run, "single-string", "46");
       auto stats = run.getStatistics("single-string");
-      TS_ASSERT_EQUALS(isnan(stats.minimum), true);
-      TS_ASSERT_EQUALS(isnan(stats.maximum), true);
-      TS_ASSERT_EQUALS(isnan(stats.mean), true);
-      TS_ASSERT_EQUALS(isnan(stats.standard_deviation), true);
-      TS_ASSERT_EQUALS(isnan(stats.time_mean), true);
-      TS_ASSERT_EQUALS(isnan(stats.time_standard_deviation), true);
-      TS_ASSERT_EQUALS(isnan(stats.duration), true);
+      TS_ASSERT_EQUALS(std::isnan(stats.minimum), true);
+      TS_ASSERT_EQUALS(std::isnan(stats.maximum), true);
+      TS_ASSERT_EQUALS(std::isnan(stats.mean), true);
+      TS_ASSERT_EQUALS(std::isnan(stats.standard_deviation), true);
+      TS_ASSERT_EQUALS(std::isnan(stats.time_mean), true);
+      TS_ASSERT_EQUALS(std::isnan(stats.time_standard_deviation), true);
+      TS_ASSERT_EQUALS(std::isnan(stats.duration), true);
     }
 
     // test time series
@@ -480,9 +480,9 @@ public:
       TS_ASSERT_DELTA(stats.mean, 13.0, 0.001);
       TS_ASSERT_DELTA(stats.median, 13.0, 0.001);
       TS_ASSERT_DELTA(stats.standard_deviation, 9.1104, 0.001);
-      TS_ASSERT_DELTA(stats.time_mean, 15.3571, 0.001);
-      TS_ASSERT_DELTA(stats.time_standard_deviation, 8.5239, 0.001);
-      TS_ASSERT_DELTA(stats.duration, 140.0, 0.001);
+      TS_ASSERT_DELTA(stats.time_mean, 18.2381, 0.001);
+      TS_ASSERT_DELTA(stats.time_standard_deviation, 8.06464, 0.001);
+      TS_ASSERT_DELTA(stats.duration, 210.0, 0.001);
     }
   }
 

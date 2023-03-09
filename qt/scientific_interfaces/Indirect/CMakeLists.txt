@@ -170,11 +170,9 @@ set(MOC_FILES
     IndirectFitPropertyBrowser.h
     InelasticDataManipulation.h
     InelasticDataManipulationElwinTab.h
-    InelasticDataManipulationElwinTabModel.h
     InelasticDataManipulationElwinTabView.h
     InelasticDataManipulationIqtTab.h
     InelasticDataManipulationIqtTabView.h
-    InelasticDataManipulationIqtTabModel.h
     InelasticDataManipulationMomentsTab.h
     InelasticDataManipulationMomentsTabView.h
     InelasticDataManipulationSqwTab.h
@@ -207,6 +205,8 @@ set(INC_FILES
     IndirectFunctionBrowser/ConvFunctionModel.h
     IndirectPlotOptionsModel.h
     IndirectSettingsHelper.h
+    InelasticDataManipulationElwinTabModel.h
+    InelasticDataManipulationIqtTabModel.h
     InelasticDataManipulationMomentsTabModel.h
     InelasticDataManipulationSqwTabModel.h
     InelasticDataManipulationSymmetriseTabModel.h

@@ -13,8 +13,8 @@ into a map of key/value pairs.
 */
 
 #include "DllOption.h"
+#include "MantidAPI/IAlgorithmRuntimeProps.h"
 #include "MantidKernel/System.h"
-#include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
 
 #include <QString>
 #include <sstream>
@@ -37,7 +37,7 @@ QString EXPORT_OPT_MANTIDQT_COMMON convertMapToString(const std::map<QString, QS
                                                       const char separator = ',', const bool quoteValues = true);
 std::string EXPORT_OPT_MANTIDQT_COMMON convertMapToString(const std::map<std::string, std::string> &optionsMap,
                                                           const char separator, const bool quoteValues);
-std::string EXPORT_OPT_MANTIDQT_COMMON convertAlgPropsToString(MantidQt::API::IAlgorithmRuntimeProps const &options);
+std::string EXPORT_OPT_MANTIDQT_COMMON convertAlgPropsToString(Mantid::API::IAlgorithmRuntimeProps const &options);
 std::string EXPORT_OPT_MANTIDQT_COMMON optionsToString(std::map<std::string, std::string> const &options,
                                                        const bool quoteValues = true,
                                                        const std::string &separator = ", ");

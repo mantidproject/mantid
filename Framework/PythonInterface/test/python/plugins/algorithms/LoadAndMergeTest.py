@@ -5,23 +5,33 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+from unittest import mock
+
 from mantid.api import MatrixWorkspace, WorkspaceGroup
 from mantid.simpleapi import LoadAndMerge, config, mtd
 
 
 class LoadAndMergeTest(unittest.TestCase):
+    _facility = None
+    _data_search_dirs = None
+
     @classmethod
     def setUpClass(cls):
+        cls._facility = config["default.facility"]
+        cls._data_search_dirs = config["datasearch.directories"]
         config.appendDataSearchSubDir("ILL/IN16B/")
         config.appendDataSearchSubDir("ILL/D20/")
         config.appendDataSearchSubDir("ILL/D11/")
-
-    def setUp(self):
         config["default.facility"] = "ILL"
         config["default.instrument"] = "IN16B"
 
     def turnDown(self):
         mtd.clear()
+
+    @classmethod
+    def tearDownClass(cls):
+        config["default.facility"] = cls._facility
+        config["datasearch.directories"] = cls._data_search_dirs
 
     def test_single_run_load(self):
         out1 = LoadAndMerge(Filename="170257")
@@ -64,7 +74,49 @@ class LoadAndMergeTest(unittest.TestCase):
             Filename="170300+170301",
             OutputWorkspace="out5",
             LoaderName="LoadILLIndirect",
-            MergeRunsOptions=dict({"FailBehaviour": "Stop"}),
+            MergeRunsOptions={"FailBehaviour": "Stop"},
+        )
+
+        out5 = LoadAndMerge(
+            Filename="170300+170301",
+            OutputWorkspace="out5",
+            LoaderName="LoadILLIndirect",
+            MergeRunsOptions={
+                "SampleLogsFail": "Doppler.maximum_delta_energy,Doppler.mirror_sense,acquisition_mode",
+                "SampleLogsFailTolerances": "10.0,10.0,10.0",
+                "SampleLogsList": "Doppler.maximum_delta_energy",
+            },
+        )
+        self.assertEqual(out5.getRun().getLogData("Doppler.maximum_delta_energy").value, "2, 0")
+
+    @mock.patch("plugins.algorithms.LoadAndMerge.MergeRuns")
+    def test_merge_runs_call(self, m_merge_runs):
+        # This try/except block is compulsory as the use of the mocked MergeRuns inside the
+        # LoadAndMerge algorithm triggers errors further
+        try:
+            LoadAndMerge(
+                Filename="170300+170301",
+                OutputWorkspace="out5",
+                LoaderName="LoadILLIndirect",
+                MergeRunsOptions={
+                    "SampleLogsFail": "Doppler.maximum_delta_energy,Doppler.mirror_sense,acquisition_mode",
+                    "SampleLogsFailTolerances": "10.0,10.0,10.0",
+                    "SampleLogsWarn": "Doppler.maximum_delta_energy,Doppler.mirror_sense,acquisition_mode",
+                    "SampleLogsWarnTolerances": "0.0,0.0,0.0",
+                    "SampleLogsList": "Doppler.maximum_delta_energy",
+                },
+            )
+        except RuntimeError:
+            pass
+
+        m_merge_runs.assert_called_with(
+            InputWorkspaces=["170300", "170301"],
+            OutputWorkspace="__tmp_170300",
+            SampleLogsFail="Doppler.maximum_delta_energy,Doppler.mirror_sense,acquisition_mode",
+            SampleLogsFailTolerances="10.0,10.0,10.0",
+            SampleLogsWarn="Doppler.maximum_delta_energy,Doppler.mirror_sense,acquisition_mode",
+            SampleLogsWarnTolerances="0.0,0.0,0.0",
+            SampleLogsList="Doppler.maximum_delta_energy",
         )
 
     def test_specific_loader(self):
@@ -123,12 +175,6 @@ class LoadAndMergeTest(unittest.TestCase):
         self.assertTrue("MUSR00015197_1" not in mtd)
         self.assertTrue("MUSR00015197_2" not in mtd)
 
-    def test_many_runs_summed(self):
-        out2 = LoadAndMerge(Filename="170257+170258", LoaderName="LoadILLIndirect")
-        self.assertTrue(out2)
-        self.assertEqual(out2.name(), "out2")
-        self.assertTrue(isinstance(out2, MatrixWorkspace))
-
     def test_concatenate_output(self):
         out = LoadAndMerge(Filename="010444:010446", OutputBehaviour="Concatenate")
         self.assertTrue(out)
@@ -138,6 +184,10 @@ class LoadAndMergeTest(unittest.TestCase):
         self.assertEqual(out.readX(0)[0], 0)
         self.assertEqual(out.readX(0)[1], 1)
         self.assertEqual(out.readX(0)[2], 2)
+        # check if LoadAndMerge does not abandon intermediate workspaces in ADS:
+        self.assertTrue("010444" not in mtd)
+        self.assertTrue("010445" not in mtd)
+        self.assertTrue("010446" not in mtd)
 
     def test_concatenate_output_with_log(self):
         out = LoadAndMerge(Filename="010444:010446", OutputBehaviour="Concatenate", SampleLogAsXAxis="sample.temperature")
@@ -148,6 +198,10 @@ class LoadAndMergeTest(unittest.TestCase):
         self.assertAlmostEqual(out.readX(0)[0], 297.6, 1)
         self.assertAlmostEqual(out.readX(0)[1], 297.7, 1)
         self.assertAlmostEqual(out.readX(0)[2], 297.7, 1)
+        # check if LoadAndMerge does not abandon intermediate workspaces in ADS:
+        self.assertTrue("010444" not in mtd)
+        self.assertTrue("010445" not in mtd)
+        self.assertTrue("010446" not in mtd)
 
 
 if __name__ == "__main__":

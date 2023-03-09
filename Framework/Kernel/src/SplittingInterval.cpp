@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/SplittingInterval.h"
+#include "MantidKernel/TimeROI.h"
 
 namespace Mantid {
 
@@ -12,70 +13,49 @@ using namespace Types::Core;
 namespace Kernel {
 
 /// Default constructor
-SplittingInterval::SplittingInterval() : m_start(), m_stop(), m_index(-1) {}
+SplittingInterval::SplittingInterval() : TimeInterval(), m_index(-1) {}
 
 /// Constructor using DateAndTime
 SplittingInterval::SplittingInterval(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop,
                                      const int index)
-    : m_start(start), m_stop(stop), m_index(index) {}
-
-/// Return the start time
-DateAndTime SplittingInterval::start() const { return m_start; }
-
-/// Return the stop time
-DateAndTime SplittingInterval::stop() const { return m_stop; }
+    : TimeInterval(start, stop), m_index(index) {}
 
 /// Returns the duration in seconds
-double SplittingInterval::duration() const { return DateAndTime::secondsFromDuration(m_stop - m_start); }
+double SplittingInterval::duration() const { return DateAndTime::secondsFromDuration(this->length()); }
 
 /// Return the index (destination of this split time block)
 int SplittingInterval::index() const { return m_index; }
-
-/// Return true if the b SplittingInterval overlaps with this one.
-bool SplittingInterval::overlaps(const SplittingInterval &b) const {
-  return ((b.m_start < this->m_stop) && (b.m_start >= this->m_start)) ||
-         ((b.m_stop < this->m_stop) && (b.m_stop >= this->m_start)) ||
-         ((this->m_start < b.m_stop) && (this->m_start >= b.m_start)) ||
-         ((this->m_stop < b.m_stop) && (this->m_stop >= b.m_start));
-}
 
 /// @cond DOXYGEN_BUG
 /// And operator. Return the smallest time interval where both intervals are
 /// TRUE.
 SplittingInterval SplittingInterval::operator&(const SplittingInterval &b) const {
-  SplittingInterval out(*this);
-  if (b.m_start > this->m_start)
-    out.m_start = b.m_start;
-  if (b.m_stop < this->m_stop)
-    out.m_stop = b.m_stop;
-  return out;
+  const auto begin = std::max(this->start(), b.start());
+  const auto end = std::min(this->stop(), b.stop());
+
+  return SplittingInterval(begin, end, this->index());
 }
 /// @endcond DOXYGEN_BUG
 
 /// Or operator. Return the largest time interval.
 SplittingInterval SplittingInterval::operator|(const SplittingInterval &b) const {
-  SplittingInterval out(*this);
-  if (!this->overlaps(b))
+  if (!this->overlaps(&b))
     throw std::invalid_argument("SplittingInterval: cannot apply the OR (|) "
                                 "operator to non-overlapping "
                                 "SplittingInterval's.");
 
-  if (b.m_start < this->m_start)
-    out.m_start = b.m_start;
-  if (b.m_stop > this->m_stop)
-    out.m_stop = b.m_stop;
-  return out;
+  const auto begin = std::min(this->start(), b.start());
+  const auto end = std::max(this->stop(), b.stop());
+
+  return SplittingInterval(begin, end, this->index());
 }
 
-/// Compare two splitter by the begin time
-bool SplittingInterval::operator<(const SplittingInterval &b) const { return (this->m_start < b.m_start); }
-
-/// Compare two splitter by the begin time
-bool SplittingInterval::operator>(const SplittingInterval &b) const { return (this->m_start > b.m_start); }
-
-/** Comparator for sorting lists of SplittingInterval */
-bool compareSplittingInterval(const SplittingInterval &si1, const SplittingInterval &si2) {
-  return (si1.start() < si2.start());
+bool SplittingInterval::operator==(const SplittingInterval &ti) const {
+  if (TimeInterval::operator==(ti)) {
+    return index() == ti.index();
+  } else {
+    return false;
+  }
 }
 
 //------------------------------------------------------------------------------------------------
@@ -147,7 +127,7 @@ SplittingIntervalVec operator&(const SplittingIntervalVec &a, const SplittingInt
   // sorted.
   for (ait = a.begin(); ait != a.end(); ++ait) {
     for (bit = b.begin(); bit != b.end(); ++bit) {
-      if (ait->overlaps(*bit)) {
+      if (ait->overlaps(&(*bit))) {
         // The & operator for SplittingInterval keeps the index of the
         // left-hand-side (ait in this case)
         //  meaning that a has to be the splitter because the b index is
@@ -201,26 +181,19 @@ SplittingIntervalVec removeFilterOverlap(const SplittingIntervalVec &a) {
  * @return the ORed filter
  */
 SplittingIntervalVec operator|(const SplittingIntervalVec &a, const SplittingIntervalVec &b) {
-  SplittingIntervalVec out;
-
   // Concatenate the two lists
   SplittingIntervalVec temp;
-  // temp.insert(temp.end(), b.begin(), b.end());
+  auto isValid = [](const SplittingInterval &value) { return value.isValid(); };
+  std::copy_if(a.begin(), a.end(), std::back_insert_iterator(temp), isValid);
+  std::copy_if(b.begin(), b.end(), std::back_insert_iterator(temp), isValid);
 
-  // Add the intervals, but don't add any invalid (empty) ranges
-  SplittingIntervalVec::const_iterator it;
-  ;
-  for (it = a.begin(); it != a.end(); ++it)
-    if (it->stop() > it->start())
-      temp.emplace_back(*it);
-  for (it = b.begin(); it != b.end(); ++it)
-    if (it->stop() > it->start())
-      temp.emplace_back(*it);
+  // Sort by start time rather than the default
+  auto compareStart = [](const SplittingInterval &left, const SplittingInterval &right) {
+    return left.start() < right.start();
+  };
+  std::sort(temp.begin(), temp.end(), compareStart);
 
-  // Sort by start time
-  std::sort(temp.begin(), temp.end(), compareSplittingInterval);
-
-  out = removeFilterOverlap(temp);
+  SplittingIntervalVec out = removeFilterOverlap(temp);
 
   return out;
 }
@@ -264,5 +237,26 @@ SplittingIntervalVec operator~(const SplittingIntervalVec &a) {
   }
   return out;
 }
+
+//------------------------------------------------------------------------------------------------
+/** For every workspace index, create a TimeROI out of its associated splitting intervals
+ * @param splitters :: vector of splitting intervals, each interval has an associated workspace index
+ * @return map from workspace index to TimeROI object
+ */
+std::map<int, Kernel::TimeROI> timeROIsFromSplitters(const SplittingIntervalVec &splitters) {
+  std::map<int, Kernel::TimeROI> roisMap;
+  for (auto const &splitter : splitters) {
+    // some input SplittingInterval can have same `begin` and `end` time, which is disallowed for a TimeROI object
+    if (splitter.start() >= splitter.stop())
+      continue;
+    int destinationIndex = splitter.index();             // if existing, nonsense index -1 will also have its TimeROI
+    if (roisMap.find(destinationIndex) == roisMap.end()) // first time we encounter destinationIndex
+      roisMap.insert({destinationIndex, TimeROI(splitter.start(), splitter.stop())});
+    else
+      roisMap[destinationIndex].addROI(splitter.start(), splitter.stop());
+  }
+  return roisMap;
+}
+
 } // namespace Kernel
 } // namespace Mantid

@@ -44,7 +44,7 @@ namespace MantidQt::MantidWidgets {
  * @param rootActor :: The instrument actor containing all info about the
  * instrument
  */
-ProjectionSurface::ProjectionSurface(const InstrumentActor *rootActor)
+ProjectionSurface::ProjectionSurface(const IInstrumentActor *rootActor)
     : m_instrActor(rootActor), m_viewImage(nullptr), m_pickImage(nullptr), m_viewRect(), m_selectRect(),
       m_interactionMode(MoveMode), m_isLightingOn(false), m_peakLabelPrecision(2), m_showPeakRows(false),
       m_showPeakLabels(false), m_showPeakRelativeIntensity(false), m_peakShapesStyle(0), m_viewChanged(true),
@@ -146,7 +146,7 @@ void ProjectionSurface::toggleToolTip(bool activateToolTip) {
  * Resets the instrument actor. The caller must ensure that the instrument
  * stays the same and workspace dimensions also don't change.
  */
-void ProjectionSurface::resetInstrumentActor(const InstrumentActor *rootActor) {
+void ProjectionSurface::resetInstrumentActor(const IInstrumentActor *rootActor) {
   m_instrActor = rootActor;
   connect(rootActor, SIGNAL(colorMapChanged()), this, SLOT(colorMapChanged()));
 }
@@ -188,23 +188,34 @@ void ProjectionSurface::draw(GLDisplay *widget) const {
  * @param picking :: Picking / normal drawing switch.
  */
 void ProjectionSurface::draw(GLDisplay *widget, bool picking) const {
+  // By default the viewport and window on the QPainter is set to
+  // the dimensions of the number of physical pixels on the device
+  // when used with an OpenGLWidget whereas methods like widget->width()/height()
+  // return logical pixels. All subsequent commands for 2D
+  // overlays assume logical pixels so we configure the painter
+  // such that the internal transformations take care o the mapping of logical
+  // to physical appropriately.
+  auto configurePainter = [widget](QPainter &painter) {
+    painter.setWindow(0, 0, widget->width(), widget->height());
+    painter.setViewport(0, 0, widget->width(), widget->height());
+  };
+
   QImage **image = picking ? &m_pickImage : &m_viewImage;
-
-  if (!*image || (*image)->width() != widget->width() || (*image)->height() != widget->height()) {
-    m_viewChanged = true;
-  }
-
   if (m_viewChanged) {
-
     this->drawSurface(widget, picking);
-
     if (*image) {
       delete (*image);
     }
-    (*image) = new QImage(widget->grabFrameBuffer());
+    (*image) = new QImage(widget->grabFramebuffer());
+    // The QImage dimensions will match the number of physical pixels
+    // but the view image is used in determining transformations for zooming
+    // where logical pixels are used. Storing the devicePixelRatio allows the
+    // information to be retrieved when necessary.
+    (*image)->setDevicePixelRatio(widget->devicePixelRatio());
 
     if (!picking) {
       QPainter painter(widget);
+      configurePainter(painter);
       drawMaskShapes(painter);
       drawPeakMarkers(painter);
       drawPeakComparisonLine(painter);
@@ -214,8 +225,8 @@ void ProjectionSurface::draw(GLDisplay *widget, bool picking) const {
     }
   } else if (!picking) {
     QPainter painter(widget);
+    configurePainter(painter);
     painter.drawImage(0, 0, **image);
-
     drawMaskShapes(painter);
     drawPeakMarkers(painter);
     drawPeakComparisonLine(painter);
@@ -345,34 +356,6 @@ QRect ProjectionSurface::selectionRect() const {
   return QRect(x_min, y_min, x_size, y_size);
 }
 
-RectF ProjectionSurface::selectionRectUV() const {
-  auto left = static_cast<double>(m_selectRect.left());
-  auto right = static_cast<double>(m_selectRect.right());
-  auto top = static_cast<double>(m_selectRect.top());
-  auto bottom = static_cast<double>(m_selectRect.bottom());
-
-  if (left > right) {
-    std::swap(left, right);
-  }
-
-  if (top > bottom) {
-    std::swap(top, bottom);
-  }
-
-  if (abs(m_selectRect.width()) <= 1 || abs(m_selectRect.height()) <= 1)
-    return RectF();
-
-  double sx = m_viewRect.xSpan() / m_viewImage->width();
-  double sy = m_viewRect.ySpan() / m_viewImage->height();
-
-  double x_min = left * sx + m_viewRect.x0();
-  double x_max = right * sx + m_viewRect.x0();
-  double y_min = (m_viewImage->height() - bottom) * sy + m_viewRect.y0();
-  double y_max = (m_viewImage->height() - top) * sy + m_viewRect.y0();
-
-  return RectF(QPointF(x_min, y_min), QPointF(x_max, y_max));
-}
-
 bool ProjectionSurface::hasSelection() const { return !m_selectRect.isNull() && m_selectRect.width() > 0; }
 
 void ProjectionSurface::colorMapChanged() {
@@ -407,7 +390,9 @@ void ProjectionSurface::setInteractionMode(int mode) {
   controller->onEnabled();
   if (mode != EditShapeMode && mode != DrawFreeMode) {
     m_maskShapes.deselectAll();
-    foreach (PeakOverlay *po, m_peakShapes) { po->deselectAll(); }
+    for (auto peakOverlay : std::as_const(m_peakShapes)) {
+      peakOverlay->deselectAll();
+    }
   }
 }
 
@@ -472,10 +457,24 @@ bool ProjectionSurface::canShowContextMenu() const {
 }
 
 //------------------------------------------------------------------------------
+/**
+ * Return the unique "pick ID" that identifies a detector index from
+ * the given 2D position in the image.
+ * @param x The X coordinate in logical pixels
+ * @param y The Y coordinate in logical pixels
+ */
 size_t ProjectionSurface::getPickID(int x, int y) const {
-  if (!m_pickImage || !m_pickImage->valid(x, y))
+  // OpenGL canvases on high-pixel density monitors have a higher number of physical
+  // pixels in the QImage. The pick coordinates are in logical coordinates so we need to scale them
+  auto toImageCoord = [this](int logical) {
+    return static_cast<int>(std::lround(logical * m_pickImage->devicePixelRatio()));
+  };
+
+  const int imageX(toImageCoord(x)), imageY(toImageCoord(y));
+  if (!m_pickImage || !m_pickImage->valid(imageX, imageY))
     return -1;
-  QRgb pixel = m_pickImage->pixel(x, y);
+
+  QRgb pixel = m_pickImage->pixel(imageX, imageY);
   return InstrumentRenderer::decodePickColor(pixel);
 }
 
@@ -499,7 +498,9 @@ void ProjectionSurface::setPeakVisibility() const {
     QString unitID = QString::fromStdString(unit->unitID());
     double xmin = m_instrActor->minBinValue();
     double xmax = m_instrActor->maxBinValue();
-    foreach (PeakOverlay *po, m_peakShapes) { po->setPeakVisibility(xmin, xmax, unitID); }
+    for (auto peakOverlay : std::as_const(m_peakShapes)) {
+      peakOverlay->setPeakVisibility(xmin, xmax, unitID);
+    }
   }
 }
 
@@ -988,7 +989,9 @@ void ProjectionSurface::enableLighting(bool on) { m_isLightingOn = on; }
  */
 QStringList ProjectionSurface::getPeaksWorkspaceNames() const {
   QStringList names;
-  foreach (PeakOverlay *po, m_peakShapes) { names << QString::fromStdString(po->getPeaksWorkspace()->getName()); }
+  for (auto peakOverlay : std::as_const(m_peakShapes)) {
+    names << QString::fromStdString(peakOverlay->getPeaksWorkspace()->getName());
+  }
   return names;
 }
 

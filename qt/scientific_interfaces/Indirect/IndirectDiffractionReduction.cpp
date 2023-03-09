@@ -7,12 +7,12 @@
 #include "IndirectDiffractionReduction.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiFileNameParser.h"
-#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 
 #include <QSignalBlocker>
 
@@ -203,7 +203,7 @@ void IndirectDiffractionReduction::saveReductions() {
           m_batchAlgoRunner->addAlgorithm(convertUnitsAlgorithm(wsName, tofWsName, "TOF"));
         }
 
-        auto runtimeInput = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+        auto runtimeInput = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
         runtimeInput->setPropertyValue("InputWorkspace", tofWsName);
         m_batchAlgoRunner->addAlgorithm(saveGSSAlgorithm(wsName + ".gss"), std::move(runtimeInput));
       }
@@ -381,7 +381,7 @@ void IndirectDiffractionReduction::runGenericReduction(const QString &instName, 
       msgDiffReduction->setProperty("ContainerScaleFactor", m_uiForm.spCanScale->value());
   }
 
-  auto diffRuntimeProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  auto diffRuntimeProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   m_groupingWsName = "__Grouping";
   // Add the property for grouping policy if needed
   if (useManualGrouping) {
@@ -442,7 +442,7 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
 
   m_batchAlgoRunner->addAlgorithm(osirisDiffReduction);
 
-  auto inputFromReductionProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  auto inputFromReductionProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   inputFromReductionProps->setPropertyValue("InputWorkspace", drangeWsName.toStdString());
 
   IAlgorithm_sptr convertUnits = AlgorithmManager::Instance().create("ConvertUnits");

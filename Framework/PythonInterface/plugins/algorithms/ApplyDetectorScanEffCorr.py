@@ -46,7 +46,7 @@ class ApplyDetectorScanEffCorr(PythonAlgorithm):
         n_hist = input_ws.getNumberHistograms()
         if n_hist % efficiencies.size != 0:
             raise ValueError(
-                "Number of histograms in input workspace is not a multiple of number of entries in detector efficiency " "workspace."
+                "Number of histograms in input workspace is not a multiple of number of entries in detector efficiency workspace."
             )
         n_time_indexes = n_hist / efficiencies.size
         to_multiply = CreateWorkspace(

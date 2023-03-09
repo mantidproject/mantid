@@ -63,7 +63,6 @@ bool SplittersWorkspace::removeSplitter(size_t index) {
 
   return removed;
 }
-
 } // namespace Mantid::DataObjects
 
 ///\cond TEMPLATE

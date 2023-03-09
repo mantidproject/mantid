@@ -7,10 +7,8 @@
 #  This file is part of the mantid package
 from collections.abc import Iterable
 import copy
-from distutils.version import LooseVersion
 from functools import wraps
 
-import matplotlib
 import numpy as np
 import re
 
@@ -1324,8 +1322,7 @@ class MantidAxes3D(Axes3D):
     name = "mantid3d"
 
     def __init__(self, *args, **kwargs):
-        if LooseVersion("3.4.0") <= LooseVersion(matplotlib.__version__):
-            kwargs["auto_add_to_figure"] = False
+        kwargs["auto_add_to_figure"] = False
         super().__init__(*args, **kwargs)
 
     def set_title(self, *args, **kwargs):
@@ -1378,7 +1375,6 @@ class MantidAxes3D(Axes3D):
                     self.collections[0]._vec[axis_index] = axis_data
 
         if hasattr(self, "original_data_wireframe"):
-
             all_data = copy.deepcopy(self.original_data_wireframe)
 
             for spectrum in range(len(all_data)):

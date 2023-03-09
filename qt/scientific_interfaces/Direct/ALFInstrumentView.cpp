@@ -129,11 +129,7 @@ void ALFInstrumentView::setVanadiumRun(std::string const &runNumber) {
 }
 
 void ALFInstrumentView::sampleLoaded() {
-  if (m_sample->getText().isEmpty()) {
-    return;
-  }
-
-  if (!m_sample->isValid()) {
+  if (!m_sample->getText().isEmpty() && !m_sample->isValid()) {
     warningBox(m_sample->getFileProblem().toStdString());
     return;
   }
@@ -157,12 +153,16 @@ MantidWidgets::IInstrumentActor const &ALFInstrumentView::getInstrumentActor() c
 }
 
 std::vector<DetectorTube> ALFInstrumentView::getSelectedDetectors() const {
-  auto const surface = std::dynamic_pointer_cast<MantidQt::MantidWidgets::UnwrappedSurface>(
-      m_instrumentWidget->getInstrumentDisplay()->getSurface());
+  auto const surface = m_instrumentWidget->getInstrumentDisplay()->getSurface();
+  auto const unwrappedSurface = std::dynamic_pointer_cast<MantidQt::MantidWidgets::UnwrappedSurface>(surface);
+
+  if (!unwrappedSurface) {
+    return {};
+  }
 
   std::vector<size_t> detectorIndices;
   // Find the detectors which are being intersected by the "masked" shapes.
-  surface->getIntersectingDetectors(detectorIndices);
+  unwrappedSurface->getIntersectingDetectors(detectorIndices);
   // Find all the detector indices in the entirety of the selected tubes
   return m_instrumentWidget->findWholeTubeDetectorIndices(detectorIndices);
 }
@@ -174,7 +174,10 @@ void ALFInstrumentView::selectWholeTube() {
 }
 
 void ALFInstrumentView::notifyWholeTubeSelected(std::size_t pickID) {
-  m_presenter->notifyTubesSelected(m_instrumentWidget->findWholeTubeDetectorIndices({pickID}));
+  auto const pickTab = m_instrumentWidget->getPickTab();
+  if (pickTab->getSelectTubeButton()->isChecked()) {
+    m_presenter->notifyTubesSelected(m_instrumentWidget->findWholeTubeDetectorIndices({pickID}));
+  }
 }
 
 void ALFInstrumentView::clearShapes() {

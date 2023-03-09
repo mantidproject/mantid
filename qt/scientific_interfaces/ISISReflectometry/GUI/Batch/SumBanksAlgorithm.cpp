@@ -5,14 +5,14 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SumBanksAlgorithm.h"
-#include "AlgorithmProperties.h"
 #include "BatchJobAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmProperties.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/IAlgorithmRuntimeProps.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
-#include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
 #include "Reduction/IBatch.h"
 #include "Reduction/Item.h"
 #include "Reduction/PreviewRow.h"
@@ -26,7 +26,7 @@ using MantidQt::API::IConfiguredAlgorithm;
 using MantidQt::API::IConfiguredAlgorithm_sptr;
 
 namespace {
-void updateInputProperties(MantidQt::API::IAlgorithmRuntimeProps &properties, MatrixWorkspace_sptr const &workspace,
+void updateInputProperties(Mantid::API::IAlgorithmRuntimeProps &properties, MatrixWorkspace_sptr const &workspace,
                            boost::optional<ProcessingInstructions> const &detIDsStr) {
   properties.setProperty("InputWorkspace", workspace);
   if (detIDsStr) {
@@ -54,7 +54,7 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Preview
   alg->setAlwaysStoreInADS(false);
   alg->getPointerToProperty("OutputWorkspace")->createTemporaryValue();
 
-  auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
 
   // Look up properties for this run on the lookup table
   auto lookupRow = model.findLookupRow(row);

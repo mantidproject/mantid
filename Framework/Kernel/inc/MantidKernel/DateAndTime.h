@@ -25,25 +25,34 @@ namespace Kernel {
 class MANTID_KERNEL_DLL TimeInterval {
 public:
   /// Default constructor
-  TimeInterval() : m_begin(), m_end() {}
+  TimeInterval() : m_start(), m_stop() {}
   /// Constructor
   TimeInterval(const Types::Core::DateAndTime &from, const Types::Core::DateAndTime &to);
+  TimeInterval(const std::string &from, const std::string &to);
+
   /// Beginning of the interval
-  Types::Core::DateAndTime begin() const { return m_begin; }
+  Types::Core::DateAndTime start() const { return m_start; }
   /// End of the interval
-  Types::Core::DateAndTime end() const { return m_end; }
+  Types::Core::DateAndTime stop() const { return m_stop; }
   /// True if the interval is not empty
-  bool isValid() const { return m_end > m_begin; }
+  bool isValid() const { return m_stop > m_start; }
 
   /// Interval length (in seconds?)
-  Types::Core::time_duration length() const { return m_end - m_begin; }
+  Types::Core::time_duration length() const { return m_stop - m_start; }
 
   /// True if the interval contains \a t.
-  bool contains(const Types::Core::DateAndTime &t) const { return t >= begin() && t < end(); }
+  bool contains(const Types::Core::DateAndTime &t) const { return t >= start() && t < stop(); }
+  /// Return true if the SplittingInterval overlaps with this one.
+  bool overlaps(const TimeInterval *other) const;
+  /// Return true if the SplittingInterval overlaps with this one.
+  bool overlaps(const TimeInterval &other) const;
+
   /// Returns an intersection of two intervals
   TimeInterval intersection(const TimeInterval &ti) const;
   /// Returns true if this interval ends before \a ti starts
-  bool operator<(const TimeInterval &ti) const { return end() < ti.begin(); }
+  bool operator<(const TimeInterval &ti) const;
+  bool operator>(const TimeInterval &ti) const;
+  bool operator==(const TimeInterval &ti) const;
   /// String representation of the begin time
   std::string begin_str() const;
   /// String representation of the end time
@@ -54,9 +63,9 @@ public:
 
 private:
   /// begin
-  Types::Core::DateAndTime m_begin;
+  Types::Core::DateAndTime m_start;
   /// end
-  Types::Core::DateAndTime m_end;
+  Types::Core::DateAndTime m_stop;
 };
 
 } // namespace Kernel

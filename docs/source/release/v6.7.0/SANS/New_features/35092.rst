@@ -1,0 +1,3 @@
+- D16B now has two monitors in the scanned variables, instead of one. Searching for monitor indices
+  in the scanned variables table is performed for each file in :ref:`LoadILLSANS <algm-LoadILLSANS>`
+- :ref:`SANSILLReduction <algm-SANSILLReduction-v2>` can now process empty container data coming from a scan measurement.

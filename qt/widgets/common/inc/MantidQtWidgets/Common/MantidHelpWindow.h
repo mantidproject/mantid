@@ -49,9 +49,6 @@ private:
 
   /// The full path of the collection file.
   std::string m_collectionFile;
-  /** The full path of the cache file. If it is not
-      determined this is an empty string. */
-  std::string m_cacheFile;
   /// The window that renders the help information
   static QPointer<pqHelpWindow> g_helpWindow;
 

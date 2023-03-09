@@ -1,1 +1,0 @@
-- In the error reporter, a label showing the maximum character limit of the additional context text has been added.

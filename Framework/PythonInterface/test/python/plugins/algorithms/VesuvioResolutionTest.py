@@ -32,14 +32,18 @@ class VesuvioResolutionTest(unittest.TestCase):
         Tests that validation fails if no output workspace is given.
         """
 
-        self.assertRaises(RuntimeError, VesuvioResolution, Workspace=self._sample_ws, Mass=1.0079)
+        self.assertRaisesRegex(
+            RuntimeError, "Must output in either time of flight or ySpace", VesuvioResolution, Workspace=self._sample_ws, Mass=1.0079
+        )
 
     def test_ws_index_validation(self):
         """
         Tests that validation fails if ws index is out of range.
         """
 
-        self.assertRaises(RuntimeError, VesuvioResolution, Workspace=self._sample_ws, Mass=1.0079, WorkspaceIndex=50)
+        self.assertRaisesRegex(
+            RuntimeError, "Workspace index is out of range", VesuvioResolution, Workspace=self._sample_ws, Mass=1.0079, WorkspaceIndex=50
+        )
 
 
 if __name__ == "__main__":

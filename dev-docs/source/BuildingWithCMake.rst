@@ -104,13 +104,6 @@ Working with CMake:
 * If you add a new dependency, that will need to be added (this is less straightforward - do ask for help).
 * Cache variables can be added via the CMake Gui or by running ``ccmake``.
 
-Building the installer package
-##############################
-
-* For Windows only, you first need to install NSIS, available at: http://nsis.sourceforge.net/Download. Ensure that the install directory is added to the PATH. You should be able to type ``makensis /?`` in a command prompt.
-* Run CMake with "ENABLE_CPACK" enabled. If using the GUI you need to click the "Advanced" checkbox to see this option.
-* You will now have a build target called `package` available to create the installer package.
-
 Caveats and Known Issues
 ########################
 

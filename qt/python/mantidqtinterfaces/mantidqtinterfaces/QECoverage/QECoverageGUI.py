@@ -4,14 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from distutils.version import LooseVersion
 
 from mantidqt.gui_helper import show_interface_help
 import numpy as np
 import mantid
 from qtpy import QtWidgets, QtCore
 from mantidqt.MPLwidgets import *
-import matplotlib
 from matplotlib.figure import Figure
 from scipy import constants
 
@@ -383,8 +381,6 @@ class QECoverageGUI(QtWidgets.QWidget):
             self.xlim = 0
             self.axes.clear()
             self.axes.axhline(color="k")
-        if LooseVersion("2.1.0") > LooseVersion(matplotlib.__version__):
-            self.axes.hold(True)  # hold is deprecated since 2.1.0, true by default
         Inst = self.direct_inst_box.currentText()
         for n in range(len(qe)):
             name = Inst + "_Ei=" + str(ei_vec[n])
@@ -417,9 +413,6 @@ class QECoverageGUI(QtWidgets.QWidget):
             self.xlim = 0
             self.axes.clear()
             self.axes.axhline(color="k")
-        else:
-            if LooseVersion("2.1.0") > LooseVersion(matplotlib.__version__):
-                self.axes.hold(True)  # hold is deprecated since 2.1.0, true by default
         (line,) = self.axes.plot(qe[0][0], qe[0][1])
         line.set_label(inst + "_" + ana)
         if max(qe[0][0]) > self.xlim:
@@ -433,7 +426,6 @@ class QECoverageGUI(QtWidgets.QWidget):
         self.canvas.draw()
 
     def direct_input_check(self, ei_vec):
-
         if len(ei_vec) > 0:
             ei_str = ""
             update_ei_str = False
@@ -480,7 +472,6 @@ class QECoverageGUI(QtWidgets.QWidget):
         return ei_vec
 
     def indirect_input_check(self, ana):
-
         Emax_min = 0
         if ana == "PG002" or ana == "Mica006":
             Emax_min = -1

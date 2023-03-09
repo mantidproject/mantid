@@ -110,13 +110,15 @@ class CalculateSampleTransmissionTest(unittest.TestCase):
         density = -0.1
         thickness = 0.1
 
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Density must be positive",
             CalculateSampleTransmission,
             WavelengthRange="5.0,0.2,7.0",
             ChemicalFormula=formula,
-            NumberDensity=density,
+            Density=density,
             Thickness=thickness,
+            OutputWorkspace="test",
         )
 
     def test_validate_thickness(self):
@@ -129,13 +131,15 @@ class CalculateSampleTransmissionTest(unittest.TestCase):
         density = 0.1
         thickness = -0.1
 
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Thickness must be positive",
             CalculateSampleTransmission,
             WavelengthRange="5.0,0.2,7.0",
             ChemicalFormula=formula,
-            NumberDensity=density,
+            Density=density,
             Thickness=thickness,
+            OutputWorkspace="test",
         )
 
 

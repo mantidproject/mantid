@@ -15,7 +15,6 @@ import numpy as np
 
 class FindGoniometerFromUB_Test(unittest.TestCase):
     def runTest(self):
-
         ubList = ["WISH00043350", "WISH00043351", "WISH00043353"]
         chiRef = 45.0
         chiTol = 5
@@ -63,9 +62,17 @@ class FindGoniometerFromUB_Test(unittest.TestCase):
 
     def test_InputValidation(self):
         alg = create_algorithm(
-            "FindGoniometerFromUB", UBfiles="WISH00043350", chi=45, chiTol=5, phiTol=10, phiHand=-1, dOmega=0, omegaHand=1
+            "FindGoniometerFromUB",
+            UBfiles="WISH00043350",
+            chi=45,
+            chiTol=5,
+            phiTol=10,
+            phiHand=-1,
+            dOmega=0,
+            omegaHand=1,
+            OutputTable="test",
         )
-        with self.assertRaises(RuntimeError):
+        with self.assertRaisesRegex(RuntimeError, "At least two UB files are required"):
             alg.execute()
 
 

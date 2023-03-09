@@ -92,7 +92,8 @@ public:
 
   /// Adds an algorithm to the execution queue
   void addAlgorithm(const Mantid::API::IAlgorithm_sptr &algo);
-  void addAlgorithm(const Mantid::API::IAlgorithm_sptr &algo, std::unique_ptr<IAlgorithmRuntimeProps> props);
+  void addAlgorithm(const Mantid::API::IAlgorithm_sptr &algo,
+                    std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> props);
 
   void setQueue(std::deque<IConfiguredAlgorithm_sptr> algorithm);
   /// Clears all algorithms from queue
@@ -104,6 +105,8 @@ public:
   bool executeBatch();
   /// Starts the batch executing and returns immediately
   void executeBatchAsync();
+  /// Starts a single algorithm and returns immediately
+  void executeAlgorithmAsync(const IConfiguredAlgorithm_sptr &algorithm);
   /// Request to cancel processing the batch
   void cancelBatch();
 

@@ -76,8 +76,9 @@ class EnggFocusTest(unittest.TestCase):
         self.assertRaises(RuntimeError, EnggFocus, InputWorkspace=self.__class__._data_ws, Detectors=tbl, OutputWorkspace="nop")
 
         # bank and indices list clash. This starts as a ValueError but the managers is raising a RuntimeError
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "It is not possible to use at the same time the input properties 'Bank' and 'DetectorIndices', as they overlap.",
             EnggFocus,
             InputWorkspace=self.__class__._data_ws,
             Bank="2",
@@ -87,8 +88,9 @@ class EnggFocusTest(unittest.TestCase):
         )
 
         # workspace index too big. This starts as a ValueError but the managers is raising a RuntimeError
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "A workspace index equal or bigger than the number of histograms available in the workspace 'ENGIN-X_test_ws'",
             EnggFocus,
             InputWorkspace=self.__class__._data_ws,
             DetectorPositions=tbl,
@@ -108,8 +110,9 @@ class EnggFocusTest(unittest.TestCase):
         )
 
         # wrong bin values for masking
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "The number of minimum and maximum values must match",
             EnggFocus,
             InputWorkspace=self.__class__._data_ws,
             DetectorPositions=tbl,
@@ -119,8 +122,9 @@ class EnggFocusTest(unittest.TestCase):
             OutputWorkspace="nop",
         )
 
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "The number of minimum and maximum values must match",
             EnggFocus,
             InputWorkspace=self.__class__._data_ws,
             DetectorPositions=tbl,
@@ -129,8 +133,9 @@ class EnggFocusTest(unittest.TestCase):
             OutputWorkspace="nop",
         )
 
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "The number of minimum and maximum values must match",
             EnggFocus,
             InputWorkspace=self.__class__._data_ws,
             DetectorPositions=tbl,

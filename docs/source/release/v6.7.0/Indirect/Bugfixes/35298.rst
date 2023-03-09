@@ -1,0 +1,1 @@
+- Fixed a hard crash caused by attempted loading of empty list of enabled SD detectors of IN16B data in :ref:`LoadILLIndirect <algm-LoadILLIndirect`.

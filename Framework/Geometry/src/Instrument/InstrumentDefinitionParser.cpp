@@ -719,6 +719,16 @@ void InstrumentDefinitionParser::setLocation(Geometry::IComponent *comp, const P
   } // end while
 }
 
+void InstrumentDefinitionParser::setSideBySideViewLocation(Geometry::IComponent *comp,
+                                                           const Poco::XML::Element *pCompElem) {
+  auto pViewLocElem = pCompElem->getChildElement("side-by-side-view-location");
+  if (pViewLocElem) {
+    double x = attrToDouble(pViewLocElem, "x");
+    double y = attrToDouble(pViewLocElem, "y");
+    comp->setSideBySideViewPos(V2D(x, y));
+  }
+}
+
 //-----------------------------------------------------------------------------------------------------------------------
 /** Calculate the position of comp relative to its parent from info provided by
  *\<location\> element.
@@ -1125,6 +1135,7 @@ void InstrumentDefinitionParser::appendAssembly(Geometry::ICompAssembly *parent,
   // check if any logfiles are referred to through the <parameter> element.
 
   setLocation(ass, pLocElem, m_angleConvertConst, m_deltaOffsets);
+  setSideBySideViewLocation(ass, pCompElem);
   setFacing(ass, pLocElem);
   setLogfile(ass, pCompElem,
              m_instrument->getLogfileCache()); // params specified within <component>
@@ -1293,6 +1304,8 @@ void InstrumentDefinitionParser::createDetectorOrMonitor(Geometry::ICompAssembly
   // only used if the
   // "facing" elements are defined in the instrument definition file
   m_facingComponent.emplace_back(detector);
+
+  setSideBySideViewLocation(detector, pCompElem);
 }
 
 void InstrumentDefinitionParser::createGridDetector(Geometry::ICompAssembly *parent, const Poco::XML::Element *pLocElem,
@@ -1366,6 +1379,8 @@ void InstrumentDefinitionParser::createGridDetector(Geometry::ICompAssembly *par
   // Default ID row step size
   if (pCompElem->hasAttribute("idstep"))
     idstep = std::stoi(pCompElem->getAttribute("idstep"));
+
+  setSideBySideViewLocation(bank, pCompElem);
 
   // Now, initialize all the pixels in the bank
   bank->initialize(shape, xpixels, xstart, xstep, ypixels, ystart, ystep, zpixels, zstart, zstep, idstart, idfillorder,
@@ -1461,6 +1476,8 @@ void InstrumentDefinitionParser::createRectangularDetector(Geometry::ICompAssemb
   // Default ID row step size
   if (pCompElem->hasAttribute("idstep"))
     idstep = std::stoi(pCompElem->getAttribute("idstep"));
+
+  setSideBySideViewLocation(bank, pCompElem);
 
   // Now, initialize all the pixels in the bank
   bank->initialize(shape, xpixels, xstart, xstep, ypixels, ystart, ystep, idstart, idfillbyfirst_y, idstepbyrow,

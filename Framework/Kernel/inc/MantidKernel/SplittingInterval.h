@@ -11,6 +11,11 @@
 namespace Mantid {
 namespace Kernel {
 
+//-----------------------------------------------------------------------------
+// Forward declarations
+//-----------------------------------------------------------------------------
+class TimeROI;
+
 /**
  * Class holding a start/end time and a destination for splitting
  * event lists and logs.
@@ -20,34 +25,25 @@ namespace Kernel {
  *
  * Author: Janik Zikovsky, SNS
  */
-class MANTID_KERNEL_DLL SplittingInterval {
+class MANTID_KERNEL_DLL SplittingInterval : public TimeInterval {
 public:
   /// Default constructor
   SplittingInterval();
 
   SplittingInterval(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop, const int index = 0);
 
-  Types::Core::DateAndTime start() const;
-  Types::Core::DateAndTime stop() const;
-
   double duration() const;
 
   int index() const;
 
-  bool overlaps(const SplittingInterval &b) const;
   /// @cond
   SplittingInterval operator&(const SplittingInterval &b) const;
   /// @endcond
   SplittingInterval operator|(const SplittingInterval &b) const;
 
-  bool operator<(const SplittingInterval &b) const;
-  bool operator>(const SplittingInterval &b) const;
+  bool operator==(const SplittingInterval &ti) const;
 
 private:
-  /// begin
-  Types::Core::DateAndTime m_start;
-  /// end
-  Types::Core::DateAndTime m_stop;
   /// Index of the destination
   int m_index;
 };
@@ -64,6 +60,10 @@ MANTID_KERNEL_DLL SplittingIntervalVec operator+(const SplittingIntervalVec &a, 
 MANTID_KERNEL_DLL SplittingIntervalVec operator&(const SplittingIntervalVec &a, const SplittingIntervalVec &b);
 MANTID_KERNEL_DLL SplittingIntervalVec operator|(const SplittingIntervalVec &a, const SplittingIntervalVec &b);
 MANTID_KERNEL_DLL SplittingIntervalVec operator~(const SplittingIntervalVec &a);
+
+// -------------- Helper Functions ---------------------
+// for every workspace index, create a TimeROI out of its associated spliting intervals
+MANTID_KERNEL_DLL std::map<int, TimeROI> timeROIsFromSplitters(const SplittingIntervalVec &splitters);
 
 } // Namespace Kernel
 } // Namespace Mantid

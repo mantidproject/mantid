@@ -27,7 +27,9 @@ Shape2DCollection::Shape2DCollection()
       m_overridingCursor(false) {}
 
 Shape2DCollection::~Shape2DCollection() {
-  foreach (Shape2D *shape, m_shapes) { delete shape; }
+  for (auto shape : std::as_const(m_shapes)) {
+    delete shape;
+  }
 }
 
 /**
@@ -40,7 +42,7 @@ void Shape2DCollection::draw(QPainter &painter) const {
   // separate scalable and nonscalable shapes
   QList<Shape2D *> scalable;
   QList<Shape2D *> nonscalable;
-  foreach (Shape2D *shape, m_shapes) {
+  for (auto shape : std::as_const(m_shapes)) {
     if (!shape->isVisible())
       continue;
     if (shape->isScalable()) {
@@ -53,7 +55,7 @@ void Shape2DCollection::draw(QPainter &painter) const {
   // first draw the scalable ones
   painter.save();
   painter.setTransform(m_transform);
-  foreach (const Shape2D *shape, scalable) {
+  for (const auto shape : std::as_const(scalable)) {
     painter.save();
     shape->draw(painter);
     painter.restore();
@@ -61,7 +63,7 @@ void Shape2DCollection::draw(QPainter &painter) const {
   painter.restore();
 
   // now the nonscalable
-  foreach (const Shape2D *shape, nonscalable) {
+  for (const auto shape : std::as_const(nonscalable)) {
     QPointF p0 = shape->origin();
     QPointF p1 = m_transform.map(p0);
     QPointF dp = p1 - p0;
@@ -111,7 +113,7 @@ void Shape2DCollection::removeShape(Shape2D *shape, bool sendSignal) {
  * @param shapeList :: A list of pointers to the shapes to be removed
  */
 void Shape2DCollection::removeShapes(const QList<Shape2D *> &shapeList) {
-  foreach (Shape2D *shape, shapeList) {
+  for (auto shape : shapeList) {
     if (shape == m_currentShape) {
       m_currentShape = nullptr;
     }
@@ -134,7 +136,9 @@ void Shape2DCollection::refit() {}
 
 void Shape2DCollection::resetBoundingRect() {
   m_boundingRect = RectF();
-  foreach (const Shape2D *shape, m_shapes) { m_boundingRect.unite(shape->getBoundingRect()); }
+  for (const auto shape : std::as_const(m_shapes)) {
+    m_boundingRect.unite(shape->getBoundingRect());
+  }
 }
 
 void Shape2DCollection::keyPressEvent(QKeyEvent *e) {
@@ -196,7 +200,7 @@ Shape2D *Shape2DCollection::createShape(const QString &type, int x, int y) const
  * Deselect all selected shapes.
  */
 void Shape2DCollection::deselectAll() {
-  foreach (Shape2D *shape, m_shapes) {
+  for (auto shape : std::as_const(m_shapes)) {
     shape->edit(false);
     shape->setSelected(false);
   }
@@ -271,7 +275,9 @@ void Shape2DCollection::moveShapeOrControlPointBy(int dx, int dy) {
     QPointF screenP1 = screenP0 + QPointF(dx, dy);
     QPointF p1 = m_transform.inverted().map(screenP1);
     QPointF dp = p1 - p0;
-    foreach (Shape2D *shape, m_selectedShapes) { shape->moveBy(dp); }
+    for (const auto shape : std::as_const(m_selectedShapes)) {
+      shape->moveBy(dp);
+    }
   }
   if (!m_overridingCursor) {
     m_overridingCursor = true;
@@ -349,7 +355,7 @@ bool Shape2DCollection::selectAtXY(const QPointF &point, bool edit) {
     // if shape has to be edited (resized) it must be the only selection
     deselectAll();
   }
-  foreach (Shape2D *shape, m_shapes) {
+  for (auto shape : std::as_const(m_shapes)) {
     bool picked = shape->selectAt(point);
     if (picked) {
       addToSelection(shape);
@@ -374,7 +380,7 @@ void Shape2DCollection::deselectAtXY(int x, int y) {
  * @param point :: point where peaks should be deselected
  */
 void Shape2DCollection::deselectAtXY(const QPointF &point) {
-  foreach (Shape2D *shape, m_shapes) {
+  for (auto shape : std::as_const(m_shapes)) {
     bool picked = shape->selectAt(point);
     if (picked) {
       removeFromSelection(shape);
@@ -394,7 +400,7 @@ bool Shape2DCollection::selectIn(const QRect &rect) {
   RectF r(m_transform.inverted().mapRect(QRectF(rect)));
   bool selected = false;
   deselectAll();
-  foreach (Shape2D *shape, m_shapes) {
+  for (auto shape : std::as_const(m_shapes)) {
     bool sel = false;
     if (shape->isScalable()) {
       sel = r.contains(shape->getBoundingRect());
@@ -426,7 +432,7 @@ void Shape2DCollection::addToSelection(int i) {
  * @return :: True if there is a selection.
  */
 bool Shape2DCollection::hasSelection() const {
-  foreach (Shape2D *shape, m_shapes) {
+  for (auto shape : std::as_const(m_shapes)) {
     if (shape->isSelected()) {
       return true;
     }
@@ -453,14 +459,11 @@ void Shape2DCollection::addToSelection(Shape2D *shape) {
  * Remove a shape from selection.
  * @param shape :: Pointer to a shape to deselect.
  */
-void Shape2DCollection::removeFromSelection(Shape2D *shape) {
-  foreach (Shape2D *s, m_selectedShapes) {
-    if (s == shape) {
-      shape->setSelected(false);
-      shape->edit(false);
-      m_selectedShapes.removeOne(shape);
-      return;
-    }
+void Shape2DCollection::removeFromSelection(Shape2D *selectedShape) {
+  if (m_selectedShapes.contains(selectedShape)) {
+    selectedShape->setSelected(false);
+    selectedShape->edit(false);
+    m_selectedShapes.removeOne(selectedShape);
   }
 }
 
@@ -506,7 +509,7 @@ bool Shape2DCollection::isOverSelectionAt(int x, int y) {
   if (m_selectedShapes.isEmpty())
     return false;
   QPointF p = m_transform.inverted().map(QPointF(x, y));
-  foreach (Shape2D *shape, m_selectedShapes) {
+  for (auto shape : std::as_const(m_selectedShapes)) {
     if (shape->selectAt(p))
       return true;
   }
@@ -562,7 +565,7 @@ void Shape2DCollection::removeSelectedShapes() {
  */
 void Shape2DCollection::copySelectedShapes() {
   m_copiedShapes.clear();
-  foreach (auto shape, m_selectedShapes) {
+  for (auto shape : std::as_const(m_selectedShapes)) {
     Shape2D *newShape = shape->clone();
     newShape->setFillColor(shape->getFillColor());
     // the fill color is not transmitted by the clone operator
@@ -575,7 +578,7 @@ void Shape2DCollection::copySelectedShapes() {
  * Add a copy of the shapes stored in the copy buffer to the collection.
  */
 void Shape2DCollection::pasteCopiedShapes() {
-  foreach (auto shape, m_copiedShapes) {
+  for (auto shape : std::as_const(m_copiedShapes)) {
     Shape2D *newShape;
     if (shape->type() == "sector") {
       double angleOffset = shape->getDouble("endAngle") - shape->getDouble("startAngle");
@@ -602,7 +605,9 @@ void Shape2DCollection::restoreOverrideCursor() {
 }
 
 void Shape2DCollection::clear() {
-  foreach (Shape2D *shape, m_shapes) { delete shape; }
+  for (auto shape : std::as_const(m_shapes)) {
+    delete shape;
+  }
   m_shapes.clear();
   m_selectedShapes.clear();
   m_currentShape = nullptr;
@@ -688,7 +693,7 @@ void Shape2DCollection::setCurrentBoundingRotation(const double rotation) {
 
 bool Shape2DCollection::isMasked(double x, double y) const {
   QPointF p(x, y);
-  foreach (Shape2D *shape, m_shapes) {
+  for (auto shape : std::as_const(m_shapes)) {
     if (shape->isMasked(p)) {
       return true;
     }
@@ -697,7 +702,7 @@ bool Shape2DCollection::isMasked(double x, double y) const {
 }
 
 bool Shape2DCollection::isIntersecting(const QRectF &rect) const {
-  foreach (Shape2D *shape, m_shapes) {
+  for (auto shape : std::as_const(m_shapes)) {
     if (shape->isIntersecting(rect)) {
       return true;
     }
@@ -712,7 +717,7 @@ QList<QPoint> Shape2DCollection::getMaskedPixels() const {
     for (int j = m_viewport.top(); j <= m_viewport.bottom(); ++j) {
       QPoint p = QPoint(i, j);
       QPointF p0 = inv.map(QPointF(p));
-      foreach (Shape2D *shape, m_shapes) {
+      for (auto shape : std::as_const(m_shapes)) {
         if (shape->isMasked(p0)) {
           pixels.append(p);
         }
@@ -735,7 +740,9 @@ void Shape2DCollection::setCurrentBoundingRectReal(const QRectF &rect) {
  * Change border color.
  */
 void Shape2DCollection::changeBorderColor(const QColor &color) {
-  foreach (Shape2D *shape, m_shapes) { shape->setColor(color); }
+  for (auto shape : std::as_const(m_shapes)) {
+    shape->setColor(color);
+  }
 }
 
 /**

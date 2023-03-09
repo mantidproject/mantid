@@ -95,7 +95,7 @@ class FindGlobalBMatrixTest(unittest.TestCase):
             "FindGlobalBMatrix", PeakWorkspaces=[peaks1], a=4.1, b=4.2, c=10, alpha=88, beta=88, gamma=89, Tolerance=0.15
         )
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaisesRegex(RuntimeError, "there must be at least two peak tables provided in total."):
             alg.execute()
 
     def test_peak_workspaces_need_at_least_six_peaks_each(self):
@@ -110,7 +110,7 @@ class FindGlobalBMatrixTest(unittest.TestCase):
             "FindGlobalBMatrix", PeakWorkspaces=[peaks1, peaks2], a=4.1, b=4.2, c=10, alpha=88, beta=88, gamma=89, Tolerance=0.15
         )
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaisesRegex(RuntimeError, "Accept only peaks workspace with more than 6 peaks"):
             alg.execute()
 
     def test_performs_correct_transform_to_ensure_consistent_indexing(self):

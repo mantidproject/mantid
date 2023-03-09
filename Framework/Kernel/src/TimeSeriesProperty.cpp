@@ -760,7 +760,7 @@ void TimeSeriesProperty<TYPE>::expandFilterToRange(std::vector<SplittingInterval
   double val = static_cast<double>(firstValue());
   if ((val >= min) && (val <= max)) {
     SplittingIntervalVec extraFilter;
-    extraFilter.emplace_back(range.begin(), firstTime(), 0);
+    extraFilter.emplace_back(range.start(), firstTime(), 0);
     // Include everything from the start of the run to the first time measured
     // (which may be a null time interval; this'll be ignored)
     split = split | extraFilter;
@@ -770,7 +770,7 @@ void TimeSeriesProperty<TYPE>::expandFilterToRange(std::vector<SplittingInterval
   val = static_cast<double>(lastValue());
   if ((val >= min) && (val <= max)) {
     SplittingIntervalVec extraFilter;
-    extraFilter.emplace_back(lastTime(), range.end(), 0);
+    extraFilter.emplace_back(lastTime(), range.stop(), 0);
     // Include everything from the start of the run to the first time measured
     // (which may be a null time interval; this'll be ignored)
     split = split | extraFilter;
@@ -788,30 +788,20 @@ void TimeSeriesProperty<std::string>::expandFilterToRange(std::vector<SplittingI
                                        "properties");
 }
 
-/** Calculates the time-weighted average of a property.
- *  @return The time-weighted average value of the log.
- */
-template <typename TYPE> double TimeSeriesProperty<TYPE>::timeAverageValue() const {
-  double retVal = 0.0;
-  try {
-    const auto &filter = getSplittingIntervals();
-    retVal = this->averageValueInFilter(filter);
-  } catch (std::exception &) {
-    // just return nan
-    retVal = std::numeric_limits<double>::quiet_NaN();
-  }
-  return retVal;
-}
-
 /** Returns the calculated time weighted average value.
  * @param timeRoi  Object that holds information about when the time measurement was active.
  * @return The time-weighted average value of the log when the time measurement was active.
  */
-template <typename TYPE> double TimeSeriesProperty<TYPE>::timeAverageValue(const TimeROI &timeRoi) const {
+template <typename TYPE> double TimeSeriesProperty<TYPE>::timeAverageValue(const TimeROI *timeRoi) const {
   double retVal = 0.0;
   try {
-    const auto &filter = timeRoi.toSplitters();
-    retVal = this->averageValueInFilter(filter);
+    if ((timeRoi == nullptr) || (timeRoi->empty())) {
+      const auto &filter = getSplittingIntervals();
+      retVal = this->averageValueInFilter(filter);
+    } else {
+      const auto &filter = timeRoi->toSplitters();
+      retVal = this->averageValueInFilter(filter);
+    }
   } catch (std::exception &) {
     // just return nan
     retVal = std::numeric_limits<double>::quiet_NaN();
@@ -829,14 +819,14 @@ template <typename TYPE>
 double TimeSeriesProperty<TYPE>::averageValueInFilter(const std::vector<SplittingInterval> &filter) const {
   // TODO: Consider logs that aren't giving starting values.
 
+  // If there's just a single value in the log, return that.
+  if (size() == 1) {
+    return static_cast<double>(this->firstValue());
+  }
+
   // First of all, if the log or the filter is empty, return NaN
   if (realSize() == 0 || filter.empty()) {
     return std::numeric_limits<double>::quiet_NaN();
-  }
-
-  // If there's just a single value in the log, return that.
-  if (realSize() == 1) {
-    return static_cast<double>(m_values.front().value());
   }
 
   sortIfNecessary();
@@ -863,8 +853,14 @@ double TimeSeriesProperty<TYPE>::averageValueInFilter(const std::vector<Splittin
     numerator += DateAndTime::secondsFromDuration(time.stop() - startTime) * value;
   }
 
-  // 'Normalise' by the total time
-  return numerator / totalTime;
+  if (totalTime > 0) {
+    // 'Normalise' by the total time
+    return numerator / totalTime;
+  } else {
+    // give simple mean
+    const auto stats = Mantid::Kernel::getStatistics(this->valuesAsVector(), Mantid::Kernel::Math::StatisticType::Mean);
+    return stats.mean;
+  }
 }
 
 /** Function specialization for TimeSeriesProperty<std::string>
@@ -879,44 +875,37 @@ double TimeSeriesProperty<std::string>::averageValueInFilter(const SplittingInte
 
 template <typename TYPE>
 std::pair<double, double>
-TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<SplittingInterval> &filter) const {
-  // the mean to calculate the standard deviation about
-  // this will sort the log as necessary as well
-  const double mean = this->averageValueInFilter(filter);
+TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<SplittingInterval> &intervals) const {
+  double mean_prev, mean_current(0.0), s(0.0), variance, duration, weighted_sum(0.0);
 
-  // First of all, if the log or the filter is empty or is a single value,
-  // return NaN for the uncertainty
-  if (realSize() <= 1 || filter.empty()) {
-    return std::pair<double, double>{mean, std::numeric_limits<double>::quiet_NaN()};
+  if (realSize() <= 1 || intervals.empty()) {
+    return std::pair<double, double>{this->averageValueInFilter(intervals), std::numeric_limits<double>::quiet_NaN()};
   }
-
-  double numerator(0.0), totalTime(0.0);
-  // Loop through the filter ranges
-  for (const auto &time : filter) {
-    // Calculate the total time duration (in seconds) within by the filter
-    totalTime += time.duration();
-
-    // Get the log value and index at the start time of the filter
+  auto real_size = realSize();
+  for (const auto &time : intervals) {
     int index;
-    double value = static_cast<double>(getSingleValue(time.start(), index));
-    double valuestddev = (value - mean) * (value - mean);
+    auto value = static_cast<double>(getSingleValue(time.start(), index));
     DateAndTime startTime = time.start();
+    while (index < real_size) {
+      index++;
+      if (index == real_size)
+        duration = DateAndTime::secondsFromDuration(time.stop() - startTime);
+      else {
+        duration = DateAndTime::secondsFromDuration(m_values[index].time() - startTime);
+        startTime = m_values[index].time();
+      }
+      weighted_sum += duration;
+      mean_prev = mean_current;
 
-    while (index < realSize() - 1 && m_values[index + 1].time() < time.stop()) {
-      ++index;
-
-      numerator += DateAndTime::secondsFromDuration(m_values[index].time() - startTime) * valuestddev;
-      startTime = m_values[index].time();
-      value = static_cast<double>(m_values[index].value());
-      valuestddev = (value - mean) * (value - mean);
+      mean_current = mean_prev + (duration / weighted_sum) * (value - mean_prev);
+      s += duration * (value - mean_prev) * (value - mean_current);
+      if (index < real_size)
+        value = static_cast<double>(m_values[index].value());
     }
-
-    // Now close off with the end of the current filter range
-    numerator += DateAndTime::secondsFromDuration(time.stop() - startTime) * valuestddev;
   }
-
+  variance = s / weighted_sum;
   // Normalise by the total time
-  return std::pair<double, double>{mean, std::sqrt(numerator / totalTime)};
+  return std::pair<double, double>{mean_current, std::sqrt(variance)};
 }
 
 template <typename TYPE> std::pair<double, double> TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev() const {
@@ -1551,10 +1540,19 @@ template <typename TYPE> TimeInterval TimeSeriesProperty<TYPE>::nthInterval(int 
       ;
     } else if (n == static_cast<int>(m_values.size()) - 1) {
       // 2. Last one by making up an end time.
-      time_duration d = m_values.rbegin()->time() - (m_values.rbegin() + 1)->time();
-      DateAndTime endTime = m_values.rbegin()->time() + d;
-      Kernel::TimeInterval dt(m_values.rbegin()->time(), endTime);
-      deltaT = dt;
+      // the last time is the last thing known
+      const auto ultimate = m_values.rbegin()->time();
+      // go backwards from the time before it that is different
+      int counter = 0;
+      while (DateAndTime::secondsFromDuration(ultimate - (m_values.rbegin() + counter)->time()) == 0.) {
+        counter += 1;
+      }
+      // get the last time that is different
+      time_duration lastDuration = m_values.rbegin()->time() - (m_values.rbegin() + counter)->time();
+      // the last duration is equal to the previous, non-zero, duration
+      DateAndTime endTime = m_values.rbegin()->time() + lastDuration;
+
+      deltaT = Kernel::TimeInterval(m_values.rbegin()->time(), endTime);
     } else {
       // 3. Regular
       DateAndTime startT = m_values[static_cast<std::size_t>(n)].time();
@@ -1854,10 +1852,12 @@ template <typename TYPE> bool TimeSeriesProperty<TYPE>::isDefault() const { retu
 /**
  * Return a TimeSeriesPropertyStatistics struct containing the
  * statistics of this TimeSeriesProperty object.
+ * @param roi : Optional TimeROI pointer to get statistics for active time.
  *
  * N.B. This method DOES take filtering into account
  */
-template <typename TYPE> TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics() const {
+template <typename TYPE>
+TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics(const TimeROI *roi) const {
   TimeSeriesPropertyStatistics out(Mantid::Kernel::getStatistics(this->filteredValuesAsVector()));
 
   if (this->size() > 0) {
@@ -1874,7 +1874,8 @@ template <typename TYPE> TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::
     out.time_standard_deviation = std::numeric_limits<double>::quiet_NaN();
     out.duration = std::numeric_limits<double>::quiet_NaN();
   }
-
+  if (roi == nullptr)
+    void(0);
   return out;
 }
 
@@ -2388,7 +2389,13 @@ template <typename TYPE> std::vector<SplittingInterval> TimeSeriesProperty<TYPE>
   std::vector<SplittingInterval> intervals;
   // Case where there is no filter
   if (m_filter.empty()) {
-    intervals.emplace_back(firstTime(), lastTime());
+    // interval calculates what a reasonable place to put the end point for the last log entry is
+    // this *should* be a reasonable estimate and *is* better than always, effectively, ignoring
+    // the last log value. The value is different than that from lastTime()
+    auto lastInterval = this->nthInterval(this->size() - 1);
+
+    intervals.emplace_back(firstTime(), lastInterval.stop());
+
     return intervals;
   }
 
@@ -2458,10 +2465,11 @@ namespace Mantid::Kernel {
  * statistics.
  *  @param propertyToFilter : Property to filter the statistics on.
  *  @param statisticType : Enum indicating the type of statistics to use.
+ *  @param roi : optional pointer to TimeROI object for active time.
  *  @return The TimeSeriesProperty filtered by the requested statistics.
  */
 double filterByStatistic(TimeSeriesProperty<double> const *const propertyToFilter,
-                         Kernel::Math::StatisticType statisticType) {
+                         Kernel::Math::StatisticType statisticType, const TimeROI *roi) {
   using namespace Kernel::Math;
   double singleValue = 0;
   switch (statisticType) {
@@ -2472,16 +2480,16 @@ double filterByStatistic(TimeSeriesProperty<double> const *const propertyToFilte
     singleValue = propertyToFilter->nthValue(propertyToFilter->size() - 1);
     break;
   case Minimum:
-    singleValue = propertyToFilter->getStatistics().minimum;
+    singleValue = propertyToFilter->getStatistics(roi).minimum;
     break;
   case Maximum:
-    singleValue = propertyToFilter->getStatistics().maximum;
+    singleValue = propertyToFilter->getStatistics(roi).maximum;
     break;
   case Mean:
-    singleValue = propertyToFilter->getStatistics().mean;
+    singleValue = propertyToFilter->getStatistics(roi).mean;
     break;
   case Median:
-    singleValue = propertyToFilter->getStatistics().median;
+    singleValue = propertyToFilter->getStatistics(roi).median;
     break;
   default:
     throw std::invalid_argument("filterByStatistic - Unknown statistic type: " +

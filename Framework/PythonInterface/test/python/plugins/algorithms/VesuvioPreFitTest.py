@@ -21,7 +21,6 @@ import vesuvio.testing as testing
 
 
 class VesuvioPreFitTest(unittest.TestCase):
-
     _test_ws = None
 
     def setUp(self):
@@ -97,7 +96,7 @@ class VesuvioPreFitTest(unittest.TestCase):
 
     def test_invalid_smooth_opt_raises_error_on_validate(self):
         alg = self._create_algorithm(InputWorkspace=self._test_ws, Smoothing="Neighbour", SmoothingOptions="npts=3")
-        self.assertRaises(RuntimeError, alg.execute)
+        self.assertRaisesRegex(RuntimeError, "Invalid value for smoothing option. It must begin the format NPoints=3", alg.execute)
 
     # -------------- Helpers --------------------
 

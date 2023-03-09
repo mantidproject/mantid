@@ -7,9 +7,10 @@
 #pragma once
 
 #include "GUI/Batch/BatchJobAlgorithm.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/MockJobRunner.h"
 #include "PreviewJobManager.h"
 
 #include "test/Batch/BatchJobManagerTest.h"
@@ -18,8 +19,8 @@
 
 #include <gmock/gmock.h>
 
+using Mantid::API::AlgorithmRuntimeProps;
 using Mantid::API::IAlgorithm_sptr;
-using MantidQt::API::AlgorithmRuntimeProps;
 using MantidQt::API::ConfiguredAlgorithm;
 using ::testing::ByRef;
 using ::testing::Eq;

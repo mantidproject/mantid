@@ -207,6 +207,7 @@ _translations = {
     "Rob": "Applin, Robert",
     "Rob Applin": "Applin, Robert",
     "Robert": "Applin, Robert",
+    "Applin": "Applin, Robert",
     "SamJenkins1": "Jenkins, Sam",
     "Sam Jenkins": "Jenkins, Sam",
     "Samuel Jones": "Jones, Sam",
@@ -294,6 +295,18 @@ _translations = {
     "rbauststfc": "Baust, Rachel",
     "Rachel Baust": "Baust, Rachel",
     "Thomas Mueller": "Mueller, Thomas",
+    "Remi Perenon": "Perenon, Remi",
+    "DonaldChung-HK": "Chung, Donald",
+    "Donald Chung": "Chung, Donald",
+    "AndriiDemk": "Demk, Andrii",
+    "eurydice76": "Pellegrini, Eric",
+    "Robert Bolotovsky": "Bolotovsky, Robert",
+    "bolotovskyr": "Bolotovsky, Robert",
+    "Mohammed Almakki": "Almakki, Mohammed",
+    "Gregory Cage": "Cage, Gregory",
+    "carson sears": "Sears, Carson",
+    "Carson Sears": "Sears, Carson",
+    "searscr": "Sears, Carson",
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT
@@ -315,6 +328,7 @@ _blacklist = [
     "luz.paz",
     "davidvoneshen",
     "dependabot[bot]",
+    "pre-commit-ci[bot]",
 ]
 
 # The whitelist is used for sponsors / contributors who should be included,

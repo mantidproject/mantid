@@ -44,15 +44,13 @@ public:
   virtual std::pair<double, double> averageAndStdDevInFilter(const std::vector<SplittingInterval> &filter) const = 0;
   /// Return the time series's times as a vector<DateAndTime>
   virtual std::vector<Types::Core::DateAndTime> timesAsVector() const = 0;
-  /// Returns the calculated time weighted average value
-  virtual double timeAverageValue() const = 0;
   /** Returns the calculated time weighted average value.
    * @param timeRoi  Object that holds information about when the time measurement was active.
    * @return The time-weighted average value of the log when the time measurement was active.
    */
-  virtual double timeAverageValue(const TimeROI &timeRoi) const = 0;
+  virtual double timeAverageValue(const TimeROI *timeRoi = nullptr) const = 0;
   /// Return a TimeSeriesPropertyStatistics object
-  virtual TimeSeriesPropertyStatistics getStatistics() const = 0;
+  virtual TimeSeriesPropertyStatistics getStatistics(const TimeROI *roi = nullptr) const = 0;
   /// Returns the real size of the time series property map:
   virtual int realSize() const = 0;
   /// Deletes the series of values in the property

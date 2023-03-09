@@ -48,11 +48,6 @@ if(BUILD_MANTIDFRAMEWORK OR BUILD_MANTIDQT)
   include(PyUnitTest)
   enable_testing()
 
-  # build f2py fortran routines
-  if(ENABLE_F2PY_ROUTINES)
-    include(f2pylibraries)
-  endif()
-
   # We want shared libraries everywhere
   set(BUILD_SHARED_LIBS On)
 
@@ -96,38 +91,23 @@ if(BUILD_MANTIDFRAMEWORK)
   find_package(Nexus 4.3.1 REQUIRED)
   find_package(MuParser REQUIRED)
   find_package(JsonCPP 0.7.0 REQUIRED)
+  find_package(Eigen3 3.4 REQUIRED)
 
   if(ENABLE_OPENCASCADE)
     find_package(OpenCascade REQUIRED)
     add_definitions(-DENABLE_OPENCASCADE)
   endif()
 
-  if(CMAKE_HOST_WIN32 AND NOT CONDA_ENV)
-    find_package(ZLIB REQUIRED CONFIGS zlib-config.cmake)
-    set(HDF5_DIR "${THIRD_PARTY_DIR}/cmake/hdf5")
-    find_package(
-      HDF5
-      COMPONENTS C CXX HL
-      REQUIRED CONFIGS hdf5-config.cmake
-    )
-    set(HDF5_LIBRARIES hdf5::hdf5_cpp-shared hdf5::hdf5_hl-shared)
-  elseif(CONDA_ENV)
-    # We'll use the cmake finder
-    find_package(
-      HDF5 MODULE
-      COMPONENTS C CXX HL
-      REQUIRED
-    )
-    set(HDF5_LIBRARIES hdf5::hdf5_cpp hdf5::hdf5)
-    set(HDF5_HL_LIBRARIES hdf5::hdf5_hl)
-  else()
-    find_package(
-      HDF5 MODULE
-      COMPONENTS C CXX HL
-      REQUIRED
-    )
-  endif()
+  find_package(
+    HDF5 MODULE
+    COMPONENTS C CXX HL
+    REQUIRED
+  )
+  set(HDF5_LIBRARIES hdf5::hdf5_cpp hdf5::hdf5)
+  set(HDF5_HL_LIBRARIES hdf5::hdf5_hl)
 endif()
+
+include(Span)
 
 if(ENABLE_WORKBENCH)
   include(PyUnitTest)
@@ -145,13 +125,6 @@ if(OpenMP_CXX_FOUND)
 endif()
 
 # ######################################################################################################################
-# Add linux-specific things
-# ######################################################################################################################
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  include(LinuxSetup)
-endif()
-
-# ######################################################################################################################
 # Set the c++ standard to 17 - cmake should do the right thing with msvc
 # ######################################################################################################################
 set(CMAKE_CXX_STANDARD 17)
@@ -160,10 +133,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # ######################################################################################################################
 # Setup ccache
 # ######################################################################################################################
-get_property(_is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
-if(NOT _is_multi_config)
-  include(CCacheSetup)
-endif()
+include(CCacheSetup)
 
 # ######################################################################################################################
 # Add compiler options if using gcc
@@ -231,45 +201,29 @@ if(ENABLE_PRECOMMIT)
   find_program(
     PRE_COMMIT_EXE
     NAMES pre-commit
-    HINTS ~/.local/bin/ "${MSVC_PYTHON_EXECUTABLE_DIR}/Scripts/"
+    HINTS ~/.local/bin/
   )
   if(NOT PRE_COMMIT_EXE)
     message(FATAL_ERROR "Failed to find pre-commit see https://developer.mantidproject.org/GettingStarted.html")
   endif()
 
   if(WIN32)
-    if(CONDA_ENV)
-      execute_process(
-        COMMAND "${PRE_COMMIT_EXE}" install --overwrite
-        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-        RESULT_VARIABLE PRE_COMMIT_RESULT
-      )
-    else()
-      execute_process(
-        COMMAND "${PRE_COMMIT_EXE}.cmd" install --overwrite
-        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-        RESULT_VARIABLE PRE_COMMIT_RESULT
-      )
-    endif()
+    execute_process(
+      COMMAND "${PRE_COMMIT_EXE}" install --overwrite
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+      RESULT_VARIABLE PRE_COMMIT_RESULT
+    )
     if(NOT PRE_COMMIT_RESULT EQUAL "0")
       message(FATAL_ERROR "Pre-commit install failed with ${PRE_COMMIT_RESULT}")
     endif()
     # Create pre-commit script wrapper to use mantid third party python for pre-commit
-    if(NOT CONDA_ENV)
-      file(RENAME "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit" "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit-script.py")
-      file(
-        WRITE "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit"
-        "#!/usr/bin/env sh\n${MSVC_PYTHON_EXECUTABLE_DIR}/python.exe ${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit-script.py"
-      )
-    else()
-      file(TO_CMAKE_PATH $ENV{CONDA_PREFIX} CONDA_SHELL_PATH)
-      file(RENAME "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit" "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit-script.py")
-      file(
-        WRITE "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit"
-        "#!/usr/bin/env sh\n${CONDA_SHELL_PATH}/Scripts/wrappers/conda/python.bat ${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit-script.py"
-      )
-    endif()
-  else() # linux as osx
+    file(TO_CMAKE_PATH $ENV{CONDA_PREFIX} CONDA_SHELL_PATH)
+    file(RENAME "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit" "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit-script.py")
+    file(
+      WRITE "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit"
+      "#!/usr/bin/env sh\n${CONDA_SHELL_PATH}/Scripts/wrappers/conda/python.bat ${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit-script.py"
+    )
+  else() # linux and osx
     execute_process(
       COMMAND bash -c "${PRE_COMMIT_EXE} install"
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}

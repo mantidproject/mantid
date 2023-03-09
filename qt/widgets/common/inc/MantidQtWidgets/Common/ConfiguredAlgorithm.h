@@ -7,23 +7,23 @@
 #pragma once
 
 #include "IConfiguredAlgorithm.h"
-#include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
+#include "MantidAPI/IAlgorithmRuntimeProps.h"
 
 namespace MantidQt::API {
 
 class EXPORT_OPT_MANTIDQT_COMMON ConfiguredAlgorithm : public IConfiguredAlgorithm {
 public:
   ConfiguredAlgorithm(Mantid::API::IAlgorithm_sptr algorithm,
-                      std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> properties);
+                      std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> properties);
   virtual ~ConfiguredAlgorithm() = default;
 
   Mantid::API::IAlgorithm_sptr algorithm() const override;
-  const MantidQt::API::IAlgorithmRuntimeProps &getAlgorithmRuntimeProps() const noexcept override;
+  const Mantid::API::IAlgorithmRuntimeProps &getAlgorithmRuntimeProps() const noexcept override;
 
 protected:
   Mantid::API::IAlgorithm_sptr m_algorithm;
 
 private:
-  std::unique_ptr<IAlgorithmRuntimeProps> m_properties;
+  std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> m_properties;
 };
 } // namespace MantidQt::API

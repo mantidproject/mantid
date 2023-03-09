@@ -7,7 +7,6 @@
 #pragma once
 #include "BatchPresenter.h"
 #include "Common/DllConfig.h"
-#include "GUI/Common/QtJobRunner.h"
 #include "GUI/Event/EventPresenterFactory.h"
 #include "GUI/Experiment/ExperimentPresenterFactory.h"
 #include "GUI/Instrument/InstrumentPresenterFactory.h"
@@ -17,6 +16,7 @@
 #include "IBatchPresenter.h"
 #include "IBatchPresenterFactory.h"
 #include "IBatchView.h"
+#include "MantidQtWidgets/Common/QtJobRunner.h"
 #include "ReflAlgorithmFactory.h"
 #include <memory>
 
@@ -53,7 +53,7 @@ public:
     auto algFactory = std::make_unique<ReflAlgorithmFactory>(*batchModel);
     auto previewPresenter = m_previewPresenterFactory.make(view->preview(), std::move(algFactory));
 
-    auto jobRunner = std::make_unique<QtJobRunner>();
+    auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>();
     return std::make_unique<BatchPresenter>(view, std::move(batchModel), std::move(jobRunner), std::move(runsPresenter),
                                             std::move(eventPresenter), std::move(experimentPresenter),
                                             std::move(instrumentPresenter), std::move(savePresenter),

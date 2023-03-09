@@ -561,6 +561,37 @@ public:
     TS_ASSERT(outputWS->detectorInfo().isMonitor(320 * 320));
     TS_ASSERT_EQUALS(outputWS->blocksize(), 261)
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 320 * 320 + 2);
+    TS_ASSERT_DELTA(outputWS->y(1)[0], 1.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(41)[4], 4.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(94954)[224], 1.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->e(94954)[224], 1.0, 1E-5)
+    checkTimeFormat(outputWS);
+    checkDuration(outputWS, 15.);
+    checkWavelength(outputWS, 4.45);
+  }
+
+  void test_D16_OMEGA_CONCATENATED_SCAN_SENSITIVITY() {
+    // test d16 scan data in a scan file, i.e. with multiple points in a single file
+    LoadILLSANS alg;
+    alg.setChild(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "025786.nxs"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("SensitivityMap", "sensitivity_d16.nxs"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS);
+    TS_ASSERT(!outputWS->isHistogramData())
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(320 * 320));
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 261)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 320 * 320 + 2);
+    TS_ASSERT_DELTA(outputWS->y(1)[0], 1.82467, 1E-5)
+    TS_ASSERT_DELTA(outputWS->e(1)[0], 1.82467, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(41)[4], 5.14239, 1E-5)
+    TS_ASSERT_DELTA(outputWS->e(41)[4], 2.57119, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(94955)[224], 1.14162, 1E-5)
+    TS_ASSERT_DELTA(outputWS->e(94955)[224], 1.14162, 1E-5)
     checkTimeFormat(outputWS);
     checkDuration(outputWS, 15.);
     checkWavelength(outputWS, 4.45);
@@ -579,8 +610,9 @@ public:
     TS_ASSERT(!outputWS->isHistogramData())
     TS_ASSERT(!outputWS->detectorInfo().isMonitor(0));
     TS_ASSERT(outputWS->detectorInfo().isMonitor(192 * 1152));
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(192 * 1152 + 1));
     TS_ASSERT_EQUALS(outputWS->blocksize(), 6)
-    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 192 * 1152 + 1);
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 192 * 1152 + 2);
     // check loaded data contains expected values
     TS_ASSERT_DELTA(outputWS->x(0)[0], 5.0, 1E-3)
     TS_ASSERT_DELTA(outputWS->x(0)[5], 6.0, 1E-3)
@@ -619,8 +651,9 @@ public:
     TS_ASSERT(outputWS->isHistogramData())
     TS_ASSERT(!outputWS->detectorInfo().isMonitor(0));
     TS_ASSERT(outputWS->detectorInfo().isMonitor(192 * 1152));
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(192 * 1152 + 1));
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
-    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 192 * 1152 + 1);
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 192 * 1152 + 2);
     // check loaded data contains expected values
     TS_ASSERT_DELTA(outputWS->x(2 + 2 * 192)[0], 4.45 * 0.95, 1E-3) // +/- 5 % wavelength resolution
     TS_ASSERT_DELTA(outputWS->x(2 + 2 * 192)[1], 4.45 * 1.05, 1E-3)

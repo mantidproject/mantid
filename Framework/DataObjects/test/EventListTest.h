@@ -40,6 +40,43 @@ private:
   int BIN_DELTA;
   int MAX_PULSE_TIME;
 
+  /**
+   * Helper function to generate a list of events.
+   *
+   * `eventsPerPulse` are spaced equally throughout `pulsePeriod`.
+   *
+   * The starting time is const DateAndTime TWO("2023-01-01T12:00:00")
+   *
+   * @param pulsePeriod : time span of a pulse, in seconds
+   * @param nPulses : number of consecutive pulses
+   * @param eventsPerPulse : number of events
+   * @param eventType : one of enum EventType {TOF, WEIGHTED, WEIGHTED_NOTIME}
+   */
+  EventList generateEvents(const DateAndTime &startTime, double pulsePeriod, size_t nPulses, size_t eventsPerPulse,
+                           EventType eventType = EventType::TOF) {
+    UNUSED_ARG(eventsPerPulse);
+    static constexpr int64_t nanosecInsec{1000000000};
+    static constexpr double microsecInsec{1000000.0};
+    int64_t pulsePeriodInNanosec = static_cast<int64_t>(pulsePeriod * nanosecInsec);
+    // time between consecutive events, in microseconds.
+    double eventPeriod = (pulsePeriod * microsecInsec) / static_cast<double>(eventsPerPulse);
+    // loop over each pulse
+    auto events = EventList();
+    DateAndTime currentPulseTime{startTime};
+    for (size_t iPulse = 0; iPulse < nPulses; iPulse++) {
+      // instantiate each event in the current pulse
+      double tof{0.0};
+      for (size_t iEvent = 0; iEvent < eventsPerPulse; iEvent++) {
+        auto event = TofEvent(tof, currentPulseTime);
+        events.addEventQuickly(event);
+        tof += eventPeriod;
+      }
+      currentPulseTime += pulsePeriodInNanosec;
+    }
+    events.switchTo(eventType);
+    return events;
+  }
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -1344,6 +1381,50 @@ public:
     TS_ASSERT_EQUALS(times[2].totalNanoseconds(), 2);
   }
 
+  void test_getPulseTOFTimes() {
+    const DateAndTime startTime{"2023-01-01T12:00:00"};
+    const double pulsePeriod{60.0}; // in seconds
+    const size_t nPulses{2};
+    const size_t eventsPerPulse{3};
+    // event list with two pulses, each pulse containing three equally spaced events.
+    EventList el = this->generateEvents(startTime, pulsePeriod, nPulses, eventsPerPulse);
+    std::vector<DateAndTime> times = el.getPulseTOFTimes();
+    std::vector<std::string> dates;
+    std::transform(times.cbegin(), times.cend(), std::back_inserter(dates),
+                   [](const DateAndTime &time) { return time.toSimpleString(); });
+    TS_ASSERT_EQUALS(dates[0], "2023-Jan-01 12:00:00");
+    TS_ASSERT_EQUALS(dates[1], "2023-Jan-01 12:00:20");
+    TS_ASSERT_EQUALS(dates[2], "2023-Jan-01 12:00:40");
+    TS_ASSERT_EQUALS(dates[3], "2023-Jan-01 12:01:00");
+    TS_ASSERT_EQUALS(dates[4], "2023-Jan-01 12:01:20");
+    TS_ASSERT_EQUALS(dates[5], "2023-Jan-01 12:01:40");
+  }
+
+  /**
+   *
+   * @param factor
+   * @param shift
+   */
+  void test_getPulseTOFTimesAtSample() {
+    const DateAndTime startTime{"2023-01-01T12:00:00"};
+    const double pulsePeriod{60.0}; // in seconds
+    const size_t nPulses{2};
+    const size_t eventsPerPulse{3};
+    // event list with two pulses, each pulse containing three equally spaced events.
+    EventList el = this->generateEvents(startTime, pulsePeriod, nPulses, eventsPerPulse);
+    const double factor{0.5};
+    const double shift{3000000}; // three seconds in units of microseconds
+    std::vector<DateAndTime> times = el.getPulseTOFTimesAtSample(factor, shift);
+    std::vector<std::string> dates;
+    std::transform(times.cbegin(), times.cend(), std::back_inserter(dates),
+                   [](const DateAndTime &time) { return time.toSimpleString(); });
+    TS_ASSERT_EQUALS(dates[0], "2023-Jan-01 12:00:03");
+    TS_ASSERT_EQUALS(dates[1], "2023-Jan-01 12:00:13");
+    TS_ASSERT_EQUALS(dates[2], "2023-Jan-01 12:00:23");
+    TS_ASSERT_EQUALS(dates[3], "2023-Jan-01 12:01:03");
+    TS_ASSERT_EQUALS(dates[4], "2023-Jan-01 12:01:13");
+    TS_ASSERT_EQUALS(dates[5], "2023-Jan-01 12:01:23");
+  }
   //-----------------------------------------------------------------------------------------------
   void test_convertTof_allTypes() {
     // Go through each possible EventType as the input
@@ -1738,6 +1819,46 @@ public:
         // Good # of events.
         TS_ASSERT_EQUALS(numGood, out.getNumberEvents());
         TS_ASSERT_EQUALS(curType, out.getEventType());
+      }
+    }
+  }
+
+  void test_filterByPulseTime_withTimeROI() {
+    // Go through each possible EventType (except the no-time one) as the input
+    for (int this_type = 0; this_type < 3; this_type++) {
+      EventType curType = static_cast<EventType>(this_type);
+      this->fake_data();
+      el.switchTo(curType);
+
+      // Filter into this
+      EventList out;
+      // Manually set a sort mode to verify that is it is switched afterward
+      out.setSortOrder(Mantid::DataObjects::TOF_SORT);
+      Kernel::TimeROI *timeRoi = nullptr;
+      TS_ASSERT_THROWS(el.filterByPulseTime(timeRoi, out), const std::invalid_argument &);
+      timeRoi = new Kernel::TimeROI();
+      timeRoi->addROI(100, 200);
+      timeRoi->addROI(250, 300);
+      if (curType == WEIGHTED_NOTIME) {
+        TS_ASSERT_THROWS(el.filterByPulseTime(timeRoi, out), const std::runtime_error &);
+      } else {
+        TS_ASSERT_THROWS_NOTHING(el.filterByPulseTime(timeRoi, out));
+
+        int numGood = 0;
+        for (std::size_t i = 0; i < el.getNumberEvents(); i++)
+          if (((el.getEvent(i).pulseTime() >= 100) && (el.getEvent(i).pulseTime() < 200)) ||
+              ((el.getEvent(i).pulseTime() >= 250) && (el.getEvent(i).pulseTime() < 300)))
+            numGood++;
+
+        // Good # of events.
+        TS_ASSERT_EQUALS(numGood, out.getNumberEvents());
+        TS_ASSERT_EQUALS(curType, out.getEventType());
+
+        for (std::size_t i = 0; i < out.getNumberEvents(); i++) {
+          // Check that the times are within the given limits.
+          TSM_ASSERT_LESS_THAN_EQUALS(this_type, DateAndTime(100), out.getEvent(i).pulseTime());
+          TS_ASSERT_LESS_THAN(out.getEvent(i).pulseTime(), DateAndTime(300));
+        }
       }
     }
   }

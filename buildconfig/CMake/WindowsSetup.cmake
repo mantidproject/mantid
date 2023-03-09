@@ -1,8 +1,4 @@
-# ######################################################################################################################
-# Set the SYSTEM_PACKAGE_TARGET to RUNTIME as we only want to package dlls
-# ######################################################################################################################
-set(SYSTEM_PACKAGE_TARGET RUNTIME)
-# Also include MSVC runtime libraries when running install commands
+# Include MSVC runtime libraries when running install commands
 set(CMAKE_INSTALL_OPENMP_LIBRARIES TRUE)
 include(InstallRequiredSystemLibraries)
 
@@ -17,6 +13,9 @@ add_definitions(-DBOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE)
 add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS)
 # Prevent deprecation errors from std::tr1 in googletest until it is fixed upstream. In MSVC 2017 and later
 add_definitions(-D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
+# Suppress codecvt deprecation warning when building with Ninja. Using codecvt is still the recommended solution for
+# converting from std::string to std::wstring. See https://stackoverflow.com/a/18597384
+add_definitions(-D_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING)
 # Suppress warnings about std::iterator as a base. TBB emits this warning and it is not yet fixed.
 add_definitions(-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING)
 add_definitions(-D_SILENCE_CXX17_SHARED_PTR_UNIQUE_DEPRECATION_WARNING)
@@ -24,14 +23,6 @@ add_definitions(-D_SILENCE_CXX17_SHARED_PTR_UNIQUE_DEPRECATION_WARNING)
 # ######################################################################################################################
 # Additional compiler flags
 # ######################################################################################################################
-# Replace "/" with "\" for use in command prompt
-if(NOT CONDA_ENV)
-  string(REGEX REPLACE "/" "\\\\" THIRD_PARTY_INCLUDE_DIR "${THIRD_PARTY_DIR}/include/")
-  string(REGEX REPLACE "/" "\\\\" THIRD_PARTY_LIB_DIR "${THIRD_PARTY_DIR}/lib/")
-  set(CMAKE_CXX_FLAGS
-      "${CMAKE_CXX_FLAGS} /external:I ${THIRD_PARTY_INCLUDE_DIR} /external:I ${THIRD_PARTY_LIB_DIR}\\python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}\\ "
-  )
-endif()
 
 # /MP - Compile .cpp files in parallel /W3 - Warning Level 3 (This is also the default) /external:I - Ignore third party
 # library  warnings (similar to "isystem" in GCC) /bigobj Compile large test targets by losing compatibility with MSVC
@@ -59,6 +50,7 @@ if(CONDA_ENV)
   # switch off all optimzations
   set(_conda_debug_cfg_name DebugWithRelRuntime)
   string(TOUPPER ${_conda_debug_cfg_name} _conda_debug_cfg_name_upper)
+  include(CCacheSetup)
   if(USE_CCACHE AND CCACHE_FOUND)
     # For a single-config generator like Ninja, aim to use CCache to speed up builds. The Zi flag is not supported by
     # CCache so we need to use Z7 to allow debugging.
@@ -96,13 +88,6 @@ endif()
 # HDF5 uses threads::threads target
 find_package(Threads)
 
-# ######################################################################################################################
-# Qt5 is always in the same place
-# ######################################################################################################################
-if(NOT CONDA_ENV)
-  set(Qt5_DIR ${THIRD_PARTY_DIR}/lib/qt5/lib/cmake/Qt5)
-endif()
-
 option(CONSOLE "Switch for enabling/disabling the console" ON)
 
 # ######################################################################################################################
@@ -114,9 +99,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 # Configure IDE/commandline startup scripts
 # ######################################################################################################################
 set(WINDOWS_BUILDCONFIG ${PROJECT_SOURCE_DIR}/buildconfig/windows)
-if(NOT CONDA_ENV)
-  configure_file(${WINDOWS_BUILDCONFIG}/thirdpartypaths.bat.in ${PROJECT_BINARY_DIR}/thirdpartypaths.bat @ONLY)
-else()
+if(CONDA_ENV)
   set(CONDA_BASE_DIR $ENV{CONDA_PREFIX})
   configure_file(${WINDOWS_BUILDCONFIG}/thirdpartypaths_conda.bat.in ${PROJECT_BINARY_DIR}/thirdpartypaths.bat @ONLY)
 endif()
@@ -132,9 +115,7 @@ else()
 endif()
 
 # Setup debugger environment to launch in VS without setting paths
-if(NOT CONDA_ENV)
-  set(MSVC_PATHS "${THIRD_PARTY_DIR}/bin$<SEMICOLON>${THIRD_PARTY_DIR}/lib/qt5/bin$<SEMICOLON>%PATH%")
-else()
+if(CONDA_ENV)
   set(MSVC_PATHS "$ENV{CONDA_PREFIX}/Library/bin$<SEMICOLON>$ENV{CONDA_PREFIX}/Library/lib$<SEMICOLON>%PATH%")
 endif()
 
@@ -161,20 +142,14 @@ configure_file(${WINDOWS_BUILDCONFIG}/pycharm.env.in ${PROJECT_BINARY_DIR}/pycha
 if(EXISTS ${MSVC_IDE_LOCATION}/devenv.exe)
   if(CONDA_ENV)
     configure_file(${WINDOWS_BUILDCONFIG}/visual-studio_conda.bat.in ${PROJECT_BINARY_DIR}/visual-studio.bat @ONLY)
-  else()
-    configure_file(${WINDOWS_BUILDCONFIG}/visual-studio.bat.in ${PROJECT_BINARY_DIR}/visual-studio.bat @ONLY)
+    configure_file(
+      ${WINDOWS_BUILDCONFIG}/visual-studio_conda_ninja.bat.in ${PROJECT_BINARY_DIR}/visual-studio_ninja.bat @ONLY
+    )
   endif()
 endif()
 if(CONDA_ENV)
   configure_file(${WINDOWS_BUILDCONFIG}/pycharm_conda.bat.in ${PROJECT_BINARY_DIR}/pycharm.bat @ONLY)
-else()
-  configure_file(${WINDOWS_BUILDCONFIG}/pycharm.bat.in ${PROJECT_BINARY_DIR}/pycharm.bat @ONLY)
 endif()
-
-# ######################################################################################################################
-# Configure Mantid startup scripts
-# ######################################################################################################################
-set(PACKAGING_DIR ${PROJECT_SOURCE_DIR}/buildconfig/CMake/Packaging)
 
 # ######################################################################################################################
 # Custom targets to fix-up and run Python entry point code

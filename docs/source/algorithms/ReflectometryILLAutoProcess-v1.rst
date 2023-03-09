@@ -62,6 +62,12 @@ Gravity correction
 
 Gravity correction is relevant for data reduction at FIGARO. Its execution is steered by a switch: `CorrectGravity`. The correction follows the algorithm described in Ref. [#Gutfreund]_, and the application to data is split in two separate steps. The first step corrects the wavelength axis of both direct and reflected beams, and takes place in :ref:`ReflectometryILLPreprocess <algm-ReflectometryILLPreprocess>`, where also the corrected by gravity reflection angle is calculated. The second and final step corrects the reflection angle, and is applied to data in :ref:`ReflectometryILLConvertToQ <algm-ReflectometryILLConvertToQ>`.
 
+Replacing sample logs
+---------------------
+
+It is possible to replace any sample log of the loaded data, or add a new log, using the `LogsToReplace` property. The key-value pairs must be provided as JSON-compatible strings or Python
+dictionaries. For an example, see :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>` usage.
+
 Workflow
 --------
 

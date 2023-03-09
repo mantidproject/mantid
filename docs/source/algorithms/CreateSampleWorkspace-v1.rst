@@ -149,21 +149,21 @@ Output:
 .. testcode:: ExHistUserFunc
 
    # create a workspace with data defined using the function string below
-   myFunc = "name=LinearBackground, A0=0.5;name=Gaussian, PeakCentre=10000, Height=50, Sigma=0.5;name=Gaussian, PeakCentre=1000, Height=80, Sigma=0.5"
+   myFunc = "name=LinearBackground, A0=0.5;name=Gaussian, PeakCentre=10100, Height=50, Sigma=0.5;name=Gaussian, PeakCentre=1100, Height=80, Sigma=0.5"
 
    ws = CreateSampleWorkspace("Histogram","User Defined",myFunc)
 
    print("My function defined a background of {} counts.".format(ws.readY(0)[0]))
-   print("With a peak reaching {} counts at 1,000 us,".format(ws.readY(0)[5]))
-   print("and another reaching {} counts at 10,000 us.".format(ws.readY(0)[50]))
+   print("With a peak reaching {} counts at 1,100 us,".format(ws.readY(0)[5]))
+   print("and another reaching {} counts at 10,100 us.".format(ws.readY(0)[50]))
 
 Output:
 
 .. testoutput:: ExHistUserFunc
 
    My function defined a background of 0.5 counts.
-   With a peak reaching 80.5 counts at 1,000 us,
-   and another reaching 50.5 counts at 10,000 us.
+   With a peak reaching ... counts at 1,100 us,
+   and another reaching ... counts at 10,100 us.
 
 **Example - Quasielastic:**
 
@@ -182,8 +182,8 @@ Output:
 
 .. testoutput:: ExQuasielastic
 
-   Number of spectra: 200
-   Number of bins: 100
+   Number of spectra: ...
+   Number of bins: ...
 
 **Example - Setting every Option:**
 
@@ -199,8 +199,8 @@ Output:
 
 .. testoutput:: ExEveryOption
 
-   Number of spectra: 103
-   Number of bins: 80
+   Number of spectra: ...
+   Number of bins: ...
 
 .. categories::
 

@@ -8,12 +8,12 @@
 #include "../../Reduction/Experiment.h"
 #include "../../Reduction/IBatch.h"
 #include "../../Reduction/Instrument.h"
-#include "AlgorithmProperties.h"
 #include "BatchJobAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmProperties.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "Reduction/Item.h"
 #include "Reduction/PreviewRow.h"
@@ -22,24 +22,21 @@
 #include <vector>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
-using namespace Mantid::API;
 using MantidQt::API::IConfiguredAlgorithm;
 using MantidQt::API::IConfiguredAlgorithm_sptr;
 
 namespace {
-void updateInputWorkspacesProperties(MantidQt::API::IAlgorithmRuntimeProps &properties,
+void updateInputWorkspacesProperties(Mantid::API::IAlgorithmRuntimeProps &properties,
                                      std::vector<std::string> const &inputRunNumbers) {
-  AlgorithmProperties::update("InputRunList", inputRunNumbers, properties);
+  Mantid::API::AlgorithmProperties::update("InputRunList", inputRunNumbers, properties);
 }
 
-void updateInstrumentSettingsProperties(MantidQt::API::IAlgorithmRuntimeProps &properties,
-                                        Instrument const &instrument) {
-  AlgorithmProperties::update("CalibrationFile", instrument.calibrationFilePath(), properties);
+void updateInstrumentSettingsProperties(Mantid::API::IAlgorithmRuntimeProps &properties, Instrument const &instrument) {
+  Mantid::API::AlgorithmProperties::update("CalibrationFile", instrument.calibrationFilePath(), properties);
 }
 
-void updateExperimentSettingsProperties(MantidQt::API::IAlgorithmRuntimeProps &properties,
-                                        Experiment const &experiment) {
-  AlgorithmProperties::update("Debug", experiment.debug(), properties);
+void updateExperimentSettingsProperties(Mantid::API::IAlgorithmRuntimeProps &properties, Experiment const &experiment) {
+  Mantid::API::AlgorithmProperties::update("Debug", experiment.debug(), properties);
 }
 
 } // namespace
@@ -52,7 +49,8 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry::PreprocessRow {
  * @param model : the reduction configuration model
  * @param row : the row from the preview tab
  */
-IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, PreviewRow &row, IAlgorithm_sptr alg) {
+IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, PreviewRow &row,
+                                                    Mantid::API::IAlgorithm_sptr alg) {
   // Create the algorithm
   if (!alg) {
     alg = Mantid::API::AlgorithmManager::Instance().create("ReflectometryISISPreprocess");
@@ -62,7 +60,7 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Preview
   alg->getPointerToProperty("OutputWorkspace")->createTemporaryValue();
 
   // Set the algorithm properties from the model
-  auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   updateInputWorkspacesProperties(*properties, row.runNumbers());
   updateInstrumentSettingsProperties(*properties, model.instrument());
   updateExperimentSettingsProperties(*properties, model.experiment());
@@ -73,10 +71,10 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Preview
   return jobAlgorithm;
 }
 
-void updateRowOnAlgorithmComplete(const IAlgorithm_sptr &algorithm, Item &item) {
+void updateRowOnAlgorithmComplete(const Mantid::API::IAlgorithm_sptr &algorithm, Item &item) {
   auto &row = dynamic_cast<PreviewRow &>(item);
-  Workspace_sptr outputWs = algorithm->getProperty("OutputWorkspace");
-  auto matrixWs = std::dynamic_pointer_cast<MatrixWorkspace>(outputWs);
+  Mantid::API::Workspace_sptr outputWs = algorithm->getProperty("OutputWorkspace");
+  auto matrixWs = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outputWs);
   if (!matrixWs)
     throw std::runtime_error("Unsupported workspace type; expected MatrixWorkspace");
   row.setLoadedWs(matrixWs);

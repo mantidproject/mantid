@@ -1,0 +1,1 @@
+* Updated the value returned by ``TimeSeriesProperty`` for time average mean and standard deviation. This now accounts for the last point in a log which was previously, in v6.5.0, being ignored.

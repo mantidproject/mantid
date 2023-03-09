@@ -280,6 +280,21 @@ class CrystalFieldTests(unittest.TestCase):
         self.assertAlmostEqual(y[0], 0.050129858433581413, 6)
         self.assertAlmostEqual(y[1], 0.054427788297191478, 6)
 
+    def test_api_CrystalField_spectrum_xrange(self):
+        cf = CrystalField.CrystalField(
+            "Ce", "C2v", B20=0.035, B40=-0.012, B43=-0.027, B60=-0.00012, B63=0.0025, B66=0.0068, Temperature=[4.0, 50.0], FWHM=[0.1, 0.2]
+        )
+
+        x, y = cf.getSpectrum(x_range=(1, 2))
+        y = y / c_mbsr
+        self.assertAlmostEqual(y[0], 0.049501635768339734, 6)
+        self.assertAlmostEqual(y[1], 0.04954322145208576, 6)
+        self.assertAlmostEqual(y[2], 0.04960108662053217, 6)
+        self.assertAlmostEqual(y[3], 0.04967567690256641, 6)
+        self.assertAlmostEqual(y[4], 0.049767471202505846, 6)
+        self.assertAlmostEqual(y[15], 0.0520903205156656, 6)
+        self.assertAlmostEqual(y[16], 0.05244155491870547, 6)
+
     def test_api_CrystalField_spectrum_peaks(self):
         cf = CrystalField.CrystalField(
             "Ce", "C2v", B20=0.035, B40=-0.012, B43=-0.027, B60=-0.00012, B63=0.0025, B66=0.0068, Temperature=10.0, FWHM=0.1
