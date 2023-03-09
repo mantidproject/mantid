@@ -236,7 +236,6 @@ void LogManager::filterByLog(const Kernel::TimeSeriesProperty<bool> &filter,
                              const std::vector<std::string> &excludedFromFiltering) {
   // This will invalidate the cache
   this->clearSingleValueCache();
-  this->m_timeroi->replaceROI(&filter);
   m_manager->filterByProperty(filter, excludedFromFiltering);
 }
 
