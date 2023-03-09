@@ -11,6 +11,11 @@
 
 namespace Mantid::Kernel {
 
+namespace {
+// local name for a time that has been made with the default constructor
+const DateAndTime UNSET_TIME(DateAndTime::GPS_EPOCH);
+} // namespace
+
 /**
  * Constructor taking a reference to a filter. Note that constructing a
  * LogFilter this
@@ -52,7 +57,7 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
   if (filter.size() == 0)
     return;
   // a single value of one at default GPS epoch is also ignorable
-  if (filter.size() == 1 && filter.firstTime() == DateAndTime::GPS_EPOCH)
+  if (filter.size() == 1 && filter.firstTime() == UNSET_TIME)
     return;
 
   // do nothing if the filter is all ignore
