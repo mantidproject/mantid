@@ -208,6 +208,7 @@ void PropertyManager::filterByProperty(const Kernel::TimeSeriesProperty<bool> &f
         break;
       std::unique_ptr<Property> filtered(nullptr);
       if (this->existsProperty(PropertyManager::getInvalidValuesFilterLogName(currentProp->name()))) {
+
         // add the filter to the passed in filters
         auto logFilter = std::make_unique<LogFilter>(filter);
         auto filterProp = getPointerToProperty(PropertyManager::getInvalidValuesFilterLogName(currentProp->name()));
@@ -217,12 +218,15 @@ void PropertyManager::filterByProperty(const Kernel::TimeSeriesProperty<bool> &f
         logFilter->addFilter(*tspFilterProp);
 
         filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(doubleSeries, *logFilter->filter());
-      } else { // attach the filter to the TimeSeriesProperty, thus creating  the FilteredTimeSeriesProperty<double>
+      } else if (filter.size() > 0) {
+        // attach the filter to the TimeSeriesProperty, thus creating  the FilteredTimeSeriesProperty<double>
         filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(doubleSeries, filter);
       }
-      orderedProperty = filtered.get();
-      // Now replace in the map
-      this->m_properties[createKey(currentProp->name())] = std::move(filtered);
+      if (filtered) {
+        // Now replace in the map
+        orderedProperty = filtered.get();
+        this->m_properties[createKey(currentProp->name())] = std::move(filtered);
+      }
     }
   }
 }
