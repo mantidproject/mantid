@@ -65,8 +65,7 @@ public:
     alg.setPropertyValue("InputWorkspace", "eventWS");
     alg.setPropertyValue("OutputWorkspace", "out");
     alg.setPropertyValue("StopTime", "120");
-    alg.setPropertyValue("AbsoluteStartTime", "2010");
-    alg.execute();
+    TS_ASSERT_THROWS_ANYTHING(alg.setPropertyValue("AbsoluteStartTime", "2010"));
     TS_ASSERT(!alg.isExecuted());
 
     FilterByTime alg2;
@@ -75,8 +74,8 @@ public:
     alg2.setPropertyValue("OutputWorkspace", "out");
     alg2.setPropertyValue("StartTime", "60");
     alg2.setPropertyValue("StopTime", "120");
-    alg2.setPropertyValue("AbsoluteStartTime", "2010");
-    alg2.execute();
+    alg2.setPropertyValue("AbsoluteStartTime", "2010-03-17 12:00");
+    TS_ASSERT_THROWS_ANYTHING(alg2.execute());
     TS_ASSERT(!alg2.isExecuted());
 
     FilterByTime alg3;
@@ -84,9 +83,9 @@ public:
     alg3.setPropertyValue("InputWorkspace", "eventWS");
     alg3.setPropertyValue("OutputWorkspace", "out");
     alg3.setPropertyValue("StopTime", "120");
-    alg3.setPropertyValue("AbsoluteStartTime", "2010");
-    alg3.setPropertyValue("AbsoluteStopTime", "2010-03");
-    alg3.execute();
+    alg3.setPropertyValue("AbsoluteStartTime", "2010-03-17 12:00");
+    alg3.setPropertyValue("AbsoluteStopTime", "2010-03-17 23:59");
+    TS_ASSERT_THROWS_ANYTHING(alg3.execute());
     TS_ASSERT(!alg3.isExecuted());
   }
 
