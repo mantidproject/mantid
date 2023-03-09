@@ -82,7 +82,8 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
     this->setFilter(mine, filterOpenEnded);
   } else if (std::find(values.cbegin(), values.cend(), true) == values.cend()) {
     // reset the filter to empty if the new one is all ignore
-    this->setFilter(TimeROI(), false);
+    filterOpenEnded = false;
+    this->setFilter(TimeROI(), filterOpenEnded);
   } else {
     // determine if the current version of things are open-ended
     filterOpenEnded = (m_filter->lastValue() && filter.lastValue());
