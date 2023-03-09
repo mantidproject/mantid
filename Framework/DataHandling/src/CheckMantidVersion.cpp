@@ -145,17 +145,26 @@ std::string CheckMantidVersion::cleanVersionTag(const std::string &versionTag) c
   return retVal;
 }
 
-/** splits a . separated version string into a vector of integers.
- * It will discard anything after (and including) a "+", which denotes a "local version":
- * https://peps.python.org/pep-0440/#local-version-identifiers
+/** Splits a . separated version string into a vector of integers.
+ * It will ignore extra characters in special version numbers that we use in line with the PEP440 versioning scheme:
+ * https://peps.python.org/pep-0440
+ * Here are examples of the special cases that are considered:
+ * - Local version numbers, e.g. "v1.2.3+somestring" (ignore the "+" and anything after)
+ *   (see https://peps.python.org/pep-0440/#local-version-identifiers)
+ * - Development builds, e.g. "v1.2.3.devXYZ" (ignore ".dev" and anything after)
+ * - Release candidate builds, e.g. "v1.2.3rc1" (ignore the "rc" and anything after)
  *
  * @param versionString Something like "2.3.4"
  * @returns a vector of [2,3,4]
  */
 std::vector<int> CheckMantidVersion::splitVersionString(const std::string &versionString) const {
   std::vector<int> versionNumbers;
-  // Discard "+" and anything after for local versions.
-  std::string versionStringBeforePlus = versionString.substr(0, versionString.find("+"));
+  // Discard suffix from release candidiate version numbers.
+  std::string versionStringBeforeRC = versionString.substr(0, versionString.find("rc"));
+  // Discrad suffix from development builds.
+  std::string versionStringBeforeDev = versionStringBeforeRC.substr(0, versionStringBeforeRC.find(".dev"));
+  // Discard suffix from local release versions.
+  std::string versionStringBeforePlus = versionStringBeforeDev.substr(0, versionStringBeforeDev.find("+"));
 
   Mantid::Kernel::StringTokenizer tokenizer(versionStringBeforePlus, ".",
                                             Mantid::Kernel::StringTokenizer::TOK_TRIM |
