@@ -59,7 +59,6 @@ def workspace_names_dummy_func(workspaces):
 
 
 class FunctionsTest(unittest.TestCase):
-
     _test_ws = None
     # MD workspace to test
     _test_md_ws = None
