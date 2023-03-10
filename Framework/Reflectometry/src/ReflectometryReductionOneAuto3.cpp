@@ -290,7 +290,7 @@ void ReflectometryReductionOneAuto3::init() {
                   "Apply polarization corrections");
 
   // Flood correction
-  std::vector<std::string> propOptions = {"Workspace", "ParameterFile"};
+  std::vector<std::string> propOptions = {"Workspace", "ParameterFile", "None"};
   declareProperty("FloodCorrection", "Workspace", std::make_shared<StringListValidator>(propOptions),
                   "The way to apply flood correction: "
                   "Workspace - use FloodWorkspace property to get the flood "
@@ -1088,6 +1088,9 @@ void ReflectometryReductionOneAuto3::applyPolarizationCorrection(const std::stri
  */
 MatrixWorkspace_sptr ReflectometryReductionOneAuto3::getFloodWorkspace() {
   const std::string method = getProperty("FloodCorrection");
+  if (method == "None") {
+    return MatrixWorkspace_sptr();
+  }
   if (method == "Workspace" && !isDefault("FloodWorkspace")) {
     return getProperty("FloodWorkspace");
   } else if (method == "ParameterFile") {

@@ -11,6 +11,7 @@
 #include "IDecoder.h"
 #include "MantidQtWidgets/Common/BaseDecoder.h"
 
+#include <QComboBox>
 #include <QMap>
 #include <QString>
 #include <QTableWidget>
@@ -56,6 +57,7 @@ public:
 private:
   BatchPresenter *findBatchPresenter(const QtBatchView *gui, const IMainWindowView *mww);
   void decodeExperiment(QtExperimentView *gui, const QMap<QString, QVariant> &map);
+  void decodePolarizationCorrectionsComboBox(QComboBox *polCorrComboBox, const QMap<QString, QVariant> &map) const;
   void decodePerAngleDefaults(QTableWidget *tab, const QMap<QString, QVariant> &map);
   void decodeLegacyPerAngleDefaultsRow(QTableWidget *tab, int rowIndex, int columnsNum, QList<QVariant> list);
   void decodePerAngleDefaultsRow(QTableWidget *tab, int rowIndex, int columnsNum, const QList<QVariant> &list);

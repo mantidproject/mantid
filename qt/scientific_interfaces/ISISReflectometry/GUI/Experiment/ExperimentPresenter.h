@@ -9,6 +9,7 @@
 #include "Common/DllConfig.h"
 #include "Common/ValidationResult.h"
 #include "ExperimentOptionDefaults.h"
+#include "GUI/Common/IFileHandler.h"
 #include "GUI/Preview/ROIType.h"
 #include "IExperimentPresenter.h"
 #include "IExperimentView.h"
@@ -47,7 +48,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentPresenter : public ExperimentView
                                                            public IExperimentPresenter {
 public:
   ExperimentPresenter(
-      IExperimentView *view, Experiment experiment, double defaultsThetaTolerance,
+      IExperimentView *view, Experiment experiment, double defaultsThetaTolerance, IFileHandler *fileHandler,
       std::unique_ptr<IExperimentOptionDefaults> experimentDefaults = std::make_unique<ExperimentOptionDefaults>());
 
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
@@ -86,6 +87,9 @@ private:
 
   std::map<std::string, std::string> stitchParametersFromView();
 
+  void showPolCorrFilePathValidity(std::string const &filePath);
+  void showFloodFilePathValidity(std::string const &filePath);
+
   void updateModelFromView();
   void updateViewFromModel();
 
@@ -97,7 +101,9 @@ private:
   void updateSummationTypeEnabledState();
   void updateBackgroundSubtractionEnabledState();
   void updatePolarizationCorrectionEnabledState();
+  void disablePolarizationEfficiencies();
   void updateFloodCorrectionEnabledState();
+  void disableFloodCorrectionInputs();
 
   void updateLookupRowProcessingInstructions(PreviewRow const &previewRow, LookupRow &lookupRow, ROIType regionType);
 
@@ -105,6 +111,7 @@ private:
   bool isAutoreducing() const;
 
   IExperimentView *m_view = nullptr;
+  IFileHandler *m_fileHandler;
   Experiment m_model;
   double m_thetaTolerance = 0;
   ExperimentValidationResult m_validationResult;

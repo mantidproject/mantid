@@ -22,7 +22,7 @@
 #include "../Save/QtSaveView.h"
 
 namespace {
-auto constexpr BATCH_VERSION = 1;
+auto constexpr BATCH_VERSION = 2;
 }
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -282,10 +282,13 @@ QMap<QString, QVariant> Encoder::encodeExperiment(const QtExperimentView *gui) {
                        QVariant(gui->m_ui.backgroundMethodComboBox->currentIndex()));
   experimentMap.insert(QString("polynomialDegreeSpinBox"), QVariant(gui->m_ui.polynomialDegreeSpinBox->value()));
   experimentMap.insert(QString("costFunctionComboBox"), QVariant(gui->m_ui.costFunctionComboBox->currentIndex()));
-  experimentMap.insert(QString("polCorrCheckBox"), QVariant(gui->m_ui.polCorrCheckBox->isChecked()));
+  experimentMap.insert(QString("polCorrComboBox"), QVariant(gui->m_ui.polCorrComboBox->currentText()));
+  experimentMap.insert(QString("polCorrEfficienciesWsSelector"),
+                       QVariant(gui->m_polCorrEfficienciesWsSelector->currentText()));
+  experimentMap.insert(QString("polCorrEfficienciesLineEdit"), QVariant(gui->m_polCorrEfficienciesLineEdit->text()));
   experimentMap.insert(QString("floodCorComboBox"), QVariant(gui->m_ui.floodCorComboBox->currentIndex()));
-  experimentMap.insert(QString("floodWorkspaceWsSelector"),
-                       QVariant(gui->m_ui.floodWorkspaceWsSelector->currentIndex()));
+  experimentMap.insert(QString("floodWorkspaceWsSelector"), QVariant(gui->m_floodCorrWsSelector->currentText()));
+  experimentMap.insert(QString("floodWorkspaceLineEdit"), QVariant(gui->m_floodCorrLineEdit->text()));
   experimentMap.insert(QString("stitchEdit"), QVariant(gui->m_stitchEdit->text()));
   return experimentMap;
 }

@@ -21,9 +21,10 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
 }
 
 ExperimentPresenter::ExperimentPresenter(IExperimentView *view, Experiment experiment, double defaultsThetaTolerance,
+                                         IFileHandler *fileHandler,
                                          std::unique_ptr<IExperimentOptionDefaults> experimentDefaults)
-    : m_experimentDefaults(std::move(experimentDefaults)), m_view(view), m_model(std::move(experiment)),
-      m_thetaTolerance(defaultsThetaTolerance), m_validationResult(m_model) {
+    : m_experimentDefaults(std::move(experimentDefaults)), m_view(view), m_fileHandler(fileHandler),
+      m_model(std::move(experiment)), m_thetaTolerance(defaultsThetaTolerance), m_validationResult(m_model) {
   m_view->subscribe(this);
 }
 
@@ -154,26 +155,51 @@ BackgroundSubtraction ExperimentPresenter::backgroundSubtractionFromView() {
 }
 
 PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
-  auto const correctionsChecked = m_view->getPolarizationCorrectionOption();
+  auto const &polCorrOptionString = m_view->getPolarizationCorrectionOption();
+  auto const &polCorrType = polarizationCorrectionTypeFromString(polCorrOptionString);
 
-  if (!correctionsChecked) {
-    return PolarizationCorrections(PolarizationCorrectionType::None);
+  if (polCorrType == PolarizationCorrectionType::None || polCorrType == PolarizationCorrectionType::ParameterFile) {
+    return PolarizationCorrections(polCorrType);
   }
-  auto const correctionsWorkspace = m_view->getPolarizationEfficienciesWorkspace();
-  if (correctionsWorkspace.empty()) {
-    return PolarizationCorrections(PolarizationCorrectionType::ParameterFile);
+  if (polCorrOptionString == "FilePath") {
+    auto const &polCorrFilePath = m_view->getPolarizationEfficienciesFilePath();
+    showPolCorrFilePathValidity(polCorrFilePath);
+    return PolarizationCorrections(polCorrType, polCorrFilePath);
   }
-  return PolarizationCorrections(PolarizationCorrectionType::Workspace, correctionsWorkspace);
+  return PolarizationCorrections(polCorrType, m_view->getPolarizationEfficienciesWorkspace());
+}
+
+void ExperimentPresenter::showPolCorrFilePathValidity(std::string const &filePath) {
+  if (m_fileHandler->fileExists(m_fileHandler->getFullFilePath(filePath))) {
+    m_view->showPolCorrFilePathValid();
+    return;
+  }
+  m_view->showPolCorrFilePathInvalid();
 }
 
 FloodCorrections ExperimentPresenter::floodCorrectionsFromView() {
-  auto const correctionType = floodCorrectionTypeFromString(m_view->getFloodCorrectionType());
+  auto const &correctionTypeString = m_view->getFloodCorrectionType();
+  auto const &correctionType = floodCorrectionTypeFromString(correctionTypeString);
 
   if (floodCorrectionRequiresInputs(correctionType)) {
-    return FloodCorrections(correctionType, m_view->getFloodWorkspace());
+    if (correctionTypeString == "Workspace") {
+      return FloodCorrections(correctionType, m_view->getFloodWorkspace());
+    }
+    if (correctionTypeString == "FilePath") {
+      auto const &floodFilePath = m_view->getFloodFilePath();
+      showFloodFilePathValidity(floodFilePath);
+      return FloodCorrections(correctionType, floodFilePath);
+    }
   }
-
   return FloodCorrections(correctionType);
+}
+
+void ExperimentPresenter::showFloodFilePathValidity(const std::string &filePath) {
+  if (m_fileHandler->fileExists(m_fileHandler->getFullFilePath(filePath))) {
+    m_view->showFloodCorrFilePathValid();
+    return;
+  }
+  m_view->showFloodCorrFilePathInvalid();
 }
 
 void ExperimentPresenter::updateBackgroundSubtractionEnabledState() {
@@ -197,26 +223,58 @@ void ExperimentPresenter::updatePolarizationCorrectionEnabledState() {
   // We could generalise which instruments polarization corrections are
   // applicable for but for now it's not worth it, so just hard code the
   // instrument names.
-  auto const instrumentName = m_mainPresenter->instrumentName();
+  auto const &instrumentName = m_mainPresenter->instrumentName();
   if (instrumentName == "INTER" || instrumentName == "SURF") {
-    m_view->setPolarizationCorrectionOption(false);
+    m_view->setPolarizationCorrectionOption("None");
     m_view->disablePolarizationCorrections();
-    m_view->disablePolarizationEfficiencies();
+    disablePolarizationEfficiencies();
     return;
   }
+  auto const &polCorrOption = m_view->getPolarizationCorrectionOption();
   m_view->enablePolarizationCorrections();
-  if (m_view->getPolarizationCorrectionOption()) {
-    m_view->enablePolarizationEfficiencies();
+  if (polCorrOption == "ParameterFile" || polCorrOption == "None") {
+    disablePolarizationEfficiencies();
     return;
   }
+  if (polCorrOption == "Workspace") {
+    m_view->enablePolarizationEfficiencies();
+    m_view->setPolarizationEfficienciesWorkspaceMode();
+    return;
+  }
+  if (polCorrOption == "FilePath") {
+    m_view->enablePolarizationEfficiencies();
+    m_view->setPolarizationEfficienciesFilePathMode();
+    return;
+  }
+}
+
+void ExperimentPresenter::disablePolarizationEfficiencies() {
+  m_view->setPolarizationEfficienciesWorkspaceMode();
   m_view->disablePolarizationEfficiencies();
 }
 
 void ExperimentPresenter::updateFloodCorrectionEnabledState() {
-  if (floodCorrectionRequiresInputs(m_model.floodCorrections().correctionType()))
+  auto const &floodCorrOption = m_view->getFloodCorrectionType();
+
+  if (floodCorrOption == "None" || floodCorrOption == "ParameterFile") {
+    disableFloodCorrectionInputs();
+    return;
+  }
+  if (floodCorrOption == "Workspace") {
     m_view->enableFloodCorrectionInputs();
-  else
-    m_view->disableFloodCorrectionInputs();
+    m_view->setFloodCorrectionWorkspaceMode();
+    return;
+  }
+  if (floodCorrOption == "FilePath") {
+    m_view->enableFloodCorrectionInputs();
+    m_view->setFloodCorrectionFilePathMode();
+    return;
+  }
+}
+
+void ExperimentPresenter::disableFloodCorrectionInputs() {
+  m_view->setFloodCorrectionWorkspaceMode();
+  m_view->disableFloodCorrectionInputs();
 }
 
 boost::optional<RangeInLambda> ExperimentPresenter::transmissionRunRangeFromView() {
@@ -364,13 +422,17 @@ void ExperimentPresenter::updateViewFromModel() {
   m_view->setPolynomialDegree(m_model.backgroundSubtraction().degreeOfPolynomial());
   m_view->setCostFunction(costFunctionTypeToString(m_model.backgroundSubtraction().costFunction()));
   // Corrections
-  m_view->setPolarizationCorrectionOption(m_model.polarizationCorrections().correctionType() !=
-                                          PolarizationCorrectionType::None);
+  m_view->setPolarizationCorrectionOption(
+      polarizationCorrectionTypeToString(m_model.polarizationCorrections().correctionType()));
+  m_view->setPolarizationEfficienciesFilePath("");
+  if (m_model.polarizationCorrections().workspace())
+    m_view->setPolarizationEfficienciesWorkspace(m_model.polarizationCorrections().workspace().get());
   m_view->setFloodCorrectionType(floodCorrectionTypeToString(m_model.floodCorrections().correctionType()));
   if (m_model.floodCorrections().workspace())
     m_view->setFloodWorkspace(m_model.floodCorrections().workspace().get());
   else
     m_view->setFloodWorkspace("");
+  m_view->setFloodFilePath("");
   m_view->setStitchOptions(m_model.stitchParametersString());
 
   // We don't allow invalid config so reset all state to valid

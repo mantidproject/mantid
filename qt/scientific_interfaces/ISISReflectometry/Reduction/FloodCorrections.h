@@ -11,12 +11,14 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
-enum class FloodCorrectionType { Workspace, ParameterFile };
+enum class FloodCorrectionType { None, Workspace, ParameterFile };
 
 inline FloodCorrectionType floodCorrectionTypeFromString(std::string const &correctionType) {
-  if (correctionType == "Workspace")
+  if (correctionType == "None")
+    return FloodCorrectionType::None;
+  if (correctionType == "Workspace" || correctionType == "FilePath")
     return FloodCorrectionType::Workspace;
-  else if (correctionType == "ParameterFile")
+  if (correctionType == "ParameterFile")
     return FloodCorrectionType::ParameterFile;
   else
     throw std::invalid_argument("Unexpected flood correction type.");
@@ -24,6 +26,8 @@ inline FloodCorrectionType floodCorrectionTypeFromString(std::string const &corr
 
 inline std::string floodCorrectionTypeToString(FloodCorrectionType correctionType) {
   switch (correctionType) {
+  case FloodCorrectionType::None:
+    return "None";
   case FloodCorrectionType::Workspace:
     return "Workspace";
   case FloodCorrectionType::ParameterFile:

@@ -78,11 +78,26 @@ private:
                      map[QString("backgroundMethodComboBox")].toInt())
     TS_ASSERT_EQUALS(gui->m_ui.polynomialDegreeSpinBox->value(), map[QString("polynomialDegreeSpinBox")].toInt())
     TS_ASSERT_EQUALS(gui->m_ui.costFunctionComboBox->currentIndex(), map[QString("costFunctionComboBox")].toInt())
-    TS_ASSERT_EQUALS(gui->m_ui.polCorrCheckBox->isChecked(), map[QString("polCorrCheckBox")].toBool())
+    testPolarizationCorrectionsComboBox(gui->m_ui.polCorrComboBox, map);
+    TS_ASSERT_EQUALS(gui->m_polCorrEfficienciesWsSelector->currentText(),
+                     map[QString("polCorrEfficienciesWsSelector")].toString())
+    TS_ASSERT_EQUALS(gui->m_polCorrEfficienciesLineEdit->text(), map[QString("polCorrEfficienciesLineEdit")].toString())
     TS_ASSERT_EQUALS(gui->m_ui.floodCorComboBox->currentIndex(), map[QString("floodCorComboBox")].toInt())
-    TS_ASSERT_EQUALS(gui->m_ui.floodWorkspaceWsSelector->currentIndex(),
-                     map[QString("floodWorkspaceWsSelector")].toInt())
+    TS_ASSERT_EQUALS(gui->m_floodCorrWsSelector->currentText(), map[QString("floodWorkspaceWsSelector")].toString())
+    TS_ASSERT_EQUALS(gui->m_floodCorrLineEdit->text(), map[QString("floodWorkspaceFilePath")].toString())
     TS_ASSERT_EQUALS(gui->m_stitchEdit->text(), map[QString("stitchEdit")].toString())
+  }
+
+  void testPolarizationCorrectionsComboBox(const QComboBox *comboBox, const QMap<QString, QVariant> &map) {
+    if (map.contains("polCorrComboBox")) {
+      TS_ASSERT_EQUALS(comboBox->currentText(), map[QString("polCorrComboBox")].toString())
+      return;
+    }
+    if (map[QString("polCorrCheckBox")].toBool()) {
+      TS_ASSERT_EQUALS(comboBox->currentText(), "ParameterFile")
+      return;
+    }
+    TS_ASSERT_EQUALS(comboBox->currentText(), "None")
   }
 
   void testPerAngleDefaults(const QTableWidget *tab, const QMap<QString, QVariant> &map) {
