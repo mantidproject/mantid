@@ -358,12 +358,16 @@ std::unique_ptr<Kernel::Property> createTimeSeriesValidityFilter(::NeXus::File &
  * @param run :: handle to the run object containing the end time.
  */
 void appendEndTimeLog(Kernel::Property *prop, const API::Run &run) {
+  // do not modify proton charge
+  if (prop->name() == "proton_charge")
+    return;
+
   try {
     auto tsLog = dynamic_cast<TimeSeriesProperty<double> *>(prop);
     const auto endTime = run.endTime();
 
     // First check if it is valid to append a log entry
-    if (!tsLog || tsLog->size() == 0 || endTime <= tsLog->lastTime() || prop->name() == "proton_charge")
+    if (!tsLog || tsLog->size() == 0 || endTime <= tsLog->lastTime())
       return;
 
     tsLog->addValue(endTime, tsLog->lastValue());
