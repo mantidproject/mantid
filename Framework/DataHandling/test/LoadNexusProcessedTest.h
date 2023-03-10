@@ -1028,6 +1028,12 @@ public:
   }
 
   void test_Log_invalid_value_filtering_survives_save_and_load() {
+    // this test checks that this log is the same from both original and processed nexus
+    const std::string LOG_TO_CHECK("cryo_temp1");
+    constexpr int LOG_SIZE{1};
+    constexpr int LOG_SECONDS{15};
+    constexpr double LOG_VALUE{7.};
+
     LoadNexus alg;
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -1044,7 +1050,7 @@ public:
     MatrixWorkspace_sptr workspace;
     workspace = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(output_ws));
 
-    check_log(workspace, "cryo_temp1", 1, 3, 7.0);
+    check_log(workspace, LOG_TO_CHECK, LOG_SIZE, LOG_SECONDS, LOG_VALUE);
 
     SaveNexusProcessed save;
     save.initialize();
@@ -1054,6 +1060,7 @@ public:
     save.setPropertyValue("Filename", filename);
     filename = save.getPropertyValue("Filename");
     save.execute();
+
     LoadNexusProcessed load;
     load.initialize();
     load.setPropertyValue("Filename", filename);
@@ -1062,7 +1069,7 @@ public:
 
     workspace = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(output_ws));
     TS_ASSERT(workspace.get());
-    check_log(workspace, "cryo_temp1", 1, 3, 7.0);
+    check_log(workspace, LOG_TO_CHECK, LOG_SIZE, LOG_SECONDS, LOG_VALUE);
     if (Poco::File(filename).exists())
       Poco::File(filename).remove();
   }
