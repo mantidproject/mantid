@@ -24,6 +24,7 @@ public:
     std::string major;
     std::string minor;
     std::string patch;
+    std::string tweak;
   };
 
   static const char *version();           ///< The full version number
@@ -35,10 +36,10 @@ public:
   static const char *releaseDate();       ///< The date of the last commit
   static std::string doi();               ///< The DOI for this release of Mantid.
   static std::string paperCitation();     ///< The citation for the Mantid paper
+  static std::string versionForReleaseNotes(const VersionInfo &); ///< The version of mantid for the release notes url.
 
 private:
-  MantidVersion(); ///< Private, unimplemented constructor. Not a class that can
-  /// be instantiated.
+  MantidVersion(); ///< Private, unimplemented constructor. Not a class that can be instantiated.
 };
 
 } // namespace Kernel
