@@ -17,7 +17,10 @@ class MantidVersionTest(unittest.TestCase):
         assertRaisesNothing(self, int, version().minor)
 
     def test_version_info_patch(self):
-        self.assertTrue(version().patch)
+        assertRaisesNothing(self, int, version().patch)
+
+    def test_version_info_tweak(self):
+        assertRaisesNothing(self, print, version().tweak)
 
     def test_version_info_string(self):
         self.assertTrue("." in str(version))
