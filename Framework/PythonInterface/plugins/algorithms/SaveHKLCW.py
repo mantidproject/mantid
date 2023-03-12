@@ -36,7 +36,6 @@ class SaveHKLCW(PythonAlgorithm):
         self.declareProperty("DirectionCosines", False, direction=Direction.Input, doc="If to include the direction cosines output")
 
     def PyExec(self):
-
         peak_ws = self.getProperty("Workspace").value
         outFile = self.getPropertyValue("OutputFile")
         header = self.getProperty("Header").value
@@ -56,16 +55,23 @@ class SaveHKLCW(PythonAlgorithm):
                 f.write(f"{wavelength:.5f}  0   0\n")
 
             if directionCosines:
-                U = peak_ws.sample().getOrientedLattice().getU()
+                UB = peak_ws.sample().getOrientedLattice().getU()
+                t1 = UB[:, 0].copy()
+                t2 = UB[:, 1].copy()
+                t3 = UB[:, 2].copy()
+                t1 /= np.linalg.norm(t1)
+                t2 /= np.linalg.norm(t2)
+                t3 /= np.linalg.norm(t3)
                 for p in peak_ws:
                     ki_n = p.getReferenceFrame().vecPointingAlongBeam()
                     R = p.getGoniometerMatrix()
-                    RU = np.dot(R, U)
                     ki = ki_n * (2 * np.pi / p.getWavelength())
                     kf_n = ki - p.getQLabFrame()  # direction of scattered wavevector
                     kf_n = kf_n * (1.0 / kf_n.norm())
-                    dir_cos_1 = np.dot(RU.T, -ki_n)  # notice ki direction is reversed
-                    dir_cos_2 = np.dot(RU.T, kf_n)
+                    up = np.dot(R.T, -ki_n)  # notice ki direction is reversed
+                    us = np.dot(R.T, kf_n)
+                    dir_cos_1 = np.dot(up, t1), np.dot(up, t2), np.dot(up, t3)
+                    dir_cos_2 = np.dot(us, t1), np.dot(us, t2), np.dot(us, t3)
                     f.write(
                         "{:4.0f}{:4.0f}{:4.0f}{:8.2f}{:8.2f}{:4d}{:8.5f}{:8.5f}{:8.5f}{:8.5f}{:8.5f}{:8.5f}\n".format(
                             p.getH(),
