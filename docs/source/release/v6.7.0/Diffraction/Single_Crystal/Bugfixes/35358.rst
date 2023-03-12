@@ -1,0 +1,1 @@
+- Fixed the calcuation of direction cosines in :ref:`SaveHKL <algm-SaveHKL>` and :ref:`SaveHKLCW <algm-SaveHKLCW>`
