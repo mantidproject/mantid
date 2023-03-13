@@ -11,6 +11,7 @@
 #include "MantidKernel/ITimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/TimeROI.h"
 
 namespace Mantid::Algorithms {
 // Register the algorithm into the algorithm factory
@@ -155,6 +156,10 @@ void FilterByLogValue::exec() {
       }
     } // (filter by value)
   }
+  TimeROI *roi = new TimeROI();
+  for (auto split : splitter) {
+    roi->addROI(split.start(), split.stop());
+  }
 
   g_log.information() << splitter.size() << " entries in the filter.\n";
   size_t numberOfSpectra = inputWS->getNumberHistograms();
@@ -163,68 +168,39 @@ void FilterByLogValue::exec() {
   Progress prog(this, 0.0, 1.0, numberOfSpectra);
 
   EventWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-  if (inputWS == outputWS) {
-    // Filtering in place!
-    // -------------------------------------------------------------
-    PARALLEL_FOR_NO_WSP_CHECK()
-    for (int64_t i = 0; i < int64_t(numberOfSpectra); ++i) {
-      PARALLEL_START_INTERRUPT_REGION
 
-      // this is the input event list
-      EventList &input_el = inputWS->getSpectrum(i);
+  // Make a brand new EventWorkspace for the output
+  outputWS = create<EventWorkspace>(*inputWS);
 
-      // Perform the filtering in place.
-      input_el.filterInPlace(splitter);
+  // Loop over the histograms (detector spectra)
+  PARALLEL_FOR_NO_WSP_CHECK()
+  for (int64_t i = 0; i < int64_t(numberOfSpectra); ++i) {
+    PARALLEL_START_INTERRUPT_REGION
 
-      prog.report();
-      PARALLEL_END_INTERRUPT_REGION
-    }
-    PARALLEL_CHECK_INTERRUPT_REGION
+    // Get the output event list (should be empty)
+    EventList &outputs = outputWS->getSpectrum(i);
 
-    // To split/filter the runs, first you make a vector with just the one
-    // output run
-    auto newRun = Kernel::make_cow<Run>(inputWS->run());
-    std::vector<LogManager *> splitRuns = {&newRun.access()};
-    inputWS->run().splitByTime(splitter, splitRuns);
-    // Set the output back in the input
-    inputWS->setSharedRun(newRun);
-    inputWS->mutableRun().integrateProtonCharge();
+    // and this is the input event list
+    const EventList &input_el = inputWS->getSpectrum(i);
 
-    // Cast the outputWS to the matrixOutputWS and save it
-    this->setProperty("OutputWorkspace", inputWS);
-  } else {
-    // Make a brand new EventWorkspace for the output
-    outputWS = create<EventWorkspace>(*inputWS);
+    // Perform the filtering (using the splitting function and just one
+    // output)
+    if (roi != nullptr && !roi->empty())
+      input_el.filterByPulseTime(roi, outputs);
 
-    // Loop over the histograms (detector spectra)
-    PARALLEL_FOR_NO_WSP_CHECK()
-    for (int64_t i = 0; i < int64_t(numberOfSpectra); ++i) {
-      PARALLEL_START_INTERRUPT_REGION
-
-      // Get the output event list (should be empty)
-      std::vector<EventList *> outputs{&outputWS->getSpectrum(i)};
-
-      // and this is the input event list
-      const EventList &input_el = inputWS->getSpectrum(i);
-
-      // Perform the filtering (using the splitting function and just one
-      // output)
-      input_el.splitByTime(splitter, outputs);
-
-      prog.report();
-      PARALLEL_END_INTERRUPT_REGION
-    }
-    PARALLEL_CHECK_INTERRUPT_REGION
-
-    // To split/filter the runs, first you make a vector with just the one
-    // output run
-    std::vector<LogManager *> output_runs;
-    output_runs.emplace_back(&outputWS->mutableRun());
-    inputWS->run().splitByTime(splitter, output_runs);
-
-    // Cast the outputWS to the matrixOutputWS and save it
-    this->setProperty("OutputWorkspace", outputWS);
+    prog.report();
+    PARALLEL_END_INTERRUPT_REGION
   }
+  PARALLEL_CHECK_INTERRUPT_REGION
+
+  // To split/filter the runs, first you make a vector with just the one
+  // output run
+  std::vector<LogManager *> output_runs;
+  output_runs.emplace_back(&outputWS->mutableRun());
+  outputWS->mutableRun().setTimeROI(*roi);
+
+  // Cast the outputWS to the matrixOutputWS and save it
+  this->setProperty("OutputWorkspace", outputWS);
 }
 
 } // namespace Mantid::Algorithms
