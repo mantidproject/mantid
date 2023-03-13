@@ -113,6 +113,11 @@ void Run::filterByTime(const Types::Core::DateAndTime start, const Types::Core::
  * @returns A reference to the summed object
  */
 Run &Run::operator+=(const Run &rhs) {
+  // combine the two TimeROI if either is non-empty
+  if ((!m_timeroi->empty()) || (!rhs.m_timeroi->empty())) {
+    m_timeroi->update_union(*(rhs.m_timeroi.get()));
+  }
+
   // merge and copy properties where there is no risk of corrupting data
   mergeMergables(*m_manager, *rhs.m_manager);
 
@@ -132,6 +137,9 @@ Run &Run::operator+=(const Run &rhs) {
         m_manager->declareProperty(std::unique_ptr<Property>(right->clone()), "");
     }
   }
+  // Re-integrate proton charge
+  this->integrateProtonCharge();
+
   return *this;
 }
 
