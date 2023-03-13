@@ -28,7 +28,7 @@ output_folder_name = "output"
 # Relative to input folder
 calibration_folder_name = os.path.join("calibration", inst_name.lower())
 calibration_map_rel_path = os.path.join("yaml_files", "osiris_system_test_mapping.yaml")
-focussed_rel_path = os.path.join("1_1", "OSI119977-119978_d_spacing.nxs")
+focussed_rel_path = os.path.join("1_1", "Test", "OSI119977_d_spacing.nxs")
 
 # Generate paths for the tests
 # This implies DIRS[0] is the system test data folder
@@ -39,7 +39,7 @@ output_dir = os.path.join(working_dir, output_folder_name)
 
 calibration_map_path = os.path.join(input_dir, calibration_map_rel_path)
 calibration_dir = os.path.join(input_dir, calibration_folder_name)
-focused_path = os.path.join(calibration_dir, focussed_rel_path)
+focused_path = os.path.join(output_dir, focussed_rel_path)
 
 
 class DiffractionFocusingTest(systemtesting.MantidSystemTest):
@@ -55,7 +55,7 @@ class DiffractionFocusingTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         foccussed_ws = self.calibration_results
-        return (foccussed_ws.name(), "OSI119977-119978_d_spacing.nxs")
+        return (foccussed_ws.name(), "OSI119977_d_spacing.nxs")
 
     def cleanup(self):
         try:
