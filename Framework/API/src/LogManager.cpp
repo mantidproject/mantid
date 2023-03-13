@@ -23,6 +23,9 @@ namespace {
 /// static logger
 Logger g_log("LogManager");
 
+const std::string START_TIME_NAME("start_time");
+const std::string END_TIME_NAME("end_time");
+
 /// Templated method to convert property to double
 template <typename T> bool convertSingleValue(const Property *property, double &value) {
   if (auto log = dynamic_cast<const PropertyWithValue<T> *>(property)) {
@@ -110,8 +113,8 @@ LogManager &LogManager::operator=(const LogManager &other) {
  * @param end :: The run end
  */
 void LogManager::setStartAndEndTime(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &end) {
-  this->addProperty<std::string>("start_time", start.toISO8601String(), true);
-  this->addProperty<std::string>("end_time", end.toISO8601String(), true);
+  this->addProperty<std::string>(START_TIME_NAME, start.toISO8601String(), true);
+  this->addProperty<std::string>(END_TIME_NAME, end.toISO8601String(), true);
 }
 
 /** Return the run start time as given by the 'start_time' or 'run_start'
@@ -122,10 +125,9 @@ void LogManager::setStartAndEndTime(const Types::Core::DateAndTime &start, const
  *  @throws std::runtime_error if neither property is defined
  */
 const Types::Core::DateAndTime LogManager::startTime() const {
-  const std::string start_prop("start_time");
-  if (hasProperty(start_prop)) {
+  if (hasProperty(START_TIME_NAME)) {
     try {
-      DateAndTime start_time(getProperty(start_prop)->value());
+      DateAndTime start_time(getProperty(START_TIME_NAME)->value());
       if (start_time != DateAndTime::GPS_EPOCH) {
         return start_time;
       }
@@ -154,10 +156,9 @@ const Types::Core::DateAndTime LogManager::startTime() const {
  *  @throws std::runtime_error if neither property is defined
  */
 const Types::Core::DateAndTime LogManager::endTime() const {
-  const std::string end_prop("end_time");
-  if (hasProperty(end_prop)) {
+  if (hasProperty(END_TIME_NAME)) {
     try {
-      return DateAndTime(getProperty(end_prop)->value());
+      return DateAndTime(getProperty(END_TIME_NAME)->value());
     } catch (std::invalid_argument &) { /*Swallow and move on*/
     }
   }
