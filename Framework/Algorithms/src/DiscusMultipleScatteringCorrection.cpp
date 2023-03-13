@@ -218,14 +218,14 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
 
   if (inputWS->sample().getShape().hasValidShape())
     if (inputWS->sample().getMaterial().numberDensity() == 0)
-      issues["InputWorkspace"] = "Sample must have a material set up with a non-zero number density";
+      issues["InputWorkspace"] = "Sample must have a material set up with a non-zero number density\n";
   if (inputWS->sample().hasEnvironment()) {
     auto env = &inputWS->sample().getEnvironment();
     for (size_t i = 0; i < env->nelements(); i++)
       if (env->getComponent(i).hasValidShape())
         if (env->getComponent(i).material().numberDensity() == 0)
           issues["InputWorkspace"] = "Sample environment component " + std::to_string(i) +
-                                     " must have a material set up with a non-zero number density ";
+                                     " must have a material set up with a non-zero number density\n";
   }
 
   std::vector<MatrixWorkspace_sptr> SQWSs;
@@ -487,9 +487,6 @@ void DiscusMultipleScatteringCorrection::convertWsBothAxesToPoints(MatrixWorkspa
  * Execution code
  */
 void DiscusMultipleScatteringCorrection::exec() {
-  g_log.warning(
-      "DiscusMultipleScatteringCorrection is in the beta stage of development. Its name, properties and behaviour "
-      "may change without warning.");
   if (!getAlwaysStoreInADS())
     throw std::runtime_error("This algorithm explicitly stores named output workspaces in the ADS so must be run with "
                              "AlwaysStoreInADS set to true");
@@ -569,7 +566,8 @@ void DiscusMultipleScatteringCorrection::exec() {
 
   m_importanceSampling = getProperty("ImportanceSampling");
 
-  Progress prog(this, 0.0, 1.0, nhists * nSimulationPoints);
+  // add one extra progress step per hist for the wavelength interpolation
+  Progress prog(this, 0.0, 1.0, nhists * (nSimulationPoints + 1));
   prog.setNotifyStep(0.1);
   const std::string reportMsg = "Computing corrections";
 
@@ -682,6 +680,7 @@ void DiscusMultipleScatteringCorrection::exec() {
           outputWSs[ne]->setHistogram(i, histnew);
         }
       }
+      prog.report(reportMsg);
     }
 
     PARALLEL_END_INTERRUPT_REGION
@@ -988,17 +987,17 @@ void DiscusMultipleScatteringCorrection::calculateQSQIntegralAsFunctionOfK(Compo
                                                                            const std::vector<double> &specialKs) {
   for (auto &SQWSMapping : matWSs) {
     std::set<double> kValues(specialKs.begin(), specialKs.end());
-    // Calculate the integral for a range of k values. Not massively important which k values but choose them here
-    // based on the q points in the S(Q) profile and the initial k values incident on the sample
-    const std::vector<double> qValues = SQWSMapping.SQ->histogram(0).X;
-    for (auto q : qValues) {
-      if (q > 0)
-        kValues.insert(q / 2);
-    }
-
-    // add a few extra points beyond supplied q range to ensure capture asymptotic value of integral/2*k*k.
-    // Useful when doing a flat interpolation on m_QSQIntegral during inelastic calculation where k not known up front
     if (m_EMode != DeltaEMode::Elastic) {
+      // Calculate the integral for a range of k values. Not massively important which k values but choose them here
+      // based on the q points in the S(Q) profile and the initial k values incident on the sample
+      const std::vector<double> qValues = SQWSMapping.SQ->histogram(0).X;
+      for (auto q : qValues) {
+        if (q > 0)
+          kValues.insert(q / 2);
+      }
+
+      // add a few extra points beyond supplied q range to ensure capture asymptotic value of integral/2*k*k.
+      // Useful when doing a flat interpolation on m_QSQIntegral during inelastic calculation where k not known up front
       double maxSuppliedQ = qValues.back();
       if (maxSuppliedQ > 0.) {
         kValues.insert(maxSuppliedQ);
