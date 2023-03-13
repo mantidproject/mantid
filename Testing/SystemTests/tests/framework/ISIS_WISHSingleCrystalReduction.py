@@ -26,12 +26,7 @@ from mantid.simpleapi import (
     ReplaceSpecialValues,
     NormaliseToMonitor,
     LoadIsawUB,
-    CreateSampleShape,
-    SetSampleMaterial,
-    AbsorptionCorrection,
     Divide,
-    SmoothNeighbours,
-    SmoothData,
     LoadNexus,
     RebinToWorkspace,
     ConvertToDiffractionMDWorkspace,
@@ -41,7 +36,9 @@ from mantid.simpleapi import (
     SaveReflections,
     BinMD,
     ConvertMDHistoToMatrixWorkspace,
+    ExtractSpectra,
 )
+from Diffraction.wish.wishSX import WishSX
 from mantid import config
 import numpy as np
 import os
@@ -188,34 +185,28 @@ class WISHProcessVanadiumForNormalisationTest(MantidSystemTest):
     This tests the processing of the vanadium run used to correct for detector efficiency
     """
 
+    @classmethod
+    def setUp(cls):
+        cls._data_dirs = config.getDataSearchDirs()
+        config.appendDataSearchSubDir(os.path.join("WISH", "input", "11_4", ""))
+
+    @classmethod
+    def tearDown(cls):
+        config.setDataSearchDirs(cls._data_dirs)
+
     def cleanup(self):
         ADS.clear()
 
     def runTest(self):
-        # load data for bank 1 (incl. monitor spectra 1-5)
-        van = load_data_and_normalise("WISH/input/11_4/WISH00019612.raw", outputWorkspace="van")
-        # create Abs Correction for V
-        shape = """<sphere id="V-sphere">
-            <centre x="0.0"  y="0.0" z="0.0" />
-            <radius val="0.0025"/>
-            </sphere>"""
-        CreateSampleShape(InputWorkspace=van, ShapeXML=shape)
-        SetSampleMaterial(
-            InputWorkspace=van,
-            SampleNumberDensity=0.0119,
-            ScatteringXSection=5.197,
-            AttenuationXSection=4.739,
-            ChemicalFormula="V0.95 Nb0.05",
+        wish = WishSX(vanadium_runno=19612)
+        wish.process_vanadium()
+        # select subset of spectra for comparision
+        ExtractSpectra(
+            InputWorkspace="WISH00019612", OutputWorkspace="WISH00019612_spec", WorkspaceIndexList="500,2500,10000,25000,50000,75000"
         )
-        abs_cor = AbsorptionCorrection(InputWorkspace=van, ElementSize=0.5)
-        # correct Vanadium run for absorption
-        van = Divide(LHSWorkspace=van, RHSWorkspace=abs_cor, OutputWorkspace=van)
-        # smooth data
-        van = SmoothNeighbours(InputWorkspace=van, OutputWorkspace=van, Radius=3, NumberOfNeighbours=6)
-        SmoothData(InputWorkspace=van, OutputWorkspace=van, NPoints=300)
 
     def validate(self):
-        return "van", "WISH19612_vana_bank1_SXProcessed.nxs"
+        return "WISH00019612_spec", "WISH00019612_processed_van_spectra.nxs"
 
 
 class WISHNormaliseDataAndCreateMDWorkspaceTest(MantidSystemTest):
