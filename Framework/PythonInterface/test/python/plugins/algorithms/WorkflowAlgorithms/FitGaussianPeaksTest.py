@@ -123,7 +123,7 @@ class FitGaussianPeaksTest(unittest.TestCase):
             FitGaussianPeaks(InputWorkspace=self.data_ws, PeakGuessTable=self.peak_guess_table, MaxPeakSigma=-1.0)
 
     def test_algorithm_with_even_fit_window_throws(self):
-        with self.assertRaises(RuntimeError):
+        with self.assertRaisesRegex(RuntimeError, "WindowSize must be an odd number"):
             FitGaussianPeaks(InputWorkspace=self.data_ws, PeakGuessTable=self.peak_guess_table, FitWindowSize=6)
 
     def test_algorithm_with_fit_window_lower_than_5_throws(self):

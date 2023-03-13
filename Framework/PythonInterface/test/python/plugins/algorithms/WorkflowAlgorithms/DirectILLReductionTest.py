@@ -75,6 +75,9 @@ class DirectILLReductionTest(unittest.TestCase):
 
     def testAbsoluteUnitsNoSampleMaterial(self):
         _add_natural_angle_step_parameter(self._TEST_WS_NAME)
+        vgeometry = {"Shape": "HollowCylinder", "Height": 4.0, "InnerRadius": 1.9, "OuterRadius": 2.0, "Center": [0.0, 0.0, 0.0]}
+        vmaterial = {"ChemicalFormula": "V", "SampleNumberDensity": 0.1}
+        SetSample(self._VANADIUM_WS_NAME, vgeometry, vmaterial)
         algProperties = {
             "InputWorkspace": self._TEST_WS_NAME,
             "OutputWorkspace": "outWS",
@@ -82,7 +85,9 @@ class DirectILLReductionTest(unittest.TestCase):
             "AbsoluteUnitsNormalisation": "Absolute Units ON",
             "IntegratedVanadiumWorkspace": self._VANADIUM_WS_NAME,
         }
-        self.assertRaises(RuntimeError, DirectILLReduction, **algProperties)
+        self.assertRaisesRegex(
+            RuntimeError, "Invalid sample number density, consider setting the sample material before", DirectILLReduction, **algProperties
+        )
 
     def testAbsoluteUnitsNoVanadiumMaterial(self):
         _add_natural_angle_step_parameter(self._TEST_WS_NAME)
@@ -96,7 +101,9 @@ class DirectILLReductionTest(unittest.TestCase):
             "AbsoluteUnitsNormalisation": "Absolute Units ON",
             "IntegratedVanadiumWorkspace": self._VANADIUM_WS_NAME,
         }
-        self.assertRaises(RuntimeError, DirectILLReduction, **algProperties)
+        self.assertRaisesRegex(
+            RuntimeError, "Invalid vanadium number density, consider setting the material before", DirectILLReduction, **algProperties
+        )
 
     def testDetectorGrouping(self):
         ws = illhelpers.create_poor_mans_in5_workspace(0.0, _groupingTestDetectors)

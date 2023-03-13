@@ -221,13 +221,16 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         # Ensure that a can chemical formula is given when using a can workspace
         if use_can:
             can_chemical_formula = self.getPropertyValue("CanChemicalFormula")
-            can_coherent_cross_section = self.getPropertyValue("CanCoherentXSection")
-            can_incoherent_cross_section = self.getPropertyValue("CanIncoherentXSection")
-            can_attenuation_cross_section = self.getPropertyValue("CanAttenuationXSection")
-            if can_chemical_formula == "" and (
-                can_coherent_cross_section == 0.0 and can_incoherent_cross_section == 0.0 and can_attenuation_cross_section == 0.0
+            can_coherent_cross_section = self.getProperty("CanCoherentXSection").value
+            can_incoherent_cross_section = self.getProperty("CanIncoherentXSection").value
+            can_attenuation_cross_section = self.getProperty("CanAttenuationXSection").value
+            if (
+                can_chemical_formula == ""
+                and can_coherent_cross_section == 0.0
+                and can_incoherent_cross_section == 0.0
+                and can_attenuation_cross_section == 0.0
             ):
-                issues["CanChemicalFormula"] = "Must provide a chemical formula or cross sections when providing a " "can workspace."
+                issues["CanChemicalFormula"] = "Must provide a chemical formula or cross sections when providing a can workspace."
 
         self._emode = self.getPropertyValue("Emode")
         self._efixed = self.getProperty("Efixed").value
@@ -553,7 +556,6 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             self._wavelengths.append(lambda_fixed)
             logger.information("Efixed mode, setting lambda_fixed to {0}".format(lambda_fixed))
         else:
-
             wave_range = "__WaveRange"
             ExtractSingleSpectrum(InputWorkspace=self._sample_ws_name, OutputWorkspace=wave_range, WorkspaceIndex=0)
             Xin = mtd[wave_range].readX(0)

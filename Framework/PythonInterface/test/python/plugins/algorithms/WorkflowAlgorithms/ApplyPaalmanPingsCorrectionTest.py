@@ -186,7 +186,7 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         kwargs = {
             "SampleWorkspace": sample_1,
             "CanWorkspace": container_1,
-            "OutputWorkspaced": corrected_ws_name,
+            "OutputWorkspace": corrected_ws_name,
             "RebinCanToSample": False,
         }
         # The Minus algorithm will fail due to different bins in sample and
@@ -196,7 +196,6 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         DeleteWorkspace(container_1)
 
     def test_fixed_window_scan(self):
-
         out_ws = ApplyPaalmanPingsCorrection(
             SampleWorkspace=mtd["fapi"][0], CorrectionsWorkspace="fws_corrections", OutputWorkspace="wsfapicorr"
         )
@@ -207,7 +206,7 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         self.assertEqual(out_ws.getAxis(0).getUnit().unitID(), mtd["fapi"][0].getAxis(0).getUnit().unitID())
 
     def test_group_raise(self):
-        kwargs = {"SampleWorkspace": "fapi", "CorrectionsWorkspace": "fws_corrections", "OutputWorkspaced": "wsfapicorr"}
+        kwargs = {"SampleWorkspace": "fapi", "CorrectionsWorkspace": "fws_corrections", "OutputWorkspace": "wsfapicorr"}
         self.assertRaises(RuntimeError, ApplyPaalmanPingsCorrection, **kwargs)
 
 

@@ -10,7 +10,6 @@ from mantid.api import MatrixWorkspace, WorkspaceGroup, ITableWorkspace
 
 
 class IqtFitMultipleTest(unittest.TestCase):
-
     _iqt_ws = None
     _function = r"name=LinearBackground,A0=0.027668,A1=0,ties=(A1=0);name=StretchExp,Height=0.972332,Lifetime=0.0247558,Stretching=1;ties=(f1.Height=1-f0.A0)"
 
@@ -185,8 +184,9 @@ class IqtFitMultipleTest(unittest.TestCase):
         )
 
     def test_maximum_spectra_more_than_workspace_spectra(self):
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "SpecMax must be smaller or equal to the number of spectra in the input workspace",
             IqtFitMultiple,
             InputWorkspace=self._iqt_ws,
             Function=self._function,
@@ -200,8 +200,9 @@ class IqtFitMultipleTest(unittest.TestCase):
         )
 
     def test_minimum_spectra_more_than_maximum_spectra(self):
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "SpecMax must be more than or equal to SpecMin",
             IqtFitMultiple,
             InputWorkspace=self._iqt_ws,
             Function=self._function,
@@ -231,8 +232,9 @@ class IqtFitMultipleTest(unittest.TestCase):
         )
 
     def test_maximum_x_more_than_workspace_max_x(self):
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "EndX must be less than the highest x value in the workspace",
             IqtFitMultiple,
             InputWorkspace=self._iqt_ws,
             Function=self._function,
@@ -247,8 +249,9 @@ class IqtFitMultipleTest(unittest.TestCase):
         )
 
     def test_minimum_spectra_more_than_maximum_spectra(self):
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "EndX must be more than StartX",
             IqtFitMultiple,
             InputWorkspace=self._iqt_ws,
             Function=self._function,

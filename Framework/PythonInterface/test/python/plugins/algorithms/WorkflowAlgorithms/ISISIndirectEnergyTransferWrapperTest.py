@@ -405,7 +405,7 @@ class ISISIndirectEnergyTransferWrapperTest(unittest.TestCase):
         self.assertTrue(CompareWorkspaces(reference, workspace)[0])
 
     def test_that_a_runtime_error_is_raised_when_there_is_an_instrument_validation_failure(self):
-        with self.assertRaises(RuntimeError):
+        with self.assertRaisesRegex(RuntimeError, "Invalid instrument configuration"):
             ISISIndirectEnergyTransferWrapper(
                 InputFiles=["IRS26176.RAW"],
                 Instrument="IRIS",
@@ -416,7 +416,7 @@ class ISISIndirectEnergyTransferWrapperTest(unittest.TestCase):
             )
 
     def test_that_a_runtime_error_is_raised_when_the_grouping_method_is_Workspace_but_no_workspace_is_provided(self):
-        with self.assertRaises(RuntimeError):
+        with self.assertRaisesRegex(RuntimeError, "Must select a grouping workspace for current GroupingWorkspace"):
             ISISIndirectEnergyTransferWrapper(
                 InputFiles=["IRS26176.RAW"],
                 Instrument="IRIS",

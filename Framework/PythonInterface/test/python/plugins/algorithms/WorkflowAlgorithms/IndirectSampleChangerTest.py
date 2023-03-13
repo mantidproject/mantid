@@ -79,8 +79,9 @@ class IndirectSampleChangerTest(unittest.TestCase):
         self.assertEqual(round(msd_ws.readY(1)[2], 7), 0.5845778)
 
     def test_that_IndirectSampleChanger_will_raise_an_error_when_given_run_numbers_in_the_wrong_order(self):
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "First run must be before last run",
             IndirectSampleChanger,
             FirstRun=self._last_run,
             LastRun=self._first_run,
@@ -95,8 +96,9 @@ class IndirectSampleChangerTest(unittest.TestCase):
         )
 
     def test_that_IndirectSampleChanger_will_raise_an_error_when_given_more_samples_tan_runs(self):
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "There must be at least 1 run per sample",
             IndirectSampleChanger,
             FirstRun=self._first_run,
             LastRun=self._last_run,
