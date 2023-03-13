@@ -98,12 +98,9 @@ def setup_inst_object(with_container=False):
 
 def _gen_required_files():
     required_run_files = [
-        "OSI82717.nxs",
-        "OSI82718.nxs",  # empty can
-        "OSIRIS00119963.nxs",
-        "OSIRIS00119964.nxs",  # van
+        "OSI82717.nxs",  # empty can
+        "OSIRIS00119963.nxs",  # van
         "OSIRIS00119977.nxs",
-        "OSIRIS00119978.nxs",
     ]  # sample
     input_files = [os.path.join(input_dir, file) for file in required_run_files]
     input_files.append(calibration_map_path)
