@@ -17,6 +17,7 @@ def create_run_details_object(
     vanadium_string,
     splined_name_list=None,
     van_abs_file_name=None,
+    sample_empty_run=None,
 ):
     """
     Creates and returns a run details object which holds various
@@ -66,6 +67,10 @@ def create_run_details_object(
 
     # Sample empty if there is one as this is instrument specific
     sample_empty = getattr(inst_settings, "sample_empty", None)
+
+    # Override sample empty run if it's passed as a parameter
+    if sample_empty_run:
+        sample_empty = sample_empty_run
 
     # By default, offset file sits in the calibration folder, but it can also be given as an absolute path
     if os.path.exists(offset_file_name):
@@ -130,7 +135,6 @@ class _RunDetails(object):
         van_paths,
         summed_empty_inst_path,
     ):
-
         # Essential attribute
         self.empty_inst_runs = empty_inst_run_number
         self.run_number = run_number
