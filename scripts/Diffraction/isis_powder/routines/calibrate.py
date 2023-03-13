@@ -10,7 +10,7 @@ import isis_powder.routines.common as common
 from isis_powder.routines.common_enums import INPUT_BATCHING
 
 
-def create_van(instrument, run_details, absorb):
+def create_van(instrument, run_details, absorb, spline=True):
     """
     Creates a splined vanadium run for the following instrument. Requires the run_details for the
     vanadium workspace we will process and whether to apply absorption corrections.
@@ -55,7 +55,9 @@ def create_van(instrument, run_details, absorb):
     focused_spectra = instrument._crop_van_to_expected_tof_range(focused_spectra)
 
     d_spacing_group, tof_group = instrument._output_focused_ws(processed_spectra=focused_spectra, run_details=run_details)
-    _create_vanadium_splines(focused_spectra, instrument, run_details)
+
+    if spline:
+        _create_vanadium_splines(focused_spectra, instrument, run_details)
 
     common.keep_single_ws_unit(d_spacing_group=d_spacing_group, tof_group=tof_group, unit_to_keep=instrument._get_unit_to_keep())
 

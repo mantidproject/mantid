@@ -48,7 +48,7 @@ class AbstractInst(object):
     def user_name(self):
         return self._user_name
 
-    def _create_vanadium(self, run_number_string, do_absorb_corrections):
+    def _create_vanadium(self, run_number_string, do_absorb_corrections, do_spline=True):
         """
         Creates a vanadium calibration - should be called by the concrete instrument
         :param run_number_string : The user input string for any run within the cycle
@@ -58,7 +58,12 @@ class AbstractInst(object):
         """
         self._is_vanadium = True
         run_details = self._get_run_details(run_number_string)
-        return calibrate.create_van(instrument=self, run_details=run_details, absorb=do_absorb_corrections)
+        return calibrate.create_van(
+            instrument=self,
+            run_details=run_details,
+            absorb=do_absorb_corrections,
+            spline=do_spline,
+        )
 
     def _focus(
         self,
