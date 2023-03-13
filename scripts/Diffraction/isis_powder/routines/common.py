@@ -535,6 +535,7 @@ def subtract_summed_runs(ws_to_correct, empty_ws):
     # would give us negative counts
     if workspace_has_current(ws_to_correct):
         try:
+            mantid.RebinToWorkspace(WorkspaceToRebin=empty_ws, WorkspaceToMatch=ws_to_correct, OutputWorkspace=empty_ws)
             mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_ws, OutputWorkspace=ws_to_correct)
         except ValueError:
             raise ValueError(
