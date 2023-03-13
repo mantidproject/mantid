@@ -51,7 +51,7 @@ class Polaris(AbstractInst):
         )
 
         run_details = self._get_run_details(run_number_string=self._inst_settings.run_in_range)
-        polaris_algs.save_unsplined_vanadium(vanadium_ws=vanadium_d, output_path=run_details.unsplined_vanadium_file_path)
+        common.save_unsplined_vanadium(vanadium_ws=vanadium_d, output_path=run_details.unsplined_vanadium_file_path)
         return vanadium_d
 
     def create_total_scattering_pdf(self, **kwargs):

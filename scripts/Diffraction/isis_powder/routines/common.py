@@ -720,3 +720,20 @@ def workspace_has_current(ws):
     """
     charge = ws.run().getProtonCharge()
     return charge is not None and charge > 0
+
+
+def save_unsplined_vanadium(vanadium_ws, output_path, keep_unit=False):
+    converted_workspaces = []
+    for ws_index in range(vanadium_ws.getNumberOfEntries()):
+        ws = vanadium_ws.getItem(ws_index)
+        previous_units = ws.getAxis(0).getUnit().unitID()
+
+        if not keep_unit and previous_units != WORKSPACE_UNITS.tof:
+            ws = mantid.ConvertUnits(InputWorkspace=ws, Target=WORKSPACE_UNITS.tof)
+
+        ws = mantid.RenameWorkspace(InputWorkspace=ws, OutputWorkspace="van_bank_{}".format(ws_index + 1))
+        converted_workspaces.append(ws)
+
+    converted_group = mantid.GroupWorkspaces(",".join(ws.name() for ws in converted_workspaces))
+    mantid.SaveNexus(InputWorkspace=converted_group, Filename=output_path, Append=False)
+    mantid.DeleteWorkspace(converted_group)

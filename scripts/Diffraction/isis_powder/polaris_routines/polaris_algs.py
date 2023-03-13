@@ -11,7 +11,6 @@ import mantid.simpleapi as mantid
 from mantid.api import WorkspaceGroup
 from mantid.kernel import MaterialBuilder
 from isis_powder.routines import absorb_corrections, common
-from isis_powder.routines.common_enums import WORKSPACE_UNITS
 from isis_powder.routines.run_details import create_run_details_object, get_cal_mapping_dict
 from isis_powder.polaris_routines import polaris_advanced_config
 
@@ -66,23 +65,6 @@ def get_run_details(run_number_string, inst_settings, is_vanadium_run):
         vanadium_string=vanadium_runs,
         grouping_file_name=grouping_file_name,
     )
-
-
-def save_unsplined_vanadium(vanadium_ws, output_path):
-    converted_workspaces = []
-    for ws_index in range(vanadium_ws.getNumberOfEntries()):
-        ws = vanadium_ws.getItem(ws_index)
-        previous_units = ws.getAxis(0).getUnit().unitID()
-
-        if previous_units != WORKSPACE_UNITS.tof:
-            ws = mantid.ConvertUnits(InputWorkspace=ws, Target=WORKSPACE_UNITS.tof)
-
-        ws = mantid.RenameWorkspace(InputWorkspace=ws, OutputWorkspace="van_bank_{}".format(ws_index + 1))
-        converted_workspaces.append(ws)
-
-    converted_group = mantid.GroupWorkspaces(",".join(ws.name() for ws in converted_workspaces))
-    mantid.SaveNexus(InputWorkspace=converted_group, Filename=output_path, Append=False)
-    mantid.DeleteWorkspace(converted_group)
 
 
 def generate_ts_pdf(
