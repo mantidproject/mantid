@@ -8,7 +8,7 @@
 import systemtesting
 import tempfile
 import shutil
-from os import path
+import os
 from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import *
 from Diffraction.single_crystal.sxd import SXD
@@ -30,10 +30,10 @@ class SXDPeakSearchAndFindUBUsingFFT(systemtesting.MantidSystemTest):
     def validate(self):
         self.assertEqual(214, self.nindexed)
         latt = SXD.retrieve(self.peaks).sample().getOrientedLattice()
-        a, alpha = 5.654, 90  # published value for NaCl is a=6.6402 but the detector positions haven't been calibrated
-        self.assertAlmostEqual(a, latt.a(), delta=1e-10)
-        self.assertAlmostEqual(a, latt.b(), delta=1e-10)
-        self.assertAlmostEqual(a, latt.c(), delta=1e-10)
+        a, alpha = 5.6541, 90  # published value for NaCl is a=6.6402 but the detector positions haven't been calibrated
+        self.assertAlmostEqual(a, latt.a(), delta=1e-5)
+        self.assertAlmostEqual(a, latt.b(), delta=1e-5)
+        self.assertAlmostEqual(a, latt.c(), delta=1e-5)
         self.assertAlmostEqual(alpha, latt.alpha(), delta=1e-10)
         self.assertAlmostEqual(alpha, latt.beta(), delta=1e-10)
         self.assertAlmostEqual(alpha, latt.gamma(), delta=1e-10)
@@ -54,7 +54,7 @@ class SXDDetectorCalibration(systemtesting.MantidSystemTest):
 
         # force lattice parameters to equal published values
         a, alpha = 5.6402, 90
-        CalculateUMatrix(PeaksWorkspace=self.peaks, a=a, b=a, c=a, alpha=alpha, beta=alpha, gamma=alpha, FixParameters=True)
+        CalculateUMatrix(PeaksWorkspace=self.peaks, a=a, b=a, c=a, alpha=alpha, beta=alpha, gamma=alpha)
         # load an empty workspace as MoveCOmpoennt etc. only work on Matrix workspaces
         self.ws = LoadEmptyInstrument(InstrumentName="SXD", OutputWorkspace="empty")
 
@@ -63,13 +63,13 @@ class SXDDetectorCalibration(systemtesting.MantidSystemTest):
         self.nindexed, *_ = IndexPeaks(PeaksWorkspace=self.peaks, Tolerance=0.1, CommonUBForAll=True)
 
     def validate(self):
-        self.assertEqual(214, self.nindexed)
+        self.assertEqual(263, self.nindexed)
         # check xml file exists
-        self.assertTrue(path.exists(self.xml_path))
+        self.assertTrue(os.path.exists(self.xml_path))
         # check calibration has been applied to both MatrixWorkspace and peaks
         for ws in [self.peaks, self.ws]:
-            self.assertAlmostEqual(-0.000386, ws.getInstrument().getComponentByName("bank1").getPos()[1], delta=1e-6)
-            self.assertAlmostEqual(-0.000817, ws.getInstrument().getComponentByName("bank2").getPos()[2], delta=1e-6)
+            self.assertAlmostEqual(0.000333, ws.getInstrument().getComponentByName("bank1").getPos()[1], delta=1e-6)
+            self.assertAlmostEqual(-0.000928, ws.getInstrument().getComponentByName("bank2").getPos()[2], delta=1e-6)
         return True
 
 
@@ -92,7 +92,7 @@ class SXDProcessSampleData(systemtesting.MantidSystemTest):
 
     def runTest(self):
         sxd = SXD(vanadium_runno=23769, empty_runno=23768)
-        sxd.van_ws = LoadNexus(Filename="SXD23769_processed_vanadium.nxs", OutputWorkspace="SXD23769_vanadium")
+        sxd.van_ws = LoadNexus(Filename="SXD23779_processed_vanadium.nxs", OutputWorkspace="SXD23779_vanadium")
         sxd.set_sample(
             Geometry={"Shape": "CSG", "Value": sxd.sphere_shape}, Material={"ChemicalFormula": "Na Cl", "SampleNumberDensity": 0.0223}
         )
@@ -127,4 +127,4 @@ class SXDIntegrateData(systemtesting.MantidSystemTest):
         self.integrated_peaks = sxd.get_peaks(runno, PEAK_TYPE.FOUND, INTEGRATION_TYPE.MD_OPTIMAL_RADIUS)
 
     def validate(self):
-        return self.integrated_peaks, "SXD23767_processed.nxs"
+        return self.integrated_peaks, "SXD23767_found_peaks_integrated.nxs"

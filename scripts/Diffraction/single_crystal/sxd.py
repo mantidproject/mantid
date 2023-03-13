@@ -166,15 +166,16 @@ class SXD(BaseSX):
         mantid.IndexPeaks(PeaksWorkspace=peaks_name, Tolerance=tol)
         # optimize position of each bank independently
         for ibank in range(1, 12):
+            peaks_bank = peaks_name + "_bank"
             mantid.FilterPeaks(
                 InputWorkspace=peaks_name,
-                OutputWorkspace=peaks + "_bank",
+                OutputWorkspace=peaks_bank,
                 FilterVariable="RunNumber",
                 BankName="bank" + str(ibank),
                 EnableLogging=False,
             )
             _, pos_table, *_ = mantid.OptimizeCrystalPlacement(
-                PeaksWorkspace=peaks_name,
+                PeaksWorkspace=peaks_bank,
                 ModifiedPeaksWorkspace="temp",
                 AdjustSampleOffsets=True,
                 OptimizeGoniometerTilt=False,
@@ -187,11 +188,11 @@ class SXD(BaseSX):
                 Workspace=wsname, ComponentName="bank" + str(ibank), RelativePosition=True, X=-x, Y=-y, Z=-z, EnableLogging=False
             )
             mantid.ApplyInstrumentToPeaks(InputWorkspace=peaks_name, InstrumentWorkspace=wsname, OutputWorkspace=peaks_name)
-        mantid.DeleteWorkspace(peaks + "_bank")
+        mantid.DeleteWorkspace(peaks_bank)
         mantid.DeleteWorkspace("temp")
         # use SCD calibrate to refine detector orientation and save detcal
         mantid.IndexPeaks(PeaksWorkspace=peaks_name, Tolerance=tol)
-        detcal_path = path.join(save_dir, "_".join([peaks, "detcal"]))
+        detcal_path = path.join(save_dir, "_".join([peaks_name, "detcal"]))
         xml_path = detcal_path + ".xml"
         mantid.SCDCalibratePanels(
             PeakWorkspace=peaks_name,
