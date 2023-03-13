@@ -60,11 +60,15 @@ struct MANTID_KERNEL_DLL TimeSeriesPropertyStatistics {
    * @param stats :: a reference to a Statistics object.
    */
   TimeSeriesPropertyStatistics(const Statistics &stats) {
+    constexpr double nan{std::numeric_limits<double>::quiet_NaN()};
     minimum = stats.minimum;
     maximum = stats.maximum;
     median = stats.median;
     mean = stats.mean;
     standard_deviation = stats.standard_deviation;
+    time_mean = nan;
+    time_standard_deviation = nan;
+    duration = nan;
   }
 
   /**
@@ -84,7 +88,7 @@ struct MANTID_KERNEL_DLL TimeSeriesPropertyStatistics {
   }
 
   void setAllToNan() {
-    double nan = std::numeric_limits<double>::quiet_NaN();
+    constexpr double nan{std::numeric_limits<double>::quiet_NaN()};
     minimum = nan;
     maximum = nan;
     mean = nan;

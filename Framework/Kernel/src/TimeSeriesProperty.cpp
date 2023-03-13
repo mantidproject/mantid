@@ -1242,8 +1242,9 @@ template <typename TYPE> double TimeSeriesProperty<TYPE>::durationInSeconds(cons
   if (this->size() == 0)
     return std::numeric_limits<double>::quiet_NaN();
   if (roi && !roi->empty()) {
-    Kernel::TimeROI seriesSpan(this->firstTime(), this->lastTime());
-    seriesSpan.update_intersection(*roi);
+    Kernel::TimeROI seriesSpan(*roi);
+    // remove everything before the start time
+    seriesSpan.addMask(DateAndTime::GPS_EPOCH, this->firstTime());
     return seriesSpan.durationInSeconds();
   } else {
     const auto &intervals = this->getSplittingIntervals();
@@ -1727,10 +1728,16 @@ TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics(const TimeR
   // Start with statistics that are not time-weighted
   TimeSeriesPropertyStatistics out(Mantid::Kernel::getStatistics(this->filteredValuesAsVector(roi)));
   out.duration = this->durationInSeconds(roi);
-  // Follow with time-weighted statistics
-  auto avAndDev = this->timeAverageValueAndStdDev(roi);
-  out.time_mean = avAndDev.first;
-  out.time_standard_deviation = avAndDev.second;
+  if (out.standard_deviation == 0.) {
+    // if the simple std-dev is zero, just copy the simple mean
+    out.time_mean = out.mean;
+    out.time_standard_deviation = 0.;
+  } else {
+    // follow with time-weighted statistics
+    auto avAndDev = this->timeAverageValueAndStdDev(roi);
+    out.time_mean = avAndDev.first;
+    out.time_standard_deviation = avAndDev.second;
+  }
   return out;
 }
 

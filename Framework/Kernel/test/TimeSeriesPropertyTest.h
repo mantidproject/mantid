@@ -1228,7 +1228,7 @@ public:
     TimeROI *rois = new TimeROI;
     rois->addROI("2007-11-30T16:17:05", "2007-11-30T16:17:15");
     rois->addROI("2007-11-30T16:17:25", "2007-11-30T16:17:35");
-    TS_ASSERT_DELTA(log->durationInSeconds(rois), 15.0, 0.1);
+    TS_ASSERT_DELTA(log->durationInSeconds(rois), 20.0, 0.1);
   }
 
   void test_firstLastTimeValue_emptyPropertyThrows() {
