@@ -655,24 +655,29 @@ def _load_list_of_files(file_name_list, keep_original=True):
     :param keep_original: Whether to retain the original loaded file in unaltered state
     :return: The loaded workspaces as a list
     """
-    read_ws_list = []
+    loaded_ws_list = []
     _check_load_range(list_of_runs_to_load=file_name_list)
 
     for file_name in file_name_list:
-        # include file extension in ws name to allow users to distinguish different partial files (eg .s1 or .s2)
-        if not AnalysisDataService.doesExist(file_name):
-            loaded_ws = mantid.Load(Filename=file_name, OutputWorkspace=file_name)
-        else:
-            loaded_ws = AnalysisDataService.retrieve(file_name)
-        if keep_original:
-            # preserve original ws in case reduction applies any corrections in situ and user wants to rerun
-            new_name = file_name + "_red"
-            read_ws = mantid.CloneWorkspace(InputWorkspace=loaded_ws, OutputWorkspace=new_name)
-        else:
-            read_ws = loaded_ws
-        read_ws_list.append(read_ws)
+        loaded_ws = load_file(file_name, keep_original=keep_original)
+        loaded_ws_list.append(loaded_ws)
 
-    return read_ws_list
+    return loaded_ws_list
+
+
+def load_file(file_name, keep_original=True):
+    # include file extension in ws name to allow users to distinguish different partial files (eg .s1 or .s2)
+    if not AnalysisDataService.doesExist(file_name):
+        loaded_ws = mantid.Load(Filename=file_name, OutputWorkspace=file_name)
+    else:
+        loaded_ws = AnalysisDataService.retrieve(file_name)
+
+    if keep_original:
+        # preserve original ws in case reduction applies any corrections in situ and user wants to rerun
+        new_name = file_name + "_red"
+        return mantid.CloneWorkspace(InputWorkspace=loaded_ws, OutputWorkspace=new_name)
+
+    return loaded_ws
 
 
 def _sum_ws_range(ws_list):
