@@ -59,7 +59,9 @@ Solving this for a quantum harmonic oscillator, making the incoherent approximat
 
 :math:`S_i(\mathbf{Q}, n\omega_{\nu}) = \sigma_i \frac{[\mathbf{Q Q : B}_{\nu,i} \left<n + 1\right>]^{n}}{n!} \exp(-\mathbf{Q Q : A}_i)`
 
-in which :math:`\sigma_i` is an atomic cross-section while :math:`\mathbf{B_{\nu,i}}` and :math:`\mathbf{A}_i` are quadratic dispacement tensors of individual phonon modes and the overall atomic dispacements, respectively.
+in which :math:`\sigma_i` is an atomic cross-section while :math:`\mathbf{B_{\nu,i}}` and :math:`\mathbf{A}_i` are :math:`3 \times 3` quadratic dispacement tensors of individual phonon modes and the overall atomic dispacements, respectively.
+In Einstein notation the contraction of two 2--D tensors :math:`\mathbf{A}:\mathbf{B}` is :math:`\mathbf{A}_{ij}\mathbf{B}_{ij}`.
+
 Similar expressions are formed for combination modes in which :math:`n\omega` becomes :math:`\sum^n \omega_\nu` and :math:`\mathbf{B}_{\nu,i}^{n}` is replaced by :math:`\prod_\nu^n \mathbf{B}_{\nu,i}`.
 
 The displacement tensors can be obtained from the calculated phonon eigenvectors :math:`{\mathbf{c}}`: :math:`\mathbf{B_{\nu_i}}` is mode-dependent and thermally-occupied in the expression above by :math:`\left<n+1\right>` Bose statistics while :math:`\mathbf{A}_i` is a property of each atom site and includes occupation :math:`\left<2n+1\right>`: at low temperature both terms reduce to 1.
@@ -80,7 +82,8 @@ where
 
 :math:`\alpha_{\nu,i} = \frac{1}{5} \left \lbrace \mathrm{Tr} \mathbf{A}_i  + \frac{2 \mathbf{B}^{\omega_\nu,i}: \mathbf{A}_i}{\mathrm{Tr} \mathbf{B}^{\omega_\nu,i}} \right\rbrace`
 
-Where :math:`\mathrm{Tr}` denotes the "trace" and :math:`:` the tensor "contraction" operation.
+Where :math:`\mathrm{Tr}` denotes the "trace".
+In this case, :math:`\mathbf{A}:\mathbf{B}` becomes equivalent to :math:`\mathrm{Tr}(\mathbf{A}\cdot\mathbf{B})` due to the symmetry of the quadratic displacement tensors.
 
 Note that the exponential term is no longer a "pure" Debye--Waller factor, as some mode-dependence is introduced by the powder-averaging.
 We have also conflated the phonon mode indices and their original wavevector :math:`\mathbf{k}` into a single index :math:`\nu`; this is a "DOS-like approximation" in which we assume that the reciprocal lattice spacing is small relative to the observed :math:`Q`, and so spherical averaging will approximate an even sampling of the Brillouin zone.
