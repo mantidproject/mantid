@@ -38,7 +38,7 @@ const MantidVersion::VersionInfo MantidVersion::versionInfo() {
 
 std::string MantidVersion::versionForReleaseNotes(const VersionInfo& version) {
   // Cast here in those cases where patch number is of the form 20131022.1356.
-  const unsigned int patchVersion = std::stoul(version.patch);
+  const unsigned long patchVersion = std::stoul(version.patch);
   // For major/minor/patch/rc/local releases we point users to a specific release-notes.
   // For dev and nightly versions we point to the next main release notes.
   // We assume that the next main release version number will be one minor version higher.
@@ -52,7 +52,7 @@ std::string MantidVersion::versionForReleaseNotes(const VersionInfo& version) {
     versionLabel << "." << patchVersion;
   }
   else {
-    const unsigned int minorVersion = std::stoul(version.minor);
+    const unsigned long minorVersion = std::stoul(version.minor);
     versionLabel << version.major << "." << minorVersion + 1  << "." << "0";
   }
 
