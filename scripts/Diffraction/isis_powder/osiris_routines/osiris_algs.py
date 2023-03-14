@@ -21,9 +21,9 @@ from mantid.simpleapi import (
     GroupWorkspaces,
     ApplyDiffCal,
     ReplaceSpecialValues,
+    ConjoinSpectra,
 )
 from mantid.api import AnalysisDataService
-
 
 d_range_with_time = {
     "drange1": [11700, 51700],
@@ -279,22 +279,22 @@ def get_empty_runs(inst_settings):
     return [_assign_drange_empty("drange" + str(i + 1), all_run_numbers) for i in range(12)]
 
 
-def _correct_drange_overlap(merged_group_ws, drange_sets):
-    for merged_ws in merged_group_ws:
+def _correct_drange_overlap(merged_ws, drange_sets):
+    for i in range(0, merged_ws.getNumberHistograms()):
         # Create scalar data to cope with where merge has combined overlapping data.
-        data_x = (merged_ws.dataX(0)[1:] + merged_ws.dataX(0)[:-1]) / 2.0
+        data_x = (merged_ws.dataX(i)[1:] + merged_ws.dataX(i)[:-1]) / 2.0
         data_y = np.zeros(data_x.size)
         for drange in drange_sets:
             if drange_sets[drange].has_sample():
-                for i in range(data_x.size):
-                    if d_range_alice[drange][0] <= data_x[i] <= d_range_alice[drange][1]:
-                        data_y[i] += len(drange_sets[drange].get_samples())
+                for j in range(data_x.size):
+                    if d_range_alice[drange][0] <= data_x[j] <= d_range_alice[drange][1]:
+                        data_y[j] += len(drange_sets[drange].get_samples())
 
         # apply scalar data to result workspace
-        for i in range(0, merged_ws.getNumberHistograms()):
-            merged_ws.setY(i, merged_ws.dataY(i) / data_y)
-            merged_ws.setE(i, merged_ws.dataE(i) / data_y)
-    return merged_group_ws
+        merged_ws.setY(i, merged_ws.dataY(i) / data_y)
+        merged_ws.setE(i, merged_ws.dataE(i) / data_y)
+
+    return merged_ws
 
 
 def merge_dspacing_runs(focussed_runs, drange_sets, run_number):
@@ -308,18 +308,21 @@ def merge_dspacing_runs(focussed_runs, drange_sets, run_number):
         logger.warning("Cannot merge focussed workspaces with different number of spectra")
         return [ws for ws in focussed_runs]
 
+    output_name = "OSIRIS" + run_number + WORKSPACE_SUFFIX.MERGED
+
     # Group workspaces located at the same index
     matched_spectra = [list(spectra) for spectra in zip(*extracted_spectra)]
     # Merge workspaces located at the same index
-    merged_spectra = [
-        MergeRuns(InputWorkspaces=spectra, OutputWorkspace="OSIRIS" + run_number + WORKSPACE_SUFFIX.MERGED + f"_{idx}")
-        for idx, spectra in enumerate(matched_spectra)
-    ]
-    grouped_spectra = GroupWorkspaces(InputWorkspaces=merged_spectra, OutputWorkspace="OSIRIS" + run_number + WORKSPACE_SUFFIX.MERGED)
+    merged_spectra = [MergeRuns(InputWorkspaces=spectra, OutputWorkspace=f"merged_{idx}") for idx, spectra in enumerate(matched_spectra)]
+
+    input_workspaces_str = ",".join([ws.name() for ws in merged_spectra])
+    ConjoinSpectra(InputWorkspaces=input_workspaces_str, OutputWorkspace=output_name)
 
     common.remove_intermediate_workspace([ws for group in matched_spectra for ws in group])
+    common.remove_intermediate_workspace(merged_spectra)
 
-    return [_correct_drange_overlap(grouped_spectra, drange_sets)]
+    joined_spectra = AnalysisDataService[output_name]
+    return [_correct_drange_overlap(joined_spectra, drange_sets)]
 
 
 def _group_workspaces(ws_list, output):
