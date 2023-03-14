@@ -987,7 +987,21 @@ void DiscusMultipleScatteringCorrection::calculateQSQIntegralAsFunctionOfK(Compo
                                                                            const std::vector<double> &specialKs) {
   for (auto &SQWSMapping : matWSs) {
     std::set<double> kValues(specialKs.begin(), specialKs.end());
-    if (m_EMode != DeltaEMode::Elastic) {
+    std::vector<double> finalkValues, QSQIntegrals;
+    if (m_EMode == DeltaEMode::Elastic) {
+      double kMax = specialKs.back();
+      std::vector<double> IOfQYFull, QValuesIntegratedAt;
+      std::tie(IOfQYFull, QValuesIntegratedAt, std::ignore) = integrateQSQ(SQWSMapping.QSQ, kMax, true);
+      for (size_t i = 0; i < IOfQYFull.size(); i++) {
+        double IOfQY = IOfQYFull[i];
+        double k = QValuesIntegratedAt[i] / 2;
+        if (IOfQY > 0) {
+          double normalisedIntegral = IOfQY / (2 * k * k);
+          finalkValues.push_back(k);
+          QSQIntegrals.push_back(normalisedIntegral);
+        }
+      }
+    } else {
       // Calculate the integral for a range of k values. Not massively important which k values but choose them here
       // based on the q points in the S(Q) profile and the initial k values incident on the sample
       const std::vector<double> qValues = SQWSMapping.SQ->histogram(0).X;
@@ -1003,19 +1017,18 @@ void DiscusMultipleScatteringCorrection::calculateQSQIntegralAsFunctionOfK(Compo
         kValues.insert(maxSuppliedQ);
         kValues.insert(2 * maxSuppliedQ);
       }
-    }
 
-    std::vector<double> finalkValues, QSQIntegrals;
-    for (auto k : kValues) {
-      std::vector<double> IOfQYFull;
-      std::tie(IOfQYFull, std::ignore, std::ignore) = integrateQSQ(SQWSMapping.QSQ, k, false);
-      auto IOfQYAtQMax = IOfQYFull.empty() ? 0. : IOfQYFull.back();
-      // going to divide by this so storing zero results not useful - and don't want to interpolate a zero value
-      // into a k region where the integral is actually non-zero
-      if (IOfQYAtQMax > 0) {
-        double normalisedIntegral = IOfQYAtQMax / (2 * k * k);
-        finalkValues.push_back(k);
-        QSQIntegrals.push_back(normalisedIntegral);
+      for (auto k : kValues) {
+        std::vector<double> IOfQYFull;
+        std::tie(IOfQYFull, std::ignore, std::ignore) = integrateQSQ(SQWSMapping.QSQ, k, false);
+        auto IOfQYAtQMax = IOfQYFull.empty() ? 0. : IOfQYFull.back();
+        // going to divide by this so storing zero results not useful - and don't want to interpolate a zero value
+        // into a k region where the integral is actually non-zero
+        if (IOfQYAtQMax > 0) {
+          double normalisedIntegral = IOfQYAtQMax / (2 * k * k);
+          finalkValues.push_back(k);
+          QSQIntegrals.push_back(normalisedIntegral);
+        }
       }
     }
     auto QSQScaleFactor = std::make_shared<DiscusData1D>(DiscusData1D{finalkValues, QSQIntegrals});
