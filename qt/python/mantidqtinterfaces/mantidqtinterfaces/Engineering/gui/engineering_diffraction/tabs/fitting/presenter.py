@@ -55,7 +55,7 @@ class FittingPresenter(object):
             fit_props,
             self.data_widget.presenter.get_loaded_ws_list(),
             self.data_widget.presenter.get_active_ws_list(),
-            self.data_widget.presenter.get_log_ws_name(),
+            self.data_widget.presenter.get_log_ws_group_name(),
         )
 
     def fit_started(self):
@@ -71,7 +71,7 @@ class FittingPresenter(object):
             fit_props,
             self.data_widget.presenter.get_loaded_ws_list(),
             self.data_widget.presenter.get_active_ws_list(),
-            self.data_widget.presenter.get_log_ws_name(),
+            self.data_widget.presenter.get_log_ws_group_name(),
         )
 
     def disable_view(self, _=None, fit_all=False):

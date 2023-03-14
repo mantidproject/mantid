@@ -48,8 +48,8 @@ class FittingDataPresenter(object):
     def get_loaded_ws_list(self):
         return self.model.get_loaded_ws_list()
 
-    def get_log_ws_name(self):
-        return self.model.get_log_workspaces_name()
+    def get_log_ws_group_name(self):
+        return self.model.get_log_workspace_group_name()
 
     def _update_file_filter(self, region, xunit):
         self.view.update_file_filter(region, xunit)
@@ -65,7 +65,7 @@ class FittingDataPresenter(object):
             # plot_presenter will already be notified of ws being removed via its own ADS observer
             self.plotted.discard(ws_name)
             self._repopulate_table()
-        elif ws_name in self.model.get_log_workspaces_name():
+        elif ws_name in self.model.get_all_log_workspaces_names():
             self.model.update_sample_log_workspace_group()
 
     def rename_workspace(self, old_name, new_name):

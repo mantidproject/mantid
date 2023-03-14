@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from os import path
 from numpy import array, argsort
 
 from mantid.simpleapi import (
@@ -246,9 +245,11 @@ class FittingDataModel(object):
     def get_sample_log_from_ws(self, ws_name, log_name):
         return self._data_workspaces[ws_name].loaded_ws.getSampleDetails().getLogData(log_name).value
 
-    def get_log_workspaces_name(self):
-        current_log_workspaces = self._sample_logs_workspace_group.get_log_workspaces()
-        return [ws.name() for ws in current_log_workspaces] if current_log_workspaces else []
+    def get_all_log_workspaces_names(self):
+        return [ws.name() for ws in self._sample_logs_workspace_group.get_log_workspaces()] if self._sample_logs_workspace_group.get_log_workspaces() else []
+
+    def get_log_workspace_group_name(self):
+        return self._sample_logs_workspace_group.get_log_workspaces().name()
 
     def set_log_workspaces_none(self):
         # to be used in the event of Ads clear, as trying to reference the deleted grp ws results in an error

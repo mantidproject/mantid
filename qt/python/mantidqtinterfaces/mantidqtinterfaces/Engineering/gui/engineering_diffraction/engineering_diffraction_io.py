@@ -93,7 +93,7 @@ class EngineeringDiffractionDecoder(EngineeringDiffractionUIAttributes):
                 fit_plot_widget.model.create_fit_tables(
                     fit_data_widget.presenter.get_loaded_ws_list(),
                     fit_data_widget.presenter.get_active_ws_list(),
-                    fit_data_widget.presenter.get_log_ws_name(),
+                    fit_data_widget.presenter.get_log_ws_group_name(),
                 )
 
             fit_properties = obj_dic.get("fit_properties", None)
