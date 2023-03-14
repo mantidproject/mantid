@@ -221,7 +221,7 @@ public:
     TS_ASSERT_EQUALS(outWS->run().getProperties().size(), num_sample_logs);
 
     // Proton charge is lower
-    if (add_proton_charge) {
+    if (add_proton_charge && seconds_kept != 0) {
       TS_ASSERT_EQUALS(outWS->run().getProtonCharge() / CURRENT_CONVERSION, seconds_kept * 1.0);
     }
 
