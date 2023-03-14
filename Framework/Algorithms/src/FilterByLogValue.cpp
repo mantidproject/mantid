@@ -158,7 +158,12 @@ void FilterByLogValue::exec() {
   }
   TimeROI *roi = new TimeROI();
   for (auto split : splitter) {
-    roi->addROI(split.start(), split.stop());
+    try {
+      roi->addROI(split.start(), split.stop());
+    } catch (const std::runtime_error &) {
+      // If values are not unique or not in ascending order
+      // values will be skipped
+    }
   }
 
   g_log.information() << splitter.size() << " entries in the filter.\n";
