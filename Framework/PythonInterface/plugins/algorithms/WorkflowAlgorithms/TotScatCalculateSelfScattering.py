@@ -92,10 +92,9 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
         placzek_kwargs = {"InputWorkspace": raw_ws, "IncidentSpectra": fit_spectra, "ScalebyPackingFraction": False, "Order": placzek_order}
         sample_temp = self.getPropertyValue("SampleTemp")
         if placzek_order == 2:
-            if sample_temp:
-                placzek_kwargs.update({"SampleTemperature": sample_temp})
-            else:
+            if not sample_temp:
                 raise ValueError("SampleTemperature must be provided")
+            placzek_kwargs.update({"SampleTemperature": sample_temp})
         self_scattering_correction = CalculatePlaczek(**placzek_kwargs)
         # Convert to Q
         self_scattering_correction = ConvertUnits(InputWorkspace=self_scattering_correction, Target="MomentumTransfer", EMode="Elastic")
