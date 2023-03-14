@@ -112,18 +112,18 @@ class KpointsDataTest(unittest.TestCase):
 
         # wrong size of the second dimension
         wrong_items = self._good_data_1.copy()
+        wrong_items["atomic_displacements"] = np.asarray(
+            [
+                [
+                    [[1.0, 1.0, 11.0], [1.0, 1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 11.0], [1.0, 1.0, 11.0]],
+                    [[1.0, 1.0, 1.0], [1.0, 1.0, 11.0], [1.0, 1.0, 11.0], [1.0, 1.0, 1.0], [1.0, 1.0, 11.0], [1.0, 1.0, 11.0]],
+                ],
+                wrong_items["atomic_displacements"][0, 0],
+                wrong_items["atomic_displacements"][0, 1],
+            ]
+        )
 
         with self.assertRaises(ValueError):
-            wrong_items["atomic_displacements"] = np.asarray(
-                [
-                    [
-                        [[1.0, 1.0, 11.0], [1.0, 1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 11.0], [1.0, 1.0, 11.0]],
-                        [[1.0, 1.0, 1.0], [1.0, 1.0, 11.0], [1.0, 1.0, 11.0], [1.0, 1.0, 1.0], [1.0, 1.0, 11.0], [1.0, 1.0, 11.0]],
-                    ],
-                    wrong_items["atomic_displacements"][0, 0],
-                    wrong_items["atomic_displacements"][0, 1],
-                ]
-            )
             KpointsData(**wrong_items)
 
         # displacements as numpy arrays with integers
