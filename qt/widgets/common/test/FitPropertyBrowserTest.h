@@ -10,6 +10,7 @@
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/PropertyHandler.h"
 #include <QString>
 #include <cxxtest/TestSuite.h>
 
@@ -92,6 +93,46 @@ public:
     const std::string expectedTieExpression = "f1.Height";
     auto oldExpString = m_fitPropertyBrowser->getOldExpressionAsString(parameterName);
     TS_ASSERT_EQUALS(oldExpString.toStdString(), expectedTieExpression);
+  }
+
+  void test_removeFunctionRemovesTie() {
+    m_fitPropertyBrowser->init();
+    m_fitPropertyBrowser->createCompositeFunction(
+        "name=Gaussian,Height=10.0,PeakCentre=-0.145,Sigma=0.135;name=Gaussian,Height=12.0,PeakCentre=0.245,Sigma=0."
+        "135;ties=(f0.Height=f1.Height)");
+    auto f0Handler = m_fitPropertyBrowser->getPeakHandler(QString("f0"));
+    auto f1Handler = m_fitPropertyBrowser->getPeakHandler(QString("f1"));
+    TS_ASSERT(f0Handler->hasTies());
+    m_fitPropertyBrowser->removeFunction(f1Handler);
+    TS_ASSERT(!f0Handler->hasTies());
+  }
+
+  void test_removeFunctionRenamesOtherFunction() {
+    m_fitPropertyBrowser->init();
+    m_fitPropertyBrowser->createCompositeFunction(
+        "name=Gaussian,Height=10.0,PeakCentre=-0.145,Sigma=0.135;name=FlatBackground,A0=10;"
+        "ties=(f0.Height=f1.A0)");
+    auto f0Handler = m_fitPropertyBrowser->getPeakHandler(QString("f0"));
+    auto f1Handler = m_fitPropertyBrowser->getPeakHandler(QString("f1"));
+    TS_ASSERT(QString("f0-Gaussian") == f0Handler->functionName());
+    m_fitPropertyBrowser->removeFunction(f0Handler);
+    // f0 should now be the flat background function
+    f0Handler = m_fitPropertyBrowser->getPeakHandler(QString("f0"));
+    TS_ASSERT(!f0Handler->hasTies());
+    TS_ASSERT(QString("f0-FlatBackground") == f0Handler->functionName());
+  }
+
+  void test_removeFunctionUpdatesTieString() {
+    m_fitPropertyBrowser->init();
+    m_fitPropertyBrowser->createCompositeFunction(
+        "name=Gaussian,Height=10.0,PeakCentre=-0.145,Sigma=0.135;name=FlatBackground,A0=10;"
+        "name=Gaussian,Height=10.0,PeakCentre=-0.555,Sigma=0.135;ties=(f0.Height=f2.Height)");
+    auto f0Handler = m_fitPropertyBrowser->getPeakHandler(QString("f0"));
+    auto f1Handler = m_fitPropertyBrowser->getPeakHandler(QString("f1"));
+    TS_ASSERT(m_fitPropertyBrowser->getOldExpressionAsString(QString("f0.Height")) == QString("f2.Height"));
+    m_fitPropertyBrowser->removeFunction(f1Handler);
+    TS_ASSERT(f0Handler->hasTies());
+    TS_ASSERT(m_fitPropertyBrowser->getOldExpressionAsString(QString("f0.Height")) == QString("f1.Height"));
   }
 
 private:
