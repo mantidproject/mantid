@@ -47,6 +47,13 @@ else()
   message(FATAL_ERROR "Error extracting version elements from: ${_version_str}\n${_error}")
 endif()
 message(STATUS "Version: ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_TWEAK}")
+message(STATUS "Major: ${VERSION_MAJOR}")
+message(STATUS "Minor: ${VERSION_MINOR}")
+message(STATUS "Patch: ${VERSION_PATCH}")
+message(STATUS "Tweak: ${VERSION_TWEAK}")
+if(NOT _version_str STREQUAL "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_TWEAK}")
+  message(FATAL_ERROR "Error when extracting version information from version string: ${_version_str}")
+endif()
 
 # Revision information
 execute_process(
