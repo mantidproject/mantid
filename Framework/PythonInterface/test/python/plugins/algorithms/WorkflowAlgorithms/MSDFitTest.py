@@ -117,7 +117,7 @@ class MSDFitTest(unittest.TestCase):
 
         self.assertRaisesRegex(
             RuntimeError,
-            "XStart must be less then XEnd",
+            "XStart must be less than XEnd",
             MSDFit,
             InputWorkspace=self._ws,
             XStart=10.0,
